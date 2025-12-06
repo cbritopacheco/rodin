@@ -1,9 +1,32 @@
+/**
+ * @file QuadratureRule.h
+ * @brief Optimized quadrature rules for P1 finite element spaces.
+ *
+ * This file provides specialized quadrature rules for P1 spaces that exploit
+ * the constant gradient property of P1 basis functions to achieve exact
+ * integration with minimal quadrature points.
+ *
+ * ## Quadrature Strategies
+ * - **Centroid quadrature**: Uses single point at element barycenter
+ * - **Exact for P1 bilinear forms**: @f$ \int \nabla \phi_i \cdot \nabla \phi_j @f$
+ * - **Reduced integration**: Enables efficient assembly
+ *
+ * ## Supported Integrands
+ * - Scalar P1 shape functions: @f$ \int v \, dx @f$
+ * - Dot products: @f$ \int f \cdot v \, dx @f$
+ * - Mass forms: @f$ \int (Au) \cdot v \, dx @f$
+ * - Stiffness forms: @f$ \int \nabla u \cdot \nabla v \, dx @f$
+ * - Anisotropic stiffness: @f$ \int (A\nabla u) \cdot \nabla v \, dx @f$
+ * - Jacobian forms: @f$ \int \mathbf{J}u : \mathbf{J}v \, dx @f$
+ * - Potential operators for boundary elements
+ *
+ * @see P1, QuadratureFormula, Integral
+ */
 #ifndef RODIN_VARIATIONAL_P1_QUADRATURERULE_H
 #define RODIN_VARIATIONAL_P1_QUADRATURERULE_H
 
-#include "Rodin/Variational/QuadratureRule.h"
-#include "Rodin/QF/QF1P1.h"
-#include "Rodin/QF/GrundmannMoller.h"
+#include "Rodin/Variational/ShapeFunction.h"
+#include "Rodin/QF/Centroid.h"
 
 #include "P1.h"
 #include "P1Element.h"
@@ -138,7 +161,7 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_integrand;
 
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
-      Optional<QF::QF1P1> m_qf;
+      Optional<QF::Centroid> m_qf;
       Optional<Geometry::Point> m_p;
 
       Real m_distortion;
@@ -277,7 +300,7 @@ namespace Rodin::Variational
         if constexpr (std::is_same_v<RHSRangeType, ScalarType>)
           fe = P1Element<RHSRangeType>(geometry);
         else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>)
-          fe = P1Element<RHSRangeType>(fes.getVectorDimension(), geometry);
+          fe = P1Element<RHSRangeType>(geometry, fes.getVectorDimension());
         else
           assert(false);
         if (recompute)
@@ -317,7 +340,7 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_integrand;
 
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
-      Optional<QF::QF1P1> m_qf;
+      Optional<QF::Centroid> m_qf;
       Optional<Geometry::Point> m_p;
 
       Real m_weight;
@@ -563,7 +586,7 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_integrand;
 
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
-      Optional<QF::QF1P1> m_qf;
+      Optional<QF::Centroid> m_qf;
       Optional<Geometry::Point> m_p;
 
       Real m_distortion;
@@ -773,7 +796,7 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_integrand;
 
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
-      Optional<QF::QF1P1> m_qf;
+      Optional<QF::Centroid> m_qf;
       Optional<Geometry::Point> m_p;
 
       Real m_weight;
@@ -1012,7 +1035,7 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_integrand;
 
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
-      Optional<QF::QF1P1> m_qf;
+      Optional<QF::Centroid> m_qf;
       Optional<Geometry::Point> m_p;
 
       Real m_weight;
@@ -1250,7 +1273,7 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_integrand;
 
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
-      Optional<QF::QF1P1> m_qf;
+      Optional<QF::Centroid> m_qf;
       Optional<Geometry::Point> m_p;
 
       Real m_distortion;
@@ -1492,7 +1515,7 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_integrand;
 
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
-      Optional<QF::QF1P1> m_qf;
+      Optional<QF::Centroid> m_qf;
       Optional<Geometry::Point> m_p;
 
       Real m_weight;
@@ -1804,9 +1827,9 @@ namespace Rodin::Variational
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_trp;
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_tep;
 
-      const QF::QF1P1 m_qfs;
-      Optional<QF::QF1P1> m_qftr;
-      Optional<QF::QF1P1> m_qfte;
+      const QF::Centroid m_qfs;
+      Optional<QF::Centroid> m_qftr;
+      Optional<QF::Centroid> m_qfte;
 
       Real m_weight;
       Real m_distortion;

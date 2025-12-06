@@ -7,6 +7,11 @@
 #ifndef RODIN_VARIATIONAL_POW_H
 #define RODIN_VARIATIONAL_POW_H
 
+/**
+ * @file
+ * @brief Power (exponentiation) operations for functions.
+ */
+
 #include <Rodin/Math/Common.h>
 
 #include "ForwardDecls.h"
@@ -26,12 +31,21 @@ namespace Rodin::Variational
    * @ingroup PowSpecializations
    * @brief Represents the power function.
    *
-   * This class represents the function @f$ f : \mathbb{R} \rightarrow
-   * \mathbb{R} @f$ defined by the exponentiation of a base value @f$ x \in
-   * \mathbb{R} @f$ to the power @f$ p @f$:
-   * @f$
-   *  f(x) = x^p \ .
-   * @f$
+   * This class represents the exponentiation operation applied to a function:
+   * @f[
+   *  \text{Pow}(f, p)(x) = f(x)^p
+   * @f]
+   *
+   * The base function @f$ f @f$ must be scalar-valued, and the exponent @f$ p @f$
+   * is a compile-time constant. The result is always a real-valued scalar function.
+   *
+   * @tparam BaseDerived Type of the base function
+   * @tparam Number Type of the exponent (must be arithmetic)
+   *
+   * @note Common use cases include quadratic functions (@f$ p = 2 @f$), cubic
+   * functions (@f$ p = 3 @f$), and fractional powers for regularization.
+   *
+   * @see RealFunctionBase, Sqrt, Exp
    */
   template <class BaseDerived, class Number>
   class Pow<FunctionBase<BaseDerived>, Number> final
@@ -49,21 +63,29 @@ namespace Rodin::Variational
       using Parent = RealFunctionBase<Pow<FunctionBase<BaseDerived>, Number>>;
 
       /**
-       * @brief Constructs the power object
-       * @param[in] s Base value
-       * @param[in] p Power
+       * @brief Constructs the power operation.
+       * @param s Base function @f$ f @f$
+       * @param p Exponent @f$ p @f$
        */
       constexpr
       Pow(const BaseType& s, ExponentType p)
         : m_s(s.copy()), m_p(p)
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param other Pow object to copy from
+       */
       constexpr
       Pow(const Pow& other)
         : Parent(other),
           m_s(other.m_s->copy()), m_p(other.m_p)
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param other Pow object to move from
+       */
       constexpr
       Pow(Pow&& other)
         : Parent(std::move(other)),
@@ -71,6 +93,11 @@ namespace Rodin::Variational
           m_p(std::move(other.m_p))
       {}
 
+      /**
+       * @brief Restricts base to a trace domain.
+       * @param args Arguments for trace restriction
+       * @returns Reference to this object
+       */
       template <class ... Args>
       constexpr
       Pow& traceOf(const Args& ... args)
@@ -79,6 +106,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Evaluates power at a point.
+       * @param p Point at which to evaluate
+       * @returns @f$ f(p)^{\text{exponent}} @f$
+       */
       constexpr
       auto getValue(const Geometry::Point& p) const
       {

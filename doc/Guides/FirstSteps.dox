@@ -1,0 +1,238 @@
+/**
+  @page guides-getting-started-first-steps First Steps with Rodin
+  @brief Understanding the basics and creating your first Rodin program
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  Now that you have Rodin installed, let's explore the basic concepts and
+  create your first program.
+
+  @section guides-getting-started-first-steps-structure Project Structure
+
+  A typical Rodin project consists of:
+
+  - **CMakeLists.txt** - Build configuration
+  - **Source files (.cpp)** - Your C++ code using Rodin
+  - **Mesh files** - Geometry data (optional, can generate programmatically)
+
+  @subsection guides-getting-started-first-steps-cmake Basic CMakeLists.txt
+
+  Here's a minimal CMakeLists.txt for a Rodin project:
+
+  @code{.cmake}
+  cmake_minimum_required(VERSION 3.16)
+  project(MyRodinProject CXX)
+
+  # Set C++20 standard
+  set(CMAKE_CXX_STANDARD 20)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+  # Find Rodin package
+  find_package(Rodin REQUIRED)
+
+  # Create executable
+  add_executable(my_program main.cpp)
+
+  # Link against Rodin libraries
+  target_link_libraries(my_program PRIVATE
+    Rodin::Geometry
+    Rodin::Variational
+    Rodin::Solver
+  )
+  @endcode
+
+  @section guides-getting-started-first-steps-modules Rodin Modules
+
+  Rodin is organized into several modules, each providing specific
+  functionality:
+
+  | Module | Purpose | Common Classes |
+  |--------|---------|----------------|
+  | Rodin::Geometry | Mesh operations and geometry | Mesh, Polytope |
+  | Rodin::Variational | Finite element spaces and forms | P1, TrialFunction, TestFunction, Problem |
+  | Rodin::Solver | Linear system solvers | CG, SparseLU |
+  | Rodin::IO | Input/output operations | File reading/writing |
+  | Rodin::Assembly | Matrix assembly | Assemblers |
+
+  @section guides-getting-started-first-steps-hello Hello Rodin
+
+  Let's create a simple program that creates a mesh and prints information
+  about it.
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+  #include <iostream>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+
+  int main() {
+    // Create a 2D uniform triangular mesh
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {8, 8});
+
+    // Print mesh information
+    std::cout << "Created a mesh with:" << std::endl;
+    std::cout << "  Vertices: " << mesh.getVertexCount() << std::endl;
+    std::cout << "  Cells: " << mesh.getCellCount() << std::endl;
+    std::cout << "  Dimension: " << mesh.getDimension() << std::endl;
+
+    return 0;
+  }
+  @endcode
+
+  Save this as `main.cpp` and build it:
+
+  @code{.bash}
+  cmake .
+  make
+  ./my_program
+  @endcode
+
+  You should see output like:
+  @code{.bash}
+  Created a mesh with:
+    Vertices: 81
+    Cells: 128
+    Dimension: 2
+  @endcode
+
+  @section guides-getting-started-first-steps-concepts Core Concepts
+
+  @subsection guides-getting-started-first-steps-mesh Working with Meshes
+
+  A @ref Rodin::Geometry::Mesh "Mesh" represents the discretization of your
+  domain. You can create meshes in several ways:
+
+  **Generate a uniform grid:**
+  @code{.cpp}
+  Mesh mesh;
+  // 2D triangular mesh with 16x16 grid
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+
+  // 3D tetrahedral mesh with 8x8x8 grid
+  mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, {8, 8, 8});
+  @endcode
+
+  **Load from file:**
+  @code{.cpp}
+  Mesh mesh;
+  mesh.load("domain.mesh");  // MEDIT format
+  @endcode
+
+  @subsection guides-getting-started-first-steps-connectivity Computing Connectivity
+
+  Before performing certain operations, you may need to compute connectivity
+  information:
+
+  @code{.cpp}
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+
+  // Compute face-to-cell connectivity (needed for boundary operations)
+  mesh.getConnectivity().compute(1, 2);
+  @endcode
+
+  The `compute(d1, d2)` method computes connectivity from polytopes of
+  dimension `d1` to polytopes of dimension `d2`. For a 2D mesh:
+  - `0` = vertices
+  - `1` = edges (faces)
+  - `2` = triangles (cells)
+
+  @subsection guides-getting-started-first-steps-fe Finite Element Spaces
+
+  Finite element spaces define the type of basis functions used for
+  approximation:
+
+  @code{.cpp}
+  #include <Rodin/Variational.h>
+
+  using namespace Rodin::Variational;
+
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+
+  // P1 (linear) finite element space
+  P1 Vh(mesh);
+
+  std::cout << "FE space has " << Vh.getSize() << " degrees of freedom" << std::endl;
+  @endcode
+
+  @subsection guides-getting-started-first-steps-functions Trial and Test Functions
+
+  To formulate problems, we use trial and test functions:
+
+  @code{.cpp}
+  P1 Vh(mesh);
+
+  // The unknown function we're solving for
+  TrialFunction u(Vh);
+
+  // The test function for weak formulation
+  TestFunction v(Vh);
+  @endcode
+
+  These are used to express variational formulations in a natural way.
+
+  @section guides-getting-started-first-steps-namespaces Using Namespaces
+
+  To avoid typing `Rodin::Geometry::` and `Rodin::Variational::` repeatedly,
+  most Rodin programs start with:
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+  #include <Rodin/Variational.h>
+  #include <Rodin/Solver.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
+  using namespace Rodin::Solver;
+  @endcode
+
+  @section guides-getting-started-first-steps-example Complete Example
+
+  Here's a complete program that demonstrates the basic workflow:
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+  #include <Rodin/Variational.h>
+  #include <iostream>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
+
+  int main() {
+    // 1. Create a mesh
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {8, 8});
+
+    // 2. Compute connectivity (needed for boundary operations)
+    mesh.getConnectivity().compute(1, 2);
+
+    // 3. Create finite element space
+    P1 Vh(mesh);
+
+    // 4. Create trial and test functions
+    TrialFunction u(Vh);
+    TestFunction v(Vh);
+
+    // 5. Print information
+    std::cout << "Setup complete!" << std::endl;
+    std::cout << "  Mesh cells: " << mesh.getCellCount() << std::endl;
+    std::cout << "  DOFs: " << Vh.getSize() << std::endl;
+
+    return 0;
+  }
+  @endcode
+
+  @section guides-getting-started-first-steps-next What's Next?
+
+  You now understand the basic building blocks of a Rodin program. In the next
+  section, @ref guides-getting-started-first-problem, we'll put these concepts
+  together to solve a complete PDE problem: the Poisson equation.
+
+  */

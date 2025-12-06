@@ -16,7 +16,7 @@
 
 #include "Rodin/FormLanguage/Traits.h"
 
-#include "Rodin/MPI/Context/MPI.h"
+#include "Rodin/MPI/Context/ForwardDecls.h"
 
 namespace Rodin::IO
 {

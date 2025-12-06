@@ -1,0 +1,235 @@
+/**
+  @page guides-meshes-queries Geometric Queries
+  @brief Querying mesh properties and measurements
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  Rodin provides various methods to query geometric properties of meshes,
+  including volumes, areas, perimeters, and spatial information.
+
+  @section guides-meshes-queries-intro Introduction
+
+  After creating or loading a mesh, you often need to query its properties:
+  dimensions, entity counts, volumes, and other geometric measurements.
+
+  @section guides-meshes-queries-basic Basic Properties
+
+  @subsection guides-meshes-queries-basic-dim Dimensions
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+
+  int main() {
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+
+    // Topological dimension (2 for 2D meshes)
+    std::cout << "Dimension: " << mesh.getDimension() << std::endl;
+
+    // Space dimension (dimension of embedding space)
+    std::cout << "Space dimension: " << mesh.getSpaceDimension() << std::endl;
+
+    return 0;
+  }
+  @endcode
+
+  @subsection guides-meshes-queries-basic-counts Entity Counts
+
+  @code{.cpp}
+  std::cout << "Vertices: " << mesh.getVertexCount() << std::endl;
+  std::cout << "Faces: " << mesh.getFaceCount() << std::endl;
+  std::cout << "Cells: " << mesh.getCellCount() << std::endl;
+
+  // Count polytopes by dimension
+  for (size_t d = 0; d <= mesh.getDimension(); ++d) {
+    std::cout << "Polytopes of dimension " << d << ": " 
+              << mesh.getPolytopeCount(d) << std::endl;
+  }
+
+  // Count by geometry type
+  std::cout << "Triangles: " 
+            << mesh.getPolytopeCount(Polytope::Type::Triangle) << std::endl;
+  @endcode
+
+  @subsection guides-meshes-queries-basic-empty Empty Check
+
+  @code{.cpp}
+  if (mesh.isEmpty()) {
+    std::cout << "Mesh is empty" << std::endl;
+  }
+  @endcode
+
+  @section guides-meshes-queries-geometric Geometric Measurements
+
+  @subsection guides-meshes-queries-geometric-volume Volume
+
+  @code{.cpp}
+  // Total volume (area in 2D)
+  Real totalVolume = mesh.getVolume();
+  std::cout << "Total volume: " << totalVolume << std::endl;
+
+  // Volume by attribute
+  Real volume1 = mesh.getVolume(1);
+  std::cout << "Volume of region 1: " << volume1 << std::endl;
+
+  // Volume of multiple attributes
+  FlatSet<Attribute> attrs = {1, 2, 3};
+  Real combinedVolume = mesh.getVolume(attrs);
+  std::cout << "Combined volume: " << combinedVolume << std::endl;
+  @endcode
+
+  @subsection guides-meshes-queries-geometric-perimeter Perimeter
+
+  @code{.cpp}
+  // Total perimeter
+  Real totalPerimeter = mesh.getPerimeter();
+  std::cout << "Total perimeter: " << totalPerimeter << std::endl;
+
+  // Perimeter by attribute
+  Real perimeter1 = mesh.getPerimeter(1);
+  @endcode
+
+  @subsection guides-meshes-queries-geometric-area Area
+
+  @code{.cpp}
+  // Total area
+  Real totalArea = mesh.getArea();
+
+  // Area by attribute
+  Real area1 = mesh.getArea(1);
+
+  // Area of multiple attributes
+  Real combinedArea = mesh.getArea(attrs);
+  @endcode
+
+  @subsection guides-meshes-queries-geometric-measure Measure
+
+  Generic measure for polytopes of any dimension:
+
+  @code{.cpp}
+  // Measure of all edges (dimension 1)
+  Real edgeMeasure = mesh.getMeasure(1);
+
+  // Measure of edges with attribute 1
+  Real edgeMeasure1 = mesh.getMeasure(1, 1);
+
+  // Measure of edges with multiple attributes
+  Real combinedEdgeMeasure = mesh.getMeasure(1, attrs);
+  @endcode
+
+  @section guides-meshes-queries-attributes Attribute Queries
+
+  @subsection guides-meshes-queries-attributes-get Getting Attributes
+
+  @code{.cpp}
+  // Get cell attribute
+  Attribute cellAttr = mesh.getCellAttribute(5);
+
+  // Get face attribute
+  Attribute faceAttr = mesh.getFaceAttribute(10);
+
+  // Get arbitrary polytope attribute
+  Attribute attr = mesh.getAttribute(2, 7);  // Cell 7
+  @endcode
+
+  @subsection guides-meshes-queries-attributes-set Setting Attributes
+
+  @code{.cpp}
+  // Set cell attribute
+  mesh.setAttribute({2, 5}, 2);  // Set cell 5 to attribute 2
+
+  // Set face attribute
+  mesh.setAttribute({1, 10}, 3);  // Set face 10 to attribute 3
+  @endcode
+
+  @section guides-meshes-queries-spatial Spatial Queries
+
+  @subsection guides-meshes-queries-spatial-coords Vertex Coordinates
+
+  @code{.cpp}
+  // Get coordinates of vertex 0
+  auto coords = mesh.getVertexCoordinates(0);
+  std::cout << "Vertex 0: (" << coords[0] << ", " << coords[1] << ")" 
+            << std::endl;
+  @endcode
+
+  @subsection guides-meshes-queries-spatial-surface Surface Check
+
+  @code{.cpp}
+  // Check if mesh is a surface mesh (codimension 1)
+  if (mesh.isSurface()) {
+    std::cout << "This is a surface mesh" << std::endl;
+  }
+  @endcode
+
+  @subsection guides-meshes-queries-spatial-boundary Boundary Checks
+
+  @code{.cpp}
+  mesh.getConnectivity().compute(1, 2);  // Required
+
+  // Check if face is on boundary
+  if (mesh.isBoundary(5)) {
+    std::cout << "Face 5 is on the boundary" << std::endl;
+  }
+
+  // Check if face is an interface
+  if (mesh.isInterface(10)) {
+    std::cout << "Face 10 is an interface" << std::endl;
+  }
+  @endcode
+
+  @section guides-meshes-queries-example Complete Example
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+
+  int main() {
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {32, 32});
+    mesh.getConnectivity().compute(1, 2);
+
+    // Basic information
+    std::cout << "=== Mesh Information ===" << std::endl;
+    std::cout << "Dimension: " << mesh.getDimension() << std::endl;
+    std::cout << "Space dimension: " << mesh.getSpaceDimension() << std::endl;
+    std::cout << "Vertices: " << mesh.getVertexCount() << std::endl;
+    std::cout << "Edges: " << mesh.getFaceCount() << std::endl;
+    std::cout << "Cells: " << mesh.getCellCount() << std::endl;
+
+    // Geometric measurements
+    std::cout << "\n=== Measurements ===" << std::endl;
+    std::cout << "Total volume: " << mesh.getVolume() << std::endl;
+    std::cout << "Total perimeter: " << mesh.getPerimeter() << std::endl;
+
+    // Boundary information
+    size_t boundaryEdges = 0;
+    for (auto it = mesh.getBoundary(); it; ++it) {
+      boundaryEdges++;
+    }
+    std::cout << "\n=== Boundary ===" << std::endl;
+    std::cout << "Boundary edges: " << boundaryEdges << std::endl;
+
+    // Average cell size
+    Real avgCellSize = mesh.getVolume() / mesh.getCellCount();
+    std::cout << "\n=== Statistics ===" << std::endl;
+    std::cout << "Average cell size: " << avgCellSize << std::endl;
+
+    return 0;
+  }
+  @endcode
+
+  @section guides-meshes-queries-see-also See Also
+
+  - @ref guides-meshes "Meshes overview"
+  - @ref Rodin::Geometry::Mesh "Mesh class reference"
+  - Example: @ref examples/Geometry/Volume.cpp
+
+  */

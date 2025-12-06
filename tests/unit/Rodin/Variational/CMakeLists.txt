@@ -1,3 +1,8 @@
+rodin_add_compile_options(LANG CXX OPTIONS -Wno-error=use-after-free)
+
+# Add H1 subdirectory for H1Element component tests
+add_subdirectory(H1)
+
 add_executable(RodinVariationalP1ElementTest P1ElementTest.cpp)
 target_link_libraries(RodinVariationalP1ElementTest
   PUBLIC
@@ -6,6 +11,22 @@ target_link_libraries(RodinVariationalP1ElementTest
   Rodin::Variational)
 gtest_discover_tests(RodinVariationalP1ElementTest)
 
+add_executable(RodinVariationalP0ElementTest P0ElementTest.cpp)
+target_link_libraries(RodinVariationalP0ElementTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalP0ElementTest)
+
+add_executable(RodinVariationalH1ElementTest H1ElementTest.cpp)
+target_link_libraries(RodinVariationalH1ElementTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalH1ElementTest)
+
 add_executable(RodinVariationalP1Test P1Test.cpp)
 target_link_libraries(RodinVariationalP1Test
   PUBLIC
@@ -13,6 +34,14 @@ target_link_libraries(RodinVariationalP1Test
   GTest::gtest_main
   Rodin::Variational)
 gtest_discover_tests(RodinVariationalP1Test)
+
+add_executable(RodinVariationalH1Test H1Test.cpp)
+target_link_libraries(RodinVariationalH1Test
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalH1Test)
 
 add_executable(RodinVariationalDirichletBCTest DirichletBCTest.cpp)
 target_link_libraries(RodinVariationalDirichletBCTest

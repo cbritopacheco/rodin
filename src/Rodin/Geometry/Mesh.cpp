@@ -292,7 +292,7 @@ namespace Rodin::Geometry
 
   size_t Mesh<Context::Local>::getDimension() const
   {
-    return m_connectivity.getMeshDimension();
+    return m_connectivity.getDimension();
   }
 
   size_t Mesh<Context::Local>::getSpaceDimension() const
@@ -305,7 +305,8 @@ namespace Rodin::Geometry
       const std::pair<size_t, Index> p, PolytopeTransformation* trans)
   {
     const size_t d = p.first;
-    m_transformations.set(p, this->getPolytopeCount(d), std::unique_ptr<PolytopeTransformation>(trans));
+    m_transformations.set(
+        p, this->getPolytopeCount(d), std::unique_ptr<PolytopeTransformation>(trans));
     return *this;
   }
 
@@ -535,22 +536,26 @@ namespace Rodin::Geometry
 
   CellIterator Mesh<Context::Local>::getCell(Index idx) const
   {
-    return CellIterator(*this, BoundedIndexGenerator(idx, getCellCount()));
+    return CellIterator(
+        *this, BoundedIndexGenerator(idx, this->getCellCount()));
   }
 
   FaceIterator Mesh<Context::Local>::getFace(Index idx) const
   {
-    return FaceIterator(*this, BoundedIndexGenerator(idx, getFaceCount()));
+    return FaceIterator(
+        *this, BoundedIndexGenerator(idx, this->getFaceCount()));
   }
 
   VertexIterator Mesh<Context::Local>::getVertex(Index idx) const
   {
-    return VertexIterator(*this, BoundedIndexGenerator(idx, getVertexCount()));
+    return VertexIterator(
+        *this, BoundedIndexGenerator(idx, this->getVertexCount()));
   }
 
   PolytopeIterator Mesh<Context::Local>::getPolytope(size_t dimension, Index idx) const
   {
-    return PolytopeIterator(dimension, *this, BoundedIndexGenerator(idx, getPolytopeCount(dimension)));
+    return PolytopeIterator(
+        dimension, *this, BoundedIndexGenerator(idx, this->getPolytopeCount(dimension)));
   }
 
   bool Mesh<Context::Local>::isInterface(Index faceIdx) const
@@ -653,6 +658,25 @@ namespace Rodin::Geometry
       case Polytope::Type::Point:
       {
         return build.nodes(1).vertex({0}).finalize();
+      }
+      case Polytope::Type::Segment:
+      {
+        assert(dimensions.size() == 1);
+        const size_t n = dimensions.coeff(0);
+        assert(n >= 2);
+
+        build.initialize(dim).nodes(n);
+
+        // Vertices on a 1D uniform grid: 0, 1, ..., n-1
+        for (size_t i = 0; i < n; ++i)
+          build.vertex({ static_cast<Real>(i) });
+
+        // Uniform segments [i, i+1]
+        build.reserve(dim, n - 1);
+        for (size_t i = 0; i + 1 < n; ++i)
+          build.polytope(g, { i, i + 1 });
+
+        return build.finalize();
       }
       case Polytope::Type::Triangle:
       {

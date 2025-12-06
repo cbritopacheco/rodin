@@ -7,16 +7,18 @@
 #ifndef RODIN_GEOMETRY_MPI_MESH_H
 #define RODIN_GEOMETRY_MPI_MESH_H
 
+#include <mpi.h>
+#include <type_traits>
+
 #include "Rodin/Configure.h"
 
 #include "Rodin/Geometry/Mesh.h"
+#include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Geometry/Shard.h"
 
 #include "Rodin/MPI/Context/MPI.h"
 
 #include "Connectivity.h"
-#include <mpi.h>
-#include <type_traits>
 
 namespace Rodin::Geometry
 {
@@ -194,7 +196,7 @@ namespace Rodin::Geometry
       Shard m_shard;
 
       mutable FlatMap<Index, Math::SpatialPoint> m_vertices;
-      mutable TransformationIndex m_transformationIndex;
+      mutable PolytopeTransformationIndex m_transformations;
   };
 }
 

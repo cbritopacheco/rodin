@@ -7,6 +7,17 @@
 #ifndef RODIN_FORMLANGUAGE_H
 #define RODIN_FORMLANGUAGE_H
 
+/**
+ * @file
+ * @brief Top level include for the Rodin::FormLanguage module.
+ *
+ * The FormLanguage module provides the base classes and infrastructure for
+ * the domain-specific language (DSL) used to express variational formulations
+ * in Rodin. This includes expression templates and lazy evaluation mechanisms.
+ *
+ * @see Rodin::FormLanguage
+ */
+
 #include "FormLanguage/Base.h"
 
 #endif

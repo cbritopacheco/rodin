@@ -7,6 +7,11 @@
 #ifndef RODIN_VARIATIONAL_COSH_H
 #define RODIN_VARIATIONAL_COSH_H
 
+/**
+ * @file Cosh.h
+ * @brief Hyperbolic cosine function operator for scalar functions.
+ */
+
 #include "Rodin/Math/Common.h"
 
 #include "ForwardDecls.h"
@@ -22,6 +27,25 @@ namespace Rodin::Variational
    */
 
   /**
+   * @brief Hyperbolic cosine function operator for real-valued scalar functions.
+   *
+   * Applies the hyperbolic cosine function pointwise to a given function:
+   * @f[
+   *    \text{Cosh}(f)(x) = \cosh(f(x)) = \frac{e^{f(x)} + e^{-f(x)}}{2}
+   * @f]
+   *
+   * Common applications include:
+   * - Solutions to hyperbolic PDEs
+   * - Catenary curves and hanging cables
+   * - Temperature distributions in infinite domains
+   * - Exact solutions with exponential behavior
+   *
+   * @note Always returns a real-valued function for real input.
+   * @note Always positive: @f$ \cosh(x) \geq 1 @f$ for all real @f$ x @f$.
+   * @see Sinh, Cos
+   */
+
+  /**
    * @ingroup CoshSpecializations
    */
   template <class NestedDerived>
@@ -33,20 +57,37 @@ namespace Rodin::Variational
 
       using Parent = RealFunctionBase<Cosh<FunctionBase<NestedDerived>>>;
 
+      /**
+       * @brief Constructs hyperbolic cosine operator from a function.
+       * @param v Function to apply cosh to
+       */
       Cosh(const OperandType& v)
         : m_operand(v.copy())
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param other Cosh operator to copy
+       */
       Cosh(const Cosh& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param other Cosh operator to move
+       */
       Cosh(Cosh&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
       {}
 
+      /**
+       * @brief Restricts cosh operator to a trace.
+       * @param args Trace restriction arguments
+       * @return Reference to this cosh operator
+       */
       template <class ... Args>
       Cosh& traceOf(const Args& ... args)
       {
@@ -54,17 +95,30 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Evaluates @f$ \cosh(f(p)) @f$ at a point.
+       * @param p Point at which to evaluate
+       * @return Hyperbolic cosine of operand function value
+       */
       auto getValue(const Geometry::Point& p) const
       {
         return Math::cosh(m_operand->getValue(p));
       }
 
+      /**
+       * @brief Gets the operand function.
+       * @return Reference to operand function
+       */
       const OperandType& getOperand() const
       {
         assert(m_operand);
         return *m_operand;
       }
 
+      /**
+       * @brief Creates a polymorphic copy of this cosh operator.
+       * @return Pointer to copy
+       */
       Cosh* copy() const noexcept override
       {
         return new Cosh(*this);

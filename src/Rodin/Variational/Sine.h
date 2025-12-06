@@ -7,6 +7,11 @@
 #ifndef RODIN_VARIATIONAL_SIN_H
 #define RODIN_VARIATIONAL_SIN_H
 
+/**
+ * @file Sine.h
+ * @brief Sine trigonometric function operator for scalar functions.
+ */
+
 #include "Rodin/Math.h"
 #include "ForwardDecls.h"
 #include "Function.h"
@@ -21,6 +26,24 @@ namespace Rodin::Variational
    */
 
   /**
+   * @brief Sine function operator for real-valued scalar functions.
+   *
+   * Applies the sine function pointwise to a given function:
+   * @f[
+   *    \text{Sin}(f)(x) = \sin(f(x))
+   * @f]
+   *
+   * Common applications include:
+   * - Periodic boundary conditions
+   * - Wave equations and vibration problems
+   * - Fourier series representations
+   * - Trigonometric manufactured solutions
+   *
+   * @note Always returns a real-valued function for real input.
+   * @see Cos, Tan, Sinh
+   */
+
+  /**
    * @ingroup SinSpecializations
    */
   template <class NestedDerived>
@@ -32,20 +55,37 @@ namespace Rodin::Variational
 
       using Parent = RealFunctionBase<Sin<FunctionBase<NestedDerived>>>;
 
+      /**
+       * @brief Constructs sine of a function.
+       * @param v Function to apply sine to
+       */
       Sin(const OperandType& v)
         : m_operand(v.copy())
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param other Sin object to copy from
+       */
       Sin(const Sin& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param other Sin object to move from
+       */
       Sin(Sin&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
       {}
 
+      /**
+       * @brief Restricts operand to a single attribute.
+       * @param attr Mesh attribute for trace restriction
+       * @returns Reference to this object
+       */
       constexpr
       Sin& traceOf(Geometry::Attribute attr)
       {
@@ -53,6 +93,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Restricts operand to multiple attributes.
+       * @param attrs Set of mesh attributes for trace restriction
+       * @returns Reference to this object
+       */
       constexpr
       Sin& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
@@ -60,6 +105,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Evaluates sine at a point.
+       * @param p Point at which to evaluate
+       * @returns @f$ \sin(f(p)) @f$
+       */
       Real getValue(const Geometry::Point& p) const
       {
         return Math::sin(getOperand().getValue(p));

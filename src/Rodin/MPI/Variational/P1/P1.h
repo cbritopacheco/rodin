@@ -2,8 +2,11 @@
 #define RODIN_MPI_VARIATIONAL_P1_P1_H
 
 #include <mpi.h>
-#include <boost/serialization/optional.hpp>
 #include <sys/mman.h>
+
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/split_free.hpp>
+#include <boost/serialization/optional.hpp>
 
 #include "Rodin/MPI/Geometry/Mesh.h"
 #include "Rodin/MPI/Variational/FiniteElementSpace.h"
@@ -98,7 +101,6 @@ namespace Rodin::Variational
           using FunctionType = CallableType;
 
           /**
-           * @param[in] polytope Reference to polytope on the mesh.
            * @param[in] v Reference to the function defined on the reference
            * space.
            */
@@ -155,7 +157,7 @@ namespace Rodin::Variational
             assert(dofs.size() == 1);
             const Index local = dofs[0];
             const Index global = dofIdx + m_offset;
-            const auto [it, inserted] = m_local_to_global.right.insert({ global, local });
+            const auto [it, inserted] = m_local_to_global.right.emplace(global, local);
             assert(inserted);
             dofIdx++;
 
@@ -194,7 +196,7 @@ namespace Rodin::Variational
             assert(i);
             const auto& dofs = m_fes.getDOFs(0, *i);
             assert(dofs.size() == 1);
-            const auto [it, inserted] = m_local_to_global.right.insert({ global, dofs[0] });
+            const auto [it, inserted] = m_local_to_global.right.emplace(global, dofs[0]);
             assert(inserted);
           }
         }
@@ -235,7 +237,7 @@ namespace Rodin::Variational
               const Index global = dofIdx + m_offset;
               s_send.push_back(global);
 
-              const auto [it, inserted] = m_local_to_global.right.insert({ global, local });
+              const auto [it, inserted] = m_local_to_global.right.emplace(global, local);
               assert(inserted);
 
               dofIdx++;
@@ -279,7 +281,7 @@ namespace Rodin::Variational
             assert(dofs.size() == global.size());
             for (size_t k = 0; k < global.size(); k++)
             {
-              const auto [it, inserted] = m_local_to_global.right.insert({ global[k], dofs[k] });
+              const auto [it, inserted] = m_local_to_global.right.emplace(global[k], dofs[k]);
               assert(inserted);
             }
           }

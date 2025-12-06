@@ -10,10 +10,17 @@
 namespace Rodin::Alert
 {
   /**
-   * @brief Empty class tag type to raise an Alert.
+   * @brief Empty tag type for raising an Alert message.
    *
-   * RaiseT is an empty class tag type to specify that a derived object of
-   * Alert should be raised.
+   * Tag type used to trigger the raising (output) of an Alert message.
+   * When streamed into a Message object using operator<<, it causes
+   * the message to be displayed and potentially triggers other actions
+   * (such as program termination for Exception types).
+   *
+   * Example usage:
+   * @code{.cpp}
+   * Exception() << "An error occurred" << Raise;
+   * @endcode
    */
   struct RaiseT
   {
@@ -21,9 +28,10 @@ namespace Rodin::Alert
   };
 
   /**
-   * @brief Instance of RaiseT
+   * @brief Instance of RaiseT tag type.
    *
-   * Instance of the empty struct tag type RaiseT.
+   * Constant instance of the RaiseT tag type for convenient usage.
+   * Stream this into a Message to trigger its raise() method.
    */
   static constexpr RaiseT Raise;
 }

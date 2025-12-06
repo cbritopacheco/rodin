@@ -4,6 +4,34 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file EQ.h
+ * @brief Equality comparison operator for functions.
+ *
+ * This file defines the EQ class, which implements the equality comparison
+ * operation between functions. This operator tests whether two function values
+ * are equal at each point in the domain.
+ *
+ * ## Mathematical Foundation
+ * For functions @f$ f, g : \Omega \to \mathbb{R} @f$, the equality operator:
+ * @f[
+ *   (f = g)(x) = \begin{cases} 1 & \text{if } f(x) = g(x) \\ 0 & \text{otherwise} \end{cases}
+ * @f]
+ *
+ * ## Numerical Considerations
+ * For floating-point comparisons, consider using approximate equality with
+ * a tolerance due to numerical precision limitations.
+ *
+ * ## Applications
+ * - Indicator functions for specific values
+ * - Level set definitions
+ * - Region identification based on function values
+ *
+ * ## Usage Example
+ * ```cpp
+ * auto is_zero = (u == 0.0);  // Boolean function, true where u equals zero
+ * ```
+ */
 #ifndef RODIN_VARIATIONAL_EQ_H
 #define RODIN_VARIATIONAL_EQ_H
 

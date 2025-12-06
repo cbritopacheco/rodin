@@ -4,6 +4,38 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file DirichletBC.h
+ * @brief Dirichlet boundary condition implementation.
+ *
+ * This file defines classes for imposing Dirichlet (essential) boundary
+ * conditions in finite element problems. Dirichlet conditions prescribe the
+ * solution values on specified boundaries.
+ *
+ * ## Mathematical Foundation
+ * A Dirichlet boundary condition specifies:
+ * @f[
+ *   u = g \quad \text{on} \quad \Gamma_D
+ * @f]
+ * where @f$ u @f$ is the solution, @f$ g @f$ is the prescribed boundary value,
+ * and @f$ \Gamma_D @f$ is a portion of the domain boundary.
+ *
+ * ## Implementation
+ * Dirichlet conditions are typically enforced by:
+ * 1. Identifying boundary degrees of freedom
+ * 2. Setting their values to @f$ g @f$
+ * 3. Modifying the system matrix and right-hand side
+ *
+ * ## Usage Example
+ * ```cpp
+ * // Homogeneous Dirichlet BC (u = 0 on boundary)
+ * auto bc = DirichletBC(u, Zero());
+ * 
+ * // Inhomogeneous Dirichlet BC
+ * auto g = [](const Point& p) { return sin(p.x()); };
+ * auto bc = DirichletBC(u, g).on(1);  // On boundary attribute 1
+ * ```
+ */
 #ifndef RODIN_VARIATIONAL_DIRICHLETBC_H
 #define RODIN_VARIATIONAL_DIRICHLETBC_H
 
@@ -51,35 +83,45 @@ namespace Rodin::Variational
       /**
        * @brief Assembles the Dirichlet boundary condition.
        *
-       * This method computes the global degree of freedom map associated to
-       * the Dirichlet boundary. In other words, it computes the IndexMap which
-       * has a keys the global indices of the DOFs, and as values @f$ \ell_i
-       * @f$ the
-       * @f[
-       *  \ell_i(\mathrm{Value}), \quad i = 1, \ldots, n
-       * @f]
-       * where @f$ \ell_i @f$ is the i-th linear form on the associated finite
-       * element space.
+       * Computes the global DOF map for the Dirichlet boundary by evaluating
+       * the prescribed value at each boundary DOF. The result is a map
+       * @f$ \{(i, g(x_i))\} @f$ where @f$ i @f$ is the global DOF index and
+       * @f$ g(x_i) @f$ is the prescribed value at that DOF.
        */
       virtual void assemble() = 0;
 
       /**
-       * @brief Gets the global degree of freedom map.
+       * @brief Gets the map of constrained DOFs and their values.
+       * @return Map from global DOF index to prescribed value
+       *
+       * Returns the assembled DOF map containing pairs @f$ (i, g_i) @f$ where
+       * @f$ i @f$ is the global DOF index and @f$ g_i @f$ is the prescribed
+       * boundary value.
        */
       virtual const DOFs& getDOFs() const = 0;
 
+      /**
+       * @brief Checks if this is a component-wise boundary condition.
+       * @return True if BC applies to a single component of a vector function
+       */
       virtual bool isComponent() const = 0;
 
       /**
-       * @brief Gets the associated operand.
+       * @brief Gets the operand (trial function) of the BC.
+       * @return Reference to the trial function being constrained
        */
       virtual const FormLanguage::Base& getOperand() const = 0;
 
       /**
-       * @brief Gets the associated value.
+       * @brief Gets the prescribed boundary value.
+       * @return Reference to the function defining the BC value
        */
       virtual const FormLanguage::Base& getValue() const = 0;
 
+      /**
+       * @brief Creates a polymorphic copy of this BC.
+       * @return Pointer to a new copy
+       */
       virtual DirichletBCBase* copy() const noexcept override = 0;
   };
 
@@ -178,7 +220,7 @@ namespace Rodin::Variational
       /**
        * @brief Specifies the region of the boundary over which the condition
        * will be imposed.
-       * @param[in] bdrAttr Attribute associated to the boundary region
+       * @param[in] bdrAtr Attribute associated to the boundary region
        */
       constexpr
       DirichletBC& on(Geometry::Attribute bdrAtr)

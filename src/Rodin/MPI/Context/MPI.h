@@ -55,7 +55,7 @@ namespace Rodin::Context
     private:
       /// Reference to the MPI environment
       std::reference_wrapper<const boost::mpi::environment> m_env;
-      
+
       /// Reference to the MPI communicator
       std::reference_wrapper<const boost::mpi::communicator> m_world;
   };

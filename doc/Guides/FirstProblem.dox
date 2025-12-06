@@ -1,0 +1,277 @@
+/**
+  @page guides-getting-started-first-problem Your First Problem: Solving the Poisson Equation
+  @brief A complete walkthrough of solving a PDE with Rodin
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  In this section, we'll solve a complete partial differential equation using
+  Rodin: the Poisson equation. This is often the "Hello World" of finite
+  element methods.
+
+  @section guides-getting-started-first-problem-math The Mathematical Problem
+
+  We want to solve the following boundary value problem:
+
+  @f[
+  \left\{
+  \begin{aligned}
+    -\Delta u &= f && \text{in } \Omega \\
+    u &= 0 && \text{on } \partial\Omega
+  \end{aligned}
+  \right.
+  @f]
+
+  where:
+  - @f$ \Omega @f$ is our domain (a square [0,1] × [0,1])
+  - @f$ u @f$ is the unknown function we're solving for
+  - @f$ f = 1 @f$ is a known source term
+  - @f$ \partial\Omega @f$ is the boundary of the domain
+
+  @subsection guides-getting-started-first-problem-weak Weak Formulation
+
+  The weak (or variational) formulation of this problem is:
+
+  Find @f$ u \in H^1_0(\Omega) @f$ such that for all @f$ v \in H^1_0(\Omega) @f$:
+
+  @f[
+    \int_{\Omega} \nabla u \cdot \nabla v \, dx = \int_{\Omega} f v \, dx
+  @f]
+
+  This is the form that finite element methods work with, and it's exactly
+  what we'll implement in Rodin.
+
+  @section guides-getting-started-first-problem-code The Complete Code
+
+  Here's the complete program to solve the Poisson equation:
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+  #include <Rodin/Variational.h>
+  #include <Rodin/Solver.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
+  using namespace Rodin::Solver;
+
+  int main() {
+    // 1. Create a mesh
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+
+    // 2. Compute connectivity for boundary operations
+    mesh.getConnectivity().compute(1, 2);
+
+    // 3. Create P1 finite element space
+    P1 Vh(mesh);
+
+    // 4. Define trial and test functions
+    TrialFunction u(Vh);
+    TestFunction v(Vh);
+
+    // 5. Define the source term f = 1
+    RealFunction f = 1.0;
+
+    // 6. Define the problem
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, Zero());
+
+    // 7. Solve the problem
+    CG(poisson).solve();
+
+    // 8. Save the solution
+    u.getSolution().save("solution.gf");
+    mesh.save("mesh.mesh");
+
+    return 0;
+  }
+  @endcode
+
+  @section guides-getting-started-first-problem-breakdown Code Breakdown
+
+  Let's understand each part of the code:
+
+  @subsection guides-getting-started-first-problem-mesh Step 1-2: Create the Mesh
+
+  @code{.cpp}
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+  mesh.getConnectivity().compute(1, 2);
+  @endcode
+
+  - Creates a 2D triangular mesh with a 16×16 grid
+  - Computes face-to-cell connectivity (dimension 1 to dimension 2)
+  - This connectivity is needed to identify boundary elements
+
+  @subsection guides-getting-started-first-problem-space Step 3-4: Define Function Space
+
+  @code{.cpp}
+  P1 Vh(mesh);
+  TrialFunction u(Vh);
+  TestFunction v(Vh);
+  @endcode
+
+  - `P1` creates a space of piecewise linear functions
+  - `u` is the unknown function (trial function)
+  - `v` is the test function for the weak formulation
+
+  @subsection guides-getting-started-first-problem-source Step 5: Define Source Term
+
+  @code{.cpp}
+  RealFunction f = 1.0;
+  @endcode
+
+  - Creates a constant function @f$ f = 1 @f$
+  - Could also be a more complex function: `RealFunction f([](const Point& p) { return p.x() * p.y(); })`
+
+  @subsection guides-getting-started-first-problem-formulation Step 6: Formulate the Problem
+
+  @code{.cpp}
+  Problem poisson(u, v);
+  poisson = Integral(Grad(u), Grad(v))
+          - Integral(f, v)
+          + DirichletBC(u, Zero());
+  @endcode
+
+  This directly translates the weak formulation:
+
+  - `Integral(Grad(u), Grad(v))` represents @f$ \int_{\Omega} \nabla u \cdot \nabla v \, dx @f$
+  - `Integral(f, v)` represents @f$ \int_{\Omega} f v \, dx @f$
+  - `DirichletBC(u, Zero())` enforces @f$ u = 0 @f$ on the boundary
+
+  Note how the code closely resembles the mathematical notation!
+
+  @subsection guides-getting-started-first-problem-solve Step 7: Solve the System
+
+  @code{.cpp}
+  CG(poisson).solve();
+  @endcode
+
+  - Uses the Conjugate Gradient (CG) iterative solver
+  - For symmetric positive definite systems (like the Poisson equation)
+  - Alternative solvers: `SparseLU`, `BiCGSTAB`, etc.
+
+  @subsection guides-getting-started-first-problem-output Step 8: Save Results
+
+  @code{.cpp}
+  u.getSolution().save("solution.gf");
+  mesh.save("mesh.mesh");
+  @endcode
+
+  - Saves the solution in MFEM GridFunction format
+  - Saves the mesh in MEDIT format
+  - Can be visualized with tools like [GLVis](https://glvis.org/)
+
+  @section guides-getting-started-first-problem-build Building and Running
+
+  Save the code as `poisson.cpp` and create a `CMakeLists.txt`:
+
+  @code{.cmake}
+  cmake_minimum_required(VERSION 3.16)
+  project(PoissonExample CXX)
+
+  set(CMAKE_CXX_STANDARD 20)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+  find_package(Rodin REQUIRED)
+
+  add_executable(poisson poisson.cpp)
+  target_link_libraries(poisson PRIVATE
+    Rodin::Geometry
+    Rodin::Variational
+    Rodin::Solver
+  )
+  @endcode
+
+  Build and run:
+
+  @code{.bash}
+  cmake .
+  make
+  ./poisson
+  @endcode
+
+  @section guides-getting-started-first-problem-visualize Visualizing the Solution
+
+  If you have [GLVis](https://glvis.org/) installed, visualize the solution:
+
+  @code{.bash}
+  glvis -m mesh.mesh -g solution.gf
+  @endcode
+
+  You should see a smooth solution that represents the deflection of a
+  membrane under uniform load.
+
+  @section guides-getting-started-first-problem-variations Common Variations
+
+  @subsection guides-getting-started-first-problem-non-homogeneous Non-Homogeneous Boundary Conditions
+
+  To set @f$ u = g @f$ on the boundary instead of @f$ u = 0 @f$:
+
+  @code{.cpp}
+  RealFunction g([](const Point& p) {
+    return p.x() * p.x();
+  });
+
+  poisson = Integral(Grad(u), Grad(v))
+          - Integral(f, v)
+          + DirichletBC(u, g);
+  @endcode
+
+  @subsection guides-getting-started-first-problem-partial-bc Partial Boundary Conditions
+
+  To apply boundary conditions only on specific boundaries:
+
+  @code{.cpp}
+  // Mark boundary with attribute 1
+  int boundaryAttribute = 1;
+
+  poisson = Integral(Grad(u), Grad(v))
+          - Integral(f, v)
+          + DirichletBC(u, Zero()).on(boundaryAttribute);
+  @endcode
+
+  @subsection guides-getting-started-first-problem-variable-source Variable Source Term
+
+  For a spatially varying source:
+
+  @code{.cpp}
+  RealFunction f([](const Point& p) {
+    return std::sin(M_PI * p.x()) * std::sin(M_PI * p.y());
+  });
+
+  poisson = Integral(Grad(u), Grad(v))
+          - Integral(f, v)
+          + DirichletBC(u, Zero());
+  @endcode
+
+  @subsection guides-getting-started-first-problem-different-solver Using Different Solvers
+
+  @code{.cpp}
+  // Sparse LU direct solver (for small to medium problems)
+  SparseLU().solve(poisson);
+
+  // Conjugate Gradient with options
+  CG solver;
+  solver.setMaxIterations(1000);
+  solver.setRelativeTolerance(1e-10);
+  solver.printIterations(true);
+  solver.solve(poisson);
+  @endcode
+
+  @section guides-getting-started-first-problem-next What's Next?
+
+  Congratulations! You've solved your first PDE with Rodin. To deepen your
+  understanding, proceed to @ref guides-getting-started-core-concepts to learn more
+  about the underlying concepts.
+
+  You can also explore:
+  - @ref examples-pdes-poisson for a more detailed Poisson example
+  - @ref examples-pdes-elasticity for a vector-valued problem
+  - @ref guides-index for in-depth conceptual guides
+
+  */

@@ -4,6 +4,11 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file
+ * @brief Addition operation for functions, shape functions, and form integrators.
+ */
+
 #ifndef RODIN_VARIATIONAL_FORMLANGUAGE_SUM_H
 #define RODIN_VARIATIONAL_FORMLANGUAGE_SUM_H
 
@@ -71,6 +76,17 @@ namespace Rodin::Variational
    */
 
   /**
+   * @brief Addition of two functions.
+   *
+   * Computes pointwise sum of two functions:
+   * @f[
+   *    (f + g)(x) = f(x) + g(x)
+   * @f]
+   *
+   * Both functions must have the same range type (scalar, vector, or matrix).
+   *
+   * @tparam LHSDerived Type of left operand function
+   * @tparam RHSDerived Type of right operand function
    * @ingroup SumSpecializations
    */
   template <class LHSDerived, class RHSDerived>
@@ -87,6 +103,11 @@ namespace Rodin::Variational
       using Parent = FunctionBase<Sum<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
+      /**
+       * @brief Constructs sum of two functions.
+       * @param lhs Left operand function
+       * @param rhs Right operand function
+       */
       constexpr
       Sum(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
@@ -104,6 +125,10 @@ namespace Rodin::Variational
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
+      /**
+       * @brief Gets the left operand.
+       * @returns Reference to left function
+       */
       constexpr
       const auto& getLHS() const
       {
@@ -111,6 +136,10 @@ namespace Rodin::Variational
         return *m_lhs;
       }
 
+      /**
+       * @brief Gets the right operand.
+       * @returns Reference to right function
+       */
       constexpr
       const auto& getRHS() const
       {
@@ -118,6 +147,11 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
+      /**
+       * @brief Restricts both functions to a trace.
+       * @param args Arguments for trace restriction
+       * @returns Reference to this object
+       */
       template <class ... Args>
       constexpr
       Sum& traceOf(const Args& ... args)
@@ -127,6 +161,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Evaluates the sum at a point.
+       * @param p Point at which to evaluate
+       * @returns Sum @f$ f(p) + g(p) @f$
+       */
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
@@ -143,10 +182,20 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
+  /**
+   * @brief Deduction guide for function sum.
+   */
   template <class LHSDerived, class RHSDerived>
   Sum(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
     -> Sum<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
+  /**
+   * @brief Addition operator for two functions.
+   * @param lhs Left operand function
+   * @param rhs Right operand function
+   * @returns Sum object
+   * @relates Sum
+   */
   template <class LHSDerived, class RHSDerived>
   constexpr
   auto
@@ -155,6 +204,13 @@ namespace Rodin::Variational
     return Sum(lhs, rhs);
   }
 
+  /**
+   * @brief Addition of function and scalar.
+   * @param lhs Function operand
+   * @param rhs Real scalar
+   * @returns Sum object
+   * @relates Sum
+   */
   template <class LHSDerived>
   constexpr
   auto
@@ -163,6 +219,13 @@ namespace Rodin::Variational
     return Sum(lhs, RealFunction(rhs));
   }
 
+  /**
+   * @brief Addition of scalar and function.
+   * @param lhs Real scalar
+   * @param rhs Function operand
+   * @returns Sum object
+   * @relates Sum
+   */
   template <class RHSDerived>
   constexpr
   auto
@@ -171,6 +234,13 @@ namespace Rodin::Variational
     return Sum(RealFunction(lhs), rhs);
   }
 
+  /**
+   * @brief Addition of function and complex scalar.
+   * @param lhs Function operand
+   * @param rhs Complex scalar
+   * @returns Sum object
+   * @relates Sum
+   */
   template <class LHSDerived>
   constexpr
   auto
@@ -179,6 +249,13 @@ namespace Rodin::Variational
     return Sum(lhs, ComplexFunction(rhs));
   }
 
+  /**
+   * @brief Addition of complex scalar and function.
+   * @param lhs Complex scalar
+   * @param rhs Function operand
+   * @returns Sum object
+   * @relates Sum
+   */
   template <class RHSDerived>
   constexpr
   auto
@@ -188,6 +265,18 @@ namespace Rodin::Variational
   }
 
   /**
+   * @brief Addition of two shape functions.
+   *
+   * Computes basis-wise sum of two trial or test functions in the same
+   * finite element space:
+   * @f[
+   *    (u + v)_i = u_i + v_i
+   * @f]
+   *
+   * @tparam LHSDerived Type of left shape function
+   * @tparam RHSDerived Type of right shape function
+   * @tparam FES Finite element space type
+   * @tparam Space Trial or test function space
    * @ingroup SumSpecializations
    */
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>

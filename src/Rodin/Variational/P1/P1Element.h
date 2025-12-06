@@ -7,6 +7,21 @@
 #ifndef RODIN_VARIATIONAL_P1_P1ELEMENT_H
 #define RODIN_VARIATIONAL_P1_P1ELEMENT_H
 
+/**
+ * @file
+ * @brief P1 (piecewise linear) finite element implementation.
+ *
+ * This file provides the P1Element class template for continuous piecewise
+ * linear finite elements. P1 elements have:
+ * - One DOF per vertex
+ * - Linear basis functions: @f$ \phi_i(x_j) = \delta_{ij} @f$ (Lagrange property)
+ * - Constant gradient per element: @f$ \nabla \phi_i|_K = \text{const} @f$
+ *
+ * P1 elements are the most common finite elements, providing first-order
+ * convergence (@f$ O(h) @f$ for L² norm, @f$ O(h^2) @f$ for energy norm) and
+ * forming the foundation for many FEM applications.
+ */
+
 #include <utility>
 
 #include <boost/serialization/access.hpp>
@@ -44,7 +59,17 @@ namespace Rodin::Variational
   /**
    * @ingroup FiniteElements
    * @ingroup P1ElementSpecializations
-   * @brief Degree 1 scalar Lagrange element
+   * @brief Continuous piecewise linear (degree 1) scalar Lagrange element.
+   *
+   * The P1Element provides a first-order finite element with:
+   * - **DOF count**: One per vertex (@f$ n_v @f$ total)
+   * - **Basis functions**: Linear functions satisfying @f$ \phi_i(x_j) = \delta_{ij} @f$
+   * - **Gradient**: Constant on each element, @f$ \nabla \phi_i|_K = \text{const} @f$
+   * - **Continuity**: Global C⁰ continuity across element interfaces
+   *
+   * P1 elements provide first-order convergence and are the standard choice
+   * for elliptic PDEs like Poisson's equation @f$ -\Delta u = f @f$.
+   *
    * @tparam Scalar Type of scalar range (e.g., Real, Complex)
    */
   template <class Scalar>
@@ -90,17 +115,44 @@ namespace Rodin::Variational
       };
 
       /**
-       * @brief Represents a basis function of a P1 scalar element.
+       * @brief Represents a piecewise linear basis function of a P1 scalar element.
+       *
+       * P1 basis functions are linear polynomials satisfying the Lagrange property:
+       * @f$ \phi_i(x_j) = \delta_{ij} @f$ where x_j are the vertices of the element.
+       *
+       * ## Properties
+       * - **Lagrange property**: φ_i = 1 at vertex i, φ_i = 0 at other vertices
+       * - **Linear**: Each basis function is a linear combination of coordinates
+       * - **Gradient**: @f$ \nabla \phi_i @f$ is constant on each element
+       * - **Partition of unity**: @f$ \sum_i \phi_i(x) = 1 @f$ for all x in element
+       * - **Continuity**: C⁰ continuous across element interfaces
+       *
+       * For example, in 1D on [0,1]: @f$ \phi_0(x) = 1-x @f$ and @f$ \phi_1(x) = x @f$.
+       * In 2D on a triangle, basis functions use barycentric coordinates.
        */
       class BasisFunction
       {
         public:
-          using ReturnType = ScalarType;
+          using ReturnType = ScalarType;  ///< Scalar return type
 
+          /**
+           * @brief Represents a partial derivative of a P1 basis function.
+           *
+           * For P1 elements, the gradient is constant on each element, so derivatives
+           * are piecewise constant functions.
+           *
+           * @tparam Order Order of differentiation (typically 1 for first derivative)
+           */
           template <size_t Order>
           class DerivativeFunction
           {
             public:
+              /**
+               * @brief Constructs a derivative function.
+               * @param i Coordinate index for differentiation (0=x, 1=y, 2=z)
+               * @param local Local index of the basis function
+               * @param g Geometry type
+               */
               constexpr
               DerivativeFunction(size_t i, size_t local, Geometry::Polytope::Type g)
                 : m_i(i), m_local(local), m_g(g)
@@ -109,20 +161,38 @@ namespace Rodin::Variational
               constexpr
               DerivativeFunction(const DerivativeFunction&) = default;
 
+              /**
+               * @brief Evaluates the derivative at a spatial point.
+               * @param r Reference point in the element
+               * @return Value of derivative (constant for P1)
+               */
               constexpr
               ReturnType operator()(const Math::SpatialPoint& r) const;
 
             private:
-              const size_t m_i;
-              const size_t m_local;
-              const Geometry::Polytope::Type m_g;
+              const size_t m_i;      ///< Coordinate index
+              const size_t m_local;  ///< Local basis function index
+              const Geometry::Polytope::Type m_g;  ///< Geometry type
           };
 
+          /**
+           * @brief Represents the gradient of a P1 basis function.
+           *
+           * The gradient is a vector of first-order partial derivatives:
+           * @f$ \nabla \phi = (\partial\phi/\partial x, \partial\phi/\partial y, \partial\phi/\partial z) @f$
+           *
+           * For P1 elements, the gradient is constant on each element.
+           */
           class GradientFunction
           {
             public:
-              using ReturnType = Math::SpatialVector<ScalarType>;
+              using ReturnType = Math::SpatialVector<ScalarType>;  ///< Gradient vector type
 
+              /**
+               * @brief Constructs a gradient function.
+               * @param local Local index of the basis function
+               * @param g Geometry type
+               */
               constexpr
               GradientFunction(size_t local, Geometry::Polytope::Type g)
                 : m_local(local), m_g(g)
@@ -131,6 +201,11 @@ namespace Rodin::Variational
               constexpr
               GradientFunction(const GradientFunction&) = default;
 
+              /**
+               * @brief Evaluates the gradient at a spatial point.
+               * @param r Reference point in the element (gradient is constant, so r doesn't affect result)
+               * @return Constant gradient vector
+               */
               const ReturnType& operator()(const Math::SpatialPoint& r) const
               {
                 static thread_local ReturnType s_out;
@@ -597,7 +672,18 @@ namespace Rodin::Variational
   /**
    * @ingroup FiniteElements
    * @ingroup P1ElementSpecializations
-   * @brief Degree 1 vector Lagrange element
+   * @brief Continuous piecewise linear (degree 1) vector Lagrange element.
+   *
+   * Vector-valued P1 element with:
+   * - **DOF count**: @f$ d \cdot n_v @f$ where @f$ d @f$ is vector dimension, @f$ n_v @f$ is vertex count
+   * - **Basis functions**: @f$ \boldsymbol{\phi}_{i,j}(x) = \phi_i(x) \mathbf{e}_j @f$
+   * - **Jacobian**: @f$ \mathbf{J}_{i,j} = \partial u_i/\partial x_j @f$ constant per element
+   * - **Continuity**: C⁰ continuous vector field
+   *
+   * Used for elasticity, fluid mechanics, and vector-valued PDEs. Each component
+   * uses P1 interpolation independently.
+   *
+   * @tparam Scalar Type of scalar components
    */
   template <class Scalar>
   class P1Element<Math::Vector<Scalar>> final
@@ -797,7 +883,7 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      P1Element(size_t vdim, Geometry::Polytope::Type geometry)
+      P1Element(Geometry::Polytope::Type geometry, size_t vdim)
         : Parent(geometry), m_vdim(vdim)
       {
         const size_t count = this->getCount();

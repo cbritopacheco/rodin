@@ -1,14 +1,63 @@
 #ifndef RODIN_VARIATIONAL_P1_LINEARELASTICITY_LINEARELASTICITYINTEGRAL_H
 #define RODIN_VARIATIONAL_P1_LINEARELASTICITY_LINEARELASTICITYINTEGRAL_H
 
+/**
+ * @file LinearElasticityIntegral.h
+ * @brief P1 specialization of the linear elasticity bilinear form integrator.
+ *
+ * This file provides an optimized implementation of the linear elasticity
+ * integrator for P1 vector finite element spaces.
+ *
+ * ## Bilinear Form
+ * The integrator assembles the elasticity bilinear form:
+ * @f[
+ *   a(\mathbf{u}, \mathbf{v}) = \int_\Omega 2\mu \, \boldsymbol{\varepsilon}(\mathbf{u}) : \boldsymbol{\varepsilon}(\mathbf{v}) + \lambda (\nabla \cdot \mathbf{u})(\nabla \cdot \mathbf{v}) \, dx
+ * @f]
+ *
+ * For P1 elements, this uses centroid quadrature (exact for the bilinear form)
+ * and exploits the constant gradient property of P1 basis functions.
+ *
+ * ## Usage
+ * @code{.cpp}
+ * P1 Vh(mesh, spaceDim);  // Vector P1 space
+ * TrialFunction u(Vh);
+ * TestFunction v(Vh);
+ * 
+ * Real mu = 1.0, lambda = 1.0;
+ * Problem problem(u, v);
+ * problem = LinearElasticityIntegral(u, v, lambda, mu);
+ * @endcode
+ *
+ * @see LinearElasticityIntegral, P1
+ */
+
 #include "Rodin/Variational/LinearElasticity/LinearElasticityIntegral.h"
 #include "Rodin/Variational/P1/ForwardDecls.h"
 #include "Rodin/Variational/P1/P1.h"
-#include "Rodin/Variational/P1/P1Element.h"
-#include "Rodin/QF/QF1P1.h"
+#include "Rodin/QF/Centroid.h"
 
 namespace Rodin::Variational
 {
+  /**
+   * @ingroup LinearElasticitySpecializations
+   * @brief P1 linear elasticity bilinear form integrator.
+   *
+   * Specialized integrator for the linear elasticity problem with P1 vector
+   * elements. Uses centroid quadrature which is exact for the constant
+   * Jacobians of P1 basis functions.
+   *
+   * ## Local Stiffness Matrix
+   * For element @f$ K @f$, computes the local matrix entries:
+   * @f[
+   *   A^K_{ij} = |K| \left[ 2\mu \, \boldsymbol{\varepsilon}(\phi_j) : \boldsymbol{\varepsilon}(\phi_i) + \lambda (\nabla \cdot \phi_j)(\nabla \cdot \phi_i) \right]
+   * @f]
+   *
+   * @tparam Solution Solution type tag
+   * @tparam MuDerived Derived type of shear modulus function
+   * @tparam LambdaDerived Derived type of Lamé parameter function
+   * @tparam Range Value range type
+   * @tparam Mesh Mesh type
+   */
   template <class Solution, class MuDerived, class LambdaDerived, class Range, class Mesh>
   class LinearElasticityIntegrator<Solution, P1<Range, Mesh>, MuDerived, LambdaDerived> final
     : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<P1<Range, Mesh>>::ScalarType>
@@ -166,7 +215,7 @@ namespace Rodin::Variational
       std::reference_wrapper<const TestFESType> m_testfes;
 
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
-      Optional<QF::QF1P1> m_qf;
+      Optional<QF::Centroid> m_qf;
       Optional<Geometry::Point> m_p;
 
       Real m_distortion;

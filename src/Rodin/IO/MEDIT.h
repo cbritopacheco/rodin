@@ -24,37 +24,51 @@
 #include "GridFunctionLoader.h"
 #include "GridFunctionPrinter.h"
 #include "Rodin/Variational/P1/ForwardDecls.h"
+#include "Rodin/Variational/H1/ForwardDecls.h"
 
 namespace Rodin::IO::MEDIT
 {
+  /**
+   * @brief Keywords used in MEDIT mesh and solution file formats.
+   *
+   * These keywords identify different sections in MEDIT files (.mesh and .sol).
+   * The MEDIT format is a text-based format used by the MMG remeshing software.
+   *
+   * @see <a href="https://www.ljll.math.upmc.fr/frey/logiciels/Docmedit.dir/index.html">MEDIT Format Specification</a>
+   */
   enum class Keyword
   {
-    MeshVersionFormatted,
-    Dimension,
-    Vertices,
-    Triangles,
-    Quadrilaterals,
-    Tetrahedra,
-    Wedges,
-    Corners,
-    Ridges,
-    Edges,
-    SolAtVertices,
-    SolAtEdges,
-    SolAtTriangles,
-    SolAtQuadrilaterals,
-    SolAtTetrahedra,
-    SolAtPentahedra,
-    SolAtHexahedra,
-    RequiredVertices,
-    RequiredEdges,
-    Normals,
-    NormalAtVertices,
-    Tangents,
-    TangentAtVertices,
-    End
+    MeshVersionFormatted,  ///< Format version declaration
+    Dimension,             ///< Spatial dimension
+    Vertices,              ///< Vertex coordinates section
+    Triangles,             ///< Triangle elements section
+    Quadrilaterals,        ///< Quadrilateral elements section
+    Tetrahedra,            ///< Tetrahedral elements section
+    Wedges,                ///< Wedge (prism) elements section
+    Corners,               ///< Corner vertices section
+    Ridges,                ///< Ridge edges section
+    Edges,                 ///< Edge elements section
+    SolAtVertices,         ///< Solution at vertices
+    SolAtEdges,            ///< Solution at edges
+    SolAtTriangles,        ///< Solution at triangles
+    SolAtQuadrilaterals,   ///< Solution at quadrilaterals
+    SolAtTetrahedra,       ///< Solution at tetrahedra
+    SolAtPentahedra,       ///< Solution at pentahedra
+    SolAtHexahedra,        ///< Solution at hexahedra
+    RequiredVertices,      ///< Required vertices section
+    RequiredEdges,         ///< Required edges section
+    Normals,               ///< Normal vectors section
+    NormalAtVertices,      ///< Normals at vertices
+    Tangents,              ///< Tangent vectors section
+    TangentAtVertices,     ///< Tangents at vertices
+    End                    ///< End of file marker
   };
 
+  /**
+   * @brief Converts a MEDIT keyword enum to its string representation.
+   * @param[in] kw Keyword to convert
+   * @returns C-style string representation of the keyword
+   */
   inline
   constexpr
   const char* toCharString(Keyword kw)
@@ -226,27 +240,52 @@ namespace Rodin::IO::MEDIT
     return res;
   }
 
+  /**
+   * @brief Solution data types in MEDIT solution files.
+   *
+   * Identifies the type of solution data stored in .sol files.
+   */
   enum SolutionType
   {
-    Real = 1,
-    Vector = 2,
-    Tensor = 3
+    Real = 1,    ///< Scalar (real-valued) solution
+    Vector = 2,  ///< Vector-valued solution
+    Tensor = 3   ///< Tensor-valued solution
   };
 
+  /**
+   * @brief Parser for mesh entities (elements) in MEDIT format.
+   * @internal
+   *
+   * Parses element connectivity and attribute information.
+   */
   class ParseEntity
   {
     public:
+      /**
+       * @brief Parsed entity data.
+       */
       struct Data
       {
-        Array<Index> vertices;
-        Geometry::Attribute attribute;
+        Array<Index> vertices;       ///< Vertex indices defining the entity
+        Geometry::Attribute attribute;  ///< Entity attribute (material ID)
       };
 
+      /**
+       * @brief Constructs an entity parser for @p n vertices.
+       * @param[in] n Number of vertices in the entity
+       */
       constexpr
       ParseEntity(size_t n)
         : m_n(n)
       {}
 
+      /**
+       * @brief Parses entity data from an iterator range.
+       * @tparam Iterator Iterator type
+       * @param[in] begin Start of input range
+       * @param[in] end End of input range
+       * @returns Optional entity data if parsing succeeds, empty otherwise
+       */
       template <class Iterator>
       Optional<Data> operator()(Iterator begin, Iterator end) const
       {
@@ -734,6 +773,429 @@ namespace Rodin::IO
       }
 
     private:
+      size_t m_version;
+      size_t m_spaceDimension;
+      size_t m_currentLineNumber;
+  };
+
+  template <size_t K, class Range>
+  class GridFunctionLoader<
+    FileFormat::MEDIT,
+    Variational::H1<K, Range, Geometry::Mesh<Context::Local>>,
+    Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
+    : public GridFunctionLoaderBase<
+        Variational::H1<K, Range, Geometry::Mesh<Context::Local>>,
+        Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
+  {
+    public:
+      using FESType    = Variational::H1<K, Range, Geometry::Mesh<Context::Local>>;
+      using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
+      using DataType   = Math::Vector<ScalarType>;
+      using ObjectType = Variational::GridFunction<FESType, DataType>;
+      using Parent     = GridFunctionLoaderBase<FESType, DataType>;
+
+      GridFunctionLoader(ObjectType& gf)
+        : Parent(gf),
+          m_version(0),
+          m_spaceDimension(0),
+          m_currentLineNumber(0)
+      {}
+
+      void load(std::istream& is) override
+      {
+        readVersion(is);
+        readDimension(is);
+        readData(is);
+      }
+
+    private:
+      // -------------------------------------------------------------
+      // Line helpers (same style as P1 loader)
+      // -------------------------------------------------------------
+      std::istream& getline(std::istream& is, std::string& line)
+      {
+        m_currentLineNumber++;
+        return std::getline(is, line);
+      }
+
+      std::string skipEmptyLines(std::istream& is)
+      {
+        std::string line;
+        while (getline(is, line))
+        {
+          if (!MEDIT::ParseEmptyLine()(line.begin(), line.end()))
+            break;
+        }
+        return line;
+      }
+
+      void readVersion(std::istream& is)
+      {
+        auto line = skipEmptyLines(is);
+        Optional<unsigned int> version =
+          MEDIT::ParseMeshVersionFormatted()(line.begin(), line.end());
+        if (version)
+        {
+          m_version = *version;
+        }
+        else
+        {
+          auto line2 = skipEmptyLines(is);
+          version = MEDIT::ParseUnsignedInteger()(line2.begin(), line2.end());
+          if (version)
+            m_version = *version;
+          else
+            Alert::Exception()
+              << "Failed to parse version number of mesh."
+              << Alert::Raise;
+        }
+      }
+
+      void readDimension(std::istream& is)
+      {
+        auto line = skipEmptyLines(is);
+        Optional<unsigned int> dimension =
+          MEDIT::ParseDimension()(line.begin(), line.end());
+        if (dimension)
+        {
+          m_spaceDimension = *dimension;
+        }
+        else
+        {
+          auto line2 = skipEmptyLines(is);
+          dimension = MEDIT::ParseUnsignedInteger()(line2.begin(), line2.end());
+          if (dimension)
+            m_spaceDimension = *dimension;
+          else
+            Alert::Exception()
+              << "Failed to parse dimension of mesh."
+              << Alert::Raise;
+        }
+      }
+
+      void readData(std::istream& is)
+      {
+        auto& gf   = this->getObject();
+        auto& data = gf.getData();
+        const auto& fes  = gf.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+
+        const size_t vdim       = fes.getVectorDimension();
+        const size_t D          = mesh.getDimension();
+        const size_t scalarSize = fes.getSize() / vdim;
+
+        // 1. SolAtVertices keyword
+        auto line = skipEmptyLines(is);
+        Optional<std::string> kw =
+          MEDIT::ParseKeyword()(line.begin(), line.end());
+        if (!kw || *kw != MEDIT::Keyword::SolAtVertices)
+        {
+          Alert::Exception()
+            << "Expected keyword " << MEDIT::Keyword::SolAtVertices
+            << " on line " << m_currentLineNumber
+            << Alert::Raise;
+        }
+
+        // 2. Number of vertices
+        line = skipEmptyLines(is);
+        Optional<unsigned int> size =
+          MEDIT::ParseUnsignedInteger()(line.begin(), line.end());
+        if (!size)
+        {
+          Alert::Exception()
+            << "Failed to parse solution size at line "
+            << m_currentLineNumber
+            << Alert::Raise;
+        }
+
+        const size_t nVertices = mesh.getVertexCount();
+        if (static_cast<size_t>(*size) != nVertices)
+        {
+          Alert::Exception()
+            << "MEDIT SolAtVertices size (" << *size
+            << ") does not match mesh vertex count (" << nVertices << ")."
+            << Alert::Raise;
+        }
+
+        // 3. solCount, vdim line
+        line = skipEmptyLines(is);
+        size_t solCount = 0;
+        size_t fileVdim = 0;
+
+        using boost::spirit::x3::space;
+        using boost::spirit::x3::uint_;
+        using boost::spirit::x3::_attr;
+
+        const auto get_sol_count = [&](auto& ctx) { solCount  = _attr(ctx); };
+        const auto get_vdim      = [&](auto& ctx) { fileVdim = _attr(ctx); };
+
+        const auto p = uint_[get_sol_count] >> uint_[get_vdim];
+        auto it = line.begin();
+        const bool r = boost::spirit::x3::phrase_parse(it, line.end(), p, space);
+
+        if (!r || it != line.end())
+        {
+          Alert::Exception()
+            << "Failed to parse solution count and vector dimension at line "
+            << m_currentLineNumber
+            << Alert::Raise;
+        }
+
+        if (solCount != 1)
+        {
+          Alert::Exception()
+            << "Only a single solution is supported in SolAtVertices, got "
+            << solCount
+            << Alert::Raise;
+        }
+
+        if (fileVdim != vdim)
+        {
+          Alert::Exception()
+            << "Vector dimension mismatch: file vdim = "
+            << fileVdim << ", H1 vdim = " << vdim
+            << Alert::Raise;
+        }
+
+        if (data.size() == 0)
+          return;
+        assert(static_cast<size_t>(data.size()) == vdim * scalarSize);
+
+        // 4. Read vertex-based P1 data
+        std::vector<ScalarType> vertexValues(vdim * nVertices);
+        for (size_t v = 0; v < nVertices; ++v)
+        {
+          for (size_t c = 0; c < vdim; ++c)
+          {
+            ScalarType val;
+            is >> val;
+            vertexValues[c * nVertices + v] = val;
+          }
+        }
+
+        // -------------------------------------------------------------
+        // Special case: 0D mesh (only points).
+        //
+        // No edges, no cells. Only vertex DOFs exist in H1, so we
+        // simply copy SolAtVertices into those DOFs.
+        // -------------------------------------------------------------
+        if (D == 0)
+        {
+          for (size_t v = 0; v < nVertices; ++v)
+          {
+            const auto& vdofs = fes.getDOFs(0, static_cast<Index>(v));
+            assert(vdofs.size() == 1);
+
+            Index d = vdofs(0);
+            for (size_t c = 0; c < vdim; ++c)
+            {
+              data.coeffRef(d + static_cast<Index>(c * scalarSize)) =
+                vertexValues[c * nVertices + v];
+            }
+          }
+          return;
+        }
+
+        // -------------------------------------------------------------
+        // Generic D >= 1: element-based injection
+        // -------------------------------------------------------------
+
+        const auto& connD0  = mesh.getConnectivity().getIncidence(D, 0);
+        const size_t nCells = mesh.getConnectivity().getCount(D);
+
+        // P1/Q1 evaluators on reference elements
+
+        auto evalP1_on_segment = [&](Real x,
+                                     const ScalarType* u) -> ScalarType
+        {
+          // Reference segment [0,1]; vertex 0 at x=0, vertex 1 at x=1
+          return (ScalarType(1) - x) * u[0] + x * u[1];
+        };
+
+        auto evalP1_on_triangle = [&](Real x, Real y,
+                                      const ScalarType* u) -> ScalarType
+        {
+          // Ref triangle (0,0)-(1,0)-(0,1)
+          const Real l0 = Real(1) - x - y;
+          const Real l1 = x;
+          const Real l2 = y;
+          return l0 * u[0] + l1 * u[1] + l2 * u[2];
+        };
+
+        auto evalQ1_on_quad = [&](Real x, Real y,
+                                  const ScalarType* u) -> ScalarType
+        {
+          // Ref quad [0,1]^2 with vertices:
+          // 0:(0,0), 1:(1,0), 2:(1,1), 3:(0,1)
+          const Real one_x = Real(1) - x;
+          const Real one_y = Real(1) - y;
+
+          const Real psi0 = one_x * one_y;
+          const Real psi1 = x      * one_y;
+          const Real psi2 = x      * y;
+          const Real psi3 = one_x  * y;
+
+          return psi0 * u[0] + psi1 * u[1] + psi2 * u[2] + psi3 * u[3];
+        };
+
+        auto evalP1_on_tet = [&](Real x, Real y, Real z,
+                                 const ScalarType* u) -> ScalarType
+        {
+          // Ref tet (0,0,0)-(1,0,0)-(0,1,0)-(0,0,1)
+          const Real l0 = Real(1) - x - y - z;
+          const Real l1 = x;
+          const Real l2 = y;
+          const Real l3 = z;
+          return l0 * u[0] + l1 * u[1] + l2 * u[2] + l3 * u[3];
+        };
+
+        auto evalP1_on_wedge = [&](Real x, Real y, Real z,
+                                   const ScalarType* u) -> ScalarType
+        {
+          // Ref wedge = triangle(x,y) × segment(z)
+          //
+          // Triangle barycentric:
+          //   λ0 = 1 - x - y, λ1 = x, λ2 = y
+          // Segment z ∈ [0,1].
+          //
+          // Vertices:
+          //   v0: (λ0, z=0), v1: (λ1, 0), v2: (λ2, 0)
+          //   v3: (λ0, 1),   v4: (λ1, 1), v5: (λ2, 1)
+          const Real l0 = Real(1) - x - y;
+          const Real l1 = x;
+          const Real l2 = y;
+
+          const Real one_z = Real(1) - z;
+
+          const Real psi0 = l0 * one_z;
+          const Real psi1 = l1 * one_z;
+          const Real psi2 = l2 * one_z;
+          const Real psi3 = l0 * z;
+          const Real psi4 = l1 * z;
+          const Real psi5 = l2 * z;
+
+          return psi0 * u[0] + psi1 * u[1] + psi2 * u[2]
+               + psi3 * u[3] + psi4 * u[4] + psi5 * u[5];
+        };
+
+        // Element loop
+        for (Index c = 0; c < static_cast<Index>(nCells); ++c)
+        {
+          const auto geom   = mesh.getGeometry(D, c);
+          const auto& verts = connD0[c];
+          const auto& cdofs = fes.getDOFs(D, c);
+
+          const size_t nLocal = static_cast<size_t>(cdofs.size());
+
+          // H1 local nodes in reference element
+          const auto& nodes = Variational::H1Element<K, Range>::getNodes(geom);
+          assert(nodes.size() == nLocal);
+
+          // Number of vertices per cell (topology)
+          size_t nCellVertices = 0;
+          switch (geom)
+          {
+            case Geometry::Polytope::Type::Point:
+              nCellVertices = 1;
+              break;
+            case Geometry::Polytope::Type::Segment:
+              nCellVertices = 2;
+              break;
+            case Geometry::Polytope::Type::Triangle:
+              nCellVertices = 3;
+              break;
+            case Geometry::Polytope::Type::Quadrilateral:
+              nCellVertices = 4;
+              break;
+            case Geometry::Polytope::Type::Tetrahedron:
+              nCellVertices = 4;
+              break;
+            case Geometry::Polytope::Type::Wedge:
+              nCellVertices = 6;
+              break;
+            default:
+              Alert::Exception()
+                << "Unsupported cell geometry in MEDIT H1 loader."
+                << Alert::Raise;
+          }
+
+          assert(verts.size() == nCellVertices);
+
+          // Per-component injection
+          for (size_t comp = 0; comp < vdim; ++comp)
+          {
+            // Gather vertex values u_vert[0..nCellVertices-1]
+            ScalarType u_vert[8];
+            for (size_t lv = 0; lv < nCellVertices; ++lv)
+            {
+              const Index vIdx = verts[lv];
+              assert(static_cast<size_t>(vIdx) < nVertices);
+              u_vert[lv] =
+                vertexValues[comp * nVertices + static_cast<size_t>(vIdx)];
+            }
+
+            // Interpolate at each H1 nodal point of this cell
+            for (size_t j = 0; j < nLocal; ++j)
+            {
+              const auto& pt = nodes[j];
+              ScalarType u_val{};
+
+              switch (geom)
+              {
+                case Geometry::Polytope::Type::Point:
+                {
+                  // Single vertex, nothing to interpolate
+                  u_val = u_vert[0];
+                  break;
+                }
+                case Geometry::Polytope::Type::Segment:
+                {
+                  const Real x = pt.x();
+                  u_val = evalP1_on_segment(x, u_vert);
+                  break;
+                }
+                case Geometry::Polytope::Type::Triangle:
+                {
+                  const Real x = pt.x();
+                  const Real y = pt.y();
+                  u_val = evalP1_on_triangle(x, y, u_vert);
+                  break;
+                }
+                case Geometry::Polytope::Type::Quadrilateral:
+                {
+                  const Real x = pt.x();
+                  const Real y = pt.y();
+                  u_val = evalQ1_on_quad(x, y, u_vert);
+                  break;
+                }
+                case Geometry::Polytope::Type::Tetrahedron:
+                {
+                  const Real x = pt.x();
+                  const Real y = pt.y();
+                  const Real z = pt.z();
+                  u_val = evalP1_on_tet(x, y, z, u_vert);
+                  break;
+                }
+                case Geometry::Polytope::Type::Wedge:
+                {
+                  const Real x = pt.x();
+                  const Real y = pt.y();
+                  const Real z = pt.z();
+                  u_val = evalP1_on_wedge(x, y, z, u_vert);
+                  break;
+                }
+                default:
+                  assert(false);
+              }
+
+              const Index gdof = cdofs(static_cast<Index>(j));
+              assert(static_cast<size_t>(gdof) < scalarSize);
+              data.coeffRef(gdof + static_cast<Index>(comp * scalarSize)) = u_val;
+            }
+          }
+        }
+      }
+
       size_t m_version;
       size_t m_spaceDimension;
       size_t m_currentLineNumber;

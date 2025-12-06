@@ -6,3 +6,4 @@ target_link_libraries(BooleanFunction PUBLIC Rodin::Variational)
 
 add_subdirectory(P0)
 add_subdirectory(P1)
+add_subdirectory(H1)

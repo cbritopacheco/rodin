@@ -1,3 +1,49 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+/**
+ * @file BoundaryNormal.h
+ * @brief Outward unit normal vector on domain boundaries.
+ *
+ * This file defines the BoundaryNormal class, which represents the outward
+ * unit normal vector field on the boundary of a domain. Boundary normals are
+ * essential for imposing natural boundary conditions and computing boundary
+ * integrals in finite element formulations.
+ *
+ * ## Mathematical Foundation
+ * For a domain @f$ \Omega \subset \mathbb{R}^d @f$ with boundary @f$ \partial\Omega @f$,
+ * the outward unit normal @f$ \mathbf{n} @f$ satisfies:
+ * @f[
+ *   \|\mathbf{n}\| = 1, \quad \mathbf{n} \cdot \mathbf{t} = 0
+ * @f]
+ * where @f$ \mathbf{t} @f$ is any tangent vector to @f$ \partial\Omega @f$.
+ *
+ * ## Applications
+ * - **Neumann boundary conditions**: @f$ \nabla u \cdot \mathbf{n} = g @f$
+ * - **Robin boundary conditions**: @f$ \alpha u + \beta \nabla u \cdot \mathbf{n} = g @f$
+ * - **Flux calculations**: @f$ \int_{\partial\Omega} (\mathbf{v} \cdot \mathbf{n}) \, ds @f$
+ * - **Integration by parts**: Boundary terms involving normal derivatives
+ * - **DG methods**: Numerical flux terms with normal components
+ *
+ * ## Properties
+ * - Orientation: Points outward from the domain
+ * - Uniqueness: Well-defined except at corners/edges (where limits differ)
+ * - Computation: Derived from surface geometry and element transformations
+ *
+ * ## Usage Example
+ * ```cpp
+ * BoundaryNormal n(mesh);
+ * 
+ * // Neumann BC: ∫_Γ g(n·∇u) v ds
+ * auto neumann = BoundaryIntegral(g * Dot(n, Grad(u)), v).on(boundary_attr);
+ * 
+ * // Normal derivative
+ * auto normal_deriv = Dot(Grad(u), n);  // ∂u/∂n
+ * ```
+ */
 #ifndef RODIN_VARIATIONAL_BOUNDARYNORMAL_H
 #define RODIN_VARIATIONAL_BOUNDARYNORMAL_H
 
@@ -13,7 +59,12 @@
 namespace Rodin::Variational
 {
   /**
-   * @brief Outward unit normal.
+   * @ingroup RodinVariational
+   * @brief Outward unit normal vector on domain boundaries.
+   *
+   * BoundaryNormal represents the outward-pointing unit normal vector field
+   * on the boundary of a mesh. It is computed from the mesh geometry and
+   * element transformations.
    */
   class BoundaryNormal final : public VectorFunctionBase<Real, BoundaryNormal>
   {

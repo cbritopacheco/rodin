@@ -15,7 +15,6 @@ namespace Rodin::Alert
 {
   /**
    * @brief Prefix class for informational messages.
-   * @ingroup AlertModule
    *
    * Provides blue-colored prefixing for informational messages using "Info" as
    * the default prefix text.
@@ -38,7 +37,6 @@ namespace Rodin::Alert
 
   /**
    * @brief Informational message class with formatted output.
-   * @ingroup AlertModule
    *
    * A specialized message class for displaying informational content with
    * blue-colored formatting. Unlike exceptions, info messages do not terminate

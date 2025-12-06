@@ -7,6 +7,20 @@
 #ifndef RODIN_ALERT_H
 #define RODIN_ALERT_H
 
+/**
+ * @file Alert.h
+ * @brief Main include file for the Alert module.
+ *
+ * This header provides access to the complete Alert system including
+ * exceptions, warnings, info messages, and success notifications with
+ * colored terminal output support.
+ *
+ * Include this header to use the Alert module:
+ * @code{.cpp}
+ * #include <Rodin/Alert.h>
+ * @endcode
+ */
+
 #include "Alert/Exception.h"
 #include "Alert/Success.h"
 #include "Alert/Warning.h"

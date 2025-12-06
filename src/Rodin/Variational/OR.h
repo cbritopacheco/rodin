@@ -4,6 +4,32 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file OR.h
+ * @brief Logical OR operator for boolean functions.
+ *
+ * This file defines the OR class, which implements the logical OR operation
+ * between boolean-valued functions. This operator is used for combining
+ * logical conditions in variational formulations.
+ *
+ * ## Mathematical Foundation
+ * For boolean functions @f$ p, q : \Omega \to \{0,1\} @f$, the OR operator:
+ * @f[
+ *   (p \lor q)(x) = \begin{cases} 1 & \text{if } p(x) = 1 \text{ or } q(x) = 1 \\ 0 & \text{otherwise} \end{cases}
+ * @f]
+ *
+ * ## Applications
+ * - Combining region indicators
+ * - Logical conditions for adaptive methods
+ * - Piecewise function definitions based on multiple criteria
+ *
+ * ## Usage Example
+ * ```cpp
+ * auto p = (x > 0.0);      // Boolean condition
+ * auto q = (y < 1.0);      // Another condition
+ * auto combined = p || q;  // True if either condition holds
+ * ```
+ */
 #ifndef RODIN_VARIATIONAL_OR_H
 #define RODIN_VARIATIONAL_OR_H
 

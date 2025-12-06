@@ -26,8 +26,22 @@
 
 namespace Rodin::Alert
 {
+  /**
+   * @internal
+   * @brief Internal helper traits for detecting streamable types.
+   *
+   * Namespace containing implementation details for the Alert module.
+   */
   namespace Internal
   {
+    /**
+     * @brief Type trait to check if a type can be output to a stream.
+     * @tparam T The type to check.
+     *
+     * Uses SFINAE to detect if a type T can be used with operator<<
+     * on an output stream. The Value member is true if T is streamable,
+     * false otherwise.
+     */
     template <typename T>
     class CanBeOutput
     {
@@ -40,46 +54,92 @@ namespace Rodin::Alert
       static std::false_type test(...);
 
     public:
+        /// @brief True if T can be streamed to an ostream, false otherwise.
         static constexpr bool Value = decltype(test<T>(nullptr))::value;
     };
   }
 
+  /**
+   * @brief Base class for message prefixes with colored text.
+   * @tparam Foreground The foreground color type.
+   *
+   * Template class that provides colored, bolded prefix text for messages.
+   * This class is used as a base for specific message type prefixes like
+   * ExceptionPrefix, WarningPrefix, etc.
+   */
   template <class Foreground>
   class MessagePrefix : public Text<Foreground>
   {
     public:
+      /// @brief Parent class type alias.
       using Parent = Text<Foreground>;
 
+      /**
+       * @brief Constructs a message prefix with foreground color and text.
+       * @param fg The foreground color.
+       * @param prefix The prefix text string.
+       */
       MessagePrefix(const Foreground& fg, const std::string& prefix)
         : Parent(fg, prefix)
       {
         this->setBold();
       }
 
+      /**
+       * @brief Constructs a message prefix with text using default color.
+       * @param prefix The prefix text string.
+       */
       MessagePrefix(const std::string& prefix)
         : Parent(prefix)
       {
         this->setBold();
       }
 
+      /**
+       * @brief Copy constructor.
+       */
       MessagePrefix(const MessagePrefix& other)
         : Parent(other)
       {}
 
+      /**
+       * @brief Move constructor.
+       */
       MessagePrefix(MessagePrefix&& other)
         : Parent(std::move(other))
       {}
   };
 
   /**
-   * @brief Base class for objects which represents output messages.
+   * @brief Base template class for formatted message output.
+   * @tparam Prefix The prefix type for the message.
    *
-   * Represents a message to output to the user with potential visible effects.
+   * Base class for creating formatted messages with customizable prefixes,
+   * colors, and styles. Messages support stream-like insertion operators
+   * for building content incrementally. This class is used as the base
+   * for Exception, Warning, Info, and Success message types.
+   *
+   * The Message class handles:
+   * - Formatted output with colored prefixes
+   * - Automatic indentation for multi-line messages
+   * - Stream-like insertion operators for content
+   * - Integration with the Alert tag types (NewLine, Raise, etc.)
+   *
+   * Example usage (through derived classes):
+   * @code{.cpp}
+   * Exception() << "Error in function: " << funcName << NewLine
+   *             << "Invalid parameter value: " << value << Raise;
+   * @endcode
    */
   template <class Prefix>
   class Message
   {
     public:
+      /**
+       * @brief Constructs a message with output stream and prefix.
+       * @param os The output stream to write the message to.
+       * @param prefix The message prefix object.
+       */
       Message(std::ostream& os, const Prefix& prefix) noexcept
         : m_os(os),
           m_prefix(prefix),
@@ -89,8 +149,11 @@ namespace Rodin::Alert
       }
 
       /**
-       * @brief Performs a copy of the Alert's message.
-       * @param[in] other Object to copy.
+       * @brief Copy constructor.
+       * @param other Object to copy.
+       *
+       * Performs a copy of the message's state including the accumulated
+       * message content.
        */
       Message(const Message& other)
         : m_os(other.m_os),
@@ -102,8 +165,8 @@ namespace Rodin::Alert
       }
 
       /**
-       * @brief Performs a move of the Alert's message.
-       * @param[in] other Object to move.
+       * @brief Move constructor.
+       * @param other Object to move.
        */
       Message(Message&& other) = default;
 
@@ -113,8 +176,11 @@ namespace Rodin::Alert
       virtual ~Message() = default;
 
       /**
-       * @brief Gets the description (or reason) for the alert.
-       * @returns String containing the message.
+       * @brief Gets the message content as a C-string.
+       * @return Null-terminated string containing the message.
+       *
+       * Returns the accumulated message content without formatting or
+       * color codes. Useful for logging or storing the message text.
        */
       const char* what() const noexcept
       {
@@ -123,8 +189,14 @@ namespace Rodin::Alert
       }
 
       /**
-       * @brief Operator overload to aid in the construction of Alert
-       * messages.
+       * @brief Stream insertion operator for arbitrary streamable types.
+       * @tparam T The type to insert (must be streamable).
+       * @param v The value to insert into the message.
+       * @return Reference to this Message object for method chaining.
+       *
+       * Appends content to the message. Handles automatic indentation
+       * when content follows a newline. Only enabled for types that
+       * can be output to an ostream.
        */
       template <class T>
       std::enable_if_t<Internal::CanBeOutput<T>::Value, Message&>
@@ -142,6 +214,13 @@ namespace Rodin::Alert
         return *this;
       }
 
+      /**
+       * @brief Stream insertion operator for NewLine tag.
+       * @return Reference to this Message object for method chaining.
+       *
+       * Inserts a newline character and marks the next insertion for
+       * automatic indentation to align with the message prefix.
+       */
       Message& operator<<(const NewLineT&)
       {
         operator<<('\n');
@@ -150,9 +229,10 @@ namespace Rodin::Alert
       }
 
       /**
-       * @brief Operator overload to raise the Alert from a stream.
+       * @brief Stream insertion operator for Raise tag.
        *
-       * This method will call @ref raise().
+       * Triggers the raise() method to output the message and perform
+       * any associated actions (such as program termination for exceptions).
        */
       void operator<<(const RaiseT&)
       {
@@ -160,22 +240,30 @@ namespace Rodin::Alert
       }
 
       /**
-       * @brief Raises the Alert to the user.
+       * @brief Raises (outputs) the message to the user.
        *
-       * The actual behaviour for raising the Alert is specified in its
-       * subclasses by overriding this function.
+       * Default behavior outputs the formatted message to the configured
+       * output stream. Derived classes may override this to add additional
+       * behavior (e.g., Exception terminates the program).
        */
       virtual void raise() const
       {
         m_os.get() << m_styled.rdbuf() << NewLine;
       }
 
+      /**
+       * @brief Sets the output stream for this message.
+       * @param os The new output stream.
+       *
+       * Changes where the message will be output when raised.
+       */
       void setOutputStream(std::ostream& os)
       {
         m_os = os;
       }
 
     private:
+      /// @brief Thread-local storage for the what() string.
       static thread_local std::string s_what;
 
       std::reference_wrapper<std::ostream> m_os;
@@ -185,6 +273,7 @@ namespace Rodin::Alert
       bool m_newline;
   };
 
+  /// @brief Thread-local storage initialization for Message::s_what.
   template <class Prefix>
   thread_local std::string Message<Prefix>::s_what;
 }

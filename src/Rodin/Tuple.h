@@ -7,6 +7,19 @@
 #ifndef RODIN_TUPLE_H
 #define RODIN_TUPLE_H
 
+/**
+ * @file
+ * @brief Defines the Tuple class, an extended tuple implementation.
+ *
+ * The Tuple class extends std::tuple with additional functionality including
+ * Cartesian products, zipping, filtering, mapping, and concatenation operations.
+ * These operations are useful for compile-time metaprogramming and type-safe
+ * container manipulation.
+ *
+ * @see Rodin::Tuple
+ * @see Rodin::Pair
+ */
+
 #include <tuple>
 #include <boost/serialization/access.hpp>
 

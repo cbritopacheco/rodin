@@ -7,6 +7,11 @@
 #ifndef RODIN_GEOMETRY_ISOPARAMETRICTRANSFORMATION_H
 #define RODIN_GEOMETRY_ISOPARAMETRICTRANSFORMATION_H
 
+/**
+ * @file
+ * @brief Isoparametric transformation for finite elements.
+ */
+
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/base_object.hpp>
 
@@ -20,7 +25,33 @@
 namespace Rodin::Geometry
 {
   /**
-   * @brief Polytope isoparametric transformation.
+   * @brief Isoparametric transformation for polytopes.
+   *
+   * An isoparametric transformation uses finite element basis functions to
+   * map reference coordinates to physical coordinates. Given a point matrix
+   * @f$ P @f$ containing the physical coordinates of degrees of freedom and
+   * a finite element @f$ \text{FE} @f$ with basis functions @f$ \phi_i @f$,
+   * the transformation is:
+   * @f[
+   *    x(r) = \sum_{i=1}^{n} P_i \phi_i(r)
+   * @f]
+   * where @f$ P_i @f$ is the @f$ i @f$-th column of the point matrix and
+   * @f$ n @f$ is the number of degrees of freedom.
+   *
+   * The Jacobian matrix is computed as:
+   * @f[
+   *    \mathbf{J}_x(r) = \sum_{i=1}^{n} P_i \otimes \nabla \phi_i(r)
+   * @f]
+   *
+   * This is the standard transformation used for curved finite elements and
+   * enables higher-order geometric approximations.
+   *
+   * @tparam FE Finite element type (must have scalar-valued basis functions)
+   *
+   * @note The finite element type must provide scalar-valued basis functions
+   * (FE::RangeType must be Real).
+   *
+   * @see PolytopeTransformation, IdentityTransformation
    */
   template <class FE>
   class IsoparametricTransformation final : public PolytopeTransformation
@@ -31,11 +62,20 @@ namespace Rodin::Geometry
     friend class boost::serialization::access;
 
     public:
+      /**
+       * @brief Parent class type.
+       */
       using Parent = PolytopeTransformation;
       using Parent::transform;
       using Parent::jacobian;
       using Parent::inverse;
 
+      /**
+       * @brief Constructs an isoparametric transformation (move semantics).
+       * @param[in] pm Point matrix of size @f$ s \times n @f$ where @f$ s @f$
+       *            is the spatial dimension and @f$ n @f$ is the number of DOFs
+       * @param[in] fe Finite element providing basis functions
+       */
       IsoparametricTransformation(Math::PointMatrix&& pm, FE&& fe)
         : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
           m_pm(std::move(pm)),
@@ -46,7 +86,9 @@ namespace Rodin::Geometry
       }
 
       /**
-       * pm : sdim x dof
+       * @brief Constructs an isoparametric transformation (copy semantics).
+       * @param[in] pm Point matrix of size @f$ s \times n @f$
+       * @param[in] fe Finite element providing basis functions
        */
       IsoparametricTransformation(const Math::PointMatrix& pm, const FE& fe)
         : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
@@ -57,6 +99,11 @@ namespace Rodin::Geometry
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
+      /**
+       * @brief Constructs an isoparametric transformation (mixed semantics).
+       * @param[in] pm Point matrix (move)
+       * @param[in] fe Finite element (copy)
+       */
       IsoparametricTransformation(Math::PointMatrix&& pm, const FE& fe)
         : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
           m_pm(std::move(pm)),
@@ -66,6 +113,11 @@ namespace Rodin::Geometry
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
+      /**
+       * @brief Constructs an isoparametric transformation (mixed semantics).
+       * @param[in] pm Point matrix (copy)
+       * @param[in] fe Finite element (move)
+       */
       IsoparametricTransformation(const Math::PointMatrix& pm, FE&& fe)
         : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
           m_pm(pm),
@@ -75,6 +127,9 @@ namespace Rodin::Geometry
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
+      /**
+       * @brief Copy constructor.
+       */
       IsoparametricTransformation(const IsoparametricTransformation& other)
         : Parent(other),
           m_pm(other.m_pm),
@@ -84,6 +139,9 @@ namespace Rodin::Geometry
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
+      /**
+       * @brief Move constructor.
+       */
       IsoparametricTransformation(IsoparametricTransformation&& other)
         : Parent(std::move(other)),
           m_pm(std::move(other.m_pm)),
@@ -93,16 +151,31 @@ namespace Rodin::Geometry
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
+      /**
+       * @brief Gets the polynomial order of the transformation.
+       * @returns Order of the finite element basis functions
+       */
       size_t getOrder() const override
       {
         return m_fe.getOrder();
       }
 
+      /**
+       * @brief Gets the polynomial order of the Jacobian.
+       * @returns Order of the Jacobian (same as basis function order)
+       */
       size_t getJacobianOrder() const override
       {
         return m_fe.getOrder();
       }
 
+      /**
+       * @brief Applies the isoparametric transformation.
+       * @param[out] pc Physical coordinates
+       * @param[in] rc Reference coordinates
+       *
+       * Computes @f$ pc = x(rc) = \sum_{i=1}^{n} P_i \phi_i(rc) @f$.
+       */
       void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc) const override
       {
         const size_t pdim = getPhysicalDimension();
@@ -117,6 +190,13 @@ namespace Rodin::Geometry
         }
       }
 
+      /**
+       * @brief Computes the Jacobian matrix.
+       * @param[out] pc Jacobian matrix of size @f$ s \times d @f$
+       * @param[in] rc Reference coordinates
+       *
+       * Computes @f$ \mathbf{J}_x(rc) = \sum_{i=1}^{n} P_i \otimes \nabla \phi_i(rc) @f$.
+       */
       void jacobian(Math::SpatialMatrix<Real>& pc, const Math::SpatialPoint& rc) const override
       {
         const size_t rdim = getReferenceDimension();
@@ -137,11 +217,23 @@ namespace Rodin::Geometry
         }
       }
 
+      /**
+       * @brief Gets the point matrix.
+       * @returns Reference to the point matrix containing DOF coordinates
+       *
+       * The returned matrix has size @f$ s \times n @f$ where @f$ s @f$ is
+       * the spatial dimension and @f$ n @f$ is the number of degrees of freedom.
+       */
       const Math::PointMatrix& getPointMatrix() const
       {
         return m_pm;
       }
 
+      /**
+       * @brief Serialization method for Boost.Serialization.
+       * @param[in,out] ar Archive object
+       * @param[in] version Serialization version (unused)
+       */
       template<class Archive>
       void serialize(Archive& ar, const unsigned int version)
       {
@@ -150,14 +242,18 @@ namespace Rodin::Geometry
         ar & m_fe;
       }
 
+      /**
+       * @brief Creates a copy of this transformation.
+       * @returns Pointer to a new IsoparametricTransformation object
+       */
       IsoparametricTransformation* copy() const noexcept override
       {
         return new IsoparametricTransformation(*this);
       }
 
     private:
-      Math::PointMatrix m_pm;
-      FE m_fe;
+      Math::PointMatrix m_pm; ///< Point matrix (spatial_dim x num_dofs)
+      FE m_fe;                ///< Finite element providing basis functions
   };
 }
 

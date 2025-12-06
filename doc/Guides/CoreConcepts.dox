@@ -1,0 +1,311 @@
+/**
+  @page guides-getting-started-core-concepts Understanding Core Concepts
+  @brief Deep dive into meshes, finite elements, and variational formulations
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  This section provides a deeper understanding of the core concepts in Rodin,
+  building on what you learned in the previous sections.
+
+  @section guides-getting-started-core-concepts-geometry Geometry and Meshes
+
+  @subsection guides-getting-started-core-concepts-mesh The Mesh Object
+
+  A @ref Rodin::Geometry::Mesh "Mesh" is the fundamental geometric object in
+  Rodin. It represents a discretization of your domain into simple shapes
+  (polytopes).
+
+  **Key concepts:**
+  - **Vertices** (dimension 0): Points in space
+  - **Edges/Faces** (dimension 1 in 2D, 1-2 in 3D): Line segments or faces
+  - **Cells** (dimension 2 in 2D, 3 in 3D): Triangles, quads, tetrahedra, etc.
+
+  @code{.cpp}
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+
+  std::cout << "Dimension: " << mesh.getDimension() << std::endl;
+  std::cout << "Vertices: " << mesh.getVertexCount() << std::endl;
+  std::cout << "Cells: " << mesh.getCellCount() << std::endl;
+  @endcode
+
+  @subsection guides-getting-started-core-concepts-polytopes Polytopes
+
+  A @ref Rodin::Geometry::Polytope "Polytope" is a geometric shape. Rodin
+  supports various polytope types:
+
+  | Type | Dimension | Description |
+  |------|-----------|-------------|
+  | `Point` | 0 | A point/vertex |
+  | `Segment` | 1 | A line segment |
+  | `Triangle` | 2 | A triangle |
+  | `Quadrilateral` | 2 | A quadrilateral |
+  | `Tetrahedron` | 3 | A tetrahedron |
+  | `Hexahedron` | 3 | A hexahedron (cube) |
+
+  @code{.cpp}
+  // Create different mesh types
+  Mesh tri_mesh = Mesh().UniformGrid(Polytope::Type::Triangle, {8, 8});
+  Mesh tet_mesh = Mesh().UniformGrid(Polytope::Type::Tetrahedron, {4, 4, 4});
+  @endcode
+
+  @subsection guides-getting-started-core-concepts-connectivity Connectivity
+
+  Connectivity describes the relationships between polytopes of different
+  dimensions. You need to compute connectivity before certain operations.
+
+  @code{.cpp}
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+
+  // Face-to-cell connectivity (needed for boundary operations)
+  mesh.getConnectivity().compute(1, 2);
+
+  // Vertex-to-cell connectivity
+  mesh.getConnectivity().compute(0, 2);
+
+  // Cell-to-cell connectivity (for finding neighbors)
+  mesh.getConnectivity().compute(2, 2);
+  @endcode
+
+  **Common connectivity patterns:**
+  - `(1, 2)`: Edges to cells - needed for boundary conditions in 2D
+  - `(2, 3)`: Faces to cells - needed for boundary conditions in 3D
+  - `(0, d)`: Vertices to cells - for vertex-based operations
+  - `(d, d)`: Cell-to-cell adjacency
+
+  @subsection guides-getting-started-core-concepts-iterators Mesh Iteration
+
+  You can iterate over polytopes of a specific dimension:
+
+  @code{.cpp}
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {8, 8});
+
+  // Iterate over all cells
+  for (auto it = mesh.getCell(); it; ++it) {
+    // Access cell information
+    std::cout << "Cell " << it->getIndex() << std::endl;
+  }
+
+  // Iterate over all vertices
+  for (auto it = mesh.getVertex(); it; ++it) {
+    Point p = it->getCoordinates();
+    std::cout << "Vertex at (" << p.x() << ", " << p.y() << ")" << std::endl;
+  }
+
+  // Iterate over faces (edges in 2D)
+  for (auto it = mesh.getFace(); it; ++it) {
+    // Access face information
+  }
+  @endcode
+
+  @section guides-getting-started-core-concepts-variational Variational Formulations
+
+  @subsection guides-getting-started-core-concepts-fe-spaces Finite Element Spaces
+
+  A finite element space defines the type of approximation used. Rodin provides
+  several standard spaces:
+
+  | Space | Description | Typical Use |
+  |-------|-------------|-------------|
+  | `P1` | Continuous piecewise linear | Most PDEs |
+  | `P2` | Continuous piecewise quadratic | Higher accuracy |
+  | `P0` | Piecewise constant | Discontinuous quantities |
+  | `H1` | General H¹ conforming space | Scalar problems |
+
+  @code{.cpp}
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+
+  // Linear elements
+  P1 Vh1(mesh);
+  std::cout << "P1 space DOFs: " << Vh1.getSize() << std::endl;
+
+  // Quadratic elements (if available)
+  // P2 Vh2(mesh);
+  // std::cout << "P2 space DOFs: " << Vh2.getSize() << std::endl;
+  @endcode
+
+  @subsection guides-getting-started-core-concepts-trial-test Trial and Test Functions
+
+  In the finite element method, we express problems in weak form using trial
+  and test functions.
+
+  @code{.cpp}
+  P1 Vh(mesh);
+
+  // Trial function: the unknown we're solving for
+  TrialFunction u(Vh);
+
+  // Test function: used in weak formulation
+  TestFunction v(Vh);
+  @endcode
+
+  **Mathematical background:**
+  - We seek @f$ u \in V_h @f$ (the trial space)
+  - We test against all @f$ v \in V_h @f$ (the test space)
+  - The discrete problem is: Find @f$ u_h @f$ such that @f$ a(u_h, v_h) = b(v_h) @f$ for all @f$ v_h @f$
+
+  @subsection guides-getting-started-core-concepts-operators Differential Operators
+
+  Rodin provides operators that work on trial and test functions:
+
+  | Operator | Mathematical Meaning | Usage |
+  |----------|---------------------|--------|
+  | `Grad(u)` | @f$ \nabla u @f$ | Gradient |
+  | `Div(u)` | @f$ \nabla \cdot u @f$ | Divergence |
+  | `Curl(u)` | @f$ \nabla \times u @f$ | Curl |
+
+  @code{.cpp}
+  TrialFunction u(Vh);
+  TestFunction v(Vh);
+
+  // Gradient operator
+  auto grad_u = Grad(u);
+  auto grad_v = Grad(v);
+
+  // Used in integrals
+  auto bilinear_form = Integral(Grad(u), Grad(v));
+  @endcode
+
+  @subsection guides-getting-started-core-concepts-integrals Integrals
+
+  The `Integral` function represents integration over the domain or boundary:
+
+  @code{.cpp}
+  // Domain integral: ∫_Ω ∇u · ∇v dx
+  auto stiffness = Integral(Grad(u), Grad(v));
+
+  // Domain integral with function: ∫_Ω f v dx
+  RealFunction f = 1.0;
+  auto load = Integral(f, v);
+
+  // The dot product is implicit for vector quantities
+  auto inner_product = Integral(Grad(u), Grad(v));
+  @endcode
+
+  @subsection guides-getting-started-core-concepts-bc Boundary Conditions
+
+  Rodin supports different types of boundary conditions:
+
+  **Dirichlet (essential) boundary conditions:**
+  @code{.cpp}
+  // Homogeneous: u = 0 on boundary
+  DirichletBC(u, Zero())
+
+  // Non-homogeneous: u = g on boundary
+  RealFunction g([](const Point& p) { return p.x(); });
+  DirichletBC(u, g)
+
+  // On specific boundary: u = 0 on boundary with attribute 1
+  DirichletBC(u, Zero()).on(1)
+  @endcode
+
+  **Neumann (natural) boundary conditions:**
+  @code{.cpp}
+  // Neumann conditions appear as boundary integrals
+  RealFunction g = 1.0;
+  auto neumann = Integral(g, v).over(BoundaryAttribute(2));
+  @endcode
+
+  @section guides-getting-started-core-concepts-problem Defining Problems
+
+  @subsection guides-getting-started-core-concepts-problem-assembly Problem Assembly
+
+  The @ref Rodin::Variational::Problem "Problem" class represents a complete
+  variational problem:
+
+  @code{.cpp}
+  Problem problem(u, v);
+  problem = Integral(Grad(u), Grad(v))  // Bilinear form
+          - Integral(f, v)               // Linear form
+          + DirichletBC(u, Zero());      // Boundary conditions
+  @endcode
+
+  **What happens internally:**
+  1. Rodin assembles the stiffness matrix from `Integral(Grad(u), Grad(v))`
+  2. Assembles the load vector from `Integral(f, v)`
+  3. Applies boundary conditions by modifying the system
+  4. Prepares the linear system @f$ Ax = b @f$
+
+  @subsection guides-getting-started-core-concepts-solving Solving
+
+  After defining a problem, solve it with an appropriate solver:
+
+  @code{.cpp}
+  // Direct solver (good for small to medium problems)
+  SparseLU().solve(problem);
+
+  // Iterative solver (good for large problems)
+  CG solver;
+  solver.setMaxIterations(1000);
+  solver.setRelativeTolerance(1e-10);
+  solver.solve(problem);
+
+  // Access solution
+  auto& solution = u.getSolution();
+  @endcode
+
+  @section guides-getting-started-core-concepts-workflow Typical Workflow
+
+  Here's a summary of the typical workflow for solving a PDE with Rodin:
+
+  1. **Create/Load Mesh**
+     @code{.cpp}
+     Mesh mesh;
+     mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+     mesh.getConnectivity().compute(1, 2);
+     @endcode
+
+  2. **Define Finite Element Space**
+     @code{.cpp}
+     P1 Vh(mesh);
+     @endcode
+
+  3. **Create Trial and Test Functions**
+     @code{.cpp}
+     TrialFunction u(Vh);
+     TestFunction v(Vh);
+     @endcode
+
+  4. **Define Problem**
+     @code{.cpp}
+     Problem problem(u, v);
+     problem = [bilinear forms] - [linear forms] + [boundary conditions];
+     @endcode
+
+  5. **Solve**
+     @code{.cpp}
+     Solver().solve(problem);
+     @endcode
+
+  6. **Post-Process**
+     @code{.cpp}
+     u.getSolution().save("solution.gf");
+     mesh.save("mesh.mesh");
+     @endcode
+
+  @section guides-getting-started-core-concepts-next What's Next?
+
+  You now have a solid understanding of Rodin's core concepts! Here are some
+  suggestions for continuing your journey:
+
+  - **Explore Examples**: Check out @ref examples-index for more complex
+    problems and techniques
+  - **Read Guides**: The @ref guides-index provide deeper dives into specific
+    topics
+  - **API Reference**: Browse the API documentation to discover all available
+    features
+  - **Try Your Own Problems**: Apply what you've learned to your own PDE
+    problems
+
+  For more detailed information on specific topics:
+  - @ref guides-meshes - Comprehensive guide to mesh operations
+  - @ref guides-polytopes - Detailed information about polytopes
+  - @ref guides-connectivity - Understanding connectivity in depth
+  - @ref fem-ciarlet - Mathematical foundations of finite elements
+
+  */

@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file Average.h
+ * @brief Average operator for interface jump terms in DG methods.
+ *
+ * This file defines the Average class, which computes the average value of
+ * a function across element interfaces. This operator is essential for
+ * Discontinuous Galerkin (DG) formulations and interior penalty methods.
+ */
 #ifndef RODIN_VARIATIONAL_AVERAGE_H
 #define RODIN_VARIATIONAL_AVERAGE_H
 
@@ -17,36 +25,85 @@
 
 namespace Rodin::Variational
 {
+  /**
+   * @ingroup RodinVariational
+   * @brief Average operator for computing interface averages.
+   *
+   * The Average operator computes the average value of a function across an
+   * interface (face) between two adjacent elements:
+   * @f[
+   *   \{\!\{u\}\!\} = \frac{1}{2}(u^+ + u^-)
+   * @f]
+   * where @f$ u^+ @f$ and @f$ u^- @f$ denote the values from the two sides
+   * of the interface.
+   *
+   * ## Mathematical Foundation
+   * In DG methods, functions are allowed to be discontinuous across element
+   * interfaces. The average operator is used to define consistent numerical
+   * fluxes and penalization terms:
+   * - **Interior Penalty**: @f$ \int_{\Gamma_h} \{\!\{\nabla u\}\!\} \cdot [\![v]\!] \, ds @f$
+   * - **Consistency**: @f$ \int_{\Gamma_h} \{\!\{\nabla v\}\!\} \cdot [\![u]\!] \, ds @f$
+   *
+   * where @f$ \Gamma_h @f$ denotes the set of interior faces.
+   *
+   * ## Usage Example
+   * ```cpp
+   * // DG interior penalty term
+   * auto penalty = InterfaceIntegral(Average(Grad(u)), Jump(v));
+   * ```
+   *
+   * @tparam FunctionDerived Type of the function being averaged
+   *
+   * @see Jump
+   */
   template <class FunctionDerived>
   class Average<FunctionBase<FunctionDerived>> final
     : public FunctionBase<Average<FunctionBase<FunctionDerived>>>
   {
     public:
+      /// @brief Type of the operand function
       using OperandType = FunctionBase<FunctionDerived>;
 
+      /// @brief Parent class type
       using Parent = FunctionBase<Average<FunctionBase<FunctionDerived>>>;
 
       using Parent::traceOf;
 
       using Parent::operator();
 
+      /**
+       * @brief Constructs an average operator for the given function.
+       * @param[in] op Function to average across interfaces
+       */
       constexpr
       Average(const OperandType& op)
         : m_operand(op.copy())
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Average operator to copy
+       */
       constexpr
       Average(const Average& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param[in] other Average operator to move
+       */
       constexpr
       Average(Average&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
       {}
 
+      /**
+       * @brief Gets the operand function.
+       * @returns Const reference to the operand
+       */
       constexpr
       const auto& getOperand() const
       {
@@ -54,6 +111,13 @@ namespace Rodin::Variational
         return *m_operand;
       }
 
+      /**
+       * @brief Evaluates the average at a point on an interface.
+       * @param[in] p Point on an interior face
+       * @returns Average value @f$ \frac{1}{2}(u^+ + u^-) @f$
+       *
+       * The point must be on an interior face with exactly two adjacent elements.
+       */
       auto getValue(const Geometry::Point& p) const
       {
         static thread_local Math::SpatialPoint rc1;
@@ -77,6 +141,10 @@ namespace Rodin::Variational
         return 0.5 * (this->object(getOperand().getValue(p1)) + this->object(getOperand().getValue(p2)));
       }
 
+      /**
+       * @brief Creates a copy of this average operator.
+       * @returns Pointer to newly allocated copy
+       */
       Average* copy() const noexcept override
       {
         return new Average(*this);
@@ -86,6 +154,9 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
+  /**
+   * @brief Deduction guide for Average.
+   */
   template <class Derived>
   Average(const FunctionBase<Derived>&) -> Average<FunctionBase<Derived>>;
 

@@ -84,8 +84,8 @@ namespace Rodin::Tests::Manufactured::DivPoisson
   }
 
   /**
-   * u(x,y) = (x, y)
-   * \nabla \cdot u = 2
+   * @f$ u(x,y) = (x, y) @f$
+   * @f$ \nabla \cdot u = 2 @f$
    */
   TEST_P(Manufactured_DivPoisson_Test_32x32, Divergence_Linear)
   {
@@ -115,8 +115,8 @@ namespace Rodin::Tests::Manufactured::DivPoisson
   }
 
   /**
-   * u(x,y) = (x(1-x)y, y(1-y)x)
-   * \nabla \cdot u = (1-2x)y + (1-2y)x
+   * @f$ u(x,y) = (x(1-x)y, y(1-y)x) @f$
+   * @f$ \nabla \cdot u = (1-2x)y + (1-2y)x @f$
    */
   TEST_P(Manufactured_DivPoisson_Test_32x32, Divergence_Polynomial)
   {

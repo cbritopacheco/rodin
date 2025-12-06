@@ -4,6 +4,31 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file LT.h
+ * @brief Less-than comparison operator for functions.
+ *
+ * This file defines the LT class, which implements the less-than comparison
+ * operation between functions. This operator creates a boolean function
+ * indicating where one function is less than another.
+ *
+ * ## Mathematical Foundation
+ * For functions @f$ f, g : \Omega \to \mathbb{R} @f$, the less-than operator:
+ * @f[
+ *   (f < g)(x) = \begin{cases} 1 & \text{if } f(x) < g(x) \\ 0 & \text{otherwise} \end{cases}
+ * @f]
+ *
+ * ## Applications
+ * - Negative region indicators: @f$ \mathbb{1}_{u < 0} @f$
+ * - Subdomain identification
+ * - Constraint violation detection
+ * - Thresholding operations
+ *
+ * ## Usage Example
+ * ```cpp
+ * auto negative_region = (u < 0.0);  // Boolean: true where u is negative
+ * ```
+ */
 #ifndef RODIN_VARIATIONAL_LT_H
 #define RODIN_VARIATIONAL_LT_H
 

@@ -23,7 +23,7 @@ namespace Rodin::Alert
    * occurred.
    *
    * Example usage:
-   * @code{cpp}
+   * @code{.cpp}
    * MemberFunctionException(*this, __func__) << "Some kind of error." << Raise;
    * @endcode
    *
@@ -43,8 +43,6 @@ namespace Rodin::Alert
        * This constructor formats an error message that includes the name of
        * the member function and the class where the exception occurred.
        *
-       * @param cls An instance of the class where the error occurred. (Unused
-       * directly, but used to deduce the class type.)
        * @param funcName The name of the member function in which the error
        * occurred.
        */

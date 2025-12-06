@@ -7,6 +7,11 @@
 #ifndef RODIN_VARIATIONAL_Min_H
 #define RODIN_VARIATIONAL_Min_H
 
+/**
+ * @file
+ * @brief Minimum function operations.
+ */
+
 #include <cmath>
 
 #include "ForwardDecls.h"
@@ -23,7 +28,25 @@ namespace Rodin::Variational
 
   /**
    * @ingroup MinSpecializations
-   * @brief Represents the minimum between two arguments.
+   * @brief Represents the minimum operation between two functions.
+   *
+   * This class represents the pointwise minimum of two functions:
+   * @f[
+   *    \text{Min}(f, g)(x) = \min(f(x), g(x))
+   * @f]
+   *
+   * For scalar functions, this computes the minimum value at each point.
+   * For vector or matrix functions, the operation is applied componentwise.
+   *
+   * Common applications include:
+   * - Truncation and clamping operations
+   * - Complementarity conditions
+   * - Non-smooth optimization problems
+   *
+   * @tparam LHSDerived Type of the left operand function
+   * @tparam RHSDerived Type of the right operand function
+   *
+   * @see Max, FunctionBase
    */
   template <class LHSDerived, class RHSDerived>
   class Min<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>> final
@@ -36,20 +59,38 @@ namespace Rodin::Variational
 
       using Parent = FunctionBase<Min<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
 
+      /**
+       * @brief Constructs minimum operator for two functions.
+       * @param a First function
+       * @param b Second function
+       */
       Min(const LHSType& a, const RHSType& b)
         : m_lhs(a.copy()), m_rhs(b.copy())
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param other Min operator to copy
+       */
       Min(const Min& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param other Min operator to move from
+       */
       Min(Min&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
+      /**
+       * @brief Restricts evaluation to specified mesh attributes.
+       * @param attrs Mesh attributes for trace restriction
+       * @returns Reference to this object
+       */
       constexpr
       Min& traceOf(Geometry::Attribute attrs)
       {
@@ -58,6 +99,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Evaluates minimum at a point.
+       * @param p Point at which to evaluate
+       * @returns @f$ \min(f(p), g(p)) @f$
+       */
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
@@ -69,18 +115,30 @@ namespace Rodin::Variational
           return rhs;
       }
 
+      /**
+       * @brief Gets the left operand function.
+       * @returns Reference to first function
+       */
       const auto& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
+      /**
+       * @brief Gets the right operand function.
+       * @returns Reference to second function
+       */
       const auto& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
       }
 
+      /**
+       * @brief Polymorphic copy.
+       * @returns Pointer to a copy of this object
+       */
       virtual Min* copy() const noexcept override
       {
         return new Min(*this);
@@ -108,23 +166,41 @@ namespace Rodin::Variational
 
       using Parent = RealFunctionBase<Min<FunctionBase<NestedDerived>, RHSType>>;
 
+      /**
+       * @brief Constructs minimum operator for function and scalar.
+       * @param a Function operand
+       * @param b Scalar constant operand
+       */
       constexpr
       Min(const LHSType& a, const RHSType& b)
         : m_lhs(a.copy()), m_rhs(b)
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param other Min operator to copy
+       */
       constexpr
       Min(const Min& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs)
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param other Min operator to move from
+       */
       constexpr
       Min(Min&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
+      /**
+       * @brief Restricts evaluation to specified mesh attributes.
+       * @param attrs Mesh attributes for trace restriction
+       * @returns Reference to this object
+       */
       constexpr
       Min& traceOf(Geometry::Attribute attrs)
       {
@@ -132,6 +208,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Evaluates minimum at a point.
+       * @param p Point at which to evaluate
+       * @returns @f$ \min(f(p), c) @f$ where @f$ c @f$ is the scalar constant
+       */
       constexpr
       ScalarType getValue(const Geometry::Point& p) const
       {
@@ -143,17 +224,29 @@ namespace Rodin::Variational
           return rhs;
       }
 
+      /**
+       * @brief Gets the function operand.
+       * @returns Reference to the function
+       */
       const auto& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
+      /**
+       * @brief Gets the scalar operand.
+       * @returns Scalar constant value
+       */
       const auto& getRHS() const
       {
         return m_rhs;
       }
 
+      /**
+       * @brief Polymorphic copy.
+       * @returns Pointer to a copy of this object
+       */
       virtual Min* copy() const noexcept override
       {
         return new Min(*this);

@@ -22,6 +22,30 @@
   @namespace Rodin::Context
   @brief Module for serial, multi-threaded, distributed, and/or parallel
   computation.
+
+  The Context module provides abstractions for different execution environments
+  and computing contexts. It enables Rodin to operate efficiently across various
+  platforms, from single-machine local execution to distributed computing
+  environments.
+
+  ## Supported Contexts
+  - **Local Context**: Single-machine execution with shared memory
+  - **Distributed Context**: Multi-node execution with message passing
+  - **GPU Context**: Accelerated computing on graphics processing units
+ */
+
+/**
+  @dir Rodin/Alert
+  @brief Namespace @ref Rodin::Alert
+ */
+
+/**
+  @namespace Rodin::Alert
+  @brief Module to handle alerts
+
+  The Alert module provides a comprehensive system for handling exceptions,
+  warnings, informational messages, and success notifications with colored
+  terminal output and formatted messaging capabilities.
  */
 
 /**
@@ -43,6 +67,18 @@
   @namespace Rodin::Assembly
   @brief Module for performing the assembly of linear algebra objects from
   variational expressions.
+
+  The Assembly module provides the core infrastructure for assembling finite
+  element matrices and vectors from variational forms. It supports both
+  sequential and parallel assembly strategies, with specializations for
+  different operator types and finite element spaces.
+
+  ## Key Features
+  - **Bilinear Form Assembly**: Efficient assembly of stiffness matrices
+  - **Linear Form Assembly**: Assembly of load vectors and right-hand sides  
+  - **Parallel Assembly**: Support for OpenMP-based parallel assembly
+  - **Template Specialization**: Optimized assembly for different operator types
+  - **Mixed Formulations**: Support for mixed finite element problems
  */
 
 /**
@@ -255,13 +291,55 @@
  */
 
 /**
+  @dir Rodin/Models/Eikonal
+  @brief Namespace @ref Rodin::Models::Eikonal
+ */
+
+/**
+  @namespace Rodin::Models::Eikonal
+  @brief Module which provides solvers for the Eikonal equation.
+
+  The Eikonal equation is a non-linear partial differential equation of the form:
+  @f[
+    |\nabla u| = F(x)
+  @f]
+  where @f$ F(x) @f$ is a speed function. When @f$ F = 1 @f$, the solution
+  represents the distance function. This module provides efficient Fast Marching
+  Method (FMM) implementations for solving the Eikonal equation on unstructured
+  meshes.
+ */
+
+/**
+  @dir Rodin/Models/Elasticity
+  @brief Namespace @ref Rodin::Models::Elasticity
+ */
+
+/**
+  @namespace Rodin::Models::Elasticity
+  @brief Module which provides models for solid mechanics and elasticity.
+
+  This module implements various elasticity models including linear elasticity
+  for small deformations. The models support both isotropic and anisotropic
+  materials with spatially varying material parameters.
+ */
+
+/**
   @dir Rodin/QF
   @brief Namespace @ref Rodin::QF
  */
 
 /**
-  @namespace Rodin::QF
-  @brief Module for defining quadrature formulae.
+  * @namespace Rodin::QF
+  * @brief Module for defining quadrature formulae.
+
+  * The QF (Quadrature Formula) module provides numerical integration rules
+  * for computing integrals over reference polytopes. These quadrature rules
+  * approximate integrals by weighted sums:
+  * @f[
+  *   \int_K f(x) \, dx \approx \sum_{i=1}^n w_i f(x_i)
+  * @f]
+  * where @f$ K @f$ is a reference polytope, @f$ x_i @f$ are quadrature points,
+  * and @f$ w_i @f$ are associated weights.
  */
 
 /**
@@ -272,6 +350,11 @@
 /**
   @namespace Rodin::FormLanguage
   @brief Module for writing high level abstract expressions.
+
+  The FormLanguage module provides a comprehensive framework for expressing
+  variational forms, mathematical expressions, and finite element operations
+  using a high-level, expressive domain-specific language. This module forms
+  the foundation for Rodin's symbolic computation capabilities.
  */
 
 /**

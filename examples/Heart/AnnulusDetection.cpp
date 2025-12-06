@@ -4,13 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include "Rodin/Geometry/Types.h"
 #include <Rodin/Geometry.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
 
-static constexpr Attribute Endocardium = 1;
-static constexpr Attribute Annulus = 50;
+static std::set<Attribute> s_epicardium = { 100, 101, 102, 103, 104, 200, 300 } ;
+static std::set<Attribute> s_endocardium = { 666 } ;
 
 template <class Mesh>
 bool isAnnulus(const Mesh& mesh, Index edgeIdx)
@@ -25,9 +26,9 @@ bool isAnnulus(const Mesh& mesh, Index edgeIdx)
       boundary = true;
     else
       break;
-    if (mesh.getAttribute(2, j) == Endocardium)
+    if (s_endocardium.contains(mesh.getAttribute(2, j)))
       endocardium = true;
-    if (mesh.getAttribute(2, j) != Endocardium)
+    else
       different = true;
   }
   return boundary && endocardium && different;
@@ -36,7 +37,9 @@ bool isAnnulus(const Mesh& mesh, Index edgeIdx)
 int main(int, char**)
 {
   Mesh mesh;
-  mesh.load("LeftAtriumTetra.mesh", IO::FileFormat::MEDIT);
+  mesh.load("LeftAtrium__tetra_layers_1.mesh", IO::FileFormat::MEDIT);
+
+
   mesh.getConnectivity().compute(2, 3);
   mesh.getConnectivity().compute(1, 2);
   mesh.getConnectivity().compute(1, 1);
@@ -54,12 +57,12 @@ int main(int, char**)
 
   std::cout << "Found " << ccl.getCount() << " annuli." << std::endl;
 
-  size_t label = Annulus;
+  Attribute label = 50;
   for (const auto& cc : ccl)
   {
     for (const auto& i : cc)
     {
-      if (label != 1)
+      if (!s_epicardium.contains(i))
         mesh.setAttribute({ 1, i }, label);
     }
     label++;

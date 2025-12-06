@@ -1,5 +1,16 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_UTILITY_MAKE_H
 #define RODIN_UTILITY_MAKE_H
+
+/**
+ * @file
+ * @brief Defines the Make factory template for perfect forwarding construction.
+ */
 
 #include <functional>
 
@@ -20,7 +31,7 @@ namespace Rodin::Utility
    * is not possible or convenient.
    *
    * Example usage:
-   * @code
+   * @code{.cpp}
    * auto factory = Make<std::vector<int>>{};
    * auto vec = factory(10, 42);  // Creates std::vector<int>(10, 42)
    * 

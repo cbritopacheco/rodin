@@ -1,3 +1,53 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+/**
+ * @file FaceNormal.h
+ * @brief Normal vector on mesh faces for DG methods.
+ *
+ * This file defines the FaceNormal class, which represents the unit normal
+ * vector on mesh faces (both interior and boundary). Face normals are crucial
+ * for Discontinuous Galerkin (DG) methods where numerical fluxes depend on
+ * the normal direction at element interfaces.
+ *
+ * ## Mathematical Foundation
+ * For a face @f$ F @f$ shared by elements @f$ K^+ @f$ and @f$ K^- @f$, the
+ * face normal @f$ \mathbf{n} @f$ satisfies:
+ * @f[
+ *   \|\mathbf{n}\| = 1
+ * @f]
+ *
+ * ## Orientation Convention
+ * The normal direction is chosen according to a consistent orientation:
+ * - For interior faces: points from @f$ K^+ @f$ to @f$ K^- @f$
+ * - For boundary faces: points outward from the domain
+ *
+ * ## Applications in DG Methods
+ * - **Numerical fluxes**: @f$ \hat{f}(\mathbf{u}^+, \mathbf{u}^-, \mathbf{n}) @f$
+ * - **Jump terms**: @f$ [\![u]\!] = u^+ \mathbf{n}^+ + u^- \mathbf{n}^- @f$
+ * - **Average terms**: @f$ \{\!\{\nabla u\}\!\} \cdot \mathbf{n} @f$
+ * - **Penalty terms**: @f$ \frac{\sigma}{h} [\![u]\!] \cdot [\![v]\!] @f$
+ *
+ * ## Difference from BoundaryNormal
+ * - **FaceNormal**: Defined on all faces (interior + boundary)
+ * - **BoundaryNormal**: Only defined on domain boundary
+ *
+ * ## Usage Example
+ * ```cpp
+ * FaceNormal n(mesh);
+ * 
+ * // DG numerical flux on interior faces
+ * auto flux = InterfaceIntegral(Average(u) * Dot(n, Jump(v)));
+ * 
+ * // Normal component of vector field
+ * auto normal_component = Dot(velocity, n);
+ * ```
+ *
+ * @see BoundaryNormal, InterfaceIntegral, Jump, Average
+ */
 #ifndef RODIN_VARIATIONAL_FACENORMAL_H
 #define RODIN_VARIATIONAL_FACENORMAL_H
 
@@ -12,7 +62,12 @@
 namespace Rodin::Variational
 {
   /**
-   * @brief Outward unit normal on a face.
+   * @ingroup RodinVariational
+   * @brief Unit normal vector on mesh faces.
+   *
+   * FaceNormal represents the unit normal vector on mesh faces, essential for
+   * DG methods and face integral computations. The normal orientation follows
+   * a consistent convention across the mesh.
    */
   class FaceNormal : public VectorFunctionBase<Real, FaceNormal>
   {

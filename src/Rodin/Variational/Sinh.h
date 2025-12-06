@@ -7,6 +7,11 @@
 #ifndef RODIN_VARIATIONAL_SINH_H
 #define RODIN_VARIATIONAL_SINH_H
 
+/**
+ * @file Sinh.h
+ * @brief Hyperbolic sine function operator for scalar functions.
+ */
+
 #include "Rodin/Math.h"
 #include "ForwardDecls.h"
 #include "Function.h"
@@ -21,6 +26,24 @@ namespace Rodin::Variational
    */
 
   /**
+   * @brief Hyperbolic sine function operator for real-valued scalar functions.
+   *
+   * Applies the hyperbolic sine function pointwise to a given function:
+   * @f[
+   *    \text{Sinh}(f)(x) = \sinh(f(x)) = \frac{e^{f(x)} - e^{-f(x)}}{2}
+   * @f]
+   *
+   * Common applications include:
+   * - Solutions to hyperbolic PDEs
+   * - Catenary curves and hanging cables
+   * - Heat transfer in semi-infinite domains
+   * - Exact solutions with exponential growth/decay
+   *
+   * @note Always returns a real-valued function for real input.
+   * @see Cosh, Sin
+   */
+
+  /**
    * @ingroup SinhSpecializations
    */
   template <class NestedDerived>
@@ -32,20 +55,37 @@ namespace Rodin::Variational
 
       using Parent = RealFunctionBase<Sinh<FunctionBase<NestedDerived>>>;
 
+      /**
+       * @brief Constructs hyperbolic sine operator from a function.
+       * @param v Function to apply sinh to
+       */
       Sinh(const OperandType& v)
         : m_operand(v.copy())
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param other Sinh operator to copy
+       */
       Sinh(const Sinh& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param other Sinh operator to move
+       */
       Sinh(Sinh&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
       {}
 
+      /**
+       * @brief Restricts sinh operator to a trace.
+       * @param attr Attribute to restrict to
+       * @return Reference to this sinh operator
+       */
       constexpr
       Sinh& traceOf(Geometry::Attribute attr)
       {
@@ -53,6 +93,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Restricts sinh operator to multiple trace attributes.
+       * @param attrs Set of attributes to restrict to
+       * @return Reference to this sinh operator
+       */
       constexpr
       Sinh& traceOf(const FlatSet<Geometry::Attribute>& attrs)
       {
@@ -60,17 +105,30 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Evaluates @f$ \sinh(f(p)) @f$ at a point.
+       * @param p Point at which to evaluate
+       * @return Hyperbolic sine of operand function value
+       */
       Real getValue(const Geometry::Point& p) const
       {
         return Math::sinh(getOperand().getValue(p));
       }
 
+      /**
+       * @brief Gets the operand function.
+       * @return Reference to operand function
+       */
       const OperandType& getOperand() const
       {
         assert(m_operand);
         return *m_operand;
       }
 
+      /**
+       * @brief Creates a polymorphic copy of this sinh operator.
+       * @return Pointer to copy
+       */
       Sinh* copy() const noexcept override
       {
         return new Sinh(*this);

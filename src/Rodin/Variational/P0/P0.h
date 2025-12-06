@@ -56,16 +56,39 @@ namespace Rodin::Variational
 
   /**
    * @ingroup P0Specializations
-   * @brief Real valued Lagrange finite element space
+   * @brief Scalar-valued piecewise constant (P0) Lagrange finite element space.
    *
-   * Represents the finite element space composed of scalar valued continuous,
-   * piecewise linear functions:
+   * Represents the finite element space composed of discontinuous,
+   * piecewise constant functions:
    * @f[
-   *  \mathbb{P}_1 (\mathcal{T}_h) = \{ v \in C^0(\mathcal{T}_h) : v|_{\tau} \in \mathbb{P}_1(\tau), \ \tau \in \mathcal{T}_h \} \ .
+   *  \mathbb{P}_0 (\mathcal{T}_h) = \{ v \in L^2(\Omega) : v|_{\tau} \in \mathbb{P}_0(\tau), \ \tau \in \mathcal{T}_h \}
    * @f]
+   * where @f$ \mathbb{P}_0(\tau) @f$ denotes constant functions on element @f$ \tau @f$.
    *
-   * This class is scalar valued, i.e. evaluations of the function are of
-   * Rodin::Real type.
+   * ## Properties
+   * - **DOF count**: One DOF per cell (total: @f$ n_{\text{cells}} @f$)
+   * - **DOF location**: Element barycenter
+   * - **Continuity**: Discontinuous across element boundaries (@f$ L^2 @f$-conforming)
+   * - **Polynomial degree**: 0 (constant functions)
+   * - **Gradient**: @f$ \nabla u|_K = 0 @f$ (zero within each element)
+   *
+   * ## Use Cases
+   * - Discontinuous Galerkin (DG) methods
+   * - Flux-based formulations
+   * - Element-wise constant material properties
+   * - Finite volume schemes as FEM
+   * - Pressure space in mixed methods (when inf-sup stability permits)
+   *
+   * ## Example
+   * @code{.cpp}
+   * Mesh Th;
+   * Th = Th.UniformGrid(Polytope::Type::Triangle, {8, 8});
+   * P0 Vh(Th);  // Scalar P0 space
+   * GridFunction u(Vh);
+   * u = 1.0;  // Constant function
+   * @endcode
+   *
+   * @see P0Element, GridFunction
    */
   template <>
   class P0<Real, Geometry::Mesh<Context::Local>> final
@@ -127,7 +150,6 @@ namespace Rodin::Variational
           using CallableType = Callable;
 
           /**
-           * @param[in] polytope Reference to polytope on the mesh.
            * @param[in] v Reference to the function defined on the reference
            * space.
            */
@@ -148,6 +170,14 @@ namespace Rodin::Variational
           CallableType m_v;
       };
 
+      /**
+       * @brief Constructs a P0 finite element space on the given mesh.
+       * @param[in] mesh Mesh on which to build the finite element space
+       *
+       * Creates the P0 space with one degree of freedom per element. The total
+       * number of DOFs equals the number of mesh cells. Each DOF represents
+       * a constant value over the entire element.
+       */
       P0(const MeshType& mesh)
         : m_mesh(mesh)
       {
@@ -157,44 +187,101 @@ namespace Rodin::Variational
           m_dofs.push_back(IndexArray{{i}});
       }
 
+      /**
+       * @brief Copy constructor.
+       * @param[in] other P0 space to copy
+       */
       P0(const P0& other)
         : Parent(other),
           m_mesh(other.m_mesh)
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param[in] other P0 space to move from
+       */
       P0(P0&& other)
         : Parent(std::move(other)),
           m_mesh(other.m_mesh)
       {}
 
+      /**
+       * @brief Move assignment operator.
+       * @param[in] other P0 space to move from
+       * @return Reference to this P0 space
+       */
       P0& operator=(P0&& other) = default;
 
+      /**
+       * @brief Gets the finite element associated with a polytope.
+       * @param[in] d Dimension of the polytope
+       * @param[in] i Index of the polytope
+       * @return Reference to the P0 element for this polytope type
+       *
+       * Returns the appropriate P0 element based on the polytope geometry.
+       * P0 elements are piecewise constant over each element.
+       */
       const ElementType& getFiniteElement(size_t d, Index i) const
       {
         return s_elements[getMesh().getGeometry(d, i)];
       }
 
+      /**
+       * @brief Gets the total number of degrees of freedom.
+       * @return Number of DOFs (equals number of cells)
+       *
+       * For P0 spaces, the number of DOFs equals the number of mesh cells
+       * since each element has one constant DOF.
+       */
       size_t getSize() const override
       {
         return m_mesh.get().getCellCount();
       }
 
+      /**
+       * @brief Gets the vector dimension of the space.
+       * @return Vector dimension (1 for scalar P0)
+       *
+       * Returns the number of components per DOF. For scalar P0, this is 1.
+       */
       size_t getVectorDimension() const override
       {
         return 1;
       }
 
+      /**
+       * @brief Gets the underlying mesh.
+       * @return Reference to the mesh
+       */
       const MeshType& getMesh() const override
       {
         return m_mesh.get();
       }
 
+      /**
+       * @brief Gets the global DOF indices for a polytope.
+       * @param[in] d Dimension of the polytope (must equal mesh dimension)
+       * @param[in] i Index of the polytope (element index)
+       * @return Array containing the single DOF index for this element
+       *
+       * For P0, each cell has exactly one DOF. The polytope must be
+       * a top-dimensional cell.
+       */
       const IndexArray& getDOFs(size_t d, Index i) const override
       {
         assert(d == getMesh().getDimension());
         return m_dofs.at(i);
       }
 
+      /**
+       * @brief Converts local to global DOF index.
+       * @param[in] idx Pair of (dimension, cell index)
+       * @param[in] local Local DOF index (always 0 for P0)
+       * @return Global DOF index (equals cell index)
+       *
+       * For P0, the global DOF index equals the cell index since there
+       * is one DOF per cell.
+       */
       Index getGlobalIndex(const std::pair<size_t, Index>& idx, Index local) const override
       {
         const auto [d, i] = idx;
@@ -202,6 +289,15 @@ namespace Rodin::Variational
         return i;
       }
 
+      /**
+       * @brief Creates a pullback transformation for a function.
+       * @tparam Callable Type of the callable function
+       * @param[in] idx Pair of (dimension, polytope index)
+       * @param[in] v Function to pull back
+       * @return Pullback transformation object
+       *
+       * The pullback maps a function from physical space to reference space.
+       */
       template <class Callable>
       auto getPullback(const std::pair<size_t, Index>& idx, Callable&& v) const
       {
@@ -210,6 +306,15 @@ namespace Rodin::Variational
         return Pullback<Callable>(*mesh.getPolytope(d, i), std::forward<Callable>(v));
       }
 
+      /**
+       * @brief Creates a pushforward transformation for a function.
+       * @tparam Callable Type of the callable function
+       * @param[in] idx Pair of (dimension, polytope index)
+       * @param[in] v Function to push forward
+       * @return Pushforward transformation object
+       *
+       * The pushforward maps a function from reference space to physical space.
+       */
       template <class Callable>
       auto getPushforward(const std::pair<size_t, Index>& idx, Callable&& v) const
       {
@@ -223,12 +328,18 @@ namespace Rodin::Variational
       std::reference_wrapper<const MeshType> m_mesh;
   };
 
+  /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for P0 from mesh - deduces to RealP0
+   */
   template <class Context>
   P0(const Geometry::Mesh<Context>&) -> P0<Real, Geometry::Mesh<Context>>;
 
+  /// Alias for a scalar real-valued P0 finite element space
   template <class Mesh>
   using RealP0 = P0<Real, Mesh>;
 
+  /// Alias for a scalar complex-valued P0 finite element space
   template <class Mesh>
   using ComplexP0 = P0<Complex, Mesh>;
 }

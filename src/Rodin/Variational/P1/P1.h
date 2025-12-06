@@ -125,7 +125,6 @@ namespace Rodin::Variational
           using CallableType = Callable;
 
           /**
-           * @param[in] polytope Reference to polytope on the mesh.
            * @param[in] v Reference to the function defined on the reference
            * space.
            */
@@ -146,15 +145,30 @@ namespace Rodin::Variational
           CallableType m_v;
       };
 
+      /**
+       * @brief Constructs a P1 finite element space on the given mesh.
+       * @param[in] mesh Mesh on which to build the finite element space
+       *
+       * Creates the P1 space with one degree of freedom per vertex. The total
+       * number of DOFs equals the number of mesh vertices.
+       */
       P1(const MeshType& mesh)
         : m_mesh(mesh)
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param[in] other P1 space to copy
+       */
       P1(const P1& other)
         : Parent(other),
           m_mesh(other.m_mesh)
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param[in] other P1 space to move from
+       */
       P1(P1&& other)
         : Parent(std::move(other)),
           m_mesh(std::move(other.m_mesh))
@@ -162,6 +176,11 @@ namespace Rodin::Variational
 
       virtual ~P1() = default;
 
+      /**
+       * @brief Move assignment operator.
+       * @param[in] other P1 space to move from
+       * @return Reference to this P1 space
+       */
       P1& operator=(P1&& other)
       {
         if (this != &other)
@@ -172,6 +191,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Copy assignment operator.
+       * @param[in] other P1 space to copy
+       * @return Reference to this P1 space
+       */
       P1& operator=(const P1& other)
       {
         if (this != &other)
@@ -182,6 +206,15 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Gets the finite element associated with a polytope.
+       * @param[in] d Dimension of the polytope
+       * @param[in] i Index of the polytope
+       * @return Reference to the P1 element for this polytope type
+       *
+       * Returns the appropriate P1 element based on the polytope geometry
+       * (point, segment, triangle, quadrilateral, tetrahedron, or wedge).
+       */
       const ElementType& getFiniteElement(size_t d, Index i) const
       {
         const auto g = getMesh().getGeometry(d, i);
@@ -223,26 +256,62 @@ namespace Rodin::Variational
         return s_null;
       }
 
+      /**
+       * @brief Gets the total number of degrees of freedom.
+       * @return Number of DOFs (equals number of vertices)
+       *
+       * For P1 spaces, the number of DOFs equals the number of mesh vertices
+       * since each vertex has one DOF.
+       */
       size_t getSize() const override
       {
         return m_mesh.get().getVertexCount();
       }
 
+      /**
+       * @brief Gets the vector dimension of the space.
+       * @return Vector dimension (1 for scalar P1)
+       *
+       * Returns the number of components per DOF. For scalar P1, this is 1.
+       * Vector-valued P1 spaces have dimension equal to the space dimension.
+       */
       size_t getVectorDimension() const override
       {
         return 1;
       }
 
+      /**
+       * @brief Gets the underlying mesh.
+       * @return Reference to the mesh
+       */
       const MeshType& getMesh() const override
       {
         return m_mesh.get();
       }
 
+      /**
+       * @brief Gets the global DOF indices for a polytope.
+       * @param[in] d Dimension of the polytope
+       * @param[in] i Index of the polytope
+       * @return Array of global DOF indices
+       *
+       * For P1, returns the vertex indices of the polytope, which are
+       * the global DOF indices.
+       */
       const IndexArray& getDOFs(size_t d, Index i) const override
       {
         return getMesh().getConnectivity().getPolytope(d, i);
       }
 
+      /**
+       * @brief Converts local to global DOF index.
+       * @param[in] idx Pair of (dimension, polytope index)
+       * @param[in] local Local DOF index within the polytope
+       * @return Global DOF index
+       *
+       * Maps the local DOF index (vertex number within element) to the
+       * global DOF index (global vertex number).
+       */
       Index getGlobalIndex(const std::pair<size_t, Index>& idx, Index local) const override
       {
         const auto& [d, i] = idx;
@@ -290,28 +359,55 @@ namespace Rodin::Variational
       std::reference_wrapper<const MeshType> m_mesh;
   };
 
+  /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for P1 from mesh - deduces to RealP1
+   */
   template <class Context>
   P1(const Geometry::Mesh<Context>&) -> P1<Real, Geometry::Mesh<Context>>;
 
-  /// Alias for a scalar valued P1 finite element space
+  /// Alias for a scalar real-valued P1 finite element space
   template <class Mesh>
   using RealP1 = P1<Real, Mesh>;
 
+  /// Alias for a scalar complex-valued P1 finite element space
   template <class Mesh>
   using ComplexP1 = P1<Complex, Mesh>;
 
   /**
    * @ingroup P1Specializations
-   * @brief Vector valued Lagrange finite element space
+   * @brief Vector-valued continuous piecewise linear Lagrange finite element space.
    *
-   * Represents the finite element space composed of @f$ d @f$ dimensional
-   * vector valued, continuous, piecewise linear functions:
+   * Represents the finite element space composed of @f$ d @f$-dimensional
+   * vector-valued, continuous, piecewise linear functions:
    * @f[
-   *  \mathbb{P}_1 (\mathcal{T}_h)^d = \{ v \in C^0(\mathcal{T}_h)^d \mid v|_{\tau} \in \mathbb{P}_1(\tau), \ \tau \in \mathcal{T}_h \} \ .
+   *  [\mathbb{P}_1 (\mathcal{T}_h)]^d = \{ \mathbf{v} \in [C^0(\mathcal{T}_h)]^d : \mathbf{v}|_{\tau} \in [\mathbb{P}_1(\tau)]^d, \ \tau \in \mathcal{T}_h \}
    * @f]
+   * where @f$ d @f$ is the vector dimension (typically the spatial dimension).
    *
-   * This class is vector valued, i.e. evaluations of the function are of
-   * Math::Vector<Scalar> type.
+   * ## Properties
+   * - **DOF count**: @f$ d \cdot n_{\text{vertices}} @f$ total
+   * - **DOF structure**: Each vertex has @f$ d @f$ DOFs (one per vector component)
+   * - **Continuity**: C⁰ continuous for each component
+   * - **Basis functions**: @f$ \boldsymbol{\phi}_{i,j}(x) = \phi_i(x) \mathbf{e}_j @f$
+   *
+   * ## Use Cases
+   * - Displacement fields in elasticity
+   * - Velocity fields in fluid mechanics
+   * - Vector-valued PDEs requiring H¹ conformity
+   *
+   * ## Example
+   * @code{.cpp}
+   * Mesh Th;
+   * Th = Th.UniformGrid(Polytope::Type::Triangle, {8, 8});
+   * size_t vdim = 2;  // 2D displacement
+   * P1 Vh(Th, vdim);  // Vector P1 space
+   * GridFunction u(Vh);
+   * @endcode
+   *
+   * @tparam Scalar Scalar type for vector components (Real or Complex)
+   *
+   * @see P1Element, TrialFunction, TestFunction
    */
   template <class Scalar>
   class P1<Math::Vector<Scalar>, Geometry::Mesh<Context::Local>> final
@@ -374,7 +470,6 @@ namespace Rodin::Variational
           using CallableType = Callable;
 
           /**
-           * @param[in] polytope Reference to polytope on the mesh.
            * @param[in] v Reference to the function defined on the reference
            * space.
            */
@@ -469,10 +564,10 @@ namespace Rodin::Variational
           {
             static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
             {
-              ElementType(0, Geometry::Polytope::Type::Point),
-              ElementType(1, Geometry::Polytope::Type::Point),
-              ElementType(2, Geometry::Polytope::Type::Point),
-              ElementType(3, Geometry::Polytope::Type::Point)
+              ElementType(Geometry::Polytope::Type::Point, 0),
+              ElementType(Geometry::Polytope::Type::Point, 1),
+              ElementType(Geometry::Polytope::Type::Point, 2),
+              ElementType(Geometry::Polytope::Type::Point, 3)
             };
             return s_elements[m_vdim];
           }
@@ -480,10 +575,10 @@ namespace Rodin::Variational
           {
             static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
             {
-              ElementType(0, Geometry::Polytope::Type::Segment),
-              ElementType(1, Geometry::Polytope::Type::Segment),
-              ElementType(2, Geometry::Polytope::Type::Segment),
-              ElementType(3, Geometry::Polytope::Type::Segment)
+              ElementType(Geometry::Polytope::Type::Segment, 0),
+              ElementType(Geometry::Polytope::Type::Segment, 1),
+              ElementType(Geometry::Polytope::Type::Segment, 2),
+              ElementType(Geometry::Polytope::Type::Segment, 3)
             };
             return s_elements[m_vdim];
           }
@@ -491,10 +586,10 @@ namespace Rodin::Variational
           {
             static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
             {
-              ElementType(0, Geometry::Polytope::Type::Triangle),
-              ElementType(1, Geometry::Polytope::Type::Triangle),
-              ElementType(2, Geometry::Polytope::Type::Triangle),
-              ElementType(3, Geometry::Polytope::Type::Triangle)
+              ElementType(Geometry::Polytope::Type::Triangle, 0),
+              ElementType(Geometry::Polytope::Type::Triangle, 1),
+              ElementType(Geometry::Polytope::Type::Triangle, 2),
+              ElementType(Geometry::Polytope::Type::Triangle, 3)
             };
             return s_elements[m_vdim];
           }
@@ -502,10 +597,10 @@ namespace Rodin::Variational
           {
             static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
             {
-              ElementType(0, Geometry::Polytope::Type::Quadrilateral),
-              ElementType(1, Geometry::Polytope::Type::Quadrilateral),
-              ElementType(2, Geometry::Polytope::Type::Quadrilateral),
-              ElementType(3, Geometry::Polytope::Type::Quadrilateral)
+              ElementType(Geometry::Polytope::Type::Quadrilateral, 0),
+              ElementType(Geometry::Polytope::Type::Quadrilateral, 1),
+              ElementType(Geometry::Polytope::Type::Quadrilateral, 2),
+              ElementType(Geometry::Polytope::Type::Quadrilateral, 3)
             };
             return s_elements[m_vdim];
           }
@@ -513,10 +608,10 @@ namespace Rodin::Variational
           {
             static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
             {
-              ElementType(0, Geometry::Polytope::Type::Tetrahedron),
-              ElementType(1, Geometry::Polytope::Type::Tetrahedron),
-              ElementType(2, Geometry::Polytope::Type::Tetrahedron),
-              ElementType(3, Geometry::Polytope::Type::Tetrahedron)
+              ElementType(Geometry::Polytope::Type::Tetrahedron, 0),
+              ElementType(Geometry::Polytope::Type::Tetrahedron, 1),
+              ElementType(Geometry::Polytope::Type::Tetrahedron, 2),
+              ElementType(Geometry::Polytope::Type::Tetrahedron, 3)
             };
             return s_elements[m_vdim];
           }
@@ -524,16 +619,16 @@ namespace Rodin::Variational
           {
             static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
             {
-              ElementType(0, Geometry::Polytope::Type::Wedge),
-              ElementType(1, Geometry::Polytope::Type::Wedge),
-              ElementType(2, Geometry::Polytope::Type::Wedge),
-              ElementType(3, Geometry::Polytope::Type::Wedge)
+              ElementType(Geometry::Polytope::Type::Wedge, 0),
+              ElementType(Geometry::Polytope::Type::Wedge, 1),
+              ElementType(Geometry::Polytope::Type::Wedge, 2),
+              ElementType(Geometry::Polytope::Type::Wedge, 3)
             };
             return s_elements[m_vdim];
           }
         }
         assert(false);
-        static thread_local ElementType s_null(0, Geometry::Polytope::Type::Point);
+        static thread_local ElementType s_null(Geometry::Polytope::Type::Point, 0);
         return s_null;
       }
 
@@ -587,11 +682,15 @@ namespace Rodin::Variational
       std::vector<std::vector<IndexArray>> m_dofs;
   };
 
+  /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for Vector P1 from mesh and vector dimension
+   */
   template <class Context>
   P1(const Geometry::Mesh<Context>&, size_t)
     -> P1<Math::Vector<Real>, Geometry::Mesh<Context>>;
 
-  /// Alias for a vector valued P1 finite element space
+  /// Alias for a vector-valued real P1 finite element space
   template <class Mesh>
   using VectorP1 = P1<Math::Vector<Real>, Mesh>;
 }

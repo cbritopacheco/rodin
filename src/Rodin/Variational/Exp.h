@@ -7,6 +7,11 @@
 #ifndef RODIN_VARIATIONAL_EXP_H
 #define RODIN_VARIATIONAL_EXP_H
 
+/**
+ * @file
+ * @brief Exponential function operations.
+ */
+
 #include "Rodin/Math/Common.h"
 
 #include "ForwardDecls.h"
@@ -23,6 +28,24 @@ namespace Rodin::Variational
 
   /**
    * @ingroup ExpSpecializations
+   * @brief Exponential function operation.
+   *
+   * This class represents the exponential operation applied to a scalar function:
+   * @f[
+   *    \text{Exp}(f)(x) = e^{f(x)}
+   * @f]
+   *
+   * The input function must be scalar-valued (real or complex). The result is
+   * always a real-valued scalar function when the input is real.
+   *
+   * Common applications include:
+   * - Growth and decay models
+   * - Softmax functions in optimization
+   * - Barrier functions in interior point methods
+   *
+   * @tparam NestedDerived Type of the operand function
+   *
+   * @see RealFunctionBase, Pow
    */
   template <class NestedDerived>
   class Exp<FunctionBase<NestedDerived>>
@@ -35,20 +58,37 @@ namespace Rodin::Variational
 
       using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
 
+      /**
+       * @brief Constructs exponential of a function.
+       * @param v Function to exponentiate
+       */
       Exp(const OperandType& v)
         : m_v(v.copy())
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param other Exp object to copy from
+       */
       Exp(const Exp& other)
         : Parent(other),
           m_v(other.m_v->copy())
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param other Exp object to move from
+       */
       Exp(Exp&& other)
         : Parent(std::move(other)),
           m_v(std::move(other.m_v))
       {}
 
+      /**
+       * @brief Restricts operand to a trace domain.
+       * @param args Arguments for trace restriction
+       * @returns Reference to this object
+       */
       template <class ... Args>
       constexpr
       Exp& traceOf(const Args& ... args)
@@ -57,12 +97,21 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Evaluates exponential at a point.
+       * @param p Point at which to evaluate
+       * @returns @f$ e^{f(p)} @f$
+       */
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
         return Math::exp(this->getOperand().getValue(p));
       }
 
+      /**
+       * @brief Gets the operand function.
+       * @returns Reference to the function in the exponent
+       */
       const OperandType& getOperand() const
       {
         assert(m_v);

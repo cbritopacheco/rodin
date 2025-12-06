@@ -7,6 +7,18 @@
 #ifndef RODIN_MATH_H
 #define RODIN_MATH_H
 
+/**
+ * @file
+ * @brief Top level include for the Rodin::Math module.
+ *
+ * The Math module provides mathematical types and operations used throughout
+ * Rodin, including vectors, matrices, sparse matrices, and mathematical constants.
+ * These types are built on top of the Eigen library for high-performance
+ * linear algebra operations.
+ *
+ * @see Rodin::Math
+ */
+
 #include "Math/ForwardDecls.h"
 #include "Math/Common.h"
 #include "Math/Vector.h"

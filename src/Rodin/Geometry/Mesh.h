@@ -7,6 +7,20 @@
 #ifndef RODIN_GEOMETRY_MESH_H
 #define RODIN_GEOMETRY_MESH_H
 
+/**
+ * @file
+ * @brief Core mesh data structure for finite element computations.
+ *
+ * This file defines the main Mesh class and related utilities for representing
+ * and manipulating unstructured finite element meshes. The Mesh class provides:
+ * - Topology management through connectivity relations
+ * - Geometry storage and access
+ * - Mesh generation and I/O operations
+ * - Iterators for traversing mesh entities
+ * - Support for submeshes and domain decomposition
+ * - Attribute-based region marking
+ */
+
 #include <deque>
 
 #include <boost/filesystem.hpp>
@@ -22,6 +36,8 @@
 #include "Rodin/Serialization/Array.h"
 #include "Rodin/Serialization/EigenMatrix.h"
 
+#include "Rodin/Alert/MemberFunctionException.h"
+
 #include "ForwardDecls.h"
 #include "Connectivity.h"
 #include "Point.h"
@@ -32,15 +48,15 @@
 
 /**
  * @ingroup RodinDirectives
- * @brief Requires the precondition that the Mesh object have the specified
- * connectivity computed.
+ * @brief Requires connectivity @f$ d \rightarrow d' @f$ to be computed.
  *
- * Throws an exception if the current mesh instance does not have the
- * connectivity
- * @f[
- *  d \longrightarrow d', \quad 0 \leq d, d' \leq D
- * @f]
- * computed, where @f$ D @f$ is the topological dimension of the mesh.
+ * Throws an exception if the specified connectivity relation has not been
+ * computed for the mesh. Connectivity must be explicitly computed using
+ * `mesh.getConnectivity().compute(d, dp)` before operations that depend on it.
+ *
+ * @param[in] mesh Mesh instance to check
+ * @param[in] d Source dimension
+ * @param[in] dp Target dimension
  */
 #define RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, d, dp) \
   if (mesh.getConnectivity().getIncidence(d, dp).size() == 0) \
@@ -53,15 +69,13 @@
 
 /**
  * @ingroup RodinDirectives
- * @brief Requires the precondition that the Mesh object have the specified
- * connectivity computed.
+ * @brief Requires connectivity @f$ d \rightarrow d' @f$ (for use in member functions).
  *
- * Throws an exception if the current mesh instance does not have the
- * connectivity
- * @f[
- *  d \longrightarrow d', \quad 0 \leq d, d' \leq D
- * @f]
- * computed, where @f$ D @f$ is the topological dimension of the mesh.
+ * Throws an exception if the specified connectivity relation has not been
+ * computed. This macro is for use inside mesh member functions.
+ *
+ * @param[in] d Source dimension
+ * @param[in] dp Target dimension
  */
 #define RODIN_GEOMETRY_MESH_REQUIRE_INCIDENCE(d, dp) \
   if (this->getConnectivity().getIncidence(d, dp).size() == 0) \
@@ -74,10 +88,10 @@
 
 /**
  * @ingroup RodinDirectives
- * @brief Requires the precondition that the Mesh object be a SubMesh.
+ * @brief Requires mesh to be a SubMesh.
  *
- * Throws an exception if the current Mesh object is not a SubMesh, i.e.
- * `this->isSubMesh()` evaluates to `false`.
+ * Throws an exception if the mesh is not a SubMesh instance, preventing
+ * invalid downcasting operations.
  */
 #define RODIN_GEOMETRY_MESH_REQUIRE_SUBMESH() \
   if (!this->isSubMesh()) \
@@ -91,9 +105,17 @@
 
 namespace Rodin::FormLanguage
 {
+  /**
+   * @brief Traits specialization for Mesh types.
+   * @tparam Context Execution context (e.g., Context::Local, Context::MPI)
+   *
+   * Provides compile-time information about mesh type properties for the
+   * form language system.
+   */
   template <class Context>
   struct Traits<Geometry::Mesh<Context>>
   {
+    /// The execution context type
     using ContextType = Context;
   };
 }
@@ -101,7 +123,6 @@ namespace Rodin::FormLanguage
 namespace Rodin::Geometry
 {
   /**
-   * @defgroup RodinGeometry Geometry Module
    * @brief Mesh data structures, geometric operations, and computational geometry utilities.
    *
    * The Geometry module provides comprehensive support for mesh generation, manipulation,
@@ -109,58 +130,129 @@ namespace Rodin::Geometry
    * for representing meshes, connectivity information, geometric transformations, and
    * algorithms for mesh processing.
    *
-   * ## Key Components
-   * - **Mesh Data Structures**: Efficient storage and access to mesh topology and geometry
-   * - **Connectivity Management**: Automatic computation of incidence relations @f$ d \to d' @f$
-   * - **Geometric Transformations**: Reference-to-physical element mappings
-   * - **Mesh Generation**: Tools for mesh creation and refinement
-   * - **Partitioning**: Support for mesh decomposition in parallel computing
+   * # Key Components
+   *
+   * ## Mesh Data Structures
+   * - **Mesh**: Core unstructured mesh class with support for mixed element types
+   * - **SubMesh**: Mesh representing a subregion of a parent mesh
+   * - **Shard**: Mesh shard for distributed parallel computing
+   *
+   * ## Connectivity Management
+   * - Automatic computation of incidence relations @f$ d \rightarrow d' @f$
+   * - Efficient storage using sparse data structures
+   * - Support for arbitrary polytope dimensions
+   *
+   * ## Geometric Transformations
+   * - Reference-to-physical element mappings
+   * - Isoparametric transformations
+   * - Jacobian computations
+   *
+   * ## Mesh Generation
+   * - Structured mesh generation (uniform grids)
+   * - Support for various file formats (MFEM, GMSH, MEDIT)
+   * - Mesh refinement and coarsening
+   *
+   * ## Partitioning
+   * - Domain decomposition for parallel computing
+   * - Ghost polytope tracking
+   * - Load balancing strategies
+   *
+   * # Mathematical Foundation
+   *
+   * A mesh @f$ \mathcal{T}_h @f$ is a partition of a domain @f$ \Omega @f$:
+   * @f[
+   *   \Omega = \bigcup_{K \in \mathcal{T}_h} K
+   * @f]
+   * where each element @f$ K @f$ is a polytope (simplex or hypercube).
+   *
+   * @see Mesh, Polytope, Connectivity
    */
 
+  /**
+   * @brief Connected component labeling result.
+   *
+   * Represents the result of connected component analysis on a mesh,
+   * storing disjoint connected regions.
+   */
   class CCL
   {
     public:
+      /**
+       * @brief Type representing a connected component.
+       *
+       * A component is a set of polytope indices that are connected.
+       */
       using Component = FlatSet<Index>;
 
+      /**
+       * @brief Constructs CCL from a deque of components.
+       * @param[in] dq Deque of connected components
+       */
       CCL(std::deque<Component>&& dq)
         : m_components(std::move(dq))
       {}
 
+      /**
+       * @brief Gets all connected components.
+       * @returns Deque of connected components
+       */
       const std::deque<Component>& getComponents() const
       {
         return m_components;
       }
 
+      /**
+       * @brief Gets iterator to first component.
+       */
       auto begin()
       {
         return m_components.begin();
       }
 
+      /**
+       * @brief Gets iterator past last component.
+       */
       auto end()
       {
         return m_components.end();
       }
 
+      /**
+       * @brief Gets const iterator to first component.
+       */
       auto begin() const
       {
         return m_components.begin();
       }
 
+      /**
+       * @brief Gets const iterator past last component.
+       */
       auto end() const
       {
         return m_components.end();
       }
 
+      /**
+       * @brief Gets const iterator to first component.
+       */
       auto cbegin() const
       {
         return m_components.cbegin();
       }
 
+      /**
+       * @brief Gets const iterator past last component.
+       */
       auto cend() const
       {
         return m_components.cend();
       }
 
+      /**
+       * @brief Gets the number of connected components.
+       * @returns Component count
+       */
       size_t getCount() const
       {
         return m_components.size();
@@ -182,31 +274,69 @@ namespace Rodin::Geometry
    * @brief Abstract base class for all mesh implementations.
    *
    * MeshBase provides the common interface for all mesh types in Rodin,
-   * defining fundamental operations such as point inclusion testing and
-   * basic mesh properties. All concrete mesh implementations derive from
-   * this base class.
+   * defining fundamental operations such as:
+   * - Point inclusion testing
+   * - Basic mesh properties (dimension, vertex count, etc.)
+   * - Polytope access through iterators
+   * - Mesh I/O operations
+   * - Connectivity queries
+   *
+   * # Inheritance Hierarchy
+   *
+   * All concrete mesh implementations derive from this base class:
+   * - Mesh<Context::Local>: Sequential (non-distributed) meshes
+   * - SubMesh<Context::Local>: Submeshes representing subregions
+   * - Shard: Distributed mesh shards for parallel computing
+   *
+   * # Thread Safety
+   * MeshBase and derived classes are not thread-safe during construction.
+   * Once finalized, read-only operations are thread-safe.
+   *
+   * @see Mesh, SubMesh, Shard
    */
   class MeshBase
   {
     public:
+      /**
+       * @brief Virtual destructor.
+       */
       virtual ~MeshBase() = default;
 
+      /**
+       * @brief Equality comparison (pointer equality).
+       * @param[in] other Mesh to compare with
+       * @returns True if this is the same mesh object
+       */
       constexpr
       bool operator==(const MeshBase& other) const
       {
         return this == &other;
       }
 
+      /**
+       * @brief Inequality comparison.
+       * @param[in] other Mesh to compare with
+       * @returns True if not the same mesh object
+       */
       constexpr
       bool operator!=(const MeshBase& other) const
       {
         return this != &other;
       }
 
+      /**
+       * @brief Tests point inclusion in the mesh.
+       * @param[in] p Point to test
+       * @returns Optional point if included in mesh
+       *
+       * Determines whether a point lies within the mesh domain and
+       * returns its representation if so.
+       */
       virtual Optional<Point> inclusion(const Point& p) const;
 
       /**
-       * @brief Indicates if the mesh is empty or not.
+       * @brief Checks if mesh is empty.
+       * @returns True if mesh has no vertices
        *
        * An empty mesh is defined as a mesh with no vertices.
        */
@@ -216,18 +346,22 @@ namespace Rodin::Geometry
       }
 
       /**
-       * @brief Indicates whether the mesh is a surface or not.
+       * @brief Checks if mesh is a surface mesh.
+       * @returns True if mesh has codimension 1
        *
-       * A mesh is considered a surface mesh if has codimension of 1, meaning
-       * the difference between its space dimension and its topological
-       * dimension is 1.
+       * A mesh is considered a surface mesh if its codimension is 1,
+       * meaning the difference between space dimension and topological
+       * dimension equals 1.
        *
-       * @returns True if mesh is a surface, false otherwise.
+       * Examples:
+       * - 2D mesh embedded in 3D space (triangulated surface)
+       * - 1D mesh embedded in 2D space (curve)
        */
       bool isSurface() const;
 
       /**
-       * @brief Gets the number of vertices in the mesh.
+       * @brief Gets the number of vertices.
+       * @returns Vertex count
        */
       size_t getVertexCount() const
       {
@@ -235,7 +369,8 @@ namespace Rodin::Geometry
       }
 
       /**
-       * @brief Gets the number of faces in the mesh.
+       * @brief Gets the number of faces.
+       * @returns Face count (codimension-1 polytopes)
        */
       size_t getFaceCount() const
       {
@@ -243,208 +378,331 @@ namespace Rodin::Geometry
       }
 
       /**
-       * @brief Gets the number of cells in the mesh.
+       * @brief Gets the number of cells.
+       * @returns Cell count (maximal dimension polytopes)
        */
       size_t getCellCount() const
       {
         return getPolytopeCount(getDimension());
       }
 
+      /**
+       * @brief Gets face attribute.
+       * @param[in] index Face index
+       * @returns Attribute value
+       */
       Attribute getFaceAttribute(Index index) const
       {
         return getAttribute(getDimension() - 1, index);
       }
 
+      /**
+       * @brief Gets cell attribute.
+       * @param[in] index Cell index
+       * @returns Attribute value
+       */
       Attribute getCellAttribute(Index index) const
       {
         return getAttribute(getDimension(), index);
       }
 
+      /**
+       * @brief Scales mesh coordinates by a factor.
+       * @param[in] c Scaling factor
+       * @returns Reference to this mesh
+       *
+       * Multiplies all vertex coordinates by @f$ c @f$.
+       */
       virtual MeshBase& scale(Real c) = 0;
 
+      /**
+       * @brief Loads mesh from file.
+       * @param[in] filename Path to mesh file
+       * @param[in] fmt File format (MFEM, GMSH, etc.)
+       * @returns Reference to this mesh
+       */
       virtual MeshBase& load(
         const boost::filesystem::path& filename,
         IO::FileFormat fmt = IO::FileFormat::MFEM) = 0;
 
+      /**
+       * @brief Saves mesh to file.
+       * @param[in] filename Path to output file
+       * @param[in] fmt File format
+       */
       virtual void save(
         const boost::filesystem::path& filename,
         IO::FileFormat fmt = IO::FileFormat::MFEM) const = 0;
 
+      /**
+       * @brief Flushes cached mesh data.
+       *
+       * Clears any internally cached derived data (e.g., cached Jacobians).
+       */
       virtual void flush() = 0;
 
       /**
-       * @brief Indicates whether the mesh is a submesh or not.
-       * @returns True if mesh is a submesh, false otherwise.
+       * @brief Checks if this mesh is a submesh.
+       * @returns True if this is a SubMesh instance
        *
-       * A Mesh which is also a SubMesh may be casted into down to access
-       * the SubMesh functionality. For example:
+       * A Mesh which is also a SubMesh may be casted down to access
+       * SubMesh-specific functionality:
        * @code{.cpp}
        * if (mesh.isSubMesh())
        * {
-       *   // Cast is well defined
-       *   auto& submesh = static_cast<SubMesh&>(mesh);
+       *   auto& submesh = static_cast<SubMesh<Context::Local>&>(mesh);
+       *   const auto& parent = submesh.getParent();
        * }
        * @endcode
-       *
        */
       virtual bool isSubMesh() const = 0;
 
+      /**
+       * @brief Checks if a face is an interface between regions.
+       * @param[in] faceIdx Face index
+       * @returns True if face connects cells with different attributes
+       */
       virtual bool isInterface(Index faceIdx) const = 0;
 
       /**
-       * @brief Determines whether a face of the mesh is on the boundary.
+       * @brief Checks if a face is on the mesh boundary.
+       * @param[in] faceIdx Face index
+       * @returns True if face belongs to only one cell
        */
       virtual bool isBoundary(Index faceIdx) const = 0;
 
+      /**
+       * @brief Casts to SubMeshBase interface (mutable).
+       * @returns Reference to SubMeshBase interface
+       * @throws Exception if mesh is not a submesh
+       */
       virtual SubMeshBase& asSubMesh() = 0;
 
+      /**
+       * @brief Casts to SubMeshBase interface (const).
+       * @returns Const reference to SubMeshBase interface
+       * @throws Exception if mesh is not a submesh
+       */
       virtual const SubMeshBase& asSubMesh() const = 0;
 
       /**
-       * @brief Gets the dimension of the cells.
-       * @returns Dimension of the cells.
-       * @see getSpaceDimension() const
+       * @brief Gets the topological dimension.
+       * @returns Mesh dimension @f$ D @f$ (highest polytope dimension)
+       * @see getSpaceDimension()
        */
       virtual size_t getDimension() const = 0;
 
       /**
-       * @brief Gets the dimension of the ambient space
-       * @returns Dimension of the space which the mesh is embedded in
-       * @see getDimension() const
+       * @brief Gets the ambient space dimension.
+       * @returns Space dimension in which mesh is embedded
+       * @see getDimension()
+       *
+       * For example, a 2D triangulated surface in 3D space has:
+       * - getDimension() = 2
+       * - getSpaceDimension() = 3
        */
       virtual size_t getSpaceDimension() const = 0;
 
       /**
-       * @brief Gets the total volume of the mesh.
-       * @returns Sum of all cell volumes.
+       * @brief Gets the total mesh volume.
+       * @returns Sum of all cell volumes
        */
       virtual Real getVolume() const = 0;
 
       /**
-       * @brief Gets the sum of the volumes of the cells given by the
-       * specified attribute.
-       * @param[in] attr Attribute of cells
-       * @returns Sum of element volumes with given attribute
-       * @note If the element attribute does not exist then this function
-       * will return 0 as the volume.
+       * @brief Gets volume of cells with specified attribute.
+       * @param[in] attr Attribute value
+       * @returns Sum of volumes of cells with attribute @p attr
+       * @note Returns 0 if attribute does not exist
        */
       virtual Real getVolume(Attribute attr) const = 0;
 
+      /**
+       * @brief Gets volume of cells with attributes in set.
+       * @param[in] attr Set of attribute values
+       * @returns Sum of volumes
+       */
       virtual Real getVolume(const FlatSet<Attribute>& attr) const = 0;
 
       /**
-       * @brief Gets the total perimeter of the mesh.
-       * @returns Sum of all element perimeters.
+       * @brief Gets the total mesh perimeter.
+       * @returns Sum of all cell perimeters
        */
       virtual Real getPerimeter() const = 0;
 
       /**
-       * @brief Gets the sum of the perimeters of the cells given by the
-       * specified attribute.
-       * @param[in] attr Attribute of cells
-       * @returns Sum of element perimeters with given attribute
-       * @note If the element attribute does not exist then this function
-       * will return 0 as the perimeter.
+       * @brief Gets perimeter of cells with specified attribute.
+       * @param[in] attr Attribute value
+       * @returns Sum of perimeters
+       * @note Returns 0 if attribute does not exist
        */
       virtual Real getPerimeter(Attribute attr) const = 0;
 
+      /**
+       * @brief Gets perimeter of cells with attributes in set.
+       * @param[in] attr Set of attribute values
+       * @returns Sum of perimeters
+       */
       virtual Real getPerimeter(const FlatSet<Attribute>& attr) const = 0;
 
+      /**
+       * @brief Gets total area.
+       * @returns Sum of all element areas
+       */
       virtual Real getArea() const = 0;
 
+      /**
+       * @brief Gets area of elements with specified attribute.
+       * @param[in] attr Attribute value
+       * @returns Sum of areas
+       */
       virtual Real getArea(Attribute attr) const = 0;
 
+      /**
+       * @brief Gets area of elements with attributes in set.
+       * @param[in] attr Set of attribute values
+       * @returns Sum of areas
+       */
       virtual Real getArea(const FlatSet<Attribute>& attr) const = 0;
 
+      /**
+       * @brief Gets measure of polytopes of given dimension.
+       * @param[in] d Polytope dimension
+       * @returns Total measure
+       */
       virtual Real getMeasure(size_t d) const = 0;
 
+      /**
+       * @brief Gets measure of polytopes with attribute.
+       * @param[in] d Polytope dimension
+       * @param[in] attr Attribute value
+       * @returns Total measure
+       */
       virtual Real getMeasure(size_t d, Attribute attr) const = 0;
 
+      /**
+       * @brief Gets measure of polytopes with attributes in set.
+       * @param[in] d Polytope dimension
+       * @param[in] attr Set of attribute values
+       * @returns Total measure
+       */
       virtual Real getMeasure(size_t d, const FlatSet<Attribute>& attr) const = 0;
 
       /**
-       * @brief Gets a FaceIterator for the boundary faces.
+       * @brief Gets iterator over boundary faces.
+       * @returns FaceIterator for boundary faces
        */
       virtual FaceIterator getBoundary() const = 0;
 
       /**
-       * @brief Gets a FaceIterator for the interface faces.
+       * @brief Gets iterator over interface faces.
+       * @returns FaceIterator for interface faces
        */
       virtual FaceIterator getInterface() const = 0;
 
       /**
-       * @brief Gets the count of polytope of the given dimension.
+       * @brief Gets count of polytopes of given dimension.
        * @param[in] dimension Polytope dimension
+       * @returns Number of polytopes
        */
       virtual size_t getPolytopeCount(size_t dimension) const = 0;
 
       /**
-       * @brief Gets the count of polytope of the given type.
-       * @param[in] dim Polytope type
+       * @brief Gets count of polytopes of given geometry type.
+       * @param[in] g Polytope geometry type
+       * @returns Number of polytopes
        */
       virtual size_t getPolytopeCount(Polytope::Type g) const = 0;
 
+      /**
+       * @brief Gets iterator over all cells.
+       * @returns CellIterator
+       */
       virtual CellIterator getCell() const = 0;
 
+      /**
+       * @brief Gets iterator over all faces.
+       * @returns FaceIterator
+       */
       virtual FaceIterator getFace() const = 0;
 
+      /**
+       * @brief Gets iterator over all vertices.
+       * @returns VertexIterator
+       */
       virtual VertexIterator getVertex() const = 0;
 
+      /**
+       * @brief Gets iterator over polytopes of given dimension.
+       * @param[in] dimension Polytope dimension
+       * @returns PolytopeIterator
+       */
       virtual PolytopeIterator getPolytope(size_t dimension) const = 0;
 
       /**
-       * @brief Gets an CellIterator to the cells of the mesh.
+       * @brief Gets iterator to specific cell.
+       * @param[in] idx Cell index
+       * @returns CellIterator positioned at cell
        */
       virtual CellIterator getCell(Index idx) const = 0;
 
       /**
-       * @brief Gets a FaceIterator to the faces of the mesh.
+       * @brief Gets iterator to specific face.
+       * @param[in] idx Face index
+       * @returns FaceIterator positioned at face
        */
       virtual FaceIterator getFace(Index idx) const = 0;
 
       /**
-       * @brief Gets a VertexIterator to the vertices of the mesh.
+       * @brief Gets iterator to specific vertex.
+       * @param[in] idx Vertex index
+       * @returns VertexIterator positioned at vertex
        */
       virtual VertexIterator getVertex(Index idx) const = 0;
 
       /**
-       * @brief Gets a PolytopeIterator to the polytopes of the given dimension
-       * of the mesh.
+       * @brief Gets iterator to specific polytope.
        * @param[in] dimension Polytope dimension
+       * @param[in] idx Polytope index
+       * @returns PolytopeIterator positioned at polytope
        */
       virtual PolytopeIterator getPolytope(size_t dimension, Index idx) const = 0;
 
       /**
-       * @brief Gets the PolytopeTransformation associated to the @f$ (d, i)
-       * @f$-polytope.
-       * @param[in] d Polytope dimension
+       * @brief Gets polytope transformation.
+       * @param[in] dimension Polytope dimension
        * @param[in] idx Polytope index
+       * @returns Reference to transformation @f$ x: K \rightarrow \tau @f$
        */
       virtual const PolytopeTransformation& getPolytopeTransformation(size_t dimension, Index idx) const = 0;
 
       /**
-       * Gets the geometry type of the @f$ (d, i) @f$-polytope.
-       * @param[in] d Polytope dimension
+       * @brief Gets geometry type of a polytope.
+       * @param[in] dimension Polytope dimension
        * @param[in] idx Polytope index
+       * @returns Geometry type
        */
       virtual Polytope::Type getGeometry(size_t dimension, Index idx) const = 0;
 
       /**
-       * Gets the attribute of the @f$ (d, i) @f$-polytope.
-       * @param[in] d Polytope dimension
-       * @param[in] idx Polytope index
+       * @brief Gets attribute of a polytope.
+       * @param[in] dimension Polytope dimension
+       * @param[in] index Polytope index
+       * @returns Attribute value
        */
       virtual Attribute getAttribute(size_t dimension, Index index) const = 0;
 
       /**
-       * Sets the attribute of the @f$ (d, i) @f$-polytope.
-       * @param[in] p Pair indicating polytope dimension and index
-       * @param[in] attr Attribute of polytope
+       * @brief Sets attribute of a polytope.
+       * @param[in] p Pair of (dimension, index)
+       * @param[in] attr New attribute value
+       * @returns Reference to this mesh
        */
       virtual MeshBase& setAttribute(const std::pair<size_t, Index>& p, Attribute attr) = 0;
 
       /**
-       * @brief Gets a reference to the mesh connectivity.
+       * @brief Gets reference to mesh connectivity.
+       * @returns Const reference to Connectivity object
        */
       virtual ConnectivityBase& getConnectivity() = 0;
 
@@ -490,6 +748,13 @@ namespace Rodin::Geometry
       virtual MeshBase& setPolytopeTransformation(
           const std::pair<size_t, Index> p, PolytopeTransformation* trans) = 0;
 
+      /**
+       * @brief Gets the execution context of the mesh.
+       * @returns Reference to the context object
+       *
+       * The context determines whether the mesh is local, distributed, or
+       * uses another execution model.
+       */
       virtual const Context::Base& getContext() const = 0;
   };
 
@@ -664,14 +929,39 @@ namespace Rodin::Geometry
            */
           Mesh finalize();
 
+          /**
+           * @brief Sets the vertex coordinates (copy).
+           * @param[in] vertices Point matrix containing vertex coordinates
+           * @returns Reference to this builder
+           */
           Builder& setVertices(const Math::PointMatrix& vertices);
 
+          /**
+           * @brief Sets the vertex coordinates (move).
+           * @param[in] vertices Point matrix containing vertex coordinates
+           * @returns Reference to this builder
+           */
           Builder& setVertices(Math::PointMatrix&& vertices);
 
+          /**
+           * @brief Sets the mesh connectivity.
+           * @param[in] connectivity Connectivity object to move into the mesh
+           * @returns Reference to this builder
+           */
           Builder& setConnectivity(Connectivity<Context>&& connectivity);
 
+          /**
+           * @brief Sets the attribute index.
+           * @param[in] attrIndex Attribute index object to move into the mesh
+           * @returns Reference to this builder
+           */
           Builder& setAttributeIndex(AttributeIndex&& attrIndex);
 
+          /**
+           * @brief Sets the transformation index.
+           * @param[in] transIndex Transformation index object to move into the mesh
+           * @returns Reference to this builder
+           */
           Builder& setTransformationIndex(PolytopeTransformationIndex&& transIndex);
 
           Connectivity<Context>& getConnectivity()
@@ -719,6 +1009,10 @@ namespace Rodin::Geometry
 
       /**
        * @brief Generates a uniform grid for a given geometry.
+       *
+       * @param[in] g Geometry type of the cells (e.g., Triangle,
+       * Quadrilateral)
+       * @param[in] shape Number of nodes in each coordinate direction
        */
       static Mesh UniformGrid(Polytope::Type g, const Array<size_t>& shape);
 
@@ -1014,7 +1308,6 @@ namespace Rodin::Geometry
       * @brief Saves a mesh to file in the given format.
       * @param[in] filename Name of file to write
       * @param[in] fmt Mesh file format
-      * @returns Reference to this (for method chaining)
       */
       virtual void save(
         const boost::filesystem::path& filename,

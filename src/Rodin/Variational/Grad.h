@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file Grad.h
+ * @brief Gradient operator for scalar functions and shape functions.
+ *
+ * This file defines the Grad class, which computes the gradient (spatial 
+ * derivative) of scalar functions in variational formulations. The gradient
+ * is a fundamental differential operator in finite element analysis.
+ */
 #ifndef RODIN_VARIATIONAL_GRAD_H
 #define RODIN_VARIATIONAL_GRAD_H
 
@@ -45,13 +53,48 @@ namespace Rodin::Variational
    */
 
   /**
-   * @brief Base class for Grad classes.
+   * @brief Base class for gradient operator implementations.
+   *
+   * GradBase provides the foundation for computing gradients of different
+   * function types (grid functions, shape functions, etc.).
+   *
+   * @tparam Operand Type of the function being differentiated
+   * @tparam Derived Derived class (CRTP pattern)
    */
   template <class Operand, class Derived>
   class GradBase;
 
   /**
    * @ingroup GradSpecializations
+   * @brief Gradient operator for grid functions.
+   *
+   * Computes the spatial gradient of a scalar grid function:
+   * @f[
+   *   \nabla u = \left(\frac{\partial u}{\partial x_1}, \frac{\partial u}{\partial x_2}, \ldots, \frac{\partial u}{\partial x_d}\right)^T
+   * @f]
+   * where @f$ u @f$ is a scalar function and @f$ d @f$ is the spatial dimension.
+   *
+   * ## Mathematical Foundation
+   * For a scalar function @f$ u : \Omega \subset \mathbb{R}^d \to \mathbb{R} @f$,
+   * the gradient is a vector field:
+   * @f[
+   *   \nabla u : \Omega \to \mathbb{R}^d
+   * @f]
+   *
+   * In the finite element context, for @f$ u_h = \sum_i u_i \phi_i @f$:
+   * @f[
+   *   \nabla u_h = \sum_i u_i \nabla \phi_i
+   * @f]
+   *
+   * ## Usage Example
+   * ```cpp
+   * // In a variational formulation
+   * auto stiffness = Integral(Grad(u), Grad(v));  // Laplacian term
+   * ```
+   *
+   * @tparam FES Finite element space type
+   * @tparam Data Data storage type
+   * @tparam Derived Derived class for CRTP
    */
   template <class FES, class Data, class Derived>
   class GradBase<GridFunction<FES, Data>, Derived>
@@ -59,16 +102,27 @@ namespace Rodin::Variational
         typename FormLanguage::Traits<FES>::ScalarType, GradBase<GridFunction<FES, Data>, Derived>>
   {
     public:
+      /// @brief Finite element space type
       using FESType = FES;
 
+      /// @brief Scalar type for computations
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief Spatial vector type
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
+      /// @brief Type of the operand (grid function)
       using OperandType = GridFunction<FESType, Data>;
 
+      /// @brief Parent class type
       using Parent = VectorFunctionBase<ScalarType, GradBase<OperandType, Derived>>;
 
+      /**
+       * @brief Constructs the gradient operator for a grid function.
+       * @param[in] u Scalar grid function to differentiate
+       *
+       * @pre The grid function must be scalar-valued (vector dimension = 1)
+       */
       GradBase(const OperandType& u)
         : m_u(u)
       {
@@ -91,12 +145,28 @@ namespace Rodin::Variational
           m_u(std::move(other.m_u))
       {}
 
+      /**
+       * @brief Gets the spatial dimension of the gradient.
+       * @return Dimension of the spatial domain
+       *
+       * Returns the number of spatial dimensions @f$ d @f$ where the gradient
+       * @f$ \nabla u \in \mathbb{R}^d @f$.
+       */
       constexpr
       size_t getDimension() const
       {
         return m_u.get().getFiniteElementSpace().getMesh().getSpaceDimension();
       }
 
+      /**
+       * @brief Evaluates the gradient at a point.
+       * @param[in] p Point at which to evaluate
+       * @return Gradient vector @f$ \nabla u(p) @f$
+       *
+       * Computes the gradient by interpolating the basis function gradients
+       * weighted by the degrees of freedom. Handles mesh inclusion and
+       * submesh restrictions automatically.
+       */
       decltype(auto) getValue(const Geometry::Point& p) const
       {
         static thread_local SpatialVectorType s_out;
@@ -127,7 +197,12 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Interpolation function to be overriden in Derived type.
+       * @brief Interpolates the gradient at a point (to be overridden in derived class).
+       * @param[out] out Output vector for gradient result
+       * @param[in] p Point at which to interpolate
+       *
+       * This virtual function is overridden in derived classes (e.g., P1::Grad)
+       * to provide finite element-specific gradient interpolation.
        */
       constexpr
       void interpolate(SpatialVectorType& out, const Geometry::Point& p) const
@@ -135,6 +210,10 @@ namespace Rodin::Variational
         static_cast<const Derived&>(*this).interpolate(out, p);
       }
 
+      /**
+       * @brief Gets the operand grid function.
+       * @return Reference to the grid function being differentiated
+       */
       constexpr
       const OperandType& getOperand() const
       {

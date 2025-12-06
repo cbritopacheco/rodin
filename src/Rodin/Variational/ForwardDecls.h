@@ -4,14 +4,38 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file ForwardDecls.h
+ * @brief Forward declarations for Variational module classes.
+ *
+ * This file contains forward declarations for all major classes in the
+ * Variational module, along with fundamental type definitions and enumerations.
+ * Forward declarations allow for efficient compilation by avoiding circular
+ * dependencies and reducing header inclusion overhead.
+ *
+ * ## Key Declarations
+ * - **Shape Functions**: TrialFunction, TestFunction, ShapeFunction
+ * - **Spaces**: FiniteElementSpace, FiniteElement
+ * - **Forms**: BilinearForm, LinearForm
+ * - **Problems**: Problem, ProblemBody
+ * - **Functions**: GridFunction, Function types
+ * - **Operators**: Grad, Div, Jacobian, etc.
+ * - **Boundary Conditions**: DirichletBC, PeriodicBC
+ *
+ * ## ShapeFunctionSpaceType Enum
+ * Distinguishes between trial and test functions in variational formulations.
+ */
 #ifndef RODIN_VARIATIONAL_FORWARDDECLS_H
 #define RODIN_VARIATIONAL_FORWARDDECLS_H
 
 namespace Rodin::Variational
 {
   /**
-   * @brief Enumeration class to indicate whether a derived instance of
-   * ShapeFunctionBase belongs to either a trial or test space.
+   * @ingroup RodinVariational
+   * @brief Enumeration for shape function space types.
+   *
+   * Indicates whether a shape function belongs to the trial space (unknowns)
+   * or test space (weighting functions) in a variational formulation.
    */
   enum class ShapeFunctionSpaceType
   {
@@ -100,9 +124,7 @@ namespace Rodin::Variational
 
   /**
    * @note For an overview of all the possible specializations of the
-   * IntegerFunction class, please see @ref IntegerFunctionSpecializations.
-   *
-   * @see IntegerFunctionSpecializations
+   * IntegerFunction class, please see the IntegerFunction specializations.
    */
   template <class T>
   class IntegerFunction;
@@ -741,9 +763,7 @@ namespace Rodin::Variational
    * @f]
    *
    * @note For an overview of all the possible specializations of the
-   * Composition class, please see @ref CompositionSpecializations.
-   *
-   * @see CompositionSpecializations
+   * Composition class, please see the Composition specializations.
    */
   template <class LHS, class RHS>
   class Composition;
@@ -855,9 +875,7 @@ namespace Rodin::Variational
    * @f]
    *
    * @note For an overview of all the possible specializations of the
-   * NEQ class, please see @ref NEQSpecializations.
-   *
-   * @see NEQSpecializations
+   * NEQ class, please see the NEQ specializations.
    */
   template <class LHS, class RHS>
   class NEQ;

@@ -7,9 +7,18 @@
 #ifndef RODIN_VARIATIONAL_P0_GRADIENT_H
 #define RODIN_VARIATIONAL_P0_GRADIENT_H
 
+/**
+ * @file
+ * @brief Gradient operator specialization for P0 (piecewise constant) functions.
+ *
+ * For P0 functions, the gradient is zero within each element since
+ * @f$ u|_K = \text{const} @f$ implies @f$ \nabla u|_K = 0 @f$.
+ */
+
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/Grad.h"
+#include "Rodin/Variational/ShapeFunction.h"
 
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
@@ -39,7 +48,10 @@ namespace Rodin::Variational
 {
   /**
    * @ingroup GradSpecializations
-   * @brief Gradient of a P0 GridFunction
+   * @brief Gradient of a P0 GridFunction.
+   *
+   * Since P0 functions are piecewise constant on each element,
+   * their gradient is identically zero: @f$ \nabla u|_K = 0 @f$.
    */
   template <class Range, class Data, class Mesh>
   class Grad<GridFunction<P0<Range, Mesh>, Data>> final
@@ -57,23 +69,26 @@ namespace Rodin::Variational
       using Parent = GradBase<Grad<OperandType>, OperandType>;
 
       /**
-       * @brief Constructs the gradient of an @f$ \mathbb{P}^1 @f$ function
-       * @f$ u @f$.
-       * @param[in] u P0 GridFunction
+       * @brief Constructs the gradient of a P0 function @f$ u @f$.
+       * @param[in] u P0 GridFunction (piecewise constant)
+       *
+       * @note The gradient of a P0 function is zero on each element.
        */
       Grad(const OperandType& u)
         : Parent(u)
       {}
 
       /**
-       * @brief Copy constructor
+       * @brief Copy constructor.
+       * @param[in] other Grad object to copy
        */
       Grad(const Grad& other)
         : Parent(other)
       {}
 
       /**
-       * @brief Move constructor
+       * @brief Move constructor.
+       * @param[in] other Grad object to move from
        */
       Grad(Grad&& other)
         : Parent(std::move(other))
@@ -177,12 +192,12 @@ namespace Rodin::Variational
    * @ingroup GradSpecializations
    * @brief Gradient of a P0 ShapeFunction
    */
-  template <class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType SpaceType>
-  class Grad<ShapeFunction<NestedDerived, P0<Range, Mesh>, SpaceType>> final
-    : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, P0<Range, Mesh>, SpaceType>>>
+  template <class NestedDerived, class Scalar, class Mesh, ShapeFunctionSpaceType SpaceType>
+  class Grad<ShapeFunction<NestedDerived, P0<Scalar, Mesh>, SpaceType>> final
+    : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, P0<Scalar, Mesh>, SpaceType>>>
   {
     public:
-      using RangeType = Range;
+      using RangeType = Scalar;
 
       using MeshType = Mesh;
 

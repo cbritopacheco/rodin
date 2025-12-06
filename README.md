@@ -6,9 +6,16 @@ Rodin is a lightweight and modular finite element framework which provides many 
 
 It is named after the French sculptor Auguste Rodin, considered the founder of modern sculpture.
 
-The library is still in development. It is primarily maintained by [Carlos Brito-Pacheco](https://edp-ljk.imag.fr/author/carlos-brito-pacheco/) and was developed to generate examples for his ongoing PhD.
-
 Any contributors are warmly encouraged and any help or comments are always appreciated!
+
+## Getting Started
+
+New to Rodin? Check out our comprehensive [Getting Started Guide](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-installation.html) which covers:
+
+- **[Installation and Setup](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-installation.html)** - Platform-specific installation instructions and verification
+- **[First Steps](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-first-steps.html)** - Basic concepts, project structure, and your first Rodin program
+- **[Your First Problem](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-first-problem.html)** - Complete walkthrough solving the Poisson equation
+- **[Core Concepts](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-getting-started-core-concepts.html)** - Deep dive into meshes, finite elements, and variational formulations
 
 ## Status
 
@@ -19,13 +26,124 @@ Any contributors are warmly encouraged and any help or comments are always appre
 
 ## Table of Contents
 
-1. [Building the project](#building-the-project)
-2. [Features](#features)
-3. [Third-Party integrations](#third-party-integrations)
-5. [Requirements](#requirements)
-6. [CMake options](#cmake-options)
-7. [Building the documentation](#building-the-documentation)
+1. [Getting Started](#getting-started)
+2. [Installation](#installation)
+3. [Building the project](#building-the-project)
+4. [Features](#features)
+5. [Documentation](#documentation)
+6. [Third-Party integrations](#third-party-integrations)
+7. [Requirements](#requirements)
+8. [CMake options](#cmake-options)
+9. [Development](#development)
 
+## Installation
+
+Rodin can be easily installed from source on Linux and macOS systems.
+
+### Prerequisites
+
+**Required:**
+- CMake 3.16.0+
+- C++20 compatible compiler (GCC 12+, Clang 14+, or AppleClang)
+- Boost 1.74+
+- Eigen3
+
+**Optional:**
+- OpenMP (for parallel execution)
+- SuiteSparse (for additional linear solvers)
+- MPI (for distributed computing)
+
+### Quick Install
+
+```bash
+# Clone repository with submodules
+git clone --recursive https://github.com/cbritopacheco/rodin.git
+cd rodin
+
+# Configure and build
+mkdir build && cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release
+make -j4
+
+# Install (may require sudo for system-wide installation)
+sudo make install
+```
+
+### User-Local Installation
+
+For installation without sudo (recommended for development):
+
+```bash
+# Configure with local prefix
+mkdir build && cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/.local -DCMAKE_BUILD_TYPE=Release
+make -j4
+make install
+
+# Add to your shell profile (~/.bashrc or ~/.zshrc)
+export CMAKE_PREFIX_PATH=$HOME/.local:$CMAKE_PREFIX_PATH
+```
+
+### Verifying Installation
+
+After installation, you can verify it works by creating a simple test project:
+
+**CMakeLists.txt:**
+```cmake
+cmake_minimum_required(VERSION 3.16)
+project(MyRodinProject CXX)
+set(CMAKE_CXX_STANDARD 20)
+
+find_package(Rodin REQUIRED)
+add_executable(my_app main.cpp)
+target_link_libraries(my_app PRIVATE Rodin::Geometry Rodin::Variational Rodin::Solver)
+```
+
+**main.cpp:**
+```cpp
+#include <Rodin/Solver.h>
+#include <Rodin/Geometry.h>
+#include <Rodin/Variational.h>
+
+using namespace Rodin;
+using namespace Rodin::Geometry;
+using namespace Rodin::Variational;
+
+int main() {
+  Mesh mesh = Mesh().UniformGrid(Polytope::Type::Triangle, {8, 8});
+  P1 Vh(mesh);
+  std::cout << "Rodin installation verified!" << std::endl;
+  return 0;
+}
+```
+
+Then build and run:
+```bash
+mkdir build && cd build
+cmake ..
+make
+./my_app
+```
+
+### Platform-Specific Notes
+
+**Ubuntu/Debian:**
+```bash
+sudo apt-get install cmake libboost-all-dev libeigen3-dev libomp-dev
+```
+
+**macOS (Homebrew):**
+```bash
+brew install cmake boost eigen libomp
+```
+
+### Troubleshooting
+
+- **CMake can't find Rodin:** Ensure `CMAKE_PREFIX_PATH` includes your installation directory
+- **Linker errors:** Make sure all required dependencies (Boost, Eigen) are installed
+- **Compiler errors:** Verify you're using a C++20 compatible compiler
+
+For detailed installation instructions, advanced configuration options, and troubleshooting, see **[INSTALL.md](INSTALL.md)**.
 
 ## Building the project
 
@@ -61,32 +179,40 @@ has the associated weak formulation:
 which can be quickly implemented via the following lines of code:
 
 ```c++
+#include <Rodin/Types.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
+#include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
 
 using namespace Rodin;
+using namespace Rodin::Solver;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  Mesh Omega;
-  Omega = Omega.UniformGrid(Polytope::Type::Triangle, 16, 16);
-  mesh.getConnectivity().compute(1, 2);
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+  mesh.getConnectivity().compute(1, 2); // Compute boundary
 
-  P1 Vh(Omega);
+  P1 vh(mesh);
 
-  TrialFunction u(Vh);
-  TestFunction v(Vh);
+  TrialFunction u(vh);
+  TestFunction  v(vh);
 
-  Solver::SparseLU solver;
+  RealFunction f = 1;
 
+  // Apply Dirichlet conditions on the entire boundary.
   Problem poisson(u, v);
   poisson = Integral(Grad(u), Grad(v))
-          - Integral(v)
+          - Integral(f, v)
           + DirichletBC(u, Zero());
-  poisson.solve(solver);
+  CG(poisson).solve();
+
+  // Save solution
+  u.getSolution().save("Poisson.gf");
+  mesh.save("Poisson.mesh");
 
   return 0;
 }
@@ -179,24 +305,95 @@ mesh.getConnectivity().compute(2, 1);
 // Etc.
 ```
 
-### Direct integration with Eigen solvers
+### Additional Features
 
-### Support for different finite elements
+Rodin provides many powerful features for finite element analysis:
 
-### Support for different mesh and solution file formats
+**Solver Integration:**
+- Direct integration with Eigen for linear algebra operations
+- Support for various linear solvers (CG, BiCGSTAB, SparseLU, etc.)
+- Iterative and direct solver methods
 
-- MFEM
-- MEDIT
+**Finite Element Spaces:**
+- P1 (piecewise linear) elements
+- P0 (piecewise constant) elements
+- H1
 
-### Different quadrature formulae
+**File Format Support:**
+- MFEM mesh and grid function formats
+- MEDIT mesh format (`.mesh`)
+- GMSH mesh format (`.msh`)
+- Support for reading and writing solutions
 
-Rodin supports different kinds of quadrature.
+**Quadrature Formulas:**
+- Multiple quadrature rules for integration
+- Grundmann-Moeller quadrature
+- Gauss-Legendre quadrature
+- See the [complete list of quadrature formulas](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/group___rodin_quadrature.html)
 
-- Grundmann-Moeller
+**Advanced Mesh Operations:**
+- SubMesh extraction for domain decomposition
+- Mesh partitioning for parallel computing
+- Boundary and interface mesh generation
+- See the [Mesh Utilities Guide](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-meshes-utilities.html) for more details
 
-[See here for the full list](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/group___rodin_quadrature.html).
+For comprehensive documentation on all features, see the [Documentation](#documentation) section below.
 
-### SubMesh support
+## Documentation
+
+Rodin provides comprehensive documentation covering all aspects of the library:
+
+### User Guides
+
+**Getting Started:**
+- Installation and setup instructions
+- Your first Rodin program
+- Solving your first PDE (Poisson equation)
+- Understanding core concepts
+
+**Mesh Guide:**
+- [Creating meshes](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-meshes-creation.html) - UniformGrid, file loading, Builder API
+- [Connectivity](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-meshes-connectivity.html) - Computing and using connectivity relations
+- [Iteration](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-meshes-iteration.html) - Iterating over mesh entities
+- [Queries](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-meshes-queries.html) - Geometric measurements
+- [I/O](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-meshes-io.html) - File formats and operations
+- [Utilities](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/guides-meshes-utilities.html) - Advanced operations
+
+### Examples
+
+The documentation includes numerous examples demonstrating Rodin's capabilities:
+
+- **PDE Examples:** Poisson equation, elasticity system, and more
+- **MMG Integration:** Mesh optimization, adaptation, and remeshing
+- **Shape Optimization:** Topology and shape optimization workflows
+- **Geometry Operations:** Mesh manipulation and transformations
+
+### API Reference
+
+Complete API documentation is available for all classes, functions, and modules:
+- [Full API Documentation](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/)
+- [Geometry Module](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/namespace_rodin_1_1_geometry.html)
+- [Variational Module](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/namespace_rodin_1_1_variational.html)
+- [Solver Module](https://cbritopacheco.github.io/rodin/docs/refs/heads/master/namespace_rodin_1_1_solver.html)
+
+### Building Documentation Locally
+
+To build the documentation yourself:
+
+```bash
+# Clone repository with submodules
+git clone --recursive https://github.com/cbritopacheco/rodin.git
+cd rodin
+
+# Configure with documentation enabled
+mkdir build && cd build
+cmake .. -DRODIN_BUILD_DOC=ON -DRODIN_USE_MCSS=ON
+
+# Build documentation
+make RodinDoxygen
+```
+
+The generated documentation will be in the `doc/` directory. For more details, see [doc/README.md](doc/README.md).
 
 ## Third-Party integrations
 
@@ -218,20 +415,6 @@ Rodin supports different kinds of quadrature.
                   .setHausdorff(hausd) // curvature refinement
                   .optimize(Omega);
   ```
-
-## Roadmap
-
-List of features and modules that are in the works:
-  - Discontinuous Galerkin methods
-  - `Rodin::Plot` module
-  - H1
-  - L2
-  - HDiv
-  - HCurl
-  - P2
-  - P0
-  - PETSc
-  - METIS
 
 ## Requirements
 
@@ -259,6 +442,23 @@ manager.
 | RODIN_SILENCE_WARNINGS | Silence warnings outputted by Rodin               |
 | RODIN_BUILD_PY         | Build Python bindings                             |
 
-## Building the documentation
+## Development
 
-See [this page](doc/README.md) to see how to build the documentation.
+Rodin includes a GitHub Copilot custom agent called **Rodin** that assists with building and testing code changes.
+
+### Using the Rodin Agent
+
+The Rodin agent can help you:
+- Compile the Rodin codebase
+- Run unit tests, manufactured tests, and benchmarks
+- Troubleshoot build and test failures
+- Understand the build system
+
+To use the Rodin agent in GitHub Copilot Chat:
+```
+@Rodin build and test my changes
+@Rodin compile the code and run unit tests
+@Rodin help me fix this build error
+```
+
+For more information, see [.github/agents/README.md](.github/agents/README.md).

@@ -33,7 +33,7 @@
  *
  * # Utilization
  *
- * @code{cpp}
+ * @code{.cpp}
  *  #ifndef RODIN_WITH_PY
  *  // Code depending on Python support
  *  #endif
@@ -44,7 +44,7 @@
 /**
  * @ingroup RodinDirectives
  * @brief Indicates if Rodin::Plot is built.
- * @code{cpp}
+ * @code{.cpp}
  *  #ifndef RODIN_WITH_PLOT
  *  // Code depending on Rodin::Plot support
  *  #endif
@@ -58,7 +58,7 @@
  *
  * # Utilization
  *
- * @code{cpp}
+ * @code{.cpp}
  *  #ifndef RODIN_USE_MPI
  *  // Code depending on MPI support
  *  #endif
@@ -72,7 +72,7 @@
  *
  * # Utilization
  *
- * @code{cpp}
+ * @code{.cpp}
  * #ifndef RODIN_USE_OPENMP
  * // Code depending on OpenMP support
  * #endif
@@ -86,7 +86,7 @@
  *
  * # Utilization
  *
- * @code{cpp}
+ * @code{.cpp}
  * #ifndef RODIN_USE_UMFPACK
  * // Code depending on UMFPACK
  * #endif
@@ -100,7 +100,7 @@
  *
  * # Utilization
  *
- * @code{cpp}
+ * @code{.cpp}
  * #ifndef RODIN_USE_SPQR
  * // Code depending on SPQR
  * #endif
@@ -114,7 +114,7 @@
  *
  * # Utilization
  *
- * @code{cpp}
+ * @code{.cpp}
  * #ifndef RODIN_USE_CHOLMOD
  * // Code depending on CHOLMOD
  * #endif
@@ -143,7 +143,7 @@
  *
  * # Utilization
  *
- * @code{cpp}
+ * @code{.cpp}
  * std::cout << RODIN_RESOURCES_DIR << std::endl;
  * @endcode
  */
@@ -155,7 +155,7 @@
  *
  * # Utilization
  *
- * @code{cpp}
+ * @code{.cpp}
  * std::cout << RODIN_THIRD_PARTY_DIR << std::endl;
  * @endcode
  */
@@ -167,7 +167,7 @@
  *
  * # Utilization
  *
- * @code{cpp}
+ * @code{.cpp}
  * #ifdef RODIN_THREAD_SAFE
  *   // Code that requires thread safety features.
  * #endif
@@ -181,7 +181,7 @@
  *
  * # Utilization
  *
- * @code{cpp}
+ * @code{.cpp}
  * #ifdef RODIN_MULTITHREADED
  *   // Code that leverages multithreading capabilities.
  * #endif
@@ -195,7 +195,7 @@
  *
  * # Utilization
  *
- * @code{cpp}
+ * @code{.cpp}
  * #ifdef RODIN_USE_APPLE_ACCELERATE
  *   // Code that uses the Apple Accelerate framework for optimized computations.
  * #endif
@@ -209,7 +209,7 @@
  *
  * # Utilization
  *
- * @code{cpp}
+ * @code{.cpp}
  * #ifdef RODIN_USE_SCOTCH
  *   // Code that uses the Scotch library for partioning.
  * #endif

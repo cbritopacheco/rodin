@@ -7,6 +7,11 @@
 #ifndef RODIN_UTILITY_OVERLOADED_H
 #define RODIN_UTILITY_OVERLOADED_H
 
+/**
+ * @file
+ * @brief Defines the Overloaded helper for combining multiple lambdas.
+ */
+
 namespace Rodin::Utility
 {
   /**
@@ -24,9 +29,9 @@ namespace Rodin::Utility
    * an overload set that can be used for pattern matching on variants.
    *
    * Example usage:
-   * @code
+   * @code{.cpp}
    * std::variant<int, std::string, double> var = 42;
-   * 
+   *
    * auto visitor = Overloaded {
    *     [](int i) { return "integer: " + std::to_string(i); },
    *     [](const std::string& s) { return "string: " + s; },

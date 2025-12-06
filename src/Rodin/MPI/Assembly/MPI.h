@@ -100,7 +100,7 @@ namespace Rodin::Assembly
                 {
                   const auto& lf = fe.getLinearForm(local);
                   const auto s = lf(mapping);
-                  res.insert(find, { global, s });
+                  res.emplace_hint(find, global, s);
                 }
               }
             }

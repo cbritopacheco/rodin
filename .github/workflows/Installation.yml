@@ -1,0 +1,108 @@
+name: Installation
+on:
+  push:
+    branches:
+      - master
+      - develop
+  pull_request:
+    branches:
+      - master
+      - develop
+
+concurrency:
+  group: Installation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  Ubuntu:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        compiler: [gcc-12, gcc-13, gcc-14]
+      fail-fast: false
+    env:
+      MAKEFLAGS: "-j2"
+    steps:
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          
+      - name: Setup Cpp (C++ / C)
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: ${{ matrix.compiler }}
+          cmake: true
+          
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libboost-all-dev \
+            libeigen3-dev \
+            libomp-dev
+            
+      - name: Run installation test
+        run: bash tests/installation/test_installation.sh
+        
+      - name: Archive installation artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: installation-test-failure-${{ matrix.compiler }}
+          path: |
+            build/install-test/
+            build/test-installation-project/
+          retention-days: 7
+
+  MacOS:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest]
+      fail-fast: false
+    env:
+      MAKEFLAGS: "-j2"
+    steps:
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          
+      - name: Setup Python
+        run: |
+          brew list -1 | grep python | while read formula; do brew unlink $formula; brew link --overwrite $formula; done || true
+          
+      - name: Update Homebrew
+        run: brew update
+          
+      - name: Install dependencies
+        run: |
+          brew install boost eigen libomp
+          
+      - name: Link libomp
+        run: |
+          brew link --force --overwrite libomp
+          
+      - name: Verify dependencies
+        run: |
+          echo "Boost location:"
+          brew --prefix boost
+          echo "Eigen location:"
+          brew --prefix eigen
+          echo "OpenMP location:"
+          brew --prefix libomp
+          
+      - name: Run installation test
+        run: bash tests/installation/test_installation.sh
+        
+      - name: Archive installation artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: installation-test-failure-macos
+          path: |
+            build/install-test/
+            build/test-installation-project/
+          retention-days: 7

@@ -16,7 +16,6 @@
 
 #include "Rodin/Types.h"
 #include "Rodin/Copyable.h"
-#include "Rodin/Threads/Unsafe.h"
 #include "Rodin/Math/ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
 
@@ -26,17 +25,6 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @defgroup RodinFormLanguage Form Language Module
-   * @brief Domain-specific language for expressing finite element forms and expressions.
-   *
-   * The FormLanguage module provides a comprehensive framework for expressing
-   * variational forms, mathematical expressions, and finite element operations
-   * using a high-level, expressive domain-specific language. This module forms
-   * the foundation for Rodin's symbolic computation capabilities.
-   */
-
-  /**
-   * @ingroup RodinFormLanguage
    * @brief Base class for all objects in Rodin's FormLanguage system.
    *
    * This class serves as the foundational base for all form language objects,
@@ -58,6 +46,13 @@ namespace Rodin::FormLanguage
     using ObjectTable = std::vector<std::shared_ptr<const void>>;
 
     public:
+      /**
+       * @brief Type alias for unique object identifiers.
+       *
+       * UUID (Universally Unique Identifier) is used to uniquely identify
+       * each FormLanguage::Base instance during its lifetime. The identifier
+       * is assigned during construction and remains constant.
+       */
       using UUID = size_t;
 
       /**
@@ -65,13 +60,7 @@ namespace Rodin::FormLanguage
        */
       Base()
         : m_uuid(s_id++)
-      {
-        m_objs.write(
-            [](auto& obj)
-            {
-              obj.reserve(8);
-            });
-      }
+      {}
 
       /**
        * @brief Copy constructor.
@@ -153,13 +142,20 @@ namespace Rodin::FormLanguage
         {
           using R = typename std::remove_reference_t<T>;
           const R* res = new R(std::forward<T>(obj));
-          m_objs.write([&](auto& obj){ obj.emplace_back(res); });
+          m_objs.emplace_back(res);
           return *res;
         }
       }
 
       /**
-       * @brief Returns the same object.
+       * @brief Forwards non-plain objects unchanged.
+       * @tparam T Type of object (must not be a plain object type)
+       * @param[in] obj Object to forward
+       * @return Forwarded object
+       *
+       * This overload handles non-plain object types (such as scalars, references,
+       * or expression templates) by forwarding them directly without storage.
+       * It is selected via SFINAE when T is not a plain object.
        */
       template <class T, typename =
         std::enable_if_t<!FormLanguage::IsPlainObject<std::remove_reference_t<T>>::Value>>
@@ -170,19 +166,29 @@ namespace Rodin::FormLanguage
       }
 
       /**
-       * @brief Destructs the objects stored.
+       * @brief Clears all stored objects, releasing their memory.
+       *
+       * Destroys all objects that were stored via the object() method,
+       * freeing the associated memory. This is useful for managing
+       * temporary object lifetimes explicitly.
+       *
+       * @note After calling clear(), any references obtained from previous
+       * object() calls become invalid.
        */
       void clear()
       {
-        m_objs.write([](auto& obj){ obj.clear(); });
+        m_objs.clear();
       }
 
       /**
-       * @brief Copies the object and returns a non-owning pointer to the
-       * copied object.
-       * @returns Non-owning pointer to the copied object.
-       * @note CRTP function to be overriden in the Derived class.
+       * @brief Creates a polymorphic copy of this object.
+       * @return Non-owning pointer to the copied object
        *
+       * Pure virtual function that must be implemented by derived classes
+       * to support polymorphic copying. The returned pointer is non-owning;
+       * the caller is responsible for managing its lifetime.
+       *
+       * @note This is a CRTP function to be overridden in derived classes.
        */
       virtual Base* copy() const noexcept override = 0;
 
@@ -190,7 +196,7 @@ namespace Rodin::FormLanguage
       thread_local static UUID s_id;
 
       const size_t m_uuid;
-      mutable Threads::Unsafe<std::vector<std::shared_ptr<const void>>> m_objs;
+      mutable std::vector<std::shared_ptr<const void>> m_objs;
   };
 }
 

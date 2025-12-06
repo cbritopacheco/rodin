@@ -4,21 +4,75 @@
 
   @tableofcontents
 
-  @subsection guides-getting-started-index Getting started with Rodin
+  @section guides-getting-started-index Getting started with Rodin
 
-  @subsection guides-geometry-index Geometry
+  New to Rodin? Start here for a comprehensive introduction:
 
-  - @subpage guides-meshes
+  Welcome to Rodin! This guide will help you get started with the Rodin
+  finite element framework. Whether you're new to finite element methods or
+  an experienced practitioner, these guides will walk you through the
+  essentials of using Rodin effectively.
 
-  - @subpage guides-polytopes
+  @subsection guides-getting-started-overview What you'll learn
 
-  - @subpage guides-connectivity
+  This Getting Started guide is organized into several sections that will take
+  you from installation to solving your first finite element problem:
 
-  @subsection guides-fem-index The finite element method
+  - @subpage guides-getting-started-installation - How to install Rodin and set up
+    your development environment
+
+  - @subpage guides-getting-started-first-steps - Basic concepts and your first Rodin
+    program
+
+  - @subpage guides-getting-started-first-problem - Solving a complete problem: the
+    Poisson equation
+
+  - @subpage guides-getting-started-core-concepts - Understanding meshes, finite
+    element spaces, and variational formulations
+
+
+  @subsection guides-getting-started-prerequisites Prerequisites
+
+  Before starting, you should have:
+  - Basic knowledge of C++
+  - Familiarity with finite element methods (recommended but not required)
+  - A Linux or macOS system with a C++20 compatible compiler
+
+  @subsection guides-getting-started-next-steps After completing this guide
+
+  Once you've completed the Getting Started guide, you can:
+  - Explore more @ref examples-index "examples" to see Rodin in action
+  - Read the @ref guides-index "general concepts" for deeper understanding
+  - Check out the API reference for detailed information on specific classes
+    and functions
+
+  @subsection guides-getting-started-help Getting help
+
+  If you encounter any issues:
+  - Check the [GitHub repository](https://github.com/cbritopacheco/rodin)
+  - Look at the @ref examples-index "examples" for similar use cases
+  - Review the @ref guides-index "guides" for conceptual explanations
+
+  @section guides-geometry-index Geometry
+
+  The Geometry module provides comprehensive support for mesh generation, manipulation,
+  and geometric computations in finite element analysis.
+
+  For detailed information on specific geometry topics, see:
+
+  - @subpage guides-meshes - Working with meshes
+
+  - @subpage guides-polytopes - Geometric elements and their properties
+
+  - @subpage guides-connectivity - Detailed connectivity information
+
+  @section guides-fem-index The finite element method
 
   - @subpage fem-ciarlet
 
-  @subsection guides-variational-index Weak formulations and variational problems
+  - @subpage fem-spaces
+
+  @section guides-variational-index Weak formulations and variational problems
 
   */
 

@@ -7,15 +7,6 @@
 #ifndef RODIN_ALERT_EXCEPTION_H
 #define RODIN_ALERT_EXCEPTION_H
 
-/**
- * @defgroup AlertModule Alert
- * @brief Alert and exception handling system for Rodin.
- *
- * The Alert module provides a comprehensive system for handling exceptions,
- * warnings, informational messages, and success notifications with colored
- * terminal output and formatted messaging capabilities.
- */
-
 #define RODIN_ALERT_EXCEPTION_PREFIX "Error"
 
 #include <exception>
@@ -26,7 +17,6 @@ namespace Rodin::Alert
 {
   /**
    * @brief Prefix class for exception messages.
-   * @ingroup AlertModule
    *
    * Provides red-colored prefixing for exception messages using "Error" as
    * the default prefix text.
@@ -49,7 +39,6 @@ namespace Rodin::Alert
 
   /**
    * @brief Exception class with formatted output capabilities.
-   * @ingroup AlertModule
    *
    * A specialized exception class that extends both std::exception and the 
    * Alert messaging system. When raised, it outputs a formatted error message
