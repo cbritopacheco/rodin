@@ -6,6 +6,10 @@
 
   @section guides-getting-started-index Getting started with Rodin
 
+  New to Rodin? Start here for a comprehensive introduction:
+
+  - @subpage getting-started-index
+
   @section guides-geometry-index Geometry
 
   - @subpage guides-meshes
