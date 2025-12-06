@@ -1,6 +1,97 @@
 /**
   @page guides-meshes Meshes
+  @brief Comprehensive guide to working with meshes in Rodin
 
   @tableofcontents
+
+  @m_footernavigation
+
+  @section guides-meshes-intro Introduction
+
+  A mesh is the fundamental data structure in finite element analysis,
+  representing the discretization of a computational domain into simple
+  geometric elements called polytopes.
+
+  In Rodin, the @ref Rodin::Geometry::Mesh "Mesh" class provides a complete
+  framework for representing, manipulating, and querying finite element meshes.
+
+  @section guides-meshes-concepts Key Concepts
+
+  @subsection guides-meshes-concepts-domain Domain Partition
+
+  Mathematically, a mesh @f$ \mathcal{T}_h @f$ partitions a domain @f$ \Omega @f$:
+
+  @f[
+    \Omega = \bigcup_{K \in \mathcal{T}_h} K
+  @f]
+
+  where each @f$ K @f$ is a polytope (e.g., triangle, tetrahedron).
+
+  @subsection guides-meshes-concepts-dimensions Dimensions
+
+  A mesh has two important dimensions:
+  
+  - **Topological dimension** (`getDimension()`): The dimension of the highest
+    dimensional polytopes (e.g., 2 for triangular meshes, 3 for tetrahedral)
+  - **Space dimension** (`getSpaceDimension()`): The dimension of the ambient
+    space in which the mesh is embedded
+
+  Example: A 2D surface embedded in 3D space has topological dimension 2 and
+  space dimension 3.
+
+  @subsection guides-meshes-concepts-entities Mesh Entities
+
+  Meshes consist of entities of different dimensions:
+
+  | Dimension | Name | Examples |
+  |-----------|------|----------|
+  | 0 | Vertices | Points |
+  | 1 | Edges | Line segments |
+  | 2 | Faces (2D) or Cells (2D meshes) | Triangles, Quadrilaterals |
+  | 3 | Cells (3D meshes) | Tetrahedra, Hexahedra |
+
+  @section guides-meshes-usage Basic Usage
+
+  Here's a simple example creating and querying a mesh:
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+
+  int main() {
+    // Create a 2D triangular mesh
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+
+    // Query mesh properties
+    std::cout << "Dimension: " << mesh.getDimension() << std::endl;
+    std::cout << "Vertices: " << mesh.getVertexCount() << std::endl;
+    std::cout << "Cells: " << mesh.getCellCount() << std::endl;
+    std::cout << "Volume: " << mesh.getVolume() << std::endl;
+
+    return 0;
+  }
+  @endcode
+
+  @section guides-meshes-topics Detailed Topics
+
+  For detailed information on specific aspects of working with meshes, see:
+
+  - @subpage guides-meshes-creation - Creating meshes from files or programmatically
+  - @subpage guides-meshes-connectivity - Understanding connectivity relations
+  - @subpage guides-meshes-iteration - Iterating over mesh entities
+  - @subpage guides-meshes-queries - Geometric queries and measurements
+  - @subpage guides-meshes-io - Input/output operations
+  - @subpage guides-meshes-utilities - Advanced utilities and transformations
+
+  @section guides-meshes-see-also See Also
+
+  - @ref Rodin::Geometry::Mesh "Mesh class reference"
+  - @ref guides-polytopes "Polytopes guide"
+  - @ref guides-connectivity "Connectivity guide"
+  - @ref examples-index "Examples"
+
   */
 

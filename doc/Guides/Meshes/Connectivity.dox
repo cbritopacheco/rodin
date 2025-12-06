@@ -1,0 +1,218 @@
+/**
+  @page guides-meshes-connectivity Mesh Connectivity
+  @brief Understanding and computing connectivity relations
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  Connectivity describes the topological relationships between polytopes of
+  different dimensions in a mesh. Understanding connectivity is essential for
+  many finite element operations.
+
+  @section guides-meshes-connectivity-intro Introduction
+
+  In finite element analysis, we often need to know how mesh entities relate to
+  each other:
+  - Which cells share a given edge?
+  - What are the faces of a cell?
+  - Which vertices belong to a face?
+
+  These relationships are called **incidence relations** or **connectivity**.
+
+  @section guides-meshes-connectivity-notation Mathematical Notation
+
+  An incidence relation @f$ d \rightarrow d' @f$ maps polytopes of dimension
+  @f$ d @f$ to polytopes of dimension @f$ d' @f$ that are incident to them.
+
+  For example, in a 2D mesh:
+  - @f$ 1 \rightarrow 2 @f$: Maps edges to incident cells
+  - @f$ 2 \rightarrow 1 @f$: Maps cells to their edges
+  - @f$ 0 \rightarrow 2 @f$: Maps vertices to incident cells
+
+  @section guides-meshes-connectivity-computing Computing Connectivity
+
+  Connectivity is not computed by default and must be explicitly requested:
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+
+  int main() {
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+
+    // Compute face-to-cell connectivity
+    mesh.getConnectivity().compute(1, 2);
+
+    return 0;
+  }
+  @endcode
+
+  @section guides-meshes-connectivity-common Common Connectivity Relations
+
+  @subsection guides-meshes-connectivity-common-2d 2D Meshes
+
+  For 2D meshes (dimension = 2):
+
+  | Relation | Description | When Needed |
+  |----------|-------------|-------------|
+  | 0 → 1 | Vertices to edges | Edge operations |
+  | 0 → 2 | Vertices to cells | Vertex-based operations |
+  | 1 → 0 | Edges to vertices | Always available |
+  | 1 → 1 | Edges to adjacent edges | Edge neighbor queries |
+  | 1 → 2 | Edges to cells | **Boundary conditions** |
+  | 2 → 0 | Cells to vertices | Always available |
+  | 2 → 1 | Cells to edges | Cell neighbor queries |
+  | 2 → 2 | Cells to cells | Cell adjacency |
+
+  @subsection guides-meshes-connectivity-common-3d 3D Meshes
+
+  For 3D meshes (dimension = 3):
+
+  | Relation | Description | When Needed |
+  |----------|-------------|-------------|
+  | 0 → 3 | Vertices to cells | Vertex-based operations |
+  | 1 → 3 | Edges to cells | Edge operations |
+  | 2 → 3 | Faces to cells | **Boundary conditions** |
+  | 3 → 2 | Cells to faces | Cell neighbor queries |
+  | 3 → 1 | Cells to edges | Edge-based operations |
+  | 3 → 0 | Cells to vertices | Always available |
+
+  @section guides-meshes-connectivity-boundary Boundary Operations
+
+  **Most important**: For boundary conditions and boundary iterations, you need:
+  
+  - 2D meshes: `mesh.getConnectivity().compute(1, 2)` (edge-to-cell)
+  - 3D meshes: `mesh.getConnectivity().compute(2, 3)` (face-to-cell)
+
+  @code{.cpp}
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+
+  // Required for boundary operations in 2D
+  mesh.getConnectivity().compute(1, 2);
+
+  // Now we can iterate over boundary
+  for (auto it = mesh.getBoundary(); it; ++it) {
+    std::cout << "Boundary edge " << it->getIndex() << std::endl;
+  }
+  @endcode
+
+  @section guides-meshes-connectivity-access Accessing Connectivity
+
+  Once computed, use connectivity to query relationships:
+
+  @code{.cpp}
+  mesh.getConnectivity().compute(1, 2);
+  mesh.getConnectivity().compute(2, 1);
+
+  // Get all edges
+  for (auto edge = mesh.getFace(); edge; ++edge) {
+    // Get cells incident to this edge
+    const auto& incidentCells = 
+      mesh.getConnectivity().getIncidence({1, edge->getIndex()}, 2);
+
+    std::cout << "Edge " << edge->getIndex() 
+              << " has " << incidentCells.size() 
+              << " incident cells" << std::endl;
+  }
+  @endcode
+
+  @section guides-meshes-connectivity-example Complete Example
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+
+  int main() {
+    // Create mesh
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {8, 8});
+
+    std::cout << "Mesh info:" << std::endl;
+    std::cout << "  Vertices: " << mesh.getVertexCount() << std::endl;
+    std::cout << "  Edges: " << mesh.getFaceCount() << std::endl;
+    std::cout << "  Cells: " << mesh.getCellCount() << std::endl;
+
+    // Compute connectivity
+    mesh.getConnectivity().compute(1, 2);  // Edge to cell
+    mesh.getConnectivity().compute(2, 1);  // Cell to edge
+    mesh.getConnectivity().compute(2, 2);  // Cell to cell
+
+    // Count boundary edges
+    size_t boundaryCount = 0;
+    for (auto edge = mesh.getFace(); edge; ++edge) {
+      if (mesh.isBoundary(edge->getIndex())) {
+        boundaryCount++;
+      }
+    }
+    std::cout << "Boundary edges: " << boundaryCount << std::endl;
+
+    // Find cell neighbors
+    auto cell = mesh.getCell(0);  // Get first cell
+    for (auto neighbor = cell->getAdjacent(); neighbor; ++neighbor) {
+      std::cout << "Cell 0 is adjacent to cell " 
+                << neighbor->getIndex() << std::endl;
+    }
+
+    return 0;
+  }
+  @endcode
+
+  @section guides-meshes-connectivity-performance Performance Considerations
+
+  @subsection guides-meshes-connectivity-performance-cost Computational Cost
+
+  Computing connectivity can be expensive for large meshes:
+  
+  - Compute only what you need
+  - Compute once, use many times
+  - Some relations are computed together (e.g., @f$ d \rightarrow d' @f$ and
+    @f$ d' \rightarrow d @f$)
+
+  @subsection guides-meshes-connectivity-performance-timing Timing Example
+
+  @code{.cpp}
+  #include <chrono>
+
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {1024, 1024});
+
+  auto t0 = std::chrono::high_resolution_clock::now();
+  mesh.getConnectivity().compute(1, 2);
+  mesh.getConnectivity().compute(2, 1);
+  mesh.getConnectivity().compute(1, 1);
+  auto t1 = std::chrono::high_resolution_clock::now();
+
+  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0);
+  std::cout << "Connectivity computation took " 
+            << duration.count() << " ms" << std::endl;
+  @endcode
+
+  @section guides-meshes-connectivity-required When Is Connectivity Required?
+
+  Many operations require specific connectivity to be computed:
+
+  | Operation | Required Connectivity |
+  |-----------|----------------------|
+  | Boundary iteration | @f$ (d-1) \rightarrow d @f$ |
+  | Dirichlet BC | @f$ (d-1) \rightarrow d @f$ |
+  | Cell adjacency | @f$ d \rightarrow d @f$ |
+  | SubMesh creation | Various |
+  | Partitioning | @f$ d \rightarrow d @f$ |
+
+  If required connectivity is missing, Rodin will raise an exception.
+
+  @section guides-meshes-connectivity-see-also See Also
+
+  - @ref guides-meshes "Meshes overview"
+  - @ref guides-connectivity "Connectivity guide (detailed)"
+  - @ref Rodin::Geometry::Connectivity "Connectivity class reference"
+  - Example: @ref examples/Geometry/Connectivity.cpp
+
+  */
