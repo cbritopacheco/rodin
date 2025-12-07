@@ -264,8 +264,14 @@ namespace Rodin::IO::MFEM
       {
         return Rodin::Geometry::Polytope::Type::Quadrilateral;
       }
-      default:
+      case GeometryType::CUBE:
+      {
+        return Rodin::Geometry::Polytope::Type::Hexahedron;
+      }
+      case GeometryType::PYRAMID:
+      {
         return {};
+      }
     }
     return {};
   }
@@ -295,8 +301,8 @@ namespace Rodin::IO::MFEM
         return GeometryType::TETRAHEDRON;
       case Geometry::Polytope::Type::Wedge:
         return GeometryType::PRISM;
-      default:
-        return {};
+      case Geometry::Polytope::Type::Hexahedron:
+        return GeometryType::CUBE;
     }
     assert(false);
     return {};

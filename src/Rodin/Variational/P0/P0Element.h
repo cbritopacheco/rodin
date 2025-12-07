@@ -52,7 +52,6 @@
 
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/Connectivity.h"
-#include "Rodin/Geometry/GeometryIndexed.h"
 
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/FiniteElement.h"
@@ -129,7 +128,7 @@ namespace Rodin::Variational
           constexpr
           ScalarType operator()(const T& v) const
           {
-            return v(s_nodes[m_g]);
+            return v(P0Element<ScalarType>(m_g).getNode(0));
           }
 
         private:
@@ -231,11 +230,47 @@ namespace Rodin::Variational
         return 1;
       }
 
-      constexpr
       const Math::SpatialVector<Real>& getNode(size_t i) const
       {
         assert(i == 0); // P0 element has only one node
-        return s_nodes[this->getGeometry()];
+        switch (this->getGeometry())
+        {
+          case Geometry::Polytope::Type::Point:
+          {
+            static thread_local const Math::SpatialVector<Real> s_node;
+            return s_node;
+          }
+          case Geometry::Polytope::Type::Segment:
+          {
+            static thread_local const Math::SpatialVector<Real> s_node{{ 0.5 }};
+            return s_node;
+          }
+          case Geometry::Polytope::Type::Triangle:
+          {
+            static thread_local const Math::SpatialVector<Real> s_node{{ Real(1) / Real(3), Real(1) / Real(3) }};
+            return s_node;
+          }
+          case Geometry::Polytope::Type::Quadrilateral:
+          {
+            static thread_local const Math::SpatialVector<Real> s_node{{ 0.5, 0.5 }};
+            return s_node;
+          }
+          case Geometry::Polytope::Type::Tetrahedron:
+          {
+            static thread_local const Math::SpatialVector<Real> s_node{{ 0.25, 0.25, 0.25 }};
+            return s_node;
+          }
+          case Geometry::Polytope::Type::Wedge:
+          {
+            static thread_local const Math::SpatialVector<Real> s_node{{ Real(1) / Real(3), Real(1) / Real(3), 0.5 }};
+            return s_node;
+          }
+          case Geometry::Polytope::Type::Hexahedron:
+          {
+            static thread_local const Math::SpatialVector<Real> s_node{{ 0.5, 0.5, 0.5 }};
+            return s_node;
+          }
+        }
       }
 
       constexpr
@@ -255,9 +290,6 @@ namespace Rodin::Variational
       {
         return 0;
       }
-
-    private:
-      static const Geometry::GeometryIndexed<Math::SpatialVector<Real>> s_nodes;
   };
 
   /**
@@ -555,7 +587,5 @@ namespace Rodin::Variational
       std::vector<BasisFunction> m_bs;      ///< Basis functions per DOF
   };
 }
-
-#include "P0Element.hpp"
 
 #endif

@@ -193,6 +193,62 @@ namespace Rodin::Variational
           }
         }
       }
+
+      case Geometry::Polytope::Type::Hexahedron:
+      {
+        const auto& x = r.x();
+        const auto& y = r.y();
+        const auto& z = r.z();
+
+        switch (m_local)
+        {
+          case 0:
+          {
+            // (1 - x)(1 - y)(1 - z)
+            return (1 - x) * (1 - y) * (1 - z);
+          }
+          case 1:
+          {
+            // x(1 - y)(1 - z)
+            return x * (1 - y) * (1 - z);
+          }
+          case 2:
+          {
+            // x y (1 - z)
+            return x * y * (1 - z);
+          }
+          case 3:
+          {
+            // (1 - x) y (1 - z)
+            return (1 - x) * y * (1 - z);
+          }
+          case 4:
+          {
+            // (1 - x)(1 - y) z
+            return (1 - x) * (1 - y) * z;
+          }
+          case 5:
+          {
+            // x(1 - y) z
+            return x * (1 - y) * z;
+          }
+          case 6:
+          {
+            // x y z
+            return x * y * z;
+          }
+          case 7:
+          {
+            // (1 - x) y z
+            return (1 - x) * y * z;
+          }
+          default: [[unlikely]]
+          {
+            assert(false);
+            return Math::nan<Scalar>();
+          }
+        }
+      }
     }
     assert(false);
     return Math::nan<Scalar>();
@@ -585,6 +641,198 @@ namespace Rodin::Variational
                 return Math::nan<Scalar>();
               }
             }
+            default: [[unlikely]]
+            {
+              assert(false);
+              return Math::nan<Scalar>();
+            }
+          }
+        }
+
+        case Geometry::Polytope::Type::Hexahedron:
+        {
+          const auto& x = r.x();
+          const auto& y = r.y();
+          const auto& z = r.z();
+
+          switch (m_local)
+          {
+            // N0 = (1 - x)(1 - y)(1 - z)
+            case 0:
+            {
+              if (m_i == 0)
+              {
+                return -(1 - y) * (1 - z);
+              }
+              else if (m_i == 1)
+              {
+                return -(1 - x) * (1 - z);
+              }
+              else if (m_i == 2)
+              {
+                return -(1 - x) * (1 - y);
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+
+            // N1 = x(1 - y)(1 - z)
+            case 1:
+            {
+              if (m_i == 0)
+              {
+                return (1 - y) * (1 - z);
+              }
+              else if (m_i == 1)
+              {
+                return -x * (1 - z);
+              }
+              else if (m_i == 2)
+              {
+                return -x * (1 - y);
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+
+            // N2 = x y (1 - z)
+            case 2:
+            {
+              if (m_i == 0)
+              {
+                return y * (1 - z);
+              }
+              else if (m_i == 1)
+              {
+                return x * (1 - z);
+              }
+              else if (m_i == 2)
+              {
+                return -x * y;
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+
+            // N3 = (1 - x) y (1 - z)
+            case 3:
+            {
+              if (m_i == 0)
+              {
+                return -y * (1 - z);
+              }
+              else if (m_i == 1)
+              {
+                return (1 - x) * (1 - z);
+              }
+              else if (m_i == 2)
+              {
+                return -(1 - x) * y;
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+
+            // N4 = (1 - x)(1 - y) z
+            case 4:
+            {
+              if (m_i == 0)
+              {
+                return -(1 - y) * z;
+              }
+              else if (m_i == 1)
+              {
+                return -(1 - x) * z;
+              }
+              else if (m_i == 2)
+              {
+                return (1 - x) * (1 - y);
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+
+            // N5 = x(1 - y) z
+            case 5:
+            {
+              if (m_i == 0)
+              {
+                return (1 - y) * z;
+              }
+              else if (m_i == 1)
+              {
+                return -x * z;
+              }
+              else if (m_i == 2)
+              {
+                return x * (1 - y);
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+
+            // N6 = x y z
+            case 6:
+            {
+              if (m_i == 0)
+              {
+                return y * z;
+              }
+              else if (m_i == 1)
+              {
+                return x * z;
+              }
+              else if (m_i == 2)
+              {
+                return x * y;
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+
+            // N7 = (1 - x) y z
+            case 7:
+            {
+              if (m_i == 0)
+              {
+                return -y * z;
+              }
+              else if (m_i == 1)
+              {
+                return (1 - x) * z;
+              }
+              else if (m_i == 2)
+              {
+                return (1 - x) * y;
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+
             default: [[unlikely]]
             {
               assert(false);

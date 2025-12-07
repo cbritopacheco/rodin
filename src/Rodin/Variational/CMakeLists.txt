@@ -51,12 +51,7 @@ set(RodinVariational_HEADERS
 )
 
 set(RodinVariational_SRCS
-  P0/P0.cpp
-  P0/P0Element.cpp
-  P1/P1.cpp
-  P1/P1Element.cpp
   H1/H1.cpp
-  H1/H1Element.cpp
   )
 
 add_library(RodinVariational

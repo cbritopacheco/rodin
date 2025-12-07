@@ -57,6 +57,21 @@ namespace Rodin::QF
         m_qf = std::make_unique<GrundmannMoller>(i / 2, g);
         break;
       }
+      case Geometry::Polytope::Type::Wedge:
+      {
+        // For wedges, tensor-product: triangle (Duffy) × segment
+        // Use same n in all directions; 2n - 1 >= m_order
+        const size_t n = std::max<size_t>(1, (m_order + 1) / 2);
+        // GaussLegendre(Polytope::Type::Wedge, ntri, nz)
+        m_qf = std::make_unique<GaussLegendre>(g, n, n);
+        break;
+      }
+      case Geometry::Polytope::Type::Hexahedron:
+      {
+        const size_t n = std::max<size_t>(1, (m_order + 1) / 2);
+        m_qf = std::make_unique<GaussLegendre>(g, n, n, n);
+        break;
+      }
     }
   }
 }

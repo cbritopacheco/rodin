@@ -876,6 +876,66 @@ namespace Rodin::Geometry
         }
         return build.finalize();
       }
+
+      case Polytope::Type::Hexahedron:
+      {
+        // Structured brick mesh with MFEM-compatible vertex ordering
+        // dimensions = {w, h, d}
+        assert(dimensions.size() == 3);
+        const size_t w = dimensions.coeff(0);
+        const size_t h = dimensions.coeff(1);
+        const size_t d = dimensions.coeff(2);
+        assert(w >= 2 && h >= 2 && d >= 2);
+
+        // Total vertices
+        build.initialize(dim).nodes(w * h * d);
+
+        // Vertex coordinates: integer lattice (i, j, k)
+        for (size_t k = 0; k < d; ++k)
+        {
+          for (size_t j = 0; j < h; ++j)
+          {
+            for (size_t i = 0; i < w; ++i)
+            {
+              build.vertex({
+                  static_cast<Real>(i),
+                  static_cast<Real>(j),
+                  static_cast<Real>(k) });
+            }
+          }
+        }
+
+        // Number of hexahedra
+        build.reserve(dim, (w - 1) * (h - 1) * (d - 1));
+
+        // Local indexing:
+        // v(i,j,k) = i + j*w + k*w*h
+        //
+        // Hex vertices (consistent with MFEM and Connectivity::getSubPolytopes):
+        // bottom: v0=(0,0,0), v1=(1,0,0), v2=(1,1,0), v3=(0,1,0)
+        // top   : v4=(0,0,1), v5=(1,0,1), v6=(1,1,1), v7=(0,1,1)
+        for (size_t k = 0; k < d - 1; ++k)
+        {
+          for (size_t j = 0; j < h - 1; ++j)
+          {
+            for (size_t i = 0; i < w - 1; ++i)
+            {
+              const Index v0  =  i      +  j      * w +  k      * w * h;
+              const Index v1  = (i + 1) +  j      * w +  k      * w * h;
+              const Index v2  = (i + 1) + (j + 1) * w +  k      * w * h;
+              const Index v3  =  i      + (j + 1) * w +  k      * w * h;
+              const Index v0p = v0 + w * h;
+              const Index v1p = v1 + w * h;
+              const Index v2p = v2 + w * h;
+              const Index v3p = v3 + w * h;
+
+              build.polytope(g, { v0, v1, v2, v3, v0p, v1p, v2p, v3p });
+            }
+          }
+        }
+
+        return build.finalize();
+      }
       default:
       {
         assert(false);

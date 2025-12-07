@@ -1635,13 +1635,10 @@ namespace Rodin::Variational
           {
             case Geometry::Polytope::Type::Point:
             case Geometry::Polytope::Type::Segment:
-            case Geometry::Polytope::Type::Tetrahedron:
-            case Geometry::Polytope::Type::Wedge:
-            {
-              assert(false);
-              break;
-            }
             case Geometry::Polytope::Type::Quadrilateral:
+            case Geometry::Polytope::Type::Tetrahedron:
+            case Geometry::Polytope::Type::Hexahedron:
+            case Geometry::Polytope::Type::Wedge:
             {
               assert(false);
               break;

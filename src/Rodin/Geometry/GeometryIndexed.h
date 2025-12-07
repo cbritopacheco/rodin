@@ -39,7 +39,8 @@ namespace Rodin::Geometry
    *   {Polytope::Type::Triangle, 3},
    *   {Polytope::Type::Quadrilateral, 4},
    *   {Polytope::Type::Tetrahedron, 5},
-   *   {Polytope::Type::Wedge, 6}
+   *   {Polytope::Type::Hexahedron, 6}
+   *   {Polytope::Type::Wedge, 7}
    * };
    * int order = quadratureOrders[Polytope::Type::Triangle]; // Returns 3
    * @endcode
