@@ -4,7 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include "Rodin/Alert.h"
+#include "Rodin/Alert/MemberFunctionException.h"
 
 #include "Mesh.h"
 #include "Rodin/Math/Vector.h"
@@ -18,11 +18,18 @@ namespace Rodin::Geometry
     m_connectivity.initialize(m_sdim);
     m_attributes.initialize(m_sdim);
     m_transformations.initialize(m_sdim);
+    m_initialized = true;
     return *this;
   }
 
   Mesh<Context::Local>::Builder& Mesh<Context::Local>::Builder::nodes(size_t n)
   {
+    assert(m_initialized);
+    if (!m_initialized)
+    {
+      Alert::MemberFunctionException(*this, __func__)
+        << "initialize(size_t) must be called before setting the number of nodes.";
+    }
     m_nodes = 0;
     m_connectivity.nodes(n);
     m_vertices.resize(m_sdim, n);
