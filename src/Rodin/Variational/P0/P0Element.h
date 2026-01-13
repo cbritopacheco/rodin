@@ -220,6 +220,8 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
+      virtual constexpr ~P0Element() override = default;
+
       /**
        * @brief Gets the number of degrees of freedom in the finite element.
        * @returns Number of degrees of freedom
@@ -237,7 +239,7 @@ namespace Rodin::Variational
         {
           case Geometry::Polytope::Type::Point:
           {
-            static thread_local const Math::SpatialVector<Real> s_node;
+            static thread_local const Math::SpatialVector<Real> s_node{};
             return s_node;
           }
           case Geometry::Polytope::Type::Segment:
