@@ -1745,31 +1745,30 @@ namespace Rodin::IO
                 
                 if (numInterior > 0)
                 {
-                  // Build MFEM element with zeros for vert/edge, interior from stream
+                  // Build MFEM element with interior from stream
+                  // Note: vertices/edges positions left as zero since we don't have them
+                  // in MFEM ordering at this point
                   for (size_t comp = 0; comp < vdim; ++comp)
                   {
                     uM_elem.setZero();
                     
-                    // Fill ONLY interior positions with MFEM values
+                    // Fill interior positions with MFEM values
                     for (int k = 0; k < numInterior; ++k)
                     {
                       assert(read_idx < mfem_values.size());
                       uM_elem(triInteriorOffset + k) = mfem_values[read_idx++];
                     }
                     
-                    // Transform to get Rodin values (in Fekete ordering)
+                    // Transform to get Rodin Fekete values
                     uR_elem[comp] = s_tri_inv_change_scalar * uM_elem;
                   }
 
-                  // Set ONLY interior DOFs from transformed values
-                  // Vertices/edges were already set in steps 1-2
+                  // Store ALL transformed values, overwriting vertices/edges
                   for (size_t k = 0; k < TriN; ++k)
                   {
                     const Index d = cdofs(k);
                     const Index sd = to_scalar_dof(d);
-                    
-                    // Skip if already written (vertex or edge DOF)
-                    if (static_cast<size_t>(sd) >= scalarSize || written[sd])
+                    if (static_cast<size_t>(sd) >= scalarSize)
                       continue;
 
                     for (size_t comp = 0; comp < vdim; ++comp)
