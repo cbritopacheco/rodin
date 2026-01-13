@@ -273,6 +273,9 @@ namespace Rodin::Variational
             return s_node;
           }
         }
+        assert(false); // Unsupported geometry
+        static thread_local const Math::SpatialVector<Real> s_null{};
+        return s_null;
       }
 
       constexpr
