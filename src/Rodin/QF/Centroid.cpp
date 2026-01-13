@@ -21,7 +21,7 @@ namespace Rodin::QF
     {
       case Geometry::Polytope::Type::Point:
       {
-        static thread_local const Math::SpatialPoint s_point;
+        static thread_local const Math::SpatialPoint s_point{};
         return s_point;
       }
       case Geometry::Polytope::Type::Segment:
@@ -80,5 +80,7 @@ namespace Rodin::QF
       case Geometry::Polytope::Type::Hexahedron:
         return 1;
     }
+    assert(false);
+    return std::numeric_limits<Real>::quiet_NaN();
   }
 }
