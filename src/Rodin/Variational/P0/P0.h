@@ -205,6 +205,8 @@ namespace Rodin::Variational
           m_mesh(other.m_mesh)
       {}
 
+      virtual ~P0() override = default;
+
       /**
        * @brief Move assignment operator.
        * @param[in] other P0 space to move from
