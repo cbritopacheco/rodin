@@ -1739,49 +1739,65 @@ namespace Rodin::IO
               {
                 assert(static_cast<size_t>(cdofs.size()) == TriN);
 
-                // Build MFEM element with vertices, edges (same as Rodin), and interior from stream
-                for (size_t comp = 0; comp < vdim; ++comp)
+                // For P2 and higher with interior nodes, apply transformation
+                // For P1 (no interior), just set DOFs directly (already read)
+                const int numInterior = static_cast<int>(TriN) - triInteriorOffset;
+                
+                if (numInterior > 0)
                 {
-                  uM_elem.setZero();
-                  
-                  // Copy vertices and edges directly (they're at the same physical points)
-                  for (size_t k = 0; k < static_cast<size_t>(triInteriorOffset); ++k)
+                  // Read interior MFEM values
+                  Math::Vector<ScalarType> mfem_interior(numInterior);
+                  for (int idx = 0; idx < numInterior; ++idx)
                   {
-                    const Index d = cdofs(static_cast<Index>(k));
-                    const Index sd = to_scalar_dof(d);
-                    if (static_cast<size_t>(sd) < scalarSize && written[sd])
-                    {
-                      uM_elem(static_cast<Index>(k)) = data.coeffRef(sd + comp * scalarSize);
-                    }
+                    assert(read_idx < mfem_values.size());
+                    mfem_interior(idx) = mfem_values[read_idx++];
                   }
                   
-                  // Read interior values from stream into MFEM positions
-                  int loc = 0;
-                  for (int j = 1; j < p; ++j)
-                  {
-                    for (int i = 1; i + j < p; ++i)
-                    {
-                      const int idx = triInteriorOffset + loc++;
-                      assert(read_idx < mfem_values.size());
-                      uM_elem(static_cast<Index>(idx)) = mfem_values[read_idx++];
-                    }
-                  }
-                  
-                  // Apply inverse transformation to get complete Rodin values
-                  uR_elem[comp] = s_tri_inv_change_scalar * uM_elem;
-                }
-
-                // Set all Rodin DOFs from the transformed values
-                for (size_t k = 0; k < TriN; ++k)
-                {
-                  const Index d = cdofs(static_cast<Index>(k));
-                  const Index sd = to_scalar_dof(d);
-                  if (static_cast<size_t>(sd) >= scalarSize)
-                    continue;
-
+                  // Build complete MFEM element with vertices/edges from data, interior from stream
                   for (size_t comp = 0; comp < vdim; ++comp)
-                    data.coeffRef(sd + comp * scalarSize) = uR_elem[comp](static_cast<Index>(k));
-                  written[sd] = true;
+                  {
+                    uM_elem.setZero();
+                    
+                    // Fill vertices and edges from already-read Rodin values
+                    for (int k = 0; k < triInteriorOffset; ++k)
+                    {
+                      const Index d = cdofs(k);
+                      const Index sd = to_scalar_dof(d);
+                      if (static_cast<size_t>(sd) < scalarSize)
+                        uM_elem(k) = data.coeffRef(sd + comp * scalarSize);
+                    }
+                    
+                    // Fill interior with MFEM values
+                    for (int k = 0; k < numInterior; ++k)
+                      uM_elem(triInteriorOffset + k) = mfem_interior(k);
+                    
+                    // Transform to get Rodin values
+                    uR_elem[comp] = s_tri_inv_change_scalar * uM_elem;
+                  }
+
+                  // Set all Rodin DOFs
+                  for (size_t k = 0; k < TriN; ++k)
+                  {
+                    const Index d = cdofs(k);
+                    const Index sd = to_scalar_dof(d);
+                    if (static_cast<size_t>(sd) >= scalarSize)
+                      continue;
+
+                    for (size_t comp = 0; comp < vdim; ++comp)
+                      data.coeffRef(sd + comp * scalarSize) = uR_elem[comp](k);
+                    written[sd] = true;
+                  }
+                }
+                else
+                {
+                  // P1: no interior, DOFs already set from vertices/edges
+                  for (size_t k = 0; k < TriN; ++k)
+                  {
+                    const Index d = cdofs(k);
+                    const Index sd = to_scalar_dof(d);
+                    if (static_cast<size_t>(sd) < scalarSize)
+                      written[sd] = true;
+                  }
                 }
                 break;
               }
