@@ -1311,753 +1311,7 @@ namespace Rodin::IO
 
       void load(std::istream& is) override
       {
-        using boost::spirit::x3::space;
-        using boost::spirit::x3::uint_;
-        using boost::spirit::x3::_attr;
-        using boost::spirit::x3::char_;
-
-        // -------------------------------------------------------------
-        // 1. Parse MFEM GridFunction header
-        // -------------------------------------------------------------
-        MFEM::GridFunctionHeader header;
-
-        const auto get_fec      = [&](auto& ctx) { header.fec      = _attr(ctx); };
-        const auto get_vdim     = [&](auto& ctx) { header.vdim     = _attr(ctx); };
-        const auto get_ordering = [&](auto& ctx)
-        {
-          header.ordering = static_cast<MFEM::Ordering>(_attr(ctx));
-        };
-
-        std::string line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-
-        auto it = line.begin();
-        const auto pfes  = boost::spirit::x3::string("FiniteElementSpace");
-        const bool rfes  = boost::spirit::x3::phrase_parse(it, line.end(), pfes, space);
-        assert(rfes && it == line.end());
-
-        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        it   = line.begin();
-        const auto pfec  =
-          boost::spirit::x3::string("FiniteElementCollection: ") >> (+char_)[get_fec];
-        const bool rfec  = boost::spirit::x3::phrase_parse(it, line.end(), pfec, space);
-        assert(rfec && it == line.end());
-
-        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        it   = line.begin();
-        const auto pvdim = boost::spirit::x3::string("VDim:") >> uint_[get_vdim];
-        const bool rvdim = boost::spirit::x3::phrase_parse(it, line.end(), pvdim, space);
-        assert(rvdim && it == line.end());
-
-        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        it   = line.begin();
-        const auto pord =
-          boost::spirit::x3::string("Ordering:") >> uint_[get_ordering];
-        const bool rord = boost::spirit::x3::phrase_parse(it, line.end(), pord, space);
-        assert(rord && it == line.end());
-
-        // -------------------------------------------------------------
-        // 2. Basic objects and sizes
-        // -------------------------------------------------------------
-        auto& gf        = this->getObject();
-        auto& data      = gf.getData();
-        const auto& fes = gf.getFiniteElementSpace();
-        const auto& mesh = fes.getMesh();
-
-        const size_t vdim       = fes.getVectorDimension();
-        const size_t D          = mesh.getDimension();
-        const size_t scalarSize = fes.getSize() / vdim;
-
-        assert(header.vdim == vdim);
-        if (data.size() == 0)
-          return;
-
-        assert(static_cast<size_t>(data.size()) == vdim * scalarSize);
-
-        // -------------------------------------------------------------
-        // 3. Precompute triangle / tetra change-of-nodes blocks
-        // -------------------------------------------------------------
-        constexpr size_t TriN = MFEM::TriangleNodes<K>::Count;
-        constexpr size_t TetN = MFEM::TetrahedronNodes<K>::Count;
-
-        struct TriChangeBlocks
-        {
-          Math::Matrix<ScalarType> C_ii_inv; // (nTriInt x nTriInt)
-          Math::Matrix<ScalarType> C_ib;     // (nTriInt x nBnd)
-          std::vector<size_t>      col_bnd;  // Fekete boundary columns
-          std::vector<size_t>      col_int;  // Fekete interior columns
-          std::vector<size_t>      row_int;  // MFEM interior rows
-          size_t nInt() const { return col_int.size(); }
-        };
-
-        struct TetChangeBlocks
-        {
-          Math::Matrix<ScalarType> C_ii_inv; // (nTetInt x nTetInt)
-          Math::Matrix<ScalarType> C_ib;     // (nTetInt x nBnd)
-          std::vector<size_t>      col_bnd;  // Fekete boundary columns
-          std::vector<size_t>      col_int;  // Fekete interior columns
-          std::vector<size_t>      row_int;  // MFEM interior rows
-          size_t nInt() const { return col_int.size(); }
-        };
-
-        static thread_local TriChangeBlocks triBlocks;
-        static thread_local TetChangeBlocks tetBlocks;
-
-        const int p_int   = static_cast<int>(K);
-        const int nTriInt = (p_int > 1) ? (p_int - 1) * (p_int - 2) / 2 : 0;
-        const int nTetInt = (p_int > 2) ? (p_int - 1) * (p_int - 2) * (p_int - 3) / 6 : 0;
-
-        if (nTriInt > 0 && triBlocks.C_ii_inv.size() == 0)
-        {
-          const auto& V_mfem   = MFEM::VandermondeTriangle<K>::getMatrix();   // TriN x TriN
-          const auto& V_rodInv = Variational::VandermondeTriangle<K>::getInverse(); // TriN x TriN
-          const Math::Matrix<Real> C_real = V_mfem * V_rodInv;
-          Math::Matrix<ScalarType> C = C_real.template cast<ScalarType>();
-
-          const int nV = 3;
-          const int nE = 3 * (p_int - 1);
-          const int triInteriorOffset = nV + nE; // 3 + 3(p-1) = 3p
-
-          // MFEM interior rows: those corresponding to MFEM interior triangle nodes
-          triBlocks.row_int.clear();
-          for (int r = triInteriorOffset; r < static_cast<int>(TriN); ++r)
-            triBlocks.row_int.push_back(static_cast<size_t>(r));
-
-          // Fekete interior vs boundary columns (based on barycentric coords)
-          triBlocks.col_bnd.clear();
-          triBlocks.col_int.clear();
-
-          const auto& fk = Variational::FeketeTriangle<K>::getNodes();
-          const Real tol = 1e-12;
-
-          for (size_t j = 0; j < TriN; ++j)
-          {
-            assert(j < fk.size());
-            const auto& pt = fk[j];
-            const Real x = pt.x();
-            const Real y = pt.y();
-            const Real l0 = Real(1) - x - y;
-            const Real l1 = x;
-            const Real l2 = y;
-            if (l0 > tol && l1 > tol && l2 > tol)
-              triBlocks.col_int.push_back(j);
-            else
-              triBlocks.col_bnd.push_back(j);
-          }
-
-          assert(static_cast<int>(triBlocks.col_int.size()) == nTriInt);
-
-          const int nInt = nTriInt;
-          const int nBnd = static_cast<int>(triBlocks.col_bnd.size());
-
-          triBlocks.C_ii_inv.resize(nInt, nInt);
-          triBlocks.C_ib.resize(nInt, nBnd);
-
-          for (int i = 0; i < nInt; ++i)
-          {
-            assert(i < static_cast<int>(triBlocks.row_int.size()));
-            const size_t ri = triBlocks.row_int[static_cast<size_t>(i)];
-            for (int k = 0; k < nInt; ++k)
-            {
-              assert(k < static_cast<int>(triBlocks.col_int.size()));
-              const size_t cj = triBlocks.col_int[static_cast<size_t>(k)];
-              triBlocks.C_ii_inv(i, k) = C(static_cast<Eigen::Index>(ri),
-                                           static_cast<Eigen::Index>(cj));
-            }
-            for (int k = 0; k < nBnd; ++k)
-            {
-              assert(k < static_cast<int>(triBlocks.col_bnd.size()));
-              const size_t cj = triBlocks.col_bnd[static_cast<size_t>(k)];
-              triBlocks.C_ib(i, k) = C(static_cast<Eigen::Index>(ri),
-                                       static_cast<Eigen::Index>(cj));
-            }
-          }
-
-          Eigen::BDCSVD<Math::Matrix<ScalarType>> svd(
-            triBlocks.C_ii_inv, Eigen::ComputeThinU | Eigen::ComputeThinV);
-          Math::Matrix<ScalarType> I =
-            Math::Matrix<ScalarType>::Identity(nInt, nInt);
-          triBlocks.C_ii_inv = svd.solve(I);
-        }
-
-        if (nTetInt > 0 && tetBlocks.C_ii_inv.size() == 0)
-        {
-          const auto& V_mfem   = MFEM::VandermondeTetrahedron<K>::getMatrix();   // TetN x TetN
-          const auto& V_rodInv = Variational::VandermondeTetrahedron<K>::getInverse(); // TetN x TetN
-          const Math::Matrix<Real> C_real = V_mfem * V_rodInv;
-          Math::Matrix<ScalarType> C = C_real.template cast<ScalarType>();
-
-          const int nV  = 4;
-          const int nE  = 6 * (p_int - 1);
-          const int nF  = 4 * (p_int - 1) * (p_int - 2) / 2;
-          const int tetInteriorOffset = nV + nE + nF;
-
-          tetBlocks.row_int.clear();
-          for (int r = tetInteriorOffset; r < static_cast<int>(TetN); ++r)
-            tetBlocks.row_int.push_back(static_cast<size_t>(r));
-
-          tetBlocks.col_bnd.clear();
-          tetBlocks.col_int.clear();
-
-          const auto& fk = Variational::FeketeTetrahedron<K>::getNodes();
-          const Real tol = 1e-12;
-          for (size_t j = 0; j < TetN; ++j)
-          {
-            const auto& pt = fk[j];
-            const Real x = pt.x();
-            const Real y = pt.y();
-            const Real z = pt.z();
-            const Real l0 = Real(1) - x - y - z;
-            const Real l1 = x;
-            const Real l2 = y;
-            const Real l3 = z;
-            if (l0 > tol && l1 > tol && l2 > tol && l3 > tol)
-              tetBlocks.col_int.push_back(j);
-            else
-              tetBlocks.col_bnd.push_back(j);
-          }
-
-          assert(static_cast<int>(tetBlocks.col_int.size()) == nTetInt);
-
-          const int nInt = nTetInt;
-          const int nBnd = static_cast<int>(tetBlocks.col_bnd.size());
-
-          tetBlocks.C_ii_inv.resize(nInt, nInt);
-          tetBlocks.C_ib.resize(nInt, nBnd);
-
-          for (int i = 0; i < nInt; ++i)
-          {
-            assert(i < static_cast<int>(tetBlocks.row_int.size()));
-            const size_t ri = tetBlocks.row_int[static_cast<size_t>(i)];
-            for (int k = 0; k < nInt; ++k)
-            {
-              assert(k < static_cast<int>(tetBlocks.col_int.size()));
-              const size_t cj = tetBlocks.col_int[static_cast<size_t>(k)];
-              tetBlocks.C_ii_inv(i, k) = C(static_cast<Eigen::Index>(ri),
-                                           static_cast<Eigen::Index>(cj));
-            }
-            for (int k = 0; k < nBnd; ++k)
-            {
-              assert(k < static_cast<int>(tetBlocks.col_bnd.size()));
-              const size_t cj = tetBlocks.col_bnd[static_cast<size_t>(k)];
-              tetBlocks.C_ib(i, k) = C(static_cast<Eigen::Index>(ri),
-                                       static_cast<Eigen::Index>(cj));
-            }
-          }
-
-          Eigen::BDCSVD<Math::Matrix<ScalarType>> svd(
-            tetBlocks.C_ii_inv, Eigen::ComputeThinU | Eigen::ComputeThinV);
-          Math::Matrix<ScalarType> I =
-            Math::Matrix<ScalarType>::Identity(nInt, nInt);
-          tetBlocks.C_ii_inv = svd.solve(I);
-        }
-
-        // -------------------------------------------------------------
-        // 4. Build global MFEM scalar index → Rodin scalar DOF map.
-        //    We mirror *exactly* the traversal in the printer:
-        //
-        //      1. vertices
-        //      2. edges (interior, oriented)
-        //      3. faces:
-        //         - D==3: triangle faces → change-of-nodes (interior only)
-        //                 quads → DOF-based
-        //         - D==2: faces (edges) → DOF-based
-        //      4. cell interiors:
-        //         - D==2: triangles → change-of-nodes (interior only)
-        //                 quads → DOF-based
-        //         - D==3: tets → change-of-nodes (interior only)
-        //                 wedges → change-of-nodes (triangle slices)
-        //                 others → DOF-based
-        // -------------------------------------------------------------
-        const size_t nVertices = mesh.getConnectivity().getCount(0);
-        const size_t nEdges    = mesh.getConnectivity().getCount(1);
-        const size_t nFaces    = (D >= 2) ? mesh.getConnectivity().getCount(2) : 0;
-        const size_t nCells    = mesh.getConnectivity().getCount(D);
-
-        std::vector<std::optional<size_t>> dof2pos(scalarSize, std::nullopt);
-        std::vector<uint8_t> seen(scalarSize, uint8_t(0));
-
-        // Interior blocks for change-of-nodes entities
-        std::vector<std::optional<size_t>> triFaceStart;
-        std::vector<std::optional<size_t>> triCellStart;
-        std::vector<std::optional<size_t>> tetCellStart;
-        std::vector<std::optional<size_t>> wedgeCellStart;
-
-        if (D == 3 && nFaces > 0)
-          triFaceStart.assign(nFaces, std::nullopt);
-        if (D == 2 && nCells > 0)
-          triCellStart.assign(nCells, std::nullopt);
-        if (D == 3 && nCells > 0)
-        {
-          tetCellStart.assign(nCells, std::nullopt);
-          wedgeCellStart.assign(nCells, std::nullopt);
-        }
-
-        // Helper to convert potentially global DOF index to scalar DOF index
-        // For vector-valued spaces, getDOFs() may return indices in [0, vdim*scalarSize)
-        // We need to extract the scalar DOF in [0, scalarSize)
-        auto toScalarDOF = [&](Index dof) -> Index
-        {
-          // If vdim > 1 and DOF seems to be global, extract scalar part
-          if (vdim > 1 && dof >= scalarSize)
-          {
-            // Assuming interleaved or block ordering, try modulo
-            return dof % scalarSize;
-          }
-          return dof;
-        };
-
-        // v → scalar DOF
-        std::vector<Index> vertexScalarDof(nVertices);
-        for (size_t v = 0; v < nVertices; ++v)
-        {
-          const auto& vdofs = fes.getDOFs(0, static_cast<Index>(v));
-          assert(vdofs.size() >= 1);
-          vertexScalarDof[v] = toScalarDOF(vdofs(0));
-        }
-
-        size_t pos = 0; // MFEM scalar index (0..scalarSize-1)
-
-        auto visit_dof = [&](Index d)
-        {
-          const Index scalar_dof = toScalarDOF(d);
-          const size_t s = static_cast<size_t>(scalar_dof);
-          if (s >= scalarSize)
-          {
-            // Skip invalid DOF indices that are out of range
-            return;
-          }
-          if (!seen[s])
-          {
-            seen[s]   = uint8_t(1);
-            assert(s < dof2pos.size());
-            dof2pos[s] = pos++;
-          }
-          // if already seen, printer's emit_scalar_dof would skip -> no new MFEM value
-        };
-
-        const int nWedgeInt = (p_int > 1 && nTriInt > 0) ? (p_int - 1) * nTriInt : 0;
-
-        // 4.1 Vertices
-        for (size_t v = 0; v < nVertices; ++v)
-        {
-          assert(v < vertexScalarDof.size());
-          visit_dof(vertexScalarDof[v]);
-        }
-
-        // 4.2 Edges (interior DOFs, oriented)
-        if (D >= 1)
-        {
-          const auto& conn10 = mesh.getConnectivity().getIncidence(1, 0);
-
-          for (size_t e = 0; e < nEdges; ++e)
-          {
-            const auto& edgeVerts = conn10[static_cast<Index>(e)];
-            assert(edgeVerts.size() == 2);
-
-            Index v0 = edgeVerts[0];
-            Index v1 = edgeVerts[1];
-
-            const Index vmin    = std::min(v0, v1);
-            const Index vmax    = std::max(v0, v1);
-            assert(static_cast<size_t>(vmin) < vertexScalarDof.size());
-            const Index vminDof = vertexScalarDof[static_cast<size_t>(vmin)];
-            assert(static_cast<size_t>(vmax) < vertexScalarDof.size());
-            const Index vmaxDof = vertexScalarDof[static_cast<size_t>(vmax)];
-
-            const auto& edofs = fes.getDOFs(1, static_cast<Index>(e));
-
-            std::vector<Index> interior;
-            interior.reserve(edofs.size());
-
-            for (size_t k = 0; k < edofs.size(); ++k)
-            {
-              const Index d = edofs(static_cast<Index>(k));
-              if (d != vminDof && d != vmaxDof)
-                interior.push_back(d);
-            }
-
-            if (v0 > v1)
-              std::reverse(interior.begin(), interior.end());
-
-            for (Index d : interior)
-              visit_dof(d);
-          }
-        }
-
-        // 4.3 Faces
-        if (D >= 2)
-        {
-          const size_t faceDim = (D == 3) ? 2 : (D - 1);
-
-          if (D == 3)
-          {
-            for (size_t f = 0; f < nFaces; ++f)
-            {
-              const auto faceGeom = mesh.getGeometry(2, static_cast<Index>(f));
-              const auto& fdofs   = fes.getDOFs(faceDim, static_cast<Index>(f));
-
-              if (faceGeom == Geometry::Polytope::Type::Triangle && nTriInt > 0)
-              {
-                assert(f < triFaceStart.size());
-                triFaceStart[f] = pos;
-                pos += static_cast<size_t>(nTriInt);
-              }
-              else
-              {
-                // Quads / others: DOF-based
-                for (size_t k = 0; k < fdofs.size(); ++k)
-                  visit_dof(fdofs(static_cast<Index>(k)));
-              }
-            }
-          }
-          else // D == 2
-          {
-            // Faces are edges; printer re-emits them, but emit_scalar_dof suppresses duplicates.
-            for (size_t f = 0; f < nFaces; ++f)
-            {
-              const auto& fdofs = fes.getDOFs(faceDim, static_cast<Index>(f));
-              for (size_t k = 0; k < fdofs.size(); ++k)
-                visit_dof(fdofs(static_cast<Index>(k)));
-            }
-          }
-        }
-
-        // 4.4 Cells
-        if (D == 2)
-        {
-          for (size_t c = 0; c < nCells; ++c)
-          {
-            const auto geom   = mesh.getGeometry(2, static_cast<Index>(c));
-            const auto& cdofs = fes.getDOFs(2, static_cast<Index>(c));
-
-            if (geom == Geometry::Polytope::Type::Triangle && nTriInt > 0)
-            {
-              assert(c < triCellStart.size());
-              triCellStart[c] = pos;
-              pos += static_cast<size_t>(nTriInt);
-            }
-            else
-            {
-              for (size_t k = 0; k < cdofs.size(); ++k)
-                visit_dof(cdofs(static_cast<Index>(k)));
-            }
-          }
-        }
-        else if (D == 3)
-        {
-          for (size_t c = 0; c < nCells; ++c)
-          {
-            const auto geom   = mesh.getGeometry(3, static_cast<Index>(c));
-            const auto& cdofs = fes.getDOFs(3, static_cast<Index>(c));
-
-            if (geom == Geometry::Polytope::Type::Tetrahedron && nTetInt > 0)
-            {
-              assert(c < tetCellStart.size());
-              tetCellStart[c] = pos;
-              pos += static_cast<size_t>(nTetInt);
-            }
-            else if (geom == Geometry::Polytope::Type::Wedge && nWedgeInt > 0)
-            {
-              assert(c < wedgeCellStart.size());
-              wedgeCellStart[c] = pos;
-              pos += static_cast<size_t>(nWedgeInt);
-            }
-            else
-            {
-              // Hexahedra / others: DOF-based
-              for (size_t k = 0; k < cdofs.size(); ++k)
-                visit_dof(cdofs(static_cast<Index>(k)));
-            }
-          }
-        }
-        else
-        {
-          // D == 1: cells are segments / points → DOF-based
-          for (size_t c = 0; c < nCells; ++c)
-          {
-            const auto& cdofs = fes.getDOFs(D, static_cast<Index>(c));
-            for (size_t k = 0; k < cdofs.size(); ++k)
-              visit_dof(cdofs(static_cast<Index>(k)));
-          }
-        }
-
-        assert(pos == scalarSize);
-
-        // -------------------------------------------------------------
-        // 5. Read MFEM data (all components, all scalar positions)
-        // -------------------------------------------------------------
-        std::vector<ScalarType> mfem_data(static_cast<size_t>(data.size()));
-
-        line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        assert(mfem_data.size() >= 1);
-        mfem_data[0] = static_cast<ScalarType>(std::stod(line));
-
-        for (size_t i = 1; i < mfem_data.size(); ++i)
-        {
-          ScalarType val;
-          is >> val;
-          mfem_data[i] = val;
-        }
-
-        auto mfem_value = [&](size_t p_s, size_t c) -> ScalarType
-        {
-          size_t idx = 0;
-          if (header.ordering == MFEM::Ordering::Nodes)
-            idx = p_s * vdim + c;
-          else
-            idx = c * scalarSize + p_s;
-          assert(idx < mfem_data.size());
-          return mfem_data[idx];
-        };
-
-        // -------------------------------------------------------------
-        // 6. Fill DOFs written directly (no change-of-nodes)
-        // -------------------------------------------------------------
-        // DOFs with dof2pos[d].has_value() were printed via emit_scalar_dof.
-        for (size_t s = 0; s < scalarSize; ++s)
-        {
-          assert(s < dof2pos.size());
-          const auto& p_s_opt = dof2pos[s];
-          if (!p_s_opt.has_value())
-            continue; // will be handled via change-of-nodes
-          const size_t p_s = p_s_opt.value();
-          for (size_t c = 0; c < vdim; ++c)
-          {
-            assert(static_cast<Index>(s + c * scalarSize) < data.size());
-            data.coeffRef(static_cast<Index>(s + c * scalarSize)) = mfem_value(p_s, c);
-          }
-        }
-
-        // -------------------------------------------------------------
-        // 7. Undo change-of-nodes for interiors
-        // -------------------------------------------------------------
-
-        // Helper for triangle patches (faces or cells)
-        auto invert_triangle_patch = [&](const std::vector<Index>& local_dofs,
-                                         size_t mfem_start, size_t comp)
-        {
-          const auto& blk = triBlocks;
-          const size_t nIntLoc = blk.col_int.size();
-          if (nIntLoc == 0)
-            return;
-
-          // Boundary Fekete DOFs
-          Math::Vector<ScalarType> u_bnd(blk.col_bnd.size());
-          for (size_t k = 0; k < blk.col_bnd.size(); ++k)
-          {
-            const size_t loc = blk.col_bnd[k];
-            assert(loc < local_dofs.size());
-            const Index d = local_dofs[loc];
-            assert(static_cast<Index>(k) < u_bnd.size());
-            assert(static_cast<Index>(d + comp * scalarSize) < data.size());
-            u_bnd(static_cast<Index>(k)) =
-              data.coeffRef(d + static_cast<Index>(comp * scalarSize));
-          }
-
-          // Interior MFEM values
-          Math::Vector<ScalarType> y_int(blk.row_int.size());
-          for (size_t i = 0; i < blk.row_int.size(); ++i)
-          {
-            const size_t p_s = mfem_start + i;
-            assert(static_cast<Index>(i) < y_int.size());
-            y_int(static_cast<Index>(i)) = mfem_value(p_s, comp);
-          }
-
-          Math::Vector<ScalarType> rhs = y_int - blk.C_ib * u_bnd;
-          Math::Vector<ScalarType> u_int = blk.C_ii_inv * rhs;
-
-          for (size_t k = 0; k < blk.col_int.size(); ++k)
-          {
-            const size_t loc = blk.col_int[k];
-            assert(loc < local_dofs.size());
-            const Index d = local_dofs[loc];
-            assert(static_cast<Index>(k) < u_int.size());
-            assert(static_cast<Index>(d + comp * scalarSize) < data.size());
-            data.coeffRef(d + static_cast<Index>(comp * scalarSize)) =
-              u_int(static_cast<Index>(k));
-          }
-        };
-
-        // 7.1 2D triangles (cell interiors)
-        if (D == 2 && nTriInt > 0)
-        {
-          for (size_t c = 0; c < nCells; ++c)
-          {
-            if (mesh.getGeometry(2, static_cast<Index>(c))
-                != Geometry::Polytope::Type::Triangle)
-              continue;
-
-            assert(c < triCellStart.size());
-            const auto& start_opt = triCellStart[c];
-            if (!start_opt.has_value())
-              continue;
-
-            const size_t start = start_opt.value();
-            const auto& cdofs = fes.getDOFs(2, static_cast<Index>(c));
-            assert(cdofs.size() == TriN);
-
-            std::vector<Index> local(TriN);
-            for (size_t i = 0; i < TriN; ++i)
-            {
-              assert(i < local.size());
-              assert(static_cast<Index>(i) < cdofs.size());
-              local[i] = cdofs(static_cast<Index>(i));
-            }
-
-            for (size_t comp = 0; comp < vdim; ++comp)
-              invert_triangle_patch(local, start, comp);
-          }
-        }
-
-        // 7.2 3D triangle faces (face interiors)
-        if (D == 3 && nTriInt > 0 && !triFaceStart.empty())
-        {
-          for (size_t f = 0; f < nFaces; ++f)
-          {
-            if (mesh.getGeometry(2, static_cast<Index>(f))
-                != Geometry::Polytope::Type::Triangle)
-              continue;
-
-            assert(f < triFaceStart.size());
-            const auto& start_opt = triFaceStart[f];
-            if (!start_opt.has_value())
-              continue;
-
-            const size_t start = start_opt.value();
-            const auto& fdofs = fes.getDOFs(2, static_cast<Index>(f));
-            assert(fdofs.size() == TriN);
-
-            std::vector<Index> local(TriN);
-            for (size_t i = 0; i < TriN; ++i)
-            {
-              assert(i < local.size());
-              assert(static_cast<Index>(i) < fdofs.size());
-              local[i] = fdofs(static_cast<Index>(i));
-            }
-
-            for (size_t comp = 0; comp < vdim; ++comp)
-              invert_triangle_patch(local, start, comp);
-          }
-        }
-
-        // 7.3 3D tetrahedra (cell interiors)
-        if (D == 3 && nTetInt > 0)
-        {
-          const auto& blk = tetBlocks;
-
-          for (size_t c = 0; c < nCells; ++c)
-          {
-            if (mesh.getGeometry(3, static_cast<Index>(c))
-                != Geometry::Polytope::Type::Tetrahedron)
-              continue;
-
-            assert(c < tetCellStart.size());
-            const auto& start_opt = tetCellStart[c];
-            if (!start_opt.has_value())
-              continue;
-
-            const size_t start = start_opt.value();
-            const auto& cdofs = fes.getDOFs(3, static_cast<Index>(c));
-            assert(cdofs.size() == TetN);
-
-            std::vector<Index> local(TetN);
-            for (size_t i = 0; i < TetN; ++i)
-            {
-              assert(i < local.size());
-              assert(static_cast<Index>(i) < cdofs.size());
-              local[i] = cdofs(static_cast<Index>(i));
-            }
-
-            for (size_t comp = 0; comp < vdim; ++comp)
-            {
-              // Fekete boundary DOFs
-              Math::Vector<ScalarType> u_bnd(blk.col_bnd.size());
-              for (size_t k = 0; k < blk.col_bnd.size(); ++k)
-              {
-                const size_t loc = blk.col_bnd[k];
-                const Index d = local[loc];
-                assert(static_cast<Index>(k) < u_bnd.size());
-                assert(static_cast<Index>(d + comp * scalarSize) < data.size());
-                u_bnd(static_cast<Index>(k)) =
-                  data.coeffRef(d + static_cast<Index>(comp * scalarSize));
-              }
-
-              // MFEM interior values
-              Math::Vector<ScalarType> y_int(blk.row_int.size());
-              for (size_t i = 0; i < blk.row_int.size(); ++i)
-              {
-                const size_t p_s = start + i;
-                assert(static_cast<Index>(i) < y_int.size());
-                y_int(static_cast<Index>(i)) = mfem_value(p_s, comp);
-              }
-
-              Math::Vector<ScalarType> rhs = y_int - blk.C_ib * u_bnd;
-              Math::Vector<ScalarType> u_int = blk.C_ii_inv * rhs;
-
-              for (size_t k = 0; k < blk.col_int.size(); ++k)
-              {
-                assert(k < blk.col_int.size());
-                const size_t loc = blk.col_int[k];
-                assert(loc < local.size());
-                const Index d = local[loc];
-                assert(static_cast<Index>(k) < u_int.size());
-                assert(static_cast<Index>(d + comp * scalarSize) < data.size());
-                data.coeffRef(d + static_cast<Index>(comp * scalarSize)) =
-                  u_int(static_cast<Index>(k));
-              }
-            }
-          }
-        }
-
-        // 7.4 3D wedges (cell interiors: tri-interior × segment-interior)
-        if (D == 3 && nWedgeInt > 0 && nTriInt > 0)
-        {
-          for (size_t c = 0; c < nCells; ++c)
-          {
-            if (mesh.getGeometry(3, static_cast<Index>(c))
-                != Geometry::Polytope::Type::Wedge)
-              continue;
-
-            assert(c < wedgeCellStart.size());
-            const auto& start_opt = wedgeCellStart[c];
-            if (!start_opt.has_value())
-              continue;
-
-            const size_t start = start_opt.value();
-            const auto& cdofs = fes.getDOFs(3, static_cast<Index>(c));
-            const size_t wedgeDofs = static_cast<size_t>((p_int + 1) * TriN);
-            assert(cdofs.size() == wedgeDofs);
-
-            // Local wedge DOFs: index = kseg * TriN + tri_idx, kseg = 0..p_int
-            std::vector<Index> local(wedgeDofs);
-            for (size_t i = 0; i < wedgeDofs; ++i)
-            {
-              assert(i < local.size());
-              assert(static_cast<Index>(i) < cdofs.size());
-              local[i] = cdofs(static_cast<Index>(i));
-            }
-
-            for (size_t comp = 0; comp < vdim; ++comp)
-            {
-              for (int kseg = 1; kseg < p_int; ++kseg) // segment interior: 1..p-1
-              {
-                // Triangle slice at fixed kseg
-                std::vector<Index> local_tri(TriN);
-                for (size_t it = 0; it < TriN; ++it)
-                {
-                  const size_t loc = static_cast<size_t>(kseg) * TriN + it;
-                  assert(loc < local.size());
-                  local_tri[it] = local[loc];
-                }
-
-                const size_t slice_start =
-                  start + static_cast<size_t>(kseg - 1) * static_cast<size_t>(nTriInt);
-
-                invert_triangle_patch(local_tri, slice_start, comp);
-              }
-            }
-          }
-        }
+        // TODO
       }
 
     private:
@@ -2498,232 +1752,350 @@ namespace Rodin::IO
    * @tparam Range Range type for the finite element space
    * @tparam Scalar Scalar type for the vector data
    */
-template <size_t K, class Range, class Scalar>
-class GridFunctionPrinter<
-    FileFormat::MFEM,
-    Variational::H1<K, Range, Geometry::Mesh<Context::Local>>,
-    Math::Vector<Scalar>> final
-  : public GridFunctionPrinterBase<
-        FileFormat::MFEM,
-        Variational::H1<K, Range, Geometry::Mesh<Context::Local>>,
-        Math::Vector<Scalar>>
-{
-  public:
-    using FESType    = Variational::H1<K, Range, Geometry::Mesh<Context::Local>>;
-    using DataType   = Math::Vector<Scalar>;
-    using ObjectType = Variational::GridFunction<FESType, DataType>;
-    using Parent     = GridFunctionPrinterBase<FileFormat::MFEM, FESType, DataType>;
+  template <size_t K, class Range, class Scalar>
+  class GridFunctionPrinter<
+      FileFormat::MFEM,
+      Variational::H1<K, Range, Geometry::Mesh<Context::Local>>,
+      Math::Vector<Scalar>> final
+    : public GridFunctionPrinterBase<
+          FileFormat::MFEM,
+          Variational::H1<K, Range, Geometry::Mesh<Context::Local>>,
+          Math::Vector<Scalar>>
+  {
+    public:
+      using FESType    = Variational::H1<K, Range, Geometry::Mesh<Context::Local>>;
+      using DataType   = Math::Vector<Scalar>;
+      using ObjectType = Variational::GridFunction<FESType, DataType>;
+      using Parent     = GridFunctionPrinterBase<FileFormat::MFEM, FESType, DataType>;
 
-    GridFunctionPrinter(const ObjectType& gf)
-      : Parent(gf)
-    {}
+      GridFunctionPrinter(const ObjectType& gf)
+        : Parent(gf)
+      {}
 
-    void printData(std::ostream& os) override
-    {
-      const auto& gf   = this->getObject();
-      const auto& fes  = gf.getFiniteElementSpace();
-      const auto& mesh = fes.getMesh();
-      const auto& data = gf.getData();
-
-      const size_t vdim       = fes.getVectorDimension();
-      const size_t D          = mesh.getDimension();
-      const size_t sdim       = mesh.getSpaceDimension();
-      const size_t scalarSize = fes.getSize() / vdim;
-
-      // Track which "Rodin scalar DOFs" have already been emitted.
-      std::vector<uint8_t> written(scalarSize, false);
-
-      const auto to_scalar_dof = [&](Index dof) -> Index
+      void printData(std::ostream& os) override
       {
-        if (vdim > 1 && dof >= scalarSize)
-          return dof % scalarSize;
-        return dof;
-      };
+        const auto& gf   = this->getObject();
+        const auto& fes  = gf.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+        const auto& data = gf.getData();
 
-      const auto emit_scalar_dof = [&](Index rodin_dof)
-      {
-        const Index scalar_dof = to_scalar_dof(rodin_dof);
-        const size_t s = static_cast<size_t>(scalar_dof);
-        if (s >= scalarSize)
-          return;
-        if (written[s])
-          return;
-        for (size_t c = 0; c < vdim; ++c)
-          os << data.coeffRef(scalar_dof + c * scalarSize) << '\n';
-        written[s] = true;
-      };
+        const size_t vdim       = fes.getVectorDimension();
+        const size_t D          = mesh.getDimension();
+        const size_t sdim       = mesh.getSpaceDimension();
+        const size_t scalarSize = fes.getSize() / vdim;
 
-      auto emit_value = [&](const auto& val)
-      {
-        if constexpr (std::is_same_v<Range, Scalar>)
+        // Track which "Rodin scalar DOFs" have already been emitted.
+        std::vector<uint8_t> written(scalarSize, false);
+
+        const auto to_scalar_dof = [&](Index dof) -> Index
         {
-          os << val << '\n';
-        }
-        else
+          if (vdim > 1 && dof >= scalarSize)
+            return dof % scalarSize;
+          return dof;
+        };
+
+        const auto emit_scalar_dof = [&](Index rodin_dof)
         {
-          static_assert(std::is_same_v<Range, Math::Vector<Scalar>>,
-                        "Range must be Scalar or Math::Vector<Scalar>.");
+          const Index scalar_dof = to_scalar_dof(rodin_dof);
+          const size_t s = static_cast<size_t>(scalar_dof);
+          if (s >= scalarSize)
+            return;
+          if (written[s])
+            return;
           for (size_t c = 0; c < vdim; ++c)
-            os << val[c] << '\n';
-        }
-      };
+            os << data.coeffRef(scalar_dof + c * scalarSize) << '\n';
+          written[s] = true;
+        };
 
-      //--------------------------------------------------------------------
-      // Precomputed change-of-nodes matrices (Rodin Fekete -> MFEM nodes)
-      //--------------------------------------------------------------------
-
-      auto& s_tri_change_scalar = []() -> const Math::Matrix<Scalar>&
-      {
-        static thread_local Math::Matrix<Scalar> C;
-        if (C.size() == 0)
+        auto emit_value = [&](const auto& val)
         {
-          const auto& V_mfem   = MFEM::VandermondeTriangle<K>::getMatrix();
-          const auto& V_rodInv = Variational::VandermondeTriangle<K>::getInverse();
-          const Math::Matrix<Real> C_real = V_mfem * V_rodInv;
-          C = C_real.template cast<Scalar>();
-        }
-        return C;
-      }();
-
-      auto& s_tet_change_scalar = []() -> const Math::Matrix<Scalar>&
-      {
-        static thread_local Math::Matrix<Scalar> C;
-        if (C.size() == 0)
-        {
-          const auto& V_mfem   = MFEM::VandermondeTetrahedron<K>::getMatrix();
-          const auto& V_rodInv = Variational::VandermondeTetrahedron<K>::getInverse();
-          const Math::Matrix<Real> C_real = V_mfem * V_rodInv;
-          C = C_real.template cast<Scalar>();
-        }
-        return C;
-      }();
-
-      //--------------------------------------------------------------------
-      // 1. Vertices
-      //--------------------------------------------------------------------
-
-      const size_t nVertices = mesh.getConnectivity().getCount(0);
-      std::vector<Index> vertexScalarDof(nVertices);
-      for (Index v = 0; v < static_cast<Index>(nVertices); ++v)
-      {
-        const auto& vdofs = fes.getDOFs(0, v);
-        assert(vdofs.size() >= 1 && "H1 vertex should have at least one DOF.");
-        vertexScalarDof[v] = to_scalar_dof(vdofs(0));
-      }
-
-      for (Index v = 0; v < static_cast<Index>(nVertices); ++v)
-        emit_scalar_dof(vertexScalarDof[v]);
-
-      //--------------------------------------------------------------------
-      // 2. Edges: interior DOFs, oriented vmin -> vmax
-      //--------------------------------------------------------------------
-
-      if (D >= 1)
-      {
-        const auto& conn10  = mesh.getConnectivity().getIncidence(1, 0);
-        const size_t nEdges = mesh.getConnectivity().getCount(1);
-
-        std::vector<Index> interior;
-        for (Index e = 0; e < static_cast<Index>(nEdges); ++e)
-        {
-          const auto& edgeVerts = conn10[e];
-          assert(edgeVerts.size() == 2);
-
-          const Index v0   = edgeVerts[0];
-          const Index v1   = edgeVerts[1];
-          const Index vmin = std::min(v0, v1);
-          const Index vmax = std::max(v0, v1);
-
-          const Index vminDof = vertexScalarDof[vmin];
-          const Index vmaxDof = vertexScalarDof[vmax];
-
-          const auto& edofs = fes.getDOFs(1, e);
-
-          interior.clear();
-          for (Index k = 0; k < static_cast<Index>(edofs.size()); ++k)
+          if constexpr (std::is_same_v<Range, Scalar>)
           {
-            Index d = edofs(k);
-            if (d != vminDof && d != vmaxDof)
-              interior.push_back(d);
+            os << val << '\n';
           }
-
-          if (v0 > v1)
-            std::reverse(interior.begin(), interior.end());
-
-          for (Index d : interior)
-            emit_scalar_dof(d);
-        }
-      }
-
-      //--------------------------------------------------------------------
-      // 3. Faces (D >= 2)
-      //--------------------------------------------------------------------
-
-      if (D >= 2)
-      {
-        const size_t faceDim   = (D == 3) ? 2 : (D - 1);
-        const size_t faceCount = mesh.getConnectivity().getCount(faceDim);
-
-        if (D == 3)
-        {
-          const auto& conn20 = mesh.getConnectivity().getIncidence(2, 0);
-          const auto& conn32 = mesh.getConnectivity().getIncidence(3, 2);
-          const size_t nCells3 = mesh.getConnectivity().getCount(3);
-
-          // Precompute "hex local face index" per face: -1 for non-hex or not seen.
-          std::vector<int> hexFaceLocalIndex(faceCount, -1);
-          for (Index c = 0; c < static_cast<Index>(nCells3); ++c)
+          else
           {
-            const auto cellGeom = mesh.getGeometry(3, c);
-            switch (cellGeom)
+            static_assert(std::is_same_v<Range, Math::Vector<Scalar>>,
+                          "Range must be Scalar or Math::Vector<Scalar>.");
+            for (size_t c = 0; c < vdim; ++c)
+              os << val[c] << '\n';
+          }
+        };
+
+        //--------------------------------------------------------------------
+        // Precomputed change-of-nodes matrices (Rodin Fekete -> MFEM nodes)
+        //--------------------------------------------------------------------
+
+        auto& s_tri_change_scalar = []() -> const Math::Matrix<Scalar>&
+        {
+          static thread_local Math::Matrix<Scalar> C;
+          if (C.size() == 0)
+          {
+            const auto& V_mfem   = MFEM::VandermondeTriangle<K>::getMatrix();
+            const auto& V_rodInv = Variational::VandermondeTriangle<K>::getInverse();
+            const Math::Matrix<Real> C_real = V_mfem * V_rodInv;
+            C = C_real.template cast<Scalar>();
+          }
+          return C;
+        }();
+
+        auto& s_tet_change_scalar = []() -> const Math::Matrix<Scalar>&
+        {
+          static thread_local Math::Matrix<Scalar> C;
+          if (C.size() == 0)
+          {
+            const auto& V_mfem   = MFEM::VandermondeTetrahedron<K>::getMatrix();
+            const auto& V_rodInv = Variational::VandermondeTetrahedron<K>::getInverse();
+            const Math::Matrix<Real> C_real = V_mfem * V_rodInv;
+            C = C_real.template cast<Scalar>();
+          }
+          return C;
+        }();
+
+        //--------------------------------------------------------------------
+        // 1. Vertices
+        //--------------------------------------------------------------------
+
+        const size_t nVertices = mesh.getConnectivity().getCount(0);
+        std::vector<Index> vertexScalarDof(nVertices);
+        for (Index v = 0; v < static_cast<Index>(nVertices); ++v)
+        {
+          const auto& vdofs = fes.getDOFs(0, v);
+          assert(vdofs.size() >= 1 && "H1 vertex should have at least one DOF.");
+          vertexScalarDof[v] = to_scalar_dof(vdofs(0));
+        }
+
+        for (Index v = 0; v < static_cast<Index>(nVertices); ++v)
+          emit_scalar_dof(vertexScalarDof[v]);
+
+        //--------------------------------------------------------------------
+        // 2. Edges: interior DOFs, oriented vmin -> vmax
+        //--------------------------------------------------------------------
+
+        if (D >= 1)
+        {
+          const auto& conn10  = mesh.getConnectivity().getIncidence(1, 0);
+          const size_t nEdges = mesh.getConnectivity().getCount(1);
+
+          std::vector<Index> interior;
+          for (Index e = 0; e < static_cast<Index>(nEdges); ++e)
+          {
+            const auto& edgeVerts = conn10[e];
+            assert(edgeVerts.size() == 2);
+
+            const Index v0   = edgeVerts[0];
+            const Index v1   = edgeVerts[1];
+            const Index vmin = std::min(v0, v1);
+            const Index vmax = std::max(v0, v1);
+
+            const Index vminDof = vertexScalarDof[vmin];
+            const Index vmaxDof = vertexScalarDof[vmax];
+
+            const auto& edofs = fes.getDOFs(1, e);
+
+            interior.clear();
+            for (Index k = 0; k < static_cast<Index>(edofs.size()); ++k)
             {
-              case Geometry::Polytope::Type::Hexahedron:
+              Index d = edofs(k);
+              if (d != vminDof && d != vmaxDof)
+                interior.push_back(d);
+            }
+
+            if (v0 > v1)
+              std::reverse(interior.begin(), interior.end());
+
+            for (Index d : interior)
+              emit_scalar_dof(d);
+          }
+        }
+
+        //--------------------------------------------------------------------
+        // 3. Faces (D >= 2)
+        //--------------------------------------------------------------------
+
+        if (D >= 2)
+        {
+          const size_t faceDim   = (D == 3) ? 2 : (D - 1);
+          const size_t faceCount = mesh.getConnectivity().getCount(faceDim);
+
+          if (D == 3)
+          {
+            const auto& conn20 = mesh.getConnectivity().getIncidence(2, 0);
+            const auto& conn32 = mesh.getConnectivity().getIncidence(3, 2);
+            const size_t nCells3 = mesh.getConnectivity().getCount(3);
+
+            // Precompute "hex local face index" per face: -1 for non-hex or not seen.
+            std::vector<int> hexFaceLocalIndex(faceCount, -1);
+            for (Index c = 0; c < static_cast<Index>(nCells3); ++c)
+            {
+              const auto cellGeom = mesh.getGeometry(3, c);
+              switch (cellGeom)
               {
-                const auto& cellFaces = conn32[c];
-                for (Index lf = 0; lf < static_cast<Index>(cellFaces.size()); ++lf)
+                case Geometry::Polytope::Type::Hexahedron:
                 {
-                  const Index f = cellFaces[lf];
-                  if (hexFaceLocalIndex[f] < 0)
-                    hexFaceLocalIndex[f] = static_cast<int>(lf);
+                  const auto& cellFaces = conn32[c];
+                  for (Index lf = 0; lf < static_cast<Index>(cellFaces.size()); ++lf)
+                  {
+                    const Index f = cellFaces[lf];
+                    if (hexFaceLocalIndex[f] < 0)
+                      hexFaceLocalIndex[f] = static_cast<int>(lf);
+                  }
+                  break;
                 }
-                break;
+                default:
+                  break;
               }
-              default:
-                break;
+            }
+
+            // Triangle face size / offsets in MFEM ordering
+            constexpr size_t TriN = MFEM::TriangleNodes<K>::Count;
+            const int p  = static_cast<int>(K);
+            const int nV = 3;
+            const int nE = 3 * (p - 1);
+            const int triInteriorOffset = nV + nE;
+
+            Math::Vector<Scalar> uR_face(TriN);
+            std::vector<Math::Vector<Scalar>> uM_face(
+              vdim, Math::Vector<Scalar>(TriN));
+
+            for (Index f = 0; f < static_cast<Index>(faceCount); ++f)
+            {
+              const auto faceGeom = mesh.getGeometry(2, f);
+              const auto& fdofs   = fes.getDOFs(2, f);
+
+              switch (faceGeom)
+              {
+                case Geometry::Polytope::Type::Triangle:
+                {
+                  assert(static_cast<size_t>(fdofs.size()) == TriN);
+
+                  for (size_t c = 0; c < vdim; ++c)
+                  {
+                    for (size_t k = 0; k < TriN; ++k)
+                    {
+                      const Index d = fdofs(static_cast<Index>(k));
+                      uR_face(static_cast<Index>(k)) =
+                        data.coeffRef(d + c * scalarSize);
+                    }
+                    uM_face[c] = s_tri_change_scalar * uR_face;
+                  }
+
+                  int loc = 0;
+                  for (int j = 1; j < p; ++j)
+                  {
+                    for (int i = 1; i + j < p; ++i)
+                    {
+                      const int idx = triInteriorOffset + loc++;
+                      for (size_t c = 0; c < vdim; ++c)
+                        os << uM_face[c](static_cast<Index>(idx)) << '\n';
+                    }
+                  }
+                  break;
+                }
+
+                case Geometry::Polytope::Type::Quadrilateral:
+                {
+                  // Collect *interior* face DOFs (skip vertex/edge DOFs already written).
+                  std::vector<Index> interior_face_dofs;
+                  interior_face_dofs.reserve(fdofs.size());
+                  for (Index k = 0; k < static_cast<Index>(fdofs.size()); ++k)
+                  {
+                    const Index d        = fdofs(k);
+                    const Index scalar_d = to_scalar_dof(d);
+                    if (scalar_d >= static_cast<Index>(scalarSize))
+                      continue;
+                    if (written[static_cast<size_t>(scalar_d)])
+                      continue;
+                    interior_face_dofs.push_back(d);
+                  }
+
+                  const int lf = hexFaceLocalIndex[f];
+                  const bool isHex       = (lf >= 0);
+                  const bool isHexBottom = (lf == 0);
+
+                  if (isHex && isHexBottom)
+                  {
+                    const int nrow = p - 1;
+                    const int nint = nrow * nrow;
+                    assert(static_cast<int>(interior_face_dofs.size()) == nint);
+
+                    // Vertical flip of the (p-1)x(p-1) interior grid.
+                    for (int row = nrow - 1; row >= 0; --row)
+                    {
+                      for (int col = 0; col < nrow; ++col)
+                      {
+                        const int loc = row * nrow + col;
+                        emit_scalar_dof(interior_face_dofs[loc]);
+                      }
+                    }
+                  }
+                  else
+                  {
+                    for (Index idx = 0; idx < static_cast<Index>(interior_face_dofs.size()); ++idx)
+                      emit_scalar_dof(interior_face_dofs[idx]);
+                  }
+                  break;
+                }
+
+                default:
+                {
+                  for (Index k = 0; k < static_cast<Index>(fdofs.size()); ++k)
+                    emit_scalar_dof(fdofs(k));
+                  break;
+                }
+              }
             }
           }
+          else
+          {
+            // D == 2: faces are edges (already oriented above); keep DOF-based.
+            for (Index f = 0; f < static_cast<Index>(faceCount); ++f)
+            {
+              const auto& fdofs = fes.getDOFs(faceDim, f);
+              for (Index k = 0; k < static_cast<Index>(fdofs.size()); ++k)
+                emit_scalar_dof(fdofs(k));
+            }
+          }
+        }
 
-          // Triangle face size / offsets in MFEM ordering
+        //--------------------------------------------------------------------
+        // 4. Element interiors
+        //--------------------------------------------------------------------
+
+        const size_t nCells = mesh.getConnectivity().getCount(D);
+
+        if (D == 2)
+        {
           constexpr size_t TriN = MFEM::TriangleNodes<K>::Count;
           const int p  = static_cast<int>(K);
           const int nV = 3;
           const int nE = 3 * (p - 1);
           const int triInteriorOffset = nV + nE;
 
-          Math::Vector<Scalar> uR_face(TriN);
-          std::vector<Math::Vector<Scalar>> uM_face(
+          Math::Vector<Scalar> uR_elem(TriN);
+          std::vector<Math::Vector<Scalar>> uM_elem(
             vdim, Math::Vector<Scalar>(TriN));
 
-          for (Index f = 0; f < static_cast<Index>(faceCount); ++f)
+          for (Index c = 0; c < static_cast<Index>(nCells); ++c)
           {
-            const auto faceGeom = mesh.getGeometry(2, f);
-            const auto& fdofs   = fes.getDOFs(2, f);
+            const auto geom = mesh.getGeometry(2, c);
+            const auto& cdofs = fes.getDOFs(2, c);
 
-            switch (faceGeom)
+            switch (geom)
             {
               case Geometry::Polytope::Type::Triangle:
               {
-                assert(static_cast<size_t>(fdofs.size()) == TriN);
+                assert(static_cast<size_t>(cdofs.size()) == TriN);
 
-                for (size_t c = 0; c < vdim; ++c)
+                for (size_t comp = 0; comp < vdim; ++comp)
                 {
                   for (size_t k = 0; k < TriN; ++k)
                   {
-                    const Index d = fdofs(static_cast<Index>(k));
-                    uR_face(static_cast<Index>(k)) =
-                      data.coeffRef(d + c * scalarSize);
+                    const Index d = cdofs(static_cast<Index>(k));
+                    uR_elem(static_cast<Index>(k)) =
+                      data.coeffRef(d + comp * scalarSize);
                   }
-                  uM_face[c] = s_tri_change_scalar * uR_face;
+                  uM_elem[comp] = s_tri_change_scalar * uR_elem;
                 }
 
                 int loc = 0;
@@ -2732,61 +2104,92 @@ class GridFunctionPrinter<
                   for (int i = 1; i + j < p; ++i)
                   {
                     const int idx = triInteriorOffset + loc++;
-                    for (size_t c = 0; c < vdim; ++c)
-                      os << uM_face[c](static_cast<Index>(idx)) << '\n';
+                    for (size_t comp = 0; comp < vdim; ++comp)
+                      os << uM_elem[comp](static_cast<Index>(idx)) << '\n';
                   }
-                }
-                break;
-              }
-
-              case Geometry::Polytope::Type::Quadrilateral:
-              {
-                // Collect *interior* face DOFs (skip vertex/edge DOFs already written).
-                std::vector<Index> interior_face_dofs;
-                interior_face_dofs.reserve(fdofs.size());
-                for (Index k = 0; k < static_cast<Index>(fdofs.size()); ++k)
-                {
-                  const Index d        = fdofs(k);
-                  const Index scalar_d = to_scalar_dof(d);
-                  if (scalar_d >= static_cast<Index>(scalarSize))
-                    continue;
-                  if (written[static_cast<size_t>(scalar_d)])
-                    continue;
-                  interior_face_dofs.push_back(d);
-                }
-
-                const int lf = hexFaceLocalIndex[f];
-                const bool isHex       = (lf >= 0);
-                const bool isHexBottom = (lf == 0);
-
-                if (isHex && isHexBottom)
-                {
-                  const int nrow = p - 1;
-                  const int nint = nrow * nrow;
-                  assert(static_cast<int>(interior_face_dofs.size()) == nint);
-
-                  // Vertical flip of the (p-1)x(p-1) interior grid.
-                  for (int row = nrow - 1; row >= 0; --row)
-                  {
-                    for (int col = 0; col < nrow; ++col)
-                    {
-                      const int loc = row * nrow + col;
-                      emit_scalar_dof(interior_face_dofs[loc]);
-                    }
-                  }
-                }
-                else
-                {
-                  for (Index idx = 0; idx < static_cast<Index>(interior_face_dofs.size()); ++idx)
-                    emit_scalar_dof(interior_face_dofs[idx]);
                 }
                 break;
               }
 
               default:
               {
-                for (Index k = 0; k < static_cast<Index>(fdofs.size()); ++k)
-                  emit_scalar_dof(fdofs(k));
+                for (Index k = 0; k < static_cast<Index>(cdofs.size()); ++k)
+                  emit_scalar_dof(cdofs(k));
+                break;
+              }
+            }
+          }
+        }
+        else if (D == 3)
+        {
+          const auto& conn30 = mesh.getConnectivity().getIncidence(3, 0);
+          const auto& cp     = Variational::GLL01<K>::getNodes();
+
+          constexpr size_t TetN = MFEM::TetrahedronNodes<K>::Count;
+          const int p = static_cast<int>(K);
+
+          const int nV    = 4;
+          const int nE    = 6 * (p - 1);
+          const int nF    = 2 * (p - 1) * (p - 2); // 4 faces × (p-1)(p-2)/2
+          const int tetInteriorOffset = nV + nE + nF;
+
+          Math::Vector<Scalar> uR_elem(TetN);
+          std::vector<Math::Vector<Scalar>> uM_elem(
+            vdim, Math::Vector<Scalar>(TetN));
+
+          for (Index c = 0; c < static_cast<Index>(nCells); ++c)
+          {
+            const auto  cellGeom = mesh.getGeometry(3, c);
+            const auto& cellVer  = conn30[c];
+            const auto  cellIt   = mesh.getCell(c);
+            const auto& cell     = *cellIt;
+            const auto& cdofs    = fes.getDOFs(3, c);
+
+            switch (cellGeom)
+            {
+              //---------------------------------------------------------------
+              // Tetrahedron: change-of-nodes for interior DOFs
+              //---------------------------------------------------------------
+              case Geometry::Polytope::Type::Tetrahedron:
+              {
+                assert(cellVer.size() == 4);
+                assert(static_cast<size_t>(cdofs.size()) == TetN);
+
+                for (size_t comp = 0; comp < vdim; ++comp)
+                {
+                  for (size_t k = 0; k < TetN; ++k)
+                  {
+                    const Index d = cdofs(static_cast<Index>(k));
+                    uR_elem(static_cast<Index>(k)) =
+                      data.coeffRef(d + comp * scalarSize);
+                  }
+                  uM_elem[comp] = s_tet_change_scalar * uR_elem;
+                }
+
+                for (int idx = tetInteriorOffset; idx < static_cast<int>(TetN); ++idx)
+                {
+                  for (size_t comp = 0; comp < vdim; ++comp)
+                    os << uM_elem[comp](static_cast<Index>(idx)) << '\n';
+                }
+                break;
+              }
+
+              //---------------------------------------------------------------
+              // Wedge / Prism: TODO
+              //---------------------------------------------------------------
+              case Geometry::Polytope::Type::Wedge:
+              {
+                assert(false); // Unsupported
+                break;
+              }
+
+              //---------------------------------------------------------------
+              // Other 3D cell types (including Hexahedron): DOF-based interiors
+              //---------------------------------------------------------------
+              default:
+              {
+                for (Index k = 0; k < static_cast<Index>(cdofs.size()); ++k)
+                  emit_scalar_dof(cdofs(k));
                 break;
               }
             }
@@ -2794,218 +2197,16 @@ class GridFunctionPrinter<
         }
         else
         {
-          // D == 2: faces are edges (already oriented above); keep DOF-based.
-          for (Index f = 0; f < static_cast<Index>(faceCount); ++f)
+          // Other dimensions: fallback DOF-based interiors
+          for (Index c = 0; c < static_cast<Index>(nCells); ++c)
           {
-            const auto& fdofs = fes.getDOFs(faceDim, f);
-            for (Index k = 0; k < static_cast<Index>(fdofs.size()); ++k)
-              emit_scalar_dof(fdofs(k));
+            const auto& cdofs = fes.getDOFs(D, c);
+            for (Index k = 0; k < static_cast<Index>(cdofs.size()); ++k)
+              emit_scalar_dof(cdofs(k));
           }
         }
       }
-
-      //--------------------------------------------------------------------
-      // 4. Element interiors
-      //--------------------------------------------------------------------
-
-      const size_t nCells = mesh.getConnectivity().getCount(D);
-
-      if (D == 2)
-      {
-        constexpr size_t TriN = MFEM::TriangleNodes<K>::Count;
-        const int p  = static_cast<int>(K);
-        const int nV = 3;
-        const int nE = 3 * (p - 1);
-        const int triInteriorOffset = nV + nE;
-
-        Math::Vector<Scalar> uR_elem(TriN);
-        std::vector<Math::Vector<Scalar>> uM_elem(
-          vdim, Math::Vector<Scalar>(TriN));
-
-        for (Index c = 0; c < static_cast<Index>(nCells); ++c)
-        {
-          const auto geom = mesh.getGeometry(2, c);
-          const auto& cdofs = fes.getDOFs(2, c);
-
-          switch (geom)
-          {
-            case Geometry::Polytope::Type::Triangle:
-            {
-              assert(static_cast<size_t>(cdofs.size()) == TriN);
-
-              for (size_t comp = 0; comp < vdim; ++comp)
-              {
-                for (size_t k = 0; k < TriN; ++k)
-                {
-                  const Index d = cdofs(static_cast<Index>(k));
-                  uR_elem(static_cast<Index>(k)) =
-                    data.coeffRef(d + comp * scalarSize);
-                }
-                uM_elem[comp] = s_tri_change_scalar * uR_elem;
-              }
-
-              int loc = 0;
-              for (int j = 1; j < p; ++j)
-              {
-                for (int i = 1; i + j < p; ++i)
-                {
-                  const int idx = triInteriorOffset + loc++;
-                  for (size_t comp = 0; comp < vdim; ++comp)
-                    os << uM_elem[comp](static_cast<Index>(idx)) << '\n';
-                }
-              }
-              break;
-            }
-
-            default:
-            {
-              for (Index k = 0; k < static_cast<Index>(cdofs.size()); ++k)
-                emit_scalar_dof(cdofs(k));
-              break;
-            }
-          }
-        }
-      }
-      else if (D == 3)
-      {
-        const auto& conn30 = mesh.getConnectivity().getIncidence(3, 0);
-        const auto& cp     = Variational::GLL01<K>::getNodes();
-
-        Math::SpatialPoint xref(3);
-        Math::SpatialPoint xphys(sdim);
-        Math::SpatialPoint Xb(sdim);
-        Math::SpatialPoint Xt(sdim);
-
-        constexpr size_t TetN = MFEM::TetrahedronNodes<K>::Count;
-        const int p = static_cast<int>(K);
-
-        const int nV    = 4;
-        const int nE    = 6 * (p - 1);
-        const int nF    = 2 * (p - 1) * (p - 2); // 4 faces × (p-1)(p-2)/2
-        const int tetInteriorOffset = nV + nE + nF;
-
-        Math::Vector<Scalar> uR_elem(TetN);
-        std::vector<Math::Vector<Scalar>> uM_elem(
-          vdim, Math::Vector<Scalar>(TetN));
-
-        for (Index c = 0; c < static_cast<Index>(nCells); ++c)
-        {
-          const auto  cellGeom = mesh.getGeometry(3, c);
-          const auto& cellVer  = conn30[c];
-          const auto  cellIt   = mesh.getCell(c);
-          const auto& cell     = *cellIt;
-          const auto& cdofs    = fes.getDOFs(3, c);
-
-          switch (cellGeom)
-          {
-            //---------------------------------------------------------------
-            // Tetrahedron: change-of-nodes for interior DOFs
-            //---------------------------------------------------------------
-            case Geometry::Polytope::Type::Tetrahedron:
-            {
-              assert(cellVer.size() == 4);
-              assert(static_cast<size_t>(cdofs.size()) == TetN);
-
-              for (size_t comp = 0; comp < vdim; ++comp)
-              {
-                for (size_t k = 0; k < TetN; ++k)
-                {
-                  const Index d = cdofs(static_cast<Index>(k));
-                  uR_elem(static_cast<Index>(k)) =
-                    data.coeffRef(d + comp * scalarSize);
-                }
-                uM_elem[comp] = s_tet_change_scalar * uR_elem;
-              }
-
-              for (int idx = tetInteriorOffset; idx < static_cast<int>(TetN); ++idx)
-              {
-                for (size_t comp = 0; comp < vdim; ++comp)
-                  os << uM_elem[comp](static_cast<Index>(idx)) << '\n';
-              }
-              break;
-            }
-
-            //---------------------------------------------------------------
-            // Wedge / Prism: evaluation-based interior (unchanged logic)
-            //---------------------------------------------------------------
-            case Geometry::Polytope::Type::Wedge:
-            {
-              constexpr size_t TriN = MFEM::TriangleNodes<K>::Count;
-              const int p  = static_cast<int>(K);
-              const int nV_tri = 3;
-              const int nE_tri = 3 * (p - 1);
-              const int triInteriorOffset = nV_tri + nE_tri;
-              const int nTriInt = (p - 1) * (p - 2) / 2;
-
-              const size_t wedgeDofs = static_cast<size_t>((p + 1) * TriN);
-              assert(static_cast<size_t>(cdofs.size()) == wedgeDofs);
-
-              Math::Vector<Scalar> uR_elem_wedge(wedgeDofs);
-              std::vector<Math::Vector<Scalar>>
-                uR_tri(p + 1, Math::Vector<Scalar>(TriN));
-              std::vector<Math::Vector<Scalar>>
-                uM_tri(p + 1, Math::Vector<Scalar>(TriN));
-
-              for (size_t comp = 0; comp < vdim; ++comp)
-              {
-                for (size_t loc = 0; loc < wedgeDofs; ++loc)
-                {
-                  const Index d = cdofs(static_cast<Index>(loc));
-                  uR_elem_wedge(static_cast<Index>(loc)) =
-                    data.coeffRef(d + comp * scalarSize);
-                }
-
-                for (int kseg = 0; kseg <= p; ++kseg)
-                {
-                  const size_t offset = static_cast<size_t>(kseg) * TriN;
-                  for (size_t itri = 0; itri < TriN; ++itri)
-                    uR_tri[kseg](static_cast<Index>(itri)) =
-                      uR_elem_wedge(static_cast<Index>(offset + itri));
-
-                  uM_tri[kseg] = s_tri_change_scalar * uR_tri[kseg];
-                }
-
-                for (int kseg = 1; kseg < p; ++kseg)
-                {
-                  int l = 0;
-                  for (int j = 1; j < p; ++j)
-                  {
-                    for (int i = 1; i + j < p; ++i)
-                    {
-                      const int triIdx = triInteriorOffset + l++;
-                      os << uM_tri[kseg](static_cast<Index>(triIdx)) << '\n';
-                    }
-                  }
-                  assert(l == nTriInt);
-                }
-              }
-              break;
-            }
-
-            //---------------------------------------------------------------
-            // Other 3D cell types (including Hexahedron): DOF-based interiors
-            //---------------------------------------------------------------
-            default:
-            {
-              for (Index k = 0; k < static_cast<Index>(cdofs.size()); ++k)
-                emit_scalar_dof(cdofs(k));
-              break;
-            }
-          }
-        }
-      }
-      else
-      {
-        // Other dimensions: fallback DOF-based interiors
-        for (Index c = 0; c < static_cast<Index>(nCells); ++c)
-        {
-          const auto& cdofs = fes.getDOFs(D, c);
-          for (Index k = 0; k < static_cast<Index>(cdofs.size()); ++k)
-            emit_scalar_dof(cdofs(k));
-        }
-      }
-    }
-};
+  };
 }
 
 #endif

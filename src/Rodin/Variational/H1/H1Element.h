@@ -458,8 +458,7 @@ namespace Rodin::Variational
               for (size_t k = 0; k <= K; ++k)
               {
                 for (const auto& p : tri)
-                  s_nodes.emplace_back(
-                    Math::SpatialPoint{{p.x(), p.y(), z[k]}});
+                  s_nodes.emplace_back(Math::SpatialPoint{{p.x(), p.y(), z[k]}});
               }
             }
             return s_nodes;
