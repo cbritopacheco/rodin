@@ -1423,8 +1423,22 @@ namespace Rodin::IO
         std::vector<uint8_t> written(scalarSize, false);
 
         //--------------------------------------------------------------------
-        // Precomputed inverse change-of-nodes matrices (MFEM nodes -> Rodin Fekete)
+        // Precomputed change-of-nodes matrices (Rodin Fekete -> MFEM nodes)
+        // and inverse matrices (MFEM nodes -> Rodin Fekete)
         //--------------------------------------------------------------------
+
+        auto& s_tri_change_scalar = []() -> const Math::Matrix<ScalarType>&
+        {
+          static thread_local Math::Matrix<ScalarType> C;
+          if (C.size() == 0)
+          {
+            const auto& V_mfem   = MFEM::VandermondeTriangle<K>::getMatrix();
+            const auto& V_rodInv = Variational::VandermondeTriangle<K>::getInverse();
+            const Math::Matrix<Real> C_real = V_mfem * V_rodInv;
+            C = C_real.template cast<ScalarType>();
+          }
+          return C;
+        }();
 
         auto& s_tri_inv_change_scalar = []() -> const Math::Matrix<ScalarType>&
         {
@@ -1438,6 +1452,19 @@ namespace Rodin::IO
             Cinv = Cinv_real.template cast<ScalarType>();
           }
           return Cinv;
+        }();
+
+        auto& s_tet_change_scalar = []() -> const Math::Matrix<ScalarType>&
+        {
+          static thread_local Math::Matrix<ScalarType> C;
+          if (C.size() == 0)
+          {
+            const auto& V_mfem   = MFEM::VandermondeTetrahedron<K>::getMatrix();
+            const auto& V_rodInv = Variational::VandermondeTetrahedron<K>::getInverse();
+            const Math::Matrix<Real> C_real = V_mfem * V_rodInv;
+            C = C_real.template cast<ScalarType>();
+          }
+          return C;
         }();
 
         auto& s_tet_inv_change_scalar = []() -> const Math::Matrix<ScalarType>&
@@ -1585,30 +1612,47 @@ namespace Rodin::IO
                   
                   if (numInterior > 0)
                   {
-                    // Build MFEM face with zeros for vert/edge, interior from stream
+                    // INVERSE OF PRINTER: same as element case
                     for (size_t comp = 0; comp < vdim; ++comp)
                     {
                       uM_face.setZero();
                       
-                      // Fill ONLY interior positions with MFEM values
+                      // Gather vertices/edges from already-stored Rodin DOFs
+                      Math::Vector<ScalarType> temp_uR(TriN);
+                      for (size_t k = 0; k < TriN; ++k)
+                      {
+                        const Index d = fdofs(k);
+                        const Index sd = to_scalar_dof(d);
+                        if (static_cast<size_t>(sd) < scalarSize)
+                          temp_uR(k) = data.coeffRef(sd + comp * scalarSize);
+                        else
+                          temp_uR(k) = 0;
+                      }
+                      
+                      // Transform to get MFEM values for vertices/edges
+                      Math::Vector<ScalarType> temp_uM = s_tri_change_scalar * temp_uR;
+                      
+                      // Copy vertices/edges
+                      for (int k = 0; k < triInteriorOffset; ++k)
+                        uM_face(k) = temp_uM(k);
+                      
+                      // Fill interior from stream
                       for (int k = 0; k < numInterior; ++k)
                       {
                         assert(read_idx < mfem_values.size());
                         uM_face(triInteriorOffset + k) = mfem_values[read_idx++];
                       }
                       
-                      // Transform to get Rodin values (in Fekete ordering)
+                      // Transform complete MFEM face to Rodin
                       uR_face[comp] = s_tri_inv_change_scalar * uM_face;
                     }
 
-                    // Set ONLY interior DOFs from transformed values
+                    // Store ALL transformed values
                     for (size_t k = 0; k < TriN; ++k)
                     {
                       const Index d = fdofs(k);
                       const Index sd = to_scalar_dof(d);
-                      
-                      // Skip if already written (vertex or edge DOF)
-                      if (static_cast<size_t>(sd) >= scalarSize || written[sd])
+                      if (static_cast<size_t>(sd) >= scalarSize)
                         continue;
 
                       for (size_t comp = 0; comp < vdim; ++comp)
@@ -1745,25 +1789,51 @@ namespace Rodin::IO
                 
                 if (numInterior > 0)
                 {
-                  // Build MFEM element with interior from stream
-                  // Note: vertices/edges positions left as zero since we don't have them
-                  // in MFEM ordering at this point
+                  // INVERSE OF PRINTER:
+                  // Printer: gathers all Rodin DOFs → transforms → prints interior
+                  // Loader: build complete MFEM element → transform → store all Rodin DOFs
+                  
                   for (size_t comp = 0; comp < vdim; ++comp)
                   {
                     uM_elem.setZero();
                     
-                    // Fill interior positions with MFEM values
+                    // First, gather vertices/edges from already-stored Rodin DOFs
+                    // These were stored in steps 1-2 at positions cdofs(k)
+                    // We need to reverse the printer's transformation to get MFEM values
+                    // But vertices/edges were printed WITHOUT transformation, so we 
+                    // need to get them by transforming Rodin values FORWARD
+                    
+                    // Build a temporary Rodin element from stored values
+                    Math::Vector<ScalarType> temp_uR(TriN);
+                    for (size_t k = 0; k < TriN; ++k)
+                    {
+                      const Index d = cdofs(k);
+                      const Index sd = to_scalar_dof(d);
+                      if (static_cast<size_t>(sd) < scalarSize)
+                        temp_uR(k) = data.coeffRef(sd + comp * scalarSize);
+                      else
+                        temp_uR(k) = 0;
+                    }
+                    
+                    // Transform to get MFEM values for vertices/edges
+                    Math::Vector<ScalarType> temp_uM = s_tri_change_scalar * temp_uR;
+                    
+                    // Copy vertices/edges from transformed values
+                    for (int k = 0; k < triInteriorOffset; ++k)
+                      uM_elem(k) = temp_uM(k);
+                    
+                    // Fill interior from stream
                     for (int k = 0; k < numInterior; ++k)
                     {
                       assert(read_idx < mfem_values.size());
                       uM_elem(triInteriorOffset + k) = mfem_values[read_idx++];
                     }
                     
-                    // Transform to get Rodin Fekete values
+                    // Now transform complete MFEM element to Rodin Fekete
                     uR_elem[comp] = s_tri_inv_change_scalar * uM_elem;
                   }
 
-                  // Store ALL transformed values, overwriting vertices/edges
+                  // Store ALL transformed Rodin values
                   for (size_t k = 0; k < TriN; ++k)
                   {
                     const Index d = cdofs(k);
@@ -1841,30 +1911,47 @@ namespace Rodin::IO
                 
                 if (numInterior > 0)
                 {
-                  // Build MFEM element with zeros for vert/edge/face, interior from stream
+                  // INVERSE OF PRINTER: same logic as triangles
                   for (size_t comp = 0; comp < vdim; ++comp)
                   {
                     uM_elem.setZero();
                     
-                    // Fill ONLY interior positions with MFEM values
+                    // Gather vertices/edges/faces from already-stored Rodin DOFs
+                    Math::Vector<ScalarType> temp_uR(TetN);
+                    for (size_t k = 0; k < TetN; ++k)
+                    {
+                      const Index d = cdofs(k);
+                      const Index sd = to_scalar_dof(d);
+                      if (static_cast<size_t>(sd) < scalarSize)
+                        temp_uR(k) = data.coeffRef(sd + comp * scalarSize);
+                      else
+                        temp_uR(k) = 0;
+                    }
+                    
+                    // Transform to get MFEM values for vertices/edges/faces
+                    Math::Vector<ScalarType> temp_uM = s_tet_change_scalar * temp_uR;
+                    
+                    // Copy vertices/edges/faces
+                    for (int k = 0; k < tetInteriorOffset; ++k)
+                      uM_elem(k) = temp_uM(k);
+                    
+                    // Fill interior from stream
                     for (int k = 0; k < numInterior; ++k)
                     {
                       assert(read_idx < mfem_values.size());
                       uM_elem(tetInteriorOffset + k) = mfem_values[read_idx++];
                     }
                     
-                    // Transform to get Rodin values (in Fekete ordering)
+                    // Transform complete MFEM element to Rodin
                     uR_elem[comp] = s_tet_inv_change_scalar * uM_elem;
                   }
 
-                  // Set ONLY interior DOFs from transformed values
+                  // Store ALL transformed values
                   for (size_t k = 0; k < TetN; ++k)
                   {
                     const Index d = cdofs(k);
                     const Index sd = to_scalar_dof(d);
-                    
-                    // Skip if already written (vertex, edge, or face DOF)
-                    if (static_cast<size_t>(sd) >= scalarSize || written[sd])
+                    if (static_cast<size_t>(sd) >= scalarSize)
                       continue;
 
                     for (size_t comp = 0; comp < vdim; ++comp)
