@@ -10,7 +10,9 @@
 #include <boost/bimap.hpp>
 #include <boost/spirit/home/x3.hpp>
 #include <ostream>
+#include <iomanip>
 #include <optional>
+#include <limits>
 
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Types.h"
@@ -2482,6 +2484,9 @@ namespace Rodin::IO
 
       void printData(std::ostream& os) override
       {
+        // Set maximum precision for floating-point output to avoid precision loss
+        os << std::setprecision(std::numeric_limits<Scalar>::max_digits10);
+        
         const auto& gf   = this->getObject();
         const auto& fes  = gf.getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
