@@ -57,6 +57,7 @@ namespace Rodin::QF
    * - Quadrilateral
    * - Tetrahedron
    * - Wedge
+   * - Hexahedron
    */
   class GaussLegendre final : public QuadratureFormulaBase
   {
@@ -224,6 +225,14 @@ namespace Rodin::QF
        * @param nz Number of points in the extrusion direction
        */
       void build_wedge(size_t ntri, size_t nz);
+
+      /**
+       * @brief Builds Gauss-Legendre quadrature on a hexahedron (cube).
+       * @param nx Number of points in x-direction
+       * @param ny Number of points in y-direction
+       * @param nz Number of points in z-direction
+       */
+      void build_hex(size_t nx, size_t ny, size_t nz);
 
       size_t m_nx { 2 }, m_ny { 2 }, m_nz { 2 }; ///< Number of points per direction
       std::vector<Math::SpatialVector<Real>> m_points; ///< Quadrature point coordinates

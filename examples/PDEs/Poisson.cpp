@@ -9,50 +9,66 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
+#include <type_traits>
 
 using namespace Rodin;
 using namespace Rodin::Solver;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
+constexpr auto order = std::integral_constant<size_t, 3>{};
+
 int main(int, char**)
 {
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
-  mesh.getConnectivity().compute(1, 2);
+  mesh = mesh.UniformGrid(Polytope::Type::Wedge, { 2, 2, 2 });
 
-  H1 vh(std::integral_constant<size_t, 12>{}, mesh);
-  // P1 vh(mesh);
+  // mesh = mesh.Build().initialize(3).nodes(6).vertex({ 0.0, 0.0, 0.0 })
+  //                             .vertex({ 1.0, 0.0, 0.0 })
+  //                             .vertex({ 0.0, 1.0, 0.0 })
+  //                             .vertex({ 0.0, 0.0, 1.0 })
+  //                             .vertex({ 1.0, 0.0, 1.0 })
+  //                             .vertex({ 0.0, 1.0, 1.0 })
+  //                             .polytope(Polytope::Type::Wedge, { 0, 1, 2, 3, 4, 5 }).finalize();
+
+  mesh.getConnectivity().compute(3, 2);
+  mesh.getConnectivity().compute(2, 1);
+
+  mesh.save("RODIN.mesh");
+
+  H1 vh(order, mesh);
+
+
+  for (size_t c = 0; c < mesh.getPolytopeCount(3); c++)
+  {
+    std::cout << "Wedge element DOFs:" << std::endl;
+    for (const auto& dof : vh.getDOFs(3, 0))
+    {
+      std::cout << "DOF: " << dof << std::endl;
+    }
+
+    const auto& conn32 = mesh.getConnectivity().getIncidence({ 3, 2}, c);
+    size_t localFaceIdx = 0;
+    for (size_t i = 0; i < conn32.size(); i++)
+    {
+      std::cout << "Local face idx: " << localFaceIdx << std::endl;
+      const auto& dofs = vh.getDOFs(2, conn32[i]);
+      for (const auto& dof : dofs)
+      {
+        std::cout << "DOF: " << dof << std::endl;
+      }
+      localFaceIdx++;
+    }
+  }
+
   GridFunction u(vh);
 
   u = [](const Geometry::Point& p)
   {
-    return std::sin(M_PI * p.x()) * std::cos(M_PI * p.y());
-    // return p.x() * (1 - p.x()) * p.y() * (1 - p.y());
+    return p.x() * (1 - p.y()) + p.z();
   };
-  std::cout << "Miaow\n";
-  u.save("Poisson.gf");
-  // u.load("Poisson.gf");
-  // u.save("Poisson2.gf");
-  mesh.save("Poisson.mesh");
 
-  // P1 vh(mesh);
-
-  // TrialFunction u(vh);
-  // TestFunction  v(vh);
-
-  // RealFunction f = 1;
-
-  // // Apply Dirichlet conditions on the entire boundary.
-  // Problem poisson(u, v);
-  // poisson = Integral(Grad(u), Grad(v))
-  //         - Integral(f, v)
-  //         + DirichletBC(u, Zero());
-  // CG(poisson).solve();
-
-  // // Save solution
-  // u.getSolution().save("Poisson.gf");
-  // mesh.save("Poisson.mesh");
+  u.save("RODIN.gf");
 
   return 0;
 }

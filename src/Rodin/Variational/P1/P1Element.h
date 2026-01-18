@@ -424,6 +424,7 @@ namespace Rodin::Variational
             }
             break;
           }
+
           case Geometry::Polytope::Type::Wedge:
           {
             switch (i)
@@ -456,6 +457,59 @@ namespace Rodin::Variational
               case 5:
               {
                 static thread_local LinearForm s_lf(5, g);
+                return s_lf;
+              }
+              default:
+              {
+                assert(false);
+                break;
+              }
+            }
+            break;
+          }
+
+          case Geometry::Polytope::Type::Hexahedron:
+          {
+            switch (i)
+            {
+              case 0:
+              {
+                static thread_local LinearForm s_lf(0, g);
+                return s_lf;
+              }
+              case 1:
+              {
+                static thread_local LinearForm s_lf(1, g);
+                return s_lf;
+              }
+              case 2:
+              {
+                static thread_local LinearForm s_lf(2, g);
+                return s_lf;
+              }
+              case 3:
+              {
+                static thread_local LinearForm s_lf(3, g);
+                return s_lf;
+              }
+              case 4:
+              {
+                static thread_local LinearForm s_lf(4, g);
+                return s_lf;
+              }
+              case 5:
+              {
+                static thread_local LinearForm s_lf(5, g);
+                return s_lf;
+              }
+              case 6:
+              {
+                static thread_local LinearForm s_lf(6, g);
+                return s_lf;
+              }
+              case 7:
+              {
+                static thread_local LinearForm s_lf(7, g);
                 return s_lf;
               }
               default:
@@ -638,6 +692,59 @@ namespace Rodin::Variational
             }
             break;
           }
+
+          case Geometry::Polytope::Type::Hexahedron:
+          {
+            switch (i)
+            {
+              case 0:
+              {
+                static thread_local BasisFunction s_basis(0, g);
+                return s_basis;
+              }
+              case 1:
+              {
+                static thread_local BasisFunction s_basis(1, g);
+                return s_basis;
+              }
+              case 2:
+              {
+                static thread_local BasisFunction s_basis(2, g);
+                return s_basis;
+              }
+              case 3:
+              {
+                static thread_local BasisFunction s_basis(3, g);
+                return s_basis;
+              }
+              case 4:
+              {
+                static thread_local BasisFunction s_basis(4, g);
+                return s_basis;
+              }
+              case 5:
+              {
+                static thread_local BasisFunction s_basis(5, g);
+                return s_basis;
+              }
+              case 6:
+              {
+                static thread_local BasisFunction s_basis(6, g);
+                return s_basis;
+              }
+              case 7:
+              {
+                static thread_local BasisFunction s_basis(7, g);
+                return s_basis;
+              }
+              default:
+              {
+                assert(false);
+                break;
+              }
+            }
+            break;
+          }
         }
         static thread_local BasisFunction s_null(0, g);
         assert(false);
@@ -656,6 +763,7 @@ namespace Rodin::Variational
             return 1;
           case Geometry::Polytope::Type::Quadrilateral:
           case Geometry::Polytope::Type::Wedge:
+          case Geometry::Polytope::Type::Hexahedron:
             return 2;
         }
         assert(false);
@@ -963,6 +1071,7 @@ namespace Rodin::Variational
             return 1;
           case Geometry::Polytope::Type::Quadrilateral:
           case Geometry::Polytope::Type::Wedge:
+          case Geometry::Polytope::Type::Hexahedron:
             return 2;
         }
         assert(false);

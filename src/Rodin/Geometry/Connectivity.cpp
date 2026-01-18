@@ -622,6 +622,79 @@ namespace Rodin::Geometry
         }
         return;
       }
+      case Polytope::Type::Hexahedron:
+      {
+        assert(dim <= 3);
+        assert(p.size() == 8);
+
+        if (dim == 0)
+        {
+          // 8 vertices
+          out.resize(8);
+          out[0] = { Polytope::Type::Point, {{ p(0) }} };
+          out[1] = { Polytope::Type::Point, {{ p(1) }} };
+          out[2] = { Polytope::Type::Point, {{ p(2) }} };
+          out[3] = { Polytope::Type::Point, {{ p(3) }} };
+          out[4] = { Polytope::Type::Point, {{ p(4) }} };
+          out[5] = { Polytope::Type::Point, {{ p(5) }} };
+          out[6] = { Polytope::Type::Point, {{ p(6) }} };
+          out[7] = { Polytope::Type::Point, {{ p(7) }} };
+        }
+        else if (dim == 1)
+        {
+          // 12 edges:
+          // bottom: (0->1),(1->2),(2->3),(3->0)  (CCW in (x,y))
+          // top:    (4->5),(5->6),(6->7),(7->4)  (CCW in (x,y))
+          // verts:  (0->4),(1->5),(2->6),(3->7)
+          out.resize(12);
+          out[0]  = { Polytope::Type::Segment, {{ p(0), p(1) }} };
+          out[1]  = { Polytope::Type::Segment, {{ p(1), p(2) }} };
+          out[2]  = { Polytope::Type::Segment, {{ p(2), p(3) }} };
+          out[3]  = { Polytope::Type::Segment, {{ p(3), p(0) }} };
+
+          out[4]  = { Polytope::Type::Segment, {{ p(4), p(5) }} };
+          out[5]  = { Polytope::Type::Segment, {{ p(5), p(6) }} };
+          out[6]  = { Polytope::Type::Segment, {{ p(6), p(7) }} };
+          out[7]  = { Polytope::Type::Segment, {{ p(7), p(4) }} };
+
+          out[8]  = { Polytope::Type::Segment, {{ p(0), p(4) }} };
+          out[9]  = { Polytope::Type::Segment, {{ p(1), p(5) }} };
+          out[10] = { Polytope::Type::Segment, {{ p(2), p(6) }} };
+          out[11] = { Polytope::Type::Segment, {{ p(3), p(7) }} };
+        }
+        else if (dim == 2)
+        {
+          // 6 quad faces, analogous to the wedge:
+          //  - start with bottom,
+          //  - then wrap the 4 side faces following the bottom edges
+          //  - end with top.
+          //
+          // bottom: (0,1,2,3)
+          // side 0: (0,1,5,4) (attached to edge 0->1)
+          // side 1: (1,2,6,5) (attached to edge 1->2)
+          // side 2: (2,3,7,6) (attached to edge 2->3)
+          // side 3: (3,0,4,7) (attached to edge 3->0)
+          // top:    (4,5,6,7)
+          out.resize(6);
+          out[0] = { Polytope::Type::Quadrilateral, {{ p(0), p(1), p(2), p(3) }} };
+          out[1] = { Polytope::Type::Quadrilateral, {{ p(0), p(1), p(5), p(4) }} };
+          out[2] = { Polytope::Type::Quadrilateral, {{ p(1), p(2), p(6), p(5) }} };
+          out[3] = { Polytope::Type::Quadrilateral, {{ p(2), p(3), p(7), p(6) }} };
+          out[4] = { Polytope::Type::Quadrilateral, {{ p(3), p(0), p(4), p(7) }} };
+          out[5] = { Polytope::Type::Quadrilateral, {{ p(4), p(5), p(6), p(7) }} };
+        }
+        else if (dim == 3)
+        {
+          out.resize(1);
+          out[0] = { Polytope::Type::Hexahedron, p };
+        }
+        else
+        {
+          assert(false);
+          out = {};
+        }
+        return;
+      }
       case Polytope::Type::Wedge:
       {
         assert(dim <= 3);

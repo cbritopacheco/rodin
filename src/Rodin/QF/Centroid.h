@@ -12,9 +12,8 @@
  * @brief Defines the Centroid single-point quadrature formula.
  */
 
-#include "Rodin/Geometry/GeometryIndexed.h"
-
 #include "QuadratureFormula.h"
+#include "Rodin/Math/Vector.h"
 
 namespace Rodin::QF
 {
@@ -44,6 +43,7 @@ namespace Rodin::QF
    * - Quadrilateral: @f$ (0.5, 0.5) @f$
    * - Tetrahedron: @f$ (0.25, 0.25, 0.25) @f$
    * - Wedge: @f$ (1/3, 1/3, 0.5) @f$
+   * - Hexahedron: @f$ (0.5, 0.5, 0.5) @f$
    *
    * ## Reference Element Weights
    *
@@ -54,6 +54,7 @@ namespace Rodin::QF
    * - Quadrilateral: @f$ 1 @f$
    * - Tetrahedron: @f$ 1/6 @f$
    * - Wedge: @f$ 1/2 @f$
+   * - Hexahedron: @f$ 1 @f$
    *
    * This is the simplest possible quadrature rule for each geometry type
    * and is computationally efficient when low accuracy is acceptable.
@@ -90,22 +91,14 @@ namespace Rodin::QF
        * @param i Index of the quadrature point (must be 0)
        * @return Reference to the centroid coordinates in reference space
        */
-      const Math::SpatialVector<Real>& getPoint(size_t i) const override
-      {
-        assert(i == 0);
-        return s_points[getGeometry()];
-      }
+      const Math::SpatialVector<Real>& getPoint(size_t i) const override;
 
       /**
        * @brief Gets the weight of the single quadrature point.
        * @param i Index of the quadrature point (must be 0)
        * @return Weight equal to the reference element measure
        */
-      Real getWeight(size_t i) const override
-      {
-        assert(i == 0);
-        return s_weights[getGeometry()];
-      }
+      Real getWeight(size_t i) const override;
 
       /**
        * @brief Creates a copy of this quadrature formula.
@@ -115,13 +108,6 @@ namespace Rodin::QF
       {
         return new Centroid(*this);
       }
-
-    private:
-      /// Static data: centroid coordinates for each geometry type
-      static const Geometry::GeometryIndexed<Math::SpatialVector<Real>> s_points;
-
-      /// Static data: quadrature weight (reference element measure) for each geometry type
-      static const Geometry::GeometryIndexed<Real> s_weights;
   };
 }
 

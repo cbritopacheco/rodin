@@ -424,6 +424,28 @@ namespace Rodin::Variational
             return s_nodes;
           }
 
+          case Geometry::Polytope::Type::Hexahedron:
+          {
+            static thread_local std::vector<Math::SpatialPoint> s_nodes;
+            if (s_nodes.empty())
+            {
+              const auto& xi = GLL01<K>::getNodes();
+              s_nodes.reserve((K + 1) * (K + 1) * (K + 1));
+              for (size_t k = 0; k <= K; ++k)
+              {
+                for (size_t j = 0; j <= K; ++j)
+                {
+                  for (size_t i = 0; i <= K; ++i)
+                  {
+                    s_nodes.emplace_back(
+                      Math::SpatialPoint{{xi[i], xi[j], xi[k]}});
+                  }
+                }
+              }
+            }
+            return s_nodes;
+          }
+
           case Geometry::Polytope::Type::Wedge:
           {
             static thread_local std::vector<Math::SpatialPoint> s_nodes;
@@ -436,8 +458,7 @@ namespace Rodin::Variational
               for (size_t k = 0; k <= K; ++k)
               {
                 for (const auto& p : tri)
-                  s_nodes.emplace_back(
-                    Math::SpatialPoint{{p.x(), p.y(), z[k]}});
+                  s_nodes.emplace_back(Math::SpatialPoint{{p.x(), p.y(), z[k]}});
               }
             }
             return s_nodes;
@@ -539,6 +560,8 @@ namespace Rodin::Variational
             return (K + 1) * (K + 2) * (K + 3) / 6;
           case Geometry::Polytope::Type::Wedge:
             return (K + 1) * (K + 1) * (K + 2) / 2;
+          case Geometry::Polytope::Type::Hexahedron:
+            return (K + 1) * (K + 1) * (K + 1);
         }
         return 0;
       }
@@ -594,6 +617,10 @@ namespace Rodin::Variational
           case G::Wedge:
             // Tensor-product type: max total degree is 2K
             return 2 * K;
+
+          case G::Hexahedron:
+            // 3D tensor product: max total degree is 3K
+            return 3 * K;
         }
 
         assert(false && "Unsupported geometry.");

@@ -789,7 +789,9 @@ namespace Rodin::Geometry
           /**
            * @brief Default constructor.
            */
-          Builder() = default;
+          Builder()
+            : m_initialized(false)
+          {}
 
           virtual ~Builder() = default;
 
@@ -826,6 +828,9 @@ namespace Rodin::Geometry
 
           /**
            * @brief Sets the number of nodes in the mesh.
+           *
+           * @note This method requires initialize(size_t) to be called
+           * beforehand.
            */
           Builder& nodes(size_t n);
 
@@ -975,6 +980,8 @@ namespace Rodin::Geometry
           }
 
         private:
+          bool m_initialized;
+
           size_t m_sdim;
           size_t m_nodes;
 

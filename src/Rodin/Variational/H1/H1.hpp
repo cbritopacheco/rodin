@@ -72,7 +72,11 @@ namespace Rodin::Variational
       /// Number of nodal DOFs on a reference quadrilateral ((K+1)×(K+1) GLL grid).
       static constexpr size_t QuadrilateralCount = (K + 1) * (K + 1);
 
+      /// Number of nodal DOFs on a reference wedge ((triangle) × (K+1) in z).
       static constexpr size_t WedgeCount = (K + 1) * FeketeTriangle<K>::Count;
+
+      /// Number of nodal DOFs on a reference hexahedron ((K+1)³ tensor GLL grid).
+      static constexpr size_t HexahedronCount = (K + 1) * (K + 1) * (K + 1);
 
       /** @} */
 
@@ -91,6 +95,8 @@ namespace Rodin::Variational
             return TetrahedronCount;
           else if constexpr (G == Geometry::Polytope::Type::Wedge)
             return WedgeCount;
+          else if constexpr (G == Geometry::Polytope::Type::Hexahedron)
+            return HexahedronCount;
           else
             return 0;
         }();
@@ -545,6 +551,132 @@ namespace Rodin::Variational
             }
           }
         }
+
+        // -------------------------------------------------------------------
+        // G = Hexahedron: from Quadrilateral face -> Hexahedron
+        //
+        // Hex reference vertices (local):
+        //   0:(0,0,0), 1:(1,0,0), 2:(1,1,0), 3:(0,1,0),
+        //   4:(0,0,1), 5:(1,0,1), 6:(1,1,1), 7:(0,1,1)
+        //
+        // Faces (consistent with getSubPolytopes):
+        //   local 0: (0,1,2,3)  bottom  z = 0
+        //   local 1: (0,1,5,4)  side 0  y = 0 (front)
+        //   local 2: (1,2,6,5)  side 1  x = 1 (right)
+        //   local 3: (2,3,7,6)  side 2  y = 1 (back)
+        //   local 4: (3,0,4,7)  side 3  x = 0 (left)
+        //   local 5: (4,5,6,7)  top     z = 1
+        //
+        // Quadrilateral DOF ordering: q(i,j) = j*(K+1) + i, i,j in [0..K]
+        // Hex DOF ordering: h(i,j,k) = k*(K+1)^2 + j*(K+1) + i
+        // -------------------------------------------------------------------
+        else if constexpr (G == Type::Hexahedron)
+        {
+          constexpr size_t N1 = K + 1;
+
+          auto hexIndex = [](size_t i, size_t j, size_t k)
+          {
+            return k * N1 * N1 + j * N1 + i;
+          };
+
+          assert(local < 6 && "Hexahedron has 6 faces (local = 0..5).");
+
+          // local 0: bottom z=0, vertices (0,1,2,3)
+          if (local == 0)
+          {
+            Utility::ForIndex<N1>([&](auto jj)
+            {
+              constexpr size_t j = jj.value; // y
+              Utility::ForIndex<N1>([&](auto ii)
+              {
+                constexpr size_t i = ii.value; // x
+                constexpr size_t qIdx = j * N1 + i;
+                const size_t hIdx = hexIndex(i, j, 0);
+                codomain[hIdx] = domain[qIdx];
+              });
+            });
+          }
+          // local 5: top z=1, vertices (4,5,6,7)
+          else if (local == 5)
+          {
+            Utility::ForIndex<N1>([&](auto jj)
+            {
+              constexpr size_t j = jj.value; // y
+              Utility::ForIndex<N1>([&](auto ii)
+              {
+                constexpr size_t i = ii.value; // x
+                constexpr size_t qIdx = j * N1 + i;
+                const size_t hIdx = hexIndex(i, j, K);
+                codomain[hIdx] = domain[qIdx];
+              });
+            });
+          }
+          // local 1: side y=0, vertices (0,1,5,4)
+          // (u,v) -> (x,z), so i=x=u, j=y=0, k=z=v
+          else if (local == 1)
+          {
+            Utility::ForIndex<N1>([&](auto jj)
+            {
+              constexpr size_t v = jj.value; // z
+              Utility::ForIndex<N1>([&](auto ii)
+              {
+                constexpr size_t u = ii.value; // x
+                constexpr size_t qIdx = v * N1 + u;
+                const size_t hIdx = hexIndex(u, 0, v);
+                codomain[hIdx] = domain[qIdx];
+              });
+            });
+          }
+          // local 2: side x=1, vertices (1,2,6,5)
+          // (u,v) -> (y,z), so i=x=1, j=y=u, k=z=v
+          else if (local == 2)
+          {
+            Utility::ForIndex<N1>([&](auto jj)
+            {
+              constexpr size_t v = jj.value; // z
+              Utility::ForIndex<N1>([&](auto ii)
+              {
+                constexpr size_t u = ii.value; // y
+                constexpr size_t qIdx = v * N1 + u;
+                const size_t hIdx = hexIndex(K, u, v);
+                codomain[hIdx] = domain[qIdx];
+              });
+            });
+          }
+          // local 3: side y=1, vertices (2,3,7,6)
+          // (u,v) -> (x,z) with x = 1-u => i = K-u, j = K, k = v
+          else if (local == 3)
+          {
+            Utility::ForIndex<N1>([&](auto jj)
+            {
+              constexpr size_t v = jj.value; // z
+              Utility::ForIndex<N1>([&](auto ii)
+              {
+                constexpr size_t u = ii.value; // param along 2->3
+                constexpr size_t qIdx = v * N1 + u;
+                const size_t hIdx = hexIndex(K - u, K, v);
+                codomain[hIdx] = domain[qIdx];
+              });
+            });
+          }
+          // local 4: side x=0, vertices (3,0,4,7)
+          // (u,v) -> (y,z) with y = 1-u => i = 0, j = K-u, k = v
+          else if (local == 4)
+          {
+            Utility::ForIndex<N1>([&](auto jj)
+            {
+              constexpr size_t v = jj.value; // z
+              Utility::ForIndex<N1>([&](auto ii)
+              {
+                constexpr size_t u = ii.value; // param along 3->0
+                constexpr size_t qIdx = v * N1 + u;
+                const size_t hIdx = hexIndex(0, K - u, v);
+                codomain[hIdx] = domain[qIdx];
+              });
+            });
+          }
+        }
+
         else
         {
           Alert::Exception()
@@ -1340,10 +1472,11 @@ namespace Rodin::Variational
         // the canonical face, and the permutation mapping canonical
         // face vertices -> triangle local vertices.
         auto getTriFaceEntityAndPerm =
-          [&](size_t lf, std::array<int,3>& canonToTri) -> Index
+          [&](size_t lf, std::array<int,3>& canonToTri) -> std::optional<Index>
         {
           const auto wanted  = canonicalTriFaceVerts(lf);
           const auto wantedS = sort3(wanted);
+          (void)wantedS; // currently unused (kept for symmetry with quad logic)
 
           for (Index f : inc)
           {
@@ -1381,7 +1514,7 @@ namespace Rodin::Variational
           }
 
           assert(false && "Could not match wedge triangular face to incident triangle entity.");
-          return -1;
+          return std::nullopt;
         };
 
         // Build a face DOF array in *canonical* FeketeTriangle<K> ordering
@@ -1442,7 +1575,10 @@ namespace Rodin::Variational
         // Bottom triangular face (k = 0)
         {
           std::array<int,3> canonToTri{};
-          const Index f = getTriFaceEntityAndPerm(0, canonToTri);
+          auto fOpt = getTriFaceEntityAndPerm(0, canonToTri);
+          assert(fOpt.has_value());
+          const Index f = *fOpt;
+
           this->getClosure(d - 1, f);
 
           IndexArray faceCanon;
@@ -1460,7 +1596,10 @@ namespace Rodin::Variational
         // Top triangular face (k = K)
         {
           std::array<int,3> canonToTri{};
-          const Index f = getTriFaceEntityAndPerm(4, canonToTri);
+          auto fOpt = getTriFaceEntityAndPerm(4, canonToTri);
+          assert(fOpt.has_value());
+          const Index f = *fOpt;
+
           this->getClosure(d - 1, f);
 
           IndexArray faceCanon;
@@ -1482,10 +1621,10 @@ namespace Rodin::Variational
 
         // Local 1: Quad (0,1,4,3): extrude edge 0->1 in z
         {
-          const auto wanted = canonicalQuadFaceVerts(1);
+          const auto wanted  = canonicalQuadFaceVerts(1);
           const auto wantedS = sort4(wanted);
 
-          Index f = -1;
+          std::optional<Index> fOpt;
           for (Index cand : inc)
           {
             if (conn.getGeometry(d - 1, cand) != Geometry::Polytope::Type::Quadrilateral)
@@ -1500,10 +1639,13 @@ namespace Rodin::Variational
             };
             if (sort4(qv) == wantedS)
             {
-              f = cand;
+              fOpt = cand;
               break;
             }
           }
+
+          assert(fOpt.has_value() && "Could not match wedge quad face 1.");
+          const Index f = *fOpt;
 
           this->getClosure(d - 1, f);
           const auto& quad = m_closure[d - 1][f];
@@ -1531,10 +1673,10 @@ namespace Rodin::Variational
 
         // Local 2: Quad (1,2,5,4): extrude edge 1->2
         {
-          const auto wanted = canonicalQuadFaceVerts(2);
+          const auto wanted  = canonicalQuadFaceVerts(2);
           const auto wantedS = sort4(wanted);
 
-          Index f = -1;
+          std::optional<Index> fOpt;
           for (Index cand : inc)
           {
             if (conn.getGeometry(d - 1, cand) != Geometry::Polytope::Type::Quadrilateral)
@@ -1549,10 +1691,14 @@ namespace Rodin::Variational
             };
             if (sort4(qv) == wantedS)
             {
-              f = cand;
+              fOpt = cand;
               break;
             }
           }
+
+          assert(fOpt.has_value() && "Could not match wedge quad face 2.");
+          const Index f = *fOpt;
+
           this->getClosure(d - 1, f);
           const auto& quad = m_closure[d - 1][f];
 
@@ -1586,10 +1732,10 @@ namespace Rodin::Variational
 
         // Local 3: Quad (2,0,3,5): extrude edge 2->0
         {
-          const auto wanted = canonicalQuadFaceVerts(3);
+          const auto wanted  = canonicalQuadFaceVerts(3);
           const auto wantedS = sort4(wanted);
 
-          Index f = -1;
+          std::optional<Index> fOpt;
           for (Index cand : inc)
           {
             if (conn.getGeometry(d - 1, cand) != Geometry::Polytope::Type::Quadrilateral)
@@ -1604,10 +1750,13 @@ namespace Rodin::Variational
             };
             if (sort4(qv) == wantedS)
             {
-              f = cand;
+              fOpt = cand;
               break;
             }
           }
+
+          assert(fOpt.has_value() && "Could not match wedge quad face 3.");
+          const Index f = *fOpt;
 
           this->getClosure(d - 1, f);
           const auto& quad = m_closure[d - 1][f];
@@ -1649,6 +1798,334 @@ namespace Rodin::Variational
         {
           if (!used[wId])
             local[wId] = m_size++;
+        }
+
+        break;
+      }
+
+      case Geometry::Polytope::Type::Hexahedron:
+      {
+        const auto& mesh = m_mesh.get();
+        const auto& conn = mesh.getConnectivity();
+
+        // Faces (dim=2): must match getSubPolytopes ordering:
+        //   0: (0,1,2,3) bottom
+        //   1: (0,1,5,4) side 0
+        //   2: (1,2,6,5) side 1
+        //   3: (2,3,7,6) side 2
+        //   4: (3,0,4,7) side 3
+        //   5: (4,5,6,7) top
+        const auto& inc = conn.getIncidence({ d, d - 1 }, idx);
+        assert(inc.size() == 6);
+
+        using HexCochain  = Cochain<Geometry::Polytope::Type::Hexahedron>;
+        using QuadCochain = Cochain<Geometry::Polytope::Type::Quadrilateral>;
+
+        constexpr size_t N1        = K + 1;
+        constexpr size_t HexCount  = HexCochain::Count;
+        constexpr size_t QuadCount = QuadCochain::Count;
+
+        std::array<uint8_t, HexCount> used{};
+        used.fill(0);
+
+        // Cell vertices in local order 0..7
+        const auto& cellVertsIA = conn.getPolytope(d, idx);
+        assert(cellVertsIA.size() == 8);
+        std::array<Index,8> v = {
+          cellVertsIA(0),
+          cellVertsIA(1),
+          cellVertsIA(2),
+          cellVertsIA(3),
+          cellVertsIA(4),
+          cellVertsIA(5),
+          cellVertsIA(6),
+          cellVertsIA(7)
+        };
+
+        // Canonical faces in terms of cell vertices, in the SAME order
+        // as getSubPolytopes(dim=2).
+        auto canonicalFaceVerts = [&](size_t lf) -> std::array<Index,4>
+        {
+          switch (lf)
+          {
+            case 0: return { v[0], v[1], v[2], v[3] }; // bottom
+            case 1: return { v[0], v[1], v[5], v[4] }; // side 0
+            case 2: return { v[1], v[2], v[6], v[5] }; // side 1
+            case 3: return { v[2], v[3], v[7], v[6] }; // side 2
+            case 4: return { v[3], v[0], v[4], v[7] }; // side 3
+            case 5: return { v[4], v[5], v[6], v[7] }; // top
+            default:
+              assert(false && "Invalid local face index for hexahedron.");
+              return { 0, 0, 0, 0 };
+          }
+        };
+
+        // 24 permutations of 4 vertices (same as wedge code)
+        static constexpr int perms4[24][4] =
+        {
+          {0,1,2,3}, {0,1,3,2}, {0,2,1,3}, {0,2,3,1},
+          {0,3,1,2}, {0,3,2,1}, {1,0,2,3}, {1,0,3,2},
+          {1,2,0,3}, {1,2,3,0}, {1,3,0,2}, {1,3,2,0},
+          {2,0,1,3}, {2,0,3,1}, {2,1,0,3}, {2,1,3,0},
+          {2,3,0,1}, {2,3,1,0}, {3,0,1,2}, {3,0,2,1},
+          {3,1,0,2}, {3,1,2,0}, {3,2,0,1}, {3,2,1,0}
+        };
+
+        auto hexIndex = [](size_t i, size_t j, size_t k)
+        {
+          return k * N1 * N1 + j * N1 + i;
+        };
+
+        // Corner coordinates in tensor index space for quad vertex 0..3:
+        //  0 -> (0,0)
+        //  1 -> (K,0)
+        //  2 -> (K,K)
+        //  3 -> (0,K)
+        auto vertCornerCoords = [](int vidx) -> std::pair<size_t,size_t>
+        {
+          switch (vidx)
+          {
+            case 0: return { 0, 0 };
+            case 1: return { static_cast<size_t>(K), 0 };
+            case 2: return { static_cast<size_t>(K), static_cast<size_t>(K) };
+            case 3: return { 0, static_cast<size_t>(K) };
+            default:
+              assert(false && "Invalid quad vertex index for corner coords.");
+              return { 0, 0 };
+          }
+        };
+
+        // 8 square symmetries on the (i,j) grid: T(i,j) -> (i',j')
+        auto applyTransform = [](int tid, size_t i, size_t j) -> std::pair<size_t,size_t>
+        {
+          switch (tid)
+          {
+            case 0: return { i, j };                                           // id
+            case 1: return { j, static_cast<size_t>(K) - i };                  // rot 90
+            case 2: return { static_cast<size_t>(K) - i,
+                            static_cast<size_t>(K) - j };                      // rot 180
+            case 3: return { static_cast<size_t>(K) - j, i };                  // rot 270
+            case 4: return { i, static_cast<size_t>(K) - j };                  // reflect y
+            case 5: return { static_cast<size_t>(K) - i, j };                  // reflect x
+            case 6: return { j, i };                                           // reflect diag
+            case 7: return { static_cast<size_t>(K) - j,
+                            static_cast<size_t>(K) - i };                      // reflect other diag
+            default:
+              assert(false && "Invalid transform id.");
+              return { i, j };
+          }
+        };
+
+        // For each canonical face lf = 0..5:
+        //   - find the corresponding quad in 'inc' and its permutation
+        //   - build canonical face DOFs (faceCanon)
+        //   - inject into hex DOFs
+        for (size_t lf = 0; lf < 6; ++lf)
+        {
+          const auto wanted = canonicalFaceVerts(lf);
+
+          std::optional<Index> fOpt;
+          std::array<int,4> canonToQuad{};
+
+          // 1) Find the quad entity and permutation canonToQuad
+          for (Index cand : inc)
+          {
+            if (conn.getGeometry(d - 1, cand) != Geometry::Polytope::Type::Quadrilateral)
+              continue;
+
+            const auto& qVertsIA = conn.getPolytope(d - 1, cand);
+            assert(qVertsIA.size() == 4);
+            std::array<Index,4> qv = {
+              qVertsIA(0),
+              qVertsIA(1),
+              qVertsIA(2),
+              qVertsIA(3)
+            };
+
+            bool matched = false;
+            for (int pi = 0; pi < 24 && !matched; ++pi)
+            {
+              const int a = perms4[pi][0];
+              const int b = perms4[pi][1];
+              const int c = perms4[pi][2];
+              const int d4 = perms4[pi][3];
+
+              if (qv[a] == wanted[0] &&
+                  qv[b] == wanted[1] &&
+                  qv[c] == wanted[2] &&
+                  qv[d4] == wanted[3])
+              {
+                canonToQuad[0] = a;
+                canonToQuad[1] = b;
+                canonToQuad[2] = c;
+                canonToQuad[3] = d4;
+                fOpt = cand;
+                matched = true;
+              }
+            }
+
+            if (fOpt.has_value())
+              break;
+          }
+
+          assert(fOpt.has_value() && "Could not match hexa face to incident quadrilateral entity.");
+          const Index f = *fOpt;
+
+          // 2) Ensure quad closure is built and get local face DOFs
+          this->getClosure(d - 1, f);
+          const IndexArray& faceLocal = m_closure[d - 1][f];
+          assert(faceLocal.size() == QuadCount);
+
+          // 3) Build canonical face DOF array faceCanon
+          IndexArray faceCanon;
+          faceCanon.resize(QuadCount);
+
+          // Old corner coordinates for canonical corner 0..3 in the quad-local grid
+          std::pair<size_t,size_t> oldCorners[4];
+          for (int kCorner = 0; kCorner < 4; ++kCorner)
+          {
+            oldCorners[kCorner] = vertCornerCoords(canonToQuad[kCorner]);
+          }
+
+          int chosenT = -1;
+          for (int tid = 0; tid < 8; ++tid)
+          {
+            auto p0 = applyTransform(tid, 0, 0);
+            auto p1 = applyTransform(tid, static_cast<size_t>(K), 0);
+            auto p2 = applyTransform(tid, static_cast<size_t>(K), static_cast<size_t>(K));
+            auto p3 = applyTransform(tid, 0, static_cast<size_t>(K));
+
+            if (p0 == oldCorners[0] &&
+                p1 == oldCorners[1] &&
+                p2 == oldCorners[2] &&
+                p3 == oldCorners[3])
+            {
+              chosenT = tid;
+              break;
+            }
+          }
+
+          assert(chosenT >= 0 && "Could not determine quad face transform.");
+
+          // Apply chosenT to all grid points
+          for (size_t j = 0; j < N1; ++j)
+          {
+            for (size_t i2 = 0; i2 < N1; ++i2)
+            {
+              const size_t qCanon = j * N1 + i2;
+              auto pOld = applyTransform(chosenT, i2, j);
+              const size_t iOld = pOld.first;
+              const size_t jOld = pOld.second;
+              assert(iOld < N1 && jOld < N1);
+
+              const size_t qOld = jOld * N1 + iOld;
+              faceCanon[qCanon] = faceLocal[qOld];
+            }
+          }
+
+          // 4) Inject canonical face DOFs into hex
+          if (lf == 0)
+          {
+            // bottom z=0: i=x, j=y, k=0
+            for (size_t j = 0; j < N1; ++j)
+            {
+              for (size_t i2 = 0; i2 < N1; ++i2)
+              {
+                const size_t qIdx = j * N1 + i2;
+                const size_t hIdx = hexIndex(i2, j, 0);
+                local[hIdx] = faceCanon[qIdx];
+                used[hIdx]  = 1;
+              }
+            }
+          }
+          else if (lf == 5)
+          {
+            // top z=1: i=x, j=y, k=K
+            for (size_t j = 0; j < N1; ++j)
+            {
+              for (size_t i2 = 0; i2 < N1; ++i2)
+              {
+                const size_t qIdx = j * N1 + i2;
+                const size_t hIdx = hexIndex(i2, j, static_cast<size_t>(K));
+                local[hIdx] = faceCanon[qIdx];
+                used[hIdx]  = 1;
+              }
+            }
+          }
+          else if (lf == 1)
+          {
+            // side 0: y=0, (0,1,5,4): (u,v) -> (x,z), i=u, j=0, k=v
+            for (size_t vIdx = 0; vIdx < N1; ++vIdx)
+            {
+              for (size_t uIdx = 0; uIdx < N1; ++uIdx)
+              {
+                const size_t qIdx = vIdx * N1 + uIdx;
+                const size_t hIdx = hexIndex(uIdx, 0, vIdx);
+                local[hIdx] = faceCanon[qIdx];
+                used[hIdx]  = 1;
+              }
+            }
+          }
+          else if (lf == 2)
+          {
+            // side 1: x=1, (1,2,6,5): (u,v) -> (y,z), i=K, j=u, k=v
+            for (size_t vIdx = 0; vIdx < N1; ++vIdx)
+            {
+              for (size_t uIdx = 0; uIdx < N1; ++uIdx)
+              {
+                const size_t qIdx = vIdx * N1 + uIdx;
+                const size_t hIdx = hexIndex(static_cast<size_t>(K), uIdx, vIdx);
+                local[hIdx] = faceCanon[qIdx];
+                used[hIdx]  = 1;
+              }
+            }
+          }
+          else if (lf == 3)
+          {
+            // side 2: y=1, (2,3,7,6): (u,v)->(x,z) with x=1-u => i=K-u, j=K, k=v
+            for (size_t vIdx = 0; vIdx < N1; ++vIdx)
+            {
+              for (size_t uIdx = 0; uIdx < N1; ++uIdx)
+              {
+                const size_t qIdx = vIdx * N1 + uIdx;
+                const size_t hIdx = hexIndex(static_cast<size_t>(K) - uIdx,
+                                             static_cast<size_t>(K),
+                                             vIdx);
+                local[hIdx] = faceCanon[qIdx];
+                used[hIdx]  = 1;
+              }
+            }
+          }
+          else if (lf == 4)
+          {
+            // side 3: x=0, (3,0,4,7): (u,v)->(y,z) with y=1-u => i=0, j=K-u, k=v
+            for (size_t vIdx = 0; vIdx < N1; ++vIdx)
+            {
+              for (size_t uIdx = 0; uIdx < N1; ++uIdx)
+              {
+                const size_t qIdx = vIdx * N1 + uIdx;
+                const size_t hIdx = hexIndex(0,
+                                             static_cast<size_t>(K) - uIdx,
+                                             vIdx);
+                local[hIdx] = faceCanon[qIdx];
+                used[hIdx]  = 1;
+              }
+            }
+          }
+        }
+
+        // Interior hex DOFs: any entry not touched by a face
+        for (size_t k = 0; k < N1; ++k)
+        {
+          for (size_t j = 0; j < N1; ++j)
+          {
+            for (size_t i2 = 0; i2 < N1; ++i2)
+            {
+              const size_t hIdx = hexIndex(i2, j, k);
+              if (!used[hIdx])
+                local[hIdx] = m_size++;
+            }
+          }
         }
 
         break;
@@ -1714,6 +2191,12 @@ namespace Rodin::Variational
           {
             m_closure[d][i].resize(
               Cochain<Geometry::Polytope::Type::Wedge>::Count);
+            break;
+          }
+          case Geometry::Polytope::Type::Hexahedron:
+          {
+            m_closure[d][i].resize(
+              Cochain<Geometry::Polytope::Type::Hexahedron>::Count);
             break;
           }
         }

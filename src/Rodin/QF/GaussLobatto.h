@@ -59,6 +59,7 @@ namespace Rodin::QF
    * - Quadrilateral
    * - Tetrahedron
    * - Wedge
+   * - Hexahedron
    *
    * @note Requires at least @f$ n \geq 2 @f$ points per direction for proper
    * Lobatto quadrature (to include both endpoints).
@@ -266,12 +267,13 @@ namespace Rodin::QF
       {
         switch (getGeometry())
         {
-          case Geometry::Polytope::Type::Point:         build_point(); break;
-          case Geometry::Polytope::Type::Segment:       build_segment(m_nx); break;
-          case Geometry::Polytope::Type::Quadrilateral: build_quad(m_nx, m_ny); break;
-          case Geometry::Polytope::Type::Triangle:      build_tri(m_nx, m_nx); break;
-          case Geometry::Polytope::Type::Tetrahedron:   build_tet(m_nx, m_ny, m_nz); break;
-          case Geometry::Polytope::Type::Wedge:         build_wedge(m_nx, m_nz); break;
+          case Geometry::Polytope::Type::Point:         build_point();                break;
+          case Geometry::Polytope::Type::Segment:       build_segment(m_nx);          break;
+          case Geometry::Polytope::Type::Quadrilateral: build_quad(m_nx, m_ny);       break;
+          case Geometry::Polytope::Type::Triangle:      build_tri(m_nx, m_nx);        break;
+          case Geometry::Polytope::Type::Tetrahedron:   build_tet(m_nx, m_ny, m_nz);  break;
+          case Geometry::Polytope::Type::Wedge:         build_wedge(m_nx, m_nz);      break;
+          case Geometry::Polytope::Type::Hexahedron:    build_hex(m_nx, m_ny, m_nz);  break;
         }
       }
 
@@ -427,6 +429,48 @@ namespace Rodin::QF
               m_points.push_back(std::move(p));
               m_weights[k++] = wu[i]*wv[j]*(1.0 - u[i]) * wz[kk]; // wedge volume = 1/2
             }
+      }
+
+      /**
+       * @brief Builds Gauss-Lobatto quadrature on a hexahedron (cube).
+       * @param nx Number of points in x-direction
+       * @param ny Number of points in y-direction
+       * @param nz Number of points in z-direction
+       *
+       * Constructs a tensor-product Gauss-Lobatto rule on the reference
+       * hexahedron @f$ [0,1]^3 @f$. Total number of points:
+       * @f$ nx \times ny \times nz @f$.
+       */
+      void build_hex(size_t nx, size_t ny, size_t nz)
+      {
+        std::vector<Real> x, wx, y, wy, z, wz;
+        gll_1d_unit(nx, x, wx);
+        gll_1d_unit(ny, y, wy);
+        gll_1d_unit(nz, z, wz);
+
+        const size_t N = nx * ny * nz;
+        m_points.clear();
+        m_points.reserve(N);
+        m_weights.resize(N);
+
+        size_t k = 0;
+        for (size_t kz = 0; kz < nz; ++kz)
+        {
+          for (size_t jy = 0; jy < ny; ++jy)
+          {
+            for (size_t ix = 0; ix < nx; ++ix)
+            {
+              Math::SpatialVector<Real> p;
+              p.resize(3);
+              p[0] = x[ix];
+              p[1] = y[jy];
+              p[2] = z[kz];
+              m_points.push_back(std::move(p));
+
+              m_weights[k++] = wx[ix] * wy[jy] * wz[kz]; // volume of [0,1]^3 is 1
+            }
+          }
+        }
       }
 
       size_t m_nx{2}, m_ny{2}, m_nz{2}; ///< Number of points per direction
