@@ -1379,22 +1379,22 @@ namespace Rodin::IO
         // Read all values into a temporary buffer first
         std::vector<ScalarType> mfem_values;
         mfem_values.reserve(fes.getSize());
-        
+
         while (true)
         {
           line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
           if (line.empty() || is.eof())
             break;
-            
+
           it = line.begin();
           ScalarType value;
           const auto get_value = [&](auto& ctx) { value = _attr(ctx); };
           const auto pvalue = double_[get_value];
           const bool rvalue = boost::spirit::x3::phrase_parse(it, line.end(), pvalue, space);
-          
+
           if (!rvalue || it != line.end())
             break;
-            
+
           mfem_values.push_back(value);
         }
 
@@ -1611,14 +1611,14 @@ namespace Rodin::IO
                   assert(static_cast<size_t>(fdofs.size()) == TriN);
 
                   const int numInterior = static_cast<int>(TriN) - triInteriorOffset;
-                  
+
                   if (numInterior > 0)
                   {
                     // INVERSE OF PRINTER: same as element case
                     for (size_t comp = 0; comp < vdim; ++comp)
                     {
                       uM_face.setZero();
-                      
+
                       // Gather vertices/edges from already-stored Rodin DOFs
                       Math::Vector<ScalarType> temp_uR(TriN);
                       for (size_t k = 0; k < TriN; ++k)
@@ -1630,21 +1630,21 @@ namespace Rodin::IO
                         else
                           temp_uR(k) = 0;
                       }
-                      
+
                       // Transform to get MFEM values for vertices/edges
                       Math::Vector<ScalarType> temp_uM = s_tri_change_scalar * temp_uR;
-                      
+
                       // Copy vertices/edges
                       for (int k = 0; k < triInteriorOffset; ++k)
                         uM_face(k) = temp_uM(k);
-                      
+
                       // Fill interior from stream
                       for (int k = 0; k < numInterior; ++k)
                       {
                         assert(read_idx < mfem_values.size());
                         uM_face(triInteriorOffset + k) = mfem_values[read_idx++];
                       }
-                      
+
                       // Transform complete MFEM face to Rodin
                       uR_face[comp] = s_tri_inv_change_scalar * uM_face;
                     }
@@ -1671,68 +1671,6 @@ namespace Rodin::IO
                       const Index sd = to_scalar_dof(d);
                       if (static_cast<size_t>(sd) < scalarSize)
                         written[sd] = true;
-                    }
-                  }
-                  break;
-                }
-
-                case Geometry::Polytope::Type::Quadrilateral:
-                {
-                  // Collect interior face DOFs
-                  std::vector<Index> interior_face_dofs;
-                  interior_face_dofs.reserve(fdofs.size());
-                  for (Index k = 0; k < static_cast<Index>(fdofs.size()); ++k)
-                  {
-                    const Index d        = fdofs(k);
-                    const Index scalar_d = to_scalar_dof(d);
-                    if (scalar_d >= static_cast<Index>(scalarSize))
-                      continue;
-                    if (written[static_cast<size_t>(scalar_d)])
-                      continue;
-                    interior_face_dofs.push_back(scalar_d);
-                  }
-
-                  const int lf = hexFaceLocalIndex[f];
-                  const bool isHex       = (lf >= 0);
-                  const bool isHexBottom = (lf == 0);
-
-                  if (isHex && isHexBottom)
-                  {
-                    // Handle vertical flip for hex bottom face
-                    const int nrow = p - 1;
-                    const int nint = nrow * nrow;
-                    assert(static_cast<int>(interior_face_dofs.size()) == nint);
-
-                    // Read values with vertical flip
-                    std::vector<std::vector<ScalarType>> values_grid(nint, std::vector<ScalarType>(vdim));
-                    for (int row = nrow - 1; row >= 0; --row)
-                    {
-                      for (int col = 0; col < nrow; ++col)
-                      {
-                        const int loc = row * nrow + col;
-                        for (size_t c = 0; c < vdim; ++c)
-                        {
-                          assert(read_idx < mfem_values.size());
-                          values_grid[loc][c] = mfem_values[read_idx++];
-                        }
-                      }
-                    }
-
-                    // Set DOFs
-                    for (size_t idx = 0; idx < interior_face_dofs.size(); ++idx)
-                    {
-                      const Index sdof = interior_face_dofs[idx];
-                      for (size_t c = 0; c < vdim; ++c)
-                        data.coeffRef(sdof + c * scalarSize) = values_grid[idx][c];
-                      written[sdof] = true;
-                    }
-                  }
-                  else
-                  {
-                    for (Index sdof : interior_face_dofs)
-                    {
-                      set_scalar_dof(sdof, read_idx);
-                      written[sdof] = true;
                     }
                   }
                   break;
@@ -1788,23 +1726,23 @@ namespace Rodin::IO
                 assert(static_cast<size_t>(cdofs.size()) == TriN);
 
                 const int numInterior = static_cast<int>(TriN) - triInteriorOffset;
-                
+
                 if (numInterior > 0)
                 {
                   // INVERSE OF PRINTER:
                   // Printer: gathers all Rodin DOFs → transforms → prints interior
                   // Loader: build complete MFEM element → transform → store all Rodin DOFs
-                  
+
                   for (size_t comp = 0; comp < vdim; ++comp)
                   {
                     uM_elem.setZero();
-                    
+
                     // First, gather vertices/edges from already-stored Rodin DOFs
                     // These were stored in steps 1-2 at positions cdofs(k)
                     // We need to reverse the printer's transformation to get MFEM values
                     // But vertices/edges were printed WITHOUT transformation, so we 
                     // need to get them by transforming Rodin values FORWARD
-                    
+
                     // Build a temporary Rodin element from stored values
                     Math::Vector<ScalarType> temp_uR(TriN);
                     for (size_t k = 0; k < TriN; ++k)
@@ -1816,21 +1754,21 @@ namespace Rodin::IO
                       else
                         temp_uR(k) = 0;
                     }
-                    
+
                     // Transform to get MFEM values for vertices/edges
                     Math::Vector<ScalarType> temp_uM = s_tri_change_scalar * temp_uR;
-                    
+
                     // Copy vertices/edges from transformed values
                     for (int k = 0; k < triInteriorOffset; ++k)
                       uM_elem(k) = temp_uM(k);
-                    
+
                     // Fill interior from stream
                     for (int k = 0; k < numInterior; ++k)
                     {
                       assert(read_idx < mfem_values.size());
                       uM_elem(triInteriorOffset + k) = mfem_values[read_idx++];
                     }
-                    
+
                     // Now transform complete MFEM element to Rodin Fekete
                     uR_elem[comp] = s_tri_inv_change_scalar * uM_elem;
                   }
@@ -1917,7 +1855,7 @@ namespace Rodin::IO
                   for (size_t comp = 0; comp < vdim; ++comp)
                   {
                     uM_elem.setZero();
-                    
+
                     // Gather vertices/edges/faces from already-stored Rodin DOFs
                     Math::Vector<ScalarType> temp_uR(TetN);
                     for (size_t k = 0; k < TetN; ++k)
@@ -1929,21 +1867,21 @@ namespace Rodin::IO
                       else
                         temp_uR(k) = 0;
                     }
-                    
+
                     // Transform to get MFEM values for vertices/edges/faces
                     Math::Vector<ScalarType> temp_uM = s_tet_change_scalar * temp_uR;
-                    
+
                     // Copy vertices/edges/faces
                     for (int k = 0; k < tetInteriorOffset; ++k)
                       uM_elem(k) = temp_uM(k);
-                    
+
                     // Fill interior from stream
                     for (int k = 0; k < numInterior; ++k)
                     {
                       assert(read_idx < mfem_values.size());
                       uM_elem(tetInteriorOffset + k) = mfem_values[read_idx++];
                     }
-                    
+
                     // Transform complete MFEM element to Rodin
                     uR_elem[comp] = s_tet_inv_change_scalar * uM_elem;
                   }
@@ -2486,7 +2424,7 @@ namespace Rodin::IO
       {
         // Set maximum precision for floating-point output to avoid precision loss
         os << std::setprecision(std::numeric_limits<Scalar>::max_digits10);
-        
+
         const auto& gf   = this->getObject();
         const auto& fes  = gf.getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
@@ -2637,29 +2575,6 @@ namespace Rodin::IO
             const auto& conn32 = mesh.getConnectivity().getIncidence(3, 2);
             const size_t nCells3 = mesh.getConnectivity().getCount(3);
 
-            // Precompute "hex local face index" per face: -1 for non-hex or not seen.
-            std::vector<int> hexFaceLocalIndex(faceCount, -1);
-            for (Index c = 0; c < static_cast<Index>(nCells3); ++c)
-            {
-              const auto cellGeom = mesh.getGeometry(3, c);
-              switch (cellGeom)
-              {
-                case Geometry::Polytope::Type::Hexahedron:
-                {
-                  const auto& cellFaces = conn32[c];
-                  for (Index lf = 0; lf < static_cast<Index>(cellFaces.size()); ++lf)
-                  {
-                    const Index f = cellFaces[lf];
-                    if (hexFaceLocalIndex[f] < 0)
-                      hexFaceLocalIndex[f] = static_cast<int>(lf);
-                  }
-                  break;
-                }
-                default:
-                  break;
-              }
-            }
-
             // Triangle face size / offsets in MFEM ordering
             constexpr size_t TriN = MFEM::TriangleNodes<K>::Count;
             const int p  = static_cast<int>(K);
@@ -2702,50 +2617,6 @@ namespace Rodin::IO
                       for (size_t c = 0; c < vdim; ++c)
                         os << uM_face[c](static_cast<Index>(idx)) << '\n';
                     }
-                  }
-                  break;
-                }
-
-                case Geometry::Polytope::Type::Quadrilateral:
-                {
-                  // Collect *interior* face DOFs (skip vertex/edge DOFs already written).
-                  std::vector<Index> interior_face_dofs;
-                  interior_face_dofs.reserve(fdofs.size());
-                  for (Index k = 0; k < static_cast<Index>(fdofs.size()); ++k)
-                  {
-                    const Index d        = fdofs(k);
-                    const Index scalar_d = to_scalar_dof(d);
-                    if (scalar_d >= static_cast<Index>(scalarSize))
-                      continue;
-                    if (written[static_cast<size_t>(scalar_d)])
-                      continue;
-                    interior_face_dofs.push_back(d);
-                  }
-
-                  const int lf = hexFaceLocalIndex[f];
-                  const bool isHex       = (lf >= 0);
-                  const bool isHexBottom = (lf == 0);
-
-                  if (isHex && isHexBottom)
-                  {
-                    const int nrow = p - 1;
-                    const int nint = nrow * nrow;
-                    assert(static_cast<int>(interior_face_dofs.size()) == nint);
-
-                    // Vertical flip of the (p-1)x(p-1) interior grid.
-                    for (int row = nrow - 1; row >= 0; --row)
-                    {
-                      for (int col = 0; col < nrow; ++col)
-                      {
-                        const int loc = row * nrow + col;
-                        emit_scalar_dof(interior_face_dofs[loc]);
-                      }
-                    }
-                  }
-                  else
-                  {
-                    for (Index idx = 0; idx < static_cast<Index>(interior_face_dofs.size()); ++idx)
-                      emit_scalar_dof(interior_face_dofs[idx]);
                   }
                   break;
                 }
