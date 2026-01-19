@@ -77,13 +77,14 @@ namespace Rodin::Tests::Manufactured::Stokes
    *  \Omega = [0, 1] \times [0, 1]
    * @f]
    *
-   * Manufactured velocity:
+   * Manufactured velocity (divergence-free):
    * @f[
    *  \mathbf{u}(x, y) = \begin{pmatrix}
-   *    \sin(\pi x) \sin(\pi y) \\
-   *    -\sin(\pi x) \sin(\pi y)
+   *    \sin(\pi x) \cos(\pi y) \\
+   *    -\cos(\pi x) \sin(\pi y)
    *  \end{pmatrix}
    * @f]
+   * Note: ∇·u = π cos(πx)cos(πy) - π cos(πx)cos(πy) = 0 ✓
    *
    * Manufactured pressure:
    * @f[
@@ -93,10 +94,11 @@ namespace Rodin::Tests::Manufactured::Stokes
    * Forcing function:
    * @f[
    *  \mathbf{f}(x, y) = \begin{pmatrix}
-   *    2\pi^2 \sin(\pi x) \sin(\pi y) - \pi \sin(\pi x) \sin(\pi y) \\
-   *    -2\pi^2 \sin(\pi x) \sin(\pi y) + \pi \cos(\pi x) \cos(\pi y)
+   *    2\pi^2 \sin(\pi x) \cos(\pi y) - \pi \sin(\pi x) \sin(\pi y) \\
+   *    2\pi^2 \cos(\pi x) \sin(\pi y) + \pi \cos(\pi x) \cos(\pi y)
    *  \end{pmatrix}
    * @f]
+   * Computed as f = -Δu + ∇p
    *
    * Boundary conditions:
    * @f[
@@ -115,19 +117,24 @@ namespace Rodin::Tests::Manufactured::Stokes
     // Pressure space: H1 of order 1 (linear), scalar
     H1 ph(std::integral_constant<size_t, 1>{}, mesh);
 
-    // Manufactured velocity solution
+    // Manufactured velocity solution (divergence-free)
+    // u = (sin(πx)cos(πy), -cos(πx)sin(πy))
+    // ∇·u = π cos(πx)cos(πy) - π cos(πx)cos(πy) = 0 ✓
     VectorFunction u_exact{
-      sin(pi * F::x) * sin(pi * F::y),
-      -sin(pi * F::x) * sin(pi * F::y)
+      sin(pi * F::x) * cos(pi * F::y),
+      -cos(pi * F::x) * sin(pi * F::y)
     };
 
     // Manufactured pressure solution
     auto p_exact = cos(pi * F::x) * sin(pi * F::y);
 
     // Forcing function (computed from -Δu + ∇p)
+    // -Δu₁ = 2π² sin(πx)cos(πy)
+    // -Δu₂ = 2π² cos(πx)sin(πy)
+    // ∇p = (-π sin(πx)sin(πy), π cos(πx)cos(πy))
     VectorFunction f{
-      2 * pi * pi * sin(pi * F::x) * sin(pi * F::y) - pi * sin(pi * F::x) * sin(pi * F::y),
-      -2 * pi * pi * sin(pi * F::x) * sin(pi * F::y) + pi * cos(pi * F::x) * cos(pi * F::y)
+      2 * pi * pi * sin(pi * F::x) * cos(pi * F::y) - pi * sin(pi * F::x) * sin(pi * F::y),
+      2 * pi * pi * cos(pi * F::x) * sin(pi * F::y) + pi * cos(pi * F::x) * cos(pi * F::y)
     };
 
     // Define trial and test functions
@@ -171,13 +178,14 @@ namespace Rodin::Tests::Manufactured::Stokes
    *  \Omega = [0, 1] \times [0, 1]
    * @f]
    *
-   * Manufactured velocity (polynomial):
+   * Manufactured velocity (divergence-free):
    * @f[
    *  \mathbf{u}(x, y) = \begin{pmatrix}
-   *    x(1-x) y(1-y) \\
-   *    -x(1-x) y(1-y)
+   *    y(1-y) \\
+   *    -x(1-x)
    *  \end{pmatrix}
    * @f]
+   * Note: ∇·u = 0 ✓
    *
    * Manufactured pressure:
    * @f[
@@ -187,10 +195,11 @@ namespace Rodin::Tests::Manufactured::Stokes
    * Forcing function:
    * @f[
    *  \mathbf{f}(x, y) = \begin{pmatrix}
-   *    2y(1-y) + 2x(1-x) + 1 \\
-   *    -2y(1-y) - 2x(1-x) + 1
+   *    3 \\
+   *    -1
    *  \end{pmatrix}
    * @f]
+   * Computed as f = -Δu + ∇p = (2, -2) + (1, 1) = (3, -1)
    *
    * Boundary conditions:
    * @f[
@@ -207,22 +216,23 @@ namespace Rodin::Tests::Manufactured::Stokes
     // Pressure space: H1 of order 1 (linear), scalar
     H1 ph(std::integral_constant<size_t, 1>{}, mesh);
 
-    // Manufactured velocity solution
-    auto u_component = F::x * (1 - F::x) * F::y * (1 - F::y);
+    // Manufactured velocity solution (divergence-free)
+    // Using u = (y(1-y), -x(1-x)) 
+    // ∇·u = ∂(y(1-y))/∂x + ∂(-x(1-x))/∂y = 0 + 0 = 0 ✓
     VectorFunction u_exact{
-      u_component,
-      -u_component
+      F::y * (1 - F::y),
+      -F::x * (1 - F::x)
     };
 
     // Manufactured pressure solution
     auto p_exact = F::x + F::y - 1;
 
-    // Forcing function
-    auto f_component = 2 * F::y * (1 - F::y) + 2 * F::x * (1 - F::x);
-    VectorFunction f{
-      f_component + 1,
-      -f_component + 1
-    };
+    // Forcing function: f = -Δu + ∇p
+    // -Δ(y(1-y)) = -∂²/∂y²[y(1-y)] = -(-2) = 2
+    // -Δ(-x(1-x)) = -∂²/∂x²[-x(1-x)] = -(-(-2)) = -2
+    // ∇p = (1, 1)
+    // Therefore f = (2+1, -2+1) = (3, -1)
+    VectorFunction f{ 3.0, -1.0 };
 
     // Define trial and test functions
     TrialFunction u(uh);
@@ -357,11 +367,14 @@ namespace Rodin::Tests::Manufactured::Stokes
    *  \Omega = [0, 1] \times [0, 1]
    * @f]
    *
-   * Manufactured velocity (quadratic):
+   * Manufactured velocity (divergence-free using stream function):
+   * @f[
+   *  \psi(x, y) = x^2(1-x)^2 y^2(1-y)^2
+   * @f]
    * @f[
    *  \mathbf{u}(x, y) = \begin{pmatrix}
-   *    x^2(1-x)^2 y(1-y) \\
-   *    -x(1-x) y^2(1-y)^2
+   *    \frac{\partial\psi}{\partial y} \\
+   *    -\frac{\partial\psi}{\partial x}
    *  \end{pmatrix}
    * @f]
    *
@@ -372,7 +385,7 @@ namespace Rodin::Tests::Manufactured::Stokes
    *
    * Forcing function (computed from -Δu + ∇p):
    * @f[
-   *  \mathbf{f}(x, y) = \text{(computed)}
+   *  \mathbf{f}(x, y) = -\Delta\mathbf{u} + \nabla p
    * @f]
    *
    * Boundary conditions:
@@ -390,27 +403,50 @@ namespace Rodin::Tests::Manufactured::Stokes
     // Pressure space: H1 of order 1 (linear), scalar
     H1 ph(std::integral_constant<size_t, 1>{}, mesh);
 
-    // Manufactured velocity solution
-    auto u1 = pow(F::x, 2) * pow(1 - F::x, 2) * F::y * (1 - F::y);
-    auto u2 = -F::x * (1 - F::x) * pow(F::y, 2) * pow(1 - F::y, 2);
+    // Manufactured velocity solution (divergence-free)
+    // Using stream function ψ = x²(1-x)² y²(1-y)²
+    // u₁ = ∂ψ/∂y, u₂ = -∂ψ/∂x ensures ∇·u = 0
+    
+    // ∂ψ/∂y = x²(1-x)² · [2y(1-y)² - 2y²(1-y)]
+    //       = 2x²(1-x)² y(1-y) [1-y-y]
+    //       = 2x²(1-x)² y(1-y)(1-2y)
+    auto u1 = 2 * pow(F::x, 2) * pow(1 - F::x, 2) * F::y * (1 - F::y) * (1 - 2 * F::y);
+    
+    // ∂ψ/∂x = [2x(1-x)² - 2x²(1-x)] · y²(1-y)²
+    //       = 2x(1-x) y²(1-y)² [1-x-x]
+    //       = 2x(1-x) y²(1-y)² (1-2x)
+    // u₂ = -∂ψ/∂x
+    auto u2 = -2 * F::x * (1 - F::x) * pow(F::y, 2) * pow(1 - F::y, 2) * (1 - 2 * F::x);
+    
     VectorFunction u_exact{ u1, u2 };
 
     // Manufactured pressure solution
     auto p_exact = pow(F::x, 2) - pow(F::y, 2);
 
-    // Compute Laplacian components manually
-    // For u1 = x^2(1-x)^2 y(1-y):
-    // ∂²u1/∂x² = 2(1-x)^2 y(1-y) - 8x(1-x) y(1-y) + 2x^2 y(1-y)
-    //          = 2y(1-y)[1 - 2x]^2 - 4x(1-x) y(1-y)
-    // ∂²u1/∂y² = x^2(1-x)^2 [-2]
-    auto laplace_u1 = 2 * F::y * (1 - F::y) * (2 - 12 * F::x + 12 * pow(F::x, 2)) 
-                     - 2 * pow(F::x, 2) * pow(1 - F::x, 2);
-
-    // For u2 = -x(1-x) y^2(1-y)^2:
-    // ∂²u2/∂x² = -y^2(1-y)^2 [-2]
-    // ∂²u2/∂y² = -x(1-x) [2(1-y)^2 - 8y(1-y) + 2y^2]
-    auto laplace_u2 = 2 * pow(F::y, 2) * pow(1 - F::y, 2)
-                     - F::x * (1 - F::x) * 2 * (2 - 12 * F::y + 12 * pow(F::y, 2));
+    // Compute Laplacian components
+    // For u1 = 2x²(1-x)² y(1-y)(1-2y), compute ∂²u1/∂x² + ∂²u1/∂y²
+    // This is quite involved, so I'll compute it symbolically:
+    
+    // ∂²u1/∂x² = 2y(1-y)(1-2y) · [2(1-x)² - 8x(1-x) + 2x²]
+    //          = 2y(1-y)(1-2y) · 2[(1-x)² - 4x(1-x) + x²]
+    //          = 4y(1-y)(1-2y) · [1 - 2x - 2x + 2x² - 4x + 4x² + x²]
+    //          = 4y(1-y)(1-2y) · [1 - 6x + 7x²]
+    auto d2u1_dx2 = 4 * F::y * (1 - F::y) * (1 - 2 * F::y) * (1 - 6 * F::x + 7 * pow(F::x, 2));
+    
+    // ∂²u1/∂y² = 2x²(1-x)² · [∂²/∂y²(y(1-y)(1-2y))]
+    //          = 2x²(1-x)² · [(1-2y)(-2) + (-2)(1-y) + (-2)y]
+    //          = 2x²(1-x)² · [-2(1-2y) - 2(1-y) - 2y]
+    //          = 2x²(1-x)² · [-2 + 4y - 2 + 2y - 2y]
+    //          = 2x²(1-x)² · [-4 + 4y]
+    //          = 8x²(1-x)² · (y - 1)
+    auto d2u1_dy2 = 8 * pow(F::x, 2) * pow(1 - F::x, 2) * (F::y - 1);
+    
+    auto laplace_u1 = d2u1_dx2 + d2u1_dy2;
+    
+    // For u2 = -2x(1-x) y²(1-y)² (1-2x), by symmetry or direct computation:
+    auto d2u2_dx2 = -8 * (F::x - 1) * pow(F::y, 2) * pow(1 - F::y, 2);
+    auto d2u2_dy2 = -4 * F::x * (1 - F::x) * (1 - 2 * F::x) * (1 - 6 * F::y + 7 * pow(F::y, 2));
+    auto laplace_u2 = d2u2_dx2 + d2u2_dy2;
 
     // Pressure gradient
     auto grad_p_x = 2 * F::x;
