@@ -19,7 +19,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     TrialFunction u(fes);
     TestFunction v(fes);
@@ -36,7 +36,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     GridFunction gf(fes);
 
@@ -51,7 +51,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // H1<2> can represent linear functions exactly
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     GridFunction gf(fes);
@@ -80,7 +80,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     GridFunction gf(fes);
 
@@ -104,7 +104,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     GridFunction gf(fes);
     gf = RealFunction(1.0);
@@ -122,7 +122,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     TrialFunction u(fes);
     TestFunction v(fes);
@@ -146,7 +146,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // H1<2> (quadratic) can represent quadratic functions exactly
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     GridFunction gf(fes);
@@ -162,7 +162,7 @@ namespace Rodin::Tests::Unit
     // Evaluate at a point in the center of the domain
     auto it = mesh.getPolytope(mesh.getDimension(), mesh.getCellCount() / 2);
     const auto& polytope = *it;
-    const Math::Vector<Real> rc{{0.5, 0.5}};
+    const Math::Vector<Real> rc{{1.0/3.0, 1.0/3.0}};
     Point p(polytope, rc);
 
     auto grad_value = grad_gf.getValue(p);
@@ -179,7 +179,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // H1<3> (cubic) can also represent quadratic functions exactly
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
     GridFunction gf(fes);
@@ -195,24 +195,24 @@ namespace Rodin::Tests::Unit
     // Evaluate at several points
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
-    
+
     std::vector<Math::Vector<Real>> test_coords =
     {
-      Math::Vector<Real>{{ 0.25, 0.25 }},
-      Math::Vector<Real>{{ 0.5, 0.5 }},
-      Math::Vector<Real>{{ 0.75, 0.25 }}
+      Math::Vector<Real>{{ 0.2, 0.2 }},
+      Math::Vector<Real>{{ 0.6, 0.2 }},
+      Math::Vector<Real>{{ 0.2, 0.6 }}
     };
 
     for (const auto& rc : test_coords)
     {
       Point p(polytope, rc);
       auto grad_value = grad_gf.getValue(p);
-      
+
       // For f(x,y) = x^2 + 2xy + y^2, grad f = [2x + 2y, 2x + 2y]
       const auto& phys_coords = p.getPhysicalCoordinates();
       Real expected_grad_x = 2.0 * phys_coords(0) + 2.0 * phys_coords(1);
       Real expected_grad_y = 2.0 * phys_coords(0) + 2.0 * phys_coords(1);
-      
+
       EXPECT_NEAR(grad_value(0), expected_grad_x, 1e-10);
       EXPECT_NEAR(grad_value(1), expected_grad_y, 1e-10);
     }
@@ -223,7 +223,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     GridFunction gf(fes);
 
@@ -239,11 +239,11 @@ namespace Rodin::Tests::Unit
 
     std::vector<Math::Vector<Real>> test_coords =
     {
-      Math::Vector<Real>{{ 0.0, 0.0 }},
-      Math::Vector<Real>{{ 1.0, 0.0 }},
-      Math::Vector<Real>{{ 0.0, 1.0 }},
-      Math::Vector<Real>{{ 0.5, 0.5 }},
-      Math::Vector<Real>{{ 0.25, 0.75 }}
+      Math::Vector<Real>{{ 0.2, 0.2 }},
+      Math::Vector<Real>{{ 0.6, 0.2 }},
+      Math::Vector<Real>{{ 0.2, 0.6 }},
+      Math::Vector<Real>{{ 1.0/3.0, 1.0/3.0 }},
+      Math::Vector<Real>{{ 0.1, 0.7 }} // sum=0.8
     };
 
     for (const auto& rc : test_coords)
@@ -271,12 +271,12 @@ namespace Rodin::Tests::Unit
       GridFunction gf(fes);
       gf.project(linear_func);
       auto grad_gf = Grad(gf);
-      
+
       auto it = mesh.getPolytope(mesh.getDimension(), 0);
       const auto& polytope = *it;
       Point p(polytope, Math::Vector<Real>{{0.5, 0.5}});
       auto grad_value = grad_gf.getValue(p);
-      
+
       EXPECT_NEAR(grad_value(0), 3.0, RODIN_FUZZY_CONSTANT);
       EXPECT_NEAR(grad_value(1), 4.0, RODIN_FUZZY_CONSTANT);
     }
@@ -287,12 +287,12 @@ namespace Rodin::Tests::Unit
       GridFunction gf(fes);
       gf.project(linear_func);
       auto grad_gf = Grad(gf);
-      
+
       auto it = mesh.getPolytope(mesh.getDimension(), 0);
       const auto& polytope = *it;
       Point p(polytope, Math::Vector<Real>{{0.5, 0.5}});
       auto grad_value = grad_gf.getValue(p);
-      
+
       EXPECT_NEAR(grad_value(0), 3.0, RODIN_FUZZY_CONSTANT);
       EXPECT_NEAR(grad_value(1), 4.0, RODIN_FUZZY_CONSTANT);
     }
@@ -303,14 +303,288 @@ namespace Rodin::Tests::Unit
       GridFunction gf(fes);
       gf.project(linear_func);
       auto grad_gf = Grad(gf);
-      
+
       auto it = mesh.getPolytope(mesh.getDimension(), 0);
       const auto& polytope = *it;
       Point p(polytope, Math::Vector<Real>{{0.5, 0.5}});
       auto grad_value = grad_gf.getValue(p);
-      
+
       EXPECT_NEAR(grad_value(0), 3.0, RODIN_FUZZY_CONSTANT);
       EXPECT_NEAR(grad_value(1), 4.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Grad_Tet, ShapeFunction_Construction)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    TrialFunction u(fes);
+    TestFunction v(fes);
+
+    auto grad_u = Grad(u);
+    auto grad_v = Grad(v);
+
+    // No explicit asserts here: compilation + construction is the test.
+    (void)grad_u;
+    (void)grad_v;
+  }
+
+  TEST(Rodin_Variational_H1_Grad_Tet, GridFunction_Construction)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    GridFunction gf(fes);
+
+    auto grad_gf = Grad(gf);
+
+    EXPECT_EQ(&grad_gf.getOperand(), &gf);
+  }
+
+  TEST(Rodin_Variational_H1_Grad_Tet, GridFunction_ConstantFunction)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    GridFunction gf(fes);
+
+    gf = RealFunction(42.0);
+
+    auto grad_gf = Grad(gf);
+
+    auto it = mesh.getPolytope(mesh.getDimension(), 0);
+    const auto& cell = *it;
+
+    // Interior reference point (sum < 1)
+    const Math::Vector<Real> rc{{ 0.2, 0.2, 0.2 }};
+    Point p(cell, rc);
+
+    auto grad_value = grad_gf.getValue(p);
+    EXPECT_NEAR(grad_value.norm(), 0.0, RODIN_FUZZY_CONSTANT);
+  }
+
+  TEST(Rodin_Variational_H1_Grad_Tet, GridFunction_LinearFunction_H1_2)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    // H1<2> can represent linear functions exactly.
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    GridFunction gf(fes);
+
+    // f(x,y,z) = 3x + 4y + 5z
+    RealFunction linear_func([](const Geometry::Point& p)
+    {
+      return 3.0 * p.x() + 4.0 * p.y() + 5.0 * p.z();
+    });
+    gf.project(linear_func);
+
+    auto grad_gf = Grad(gf);
+
+    auto it = mesh.getPolytope(mesh.getDimension(), 0);
+    const auto& cell = *it;
+
+    const Math::Vector<Real> rc{{ 0.25, 0.25, 0.25 }};
+    Point p(cell, rc);
+
+    auto grad_value = grad_gf.getValue(p);
+
+    EXPECT_NEAR(grad_value(0), 3.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(grad_value(1), 4.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(grad_value(2), 5.0, RODIN_FUZZY_CONSTANT);
+  }
+
+  TEST(Rodin_Variational_H1_Grad_Tet, GridFunction_QuadraticFunction_H1_2)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    // H1<2> can represent quadratics exactly.
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    GridFunction gf(fes);
+
+    // f(x,y,z) = x^2 + y^2 + z^2
+    RealFunction quad([](const Geometry::Point& p)
+    {
+      return p.x() * p.x() + p.y() * p.y() + p.z() * p.z();
+    });
+    gf.project(quad);
+
+    auto grad_gf = Grad(gf);
+
+    auto it = mesh.getPolytope(mesh.getDimension(), mesh.getCellCount() / 2);
+    const auto& cell = *it;
+
+    const Math::Vector<Real> rc{{ 0.2, 0.3, 0.1 }}; // sum = 0.6 < 1
+    Point p(cell, rc);
+
+    auto grad_value = grad_gf.getValue(p);
+
+    const auto& X = p.getPhysicalCoordinates();
+    EXPECT_NEAR(grad_value(0), 2.0 * X(0), 1e-10);
+    EXPECT_NEAR(grad_value(1), 2.0 * X(1), 1e-10);
+    EXPECT_NEAR(grad_value(2), 2.0 * X(2), 1e-10);
+  }
+
+  TEST(Rodin_Variational_H1_Grad_Tet, GridFunction_QuadraticFunction_H1_3)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    // H1<3> can also represent quadratics exactly.
+    H1 fes(std::integral_constant<size_t, 3>{}, mesh);
+    GridFunction gf(fes);
+
+    // f(x,y,z) = x^2 + 2xy + y^2 + 3z^2
+    RealFunction quad([](const Geometry::Point& p)
+    {
+      return p.x()*p.x() + 2.0*p.x()*p.y() + p.y()*p.y() + 3.0*p.z()*p.z();
+    });
+    gf.project(quad);
+
+    auto grad_gf = Grad(gf);
+
+    auto it = mesh.getPolytope(mesh.getDimension(), 0);
+    const auto& cell = *it;
+
+    std::vector<Math::Vector<Real>> test_coords =
+    {
+      Math::Vector<Real>{{ 0.1, 0.1, 0.1 }}, // sum=0.3
+      Math::Vector<Real>{{ 0.2, 0.3, 0.1 }}, // sum=0.6
+      Math::Vector<Real>{{ 0.3, 0.1, 0.2 }}  // sum=0.6
+    };
+
+    for (const auto& rc : test_coords)
+    {
+      Point p(cell, rc);
+      auto grad_value = grad_gf.getValue(p);
+
+      const auto& X = p.getPhysicalCoordinates();
+
+      // ∇f = [2x + 2y, 2x + 2y, 6z]
+      const Real ex = 2.0 * X(0) + 2.0 * X(1);
+      const Real ey = 2.0 * X(0) + 2.0 * X(1);
+      const Real ez = 6.0 * X(2);
+
+      EXPECT_NEAR(grad_value(0), ex, 1e-10);
+      EXPECT_NEAR(grad_value(1), ey, 1e-10);
+      EXPECT_NEAR(grad_value(2), ez, 1e-10);
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Grad_Tet, MultipleEvaluations)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    GridFunction gf(fes);
+
+    // f(x,y,z) = x + 2y + 3z  -> ∇f = [1,2,3]
+    RealFunction linear_func([](const Geometry::Point& p)
+    {
+      return p.x() + 2.0 * p.y() + 3.0 * p.z();
+    });
+    gf.project(linear_func);
+
+    auto grad_gf = Grad(gf);
+
+    auto it = mesh.getPolytope(mesh.getDimension(), 0);
+    const auto& cell = *it;
+
+    std::vector<Math::Vector<Real>> test_coords =
+    {
+      Math::Vector<Real>{{ 0.1, 0.1, 0.1 }},
+      Math::Vector<Real>{{ 0.2, 0.2, 0.1 }},
+      Math::Vector<Real>{{ 0.3, 0.1, 0.1 }},
+      Math::Vector<Real>{{ 0.2, 0.3, 0.1 }},
+      Math::Vector<Real>{{ 0.1, 0.2, 0.3 }}
+    };
+
+    for (const auto& rc : test_coords)
+    {
+      ASSERT_LT(rc(0) + rc(1) + rc(2), 1.0); // stay inside reference tet
+      Point p(cell, rc);
+      auto grad_value = grad_gf.getValue(p);
+
+      EXPECT_NEAR(grad_value(0), 1.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(grad_value(1), 2.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(grad_value(2), 3.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Grad_Tet, DifferentPolynomialDegrees)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    // f(x,y,z) = 3x + 4y + 5z
+    RealFunction linear_func([](const Geometry::Point& p)
+    {
+      return 3.0 * p.x() + 4.0 * p.y() + 5.0 * p.z();
+    });
+
+    auto it = mesh.getPolytope(mesh.getDimension(), 0);
+    const auto& cell = *it;
+    Point p(cell, Math::Vector<Real>{{ 0.25, 0.25, 0.25 }});
+
+    // H1<1>
+    {
+      H1 fes(std::integral_constant<size_t, 1>{}, mesh);
+      GridFunction gf(fes);
+      gf.project(linear_func);
+      auto grad_gf = Grad(gf);
+      auto g = grad_gf.getValue(p);
+
+      EXPECT_NEAR(g(0), 3.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(g(1), 4.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(g(2), 5.0, RODIN_FUZZY_CONSTANT);
+    }
+
+    // H1<2>
+    {
+      H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+      GridFunction gf(fes);
+      gf.project(linear_func);
+      auto grad_gf = Grad(gf);
+      auto g = grad_gf.getValue(p);
+
+      EXPECT_NEAR(g(0), 3.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(g(1), 4.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(g(2), 5.0, RODIN_FUZZY_CONSTANT);
+    }
+
+    // H1<3>
+    {
+      H1 fes(std::integral_constant<size_t, 3>{}, mesh);
+      GridFunction gf(fes);
+      gf.project(linear_func);
+      auto grad_gf = Grad(gf);
+      auto g = grad_gf.getValue(p);
+
+      EXPECT_NEAR(g(0), 3.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(g(1), 4.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(g(2), 5.0, RODIN_FUZZY_CONSTANT);
     }
   }
 }
