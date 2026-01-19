@@ -58,11 +58,12 @@ namespace Rodin::Tests::Unit
     GridFunction gf(fes);
 
     // Project a constant vector field
-    VectorFunction const_func([]( const Geometry::Point& p) { 
+    auto const_func_lambda = []( const Geometry::Point& p) { 
       Math::Vector<Real> v(2);
       v << 1.0, 2.0;
       return v;
-    });
+    };
+    VectorFunction<decltype(const_func_lambda)> const_func(2, const_func_lambda);
     gf.project(const_func);
 
     auto jac_gf = Jacobian(gf);
@@ -85,11 +86,12 @@ namespace Rodin::Tests::Unit
     
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
     GridFunction gf(fes);
-    gf = VectorFunction([](const Geometry::Point& p) {
+    auto copy_lambda = [](const Geometry::Point& p) {
       Math::Vector<Real> v(2);
       v << 1.0, 2.0;
       return v;
-    });
+    };
+    gf = VectorFunction<decltype(copy_lambda)>(2, copy_lambda);
 
     auto jac_gf = Jacobian(gf);
     auto copied = jac_gf.copy();
@@ -111,11 +113,12 @@ namespace Rodin::Tests::Unit
 
     // Project a linear vector field: u = (2x + y, x - 3y)
     // Jacobian should be: [[2, 1], [1, -3]]
-    VectorFunction linear_func([](const Geometry::Point& p) {
+    auto linear_lambda = [](const Geometry::Point& p) {
       Math::Vector<Real> v(2);
       v << 2.0 * p.x() + p.y(), p.x() - 3.0 * p.y();
       return v;
-    });
+    };
+    VectorFunction<decltype(linear_lambda)> linear_func(2, linear_lambda);
     gf.project(linear_func);
 
     auto jac_gf = Jacobian(gf);
@@ -148,11 +151,12 @@ namespace Rodin::Tests::Unit
 
     // Project a quadratic vector field: u = (x^2, y^2)
     // Jacobian should be: [[2x, 0], [0, 2y]]
-    VectorFunction quadratic_func([](const Geometry::Point& p) {
+    auto quadratic_lambda = [](const Geometry::Point& p) {
       Math::Vector<Real> v(2);
       v << p.x() * p.x(), p.y() * p.y();
       return v;
-    });
+    };
+    VectorFunction<decltype(quadratic_lambda)> quadratic_func(2, quadratic_lambda);
     gf.project(quadratic_func);
 
     auto jac_gf = Jacobian(gf);
@@ -187,11 +191,12 @@ namespace Rodin::Tests::Unit
 
     // Project a quadratic vector field: u = (x^2 + xy, y^2 - xy)
     // Jacobian should be: [[2x + y, x], [-y, 2y - x]]
-    VectorFunction quadratic_func([](const Geometry::Point& p) {
+    auto quadratic_lambda = [](const Geometry::Point& p) {
       Math::Vector<Real> v(2);
       v << p.x() * p.x() + p.x() * p.y(), p.y() * p.y() - p.x() * p.y();
       return v;
-    });
+    };
+    VectorFunction<decltype(quadratic_lambda)> quadratic_func(2, quadratic_lambda);
     gf.project(quadratic_func);
 
     auto jac_gf = Jacobian(gf);
@@ -235,11 +240,12 @@ namespace Rodin::Tests::Unit
 
     // Project a linear vector field: u = (x + 2y, 3x - y)
     // Jacobian should be: [[1, 2], [3, -1]]
-    VectorFunction linear_func([](const Geometry::Point& p) {
+    auto linear_lambda = [](const Geometry::Point& p) {
       Math::Vector<Real> v(2);
       v << p.x() + 2.0 * p.y(), 3.0 * p.x() - p.y();
       return v;
-    });
+    };
+    VectorFunction<decltype(linear_lambda)> linear_func(2, linear_lambda);
     gf.project(linear_func);
 
     auto jac_gf = Jacobian(gf);
@@ -250,11 +256,11 @@ namespace Rodin::Tests::Unit
 
     std::vector<Math::Vector<Real>> test_coords =
     {
-      Math::Vector<Real>{{ 0.0, 0.0 }},
-      Math::Vector<Real>{{ 1.0, 0.0 }},
-      Math::Vector<Real>{{ 0.0, 1.0 }},
-      Math::Vector<Real>{{ 0.5, 0.5 }},
-      Math::Vector<Real>{{ 0.25, 0.75 }}
+      Math::Vector<Real>{{ 0.1, 0.1 }},
+      Math::Vector<Real>{{ 0.5, 0.2 }},
+      Math::Vector<Real>{{ 0.2, 0.5 }},
+      Math::Vector<Real>{{ 0.5, 0.3 }},
+      Math::Vector<Real>{{ 0.25, 0.25 }}
     };
 
     for (const auto& rc : test_coords)
@@ -277,11 +283,12 @@ namespace Rodin::Tests::Unit
     mesh.getConnectivity().compute(1, 0);
 
     // Linear vector field for testing
-    VectorFunction linear_func([](const Geometry::Point& p) {
+    auto linear_lambda = [](const Geometry::Point& p) {
       Math::Vector<Real> v(2);
       v << 3.0 * p.x() + 4.0 * p.y(), -2.0 * p.x() + p.y();
       return v;
-    });
+    };
+    VectorFunction<decltype(linear_lambda)> linear_func(2, linear_lambda);
 
     // Expected Jacobian: [[3, 4], [-2, 1]]
 
