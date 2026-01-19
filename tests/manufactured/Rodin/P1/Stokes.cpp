@@ -429,23 +429,25 @@ namespace Rodin::Tests::Manufactured::Stokes
     
     // ∂²u1/∂x² = 2y(1-y)(1-2y) · [2(1-x)² - 8x(1-x) + 2x²]
     //          = 2y(1-y)(1-2y) · 2[(1-x)² - 4x(1-x) + x²]
-    //          = 4y(1-y)(1-2y) · [1 - 2x - 2x + 2x² - 4x + 4x² + x²]
-    //          = 4y(1-y)(1-2y) · [1 - 6x + 7x²]
-    auto d2u1_dx2 = 4 * F::y * (1 - F::y) * (1 - 2 * F::y) * (1 - 6 * F::x + 7 * pow(F::x, 2));
+    //          = 4y(1-y)(1-2y) · [1 - 2x + x² - 4x + 4x² + x²]
+    //          = 4y(1-y)(1-2y) · [1 - 6x + 6x²]
+    auto d2u1_dx2 = 4 * F::y * (1 - F::y) * (1 - 2 * F::y) * (1 - 6 * F::x + 6 * pow(F::x, 2));
     
     // ∂²u1/∂y² = 2x²(1-x)² · [∂²/∂y²(y(1-y)(1-2y))]
-    //          = 2x²(1-x)² · [(1-2y)(-2) + (-2)(1-y) + (-2)y]
-    //          = 2x²(1-x)² · [-2(1-2y) - 2(1-y) - 2y]
-    //          = 2x²(1-x)² · [-2 + 4y - 2 + 2y - 2y]
-    //          = 2x²(1-x)² · [-4 + 4y]
-    //          = 8x²(1-x)² · (y - 1)
-    auto d2u1_dy2 = 8 * pow(F::x, 2) * pow(1 - F::x, 2) * (F::y - 1);
+    // Let g(y) = y(1-y)(1-2y) = y(1-3y+2y²) = y - 3y² + 2y³
+    // g'(y) = 1 - 6y + 6y²
+    // g''(y) = -6 + 12y
+    auto d2u1_dy2 = 2 * pow(F::x, 2) * pow(1 - F::x, 2) * (-6 + 12 * F::y);
     
     auto laplace_u1 = d2u1_dx2 + d2u1_dy2;
     
-    // For u2 = -2x(1-x) y²(1-y)² (1-2x), by symmetry or direct computation:
-    auto d2u2_dx2 = -8 * (F::x - 1) * pow(F::y, 2) * pow(1 - F::y, 2);
-    auto d2u2_dy2 = -4 * F::x * (1 - F::x) * (1 - 2 * F::x) * (1 - 6 * F::y + 7 * pow(F::y, 2));
+    // For u2 = -2x(1-x) y²(1-y)² (1-2x), by symmetry:
+    // Let h(x) = x(1-x)(1-2x) = x(1-3x+2x²) = x - 3x² + 2x³
+    // h'(x) = 1 - 6x + 6x²
+    // h''(x) = -6 + 12x
+    auto d2u2_dx2 = -2 * pow(F::y, 2) * pow(1 - F::y, 2) * (-6 + 12 * F::x);
+    
+    auto d2u2_dy2 = -2 * F::x * (1 - F::x) * (1 - 2 * F::x) * (1 - 6 * F::y + 6 * pow(F::y, 2));
     auto laplace_u2 = d2u2_dx2 + d2u2_dy2;
 
     // Pressure gradient
