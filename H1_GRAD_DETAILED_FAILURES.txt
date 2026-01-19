@@ -1,0 +1,280 @@
+================================================================================
+                    H1 GRAD TEST - DETAILED FAILURE REPORT
+================================================================================
+
+BUILD SUMMARY
+═════════════════════════════════════════════════════════════════════════════════
+Status:        ✅ SUCCESS
+Target:        RodinVariationalH1GradTest
+Build Time:    ~3 seconds
+Warnings:      Several compiler warnings (unused variables, sign comparisons)
+                but no errors
+
+
+TEST EXECUTION SUMMARY
+═════════════════════════════════════════════════════════════════════════════════
+Total Tests Run:        10
+Passed:                 5 ✅
+Failed:                 5 ❌
+Total Execution Time:   18ms
+
+
+DETAILED FAILURE #1: GridFunction_LinearFunction
+═════════════════════════════════════════════════════════════════════════════════
+File:           tests/unit/Rodin/Variational/H1/GradTest.cpp
+Test Function:  Rodin_Variational_H1_Grad.GridFunction_LinearFunction (Lines 49-76)
+Status:         ❌ FAILED (1ms)
+
+What was being tested:
+  - Projecting a linear function f(x,y) = 3x + 4y onto H1<2> (quadratic space)
+  - Computing the gradient at point (0.5, 0.5) in reference coordinates
+  - Expected gradient: [3.0, 4.0] (constant for linear functions)
+
+Failure Location:
+  Line 75: EXPECT_NEAR(grad_value(1), 4.0, RODIN_FUZZY_CONSTANT);
+
+Error Message:
+  The difference between grad_value(1) and 4.0 is 6.000000000000024, 
+  which exceeds 1e-5, where
+    grad_value(1) evaluates to -2.000000000000024,
+    4.0 evaluates to 4,
+    1e-5 evaluates to 1.0000000000000001e-05.
+
+Analysis:
+  ┌─────────────────────────────────────────┐
+  │ Component │ Expected │ Got     │ Error   │
+  ├─────────────────────────────────────────┤
+  │ [0]       │ 3.0      │ ? (not  │ ?       │
+  │           │          │ shown)  │         │
+  │ [1]       │ 4.0      │ -2.000  │ -6.000  │
+  │           │          │ 000024  │ 000024  │
+  └─────────────────────────────────────────┘
+
+Issue: The y-component gradient has the WRONG SIGN and WRONG MAGNITUDE
+
+
+DETAILED FAILURE #2: GridFunction_QuadraticFunction_H1_2
+═════════════════════════════════════════════════════════════════════════════════
+File:           tests/unit/Rodin/Variational/H1/GradTest.cpp
+Test Function:  Rodin_Variational_H1_Grad.GridFunction_QuadraticFunction_H1_2 
+                (Lines 144-175)
+Status:         ❌ FAILED (1ms)
+
+What was being tested:
+  - Projecting quadratic function f(x,y) = x² + y² onto H1<2> (quadratic space)
+  - Computing gradient at physical coordinates (1.5, 2.0) [center of domain]
+  - Expected gradient: [2*1.5, 2*2.0] = [3.0, 4.0]
+  - (Should be exact since H1<2> can represent quadratic functions exactly)
+
+Failure Locations:
+  Line 173: EXPECT_NEAR(grad_value(0), 2.0 * phys_coords(0), 1e-10);
+  Line 174: EXPECT_NEAR(grad_value(1), 2.0 * phys_coords(1), 1e-10);
+
+Error Messages:
+
+  Failure 1 (grad_value(0)):
+    The difference between grad_value(0) and 2.0 * phys_coords(0) is 
+    10.500000000000107, which exceeds 1e-10, where
+      grad_value(0) evaluates to 13.500000000000107,
+      2.0 * phys_coords(0) evaluates to 3,
+      1e-10 evaluates to 1e-10.
+
+  Failure 2 (grad_value(1)):
+    The difference between grad_value(1) and 2.0 * phys_coords(1) is 
+    1.5000000000000497, which exceeds 1e-10, where
+      grad_value(1) evaluates to 5.5000000000000497,
+      2.0 * phys_coords(1) evaluates to 4,
+      1e-10 evaluates to 1e-10.
+
+Analysis:
+  ┌──────────────────────────────────────────────────────┐
+  │ Component │ Expected │ Got       │ Error              │
+  ├──────────────────────────────────────────────────────┤
+  │ [0]       │ 3.0      │ 13.5      │ +10.5 (350% error) │
+  │ [1]       │ 4.0      │ 5.5       │ +1.5 (37.5% error) │
+  └──────────────────────────────────────────────────────┘
+
+Issue: MAGNITUDES COMPLETELY WRONG - not just wrong sign, values are off
+
+
+DETAILED FAILURE #3: GridFunction_QuadraticFunction_H1_3
+═════════════════════════════════════════════════════════════════════════════════
+File:           tests/unit/Rodin/Variational/H1/GradTest.cpp
+Test Function:  Rodin_Variational_H1_Grad.GridFunction_QuadraticFunction_H1_3 
+                (Lines 177-219)
+Status:         ❌ FAILED (3ms) [Multiple point evaluations]
+
+What was being tested:
+  - Projecting f(x,y) = x² + 2xy + y² onto H1<3> (cubic space)
+  - Computing gradient at 3 evaluation points
+  - Expected gradient: [2x + 2y, 2x + 2y] everywhere
+  - (Should be exact since H1<3> can represent quadratic functions)
+
+Evaluated Points and Results:
+
+Point 1: Reference (0.25, 0.25)
+  ┌──────────────────────────────────────────────────────┐
+  │ Component │ Expected │ Got      │ Error              │
+  ├──────────────────────────────────────────────────────┤
+  │ [0]       │ 1.0      │ 0.9907   │ -0.0093 (0.93%)    │
+  │ [1]       │ 1.0      │ 0.3735   │ -0.6265 (62.65%)   │
+  └──────────────────────────────────────────────────────┘
+
+Point 2: Reference (0.5, 0.5)
+  ┌──────────────────────────────────────────────────────┐
+  │ Component │ Expected │ Got       │ Error              │
+  ├──────────────────────────────────────────────────────┤
+  │ [0]       │ 2.0      │ 1.8333    │ -0.1667 (8.33%)    │
+  │ [1]       │ 2.0      │ -1.8333   │ -3.8333 (191.67%)  │
+  └──────────────────────────────────────────────────────┘
+
+Point 3: Reference (0.75, 0.25)
+  ┌──────────────────────────────────────────────────────┐
+  │ Component │ Expected │ Got      │ Error              │
+  ├──────────────────────────────────────────────────────┤
+  │ [0]       │ 2.0      │ 2.0278   │ +0.0278 (1.39%)    │
+  │ [1]       │ 2.0      │ -2.0278  │ -4.0278 (201.39%)  │
+  └──────────────────────────────────────────────────────┘
+
+Issue: Y-COMPONENT CONSISTENTLY NEGATIVE - systematic error across all points
+
+
+DETAILED FAILURE #4: MultipleEvaluations
+═════════════════════════════════════════════════════════════════════════════════
+File:           tests/unit/Rodin/Variational/H1/GradTest.cpp
+Test Function:  Rodin_Variational_H1_Grad.MultipleEvaluations (Lines 221-257)
+Status:         ❌ FAILED (0ms)
+
+What was being tested:
+  - Projecting f(x,y) = x + 2y onto H1<2> (quadratic space)
+  - Computing gradient at 5 different reference coordinates
+  - Expected gradient: [1.0, 2.0] everywhere (constant for linear functions)
+
+Test Coordinates and Results:
+
+Point 1: (0.0, 0.0)
+  ┌──────────────────────────────────────────────────────┐
+  │ Component │ Expected │ Got            │ Error        │
+  ├──────────────────────────────────────────────────────┤
+  │ [0]       │ 1.0      │ 0.0            │ -1.0         │
+  │ [1]       │ 2.0      │ 4.44e-16       │ -2.0         │
+  └──────────────────────────────────────────────────────┘
+
+Point 2: (1.0, 0.0)
+  ┌──────────────────────────────────────────────────────┐
+  │ Component │ Expected │ Got       │ Error            │
+  ├──────────────────────────────────────────────────────┤
+  │ [0]       │ 1.0      │ ? (not    │ ?                │
+  │           │          │ shown)    │                  │
+  │ [1]       │ 2.0      │ 0.0       │ -2.0 (100% error)│
+  └──────────────────────────────────────────────────────┘
+
+Point 3: (0.0, 1.0)
+  ┌──────────────────────────────────────────────────────┐
+  │ Component │ Expected │ Got                │ Error     │
+  ├──────────────────────────────────────────────────────┤
+  │ [0]       │ 1.0      │ ? (not shown)      │ ?         │
+  │ [1]       │ 2.0      │ 0.0                │ -2.0      │
+  └──────────────────────────────────────────────────────┘
+
+Points 4-5: (0.5, 0.5), (0.25, 0.75)
+  Similar results: Y-component is 0 or near floating-point noise
+
+Issue: GRADIENTS IN Y-DIRECTION ARE COMPLETELY ZERO
+
+
+DETAILED FAILURE #5: DifferentPolynomialDegrees
+═════════════════════════════════════════════════════════════════════════════════
+File:           tests/unit/Rodin/Variational/H1/GradTest.cpp
+Test Function:  Rodin_Variational_H1_Grad.DifferentPolynomialDegrees 
+                (Lines 259-315)
+Status:         ❌ FAILED (2ms)
+
+What was being tested:
+  - Same linear function f(x,y) = 3x + 4y with different H1 spaces
+  - Testing H1<1> (linear), H1<2> (quadratic), H1<3> (cubic) spaces
+  - All should give exact gradient [3, 4] since function is linear
+  - Expected gradient everywhere: [3.0, 4.0]
+
+Test 1: H1<1> (Linear basis)
+  ┌──────────────────────────────────────────────────────┐
+  │ Component │ Expected │ Got    │ Error              │
+  ├──────────────────────────────────────────────────────┤
+  │ [0]       │ 3.0      │ 6.0    │ +3.0 (100% error)  │
+  │ [1]       │ 4.0      │ -2.0   │ -6.0 (150% error)  │
+  └──────────────────────────────────────────────────────┘
+
+Test 2: H1<2> (Quadratic basis)
+  ┌──────────────────────────────────────────────────────┐
+  │ Component │ Expected │ Got                 │ Error  │
+  ├──────────────────────────────────────────────────────┤
+  │ [0]       │ 3.0      │ ? (not shown)       │ ?      │
+  │ [1]       │ 4.0      │ -2.000000000000024  │ -6.0   │
+  └──────────────────────────────────────────────────────┘
+
+Test 3: H1<3> (Cubic basis)
+  ┌──────────────────────────────────────────────────────┐
+  │ Component │ Expected │ Got                    │ Error │
+  ├──────────────────────────────────────────────────────┤
+  │ [0]       │ 3.0      │ ? (not shown)          │ ?     │
+  │ [1]       │ 4.0      │ -2.0000000000000946    │ -6.0  │
+  └──────────────────────────────────────────────────────┘
+
+Issue: Y-COMPONENT CONSISTENTLY -2 ACROSS ALL POLYNOMIAL DEGREES
+       X-COMPONENT WRONG FOR H1<1> (off by factor of 2)
+
+
+CROSS-TEST PATTERN ANALYSIS
+═════════════════════════════════════════════════════════════════════════════════
+
+Observation 1: Y-COMPONENT SIGN ERROR
+  ❌ GridFunction_LinearFunction:        y-grad = -2.0 (expected 4.0)
+  ❌ GridFunction_QuadraticFunction_H1_3: y-grad often negative
+  ❌ MultipleEvaluations:                 y-grad = 0 across all points
+  ❌ DifferentPolynomialDegrees:          y-grad = -2.0 across all spaces
+
+  VERDICT: SYSTEMATIC ERROR IN Y-COMPONENT COMPUTATION
+
+Observation 2: WRONG MAGNITUDES
+  ❌ GridFunction_QuadraticFunction_H1_2: grad[0] = 13.5 (expected 3.0)
+  ❌ GridFunction_LinearFunction:         grad[1] = -2.0 (expected 4.0)
+
+  VERDICT: JACOBIAN TRANSFORMATION LIKELY INCORRECT
+
+Observation 3: POLYNOMIAL DEGREE DOESN'T HELP
+  ❌ All test failures persist across H1<1>, H1<2>, H1<3>
+  ❌ Higher polynomial degrees don't give better accuracy
+
+  VERDICT: NOT A BASIS FUNCTION APPROXIMATION ISSUE
+          LIKELY AN IMPLEMENTATION BUG
+
+
+================================================================================
+                           SUMMARY OF FAILURES
+================================================================================
+
+FAILED TEST CASES:
+  1. GridFunction_LinearFunction
+  2. GridFunction_QuadraticFunction_H1_2
+  3. GridFunction_QuadraticFunction_H1_3
+  4. MultipleEvaluations
+  5. DifferentPolynomialDegrees
+
+PASSED TEST CASES:
+  1. ShapeFunction_Construction
+  2. GridFunction_Construction
+  3. GridFunction_ConstantFunction
+  4. Copy
+  5. UsageInBilinearForm (assembly works even though evaluation is wrong)
+
+KEY FINDING: The Grad operator can be assembled and used in forms, but
+the actual gradient EVALUATION (getValue) is incorrect.
+
+SUSPECTED CODE LOCATION:
+  File: src/Rodin/Variational/H1/Grad.h
+  Lines: 160-172 (the interpolate method for GridFunction)
+  
+  Specific problem: Likely in how the Jacobian inverse transformation is
+  being applied to convert reference gradients to physical gradients.
+
+================================================================================

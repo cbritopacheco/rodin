@@ -62,5 +62,6 @@
 
 #include "H1/H1.h"
 #include "H1/H1Element.h"
+#include "H1/Grad.h"
 
 #endif

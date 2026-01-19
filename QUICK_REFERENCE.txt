@@ -1,0 +1,81 @@
+================================================================================
+                    H1 GRAD TEST - QUICK REFERENCE GUIDE
+================================================================================
+
+BUILD & RUN COMMAND:
+  mkdir -p build && cd build
+  cmake -DCMAKE_BUILD_TYPE=Debug -DRODIN_BUILD_UNIT_TESTS=ON ..
+  cmake --build . --target RodinVariationalH1GradTest
+  ./tests/unit/Rodin/Variational/H1/RodinVariationalH1GradTest
+
+TEST STATISTICS:
+  Total:   10 tests
+  Passed:  5  tests ✅
+  Failed:  5  tests ❌
+  Time:    18ms
+
+FAILED TESTS SUMMARY:
+  1. GridFunction_LinearFunction
+     └─ Y-gradient = -2.0 (expected 4.0)
+
+  2. GridFunction_QuadraticFunction_H1_2
+     └─ Gradient [13.5, 5.5] (expected [3.0, 4.0])
+
+  3. GridFunction_QuadraticFunction_H1_3
+     └─ Y-gradient consistently negative
+
+  4. MultipleEvaluations
+     └─ Y-gradient = 0 at all 5 test points
+
+  5. DifferentPolynomialDegrees
+     └─ Y-gradient = -2.0 across H1<1>, H1<2>, H1<3>
+
+COMMON PATTERN:
+  ⚠️  Y-component of gradient is ALWAYS wrong
+  ⚠️  Error affects all polynomial degrees
+  ⚠️  Error affects all evaluation points
+  ⚠️  Point evaluation fails but assembly works
+
+BUG LOCATION:
+  File: src/Rodin/Variational/H1/Grad.h
+  Method: interpolate() for GridFunction specialization
+  Lines: 160-172
+  
+  Most likely issue: Line 171
+  ```cpp
+  out = p.getJacobianInverse().transpose() * s_res;
+  ```
+  Jacobian transformation is incorrect
+
+ROOT CAUSE INDICATORS:
+  ✓ Construction tests pass → not an initialization issue
+  ✓ Copy tests pass → not a memory/reference issue
+  ✓ Assembly tests pass → not a basis function issue
+  ✓ Constant function test passes → not a zero issue
+  ✗ Point evaluation fails → issue in interpolate method
+  ✗ ALL y-components wrong → systematic transformation bug
+
+DETAILED REPORTS AVAILABLE:
+  1. TEST_EXECUTION_REPORT.md (7.3 KB)
+     └─ Comprehensive analysis with recommendations
+  
+  2. H1_GRAD_TEST_SUMMARY.md (6.7 KB)
+     └─ Detailed breakdown of each failing test
+  
+  3. H1_GRAD_DETAILED_FAILURES.txt (17 KB)
+     └─ Formatted failure report with tables and patterns
+
+QUICK DEBUG COMMAND:
+  cd /home/runner/work/rodin/rodin/build
+  ./tests/unit/Rodin/Variational/H1/RodinVariationalH1GradTest \
+    --gtest_filter="Rodin_Variational_H1_Grad.GridFunction_LinearFunction" \
+    --gtest_color=yes
+
+KEY FACTS:
+  • 50% test failure rate (5 of 10 tests)
+  • Y-component ALWAYS wrong
+  • No approximation errors (linear functions exact)
+  • Systematic bug in Jacobian transformation
+  • HIGH PRIORITY - core functionality affected
+
+================================================================================
