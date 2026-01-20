@@ -593,7 +593,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     GridFunction gf(fes);
 
@@ -613,7 +613,7 @@ namespace Rodin::Tests::Unit
       Index cellIdx = gen() * (mesh.getCellCount() - 1);
       auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
       const auto& polytope = *it;
-      
+
       Real x = gen();
       Real y = gen();
       if (x + y > 1.0) {
@@ -634,7 +634,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 5, 5 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // H1<2> can represent quadratic functions exactly
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     GridFunction gf(fes);
@@ -655,7 +655,7 @@ namespace Rodin::Tests::Unit
       Index cellIdx = gen() * (mesh.getCellCount() - 1);
       auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
       const auto& polytope = *it;
-      
+
       Real x = gen();
       Real y = gen();
       if (x + y > 1.0) {
@@ -667,7 +667,7 @@ namespace Rodin::Tests::Unit
 
       auto grad_value = grad_gf.getValue(p);
       const auto& phys_coords = p.getPhysicalCoordinates();
-      
+
       // Expected gradient: [2x, 2y]
       EXPECT_NEAR(grad_value(0), 2.0 * phys_coords(0), 1e-10);
       EXPECT_NEAR(grad_value(1), 2.0 * phys_coords(1), 1e-10);
@@ -679,7 +679,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // H1<3> can also represent quadratic functions exactly
     H1 fes(std::integral_constant<size_t, 3>{}, mesh);
     GridFunction gf(fes);
@@ -700,7 +700,7 @@ namespace Rodin::Tests::Unit
       Index cellIdx = gen() * (mesh.getCellCount() - 1);
       auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
       const auto& polytope = *it;
-      
+
       Real x = gen();
       Real y = gen();
       if (x + y > 1.0) {
@@ -712,10 +712,10 @@ namespace Rodin::Tests::Unit
 
       auto grad_value = grad_gf.getValue(p);
       const auto& phys_coords = p.getPhysicalCoordinates();
-      
+
       Real px = phys_coords(0);
       Real py = phys_coords(1);
-      
+
       // Expected gradient: [2x - y, -x + 4y]
       EXPECT_NEAR(grad_value(0), 2.0 * px - py, 1e-10);
       EXPECT_NEAR(grad_value(1), -px + 4.0 * py, 1e-10);
@@ -727,7 +727,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     GridFunction gf(fes);
 
@@ -743,7 +743,7 @@ namespace Rodin::Tests::Unit
       Index cellIdx = gen() * (mesh.getCellCount() - 1);
       auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
       const auto& polytope = *it;
-      
+
       Real x = gen();
       Real y = gen();
       if (x + y > 1.0) {
@@ -763,7 +763,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // H1<5> can represent quartic (degree 4) functions exactly
     H1 fes(std::integral_constant<size_t, 5>{}, mesh);
     GridFunction gf(fes);
@@ -786,7 +786,7 @@ namespace Rodin::Tests::Unit
       Index cellIdx = gen() * (mesh.getCellCount() - 1);
       auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
       const auto& polytope = *it;
-      
+
       Real x = gen();
       Real y = gen();
       if (x + y > 1.0) {
@@ -798,14 +798,14 @@ namespace Rodin::Tests::Unit
 
       auto grad_value = grad_gf.getValue(p);
       const auto& phys_coords = p.getPhysicalCoordinates();
-      
+
       Real px = phys_coords(0);
       Real py = phys_coords(1);
-      
+
       // Expected gradient: [4x^3 + 2xy^2, 2x^2*y + 4y^3]
       Real expected_grad_x = 4.0 * px*px*px + 2.0 * px * py*py;
       Real expected_grad_y = 2.0 * px*px * py + 4.0 * py*py*py;
-      
+
       EXPECT_NEAR(grad_value(0), expected_grad_x, 1e-9);
       EXPECT_NEAR(grad_value(1), expected_grad_y, 1e-9);
     }
@@ -816,7 +816,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // Create scalar H1<2> space for the original function
     H1 fes_scalar(std::integral_constant<size_t, 2>{}, mesh);
     GridFunction gf(fes_scalar);
@@ -841,7 +841,7 @@ namespace Rodin::Tests::Unit
       Index cellIdx = gen() * (mesh.getCellCount() - 1);
       auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
       const auto& polytope = *it;
-      
+
       Real x = gen();
       Real y = gen();
       if (x + y > 1.0) {
@@ -853,7 +853,7 @@ namespace Rodin::Tests::Unit
 
       // Evaluate the projected gradient grid function
       auto grad_value = gf_grad.getValue(p);
-      
+
       // Should match the constant gradient [2, 3]
       EXPECT_NEAR(grad_value(0), 2.0, 0.1);  // Relaxed tolerance for FE projection
       EXPECT_NEAR(grad_value(1), 3.0, 0.1);
@@ -865,7 +865,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // Create H1<3> space for the quadratic function
     H1 fes_scalar(std::integral_constant<size_t, 3>{}, mesh);
     GridFunction gf(fes_scalar);
@@ -890,7 +890,7 @@ namespace Rodin::Tests::Unit
       Index cellIdx = gen() * (mesh.getCellCount() - 1);
       auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
       const auto& polytope = *it;
-      
+
       Real x = gen();
       Real y = gen();
       if (x + y > 1.0) {
@@ -903,7 +903,7 @@ namespace Rodin::Tests::Unit
       // Evaluate the projected gradient grid function
       auto grad_value = gf_grad.getValue(p);
       const auto& phys_coords = p.getPhysicalCoordinates();
-      
+
       // Should match gradient [2x, 2y]
       EXPECT_NEAR(grad_value(0), 2.0 * phys_coords(0), 1.0);  // Larger tolerance for quadratic FE projection
       EXPECT_NEAR(grad_value(1), 2.0 * phys_coords(1), 1.0);
@@ -1012,7 +1012,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // H1<2> can represent quadratic functions exactly
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     GridFunction gf(fes);
@@ -1033,7 +1033,7 @@ namespace Rodin::Tests::Unit
       Index cellIdx = gen() * (mesh.getCellCount() - 1);
       auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
       const auto& polytope = *it;
-      
+
       Real x = gen();
       Real y = gen();
       const Math::Vector<Real> rc{{x, y}};
@@ -1041,10 +1041,10 @@ namespace Rodin::Tests::Unit
 
       auto grad_value = grad_gf.getValue(p);
       const auto& phys_coords = p.getPhysicalCoordinates();
-      
+
       Real px = phys_coords(0);
       Real py = phys_coords(1);
-      
+
       // Expected gradient: [2x - y, -x + 4y]
       EXPECT_NEAR(grad_value(0), 2.0 * px - py, 1e-10);
       EXPECT_NEAR(grad_value(1), -px + 4.0 * py, 1e-10);
@@ -1065,14 +1065,14 @@ namespace Rodin::Tests::Unit
     // Get first element
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
-    
+
     // Create evaluation point
     const Math::Vector<Real> rc{{0.25, 0.25}};
     Point p(polytope, rc);
 
     // Test setPoint
     grad_u.setPoint(p);
-    
+
     // Verify getPoint returns the correct point
     const auto& retrieved_point = grad_u.getPoint();
     EXPECT_EQ(&retrieved_point, &p);
@@ -1092,18 +1092,18 @@ namespace Rodin::Tests::Unit
     // Get first element
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
-    
+
     // Create evaluation point at centroid
     const Math::Vector<Real> rc{{1.0/3.0, 1.0/3.0}};
     Point p(polytope, rc);
 
     // Set the point
     grad_u.setPoint(p);
-    
+
     // Test getBasis for each local DOF
     const size_t num_dofs = grad_u.getDOFs(polytope);
     EXPECT_EQ(num_dofs, 6); // H1<2> on triangle has 6 DOFs
-    
+
     // Verify that getBasis returns vector values for each local DOF
     for (size_t local = 0; local < num_dofs; local++)
     {
@@ -1130,18 +1130,18 @@ namespace Rodin::Tests::Unit
     // Get first element
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
-    
+
     // Create evaluation point
     const Math::Vector<Real> rc{{0.2, 0.2, 0.2}};
     Point p(polytope, rc);
 
     // Set the point
     grad_u.setPoint(p);
-    
+
     // Test getBasis for each local DOF
     const size_t num_dofs = grad_u.getDOFs(polytope);
     EXPECT_EQ(num_dofs, 10); // H1<2> on tetrahedron has 10 DOFs
-    
+
     // Verify that getBasis returns vector values for each local DOF
     for (size_t local = 0; local < num_dofs; local++)
     {
@@ -1168,18 +1168,18 @@ namespace Rodin::Tests::Unit
     // Get first element
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
-    
+
     // Create evaluation point
     const Math::Vector<Real> rc{{0.5, 0.5}};
     Point p(polytope, rc);
 
     // Set the point
     grad_u.setPoint(p);
-    
+
     // Test getBasis for each local DOF
     const size_t num_dofs = grad_u.getDOFs(polytope);
     EXPECT_EQ(num_dofs, 9); // H1<2> on quadrilateral has 9 DOFs
-    
+
     // Verify that getBasis returns vector values for each local DOF
     for (size_t local = 0; local < num_dofs; local++)
     {
@@ -1211,7 +1211,7 @@ namespace Rodin::Tests::Unit
     // Set first point
     grad_u.setPoint(p1);
     EXPECT_EQ(&grad_u.getPoint(), &p1);
-    
+
     // Get gradients at first point
     auto basis_grad1_0 = grad_u.getBasis(0);
 
@@ -1224,10 +1224,10 @@ namespace Rodin::Tests::Unit
     // Set second point
     grad_u.setPoint(p2);
     EXPECT_EQ(&grad_u.getPoint(), &p2);
-    
+
     // Get gradients at second point (should be different if elements differ)
     auto basis_grad2_0 = grad_u.getBasis(0);
-    
+
     // The gradients should potentially be different for different elements
     // Just verify both are valid
     EXPECT_TRUE(std::isfinite(basis_grad1_0(0)));
@@ -1248,26 +1248,26 @@ namespace Rodin::Tests::Unit
     // Get first element
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
-    
+
     // Test at centroid
     const Math::Vector<Real> rc{{1.0/3.0, 1.0/3.0}};
     Point p(polytope, rc);
 
     grad_u.setPoint(p);
-    
+
     const size_t num_dofs = grad_u.getDOFs(polytope);
     EXPECT_EQ(num_dofs, 3); // H1<1> on triangle has 3 DOFs (vertices)
-    
+
     // Sum of gradients should equal zero (constant function gradient is zero)
     Math::Vector<Real> grad_sum(2);
     grad_sum.setZero();
-    
+
     for (size_t local = 0; local < num_dofs; local++)
     {
       auto basis_grad = grad_u.getBasis(local);
       grad_sum += basis_grad;
     }
-    
+
     // Sum of basis function gradients should be zero
     EXPECT_NEAR(grad_sum.norm(), 0.0, 1e-10);
   }
@@ -1285,15 +1285,15 @@ namespace Rodin::Tests::Unit
     // Get first element
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
-    
+
     const Math::Vector<Real> rc{{0.3, 0.4}};
     Point p(polytope, rc);
 
     grad_u.setPoint(p);
-    
+
     const size_t num_dofs = grad_u.getDOFs(polytope);
     EXPECT_EQ(num_dofs, 10); // H1<3> on triangle has 10 DOFs
-    
+
     // Verify all basis gradients are valid
     for (size_t local = 0; local < num_dofs; local++)
     {
@@ -1317,14 +1317,14 @@ namespace Rodin::Tests::Unit
     // Test with 10 random evaluation points
     const size_t num_random_points = 10;
     const size_t num_cells = mesh.getCellCount();
-    
+
     for (size_t i = 0; i < num_random_points; i++)
     {
       // Random cell
       const size_t cell_idx = randomSize(0, num_cells - 1);
       auto it = mesh.getPolytope(mesh.getDimension(), cell_idx);
       const auto& polytope = *it;
-      
+
       // Random reference coordinates (barycentric for triangle)
       const Real r1 = randomReal(0.0, 1.0);
       const Real r2 = randomReal(0.0, 1.0 - r1);
@@ -1334,7 +1334,7 @@ namespace Rodin::Tests::Unit
       // Set point and verify getBasis works
       grad_u.setPoint(p);
       EXPECT_EQ(&grad_u.getPoint(), &p);
-      
+
       const size_t num_dofs = grad_u.getDOFs(polytope);
       for (size_t local = 0; local < num_dofs; local++)
       {
@@ -1342,7 +1342,7 @@ namespace Rodin::Tests::Unit
         EXPECT_EQ(basis_grad.size(), 2);
         EXPECT_TRUE(std::isfinite(basis_grad(0)));
         EXPECT_TRUE(std::isfinite(basis_grad(1)));
-        
+
         // Gradient values should be reasonable (not too large)
         EXPECT_LT(std::abs(basis_grad(0)), 1000.0);
         EXPECT_LT(std::abs(basis_grad(1)), 1000.0);

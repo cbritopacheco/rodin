@@ -19,7 +19,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // Vector-valued H1<2> space
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
     TrialFunction u(fes);
@@ -37,7 +37,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // Vector-valued H1<2> space
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
     GridFunction gf(fes);
@@ -53,7 +53,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
     GridFunction gf(fes);
 
@@ -83,7 +83,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
     GridFunction gf(fes);
     auto copy_lambda = [](const Geometry::Point& p) {
@@ -106,7 +106,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // H1<2> can represent linear functions exactly
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
     GridFunction gf(fes);
@@ -144,7 +144,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // H1<2> (quadratic) can represent quadratic functions exactly
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
     GridFunction gf(fes);
@@ -169,7 +169,7 @@ namespace Rodin::Tests::Unit
 
     auto jac_value = jac_gf.getValue(p);
     const auto& phys_coords = p.getPhysicalCoordinates();
-    
+
     // Expected Jacobian: [[2x, 0], [0, 2y]]
     EXPECT_EQ(jac_value.rows(), 2);
     EXPECT_EQ(jac_value.cols(), 2);
@@ -184,7 +184,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // H1<3> (cubic) can also represent quadratic functions exactly
     H1 fes(std::integral_constant<size_t, 3>{}, mesh, mesh.getSpaceDimension());
     GridFunction gf(fes);
@@ -204,7 +204,7 @@ namespace Rodin::Tests::Unit
     // Evaluate at several points
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
-    
+
     std::vector<Math::Vector<Real>> test_coords =
     {
       Math::Vector<Real>{{ 0.25, 0.25 }},
@@ -217,10 +217,10 @@ namespace Rodin::Tests::Unit
       Point p(polytope, rc);
       auto jac_value = jac_gf.getValue(p);
       const auto& phys_coords = p.getPhysicalCoordinates();
-      
+
       Real x = phys_coords(0);
       Real y = phys_coords(1);
-      
+
       // Expected Jacobian: [[2x + y, x], [-y, 2y - x]]
       EXPECT_NEAR(jac_value(0, 0), 2.0 * x + y, 1e-10);
       EXPECT_NEAR(jac_value(0, 1), x, 1e-10);
@@ -234,7 +234,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
     GridFunction gf(fes);
 
@@ -267,7 +267,7 @@ namespace Rodin::Tests::Unit
     {
       Point p(polytope, rc);
       auto jac_value = jac_gf.getValue(p);
-      
+
       // Jacobian should be constant: [[1, 2], [3, -1]]
       EXPECT_NEAR(jac_value(0, 0), 1.0, RODIN_FUZZY_CONSTANT);
       EXPECT_NEAR(jac_value(0, 1), 2.0, RODIN_FUZZY_CONSTANT);
@@ -298,12 +298,12 @@ namespace Rodin::Tests::Unit
       GridFunction gf(fes);
       gf.project(linear_func);
       auto jac_gf = Jacobian(gf);
-      
+
       auto it = mesh.getPolytope(mesh.getDimension(), 0);
       const auto& polytope = *it;
       Point p(polytope, Math::Vector<Real>{{0.5, 0.5}});
       auto jac_value = jac_gf.getValue(p);
-      
+
       EXPECT_NEAR(jac_value(0, 0), 3.0, RODIN_FUZZY_CONSTANT);
       EXPECT_NEAR(jac_value(0, 1), 4.0, RODIN_FUZZY_CONSTANT);
       EXPECT_NEAR(jac_value(1, 0), -2.0, RODIN_FUZZY_CONSTANT);
@@ -316,12 +316,12 @@ namespace Rodin::Tests::Unit
       GridFunction gf(fes);
       gf.project(linear_func);
       auto jac_gf = Jacobian(gf);
-      
+
       auto it = mesh.getPolytope(mesh.getDimension(), 0);
       const auto& polytope = *it;
       Point p(polytope, Math::Vector<Real>{{0.5, 0.5}});
       auto jac_value = jac_gf.getValue(p);
-      
+
       EXPECT_NEAR(jac_value(0, 0), 3.0, RODIN_FUZZY_CONSTANT);
       EXPECT_NEAR(jac_value(0, 1), 4.0, RODIN_FUZZY_CONSTANT);
       EXPECT_NEAR(jac_value(1, 0), -2.0, RODIN_FUZZY_CONSTANT);
@@ -334,12 +334,12 @@ namespace Rodin::Tests::Unit
       GridFunction gf(fes);
       gf.project(linear_func);
       auto jac_gf = Jacobian(gf);
-      
+
       auto it = mesh.getPolytope(mesh.getDimension(), 0);
       const auto& polytope = *it;
       Point p(polytope, Math::Vector<Real>{{0.5, 0.5}});
       auto jac_value = jac_gf.getValue(p);
-      
+
       EXPECT_NEAR(jac_value(0, 0), 3.0, RODIN_FUZZY_CONSTANT);
       EXPECT_NEAR(jac_value(0, 1), 4.0, RODIN_FUZZY_CONSTANT);
       EXPECT_NEAR(jac_value(1, 0), -2.0, RODIN_FUZZY_CONSTANT);
@@ -352,7 +352,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
     TrialFunction u(fes);
     TestFunction v(fes);
@@ -376,7 +376,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
     GridFunction gf(fes);
 
@@ -399,7 +399,7 @@ namespace Rodin::Tests::Unit
       Index cellIdx = gen() * (mesh.getCellCount() - 1);
       auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
       const auto& polytope = *it;
-      
+
       Real x = gen();
       Real y = gen();
       if (x + y > 1.0) {
@@ -410,7 +410,7 @@ namespace Rodin::Tests::Unit
       Point p(polytope, rc);
 
       auto jac_value = jac_gf.getValue(p);
-      
+
       // Expected Jacobian: [[1, 1], [2, -1]]
       EXPECT_NEAR(jac_value(0, 0), 1.0, RODIN_FUZZY_CONSTANT);
       EXPECT_NEAR(jac_value(0, 1), 1.0, RODIN_FUZZY_CONSTANT);
@@ -424,7 +424,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 5, 5 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // H1<2> can represent quadratic functions exactly
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
     GridFunction gf(fes);
@@ -448,7 +448,7 @@ namespace Rodin::Tests::Unit
       Index cellIdx = gen() * (mesh.getCellCount() - 1);
       auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
       const auto& polytope = *it;
-      
+
       Real x = gen();
       Real y = gen();
       if (x + y > 1.0) {
@@ -460,7 +460,7 @@ namespace Rodin::Tests::Unit
 
       auto jac_value = jac_gf.getValue(p);
       const auto& phys_coords = p.getPhysicalCoordinates();
-      
+
       // Expected Jacobian: [[2x, 0], [0, 2y]]
       EXPECT_NEAR(jac_value(0, 0), 2.0 * phys_coords(0), 1e-10);
       EXPECT_NEAR(jac_value(0, 1), 0.0, 1e-10);
@@ -474,7 +474,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // H1<3> can represent quadratic functions exactly
     H1 fes(std::integral_constant<size_t, 3>{}, mesh, mesh.getSpaceDimension());
     GridFunction gf(fes);
@@ -499,7 +499,7 @@ namespace Rodin::Tests::Unit
       Index cellIdx = gen() * (mesh.getCellCount() - 1);
       auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
       const auto& polytope = *it;
-      
+
       Real x = gen();
       Real y = gen();
       if (x + y > 1.0) {
@@ -511,10 +511,10 @@ namespace Rodin::Tests::Unit
 
       auto jac_value = jac_gf.getValue(p);
       const auto& phys_coords = p.getPhysicalCoordinates();
-      
+
       Real px = phys_coords(0);
       Real py = phys_coords(1);
-      
+
       // Expected Jacobian: [[2x + y, x], [-y, 2y - x]]
       EXPECT_NEAR(jac_value(0, 0), 2.0 * px + py, 1e-10);
       EXPECT_NEAR(jac_value(0, 1), px, 1e-10);
@@ -528,7 +528,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
     GridFunction gf(fes);
 
@@ -550,7 +550,7 @@ namespace Rodin::Tests::Unit
       Index cellIdx = gen() * (mesh.getCellCount() - 1);
       auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
       const auto& polytope = *it;
-      
+
       Real x = gen();
       Real y = gen();
       if (x + y > 1.0) {
@@ -570,7 +570,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // H1<5> can represent quartic (degree 4) functions exactly
     H1 fes(std::integral_constant<size_t, 5>{}, mesh, mesh.getSpaceDimension());
     GridFunction gf(fes);
@@ -596,7 +596,7 @@ namespace Rodin::Tests::Unit
       Index cellIdx = gen() * (mesh.getCellCount() - 1);
       auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
       const auto& polytope = *it;
-      
+
       Real x = gen();
       Real y = gen();
       if (x + y > 1.0) {
@@ -608,10 +608,10 @@ namespace Rodin::Tests::Unit
 
       auto jac_value = jac_gf.getValue(p);
       const auto& phys_coords = p.getPhysicalCoordinates();
-      
+
       Real px = phys_coords(0);
       Real py = phys_coords(1);
-      
+
       // Expected Jacobian: [[4x^3, 0], [0, 4y^3]]
       EXPECT_NEAR(jac_value(0, 0), 4.0 * px*px*px, 1e-9);
       EXPECT_NEAR(jac_value(0, 1), 0.0, 1e-10);
@@ -625,7 +625,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // Create vector H1<2> space for the original vector field
     H1 fes_vector(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
     GridFunction gf(fes_vector);
@@ -658,7 +658,7 @@ namespace Rodin::Tests::Unit
       Index cellIdx = gen() * (mesh.getCellCount() - 1);
       auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
       const auto& polytope = *it;
-      
+
       Real x = gen();
       Real y = gen();
       if (x + y > 1.0) {
@@ -673,7 +673,7 @@ namespace Rodin::Tests::Unit
       Real j01 = jac_01.getValue(p);
       Real j10 = jac_10.getValue(p);
       Real j11 = jac_11.getValue(p);
-      
+
       // Should match the constant Jacobian [[1, 1], [2, -1]]
       EXPECT_NEAR(j00, 1.0, 0.1);  // Relaxed tolerance for FE projection
       EXPECT_NEAR(j01, 1.0, 0.1);
@@ -687,7 +687,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // Create vector H1<3> space for the quadratic vector field
     H1 fes_vector(std::integral_constant<size_t, 3>{}, mesh, mesh.getSpaceDimension());
     GridFunction gf(fes_vector);
@@ -719,7 +719,7 @@ namespace Rodin::Tests::Unit
       Index cellIdx = gen() * (mesh.getCellCount() - 1);
       auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
       const auto& polytope = *it;
-      
+
       Real x = gen();
       Real y = gen();
       if (x + y > 1.0) {
@@ -734,11 +734,11 @@ namespace Rodin::Tests::Unit
       Real j01 = jac_01.getValue(p);
       Real j10 = jac_10.getValue(p);
       Real j11 = jac_11.getValue(p);
-      
+
       const auto& phys_coords = p.getPhysicalCoordinates();
       Real px = phys_coords(0);
       Real py = phys_coords(1);
-      
+
       // Should match Jacobian [[2x, 0], [0, 2y]]
       EXPECT_NEAR(j00, 2.0 * px, 1.0);  // Larger tolerance for quadratic FE projection
       EXPECT_NEAR(j01, 0.0, 0.5);
@@ -757,7 +757,7 @@ namespace Rodin::Tests::Unit
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // Vector-valued H1<2> space
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
     TrialFunction u(fes);
@@ -776,7 +776,7 @@ namespace Rodin::Tests::Unit
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // Vector-valued H1<2> space
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
     GridFunction gf(fes);
@@ -793,7 +793,7 @@ namespace Rodin::Tests::Unit
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
     GridFunction gf(fes);
 
@@ -824,7 +824,7 @@ namespace Rodin::Tests::Unit
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // H1<2> can represent linear functions exactly
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
     GridFunction gf(fes);
@@ -868,7 +868,7 @@ namespace Rodin::Tests::Unit
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // H1<2> (quadratic) can represent quadratic functions exactly
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
     GridFunction gf(fes);
@@ -893,7 +893,7 @@ namespace Rodin::Tests::Unit
 
     auto jac_value = jac_gf.getValue(p);
     const auto& phys_coords = p.getPhysicalCoordinates();
-    
+
     // Expected Jacobian: [[2x, 0, 0], [0, 2y, 0], [0, 0, 2z]]
     EXPECT_EQ(jac_value.rows(), 3);
     EXPECT_EQ(jac_value.cols(), 3);
@@ -914,7 +914,7 @@ namespace Rodin::Tests::Unit
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // H1<2> can represent linear functions exactly
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
     GridFunction gf(fes);
@@ -938,7 +938,7 @@ namespace Rodin::Tests::Unit
       Index cellIdx = gen() * (mesh.getCellCount() - 1);
       auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
       const auto& polytope = *it;
-      
+
       // Generate random barycentric coordinates for tetrahedron
       Real x = gen();
       Real y = gen();
@@ -953,7 +953,7 @@ namespace Rodin::Tests::Unit
       Point p(polytope, rc);
 
       auto jac_value = jac_gf.getValue(p);
-      
+
       // Expected Jacobian: [[1, 1, 0], [0, 1, 1], [1, 0, 1]]
       EXPECT_NEAR(jac_value(0, 0), 1.0, RODIN_FUZZY_CONSTANT);
       EXPECT_NEAR(jac_value(0, 1), 1.0, RODIN_FUZZY_CONSTANT);
@@ -976,7 +976,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // Vector-valued H1<2> space
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
     TrialFunction u(fes);
@@ -994,7 +994,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // Vector-valued H1<2> space
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
     GridFunction gf(fes);
@@ -1010,7 +1010,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // H1<2> can represent linear functions exactly
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
     GridFunction gf(fes);
@@ -1048,7 +1048,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
-    
+
     // H1<2> can represent linear functions exactly
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
     GridFunction gf(fes);
@@ -1072,14 +1072,14 @@ namespace Rodin::Tests::Unit
       Index cellIdx = gen() * (mesh.getCellCount() - 1);
       auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
       const auto& polytope = *it;
-      
+
       Real x = gen();
       Real y = gen();
       const Math::Vector<Real> rc{{x, y}};
       Point p(polytope, rc);
 
       auto jac_value = jac_gf.getValue(p);
-      
+
       // Expected Jacobian: [[2, 1], [1, -1]]
       EXPECT_NEAR(jac_value(0, 0), 2.0, RODIN_FUZZY_CONSTANT);
       EXPECT_NEAR(jac_value(0, 1), 1.0, RODIN_FUZZY_CONSTANT);
@@ -1104,14 +1104,14 @@ namespace Rodin::Tests::Unit
     // Get first element
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
-    
+
     // Create evaluation point
     const Math::Vector<Real> rc{{0.25, 0.25}};
     Point p(polytope, rc);
 
     // Test setPoint
     jac_u.setPoint(p);
-    
+
     // Verify getPoint returns the correct point
     const auto& retrieved_point = jac_u.getPoint();
     EXPECT_EQ(&retrieved_point, &p);
@@ -1132,18 +1132,18 @@ namespace Rodin::Tests::Unit
     // Get first element
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
-    
+
     // Create evaluation point at centroid
     const Math::Vector<Real> rc{{1.0/3.0, 1.0/3.0}};
     Point p(polytope, rc);
 
     // Set the point
     jac_u.setPoint(p);
-    
+
     // Test getBasis for each local DOF
     const size_t num_dofs = jac_u.getDOFs(polytope);
     EXPECT_EQ(num_dofs, 6); // H1<2> on triangle has 6 DOFs per component, 2 components
-    
+
     // Verify that getBasis returns matrix values (Jacobian) for each local DOF
     for (size_t local = 0; local < num_dofs; local++)
     {
@@ -1173,18 +1173,18 @@ namespace Rodin::Tests::Unit
     // Get first element
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
-    
+
     // Create evaluation point
     const Math::Vector<Real> rc{{0.2, 0.2, 0.2}};
     Point p(polytope, rc);
 
     // Set the point
     jac_u.setPoint(p);
-    
+
     // Test getBasis for each local DOF
     const size_t num_dofs = jac_u.getDOFs(polytope);
     EXPECT_EQ(num_dofs, 10); // H1<2> on tetrahedron has 10 DOFs per component, 3 components
-    
+
     // Verify that getBasis returns matrix values for each local DOF
     for (size_t local = 0; local < num_dofs; local++)
     {
@@ -1213,18 +1213,18 @@ namespace Rodin::Tests::Unit
     // Get first element
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
-    
+
     // Create evaluation point
     const Math::Vector<Real> rc{{0.5, 0.5}};
     Point p(polytope, rc);
 
     // Set the point
     jac_u.setPoint(p);
-    
+
     // Test getBasis for each local DOF
     const size_t num_dofs = jac_u.getDOFs(polytope);
     EXPECT_EQ(num_dofs, 9); // H1<2> on quadrilateral has 9 DOFs per component, 2 components
-    
+
     // Verify that getBasis returns matrix values for each local DOF
     for (size_t local = 0; local < num_dofs; local++)
     {
@@ -1258,7 +1258,7 @@ namespace Rodin::Tests::Unit
     // First setPoint
     jac_u.setPoint(p1);
     EXPECT_EQ(&jac_u.getPoint(), &p1);
-    
+
     // Verify getBasis works
     const size_t num_dofs1 = jac_u.getDOFs(polytope1);
     for (size_t local = 0; local < num_dofs1; local++)
@@ -1278,7 +1278,7 @@ namespace Rodin::Tests::Unit
     jac_u.setPoint(p2);
     EXPECT_EQ(&jac_u.getPoint(), &p2);
     EXPECT_EQ(&jac_u.getPoint().getPolytope(), &polytope2);
-    
+
     // Verify getBasis still works after changing point
     const size_t num_dofs2 = jac_u.getDOFs(polytope2);
     for (size_t local = 0; local < num_dofs2; local++)
@@ -1303,19 +1303,19 @@ namespace Rodin::Tests::Unit
     // Get first element
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
-    
+
     // Create evaluation point
     const Math::Vector<Real> rc{{0.3, 0.4}};
     Point p(polytope, rc);
 
     // Set the point
     jac_u.setPoint(p);
-    
+
     // For H1<1>, the Jacobian of constant vector field should be zero
     // Sum of all basis Jacobians should give identity scaled by constant
     const size_t num_dofs = jac_u.getDOFs(polytope);
     EXPECT_EQ(num_dofs, 3); // H1<1> on triangle has 3 DOFs per component
-    
+
     // Sum all basis Jacobians for component 0
     Math::SpatialMatrix<Real> sum_jac = Math::SpatialMatrix<Real>::Zero(2, 2);
     for (size_t local = 0; local < num_dofs; local++)
@@ -1323,7 +1323,7 @@ namespace Rodin::Tests::Unit
       auto basis_jac = jac_u.getBasis(local);
       sum_jac += basis_jac;
     }
-    
+
     // For linear basis functions, sum of Jacobians should be zero
     // (gradient of sum of basis functions = gradient of 1 = 0)
     EXPECT_NEAR(sum_jac.norm(), 0.0, 1e-10);
@@ -1343,18 +1343,18 @@ namespace Rodin::Tests::Unit
     // Get first element
     auto it = mesh.getPolytope(mesh.getDimension(), 0);
     const auto& polytope = *it;
-    
+
     // Create evaluation point
     const Math::Vector<Real> rc{{0.2, 0.3}};
     Point p(polytope, rc);
 
     // Set the point
     jac_u.setPoint(p);
-    
+
     // Test getBasis for H1<3>
     const size_t num_dofs = jac_u.getDOFs(polytope);
     EXPECT_EQ(num_dofs, 10); // H1<3> on triangle has 10 DOFs per component
-    
+
     // Verify all basis Jacobians are finite
     for (size_t local = 0; local < num_dofs; local++)
     {
@@ -1381,14 +1381,14 @@ namespace Rodin::Tests::Unit
     const size_t num_tests = 10;
     std::uniform_int_distribution<size_t> cell_dist(0, mesh.getCellCount() - 1);
     std::uniform_real_distribution<Real> coord_dist(0.1, 0.8);
-    
+
     for (size_t test = 0; test < num_tests; test++)
     {
       // Random cell
       size_t cell_idx = cell_dist(gen);
       auto it = mesh.getPolytope(mesh.getDimension(), cell_idx);
       const auto& polytope = *it;
-      
+
       // Random reference coordinates
       Real r1 = coord_dist(gen);
       Real r2 = coord_dist(gen);
@@ -1402,14 +1402,14 @@ namespace Rodin::Tests::Unit
 
       // Set point and test getBasis
       jac_u.setPoint(p);
-      
+
       const size_t num_dofs = jac_u.getDOFs(polytope);
       for (size_t local = 0; local < num_dofs; local++)
       {
         auto basis_jac = jac_u.getBasis(local);
         EXPECT_EQ(basis_jac.rows(), 2);
         EXPECT_EQ(basis_jac.cols(), 2);
-        
+
         // Check that values are finite and reasonably bounded
         Real norm = basis_jac.norm();
         EXPECT_TRUE(std::isfinite(norm));
