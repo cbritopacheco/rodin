@@ -85,3 +85,11 @@ target_link_libraries(RodinVariationalH1JacobianTest
   GTest::gtest_main
   Rodin::Variational)
 gtest_discover_tests(RodinVariationalH1JacobianTest)
+
+add_executable(RodinVariationalH1DivTest DivTest.cpp)
+target_link_libraries(RodinVariationalH1DivTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalH1DivTest)

@@ -1,0 +1,458 @@
+#include <gtest/gtest.h>
+#include "Rodin/Test/Random.h"
+
+#include "Rodin/Variational.h"
+#include "Rodin/Variational/H1.h"
+#include "Rodin/Variational/H1/Div.h"
+#include "Rodin/Assembly/Default.h"
+
+using namespace Rodin;
+using namespace Rodin::IO;
+using namespace Rodin::Geometry;
+using namespace Rodin::Variational;
+using namespace Rodin::Test::Random;
+
+namespace Rodin::Tests::Unit
+{
+  TEST(Rodin_Variational_H1_Div, ShapeFunction_Construction)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    // Vector-valued H1<2> space
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    TrialFunction u(fes);
+    TestFunction v(fes);
+
+    auto div_u = Div(u);
+    auto div_v = Div(v);
+
+    // Divergence of a vector function should be a scalar function
+  }
+
+  TEST(Rodin_Variational_H1_Div, GridFunction_Construction)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    // Vector-valued H1<2> space
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    GridFunction gf(fes);
+
+    auto div_gf = Div(gf);
+
+    // Divergence of a vector GridFunction should be a scalar function
+    EXPECT_EQ(&div_gf.getOperand(), &gf);
+  }
+
+  TEST(Rodin_Variational_H1_Div, GridFunction_ConstantVectorField)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    GridFunction gf(fes);
+
+    // Project a constant vector field
+    VectorFunction const_func{5.0, 7.0};
+    gf.project(const_func);
+
+    auto div_gf = Div(gf);
+
+    // Divergence of a constant vector field should be zero
+    auto it = mesh.getPolytope(mesh.getDimension(), 0);
+    const auto& polytope = *it;
+    const Math::Vector<Real> rc{{0.5, 0.5}};
+    Point p(polytope, rc);
+
+    Real div_value = div_gf.getValue(p);
+    EXPECT_NEAR(div_value, 0.0, RODIN_FUZZY_CONSTANT);
+  }
+
+  TEST(Rodin_Variational_H1_Div, Copy)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    GridFunction gf(fes);
+    gf = VectorFunction{1.0, 2.0};
+
+    auto div_gf = Div(gf);
+    auto copied = div_gf.copy();
+
+    EXPECT_NE(copied, nullptr);
+
+    delete copied;
+  }
+
+  TEST(Rodin_Variational_H1_Div, GridFunction_LinearVectorField_H1_2)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    // H1<2> can represent linear functions exactly
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    GridFunction gf(fes);
+
+    // Project a linear vector field: (x, y) - divergence should be 2
+    VectorFunction linear_func{
+      [](const Geometry::Point& p) { return p.x(); },
+      [](const Geometry::Point& p) { return p.y(); }
+    };
+    gf.project(linear_func);
+
+    auto div_gf = Div(gf);
+
+    // For linear functions, divergence should be constant = 2
+    auto it = mesh.getPolytope(mesh.getDimension(), 0);
+    const auto& polytope = *it;
+    const Math::Vector<Real> rc{{0.5, 0.5}};
+    Point p(polytope, rc);
+
+    Real div_value = div_gf.getValue(p);
+    EXPECT_NEAR(div_value, 2.0, RODIN_FUZZY_CONSTANT);
+  }
+
+  TEST(Rodin_Variational_H1_Div, GridFunction_DivergenceFreeField_H1_2)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    // H1<2> (quadratic) can represent linear divergence-free fields exactly
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    GridFunction gf(fes);
+
+    // Project a divergence-free field: (-y, x)
+    // div(u) = ∂(-y)/∂x + ∂(x)/∂y = 0 + 0 = 0
+    VectorFunction divergence_free{
+      [](const Geometry::Point& p) { return -p.y(); },
+      [](const Geometry::Point& p) { return p.x(); }
+    };
+    gf.project(divergence_free);
+
+    auto div_gf = Div(gf);
+
+    // Test at random coordinates
+    RandomFloat gen(0.0, 1.0);
+    auto it = mesh.getPolytope(mesh.getDimension(), 0);
+    const auto& polytope = *it;
+
+    for (int i = 0; i < 10; i++)
+    {
+      Real x = gen();
+      Real y = gen();
+      // Ensure point is inside the reference triangle
+      if (x + y > 1.0) {
+        x = 1.0 - x;
+        y = 1.0 - y;
+      }
+      const Math::Vector<Real> rc{{x, y}};
+      Point p(polytope, rc);
+
+      Real div_value = div_gf.getValue(p);
+      EXPECT_NEAR(div_value, 0.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Div, GridFunction_QuadraticVectorField_H1_2)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    // H1<2> (quadratic) can represent quadratic functions exactly
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    GridFunction gf(fes);
+
+    // Project a quadratic vector field: (x^2, y^2)
+    // div(u) = ∂(x^2)/∂x + ∂(y^2)/∂y = 2x + 2y
+    VectorFunction quadratic_func{
+      [](const Geometry::Point& p) { return p.x() * p.x(); },
+      [](const Geometry::Point& p) { return p.y() * p.y(); }
+    };
+    gf.project(quadratic_func);
+
+    auto div_gf = Div(gf);
+
+    // Test at random coordinates
+    RandomFloat gen(0.0, 1.0);
+    for (int test = 0; test < 5; test++)
+    {
+      Index cellIdx = gen() * (mesh.getCellCount() - 1);
+      auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
+      const auto& polytope = *it;
+      
+      Real x = gen();
+      Real y = gen();
+      if (x + y > 1.0) {
+        x = 1.0 - x;
+        y = 1.0 - y;
+      }
+      const Math::Vector<Real> rc{{x, y}};
+      Point p(polytope, rc);
+
+      Real div_value = div_gf.getValue(p);
+      const auto& phys_coords = p.getPhysicalCoordinates();
+      
+      // Expected div = 2x + 2y
+      Real expected_div = 2.0 * phys_coords(0) + 2.0 * phys_coords(1);
+      EXPECT_NEAR(div_value, expected_div, 1e-10);
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Div, GridFunction_QuadraticVectorField_H1_3)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    // H1<3> (cubic) can also represent quadratic functions exactly
+    H1 fes(std::integral_constant<size_t, 3>{}, mesh, mesh.getSpaceDimension());
+    GridFunction gf(fes);
+
+    // Project a quadratic vector field: (x^2 - y^2, 2xy)
+    // div(u) = ∂(x^2 - y^2)/∂x + ∂(2xy)/∂y = 2x + 2x = 4x
+    VectorFunction quadratic_func{
+      [](const Geometry::Point& p) { return p.x() * p.x() - p.y() * p.y(); },
+      [](const Geometry::Point& p) { return 2.0 * p.x() * p.y(); }
+    };
+    gf.project(quadratic_func);
+
+    auto div_gf = Div(gf);
+
+    // Test at random coordinates
+    RandomFloat gen(0.0, 1.0);
+    for (int test = 0; test < 10; test++)
+    {
+      Index cellIdx = gen() * (mesh.getCellCount() - 1);
+      auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
+      const auto& polytope = *it;
+      
+      Real x = gen();
+      Real y = gen();
+      if (x + y > 1.0) {
+        x = 1.0 - x;
+        y = 1.0 - y;
+      }
+      const Math::Vector<Real> rc{{x, y}};
+      Point p(polytope, rc);
+
+      Real div_value = div_gf.getValue(p);
+      const auto& phys_coords = p.getPhysicalCoordinates();
+      
+      // Expected div = 4x
+      Real expected_div = 4.0 * phys_coords(0);
+      EXPECT_NEAR(div_value, expected_div, 1e-10);
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Div, MultipleRandomEvaluations)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    GridFunction gf(fes);
+
+    // Project a linear vector field: (2x + y, x - y)
+    // div(u) = ∂(2x + y)/∂x + ∂(x - y)/∂y = 2 + (-1) = 1
+    VectorFunction linear_func{
+      [](const Geometry::Point& p) { return 2.0 * p.x() + p.y(); },
+      [](const Geometry::Point& p) { return p.x() - p.y(); }
+    };
+    gf.project(linear_func);
+
+    auto div_gf = Div(gf);
+
+    // Test at many random points
+    RandomFloat gen(0.0, 1.0);
+    for (int test = 0; test < 20; test++)
+    {
+      Index cellIdx = gen() * (mesh.getCellCount() - 1);
+      auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
+      const auto& polytope = *it;
+      
+      Real x = gen();
+      Real y = gen();
+      if (x + y > 1.0) {
+        x = 1.0 - x;
+        y = 1.0 - y;
+      }
+      const Math::Vector<Real> rc{{x, y}};
+      Point p(polytope, rc);
+
+      Real div_value = div_gf.getValue(p);
+      
+      // Divergence should be constant = 1
+      EXPECT_NEAR(div_value, 1.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Div, DifferentPolynomialDegrees)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    // Linear vector field for testing: (3x + 4y, -2x + y)
+    // div(u) = 3 + 1 = 4
+    VectorFunction linear_func{
+      [](const Geometry::Point& p) { return 3.0 * p.x() + 4.0 * p.y(); },
+      [](const Geometry::Point& p) { return -2.0 * p.x() + p.y(); }
+    };
+
+    RandomFloat gen(0.0, 1.0);
+    Real x = gen();
+    Real y = gen();
+    if (x + y > 1.0) {
+      x = 1.0 - x;
+      y = 1.0 - y;
+    }
+
+    // Test with H1<1> (linear)
+    {
+      H1 fes(std::integral_constant<size_t, 1>{}, mesh, mesh.getSpaceDimension());
+      GridFunction gf(fes);
+      gf.project(linear_func);
+      auto div_gf = Div(gf);
+      
+      auto it = mesh.getPolytope(mesh.getDimension(), 0);
+      const auto& polytope = *it;
+      Point p(polytope, Math::Vector<Real>{{x, y}});
+      Real div_value = div_gf.getValue(p);
+      
+      EXPECT_NEAR(div_value, 4.0, RODIN_FUZZY_CONSTANT);
+    }
+
+    // Test with H1<2> (quadratic)
+    {
+      H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+      GridFunction gf(fes);
+      gf.project(linear_func);
+      auto div_gf = Div(gf);
+      
+      auto it = mesh.getPolytope(mesh.getDimension(), 0);
+      const auto& polytope = *it;
+      Point p(polytope, Math::Vector<Real>{{x, y}});
+      Real div_value = div_gf.getValue(p);
+      
+      EXPECT_NEAR(div_value, 4.0, RODIN_FUZZY_CONSTANT);
+    }
+
+    // Test with H1<3> (cubic)
+    {
+      H1 fes(std::integral_constant<size_t, 3>{}, mesh, mesh.getSpaceDimension());
+      GridFunction gf(fes);
+      gf.project(linear_func);
+      auto div_gf = Div(gf);
+      
+      auto it = mesh.getPolytope(mesh.getDimension(), 0);
+      const auto& polytope = *it;
+      Point p(polytope, Math::Vector<Real>{{x, y}});
+      Real div_value = div_gf.getValue(p);
+      
+      EXPECT_NEAR(div_value, 4.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Div, UsageInBilinearForm)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    TrialFunction u(fes);
+    TestFunction v(fes);
+    BilinearForm bf(u, v);
+
+    // ∫ div(u) * div(v) dx - part of mixed elasticity formulations
+    bf = Integral(Div(u), Div(v));
+
+    EXPECT_FALSE(bf.getLocalIntegrators().empty());
+
+    // This should assemble without errors
+    bf.assemble();
+
+    const auto& op = bf.getOperator();
+    EXPECT_GT(op.rows(), 0);
+    EXPECT_GT(op.cols(), 0);
+  }
+
+  TEST(Rodin_Variational_H1_Div, ZeroVectorField)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    GridFunction gf(fes);
+
+    // Zero vector field (default initialization)
+    auto div_gf = Div(gf);
+
+    // Test at random point
+    RandomFloat gen(0.0, 1.0);
+    auto it = mesh.getPolytope(mesh.getDimension(), 0);
+    const auto& polytope = *it;
+    Real x = gen();
+    Real y = gen();
+    if (x + y > 1.0) {
+      x = 1.0 - x;
+      y = 1.0 - y;
+    }
+    const Math::Vector<Real> rc{{x, y}};
+    Point p(polytope, rc);
+
+    Real div_value = div_gf.getValue(p);
+    EXPECT_NEAR(div_value, 0.0, RODIN_FUZZY_CONSTANT);
+  }
+
+  TEST(Rodin_Variational_H1_Div, RandomCoordinatesOnMultipleCells)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 5, 5 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    GridFunction gf(fes);
+
+    // Project: (x, 2y) - div = 1 + 2 = 3
+    VectorFunction func{
+      [](const Geometry::Point& p) { return p.x(); },
+      [](const Geometry::Point& p) { return 2.0 * p.y(); }
+    };
+    gf.project(func);
+
+    auto div_gf = Div(gf);
+
+    // Test at 30 random points across different cells
+    RandomFloat gen(0.0, 1.0);
+    for (int test = 0; test < 30; test++)
+    {
+      Index cellIdx = gen() * (mesh.getCellCount() - 1);
+      auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
+      const auto& polytope = *it;
+      
+      Real x = gen();
+      Real y = gen();
+      if (x + y > 1.0) {
+        x = 1.0 - x;
+        y = 1.0 - y;
+      }
+      const Math::Vector<Real> rc{{x, y}};
+      Point p(polytope, rc);
+
+      Real div_value = div_gf.getValue(p);
+      EXPECT_NEAR(div_value, 3.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+}

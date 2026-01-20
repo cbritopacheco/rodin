@@ -64,5 +64,6 @@
 #include "H1/H1Element.h"
 #include "H1/Grad.h"
 #include "H1/Jacobian.h"
+#include "H1/Div.h"
 
 #endif
