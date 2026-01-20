@@ -746,4 +746,345 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(j11, 2.0 * py, 1.0);
     }
   }
+
+  // ============================================================================
+  // Tetrahedron tests
+  // ============================================================================
+
+  TEST(Rodin_Variational_H1_Jacobian_Tet, ShapeFunction_Construction)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    // Vector-valued H1<2> space
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    TrialFunction u(fes);
+    TestFunction v(fes);
+
+    auto jac_u = Jacobian(u);
+    auto jac_v = Jacobian(v);
+
+    // Jacobian of a vector function should be a matrix function
+    // For 3D, Jacobian should be 3x3
+  }
+
+  TEST(Rodin_Variational_H1_Jacobian_Tet, GridFunction_Construction)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    // Vector-valued H1<2> space
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    GridFunction gf(fes);
+
+    auto jac_gf = Jacobian(gf);
+
+    // Jacobian of a vector GridFunction should be a matrix function
+    EXPECT_EQ(&jac_gf.getOperand(), &gf);
+  }
+
+  TEST(Rodin_Variational_H1_Jacobian_Tet, GridFunction_ConstantFunction)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    GridFunction gf(fes);
+
+    // Project a constant vector field
+    auto const_func_lambda = []( const Geometry::Point& p) { 
+      Math::Vector<Real> v(3);
+      v << 1.0, 2.0, 3.0;
+      return v;
+    };
+    VectorFunction<decltype(const_func_lambda)> const_func(3, const_func_lambda);
+    gf.project(const_func);
+
+    auto jac_gf = Jacobian(gf);
+
+    // Jacobian of a constant vector field should be zero
+    auto it = mesh.getPolytope(mesh.getDimension(), 0);
+    const auto& polytope = *it;
+    const Math::Vector<Real> rc{{0.2, 0.2, 0.2}};
+    Point p(polytope, rc);
+
+    auto jac_value = jac_gf.getValue(p);
+    EXPECT_NEAR(jac_value.norm(), 0.0, RODIN_FUZZY_CONSTANT);
+  }
+
+  TEST(Rodin_Variational_H1_Jacobian_Tet, GridFunction_LinearVectorField_H1_2)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    // H1<2> can represent linear functions exactly
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    GridFunction gf(fes);
+
+    // Project the identity vector field: u = (x, y, z)
+    // Jacobian should be the identity matrix: [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+    auto linear_lambda = [](const Geometry::Point& p) {
+      Math::Vector<Real> v(3);
+      v << p.x(), p.y(), p.z();
+      return v;
+    };
+    VectorFunction<decltype(linear_lambda)> linear_func(3, linear_lambda);
+    gf.project(linear_func);
+
+    auto jac_gf = Jacobian(gf);
+
+    // For linear functions, Jacobian should be constant
+    auto it = mesh.getPolytope(mesh.getDimension(), 0);
+    const auto& polytope = *it;
+    const Math::Vector<Real> rc{{0.25, 0.25, 0.25}};
+    Point p(polytope, rc);
+
+    auto jac_value = jac_gf.getValue(p);
+    // Expected Jacobian: identity matrix
+    EXPECT_EQ(jac_value.rows(), 3);
+    EXPECT_EQ(jac_value.cols(), 3);
+    EXPECT_NEAR(jac_value(0, 0), 1.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(jac_value(0, 1), 0.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(jac_value(0, 2), 0.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(jac_value(1, 0), 0.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(jac_value(1, 1), 1.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(jac_value(1, 2), 0.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(jac_value(2, 0), 0.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(jac_value(2, 1), 0.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(jac_value(2, 2), 1.0, RODIN_FUZZY_CONSTANT);
+  }
+
+  TEST(Rodin_Variational_H1_Jacobian_Tet, GridFunction_QuadraticVectorField_H1_2)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    // H1<2> (quadratic) can represent quadratic functions exactly
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    GridFunction gf(fes);
+
+    // Project a quadratic vector field: u = (x^2, y^2, z^2)
+    // Jacobian should be: [[2x, 0, 0], [0, 2y, 0], [0, 0, 2z]]
+    auto quadratic_lambda = [](const Geometry::Point& p) {
+      Math::Vector<Real> v(3);
+      v << p.x() * p.x(), p.y() * p.y(), p.z() * p.z();
+      return v;
+    };
+    VectorFunction<decltype(quadratic_lambda)> quadratic_func(3, quadratic_lambda);
+    gf.project(quadratic_func);
+
+    auto jac_gf = Jacobian(gf);
+
+    // Evaluate at a point
+    auto it = mesh.getPolytope(mesh.getDimension(), mesh.getCellCount() / 2);
+    const auto& polytope = *it;
+    const Math::Vector<Real> rc{{0.2, 0.3, 0.1}};
+    Point p(polytope, rc);
+
+    auto jac_value = jac_gf.getValue(p);
+    const auto& phys_coords = p.getPhysicalCoordinates();
+    
+    // Expected Jacobian: [[2x, 0, 0], [0, 2y, 0], [0, 0, 2z]]
+    EXPECT_EQ(jac_value.rows(), 3);
+    EXPECT_EQ(jac_value.cols(), 3);
+    EXPECT_NEAR(jac_value(0, 0), 2.0 * phys_coords(0), 1e-10);
+    EXPECT_NEAR(jac_value(0, 1), 0.0, 1e-10);
+    EXPECT_NEAR(jac_value(0, 2), 0.0, 1e-10);
+    EXPECT_NEAR(jac_value(1, 0), 0.0, 1e-10);
+    EXPECT_NEAR(jac_value(1, 1), 2.0 * phys_coords(1), 1e-10);
+    EXPECT_NEAR(jac_value(1, 2), 0.0, 1e-10);
+    EXPECT_NEAR(jac_value(2, 0), 0.0, 1e-10);
+    EXPECT_NEAR(jac_value(2, 1), 0.0, 1e-10);
+    EXPECT_NEAR(jac_value(2, 2), 2.0 * phys_coords(2), 1e-10);
+  }
+
+  TEST(Rodin_Variational_H1_Jacobian_Tet, RandomCoordinates_LinearVectorField)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    // H1<2> can represent linear functions exactly
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    GridFunction gf(fes);
+
+    // Project a linear vector field: u = (x + y, y + z, x + z)
+    // Jacobian should be constant: [[1, 1, 0], [0, 1, 1], [1, 0, 1]]
+    auto linear_lambda = [](const Geometry::Point& p) {
+      Math::Vector<Real> v(3);
+      v << p.x() + p.y(), p.y() + p.z(), p.x() + p.z();
+      return v;
+    };
+    VectorFunction<decltype(linear_lambda)> linear_func(3, linear_lambda);
+    gf.project(linear_func);
+
+    auto jac_gf = Jacobian(gf);
+
+    // Test at 20 random points across different cells
+    RandomFloat gen(0.0, 1.0);
+    for (int test = 0; test < 20; test++)
+    {
+      Index cellIdx = gen() * (mesh.getCellCount() - 1);
+      auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
+      const auto& polytope = *it;
+      
+      // Generate random barycentric coordinates for tetrahedron
+      Real x = gen();
+      Real y = gen();
+      Real z = gen();
+      Real sum = x + y + z;
+      if (sum > 1.0) {
+        x = x / sum * 0.9;
+        y = y / sum * 0.9;
+        z = z / sum * 0.9;
+      }
+      const Math::Vector<Real> rc{{x, y, z}};
+      Point p(polytope, rc);
+
+      auto jac_value = jac_gf.getValue(p);
+      
+      // Expected Jacobian: [[1, 1, 0], [0, 1, 1], [1, 0, 1]]
+      EXPECT_NEAR(jac_value(0, 0), 1.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(jac_value(0, 1), 1.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(jac_value(0, 2), 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(jac_value(1, 0), 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(jac_value(1, 1), 1.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(jac_value(1, 2), 1.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(jac_value(2, 0), 1.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(jac_value(2, 1), 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(jac_value(2, 2), 1.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  // ============================================================================
+  // Quadrilateral tests
+  // ============================================================================
+
+  TEST(Rodin_Variational_H1_Jacobian_Quad, ShapeFunction_Construction)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    // Vector-valued H1<2> space
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    TrialFunction u(fes);
+    TestFunction v(fes);
+
+    auto jac_u = Jacobian(u);
+    auto jac_v = Jacobian(v);
+
+    // Jacobian of a vector function should be a matrix function
+    // For 2D, Jacobian should be 2x2
+  }
+
+  TEST(Rodin_Variational_H1_Jacobian_Quad, GridFunction_Construction)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    // Vector-valued H1<2> space
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    GridFunction gf(fes);
+
+    auto jac_gf = Jacobian(gf);
+
+    // Jacobian of a vector GridFunction should be a matrix function
+    EXPECT_EQ(&jac_gf.getOperand(), &gf);
+  }
+
+  TEST(Rodin_Variational_H1_Jacobian_Quad, GridFunction_LinearVectorField_H1_2)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    // H1<2> can represent linear functions exactly
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    GridFunction gf(fes);
+
+    // Project the identity vector field: u = (x, y)
+    // Jacobian should be the identity matrix: [[1, 0], [0, 1]]
+    auto linear_lambda = [](const Geometry::Point& p) {
+      Math::Vector<Real> v(2);
+      v << p.x(), p.y();
+      return v;
+    };
+    VectorFunction<decltype(linear_lambda)> linear_func(2, linear_lambda);
+    gf.project(linear_func);
+
+    auto jac_gf = Jacobian(gf);
+
+    // For linear functions, Jacobian should be constant
+    auto it = mesh.getPolytope(mesh.getDimension(), 0);
+    const auto& polytope = *it;
+    const Math::Vector<Real> rc{{0.3, 0.4}};
+    Point p(polytope, rc);
+
+    auto jac_value = jac_gf.getValue(p);
+    // Expected Jacobian: identity matrix
+    EXPECT_EQ(jac_value.rows(), 2);
+    EXPECT_EQ(jac_value.cols(), 2);
+    EXPECT_NEAR(jac_value(0, 0), 1.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(jac_value(0, 1), 0.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(jac_value(1, 0), 0.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(jac_value(1, 1), 1.0, RODIN_FUZZY_CONSTANT);
+  }
+
+  TEST(Rodin_Variational_H1_Jacobian_Quad, RandomCoordinates_LinearVectorField)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    // H1<2> can represent linear functions exactly
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    GridFunction gf(fes);
+
+    // Project a linear vector field: u = (2x + y, x - y)
+    // Jacobian should be constant: [[2, 1], [1, -1]]
+    auto linear_lambda = [](const Geometry::Point& p) {
+      Math::Vector<Real> v(2);
+      v << 2.0 * p.x() + p.y(), p.x() - p.y();
+      return v;
+    };
+    VectorFunction<decltype(linear_lambda)> linear_func(2, linear_lambda);
+    gf.project(linear_func);
+
+    auto jac_gf = Jacobian(gf);
+
+    // Test at 15 random points across different cells
+    RandomFloat gen(0.0, 1.0);
+    for (int test = 0; test < 15; test++)
+    {
+      Index cellIdx = gen() * (mesh.getCellCount() - 1);
+      auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
+      const auto& polytope = *it;
+      
+      Real x = gen();
+      Real y = gen();
+      const Math::Vector<Real> rc{{x, y}};
+      Point p(polytope, rc);
+
+      auto jac_value = jac_gf.getValue(p);
+      
+      // Expected Jacobian: [[2, 1], [1, -1]]
+      EXPECT_NEAR(jac_value(0, 0), 2.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(jac_value(0, 1), 1.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(jac_value(1, 0), 1.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(jac_value(1, 1), -1.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
 }

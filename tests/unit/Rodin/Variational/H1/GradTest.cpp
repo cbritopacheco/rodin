@@ -909,4 +909,145 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(grad_value(1), 2.0 * phys_coords(1), 1.0);
     }
   }
+
+  // ============================================================================
+  // Quadrilateral tests
+  // ============================================================================
+
+  TEST(Rodin_Variational_H1_Grad_Quad, ShapeFunction_Construction)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    TrialFunction u(fes);
+    TestFunction v(fes);
+
+    auto grad_u = Grad(u);
+    auto grad_v = Grad(v);
+
+    // Gradient of a scalar function should be a vector function
+    // For 2D, gradient should have 2 components
+  }
+
+  TEST(Rodin_Variational_H1_Grad_Quad, GridFunction_Construction)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    GridFunction gf(fes);
+
+    auto grad_gf = Grad(gf);
+
+    // Gradient of a scalar GridFunction should be a vector function
+    EXPECT_EQ(&grad_gf.getOperand(), &gf);
+  }
+
+  TEST(Rodin_Variational_H1_Grad_Quad, GridFunction_LinearFunction)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    // H1<2> can represent linear functions exactly
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    GridFunction gf(fes);
+
+    // Project a linear function: f(x,y) = x + y
+    RealFunction linear_func([](const Geometry::Point& p) { return p.x() + p.y(); });
+    gf.project(linear_func);
+
+    auto grad_gf = Grad(gf);
+
+    // For linear functions, gradient should be constant
+    auto it = mesh.getPolytope(mesh.getDimension(), 0);
+    const auto& polytope = *it;
+    const Math::Vector<Real> rc{{0.3, 0.4}};
+    Point p(polytope, rc);
+
+    auto grad_value = grad_gf.getValue(p);
+    // Gradient should be approximately [1, 1]
+    EXPECT_NEAR(grad_value(0), 1.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(grad_value(1), 1.0, RODIN_FUZZY_CONSTANT);
+  }
+
+  TEST(Rodin_Variational_H1_Grad_Quad, GridFunction_QuadraticFunction_H1_2)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    // H1<2> (quadratic) can represent quadratic functions exactly
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    GridFunction gf(fes);
+
+    // Project a quadratic function: f(x,y) = x^2 + y^2
+    RealFunction quadratic_func([](const Geometry::Point& p) { 
+      return p.x() * p.x() + p.y() * p.y(); 
+    });
+    gf.project(quadratic_func);
+
+    auto grad_gf = Grad(gf);
+
+    // Evaluate at a point in the center of the domain
+    auto it = mesh.getPolytope(mesh.getDimension(), mesh.getCellCount() / 2);
+    const auto& polytope = *it;
+    const Math::Vector<Real> rc{{0.5, 0.5}};
+    Point p(polytope, rc);
+
+    auto grad_value = grad_gf.getValue(p);
+
+    // For f(x,y) = x^2 + y^2, grad f = [2x, 2y]
+    // At the point, we expect approximately [2*x_phys, 2*y_phys]
+    const auto& phys_coords = p.getPhysicalCoordinates();
+    EXPECT_NEAR(grad_value(0), 2.0 * phys_coords(0), 1e-10);
+    EXPECT_NEAR(grad_value(1), 2.0 * phys_coords(1), 1e-10);
+  }
+
+  TEST(Rodin_Variational_H1_Grad_Quad, RandomCoordinates_QuadraticFunction)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    // H1<2> can represent quadratic functions exactly
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    GridFunction gf(fes);
+
+    // Project a quadratic function: f(x,y) = x^2 - xy + 2y^2
+    // Gradient: [2x - y, -x + 4y]
+    RealFunction quadratic_func([](const Geometry::Point& p) { 
+      return p.x() * p.x() - p.x() * p.y() + 2.0 * p.y() * p.y(); 
+    });
+    gf.project(quadratic_func);
+
+    auto grad_gf = Grad(gf);
+
+    // Test at 15 random points across different cells
+    RandomFloat gen(0.0, 1.0);
+    for (int test = 0; test < 15; test++)
+    {
+      Index cellIdx = gen() * (mesh.getCellCount() - 1);
+      auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
+      const auto& polytope = *it;
+      
+      Real x = gen();
+      Real y = gen();
+      const Math::Vector<Real> rc{{x, y}};
+      Point p(polytope, rc);
+
+      auto grad_value = grad_gf.getValue(p);
+      const auto& phys_coords = p.getPhysicalCoordinates();
+      
+      Real px = phys_coords(0);
+      Real py = phys_coords(1);
+      
+      // Expected gradient: [2x - y, -x + 4y]
+      EXPECT_NEAR(grad_value(0), 2.0 * px - py, 1e-10);
+      EXPECT_NEAR(grad_value(1), -px + 4.0 * py, 1e-10);
+    }
+  }
 }
