@@ -202,7 +202,7 @@ namespace Rodin::Tests::Unit
     mesh.getConnectivity().compute(1, 0);
 
     P1 Vh(mesh);
-    ShapeFunction u(Vh);
+    TrialFunction u(Vh);
     auto grad_u = Grad(u);
 
     auto cellIt = mesh.getCell(0);
@@ -219,17 +219,15 @@ namespace Rodin::Tests::Unit
     mesh.getConnectivity().compute(1, 0);
 
     P1 Vh(mesh);
-    ShapeFunction u(Vh);
+    TrialFunction u(Vh);
     auto grad_u = Grad(u);
 
     auto cellIt = mesh.getCell(0);
     size_t dofs = grad_u.getDOFs(*cellIt);
 
-    Math::SpatialPoint<Real> sp(2);
-    sp(0) = 0.3;
-    sp(1) = 0.4;
-    Point p(*cellIt, sp);
-    grad_u.setLeaf(p);
+    Math::SpatialPoint refCoord(2);
+    refCoord << 0.3, 0.4;
+    grad_u.setPoint(Point(*cellIt, refCoord));
 
     // Check that getBasis returns valid values for all local DOFs
     for (size_t local = 0; local < dofs; local++)
@@ -253,7 +251,7 @@ namespace Rodin::Tests::Unit
     mesh.getConnectivity().compute(1, 0);
 
     P1 Vh(mesh);
-    ShapeFunction u(Vh);
+    TrialFunction u(Vh);
     auto grad_u = Grad(u);
 
     auto cellIt = mesh.getCell(0);
@@ -271,18 +269,15 @@ namespace Rodin::Tests::Unit
     mesh.getConnectivity().compute(1, 0);
 
     P1 Vh(mesh);
-    ShapeFunction u(Vh);
+    TrialFunction u(Vh);
     auto grad_u = Grad(u);
 
     auto cellIt = mesh.getCell(0);
     size_t dofs = grad_u.getDOFs(*cellIt);
 
-    Math::SpatialPoint<Real> sp(3);
-    sp(0) = 0.2;
-    sp(1) = 0.2;
-    sp(2) = 0.2;
-    Point p(*cellIt, sp);
-    grad_u.setLeaf(p);
+    Math::SpatialPoint refCoord(3);
+    refCoord << 0.2, 0.2, 0.2;
+    grad_u.setPoint(Point(*cellIt, refCoord));
 
     // Check that getBasis returns valid values for all local DOFs
     for (size_t local = 0; local < dofs; local++)
