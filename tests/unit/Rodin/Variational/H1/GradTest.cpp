@@ -810,4 +810,103 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(grad_value(1), expected_grad_y, 1e-9);
     }
   }
+
+  TEST(Rodin_Variational_H1_Grad, ProjectGradOntoGridFunction_LinearFunction)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    // Create scalar H1<2> space for the original function
+    H1 fes_scalar(std::integral_constant<size_t, 2>{}, mesh);
+    GridFunction gf(fes_scalar);
+
+    // Project linear function f(x,y) = 2x + 3y with gradient [2, 3]
+    RealFunction linear_func([](const Geometry::Point& p) { 
+      return 2.0 * p.x() + 3.0 * p.y(); 
+    });
+    gf.project(linear_func);
+
+    // Create vector H1<2> space for the gradient (dimension = 2)
+    H1 fes_vector(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    GridFunction gf_grad(fes_vector);
+
+    // Project Grad(gf) onto gf_grad
+    gf_grad.project(Grad(gf));
+
+    // Test at multiple random points
+    RandomFloat gen(0.0, 1.0);
+    for (int test = 0; test < 10; test++)
+    {
+      Index cellIdx = gen() * (mesh.getCellCount() - 1);
+      auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
+      const auto& polytope = *it;
+      
+      Real x = gen();
+      Real y = gen();
+      if (x + y > 1.0) {
+        x = 1.0 - x;
+        y = 1.0 - y;
+      }
+      const Math::Vector<Real> rc{{x, y}};
+      Point p(polytope, rc);
+
+      // Evaluate the projected gradient grid function
+      auto grad_value = gf_grad.getValue(p);
+      
+      // Should match the constant gradient [2, 3]
+      EXPECT_NEAR(grad_value(0), 2.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(grad_value(1), 3.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Grad, ProjectGradOntoGridFunction_QuadraticFunction)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    // Create H1<3> space for the quadratic function
+    H1 fes_scalar(std::integral_constant<size_t, 3>{}, mesh);
+    GridFunction gf(fes_scalar);
+
+    // Project quadratic function f(x,y) = x^2 + y^2 with gradient [2x, 2y]
+    RealFunction quadratic_func([](const Geometry::Point& p) { 
+      return p.x() * p.x() + p.y() * p.y(); 
+    });
+    gf.project(quadratic_func);
+
+    // Create vector H1<3> space for the gradient
+    H1 fes_vector(std::integral_constant<size_t, 3>{}, mesh, mesh.getSpaceDimension());
+    GridFunction gf_grad(fes_vector);
+
+    // Project Grad(gf) onto gf_grad
+    gf_grad = Grad(gf);  // Using operator= instead of project()
+
+    // Test at multiple random points
+    RandomFloat gen(0.0, 1.0);
+    for (int test = 0; test < 15; test++)
+    {
+      Index cellIdx = gen() * (mesh.getCellCount() - 1);
+      auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
+      const auto& polytope = *it;
+      
+      Real x = gen();
+      Real y = gen();
+      if (x + y > 1.0) {
+        x = 1.0 - x;
+        y = 1.0 - y;
+      }
+      const Math::Vector<Real> rc{{x, y}};
+      Point p(polytope, rc);
+
+      // Evaluate the projected gradient grid function
+      auto grad_value = gf_grad.getValue(p);
+      const auto& phys_coords = p.getPhysicalCoordinates();
+      
+      // Should match gradient [2x, 2y]
+      EXPECT_NEAR(grad_value(0), 2.0 * phys_coords(0), 1e-10);
+      EXPECT_NEAR(grad_value(1), 2.0 * phys_coords(1), 1e-10);
+    }
+  }
 }

@@ -511,4 +511,108 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(div_value, expected_div, 1e-9);
     }
   }
+
+  TEST(Rodin_Variational_H1_Div, ProjectDivOntoGridFunction_LinearVectorField)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    // Create vector H1<2> space for the vector field
+    H1 fes_vector(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    GridFunction gf(fes_vector);
+
+    // Project linear vector field u = (2x, 3y) with div(u) = 2 + 3 = 5
+    auto linear_lambda = [](const Geometry::Point& p) {
+      Math::Vector<Real> v(2);
+      v << 2.0 * p.x(), 3.0 * p.y();
+      return v;
+    };
+    VectorFunction<decltype(linear_lambda)> linear_func(2, linear_lambda);
+    gf.project(linear_func);
+
+    // Create scalar H1<2> space for the divergence
+    H1 fes_scalar(std::integral_constant<size_t, 2>{}, mesh);
+    GridFunction gf_div(fes_scalar);
+
+    // Project Div(gf) onto gf_div
+    gf_div.project(Div(gf));
+
+    // Test at multiple random points
+    RandomFloat gen(0.0, 1.0);
+    for (int test = 0; test < 10; test++)
+    {
+      Index cellIdx = gen() * (mesh.getCellCount() - 1);
+      auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
+      const auto& polytope = *it;
+      
+      Real x = gen();
+      Real y = gen();
+      if (x + y > 1.0) {
+        x = 1.0 - x;
+        y = 1.0 - y;
+      }
+      const Math::Vector<Real> rc{{x, y}};
+      Point p(polytope, rc);
+
+      // Evaluate the projected divergence grid function
+      Real div_value = gf_div.getValue(p);
+      
+      // Should match the constant divergence 2 + 3 = 5
+      EXPECT_NEAR(div_value, 5.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Div, ProjectDivOntoGridFunction_QuadraticVectorField)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    // Create vector H1<3> space for the quadratic vector field
+    H1 fes_vector(std::integral_constant<size_t, 3>{}, mesh, mesh.getSpaceDimension());
+    GridFunction gf(fes_vector);
+
+    // Project quadratic vector field u = (x^2, y^2) with div(u) = 2x + 2y
+    auto quadratic_lambda = [](const Geometry::Point& p) {
+      Math::Vector<Real> v(2);
+      v << p.x() * p.x(), p.y() * p.y();
+      return v;
+    };
+    VectorFunction<decltype(quadratic_lambda)> quadratic_func(2, quadratic_lambda);
+    gf.project(quadratic_func);
+
+    // Create scalar H1<3> space for the divergence
+    H1 fes_scalar(std::integral_constant<size_t, 3>{}, mesh);
+    GridFunction gf_div(fes_scalar);
+
+    // Project Div(gf) onto gf_div using operator=
+    gf_div = Div(gf);
+
+    // Test at multiple random points
+    RandomFloat gen(0.0, 1.0);
+    for (int test = 0; test < 15; test++)
+    {
+      Index cellIdx = gen() * (mesh.getCellCount() - 1);
+      auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
+      const auto& polytope = *it;
+      
+      Real x = gen();
+      Real y = gen();
+      if (x + y > 1.0) {
+        x = 1.0 - x;
+        y = 1.0 - y;
+      }
+      const Math::Vector<Real> rc{{x, y}};
+      Point p(polytope, rc);
+
+      // Evaluate the projected divergence grid function
+      Real div_value = gf_div.getValue(p);
+      const auto& phys_coords = p.getPhysicalCoordinates();
+      
+      // Should match divergence 2x + 2y
+      Real expected_div = 2.0 * phys_coords(0) + 2.0 * phys_coords(1);
+      EXPECT_NEAR(div_value, expected_div, 1e-10);
+    }
+  }
 }

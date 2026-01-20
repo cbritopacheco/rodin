@@ -619,4 +619,131 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(jac_value(1, 1), 4.0 * py*py*py, 1e-9);
     }
   }
+
+  TEST(Rodin_Variational_H1_Jacobian, ProjectJacobianOntoGridFunction_LinearVectorField)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    // Create vector H1<2> space for the original vector field
+    H1 fes_vector(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    GridFunction gf(fes_vector);
+
+    // Project linear vector field u = (x + y, 2x - y) with Jacobian [[1, 1], [2, -1]]
+    auto linear_lambda = [](const Geometry::Point& p) {
+      Math::Vector<Real> v(2);
+      v << p.x() + p.y(), 2.0 * p.x() - p.y();
+      return v;
+    };
+    VectorFunction<decltype(linear_lambda)> linear_func(2, linear_lambda);
+    gf.project(linear_func);
+
+    // Create a higher-dimensional H1<2> space for the Jacobian matrix (2x2 = 4 components)
+    // For simplicity, we'll create separate GridFunctions for each component
+    H1 fes_scalar(std::integral_constant<size_t, 2>{}, mesh);
+    GridFunction jac_00(fes_scalar), jac_01(fes_scalar), jac_10(fes_scalar), jac_11(fes_scalar);
+
+    // Project Jacobian components
+    auto jac = Jacobian(gf);
+    jac_00 = Component(jac, 0, 0);
+    jac_01 = Component(jac, 0, 1);
+    jac_10 = Component(jac, 1, 0);
+    jac_11 = Component(jac, 1, 1);
+
+    // Test at multiple random points
+    RandomFloat gen(0.0, 1.0);
+    for (int test = 0; test < 10; test++)
+    {
+      Index cellIdx = gen() * (mesh.getCellCount() - 1);
+      auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
+      const auto& polytope = *it;
+      
+      Real x = gen();
+      Real y = gen();
+      if (x + y > 1.0) {
+        x = 1.0 - x;
+        y = 1.0 - y;
+      }
+      const Math::Vector<Real> rc{{x, y}};
+      Point p(polytope, rc);
+
+      // Evaluate the projected Jacobian components
+      Real j00 = jac_00.getValue(p);
+      Real j01 = jac_01.getValue(p);
+      Real j10 = jac_10.getValue(p);
+      Real j11 = jac_11.getValue(p);
+      
+      // Should match the constant Jacobian [[1, 1], [2, -1]]
+      EXPECT_NEAR(j00, 1.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(j01, 1.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(j10, 2.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(j11, -1.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Jacobian, ProjectJacobianOntoGridFunction_QuadraticVectorField)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    // Create vector H1<3> space for the quadratic vector field
+    H1 fes_vector(std::integral_constant<size_t, 3>{}, mesh, mesh.getSpaceDimension());
+    GridFunction gf(fes_vector);
+
+    // Project quadratic vector field u = (x^2, y^2) with Jacobian [[2x, 0], [0, 2y]]
+    auto quadratic_lambda = [](const Geometry::Point& p) {
+      Math::Vector<Real> v(2);
+      v << p.x() * p.x(), p.y() * p.y();
+      return v;
+    };
+    VectorFunction<decltype(quadratic_lambda)> quadratic_func(2, quadratic_lambda);
+    gf.project(quadratic_func);
+
+    // Create scalar H1<3> spaces for Jacobian components
+    H1 fes_scalar(std::integral_constant<size_t, 3>{}, mesh);
+    GridFunction jac_00(fes_scalar), jac_01(fes_scalar), jac_10(fes_scalar), jac_11(fes_scalar);
+
+    // Project Jacobian components
+    auto jac = Jacobian(gf);
+    jac_00.project(Component(jac, 0, 0));
+    jac_01.project(Component(jac, 0, 1));
+    jac_10.project(Component(jac, 1, 0));
+    jac_11.project(Component(jac, 1, 1));
+
+    // Test at multiple random points
+    RandomFloat gen(0.0, 1.0);
+    for (int test = 0; test < 15; test++)
+    {
+      Index cellIdx = gen() * (mesh.getCellCount() - 1);
+      auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
+      const auto& polytope = *it;
+      
+      Real x = gen();
+      Real y = gen();
+      if (x + y > 1.0) {
+        x = 1.0 - x;
+        y = 1.0 - y;
+      }
+      const Math::Vector<Real> rc{{x, y}};
+      Point p(polytope, rc);
+
+      // Evaluate the projected Jacobian components
+      Real j00 = jac_00.getValue(p);
+      Real j01 = jac_01.getValue(p);
+      Real j10 = jac_10.getValue(p);
+      Real j11 = jac_11.getValue(p);
+      
+      const auto& phys_coords = p.getPhysicalCoordinates();
+      Real px = phys_coords(0);
+      Real py = phys_coords(1);
+      
+      // Should match Jacobian [[2x, 0], [0, 2y]]
+      EXPECT_NEAR(j00, 2.0 * px, 1e-10);
+      EXPECT_NEAR(j01, 0.0, 1e-10);
+      EXPECT_NEAR(j10, 0.0, 1e-10);
+      EXPECT_NEAR(j11, 2.0 * py, 1e-10);
+    }
+  }
 }
