@@ -1082,7 +1082,8 @@ TEST(H1Grad, ShapeFunction_getBasis_Triangle_H1_2)
   const auto cellIt = mesh.getCell(0);
   Math::SpatialPoint refCoord(2);
   refCoord << 0.3, 0.3;
-  grad_u.setPoint(Geometry::Point(*cellIt, refCoord));
+  Geometry::Point p(*cellIt, refCoord);
+  grad_u.setPoint(p);
 
   // Check that getBasis returns valid 2D vectors for all 6 DOFs
   for (size_t local = 0; local < grad_u.getDOFs(*cellIt); local++)
@@ -1126,7 +1127,8 @@ TEST(H1Grad, ShapeFunction_getBasis_Tetrahedron_H1_2)
   const auto cellIt = mesh.getCell(0);
   Math::SpatialPoint refCoord(3);
   refCoord << 0.2, 0.2, 0.2;
-  grad_u.setPoint(Geometry::Point(*cellIt, refCoord));
+  Geometry::Point p(*cellIt, refCoord);
+  grad_u.setPoint(p);
 
   // Check that getBasis returns valid 3D vectors for all 10 DOFs
   for (size_t local = 0; local < grad_u.getDOFs(*cellIt); local++)

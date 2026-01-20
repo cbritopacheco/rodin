@@ -303,7 +303,8 @@ namespace Rodin::Tests::Unit
 
     Math::SpatialPoint refCoord(2);
     refCoord << 0.3, 0.4;
-    div_u.setPoint(Point(*cellIt, refCoord));
+    Point p(*cellIt, refCoord);
+    div_u.setPoint(p);
 
     // Check that getBasis returns valid scalar values for all local DOFs
     for (size_t local = 0; local < dofs; local++)
@@ -350,7 +351,8 @@ namespace Rodin::Tests::Unit
 
     Math::SpatialPoint refCoord(3);
     refCoord << 0.2, 0.2, 0.2;
-    div_u.setPoint(Point(*cellIt, refCoord));
+    Point p(*cellIt, refCoord);
+    div_u.setPoint(p);
 
     // Check that getBasis returns valid scalar values for all local DOFs
     for (size_t local = 0; local < dofs; local++)
