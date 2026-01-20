@@ -912,8 +912,9 @@ TEST(H1Div, ShapeFunction_getDOFs_Triangle_H1_2)
   TrialFunction u(uh);
   auto div_u = Div(u);
 
-  // H1<2> on a triangle has 6 DOFs per component
-  EXPECT_EQ(div_u.getDOFs(), 6);
+  // H1<2> on a triangle has 6 DOFs per component, 2 components = 12 total
+  const auto cellIt = mesh.getCell(0);
+  EXPECT_EQ(div_u.getDOFs(*cellIt), 12);
 }
 
 TEST(H1Div, ShapeFunction_getBasis_Triangle_H1_2)
@@ -927,11 +928,13 @@ TEST(H1Div, ShapeFunction_getBasis_Triangle_H1_2)
   TrialFunction u(uh);
   auto div_u = Div(u);
 
-  const auto& polytope = mesh.getCell(0);
-  div_u.setPoint(Geometry::Point(polytope, {{0.3, 0.3}}));
+  const auto cellIt = mesh.getCell(0);
+  Math::SpatialPoint refCoord(2);
+  refCoord << 0.3, 0.3;
+  div_u.setPoint(Geometry::Point(*cellIt, refCoord));
 
   // Check that getBasis returns valid scalars for all DOFs
-  for (size_t local = 0; local < div_u.getDOFs(); local++)
+  for (size_t local = 0; local < div_u.getDOFs(*cellIt); local++)
   {
     const auto& basis = div_u.getBasis(local);
     EXPECT_TRUE(std::isfinite(basis));
@@ -950,8 +953,9 @@ TEST(H1Div, ShapeFunction_getDOFs_Tetrahedron_H1_2)
   TrialFunction u(uh);
   auto div_u = Div(u);
 
-  // H1<2> on a tetrahedron has 10 DOFs per component
-  EXPECT_EQ(div_u.getDOFs(), 10);
+  // H1<2> on a tetrahedron has 10 DOFs per component, 3 components = 30 total
+  const auto cellIt = mesh.getCell(0);
+  EXPECT_EQ(div_u.getDOFs(*cellIt), 30);
 }
 
 TEST(H1Div, ShapeFunction_getBasis_Tetrahedron_H1_2)
@@ -966,11 +970,13 @@ TEST(H1Div, ShapeFunction_getBasis_Tetrahedron_H1_2)
   TrialFunction u(uh);
   auto div_u = Div(u);
 
-  const auto& polytope = mesh.getCell(0);
-  div_u.setPoint(Geometry::Point(polytope, {{0.2, 0.2, 0.2}}));
+  const auto cellIt = mesh.getCell(0);
+  Math::SpatialPoint refCoord(3);
+  refCoord << 0.2, 0.2, 0.2;
+  div_u.setPoint(Geometry::Point(*cellIt, refCoord));
 
   // Check that getBasis returns valid scalars for all DOFs
-  for (size_t local = 0; local < div_u.getDOFs(); local++)
+  for (size_t local = 0; local < div_u.getDOFs(*cellIt); local++)
   {
     const auto& basis = div_u.getBasis(local);
     EXPECT_TRUE(std::isfinite(basis));

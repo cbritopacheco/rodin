@@ -1101,7 +1101,8 @@ TEST(H1Jacobian, ShapeFunction_getDOFs_Triangle_H1_2)
   auto jac_u = Jacobian(u);
 
   // H1<2> on a triangle has 6 DOFs per component, 2 components = 12 total
-  EXPECT_EQ(jac_u.getDOFs(), 6);
+  const auto cellIt = mesh.getCell(0);
+  EXPECT_EQ(jac_u.getDOFs(*cellIt), 12);
 }
 
 TEST(H1Jacobian, ShapeFunction_getBasis_Triangle_H1_2)
@@ -1115,11 +1116,13 @@ TEST(H1Jacobian, ShapeFunction_getBasis_Triangle_H1_2)
   TrialFunction u(uh);
   auto jac_u = Jacobian(u);
 
-  const auto& polytope = mesh.getCell(0);
-  jac_u.setPoint(Geometry::Point(polytope, {{0.3, 0.3}}));
+  const auto cellIt = mesh.getCell(0);
+  Math::SpatialPoint refCoord(2);
+  refCoord << 0.3, 0.3;
+  jac_u.setPoint(Geometry::Point(*cellIt, refCoord));
 
   // Check that getBasis returns valid 2x2 matrices for all DOFs
-  for (size_t local = 0; local < jac_u.getDOFs(); local++)
+  for (size_t local = 0; local < jac_u.getDOFs(*cellIt); local++)
   {
     const auto& basis = jac_u.getBasis(local);
     EXPECT_EQ(basis.rows(), 2);
@@ -1142,8 +1145,9 @@ TEST(H1Jacobian, ShapeFunction_getDOFs_Tetrahedron_H1_2)
   TrialFunction u(uh);
   auto jac_u = Jacobian(u);
 
-  // H1<2> on a tetrahedron has 10 DOFs per component
-  EXPECT_EQ(jac_u.getDOFs(), 10);
+  // H1<2> on a tetrahedron has 10 DOFs per component, 3 components = 30 total
+  const auto cellIt = mesh.getCell(0);
+  EXPECT_EQ(jac_u.getDOFs(*cellIt), 30);
 }
 
 TEST(H1Jacobian, ShapeFunction_getBasis_Tetrahedron_H1_2)
@@ -1158,11 +1162,13 @@ TEST(H1Jacobian, ShapeFunction_getBasis_Tetrahedron_H1_2)
   TrialFunction u(uh);
   auto jac_u = Jacobian(u);
 
-  const auto& polytope = mesh.getCell(0);
-  jac_u.setPoint(Geometry::Point(polytope, {{0.2, 0.2, 0.2}}));
+  const auto cellIt = mesh.getCell(0);
+  Math::SpatialPoint refCoord(3);
+  refCoord << 0.2, 0.2, 0.2;
+  jac_u.setPoint(Geometry::Point(*cellIt, refCoord));
 
   // Check that getBasis returns valid 3x3 matrices for all DOFs
-  for (size_t local = 0; local < jac_u.getDOFs(); local++)
+  for (size_t local = 0; local < jac_u.getDOFs(*cellIt); local++)
   {
     const auto& basis = jac_u.getBasis(local);
     EXPECT_EQ(basis.rows(), 3);

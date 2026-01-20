@@ -1064,7 +1064,8 @@ TEST(H1Grad, ShapeFunction_getDOFs_Triangle_H1_2)
   auto grad_u = Grad(u);
 
   // H1<2> on a triangle has 6 DOFs
-  EXPECT_EQ(grad_u.getDOFs(), 6);
+  const auto cellIt = mesh.getCell(0);
+  EXPECT_EQ(grad_u.getDOFs(*cellIt), 6);
 }
 
 TEST(H1Grad, ShapeFunction_getBasis_Triangle_H1_2)
@@ -1078,11 +1079,13 @@ TEST(H1Grad, ShapeFunction_getBasis_Triangle_H1_2)
   TrialFunction u(Vh);
   auto grad_u = Grad(u);
 
-  const auto& polytope = mesh.getCell(0);
-  grad_u.setPoint(Geometry::Point(polytope, {{0.3, 0.3}}));
+  const auto cellIt = mesh.getCell(0);
+  Math::SpatialPoint refCoord(2);
+  refCoord << 0.3, 0.3;
+  grad_u.setPoint(Geometry::Point(*cellIt, refCoord));
 
   // Check that getBasis returns valid 2D vectors for all 6 DOFs
-  for (size_t local = 0; local < grad_u.getDOFs(); local++)
+  for (size_t local = 0; local < grad_u.getDOFs(*cellIt); local++)
   {
     const auto& basis = grad_u.getBasis(local);
     EXPECT_EQ(basis.size(), 2); // 2D gradient
@@ -1104,7 +1107,8 @@ TEST(H1Grad, ShapeFunction_getDOFs_Tetrahedron_H1_2)
   auto grad_u = Grad(u);
 
   // H1<2> on a tetrahedron has 10 DOFs
-  EXPECT_EQ(grad_u.getDOFs(), 10);
+  const auto cellIt = mesh.getCell(0);
+  EXPECT_EQ(grad_u.getDOFs(*cellIt), 10);
 }
 
 TEST(H1Grad, ShapeFunction_getBasis_Tetrahedron_H1_2)
@@ -1119,11 +1123,13 @@ TEST(H1Grad, ShapeFunction_getBasis_Tetrahedron_H1_2)
   TrialFunction u(Vh);
   auto grad_u = Grad(u);
 
-  const auto& polytope = mesh.getCell(0);
-  grad_u.setPoint(Geometry::Point(polytope, {{0.2, 0.2, 0.2}}));
+  const auto cellIt = mesh.getCell(0);
+  Math::SpatialPoint refCoord(3);
+  refCoord << 0.2, 0.2, 0.2;
+  grad_u.setPoint(Geometry::Point(*cellIt, refCoord));
 
   // Check that getBasis returns valid 3D vectors for all 10 DOFs
-  for (size_t local = 0; local < grad_u.getDOFs(); local++)
+  for (size_t local = 0; local < grad_u.getDOFs(*cellIt); local++)
   {
     const auto& basis = grad_u.getBasis(local);
     EXPECT_EQ(basis.size(), 3); // 3D gradient
