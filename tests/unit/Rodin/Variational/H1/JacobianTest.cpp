@@ -1379,19 +1379,19 @@ namespace Rodin::Tests::Unit
 
     // Test with random evaluation points
     const size_t num_tests = 10;
-    std::uniform_int_distribution<size_t> cell_dist(0, mesh.getCellCount() - 1);
-    std::uniform_real_distribution<Real> coord_dist(0.1, 0.8);
+    RandomInteger<size_t> cell_dist(0, mesh.getCellCount() - 1);
+    RandomReal coord_dist(0.1, 0.8);
 
     for (size_t test = 0; test < num_tests; test++)
     {
       // Random cell
-      size_t cell_idx = cell_dist(gen);
+      size_t cell_idx = cell_dist();
       auto it = mesh.getPolytope(mesh.getDimension(), cell_idx);
       const auto& polytope = *it;
 
       // Random reference coordinates
-      Real r1 = coord_dist(gen);
-      Real r2 = coord_dist(gen);
+      Real r1 = coord_dist();
+      Real r2 = coord_dist();
       if (r1 + r2 > 1.0)
       {
         r1 = 1.0 - r1;

@@ -1318,16 +1318,19 @@ namespace Rodin::Tests::Unit
     const size_t num_random_points = 10;
     const size_t num_cells = mesh.getCellCount();
 
+    RandomInteger<size_t> randomSize(0, num_cells - 1);
+    RandomReal randomReal(0.0, 1.0);
+
     for (size_t i = 0; i < num_random_points; i++)
     {
       // Random cell
-      const size_t cell_idx = randomSize(0, num_cells - 1);
+      const size_t cell_idx = randomSize();
       auto it = mesh.getPolytope(mesh.getDimension(), cell_idx);
       const auto& polytope = *it;
 
       // Random reference coordinates (barycentric for triangle)
-      const Real r1 = randomReal(0.0, 1.0);
-      const Real r2 = randomReal(0.0, 1.0 - r1);
+      const Real r1 = randomReal();
+      const Real r2 = randomReal() * (1.0 - r1);
       const Math::Vector<Real> rc{{r1, r2}};
       Point p(polytope, rc);
 
