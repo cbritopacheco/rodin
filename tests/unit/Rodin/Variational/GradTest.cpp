@@ -194,4 +194,107 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(grad_value(1), 2.0, RODIN_FUZZY_CONSTANT);
     }
   }
+
+  TEST(Rodin_Variational_Grad, ShapeFunction_getDOFs_Triangle_P1)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    P1 Vh(mesh);
+    ShapeFunction u(Vh);
+    auto grad_u = Grad(u);
+
+    auto cellIt = mesh.getCell(0);
+    size_t dofs = grad_u.getDOFs(*cellIt);
+
+    // P1 triangle has 3 DOFs
+    EXPECT_EQ(dofs, 3);
+  }
+
+  TEST(Rodin_Variational_Grad, ShapeFunction_getBasis_Triangle_P1)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    P1 Vh(mesh);
+    ShapeFunction u(Vh);
+    auto grad_u = Grad(u);
+
+    auto cellIt = mesh.getCell(0);
+    size_t dofs = grad_u.getDOFs(*cellIt);
+
+    Math::SpatialPoint<Real> sp(2);
+    sp(0) = 0.3;
+    sp(1) = 0.4;
+    Point p(*cellIt, sp);
+    grad_u.setLeaf(p);
+
+    // Check that getBasis returns valid values for all local DOFs
+    for (size_t local = 0; local < dofs; local++)
+    {
+      auto basis_val = grad_u.getBasis(local);
+      // Verify it's a 2D vector
+      EXPECT_EQ(basis_val.size(), 2);
+      // Check all values are finite
+      for (int i = 0; i < basis_val.size(); i++)
+      {
+        EXPECT_TRUE(std::isfinite(basis_val(i)));
+      }
+    }
+  }
+
+  TEST(Rodin_Variational_Grad, ShapeFunction_getDOFs_Tetrahedron_P1)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    P1 Vh(mesh);
+    ShapeFunction u(Vh);
+    auto grad_u = Grad(u);
+
+    auto cellIt = mesh.getCell(0);
+    size_t dofs = grad_u.getDOFs(*cellIt);
+
+    // P1 tetrahedron has 4 DOFs
+    EXPECT_EQ(dofs, 4);
+  }
+
+  TEST(Rodin_Variational_Grad, ShapeFunction_getBasis_Tetrahedron_P1)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    P1 Vh(mesh);
+    ShapeFunction u(Vh);
+    auto grad_u = Grad(u);
+
+    auto cellIt = mesh.getCell(0);
+    size_t dofs = grad_u.getDOFs(*cellIt);
+
+    Math::SpatialPoint<Real> sp(3);
+    sp(0) = 0.2;
+    sp(1) = 0.2;
+    sp(2) = 0.2;
+    Point p(*cellIt, sp);
+    grad_u.setLeaf(p);
+
+    // Check that getBasis returns valid values for all local DOFs
+    for (size_t local = 0; local < dofs; local++)
+    {
+      auto basis_val = grad_u.getBasis(local);
+      // Verify it's a 3D vector
+      EXPECT_EQ(basis_val.size(), 3);
+      // Check all values are finite
+      for (int i = 0; i < basis_val.size(); i++)
+      {
+        EXPECT_TRUE(std::isfinite(basis_val(i)));
+      }
+    }
+  }
 }
