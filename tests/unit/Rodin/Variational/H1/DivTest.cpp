@@ -899,4 +899,311 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(div_value, 5.0, RODIN_FUZZY_CONSTANT);
     }
   }
+
+  // ===== ShapeFunctionBase setPoint and getBasis Tests =====
+
+  TEST(Rodin_Variational_H1_Div, ShapeFunction_setPoint_Triangle)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    // Vector-valued H1<2> space
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    TrialFunction u(fes);
+    auto div_u = Div(u);
+
+    // Get first element
+    auto it = mesh.getPolytope(mesh.getDimension(), 0);
+    const auto& polytope = *it;
+    
+    // Create evaluation point
+    const Math::Vector<Real> rc{{0.25, 0.25}};
+    Point p(polytope, rc);
+
+    // Test setPoint
+    div_u.setPoint(p);
+    
+    // Verify getPoint returns the correct point
+    const auto& retrieved_point = div_u.getPoint();
+    EXPECT_EQ(&retrieved_point, &p);
+    EXPECT_EQ(&retrieved_point.getPolytope(), &polytope);
+  }
+
+  TEST(Rodin_Variational_H1_Div, ShapeFunction_getBasis_Triangle_H1_2)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    // Vector-valued H1<2> space (2D vectors)
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    TrialFunction u(fes);
+    auto div_u = Div(u);
+
+    // Get first element
+    auto it = mesh.getPolytope(mesh.getDimension(), 0);
+    const auto& polytope = *it;
+    
+    // Create evaluation point at centroid
+    const Math::Vector<Real> rc{{1.0/3.0, 1.0/3.0}};
+    Point p(polytope, rc);
+
+    // Set the point
+    div_u.setPoint(p);
+    
+    // Test getBasis for each local DOF
+    const size_t num_dofs = div_u.getDOFs(polytope);
+    EXPECT_EQ(num_dofs, 6); // H1<2> on triangle has 6 DOFs per component, 2 components
+    
+    // Verify that getBasis returns scalar values (divergence) for each local DOF
+    for (size_t local = 0; local < num_dofs; local++)
+    {
+      Real basis_div = div_u.getBasis(local);
+      // Divergence should be a scalar
+      // Value should be finite
+      EXPECT_TRUE(std::isfinite(basis_div));
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Div, ShapeFunction_getBasis_Tetrahedron_H1_2)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    // Vector-valued H1<2> space (3D vectors)
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    TrialFunction u(fes);
+    auto div_u = Div(u);
+
+    // Get first element
+    auto it = mesh.getPolytope(mesh.getDimension(), 0);
+    const auto& polytope = *it;
+    
+    // Create evaluation point
+    const Math::Vector<Real> rc{{0.2, 0.2, 0.2}};
+    Point p(polytope, rc);
+
+    // Set the point
+    div_u.setPoint(p);
+    
+    // Test getBasis for each local DOF
+    const size_t num_dofs = div_u.getDOFs(polytope);
+    EXPECT_EQ(num_dofs, 10); // H1<2> on tetrahedron has 10 DOFs per component, 3 components
+    
+    // Verify that getBasis returns scalar values for each local DOF
+    for (size_t local = 0; local < num_dofs; local++)
+    {
+      Real basis_div = div_u.getBasis(local);
+      // Divergence should be a scalar value
+      EXPECT_TRUE(std::isfinite(basis_div));
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Div, ShapeFunction_getBasis_Quadrilateral_H1_2)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    // Vector-valued H1<2> space
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    TrialFunction u(fes);
+    auto div_u = Div(u);
+
+    // Get first element
+    auto it = mesh.getPolytope(mesh.getDimension(), 0);
+    const auto& polytope = *it;
+    
+    // Create evaluation point
+    const Math::Vector<Real> rc{{0.5, 0.5}};
+    Point p(polytope, rc);
+
+    // Set the point
+    div_u.setPoint(p);
+    
+    // Test getBasis for each local DOF
+    const size_t num_dofs = div_u.getDOFs(polytope);
+    EXPECT_EQ(num_dofs, 9); // H1<2> on quadrilateral has 9 DOFs per component, 2 components
+    
+    // Verify that getBasis returns scalar values for each local DOF
+    for (size_t local = 0; local < num_dofs; local++)
+    {
+      Real basis_div = div_u.getBasis(local);
+      // Divergence should be a scalar
+      EXPECT_TRUE(std::isfinite(basis_div));
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Div, ShapeFunction_setPoint_MultipleCalls)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    TrialFunction u(fes);
+    auto div_u = Div(u);
+
+    // Get first element
+    auto it1 = mesh.getPolytope(mesh.getDimension(), 0);
+    const auto& polytope1 = *it1;
+    const Math::Vector<Real> rc1{{0.25, 0.25}};
+    Point p1(polytope1, rc1);
+
+    // First setPoint
+    div_u.setPoint(p1);
+    EXPECT_EQ(&div_u.getPoint(), &p1);
+    
+    // Verify getBasis works
+    const size_t num_dofs1 = div_u.getDOFs(polytope1);
+    for (size_t local = 0; local < num_dofs1; local++)
+    {
+      Real basis_div = div_u.getBasis(local);
+      EXPECT_TRUE(std::isfinite(basis_div));
+    }
+
+    // Get different element
+    auto it2 = mesh.getPolytope(mesh.getDimension(), 2);
+    const auto& polytope2 = *it2;
+    const Math::Vector<Real> rc2{{0.5, 0.3}};
+    Point p2(polytope2, rc2);
+
+    // Second setPoint
+    div_u.setPoint(p2);
+    EXPECT_EQ(&div_u.getPoint(), &p2);
+    EXPECT_EQ(&div_u.getPoint().getPolytope(), &polytope2);
+    
+    // Verify getBasis still works after changing point
+    const size_t num_dofs2 = div_u.getDOFs(polytope2);
+    for (size_t local = 0; local < num_dofs2; local++)
+    {
+      Real basis_div = div_u.getBasis(local);
+      EXPECT_TRUE(std::isfinite(basis_div));
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Div, ShapeFunction_getBasis_PartitionOfUnity_Triangle)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    // Use H1<1> for simplicity - linear basis functions
+    H1 fes(std::integral_constant<size_t, 1>{}, mesh, mesh.getSpaceDimension());
+    TrialFunction u(fes);
+    auto div_u = Div(u);
+
+    // Get first element
+    auto it = mesh.getPolytope(mesh.getDimension(), 0);
+    const auto& polytope = *it;
+    
+    // Create evaluation point
+    const Math::Vector<Real> rc{{0.3, 0.4}};
+    Point p(polytope, rc);
+
+    // Set the point
+    div_u.setPoint(p);
+    
+    // For H1<1>, the divergence of constant vector field should be zero
+    // Sum of all basis divergences should be zero
+    const size_t num_dofs = div_u.getDOFs(polytope);
+    EXPECT_EQ(num_dofs, 3); // H1<1> on triangle has 3 DOFs per component
+    
+    // Sum all basis divergences
+    Real sum_div = 0.0;
+    for (size_t local = 0; local < num_dofs; local++)
+    {
+      Real basis_div = div_u.getBasis(local);
+      sum_div += basis_div;
+    }
+    
+    // For linear basis functions, sum of divergences should be zero
+    // (divergence of sum of basis functions = divergence of constant = 0)
+    EXPECT_NEAR(sum_div, 0.0, 1e-10);
+  }
+
+  TEST(Rodin_Variational_H1_Div, ShapeFunction_getBasis_H1_3)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    // Vector-valued H1<3> space
+    H1 fes(std::integral_constant<size_t, 3>{}, mesh, mesh.getSpaceDimension());
+    TrialFunction u(fes);
+    auto div_u = Div(u);
+
+    // Get first element
+    auto it = mesh.getPolytope(mesh.getDimension(), 0);
+    const auto& polytope = *it;
+    
+    // Create evaluation point
+    const Math::Vector<Real> rc{{0.2, 0.3}};
+    Point p(polytope, rc);
+
+    // Set the point
+    div_u.setPoint(p);
+    
+    // Test getBasis for H1<3>
+    const size_t num_dofs = div_u.getDOFs(polytope);
+    EXPECT_EQ(num_dofs, 10); // H1<3> on triangle has 10 DOFs per component
+    
+    // Verify all basis divergences are finite
+    for (size_t local = 0; local < num_dofs; local++)
+    {
+      Real basis_div = div_u.getBasis(local);
+      EXPECT_TRUE(std::isfinite(basis_div));
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Div, ShapeFunction_getBasis_RandomPoints)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    TrialFunction u(fes);
+    auto div_u = Div(u);
+
+    // Test with random evaluation points
+    const size_t num_tests = 10;
+    std::uniform_int_distribution<size_t> cell_dist(0, mesh.getCellCount() - 1);
+    std::uniform_real_distribution<Real> coord_dist(0.1, 0.8);
+    
+    for (size_t test = 0; test < num_tests; test++)
+    {
+      // Random cell
+      size_t cell_idx = cell_dist(gen);
+      auto it = mesh.getPolytope(mesh.getDimension(), cell_idx);
+      const auto& polytope = *it;
+      
+      // Random reference coordinates
+      Real r1 = coord_dist(gen);
+      Real r2 = coord_dist(gen);
+      if (r1 + r2 > 1.0)
+      {
+        r1 = 1.0 - r1;
+        r2 = 1.0 - r2;
+      }
+      const Math::Vector<Real> rc{{r1, r2}};
+      Point p(polytope, rc);
+
+      // Set point and test getBasis
+      div_u.setPoint(p);
+      
+      const size_t num_dofs = div_u.getDOFs(polytope);
+      for (size_t local = 0; local < num_dofs; local++)
+      {
+        Real basis_div = div_u.getBasis(local);
+        
+        // Check that value is finite and reasonably bounded
+        EXPECT_TRUE(std::isfinite(basis_div));
+        EXPECT_LT(std::abs(basis_div), 1000.0); // Sanity check
+      }
+    }
+  }
 }
