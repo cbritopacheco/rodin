@@ -455,4 +455,60 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(div_value, 3.0, RODIN_FUZZY_CONSTANT);
     }
   }
+
+  TEST(Rodin_Variational_H1_Div, RandomCoordinates_QuarticVectorField_H1_5)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    // H1<5> can represent quartic (degree 4) functions exactly
+    H1 fes(std::integral_constant<size_t, 5>{}, mesh, mesh.getSpaceDimension());
+    GridFunction gf(fes);
+
+    // Project a quartic vector field: u = (x^4 + x^2*y, y^4 + xy^2)
+    // div(u) = ∂(x^4 + x^2*y)/∂x + ∂(y^4 + xy^2)/∂y
+    //        = 4x^3 + 2xy + 4y^3 + 2xy
+    //        = 4x^3 + 4y^3 + 4xy
+    auto quartic_lambda = [](const Geometry::Point& p) {
+      Math::Vector<Real> v(2);
+      Real x = p.x();
+      Real y = p.y();
+      v << x*x*x*x + x*x*y, 
+           y*y*y*y + x*y*y;
+      return v;
+    };
+    VectorFunction<decltype(quartic_lambda)> quartic_func(2, quartic_lambda);
+    gf.project(quartic_func);
+
+    auto div_gf = Div(gf);
+
+    // Test at 30 random points across different cells
+    RandomFloat gen(0.0, 1.0);
+    for (int test = 0; test < 30; test++)
+    {
+      Index cellIdx = gen() * (mesh.getCellCount() - 1);
+      auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
+      const auto& polytope = *it;
+      
+      Real x = gen();
+      Real y = gen();
+      if (x + y > 1.0) {
+        x = 1.0 - x;
+        y = 1.0 - y;
+      }
+      const Math::Vector<Real> rc{{x, y}};
+      Point p(polytope, rc);
+
+      Real div_value = div_gf.getValue(p);
+      const auto& phys_coords = p.getPhysicalCoordinates();
+      
+      Real px = phys_coords(0);
+      Real py = phys_coords(1);
+      
+      // Expected div = 4x^3 + 4y^3 + 4xy
+      Real expected_div = 4.0 * px*px*px + 4.0 * py*py*py + 4.0 * px * py;
+      EXPECT_NEAR(div_value, expected_div, 1e-9);
+    }
+  }
 }

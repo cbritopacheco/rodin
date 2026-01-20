@@ -757,4 +757,57 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(grad_value.norm(), 0.0, RODIN_FUZZY_CONSTANT);
     }
   }
+
+  TEST(Rodin_Variational_H1_Grad, RandomCoordinates_H1_5_QuarticFunction)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    
+    // H1<5> can represent quartic (degree 4) functions exactly
+    H1 fes(std::integral_constant<size_t, 5>{}, mesh);
+    GridFunction gf(fes);
+
+    // Project a quartic function: f(x,y) = x^4 + x^2*y^2 + y^4
+    // Gradient: [4x^3 + 2xy^2, 2x^2*y + 4y^3]
+    RealFunction quartic_func([](const Geometry::Point& p) { 
+      Real x = p.x();
+      Real y = p.y();
+      return x*x*x*x + x*x*y*y + y*y*y*y; 
+    });
+    gf.project(quartic_func);
+
+    auto grad_gf = Grad(gf);
+
+    // Test at 30 random points across different cells
+    RandomFloat gen(0.0, 1.0);
+    for (int test = 0; test < 30; test++)
+    {
+      Index cellIdx = gen() * (mesh.getCellCount() - 1);
+      auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
+      const auto& polytope = *it;
+      
+      Real x = gen();
+      Real y = gen();
+      if (x + y > 1.0) {
+        x = 1.0 - x;
+        y = 1.0 - y;
+      }
+      const Math::Vector<Real> rc{{x, y}};
+      Point p(polytope, rc);
+
+      auto grad_value = grad_gf.getValue(p);
+      const auto& phys_coords = p.getPhysicalCoordinates();
+      
+      Real px = phys_coords(0);
+      Real py = phys_coords(1);
+      
+      // Expected gradient: [4x^3 + 2xy^2, 2x^2*y + 4y^3]
+      Real expected_grad_x = 4.0 * px*px*px + 2.0 * px * py*py;
+      Real expected_grad_y = 2.0 * px*px * py + 4.0 * py*py*py;
+      
+      EXPECT_NEAR(grad_value(0), expected_grad_x, 1e-9);
+      EXPECT_NEAR(grad_value(1), expected_grad_y, 1e-9);
+    }
+  }
 }
