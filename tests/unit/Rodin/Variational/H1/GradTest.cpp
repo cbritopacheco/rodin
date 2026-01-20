@@ -1051,3 +1051,85 @@ namespace Rodin::Tests::Unit
     }
   }
 }
+
+TEST(H1Grad, ShapeFunction_getDOFs_Triangle_H1_2)
+{
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
+  mesh.getConnectivity().compute(2, 1);
+  mesh.getConnectivity().compute(1, 0);
+
+  H1 Vh(std::integral_constant<size_t, 2>{}, mesh);
+  TrialFunction u(Vh);
+  auto grad_u = Grad(u);
+
+  // H1<2> on a triangle has 6 DOFs
+  EXPECT_EQ(grad_u.getDOFs(), 6);
+}
+
+TEST(H1Grad, ShapeFunction_getBasis_Triangle_H1_2)
+{
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
+  mesh.getConnectivity().compute(2, 1);
+  mesh.getConnectivity().compute(1, 0);
+
+  H1 Vh(std::integral_constant<size_t, 2>{}, mesh);
+  TrialFunction u(Vh);
+  auto grad_u = Grad(u);
+
+  const auto& polytope = mesh.getCell(0);
+  grad_u.setPoint(Geometry::Point(polytope, {{0.3, 0.3}}));
+
+  // Check that getBasis returns valid 2D vectors for all 6 DOFs
+  for (size_t local = 0; local < grad_u.getDOFs(); local++)
+  {
+    const auto& basis = grad_u.getBasis(local);
+    EXPECT_EQ(basis.size(), 2); // 2D gradient
+    EXPECT_TRUE(std::isfinite(basis(0)));
+    EXPECT_TRUE(std::isfinite(basis(1)));
+  }
+}
+
+TEST(H1Grad, ShapeFunction_getDOFs_Tetrahedron_H1_2)
+{
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+  mesh.getConnectivity().compute(3, 2);
+  mesh.getConnectivity().compute(2, 1);
+  mesh.getConnectivity().compute(1, 0);
+
+  H1 Vh(std::integral_constant<size_t, 2>{}, mesh);
+  TrialFunction u(Vh);
+  auto grad_u = Grad(u);
+
+  // H1<2> on a tetrahedron has 10 DOFs
+  EXPECT_EQ(grad_u.getDOFs(), 10);
+}
+
+TEST(H1Grad, ShapeFunction_getBasis_Tetrahedron_H1_2)
+{
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+  mesh.getConnectivity().compute(3, 2);
+  mesh.getConnectivity().compute(2, 1);
+  mesh.getConnectivity().compute(1, 0);
+
+  H1 Vh(std::integral_constant<size_t, 2>{}, mesh);
+  TrialFunction u(Vh);
+  auto grad_u = Grad(u);
+
+  const auto& polytope = mesh.getCell(0);
+  grad_u.setPoint(Geometry::Point(polytope, {{0.2, 0.2, 0.2}}));
+
+  // Check that getBasis returns valid 3D vectors for all 10 DOFs
+  for (size_t local = 0; local < grad_u.getDOFs(); local++)
+  {
+    const auto& basis = grad_u.getBasis(local);
+    EXPECT_EQ(basis.size(), 3); // 3D gradient
+    EXPECT_TRUE(std::isfinite(basis(0)));
+    EXPECT_TRUE(std::isfinite(basis(1)));
+    EXPECT_TRUE(std::isfinite(basis(2)));
+  }
+}
+

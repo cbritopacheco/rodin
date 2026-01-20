@@ -1088,3 +1088,88 @@ namespace Rodin::Tests::Unit
     }
   }
 }
+
+TEST(H1Jacobian, ShapeFunction_getDOFs_Triangle_H1_2)
+{
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
+  mesh.getConnectivity().compute(2, 1);
+  mesh.getConnectivity().compute(1, 0);
+
+  H1 uh(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+  TrialFunction u(uh);
+  auto jac_u = Jacobian(u);
+
+  // H1<2> on a triangle has 6 DOFs per component, 2 components = 12 total
+  EXPECT_EQ(jac_u.getDOFs(), 6);
+}
+
+TEST(H1Jacobian, ShapeFunction_getBasis_Triangle_H1_2)
+{
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
+  mesh.getConnectivity().compute(2, 1);
+  mesh.getConnectivity().compute(1, 0);
+
+  H1 uh(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+  TrialFunction u(uh);
+  auto jac_u = Jacobian(u);
+
+  const auto& polytope = mesh.getCell(0);
+  jac_u.setPoint(Geometry::Point(polytope, {{0.3, 0.3}}));
+
+  // Check that getBasis returns valid 2x2 matrices for all DOFs
+  for (size_t local = 0; local < jac_u.getDOFs(); local++)
+  {
+    const auto& basis = jac_u.getBasis(local);
+    EXPECT_EQ(basis.rows(), 2);
+    EXPECT_EQ(basis.cols(), 2);
+    for (int i = 0; i < 2; i++)
+      for (int j = 0; j < 2; j++)
+        EXPECT_TRUE(std::isfinite(basis(i, j)));
+  }
+}
+
+TEST(H1Jacobian, ShapeFunction_getDOFs_Tetrahedron_H1_2)
+{
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+  mesh.getConnectivity().compute(3, 2);
+  mesh.getConnectivity().compute(2, 1);
+  mesh.getConnectivity().compute(1, 0);
+
+  H1 uh(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+  TrialFunction u(uh);
+  auto jac_u = Jacobian(u);
+
+  // H1<2> on a tetrahedron has 10 DOFs per component
+  EXPECT_EQ(jac_u.getDOFs(), 10);
+}
+
+TEST(H1Jacobian, ShapeFunction_getBasis_Tetrahedron_H1_2)
+{
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+  mesh.getConnectivity().compute(3, 2);
+  mesh.getConnectivity().compute(2, 1);
+  mesh.getConnectivity().compute(1, 0);
+
+  H1 uh(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+  TrialFunction u(uh);
+  auto jac_u = Jacobian(u);
+
+  const auto& polytope = mesh.getCell(0);
+  jac_u.setPoint(Geometry::Point(polytope, {{0.2, 0.2, 0.2}}));
+
+  // Check that getBasis returns valid 3x3 matrices for all DOFs
+  for (size_t local = 0; local < jac_u.getDOFs(); local++)
+  {
+    const auto& basis = jac_u.getBasis(local);
+    EXPECT_EQ(basis.rows(), 3);
+    EXPECT_EQ(basis.cols(), 3);
+    for (int i = 0; i < 3; i++)
+      for (int j = 0; j < 3; j++)
+        EXPECT_TRUE(std::isfinite(basis(i, j)));
+  }
+}
+

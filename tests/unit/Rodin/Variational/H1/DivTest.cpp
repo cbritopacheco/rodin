@@ -900,3 +900,80 @@ namespace Rodin::Tests::Unit
     }
   }
 }
+
+TEST(H1Div, ShapeFunction_getDOFs_Triangle_H1_2)
+{
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
+  mesh.getConnectivity().compute(2, 1);
+  mesh.getConnectivity().compute(1, 0);
+
+  H1 uh(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+  TrialFunction u(uh);
+  auto div_u = Div(u);
+
+  // H1<2> on a triangle has 6 DOFs per component
+  EXPECT_EQ(div_u.getDOFs(), 6);
+}
+
+TEST(H1Div, ShapeFunction_getBasis_Triangle_H1_2)
+{
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
+  mesh.getConnectivity().compute(2, 1);
+  mesh.getConnectivity().compute(1, 0);
+
+  H1 uh(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+  TrialFunction u(uh);
+  auto div_u = Div(u);
+
+  const auto& polytope = mesh.getCell(0);
+  div_u.setPoint(Geometry::Point(polytope, {{0.3, 0.3}}));
+
+  // Check that getBasis returns valid scalars for all DOFs
+  for (size_t local = 0; local < div_u.getDOFs(); local++)
+  {
+    const auto& basis = div_u.getBasis(local);
+    EXPECT_TRUE(std::isfinite(basis));
+  }
+}
+
+TEST(H1Div, ShapeFunction_getDOFs_Tetrahedron_H1_2)
+{
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+  mesh.getConnectivity().compute(3, 2);
+  mesh.getConnectivity().compute(2, 1);
+  mesh.getConnectivity().compute(1, 0);
+
+  H1 uh(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+  TrialFunction u(uh);
+  auto div_u = Div(u);
+
+  // H1<2> on a tetrahedron has 10 DOFs per component
+  EXPECT_EQ(div_u.getDOFs(), 10);
+}
+
+TEST(H1Div, ShapeFunction_getBasis_Tetrahedron_H1_2)
+{
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+  mesh.getConnectivity().compute(3, 2);
+  mesh.getConnectivity().compute(2, 1);
+  mesh.getConnectivity().compute(1, 0);
+
+  H1 uh(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+  TrialFunction u(uh);
+  auto div_u = Div(u);
+
+  const auto& polytope = mesh.getCell(0);
+  div_u.setPoint(Geometry::Point(polytope, {{0.2, 0.2, 0.2}}));
+
+  // Check that getBasis returns valid scalars for all DOFs
+  for (size_t local = 0; local < div_u.getDOFs(); local++)
+  {
+    const auto& basis = div_u.getBasis(local);
+    EXPECT_TRUE(std::isfinite(basis));
+  }
+}
+
