@@ -74,3 +74,47 @@ target_link_libraries(RodinManufacturedHelmholtz
   Rodin::Solver
   )
 gtest_discover_tests(RodinManufacturedHelmholtz)
+
+add_executable(RodinManufacturedPoissonHexahedron PoissonHexahedron.cpp)
+target_link_libraries(RodinManufacturedPoissonHexahedron
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solver
+  )
+gtest_discover_tests(RodinManufacturedPoissonHexahedron)
+
+add_executable(RodinManufacturedHelmholtz3D Helmholtz3D.cpp)
+target_link_libraries(RodinManufacturedHelmholtz3D
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solver
+  )
+gtest_discover_tests(RodinManufacturedHelmholtz3D)
+
+add_executable(RodinManufacturedReactionDiffusion3D ReactionDiffusion3D.cpp)
+target_link_libraries(RodinManufacturedReactionDiffusion3D
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solver
+  )
+gtest_discover_tests(RodinManufacturedReactionDiffusion3D)
+
+add_executable(RodinManufacturedLinearElasticity3D LinearElasticity3D.cpp)
+target_link_libraries(RodinManufacturedLinearElasticity3D
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solver
+  )
+gtest_discover_tests(RodinManufacturedLinearElasticity3D)
