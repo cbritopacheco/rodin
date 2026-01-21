@@ -153,7 +153,7 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type
       using FESType = FES;
-      
+
       /// @brief Space type (trial or test)
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
