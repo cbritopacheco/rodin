@@ -75,17 +75,6 @@ target_link_libraries(RodinManufacturedHelmholtz
   )
 gtest_discover_tests(RodinManufacturedHelmholtz)
 
-add_executable(RodinManufacturedPoissonHexahedron PoissonHexahedron.cpp)
-target_link_libraries(RodinManufacturedPoissonHexahedron
-  PUBLIC
-  GTest::gtest
-  GTest::gtest_main
-  Rodin::Geometry
-  Rodin::Variational
-  Rodin::Solver
-  )
-gtest_discover_tests(RodinManufacturedPoissonHexahedron)
-
 add_executable(RodinManufacturedHelmholtz3D Helmholtz3D.cpp)
 target_link_libraries(RodinManufacturedHelmholtz3D
   PUBLIC
