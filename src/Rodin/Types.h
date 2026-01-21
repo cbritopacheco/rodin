@@ -143,7 +143,7 @@ namespace Rodin
    * @note This provides backward compatibility for the _UZ suffix
    */
   constexpr
-  std::size_t operator "" _UZ (unsigned long long x)
+  std::size_t operator""_UZ (unsigned long long x)
   {
     return x;
   }
