@@ -95,7 +95,7 @@ namespace Rodin::Tests::Manufactured::Stokes
    * @f[
    *  \mathbf{f}(x, y) = \begin{pmatrix}
    *    2\pi^2 \sin(\pi x) \cos(\pi y) - \pi \sin(\pi x) \sin(\pi y) \\
-   *    2\pi^2 \cos(\pi x) \sin(\pi y) + \pi \cos(\pi x) \cos(\pi y)
+   *    -2\pi^2 \cos(\pi x) \sin(\pi y) + \pi \cos(\pi x) \cos(\pi y)
    *  \end{pmatrix}
    * @f]
    * Computed as f = -Δu + ∇p
@@ -128,13 +128,9 @@ namespace Rodin::Tests::Manufactured::Stokes
     // Manufactured pressure solution
     auto p_exact = cos(pi * F::x) * sin(pi * F::y);
 
-    // Forcing function (computed from -Δu + ∇p)
-    // -Δu₁ = 2π² sin(πx)cos(πy)
-    // -Δu₂ = 2π² cos(πx)sin(πy)
-    // ∇p = (-π sin(πx)sin(πy), π cos(πx)cos(πy))
     VectorFunction f{
       2 * pi * pi * sin(pi * F::x) * cos(pi * F::y) - pi * sin(pi * F::x) * sin(pi * F::y),
-      2 * pi * pi * cos(pi * F::x) * sin(pi * F::y) + pi * cos(pi * F::x) * cos(pi * F::y)
+     -2 * pi * pi * cos(pi * F::x) * sin(pi * F::y) + pi * cos(pi * F::x) * cos(pi * F::y)
     };
 
     // Define trial and test functions
@@ -148,7 +144,7 @@ namespace Rodin::Tests::Manufactured::Stokes
     Problem stokes(u, p, v, q);
     stokes = Integral(Jacobian(u), Jacobian(v))
            - Integral(p, Div(v))
-           - Integral(q, Div(u))
+           + Integral(Div(u), q)
            - Integral(f, v)
            + DirichletBC(u, u_exact);
 
@@ -244,7 +240,7 @@ namespace Rodin::Tests::Manufactured::Stokes
     Problem stokes(u, p, v, q);
     stokes = Integral(Jacobian(u), Jacobian(v))
            - Integral(p, Div(v))
-           - Integral(q, Div(u))
+           - Integral(Div(u), q)
            - Integral(f, v)
            + DirichletBC(u, Zero(mesh.getSpaceDimension()));
 
@@ -337,7 +333,7 @@ namespace Rodin::Tests::Manufactured::Stokes
     Problem stokes(u, p, v, q);
     stokes = Integral(Jacobian(u), Jacobian(v))
            - Integral(p, Div(v))
-           - Integral(q, Div(u))
+           - Integral(Div(u), q)
            - Integral(f, v)
            + DirichletBC(u, u_exact);
 
@@ -470,7 +466,7 @@ namespace Rodin::Tests::Manufactured::Stokes
     Problem stokes(u, p, v, q);
     stokes = Integral(Jacobian(u), Jacobian(v))
            - Integral(p, Div(v))
-           - Integral(q, Div(u))
+           - Integral(Div(u), q)
            - Integral(f, v)
            + DirichletBC(u, Zero(mesh.getSpaceDimension()));
 
