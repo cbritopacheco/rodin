@@ -9,6 +9,17 @@ target_link_libraries(RodinManufacturedPoisson
   )
 gtest_discover_tests(RodinManufacturedPoisson)
 
+add_executable(RodinManufacturedPoisson3D Poisson3D.cpp)
+target_link_libraries(RodinManufacturedPoisson3D
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solver
+  )
+gtest_discover_tests(RodinManufacturedPoisson3D)
+
 add_executable(RodinManufacturedConductivity Conductivity.cpp)
 target_link_libraries(RodinManufacturedConductivity
   PUBLIC
