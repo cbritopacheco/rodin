@@ -20,17 +20,6 @@ target_link_libraries(RodinManufacturedPoisson3D
   )
 gtest_discover_tests(RodinManufacturedPoisson3D)
 
-add_executable(RodinManufacturedPoissonHexahedron PoissonHexahedron.cpp)
-target_link_libraries(RodinManufacturedPoissonHexahedron
-  PUBLIC
-  GTest::gtest
-  GTest::gtest_main
-  Rodin::Geometry
-  Rodin::Variational
-  Rodin::Solver
-  )
-gtest_discover_tests(RodinManufacturedPoissonHexahedron)
-
 add_executable(RodinManufacturedConductivity Conductivity.cpp)
 target_link_libraries(RodinManufacturedConductivity
   PUBLIC

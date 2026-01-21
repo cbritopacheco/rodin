@@ -7,6 +7,7 @@
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
+#include "Rodin/Context/Local.h"
 #include "Rodin/Variational.h"
 #include "Rodin/Solver/CG.h"
 #include "Rodin/Test/Random.h"
@@ -46,15 +47,32 @@ namespace Rodin::Tests::Manufactured::Poisson3D
   template <size_t M>
   class Manufactured_Poisson3D_Test : public ::testing::Test
   {
-    protected:
-      Mesh<Context::Local> getMesh()
-      {
-        Mesh mesh;
-        mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { M, M, M });
-        mesh.scale(1.0 / (M - 1));
-        mesh.getConnectivity().compute(2, 3);
-        return mesh;
-      }
+  protected:
+    void SetUp() override
+    {
+      m_mesh = Mesh().UniformGrid(Polytope::Type::Tetrahedron, {M, M, M});
+      m_mesh.scale(1.0 / (M - 1));
+      m_mesh.getConnectivity().compute(2, 3);
+    }
+
+    const auto& getMesh() const { return m_mesh; }
+
+    template <class FES, class Expr, class GF>
+    static Real relL2Error(const FES& vh, const GF& uh, const Expr& uex)
+    {
+      GridFunction err(vh);
+      err = Pow(uh - uex, 2);
+      const Real l2e = Math::sqrt(Integral(err).compute());
+
+      GridFunction sol(vh);
+      sol = Pow(uex, 2);
+      const Real l2u = Math::sqrt(Integral(sol).compute());
+
+      return l2e / (l2u + 1e-30);
+    }
+
+  private:
+    Mesh<Context::Local> m_mesh;
   };
 
   using Manufactured_Poisson3D_Test_8 =
@@ -63,6 +81,18 @@ namespace Rodin::Tests::Manufactured::Poisson3D
     Rodin::Tests::Manufactured::Poisson3D::Manufactured_Poisson3D_Test<16>;
   using Manufactured_Poisson3D_Test_32 =
     Rodin::Tests::Manufactured::Poisson3D::Manufactured_Poisson3D_Test<32>;
+
+  TEST_F(Manufactured_Poisson3D_Test_16, MeshVolumeIsOne)
+  {
+    const auto& mesh = this->getMesh();
+    P1 vh(mesh);
+
+    GridFunction one(vh);
+    one = 1.0;
+
+    const Real vol = Integral(one).compute();
+    EXPECT_NEAR(vol, 1.0, 1e-12);
+  }
 
   /**
    * @f[
@@ -86,11 +116,11 @@ namespace Rodin::Tests::Manufactured::Poisson3D
    * @f]
    *
    */
-  TEST_F(Manufactured_Poisson3D_Test_8, Poisson3D_SimpleSine)
+  TEST_F(Manufactured_Poisson3D_Test_16, Poisson3D_SimpleSine)
   {
     auto pi = Rodin::Math::Constants::pi();
 
-    Mesh mesh = this->getMesh();
+    const auto& mesh = this->getMesh();
 
     P1 vh(mesh);
     auto f = 3 * pi * pi * sin(pi * F::x) * sin(pi * F::y) * sin(pi * F::z);
@@ -133,7 +163,7 @@ namespace Rodin::Tests::Manufactured::Poisson3D
    */
   TEST_F(Manufactured_Poisson3D_Test_8, Poisson3D_Polynomial)
   {
-    Mesh mesh = this->getMesh();
+    const auto& mesh = this->getMesh();
 
     P1 vh(mesh);
     auto f = 2 * F::y * (1 - F::y) * F::z * (1 - F::z)
@@ -176,11 +206,11 @@ namespace Rodin::Tests::Manufactured::Poisson3D
    * @f]
    *
    */
-  TEST_F(Manufactured_Poisson3D_Test_8, Poisson3D_TrigonometricPolynomial)
+  TEST_F(Manufactured_Poisson3D_Test_16, Poisson3D_TrigonometricPolynomial)
   {
     auto pi = Rodin::Math::Constants::pi();
 
-    Mesh mesh = this->getMesh();
+    const auto& mesh = this->getMesh();
 
     P1 vh(mesh);
     auto f = 2 * sin(pi * F::y) * sin(pi * F::z)
@@ -222,11 +252,11 @@ namespace Rodin::Tests::Manufactured::Poisson3D
    * @f]
    *
    */
-  TEST_F(Manufactured_Poisson3D_Test_8, Poisson3D_NonhomogeneousDirichlet)
+  TEST_F(Manufactured_Poisson3D_Test_16, Poisson3D_NonhomogeneousDirichlet)
   {
     auto pi = Rodin::Math::Constants::pi();
 
-    Mesh mesh = this->getMesh();
+    const auto& mesh = this->getMesh();
 
     P1 vh(mesh);
     auto f = 3 * pi * pi * cos(pi * F::x) * cos(pi * F::y) * cos(pi * F::z);
@@ -268,11 +298,11 @@ namespace Rodin::Tests::Manufactured::Poisson3D
    * @f]
    *
    */
-  TEST_F(Manufactured_Poisson3D_Test_8, Poisson3D_MixedBoundary)
+  TEST_F(Manufactured_Poisson3D_Test_32, Poisson3D_MixedBoundary)
   {
     auto pi = Rodin::Math::Constants::pi();
 
-    Mesh mesh = this->getMesh();
+    const auto& mesh = this->getMesh();
 
     P1 vh(mesh);
     auto f = (2 * pi * pi - 1) * sin(pi * F::x) * sin(pi * F::y) * exp(F::z);
@@ -315,7 +345,7 @@ namespace Rodin::Tests::Manufactured::Poisson3D
    */
   TEST_F(Manufactured_Poisson3D_Test_8, Poisson3D_LinearNonhomogeneous)
   {
-    Mesh mesh = this->getMesh();
+    const auto& mesh = this->getMesh();
     P1 vh(mesh);
     auto f = Zero();
     TrialFunction u(vh);
@@ -360,11 +390,11 @@ namespace Rodin::Tests::Manufactured::Poisson3D
    * @f]
    *
    */
-  TEST_F(Manufactured_Poisson3D_Test_16, VectorPoisson3D_SimpleSine)
+  TEST_F(Manufactured_Poisson3D_Test_32, VectorPoisson3D_SimpleSine)
   {
     auto pi = Rodin::Math::Constants::pi();
 
-    Mesh mesh = this->getMesh();
+    const auto& mesh = this->getMesh();
 
     P1 vh(mesh, mesh.getSpaceDimension());
     auto sol_expr = sin(pi * F::x) * sin(pi * F::y) * sin(pi * F::z);
@@ -427,7 +457,7 @@ namespace Rodin::Tests::Manufactured::Poisson3D
    */
   TEST_F(Manufactured_Poisson3D_Test_8, VectorPoisson3D_Polynomial)
   {
-    Mesh mesh = this->getMesh();
+    const auto& mesh = this->getMesh();
 
     P1 vh(mesh, mesh.getSpaceDimension());
     auto f_expr = 2 * F::y * (1 - F::y) * F::z * (1 - F::z)
@@ -491,11 +521,11 @@ namespace Rodin::Tests::Manufactured::Poisson3D
    * @f]
    *
    */
-  TEST_F(Manufactured_Poisson3D_Test_8, VectorPoisson3D_TrigonometricPolynomial)
+  TEST_F(Manufactured_Poisson3D_Test_16, VectorPoisson3D_TrigonometricPolynomial)
   {
     auto pi = Rodin::Math::Constants::pi();
 
-    Mesh mesh = this->getMesh();
+    const auto& mesh = this->getMesh();
 
     P1 vh(mesh, mesh.getSpaceDimension());
     VectorFunction f{
@@ -558,11 +588,11 @@ namespace Rodin::Tests::Manufactured::Poisson3D
    * @f]
    *
    */
-  TEST_F(Manufactured_Poisson3D_Test_16, VectorPoisson3D_NonhomogeneousDirichlet)
+  TEST_F(Manufactured_Poisson3D_Test_32, VectorPoisson3D_NonhomogeneousDirichlet)
   {
     auto pi = Rodin::Math::Constants::pi();
 
-    Mesh mesh = this->getMesh();
+    const auto& mesh = this->getMesh();
 
     P1 vh(mesh, mesh.getSpaceDimension());
     VectorFunction f{
