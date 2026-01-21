@@ -211,7 +211,7 @@ namespace Rodin::Variational
 
       Flow(Flow&& other)
         : Parent(std::move(other)),
-          m_t(std::exchange(other.m_t, 0)),
+          m_t(std::move(other.m_t)),
           m_operand(std::move(other.m_operand)),
           m_velocity(std::move(other.m_velocity)),
           m_step(std::move(other.m_step)),
