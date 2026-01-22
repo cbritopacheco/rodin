@@ -42,10 +42,12 @@ namespace Rodin::Tests::Manufactured::H1Poisson3D
   TEST_F(Manufactured_Poisson3D_H1_Test_8, Poisson3D_SimpleSine_H1)
   {
     auto pi = Rodin::Math::Constants::pi();
+    constexpr auto kQuadraticOrder = std::integral_constant<size_t, 2>{};
 
     const auto& mesh = this->getMesh();
 
-    H1 vh(std::integral_constant<size_t, 2>{}, mesh);
+    // Scalar H1 space, quadratic order on a 3D mesh
+    H1 vh(kQuadraticOrder, mesh);
 
     TrialFunction u(vh);
     TestFunction  v(vh);
