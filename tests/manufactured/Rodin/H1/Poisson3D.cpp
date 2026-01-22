@@ -28,6 +28,9 @@ namespace Rodin::Tests::Manufactured::H1Poisson3D
       m_mesh = Mesh().UniformGrid(Polytope::Type::Tetrahedron, { M, M, M });
       m_mesh.scale(1.0 / (M - 1));
       m_mesh.getConnectivity().compute(2, 3);
+      m_mesh.getConnectivity().compute(3, 2);
+      m_mesh.getConnectivity().compute(2, 1);
+      m_mesh.getConnectivity().compute(1, 0);
     }
 
     const auto& getMesh() const { return m_mesh; }
@@ -39,15 +42,102 @@ namespace Rodin::Tests::Manufactured::H1Poisson3D
   using Manufactured_Poisson3D_H1_Test_8 =
     Rodin::Tests::Manufactured::H1Poisson3D::Manufactured_Poisson3D_H1_Test<8>;
 
-  TEST_F(Manufactured_Poisson3D_H1_Test_8, Poisson3D_SimpleSine_H1)
+  TEST_F(Manufactured_Poisson3D_H1_Test_8, Poisson3D_SimpleSine_H1_2)
   {
     auto pi = Rodin::Math::Constants::pi();
-    constexpr auto kQuadraticOrder = std::integral_constant<size_t, 2>{};
+    constexpr auto order = std::integral_constant<size_t, 2>{};
 
     const auto& mesh = this->getMesh();
 
     // Scalar H1 space, quadratic order on a 3D mesh
-    H1 vh(kQuadraticOrder, mesh);
+    H1 vh(order, mesh);
+
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+
+    auto solution = sin(pi * F::x) * sin(pi * F::y) * sin(pi * F::z);
+    auto f = 3 * pi * pi * solution;
+
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, solution);
+    CG(poisson).solve();
+
+    GridFunction diff(vh);
+    diff = Pow(u.getSolution() - solution, 2);
+
+    Real error = Integral(diff).compute();
+    EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
+  }
+
+  TEST_F(Manufactured_Poisson3D_H1_Test_8, Poisson3D_SimpleSine_H1_3)
+  {
+    auto pi = Rodin::Math::Constants::pi();
+    constexpr auto order = std::integral_constant<size_t, 3>{};
+
+    const auto& mesh = this->getMesh();
+
+    // Scalar H1 space, quadratic order on a 3D mesh
+    H1 vh(order, mesh);
+
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+
+    auto solution = sin(pi * F::x) * sin(pi * F::y) * sin(pi * F::z);
+    auto f = 3 * pi * pi * solution;
+
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, solution);
+    CG(poisson).solve();
+
+    GridFunction diff(vh);
+    diff = Pow(u.getSolution() - solution, 2);
+
+    Real error = Integral(diff).compute();
+    EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
+  }
+
+  TEST_F(Manufactured_Poisson3D_H1_Test_8, Poisson3D_SimpleSine_H1_4)
+  {
+    auto pi = Rodin::Math::Constants::pi();
+    constexpr auto order = std::integral_constant<size_t, 4>{};
+
+    const auto& mesh = this->getMesh();
+
+    // Scalar H1 space, quadratic order on a 3D mesh
+    H1 vh(order, mesh);
+
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+
+    auto solution = sin(pi * F::x) * sin(pi * F::y) * sin(pi * F::z);
+    auto f = 3 * pi * pi * solution;
+
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, solution);
+    CG(poisson).solve();
+
+    GridFunction diff(vh);
+    diff = Pow(u.getSolution() - solution, 2);
+
+    Real error = Integral(diff).compute();
+    EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
+  }
+
+  TEST_F(Manufactured_Poisson3D_H1_Test_8, Poisson3D_SimpleSine_H1_5)
+  {
+    auto pi = Rodin::Math::Constants::pi();
+    constexpr auto order = std::integral_constant<size_t, 4>{};
+
+    const auto& mesh = this->getMesh();
+
+    // Scalar H1 space, quadratic order on a 3D mesh
+    H1 vh(order, mesh);
 
     TrialFunction u(vh);
     TestFunction  v(vh);
