@@ -44,6 +44,7 @@ namespace Rodin::IO::MEDIT
     Triangles,             ///< Triangle elements section
     Quadrilaterals,        ///< Quadrilateral elements section
     Tetrahedra,            ///< Tetrahedral elements section
+    Hexahedra,             ///< Hexahedral elements section
     Wedges,                ///< Wedge (prism) elements section
     Corners,               ///< Corner vertices section
     Ridges,                ///< Ridge edges section
@@ -87,6 +88,8 @@ namespace Rodin::IO::MEDIT
         return "Quadrilaterals";
       case Keyword::Tetrahedra:
         return "Tetrahedra";
+      case Keyword::Hexahedra:
+        return "Hexahedra";
       case Keyword::Wedges:
         return "Wedges";
       case Keyword::Corners:
@@ -198,6 +201,8 @@ namespace Rodin::IO::MEDIT
       res = Keyword::Quadrilaterals;
     else if (str == Keyword::Tetrahedra)
       res = Keyword::Tetrahedra;
+    else if (str == Keyword::Hexahedra)
+      res = Keyword::Hexahedra;
     else if (str == Keyword::Wedges)
       res = Keyword::Wedges;
     else if (str == Keyword::Corners)
