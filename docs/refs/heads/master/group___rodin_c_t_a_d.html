@@ -149,6 +149,16 @@
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a> of a <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Scalar, class Data, class Mesh&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#gaf1996f416536c7c1cb88834919508648" class="m-doc">Div</a>(</span><span class="m-doc-wrap">const GridFunction&lt;H1&lt;K, Math::Vector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&amp;) -&gt; Div&lt; GridFunction&lt; H1&lt; K, Math::Vector&lt; Scalar &gt;, Mesh &gt;, Data &gt; &gt;</span>
+            </dt>
+            <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a> of an <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Range, class Data, class Mesh&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#gaa5d0593b4bd50f437ea43e556563df44" class="m-doc">Jacobian</a>(</span><span class="m-doc-wrap">const GridFunction&lt;H1&lt;K, Range, Mesh&gt;, Data&gt;&amp;) -&gt; Jacobian&lt; GridFunction&lt; H1&lt; K, Range, Mesh &gt;, Data &gt; &gt;</span>
+            </dt>
+            <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> of an <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class FES&gt;</div>
               <span class="m-doc-wrap-bumper"><a href="#ga1bd1a873841469d1f210e6c14c98b542" class="m-doc">LinearForm</a>(</span><span class="m-doc-wrap">const TestFunction&lt;FES&gt;&amp; v) -&gt; LinearForm&lt; FES, Math::Vector&lt; typename FormLanguage::Traits&lt; FES &gt;::ScalarType &gt; &gt;</span>
             </dt>
@@ -325,6 +335,26 @@
               <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga891e0a7ae2783f1b6536a482897c58fc" class="m-doc-self">Grad</a>(</span><span class="m-doc-wrap">const ShapeFunction&lt;NestedDerived, FES, Space&gt;&amp;) -&gt; Grad&lt; ShapeFunction&lt; NestedDerived, FES, Space &gt; &gt;</span></span>
             </h3>
             <p>CTAD for <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a> of a <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</p>
+          </div></section>
+          <section class="m-doc-details" id="gaf1996f416536c7c1cb88834919508648"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_h1_2_div_8h.html">&lt;Rodin/Variational/H1/Div.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;size_t K, class Scalar, class Data, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gaf1996f416536c7c1cb88834919508648" class="m-doc-self">Div</a>(</span><span class="m-doc-wrap">const GridFunction&lt;H1&lt;K, Math::Vector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&amp;) -&gt; Div&lt; GridFunction&lt; H1&lt; K, Math::Vector&lt; Scalar &gt;, Mesh &gt;, Data &gt; &gt;</span></span>
+            </h3>
+            <p>CTAD for <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a> of an <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</p>
+          </div></section>
+          <section class="m-doc-details" id="gaa5d0593b4bd50f437ea43e556563df44"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_h1_2_jacobian_8h.html">&lt;Rodin/Variational/H1/Jacobian.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;size_t K, class Range, class Data, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gaa5d0593b4bd50f437ea43e556563df44" class="m-doc-self">Jacobian</a>(</span><span class="m-doc-wrap">const GridFunction&lt;H1&lt;K, Range, Mesh&gt;, Data&gt;&amp;) -&gt; Jacobian&lt; GridFunction&lt; H1&lt; K, Range, Mesh &gt;, Data &gt; &gt;</span></span>
+            </h3>
+            <p>CTAD for <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> of an <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</p>
           </div></section>
           <section class="m-doc-details" id="ga1bd1a873841469d1f210e6c14c98b542"><div>
             <h3>

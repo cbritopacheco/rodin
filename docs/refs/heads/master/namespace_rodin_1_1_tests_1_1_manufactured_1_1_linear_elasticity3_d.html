@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin/Variational/P0/P0.cpp file | Rodin</title>
+  <title>Rodin::Tests::Manufactured::LinearElasticity3D namespace | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -71,30 +71,9 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_8abf735db4842a0d37da7c8b4f1d6568.html">Variational</a>/</span><span class="m-breadcrumb"><a href="dir_0b8ee9f5e015f8676011fb173d2a236a.html">P0</a>/</span>P0.cpp <span class="m-thin">file</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_tests.html">Tests</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_tests_1_1_manufactured.html">Manufactured</a>::<wbr/></span>LinearElasticity3D <span class="m-thin">namespace</span>
         </h1>
-        <p>Implementation of P0 finite element space static members.</p>
-        <nav class="m-block m-default">
-          <h3>Contents</h3>
-          <ul>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#namespaces">Namespaces</a></li>
-              </ul>
-            </li>
-          </ul>
-        </nav>
-<p>This file initializes the static P0Element instances for each supported polytope geometry type (Point, Segment, Triangle, Quadrilateral, Tetrahedron, Wedge).</p>
-        <section id="namespaces">
-          <h2><a href="#namespaces">Namespaces</a></h2>
-          <dl class="m-doc">
-            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for Shape and Topology Optimization.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Module which provides the necessary tools for constructing variational problems.</dd>
-          </dl>
-        </section>
+<p>3D manufactured tests for isotropic linear elasticity:</p><p>Strong form: -div(sigma(u)) = f in Omega u = g on dOmega</p><p>sigma(u) = lambda (div u) I + 2 mu eps(u), eps(u) = 0.5 (grad u + grad u^T)</p><p>Weak form: ∫ [ lambda (div u)(div v) + 2 mu eps(u):eps(v) ] dx = ∫ f·v dx</p><p>NOTE on geometry: <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s UniformGrid({M,M,M}) produces coordinates {0,...,M-1}. We scale by 1/(M-1) so the domain is [0,1]^3.</p><p>NOTE on &quot;manufactured&quot;: For non-affine u_exact, the exact discrete solution is not expected with P1. These tests check mathematical consistency (correct f for chosen u), and use a relaxed error bound on a fixed mesh.</p>
       </div>
     </div>
   </div>
