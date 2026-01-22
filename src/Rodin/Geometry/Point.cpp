@@ -256,30 +256,37 @@ namespace Rodin::Geometry
 
   Real PointBase::getDistortion() const
   {
-    if (!m_distortion)
+    if (m_distortion)
+      return *m_distortion;
+
+    const auto& J = this->getJacobian();
+    const auto m = J.rows();
+    const auto n = J.cols();
+
+    Real dist = 0;
+
+    if (m == n)
     {
-      const auto& jac = this->getJacobian();
-      const auto rows = jac.rows();
-      const auto cols = jac.cols();
-      if (rows == cols)
-      {
-        return m_distortion.emplace(this->getJacobianDeterminant());
-      }
-      else
-      {
-        if (jac.rows() == 2 && jac.cols() == 1)
-        {
-          return m_distortion.emplace(
-              Math::sqrt(jac.coeff(0) * jac.coeff(0) + jac.coeff(1) * jac.coeff(1)));
-        }
-        else
-        {
-          return m_distortion.emplace(Math::sqrt(Math::abs((jac.transpose() * jac).determinant())));
-        }
-      }
+      // Integration measure for volume/area: |det J|
+      dist = Math::abs(this->getJacobianDeterminant());
     }
-    assert(m_distortion);
-    return *m_distortion;
+    else if (m == 2 && n == 1)
+    {
+      // Curve in 2D: ||dX/ds||
+      const Real a = J.coeff(0, 0);
+      const Real b = J.coeff(1, 0);
+      dist = Math::sqrt(a * a + b * b);
+    }
+    else
+    {
+      // General k-dimensional measure: sqrt(det(J^T J))
+      const Real detG = (J.transpose() * J).determinant();
+
+      // Numerical guard: detG should be >= 0; clamp tiny negatives due to roundoff
+      dist = Math::sqrt(detG >= 0 ? detG : 0);
+    }
+
+    return m_distortion.emplace(dist);
   }
 
   size_t PointBase::getDimension(Coordinates coords) const

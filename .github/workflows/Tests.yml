@@ -1,4 +1,5 @@
 name: Tests
+
 on:
   push:
     branches:
@@ -25,20 +26,24 @@ jobs:
         asan: ['ON', 'OFF']
         ubsan: ['ON', 'OFF']
       fail-fast: false
+
     env:
       MAKEFLAGS: "-j2"
       CTEST_PARALLEL_LEVEL: 1
       OMP_NUM_THREADS: 2
+
     steps:
       - name: Checkout repository and submodules
         uses: actions/checkout@v4
         with:
           submodules: recursive
+
       - name: Setup Cpp (C++ / C)
         uses: aminya/setup-cpp@v1
         with:
           compiler: ${{ matrix.compiler }}
           cmake: true
+
       - name: Install dependencies
         run: >-
           sudo apt-get update && sudo apt-get install -y
@@ -53,10 +58,11 @@ jobs:
           libsuitesparse-dev
           libmetis-dev
           libboost1.74-all-dev
+
       - name: Configure CMake
         run: >
           cmake
-          -B ${{github.workspace}}/build
+          -B ${{ github.workspace }}/build
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
           -DRODIN_USE_ASAN=${{ matrix.asan }}
           -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
@@ -70,17 +76,22 @@ jobs:
           -DRODIN_LCOV_FLAGS="--ignore-errors gcov,gcov --ignore-errors mismatch --ignore-errors unused"
           -DRODIN_CODE_COVERAGE=ON
           -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
+
       - name: Build
-        run: cmake --build ${{github.workspace}}/build
+        run: cmake --build ${{ github.workspace }}/build
+
       - name: Run tests
-        run: ctest --test-dir ${{github.workspace}}/build/tests
+        run: ctest --test-dir ${{ github.workspace }}/build/tests
+
       - name: Rerun failed tests (verbose)
         if: failure()
-        run: ctest --test-dir ${{github.workspace}}/build/tests --rerun-failed -V --output-on-failure
+        run: ctest --test-dir ${{ github.workspace }}/build/tests --rerun-failed -V --output-on-failure
+
       - name: Make coverage
-        run: cmake --build ${{github.workspace}}/build --target RodinCoverage
+        run: cmake --build ${{ github.workspace }}/build --target RodinCoverage
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
-          files: ${{github.workspace}}/build/RodinCoverage.info
+          files: ${{ github.workspace }}/build/RodinCoverage.info
           token: ${{ secrets.CODECOV_TOKEN }}

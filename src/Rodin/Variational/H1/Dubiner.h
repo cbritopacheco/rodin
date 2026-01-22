@@ -49,27 +49,22 @@ namespace Rodin::Variational
   {
     public:
       /**
-       * @brief Evaluates the Dubiner basis function @f$ \psi_{P,Q}(r,s) @f$.
+       * @brief Evaluates the Dubiner basis function ψ_{P,Q} on the collapsed coordinates (a,b).
        *
        * @tparam P First modal index (0 ≤ P).
        * @tparam Q Second modal index (0 ≤ Q, P + Q ≤ K).
        * @param[out] basis The computed basis function value.
-       * @param r First collapsed coordinate in [-1,1].
-       * @param s Second collapsed coordinate in [-1,1].
+       * @param a First collapsed coordinate in [-1,1].
+       * @param b Second collapsed coordinate in [-1,1].
+       *
+       * @note Inputs (a,b) are the *collapsed coordinates*.
+       *       If you have (x,y) on the reference triangle, call getCollapsed(a,b,x,y)
+       *       first, then call getBasis(basis,a,b).
        */
       template <size_t P, size_t Q>
-      static constexpr void getBasis(Real& basis, Real r, Real s)
+      static constexpr void getBasis(Real& basis, Real a, Real b)
       {
         static_assert(P + Q <= K, "DubinerTriangle: P + Q must be <= K.");
-
-        Real b = s;
-        Real a;
-
-        // Handle singularity at s = 1
-        if (std::abs(s - 1.0) < RODIN_VARIATIONAL_H1_DUBINER_TOLERANCE)
-          a = -1.0;
-        else
-          a = 2.0 * (1.0 + r) / (1.0 - s) - 1.0;
 
         Real _unused;
 
@@ -83,85 +78,74 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Computes the gradient of @f$ \psi_{P,Q} @f$ w.r.t. collapsed coordinates.
+       * @brief Computes the gradient of ψ_{P,Q} with respect to the collapsed coordinates (a,b).
        *
-       * Uses the chain rule to compute:
-       * @f[
-       *   \frac{\partial \psi}{\partial r}, \quad \frac{\partial \psi}{\partial s}
-       * @f]
+       * Computes:
+       *   dψ/da, dψ/db
        *
        * @tparam P First modal index.
        * @tparam Q Second modal index.
-       * @param[out] dpsi_dr Derivative w.r.t. r.
-       * @param[out] dpsi_ds Derivative w.r.t. s.
-       * @param r First collapsed coordinate.
-       * @param s Second collapsed coordinate.
+       * @param[out] dpsi_da Derivative w.r.t. a.
+       * @param[out] dpsi_db Derivative w.r.t. b.
+       * @param a First collapsed coordinate in [-1,1].
+       * @param b Second collapsed coordinate in [-1,1].
+       *
+       * @note This function returns derivatives in (a,b). If you need derivatives
+       *       w.r.t. (x,y) on the reference triangle, apply the outer chain rule:
+       *
+       *   a = 2x/(1-y) - 1,   b = 2y - 1
+       *   da/dx = 2/(1-y),    da/dy = 2x/(1-y)^2
+       *   db/dx = 0,          db/dy = 2
+       *
+       * so:
+       *   dψ/dx = dψ/da * da/dx + dψ/db * db/dx
+       *   dψ/dy = dψ/da * da/dy + dψ/db * db/dy
        */
       template <size_t P, size_t Q>
-      static constexpr void getGradient(Real& dpsi_dr, Real& dpsi_ds, Real r, Real s)
+      static constexpr void getGradient(Real& dpsi_da, Real& dpsi_db, Real a, Real b)
       {
-        Real b = s;
-        Real a;
-
-        if (Math::abs(s - 1.0) < RODIN_VARIATIONAL_H1_DUBINER_TOLERANCE)
-          a = -1.0;
-        else
-          a = 2.0 * (1.0 + r) / (1.0 - s) - 1.0;
-
         Real Pa, dPa;
         JacobiPolynomial<P>::getValue(Pa, dPa, 0.0, 0.0, a);
 
         Real Pb, dPb;
         JacobiPolynomial<Q>::getValue(Pb, dPb, 2.0 * P + 1.0, 0.0, b);
 
-        Real scale_b = Math::pow(0.5 * (1.0 - b), P);
+        const Real scale_b = Math::pow(0.5 * (1.0 - b), P);
 
-        // ∂ψ / ∂r: only a depends on r
-        dpsi_dr = 0.0;
-        if (Math::abs(s - 1.0) > RODIN_VARIATIONAL_H1_DUBINER_TOLERANCE)
-        {
-          const Real da_dr = 2.0 / (1.0 - s);
-          dpsi_dr = dPa * da_dr * Pb * scale_b;
-        }
+        // ∂ψ/∂a
+        dpsi_da = dPa * Pb * scale_b;
 
-        // ∂ψ / ∂s: both a and b depend on s, and scale_b depends on b = s
-        dpsi_ds = 0.0;
-        if (Math::abs(s - 1.0) > RODIN_VARIATIONAL_H1_DUBINER_TOLERANCE)
-        {
-          const Real da_ds = -2.0 * (1.0 + r) / ((1.0 - s) * (1.0 - s));
-          dpsi_ds += dPa * da_ds * Pb * scale_b;
-        }
-
-        dpsi_ds += Pa * dPb * scale_b;  // db_ds = 1
-
+        // ∂ψ/∂b
+        Real dscale_db = 0.0;
         if constexpr (P > 0)
-          dpsi_ds += Pa * Pb * P * Math::pow(0.5 * (1.0 - b), P - 1) * (-0.5);
+          dscale_db = P * Math::pow(0.5 * (1.0 - b), P - 1) * (-0.5);
+
+        dpsi_db = Pa * (dPb * scale_b + Pb * dscale_db);
       }
 
       /**
-       * @brief Converts reference triangle coordinates to collapsed coordinates.
+       * @brief Converts (x,y) on the reference triangle to collapsed coordinates (a,b) ∈ [-1,1]^2.
        *
-       * Maps @f$ (x,y) @f$ from the reference triangle to @f$ (r,s) \in [-1,1]^2 @f$:
-       * @f[
-       *   s = 2y - 1, \quad r = \frac{2x}{1-y} - 1
-       * @f]
-       * with singularity handling at @f$ y = 1 @f$ (top vertex).
+       * Reference triangle vertices: (0,0), (1,0), (0,1).
        *
-       * @param[out] r First collapsed coordinate.
-       * @param[out] s Second collapsed coordinate.
-       * @param x First reference coordinate.
-       * @param y Second reference coordinate.
+       * Mapping:
+       *   b = 2y - 1
+       *   a = 2x/(1-y) - 1    if 1-y > tol
+       *   a = -1              otherwise (collapse at the top edge/vertex y=1)
+       *
+       * @param[out] a First collapsed coordinate.
+       * @param[out] b Second collapsed coordinate.
+       * @param x First reference coordinate in [0,1].
+       * @param y Second reference coordinate in [0,1], with x+y ≤ 1.
        */
-      static constexpr void getCollapsed(Real& r, Real& s, Real x, Real y)
+      static constexpr void getCollapsed(Real& a, Real& b, Real x, Real y)
       {
-        // s = 2y - 1 always
-        s = 2.0 * y - 1.0;
+        b = 2.0 * y - 1.0;
 
-        // r = 2x / (1 - y) - 1, with collapse at the top edge
         if (1.0 - y > RODIN_VARIATIONAL_H1_DUBINER_TOLERANCE)
-          r = 2.0 * (x / (1.0 - y)) - 1.0;
+          a = 2.0 * (x / (1.0 - y)) - 1.0;
         else
-          r = -1.0; // collapse at top vertex/edge
+          a = -1.0;
       }
   };
 

@@ -71,8 +71,8 @@ namespace Rodin::Assembly
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 
-  template <class OperatorType, class Solution, class ... TrialFES, class ... TestFES>
-  class AssemblyBase<OperatorType, Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>...>>
+  template <class OperatorType, class ... Solution, class ... TrialFES, class ... TestFES, class ... BlockType>
+  class AssemblyBase<OperatorType, Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES, BlockType>...>>
   {
     public:
       static_assert(sizeof...(TrialFES) == sizeof...(TestFES));
@@ -143,8 +143,8 @@ namespace Rodin::Assembly
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 
-  template <class VectorType, class ... FES>
-  class AssemblyBase<VectorType, Tuple<Variational::LinearForm<FES, VectorType>...>>
+  template <class VectorType, class ... FES, class ... BlockType>
+  class AssemblyBase<VectorType, Tuple<Variational::LinearForm<FES, BlockType>...>>
   {
     public:
       static_assert(sizeof...(FES) == sizeof...(FES));

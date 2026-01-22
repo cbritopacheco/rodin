@@ -69,3 +69,27 @@ target_link_libraries(RodinVariationalH1FaceConformityTest
   GTest::gtest_main
   Rodin::Variational)
 gtest_discover_tests(RodinVariationalH1FaceConformityTest)
+
+add_executable(RodinVariationalH1GradTest GradTest.cpp)
+target_link_libraries(RodinVariationalH1GradTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalH1GradTest)
+
+add_executable(RodinVariationalH1JacobianTest JacobianTest.cpp)
+target_link_libraries(RodinVariationalH1JacobianTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalH1JacobianTest)
+
+add_executable(RodinVariationalH1DivTest DivTest.cpp)
+target_link_libraries(RodinVariationalH1DivTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalH1DivTest)
