@@ -36,13 +36,15 @@ namespace Rodin::Tests::Manufactured::H1Poisson
   using Manufactured_Poisson_H1_Test_16x16 =
     Rodin::Tests::Manufactured::H1Poisson::Manufactured_Poisson_H1_Test<16>;
 
+  constexpr auto kQuadraticOrder = std::integral_constant<size_t, 2>{};
+
   TEST_P(Manufactured_Poisson_H1_Test_16x16, Poisson_SimpleSine_H1)
   {
     auto pi = Rodin::Math::Constants::pi();
 
     Mesh mesh = this->getMesh();
 
-    H1 vh(std::integral_constant<size_t, 2>{}, mesh);
+    H1 vh(kQuadraticOrder, mesh);
 
     TrialFunction u(vh);
     TestFunction  v(vh);
@@ -70,7 +72,7 @@ namespace Rodin::Tests::Manufactured::H1Poisson
 
     Mesh mesh = this->getMesh();
 
-    H1 vh(std::integral_constant<size_t, 2>{}, mesh);
+    H1 vh(kQuadraticOrder, mesh);
 
     TrialFunction u(vh);
     TestFunction  v(vh);
