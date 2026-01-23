@@ -21,7 +21,9 @@
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/FormLanguage/Base.h"
 #include "Rodin/FormLanguage/Traits.h"
-#include "Rodin/Variational/Traits.h"
+
+#include "IntegrationPoint.h"
+#include "Traits.h"
 
 namespace Rodin::FormLanguage
 {
@@ -286,6 +288,12 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this).setPoint(p);
       }
 
+      constexpr
+      virtual Derived& setPoint(const IntegrationPoint& p)
+      {
+        return static_cast<Derived&>(*this).setPoint(p.getPoint());
+      }
+
       /**
        * @brief Gets the basis function at the specified local index.
        * @param[in] local Local index of the basis function
@@ -372,7 +380,7 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type
       using FESType = FES;
-      
+
       /// @brief Space type (trial or test)
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 

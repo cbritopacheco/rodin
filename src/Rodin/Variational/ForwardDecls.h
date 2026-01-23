@@ -930,6 +930,8 @@ namespace Rodin::Variational
   template <class Integrand>
   class QuadratureRule;
 
+  class IntegrationPoint;
+
   /**
    * @brief Represents mathematical expressions of the integral operator on a
    * domain.

@@ -115,6 +115,36 @@ namespace Rodin::Math
     return base * base;
   }
 
+  template <size_t N, class Base>
+  constexpr Base pow(const Base& x)
+  {
+    if constexpr (N == 0)
+    {
+      return Base(1);
+    }
+    else if constexpr (N == 1)
+    {
+      return x;
+    }
+    else if constexpr (N % 2 == 0)
+    {
+      const Base y = pow<N / 2>(x);
+      return y * y;
+    }
+    else
+    {
+      const Base y = pow<N / 2>(x);
+      return y * y * x;
+    }
+  }
+
+  // Integral-constant overload (same behavior)
+  template <class Base, size_t N>
+  constexpr Base pow(const Base& x, std::integral_constant<size_t, N>)
+  {
+    return pow<N>(x);
+  }
+
   /**
    * @brief Computes a power with arbitrary exponent.
    *
