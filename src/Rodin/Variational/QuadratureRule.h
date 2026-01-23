@@ -97,7 +97,6 @@ namespace Rodin::Variational
         : Parent(other),
           m_polytope(nullptr),
           m_integrand(other.m_integrand->copy()),
-          m_qfgg(other.m_qfgg),
           m_qf(other.m_qf)
       {}
 
@@ -105,7 +104,6 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_polytope(std::exchange(other.m_polytope, nullptr)),
           m_integrand(std::move(other.m_integrand)),
-          m_qfgg(std::move(other.m_qfgg)),
           m_qf(std::move(other.m_qf))
       {}
 
@@ -120,10 +118,10 @@ namespace Rodin::Variational
         m_polytope = &polytope;
         if (!m_qf)
         {
-          m_qfgg.emplace(polytope.getGeometry());
-          m_qf = m_qfgg.value();
+          m_qf = &QF::GenericPolytopeQuadrature::get(1, polytope.getGeometry());
         }
-        const auto& qf = m_qf.value().get();
+        assert(m_qf);
+        const auto& qf = *m_qf;
         m_ps.clear();
         m_ps.reserve(qf.getSize());
         for (size_t i = 0; i < qf.getSize(); i++)
@@ -156,21 +154,15 @@ namespace Rodin::Variational
       const QF::QuadratureFormulaBase& getQuadratureFormula() const
       {
         assert(m_qf);
-        return m_qf.value().get();
-      }
-
-      QuadratureRule& setQuadratureFormula(const QF::QuadratureFormulaBase& qf)
-      {
-        m_qf = qf;
-        return *this;
+        return *m_qf;
       }
 
     private:
       std::unique_ptr<IntegrandType> m_integrand;
 
       const Geometry::Polytope* m_polytope;
-      Optional<const QF::GenericPolytopeQuadrature> m_qfgg;
-      Optional<std::reference_wrapper<const QF::QuadratureFormulaBase>> m_qf;
+      const QF::QuadratureFormulaBase* m_qf;
+
       Optional<ScalarType> m_value;
 
       std::vector<Geometry::Point> m_ps;
@@ -428,7 +420,7 @@ namespace Rodin::Variational
           m_set = true;
           m_order = order;
           m_geometry = geometry;
-          m_qf.reset(new QF::GenericPolytopeQuadrature(order, geometry));
+          m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
           m_ps.clear();
           m_ps.reserve(m_qf->getSize());
           for (size_t i = 0; i < m_qf->getSize(); i++)
@@ -436,6 +428,7 @@ namespace Rodin::Variational
         }
         else
         {
+          assert(m_qf);
           for (size_t i = 0; i < m_qf->getSize(); i++)
             m_ps[i].setPolytope(polytope);
         }
@@ -444,6 +437,7 @@ namespace Rodin::Variational
 
       ScalarType integrate(size_t tr, size_t te) final override
       {
+        assert(m_qf);
         ScalarType res = 0;
         auto& integrand = *m_integrand;
         for (size_t i = 0; i < m_ps.size(); i++)
@@ -461,7 +455,7 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;
 
-      std::unique_ptr<QF::QuadratureFormulaBase> m_qf;
+      const QF::QuadratureFormulaBase* m_qf;
       std::vector<Geometry::Point> m_ps;
 
       const Geometry::Polytope* m_polytope;
@@ -551,7 +545,7 @@ namespace Rodin::Variational
           m_set = true;
           m_order = order;
           m_geometry = geometry;
-          m_qf.reset(new QF::GenericPolytopeQuadrature(order, geometry));
+          m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
           m_ps.clear();
           m_ps.reserve(m_qf->getSize());
           for (size_t i = 0; i < m_qf->getSize(); i++)
@@ -559,6 +553,7 @@ namespace Rodin::Variational
         }
         else
         {
+          assert(m_qf);
           for (size_t i = 0; i < m_qf->getSize(); i++)
             m_ps[i].setPolytope(polytope);
         }
@@ -567,6 +562,7 @@ namespace Rodin::Variational
 
       ScalarType integrate(size_t local) final override
       {
+        assert(m_qf);
         ScalarType res = 0;
         auto& integrand = *m_integrand;
         for (size_t i = 0; i < m_ps.size(); i++)
@@ -584,7 +580,7 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;
 
-      std::unique_ptr<QF::QuadratureFormulaBase> m_qf;
+      const QF::QuadratureFormulaBase* m_qf;
       std::vector<Geometry::Point> m_ps;
 
       const Geometry::Polytope* m_polytope;
