@@ -80,7 +80,7 @@ namespace Rodin::QF
       case Geometry::Polytope::Type::Point:         build_point();                 break;
       case Geometry::Polytope::Type::Segment:       build_segment(m_nx);           break;
       case Geometry::Polytope::Type::Quadrilateral: build_quad(m_nx, m_ny);        break;
-      case Geometry::Polytope::Type::Triangle:      build_tri(m_nx, m_nx);         break;
+      case Geometry::Polytope::Type::Triangle:      build_tri(m_nx, m_ny);         break;
       case Geometry::Polytope::Type::Tetrahedron:   build_tet(m_nx, m_ny, m_nz);   break;
       case Geometry::Polytope::Type::Wedge:         build_wedge(m_nx, m_ny);       break;
       case Geometry::Polytope::Type::Hexahedron:    build_hex(m_nx, m_ny, m_nz);   break;

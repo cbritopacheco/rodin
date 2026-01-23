@@ -42,6 +42,9 @@ namespace Rodin::Tests::Manufactured::H1Poisson3D
   using Manufactured_Poisson3D_H1_Test_8 =
     Rodin::Tests::Manufactured::H1Poisson3D::Manufactured_Poisson3D_H1_Test<8>;
 
+  using Manufactured_Poisson3D_H1_Test_16 =
+    Rodin::Tests::Manufactured::H1Poisson3D::Manufactured_Poisson3D_H1_Test<16>;
+
   TEST_F(Manufactured_Poisson3D_H1_Test_8, Poisson3D_SimpleSine_H1_2)
   {
     auto pi = Rodin::Math::Constants::pi();
@@ -71,7 +74,7 @@ namespace Rodin::Tests::Manufactured::H1Poisson3D
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
 
-  TEST_F(Manufactured_Poisson3D_H1_Test_8, Poisson3D_SimpleSine_H1_3)
+  TEST_F(Manufactured_Poisson3D_H1_Test_16, Poisson3D_SimpleSine_H1_3)
   {
     auto pi = Rodin::Math::Constants::pi();
     constexpr auto order = std::integral_constant<size_t, 3>{};

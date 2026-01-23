@@ -90,7 +90,7 @@ namespace Rodin::QF
        * Requires @f$ nx, ny \geq 1 @f$.
        */
       GaussLegendre(Geometry::Polytope::Type g, size_t nx, size_t ny)
-        : Parent(g), m_nx(nx), m_ny(ny), m_nz(ny)
+        : Parent(g), m_nx(nx), m_ny(ny), m_nz(1)
       {
         assert(nx >= 1 && ny >= 1);
         build();

@@ -32,22 +32,21 @@ namespace Rodin::QF
       }
       case Geometry::Polytope::Type::Segment:
       {
-        // For segments, use Grundmann-Möller with appropriate s parameter
-        const size_t i = (m_order / 2) * 2 + 1;
-        m_qf = std::make_unique<GrundmannMoller>(i / 2, g);
+        const size_t n = std::max<size_t>(1, (m_order + 2) / 2);
+        m_qf = std::make_unique<GaussLegendre>(g, n);
         break;
       }
       case Geometry::Polytope::Type::Triangle:
       {
-        // For triangles, use Grundmann-Möller with appropriate s parameter
-        const size_t i = (m_order / 2) * 2 + 1;
-        m_qf = std::make_unique<GrundmannMoller>(i / 2, g);
+        const size_t s = (m_order + 1) / 2;
+        m_qf = std::make_unique<GrundmannMoller>(s, g);
         break;
       }
       case Geometry::Polytope::Type::Quadrilateral:
       {
         // For quadrilaterals, use tensor-product Gauss-Legendre
-        m_qf = std::make_unique<GaussLegendre>(g);
+        const size_t n = std::max<size_t>(1, (m_order + 2) / 2); // ceil((order+1)/2)
+        m_qf = std::make_unique<GaussLegendre>(g, n, n);
         break;
       }
       case Geometry::Polytope::Type::Tetrahedron:
@@ -68,7 +67,7 @@ namespace Rodin::QF
       }
       case Geometry::Polytope::Type::Hexahedron:
       {
-        const size_t n = std::max<size_t>(1, (m_order + 1) / 2);
+        const size_t n = std::max<size_t>(1, (m_order + 2) / 2);
         m_qf = std::make_unique<GaussLegendre>(g, n, n, n);
         break;
       }

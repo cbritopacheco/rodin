@@ -29,6 +29,8 @@ namespace Rodin::Tests::Manufactured::H1Poisson
         mesh = mesh.UniformGrid(GetParam(), { M, M });
         mesh.scale(1.0 / (M - 1));
         mesh.getConnectivity().compute(1, 2);
+        mesh.getConnectivity().compute(2, 1);
+        mesh.getConnectivity().compute(1, 0);
         return mesh;
       }
   };
@@ -38,6 +40,9 @@ namespace Rodin::Tests::Manufactured::H1Poisson
 
   using Manufactured_Poisson_H1_Test_32x32 =
     Rodin::Tests::Manufactured::H1Poisson::Manufactured_Poisson_H1_Test<32>;
+
+  using Manufactured_Poisson_H1_Test_64x64 =
+    Rodin::Tests::Manufactured::H1Poisson::Manufactured_Poisson_H1_Test<64>;
 
   TEST_P(Manufactured_Poisson_H1_Test_16x16, Poisson_SimpleSine_H1_2)
   {
@@ -128,7 +133,7 @@ namespace Rodin::Tests::Manufactured::H1Poisson
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
 
-  TEST_P(Manufactured_Poisson_H1_Test_32x32, Poisson_NonhomogeneousDirichlet_H1_3)
+  TEST_P(Manufactured_Poisson_H1_Test_64x64, Poisson_NonhomogeneousDirichlet_H1_3)
   {
     auto pi = Rodin::Math::Constants::pi();
 
@@ -164,8 +169,8 @@ namespace Rodin::Tests::Manufactured::H1Poisson
   );
 
   INSTANTIATE_TEST_SUITE_P(
-    MeshParams16x16,
-    Manufactured_Poisson_H1_Test_32x32,
+    MeshParams64x64,
+    Manufactured_Poisson_H1_Test_64x64,
     ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle)
   );
 }
