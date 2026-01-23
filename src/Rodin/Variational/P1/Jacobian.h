@@ -266,38 +266,65 @@ namespace Rodin::Variational
 
       const Geometry::Point& getPoint() const
       {
-        return m_p.value().get();
+        assert(m_p);
+        return *m_p;
       }
 
       Jacobian& setPoint(const Geometry::Point& p)
       {
-        m_p = p;
+        if (m_p == &p)
+          return *this;
+        m_p = &p;
+
         const auto& polytope = p.getPolytope();
         const auto& rc = p.getReferenceCoordinates();
         const size_t d = polytope.getDimension();
-        const Index i = polytope.getIndex();
+        const Index cell = polytope.getIndex();
+
         const auto& fes = this->getFiniteElementSpace();
-        const auto& fe = fes.getFiniteElement(d, i);
+        decltype(auto) fe = fes.getFiniteElement(d, cell);
+
         const size_t count = fe.getCount();
-        const size_t vdim = fes.getVectorDimension();
-        m_jacobian.resize(count);
-        for (size_t local = 0; local < count; local++)
+        const size_t vdim  = fes.getVectorDimension();
+
+        // Jinv is a stable reference (per your guarantee)
+        const auto& Jinv = p.getJacobianInverse();
+
+        // Resize once / only if needed
+        m_jacobian_ref.resize(count);
+        m_jacobian_phys.resize(count);
+        for (size_t local = 0; local < count; ++local)
         {
-          m_jacobian[local].resize(vdim, d);
-          for (size_t i = 0; i < vdim; i++)
-          {
-            const auto& basis = fe.getBasis(local);
-            for (size_t j = 0; j < d; j++)
-              m_jacobian[local](i, j) = basis.template getDerivative<1>(i, j)(rc);
-          }
+          auto& Jr = m_jacobian_ref[local];
+          auto& Jp = m_jacobian_phys[local];
+
+          if (Jr.rows() != vdim || Jr.cols() != d)
+            Jr.resize(vdim, d);
+          if (Jp.rows() != vdim || Jp.cols() != d)
+            Jp.resize(vdim, d);
         }
+
+        for (size_t local = 0; local < count; ++local)
+        {
+          decltype(auto) basis = fe.getBasis(local); // hoist once
+
+          auto& Jref  = m_jacobian_ref[local];
+          auto& Jphys = m_jacobian_phys[local];
+
+          for (size_t comp = 0; comp < vdim; ++comp)
+            for (size_t j = 0; j < d; ++j)
+              Jref(comp, j) = basis.template getDerivative<1>(comp, j)(rc);
+
+          // map once
+          Jphys.noalias() = Jref * Jinv;
+        }
+
         return *this;
       }
 
-      constexpr
-      auto getBasis(size_t local) const
+      decltype(auto) getBasis(size_t local) const
       {
-        return m_jacobian[local] * getPoint().getJacobianInverse();
+        return m_jacobian_phys[local];
       }
 
       Jacobian* copy() const noexcept override
@@ -308,9 +335,10 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const OperandType> m_u;
 
-      std::vector<SpatialMatrixType> m_jacobian;
+      std::vector<SpatialMatrixType> m_jacobian_ref;
+      std::vector<SpatialMatrixType> m_jacobian_phys;
 
-      Optional<std::reference_wrapper<const Geometry::Point>> m_p;
+      const Geometry::Point* m_p;
   };
 
   template <class ShapeFunctionDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>

@@ -250,26 +250,42 @@ namespace Rodin::Variational
         if (m_p == &p)
           return *this;
         m_p = &p;
+
         const auto& polytope = p.getPolytope();
         const auto& rc = p.getReferenceCoordinates();
         const size_t d = polytope.getDimension();
         const Index i = polytope.getIndex();
+
         const auto& fes = this->getFiniteElementSpace();
-        const auto& fe = fes.getFiniteElement(d, i);
+        decltype(auto) fe  = fes.getFiniteElement(d, i);
+
         const size_t count = fe.getCount();
+
+        // Ensure vector objects are sized once
         m_gradient.resize(count);
-        for (size_t local = 0; local < count; local++)
+        for (auto& g : m_gradient)
+          g.resize(d);
+
+        const auto JinvT = p.getJacobianInverse().transpose(); // compute once
+
+        for (size_t local = 0; local < count; ++local)
         {
-          const auto& basis = fe.getBasis(local);
-          m_gradient[local] = basis.getGradient()(rc);
+          decltype(auto) basis = fe.getBasis(local);
+
+          // refGrad should be size d
+          decltype(auto) refGrad = basis.getGradient()(rc);
+
+          // cache physical gradient directly
+          m_gradient[local].noalias() = JinvT * refGrad;
         }
+
         return *this;
       }
 
       constexpr
       auto getBasis(size_t local) const
       {
-        return getPoint().getJacobianInverse().transpose() * m_gradient[local];
+        return m_gradient[local]; // already physical
       }
 
       Grad* copy() const noexcept override

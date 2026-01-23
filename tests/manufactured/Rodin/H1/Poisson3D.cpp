@@ -109,9 +109,11 @@ namespace Rodin::Tests::Manufactured::H1Poisson3D
     constexpr auto order = std::integral_constant<size_t, 4>{};
 
     const auto& mesh = this->getMesh();
+    std::cout << "Number of elements: " << mesh.getPolytopeCount(3) << std::endl;
 
     // Scalar H1 space, quadratic order on a 3D mesh
     H1 vh(order, mesh);
+    std::cout << "Number of DOFs: " << vh.getSize() << std::endl;
 
     TrialFunction u(vh);
     TestFunction  v(vh);
@@ -123,8 +125,12 @@ namespace Rodin::Tests::Manufactured::H1Poisson3D
     poisson = Integral(Grad(u), Grad(v))
             - Integral(f, v)
             + DirichletBC(u, solution);
+    poisson.assemble();
+    std::cout << "Assembled\n";
+
     CG(poisson).solve();
 
+    std::cout << "Solved\n";
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - solution, 2);
 

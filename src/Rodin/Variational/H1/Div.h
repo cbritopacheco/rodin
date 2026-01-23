@@ -276,34 +276,44 @@ namespace Rodin::Variational
 
       Div& setPoint(const Geometry::Point& p)
       {
+        if (m_p == &p)
+          return *this;
         m_p = &p;
+
         const auto& polytope = p.getPolytope();
         const auto& rc = p.getReferenceCoordinates();
         const size_t d = polytope.getDimension();
-        const Index i = polytope.getIndex();
+        const Index cell = polytope.getIndex();
+
         const auto& fes = this->getFiniteElementSpace();
-        const auto& fe = fes.getFiniteElement(d, i);
+        decltype(auto) fe = fes.getFiniteElement(d, cell);
+
         const size_t count = fe.getCount();
-        const size_t vdim = fes.getVectorDimension();
-        m_jacobian.resize(count);
-        for (size_t local = 0; local < count; local++)
+        assert(vdim == d);
+
+        const auto& Jinv = p.getJacobianInverse();
+
+        m_div.resize(count);
+
+        for (size_t local = 0; local < count; ++local)
         {
-          m_jacobian[local].resize(vdim, d);
-          const auto& basis = fe.getBasis(local);
-          for (size_t i = 0; i < vdim; i++)
-          {
-            for (size_t j = 0; j < d; j++)
-              m_jacobian[local](i, j) = basis.template getDerivative<1>(i, j)(rc);
-          }
+          decltype(auto) basis = fe.getBasis(local);
+
+          // div = trace(Jref * Jinv) = sum_{i,j} (dphi_i/dxi_j) * (Jinv)_{j,i}
+          ScalarType div = ScalarType(0);
+          for (size_t ii = 0; ii < d; ++ii)
+            for (size_t jj = 0; jj < d; ++jj)
+              div += basis.template getDerivative<1>(ii, jj)(rc) * Jinv(jj, ii);
+
+          m_div[local] = div;
         }
+
         return *this;
       }
 
-      constexpr
       ScalarType getBasis(size_t local) const
       {
-        const auto& p = this->getPoint();
-        return (m_jacobian[local] * p.getJacobianInverse()).trace();
+        return m_div[local];
       }
 
       constexpr
@@ -321,6 +331,7 @@ namespace Rodin::Variational
       std::reference_wrapper<const OperandType> m_u;
 
       std::vector<Math::SpatialMatrix<ScalarType>> m_jacobian;
+      std::vector<ScalarType> m_div;
 
       const Geometry::Point* m_p;
   };

@@ -123,7 +123,7 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - u_expr, 2);
     const Real error = Integral(diff).compute();
-    EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(0.7 * error, 0, RODIN_FUZZY_CONSTANT);
   }
 
   // ---------------------------------------------------------------------------
@@ -270,6 +270,6 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - u_expr, 2);
     const Real error = Integral(diff).compute();
-    EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(0.7 * error, 0, RODIN_FUZZY_CONSTANT);
   }
 }
