@@ -289,7 +289,7 @@ namespace Rodin::Variational
         decltype(auto) fe = fes.getFiniteElement(d, cell);
 
         const size_t count = fe.getCount();
-        assert(vdim == d);
+        assert(fes.getVectorDimension() == d);
 
         const auto& Jinv = p.getJacobianInverse();
 
