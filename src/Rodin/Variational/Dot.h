@@ -598,6 +598,13 @@ namespace Rodin::Variational
         return m_trial->getPoint();
       }
 
+      Dot& setIntegrationPoint(const IntegrationPoint& ip)
+      {
+        m_trial->setIntegrationPoint(ip);
+        m_test->setIntegrationPoint(ip);
+        return *this;
+      }
+
       Dot& setPoint(const Geometry::Point& p)
       {
         m_trial->setPoint(p);

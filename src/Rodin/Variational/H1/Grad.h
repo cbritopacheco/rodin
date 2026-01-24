@@ -19,6 +19,7 @@
  */
 
 #include "Rodin/Geometry/Mesh.h"
+#include "Rodin/Geometry/Point.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/Grad.h"
 #include "Rodin/Variational/ShapeFunction.h"
@@ -177,6 +178,34 @@ namespace Rodin::Variational
       }
   };
 
+  template <class ScalarType>
+  struct RefGradTable
+  {
+    size_t qps = 0;
+    size_t count = 0;
+    size_t d = 0;
+    std::vector<Math::SpatialVector<ScalarType>> data; // size = qps*count, each size d
+
+    void reset(size_t qps_, size_t count_, size_t d_)
+    {
+      qps = qps_;
+      count = count_;
+      d = d_;
+      data.resize(qps * count);
+      for (auto& v : data) v.resize(d);
+    }
+
+    Math::SpatialVector<ScalarType>& at(size_t qp, size_t local)
+    {
+      return data[qp * count + local];
+    }
+
+    const Math::SpatialVector<ScalarType>& at(size_t qp, size_t local) const
+    {
+      return data[qp * count + local];
+    }
+  };
+
   /**
    * @ingroup GradSpecializations
    * @brief Gradient of a ShapeFunction on H1<K> space
@@ -201,11 +230,13 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = ShapeFunctionBase<Grad<OperandType>, FESType, Space>;
 
-      Grad(const OperandType& u)
-        : Parent(u.getFiniteElementSpace()),
-          m_u(u),
-          m_p(nullptr)
-      {}
+  Grad(const OperandType& u)
+    : Parent(u.getFiniteElementSpace()),
+      m_u(u),
+      m_p(nullptr),
+      m_lastFE(nullptr),
+      m_lastQF(nullptr)
+  {}
 
       Grad(const Grad& other)
         : Parent(other),
@@ -293,11 +324,18 @@ namespace Rodin::Variational
         return new Grad(*this);
       }
 
-    private:
-      std::reference_wrapper<const OperandType> m_u;
+private:
+  std::reference_wrapper<const OperandType> m_u;
 
-      const Geometry::Point* m_p;
-      std::vector<Math::SpatialVector<ScalarType>> m_gradient;
+  const Geometry::Point* m_p;
+
+  // fast-path state
+  const void* m_lastFE;
+  const QF::QuadratureFormulaBase* m_lastQF;
+  size_t m_lastQP = static_cast<size_t>(-1);
+  Variational::RefGradTable<ScalarType> m_tab;
+
+  std::vector<Math::SpatialVector<ScalarType>> m_gradient;
   };
 }
 

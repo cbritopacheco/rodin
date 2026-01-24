@@ -289,9 +289,11 @@ namespace Rodin::Variational
       }
 
       constexpr
-      virtual Derived& setPoint(const IntegrationPoint& p)
+      Derived& setIntegrationPoint(const IntegrationPoint& ip)
       {
-        return static_cast<Derived&>(*this).setPoint(p.getPoint());
+        // TODO: Change to setIntegrationPoint in Derived classes
+        assert(ip.getPoint() != nullptr);
+        return static_cast<Derived&>(*this).setPoint(*ip.getPoint());
       }
 
       /**

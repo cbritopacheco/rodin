@@ -406,7 +406,7 @@ namespace Rodin::Geometry
     auto idx = getLocalIndex(dimension, globalIdx);
     const auto& comm = m_context.getCommunicator();
     const auto& shard = getShard();
-    PolytopeTransformation* local;
+    PolytopeTransformation* local = nullptr;
     if (idx)
     {
       if (shard.isOwned(dimension, *idx))

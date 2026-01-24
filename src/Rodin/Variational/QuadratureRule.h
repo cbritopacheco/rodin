@@ -54,6 +54,7 @@
 
 #include "Rodin/QF/GenericPolytopeQuadrature.h"
 
+#include "IntegrationPoint.h"
 #include "ShapeFunction.h"
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
@@ -405,7 +406,7 @@ namespace Rodin::Variational
         m_polytope = &polytope;
         const size_t d = polytope.getDimension();
         const Index idx = polytope.getIndex();
-        const auto& integrand = *m_integrand;
+        auto& integrand = *m_integrand;
         const auto& trial = integrand.getLHS();
         const auto& test = integrand.getRHS();
         const auto& trialfes = trial.getFiniteElementSpace();
@@ -432,20 +433,33 @@ namespace Rodin::Variational
           for (size_t i = 0; i < m_qf->getSize(); i++)
             m_ps[i].setPolytope(polytope);
         }
+
+        const size_t ntr = trial.getDOFs(*m_polytope);
+        const size_t nte = test .getDOFs(*m_polytope);
+
+        m_mat.resize(nte, ntr);
+        m_mat.setZero();
+
+        for (size_t qp = 0; qp < m_ps.size(); ++qp)
+        {
+          const auto& p = m_ps[qp];
+          const ScalarType wdet = m_qf->getWeight(qp) * p.getDistortion();
+
+          const Variational::IntegrationPoint ip(&p, m_qf, qp);
+          integrand.setIntegrationPoint(ip);
+
+          // fill all entries for this qp
+          for (size_t te = 0; te < nte; ++te)
+            for (size_t tr = 0; tr < ntr; ++tr)
+              m_mat(te, tr) += wdet * integrand(tr, te);
+        }
+
         return *this;
       }
 
-      ScalarType integrate(size_t tr, size_t te) final override
+      inline ScalarType integrate(size_t tr, size_t te) final override
       {
-        assert(m_qf);
-        ScalarType res = 0;
-        auto& integrand = *m_integrand;
-        for (size_t i = 0; i < m_ps.size(); i++)
-        {
-          integrand.setPoint(m_ps[i]);
-          res += m_qf->getWeight(i) * m_ps[i].getDistortion() * integrand(tr, te);
-        }
-        return res;
+        return m_mat(te, tr); // rows=test, cols=trial
       }
 
       virtual Geometry::Region getRegion() const override = 0;
@@ -462,6 +476,8 @@ namespace Rodin::Variational
       bool m_set;
       size_t m_order;
       Geometry::Polytope::Type m_geometry;
+
+      Math::Matrix<ScalarType> m_mat; // rows=test, cols=trial
   };
 
   /**
@@ -534,7 +550,8 @@ namespace Rodin::Variational
         m_polytope = &polytope;
         const size_t d = polytope.getDimension();
         const Index idx = polytope.getIndex();
-        const auto& integrand = getIntegrand();
+        assert(m_integrand);
+        auto& integrand = *m_integrand;
         const auto& fes = integrand.getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, idx);
         const size_t order = fe.getOrder();
@@ -557,20 +574,30 @@ namespace Rodin::Variational
           for (size_t i = 0; i < m_qf->getSize(); i++)
             m_ps[i].setPolytope(polytope);
         }
+
+        const size_t nte = integrand.getDOFs(polytope);
+
+        m_vec.resize(nte);
+        m_vec.setZero();
+
+        for (size_t qp = 0; qp < m_ps.size(); ++qp)
+        {
+          const auto& p = m_ps[qp];
+          const ScalarType wdet = m_qf->getWeight(qp) * p.getDistortion();
+
+          const Variational::IntegrationPoint ip(&p, m_qf, qp);
+          integrand.setIntegrationPoint(ip); // triggers caching once per qp
+
+          for (size_t te = 0; te < nte; ++te)
+            m_vec(te) += wdet * integrand.getBasis(te);
+        }
+
         return *this;
       }
 
-      ScalarType integrate(size_t local) final override
+      inline ScalarType integrate(size_t local) final override
       {
-        assert(m_qf);
-        ScalarType res = 0;
-        auto& integrand = *m_integrand;
-        for (size_t i = 0; i < m_ps.size(); i++)
-        {
-          integrand.setPoint(m_ps[i]);
-          res += m_qf->getWeight(i) * m_ps[i].getDistortion() * integrand.getBasis(local);
-        }
-        return res;
+        return m_vec(local);
       }
 
       virtual Geometry::Region getRegion() const override = 0;
@@ -587,6 +614,8 @@ namespace Rodin::Variational
       bool m_set;
       size_t m_order;
       Geometry::Polytope::Type m_geometry;
+
+      Math::Vector<ScalarType> m_vec;
   };
 }
 
