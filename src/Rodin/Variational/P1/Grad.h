@@ -267,13 +267,8 @@ namespace Rodin::Variational
 
         for (size_t local = 0; local < count; ++local)
         {
-          decltype(auto) basis = fe.getBasis(local);
-
-          // refGrad should be size d
-          decltype(auto) refGrad = basis.getGradient()(rc);
-
           // cache physical gradient directly
-          m_gradient[local].noalias() = JinvT * refGrad;
+          m_gradient[local].noalias() = JinvT * fe.getBasis(local).getGradient()(rc);
         }
 
         return *this;

@@ -207,6 +207,12 @@ namespace Rodin::Variational
         return getOperand().getDOFs(element);
       }
 
+      UnaryMinus& setIntegrationPoint(const IntegrationPoint& ip)
+      {
+        m_operand->setIntegrationPoint(ip);
+        return *this;
+      }
+
       constexpr
       UnaryMinus& setPoint(const Geometry::Point& p)
       {

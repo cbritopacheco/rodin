@@ -11,6 +11,7 @@
 #include "Rodin/FormLanguage/Traits.h"
 
 #include "ForwardDecls.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 
 namespace Rodin::FormLanguage
 {
@@ -435,6 +436,12 @@ namespace Rodin::Variational
       Component& setPoint(const Geometry::Point& p)
       {
         m_u->setPoint(p);
+        return *this;
+      }
+
+      Component& setIntegrationPoint(const IntegrationPoint& ip)
+      {
+        m_u->setIntegrationPoint(ip);
         return *this;
       }
 

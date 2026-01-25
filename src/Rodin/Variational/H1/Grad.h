@@ -230,13 +230,11 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = ShapeFunctionBase<Grad<OperandType>, FESType, Space>;
 
-  Grad(const OperandType& u)
-    : Parent(u.getFiniteElementSpace()),
-      m_u(u),
-      m_p(nullptr),
-      m_lastFE(nullptr),
-      m_lastQF(nullptr)
-  {}
+      Grad(const OperandType& u)
+        : Parent(u.getFiniteElementSpace()),
+          m_u(u),
+          m_p(nullptr)
+      {}
 
       Grad(const Grad& other)
         : Parent(other),
@@ -300,14 +298,57 @@ namespace Rodin::Variational
         const auto JinvT = p.getJacobianInverse().transpose(); // compute once
 
         for (size_t local = 0; local < count; ++local)
+          m_gradient[local].noalias() = JinvT * fe.getBasis(local).getGradient()(rc);
+
+        return *this;
+      }
+
+      Grad& setIntegrationPoint(const Variational::IntegrationPoint& ip)
+      {
+        static thread_local Math::SpatialVector<Real> s_refGrad;
+
+        // keep old pointer check if you want
+        const auto& p  = *ip.getPoint();           // Geometry::Point
+        const auto& qf = *ip.getQuadratureFormula();
+        const size_t qp = ip.getIndex();           // quadrature point index
+
+        m_p = &p;
+
+        const auto& polytope = p.getPolytope();
+        const size_t d   = polytope.getDimension();
+        const Index  idx = polytope.getIndex();
+
+        const auto& fes = this->getFiniteElementSpace();
+        const auto& fe  = fes.getFiniteElement(d, idx); // H1Element<K,Scalar> (scalar)
+
+        const size_t ndof = fe.getCount();
+
+        s_refGrad.resize(d);
+
+        // Resize once if possible
+        if (m_gradient.size() != ndof || (ndof && m_gradient[0].size() != d))
         {
-          decltype(auto) basis = fe.getBasis(local);
+          m_gradient.resize(ndof);
+          for (auto& g : m_gradient) g.resize(d);
+        }
 
-          // refGrad should be size d
-          decltype(auto) refGrad = basis.getGradient()(rc);
+        // Get tabulation for this geometry+qf
+        const auto& tab = fe.getTabulation(qf);
+        // tab is qp-major, derivatives in reference coordinates
 
-          // cache physical gradient directly
-          m_gradient[local].noalias() = JinvT * refGrad;
+        const auto JinvT = p.getJacobianInverse().transpose();
+
+        for (size_t a = 0; a < ndof; ++a)
+        {
+          // span<const Scalar> of size d
+          const auto gref = tab.getGradient(qp, a);
+
+          // fill a small ref vector without calling basis.getGradient()(rc)
+          // (choose whichever type you use for ref vectors)
+          for (size_t i = 0; i < d; ++i)
+            s_refGrad(i) = gref[i];
+
+          m_gradient[a].noalias() = JinvT * s_refGrad;
         }
 
         return *this;
@@ -324,18 +365,12 @@ namespace Rodin::Variational
         return new Grad(*this);
       }
 
-private:
-  std::reference_wrapper<const OperandType> m_u;
+    private:
+      std::reference_wrapper<const OperandType> m_u;
 
-  const Geometry::Point* m_p;
+      const Geometry::Point* m_p;
 
-  // fast-path state
-  const void* m_lastFE;
-  const QF::QuadratureFormulaBase* m_lastQF;
-  size_t m_lastQP = static_cast<size_t>(-1);
-  Variational::RefGradTable<ScalarType> m_tab;
-
-  std::vector<Math::SpatialVector<ScalarType>> m_gradient;
+      std::vector<Math::SpatialVector<ScalarType>> m_gradient;
   };
 }
 

@@ -25,6 +25,7 @@
 
 #include <cstddef>
 #include <array>
+#include <span>
 #include <vector>
 #include <utility>
 
@@ -34,6 +35,7 @@
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Geometry/Polytope.h"
+#include "Rodin/QF/ForwardDecls.h"
 
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/FiniteElement.h"
@@ -140,6 +142,53 @@ namespace Rodin::Variational
 
     public:
       static_assert(K > 0, "Polynomial degree K must be greater than 0.");
+
+      struct Tabulation
+      {
+        size_t nqp  = 0;
+        size_t ndof = 0;
+        size_t dim  = 0;
+
+        // qp-major storage
+        // phi[(qp*ndof) + a]
+        std::vector<Scalar> phi;
+
+        // derivative in reference coordinates
+        // dphi[((qp*ndof + a)*dim) + i]
+        std::vector<Scalar> dphi;
+
+        // ---------- fast path (tight loops) ----------
+        const Scalar& getBasis(size_t qp, size_t a) const noexcept
+        {
+          return phi[qp * ndof + a];
+        }
+
+        template <size_t Order>
+        const Scalar& getDerivative(size_t qp, size_t a, size_t i) const noexcept
+        {
+          if constexpr (Order == 0)
+          {
+            assert(i == 0);
+            return phi[qp * ndof + a];
+          }
+          else if constexpr (Order == 1)
+          {
+            assert(i < dim);
+            return dphi[(qp * ndof + a) * dim + i];
+          }
+          else
+          {
+            // Higher-order derivatives not implemented
+            static const Scalar zero = Scalar(0);
+            return zero;
+          }
+        }
+
+        std::span<const Scalar> getGradient(size_t qp, size_t a) const noexcept
+        {
+          return std::span<const Scalar>(&dphi[(qp * ndof + a) * dim], dim);
+        }
+      };
 
       friend class boost::serialization::access;
 
@@ -347,6 +396,8 @@ namespace Rodin::Variational
           const size_t m_local;  ///< Local basis function index
           const Geometry::Polytope::Type m_g;  ///< Geometry type
       };
+
+      const Tabulation& getTabulation(const QF::QuadratureFormulaBase& qf) const;
 
       /**
        * @brief Builds the high-order stable nodes for the element geometry.

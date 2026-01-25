@@ -200,6 +200,12 @@ namespace Rodin::Variational
         return *this;
       }
 
+      Transpose& setIntegrationPoint(const IntegrationPoint& ip)
+      {
+        m_operand->setIntegrationPoint(ip);
+        return *this;
+      }
+
       /**
        * @brief Gets the transposed basis function for local DOF.
        * @param local Local DOF index

@@ -17,6 +17,7 @@
 
 #include "Rodin/Math.h"
 #include "Rodin/Copyable.h"
+#include "Rodin/Identifiable.h"
 #include "Rodin/Geometry.h"
 
 

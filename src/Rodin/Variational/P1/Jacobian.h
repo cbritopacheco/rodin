@@ -270,6 +270,13 @@ namespace Rodin::Variational
         return *m_p;
       }
 
+      Jacobian& setIntegrationPoint(const IntegrationPoint& ip)
+      {
+        assert(ip.getPoint());
+        this->setPoint(*ip.getPoint());
+        return *this;
+      }
+
       Jacobian& setPoint(const Geometry::Point& p)
       {
         if (m_p == &p)

@@ -345,6 +345,13 @@ namespace Rodin::Variational
         return getLHS().getDOFs(element);
       }
 
+      Sum& setIntegrationPoint(const IntegrationPoint& ip)
+      {
+        m_lhs->setIntegrationPoint(ip);
+        m_rhs->setIntegrationPoint(ip);
+        return *this;
+      }
+
       Sum& setPoint(const Geometry::Point& p)
       {
         m_lhs->setPoint(p);

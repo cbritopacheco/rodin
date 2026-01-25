@@ -4,10 +4,11 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include <type_traits>
+#include "Identifiable.h"
 
-#include "Base.h"
+namespace Rodin
+{
+  thread_local Identifiable::UUID Identifiable::s_id = 0;
+}
 
-namespace Rodin::FormLanguage
-{}
 

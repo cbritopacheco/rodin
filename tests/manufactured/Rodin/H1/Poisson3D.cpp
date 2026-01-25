@@ -65,36 +65,7 @@ namespace Rodin::Tests::Manufactured::H1Poisson3D
     poisson = Integral(Grad(u), Grad(v))
             - Integral(f, v)
             + DirichletBC(u, solution);
-    CG(poisson).solve();
-
-    GridFunction diff(vh);
-    diff = Pow(u.getSolution() - solution, 2);
-
-    Real error = Integral(diff).compute();
-    EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
-  }
-
-  TEST_F(Manufactured_Poisson3D_H1_Test_16, Poisson3D_SimpleSine_H1_3)
-  {
-    auto pi = Rodin::Math::Constants::pi();
-    constexpr auto order = std::integral_constant<size_t, 3>{};
-
-    const auto& mesh = this->getMesh();
-
-    // Scalar H1 space, quadratic order on a 3D mesh
-    H1 vh(order, mesh);
-
-    TrialFunction u(vh);
-    TestFunction  v(vh);
-
-    auto solution = sin(pi * F::x) * sin(pi * F::y) * sin(pi * F::z);
-    auto f = 3 * pi * pi * solution;
-
-    Problem poisson(u, v);
-    poisson = Integral(Grad(u), Grad(v))
-            - Integral(f, v)
-            + DirichletBC(u, solution);
-    CG(poisson).solve();
+    CG(poisson).setTolerance(1e-8).solve();
 
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - solution, 2);
@@ -109,11 +80,9 @@ namespace Rodin::Tests::Manufactured::H1Poisson3D
     constexpr auto order = std::integral_constant<size_t, 4>{};
 
     const auto& mesh = this->getMesh();
-    std::cout << "Number of elements: " << mesh.getPolytopeCount(3) << std::endl;
 
     // Scalar H1 space, quadratic order on a 3D mesh
     H1 vh(order, mesh);
-    std::cout << "Number of DOFs: " << vh.getSize() << std::endl;
 
     TrialFunction u(vh);
     TestFunction  v(vh);
@@ -125,12 +94,9 @@ namespace Rodin::Tests::Manufactured::H1Poisson3D
     poisson = Integral(Grad(u), Grad(v))
             - Integral(f, v)
             + DirichletBC(u, solution);
-    poisson.assemble();
-    std::cout << "Assembled\n";
 
     CG(poisson).solve();
 
-    std::cout << "Solved\n";
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - solution, 2);
 

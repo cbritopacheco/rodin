@@ -409,6 +409,12 @@ namespace Rodin::Variational
         return *this;
       }
 
+      Mult& setIntegrationPoint(const IntegrationPoint& ip)
+      {
+        m_rhs->setIntegrationPoint(ip);
+        return *this;
+      }
+
       constexpr
       auto getBasis(size_t local) const
       {
@@ -547,6 +553,12 @@ namespace Rodin::Variational
       Mult& setPoint(const Geometry::Point& p)
       {
         m_lhs->setPoint(p);
+        return *this;
+      }
+
+      Mult& setIntegrationPoint(const IntegrationPoint& ip)
+      {
+        m_lhs->setIntegrationPoint(ip);
         return *this;
       }
 
