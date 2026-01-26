@@ -227,17 +227,20 @@ namespace Rodin::Variational
 
       Jacobian(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
-          m_u(u)
+          m_u(u),
+          m_p(nullptr)
       {}
 
       Jacobian(const Jacobian& other)
         : Parent(other),
-          m_u(other.m_u)
+          m_u(other.m_u),
+          m_p(other.m_p)
       {}
 
       Jacobian(Jacobian&& other)
         : Parent(std::move(other)),
-          m_u(other.m_u)
+          m_u(std::move(other.m_u)),
+          m_p(std::move(other.m_p))
       {}
 
       constexpr
