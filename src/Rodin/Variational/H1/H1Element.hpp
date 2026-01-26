@@ -46,16 +46,24 @@ namespace Rodin::Variational
   {
     struct CacheEntry
     {
-      const QF::QuadratureFormulaBase* qf = nullptr;
-      Geometry::Polytope::Type g = Geometry::Polytope::Type::Point;
-      size_t nqp = 0;
-      bool valid = false;
+      const QF::QuadratureFormulaBase* qf;
+      Geometry::Polytope::Type g;
+      size_t nqp;
+      bool valid;
       Tabulation tab;
+
+      CacheEntry()
+        : qf(nullptr),
+          g(Geometry::Polytope::Type::Point),
+          nqp(0),
+          valid(false),
+          tab()
+      {}
     };
 
     struct Cache
     {
-      std::array<CacheEntry, 8> e{};
+      std::array<CacheEntry, 8> e;
       size_t next = 0; // eviction pointer
     };
 
