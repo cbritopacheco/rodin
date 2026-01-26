@@ -62,9 +62,9 @@ namespace Rodin::Tests::Manufactured::H1LinearElasticity3D
   using Manufactured_LinearElasticity3D_H1_Test_8 =
     Manufactured_LinearElasticity3D_H1_Test<8>;
 
-  TEST_F(Manufactured_LinearElasticity3D_H1_Test_8, LinearElasticity_Polynomial_H1_Order2)
+  TEST_F(Manufactured_LinearElasticity3D_H1_Test_8, Manufactured_LinearElasticity3D_H1_1)
   {
-    constexpr auto order = std::integral_constant<size_t, 2>{};
+    constexpr auto order = std::integral_constant<size_t, 1>{};
     const Real lambda = 2.0;
     const Real mu = 1.0;
 
@@ -92,9 +92,9 @@ namespace Rodin::Tests::Manufactured::H1LinearElasticity3D
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
 
-  TEST_F(Manufactured_LinearElasticity3D_H1_Test_8, LinearElasticity_Polynomial_H1_Order3)
+  TEST_F(Manufactured_LinearElasticity3D_H1_Test_8, Manufactured_LinearElasticity3D_H1_2)
   {
-    constexpr auto order = std::integral_constant<size_t, 3>{};
+    constexpr auto order = std::integral_constant<size_t, 2>{};
     const Real lambda = 1.5;
     const Real mu = 0.5;
 
