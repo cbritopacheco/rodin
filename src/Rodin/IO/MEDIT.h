@@ -1093,7 +1093,8 @@ namespace Rodin::IO
           const size_t nLocal = static_cast<size_t>(cdofs.size());
 
           // H1 local nodes in reference element
-          const auto& nodes = Variational::H1Element<K, Range>::getNodes(geom);
+          const auto& nodes =
+            Variational::H1Element<K, typename FormLanguage::Traits<Range>::ScalarType>::getNodes(geom);
           assert(nodes.size() == nLocal);
 
           // Number of vertices per cell (topology)
