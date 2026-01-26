@@ -30,4 +30,15 @@ target_link_libraries(RodinManufacturedH1Poisson3D
   Rodin::Solver
   )
 gtest_discover_tests(RodinManufacturedH1Poisson3D)
+
+add_executable(RodinManufacturedH1LinearElasticity3D LinearElasticity3D.cpp)
+target_link_libraries(RodinManufacturedH1LinearElasticity3D
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solver
+  )
+gtest_discover_tests(RodinManufacturedH1LinearElasticity3D)
 # 
