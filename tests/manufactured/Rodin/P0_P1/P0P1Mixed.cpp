@@ -57,7 +57,7 @@ namespace Rodin::Tests::Manufactured::P0P1
       auto pi = Rodin::Math::Constants::pi();
       return [pi](const Geometry::Point& p) -> double
       {
-        return std::sin(pi * p.x()) * std::sin(pi * p.y());
+        return std::sin(pi * p.x()) * std::sin(pi * p.y()) * std::sin(pi * p.z());
       };
     }
 
