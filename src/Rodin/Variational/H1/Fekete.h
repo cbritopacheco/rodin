@@ -1,4 +1,5 @@
 /*
+ *
  *          Copyright Carlos BRITO PACHECO 2021 - 2025.
  * Distributed under the Boost Software License, Version 1.0.
  *       (See accompanying file LICENSE or copy at
@@ -55,7 +56,8 @@ namespace Rodin::Variational
         if constexpr (K == 0)
         {
           // Single vertex node; choose (0,0) by convention.
-          nodes[0] = Math::SpatialPoint{{0.0, 0.0}};
+          nodes[0].resize(2);
+          nodes[0] << 0.0, 0.0;
           return nodes;
         }
 
@@ -66,7 +68,8 @@ namespace Rodin::Variational
           {
             const Real s = static_cast<Real>(i) / static_cast<Real>(K);
             const Real t = static_cast<Real>(j) / static_cast<Real>(K);
-            nodes[idx] = Math::SpatialPoint{{s, t}};
+            nodes[idx].resize(2);
+            nodes[idx] << s, t;
           }
         }
 
@@ -120,7 +123,8 @@ namespace Rodin::Variational
         if constexpr (K == 0)
         {
           // Single vertex node; choose (0,0,0) by convention.
-          nodes[0] = Math::SpatialPoint{{0.0, 0.0, 0.0}};
+          nodes[0].resize(3);
+          nodes[0] << 0.0, 0.0, 0.0;
           return nodes;
         }
 
@@ -135,7 +139,8 @@ namespace Rodin::Variational
               const Real r = static_cast<Real>(i) / static_cast<Real>(K);
               const Real s = static_cast<Real>(j) / static_cast<Real>(K);
               const Real t = static_cast<Real>(k) / static_cast<Real>(K);
-              nodes[idx] = Math::SpatialPoint{{r, s, t}};
+              nodes[idx].resize(3);
+              nodes[idx] << r, s, t;
             }
           }
         }

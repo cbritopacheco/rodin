@@ -128,7 +128,10 @@ namespace Rodin::Variational
       {
         m_polytope = polytope;
         const auto& geometry = polytope.getGeometry();
-        const bool recompute = !m_set || m_geometry != geometry;
+        bool recompute = !m_set;
+        recompute = recompute || !m_geometry.has_value();
+        if (m_geometry.has_value())
+          recompute = recompute || *m_geometry != geometry;
         if (recompute)
         {
           m_set = true;
@@ -175,7 +178,7 @@ namespace Rodin::Variational
       std::vector<ScalarType> m_basis;
 
       bool m_set;
-      Geometry::Polytope::Type m_geometry;
+      std::optional<Geometry::Polytope::Type> m_geometry;
   };
 
   /**

@@ -413,6 +413,7 @@ namespace Rodin::Variational
           const Real L2 = t;
           const Real L3 = static_cast<Real>(0.0);
 
+          assert(nodes[idx_edge].size() == 2);
           nodes[idx_edge].x() = L2;
           nodes[idx_edge].y() = L3;
         }
@@ -427,6 +428,7 @@ namespace Rodin::Variational
           const Real L2 = static_cast<Real>(0.0);
           const Real L3 = t;
 
+          assert(nodes[idx_edge].size() == 2);
           nodes[idx_edge].x() = L2;
           nodes[idx_edge].y() = L3;
         }
@@ -445,6 +447,7 @@ namespace Rodin::Variational
           const Real L3 = t;
           const Real L2 = static_cast<Real>(1.0) - t;
 
+          assert(nodes[idx_edge].size() == 2);
           nodes[idx_edge].x() = L2;
           nodes[idx_edge].y() = L3;
         }
@@ -712,6 +715,7 @@ namespace Rodin::Variational
               }
 
               // Back to reference tetra: (x,y,z) = (L2,L3,L4)
+              assert(nodes[idx].size() == 3);
               nodes[idx].x() = l2n;
               nodes[idx].y() = l3n;
               nodes[idx].z() = l4n;
@@ -833,6 +837,7 @@ namespace Rodin::Variational
               Lnew[ic] = Lc_new;
 
               // Back to reference tetra: (x,y,z) = (L2,L3,L4)
+              assert(nodes[idx].size() == 3);
               nodes[idx].x() = Lnew[1];
               nodes[idx].y() = Lnew[2];
               nodes[idx].z() = Lnew[3];
@@ -848,6 +853,7 @@ namespace Rodin::Variational
         auto set_from_bary = [&](size_t idx, Real L1, Real L2, Real L3, Real L4)
         {
           (void) L1;
+          assert(nodes[idx].size() == 3);
           nodes[idx].x() = L2;
           nodes[idx].y() = L3;
           nodes[idx].z() = L4;
