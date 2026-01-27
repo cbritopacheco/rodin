@@ -17,21 +17,33 @@ using namespace Rodin::Solver;
 
 namespace Rodin::Tests::Manufactured::P0
 {
-  class Manufactured_P0_L2_Test : public ::testing::Test
+  template <size_t NX, size_t NY, size_t NZ = 1>
+  class Manufactured_P0_L2_Test : public ::testing::TestWithParam<Polytope::Type>
   {
   protected:
     void SetUp() override
     {
-      m_mesh = Mesh().UniformGrid(Polytope::Type::Quadrilateral, { 10, 10 });
-      m_mesh.scale(1.0 / 9.0);
-      m_mesh.getConnectivity().compute(1, 2);
-      m_mesh.getConnectivity().compute(2, 1);
+      const auto geom = GetParam();
+      if (geom == Polytope::Type::Tetrahedron || geom == Polytope::Type::Hexahedron || geom == Polytope::Type::Wedge)
+      {
+        m_mesh = Mesh().UniformGrid(geom, { NX, NY, NZ });
+        m_mesh.scale(1.0 / (NX - 1));
+        m_mesh.getConnectivity().compute(2, 3);
+        m_mesh.getConnectivity().compute(3, 2);
+      }
+      else
+      {
+        m_mesh = Mesh().UniformGrid(geom, { NX, NY });
+        m_mesh.scale(1.0 / (NX - 1));
+        m_mesh.getConnectivity().compute(1, 2);
+        m_mesh.getConnectivity().compute(2, 1);
+      }
       m_mesh.getConnectivity().compute(1, 0);
     }
 
     const Mesh<Context::Local>& getMesh() const { return m_mesh; }
 
-    static RealFunction rhs()
+    static RealFunction rhs_quadratic()
     {
       return [](const Geometry::Point& p) -> double
       {
@@ -39,11 +51,25 @@ namespace Rodin::Tests::Manufactured::P0
       };
     }
 
+    static RealFunction rhs_sine()
+    {
+      auto pi = Rodin::Math::Constants::pi();
+      return [pi](const Geometry::Point& p) -> double
+      {
+        return std::sin(pi * p.x()) * std::sin(pi * p.y());
+      };
+    }
+
   private:
     Mesh<Context::Local> m_mesh;
   };
 
-  TEST_F(Manufactured_P0_L2_Test, P0_L2Projection)
+  using Manufactured_P0_L2_Test_10x10 =
+    Manufactured_P0_L2_Test<10, 10>;
+  using Manufactured_P0_L2_Test_6x6x6 =
+    Manufactured_P0_L2_Test<6, 6, 6>;
+
+  TEST_P(Manufactured_P0_L2_Test_10x10, P0_L2Projection_QuadraticRHS)
   {
     const auto& mesh = getMesh();
 
@@ -51,7 +77,7 @@ namespace Rodin::Tests::Manufactured::P0
     TrialFunction p(p0h);
     TestFunction  q(p0h);
 
-    const auto f = rhs();
+    const auto f = rhs_quadratic();
 
     Problem p_l2(p, q);
     p_l2 = Integral(p, q) - Integral(f, q);
@@ -62,4 +88,41 @@ namespace Rodin::Tests::Manufactured::P0
     const Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
+
+  TEST_P(Manufactured_P0_L2_Test_6x6x6, P0_L2Projection_SineRHS)
+  {
+    const auto& mesh = getMesh();
+
+    P0 p0h(mesh);
+    TrialFunction p(p0h);
+    TestFunction  q(p0h);
+
+    const auto f = rhs_sine();
+
+    Problem p_l2(p, q);
+    p_l2 = Integral(p, q) - Integral(f, q);
+    CG(p_l2).solve();
+
+    GridFunction diff(p0h);
+    diff = Pow(p.getSolution() - f, 2);
+    const Real error = Integral(diff).compute();
+    EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
+  }
+
+  INSTANTIATE_TEST_SUITE_P(
+    PolytopeCoverage2D,
+    Manufactured_P0_L2_Test_10x10,
+    ::testing::Values(
+      Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral)
+  );
+
+  INSTANTIATE_TEST_SUITE_P(
+    PolytopeCoverage3D,
+    Manufactured_P0_L2_Test_6x6x6,
+    ::testing::Values(
+      Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron,
+      Polytope::Type::Wedge)
+  );
 }
