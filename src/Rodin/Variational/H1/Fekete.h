@@ -42,7 +42,7 @@ namespace Rodin::Variational
       /// Return cached nodes as a std::array.
       static const std::array<Math::SpatialPoint, Count>& getNodes()
       {
-        static const std::array<Math::SpatialPoint, Count> s_nodes = compute();
+        static thread_local const std::array<Math::SpatialPoint, Count> s_nodes = compute();
         return s_nodes;
       }
 
@@ -109,7 +109,7 @@ namespace Rodin::Variational
       /// Return cached nodes as a std::array.
       static const std::array<Math::SpatialPoint, Count>& getNodes()
       {
-        static const std::array<Math::SpatialPoint, Count> s_nodes = compute();
+        static thread_local const std::array<Math::SpatialPoint, Count> s_nodes = compute();
         return s_nodes;
       }
 
