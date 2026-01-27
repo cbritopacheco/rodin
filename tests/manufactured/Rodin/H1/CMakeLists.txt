@@ -18,7 +18,10 @@ target_link_libraries(RodinManufacturedH1Poisson
   Rodin::Variational
   Rodin::Solver
   )
-gtest_discover_tests(RodinManufacturedH1Poisson)
+
+gtest_discover_tests(RodinManufacturedH1Poisson
+    PROPERTIES
+    LABELS manufactured)
 
 add_executable(RodinManufacturedH1Poisson3D Poisson3D.cpp)
 target_link_libraries(RodinManufacturedH1Poisson3D
@@ -29,7 +32,10 @@ target_link_libraries(RodinManufacturedH1Poisson3D
   Rodin::Variational
   Rodin::Solver
   )
-gtest_discover_tests(RodinManufacturedH1Poisson3D)
+
+gtest_discover_tests(RodinManufacturedH1Poisson3D
+    PROPERTIES
+    LABELS manufactured)
 
 add_executable(RodinManufacturedH1LinearElasticity3D LinearElasticity3D.cpp)
 target_link_libraries(RodinManufacturedH1LinearElasticity3D
@@ -40,5 +46,6 @@ target_link_libraries(RodinManufacturedH1LinearElasticity3D
   Rodin::Variational
   Rodin::Solver
   )
-gtest_discover_tests(RodinManufacturedH1LinearElasticity3D)
-# 
+gtest_discover_tests(RodinManufacturedH1LinearElasticity3D
+    PROPERTIES
+    LABELS manufactured)

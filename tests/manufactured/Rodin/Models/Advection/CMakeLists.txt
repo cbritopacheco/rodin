@@ -5,6 +5,9 @@ target_link_libraries(RodinManufacturedAdvectionLagrangianTest
   GTest::gtest_main
   Rodin::Rodin
   Rodin::Variational
-  Rodin::Models::Advection)
-gtest_discover_tests(RodinManufacturedAdvectionLagrangianTest)
-
+  Rodin::Models::Advection
+)
+gtest_discover_tests(RodinManufacturedAdvectionLagrangianTest
+  PROPERTIES
+    LABELS manufactured
+)
