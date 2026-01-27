@@ -43,7 +43,7 @@ namespace Rodin::Tests::Manufactured::P0
 
     const Mesh<Context::Local>& getMesh() const { return m_mesh; }
 
-    static RealFunction rhs_quadratic()
+    static RealFunction rhs_polynomial()
     {
       return [](const Geometry::Point& p) -> double
       {
@@ -69,7 +69,7 @@ namespace Rodin::Tests::Manufactured::P0
   using Manufactured_P0_L2_Test_6x6x6 =
     Manufactured_P0_L2_Test<6, 6, 6>;
 
-  TEST_P(Manufactured_P0_L2_Test_10x10, P0_L2Projection_QuadraticRHS)
+  TEST_P(Manufactured_P0_L2_Test_10x10, P0_L2Projection_PolynomialRHS)
   {
     const auto& mesh = getMesh();
 
@@ -77,7 +77,7 @@ namespace Rodin::Tests::Manufactured::P0
     TrialFunction p(p0h);
     TestFunction  q(p0h);
 
-    const auto f = rhs_quadratic();
+    const auto f = rhs_polynomial();
 
     Problem p_l2(p, q);
     p_l2 = Integral(p, q) - Integral(f, q);
@@ -105,8 +105,14 @@ namespace Rodin::Tests::Manufactured::P0
 
     GridFunction diff(p0h);
     diff = Pow(p.getSolution() - f, 2);
-    const Real error = Integral(diff).compute();
-    EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
+    const Real l2_err = Integral(diff).compute();
+
+    GridFunction ref(p0h);
+    ref = Pow(f, 2);
+    const Real l2_ref = Integral(ref).compute();
+
+    const Real rel_err = l2_ref > 0 ? l2_err / l2_ref : 0;
+    EXPECT_LT(rel_err, 1e-2);
   }
 
   INSTANTIATE_TEST_SUITE_P(

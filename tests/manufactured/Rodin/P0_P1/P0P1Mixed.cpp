@@ -44,7 +44,7 @@ namespace Rodin::Tests::Manufactured::P0P1
 
     const Mesh<Context::Local>& getMesh() const { return m_mesh; }
 
-    static RealFunction rhs_quadratic()
+    static RealFunction rhs_polynomial()
     {
       return [](const Geometry::Point& p) -> double
       {
@@ -70,7 +70,7 @@ namespace Rodin::Tests::Manufactured::P0P1
   using Manufactured_P0P1_Mixed_Test_6x6x6 =
     Manufactured_P0P1_Mixed_Test<6, 6, 6>;
 
-  TEST_P(Manufactured_P0P1_Mixed_Test_10x10, P0P1_MixedProblem_QuadraticRHS)
+  TEST_P(Manufactured_P0P1_Mixed_Test_10x10, P0P1_MixedProblem_PolynomialRHS)
   {
     const auto& mesh = getMesh();
 
@@ -83,7 +83,7 @@ namespace Rodin::Tests::Manufactured::P0P1
     TrialFunction p(p0h);
     TestFunction  q(p0h);
 
-    const auto f = rhs_quadratic();
+    const auto f = rhs_polynomial();
 
     // First, L2 projection of f onto P0: solve (p, q) = (f, q)
     Problem p_l2(p, q);
