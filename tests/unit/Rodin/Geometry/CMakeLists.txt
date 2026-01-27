@@ -4,7 +4,10 @@ target_link_libraries(RodinGeometryConnectivityTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryConnectivityTest)
+gtest_discover_tests(RodinGeometryConnectivityTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinGeometryMeshTest MeshTest.cpp)
 target_link_libraries(RodinGeometryMeshTest
@@ -12,7 +15,10 @@ target_link_libraries(RodinGeometryMeshTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryMeshTest)
+gtest_discover_tests(RodinGeometryMeshTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinGeometryIsoparametricTransformationTest IsoparametricTransformationTest.cpp)
 target_link_libraries(RodinGeometryIsoparametricTransformationTest
@@ -20,7 +26,10 @@ target_link_libraries(RodinGeometryIsoparametricTransformationTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryIsoparametricTransformationTest)
+gtest_discover_tests(RodinGeometryIsoparametricTransformationTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinGeometryUniformGridTest UniformGridTest.cpp)
 target_link_libraries(RodinGeometryUniformGridTest
@@ -28,7 +37,10 @@ target_link_libraries(RodinGeometryUniformGridTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryUniformGridTest)
+gtest_discover_tests(RodinGeometryUniformGridTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinGeometryRegionTest RegionTest.cpp)
 target_link_libraries(RodinGeometryRegionTest
@@ -36,7 +48,10 @@ target_link_libraries(RodinGeometryRegionTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryRegionTest)
+gtest_discover_tests(RodinGeometryRegionTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinGeometryIndexGeneratorTest IndexGeneratorTest.cpp)
 target_link_libraries(RodinGeometryIndexGeneratorTest
@@ -44,7 +59,10 @@ target_link_libraries(RodinGeometryIndexGeneratorTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryIndexGeneratorTest)
+gtest_discover_tests(RodinGeometryIndexGeneratorTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinGeometryPolytopeTraitsTest PolytopeTraitsTest.cpp)
 target_link_libraries(RodinGeometryPolytopeTraitsTest
@@ -52,7 +70,10 @@ target_link_libraries(RodinGeometryPolytopeTraitsTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryPolytopeTraitsTest)
+gtest_discover_tests(RodinGeometryPolytopeTraitsTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinGeometryPolytopeTest PolytopeTest.cpp)
 target_link_libraries(RodinGeometryPolytopeTest
@@ -60,7 +81,10 @@ target_link_libraries(RodinGeometryPolytopeTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryPolytopeTest)
+gtest_discover_tests(RodinGeometryPolytopeTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinGeometryPointTest PointTest.cpp)
 target_link_libraries(RodinGeometryPointTest
@@ -68,4 +92,7 @@ target_link_libraries(RodinGeometryPointTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryPointTest)
+gtest_discover_tests(RodinGeometryPointTest
+  PROPERTIES
+    LABELS unit
+)
