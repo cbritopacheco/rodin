@@ -9,7 +9,10 @@ target_link_libraries(RodinVariationalP1ElementTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalP1ElementTest)
+gtest_discover_tests(RodinVariationalP1ElementTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalP0ElementTest P0ElementTest.cpp)
 target_link_libraries(RodinVariationalP0ElementTest
@@ -17,7 +20,10 @@ target_link_libraries(RodinVariationalP0ElementTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalP0ElementTest)
+gtest_discover_tests(RodinVariationalP0ElementTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalH1ElementTest H1ElementTest.cpp)
 target_link_libraries(RodinVariationalH1ElementTest
@@ -25,7 +31,10 @@ target_link_libraries(RodinVariationalH1ElementTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalH1ElementTest)
+gtest_discover_tests(RodinVariationalH1ElementTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalP1Test P1Test.cpp)
 target_link_libraries(RodinVariationalP1Test
@@ -33,7 +42,10 @@ target_link_libraries(RodinVariationalP1Test
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalP1Test)
+gtest_discover_tests(RodinVariationalP1Test
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalH1Test H1Test.cpp)
 target_link_libraries(RodinVariationalH1Test
@@ -41,7 +53,10 @@ target_link_libraries(RodinVariationalH1Test
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalH1Test)
+gtest_discover_tests(RodinVariationalH1Test
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalDirichletBCTest DirichletBCTest.cpp)
 target_link_libraries(RodinVariationalDirichletBCTest
@@ -49,7 +64,10 @@ target_link_libraries(RodinVariationalDirichletBCTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalDirichletBCTest)
+gtest_discover_tests(RodinVariationalDirichletBCTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalTestFunctionTest TestFunctionTest.cpp)
 target_link_libraries(RodinVariationalTestFunctionTest
@@ -57,7 +75,10 @@ target_link_libraries(RodinVariationalTestFunctionTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalTestFunctionTest)
+gtest_discover_tests(RodinVariationalTestFunctionTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalTrialFunctionTest TrialFunctionTest.cpp)
 target_link_libraries(RodinVariationalTrialFunctionTest
@@ -65,7 +86,10 @@ target_link_libraries(RodinVariationalTrialFunctionTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalTrialFunctionTest)
+gtest_discover_tests(RodinVariationalTrialFunctionTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalLinearFormTest LinearFormTest.cpp)
 target_link_libraries(RodinVariationalLinearFormTest
@@ -73,7 +97,10 @@ target_link_libraries(RodinVariationalLinearFormTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalLinearFormTest)
+gtest_discover_tests(RodinVariationalLinearFormTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalBilinearFormTest BilinearFormTest.cpp)
 target_link_libraries(RodinVariationalBilinearFormTest
@@ -81,7 +108,10 @@ target_link_libraries(RodinVariationalBilinearFormTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalBilinearFormTest)
+gtest_discover_tests(RodinVariationalBilinearFormTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalRealFunctionTest RealFunctionTest.cpp)
 target_link_libraries(RodinVariationalRealFunctionTest
@@ -89,7 +119,10 @@ target_link_libraries(RodinVariationalRealFunctionTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalRealFunctionTest)
+gtest_discover_tests(RodinVariationalRealFunctionTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalVectorFunctionTest VectorFunctionTest.cpp)
 target_link_libraries(RodinVariationalVectorFunctionTest
@@ -97,7 +130,10 @@ target_link_libraries(RodinVariationalVectorFunctionTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalVectorFunctionTest)
+gtest_discover_tests(RodinVariationalVectorFunctionTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalGridFunctionTest GridFunctionTest.cpp)
 target_link_libraries(RodinVariationalGridFunctionTest
@@ -105,7 +141,10 @@ target_link_libraries(RodinVariationalGridFunctionTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalGridFunctionTest)
+gtest_discover_tests(RodinVariationalGridFunctionTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalGradTest GradTest.cpp)
 target_link_libraries(RodinVariationalGradTest
@@ -113,7 +152,10 @@ target_link_libraries(RodinVariationalGradTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalGradTest)
+gtest_discover_tests(RodinVariationalGradTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalIntegralTest IntegralTest.cpp)
 target_link_libraries(RodinVariationalIntegralTest
@@ -121,7 +163,10 @@ target_link_libraries(RodinVariationalIntegralTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalIntegralTest)
+gtest_discover_tests(RodinVariationalIntegralTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalDotTest DotTest.cpp)
 target_link_libraries(RodinVariationalDotTest
@@ -129,7 +174,10 @@ target_link_libraries(RodinVariationalDotTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalDotTest)
+gtest_discover_tests(RodinVariationalDotTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalComponentTest ComponentTest.cpp)
 target_link_libraries(RodinVariationalComponentTest
@@ -137,7 +185,10 @@ target_link_libraries(RodinVariationalComponentTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalComponentTest)
+gtest_discover_tests(RodinVariationalComponentTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalDivTest DivTest.cpp)
 target_link_libraries(RodinVariationalDivTest
@@ -145,7 +196,10 @@ target_link_libraries(RodinVariationalDivTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalDivTest)
+gtest_discover_tests(RodinVariationalDivTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalBooleanFunctionTest BooleanFunctionTest.cpp)
 target_link_libraries(RodinVariationalBooleanFunctionTest
@@ -153,7 +207,10 @@ target_link_libraries(RodinVariationalBooleanFunctionTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalBooleanFunctionTest)
+gtest_discover_tests(RodinVariationalBooleanFunctionTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalSumTest SumTest.cpp)
 target_link_libraries(RodinVariationalSumTest
@@ -161,7 +218,10 @@ target_link_libraries(RodinVariationalSumTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalSumTest)
+gtest_discover_tests(RodinVariationalSumTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalMultTest MultTest.cpp)
 target_link_libraries(RodinVariationalMultTest
@@ -169,7 +229,10 @@ target_link_libraries(RodinVariationalMultTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalMultTest)
+gtest_discover_tests(RodinVariationalMultTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalPowTest PowTest.cpp)
 target_link_libraries(RodinVariationalPowTest
@@ -177,7 +240,10 @@ target_link_libraries(RodinVariationalPowTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalPowTest)
+gtest_discover_tests(RodinVariationalPowTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalSqrtTest SqrtTest.cpp)
 target_link_libraries(RodinVariationalSqrtTest
@@ -185,7 +251,10 @@ target_link_libraries(RodinVariationalSqrtTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalSqrtTest)
+gtest_discover_tests(RodinVariationalSqrtTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalAbsTest AbsTest.cpp)
 target_link_libraries(RodinVariationalAbsTest
@@ -193,7 +262,10 @@ target_link_libraries(RodinVariationalAbsTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalAbsTest)
+gtest_discover_tests(RodinVariationalAbsTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalMinTest MinTest.cpp)
 target_link_libraries(RodinVariationalMinTest
@@ -201,7 +273,10 @@ target_link_libraries(RodinVariationalMinTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalMinTest)
+gtest_discover_tests(RodinVariationalMinTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalMaxTest MaxTest.cpp)
 target_link_libraries(RodinVariationalMaxTest
@@ -209,7 +284,10 @@ target_link_libraries(RodinVariationalMaxTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalMaxTest)
+gtest_discover_tests(RodinVariationalMaxTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalSineTest SineTest.cpp)
 target_link_libraries(RodinVariationalSineTest
@@ -217,7 +295,10 @@ target_link_libraries(RodinVariationalSineTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalSineTest)
+gtest_discover_tests(RodinVariationalSineTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalCosineTest CosineTest.cpp)
 target_link_libraries(RodinVariationalCosineTest
@@ -225,7 +306,10 @@ target_link_libraries(RodinVariationalCosineTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalCosineTest)
+gtest_discover_tests(RodinVariationalCosineTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalExpTest ExpTest.cpp)
 target_link_libraries(RodinVariationalExpTest
@@ -233,7 +317,10 @@ target_link_libraries(RodinVariationalExpTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalExpTest)
+gtest_discover_tests(RodinVariationalExpTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalDivisionTest DivisionTest.cpp)
 target_link_libraries(RodinVariationalDivisionTest
@@ -241,7 +328,10 @@ target_link_libraries(RodinVariationalDivisionTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalDivisionTest)
+gtest_discover_tests(RodinVariationalDivisionTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalMinusTest MinusTest.cpp)
 target_link_libraries(RodinVariationalMinusTest
@@ -249,7 +339,10 @@ target_link_libraries(RodinVariationalMinusTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalMinusTest)
+gtest_discover_tests(RodinVariationalMinusTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalTangentTest TangentTest.cpp)
 target_link_libraries(RodinVariationalTangentTest
@@ -257,7 +350,10 @@ target_link_libraries(RodinVariationalTangentTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalTangentTest)
+gtest_discover_tests(RodinVariationalTangentTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalFlowTest FlowTest.cpp)
 target_link_libraries(RodinVariationalFlowTest
@@ -266,4 +362,7 @@ target_link_libraries(RodinVariationalFlowTest
   GTest::gtest_main
   Rodin::Rodin
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalFlowTest)
+gtest_discover_tests(RodinVariationalFlowTest
+  PROPERTIES
+    LABELS unit
+)

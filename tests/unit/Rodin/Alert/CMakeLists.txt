@@ -6,7 +6,10 @@ target_link_libraries(RodinAlertExceptionTest
   Rodin::Rodin
   Rodin::Alert
   )
-gtest_discover_tests(RodinAlertExceptionTest)
+gtest_discover_tests(RodinAlertExceptionTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinAlertWarningTest WarningTest.cpp)
 target_link_libraries(RodinAlertWarningTest
@@ -16,7 +19,10 @@ target_link_libraries(RodinAlertWarningTest
   Rodin::Rodin
   Rodin::Alert
   )
-gtest_discover_tests(RodinAlertWarningTest)
+gtest_discover_tests(RodinAlertWarningTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinAlertInfoTest InfoTest.cpp)
 target_link_libraries(RodinAlertInfoTest
@@ -26,7 +32,10 @@ target_link_libraries(RodinAlertInfoTest
   Rodin::Rodin
   Rodin::Alert
   )
-gtest_discover_tests(RodinAlertInfoTest)
+gtest_discover_tests(RodinAlertInfoTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinAlertSuccessTest SuccessTest.cpp)
 target_link_libraries(RodinAlertSuccessTest
@@ -36,7 +45,10 @@ target_link_libraries(RodinAlertSuccessTest
   Rodin::Rodin
   Rodin::Alert
   )
-gtest_discover_tests(RodinAlertSuccessTest)
+gtest_discover_tests(RodinAlertSuccessTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinAlertIntegrationTest AlertIntegrationTest.cpp)
 target_link_libraries(RodinAlertIntegrationTest
@@ -46,4 +58,7 @@ target_link_libraries(RodinAlertIntegrationTest
   Rodin::Rodin
   Rodin::Alert
   )
-gtest_discover_tests(RodinAlertIntegrationTest)
+gtest_discover_tests(RodinAlertIntegrationTest
+  PROPERTIES
+    LABELS unit
+)
