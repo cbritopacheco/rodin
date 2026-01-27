@@ -21,6 +21,9 @@ namespace Rodin
    * @brief Abstract base class for objects that can be copied.
    *
    * This class defines an interface for polymorphic identifying of objects.
+   *
+   * They are copy-stable, meaning that copies of an object will retain the
+   * same identifier as the original object.
    */
   class Identifiable
   {

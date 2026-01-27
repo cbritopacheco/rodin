@@ -741,7 +741,7 @@ namespace Rodin::Variational
               .iapply(
                 [&](const Index i, size_t s) { sz[i] = s; });
           m_testOffsets[0] = 0;
-          for (size_t i = 0; i < TrialFunctionTuple::Size - 1; i++)
+          for (size_t i = 0; i < TestFunctionTuple::Size - 1; i++)
             m_testOffsets[i + 1] = sz[i] + m_testOffsets[i];
         }
 
@@ -760,8 +760,13 @@ namespace Rodin::Variational
             });
 
         // Compute block offsets to build the triplets
-        std::array<Pair<size_t, size_t>, decltype(bt)::Size> boffsets;
-        std::array<size_t, decltype(lt)::Size> loffsets;
+        std::array<Pair<size_t, size_t>, decltype(bt)::Size> boffsets{};
+        std::array<size_t, decltype(lt)::Size> loffsets{};
+
+        for (auto& offset : boffsets)
+          offset = Pair{0, 0};
+        for (auto& offset : loffsets)
+          offset = 0;
 
         m_lft.iapply(
             [&](const Index i, const auto& lf)

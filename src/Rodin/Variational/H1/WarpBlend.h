@@ -394,7 +394,8 @@ namespace Rodin::Variational
             L3 *= invSum;
 
             // Back to reference triangle: (x,y) = (L2,L3)
-            nodes[rowOff + i] = Math::SpatialPoint{{L2, L3}};
+            nodes[rowOff + i].resize(2);
+            nodes[rowOff + i] << L2, L3;
           }
         }
 
@@ -414,8 +415,7 @@ namespace Rodin::Variational
           const Real L3 = static_cast<Real>(0.0);
 
           assert(nodes[idx_edge].size() == 2);
-          nodes[idx_edge].x() = L2;
-          nodes[idx_edge].y() = L3;
+          nodes[idx_edge] << L2, L3;
         }
 
         // Edge e31: from v1=(0,0) to v3=(0,1), i=0, j=0..K
@@ -429,8 +429,7 @@ namespace Rodin::Variational
           const Real L3 = t;
 
           assert(nodes[idx_edge].size() == 2);
-          nodes[idx_edge].x() = L2;
-          nodes[idx_edge].y() = L3;
+          nodes[idx_edge] << L2, L3;
         }
 
         // Edge e23: from v2=(1,0) to v3=(0,1), nodes with i+j=K.
@@ -448,8 +447,7 @@ namespace Rodin::Variational
           const Real L2 = static_cast<Real>(1.0) - t;
 
           assert(nodes[idx_edge].size() == 2);
-          nodes[idx_edge].x() = L2;
-          nodes[idx_edge].y() = L3;
+          nodes[idx_edge] << L2, L3;
         }
       }
   };
@@ -716,9 +714,7 @@ namespace Rodin::Variational
 
               // Back to reference tetra: (x,y,z) = (L2,L3,L4)
               assert(nodes[idx].size() == 3);
-              nodes[idx].x() = l2n;
-              nodes[idx].y() = l3n;
-              nodes[idx].z() = l4n;
+              nodes[idx] << l2n, l3n, l4n;
             }
           }
         }
@@ -838,9 +834,7 @@ namespace Rodin::Variational
 
               // Back to reference tetra: (x,y,z) = (L2,L3,L4)
               assert(nodes[idx].size() == 3);
-              nodes[idx].x() = Lnew[1];
-              nodes[idx].y() = Lnew[2];
-              nodes[idx].z() = Lnew[3];
+              nodes[idx] << Lnew[1], Lnew[2], Lnew[3];
             }
           }
         }
@@ -854,9 +848,7 @@ namespace Rodin::Variational
         {
           (void) L1;
           assert(nodes[idx].size() == 3);
-          nodes[idx].x() = L2;
-          nodes[idx].y() = L3;
-          nodes[idx].z() = L4;
+          nodes[idx] << L2, L3, L4;
         };
 
         // Edge v1-v2: (0,0,0)–(1,0,0): j=0, k=0, i=0..K
