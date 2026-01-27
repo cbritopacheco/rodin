@@ -418,20 +418,14 @@ namespace Rodin::Math
   constexpr
   auto nan()
   {
-    return std::numeric_limits<T>::quiet_NaN();
-  }
-
-  /**
-   * @brief Returns a complex NaN value.
-   *
-   * Returns a complex number where both real and imaginary parts are NaN.
-   *
-   * @return Complex NaN value
-   */
-  constexpr
-  Complex nan()
-  {
-    return Complex(nan<Real>(), nan<Real>());
+    if constexpr (std::is_same_v<T, Complex>)
+    {
+      return Complex(nan<Real>(), nan<Real>());
+    }
+    else
+    {
+      return std::numeric_limits<T>::quiet_NaN();
+    }
   }
 
   /**

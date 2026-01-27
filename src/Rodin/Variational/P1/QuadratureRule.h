@@ -26,6 +26,7 @@
 #define RODIN_VARIATIONAL_P1_QUADRATURERULE_H
 
 #include "Rodin/Geometry/Region.h"
+#include "Rodin/Math/Common.h"
 #include "Rodin/Variational/ShapeFunction.h"
 #include "Rodin/QF/Centroid.h"
 
@@ -83,6 +84,8 @@ namespace Rodin::Variational
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLeaf()),
           m_integrand(integrand.copy()),
+          m_distortion(Math::nan<ScalarType>()),
+          m_weight(Math::nan<ScalarType>()),
           m_set(false)
       {}
 
@@ -90,6 +93,8 @@ namespace Rodin::Variational
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
+          m_distortion(Math::nan<ScalarType>()),
+          m_weight(Math::nan<ScalarType>()),
           m_set(false)
       {}
 
