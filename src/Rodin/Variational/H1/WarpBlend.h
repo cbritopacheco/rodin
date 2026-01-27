@@ -292,6 +292,9 @@ namespace Rodin::Variational
           "WarpBlendTriangle<K>::apply: N must be (K+1)(K+2)/2."
         );
 
+        for (auto& p : nodes)
+            p.resize(2);
+
         if constexpr (K <= 1)
           return;
 
@@ -480,6 +483,9 @@ namespace Rodin::Variational
           N == (K + 1) * (K + 2) * (K + 3) / 6,
           "WarpBlendTetrahedron<K>::apply: N must be (K + 1)(K + 2)(K + 3) / 6."
         );
+
+        for (auto& p : nodes)
+            p.resize(3);
 
         if constexpr (K <= 1)
           return;

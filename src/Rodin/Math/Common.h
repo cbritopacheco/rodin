@@ -420,7 +420,7 @@ namespace Rodin::Math
   {
     if constexpr (std::is_same_v<T, Complex>)
     {
-      return Complex(nan<Real>(), nan<Real>());
+      return Complex(std::numeric_limits<Real>::quiet_NaN(), std::numeric_limits<Real>::quiet_NaN());
     }
     else
     {
