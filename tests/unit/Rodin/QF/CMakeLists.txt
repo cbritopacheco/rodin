@@ -7,7 +7,10 @@ target_link_libraries(RodinCentroidTest
   Rodin::Rodin
   Rodin::QF
   )
-gtest_discover_tests(RodinCentroidTest)
+gtest_discover_tests(RodinCentroidTest
+  PROPERTIES
+    LABELS unit
+)
 
 # GaussLegendre tests
 add_executable(RodinGaussLegendreTest GaussLegendreTest.cpp)
@@ -18,5 +21,7 @@ target_link_libraries(RodinGaussLegendreTest
   Rodin::Rodin
   Rodin::QF
   )
-gtest_discover_tests(RodinGaussLegendreTest)
-
+gtest_discover_tests(RodinGaussLegendreTest
+  PROPERTIES
+    LABELS unit
+)
