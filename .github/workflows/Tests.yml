@@ -162,7 +162,7 @@ jobs:
           -L manufactured
           --rerun-failed -V --output-on-failure
 
-  Ubuntu:
+  Coverage:
     runs-on: ubuntu-latest
     needs: [UnitTests, ManufacturedTests]
     strategy:
