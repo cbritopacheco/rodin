@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <array>
 #include <algorithm>
+#include <cmath>
 
 #include "Rodin/Types.h"
 #include "Rodin/Math/Common.h"
@@ -289,7 +290,7 @@ namespace Rodin::Variational
         );
 
         for (auto& p : nodes)
-            p.resize(2);
+          p.resize(2);
 
         if constexpr (K <= 1)
           return;
@@ -357,8 +358,8 @@ namespace Rodin::Variational
             // Strictly interior node: apply full 2D warp–blend.
 
             // Start from equispaced coordinates (i/K, j/K)
-            Real xref = static_cast<Real>(i) / static_cast<Real>(K);
-            Real yref = static_cast<Real>(j) / static_cast<Real>(K);
+            const Real xref = static_cast<Real>(i) / static_cast<Real>(K);
+            const Real yref = static_cast<Real>(j) / static_cast<Real>(K);
 
             // Barycentric on reference triangle
             Real L1 = static_cast<Real>(1.0) - xref - yref; // at (0,0)
@@ -370,7 +371,9 @@ namespace Rodin::Variational
             Real y = (-L2 - L3 + static_cast<Real>(2.0) * L1) * INV_SQRT3;
 
             // 2D warp–blend shift
-            const auto [dx, dy] = WarpShiftFace2D<K>::apply(L1, L2, L3, alpha);
+            const auto d = WarpShiftFace2D<K>::apply(L1, L2, L3, alpha);
+            const Real dx = d[0];
+            const Real dy = d[1];
 
             x += dx;
             y += dy;
@@ -479,6 +482,45 @@ namespace Rodin::Variational
   template <size_t K>
   class WarpBlendTetrahedron
   {
+    private:
+      // -------------------------------------------------------------------
+      // Helper: index mapping (i,j,k) -> flat idx (no lambdas; avoids ASan
+      // stack-use-after-scope reports from short-lifetime closure objects).
+      // -------------------------------------------------------------------
+      static constexpr size_t layerOffset(size_t kk)
+      {
+        size_t off = 0;
+        for (size_t m = 0; m < kk; ++m)
+        {
+          const size_t n = K - m;
+          off += (n + 1) * (n + 2) / 2;
+        }
+        return off;
+      }
+
+      static constexpr size_t rowOffsetWithinLayer(size_t kk, size_t jj)
+      {
+        size_t off = 0;
+        const size_t n = K - kk;
+        for (size_t r = 0; r < jj; ++r)
+          off += (n + 1 - r);
+        return off;
+      }
+
+      static constexpr size_t idxOf(size_t i, size_t j, size_t k)
+      {
+        return layerOffset(k) + rowOffsetWithinLayer(k, j) + i;
+      }
+
+      static inline void set_from_bary(
+        Math::SpatialPoint& p, Real L2, Real L3, Real L4)
+      {
+        assert(p.size() == 3);
+        p[0] = L2;
+        p[1] = L3;
+        p[2] = L4;
+      }
+
     public:
       template <size_t N>
       static void apply(std::array<Math::SpatialPoint, N>& nodes)
@@ -489,7 +531,7 @@ namespace Rodin::Variational
         );
 
         for (auto& p : nodes)
-            p.resize(3);
+          p.resize(3);
 
         if constexpr (K <= 1)
           return;
@@ -497,39 +539,9 @@ namespace Rodin::Variational
         using Real = Rodin::Real;
         constexpr Real TOL = static_cast<Real>(RODIN_VARIATIONAL_H1_WARPBLEND_TOLERANCE);
 
-        const Real alpha = TetrahedronBlend<K>::getAlpha();
+        const Real alpha  = TetrahedronBlend<K>::getAlpha();
         const Real alphaT = TriangleBlend<K>::getAlpha();
-        const Real invK = static_cast<Real>(1.0) / static_cast<Real>(K);
-
-        // -------------------------------------------------------------------
-        // Helper: index mapping (i,j,k) -> flat idx
-        // -------------------------------------------------------------------
-        auto layerOffset = [](size_t kk) constexpr -> size_t
-        {
-          size_t off = 0;
-          for (size_t m = 0; m < kk; ++m)
-          {
-            const size_t n = K - m;
-            off += (n + 1) * (n + 2) / 2;
-          }
-          return off;
-        };
-
-        auto rowOffsetWithinLayer = [](size_t kk, size_t jj) constexpr -> size_t
-        {
-          size_t off = 0;
-          const size_t n = K - kk;
-          for (size_t r = 0; r < jj; ++r)
-            off += (n + 1 - r);
-          return off;
-        };
-
-        const auto idxOf = [&](size_t i, size_t j, size_t k) -> size_t
-        {
-          const size_t lo = layerOffset(k);
-          const size_t ro = rowOffsetWithinLayer(k, j);
-          return lo + ro + i;
-        };
+        const Real invK   = static_cast<Real>(1.0) / static_cast<Real>(K);
 
         // -------------------------------------------------------------------
         // Equilateral tetrahedron geometry (as before)
@@ -617,7 +629,7 @@ namespace Rodin::Variational
         // -------------------------------------------------------------------
         for (size_t k = 0; k <= K; ++k)
         {
-          const size_t lo = layerOffset(k);
+          const size_t lo  = layerOffset(k);
           const size_t nJK = K - k;
 
           for (size_t j = 0; j <= nJK; ++j)
@@ -632,6 +644,14 @@ namespace Rodin::Variational
               const size_t l3 = j;
               const size_t l4 = k;
               const size_t l1 = K - i - j - k;
+
+              // Hoist these to the full loop-iteration scope:
+              // avoids ASan stack-use-after-scope reports caused by
+              // compiler lifetime shortening and later stack spills.
+              Real l1n = static_cast<Real>(0.0);
+              Real l2n = static_cast<Real>(0.0);
+              Real l3n = static_cast<Real>(0.0);
+              Real l4n = static_cast<Real>(0.0);
 
               const int nz =
                 (l1 > 0 ? 1 : 0) +
@@ -667,7 +687,10 @@ namespace Rodin::Variational
                 else if (face == 2) { La = L3; Lb = L1; Lc = L4; Ld = L2; }
                 else { /* face == 3 */ La = L4; Lb = L1; Lc = L3; Ld = L2; }
 
-                const auto [warp1, warp2] = WarpShiftFace3D<K>::apply(La, Lb, Lc, Ld, alpha);
+                // Avoid structured bindings temporaries (keeps lifetime simple under ASan).
+                const auto w = WarpShiftFace3D<K>::apply(La, Lb, Lc, Ld, alpha);
+                const Real warp1 = w[0];
+                const Real warp2 = w[1];
 
                 Real blend = Lb * Lc * Ld;
                 const Real denom = (Lb + static_cast<Real>(0.5) * La)
@@ -701,10 +724,10 @@ namespace Rodin::Variational
               const Real dyv = ry - v4y;
               const Real dzv = rz - v4z;
 
-              Real l1n = a11 * dxv + a12 * dyv + a13 * dzv;
-              Real l2n = a21 * dxv + a22 * dyv + a23 * dzv;
-              Real l3n = a31 * dxv + a32 * dyv + a33 * dzv;
-              Real l4n = static_cast<Real>(1.0) - l1n - l2n - l3n;
+              l1n = a11 * dxv + a12 * dyv + a13 * dzv;
+              l2n = a21 * dxv + a22 * dyv + a23 * dzv;
+              l3n = a31 * dxv + a32 * dyv + a33 * dzv;
+              l4n = static_cast<Real>(1.0) - l1n - l2n - l3n;
 
               l1n = std::max(static_cast<Real>(0.0), l1n);
               l2n = std::max(static_cast<Real>(0.0), l2n);
@@ -735,12 +758,12 @@ namespace Rodin::Variational
         // 2. Per-face 2D warp for strictly face-interior nodes
         //    (exactly one barycentric integer is 0, others > 0)
         // -------------------------------------------------------------------
-        constexpr Real SQRT3 = static_cast<Real>(1.7320508075688772);
+        constexpr Real SQRT3     = static_cast<Real>(1.7320508075688772);
         constexpr Real INV_SQRT3 = static_cast<Real>(1.0) / SQRT3;
 
         for (size_t k = 0; k <= K; ++k)
         {
-          const size_t lo = layerOffset(k);
+          const size_t lo  = layerOffset(k);
           const size_t nJK = K - k;
 
           for (size_t j = 0; j <= nJK; ++j)
@@ -785,17 +808,17 @@ namespace Rodin::Variational
               else i_zero = 3;
 
               int ia, ib, ic;
-              if (i_zero == 0) { ia = 1; ib = 2; ic = 3; } // face v2-v3-v4 (L1=0)
-              else if (i_zero == 1) { ia = 0; ib = 2; ic = 3; } // face v1-v3-v4 (L2=0)
-              else if (i_zero == 2) { ia = 0; ib = 1; ic = 3; } // face v1-v2-v4 (L3=0)
-              else { ia = 0; ib = 1; ic = 2; }                 // face v1-v2-v3 (L4=0)
+              if (i_zero == 0) { ia = 1; ib = 2; ic = 3; }       // face v2-v3-v4 (L1=0)
+              else if (i_zero == 1) { ia = 0; ib = 2; ic = 3; }  // face v1-v3-v4 (L2=0)
+              else if (i_zero == 2) { ia = 0; ib = 1; ic = 3; }  // face v1-v2-v4 (L3=0)
+              else { ia = 0; ib = 1; ic = 2; }                   // face v1-v2-v3 (L4=0)
 
               Real La = L[ia];
               Real Lb = L[ib];
               Real Lc = L[ic];
 
               // (La,Lb,Lc) already sum to 1, but normalize for safety
-              Real sum = La + Lb + Lc;
+              const Real sum = La + Lb + Lc;
               const Real invSum = static_cast<Real>(1.0) / sum;
               La *= invSum;
               Lb *= invSum;
@@ -806,7 +829,9 @@ namespace Rodin::Variational
               Real y = (-Lb - Lc + static_cast<Real>(2.0) * La) * INV_SQRT3;
 
               // 2D warp–blend on face
-              const auto [dx, dy] = WarpShiftFace2D<K>::apply(La, Lb, Lc, alphaT);
+              const auto d = WarpShiftFace2D<K>::apply(La, Lb, Lc, alphaT);
+              const Real dx = d[0];
+              const Real dy = d[1];
 
               x += dx;
               y += dy;
@@ -858,80 +883,91 @@ namespace Rodin::Variational
         // -------------------------------------------------------------------
         const auto& gll01 = GLL01<K>::getNodes();
 
-        auto set_from_bary = [&](size_t idx, Real L1, Real L2, Real L3, Real L4)
-        {
-          (void) L1;
-          assert(idx < nodes.size());
-          assert(nodes[idx].size() == 3);
-          nodes[idx][0] = L2;
-          nodes[idx][1] = L3;
-          nodes[idx][2] = L4;
-        };
-
         // Edge v1-v2: (0,0,0)–(1,0,0): j=0, k=0, i=0..K
         for (size_t i = 0; i <= K; ++i)
         {
-          const size_t idx = idxOf(i, 0, 0);
-          const Real t = gll01[i];
-          const Real L1 = static_cast<Real>(1.0) - t;
+          const size_t id = idxOf(i, 0, 0);
+          const Real t  = gll01[i];
           const Real L2 = t;
-          set_from_bary(idx, L1, L2, static_cast<Real>(0.0), static_cast<Real>(0.0));
+          const Real L3 = static_cast<Real>(0.0);
+          const Real L4 = static_cast<Real>(0.0);
+
+          assert(id < nodes.size());
+          set_from_bary(nodes[id], L2, L3, L4);
         }
 
         // Edge v1-v3: (0,0,0)–(0,1,0): i=0, k=0, j=0..K
         for (size_t j = 0; j <= K; ++j)
         {
-          const size_t idx = idxOf(0, j, 0);
-          const Real t = gll01[j];
-          const Real L1 = static_cast<Real>(1.0) - t;
+          const size_t id = idxOf(0, j, 0);
+          const Real t  = gll01[j];
+          const Real L2 = static_cast<Real>(0.0);
           const Real L3 = t;
-          set_from_bary(idx, L1, static_cast<Real>(0.0), L3, static_cast<Real>(0.0));
+          const Real L4 = static_cast<Real>(0.0);
+
+          assert(id < nodes.size());
+          set_from_bary(nodes[id], L2, L3, L4);
         }
 
         // Edge v1-v4: (0,0,0)–(0,0,1): i=0, j=0, k=0..K
         for (size_t k = 0; k <= K; ++k)
         {
-          const size_t idx = idxOf(0, 0, k);
-          const Real t = gll01[k];
-          const Real L1 = static_cast<Real>(1.0) - t;
+          const size_t id = idxOf(0, 0, k);
+          const Real t  = gll01[k];
+          const Real L2 = static_cast<Real>(0.0);
+          const Real L3 = static_cast<Real>(0.0);
           const Real L4 = t;
-          set_from_bary(idx, L1, static_cast<Real>(0.0), static_cast<Real>(0.0), L4);
+
+          assert(id < nodes.size());
+          set_from_bary(nodes[id], L2, L3, L4);
         }
 
         // Edge v2-v3: (1,0,0)–(0,1,0): k=0, i+j=K
         //   L1 = 0, L2 = 1-t, L3 = t, L4 = 0
         for (size_t j = 0; j <= K; ++j)
         {
-          const size_t i = K - j;
-          const size_t idx = idxOf(i, j, 0);
-          const Real t = gll01[j]; // parameter from v2→v3: t = L3
+          const size_t i  = K - j;
+          const size_t id = idxOf(i, j, 0);
+
+          const Real t  = gll01[j]; // parameter from v2→v3: t = L3
           const Real L2 = static_cast<Real>(1.0) - t;
           const Real L3 = t;
-          set_from_bary(idx, static_cast<Real>(0.0), L2, L3, static_cast<Real>(0.0));
+          const Real L4 = static_cast<Real>(0.0);
+
+          assert(id < nodes.size());
+          set_from_bary(nodes[id], L2, L3, L4);
         }
 
         // Edge v2-v4: (1,0,0)–(0,0,1): j=0, i+k=K
         //   L1 = 0, L2 = 1-t, L4 = t, L3 = 0
         for (size_t k = 0; k <= K; ++k)
         {
-          const size_t i = K - k;
-          const size_t idx = idxOf(i, 0, k);
-          const Real t = gll01[k]; // parameter from v2→v4: t = L4
+          const size_t i  = K - k;
+          const size_t id = idxOf(i, 0, k);
+
+          const Real t  = gll01[k]; // parameter from v2→v4: t = L4
           const Real L2 = static_cast<Real>(1.0) - t;
+          const Real L3 = static_cast<Real>(0.0);
           const Real L4 = t;
-          set_from_bary(idx, static_cast<Real>(0.0), L2, static_cast<Real>(0.0), L4);
+
+          assert(id < nodes.size());
+          set_from_bary(nodes[id], L2, L3, L4);
         }
 
         // Edge v3-v4: (0,1,0)–(0,0,1): i=0, j+k=K
         //   L1 = 0, L3 = 1-t, L4 = t, L2 = 0
         for (size_t j = 0; j <= K; ++j)
         {
-          const size_t k = K - j;
-          const size_t idx = idxOf(0, j, k);
-          const Real t = gll01[k]; // parameter from v3→v4: t = L4
+          const size_t k  = K - j;
+          const size_t id = idxOf(0, j, k);
+
+          const Real t  = gll01[k]; // parameter from v3→v4: t = L4
+          const Real L2 = static_cast<Real>(0.0);
           const Real L3 = static_cast<Real>(1.0) - t;
           const Real L4 = t;
-          set_from_bary(idx, static_cast<Real>(0.0), static_cast<Real>(0.0), L3, L4);
+
+          assert(id < nodes.size());
+          set_from_bary(nodes[id], L2, L3, L4);
         }
       }
   };
