@@ -38,11 +38,11 @@
 #include "Solver/CG.h"
 #include "Solver/BiCGSTAB.h"
 #include "Solver/LeastSquaresCG.h"
+#include "Solver/GMRES.h"
 
 // SuiteSparse solvers
 #include "Solver/UMFPack.h"
 #include "Solver/SPQR.h"
 #include "Solver/CHOLMOD.h"
-
 
 #endif

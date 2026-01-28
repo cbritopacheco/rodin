@@ -70,7 +70,7 @@ namespace Rodin::QF
 
       case Geometry::Polytope::Type::Wedge:
       {
-        const size_t n = std::max<size_t>(1, (order + 1) / 2);
+        const size_t n = std::max<size_t>(1, (order + 2) / 2);
         return std::make_unique<GaussLegendre>(g, n, n);
       }
 

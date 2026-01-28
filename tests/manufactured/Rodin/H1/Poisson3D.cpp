@@ -7,9 +7,11 @@
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
+#include "Rodin/Solver/ForwardDecls.h"
 #include "Rodin/Variational.h"
 #include "Rodin/Variational/H1.h"
 #include "Rodin/Solver/CG.h"
+#include "Rodin/Solver/BiCGSTAB.h"
 
 using namespace Rodin;
 using namespace Rodin::IO;
@@ -107,7 +109,7 @@ namespace Rodin::Tests::Manufactured::H1Poisson3D
   TEST_F(Manufactured_Poisson3D_H1_Test_8, Manufactured_Poisson3D_H1_5)
   {
     auto pi = Rodin::Math::Constants::pi();
-    constexpr auto order = std::integral_constant<size_t, 4>{};
+    constexpr auto order = std::integral_constant<size_t, 5>{};
 
     const auto& mesh = this->getMesh();
 

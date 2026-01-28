@@ -15,7 +15,7 @@ using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 using namespace Rodin::Solver;
 
-namespace Rodin::Tests::Manufactured::P0
+namespace Rodin::Tests::Manufactured::P0L2
 {
   template <size_t NX, size_t NY, size_t NZ = 1>
   class Manufactured_P0_L2_Test : public ::testing::TestWithParam<Polytope::Type>
@@ -43,21 +43,21 @@ namespace Rodin::Tests::Manufactured::P0
 
     const Mesh<Context::Local>& getMesh() const { return m_mesh; }
 
-    static RealFunction rhs_polynomial()
+    static auto rhs_polynomial()
     {
-      return [](const Geometry::Point& p) -> double
+      return RealFunction([](const Geometry::Point& p) -> double
       {
         return 2.0 * (p.x() * (1.0 - p.x()) + p.y() * p.y());
-      };
+      });
     }
 
-    static RealFunction rhs_sine()
+    static auto rhs_sine()
     {
       auto pi = Rodin::Math::Constants::pi();
-      return [pi](const Geometry::Point& p) -> double
+      return RealFunction([pi](const Geometry::Point& p) -> double
       {
         return std::sin(pi * p.x()) * std::sin(pi * p.y()) * std::sin(pi * p.z());
-      };
+      });
     }
 
   private:
@@ -66,8 +66,8 @@ namespace Rodin::Tests::Manufactured::P0
 
   using Manufactured_P0_L2_Test_10x10 =
     Manufactured_P0_L2_Test<10, 10>;
-  using Manufactured_P0_L2_Test_6x6x6 =
-    Manufactured_P0_L2_Test<6, 6, 6>;
+  using Manufactured_P0_L2_Test_20x20x20 =
+    Manufactured_P0_L2_Test<20, 20, 20>;
 
   TEST_P(Manufactured_P0_L2_Test_10x10, P0_L2Projection_PolynomialRHS)
   {
@@ -89,7 +89,7 @@ namespace Rodin::Tests::Manufactured::P0
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
 
-  TEST_P(Manufactured_P0_L2_Test_6x6x6, P0_L2Projection_SineRHS)
+  TEST_P(Manufactured_P0_L2_Test_20x20x20, P0_L2Projection_SineRHS)
   {
     const auto& mesh = getMesh();
 
@@ -112,7 +112,7 @@ namespace Rodin::Tests::Manufactured::P0
     const Real l2_ref = Integral(ref).compute();
 
     const Real rel_err = l2_ref > 0 ? l2_err / l2_ref : 0;
-    EXPECT_LT(rel_err, 1e-2);
+    EXPECT_LT(rel_err, 1e-3);
   }
 
   INSTANTIATE_TEST_SUITE_P(
@@ -125,10 +125,11 @@ namespace Rodin::Tests::Manufactured::P0
 
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D,
-    Manufactured_P0_L2_Test_6x6x6,
+    Manufactured_P0_L2_Test_20x20x20,
     ::testing::Values(
       Polytope::Type::Tetrahedron,
       Polytope::Type::Hexahedron,
-      Polytope::Type::Wedge)
+      Polytope::Type::Wedge
+      )
   );
 }

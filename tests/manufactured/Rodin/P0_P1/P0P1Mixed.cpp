@@ -16,7 +16,7 @@ using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 using namespace Rodin::Solver;
 
-namespace Rodin::Tests::Manufactured::P0P1
+namespace Rodin::Tests::Manufactured::P0P1Mixed
 {
   template <size_t NX, size_t NY, size_t NZ = 1>
   class Manufactured_P0P1_Mixed_Test : public ::testing::TestWithParam<Polytope::Type>
@@ -44,21 +44,21 @@ namespace Rodin::Tests::Manufactured::P0P1
 
     const Mesh<Context::Local>& getMesh() const { return m_mesh; }
 
-    static RealFunction rhs_polynomial()
+    static auto rhs_polynomial()
     {
-      return [](const Geometry::Point& p) -> double
+      return RealFunction([](const Geometry::Point& p) -> double
       {
         return 2.0 * (p.x() * (1.0 - p.x()) + p.y() * p.y());
-      };
+      });
     }
 
-    static RealFunction rhs_sine()
+    static auto rhs_sine()
     {
       auto pi = Rodin::Math::Constants::pi();
-      return [pi](const Geometry::Point& p) -> double
+      return RealFunction([pi](const Geometry::Point& p) -> double
       {
         return std::sin(pi * p.x()) * std::sin(pi * p.y()) * std::sin(pi * p.z());
-      };
+      });
     }
 
   private:
@@ -77,6 +77,7 @@ namespace Rodin::Tests::Manufactured::P0P1
     P0 p0h(mesh);
     P1 p1h(mesh);
 
+    TrialFunction u0(p1h);
     TrialFunction u(p1h);
     TestFunction  v(p1h);
 
@@ -91,13 +92,12 @@ namespace Rodin::Tests::Manufactured::P0P1
     CG(p_l2).solve();
 
     // L2 projection of p onto P1: solve (u, v) = (p, v)
-    Problem u_l2(u, v);
-    u_l2 = Integral(u, v) - Integral(p.getSolution(), v);
+    Problem u_l2(u0, v);
+    u_l2 = Integral(u0, v) - Integral(p.getSolution(), v);
     CG(u_l2).solve();
 
     // Reset for mixed solve
     p.getSolution() = 0.0;
-    u.getSolution() = 0.0;
 
     // Mixed system:
     // (u, v) - (p, v) + (p, q) - (f, q) = 0
@@ -111,7 +111,7 @@ namespace Rodin::Tests::Manufactured::P0P1
 
     // Check that u matches the L2 projection of f onto P1 (from u_l2)
     GridFunction diff(p1h);
-    diff = Pow(u.getSolution() - u_l2.getSolution(), 2);
+    diff = Pow(u.getSolution() - u0.getSolution(), 2);
     const Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
@@ -123,6 +123,7 @@ namespace Rodin::Tests::Manufactured::P0P1
     P0 p0h(mesh);
     P1 p1h(mesh);
 
+    TrialFunction u0(p1h);
     TrialFunction u(p1h);
     TestFunction  v(p1h);
 
@@ -135,8 +136,8 @@ namespace Rodin::Tests::Manufactured::P0P1
     p_l2 = Integral(p, q) - Integral(f, q);
     CG(p_l2).solve();
 
-    Problem u_l2(u, v);
-    u_l2 = Integral(u, v) - Integral(p.getSolution(), v);
+    Problem u_l2(u0, v);
+    u_l2 = Integral(u0, v) - Integral(p.getSolution(), v);
     CG(u_l2).solve();
 
     p.getSolution() = 0.0;
@@ -151,7 +152,7 @@ namespace Rodin::Tests::Manufactured::P0P1
     BiCGSTAB(mixed).solve();
 
     GridFunction diff(p1h);
-    diff = Pow(u.getSolution() - u_l2.getSolution(), 2);
+    diff = Pow(u.getSolution() - u0.getSolution(), 2);
     const Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
