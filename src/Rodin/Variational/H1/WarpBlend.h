@@ -195,14 +195,10 @@ namespace Rodin::Variational
   class WarpShiftFace2D
   {
     public:
-      static void apply(Real& dx, Real& dy,
-          Real L1, Real L2, Real L3, Real alpha)
+      static std::array<Real, 2> apply(Real L1, Real L2, Real L3, Real alpha)
       {
         if constexpr (K <= 1)
-        {
-          dx = dy = static_cast<Real>(0.0);
-          return;
-        }
+          return { Real(0), Real(0) };
 
         // 2) blending per edge
         const Real blend1 = L2 * L3; // edge opposite L1
@@ -232,13 +228,15 @@ namespace Rodin::Variational
         const Real cos4pi3 = cos2pi3;
         const Real sin4pi3 = -sin2pi3;
 
-        dx = warp1
+        const Real dx = warp1
            + cos2pi3 * warp2
            + cos4pi3 * warp3;
 
-        dy = static_cast<Real>(0.0)
+        const Real dy = static_cast<Real>(0.0)
            + sin2pi3 * warp2
            + sin4pi3 * warp3;
+
+        return { dx, dy };
       }
   };
 
@@ -254,12 +252,10 @@ namespace Rodin::Variational
   class WarpShiftFace3D
   {
     public:
-      static void apply(
-          Real& warpx, Real& warpy,
-          Real La, Real Lb, Real Lc, Real Ld, Real alpha)
+      static std::array<Real, 2> apply(Real La, Real Lb, Real Lc, Real Ld, Real alpha)
       {
         (void) La;
-        WarpShiftFace2D<K>::apply(warpx, warpy, Lb, Lc, Ld, alpha);
+        return WarpShiftFace2D<K>::apply(Lb, Lc, Ld, alpha);
       }
   };
 
@@ -305,7 +301,7 @@ namespace Rodin::Variational
         // Row offset for the (i,j) enumeration used in FeketeTriangle:
         // for j in [0..K], i in [0..K-j]:
         //   idx(j,i) = sum_{m=0}^{j-1} (K+1-m) + i
-        auto rowOffset = [](size_t j) constexpr -> size_t
+        static constexpr auto rowOffset = [](size_t j) -> size_t
         {
           size_t off = 0;
           for (size_t m = 0; m < j; ++m)
@@ -374,8 +370,7 @@ namespace Rodin::Variational
             Real y = (-L2 - L3 + static_cast<Real>(2.0) * L1) * INV_SQRT3;
 
             // 2D warp–blend shift
-            Real dx, dy;
-            WarpShiftFace2D<K>::apply(dx, dy, L1, L2, L3, alpha);
+            const auto [dx, dy] = WarpShiftFace2D<K>::apply(L1, L2, L3, alpha);
 
             x += dx;
             y += dy;
@@ -529,7 +524,7 @@ namespace Rodin::Variational
           return off;
         };
 
-        auto idxOf = [&](size_t i, size_t j, size_t k) -> size_t
+        const auto idxOf = [&](size_t i, size_t j, size_t k) -> size_t
         {
           const size_t lo = layerOffset(k);
           const size_t ro = rowOffsetWithinLayer(k, j);
@@ -672,8 +667,7 @@ namespace Rodin::Variational
                 else if (face == 2) { La = L3; Lb = L1; Lc = L4; Ld = L2; }
                 else { /* face == 3 */ La = L4; Lb = L1; Lc = L3; Ld = L2; }
 
-                Real warp1, warp2;
-                WarpShiftFace3D<K>::apply(warp1, warp2, La, Lb, Lc, Ld, alpha);
+                const auto [warp1, warp2] = WarpShiftFace3D<K>::apply(La, Lb, Lc, Ld, alpha);
 
                 Real blend = Lb * Lc * Ld;
                 const Real denom = (Lb + static_cast<Real>(0.5) * La)
@@ -812,8 +806,7 @@ namespace Rodin::Variational
               Real y = (-Lb - Lc + static_cast<Real>(2.0) * La) * INV_SQRT3;
 
               // 2D warp–blend on face
-              Real dx, dy;
-              WarpShiftFace2D<K>::apply(dx, dy, La, Lb, Lc, alphaT);
+              const auto [dx, dy] = WarpShiftFace2D<K>::apply(La, Lb, Lc, alphaT);
 
               x += dx;
               y += dy;
