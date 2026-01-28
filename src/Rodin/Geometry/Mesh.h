@@ -1094,7 +1094,7 @@ namespace Rodin::Geometry
 
       /**
        * @brief Gets the total volume of the mesh.
-       * @returns Sum of all cell volumes.
+       * @returns Sum of all 3D polytope volumes.
        */
       Real getVolume() const override;
 

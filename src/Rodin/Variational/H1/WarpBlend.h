@@ -397,7 +397,9 @@ namespace Rodin::Variational
             L3 *= invSum;
 
             // Back to reference triangle: (x,y) = (L2,L3)
+            assert(rowOff + i < nodes.size());
             nodes[rowOff + i].resize(2);
+            assert(nodes[rowOff + i].size() == 2);
             nodes[rowOff + i][0] = L2;
             nodes[rowOff + i][1] = L3;
           }
@@ -418,6 +420,7 @@ namespace Rodin::Variational
           const Real L2 = t;
           const Real L3 = static_cast<Real>(0.0);
 
+          assert(idx_edge < nodes.size());
           assert(nodes[idx_edge].size() == 2);
           nodes[idx_edge][0] = L2;
           nodes[idx_edge][1] = L3;
@@ -433,6 +436,7 @@ namespace Rodin::Variational
           const Real L2 = static_cast<Real>(0.0);
           const Real L3 = t;
 
+          assert(idx_edge < nodes.size());
           assert(nodes[idx_edge].size() == 2);
           nodes[idx_edge][0] = L2;
           nodes[idx_edge][1] = L3;
@@ -452,6 +456,7 @@ namespace Rodin::Variational
           const Real L3 = t;
           const Real L2 = static_cast<Real>(1.0) - t;
 
+          assert(idx_edge < nodes.size());
           assert(nodes[idx_edge].size() == 2);
           nodes[idx_edge][0] = L2;
           nodes[idx_edge][1] = L3;
@@ -723,6 +728,7 @@ namespace Rodin::Variational
               }
 
               // Back to reference tetra: (x,y,z) = (L2,L3,L4)
+              assert(idx < nodes.size());
               assert(nodes[idx].size() == 3);
               nodes[idx][0] = l2n;
               nodes[idx][1] = l3n;
@@ -845,6 +851,7 @@ namespace Rodin::Variational
               Lnew[ic] = Lc_new;
 
               // Back to reference tetra: (x,y,z) = (L2,L3,L4)
+              assert(idx < nodes.size());
               assert(nodes[idx].size() == 3);
               nodes[idx][0] = Lnew[1];
               nodes[idx][1] = Lnew[2];
@@ -861,6 +868,7 @@ namespace Rodin::Variational
         auto set_from_bary = [&](size_t idx, Real L1, Real L2, Real L3, Real L4)
         {
           (void) L1;
+          assert(idx < nodes.size());
           assert(nodes[idx].size() == 3);
           nodes[idx][0] = L2;
           nodes[idx][1] = L3;
