@@ -17,6 +17,7 @@
 
 #include <functional>
 
+#include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Variational/ForwardDecls.h"
 #include "ShapeFunction.h"
 
@@ -54,7 +55,7 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type
       using FESType = FES;
-      
+
       /// @brief Space type (trial space)
       static constexpr ShapeFunctionSpaceType SpaceType = ShapeFunctionSpaceType::Trial;
 
@@ -173,6 +174,12 @@ namespace Rodin::Variational
         return m_ref.get().getSolution();
       }
 
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        return m_ref.get().getOrder(poly);
+      }
+
       /**
        * @brief Creates a copy of this reference.
        * @returns Pointer to newly allocated copy
@@ -238,7 +245,7 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type
       using FESType = FES;
-      
+
       /// @brief Space type (trial space)
       static constexpr ShapeFunctionSpaceType Space = TrialSpace;
 

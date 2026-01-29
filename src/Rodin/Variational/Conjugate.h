@@ -110,6 +110,12 @@ namespace Rodin::Variational
         return *m_v;
       }
 
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geometry) const noexcept
+      {
+        return getOperand().getOrder(geometry);
+      }
+
       Conjugate* copy() const noexcept override
       {
         return new Conjugate(*this);
@@ -241,6 +247,12 @@ namespace Rodin::Variational
       const FES& getFiniteElementSpace() const
       {
         return getOperand().getFiniteElementSpace();
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geometry) const noexcept
+      {
+        return getOperand().getOrder(geometry);
       }
 
       Conjugate* copy() const noexcept override

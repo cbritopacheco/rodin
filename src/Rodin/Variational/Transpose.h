@@ -89,6 +89,11 @@ namespace Rodin::Variational
         return this->object(getOperand().getValue(p)).transpose();
       }
 
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
+      {
+        return getOperand().getOrder(polytope);
+      }
+
       Transpose* copy() const noexcept override
       {
         return new Transpose(*this);
@@ -224,7 +229,12 @@ namespace Rodin::Variational
       constexpr
       const FES& getFiniteElementSpace() const
       {
-        return m_operand.getFiniteElementSpace();
+        return m_operand->getFiniteElementSpace();
+      }
+
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
+      {
+        return getOperand().getOrder(polytope);
       }
 
       Transpose* copy() const noexcept override

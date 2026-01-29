@@ -413,8 +413,8 @@ namespace Rodin::Variational
         const auto& testfes = test.getFiniteElementSpace();
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
-        const size_t order = std::max(trialfe.getOrder(), testfe.getOrder());
         const auto& geometry = polytope.getGeometry();
+        const size_t order = integrand.getOrder(polytope).value_or(trialfe.getOrder() + testfe.getOrder());
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
         if (recompute)
         {
@@ -554,8 +554,8 @@ namespace Rodin::Variational
         auto& integrand = *m_integrand;
         const auto& fes = integrand.getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, idx);
-        const size_t order = fe.getOrder();
         const auto& geometry = polytope.getGeometry();
+        const size_t order = integrand.getOrder(polytope).value_or(fe.getOrder());
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
         if (recompute)
         {

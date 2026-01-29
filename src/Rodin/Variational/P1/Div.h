@@ -189,6 +189,13 @@ namespace Rodin::Variational
         }
       }
 
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        const size_t k = P1Element<ScalarType>(geom.getGeometry()).getOrder();
+        return (k == 0) ? 0 : (k - 1);
+      }
+
       Div* copy() const noexcept override
       {
         return new Div(*this);
@@ -327,6 +334,15 @@ namespace Rodin::Variational
       const auto& getFiniteElementSpace() const
       {
         return getOperand().getFiniteElementSpace();
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        const auto k = getOperand().getOrder(geom);
+        if (!k.has_value())
+          return std::nullopt;
+        return (*k == 0) ? 0 : (*k - 1);
       }
 
       Div* copy() const noexcept override

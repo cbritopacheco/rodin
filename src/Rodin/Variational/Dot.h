@@ -1,5 +1,5 @@
 /*
- *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
  * Distributed under the Boost Software License, Version 1.0.
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
@@ -18,6 +18,7 @@
 
 #include <Eigen/Core>
 
+#include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Types.h"
 #include "Rodin/FormLanguage/Base.h"
 #include "Rodin/Math/Matrix.h"
@@ -232,6 +233,17 @@ namespace Rodin::Variational
         return Math::dot(this->object(getLHS().getValue(p)), this->object(getRHS().getValue(p)));
       }
 
+      constexpr
+      std::optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        const auto lo = getLHS().getOrder(poly);
+        const auto ro = getRHS().getOrder(poly);
+        if (!lo || !ro)
+          return std::nullopt;
+        return *lo + *ro;
+      }
+
+
       /**
        * @brief Polymorphic copy.
        * @returns Pointer to a copy of this object
@@ -383,6 +395,16 @@ namespace Rodin::Variational
         return Math::dot(this->object(getLHS().getValue(p)), this->object(getRHS().getBasis(local)));
       }
 
+      constexpr
+      std::optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        const auto lo = getLHS().getOrder(poly);
+        const auto ro = getRHS().getOrder(poly);
+        if (!lo || !ro)
+          return std::nullopt;
+        return *lo + *ro;
+      }
+
       Dot* copy() const noexcept final override
       {
         return new Dot(*this);
@@ -515,6 +537,16 @@ namespace Rodin::Variational
         return Math::dot(this->object(getLHS().getBasis(local)), this->object(getRHS().getValue(p)));
       }
 
+      constexpr
+      std::optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        const auto lo = getLHS().getOrder(poly);
+        const auto ro = getRHS().getOrder(poly);
+        if (!lo || !ro)
+          return std::nullopt;
+        return *lo + *ro;
+      }
+
       Dot* copy() const noexcept final override
       {
         return new Dot(*this);
@@ -630,6 +662,16 @@ namespace Rodin::Variational
         return Math::dot(this->object(getLHS().getBasis(tr)), this->object(getRHS().getBasis(te)));
       }
 
+      constexpr
+      std::optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        const auto lo = getLHS().getOrder(poly);
+        const auto ro = getRHS().getOrder(poly);
+        if (!lo || !ro)
+          return std::nullopt;
+        return *lo + *ro;
+      }
+
       Dot* copy() const noexcept final override
       {
         return new Dot(*this);
@@ -702,6 +744,12 @@ namespace Rodin::Variational
       {
         assert(m_rhs);
         return *m_rhs;
+      }
+
+      constexpr
+      std::optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        return std::nullopt;
       }
 
       Dot* copy() const noexcept final override

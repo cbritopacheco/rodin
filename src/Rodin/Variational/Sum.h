@@ -172,6 +172,18 @@ namespace Rodin::Variational
         return this->object(this->getLHS().getValue(p)) + this->object(this->getRHS().getValue(p));
       }
 
+      constexpr
+      std::optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        const auto lo = getLHS().getOrder(poly);
+        const auto ro = getRHS().getOrder(poly);
+
+        if (lo && ro)
+          return std::max(*lo, *ro);
+        else
+          return std::nullopt;
+      }
+
       Sum* copy() const noexcept override
       {
         return new Sum(*this);
@@ -374,6 +386,18 @@ namespace Rodin::Variational
       const auto& getFiniteElementSpace() const
       {
         return getLHS().getFiniteElementSpace();
+      }
+
+      constexpr
+      std::optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        const auto lo = getLHS().getOrder(poly);
+        const auto ro = getRHS().getOrder(poly);
+
+        if (lo && ro)
+          return std::max(*lo, *ro);
+        else
+          return std::nullopt;
       }
 
       Sum* copy() const noexcept override

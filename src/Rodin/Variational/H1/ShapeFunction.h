@@ -142,6 +142,12 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getLeaf();
       }
 
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        return H1Element<K, Scalar>(geom.getGeometry()).getOrder();
+      }
+
       virtual ShapeFunction* copy() const noexcept override
       {
         return static_cast<const Derived&>(*this).copy();
@@ -258,6 +264,12 @@ namespace Rodin::Variational
       const auto& getLeaf() const
       {
         return static_cast<const Derived&>(*this).getLeaf();
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        return H1Element<K, Scalar>(geom.getGeometry()).getOrder();
       }
 
       virtual ShapeFunction* copy() const noexcept override

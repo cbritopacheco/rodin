@@ -168,6 +168,13 @@ namespace Rodin::Variational
         }
       }
 
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        const size_t k = P1Element<ScalarType>(geom.getGeometry()).getOrder();
+        return (k == 0) ? 0 : (k - 1);
+      }
+
       Grad* copy() const noexcept override
       {
         return new Grad(*this);
@@ -278,6 +285,15 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         return m_gradient[local]; // already physical
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        const auto k = getOperand().getOrder(geom);
+        if (!k.has_value())
+          return std::nullopt;
+        return (*k == 0) ? 0 : (*k - 1);
       }
 
       Grad* copy() const noexcept override
