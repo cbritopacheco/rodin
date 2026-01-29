@@ -84,6 +84,12 @@ namespace Rodin::Variational
         return 0;
       }
 
+      constexpr
+      std::optional<size_t> getOrder(Geometry::Polytope::Type geom) const noexcept
+      {
+        return size_t(0);
+      }
+
       /**
        * @brief Creates a copy of this zero function
        * @returns Pointer to newly allocated copy
@@ -158,6 +164,12 @@ namespace Rodin::Variational
       auto getValue(const Geometry::Point&) const
       {
         return VectorType::Zero(m_d);
+      }
+
+      constexpr
+      std::optional<size_t> getOrder(Geometry::Polytope::Type geom) const noexcept
+      {
+        return size_t(0);
       }
 
       /**

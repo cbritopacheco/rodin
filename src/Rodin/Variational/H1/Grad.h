@@ -172,38 +172,17 @@ namespace Rodin::Variational
         }
       }
 
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        const size_t k = H1Element<K, ScalarType>(geom.getGeometry()).getOrder();
+        return (k == 0) ? 0 : (k - 1);
+      }
+
       Grad* copy() const noexcept override
       {
         return new Grad(*this);
       }
-  };
-
-  template <class ScalarType>
-  struct RefGradTable
-  {
-    size_t qps = 0;
-    size_t count = 0;
-    size_t d = 0;
-    std::vector<Math::SpatialVector<ScalarType>> data; // size = qps*count, each size d
-
-    void reset(size_t qps_, size_t count_, size_t d_)
-    {
-      qps = qps_;
-      count = count_;
-      d = d_;
-      data.resize(qps * count);
-      for (auto& v : data) v.resize(d);
-    }
-
-    Math::SpatialVector<ScalarType>& at(size_t qp, size_t local)
-    {
-      return data[qp * count + local];
-    }
-
-    const Math::SpatialVector<ScalarType>& at(size_t qp, size_t local) const
-    {
-      return data[qp * count + local];
-    }
   };
 
   /**
@@ -358,6 +337,15 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         return m_gradient[local]; // already physical
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        const auto k = getOperand().getOrder(geom);
+        if (!k.has_value())
+          return std::nullopt;
+        return (*k == 0) ? 0 : (*k - 1);
       }
 
       Grad* copy() const noexcept override

@@ -119,6 +119,12 @@ namespace Rodin::Variational
         return this->getOperand().getValue(p).coeff(m_idx);
       }
 
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        return getOperand().getOrder(geom);
+      }
+
       Component* copy() const noexcept override
       {
         return new Component(*this);
@@ -210,6 +216,11 @@ namespace Rodin::Variational
         return this->getOperand().getValue(p).coeff(m_i, m_j);
       }
 
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        return getOperand().getOrder(geom);
+      }
 
       Component* copy() const noexcept override
       {
@@ -266,13 +277,15 @@ namespace Rodin::Variational
       constexpr
       Component(const Component& other)
         : Parent(other),
-          m_u(other.m_u)
+          m_u(other.m_u),
+          m_idx(other.m_idx)
       {}
 
       constexpr
       Component(Component&& other)
         : Parent(std::move(other)),
-          m_u(std::move(other.m_u))
+          m_u(std::move(other.m_u)),
+          m_idx(std::move(other.m_idx))
       {}
 
       /**
@@ -304,6 +317,12 @@ namespace Rodin::Variational
       auto getValue(const Geometry::Point& p) const
       {
         return m_u.get().getValue(p).coeff(m_idx);
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        return getGridFunction().getOrder(geom);
       }
 
       Component* copy() const noexcept override
@@ -454,6 +473,12 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         return this->object(this->getOperand().getBasis(local)).coeff(m_idx);
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        return getOperand().getOrder(geom);
       }
 
       Component* copy() const noexcept override

@@ -763,8 +763,9 @@ namespace Rodin::Variational
             return 1;
           case Geometry::Polytope::Type::Quadrilateral:
           case Geometry::Polytope::Type::Wedge:
-          case Geometry::Polytope::Type::Hexahedron:
             return 2;
+          case Geometry::Polytope::Type::Hexahedron:
+            return 3;
         }
         assert(false);
         return 0;
@@ -1071,8 +1072,9 @@ namespace Rodin::Variational
             return 1;
           case Geometry::Polytope::Type::Quadrilateral:
           case Geometry::Polytope::Type::Wedge:
-          case Geometry::Polytope::Type::Hexahedron:
             return 2;
+          case Geometry::Polytope::Type::Hexahedron:
+            return 3;
         }
         assert(false);
         return 0;

@@ -262,6 +262,27 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
+      /**
+       * @brief Returns a geometry-dependent polynomial order bound of the expression
+       *        on the reference element.
+       *
+       * The returned value is a **safe upper bound** on the total polynomial degree
+       * of the expression in reference coordinates, ignoring the geometry map.
+       *
+       * - Used for quadrature selection and composition rules.
+       * - May depend on the reference geometry (simplex, tensor-product, wedge).
+       * - Returns std::nullopt for non-polynomial expressions.
+       * - The value is not guaranteed to be sharp.
+       *
+       * @param geom Reference geometry type.
+       * @return Polynomial order bound, or std::nullopt if not polynomial.
+       */
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        return static_cast<const Derived&>(*this).getOrder(geom);
+      }
+
       Derived& getDerived() noexcept
       {
         return static_cast<Derived&>(*this);

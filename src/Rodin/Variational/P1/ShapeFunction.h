@@ -4,6 +4,7 @@
 #include <utility>
 #include <vector>
 
+#include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Variational/P1/ForwardDecls.h"
 #include "Rodin/Variational/ShapeFunction.h"
 #include "Rodin/Variational/IntegrationPoint.h"
@@ -109,6 +110,12 @@ namespace Rodin::Variational
       const auto& getLeaf() const
       {
         return static_cast<const Derived&>(*this).getLeaf();
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        return P1Element<ScalarType>(poly.getGeometry()).getOrder();
       }
 
       virtual ShapeFunction* copy() const noexcept override

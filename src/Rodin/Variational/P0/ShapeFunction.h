@@ -111,6 +111,13 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getLeaf();
       }
 
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      {
+        // P0 basis functions are constant on the reference element for any geometry.
+        return 0;
+      }
+
       virtual ShapeFunction* copy() const noexcept override
       {
         return static_cast<const Derived&>(*this).copy();

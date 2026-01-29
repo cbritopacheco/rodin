@@ -192,6 +192,13 @@ namespace Rodin::Variational
         }
       }
 
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
+      {
+        const size_t k = P1Element<ScalarType>(polytope.getGeometry()).getOrder();
+        return (k == 0) ? 0 : (k - 1);
+      }
+
       Jacobian* copy() const noexcept override
       {
         return new Jacobian(*this);
@@ -332,6 +339,15 @@ namespace Rodin::Variational
       decltype(auto) getBasis(size_t local) const
       {
         return m_jacobian_phys[local];
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        const auto k = getOperand().getOrder(geom);
+        if (!k.has_value())
+          return std::nullopt;
+        return (*k == 0) ? 0 : (*k - 1);
       }
 
       Jacobian* copy() const noexcept override

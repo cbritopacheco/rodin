@@ -219,6 +219,15 @@ namespace Rodin::Variational
         return this->object(this->getLHS().getValue(p)) * this->object(this->getRHS().getValue(p));
       }
 
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
+      {
+        const auto lo = getLHS().getOrder(polytope);      // ShapeFunction
+        const auto ro = getRHS().getOrder(polytope);      // Function
+        if (!lo || !ro)
+          return {};
+        return *lo + *ro;
+      }
+
       Mult* copy() const noexcept override
       {
         return new Mult(*this);
@@ -422,6 +431,15 @@ namespace Rodin::Variational
         return this->object(getLHS().getValue(p)) * this->object(getRHS().getBasis(local));
       }
 
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
+      {
+        const auto lo = getLHS().getOrder(polytope);      // ShapeFunction
+        const auto ro = getRHS().getOrder(polytope);      // Function
+        if (!lo || !ro)
+          return {};
+        return *lo + *ro;
+      }
+
       Mult* copy() const noexcept override
       {
         return new Mult(*this);
@@ -567,6 +585,15 @@ namespace Rodin::Variational
       {
         const auto& p = getPoint();
         return this->object(this->getLHS().getBasis(local)) * this->object(this->getRHS().getValue(p));
+      }
+
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
+      {
+        const auto lo = getLHS().getOrder(polytope);      // ShapeFunction
+        const auto ro = getRHS().getOrder(polytope);      // Function
+        if (!lo || !ro)
+          return {};
+        return *lo + *ro;
       }
 
       Mult* copy() const noexcept override
