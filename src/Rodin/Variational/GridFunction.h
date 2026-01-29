@@ -225,9 +225,9 @@ namespace Rodin::Variational
         return m_ref.get().getSize();
       }
 
-      Optional<size_t> getOrder(const Geometry::Polytope&) const
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const
       {
-        return m_ref.get().getOrder();
+        return m_ref.get().getOrder(geom);
       }
 
       GridFunctionBaseReference* copy() const noexcept final override
@@ -816,6 +816,11 @@ namespace Rodin::Variational
       Derived& operator/=(const GridFunctionBase& rhs)
       {
         return static_cast<Derived&>(*this).operator/=(rhs);
+      }
+
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const
+      {
+        return static_cast<const Derived&>(*this).getOrder(geom);
       }
 
     private:
