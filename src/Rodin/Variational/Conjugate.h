@@ -17,6 +17,7 @@
 #include "Rodin/Math/Common.h"
 
 #include "Function.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
 
 namespace Rodin::FormLanguage
@@ -214,9 +215,9 @@ namespace Rodin::Variational
        * @returns Reference to this
        */
       constexpr
-      Conjugate& setPoint(const Geometry::Point& p)
+      Conjugate& setIntegrationPoint(const IntegrationPoint& p)
       {
-        m_operand->setPoint(p);
+        m_operand->setIntegrationPoint(p);
         return *this;
       }
 
@@ -224,9 +225,9 @@ namespace Rodin::Variational
        * @brief Gets the evaluation point.
        * @returns Current evaluation point
        */
-      const Geometry::Point& getPoint() const
+      const IntegrationPoint& getIntegrationPoint() const
       {
-        return m_operand->getPoint();
+        return m_operand->getIntegrationPoint();
       }
 
       /**

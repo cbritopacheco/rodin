@@ -247,91 +247,91 @@ namespace Rodin::Variational
         return getOperand().getDOFs(element);
       }
 
-      const Geometry::Point& getPoint() const
-      {
-        assert(m_p);
-        return *m_p;
-      }
+      // const Geometry::Point& getPoint() const
+      // {
+      //   assert(m_p);
+      //   return *m_p;
+      // }
 
-      Grad& setPoint(const Geometry::Point& p)
-      {
-        if (m_p == &p)
-          return *this;
-        m_p = &p;
+      // Grad& setPoint(const Geometry::Point& p)
+      // {
+      //   if (m_p == &p)
+      //     return *this;
+      //   m_p = &p;
 
-        const auto& polytope = p.getPolytope();
-        const auto& rc = p.getReferenceCoordinates();
-        const size_t d = polytope.getDimension();
-        const Index i = polytope.getIndex();
+      //   const auto& polytope = p.getPolytope();
+      //   const auto& rc = p.getReferenceCoordinates();
+      //   const size_t d = polytope.getDimension();
+      //   const Index i = polytope.getIndex();
 
-        const auto& fes = this->getFiniteElementSpace();
-        decltype(auto) fe  = fes.getFiniteElement(d, i);
+      //   const auto& fes = this->getFiniteElementSpace();
+      //   decltype(auto) fe  = fes.getFiniteElement(d, i);
 
-        const size_t count = fe.getCount();
+      //   const size_t count = fe.getCount();
 
-        // Ensure vector objects are sized once
-        m_gradient.resize(count);
-        for (auto& g : m_gradient)
-          g.resize(d);
+      //   // Ensure vector objects are sized once
+      //   m_gradient.resize(count);
+      //   for (auto& g : m_gradient)
+      //     g.resize(d);
 
-        const auto JinvT = p.getJacobianInverse().transpose(); // compute once
+      //   const auto JinvT = p.getJacobianInverse().transpose(); // compute once
 
-        for (size_t local = 0; local < count; ++local)
-          m_gradient[local].noalias() = JinvT * fe.getBasis(local).getGradient()(rc);
+      //   for (size_t local = 0; local < count; ++local)
+      //     m_gradient[local].noalias() = JinvT * fe.getBasis(local).getGradient()(rc);
 
-        return *this;
-      }
+      //   return *this;
+      // }
 
-      Grad& setIntegrationPoint(const Variational::IntegrationPoint& ip)
-      {
-        static thread_local Math::SpatialVector<Real> s_refGrad;
+      // Grad& setIntegrationPoint(const Variational::IntegrationPoint& ip)
+      // {
+      //   static thread_local Math::SpatialVector<Real> s_refGrad;
 
-        // keep old pointer check if you want
-        const auto& p  = *ip.getPoint();           // Geometry::Point
-        const auto& qf = *ip.getQuadratureFormula();
-        const size_t qp = ip.getIndex();           // quadrature point index
+      //   // keep old pointer check if you want
+      //   const auto& p  = *ip.getPoint();           // Geometry::Point
+      //   const auto& qf = *ip.getQuadratureFormula();
+      //   const size_t qp = ip.getIndex();           // quadrature point index
 
-        m_p = &p;
+      //   m_p = &p;
 
-        const auto& polytope = p.getPolytope();
-        const size_t d   = polytope.getDimension();
-        const Index  idx = polytope.getIndex();
+      //   const auto& polytope = p.getPolytope();
+      //   const size_t d   = polytope.getDimension();
+      //   const Index  idx = polytope.getIndex();
 
-        const auto& fes = this->getFiniteElementSpace();
-        const auto& fe  = fes.getFiniteElement(d, idx); // H1Element<K,Scalar> (scalar)
+      //   const auto& fes = this->getFiniteElementSpace();
+      //   const auto& fe  = fes.getFiniteElement(d, idx); // H1Element<K,Scalar> (scalar)
 
-        const size_t ndof = fe.getCount();
+      //   const size_t ndof = fe.getCount();
 
-        s_refGrad.resize(d);
+      //   s_refGrad.resize(d);
 
-        // Resize once if possible
-        if (m_gradient.size() != ndof || (ndof && m_gradient[0].size() != d))
-        {
-          m_gradient.resize(ndof);
-          for (auto& g : m_gradient) g.resize(d);
-        }
+      //   // Resize once if possible
+      //   if (m_gradient.size() != ndof || (ndof && m_gradient[0].size() != d))
+      //   {
+      //     m_gradient.resize(ndof);
+      //     for (auto& g : m_gradient) g.resize(d);
+      //   }
 
-        // Get tabulation for this geometry+qf
-        const auto& tab = fe.getTabulation(qf);
-        // tab is qp-major, derivatives in reference coordinates
+      //   // Get tabulation for this geometry+qf
+      //   const auto& tab = fe.getTabulation(qf);
+      //   // tab is qp-major, derivatives in reference coordinates
 
-        const auto JinvT = p.getJacobianInverse().transpose();
+      //   const auto JinvT = p.getJacobianInverse().transpose();
 
-        for (size_t a = 0; a < ndof; ++a)
-        {
-          // span<const Scalar> of size d
-          const auto gref = tab.getGradient(qp, a);
+      //   for (size_t a = 0; a < ndof; ++a)
+      //   {
+      //     // span<const Scalar> of size d
+      //     const auto gref = tab.getGradient(qp, a);
 
-          // fill a small ref vector without calling basis.getGradient()(rc)
-          // (choose whichever type you use for ref vectors)
-          for (size_t i = 0; i < d; ++i)
-            s_refGrad(i) = gref[i];
+      //     // fill a small ref vector without calling basis.getGradient()(rc)
+      //     // (choose whichever type you use for ref vectors)
+      //     for (size_t i = 0; i < d; ++i)
+      //       s_refGrad(i) = gref[i];
 
-          m_gradient[a].noalias() = JinvT * s_refGrad;
-        }
+      //     m_gradient[a].noalias() = JinvT * s_refGrad;
+      //   }
 
-        return *this;
-      }
+      //   return *this;
+      // }
 
       constexpr
       auto getBasis(size_t local) const

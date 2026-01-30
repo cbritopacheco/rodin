@@ -5,7 +5,9 @@
 #include <vector>
 
 #include "Rodin/Geometry/Polytope.h"
+#include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/P1/ForwardDecls.h"
+#include "Rodin/Variational/P1/P1.h"
 #include "Rodin/Variational/ShapeFunction.h"
 #include "Rodin/Variational/IntegrationPoint.h"
 
@@ -29,81 +31,135 @@ namespace Rodin::Variational
           FESType,
           SpaceType>;
 
+      struct Cache
+      {
+        struct Key
+        {
+          Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
+          const QF::QuadratureFormulaBase* qf = nullptr;
+          size_t qp = 0;
+          bool valid = false;
+
+          explicit operator bool() const noexcept { return valid; }
+
+          bool operator==(const Key& other) const noexcept
+          {
+            if (!valid || !other.valid)
+              return false;
+            return geom == other.geom && qf == other.qf && qp == other.qp;
+          }
+
+          void operator=(std::initializer_list<int>) noexcept
+          {
+            valid = false;
+            qf = nullptr;
+            qp = 0;
+            geom = Geometry::Polytope::Type::Point;
+          }
+        };
+
+        std::vector<RangeType> basis;
+        Key key;
+      };
+
       ShapeFunction() = delete;
 
       constexpr
       ShapeFunction(const FESType& fes)
-        : Parent(fes),
-          m_p(nullptr)
+        : Parent(fes)
       {}
 
       constexpr
       ShapeFunction(const ShapeFunction& other)
         : Parent(other),
-          m_basis(other.m_basis),
-          m_p(nullptr)
+          m_ip(nullptr),
+          m_cache(other.m_cache)
       {}
 
       constexpr
       ShapeFunction(ShapeFunction&& other)
         : Parent(std::move(other)),
-          m_basis(std::move(other.m_basis)),
-          m_p(std::exchange(other.m_p, nullptr))
+          m_ip(std::exchange(other.m_ip, nullptr)),
+          m_cache(std::move(other.m_cache))
       {}
 
       constexpr
       size_t getDOFs(const Geometry::Polytope& polytope) const
       {
-        const size_t d = polytope.getDimension();
-        const Index  i = polytope.getIndex();
-        return this->getFiniteElementSpace().getFiniteElement(d, i).getCount();
+        if constexpr (std::is_same_v<RangeType, ScalarType>)
+        {
+          return P1Element<ScalarType>(polytope.getGeometry()).getCount();
+        }
+        else
+        {
+          static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
+          return P1Element<RangeType>(polytope.getGeometry(), this->getFiniteElementSpace().getVectorDimension()).getCount();
+        }
       }
 
       constexpr
-      const Geometry::Point& getPoint() const
+      const IntegrationPoint& getIntegrationPoint() const
       {
-        assert(m_p);
-        return *m_p;
+        assert(m_ip);
+        return *m_ip;
       }
 
       /**
        * Fallback path (non-quadrature evaluations).
        * Keeps your previous behavior (pushforward of each basis at p).
        */
-      ShapeFunction& setPoint(const Geometry::Point& p)
-      {
-        if (m_p == &p)
-          return *this;
-
-        m_p = &p;
-
-        const auto& polytope = p.getPolytope();
-        const size_t d   = polytope.getDimension();
-        const Index  idx = polytope.getIndex();
-
-        const auto& fes = this->getFiniteElementSpace();
-        const auto& fe  = fes.getFiniteElement(d, idx);
-
-        const size_t ndof = fe.getCount();
-        m_basis.resize(ndof);
-
-        for (size_t a = 0; a < ndof; ++a)
-          m_basis[a] = fes.getPushforward({ d, idx }, fe.getBasis(a))(p);
-
-        return *this;
-      }
-
       ShapeFunction& setIntegrationPoint(const IntegrationPoint& ip)
       {
-        assert(ip.getPoint());
-        return this->setPoint(*ip.getPoint());
+        m_ip = &ip;
+
+        const auto& p = ip.getPoint();
+        const auto& qf = ip.getQuadratureFormula();
+        const size_t qp = ip.getIndex();
+        const auto& polytope = p.getPolytope();
+        const Geometry::Polytope::Type geom = polytope.getGeometry();
+
+        typename Cache::Key key;
+        key.geom  = geom;
+        key.qf    = &qf;
+        key.qp    = qp;
+        key.valid = true;
+
+        const bool recompute = !(m_cache.key == key);
+
+        if (recompute)
+        {
+          m_cache.key = key;
+
+          if constexpr (std::is_same_v<RangeType, ScalarType>)
+          {
+            const P1Element<RangeType> fe(geom);
+            const size_t ndof = fe.getCount();
+            m_cache.basis.resize(ndof);
+            const auto& rq = qf.getPoint(qp);
+            for (size_t a = 0; a < ndof; ++a)
+              m_cache.basis[a] = fe.getBasis(a)(rq);
+          }
+          else
+          {
+            static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
+            const P1Element<RangeType> fe(geom, this->getFiniteElementSpace().getVectorDimension());
+            const size_t ndof = fe.getCount();
+            m_cache.basis.resize(ndof);
+            const auto& rq = qf.getPoint(qp);
+            for (size_t a = 0; a < ndof; ++a)
+              m_cache.basis[a] = fe.getBasis(a)(rq);
+          }
+        }
+
+        return *this;
       }
 
       constexpr
       const RangeType& getBasis(size_t local) const
       {
-        assert(local < m_basis.size());
-        return m_basis[local];
+        assert(m_cache.key);
+        assert(local < m_cache.basis.size());
+        return m_cache.basis[local];
       }
 
       constexpr
@@ -124,8 +180,8 @@ namespace Rodin::Variational
       }
 
     private:
-      std::vector<RangeType> m_basis;
-      const Geometry::Point* m_p;
+      const IntegrationPoint* m_ip;
+      Cache m_cache;
   };
 }
 

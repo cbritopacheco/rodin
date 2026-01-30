@@ -243,43 +243,43 @@ namespace Rodin::Variational
         return getOperand().getDOFs(element);
       }
 
-      const Geometry::Point& getPoint() const
-      {
-        assert(m_p);
-        return *m_p;
-      }
+      // const Geometry::Point& getPoint() const
+      // {
+      //   assert(m_p);
+      //   return *m_p;
+      // }
 
-      Grad& setPoint(const Geometry::Point& p)
-      {
-        if (m_p == &p)
-          return *this;
-        m_p = &p;
+      // Grad& setPoint(const Geometry::Point& p)
+      // {
+      //   if (m_p == &p)
+      //     return *this;
+      //   m_p = &p;
 
-        const auto& polytope = p.getPolytope();
-        const auto& rc = p.getReferenceCoordinates();
-        const size_t d = polytope.getDimension();
-        const Index i = polytope.getIndex();
+      //   const auto& polytope = p.getPolytope();
+      //   const auto& rc = p.getReferenceCoordinates();
+      //   const size_t d = polytope.getDimension();
+      //   const Index i = polytope.getIndex();
 
-        const auto& fes = this->getFiniteElementSpace();
-        decltype(auto) fe  = fes.getFiniteElement(d, i);
+      //   const auto& fes = this->getFiniteElementSpace();
+      //   decltype(auto) fe  = fes.getFiniteElement(d, i);
 
-        const size_t count = fe.getCount();
+      //   const size_t count = fe.getCount();
 
-        // Ensure vector objects are sized once
-        m_gradient.resize(count);
-        for (auto& g : m_gradient)
-          g.resize(d);
+      //   // Ensure vector objects are sized once
+      //   m_gradient.resize(count);
+      //   for (auto& g : m_gradient)
+      //     g.resize(d);
 
-        const auto JinvT = p.getJacobianInverse().transpose(); // compute once
+      //   const auto JinvT = p.getJacobianInverse().transpose(); // compute once
 
-        for (size_t local = 0; local < count; ++local)
-        {
-          // cache physical gradient directly
-          m_gradient[local].noalias() = JinvT * fe.getBasis(local).getGradient()(rc);
-        }
+      //   for (size_t local = 0; local < count; ++local)
+      //   {
+      //     // cache physical gradient directly
+      //     m_gradient[local].noalias() = JinvT * fe.getBasis(local).getGradient()(rc);
+      //   }
 
-        return *this;
-      }
+      //   return *this;
+      // }
 
       constexpr
       auto getBasis(size_t local) const

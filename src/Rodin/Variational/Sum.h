@@ -17,6 +17,7 @@
 
 #include "ForwardDecls.h"
 #include "Function.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
 
 #include "RealFunction.h"
@@ -364,16 +365,9 @@ namespace Rodin::Variational
         return *this;
       }
 
-      Sum& setPoint(const Geometry::Point& p)
+      const IntegrationPoint& getIntegrationPoint() const
       {
-        m_lhs->setPoint(p);
-        m_rhs->setPoint(p);
-        return *this;
-      }
-
-      const Geometry::Point& getPoint() const
-      {
-        return m_lhs->getPoint();
+        return m_lhs->getIntegrationPoint();
       }
 
       constexpr

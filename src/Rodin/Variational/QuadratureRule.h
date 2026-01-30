@@ -445,7 +445,8 @@ namespace Rodin::Variational
           const auto& p = m_ps[qp];
           const ScalarType wdet = m_qf->getWeight(qp) * p.getDistortion();
 
-          const Variational::IntegrationPoint ip(&p, m_qf, qp);
+          assert(m_qf);
+          const Variational::IntegrationPoint ip(p, *m_qf, qp);
           integrand.setIntegrationPoint(ip);
 
           // fill all entries for this qp
@@ -585,7 +586,8 @@ namespace Rodin::Variational
           const auto& p = m_ps[qp];
           const ScalarType wdet = m_qf->getWeight(qp) * p.getDistortion();
 
-          const Variational::IntegrationPoint ip(&p, m_qf, qp);
+          assert(m_qf);
+          const Variational::IntegrationPoint ip(p, *m_qf, qp);
           integrand.setIntegrationPoint(ip); // triggers caching once per qp
 
           for (size_t te = 0; te < nte; ++te)

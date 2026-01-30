@@ -37,6 +37,7 @@
 #include "RealFunction.h"
 #include "ComplexFunction.h"
 #include "MatrixFunction.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
 
 #include "LinearFormIntegrator.h"
@@ -407,15 +408,9 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
-      const Geometry::Point& getPoint() const
+      const IntegrationPoint& getIntegrationPoint() const
       {
-        return m_rhs->getPoint();
-      }
-
-      Mult& setPoint(const Geometry::Point& p)
-      {
-        m_rhs->setPoint(p);
-        return *this;
+        return m_rhs->getIntegrationPoint();
       }
 
       Mult& setIntegrationPoint(const IntegrationPoint& ip)
@@ -427,8 +422,8 @@ namespace Rodin::Variational
       constexpr
       auto getBasis(size_t local) const
       {
-        const auto& p = getPoint();
-        return this->object(getLHS().getValue(p)) * this->object(getRHS().getBasis(local));
+        const auto& p = this->getIntegrationPoint();
+        return this->object(getLHS().getValue(p.getPoint())) * this->object(getRHS().getBasis(local));
       }
 
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
@@ -563,15 +558,9 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
-      const Geometry::Point& getPoint() const
+      const IntegrationPoint& getIntegrationPoint() const
       {
-        return m_lhs->getPoint();
-      }
-
-      Mult& setPoint(const Geometry::Point& p)
-      {
-        m_lhs->setPoint(p);
-        return *this;
+        return m_lhs->getIntegrationPoint();
       }
 
       Mult& setIntegrationPoint(const IntegrationPoint& ip)
@@ -583,8 +572,8 @@ namespace Rodin::Variational
       constexpr
       auto getBasis(size_t local) const
       {
-        const auto& p = getPoint();
-        return this->object(this->getLHS().getBasis(local)) * this->object(this->getRHS().getValue(p));
+        const auto& p = getIntegrationPoint();
+        return this->object(this->getLHS().getBasis(local)) * this->object(this->getRHS().getValue(p.getPoint()));
       }
 
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const

@@ -275,55 +275,55 @@ namespace Rodin::Variational
         return getOperand().getDOFs(polytope);
       }
 
-      const Geometry::Point& getPoint() const
-      {
-        assert(m_p);
-        return *m_p;
-      }
+      // const Geometry::Point& getPoint() const
+      // {
+      //   assert(m_p);
+      //   return *m_p;
+      // }
 
-      Div& setIntegrationPoint(const IntegrationPoint& ip)
-      {
-        assert(ip.getPoint());
-        this->setPoint(*ip.getPoint());
-        return *this;
-      }
+      // Div& setIntegrationPoint(const IntegrationPoint& ip)
+      // {
+      //   assert(ip.getPoint());
+      //   this->setPoint(*ip.getPoint());
+      //   return *this;
+      // }
 
-      Div& setPoint(const Geometry::Point& p)
-      {
-        if (m_p == &p)
-          return *this;
-        m_p = &p;
+      // Div& setPoint(const Geometry::Point& p)
+      // {
+      //   if (m_p == &p)
+      //     return *this;
+      //   m_p = &p;
 
-        const auto& polytope = p.getPolytope();
-        const auto& rc = p.getReferenceCoordinates();
-        const size_t d = polytope.getDimension();
-        const Index cell = polytope.getIndex();
+      //   const auto& polytope = p.getPolytope();
+      //   const auto& rc = p.getReferenceCoordinates();
+      //   const size_t d = polytope.getDimension();
+      //   const Index cell = polytope.getIndex();
 
-        const auto& fes = this->getFiniteElementSpace();
-        decltype(auto) fe = fes.getFiniteElement(d, cell);
+      //   const auto& fes = this->getFiniteElementSpace();
+      //   decltype(auto) fe = fes.getFiniteElement(d, cell);
 
-        const size_t count = fe.getCount();
-        assert(fes.getVectorDimension() == d);
+      //   const size_t count = fe.getCount();
+      //   assert(fes.getVectorDimension() == d);
 
-        const auto& Jinv = p.getJacobianInverse();
+      //   const auto& Jinv = p.getJacobianInverse();
 
-        m_div.resize(count);
+      //   m_div.resize(count);
 
-        for (size_t local = 0; local < count; ++local)
-        {
-          decltype(auto) basis = fe.getBasis(local);
+      //   for (size_t local = 0; local < count; ++local)
+      //   {
+      //     decltype(auto) basis = fe.getBasis(local);
 
-          // div = trace(Jref * Jinv) = sum_{i,j} (dphi_i/dxi_j) * (Jinv)_{j,i}
-          ScalarType div = ScalarType(0);
-          for (size_t ii = 0; ii < d; ++ii)
-            for (size_t jj = 0; jj < d; ++jj)
-              div += basis.template getDerivative<1>(ii, jj)(rc) * Jinv(jj, ii);
+      //     // div = trace(Jref * Jinv) = sum_{i,j} (dphi_i/dxi_j) * (Jinv)_{j,i}
+      //     ScalarType div = ScalarType(0);
+      //     for (size_t ii = 0; ii < d; ++ii)
+      //       for (size_t jj = 0; jj < d; ++jj)
+      //         div += basis.template getDerivative<1>(ii, jj)(rc) * Jinv(jj, ii);
 
-          m_div[local] = div;
-        }
+      //     m_div[local] = div;
+      //   }
 
-        return *this;
-      }
+      //   return *this;
+      // }
 
       ScalarType getBasis(size_t local) const
       {

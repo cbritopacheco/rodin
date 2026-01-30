@@ -12,6 +12,7 @@
 #ifndef RODIN_VARIATIONAL_TRANSPOSE_H
 #define RODIN_VARIATIONAL_TRANSPOSE_H
 
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
 #include "MatrixFunction.h"
 
@@ -189,20 +190,9 @@ namespace Rodin::Variational
        * @brief Gets the current evaluation point.
        * @returns Reference to the point
        */
-      const Geometry::Point& getPoint() const
+      const IntegrationPoint& getIntegrationPoint() const
       {
-        return m_operand->getPoint();
-      }
-
-      /**
-       * @brief Sets the evaluation point.
-       * @param p Point to evaluate at
-       * @returns Reference to this object
-       */
-      Transpose& setPoint(const Geometry::Point& p)
-      {
-        m_operand->setPoint(p);
-        return *this;
+        return m_operand->getIntegrationPoint();
       }
 
       Transpose& setIntegrationPoint(const IntegrationPoint& ip)

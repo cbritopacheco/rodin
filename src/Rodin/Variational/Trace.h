@@ -42,6 +42,7 @@
 
 #include "ForwardDecls.h"
 
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
 
 namespace Rodin::FormLanguage
@@ -208,14 +209,14 @@ namespace Rodin::Variational
         return getOperand().getDOFs(element);
       }
 
-      const Geometry::Point& getPoint() const
+      const IntegrationPoint& getIntegrationPoint() const
       {
-        return m_operand->getPoint();
+        return m_operand->getIntegrationPoint();
       }
 
-      Trace& setPoint(const Geometry::Point& p)
+      Trace& setIntegrationPoint(const IntegrationPoint& ip)
       {
-        m_operand->setPoint(p);
+        m_operand->setIntegrationPoint(ip);
         return *this;
       }
 

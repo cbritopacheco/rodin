@@ -442,20 +442,9 @@ namespace Rodin::Variational
        * @brief Gets the current evaluation point.
        * @returns Reference to the point
        */
-      const Geometry::Point& getPoint() const
+      const IntegrationPoint& getIntegrationPoint() const
       {
-        return m_u->getPoint();
-      }
-
-      /**
-       * @brief Sets the evaluation point.
-       * @param p Point to evaluate at
-       * @returns Reference to this object
-       */
-      Component& setPoint(const Geometry::Point& p)
-      {
-        m_u->setPoint(p);
-        return *this;
+        return m_u->getIntegrationPoint();
       }
 
       Component& setIntegrationPoint(const IntegrationPoint& ip)

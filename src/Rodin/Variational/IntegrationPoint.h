@@ -15,16 +15,19 @@ namespace Rodin::Variational
   class IntegrationPoint
   {
     public:
-      IntegrationPoint(const Geometry::Point* p, const QF::QuadratureFormulaBase* qf, size_t qp)
+      IntegrationPoint(
+          const Geometry::Point& p,
+          const QF::QuadratureFormulaBase& qf,
+          size_t qp)
         : m_p(p), m_qf(qf), m_qp(qp)
       {}
 
-      const Geometry::Point* getPoint() const
+      const Geometry::Point& getPoint() const
       {
         return m_p;
       }
 
-      const QF::QuadratureFormulaBase* getQuadratureFormula() const
+      const QF::QuadratureFormulaBase& getQuadratureFormula() const
       {
         return m_qf;
       }
@@ -35,8 +38,8 @@ namespace Rodin::Variational
       }
 
     private:
-      const Geometry::Point* m_p;
-      const QF::QuadratureFormulaBase* m_qf;
+      std::reference_wrapper<const Geometry::Point> m_p;
+      std::reference_wrapper<const QF::QuadratureFormulaBase> m_qf;
       size_t m_qp;
   };
 }

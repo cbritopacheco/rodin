@@ -19,6 +19,7 @@
 
 #include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Variational/ForwardDecls.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
 
 namespace Rodin::FormLanguage
@@ -97,10 +98,15 @@ namespace Rodin::Variational
        * @param[in] p Point at which to evaluate
        * @returns Reference to this object
        */
-      TrialFunctionReference& setPoint(const Geometry::Point& p)
+      TrialFunctionReference& setIntegrationPoint(const IntegrationPoint& p)
       {
-        m_ref.get().setPoint(p);
+        m_ref.get().setIntegrationPoint(p);
         return *this;
+      }
+
+      const IntegrationPoint& getIntegrationPoint() const
+      {
+        return m_ref.get().getIntegrationPoint();
       }
 
       /**

@@ -25,6 +25,7 @@
 
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/Div.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 
 namespace Rodin::FormLanguage
 {
@@ -248,13 +249,14 @@ namespace Rodin::Variational
 
       Div(const Div& other)
         : Parent(other),
-          m_u(other.m_u)
+          m_u(other.m_u),
+          m_ip(nullptr)
       {}
 
       Div(Div&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
-          m_p(std::exchange(other.m_p, nullptr))
+          m_ip(std::exchange(other.m_p, nullptr))
       {}
 
       constexpr
@@ -275,55 +277,55 @@ namespace Rodin::Variational
         return getOperand().getDOFs(polytope);
       }
 
-      const Geometry::Point& getPoint() const
+      const IntegrationPoint& getIntegrationPoint() const
       {
-        assert(m_p);
-        return *m_p;
+        assert(m_ip);
+        return *m_ip;
       }
 
-      Div& setIntegrationPoint(const IntegrationPoint& ip)
-      {
-        assert(ip.getPoint());
-        this->setPoint(*ip.getPoint());
-        return *this;
-      }
+      // Div& setIntegrationPoint(const IntegrationPoint& ip)
+      // {
+      //   assert(ip.getPoint());
+      //   this->setPoint(*ip.getPoint());
+      //   return *this;
+      // }
 
-      Div& setPoint(const Geometry::Point& p)
-      {
-        if (m_p == &p)
-          return *this;
-        m_p = &p;
+      // Div& setPoint(const Geometry::Point& p)
+      // {
+      //   if (m_p == &p)
+      //     return *this;
+      //   m_p = &p;
 
-        const auto& polytope = p.getPolytope();
-        const auto& rc = p.getReferenceCoordinates();
-        const size_t d = polytope.getDimension();
-        const Index cell = polytope.getIndex();
+      //   const auto& polytope = p.getPolytope();
+      //   const auto& rc = p.getReferenceCoordinates();
+      //   const size_t d = polytope.getDimension();
+      //   const Index cell = polytope.getIndex();
 
-        const auto& fes = this->getFiniteElementSpace();
-        decltype(auto) fe = fes.getFiniteElement(d, cell);
+      //   const auto& fes = this->getFiniteElementSpace();
+      //   decltype(auto) fe = fes.getFiniteElement(d, cell);
 
-        const size_t count = fe.getCount();
-        assert(fes.getVectorDimension() == d);
+      //   const size_t count = fe.getCount();
+      //   assert(fes.getVectorDimension() == d);
 
-        const auto& Jinv = p.getJacobianInverse();
+      //   const auto& Jinv = p.getJacobianInverse();
 
-        m_div.resize(count);
+      //   m_div.resize(count);
 
-        for (size_t local = 0; local < count; ++local)
-        {
-          decltype(auto) basis = fe.getBasis(local);
+      //   for (size_t local = 0; local < count; ++local)
+      //   {
+      //     decltype(auto) basis = fe.getBasis(local);
 
-          // div = trace(Jref * Jinv) = sum_{i,j} (dphi_i/dxi_j) * (Jinv)_{j,i}
-          ScalarType div = ScalarType(0);
-          for (size_t ii = 0; ii < d; ++ii)
-            for (size_t jj = 0; jj < d; ++jj)
-              div += basis.template getDerivative<1>(ii, jj)(rc) * Jinv(jj, ii);
+      //     // div = trace(Jref * Jinv) = sum_{i,j} (dphi_i/dxi_j) * (Jinv)_{j,i}
+      //     ScalarType div = ScalarType(0);
+      //     for (size_t ii = 0; ii < d; ++ii)
+      //       for (size_t jj = 0; jj < d; ++jj)
+      //         div += basis.template getDerivative<1>(ii, jj)(rc) * Jinv(jj, ii);
 
-          m_div[local] = div;
-        }
+      //     m_div[local] = div;
+      //   }
 
-        return *this;
-      }
+      //   return *this;
+      // }
 
       ScalarType getBasis(size_t local) const
       {
@@ -352,11 +354,10 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const OperandType> m_u;
+      const IntegrationPoint* m_ip;
 
       std::vector<Math::SpatialMatrix<ScalarType>> m_jacobian;
       std::vector<ScalarType> m_div;
-
-      const Geometry::Point* m_p;
   };
 
   template <size_t K, class NestedDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>

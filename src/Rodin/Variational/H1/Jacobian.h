@@ -274,70 +274,70 @@ namespace Rodin::Variational
         return getOperand().getDOFs(element);
       }
 
-      const Geometry::Point& getPoint() const
-      {
-        assert(m_p);
-        return *m_p;
-      }
+      // const Geometry::Point& getPoint() const
+      // {
+      //   assert(m_p);
+      //   return *m_p;
+      // }
 
-      Jacobian& setIntegrationPoint(const IntegrationPoint& ip)
-      {
-        assert(ip.getPoint());
-        this->setPoint(*ip.getPoint());
-        return *this;
-      }
+      // Jacobian& setIntegrationPoint(const IntegrationPoint& ip)
+      // {
+      //   assert(ip.getPoint());
+      //   this->setPoint(*ip.getPoint());
+      //   return *this;
+      // }
 
-      Jacobian& setPoint(const Geometry::Point& p)
-      {
-        if (m_p == &p)
-          return *this;
-        m_p = &p;
+      // Jacobian& setPoint(const Geometry::Point& p)
+      // {
+      //   if (m_p == &p)
+      //     return *this;
+      //   m_p = &p;
 
-        const auto& polytope = p.getPolytope();
-        const auto& rc = p.getReferenceCoordinates();
-        const size_t d = polytope.getDimension();
-        const Index cell = polytope.getIndex();
+      //   const auto& polytope = p.getPolytope();
+      //   const auto& rc = p.getReferenceCoordinates();
+      //   const size_t d = polytope.getDimension();
+      //   const Index cell = polytope.getIndex();
 
-        const auto& fes = this->getFiniteElementSpace();
-        decltype(auto) fe = fes.getFiniteElement(d, cell);
+      //   const auto& fes = this->getFiniteElementSpace();
+      //   decltype(auto) fe = fes.getFiniteElement(d, cell);
 
-        const size_t count = fe.getCount();
-        const size_t vdim  = fes.getVectorDimension();
+      //   const size_t count = fe.getCount();
+      //   const size_t vdim  = fes.getVectorDimension();
 
-        // Jinv is a stable reference (per your guarantee)
-        const auto& Jinv = p.getJacobianInverse();
+      //   // Jinv is a stable reference (per your guarantee)
+      //   const auto& Jinv = p.getJacobianInverse();
 
-        // Resize once / only if needed
-        m_jacobian_ref.resize(count);
-        m_jacobian_phys.resize(count);
-        for (size_t local = 0; local < count; ++local)
-        {
-          auto& Jr = m_jacobian_ref[local];
-          auto& Jp = m_jacobian_phys[local];
+      //   // Resize once / only if needed
+      //   m_jacobian_ref.resize(count);
+      //   m_jacobian_phys.resize(count);
+      //   for (size_t local = 0; local < count; ++local)
+      //   {
+      //     auto& Jr = m_jacobian_ref[local];
+      //     auto& Jp = m_jacobian_phys[local];
 
-          if (Jr.rows() != vdim || Jr.cols() != d)
-            Jr.resize(vdim, d);
-          if (Jp.rows() != vdim || Jp.cols() != d)
-            Jp.resize(vdim, d);
-        }
+      //     if (Jr.rows() != vdim || Jr.cols() != d)
+      //       Jr.resize(vdim, d);
+      //     if (Jp.rows() != vdim || Jp.cols() != d)
+      //       Jp.resize(vdim, d);
+      //   }
 
-        for (size_t local = 0; local < count; ++local)
-        {
-          decltype(auto) basis = fe.getBasis(local); // hoist once
+      //   for (size_t local = 0; local < count; ++local)
+      //   {
+      //     decltype(auto) basis = fe.getBasis(local); // hoist once
 
-          auto& Jref  = m_jacobian_ref[local];
-          auto& Jphys = m_jacobian_phys[local];
+      //     auto& Jref  = m_jacobian_ref[local];
+      //     auto& Jphys = m_jacobian_phys[local];
 
-          for (size_t comp = 0; comp < vdim; ++comp)
-            for (size_t j = 0; j < d; ++j)
-              Jref(comp, j) = basis.template getDerivative<1>(comp, j)(rc);
+      //     for (size_t comp = 0; comp < vdim; ++comp)
+      //       for (size_t j = 0; j < d; ++j)
+      //         Jref(comp, j) = basis.template getDerivative<1>(comp, j)(rc);
 
-          // map once
-          Jphys.noalias() = Jref * Jinv;
-        }
+      //     // map once
+      //     Jphys.noalias() = Jref * Jinv;
+      //   }
 
-        return *this;
-      }
+      //   return *this;
+      // }
 
       decltype(auto) getBasis(size_t local) const
       {

@@ -272,21 +272,9 @@ namespace Rodin::Variational
        * @note CRTP function to be overriden in the Derived class.
        */
       constexpr
-      const Geometry::Point& getPoint() const
+      const IntegrationPoint& getIntegrationPoint() const
       {
-        return static_cast<const Derived&>(*this).getPoint();
-      }
-
-      /**
-       * @brief Sets the evaluation point for the shape function.
-       * @param[in] p Point at which to evaluate
-       * @returns Reference to the derived object
-       * @note CRTP function to be overriden in the Derived class.
-       */
-      constexpr
-      Derived& setPoint(const Geometry::Point& p)
-      {
-        return static_cast<Derived&>(*this).setPoint(p);
+        return static_cast<const Derived&>(*this).getIntegrationPoint();
       }
 
       constexpr

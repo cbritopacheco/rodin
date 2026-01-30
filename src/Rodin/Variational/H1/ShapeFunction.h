@@ -32,21 +32,21 @@ namespace Rodin::Variational
       constexpr
       ShapeFunction(const FESType& fes)
         : Parent(fes),
-          m_p(nullptr)
+          m_ip(nullptr)
       {}
 
       constexpr
       ShapeFunction(const ShapeFunction& other)
         : Parent(other),
           m_basis(other.m_basis),
-          m_p(nullptr)
+          m_ip(nullptr)
       {}
 
       constexpr
       ShapeFunction(ShapeFunction&& other)
         : Parent(std::move(other)),
           m_basis(std::move(other.m_basis)),
-          m_p(std::exchange(other.m_p, nullptr))
+          m_ip(std::exchange(other.m_p, nullptr))
       {}
 
       constexpr
@@ -58,76 +58,76 @@ namespace Rodin::Variational
       }
 
       constexpr
-      const Geometry::Point& getPoint() const
+      const IntegrationPoint& getIntegrationPoint() const
       {
-        assert(m_p);
-        return *m_p;
+        assert(m_ip);
+        return *m_ip;
       }
 
-      /**
-       * Fallback path (non-quadrature evaluations).
-       * Keeps your previous behavior (pushforward of each basis at p).
-       */
-      ShapeFunction& setPoint(const Geometry::Point& p)
-      {
-        if (m_p == &p)
-          return *this;
+      // /**
+      //  * Fallback path (non-quadrature evaluations).
+      //  * Keeps your previous behavior (pushforward of each basis at p).
+      //  */
+      // ShapeFunction& setPoint(const Geometry::Point& p)
+      // {
+      //   if (m_p == &p)
+      //     return *this;
 
-        m_p = &p;
+      //   m_p = &p;
 
-        const auto& polytope = p.getPolytope();
-        const size_t d   = polytope.getDimension();
-        const Index  idx = polytope.getIndex();
+      //   const auto& polytope = p.getPolytope();
+      //   const size_t d   = polytope.getDimension();
+      //   const Index  idx = polytope.getIndex();
 
-        const auto& fes = this->getFiniteElementSpace();
-        const auto& fe  = fes.getFiniteElement(d, idx);
+      //   const auto& fes = this->getFiniteElementSpace();
+      //   const auto& fe  = fes.getFiniteElement(d, idx);
 
-        const size_t ndof = fe.getCount();
-        m_basis.resize(ndof);
+      //   const size_t ndof = fe.getCount();
+      //   m_basis.resize(ndof);
 
-        for (size_t a = 0; a < ndof; ++a)
-          m_basis[a] = fes.getPushforward({ d, idx }, fe.getBasis(a))(p);
+      //   for (size_t a = 0; a < ndof; ++a)
+      //     m_basis[a] = fes.getPushforward({ d, idx }, fe.getBasis(a))(p);
 
-        return *this;
-      }
+      //   return *this;
+      // }
 
-      /**
-       * Fast path: quadrature evaluation via Tabulation.
-       */
-      ShapeFunction& setIntegrationPoint(const IntegrationPoint& ip)
-      {
-        const auto* pp = ip.getPoint();
-        assert(pp);
-        const Geometry::Point& p = *pp;
+      // /**
+      //  * Fast path: quadrature evaluation via Tabulation.
+      //  */
+      // ShapeFunction& setIntegrationPoint(const IntegrationPoint& ip)
+      // {
+      //   const auto* pp = ip.getPoint();
+      //   assert(pp);
+      //   const Geometry::Point& p = *pp;
 
-        // If you want: keep the same pointer short-circuit
-        if (m_p == &p)
-          return *this;
+      //   // If you want: keep the same pointer short-circuit
+      //   if (m_p == &p)
+      //     return *this;
 
-        const auto* qf = ip.getQuadratureFormula();
-        assert(qf);
+      //   const auto* qf = ip.getQuadratureFormula();
+      //   assert(qf);
 
-        const size_t qp = ip.getIndex();
+      //   const size_t qp = ip.getIndex();
 
-        m_p = &p;
+      //   m_p = &p;
 
-        const auto& polytope = p.getPolytope();
-        const size_t d   = polytope.getDimension();
-        const Index  idx = polytope.getIndex();
+      //   const auto& polytope = p.getPolytope();
+      //   const size_t d   = polytope.getDimension();
+      //   const Index  idx = polytope.getIndex();
 
-        const auto& fes = this->getFiniteElementSpace();
-        const auto& fe  = fes.getFiniteElement(d, idx);
+      //   const auto& fes = this->getFiniteElementSpace();
+      //   const auto& fe  = fes.getFiniteElement(d, idx);
 
-        const size_t ndof = fe.getCount();
-        m_basis.resize(ndof);
+      //   const size_t ndof = fe.getCount();
+      //   m_basis.resize(ndof);
 
-        const auto& tab = fe.getTabulation(*qf);
+      //   const auto& tab = fe.getTabulation(*qf);
 
-        for (size_t a = 0; a < ndof; ++a)
-          m_basis[a] = tab.getBasis(qp, a);
+      //   for (size_t a = 0; a < ndof; ++a)
+      //     m_basis[a] = tab.getBasis(qp, a);
 
-        return *this;
-      }
+      //   return *this;
+      // }
 
       constexpr
       const RangeType& getBasis(size_t local) const
@@ -155,7 +155,7 @@ namespace Rodin::Variational
 
     private:
       std::vector<RangeType> m_basis;
-      const Geometry::Point* m_p;
+      const IntegrationPoint* m_ip;
   };
 
   template <class Derived, size_t K, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
@@ -184,22 +184,19 @@ namespace Rodin::Variational
 
       constexpr
       ShapeFunction(const FESType& fes)
-        : Parent(fes),
-          m_p(nullptr)
+        : Parent(fes)
       {}
 
       constexpr
       ShapeFunction(const ShapeFunction& other)
         : Parent(other),
-          m_basis(other.m_basis),
-          m_p(nullptr)
+          m_basis(other.m_basis)
       {}
 
       constexpr
       ShapeFunction(ShapeFunction&& other)
         : Parent(std::move(other)),
-          m_basis(std::move(other.m_basis)),
-          m_p(std::exchange(other.m_p, nullptr))
+          m_basis(std::move(other.m_basis))
       {}
 
       constexpr
@@ -210,48 +207,48 @@ namespace Rodin::Variational
         return this->getFiniteElementSpace().getFiniteElement(d, i).getCount();
       }
 
-      constexpr
-      const Geometry::Point& getPoint() const
-      {
-        assert(m_p);
-        return *m_p;
-      }
+      // constexpr
+      // const Geometry::Point& getPoint() const
+      // {
+      //   assert(m_p);
+      //   return *m_p;
+      // }
 
-      /**
-       * Slow path: pushforward each basis at p.
-       */
-      ShapeFunction& setPoint(const Geometry::Point& p)
-      {
-        if (m_p == &p)
-          return *this;
+      // /**
+      //  * Slow path: pushforward each basis at p.
+      //  */
+      // ShapeFunction& setPoint(const Geometry::Point& p)
+      // {
+      //   if (m_p == &p)
+      //     return *this;
 
-        m_p = &p;
+      //   m_p = &p;
 
-        const auto& polytope = p.getPolytope();
-        const size_t d   = polytope.getDimension();
-        const Index  idx = polytope.getIndex();
+      //   const auto& polytope = p.getPolytope();
+      //   const size_t d   = polytope.getDimension();
+      //   const Index  idx = polytope.getIndex();
 
-        const auto& fes = this->getFiniteElementSpace();
-        const auto& fe  = fes.getFiniteElement(d, idx);
+      //   const auto& fes = this->getFiniteElementSpace();
+      //   const auto& fe  = fes.getFiniteElement(d, idx);
 
-        const size_t ndof = fe.getCount();
-        m_basis.resize(ndof);
+      //   const size_t ndof = fe.getCount();
+      //   m_basis.resize(ndof);
 
-        for (size_t a = 0; a < ndof; ++a)
-          m_basis[a] = fes.getPushforward({ d, idx }, fe.getBasis(a))(p);
+      //   for (size_t a = 0; a < ndof; ++a)
+      //     m_basis[a] = fes.getPushforward({ d, idx }, fe.getBasis(a))(p);
 
-        return *this;
-      }
+      //   return *this;
+      // }
 
-      /**
-       * Intentionally slow: reuse setPoint (pushforward) even under quadrature.
-       */
-      ShapeFunction& setIntegrationPoint(const IntegrationPoint& ip)
-      {
-        const auto* pp = ip.getPoint();
-        assert(pp);
-        return setPoint(*pp);
-      }
+      // /**
+      //  * Intentionally slow: reuse setPoint (pushforward) even under quadrature.
+      //  */
+      // ShapeFunction& setIntegrationPoint(const IntegrationPoint& ip)
+      // {
+      //   const auto* pp = ip.getPoint();
+      //   assert(pp);
+      //   return setPoint(*pp);
+      // }
 
       constexpr
       const RangeType& getBasis(size_t local) const
@@ -279,7 +276,7 @@ namespace Rodin::Variational
 
     private:
       std::vector<RangeType> m_basis;
-      const Geometry::Point* m_p;
+      const IntegrationPoint* m_ip;
   };
 }
 

@@ -102,9 +102,6 @@ namespace Rodin::Tests::Manufactured::LinearElasticity
                  + DirichletBC(u, u_exact);
       CG(elasticity).solve();
 
-      mesh.save("LinearElasticity.mesh");
-      u.getSolution().save("LinearElasticity.gf");
-
       P1 scalar(mesh);
       GridFunction err2(scalar);
       err2 = Pow(Frobenius(u.getSolution() - u_exact), 2);
@@ -172,7 +169,7 @@ namespace Rodin::Tests::Manufactured::LinearElasticity
     };
 
     // zero body force since divergence of constant stress = 0
-    VectorFunction f = VectorFunction{Zero(), Zero()};
+    VectorFunction f = VectorFunction{ Zero(), Zero() };
 
     // assemble and solve
     TrialFunction u(vh);

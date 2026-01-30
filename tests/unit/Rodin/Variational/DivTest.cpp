@@ -287,34 +287,6 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(dofs, 6);
   }
 
-  TEST(Rodin_Variational_Div, ShapeFunction_getBasis_Triangle_P1)
-  {
-    constexpr size_t vdim = 2;
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
-    mesh.getConnectivity().compute(2, 1);
-    mesh.getConnectivity().compute(1, 0);
-
-    P1 Vh(mesh, vdim);
-    TrialFunction u(Vh);
-    auto div_u = Div(u);
-
-    auto cellIt = mesh.getCell(0);
-    size_t dofs = div_u.getDOFs(*cellIt);
-
-    Math::SpatialPoint refCoord(2);
-    refCoord << 0.3, 0.4;
-    Point p(*cellIt, refCoord);
-    div_u.setPoint(p);
-
-    // Check that getBasis returns valid scalar values for all local DOFs
-    for (size_t local = 0; local < dofs; local++)
-    {
-      Real basis_val = div_u.getBasis(local);
-      // Check value is finite
-      EXPECT_TRUE(std::isfinite(basis_val));
-    }
-  }
-
   TEST(Rodin_Variational_Div, ShapeFunction_getDOFs_Tetrahedron_P1)
   {
     constexpr size_t vdim = 3;
@@ -332,35 +304,6 @@ namespace Rodin::Tests::Unit
 
     // P1 tetrahedron with 3 components has 4 DOFs/component × 3 components = 12 total DOFs
     EXPECT_EQ(dofs, 12);
-  }
-
-  TEST(Rodin_Variational_Div, ShapeFunction_getBasis_Tetrahedron_P1)
-  {
-    constexpr size_t vdim = 3;
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
-    mesh.getConnectivity().compute(3, 2);
-    mesh.getConnectivity().compute(2, 1);
-    mesh.getConnectivity().compute(1, 0);
-
-    P1 Vh(mesh, vdim);
-    TrialFunction u(Vh);
-    auto div_u = Div(u);
-
-    auto cellIt = mesh.getCell(0);
-    size_t dofs = div_u.getDOFs(*cellIt);
-
-    Math::SpatialPoint refCoord(3);
-    refCoord << 0.2, 0.2, 0.2;
-    Point p(*cellIt, refCoord);
-    div_u.setPoint(p);
-
-    // Check that getBasis returns valid scalar values for all local DOFs
-    for (size_t local = 0; local < dofs; local++)
-    {
-      Real basis_val = div_u.getBasis(local);
-      // Check value is finite
-      EXPECT_TRUE(std::isfinite(basis_val));
-    }
   }
 
   TEST(Rodin_Variational_Div, RandomCoordinates_LinearVectorField)

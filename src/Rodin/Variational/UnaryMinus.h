@@ -24,6 +24,7 @@
 
 #include "ForwardDecls.h"
 #include "Function.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
@@ -219,16 +220,9 @@ namespace Rodin::Variational
         return *this;
       }
 
-      constexpr
-      UnaryMinus& setPoint(const Geometry::Point& p)
+      const IntegrationPoint& getIntegrationPoint() const
       {
-        m_operand->setPoint(p);
-        return *this;
-      }
-
-      const Geometry::Point& getPoint() const
-      {
-        return m_operand->getPoint();
+        return m_operand->getIntegrationPoint();
       }
 
       /**
