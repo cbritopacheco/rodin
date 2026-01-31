@@ -33,21 +33,22 @@ namespace Rodin::Variational
         struct Key
         {
           Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
+          size_t vdim = 1;
           bool valid = false;
 
           explicit operator bool() const noexcept { return valid; }
 
-          bool operator==(const Key& other) const noexcept
+          bool operator==(const Key& o) const noexcept
           {
-            if (!valid || !other.valid)
-              return false;
-            return geom == other.geom;
+            if (!valid || !o.valid) return false;
+            return geom == o.geom && vdim == o.vdim;
           }
 
           void operator=(std::initializer_list<int>) noexcept
           {
             valid = false;
             geom = Geometry::Polytope::Type::Point;
+            vdim = 1;
           }
         };
 
@@ -103,39 +104,44 @@ namespace Rodin::Variational
         m_ip = &ip;
 
         const auto& poly = ip.getPoint().getPolytope();
-        const auto& qf = ip.getQuadratureFormula();
-        const size_t qp = ip.getIndex();
         const auto geom  = poly.getGeometry();
+
+        const size_t vdim =
+          [] (const auto& self) -> size_t
+          {
+            if constexpr (std::is_same_v<RangeType, ScalarType>)
+              return 1;
+            else
+              return self.getFiniteElementSpace().getVectorDimension();
+          }(*this);
 
         typename Cache::Key key;
         key.geom  = geom;
+        key.vdim  = vdim;
         key.valid = true;
 
-        const bool recompute = !(m_cache.key == key);
-
-        if (recompute)
+        if (!(m_cache.key == key))
         {
           m_cache.key = key;
 
-
           if constexpr (std::is_same_v<RangeType, ScalarType>)
           {
-            const P0Element<RangeType> fe(geom);
-            const size_t ndof = fe.getCount();
-            m_cache.basis.resize(ndof);
-            const auto& rq = qf.getPoint(qp);
-            for (size_t a = 0; a < ndof; ++a)
-              m_cache.basis[a] = fe.getBasis(a)(rq);
+            m_cache.basis.resize(1);
+            m_cache.basis[0] = ScalarType(1);
           }
           else
           {
             static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
-            const P0Element<RangeType> fe(geom, this->getFiniteElementSpace().getVectorDimension());
-            const size_t ndof = fe.getCount();
-            m_cache.basis.resize(ndof);
-            const auto& rq = qf.getPoint(qp);
-            for (size_t a = 0; a < ndof; ++a)
-              m_cache.basis[a] = fe.getBasis(a)(rq);
+
+            m_cache.basis.resize(vdim);
+            for (size_t c = 0; c < vdim; ++c)
+            {
+              RangeType e;
+              e.resize(vdim);
+              e.setZero();
+              e.coeffRef(c) = ScalarType(1);
+              m_cache.basis[c] = std::move(e);
+            }
           }
         }
 

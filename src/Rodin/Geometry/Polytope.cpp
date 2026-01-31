@@ -33,6 +33,24 @@ namespace Rodin::Geometry
     return false;
   }
 
+  bool Polytope::Traits::isTensorProduct() const
+  {
+    switch (m_g)
+    {
+      case Type::Point:
+      case Type::Segment:
+      case Type::Quadrilateral:
+      case Type::Hexahedron:
+      case Type::Wedge:
+        return true;
+      case Type::Triangle:
+      case Type::Tetrahedron:
+        return false;
+    }
+    assert(false);
+    return false;
+  }
+
   size_t Polytope::Traits::getDimension() const
   {
     switch (m_g)
@@ -390,7 +408,7 @@ namespace Rodin::Geometry
   Real Polytope::getMeasure() const
   {
     Real res = 0;
-    QF::GenericPolytopeQuadrature qf(getTransformation().getJacobianOrder(), getGeometry());
+    QF::GenericPolytopeQuadrature qf(getTransformation().getOrder(), getGeometry());
     for (size_t i = 0; i < qf.getSize(); i++)
     {
       const Geometry::Point p(*this, qf.getPoint(i));

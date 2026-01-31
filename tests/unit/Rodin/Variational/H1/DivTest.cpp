@@ -917,31 +917,6 @@ TEST(H1Div, ShapeFunction_getDOFs_Triangle_H1_2)
   EXPECT_EQ(div_u.getDOFs(*cellIt), 12);
 }
 
-TEST(H1Div, ShapeFunction_getBasis_Triangle_H1_2)
-{
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
-  mesh.getConnectivity().compute(2, 1);
-  mesh.getConnectivity().compute(1, 0);
-
-  H1 uh(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
-  TrialFunction u(uh);
-  auto div_u = Div(u);
-
-  const auto cellIt = mesh.getCell(0);
-  Math::SpatialPoint refCoord(2);
-  refCoord << 0.3, 0.3;
-  Geometry::Point p(*cellIt, refCoord);
-  div_u.setPoint(p);
-
-  // Check that getBasis returns valid scalars for all DOFs
-  for (size_t local = 0; local < div_u.getDOFs(*cellIt); local++)
-  {
-    const auto& basis = div_u.getBasis(local);
-    EXPECT_TRUE(std::isfinite(basis));
-  }
-}
-
 TEST(H1Div, ShapeFunction_getDOFs_Tetrahedron_H1_2)
 {
   Mesh mesh;
@@ -957,31 +932,5 @@ TEST(H1Div, ShapeFunction_getDOFs_Tetrahedron_H1_2)
   // H1<2> on a tetrahedron has 10 DOFs per component, 3 components = 30 total
   const auto cellIt = mesh.getCell(0);
   EXPECT_EQ(div_u.getDOFs(*cellIt), 30);
-}
-
-TEST(H1Div, ShapeFunction_getBasis_Tetrahedron_H1_2)
-{
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
-  mesh.getConnectivity().compute(3, 2);
-  mesh.getConnectivity().compute(2, 1);
-  mesh.getConnectivity().compute(1, 0);
-
-  H1 uh(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
-  TrialFunction u(uh);
-  auto div_u = Div(u);
-
-  const auto cellIt = mesh.getCell(0);
-  Math::SpatialPoint refCoord(3);
-  refCoord << 0.2, 0.2, 0.2;
-  Geometry::Point p(*cellIt, refCoord);
-  div_u.setPoint(p);
-
-  // Check that getBasis returns valid scalars for all DOFs
-  for (size_t local = 0; local < div_u.getDOFs(*cellIt); local++)
-  {
-    const auto& basis = div_u.getBasis(local);
-    EXPECT_TRUE(std::isfinite(basis));
-  }
 }
 

@@ -954,7 +954,7 @@ namespace Rodin::Tests::Unit
     const auto& trans = triangle.getTransformation();
 
     // Just verify we can get the transformation
-    EXPECT_GE(trans.getJacobianOrder(), 0);
+    EXPECT_GE(trans.getOrder(), 0);
   }
 
   TEST(Geometry_Polytope, PolytopeComparison_LessThan)

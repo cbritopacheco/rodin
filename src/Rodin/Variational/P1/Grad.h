@@ -190,39 +190,98 @@ namespace Rodin::Variational
     : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, P1<Scalar, Mesh>, SpaceType>>>
   {
     public:
-      /// Finite element space type
       using FESType = P1<Scalar, Mesh>;
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
-      /// Type of scalar values in the finite element space
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
-      using RangeType = Math::Vector<ScalarType>;
+      // Gradient of a scalar P1 basis is a spatial vector
+      using RangeType = Math::SpatialVector<ScalarType>;
 
-      /// Operand type
       using OperandType = ShapeFunction<NestedDerived, FESType, Space>;
 
-      /// Parent class
       using Parent = ShapeFunctionBase<Grad<OperandType>, FESType, Space>;
+
+      struct Cache
+      {
+        struct CellKey
+        {
+          const void* mesh = nullptr;
+          size_t d = 0;
+          Index i = 0;
+          Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
+          int transOrder = 1;
+          bool valid = false;
+
+          explicit operator bool() const noexcept { return valid; }
+
+          bool operator==(const CellKey& o) const noexcept
+          {
+            if (!valid || !o.valid)
+              return false;
+            return mesh == o.mesh && d == o.d && i == o.i
+                && geom == o.geom && transOrder == o.transOrder;
+          }
+
+          void operator=(std::initializer_list<int>) noexcept
+          {
+            valid = false;
+            mesh = nullptr;
+            d = 0;
+            i = 0;
+            geom = Geometry::Polytope::Type::Point;
+            transOrder = 1;
+          }
+        };
+
+        struct QpKey
+        {
+          const QF::QuadratureFormulaBase* qf = nullptr;
+          size_t qp = 0;
+          bool valid = false;
+
+          explicit operator bool() const noexcept { return valid; }
+
+          bool operator==(const QpKey& o) const noexcept
+          {
+            if (!valid || !o.valid)
+              return false;
+            return qf == o.qf && qp == o.qp;
+          }
+
+          void operator=(std::initializer_list<int>) noexcept
+          {
+            valid = false;
+            qf = nullptr;
+            qp = 0;
+          }
+        };
+
+        // Cached physical gradients ∇_x φ_a (one per scalar basis function)
+        std::vector<RangeType> grad;
+
+        CellKey cellKey;
+        QpKey qpKey;
+      };
 
       Grad(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
           m_u(u),
-          m_p(nullptr)
+          m_ip(nullptr)
       {}
 
       Grad(const Grad& other)
         : Parent(other),
           m_u(other.m_u),
-          m_p(other.m_p),
-          m_gradient(other.m_gradient)
+          m_ip(nullptr),
+          m_cache(other.m_cache)
       {}
 
       Grad(Grad&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
-          m_p(std::exchange(other.m_p, nullptr)),
-          m_gradient(std::move(other.m_gradient))
+          m_ip(std::exchange(other.m_ip, nullptr)),
+          m_cache(std::move(other.m_cache))
       {}
 
       constexpr
@@ -240,51 +299,119 @@ namespace Rodin::Variational
       constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
+        // Gradient has same number of scalar DOFs as the operand basis count.
         return getOperand().getDOFs(element);
       }
 
-      // const Geometry::Point& getPoint() const
-      // {
-      //   assert(m_p);
-      //   return *m_p;
-      // }
+      constexpr
+      const IntegrationPoint& getIntegrationPoint() const
+      {
+        assert(m_ip);
+        return *m_ip;
+      }
 
-      // Grad& setPoint(const Geometry::Point& p)
-      // {
-      //   if (m_p == &p)
-      //     return *this;
-      //   m_p = &p;
+      Grad& setIntegrationPoint(const IntegrationPoint& ip)
+      {
+        // Keep operand aligned (also lets operand reuse its own cache elsewhere)
+        m_u.get().setIntegrationPoint(ip);
 
-      //   const auto& polytope = p.getPolytope();
-      //   const auto& rc = p.getReferenceCoordinates();
-      //   const size_t d = polytope.getDimension();
-      //   const Index i = polytope.getIndex();
+        m_ip = &ip;
 
-      //   const auto& fes = this->getFiniteElementSpace();
-      //   decltype(auto) fe  = fes.getFiniteElement(d, i);
+        const auto& pt   = ip.getPoint();
+        const auto& poly = pt.getPolytope();
+        const auto& mesh = poly.getMesh();
 
-      //   const size_t count = fe.getCount();
+        const size_t d    = poly.getDimension();
+        const Index  i    = poly.getIndex();
+        const auto   geom = poly.getGeometry();
 
-      //   // Ensure vector objects are sized once
-      //   m_gradient.resize(count);
-      //   for (auto& g : m_gradient)
-      //     g.resize(d);
+        const int transOrder = poly.getTransformation().getOrder();
 
-      //   const auto JinvT = p.getJacobianInverse().transpose(); // compute once
+        // ---- cell key: allocate/size once per cell
+        typename Cache::CellKey ckey;
+        ckey.mesh = static_cast<const void*>(&mesh);
+        ckey.d = d;
+        ckey.i = i;
+        ckey.geom = geom;
+        ckey.transOrder = transOrder;
+        ckey.valid = true;
 
-      //   for (size_t local = 0; local < count; ++local)
-      //   {
-      //     // cache physical gradient directly
-      //     m_gradient[local].noalias() = JinvT * fe.getBasis(local).getGradient()(rc);
-      //   }
+        const bool cell_changed = !(m_cache.cellKey == ckey);
+        if (cell_changed)
+        {
+          m_cache.cellKey = ckey;
+          m_cache.qpKey = {}; // invalidate qp cache
 
-      //   return *this;
-      // }
+          const size_t nv = Geometry::Polytope::Traits(geom).getVertexCount();
+          m_cache.grad.resize(nv);
+          for (auto& gvec : m_cache.grad)
+          {
+            gvec.resize(d);
+            gvec.setZero();
+          }
+        }
+
+        // ---- decide if gradients depend on quadrature point
+        const bool tensor_ref =
+          (geom == Geometry::Polytope::Type::Quadrilateral) ||
+          (geom == Geometry::Polytope::Type::Wedge) ||
+          (geom == Geometry::Polytope::Type::Hexahedron);
+
+        const bool needs_qp = (transOrder > 1) || tensor_ref;
+
+        typename Cache::QpKey qkey;
+        if (needs_qp)
+        {
+          qkey.qf = &ip.getQuadratureFormula();
+          qkey.qp = ip.getIndex();
+          qkey.valid = true;
+        }
+        else
+        {
+          // one state per cell
+          qkey.qf = nullptr;
+          qkey.qp = 0;
+          qkey.valid = true;
+        }
+
+        const bool qp_changed = !(m_cache.qpKey == qkey);
+        if (cell_changed || qp_changed)
+        {
+          m_cache.qpKey = qkey;
+
+          const P1Element<ScalarType> fe(geom);
+          const size_t nv = fe.getCount();
+
+          const auto& qf = ip.getQuadratureFormula();
+          const size_t qp = ip.getIndex();
+          const auto& rc = qf.getPoint(qp);
+
+          // J^{-T} at this integration point (constant for affine maps)
+          const auto JinvT = pt.getJacobianInverse().transpose();
+
+          // Compute physical gradients: ∇_x φ_a = J^{-T} ∇_hat φ_a
+          for (size_t a = 0; a < nv; ++a)
+          {
+            // Reference gradient (size d). Build without using GradientFunction()
+            // to avoid constructing thread_local vectors repeatedly.
+            Math::SpatialVector<ScalarType> ghat;
+            ghat.resize(d);
+            for (size_t k = 0; k < d; ++k)
+              ghat(k) = fe.getBasis(a).template getDerivative<1>(k)(rc);
+
+            m_cache.grad[a].noalias() = JinvT * ghat;
+          }
+        }
+
+        return *this;
+      }
 
       constexpr
-      auto getBasis(size_t local) const
+      const RangeType& getBasis(size_t local) const
       {
-        return m_gradient[local]; // already physical
+        assert(m_cache.cellKey);
+        assert(local < m_cache.grad.size());
+        return m_cache.grad[local];
       }
 
       constexpr
@@ -303,9 +430,8 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const OperandType> m_u;
-
-      const Geometry::Point* m_p;
-      std::vector<Math::SpatialVector<ScalarType>> m_gradient;
+      const IntegrationPoint* m_ip;
+      Cache m_cache;
   };
 }
 

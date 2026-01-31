@@ -166,6 +166,8 @@ namespace Rodin::Geometry
            */
           bool isSimplex() const;
 
+          bool isTensorProduct() const;
+
           /**
            * @brief Gets the topological dimension.
            * @returns Dimension (0 for points, 1 for segments, 2 for triangles/quads, 3 for tets/wedges)

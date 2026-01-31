@@ -161,15 +161,6 @@ namespace Rodin::Geometry
       }
 
       /**
-       * @brief Gets the polynomial order of the Jacobian.
-       * @returns Order of the Jacobian (same as basis function order)
-       */
-      size_t getJacobianOrder() const override
-      {
-        return m_fe.getOrder();
-      }
-
-      /**
        * @brief Applies the isoparametric transformation.
        * @param[out] pc Physical coordinates
        * @param[in] rc Reference coordinates
