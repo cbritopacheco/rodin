@@ -169,7 +169,7 @@ namespace Rodin::Geometry
         this->save(path, fmt);
       }
 
-      Eigen::Map<const Math::SpatialPoint> getVertexCoordinates(Index globalIdx) const override;
+      Eigen::Map<const Math::Vector<Real>> getVertexCoordinates(Index globalIdx) const override;
 
       SubMeshBase& asSubMesh() override
       {

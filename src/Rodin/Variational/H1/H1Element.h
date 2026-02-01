@@ -420,7 +420,7 @@ namespace Rodin::Variational
           {
             static thread_local const std::vector<Math::SpatialPoint> s_nodes = [] {
               std::vector<Math::SpatialPoint> n;
-              n.emplace_back(Math::SpatialPoint{{0}});
+              n.emplace_back(Math::SpatialPoint{ 0 });
               return n;
             }();
             return s_nodes;

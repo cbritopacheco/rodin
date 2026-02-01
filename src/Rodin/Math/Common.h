@@ -18,6 +18,8 @@
 #include <cmath>
 #include <Eigen/Core>
 
+#include "Rodin/Math/ForwardDecls.h"
+#include "Rodin/Math/Vector.h"
 #include "Rodin/Types.h"
 
 namespace Rodin::Math
@@ -575,6 +577,20 @@ namespace Rodin::Math
   auto dot(const Eigen::MatrixBase<LHSDerived>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
   {
     return (lhs.array() * rhs.conjugate().array()).sum();
+  }
+
+  template <class LHSScalar, class RHSScalar>
+  constexpr
+  auto dot(const SpatialVector<LHSScalar>& lhs, const SpatialVector<RHSScalar>& rhs)
+  {
+    return dot(lhs.eigen(), rhs.eigen());
+  }
+
+  template <class LHSScalar, class RHSScalar>
+  constexpr
+  auto dot(const SpatialMatrix<LHSScalar>& lhs, const SpatialMatrix<RHSScalar>& rhs)
+  {
+    return dot(lhs.eigen(), rhs.eigen());
   }
 }
 

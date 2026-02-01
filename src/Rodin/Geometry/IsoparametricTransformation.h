@@ -177,7 +177,7 @@ namespace Rodin::Geometry
         for (size_t local = 0; local < m_fe.getCount(); local++)
         {
           assert(pc.size() == m_pm.col(local).size());
-          pc.noalias() += m_pm.col(local) * m_fe.getBasis(local)(rc);
+          pc += m_pm.col(local) * m_fe.getBasis(local)(rc);
         }
       }
 

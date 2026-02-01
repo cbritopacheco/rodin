@@ -47,7 +47,7 @@ namespace Rodin::Variational
     public:
       using FESType = P1<Scalar, Mesh>;
 
-      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
+      using RangeType = Math::Vector<Scalar>;
 
       using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
 
@@ -148,10 +148,8 @@ namespace Rodin::Variational
         }
         else // Evaluating on a cell
         {
-          static thread_local SpatialVectorType s_res;
-
-          s_res.resize(d);
-          s_res.setZero();
+          SpatialVectorType res(d);
+          res.setZero();
 
           assert(d == mesh.getDimension());
           const auto& gf = this->getOperand();
@@ -162,9 +160,9 @@ namespace Rodin::Variational
           {
             const auto& basis = fe.getBasis(local);
             basis.getGradient()(rc);
-            s_res += gf[fes.getGlobalIndex({d, i}, local)] * basis.getGradient()(rc);
+            res += gf[fes.getGlobalIndex({d, i}, local)] * basis.getGradient()(rc);
           }
-          out = p.getJacobianInverse().transpose() * s_res;
+          out = p.getJacobianInverse().transpose() * res;
         }
       }
 
@@ -195,8 +193,7 @@ namespace Rodin::Variational
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
-      // Gradient of a scalar P1 basis is a spatial vector
-      using RangeType = Math::SpatialVector<ScalarType>;
+      using RangeType = Math::Vector<ScalarType>;
 
       using OperandType = ShapeFunction<NestedDerived, FESType, Space>;
 
@@ -394,8 +391,7 @@ namespace Rodin::Variational
           {
             // Reference gradient (size d). Build without using GradientFunction()
             // to avoid constructing thread_local vectors repeatedly.
-            Math::SpatialVector<ScalarType> ghat;
-            ghat.resize(d);
+            Math::SpatialVector<ScalarType> ghat(d);
             for (size_t k = 0; k < d; ++k)
               ghat(k) = fe.getBasis(a).template getDerivative<1>(k)(rc);
 

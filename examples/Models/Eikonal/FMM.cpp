@@ -46,7 +46,7 @@ int main(int, char**)
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
       const auto& coord = mesh.getVertexCoordinates(it->getIndex());
-      Real distance = (coord - Math::SpatialVector<Real>{{0.5, 0.5}}).norm();
+      Real distance = (coord - Math::SpatialVector<Real>{{0.5, 0.5}}.eigen()).norm();
       if (distance < 0.05)
         interface.push_back(it->getIndex());
     }

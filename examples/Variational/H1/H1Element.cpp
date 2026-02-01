@@ -19,7 +19,7 @@ int main(int, char**)
 
   for (size_t i = 0; i < e1.getCount(); ++i)
   {
-    std::cout << e1.getNode(i) << std::endl;
+    std::cout << e1.getNode(i).eigen() << std::endl;
     std::cout << "----------" << std::endl;
   }
 }

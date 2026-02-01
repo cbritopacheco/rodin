@@ -99,7 +99,7 @@ namespace Rodin::Models::Advection
         {
           const auto n = hs.matrix.row(j).transpose();
           const Real b = hs.vector[j];
-          const Real gj = b - n.dot(rref);
+          const Real gj = b - rref.dot(n);
           if (gj < gbest)
           {
             gbest = gj;
@@ -133,7 +133,7 @@ namespace Rodin::Models::Advection
         rref = s_rtmp;
 
         const Real b = hs.vector[jbest];
-        const Real gcur = b - nref.dot(rref);
+        const Real gcur = b - rref.dot(nref);
         const Real ndn = nref.dot(nref);
         if (ndn > 0)
         {

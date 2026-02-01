@@ -19,7 +19,7 @@ int main(int, char**)
   {
     std::cout << "Weight:\n";
     std::cout << qfe.getWeight(i) << std::endl;
-    std::cout << "Point:\n" << qfe.getPoint(i) << std::endl;
+    std::cout << "Point:\n" << qfe.getPoint(i).eigen() << std::endl;
   }
 
   // QF::GrundmannMoller qf(1, Polytope::Type::Triangle);

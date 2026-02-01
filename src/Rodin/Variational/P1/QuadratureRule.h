@@ -1671,19 +1671,19 @@ namespace Rodin::Variational
               const ScalarType eta2 = r;
               const ScalarType eta3 = r;
 
-              rx0 << xi, xi * (1 - eta1 + eta1 * eta2);
-              rz1 << xi, xi * (1 - eta1 + eta1 * eta2);
-              rz2 << xi * (1 - eta1 * eta2), xi * eta1 * (1 - eta2);
-              rx3 << xi * (1 - eta1 * eta2), xi * eta1 * (1 - eta2);
-              rz4 << xi, xi * eta1 * (1 - eta2);
-              rx5 << xi, xi * eta1 * (1 - eta2);
+              rx0.eigen() << xi, xi * (1 - eta1 + eta1 * eta2);
+              rz1.eigen() << xi, xi * (1 - eta1 + eta1 * eta2);
+              rz2.eigen() << xi * (1 - eta1 * eta2), xi * eta1 * (1 - eta2);
+              rx3.eigen() << xi * (1 - eta1 * eta2), xi * eta1 * (1 - eta2);
+              rz4.eigen() << xi, xi * eta1 * (1 - eta2);
+              rx5.eigen() << xi, xi * eta1 * (1 - eta2);
 
-              rz0 << xi * (1 - eta1 * eta2 * eta3), xi * (1 - eta1);
-              rx1 << xi * (1 - eta1 * eta2 * eta3), xi * (1 - eta1);
-              rx2 << xi, xi * eta1 * (1 - eta2 + eta2 * eta3);
-              rz3 << xi, xi * eta1 * (1 - eta2 + eta2 * eta3);
-              rx4 << xi * (1 - eta1 * eta2 * eta3), xi * eta1 * (1 - eta2 * eta3);
-              rz5 << xi * (1 - eta1 * eta2 * eta3), xi * eta1 * (1 - eta2 * eta3);
+              rz0.eigen() << xi * (1 - eta1 * eta2 * eta3), xi * (1 - eta1);
+              rx1.eigen() << xi * (1 - eta1 * eta2 * eta3), xi * (1 - eta1);
+              rx2.eigen() << xi, xi * eta1 * (1 - eta2 + eta2 * eta3);
+              rz3.eigen() << xi, xi * eta1 * (1 - eta2 + eta2 * eta3);
+              rx4.eigen() << xi * (1 - eta1 * eta2 * eta3), xi * eta1 * (1 - eta2 * eta3);
+              rz5.eigen() << xi * (1 - eta1 * eta2 * eta3), xi * eta1 * (1 - eta2 * eta3);
 
               const Geometry::Point x0(polytope, rx0);
               const Geometry::Point x1(polytope, rx1);

@@ -17,9 +17,7 @@
 
 #include <Eigen/Sparse>
 
-#include "Rodin/Types.h"
-
-#include "ForwardDecls.h"
+#include "Rodin/FormLanguage/Traits.h"
 
 namespace Rodin::Math
 {

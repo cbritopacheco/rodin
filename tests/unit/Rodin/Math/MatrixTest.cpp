@@ -24,13 +24,9 @@ TEST_F(MatrixTest, TypeAliases)
 {
   // Test that Matrix<Real> is the same as RealMatrix
   static_assert(std::is_same_v<Matrix<Real>, RealMatrix>);
-  
+
   // Test that Matrix<Complex> is the same as ComplexMatrix
   static_assert(std::is_same_v<Matrix<Complex>, ComplexMatrix>);
-  
-  // Test SpatialMatrix type
-  static_assert(std::is_same_v<SpatialMatrix<Real>, 
-    Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic, 0, RODIN_MAXIMAL_SPACE_DIMENSION, RODIN_MAXIMAL_SPACE_DIMENSION>>);
 }
 
 // Test matrix construction and basic operations
@@ -40,12 +36,12 @@ TEST_F(MatrixTest, Construction)
   RealMatrix m1;
   EXPECT_EQ(m1.rows(), 0);
   EXPECT_EQ(m1.cols(), 0);
-  
+
   // Test sized construction
   RealMatrix m2(3, 4);
   EXPECT_EQ(m2.rows(), 3);
   EXPECT_EQ(m2.cols(), 4);
-  
+
   // Test zero initialization
   RealMatrix m3 = RealMatrix::Zero(2, 3);
   EXPECT_EQ(m3.rows(), 2);
@@ -59,13 +55,13 @@ TEST_F(MatrixTest, Construction)
 TEST_F(MatrixTest, AssignmentAndAccess)
 {
   RealMatrix m(2, 2);
-  
+
   // Test element assignment
   m(0, 0) = 1.0;
   m(0, 1) = 2.0;
   m(1, 0) = 3.0;
   m(1, 1) = 4.0;
-  
+
   // Test element access
   EXPECT_DOUBLE_EQ(m(0, 0), 1.0);
   EXPECT_DOUBLE_EQ(m(0, 1), 2.0);
@@ -79,25 +75,25 @@ TEST_F(MatrixTest, ArithmeticOperations)
   RealMatrix m1(2, 2);
   m1 << 1, 2,
         3, 4;
-        
+
   RealMatrix m2(2, 2);
   m2 << 5, 6,
         7, 8;
-  
+
   // Test matrix addition
   RealMatrix sum = m1 + m2;
   EXPECT_DOUBLE_EQ(sum(0, 0), 6.0);
   EXPECT_DOUBLE_EQ(sum(0, 1), 8.0);
   EXPECT_DOUBLE_EQ(sum(1, 0), 10.0);
   EXPECT_DOUBLE_EQ(sum(1, 1), 12.0);
-  
+
   // Test matrix subtraction
   RealMatrix diff = m2 - m1;
   EXPECT_DOUBLE_EQ(diff(0, 0), 4.0);
   EXPECT_DOUBLE_EQ(diff(0, 1), 4.0);
   EXPECT_DOUBLE_EQ(diff(1, 0), 4.0);
   EXPECT_DOUBLE_EQ(diff(1, 1), 4.0);
-  
+
   // Test scalar multiplication
   RealMatrix scaled = 2.0 * m1;
   EXPECT_DOUBLE_EQ(scaled(0, 0), 2.0);
@@ -112,16 +108,16 @@ TEST_F(MatrixTest, MatrixMultiplication)
   RealMatrix m1(2, 3);
   m1 << 1, 2, 3,
         4, 5, 6;
-        
+
   RealMatrix m2(3, 2);
   m2 << 7,  8,
         9,  10,
         11, 12;
-  
+
   RealMatrix result = m1 * m2;
   EXPECT_EQ(result.rows(), 2);
   EXPECT_EQ(result.cols(), 2);
-  
+
   // Expected result: [58, 64; 139, 154]
   EXPECT_DOUBLE_EQ(result(0, 0), 58.0);
   EXPECT_DOUBLE_EQ(result(0, 1), 64.0);
@@ -156,7 +152,7 @@ TEST_F(MatrixTest, FixedSizeMatrix)
 TEST_F(MatrixTest, SpatialMatrix)
 {
   SpatialMatrix<Real> sm(3, 3);
-  sm.setIdentity();
+  sm.eigen().setIdentity();
   
   EXPECT_EQ(sm.rows(), 3);
   EXPECT_EQ(sm.cols(), 3);

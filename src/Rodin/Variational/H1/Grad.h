@@ -113,10 +113,8 @@ namespace Rodin::Variational
         }
         else // cell
         {
-          static thread_local SpatialVectorType s_res;
-
-          s_res.resize(d);
-          s_res.setZero();
+          out.resize(d);
+          out.setZero();
 
           assert(d == mesh.getDimension());
 
@@ -128,10 +126,10 @@ namespace Rodin::Variational
           for (size_t local = 0; local < fe.getCount(); ++local)
           {
             const auto& basis = fe.getBasis(local);
-            s_res.noalias() += gf[fes.getGlobalIndex({d, i}, local)] * basis.getGradient()(rc);
+            out += gf[fes.getGlobalIndex({d, i}, local)] * basis.getGradient()(rc);
           }
 
-          out = p.getJacobianInverse().transpose() * s_res;
+          out = p.getJacobianInverse().transpose() * out;
         }
       }
 
@@ -308,18 +306,18 @@ namespace Rodin::Variational
           for (size_t ii = 0; ii < d; ++ii)
             s_ref(ii) = gref[ii];
 
-          m_cache.grad_phys[a].noalias() = JinvT * s_ref;
+          m_cache.grad_phys[a] = JinvT * s_ref;
         }
 
         return *this;
       }
 
       constexpr
-      const SpatialVectorType& getBasis(size_t local) const
+      auto getBasis(size_t local) const
       {
         assert(m_cache.key);
         assert(local < m_cache.grad_phys.size());
-        return m_cache.grad_phys[local];
+        return m_cache.grad_phys[local].eigen();
       }
 
       constexpr

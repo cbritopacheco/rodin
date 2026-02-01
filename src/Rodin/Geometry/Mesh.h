@@ -715,7 +715,7 @@ namespace Rodin::Geometry
        * @brief Gets the space coordinates of the vertex at the given index.
        * @param[in] idx Vertex index
        */
-      virtual Eigen::Map<const Math::SpatialPoint> getVertexCoordinates(Index idx) const = 0;
+      virtual Eigen::Map<const Math::Vector<Real>> getVertexCoordinates(Index idx) const = 0;
 
       /**
        * @brief Sets the space coordinate of the vertex at the given index for
@@ -866,21 +866,7 @@ namespace Rodin::Geometry
            *
            * @note This method requires nodes(size_t) to be called beforehand.
            */
-          Builder& vertex(Eigen::Map<const Math::SpatialPoint> x);
-
-          /**
-           * @brief Adds vertex with coordinates given by the vector.
-           *
-           * @note This method requires nodes(size_t) to be called beforehand.
-           */
-          Builder& vertex(Math::Vector<Real>&& x);
-
-          /**
-           * @brief Adds vertex with coordinates given by the vector.
-           *
-           * This method requires nodes(size_t) to be called beforehand.
-           */
-          Builder& vertex(const Math::Vector<Real>& x);
+          Builder& vertex(const Math::SpatialPoint& x);
 
           /**
            * @brief Sets the attribute of the given polytope.
@@ -1075,12 +1061,14 @@ namespace Rodin::Geometry
       template <class FunctionDerived>
       Mesh& displace(const Variational::FunctionBase<FunctionDerived>& u)
       {
+        Math::SpatialPoint pc;
         for (auto it = getVertex(); !it.end(); ++it)
         {
+          pc = this->getVertexCoordinates(it->getIndex());
           const Geometry::Point p(
               *it,
               Polytope::Traits(Polytope::Type::Point).getVertex(0),
-              it->getCoordinates());
+              pc);
           m_vertices.col(it->getIndex()) += u(p);
         }
         return *this;
@@ -1393,7 +1381,7 @@ namespace Rodin::Geometry
         return m_connectivity;
       }
 
-      virtual Eigen::Map<const Math::SpatialPoint> getVertexCoordinates(Index idx) const override;
+      virtual Eigen::Map<const Math::Vector<Real>> getVertexCoordinates(Index idx) const override;
 
       virtual Mesh& setAttribute(const std::pair<size_t, Index>&, Attribute attr) override;
 

@@ -87,11 +87,17 @@ namespace Rodin::Variational
   {
     public:
       using FESType = H1<K, Math::Vector<Scalar>, Mesh>;
+
       using OperandType = GridFunction<FESType, Data>;
+
       using Parent = JacobianBase<OperandType, Jacobian<OperandType>>;
 
+      using RangeType = Math::Matrix<Scalar>;
+
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
+
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
       Jacobian(const OperandType& u) : Parent(u) {}
@@ -188,7 +194,7 @@ namespace Rodin::Variational
           for (size_t j = 0; j < d; ++j)
             s_ref(j) = gref(j);
 
-          s_phys.noalias() = JinvT * s_ref; // ∇_x φ_alpha
+          s_phys = JinvT * s_ref; // ∇_x φ_alpha
 
           for (size_t comp = 0; comp < vdim; ++comp)
           {
@@ -240,6 +246,7 @@ namespace Rodin::Variational
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       using OperandType = ShapeFunction<NestedDerived, FESType, SpaceType>;
+
       using Parent      =
         ShapeFunctionBase<
           Jacobian<ShapeFunction<NestedDerived, FESType, SpaceType>>,
@@ -247,7 +254,11 @@ namespace Rodin::Variational
           SpaceType>;
 
       using ScalarType        = typename FormLanguage::Traits<FESType>::ScalarType;
+
+      using RangeType         = Math::Matrix<ScalarType>;
+
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
+
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
       struct Cache
@@ -391,13 +402,13 @@ namespace Rodin::Variational
           for (size_t j = 0; j < d; ++j)
             s_ref(j) = gref[j];
 
-          m_cache.grad_phys[alpha].noalias() = JinvT * s_ref;
+          m_cache.grad_phys[alpha] = JinvT * s_ref;
         }
 
         return *this;
       }
 
-      const SpatialMatrixType& getBasis(size_t local) const
+      const RangeType& getBasis(size_t local) const
       {
         assert(m_cache.key);
 
@@ -412,7 +423,7 @@ namespace Rodin::Variational
 
         assert(alpha < m_cache.grad_phys.size());
 
-        static thread_local SpatialMatrixType s_J;
+        static thread_local RangeType s_J;
         if (s_J.rows() != vdim || s_J.cols() != d)
           s_J.resize(vdim, d);
 

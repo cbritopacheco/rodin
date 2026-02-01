@@ -273,7 +273,7 @@ namespace Rodin::Geometry
   Mesh<Context::Local>&
   Mesh<Context::Local>::setVertexCoordinates(Index idx, const Math::SpatialVector<Real>& coords)
   {
-    m_vertices.col(idx) = coords;
+    m_vertices.col(idx) = coords.eigen();
     return *this;
   }
 
@@ -284,7 +284,7 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  Eigen::Map<const Math::SpatialVector<Real>> Mesh<Context::Local>::getVertexCoordinates(Index idx) const
+  Eigen::Map<const Math::Vector<Real>> Mesh<Context::Local>::getVertexCoordinates(Index idx) const
   {
     const auto size = static_cast<Eigen::Index>(getSpaceDimension());
     return { m_vertices.data() + getSpaceDimension() * idx, size };

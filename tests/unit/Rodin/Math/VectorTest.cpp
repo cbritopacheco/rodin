@@ -25,14 +25,10 @@ TEST_F(VectorTest, TypeAliases)
   // Test Vector type alias
   static_assert(std::is_same_v<Vector<Real>, Eigen::VectorX<Real>>);
   static_assert(std::is_same_v<Vector<Complex>, ComplexVector>);
-  
-  // Test SpatialVector type
-  static_assert(std::is_same_v<SpatialVector<Real>, 
-    Eigen::Matrix<Real, Eigen::Dynamic, 1, 0, RODIN_MAXIMAL_SPACE_DIMENSION, 1>>);
-  
+
   // Test SpatialPoint type
   static_assert(std::is_same_v<SpatialPoint, SpatialVector<Real>>);
-  
+
   // Test fixed size vectors
   static_assert(std::is_same_v<Vector2<Real>, FixedSizeVector<Real, 2>>);
   static_assert(std::is_same_v<Vector3<Real>, FixedSizeVector<Real, 3>>);
@@ -187,16 +183,16 @@ TEST_F(VectorTest, FixedSizeVectors)
 TEST_F(VectorTest, SpatialVector)
 {
   SpatialVector<Real> sv(3);
-  sv << 1.0, 2.0, 3.0;
-  
+  sv.eigen() << 1.0, 2.0, 3.0;
+
   EXPECT_EQ(sv.size(), 3);
   EXPECT_DOUBLE_EQ(sv[0], 1.0);
   EXPECT_DOUBLE_EQ(sv[1], 2.0);
   EXPECT_DOUBLE_EQ(sv[2], 3.0);
-  
+
   // Test SpatialPoint (alias for SpatialVector<Real>)
   SpatialPoint sp(3);
-  sp << 4.0, 5.0, 6.0;
+  sp.eigen() << 4.0, 5.0, 6.0;
   EXPECT_EQ(sp.size(), 3);
   EXPECT_DOUBLE_EQ(sp[0], 4.0);
   EXPECT_DOUBLE_EQ(sp[1], 5.0);
@@ -210,7 +206,7 @@ TEST_F(VectorTest, ComplexVector)
   cv[0] = Complex(1.0, 2.0);  // 1 + 2i
   cv[1] = Complex(3.0, -1.0); // 3 - i
   cv[2] = Complex(-2.0, 1.0); // -2 + i
-  
+
   // Test conjugate
   ComplexVector conjugated = cv.conjugate();
   EXPECT_DOUBLE_EQ(conjugated[0].real(), 1.0);

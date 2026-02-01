@@ -5,6 +5,7 @@ target_link_libraries(RodinGeometryConnectivityTest
   GTest::gtest_main
   Rodin::Geometry)
 gtest_discover_tests(RodinGeometryConnectivityTest
+  DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
 )
@@ -16,6 +17,7 @@ target_link_libraries(RodinGeometryMeshTest
   GTest::gtest_main
   Rodin::Geometry)
 gtest_discover_tests(RodinGeometryMeshTest
+  DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
 )
@@ -27,6 +29,7 @@ target_link_libraries(RodinGeometryIsoparametricTransformationTest
   GTest::gtest_main
   Rodin::Geometry)
 gtest_discover_tests(RodinGeometryIsoparametricTransformationTest
+  DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
 )
@@ -38,6 +41,7 @@ target_link_libraries(RodinGeometryUniformGridTest
   GTest::gtest_main
   Rodin::Geometry)
 gtest_discover_tests(RodinGeometryUniformGridTest
+  DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
 )
@@ -49,6 +53,7 @@ target_link_libraries(RodinGeometryRegionTest
   GTest::gtest_main
   Rodin::Geometry)
 gtest_discover_tests(RodinGeometryRegionTest
+  DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
 )
@@ -60,6 +65,7 @@ target_link_libraries(RodinGeometryIndexGeneratorTest
   GTest::gtest_main
   Rodin::Geometry)
 gtest_discover_tests(RodinGeometryIndexGeneratorTest
+  DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
 )
@@ -71,6 +77,7 @@ target_link_libraries(RodinGeometryPolytopeTraitsTest
   GTest::gtest_main
   Rodin::Geometry)
 gtest_discover_tests(RodinGeometryPolytopeTraitsTest
+  DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
 )
@@ -82,6 +89,7 @@ target_link_libraries(RodinGeometryPolytopeTest
   GTest::gtest_main
   Rodin::Geometry)
 gtest_discover_tests(RodinGeometryPolytopeTest
+  DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
 )
@@ -93,6 +101,7 @@ target_link_libraries(RodinGeometryPointTest
   GTest::gtest_main
   Rodin::Geometry)
 gtest_discover_tests(RodinGeometryPointTest
+  DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
 )

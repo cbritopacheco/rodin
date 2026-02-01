@@ -457,7 +457,7 @@ namespace Rodin::Geometry
     : Polytope(0, index, mesh)
   {}
 
-  Eigen::Map<const Math::SpatialPoint> Vertex::getCoordinates() const
+  Eigen::Map<const Math::Vector<Real>> Vertex::getCoordinates() const
   {
     return getMesh().getVertexCoordinates(getIndex());
   }

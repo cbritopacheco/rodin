@@ -307,9 +307,9 @@ namespace Rodin::Variational
           return Trace{ true, 0, p };
         }
 
-        s_rc1.resizeLike(s_rc);
-        s_rc_tmp.resizeLike(s_rc);
-        s_pc.resizeLike(p.getPhysicalCoordinates());
+        s_rc1.resize(s_rc.size());
+        s_rc_tmp.resize(s_rc.size());
+        s_pc.resize(p.getPhysicalCoordinates().size());
 
         // Hysteresis: last crossed local face index in current cell
         std::optional<size_t> last_face;
@@ -321,7 +321,7 @@ namespace Rodin::Variational
           const auto& faces = conn.getIncidence(cd, cd - 1).at(s_cell);
           const auto& hs = Geometry::Polytope::Traits(g).getHalfSpace();
 
-          const auto vref = [&](const Math::SpatialPoint& r)
+          const auto vref = [&](const Math::SpatialPoint& r) -> auto
           {
             static thread_local Math::SpatialVector<Real> s_v;
             const Geometry::Point qp(cell, r);
@@ -348,11 +348,11 @@ namespace Rodin::Variational
             const Real b = hs.vector[i];
 
             assert(n.size() == s_rc.size());
-            const Real g0 = b - n.dot(s_rc);
+            const Real g0 = b - s_rc.dot(n);
             if (g0 <= 0) // interior requires g0 > 0
               continue;
 
-            const Real ndv = n.dot(vref(s_rc));
+            const Real ndv = vref(s_rc).dot(n);
             if (ndv <= eps_denom) // not moving toward that face
               continue;
 
@@ -453,8 +453,8 @@ namespace Rodin::Variational
                 assert(i < hsz.vector.size());
                 const Real b = hsz.vector[i];
                 assert(n.size() == s_rc.size());
-                const Real gi = b - n.dot(s_rc);
-                if (std::abs(gi) <= eps_g && n.dot(vz(s_rc)) > eps_denom)
+                const Real gi = b - s_rc.dot(n);
+                if (std::abs(gi) <= eps_g && vz(s_rc).dot(n) > eps_denom)
                 {
                   kface = i;
                   break;

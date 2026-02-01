@@ -183,7 +183,7 @@ namespace Rodin::Variational
             for (size_t j = 0; j < d; ++j)
               s_ref(j) = feS.getBasis(alpha).template getDerivative<1>(j)(rc);
 
-            s_grad_phys.noalias() = JinvT * s_ref;
+            s_grad_phys = JinvT * s_ref;
 
             // divergence contribution is u_comp * dphi/dx_comp if comp < d
             // (only makes sense when vdim == d; if vdim != d, we only sum over min(vdim,d))
@@ -385,7 +385,7 @@ namespace Rodin::Variational
           for (size_t j = 0; j < d; ++j)
             s_ref(j) = gref[j];
 
-          s_phys.noalias() = JinvT * s_ref;
+          s_phys = JinvT * s_ref;
 
           for (size_t comp = 0; comp < vdim; ++comp)
           {

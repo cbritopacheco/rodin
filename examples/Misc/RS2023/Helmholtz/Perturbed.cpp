@@ -69,7 +69,7 @@ int main(int, char**)
   RealFunction gamma_e =
     [&](const Point& p)
     {
-      const Real r = (p.getCoordinates() - x0).norm();
+      const Real r = (p.getCoordinates().eigen() - x0).norm();
       if (r > epsilon)
         return gamma(p);
       else
@@ -90,7 +90,7 @@ int main(int, char**)
   VectorFunction xi = { std::cos(angle), std::sqrt(angle) };
   RealFunction phi =
     [&](const Point& p)
-    { return cos(waveNumber * p.getCoordinates().dot(xi(p))); };
+    { return cos(waveNumber * p.getCoordinates().eigen().dot(xi(p))); };
 
   GridFunction miaow(vh);
   miaow = phi;
@@ -136,7 +136,7 @@ int main(int, char**)
 
   RealFunction chi =
     [&](const Point& p)
-    { return Real((p.getCoordinates() - x0).norm() > 0.25); };
+    { return Real((p.getCoordinates().eigen() - x0).norm() > 0.25); };
 
   GridFunction diff(vh);
   diff = chi * Pow(u0 - u_e, 2);

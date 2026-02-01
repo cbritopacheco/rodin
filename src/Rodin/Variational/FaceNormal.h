@@ -74,6 +74,8 @@ namespace Rodin::Variational
     public:
       using ScalarType = Real;
 
+      using RangeType = Math::Vector<ScalarType>;
+
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
       using Parent = VectorFunctionBase<ScalarType, FaceNormal>;
@@ -107,7 +109,8 @@ namespace Rodin::Variational
 
       decltype(auto) getValue(const Geometry::Point& p) const
       {
-        static thread_local SpatialVectorType s_res;
+        static thread_local RangeType s_res;
+
         const auto& polytope = p.getPolytope();
         const auto& vs = polytope.getVertices();
         const auto  d  = polytope.getDimension();
@@ -116,10 +119,13 @@ namespace Rodin::Variational
         assert(d == mesh.getDimension() - 1);
         const auto& jacobian = p.getJacobian();
 
-        s_res.resize(m_sdim);
+        SpatialVectorType res;
+
+        res.resize(m_sdim);
         if (jacobian.rows() == 2)
         {
-          s_res << jacobian(1,0), -jacobian(0,0);
+          res[0] = jacobian(1,0);
+          res[1] = -jacobian(0,0);
         }
         else if (jacobian.rows() == 3)
         {
@@ -133,20 +139,22 @@ namespace Rodin::Variational
             n << jacobian(1, 0), -jacobian(0, 0), jacobian(2, 0);
             n = n.cross(a);
             n.stableNormalize();
-            s_res = n.cross(a) + n * (n.dot(a));
+            res = n.cross(a) + n * (n.dot(a));
           }
           else if (jacobian.cols() == 2)
           {
-            s_res <<
-              jacobian(1, 0) * jacobian(2, 1) - jacobian(2, 0) * jacobian(1, 1),
-              jacobian(2, 0) * jacobian(0, 1) - jacobian(0, 0) * jacobian(2, 1),
+            res[0] =
+              jacobian(1, 0) * jacobian(2, 1) - jacobian(2, 0) * jacobian(1, 1);
+            res[1] =
+              jacobian(2, 0) * jacobian(0, 1) - jacobian(0, 0) * jacobian(2, 1);
+            res[2] =
               jacobian(0, 0) * jacobian(1, 1) - jacobian(1, 0) * jacobian(0, 1);
           }
         }
         else
         {
           assert(false);
-          s_res.setConstant(Math::nan<ScalarType>());
+          res.setConstant(Math::nan<ScalarType>());
         }
 
         const auto& incidence = mesh.getConnectivity().getIncidence({d, d+1}, i);
@@ -173,14 +181,14 @@ namespace Rodin::Variational
               for (auto vit = pit->getVertex(); vit; ++vit)
               {
                 const auto v = vit->getCoordinates() - polytope.getVertex()->getCoordinates();
-                if (s_res.dot(v) < 0)
+                if (res.dot(v) < 0)
                 {
                   ori *= -1;
                   break;
                 }
               }
-              s_res *= ori;
-              s_res.normalize();
+              res *= ori;
+              res.normalize();
               matched = true;
               break;
             }
@@ -192,6 +200,7 @@ namespace Rodin::Variational
               *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()).raise();
           }
         }
+        s_res = res.eigen();
         return s_res;
       }
 

@@ -831,6 +831,7 @@ namespace Rodin::Variational
             static thread_local RangeType s_out;
             const auto& vtx = P1Element<ScalarType>(m_g).getNode(m_local / m_vdim);
             s_out = v(vtx);
+            decltype(auto) value = v(vtx);
             return s_out.coeff(m_local % m_vdim);
           }
 

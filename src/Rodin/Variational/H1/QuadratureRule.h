@@ -208,11 +208,11 @@ namespace Rodin::Variational
           // A(b,a) += wdet * (J^{-T} ghat_a)·(J^{-T} ghat_b)
           for (size_t b = 0; b < m_teCount; ++b)
           {
-            gte_phys.noalias() = JinvT * m_teRefGrad[qp * m_teCount + b];
+            gte_phys = JinvT * m_teRefGrad[qp * m_teCount + b];
 
             for (size_t a = 0; a < m_trCount; ++a)
             {
-              gtr_phys.noalias() = JinvT * m_trRefGrad[qp * m_trCount + a];
+              gtr_phys = JinvT * m_trRefGrad[qp * m_trCount + a];
               m_mat(b, a) += wdet * Math::dot(gtr_phys, gte_phys);
             }
           }

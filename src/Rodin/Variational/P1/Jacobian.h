@@ -32,6 +32,7 @@
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/Jacobian.h"
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
+#include "Rodin/Variational/Mult.h"
 
 namespace Rodin::FormLanguage
 {
@@ -86,8 +87,9 @@ namespace Rodin::Variational
         Jacobian<GridFunction<P1<Math::Vector<Scalar>, Mesh>, Data>>>
   {
     public:
-      using Range = Math::Vector<Scalar>;
-      using FESType = P1<Range, Mesh>;
+      using RangeType = Math::Matrix<Scalar>;
+
+      using FESType = P1<Math::Vector<Scalar>, Mesh>;
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
@@ -191,8 +193,7 @@ namespace Rodin::Variational
         {
           // ∇_hat φ_v (size d)
           // Avoid GradientFunction() to prevent extra vector construction.
-          Math::SpatialVector<ScalarType> ghat;
-          ghat.resize(d);
+          Math::SpatialVector<ScalarType> ghat(d);
           for (size_t k = 0; k < d; ++k)
             ghat(k) = fe_scalar.getBasis(v).template getDerivative<1>(k)(rc);
 
@@ -249,6 +250,8 @@ namespace Rodin::Variational
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
+      using RangeType = Math::Matrix<ScalarType>;
 
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
@@ -495,11 +498,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      const SpatialMatrixType& getBasis(size_t local) const
+      auto getBasis(size_t local) const
       {
         assert(m_cache.cellKey);
         assert(local < m_cache.jac.size());
-        return m_cache.jac[local];
+        return m_cache.jac[local].eigen();
       }
 
       constexpr

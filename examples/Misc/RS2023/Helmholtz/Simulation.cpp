@@ -178,7 +178,7 @@ void run(int id, const std::vector<Data>& grid)
     RealFunction gamma_e =
       [&](const Point& p)
       {
-        const Real r = (p.getCoordinates() - x0).norm();
+        const Real r = (p.getCoordinates().eigen() - x0).norm();
         if (r > data.epsilon)
           return gamma(p);
         else
@@ -189,7 +189,7 @@ void run(int id, const std::vector<Data>& grid)
     VectorFunction xi = { std::cos(data.angle), std::sin(data.angle) };
     RealFunction phi =
       [&](const Point& p)
-      { return cos(std::sqrt(2) * data.waveNumber * p.getCoordinates().dot(xi(p))); };
+      { return cos(std::sqrt(2) * data.waveNumber * p.getCoordinates().eigen().dot(xi(p))); };
 
     // Define variational problems
     TrialFunction u(vh);
@@ -218,7 +218,7 @@ void run(int id, const std::vector<Data>& grid)
 
   RealFunction chi =
     [&](const Point& p)
-    { return Real((p.getCoordinates() - x0).norm() > 0.25); };
+    { return Real((p.getCoordinates().eigen() - x0).norm() > 0.25); };
 
     GridFunction diff(vh);
     diff = chi * Pow(u0 - ue, 2);

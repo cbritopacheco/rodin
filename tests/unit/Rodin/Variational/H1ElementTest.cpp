@@ -2723,12 +2723,13 @@ namespace Rodin::Tests::Unit
     RealH1Element<2> elem(Polytope::Type::Triangle);
 
     Math::Vector<Real> p{{0.3, 0.4}};
-    Math::SpatialVector<Real> grad_sum = Math::SpatialVector<Real>::Zero(2);
+    Math::SpatialVector<Real> grad_sum(2);;
+    grad_sum.eigen().setZero();
 
     for (size_t i = 0; i < elem.getCount(); i++)
     {
       auto grad_func = elem.getBasis(i).getGradient();
-      grad_sum += grad_func(p);
+      grad_sum.eigen() += grad_func(p).eigen();
     }
 
     EXPECT_NEAR(grad_sum(0), 0.0, RODIN_FUZZY_CONSTANT);

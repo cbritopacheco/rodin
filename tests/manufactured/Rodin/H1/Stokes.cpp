@@ -350,11 +350,28 @@ namespace Rodin::Tests::Manufactured::Stokes
            - Integral(f, v)
            + DirichletBC(u, u_exact);
 
+    auto time_start = std::chrono::high_resolution_clock::now();
+    stokes.assemble();
+    auto time_end = std::chrono::high_resolution_clock::now();
+    std::cout << "Assembly time: "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(time_end - time_start).count()
+              << " ms" << std::endl;
+
     // Solve the system
     GMRES gmres(stokes);
     gmres.setTolerance(1e-12);
     gmres.setMaxIterations(1000);
+
+    auto time_start_solve = std::chrono::high_resolution_clock::now();
     gmres.solve();
+    auto time_end_solve = std::chrono::high_resolution_clock::now();
+    std::cout << "Solve time: "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(time_end_solve - time_start_solve).count()
+              << " ms" << std::endl;
+
+    u.getSolution().save("u_taylor_green.gf");
+    mesh.save("mesh_taylor_green.mesh");
+    std::exit(1);
 
     // Compute the L^2 error for velocity
     H1 sh(std::integral_constant<size_t, 1>{}, mesh);

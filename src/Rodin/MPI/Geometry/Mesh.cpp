@@ -499,7 +499,7 @@ namespace Rodin::Geometry
     shard.save(filename, fmt);
   }
 
-  Eigen::Map<const Math::SpatialPoint> MPIMesh::getVertexCoordinates(Index globalIdx) const
+  Eigen::Map<const Math::Vector<Real>> MPIMesh::getVertexCoordinates(Index globalIdx) const
   {
     auto idx = getLocalIndex(0, globalIdx);
     const auto& shard = getShard();

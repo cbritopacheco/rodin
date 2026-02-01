@@ -99,7 +99,7 @@ namespace Rodin::Variational
       {
         Math::SpatialVector<Real> tmp;
         interpolate(tmp, p);
-        out = std::move(tmp);
+        out = tmp.eigen();
       }
 
       void interpolate(Math::SpatialVector<Real>& out, const Geometry::Point& p) const

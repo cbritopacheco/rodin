@@ -57,7 +57,8 @@ namespace Rodin::Variational
         {
           // Single vertex node; choose (0,0) by convention.
           nodes[0].resize(2);
-          nodes[0] << 0.0, 0.0;
+          nodes[0][0] = 0.0;
+          nodes[0][1] = 0.0;
           return nodes;
         }
 
@@ -69,7 +70,8 @@ namespace Rodin::Variational
             const Real s = static_cast<Real>(i) / static_cast<Real>(K);
             const Real t = static_cast<Real>(j) / static_cast<Real>(K);
             nodes[idx].resize(2);
-            nodes[idx] << s, t;
+            nodes[idx][0] = s;
+            nodes[idx][1] = t;
           }
         }
 
@@ -124,7 +126,9 @@ namespace Rodin::Variational
         {
           // Single vertex node; choose (0,0,0) by convention.
           nodes[0].resize(3);
-          nodes[0] << 0.0, 0.0, 0.0;
+          nodes[0][0] = 0.0;
+          nodes[0][1] = 0.0;
+          nodes[0][2] = 0.0;
           return nodes;
         }
 
@@ -140,7 +144,9 @@ namespace Rodin::Variational
               const Real s = static_cast<Real>(j) / static_cast<Real>(K);
               const Real t = static_cast<Real>(k) / static_cast<Real>(K);
               nodes[idx].resize(3);
-              nodes[idx] << r, s, t;
+              nodes[idx][0] = r;
+              nodes[idx][1] = s;
+              nodes[idx][2] = t;
             }
           }
         }

@@ -251,7 +251,7 @@ namespace Rodin::Variational
 
       decltype(auto) getBasis(size_t local) const
       {
-        return m_gradients[local].coeff(m_i);
+        return m_gradients[local](m_i);
       }
 
       Derivative* copy() const noexcept override
