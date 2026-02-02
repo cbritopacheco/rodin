@@ -113,7 +113,6 @@ namespace Rodin::Tests::Manufactured::H1Poisson3D
 
     const auto& mesh = this->getMesh();
 
-    // Scalar H1 space, quadratic order on a 3D mesh
     H1 vh(order, mesh);
 
     TrialFunction u(vh);
@@ -126,6 +125,7 @@ namespace Rodin::Tests::Manufactured::H1Poisson3D
     poisson = Integral(Grad(u), Grad(v))
             - Integral(f, v)
             + DirichletBC(u, solution);
+
     CG(poisson).solve();
 
     GridFunction diff(vh);

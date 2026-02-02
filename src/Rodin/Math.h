@@ -26,4 +26,7 @@
 #include "Math/Constants.h"
 #include "Math/SparseMatrix.h"
 
+#include "Math/SpatialVector.h"
+#include "Math/SpatialMatrix.h"
+
 #endif

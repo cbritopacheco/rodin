@@ -72,8 +72,7 @@ namespace Rodin::Variational
       constexpr
       ShapeFunction(const ShapeFunction& other)
         : Parent(other),
-          m_ip(nullptr),
-          m_cache(other.m_cache)
+          m_ip(nullptr)
       {}
 
       constexpr

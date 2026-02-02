@@ -404,55 +404,84 @@ namespace Rodin::Variational
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) override
       {
         m_polytope = &polytope;
-        const size_t d = polytope.getDimension();
-        const Index idx = polytope.getIndex();
+
+        const size_t d   = polytope.getDimension();
+        const Index  idx = polytope.getIndex();
+
+        assert(m_integrand);
         auto& integrand = *m_integrand;
+
         const auto& trial = integrand.getLHS();
-        const auto& test = integrand.getRHS();
+        const auto& test  = integrand.getRHS();
+
         const auto& trialfes = trial.getFiniteElementSpace();
-        const auto& testfes = test.getFiniteElementSpace();
+        const auto& testfes  = test .getFiniteElementSpace();
+
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
-        const auto& testfe = testfes.getFiniteElement(d, idx);
-        const auto& geometry = polytope.getGeometry();
-        const size_t order = integrand.getOrder(polytope).value_or(trialfe.getOrder() + testfe.getOrder());
-        const bool recompute = !m_set || m_order != order || m_geometry != geometry;
+        const auto& testfe  = testfes .getFiniteElement(d, idx);
+
+        const auto geometry = polytope.getGeometry();
+
+        const size_t order =
+          integrand.getOrder(polytope).value_or(trialfe.getOrder() + testfe.getOrder());
+
+        const bool recompute = !m_set || (m_order != order) || (m_geometry != geometry);
+
         if (recompute)
         {
-          m_set = true;
-          m_order = order;
+          m_set      = true;
+          m_order    = order;
           m_geometry = geometry;
+
           m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
+
           m_ps.clear();
           m_ps.reserve(m_qf->getSize());
-          for (size_t i = 0; i < m_qf->getSize(); i++)
+          for (size_t i = 0; i < m_qf->getSize(); ++i)
             m_ps.emplace_back(polytope, m_qf->getPoint(i));
         }
         else
         {
           assert(m_qf);
-          for (size_t i = 0; i < m_qf->getSize(); i++)
+          for (size_t i = 0; i < m_qf->getSize(); ++i)
             m_ps[i].setPolytope(polytope);
         }
 
         const size_t ntr = trial.getDOFs(*m_polytope);
         const size_t nte = test .getDOFs(*m_polytope);
 
-        m_mat.resize(nte, ntr);
+        m_mat.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
         m_mat.setZero();
+
+        // Assume Eigen default (ColMajor). We write columns contiguously.
+        // If you ever switch Matrix typedef to RowMajor, flip loop order accordingly.
+        ScalarType* __restrict M = m_mat.data();
+        const Eigen::Index ld = m_mat.outerStride(); // leading dimension for ColMajor is rows
 
         for (size_t qp = 0; qp < m_ps.size(); ++qp)
         {
           const auto& p = m_ps[qp];
-          const ScalarType wdet = m_qf->getWeight(qp) * p.getDistortion();
-
           assert(m_qf);
-          const Variational::IntegrationPoint ip(p, *m_qf, qp);
-          integrand.setIntegrationPoint(ip);
 
-          // fill all entries for this qp
-          for (size_t te = 0; te < nte; ++te)
-            for (size_t tr = 0; tr < ntr; ++tr)
-              m_mat(te, tr) += wdet * integrand(tr, te);
+          const ScalarType wdet =
+            static_cast<ScalarType>(m_qf->getWeight(qp)) * static_cast<ScalarType>(p.getDistortion());
+
+          const IntegrationPoint ip(p, *m_qf, qp);
+          integrand.setIntegrationPoint(ip); // caches basis at this qp
+
+          // Column-wise fill (tr outer) => no (te,tr) operator() calls.
+          for (size_t tr = 0; tr < ntr; ++tr)
+          {
+            ScalarType* __restrict col = M + static_cast<Eigen::Index>(tr) * ld;
+
+            const auto& phi_tr = trial.getBasis(tr);
+
+            for (size_t te = 0; te < nte; ++te)
+            {
+              const auto& phi_te = test.getBasis(te);
+              col[static_cast<Eigen::Index>(te)] += wdet * Math::dot(phi_tr, phi_te);
+            }
+          }
         }
 
         return *this;
@@ -549,49 +578,64 @@ namespace Rodin::Variational
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
-        const size_t d = polytope.getDimension();
-        const Index idx = polytope.getIndex();
+
+        const size_t d   = polytope.getDimension();
+        const Index  idx = polytope.getIndex();
+
         assert(m_integrand);
         auto& integrand = *m_integrand;
+
         const auto& fes = integrand.getFiniteElementSpace();
-        const auto& fe = fes.getFiniteElement(d, idx);
-        const auto& geometry = polytope.getGeometry();
-        const size_t order = integrand.getOrder(polytope).value_or(fe.getOrder());
-        const bool recompute = !m_set || m_order != order || m_geometry != geometry;
+        const auto& fe  = fes.getFiniteElement(d, idx);
+
+        const auto geometry = polytope.getGeometry();
+
+        const size_t order =
+          integrand.getOrder(polytope).value_or(fe.getOrder());
+
+        const bool recompute = !m_set || (m_order != order) || (m_geometry != geometry);
+
         if (recompute)
         {
-          m_set = true;
-          m_order = order;
+          m_set      = true;
+          m_order    = order;
           m_geometry = geometry;
+
           m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
+
           m_ps.clear();
           m_ps.reserve(m_qf->getSize());
-          for (size_t i = 0; i < m_qf->getSize(); i++)
+          for (size_t i = 0; i < m_qf->getSize(); ++i)
             m_ps.emplace_back(polytope, m_qf->getPoint(i));
         }
         else
         {
           assert(m_qf);
-          for (size_t i = 0; i < m_qf->getSize(); i++)
+          for (size_t i = 0; i < m_qf->getSize(); ++i)
             m_ps[i].setPolytope(polytope);
         }
 
         const size_t nte = integrand.getDOFs(polytope);
 
-        m_vec.resize(nte);
+        m_vec.resize(static_cast<Eigen::Index>(nte));
         m_vec.setZero();
+
+        ScalarType* __restrict v = m_vec.data();
 
         for (size_t qp = 0; qp < m_ps.size(); ++qp)
         {
           const auto& p = m_ps[qp];
-          const ScalarType wdet = m_qf->getWeight(qp) * p.getDistortion();
-
           assert(m_qf);
-          const Variational::IntegrationPoint ip(p, *m_qf, qp);
-          integrand.setIntegrationPoint(ip); // triggers caching once per qp
+
+          const ScalarType wdet =
+            static_cast<ScalarType>(m_qf->getWeight(qp)) *
+            static_cast<ScalarType>(p.getDistortion());
+
+          const IntegrationPoint ip(p, *m_qf, qp);
+          integrand.setIntegrationPoint(ip); // cache once per qp
 
           for (size_t te = 0; te < nte; ++te)
-            m_vec(te) += wdet * integrand.getBasis(te);
+            v[static_cast<Eigen::Index>(te)] += wdet * integrand.getBasis(te);
         }
 
         return *this;

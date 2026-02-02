@@ -7,6 +7,7 @@
 #include <gtest/gtest.h>
 
 #include "Rodin/Math/Matrix.h"
+#include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/Types.h"
 
 using namespace Rodin;

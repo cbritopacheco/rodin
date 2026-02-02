@@ -6,6 +6,7 @@
  */
 #include <gtest/gtest.h>
 
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Types.h"
 

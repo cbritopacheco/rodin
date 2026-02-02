@@ -108,7 +108,7 @@ namespace Rodin::Variational
         const size_t d   = polytope.getDimension();
         const Index  idx = polytope.getIndex();
 
-        const auto& integrand = *m_integrand;
+        auto& integrand = *m_integrand;
         const auto& lhs = integrand.getLHS();
         const auto& rhs = integrand.getRHS();
 
@@ -116,18 +116,13 @@ namespace Rodin::Variational
         const auto& testfes  = rhs.getFiniteElementSpace();
 
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
-        const auto& testfe  = testfes.getFiniteElement(d, idx);
+        const auto& testfe  = testfes .getFiniteElement(d, idx);
 
-        // For grad-grad, the integrand is degree 2*(K-1) in reference coordinates.
-        // Keep the "get(order, geometry)" strategy; just choose the right order.
-        // If your FE order is K, trialfe.getOrder()==K etc.
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe .getOrder();
-        const size_t k    = std::max(k_tr, k_te);
-        const size_t order = (k > 0) ? 2 * (k - 1) : 0;
+        const size_t order = (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2);
 
         const auto geometry = polytope.getGeometry();
-
         const bool recompute_qf = (!m_set || m_order != order || m_geometry != geometry);
 
         if (recompute_qf)
@@ -153,69 +148,135 @@ namespace Rodin::Variational
         const size_t ntr = lhs.getDOFs(polytope);
         const size_t nte = rhs.getDOFs(polytope);
 
-        m_mat.resize(nte, ntr);
+        // Symmetry applicability for this specialization:
+        const bool symmetric =
+          (&trialfes == &testfes) && (ntr == nte);
+        // If you can assert stronger (same FE object / same ordering), do it here.
+
+        // Row-major local matrix for fast row writes.
+        m_mat.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
         m_mat.setZero();
+        ScalarType* A = m_mat.data();
 
-        // Resize ref-grad caches if needed (qp-major)
-        const bool recompute_sizes =
-          (m_dim != d) || (m_trCount != ntr) || (m_teCount != nte) || (m_qps != m_ps.size());
-
-        if (recompute_sizes)
-        {
-          m_dim = d;
-          m_qps = m_ps.size();
-          m_trCount = ntr;
-          m_teCount = nte;
-
-          m_trRefGrad.resize(m_qps * m_trCount);
-          m_teRefGrad.resize(m_qps * m_teCount);
-          for (auto& v : m_trRefGrad) v.resize(d);
-          for (auto& v : m_teRefGrad) v.resize(d);
-        }
-
-        // Tabulations (reference gradients) tied to this QF instance
         const auto& trTab = trialfe.getTabulation(*m_qf);
         const auto& teTab = testfe .getTabulation(*m_qf);
 
-        static thread_local Math::SpatialVector<ScalarType> gtr_phys;
-        static thread_local Math::SpatialVector<ScalarType> gte_phys;
-        gtr_phys.resize(d);
-        gte_phys.resize(d);
+        // Scratch for physical gradients at this qp.
+        static thread_local std::vector<Math::SpatialVector<ScalarType>> Gtr;
+        static thread_local std::vector<Math::SpatialVector<ScalarType>> Gte;
 
-        // Assemble local matrix
-        for (size_t qp = 0; qp < m_qps; ++qp)
+        if (Gtr.size() < ntr) Gtr.resize(ntr);
+        if (Gte.size() < nte) Gte.resize(nte);
+        for (size_t a = 0; a < ntr; ++a) Gtr[a].resize(static_cast<std::uint8_t>(d));
+        for (size_t b = 0; b < nte; ++b) Gte[b].resize(static_cast<std::uint8_t>(d));
+
+        for (size_t qp = 0; qp < m_ps.size(); ++qp)
         {
           const auto& p = m_ps[qp];
-          const auto JinvT = p.getJacobianInverse().transpose();
-
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
-          // cache reference gradients for this qp (optional; keeps API uniform)
-          for (size_t a = 0; a < m_trCount; ++a)
-          {
-            const auto gref = trTab.getGradient(qp, a); // span/ptr length d
-            auto& dst = m_trRefGrad[qp * m_trCount + a];
-            for (size_t j = 0; j < d; ++j) dst(j) = gref[j];
-          }
-          for (size_t b = 0; b < m_teCount; ++b)
-          {
-            const auto gref = teTab.getGradient(qp, b);
-            auto& dst = m_teRefGrad[qp * m_teCount + b];
-            for (size_t j = 0; j < d; ++j) dst(j) = gref[j];
-          }
+          const auto Jinv = p.getJacobianInverse();
 
-          // A(b,a) += wdet * (J^{-T} ghat_a)·(J^{-T} ghat_b)
-          for (size_t b = 0; b < m_teCount; ++b)
+          // Build physical gradients for trial and test
+          if (d == 3)
           {
-            gte_phys = JinvT * m_teRefGrad[qp * m_teCount + b];
+            const ScalarType a00 = Jinv(0,0), a10 = Jinv(1,0), a20 = Jinv(2,0);
+            const ScalarType a01 = Jinv(0,1), a11 = Jinv(1,1), a21 = Jinv(2,1);
+            const ScalarType a02 = Jinv(0,2), a12 = Jinv(1,2), a22 = Jinv(2,2);
 
-            for (size_t a = 0; a < m_trCount; ++a)
+            for (size_t a = 0; a < ntr; ++a)
             {
-              gtr_phys = JinvT * m_trRefGrad[qp * m_trCount + a];
-              m_mat(b, a) += wdet * Math::dot(gtr_phys, gte_phys);
+              const auto g = trTab.getGradient(qp, a);
+              const ScalarType gx = g[0], gy = g[1], gz = g[2];
+              Gtr[a][0] = a00*gx + a10*gy + a20*gz;
+              Gtr[a][1] = a01*gx + a11*gy + a21*gz;
+              Gtr[a][2] = a02*gx + a12*gy + a22*gz;
+            }
+            for (size_t b = 0; b < nte; ++b)
+            {
+              const auto g = teTab.getGradient(qp, b);
+              const ScalarType gx = g[0], gy = g[1], gz = g[2];
+              Gte[b][0] = a00*gx + a10*gy + a20*gz;
+              Gte[b][1] = a01*gx + a11*gy + a21*gz;
+              Gte[b][2] = a02*gx + a12*gy + a22*gz;
             }
           }
+          else if (d == 2)
+          {
+            const ScalarType a00 = Jinv(0,0), a10 = Jinv(1,0);
+            const ScalarType a01 = Jinv(0,1), a11 = Jinv(1,1);
+
+            for (size_t a = 0; a < ntr; ++a)
+            {
+              const auto g = trTab.getGradient(qp, a);
+              const ScalarType gx = g[0], gy = g[1];
+              Gtr[a][0] = a00*gx + a10*gy;
+              Gtr[a][1] = a01*gx + a11*gy;
+            }
+            for (size_t b = 0; b < nte; ++b)
+            {
+              const auto g = teTab.getGradient(qp, b);
+              const ScalarType gx = g[0], gy = g[1];
+              Gte[b][0] = a00*gx + a10*gy;
+              Gte[b][1] = a01*gx + a11*gy;
+            }
+          }
+          else if (d == 1)
+          {
+            const ScalarType a00 = Jinv(0,0);
+            for (size_t a = 0; a < ntr; ++a)
+            {
+              const auto g = trTab.getGradient(qp, a);
+              Gtr[a][0] = a00 * g[0];
+            }
+            for (size_t b = 0; b < nte; ++b)
+            {
+              const auto g = teTab.getGradient(qp, b);
+              Gte[b][0] = a00 * g[0];
+            }
+          }
+          else
+          {
+            assert(false);
+          }
+
+          if (symmetric)
+          {
+            // Accumulate only lower triangle (i,j with j <= i)
+            // Use trial index as column, test index as row: A[row*ntr + col]
+            for (size_t i = 0; i < nte; ++i)
+            {
+              ScalarType* row = A + i * ntr;
+              const auto& gi = Gte[i];
+
+              // diagonal
+              row[i] += wdet * Math::dot(gi, Gtr[i]);
+
+              for (size_t j = 0; j < i; ++j)
+                row[j] += wdet * Math::dot(gi, Gtr[j]);
+            }
+          }
+          else
+          {
+            // General (non-symmetric) accumulation
+            for (size_t b = 0; b < nte; ++b)
+            {
+              ScalarType* row = A + b * ntr;
+              const auto& gb = Gte[b];
+              for (size_t a = 0; a < ntr; ++a)
+                row[a] += wdet * Math::dot(gb, Gtr[a]);
+            }
+          }
+        }
+
+        if (symmetric)
+        {
+          // Mirror lower -> upper
+          // m_mat is row-major, but Eigen triangular views still work.
+          // We filled (i,i) and (i,j) for j<i. Mirror to upper.
+          m_mat.template triangularView<Eigen::Upper>() =
+            m_mat.transpose().template triangularView<Eigen::Upper>();
         }
 
         return *this;
@@ -252,7 +313,7 @@ namespace Rodin::Variational
       std::vector<Math::SpatialVector<ScalarType>> m_teRefGrad;
 
       // local matrix (rows=test, cols=trial)
-      Math::Matrix<ScalarType> m_mat;
+      Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
     };
 
   // CTAD helper

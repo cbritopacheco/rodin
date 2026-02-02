@@ -27,12 +27,8 @@ namespace Rodin::Geometry
     this->jacobian(jac, zero);
 
     if (rdim == pdim)
-    {
-      rc = jac.eigen().partialPivLu().solve(pc - pc0);
-    }
+      rc = jac.solve(pc - pc0);
     else
-    {
-      rc = (jac.transpose() * jac).partialPivLu().solve(jac.transpose() * (pc - pc0));
-    }
+      rc = (jac.transpose() * jac).solve(jac.transpose() * (pc - pc0));
   }
 }

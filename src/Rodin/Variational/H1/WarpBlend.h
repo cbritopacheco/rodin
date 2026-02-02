@@ -14,7 +14,7 @@
 
 #include "Rodin/Types.h"
 #include "Rodin/Math/Common.h"
-#include "Rodin/Math/Vector.h"
+#include "Rodin/Math/SpatialVector.h"
 
 #include "LagrangeBasis.h" // LagrangeBasis1D<K>
 #include "GLL.h"           // GLL<K>

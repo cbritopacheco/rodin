@@ -18,9 +18,9 @@
 #include <cmath>
 #include <Eigen/Core>
 
-#include "Rodin/Math/ForwardDecls.h"
-#include "Rodin/Math/Vector.h"
 #include "Rodin/Types.h"
+
+#include "ForwardDecls.h"
 
 namespace Rodin::Math
 {
@@ -583,14 +583,14 @@ namespace Rodin::Math
   constexpr
   auto dot(const SpatialVector<LHSScalar>& lhs, const SpatialVector<RHSScalar>& rhs)
   {
-    return dot(lhs.eigen(), rhs.eigen());
+    return lhs.dot(rhs);
   }
 
   template <class LHSScalar, class RHSScalar>
   constexpr
   auto dot(const SpatialMatrix<LHSScalar>& lhs, const SpatialMatrix<RHSScalar>& rhs)
   {
-    return dot(lhs.eigen(), rhs.eigen());
+    return lhs.dot(rhs);
   }
 }
 

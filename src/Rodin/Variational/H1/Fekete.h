@@ -12,7 +12,7 @@
 #include <cstddef>
 
 #include "Rodin/Types.h"
-#include "Rodin/Math/Vector.h"
+#include "Rodin/Math/SpatialVector.h"
 
 #include "WarpBlend.h"
 
