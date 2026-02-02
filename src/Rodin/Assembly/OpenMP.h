@@ -612,7 +612,7 @@ namespace Rodin::Assembly
               integrator->setPolytope(*it);
 
               const auto& dofs = input.getFES().getDOFs(d, i);
-              assert(dofs.size >= 0);
+              assert(dofs.size() >= 0);
               for (size_t k = 0; k < static_cast<size_t>(dofs.size()); ++k)
                 local(dofs(k)) += integrator->integrate(k);
             }
