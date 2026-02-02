@@ -772,7 +772,7 @@ namespace Rodin::Variational
       }
 
       template<class Archive>
-      void serialize(Archive& ar, const unsigned int version)
+      void serialize(Archive& ar, const unsigned int)
       {
         ar & boost::serialization::base_object<Parent>(*this);
       }
@@ -831,7 +831,6 @@ namespace Rodin::Variational
             static thread_local RangeType s_out;
             const auto& vtx = P1Element<ScalarType>(m_g).getNode(m_local / m_vdim);
             s_out = v(vtx);
-            decltype(auto) value = v(vtx);
             return s_out.coeff(m_local % m_vdim);
           }
 
@@ -1082,7 +1081,7 @@ namespace Rodin::Variational
       }
 
       template<class Archive>
-      void serialize(Archive& ar, const unsigned int version)
+      void serialize(Archive& ar, const unsigned int)
       {
         ar & boost::serialization::base_object<Parent>(*this);
         ar & m_vdim;

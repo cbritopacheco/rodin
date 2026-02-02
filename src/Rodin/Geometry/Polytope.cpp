@@ -105,15 +105,15 @@ namespace Rodin::Geometry
     {
       case Type::Point:
       {
-        static thread_local const Math::SpatialPoint s_node{{ 0 }};
+        static thread_local const Math::SpatialPoint s_node{ 0 };
         return s_node;
       }
       case Type::Segment:
       {
         static thread_local const std::vector<Math::SpatialPoint> s_nodes =
         {
-          Math::SpatialPoint{{ 0 }},
-          Math::SpatialPoint{{ 1 }}
+          Math::SpatialPoint{ 0 },
+          Math::SpatialPoint{ 1 }
         };
         return s_nodes[i];
       }

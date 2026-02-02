@@ -509,7 +509,7 @@ namespace Rodin::Math
       }
 
       template<class Archive>
-      void serialize(Archive& ar, const unsigned int version)
+      void serialize(Archive& ar, const unsigned int)
       {
         ar & m_size;
         for (std::uint8_t i = 0; i < m_size; i++)

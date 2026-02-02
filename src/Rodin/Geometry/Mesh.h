@@ -1398,7 +1398,7 @@ namespace Rodin::Geometry
       virtual PolytopeTransformation* getDefaultPolytopeTransformation(size_t d, Index i) const;
 
       template<class Archive>
-      void serialize(Archive& ar, const unsigned int version)
+      void serialize(Archive& ar, const unsigned int)
       {
         ar & m_sdim;
         ar & m_vertices;

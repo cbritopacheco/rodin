@@ -1224,24 +1224,28 @@ namespace Rodin::IO
         auto it = line.begin();
         const auto pfes = boost::spirit::x3::string("FiniteElementSpace");
         const bool rfes = boost::spirit::x3::phrase_parse(it, line.end(), pfes, space);
+        (void) rfes;
         assert(it == line.end() && rfes);
 
         line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
         it = line.begin();
         const auto pfec = boost::spirit::x3::string("FiniteElementCollection: ") >> (+char_)[get_fec];
         const bool rfec = boost::spirit::x3::phrase_parse(it, line.end(), pfec, space);
+        (void) rfec;
         assert(it == line.end() && rfec);
 
         line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
         it = line.begin();
         const auto pvdim = boost::spirit::x3::string("VDim:") >> uint_[get_vdim];
         const bool rvdim = boost::spirit::x3::phrase_parse(it, line.end(), pvdim, space);
+        (void) rvdim;
         assert(it == line.end() && rvdim);
 
         line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
         it = line.begin();
         const auto pordering = boost::spirit::x3::string("Ordering:") >> uint_[get_ordering];
         const bool rordering = boost::spirit::x3::phrase_parse(it, line.end(), pordering, space);
+        (void) rordering;
         assert(it == line.end() && rordering);
 
         auto& gf  = this->getObject();
@@ -1363,6 +1367,7 @@ namespace Rodin::IO
         auto it = line.begin();
         const auto pfes  = boost::spirit::x3::string("FiniteElementSpace");
         const bool rfes  = boost::spirit::x3::phrase_parse(it, line.end(), pfes, space);
+        (void) rfes;
         assert(rfes && it == line.end());
 
         line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
@@ -1370,12 +1375,14 @@ namespace Rodin::IO
         const auto pfec =
           boost::spirit::x3::string("FiniteElementCollection: ") >> (+char_)[get_fec];
         const bool rfec = boost::spirit::x3::phrase_parse(it, line.end(), pfec, space);
+        (void) rfec;
         assert(rfec && it == line.end());
 
         line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
         it   = line.begin();
         const auto pvdim = boost::spirit::x3::string("VDim:") >> uint_[get_vdim];
         const bool rvdim = boost::spirit::x3::phrase_parse(it, line.end(), pvdim, space);
+        (void) rvdim;
         assert(rvdim && it == line.end());
 
         line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
@@ -1383,6 +1390,7 @@ namespace Rodin::IO
         const auto pord =
           boost::spirit::x3::string("Ordering:") >> uint_[get_ordering];
         const bool rord = boost::spirit::x3::phrase_parse(it, line.end(), pord, space);
+        (void) rord;
         assert(rord && it == line.end());
 
         // -------------------------------------------------------------
@@ -2024,6 +2032,7 @@ namespace Rodin::IO
         auto it = line.begin();
         const auto pfes  = boost::spirit::x3::string("FiniteElementSpace");
         const bool rfes  = boost::spirit::x3::phrase_parse(it, line.end(), pfes, space);
+        (void) rfes;
         assert(rfes && it == line.end());
 
         line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
@@ -2031,12 +2040,14 @@ namespace Rodin::IO
         const auto pfec  =
           boost::spirit::x3::string("FiniteElementCollection: ") >> (+char_)[get_fec];
         const bool rfec  = boost::spirit::x3::phrase_parse(it, line.end(), pfec, space);
+        (void) rfec;
         assert(rfec && it == line.end());
 
         line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
         it   = line.begin();
         const auto pvdim = boost::spirit::x3::string("VDim:") >> uint_[get_vdim];
         const bool rvdim = boost::spirit::x3::phrase_parse(it, line.end(), pvdim, space);
+        (void) rvdim;
         assert(rvdim && it == line.end());
 
         line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
@@ -2044,6 +2055,7 @@ namespace Rodin::IO
         const auto pord =
           boost::spirit::x3::string("Ordering:") >> uint_[get_ordering];
         const bool rord = boost::spirit::x3::phrase_parse(it, line.end(), pord, space);
+        (void) rord;
         assert(rord && it == line.end());
 
         // -------------------------------------------------------------
@@ -2053,7 +2065,6 @@ namespace Rodin::IO
         auto& fes = gf.getFiniteElementSpace();
         auto& data = gf.getData();
 
-        const size_t vdim = fes.getVectorDimension();
         const size_t dofCount = fes.getSize();
 
         // Resize data vector
@@ -2073,6 +2084,7 @@ namespace Rodin::IO
           using boost::spirit::x3::double_;
           const auto pvalue = double_[get_value];
           const bool rvalue = boost::spirit::x3::phrase_parse(it, line.end(), pvalue, space);
+          (void) rvalue;
           assert(rvalue && it == line.end());
 
           data(i) = value;
@@ -2406,7 +2418,6 @@ namespace Rodin::IO
 
         const size_t vdim       = fes.getVectorDimension();
         const size_t D          = mesh.getDimension();
-        const size_t sdim       = mesh.getSpaceDimension();
         const size_t scalarSize = fes.getSize() / vdim;
 
         // Track which "Rodin scalar DOFs" have already been emitted.
@@ -2547,7 +2558,6 @@ namespace Rodin::IO
           {
             const auto& conn20 = mesh.getConnectivity().getIncidence(2, 0);
             const auto& conn32 = mesh.getConnectivity().getIncidence(3, 2);
-            const size_t nCells3 = mesh.getConnectivity().getCount(3);
 
             // Triangle face size / offsets in MFEM ordering
             constexpr size_t TriN = MFEM::TriangleNodes<K>::Count;

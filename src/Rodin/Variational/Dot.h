@@ -729,7 +729,7 @@ namespace Rodin::Variational
       }
 
       constexpr
-      std::optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      std::optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
         return std::nullopt;
       }

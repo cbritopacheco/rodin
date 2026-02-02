@@ -761,6 +761,7 @@ namespace Rodin::IO
         auto it = line.begin();
         const bool r = boost::spirit::x3::phrase_parse(it, line.end(), p, space);
 
+        (void) solCount;
         assert(solCount == 1);
         if (it != line.end() || !r)
         {

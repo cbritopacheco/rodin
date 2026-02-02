@@ -214,7 +214,7 @@ namespace Rodin::Variational
           m_vector(std::move(other.m_vector))
       {}
 
-      const VectorType& getValue(const Geometry::Point& p) const
+      const VectorType& getValue(const Geometry::Point&) const
       {
         return m_vector.get();
       }

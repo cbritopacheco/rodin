@@ -226,7 +226,7 @@ namespace Rodin::Geometry
        * @param[in] version Serialization version (unused)
        */
       template<class Archive>
-      void serialize(Archive& ar, const unsigned int version)
+      void serialize(Archive& ar, const unsigned int)
       {
         ar & boost::serialization::base_object<PolytopeTransformation>(*this);
         ar & m_pm;

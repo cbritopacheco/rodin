@@ -687,7 +687,7 @@ namespace Rodin::Variational
       }
 
       template <class Callable>
-      auto getPushforward(const std::pair<size_t, Index>& idx, Callable&& v) const
+      auto getPushforward(const std::pair<size_t, Index>&, Callable&& v) const
       {
         return Pushforward<Callable>(std::forward<Callable>(v));
       }

@@ -222,6 +222,7 @@ namespace Rodin::Variational
         ierr = VecDestroy(&m_data);
         assert(ierr == PETSC_SUCCESS);
         m_data = PETSC_NULLPTR;
+        (void) ierr;
       }
 
       constexpr
@@ -233,6 +234,7 @@ namespace Rodin::Variational
         ScalarType res;
         ierr = VecMin(data, idx, &res);
         assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
         return res;
       }
 
@@ -245,6 +247,7 @@ namespace Rodin::Variational
         ScalarType res;
         ierr = VecMax(data, idx, &res);
         assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
         return res;
       }
 
@@ -302,6 +305,7 @@ namespace Rodin::Variational
         auto& data = this->getData();
         ierr = VecShift(data, rhs);
         assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
         return *this;
       }
 
@@ -313,6 +317,7 @@ namespace Rodin::Variational
         auto& data = this->getData();
         ierr = VecShift(data, -rhs);
         assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
         return *this;
       }
 
@@ -323,6 +328,7 @@ namespace Rodin::Variational
         auto& data = this->getData();
         ierr = VecScale(data, rhs);
         assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
         return *this;
       }
 
@@ -333,6 +339,7 @@ namespace Rodin::Variational
         auto& data = this->getData();
         ierr = VecScale(data, 1.0 / rhs);
         assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
         return static_cast<GridFunction&>(*this);
       }
 
@@ -344,6 +351,7 @@ namespace Rodin::Variational
         auto& data = this->getData();
         ierr = VecAXPY(data, 1.0, rhs.getData());
         assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
         return *this;
       }
 
@@ -355,6 +363,7 @@ namespace Rodin::Variational
         auto& data = this->getData();
         ierr = VecAXPY(data, -1.0, rhs.getData());
         assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
         return *this;
       }
 
@@ -365,6 +374,7 @@ namespace Rodin::Variational
         auto& data = this->getData();
         ierr = VecPointwiseMult(data, data, rhs.getData());
         assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
         return *this;
       }
 
@@ -375,6 +385,7 @@ namespace Rodin::Variational
         auto& data = this->getData();
         ierr = VecPointwiseDivide(data, data, rhs.getData());
         assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
         return *this;
       }
 
@@ -403,6 +414,7 @@ namespace Rodin::Variational
         {
           assert(false);
         }
+        (void) ierr;
         return *this;
       }
 
@@ -637,6 +649,7 @@ namespace Rodin::Variational
         {
           assert(false);
         }
+        (void) ierr;
         return *this;
       }
 
@@ -676,6 +689,7 @@ namespace Rodin::Variational
         {
           assert(false);
         }
+        (void) ierr;
         return *this;
       }
 
@@ -715,6 +729,7 @@ namespace Rodin::Variational
         {
           assert(false);
         }
+        (void) ierr;
         return *this;
       }
 
@@ -754,6 +769,7 @@ namespace Rodin::Variational
         {
           assert(false);
         }
+        (void) ierr;
         return *this;
       }
 

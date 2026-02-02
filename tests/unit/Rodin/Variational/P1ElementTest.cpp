@@ -873,7 +873,6 @@ namespace Rodin::Tests::Unit
       // Verify correctness
       for (size_t local = 0; local < elem.getCount(); local++)
       {
-        size_t node_idx = local / vdim;
         size_t comp_idx = local % vdim;
         const auto& node = elem.getNode(local);
         Math::Vector<Real> f_val = f(node);
@@ -973,7 +972,6 @@ namespace Rodin::Tests::Unit
         EXPECT_EQ(jac.cols(), 1);
 
         // Verify Jacobian entries match derivatives
-        size_t comp = local % vdim;
         for (size_t i = 0; i < vdim; i++)
         {
           auto deriv = elem.getBasis(local).getDerivative<1>(i, 0);

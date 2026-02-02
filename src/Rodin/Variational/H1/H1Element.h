@@ -684,7 +684,7 @@ namespace Rodin::Variational
        * @param version Serialization version
        */
       template<class Archive>
-      void serialize(Archive& ar, const unsigned int version)
+      void serialize(Archive& ar, const unsigned int)
       {
         ar & boost::serialization::base_object<Parent>(*this);
       }
@@ -1005,7 +1005,7 @@ namespace Rodin::Variational
       }
 
       template<class Archive>
-      void serialize(Archive& ar, const unsigned int version)
+      void serialize(Archive& ar, const unsigned int)
       {
         ar & boost::serialization::base_object<Parent>(*this);
         ar & m_vdim;

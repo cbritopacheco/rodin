@@ -424,7 +424,7 @@ namespace Rodin::Variational
         assert(alpha < m_cache.grad_phys.size());
 
         static thread_local RangeType s_J;
-        if (s_J.rows() != vdim || s_J.cols() != d)
+        if (static_cast<size_t>(s_J.rows()) != vdim || static_cast<size_t>(s_J.cols()) != d)
           s_J.resize(vdim, d);
 
         s_J.setZero();
