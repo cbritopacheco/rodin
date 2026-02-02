@@ -63,7 +63,9 @@ namespace Rodin::Geometry
     assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
     assert(x.size() >= 0);
     assert(static_cast<size_t>(x.size()) == m_sdim);
-    m_vertices.col(m_nodes++) = x.eigen();
+    for (size_t i = 0; i < m_sdim; ++i)
+      m_vertices(i, m_nodes) = x(i);
+    m_nodes++;
     return *this;
   }
 

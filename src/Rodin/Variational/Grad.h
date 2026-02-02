@@ -202,7 +202,8 @@ namespace Rodin::Variational
           assert(false);
         }
 
-        s_res = out.eigen();
+        s_res = out.getData().head(out.size());
+
         return s_res;
       }
 
@@ -211,7 +212,9 @@ namespace Rodin::Variational
       {
         SpatialVectorType res;
         this->interpolate(res, p);
-        out = res.eigen();
+
+        out.resize(res.size());
+        std::copy(res.begin(), res.end(), out.begin());
       }
 
       /**

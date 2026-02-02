@@ -1671,19 +1671,43 @@ namespace Rodin::Variational
               const ScalarType eta2 = r;
               const ScalarType eta3 = r;
 
-              rx0.eigen() << xi, xi * (1 - eta1 + eta1 * eta2);
-              rz1.eigen() << xi, xi * (1 - eta1 + eta1 * eta2);
-              rz2.eigen() << xi * (1 - eta1 * eta2), xi * eta1 * (1 - eta2);
-              rx3.eigen() << xi * (1 - eta1 * eta2), xi * eta1 * (1 - eta2);
-              rz4.eigen() << xi, xi * eta1 * (1 - eta2);
-              rx5.eigen() << xi, xi * eta1 * (1 - eta2);
+              // First block
+              rx0[0] = xi;
+              rx0[1] = xi * (1 - eta1 + eta1 * eta2);
 
-              rz0.eigen() << xi * (1 - eta1 * eta2 * eta3), xi * (1 - eta1);
-              rx1.eigen() << xi * (1 - eta1 * eta2 * eta3), xi * (1 - eta1);
-              rx2.eigen() << xi, xi * eta1 * (1 - eta2 + eta2 * eta3);
-              rz3.eigen() << xi, xi * eta1 * (1 - eta2 + eta2 * eta3);
-              rx4.eigen() << xi * (1 - eta1 * eta2 * eta3), xi * eta1 * (1 - eta2 * eta3);
-              rz5.eigen() << xi * (1 - eta1 * eta2 * eta3), xi * eta1 * (1 - eta2 * eta3);
+              rz1[0] = xi;
+              rz1[1] = xi * (1 - eta1 + eta1 * eta2);
+
+              rz2[0] = xi * (1 - eta1 * eta2);
+              rz2[1] = xi * eta1 * (1 - eta2);
+
+              rx3[0] = xi * (1 - eta1 * eta2);
+              rx3[1] = xi * eta1 * (1 - eta2);
+
+              rz4[0] = xi;
+              rz4[1] = xi * eta1 * (1 - eta2);
+
+              rx5[0] = xi;
+              rx5[1] = xi * eta1 * (1 - eta2);
+
+              // Second block
+              rz0[0] = xi * (1 - eta1 * eta2 * eta3);
+              rz0[1] = xi * (1 - eta1);
+
+              rx1[0] = xi * (1 - eta1 * eta2 * eta3);
+              rx1[1] = xi * (1 - eta1);
+
+              rx2[0] = xi;
+              rx2[1] = xi * eta1 * (1 - eta2 + eta2 * eta3);
+
+              rz3[0] = xi;
+              rz3[1] = xi * eta1 * (1 - eta2 + eta2 * eta3);
+
+              rx4[0] = xi * (1 - eta1 * eta2 * eta3);
+              rx4[1] = xi * eta1 * (1 - eta2 * eta3);
+
+              rz5[0] = xi * (1 - eta1 * eta2 * eta3);
+              rz5[1] = xi * eta1 * (1 - eta2 * eta3);
 
               const Geometry::Point x0(polytope, rx0);
               const Geometry::Point x1(polytope, rx1);

@@ -271,9 +271,11 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Local>&
-  Mesh<Context::Local>::setVertexCoordinates(Index idx, const Math::SpatialVector<Real>& coords)
+  Mesh<Context::Local>::setVertexCoordinates(
+      Index idx, const Math::SpatialVector<Real>& coords)
   {
-    m_vertices.col(idx) = coords.eigen();
+    for (size_t i = 0; i < static_cast<size_t>(coords.size()); ++i)
+      m_vertices.col(idx).coeffRef(i) = coords(i);
     return *this;
   }
 

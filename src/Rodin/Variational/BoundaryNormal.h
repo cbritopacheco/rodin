@@ -114,7 +114,7 @@ namespace Rodin::Variational
       {
         Math::SpatialVector<ScalarType> out;
         this->interpolate(out, p);
-        res = out.eigen();
+        res = out.getData().head(m_sdim);
       }
 
       void interpolate(Math::SpatialVector<ScalarType>& res, const Geometry::Point& p) const
@@ -221,30 +221,29 @@ namespace Rodin::Variational
       {
         static thread_local RangeType s_res;
 
-        SpatialVectorType out;
+        SpatialVectorType res;
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         if (polytopeMesh == m_mesh.get())
         {
-          this->interpolate(out, p);
+          this->interpolate(res, p);
         }
         else if (const auto inclusion = m_mesh.get().inclusion(p))
         {
-          this->interpolate(out, *inclusion);
+          this->interpolate(res, *inclusion);
         }
         else if (m_mesh.get().isSubMesh())
         {
           const auto& submesh = m_mesh.get().asSubMesh();
           const auto restriction = submesh.restriction(p);
-          this->interpolate(out, *restriction);
+          this->interpolate(res, *restriction);
         }
         else
         {
-          out.setConstant(Math::nan<ScalarType>());
+          res.setConstant(Math::nan<ScalarType>());
           assert(false);
         }
-
-        s_res = out.eigen();
+        s_res = res.getData().head(m_sdim);
         return s_res;
       }
 

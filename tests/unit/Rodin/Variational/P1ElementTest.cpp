@@ -937,11 +937,11 @@ namespace Rodin::Tests::Unit
     Math::Vector<Real> p{{0.3, 0.4}};
 
     Math::SpatialVector<Real> grad_sum(2);
-    grad_sum.eigen().setZero();
+    grad_sum.setZero();
     for (size_t i = 0; i < elem.getCount(); i++)
     {
       auto grad_func = elem.getBasis(i).getGradient();
-      grad_sum.eigen() += grad_func(p).eigen();
+      grad_sum += grad_func(p);
     }
 
     // Sum of gradients should be zero

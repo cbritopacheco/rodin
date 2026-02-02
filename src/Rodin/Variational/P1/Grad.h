@@ -193,6 +193,8 @@ namespace Rodin::Variational
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      using SpatialVectorType = Math::SpatialVector<ScalarType>;
+
       using RangeType = Math::Vector<ScalarType>;
 
       using OperandType = ShapeFunction<NestedDerived, FESType, Space>;
@@ -255,7 +257,7 @@ namespace Rodin::Variational
         };
 
         // Cached physical gradients ∇_x φ_a (one per scalar basis function)
-        std::vector<RangeType> grad;
+        std::vector<SpatialVectorType> grad;
 
         CellKey cellKey;
         QpKey qpKey;
@@ -403,11 +405,11 @@ namespace Rodin::Variational
       }
 
       constexpr
-      const RangeType& getBasis(size_t local) const
+      auto getBasis(size_t local) const
       {
         assert(m_cache.cellKey);
         assert(local < m_cache.grad.size());
-        return m_cache.grad[local];
+        return m_cache.grad[local].getData().head(m_cache.cellKey.d);
       }
 
       constexpr

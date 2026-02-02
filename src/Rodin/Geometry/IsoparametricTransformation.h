@@ -202,8 +202,8 @@ namespace Rodin::Geometry
           for (size_t i = 0; i < rdim; i++)
           {
             const auto derivative = basis.template getDerivative<1>(i);
-            assert(pc.col(i).size() == m_pm.col(local).size());
-            pc.col(i).noalias() += m_pm.col(local) * derivative(rc);
+            for (size_t j = 0; j < pdim; j++)
+              pc(j, i) += m_pm(j, local) * derivative(rc);
           }
         }
       }

@@ -184,7 +184,9 @@ TEST_F(VectorTest, FixedSizeVectors)
 TEST_F(VectorTest, SpatialVector)
 {
   SpatialVector<Real> sv(3);
-  sv.eigen() << 1.0, 2.0, 3.0;
+  sv[0] = 1.0;
+  sv[1] = 2.0;
+  sv[2] = 3.0;
 
   EXPECT_EQ(sv.size(), 3);
   EXPECT_DOUBLE_EQ(sv[0], 1.0);
@@ -193,7 +195,10 @@ TEST_F(VectorTest, SpatialVector)
 
   // Test SpatialPoint (alias for SpatialVector<Real>)
   SpatialPoint sp(3);
-  sp.eigen() << 4.0, 5.0, 6.0;
+  sp[0] = 4.0;
+  sp[1] = 5.0;
+  sp[2] = 6.0;
+
   EXPECT_EQ(sp.size(), 3);
   EXPECT_DOUBLE_EQ(sp[0], 4.0);
   EXPECT_DOUBLE_EQ(sp[1], 5.0);

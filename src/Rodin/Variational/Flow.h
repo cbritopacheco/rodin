@@ -274,8 +274,7 @@ namespace Rodin::Variational
             const auto it0 = mesh.getPolytope(cd, c0);
             const auto& cell0 = *it0;
             const Geometry::Point q0(cell0, s_rc_tmp, p.getPhysicalCoordinates());
-            Math::Vector<Real> vel = m_velocity(q0);
-            const auto a0 = sgn * (q0.getJacobianInverse() * vel);
+            const auto a0 = sgn * (q0.getJacobianInverse() * m_velocity(q0));
 
             const auto& faces0 = conn.getIncidence(cd, cd - 1).at(c0);
             size_t j0 = faces0.size();
@@ -287,7 +286,7 @@ namespace Rodin::Variational
             const auto& hs = Geometry::Polytope::Traits(g0).getHalfSpace();
             const auto nref = hs.matrix.row(j0); // outward in ref(c0)
 
-            if (a0.dot(nref) < 0)
+            if (nref.dot(a0) < 0)
             {
               Geometry::Polytope::Project(g0).cell(s_rc, s_rc_tmp);
               s_cell = c0;
@@ -322,13 +321,12 @@ namespace Rodin::Variational
           const auto& faces = conn.getIncidence(cd, cd - 1).at(s_cell);
           const auto& hs = Geometry::Polytope::Traits(g).getHalfSpace();
 
-          const auto vref = [&](const Math::SpatialPoint& r) -> auto
+          const auto vref = [&](const Math::SpatialPoint& r) -> decltype(auto)
           {
-            Math::SpatialVector<Real> v;
+            static thread_local Math::SpatialVector<Real> s_v;
             const Geometry::Point qp(cell, r);
-            Math::Vector<Real> vel = m_velocity(qp);
-            v = sgn * qp.getJacobianInverse() * vel;
-            return v;
+            s_v = sgn * qp.getJacobianInverse() * m_velocity(qp);
+            return s_v;
           };
 
           s_cand.clear();
@@ -350,7 +348,7 @@ namespace Rodin::Variational
             const Real b = hs.vector[i];
 
             assert(n.size() == s_rc.size());
-            const Real g0 = b - s_rc.dot(n.transpose());
+            const Real g0 = b - s_rc.dot(n);
             if (g0 <= 0) // interior requires g0 > 0
               continue;
 
@@ -439,11 +437,10 @@ namespace Rodin::Variational
               const auto& facesz = conn.getIncidence(cd, cd - 1).at(s_cell);
               const auto vz = [&] (const Math::SpatialPoint& r)
               {
-                Math::SpatialVector<Real> v;
+                static thread_local Math::SpatialVector<Real> s_v;
                 const Geometry::Point qp(cellz, r);
-                Math::Vector<Real> vel = m_velocity(qp);
-                v = sgn * qp.getJacobianInverse() * vel;
-                return v;
+                s_v = sgn * qp.getJacobianInverse() * m_velocity(qp);
+                return s_v;
               };
 
               // find another face k with |g_k| <= eps_g and n_k·v_on > 0, excluding hysteresis face

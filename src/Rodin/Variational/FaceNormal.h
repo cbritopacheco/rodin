@@ -200,7 +200,7 @@ namespace Rodin::Variational
               *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()).raise();
           }
         }
-        s_res = res.eigen();
+        s_res = res.getData().head(static_cast<Eigen::Index>(m_sdim));
         return s_res;
       }
 

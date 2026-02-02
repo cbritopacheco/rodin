@@ -552,7 +552,7 @@ TEST(Geometry_Point, AdditionWithVector)
   vec[1] = 2.0;
 
   // Test point + vector
-  Math::SpatialVector<Real> result = p + vec.eigen();
+  Math::SpatialVector<Real> result = p + vec;
   EXPECT_NEAR(result(0), p.x() + 1.0, 1e-10);
   EXPECT_NEAR(result(1), p.y() + 2.0, 1e-10);
 }
@@ -584,7 +584,7 @@ TEST(Geometry_Point, SubtractionWithVector)
   vec[1] = 0.2;
 
   // Test point - vector
-  auto result = p - vec.eigen();
+  auto result = p - vec;
   EXPECT_NEAR(result(0), p.x() - 0.1, 1e-10);
   EXPECT_NEAR(result(1), p.y() - 0.2, 1e-10);
 }

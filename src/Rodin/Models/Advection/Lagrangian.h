@@ -79,7 +79,7 @@ namespace Rodin::Models::Advection
        */
       bool operator()(Real& tau, Index& cell, Math::SpatialPoint& rref) const
       {
-        static thread_local Math::SpatialVector<Real> s_nphys_u;
+        static thread_local Math::Vector<Real> s_nphys_u;
         static thread_local Math::SpatialPoint s_rtmp;
         static thread_local Math::SpatialPoint s_xint;
 
@@ -107,7 +107,7 @@ namespace Rodin::Models::Advection
           }
         }
 
-        const Math::SpatialVector<Real> nref = hs.matrix.row(jbest).transpose();
+        const auto nref = hs.matrix.row(jbest).transpose();
         const auto itc = mesh.getPolytope(cd, cell);
         const auto& cellO = *itc;
         const Geometry::Point qface(cellO, rref);
@@ -123,7 +123,7 @@ namespace Rodin::Models::Advection
 
         const auto nphys = trace_sign * s_nphys_u / nlen;
         decltype(auto) vphys = m_vel(qface);
-        const Real vn = nphys.dot(vphys);
+        const Real vn = vphys.dot(nphys);
         const Real h = std::max<Real>(0, vn) * tau;
         const auto& xface = qface.getPhysicalCoordinates();
         s_xint = xface + (-h - m_eps) * nphys;

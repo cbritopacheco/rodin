@@ -153,7 +153,7 @@ TEST_F(MatrixTest, FixedSizeMatrix)
 TEST_F(MatrixTest, SpatialMatrix)
 {
   SpatialMatrix<Real> sm(3, 3);
-  sm.eigen().setIdentity();
+  sm.setIdentity();
   
   EXPECT_EQ(sm.rows(), 3);
   EXPECT_EQ(sm.cols(), 3);

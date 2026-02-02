@@ -190,8 +190,7 @@ namespace Rodin::Geometry
       }
       else
       {
-        return m_jacobianInverse.emplace(
-            this->getJacobian().eigen().completeOrthogonalDecomposition().pseudoInverse());
+        return m_jacobianInverse.emplace(this->getJacobian().pseudoInverse());
       }
     }
     assert(m_jacobianInverse);

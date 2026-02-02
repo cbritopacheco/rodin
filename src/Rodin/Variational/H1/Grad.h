@@ -317,7 +317,7 @@ namespace Rodin::Variational
       {
         assert(m_cache.key);
         assert(local < m_cache.grad_phys.size());
-        return m_cache.grad_phys[local].eigen();
+        return m_cache.grad_phys[local].getData().head(m_cache.key.dim);
       }
 
       constexpr

@@ -511,5 +511,33 @@ namespace Rodin::Geometry
   {
     return p.vector() * s;
   }
+
+  template <class Scalar>
+  auto operator+(
+    const Math::SpatialVector<Scalar>& v, const Geometry::Point& p)
+  {
+    return v + p.vector();
+  }
+
+  template <class Scalar>
+  auto operator+(
+    const Geometry::Point& p, const Math::SpatialVector<Scalar>& v)
+  {
+    return p.vector() + v;
+  }
+
+  template <class Scalar>
+  auto operator-(
+    const Math::SpatialVector<Scalar>& v, const Geometry::Point& p)
+  {
+    return v - p.vector();
+  }
+
+  template <class Scalar>
+  auto operator-(
+    const Geometry::Point& p, const Math::SpatialVector<Scalar>& v)
+  {
+    return p.vector() - v;
+  }
 }
 #endif

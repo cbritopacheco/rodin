@@ -163,27 +163,27 @@ namespace Rodin::Variational
         const auto& fes = gf.getFiniteElementSpace();
         const auto& fesMesh = fes.getMesh();
 
-        SpatialMatrixType out;
+        SpatialMatrixType res;
         if (polytopeMesh == fesMesh)
         {
-          this->interpolate(out, p);
+          this->interpolate(res, p);
         }
         else if (const auto inclusion = fesMesh.inclusion(p))
         {
-          this->interpolate(out, *inclusion);
+          this->interpolate(res, *inclusion);
         }
         else if (fesMesh.isSubMesh())
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
-          this->interpolate(out, *restriction);
+          this->interpolate(res, *restriction);
         }
         else
         {
           assert(false);
         }
 
-        s_res = out.eigen();
+        s_res = res.getData().topLeftCorner(res.rows(), res.cols());
         return s_res;
       }
 
@@ -202,7 +202,7 @@ namespace Rodin::Variational
       {
         SpatialMatrixType res;
         this->interpolate(res, p);
-        out = res.eigen();
+        out = res.getData().topLeftCorner(res.rows(), res.cols());
       }
 
       /**

@@ -515,7 +515,7 @@ namespace Rodin::Geometry
     auto res = boost::mpi::all_reduce(
         comm, local, [](auto const& a, auto const& b) { return a.size() > 0 ? a : b; });
     const auto& coords = (m_vertices[globalIdx] = res);
-    return { coords.data(), static_cast<Eigen::Index>(coords.size()) };
+    return { coords.getData().data(), static_cast<Eigen::Index>(coords.size()) };
   }
 }
 

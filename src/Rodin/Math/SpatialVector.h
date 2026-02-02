@@ -14,6 +14,8 @@
 #ifndef RODIN_MATH_SPATIALVECTOR_H
 #define RODIN_MATH_SPATIALVECTOR_H
 
+#include <iostream>
+
 #include "Rodin/FormLanguage/Traits.h"
 
 #include "ForwardDecls.h"
@@ -126,7 +128,7 @@ namespace Rodin::Math
       constexpr
       SpatialVector& operator=(const SpatialMatrix<Scalar>& other)
       {
-        const std::uint8_t n = static_cast<std::uint8_t>(other.cols());
+        const std::uint8_t n = static_cast<std::uint8_t>(other.rows());
         assert(n == 1);
         m_size = n;
         // Assume column vector
@@ -248,13 +250,6 @@ namespace Rodin::Math
         return result;
       }
 
-      SpatialVector& operator*=(const SpatialVector& other)
-      {
-        assert(m_size == other.m_size);
-        this->eigen() *= other.eigen();
-        return *this;
-      }
-
       template <class EigenDerived>
       constexpr
       SpatialVector& operator=(const Eigen::ArrayBase<EigenDerived>& other)
@@ -262,7 +257,22 @@ namespace Rodin::Math
         const std::uint8_t n = static_cast<std::uint8_t>(other.size());
         assert(n <= MaxSize);
         m_size = n;
-        this->eigen() = other;
+        switch (m_size)
+        {
+          case 3:
+            m_data[2] = other(static_cast<Eigen::Index>(2));
+            [[fallthrough]];
+          case 2:
+            m_data[1] = other(static_cast<Eigen::Index>(1));
+            [[fallthrough]];
+          case 1:
+            m_data[0] = other(static_cast<Eigen::Index>(0));
+            break;
+          case 0:
+            break;
+          default:
+            assert(false);
+        }
         return *this;
       }
 
@@ -272,7 +282,22 @@ namespace Rodin::Math
         const std::uint8_t n = static_cast<std::uint8_t>(v.size());
         assert(n <= MaxSize);
         m_size = n;
-        this->eigen() = v;
+        switch (m_size)
+        {
+          case 3:
+            m_data[2] = v(static_cast<Eigen::Index>(2));
+            [[fallthrough]];
+          case 2:
+            m_data[1] = v(static_cast<Eigen::Index>(1));
+            [[fallthrough]];
+          case 1:
+            m_data[0] = v(static_cast<Eigen::Index>(0));
+            break;
+          case 0:
+            break;
+          default:
+            assert(false);
+        }
         return *this;
       }
 
@@ -280,7 +305,22 @@ namespace Rodin::Math
       SpatialVector& operator+=(const Eigen::MatrixBase<EigenDerived>& v)
       {
         assert(static_cast<std::uint8_t>(v.size()) == m_size);
-        this->eigen() += v;
+        switch (m_size)
+        {
+          case 3:
+            m_data[2] += v(static_cast<Eigen::Index>(2));
+            [[fallthrough]];
+          case 2:
+            m_data[1] += v(static_cast<Eigen::Index>(1));
+            [[fallthrough]];
+          case 1:
+            m_data[0] += v(static_cast<Eigen::Index>(0));
+            break;
+          case 0:
+            break;
+          default:
+            assert(false);
+        }
         return *this;
       }
 
@@ -288,14 +328,22 @@ namespace Rodin::Math
       SpatialVector& operator-=(const Eigen::MatrixBase<EigenDerived>& v)
       {
         assert(static_cast<std::uint8_t>(v.size()) == m_size);
-        this->eigen() -= v;
-        return *this;
-      }
-
-      template <class EigenDerived>
-      SpatialVector& operator*=(const Eigen::MatrixBase<EigenDerived>& s)
-      {
-        this->eigen() *= s;
+        switch (m_size)
+        {
+          case 3:
+            m_data[2] -= v(static_cast<Eigen::Index>(2));
+            [[fallthrough]];
+          case 2:
+            m_data[1] -= v(static_cast<Eigen::Index>(1));
+            [[fallthrough]];
+          case 1:
+            m_data[0] -= v(static_cast<Eigen::Index>(0));
+            break;
+          case 0:
+            break;
+          default:
+            assert(false);
+        }
         return *this;
       }
 
@@ -425,84 +473,178 @@ namespace Rodin::Math
       constexpr
       ScalarType dot(const Eigen::MatrixBase<EigenDerived>& other) const noexcept
       {
-        return Math::dot(this->eigen(), other);
+        assert(static_cast<std::uint8_t>(other.size()) == m_size);
+        ScalarType s = ScalarType(0);
+        switch (m_size)
+        {
+          case 3:
+            s += m_data[2] * other(static_cast<Eigen::Index>(2));
+            [[fallthrough]];
+          case 2:
+            s += m_data[1] * other(static_cast<Eigen::Index>(1));
+            [[fallthrough]];
+          case 1:
+            s += m_data[0] * other(static_cast<Eigen::Index>(0));
+            [[fallthrough]];
+          case 0:
+            break;
+          default:
+            assert(false);
+        }
+        return s;
       }
 
-      auto transpose() const noexcept
+      SpatialMatrix<Scalar> transpose() const noexcept
       {
-        return this->eigen().transpose();
+        SpatialMatrix<Scalar> m(1, m_size);
+        switch (m_size)
+        {
+          case 3:
+            m(0,2) = m_data[2];
+            [[fallthrough]];
+          case 2:
+            m(0,1) = m_data[1];
+            [[fallthrough]];
+          case 1:
+            m(0,0) = m_data[0];
+            break;
+          case 0:
+            break;
+          default:
+            assert(false);
+        }
+        return m;
       }
 
-      auto value() const noexcept
+      ScalarType value() const noexcept
       {
-        return this->eigen().value();
+        assert(m_size >= 1);
+        return m_data[0];
       }
 
       constexpr
       void normalize() noexcept
       {
-        this->eigen().normalize();
+        ScalarType n = this->norm();
+        switch (m_size)
+        {
+          case 3:
+            m_data[2] /= n;
+            [[fallthrough]];
+          case 2:
+            m_data[1] /= n;
+            [[fallthrough]];
+          case 1:
+            m_data[0] /= n;
+            break;
+          case 0:
+            break;
+          default:
+            assert(false);
+        }
       }
 
       constexpr
       auto squaredNorm() const noexcept
       {
-        return this->eigen().squaredNorm();
+        ScalarType s = ScalarType(0);
+        switch (m_size)
+        {
+          case 3:
+            s += Math::pow2(m_data[2]);
+            [[fallthrough]];
+          case 2:
+            s += Math::pow2(m_data[1]);
+            [[fallthrough]];
+          case 1:
+            s += Math::pow2(m_data[0]);
+            [[fallthrough]];
+          case 0:
+            break;
+          default:
+            assert(false);
+        }
+        return s;
       }
 
       constexpr
-      auto stableNorm() const noexcept
+      ScalarType stableNorm() const noexcept
       {
-        return this->eigen().stableNorm();
+        return m_data.stableNorm();
       }
 
       constexpr
-      auto blueNorm() const noexcept
+      ScalarType blueNorm() const noexcept
       {
-        return this->eigen().blueNorm();
+        return m_data.blueNorm();
       }
 
       template <size_t P>
       constexpr
-      auto lpNorm() const noexcept
+      ScalarType lpNorm() const noexcept
       {
-        return this->eigen().template lpNorm<P>();
+        ScalarType s = ScalarType(0);
+        std::integral_constant<size_t, P> p;
+        switch (m_size)
+        {
+          case 3:
+            s += Math::pow(Math::abs(m_data[2]), p);
+            [[fallthrough]];
+          case 2:
+            s += Math::pow(Math::abs(m_data[1]), p);
+            [[fallthrough]];
+          case 1:
+            s += Math::pow(Math::abs(m_data[0]), p);
+            [[fallthrough]];
+          case 0:
+            break;
+          default:
+            assert(false);
+        }
+        return Math::pow(s, ScalarType(1) / ScalarType(P));
       }
 
       constexpr
-      auto normalized() const noexcept
+      SpatialVector normalized() const noexcept
       {
-        return this->eigen().normalized();
+        SpatialVector v(*this);
+        v.normalize();
+        return v;
       }
 
       constexpr
-      auto norm() const noexcept
+      ScalarType norm() const noexcept
       {
-        return this->eigen().norm();
+        ScalarType s = 0;
+        switch (m_size)
+        {
+          case 3:
+            s += Math::pow2(m_data[2]);
+            [[fallthrough]];
+          case 2:
+            s += Math::pow2(m_data[1]);
+            [[fallthrough]];
+          case 1:
+            s += Math::pow2(m_data[0]);
+            [[fallthrough]];
+          case 0:
+            break;
+          default:
+            assert(false);
+        }
+        return Math::sqrt(s);
       }
 
       constexpr
-      auto data() noexcept
+      auto& getData() noexcept
       {
-        return m_data.data();
+        return m_data;
       }
 
       constexpr
-      auto data() const noexcept
+      const auto& getData() const noexcept
       {
-        return m_data.data();
-      }
-
-      constexpr
-      auto eigen() noexcept
-      {
-        return m_data.head(static_cast<Eigen::Index>(m_size));
-      }
-
-      constexpr
-      auto eigen() const noexcept
-      {
-        return m_data.head(static_cast<Eigen::Index>(m_size));
+        return m_data;
       }
 
       template<class Archive>
@@ -646,21 +788,55 @@ namespace Rodin::Math
   }
 
   template <class EigenDerived, class Scalar>
-  auto operator+(
+  SpatialVector<Scalar> operator+(
     const Eigen::MatrixBase<EigenDerived>& a,
     const SpatialVector<Scalar>& b)
   {
     assert(static_cast<std::uint8_t>(a.size()) == b.size());
-    return a + b.eigen();
+    SpatialVector<Scalar> r(b.size());
+    switch (b.size())
+    {
+      case 3:
+        r[2] = a(static_cast<Eigen::Index>(2)) + b[2];
+        [[fallthrough]];
+      case 2:
+        r[1] = a(static_cast<Eigen::Index>(1)) + b[1];
+        [[fallthrough]];
+      case 1:
+        r[0] = a(static_cast<Eigen::Index>(0)) + b[0];
+        break;
+      case 0:
+        break;
+      default:
+        assert(false);
+    }
+    return r;
   }
 
   template <class Scalar, class EigenDerived>
-  auto operator+(
+  SpatialVector<Scalar> operator+(
     const SpatialVector<Scalar>& a,
     const Eigen::MatrixBase<EigenDerived>& b)
   {
     assert(static_cast<std::uint8_t>(b.size()) == a.size());
-    return a.eigen() + b;
+    SpatialVector<Scalar> r(a.size());
+    switch (a.size())
+    {
+      case 3:
+        r[2] = a[2] + b(static_cast<Eigen::Index>(2));
+        [[fallthrough]];
+      case 2:
+        r[1] = a[1] + b(static_cast<Eigen::Index>(1));
+        [[fallthrough]];
+      case 1:
+        r[0] = a[0] + b(static_cast<Eigen::Index>(0));
+        break;
+      case 0:
+        break;
+      default:
+        assert(false);
+    }
+    return r;
   }
 
   template <class EigenDerived, class Scalar>
@@ -669,7 +845,7 @@ namespace Rodin::Math
     const SpatialVector<Scalar>& b)
   {
     assert(static_cast<std::uint8_t>(a.size()) == b.size());
-    return a - b.eigen();
+    return a - b.getData().head(static_cast<Eigen::Index>(b.size()));
   }
 
   template <class Scalar, class EigenDerived>
@@ -678,7 +854,7 @@ namespace Rodin::Math
     const Eigen::MatrixBase<EigenDerived>& b)
   {
     assert(static_cast<std::uint8_t>(b.size()) == a.size());
-    return a.eigen() - b;
+    return a.getData().head(static_cast<Eigen::Index>(a.size())) - b;
   }
 
   template <class Scalar, class EigenDerived>
@@ -687,7 +863,7 @@ namespace Rodin::Math
       const Eigen::MatrixBase<EigenDerived>& m)
   {
     assert(static_cast<std::uint8_t>(m.rows()) == v.size());
-    return v.eigen() * m;
+    return v.getData().head(static_cast<Eigen::Index>(v.size())) * m;
   }
 
   template <class EigenDerived, class Scalar>
@@ -696,7 +872,7 @@ namespace Rodin::Math
       const SpatialVector<Scalar>& v)
   {
     assert(static_cast<std::uint8_t>(m.cols()) == v.size());
-    return m * v.eigen();
+    return m * v.getData().head(static_cast<Eigen::Index>(v.size()));
   }
 
   /**

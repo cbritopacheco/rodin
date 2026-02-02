@@ -46,6 +46,29 @@ namespace Rodin::Math
       }
 
       constexpr
+      SpatialMatrix(const SpatialVector<Scalar>& vec)
+        : m_rows(static_cast<std::uint8_t>(vec.size())),
+          m_cols(1)
+      {
+        switch (m_rows)
+        {
+          case 3:
+            m_data(2,0) = vec(2);
+            [[fallthrough]];
+          case 2:
+            m_data(1,0) = vec(1);
+            [[fallthrough]];
+          case 1:
+            m_data(0,0) = vec(0);
+            break;
+          case 0:
+            break;
+          default:
+            assert(false);
+        }
+      }
+
+      constexpr
       SpatialMatrix(const SpatialMatrix&) = default;
 
       constexpr
@@ -76,7 +99,67 @@ namespace Rodin::Math
         assert(r <= MaxSize && c <= MaxSize);
         m_rows = r;
         m_cols = c;
-        this->eigen() = other;
+        switch (m_rows)
+        {
+          case 3:
+            switch (m_cols)
+            {
+              case 3:
+                m_data(2,2) = other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(2));
+                [[fallthrough]];
+              case 2:
+                m_data(2,1) = other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(1));
+                [[fallthrough]];
+              case 1:
+                m_data(2,0) = other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(0));
+                break;
+              case 0:
+                break;
+              default:
+                assert(false);
+            }
+            [[fallthrough]];
+          case 2:
+            switch (m_cols)
+            {
+              case 3:
+                m_data(1,2) = other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(2));
+                [[fallthrough]];
+              case 2:
+                m_data(1,1) = other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(1));
+                [[fallthrough]];
+              case 1:
+                m_data(1,0) = other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(0));
+                break;
+              case 0:
+                break;
+              default:
+                assert(false);
+            }
+            [[fallthrough]];
+          case 1:
+            switch (m_cols)
+            {
+              case 3:
+                m_data(0,2) = other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(2));
+                [[fallthrough]];
+              case 2:
+                m_data(0,1) = other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(1));
+                [[fallthrough]];
+              case 1:
+                m_data(0,0) = other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(0));
+                break;
+              case 0:
+                break;
+              default:
+                assert(false);
+            }
+            break;
+          case 0:
+            break;
+          default:
+            assert(false);
+        }
         return *this;
       }
 
@@ -89,7 +172,67 @@ namespace Rodin::Math
         assert(r <= MaxSize && c <= MaxSize);
         m_rows = r;
         m_cols = c;
-        this->eigen() = other;
+        switch (m_rows)
+        {
+          case 3:
+            switch (m_cols)
+            {
+              case 3:
+                m_data(2,2) = other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(2));
+                [[fallthrough]];
+              case 2:
+                m_data(2,1) = other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(1));
+                [[fallthrough]];
+              case 1:
+                m_data(2,0) = other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(0));
+                break;
+              case 0:
+                break;
+              default:
+                assert(false);
+            }
+            [[fallthrough]];
+          case 2:
+            switch (m_cols)
+            {
+              case 3:
+                m_data(1,2) = other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(2));
+                [[fallthrough]];
+              case 2:
+                m_data(1,1) = other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(1));
+                [[fallthrough]];
+              case 1:
+                m_data(1,0) = other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(0));
+                break;
+              case 0:
+                break;
+              default:
+                assert(false);
+            }
+            [[fallthrough]];
+          case 1:
+            switch (m_cols)
+            {
+              case 3:
+                m_data(0,2) = other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(2));
+                [[fallthrough]];
+              case 2:
+                m_data(0,1) = other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(1));
+                [[fallthrough]];
+              case 1:
+                m_data(0,0) = other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(0));
+                break;
+              case 0:
+                break;
+              default:
+                assert(false);
+            }
+            break;
+          case 0:
+            break;
+          default:
+            assert(false);
+        }
         return *this;
       }
 
@@ -137,6 +280,12 @@ namespace Rodin::Math
       void setConstant(const ScalarType& value) noexcept
       {
         m_data.setConstant(value);
+      }
+
+      constexpr
+      void setIdentity() noexcept
+      {
+        m_data.setIdentity();
       }
 
       constexpr
@@ -241,7 +390,69 @@ namespace Rodin::Math
       constexpr
       ScalarType dot(const Eigen::MatrixBase<EigenDerived>& other) const noexcept
       {
-        return Math::dot(this->eigen(), other);
+        ScalarType s = ScalarType(0);
+        switch (m_rows)
+        {
+          case 3:
+            switch (m_cols)
+            {
+              case 3:
+                s += m_data(2,2) * other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(2));
+                [[fallthrough]];
+              case 2:
+                s += m_data(2,1) * other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(1));
+                [[fallthrough]];
+              case 1:
+                s += m_data(2,0) * other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(0));
+                [[fallthrough]];
+              case 0:
+                break;
+              default:
+                assert(false);
+            }
+            [[fallthrough]];
+          case 2:
+            switch (m_cols)
+            {
+              case 3:
+                s += m_data(1,2) * other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(2));
+                [[fallthrough]];
+              case 2:
+                s += m_data(1,1) * other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(1));
+                [[fallthrough]];
+              case 1:
+                s += m_data(1,0) * other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(0));
+                [[fallthrough]];
+              case 0:
+                break;
+              default:
+                assert(false);
+            }
+            [[fallthrough]];
+          case 1:
+            switch (m_cols)
+            {
+              case 3:
+                s += m_data(0,2) * other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(2));
+                [[fallthrough]];
+              case 2:
+                s += m_data(0,1) * other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(1));
+                [[fallthrough]];
+              case 1:
+                s += m_data(0,0) * other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(0));
+                [[fallthrough]];
+              case 0:
+                break;
+              default:
+                assert(false);
+            }
+            [[fallthrough]];
+          case 0:
+            break;
+          default:
+            assert(false);
+        }
+        return s;
       }
 
       constexpr
@@ -334,7 +545,69 @@ namespace Rodin::Math
       constexpr
       ScalarType squaredNorm() const noexcept
       {
-        return this->eigen().squaredNorm();
+        ScalarType s = ScalarType(0);
+        switch (m_rows)
+        {
+          case 3:
+            switch (m_cols)
+            {
+              case 3:
+                s += Math::pow2(m_data(2,2));
+                [[fallthrough]];
+              case 2:
+                s += Math::pow2(m_data(2,1));
+                [[fallthrough]];
+              case 1:
+                s += Math::pow2(m_data(2,0));
+                [[fallthrough]];
+              case 0:
+                break;
+              default:
+                assert(false);
+            }
+            [[fallthrough]];
+          case 2:
+            switch (m_cols)
+            {
+              case 3:
+                s += Math::pow2(m_data(1,2));
+                [[fallthrough]];
+              case 2:
+                s += Math::pow2(m_data(1,1));
+                [[fallthrough]];
+              case 1:
+                s += Math::pow2(m_data(1,0));
+                [[fallthrough]];
+              case 0:
+                break;
+              default:
+                assert(false);
+            }
+            [[fallthrough]];
+          case 1:
+            switch (m_cols)
+            {
+              case 3:
+                s += Math::pow2(m_data(0,2));
+                [[fallthrough]];
+              case 2:
+                s += Math::pow2(m_data(0,1));
+                [[fallthrough]];
+              case 1:
+                s += Math::pow2(m_data(0,0));
+                [[fallthrough]];
+              case 0:
+                break;
+              default:
+                assert(false);
+            }
+            [[fallthrough]];
+          case 0:
+            break;
+          default:
+            assert(false);
+        }
+        return s;
       }
 
       [[nodiscard]] inline
@@ -449,8 +722,8 @@ namespace Rodin::Math
         }
         else
         {
-          // Should never happen with MaxSize==3, but keep a safe fallback.
-          return this->eigen().determinant();
+          assert(false);
+          return Math::nan<ScalarType>();
         }
       }
 
@@ -539,36 +812,91 @@ namespace Rodin::Math
         }
         else
         {
-          // Should never happen with MaxSize==3, but keep fallback.
-          inv = this->eigen().inverse();
+          assert(false);
           return inv;
         }
       }
 
       constexpr
-      auto row(std::uint8_t i) noexcept
+      SpatialVector<Scalar> row(std::uint8_t i) noexcept
       {
         assert(i < m_rows);
-        return this->eigen().row(static_cast<Eigen::Index>(i));
+        SpatialVector<Scalar> v(m_cols);
+        switch (m_cols)
+        {
+          case 3:
+            v(2) = (*this)(static_cast<Eigen::Index>(i), 2);
+            [[fallthrough]];
+          case 2:
+            v(1) = (*this)(static_cast<Eigen::Index>(i), 1);
+            [[fallthrough]];
+          case 1:
+            v(0) = (*this)(static_cast<Eigen::Index>(i), 0);
+            break;
+          case 0:
+            break;
+          default:
+            assert(false);
+        }
+        return v;
       }
 
       constexpr
-      auto col(std::uint8_t j) noexcept
+      SpatialVector<Scalar> col(std::uint8_t j) noexcept
       {
         assert(j < m_cols);
-        return this->eigen().col(static_cast<Eigen::Index>(j));
+        SpatialVector<Scalar> v(m_rows);
+        switch (m_rows)
+        {
+          case 3:
+            v(2) = (*this)(2, static_cast<Eigen::Index>(j));
+            [[fallthrough]];
+          case 2:
+            v(1) = (*this)(1, static_cast<Eigen::Index>(j));
+            [[fallthrough]];
+          case 1:
+            v(0) = (*this)(0, static_cast<Eigen::Index>(j));
+            break;
+          case 0:
+            break;
+          default:
+            assert(false);
+        }
+        return v;
       }
 
       constexpr
-      auto eigen() noexcept
+      SpatialMatrix pseudoInverse() const noexcept
       {
-        return m_data.topLeftCorner(static_cast<Eigen::Index>(m_rows), static_cast<Eigen::Index>(m_cols));
+        // Moore-Penrose pseudoinverse via (A^T A)^{-1} A^T for full column rank
+        // and A^T (A A^T)^{-1} for full row rank.
+        SpatialMatrix<Scalar> A_T = this->transpose();
+        if (m_rows >= m_cols)
+        {
+          // Full column rank assumed
+          SpatialMatrix<Scalar> AtA = A_T * (*this);
+          SpatialMatrix<Scalar> AtA_inv = AtA.inverse();
+          return AtA_inv * A_T;
+        }
+        else
+        {
+          // Full row rank assumed
+          SpatialMatrix<Scalar> AAt = (*this) * A_T;
+          SpatialMatrix<Scalar> AAt_inv = AAt.inverse();
+          return A_T * AAt_inv;
+        }
       }
 
       constexpr
-      auto eigen() const noexcept
+      auto& getData() noexcept
       {
-        return m_data.topLeftCorner(static_cast<Eigen::Index>(m_rows), static_cast<Eigen::Index>(m_cols));
+        return m_data;
+      }
+
+      constexpr
+      const auto& getData() const noexcept
+      {
+        return m_data;
       }
 
     private:
@@ -577,10 +905,10 @@ namespace Rodin::Math
       Data m_data;
   };
 
-  template <class LHS, class Scalar>
+  template <class Scalar>
   [[nodiscard]] inline
   SpatialMatrix<Scalar>
-  operator*(const LHS& s, const SpatialMatrix<Scalar>& A) noexcept
+  operator*(const Scalar& s, const SpatialMatrix<Scalar>& A) noexcept
   {
     SpatialMatrix<Scalar> C(A.rows(), A.cols());
 
@@ -734,10 +1062,10 @@ namespace Rodin::Math
     }
   }
 
-  template <class Scalar, class RHS>
+  template <class Scalar>
   [[nodiscard]] inline
   SpatialMatrix<Scalar>
-  operator*(const SpatialMatrix<Scalar>& A, const RHS& s) noexcept
+  operator*(const SpatialMatrix<Scalar>& A, const Scalar& s) noexcept
   {
     SpatialMatrix<Scalar> C(A.rows(), A.cols());
 
@@ -891,10 +1219,69 @@ namespace Rodin::Math
   }
 
   template <class Scalar>
-  auto operator*(const SpatialVector<Scalar>& v, const SpatialMatrix<Scalar>& m)
+  [[nodiscard]] inline
+  SpatialMatrix<Scalar>
+  operator*(const SpatialVector<Scalar>& v, const SpatialMatrix<Scalar>& m) noexcept
   {
     assert(v.size() == m.rows());
-    return v.eigen() * m.eigen();
+
+    const std::uint8_t r = v.size();
+    const std::uint8_t c = m.cols();
+
+    SpatialMatrix<Scalar> result(1, c);
+
+    switch (c)
+    {
+      case 3:
+      {
+        Scalar s2 = Scalar(0);
+        switch (r)
+        {
+          case 3: s2 += v[2] * m(2,2); [[fallthrough]];
+          case 2: s2 += v[1] * m(1,2); [[fallthrough]];
+          case 1: s2 += v[0] * m(0,2); [[fallthrough]];
+          case 0: break;
+          default: assert(false);
+        }
+        result(0,2) = s2;
+        [[fallthrough]];
+      }
+      case 2:
+      {
+        Scalar s1 = Scalar(0);
+        switch (r)
+        {
+          case 3: s1 += v[2] * m(2,1); [[fallthrough]];
+          case 2: s1 += v[1] * m(1,1); [[fallthrough]];
+          case 1: s1 += v[0] * m(0,1); [[fallthrough]];
+          case 0: break;
+          default: assert(false);
+        }
+        result(0,1) = s1;
+        [[fallthrough]];
+      }
+      case 1:
+      {
+        Scalar s0 = Scalar(0);
+        switch (r)
+        {
+          case 3: s0 += v[2] * m(2,0); [[fallthrough]];
+          case 2: s0 += v[1] * m(1,0); [[fallthrough]];
+          case 1: s0 += v[0] * m(0,0); [[fallthrough]];
+          case 0: break;
+          default: assert(false);
+        }
+        result(0,0) = s0;
+        break;
+      }
+      case 0:
+        // 1x0 matrix: nothing to do
+        break;
+      default:
+        assert(false);
+    }
+
+    return result;
   }
 
 
@@ -904,7 +1291,9 @@ namespace Rodin::Math
     const Eigen::MatrixBase<EigenDerived>& s,
     const SpatialMatrix<Scalar>& m)
   {
-    return s * m.eigen();
+    return s * m.getData().topLeftCorner(
+      static_cast<Eigen::Index>(m.rows()),
+      static_cast<Eigen::Index>(m.cols()));
   }
 
   template <class Scalar, class EigenDerived>
@@ -913,7 +1302,9 @@ namespace Rodin::Math
     const SpatialMatrix<Scalar>& m,
     const Eigen::MatrixBase<EigenDerived>& s)
   {
-    return m.eigen() * s;
+    return m.getData().topLeftCorner(
+      static_cast<Eigen::Index>(m.rows()),
+      static_cast<Eigen::Index>(m.cols())) * s;
   }
 }
 

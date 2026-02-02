@@ -502,7 +502,9 @@ namespace Rodin::Variational
       {
         assert(m_cache.cellKey);
         assert(local < m_cache.jac.size());
-        return m_cache.jac[local].eigen();
+        return m_cache.jac[local].getData().topLeftCorner(
+          m_cache.cellKey.vdim,
+          m_cache.cellKey.d);
       }
 
       constexpr
