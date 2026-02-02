@@ -211,7 +211,7 @@ namespace Rodin::Variational
         }
 
         // Physical jacobian: Jx = G * J^{-1}
-        out.noalias() = G * p.getJacobianInverse();
+        out = G * p.getJacobianInverse();
       }
 
       constexpr

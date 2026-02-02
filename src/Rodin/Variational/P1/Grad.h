@@ -395,7 +395,7 @@ namespace Rodin::Variational
             for (size_t k = 0; k < d; ++k)
               ghat(k) = fe.getBasis(a).template getDerivative<1>(k)(rc);
 
-            m_cache.grad[a].noalias() = JinvT * ghat;
+            m_cache.grad[a] = JinvT * ghat;
           }
         }
 
