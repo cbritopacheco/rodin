@@ -128,7 +128,6 @@ namespace Rodin::Math
       {
         const std::uint8_t n = static_cast<std::uint8_t>(other.cols());
         assert(n == 1);
-        assert(m_size == other.rows());
         m_size = n;
         // Assume column vector
         switch (m_size)

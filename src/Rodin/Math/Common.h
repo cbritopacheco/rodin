@@ -576,6 +576,9 @@ namespace Rodin::Math
   constexpr
   auto dot(const Eigen::MatrixBase<LHSDerived>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
   {
+    assert(lhs.size() == rhs.size());
+    assert(lhs.rows() == lhs.rows());
+    assert(rhs.cols() == rhs.cols());
     return (lhs.array() * rhs.conjugate().array()).sum();
   }
 

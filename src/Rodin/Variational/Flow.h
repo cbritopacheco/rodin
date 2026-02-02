@@ -350,7 +350,7 @@ namespace Rodin::Variational
             const Real b = hs.vector[i];
 
             assert(n.size() == s_rc.size());
-            const Real g0 = b - s_rc.dot(n);
+            const Real g0 = b - s_rc.dot(n.transpose());
             if (g0 <= 0) // interior requires g0 > 0
               continue;
 
