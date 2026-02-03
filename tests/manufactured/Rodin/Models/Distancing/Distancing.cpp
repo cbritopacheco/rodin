@@ -1,0 +1,107 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+#include <gtest/gtest.h>
+
+#include "Rodin/Variational.h"
+#include "Rodin/Models/Distancing/SignedDistance.h"
+
+using namespace Rodin;
+using namespace Rodin::Geometry;
+using namespace Rodin::Variational;
+
+namespace Rodin::Tests::Manufactured::Distancing
+{
+  template <size_t NX, size_t NY, size_t NZ = 1>
+  class DistancingManufacturedTest : public ::testing::TestWithParam<Polytope::Type>
+  {
+  protected:
+    Mesh<Context::Local> buildMesh() const
+    {
+      const auto geom = GetParam();
+      if constexpr (NZ == 1)
+      {
+        Mesh<Context::Local> mesh = Mesh<Context::Local>::UniformGrid(geom, { NX, NY });
+        mesh.scale(1.0 / (NX - 1));
+        mesh.getConnectivity().compute(1, 2);
+        mesh.getConnectivity().compute(0, 1);
+        return mesh;
+      }
+      else
+      {
+        Mesh<Context::Local> mesh = Mesh<Context::Local>::UniformGrid(geom, { NX, NY, NZ });
+        mesh.scale(1.0 / (NX - 1));
+        mesh.getConnectivity().compute(2, 3);
+        mesh.getConnectivity().compute(0, 1);
+        return mesh;
+      }
+    }
+
+    template <class GF>
+    static void checkDistance(const Mesh<Context::Local>& mesh, const GF& u, Real tol)
+    {
+      const size_t dim = mesh.getDimension();
+      Math::SpatialVector<Real> center(dim == 2 ? Math::SpatialVector<Real>{{0.5, 0.5}}
+                                                : Math::SpatialVector<Real>{{0.5, 0.5, 0.5}});
+
+      for (auto it = mesh.getVertex(); !it.end(); ++it)
+      {
+        const auto coord = mesh.getVertexCoordinates(it->getIndex());
+        const Real r = (coord - center).norm();
+        const Real err = std::abs(u[it->getIndex()] - r);
+        EXPECT_LT(err, tol);
+      }
+    }
+  };
+
+  using Distancing2DTest = DistancingManufacturedTest<33, 33, 1>;
+  using Distancing3DTest = DistancingManufacturedTest<17, 17, 17>;
+
+  TEST_P(Distancing2DTest, SignedDistance_PointSource)
+  {
+    auto mesh = buildMesh();
+    P1 vh(mesh);
+    GridFunction u(vh);
+
+    Math::SpatialVector<Real> center{{0.5, 0.5}};
+    Models::Distancing::SignedDistance sd(u, center);
+    sd.solve();
+
+    const Real tol = 5e-2;
+    checkDistance(mesh, u, tol);
+  }
+
+  TEST_P(Distancing3DTest, SignedDistance_PointSource)
+  {
+    auto mesh = buildMesh();
+    P1 vh(mesh);
+    GridFunction u(vh);
+
+    Math::SpatialVector<Real> center{{0.5, 0.5, 0.5}};
+    Models::Distancing::SignedDistance sd(u, center);
+    sd.solve();
+
+    const Real tol = 7e-2;
+    checkDistance(mesh, u, tol);
+  }
+
+  INSTANTIATE_TEST_SUITE_P(
+    PolytopeCoverage2D,
+    Distancing2DTest,
+    ::testing::Values(
+      Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral)
+  );
+
+  INSTANTIATE_TEST_SUITE_P(
+    PolytopeCoverage3D,
+    Distancing3DTest,
+    ::testing::Values(
+      Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron,
+      Polytope::Type::Wedge)
+  );
+}
