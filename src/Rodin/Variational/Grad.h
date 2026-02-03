@@ -241,6 +241,12 @@ namespace Rodin::Variational
         return m_u.get();
       }
 
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
+      {
+        return static_cast<const Derived&>(*this).getOrder(polytope);
+      }
+
       /**
        * @brief Copy function to be overriden in Derived type.
        */

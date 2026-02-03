@@ -247,6 +247,12 @@ namespace Rodin::Variational
         return s_res;
       }
 
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      {
+        return 0;
+      }
+
       BoundaryNormal* copy() const noexcept override
       {
         return new BoundaryNormal(*this);

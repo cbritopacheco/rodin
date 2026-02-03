@@ -42,6 +42,7 @@
 
 #include "ForwardDecls.h"
 
+#include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
 
@@ -145,6 +146,12 @@ namespace Rodin::Variational
         return *this;
       }
 
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
+      {
+        return this->getOperand().getOrder(p);
+      }
+
       /**
        * @brief Creates a polymorphic copy of this trace operator.
        * @return Pointer to a new copy
@@ -223,12 +230,18 @@ namespace Rodin::Variational
       constexpr
       auto getBasis(size_t local) const
       {
-        return this->getOperand().getBasis(local).transpose();
+        return this->getOperand().getBasis(local).trace();
       }
 
       const FES& getFiniteElementSpace() const
       {
         return this->getOperand().getFiniteElementSpace();
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
+      {
+        return this->getOperand().getOrder(p);
       }
 
       Trace* copy() const noexcept override

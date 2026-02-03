@@ -38,6 +38,7 @@
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/Geometry/Region.h"
 
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/RungeKutta/RK4.h"
 
@@ -274,7 +275,7 @@ namespace Rodin::Variational
             const auto it0 = mesh.getPolytope(cd, c0);
             const auto& cell0 = *it0;
             const Geometry::Point q0(cell0, s_rc_tmp, p.getPhysicalCoordinates());
-            const auto a0 = sgn * (q0.getJacobianInverse() * m_velocity(q0));
+            const auto a0 = sgn * (q0.getJacobianInverse() * m_velocity(q0)).col(0);
 
             const auto& faces0 = conn.getIncidence(cd, cd - 1).at(c0);
             size_t j0 = faces0.size();
@@ -284,7 +285,7 @@ namespace Rodin::Variational
 
             const auto g0 = mesh.getGeometry(cd, c0);
             const auto& hs = Geometry::Polytope::Traits(g0).getHalfSpace();
-            const auto nref = hs.matrix.row(j0); // outward in ref(c0)
+            const Math::SpatialVector<Real> nref = hs.matrix.row(j0); // outward in ref(c0)
 
             if (nref.dot(a0) < 0)
             {
@@ -325,7 +326,7 @@ namespace Rodin::Variational
           {
             static thread_local Math::SpatialVector<Real> s_v;
             const Geometry::Point qp(cell, r);
-            s_v = sgn * qp.getJacobianInverse() * m_velocity(qp);
+            s_v = (sgn * qp.getJacobianInverse() * m_velocity(qp)).col(0);
             return s_v;
           };
 
@@ -439,7 +440,7 @@ namespace Rodin::Variational
               {
                 static thread_local Math::SpatialVector<Real> s_v;
                 const Geometry::Point qp(cellz, r);
-                s_v = sgn * qp.getJacobianInverse() * m_velocity(qp);
+                s_v = (sgn * qp.getJacobianInverse() * m_velocity(qp)).col(0);
                 return s_v;
               };
 

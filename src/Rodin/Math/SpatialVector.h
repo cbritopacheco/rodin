@@ -125,32 +125,6 @@ namespace Rodin::Math
       constexpr
       SpatialVector& operator=(SpatialVector&& other) noexcept = default;
 
-      constexpr
-      SpatialVector& operator=(const SpatialMatrix<Scalar>& other)
-      {
-        const std::uint8_t n = static_cast<std::uint8_t>(other.rows());
-        assert(n == 1);
-        m_size = n;
-        // Assume column vector
-        switch (m_size)
-        {
-          case 3:
-            m_data[2] = other(2, 0);
-            [[fallthrough]];
-          case 2:
-            m_data[1] = other(1, 0);
-            [[fallthrough]];
-          case 1:
-            m_data[0] = other(0, 0);
-            break;
-          case 0:
-            break;
-          default:
-            assert(false);
-        }
-        return *this;
-      }
-
       SpatialVector& operator+=(const SpatialVector& other) noexcept
       {
         assert(m_size == other.m_size);
@@ -882,6 +856,13 @@ namespace Rodin::Math
    * points in 2D or 3D space.
    */
   using SpatialPoint = SpatialVector<Real>;
+
+  template <class Scalar>
+  std::ostream& operator<<(std::ostream& os, const SpatialVector<Scalar>& v)
+  {
+    os << v.getData().head(static_cast<Eigen::Index>(v.size()));
+    return os;
+  }
 }
 
 

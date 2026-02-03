@@ -7,6 +7,7 @@
 #define RODIN_VARIATIONAL_IDENTITYMATRIX_H
 
 #include "MatrixFunction.h"
+#include "Rodin/Geometry/Polytope.h"
 
 namespace Rodin::Variational
 {
@@ -87,6 +88,12 @@ namespace Rodin::Variational
       auto getValue(const Geometry::Point&) const
       {
         return Math::Matrix<Real>::Identity(m_n, m_n);
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      {
+        return 0;
       }
 
       /**

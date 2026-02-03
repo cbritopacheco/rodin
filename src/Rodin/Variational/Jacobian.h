@@ -219,6 +219,12 @@ namespace Rodin::Variational
         static_cast<const Derived&>(*this).interpolate(out, p);
       }
 
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
+      {
+        return static_cast<const Derived&>(*this).getOrder(polytope);
+      }
+
       /**
        * @brief Creates a polymorphic copy (to be overridden in derived class).
        * @return Pointer to a new copy

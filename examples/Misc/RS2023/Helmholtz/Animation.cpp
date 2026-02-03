@@ -126,7 +126,7 @@ void run(int id, const std::vector<Data>& grid)
     RealFunction gamma_e =
       [&](const Point& p)
       {
-        const Real r = (p.getCoordinates().eigen() - x0).norm();
+        const Real r = (p.getCoordinates() - x0).norm();
         if (r > data.epsilon)
           return gamma(p);
         else
@@ -165,7 +165,7 @@ void run(int id, const std::vector<Data>& grid)
 
     RealFunction chi_e =
       [&](const Point& p)
-      { return Real((p.getCoordinates().eigen() - x0).norm() > 2 * data.epsilon); };
+      { return Real((p.getCoordinates() - x0).norm() > 2 * data.epsilon); };
 
     GridFunction diff(vh);
     diff = chi_e * Pow(u0 - ue, 2);

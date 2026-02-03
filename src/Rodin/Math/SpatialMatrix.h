@@ -1306,6 +1306,15 @@ namespace Rodin::Math
       static_cast<Eigen::Index>(m.rows()),
       static_cast<Eigen::Index>(m.cols())) * s;
   }
+
+  template <class Scalar>
+  std::ostream& operator<<(std::ostream& os, const SpatialMatrix<Scalar>& m)
+  {
+    os << m.getData().topLeftCorner(
+      static_cast<Eigen::Index>(m.rows()),
+      static_cast<Eigen::Index>(m.cols()));
+    return os;
+  }
 }
 
 namespace Rodin::FormLanguage
