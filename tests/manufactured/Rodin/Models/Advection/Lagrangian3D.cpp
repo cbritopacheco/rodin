@@ -90,9 +90,9 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian3D
     }
   };
 
-  using Mfg10 = ManufacturedAdvection3DTest<10, 10, 10>;
+  using ManufacturedAdvection3DTest_10 = ManufacturedAdvection3DTest<10, 10, 10>;
 
-  TEST_P(Mfg10, ConstantVelocity_OneStep_L2Interior)
+  TEST_P(ManufacturedAdvection3DTest_10, ConstantVelocity_OneStep_L2Interior)
   {
     auto mesh = this->getMesh();
     P1 vh(mesh);
@@ -123,7 +123,7 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian3D
     this->checkL2CentroidError(mesh, uh, vel, dt, atol, rtol);
   }
 
-  TEST_P(Mfg10, ConstantVelocity_TwoHalfSteps_vs_OneFullStep)
+  TEST_P(ManufacturedAdvection3DTest_10, ConstantVelocity_TwoHalfSteps_vs_OneFullStep)
   {
     auto mesh = this->getMesh();
     P1 vh(mesh);
@@ -199,7 +199,7 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian3D
 
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D,
-    Mfg10,
+    ManufacturedAdvection3DTest_10,
     ::testing::Values(
       Polytope::Type::Tetrahedron,
       Polytope::Type::Hexahedron,
