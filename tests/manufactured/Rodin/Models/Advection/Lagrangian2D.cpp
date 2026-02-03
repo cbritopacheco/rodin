@@ -18,7 +18,7 @@ using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 using namespace Rodin::Models::Advection;
 
-namespace Rodin::Tests::Manufactured::AdvectionLagrangian
+namespace Rodin::Tests::Manufactured::AdvectionLagrangian2D
 {
   template <size_t M>
   class ManufacturedAdvectionTest : public ::testing::TestWithParam<Polytope::Type>
