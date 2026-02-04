@@ -44,7 +44,9 @@ namespace Rodin::Geometry
     assert(m_vertices.cols() > 0);
     assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
     assert(l.size() == m_sdim);
-    std::copy(l.begin(), l.end(), m_vertices.col(m_nodes++).begin());
+    for (size_t i = 0; i < m_sdim; ++i)
+      m_vertices(i, m_nodes) = *(l.begin() + i);
+    m_nodes++;
     return *this;
   }
 

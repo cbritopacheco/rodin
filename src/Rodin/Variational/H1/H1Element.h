@@ -31,6 +31,7 @@
 
 #include <boost/serialization/access.hpp>
 
+#include "Rodin/Math/PointMatrix.h"
 #include "Rodin/Types.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/Vector.h"
@@ -854,7 +855,7 @@ namespace Rodin::Variational
           class JacobianFunction
           {
             public:
-              using ReturnType = Math::PointMatrix;
+              using ReturnType = Math::SpatialMatrix<ScalarType>;
 
               constexpr
               JacobianFunction(size_t vdim, size_t local, Geometry::Polytope::Type g)

@@ -54,6 +54,7 @@
 #include <Eigen/Geometry>
 
 #include "Rodin/Geometry/Mesh.h"
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
 #include "ForwardDecls.h"
@@ -133,12 +134,14 @@ namespace Rodin::Variational
           {
             const Index v1 = vs[0];
             const Index v2 = vs[1];
-            Eigen::Vector3<ScalarType> a =
+            Math::SpatialVector<ScalarType> a =
                 mesh.getVertexCoordinates(v1) - mesh.getVertexCoordinates(v2);
-            Eigen::Vector3<ScalarType> n;
-            n << jacobian(1, 0), -jacobian(0, 0), jacobian(2, 0);
+            Math::SpatialVector<ScalarType> n(3);
+            n[0] = jacobian(1, 0);
+            n[1] = -jacobian(0, 0);
+            n[2] = jacobian(2, 0);
             n = n.cross(a);
-            n.stableNormalize();
+            n.normalize();
             res = n.cross(a) + n * (n.dot(a));
           }
           else if (jacobian.cols() == 2)

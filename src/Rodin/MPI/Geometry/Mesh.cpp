@@ -7,6 +7,7 @@
 #include "Mesh.h"
 #include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Geometry/PolytopeTransformation.h"
+#include "Rodin/Math/SpatialVector.h"
 
 namespace Rodin::Geometry
 {
@@ -499,7 +500,7 @@ namespace Rodin::Geometry
     shard.save(filename, fmt);
   }
 
-  Eigen::Map<const Math::Vector<Real>> MPIMesh::getVertexCoordinates(Index globalIdx) const
+  Math::SpatialPoint MPIMesh::getVertexCoordinates(Index globalIdx) const
   {
     auto idx = getLocalIndex(0, globalIdx);
     const auto& shard = getShard();
@@ -514,8 +515,7 @@ namespace Rodin::Geometry
     assert(static_cast<size_t>(local.size()) == getSpaceDimension());
     auto res = boost::mpi::all_reduce(
         comm, local, [](auto const& a, auto const& b) { return a.size() > 0 ? a : b; });
-    const auto& coords = (m_vertices[globalIdx] = res);
-    return { coords.getData().data(), static_cast<Eigen::Index>(coords.size()) };
+    return res;
   }
 }
 

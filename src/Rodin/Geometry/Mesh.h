@@ -26,6 +26,8 @@
 #include <boost/filesystem.hpp>
 #include <boost/serialization/access.hpp>
 
+#include "Rodin/Math/PointMatrix.h"
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Types.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Context/Local.h"
@@ -715,7 +717,7 @@ namespace Rodin::Geometry
        * @brief Gets the space coordinates of the vertex at the given index.
        * @param[in] idx Vertex index
        */
-      virtual Eigen::Map<const Math::Vector<Real>> getVertexCoordinates(Index idx) const = 0;
+      virtual Math::SpatialPoint getVertexCoordinates(Index idx) const = 0;
 
       /**
        * @brief Sets the space coordinate of the vertex at the given index for
@@ -843,7 +845,9 @@ namespace Rodin::Geometry
           Builder& vertex(const Real (&data)[Size])
           {
             assert(Size == m_sdim);
-            m_vertices.col(m_nodes++) = data;
+            for (size_t i = 0; i < m_sdim; ++i)
+              m_vertices(i, m_nodes) = data[i];
+            ++m_nodes;
             return *this;
           }
 
@@ -1069,7 +1073,8 @@ namespace Rodin::Geometry
               *it,
               Polytope::Traits(Polytope::Type::Point).getVertex(0),
               pc);
-          m_vertices.col(it->getIndex()) += u(p);
+          for (size_t i = 0; i < m_sdim; ++i)
+            m_vertices(i, it->getIndex()) += u(p)[i];
         }
         return *this;
       }
@@ -1381,7 +1386,7 @@ namespace Rodin::Geometry
         return m_connectivity;
       }
 
-      virtual Eigen::Map<const Math::Vector<Real>> getVertexCoordinates(Index idx) const override;
+      virtual Math::SpatialPoint getVertexCoordinates(Index idx) const override;
 
       virtual Mesh& setAttribute(const std::pair<size_t, Index>&, Attribute attr) override;
 

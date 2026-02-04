@@ -118,9 +118,6 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian3D
 
     const auto& uh = u.getSolution();
 
-    // u.getSolution().save("u3d.gf");
-    // mesh.save("u3d.mesh");
-
     const Real atol = 5e-3;
     const Real rtol = 5e-2;
     this->checkL2CentroidError(mesh, uh, vel, dt, atol, rtol);

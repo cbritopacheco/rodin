@@ -916,7 +916,7 @@ namespace Rodin::Variational
           class JacobianFunction
           {
             public:
-              using ReturnType = Math::PointMatrix;
+              using ReturnType = Math::SpatialMatrix<ScalarType>;
 
               constexpr
               JacobianFunction(size_t vdim, size_t local, Geometry::Polytope::Type g)

@@ -20,6 +20,7 @@
 #include "PolytopeTransformation.h"
 
 #include "ForwardDecls.h"
+#include "Rodin/Math/PointMatrix.h"
 #include "Rodin/Math/Vector.h"
 
 namespace Rodin::Geometry

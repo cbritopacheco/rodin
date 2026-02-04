@@ -2,6 +2,7 @@
 
 #include "Rodin/Configure.h"
 
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/QF/GenericPolytopeQuadrature.h"
 
 #include "Mesh.h"
@@ -459,7 +460,7 @@ namespace Rodin::Geometry
     : Polytope(0, index, mesh)
   {}
 
-  Eigen::Map<const Math::Vector<Real>> Vertex::getCoordinates() const
+  Math::SpatialPoint Vertex::getCoordinates() const
   {
     return getMesh().getVertexCoordinates(getIndex());
   }

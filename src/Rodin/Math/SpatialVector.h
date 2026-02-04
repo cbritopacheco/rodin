@@ -414,6 +414,38 @@ namespace Rodin::Math
         m_data.setConstant(value);
       }
 
+      [[nodiscard]] constexpr
+      SpatialVector cross(const SpatialVector& other) const noexcept
+      {
+        assert(m_size == 3 && other.m_size == 3);
+
+        SpatialVector r(3);
+        r[0] = m_data[1] * other.m_data[2] - m_data[2] * other.m_data[1];
+        r[1] = m_data[2] * other.m_data[0] - m_data[0] * other.m_data[2];
+        r[2] = m_data[0] * other.m_data[1] - m_data[1] * other.m_data[0];
+        return r;
+      }
+
+      template <class EigenDerived>
+      [[nodiscard]] constexpr
+      SpatialVector cross(const Eigen::MatrixBase<EigenDerived>& other) const noexcept
+      {
+        static_assert(EigenDerived::ColsAtCompileTime == 1 || EigenDerived::RowsAtCompileTime == 1,
+                      "cross expects a vector expression");
+        assert(m_size == 3);
+        assert(other.size() == 3);
+
+        const ScalarType bx = other(static_cast<Eigen::Index>(0));
+        const ScalarType by = other(static_cast<Eigen::Index>(1));
+        const ScalarType bz = other(static_cast<Eigen::Index>(2));
+
+        SpatialVector r(3);
+        r[0] = m_data[1] * bz - m_data[2] * by;
+        r[1] = m_data[2] * bx - m_data[0] * bz;
+        r[2] = m_data[0] * by - m_data[1] * bx;
+        return r;
+      }
+
       inline
       constexpr
       ScalarType dot(const SpatialVector& other) const noexcept
