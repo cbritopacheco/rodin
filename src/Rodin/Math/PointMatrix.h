@@ -362,9 +362,7 @@ namespace Rodin::Math
       {
         ar & m_rows;
         ar & m_cols;
-        for (std::uint8_t i = 0; i < MaxRows; ++i)
-          for (Eigen::Index j = 0; j < m_cols; ++j)
-            ar & m_data(i, j);
+        ar & m_data;
       }
 
     private:
