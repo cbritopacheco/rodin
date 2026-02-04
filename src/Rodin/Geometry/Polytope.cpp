@@ -99,6 +99,42 @@ namespace Rodin::Geometry
     return 0;
   }
 
+  Math::SpatialPoint Polytope::Traits::getCentroid() const
+  {
+    switch (m_g)
+    {
+      case Type::Point:
+      {
+        return Math::SpatialPoint{ 0 };
+      }
+      case Type::Segment:
+      {
+        return Math::SpatialPoint{ 0.5 };
+      }
+      case Type::Triangle:
+      {
+        return Math::SpatialPoint{{ 1.0 / 3.0, 1.0 / 3.0 }};
+      }
+      case Type::Quadrilateral:
+      {
+        return Math::SpatialPoint{{ 0.5, 0.5 }};
+      }
+      case Type::Tetrahedron:
+      {
+        return Math::SpatialPoint{{ 0.25, 0.25, 0.25 }};
+      }
+      case Type::Hexahedron:
+      {
+        return Math::SpatialPoint{{ 0.5, 0.5, 0.5 }};
+      }
+      case Type::Wedge:
+      {
+        return Math::SpatialPoint{{ 1.0 / 3.0, 1.0 / 3.0, 0.5 }};
+      }
+    }
+    return Math::SpatialPoint{};
+  }
+
   const Math::SpatialPoint& Polytope::Traits::getVertex(size_t i) const
   {
     assert(i < getVertexCount());

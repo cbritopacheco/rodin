@@ -120,10 +120,26 @@ namespace Rodin::Math
       {}
 
       constexpr
-      SpatialVector& operator=(const SpatialVector& other) noexcept = default;
+      SpatialVector& operator=(const SpatialVector& other) noexcept
+      {
+        if (this != &other)
+        {
+          m_size = other.m_size;
+          m_data = other.m_data;
+        }
+        return *this;
+      }
 
       constexpr
-      SpatialVector& operator=(SpatialVector&& other) noexcept = default;
+      SpatialVector& operator=(SpatialVector&& other) noexcept
+      {
+        if (this != &other)
+        {
+          m_size = std::move(other.m_size);
+          m_data = std::move(other.m_data);
+        }
+        return *this;
+      }
 
       SpatialVector& operator+=(const SpatialVector& other) noexcept
       {
