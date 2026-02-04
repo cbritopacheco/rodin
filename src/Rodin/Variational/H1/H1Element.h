@@ -1023,6 +1023,8 @@ namespace Rodin::Variational
             // 3D tensor product: max total degree is 3K
             return 3 * K;
         }
+        assert(false);
+        return 0;
       }
 
       template<class Archive>
