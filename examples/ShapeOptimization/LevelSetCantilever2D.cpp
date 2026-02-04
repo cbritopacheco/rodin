@@ -165,7 +165,7 @@ int main(int, char**)
     th.save("distance.mesh");
     dist.save("dist.gf");
 
-    Models::Advection::Lagrangian(advect, test, dist, dJ).step(0.2);
+    Models::Advection::Lagrangian(advect, test, dist, dJ).step(dt);
 
     th.save("advect.mesh");
     advect.getSolution().save("advect.gf");
