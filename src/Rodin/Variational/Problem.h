@@ -746,18 +746,20 @@ namespace Rodin::Variational
         }
 
         size_t rows =
-          m_vs.reduce(
-            [](const auto& a, const auto& b)
+          m_vs
+            .map([](const auto& v)
             {
-              return a.get().getFiniteElementSpace().getSize() + b.get().getFiniteElementSpace().getSize();
-            });
+              return static_cast<size_t>(v.get().getFiniteElementSpace().getSize());
+            })
+            .reduce([](size_t a, size_t b) { return a + b; });
 
         size_t cols =
-          m_us.reduce(
-            [](const auto& a, const auto& b)
+          m_us
+            .map([](const auto& u)
             {
-              return a.get().getFiniteElementSpace().getSize() + b.get().getFiniteElementSpace().getSize();
-            });
+              return static_cast<size_t>(u.get().getFiniteElementSpace().getSize());
+            })
+            .reduce([](size_t a, size_t b) { return a + b; });
 
         // Compute block offsets to build the triplets
         std::array<Pair<size_t, size_t>, decltype(bt)::Size> boffsets{};

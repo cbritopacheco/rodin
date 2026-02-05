@@ -28,6 +28,9 @@ namespace Rodin::Tests::Manufactured::Stokes3D
       mesh = mesh.UniformGrid(GetParam(), { NX, NY, NZ });
       mesh.scale(1.0 / (NX - 1));
       mesh.getConnectivity().compute(2, 3);
+      mesh.getConnectivity().compute(3, 2);
+      mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 0);
       return mesh;
     }
   };
@@ -48,8 +51,15 @@ namespace Rodin::Tests::Manufactured::Stokes3D
 
     Mesh mesh = this->getMesh();
 
+    std::cout << "Number of elements: " << mesh.getPolytopeCount(3) << std::endl;
+
     H1 uh(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
     H1 ph(std::integral_constant<size_t, 1>{}, mesh);
+
+    P0g p0g(mesh);
+
+    std::cout << "Vector FES size: " << uh.getSize() << std::endl;
+    std::cout << "Scalar FES size: " << ph.getSize() << std::endl;
 
     VectorFunction u_exact{
       sin(pi * F::x) * cos(pi * F::y) * cos(pi * F::z),
@@ -67,25 +77,49 @@ namespace Rodin::Tests::Manufactured::Stokes3D
       + pi * cos(pi * F::x) * sin(pi * F::y) * sin(pi * F::z),
       -3 * pi * pi * cos(pi * F::x) * sin(pi * F::y) * cos(pi * F::z)
       + pi * sin(pi * F::x) * cos(pi * F::y) * sin(pi * F::z),
-      pi * cos(pi * F::x) * sin(pi * F::y) * cos(pi * F::z)
+      pi * sin(pi * F::x) * sin(pi * F::y) * cos(pi * F::z)
     };
 
     TrialFunction u(uh);
     TrialFunction p(ph);
     TestFunction  v(uh);
     TestFunction  q(ph);
+    TrialFunction lambda(p0g);
+    TestFunction  mu(p0g);
 
-    Problem stokes(u, p, v, q);
+    Problem stokes(u, p, v, q, lambda, mu);
     stokes = Integral(Jacobian(u), Jacobian(v))
            - Integral(p, Div(v))
            + Integral(Div(u), q)
+           + Integral(lambda, q)
+           + Integral(p, mu)
            - Integral(f, v)
            + DirichletBC(u, u_exact);
 
+    auto t0 = std::chrono::high_resolution_clock::now();
+    stokes.assemble();
+    auto t1 = std::chrono::high_resolution_clock::now();
+
+    std::cout << "Assembly time (ms): "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count()
+              << std::endl;
+
+
     GMRES gmres(stokes);
     gmres.setTolerance(1e-10);
-    gmres.setMaxIterations(500);
+    gmres.setMaxIterations(1000);
+
+    auto t2 = std::chrono::high_resolution_clock::now();
     gmres.solve();
+    auto t3 = std::chrono::high_resolution_clock::now();
+    std::cout << "Solver time (ms): "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(t3 - t2).count()
+              << std::endl;
+
+    u.getSolution().save("u.gf");
+    mesh.save("u.mesh");
+
+    p.getSolution().save("p.gf");
 
     // L2 errors
     H1 sh(std::integral_constant<size_t, 1>{}, mesh);
@@ -93,15 +127,15 @@ namespace Rodin::Tests::Manufactured::Stokes3D
     diff_u = Pow(Frobenius(u.getSolution() - u_exact), 2);
     Real error_u = Integral(diff_u).compute();
 
-    // mean-corrected pressure error
-    Real vol = mesh.getMeasure(mesh.getDimension());
-    GridFunction mean(sh);
-    mean = p.getSolution() - p_exact;
-    Real mean_diff = Integral(mean).compute() / vol;
-
     GridFunction diff_p(sh);
-    diff_p = Pow((p.getSolution() - mean_diff) - p_exact, 2);
+    diff_p = Pow(p.getSolution() - p_exact, 2);
     Real error_p = Integral(diff_p).compute();
+
+    u.getSolution() = u_exact;
+    u.getSolution().save("u_exact.gf");
+
+    p.getSolution() = p_exact;
+    p.getSolution().save("p_exact.gf");
 
     EXPECT_NEAR(error_u, 0, RODIN_FUZZY_CONSTANT);
     EXPECT_NEAR(0.5 * error_p, 0, RODIN_FUZZY_CONSTANT);
@@ -113,6 +147,7 @@ namespace Rodin::Tests::Manufactured::Stokes3D
     ::testing::Values(
       Polytope::Type::Tetrahedron,
       Polytope::Type::Hexahedron,
-      Polytope::Type::Wedge)
+      Polytope::Type::Wedge
+      )
   );
 }

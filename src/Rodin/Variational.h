@@ -89,6 +89,7 @@
 #include "Variational/BooleanFunction.h"
 
 #include "Variational/P0.h"
+#include "Variational/P0g.h"
 #include "Variational/P1.h"
 #include "Variational/H1.h"
 
