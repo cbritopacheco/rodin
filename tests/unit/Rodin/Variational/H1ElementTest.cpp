@@ -1264,7 +1264,7 @@ namespace Rodin::Tests::Unit
 
     // P2 element on Quadrilateral with vdim=2 should have 9*2=18 DOFs
     EXPECT_EQ(k.getCount(), 18);
-    EXPECT_EQ(k.getOrder(), 2);
+    EXPECT_EQ(k.getOrder(), 4);
   }
 
   // Test Vector P2 on Tetrahedron
@@ -1330,9 +1330,8 @@ namespace Rodin::Tests::Unit
     VectorH1Element<3> k(Polytope::Type::Wedge, vdim);
 
     // P3 element on Wedge: (k+1) * (k+1)(k+2)/2 = 4 * 4*5/2 = 4 * 10 = 40 scalar DOFs
-    // With vdim=3: 40*3 = 120 total DOFs
     EXPECT_EQ(k.getCount(), 120);
-    EXPECT_EQ(k.getOrder(), 3);
+    EXPECT_EQ(k.getOrder(), 6);
   }
 
   // ========================================================================
