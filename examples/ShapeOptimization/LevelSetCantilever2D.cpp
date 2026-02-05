@@ -4,6 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include "Rodin/Geometry/Region.h"
 #include "Rodin/IO/ForwardDecls.h"
 #include "Rodin/Models/Advection/Lagrangian.h"
 #include "Rodin/Models/Distance/Eikonal.h"
@@ -102,6 +103,8 @@ int main(int, char**)
                + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
     Solver::CG(elasticity).solve();
 
+
+    u.getSolution().save("u.gf");
     trimmed.save("u.mesh");
 
     Alert::Info() << "   | Computing shape gradient." << Alert::Raise;
@@ -112,9 +115,14 @@ int main(int, char**)
     auto n = FaceNormal(th);
     n.traceOf(interior);
 
-    GridFunction miaow(shInt);
-    miaow = Dot(Ae, e);
-    miaow.save("u.gf");
+    GridFunction miaow(vh);
+    miaow.project(Geometry::Region::Faces, n, Gamma);
+    miaow.save("n.gf");
+    vh.getMesh().save("n.mesh");
+
+    // GridFunction miaow(shInt);
+    // miaow = Dot(Ae, e);
+    // miaow.save("u.gf");
 
     // Hilbert extension-regularization procedure
     TrialFunction g(vh);
@@ -152,6 +160,10 @@ int main(int, char**)
 
     TrialFunction advect(sh);
     TestFunction test(sh);
+
+
+    th.save("distance.mesh");
+    dist.save("dist.gf");
 
     Models::Advection::Lagrangian(advect, test, dist, dJ).step(dt);
 

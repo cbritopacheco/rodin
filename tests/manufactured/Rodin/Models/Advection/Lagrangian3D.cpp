@@ -98,7 +98,7 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian3D
     P1 vh(mesh);
 
     Math::SpatialVector<Real> vel{{0.15, -0.25, 0.20}};
-    const Real dt = 0.1;
+    const Real dt = 0.9;
 
     auto velocity = VectorFunction{
       RealFunction([&](const Point&) { return vel[0]; }),

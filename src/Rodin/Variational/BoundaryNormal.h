@@ -201,18 +201,22 @@ namespace Rodin::Variational
 
           const auto& incidence = mesh.getConnectivity().getIncidence({ d, d + 1 }, i);
           assert(incidence.size() == 1);
+
           auto pit = mesh.getPolytope(d + 1, *incidence.begin());
-          Integer ori = -1;
-          for (auto vit = pit->getVertex(); vit; ++vit)
-          {
-            const auto v = vit->getCoordinates() - polytope.getVertex()->getCoordinates();
-            if (res.dot(v) < 0)
-            {
-              ori *= -1;
-              break;
-            }
-          }
-          res *= ori;
+          const auto& cellPoly = *pit;
+
+          // face point (physical)
+          const auto xf = p.getCoordinates();
+
+          // cell interior point (physical)
+          const auto rc_cell = Geometry::Polytope::Traits(cellPoly.getGeometry()).getCentroid();
+          Geometry::Point pc(cellPoly, rc_cell);
+          const auto xc = pc.getCoordinates();
+
+          // If res points into the cell, flip it to point outward.
+          if (res.dot(xc - xf) > 0)
+            res *= ScalarType(-1);
+
           res.normalize();
         }
       }

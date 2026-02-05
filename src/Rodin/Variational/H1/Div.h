@@ -147,7 +147,7 @@ namespace Rodin::Variational
 
           const auto& gf  = this->getOperand();
           const auto& fes = gf.getFiniteElementSpace();
-          const auto& fe  = fes.getFiniteElement(d, i);
+          decltype(auto) fe  = fes.getFiniteElement(d, i);
           const auto& rc  = p.getReferenceCoordinates();
 
           // div(u) = trace( Jinv^T * sum_a u_a * grad_ref(phi_a) )

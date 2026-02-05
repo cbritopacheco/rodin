@@ -26,7 +26,7 @@ namespace Rodin::QF
       }
       case Geometry::Polytope::Type::Segment:
       {
-        static thread_local const Math::SpatialPoint s_point{{ 0.5 }};
+        static thread_local const Math::SpatialPoint s_point{ 0.5 };
         return s_point;
       }
       case Geometry::Polytope::Type::Triangle:

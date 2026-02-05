@@ -288,6 +288,70 @@ namespace Rodin::Math
         m_data.setIdentity();
       }
 
+      [[nodiscard]] constexpr
+      ScalarType squaredNorm() const noexcept
+      {
+        const auto r = m_rows;
+        const auto c = m_cols;
+        const auto& A = m_data;
+
+        // key in [0..15] for r,c in [0..3]
+        switch (static_cast<unsigned>(r) * 4u + static_cast<unsigned>(c))
+        {
+          case 0u:  // 0x0
+          case 1u:  // 0x1
+          case 2u:  // 0x2
+          case 3u:  // 0x3
+          case 4u:  // 1x0
+          case 8u:  // 2x0
+          case 12u: // 3x0
+            return ScalarType(0);
+
+          case 5u: // 1x1
+            return Math::pow2(A(0,0));
+
+          case 6u: // 1x2
+            return Math::pow2(A(0,0)) + Math::pow2(A(0,1));
+
+          case 7u: // 1x3
+            return Math::pow2(A(0,0)) + Math::pow2(A(0,1)) + Math::pow2(A(0,2));
+
+          case 9u: // 2x1
+            return Math::pow2(A(0,0)) + Math::pow2(A(1,0));
+
+          case 10u: // 2x2
+            return Math::pow2(A(0,0)) + Math::pow2(A(0,1))
+                 + Math::pow2(A(1,0)) + Math::pow2(A(1,1));
+
+          case 11u: // 2x3
+            return Math::pow2(A(0,0)) + Math::pow2(A(0,1)) + Math::pow2(A(0,2))
+                 + Math::pow2(A(1,0)) + Math::pow2(A(1,1)) + Math::pow2(A(1,2));
+
+          case 13u: // 3x1
+            return Math::pow2(A(0,0)) + Math::pow2(A(1,0)) + Math::pow2(A(2,0));
+
+          case 14u: // 3x2
+            return Math::pow2(A(0,0)) + Math::pow2(A(0,1))
+                 + Math::pow2(A(1,0)) + Math::pow2(A(1,1))
+                 + Math::pow2(A(2,0)) + Math::pow2(A(2,1));
+
+          case 15u: // 3x3
+            return Math::pow2(A(0,0)) + Math::pow2(A(0,1)) + Math::pow2(A(0,2))
+                 + Math::pow2(A(1,0)) + Math::pow2(A(1,1)) + Math::pow2(A(1,2))
+                 + Math::pow2(A(2,0)) + Math::pow2(A(2,1)) + Math::pow2(A(2,2));
+
+          default:
+            assert(false);
+            return ScalarType(0);
+        }
+      }
+
+      [[nodiscard]] constexpr
+      ScalarType norm() const noexcept
+      {
+        return Math::sqrt(this->squaredNorm());
+      }
+
       constexpr
       ScalarType dot(const SpatialMatrix& other) const noexcept
       {
@@ -537,77 +601,9 @@ namespace Rodin::Math
       }
 
       constexpr
-      auto value() const noexcept
+      ScalarType value() const noexcept
       {
         return m_data(0, 0);
-      }
-
-      constexpr
-      ScalarType squaredNorm() const noexcept
-      {
-        ScalarType s = ScalarType(0);
-        switch (m_rows)
-        {
-          case 3:
-            switch (m_cols)
-            {
-              case 3:
-                s += Math::pow2(m_data(2,2));
-                [[fallthrough]];
-              case 2:
-                s += Math::pow2(m_data(2,1));
-                [[fallthrough]];
-              case 1:
-                s += Math::pow2(m_data(2,0));
-                [[fallthrough]];
-              case 0:
-                break;
-              default:
-                assert(false);
-            }
-            [[fallthrough]];
-          case 2:
-            switch (m_cols)
-            {
-              case 3:
-                s += Math::pow2(m_data(1,2));
-                [[fallthrough]];
-              case 2:
-                s += Math::pow2(m_data(1,1));
-                [[fallthrough]];
-              case 1:
-                s += Math::pow2(m_data(1,0));
-                [[fallthrough]];
-              case 0:
-                break;
-              default:
-                assert(false);
-            }
-            [[fallthrough]];
-          case 1:
-            switch (m_cols)
-            {
-              case 3:
-                s += Math::pow2(m_data(0,2));
-                [[fallthrough]];
-              case 2:
-                s += Math::pow2(m_data(0,1));
-                [[fallthrough]];
-              case 1:
-                s += Math::pow2(m_data(0,0));
-                [[fallthrough]];
-              case 0:
-                break;
-              default:
-                assert(false);
-            }
-            [[fallthrough]];
-          case 0:
-            break;
-          default:
-            assert(false);
-        }
-        return s;
       }
 
       [[nodiscard]] inline

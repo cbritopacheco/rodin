@@ -54,6 +54,8 @@
 #include <Eigen/Geometry>
 
 #include "Rodin/Geometry/Mesh.h"
+#include "Rodin/Geometry/Polytope.h"
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
 #include "ForwardDecls.h"
@@ -124,8 +126,8 @@ namespace Rodin::Variational
         res.resize(m_sdim);
         if (jacobian.rows() == 2)
         {
-          res[0] = jacobian(1,0);
-          res[1] = -jacobian(0,0);
+          res[0] = jacobian(1, 0);
+          res[1] = -jacobian(0, 0);
         }
         else if (jacobian.rows() == 3)
         {
@@ -133,12 +135,14 @@ namespace Rodin::Variational
           {
             const Index v1 = vs[0];
             const Index v2 = vs[1];
-            Eigen::Vector3<ScalarType> a =
+            Math::SpatialVector<ScalarType> a =
                 mesh.getVertexCoordinates(v1) - mesh.getVertexCoordinates(v2);
-            Eigen::Vector3<ScalarType> n;
-            n << jacobian(1, 0), -jacobian(0, 0), jacobian(2, 0);
+            Math::SpatialVector<ScalarType> n(3);
+            n[0] = jacobian(1, 0);
+            n[1] = -jacobian(0, 0);
+            n[2] = jacobian(2, 0);
             n = n.cross(a);
-            n.stableNormalize();
+            n.normalize();
             res = n.cross(a) + n * (n.dot(a));
           }
           else if (jacobian.cols() == 2)
@@ -175,23 +179,26 @@ namespace Rodin::Variational
           for (const Index cell : incidence)
           {
             auto pit = mesh.getPolytope(d + 1, cell);
-            if (traceDomain.contains(pit->getAttribute()))
-            {
-              Integer ori = -1;
-              for (auto vit = pit->getVertex(); vit; ++vit)
-              {
-                const auto v = vit->getCoordinates() - polytope.getVertex()->getCoordinates();
-                if (res.dot(v) < 0)
-                {
-                  ori *= -1;
-                  break;
-                }
-              }
-              res *= ori;
-              res.normalize();
-              matched = true;
-              break;
-            }
+            if (!traceDomain.contains(pit->getAttribute()))
+              continue;
+
+            // `pit` is the chosen adjacent cell that defines "outward"
+            const auto& cellPoly = *pit;
+
+            // face point (physical)
+            const auto xf = p.getCoordinates();
+
+            // cell interior point (physical)
+            const auto rc_cell = Geometry::Polytope::Traits(cellPoly.getGeometry()).getCentroid();
+            Geometry::Point pc(cellPoly, rc_cell);
+            const auto xc = pc.getCoordinates();
+
+            if (res.dot(xc - xf) > 0)
+              res *= ScalarType(-1);
+
+            res.normalize();
+            matched = true;
+            break;
           }
 
           if (!matched)

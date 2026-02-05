@@ -72,6 +72,14 @@ namespace Rodin::FormLanguage
 
 namespace Rodin::Variational
 {
+  struct BoundaryHit
+  {
+    Real& tau; ///< Time remaining until end of step
+    Index& cell; ///< Cell index where boundary was hit
+    Math::SpatialPoint& rref; ///< Reference coordinates where boundary was hit
+    size_t face; ///< Local face index where boundary was hit
+  };
+
   /**
    * @brief Default boundary policy for flow maps.
    *
@@ -86,7 +94,7 @@ namespace Rodin::Variational
        * @returns false (no special boundary treatment)
        */
       constexpr
-      bool operator()(Real&, Index&, Math::SpatialPoint&) const
+      bool operator()(const BoundaryHit&) const
       {
         return false;
       }
@@ -105,7 +113,7 @@ namespace Rodin::Variational
        * @returns true (always allow tangent computation)
        */
       constexpr
-      bool operator()(Real&, Index&, Math::SpatialPoint&) const
+      bool operator()(const BoundaryHit&) const
       {
         return true;
       }
@@ -389,6 +397,7 @@ namespace Rodin::Variational
 
           // advance to the face
           m_step.step(s_rc1, thit, s_rc, vref);
+          Geometry::Polytope::Project(g).face(jhit, s_rc, s_rc1);
           s_rc = s_rc1;
           tau -= thit;
 
@@ -398,7 +407,7 @@ namespace Rodin::Variational
           // first hop across the hit face if not boundary
           if (mesh.isBoundary(face_hit))
           {
-            if (!m_bp(tau, s_cell, s_rc))
+            if (!m_bp(BoundaryHit{tau, s_cell, s_rc, jhit}))
               return Trace{ true, tau, Geometry::Point(*itc, s_rc) };
             last_face.reset();
           }
@@ -470,7 +479,7 @@ namespace Rodin::Variational
               const Index f2 = facesz[kface];
               if (mesh.isBoundary(f2))
               {
-                if (!m_bp(tau, s_cell, s_rc))
+                if (!m_bp(BoundaryHit{tau, s_cell, s_rc, kface}))
                   return Trace{ true, tau, Geometry::Point(*itz, s_rc) };
                 last_face.reset();
                 break;

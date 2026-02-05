@@ -31,6 +31,7 @@
 
 #include <boost/serialization/access.hpp>
 
+#include "Rodin/Math/PointMatrix.h"
 #include "Rodin/Types.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/Vector.h"
@@ -854,7 +855,7 @@ namespace Rodin::Variational
           class JacobianFunction
           {
             public:
-              using ReturnType = Math::PointMatrix;
+              using ReturnType = Math::SpatialMatrix<ScalarType>;
 
               constexpr
               JacobianFunction(size_t vdim, size_t local, Geometry::Polytope::Type g)
@@ -1001,7 +1002,29 @@ namespace Rodin::Variational
       constexpr
       size_t getOrder() const
       {
-        return K;
+        using G = Geometry::Polytope::Type;
+        switch (this->getGeometry())
+        {
+          case G::Point:
+            // No actual polynomial variation
+            return 0;
+
+          case G::Segment:
+          case G::Triangle:
+          case G::Tetrahedron:
+            return K;
+
+          case G::Quadrilateral:
+          case G::Wedge:
+            // Tensor-product type: max total degree is 2K
+            return 2 * K;
+
+          case G::Hexahedron:
+            // 3D tensor product: max total degree is 3K
+            return 3 * K;
+        }
+        assert(false);
+        return 0;
       }
 
       template<class Archive>

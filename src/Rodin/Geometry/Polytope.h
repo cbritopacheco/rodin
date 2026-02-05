@@ -193,6 +193,8 @@ namespace Rodin::Geometry
            */
           const HalfSpace& getHalfSpace() const;
 
+          Math::SpatialPoint getCentroid() const;
+
         private:
           const Type m_g;
       };
@@ -586,7 +588,7 @@ namespace Rodin::Geometry
        * @brief Gets the vertex coordinates as a vector.
        * @returns Eigen map to the coordinate vector
        */
-      Eigen::Map<const Math::Vector<Real>> getCoordinates() const;
+      Math::SpatialPoint getCoordinates() const;
 
       /**
        * @brief Gets the geometry type (always Point for vertices).

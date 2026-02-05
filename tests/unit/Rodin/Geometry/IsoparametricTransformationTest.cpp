@@ -1,3 +1,4 @@
+#include "Rodin/Math/PointMatrix.h"
 #include <gtest/gtest.h>
 
 #include <Rodin/Geometry.h>
@@ -15,9 +16,9 @@ namespace Rodin::Tests::Unit
     constexpr const size_t sdim = 2;
     constexpr const size_t n = 3;
 
-    Math::Matrix<Real> pm(sdim, n);
-    pm << 0, 1, 0,
-          0, 0, 1;
+    Math::PointMatrix pm(sdim, n);
+    pm(0,0) = 0; pm(0,1) = 1; pm(0,2) = 0;
+    pm(1,0) = 0; pm(1,1) = 0; pm(1,2) = 1;
 
     Variational::RealP1Element fe(Polytope::Type::Triangle);
     IsoparametricTransformation trans(pm, fe);
@@ -40,9 +41,9 @@ namespace Rodin::Tests::Unit
     constexpr const size_t sdim = 2;
     constexpr const size_t n = 3;
 
-    Math::Matrix<Real> pm(sdim, n);
-    pm << -1, 1, 0,
-          -1, 1, 1;
+    Math::PointMatrix pm(sdim, n);
+    pm(0,0) = -1; pm(0,1) = 1; pm(0,2) = 0;
+    pm(1,0) = -1; pm(1,1) = 1; pm(1,2) = 1;
 
     Variational::RealP1Element fe(Polytope::Type::Triangle);
     IsoparametricTransformation trans(pm, fe);

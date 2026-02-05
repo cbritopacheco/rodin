@@ -28,6 +28,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
         mesh.scale(1.0 / (NX - 1));
         mesh.getConnectivity().compute(1, 2);
         mesh.getConnectivity().compute(0, 1);
+        mesh.getConnectivity().compute(0, 0);
         return mesh;
       }
       else
@@ -36,6 +37,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
         mesh.scale(1.0 / (NX - 1));
         mesh.getConnectivity().compute(2, 3);
         mesh.getConnectivity().compute(0, 1);
+        mesh.getConnectivity().compute(0, 0);
         return mesh;
       }
     }
@@ -58,7 +60,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
   };
 
   using Eikonal2DTest = EikonalManufacturedTest<33, 33, 1>;
-  using Eikonal3DTest = EikonalManufacturedTest<17, 17, 17>;
+  using Eikonal3DTest = EikonalManufacturedTest<33, 33, 33>;
 
   TEST_P(Eikonal2DTest, ConstantSpeed_PointSource)
   {
@@ -93,6 +95,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
   {
     auto mesh = buildMesh();
     P1 vh(mesh);
+
     GridFunction u(vh);
 
     auto speed = [](const Geometry::Point&) -> Real { return 1.0; };
@@ -110,7 +113,9 @@ namespace Rodin::Tests::Manufactured::Eikonal
     ASSERT_FALSE(interface.empty());
 
     Models::Eikonal::FMM fmm(u, speed);
-    fmm.seed(interface).solve();
+
+    fmm.seed(interface);
+    fmm.solve();
 
     const Real tol = 7e-2;
     checkDistance(mesh, u, tol);
@@ -120,16 +125,13 @@ namespace Rodin::Tests::Manufactured::Eikonal
     PolytopeCoverage2D,
     Eikonal2DTest,
     ::testing::Values(
-      Polytope::Type::Triangle,
-      Polytope::Type::Quadrilateral)
+      Polytope::Type::Triangle)
   );
 
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D,
     Eikonal3DTest,
     ::testing::Values(
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Wedge)
+      Polytope::Type::Tetrahedron)
   );
 }

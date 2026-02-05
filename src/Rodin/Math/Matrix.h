@@ -60,19 +60,6 @@ namespace Rodin::Math
   using ComplexMatrix = Matrix<Complex>;
 
   /**
-   * @brief Point matrix with bounded row dimension.
-   *
-   * A dynamic-size matrix where the number of rows is bounded by
-   * RODIN_MAXIMAL_SPACE_DIMENSION. Commonly used to store collections of
-   * spatial points as columns.
-   *
-   * Example: storing vertex coordinates of a mesh element where each column
-   * represents one vertex's coordinates.
-   */
-  using PointMatrix =
-    Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic, 0, RODIN_MAXIMAL_SPACE_DIMENSION, Eigen::Dynamic>;
-
-  /**
    * @brief Fixed-size matrix type.
    *
    * A compile-time fixed-size matrix. Both dimensions are known at compile time,
