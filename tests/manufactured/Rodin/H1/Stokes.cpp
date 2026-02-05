@@ -420,6 +420,8 @@ namespace Rodin::Tests::Manufactured::Stokes
     // Pressure space: H1 of order 1 (linear), scalar
     H1 ph(std::integral_constant<size_t, 1>{}, mesh);
 
+    P0g p0g(mesh);
+
     // Manufactured velocity solution (divergence-free)
     // Using stream function ψ = x²(1-x)² y²(1-y)²
     // u₁ = ∂ψ/∂y, u₂ = -∂ψ/∂x ensures ∇·u = 0
@@ -484,12 +486,17 @@ namespace Rodin::Tests::Manufactured::Stokes
     TestFunction  v(uh);
     TestFunction  q(ph);
 
+    TrialFunction lambda(p0g);
+    TestFunction  mu(p0g);
+
     // Assemble the weak form
-    Problem stokes(u, p, v, q);
+    Problem stokes(u, p, v, q, lambda, mu);
     stokes = Integral(Jacobian(u), Jacobian(v))
            - Integral(p, Div(v))
            + Integral(Div(u), q)
            - Integral(f, v)
+           + Integral(lambda, q)
+           + Integral(p, mu)
            + DirichletBC(u, u_exact);
 
     // Solve the system

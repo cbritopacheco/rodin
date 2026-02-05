@@ -11,6 +11,7 @@ set(RodinPETSc_HEADERS
   IO/GridFunctionPrinter.h
   Solver/KSP.h
   Solver/CG.h
+  Solver/GMRES.h
   Math/Vector.h
   Math/Matrix.h
   Math/LinearSystem.h
@@ -23,6 +24,7 @@ set(RodinPETSc_SRCS
   IO/GridFunctionPrinter.cpp
   Solver/KSP.cpp
   Solver/CG.cpp
+  Solver/GMRES.cpp
   Assembly/MPI.cpp
   Assembly/Sequential.cpp
   Math/LinearSystem.cpp

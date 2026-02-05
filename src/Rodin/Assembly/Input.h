@@ -461,6 +461,9 @@ namespace Rodin::Assembly
       std::reference_wrapper<const FlatSet<Geometry::Attribute>> m_essBdr;  ///< Boundary attributes
   };
 
+  template <class ... Ts>
+  class ProblemAssemblyInput;
+
   /**
    * @brief Input data for complete problem assembly.
    *
@@ -481,7 +484,7 @@ namespace Rodin::Assembly
    * @tparam TestFunction Test function type
    */
   template <class ProblemBody, class TrialFunction, class TestFunction>
-  class ProblemAssemblyInput
+  class ProblemAssemblyInput<ProblemBody, TrialFunction, TestFunction>
   {
     public:
       /// @brief Problem body type
@@ -532,6 +535,165 @@ namespace Rodin::Assembly
       std::reference_wrapper<ProblemBody> m_body;                           ///< Problem body reference
       std::reference_wrapper<const TrialFunction> m_trialFunction;          ///< Trial function reference
       std::reference_wrapper<const TestFunction> m_testFunction;            ///< Test function reference
+  };
+
+  template <class ProblemBody, class U1, class U2, class U3, class ... Us>
+  class ProblemAssemblyInput<ProblemBody, U1, U2, U3, Us...>
+  {
+    using ProblemBodyType = ProblemBody;
+
+    private:
+      template <class T>
+      struct IsTrialOrTestFunction
+      {
+        static constexpr Boolean Value =
+          Variational::IsTrialFunction<T>::Value || Variational::IsTestFunction<T>::Value;
+      };
+
+      static_assert(
+        Utility::ParameterPack<U1, U2, U3, Us...>::template All<IsTrialOrTestFunction>::Value);
+
+      // --------------------------
+      // Helpers to build tuples
+      // --------------------------
+      template <class T>
+      struct GetFES;
+
+      template <class T>
+      struct GetFES<std::reference_wrapper<T>>
+      {
+        using Type = typename FormLanguage::Traits<T>::FESType;
+      };
+
+      template <class T>
+      struct GetSolution;
+
+      template <class T>
+      struct GetSolution<std::reference_wrapper<T>>
+      {
+        using Type = typename FormLanguage::Traits<T>::SolutionType;
+      };
+
+      template <class T>
+      struct IsTrialFunctionReferenceWrapper
+      {
+        static constexpr Boolean Value = false;
+      };
+
+      template <class T>
+      struct IsTrialFunctionReferenceWrapper<std::reference_wrapper<T>>
+      {
+        static constexpr Boolean Value = Variational::IsTrialFunction<T>::Value;
+      };
+
+      template <class T>
+      struct IsTestFunctionReferenceWrapper
+      {
+        static constexpr Boolean Value = false;
+      };
+
+      template <class T>
+      struct IsTestFunctionReferenceWrapper<std::reference_wrapper<T>>
+      {
+        static constexpr Boolean Value = Variational::IsTestFunction<T>::Value;
+      };
+
+      using AllTuple =
+        Tuple<
+          std::reference_wrapper<U1>,
+          std::reference_wrapper<U2>,
+          std::reference_wrapper<U3>,
+          std::reference_wrapper<Us>...>;
+
+      using TrialFunctionTuple =
+        decltype(std::declval<AllTuple>()
+                 .template filter<IsTrialFunctionReferenceWrapper>());
+
+      using TestFunctionTuple =
+        decltype(std::declval<AllTuple>()
+                 .template filter<IsTestFunctionReferenceWrapper>());
+
+      public:
+        ProblemAssemblyInput(
+            ProblemBodyType& body,
+            TrialFunctionTuple& us,
+            TestFunctionTuple& vs,
+            std::array<size_t, TrialFunctionTuple::Size>& trialOffsets,
+            std::array<size_t, TestFunctionTuple::Size>& testOffsets,
+            boost::bimap<Rodin::FormLanguage::Base::UUID, size_t>& trialUUIDMap,
+            boost::bimap<Rodin::FormLanguage::Base::UUID, size_t>& testUUIDMap,
+            size_t totalTrial, size_t totalTest)
+          : m_pb(body),
+            m_us(us),
+            m_vs(vs),
+            m_trialOffsets(trialOffsets),
+            m_testOffsets(testOffsets),
+            m_trialUUIDMap(trialUUIDMap),
+            m_testUUIDMap(testUUIDMap),
+            m_totalTrial(totalTrial),
+            m_totalTest(totalTest)
+        {}
+
+        ProblemBodyType& getProblemBody() const
+        {
+          return m_pb;
+        }
+
+        TrialFunctionTuple& getTrialFunctions() const
+        {
+          return m_us;
+        }
+
+        TestFunctionTuple& getTestFunctions() const
+        {
+          return m_vs;
+        }
+
+        auto& getTrialOffsets() const
+        {
+          return m_trialOffsets;
+        }
+
+        auto& getTestOffsets()  const
+        {
+          return m_testOffsets;
+        }
+
+        auto& getTrialUUIDMap() const
+        {
+          return m_trialUUIDMap;
+        }
+
+        auto& getTestUUIDMap()  const
+        {
+          return m_testUUIDMap;
+        }
+
+        size_t getTotalTrialSize() const
+        {
+          return m_totalTrial;
+        }
+
+        size_t getTotalTestSize()  const
+        {
+          return m_totalTest;
+        }
+
+      private:
+        ProblemBodyType& m_pb;
+
+        TrialFunctionTuple& m_us;
+
+        TestFunctionTuple&  m_vs;
+
+        std::array<size_t, TrialFunctionTuple::Size>& m_trialOffsets;
+        std::array<size_t, TestFunctionTuple::Size>&  m_testOffsets;
+
+        boost::bimap<Rodin::FormLanguage::Base::UUID, size_t>& m_trialUUIDMap;
+        boost::bimap<Rodin::FormLanguage::Base::UUID, size_t>& m_testUUIDMap;
+
+        size_t m_totalTrial;
+        size_t m_totalTest;
   };
 }
 
