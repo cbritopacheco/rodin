@@ -40,6 +40,7 @@ namespace Rodin::Tests::Manufactured::Stokes3D
 
   TEST_P(Manufactured_Stokes3D_Test_12, Stokes3D_AffineVelocity_ConstantPressure)
   {
+    std::exit(1);
     auto pi = Rodin::Math::Constants::pi();
 
     Mesh mesh = this->getMesh();
@@ -135,6 +136,7 @@ namespace Rodin::Tests::Manufactured::Stokes3D
   // f = -Δu + ∇p
   TEST_P(Manufactured_Stokes3D_Test_12, Stokes3D_SimpleSine)
   {
+    std::exit(1);
     auto pi = Rodin::Math::Constants::pi();
 
     Mesh mesh = this->getMesh();
