@@ -705,6 +705,15 @@ namespace Rodin::Assembly
         b.resize(nrows);
         b.setZero();
 
+        constexpr bool IsSparse =
+          std::is_base_of_v<Eigen::SparseMatrixBase<OperatorType>, OperatorType>;
+
+        if constexpr (!IsSparse)
+        {
+          A.resize(nrows, ncols);
+          A.setZero();
+        }
+
         std::vector<Eigen::Triplet<ScalarType>> triplets;
 
         const auto findTrialBlock = [&](const auto& uuid) -> size_t
@@ -789,19 +798,24 @@ namespace Rodin::Assembly
             const auto& rows = vFES.getDOFs(d, p);
             const auto& cols = uFES.getDOFs(d, p);
 
-            for (size_t i = 0; i < static_cast<size_t>(rows.size()); ++i)
-            {
-              const Index I = static_cast<Index>(vOff + static_cast<size_t>(rows[i]));
-              for (size_t j = 0; j < static_cast<size_t>(cols.size()); ++j)
+              for (size_t i = 0; i < static_cast<size_t>(rows.size()); ++i)
               {
-                const Index J = static_cast<Index>(uOff + static_cast<size_t>(cols[j]));
-                const ScalarType val = Math::conj(bfi.integrate(j, i));
-                if (val != ScalarType(0))
-                  triplets.emplace_back(I, J, val);
+                const Index I = static_cast<Index>(vOff + static_cast<size_t>(rows[i]));
+                for (size_t j = 0; j < static_cast<size_t>(cols.size()); ++j)
+                {
+                  const Index J = static_cast<Index>(uOff + static_cast<size_t>(cols[j]));
+                  const ScalarType val = Math::conj(bfi.integrate(j, i));
+                  if (val != ScalarType(0))
+                  {
+                    if constexpr (IsSparse)
+                      triplets.emplace_back(I, J, val);
+                    else
+                      A(I, J) += val;
+                  }
+                }
               }
             }
           }
-        }
 
         for (auto& bfi : pb.getGlobalBFIs())
         {
@@ -847,7 +861,12 @@ namespace Rodin::Assembly
                   const Index J = static_cast<Index>(uOff + static_cast<size_t>(cols[j]));
                   const ScalarType val = Math::conj(bfi.integrate(j, i));
                   if (val != ScalarType(0))
-                    triplets.emplace_back(I, J, val);
+                  {
+                    if constexpr (IsSparse)
+                      triplets.emplace_back(I, J, val);
+                    else
+                      A(I, J) += val;
+                  }
                 }
               }
             }
@@ -894,51 +913,59 @@ namespace Rodin::Assembly
             fixed.emplace(static_cast<Index>(uOff + local), static_cast<ScalarType>(value));
         }
 
-        if (!fixed.empty())
+        if constexpr (IsSparse)
         {
-          std::vector<Eigen::Triplet<ScalarType>> filtered;
-          filtered.reserve(triplets.size());
-
-          for (const auto& t : triplets)
+          if (!fixed.empty())
           {
-            auto colIt = fixed.find(t.col());
-            if (colIt != fixed.end() && t.row() != t.col())
-              b.coeffRef(t.row()) -= t.value() * colIt->second;
+            std::vector<Eigen::Triplet<ScalarType>> filtered;
+            filtered.reserve(triplets.size());
 
-            const bool rowFixed = fixed.find(t.row()) != fixed.end();
-            const bool colFixed = colIt != fixed.end();
+            for (const auto& t : triplets)
+            {
+              auto colIt = fixed.find(t.col());
+              if (colIt != fixed.end() && t.row() != t.col())
+                b.coeffRef(t.row()) -= t.value() * colIt->second;
 
-            if (rowFixed || colFixed)
-              continue;
-            filtered.emplace_back(t);
+              const bool rowFixed = fixed.find(t.row()) != fixed.end();
+              const bool colFixed = colIt != fixed.end();
+
+              if (rowFixed || colFixed)
+                continue;
+              filtered.emplace_back(t);
+            }
+
+            for (const auto& [idx, value] : fixed)
+            {
+              filtered.emplace_back(idx, idx, ScalarType(1));
+              b.coeffRef(idx) = value;
+            }
+
+            triplets.swap(filtered);
           }
 
-          for (const auto& [idx, value] : fixed)
-          {
-            filtered.emplace_back(idx, idx, ScalarType(1));
-            b.coeffRef(idx) = value;
-          }
-
-          triplets.swap(filtered);
-        }
-
-        if constexpr (std::is_base_of_v<Eigen::SparseMatrixBase<OperatorType>, OperatorType>)
-        {
           A.resize(nrows, ncols);
           A.setFromTriplets(triplets.begin(), triplets.end());
         }
         else
         {
-          A.resize(nrows, ncols);
-          A.setZero();
-          std::sort(
-            triplets.begin(), triplets.end(),
-            [](const auto& a, const auto& b)
+          for (const auto& [idx, value] : fixed)
+          {
+            for (size_t r = 0; r < nrows; ++r)
             {
-              return a.row() == b.row() ? a.col() < b.col() : a.row() < b.row();
-            });
-          for (const auto& t : triplets)
-            A(t.row(), t.col()) += t.value();
+              if (r == static_cast<size_t>(idx))
+                continue;
+              b.coeffRef(r) -= A(r, idx) * value;
+              A(r, idx) = ScalarType(0);
+            }
+            for (size_t c = 0; c < ncols; ++c)
+            {
+              if (c == static_cast<size_t>(idx))
+                continue;
+              A(idx, c) = ScalarType(0);
+            }
+            A(idx, idx) = ScalarType(1);
+            b.coeffRef(idx) = value;
+          }
         }
       }
 
@@ -1006,7 +1033,15 @@ namespace Rodin::Assembly
         b.resize(rows);
         b.setZero();
 
+        constexpr bool IsSparse =
+          std::is_base_of_v<Eigen::SparseMatrixBase<OperatorType>, OperatorType>;
+
         std::vector<Eigen::Triplet<ScalarType>> triplets;
+        if constexpr (!IsSparse)
+        {
+          A.resize(rows, cols);
+          A.setZero();
+        }
 
         // Local BFIs
         for (auto& bfi : pb.getLocalBFIs())
@@ -1032,7 +1067,12 @@ namespace Rodin::Assembly
               {
                 const ScalarType val = Math::conj(bfi.integrate(j, i));
                 if (val != ScalarType(0))
-                  triplets.emplace_back(rowsDOF[i], colsDOF[j], val);
+                {
+                  if constexpr (IsSparse)
+                    triplets.emplace_back(rowsDOF[i], colsDOF[j], val);
+                  else
+                    A(rowsDOF[i], colsDOF[j]) += val;
+                }
               }
             }
           }
@@ -1068,7 +1108,12 @@ namespace Rodin::Assembly
                 {
                   const ScalarType val = Math::conj(bfi.integrate(j, i));
                   if (val != ScalarType(0))
-                    triplets.emplace_back(rowsDOF[i], colsDOF[j], val);
+                  {
+                    if constexpr (IsSparse)
+                      triplets.emplace_back(rowsDOF[i], colsDOF[j], val);
+                    else
+                      A(rowsDOF[i], colsDOF[j]) += val;
+                  }
                 }
               }
             }
@@ -1079,9 +1124,16 @@ namespace Rodin::Assembly
         for (auto& bf : pb.getBFs())
         {
           const auto& op = bf.getOperator();
-          for (int k = 0; k < op.outerSize(); ++k)
-            for (typename OperatorType::InnerIterator it(op, k); it; ++it)
-              triplets.emplace_back(it.row(), it.col(), it.value());
+          if constexpr (IsSparse)
+          {
+            for (int k = 0; k < op.outerSize(); ++k)
+              for (typename OperatorType::InnerIterator it(op, k); it; ++it)
+                triplets.emplace_back(it.row(), it.col(), it.value());
+          }
+          else
+          {
+            A += op;
+          }
         }
 
         // Linear forms
@@ -1105,7 +1157,7 @@ namespace Rodin::Assembly
         for (auto& lf : pb.getLFs())
           b -= lf.getVector();
 
-        // Dirichlet BC elimination in triplets
+        // Dirichlet BC elimination
         std::unordered_map<Index, ScalarType> fixed;
         for (auto& dbc : pb.getDBCs())
         {
@@ -1118,39 +1170,63 @@ namespace Rodin::Assembly
             fixed.emplace(static_cast<Index>(local), static_cast<ScalarType>(value));
         }
 
-        if (!fixed.empty())
+        if constexpr (IsSparse)
         {
-          for (const auto& t : triplets)
+          if (!fixed.empty())
           {
-            auto colIt = fixed.find(t.col());
-            if (colIt != fixed.end() && t.row() != t.col())
-              b.coeffRef(t.row()) -= t.value() * colIt->second;
+            for (const auto& t : triplets)
+            {
+              auto colIt = fixed.find(t.col());
+              if (colIt != fixed.end() && t.row() != t.col())
+                b.coeffRef(t.row()) -= t.value() * colIt->second;
+            }
+
+            std::vector<Eigen::Triplet<ScalarType>> filtered;
+            filtered.reserve(triplets.size());
+
+            for (const auto& t : triplets)
+            {
+              const bool rowFixed = fixed.find(t.row()) != fixed.end();
+              const bool colFixed = fixed.find(t.col()) != fixed.end();
+
+              if (rowFixed || colFixed)
+                continue;
+              filtered.emplace_back(t);
+            }
+
+            for (const auto& [idx, value] : fixed)
+            {
+              filtered.emplace_back(idx, idx, ScalarType(1));
+              b.coeffRef(idx) = value;
+            }
+
+            triplets.swap(filtered);
           }
 
-          std::vector<Eigen::Triplet<ScalarType>> filtered;
-          filtered.reserve(triplets.size());
-
-          for (const auto& t : triplets)
-          {
-            const bool rowFixed = fixed.find(t.row()) != fixed.end();
-            const bool colFixed = fixed.find(t.col()) != fixed.end();
-
-            if (rowFixed || colFixed)
-              continue;
-            filtered.emplace_back(t);
-          }
-
+          A.resize(rows, cols);
+          A.setFromTriplets(triplets.begin(), triplets.end());
+        }
+        else
+        {
           for (const auto& [idx, value] : fixed)
           {
-            filtered.emplace_back(idx, idx, ScalarType(1));
+            for (size_t r = 0; r < rows; ++r)
+            {
+              if (r == static_cast<size_t>(idx))
+                continue;
+              b.coeffRef(r) -= A(r, idx) * value;
+              A(r, idx) = ScalarType(0);
+            }
+            for (size_t c = 0; c < cols; ++c)
+            {
+              if (c == static_cast<size_t>(idx))
+                continue;
+              A(idx, c) = ScalarType(0);
+            }
+            A(idx, idx) = ScalarType(1);
             b.coeffRef(idx) = value;
           }
-
-          triplets.swap(filtered);
         }
-
-        A.resize(rows, cols);
-        A.setFromTriplets(triplets.begin(), triplets.end());
       }
 
       Sequential* copy() const noexcept override
