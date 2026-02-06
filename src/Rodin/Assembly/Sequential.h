@@ -7,6 +7,8 @@
 #ifndef RODIN_ASSEMBLY_SEQUENTIAL_H
 #define RODIN_ASSEMBLY_SEQUENTIAL_H
 
+#include <unordered_map>
+
 #include "Rodin/Context/Local.h"
 
 #include "Rodin/Tuple.h"
@@ -655,6 +657,282 @@ namespace Rodin::Assembly
     };
 
 
+  template <class LinearSystem, class U1, class U2, class U3, class ... Us>
+  class Sequential<
+      LinearSystem,
+      Variational::Problem<LinearSystem, U1, U2, U3, Us...>> final
+    : public AssemblyBase<
+        LinearSystem,
+        Variational::Problem<LinearSystem, U1, U2, U3, Us...>>
+  {
+    public:
+      using LinearSystemType = LinearSystem;
+
+      using Parent =
+        AssemblyBase<
+          LinearSystemType,
+          Variational::Problem<LinearSystemType, U1, U2, U3, Us...>>;
+
+      using InputType = typename Parent::InputType;
+
+      using OperatorType =
+        typename FormLanguage::Traits<LinearSystemType>::OperatorType;
+
+      using VectorType =
+        typename FormLanguage::Traits<LinearSystemType>::VectorType;
+
+      using ScalarType =
+        typename FormLanguage::Traits<LinearSystemType>::ScalarType;
+
+      void execute(LinearSystemType& axb, const InputType& input) const override
+      {
+        auto& A = axb.getOperator();
+        auto& b = axb.getVector();
+
+        auto& pb = input.getProblemBody();
+        auto&       us           = input.getTrialFunctions();
+        auto&       vs           = input.getTestFunctions();
+        const auto& trialOffsets = input.getTrialOffsets();
+        const auto& testOffsets  = input.getTestOffsets();
+        auto&       trialUUIDMap = input.getTrialUUIDMap();
+        auto&       testUUIDMap  = input.getTestUUIDMap();
+
+        const size_t ncols = input.getTotalTrialSize();
+        const size_t nrows = input.getTotalTestSize();
+
+        b.resize(nrows);
+        b.setZero();
+
+        std::vector<Eigen::Triplet<ScalarType>> triplets;
+
+        const auto findTrialBlock = [&](const auto& uuid) -> size_t
+        {
+          auto it = trialUUIDMap.left.find(uuid);
+          assert(it != trialUUIDMap.left.end());
+          return it->second;
+        };
+
+        const auto findTestBlock = [&](const auto& uuid) -> size_t
+        {
+          auto it = testUUIDMap.left.find(uuid);
+          assert(it != testUUIDMap.left.end());
+          return it->second;
+        };
+
+        const auto& getTrialFESByUUID = [&](const auto& uuid) -> const auto&
+        {
+          const size_t k = findTrialBlock(uuid);
+          const void* addr = nullptr;
+          us.iapply([&](size_t i, const auto& uref)
+          {
+            if (i == k)
+              addr = static_cast<const void*>(&uref.get().getFiniteElementSpace());
+          });
+          assert(addr);
+          return *static_cast<const std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace())>*>(addr);
+        };
+
+        const auto& getTestFESByUUID = [&](const auto& uuid) -> const auto&
+        {
+          const size_t k = findTestBlock(uuid);
+          const void* addr = nullptr;
+          vs.iapply([&](size_t i, const auto& vref)
+          {
+            if (i == k)
+              addr = static_cast<const void*>(&vref.get().getFiniteElementSpace());
+          });
+          assert(addr);
+          return *static_cast<const std::decay_t<decltype(vs.template get<0>().get().getFiniteElementSpace())>*>(addr);
+        };
+
+        const auto& mesh = [&]() -> const auto&
+        {
+          const void* addr = nullptr;
+          us.apply([&](const auto& uref)
+          {
+            if (!addr)
+              addr = static_cast<const void*>(&uref.get().getFiniteElementSpace().getMesh());
+          });
+          assert(addr);
+          return *static_cast<const std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace().getMesh())>*>(addr);
+        }();
+
+        for (auto& bfi : pb.getLocalBFIs())
+        {
+          const auto uUUID = bfi.getTrialFunction().getUUID();
+          const auto vUUID = bfi.getTestFunction().getUUID();
+
+          const size_t uBlock = findTrialBlock(uUUID);
+          const size_t vBlock = findTestBlock(vUUID);
+
+          const size_t uOff = trialOffsets[uBlock];
+          const size_t vOff = testOffsets[vBlock];
+
+          const auto& uFES = getTrialFESByUUID(uUUID);
+          const auto& vFES = getTestFESByUUID(vUUID);
+
+          const auto& attrs = bfi.getAttributes();
+          SequentialIteration seq(mesh, bfi.getRegion());
+
+          for (auto it = seq.getIterator(); it; ++it)
+          {
+            if (!attrs.empty() && !attrs.count(it->getAttribute()))
+              continue;
+
+            const size_t d = it->getDimension();
+            const Index  p = it->getIndex();
+
+            bfi.setPolytope(*it);
+
+            const auto& rows = vFES.getDOFs(d, p);
+            const auto& cols = uFES.getDOFs(d, p);
+
+            for (size_t i = 0; i < static_cast<size_t>(rows.size()); ++i)
+            {
+              const Index I = static_cast<Index>(vOff + static_cast<size_t>(rows[i]));
+              for (size_t j = 0; j < static_cast<size_t>(cols.size()); ++j)
+              {
+                const Index J = static_cast<Index>(uOff + static_cast<size_t>(cols[j]));
+                const ScalarType val = Math::conj(bfi.integrate(j, i));
+                if (val != ScalarType(0))
+                  triplets.emplace_back(I, J, val);
+              }
+            }
+          }
+        }
+
+        for (auto& bfi : pb.getGlobalBFIs())
+        {
+          const auto uUUID = bfi.getTrialFunction().getUUID();
+          const auto vUUID = bfi.getTestFunction().getUUID();
+
+          const size_t uBlock = findTrialBlock(uUUID);
+          const size_t vBlock = findTestBlock(vUUID);
+
+          const size_t uOff = trialOffsets[uBlock];
+          const size_t vOff = testOffsets[vBlock];
+
+          const auto& uFES = getTrialFESByUUID(uUUID);
+          const auto& vFES = getTestFESByUUID(vUUID);
+
+          const auto& trialAttrs = bfi.getTrialAttributes();
+          const auto& testAttrs  = bfi.getTestAttributes();
+
+          SequentialIteration trialseq(mesh, bfi.getTrialRegion());
+          SequentialIteration testseq(mesh, bfi.getTestRegion());
+
+          for (auto teIt = testseq.getIterator(); teIt; ++teIt)
+          {
+            if (!testAttrs.empty() && !testAttrs.count(teIt->getAttribute()))
+              continue;
+
+            const auto& rows = vFES.getDOFs(teIt.getDimension(), teIt->getIndex());
+
+            for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
+            {
+              if (!trialAttrs.empty() && !trialAttrs.count(trIt->getAttribute()))
+                continue;
+
+              const auto& cols = uFES.getDOFs(trIt.getDimension(), trIt->getIndex());
+
+              bfi.setPolytope(*trIt, *teIt);
+
+              for (size_t i = 0; i < static_cast<size_t>(rows.size()); ++i)
+              {
+                const Index I = static_cast<Index>(vOff + static_cast<size_t>(rows[i]));
+                for (size_t j = 0; j < static_cast<size_t>(cols.size()); ++j)
+                {
+                  const Index J = static_cast<Index>(uOff + static_cast<size_t>(cols[j]));
+                  const ScalarType val = Math::conj(bfi.integrate(j, i));
+                  if (val != ScalarType(0))
+                    triplets.emplace_back(I, J, val);
+                }
+              }
+            }
+          }
+        }
+
+        for (auto& lfi : pb.getLFIs())
+        {
+          const auto vUUID = lfi.getTestFunction().getUUID();
+          const size_t vBlock = findTestBlock(vUUID);
+          const size_t vOff   = testOffsets[vBlock];
+
+          const auto& vFES = getTestFESByUUID(vUUID);
+
+          const auto& attrs = lfi.getAttributes();
+          SequentialIteration seq(mesh, lfi.getRegion());
+
+          for (auto it = seq.getIterator(); it; ++it)
+          {
+            if (!attrs.empty() && !attrs.count(it->getAttribute()))
+              continue;
+
+            lfi.setPolytope(*it);
+
+            const auto& dofs = vFES.getDOFs(it.getDimension(), it->getIndex());
+            for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
+            {
+              const Index I = static_cast<Index>(vOff + static_cast<size_t>(dofs[l]));
+              b.coeffRef(I) -= lfi.integrate(l);
+            }
+          }
+        }
+
+        std::unordered_map<Index, ScalarType> fixed;
+        for (auto& dbc : pb.getDBCs())
+        {
+          const auto uUUID = dbc.getOperand().getUUID();
+          const size_t uBlock = findTrialBlock(uUUID);
+          const size_t uOff   = trialOffsets[uBlock];
+
+          dbc.assemble();
+          const auto& dofs = dbc.getDOFs();
+          for (const auto& [local, value] : dofs)
+            fixed.emplace(static_cast<Index>(uOff + local), static_cast<ScalarType>(value));
+        }
+
+        if (!fixed.empty())
+        {
+          for (const auto& t : triplets)
+          {
+            auto colIt = fixed.find(t.col());
+            if (colIt != fixed.end() && t.row() != t.col())
+              b.coeffRef(t.row()) -= t.value() * colIt->second;
+          }
+
+          std::vector<Eigen::Triplet<ScalarType>> filtered;
+          filtered.reserve(triplets.size());
+
+          for (const auto& t : triplets)
+          {
+            const bool rowFixed = fixed.find(t.row()) != fixed.end();
+            const bool colFixed = fixed.find(t.col()) != fixed.end();
+
+            if (rowFixed || colFixed)
+              continue;
+            filtered.emplace_back(t);
+          }
+
+          for (const auto& [idx, value] : fixed)
+            filtered.emplace_back(idx, idx, ScalarType(1));
+
+          for (const auto& [idx, value] : fixed)
+            b.coeffRef(idx) = value;
+
+          triplets.swap(filtered);
+        }
+
+        A.resize(nrows, ncols);
+        A.setFromTriplets(triplets.begin(), triplets.end());
+      }
+
+      Sequential* copy() const noexcept override
+      {
+        return new Sequential(*this);
+      }
+  };
+
   template <class Scalar, class Solution, class FES, class ValueDerived>
   class Sequential<
     IndexMap<Scalar>,
@@ -728,4 +1006,3 @@ namespace Rodin::Assembly
 }
 
 #endif
-
