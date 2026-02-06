@@ -29,7 +29,10 @@ namespace Rodin::Variational
         PETSc::Math::LinearSystem;
 
       using AssemblyType =
-        PETSc::Assembly::Sequential<LinearSystemType, Problem>;
+        std::conditional_t<
+          std::is_same_v<TrialFESMeshContextType, Context::Local>,
+          PETSc::Assembly::Sequential<LinearSystemType, Problem>,
+          PETSc::Assembly::Generic<LinearSystemType, Problem>>;
 
       using SolverBaseType =
         Solver::SolverBase<LinearSystemType>;

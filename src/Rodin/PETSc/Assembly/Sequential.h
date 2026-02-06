@@ -217,9 +217,15 @@ namespace Rodin::Assembly
       using OperatorType = typename Rodin::FormLanguage::Traits<LinearSystemType>::OperatorType; // ::Mat
       using VectorType   = typename Rodin::FormLanguage::Traits<LinearSystemType>::VectorType;   // ::Vec
       using ScalarType   = typename Rodin::FormLanguage::Traits<LinearSystemType>::ScalarType;   // PetscScalar
+      using TrialFESType = typename Rodin::FormLanguage::Traits<U>::FESType;
+      using TrialMeshType = typename Rodin::FormLanguage::Traits<TrialFESType>::MeshType;
+      using TrialMeshContextType = typename Rodin::FormLanguage::Traits<TrialMeshType>::ContextType;
 
       void execute(LinearSystemType& axb, const InputType& input) const override
       {
+        static_assert(std::is_same_v<TrialMeshContextType, Rodin::Context::Local>,
+          "PETSc sequential assembly should only be used with Local mesh context.");
+
         auto& A = axb.getOperator();
         auto& b = axb.getVector();
 
