@@ -18,6 +18,7 @@
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/Grad.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Variational/ShapeFunction.h"
 
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
@@ -98,7 +99,8 @@ namespace Rodin::Variational
       {
         Math::SpatialVector<Real> tmp;
         interpolate(tmp, p);
-        out = std::move(tmp);
+
+        out = tmp.getData().head(tmp.size());
       }
 
       void interpolate(Math::SpatialVector<Real>& out, const Geometry::Point& p) const
@@ -244,21 +246,21 @@ namespace Rodin::Variational
         return getOperand().getDOFs(element);
       }
 
-      const Geometry::Point& getPoint() const
+      const IntegrationPoint& getIntegrationPoint() const
       {
-        assert(m_p.has_value());
-        return m_p.value().get();
+        assert(m_ip);
+        return *m_ip;
       }
 
-      Grad& setPoint(const Geometry::Point& p)
+      Grad& setIntegrationPoint(const IntegrationPoint& ip)
       {
-        m_p = p;
+        m_ip = &ip;
         return *this;
       }
 
       auto getBasis(size_t local) const
       {
-        const size_t sdim = getPoint().getPolytope().getMesh().getSpaceDimension();
+        const size_t sdim = getIntegrationPoint().getPoint().getPolytope().getMesh().getSpaceDimension();
         return Math::Vector<ScalarType>::Zero(sdim);
       }
 
@@ -269,8 +271,7 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const OperandType> m_u;
-
-      Optional<std::reference_wrapper<const Geometry::Point>> m_p;
+      const IntegrationPoint* m_ip;
   };
 
   template <class NestedDerived, class Range, class Mesh, ShapeFunctionSpaceType Space>

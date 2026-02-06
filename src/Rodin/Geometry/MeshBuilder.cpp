@@ -44,7 +44,9 @@ namespace Rodin::Geometry
     assert(m_vertices.cols() > 0);
     assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
     assert(l.size() == m_sdim);
-    std::copy(l.begin(), l.end(), m_vertices.col(m_nodes++).begin());
+    for (size_t i = 0; i < m_sdim; ++i)
+      m_vertices(i, m_nodes) = *(l.begin() + i);
+    m_nodes++;
     return *this;
   }
 
@@ -57,35 +59,15 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Local>::Builder&
-  Mesh<Context::Local>::Builder::vertex(Eigen::Map<const Math::SpatialPoint> x)
+  Mesh<Context::Local>::Builder::vertex(const Math::SpatialPoint& x)
   {
     assert(m_vertices.cols() > 0);
     assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
     assert(x.size() >= 0);
     assert(static_cast<size_t>(x.size()) == m_sdim);
-    m_vertices.col(m_nodes++) = x;
-    return *this;
-  }
-
-  Mesh<Context::Local>::Builder&
-  Mesh<Context::Local>::Builder::vertex(Math::Vector<Real>&& x)
-  {
-    assert(m_vertices.cols() > 0);
-    assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
-    assert(x.size() >= 0);
-    assert(static_cast<size_t>(x.size()) == m_sdim);
-    m_vertices.col(m_nodes++) = std::move(x);
-    return *this;
-  }
-
-  Mesh<Context::Local>::Builder&
-  Mesh<Context::Local>::Builder::vertex(const Math::Vector<Real>& x)
-  {
-    assert(m_vertices.cols() > 0);
-    assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
-    assert(x.size() >= 0);
-    assert(static_cast<size_t>(x.size()) == m_sdim);
-    m_vertices.col(m_nodes++) = x;
+    for (size_t i = 0; i < m_sdim; ++i)
+      m_vertices(i, m_nodes) = x(i);
+    m_nodes++;
     return *this;
   }
 

@@ -105,6 +105,9 @@ namespace Rodin::Variational
       /// @brief Finite element space type
       using FESType = FES;
 
+      /// @brief Type of the output range
+      using RangeType = Math::Vector<typename FormLanguage::Traits<FESType>::ScalarType>;
+
       /// @brief Scalar type for computations
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
@@ -169,31 +172,49 @@ namespace Rodin::Variational
        */
       decltype(auto) getValue(const Geometry::Point& p) const
       {
-        static thread_local SpatialVectorType s_out;
+        static thread_local RangeType s_res;
+
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& gf = getOperand();
         const auto& fes = gf.getFiniteElementSpace();
         const auto& fesMesh = fes.getMesh();
+
+        SpatialVectorType out;
+
+        // SpatialVectorType out;
         if (polytopeMesh == fesMesh)
         {
-          this->interpolate(s_out, p);
+          this->interpolate(out, p);
         }
         else if (const auto inclusion = fesMesh.inclusion(p))
         {
-          this->interpolate(s_out, *inclusion);
+          this->interpolate(out, *inclusion);
         }
         else if (fesMesh.isSubMesh())
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
-          this->interpolate(s_out, *restriction);
+          this->interpolate(out, *restriction);
         }
         else
         {
           assert(false);
         }
-        return s_out;
+
+        s_res = out.getData().head(out.size());
+
+        return s_res;
+      }
+
+      constexpr
+      void interpolate(RangeType& out, const Geometry::Point& p) const
+      {
+        SpatialVectorType res;
+        this->interpolate(res, p);
+
+        out.resize(res.size());
+        std::copy(res.begin(), res.end(), out.begin());
       }
 
       /**
@@ -218,6 +239,12 @@ namespace Rodin::Variational
       const OperandType& getOperand() const
       {
         return m_u.get();
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
+      {
+        return static_cast<const Derived&>(*this).getOrder(polytope);
       }
 
       /**

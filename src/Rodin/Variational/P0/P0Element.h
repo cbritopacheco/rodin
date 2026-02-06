@@ -244,7 +244,7 @@ namespace Rodin::Variational
           }
           case Geometry::Polytope::Type::Segment:
           {
-            static thread_local const Math::SpatialVector<Real> s_node{{ 0.5 }};
+            static thread_local const Math::SpatialVector<Real> s_node{ 0.5 };
             return s_node;
           }
           case Geometry::Polytope::Type::Triangle:

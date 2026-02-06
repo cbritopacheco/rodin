@@ -4,7 +4,10 @@ target_link_libraries(RodinPairTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin)
-gtest_discover_tests(RodinPairTest)
+gtest_discover_tests(RodinPairTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinTupleTest TupleTest.cpp)
 target_link_libraries(RodinTupleTest
@@ -12,7 +15,10 @@ target_link_libraries(RodinTupleTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin)
-gtest_discover_tests(RodinTupleTest)
+gtest_discover_tests(RodinTupleTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinArrayTest ArrayTest.cpp)
 target_link_libraries(RodinArrayTest
@@ -20,7 +26,10 @@ target_link_libraries(RodinArrayTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin)
-gtest_discover_tests(RodinArrayTest)
+gtest_discover_tests(RodinArrayTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinCopyableTest CopyableTest.cpp)
 target_link_libraries(RodinCopyableTest
@@ -28,7 +37,10 @@ target_link_libraries(RodinCopyableTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin)
-gtest_discover_tests(RodinCopyableTest)
+gtest_discover_tests(RodinCopyableTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinMoveableTest MoveableTest.cpp)
 target_link_libraries(RodinMoveableTest
@@ -36,7 +48,10 @@ target_link_libraries(RodinMoveableTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin)
-gtest_discover_tests(RodinMoveableTest)
+gtest_discover_tests(RodinMoveableTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinFlatSetTest FlatSetTest.cpp)
 target_link_libraries(RodinFlatSetTest
@@ -44,7 +59,10 @@ target_link_libraries(RodinFlatSetTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin)
-gtest_discover_tests(RodinFlatSetTest)
+gtest_discover_tests(RodinFlatSetTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinTypesTest TypesTest.cpp)
 target_link_libraries(RodinTypesTest
@@ -52,7 +70,10 @@ target_link_libraries(RodinTypesTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin)
-gtest_discover_tests(RodinTypesTest)
+gtest_discover_tests(RodinTypesTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinCastTest CastTest.cpp)
 target_link_libraries(RodinCastTest
@@ -60,7 +81,10 @@ target_link_libraries(RodinCastTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin)
-gtest_discover_tests(RodinCastTest)
+gtest_discover_tests(RodinCastTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinUtilityTest UtilityTest.cpp)
 target_link_libraries(RodinUtilityTest
@@ -68,7 +92,10 @@ target_link_libraries(RodinUtilityTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin)
-gtest_discover_tests(RodinUtilityTest)
+gtest_discover_tests(RodinUtilityTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_subdirectory(Alert)
 add_subdirectory(IO)

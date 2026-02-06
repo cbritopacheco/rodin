@@ -21,7 +21,10 @@
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/FormLanguage/Base.h"
 #include "Rodin/FormLanguage/Traits.h"
-#include "Rodin/Variational/Traits.h"
+
+#include "IntegrationPoint.h"
+#include "Rodin/Geometry/Polytope.h"
+#include "Traits.h"
 
 namespace Rodin::FormLanguage
 {
@@ -269,21 +272,15 @@ namespace Rodin::Variational
        * @note CRTP function to be overriden in the Derived class.
        */
       constexpr
-      const Geometry::Point& getPoint() const
+      const IntegrationPoint& getIntegrationPoint() const
       {
-        return static_cast<const Derived&>(*this).getPoint();
+        return static_cast<const Derived&>(*this).getIntegrationPoint();
       }
 
-      /**
-       * @brief Sets the evaluation point for the shape function.
-       * @param[in] p Point at which to evaluate
-       * @returns Reference to the derived object
-       * @note CRTP function to be overriden in the Derived class.
-       */
       constexpr
-      Derived& setPoint(const Geometry::Point& p)
+      Derived& setIntegrationPoint(const IntegrationPoint& ip)
       {
-        return static_cast<Derived&>(*this).setPoint(p);
+        return static_cast<Derived&>(*this).setIntegrationPoint(ip);
       }
 
       /**
@@ -340,6 +337,27 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Returns a geometry-dependent polynomial order bound of the expression
+       *        on the reference element.
+       *
+       * The returned value is a **safe upper bound** on the total polynomial degree
+       * of the expression in reference coordinates, ignoring the geometry map.
+       *
+       * - Used for quadrature selection and composition rules.
+       * - May depend on the reference geometry (simplex, tensor-product, wedge).
+       * - Returns std::nullopt for non-polynomial expressions.
+       * - The value is not guaranteed to be sharp.
+       *
+       * @param geom Reference geometry type.
+       * @return Polynomial order bound, or std::nullopt if not polynomial.
+       */
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        return static_cast<const Derived&>(*this).getOrder(poly);
+      }
+
+      /**
        * @brief Creates a polymorphic copy of the shape function.
        * @returns Pointer to newly allocated copy
        */
@@ -350,120 +368,6 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const FES> m_fes;
-  };
-
-  /**
-   * @ingroup ShapeFunctionSpecializations
-   * @brief Intermediate shape function class for CRTP derivation.
-   *
-   * This class provides an intermediate layer in the ShapeFunction hierarchy,
-   * allowing for further specialization while maintaining the common interface.
-   * It is used as a base for specific shape function implementations like
-   * TestFunction and TrialFunction.
-   *
-   * @tparam Derived Final derived class
-   * @tparam FES Finite element space type
-   * @tparam Space Space type (trial or test)
-   */
-  template <class Derived, class FES, ShapeFunctionSpaceType Space>
-  class ShapeFunction
-    : public ShapeFunctionBase<ShapeFunction<Derived, FES, Space>, FES, Space>
-  {
-    public:
-      /// @brief Finite element space type
-      using FESType = FES;
-      
-      /// @brief Space type (trial or test)
-      static constexpr ShapeFunctionSpaceType SpaceType = Space;
-
-      /// @brief Scalar type from the finite element space
-      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
-
-      /// @brief Range type from the finite element space
-      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
-
-      /// @brief Parent class type
-      using Parent =
-        ShapeFunctionBase<
-          ShapeFunction<Derived, FESType, SpaceType>, FESType, SpaceType>;
-
-      /// @brief Default constructor is deleted
-      ShapeFunction() = delete;
-
-      constexpr
-      ShapeFunction(const FESType& fes)
-        : Parent(fes),
-          m_p(nullptr)
-      {}
-
-      constexpr
-      ShapeFunction(const ShapeFunction& other)
-        : Parent(other),
-          m_basis(other.m_basis),
-          m_p(nullptr)
-      {}
-
-      constexpr
-      ShapeFunction(ShapeFunction&& other)
-        : Parent(std::move(other)),
-          m_basis(std::move(other.m_basis)),
-          m_p(std::exchange(other.m_p, nullptr))
-      {}
-
-      constexpr
-      size_t getDOFs(const Geometry::Polytope& polytope) const
-      {
-        const size_t d = polytope.getDimension();
-        const size_t i = polytope.getIndex();
-        return this->getFiniteElementSpace().getFiniteElement(d, i).getCount();
-      }
-
-      constexpr
-      const Geometry::Point& getPoint() const
-      {
-        assert(m_p);
-        return *m_p;
-      }
-
-      ShapeFunction& setPoint(const Geometry::Point& p)
-      {
-        if (m_p == &p)
-          return *this;
-        m_p = &p;
-        const auto& polytope = p.getPolytope();
-        const size_t d = polytope.getDimension();
-        const Index i = polytope.getIndex();
-        const auto& fes = this->getFiniteElementSpace();
-        const auto& fe = fes.getFiniteElement(d, i);
-        const size_t count = fe.getCount();
-        m_basis.resize(count);
-        for (size_t local = 0; local < count; local++)
-          m_basis[local] = fes.getPushforward({ d, i }, fe.getBasis(local))(p);
-        return *this;
-      }
-
-      constexpr
-      const RangeType& getBasis(size_t local) const
-      {
-        assert(local < m_basis.size());
-        return m_basis[local];
-      }
-
-      constexpr
-      const auto& getLeaf() const
-      {
-        return static_cast<const Derived&>(*this).getLeaf();
-      }
-
-      virtual ShapeFunction* copy() const noexcept override
-      {
-        return static_cast<const Derived&>(*this).copy();
-      }
-
-    private:
-      std::vector<RangeType> m_basis;
-
-      const Geometry::Point* m_p;
   };
 }
 

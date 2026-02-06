@@ -434,7 +434,7 @@ namespace Rodin::Variational
               typename FormLanguage::Traits<typename FormLanguage::Traits<V>::FESType>::ScalarType>>,
           U, V>;
 
-  template <class LinearSystem, class U1, class U2, class ... Us>
+  template <class LinearSystem, class U1, class U2, class U3, class ... Us>
   class ProblemUsBase : public ProblemBase<LinearSystem>
   {
     template <class T>
@@ -444,7 +444,7 @@ namespace Rodin::Variational
     };
 
     static_assert(
-        Utility::ParameterPack<U1, U2, Us...>::template All<IsTrialOrTestFunction>::Value);
+        Utility::ParameterPack<U1, U2, U3, Us...>::template All<IsTrialOrTestFunction>::Value);
 
     public:
       using LinearSystemType = LinearSystem;
@@ -511,6 +511,7 @@ namespace Rodin::Variational
           Tuple<
             std::reference_wrapper<U1>,
             std::reference_wrapper<U2>,
+            std::reference_wrapper<U3>,
             std::reference_wrapper<Us>...>>()
             .template filter<IsTrialFunctionReferenceWrapper>());
 
@@ -519,6 +520,7 @@ namespace Rodin::Variational
           Tuple<
             std::reference_wrapper<U1>,
             std::reference_wrapper<U2>,
+            std::reference_wrapper<U3>,
             std::reference_wrapper<Us>...>>()
             .template filter<IsTestFunctionReferenceWrapper>());
 
@@ -559,13 +561,13 @@ namespace Rodin::Variational
         Assembly::Sequential<VectorType, LinearFormTuple>;
 
     public:
-      ProblemUsBase(U1& u1, U2& u2, Us&... us)
+      ProblemUsBase(U1& u1, U2& u2, U3& u3, Us&... us)
         : m_assembled(false),
           m_us(
-            Tuple{std::ref(u1), std::ref(u2), std::ref(us)...}
+            Tuple{std::ref(u1), std::ref(u2), std::ref(u3), std::ref(us)...}
             .template filter<IsTrialFunctionReferenceWrapper>()),
           m_vs(
-            Tuple{std::ref(u1), std::ref(u2), std::ref(us)...}
+            Tuple{std::ref(u1), std::ref(u2), std::ref(u3), std::ref(us)...}
             .template filter<IsTestFunctionReferenceWrapper>()),
           m_lft(m_vs.map(
                 [](const auto& v)
@@ -741,27 +743,34 @@ namespace Rodin::Variational
               .iapply(
                 [&](const Index i, size_t s) { sz[i] = s; });
           m_testOffsets[0] = 0;
-          for (size_t i = 0; i < TrialFunctionTuple::Size - 1; i++)
+          for (size_t i = 0; i < TestFunctionTuple::Size - 1; i++)
             m_testOffsets[i + 1] = sz[i] + m_testOffsets[i];
         }
 
         size_t rows =
-          m_vs.reduce(
-            [](const auto& a, const auto& b)
+          m_vs
+            .map([](const auto& v)
             {
-              return a.get().getFiniteElementSpace().getSize() + b.get().getFiniteElementSpace().getSize();
-            });
+              return static_cast<size_t>(v.get().getFiniteElementSpace().getSize());
+            })
+            .reduce([](size_t a, size_t b) { return a + b; });
 
         size_t cols =
-          m_us.reduce(
-            [](const auto& a, const auto& b)
+          m_us
+            .map([](const auto& u)
             {
-              return a.get().getFiniteElementSpace().getSize() + b.get().getFiniteElementSpace().getSize();
-            });
+              return static_cast<size_t>(u.get().getFiniteElementSpace().getSize());
+            })
+            .reduce([](size_t a, size_t b) { return a + b; });
 
         // Compute block offsets to build the triplets
-        std::array<Pair<size_t, size_t>, decltype(bt)::Size> boffsets;
-        std::array<size_t, decltype(lt)::Size> loffsets;
+        std::array<Pair<size_t, size_t>, decltype(bt)::Size> boffsets{};
+        std::array<size_t, decltype(lt)::Size> loffsets{};
+
+        for (auto& offset : boffsets)
+          offset = Pair{0, 0};
+        for (auto& offset : loffsets)
+          offset = 0;
 
         m_lft.iapply(
             [&](const Index i, const auto& lf)
@@ -867,8 +876,9 @@ namespace Rodin::Variational
       std::unique_ptr<Assembly::AssemblyBase<VectorType, LinearFormTuple>>      m_lfa;
   };
 
-  template <class LinearSystem, class U1, class U2, class ... Us>
-  class Problem<LinearSystem, U1, U2, Us...> : public ProblemUsBase<LinearSystem, U1, U2, Us...>
+  template <class LinearSystem, class U1, class U2, class U3, class ... Us>
+  class Problem<LinearSystem, U1, U2, U3, Us...>
+    : public ProblemUsBase<LinearSystem, U1, U2, U3, Us...>
   {
     public:
       using LinearSystemType = LinearSystem;
@@ -885,10 +895,10 @@ namespace Rodin::Variational
       using ProblemBodyType =
         ProblemBody<OperatorType, VectorType, ScalarType>;
 
-      using Parent = ProblemUsBase<LinearSystem, U1, U2, Us...>;
+      using Parent = ProblemUsBase<LinearSystem, U1, U2, U3, Us...>;
 
-      Problem(U1& u1, U2& u2, Us&... us)
-        : Parent(u1, u2, us...)
+      Problem(U1& u1, U2& u2, U3& u3, Us&... us)
+        : Parent(u1, u2, u3, us...)
       {}
 
       Problem(const Problem& other)
@@ -946,8 +956,8 @@ namespace Rodin::Variational
       LinearSystemType m_axb;
   };
 
-  template <class U1, class U2, class ... Us>
-  Problem(U1& u1, U2& u2, Us&... us)
+  template <class U1, class U2, class U3, class ... Us>
+  Problem(U1& u1, U2& u2, U3& u3, Us&... us)
     -> Problem<
         Math::LinearSystem<
           Math::SparseMatrix<
@@ -956,7 +966,7 @@ namespace Rodin::Variational
               typename FormLanguage::Traits<typename FormLanguage::Traits<U2>::FESType>::ScalarType>::Type>,
           Math::Vector<
             typename FormLanguage::Traits<typename FormLanguage::Traits<U2>::FESType>::ScalarType>>,
-        U1, U2, Us...>;
+        U1, U2, U3, Us...>;
 }
 
 #endif

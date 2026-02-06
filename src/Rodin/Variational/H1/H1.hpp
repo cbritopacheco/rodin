@@ -1380,11 +1380,8 @@ namespace Rodin::Variational
 
         using WedgeCochain = Cochain<Geometry::Polytope::Type::Wedge>;
         using TriCochain   = Cochain<Geometry::Polytope::Type::Triangle>;
-        using SegCochain   = Cochain<Geometry::Polytope::Type::Segment>;
 
         constexpr size_t TriCount = TriCochain::Count;
-        constexpr size_t Ns       = SegCochain::Count; // = K+1
-        constexpr size_t N1       = K + 1;
 
         std::array<uint8_t, WedgeCochain::Count> used{};
         used.fill(0);

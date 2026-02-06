@@ -183,10 +183,10 @@ namespace Rodin::QF
     private:
       /// Static table: number of points for each [s][n] combination
       static boost::multi_array<size_t, 2> s_sizes;
-      
+
       /// Static table: quadrature weights for each [s][n] combination
       static boost::multi_array<Math::Vector<Real>, 2> s_weights;
-      
+
       /// Static table: quadrature points for each [s][n] combination
       static boost::multi_array<std::vector<Math::SpatialVector<Real>>, 2> s_points;
 

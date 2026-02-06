@@ -4,5 +4,7 @@ target_link_libraries(RodinSerializationMeshTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinSerializationMeshTest)
-
+gtest_discover_tests(RodinSerializationMeshTest
+  PROPERTIES
+    LABELS unit
+)

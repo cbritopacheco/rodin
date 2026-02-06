@@ -312,6 +312,7 @@ namespace Rodin::Variational
       const IndexArray& getDOFs(size_t d, Index i) const override
       {
         assert(d == getMesh().getDimension());
+        (void) d;
         return m_dofs.at(i);
       }
 
@@ -351,14 +352,13 @@ namespace Rodin::Variational
       /**
        * @brief Creates a pushforward transformation for a function.
        * @tparam Callable Type of the callable function
-       * @param[in] idx Pair of (dimension, polytope index)
        * @param[in] v Function to push forward
        * @return Pushforward transformation object
        *
        * The pushforward maps a function from reference space to physical space.
        */
       template <class Callable>
-      auto getPushforward(const std::pair<size_t, Index>& idx, Callable&& v) const
+      auto getPushforward(const std::pair<size_t, Index>&, Callable&& v) const
       {
         return Pushforward<Callable>(std::forward<Callable>(v));
       }

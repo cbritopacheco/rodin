@@ -79,38 +79,30 @@ namespace Rodin::Variational
    * @tparam Data Data storage type
    * @tparam Mesh Mesh type
    */
-  template <size_t K, class Range, class Data, class Mesh>
-  class Jacobian<GridFunction<H1<K, Range, Mesh>, Data>> final
+  template <size_t K, class Scalar, class Data, class Mesh>
+  class Jacobian<GridFunction<H1<K, Math::Vector<Scalar>, Mesh>, Data>> final
     : public JacobianBase<
-        GridFunction<H1<K, Range, Mesh>, Data>, Jacobian<GridFunction<H1<K, Range, Mesh>, Data>>>
+        GridFunction<H1<K, Math::Vector<Scalar>, Mesh>, Data>,
+        Jacobian<GridFunction<H1<K, Math::Vector<Scalar>, Mesh>, Data>>>
   {
     public:
-      using FESType = H1<K, Range, Mesh>;
-
-      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
-
-      using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
+      using FESType = H1<K, Math::Vector<Scalar>, Mesh>;
 
       using OperandType = GridFunction<FESType, Data>;
 
       using Parent = JacobianBase<OperandType, Jacobian<OperandType>>;
 
-      /**
-       * @brief Constructs the Jacobian matrix of an @f$ H^1 (\Omega)^d @f$ function
-       * @f$ u @f$.
-       * @param[in] u Grid function to be differentiated
-       */
-      Jacobian(const OperandType& u)
-        : Parent(u)
-      {}
+      using RangeType = Math::Matrix<Scalar>;
 
-      Jacobian(const Jacobian& other)
-        : Parent(other)
-      {}
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
-      Jacobian(Jacobian&& other)
-        : Parent(std::move(other))
-      {}
+      using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
+
+      using SpatialVectorType = Math::SpatialVector<ScalarType>;
+
+      Jacobian(const OperandType& u) : Parent(u) {}
+      Jacobian(const Jacobian& other) : Parent(other) {}
+      Jacobian(Jacobian&& other) : Parent(std::move(other)) {}
 
       void interpolate(SpatialMatrixType& out, const Geometry::Point& p) const
       {
@@ -119,12 +111,15 @@ namespace Rodin::Variational
         const auto& i = polytope.getIndex();
         const auto& mesh = polytope.getMesh();
         const size_t meshDim = mesh.getDimension();
-        if (d == meshDim - 1) // Evaluating on a face
+
+        if (d == meshDim - 1) // face
         {
           const auto& conn = mesh.getConnectivity();
-          const auto& inc = conn.getIncidence({ meshDim - 1, meshDim }, i);
-          const auto& pc = p.getPhysicalCoordinates();
+          const auto& inc  = conn.getIncidence({ meshDim - 1, meshDim }, i);
+          const auto& pc   = p.getPhysicalCoordinates();
+
           assert(inc.size() == 1 || inc.size() == 2);
+
           if (inc.size() == 1)
           {
             const auto& tracePolytope = mesh.getPolytope(meshDim, *inc.begin());
@@ -136,9 +131,7 @@ namespace Rodin::Variational
           }
           else
           {
-            assert(inc.size() == 2);
             const auto& traceDomain = this->getTraceDomain();
-            assert(traceDomain.size() > 0);
             if (traceDomain.size() == 0)
             {
               Alert::MemberFunctionException(*this, __func__)
@@ -147,55 +140,87 @@ namespace Rodin::Variational
                 << ". Jacobian at an interface with no trace domain is undefined."
                 << Alert::Raise;
             }
-            else
+
+            for (auto& idx : inc)
             {
-              for (auto& idx : inc)
+              const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
+              if (traceDomain.count(tracePolytope->getAttribute()))
               {
-                const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
-                if (traceDomain.count(tracePolytope->getAttribute()))
-                {
-                  Math::SpatialPoint rc;
-                  tracePolytope->getTransformation().inverse(rc, pc);
-                  const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
-                  this->interpolate(out, np);
-                  return;
-                }
+                Math::SpatialPoint rc;
+                tracePolytope->getTransformation().inverse(rc, pc);
+                const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
+                this->interpolate(out, np);
+                return;
               }
-              UndeterminedTraceDomainException(
-                  *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()) << Alert::Raise;
             }
+
+            UndeterminedTraceDomainException(
+                *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()) << Alert::Raise;
             return;
           }
         }
-        else // Evaluating on a cell
+
+        // cell
+        assert(d == mesh.getDimension());
+
+        const auto& gf  = this->getOperand();
+        const auto& fes = gf.getFiniteElementSpace();
+        const size_t vdim = fes.getVectorDimension();
+
+        const auto geom = polytope.getGeometry();
+        const auto& rc  = p.getReferenceCoordinates();
+
+        // scalar element gives scalar basis gradients in reference coords
+        const auto feS = H1Element<K, ScalarType>(geom);
+        const size_t nscalar = feS.getCount();
+
+        // phys gradient mapping
+        const auto JinvT = p.getJacobianInverse().transpose();
+
+        static thread_local SpatialVectorType s_ref;
+        static thread_local SpatialVectorType s_phys;
+        s_ref.resize(d);
+        s_phys.resize(d);
+
+        SpatialMatrixType res(vdim, d);
+        res.setZero();
+
+        // Local ordering must match your vector H1 element:
+        // local = alpha * vdim + comp
+        for (size_t alpha = 0; alpha < nscalar; ++alpha)
         {
-          assert(d == mesh.getDimension());
-          const auto& gf = this->getOperand();
-          const auto& fes = gf.getFiniteElementSpace();
-          const auto& vdim = fes.getVectorDimension();
-          const auto& fe = fes.getFiniteElement(d, i);
-          const auto& rc = p.getReferenceCoordinates();
-          SpatialMatrixType jacobian(d, d);
-          SpatialMatrixType res(vdim, d);
-          res.setZero();
-          for (size_t local = 0; local < fe.getCount(); local++)
+          const auto gref = feS.getBasis(alpha).getGradient()(rc); // length d
+
+          for (size_t j = 0; j < d; ++j)
+            s_ref(j) = gref(j);
+
+          s_phys = JinvT * s_ref; // ∇_x φ_alpha
+
+          for (size_t comp = 0; comp < vdim; ++comp)
           {
-            const auto& basis = fe.getBasis(local);
-            for (size_t j = 0; j < d; j++)
+            const size_t local = alpha * vdim + comp;
+
+            // J(u) row 'comp' gets contribution u_comp(alpha) * (∇φ_alpha)^T
+            const auto uval = gf[fes.getGlobalIndex({d, i}, local)];
+            if (comp < vdim)
             {
-              for (size_t k = 0; k < d; k++)
-                jacobian(j, k) = basis.template getDerivative<1>(j, k)(rc);
+              for (size_t j = 0; j < d; ++j)
+                res(comp, j) += uval * s_phys(j);
             }
-            res += gf[fes.getGlobalIndex({d, i}, local)] * jacobian;
           }
-          out = res * p.getJacobianInverse();
         }
+
+        out = std::move(res);
       }
 
-      Jacobian* copy() const noexcept override
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
-        return new Jacobian(*this);
+        const size_t k = H1Element<K, ScalarType>(polytope.getGeometry()).getOrder();
+        return (k == 0) ? 0 : (k - 1);
       }
+
+      Jacobian* copy() const noexcept override { return new Jacobian(*this); }
   };
 
   /**
@@ -209,47 +234,99 @@ namespace Rodin::Variational
    * @ingroup JacobianSpecializations
    * @brief Jacobian of an H1 ShapeFunction object.
    */
-  template <size_t K, class ShapeFunctionDerived, class Range, class Mesh, ShapeFunctionSpaceType Space>
-  class Jacobian<ShapeFunction<ShapeFunctionDerived, H1<K, Range, Mesh>, Space>> final
-    : public ShapeFunctionBase<Jacobian<ShapeFunction<ShapeFunctionDerived, H1<K, Range, Mesh>, Space>>>
+  template <size_t K, class NestedDerived, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
+  class Jacobian<ShapeFunction<NestedDerived, H1<K, Math::Vector<Scalar>, Mesh>, Space>> final
+    : public ShapeFunctionBase<
+        Jacobian<ShapeFunction<NestedDerived, H1<K, Math::Vector<Scalar>, Mesh>, Space>>,
+        H1<K, Math::Vector<Scalar>, Mesh>,
+        Space>
   {
     public:
-      using FESType = H1<K, Range, Mesh>;
+      using FESType = H1<K, Math::Vector<Scalar>, Mesh>;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
-      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+      using OperandType = ShapeFunction<NestedDerived, FESType, SpaceType>;
+
+      using Parent      =
+        ShapeFunctionBase<
+          Jacobian<ShapeFunction<NestedDerived, FESType, SpaceType>>,
+          FESType,
+          SpaceType>;
+
+      using ScalarType        = typename FormLanguage::Traits<FESType>::ScalarType;
+
+      using RangeType         = Math::Matrix<ScalarType>;
 
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
-      using OperandType = ShapeFunction<ShapeFunctionDerived, FESType, SpaceType>;
+      using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
-      using Parent = ShapeFunctionBase<Jacobian<OperandType>, FESType, SpaceType>;
+      struct Cache
+      {
+        struct Key
+        {
+          Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
+          size_t dim = 0;
+          Index cell = 0;
+
+          const QF::QuadratureFormulaBase* qf = nullptr;
+          size_t qp = 0;
+
+          bool valid = false;
+
+          explicit operator bool() const noexcept { return valid; }
+
+          bool operator==(const Key& o) const noexcept
+          {
+            if (!valid || !o.valid)
+              return false;
+            return geom == o.geom
+                && dim  == o.dim
+                && cell == o.cell
+                && qf   == o.qf
+                && qp   == o.qp;
+          }
+
+          void invalidate() noexcept
+          {
+            valid = false;
+            geom = Geometry::Polytope::Type::Point;
+            dim = 0;
+            cell = 0;
+            qf = nullptr;
+            qp = 0;
+          }
+        };
+
+        // minimal cache: physical gradients for scalar basis indices alpha
+        std::vector<SpatialVectorType> grad_phys; // size = nscalar, each size = dim
+        Key key;
+      };
 
       Jacobian(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
-          m_u(u)
+          m_u(u),
+          m_ip(nullptr)
       {}
 
       Jacobian(const Jacobian& other)
         : Parent(other),
-          m_u(other.m_u)
+          m_u(other.m_u),
+          m_ip(nullptr),
+          m_cache(other.m_cache)
       {}
 
       Jacobian(Jacobian&& other)
         : Parent(std::move(other)),
-          m_u(other.m_u)
+          m_u(std::move(other.m_u)),
+          m_ip(std::exchange(other.m_ip, nullptr)),
+          m_cache(std::move(other.m_cache))
       {}
 
       constexpr
       const OperandType& getOperand() const
       {
         return m_u.get();
-      }
-
-      constexpr
-      const FESType& getFiniteElementSpace() const
-      {
-        return getOperand().getFiniteElementSpace();
       }
 
       constexpr
@@ -264,40 +341,108 @@ namespace Rodin::Variational
         return getOperand().getDOFs(element);
       }
 
-      const Geometry::Point& getPoint() const
+      constexpr
+      const auto& getFiniteElementSpace() const
       {
-        return m_p.value().get();
-      }
-
-      Jacobian& setPoint(const Geometry::Point& p)
-      {
-        m_p = p;
-        const auto& polytope = p.getPolytope();
-        const auto& rc = p.getReferenceCoordinates();
-        const size_t d = polytope.getDimension();
-        const Index i = polytope.getIndex();
-        const auto& fes = this->getFiniteElementSpace();
-        const auto& fe = fes.getFiniteElement(d, i);
-        const size_t count = fe.getCount();
-        const size_t vdim = fes.getVectorDimension();
-        m_jacobian.resize(count);
-        for (size_t local = 0; local < count; local++)
-        {
-          m_jacobian[local].resize(vdim, d);
-          for (size_t i = 0; i < vdim; i++)
-          {
-            const auto& basis = fe.getBasis(local);
-            for (size_t j = 0; j < d; j++)
-              m_jacobian[local](i, j) = basis.template getDerivative<1>(i, j)(rc);
-          }
-        }
-        return *this;
+        return getOperand().getFiniteElementSpace();
       }
 
       constexpr
-      auto getBasis(size_t local) const
+      const IntegrationPoint& getIntegrationPoint() const
       {
-        return m_jacobian[local] * getPoint().getJacobianInverse();
+        assert(m_ip);
+        return *m_ip;
+      }
+
+      Jacobian& setIntegrationPoint(const IntegrationPoint& ip)
+      {
+        m_ip = &ip;
+
+        const auto& p  = ip.getPoint();
+        const auto& qf = ip.getQuadratureFormula();
+        const size_t qp = ip.getIndex();
+
+        const auto& poly = p.getPolytope();
+        const auto  geom = poly.getGeometry();
+        const size_t d   = poly.getDimension();
+        const Index  cell = poly.getIndex();
+
+        typename Cache::Key key;
+        key.geom  = geom;
+        key.dim   = d;
+        key.cell  = cell;
+        key.qf    = &qf;
+        key.qp    = qp;
+        key.valid = true;
+
+        if (m_cache.key == key)
+          return *this;
+
+        m_cache.key = key;
+
+        // scalar element for geometry-only tabulation
+        const H1Element<K, ScalarType> feS(geom);
+        const size_t nscalar = feS.getCount();
+
+        if (m_cache.grad_phys.size() != nscalar)
+          m_cache.grad_phys.resize(nscalar);
+
+        for (auto& g : m_cache.grad_phys)
+          if (g.size() != d) g.resize(d);
+
+        const auto& tab   = feS.getTabulation(qf);
+        const auto  JinvT = p.getJacobianInverse().transpose();
+
+        static thread_local SpatialVectorType s_ref;
+        s_ref.resize(d);
+
+        for (size_t alpha = 0; alpha < nscalar; ++alpha)
+        {
+          const auto gref = tab.getGradient(qp, alpha); // span size d
+          for (size_t j = 0; j < d; ++j)
+            s_ref(j) = gref[j];
+
+          m_cache.grad_phys[alpha] = JinvT * s_ref;
+        }
+
+        return *this;
+      }
+
+      const RangeType& getBasis(size_t local) const
+      {
+        assert(m_cache.key);
+
+        const auto& fes  = this->getFiniteElementSpace();
+        const size_t vdim = fes.getVectorDimension();
+
+        const auto& p = this->getIntegrationPoint().getPoint();
+        const size_t d = p.getPolytope().getDimension();
+
+        const size_t alpha = local / vdim;
+        const size_t comp  = local % vdim;
+
+        assert(alpha < m_cache.grad_phys.size());
+
+        static thread_local RangeType s_J;
+        if (static_cast<size_t>(s_J.rows()) != vdim || static_cast<size_t>(s_J.cols()) != d)
+          s_J.resize(vdim, d);
+
+        s_J.setZero();
+
+        // Only row comp is non-zero
+        for (size_t j = 0; j < d; ++j)
+          s_J(comp, j) = m_cache.grad_phys[alpha](j);
+
+        return s_J;
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        const auto k = getOperand().getOrder(geom);
+        if (!k.has_value())
+          return std::nullopt;
+        return (*k == 0) ? 0 : (*k - 1);
       }
 
       Jacobian* copy() const noexcept override
@@ -307,10 +452,9 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const OperandType> m_u;
+      const IntegrationPoint* m_ip;
 
-      std::vector<SpatialMatrixType> m_jacobian;
-
-      Optional<std::reference_wrapper<const Geometry::Point>> m_p;
+      Cache m_cache;
   };
 
   template <size_t K, class ShapeFunctionDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>

@@ -342,7 +342,8 @@ namespace Rodin::External::MMG
         assert(vertex.getGeometry() == Geometry::Polytope::Type::Point);
         const Index i = vertex.getIndex() + 1;
         const auto& coords = vertex.getCoordinates();
-        std::copy(coords.begin(), coords.end(), res->point[i].c);
+        for (size_t d = 0; d < src.getSpaceDimension(); d++)
+          res->point[i].c[d] = coords[d];
         res->point[i].ref = vertex.getAttribute();
       }
 
@@ -388,7 +389,8 @@ namespace Rodin::External::MMG
         assert(vertex.getGeometry() == Geometry::Polytope::Type::Point);
         const Index i = vertex.getIndex() + 1;
         const auto& coords = vertex.getCoordinates();
-        std::copy(coords.begin(), coords.end(), res->point[i].c);
+        for (size_t d = 0; d < src.getSpaceDimension(); d++)
+          res->point[i].c[d] = coords[d];
         res->point[i].ref = vertex.getAttribute();
         res->point[i].tag = MG_NUL;
       }
@@ -463,7 +465,8 @@ namespace Rodin::External::MMG
         assert(vertex.getGeometry() == Geometry::Polytope::Type::Point);
         const Index i = vertex.getIndex() + 1;
         const auto& coords = vertex.getCoordinates();
-        std::copy(coords.begin(), coords.end(), res->point[i].c);
+        for (size_t d = 0; d < src.getSpaceDimension(); d++)
+          res->point[i].c[d] = coords[d];
         res->point[i].ref = vertex.getAttribute();
         res->point[i].tag = MG_NUL;
       }

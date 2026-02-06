@@ -115,6 +115,18 @@ namespace Rodin::Variational
         return *m_operand;
       }
 
+      Optional<size_t> getOrder(const Geometry::Polytope& g) const
+      {
+        const auto o = getOperand().getOrder(g);
+
+        // Only constant -> constant preserves polynomial nature.
+        if (o && *o == 0)
+          return size_t{0};
+
+        // Anything else: not a polynomial integrand in general.
+        return {};
+      }
+
       /**
        * @brief Polymorphic copy.
        * @returns Pointer to a copy of this object

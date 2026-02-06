@@ -8,6 +8,7 @@
 #define RODIN_VARIATIONAL_H1_DUBINER_H
 
 #include <cstddef>
+#include <type_traits>
 
 #include "Rodin/Math/Common.h"
 #include "Rodin/Math/Matrix.h"
@@ -74,7 +75,7 @@ namespace Rodin::Variational
         Real psi_q;
         JacobiPolynomial<Q>::getValue(psi_q, _unused, 2.0 * P + 1.0, 0.0, b);
 
-        basis = psi_p * psi_q * Math::pow(0.5 * (1.0 - b), P);
+        basis = psi_p * psi_q * Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P>{});
       }
 
       /**
@@ -110,7 +111,7 @@ namespace Rodin::Variational
         Real Pb, dPb;
         JacobiPolynomial<Q>::getValue(Pb, dPb, 2.0 * P + 1.0, 0.0, b);
 
-        const Real scale_b = Math::pow(0.5 * (1.0 - b), P);
+        const Real scale_b = Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P>{});
 
         // ∂ψ/∂a
         dpsi_da = dPa * Pb * scale_b;
@@ -118,7 +119,7 @@ namespace Rodin::Variational
         // ∂ψ/∂b
         Real dscale_db = 0.0;
         if constexpr (P > 0)
-          dscale_db = P * Math::pow(0.5 * (1.0 - b), P - 1) * (-0.5);
+          dscale_db = P * Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P - 1>{}) * (-0.5);
 
         dpsi_db = Pa * (dPb * scale_b + Pb * dscale_db);
       }
@@ -285,8 +286,8 @@ namespace Rodin::Variational
         Real P_c;
         JacobiPolynomial<R>::getValue(P_c, _unused, 2.0 * P + 2.0 * Q + 2.0, 0.0, c);
 
-        Real scale_b = Math::pow(0.5 * (1.0 - b), P);
-        Real scale_c = Math::pow(0.5 * (1.0 - c), P + Q);
+        Real scale_b = Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P>{});
+        Real scale_c = Math::pow(0.5 * (1.0 - c), std::integral_constant<size_t, P + Q>{});
 
         basis = P_a * P_b * P_c * scale_b * scale_c;
       }
@@ -306,8 +307,8 @@ namespace Rodin::Variational
         Real P_c, dP_c;
         JacobiPolynomial<R>::getValue(P_c, dP_c, 2.0 * P + 2.0 * Q + 2.0, 0.0, c);
 
-        const Real scale_b = Math::pow(0.5 * (1.0 - b), P);
-        const Real scale_c = Math::pow(0.5 * (1.0 - c), P + Q);
+        const Real scale_b = Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P>{});
+        const Real scale_c = Math::pow(0.5 * (1.0 - c), std::integral_constant<size_t, P + Q>{});
 
         // ∂ψ / ∂a
         dpsi_da = dP_a * P_b * P_c * scale_b * scale_c;
@@ -315,14 +316,14 @@ namespace Rodin::Variational
         // ∂ψ / ∂b
         Real dscale_b_db = 0.0;
         if constexpr (P > 0)
-          dscale_b_db = P * Math::pow(0.5 * (1.0 - b), P - 1) * (-0.5);
+          dscale_b_db = P * Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P - 1>{}) * (-0.5);
 
         dpsi_db = P_a * (dP_b * scale_b + P_b * dscale_b_db) * P_c * scale_c;
 
         // ∂ψ / ∂c
         Real dscale_c_dc = 0.0;
         if constexpr (P + Q > 0)
-          dscale_c_dc = (P + Q) * Math::pow(0.5 * (1.0 - c), P + Q - 1) * (-0.5);
+          dscale_c_dc = (P + Q) * Math::pow(0.5 * (1.0 - c), std::integral_constant<size_t, P + Q - 1>{}) * (-0.5);
 
         dpsi_dc = P_a * P_b * (dP_c * scale_c + P_c * dscale_c_dc) * scale_b;
       }

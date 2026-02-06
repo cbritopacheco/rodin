@@ -19,6 +19,7 @@
  */
 
 #include "Rodin/Geometry/Mesh.h"
+#include "Rodin/Geometry/Point.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/Grad.h"
 #include "Rodin/Variational/ShapeFunction.h"
@@ -35,66 +36,27 @@ namespace Rodin::Variational
    */
 
   /**
-   * @brief Base class for Grad classes.
-   */
-  template <class Operand, class Derived>
-  class GradBase;
-
-  /**
    * @ingroup GradSpecializations
    * @brief Gradient of a GridFunction on H1<K> space
    */
   template <size_t K, class Scalar, class Mesh, class Data>
   class Grad<GridFunction<H1<K, Scalar, Mesh>, Data>> final
-    : public GradBase<GridFunction<H1<K, Scalar, Mesh>, Data>, Grad<GridFunction<H1<K, Scalar, Mesh>, Data>>>
+    : public GradBase<
+        GridFunction<H1<K, Scalar, Mesh>, Data>,
+        Grad<GridFunction<H1<K, Scalar, Mesh>, Data>>>
   {
     public:
       using FESType = H1<K, Scalar, Mesh>;
-
       using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
-
       using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
-
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
-
       using OperandType = GridFunction<FESType, Data>;
-
       using Parent = GradBase<OperandType, Grad<OperandType>>;
 
-      /**
-       * @brief Constructs the gradient of an H1<K> function @f$ u @f$.
-       * @param[in] u H1<K> GridFunction
-       *
-       * @note The gradient is a polynomial of degree K-1 on each element for H1<K> functions.
-       */
-      Grad(const OperandType& u)
-        : Parent(u)
-      {}
+      Grad(const OperandType& u) : Parent(u) {}
+      Grad(const Grad& other) : Parent(other) {}
+      Grad(Grad&& other) : Parent(std::move(other)) {}
 
-      /**
-       * @brief Copy constructor.
-       * @param[in] other Grad object to copy
-       */
-      Grad(const Grad& other)
-        : Parent(other)
-      {}
-
-      /**
-       * @brief Move constructor.
-       * @param[in] other Grad object to move from
-       */
-      Grad(Grad&& other)
-        : Parent(std::move(other))
-      {}
-
-      /**
-       * @brief Interpolates the gradient at a given point.
-       * @param[out] out Output spatial vector for gradient
-       * @param[in] p Point at which to evaluate gradient
-       *
-       * Computes @f$ \nabla u(p) @f$ using H1<K> basis function gradients.
-       * Handles evaluation on faces by projecting to adjacent cells.
-       */
       void interpolate(SpatialVectorType& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
@@ -102,12 +64,14 @@ namespace Rodin::Variational
         const auto& i = polytope.getIndex();
         const auto& mesh = polytope.getMesh();
         const size_t meshDim = mesh.getDimension();
-        if (d == meshDim - 1) // Evaluating on a face
+
+        if (d == meshDim - 1) // face
         {
           const auto& conn = mesh.getConnectivity();
           const auto& inc = conn.getIncidence({ meshDim - 1, meshDim }, i);
           const auto& pc = p.getPhysicalCoordinates();
           assert(inc.size() == 1 || inc.size() == 2);
+
           if (inc.size() == 1)
           {
             const auto& tracePolytope = mesh.getPolytope(meshDim, *inc.begin());
@@ -117,58 +81,63 @@ namespace Rodin::Variational
             this->interpolate(out, np);
             return;
           }
-          else
-          {
-            assert(inc.size() == 2);
-            const auto& traceDomain = this->getTraceDomain();
-            assert(traceDomain.size() > 0);
-            if (traceDomain.size() == 0)
-            {
-              Alert::MemberFunctionException(*this, __func__)
-                << "No trace domain provided: "
-                << Alert::Notation::Predicate(true, "getTraceDomain().size() == 0")
-                << ". Grad at an interface with no trace domain is undefined."
-                << Alert::Raise;
-            }
-            else
-            {
-              for (auto& idx : inc)
-              {
-                const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
-                if (traceDomain.count(tracePolytope->getAttribute()))
-                {
-                  Math::SpatialPoint rc;
-                  tracePolytope->getTransformation().inverse(rc, pc);
-                  const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
-                  this->interpolate(out, np);
-                  return;
-                }
-              }
-              UndeterminedTraceDomainException(
-                  *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()) << Alert::Raise;
-            }
-            return;
-          }
-        }
-        else // Evaluating on a cell
-        {
-          static thread_local SpatialVectorType s_res;
 
-          s_res.resize(d);
-          s_res.setZero();
+          assert(inc.size() == 2);
+          const auto& traceDomain = this->getTraceDomain();
+          if (traceDomain.size() == 0)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "No trace domain provided: "
+              << Alert::Notation::Predicate(true, "getTraceDomain().size() == 0")
+              << ". Grad at an interface with no trace domain is undefined."
+              << Alert::Raise;
+          }
+
+          for (auto& idx : inc)
+          {
+            const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
+            if (traceDomain.count(tracePolytope->getAttribute()))
+            {
+              Math::SpatialPoint rc;
+              tracePolytope->getTransformation().inverse(rc, pc);
+              const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
+              this->interpolate(out, np);
+              return;
+            }
+          }
+
+          UndeterminedTraceDomainException(
+              *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end())
+            << Alert::Raise;
+          return;
+        }
+        else // cell
+        {
+          out.resize(d);
+          out.setZero();
 
           assert(d == mesh.getDimension());
-          const auto& gf = this->getOperand();
+
+          const auto& gf  = this->getOperand();
           const auto& fes = gf.getFiniteElementSpace();
-          const auto& fe = fes.getFiniteElement(d, i);
-          const auto& rc = p.getReferenceCoordinates();
-          for (size_t local = 0; local < fe.getCount(); local++)
+          const auto& fe  = fes.getFiniteElement(d, i);
+          const auto& rc  = p.getReferenceCoordinates();
+
+          for (size_t local = 0; local < fe.getCount(); ++local)
           {
             const auto& basis = fe.getBasis(local);
-            s_res += gf[fes.getGlobalIndex({d, i}, local)] * basis.getGradient()(rc);
+            out += gf[fes.getGlobalIndex({d, i}, local)] * basis.getGradient()(rc);
           }
-          out = p.getJacobianInverse().transpose() * s_res;
+
+          out = p.getJacobianInverse().transpose() * out;
         }
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        const size_t k = H1Element<K, ScalarType>(geom.getGeometry()).getOrder();
+        return (k == 0) ? 0 : (k - 1);
       }
 
       Grad* copy() const noexcept override
@@ -186,39 +155,75 @@ namespace Rodin::Variational
     : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, H1<K, Scalar, Mesh>, SpaceType>>>
   {
     public:
-      /// Finite element space type
       using FESType = H1<K, Scalar, Mesh>;
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
-      /// Type of scalar values in the finite element space
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
-
-      using RangeType = Math::Vector<ScalarType>;
-
-      /// Operand type
+      using RangeType  = Math::Vector<ScalarType>;
       using OperandType = ShapeFunction<NestedDerived, FESType, Space>;
-
-      /// Parent class
       using Parent = ShapeFunctionBase<Grad<OperandType>, FESType, Space>;
+
+      using SpatialVectorType = Math::SpatialVector<ScalarType>;
+
+      struct Cache
+      {
+        struct Key
+        {
+          Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
+          size_t dim = 0;
+          Index cell = 0;
+
+          const QF::QuadratureFormulaBase* qf = nullptr;
+          size_t qp = 0;
+
+          bool valid = false;
+
+          explicit operator bool() const noexcept { return valid; }
+
+          bool operator==(const Key& o) const noexcept
+          {
+            if (!valid || !o.valid)
+              return false;
+            return geom == o.geom
+                && dim  == o.dim
+                && cell == o.cell
+                && qf   == o.qf
+                && qp   == o.qp;
+          }
+
+          void operator=(std::initializer_list<int>) noexcept
+          {
+            valid = false;
+            geom = Geometry::Polytope::Type::Point;
+            dim = 0;
+            cell = 0;
+            qf = nullptr;
+            qp = 0;
+          }
+        };
+
+        std::vector<SpatialVectorType> grad_phys; // size = ndof, each dim = d
+        Key key;
+      };
 
       Grad(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
           m_u(u),
-          m_p(nullptr)
+          m_ip(nullptr)
       {}
 
       Grad(const Grad& other)
         : Parent(other),
           m_u(other.m_u),
-          m_p(other.m_p),
-          m_gradient(other.m_gradient)
+          m_ip(nullptr),
+          m_cache(other.m_cache)
       {}
 
       Grad(Grad&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
-          m_p(std::exchange(other.m_p, nullptr)),
-          m_gradient(std::move(other.m_gradient))
+          m_ip(std::exchange(other.m_ip, nullptr)),
+          m_cache(std::move(other.m_cache))
       {}
 
       constexpr
@@ -239,37 +244,89 @@ namespace Rodin::Variational
         return getOperand().getDOFs(element);
       }
 
-      const Geometry::Point& getPoint() const
+      constexpr
+      const IntegrationPoint& getIntegrationPoint() const
       {
-        assert(m_p);
-        return *m_p;
+        assert(m_ip);
+        return *m_ip;
       }
 
-      Grad& setPoint(const Geometry::Point& p)
+      Grad& setIntegrationPoint(const IntegrationPoint& ip)
       {
-        if (m_p == &p)
+        m_ip = &ip;
+
+        const auto& p  = ip.getPoint();
+        const auto& qf = ip.getQuadratureFormula();
+        const size_t qp = ip.getIndex();
+
+        const auto& poly = p.getPolytope();
+        const size_t d   = poly.getDimension();
+        const Index  cell = poly.getIndex();
+        const auto geom = poly.getGeometry();
+
+        typename Cache::Key key;
+        key.geom  = geom;
+        key.dim   = d;
+        key.cell  = cell;
+        key.qf    = &qf;
+        key.qp    = qp;
+        key.valid = true;
+
+        const bool recompute = !(m_cache.key == key);
+        if (!recompute)
           return *this;
-        m_p = &p;
-        const auto& polytope = p.getPolytope();
-        const auto& rc = p.getReferenceCoordinates();
-        const size_t d = polytope.getDimension();
-        const Index i = polytope.getIndex();
+
+        m_cache.key = key;
+
         const auto& fes = this->getFiniteElementSpace();
-        const auto& fe = fes.getFiniteElement(d, i);
-        const size_t count = fe.getCount();
-        m_gradient.resize(count);
-        for (size_t local = 0; local < count; local++)
+        const auto& fe  = fes.getFiniteElement(d, cell);
+        const size_t ndof = fe.getCount();
+
+        // Ensure storage sized once.
+        if (m_cache.grad_phys.size() != ndof)
+          m_cache.grad_phys.resize(ndof);
+
+        for (auto& g : m_cache.grad_phys)
         {
-          const auto& basis = fe.getBasis(local);
-          m_gradient[local] = basis.getGradient()(rc);
+          if (g.size() != d)
+            g.resize(d);
         }
+
+        // Reference gradients from tabulation, mapped by J^{-T}.
+        const auto& tab = fe.getTabulation(qf);
+        const auto JinvT = p.getJacobianInverse().transpose();
+
+        static thread_local SpatialVectorType s_ref;
+        s_ref.resize(d);
+
+        for (size_t a = 0; a < ndof; ++a)
+        {
+          const auto gref = tab.getGradient(qp, a); // span<const Scalar>, size d
+
+          for (size_t ii = 0; ii < d; ++ii)
+            s_ref(ii) = gref[ii];
+
+          m_cache.grad_phys[a] = JinvT * s_ref;
+        }
+
         return *this;
       }
 
       constexpr
       auto getBasis(size_t local) const
       {
-        return getPoint().getJacobianInverse().transpose() * m_gradient[local];
+        assert(m_cache.key);
+        assert(local < m_cache.grad_phys.size());
+        return m_cache.grad_phys[local].getData().head(m_cache.key.dim);
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        const auto k = getOperand().getOrder(geom);
+        if (!k.has_value())
+          return std::nullopt;
+        return (*k == 0) ? 0 : (*k - 1);
       }
 
       Grad* copy() const noexcept override
@@ -280,8 +337,8 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const OperandType> m_u;
 
-      const Geometry::Point* m_p;
-      std::vector<Math::SpatialVector<ScalarType>> m_gradient;
+      const IntegrationPoint* m_ip;
+      Cache m_cache;
   };
 }
 

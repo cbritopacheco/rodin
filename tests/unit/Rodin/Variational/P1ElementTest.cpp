@@ -818,7 +818,7 @@ namespace Rodin::Tests::Unit
                       Polytope::Type::Wedge})
     {
       RealP1Element elem(geom);
-      
+
       // Linear function to interpolate
       auto f = [geom](const Math::SpatialPoint& x) -> Real {
         switch (geom)
@@ -835,12 +835,12 @@ namespace Rodin::Tests::Unit
             return 0.0;
         }
       };
-      
+
       // Evaluate linear forms at nodes
       std::vector<Real> dof_values(elem.getCount());
       for (size_t i = 0; i < elem.getCount(); i++)
         dof_values[i] = elem.getLinearForm(i)(f);
-      
+
       // Verify values are correct at nodes
       for (size_t i = 0; i < elem.getCount(); i++)
       {
@@ -856,7 +856,7 @@ namespace Rodin::Tests::Unit
     for (size_t vdim : {1, 2, 3})
     {
       VectorP1Element<Real> elem(Polytope::Type::Segment, vdim);
-      
+
       // Vector function to interpolate
       auto f = [vdim](const Math::SpatialPoint& x) {
         Math::Vector<Real> v(vdim);
@@ -864,16 +864,15 @@ namespace Rodin::Tests::Unit
           v(i) = (i + 1) * (1.0 + x.x());
         return v;
       };
-      
+
       // Evaluate all linear forms
       std::vector<Real> dof_values(elem.getCount());
       for (size_t i = 0; i < elem.getCount(); i++)
         dof_values[i] = elem.getLinearForm(i)(f);
-      
+
       // Verify correctness
       for (size_t local = 0; local < elem.getCount(); local++)
       {
-        size_t node_idx = local / vdim;
         size_t comp_idx = local % vdim;
         const auto& node = elem.getNode(local);
         Math::Vector<Real> f_val = f(node);
@@ -893,10 +892,10 @@ namespace Rodin::Tests::Unit
                       Polytope::Type::Tetrahedron})
     {
       RealP1Element elem(geom);
-      
+
       Math::Vector<Real> p;
       size_t dim = Geometry::Polytope::Traits(geom).getDimension();
-      
+
       switch (geom)
       {
         case Polytope::Type::Segment:
@@ -911,15 +910,15 @@ namespace Rodin::Tests::Unit
         default:
           continue;
       }
-      
+
       // For each basis function
       for (size_t i = 0; i < elem.getCount(); i++)
       {
         auto grad_func = elem.getBasis(i).getGradient();
         const auto& grad_val = grad_func(p);
-        
+
         EXPECT_EQ(grad_val.size(), dim);
-        
+
         // Verify gradient is consistent with individual derivatives
         for (size_t j = 0; j < dim; j++)
         {
@@ -934,16 +933,17 @@ namespace Rodin::Tests::Unit
   {
     // Test that sum of gradients equals zero (partition of unity property)
     RealP1Element elem(Polytope::Type::Triangle);
-    
+
     Math::Vector<Real> p{{0.3, 0.4}};
-    
-    Math::SpatialVector<Real> grad_sum = Math::SpatialVector<Real>::Zero(2);
+
+    Math::SpatialVector<Real> grad_sum(2);
+    grad_sum.setZero();
     for (size_t i = 0; i < elem.getCount(); i++)
     {
       auto grad_func = elem.getBasis(i).getGradient();
       grad_sum += grad_func(p);
     }
-    
+
     // Sum of gradients should be zero
     EXPECT_NEAR(grad_sum(0), 0.0, RODIN_FUZZY_CONSTANT);
     EXPECT_NEAR(grad_sum(1), 0.0, RODIN_FUZZY_CONSTANT);
@@ -959,20 +959,19 @@ namespace Rodin::Tests::Unit
     for (size_t vdim : {1, 2, 3})
     {
       VectorP1Element<Real> elem(Polytope::Type::Segment, vdim);
-      
+
       Math::Vector<Real> p{{0.5}};
-      
+
       for (size_t local = 0; local < elem.getCount(); local++)
       {
         auto jac_func = elem.getBasis(local).getJacobian();
         const auto& jac = jac_func(p);
-        
+
         // Jacobian should be vdim × 1 for segment
         EXPECT_EQ(jac.rows(), vdim);
         EXPECT_EQ(jac.cols(), 1);
-        
+
         // Verify Jacobian entries match derivatives
-        size_t comp = local % vdim;
         for (size_t i = 0; i < vdim; i++)
         {
           auto deriv = elem.getBasis(local).getDerivative<1>(i, 0);
@@ -986,18 +985,18 @@ namespace Rodin::Tests::Unit
   {
     // Test Jacobian for 2D vector field on triangle
     VectorP1Element<Real> elem(Polytope::Type::Triangle, 2);
-    
+
     Math::Vector<Real> p{{0.3, 0.4}};
-    
+
     for (size_t local = 0; local < elem.getCount(); local++)
     {
       auto jac_func = elem.getBasis(local).getJacobian();
       const auto& jac = jac_func(p);
-      
+
       // Jacobian should be 2×2
       EXPECT_EQ(jac.rows(), 2);
       EXPECT_EQ(jac.cols(), 2);
-      
+
       // Most entries should be zero (sparse structure)
       size_t comp = local % 2;
       for (size_t i = 0; i < 2; i++)
@@ -1024,19 +1023,19 @@ namespace Rodin::Tests::Unit
   {
     // Test Jacobian for 3D vector field on tetrahedron
     VectorP1Element<Real> elem(Polytope::Type::Tetrahedron, 3);
-    
+
     Math::Vector<Real> p{{0.25, 0.25, 0.25}};
-    
+
     // Test first few DOFs
     for (size_t local = 0; local < std::min(elem.getCount(), size_t(9)); local++)
     {
       auto jac_func = elem.getBasis(local).getJacobian();
       const auto& jac = jac_func(p);
-      
+
       // Jacobian should be 3×3
       EXPECT_EQ(jac.rows(), 3);
       EXPECT_EQ(jac.cols(), 3);
-      
+
       // Verify structure
       EXPECT_TRUE(std::isfinite(jac.norm()));
     }
@@ -1053,7 +1052,7 @@ namespace Rodin::Tests::Unit
                       Polytope::Type::Tetrahedron})
     {
       RealP1Element elem(geom);
-      
+
       // Linear function
       auto f = [geom](const Math::SpatialPoint& x) -> Real {
         switch (geom)
@@ -1068,12 +1067,12 @@ namespace Rodin::Tests::Unit
             return 0.0;
         }
       };
-      
+
       // Get DOF values
       std::vector<Real> dof_values(elem.getCount());
       for (size_t i = 0; i < elem.getCount(); i++)
         dof_values[i] = elem.getLinearForm(i)(f);
-      
+
       // Test interpolation at random points
       RandomFloat gen(0.0, 1.0);
       for (size_t test = 0; test < 10; test++)
@@ -1102,12 +1101,12 @@ namespace Rodin::Tests::Unit
           default:
             continue;
         }
-        
+
         // Interpolate
         Real interpolated = 0.0;
         for (size_t i = 0; i < elem.getCount(); i++)
           interpolated += dof_values[i] * elem.getBasis(i)(p);
-        
+
         EXPECT_NEAR(interpolated, f(p), RODIN_FUZZY_CONSTANT);
       }
     }
@@ -1119,7 +1118,7 @@ namespace Rodin::Tests::Unit
     for (size_t vdim : {2, 3})
     {
       VectorP1Element<Real> elem(Polytope::Type::Triangle, vdim);
-      
+
       // Linear vector field
       auto f = [vdim](const Math::SpatialPoint& x) {
         Math::Vector<Real> v(vdim);
@@ -1127,19 +1126,19 @@ namespace Rodin::Tests::Unit
           v(i) = (i + 1) * (1.0 + 2.0 * x.x() + 3.0 * x.y());
         return v;
       };
-      
+
       // Get DOF values
       std::vector<Real> dof_values(elem.getCount());
       for (size_t i = 0; i < elem.getCount(); i++)
         dof_values[i] = elem.getLinearForm(i)(f);
-      
+
       // Test interpolation at a point
       Math::Vector<Real> p{{0.3, 0.4}};
       Math::Vector<Real> interpolated = Math::Vector<Real>::Zero(vdim);
-      
+
       for (size_t i = 0; i < elem.getCount(); i++)
         interpolated += dof_values[i] * elem.getBasis(i)(p);
-      
+
       Math::Vector<Real> exact = f(p);
       for (size_t i = 0; i < vdim; i++)
         EXPECT_NEAR(interpolated(i), exact(i), RODIN_FUZZY_CONSTANT);
@@ -1150,15 +1149,15 @@ namespace Rodin::Tests::Unit
   {
     // Test that gradient of interpolant matches expected gradient
     RealP1Element elem(Polytope::Type::Segment);
-    
+
     // Linear function f(x) = 2 + 3x, so f'(x) = 3
     auto f = [](const Math::SpatialPoint& x) { return 2.0 + 3.0 * x.x(); };
-    
+
     // Get DOF values
     std::vector<Real> dof_values(elem.getCount());
     for (size_t i = 0; i < elem.getCount(); i++)
       dof_values[i] = elem.getLinearForm(i)(f);
-    
+
     // Compute interpolated gradient
     Math::Vector<Real> p{{0.5}};
     Real interpolated_grad = 0.0;
@@ -1167,7 +1166,7 @@ namespace Rodin::Tests::Unit
       auto deriv = elem.getBasis(i).getDerivative<1>(0);
       interpolated_grad += dof_values[i] * deriv(p);
     }
-    
+
     EXPECT_NEAR(interpolated_grad, 3.0, RODIN_FUZZY_CONSTANT);
   }
 }

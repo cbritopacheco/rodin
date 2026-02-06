@@ -19,6 +19,7 @@
 #include "Rodin/MPI/Context/MPI.h"
 
 #include "Connectivity.h"
+#include "Rodin/Math/SpatialVector.h"
 
 namespace Rodin::Geometry
 {
@@ -169,7 +170,7 @@ namespace Rodin::Geometry
         this->save(path, fmt);
       }
 
-      Eigen::Map<const Math::SpatialPoint> getVertexCoordinates(Index globalIdx) const override;
+      Math::SpatialPoint getVertexCoordinates(Index globalIdx) const override;
 
       SubMeshBase& asSubMesh() override
       {
@@ -194,8 +195,6 @@ namespace Rodin::Geometry
     private:
       Context::MPI m_context;
       Shard m_shard;
-
-      mutable FlatMap<Index, Math::SpatialPoint> m_vertices;
       mutable PolytopeTransformationIndex m_transformations;
   };
 }

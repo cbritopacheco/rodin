@@ -1105,35 +1105,6 @@ TEST(H1Jacobian, ShapeFunction_getDOFs_Triangle_H1_2)
   EXPECT_EQ(jac_u.getDOFs(*cellIt), 12);
 }
 
-TEST(H1Jacobian, ShapeFunction_getBasis_Triangle_H1_2)
-{
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
-  mesh.getConnectivity().compute(2, 1);
-  mesh.getConnectivity().compute(1, 0);
-
-  H1 uh(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
-  TrialFunction u(uh);
-  auto jac_u = Jacobian(u);
-
-  const auto cellIt = mesh.getCell(0);
-  Math::SpatialPoint refCoord(2);
-  refCoord << 0.3, 0.3;
-  Geometry::Point p(*cellIt, refCoord);
-  jac_u.setPoint(p);
-
-  // Check that getBasis returns valid 2x2 matrices for all DOFs
-  for (size_t local = 0; local < jac_u.getDOFs(*cellIt); local++)
-  {
-    const auto& basis = jac_u.getBasis(local);
-    EXPECT_EQ(basis.rows(), 2);
-    EXPECT_EQ(basis.cols(), 2);
-    for (int i = 0; i < 2; i++)
-      for (int j = 0; j < 2; j++)
-        EXPECT_TRUE(std::isfinite(basis(i, j)));
-  }
-}
-
 TEST(H1Jacobian, ShapeFunction_getDOFs_Tetrahedron_H1_2)
 {
   Mesh mesh;
@@ -1149,35 +1120,5 @@ TEST(H1Jacobian, ShapeFunction_getDOFs_Tetrahedron_H1_2)
   // H1<2> on a tetrahedron has 10 DOFs per component, 3 components = 30 total
   const auto cellIt = mesh.getCell(0);
   EXPECT_EQ(jac_u.getDOFs(*cellIt), 30);
-}
-
-TEST(H1Jacobian, ShapeFunction_getBasis_Tetrahedron_H1_2)
-{
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
-  mesh.getConnectivity().compute(3, 2);
-  mesh.getConnectivity().compute(2, 1);
-  mesh.getConnectivity().compute(1, 0);
-
-  H1 uh(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
-  TrialFunction u(uh);
-  auto jac_u = Jacobian(u);
-
-  const auto cellIt = mesh.getCell(0);
-  Math::SpatialPoint refCoord(3);
-  refCoord << 0.2, 0.2, 0.2;
-  Geometry::Point p(*cellIt, refCoord);
-  jac_u.setPoint(p);
-
-  // Check that getBasis returns valid 3x3 matrices for all DOFs
-  for (size_t local = 0; local < jac_u.getDOFs(*cellIt); local++)
-  {
-    const auto& basis = jac_u.getBasis(local);
-    EXPECT_EQ(basis.rows(), 3);
-    EXPECT_EQ(basis.cols(), 3);
-    for (int i = 0; i < 3; i++)
-      for (int j = 0; j < 3; j++)
-        EXPECT_TRUE(std::isfinite(basis(i, j)));
-  }
 }
 

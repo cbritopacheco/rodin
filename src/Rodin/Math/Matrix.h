@@ -17,12 +17,17 @@
 
 #include <Eigen/Core>
 #include <Eigen/Dense>
+#include <Eigen/src/Core/ArrayBase.h>
 
 #include "Rodin/Configure.h"
 
 #include "Rodin/FormLanguage/Traits.h"
 
+#include "Rodin/Math/Traits.h"
 #include "Rodin/Types.h"
+
+#include "ForwardDecls.h"
+#include "Common.h"
 
 namespace Rodin::Math
 {
@@ -55,37 +60,6 @@ namespace Rodin::Math
   using ComplexMatrix = Matrix<Complex>;
 
   /**
-   * @brief Spatial matrix with bounded maximum dimensions.
-   *
-   * A dynamic-size matrix with maximum dimensions bounded by
-   * RODIN_MAXIMAL_SPACE_DIMENSION. Used for geometric transformations,
-   * Jacobians, and other spatial operators to optimize memory allocation.
-   *
-   * Typical uses:
-   * - Jacobian matrices: @f$ J = \frac{\partial \mathbf{f}}{\partial \mathbf{x}} @f$
-   * - Metric tensors
-   * - Local coordinate transformations
-   *
-   * @tparam ScalarType The element type
-   */
-  template <class ScalarType>
-  using SpatialMatrix = Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, 0,
-        RODIN_MAXIMAL_SPACE_DIMENSION, RODIN_MAXIMAL_SPACE_DIMENSION>;
-
-  /**
-   * @brief Point matrix with bounded row dimension.
-   *
-   * A dynamic-size matrix where the number of rows is bounded by
-   * RODIN_MAXIMAL_SPACE_DIMENSION. Commonly used to store collections of
-   * spatial points as columns.
-   *
-   * Example: storing vertex coordinates of a mesh element where each column
-   * represents one vertex's coordinates.
-   */
-  using PointMatrix =
-    Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic, 0, RODIN_MAXIMAL_SPACE_DIMENSION, Eigen::Dynamic>;
-
-  /**
    * @brief Fixed-size matrix type.
    *
    * A compile-time fixed-size matrix. Both dimensions are known at compile time,
@@ -108,12 +82,6 @@ namespace Rodin::FormLanguage
 {
   template <class Number>
   struct Traits<Math::Matrix<Number>>
-  {
-    using ScalarType = Number;
-  };
-
-  template <class Number>
-  struct Traits<Math::SpatialMatrix<Number>>
   {
     using ScalarType = Number;
   };

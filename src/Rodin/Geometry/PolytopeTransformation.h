@@ -131,15 +131,6 @@ namespace Rodin::Geometry
       virtual size_t getOrder() const = 0;
 
       /**
-       * @brief Gets the polynomial order of the Jacobian.
-       * @returns Polynomial order of the Jacobian matrix entries
-       *
-       * For linear transformations, returns 0 (constant Jacobian). For higher-order
-       * transformations, returns the order of the derivative.
-       */
-      virtual size_t getJacobianOrder() const = 0;
-
-      /**
        * @brief Computes the physical coordinates from reference coordinates.
        * @param[out] pc Physical coordinates @f$ p @f$ (resized automatically)
        * @param[in] rc Reference coordinates @f$ r \in K @f$

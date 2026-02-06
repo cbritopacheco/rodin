@@ -89,13 +89,11 @@ namespace Rodin::Geometry
 
   const Math::SpatialVector<Real>& PointBase::getPhysicalCoordinates() const
   {
-    static thread_local Math::SpatialPoint s_pc;
     if (!m_pc)
     {
-      this->getPolytope().getTransformation().transform(s_pc, this->getReferenceCoordinates());
-      return m_pc.emplace(std::move(s_pc));
+      auto& pc = m_pc.emplace();
+      this->getPolytope().getTransformation().transform(pc, this->getReferenceCoordinates());
     }
-    assert(m_pc);
     return *m_pc;
   }
 
@@ -126,40 +124,40 @@ namespace Rodin::Geometry
           case 1:
           {
             const auto& jac = this->getJacobian();
-            const auto& det = m_jacobianDeterminant.emplace(jac.coeff(0, 0));
+            const auto& det = m_jacobianDeterminant.emplace(jac(0, 0));
             auto& inv = m_jacobianInverse.emplace(1, 1);
-            inv.coeffRef(0, 0) = 1 / det;
+            inv(0, 0) = 1 / det;
             return inv;
           }
           case 2:
           {
             const auto& jac = this->getJacobian();
-            const Real a = jac.coeff(0, 0);
-            const Real b = jac.coeff(0, 1);
-            const Real c = jac.coeff(1, 0);
-            const Real d = jac.coeff(1, 1);
+            const Real a = jac(0, 0);
+            const Real b = jac(0, 1);
+            const Real c = jac(1, 0);
+            const Real d = jac(1, 1);
             const auto& det = m_jacobianDeterminant.emplace(a * d - b * c);
             assert(det != 0);
 
             auto& inv = m_jacobianInverse.emplace(2, 2);
-            inv.coeffRef(0, 0) = d / det;
-            inv.coeffRef(0, 1) = -b / det;
-            inv.coeffRef(1, 0) = -c / det;
-            inv.coeffRef(1, 1) = a / det;
+            inv(0, 0) = d / det;
+            inv(0, 1) = -b / det;
+            inv(1, 0) = -c / det;
+            inv(1, 1) = a / det;
             return inv;
           }
           case 3:
           {
             const auto& jac = this->getJacobian();
-            const Real a = jac.coeff(0, 0);
-            const Real b = jac.coeff(0, 1);
-            const Real c = jac.coeff(0, 2);
-            const Real d = jac.coeff(1, 0);
-            const Real e = jac.coeff(1, 1);
-            const Real f = jac.coeff(1, 2);
-            const Real g = jac.coeff(2, 0);
-            const Real h = jac.coeff(2, 1);
-            const Real i = jac.coeff(2, 2);
+            const Real a = jac(0, 0);
+            const Real b = jac(0, 1);
+            const Real c = jac(0, 2);
+            const Real d = jac(1, 0);
+            const Real e = jac(1, 1);
+            const Real f = jac(1, 2);
+            const Real g = jac(2, 0);
+            const Real h = jac(2, 1);
+            const Real i = jac(2, 2);
             const Real A = e * i - f * h;
             const Real B = -(d * i - f * g);
             const Real C = d * h - e * g;
@@ -173,15 +171,15 @@ namespace Rodin::Geometry
             assert(det != 0);
 
             auto& inv = m_jacobianInverse.emplace(3, 3);
-            inv.coeffRef(0, 0) = A / det;
-            inv.coeffRef(0, 1) = D / det;
-            inv.coeffRef(0, 2) = G / det;
-            inv.coeffRef(1, 0) = B / det;
-            inv.coeffRef(1, 1) = E / det;
-            inv.coeffRef(1, 2) = H / det;
-            inv.coeffRef(2, 0) = C / det;
-            inv.coeffRef(2, 1) = F / det;
-            inv.coeffRef(2, 2) = I / det;
+            inv(0, 0) = A / det;
+            inv(0, 1) = D / det;
+            inv(0, 2) = G / det;
+            inv(1, 0) = B / det;
+            inv(1, 1) = E / det;
+            inv(1, 2) = H / det;
+            inv(2, 0) = C / det;
+            inv(2, 1) = F / det;
+            inv(2, 2) = I / det;
             return inv;
           }
           default:
@@ -192,8 +190,7 @@ namespace Rodin::Geometry
       }
       else
       {
-        return m_jacobianInverse.emplace(
-            this->getJacobian().completeOrthogonalDecomposition().pseudoInverse());
+        return m_jacobianInverse.emplace(this->getJacobian().pseudoInverse());
       }
     }
     assert(m_jacobianInverse);
@@ -213,27 +210,27 @@ namespace Rodin::Geometry
         {
           case 1:
           {
-            return m_jacobianDeterminant.emplace(jac.coeff(0, 0));
+            return m_jacobianDeterminant.emplace(jac(0, 0));
           }
           case 2:
           {
-            const Real a = jac.coeff(0, 0);
-            const Real b = jac.coeff(0, 1);
-            const Real c = jac.coeff(1, 0);
-            const Real d = jac.coeff(1, 1);
+            const Real a = jac(0, 0);
+            const Real b = jac(0, 1);
+            const Real c = jac(1, 0);
+            const Real d = jac(1, 1);
             return m_jacobianDeterminant.emplace(a * d - b * c);
           }
           case 3:
           {
-            const Real a = jac.coeff(0, 0);
-            const Real b = jac.coeff(0, 1);
-            const Real c = jac.coeff(0, 2);
-            const Real d = jac.coeff(1, 0);
-            const Real e = jac.coeff(1, 1);
-            const Real f = jac.coeff(1, 2);
-            const Real g = jac.coeff(2, 0);
-            const Real h = jac.coeff(2, 1);
-            const Real i = jac.coeff(2, 2);
+            const Real a = jac(0, 0);
+            const Real b = jac(0, 1);
+            const Real c = jac(0, 2);
+            const Real d = jac(1, 0);
+            const Real e = jac(1, 1);
+            const Real f = jac(1, 2);
+            const Real g = jac(2, 0);
+            const Real h = jac(2, 1);
+            const Real i = jac(2, 2);
             const Real A = e * i - f * h;
             const Real B = -(d * i - f * g);
             const Real C = d * h - e * g;
@@ -247,7 +244,8 @@ namespace Rodin::Geometry
       }
       else
       {
-        return m_jacobianDeterminant.emplace(Math::sqrt((jac.transpose() * jac).determinant()));
+        return m_jacobianDeterminant.emplace(
+            Math::sqrt((jac.transpose() * jac).determinant()));
       }
     }
     assert(m_jacobianDeterminant);
@@ -273,8 +271,8 @@ namespace Rodin::Geometry
     else if (m == 2 && n == 1)
     {
       // Curve in 2D: ||dX/ds||
-      const Real a = J.coeff(0, 0);
-      const Real b = J.coeff(1, 0);
+      const Real a = J(0, 0);
+      const Real b = J(1, 0);
       dist = Math::sqrt(a * a + b * b);
     }
     else

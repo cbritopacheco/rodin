@@ -25,15 +25,18 @@
 
 #include <cstddef>
 #include <array>
+#include <span>
 #include <vector>
 #include <utility>
 
 #include <boost/serialization/access.hpp>
 
+#include "Rodin/Math/PointMatrix.h"
 #include "Rodin/Types.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Geometry/Polytope.h"
+#include "Rodin/QF/ForwardDecls.h"
 
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/FiniteElement.h"
@@ -140,6 +143,53 @@ namespace Rodin::Variational
 
     public:
       static_assert(K > 0, "Polynomial degree K must be greater than 0.");
+
+      struct Tabulation
+      {
+        size_t nqp  = 0;
+        size_t ndof = 0;
+        size_t dim  = 0;
+
+        // qp-major storage
+        // phi[(qp*ndof) + a]
+        std::vector<Scalar> phi;
+
+        // derivative in reference coordinates
+        // dphi[((qp*ndof + a)*dim) + i]
+        std::vector<Scalar> dphi;
+
+        // ---------- fast path (tight loops) ----------
+        const Scalar& getBasis(size_t qp, size_t a) const noexcept
+        {
+          return phi[qp * ndof + a];
+        }
+
+        template <size_t Order>
+        const Scalar& getDerivative(size_t qp, size_t a, size_t i) const noexcept
+        {
+          if constexpr (Order == 0)
+          {
+            assert(i == 0);
+            return phi[qp * ndof + a];
+          }
+          else if constexpr (Order == 1)
+          {
+            assert(i < dim);
+            return dphi[(qp * ndof + a) * dim + i];
+          }
+          else
+          {
+            // Higher-order derivatives not implemented
+            static const Scalar zero = Scalar(0);
+            return zero;
+          }
+        }
+
+        std::span<const Scalar> getGradient(size_t qp, size_t a) const noexcept
+        {
+          return std::span<const Scalar>(&dphi[(qp * ndof + a) * dim], dim);
+        }
+      };
 
       friend class boost::serialization::access;
 
@@ -348,6 +398,8 @@ namespace Rodin::Variational
           const Geometry::Polytope::Type m_g;  ///< Geometry type
       };
 
+      const Tabulation& getTabulation(const QF::QuadratureFormulaBase& qf) const;
+
       /**
        * @brief Builds the high-order stable nodes for the element geometry.
        *
@@ -369,7 +421,7 @@ namespace Rodin::Variational
           {
             static thread_local const std::vector<Math::SpatialPoint> s_nodes = [] {
               std::vector<Math::SpatialPoint> n;
-              n.emplace_back(Math::SpatialPoint{{0}});
+              n.emplace_back(Math::SpatialPoint{ 0 });
               return n;
             }();
             return s_nodes;
@@ -633,7 +685,7 @@ namespace Rodin::Variational
        * @param version Serialization version
        */
       template<class Archive>
-      void serialize(Archive& ar, const unsigned int version)
+      void serialize(Archive& ar, const unsigned int)
       {
         ar & boost::serialization::base_object<Parent>(*this);
       }
@@ -803,7 +855,7 @@ namespace Rodin::Variational
           class JacobianFunction
           {
             public:
-              using ReturnType = Math::PointMatrix;
+              using ReturnType = Math::SpatialMatrix<ScalarType>;
 
               constexpr
               JacobianFunction(size_t vdim, size_t local, Geometry::Polytope::Type g)
@@ -950,11 +1002,33 @@ namespace Rodin::Variational
       constexpr
       size_t getOrder() const
       {
-        return K;
+        using G = Geometry::Polytope::Type;
+        switch (this->getGeometry())
+        {
+          case G::Point:
+            // No actual polynomial variation
+            return 0;
+
+          case G::Segment:
+          case G::Triangle:
+          case G::Tetrahedron:
+            return K;
+
+          case G::Quadrilateral:
+          case G::Wedge:
+            // Tensor-product type: max total degree is 2K
+            return 2 * K;
+
+          case G::Hexahedron:
+            // 3D tensor product: max total degree is 3K
+            return 3 * K;
+        }
+        assert(false);
+        return 0;
       }
 
       template<class Archive>
-      void serialize(Archive& ar, const unsigned int version)
+      void serialize(Archive& ar, const unsigned int)
       {
         ar & boost::serialization::base_object<Parent>(*this);
         ar & m_vdim;

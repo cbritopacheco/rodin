@@ -104,10 +104,10 @@ int main(int, char**)
   Alert::Info() << "Computing homogenized coefficient..." << Alert::Raise;
 
   GridFunction Ah00(vh);
-  Ah00 = [&](const Point& p) { return gamma(p) - gamma(p) * Jacobian(psi)(p).coeff(0, 0); };
+  Ah00 = [&](const Point& p) { return gamma(p) - gamma(p) * Jacobian(psi)(p)(0, 0); };
 
   GridFunction Ah11(vh);
-  Ah11 = [&](const Point& p) { return gamma(p) - gamma(p) * Jacobian(psi)(p).coeff(1, 1); };
+  Ah11 = [&](const Point& p) { return gamma(p) - gamma(p) * Jacobian(psi)(p)(1, 1); };
 
   Alert::Success() << "Homogenized coefficient: "
                    << Alert::NewLine

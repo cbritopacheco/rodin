@@ -294,8 +294,9 @@ namespace Rodin::IO
           os << MEDIT::Keyword::Vertices << '\n' << mesh.getVertexCount() << '\n';
           for (auto it = mesh.getVertex(); !it.end(); ++it)
           {
-            for (const auto& x : it->getCoordinates())
-              os << x << " ";
+            auto coords = it->getCoordinates();
+            for (size_t i = 0; i < mesh.getSpaceDimension(); i++)
+              os << coords(i) << " ";
             os << it->getAttribute() << '\n';
           }
 

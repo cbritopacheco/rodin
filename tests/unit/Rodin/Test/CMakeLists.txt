@@ -6,7 +6,10 @@ target_link_libraries(RodinTestRandomFloatTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin)
-gtest_discover_tests(RodinTestRandomFloatTest)
+gtest_discover_tests(RodinTestRandomFloatTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinTestRandomIntegerTest RandomIntegerTest.cpp)
 target_link_libraries(RodinTestRandomIntegerTest
@@ -14,7 +17,10 @@ target_link_libraries(RodinTestRandomIntegerTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin)
-gtest_discover_tests(RodinTestRandomIntegerTest)
+gtest_discover_tests(RodinTestRandomIntegerTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinTestExpectedResultTableTest ExpectedResultTableTest.cpp)
 target_link_libraries(RodinTestExpectedResultTableTest
@@ -22,4 +28,7 @@ target_link_libraries(RodinTestExpectedResultTableTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin)
-gtest_discover_tests(RodinTestExpectedResultTableTest)
+gtest_discover_tests(RodinTestExpectedResultTableTest
+  PROPERTIES
+    LABELS unit
+)

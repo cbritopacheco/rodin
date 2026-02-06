@@ -54,6 +54,8 @@
 #include <Eigen/Geometry>
 
 #include "Rodin/Geometry/Mesh.h"
+#include "Rodin/Geometry/Polytope.h"
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
 #include "ForwardDecls.h"
@@ -73,6 +75,8 @@ namespace Rodin::Variational
   {
     public:
       using ScalarType = Real;
+
+      using RangeType = Math::Vector<ScalarType>;
 
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
@@ -107,7 +111,8 @@ namespace Rodin::Variational
 
       decltype(auto) getValue(const Geometry::Point& p) const
       {
-        static thread_local SpatialVectorType s_res;
+        static thread_local RangeType s_res;
+
         const auto& polytope = p.getPolytope();
         const auto& vs = polytope.getVertices();
         const auto  d  = polytope.getDimension();
@@ -116,10 +121,13 @@ namespace Rodin::Variational
         assert(d == mesh.getDimension() - 1);
         const auto& jacobian = p.getJacobian();
 
-        s_res.resize(m_sdim);
+        SpatialVectorType res;
+
+        res.resize(m_sdim);
         if (jacobian.rows() == 2)
         {
-          s_res << jacobian(1,0), -jacobian(0,0);
+          res[0] = jacobian(1, 0);
+          res[1] = -jacobian(0, 0);
         }
         else if (jacobian.rows() == 3)
         {
@@ -127,26 +135,30 @@ namespace Rodin::Variational
           {
             const Index v1 = vs[0];
             const Index v2 = vs[1];
-            Eigen::Vector3<ScalarType> a =
+            Math::SpatialVector<ScalarType> a =
                 mesh.getVertexCoordinates(v1) - mesh.getVertexCoordinates(v2);
-            Eigen::Vector3<ScalarType> n;
-            n << jacobian(1, 0), -jacobian(0, 0), jacobian(2, 0);
+            Math::SpatialVector<ScalarType> n(3);
+            n[0] = jacobian(1, 0);
+            n[1] = -jacobian(0, 0);
+            n[2] = jacobian(2, 0);
             n = n.cross(a);
-            n.stableNormalize();
-            s_res = n.cross(a) + n * (n.dot(a));
+            n.normalize();
+            res = n.cross(a) + n * (n.dot(a));
           }
           else if (jacobian.cols() == 2)
           {
-            s_res <<
-              jacobian(1, 0) * jacobian(2, 1) - jacobian(2, 0) * jacobian(1, 1),
-              jacobian(2, 0) * jacobian(0, 1) - jacobian(0, 0) * jacobian(2, 1),
+            res[0] =
+              jacobian(1, 0) * jacobian(2, 1) - jacobian(2, 0) * jacobian(1, 1);
+            res[1] =
+              jacobian(2, 0) * jacobian(0, 1) - jacobian(0, 0) * jacobian(2, 1);
+            res[2] =
               jacobian(0, 0) * jacobian(1, 1) - jacobian(1, 0) * jacobian(0, 1);
           }
         }
         else
         {
           assert(false);
-          s_res.setConstant(Math::nan<ScalarType>());
+          res.setConstant(Math::nan<ScalarType>());
         }
 
         const auto& incidence = mesh.getConnectivity().getIncidence({d, d+1}, i);
@@ -167,23 +179,26 @@ namespace Rodin::Variational
           for (const Index cell : incidence)
           {
             auto pit = mesh.getPolytope(d + 1, cell);
-            if (traceDomain.contains(pit->getAttribute()))
-            {
-              Integer ori = -1;
-              for (auto vit = pit->getVertex(); vit; ++vit)
-              {
-                const auto v = vit->getCoordinates() - polytope.getVertex()->getCoordinates();
-                if (s_res.dot(v) < 0)
-                {
-                  ori *= -1;
-                  break;
-                }
-              }
-              s_res *= ori;
-              s_res.normalize();
-              matched = true;
-              break;
-            }
+            if (!traceDomain.contains(pit->getAttribute()))
+              continue;
+
+            // `pit` is the chosen adjacent cell that defines "outward"
+            const auto& cellPoly = *pit;
+
+            // face point (physical)
+            const auto xf = p.getCoordinates();
+
+            // cell interior point (physical)
+            const auto rc_cell = Geometry::Polytope::Traits(cellPoly.getGeometry()).getCentroid();
+            Geometry::Point pc(cellPoly, rc_cell);
+            const auto xc = pc.getCoordinates();
+
+            if (res.dot(xc - xf) > 0)
+              res *= ScalarType(-1);
+
+            res.normalize();
+            matched = true;
+            break;
           }
 
           if (!matched)
@@ -192,7 +207,14 @@ namespace Rodin::Variational
               *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()).raise();
           }
         }
+        s_res = res.getData().head(static_cast<Eigen::Index>(m_sdim));
         return s_res;
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      {
+        return 0;
       }
 
       FaceNormal* copy() const noexcept override

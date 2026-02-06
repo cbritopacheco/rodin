@@ -213,13 +213,17 @@ namespace Rodin::Assembly
 
               const auto& rows = input.getTestFES().getDOFs(d, i);
               const auto& cols = input.getTrialFES().getDOFs(d, i);
-              for (size_t r = 0; r < rows.size(); ++r)
-                for (size_t c = 0; c < cols.size(); ++c)
+              assert(rows.size() >= 0);
+              for (size_t r = 0; r < static_cast<size_t>(rows.size()); ++r)
+              {
+                assert(cols.size() >= 0);
+                for (size_t c = 0; c < static_cast<size_t>(cols.size()); ++c)
                 {
                   const ScalarType s = Math::conj(integrator->integrate(c, r));
                   if (s != ScalarType(0))
                     local.emplace_back(rows(r), cols(c), s);
                 }
+              }
             }
 
             chunks[static_cast<size_t>(tid)] = std::move(local);
@@ -608,7 +612,8 @@ namespace Rodin::Assembly
               integrator->setPolytope(*it);
 
               const auto& dofs = input.getFES().getDOFs(d, i);
-              for (size_t k = 0; k < dofs.size(); ++k)
+              assert(dofs.size() >= 0);
+              for (size_t k = 0; k < static_cast<size_t>(dofs.size()); ++k)
                 local(dofs(k)) += integrator->integrate(k);
             }
 

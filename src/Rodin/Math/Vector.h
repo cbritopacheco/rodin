@@ -42,26 +42,6 @@ namespace Rodin::Math
   using ComplexVector = Vector<Complex>;
 
   /**
-   * @brief Spatial vector with bounded maximum size.
-   *
-   * A dynamic-size vector with maximum size bounded by RODIN_MAXIMAL_SPACE_DIMENSION.
-   * Used for geometric quantities in 2D or 3D space to optimize memory allocation.
-   *
-   * @tparam ScalarType The element type
-   */
-  template <class ScalarType>
-  using SpatialVector =
-    Eigen::Matrix<ScalarType, Eigen::Dynamic, 1, 0, RODIN_MAXIMAL_SPACE_DIMENSION, 1>;
-
-  /**
-   * @brief Real-valued spatial vector for point coordinates.
-   *
-   * Convenience alias for SpatialVector<Real>, commonly used to represent
-   * points in 2D or 3D space.
-   */
-  using SpatialPoint = SpatialVector<Real>;
-
-  /**
    * @brief Fixed-size vector type.
    *
    * A compile-time fixed-size column vector. The size is known at compile time,
@@ -158,12 +138,6 @@ namespace Rodin::FormLanguage
 {
   template <class Number>
   struct Traits<Math::Vector<Number>>
-  {
-    using ScalarType = Number;
-  };
-
-  template <class Number>
-  struct Traits<Math::SpatialVector<Number>>
   {
     using ScalarType = Number;
   };

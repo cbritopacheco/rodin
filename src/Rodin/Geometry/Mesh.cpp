@@ -6,6 +6,7 @@
  */
 #include "Rodin/Alert/MemberFunctionException.h"
 
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Variational/P1.h"
 #include "Rodin/Variational/GridFunction.h"
 #include "Rodin/Variational/FiniteElementSpace.h"
@@ -271,23 +272,24 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Local>&
-  Mesh<Context::Local>::setVertexCoordinates(Index idx, const Math::SpatialVector<Real>& coords)
+  Mesh<Context::Local>::setVertexCoordinates(
+      Index idx, const Math::SpatialVector<Real>& coords)
   {
-    m_vertices.col(idx) = coords;
+    for (size_t i = 0; i < static_cast<size_t>(coords.size()); ++i)
+      m_vertices(i, idx) = coords[i];
     return *this;
   }
 
   Mesh<Context::Local>&
   Mesh<Context::Local>::setVertexCoordinates(Index idx, Real xi, size_t i)
   {
-    m_vertices.col(idx).coeffRef(i) = xi;
+    m_vertices(i, idx) = xi;
     return *this;
   }
 
-  Eigen::Map<const Math::SpatialVector<Real>> Mesh<Context::Local>::getVertexCoordinates(Index idx) const
+  Math::SpatialPoint Mesh<Context::Local>::getVertexCoordinates(Index idx) const
   {
-    const auto size = static_cast<Eigen::Index>(getSpaceDimension());
-    return { m_vertices.data() + getSpaceDimension() * idx, size };
+    return m_vertices.col(idx);
   }
 
   size_t Mesh<Context::Local>::getDimension() const
@@ -318,7 +320,8 @@ namespace Rodin::Geometry
       Variational::RealP1Element fe(Polytope::Type::Point);
       const size_t sdim = getSpaceDimension();
       Math::PointMatrix pm(sdim, 1);
-      pm.col(0) = getVertexCoordinates(idx);
+      for (size_t i = 0; i < sdim; ++i)
+        pm(i, 0) = m_vertices(i, idx);
       return new IsoparametricTransformation(std::move(pm), std::move(fe));
     }
     else
@@ -332,7 +335,8 @@ namespace Rodin::Geometry
       for (const auto& v : polytope | boost::adaptors::indexed())
       {
         assert(sdim == static_cast<size_t>(getVertexCoordinates(v.value()).size()));
-        pm.col(v.index()) = getVertexCoordinates(v.value());
+        for (size_t i = 0; i < sdim; ++i)
+          pm(i, v.index()) = m_vertices(i, v.value());
       }
       Variational::RealP1Element fe(g);
       return new IsoparametricTransformation(std::move(pm), std::move(fe));

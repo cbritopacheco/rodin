@@ -18,7 +18,8 @@ namespace Rodin::Geometry
     auto poly = mesh.getPolytope(d, polyIndex);
     const auto& vertices = poly->getVertices();
     size_t spaceDim = mesh.getSpaceDimension();
-    Math::SpatialVector<Real> centroid = Math::SpatialVector<Real>::Zero(spaceDim);
+    Math::SpatialVector<Real> centroid(spaceDim);
+    centroid.setZero();
     for (size_t i = 0; i < static_cast<size_t>(vertices.size()); ++i)
     {
       centroid += mesh.getVertexCoordinates(vertices[i]);

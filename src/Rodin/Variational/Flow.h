@@ -38,6 +38,7 @@
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/Geometry/Region.h"
 
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/RungeKutta/RK4.h"
 
@@ -71,6 +72,14 @@ namespace Rodin::FormLanguage
 
 namespace Rodin::Variational
 {
+  struct BoundaryHit
+  {
+    Real& tau; ///< Time remaining until end of step
+    Index& cell; ///< Cell index where boundary was hit
+    Math::SpatialPoint& rref; ///< Reference coordinates where boundary was hit
+    size_t face; ///< Local face index where boundary was hit
+  };
+
   /**
    * @brief Default boundary policy for flow maps.
    *
@@ -85,7 +94,7 @@ namespace Rodin::Variational
        * @returns false (no special boundary treatment)
        */
       constexpr
-      bool operator()(Real&, Index&, Math::SpatialPoint&) const
+      bool operator()(const BoundaryHit&) const
       {
         return false;
       }
@@ -104,7 +113,7 @@ namespace Rodin::Variational
        * @returns true (always allow tangent computation)
        */
       constexpr
-      bool operator()(Real&, Index&, Math::SpatialPoint&) const
+      bool operator()(const BoundaryHit&) const
       {
         return true;
       }
@@ -274,7 +283,7 @@ namespace Rodin::Variational
             const auto it0 = mesh.getPolytope(cd, c0);
             const auto& cell0 = *it0;
             const Geometry::Point q0(cell0, s_rc_tmp, p.getPhysicalCoordinates());
-            const auto a0 = sgn * (q0.getJacobianInverse() * m_velocity(q0));
+            const auto a0 = sgn * (q0.getJacobianInverse() * m_velocity(q0)).col(0);
 
             const auto& faces0 = conn.getIncidence(cd, cd - 1).at(c0);
             size_t j0 = faces0.size();
@@ -284,7 +293,7 @@ namespace Rodin::Variational
 
             const auto g0 = mesh.getGeometry(cd, c0);
             const auto& hs = Geometry::Polytope::Traits(g0).getHalfSpace();
-            const auto nref = hs.matrix.row(j0); // outward in ref(c0)
+            const Math::SpatialVector<Real> nref = hs.matrix.row(j0); // outward in ref(c0)
 
             if (nref.dot(a0) < 0)
             {
@@ -307,9 +316,9 @@ namespace Rodin::Variational
           return Trace{ true, 0, p };
         }
 
-        s_rc1.resizeLike(s_rc);
-        s_rc_tmp.resizeLike(s_rc);
-        s_pc.resizeLike(p.getPhysicalCoordinates());
+        s_rc1.resize(s_rc.size());
+        s_rc_tmp.resize(s_rc.size());
+        s_pc.resize(p.getPhysicalCoordinates().size());
 
         // Hysteresis: last crossed local face index in current cell
         std::optional<size_t> last_face;
@@ -321,11 +330,11 @@ namespace Rodin::Variational
           const auto& faces = conn.getIncidence(cd, cd - 1).at(s_cell);
           const auto& hs = Geometry::Polytope::Traits(g).getHalfSpace();
 
-          const auto vref = [&](const Math::SpatialPoint& r)
+          const auto vref = [&](const Math::SpatialPoint& r) -> decltype(auto)
           {
             static thread_local Math::SpatialVector<Real> s_v;
             const Geometry::Point qp(cell, r);
-            s_v = sgn * qp.getJacobianInverse() * m_velocity(qp);
+            s_v = (sgn * qp.getJacobianInverse() * m_velocity(qp)).col(0);
             return s_v;
           };
 
@@ -348,11 +357,11 @@ namespace Rodin::Variational
             const Real b = hs.vector[i];
 
             assert(n.size() == s_rc.size());
-            const Real g0 = b - n.dot(s_rc);
+            const Real g0 = b - s_rc.dot(n);
             if (g0 <= 0) // interior requires g0 > 0
               continue;
 
-            const Real ndv = n.dot(vref(s_rc));
+            const Real ndv = vref(s_rc).dot(n);
             if (ndv <= eps_denom) // not moving toward that face
               continue;
 
@@ -388,6 +397,7 @@ namespace Rodin::Variational
 
           // advance to the face
           m_step.step(s_rc1, thit, s_rc, vref);
+          Geometry::Polytope::Project(g).face(jhit, s_rc, s_rc1);
           s_rc = s_rc1;
           tau -= thit;
 
@@ -397,7 +407,7 @@ namespace Rodin::Variational
           // first hop across the hit face if not boundary
           if (mesh.isBoundary(face_hit))
           {
-            if (!m_bp(tau, s_cell, s_rc))
+            if (!m_bp(BoundaryHit{tau, s_cell, s_rc, jhit}))
               return Trace{ true, tau, Geometry::Point(*itc, s_rc) };
             last_face.reset();
           }
@@ -439,7 +449,7 @@ namespace Rodin::Variational
               {
                 static thread_local Math::SpatialVector<Real> s_v;
                 const Geometry::Point qp(cellz, r);
-                s_v = sgn * qp.getJacobianInverse() * m_velocity(qp);
+                s_v = (sgn * qp.getJacobianInverse() * m_velocity(qp)).col(0);
                 return s_v;
               };
 
@@ -453,8 +463,8 @@ namespace Rodin::Variational
                 assert(i < hsz.vector.size());
                 const Real b = hsz.vector[i];
                 assert(n.size() == s_rc.size());
-                const Real gi = b - n.dot(s_rc);
-                if (std::abs(gi) <= eps_g && n.dot(vz(s_rc)) > eps_denom)
+                const Real gi = b - s_rc.dot(n);
+                if (std::abs(gi) <= eps_g && vz(s_rc).dot(n) > eps_denom)
                 {
                   kface = i;
                   break;
@@ -469,7 +479,7 @@ namespace Rodin::Variational
               const Index f2 = facesz[kface];
               if (mesh.isBoundary(f2))
               {
-                if (!m_bp(tau, s_cell, s_rc))
+                if (!m_bp(BoundaryHit{tau, s_cell, s_rc, kface}))
                   return Trace{ true, tau, Geometry::Point(*itz, s_rc) };
                 last_face.reset();
                 break;

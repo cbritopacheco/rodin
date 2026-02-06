@@ -24,6 +24,7 @@
 
 #include "ForwardDecls.h"
 #include "Function.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
@@ -117,6 +118,12 @@ namespace Rodin::Variational
         return *this;
       }
 
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
+      {
+        return getOperand().getOrder(polytope);
+      }
+
       UnaryMinus* copy() const noexcept override
       {
         return new UnaryMinus(*this);
@@ -207,16 +214,15 @@ namespace Rodin::Variational
         return getOperand().getDOFs(element);
       }
 
-      constexpr
-      UnaryMinus& setPoint(const Geometry::Point& p)
+      UnaryMinus& setIntegrationPoint(const IntegrationPoint& ip)
       {
-        m_operand->setPoint(p);
+        m_operand->setIntegrationPoint(ip);
         return *this;
       }
 
-      const Geometry::Point& getPoint() const
+      const IntegrationPoint& getIntegrationPoint() const
       {
-        return m_operand->getPoint();
+        return m_operand->getIntegrationPoint();
       }
 
       /**
@@ -233,6 +239,12 @@ namespace Rodin::Variational
       const FES& getFiniteElementSpace() const
       {
         return getOperand().getFiniteElementSpace();
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
+      {
+        return getOperand().getOrder(polytope);
       }
 
       UnaryMinus* copy() const noexcept override

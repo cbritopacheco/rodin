@@ -4,4 +4,7 @@ target_link_libraries(RodinFormLanguageListTest
   GTest::gtest
   GTest::gtest_main
   Rodin::FormLanguage)
-gtest_discover_tests(RodinFormLanguageListTest)
+gtest_discover_tests(RodinFormLanguageListTest
+  PROPERTIES
+    LABELS unit
+)

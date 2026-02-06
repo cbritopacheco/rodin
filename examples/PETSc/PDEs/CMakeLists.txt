@@ -8,6 +8,16 @@ target_link_libraries(PETSc_Seq_Poisson
   Rodin::PETSc
   )
 
+add_executable(PETSc_Seq_Stokes Seq_Stokes.cpp)
+target_link_libraries(PETSc_Seq_Stokes
+  PUBLIC
+  Rodin::Math
+  Rodin::Solver
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::PETSc
+  )
+
 
 if (RODIN_USE_MPI)
   add_executable(PETSc_MPI_Poisson MPI_Poisson.cpp)

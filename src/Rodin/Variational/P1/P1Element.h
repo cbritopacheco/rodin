@@ -763,15 +763,16 @@ namespace Rodin::Variational
             return 1;
           case Geometry::Polytope::Type::Quadrilateral:
           case Geometry::Polytope::Type::Wedge:
-          case Geometry::Polytope::Type::Hexahedron:
             return 2;
+          case Geometry::Polytope::Type::Hexahedron:
+            return 3;
         }
         assert(false);
         return 0;
       }
 
       template<class Archive>
-      void serialize(Archive& ar, const unsigned int version)
+      void serialize(Archive& ar, const unsigned int)
       {
         ar & boost::serialization::base_object<Parent>(*this);
       }
@@ -915,7 +916,7 @@ namespace Rodin::Variational
           class JacobianFunction
           {
             public:
-              using ReturnType = Math::PointMatrix;
+              using ReturnType = Math::SpatialMatrix<ScalarType>;
 
               constexpr
               JacobianFunction(size_t vdim, size_t local, Geometry::Polytope::Type g)
@@ -1071,15 +1072,16 @@ namespace Rodin::Variational
             return 1;
           case Geometry::Polytope::Type::Quadrilateral:
           case Geometry::Polytope::Type::Wedge:
-          case Geometry::Polytope::Type::Hexahedron:
             return 2;
+          case Geometry::Polytope::Type::Hexahedron:
+            return 3;
         }
         assert(false);
         return 0;
       }
 
       template<class Archive>
-      void serialize(Archive& ar, const unsigned int version)
+      void serialize(Archive& ar, const unsigned int)
       {
         ar & boost::serialization::base_object<Parent>(*this);
         ar & m_vdim;

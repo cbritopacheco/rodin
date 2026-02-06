@@ -65,5 +65,7 @@
 #include "H1/Grad.h"
 #include "H1/Jacobian.h"
 #include "H1/Div.h"
+#include "H1/ShapeFunction.h"
+#include "H1/QuadratureRule.h"
 
 #endif

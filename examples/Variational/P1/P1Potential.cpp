@@ -17,7 +17,7 @@ using namespace Rodin::External;
 inline
 Real K(const Point& x, const Point& y)
 {
-  return 1. / (4 * M_PI * ((x.asVector() - y.asVector()).stableNorm()));
+  return 1. / (4 * M_PI * ((x.vector() - y.vector()).stableNorm()));
 }
 
 int main(int, char**)
@@ -53,7 +53,7 @@ int main(int, char**)
   RealFunction f =
     [](const Geometry::Point& p)
     {
-      return 4.0 / (M_PI * std::sqrt(std::abs(1 - p.asVector().squaredNorm())));
+      return 4.0 / (M_PI * std::sqrt(std::abs(1 - p.vector().squaredNorm())));
     };
 
   Potential sl(K, f);

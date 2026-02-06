@@ -16,6 +16,7 @@
 
 #include "Rodin/Types.h"
 #include "Rodin/Copyable.h"
+#include "Rodin/Identifiable.h"
 #include "Rodin/Math/ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
 
@@ -41,36 +42,33 @@ namespace Rodin::FormLanguage
    * - **Polymorphic Operations**: Support for copying and cloning operations
    * - **Type Safety**: Template-based object storage with type validation
    */
-  class Base : public Copyable
+  class Base : public Copyable, public Identifiable
   {
     using ObjectTable = std::vector<std::shared_ptr<const void>>;
 
     public:
       /**
-       * @brief Type alias for unique object identifiers.
-       *
-       * UUID (Universally Unique Identifier) is used to uniquely identify
-       * each FormLanguage::Base instance during its lifetime. The identifier
-       * is assigned during construction and remains constant.
-       */
-      using UUID = size_t;
-
-      /**
        * @brief Constructor.
        */
-      Base()
-        : m_uuid(s_id++)
-      {}
+      Base() = default;
 
       /**
        * @brief Copy constructor.
        */
-      Base(const Base& other) = default;
+      Base(const Base& other)
+        : Copyable(other),
+          Identifiable(other),
+          m_objs(other.m_objs)
+      {}
 
       /**
        * @brief Move constructor.
        */
-      Base(Base&&) = default;
+      Base(Base&& other)
+        : Copyable(std::move(other)),
+          Identifiable(std::move(other)),
+          m_objs(std::move(other.m_objs))
+      {}
 
       /**
        * @brief Destructor.
@@ -86,20 +84,6 @@ namespace Rodin::FormLanguage
        * @brief Move assignment is not allowed.
        */
       Base& operator=(Base&&) = delete;
-
-      /**
-       * @brief Gets the unique identifier associated with this instance.
-       * 
-       * @return UUID Unique identifier for this form language object
-       * 
-       * Each FormLanguage::Base instance receives a unique identifier during
-       * construction that persists for the lifetime of the object. This UUID
-       * can be used for object tracking, caching, and debugging purposes.
-       */
-      const UUID& getUUID() const
-      {
-        return m_uuid;
-      }
 
       /**
        * @brief Gets the human-readable name of this object.
@@ -193,9 +177,6 @@ namespace Rodin::FormLanguage
       virtual Base* copy() const noexcept override = 0;
 
     private:
-      thread_local static UUID s_id;
-
-      const size_t m_uuid;
       mutable std::vector<std::shared_ptr<const void>> m_objs;
   };
 }

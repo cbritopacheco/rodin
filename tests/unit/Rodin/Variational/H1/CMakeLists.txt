@@ -4,7 +4,10 @@ target_link_libraries(RodinVariationalH1LegendrePolynomialTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalH1LegendrePolynomialTest)
+gtest_discover_tests(RodinVariationalH1LegendrePolynomialTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalH1JacobiPolynomialTest JacobiPolynomialTest.cpp)
 target_link_libraries(RodinVariationalH1JacobiPolynomialTest
@@ -12,7 +15,10 @@ target_link_libraries(RodinVariationalH1JacobiPolynomialTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalH1JacobiPolynomialTest)
+gtest_discover_tests(RodinVariationalH1JacobiPolynomialTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalH1GLLTest GLLTest.cpp)
 target_link_libraries(RodinVariationalH1GLLTest
@@ -20,7 +26,10 @@ target_link_libraries(RodinVariationalH1GLLTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalH1GLLTest)
+gtest_discover_tests(RodinVariationalH1GLLTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalH1FeketeTest FeketeTest.cpp)
 target_link_libraries(RodinVariationalH1FeketeTest
@@ -28,7 +37,10 @@ target_link_libraries(RodinVariationalH1FeketeTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalH1FeketeTest)
+gtest_discover_tests(RodinVariationalH1FeketeTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalH1DubinerTest DubinerTest.cpp)
 target_link_libraries(RodinVariationalH1DubinerTest
@@ -36,7 +48,10 @@ target_link_libraries(RodinVariationalH1DubinerTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalH1DubinerTest)
+gtest_discover_tests(RodinVariationalH1DubinerTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalH1LagrangeBasisTest LagrangeBasisTest.cpp)
 target_link_libraries(RodinVariationalH1LagrangeBasisTest
@@ -44,7 +59,10 @@ target_link_libraries(RodinVariationalH1LagrangeBasisTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalH1LagrangeBasisTest)
+gtest_discover_tests(RodinVariationalH1LagrangeBasisTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalH1WarpBlendTest WarpBlendTest.cpp)
 target_link_libraries(RodinVariationalH1WarpBlendTest
@@ -52,7 +70,10 @@ target_link_libraries(RodinVariationalH1WarpBlendTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalH1WarpBlendTest)
+gtest_discover_tests(RodinVariationalH1WarpBlendTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalH1EdgeConformityTest EdgeConformityTest.cpp)
 target_link_libraries(RodinVariationalH1EdgeConformityTest
@@ -60,7 +81,10 @@ target_link_libraries(RodinVariationalH1EdgeConformityTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalH1EdgeConformityTest)
+gtest_discover_tests(RodinVariationalH1EdgeConformityTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalH1FaceConformityTest FaceConformityTest.cpp)
 target_link_libraries(RodinVariationalH1FaceConformityTest
@@ -68,7 +92,10 @@ target_link_libraries(RodinVariationalH1FaceConformityTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalH1FaceConformityTest)
+gtest_discover_tests(RodinVariationalH1FaceConformityTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalH1GradTest GradTest.cpp)
 target_link_libraries(RodinVariationalH1GradTest
@@ -76,7 +103,10 @@ target_link_libraries(RodinVariationalH1GradTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalH1GradTest)
+gtest_discover_tests(RodinVariationalH1GradTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalH1JacobianTest JacobianTest.cpp)
 target_link_libraries(RodinVariationalH1JacobianTest
@@ -84,7 +114,10 @@ target_link_libraries(RodinVariationalH1JacobianTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalH1JacobianTest)
+gtest_discover_tests(RodinVariationalH1JacobianTest
+  PROPERTIES
+    LABELS unit
+)
 
 add_executable(RodinVariationalH1DivTest DivTest.cpp)
 target_link_libraries(RodinVariationalH1DivTest
@@ -92,4 +125,7 @@ target_link_libraries(RodinVariationalH1DivTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Variational)
-gtest_discover_tests(RodinVariationalH1DivTest)
+gtest_discover_tests(RodinVariationalH1DivTest
+  PROPERTIES
+    LABELS unit
+)

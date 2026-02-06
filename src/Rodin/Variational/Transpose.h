@@ -12,6 +12,7 @@
 #ifndef RODIN_VARIATIONAL_TRANSPOSE_H
 #define RODIN_VARIATIONAL_TRANSPOSE_H
 
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
 #include "MatrixFunction.h"
 
@@ -87,6 +88,11 @@ namespace Rodin::Variational
       auto getValue(const Geometry::Point& p) const
       {
         return this->object(getOperand().getValue(p)).transpose();
+      }
+
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
+      {
+        return getOperand().getOrder(polytope);
       }
 
       Transpose* copy() const noexcept override
@@ -184,19 +190,14 @@ namespace Rodin::Variational
        * @brief Gets the current evaluation point.
        * @returns Reference to the point
        */
-      const Geometry::Point& getPoint() const
+      const IntegrationPoint& getIntegrationPoint() const
       {
-        return m_operand->getPoint();
+        return m_operand->getIntegrationPoint();
       }
 
-      /**
-       * @brief Sets the evaluation point.
-       * @param p Point to evaluate at
-       * @returns Reference to this object
-       */
-      Transpose& setPoint(const Geometry::Point& p)
+      Transpose& setIntegrationPoint(const IntegrationPoint& ip)
       {
-        m_operand->setPoint(p);
+        m_operand->setIntegrationPoint(ip);
         return *this;
       }
 
@@ -218,7 +219,12 @@ namespace Rodin::Variational
       constexpr
       const FES& getFiniteElementSpace() const
       {
-        return m_operand.getFiniteElementSpace();
+        return m_operand->getFiniteElementSpace();
+      }
+
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
+      {
+        return getOperand().getOrder(polytope);
       }
 
       Transpose* copy() const noexcept override

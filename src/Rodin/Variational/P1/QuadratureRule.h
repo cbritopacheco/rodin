@@ -25,6 +25,8 @@
 #ifndef RODIN_VARIATIONAL_P1_QUADRATURERULE_H
 #define RODIN_VARIATIONAL_P1_QUADRATURERULE_H
 
+#include "Rodin/Geometry/Region.h"
+#include "Rodin/Math/Common.h"
 #include "Rodin/Variational/ShapeFunction.h"
 #include "Rodin/QF/Centroid.h"
 
@@ -82,6 +84,8 @@ namespace Rodin::Variational
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLeaf()),
           m_integrand(integrand.copy()),
+          m_distortion(Math::nan<ScalarType>()),
+          m_weight(Math::nan<ScalarType>()),
           m_set(false)
       {}
 
@@ -89,6 +93,8 @@ namespace Rodin::Variational
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
+          m_distortion(Math::nan<ScalarType>()),
+          m_weight(Math::nan<ScalarType>()),
           m_set(false)
       {}
 
@@ -122,7 +128,10 @@ namespace Rodin::Variational
       {
         m_polytope = polytope;
         const auto& geometry = polytope.getGeometry();
-        const bool recompute = !m_set || m_geometry != geometry;
+        bool recompute = !m_set;
+        recompute = recompute || !m_geometry.has_value();
+        if (m_geometry.has_value())
+          recompute = recompute || *m_geometry != geometry;
         if (recompute)
         {
           m_set = true;
@@ -169,7 +178,7 @@ namespace Rodin::Variational
       std::vector<ScalarType> m_basis;
 
       bool m_set;
-      Geometry::Polytope::Type m_geometry;
+      std::optional<Geometry::Polytope::Type> m_geometry;
   };
 
   /**
@@ -1662,19 +1671,43 @@ namespace Rodin::Variational
               const ScalarType eta2 = r;
               const ScalarType eta3 = r;
 
-              rx0 << xi, xi * (1 - eta1 + eta1 * eta2);
-              rz1 << xi, xi * (1 - eta1 + eta1 * eta2);
-              rz2 << xi * (1 - eta1 * eta2), xi * eta1 * (1 - eta2);
-              rx3 << xi * (1 - eta1 * eta2), xi * eta1 * (1 - eta2);
-              rz4 << xi, xi * eta1 * (1 - eta2);
-              rx5 << xi, xi * eta1 * (1 - eta2);
+              // First block
+              rx0[0] = xi;
+              rx0[1] = xi * (1 - eta1 + eta1 * eta2);
 
-              rz0 << xi * (1 - eta1 * eta2 * eta3), xi * (1 - eta1);
-              rx1 << xi * (1 - eta1 * eta2 * eta3), xi * (1 - eta1);
-              rx2 << xi, xi * eta1 * (1 - eta2 + eta2 * eta3);
-              rz3 << xi, xi * eta1 * (1 - eta2 + eta2 * eta3);
-              rx4 << xi * (1 - eta1 * eta2 * eta3), xi * eta1 * (1 - eta2 * eta3);
-              rz5 << xi * (1 - eta1 * eta2 * eta3), xi * eta1 * (1 - eta2 * eta3);
+              rz1[0] = xi;
+              rz1[1] = xi * (1 - eta1 + eta1 * eta2);
+
+              rz2[0] = xi * (1 - eta1 * eta2);
+              rz2[1] = xi * eta1 * (1 - eta2);
+
+              rx3[0] = xi * (1 - eta1 * eta2);
+              rx3[1] = xi * eta1 * (1 - eta2);
+
+              rz4[0] = xi;
+              rz4[1] = xi * eta1 * (1 - eta2);
+
+              rx5[0] = xi;
+              rx5[1] = xi * eta1 * (1 - eta2);
+
+              // Second block
+              rz0[0] = xi * (1 - eta1 * eta2 * eta3);
+              rz0[1] = xi * (1 - eta1);
+
+              rx1[0] = xi * (1 - eta1 * eta2 * eta3);
+              rx1[1] = xi * (1 - eta1);
+
+              rx2[0] = xi;
+              rx2[1] = xi * eta1 * (1 - eta2 + eta2 * eta3);
+
+              rz3[0] = xi;
+              rz3[1] = xi * eta1 * (1 - eta2 + eta2 * eta3);
+
+              rx4[0] = xi * (1 - eta1 * eta2 * eta3);
+              rx4[1] = xi * eta1 * (1 - eta2 * eta3);
+
+              rz5[0] = xi * (1 - eta1 * eta2 * eta3);
+              rz5[1] = xi * eta1 * (1 - eta2 * eta3);
 
               const Geometry::Point x0(polytope, rx0);
               const Geometry::Point x1(polytope, rx1);

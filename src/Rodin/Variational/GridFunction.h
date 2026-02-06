@@ -208,7 +208,7 @@ namespace Rodin::Variational
        * @brief Returns a constant reference to the GridFunction data.
        */
       constexpr
-      auto& getData()
+      const auto& getData()
       {
         return m_ref.get().getData();
       }
@@ -223,6 +223,11 @@ namespace Rodin::Variational
       size_t getSize() const
       {
         return m_ref.get().getSize();
+      }
+
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const
+      {
+        return m_ref.get().getOrder(geom);
       }
 
       GridFunctionBaseReference* copy() const noexcept final override
@@ -813,6 +818,11 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this).operator/=(rhs);
       }
 
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const
+      {
+        return static_cast<const Derived&>(*this).getOrder(geom);
+      }
+
     private:
       std::reference_wrapper<const FESType> m_fes;
   };
@@ -1048,6 +1058,11 @@ namespace Rodin::Variational
       const DataType& getData() const
       {
         return m_data;
+      }
+
+      Optional<size_t> getOrder(const Geometry::Polytope&) const
+      {
+        return std::nullopt;
       }
 
     private:

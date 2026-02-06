@@ -18,8 +18,8 @@
 #include "Rodin/Configure.h"
 
 #include "Rodin/Array.h"
-#include "Rodin/Math/Matrix.h"
-#include "Rodin/Math/Vector.h"
+#include "Rodin/Math/SpatialMatrix.h"
+#include "Rodin/Math/SpatialVector.h"
 
 #include "ForwardDecls.h"
 
@@ -166,6 +166,8 @@ namespace Rodin::Geometry
            */
           bool isSimplex() const;
 
+          bool isTensorProduct() const;
+
           /**
            * @brief Gets the topological dimension.
            * @returns Dimension (0 for points, 1 for segments, 2 for triangles/quads, 3 for tets/wedges)
@@ -190,6 +192,8 @@ namespace Rodin::Geometry
            * @returns Half-space defining the reference element
            */
           const HalfSpace& getHalfSpace() const;
+
+          Math::SpatialPoint getCentroid() const;
 
         private:
           const Type m_g;
@@ -584,7 +588,7 @@ namespace Rodin::Geometry
        * @brief Gets the vertex coordinates as a vector.
        * @returns Eigen map to the coordinate vector
        */
-      Eigen::Map<const Math::SpatialPoint> getCoordinates() const;
+      Math::SpatialPoint getCoordinates() const;
 
       /**
        * @brief Gets the geometry type (always Point for vertices).

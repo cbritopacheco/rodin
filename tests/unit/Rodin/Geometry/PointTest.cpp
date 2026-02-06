@@ -9,6 +9,7 @@
 #include "Rodin/Context/Local.h"
 #include "Rodin/Geometry.h"
 #include "Rodin/Geometry/ForwardDecls.h"
+#include "Rodin/Math/Vector.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -37,7 +38,8 @@ TEST(Geometry_Point, BasicConstruction_2D_Triangle)
 
   // Create a point at the barycenter in reference coordinates
   Math::SpatialVector<Real> rc(2);
-  rc << 1.0 / 3.0, 1.0 / 3.0;
+  rc[0] = 1.0 / 3.0;
+  rc[1] = 1.0 / 3.0;
 
   Point p(tri, rc);
 
@@ -68,7 +70,9 @@ TEST(Geometry_Point, BasicConstruction_3D_Tetrahedron)
 
   // Create a point at the barycenter
   Math::SpatialVector<Real> rc(3);
-  rc << 0.25, 0.25, 0.25;
+  rc[0] = 0.25;
+  rc[1] = 0.25;
+  rc[2] = 0.25;
 
   Point p(tet, rc);
 
@@ -97,7 +101,8 @@ TEST(Geometry_Point, CopyConstruction)
   Polytope tri = *it;
 
   Math::SpatialVector<Real> rc(2);
-  rc << 0.5, 0.5;
+  rc[0] = 0.5;
+  rc[1] = 0.5;
 
   Point p1(tri, rc);
   Point p2(p1);  // Copy construction
@@ -125,7 +130,8 @@ TEST(Geometry_Point, MoveConstruction)
   Polytope tri = *it;
 
   Math::SpatialVector<Real> rc(2);
-  rc << 0.5, 0.5;
+  rc[0] = 0.5;
+  rc[1] = 0.5;
 
   Point p1(tri, rc);
   Real x_orig = p1.x();
@@ -159,7 +165,9 @@ TEST(Geometry_Point, CoordinateAccess_XYZ)
 
   // Point at (0.25, 0.25, 0.25) in physical coordinates
   Math::SpatialVector<Real> rc(3);
-  rc << 0.25, 0.25, 0.25;
+  rc[0] = 0.25;
+  rc[1] = 0.25;
+  rc[2] = 0.25;
 
   Point p(tet, rc);
 
@@ -191,12 +199,13 @@ TEST(Geometry_Point, CoordinateAccess_AsVector)
   Polytope tri = *it;
 
   Math::SpatialVector<Real> rc(2);
-  rc << 0.5, 0.5;
+  rc[0] = 0.5;
+  rc[1] = 0.5;
 
   Point p(tri, rc);
 
   // Test asVector accessor
-  const auto& vec = p.asVector();
+  const auto& vec = p.vector();
   EXPECT_EQ(vec.size(), 2);
   EXPECT_NEAR(vec(0), 1.0, 1e-10);
   EXPECT_NEAR(vec(1), 1.0, 1e-10);
@@ -219,7 +228,8 @@ TEST(Geometry_Point, GetPhysicalCoordinates)
   Polytope tri = *it;
 
   Math::SpatialVector<Real> rc(2);
-  rc << 1.0/3.0, 1.0/3.0;
+  rc[0] = 1.0 / 3.0;
+  rc[1] = 1.0 / 3.0;
 
   Point p(tri, rc);
 
@@ -247,7 +257,8 @@ TEST(Geometry_Point, GetReferenceCoordinates)
   Polytope tri = *it;
 
   Math::SpatialVector<Real> rc(2);
-  rc << 0.2, 0.3;
+  rc[0] = 0.2;
+  rc[1] = 0.3;
 
   Point p(tri, rc);
 
@@ -278,7 +289,8 @@ TEST(Geometry_Point, NormCalculations)
 
   // Point at physical (3, 4) should have norm 5
   Math::SpatialVector<Real> rc(2);
-  rc << 0.75, 0.0;
+  rc[0] = 0.75;
+  rc[1] = 0;
 
   Point p(tri, rc);
 
@@ -309,7 +321,9 @@ TEST(Geometry_Point, Norm_3D)
 
   // Point at (1, 1, 1) should have norm sqrt(3)
   Math::SpatialVector<Real> rc(3);
-  rc << 0.5, 0.0, 0.0;
+  rc[0] = 0.5;
+  rc[1] = 0.0;
+  rc[2] = 0.0;
 
   Point p(tet, rc);
 
@@ -336,7 +350,8 @@ TEST(Geometry_Point, GetJacobian_2D)
   Polytope tri = *it;
 
   Math::SpatialVector<Real> rc(2);
-  rc << 0.5, 0.5;
+  rc[0] = 0.5;
+  rc[1] = 0.5;
 
   Point p(tri, rc);
 
@@ -367,7 +382,8 @@ TEST(Geometry_Point, GetJacobianDeterminant_2D)
   Polytope tri = *it;
 
   Math::SpatialVector<Real> rc(2);
-  rc << 0.5, 0.5;
+  rc[0] = 0.5;
+  rc[1] = 0.5;
 
   Point p(tri, rc);
 
@@ -393,7 +409,8 @@ TEST(Geometry_Point, GetJacobianInverse_2D)
   Polytope tri = *it;
 
   Math::SpatialVector<Real> rc(2);
-  rc << 0.5, 0.5;
+  rc[0] = 0.5;
+  rc[1] = 0.5;
 
   Point p(tri, rc);
 
@@ -431,7 +448,8 @@ TEST(Geometry_Point, GetDistortion_2D)
   Polytope tri = *it;
 
   Math::SpatialVector<Real> rc(2);
-  rc << 0.5, 0.5;
+  rc[0] = 0.5;
+  rc[1] = 0.5;
 
   Point p(tri, rc);
 
@@ -459,8 +477,12 @@ TEST(Geometry_Point, LexicographicalComparison)
   Polytope tri = *it;
 
   Math::SpatialVector<Real> rc1(2), rc2(2);
-  rc1 << 0.25, 0.25;  // Physical (0.5, 0.5)
-  rc2 << 0.5, 0.25;   // Physical (1.0, 0.5)
+
+  rc1[0] = 0.25;
+  rc1[1] = 0.25;
+
+  rc2[0] = 0.5;
+  rc2[1] = 0.25;
 
   Point p1(tri, rc1);
   Point p2(tri, rc2);
@@ -488,7 +510,8 @@ TEST(Geometry_Point, SetPolytope)
   Polytope tri = *it;
 
   Math::SpatialVector<Real> rc(2);
-  rc << 0.5, 0.5;
+  rc[0] = 0.5;
+  rc[1] = 0.5;
 
   Point p(tri, rc);
   Real x_orig = p.x();
@@ -519,15 +542,17 @@ TEST(Geometry_Point, AdditionWithVector)
   Polytope tri = *it;
 
   Math::SpatialVector<Real> rc(2);
-  rc << 0.5, 0.5;
+  rc[0] = 0.5;
+  rc[1] = 0.5;
 
   Point p(tri, rc);
 
   Math::SpatialVector<Real> vec(2);
-  vec << 1.0, 2.0;
+  vec[0] = 1.0;
+  vec[1] = 2.0;
 
   // Test point + vector
-  auto result = p + vec;
+  Math::SpatialVector<Real> result = p + vec;
   EXPECT_NEAR(result(0), p.x() + 1.0, 1e-10);
   EXPECT_NEAR(result(1), p.y() + 2.0, 1e-10);
 }
@@ -549,12 +574,14 @@ TEST(Geometry_Point, SubtractionWithVector)
   Polytope tri = *it;
 
   Math::SpatialVector<Real> rc(2);
-  rc << 0.5, 0.5;
+  rc[0] = 0.5;
+  rc[1] = 0.5;
 
   Point p(tri, rc);
 
   Math::SpatialVector<Real> vec(2);
-  vec << 0.1, 0.2;
+  vec[0] = 0.1;
+  vec[1] = 0.2;
 
   // Test point - vector
   auto result = p - vec;
@@ -579,8 +606,11 @@ TEST(Geometry_Point, AdditionOfPoints)
   Polytope tri = *it;
 
   Math::SpatialVector<Real> rc1(2), rc2(2);
-  rc1 << 0.25, 0.25;
-  rc2 << 0.5, 0.5;
+  rc1[0] = 0.25;
+  rc1[1] = 0.25;
+
+  rc2[0] = 0.5;
+  rc2[1] = 0.5;
 
   Point p1(tri, rc1);
   Point p2(tri, rc2);
@@ -608,8 +638,11 @@ TEST(Geometry_Point, SubtractionOfPoints)
   Polytope tri = *it;
 
   Math::SpatialVector<Real> rc1(2), rc2(2);
-  rc1 << 0.75, 0.25;
-  rc2 << 0.25, 0.25;
+  rc1[0] = 0.75;
+  rc1[1] = 0.25;
+
+  rc2[0] = 0.25;
+  rc2[1] = 0.25;
 
   Point p1(tri, rc1);
   Point p2(tri, rc2);
@@ -637,7 +670,8 @@ TEST(Geometry_Point, ScalarMultiplication)
   Polytope tri = *it;
 
   Math::SpatialVector<Real> rc(2);
-  rc << 0.5, 0.5;
+  rc[0] = 0.5;
+  rc[1] = 0.5;
 
   Point p(tri, rc);
 
@@ -672,7 +706,8 @@ TEST(Geometry_Point, EdgeCase_PointAtVertex)
 
   // Point at first vertex (0, 0)
   Math::SpatialVector<Real> rc(2);
-  rc << 0.0, 0.0;
+  rc[0] = 0.0;
+  rc[1] = 0.0;
 
   Point p(tri, rc);
 
@@ -698,7 +733,8 @@ TEST(Geometry_Point, EdgeCase_PointOnEdge)
 
   // Point on edge between v0 and v1 (midpoint)
   Math::SpatialVector<Real> rc(2);
-  rc << 0.5, 0.0;
+  rc[0] = 0.5;
+  rc[1] = 0.0;
 
   Point p(tri, rc);
 
@@ -726,7 +762,9 @@ TEST(Geometry_Point, 3D_JacobianDeterminant)
   Polytope tet = *it;
 
   Math::SpatialVector<Real> rc(3);
-  rc << 0.25, 0.25, 0.25;
+  rc[0] = 0.25;
+  rc[1] = 0.25;
+  rc[2] = 0.25;
 
   Point p(tet, rc);
 
@@ -753,7 +791,9 @@ TEST(Geometry_Point, 3D_JacobianInverse)
   Polytope tet = *it;
 
   Math::SpatialVector<Real> rc(3);
-  rc << 0.25, 0.25, 0.25;
+  rc[0] = 0.25;
+  rc[1] = 0.25;
+  rc[2] = 0.25;
 
   Point p(tet, rc);
 
@@ -795,8 +835,11 @@ TEST(Geometry_Point, ConstructionWithPhysicalCoordinates)
   Polytope tri = *it;
 
   Math::SpatialVector<Real> rc(2), pc(2);
-  rc << 0.5, 0.5;
-  pc << 0.5, 0.5;
+  rc[0] = 0.5;
+  rc[1] = 0.5;
+
+  pc[0] = 0.5;
+  pc[1] = 0.5;
 
   // Construct with both reference and physical coordinates
   Point p(tri, rc, pc);
@@ -826,7 +869,8 @@ TEST(Geometry_Point, GetPolytope_ValidReference)
   Polytope tri = *it;
 
   Math::SpatialVector<Real> rc(2);
-  rc << 0.5, 0.5;
+  rc[0] = 0.5;
+  rc[1] = 0.5;
 
   Point p(tri, rc);
 

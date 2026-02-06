@@ -230,6 +230,46 @@ namespace Rodin::Assembly
 
       virtual AssemblyBase* copy() const noexcept = 0;
   };
+
+  template <class LinearSystem, class U1, class U2, class U3, class... Us>
+  class AssemblyBase<LinearSystem, Variational::Problem<LinearSystem, U1, U2, U3, Us...>>
+    : public FormLanguage::Base
+  {
+    public:
+      using OperatorType =
+        typename FormLanguage::Traits<LinearSystem>::OperatorType;
+
+      using VectorType =
+        typename FormLanguage::Traits<LinearSystem>::VectorType;
+
+      using ScalarType =
+        typename FormLanguage::Traits<LinearSystem>::ScalarType;
+
+      using ProblemBodyType =
+        Variational::ProblemBody<OperatorType, VectorType, ScalarType>;
+
+      using InputType =
+        ProblemAssemblyInput<ProblemBodyType, U1, U2, U3, Us...>;
+
+      using Parent =
+        FormLanguage::Base;
+
+      AssemblyBase() = default;
+
+      AssemblyBase(const AssemblyBase& other)
+        : Parent(other)
+      {}
+
+      AssemblyBase(AssemblyBase&& other)
+        : Parent(std::move(other))
+      {}
+
+      virtual ~AssemblyBase() = default;
+
+      virtual void execute(LinearSystem& out, const InputType& input) const = 0;
+
+      virtual AssemblyBase* copy() const noexcept = 0;
+  };
 }
 
 #endif

@@ -125,6 +125,18 @@ namespace Rodin::Variational
         return *m_operand;
       }
 
+      Optional<size_t> getOrder(const Geometry::Polytope& g) const
+      {
+        const auto o = getOperand().getOrder(g);
+
+        // Only constant -> constant preserves polynomial nature.
+        if (o && *o == 0)
+          return size_t{0};
+
+        // Anything else: not a polynomial integrand in general.
+        return {};
+      }
+
       /**
        * @brief Creates a polymorphic copy of this sinh operator.
        * @return Pointer to copy

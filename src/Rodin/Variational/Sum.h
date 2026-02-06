@@ -17,6 +17,7 @@
 
 #include "ForwardDecls.h"
 #include "Function.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
 
 #include "RealFunction.h"
@@ -170,6 +171,18 @@ namespace Rodin::Variational
       auto getValue(const Geometry::Point& p) const
       {
         return this->object(this->getLHS().getValue(p)) + this->object(this->getRHS().getValue(p));
+      }
+
+      constexpr
+      std::optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        const auto lo = getLHS().getOrder(poly);
+        const auto ro = getRHS().getOrder(poly);
+
+        if (lo && ro)
+          return std::max(*lo, *ro);
+        else
+          return std::nullopt;
       }
 
       Sum* copy() const noexcept override
@@ -345,16 +358,16 @@ namespace Rodin::Variational
         return getLHS().getDOFs(element);
       }
 
-      Sum& setPoint(const Geometry::Point& p)
+      Sum& setIntegrationPoint(const IntegrationPoint& ip)
       {
-        m_lhs->setPoint(p);
-        m_rhs->setPoint(p);
+        m_lhs->setIntegrationPoint(ip);
+        m_rhs->setIntegrationPoint(ip);
         return *this;
       }
 
-      const Geometry::Point& getPoint() const
+      const IntegrationPoint& getIntegrationPoint() const
       {
-        return m_lhs->getPoint();
+        return m_lhs->getIntegrationPoint();
       }
 
       constexpr
@@ -367,6 +380,18 @@ namespace Rodin::Variational
       const auto& getFiniteElementSpace() const
       {
         return getLHS().getFiniteElementSpace();
+      }
+
+      constexpr
+      std::optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        const auto lo = getLHS().getOrder(poly);
+        const auto ro = getRHS().getOrder(poly);
+
+        if (lo && ro)
+          return std::max(*lo, *ro);
+        else
+          return std::nullopt;
       }
 
       Sum* copy() const noexcept override

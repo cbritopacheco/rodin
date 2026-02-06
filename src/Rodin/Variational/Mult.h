@@ -37,6 +37,7 @@
 #include "RealFunction.h"
 #include "ComplexFunction.h"
 #include "MatrixFunction.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
 
 #include "LinearFormIntegrator.h"
@@ -219,6 +220,15 @@ namespace Rodin::Variational
         return this->object(this->getLHS().getValue(p)) * this->object(this->getRHS().getValue(p));
       }
 
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
+      {
+        const auto lo = getLHS().getOrder(polytope);      // ShapeFunction
+        const auto ro = getRHS().getOrder(polytope);      // Function
+        if (!lo || !ro)
+          return {};
+        return *lo + *ro;
+      }
+
       Mult* copy() const noexcept override
       {
         return new Mult(*this);
@@ -398,22 +408,31 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
-      const Geometry::Point& getPoint() const
+      const IntegrationPoint& getIntegrationPoint() const
       {
-        return m_rhs->getPoint();
+        return m_rhs->getIntegrationPoint();
       }
 
-      Mult& setPoint(const Geometry::Point& p)
+      Mult& setIntegrationPoint(const IntegrationPoint& ip)
       {
-        m_rhs->setPoint(p);
+        m_rhs->setIntegrationPoint(ip);
         return *this;
       }
 
       constexpr
       auto getBasis(size_t local) const
       {
-        const auto& p = getPoint();
-        return this->object(getLHS().getValue(p)) * this->object(getRHS().getBasis(local));
+        const auto& p = this->getIntegrationPoint();
+        return this->object(getLHS().getValue(p.getPoint())) * this->object(getRHS().getBasis(local));
+      }
+
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
+      {
+        const auto lo = getLHS().getOrder(polytope);      // ShapeFunction
+        const auto ro = getRHS().getOrder(polytope);      // Function
+        if (!lo || !ro)
+          return {};
+        return *lo + *ro;
       }
 
       Mult* copy() const noexcept override
@@ -539,22 +558,31 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
-      const Geometry::Point& getPoint() const
+      const IntegrationPoint& getIntegrationPoint() const
       {
-        return m_lhs->getPoint();
+        return m_lhs->getIntegrationPoint();
       }
 
-      Mult& setPoint(const Geometry::Point& p)
+      Mult& setIntegrationPoint(const IntegrationPoint& ip)
       {
-        m_lhs->setPoint(p);
+        m_lhs->setIntegrationPoint(ip);
         return *this;
       }
 
       constexpr
       auto getBasis(size_t local) const
       {
-        const auto& p = getPoint();
-        return this->object(this->getLHS().getBasis(local)) * this->object(this->getRHS().getValue(p));
+        const auto& p = getIntegrationPoint();
+        return this->object(this->getLHS().getBasis(local)) * this->object(this->getRHS().getValue(p.getPoint()));
+      }
+
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
+      {
+        const auto lo = getLHS().getOrder(polytope);      // ShapeFunction
+        const auto ro = getRHS().getOrder(polytope);      // Function
+        if (!lo || !ro)
+          return {};
+        return *lo + *ro;
       }
 
       Mult* copy() const noexcept override

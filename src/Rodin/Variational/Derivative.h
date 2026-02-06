@@ -43,6 +43,7 @@
 #include <cstdlib>
 
 #include "ForwardDecls.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
 
 namespace Rodin::FormLanguage
@@ -226,31 +227,31 @@ namespace Rodin::Variational
         return getOperand().getDOFs(element);
       }
 
-      const Geometry::Point& getPoint() const
+      const IntegrationPoint& getIntegrationPoint() const
       {
-        assert(m_p);
-        return *m_p;
+        assert(m_ip);
+        return *m_ip;
       }
 
-      Derivative& setPoint(const Geometry::Point& p)
-      {
-        m_p = &p;
-        const auto& polytope = p.getPolytope();
-        const size_t d = polytope.getDimension();
-        const Index i = polytope.getIndex();
-        const auto& fes = this->getFiniteElementSpace();
-        const auto& fe = fes.getFiniteElement(d, i);
-        const auto& rc = p.getReferenceCoordinates();
-        const size_t dofs = this->getDOFs(p.getPolytope());
-        m_gradients.resize(dofs);
-        for (size_t local = 0; local < dofs; local++)
-          m_gradients[local] = p.getJacobianInverse().transpose() * fe.getGradient(local)(rc);
-        return *this;
-      }
+      // Derivative& setIntegrationPoint(const Geometry::Point& p)
+      // {
+      //   m_ip = &ip;
+      //   const auto& polytope = p.getPolytope();
+      //   const size_t d = polytope.getDimension();
+      //   const Index i = polytope.getIndex();
+      //   const auto& fes = this->getFiniteElementSpace();
+      //   const auto& fe = fes.getFiniteElement(d, i);
+      //   const auto& rc = p.getReferenceCoordinates();
+      //   const size_t dofs = this->getDOFs(p.getPolytope());
+      //   m_gradients.resize(dofs);
+      //   for (size_t local = 0; local < dofs; local++)
+      //     m_gradients[local] = p.getJacobianInverse().transpose() * fe.getGradient(local)(rc);
+      //   return *this;
+      // }
 
       decltype(auto) getBasis(size_t local) const
       {
-        return m_gradients[local].coeff(m_i);
+        return m_gradients[local](m_i);
       }
 
       Derivative* copy() const noexcept override
@@ -262,7 +263,7 @@ namespace Rodin::Variational
       size_t m_i;
       std::reference_wrapper<const OperandType> m_u;
 
-      const Geometry::Point* m_p;
+      const IntegrationPoint* m_ip;
 
       std::vector<Math::SpatialVector<Real>> m_gradients;
   };

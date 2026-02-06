@@ -20,6 +20,7 @@
 #include "PolytopeTransformation.h"
 
 #include "ForwardDecls.h"
+#include "Rodin/Math/PointMatrix.h"
 #include "Rodin/Math/Vector.h"
 
 namespace Rodin::Geometry
@@ -161,15 +162,6 @@ namespace Rodin::Geometry
       }
 
       /**
-       * @brief Gets the polynomial order of the Jacobian.
-       * @returns Order of the Jacobian (same as basis function order)
-       */
-      size_t getJacobianOrder() const override
-      {
-        return m_fe.getOrder();
-      }
-
-      /**
        * @brief Applies the isoparametric transformation.
        * @param[out] pc Physical coordinates
        * @param[in] rc Reference coordinates
@@ -186,7 +178,7 @@ namespace Rodin::Geometry
         for (size_t local = 0; local < m_fe.getCount(); local++)
         {
           assert(pc.size() == m_pm.col(local).size());
-          pc.noalias() += m_pm.col(local) * m_fe.getBasis(local)(rc);
+          pc += m_pm.col(local) * m_fe.getBasis(local)(rc);
         }
       }
 
@@ -211,8 +203,8 @@ namespace Rodin::Geometry
           for (size_t i = 0; i < rdim; i++)
           {
             const auto derivative = basis.template getDerivative<1>(i);
-            assert(pc.col(i).size() == m_pm.col(local).size());
-            pc.col(i).noalias() += m_pm.col(local) * derivative(rc);
+            for (size_t j = 0; j < pdim; j++)
+              pc(j, i) += m_pm(j, local) * derivative(rc);
           }
         }
       }
@@ -235,7 +227,7 @@ namespace Rodin::Geometry
        * @param[in] version Serialization version (unused)
        */
       template<class Archive>
-      void serialize(Archive& ar, const unsigned int version)
+      void serialize(Archive& ar, const unsigned int)
       {
         ar & boost::serialization::base_object<PolytopeTransformation>(*this);
         ar & m_pm;
