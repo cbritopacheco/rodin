@@ -486,6 +486,15 @@ namespace Rodin::Assembly
         const size_t ncols = input.getTotalTrialSize();
         const size_t nrows = input.getTotalTestSize();
 
+        using FirstTrialMeshType =
+          std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace().getMesh())>;
+        using MeshContextType =
+          typename Rodin::FormLanguage::Traits<FirstTrialMeshType>::ContextType;
+
+        static_assert(
+          std::is_same_v<MeshContextType, Rodin::Context::Local>,
+          "PETSc sequential assembly supports only Local mesh context.");
+
         PetscErrorCode ierr;
 
         // ------------------------

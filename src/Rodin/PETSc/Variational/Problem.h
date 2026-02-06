@@ -14,7 +14,6 @@
 
 #include "Rodin/PETSc/Math/LinearSystem.h"
 
-#include "Rodin/PETSc/Assembly/Generic.h"
 #include "Rodin/PETSc/Assembly/Sequential.h"
 #include "Rodin/Variational/TestFunction.h"
 
@@ -29,10 +28,7 @@ namespace Rodin::Variational
         PETSc::Math::LinearSystem;
 
       using AssemblyType =
-        std::conditional_t<
-          std::is_same_v<TrialFESMeshContextType, Context::Local>,
-          PETSc::Assembly::Sequential<LinearSystemType, Problem>,
-          PETSc::Assembly::Generic<LinearSystemType, Problem>>;
+        PETSc::Assembly::Sequential<LinearSystemType, Problem>;
 
       using SolverBaseType =
         Solver::SolverBase<LinearSystemType>;
@@ -70,8 +66,8 @@ namespace Rodin::Variational
         Variational::ProblemUVBase<LinearSystemType, U, V>;
 
       static_assert(
-          std::is_same_v<TrialFESMeshContextType, Context::Local> ||
-          std::is_same_v<TrialFESMeshContextType, Context::MPI>);
+          std::is_same_v<TrialFESMeshContextType, Context::Local>,
+          "PETSc sequential assembly supports only Local mesh context.");
 
       static_assert(
           std::is_same_v<TrialFESMeshContextType, TestFESMeshContextType>);
