@@ -79,13 +79,12 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md400">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md401">Usage</a></li>
+            <li><a href="#autotoc_md414">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md415">Usage</a></li>
             <li>
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
-                <li><a href="#derived-classes">Derived classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#pub-static-attribs">Public static variables</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
@@ -94,7 +93,7 @@
             </li>
           </ul>
         </nav>
-<p>Base class for shape functions in finite element spaces.</p><p><a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a> provides the foundation for representing finite element basis functions (shape functions) in both trial and test spaces. Shape functions are the building blocks of finite element approximations.</p><section id="autotoc_md400"><h3><a href="#autotoc_md400">Mathematical Foundation</a></h3><p>In the finite element method, functions are approximated using a linear combination of basis functions (shape functions):</p><div class="m-math"><svg style="width: 10.304em; height: 3.565em;" viewBox="144.814262 -35.422661 98.914467 34.227147">
+<p>Base class for shape functions in finite element spaces.</p><p><a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a> provides the foundation for representing finite element basis functions (shape functions) in both trial and test spaces. Shape functions are the building blocks of finite element approximations.</p><section id="autotoc_md414"><h3><a href="#autotoc_md414">Mathematical Foundation</a></h3><p>In the finite element method, functions are approximated using a linear combination of basis functions (shape functions):</p><div class="m-math"><svg style="width: 10.304em; height: 3.565em;" viewBox="144.814262 -35.422661 98.914467 34.227147">
 <title>
 \[
   u_h(x) = \sum_{i=1}^N u_i \phi_i(x)
@@ -263,7 +262,7 @@ $ \phi_i(x_j) = \delta_{ij} $
 <use x='51.379235' y='1.793263' xlink:href='#eq9-g0-105'/>
 <use x='54.262375' y='1.793263' xlink:href='#eq9-g0-106'/>
 </g>
-</svg></li></ul></section><section id="autotoc_md401"><h3><a href="#autotoc_md401">Usage</a></h3><p><a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a> is a CRTP base class. Derived classes include:</p><ul><li><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>: Represents <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
+</svg></li></ul></section><section id="autotoc_md415"><h3><a href="#autotoc_md415">Usage</a></h3><p><a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a> is a CRTP base class. Derived classes include:</p><ul><li><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>: Represents <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
 $ u $
 </title>
@@ -291,21 +290,6 @@ $ v $
               class <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a>
             </dt>
             <dd><a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a> class for all objects in <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a> system.</dd>
-          </dl>
-        </section>
-        <section id="derived-classes">
-          <h2><a href="#derived-classes">Derived classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>
-            </dt>
-            <dd>Intermediate shape function class for CRTP derivation.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>
-            </dt>
-            <dd>Intermediate shape function class for CRTP derivation.</dd>
           </dl>
         </section>
         <section id="pub-types">
@@ -383,13 +367,9 @@ $ v $
             </dt>
             <dd>Gets the number of degrees of freedom for the given polytope.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a242de33566cac5427ebb9a3a0c97c201" class="m-doc">getPoint</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a233f39a256667047f0c412b2a212bbd4" class="m-doc">getIntegrationPoint</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the current evaluation point.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a14fd985d8aceba0c11cfea0d3197fb25" class="m-doc">setPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) -&gt; Derived&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Sets the evaluation point for the shape function.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ac10ed89d40af768f3a1bb4be01f67a3f" class="m-doc">getBasis</a>(</span><span class="m-doc-wrap">size_t local) const -&gt; decltype(auto) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
@@ -410,6 +390,10 @@ $ v $
               <span class="m-doc-wrap-bumper">auto <a href="#aa75b0ee8f7f82337ebf0b88abfa91b18" class="m-doc">getDerived</a>(</span><span class="m-doc-wrap">) const -&gt; const Derived&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets the derived object (const).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9a1cb09f4677024a3b681cdb49fe4a25" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; poly) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a geometry-dependent polynomial order bound of the expression on the reference element.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a1428ee337cebecb42cce3db0724526bb" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -600,12 +584,12 @@ $ v $
             </table>
 <aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a242de33566cac5427ebb9a3a0c97c201"><div>
+          <section class="m-doc-details" id="a233f39a256667047f0c412b2a212bbd4"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Derived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; Rodin::<wbr />Variational::<wbr />ShapeFunctionBase&lt;Derived, FES, SpaceType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a242de33566cac5427ebb9a3a0c97c201" class="m-doc-self">getPoint</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; Rodin::<wbr />Variational::<wbr />ShapeFunctionBase&lt;Derived, FES, SpaceType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a233f39a256667047f0c412b2a212bbd4" class="m-doc-self">getIntegrationPoint</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the current evaluation point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -613,33 +597,6 @@ $ v $
                 <tr>
                   <th style="width: 1%">Returns</th>
                   <td>Reference to the point</td>
-                </tr>
-              </tfoot>
-            </table>
-<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
-          </div></section>
-          <section class="m-doc-details" id="a14fd985d8aceba0c11cfea0d3197fb25"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />ShapeFunctionBase&lt;Derived, FES, SpaceType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a14fd985d8aceba0c11cfea0d3197fb25" class="m-doc-self">setPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) <span class="m-label m-primary">constexpr</span></span></span>
-            </h3>
-            <p>Sets the evaluation point for the shape function.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Point at which to evaluate</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>Reference to the derived object</td>
                 </tr>
               </tfoot>
             </table>
@@ -749,6 +706,24 @@ $ v $
                 </tr>
               </tfoot>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="a9a1cb09f4677024a3b681cdb49fe4a25"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; Rodin::<wbr />Variational::<wbr />ShapeFunctionBase&lt;Derived, FES, SpaceType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9a1cb09f4677024a3b681cdb49fe4a25" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; poly) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a geometry-dependent polynomial order bound of the expression on the reference element.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Polynomial order bound, or std::nullopt if not polynomial.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The returned value is a <strong>safe upper bound</strong> on the total polynomial degree of the expression in reference coordinates, ignoring the geometry map.</p><ul><li>Used for quadrature selection and composition rules.</li><li>May depend on the reference geometry (simplex, tensor-product, wedge).</li><li>Returns std::nullopt for non-polynomial expressions.</li><li>The value is not guaranteed to be sharp.</li></ul>
           </div></section>
           <section class="m-doc-details" id="a1428ee337cebecb42cce3db0724526bb"><div>
             <h3>

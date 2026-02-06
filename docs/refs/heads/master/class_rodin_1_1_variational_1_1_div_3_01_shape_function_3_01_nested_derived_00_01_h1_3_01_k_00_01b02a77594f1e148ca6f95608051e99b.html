@@ -83,7 +83,6 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
-                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -144,15 +143,6 @@ $ \nabla \cdot \mathbf{v} $
             <dd>Base class for shape function objects.</dd>
           </dl>
         </section>
-        <section id="typeless-methods">
-          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a251401874f3126eec1cec22547303fb6" class="m-doc">Div</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">OperandType</a>&amp; u)</span>
-            </dt>
-            <dd>Constructs divergence of <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
-          </dl>
-        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
@@ -164,41 +154,6 @@ $ \nabla \cdot \mathbf{v} $
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a251401874f3126eec1cec22547303fb6"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;size_t K, class NestedDerived, class Number, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Div&lt;ShapeFunction&lt;NestedDerived, H1&lt;K, Math::<wbr />Vector&lt;Number&gt;, Mesh&gt;, Space&gt;&gt;&lt;K, NestedDerived, Number, Mesh, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a251401874f3126eec1cec22547303fb6" class="m-doc-self">Div</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">OperandType</a>&amp; u)</span></span>
-            </h3>
-            <p>Constructs divergence of <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">u&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a> to differentiate</td>
-                </tr>
-              </tbody>
-            </table>
-<p>Creates <svg class="m-math" style="width: 2.716em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169354 26.068868 8.169354">
-<title>
-$ \nabla \cdot \mathbf{u} $
-</title>
-<defs>
-<path id='eq3-g0-117' d='M4.220174-5.284184V-4.770112C4.961395-4.770112 5.045081-4.770112 5.045081-4.303861V-1.960648C5.045081-1.052055 4.507098-.32279 3.574595-.32279C2.677958-.32279 2.630137-.621669 2.630137-1.279203V-5.379826L.502117-5.284184V-4.770112C1.243337-4.770112 1.327024-4.770112 1.327024-4.303861V-1.470486C1.327024-.274969 2.12802 .071731 3.407223 .071731C3.694147 .071731 4.578829 .071731 5.092902-.896638H5.104857V.071731L7.173101 0V-.514072C6.43188-.514072 6.348194-.514072 6.348194-.980324V-5.379826L4.220174-5.284184Z'/>
-<path id='eq3-g1-1' d='M2.295392-2.988792C2.295392-3.335492 2.008468-3.622416 1.661768-3.622416S1.028144-3.335492 1.028144-2.988792S1.315068-2.355168 1.661768-2.355168S2.295392-2.642092 2.295392-2.988792Z'/>
-<path id='eq3-g1-114' d='M9.325031-7.902366C9.348941-7.938232 9.384807-8.021918 9.384807-8.069738C9.384807-8.153425 9.372852-8.16538 9.097883-8.16538H.848817C.573848-8.16538 .561893-8.153425 .561893-8.069738C.561893-8.021918 .597758-7.938232 .621669-7.902366L4.65056 .167372C4.734247 .32279 4.770112 .394521 4.97335 .394521S5.212453 .32279 5.296139 .167372L9.325031-7.902366ZM2.044334-7.304608H8.607721L5.332005-.729265L2.044334-7.304608Z'/>
-</defs>
-<g id='eq3-page1'>
-<use x='0' y='0' xlink:href='#eq3-g1-114'/>
-<use x='12.619334' y='0' xlink:href='#eq3-g1-1'/>
-<use x='18.596888' y='0' xlink:href='#eq3-g0-117'/>
-</g>
-</svg> for use in bilinear forms.</p>
-          </div></section>
           <section class="m-doc-details" id="a0e071453b9d576fa6557bdc5600ae87c"><div>
             <h3>
               <div class="m-doc-template">

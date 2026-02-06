@@ -78,9 +78,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md348">Properties</a></li>
-            <li><a href="#autotoc_md349">Use Cases</a></li>
-            <li><a href="#autotoc_md350">Example</a></li>
+            <li><a href="#autotoc_md362">Properties</a></li>
+            <li><a href="#autotoc_md363">Use Cases</a></li>
+            <li><a href="#autotoc_md364">Example</a></li>
             <li>
               Reference
               <ul>
@@ -180,7 +180,7 @@ $ \tau $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-28'/>
 </g>
-</svg>.</p><section id="autotoc_md348"><h3><a href="#autotoc_md348">Properties</a></h3><ul><li><strong>DOF count</strong>: One DOF per cell (total: <svg class="m-math" style="width: 2.248em; height: 0.732em; vertical-align: -0.196em;" viewBox="0 -5.147373 21.58524 7.024009">
+</svg>.</p><section id="autotoc_md362"><h3><a href="#autotoc_md362">Properties</a></h3><ul><li><strong>DOF count</strong>: One DOF per cell (total: <svg class="m-math" style="width: 2.248em; height: 0.732em; vertical-align: -0.196em;" viewBox="0 -5.147373 21.58524 7.024009">
 <title>
 $ n_{\text{cells}} $
 </title>
@@ -231,7 +231,7 @@ $ \nabla u|_K = 0 $
 <use x='31.469499' y='0' xlink:href='#eq6-g3-61'/>
 <use x='43.894979' y='0' xlink:href='#eq6-g3-48'/>
 </g>
-</svg> (zero within each element)</li></ul></section><section id="autotoc_md349"><h3><a href="#autotoc_md349">Use Cases</a></h3><ul><li>Discontinuous Galerkin (DG) methods</li><li>Flux-based formulations</li><li>Element-wise constant material properties</li><li>Finite volume schemes as FEM</li><li>Pressure space in mixed methods (when inf-sup stability permits)</li></ul></section><section id="autotoc_md350"><h3><a href="#autotoc_md350">Example</a></h3><pre class="m-code"><span class="n">Mesh</span><span class="w"> </span><span class="n">Th</span><span class="p">;</span>
+</svg> (zero within each element)</li></ul></section><section id="autotoc_md363"><h3><a href="#autotoc_md363">Use Cases</a></h3><ul><li>Discontinuous Galerkin (DG) methods</li><li>Flux-based formulations</li><li>Element-wise constant material properties</li><li>Finite volume schemes as FEM</li><li>Pressure space in mixed methods (when inf-sup stability permits)</li></ul></section><section id="autotoc_md364"><h3><a href="#autotoc_md364">Example</a></h3><pre class="m-code"><span class="n">Mesh</span><span class="w"> </span><span class="n">Th</span><span class="p">;</span>
 <span class="n">Th</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Th</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">});</span>
 <span class="n">P0</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">Th</span><span class="p">);</span><span class="w">  </span><span class="c1">// Scalar P0 space</span>
 <span class="n">GridFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
@@ -330,7 +330,7 @@ $ \nabla u|_K = 0 $
             <dd>Creates a pullback transformation for a function.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Callable&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2bb691029e9f76c7cca068caf5272566" class="m-doc">getPushforward</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
+              <span class="m-doc-wrap-bumper">auto <a href="#ade4ab4e2158c4401d86b57b14fced78f" class="m-doc">getPushforward</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp;,
               Callable&amp;&amp; v) const -&gt; auto</span>
             </dt>
             <dd>Creates a pushforward transformation for a function.</dd>
@@ -616,13 +616,13 @@ $ \nabla u|_K = 0 $
             </table>
 <p>The pullback maps a function from physical space to reference space.</p>
           </div></section>
-          <section class="m-doc-details" id="a2bb691029e9f76c7cca068caf5272566"><div>
+          <section class="m-doc-details" id="ade4ab4e2158c4401d86b57b14fced78f"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
                 template&lt;class Callable&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />P0&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2bb691029e9f76c7cca068caf5272566" class="m-doc-self">getPushforward</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />P0&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ade4ab4e2158c4401d86b57b14fced78f" class="m-doc-self">getPushforward</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp;,
               Callable&amp;&amp; v) const</span></span>
             </h3>
             <p>Creates a pushforward transformation for a function.</p>
@@ -640,10 +640,6 @@ $ \nabla u|_K = 0 $
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>idx&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> of (dimension, polytope index)</td>
-                </tr>
                 <tr>
                   <td>v&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td><a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a> to push forward</td>
