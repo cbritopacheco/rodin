@@ -78,9 +78,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md411">Supported Norms</a></li>
-            <li><a href="#autotoc_md412">Usage Example</a></li>
-            <li><a href="#autotoc_md413">Convergence Analysis</a></li>
+            <li><a href="#autotoc_md412">Supported Norms</a></li>
+            <li><a href="#autotoc_md413">Usage Example</a></li>
+            <li><a href="#autotoc_md414">Convergence Analysis</a></li>
             <li>
               Reference
               <ul>
@@ -170,7 +170,7 @@ $ u_{\text{exact}} $
 <use x='17.366303' y='1.793263' xlink:href='#eq3-g2-99'/>
 <use x='20.905035' y='1.793263' xlink:href='#eq3-g2-116'/>
 </g>
-</svg> is the exact solution.</p><section id="autotoc_md411"><h3><a href="#autotoc_md411">Supported Norms</a></h3><ul><li><strong>L1 norm</strong>: <svg class="m-math" style="width: 9.068em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 87.055853 13.781784">
+</svg> is the exact solution.</p><section id="autotoc_md412"><h3><a href="#autotoc_md412">Supported Norms</a></h3><ul><li><strong>L1 norm</strong>: <svg class="m-math" style="width: 9.068em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 87.055853 13.781784">
 <title>
 $ \|u\|_{L^1} = \int_\Omega |u| \, dx $
 </title>
@@ -275,13 +275,13 @@ $ \|u\|_{L^\infty} = \max_{x \in \Omega} |u(x)| $
 <use x='110.418177' y='0' xlink:href='#eq6-g6-41'/>
 <use x='114.970502' y='0' xlink:href='#eq6-g2-106'/>
 </g>
-</svg></li></ul></section><section id="autotoc_md412"><h3><a href="#autotoc_md412">Usage Example</a></h3><pre class="m-code"><span class="c1">// Compute L2 relative error</span>
+</svg></li></ul></section><section id="autotoc_md413"><h3><a href="#autotoc_md413">Usage Example</a></h3><pre class="m-code"><span class="c1">// Compute L2 relative error</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">exact</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">Point</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">sin</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">x</span><span class="p">())</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">cos</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">y</span><span class="p">());</span><span class="w"> </span><span class="p">};</span>
 <span class="n">Real</span><span class="w"> </span><span class="n">error_l2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RelativeError</span><span class="o">::</span><span class="n">l2</span><span class="p">(</span><span class="n">uh</span><span class="p">,</span><span class="w"> </span><span class="n">exact</span><span class="p">);</span>
 <span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;L2 relative error: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">error_l2</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
 
 <span class="c1">// Compute L∞ relative error</span>
-<span class="n">Real</span><span class="w"> </span><span class="n">error_linf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RelativeError</span><span class="o">::</span><span class="n">lInf</span><span class="p">(</span><span class="n">uh</span><span class="p">,</span><span class="w"> </span><span class="n">exact</span><span class="p">);</span></pre></section><section id="autotoc_md413"><h3><a href="#autotoc_md413">Convergence Analysis</a></h3><p>These error measures are used to verify convergence rates:</p><ul><li><a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> elements: <svg class="m-math" style="width: 6.756em; height: 1.298em; vertical-align: -0.312em;" viewBox="0 -9.474739 64.860491 12.463531">
+<span class="n">Real</span><span class="w"> </span><span class="n">error_linf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RelativeError</span><span class="o">::</span><span class="n">lInf</span><span class="p">(</span><span class="n">uh</span><span class="p">,</span><span class="w"> </span><span class="n">exact</span><span class="p">);</span></pre></section><section id="autotoc_md414"><h3><a href="#autotoc_md414">Convergence Analysis</a></h3><p>These error measures are used to verify convergence rates:</p><ul><li><a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> elements: <svg class="m-math" style="width: 6.756em; height: 1.298em; vertical-align: -0.312em;" viewBox="0 -9.474739 64.860491 12.463531">
 <title>
 $ E_{L^2} \sim O(h^2) $
 </title>

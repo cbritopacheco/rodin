@@ -89,8 +89,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md115">Expected MFEM Format</a></li>
-            <li><a href="#autotoc_md116">Usage Example</a></li>
+            <li><a href="#autotoc_md116">Expected MFEM Format</a></li>
+            <li><a href="#autotoc_md117">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -101,7 +101,7 @@
             </li>
           </ul>
         </nav>
-<p>Loads discontinuous finite element solutions from MFEM format. P0 spaces have one DOF per element, stored in element order.</p><section id="autotoc_md115"><h3><a href="#autotoc_md115">Expected MFEM Format</a></h3><ul><li>Header: FiniteElementSpace</li><li>FiniteElementCollection: L2_&lt;dim&gt;D_P0</li><li>VDim: vector dimension</li><li>Ordering: data layout (Nodes=0 or VectorDimension=1)</li><li>Coefficient data values (one per element, in element order)</li></ul></section><section id="autotoc_md116"><h3><a href="#autotoc_md116">Usage Example</a></h3><pre class="m-code"><span class="n">P0</span><span class="w"> </span><span class="nf">fes</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<p>Loads discontinuous finite element solutions from MFEM format. P0 spaces have one DOF per element, stored in element order.</p><section id="autotoc_md116"><h3><a href="#autotoc_md116">Expected MFEM Format</a></h3><ul><li>Header: FiniteElementSpace</li><li>FiniteElementCollection: L2_&lt;dim&gt;D_P0</li><li>VDim: vector dimension</li><li>Ordering: data layout (Nodes=0 or VectorDimension=1)</li><li>Coefficient data values (one per element, in element order)</li></ul></section><section id="autotoc_md117"><h3><a href="#autotoc_md117">Usage Example</a></h3><pre class="m-code"><span class="n">P0</span><span class="w"> </span><span class="nf">fes</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">GridFunction</span><span class="w"> </span><span class="nf">gf</span><span class="p">(</span><span class="n">fes</span><span class="p">);</span>
 <span class="n">GridFunctionLoader</span><span class="o">&lt;</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">,</span><span class="w"> </span><span class="n">P0</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">loader</span><span class="p">(</span><span class="n">gf</span><span class="p">);</span>
 <span class="n">loader</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;solution.gf&quot;</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html" class="m-doc">GridFunctionPrinter</a></p></aside></section>

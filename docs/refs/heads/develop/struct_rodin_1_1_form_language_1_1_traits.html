@@ -91,13 +91,13 @@
           <h3>Contents</h3>
           <ul>
             <li>
-              <a href="#autotoc_md33">Common Trait Members</a>
+              <a href="#autotoc_md34">Common Trait Members</a>
               <ul>
-                <li><a href="#autotoc_md34">Type Members</a></li>
-                <li><a href="#autotoc_md35">Static Constants</a></li>
+                <li><a href="#autotoc_md35">Type Members</a></li>
+                <li><a href="#autotoc_md36">Static Constants</a></li>
               </ul>
             </li>
-            <li><a href="#autotoc_md36">Specialization Example</a></li>
+            <li><a href="#autotoc_md37">Specialization Example</a></li>
             <li>
               Reference
               <ul>
@@ -105,7 +105,7 @@
             </li>
           </ul>
         </nav>
-<p>Primary template for type traits of form language objects.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a></p></aside><p>The <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a> template provides a centralized mechanism for querying compile-time type information about form language objects. This is the primary (unspecialized) template; specific types require explicit specializations to be useful.</p><section id="autotoc_md33"><h3><a href="#autotoc_md33">Common Trait Members</a></h3><p>While the primary template is intentionally incomplete, specializations typically provide some or all of the following:</p><section id="autotoc_md34"><h4><a href="#autotoc_md34">Type Members</a></h4><ul><li><strong>FESType</strong>: Associated finite element space type</li><li><strong>ScalarType</strong>: Scalar type for numerical values</li><li><strong>RangeType</strong>: Range type for function evaluations</li></ul></section><section id="autotoc_md35"><h4><a href="#autotoc_md35">Static Constants</a></h4><ul><li><strong>SpaceType</strong>: Indicates trial space, test space, or other</li><li><strong>Dimension</strong>: Spatial or value dimension</li></ul></section></section><section id="autotoc_md36"><h3><a href="#autotoc_md36">Specialization Example</a></h3><pre class="m-code"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Derived</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">FES</span><span class="o">&gt;</span>
+<p>Primary template for type traits of form language objects.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a></p></aside><p>The <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a> template provides a centralized mechanism for querying compile-time type information about form language objects. This is the primary (unspecialized) template; specific types require explicit specializations to be useful.</p><section id="autotoc_md34"><h3><a href="#autotoc_md34">Common Trait Members</a></h3><p>While the primary template is intentionally incomplete, specializations typically provide some or all of the following:</p><section id="autotoc_md35"><h4><a href="#autotoc_md35">Type Members</a></h4><ul><li><strong>FESType</strong>: Associated finite element space type</li><li><strong>ScalarType</strong>: Scalar type for numerical values</li><li><strong>RangeType</strong>: Range type for function evaluations</li></ul></section><section id="autotoc_md36"><h4><a href="#autotoc_md36">Static Constants</a></h4><ul><li><strong>SpaceType</strong>: Indicates trial space, test space, or other</li><li><strong>Dimension</strong>: Spatial or value dimension</li></ul></section></section><section id="autotoc_md37"><h3><a href="#autotoc_md37">Specialization Example</a></h3><pre class="m-code"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Derived</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">FES</span><span class="o">&gt;</span>
 <span class="k">struct</span><span class="w"> </span><span class="nc">Traits</span><span class="o">&lt;</span><span class="n">MyFormType</span><span class="o">&lt;</span><span class="n">Derived</span><span class="p">,</span><span class="w"> </span><span class="n">FES</span><span class="o">&gt;&gt;</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="k">using</span><span class="w"> </span><span class="n">FESType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FES</span><span class="p">;</span>

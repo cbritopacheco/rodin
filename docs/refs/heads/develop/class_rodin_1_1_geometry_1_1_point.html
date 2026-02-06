@@ -78,8 +78,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md74">Usage Examples</a></li>
-            <li><a href="#autotoc_md75">Thread Safety</a></li>
+            <li><a href="#autotoc_md75">Usage Examples</a></li>
+            <li><a href="#autotoc_md76">Thread Safety</a></li>
             <li>
               Reference
               <ul>
@@ -91,7 +91,7 @@
             </li>
           </ul>
         </nav>
-<p>This class provides a complete implementation of <a href="class_rodin_1_1_geometry_1_1_point_base.html" class="m-doc">PointBase</a> with storage for reference coordinates. Points can be constructed with various combinations of reference and physical coordinates.</p><section id="autotoc_md74"><h2><a href="#autotoc_md74">Usage Examples</a></h2><pre class="m-code"><span class="c1">// Create a point at the centroid of a cell in reference coordinates</span>
+<p>This class provides a complete implementation of <a href="class_rodin_1_1_geometry_1_1_point_base.html" class="m-doc">PointBase</a> with storage for reference coordinates. Points can be constructed with various combinations of reference and physical coordinates.</p><section id="autotoc_md75"><h2><a href="#autotoc_md75">Usage Examples</a></h2><pre class="m-code"><span class="c1">// Create a point at the centroid of a cell in reference coordinates</span>
 <span class="n">Math</span><span class="o">::</span><span class="n">SpatialPoint</span><span class="w"> </span><span class="nf">rc</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
 <span class="n">rc</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mf">0.25</span><span class="p">,</span><span class="w"> </span><span class="mf">0.25</span><span class="p">,</span><span class="w"> </span><span class="mf">0.25</span><span class="p">;</span><span class="w">  </span><span class="c1">// Barycentric coords for tetrahedron</span>
 <span class="n">Point</span><span class="w"> </span><span class="nf">p</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span><span class="w"> </span><span class="n">rc</span><span class="p">);</span>
@@ -101,7 +101,7 @@
 
 <span class="c1">// Compute Jacobian information</span>
 <span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">J</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">getJacobian</span><span class="p">();</span>
-<span class="n">Real</span><span class="w"> </span><span class="n">detJ</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">getJacobianDeterminant</span><span class="p">();</span></pre></section><section id="autotoc_md75"><h2><a href="#autotoc_md75">Thread Safety</a></h2><p>Not thread-safe. Each thread should use separate <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> instances.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_point_base.html" class="m-doc">PointBase</a>, <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>, <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a></p></aside></section>
+<span class="n">Real</span><span class="w"> </span><span class="n">detJ</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">getJacobianDeterminant</span><span class="p">();</span></pre></section><section id="autotoc_md76"><h2><a href="#autotoc_md76">Thread Safety</a></h2><p>Not thread-safe. Each thread should use separate <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> instances.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_point_base.html" class="m-doc">PointBase</a>, <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>, <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a></p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">

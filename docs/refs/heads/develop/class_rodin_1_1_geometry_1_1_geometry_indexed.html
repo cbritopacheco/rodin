@@ -90,7 +90,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md60">Usage Example</a></li>
+            <li><a href="#autotoc_md61">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -100,7 +100,7 @@
             </li>
           </ul>
         </nav>
-<p>Container that maps polytope types to associated data.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="_geometry_indexed_8h.html" class="m-doc">GeometryIndexed.h</a></p></aside><p>This class provides an efficient mapping from polytope geometry types (<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>, Segment, Triangle, etc.) to arbitrary data of type T. It uses compile-time knowledge of the number of polytope types to provide O(1) access with minimal memory overhead.</p><section id="autotoc_md60"><h2><a href="#autotoc_md60">Usage Example</a></h2><pre class="m-code"><span class="c1">// Store quadrature orders for each polytope type</span>
+<p>Container that maps polytope types to associated data.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="_geometry_indexed_8h.html" class="m-doc">GeometryIndexed.h</a></p></aside><p>This class provides an efficient mapping from polytope geometry types (<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>, Segment, Triangle, etc.) to arbitrary data of type T. It uses compile-time knowledge of the number of polytope types to provide O(1) access with minimal memory overhead.</p><section id="autotoc_md61"><h2><a href="#autotoc_md61">Usage Example</a></h2><pre class="m-code"><span class="c1">// Store quadrature orders for each polytope type</span>
 <span class="n">GeometryIndexed</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">quadratureOrders</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="p">{</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Point</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span>
 <span class="w">  </span><span class="p">{</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Segment</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">},</span>

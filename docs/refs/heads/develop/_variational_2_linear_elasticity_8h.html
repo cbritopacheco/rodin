@@ -77,13 +77,13 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md341">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md342">Constitutive Relations</a></li>
-            <li><a href="#autotoc_md343">Weak Formulation</a></li>
-            <li><a href="#autotoc_md344">Usage Example</a></li>
+            <li><a href="#autotoc_md342">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md343">Constitutive Relations</a></li>
+            <li><a href="#autotoc_md344">Weak Formulation</a></li>
+            <li><a href="#autotoc_md345">Usage Example</a></li>
           </ul>
         </nav>
-<p>This header aggregates functionality for linear elasticity problems, which model the deformation of elastic bodies under small strains.</p><section id="autotoc_md341"><h3><a href="#autotoc_md341">Mathematical Foundation</a></h3><p>Linear elasticity is governed by the equilibrium equation:</p><div class="m-math"><svg style="width: 7.729em; height: 1.245em;" viewBox="157.173964 -11.955168 74.195047 11.955168">
+<p>This header aggregates functionality for linear elasticity problems, which model the deformation of elastic bodies under small strains.</p><section id="autotoc_md342"><h3><a href="#autotoc_md342">Mathematical Foundation</a></h3><p>Linear elasticity is governed by the equilibrium equation:</p><div class="m-math"><svg style="width: 7.729em; height: 1.245em;" viewBox="157.173964 -11.955168 74.195047 11.955168">
 <title>
 \[
   -\nabla \cdot \boldsymbol{\sigma}(\mathbf{u}) = \mathbf{f}
@@ -141,7 +141,7 @@ $ \mathbf{f} $
 <g id='eq4-page1'>
 <use x='0' y='0' xlink:href='#eq4-g0-102'/>
 </g>
-</svg> is the body force</li></ul></section><section id="autotoc_md342"><h3><a href="#autotoc_md342">Constitutive Relations</a></h3><p>For isotropic linear elastic materials:</p><div class="m-math"><svg style="width: 9.645em; height: 1.245em;" viewBox="147.974606 -11.955168 92.593764 11.955168">
+</svg> is the body force</li></ul></section><section id="autotoc_md343"><h3><a href="#autotoc_md343">Constitutive Relations</a></h3><p>For isotropic linear elastic materials:</p><div class="m-math"><svg style="width: 9.645em; height: 1.245em;" viewBox="147.974606 -11.955168 92.593764 11.955168">
 <title>
 \[
   \boldsymbol{\sigma} = \lambda \text{tr}(\boldsymbol{\varepsilon}) \mathbf{I} + 2\mu \boldsymbol{\varepsilon}
@@ -221,7 +221,7 @@ $ \lambda, \mu $
 <use x='6.828489' y='0' xlink:href='#eq7-g0-59'/>
 <use x='12.072647' y='0' xlink:href='#eq7-g0-22'/>
 </g>
-</svg> are the Lamé parameters</li></ul></section><section id="autotoc_md343"><h3><a href="#autotoc_md343">Weak Formulation</a></h3><p>Find <svg class="m-math" style="width: 3.282em; height: 0.900em; vertical-align: -0.049em;" viewBox="0 -8.169366 31.509456 8.636786">
+</svg> are the Lamé parameters</li></ul></section><section id="autotoc_md344"><h3><a href="#autotoc_md344">Weak Formulation</a></h3><p>Find <svg class="m-math" style="width: 3.282em; height: 0.900em; vertical-align: -0.049em;" viewBox="0 -8.169366 31.509456 8.636786">
 <title>
 $ \mathbf{u} \in V $
 </title>
@@ -294,7 +294,7 @@ $ \mathbf{v} \in V $
 <use x='10.60601' y='0' xlink:href='#eq10-g1-50'/>
 <use x='21.896978' y='0' xlink:href='#eq10-g2-86'/>
 </g>
-</svg>.</p></section><section id="autotoc_md344"><h3><a href="#autotoc_md344">Usage Example</a></h3><pre class="m-code"><span class="c1">// Define vector-valued P1 space (dimension = spatial dimension)</span>
+</svg>.</p></section><section id="autotoc_md345"><h3><a href="#autotoc_md345">Usage Example</a></h3><pre class="m-code"><span class="c1">// Define vector-valued P1 space (dimension = spatial dimension)</span>
 <span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getSpaceDimension</span><span class="p">());</span>
 
 <span class="n">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
