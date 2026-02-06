@@ -322,7 +322,7 @@ namespace Rodin::Variational
         ProblemBody<OperatorType, VectorType, ScalarType>;
 
       using AssemblyType =
-        Assembly::Generic<LinearSystem, Problem>;
+        Assembly::Sequential<LinearSystem, Problem>;
 
       using Parent =
         ProblemUVBase<LinearSystem, TrialFunction, TestFunction>;

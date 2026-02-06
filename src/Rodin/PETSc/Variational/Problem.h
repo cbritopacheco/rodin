@@ -29,7 +29,7 @@ namespace Rodin::Variational
         PETSc::Math::LinearSystem;
 
       using AssemblyType =
-        PETSc::Assembly::Generic<LinearSystemType, Problem>;
+        PETSc::Assembly::Sequential<LinearSystemType, Problem>;
 
       using SolverBaseType =
         Solver::SolverBase<LinearSystemType>;

@@ -894,6 +894,214 @@ namespace Rodin::Assembly
 
         if (!fixed.empty())
         {
+          std::vector<Eigen::Triplet<ScalarType>> filtered;
+          filtered.reserve(triplets.size());
+
+          for (const auto& t : triplets)
+          {
+            auto colIt = fixed.find(t.col());
+            if (colIt != fixed.end() && t.row() != t.col())
+              b.coeffRef(t.row()) -= t.value() * colIt->second;
+
+            const bool rowFixed = fixed.find(t.row()) != fixed.end();
+            const bool colFixed = colIt != fixed.end();
+
+            if (rowFixed || colFixed)
+              continue;
+            filtered.emplace_back(t);
+          }
+
+          for (const auto& [idx, value] : fixed)
+          {
+            filtered.emplace_back(idx, idx, ScalarType(1));
+            b.coeffRef(idx) = value;
+          }
+
+          triplets.swap(filtered);
+        }
+
+        A.resize(nrows, ncols);
+        A.setFromTriplets(triplets.begin(), triplets.end());
+      }
+
+      Sequential* copy() const noexcept override
+        {
+          return new Sequential(*this);
+        }
+    };
+
+  template <class LinearSystem, class TrialFunction, class TestFunction>
+  class Sequential<
+    LinearSystem,
+    Variational::Problem<LinearSystem, TrialFunction, TestFunction>> final
+    : public AssemblyBase<
+        LinearSystem,
+        Variational::Problem<LinearSystem, TrialFunction, TestFunction>>
+  {
+    public:
+      using LinearSystemType = LinearSystem;
+
+      using Parent =
+        AssemblyBase<
+          LinearSystemType,
+          Variational::Problem<LinearSystemType, TrialFunction, TestFunction>>;
+
+      using InputType = typename Parent::InputType;
+
+      using OperatorType =
+        typename FormLanguage::Traits<LinearSystemType>::OperatorType;
+
+      using VectorType =
+        typename FormLanguage::Traits<LinearSystemType>::VectorType;
+
+      using ScalarType =
+        typename FormLanguage::Traits<LinearSystemType>::ScalarType;
+
+      using BilinearFormType =
+        Variational::BilinearForm<
+          typename FormLanguage::Traits<TrialFunction>::SolutionType,
+          typename FormLanguage::Traits<TrialFunction>::FESType,
+          typename FormLanguage::Traits<TestFunction>::FESType,
+          OperatorType>;
+
+      using LinearFormType =
+        Variational::LinearForm<
+          typename FormLanguage::Traits<TestFunction>::FESType,
+          VectorType>;
+
+      void execute(LinearSystemType& axb, const InputType& input) const override
+      {
+        auto& A = axb.getOperator();
+        auto& b = axb.getVector();
+
+        auto& pb = input.getProblemBody();
+        const auto& u = input.getTrialFunction();
+        const auto& v = input.getTestFunction();
+
+        const auto& trialFES = u.getFiniteElementSpace();
+        const auto& testFES  = v.getFiniteElementSpace();
+        const auto& mesh     = trialFES.getMesh();
+
+        const size_t cols = static_cast<size_t>(trialFES.getSize());
+        const size_t rows = static_cast<size_t>(testFES.getSize());
+
+        b.resize(rows);
+        b.setZero();
+
+        std::vector<Eigen::Triplet<ScalarType>> triplets;
+
+        // Local BFIs
+        for (auto& bfi : pb.getLocalBFIs())
+        {
+          const auto& attrs = bfi.getAttributes();
+          SequentialIteration seq(mesh, bfi.getRegion());
+          for (auto it = seq.getIterator(); it; ++it)
+          {
+            if (!attrs.empty() && !attrs.count(it->getAttribute()))
+              continue;
+
+            const size_t d = it->getDimension();
+            const Index  p = it->getIndex();
+
+            bfi.setPolytope(*it);
+
+            const auto& rowsDOF = testFES.getDOFs(d, p);
+            const auto& colsDOF = trialFES.getDOFs(d, p);
+
+            for (size_t i = 0; i < static_cast<size_t>(rowsDOF.size()); ++i)
+            {
+              for (size_t j = 0; j < static_cast<size_t>(colsDOF.size()); ++j)
+              {
+                const ScalarType val = Math::conj(bfi.integrate(j, i));
+                if (val != ScalarType(0))
+                  triplets.emplace_back(rowsDOF[i], colsDOF[j], val);
+              }
+            }
+          }
+        }
+
+        // Global BFIs
+        for (auto& bfi : pb.getGlobalBFIs())
+        {
+          const auto& trialAttrs = bfi.getTrialAttributes();
+          const auto& testAttrs  = bfi.getTestAttributes();
+          SequentialIteration trialseq(mesh, bfi.getTrialRegion());
+          SequentialIteration testseq(mesh, bfi.getTestRegion());
+
+          for (auto teIt = testseq.getIterator(); teIt; ++teIt)
+          {
+            if (!testAttrs.empty() && !testAttrs.count(teIt->getAttribute()))
+              continue;
+
+            const auto& rowsDOF = testFES.getDOFs(teIt->getDimension(), teIt->getIndex());
+
+            for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
+            {
+              if (!trialAttrs.empty() && !trialAttrs.count(trIt->getAttribute()))
+                continue;
+
+              const auto& colsDOF = trialFES.getDOFs(trIt->getDimension(), trIt->getIndex());
+
+              bfi.setPolytope(*trIt, *teIt);
+
+              for (size_t i = 0; i < static_cast<size_t>(rowsDOF.size()); ++i)
+              {
+                for (size_t j = 0; j < static_cast<size_t>(colsDOF.size()); ++j)
+                {
+                  const ScalarType val = Math::conj(bfi.integrate(j, i));
+                  if (val != ScalarType(0))
+                    triplets.emplace_back(rowsDOF[i], colsDOF[j], val);
+                }
+              }
+            }
+          }
+        }
+
+        // Preassembled bilinear forms
+        for (auto& bf : pb.getBFs())
+        {
+          const auto& op = bf.getOperator();
+          for (int k = 0; k < op.outerSize(); ++k)
+            for (typename OperatorType::InnerIterator it(op, k); it; ++it)
+              triplets.emplace_back(it.row(), it.col(), it.value());
+        }
+
+        // Linear forms
+        for (auto& lfi : pb.getLFIs())
+        {
+          const auto& attrs = lfi.getAttributes();
+          SequentialIteration seq(mesh, lfi.getRegion());
+          for (auto it = seq.getIterator(); it; ++it)
+          {
+            if (!attrs.empty() && !attrs.count(it->getAttribute()))
+              continue;
+
+            lfi.setPolytope(*it);
+            const auto& dofs = testFES.getDOFs(it->getDimension(), it->getIndex());
+            for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
+              b.coeffRef(dofs[l]) -= lfi.integrate(l);
+          }
+        }
+
+        // Preassembled linear forms
+        for (auto& lf : pb.getLFs())
+          b -= lf.getVector();
+
+        // Dirichlet BC elimination in triplets
+        std::unordered_map<Index, ScalarType> fixed;
+        for (auto& dbc : pb.getDBCs())
+        {
+          if (dbc.getOperand().getUUID() != u.getUUID())
+            continue;
+
+          dbc.assemble();
+          const auto& dofs = dbc.getDOFs();
+          for (const auto& [local, value] : dofs)
+            fixed.emplace(static_cast<Index>(local), static_cast<ScalarType>(value));
+        }
+
+        if (!fixed.empty())
+        {
           for (const auto& t : triplets)
           {
             auto colIt = fixed.find(t.col());
@@ -923,7 +1131,7 @@ namespace Rodin::Assembly
           triplets.swap(filtered);
         }
 
-        A.resize(nrows, ncols);
+        A.resize(rows, cols);
         A.setFromTriplets(triplets.begin(), triplets.end());
       }
 
