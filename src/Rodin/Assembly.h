@@ -22,7 +22,6 @@
  * @see Rodin::Assembly
  */
 
-#include "Assembly/Generic.h"
 #include "Assembly/Sequential.h"
 #include "Assembly/AssemblyBase.h"
 

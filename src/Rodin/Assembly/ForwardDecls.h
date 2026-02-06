@@ -106,17 +106,6 @@ namespace Rodin::Assembly
    */
   template <class ... Ts>
   class Default;
-
-  /**
-   * @brief Generic problem assembly implementation.
-   *
-   * Provides a complete assembly implementation for variational problems,
-   * handling both bilinear and linear forms along with boundary conditions.
-   *
-   * @tparam Ts Type parameters for problem assembly
-   */
-  template <class ... Ts>
-  class Generic;
 }
 
 #ifdef RODIN_USE_OPENMP

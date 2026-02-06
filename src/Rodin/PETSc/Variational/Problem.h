@@ -27,9 +27,6 @@ namespace Rodin::Variational
       using LinearSystemType =
         PETSc::Math::LinearSystem;
 
-      using AssemblyType =
-        PETSc::Assembly::Sequential<LinearSystemType, Problem>;
-
       using SolverBaseType =
         Solver::SolverBase<LinearSystemType>;
 
@@ -65,9 +62,9 @@ namespace Rodin::Variational
       using Parent =
         Variational::ProblemUVBase<LinearSystemType, U, V>;
 
-      static_assert(
-          std::is_same_v<TrialFESMeshContextType, Context::Local>,
-          "PETSc sequential assembly supports only Local mesh context.");
+      using AssemblyType =
+        Assembly::Default<TrialFESMeshContextType, TestFESMeshContextType>
+          ::template Type<LinearSystemType, Problem>;
 
       static_assert(
           std::is_same_v<TrialFESMeshContextType, TestFESMeshContextType>);
@@ -182,12 +179,6 @@ namespace Rodin::Variational
           TrialFunction<Solution, TrialFES>,
           TestFunction<TestFES>>;
 
-  // -----------------------------------------------------------------------------
-  // PETSc multi-variable Problem specialization
-  // - Owns: pb, trial/test tuples, UUID→block index maps, offsets, PETSc LinearSystem
-  // - Delegates assembly to PETSc::Assembly::Generic<LinearSystemType, Problem>
-  //   via an AssemblyInput that exposes everything Generic needs.
-  // -----------------------------------------------------------------------------
   template <class U1, class U2, class U3, class... Us>
   class Problem<PETSc::Math::LinearSystem, U1, U2, U3, Us...>
     : public ProblemBase<PETSc::Math::LinearSystem>
