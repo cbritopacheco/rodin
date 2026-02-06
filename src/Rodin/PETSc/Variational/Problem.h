@@ -14,7 +14,7 @@
 
 #include "Rodin/PETSc/Math/LinearSystem.h"
 
-#include "Rodin/PETSc/Assembly/Generic.h"
+#include "Rodin/PETSc/Assembly/Default.h"
 #include "Rodin/PETSc/Assembly/Sequential.h"
 #include "Rodin/Variational/TestFunction.h"
 
@@ -27,9 +27,6 @@ namespace Rodin::Variational
     public:
       using LinearSystemType =
         PETSc::Math::LinearSystem;
-
-      using AssemblyType =
-        PETSc::Assembly::Generic<LinearSystemType, Problem>;
 
       using SolverBaseType =
         Solver::SolverBase<LinearSystemType>;
@@ -72,6 +69,10 @@ namespace Rodin::Variational
 
       static_assert(
           std::is_same_v<TrialFESMeshContextType, TestFESMeshContextType>);
+
+      using AssemblyType =
+        PETSc::Assembly::Default<TrialFESMeshContextType, TestFESMeshContextType>
+          ::template Type<LinearSystemType, Problem>;
 
       Problem(U& u, V& v)
         : Parent(u, v),
