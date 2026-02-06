@@ -8,6 +8,8 @@
 #define RODIN_ASSEMBLY_SEQUENTIAL_H
 
 #include <unordered_map>
+#include <type_traits>
+#include <algorithm>
 
 #include "Rodin/Context/Local.h"
 
@@ -920,8 +922,24 @@ namespace Rodin::Assembly
           triplets.swap(filtered);
         }
 
-        A.resize(nrows, ncols);
-        A.setFromTriplets(triplets.begin(), triplets.end());
+        if constexpr (std::is_base_of_v<Eigen::SparseMatrixBase<OperatorType>, OperatorType>)
+        {
+          A.resize(nrows, ncols);
+          A.setFromTriplets(triplets.begin(), triplets.end());
+        }
+        else
+        {
+          A.resize(nrows, ncols);
+          A.setZero();
+          std::sort(
+            triplets.begin(), triplets.end(),
+            [](const auto& a, const auto& b)
+            {
+              return a.row() == b.row() ? a.col() < b.col() : a.row() < b.row();
+            });
+          for (const auto& t : triplets)
+            A(t.row(), t.col()) += t.value();
+        }
       }
 
       Sequential* copy() const noexcept override
