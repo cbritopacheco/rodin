@@ -265,10 +265,12 @@ namespace Rodin::Assembly
         assert(ierr == PETSC_SUCCESS);
 
         // Local BFIs
+        using MeshType = std::decay_t<decltype(mesh)>;
+
         for (auto& bfi : pb.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
-          SequentialIteration seq(mesh, bfi.getRegion());
+          SequentialIteration<MeshType> seq(mesh, bfi.getRegion());
           for (auto it = seq.getIterator(); it; ++it)
           {
             if (!attrs.empty() && !attrs.count(it->getAttribute()))
@@ -302,8 +304,8 @@ namespace Rodin::Assembly
         {
           const auto& trialAttrs = bfi.getTrialAttributes();
           const auto& testAttrs  = bfi.getTestAttributes();
-          SequentialIteration trialseq(mesh, bfi.getTrialRegion());
-          SequentialIteration testseq(mesh, bfi.getTestRegion());
+          SequentialIteration<MeshType> trialseq(mesh, bfi.getTrialRegion());
+          SequentialIteration<MeshType> testseq(mesh, bfi.getTestRegion());
 
           for (auto teIt = testseq.getIterator(); teIt; ++teIt)
           {
@@ -349,7 +351,7 @@ namespace Rodin::Assembly
         for (auto& lfi : pb.getLFIs())
         {
           const auto& attrs = lfi.getAttributes();
-          SequentialIteration seq(mesh, lfi.getRegion());
+          SequentialIteration<MeshType> seq(mesh, lfi.getRegion());
           for (auto it = seq.getIterator(); it; ++it)
           {
             if (!attrs.empty() && !attrs.count(it->getAttribute()))
