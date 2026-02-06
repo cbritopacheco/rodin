@@ -77,10 +77,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md227">Dense Matrix Storage</a></li>
-            <li><a href="#autotoc_md228">When to Use Dense Storage</a></li>
-            <li><a href="#autotoc_md229">Performance Considerations</a></li>
-            <li><a href="#autotoc_md230">Usage Example</a></li>
+            <li><a href="#autotoc_md241">Dense Matrix Storage</a></li>
+            <li><a href="#autotoc_md242">When to Use Dense Storage</a></li>
+            <li><a href="#autotoc_md243">Performance Considerations</a></li>
+            <li><a href="#autotoc_md244">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -90,7 +90,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the DenseProblem class, a specialization of the Problem class that uses dense matrix storage. While less memory-efficient than sparse storage, dense matrices can be advantageous for small problems or when matrix structure doesn&#x27;t favor sparsity.</p><section id="autotoc_md227"><h3><a href="#autotoc_md227">Dense Matrix Storage</a></h3><p>Dense storage stores all <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
+<p>This file defines the DenseProblem class, a specialization of the Problem class that uses dense matrix storage. While less memory-efficient than sparse storage, dense matrices can be advantageous for small problems or when matrix structure doesn&#x27;t favor sparsity.</p><section id="autotoc_md241"><h3><a href="#autotoc_md241">Dense Matrix Storage</a></h3><p>Dense storage stores all <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
 <title>
 $ N^2 $
 </title>
@@ -136,7 +136,7 @@ $ O(1) $
 <use x='13.823574' y='0' xlink:href='#eq3-g1-49'/>
 <use x='19.676564' y='0' xlink:href='#eq3-g1-41'/>
 </g>
-</svg> for any entry</li><li><strong>Operations</strong>: Cache-friendly for small matrices</li></ul></section><section id="autotoc_md228"><h3><a href="#autotoc_md228">When to Use Dense Storage</a></h3><ul><li>Small problems (few hundred DOFs)</li><li>Nearly full matrices (rare in standard FEM)</li><li>Prototyping and testing</li><li>Spectral methods with global basis functions</li><li>Problems with dense blocks (e.g., boundary elements)</li></ul></section><section id="autotoc_md229"><h3><a href="#autotoc_md229">Performance Considerations</a></h3><p>For typical FEM problems:</p><ul><li>Sparse: scales to millions of DOFs</li><li>Dense: practical only for ~1000 DOFs or less</li></ul></section><section id="autotoc_md230"><h3><a href="#autotoc_md230">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w">  </span><span class="c1">// Small mesh</span>
+</svg> for any entry</li><li><strong>Operations</strong>: Cache-friendly for small matrices</li></ul></section><section id="autotoc_md242"><h3><a href="#autotoc_md242">When to Use Dense Storage</a></h3><ul><li>Small problems (few hundred DOFs)</li><li>Nearly full matrices (rare in standard FEM)</li><li>Prototyping and testing</li><li>Spectral methods with global basis functions</li><li>Problems with dense blocks (e.g., boundary elements)</li></ul></section><section id="autotoc_md243"><h3><a href="#autotoc_md243">Performance Considerations</a></h3><p>For typical FEM problems:</p><ul><li>Sparse: scales to millions of DOFs</li><li>Dense: practical only for ~1000 DOFs or less</li></ul></section><section id="autotoc_md244"><h3><a href="#autotoc_md244">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w">  </span><span class="c1">// Small mesh</span>
 <span class="n">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="n">TestFunction</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 

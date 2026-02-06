@@ -369,16 +369,12 @@ $ s $
             </dt>
             <dd>Gets the polynomial order of the transformation.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aca9c67c6b8da73405b94bbb5a3b232ad" class="m-doc">getJacobianOrder</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">pure virtual</span></span>
-            </dt>
-            <dd>Gets the polynomial order of the Jacobian.</dd>
-            <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a1cebe38715f95dd2bcca579a27e476bb" class="m-doc">transform</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; pc,
               const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Computes the physical coordinates from reference coordinates.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a551bb1d2930d7c149e9f6f03cfe779b5" class="m-doc">jacobian</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a402789b5574468564b86b961636c47b9" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; jacobian,
+              <span class="m-doc-wrap-bumper">void <a href="#a551bb1d2930d7c149e9f6f03cfe779b5" class="m-doc">jacobian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; jacobian,
               const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Computes the Jacobian matrix of the transformation.</dd>
@@ -506,21 +502,6 @@ $ s $
             </table>
 <p>For linear transformations, returns 1. For higher-order geometric approximations (e.g., quadratic elements), returns the appropriate order.</p>
           </div></section>
-          <section class="m-doc-details" id="aca9c67c6b8da73405b94bbb5a3b232ad"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />PolytopeTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aca9c67c6b8da73405b94bbb5a3b232ad" class="m-doc-self">getJacobianOrder</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
-            </h3>
-            <p>Gets the polynomial order of the Jacobian.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Polynomial order of the Jacobian matrix entries</td>
-                </tr>
-              </tfoot>
-            </table>
-<p>For linear transformations, returns 0 (constant Jacobian). For higher-order transformations, returns the order of the derivative.</p>
-          </div></section>
           <section class="m-doc-details" id="a1cebe38715f95dd2bcca579a27e476bb"><div>
             <h3>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1cebe38715f95dd2bcca579a27e476bb" class="m-doc-self">transform</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; pc,
@@ -605,7 +586,7 @@ $ s $
           </div></section>
           <section class="m-doc-details" id="a551bb1d2930d7c149e9f6f03cfe779b5"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a551bb1d2930d7c149e9f6f03cfe779b5" class="m-doc-self">jacobian</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a402789b5574468564b86b961636c47b9" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; jacobian,
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a551bb1d2930d7c149e9f6f03cfe779b5" class="m-doc-self">jacobian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; jacobian,
               const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Computes the Jacobian matrix of the transformation.</p>

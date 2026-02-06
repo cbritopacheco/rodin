@@ -82,6 +82,10 @@
 <span class="cm"> *       (See accompanying file LICENSE or copy at</span>
 <span class="cm"> *          https://www.boost.org/LICENSE_1_0.txt)</span>
 <span class="cm"> */</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;Rodin/Geometry/Polytope.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;Rodin/IO/ForwardDecls.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;Rodin/Solver/ForwardDecls.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;Rodin/Variational/TrialFunction.h&quot;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Types.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solver.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
@@ -94,59 +98,83 @@
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Geometry</span><span class="p">;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Variational</span><span class="p">;</span>
 
-<span class="k">constexpr</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">order</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">integral_constant</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="o">&gt;</span><span class="p">{};</span>
-
 <span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">**</span><span class="p">)</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
-<span class="w">  </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Wedge</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">});</span>
+<span class="w">  </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">Build</span><span class="p">().</span><span class="n">initialize</span><span class="p">(</span><span class="mi">2</span><span class="p">).</span><span class="n">nodes</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="w">                     </span><span class="p">.</span><span class="n">vertex</span><span class="p">({</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">})</span>
+<span class="w">                     </span><span class="p">.</span><span class="n">vertex</span><span class="p">({</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">})</span>
+<span class="w">                     </span><span class="p">.</span><span class="n">vertex</span><span class="p">({</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">})</span>
+<span class="w">                     </span><span class="p">.</span><span class="n">polytope</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">})</span>
+<span class="w">                     </span><span class="p">.</span><span class="n">finalize</span><span class="p">();</span>
 
-<span class="w">  </span><span class="c1">// mesh = mesh.Build().initialize(3).nodes(6).vertex({ 0.0, 0.0, 0.0 })</span>
-<span class="w">  </span><span class="c1">//                             .vertex({ 1.0, 0.0, 0.0 })</span>
-<span class="w">  </span><span class="c1">//                             .vertex({ 0.0, 1.0, 0.0 })</span>
-<span class="w">  </span><span class="c1">//                             .vertex({ 0.0, 0.0, 1.0 })</span>
-<span class="w">  </span><span class="c1">//                             .vertex({ 1.0, 0.0, 1.0 })</span>
-<span class="w">  </span><span class="c1">//                             .vertex({ 0.0, 1.0, 1.0 })</span>
-<span class="w">  </span><span class="c1">//                             .polytope(Polytope::Type::Wedge, { 0, 1, 2, 3, 4, 5 }).finalize();</span>
+<span class="w">  </span><span class="n">P1</span><span class="w"> </span><span class="n">vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
 
-<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
-<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">  </span><span class="n">TrialFunction</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">vh</span><span class="p">);</span>
+<span class="w">  </span><span class="n">TestFunction</span><span class="w"> </span><span class="n">v</span><span class="p">(</span><span class="n">vh</span><span class="p">);</span>
 
-<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;RODIN.mesh&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">lambda</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="n">mu</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Problem</span><span class="w"> </span><span class="n">prob</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+<span class="w">      </span><span class="n">prob</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">lambda</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">Div</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Div</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+<span class="w">                 </span><span class="o">+</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span>
+<span class="w">                     </span><span class="n">mu</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">Jacobian</span><span class="p">(</span><span class="n">u</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">Jacobian</span><span class="p">(</span><span class="n">u</span><span class="p">).</span><span class="n">T</span><span class="p">()),</span><span class="w"> </span><span class="mf">0.5</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">Jacobian</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">Jacobian</span><span class="p">(</span><span class="n">v</span><span class="p">).</span><span class="n">T</span><span class="p">()));</span>
+<span class="w">  </span><span class="n">prob</span><span class="p">.</span><span class="n">assemble</span><span class="p">();</span>
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Operator:</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">prob</span><span class="p">.</span><span class="n">getLinearSystem</span><span class="p">().</span><span class="n">getOperator</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
 
-<span class="w">  </span><span class="n">H1</span><span class="w"> </span><span class="n">vh</span><span class="p">(</span><span class="n">order</span><span class="p">,</span><span class="w"> </span><span class="n">mesh</span><span class="p">);</span>
 
+<span class="w">  </span><span class="c1">// P0 p0h(mesh);</span>
+<span class="w">  </span><span class="c1">// P1 p1h(mesh);</span>
 
-<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getPolytopeCount</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span><span class="w"> </span><span class="n">c</span><span class="o">++</span><span class="p">)</span>
-<span class="w">  </span><span class="p">{</span>
-<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Wedge element DOFs:&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">dof</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">vh</span><span class="p">.</span><span class="n">getDOFs</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">))</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;DOF: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">dof</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="c1">// TrialFunction u(p1h);</span>
+<span class="w">  </span><span class="c1">// TestFunction v(p1h);</span>
 
-<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">conn32</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">getIncidence</span><span class="p">({</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">},</span><span class="w"> </span><span class="n">c</span><span class="p">);</span>
-<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">localFaceIdx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">conn32</span><span class="p">.</span><span class="n">size</span><span class="p">();</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Local face idx: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">localFaceIdx</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-<span class="w">      </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">dofs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vh</span><span class="p">.</span><span class="n">getDOFs</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">conn32</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
-<span class="w">      </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">dof</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">dofs</span><span class="p">)</span>
-<span class="w">      </span><span class="p">{</span>
-<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;DOF: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">dof</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">      </span><span class="n">localFaceIdx</span><span class="o">++</span><span class="p">;</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="c1">// TrialFunction p(p0h);</span>
+<span class="w">  </span><span class="c1">// TestFunction q(p0h);</span>
 
-<span class="w">  </span><span class="n">GridFunction</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">vh</span><span class="p">);</span>
+<span class="w">  </span><span class="c1">// RealFunction f = [](const Geometry::Point&amp; p) -&gt; double</span>
+<span class="w">  </span><span class="c1">// {</span>
+<span class="w">  </span><span class="c1">//   return 2.0 * (p.x() * (1.0 - p.x()) + p.y() * p.y());</span>
+<span class="w">  </span><span class="c1">// };</span>
 
-<span class="w">  </span><span class="n">u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="n">Point</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="p">)</span>
-<span class="w">  </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">x</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">y</span><span class="p">())</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">z</span><span class="p">();</span>
-<span class="w">  </span><span class="p">};</span>
+<span class="w">  </span><span class="c1">// Problem p_l2(p, q);</span>
+<span class="w">  </span><span class="c1">// p_l2 = Integral(p, q) - Integral(f, q);</span>
+<span class="w">  </span><span class="c1">// CG(p_l2).solve();</span>
 
-<span class="w">  </span><span class="n">u</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;RODIN.gf&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="c1">// p.getSolution().save(&quot;p0.mesh&quot;);</span>
+
+<span class="w">  </span><span class="c1">// Problem u_l2(u, v);</span>
+<span class="w">  </span><span class="c1">// u_l2 = Integral(u, v) - Integral(p.getSolution(), v);</span>
+<span class="w">  </span><span class="c1">// CG(u_l2).solve();</span>
+
+<span class="w">  </span><span class="c1">// u.getSolution().save(&quot;u0.mesh&quot;);</span>
+
+<span class="w">  </span><span class="c1">// p.getSolution() = 0.0;</span>
+<span class="w">  </span><span class="c1">// u.getSolution() = 0.0;</span>
+
+<span class="w">  </span><span class="c1">// Problem mixed(u, v, p, q);</span>
+<span class="w">  </span><span class="c1">// mixed = Integral(u, v)</span>
+<span class="w">  </span><span class="c1">//       - Integral(p, v)</span>
+<span class="w">  </span><span class="c1">//       + Integral(p, q)</span>
+<span class="w">  </span><span class="c1">//       - Integral(f, q);</span>
+
+<span class="w">  </span><span class="c1">// BiCGSTAB(mixed).solve();</span>
+
+<span class="w">  </span><span class="c1">// std::cout &lt;&lt; &quot;Operator:\n&quot;;</span>
+<span class="w">  </span><span class="c1">// std::cout &lt;&lt; mixed.getLinearSystem().getOperator() &lt;&lt; std::endl;</span>
+
+<span class="w">  </span><span class="c1">// std::cout &lt;&lt; &quot;Vector:\n&quot;;</span>
+<span class="w">  </span><span class="c1">// std::cout &lt;&lt; mixed.getLinearSystem().getVector() &lt;&lt; std::endl;</span>
+
+<span class="w">  </span><span class="c1">// u.getSolution().save(&quot;u.mesh&quot;);</span>
+<span class="w">  </span><span class="c1">// p.getSolution().save(&quot;p.mesh&quot;);</span>
+<span class="w">  </span><span class="c1">// mesh.save(&quot;mesh.mesh&quot;);</span>
+
+<span class="w">  </span><span class="c1">// // mesh.load(&quot;CoronaryArtery.mesh&quot;, IO::FileFormat::MEDIT);</span>
+<span class="w">  </span><span class="c1">// // mesh.getConnectivity().compute(2, 3);</span>
+
+<span class="w">  </span><span class="c1">// // auto skin = mesh.skin();</span>
+<span class="w">  </span><span class="c1">// // skin.save(&quot;CoronaryArtery_Skin.mesh&quot;, IO::FileFormat::MEDIT);</span>
 
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="p">}</span></pre>
