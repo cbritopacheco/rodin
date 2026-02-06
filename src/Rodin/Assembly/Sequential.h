@@ -915,10 +915,10 @@ namespace Rodin::Assembly
           }
 
           for (const auto& [idx, value] : fixed)
+          {
             filtered.emplace_back(idx, idx, ScalarType(1));
-
-          for (const auto& [idx, value] : fixed)
             b.coeffRef(idx) = value;
+          }
 
           triplets.swap(filtered);
         }
