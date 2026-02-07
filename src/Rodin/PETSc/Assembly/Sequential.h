@@ -270,6 +270,17 @@ namespace Rodin::Assembly
         ierr = VecZeroEntries(b);
         assert(ierr == PETSC_SUCCESS);
 
+        auto& x = axb.getSolution();
+        assert(x);
+        ierr = VecSetSizes(x, static_cast<PetscInt>(rows), PETSC_DECIDE);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecSetType(x, VECSEQ);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecSetFromOptions(x);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecZeroEntries(x);
+        assert(ierr == PETSC_SUCCESS);
+
         // Local BFIs
         using MeshType = std::decay_t<decltype(mesh)>;
 
@@ -536,6 +547,17 @@ namespace Rodin::Assembly
         assert(ierr == PETSC_SUCCESS);
 
         ierr = VecZeroEntries(b);
+        assert(ierr == PETSC_SUCCESS);
+
+        auto& x = axb.getSolution();
+        assert(x);
+        ierr = VecSetSizes(x, static_cast<PetscInt>(nrows), PETSC_DECIDE);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecSetType(x, VECSEQ);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecSetFromOptions(x);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecZeroEntries(x);
         assert(ierr == PETSC_SUCCESS);
 
         // ------------------------
