@@ -10,6 +10,7 @@
 #include <omp.h>
 #include <petsc.h>
 #include <petscerror.h>
+#include <optional>
 
 #include "Rodin/Assembly/OpenMP.h"
 #include "Rodin/PETSc/Math/LinearSystem.h"
@@ -860,68 +861,71 @@ namespace Rodin::Assembly
           return it->second;
         };
 
-        const auto& getTrialFESByUUID = [&](const auto& uuid) -> const auto&
+        const auto withTrialFES = [&](const auto& uuid, auto&& fn)
         {
           const size_t k = findTrialBlock(uuid);
-          const void* addr = nullptr;
+          bool found = false;
           us.iapply([&](size_t i, const auto& uref)
           {
             if (i == k)
-              addr = static_cast<const void*>(&uref.get().getFiniteElementSpace());
+            {
+              fn(uref.get().getFiniteElementSpace());
+              found = true;
+            }
           });
-          assert(addr);
-          return *static_cast<const std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace())>*>(addr);
+          assert(found);
         };
 
-        const auto& getTestFESByUUID = [&](const auto& uuid) -> const auto&
+        const auto withTestFES = [&](const auto& uuid, auto&& fn)
         {
           const size_t k = findTestBlock(uuid);
-          const void* addr = nullptr;
+          bool found = false;
           vs.iapply([&](size_t i, const auto& vref)
           {
             if (i == k)
-              addr = static_cast<const void*>(&vref.get().getFiniteElementSpace());
+            {
+              fn(vref.get().getFiniteElementSpace());
+              found = true;
+            }
           });
-          assert(addr);
-          return *static_cast<const std::decay_t<decltype(vs.template get<0>().get().getFiniteElementSpace())>*>(addr);
+          assert(found);
         };
 
-        const auto& mesh = [&]() -> const auto&
+        using MeshType0 =
+          std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace().getMesh())>;
+        std::optional<std::reference_wrapper<const MeshType0>> meshRef;
+        us.apply([&](const auto& uref)
         {
-          const void* addr = nullptr;
-          us.apply([&](const auto& uref)
-          {
-            if (!addr)
-              addr = static_cast<const void*>(&uref.get().getFiniteElementSpace().getMesh());
-          });
-          assert(addr);
-          return *static_cast<const std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace().getMesh())>*>(addr);
-        }();
+          using MeshT = std::decay_t<decltype(uref.get().getFiniteElementSpace().getMesh())>;
+          static_assert(std::is_same_v<MeshT, MeshType0>,
+            "Mixed mesh types are not supported in PETSc multi-field OpenMP assembly.");
+          if (!meshRef)
+            meshRef = std::cref(uref.get().getFiniteElementSpace().getMesh());
+        });
+        assert(meshRef.has_value());
+        const MeshType0& mesh = meshRef->get();
 
         const int tc = static_cast<int>(getThreadCount());
 
         // ------------------------
         // Assemble bilinear terms into A (parallel)
         // ------------------------
-        for (auto& bfi : pb.getLocalBFIs())
-        {
-          const auto uUUID = bfi.getTrialFunction().getUUID();
-          const auto vUUID = bfi.getTestFunction().getUUID();
+          for (auto& bfi : pb.getLocalBFIs())
+          {
+            const auto uUUID = bfi.getTrialFunction().getUUID();
+            const auto vUUID = bfi.getTestFunction().getUUID();
 
-          const size_t uBlock = findTrialBlock(uUUID);
-          const size_t vBlock = findTestBlock(vUUID);
+            const size_t uBlock = findTrialBlock(uUUID);
+            const size_t vBlock = findTestBlock(vUUID);
 
-          const size_t uOff = trialOffsets[uBlock];
-          const size_t vOff = testOffsets[vBlock];
+            const size_t uOff = trialOffsets[uBlock];
+            const size_t vOff = testOffsets[vBlock];
 
-          const auto& uFES = getTrialFESByUUID(uUUID);
-          const auto& vFES = getTestFESByUUID(vUUID);
+            const auto& attrs = bfi.getAttributes();
+            OpenMPIteration seq(mesh, bfi.getRegion());
 
-          const auto& attrs = bfi.getAttributes();
-          OpenMPIteration seq(mesh, bfi.getRegion());
-
-          const PetscInt dim = static_cast<PetscInt>(seq.getDimension());
-          const PetscInt cnt = static_cast<PetscInt>(seq.getCount());
+            const PetscInt dim = static_cast<PetscInt>(seq.getDimension());
+            const PetscInt cnt = static_cast<PetscInt>(seq.getCount());
 
           std::vector<std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>>> chunks(static_cast<size_t>(tc));
 
@@ -942,22 +946,26 @@ namespace Rodin::Assembly
               if (!attrs.empty() && !attrs.count(mesh.getAttribute(dim, k))) continue;
 
               auto it = seq.getIterator(k);
-              integrator->setPolytope(*it);
-
-              const auto& rows = vFES.getDOFs(dim, k);
-              const auto& cols = uFES.getDOFs(dim, k);
-
-              for (PetscInt i = 0; i < static_cast<PetscInt>(rows.size()); ++i)
+              withTrialFES(uUUID, [&](const auto& uFES)
               {
-                const PetscInt I = static_cast<PetscInt>(vOff + static_cast<size_t>(rows[i]));
-                for (PetscInt j = 0; j < static_cast<PetscInt>(cols.size()); ++j)
+                withTestFES(vUUID, [&](const auto& vFES)
                 {
-                  const PetscInt J = static_cast<PetscInt>(uOff + static_cast<size_t>(cols[j]));
-                  const PetscScalar val = static_cast<PetscScalar>(integrator->integrate(j, i));
-                  if (val != PetscScalar(0))
-                    local.emplace_back(I, J, val);
-                }
-              }
+                  integrator->setPolytope(*it);
+                  const auto& rows = vFES.getDOFs(dim, k);
+                  const auto& cols = uFES.getDOFs(dim, k);
+                  for (PetscInt i = 0; i < static_cast<PetscInt>(rows.size()); ++i)
+                  {
+                    const PetscInt I = static_cast<PetscInt>(vOff + static_cast<size_t>(rows[i]));
+                    for (PetscInt j = 0; j < static_cast<PetscInt>(cols.size()); ++j)
+                    {
+                      const PetscInt J = static_cast<PetscInt>(uOff + static_cast<size_t>(cols[j]));
+                      const PetscScalar val = static_cast<PetscScalar>(integrator->integrate(j, i));
+                      if (val != PetscScalar(0))
+                        local.emplace_back(I, J, val);
+                    }
+                  }
+                });
+              });
             }
 
             chunks[static_cast<size_t>(tid)] = std::move(local);
@@ -987,9 +995,6 @@ namespace Rodin::Assembly
 
           const size_t uOff = trialOffsets[uBlock];
           const size_t vOff = testOffsets[vBlock];
-
-          const auto& uFES = getTrialFESByUUID(uUUID);
-          const auto& vFES = getTestFESByUUID(vUUID);
 
           const auto& trialAttrs = bfi.getTrialAttributes();
           const auto& testAttrs  = bfi.getTestAttributes();
@@ -1022,30 +1027,36 @@ namespace Rodin::Assembly
               if (!testAttrs.empty() && !testAttrs.count(mesh.getAttribute(tdim, te))) continue;
 
               auto teIt = testseq.getIterator(te);
-              const auto& rows = vFES.getDOFs(tdim, te);
-
-              for (PetscInt tr = 0; tr < rcnt; ++tr)
+              withTrialFES(uUUID, [&](const auto& uFES)
               {
-                if (!trialseq.filter(tr)) continue;
-                if (!trialAttrs.empty() && !trialAttrs.count(mesh.getAttribute(rdim, tr))) continue;
-
-                auto trIt = trialseq.getIterator(tr);
-                const auto& cols = uFES.getDOFs(rdim, tr);
-
-                integrator->setPolytope(*trIt, *teIt);
-
-                for (PetscInt i = 0; i < static_cast<PetscInt>(rows.size()); ++i)
+                withTestFES(vUUID, [&](const auto& vFES)
                 {
-                  const PetscInt I = static_cast<PetscInt>(vOff + static_cast<size_t>(rows[i]));
-                  for (PetscInt j = 0; j < static_cast<PetscInt>(cols.size()); ++j)
+                  const auto& rows = vFES.getDOFs(tdim, te);
+
+                  for (PetscInt tr = 0; tr < rcnt; ++tr)
                   {
-                    const PetscInt J = static_cast<PetscInt>(uOff + static_cast<size_t>(cols[j]));
-                    const PetscScalar val = static_cast<PetscScalar>(integrator->integrate(j, i));
-                    if (val != PetscScalar(0))
-                      local.emplace_back(I, J, val);
+                    if (!trialseq.filter(tr)) continue;
+                    if (!trialAttrs.empty() && !trialAttrs.count(mesh.getAttribute(rdim, tr))) continue;
+
+                    auto trIt = trialseq.getIterator(tr);
+                    const auto& cols = uFES.getDOFs(rdim, tr);
+
+                    integrator->setPolytope(*trIt, *teIt);
+
+                    for (PetscInt i = 0; i < static_cast<PetscInt>(rows.size()); ++i)
+                    {
+                      const PetscInt I = static_cast<PetscInt>(vOff + static_cast<size_t>(rows[i]));
+                      for (PetscInt j = 0; j < static_cast<PetscInt>(cols.size()); ++j)
+                      {
+                        const PetscInt J = static_cast<PetscInt>(uOff + static_cast<size_t>(cols[j]));
+                        const PetscScalar val = static_cast<PetscScalar>(integrator->integrate(j, i));
+                        if (val != PetscScalar(0))
+                          local.emplace_back(I, J, val);
+                      }
+                    }
                   }
-                }
-              }
+                });
+              });
             }
 
             chunks[static_cast<size_t>(tid)] = std::move(local);
@@ -1081,8 +1092,6 @@ namespace Rodin::Assembly
           const size_t vBlock = findTestBlock(vUUID);
           const size_t vOff   = testOffsets[vBlock];
 
-          const auto& vFES = getTestFESByUUID(vUUID);
-
           const auto& attrs = lfi.getAttributes();
           OpenMPIteration seq(mesh, lfi.getRegion());
 
@@ -1107,15 +1116,17 @@ namespace Rodin::Assembly
               if (!attrs.empty() && !attrs.count(mesh.getAttribute(dim, k))) continue;
 
               auto it = seq.getIterator(k);
-              integrator->setPolytope(*it);
-
-              const auto& dofs = vFES.getDOFs(dim, k);
-              for (PetscInt l = 0; l < static_cast<PetscInt>(dofs.size()); ++l)
+              withTestFES(vUUID, [&](const auto& vFES)
               {
-                const PetscInt I = static_cast<PetscInt>(vOff + static_cast<size_t>(dofs[l]));
-                const PetscScalar val = static_cast<PetscScalar>(integrator->integrate(l));
-                local[static_cast<size_t>(I)] += val;
-              }
+                integrator->setPolytope(*it);
+                const auto& dofs = vFES.getDOFs(dim, k);
+                for (PetscInt l = 0; l < static_cast<PetscInt>(dofs.size()); ++l)
+                {
+                  const PetscInt I = static_cast<PetscInt>(vOff + static_cast<size_t>(dofs[l]));
+                  const PetscScalar val = static_cast<PetscScalar>(integrator->integrate(l));
+                  local[static_cast<size_t>(I)] += val;
+                }
+              });
             }
 
             chunks[static_cast<size_t>(tid)] = std::move(local);

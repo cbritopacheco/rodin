@@ -4,6 +4,7 @@
 #include <petsc.h>
 #include <petscsys.h>
 #include <petscsystypes.h>
+#include <optional>
 
 #include "Rodin/Assembly/AssemblyBase.h"
 #include "Rodin/Assembly/Sequential.h"
@@ -607,18 +608,19 @@ namespace Rodin::Assembly
           assert(found);
         };
 
-        // Mesh: take it from the first trial FES
-        const auto& mesh = [&]() -> const auto&
+        using MeshType0 =
+          std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace().getMesh())>;
+        std::optional<std::reference_wrapper<const MeshType0>> meshRef;
+        us.apply([&](const auto& uref)
         {
-          const void* addr = nullptr;
-          us.apply([&](const auto& uref)
-          {
-            if (!addr)
-              addr = static_cast<const void*>(&uref.get().getFiniteElementSpace().getMesh());
-          });
-          assert(addr);
-          return *static_cast<const std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace().getMesh())>*>(addr);
-        }();
+          using MeshT = std::decay_t<decltype(uref.get().getFiniteElementSpace().getMesh())>;
+          static_assert(std::is_same_v<MeshT, MeshType0>,
+            "Mixed mesh types are not supported in PETSc multi-field sequential assembly.");
+          if (!meshRef)
+            meshRef = std::cref(uref.get().getFiniteElementSpace().getMesh());
+        });
+        assert(meshRef.has_value());
+        const MeshType0& mesh = meshRef->get();
 
         // ------------------------
         // Assemble bilinear terms into A
