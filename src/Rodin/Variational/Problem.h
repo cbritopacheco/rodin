@@ -302,6 +302,24 @@ namespace Rodin::Variational
   class Problem<LinearSystem, TrialFunction, TestFunction>
     : public ProblemUVBase<LinearSystem, TrialFunction, TestFunction>
   {
+    using TrialFESType =
+      typename FormLanguage::Traits<TrialFunction>::FESType;
+
+    using TestFESType =
+      typename FormLanguage::Traits<TestFunction>::FESType;
+
+    using TrialFESMeshType =
+      typename FormLanguage::Traits<TrialFESType>::MeshType;
+
+    using TestFESMeshType =
+      typename FormLanguage::Traits<TestFESType>::MeshType;
+
+    using TrialFESContextType =
+      typename FormLanguage::Traits<TrialFESMeshType>::ContextType;
+
+    using TestFESContextType =
+      typename FormLanguage::Traits<TestFESMeshType>::ContextType;
+
     public:
       using LinearSystemType =
         LinearSystem;
@@ -321,20 +339,8 @@ namespace Rodin::Variational
       using ProblemBodyType =
         ProblemBody<OperatorType, VectorType, ScalarType>;
 
-      using TrialFESType =
-        typename FormLanguage::Traits<TrialFunction>::FESType;
-
-      using TestFESType =
-        typename FormLanguage::Traits<TestFunction>::FESType;
-
-      using TrialFESMeshType =
-        typename FormLanguage::Traits<TrialFESType>::MeshType;
-
       using TrialFESMeshContextType =
         typename FormLanguage::Traits<TrialFESMeshType>::ContextType;
-
-      using TestFESMeshType =
-        typename FormLanguage::Traits<TestFESType>::MeshType;
 
       using TestFESMeshContextType =
         typename FormLanguage::Traits<TestFESMeshType>::ContextType;

@@ -80,6 +80,8 @@ namespace Rodin::Solver
 
     ierr = KSPSolve(m_ksp, b, x);
     assert(ierr == PETSC_SUCCESS);
+
+    (void) ierr;
   }
 
   KSP& KSP::setType(::KSPType type) noexcept
