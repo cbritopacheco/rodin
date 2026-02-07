@@ -428,6 +428,15 @@ namespace Rodin::Assembly
         // ------------------------
         for (auto& bfi : pb.getGlobalBFIs())
         {
+          const auto uUUID = bfi.getTrialFunction().getUUID();
+          const auto vUUID = bfi.getTestFunction().getUUID();
+
+          const size_t uBlock = findTrialBlock(uUUID);
+          const size_t vBlock = findTestBlock(vUUID);
+
+          const size_t uOff = trialOffsets[uBlock];
+          const size_t vOff = testOffsets[vBlock];
+
           const auto& trialAttrs = bfi.getTrialAttributes();
           const auto& testAttrs  = bfi.getTestAttributes();
 
@@ -445,9 +454,9 @@ namespace Rodin::Assembly
             if (!testAttrs.empty() && !testAttrs.count(teIt->getAttribute()))
               continue;
 
-            withTrialFES(bfi.getTrialFunction().getUUID(), [&](const auto& uFES)
+            withTrialFES(uUUID, [&](const auto& uFES)
             {
-              withTestFES(bfi.getTestFunction().getUUID(), [&](const auto& vFES)
+              withTestFES(vUUID, [&](const auto& vFES)
               {
                 const auto& rowsDOF = vFES.getShard().getDOFs(td, tidx);
 
@@ -468,11 +477,11 @@ namespace Rodin::Assembly
                   for (Index i = 0; i < rowsDOF.size(); ++i)
                   {
                     const PetscInt I =
-                      static_cast<PetscInt>(vFES.getGlobalIndex(rowsDOF[i]) + testOffsets[findTestBlock(vUUID)]);
+                      static_cast<PetscInt>(vFES.getGlobalIndex(rowsDOF[i]) + vOff);
                     for (Index j = 0; j < colsDOF.size(); ++j)
                     {
                       const PetscInt J =
-                        static_cast<PetscInt>(uFES.getGlobalIndex(colsDOF[j]) + trialOffsets[findTrialBlock(uUUID)]);
+                        static_cast<PetscInt>(uFES.getGlobalIndex(colsDOF[j]) + uOff);
                       const PetscScalar val = static_cast<PetscScalar>(bfi.integrate(j, i));
                       if (val != PetscScalar(0))
                       {
