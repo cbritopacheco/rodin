@@ -12,6 +12,7 @@
 #include "Rodin/PETSc/Variational/TrialFunction.h"
 #include "Rodin/Variational/Problem.h"
 
+#include "Rodin/Assembly/Default.h"
 #include "Rodin/PETSc/Math/LinearSystem.h"
 
 #include "Rodin/PETSc/Assembly/Sequential.h"
@@ -63,7 +64,7 @@ namespace Rodin::Variational
         Variational::ProblemUVBase<LinearSystemType, U, V>;
 
       using AssemblyType =
-        Assembly::Default<TrialFESMeshContextType, TestFESMeshContextType>
+        typename Assembly::Default<TrialFESMeshContextType, TestFESMeshContextType>
           ::template Type<LinearSystemType, Problem>;
 
       static_assert(

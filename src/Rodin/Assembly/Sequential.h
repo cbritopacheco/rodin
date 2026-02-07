@@ -13,6 +13,7 @@
 
 #include "Rodin/Context/Local.h"
 
+#include "Rodin/Math/Common.h"
 #include "Rodin/Tuple.h"
 
 #include "Rodin/Math/Traits.h"
@@ -433,6 +434,7 @@ namespace Rodin::Assembly
             }
           }
         }
+
         for (auto& bfi : input.getGlobalBFIs())
         {
           const auto& trialAttrs = bfi.getTrialAttributes();
@@ -1036,6 +1038,30 @@ namespace Rodin::Assembly
         constexpr bool IsSparse =
           std::is_base_of_v<Eigen::SparseMatrixBase<OperatorType>, OperatorType>;
 
+        // ------------------------------------------------------------
+        // Dirichlet BC elimination data (NaN sentinel)
+        // ------------------------------------------------------------
+        std::vector<ScalarType> fixed(rows, Math::nan<ScalarType>());
+
+        auto isFixed = [&](Index i) -> bool
+        {
+          return !Math::isNaN(fixed[static_cast<size_t>(i)]);
+        };
+
+        for (auto& dbc : pb.getDBCs())
+        {
+          if (dbc.getOperand().getUUID() != u.getUUID())
+            continue;
+
+          dbc.assemble();
+          const auto& dofs = dbc.getDOFs();
+          for (const auto& [local, value] : dofs)
+            fixed[static_cast<size_t>(local)] = static_cast<ScalarType>(value);
+        }
+
+        // ------------------------------------------------------------
+        // Matrix init
+        // ------------------------------------------------------------
         std::vector<Eigen::Triplet<ScalarType>> triplets;
         if constexpr (!IsSparse)
         {
@@ -1043,7 +1069,40 @@ namespace Rodin::Assembly
           A.setZero();
         }
 
+        // ------------------------------------------------------------
+        // Sparse-only: eliminate during assembly
+        // Dense: do plain accumulation; eliminate afterwards
+        // ------------------------------------------------------------
+        auto sparse_entry = [&](Index row, Index col, ScalarType val)
+        {
+          if (val == ScalarType(0))
+            return;
+
+          if constexpr (IsSparse)
+          {
+            const bool rowFixed = isFixed(row);
+            const bool colFixed = isFixed(col);
+
+            if (rowFixed)
+              return;
+
+            if (colFixed && row != col)
+            {
+              b.coeffRef(row) -= val * fixed[static_cast<size_t>(col)];
+              return;
+            }
+
+            triplets.emplace_back(row, col, val);
+          }
+          else
+          {
+            A(row, col) += val;
+          }
+        };
+
+        // ------------------------------------------------------------
         // Local BFIs
+        // ------------------------------------------------------------
         for (auto& bfi : pb.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
@@ -1066,19 +1125,15 @@ namespace Rodin::Assembly
               for (size_t j = 0; j < static_cast<size_t>(colsDOF.size()); ++j)
               {
                 const ScalarType val = Math::conj(bfi.integrate(j, i));
-                if (val != ScalarType(0))
-                {
-                  if constexpr (IsSparse)
-                    triplets.emplace_back(rowsDOF[i], colsDOF[j], val);
-                  else
-                    A(rowsDOF[i], colsDOF[j]) += val;
-                }
+                sparse_entry(rowsDOF[i], colsDOF[j], val);
               }
             }
           }
         }
 
+        // ------------------------------------------------------------
         // Global BFIs
+        // ------------------------------------------------------------
         for (auto& bfi : pb.getGlobalBFIs())
         {
           const auto& trialAttrs = bfi.getTrialAttributes();
@@ -1107,20 +1162,16 @@ namespace Rodin::Assembly
                 for (size_t j = 0; j < static_cast<size_t>(colsDOF.size()); ++j)
                 {
                   const ScalarType val = Math::conj(bfi.integrate(j, i));
-                  if (val != ScalarType(0))
-                  {
-                    if constexpr (IsSparse)
-                      triplets.emplace_back(rowsDOF[i], colsDOF[j], val);
-                    else
-                      A(rowsDOF[i], colsDOF[j]) += val;
-                  }
+                  sparse_entry(rowsDOF[i], colsDOF[j], val);
                 }
               }
             }
           }
         }
 
+        // ------------------------------------------------------------
         // Preassembled bilinear forms
+        // ------------------------------------------------------------
         for (auto& bf : pb.getBFs())
         {
           const auto& op = bf.getOperator();
@@ -1128,7 +1179,7 @@ namespace Rodin::Assembly
           {
             for (int k = 0; k < op.outerSize(); ++k)
               for (typename OperatorType::InnerIterator it(op, k); it; ++it)
-                triplets.emplace_back(it.row(), it.col(), it.value());
+                sparse_entry(it.row(), it.col(), it.value());
           }
           else
           {
@@ -1136,7 +1187,9 @@ namespace Rodin::Assembly
           }
         }
 
-        // Linear forms
+        // ------------------------------------------------------------
+        // Linear forms (unchanged)
+        // ------------------------------------------------------------
         for (auto& lfi : pb.getLFIs())
         {
           const auto& attrs = lfi.getAttributes();
@@ -1153,54 +1206,22 @@ namespace Rodin::Assembly
           }
         }
 
-        // Preassembled linear forms
         for (auto& lf : pb.getLFs())
           b -= lf.getVector();
 
-        // Dirichlet BC elimination
-        std::unordered_map<Index, ScalarType> fixed;
-        for (auto& dbc : pb.getDBCs())
-        {
-          if (dbc.getOperand().getUUID() != u.getUUID())
-            continue;
-
-          dbc.assemble();
-          const auto& dofs = dbc.getDOFs();
-          for (const auto& [local, value] : dofs)
-            fixed.emplace(static_cast<Index>(local), static_cast<ScalarType>(value));
-        }
-
+        // ------------------------------------------------------------
+        // Finalize: Sparse build; Dense eliminate afterwards
+        // ------------------------------------------------------------
         if constexpr (IsSparse)
         {
-          if (!fixed.empty())
+          // Inject identity rows for fixed dofs
+          for (Index i = 0; i < static_cast<Index>(rows); ++i)
           {
-            for (const auto& t : triplets)
+            if (isFixed(i))
             {
-              auto colIt = fixed.find(t.col());
-              if (colIt != fixed.end() && t.row() != t.col())
-                b.coeffRef(t.row()) -= t.value() * colIt->second;
+              triplets.emplace_back(i, i, ScalarType(1));
+              b.coeffRef(i) = fixed[static_cast<size_t>(i)];
             }
-
-            std::vector<Eigen::Triplet<ScalarType>> filtered;
-            filtered.reserve(triplets.size());
-
-            for (const auto& t : triplets)
-            {
-              const bool rowFixed = fixed.find(t.row()) != fixed.end();
-              const bool colFixed = fixed.find(t.col()) != fixed.end();
-
-              if (rowFixed || colFixed)
-                continue;
-              filtered.emplace_back(t);
-            }
-
-            for (const auto& [idx, value] : fixed)
-            {
-              filtered.emplace_back(idx, idx, ScalarType(1));
-              b.coeffRef(idx) = value;
-            }
-
-            triplets.swap(filtered);
           }
 
           A.resize(rows, cols);
@@ -1208,8 +1229,14 @@ namespace Rodin::Assembly
         }
         else
         {
-          for (const auto& [idx, value] : fixed)
+          // Dense elimination after full assembly (your original approach, driven by fixedValue)
+          for (Index idx = 0; idx < static_cast<Index>(rows); ++idx)
           {
+            if (!isFixed(idx))
+              continue;
+
+            const ScalarType value = fixed[static_cast<size_t>(idx)];
+
             for (size_t r = 0; r < rows; ++r)
             {
               if (r == static_cast<size_t>(idx))
@@ -1217,14 +1244,16 @@ namespace Rodin::Assembly
               b.coeffRef(r) -= A(r, idx) * value;
               A(r, idx) = ScalarType(0);
             }
+
             for (size_t c = 0; c < cols; ++c)
             {
               if (c == static_cast<size_t>(idx))
                 continue;
               A(idx, c) = ScalarType(0);
             }
+
             A(idx, idx) = ScalarType(1);
-            b.coeffRef(idx) = value;
+            b.coeffRef(static_cast<size_t>(idx)) = value;
           }
         }
       }

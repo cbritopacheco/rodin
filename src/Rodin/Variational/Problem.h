@@ -321,8 +321,27 @@ namespace Rodin::Variational
       using ProblemBodyType =
         ProblemBody<OperatorType, VectorType, ScalarType>;
 
+      using TrialFESType =
+        typename FormLanguage::Traits<TrialFunction>::FESType;
+
+      using TestFESType =
+        typename FormLanguage::Traits<TestFunction>::FESType;
+
+      using TrialFESMeshType =
+        typename FormLanguage::Traits<TrialFESType>::MeshType;
+
+      using TrialFESMeshContextType =
+        typename FormLanguage::Traits<TrialFESMeshType>::ContextType;
+
+      using TestFESMeshType =
+        typename FormLanguage::Traits<TestFESType>::MeshType;
+
+      using TestFESMeshContextType =
+        typename FormLanguage::Traits<TestFESMeshType>::ContextType;
+
       using AssemblyType =
-        Assembly::Sequential<LinearSystem, Problem>;
+        typename Assembly::Default<TrialFESMeshContextType, TestFESMeshContextType>
+          ::template Type<LinearSystem, Problem>;
 
       using Parent =
         ProblemUVBase<LinearSystem, TrialFunction, TestFunction>;
@@ -467,8 +486,21 @@ namespace Rodin::Variational
       using AssemblyInput =
         Assembly::ProblemAssemblyInput<ProblemBodyType, U1, U2, U3, Us...>;
 
+      using U1FESType = typename FormLanguage::Traits<U1>::FESType;
+      using U2FESType = typename FormLanguage::Traits<U2>::FESType;
+      using U3FESType = typename FormLanguage::Traits<U3>::FESType;
+
+      using U1FESMeshType = typename FormLanguage::Traits<U1FESType>::MeshType;
+      using U2FESMeshType = typename FormLanguage::Traits<U2FESType>::MeshType;
+      using U3FESMeshType = typename FormLanguage::Traits<U3FESType>::MeshType;
+
+      using U1FESMeshContextType = typename FormLanguage::Traits<U1FESMeshType>::ContextType;
+      using U2FESMeshContextType = typename FormLanguage::Traits<U2FESMeshType>::ContextType;
+      using U3FESMeshContextType = typename FormLanguage::Traits<U3FESMeshType>::ContextType;
+
       using AssemblyType =
-        Assembly::Sequential<LinearSystemType, Problem<LinearSystemType, U1, U2, U3, Us...>>;
+        typename Assembly::Default<U1FESMeshContextType, U2FESMeshContextType>
+          ::template Type<LinearSystemType, Problem<LinearSystemType, U1, U2, U3, Us...>>;
 
     private:
       template <class T>
