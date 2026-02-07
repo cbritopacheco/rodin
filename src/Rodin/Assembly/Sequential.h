@@ -732,32 +732,7 @@ namespace Rodin::Assembly
           return it->second;
         };
 
-        const auto& getTrialFESByUUID = [&](const auto& uuid) -> const auto&
-        {
-          const size_t k = findTrialBlock(uuid);
-          const void* addr = nullptr;
-          us.iapply([&](size_t i, const auto& uref)
-          {
-            if (i == k)
-              addr = static_cast<const void*>(&uref.get().getFiniteElementSpace());
-          });
-          assert(addr);
-          return *static_cast<const std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace())>*>(addr);
-        };
-
-        const auto& getTestFESByUUID = [&](const auto& uuid) -> const auto&
-        {
-          const size_t k = findTestBlock(uuid);
-          const void* addr = nullptr;
-          vs.iapply([&](size_t i, const auto& vref)
-          {
-            if (i == k)
-              addr = static_cast<const void*>(&vref.get().getFiniteElementSpace());
-          });
-          assert(addr);
-          return *static_cast<const std::decay_t<decltype(vs.template get<0>().get().getFiniteElementSpace())>*>(addr);
-        };
-
+        // Mesh (assumed common across spaces)
         const auto& mesh = [&]() -> const auto&
         {
           const void* addr = nullptr;
@@ -767,9 +742,77 @@ namespace Rodin::Assembly
               addr = static_cast<const void*>(&uref.get().getFiniteElementSpace().getMesh());
           });
           assert(addr);
-          return *static_cast<const std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace().getMesh())>*>(addr);
+          return *static_cast<
+            const std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace().getMesh())>*
+          >(addr);
         }();
 
+        // ------------------------------------------------------------
+        // Dirichlet BC elimination data (NaN sentinel, global indexing)
+        // ------------------------------------------------------------
+        const size_t ndofs = std::max(nrows, ncols);
+        std::vector<ScalarType> fixed(ndofs, Math::nan<ScalarType>());
+
+        auto isFixed = [&](Index i) -> bool
+        {
+          const size_t k = static_cast<size_t>(i);
+          return k < fixed.size() && !Math::isNaN(fixed[k]);
+        };
+
+        auto fixedValue = [&](Index i) -> ScalarType
+        {
+          return fixed[static_cast<size_t>(i)];
+        };
+
+        for (auto& dbc : pb.getDBCs())
+        {
+          const auto uUUID = dbc.getOperand().getUUID();
+          const size_t uBlock = findTrialBlock(uUUID);
+          const size_t uOff   = trialOffsets[uBlock];
+
+          dbc.assemble();
+          const auto& dofs = dbc.getDOFs();
+          for (const auto& [local, value] : dofs)
+          {
+            const Index g = static_cast<Index>(uOff + static_cast<size_t>(local));
+            if (static_cast<size_t>(g) < fixed.size())
+              fixed[static_cast<size_t>(g)] = static_cast<ScalarType>(value);
+          }
+        }
+
+        // ------------------------------------------------------------
+        // Sparse-only: eliminate during assembly; Dense: accumulate
+        // ------------------------------------------------------------
+        auto sparse_entry = [&](Index row, Index col, ScalarType val)
+        {
+          if (val == ScalarType(0))
+            return;
+
+          if constexpr (IsSparse)
+          {
+            const bool rowFixed = isFixed(row);
+            const bool colFixed = isFixed(col);
+
+            if (rowFixed)
+              return;
+
+            if (colFixed && row != col)
+            {
+              b.coeffRef(row) -= val * fixedValue(col);
+              return;
+            }
+
+            triplets.emplace_back(row, col, val);
+          }
+          else
+          {
+            A(row, col) += val;
+          }
+        };
+
+        // ------------------------------------------------------------
+        // Local BFIs (type-safe per-block FES access)
+        // ------------------------------------------------------------
         for (auto& bfi : pb.getLocalBFIs())
         {
           const auto uUUID = bfi.getTrialFunction().getUUID();
@@ -781,44 +824,50 @@ namespace Rodin::Assembly
           const size_t uOff = trialOffsets[uBlock];
           const size_t vOff = testOffsets[vBlock];
 
-          const auto& uFES = getTrialFESByUUID(uUUID);
-          const auto& vFES = getTestFESByUUID(vUUID);
-
           const auto& attrs = bfi.getAttributes();
           SequentialIteration seq(mesh, bfi.getRegion());
 
-          for (auto it = seq.getIterator(); it; ++it)
+          us.iapply([&](size_t ui, const auto& uref)
           {
-            if (!attrs.empty() && !attrs.count(it->getAttribute()))
-              continue;
+            if (ui != uBlock) return;
+            const auto& uFES = uref.get().getFiniteElementSpace();
 
-            const size_t d = it->getDimension();
-            const Index  p = it->getIndex();
+            vs.iapply([&](size_t vi, const auto& vref)
+            {
+              if (vi != vBlock) return;
+              const auto& vFES = vref.get().getFiniteElementSpace();
 
-            bfi.setPolytope(*it);
-
-            const auto& rows = vFES.getDOFs(d, p);
-            const auto& cols = uFES.getDOFs(d, p);
-
-              for (size_t i = 0; i < static_cast<size_t>(rows.size()); ++i)
+              for (auto it = seq.getIterator(); it; ++it)
               {
-                const Index I = static_cast<Index>(vOff + static_cast<size_t>(rows[i]));
-                for (size_t j = 0; j < static_cast<size_t>(cols.size()); ++j)
+                if (!attrs.empty() && !attrs.count(it->getAttribute()))
+                  continue;
+
+                const size_t d = it->getDimension();
+                const Index  p = it->getIndex();
+
+                bfi.setPolytope(*it);
+
+                const auto& rows = vFES.getDOFs(d, p);
+                const auto& cols = uFES.getDOFs(d, p);
+
+                for (size_t i = 0; i < static_cast<size_t>(rows.size()); ++i)
                 {
-                  const Index J = static_cast<Index>(uOff + static_cast<size_t>(cols[j]));
-                  const ScalarType val = Math::conj(bfi.integrate(j, i));
-                  if (val != ScalarType(0))
+                  const Index I = static_cast<Index>(vOff + static_cast<size_t>(rows[i]));
+                  for (size_t j = 0; j < static_cast<size_t>(cols.size()); ++j)
                   {
-                    if constexpr (IsSparse)
-                      triplets.emplace_back(I, J, val);
-                    else
-                      A(I, J) += val;
+                    const Index J = static_cast<Index>(uOff + static_cast<size_t>(cols[j]));
+                    const ScalarType val = Math::conj(bfi.integrate(j, i));
+                    sparse_entry(I, J, val);
                   }
                 }
               }
-            }
-          }
+            });
+          });
+        }
 
+        // ------------------------------------------------------------
+        // Global BFIs (type-safe per-block FES access)
+        // ------------------------------------------------------------
         for (auto& bfi : pb.getGlobalBFIs())
         {
           const auto uUUID = bfi.getTrialFunction().getUUID();
@@ -830,119 +879,105 @@ namespace Rodin::Assembly
           const size_t uOff = trialOffsets[uBlock];
           const size_t vOff = testOffsets[vBlock];
 
-          const auto& uFES = getTrialFESByUUID(uUUID);
-          const auto& vFES = getTestFESByUUID(vUUID);
-
           const auto& trialAttrs = bfi.getTrialAttributes();
           const auto& testAttrs  = bfi.getTestAttributes();
 
           SequentialIteration trialseq(mesh, bfi.getTrialRegion());
           SequentialIteration testseq(mesh, bfi.getTestRegion());
 
-          for (auto teIt = testseq.getIterator(); teIt; ++teIt)
+          us.iapply([&](size_t ui, const auto& uref)
           {
-            if (!testAttrs.empty() && !testAttrs.count(teIt->getAttribute()))
-              continue;
+            if (ui != uBlock) return;
+            const auto& uFES = uref.get().getFiniteElementSpace();
 
-            const auto& rows = vFES.getDOFs(teIt.getDimension(), teIt->getIndex());
-
-            for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
+            vs.iapply([&](size_t vi, const auto& vref)
             {
-              if (!trialAttrs.empty() && !trialAttrs.count(trIt->getAttribute()))
-                continue;
+              if (vi != vBlock) return;
+              const auto& vFES = vref.get().getFiniteElementSpace();
 
-              const auto& cols = uFES.getDOFs(trIt.getDimension(), trIt->getIndex());
-
-              bfi.setPolytope(*trIt, *teIt);
-
-              for (size_t i = 0; i < static_cast<size_t>(rows.size()); ++i)
+              for (auto teIt = testseq.getIterator(); teIt; ++teIt)
               {
-                const Index I = static_cast<Index>(vOff + static_cast<size_t>(rows[i]));
-                for (size_t j = 0; j < static_cast<size_t>(cols.size()); ++j)
+                if (!testAttrs.empty() && !testAttrs.count(teIt->getAttribute()))
+                  continue;
+
+                const auto& rows = vFES.getDOFs(teIt->getDimension(), teIt->getIndex());
+
+                for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
                 {
-                  const Index J = static_cast<Index>(uOff + static_cast<size_t>(cols[j]));
-                  const ScalarType val = Math::conj(bfi.integrate(j, i));
-                  if (val != ScalarType(0))
+                  if (!trialAttrs.empty() && !trialAttrs.count(trIt->getAttribute()))
+                    continue;
+
+                  const auto& cols = uFES.getDOFs(trIt->getDimension(), trIt->getIndex());
+
+                  bfi.setPolytope(*trIt, *teIt);
+
+                  for (size_t i = 0; i < static_cast<size_t>(rows.size()); ++i)
                   {
-                    if constexpr (IsSparse)
-                      triplets.emplace_back(I, J, val);
-                    else
-                      A(I, J) += val;
+                    const Index I = static_cast<Index>(vOff + static_cast<size_t>(rows[i]));
+                    for (size_t j = 0; j < static_cast<size_t>(cols.size()); ++j)
+                    {
+                      const Index J = static_cast<Index>(uOff + static_cast<size_t>(cols[j]));
+                      const ScalarType val = Math::conj(bfi.integrate(j, i));
+                      sparse_entry(I, J, val);
+                    }
                   }
                 }
               }
-            }
-          }
+            });
+          });
         }
 
+        // ------------------------------------------------------------
+        // LFIs (type-safe test FES access)
+        // ------------------------------------------------------------
         for (auto& lfi : pb.getLFIs())
         {
           const auto vUUID = lfi.getTestFunction().getUUID();
           const size_t vBlock = findTestBlock(vUUID);
           const size_t vOff   = testOffsets[vBlock];
 
-          const auto& vFES = getTestFESByUUID(vUUID);
-
           const auto& attrs = lfi.getAttributes();
           SequentialIteration seq(mesh, lfi.getRegion());
 
-          for (auto it = seq.getIterator(); it; ++it)
+          vs.iapply([&](size_t vi, const auto& vref)
           {
-            if (!attrs.empty() && !attrs.count(it->getAttribute()))
-              continue;
+            if (vi != vBlock) return;
+            const auto& vFES = vref.get().getFiniteElementSpace();
 
-            lfi.setPolytope(*it);
-
-            const auto& dofs = vFES.getDOFs(it.getDimension(), it->getIndex());
-            for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
+            for (auto it = seq.getIterator(); it; ++it)
             {
-              const Index I = static_cast<Index>(vOff + static_cast<size_t>(dofs[l]));
-              b.coeffRef(I) -= lfi.integrate(l);
+              if (!attrs.empty() && !attrs.count(it->getAttribute()))
+                continue;
+
+              lfi.setPolytope(*it);
+
+              const auto& dofs = vFES.getDOFs(it->getDimension(), it->getIndex());
+              for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
+              {
+                const Index I = static_cast<Index>(vOff + static_cast<size_t>(dofs[l]));
+                if constexpr (IsSparse)
+                {
+                  if (isFixed(I))
+                    continue;
+                }
+                b.coeffRef(I) -= lfi.integrate(l);
+              }
             }
-          }
+          });
         }
 
-        std::unordered_map<Index, ScalarType> fixed;
-        for (auto& dbc : pb.getDBCs())
-        {
-          const auto uUUID = dbc.getOperand().getUUID();
-          const size_t uBlock = findTrialBlock(uUUID);
-          const size_t uOff   = trialOffsets[uBlock];
-
-          dbc.assemble();
-          const auto& dofs = dbc.getDOFs();
-          for (const auto& [local, value] : dofs)
-            fixed.emplace(static_cast<Index>(uOff + local), static_cast<ScalarType>(value));
-        }
-
+        // ------------------------------------------------------------
+        // Finalize
+        // ------------------------------------------------------------
         if constexpr (IsSparse)
         {
-          if (!fixed.empty())
+          for (Index i = 0; i < static_cast<Index>(nrows); ++i)
           {
-            std::vector<Eigen::Triplet<ScalarType>> filtered;
-            filtered.reserve(triplets.size());
-
-            for (const auto& t : triplets)
+            if (isFixed(i))
             {
-              auto colIt = fixed.find(t.col());
-              if (colIt != fixed.end() && t.row() != t.col())
-                b.coeffRef(t.row()) -= t.value() * colIt->second;
-
-              const bool rowFixed = fixed.find(t.row()) != fixed.end();
-              const bool colFixed = colIt != fixed.end();
-
-              if (rowFixed || colFixed)
-                continue;
-              filtered.emplace_back(t);
+              triplets.emplace_back(i, i, ScalarType(1));
+              b.coeffRef(i) = fixedValue(i);
             }
-
-            for (const auto& [idx, value] : fixed)
-            {
-              filtered.emplace_back(idx, idx, ScalarType(1));
-              b.coeffRef(idx) = value;
-            }
-
-            triplets.swap(filtered);
           }
 
           A.resize(nrows, ncols);
@@ -950,8 +985,13 @@ namespace Rodin::Assembly
         }
         else
         {
-          for (const auto& [idx, value] : fixed)
+          for (Index idx = 0; idx < static_cast<Index>(nrows); ++idx)
           {
+            if (!isFixed(idx))
+              continue;
+
+            const ScalarType value = fixedValue(idx);
+
             for (size_t r = 0; r < nrows; ++r)
             {
               if (r == static_cast<size_t>(idx))
@@ -959,14 +999,16 @@ namespace Rodin::Assembly
               b.coeffRef(r) -= A(r, idx) * value;
               A(r, idx) = ScalarType(0);
             }
+
             for (size_t c = 0; c < ncols; ++c)
             {
               if (c == static_cast<size_t>(idx))
                 continue;
               A(idx, c) = ScalarType(0);
             }
+
             A(idx, idx) = ScalarType(1);
-            b.coeffRef(idx) = value;
+            b.coeffRef(static_cast<size_t>(idx)) = value;
           }
         }
       }

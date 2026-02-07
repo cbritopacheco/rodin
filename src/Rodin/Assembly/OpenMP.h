@@ -823,11 +823,19 @@ namespace Rodin::Assembly
         constexpr bool IsSparse =
           std::is_base_of_v<Eigen::SparseMatrixBase<OperatorType>, OperatorType>;
 
+        const int tc =
+          m_threadCount.has_value()
+            ? static_cast<int>(m_threadCount.value())
+            : omp_get_max_threads();
+
         // ---- Dirichlet fixed values (NaN sentinel) ----
-        std::vector<ScalarType> fixed(rows, Math::nan<ScalarType>());
+        const size_t ndofs = std::max(rows, cols);
+        std::vector<ScalarType> fixed(ndofs, Math::nan<ScalarType>());
+
         auto isFixed = [&](Index i) -> bool
         {
-          return !Math::isNaN(fixed[static_cast<size_t>(i)]);
+          const size_t k = static_cast<size_t>(i);
+          return k < fixed.size() && !Math::isNaN(fixed[k]);
         };
 
         for (auto& dbc : pb.getDBCs())
@@ -837,17 +845,15 @@ namespace Rodin::Assembly
 
           dbc.assemble();
           for (const auto& [local, value] : dbc.getDOFs())
-            fixed[static_cast<size_t>(local)] = static_cast<ScalarType>(value);
+          {
+            const Index I = static_cast<Index>(local);
+            fixed[static_cast<size_t>(I)] = static_cast<ScalarType>(value);
+          }
         }
-
-        const int tc =
-          m_threadCount.has_value()
-            ? static_cast<int>(m_threadCount.value())
-            : omp_get_max_threads();
 
         if constexpr (IsSparse)
         {
-          // ---- Sparse path: eliminate during assembly ----
+          // ---- Sparse path: eliminate during assembly (thread-local triplets + RHS) ----
           std::vector<std::vector<Eigen::Triplet<ScalarType>>> tchunks(static_cast<size_t>(tc));
           std::vector<std::vector<ScalarType>> rhsChunks(
             static_cast<size_t>(tc),
@@ -917,7 +923,7 @@ namespace Rodin::Assembly
                   }
                 }
               }
-            } // omp parallel
+            }
           }
 
           // ---------------- Global BFIs ----------------
@@ -975,22 +981,16 @@ namespace Rodin::Assembly
                   }
                 }
               }
-            } // omp parallel
+            }
           }
 
           // ---------------- Preassembled bilinear forms ----------------
-          // (serial; safe, usually small; also respects elimination)
           for (auto& bf : pb.getBFs())
           {
             const auto& op = bf.getOperator();
             for (int k = 0; k < op.outerSize(); ++k)
-            {
               for (typename OperatorType::InnerIterator it(op, k); it; ++it)
-              {
-                // apply elimination rules on the fly into thread 0 buffers
                 sparse_entry(tchunks[0], rhsChunks[0], it.row(), it.col(), it.value());
-              }
-            }
           }
 
           // ---------------- LFIs ----------------
@@ -1019,9 +1019,12 @@ namespace Rodin::Assembly
 
                 const auto& dofs = testFES.getDOFs(d, p);
                 for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
-                  localRhs[static_cast<size_t>(dofs(l))] -= integrator->integrate(l);
+                {
+                  const Index I = dofs(l);
+                  localRhs[static_cast<size_t>(I)] -= integrator->integrate(l);
+                }
               }
-            } // omp parallel
+            }
           }
 
           // Preassembled linear forms (serial)
@@ -1036,19 +1039,19 @@ namespace Rodin::Assembly
               b.coeffRef(i) += localRhs[i];
           }
 
-          // ---------------- Merge triplet chunks ----------------
+          // ---------------- Merge triplets ----------------
           size_t totalTriplets = 0;
-          for (auto& v : tchunks) totalTriplets += v.size();
+          for (auto& v0 : tchunks) totalTriplets += v0.size();
 
-          std::vector<Eigen::Triplet<ScalarType>> triplets;
-          triplets.reserve(totalTriplets + rows); // + diagonal identities
+          std::vector<Eigen::Triplet<ScalarType>> all;
+          all.reserve(totalTriplets + rows);
 
-          for (auto& v : tchunks)
+          for (auto& v0 : tchunks)
           {
-            triplets.insert(triplets.end(),
-                            std::make_move_iterator(v.begin()),
-                            std::make_move_iterator(v.end()));
-            v.clear();
+            all.insert(all.end(),
+                       std::make_move_iterator(v0.begin()),
+                       std::make_move_iterator(v0.end()));
+            v0.clear();
           }
 
           // Inject identity rows for fixed dofs
@@ -1056,13 +1059,13 @@ namespace Rodin::Assembly
           {
             if (isFixed(i))
             {
-              triplets.emplace_back(i, i, ScalarType(1));
+              all.emplace_back(i, i, ScalarType(1));
               b.coeffRef(static_cast<size_t>(i)) = fixed[static_cast<size_t>(i)];
             }
           }
 
           A.resize(rows, cols);
-          A.setFromTriplets(triplets.begin(), triplets.end());
+          A.setFromTriplets(all.begin(), all.end());
         }
         else
         {
@@ -1070,7 +1073,6 @@ namespace Rodin::Assembly
           A.resize(rows, cols);
           A.setZero();
 
-          // Thread-local dense matrices + rhs deltas (safe, but memory heavy)
           std::vector<OperatorType> Achunks(static_cast<size_t>(tc));
           std::vector<std::vector<ScalarType>> rhsChunks(
             static_cast<size_t>(tc),
@@ -1122,7 +1124,7 @@ namespace Rodin::Assembly
                   }
                 }
               }
-            } // omp parallel
+            }
           }
 
           // Global BFIs
@@ -1180,7 +1182,7 @@ namespace Rodin::Assembly
                   }
                 }
               }
-            } // omp parallel
+            }
           }
 
           // Preassembled bilinear forms (serial)
@@ -1219,7 +1221,7 @@ namespace Rodin::Assembly
                 for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
                   localRhs[static_cast<size_t>(dofs(l))] -= integrator->integrate(l);
               }
-            } // omp parallel
+            }
           }
 
           // Reduce RHS chunks into b
@@ -1234,7 +1236,7 @@ namespace Rodin::Assembly
           for (auto& lf : pb.getLFs())
             b -= lf.getVector();
 
-          // Dense elimination afterwards (same as your sequential)
+          // Dense elimination afterwards
           for (Index idx = 0; idx < static_cast<Index>(rows); ++idx)
           {
             if (!isFixed(idx))
@@ -1342,9 +1344,6 @@ namespace Rodin::Assembly
             ? static_cast<int>(m_threadCount.value())
             : omp_get_max_threads();
 
-        // ------------------------------------------------------------------
-        // UUID routing helpers
-        // ------------------------------------------------------------------
         const auto findTrialBlock = [&](const auto& uuid) -> size_t
         {
           auto it = trialUUIDMap.left.find(uuid);
@@ -1359,32 +1358,7 @@ namespace Rodin::Assembly
           return it->second;
         };
 
-        const auto& getTrialFESByUUID = [&](const auto& uuid) -> const auto&
-        {
-          const size_t k = findTrialBlock(uuid);
-          const void* addr = nullptr;
-          us.iapply([&](size_t i, const auto& uref)
-          {
-            if (i == k)
-              addr = static_cast<const void*>(&uref.get().getFiniteElementSpace());
-          });
-          assert(addr);
-          return *static_cast<const std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace())>*>(addr);
-        };
-
-        const auto& getTestFESByUUID = [&](const auto& uuid) -> const auto&
-        {
-          const size_t k = findTestBlock(uuid);
-          const void* addr = nullptr;
-          vs.iapply([&](size_t i, const auto& vref)
-          {
-            if (i == k)
-              addr = static_cast<const void*>(&vref.get().getFiniteElementSpace());
-          });
-          assert(addr);
-          return *static_cast<const std::decay_t<decltype(vs.template get<0>().get().getFiniteElementSpace())>*>(addr);
-        };
-
+        // Mesh (assume common)
         const auto& mesh = [&]() -> const auto&
         {
           const void* addr = nullptr;
@@ -1394,17 +1368,21 @@ namespace Rodin::Assembly
               addr = static_cast<const void*>(&uref.get().getFiniteElementSpace().getMesh());
           });
           assert(addr);
-          return *static_cast<const std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace().getMesh())>*>(addr);
+          return *static_cast<
+            const std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace().getMesh())>*
+          >(addr);
         }();
 
         // ------------------------------------------------------------------
         // Dirichlet: NaN sentinel (global indices!)
         // ------------------------------------------------------------------
-        std::vector<ScalarType> fixed(nrows, Math::nan<ScalarType>());
+        const size_t ndofs = std::max(nrows, ncols);
+        std::vector<ScalarType> fixed(ndofs, Math::nan<ScalarType>());
 
-        const auto isFixed = [&](Index I) -> bool
+        auto isFixed = [&](Index I) -> bool
         {
-          return !Math::isNaN(fixed[static_cast<size_t>(I)]);
+          const size_t k = static_cast<size_t>(I);
+          return k < fixed.size() && !Math::isNaN(fixed[k]);
         };
 
         for (auto& dbc : pb.getDBCs())
@@ -1440,43 +1418,35 @@ namespace Rodin::Assembly
             Achunks[static_cast<size_t>(tid)].setZero();
           }
         }
+        else
+        {
+          if constexpr (IsSparse)
+            tchunks.shrink_to_fit(); // no-op typically; keeps symmetry with dense path
+        }
 
-        // ------------------------------------------------------------------
-        // Sparse-only entry: eliminate at insertion time using NaN sentinel
-        // Dense: accumulate into thread-local matrices (no elimination here)
-        // ------------------------------------------------------------------
-        const auto sparse_entry = [&](int tid, Index row, Index col, ScalarType val)
+        auto sparse_entry = [&](int tid, Index row, Index col, ScalarType val)
         {
           if (val == ScalarType(0))
             return;
 
-          if constexpr (IsSparse)
+          const bool rowFixed = isFixed(row);
+          const bool colFixed = isFixed(col);
+
+          if (rowFixed)
+            return;
+
+          if (colFixed && row != col)
           {
-            const bool rowFixed = isFixed(row);
-            const bool colFixed = isFixed(col);
-
-            if (rowFixed)
-              return;
-
-            if (colFixed && row != col)
-            {
-              // elimination contribution to RHS (thread-local)
-              rhsChunks[static_cast<size_t>(tid)][static_cast<size_t>(row)] -=
-                val * fixed[static_cast<size_t>(col)];
-              return;
-            }
-
-            tchunks[static_cast<size_t>(tid)].emplace_back(row, col, val);
+            rhsChunks[static_cast<size_t>(tid)][static_cast<size_t>(row)] -=
+              val * fixed[static_cast<size_t>(col)];
+            return;
           }
-          else
-          {
-            (void)tid; (void)row; (void)col; (void)val;
-            // dense path does not use sparse_entry
-          }
+
+          tchunks[static_cast<size_t>(tid)].emplace_back(row, col, val);
         };
 
         // ------------------------------------------------------------------
-        // Local BFIs
+        // Local BFIs (BUGFIX: type-safe per-block FES access; no casts)
         // ------------------------------------------------------------------
         for (auto& bfi : pb.getLocalBFIs())
         {
@@ -1489,62 +1459,66 @@ namespace Rodin::Assembly
           const size_t uOff = trialOffsets[uBlock];
           const size_t vOff = testOffsets[vBlock];
 
-          const auto& uFES = getTrialFESByUUID(uUUID);
-          const auto& vFES = getTestFESByUUID(vUUID);
-
           const auto& attrs = bfi.getAttributes();
           OpenMPIteration seq(mesh, bfi.getRegion());
           const Index d = seq.getDimension();
           const Index count = seq.getCount();
 
-#pragma omp parallel num_threads(tc)
+          us.iapply([&](size_t ui, const auto& uref)
           {
-            const int tid = omp_get_thread_num();
+            if (ui != uBlock) return;
+            const auto& uFES = uref.get().getFiniteElementSpace();
 
-            std::unique_ptr<LocalBilinearFormIntegratorBaseType> integrator(bfi.copy());
-            OperatorType* Alocal = nullptr;
-            if constexpr (!IsSparse)
-              Alocal = &Achunks[static_cast<size_t>(tid)];
+            vs.iapply([&](size_t vi, const auto& vref)
+            {
+              if (vi != vBlock) return;
+              const auto& vFES = vref.get().getFiniteElementSpace();
+
+#pragma omp parallel num_threads(tc)
+              {
+                const int tid = omp_get_thread_num();
+
+                std::unique_ptr<LocalBilinearFormIntegratorBaseType> integrator(bfi.copy());
+                OperatorType* Alocal = nullptr;
+                if constexpr (!IsSparse)
+                  Alocal = &Achunks[static_cast<size_t>(tid)];
 
 #pragma omp for
-            for (Index p = 0; p < count; ++p)
-            {
-              if (!seq.filter(p)) continue;
-              if (!attrs.empty() && !attrs.count(mesh.getAttribute(d, p))) continue;
-
-              auto it = seq.getIterator(p);
-              integrator->setPolytope(*it);
-
-              const auto& rows = vFES.getDOFs(d, p);
-              const auto& cols = uFES.getDOFs(d, p);
-
-              for (size_t i = 0; i < static_cast<size_t>(rows.size()); ++i)
-              {
-                const Index I = static_cast<Index>(vOff + static_cast<size_t>(rows(i)));
-                for (size_t j = 0; j < static_cast<size_t>(cols.size()); ++j)
+                for (Index p = 0; p < count; ++p)
                 {
-                  const Index J = static_cast<Index>(uOff + static_cast<size_t>(cols(j)));
-                  const ScalarType val = Math::conj(integrator->integrate(j, i));
-                  if (val == ScalarType(0))
-                    continue;
+                  if (!seq.filter(p)) continue;
+                  if (!attrs.empty() && !attrs.count(mesh.getAttribute(d, p))) continue;
 
-                  if constexpr (IsSparse)
+                  auto it = seq.getIterator(p);
+                  integrator->setPolytope(*it);
+
+                  const auto& rows = vFES.getDOFs(d, p);
+                  const auto& cols = uFES.getDOFs(d, p);
+
+                  for (size_t i = 0; i < static_cast<size_t>(rows.size()); ++i)
                   {
-                    sparse_entry(tid, I, J, val);
-                  }
-                  else
-                  {
-                    // thread-local dense
-                    (*Alocal)(I, J) += val;
+                    const Index I = static_cast<Index>(vOff + static_cast<size_t>(rows(i)));
+                    for (size_t j = 0; j < static_cast<size_t>(cols.size()); ++j)
+                    {
+                      const Index J = static_cast<Index>(uOff + static_cast<size_t>(cols(j)));
+                      const ScalarType val = Math::conj(integrator->integrate(j, i));
+                      if (val == ScalarType(0))
+                        continue;
+
+                      if constexpr (IsSparse)
+                        sparse_entry(tid, I, J, val);
+                      else
+                        (*Alocal)(I, J) += val;
+                    }
                   }
                 }
-              }
-            }
-          } // omp parallel
+              } // omp parallel
+            });
+          });
         }
 
         // ------------------------------------------------------------------
-        // Global BFIs
+        // Global BFIs (BUGFIX: type-safe per-block FES access; no casts)
         // ------------------------------------------------------------------
         for (auto& bfi : pb.getGlobalBFIs())
         {
@@ -1557,9 +1531,6 @@ namespace Rodin::Assembly
           const size_t uOff = trialOffsets[uBlock];
           const size_t vOff = testOffsets[vBlock];
 
-          const auto& uFES = getTrialFESByUUID(uUUID);
-          const auto& vFES = getTestFESByUUID(vUUID);
-
           const auto& trialAttrs = bfi.getTrialAttributes();
           const auto& testAttrs  = bfi.getTestAttributes();
 
@@ -1569,65 +1540,73 @@ namespace Rodin::Assembly
           const Index td = testseq.getDimension();
           const Index tcount = testseq.getCount();
 
-#pragma omp parallel num_threads(tc)
+          us.iapply([&](size_t ui, const auto& uref)
           {
-            const int tid = omp_get_thread_num();
+            if (ui != uBlock) return;
+            const auto& uFES = uref.get().getFiniteElementSpace();
 
-            std::unique_ptr<GlobalBilinearFormIntegratorBaseType> integrator(bfi.copy());
-            OperatorType* Alocal = nullptr;
-            if constexpr (!IsSparse)
-              Alocal = &Achunks[static_cast<size_t>(tid)];
+            vs.iapply([&](size_t vi, const auto& vref)
+            {
+              if (vi != vBlock) return;
+              const auto& vFES = vref.get().getFiniteElementSpace();
+
+#pragma omp parallel num_threads(tc)
+              {
+                const int tid = omp_get_thread_num();
+
+                std::unique_ptr<GlobalBilinearFormIntegratorBaseType> integrator(bfi.copy());
+                OperatorType* Alocal = nullptr;
+                if constexpr (!IsSparse)
+                  Alocal = &Achunks[static_cast<size_t>(tid)];
 
 #pragma omp for
-            for (Index te = 0; te < tcount; ++te)
-            {
-              if (!testseq.filter(te)) continue;
-              if (!testAttrs.empty() && !testAttrs.count(mesh.getAttribute(td, te))) continue;
-
-              const auto& rows = vFES.getDOFs(td, te);
-
-              const Index rd = trialseq.getDimension();
-              const Index rcount = trialseq.getCount();
-
-              for (Index tr = 0; tr < rcount; ++tr)
-              {
-                if (!trialseq.filter(tr)) continue;
-                if (!trialAttrs.empty() && !trialAttrs.count(mesh.getAttribute(rd, tr))) continue;
-
-                const auto& cols = uFES.getDOFs(rd, tr);
-
-                auto teIt = testseq.getIterator(te);
-                auto trIt = trialseq.getIterator(tr);
-
-                integrator->setPolytope(*trIt, *teIt);
-
-                for (size_t i = 0; i < static_cast<size_t>(rows.size()); ++i)
+                for (Index te = 0; te < tcount; ++te)
                 {
-                  const Index I = static_cast<Index>(vOff + static_cast<size_t>(rows(i)));
-                  for (size_t j = 0; j < static_cast<size_t>(cols.size()); ++j)
-                  {
-                    const Index J = static_cast<Index>(uOff + static_cast<size_t>(cols(j)));
-                    const ScalarType val = Math::conj(integrator->integrate(j, i));
-                    if (val == ScalarType(0))
-                      continue;
+                  if (!testseq.filter(te)) continue;
+                  if (!testAttrs.empty() && !testAttrs.count(mesh.getAttribute(td, te))) continue;
 
-                    if constexpr (IsSparse)
+                  const auto& rows = vFES.getDOFs(td, te);
+
+                  const Index rd = trialseq.getDimension();
+                  const Index rcount = trialseq.getCount();
+
+                  for (Index tr = 0; tr < rcount; ++tr)
+                  {
+                    if (!trialseq.filter(tr)) continue;
+                    if (!trialAttrs.empty() && !trialAttrs.count(mesh.getAttribute(rd, tr))) continue;
+
+                    const auto& cols = uFES.getDOFs(rd, tr);
+
+                    auto teIt = testseq.getIterator(te);
+                    auto trIt = trialseq.getIterator(tr);
+
+                    integrator->setPolytope(*trIt, *teIt);
+
+                    for (size_t i = 0; i < static_cast<size_t>(rows.size()); ++i)
                     {
-                      sparse_entry(tid, I, J, val);
-                    }
-                    else
-                    {
-                      (*Alocal)(I, J) += val;
+                      const Index I = static_cast<Index>(vOff + static_cast<size_t>(rows(i)));
+                      for (size_t j = 0; j < static_cast<size_t>(cols.size()); ++j)
+                      {
+                        const Index J = static_cast<Index>(uOff + static_cast<size_t>(cols(j)));
+                        const ScalarType val = Math::conj(integrator->integrate(j, i));
+                        if (val == ScalarType(0))
+                          continue;
+
+                        if constexpr (IsSparse)
+                          sparse_entry(tid, I, J, val);
+                        else
+                          (*Alocal)(I, J) += val;
+                      }
                     }
                   }
                 }
-              }
-            }
-          } // omp parallel
+              } // omp parallel
+            });
+          });
         }
 
         // ------------------------------------------------------------------
-        // LFIs (thread-local rhs, then reduce)
+        // LFIs (type-safe test FES; thread-local rhs)
         // ------------------------------------------------------------------
         for (auto& lfi : pb.getLFIs())
         {
@@ -1635,37 +1614,41 @@ namespace Rodin::Assembly
           const size_t vBlock = findTestBlock(vUUID);
           const size_t vOff   = testOffsets[vBlock];
 
-          const auto& vFES = getTestFESByUUID(vUUID);
-
           const auto& attrs = lfi.getAttributes();
           OpenMPIteration seq(mesh, lfi.getRegion());
           const Index d = seq.getDimension();
           const Index count = seq.getCount();
 
-#pragma omp parallel num_threads(tc)
+          vs.iapply([&](size_t vi, const auto& vref)
           {
-            const int tid = omp_get_thread_num();
-            auto& localRhs = rhsChunks[static_cast<size_t>(tid)];
+            if (vi != vBlock) return;
+            const auto& vFES = vref.get().getFiniteElementSpace();
 
-            std::unique_ptr<LinearFormIntegratorBaseType> integrator(lfi.copy());
+#pragma omp parallel num_threads(tc)
+            {
+              const int tid = omp_get_thread_num();
+              auto& localRhs = rhsChunks[static_cast<size_t>(tid)];
+
+              std::unique_ptr<LinearFormIntegratorBaseType> integrator(lfi.copy());
 
 #pragma omp for
-            for (Index p = 0; p < count; ++p)
-            {
-              if (!seq.filter(p)) continue;
-              if (!attrs.empty() && !attrs.count(mesh.getAttribute(d, p))) continue;
-
-              auto it = seq.getIterator(p);
-              integrator->setPolytope(*it);
-
-              const auto& dofs = vFES.getDOFs(d, p);
-              for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
+              for (Index p = 0; p < count; ++p)
               {
-                const Index I = static_cast<Index>(vOff + static_cast<size_t>(dofs(l)));
-                localRhs[static_cast<size_t>(I)] -= integrator->integrate(l);
+                if (!seq.filter(p)) continue;
+                if (!attrs.empty() && !attrs.count(mesh.getAttribute(d, p))) continue;
+
+                auto it = seq.getIterator(p);
+                integrator->setPolytope(*it);
+
+                const auto& dofs = vFES.getDOFs(d, p);
+                for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
+                {
+                  const Index I = static_cast<Index>(vOff + static_cast<size_t>(dofs(l)));
+                  localRhs[static_cast<size_t>(I)] -= integrator->integrate(l);
+                }
               }
-            }
-          } // omp parallel
+            } // omp parallel
+          });
         }
 
         // ------------------------------------------------------------------
@@ -1687,7 +1670,7 @@ namespace Rodin::Assembly
         // ------------------------------------------------------------------
         if constexpr (IsSparse)
         {
-          // Preassembled BFs -> go through sparse_entry with tid=0 so NaN elimination applies
+          // Preassembled BFs -> apply elimination through sparse_entry (tid=0)
           for (auto& bf : pb.getBFs())
           {
             const auto& op = bf.getOperator();
@@ -1698,35 +1681,35 @@ namespace Rodin::Assembly
 
           // Merge triplets
           size_t totalTriplets = 0;
-          for (auto& v : tchunks) totalTriplets += v.size();
+          for (auto& v0 : tchunks) totalTriplets += v0.size();
 
-          std::vector<Eigen::Triplet<ScalarType>> triplets;
-          triplets.reserve(totalTriplets);
+          std::vector<Eigen::Triplet<ScalarType>> all;
+          all.reserve(totalTriplets + nrows);
 
-          for (auto& v : tchunks)
+          for (auto& v0 : tchunks)
           {
-            triplets.insert(triplets.end(),
-                            std::make_move_iterator(v.begin()),
-                            std::make_move_iterator(v.end()));
-            v.clear();
+            all.insert(all.end(),
+                       std::make_move_iterator(v0.begin()),
+                       std::make_move_iterator(v0.end()));
+            v0.clear();
           }
 
-          // Inject identity rows for fixed dofs (NaN sentinel)
+          // Identity rows for fixed dofs
           for (Index I = 0; I < static_cast<Index>(nrows); ++I)
           {
             if (isFixed(I))
             {
-              triplets.emplace_back(I, I, ScalarType(1));
+              all.emplace_back(I, I, ScalarType(1));
               b.coeffRef(static_cast<size_t>(I)) = fixed[static_cast<size_t>(I)];
             }
           }
 
           A.resize(nrows, ncols);
-          A.setFromTriplets(triplets.begin(), triplets.end());
+          A.setFromTriplets(all.begin(), all.end());
         }
         else
         {
-          // Reduce dense thread-local matrices -> A
+          // Reduce dense thread-local matrices
           A.resize(nrows, ncols);
           A.setZero();
           for (int tid = 0; tid < tc; ++tid)
@@ -1736,7 +1719,7 @@ namespace Rodin::Assembly
           for (auto& bf : pb.getBFs())
             A += bf.getOperator();
 
-          // Dense elimination AFTER assembly using NaN sentinel (global indexing)
+          // Dense elimination after assembly
           for (Index idx = 0; idx < static_cast<Index>(nrows); ++idx)
           {
             if (!isFixed(idx))
@@ -1762,6 +1745,7 @@ namespace Rodin::Assembly
           }
         }
       }
+
 
       OpenMP* copy() const noexcept override { return new OpenMP(*this); }
 
