@@ -407,8 +407,6 @@ namespace Rodin::Variational
       {
         computeOffsets();
 
-        setFieldSplits();
-
         AssemblyInput in{
           m_pb, m_us, m_vs,
           m_trialOffsets, m_testOffsets,
@@ -465,7 +463,6 @@ namespace Rodin::Variational
         return new Problem(*this);
       }
 
-    private:
       void setFieldSplits()
       {
         PetscErrorCode ierr;
@@ -524,6 +521,8 @@ namespace Rodin::Variational
 
         (void) ierr;
       }
+
+    private:
 
       void buildUUIDMaps()
       {

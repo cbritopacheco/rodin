@@ -106,6 +106,23 @@ namespace Rodin::Tests::Manufactured::Poisson
 
     auto solution = sin(pi * F::x) * sin(pi * F::y);
 
+    GridFunction u_exact(vh);
+    u_exact = solution;
+
+    auto& A = poisson.getLinearSystem().getOperator();
+    auto& b = poisson.getLinearSystem().getVector();
+    auto& x = poisson.getLinearSystem().getSolution();
+
+    // Algebraic residual: r = A*x - b
+    auto r = A * x - b;
+
+    // Use an absolute tolerance tied to your fuzzy constant and problem scale.
+    // A robust scale is ||b|| or ||A||*||x||; here is a simple one:
+    const Real scale = std::max<Real>(b.norm(), 1);
+    const Real resRel = r.norm() / scale;
+
+    EXPECT_NEAR(resRel, 0, 1e-10);  // pick based on your CG tolerance
+
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - solution, 2);
 

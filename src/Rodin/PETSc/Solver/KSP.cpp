@@ -77,14 +77,14 @@ namespace Rodin::Solver
       assert(ierr == PETSC_SUCCESS);
     }
 
-    ierr = KSPSetFromOptions(m_ksp);
-    assert(ierr == PETSC_SUCCESS);
-
     const auto& splits = axb.getFieldSplits();
     if (!splits.empty())
     {
       ::PC pc = PETSC_NULLPTR;
       ierr = KSPGetPC(m_ksp, &pc);
+      assert(ierr == PETSC_SUCCESS);
+
+      ierr = PCSetType(pc, PCFIELDSPLIT);
       assert(ierr == PETSC_SUCCESS);
 
       for (size_t k = 0; k < splits.size(); ++k)
@@ -99,6 +99,9 @@ namespace Rodin::Solver
         assert(ierr == PETSC_SUCCESS);
       }
     }
+
+    ierr = KSPSetFromOptions(m_ksp);
+    assert(ierr == PETSC_SUCCESS);
 
     ierr = KSPSolve(m_ksp, b, x);
     assert(ierr == PETSC_SUCCESS);
