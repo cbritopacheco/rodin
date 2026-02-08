@@ -228,29 +228,81 @@ namespace Rodin::Assembly
         auto& b = axb.getVector();
 
         auto& pb = input.getProblemBody();
-        const auto& u = input.getTrialFunction();
-        const auto& v = input.getTestFunction();
+        auto&       us           = input.getTrialFunctions();
+        auto&       vs           = input.getTestFunctions();
+        const auto& trialOffsets = input.getTrialOffsets();
+        const auto& testOffsets  = input.getTestOffsets();
+        auto&       trialUUIDMap = input.getTrialUUIDMap();
+        auto&       testUUIDMap  = input.getTestUUIDMap();
 
-        const auto& trialFES = u.getFiniteElementSpace();
-        const auto& testFES  = v.getFiniteElementSpace();
-        assert(trialFES.getMesh() == testFES.getMesh());
+        using MeshType0 =
+          std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace().getMesh())>;
+        std::optional<std::reference_wrapper<const MeshType0>> meshRef;
+        us.apply([&](const auto& uref)
+        {
+          using MeshT = std::decay_t<decltype(uref.get().getFiniteElementSpace().getMesh())>;
+          static_assert(std::is_same_v<MeshT, MeshType0>,
+            "Mixed mesh types are not supported in PETSc multi-field MPI assembly.");
+          if (!meshRef)
+            meshRef = std::cref(uref.get().getFiniteElementSpace().getMesh());
+        });
+        assert(meshRef.has_value());
+        const MeshType0& mesh = meshRef->get();
 
-        const auto& mesh  = trialFES.getMesh();
         const auto& shard = mesh.getShard();
         const auto& ctx   = mesh.getContext();
         const auto& comm  = ctx.getCommunicator();
 
-        const size_t globalCols = trialFES.getSize();
-        const size_t globalRows = testFES.getSize();
+        const auto findTrialBlock = [&](const auto& uuid) -> size_t
+        {
+          auto it = trialUUIDMap.left.find(uuid);
+          assert(it != trialUUIDMap.left.end());
+          return it->second;
+        };
 
-        // Ownership ranges (global indices)
-        size_t rbegin, rend;
-        testFES.getOwnershipRange(rbegin, rend);
-        const size_t localRows = rend - rbegin;
+        const auto findTestBlock = [&](const auto& uuid) -> size_t
+        {
+          auto it = testUUIDMap.left.find(uuid);
+          assert(it != testUUIDMap.left.end());
+          return it->second;
+        };
 
-        size_t cbegin, cend;
-        trialFES.getOwnershipRange(cbegin, cend);
-        const size_t localCols = cend - cbegin;
+        const auto withTrialFES = [&](const auto& uuid, auto&& fn)
+        {
+          const size_t k = findTrialBlock(uuid);
+          bool found = false;
+          us.iapply([&](size_t i, const auto& uref)
+          {
+            if (i == k)
+            {
+              fn(uref.get().getFiniteElementSpace());
+              found = true;
+            }
+          });
+          assert(found);
+        };
+
+        const auto withTestFES = [&](const auto& uuid, auto&& fn)
+        {
+          const size_t k = findTestBlock(uuid);
+          bool found = false;
+          vs.iapply([&](size_t i, const auto& vref)
+          {
+            if (i == k)
+            {
+              fn(vref.get().getFiniteElementSpace());
+              found = true;
+            }
+          });
+          assert(found);
+        };
+
+        const size_t globalCols = input.getTotalTrialSize();
+        const size_t globalRows = input.getTotalTestSize();
+
+        // Ownership ranges (global indices) using offsets from input
+        const size_t localRows = testOffsets.back() - testOffsets.front();
+        const size_t localCols = trialOffsets.back() - trialOffsets.front();
 
         PetscErrorCode ierr;
 
@@ -308,6 +360,15 @@ namespace Rodin::Assembly
         // ------------------------
         for (auto& bfi : pb.getLocalBFIs())
         {
+          const auto uUUID = bfi.getTrialFunction().getUUID();
+          const auto vUUID = bfi.getTestFunction().getUUID();
+
+          const size_t uBlock = findTrialBlock(uUUID);
+          const size_t vBlock = findTestBlock(vUUID);
+
+          const size_t uOff = trialOffsets[uBlock];
+          const size_t vOff = testOffsets[vBlock];
+
           const auto& attrs = bfi.getAttributes();
           MPIIteration seq(mesh, bfi.getRegion());
 
@@ -324,23 +385,31 @@ namespace Rodin::Assembly
 
             bfi.setPolytope(*it);
 
-            const auto& rowsDOF = testFES.getShard().getDOFs(d, idx);
-            const auto& colsDOF = trialFES.getShard().getDOFs(d, idx);
-
-            for (Index i = 0; i < rowsDOF.size(); ++i)
+            withTrialFES(uUUID, [&](const auto& uFES)
             {
-              const PetscInt I = static_cast<PetscInt>(testFES.getGlobalIndex(rowsDOF[i]));
-              for (Index j = 0; j < colsDOF.size(); ++j)
+              withTestFES(vUUID, [&](const auto& vFES)
               {
-                const PetscInt J = static_cast<PetscInt>(trialFES.getGlobalIndex(colsDOF[j]));
-                const PetscScalar val = static_cast<PetscScalar>(bfi.integrate(j, i));
-                if (val != PetscScalar(0))
+                const auto& rowsDOF = vFES.getShard().getDOFs(d, idx);
+                const auto& colsDOF = uFES.getShard().getDOFs(d, idx);
+
+                for (Index i = 0; i < rowsDOF.size(); ++i)
                 {
-                  ierr = MatSetValue(A, I, J, val, ADD_VALUES);
-                  assert(ierr == PETSC_SUCCESS);
+                  const PetscInt I =
+                    static_cast<PetscInt>(vFES.getGlobalIndex(rowsDOF[i]) + vOff);
+                  for (Index j = 0; j < colsDOF.size(); ++j)
+                  {
+                    const PetscInt J =
+                      static_cast<PetscInt>(uFES.getGlobalIndex(colsDOF[j]) + uOff);
+                    const PetscScalar val = static_cast<PetscScalar>(bfi.integrate(j, i));
+                    if (val != PetscScalar(0))
+                    {
+                      ierr = MatSetValue(A, I, J, val, ADD_VALUES);
+                      assert(ierr == PETSC_SUCCESS);
+                    }
+                  }
                 }
-              }
-            }
+              });
+            });
           }
         }
 
@@ -351,6 +420,15 @@ namespace Rodin::Assembly
         // ------------------------
         for (auto& bfi : pb.getGlobalBFIs())
         {
+          const auto uUUID = bfi.getTrialFunction().getUUID();
+          const auto vUUID = bfi.getTestFunction().getUUID();
+
+          const size_t uBlock = findTrialBlock(uUUID);
+          const size_t vBlock = findTestBlock(vUUID);
+
+          const size_t uOff = trialOffsets[uBlock];
+          const size_t vOff = testOffsets[vBlock];
+
           const auto& trialAttrs = bfi.getTrialAttributes();
           const auto& testAttrs  = bfi.getTestAttributes();
 
@@ -368,37 +446,45 @@ namespace Rodin::Assembly
             if (!testAttrs.empty() && !testAttrs.count(teIt->getAttribute()))
               continue;
 
-            const auto& rowsDOF = testFES.getShard().getDOFs(td, tidx);
-
-            for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
+            withTrialFES(uUUID, [&](const auto& uFES)
             {
-              const size_t rd   = trIt->getDimension();
-              const Index  ridx = trIt->getIndex();
-
-              if (!trialAttrs.empty() && !trialAttrs.count(trIt->getAttribute()))
-                continue;
-
-              // NOTE: do NOT skip ghost trial entities here: they still contribute to
-              // owned test rows, producing off-process columns in MatSetValue.
-              const auto& colsDOF = trialFES.getShard().getDOFs(rd, ridx);
-
-              bfi.setPolytope(*trIt, *teIt);
-
-              for (Index i = 0; i < rowsDOF.size(); ++i)
+              withTestFES(vUUID, [&](const auto& vFES)
               {
-                const PetscInt I = static_cast<PetscInt>(testFES.getGlobalIndex(rowsDOF[i]));
-                for (Index j = 0; j < colsDOF.size(); ++j)
+                const auto& rowsDOF = vFES.getShard().getDOFs(td, tidx);
+
+                for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
                 {
-                  const PetscInt J = static_cast<PetscInt>(trialFES.getGlobalIndex(colsDOF[j]));
-                  const PetscScalar val = static_cast<PetscScalar>(bfi.integrate(j, i));
-                  if (val != PetscScalar(0))
+                  const size_t rd   = trIt->getDimension();
+                  const Index  ridx = trIt->getIndex();
+
+                  if (!trialAttrs.empty() && !trialAttrs.count(trIt->getAttribute()))
+                    continue;
+
+                  // NOTE: do NOT skip ghost trial entities here: they still contribute to
+                  // owned test rows, producing off-process columns in MatSetValue.
+                  const auto& colsDOF = uFES.getShard().getDOFs(rd, ridx);
+
+                  bfi.setPolytope(*trIt, *teIt);
+
+                  for (Index i = 0; i < rowsDOF.size(); ++i)
                   {
-                    ierr = MatSetValue(A, I, J, val, ADD_VALUES);
-                    assert(ierr == PETSC_SUCCESS);
+                    const PetscInt I =
+                      static_cast<PetscInt>(vFES.getGlobalIndex(rowsDOF[i]) + vOff);
+                    for (Index j = 0; j < colsDOF.size(); ++j)
+                    {
+                      const PetscInt J =
+                        static_cast<PetscInt>(uFES.getGlobalIndex(colsDOF[j]) + uOff);
+                      const PetscScalar val = static_cast<PetscScalar>(bfi.integrate(j, i));
+                      if (val != PetscScalar(0))
+                      {
+                        ierr = MatSetValue(A, I, J, val, ADD_VALUES);
+                        assert(ierr == PETSC_SUCCESS);
+                      }
+                    }
                   }
                 }
-              }
-            }
+              });
+            });
           }
         }
 
