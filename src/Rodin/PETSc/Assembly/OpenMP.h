@@ -420,17 +420,6 @@ namespace Rodin::Assembly
         ierr = VecZeroEntries(x);
         assert(ierr == PETSC_SUCCESS);
 
-        auto& x = axb.getSolution();
-        assert(x);
-        ierr = VecSetSizes(x, nrows, PETSC_DECIDE);
-        assert(ierr == PETSC_SUCCESS);
-        ierr = VecSetType(x, VECSEQ);
-        assert(ierr == PETSC_SUCCESS);
-        ierr = VecSetFromOptions(x);
-        assert(ierr == PETSC_SUCCESS);
-        ierr = VecZeroEntries(x);
-        assert(ierr == PETSC_SUCCESS);
-
         const int tc = static_cast<int>(getThreadCount());
 
         // ------------------------
