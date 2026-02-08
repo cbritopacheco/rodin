@@ -82,8 +82,7 @@ namespace Rodin::Solver
       {}
 
       IDRS(const IDRS& other)
-        : Parent(other),
-          m_solver(other.m_solver)
+        : Parent(other)
       {}
 
       IDRS(IDRS&& other)

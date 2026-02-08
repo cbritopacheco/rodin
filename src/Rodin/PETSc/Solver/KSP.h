@@ -73,6 +73,11 @@ namespace Rodin::Solver
 
       const HandleType& getHandle() const noexcept override;
 
+      virtual KSP* copy() const noexcept override
+      {
+        return new KSP(*this);
+      }
+
     private:
       HandleType   m_ksp;
       ::KSPType    m_type;

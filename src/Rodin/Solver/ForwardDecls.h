@@ -166,6 +166,9 @@ namespace Rodin::Solver
   template <class LinearSystem>
   class DGMRES;
 
+  template <class LinearSystem>
+  class IDRS;
+
   /**
    * @brief IDR(s)STABL iterative solver.
    * @tparam LinearSystem Type of linear system to solve
