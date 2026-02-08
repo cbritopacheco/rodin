@@ -395,9 +395,7 @@ namespace Rodin::Variational
 
         PetscErrorCode ierr;
 
-        // ---------------------------
-        // Size checks (global sizes)
-        // ---------------------------
+        // Global size checks
         PetscInt nDst = 0, nSrc = 0;
         ierr = VecGetSize(m_data, &nDst); assert(ierr == PETSC_SUCCESS);
         ierr = VecGetSize(data,   &nSrc); assert(ierr == PETSC_SUCCESS);
@@ -406,49 +404,64 @@ namespace Rodin::Variational
         assert(off >= 0);
         assert(off + nDst <= nSrc);
 
-        // ---------------------------
-        // Communicator inference
-        // ---------------------------
-        MPI_Comm comm;
         if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
         {
-          comm = PETSC_COMM_SELF;
+          // Sequential: simple local slice
+          IS is = nullptr;
+          ierr = ISCreateStride(PETSC_COMM_SELF, nDst, off, 1, &is);
+          assert(ierr == PETSC_SUCCESS);
+
+          Vec sub = nullptr;
+          ierr = VecGetSubVector(data, is, &sub);
+          assert(ierr == PETSC_SUCCESS);
+
+          ierr = VecCopy(sub, m_data);
+          assert(ierr == PETSC_SUCCESS);
+
+          ierr = VecRestoreSubVector(data, is, &sub);
+          assert(ierr == PETSC_SUCCESS);
+
+          ierr = ISDestroy(&is);
+          assert(ierr == PETSC_SUCCESS);
         }
         else
         {
           static_assert(std::is_same_v<FESMeshContextType, Context::MPI>);
-          const auto& fes  = this->getFiniteElementSpace();
-          const auto& mesh = fes.getMesh();
-          const auto& ctx  = mesh.getContext(); // dependent member access is fine here
-          comm = ctx.getCommunicator();
-        }
 
-        // ---------------------------
-        // data slice view: data[off : off+nDst)
-        // ---------------------------
-        IS is = nullptr;
-        ierr = ISCreateStride(comm, nDst, off, 1, &is);
-        assert(ierr == PETSC_SUCCESS);
+          // MPI: copy only the owned range of m_data on this rank
+          PetscInt rb = 0, re = 0;
+          ierr = VecGetOwnershipRange(m_data, &rb, &re);
+          assert(ierr == PETSC_SUCCESS);
 
-        Vec sub = nullptr;
-        ierr = VecGetSubVector(data, is, &sub);
-        assert(ierr == PETSC_SUCCESS);
+          const PetscInt nLocal = re - rb;
+          assert(nLocal >= 0);
 
-        // Copy slice into this field vector
-        ierr = VecCopy(sub, m_data);
-        assert(ierr == PETSC_SUCCESS);
+          // Indices in 'data' we want are shifted by 'off'
+          const PetscInt start = off + rb;
 
-        ierr = VecRestoreSubVector(data, is, &sub);
-        assert(ierr == PETSC_SUCCESS);
+          // Important: IS local size must be nLocal, not nDst (global)
+          MPI_Comm comm;
+          PetscObjectGetComm((PetscObject) m_data, &comm);
 
-        ierr = ISDestroy(&is);
-        assert(ierr == PETSC_SUCCESS);
+          IS is = nullptr;
+          ierr = ISCreateStride(comm, nLocal, start, 1, &is);
+          assert(ierr == PETSC_SUCCESS);
 
-        // ---------------------------
-        // Refresh ghosts if needed
-        // ---------------------------
-        if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
-        {
+          Vec sub = nullptr;
+          ierr = VecGetSubVector(data, is, &sub);
+          assert(ierr == PETSC_SUCCESS);
+
+          // Now sub and m_data have identical local layouts -> VecCopy is valid
+          ierr = VecCopy(sub, m_data);
+          assert(ierr == PETSC_SUCCESS);
+
+          ierr = VecRestoreSubVector(data, is, &sub);
+          assert(ierr == PETSC_SUCCESS);
+
+          ierr = ISDestroy(&is);
+          assert(ierr == PETSC_SUCCESS);
+
+          // Refresh ghosts from owned values
           ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
           assert(ierr == PETSC_SUCCESS);
           ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);

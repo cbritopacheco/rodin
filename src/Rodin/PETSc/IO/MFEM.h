@@ -116,44 +116,44 @@ namespace Rodin::IO
       static_assert(std::is_same_v<ScalarType, PetscScalar>,
         "PETSc MFEM printer: Range scalar must be PetscScalar.");
 
+      using FESMeshContextType = typename FormLanguage::Traits<typename FESType::MeshType>::ContextType;
+
       GridFunctionPrinter(const ObjectType& gf)
         : Parent(gf)
       {}
 
       void printData(std::ostream& os) override
       {
-        os << std::setprecision(std::numeric_limits<PetscReal>::max_digits10);
+        const auto& gf = this->getObject();
 
-        const auto& gf   = this->getObject();
-        const auto& fes  = gf.getFiniteElementSpace();
-        const auto& mesh = fes.getMesh();
-
-        const size_t vdim = fes.getVectorDimension();
-
-        const size_t totalSize  = fes.getSize();
-        const size_t scalarSize = totalSize / vdim;
-
-        // P1 scalar dofs = vertices. Base prints Ordering: Nodes (0),
-        // i.e. XXX..YYY..ZZZ.. (component-blocked). That matches Rodin’s
-        // assumed component-blocked storage.
-        const size_t vn = mesh.getVertexCount();
-        (void)vn;
-
-        if constexpr (std::is_same_v<Ctx, Context::MPI>)
+        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
         {
-          gf.acquire();
+          const size_t sz = gf.getSize();
+          for (size_t i = 0; i < sz; ++i)
+            os << gf[i] << '\n';
         }
-
-        for (size_t c = 0; c < vdim; ++c)
+        else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
         {
-          const Index base = static_cast<Index>(c * scalarSize);
-          for (Index v = 0; v < static_cast<Index>(scalarSize); ++v)
-            os << gf[base + v] << '\n';
+          const auto& fes   = gf.getFiniteElementSpace();
+          const auto& shard = fes.getShard();
+
+          const size_t localSz = shard.getSize();
+
+          // Force read-acquire, not write-acquire:
+          const auto& cgf = static_cast<const std::decay_t<decltype(gf)>&>(gf);
+          cgf.acquire();
+
+          for (size_t i = 0; i < localSz; ++i)
+          {
+            const Index g = fes.getGlobalIndex(i);   // IMPORTANT: shard-local dof i -> global dof
+            os << cgf[g] << '\n';
+          }
+
+          cgf.flush();
         }
-
-        if constexpr (std::is_same_v<Ctx, Context::MPI>)
+        else
         {
-          gf.flush();
+          assert(false);
         }
       }
   };
