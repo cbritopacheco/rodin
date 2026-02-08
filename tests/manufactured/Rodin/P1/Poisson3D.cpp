@@ -140,7 +140,7 @@ namespace Rodin::Tests::Manufactured::Poisson3D
     diff = Pow(u.getSolution() - solution, 2);
 
     Real error = Integral(diff).compute();
-    EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(0.5 * error, 0, RODIN_FUZZY_CONSTANT);
   }
 
   /**

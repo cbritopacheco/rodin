@@ -331,7 +331,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     {
       const auto coord = mesh.getVertexCoordinates(it->getIndex());
       Real distance = coord.norm();
-      if (distance < 0.05)
+      if (distance < 0.2)
         interface.push_back(it->getIndex());
     }
 

@@ -392,29 +392,70 @@ namespace Rodin::Variational
       GridFunction& setData(const DataType& data, size_t offset = 0)
       {
         this->flush();
+
         PetscErrorCode ierr;
+
+        // ---------------------------
+        // Size checks (global sizes)
+        // ---------------------------
+        PetscInt nDst = 0, nSrc = 0;
+        ierr = VecGetSize(m_data, &nDst); assert(ierr == PETSC_SUCCESS);
+        ierr = VecGetSize(data,   &nSrc); assert(ierr == PETSC_SUCCESS);
+
+        const PetscInt off = static_cast<PetscInt>(offset);
+        assert(off >= 0);
+        assert(off + nDst <= nSrc);
+
+        // ---------------------------
+        // Communicator inference
+        // ---------------------------
+        MPI_Comm comm;
         if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
         {
-          assert(offset == 0);
-          ierr = VecCopy(data, m_data);
-          assert(ierr == PETSC_SUCCESS);
-        }
-        else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
-        {
-          ierr = VecCopy(data, m_data);
-          assert(ierr == PETSC_SUCCESS);
-
-          ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
-          assert(ierr == PETSC_SUCCESS);
-
-          ierr = VecGhostUpdateEnd(  m_data, INSERT_VALUES, SCATTER_FORWARD);
-          assert(ierr == PETSC_SUCCESS);
+          comm = PETSC_COMM_SELF;
         }
         else
         {
-          assert(false);
+          static_assert(std::is_same_v<FESMeshContextType, Context::MPI>);
+          const auto& fes  = this->getFiniteElementSpace();
+          const auto& mesh = fes.getMesh();
+          const auto& ctx  = mesh.getContext(); // dependent member access is fine here
+          comm = ctx.getCommunicator();
         }
-        (void) ierr;
+
+        // ---------------------------
+        // data slice view: data[off : off+nDst)
+        // ---------------------------
+        IS is = nullptr;
+        ierr = ISCreateStride(comm, nDst, off, 1, &is);
+        assert(ierr == PETSC_SUCCESS);
+
+        Vec sub = nullptr;
+        ierr = VecGetSubVector(data, is, &sub);
+        assert(ierr == PETSC_SUCCESS);
+
+        // Copy slice into this field vector
+        ierr = VecCopy(sub, m_data);
+        assert(ierr == PETSC_SUCCESS);
+
+        ierr = VecRestoreSubVector(data, is, &sub);
+        assert(ierr == PETSC_SUCCESS);
+
+        ierr = ISDestroy(&is);
+        assert(ierr == PETSC_SUCCESS);
+
+        // ---------------------------
+        // Refresh ghosts if needed
+        // ---------------------------
+        if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        {
+          ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+        }
+
+        (void)ierr;
         return *this;
       }
 
@@ -426,7 +467,7 @@ namespace Rodin::Variational
         const size_t d = polytope.getDimension();
         const Index  i = polytope.getIndex();
 
-        if (std::is_same_v<FESMeshContextType, Context::Local>)
+        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
         {
           const auto& fe = fes.getFiniteElement(d, i);
           const size_t count = fe.getCount();
@@ -434,8 +475,7 @@ namespace Rodin::Variational
           for (Index local = 0; local < count; ++local)
           {
             const auto mapping = fes.getPushforward({ d, i }, fe.getBasis(local));
-            mapping(v, p);
-            const auto k = this->operator[](fes.getGlobalIndex({ d, i }, local)) * v;
+            const auto k = this->operator[](fes.getGlobalIndex({ d, i }, local)) * mapping(p);
             if (local == 0)
               res = k; // Initializes the result (resizes)
             else
@@ -451,8 +491,7 @@ namespace Rodin::Variational
           for (Index local = 0; local < count; ++local)
           {
             const auto mapping = fes.getPushforward({ d, i }, fe.getBasis(local));
-            mapping(v, p);
-            const auto k = this->operator[](fes.getGlobalIndex({ d, i }, local)) * v;
+            const auto k = this->operator[](fes.getGlobalIndex({ d, i }, local)) * mapping(p);
             if (local == 0)
               res = k; // Initializes the result (resizes)
             else
@@ -587,7 +626,7 @@ namespace Rodin::Variational
       {
         const auto& fes = this->getFiniteElementSpace();
         const auto& [d, i] = p;
-        if (std::is_same_v<FESMeshContextType, Context::Local>)
+        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
         {
           const auto& fe = fes.getFiniteElement(d, i);
           const auto mapping = fes.getPullback({ d, i }, fn);

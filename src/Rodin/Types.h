@@ -135,6 +135,8 @@ namespace Rodin
   template <class T>
   using Optional = std::optional<T>;
 
+  using StringView = std::string_view;
+
 #if __cpp_size_t_suffix < 202011L
   /**
    * @brief User-defined literal for size_t values.

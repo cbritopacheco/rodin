@@ -6,6 +6,9 @@
 #include <petscsys.h>
 #include <type_traits>
 
+#include <petscmat.h>
+#include <petscvec.h>
+
 #include "Rodin/Context/Local.h"
 #include "Rodin/MPI/Context/MPI.h"
 #include "Rodin/PETSc/Variational/TestFunction.h"
@@ -274,10 +277,24 @@ namespace Rodin::Variational
       using SolutionTuple =
         typename Utility::Extract<TrialFunctionTuple>::template Type<GetSolution>;
 
+      using U1FESType = typename GetFES<std::reference_wrapper<U1>>::Type;
+
+      using U2FESType = typename GetFES<std::reference_wrapper<U2>>::Type;
+
+      using U3FESType = typename GetFES<std::reference_wrapper<U3>>::Type;
+
+      using U1FESMeshType = typename FormLanguage::Traits<U1FESType>::MeshType;
+
+      using U1FESMeshContextType = typename FormLanguage::Traits<U1FESMeshType>::ContextType;
+
+      using U2FESMeshType = typename FormLanguage::Traits<U2FESType>::MeshType;
+
+      using U2FESMeshContextType = typename FormLanguage::Traits<U2FESMeshType>::ContextType;
+
     public:
-      // Assembly backend
       using AssemblyType =
-        PETSc::Assembly::Sequential<LinearSystemType, Problem>;
+        typename Assembly::Default<U1FESMeshContextType, U2FESMeshContextType>
+          ::template Type<LinearSystemType, Problem>;
 
       using SolverBaseType =
         Solver::SolverBase<LinearSystemType>;
@@ -390,6 +407,8 @@ namespace Rodin::Variational
       {
         computeOffsets();
 
+        setFieldSplits();
+
         AssemblyInput in{
           m_pb, m_us, m_vs,
           m_trialOffsets, m_testOffsets,
@@ -447,6 +466,65 @@ namespace Rodin::Variational
       }
 
     private:
+      void setFieldSplits()
+      {
+        PetscErrorCode ierr;
+
+        using Split = typename LinearSystemType::FieldSplits::Split;
+
+        std::vector<Split> splits;
+        splits.reserve(TrialFunctionTuple::Size);
+
+        // Sizes in the same order as m_us (== offsets order)
+        std::array<PetscInt, TrialFunctionTuple::Size> sz{};
+        m_us
+          .map([](const auto& u)
+          {
+            return static_cast<PetscInt>(u.get().getFiniteElementSpace().getSize());
+          })
+          .iapply([&](const Index i, const PetscInt s) { sz[i] = s; });
+
+        // Build one IS per trial field (block layout: [u][p][lambda]...)
+        for (size_t k = 0; k < TrialFunctionTuple::Size; ++k)
+        {
+          const PetscInt n     = sz[k];
+          const PetscInt start = static_cast<PetscInt>(m_trialOffsets[k]);
+
+          ::IS is = PETSC_NULLPTR;
+          ierr = ISCreateStride(
+            m_axb.getCommunicator(), // PETSC_COMM_SELF in sequential
+            n,
+            start,
+            1,
+            &is);
+          assert(ierr == PETSC_SUCCESS);
+
+          std::string name;
+          // Fetch the name from the k-th trial function (same order as splits)
+          m_us.iapply([&](size_t i, const auto& uref)
+          {
+            if (i != k)
+              return;
+
+            const auto opt = uref.get().getName(); // Optional<StringView>
+            if (opt.has_value())
+              name = std::string(opt->data(), opt->size());
+          });
+
+          if (name.empty())
+          {
+            name = std::to_string(k); // deterministic fallback
+          }
+
+          splits.push_back(Split{ std::move(name), is });
+        }
+
+        // Store (takes ownership of IS handles)
+        m_axb.setFieldSplits(typename LinearSystemType::FieldSplits{ std::move(splits) });
+
+        (void) ierr;
+      }
+
       void buildUUIDMaps()
       {
         m_trialUUIDMap.clear();

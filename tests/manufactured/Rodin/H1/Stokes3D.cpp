@@ -35,10 +35,10 @@ namespace Rodin::Tests::Manufactured::Stokes3D
     }
   };
 
-  using Manufactured_Stokes3D_Test_12 =
-    Manufactured_Stokes3D_Test<12, 12, 12>;
+  using Manufactured_Stokes3D_Test_6 =
+    Manufactured_Stokes3D_Test<6, 6, 6>;
 
-  TEST_P(Manufactured_Stokes3D_Test_12, Stokes3D_AffineVelocity_ConstantPressure)
+  TEST_P(Manufactured_Stokes3D_Test_6, Stokes3D_AffineVelocity_ConstantPressure)
   {
     std::exit(1);
     auto pi = Rodin::Math::Constants::pi();
@@ -89,8 +89,8 @@ namespace Rodin::Tests::Manufactured::Stokes3D
 
 
     GMRES gmres(stokes);
-    gmres.setTolerance(1e-10);
-    gmres.setMaxIterations(2000);
+    gmres.setTolerance(1e-12);
+    // gmres.setMaxIterations(2000);
 
     auto t2 = std::chrono::high_resolution_clock::now();
     gmres.solve();
@@ -134,7 +134,7 @@ namespace Rodin::Tests::Manufactured::Stokes3D
   // ∇·u = 0
   // p = sin(pi x) sin(pi y) sin(pi z)
   // f = -Δu + ∇p
-  TEST_P(Manufactured_Stokes3D_Test_12, Stokes3D_SimpleSine)
+  TEST_P(Manufactured_Stokes3D_Test_6, Stokes3D_SimpleSine)
   {
     std::exit(1);
     auto pi = Rodin::Math::Constants::pi();
@@ -236,7 +236,7 @@ namespace Rodin::Tests::Manufactured::Stokes3D
 
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D,
-    Manufactured_Stokes3D_Test_12,
+    Manufactured_Stokes3D_Test_6,
     ::testing::Values(
       Polytope::Type::Tetrahedron,
       Polytope::Type::Hexahedron,

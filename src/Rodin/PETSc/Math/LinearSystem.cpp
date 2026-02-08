@@ -16,6 +16,7 @@ namespace Rodin::Math
     assert(ierr == PETSC_SUCCESS);
     ierr = VecCreate(comm, &m_vector);
     assert(ierr == PETSC_SUCCESS);
+    (void) ierr;
   }
 
   LinearSystem<::Mat, ::Vec>::LinearSystem(const LinearSystem& other)
@@ -23,7 +24,8 @@ namespace Rodin::Math
       m_comm(other.m_comm),
       m_operator(other.m_operator),
       m_solution(other.m_solution),
-      m_vector(other.m_vector)
+      m_vector(other.m_vector),
+      m_fieldSplits(other.m_fieldSplits)
   {}
 
   LinearSystem<::Mat, ::Vec>::LinearSystem(LinearSystem&& other) noexcept
@@ -31,19 +33,25 @@ namespace Rodin::Math
       m_comm(std::exchange(other.m_comm, MPI_COMM_NULL)),
       m_operator(std::exchange(other.m_operator, PETSC_NULLPTR)),
       m_solution(std::exchange(other.m_solution, PETSC_NULLPTR)),
-      m_vector(std::exchange(other.m_vector, PETSC_NULLPTR))
+      m_vector(std::exchange(other.m_vector, PETSC_NULLPTR)),
+      m_fieldSplits(std::move(other.m_fieldSplits))
   {}
 
   LinearSystem<::Mat, ::Vec>::~LinearSystem()
   {
     m_comm = MPI_COMM_NULL;
     PetscErrorCode ierr;
+
     ierr = MatDestroy(&m_operator);
     assert(ierr == PETSC_SUCCESS);
+
     ierr = VecDestroy(&m_solution);
     assert(ierr == PETSC_SUCCESS);
+
     ierr = VecDestroy(&m_vector);
     assert(ierr == PETSC_SUCCESS);
+
+    (void) ierr;
   }
 
   LinearSystem<::Mat, ::Vec>&
@@ -56,6 +64,7 @@ namespace Rodin::Math
       m_operator = other.m_operator;
       m_solution = other.m_solution;
       m_vector = other.m_vector;
+      m_fieldSplits = other.m_fieldSplits;
     }
     return *this;
   }
@@ -70,6 +79,7 @@ namespace Rodin::Math
       m_operator = std::exchange(other.m_operator, PETSC_NULLPTR);
       m_solution = std::exchange(other.m_solution, PETSC_NULLPTR);
       m_vector = std::exchange(other.m_vector, PETSC_NULLPTR);
+      m_fieldSplits = std::move(other.m_fieldSplits);
     }
     return *this;
   }

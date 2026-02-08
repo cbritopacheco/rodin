@@ -387,9 +387,6 @@ namespace Rodin::Assembly
         ierr = MatSetType(A, MATSEQAIJ);
         assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatSeqAIJSetPreallocation(A, PETSC_DETERMINE, PETSC_NULLPTR);
-        assert(ierr == PETSC_SUCCESS);
-
         ierr = MatSetUp(A);
         assert(ierr == PETSC_SUCCESS);
 
@@ -817,9 +814,6 @@ namespace Rodin::Assembly
         assert(ierr == PETSC_SUCCESS);
 
         ierr = MatSetType(A, MATSEQAIJ);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = MatSeqAIJSetPreallocation(A, PETSC_DETERMINE, PETSC_NULLPTR);
         assert(ierr == PETSC_SUCCESS);
 
         ierr = MatSetUp(A);

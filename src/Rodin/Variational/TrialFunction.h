@@ -186,6 +186,17 @@ namespace Rodin::Variational
         return m_ref.get().getOrder(poly);
       }
 
+      TrialFunctionReference& setName(const std::string& name)
+      {
+        m_ref.get().setName(name);
+        return *this;
+      }
+
+      Optional<StringView> getName() const override
+      {
+        return m_ref.get().getName();
+      }
+
       /**
        * @brief Creates a copy of this reference.
        * @returns Pointer to newly allocated copy
@@ -368,7 +379,19 @@ namespace Rodin::Variational
         return m_gf;
       }
 
+      TrialFunction& setName(const std::string& name)
+      {
+        m_name = name;
+        return *this;
+      }
+
+      Optional<StringView> getName() const override
+      {
+        return m_name;
+      }
+
     private:
+      std::string m_name; ///< Optional name for the trial function
       SolutionType m_gf;
   };
 

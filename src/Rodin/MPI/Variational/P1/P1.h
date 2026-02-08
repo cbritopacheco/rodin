@@ -55,16 +55,16 @@ namespace Rodin::Variational
        * @brief Mapping for the scalar/complex P1 space.
        */
       template <class FunctionDerived>
-      class Mapping : public FiniteElementSpacePullbackBase<Mapping<FunctionDerived>>
+      class Pullback : public FiniteElementSpacePullbackBase<Pullback<FunctionDerived>>
       {
         public:
           using FunctionType = FunctionBase<FunctionDerived>;
 
-          Mapping(const Geometry::Polytope& polytope, const FunctionType& v)
+          Pullback(const Geometry::Polytope& polytope, const FunctionType& v)
             : m_polytope(polytope), m_v(v.copy())
           {}
 
-          Mapping(const Mapping&) = default;
+          Pullback(const Pullback&) = default;
 
           auto operator()(const Math::SpatialVector<Real>& r) const
           {
@@ -95,7 +95,7 @@ namespace Rodin::Variational
        * @brief Inverse mapping for the scalar/complex P1 space.
        */
       template <class CallableType>
-      class InverseMapping : public FiniteElementSpacePushforwardBase<InverseMapping<CallableType>>
+      class Pushforward : public FiniteElementSpacePushforwardBase<Pushforward<CallableType>>
       {
         public:
           using FunctionType = CallableType;
@@ -104,11 +104,11 @@ namespace Rodin::Variational
            * @param[in] v Reference to the function defined on the reference
            * space.
            */
-          InverseMapping(const FunctionType& v)
+          Pushforward(const FunctionType& v)
             : m_v(v)
           {}
 
-          InverseMapping(const InverseMapping&) = default;
+          Pushforward(const Pushforward&) = default;
 
           constexpr
           auto operator()(const Geometry::Point& p) const
@@ -428,19 +428,19 @@ namespace Rodin::Variational
       {
         const auto& [d, globalIdx] = p;
         const auto& mesh = getMesh();
-        return Mapping<FunctionDerived>(*mesh.getPolytope(d, globalIdx), v);
+        return Pullback<FunctionDerived>(*mesh.getPolytope(d, globalIdx), v);
       }
 
       template <class CallableType>
       auto getPushforward(const std::pair<size_t, Index>& idx, const CallableType& v) const
       {
-        return typename FESType::template InverseMapping<CallableType>(v);
+        return typename FESType::template Pushforward<CallableType>(v);
       }
 
       template <class CallableType>
       auto getPushforward(const Geometry::Polytope& polytope, const CallableType& v) const
       {
-        return typename FESType::InverseMapping(v);
+        return typename FESType::Pushforward(v);
       }
 
     private:

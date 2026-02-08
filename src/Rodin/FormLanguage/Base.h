@@ -94,9 +94,9 @@ namespace Rodin::FormLanguage
        * Derived classes should override this method to provide meaningful
        * names for debugging and diagnostic purposes.
        */
-      virtual const char* getName() const
+      virtual Optional<StringView> getName() const
       {
-        return nullptr;
+        return {};
       }
 
       /**

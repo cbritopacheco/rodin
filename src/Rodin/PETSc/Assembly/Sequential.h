@@ -114,9 +114,6 @@ namespace Rodin::Assembly
         ierr = MatSetSizes(res, m, n, PETSC_DETERMINE, PETSC_DETERMINE);
         assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatSeqAIJSetPreallocation(res, PETSC_DETERMINE, PETSC_NULLPTR);
-        assert(ierr == PETSC_SUCCESS);
-
         ierr = MatSetFromOptions(res);
         assert(ierr == PETSC_SUCCESS);
 
@@ -253,8 +250,6 @@ namespace Rodin::Assembly
         assert(ierr == PETSC_SUCCESS);
         ierr = MatSetType(A, MATSEQAIJ);
         assert(ierr == PETSC_SUCCESS);
-        ierr = MatSeqAIJSetPreallocation(A, PETSC_DETERMINE, PETSC_NULLPTR);
-        assert(ierr == PETSC_SUCCESS);
         ierr = MatSetUp(A);
         assert(ierr == PETSC_SUCCESS);
         ierr = MatZeroEntries(A);
@@ -273,7 +268,7 @@ namespace Rodin::Assembly
 
         auto& x = axb.getSolution();
         assert(x);
-        ierr = VecSetSizes(x, static_cast<PetscInt>(rows), PETSC_DECIDE);
+        ierr = VecSetSizes(x, static_cast<PetscInt>(cols), PETSC_DECIDE);
         assert(ierr == PETSC_SUCCESS);
         ierr = VecSetType(x, VECSEQ);
         assert(ierr == PETSC_SUCCESS);
@@ -524,15 +519,13 @@ namespace Rodin::Assembly
         ierr = MatSetType(A, MATSEQAIJ);
         assert(ierr == PETSC_SUCCESS);
 
-        // Cheap preallocation (works; not optimal). You can improve with nnz estimates later.
-        ierr = MatSeqAIJSetPreallocation(A, PETSC_DETERMINE, PETSC_NULLPTR);
-        assert(ierr == PETSC_SUCCESS);
-
         ierr = MatSetUp(A);
         assert(ierr == PETSC_SUCCESS);
 
         ierr = MatZeroEntries(A);
         assert(ierr == PETSC_SUCCESS);
+
+        MatSetOption(A, MAT_IGNORE_ZERO_ENTRIES, PETSC_TRUE);
 
         // ------------------------
         // Allocate / reset b (Seq Vec)
@@ -552,7 +545,7 @@ namespace Rodin::Assembly
 
         auto& x = axb.getSolution();
         assert(x);
-        ierr = VecSetSizes(x, static_cast<PetscInt>(nrows), PETSC_DECIDE);
+        ierr = VecSetSizes(x, static_cast<PetscInt>(ncols), PETSC_DECIDE);
         assert(ierr == PETSC_SUCCESS);
         ierr = VecSetType(x, VECSEQ);
         assert(ierr == PETSC_SUCCESS);
@@ -644,6 +637,11 @@ namespace Rodin::Assembly
           {
             withTestFES(vUUID, [&](const auto& vFES)
             {
+              // Reusable buffers to avoid realloc each cell
+              std::vector<PetscInt>    Iidx;
+              std::vector<PetscInt>    Jidx;
+              std::vector<PetscScalar> Ke; // row-major (i * nc + j)
+
               for (auto it = seq.getIterator(); it; ++it)
               {
                 if (!attrs.empty() && !attrs.count(it->getAttribute()))
@@ -657,17 +655,44 @@ namespace Rodin::Assembly
                 const auto& rows = vFES.getDOFs(d, p);
                 const auto& cols = uFES.getDOFs(d, p);
 
-                for (PetscInt i = 0; i < static_cast<PetscInt>(rows.size()); ++i)
+                const PetscInt nr = static_cast<PetscInt>(rows.size());
+                const PetscInt nc = static_cast<PetscInt>(cols.size());
+
+                Iidx.resize(static_cast<size_t>(nr));
+                Jidx.resize(static_cast<size_t>(nc));
+                Ke.resize(static_cast<size_t>(nr) * static_cast<size_t>(nc));
+
+                // Map DOFs -> global indices once
+                for (PetscInt i = 0; i < nr; ++i)
                 {
-                  const PetscInt I = static_cast<PetscInt>(vOff + static_cast<size_t>(rows[i]));
-                  for (PetscInt j = 0; j < static_cast<PetscInt>(cols.size()); ++j)
+                  Iidx[static_cast<size_t>(i)] =
+                    static_cast<PetscInt>(vOff + static_cast<size_t>(rows[static_cast<size_t>(i)]));
+                }
+
+                for (PetscInt j = 0; j < nc; ++j)
+                {
+                  Jidx[static_cast<size_t>(j)] =
+                    static_cast<PetscInt>(uOff + static_cast<size_t>(cols[static_cast<size_t>(j)]));
+                }
+
+                // Build element matrix (row-major)
+                for (PetscInt i = 0; i < nr; ++i)
+                {
+                  for (PetscInt j = 0; j < nc; ++j)
                   {
-                    const PetscInt J = static_cast<PetscInt>(uOff + static_cast<size_t>(cols[j]));
-                    const PetscScalar val = static_cast<PetscScalar>(bfi.integrate(j, i));
-                    ierr = MatSetValue(A, I, J, val, ADD_VALUES);
-                    assert(ierr == PETSC_SUCCESS);
+                    Ke[static_cast<size_t>(i) * static_cast<size_t>(nc) + static_cast<size_t>(j)] =
+                      static_cast<PetscScalar>(bfi.integrate(static_cast<size_t>(j), static_cast<size_t>(i)));
                   }
                 }
+
+                // One PETSc call per element (instead of nr*nc calls)
+                ierr = MatSetValues(
+                  A,
+                  nr, Iidx.data(),
+                  nc, Jidx.data(),
+                  Ke.data(),
+                  ADD_VALUES);
+                assert(ierr == PETSC_SUCCESS);
               }
             });
           });

@@ -141,10 +141,6 @@ namespace Rodin::Assembly
         ierr = MatSetSizes(res, localRows, localCols, globalRows, globalCols);
         assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatMPIAIJSetPreallocation(
-            res, PETSC_DECIDE, PETSC_NULLPTR, PETSC_DECIDE, PETSC_NULLPTR);
-        assert(ierr == PETSC_SUCCESS);
-
         ierr = MatSetFromOptions(res);
         assert(ierr == PETSC_SUCCESS);
 
@@ -268,10 +264,6 @@ namespace Rodin::Assembly
             static_cast<PetscInt>(localCols),
             static_cast<PetscInt>(globalRows),
             static_cast<PetscInt>(globalCols));
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = MatMPIAIJSetPreallocation(A, PETSC_DECIDE, PETSC_NULLPTR,
-                                           PETSC_DECIDE, PETSC_NULLPTR);
         assert(ierr == PETSC_SUCCESS);
 
         ierr = MatSetFromOptions(A);
@@ -680,10 +672,6 @@ namespace Rodin::Assembly
             static_cast<PetscInt>(localCols),
             static_cast<PetscInt>(nrows),
             static_cast<PetscInt>(ncols));
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = MatMPIAIJSetPreallocation(A, PETSC_DECIDE, PETSC_NULLPTR,
-                                           PETSC_DECIDE, PETSC_NULLPTR);
         assert(ierr == PETSC_SUCCESS);
 
         ierr = MatSetFromOptions(A);
