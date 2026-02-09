@@ -79,7 +79,7 @@ namespace Rodin::Tests::Manufactured::P0P1Mixed
     P0 p0h(mesh);
     P1 p1h(mesh);
 
-    auto exact_solution = 2.0; // arbitrary non-zero constant exact solution in both spaces
+    auto exact_solution = RealFunction(2.0); // arbitrary non-zero constant exact solution in both spaces
     // Mixed saddle-point system weakly enforces u ≈ p and p ≈ exact_solution; picking
     // exact_solution as the forcing makes (u, p) = (exact_solution, exact_solution)
     // the exact discrete solution when combined with the Dirichlet conditions below.
@@ -94,10 +94,9 @@ namespace Rodin::Tests::Manufactured::P0P1Mixed
           - Integral(p, v)
           + Integral(p, q)
           - Integral(exact_solution, q)
-          + DirichletBC(u, exact_solution)
-          + DirichletBC(p, exact_solution);
+          + DirichletBC(u, exact_solution);
 
-    CG(mixed).solve();
+    BiCGSTAB(mixed).solve();
 
     GridFunction u_exact_coeffs(p1h); // grid-function coefficients of the exact solution for u
     u_exact_coeffs = exact_solution;
@@ -149,12 +148,12 @@ namespace Rodin::Tests::Manufactured::P0P1Mixed
     // First, L2 projection of f onto P0: solve (p, q) = (f, q)
     Problem p_l2(p, q);
     p_l2 = Integral(p, q) - Integral(f, q);
-    CG(p_l2).solve();
+    BiCGSTAB(p_l2).solve();
 
     // L2 projection of p onto P1: solve (u, v) = (p, v)
     Problem u_l2(u0, v);
     u_l2 = Integral(u0, v) - Integral(p.getSolution(), v);
-    CG(u_l2).solve();
+    BiCGSTAB(u_l2).solve();
 
     // Reset for mixed solve
     p.getSolution() = 0.0;
@@ -194,11 +193,11 @@ namespace Rodin::Tests::Manufactured::P0P1Mixed
 
     Problem p_l2(p, q);
     p_l2 = Integral(p, q) - Integral(f, q);
-    CG(p_l2).solve();
+    BiCGSTAB(p_l2).solve();
 
     Problem u_l2(u0, v);
     u_l2 = Integral(u0, v) - Integral(p.getSolution(), v);
-    CG(u_l2).solve();
+    BiCGSTAB(u_l2).solve();
 
     p.getSolution() = 0.0;
     u.getSolution() = 0.0;

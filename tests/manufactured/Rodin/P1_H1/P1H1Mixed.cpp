@@ -94,7 +94,7 @@ namespace Rodin::Tests::Manufactured::P1H1
     const auto& mesh = getMesh();
 
     P1 p1h(mesh);
-    H1 h1(Fixture::K, mesh);
+    H1 h1(std::integral_constant<size_t, K>{}, mesh);
 
     auto exact_solution = 2 * F::x + 3 * F::y + 1; // affine P1 field to exercise constant gradients
     // Mixed saddle-point system weakly enforces u ≈ p and p ≈ exact_solution; picking
@@ -114,7 +114,7 @@ namespace Rodin::Tests::Manufactured::P1H1
           + DirichletBC(u, exact_solution)
           + DirichletBC(p, exact_solution);
 
-    CG(mixed).solve();
+    BiCGSTAB(mixed).solve();
 
     GridFunction u_exact_coeffs(h1); // grid-function coefficients of the exact solution for u
     u_exact_coeffs = exact_solution;
@@ -166,11 +166,11 @@ namespace Rodin::Tests::Manufactured::P1H1
 
     Problem p_l2(p, q);
     p_l2 = Integral(p, q) - Integral(f, q);
-    CG(p_l2).solve();
+    BiCGSTAB(p_l2).solve();
 
     Problem u_l2(u0, v);
     u_l2 = Integral(u0, v) - Integral(p.getSolution(), v);
-    CG(u_l2).solve();
+    BiCGSTAB(u_l2).solve();
 
     Problem mixed(u, p, v, q);
     mixed = Integral(u, v)

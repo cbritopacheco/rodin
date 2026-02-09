@@ -1,0 +1,36 @@
+name: Copilot setup steps
+
+on:
+  workflow_call:
+    inputs:
+      compiler:
+        description: "Compiler toolchain to install (e.g., gcc-14)"
+        required: false
+        type: string
+        default: gcc-14
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup Cpp (C++ / C)
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: ${{ inputs.compiler }}
+          cmake: true
+
+      - name: Install dependencies
+        run: >-
+          sudo apt-get update && sudo apt-get install -y
+          lcov
+          libeigen3-dev
+          libomp-dev
+          libgl1-mesa-dev
+          libsdl2-dev
+          libglfw3-dev
+          libopenal-dev
+          libvulkan-dev
+          libsuitesparse-dev
+          libmetis-dev
+          libboost1.74-all-dev
