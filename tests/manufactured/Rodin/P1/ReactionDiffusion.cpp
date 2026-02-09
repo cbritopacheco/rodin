@@ -55,6 +55,44 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion
   using ManufacturedReactionDiffusionTest64x64 = ManufacturedReactionDiffusionTest<64>;
   using ManufacturedReactionDiffusionTest128x128 = ManufacturedReactionDiffusionTest<128>;
 
+  TEST_P(ManufacturedReactionDiffusionTest16x16, ReactionDiffusion_P1ExactResidual)
+  {
+    Mesh mesh = this->getMesh();
+
+    P1 vh(mesh);
+    auto solution = 2 * F::x + 3 * F::y + 1;
+    auto f = solution;
+
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+
+    Problem rd(u, v);
+    rd = Integral(Grad(u), Grad(v))
+       + Integral(u, v)
+       - Integral(f, v)
+       + DirichletBC(u, solution);
+
+    CG(rd).solve();
+
+    GridFunction u_exact(vh);
+    u_exact = solution;
+
+    auto& A = rd.getLinearSystem().getOperator();
+    auto& b = rd.getLinearSystem().getVector();
+    auto& x = rd.getLinearSystem().getSolution();
+
+    auto r = A * x - b;
+    auto re = A * u_exact.getData() - b;
+
+    const Real scale = std::max<Real>(b.norm(), 1);
+    EXPECT_NEAR(r.norm() / scale, 0, 1e-10);
+    EXPECT_NEAR(re.norm() / scale, 0, 1e-12);
+
+    GridFunction diff(vh);
+    diff = Pow(u.getSolution() - solution, 2);
+    EXPECT_NEAR(Integral(diff).compute(), 0, 1e-12);
+  }
+
   /**
    * @brief Sine/Cosine manufactured solution.
    *
@@ -229,4 +267,3 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion
     ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle)
   );
 }
-

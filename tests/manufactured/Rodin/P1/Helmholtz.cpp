@@ -34,6 +34,45 @@ namespace Rodin::Tests::Manufactured::Helmholtz
   using Manufactured_Helmholtz_Test_32x32 = Manufactured_Helmholtz_Test<32>;
   using Manufactured_Helmholtz_Test_64x64 = Manufactured_Helmholtz_Test<64>;
 
+  TEST_P(Manufactured_Helmholtz_Test_32x32, Helmholtz_P1ExactResidual)
+  {
+    const Real kappa = 1.5;
+
+    Mesh mesh = this->getMesh();
+    P1 vh(mesh);
+
+    auto u_expr = 2 * F::x - F::y + 1;
+    auto f = -kappa * kappa * u_expr;
+
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+
+    Problem helmholtz(u, v);
+    helmholtz = Integral(Grad(u), Grad(v))
+              - kappa * kappa * Integral(u, v)
+              - Integral(f, v)
+              + DirichletBC(u, u_expr);
+    CG(helmholtz).solve();
+
+    GridFunction u_exact(vh);
+    u_exact = u_expr;
+
+    auto& A = helmholtz.getLinearSystem().getOperator();
+    auto& b = helmholtz.getLinearSystem().getVector();
+    auto& x = helmholtz.getLinearSystem().getSolution();
+
+    auto r = A * x - b;
+    auto re = A * u_exact.getData() - b;
+
+    const Real scale = std::max<Real>(b.norm(), 1);
+    EXPECT_NEAR(r.norm() / scale, 0, 1e-10);
+    EXPECT_NEAR(re.norm() / scale, 0, 1e-12);
+
+    GridFunction diff(vh);
+    diff = Pow(u.getSolution() - u_expr, 2);
+    EXPECT_NEAR(Integral(diff).compute(), 0, 1e-12);
+  }
+
   TEST_P(Manufactured_Helmholtz_Test_32x32, Helmholtz_SimpleSine)
   {
     auto pi = Math::Constants::pi();
@@ -103,4 +142,3 @@ namespace Rodin::Tests::Manufactured::Helmholtz
     ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle)
   );
 }
-
