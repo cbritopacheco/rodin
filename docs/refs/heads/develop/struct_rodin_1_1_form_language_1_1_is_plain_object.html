@@ -90,8 +90,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md25">Type Classification</a></li>
-            <li><a href="#autotoc_md26">Usage</a></li>
+            <li><a href="#autotoc_md21">Type Classification</a></li>
+            <li><a href="#autotoc_md22">Usage</a></li>
             <li>
               Reference
               <ul>
@@ -100,7 +100,7 @@
             </li>
           </ul>
         </nav>
-<p>General case: checks if type derives from Eigen::PlainObjectBase.</p><p>This trait determines whether a type is an Eigen plain object type that owns its data storage, such as Matrix, Array, or Vector. Plain objects are distinguished from expression templates and mapped types.</p><section id="autotoc_md25"><h3><a href="#autotoc_md25">Type Classification</a></h3><ul><li><strong>Plain objects</strong>: Matrix, Array, Vector (own their data)</li><li><strong>Non-plain</strong>: MatrixBase expressions, Map types, Block expressions</li></ul></section><section id="autotoc_md26"><h3><a href="#autotoc_md26">Usage</a></h3><pre class="m-code"><span class="c1">// Check if type is plain object</span>
+<p>General case: checks if type derives from Eigen::PlainObjectBase.</p><p>This trait determines whether a type is an Eigen plain object type that owns its data storage, such as Matrix, Array, or Vector. Plain objects are distinguished from expression templates and mapped types.</p><section id="autotoc_md21"><h3><a href="#autotoc_md21">Type Classification</a></h3><ul><li><strong>Plain objects</strong>: Matrix, Array, Vector (own their data)</li><li><strong>Non-plain</strong>: MatrixBase expressions, Map types, Block expressions</li></ul></section><section id="autotoc_md22"><h3><a href="#autotoc_md22">Usage</a></h3><pre class="m-code"><span class="c1">// Check if type is plain object</span>
 <span class="k">static_assert</span><span class="p">(</span><span class="n">IsPlainObject</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="o">&gt;::</span><span class="n">Value</span><span class="p">);</span>
 <span class="k">static_assert</span><span class="p">(</span><span class="n">IsPlainObject</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">VectorXd</span><span class="o">&gt;::</span><span class="n">Value</span><span class="p">);</span>
 <span class="k">static_assert</span><span class="p">(</span><span class="o">!</span><span class="n">IsPlainObject</span><span class="o">&lt;</span><span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span><span class="o">::</span><span class="n">RowXpr</span><span class="o">&gt;::</span><span class="n">Value</span><span class="p">);</span></pre><aside class="m-note m-info"><h4>Note</h4><p>This trait is used internally for object lifetime management in <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a> to determine whether objects should be stored or referenced.</p></aside></section>

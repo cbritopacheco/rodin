@@ -162,6 +162,10 @@ $ x $
 </g>
 </svg> if null.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa9f324ce2edff03c8fa2fe0079bc80f9" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Creates a polymorphic copy of this object.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">void <a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc">solve</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
             <dd>Solves the associated problem.</dd>
@@ -234,6 +238,21 @@ $ x $
               </tbody>
             </table>
 <p>If <code>x == PETSC_NULL</code>, automatically <code>VecDuplicate(b, &amp;x)</code> and zero it. Otherwise uses <code>x</code> contents as initial guess.</p><p>Applies programmatic settings, then SetFromOptions, then KSPSolve.</p>
+          </div></section>
+          <section class="m-doc-details" id="aa9f324ce2edff03c8fa2fe0079bc80f9"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a>* Rodin::<wbr />Solver::<wbr />KSP::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa9f324ce2edff03c8fa2fe0079bc80f9" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Creates a polymorphic copy of this object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a new instance that is a copy of this object. The caller is responsible for memory management.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-info"><h4>Note</h4><p>This method enables polymorphic copy behavior. The copy semantics (shallow vs deep) depend on the concrete implementation. This method should not throw exceptions.</p></aside>
           </div></section>
           <section class="m-doc-details" id="af7d39f0eac0af0ed5785935ac72a1e7d"><div>
             <h3>
