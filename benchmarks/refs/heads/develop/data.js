@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1770368240935,
+  "lastUpdate": 1770624413543,
   "repoUrl": "https://github.com/cbritopacheco/rodin",
   "entries": {
     "C++ Rodin Benchmarks": [
@@ -41326,6 +41326,162 @@ window.BENCHMARK_DATA = {
             "value": 52.222335225021276,
             "unit": "ns/iter",
             "extra": "iterations: 12219953\ncpu: 52.219554936095086 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "198982749+Copilot@users.noreply.github.com",
+            "name": "Copilot",
+            "username": "Copilot"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e15528c52221432d5c2631d93225372b2e60106a",
+          "message": "Remove unsafe PETSc assembly casts and harden mesh/FES dispatch (#167)\n\n* Initial plan\n\n* Implement multi-variable assembly specialization\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Refine triplet filtering for Dirichlet DOFs\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Apply Dirichlet elimination to single-variable problems\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix dense assembly fallback without setFromTriplets\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Direct dense assembly paths\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add PETSc single-variable sequential assembly\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix PETSc sequential iteration type deduction\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Guard PETSc sequential for local meshes\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Enforce local-only PETSc sequential and drop Generic fallback\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Remove Generic\n\n* Fix compilation\n\n* Elimination logic\n\n* Fix bug\n\n* Co-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Initialize PETSc solution vectors during assembly\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Replace PETSc assembly void* mesh/FES access with typed visitors\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Remove void* mesh/FES access in PETSc MPI assembly\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Hoist block offsets in PETSc MPI global assembly\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* PETSc multi-field sequential assembly\n\n* Fix P1 MPI IO\n\n* Update\n\n* CI\n\n* Make Stokes3D tests pass\n\n* Update Poisson tests\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\nCo-authored-by: cbritopacheco <carlos.brito524@gmail.com>",
+          "timestamp": "2026-02-09T09:01:38+01:00",
+          "tree_id": "66de08b380d9bb926bf211ddb0a25dd84adc54d1",
+          "url": "https://github.com/cbritopacheco/rodin/commit/e15528c52221432d5c2631d93225372b2e60106a"
+        },
+        "date": 1770624406926,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "P1Benchmark/UniformTriangular16_Build",
+            "value": 0.31397034540725316,
+            "unit": "ns/iter",
+            "extra": "iterations: 2248725739\ncpu: 0.31394764410618947 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_Build",
+            "value": 0.3141735933150245,
+            "unit": "ns/iter",
+            "extra": "iterations: 2249916559\ncpu: 0.31412798984604484 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular64_Build",
+            "value": 0.3110216715811762,
+            "unit": "ns/iter",
+            "extra": "iterations: 2251083188\ncpu: 0.3109929387469621 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular128_Build",
+            "value": 0.31089295944789513,
+            "unit": "ns/iter",
+            "extra": "iterations: 2247396928\ncpu: 0.31085199694639776 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Real_SumOfComponents",
+            "value": 623.1236481945823,
+            "unit": "ns/iter",
+            "extra": "iterations: 1123405\ncpu: 623.0801687726151 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Real_SumOfComponents",
+            "value": 124303.36521738848,
+            "unit": "ns/iter",
+            "extra": "iterations: 5635\ncpu: 124296.78544809228 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Real_SumOfComponents",
+            "value": 541935.6061776105,
+            "unit": "ns/iter",
+            "extra": "iterations: 1295\ncpu: 541891.5706563706 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Vector_Components",
+            "value": 1011.8701059432206,
+            "unit": "ns/iter",
+            "extra": "iterations: 691502\ncpu: 1011.8309317977398 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Vector_Components",
+            "value": 223927.29639174798,
+            "unit": "ns/iter",
+            "extra": "iterations: 3104\ncpu: 223902.40689433014 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Vector_Components",
+            "value": 927656.7556440457,
+            "unit": "ns/iter",
+            "extra": "iterations: 753\ncpu: 927637.9322709161 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_NoCoefficient_ConstantSource",
+            "value": 266018.3943396318,
+            "unit": "ns/iter",
+            "extra": "iterations: 2650\ncpu: 265999.1788679244 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_ConstantCoefficient_ConstantSource",
+            "value": 229172.2427406155,
+            "unit": "ns/iter",
+            "extra": "iterations: 3065\ncpu: 229164.96867862964 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_Square",
+            "value": 13491.542199940972,
+            "unit": "ns/iter",
+            "extra": "iterations: 50865\ncpu: 13490.159382679622 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_UniformTriangular64",
+            "value": 5997485.512605009,
+            "unit": "ns/iter",
+            "extra": "iterations: 119\ncpu: 5997049.092436986 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_16x16",
+            "value": 112424.46156315495,
+            "unit": "ns/iter",
+            "extra": "iterations: 6231\ncpu: 112419.17461081686 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_64x64",
+            "value": 2106511.6946106935,
+            "unit": "ns/iter",
+            "extra": "iterations: 334\ncpu: 2106221.28742515 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_128x128",
+            "value": 9204413.092105238,
+            "unit": "ns/iter",
+            "extra": "iterations: 76\ncpu: 9204261.368421072 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_256x256",
+            "value": 42014245.38461669,
+            "unit": "ns/iter",
+            "extra": "iterations: 13\ncpu: 42008670.61538461 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_512x512",
+            "value": 303837975.499988,
+            "unit": "ns/iter",
+            "extra": "iterations: 2\ncpu: 303817394.9999994 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_16x16",
+            "value": 51.181091097800156,
+            "unit": "ns/iter",
+            "extra": "iterations: 13604280\ncpu: 51.17507262420374 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_32x32",
+            "value": 51.13661781389696,
+            "unit": "ns/iter",
+            "extra": "iterations: 13289387\ncpu: 51.134572648083704 ns\nthreads: 1"
+          },
+          {
+            "name": "Connectivity/Triangular_64x64",
+            "value": 52.264545820243,
+            "unit": "ns/iter",
+            "extra": "iterations: 11905121\ncpu: 52.263577833438255 ns\nthreads: 1"
           }
         ]
       }
