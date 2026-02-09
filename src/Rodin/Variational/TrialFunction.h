@@ -180,12 +180,6 @@ namespace Rodin::Variational
         return m_ref.get().getSolution();
       }
 
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
-      {
-        return m_ref.get().getOrder(poly);
-      }
-
       TrialFunctionReference& setName(const std::string& name)
       {
         m_ref.get().setName(name);
@@ -389,6 +383,11 @@ namespace Rodin::Variational
       {
         return m_name;
       }
+
+       /**
+       * @brief Creates a copy of this trial function.
+       * @returns Pointer to newly allocated copy
+       */
 
     private:
       std::string m_name; ///< Optional name for the trial function

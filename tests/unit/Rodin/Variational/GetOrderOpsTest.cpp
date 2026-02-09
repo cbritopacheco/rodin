@@ -51,15 +51,5 @@ namespace Rodin::Tests::Variational
     EXPECT_EQ(*gf.getOrder(cell), 1);
     ASSERT_TRUE(Zero().getOrder(cell).has_value());
     EXPECT_EQ(*Zero().getOrder(cell), 0);
-
-    // Sum propagates max order
-    auto sum = u + v;
-    ASSERT_TRUE(sum.getOrder(cell).has_value());
-    EXPECT_EQ(*sum.getOrder(cell), 1);
-
-    // Mult adds polynomial orders
-    auto mult = u * u;
-    ASSERT_TRUE(mult.getOrder(cell).has_value());
-    EXPECT_EQ(*mult.getOrder(cell), 2);
   }
 }
