@@ -49,5 +49,46 @@ namespace Rodin::Tests::Variational
     EXPECT_EQ(*v.getOrder(cell), 1);
     ASSERT_TRUE(Zero().getOrder(cell).has_value());
     EXPECT_EQ(*Zero().getOrder(cell), 0);
+
+    // Sum propagates max order
+    auto sumOp = u + v;
+    ASSERT_TRUE(sumOp.getOrder(cell).has_value());
+    EXPECT_EQ(*sumOp.getOrder(cell), 1);
+
+    // Multiplication adds polynomial orders
+    auto multOp = u * u;
+    ASSERT_TRUE(multOp.getOrder(cell).has_value());
+    EXPECT_EQ(*multOp.getOrder(cell), 2);
+
+    // Division only polynomial if denominator is constant
+    auto div = u / RealFunction(2.0);
+    ASSERT_TRUE(div.getOrder(cell).has_value());
+    EXPECT_EQ(*div.getOrder(cell), 1);
+    auto divNonConst = u / v;
+    EXPECT_FALSE(divNonConst.getOrder(cell).has_value());
+
+    // Pow with non-negative integer exponent
+    auto sq = Pow(u, 2);
+    ASSERT_TRUE(sq.getOrder(cell).has_value());
+    EXPECT_EQ(*sq.getOrder(cell), 2);
+    auto powNonInt = Pow(u, 2.5);
+    EXPECT_FALSE(powNonInt.getOrder(cell).has_value());
+
+    // abs, sqrt, and exp return order 0 for constant operands
+    auto absVal = abs(RealFunction(3.0));
+    ASSERT_TRUE(absVal.getOrder(cell).has_value());
+    EXPECT_EQ(*absVal.getOrder(cell), 0);
+    auto sqrtConst = sqrt(RealFunction(4.0));
+    ASSERT_TRUE(sqrtConst.getOrder(cell).has_value());
+    EXPECT_EQ(*sqrtConst.getOrder(cell), 0);
+    auto expConst = exp(RealFunction(1.0));
+    ASSERT_TRUE(expConst.getOrder(cell).has_value());
+    EXPECT_EQ(*expConst.getOrder(cell), 0);
+    auto absPoly = abs(u);
+    EXPECT_FALSE(absPoly.getOrder(cell).has_value());
+    auto sqrtPoly = sqrt(u);
+    EXPECT_FALSE(sqrtPoly.getOrder(cell).has_value());
+    auto expPoly = exp(u);
+    EXPECT_FALSE(expPoly.getOrder(cell).has_value());
   }
 }

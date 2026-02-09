@@ -108,6 +108,12 @@ namespace Rodin::Variational
         return Math::exp(this->getOperand().getValue(p));
       }
 
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
+      {
+        // Exponential of a polynomial is not a polynomial unless operand is constant.
+        return GetOrderIfConstant(getOperand(), polytope);
+      }
+
       /**
        * @brief Gets the operand function.
        * @returns Reference to the function in the exponent
@@ -139,6 +145,3 @@ namespace Rodin::Variational
 }
 
 #endif
-
-
-
