@@ -94,6 +94,11 @@ namespace Rodin::Variational
         return Math::abs(getOperand().getValue(p));
       }
 
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
+      {
+        return GetOrderIfConstant(getOperand(), polytope);
+      }
+
       /**
        * @brief Gets the operand function.
        * @returns Reference to the function being operated on
@@ -129,5 +134,3 @@ namespace Rodin::Variational
 }
 
 #endif
-
-

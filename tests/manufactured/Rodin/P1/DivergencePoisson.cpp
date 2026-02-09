@@ -51,6 +51,43 @@ namespace Rodin::Tests::Manufactured::DivPoisson
   using Manufactured_DivPoisson_Test_64x64 =
     Rodin::Tests::Manufactured::DivPoisson::Manufactured_DivPoisson_Test<64>;
 
+  TEST_P(Manufactured_DivPoisson_Test_32x32, Divergence_P1ExactResidual)
+  {
+    Mesh mesh = this->getMesh();
+
+    P1 vh(mesh, mesh.getSpaceDimension());
+    VectorFunction u_exact{ 2 * F::x - F::y + 1, -3 * F::x + 4 * F::y - 2 };
+    RealFunction f = 6.0;
+
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+
+    Problem divProb(u, v);
+    divProb = Integral(Div(u), Div(v))
+            - Integral(f, Div(v))
+            + DirichletBC(u, u_exact);
+    CG(divProb).solve();
+
+    GridFunction u_gf(vh);
+    u_gf = u_exact;
+
+    auto& A = divProb.getLinearSystem().getOperator();
+    auto& b = divProb.getLinearSystem().getVector();
+    auto& x = divProb.getLinearSystem().getSolution();
+
+    auto r = A * x - b;
+    auto re = A * u_gf.getData() - b;
+
+    const Real scale = std::max<Real>(b.norm(), 1);
+    EXPECT_NEAR(r.norm() / scale, 0, 1e-10);
+    EXPECT_NEAR(re.norm() / scale, 0, 1e-12);
+
+    P1 sh(mesh);
+    GridFunction diff(sh);
+    diff = Pow(Frobenius(u.getSolution() - u_exact), 2);
+    EXPECT_NEAR(Integral(diff).compute(), 0, 1e-12);
+  }
+
   /**
    * u(x,y) = (sin(pi x), sin(pi y))
    * Div(u) = pi cos(pi x) + pi cos(pi y)
@@ -151,4 +188,3 @@ namespace Rodin::Tests::Manufactured::DivPoisson
     ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle)
   );
 }
-

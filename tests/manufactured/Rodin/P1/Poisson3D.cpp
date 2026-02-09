@@ -94,6 +94,43 @@ namespace Rodin::Tests::Manufactured::Poisson3D
     EXPECT_NEAR(vol, 1.0, 1e-12);
   }
 
+  TEST_F(Manufactured_Poisson3D_Test_8, Poisson3D_P1ExactResidual)
+  {
+    const auto& mesh = this->getMesh();
+    P1 vh(mesh);
+
+    auto solution = F::x + F::y + F::z + 1;
+    auto f = Zero();
+
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, solution);
+
+    CG(poisson).solve();
+
+    GridFunction u_exact(vh);
+    u_exact = solution;
+
+    auto& A = poisson.getLinearSystem().getOperator();
+    auto& b = poisson.getLinearSystem().getVector();
+    auto& x = poisson.getLinearSystem().getSolution();
+
+    auto r = A * x - b;
+    auto re = A * u_exact.getData() - b;
+
+    const Real scale = std::max<Real>(b.norm(), 1);
+    EXPECT_NEAR(r.norm() / scale, 0, 1e-10);
+    EXPECT_NEAR(re.norm() / scale, 0, 1e-12);
+
+    GridFunction diff(vh);
+    diff = Pow(u.getSolution() - solution, 2);
+    EXPECT_NEAR(Integral(diff).compute(), 0, 1e-12);
+  }
+
   /**
    * @f[
    *  \Omega = [0, 1] \times [0, 1] \times [0, 1]

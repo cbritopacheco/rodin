@@ -6,6 +6,8 @@
  */
 #include <gtest/gtest.h>
 
+#include <algorithm>
+
 #include "Rodin/Assembly.h"
 #include "Rodin/Variational.h"
 #include "Rodin/Solver/CG.h"
@@ -70,6 +72,63 @@ namespace Rodin::Tests::Manufactured::P0P1Mixed
   using Manufactured_P0P1_Mixed_Test_6x6x6 =
     Manufactured_P0P1_Mixed_Test<6, 6, 6>;
 
+  TEST_P(Manufactured_P0P1_Mixed_Test_10x10, P0P1_Mixed_ConstantExactSolutionResidual)
+  {
+    const auto& mesh = getMesh();
+
+    P0 p0h(mesh);
+    P1 p1h(mesh);
+
+    auto exact_solution = RealFunction(2.0); // arbitrary non-zero constant exact solution in both spaces
+    // Mixed saddle-point system weakly enforces u ≈ p and p ≈ exact_solution; picking
+    // exact_solution as the forcing makes (u, p) = (exact_solution, exact_solution)
+    // the exact discrete solution when combined with the Dirichlet conditions below.
+
+    TrialFunction u(p1h);
+    TrialFunction p(p0h);
+    TestFunction  v(p1h);
+    TestFunction  q(p0h);
+
+    Problem mixed(u, v, p, q);
+    mixed = Integral(u, v)
+          - Integral(p, v)
+          + Integral(p, q)
+          - Integral(exact_solution, q)
+          + DirichletBC(u, exact_solution);
+
+    BiCGSTAB(mixed).solve();
+
+    GridFunction u_exact_coeffs(p1h); // grid-function coefficients of the exact solution for u
+    u_exact_coeffs = exact_solution;
+    GridFunction p_exact_coeffs(p0h); // grid-function coefficients of the exact solution for p
+    p_exact_coeffs = exact_solution;
+
+    auto& A = mixed.getLinearSystem().getOperator();
+    auto& b = mixed.getLinearSystem().getVector();
+    auto& x = mixed.getLinearSystem().getSolution();
+
+    auto x_exact = x;
+    const auto uSize = u_exact_coeffs.getData().size();
+    const auto pSize = p_exact_coeffs.getData().size();
+    x_exact.head(uSize) = u_exact_coeffs.getData();
+    x_exact.tail(pSize) = p_exact_coeffs.getData();
+
+    auto r = A * x - b;
+    auto re = A * x_exact - b;
+
+    const Real scale = std::max<Real>(b.norm(), 1);
+    EXPECT_NEAR(r.norm() / scale, 0, 1e-10);
+    EXPECT_NEAR(re.norm() / scale, 0, 1e-12);
+
+    GridFunction diff_u(p1h);
+    diff_u = Pow(u.getSolution() - exact_solution, 2);
+    EXPECT_NEAR(Integral(diff_u).compute(), 0, 1e-12);
+
+    GridFunction diff_p(p0h);
+    diff_p = Pow(p.getSolution() - exact_solution, 2);
+    EXPECT_NEAR(Integral(diff_p).compute(), 0, 1e-12);
+  }
+
   TEST_P(Manufactured_P0P1_Mixed_Test_10x10, P0P1_MixedProblem_PolynomialRHS)
   {
     const auto& mesh = getMesh();
@@ -89,12 +148,12 @@ namespace Rodin::Tests::Manufactured::P0P1Mixed
     // First, L2 projection of f onto P0: solve (p, q) = (f, q)
     Problem p_l2(p, q);
     p_l2 = Integral(p, q) - Integral(f, q);
-    CG(p_l2).solve();
+    BiCGSTAB(p_l2).solve();
 
     // L2 projection of p onto P1: solve (u, v) = (p, v)
     Problem u_l2(u0, v);
     u_l2 = Integral(u0, v) - Integral(p.getSolution(), v);
-    CG(u_l2).solve();
+    BiCGSTAB(u_l2).solve();
 
     // Reset for mixed solve
     p.getSolution() = 0.0;
@@ -134,11 +193,11 @@ namespace Rodin::Tests::Manufactured::P0P1Mixed
 
     Problem p_l2(p, q);
     p_l2 = Integral(p, q) - Integral(f, q);
-    CG(p_l2).solve();
+    BiCGSTAB(p_l2).solve();
 
     Problem u_l2(u0, v);
     u_l2 = Integral(u0, v) - Integral(p.getSolution(), v);
-    CG(u_l2).solve();
+    BiCGSTAB(u_l2).solve();
 
     p.getSolution() = 0.0;
     u.getSolution() = 0.0;

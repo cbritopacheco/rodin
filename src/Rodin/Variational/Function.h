@@ -301,6 +301,16 @@ namespace Rodin::Variational
     private:
       FlatSet<Geometry::Attribute> m_traceDomain;
   };
+
+  template <class Derived>
+  inline Optional<size_t>
+  GetOrderIfConstant(const FunctionBase<Derived>& f, const Geometry::Polytope& polytope) noexcept
+  {
+    const auto o = f.getOrder(polytope);
+    if (o && *o == 0)
+      return o;
+    return std::nullopt;
+  }
 }
 
 #endif
