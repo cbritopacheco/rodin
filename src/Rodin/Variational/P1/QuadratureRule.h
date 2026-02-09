@@ -406,7 +406,8 @@ namespace Rodin::Variational
    *
    * The specialization evaluates the integrand at the element centroid and
    * supports distinct P1 trial and test spaces while keeping the coefficient
-   * evaluation to a single point.
+   * evaluation to a single point. This specialization only applies to P1
+   * finite element spaces by construction.
    */
   template <
     class CoefficientDerived, class LHSDerived, class RHSDerived,
@@ -586,6 +587,7 @@ namespace Rodin::Variational
           const auto& trialfe = trialfes.getFiniteElement(d, idx);
           const auto& testfe = testfes.getFiniteElement(d, idx);
           m_matrix.resize(testfe.getCount(), trialfe.getCount());
+          assert(m_qf);
           const auto& rc = m_qf->getPoint(0);
           if constexpr (std::is_same_v<CoefficientRangeType, ScalarType>)
           {
@@ -637,10 +639,10 @@ namespace Rodin::Variational
             static_assert(std::is_same_v<MultiplicandRangeType, Math::Vector<ScalarType>>);
             m_vb1.resize(trialfe.getCount());
             for (size_t i = 0; i < trialfe.getCount(); i++)
-              trialfe.getBasis(m_vb1[i], rc);
+              m_vb1[i] = trialfe.getBasis(i)(rc);
             m_vb2.resize(testfe.getCount());
             for (size_t i = 0; i < testfe.getCount(); i++)
-              testfe.getBasis(m_vb2[i], rc);
+              m_vb2[i] = testfe.getBasis(i)(rc);
             for (size_t te = 0; te < testfe.getCount(); te++)
               for (size_t tr = 0; tr < trialfe.getCount(); tr++)
                 m_matrix(te, tr) = Math::dot(m_cmv * m_vb1[tr], m_vb2[te]);
@@ -801,7 +803,8 @@ namespace Rodin::Variational
           m_p(std::move(other.m_p)),
           m_weight(std::move(other.m_weight)),
           m_distortion(std::move(other.m_distortion)),
-          m_grad(std::move(other.m_grad)),
+          m_trialGrad(std::move(other.m_trialGrad)),
+          m_testGrad(std::move(other.m_testGrad)),
           m_matrix(std::move(other.m_matrix)),
           m_set(std::move(other.m_set)),
           m_geometry(std::move(other.m_geometry))
@@ -824,17 +827,17 @@ namespace Rodin::Variational
         m_polytope = polytope;
         const auto& geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_geometry != geometry;
-        const size_t d = polytope.getDimension();
-        const Index idx = polytope.getIndex();
-        const auto& integrand = getIntegrand();
-        const auto& lhs = integrand.getLHS();
-        const auto& rhs = integrand.getRHS();
-        const auto& trialfes = lhs.getFiniteElementSpace();
-        const auto& testfes = rhs.getFiniteElementSpace();
-        const auto& trialfe = trialfes.getFiniteElement(d, idx);
-        const auto& testfe = testfes.getFiniteElement(d, idx);
         if (recompute)
         {
+          const size_t d = polytope.getDimension();
+          const Index idx = polytope.getIndex();
+          const auto& integrand = getIntegrand();
+          const auto& lhs = integrand.getLHS();
+          const auto& rhs = integrand.getRHS();
+          const auto& trialfes = lhs.getFiniteElementSpace();
+          const auto& testfes = rhs.getFiniteElementSpace();
+          const auto& trialfe = trialfes.getFiniteElement(d, idx);
+          const auto& testfe = testfes.getFiniteElement(d, idx);
           m_qf.emplace(geometry);
           assert(m_qf->getSize() == 1);
           m_p.emplace(polytope, m_qf->getPoint(0));
@@ -842,7 +845,7 @@ namespace Rodin::Variational
           const auto& rc = m_qf->getPoint(0);
           const auto& p = *m_p;
           m_matrix.resize(testfe.getCount(), trialfe.getCount());
-          m_grad.resize(trialfe.getCount());
+          m_trialGrad.resize(trialfe.getCount());
           m_testGrad.resize(testfe.getCount());
           Math::SpatialVector<ScalarType> grad(d);
           for (size_t local = 0; local < trialfe.getCount(); local++)
@@ -850,7 +853,7 @@ namespace Rodin::Variational
             const auto& basis = trialfe.getBasis(local);
             for (size_t j = 0; j < d; j++)
               grad(j) = basis.template getDerivative<1>(j)(rc);
-            m_grad[local] = p.getJacobianInverse().transpose() * grad;
+            m_trialGrad[local] = p.getJacobianInverse().transpose() * grad;
           }
           for (size_t local = 0; local < testfe.getCount(); local++)
           {
@@ -861,7 +864,7 @@ namespace Rodin::Variational
           }
           for (size_t te = 0; te < testfe.getCount(); te++)
             for (size_t tr = 0; tr < trialfe.getCount(); tr++)
-              m_matrix(te, tr) = Math::dot(m_testGrad[te], m_grad[tr]);
+              m_matrix(te, tr) = Math::dot(m_testGrad[te], m_trialGrad[tr]);
         }
         assert(m_p);
         auto& p = *m_p;
@@ -888,7 +891,7 @@ namespace Rodin::Variational
 
       Real m_weight;
       Real m_distortion;
-      std::vector<Math::SpatialVector<ScalarType>> m_grad;
+      std::vector<Math::SpatialVector<ScalarType>> m_trialGrad;
       std::vector<Math::SpatialVector<ScalarType>> m_testGrad;
 
       Math::Matrix<ScalarType> m_matrix;
@@ -1024,8 +1027,10 @@ namespace Rodin::Variational
           m_p(std::move(other.m_p)),
           m_weight(std::move(other.m_weight)),
           m_distortion(std::move(other.m_distortion)),
-          m_grad1(std::move(other.m_grad1)),
-          m_grad2(std::move(other.m_grad2)),
+          m_trialGrad(std::move(other.m_trialGrad)),
+          m_testGrad(std::move(other.m_testGrad)),
+          m_transformedTrialGrad(std::move(other.m_transformedTrialGrad)),
+          m_transformedTestGrad(std::move(other.m_transformedTestGrad)),
           m_matrix(std::move(other.m_matrix)),
           m_set(std::move(other.m_set))
       {}
@@ -1057,7 +1062,7 @@ namespace Rodin::Variational
         const auto& multiplicand = lhs.getDerived().getRHS();
         const auto& trialfes = lhs.getFiniteElementSpace();
         const auto& testfes = rhs.getFiniteElementSpace();
-        const auto& fe = trialfes.getFiniteElement(d, idx);
+        const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe = testfes.getFiniteElement(d, idx);
         const bool recompute = !m_set || m_geometry != geometry;
 
@@ -1069,23 +1074,23 @@ namespace Rodin::Variational
           assert(m_qf->getSize() == 1);
           m_p.emplace(polytope, m_qf->getPoint(0));
           m_weight = m_qf->getWeight(0);
-          m_matrix.resize(testfe.getCount(), fe.getCount());
-          m_grad1.resize(fe.getCount());
-          m_grad2.resize(testfe.getCount());
+          m_matrix.resize(testfe.getCount(), trialfe.getCount());
+          m_trialGrad.resize(trialfe.getCount());
+          m_testGrad.resize(testfe.getCount());
           const auto& rc = m_qf->getPoint(0);
-          for (size_t local = 0; local < fe.getCount(); local++)
+          for (size_t local = 0; local < trialfe.getCount(); local++)
           {
-            m_grad1[local].resize(d);
-            const auto& basis = fe.getBasis(local);
+            m_trialGrad[local].resize(d);
+            const auto& basis = trialfe.getBasis(local);
             for (size_t j = 0; j < d; j++)
-              m_grad1[local](j) = basis.template getDerivative<1>(j)(rc);
+              m_trialGrad[local](j) = basis.template getDerivative<1>(j)(rc);
           }
           for (size_t local = 0; local < testfe.getCount(); local++)
           {
-            m_grad2[local].resize(d);
+            m_testGrad[local].resize(d);
             const auto& basis = testfe.getBasis(local);
             for (size_t j = 0; j < d; j++)
-              m_grad2[local](j) = basis.template getDerivative<1>(j)(rc);
+              m_testGrad[local](j) = basis.template getDerivative<1>(j)(rc);
           }
         }
 
@@ -1093,36 +1098,19 @@ namespace Rodin::Variational
         p.setPolytope(polytope);
         s_cv = coeff(p);
 
-        if (trialfes == testfes)
+        const auto jtinv = p.getJacobianInverse().transpose();
+        m_transformedTrialGrad.resize(trialfe.getCount());
+        for (size_t tr = 0; tr < trialfe.getCount(); tr++)
+          m_transformedTrialGrad[tr] = jtinv * m_trialGrad[tr];
+        m_transformedTestGrad.resize(testfe.getCount());
+        for (size_t te = 0; te < testfe.getCount(); te++)
+          m_transformedTestGrad[te] = jtinv * m_testGrad[te];
+        for (size_t te = 0; te < testfe.getCount(); te++)
         {
-          for (size_t i = 0; i < fe.getCount(); i++)
+          for (size_t tr = 0; tr < trialfe.getCount(); tr++)
           {
-            m_matrix(i, i) = Math::dot(
-                s_cv * p.getJacobianInverse().transpose() * m_grad1[i],
-                p.getJacobianInverse().transpose() * m_grad1[i]);
-          }
-          for (size_t i = 0; i < fe.getCount(); i++)
-          {
-            for (size_t j = 0; j < i; j++)
-            {
-              m_matrix(i, j) = Math::dot(
-                  s_cv * p.getJacobianInverse().transpose() * m_grad1[j],
-                  p.getJacobianInverse().transpose() * m_grad1[i]);
-            }
-          }
-          m_matrix.template triangularView<Eigen::Upper>() = m_matrix.adjoint();
-        }
-        else
-        {
-          const auto jtinv = p.getJacobianInverse().transpose();
-          for (size_t te = 0; te < testfe.getCount(); te++)
-          {
-            const auto gv = jtinv * m_grad2[te];
-            for (size_t tr = 0; tr < fe.getCount(); tr++)
-            {
-              m_matrix(te, tr) =
-                Math::dot(s_cv * jtinv * m_grad1[tr], gv);
-            }
+            m_matrix(te, tr) =
+              Math::dot(s_cv * m_transformedTrialGrad[tr], m_transformedTestGrad[te]);
           }
         }
 
@@ -1150,7 +1138,8 @@ namespace Rodin::Variational
       Real m_weight;
       Real m_distortion;
 
-      std::vector<Math::SpatialVector<ScalarType>> m_grad1, m_grad2;
+      std::vector<Math::SpatialVector<ScalarType>> m_trialGrad, m_testGrad;
+      std::vector<Math::SpatialVector<ScalarType>> m_transformedTrialGrad, m_transformedTestGrad;
 
       Math::Matrix<ScalarType> m_matrix;
 
@@ -1333,8 +1322,8 @@ namespace Rodin::Variational
         }
         else
         {
-          Math::SpatialMatrix<ScalarType> jac1(d, d);
-          Math::SpatialMatrix<ScalarType> jac2(d, d);
+          Math::SpatialMatrix<ScalarType> trialJac(d, d);
+          Math::SpatialMatrix<ScalarType> testJac(d, d);
 
           const auto& trialfe = lhs.getFiniteElementSpace().getFiniteElement(d, idx);
           m_jac1.resize(trialfe.getCount());
@@ -1344,9 +1333,9 @@ namespace Rodin::Variational
             for (size_t j = 0; j < d; j++)
             {
               for (size_t k = 0; k < d; k++)
-                jac1(j, k) = basis.template getDerivative<1>(j, k)(rc);
+                trialJac(j, k) = basis.template getDerivative<1>(j, k)(rc);
             }
-            m_jac1[i] = jac1 * p.getJacobianInverse();
+            m_jac1[i] = trialJac * p.getJacobianInverse();
           }
 
           const auto& testfe = rhs.getFiniteElementSpace().getFiniteElement(d, idx);
@@ -1357,9 +1346,9 @@ namespace Rodin::Variational
             for (size_t j = 0; j < d; j++)
             {
               for (size_t k = 0; k < d; k++)
-                jac2(j, k) = basis.template getDerivative<1>(j, k)(rc);
+                testJac(j, k) = basis.template getDerivative<1>(j, k)(rc);
             }
-            m_jac2[i] = jac2 * p.getJacobianInverse();
+            m_jac2[i] = testJac * p.getJacobianInverse();
           }
 
           for (size_t i = 0; i < testfe.getCount(); i++)
@@ -1609,8 +1598,8 @@ namespace Rodin::Variational
         }
         else
         {
-          Math::SpatialMatrix<ScalarType> jac1(d, d);
-          Math::SpatialMatrix<ScalarType> jac2(d, d);
+          m_trialJac.resize(d, d);
+          m_testJac.resize(d, d);
 
           const auto& trialfe = lhs.getFiniteElementSpace().getFiniteElement(d, idx);
           const auto& testfe = rhs.getFiniteElementSpace().getFiniteElement(d, idx);
@@ -1623,9 +1612,9 @@ namespace Rodin::Variational
             for (size_t j = 0; j < d; j++)
             {
               for (size_t k = 0; k < d; k++)
-                jac1(j, k) = basis.template getDerivative<1>(j, k)(rc);
+                m_trialJac(j, k) = basis.template getDerivative<1>(j, k)(rc);
             }
-            m_jac1[i] = jac1 * p.getJacobianInverse();
+            m_jac1[i] = m_trialJac * p.getJacobianInverse();
           }
 
           m_jac2.resize(testfe.getCount());
@@ -1635,9 +1624,9 @@ namespace Rodin::Variational
             for (size_t j = 0; j < d; j++)
             {
               for (size_t k = 0; k < d; k++)
-                jac2(j, k) = basis.template getDerivative<1>(j, k)(rc);
+                m_testJac(j, k) = basis.template getDerivative<1>(j, k)(rc);
             }
-            m_jac2[i] = jac2 * p.getJacobianInverse();
+            m_jac2[i] = m_testJac * p.getJacobianInverse();
           }
 
           if constexpr (std::is_same_v<CoefficientRangeType, ScalarType>)
@@ -1683,6 +1672,7 @@ namespace Rodin::Variational
 
       Math::Matrix<ScalarType> m_cmv;
 
+      Math::SpatialMatrix<ScalarType> m_trialJac, m_testJac;
       std::vector<Math::SpatialMatrix<ScalarType>> m_jac1, m_jac2;
 
       Math::Matrix<ScalarType> m_matrix;
@@ -1938,20 +1928,22 @@ namespace Rodin::Variational
             }
             default:
             {
+              // Generic centroid pairing for all non-triangular polytopes when
+              // the trial and test polytopes coincide.
               m_qftr.emplace(polytope.getGeometry());
               assert(m_qftr->getSize() == 1);
               m_qfte.emplace(polytope.getGeometry());
               assert(m_qfte->getSize() == 1);
               const auto& rx = m_qftr->getPoint(0);
               const auto& ry = m_qfte->getPoint(0);
-              const Geometry::Point x(polytope, std::cref(rx));
-              const Geometry::Point y(polytope, std::cref(ry));
-              m_distortion = x.getDistortion() * y.getDistortion();
+              const Geometry::Point trialPoint(polytope, std::cref(rx));
+              const Geometry::Point testPoint(polytope, std::cref(ry));
+              m_distortion = trialPoint.getDistortion() * testPoint.getDistortion();
               m_weight = m_qftr->getWeight(0) * m_qfte->getWeight(0);
               m_matrix.resize(testfe.getCount(), trialfe.getCount());
               if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
               {
-                m_sk = kernel(x, y);
+                m_sk = kernel(trialPoint, testPoint);
                 for (size_t l = 0; l < testfe.getCount(); l++)
                 {
                   const ScalarType teb = testfe.getBasis(l)(ry);
@@ -1964,7 +1956,7 @@ namespace Rodin::Variational
               }
               else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>)
               {
-                kernel(m_mk, x, y);
+                kernel(m_mk, trialPoint, testPoint);
                 for (size_t l = 0; l < testfe.getCount(); l++)
                 {
                   m_tev = testfe.getBasis(l)(ry);
