@@ -4,6 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <algorithm>
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
@@ -71,6 +72,63 @@ namespace Rodin::Tests::Manufactured::Stokes
     Rodin::Tests::Manufactured::Stokes::Manufactured_Stokes_Test<32>;
   using Manufactured_Stokes_Test_64x64 =
     Rodin::Tests::Manufactured::Stokes::Manufactured_Stokes_Test<64>;
+
+  TEST_P(Manufactured_Stokes_Test_16x16, Stokes_P1ExactResidual)
+  {
+    Mesh mesh = this->getMesh();
+
+    H1 uh(std::integral_constant<size_t, 1>{}, mesh, mesh.getSpaceDimension());
+    H1 ph(std::integral_constant<size_t, 1>{}, mesh);
+
+    VectorFunction u_exact{ F::x, -F::x };
+    RealFunction p_exact = 0.0;
+    VectorFunction f{ Zero(), Zero() };
+
+    TrialFunction u(uh);
+    TrialFunction p(ph);
+    TestFunction  v(uh);
+    TestFunction  q(ph);
+
+    Problem stokes(u, p, v, q);
+    stokes = Integral(Jacobian(u), Jacobian(v))
+           - Integral(p, Div(v))
+           + Integral(Div(u), q)
+           - Integral(f, v)
+           + DirichletBC(u, u_exact);
+
+    GMRES solver(stokes);
+    solver.setTolerance(1e-12);
+    solver.setMaxIterations(500);
+    solver.solve();
+
+    GridFunction u_exact_coeffs(uh);
+    u_exact_coeffs = u_exact;
+    GridFunction p_exact_coeffs(ph);
+    p_exact_coeffs = p_exact;
+
+    auto& ls = stokes.getLinearSystem();
+    auto& A = ls.getOperator();
+    auto& b = ls.getVector();
+    auto& x = ls.getSolution();
+
+    auto x_exact = x;
+    const auto uSize = u_exact_coeffs.getData().size();
+    const auto pSize = p_exact_coeffs.getData().size();
+    x_exact.head(uSize) = u_exact_coeffs.getData();
+    x_exact.tail(pSize) = p_exact_coeffs.getData();
+
+    auto r = A * x - b;
+    auto re = A * x_exact - b;
+
+    const Real scale = std::max<Real>(b.norm(), 1);
+    EXPECT_NEAR(r.norm() / scale, 0, 1e-10);
+    EXPECT_NEAR(re.norm() / scale, 0, 1e-12);
+
+    H1 sh(std::integral_constant<size_t, 1>{}, mesh);
+    GridFunction diff_u(sh);
+    diff_u = Pow(Frobenius(u.getSolution() - u_exact), 2);
+    EXPECT_NEAR(Integral(diff_u).compute(), 0, 1e-12);
+  }
 
   /**
    * @f[

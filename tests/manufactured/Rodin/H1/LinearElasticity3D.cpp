@@ -4,6 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <algorithm>
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
@@ -67,6 +68,52 @@ namespace Rodin::Tests::Manufactured::H1LinearElasticity3D
 
   using Manufactured_LinearElasticity3D_H1_Test_32 =
     Manufactured_LinearElasticity3D_H1_Test<32>;
+
+  TEST_F(Manufactured_LinearElasticity3D_H1_Test_8, LinearElasticity3D_P1ExactResidual)
+  {
+    constexpr auto order = std::integral_constant<size_t, 1>{};
+    const Real lambda = 1.0;
+    const Real mu = 1.0;
+
+    const auto& mesh = this->getMesh();
+
+    H1 sh(order, mesh);
+    H1 vh(order, mesh, mesh.getSpaceDimension());
+
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+
+    VectorFunction u_exact{ F::x, F::y, F::z };
+    VectorFunction f_body{ Zero(), Zero(), Zero() };
+
+    Problem elasticity(u, v);
+    elasticity = Integral(lambda * Div(u), Div(v))
+               + Integral(
+                   mu * (Jacobian(u) + Jacobian(u).T()),
+                   0.5 * (Jacobian(v) + Jacobian(v).T()))
+               - Integral(f_body, v)
+               + DirichletBC(u, u_exact);
+
+    CG(elasticity).solve();
+
+    GridFunction u_exact_coeffs(vh);
+    u_exact_coeffs = u_exact;
+
+    auto& A = elasticity.getLinearSystem().getOperator();
+    auto& b = elasticity.getLinearSystem().getVector();
+    auto& x = elasticity.getLinearSystem().getSolution();
+
+    auto r = A * x - b;
+    auto re = A * u_exact_coeffs.getData() - b;
+
+    const Real scale = std::max<Real>(b.norm(), 1);
+    EXPECT_NEAR(r.norm() / scale, 0, 1e-10);
+    EXPECT_NEAR(re.norm() / scale, 0, 1e-12);
+
+    GridFunction diff(sh);
+    diff = Pow(Frobenius(u.getSolution() - u_exact), 2);
+    EXPECT_NEAR(Integral(diff).compute(), 0, 1e-12);
+  }
 
   TEST_F(Manufactured_LinearElasticity3D_H1_Test_8, Manufactured_LinearElasticity3D_H1_2)
   {

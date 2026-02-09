@@ -4,6 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <algorithm>
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
@@ -39,6 +40,72 @@ namespace Rodin::Tests::Manufactured::Stokes3D
 
   using Manufactured_Stokes3D_Test_12 =
     Manufactured_Stokes3D_Test<12, 12, 12>;
+
+  TEST_P(Manufactured_Stokes3D_Test_12, Stokes3D_P1ExactResidual)
+  {
+    Mesh mesh = this->getMesh();
+
+    H1 uh(std::integral_constant<size_t, 1>{}, mesh, mesh.getSpaceDimension());
+    P1 ph(mesh);
+    P0g p0g(mesh);
+
+    VectorFunction u_exact{ F::y, -F::y, Zero() }; // divergence-free affine
+    RealFunction p_exact = 0.0;
+    RealFunction lambda_exact = 0.0;
+    VectorFunction f{ Zero(), Zero(), Zero() };
+
+    TrialFunction u(uh);
+    TrialFunction p(ph);
+    TestFunction  v(uh);
+    TestFunction  q(ph);
+
+    TrialFunction lambda(p0g);
+    TestFunction  mu(p0g);
+
+    Problem stokes(u, p, v, q, lambda, mu);
+    stokes = Integral(Jacobian(u), Jacobian(v))
+           - Integral(p, Div(v))
+           + Integral(Div(u), q)
+           + Integral(lambda, q)
+           + Integral(p, mu)
+           - Integral(f, v)
+           + DirichletBC(u, u_exact);
+
+    stokes.assemble();
+
+    DGMRES gmres(stokes);
+    gmres.setTolerance(1e-10);
+    gmres.setRestart(50);
+    gmres.setMaxIterations(500);
+    gmres.solve();
+
+    GridFunction u_exact_coeffs(uh);
+    u_exact_coeffs = u_exact;
+    GridFunction p_exact_coeffs(ph);
+    p_exact_coeffs = p_exact;
+    GridFunction lambda_exact_coeffs(p0g);
+    lambda_exact_coeffs = lambda_exact;
+
+    auto& ls = stokes.getLinearSystem();
+    auto& A = ls.getOperator();
+    auto& b = ls.getVector();
+    auto& x = ls.getSolution();
+
+    auto x_exact = x;
+    const auto uSize = u_exact_coeffs.getData().size();
+    const auto pSize = p_exact_coeffs.getData().size();
+    const auto lSize = lambda_exact_coeffs.getData().size();
+    x_exact.head(uSize) = u_exact_coeffs.getData();
+    x_exact.segment(uSize, pSize) = p_exact_coeffs.getData();
+    x_exact.tail(lSize) = lambda_exact_coeffs.getData();
+
+    auto r = A * x - b;
+    auto re = A * x_exact - b;
+
+    const Real scale = std::max<Real>(b.norm(), 1);
+    EXPECT_NEAR(r.norm() / scale, 0, 1e-8);
+    EXPECT_NEAR(re.norm() / scale, 0, 1e-10);
+  }
 
   TEST_P(Manufactured_Stokes3D_Test_12, Stokes3D_Trigonometric)
   {
