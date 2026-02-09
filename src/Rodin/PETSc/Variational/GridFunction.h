@@ -222,6 +222,7 @@ namespace Rodin::Variational
         ierr = VecDestroy(&m_data);
         assert(ierr == PETSC_SUCCESS);
         m_data = PETSC_NULLPTR;
+        (void) ierr;
       }
 
       constexpr
@@ -233,6 +234,7 @@ namespace Rodin::Variational
         ScalarType res;
         ierr = VecMin(data, idx, &res);
         assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
         return res;
       }
 
@@ -245,6 +247,7 @@ namespace Rodin::Variational
         ScalarType res;
         ierr = VecMax(data, idx, &res);
         assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
         return res;
       }
 
@@ -302,6 +305,7 @@ namespace Rodin::Variational
         auto& data = this->getData();
         ierr = VecShift(data, rhs);
         assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
         return *this;
       }
 
@@ -313,6 +317,7 @@ namespace Rodin::Variational
         auto& data = this->getData();
         ierr = VecShift(data, -rhs);
         assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
         return *this;
       }
 
@@ -323,6 +328,7 @@ namespace Rodin::Variational
         auto& data = this->getData();
         ierr = VecScale(data, rhs);
         assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
         return *this;
       }
 
@@ -333,6 +339,7 @@ namespace Rodin::Variational
         auto& data = this->getData();
         ierr = VecScale(data, 1.0 / rhs);
         assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
         return static_cast<GridFunction&>(*this);
       }
 
@@ -344,6 +351,7 @@ namespace Rodin::Variational
         auto& data = this->getData();
         ierr = VecAXPY(data, 1.0, rhs.getData());
         assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
         return *this;
       }
 
@@ -355,6 +363,7 @@ namespace Rodin::Variational
         auto& data = this->getData();
         ierr = VecAXPY(data, -1.0, rhs.getData());
         assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
         return *this;
       }
 
@@ -365,6 +374,7 @@ namespace Rodin::Variational
         auto& data = this->getData();
         ierr = VecPointwiseMult(data, data, rhs.getData());
         assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
         return *this;
       }
 
@@ -375,34 +385,90 @@ namespace Rodin::Variational
         auto& data = this->getData();
         ierr = VecPointwiseDivide(data, data, rhs.getData());
         assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
         return *this;
       }
 
       GridFunction& setData(const DataType& data, size_t offset = 0)
       {
         this->flush();
+
         PetscErrorCode ierr;
+
+        // Global size checks
+        PetscInt nDst = 0, nSrc = 0;
+        ierr = VecGetSize(m_data, &nDst); assert(ierr == PETSC_SUCCESS);
+        ierr = VecGetSize(data,   &nSrc); assert(ierr == PETSC_SUCCESS);
+
+        const PetscInt off = static_cast<PetscInt>(offset);
+        assert(off >= 0);
+        assert(off + nDst <= nSrc);
+
         if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
         {
-          assert(offset == 0);
-          ierr = VecCopy(data, m_data);
-          assert(ierr == PETSC_SUCCESS);
-        }
-        else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
-        {
-          ierr = VecCopy(data, m_data);
+          // Sequential: simple local slice
+          IS is = nullptr;
+          ierr = ISCreateStride(PETSC_COMM_SELF, nDst, off, 1, &is);
           assert(ierr == PETSC_SUCCESS);
 
-          ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          Vec sub = nullptr;
+          ierr = VecGetSubVector(data, is, &sub);
           assert(ierr == PETSC_SUCCESS);
 
-          ierr = VecGhostUpdateEnd(  m_data, INSERT_VALUES, SCATTER_FORWARD);
+          ierr = VecCopy(sub, m_data);
+          assert(ierr == PETSC_SUCCESS);
+
+          ierr = VecRestoreSubVector(data, is, &sub);
+          assert(ierr == PETSC_SUCCESS);
+
+          ierr = ISDestroy(&is);
           assert(ierr == PETSC_SUCCESS);
         }
         else
         {
-          assert(false);
+          static_assert(std::is_same_v<FESMeshContextType, Context::MPI>);
+
+          // MPI: copy only the owned range of m_data on this rank
+          PetscInt rb = 0, re = 0;
+          ierr = VecGetOwnershipRange(m_data, &rb, &re);
+          assert(ierr == PETSC_SUCCESS);
+
+          const PetscInt nLocal = re - rb;
+          assert(nLocal >= 0);
+
+          // Indices in 'data' we want are shifted by 'off'
+          const PetscInt start = off + rb;
+
+          // Important: IS local size must be nLocal, not nDst (global)
+          MPI_Comm comm;
+          PetscObjectGetComm((PetscObject) m_data, &comm);
+
+          IS is = nullptr;
+          ierr = ISCreateStride(comm, nLocal, start, 1, &is);
+          assert(ierr == PETSC_SUCCESS);
+
+          Vec sub = nullptr;
+          ierr = VecGetSubVector(data, is, &sub);
+          assert(ierr == PETSC_SUCCESS);
+
+          // Now sub and m_data have identical local layouts -> VecCopy is valid
+          ierr = VecCopy(sub, m_data);
+          assert(ierr == PETSC_SUCCESS);
+
+          ierr = VecRestoreSubVector(data, is, &sub);
+          assert(ierr == PETSC_SUCCESS);
+
+          ierr = ISDestroy(&is);
+          assert(ierr == PETSC_SUCCESS);
+
+          // Refresh ghosts from owned values
+          ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
         }
+
+        (void)ierr;
         return *this;
       }
 
@@ -414,7 +480,7 @@ namespace Rodin::Variational
         const size_t d = polytope.getDimension();
         const Index  i = polytope.getIndex();
 
-        if (std::is_same_v<FESMeshContextType, Context::Local>)
+        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
         {
           const auto& fe = fes.getFiniteElement(d, i);
           const size_t count = fe.getCount();
@@ -422,8 +488,7 @@ namespace Rodin::Variational
           for (Index local = 0; local < count; ++local)
           {
             const auto mapping = fes.getPushforward({ d, i }, fe.getBasis(local));
-            mapping(v, p);
-            const auto k = this->operator[](fes.getGlobalIndex({ d, i }, local)) * v;
+            const auto k = this->operator[](fes.getGlobalIndex({ d, i }, local)) * mapping(p);
             if (local == 0)
               res = k; // Initializes the result (resizes)
             else
@@ -439,8 +504,7 @@ namespace Rodin::Variational
           for (Index local = 0; local < count; ++local)
           {
             const auto mapping = fes.getPushforward({ d, i }, fe.getBasis(local));
-            mapping(v, p);
-            const auto k = this->operator[](fes.getGlobalIndex({ d, i }, local)) * v;
+            const auto k = this->operator[](fes.getGlobalIndex({ d, i }, local)) * mapping(p);
             if (local == 0)
               res = k; // Initializes the result (resizes)
             else
@@ -575,7 +639,7 @@ namespace Rodin::Variational
       {
         const auto& fes = this->getFiniteElementSpace();
         const auto& [d, i] = p;
-        if (std::is_same_v<FESMeshContextType, Context::Local>)
+        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
         {
           const auto& fe = fes.getFiniteElement(d, i);
           const auto mapping = fes.getPullback({ d, i }, fn);
@@ -637,6 +701,7 @@ namespace Rodin::Variational
         {
           assert(false);
         }
+        (void) ierr;
         return *this;
       }
 
@@ -676,6 +741,7 @@ namespace Rodin::Variational
         {
           assert(false);
         }
+        (void) ierr;
         return *this;
       }
 
@@ -715,6 +781,7 @@ namespace Rodin::Variational
         {
           assert(false);
         }
+        (void) ierr;
         return *this;
       }
 
@@ -754,6 +821,7 @@ namespace Rodin::Variational
         {
           assert(false);
         }
+        (void) ierr;
         return *this;
       }
 

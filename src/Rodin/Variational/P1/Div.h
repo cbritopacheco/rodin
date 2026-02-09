@@ -74,39 +74,19 @@ namespace Rodin::Variational
         Div<GridFunction<P1<Math::Vector<Scalar>, Mesh>, Data>>>
   {
     public:
-      using FESType = Variational::P1<Math::Vector<Scalar>, Mesh>;
-
+      using FESType = P1<Math::Vector<Scalar>, Mesh>;
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
-
-      using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
-
-      /// Operand type
       using OperandType = GridFunction<FESType, Data>;
-
-      /// Parent class
       using Parent = DivBase<OperandType, Div<OperandType>>;
 
-      /**
-       * @brief Constructs the divergence of a P1 vector function.
-       * @param[in] u P1 vector GridFunction to differentiate
-       *
-       * Creates divergence operator @f$ \nabla \cdot \mathbf{u} @f$ where
-       * @f$ \mathbf{u} \in [\mathbb{P}^1]^d @f$.
-       */
       Div(const OperandType& u)
         : Parent(u)
       {}
 
-      /**
-       * @brief Copy constructor
-       */
       Div(const Div& other)
         : Parent(other)
       {}
 
-      /**
-       * @brief Move constructor
-       */
       Div(Div&& other)
         : Parent(std::move(other))
       {}
@@ -118,12 +98,14 @@ namespace Rodin::Variational
         const auto& i = polytope.getIndex();
         const auto& mesh = polytope.getMesh();
         const size_t meshDim = mesh.getDimension();
-        if (d == meshDim - 1) // Evaluating on a face
+
+        if (d == meshDim - 1) // face eval
         {
           const auto& conn = mesh.getConnectivity();
           const auto& inc = conn.getIncidence({ meshDim - 1, meshDim }, i);
           const auto& pc = p.getPhysicalCoordinates();
           assert(inc.size() == 1 || inc.size() == 2);
+
           if (inc.size() == 1)
           {
             const auto& tracePolytope = mesh.getPolytope(meshDim, *inc.begin());
@@ -135,9 +117,7 @@ namespace Rodin::Variational
           }
           else
           {
-            assert(inc.size() == 2);
             const auto& traceDomain = this->getTraceDomain();
-            assert(traceDomain.size() > 0);
             if (traceDomain.size() == 0)
             {
               Alert::MemberFunctionException(*this, __func__)
@@ -146,47 +126,73 @@ namespace Rodin::Variational
                 << ". Div at an interface with no trace domain is undefined."
                 << Alert::Raise;
             }
-            else
+
+            for (auto& idx : inc)
             {
-              for (auto& idx : inc)
+              const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
+              if (traceDomain.count(tracePolytope->getAttribute()))
               {
-                const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
-                if (traceDomain.count(tracePolytope->getAttribute()))
-                {
-                  Math::SpatialPoint rc;
-                  tracePolytope->getTransformation().inverse(rc, pc);
-                  const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
-                  interpolate(out, np);
-                  return;
-                }
+                Math::SpatialPoint rc;
+                tracePolytope->getTransformation().inverse(rc, pc);
+                const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
+                interpolate(out, np);
+                return;
               }
-              UndeterminedTraceDomainException(
-                  *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()) << Alert::Raise;
             }
+
+            UndeterminedTraceDomainException(
+                *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()) << Alert::Raise;
             return;
           }
         }
-        else // Evaluating on a cell
+
+        // cell eval
+        assert(d == mesh.getDimension());
+
+        const auto& gf  = this->getOperand();
+        const auto& fes = gf.getFiniteElementSpace();
+        const size_t vdim = fes.getVectorDimension();
+        assert(vdim == d); // divergence is defined as trace of Jacobian: requires vdim == spatial dim.
+
+        const auto geom = polytope.getGeometry();
+        const P1Element<ScalarType> fe_scalar(geom);
+        const size_t nv = fe_scalar.getCount();
+
+        const auto& rc = p.getReferenceCoordinates();
+        const auto& Jinv = p.getJacobianInverse();
+
+        // out = Σ_v u(v) · (J^{-T} ∇_hat φ_v)
+        // but compute as: out = Σ_v Σ_j u_j(v) * (∇_hat φ_v)^T * (Jinv)_{:,j}
+        out = ScalarType(0);
+
+        // Precompute column sums: s_j = Σ_k ghat(k) * Jinv(k,j)  (this is (J^{-T} ghat)_j)
+        for (size_t v = 0; v < nv; ++v)
         {
-          assert(d == mesh.getDimension());
-          const auto& gf = this->getOperand();
-          const auto& fes = gf.getFiniteElementSpace();
-          const auto& vdim = fes.getVectorDimension();
-          const auto& fe = fes.getFiniteElement(d, i);
-          const auto& rc = p.getReferenceCoordinates();
-          SpatialMatrixType jacobian(d, d);
-          out = 0;
-          for (size_t local = 0; local < fe.getCount(); local++)
+          // ∇_hat φ_v
+          Math::SpatialVector<ScalarType> ghat;
+          ghat.resize(d);
+          for (size_t k = 0; k < d; ++k)
+            ghat(k) = fe_scalar.getBasis(v).template getDerivative<1>(k)(rc);
+
+          // phys grad components: gphys(j) = Σ_k Jinv(k,j) * ghat(k)
+          // and add u(v)·gphys
+          for (size_t j = 0; j < d; ++j)
           {
-            for (size_t j = 0; j < d; j++)
-            {
-              const auto& basis = fe.getBasis(local);
-              for (size_t k = 0; k < d; k++)
-                jacobian(j, k) = basis.template getDerivative<1>(j, k)(rc);
-            }
-            out += gf[fes.getGlobalIndex({d, i}, local)] * (jacobian * p.getJacobianInverse()).trace();
+            ScalarType gphys_j = ScalarType(0);
+            for (size_t k = 0; k < d; ++k)
+              gphys_j += Jinv(k, j) * ghat(k);
+
+            const size_t local = v * vdim + j; // component j at vertex v
+            out += gf[fes.getGlobalIndex({d, i}, local)] * gphys_j;
           }
         }
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        const size_t k = P1Element<ScalarType>(geom.getGeometry()).getOrder();
+        return (k == 0) ? 0 : (k - 1);
       }
 
       Div* copy() const noexcept override
@@ -214,40 +220,100 @@ namespace Rodin::Variational
    * @f]
    * for pressure-velocity coupling in Stokes/Navier-Stokes equations.
    */
-  template <class NestedDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
-  class Div<ShapeFunction<NestedDerived, P1<Math::Vector<Number>, Mesh>, Space>> final
-    : public ShapeFunctionBase<Div<ShapeFunction<NestedDerived, P1<Math::Vector<Number>, Mesh>, Space>>>
+  template <class NestedDerived, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
+  class Div<ShapeFunction<NestedDerived, P1<Math::Vector<Scalar>, Mesh>, Space>> final
+    : public ShapeFunctionBase<Div<ShapeFunction<NestedDerived, P1<Math::Vector<Scalar>, Mesh>, Space>>>
   {
     public:
-      using FESType = P1<Math::Vector<Number>, Mesh>;
+      using FESType = P1<Math::Vector<Scalar>, Mesh>;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
+
+      using ScalarType = Scalar;
 
       using OperandType = ShapeFunction<NestedDerived, FESType, SpaceType>;
 
       using Parent = ShapeFunctionBase<Div<OperandType>, FESType, SpaceType>;
 
-      using ScalarType = Number;
+      struct Cache
+      {
+        struct CellKey
+        {
+          const void* mesh = nullptr;
+          size_t d = 0;
+          Index i = 0;
+          Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
+          int transOrder = 1;
+          size_t vdim = 0;
+          bool valid = false;
 
-      /**
-       * @brief Constructs divergence of P1 ShapeFunction.
-       * @param[in] u ShapeFunction to differentiate
-       *
-       * Creates @f$ \nabla \cdot \mathbf{u} @f$ for use in bilinear forms.
-       */
+          explicit operator bool() const noexcept { return valid; }
+
+          bool operator==(const CellKey& o) const noexcept
+          {
+            if (!valid || !o.valid) return false;
+            return mesh == o.mesh && d == o.d && i == o.i
+                && geom == o.geom && transOrder == o.transOrder && vdim == o.vdim;
+          }
+
+          void operator=(std::initializer_list<int>) noexcept
+          {
+            valid = false;
+            mesh = nullptr;
+            d = 0;
+            i = 0;
+            geom = Geometry::Polytope::Type::Point;
+            transOrder = 1;
+            vdim = 0;
+          }
+        };
+
+        struct QpKey
+        {
+          const QF::QuadratureFormulaBase* qf = nullptr;
+          size_t qp = 0;
+          bool valid = false;
+
+          explicit operator bool() const noexcept { return valid; }
+
+          bool operator==(const QpKey& o) const noexcept
+          {
+            if (!valid || !o.valid) return false;
+            return qf == o.qf && qp == o.qp;
+          }
+
+          void operator=(std::initializer_list<int>) noexcept
+          {
+            valid = false;
+            qf = nullptr;
+            qp = 0;
+          }
+        };
+
+        // Cached divergence of each vector basis (scalar), size = vdim * nvertices
+        std::vector<ScalarType> div;
+
+        CellKey cellKey;
+        QpKey qpKey;
+      };
+
       Div(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
-          m_u(u)
+          m_u(u),
+          m_ip(nullptr)
       {}
 
       Div(const Div& other)
         : Parent(other),
-          m_u(other.m_u)
+          m_u(other.m_u),
+          m_ip(nullptr),
+          m_cache(other.m_cache)
       {}
 
       Div(Div&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
-          m_p(std::exchange(other.m_p, nullptr))
+          m_ip(std::exchange(other.m_ip, nullptr)),
+          m_cache(std::move(other.m_cache))
       {}
 
       constexpr
@@ -268,48 +334,125 @@ namespace Rodin::Variational
         return getOperand().getDOFs(polytope);
       }
 
-      const Geometry::Point& getPoint() const
+      constexpr
+      const IntegrationPoint& getIntegrationPoint() const
       {
-        assert(m_p);
-        return *m_p;
+        assert(m_ip);
+        return *m_ip;
       }
 
-      Div& setPoint(const Geometry::Point& p)
+      static constexpr bool isTensorGeom(Geometry::Polytope::Type g) noexcept
       {
-        m_p = &p;
-        const auto& polytope = p.getPolytope();
-        const auto& rc = p.getReferenceCoordinates();
-        const size_t d = polytope.getDimension();
-        const Index i = polytope.getIndex();
+        return g == Geometry::Polytope::Type::Quadrilateral
+            || g == Geometry::Polytope::Type::Wedge
+            || g == Geometry::Polytope::Type::Hexahedron;
+      }
+
+      Div& setIntegrationPoint(const IntegrationPoint& ip)
+      {
+        m_ip = &ip;
+
+        const auto& pt   = ip.getPoint();
+        const auto& poly = pt.getPolytope();
+        const auto& mesh = poly.getMesh();
+
+        const size_t d    = poly.getDimension();
+        const Index  i    = poly.getIndex();
+        const auto   geom = poly.getGeometry();
+
+        const int transOrder = poly.getTransformation().getOrder();
+
         const auto& fes = this->getFiniteElementSpace();
-        const auto& fe = fes.getFiniteElement(d, i);
-        const size_t count = fe.getCount();
         const size_t vdim = fes.getVectorDimension();
-        m_jacobian.resize(count);
-        for (size_t local = 0; local < count; local++)
+        assert(vdim == d);
+
+        // cell key
+        typename Cache::CellKey ckey;
+        ckey.mesh = static_cast<const void*>(&mesh);
+        ckey.d = d;
+        ckey.i = i;
+        ckey.geom = geom;
+        ckey.transOrder = transOrder;
+        ckey.vdim = vdim;
+        ckey.valid = true;
+
+        const bool cell_changed = !(m_cache.cellKey == ckey);
+        if (cell_changed)
         {
-          m_jacobian[local].resize(vdim, d);
-          const auto& basis = fe.getBasis(local);
-          for (size_t i = 0; i < vdim; i++)
+          m_cache.cellKey = ckey;
+          m_cache.qpKey = {};
+
+          const size_t nv = Geometry::Polytope::Traits(geom).getVertexCount();
+          m_cache.div.resize(vdim * nv);
+        }
+
+        const bool needs_qp = (transOrder > 1) || isTensorGeom(geom);
+
+        typename Cache::QpKey qkey;
+        if (needs_qp)
+        {
+          qkey.qf = &ip.getQuadratureFormula();
+          qkey.qp = ip.getIndex();
+          qkey.valid = true;
+        }
+        else
+        {
+          qkey.qf = nullptr;
+          qkey.qp = 0;
+          qkey.valid = true;
+        }
+
+        const bool qp_changed = !(m_cache.qpKey == qkey);
+        if (cell_changed || qp_changed)
+        {
+          m_cache.qpKey = qkey;
+
+          const P1Element<ScalarType> fe_scalar(geom);
+          const size_t nv = fe_scalar.getCount();
+
+          const auto& qf = ip.getQuadratureFormula();
+          const size_t qp = ip.getIndex();
+          const auto& rc = qf.getPoint(qp);
+
+          const auto& Jinv = pt.getJacobianInverse();
+
+          // For basis (v,c): div(φ_{v,c}) = (J^{-T} ∇_hat φ_v)_c
+          // because only component c is nonzero.
+          for (size_t v = 0; v < nv; ++v)
           {
-            for (size_t j = 0; j < d; j++)
-              m_jacobian[local](i, j) = basis.template getDerivative<1>(i, j)(rc);
+            Math::SpatialVector<ScalarType> ghat;
+            ghat.resize(d);
+            for (size_t k = 0; k < d; ++k)
+              ghat(k) = fe_scalar.getBasis(v).template getDerivative<1>(k)(rc);
+
+            for (size_t c = 0; c < d; ++c)
+            {
+              ScalarType gphys_c = ScalarType(0);
+              for (size_t k = 0; k < d; ++k)
+                gphys_c += Jinv(k, c) * ghat(k);
+
+              m_cache.div[v * vdim + c] = gphys_c;
+            }
           }
         }
+
         return *this;
       }
 
-      constexpr
       ScalarType getBasis(size_t local) const
       {
-        const auto& p = this->getPoint();
-        return (m_jacobian[local] * p.getJacobianInverse()).trace();
+        assert(m_cache.cellKey);
+        assert(local < m_cache.div.size());
+        return m_cache.div[local];
       }
 
       constexpr
-      const auto& getFiniteElementSpace() const
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
-        return getOperand().getFiniteElementSpace();
+        const auto k = getOperand().getOrder(geom);
+        if (!k.has_value())
+          return std::nullopt;
+        return (*k == 0) ? 0 : (*k - 1);
       }
 
       Div* copy() const noexcept override
@@ -319,10 +462,8 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const OperandType> m_u;
-
-      std::vector<Math::SpatialMatrix<ScalarType>> m_jacobian;
-
-      const Geometry::Point* m_p;
+      const IntegrationPoint* m_ip;
+      Cache m_cache;
   };
 
   template <class NestedDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>

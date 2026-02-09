@@ -227,7 +227,9 @@ namespace Rodin::Variational
           {}
 
           constexpr
-          BasisFunction(const BasisFunction&) = delete;
+          BasisFunction(const BasisFunction& other)
+            : m_local(other.m_local), m_g(other.m_g)
+          {}
 
           constexpr
           ReturnType operator()(const Math::SpatialPoint& r) const;
@@ -424,6 +426,7 @@ namespace Rodin::Variational
             }
             break;
           }
+
           case Geometry::Polytope::Type::Wedge:
           {
             switch (i)
@@ -456,6 +459,59 @@ namespace Rodin::Variational
               case 5:
               {
                 static thread_local LinearForm s_lf(5, g);
+                return s_lf;
+              }
+              default:
+              {
+                assert(false);
+                break;
+              }
+            }
+            break;
+          }
+
+          case Geometry::Polytope::Type::Hexahedron:
+          {
+            switch (i)
+            {
+              case 0:
+              {
+                static thread_local LinearForm s_lf(0, g);
+                return s_lf;
+              }
+              case 1:
+              {
+                static thread_local LinearForm s_lf(1, g);
+                return s_lf;
+              }
+              case 2:
+              {
+                static thread_local LinearForm s_lf(2, g);
+                return s_lf;
+              }
+              case 3:
+              {
+                static thread_local LinearForm s_lf(3, g);
+                return s_lf;
+              }
+              case 4:
+              {
+                static thread_local LinearForm s_lf(4, g);
+                return s_lf;
+              }
+              case 5:
+              {
+                static thread_local LinearForm s_lf(5, g);
+                return s_lf;
+              }
+              case 6:
+              {
+                static thread_local LinearForm s_lf(6, g);
+                return s_lf;
+              }
+              case 7:
+              {
+                static thread_local LinearForm s_lf(7, g);
                 return s_lf;
               }
               default:
@@ -638,6 +694,59 @@ namespace Rodin::Variational
             }
             break;
           }
+
+          case Geometry::Polytope::Type::Hexahedron:
+          {
+            switch (i)
+            {
+              case 0:
+              {
+                static thread_local BasisFunction s_basis(0, g);
+                return s_basis;
+              }
+              case 1:
+              {
+                static thread_local BasisFunction s_basis(1, g);
+                return s_basis;
+              }
+              case 2:
+              {
+                static thread_local BasisFunction s_basis(2, g);
+                return s_basis;
+              }
+              case 3:
+              {
+                static thread_local BasisFunction s_basis(3, g);
+                return s_basis;
+              }
+              case 4:
+              {
+                static thread_local BasisFunction s_basis(4, g);
+                return s_basis;
+              }
+              case 5:
+              {
+                static thread_local BasisFunction s_basis(5, g);
+                return s_basis;
+              }
+              case 6:
+              {
+                static thread_local BasisFunction s_basis(6, g);
+                return s_basis;
+              }
+              case 7:
+              {
+                static thread_local BasisFunction s_basis(7, g);
+                return s_basis;
+              }
+              default:
+              {
+                assert(false);
+                break;
+              }
+            }
+            break;
+          }
         }
         static thread_local BasisFunction s_null(0, g);
         assert(false);
@@ -657,13 +766,15 @@ namespace Rodin::Variational
           case Geometry::Polytope::Type::Quadrilateral:
           case Geometry::Polytope::Type::Wedge:
             return 2;
+          case Geometry::Polytope::Type::Hexahedron:
+            return 3;
         }
         assert(false);
         return 0;
       }
 
       template<class Archive>
-      void serialize(Archive& ar, const unsigned int version)
+      void serialize(Archive& ar, const unsigned int)
       {
         ar & boost::serialization::base_object<Parent>(*this);
       }
@@ -807,7 +918,7 @@ namespace Rodin::Variational
           class JacobianFunction
           {
             public:
-              using ReturnType = Math::PointMatrix;
+              using ReturnType = Math::SpatialMatrix<ScalarType>;
 
               constexpr
               JacobianFunction(size_t vdim, size_t local, Geometry::Polytope::Type g)
@@ -964,13 +1075,15 @@ namespace Rodin::Variational
           case Geometry::Polytope::Type::Quadrilateral:
           case Geometry::Polytope::Type::Wedge:
             return 2;
+          case Geometry::Polytope::Type::Hexahedron:
+            return 3;
         }
         assert(false);
         return 0;
       }
 
       template<class Archive>
-      void serialize(Archive& ar, const unsigned int version)
+      void serialize(Archive& ar, const unsigned int)
       {
         ar & boost::serialization::base_object<Parent>(*this);
         ar & m_vdim;

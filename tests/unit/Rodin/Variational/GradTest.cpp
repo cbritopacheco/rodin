@@ -194,4 +194,168 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(grad_value(1), 2.0, RODIN_FUZZY_CONSTANT);
     }
   }
+
+  TEST(Rodin_Variational_Grad, ShapeFunction_getDOFs_Triangle_P1)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    P1 Vh(mesh);
+    TrialFunction u(Vh);
+    auto grad_u = Grad(u);
+
+    auto cellIt = mesh.getCell(0);
+    size_t dofs = grad_u.getDOFs(*cellIt);
+
+    // P1 triangle has 3 DOFs
+    EXPECT_EQ(dofs, 3);
+  }
+
+  TEST(Rodin_Variational_Grad, ShapeFunction_getDOFs_Tetrahedron_P1)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    P1 Vh(mesh);
+    TrialFunction u(Vh);
+    auto grad_u = Grad(u);
+
+    auto cellIt = mesh.getCell(0);
+    size_t dofs = grad_u.getDOFs(*cellIt);
+
+    // P1 tetrahedron has 4 DOFs
+    EXPECT_EQ(dofs, 4);
+  }
+
+  TEST(Rodin_Variational_Grad, RandomCoordinates_LinearFunction)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    P1 fes(mesh);
+    GridFunction gf(fes);
+
+    // Project a linear function: f(x,y) = 2x + 3y
+    // Gradient should be constant: [2, 3]
+    RealFunction linear_func([](const Geometry::Point& p) {
+      return 2.0 * p.x() + 3.0 * p.y();
+    });
+    gf.project(linear_func);
+
+    auto grad_gf = Grad(gf);
+
+    // Test at 20 random points across different cells
+    RandomFloat gen(0.0, 1.0);
+    for (int test = 0; test < 20; test++)
+    {
+      Index cellIdx = gen() * (mesh.getCellCount() - 1);
+      auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
+      const auto& polytope = *it;
+
+      Real x = gen();
+      Real y = gen();
+      if (x + y > 1.0) {
+        x = 1.0 - x;
+        y = 1.0 - y;
+      }
+      const Math::Vector<Real> rc{{x, y}};
+      Point p(polytope, rc);
+
+      auto grad_value = grad_gf.getValue(p);
+      EXPECT_NEAR(grad_value(0), 2.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(grad_value(1), 3.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  TEST(Rodin_Variational_Grad, RandomCoordinates_ZeroGradient)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 5, 5 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    P1 fes(mesh);
+    GridFunction gf(fes);
+
+    // Project a constant function: f(x,y) = 5.0
+    // Gradient should be zero: [0, 0]
+    RealFunction constant_func([](const Geometry::Point& p) {
+      return 5.0;
+    });
+    gf.project(constant_func);
+
+    auto grad_gf = Grad(gf);
+
+    // Test at 10 random points across different cells
+    RandomFloat gen(0.0, 1.0);
+    for (int test = 0; test < 10; test++)
+    {
+      Index cellIdx = gen() * (mesh.getCellCount() - 1);
+      auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
+      const auto& polytope = *it;
+
+      Real x = gen();
+      Real y = gen();
+      if (x + y > 1.0) {
+        x = 1.0 - x;
+        y = 1.0 - y;
+      }
+      const Math::Vector<Real> rc{{x, y}};
+      Point p(polytope, rc);
+
+      auto grad_value = grad_gf.getValue(p);
+      EXPECT_NEAR(grad_value(0), 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(grad_value(1), 0.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  TEST(Rodin_Variational_Grad, RandomCoordinates_Tetrahedron_LinearFunction)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 3, 3, 3 });
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    P1 fes(mesh);
+    GridFunction gf(fes);
+
+    // Project a linear function: f(x,y,z) = 2x + 3y - z
+    // Gradient should be constant: [2, 3, -1]
+    RealFunction linear_func([](const Geometry::Point& p) {
+      return 2.0 * p.x() + 3.0 * p.y() - p.z();
+    });
+    gf.project(linear_func);
+
+    auto grad_gf = Grad(gf);
+
+    // Test at 15 random points across different cells
+    RandomFloat gen(0.0, 1.0);
+    for (int test = 0; test < 15; test++)
+    {
+      Index cellIdx = gen() * (mesh.getCellCount() - 1);
+      auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
+      const auto& polytope = *it;
+
+      // Generate random barycentric coordinates for tetrahedron
+      Real r1 = gen();
+      Real r2 = gen();
+      Real r3 = gen();
+      Real sum = r1 + r2 + r3;
+      if (sum > 1.0) {
+        r1 /= sum;
+        r2 /= sum;
+        r3 /= sum;
+      }
+      const Math::Vector<Real> rc{{r1, r2, r3}};
+      Point p(polytope, rc);
+
+      auto grad_value = grad_gf.getValue(p);
+      EXPECT_NEAR(grad_value(0), 2.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(grad_value(1), 3.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(grad_value(2), -1.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
 }

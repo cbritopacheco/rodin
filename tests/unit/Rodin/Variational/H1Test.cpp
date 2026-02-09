@@ -339,7 +339,7 @@ namespace Rodin::Tests::Unit
   // Test finite element retrieval
   TEST(Rodin_Variational_H1_Space, FiniteElement_H1_2)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 12, 16 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -529,7 +529,7 @@ namespace Rodin::Tests::Unit
   // Test DOF count consistency for various polynomial degrees
   TEST(Rodin_Variational_H1_Space, DOFCount_Consistency)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 12, 16 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -561,7 +561,7 @@ namespace Rodin::Tests::Unit
   // GlobalIndex must match getDOFs entry for every (d,i,local)
   TEST(Rodin_Variational_H1_Space, GlobalIndex_MatchesGetDOFs)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 12, 16 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -894,7 +894,7 @@ namespace Rodin::Tests::Unit
   // Test finite element retrieval for K = 4, 5, 6
   TEST(Rodin_Variational_H1_Space, FiniteElement_K4_to_K6)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 12, 16 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -1124,7 +1124,7 @@ namespace Rodin::Tests::Unit
   // Test GlobalIndex matches getDOFs for K = 4, 5, 6
   TEST(Rodin_Variational_H1_Space, GlobalIndex_MatchesGetDOFs_K4_to_K6)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 12, 16 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -1262,7 +1262,7 @@ namespace Rodin::Tests::Unit
     using LocalMesh = Geometry::Mesh<Context::Local>;
     using Polytope  = Geometry::Polytope;
 
-    LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 12, 16 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -1324,7 +1324,7 @@ namespace Rodin::Tests::Unit
   // Test vertex DOF count per entity for K = 1 to 6
   TEST(Rodin_Variational_H1_Space, VertexDOFCount_K1_to_K6)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 12, 16 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -1390,7 +1390,7 @@ namespace Rodin::Tests::Unit
   // Test cell closure size matches element DOF count for K = 1 to 6
   TEST(Rodin_Variational_H1_Space, CellClosureSize_MatchesElementDOFCount_K1_to_K6)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 12, 16 });
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
 
@@ -2284,7 +2284,7 @@ namespace Rodin::Tests::Unit
   {
     // 2x2 mesh
     {
-      Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+      Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 12, 16 });
       mesh.getConnectivity().compute(2, 1);
       mesh.getConnectivity().compute(1, 0);
 
@@ -2754,7 +2754,7 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_Variational_H1_Space, Tetrahedron_H1_1_DOFCount)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 12, 16, 2 });
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -2770,7 +2770,7 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_Variational_H1_Space, Tetrahedron_H1_2_DOFCount)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 12, 16, 2 });
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -2788,7 +2788,7 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_Variational_H1_Space, Tetrahedron_H1_3_DOFCount)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 12, 16, 2 });
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -2808,7 +2808,7 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_Variational_H1_Space, Tetrahedron_H1_4_DOFCount)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 12, 16, 2 });
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -2830,7 +2830,7 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_Variational_H1_Space, Tetrahedron_H1_K1_to_K6_Indexing)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 12, 16, 2 });
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -2866,7 +2866,7 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_Variational_H1_Space, Tetrahedron_TrialTestFunction)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 12, 16, 2 });
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -2882,7 +2882,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Tetrahedron_VectorH1_DOFCount)
   {
     constexpr size_t vdim = 3;
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 12, 16, 2 });
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -2898,7 +2898,7 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_Variational_H1_Space, Tetrahedron_ComplexH1_DOFCount)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 12, 16, 2 });
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -2918,7 +2918,7 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_Variational_H1_Space, Wedge_H1_1_DOFCount)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 12, 16, 2 });
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -2955,7 +2955,7 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_Variational_H1_Space, Wedge_H1_K1_to_K6_Indexing)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 12, 16, 2 });
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -2991,7 +2991,7 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_Variational_H1_Space, Wedge_TrialTestFunction)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 12, 16, 2 });
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -3069,7 +3069,7 @@ namespace Rodin::Tests::Unit
 
     // 3D Tetrahedron
     {
-      Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+      Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 12, 16, 2 });
       mesh.getConnectivity().compute(3, 2);
       mesh.getConnectivity().compute(2, 1);
       mesh.getConnectivity().compute(1, 0);
@@ -3079,7 +3079,7 @@ namespace Rodin::Tests::Unit
 
     // 3D Wedge
     {
-      Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 2, 2, 2 });
+      Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 12, 16, 2 });
       mesh.getConnectivity().compute(3, 2);
       mesh.getConnectivity().compute(2, 1);
       mesh.getConnectivity().compute(1, 0);
@@ -3137,7 +3137,7 @@ namespace Rodin::Tests::Unit
 
     // 3D Tetrahedron
     {
-      Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+      Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 12, 16, 2 });
       mesh.getConnectivity().compute(3, 2);
       mesh.getConnectivity().compute(2, 1);
       mesh.getConnectivity().compute(1, 0);
@@ -3147,7 +3147,7 @@ namespace Rodin::Tests::Unit
 
     // 3D Wedge - just verify it runs without error
     {
-      Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 2, 2, 2 });
+      Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 12, 16, 2 });
       mesh.getConnectivity().compute(3, 2);
       mesh.getConnectivity().compute(2, 1);
       mesh.getConnectivity().compute(1, 0);
@@ -3184,7 +3184,7 @@ namespace Rodin::Tests::Unit
 
     // 2D Triangle
     {
-      Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
+      Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 9, 9 });
       mesh.getConnectivity().compute(2, 1);
       mesh.getConnectivity().compute(1, 0);
       H1 fes(std::integral_constant<size_t, 2>{}, mesh);
@@ -3194,7 +3194,7 @@ namespace Rodin::Tests::Unit
 
     // 2D Quadrilateral
     {
-      Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 3, 3 });
+      Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 9, 9 });
       mesh.getConnectivity().compute(2, 1);
       mesh.getConnectivity().compute(1, 0);
       H1 fes(std::integral_constant<size_t, 2>{}, mesh);
@@ -3204,7 +3204,7 @@ namespace Rodin::Tests::Unit
 
     // 3D Tetrahedron
     {
-      Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+      Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 12, 16, 2 });
       mesh.getConnectivity().compute(3, 2);
       mesh.getConnectivity().compute(2, 1);
       mesh.getConnectivity().compute(1, 0);
@@ -3215,7 +3215,7 @@ namespace Rodin::Tests::Unit
 
     // 3D Wedge
     {
-      Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 2, 2, 2 });
+      Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 12, 16, 2 });
       mesh.getConnectivity().compute(3, 2);
       mesh.getConnectivity().compute(2, 1);
       mesh.getConnectivity().compute(1, 0);
@@ -3500,7 +3500,7 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_Variational_H1_Space, Interpolation_Tetrahedron_H1_2)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 8, 4, 8 });
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -3536,7 +3536,7 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_Variational_H1_Space, Interpolation_Tetrahedron_H1_3)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 4, 7, 9 });
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -3572,7 +3572,7 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_Variational_H1_Space, Interpolation_Tetrahedron_H1_6)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 4, 7, 9 });
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -3615,7 +3615,7 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_Variational_H1_Space, Interpolation_Wedge_H1_2)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 4, 7, 9 });
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -3651,7 +3651,7 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_Variational_H1_Space, Interpolation_Wedge_H1_3)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 4, 7, 9 });
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -3687,7 +3687,7 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_Variational_H1_Space, Interpolation_Wedge_H1_6)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 4, 7, 9 });
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -3721,6 +3721,121 @@ namespace Rodin::Tests::Unit
       Real value = gf(p);
       EXPECT_NEAR(value, expected, 1e-10)
         << "Wedge H1<6> interpolation at vertex " << vtx << " should match exact quintic function.";
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // Hexahedron (3D) Interpolation Tests
+  // --------------------------------------------------------------------------
+
+  TEST(Rodin_Variational_H1_Space, Interpolation_Hexahedron_H1_2)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Hexahedron, { 4, 7, 9 });
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    GridFunction gf(fes);
+
+    // Linear function (degree 1) - H1<2> can represent this exactly
+    auto exact = [](const Geometry::Point& p) -> Real
+    {
+      return 2.0 * p.x() + 3.0 * p.y() + 4.0 * p.z() + 1.0;
+    };
+
+    gf = exact;
+
+    EXPECT_EQ(gf.getSize(), fes.getSize());
+
+    // Verify interpolated values at vertices
+    const size_t nv = mesh.getVertexCount();
+    for (size_t vtx = 0; vtx < nv; ++vtx)
+    {
+      const auto vit = mesh.getVertex(vtx);
+      const Geometry::Point p(
+          *vit,
+          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          vit->getCoordinates());
+      Real expected = exact(p);
+      Real value = gf(p);
+      EXPECT_NEAR(value, expected, 1e-10)
+        << "Hexahedron H1<2> interpolation at vertex " << vtx << " should match exact linear function.";
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Space, Interpolation_Hexahedron_H1_3)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Hexahedron, { 8, 8, 8 });
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    H1 fes(std::integral_constant<size_t, 3>{}, mesh);
+    GridFunction gf(fes);
+
+    // Quadratic function (degree 2) - H1<3> can represent this exactly
+    auto exact = [](const Geometry::Point& p) -> Real
+    {
+      return p.x() * p.x() + p.y() * p.y() + p.z() * p.z() + p.x() * p.y();
+    };
+
+    gf = exact;
+
+    EXPECT_EQ(gf.getSize(), fes.getSize());
+
+    // Verify interpolated values at vertices
+    const size_t nv = mesh.getVertexCount();
+    for (size_t vtx = 0; vtx < nv; ++vtx)
+    {
+      const auto vit = mesh.getVertex(vtx);
+      const Geometry::Point p(
+          *vit,
+          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          vit->getCoordinates());
+      Real expected = exact(p);
+      Real value = gf(p);
+      EXPECT_NEAR(value, expected, 1e-10)
+        << "Hexahedron H1<3> interpolation at vertex " << vtx << " should match exact quadratic function.";
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Space, Interpolation_Hexahedron_H1_6)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Hexahedron, { 6, 6, 6 });
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    H1 fes(std::integral_constant<size_t, 6>{}, mesh);
+    GridFunction gf(fes);
+
+    // Quintic function (degree 5) - H1<6> can represent this exactly
+    auto exact = [](const Geometry::Point& p) -> Real
+    {
+      return p.x() * p.x() * p.x() * p.x() * p.x()
+           + p.y() * p.y() * p.y() * p.y() * p.y()
+           + p.z() * p.z() * p.z() * p.z() * p.z()
+           + p.x() * p.x() * p.y() * p.y() * p.z();
+    };
+
+    gf = exact;
+
+    EXPECT_EQ(gf.getSize(), fes.getSize());
+
+    // Verify interpolated values at vertices
+    const size_t nv = mesh.getVertexCount();
+    for (size_t vtx = 0; vtx < nv; ++vtx)
+    {
+      const auto vit = mesh.getVertex(vtx);
+      const Geometry::Point p(
+          *vit,
+          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          vit->getCoordinates());
+      Real expected = exact(p);
+      Real value = gf(p);
+      EXPECT_NEAR(value, expected, 1e-10)
+        << "Hexahedron H1<6> interpolation at vertex " << vtx << " should match exact quintic function.";
     }
   }
 
@@ -4107,7 +4222,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Interpolation_SingleCell_Tetrahedron_H1_3)
   {
     // Small tetrahedron mesh for edge case testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 4, 7, 9 });
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -4145,7 +4260,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Interpolation_SingleCell_Wedge_H1_3)
   {
     // Small wedge mesh for edge case testing
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 4, 7, 9 });
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -4475,7 +4590,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Interpolation_Tetrahedron_H1_3_NonTrivialMesh)
   {
     // Non-trivial 3D tetrahedron mesh (3x3x3 grid)
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 3, 3, 3 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 6, 7, 5 });
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -4511,7 +4626,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Projection_Tetrahedron_H1_4_NonTrivialMesh)
   {
     // Non-trivial 3D tetrahedron mesh (2x2x2 grid)
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 4, 7, 9 });
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -4549,7 +4664,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Projection_Wedge_H1_2_NonTrivialMesh)
   {
     // Non-trivial 3D wedge mesh (3x3x3 grid)
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 3, 3, 3 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 6, 7, 5 });
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -4586,7 +4701,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Interpolation_Wedge_H1_3_NonTrivialMesh)
   {
     // Non-trivial 3D wedge mesh (3x3x3 grid)
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 3, 3, 3 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 6, 7, 5 });
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -4780,7 +4895,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Projection_Tetrahedron_H1_4_RefinedNonTrivialMesh)
   {
     // Refined non-trivial 3D tetrahedron mesh (3x3x3 grid, 162 tets)
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 3, 3, 3 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 6, 7, 5 });
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
@@ -4902,7 +5017,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1_Space, Projection_Wedge_H1_4_RefinedNonTrivialMesh)
   {
     // Refined non-trivial 3D wedge mesh (3x3x3 grid, 54 wedges)
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 3, 3, 3 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 6, 7, 5 });
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);

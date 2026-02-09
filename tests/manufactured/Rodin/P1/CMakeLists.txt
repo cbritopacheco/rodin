@@ -6,8 +6,25 @@ target_link_libraries(RodinManufacturedPoisson
   Rodin::Geometry
   Rodin::Variational
   Rodin::Solver
-  )
-gtest_discover_tests(RodinManufacturedPoisson)
+)
+gtest_discover_tests(RodinManufacturedPoisson
+  PROPERTIES
+    LABELS manufactured
+)
+
+add_executable(RodinManufacturedPoisson3D Poisson3D.cpp)
+target_link_libraries(RodinManufacturedPoisson3D
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solver
+)
+gtest_discover_tests(RodinManufacturedPoisson3D
+  PROPERTIES
+    LABELS manufactured
+)
 
 add_executable(RodinManufacturedConductivity Conductivity.cpp)
 target_link_libraries(RodinManufacturedConductivity
@@ -17,8 +34,11 @@ target_link_libraries(RodinManufacturedConductivity
   Rodin::Geometry
   Rodin::Variational
   Rodin::Solver
-  )
-gtest_discover_tests(RodinManufacturedConductivity)
+)
+gtest_discover_tests(RodinManufacturedConductivity
+  PROPERTIES
+    LABELS manufactured
+)
 
 add_executable(RodinManufacturedReactionDiffusion ReactionDiffusion.cpp)
 target_link_libraries(RodinManufacturedReactionDiffusion
@@ -28,8 +48,11 @@ target_link_libraries(RodinManufacturedReactionDiffusion
   Rodin::Geometry
   Rodin::Variational
   Rodin::Solver
-  )
-gtest_discover_tests(RodinManufacturedReactionDiffusion)
+)
+gtest_discover_tests(RodinManufacturedReactionDiffusion
+  PROPERTIES
+    LABELS manufactured
+)
 
 add_executable(RodinManufacturedDivergencePoisson DivergencePoisson.cpp)
 target_link_libraries(RodinManufacturedDivergencePoisson
@@ -39,8 +62,11 @@ target_link_libraries(RodinManufacturedDivergencePoisson
   Rodin::Geometry
   Rodin::Variational
   Rodin::Solver
-  )
-gtest_discover_tests(RodinManufacturedDivergencePoisson)
+)
+gtest_discover_tests(RodinManufacturedDivergencePoisson
+  PROPERTIES
+    LABELS manufactured
+)
 
 add_executable(RodinManufacturedLinearElasticity LinearElasticity.cpp)
 target_link_libraries(RodinManufacturedLinearElasticity
@@ -50,8 +76,11 @@ target_link_libraries(RodinManufacturedLinearElasticity
   Rodin::Geometry
   Rodin::Variational
   Rodin::Solver
-  )
-gtest_discover_tests(RodinManufacturedLinearElasticity)
+)
+gtest_discover_tests(RodinManufacturedLinearElasticity
+  PROPERTIES
+    LABELS manufactured
+)
 
 add_executable(RodinManufacturedHelmholtz Helmholtz.cpp)
 target_link_libraries(RodinManufacturedHelmholtz
@@ -61,5 +90,50 @@ target_link_libraries(RodinManufacturedHelmholtz
   Rodin::Geometry
   Rodin::Variational
   Rodin::Solver
-  )
-gtest_discover_tests(RodinManufacturedHelmholtz)
+)
+gtest_discover_tests(RodinManufacturedHelmholtz
+  PROPERTIES
+    LABELS manufactured
+)
+
+add_executable(RodinManufacturedHelmholtz3D Helmholtz3D.cpp)
+target_link_libraries(RodinManufacturedHelmholtz3D
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solver
+)
+gtest_discover_tests(RodinManufacturedHelmholtz3D
+  PROPERTIES
+    LABELS manufactured
+)
+
+add_executable(RodinManufacturedReactionDiffusion3D ReactionDiffusion3D.cpp)
+target_link_libraries(RodinManufacturedReactionDiffusion3D
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solver
+)
+gtest_discover_tests(RodinManufacturedReactionDiffusion3D
+  PROPERTIES
+    LABELS manufactured
+)
+
+add_executable(RodinManufacturedLinearElasticity3D LinearElasticity3D.cpp)
+target_link_libraries(RodinManufacturedLinearElasticity3D
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solver
+)
+gtest_discover_tests(RodinManufacturedLinearElasticity3D
+  PROPERTIES
+    LABELS manufactured
+)

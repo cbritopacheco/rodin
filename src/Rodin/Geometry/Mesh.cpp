@@ -6,6 +6,7 @@
  */
 #include "Rodin/Alert/MemberFunctionException.h"
 
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Variational/P1.h"
 #include "Rodin/Variational/GridFunction.h"
 #include "Rodin/Variational/FiniteElementSpace.h"
@@ -271,23 +272,24 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Local>&
-  Mesh<Context::Local>::setVertexCoordinates(Index idx, const Math::SpatialVector<Real>& coords)
+  Mesh<Context::Local>::setVertexCoordinates(
+      Index idx, const Math::SpatialVector<Real>& coords)
   {
-    m_vertices.col(idx) = coords;
+    for (size_t i = 0; i < static_cast<size_t>(coords.size()); ++i)
+      m_vertices(i, idx) = coords[i];
     return *this;
   }
 
   Mesh<Context::Local>&
   Mesh<Context::Local>::setVertexCoordinates(Index idx, Real xi, size_t i)
   {
-    m_vertices.col(idx).coeffRef(i) = xi;
+    m_vertices(i, idx) = xi;
     return *this;
   }
 
-  Eigen::Map<const Math::SpatialVector<Real>> Mesh<Context::Local>::getVertexCoordinates(Index idx) const
+  Math::SpatialPoint Mesh<Context::Local>::getVertexCoordinates(Index idx) const
   {
-    const auto size = static_cast<Eigen::Index>(getSpaceDimension());
-    return { m_vertices.data() + getSpaceDimension() * idx, size };
+    return m_vertices.col(idx);
   }
 
   size_t Mesh<Context::Local>::getDimension() const
@@ -318,7 +320,8 @@ namespace Rodin::Geometry
       Variational::RealP1Element fe(Polytope::Type::Point);
       const size_t sdim = getSpaceDimension();
       Math::PointMatrix pm(sdim, 1);
-      pm.col(0) = getVertexCoordinates(idx);
+      for (size_t i = 0; i < sdim; ++i)
+        pm(i, 0) = m_vertices(i, idx);
       return new IsoparametricTransformation(std::move(pm), std::move(fe));
     }
     else
@@ -332,7 +335,8 @@ namespace Rodin::Geometry
       for (const auto& v : polytope | boost::adaptors::indexed())
       {
         assert(sdim == static_cast<size_t>(getVertexCoordinates(v.value()).size()));
-        pm.col(v.index()) = getVertexCoordinates(v.value());
+        for (size_t i = 0; i < sdim; ++i)
+          pm(i, v.index()) = m_vertices(i, v.value());
       }
       Variational::RealP1Element fe(g);
       return new IsoparametricTransformation(std::move(pm), std::move(fe));
@@ -732,106 +736,57 @@ namespace Rodin::Geometry
       case Polytope::Type::Tetrahedron:
       {
         assert(dimensions.size() == 3);
-        const size_t width = dimensions.coeff(0);
-        const size_t height = dimensions.coeff(1);
-        const size_t depth = dimensions.coeff(2);
-        assert(width * height * depth >= 8);
+        const size_t w = dimensions.coeff(0);
+        const size_t h = dimensions.coeff(1);
+        const size_t d = dimensions.coeff(2);
+        assert(w >= 2 && h >= 2 && d >= 2);
+
         build.initialize(dim)
-             .nodes(width * height * depth + (width - 1) * (height - 1) * (depth - 1))
-             .reserve(dim, 10 * (width - 1) * (height - 1) * (depth - 1));
+             .nodes(w * h * d)
+             .reserve(dim, 6 * (w - 1) * (h - 1) * (d - 1));
 
-        for (size_t k = 0; k < depth; ++k)
+        // Vertex coordinates: integer lattice (i, j, k)
+        for (size_t k = 0; k < d; ++k)
+          for (size_t j = 0; j < h; ++j)
+            for (size_t i = 0; i < w; ++i)
+              build.vertex({ static_cast<Real>(i),
+                             static_cast<Real>(j),
+                             static_cast<Real>(k) });
+
+        // Helper: v(i,j,k) = i + j*w + k*w*h
+        const auto vid = [w, h](size_t i, size_t j, size_t k) -> Index
         {
-          for (size_t j = 0; j < height; ++j)
+          return static_cast<Index>(i + j * w + k * w * h);
+        };
+
+        // Kuhn triangulation (main diagonal v000 -> v111), 6 tets per cell
+        for (size_t k = 0; k + 1 < d; ++k)
+        {
+          for (size_t j = 0; j + 1 < h; ++j)
           {
-            for (size_t i = 0; i < width; ++i)
+            for (size_t i = 0; i + 1 < w; ++i)
             {
-              build.vertex({
-                  static_cast<Real>(i),
-                  static_cast<Real>(j),
-                  static_cast<Real>(k) });
+              const Index v000 = vid(i,     j,     k);
+              const Index v100 = vid(i + 1, j,     k);
+              const Index v010 = vid(i,     j + 1, k);
+              const Index v110 = vid(i + 1, j + 1, k);
+
+              const Index v001 = vid(i,     j,     k + 1);
+              const Index v101 = vid(i + 1, j,     k + 1);
+              const Index v011 = vid(i,     j + 1, k + 1);
+              const Index v111 = vid(i + 1, j + 1, k + 1);
+
+              // All 6 have positive orientation for an axis-aligned cube.
+              build.polytope(g, { v000, v100, v110, v111 })
+                   .polytope(g, { v000, v110, v010, v111 })
+                   .polytope(g, { v000, v010, v011, v111 })
+                   .polytope(g, { v000, v011, v001, v111 })
+                   .polytope(g, { v000, v001, v101, v111 })
+                   .polytope(g, { v000, v101, v100, v111 });
             }
           }
         }
 
-        for (size_t k = 0; k < depth - 1; ++k)
-        {
-          for (size_t j = 0; j < height - 1; ++j)
-          {
-            for (size_t i = 0; i < width - 1; ++i)
-            {
-              build.vertex({
-                  static_cast<Real>(i + 0.5),
-                  static_cast<Real>(j + 0.5),
-                  static_cast<Real>(k + 0.5) });
-            }
-          }
-        }
-
-        for (size_t i = 0; i < width - 1; ++i)
-        {
-          for (size_t j = 0; j < height - 1; ++j)
-          {
-            for (size_t k = 0; k < depth - 1; ++k)
-            {
-              const Index c =
-                  i + (width - 1) * j + (width - 1) * (height - 1) * k
-                    + (width - 1) + width * (height - 1) + width * height * (depth - 1) + 1;
-              build.polytope(g, // Front-left
-                       { i + width * j + width * height * k,
-                        (i + 1) + width * j + width * height * k,
-                         i + width * (j + 1) + width * height * k,
-                         i + width * j + width * height * (k + 1) })
-                   .polytope(g, // Front-right
-                       { (i + 1) + width * j + width * height * (k + 1),
-                          i + width * j + width * height * (k + 1),
-                          c,
-                          (i + 1) + width * j + width * height * k })
-                   .polytope(g, // Left-top
-                       { i + width * (j + 1) + width * height * (k + 1),
-                         c,
-                         i + width * j + width * height * (k + 1),
-                         i + width * (j + 1) + width * height * k })
-                   .polytope(g, // Top-left
-                       { i + width * j + width * height * (k + 1),
-                        (i + 1) + width * j + width * height * (k + 1),
-                         i + width * (j + 1) + width * height * (k + 1),
-                         c })
-                   .polytope(g, // Right-bottom
-                       { c,
-                        (i + 1) + width * j + width * height * k,
-                         (i + 1) + width * (j + 1) + width * height * k,
-                         (i + 1) + width * j + width * height * (k + 1) })
-                   .polytope(g, // Bottom-right
-                       { (i + 1) + width * j + width * height * k,
-                         i + width * (j + 1) + width * height * k,
-                         (i + 1) + width * (j + 1) + width * height * k,
-                          c
-                         })
-                   .polytope(g, // Back-left
-                       {  i + width * (j + 1) + width * height * k,
-                          (i + 1) + width * (j + 1) + width * height * k,
-                          c,
-                          i + width * (j + 1) + width * height * (k + 1) })
-                   .polytope(g, // Back-right
-                        { (i + 1) + width * (j + 1) + width * height * (k + 1),
-                           i + width * (j + 1) + width * height * (k + 1),
-                           (i + 1) + width * j + width * height * (k + 1),
-                          (i + 1) + width * (j + 1) + width * height * k })
-                   .polytope(g, // Front fill
-                       { (i + 1) + width * j + width * height * k,
-                          i + width * (j + 1) + width * height * k,
-                          c,
-                          i + width * j + width * height * (k + 1) })
-                   .polytope(g, // Back fill
-                       { (i + 1) + width * j + width * height * (k + 1),
-                          (i + 1) + width * (j + 1) + width * height * k,
-                          c,
-                          i + width * (j + 1) + width * height * (k + 1) })
-                   ;
-            }
-          }
-        }
         return build.finalize();
       }
       case Polytope::Type::Wedge:
@@ -874,6 +829,66 @@ namespace Rodin::Geometry
             }
           }
         }
+        return build.finalize();
+      }
+
+      case Polytope::Type::Hexahedron:
+      {
+        // Structured brick mesh with MFEM-compatible vertex ordering
+        // dimensions = {w, h, d}
+        assert(dimensions.size() == 3);
+        const size_t w = dimensions.coeff(0);
+        const size_t h = dimensions.coeff(1);
+        const size_t d = dimensions.coeff(2);
+        assert(w >= 2 && h >= 2 && d >= 2);
+
+        // Total vertices
+        build.initialize(dim).nodes(w * h * d);
+
+        // Vertex coordinates: integer lattice (i, j, k)
+        for (size_t k = 0; k < d; ++k)
+        {
+          for (size_t j = 0; j < h; ++j)
+          {
+            for (size_t i = 0; i < w; ++i)
+            {
+              build.vertex({
+                  static_cast<Real>(i),
+                  static_cast<Real>(j),
+                  static_cast<Real>(k) });
+            }
+          }
+        }
+
+        // Number of hexahedra
+        build.reserve(dim, (w - 1) * (h - 1) * (d - 1));
+
+        // Local indexing:
+        // v(i,j,k) = i + j*w + k*w*h
+        //
+        // Hex vertices (consistent with MFEM and Connectivity::getSubPolytopes):
+        // bottom: v0=(0,0,0), v1=(1,0,0), v2=(1,1,0), v3=(0,1,0)
+        // top   : v4=(0,0,1), v5=(1,0,1), v6=(1,1,1), v7=(0,1,1)
+        for (size_t k = 0; k < d - 1; ++k)
+        {
+          for (size_t j = 0; j < h - 1; ++j)
+          {
+            for (size_t i = 0; i < w - 1; ++i)
+            {
+              const Index v0  =  i      +  j      * w +  k      * w * h;
+              const Index v1  = (i + 1) +  j      * w +  k      * w * h;
+              const Index v2  = (i + 1) + (j + 1) * w +  k      * w * h;
+              const Index v3  =  i      + (j + 1) * w +  k      * w * h;
+              const Index v0p = v0 + w * h;
+              const Index v1p = v1 + w * h;
+              const Index v2p = v2 + w * h;
+              const Index v3p = v3 + w * h;
+
+              build.polytope(g, { v0, v1, v2, v3, v0p, v1p, v2p, v3p });
+            }
+          }
+        }
+
         return build.finalize();
       }
       default:

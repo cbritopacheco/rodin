@@ -205,6 +205,8 @@ namespace Rodin::Variational
           m_mesh(other.m_mesh)
       {}
 
+      virtual ~P0() override = default;
+
       /**
        * @brief Move assignment operator.
        * @param[in] other P0 space to move from
@@ -223,7 +225,47 @@ namespace Rodin::Variational
        */
       const ElementType& getFiniteElement(size_t d, Index i) const
       {
-        return s_elements[getMesh().getGeometry(d, i)];
+        switch (getMesh().getGeometry(d, i))
+        {
+          case Geometry::Polytope::Type::Point:
+          {
+            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Point);
+            return s_element;
+          }
+          case Geometry::Polytope::Type::Segment:
+          {
+            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Segment);
+            return s_element;
+          }
+          case Geometry::Polytope::Type::Triangle:
+          {
+            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Triangle);
+            return s_element;
+          }
+          case Geometry::Polytope::Type::Quadrilateral:
+          {
+            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Quadrilateral);
+            return s_element;
+          }
+          case Geometry::Polytope::Type::Tetrahedron:
+          {
+            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Tetrahedron);
+            return s_element;
+          }
+          case Geometry::Polytope::Type::Wedge:
+          {
+            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Wedge);
+            return s_element;
+          }
+          case Geometry::Polytope::Type::Hexahedron:
+          {
+            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Hexahedron);
+            return s_element;
+          }
+        }
+        assert(false);
+        static thread_local constexpr ElementType s_null(Geometry::Polytope::Type::Point);
+        return s_null;
       }
 
       /**
@@ -270,6 +312,7 @@ namespace Rodin::Variational
       const IndexArray& getDOFs(size_t d, Index i) const override
       {
         assert(d == getMesh().getDimension());
+        (void) d;
         return m_dofs.at(i);
       }
 
@@ -309,21 +352,18 @@ namespace Rodin::Variational
       /**
        * @brief Creates a pushforward transformation for a function.
        * @tparam Callable Type of the callable function
-       * @param[in] idx Pair of (dimension, polytope index)
        * @param[in] v Function to push forward
        * @return Pushforward transformation object
        *
        * The pushforward maps a function from reference space to physical space.
        */
       template <class Callable>
-      auto getPushforward(const std::pair<size_t, Index>& idx, Callable&& v) const
+      auto getPushforward(const std::pair<size_t, Index>&, Callable&& v) const
       {
         return Pushforward<Callable>(std::forward<Callable>(v));
       }
 
     private:
-      static const Geometry::GeometryIndexed<ElementType> s_elements;
-
       std::vector<IndexArray> m_dofs;
       std::reference_wrapper<const MeshType> m_mesh;
   };

@@ -18,45 +18,91 @@
 
 namespace Rodin::QF
 {
-  GenericPolytopeQuadrature::GenericPolytopeQuadrature(size_t order, Geometry::Polytope::Type g)
-    : Parent(g),
-      m_order(order)
+  struct Key
+  {
+    size_t order;
+
+    Geometry::Polytope::Type g;
+
+    friend bool operator<(const Key& a, const Key& b)
+    {
+      if (a.g != b.g) return a.g < b.g;
+      return a.order < b.order;
+    }
+
+    friend bool operator==(const Key& a, const Key& b)
+    {
+      return a.order == b.order && a.g == b.g;
+    }
+  };
+
+  std::unique_ptr<const QuadratureFormulaBase>
+  GenericPolytopeQuadrature::build(size_t order, Geometry::Polytope::Type g)
   {
     switch (g)
     {
       case Geometry::Polytope::Type::Point:
-      {
-        // For points, use the single-point centroid rule
-        m_qf = std::make_unique<Centroid>(g);
-        break;
-      }
+        return std::make_unique<Centroid>(g);
+
       case Geometry::Polytope::Type::Segment:
       {
-        // For segments, use Grundmann-Möller with appropriate s parameter
-        const size_t i = (m_order / 2) * 2 + 1;
-        m_qf = std::make_unique<GrundmannMoller>(i / 2, g);
-        break;
+        const size_t n = std::max<size_t>(1, (order + 2) / 2);
+        return std::make_unique<GaussLegendre>(g, n);
       }
+
       case Geometry::Polytope::Type::Triangle:
       {
-        // For triangles, use Grundmann-Möller with appropriate s parameter
-        const size_t i = (m_order / 2) * 2 + 1;
-        m_qf = std::make_unique<GrundmannMoller>(i / 2, g);
-        break;
+        const size_t s = (order + 1) / 2;
+        return std::make_unique<GrundmannMoller>(s, g);
       }
+
       case Geometry::Polytope::Type::Quadrilateral:
       {
-        // For quadrilaterals, use tensor-product Gauss-Legendre
-        m_qf = std::make_unique<GaussLegendre>(g);
-        break;
+        const size_t n = std::max<size_t>(1, (order + 2) / 2);
+        return std::make_unique<GaussLegendre>(g, n, n);
       }
+
       case Geometry::Polytope::Type::Tetrahedron:
       {
-        // For tetrahedra, use Grundmann-Möller with appropriate s parameter
-        const size_t i = (m_order / 2) * 2 + 1;
-        m_qf = std::make_unique<GrundmannMoller>(i / 2, g);
-        break;
+        const size_t i = (order / 2) * 2 + 1;
+        return std::make_unique<GrundmannMoller>(i / 2, g);
+      }
+
+      case Geometry::Polytope::Type::Wedge:
+      {
+        const size_t n = std::max<size_t>(1, (order + 2) / 2);
+        return std::make_unique<GaussLegendre>(g, n, n);
+      }
+
+      case Geometry::Polytope::Type::Hexahedron:
+      {
+        const size_t n = std::max<size_t>(1, (order + 2) / 2);
+        return std::make_unique<GaussLegendre>(g, n, n, n);
+      }
+
+      default:
+      {
+        assert(false);
+        return {};
       }
     }
   }
+
+  const QuadratureFormulaBase& GenericPolytopeQuadrature::get(size_t order, Geometry::Polytope::Type g)
+  {
+    static thread_local FlatMap<Key, std::unique_ptr<const QuadratureFormulaBase>> pool;
+
+    const Key key{order, g};
+
+    auto it = pool.find(key);
+    if (it == pool.end())
+      it = pool.emplace(key, build(order, g)).first;
+
+    return *it->second;
+  }
+
+  // Optional: keep the old behavior, but delegate to build()
+  GenericPolytopeQuadrature::GenericPolytopeQuadrature(size_t order, Geometry::Polytope::Type g)
+    : Parent(g), m_qf(build(order, g)), m_order(order)
+  {}
 }

@@ -63,6 +63,62 @@ namespace Rodin::Tests::Manufactured::Darcy
   using ManufacturedDarcyTest32x32 = ManufacturedDarcyTest<32>;
   using ManufacturedDarcyTest64x64 = ManufacturedDarcyTest<64>;
 
+  TEST_P(ManufacturedDarcyTest16x16, Darcy_P1ExactResidual)
+  {
+    Mesh mesh = this->getMesh();
+
+    P1 uh(mesh, mesh.getSpaceDimension());
+    P1 ph(mesh);
+
+    auto p_exact = 2 * F::x - 3 * F::y + 1;
+    VectorFunction u_exact{ -2, 3 };
+    auto f = Zero();
+
+    TrialFunction u(uh);
+    TrialFunction p(ph);
+    TestFunction  v(uh);
+    TestFunction  q(ph);
+
+    Problem darcy(u, p, v, q);
+    darcy = Integral(u, v)
+         -  Integral(p, Div(v))
+         -  Integral(Div(u), q)
+         +  Integral(f, q)
+         +  DirichletBC(p, p_exact);
+    CG(darcy).solve();
+
+    GridFunction p_gf(ph);
+    p_gf = p_exact;
+    GridFunction u_gf(uh);
+    u_gf = u_exact;
+
+    auto& ls = darcy.getLinearSystem();
+    auto& A = ls.getOperator();
+    auto& b = ls.getVector();
+    auto& x = ls.getSolution();
+
+    auto xe = x;
+    const auto uSize = u_gf.getData().size();
+    const auto pSize = p_gf.getData().size();
+    xe.head(uSize) = u_gf.getData();
+    xe.tail(pSize) = p_gf.getData();
+
+    auto r = A * x - b;
+    auto re = A * xe - b;
+
+    const Real scale = std::max<Real>(b.norm(), 1);
+    EXPECT_NEAR(r.norm() / scale, 0, 1e-10);
+    EXPECT_NEAR(re.norm() / scale, 0, 1e-12);
+
+    GridFunction diff_p(ph);
+    diff_p = Pow(p.getSolution() - p_exact, 2);
+    EXPECT_NEAR(Integral(diff_p).compute(), 0, 1e-12);
+
+    GridFunction diff_u(ph);
+    diff_u = Pow(Frobenius(u.getSolution() - u_exact), 2);
+    EXPECT_NEAR(Integral(diff_u).compute(), 0, 1e-12);
+  }
+
   /**
    * @f[
    *   \Omega = [0,1]\times[0,1]
@@ -151,4 +207,3 @@ namespace Rodin::Tests::Manufactured::Darcy
     ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle)
   );
 }
-

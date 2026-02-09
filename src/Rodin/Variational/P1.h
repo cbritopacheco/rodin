@@ -57,5 +57,6 @@
 #include "P1/Derivative.h"
 #include "P1/QuadratureRule.h"
 #include "P1/LinearElasticity.h"
+#include "P1/ShapeFunction.h"
 
 #endif

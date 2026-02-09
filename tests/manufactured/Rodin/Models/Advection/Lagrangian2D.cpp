@@ -18,7 +18,7 @@ using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 using namespace Rodin::Models::Advection;
 
-namespace Rodin::Tests::Manufactured::AdvectionLagrangian
+namespace Rodin::Tests::Manufactured::AdvectionLagrangian2D
 {
   template <size_t M>
   class ManufacturedAdvectionTest : public ::testing::TestWithParam<Polytope::Type>
@@ -92,13 +92,13 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian
     }
   };
 
-  using Mfg16 = ManufacturedAdvectionTest<16>;
-  using Mfg32 = ManufacturedAdvectionTest<32>;
+  using ManufacturedAdvectiionTest_16 = ManufacturedAdvectionTest<16>;
+  using ManufacturedAdvectiionTest_32 = ManufacturedAdvectionTest<32>;
 
   // One-step manufactured check with constant velocity.
   // u0(x,y) = sin(pi x) sin(pi y)
   // u(x,y,dt) = u0(x - vx dt, y - vy dt)
-  TEST_P(Mfg32, ConstantVelocity_OneStep_L2Interior)
+  TEST_P(ManufacturedAdvectiionTest_32, ConstantVelocity_OneStep_L2Interior)
   {
     auto mesh = this->getMesh();
 
@@ -131,7 +131,7 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian
   }
 
   // Two smaller steps should not be worse than one larger step for the same total time.
-  TEST_P(Mfg32, ConstantVelocity_TwoHalfSteps_vs_OneFullStep)
+  TEST_P(ManufacturedAdvectiionTest_32, ConstantVelocity_TwoHalfSteps_vs_OneFullStep)
   {
     auto mesh = this->getMesh();
     P1 vh(mesh);
@@ -208,7 +208,7 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian
   }
 
   // REPLACE the failing test with a spatial-refinement check.
-  TEST_P(Mfg16, ConstantVelocity_SpatialRefinement_DecreasesError)
+  TEST_P(ManufacturedAdvectiionTest_16, ConstantVelocity_SpatialRefinement_DecreasesError)
   {
     // coarse mesh
     auto meshC = this->getMesh();          // 16x16
@@ -273,13 +273,13 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian
 
   INSTANTIATE_TEST_SUITE_P(
     MeshParams16x16,
-    Mfg16,
+    ManufacturedAdvectiionTest_16,
     ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle)
   );
 
   INSTANTIATE_TEST_SUITE_P(
     MeshParams32x32,
-    Mfg32,
+    ManufacturedAdvectiionTest_32,
     ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle)
   );
 }

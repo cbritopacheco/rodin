@@ -9,7 +9,5 @@
 #include "Base.h"
 
 namespace Rodin::FormLanguage
-{
-  thread_local Base::UUID Base::s_id = 0;
-}
+{}
 

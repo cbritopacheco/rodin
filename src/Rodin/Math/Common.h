@@ -20,6 +20,8 @@
 
 #include "Rodin/Types.h"
 
+#include "ForwardDecls.h"
+
 namespace Rodin::Math
 {
   /**
@@ -108,11 +110,41 @@ namespace Rodin::Math
    * @param[in] base Value to square
    * @return @f$ \text{base}^2 @f$
    */
-  template <class Base, class Exponent>
+  template <class Base>
   constexpr
   auto pow2(const Base& base)
   {
     return base * base;
+  }
+
+  template <size_t N, class Base>
+  constexpr Base pow(const Base& x)
+  {
+    if constexpr (N == 0)
+    {
+      return Base(1);
+    }
+    else if constexpr (N == 1)
+    {
+      return x;
+    }
+    else if constexpr (N % 2 == 0)
+    {
+      const Base y = pow<N / 2>(x);
+      return y * y;
+    }
+    else
+    {
+      const Base y = pow<N / 2>(x);
+      return y * y * x;
+    }
+  }
+
+  // Integral-constant overload (same behavior)
+  template <class Base, size_t N>
+  constexpr Base pow(const Base& x, std::integral_constant<size_t, N>)
+  {
+    return pow<N>(x);
   }
 
   /**
@@ -388,20 +420,14 @@ namespace Rodin::Math
   constexpr
   auto nan()
   {
-    return std::numeric_limits<T>::quiet_NaN();
-  }
-
-  /**
-   * @brief Returns a complex NaN value.
-   *
-   * Returns a complex number where both real and imaginary parts are NaN.
-   *
-   * @return Complex NaN value
-   */
-  constexpr
-  Complex nan()
-  {
-    return Complex(nan<Real>(), nan<Real>());
+    if constexpr (std::is_same_v<T, Complex>)
+    {
+      return Complex(std::numeric_limits<Real>::quiet_NaN(), std::numeric_limits<Real>::quiet_NaN());
+    }
+    else
+    {
+      return std::numeric_limits<T>::quiet_NaN();
+    }
   }
 
   /**
@@ -550,7 +576,23 @@ namespace Rodin::Math
   constexpr
   auto dot(const Eigen::MatrixBase<LHSDerived>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
   {
+    assert(lhs.rows() == lhs.rows());
+    assert(rhs.cols() == rhs.cols());
     return (lhs.array() * rhs.conjugate().array()).sum();
+  }
+
+  template <class LHSScalar, class RHSScalar>
+  constexpr
+  auto dot(const SpatialVector<LHSScalar>& lhs, const SpatialVector<RHSScalar>& rhs)
+  {
+    return lhs.dot(rhs);
+  }
+
+  template <class LHSScalar, class RHSScalar>
+  constexpr
+  auto dot(const SpatialMatrix<LHSScalar>& lhs, const SpatialMatrix<RHSScalar>& rhs)
+  {
+    return lhs.dot(rhs);
   }
 }
 

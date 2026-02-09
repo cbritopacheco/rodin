@@ -80,7 +80,7 @@ namespace Rodin
        * @return An empty Tuple.
        */
       constexpr
-      Tuple<> product(const Tuple<> other)
+      Tuple<> product(const Tuple<>&)
       {
         return Tuple<>{};
       }
@@ -121,7 +121,9 @@ namespace Rodin
       template <typename Function>
       constexpr
       void apply(Function&& func)
-      {}
+      {
+        (void) func;
+      }
 
       /**
        * @brief Returns the size of the tuple.
@@ -135,7 +137,7 @@ namespace Rodin
       }
 
       template<class Archive>
-      void serialize(Archive& ar, const unsigned int version)
+      void serialize(Archive&, const unsigned int)
       {}
   };
 
@@ -249,6 +251,7 @@ namespace Rodin
       constexpr
       Tuple<> product(const Tuple<>& other) const
       {
+        (void) other;
         return Tuple<>{};
       }
 

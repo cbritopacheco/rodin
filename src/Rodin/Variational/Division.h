@@ -128,6 +128,16 @@ namespace Rodin::Variational
         return this->object(getLHS().getValue(p)) / this->object(getRHS().getValue(p));
       }
 
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
+      {
+        const auto lo = getLHS().getOrder(polytope);
+        const auto ro = getRHS().getOrder(polytope);
+        // Only polynomial if denominator is polynomial of order 0 (constant)
+        if (!lo || !ro || *ro != 0)
+          return std::nullopt;
+        return lo;
+      }
+
       /**
        * @brief Creates a copy of the division operation.
        * @returns Pointer to copied object

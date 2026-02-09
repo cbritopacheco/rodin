@@ -32,6 +32,133 @@ namespace Rodin::Math
       using Parent =
         LinearSystemBase<MatrixType, VectorType, LinearSystem<MatrixType, VectorType>>;
 
+      class FieldSplits
+      {
+        public:
+          struct Split
+          {
+            std::string name;
+            ::IS is = PETSC_NULLPTR;
+          };
+
+          FieldSplits() = default;
+
+          explicit FieldSplits(std::vector<Split> splits)
+            : m_splits(std::move(splits))
+          {}
+
+          FieldSplits(const FieldSplits& other)
+          {
+            copyFrom(other);
+          }
+
+          FieldSplits(FieldSplits&& other) noexcept
+            : m_splits(std::move(other.m_splits))
+          {}
+
+          ~FieldSplits()
+          {
+            clear();
+          }
+
+          FieldSplits& operator=(const FieldSplits& other)
+          {
+            if (this != &other)
+            {
+              clear();
+              copyFrom(other);
+            }
+            return *this;
+          }
+
+          FieldSplits& operator=(FieldSplits&& other) noexcept
+          {
+            if (this != &other)
+            {
+              clear();
+              m_splits = std::move(other.m_splits);
+            }
+            return *this;
+          }
+
+          std::vector<Split>& getSplits() noexcept
+          {
+            return m_splits;
+          }
+
+          const std::vector<Split>& getSplits() const noexcept
+          {
+            return m_splits;
+          }
+
+          void clear() noexcept
+          {
+            PetscErrorCode ierr;
+            for (auto& s : m_splits)
+            {
+              if (s.is)
+              {
+                ierr = ISDestroy(&s.is);
+                assert(ierr == PETSC_SUCCESS);
+                s.is = PETSC_NULLPTR;
+              }
+            }
+            m_splits.clear();
+            (void) ierr;
+          }
+
+          void copyFrom(const FieldSplits& other)
+          {
+            PetscErrorCode ierr;
+
+            m_splits.reserve(other.m_splits.size());
+            for (const auto& s : other.m_splits)
+            {
+              Split out;
+              out.name = s.name;
+
+              if (s.is)
+              {
+                ierr = ISDuplicate(s.is, &out.is);
+                assert(ierr == PETSC_SUCCESS);
+                ierr = ISCopy(s.is, out.is);
+                assert(ierr == PETSC_SUCCESS);
+              }
+              else
+              {
+                out.is = PETSC_NULLPTR;
+              }
+
+              m_splits.push_back(std::move(out));
+            }
+
+            (void) ierr;
+          }
+
+          Split& operator[](size_t i)
+          {
+            return m_splits[i];
+          }
+
+          const Split& operator[](size_t i) const
+          {
+            return m_splits[i];
+          }
+
+          size_t size() const noexcept
+          {
+            return m_splits.size();
+          }
+
+          bool empty() const noexcept
+          {
+            return m_splits.empty();
+          }
+
+        private:
+          std::vector<Split> m_splits;
+      };
+
       LinearSystem(MPI_Comm comm);
 
       LinearSystem(const LinearSystem& other);
@@ -75,6 +202,8 @@ namespace Rodin::Math
         ierr = MatZeroRows(a, rows.size(), rows.data(), 1.0, x, b);
         assert(ierr == PETSC_SUCCESS);
 
+        (void) ierr;
+
         return *this;
       }
 
@@ -85,10 +214,6 @@ namespace Rodin::Math
         throw "Unimplemented.";
         return *this;
       }
-
-      LinearSystem& create(MPI_Comm comm);
-
-      LinearSystem& destroy();
 
       constexpr
       MPI_Comm getCommunicator() const noexcept
@@ -132,11 +257,24 @@ namespace Rodin::Math
         return m_solution;
       }
 
+      LinearSystem& setFieldSplits(FieldSplits fields)
+      {
+        m_fieldSplits = std::move(fields);
+        return *this;
+      }
+
+      const FieldSplits& getFieldSplits() const noexcept
+      {
+        return m_fieldSplits;
+      }
+
     private:
       MPI_Comm m_comm; ///< The MPI communicator for the linear system.
       MatrixType m_operator; ///< The operator of the linear system.
       VectorType m_solution; ///< The solution vector of the linear system.
       VectorType m_vector;   ///< The vector of the linear system.
+
+      FieldSplits m_fieldSplits; ///< The field splits for block preconditioning.
   };
 }
 

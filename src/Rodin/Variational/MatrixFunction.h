@@ -148,6 +148,12 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getColumns();
       }
 
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
+      {
+        return static_cast<const Derived&>(*this).getOrder(polytope);
+      }
+
       /**
        * @brief Creates a polymorphic copy of the function.
        * @returns Pointer to newly allocated copy
@@ -208,6 +214,12 @@ namespace Rodin::Variational
       size_t getColumns() const
       {
         return m_matrix.cols();
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& ) const noexcept
+      {
+        return 0;
       }
 
       MatrixFunction* copy() const noexcept override

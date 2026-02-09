@@ -170,6 +170,12 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getDimension();
       }
 
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        return static_cast<const Derived&>(*this).getOrder(geom);
+      }
+
       virtual VectorFunctionBase* copy() const noexcept override
       {
         return static_cast<const Derived&>(*this).copy();
@@ -208,7 +214,7 @@ namespace Rodin::Variational
           m_vector(std::move(other.m_vector))
       {}
 
-      const VectorType& getValue(const Geometry::Point& p) const
+      const VectorType& getValue(const Geometry::Point&) const
       {
         return m_vector.get();
       }
@@ -223,6 +229,12 @@ namespace Rodin::Variational
       VectorFunction& traceOf(const FlatSet<Geometry::Attribute>& attr)
       {
         return *this;
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      {
+        return size_t(0);
       }
 
       VectorFunction* copy() const noexcept override
@@ -315,6 +327,24 @@ namespace Rodin::Variational
         return *this;
       }
 
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        std::optional<size_t> res = std::nullopt;
+        std::apply(
+          [&](const auto&... s)
+          {
+            (([&]
+              {
+                const auto o = s.getOrder(geom);
+                if (o)
+                  res = res ? std::max(*res, *o) : *o;
+              }()), ...);
+          },
+          m_fs);
+        return res;
+      }
+
       VectorFunction* copy() const noexcept override
       {
         return new VectorFunction(*this);
@@ -364,6 +394,12 @@ namespace Rodin::Variational
       VectorFunction& traceOf(const FlatSet<Geometry::Attribute>& attr)
       {
         return *this;
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      {
+        return std::nullopt;
       }
 
       VectorFunction* copy() const noexcept override

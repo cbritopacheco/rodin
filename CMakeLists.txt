@@ -172,6 +172,7 @@ rodin_add_compile_options(LANG C CXX OPTIONS -fcolor-diagnostics)
 rodin_add_compile_options(LANG C CXX OPTIONS -Wno-error=double-promotion -Wno-error=maybe-uninitialized)
 rodin_add_compile_options(LANG C CXX OPTIONS -Wno-old-style-cast -Wno-deprecated-anon-enum-enum-conversion)
 rodin_add_compile_options(LANG C CXX OPTIONS -Wno-error=array-bounds)
+rodin_add_compile_options(LANG C CXX OPTIONS -Wno-error=nontrivial-memcall)
 
 add_compile_definitions(_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION)
 add_compile_definitions(__MAC_OS_X_VERSION_MIN_REQUIRED=__MAC_10_8)

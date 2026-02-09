@@ -9,8 +9,16 @@ set(Rodin_HEADERS
   Variational.h
 )
 
-add_library(Rodin INTERFACE)
+set(Rodin_SRCS
+  Identifiable.cpp
+)
+
+add_library(Rodin
+  ${Rodin_SRCS}
+  ${Rodin_HEADERS}
+)
 add_library(Rodin::Rodin ALIAS Rodin)
+set_target_properties(Rodin PROPERTIES EXPORT_NAME Rodin)
 
 target_compile_definitions(Rodin
   INTERFACE _LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION)

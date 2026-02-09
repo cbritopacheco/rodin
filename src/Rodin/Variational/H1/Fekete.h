@@ -1,4 +1,5 @@
 /*
+ *
  *          Copyright Carlos BRITO PACHECO 2021 - 2025.
  * Distributed under the Boost Software License, Version 1.0.
  *       (See accompanying file LICENSE or copy at
@@ -11,7 +12,7 @@
 #include <cstddef>
 
 #include "Rodin/Types.h"
-#include "Rodin/Math/Vector.h"
+#include "Rodin/Math/SpatialVector.h"
 
 #include "WarpBlend.h"
 
@@ -41,7 +42,7 @@ namespace Rodin::Variational
       /// Return cached nodes as a std::array.
       static const std::array<Math::SpatialPoint, Count>& getNodes()
       {
-        static const std::array<Math::SpatialPoint, Count> s_nodes = compute();
+        static thread_local const std::array<Math::SpatialPoint, Count> s_nodes = compute();
         return s_nodes;
       }
 
@@ -55,7 +56,9 @@ namespace Rodin::Variational
         if constexpr (K == 0)
         {
           // Single vertex node; choose (0,0) by convention.
-          nodes[0] = Math::SpatialPoint{{0.0, 0.0}};
+          nodes[0].resize(2);
+          nodes[0][0] = 0.0;
+          nodes[0][1] = 0.0;
           return nodes;
         }
 
@@ -66,7 +69,9 @@ namespace Rodin::Variational
           {
             const Real s = static_cast<Real>(i) / static_cast<Real>(K);
             const Real t = static_cast<Real>(j) / static_cast<Real>(K);
-            nodes[idx] = Math::SpatialPoint{{s, t}};
+            nodes[idx].resize(2);
+            nodes[idx][0] = s;
+            nodes[idx][1] = t;
           }
         }
 
@@ -106,7 +111,7 @@ namespace Rodin::Variational
       /// Return cached nodes as a std::array.
       static const std::array<Math::SpatialPoint, Count>& getNodes()
       {
-        static const std::array<Math::SpatialPoint, Count> s_nodes = compute();
+        static thread_local const std::array<Math::SpatialPoint, Count> s_nodes = compute();
         return s_nodes;
       }
 
@@ -120,7 +125,10 @@ namespace Rodin::Variational
         if constexpr (K == 0)
         {
           // Single vertex node; choose (0,0,0) by convention.
-          nodes[0] = Math::SpatialPoint{{0.0, 0.0, 0.0}};
+          nodes[0].resize(3);
+          nodes[0][0] = 0.0;
+          nodes[0][1] = 0.0;
+          nodes[0][2] = 0.0;
           return nodes;
         }
 
@@ -135,7 +143,10 @@ namespace Rodin::Variational
               const Real r = static_cast<Real>(i) / static_cast<Real>(K);
               const Real s = static_cast<Real>(j) / static_cast<Real>(K);
               const Real t = static_cast<Real>(k) / static_cast<Real>(K);
-              nodes[idx] = Math::SpatialPoint{{r, s, t}};
+              nodes[idx].resize(3);
+              nodes[idx][0] = r;
+              nodes[idx][1] = s;
+              nodes[idx][2] = t;
             }
           }
         }

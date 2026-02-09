@@ -250,6 +250,11 @@ namespace Rodin::Variational
             static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Wedge);
             return s_element;
           }
+          case Geometry::Polytope::Type::Hexahedron:
+          {
+            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Hexahedron);
+            return s_element;
+          }
         }
         assert(false);
         static thread_local constexpr ElementType s_null;
@@ -626,6 +631,17 @@ namespace Rodin::Variational
             };
             return s_elements[m_vdim];
           }
+          case Geometry::Polytope::Type::Hexahedron:
+          {
+            static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
+            {
+              ElementType(Geometry::Polytope::Type::Hexahedron, 0),
+              ElementType(Geometry::Polytope::Type::Hexahedron, 1),
+              ElementType(Geometry::Polytope::Type::Hexahedron, 2),
+              ElementType(Geometry::Polytope::Type::Hexahedron, 3)
+            };
+            return s_elements[m_vdim];
+          }
         }
         assert(false);
         static thread_local ElementType s_null(Geometry::Polytope::Type::Point, 0);
@@ -671,7 +687,7 @@ namespace Rodin::Variational
       }
 
       template <class Callable>
-      auto getPushforward(const std::pair<size_t, Index>& idx, Callable&& v) const
+      auto getPushforward(const std::pair<size_t, Index>&, Callable&& v) const
       {
         return Pushforward<Callable>(std::forward<Callable>(v));
       }

@@ -43,6 +43,51 @@ using namespace Rodin::Test::Random;
  */
 namespace Rodin::Tests::Manufactured::Conductivity
 {
+  TEST(Rodin_Manufactured_P1, Conductivity_P1ExactResidual)
+  {
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Quadrilateral, {8, 8});
+    mesh.scale(1.0 / 7);
+    mesh.getConnectivity().compute(1, 2);
+
+    P1 vh(mesh);
+    const Real gamma = 2.0;
+    auto solution = 3 * F::x + 2 * F::y + 1;
+    auto f = Zero();
+
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+
+    Problem conductivity(u, v);
+    conductivity = Integral(gamma * Grad(u), Grad(v))
+                 - Integral(f, v)
+                 + DirichletBC(u, solution);
+    CG(conductivity).solve();
+
+    GridFunction u_exact(vh);
+    u_exact = solution;
+
+    auto& A = conductivity.getLinearSystem().getOperator();
+    auto& b = conductivity.getLinearSystem().getVector();
+    auto& x = conductivity.getLinearSystem().getSolution();
+
+    auto r = A * x - b;
+    auto re = A * u_exact.getData() - b;
+
+    const Real scale = std::max<Real>(b.norm(), 1);
+    const Real res = r.norm() / scale;
+    const Real res_e = re.norm() / scale;
+
+    EXPECT_NEAR(res, 0, 1e-10);
+    EXPECT_NEAR(res_e, 0, 1e-12);
+
+    GridFunction diff(vh);
+    diff = Pow(u.getSolution() - solution, 2);
+
+    Real error = Integral(diff).compute();
+    EXPECT_NEAR(error, 0, 1e-12);
+  }
+
   /**
    * Test 1.
    *

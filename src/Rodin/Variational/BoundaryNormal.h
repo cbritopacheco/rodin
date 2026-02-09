@@ -51,6 +51,7 @@
 #include "Rodin/Geometry/SubMesh.h"
 #include "Rodin/Geometry/PolytopeTransformation.h"
 #include "Rodin/Math/Common.h"
+#include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
 #include "ForwardDecls.h"
@@ -71,7 +72,9 @@ namespace Rodin::Variational
     public:
       using ScalarType = Real;
 
-      using VectorType = Math::SpatialVector<ScalarType>;
+      using RangeType = Math::Vector<ScalarType>;
+
+      using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
       using Parent = VectorFunctionBase<ScalarType, BoundaryNormal>;
 
@@ -107,7 +110,14 @@ namespace Rodin::Variational
         return m_sdim;
       }
 
-      void interpolate(VectorType& res, const Geometry::Point& p) const
+      void interpolate(Math::Vector<ScalarType>& res, const Geometry::Point& p) const
+      {
+        Math::SpatialVector<ScalarType> out;
+        this->interpolate(out, p);
+        res = out.getData().head(m_sdim);
+      }
+
+      void interpolate(Math::SpatialVector<ScalarType>& res, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
         const auto& d = polytope.getDimension();
@@ -125,7 +135,7 @@ namespace Rodin::Variational
           if (inc.size() == 1)
           {
             const auto& tracePolytope = mesh.getPolytope(meshDim - 1, *inc.begin());
-            VectorType rc;
+            Math::SpatialPoint rc;
             tracePolytope->getTransformation().inverse(rc, pc);
             const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
             interpolate(res, np);
@@ -151,7 +161,7 @@ namespace Rodin::Variational
                 const auto& tracePolytope = mesh.getPolytope(meshDim - 1, idx);
                 if (traceDomain.count(tracePolytope->getAttribute()))
                 {
-                  VectorType rc;
+                  Math::SpatialPoint rc;
                   tracePolytope->getTransformation().inverse(rc, pc);
                   const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
                   interpolate(res, np);
@@ -170,65 +180,81 @@ namespace Rodin::Variational
           assert(mesh.isBoundary(i));
           if (jacobian.rows() == 2)
           {
-            res << jacobian(1, 0), -jacobian(0, 0);
+            res[0] = jacobian(1, 0);
+            res[1] = -jacobian(0, 0);
           }
           else if (jacobian.rows() == 3)
           {
-            res <<
-              jacobian(1, 0) * jacobian(2, 1) - jacobian(2, 0) * jacobian(1, 1),
-              jacobian(2, 0) * jacobian(0, 1) - jacobian(0, 0) * jacobian(2, 1),
+            res[0] =
+              jacobian(1, 0) * jacobian(2, 1) - jacobian(2, 0) * jacobian(1, 1);
+            res[1] =
+              jacobian(2, 0) * jacobian(0, 1) - jacobian(0, 0) * jacobian(2, 1);
+            res[2] =
               jacobian(0, 0) * jacobian(1, 1) - jacobian(1, 0) * jacobian(0, 1);
           }
           else
           {
             assert(false);
-            res.setConstant(NAN);
+            res.setConstant(Math::nan<ScalarType>());
             return;
           }
 
           const auto& incidence = mesh.getConnectivity().getIncidence({ d, d + 1 }, i);
           assert(incidence.size() == 1);
+
           auto pit = mesh.getPolytope(d + 1, *incidence.begin());
-          Integer ori = -1;
-          for (auto vit = pit->getVertex(); vit; ++vit)
-          {
-            const auto v = vit->getCoordinates() - polytope.getVertex()->getCoordinates();
-            if (res.dot(v) < 0)
-            {
-              ori *= -1;
-              break;
-            }
-          }
-          res *= ori;
+          const auto& cellPoly = *pit;
+
+          // face point (physical)
+          const auto xf = p.getCoordinates();
+
+          // cell interior point (physical)
+          const auto rc_cell = Geometry::Polytope::Traits(cellPoly.getGeometry()).getCentroid();
+          Geometry::Point pc(cellPoly, rc_cell);
+          const auto xc = pc.getCoordinates();
+
+          // If res points into the cell, flip it to point outward.
+          if (res.dot(xc - xf) > 0)
+            res *= ScalarType(-1);
+
           res.normalize();
         }
       }
 
       decltype(auto) getValue(const Geometry::Point& p) const
       {
-        static thread_local VectorType s_out;
+        static thread_local RangeType s_res;
+
+        SpatialVectorType res;
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         if (polytopeMesh == m_mesh.get())
         {
-          this->interpolate(s_out, p);
+          this->interpolate(res, p);
         }
         else if (const auto inclusion = m_mesh.get().inclusion(p))
         {
-          this->interpolate(s_out, *inclusion);
+          this->interpolate(res, *inclusion);
         }
         else if (m_mesh.get().isSubMesh())
         {
           const auto& submesh = m_mesh.get().asSubMesh();
           const auto restriction = submesh.restriction(p);
-          this->interpolate(s_out, *restriction);
+          this->interpolate(res, *restriction);
         }
         else
         {
-          s_out.setConstant(Math::nan<ScalarType>());
+          res.setConstant(Math::nan<ScalarType>());
           assert(false);
         }
-        return s_out;
+        s_res = res.getData().head(m_sdim);
+        return s_res;
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      {
+        return 0;
       }
 
       BoundaryNormal* copy() const noexcept override

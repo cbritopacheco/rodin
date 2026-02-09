@@ -71,8 +71,8 @@ namespace Rodin::Assembly
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 
-  template <class OperatorType, class Solution, class ... TrialFES, class ... TestFES>
-  class AssemblyBase<OperatorType, Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>...>>
+  template <class OperatorType, class ... Solution, class ... TrialFES, class ... TestFES, class ... BlockType>
+  class AssemblyBase<OperatorType, Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES, BlockType>...>>
   {
     public:
       static_assert(sizeof...(TrialFES) == sizeof...(TestFES));
@@ -143,8 +143,8 @@ namespace Rodin::Assembly
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 
-  template <class VectorType, class ... FES>
-  class AssemblyBase<VectorType, Tuple<Variational::LinearForm<FES, VectorType>...>>
+  template <class VectorType, class ... FES, class ... BlockType>
+  class AssemblyBase<VectorType, Tuple<Variational::LinearForm<FES, BlockType>...>>
   {
     public:
       static_assert(sizeof...(FES) == sizeof...(FES));
@@ -210,6 +210,46 @@ namespace Rodin::Assembly
 
       using InputType =
         ProblemAssemblyInput<ProblemBodyType, TrialFunction, TestFunction>;
+
+      using Parent =
+        FormLanguage::Base;
+
+      AssemblyBase() = default;
+
+      AssemblyBase(const AssemblyBase& other)
+        : Parent(other)
+      {}
+
+      AssemblyBase(AssemblyBase&& other)
+        : Parent(std::move(other))
+      {}
+
+      virtual ~AssemblyBase() = default;
+
+      virtual void execute(LinearSystem& out, const InputType& input) const = 0;
+
+      virtual AssemblyBase* copy() const noexcept = 0;
+  };
+
+  template <class LinearSystem, class U1, class U2, class U3, class... Us>
+  class AssemblyBase<LinearSystem, Variational::Problem<LinearSystem, U1, U2, U3, Us...>>
+    : public FormLanguage::Base
+  {
+    public:
+      using OperatorType =
+        typename FormLanguage::Traits<LinearSystem>::OperatorType;
+
+      using VectorType =
+        typename FormLanguage::Traits<LinearSystem>::VectorType;
+
+      using ScalarType =
+        typename FormLanguage::Traits<LinearSystem>::ScalarType;
+
+      using ProblemBodyType =
+        Variational::ProblemBody<OperatorType, VectorType, ScalarType>;
+
+      using InputType =
+        ProblemAssemblyInput<ProblemBodyType, U1, U2, U3, Us...>;
 
       using Parent =
         FormLanguage::Base;

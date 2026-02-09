@@ -14,11 +14,6 @@
 #ifndef RODIN_MATH_FORWARDDECLS_H
 #define RODIN_MATH_FORWARDDECLS_H
 
-#include "Matrix.h"
-#include "Vector.h"
-
-#include "SparseMatrix.h"
-
 namespace Rodin::Math
 {
   /**
@@ -42,6 +37,12 @@ namespace Rodin::Math
    */
   template <class Operator, class Vector>
   class LinearSystem;
+
+  template <class Scalar>
+  class SpatialVector;
+
+  template <class Scalar>
+  class SpatialMatrix;
 }
 
 #endif

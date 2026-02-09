@@ -115,6 +115,15 @@ namespace Rodin::Variational
           return rhs;
       }
 
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
+      {
+        const auto lo = getLHS().getOrder(polytope);
+        const auto ro = getRHS().getOrder(polytope);
+        if (lo && ro && *lo == 0 && *ro == 0)
+          return size_t{0};
+        return std::nullopt;
+      }
+
       /**
        * @brief Gets the left operand function.
        * @returns Reference to first function

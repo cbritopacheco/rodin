@@ -4,13 +4,11 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include "Identifiable.h"
 
-/**
- * @file
- * @brief Implementation file for H1Element non-template members.
- */
+namespace Rodin
+{
+  thread_local Identifiable::UUID Identifiable::s_id = 0;
+}
 
-#include "H1Element.h"
 
-namespace Rodin::Variational
-{}

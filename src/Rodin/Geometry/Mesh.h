@@ -26,6 +26,8 @@
 #include <boost/filesystem.hpp>
 #include <boost/serialization/access.hpp>
 
+#include "Rodin/Math/PointMatrix.h"
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Types.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Context/Local.h"
@@ -715,7 +717,7 @@ namespace Rodin::Geometry
        * @brief Gets the space coordinates of the vertex at the given index.
        * @param[in] idx Vertex index
        */
-      virtual Eigen::Map<const Math::SpatialPoint> getVertexCoordinates(Index idx) const = 0;
+      virtual Math::SpatialPoint getVertexCoordinates(Index idx) const = 0;
 
       /**
        * @brief Sets the space coordinate of the vertex at the given index for
@@ -789,7 +791,9 @@ namespace Rodin::Geometry
           /**
            * @brief Default constructor.
            */
-          Builder() = default;
+          Builder()
+            : m_initialized(false)
+          {}
 
           virtual ~Builder() = default;
 
@@ -826,6 +830,9 @@ namespace Rodin::Geometry
 
           /**
            * @brief Sets the number of nodes in the mesh.
+           *
+           * @note This method requires initialize(size_t) to be called
+           * beforehand.
            */
           Builder& nodes(size_t n);
 
@@ -838,7 +845,9 @@ namespace Rodin::Geometry
           Builder& vertex(const Real (&data)[Size])
           {
             assert(Size == m_sdim);
-            m_vertices.col(m_nodes++) = data;
+            for (size_t i = 0; i < m_sdim; ++i)
+              m_vertices(i, m_nodes) = data[i];
+            ++m_nodes;
             return *this;
           }
 
@@ -861,21 +870,7 @@ namespace Rodin::Geometry
            *
            * @note This method requires nodes(size_t) to be called beforehand.
            */
-          Builder& vertex(Eigen::Map<const Math::SpatialPoint> x);
-
-          /**
-           * @brief Adds vertex with coordinates given by the vector.
-           *
-           * @note This method requires nodes(size_t) to be called beforehand.
-           */
-          Builder& vertex(Math::Vector<Real>&& x);
-
-          /**
-           * @brief Adds vertex with coordinates given by the vector.
-           *
-           * This method requires nodes(size_t) to be called beforehand.
-           */
-          Builder& vertex(const Math::Vector<Real>& x);
+          Builder& vertex(const Math::SpatialPoint& x);
 
           /**
            * @brief Sets the attribute of the given polytope.
@@ -975,6 +970,8 @@ namespace Rodin::Geometry
           }
 
         private:
+          bool m_initialized;
+
           size_t m_sdim;
           size_t m_nodes;
 
@@ -1068,13 +1065,16 @@ namespace Rodin::Geometry
       template <class FunctionDerived>
       Mesh& displace(const Variational::FunctionBase<FunctionDerived>& u)
       {
+        Math::SpatialPoint pc;
         for (auto it = getVertex(); !it.end(); ++it)
         {
+          pc = this->getVertexCoordinates(it->getIndex());
           const Geometry::Point p(
               *it,
               Polytope::Traits(Polytope::Type::Point).getVertex(0),
-              it->getCoordinates());
-          m_vertices.col(it->getIndex()) += u(p);
+              pc);
+          for (size_t i = 0; i < m_sdim; ++i)
+            m_vertices(i, it->getIndex()) += u(p)[i];
         }
         return *this;
       }
@@ -1087,7 +1087,7 @@ namespace Rodin::Geometry
 
       /**
        * @brief Gets the total volume of the mesh.
-       * @returns Sum of all cell volumes.
+       * @returns Sum of all 3D polytope volumes.
        */
       Real getVolume() const override;
 
@@ -1386,7 +1386,7 @@ namespace Rodin::Geometry
         return m_connectivity;
       }
 
-      virtual Eigen::Map<const Math::SpatialPoint> getVertexCoordinates(Index idx) const override;
+      virtual Math::SpatialPoint getVertexCoordinates(Index idx) const override;
 
       virtual Mesh& setAttribute(const std::pair<size_t, Index>&, Attribute attr) override;
 
@@ -1403,7 +1403,7 @@ namespace Rodin::Geometry
       virtual PolytopeTransformation* getDefaultPolytopeTransformation(size_t d, Index i) const;
 
       template<class Archive>
-      void serialize(Archive& ar, const unsigned int version)
+      void serialize(Archive& ar, const unsigned int)
       {
         ar & m_sdim;
         ar & m_vertices;

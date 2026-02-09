@@ -128,9 +128,13 @@ namespace Rodin::Tests::Unit
     {
       const auto& trans = mesh.getPolytopeTransformation(meshDim, 0);
       Math::SpatialPoint rc(rdim);
-      rc << 0.5, 0.5;
+      rc[0] = 0.5;
+      rc[1] = 0.5;
+
       Math::SpatialPoint pc(sdim);
-      pc << 0.5, 0.5;
+      pc[0] = 0.5;
+      pc[1] = 0.5;
+
       Math::SpatialPoint res;
       trans.transform(res, rc);
       Math::SpatialPoint inv;
@@ -144,9 +148,13 @@ namespace Rodin::Tests::Unit
 
       {
         Math::SpatialPoint rc(rdim);
-        rc << 0.0, 0.0;
+        rc[0] = 0.0;
+        rc[1] = 0.0;
+
         Math::SpatialPoint pc(sdim);
-        pc << 0.0, 0.0;
+        pc[0] = 0.0;
+        pc[1] = 0.0;
+
         Math::SpatialPoint res;
         trans.transform(res, rc);
         Math::SpatialPoint inv;
@@ -157,9 +165,13 @@ namespace Rodin::Tests::Unit
 
       {
         Math::SpatialPoint rc(rdim);
-        rc << 1.0, 0.0;
+        rc[0] = 1.0;
+        rc[1] = 0.0;
+
         Math::SpatialPoint pc(sdim);
-        pc << 1.0, 0.0;
+        pc[0] = 1.0;
+        pc[1] = 0.0;
+
         Math::SpatialPoint res;
         trans.transform(res, rc);
         Math::SpatialPoint inv;
@@ -170,9 +182,13 @@ namespace Rodin::Tests::Unit
 
       {
         Math::SpatialPoint rc(rdim);
-        rc << 0.0, 1.0;
+        rc[0] = 0.0;
+        rc[1] = 1.0;
+
         Math::SpatialPoint pc(sdim);
-        pc << 0.0, 1.0;
+        pc[0] = 0.0;
+        pc[1] = 1.0;
+
         Math::SpatialPoint res;
         trans.transform(res, rc);
         Math::SpatialPoint inv;
@@ -183,9 +199,12 @@ namespace Rodin::Tests::Unit
 
       {
         Math::SpatialPoint r(rdim);
-        r << (1.0 / 3.0), (1.0 / 3.0);
+        r[0] = 1.0 / 3.0;
+        r[1] = 1.0 / 3.0;
+
         Math::SpatialPoint p(sdim);
-        p << (1.0 / 3.0), (1.0 / 3.0);
+        p[0] = (1.0 / 3.0);
+        p[1] = (1.0 / 3.0);
 
         Math::SpatialPoint res;
         trans.transform(res, r);
@@ -198,9 +217,13 @@ namespace Rodin::Tests::Unit
 
       {
         Math::SpatialPoint rc(rdim);
-        rc << 0, 0;
+        rc[0] = 0.0;
+        rc[1] = 0.0;
+
         Math::SpatialPoint pc(sdim);
-        pc << 1, 0;
+        pc[0] = 1.0;
+        pc[1] = 0.0;
+
         Math::SpatialPoint res;
         trans.transform(res, rc);
         Math::SpatialPoint inv;
@@ -211,9 +234,13 @@ namespace Rodin::Tests::Unit
 
       {
         Math::SpatialPoint rc(rdim);
-        rc << 1, 0;
+        rc[0] = 1.0;
+        rc[1] = 0.0;
+
         Math::SpatialPoint pc(sdim);
-        pc << 1, 1;
+        pc[0] = 1.0;
+        pc[1] = 1.0;
+
         Math::SpatialPoint res;
         trans.transform(res, rc);
         Math::SpatialPoint inv;
@@ -224,9 +251,13 @@ namespace Rodin::Tests::Unit
 
       {
         Math::SpatialPoint rc(rdim);
-        rc << 0, 1;
+        rc[0] = 0.0;
+        rc[1] = 1.0;
+
         Math::SpatialPoint pc(sdim);
-        pc << 0, 1;
+        pc[0] = 0.0;
+        pc[1] = 1.0;
+
         Math::SpatialPoint res;
         trans.transform(res, rc);
         Math::SpatialPoint inv;
@@ -237,9 +268,14 @@ namespace Rodin::Tests::Unit
 
       {
         Math::SpatialPoint rc(rdim);
-        rc << (1.0 / 3.0), (1.0 / 3.0);
+        rc[0] = 1.0 / 3.0;
+        rc[1] = 1.0 / 3.0;
+
         Math::SpatialPoint pc(sdim);
-        pc << (2.0 / 3.0), (2.0 / 3.0);
+        pc[0] = (2.0 / 3.0);
+        pc[1] = (2.0 / 3.0);
+
+
         Math::SpatialPoint res;
         trans.transform(res, rc);
         Math::SpatialPoint inv;

@@ -135,6 +135,8 @@ namespace Rodin
   template <class T>
   using Optional = std::optional<T>;
 
+  using StringView = std::string_view;
+
 #if __cpp_size_t_suffix < 202011L
   /**
    * @brief User-defined literal for size_t values.
@@ -143,7 +145,7 @@ namespace Rodin
    * @note This provides backward compatibility for the _UZ suffix
    */
   constexpr
-  std::size_t operator "" _UZ (unsigned long long x)
+  std::size_t operator""_UZ (unsigned long long x)
   {
     return x;
   }

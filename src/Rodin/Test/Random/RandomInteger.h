@@ -14,40 +14,59 @@
 
 namespace Rodin::Test::Random
 {
+  namespace detail
+  {
+    template <class T>
+    struct UniformIntDistType
+    {
+      // libc++ rejects char / signed char / unsigned char as IntType.
+      using type = std::conditional_t<
+        std::is_same_v<T, char> || std::is_same_v<T, signed char> || std::is_same_v<T, unsigned char>,
+        int,
+        T>;
+    };
+
+    template <class T>
+    using UniformIntDistTypeT = typename UniformIntDistType<T>::type;
+  }
+
   template <class T = int>
   class RandomInteger
   {
-   static_assert(std::is_integral<T>::value,
-      "Template parameter T must be an integral type");
-   public:
+    static_assert(std::is_integral_v<T>, "Template parameter T must be an integral type");
+
+  public:
+    using dist_type = detail::UniformIntDistTypeT<T>;
+
     RandomInteger(
-       T a = std::numeric_limits<T>::min(),
-       T b = std::numeric_limits<T>::max(),
-       unsigned int seed = std::random_device()())
-      : m_distrib(a, b), m_seed(seed)
+      T a = std::numeric_limits<T>::min(),
+      T b = std::numeric_limits<T>::max(),
+      unsigned int seed = std::random_device()())
+      : m_gen(seed),
+        m_distrib(static_cast<dist_type>(a), static_cast<dist_type>(b)),
+        m_seed(seed)
     {
       assert(a <= b);
     }
 
     RandomInteger& setSeed(unsigned int seed)
     {
+      m_seed = seed;
       m_gen.seed(seed);
       return *this;
     }
 
-    unsigned int getSeed() const
-    {
-      return m_seed;
-    }
+    unsigned int getSeed() const { return m_seed; }
 
     T operator()()
     {
-      return m_distrib(m_gen);
+      dist_type x = m_distrib(m_gen);
+      return static_cast<T>(x);
     }
 
-   private:
+  private:
     std::mt19937 m_gen;
-    std::uniform_int_distribution<T> m_distrib;
+    std::uniform_int_distribution<dist_type> m_distrib;
     unsigned int m_seed;
   };
 }

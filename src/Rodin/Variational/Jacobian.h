@@ -80,6 +80,8 @@ namespace Rodin::Variational
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      using RangeType = Math::Matrix<ScalarType>;
+
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
       using OperandType = GridFunction<FESType, Data>;
@@ -153,31 +155,36 @@ namespace Rodin::Variational
        */
       decltype(auto) getValue(const Geometry::Point& p) const
       {
-        static thread_local SpatialMatrixType s_out;
+        static thread_local RangeType s_res;
+
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& gf = getOperand();
         const auto& fes = gf.getFiniteElementSpace();
         const auto& fesMesh = fes.getMesh();
+
+        SpatialMatrixType res;
         if (polytopeMesh == fesMesh)
         {
-          this->interpolate(s_out, p);
+          this->interpolate(res, p);
         }
         else if (const auto inclusion = fesMesh.inclusion(p))
         {
-          this->interpolate(s_out, *inclusion);
+          this->interpolate(res, *inclusion);
         }
         else if (fesMesh.isSubMesh())
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
-          this->interpolate(s_out, *restriction);
+          this->interpolate(res, *restriction);
         }
         else
         {
           assert(false);
         }
-        return s_out;
+
+        s_res = res.getData().topLeftCorner(res.rows(), res.cols());
+        return s_res;
       }
 
       /**
@@ -188,6 +195,14 @@ namespace Rodin::Variational
       const OperandType& getOperand() const
       {
         return m_u.get();
+      }
+
+      constexpr
+      void interpolate(RangeType& out, const Geometry::Point& p) const
+      {
+        SpatialMatrixType res;
+        this->interpolate(res, p);
+        out = res.getData().topLeftCorner(res.rows(), res.cols());
       }
 
       /**
@@ -202,6 +217,12 @@ namespace Rodin::Variational
       void interpolate(SpatialMatrixType& out, const Geometry::Point& p) const
       {
         static_cast<const Derived&>(*this).interpolate(out, p);
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
+      {
+        return static_cast<const Derived&>(*this).getOrder(polytope);
       }
 
       /**

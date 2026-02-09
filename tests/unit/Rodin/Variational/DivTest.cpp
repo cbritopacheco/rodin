@@ -268,4 +268,178 @@ namespace Rodin::Tests::Unit
     auto div_moved(std::move(div_gf));
     EXPECT_NEAR(div_moved.getValue(p), original_value, RODIN_FUZZY_CONSTANT);
   }
+
+  TEST(Rodin_Variational_Div, ShapeFunction_getDOFs_Triangle_P1)
+  {
+    constexpr size_t vdim = 2;
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    P1 Vh(mesh, vdim);
+    TrialFunction u(Vh);
+    auto div_u = Div(u);
+
+    auto cellIt = mesh.getCell(0);
+    size_t dofs = div_u.getDOFs(*cellIt);
+
+    // P1 triangle with 2 components has 3 DOFs/component × 2 components = 6 total DOFs
+    EXPECT_EQ(dofs, 6);
+  }
+
+  TEST(Rodin_Variational_Div, ShapeFunction_getDOFs_Tetrahedron_P1)
+  {
+    constexpr size_t vdim = 3;
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    P1 Vh(mesh, vdim);
+    TrialFunction u(Vh);
+    auto div_u = Div(u);
+
+    auto cellIt = mesh.getCell(0);
+    size_t dofs = div_u.getDOFs(*cellIt);
+
+    // P1 tetrahedron with 3 components has 4 DOFs/component × 3 components = 12 total DOFs
+    EXPECT_EQ(dofs, 12);
+  }
+
+  TEST(Rodin_Variational_Div, RandomCoordinates_LinearVectorField)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    // Create vector P1 space for the vector field
+    P1 fes_vector(mesh, mesh.getSpaceDimension());
+    GridFunction gf(fes_vector);
+
+    // Project linear vector field u = (2x, 3y) with div(u) = 2 + 3 = 5
+    auto linear_lambda = [](const Geometry::Point& p) {
+      Math::Vector<Real> v(2);
+      v << 2.0 * p.x(), 3.0 * p.y();
+      return v;
+    };
+    VectorFunction<decltype(linear_lambda)> linear_func(2, linear_lambda);
+    gf.project(linear_func);
+
+    auto div_gf = Div(gf);
+
+    // Test at 20 random points across different cells
+    RandomFloat gen(0.0, 1.0);
+    for (int test = 0; test < 20; test++)
+    {
+      Index cellIdx = gen() * (mesh.getCellCount() - 1);
+      auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
+      const auto& polytope = *it;
+
+      Real x = gen();
+      Real y = gen();
+      if (x + y > 1.0) {
+        x = 1.0 - x;
+        y = 1.0 - y;
+      }
+      const Math::Vector<Real> rc{{x, y}};
+      Point p(polytope, rc);
+
+      Real div_value = div_gf.getValue(p);
+      // Expected div = 2 + 3 = 5
+      EXPECT_NEAR(div_value, 5.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  TEST(Rodin_Variational_Div, RandomCoordinates_DivergenceFreeField)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 5, 5 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    // Create vector P1 space for the vector field
+    P1 fes_vector(mesh, mesh.getSpaceDimension());
+    GridFunction gf(fes_vector);
+
+    // Project divergence-free field u = (y, -x) with div(u) = 0
+    auto divfree_lambda = [](const Geometry::Point& p) {
+      Math::Vector<Real> v(2);
+      v << p.y(), -p.x();
+      return v;
+    };
+    VectorFunction<decltype(divfree_lambda)> divfree_func(2, divfree_lambda);
+    gf.project(divfree_func);
+
+    auto div_gf = Div(gf);
+
+    // Test at 15 random points across different cells
+    RandomFloat gen(0.0, 1.0);
+    for (int test = 0; test < 15; test++)
+    {
+      Index cellIdx = gen() * (mesh.getCellCount() - 1);
+      auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
+      const auto& polytope = *it;
+
+      Real x = gen();
+      Real y = gen();
+      if (x + y > 1.0) {
+        x = 1.0 - x;
+        y = 1.0 - y;
+      }
+      const Math::Vector<Real> rc{{x, y}};
+      Point p(polytope, rc);
+
+      Real div_value = div_gf.getValue(p);
+      // Expected div = 0
+      EXPECT_NEAR(div_value, 0.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  TEST(Rodin_Variational_Div, RandomCoordinates_Tetrahedron_LinearVectorField)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 3, 3, 3 });
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    // Create vector P1 space for the 3D vector field
+    P1 fes_vector(mesh, mesh.getSpaceDimension());
+    GridFunction gf(fes_vector);
+
+    // Project linear vector field u = (x, 2y, 3z) with div(u) = 1 + 2 + 3 = 6
+    auto linear_lambda = [](const Geometry::Point& p) {
+      Math::Vector<Real> v(3);
+      v << p.x(), 2.0 * p.y(), 3.0 * p.z();
+      return v;
+    };
+    VectorFunction<decltype(linear_lambda)> linear_func(3, linear_lambda);
+    gf.project(linear_func);
+
+    auto div_gf = Div(gf);
+
+    // Test at 15 random points across different cells
+    RandomFloat gen(0.0, 1.0);
+    for (int test = 0; test < 15; test++)
+    {
+      Index cellIdx = gen() * (mesh.getCellCount() - 1);
+      auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
+      const auto& polytope = *it;
+
+      // Generate random barycentric coordinates for tetrahedron
+      Real r1 = gen();
+      Real r2 = gen();
+      Real r3 = gen();
+      Real sum = r1 + r2 + r3;
+      if (sum > 1.0) {
+        r1 /= sum;
+        r2 /= sum;
+        r3 /= sum;
+      }
+      const Math::Vector<Real> rc{{r1, r2, r3}};
+      Point p(polytope, rc);
+
+      Real div_value = div_gf.getValue(p);
+      // Expected div = 1 + 2 + 3 = 6
+      EXPECT_NEAR(div_value, 6.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
 }

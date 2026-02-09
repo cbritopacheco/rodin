@@ -2,10 +2,7 @@
 #define RODIN_PETSC_ASSEMBLY_FORWARDDECLS_H
 
 namespace Rodin::PETSc::Assembly
-{
-  template <class LinearSystem, class Problem>
-  class Generic;
-}
+{}
 
 #endif
 

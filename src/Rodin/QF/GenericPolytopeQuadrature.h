@@ -65,6 +65,10 @@ namespace Rodin::QF
       /// Parent class type
       using Parent = QuadratureFormulaBase;
 
+      static const QuadratureFormulaBase& get(size_t order, Geometry::Polytope::Type g);
+
+      static std::unique_ptr<const QuadratureFormulaBase> build(size_t order, Geometry::Polytope::Type g);
+
       /**
        * @brief Constructs quadrature with default order.
        * @param g Polytope geometry type

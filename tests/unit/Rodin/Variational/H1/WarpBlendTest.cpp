@@ -102,30 +102,24 @@ namespace Rodin::Tests::Unit
 
   TEST(WarpShiftFace2D, ZeroAtVertex_K2)
   {
-    Real dx, dy;
-
     // At vertex L1 = 1 (other two are 0)
-    WarpShiftFace2D<2>::apply(dx, dy, 1.0, 0.0, 0.0, 0.0);
+    const auto [dx, dy] = WarpShiftFace2D<2>::apply(1.0, 0.0, 0.0, 0.0);
     EXPECT_NEAR(dx, 0.0, 1e-14);
     EXPECT_NEAR(dy, 0.0, 1e-14);
   }
 
   TEST(WarpShiftFace2D, ZeroForLowOrder)
   {
-    Real dx, dy;
-
     // K=1 should give zero warp
-    WarpShiftFace2D<1>::apply(dx, dy, 0.5, 0.25, 0.25, 0.0);
+    const auto [dx, dy] = WarpShiftFace2D<1>::apply(0.5, 0.25, 0.25, 0.0);
     EXPECT_NEAR(dx, 0.0, 1e-14);
     EXPECT_NEAR(dy, 0.0, 1e-14);
   }
 
   TEST(WarpShiftFace2D, Finite_K5)
   {
-    Real dx, dy;
-
     // Test at interior point
-    WarpShiftFace2D<5>::apply(dx, dy, 0.4, 0.3, 0.3, 0.5);
+    const auto [dx, dy] = WarpShiftFace2D<5>::apply(0.4, 0.3, 0.3, 0.5);
     EXPECT_FALSE(std::isnan(dx));
     EXPECT_FALSE(std::isnan(dy));
     EXPECT_FALSE(std::isinf(dx));
@@ -469,10 +463,8 @@ namespace Rodin::Tests::Unit
 
   TEST(WarpShiftFace2D, Finite_K6)
   {
-    Real dx, dy;
-
     // Test at interior point
-    WarpShiftFace2D<6>::apply(dx, dy, 0.35, 0.35, 0.3, 0.5);
+    const auto [dx, dy] = WarpShiftFace2D<6>::apply(0.35, 0.35, 0.3, 0.5);
     EXPECT_FALSE(std::isnan(dx));
     EXPECT_FALSE(std::isnan(dy));
     EXPECT_FALSE(std::isinf(dx));
@@ -517,10 +509,8 @@ namespace Rodin::Tests::Unit
 
   TEST(WarpShiftFace2D, Finite_K15)
   {
-    Real dx, dy;
-
     // Test at interior point
-    WarpShiftFace2D<15>::apply(dx, dy, 0.4, 0.3, 0.3, 0.5);
+    const auto [dx, dy] = WarpShiftFace2D<15>::apply(0.4, 0.3, 0.3, 0.5);
     EXPECT_FALSE(std::isnan(dx));
     EXPECT_FALSE(std::isnan(dy));
     EXPECT_FALSE(std::isinf(dx));

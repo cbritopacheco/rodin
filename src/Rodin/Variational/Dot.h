@@ -1,5 +1,5 @@
 /*
- *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
  * Distributed under the Boost Software License, Version 1.0.
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
@@ -18,6 +18,7 @@
 
 #include <Eigen/Core>
 
+#include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Types.h"
 #include "Rodin/FormLanguage/Base.h"
 #include "Rodin/Math/Matrix.h"
@@ -26,6 +27,7 @@
 #include "ForwardDecls.h"
 
 #include "Function.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
 #include "RealFunction.h"
 
@@ -232,6 +234,17 @@ namespace Rodin::Variational
         return Math::dot(this->object(getLHS().getValue(p)), this->object(getRHS().getValue(p)));
       }
 
+      constexpr
+      std::optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        const auto lo = getLHS().getOrder(poly);
+        const auto ro = getRHS().getOrder(poly);
+        if (!lo || !ro)
+          return std::nullopt;
+        return *lo + *ro;
+      }
+
+
       /**
        * @brief Polymorphic copy.
        * @returns Pointer to a copy of this object
@@ -359,22 +372,32 @@ namespace Rodin::Variational
         return getRHS().getFiniteElementSpace();
       }
 
-      const Geometry::Point& getPoint() const
+      const IntegrationPoint& getIntegrationPoint() const
       {
-        return getRHS().getPoint();
+        return getRHS().getIntegrationPoint();
       }
 
-      Dot& setPoint(const Geometry::Point& p)
+      Dot& setIntegrationPoint(const IntegrationPoint& ip)
       {
-        m_rhs->setPoint(p);
+        m_rhs->setIntegrationPoint(ip);
         return *this;
       }
 
       constexpr
       auto getBasis(size_t local) const
       {
-        const auto& p = getRHS().getPoint();
-        return Math::dot(this->object(getLHS().getValue(p)), this->object(getRHS().getBasis(local)));
+        const auto& ip = getRHS().getIntegrationPoint();
+        return Math::dot(this->object(getLHS().getValue(ip.getPoint())), this->object(getRHS().getBasis(local)));
+      }
+
+      constexpr
+      std::optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        const auto lo = getLHS().getOrder(poly);
+        const auto ro = getRHS().getOrder(poly);
+        if (!lo || !ro)
+          return std::nullopt;
+        return *lo + *ro;
       }
 
       Dot* copy() const noexcept final override
@@ -485,22 +508,32 @@ namespace Rodin::Variational
         return getLHS().getFiniteElementSpace();
       }
 
-      const Geometry::Point& getPoint() const
+      const IntegrationPoint& getIntegrationPoint() const
       {
-        return getLHS().getPoint();
+        return getLHS().getIntegrationPoint();
       }
 
-      Dot& setPoint(const Geometry::Point& p)
+      Dot& setIntegrationPoint(const IntegrationPoint& ip)
       {
-        m_lhs->setPoint(p);
+        m_lhs->setIntegrationPoint(ip);
         return *this;
       }
 
       constexpr
       auto getBasis(size_t local) const
       {
-        const auto& p = getLHS().getPoint();
-        return Math::dot(this->object(getLHS().getBasis(local)), this->object(getRHS().getValue(p)));
+        const auto& p = getLHS().getIntegrationPoint();
+        return Math::dot(this->object(getLHS().getBasis(local)), this->object(getRHS().getValue(p.getPoint())));
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        const auto lo = getLHS().getOrder(poly);
+        const auto ro = getRHS().getOrder(poly);
+        if (!lo || !ro)
+          return std::nullopt;
+        return *lo + *ro;
       }
 
       Dot* copy() const noexcept final override
@@ -593,15 +626,15 @@ namespace Rodin::Variational
         return *m_test;
       }
 
-      const Geometry::Point& getPoint() const
+      const IntegrationPoint& getIntegrationPoint() const
       {
-        return m_trial->getPoint();
+        return m_trial->getIntegrationPoint();
       }
 
-      Dot& setPoint(const Geometry::Point& p)
+      Dot& setIntegrationPoint(const IntegrationPoint& ip)
       {
-        m_trial->setPoint(p);
-        m_test->setPoint(p);
+        m_trial->setIntegrationPoint(ip);
+        m_test->setIntegrationPoint(ip);
         return *this;
       }
 
@@ -609,6 +642,16 @@ namespace Rodin::Variational
       auto operator()(size_t tr, size_t te)
       {
         return Math::dot(this->object(getLHS().getBasis(tr)), this->object(getRHS().getBasis(te)));
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        const auto lo = getLHS().getOrder(poly);
+        const auto ro = getRHS().getOrder(poly);
+        if (!lo || !ro)
+          return std::nullopt;
+        return *lo + *ro;
       }
 
       Dot* copy() const noexcept final override
@@ -683,6 +726,12 @@ namespace Rodin::Variational
       {
         assert(m_rhs);
         return *m_rhs;
+      }
+
+      constexpr
+      std::optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      {
+        return std::nullopt;
       }
 
       Dot* copy() const noexcept final override

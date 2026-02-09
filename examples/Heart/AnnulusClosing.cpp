@@ -161,7 +161,13 @@ int main()
 
   std::vector<Vector3> points3D;
   for (int v : loop)
-    points3D.push_back(mesh.getVertex(v)->getCoordinates());
+  {
+    Vector3 v3;
+    auto coords = mesh.getVertex(v)->getCoordinates();
+    for (size_t i = 0; i < 3; ++i)
+      v3[i] = coords[i];
+    points3D.push_back(v3);
+  }
 
   std::vector<Vector2> points2D;
   Vector3 origin;

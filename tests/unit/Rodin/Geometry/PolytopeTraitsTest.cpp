@@ -157,7 +157,7 @@ namespace Rodin::Tests::Unit
 
   TEST(Geometry_PolytopeTypes, ArraySize)
   {
-    EXPECT_EQ(Polytope::Types.size(), 6);
+    EXPECT_EQ(Polytope::Types.size(), 7);
   }
 
   TEST(Geometry_PolytopeTypes, ArrayContents)
@@ -167,7 +167,8 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(Polytope::Types[2], Polytope::Type::Triangle);
     EXPECT_EQ(Polytope::Types[3], Polytope::Type::Quadrilateral);
     EXPECT_EQ(Polytope::Types[4], Polytope::Type::Tetrahedron);
-    EXPECT_EQ(Polytope::Types[5], Polytope::Type::Wedge);
+    EXPECT_EQ(Polytope::Types[5], Polytope::Type::Hexahedron);
+    EXPECT_EQ(Polytope::Types[6], Polytope::Type::Wedge);
   }
 
   TEST(Geometry_PolytopeTypes, IterableArray)
@@ -179,6 +180,6 @@ namespace Rodin::Tests::Unit
       (void)type;  // Suppress unused variable warning
       ++count;
     }
-    EXPECT_EQ(count, 6);
+    EXPECT_EQ(count, 7);
   }
 }

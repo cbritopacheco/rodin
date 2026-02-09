@@ -37,5 +37,6 @@
 #include "P0/Grad.h"
 #include "P0/P0Element.h"
 #include "P0/GridFunction.h"
+#include "P0/ShapeFunction.h"
 
 #endif

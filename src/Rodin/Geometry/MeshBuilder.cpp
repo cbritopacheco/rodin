@@ -4,7 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include "Rodin/Alert.h"
+#include "Rodin/Alert/MemberFunctionException.h"
 
 #include "Mesh.h"
 #include "Rodin/Math/Vector.h"
@@ -18,11 +18,18 @@ namespace Rodin::Geometry
     m_connectivity.initialize(m_sdim);
     m_attributes.initialize(m_sdim);
     m_transformations.initialize(m_sdim);
+    m_initialized = true;
     return *this;
   }
 
   Mesh<Context::Local>::Builder& Mesh<Context::Local>::Builder::nodes(size_t n)
   {
+    assert(m_initialized);
+    if (!m_initialized)
+    {
+      Alert::MemberFunctionException(*this, __func__)
+        << "initialize(size_t) must be called before setting the number of nodes.";
+    }
     m_nodes = 0;
     m_connectivity.nodes(n);
     m_vertices.resize(m_sdim, n);
@@ -37,7 +44,9 @@ namespace Rodin::Geometry
     assert(m_vertices.cols() > 0);
     assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
     assert(l.size() == m_sdim);
-    std::copy(l.begin(), l.end(), m_vertices.col(m_nodes++).begin());
+    for (size_t i = 0; i < m_sdim; ++i)
+      m_vertices(i, m_nodes) = *(l.begin() + i);
+    m_nodes++;
     return *this;
   }
 
@@ -50,35 +59,15 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Local>::Builder&
-  Mesh<Context::Local>::Builder::vertex(Eigen::Map<const Math::SpatialPoint> x)
+  Mesh<Context::Local>::Builder::vertex(const Math::SpatialPoint& x)
   {
     assert(m_vertices.cols() > 0);
     assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
     assert(x.size() >= 0);
     assert(static_cast<size_t>(x.size()) == m_sdim);
-    m_vertices.col(m_nodes++) = x;
-    return *this;
-  }
-
-  Mesh<Context::Local>::Builder&
-  Mesh<Context::Local>::Builder::vertex(Math::Vector<Real>&& x)
-  {
-    assert(m_vertices.cols() > 0);
-    assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
-    assert(x.size() >= 0);
-    assert(static_cast<size_t>(x.size()) == m_sdim);
-    m_vertices.col(m_nodes++) = std::move(x);
-    return *this;
-  }
-
-  Mesh<Context::Local>::Builder&
-  Mesh<Context::Local>::Builder::vertex(const Math::Vector<Real>& x)
-  {
-    assert(m_vertices.cols() > 0);
-    assert(m_nodes < static_cast<size_t>(m_vertices.cols()));
-    assert(x.size() >= 0);
-    assert(static_cast<size_t>(x.size()) == m_sdim);
-    m_vertices.col(m_nodes++) = x;
+    for (size_t i = 0; i < m_sdim; ++i)
+      m_vertices(i, m_nodes) = x(i);
+    m_nodes++;
     return *this;
   }
 

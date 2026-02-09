@@ -124,6 +124,12 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this).traceOf(args...);
       }
 
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        return static_cast<const Derived&>(*this).getOrder(geom);
+      }
+
       /**
        * @brief Creates a polymorphic copy of the function.
        * @returns Pointer to newly allocated copy
@@ -161,6 +167,12 @@ namespace Rodin::Variational
       decltype(auto) getValue(const Geometry::Point& v) const
       {
         return m_nested->getValue(v);
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        return m_nested->getOrder(geom);
       }
 
       RealFunction* copy() const noexcept override
@@ -221,6 +233,12 @@ namespace Rodin::Variational
         return *this;
       }
 
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      {
+        return size_t(0);
+      }
+
       RealFunction* copy() const noexcept override
       {
         return new RealFunction(*this);
@@ -274,6 +292,12 @@ namespace Rodin::Variational
         return *this;
       }
 
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      {
+        return size_t(0);
+      }
+
       RealFunction* copy() const noexcept override
       {
         return new RealFunction(*this);
@@ -323,6 +347,12 @@ namespace Rodin::Variational
       RealFunction& traceOf(Args&&... args) noexcept
       {
         return *this;
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      {
+        return std::nullopt;
       }
 
       RealFunction* copy() const noexcept override

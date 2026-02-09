@@ -260,7 +260,8 @@ namespace Rodin::Variational
       H1(const H1& other)
         : Parent(other),
           m_mesh(other.m_mesh),
-          m_closure(other.m_dofs),
+          m_visited(other.m_visited),
+          m_closure(other.m_closure),
           m_size(other.m_size)
       {}
 
@@ -271,7 +272,8 @@ namespace Rodin::Variational
       H1(H1&& other)
         : Parent(std::move(other)),
           m_mesh(std::move(other.m_mesh)),
-          m_closure(std::move(other.m_dofs)),
+          m_visited(std::move(other.m_visited)),
+          m_closure(std::move(other.m_closure)),
           m_size(std::move(other.m_size))
       {}
 
@@ -288,7 +290,8 @@ namespace Rodin::Variational
         {
           Parent::operator=(std::move(other));
           m_mesh = std::move(other.m_mesh);
-          m_closure = std::move(other.m_dofs);
+          m_closure = std::move(other.m_closure);
+          m_visited = std::move(other.m_visited);
           m_size = std::move(other.m_size);
         }
         return *this;
@@ -305,7 +308,7 @@ namespace Rodin::Variational
         {
           Parent::operator=(other);
           m_mesh = other.m_mesh;
-          m_closure = other.m_dofs;
+          m_closure = other.m_closure;
           m_size = other.m_size;
         }
         return *this;
@@ -402,6 +405,11 @@ namespace Rodin::Variational
           case Geometry::Polytope::Type::Wedge:
           {
             static thread_local const ElementType s_element(Geometry::Polytope::Type::Wedge);
+            return s_element;
+          }
+          case Geometry::Polytope::Type::Hexahedron:
+          {
+            static thread_local const ElementType s_element(Geometry::Polytope::Type::Hexahedron);
             return s_element;
           }
         }
@@ -615,7 +623,7 @@ namespace Rodin::Variational
         : Parent(other),
           m_mesh(other.m_mesh),
           m_vdim(other.m_vdim),
-          m_closure(other.m_dofs),
+          m_closure(other.m_closure),
           m_size(other.m_size)
       {}
 
@@ -623,7 +631,7 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_mesh(std::move(other.m_mesh)),
           m_vdim(std::move(other.m_vdim)),
-          m_closure(std::move(other.m_dofs)),
+          m_closure(std::move(other.m_closure)),
           m_size(std::move(other.m_size))
       {}
 
@@ -636,7 +644,7 @@ namespace Rodin::Variational
           Parent::operator=(std::move(other));
           m_mesh = std::move(other.m_mesh);
           m_vdim = std::move(other.m_vdim);
-          m_closure = std::move(other.m_dofs);
+          m_closure = std::move(other.m_closure);
           m_size = std::move(other.m_size);
         }
         return *this;
@@ -649,7 +657,7 @@ namespace Rodin::Variational
           Parent::operator=(other);
           m_mesh = other.m_mesh;
           m_vdim = other.m_vdim;
-          m_closure = other.m_dofs;
+          m_closure = other.m_closure;
           m_size = other.m_size;
         }
         return *this;
@@ -726,6 +734,17 @@ namespace Rodin::Variational
             };
             return s_elements[m_vdim];
           }
+          case Geometry::Polytope::Type::Hexahedron:
+          {
+            static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
+            {
+              ElementType(Geometry::Polytope::Type::Hexahedron, 0),
+              ElementType(Geometry::Polytope::Type::Hexahedron, 1),
+              ElementType(Geometry::Polytope::Type::Hexahedron, 2),
+              ElementType(Geometry::Polytope::Type::Hexahedron, 3)
+            };
+            return s_elements[m_vdim];
+          }
         }
         assert(false);
         static thread_local ElementType s_null(Geometry::Polytope::Type::Point, 0);
@@ -769,6 +788,7 @@ namespace Rodin::Variational
       template <class Callable>
       auto getPushforward(const std::pair<size_t, Index>& idx, Callable&& v) const
       {
+        (void) idx;
         return Pushforward<Callable>(std::forward<Callable>(v));
       }
 

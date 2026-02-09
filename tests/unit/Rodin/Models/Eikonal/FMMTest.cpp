@@ -156,8 +156,8 @@ namespace Rodin::Tests::Unit
   {
     // Create 3D tetrahedral mesh
     Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { 8, 8, 8 });
-    mesh.scale(1.0 / 7.0);  // Scale to [0,1]^3
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { 16, 16, 16 });
+    mesh.scale(1.0 / 15.0);  // Scale to [0,1]^3
     mesh.getConnectivity().compute(3, 0);
     mesh.getConnectivity().compute(0, 0);
 

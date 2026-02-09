@@ -17,7 +17,9 @@
 
 #include <functional>
 
+#include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Variational/ForwardDecls.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
 
 namespace Rodin::FormLanguage
@@ -54,7 +56,7 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type
       using FESType = FES;
-      
+
       /// @brief Space type (trial space)
       static constexpr ShapeFunctionSpaceType SpaceType = ShapeFunctionSpaceType::Trial;
 
@@ -96,10 +98,15 @@ namespace Rodin::Variational
        * @param[in] p Point at which to evaluate
        * @returns Reference to this object
        */
-      TrialFunctionReference& setPoint(const Geometry::Point& p)
+      TrialFunctionReference& setIntegrationPoint(const IntegrationPoint& p)
       {
-        m_ref.get().setPoint(p);
+        m_ref.get().setIntegrationPoint(p);
         return *this;
+      }
+
+      const IntegrationPoint& getIntegrationPoint() const
+      {
+        return m_ref.get().getIntegrationPoint();
       }
 
       /**
@@ -173,6 +180,17 @@ namespace Rodin::Variational
         return m_ref.get().getSolution();
       }
 
+      TrialFunctionReference& setName(const std::string& name)
+      {
+        m_ref.get().setName(name);
+        return *this;
+      }
+
+      Optional<StringView> getName() const override
+      {
+        return m_ref.get().getName();
+      }
+
       /**
        * @brief Creates a copy of this reference.
        * @returns Pointer to newly allocated copy
@@ -238,7 +256,7 @@ namespace Rodin::Variational
     public:
       /// @brief Finite element space type
       using FESType = FES;
-      
+
       /// @brief Space type (trial space)
       static constexpr ShapeFunctionSpaceType Space = TrialSpace;
 
@@ -355,7 +373,24 @@ namespace Rodin::Variational
         return m_gf;
       }
 
+      TrialFunction& setName(const std::string& name)
+      {
+        m_name = name;
+        return *this;
+      }
+
+      Optional<StringView> getName() const override
+      {
+        return m_name;
+      }
+
+       /**
+       * @brief Creates a copy of this trial function.
+       * @returns Pointer to newly allocated copy
+       */
+
     private:
+      std::string m_name; ///< Optional name for the trial function
       SolutionType m_gf;
   };
 

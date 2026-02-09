@@ -11,6 +11,7 @@
 #include "Rodin/FormLanguage/Traits.h"
 
 #include "ForwardDecls.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 
 namespace Rodin::FormLanguage
 {
@@ -118,6 +119,12 @@ namespace Rodin::Variational
         return this->getOperand().getValue(p).coeff(m_idx);
       }
 
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        return getOperand().getOrder(geom);
+      }
+
       Component* copy() const noexcept override
       {
         return new Component(*this);
@@ -209,6 +216,11 @@ namespace Rodin::Variational
         return this->getOperand().getValue(p).coeff(m_i, m_j);
       }
 
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        return getOperand().getOrder(geom);
+      }
 
       Component* copy() const noexcept override
       {
@@ -265,13 +277,15 @@ namespace Rodin::Variational
       constexpr
       Component(const Component& other)
         : Parent(other),
-          m_u(other.m_u)
+          m_u(other.m_u),
+          m_idx(other.m_idx)
       {}
 
       constexpr
       Component(Component&& other)
         : Parent(std::move(other)),
-          m_u(std::move(other.m_u))
+          m_u(std::move(other.m_u)),
+          m_idx(std::move(other.m_idx))
       {}
 
       /**
@@ -303,6 +317,12 @@ namespace Rodin::Variational
       auto getValue(const Geometry::Point& p) const
       {
         return m_u.get().getValue(p).coeff(m_idx);
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        return getGridFunction().getOrder(geom);
       }
 
       Component* copy() const noexcept override
@@ -422,19 +442,14 @@ namespace Rodin::Variational
        * @brief Gets the current evaluation point.
        * @returns Reference to the point
        */
-      const Geometry::Point& getPoint() const
+      const IntegrationPoint& getIntegrationPoint() const
       {
-        return m_u->getPoint();
+        return m_u->getIntegrationPoint();
       }
 
-      /**
-       * @brief Sets the evaluation point.
-       * @param p Point to evaluate at
-       * @returns Reference to this object
-       */
-      Component& setPoint(const Geometry::Point& p)
+      Component& setIntegrationPoint(const IntegrationPoint& ip)
       {
-        m_u->setPoint(p);
+        m_u->setIntegrationPoint(ip);
         return *this;
       }
 
@@ -447,6 +462,12 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         return this->object(this->getOperand().getBasis(local)).coeff(m_idx);
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        return getOperand().getOrder(geom);
       }
 
       Component* copy() const noexcept override

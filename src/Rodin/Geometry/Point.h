@@ -134,7 +134,7 @@ namespace Rodin::Geometry
        * @brief Gets physical coordinates as a vector.
        * @returns Reference to physical coordinate vector
        */
-      const auto& asVector() const
+      const auto& vector() const
       {
         return getPhysicalCoordinates();
       }
@@ -172,7 +172,7 @@ namespace Rodin::Geometry
        */
       Real norm() const
       {
-        return asVector().norm();
+        return vector().norm();
       }
 
       /**
@@ -181,7 +181,7 @@ namespace Rodin::Geometry
        */
       Real stableNorm() const
       {
-        return asVector().stableNorm();
+        return vector().stableNorm();
       }
 
       /**
@@ -190,7 +190,7 @@ namespace Rodin::Geometry
        */
       Real blueNorm() const
       {
-        return asVector().blueNorm();
+        return vector().blueNorm();
       }
 
       /**
@@ -201,7 +201,7 @@ namespace Rodin::Geometry
       template <size_t p>
       Real lpNorm() const
       {
-        return asVector().lpNorm<p>();
+        return vector().lpNorm<p>();
       }
 
       /**
@@ -210,7 +210,7 @@ namespace Rodin::Geometry
        */
       Real squaredNorm() const
       {
-        return asVector().squaredNorm();
+        return vector().squaredNorm();
       }
 
       /**
@@ -415,7 +415,7 @@ namespace Rodin::Geometry
   auto
   operator+(const Geometry::Point& p, const Eigen::MatrixBase<EigenDerived>& q)
   {
-    return p.asVector() + q;
+    return p.vector() + q;
   }
 
   /**
@@ -429,7 +429,7 @@ namespace Rodin::Geometry
   auto
   operator+(const Eigen::MatrixBase<EigenDerived>& p, const Geometry::Point& q)
   {
-    return p + q.asVector();
+    return p + q.vector();
   }
 
   /**
@@ -443,7 +443,7 @@ namespace Rodin::Geometry
   auto
   operator-(const Geometry::Point& p, const Eigen::MatrixBase<EigenDerived>& q)
   {
-    return p.asVector() - q;
+    return p.vector() - q;
   }
 
   /**
@@ -457,7 +457,7 @@ namespace Rodin::Geometry
   auto
   operator-(const Eigen::MatrixBase<EigenDerived>& p, const Geometry::Point& q)
   {
-    return p - q.asVector();
+    return p - q.vector();
   }
 
   /**
@@ -470,7 +470,7 @@ namespace Rodin::Geometry
   auto
   operator+(const Geometry::Point& p, const Geometry::Point& q)
   {
-    return p.asVector() + q.asVector();
+    return p.vector() + q.vector();
   }
 
   /**
@@ -483,7 +483,7 @@ namespace Rodin::Geometry
   auto
   operator-(const Geometry::Point& p, const Geometry::Point& q)
   {
-    return p.asVector() - q.asVector();
+    return p.vector() - q.vector();
   }
 
   /**
@@ -496,7 +496,7 @@ namespace Rodin::Geometry
   auto
   operator*(Real s, const Geometry::Point& p)
   {
-    return s * p.asVector();
+    return s * p.vector();
   }
 
   /**
@@ -509,7 +509,35 @@ namespace Rodin::Geometry
   auto
   operator*(const Geometry::Point& p, Real s)
   {
-    return p.asVector() * s;
+    return p.vector() * s;
+  }
+
+  template <class Scalar>
+  auto operator+(
+    const Math::SpatialVector<Scalar>& v, const Geometry::Point& p)
+  {
+    return v + p.vector();
+  }
+
+  template <class Scalar>
+  auto operator+(
+    const Geometry::Point& p, const Math::SpatialVector<Scalar>& v)
+  {
+    return p.vector() + v;
+  }
+
+  template <class Scalar>
+  auto operator-(
+    const Math::SpatialVector<Scalar>& v, const Geometry::Point& p)
+  {
+    return v - p.vector();
+  }
+
+  template <class Scalar>
+  auto operator-(
+    const Geometry::Point& p, const Math::SpatialVector<Scalar>& v)
+  {
+    return p.vector() - v;
   }
 }
 #endif

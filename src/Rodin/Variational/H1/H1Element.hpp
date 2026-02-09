@@ -27,6 +27,8 @@
 
 #include "Rodin/Math/Common.h"
 
+#include "Rodin/QF/QuadratureFormula.h"
+
 #include "H1Element.h"
 
 #include "LagrangeBasis.h"
@@ -36,13 +38,96 @@
 #include "GLL.h"
 #include "LegendrePolynomial.h"
 
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
 namespace Rodin::Variational
 {
+  template <size_t K, class Scalar>
+  const typename H1Element<K, Scalar>::Tabulation&
+  H1Element<K, Scalar>::getTabulation(const QF::QuadratureFormulaBase& qf) const
+  {
+    struct CacheEntry
+    {
+      const QF::QuadratureFormulaBase* qf;
+      Geometry::Polytope::Type g;
+      size_t nqp;
+      bool valid;
+      Tabulation tab;
+
+      CacheEntry()
+        : qf(nullptr),
+          g(Geometry::Polytope::Type::Point),
+          nqp(0),
+          valid(false),
+          tab()
+      {}
+    };
+
+    struct Cache
+    {
+      std::array<CacheEntry, 8> e;
+      size_t next = 0; // eviction pointer
+    };
+
+    static thread_local Cache s_cache;
+
+    const auto g   = this->getGeometry();
+    const auto nqp = qf.getSize();
+
+    // 1) lookup
+    for (auto& ce : s_cache.e)
+    {
+      if (ce.valid && ce.qf == &qf && ce.g == g && ce.nqp == nqp)
+        return ce.tab;
+    }
+
+    // 2) miss -> rebuild into an entry
+    CacheEntry& ce = s_cache.e[s_cache.next];
+    s_cache.next = (s_cache.next + 1) % s_cache.e.size();
+
+    ce.valid = true;
+    ce.qf = &qf;
+    ce.g = g;
+    ce.nqp = nqp;
+
+    Tabulation& t = ce.tab;
+
+    const size_t dim  = Geometry::Polytope::Traits(g).getDimension();
+    const size_t ndof = this->getCount();
+
+    t.nqp  = nqp;
+    t.ndof = ndof;
+    t.dim  = dim;
+
+    t.phi.resize(nqp * ndof);
+    t.dphi.resize(nqp * ndof * dim);
+
+    // Cache basis handles (cheap, avoids repeated getBasis(a) calls)
+    std::vector<std::reference_wrapper<const BasisFunction>> bf;
+    bf.reserve(ndof);
+    for (size_t a = 0; a < ndof; ++a)
+      bf.emplace_back(this->getBasis(a));
+
+    for (size_t qp = 0; qp < nqp; ++qp)
+    {
+      const auto& rc = qf.getPoint(qp);
+
+      Scalar* phi_row  = t.phi.data()  + qp * ndof;
+      Scalar* dphi_row = t.dphi.data() + qp * ndof * dim;
+
+      for (size_t a = 0; a < ndof; ++a)
+      {
+        const auto& bfa = bf[a].get();
+
+        phi_row[a] = bfa(rc);
+
+        Scalar* d = dphi_row + a * dim;
+        for (size_t i = 0; i < dim; ++i)
+          d[i] = bfa.template getDerivative<1>(i)(rc);
+      }
+    }
+
+    return t;
+  }
+
   template <size_t K, class Scalar>
   constexpr
   const Math::SpatialPoint& H1Element<K, Scalar>::getNode(size_t i) const
@@ -119,6 +204,18 @@ namespace Rodin::Variational
         return s_lfs[i];
       }
       case Geometry::Polytope::Type::Wedge:
+      {
+        static thread_local std::vector<LinearForm> s_lfs;
+        if (s_lfs.empty())
+        {
+          const size_t count = getCount();
+          s_lfs.reserve(count);
+          for (size_t j = 0; j < count; ++j)
+            s_lfs.emplace_back(j, g);
+        }
+        return s_lfs[i];
+      }
+      case Geometry::Polytope::Type::Hexahedron:
       {
         static thread_local std::vector<LinearForm> s_lfs;
         if (s_lfs.empty())
@@ -207,6 +304,18 @@ namespace Rodin::Variational
         return s_bs[i];
       }
       case Geometry::Polytope::Type::Wedge:
+      {
+        static thread_local std::vector<BasisFunction> s_bs;
+        if (s_bs.empty())
+        {
+          const size_t count = getCount();
+          s_bs.reserve(count);
+          for (size_t j = 0; j < count; ++j)
+            s_bs.emplace_back(j, g);
+        }
+        return s_bs[i];
+      }
+      case Geometry::Polytope::Type::Hexahedron:
       {
         static thread_local std::vector<BasisFunction> s_bs;
         if (s_bs.empty())
@@ -349,6 +458,26 @@ namespace Rodin::Variational
         const Real seg_val = LagrangeBasisSegment<K>::getBasis(k, z);
 
         return tri_val * seg_val;
+      }
+      case Geometry::Polytope::Type::Hexahedron:
+      {
+        // Tensor product GLL01 × GLL01 × GLL01
+        // Node ordering matches getNodes(): i + (K+1)*(j + (K+1)*k)
+        const size_t n1 = K + 1;
+        const size_t k  = m_local / (n1 * n1);
+        const size_t r2 = m_local % (n1 * n1);
+        const size_t j  = r2 / n1;
+        const size_t i  = r2 % n1;
+
+        const Real x = r.x();
+        const Real y = r.y();
+        const Real z = r.z();
+
+        const Real lx = LagrangeBasisSegment<K>::getBasis(i, x);
+        const Real ly = LagrangeBasisSegment<K>::getBasis(j, y);
+        const Real lz = LagrangeBasisSegment<K>::getBasis(k, z);
+
+        return static_cast<Scalar>(lx * ly * lz);
       }
     }
 
@@ -643,6 +772,38 @@ namespace Rodin::Variational
             const Real dseg = LagrangeBasisSegment<K>::getDerivative(k, z);
             return tri_val * dseg;
           }
+        }
+        case Geometry::Polytope::Type::Hexahedron:
+        {
+          // Tensor product derivative on [0,1]^3 with GLL nodes.
+          // Node ordering: i + (K+1)*(j + (K+1)*k)
+          const size_t n1 = K + 1;
+          const size_t k  = m_local / (n1 * n1);
+          const size_t r2 = m_local % (n1 * n1);
+          const size_t j  = r2 / n1;
+          const size_t i  = r2 % n1;
+
+          const Real x = r.x();
+          const Real y = r.y();
+          const Real z = r.z();
+
+          const Real lx = LagrangeBasisSegment<K>::getBasis(i, x);
+          const Real ly = LagrangeBasisSegment<K>::getBasis(j, y);
+          const Real lz = LagrangeBasisSegment<K>::getBasis(k, z);
+
+          const Real dlx = LagrangeBasisSegment<K>::getDerivative(i, x);
+          const Real dly = LagrangeBasisSegment<K>::getDerivative(j, y);
+          const Real dlz = LagrangeBasisSegment<K>::getDerivative(k, z);
+
+          Real val = 0;
+          if (m_i == 0)      // ∂/∂x
+            val = dlx * ly * lz;
+          else if (m_i == 1) // ∂/∂y
+            val = lx * dly * lz;
+          else if (m_i == 2) // ∂/∂z
+            val = lx * ly * dlz;
+
+          return static_cast<Scalar>(val);
         }
       }
 

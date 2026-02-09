@@ -77,72 +77,60 @@ namespace Rodin::Models::Advection
        * @param[in,out] rref Reference coordinates in the cell
        * @return True if boundary treatment was successful, false otherwise
        */
-      bool operator()(Real& tau, Index& cell, Math::SpatialPoint& rref) const
+      bool operator()(const Variational::BoundaryHit& hit) const
       {
         static thread_local Math::Vector<Real> s_nphys_u;
         static thread_local Math::SpatialPoint s_rtmp;
         static thread_local Math::SpatialPoint s_xint;
 
-        const Real trace_sign = std::abs(m_dt);
+        const Real trace_sign = (m_dt >= 0) ? 1.0 : -1.0;
 
-        if (tau <= 0)
+        if (hit.tau <= 0)
           return true;
 
         const auto& mesh = m_mesh.get();
         const size_t cd = mesh.getDimension();
-        const auto g = mesh.getGeometry(cd, cell);
+        const auto g = mesh.getGeometry(cd, hit.cell);
         const auto& hs = Geometry::Polytope::Traits(g).getHalfSpace();
 
-        size_t jbest = 0;
-        Real gbest = std::numeric_limits<Real>::infinity();
-        for (size_t j = 0; j < static_cast<size_t>(hs.matrix.rows()); ++j)
-        {
-          const auto n = hs.matrix.row(j).transpose();
-          const Real b = hs.vector[j];
-          const Real gj = b - n.dot(rref);
-          if (gj < gbest)
-          {
-            gbest = gj;
-            jbest = j;
-          }
-        }
+        const size_t j = hit.face; // local
+        const auto nref = hs.matrix.row(j).transpose();
+        const Real b = hs.vector[j];
 
-        const auto nref = hs.matrix.row(jbest).transpose();
-        const auto itc = mesh.getPolytope(cd, cell);
+        const auto itc = mesh.getPolytope(cd, hit.cell);
         const auto& cellO = *itc;
-        const Geometry::Point qface(cellO, rref);
+        const Geometry::Point qface(cellO, hit.rref);
 
         const auto& Jinv = qface.getJacobianInverse();
         s_nphys_u = Jinv.transpose() * nref;
         const Real nlen = s_nphys_u.norm();
         if (nlen == 0)
         {
-          tau = 0;
+          hit.tau = 0;
           return true;
         }
 
         const auto nphys = trace_sign * s_nphys_u / nlen;
         decltype(auto) vphys = m_vel(qface);
         const Real vn = vphys.dot(nphys);
-        const Real h = std::max<Real>(0, vn) * tau;
+        const Real h = std::max<Real>(0, vn) * hit.tau;
         const auto& xface = qface.getPhysicalCoordinates();
         s_xint = xface + (-h - m_eps) * nphys;
 
-        mesh.getPolytopeTransformation(cd, cell).inverse(s_rtmp, s_xint);
+        mesh.getPolytopeTransformation(cd, hit.cell).inverse(s_rtmp, s_xint);
         Geometry::Polytope::Project(g).cell(s_rtmp, s_rtmp);
-        rref = s_rtmp;
+        hit.rref = s_rtmp;
 
-        const Real b = hs.vector[jbest];
-        const Real gcur = b - nref.dot(rref);
+        const Real gcur = b - hit.rref.dot(nref);
         const Real ndn = nref.dot(nref);
         if (ndn > 0)
         {
           const Real target = std::max(m_eps, gcur + m_eps);
           const Real alpha = (gcur - target) / ndn;
-          rref += alpha * nref;
+          hit.rref += alpha * nref;
         }
 
-        tau = 0;
+        hit.tau = 0;
         return true;
       }
 

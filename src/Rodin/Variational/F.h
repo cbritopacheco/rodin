@@ -16,7 +16,10 @@
  * in defining boundary conditions, source terms, and exact solutions.
  */
 
+#include "Rodin/Geometry/PolytopeTransformation.h"
+
 #include "RealFunction.h"
+
 
 /**
  * @brief Contains built-in coordinate functions
@@ -68,6 +71,11 @@ namespace Rodin::Variational::F
       decltype(auto) getValue(const Geometry::Point& p) const
       {
         return p.x();
+      }
+
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
+      {
+        return polytope.getTransformation().getOrder();
       }
 
       /**
@@ -140,6 +148,11 @@ namespace Rodin::Variational::F
         return p.y();
       }
 
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
+      {
+        return polytope.getTransformation().getOrder();
+      }
+
       /**
        * @brief Creates a copy of this function
        * @returns Pointer to newly allocated copy
@@ -208,6 +221,11 @@ namespace Rodin::Variational::F
       decltype(auto) getValue(const Geometry::Point& p) const
       {
         return p.z();
+      }
+
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
+      {
+        return polytope.getTransformation().getOrder();
       }
 
       /**
