@@ -21,54 +21,7 @@
 namespace Rodin::IO
 {
   template <FileFormat Fmt, class FES>
-  class GridFunctionPrinter<Fmt, FES, ::Vec>
-    : public GridFunctionPrinterBase<Fmt, FES, ::Vec>
-  {
-    public:
-      using FESType = FES;
-
-      static constexpr FileFormat Format = Fmt;
-
-      using RangeType = typename FormLanguage::Traits<FES>::RangeType;
-
-      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
-
-      using DataType = ::Vec;
-
-      using Parent = GridFunctionPrinterBase<Format, FES, DataType>;
-
-      using FESMeshType = typename FormLanguage::Traits<FESType>::MeshType;
-
-      using FESMeshContextType = typename FormLanguage::Traits<FESMeshType>::ContextType;
-
-      using Parent::Parent;
-
-      void printData(std::ostream& os) override
-      {
-        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
-        {
-          const auto& gf = this->getObject();
-          const size_t sz = gf.getSize();
-          for (size_t i = 0; i < sz; ++i)
-            os << gf[i] << '\n';
-        }
-        else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
-        {
-          const auto& gf = this->getObject();
-          const auto& fes = gf.getFiniteElementSpace();
-          const auto& shard = fes.getShard();
-          const size_t sz = shard.getSize();
-          gf.acquire();
-          for (size_t i = 0; i < sz; ++i)
-            os << gf[fes.getGlobalIndex(i)] << '\n';
-          gf.flush();
-        }
-        else
-        {
-          assert(false);
-        }
-      }
-  };
+  class GridFunctionPrinter<Fmt, FES, ::Vec>;
 }
 #endif
 

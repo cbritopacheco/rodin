@@ -80,8 +80,7 @@ namespace Rodin::Solver
       {}
 
       IDRSTABL(const IDRSTABL& other)
-        : Parent(other),
-          m_solver(other.m_solver)
+        : Parent(other)
       {}
 
       IDRSTABL(IDRSTABL&& other)

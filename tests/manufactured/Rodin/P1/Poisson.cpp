@@ -64,6 +64,54 @@ namespace Rodin::Tests::Manufactured::Poisson
   using Manufactured_Poisson_Test_64x64 =
     Rodin::Tests::Manufactured::Poisson::Manufactured_Poisson_Test<64>;
 
+  TEST_P(Manufactured_Poisson_Test_16x16, Poisson_P1Exact)
+  {
+    Mesh mesh = this->getMesh();
+
+    P1 vh(mesh);
+
+    // P1-exact manufactured solution
+    auto solution = F::x + 2 * F::y + 1;
+    auto f = Zero(); // -Δ(affine) = 0
+
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, solution);
+
+    CG(poisson).solve();
+
+    GridFunction u_exact(vh);
+    u_exact = solution;
+
+    auto& A = poisson.getLinearSystem().getOperator();
+    auto& b = poisson.getLinearSystem().getVector();
+    auto& x = poisson.getLinearSystem().getSolution();
+
+    // Solver residual
+    auto r = A * x - b;
+
+    // Manufactured residual (should be roundoff)
+    auto re = A * u_exact.getData() - b;
+
+    const Real scale = std::max<Real>(b.norm(), 1);
+    const Real res = r.norm() / scale;
+    const Real res_e = re.norm() / scale;
+
+    EXPECT_NEAR(res, 0, 1e-10);
+    EXPECT_NEAR(res_e, 0, 1e-12);
+
+    // FE error should be roundoff too
+    GridFunction diff(vh);
+    diff = Pow(u.getSolution() - solution, 2);
+
+    Real error = Integral(diff).compute();
+    EXPECT_NEAR(error, 0, 1e-12);
+  }
+
   /**
    * @f[
    *  \Omega = [0, 1] \times [0, 1]

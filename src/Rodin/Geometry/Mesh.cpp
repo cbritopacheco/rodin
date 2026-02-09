@@ -736,106 +736,57 @@ namespace Rodin::Geometry
       case Polytope::Type::Tetrahedron:
       {
         assert(dimensions.size() == 3);
-        const size_t width = dimensions.coeff(0);
-        const size_t height = dimensions.coeff(1);
-        const size_t depth = dimensions.coeff(2);
-        assert(width * height * depth >= 8);
+        const size_t w = dimensions.coeff(0);
+        const size_t h = dimensions.coeff(1);
+        const size_t d = dimensions.coeff(2);
+        assert(w >= 2 && h >= 2 && d >= 2);
+
         build.initialize(dim)
-             .nodes(width * height * depth + (width - 1) * (height - 1) * (depth - 1))
-             .reserve(dim, 10 * (width - 1) * (height - 1) * (depth - 1));
+             .nodes(w * h * d)
+             .reserve(dim, 6 * (w - 1) * (h - 1) * (d - 1));
 
-        for (size_t k = 0; k < depth; ++k)
+        // Vertex coordinates: integer lattice (i, j, k)
+        for (size_t k = 0; k < d; ++k)
+          for (size_t j = 0; j < h; ++j)
+            for (size_t i = 0; i < w; ++i)
+              build.vertex({ static_cast<Real>(i),
+                             static_cast<Real>(j),
+                             static_cast<Real>(k) });
+
+        // Helper: v(i,j,k) = i + j*w + k*w*h
+        const auto vid = [w, h](size_t i, size_t j, size_t k) -> Index
         {
-          for (size_t j = 0; j < height; ++j)
+          return static_cast<Index>(i + j * w + k * w * h);
+        };
+
+        // Kuhn triangulation (main diagonal v000 -> v111), 6 tets per cell
+        for (size_t k = 0; k + 1 < d; ++k)
+        {
+          for (size_t j = 0; j + 1 < h; ++j)
           {
-            for (size_t i = 0; i < width; ++i)
+            for (size_t i = 0; i + 1 < w; ++i)
             {
-              build.vertex({
-                  static_cast<Real>(i),
-                  static_cast<Real>(j),
-                  static_cast<Real>(k) });
+              const Index v000 = vid(i,     j,     k);
+              const Index v100 = vid(i + 1, j,     k);
+              const Index v010 = vid(i,     j + 1, k);
+              const Index v110 = vid(i + 1, j + 1, k);
+
+              const Index v001 = vid(i,     j,     k + 1);
+              const Index v101 = vid(i + 1, j,     k + 1);
+              const Index v011 = vid(i,     j + 1, k + 1);
+              const Index v111 = vid(i + 1, j + 1, k + 1);
+
+              // All 6 have positive orientation for an axis-aligned cube.
+              build.polytope(g, { v000, v100, v110, v111 })
+                   .polytope(g, { v000, v110, v010, v111 })
+                   .polytope(g, { v000, v010, v011, v111 })
+                   .polytope(g, { v000, v011, v001, v111 })
+                   .polytope(g, { v000, v001, v101, v111 })
+                   .polytope(g, { v000, v101, v100, v111 });
             }
           }
         }
 
-        for (size_t k = 0; k < depth - 1; ++k)
-        {
-          for (size_t j = 0; j < height - 1; ++j)
-          {
-            for (size_t i = 0; i < width - 1; ++i)
-            {
-              build.vertex({
-                  static_cast<Real>(i + 0.5),
-                  static_cast<Real>(j + 0.5),
-                  static_cast<Real>(k + 0.5) });
-            }
-          }
-        }
-
-        for (size_t i = 0; i < width - 1; ++i)
-        {
-          for (size_t j = 0; j < height - 1; ++j)
-          {
-            for (size_t k = 0; k < depth - 1; ++k)
-            {
-              const Index c =
-                  i + (width - 1) * j + (width - 1) * (height - 1) * k
-                    + (width - 1) + width * (height - 1) + width * height * (depth - 1) + 1;
-              build.polytope(g, // Front-left
-                       { i + width * j + width * height * k,
-                        (i + 1) + width * j + width * height * k,
-                         i + width * (j + 1) + width * height * k,
-                         i + width * j + width * height * (k + 1) })
-                   .polytope(g, // Front-right
-                       { (i + 1) + width * j + width * height * (k + 1),
-                          i + width * j + width * height * (k + 1),
-                          c,
-                          (i + 1) + width * j + width * height * k })
-                   .polytope(g, // Left-top
-                       { i + width * (j + 1) + width * height * (k + 1),
-                         c,
-                         i + width * j + width * height * (k + 1),
-                         i + width * (j + 1) + width * height * k })
-                   .polytope(g, // Top-left
-                       { i + width * j + width * height * (k + 1),
-                        (i + 1) + width * j + width * height * (k + 1),
-                         i + width * (j + 1) + width * height * (k + 1),
-                         c })
-                   .polytope(g, // Right-bottom
-                       { c,
-                        (i + 1) + width * j + width * height * k,
-                         (i + 1) + width * (j + 1) + width * height * k,
-                         (i + 1) + width * j + width * height * (k + 1) })
-                   .polytope(g, // Bottom-right
-                       { (i + 1) + width * j + width * height * k,
-                         i + width * (j + 1) + width * height * k,
-                         (i + 1) + width * (j + 1) + width * height * k,
-                          c
-                         })
-                   .polytope(g, // Back-left
-                       {  i + width * (j + 1) + width * height * k,
-                          (i + 1) + width * (j + 1) + width * height * k,
-                          c,
-                          i + width * (j + 1) + width * height * (k + 1) })
-                   .polytope(g, // Back-right
-                        { (i + 1) + width * (j + 1) + width * height * (k + 1),
-                           i + width * (j + 1) + width * height * (k + 1),
-                           (i + 1) + width * j + width * height * (k + 1),
-                          (i + 1) + width * (j + 1) + width * height * k })
-                   .polytope(g, // Front fill
-                       { (i + 1) + width * j + width * height * k,
-                          i + width * (j + 1) + width * height * k,
-                          c,
-                          i + width * j + width * height * (k + 1) })
-                   .polytope(g, // Back fill
-                       { (i + 1) + width * j + width * height * (k + 1),
-                          (i + 1) + width * (j + 1) + width * height * k,
-                          c,
-                          i + width * (j + 1) + width * height * (k + 1) })
-                   ;
-            }
-          }
-        }
         return build.finalize();
       }
       case Polytope::Type::Wedge:

@@ -27,8 +27,9 @@ namespace Rodin::Variational
               << " in the problem body: ";
         if (uPb.getName())
         {
+          StringView name = *uPb.getName();
           *this << Alert::Notation("\"")
-                << Alert::Notation(uPb.getName())
+                << Alert::Notation(std::string(name.data(), name.size()))
                 << Alert::Notation("\"");
         }
         else

@@ -83,8 +83,8 @@ namespace Rodin::Tests::Manufactured::P1H1
     Manufactured_P1H1_Mixed_Test<10, 10, 1, 1>;
   using Manufactured_P1H1_Mixed_Test_10x10_K2 =
     Manufactured_P1H1_Mixed_Test<10, 10, 1, 2>;
-  using Manufactured_P1H1_Mixed_Test_16x16x16_K1 =
-    Manufactured_P1H1_Mixed_Test<16, 16, 16, 1>;
+  using Manufactured_P1H1_Mixed_Test_20_K1 =
+    Manufactured_P1H1_Mixed_Test<20, 20, 20, 1>;
   using Manufactured_P1H1_Mixed_Test_6x6x6_K2 =
     Manufactured_P1H1_Mixed_Test<6, 6, 6, 2>;
 
@@ -133,12 +133,12 @@ namespace Rodin::Tests::Manufactured::P1H1
     runMixedTest(*this, rhs_polynomial_2d);
   }
 
-  TEST_P(Manufactured_P1H1_Mixed_Test_16x16x16_K1, P1H1_Mixed_PolynomialRHS_3D)
+  TEST_P(Manufactured_P1H1_Mixed_Test_20_K1, P1H1_Mixed_PolynomialRHS_3D)
   {
     runMixedTest(*this, rhs_polynomial_3d);
   }
 
-  TEST_P(Manufactured_P1H1_Mixed_Test_16x16x16_K1, P1H1_Mixed_SineRHS_3D)
+  TEST_P(Manufactured_P1H1_Mixed_Test_20_K1, P1H1_Mixed_SineRHS_3D)
   {
     runMixedTest(*this, rhs_sine_3d);
   }
@@ -169,7 +169,7 @@ namespace Rodin::Tests::Manufactured::P1H1
 
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D_K1,
-    Manufactured_P1H1_Mixed_Test_16x16x16_K1,
+    Manufactured_P1H1_Mixed_Test_20_K1,
     ::testing::Values(
       Polytope::Type::Tetrahedron,
       Polytope::Type::Hexahedron,

@@ -7,8 +7,13 @@
 #ifndef RODIN_ASSEMBLY_SEQUENTIAL_H
 #define RODIN_ASSEMBLY_SEQUENTIAL_H
 
+#include <unordered_map>
+#include <type_traits>
+#include <algorithm>
+
 #include "Rodin/Context/Local.h"
 
+#include "Rodin/Math/Common.h"
 #include "Rodin/Tuple.h"
 
 #include "Rodin/Math/Traits.h"
@@ -429,6 +434,7 @@ namespace Rodin::Assembly
             }
           }
         }
+
         for (auto& bfi : input.getGlobalBFIs())
         {
           const auto& trialAttrs = bfi.getTrialAttributes();
@@ -655,6 +661,651 @@ namespace Rodin::Assembly
     };
 
 
+  template <class LinearSystem, class U1, class U2, class U3, class ... Us>
+  class Sequential<
+      LinearSystem,
+      Variational::Problem<LinearSystem, U1, U2, U3, Us...>> final
+    : public AssemblyBase<
+        LinearSystem,
+        Variational::Problem<LinearSystem, U1, U2, U3, Us...>>
+  {
+    public:
+      using LinearSystemType = LinearSystem;
+
+      using Parent =
+        AssemblyBase<
+          LinearSystemType,
+          Variational::Problem<LinearSystemType, U1, U2, U3, Us...>>;
+
+      using InputType = typename Parent::InputType;
+
+      using OperatorType =
+        typename FormLanguage::Traits<LinearSystemType>::OperatorType;
+
+      using VectorType =
+        typename FormLanguage::Traits<LinearSystemType>::VectorType;
+
+      using ScalarType =
+        typename FormLanguage::Traits<LinearSystemType>::ScalarType;
+
+      void execute(LinearSystemType& axb, const InputType& input) const override
+      {
+        auto& A = axb.getOperator();
+        auto& b = axb.getVector();
+
+        auto& pb = input.getProblemBody();
+        auto&       us           = input.getTrialFunctions();
+        auto&       vs           = input.getTestFunctions();
+        const auto& trialOffsets = input.getTrialOffsets();
+        const auto& testOffsets  = input.getTestOffsets();
+        auto&       trialUUIDMap = input.getTrialUUIDMap();
+        auto&       testUUIDMap  = input.getTestUUIDMap();
+
+        const size_t ncols = input.getTotalTrialSize();
+        const size_t nrows = input.getTotalTestSize();
+
+        b.resize(nrows);
+        b.setZero();
+
+        constexpr bool IsSparse =
+          std::is_base_of_v<Eigen::SparseMatrixBase<OperatorType>, OperatorType>;
+
+        if constexpr (!IsSparse)
+        {
+          A.resize(nrows, ncols);
+          A.setZero();
+        }
+
+        std::vector<Eigen::Triplet<ScalarType>> triplets;
+
+        const auto findTrialBlock = [&](const auto& uuid) -> size_t
+        {
+          auto it = trialUUIDMap.left.find(uuid);
+          assert(it != trialUUIDMap.left.end());
+          return it->second;
+        };
+
+        const auto findTestBlock = [&](const auto& uuid) -> size_t
+        {
+          auto it = testUUIDMap.left.find(uuid);
+          assert(it != testUUIDMap.left.end());
+          return it->second;
+        };
+
+        // Mesh (assumed common across spaces)
+        const auto& mesh = [&]() -> const auto&
+        {
+          const void* addr = nullptr;
+          us.apply([&](const auto& uref)
+          {
+            if (!addr)
+              addr = static_cast<const void*>(&uref.get().getFiniteElementSpace().getMesh());
+          });
+          assert(addr);
+          return *static_cast<
+            const std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace().getMesh())>*
+          >(addr);
+        }();
+
+        // ------------------------------------------------------------
+        // Dirichlet BC elimination data (NaN sentinel, global indexing)
+        // ------------------------------------------------------------
+        const size_t ndofs = std::max(nrows, ncols);
+        std::vector<ScalarType> fixed(ndofs, Math::nan<ScalarType>());
+
+        auto isFixed = [&](Index i) -> bool
+        {
+          const size_t k = static_cast<size_t>(i);
+          return k < fixed.size() && !Math::isNaN(fixed[k]);
+        };
+
+        auto fixedValue = [&](Index i) -> ScalarType
+        {
+          return fixed[static_cast<size_t>(i)];
+        };
+
+        for (auto& dbc : pb.getDBCs())
+        {
+          const auto uUUID = dbc.getOperand().getUUID();
+          const size_t uBlock = findTrialBlock(uUUID);
+          const size_t uOff   = trialOffsets[uBlock];
+
+          dbc.assemble();
+          const auto& dofs = dbc.getDOFs();
+          for (const auto& [local, value] : dofs)
+          {
+            const Index g = static_cast<Index>(uOff + static_cast<size_t>(local));
+            if (static_cast<size_t>(g) < fixed.size())
+              fixed[static_cast<size_t>(g)] = static_cast<ScalarType>(value);
+          }
+        }
+
+        // ------------------------------------------------------------
+        // Sparse-only: eliminate during assembly; Dense: accumulate
+        // ------------------------------------------------------------
+        auto sparse_entry = [&](Index row, Index col, ScalarType val)
+        {
+          if (val == ScalarType(0))
+            return;
+
+          if constexpr (IsSparse)
+          {
+            const bool rowFixed = isFixed(row);
+            const bool colFixed = isFixed(col);
+
+            if (rowFixed)
+              return;
+
+            if (colFixed && row != col)
+            {
+              b.coeffRef(row) -= val * fixedValue(col);
+              return;
+            }
+
+            triplets.emplace_back(row, col, val);
+          }
+          else
+          {
+            A(row, col) += val;
+          }
+        };
+
+        // ------------------------------------------------------------
+        // Local BFIs (type-safe per-block FES access)
+        // ------------------------------------------------------------
+        for (auto& bfi : pb.getLocalBFIs())
+        {
+          const auto uUUID = bfi.getTrialFunction().getUUID();
+          const auto vUUID = bfi.getTestFunction().getUUID();
+
+          const size_t uBlock = findTrialBlock(uUUID);
+          const size_t vBlock = findTestBlock(vUUID);
+
+          const size_t uOff = trialOffsets[uBlock];
+          const size_t vOff = testOffsets[vBlock];
+
+          const auto& attrs = bfi.getAttributes();
+          SequentialIteration seq(mesh, bfi.getRegion());
+
+          us.iapply([&](size_t ui, const auto& uref)
+          {
+            if (ui != uBlock) return;
+            const auto& uFES = uref.get().getFiniteElementSpace();
+
+            vs.iapply([&](size_t vi, const auto& vref)
+            {
+              if (vi != vBlock) return;
+              const auto& vFES = vref.get().getFiniteElementSpace();
+
+              for (auto it = seq.getIterator(); it; ++it)
+              {
+                if (!attrs.empty() && !attrs.count(it->getAttribute()))
+                  continue;
+
+                const size_t d = it->getDimension();
+                const Index  p = it->getIndex();
+
+                bfi.setPolytope(*it);
+
+                const auto& rows = vFES.getDOFs(d, p);
+                const auto& cols = uFES.getDOFs(d, p);
+
+                for (size_t i = 0; i < static_cast<size_t>(rows.size()); ++i)
+                {
+                  const Index I = static_cast<Index>(vOff + static_cast<size_t>(rows[i]));
+                  for (size_t j = 0; j < static_cast<size_t>(cols.size()); ++j)
+                  {
+                    const Index J = static_cast<Index>(uOff + static_cast<size_t>(cols[j]));
+                    const ScalarType val = Math::conj(bfi.integrate(j, i));
+                    sparse_entry(I, J, val);
+                  }
+                }
+              }
+            });
+          });
+        }
+
+        // ------------------------------------------------------------
+        // Global BFIs (type-safe per-block FES access)
+        // ------------------------------------------------------------
+        for (auto& bfi : pb.getGlobalBFIs())
+        {
+          const auto uUUID = bfi.getTrialFunction().getUUID();
+          const auto vUUID = bfi.getTestFunction().getUUID();
+
+          const size_t uBlock = findTrialBlock(uUUID);
+          const size_t vBlock = findTestBlock(vUUID);
+
+          const size_t uOff = trialOffsets[uBlock];
+          const size_t vOff = testOffsets[vBlock];
+
+          const auto& trialAttrs = bfi.getTrialAttributes();
+          const auto& testAttrs  = bfi.getTestAttributes();
+
+          SequentialIteration trialseq(mesh, bfi.getTrialRegion());
+          SequentialIteration testseq(mesh, bfi.getTestRegion());
+
+          us.iapply([&](size_t ui, const auto& uref)
+          {
+            if (ui != uBlock) return;
+            const auto& uFES = uref.get().getFiniteElementSpace();
+
+            vs.iapply([&](size_t vi, const auto& vref)
+            {
+              if (vi != vBlock) return;
+              const auto& vFES = vref.get().getFiniteElementSpace();
+
+              for (auto teIt = testseq.getIterator(); teIt; ++teIt)
+              {
+                if (!testAttrs.empty() && !testAttrs.count(teIt->getAttribute()))
+                  continue;
+
+                const auto& rows = vFES.getDOFs(teIt->getDimension(), teIt->getIndex());
+
+                for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
+                {
+                  if (!trialAttrs.empty() && !trialAttrs.count(trIt->getAttribute()))
+                    continue;
+
+                  const auto& cols = uFES.getDOFs(trIt->getDimension(), trIt->getIndex());
+
+                  bfi.setPolytope(*trIt, *teIt);
+
+                  for (size_t i = 0; i < static_cast<size_t>(rows.size()); ++i)
+                  {
+                    const Index I = static_cast<Index>(vOff + static_cast<size_t>(rows[i]));
+                    for (size_t j = 0; j < static_cast<size_t>(cols.size()); ++j)
+                    {
+                      const Index J = static_cast<Index>(uOff + static_cast<size_t>(cols[j]));
+                      const ScalarType val = Math::conj(bfi.integrate(j, i));
+                      sparse_entry(I, J, val);
+                    }
+                  }
+                }
+              }
+            });
+          });
+        }
+
+        // ------------------------------------------------------------
+        // LFIs (type-safe test FES access)
+        // ------------------------------------------------------------
+        for (auto& lfi : pb.getLFIs())
+        {
+          const auto vUUID = lfi.getTestFunction().getUUID();
+          const size_t vBlock = findTestBlock(vUUID);
+          const size_t vOff   = testOffsets[vBlock];
+
+          const auto& attrs = lfi.getAttributes();
+          SequentialIteration seq(mesh, lfi.getRegion());
+
+          vs.iapply([&](size_t vi, const auto& vref)
+          {
+            if (vi != vBlock) return;
+            const auto& vFES = vref.get().getFiniteElementSpace();
+
+            for (auto it = seq.getIterator(); it; ++it)
+            {
+              if (!attrs.empty() && !attrs.count(it->getAttribute()))
+                continue;
+
+              lfi.setPolytope(*it);
+
+              const auto& dofs = vFES.getDOFs(it->getDimension(), it->getIndex());
+              for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
+              {
+                const Index I = static_cast<Index>(vOff + static_cast<size_t>(dofs[l]));
+                if constexpr (IsSparse)
+                {
+                  if (isFixed(I))
+                    continue;
+                }
+                b.coeffRef(I) -= lfi.integrate(l);
+              }
+            }
+          });
+        }
+
+        // ------------------------------------------------------------
+        // Finalize
+        // ------------------------------------------------------------
+        if constexpr (IsSparse)
+        {
+          for (Index i = 0; i < static_cast<Index>(nrows); ++i)
+          {
+            if (isFixed(i))
+            {
+              triplets.emplace_back(i, i, ScalarType(1));
+              b.coeffRef(i) = fixedValue(i);
+            }
+          }
+
+          A.resize(nrows, ncols);
+          A.setFromTriplets(triplets.begin(), triplets.end());
+        }
+        else
+        {
+          for (Index idx = 0; idx < static_cast<Index>(nrows); ++idx)
+          {
+            if (!isFixed(idx))
+              continue;
+
+            const ScalarType value = fixedValue(idx);
+
+            for (size_t r = 0; r < nrows; ++r)
+            {
+              if (r == static_cast<size_t>(idx))
+                continue;
+              b.coeffRef(r) -= A(r, idx) * value;
+              A(r, idx) = ScalarType(0);
+            }
+
+            for (size_t c = 0; c < ncols; ++c)
+            {
+              if (c == static_cast<size_t>(idx))
+                continue;
+              A(idx, c) = ScalarType(0);
+            }
+
+            A(idx, idx) = ScalarType(1);
+            b.coeffRef(static_cast<size_t>(idx)) = value;
+          }
+        }
+      }
+
+      Sequential* copy() const noexcept override
+        {
+          return new Sequential(*this);
+        }
+    };
+
+  template <class LinearSystem, class TrialFunction, class TestFunction>
+  class Sequential<
+    LinearSystem,
+    Variational::Problem<LinearSystem, TrialFunction, TestFunction>> final
+    : public AssemblyBase<
+        LinearSystem,
+        Variational::Problem<LinearSystem, TrialFunction, TestFunction>>
+  {
+    public:
+      using LinearSystemType = LinearSystem;
+
+      using Parent =
+        AssemblyBase<
+          LinearSystemType,
+          Variational::Problem<LinearSystemType, TrialFunction, TestFunction>>;
+
+      using InputType = typename Parent::InputType;
+
+      using OperatorType =
+        typename FormLanguage::Traits<LinearSystemType>::OperatorType;
+
+      using VectorType =
+        typename FormLanguage::Traits<LinearSystemType>::VectorType;
+
+      using ScalarType =
+        typename FormLanguage::Traits<LinearSystemType>::ScalarType;
+
+      using BilinearFormType =
+        Variational::BilinearForm<
+          typename FormLanguage::Traits<TrialFunction>::SolutionType,
+          typename FormLanguage::Traits<TrialFunction>::FESType,
+          typename FormLanguage::Traits<TestFunction>::FESType,
+          OperatorType>;
+
+      using LinearFormType =
+        Variational::LinearForm<
+          typename FormLanguage::Traits<TestFunction>::FESType,
+          VectorType>;
+
+      void execute(LinearSystemType& axb, const InputType& input) const override
+      {
+        auto& A = axb.getOperator();
+        auto& b = axb.getVector();
+
+        auto& pb = input.getProblemBody();
+        const auto& u = input.getTrialFunction();
+        const auto& v = input.getTestFunction();
+
+        const auto& trialFES = u.getFiniteElementSpace();
+        const auto& testFES  = v.getFiniteElementSpace();
+        const auto& mesh     = trialFES.getMesh();
+
+        const size_t cols = static_cast<size_t>(trialFES.getSize());
+        const size_t rows = static_cast<size_t>(testFES.getSize());
+
+        b.resize(rows);
+        b.setZero();
+
+        constexpr bool IsSparse =
+          std::is_base_of_v<Eigen::SparseMatrixBase<OperatorType>, OperatorType>;
+
+        // ------------------------------------------------------------
+        // Dirichlet BC elimination data (NaN sentinel)
+        // ------------------------------------------------------------
+        std::vector<ScalarType> fixed(rows, Math::nan<ScalarType>());
+
+        auto isFixed = [&](Index i) -> bool
+        {
+          return !Math::isNaN(fixed[static_cast<size_t>(i)]);
+        };
+
+        for (auto& dbc : pb.getDBCs())
+        {
+          if (dbc.getOperand().getUUID() != u.getUUID())
+            continue;
+
+          dbc.assemble();
+          const auto& dofs = dbc.getDOFs();
+          for (const auto& [local, value] : dofs)
+            fixed[static_cast<size_t>(local)] = static_cast<ScalarType>(value);
+        }
+
+        // ------------------------------------------------------------
+        // Matrix init
+        // ------------------------------------------------------------
+        std::vector<Eigen::Triplet<ScalarType>> triplets;
+        if constexpr (!IsSparse)
+        {
+          A.resize(rows, cols);
+          A.setZero();
+        }
+
+        // ------------------------------------------------------------
+        // Sparse-only: eliminate during assembly
+        // Dense: do plain accumulation; eliminate afterwards
+        // ------------------------------------------------------------
+        auto sparse_entry = [&](Index row, Index col, ScalarType val)
+        {
+          if (val == ScalarType(0))
+            return;
+
+          if constexpr (IsSparse)
+          {
+            const bool rowFixed = isFixed(row);
+            const bool colFixed = isFixed(col);
+
+            if (rowFixed)
+              return;
+
+            if (colFixed && row != col)
+            {
+              b.coeffRef(row) -= val * fixed[static_cast<size_t>(col)];
+              return;
+            }
+
+            triplets.emplace_back(row, col, val);
+          }
+          else
+          {
+            A(row, col) += val;
+          }
+        };
+
+        // ------------------------------------------------------------
+        // Local BFIs
+        // ------------------------------------------------------------
+        for (auto& bfi : pb.getLocalBFIs())
+        {
+          const auto& attrs = bfi.getAttributes();
+          SequentialIteration seq(mesh, bfi.getRegion());
+          for (auto it = seq.getIterator(); it; ++it)
+          {
+            if (!attrs.empty() && !attrs.count(it->getAttribute()))
+              continue;
+
+            const size_t d = it->getDimension();
+            const Index  p = it->getIndex();
+
+            bfi.setPolytope(*it);
+
+            const auto& rowsDOF = testFES.getDOFs(d, p);
+            const auto& colsDOF = trialFES.getDOFs(d, p);
+
+            for (size_t i = 0; i < static_cast<size_t>(rowsDOF.size()); ++i)
+            {
+              for (size_t j = 0; j < static_cast<size_t>(colsDOF.size()); ++j)
+              {
+                const ScalarType val = Math::conj(bfi.integrate(j, i));
+                sparse_entry(rowsDOF[i], colsDOF[j], val);
+              }
+            }
+          }
+        }
+
+        // ------------------------------------------------------------
+        // Global BFIs
+        // ------------------------------------------------------------
+        for (auto& bfi : pb.getGlobalBFIs())
+        {
+          const auto& trialAttrs = bfi.getTrialAttributes();
+          const auto& testAttrs  = bfi.getTestAttributes();
+          SequentialIteration trialseq(mesh, bfi.getTrialRegion());
+          SequentialIteration testseq(mesh, bfi.getTestRegion());
+
+          for (auto teIt = testseq.getIterator(); teIt; ++teIt)
+          {
+            if (!testAttrs.empty() && !testAttrs.count(teIt->getAttribute()))
+              continue;
+
+            const auto& rowsDOF = testFES.getDOFs(teIt->getDimension(), teIt->getIndex());
+
+            for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
+            {
+              if (!trialAttrs.empty() && !trialAttrs.count(trIt->getAttribute()))
+                continue;
+
+              const auto& colsDOF = trialFES.getDOFs(trIt->getDimension(), trIt->getIndex());
+
+              bfi.setPolytope(*trIt, *teIt);
+
+              for (size_t i = 0; i < static_cast<size_t>(rowsDOF.size()); ++i)
+              {
+                for (size_t j = 0; j < static_cast<size_t>(colsDOF.size()); ++j)
+                {
+                  const ScalarType val = Math::conj(bfi.integrate(j, i));
+                  sparse_entry(rowsDOF[i], colsDOF[j], val);
+                }
+              }
+            }
+          }
+        }
+
+        // ------------------------------------------------------------
+        // Preassembled bilinear forms
+        // ------------------------------------------------------------
+        for (auto& bf : pb.getBFs())
+        {
+          const auto& op = bf.getOperator();
+          if constexpr (IsSparse)
+          {
+            for (int k = 0; k < op.outerSize(); ++k)
+              for (typename OperatorType::InnerIterator it(op, k); it; ++it)
+                sparse_entry(it.row(), it.col(), it.value());
+          }
+          else
+          {
+            A += op;
+          }
+        }
+
+        // ------------------------------------------------------------
+        // Linear forms (unchanged)
+        // ------------------------------------------------------------
+        for (auto& lfi : pb.getLFIs())
+        {
+          const auto& attrs = lfi.getAttributes();
+          SequentialIteration seq(mesh, lfi.getRegion());
+          for (auto it = seq.getIterator(); it; ++it)
+          {
+            if (!attrs.empty() && !attrs.count(it->getAttribute()))
+              continue;
+
+            lfi.setPolytope(*it);
+            const auto& dofs = testFES.getDOFs(it->getDimension(), it->getIndex());
+            for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
+              b.coeffRef(dofs[l]) -= lfi.integrate(l);
+          }
+        }
+
+        for (auto& lf : pb.getLFs())
+          b -= lf.getVector();
+
+        // ------------------------------------------------------------
+        // Finalize: Sparse build; Dense eliminate afterwards
+        // ------------------------------------------------------------
+        if constexpr (IsSparse)
+        {
+          // Inject identity rows for fixed dofs
+          for (Index i = 0; i < static_cast<Index>(rows); ++i)
+          {
+            if (isFixed(i))
+            {
+              triplets.emplace_back(i, i, ScalarType(1));
+              b.coeffRef(i) = fixed[static_cast<size_t>(i)];
+            }
+          }
+
+          A.resize(rows, cols);
+          A.setFromTriplets(triplets.begin(), triplets.end());
+        }
+        else
+        {
+          // Dense elimination after full assembly (your original approach, driven by fixedValue)
+          for (Index idx = 0; idx < static_cast<Index>(rows); ++idx)
+          {
+            if (!isFixed(idx))
+              continue;
+
+            const ScalarType value = fixed[static_cast<size_t>(idx)];
+
+            for (size_t r = 0; r < rows; ++r)
+            {
+              if (r == static_cast<size_t>(idx))
+                continue;
+              b.coeffRef(r) -= A(r, idx) * value;
+              A(r, idx) = ScalarType(0);
+            }
+
+            for (size_t c = 0; c < cols; ++c)
+            {
+              if (c == static_cast<size_t>(idx))
+                continue;
+              A(idx, c) = ScalarType(0);
+            }
+
+            A(idx, idx) = ScalarType(1);
+            b.coeffRef(static_cast<size_t>(idx)) = value;
+          }
+        }
+      }
+
+      Sequential* copy() const noexcept override
+      {
+        return new Sequential(*this);
+      }
+  };
+
   template <class Scalar, class Solution, class FES, class ValueDerived>
   class Sequential<
     IndexMap<Scalar>,
@@ -725,205 +1376,6 @@ namespace Rodin::Assembly
         return new Sequential(*this);
       }
   };
-
-
-  /**
-   * @brief Sequential assembly implementation for complete variational problems.
-   *
-   * This class provides a complete assembly implementation that handles all
-   * components of a variational problem:
-   * - Bilinear forms @f$ a(u,v) @f$ assembled into stiffness matrix @f$ A @f$
-   * - Linear forms @f$ l(v) @f$ assembled into load vector @f$ b @f$
-   * - Dirichlet boundary conditions eliminating constrained DOFs
-   * - Periodic boundary conditions merging dependent DOFs
-   *
-   * The resulting linear system has the form:
-   * @f[
-   *   A u = b
-   * @f]
-   * after applying boundary conditions.
-   *
-   * @tparam LinearSystem Linear system type (contains operator, solution, and RHS)
-   * @tparam TrialFunction Trial function type
-   * @tparam TestFunction Test function type
-   *
-   * ## Assembly Process
-   * 1. **Bilinear Form Assembly**: Assembles all bilinear form integrators into
-   *    the stiffness matrix @f$ A @f$
-   * 2. **Linear Form Assembly**: Assembles all linear form integrators into the
-   *    load vector @f$ b @f$ (stored as negative mass for compatibility)
-   * 3. **Dirichlet BC Application**: Eliminates rows/columns corresponding to
-   *    essential boundary conditions
-   * 4. **Periodic BC Application**: Merges dependent degrees of freedom for
-   *    periodic boundary conditions
-   *
-   * ## Usage Example
-   * ```cpp
-   * Problem problem(u, v);
-   * problem = Integral(Grad(u), Grad(v)) - Integral(v) + DirichletBC(u, 0.0);
-   * 
-   * Sequential<LinearSystem, decltype(u), decltype(v)> assembly;
-   * LinearSystem ls;
-   * assembly.execute(ls, problemInput);
-   * ```
-   */
-  template <class LinearSystem, class TrialFunction, class TestFunction>
-  class Sequential<LinearSystem, Variational::Problem<LinearSystem, TrialFunction, TestFunction>>
-    : public AssemblyBase<LinearSystem, Variational::Problem<LinearSystem, TrialFunction, TestFunction>>
-  {
-    public:
-      /// @brief Linear system type
-      using LinearSystemType = LinearSystem;
-
-      /// @brief Trial finite element space type
-      using TrialFESType = typename FormLanguage::Traits<TrialFunction>::FESType;
-
-      /// @brief Test finite element space type
-      using TestFESType = typename FormLanguage::Traits<TestFunction>::FESType;
-
-      /// @brief Trial space mesh type
-      using TrialFESMeshType = typename FormLanguage::Traits<TrialFESType>::MeshType;
-
-      /// @brief Test space mesh type
-      using TestFESMeshType = typename FormLanguage::Traits<TestFESType>::MeshType;
-
-      /// @brief Trial space mesh context type
-      using TrialFESMeshContextType = typename FormLanguage::Traits<TrialFESMeshType>::ContextType;
-
-      /// @brief Test space mesh context type
-      using TestFESMeshContextType = typename FormLanguage::Traits<TestFESMeshType>::ContextType;
-
-      /// @brief Operator type (matrix)
-      using OperatorType = typename FormLanguage::Traits<LinearSystemType>::OperatorType;
-
-      /// @brief Vector type
-      using VectorType = typename FormLanguage::Traits<LinearSystemType>::VectorType;
-
-      /// @brief Scalar type
-      using ScalarType = typename FormLanguage::Traits<LinearSystemType>::ScalarType;
-
-      /// @brief Solution variable type
-      using SolutionType = typename FormLanguage::Traits<TrialFunction>::SolutionType;
-
-      /// @brief Bilinear form type
-      using BilinearFormType =
-        Variational::BilinearForm<SolutionType, TrialFESType, TestFESType, OperatorType>;
-
-      /// @brief Default bilinear form assembly type
-      using BilinearFormAssemblyType =
-        typename Assembly::Default<TrialFESMeshContextType, TestFESMeshContextType>
-          ::template Type<OperatorType, BilinearFormType>;
-
-      /// @brief Linear form type
-      using LinearFormType = Variational::LinearForm<TestFESType, VectorType>;
-
-      /// @brief Default linear form assembly type
-      using LinearFormAssemblyType =
-        typename Assembly::Default<TestFESMeshContextType>
-          ::template Type<VectorType, LinearFormType>;
-
-      /// @brief Parent class type
-      using Parent =
-        AssemblyBase<LinearSystemType, Variational::Problem<LinearSystem, TrialFunction, TestFunction>>;
-
-      /// @brief Input data type
-      using InputType = typename Parent::InputType;
-
-      /// @brief Default constructor
-      Sequential() = default;
-
-      /**
-       * @brief Copy constructor.
-       * @param other Sequential assembly to copy
-       */
-      Sequential(const Sequential& other)
-        : Parent(other)
-      {}
-
-      /**
-       * @brief Move constructor.
-       * @param other Sequential assembly to move
-       */
-      Sequential(Sequential&& other)
-        : Parent(std::move(other))
-      {}
-
-      /**
-       * @brief Executes the complete problem assembly.
-       *
-       * Assembles the complete linear system by processing all bilinear forms,
-       * linear forms, and boundary conditions specified in the problem.
-       *
-       * @param out Output linear system containing matrix, solution, and RHS
-       * @param input Problem assembly input data
-       *
-       * ## Assembly Steps
-       * 1. Assemble bilinear forms into stiffness matrix
-       * 2. Add pre-assembled bilinear forms
-       * 3. Assemble linear forms into load vector
-       * 4. Add pre-assembled linear forms
-       * 5. Apply Dirichlet boundary conditions (eliminate DOFs)
-       * 6. Apply periodic boundary conditions (merge DOFs)
-       */
-      void execute(LinearSystemType& out, const InputType& input) const override
-      {
-        const auto& u = input.getTrialFunction();
-        const auto& v = input.getTestFunction();
-        const auto& trialFES = u.getFiniteElementSpace();
-        const auto& testFES = v.getFiniteElementSpace();
-        auto& pb = input.getProblemBody();
-        auto& [stiffness, solution, mass] = out;
-
-        const BilinearFormAssemblyType bfa;
-        bfa.execute(
-            stiffness,
-            {
-              u.getFiniteElementSpace(),
-              v.getFiniteElementSpace(),
-              pb.getLocalBFIs(),
-              pb.getGlobalBFIs()
-            });
-
-        for (auto& bf : pb.getBFs())
-          stiffness += bf.getOperator();
-
-        const LinearFormAssemblyType lfa;
-        lfa.execute(
-            mass,
-            {
-              v.getFiniteElementSpace(),
-              pb.getLFIs()
-            });
-
-        for (const auto& lf : pb.getLFs())
-          mass += lf.getVector();
-
-        mass *= -1;
-
-        for (auto& dbc : pb.getDBCs())
-        {
-          dbc.assemble();
-          out.eliminate(dbc.getDOFs());
-        }
-
-        for (auto& pbc : pb.getPBCs())
-        {
-          assert(trialFES == testFES);
-          pbc.assemble();
-          out.merge(pbc.getDOFs());
-        }
-      }
-
-      /**
-       * @brief Creates a polymorphic copy of this assembly object.
-       * @return Sequential* Pointer to a new copy
-       */
-      Sequential* copy() const noexcept override
-      {
-        return new Sequential(*this);
-      }
-  };
 }
 
 #endif
-

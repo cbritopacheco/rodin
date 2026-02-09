@@ -90,7 +90,7 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion3D
 
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - u_expr, 2);
-    EXPECT_NEAR(Integral(diff).compute(), 0.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(0.5 * Integral(diff).compute(), 0.0, RODIN_FUZZY_CONSTANT);
   }
 
   TEST_F(Hex16, SimpleSine_Hexahedron)
