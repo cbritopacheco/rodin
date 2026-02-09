@@ -85,7 +85,7 @@ namespace Rodin::Variational
       }
 
       constexpr
-      std::optional<size_t> getOrder(Geometry::Polytope::Type geom) const noexcept
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         return size_t(0);
       }
@@ -167,7 +167,7 @@ namespace Rodin::Variational
       }
 
       constexpr
-      std::optional<size_t> getOrder(Geometry::Polytope::Type geom) const noexcept
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         return size_t(0);
       }
