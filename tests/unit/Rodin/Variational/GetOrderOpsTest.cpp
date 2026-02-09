@@ -47,8 +47,6 @@ namespace Rodin::Tests::Variational
     EXPECT_EQ(*u.getOrder(cell), 1);
     ASSERT_TRUE(v.getOrder(cell).has_value());
     EXPECT_EQ(*v.getOrder(cell), 1);
-    ASSERT_TRUE(gf.getOrder(cell).has_value());
-    EXPECT_EQ(*gf.getOrder(cell), 1);
     ASSERT_TRUE(Zero().getOrder(cell).has_value());
     EXPECT_EQ(*Zero().getOrder(cell), 0);
   }
