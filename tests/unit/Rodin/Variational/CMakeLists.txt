@@ -58,6 +58,17 @@ gtest_discover_tests(RodinVariationalH1Test
     LABELS unit
 )
 
+add_executable(RodinVariationalGetOrderOpsTest GetOrderOpsTest.cpp)
+target_link_libraries(RodinVariationalGetOrderOpsTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalGetOrderOpsTest
+  PROPERTIES
+    LABELS unit
+)
+
 add_executable(RodinVariationalDirichletBCTest DirichletBCTest.cpp)
 target_link_libraries(RodinVariationalDirichletBCTest
   PUBLIC
