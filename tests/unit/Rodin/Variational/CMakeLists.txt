@@ -223,6 +223,17 @@ gtest_discover_tests(RodinVariationalSumTest
     LABELS unit
 )
 
+add_executable(RodinVariationalP1QuadratureRuleTest P1QuadratureRuleTest.cpp)
+target_link_libraries(RodinVariationalP1QuadratureRuleTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalP1QuadratureRuleTest
+  PROPERTIES
+    LABELS unit
+)
+
 add_executable(RodinVariationalMultTest MultTest.cpp)
 target_link_libraries(RodinVariationalMultTest
   PUBLIC
