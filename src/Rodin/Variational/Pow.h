@@ -117,6 +117,31 @@ namespace Rodin::Variational
         return Math::pow(this->getBase().getValue(p), getExponent());
       }
 
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
+      {
+        const auto o = getBase().getOrder(polytope);
+        if (!o)
+          return std::nullopt;
+        if constexpr (std::is_integral_v<ExponentType>)
+        {
+          const auto rawExp = getExponent();
+          if constexpr (std::is_signed_v<ExponentType>)
+          {
+            if (rawExp < 0)
+              return std::nullopt;
+          }
+          if (rawExp == 0)
+            return size_t{0};
+          const auto exp = static_cast<size_t>(rawExp);
+          // At this point exp >= 1 because the rawExp == 0 case has returned above.
+          const auto limit = std::numeric_limits<size_t>::max() / exp;
+          if (*o > limit)
+            return std::nullopt;
+          return (*o) * exp;
+        }
+        return std::nullopt;
+      }
+
       const BaseType& getBase() const
       {
         return *m_s;

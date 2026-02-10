@@ -159,7 +159,7 @@ namespace Rodin::Variational
         const size_t nv = fe_scalar.getCount();
 
         const auto& rc = p.getReferenceCoordinates();
-        const auto Jinv = p.getJacobianInverse();
+        const auto& Jinv = p.getJacobianInverse();
 
         // out = Σ_v u(v) · (J^{-T} ∇_hat φ_v)
         // but compute as: out = Σ_v Σ_j u_j(v) * (∇_hat φ_v)^T * (Jinv)_{:,j}
@@ -414,7 +414,7 @@ namespace Rodin::Variational
           const size_t qp = ip.getIndex();
           const auto& rc = qf.getPoint(qp);
 
-          const auto Jinv = pt.getJacobianInverse();
+          const auto& Jinv = pt.getJacobianInverse();
 
           // For basis (v,c): div(φ_{v,c}) = (J^{-T} ∇_hat φ_v)_c
           // because only component c is nonzero.

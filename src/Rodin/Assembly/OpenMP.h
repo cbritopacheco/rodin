@@ -753,6 +753,1005 @@ namespace Rodin::Assembly
     private:
       Optional<size_t> m_threadCount;
   };
+
+  template <class LinearSystem, class TrialFunction, class TestFunction>
+  class OpenMP<
+    LinearSystem,
+    Variational::Problem<LinearSystem, TrialFunction, TestFunction>> final
+    : public AssemblyBase<
+        LinearSystem,
+        Variational::Problem<LinearSystem, TrialFunction, TestFunction>>
+  {
+    public:
+      using LinearSystemType = LinearSystem;
+
+      using Parent =
+        AssemblyBase<
+          LinearSystemType,
+          Variational::Problem<LinearSystemType, TrialFunction, TestFunction>>;
+
+      using InputType = typename Parent::InputType;
+
+      using OperatorType =
+        typename FormLanguage::Traits<LinearSystemType>::OperatorType;
+
+      using VectorType =
+        typename FormLanguage::Traits<LinearSystemType>::VectorType;
+
+      using ScalarType =
+        typename FormLanguage::Traits<LinearSystemType>::ScalarType;
+
+      using LocalBilinearFormIntegratorBaseType =
+        Variational::LocalBilinearFormIntegratorBase<ScalarType>;
+
+      using GlobalBilinearFormIntegratorBaseType =
+        Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
+
+      using LinearFormIntegratorBaseType =
+        Variational::LinearFormIntegratorBase<ScalarType>;
+
+      OpenMP() = default;
+
+      OpenMP(const OpenMP& other)
+        : Parent(other),
+          m_threadCount(other.m_threadCount)
+      {}
+
+      OpenMP(OpenMP&& other)
+        : Parent(std::move(other)), m_threadCount(other.m_threadCount)
+      {}
+
+      void execute(LinearSystemType& axb, const InputType& input) const override
+      {
+        auto& A = axb.getOperator();
+        auto& b = axb.getVector();
+
+        auto& pb = input.getProblemBody();
+        const auto& u = input.getTrialFunction();
+        const auto& v = input.getTestFunction();
+
+        const auto& trialFES = u.getFiniteElementSpace();
+        const auto& testFES  = v.getFiniteElementSpace();
+        const auto& mesh     = trialFES.getMesh();
+
+        const size_t cols = static_cast<size_t>(trialFES.getSize());
+        const size_t rows = static_cast<size_t>(testFES.getSize());
+
+        b.resize(rows);
+        b.setZero();
+
+        constexpr bool IsSparse =
+          std::is_base_of_v<Eigen::SparseMatrixBase<OperatorType>, OperatorType>;
+
+        const int tc =
+          m_threadCount.has_value()
+            ? static_cast<int>(m_threadCount.value())
+            : omp_get_max_threads();
+
+        // ---- Dirichlet fixed values (NaN sentinel) ----
+        const size_t ndofs = std::max(rows, cols);
+        std::vector<ScalarType> fixed(ndofs, Math::nan<ScalarType>());
+
+        auto isFixed = [&](Index i) -> bool
+        {
+          const size_t k = static_cast<size_t>(i);
+          return k < fixed.size() && !Math::isNaN(fixed[k]);
+        };
+
+        for (auto& dbc : pb.getDBCs())
+        {
+          if (dbc.getOperand().getUUID() != u.getUUID())
+            continue;
+
+          dbc.assemble();
+          for (const auto& [local, value] : dbc.getDOFs())
+          {
+            const Index I = static_cast<Index>(local);
+            fixed[static_cast<size_t>(I)] = static_cast<ScalarType>(value);
+          }
+        }
+
+        if constexpr (IsSparse)
+        {
+          // ---- Sparse path: eliminate during assembly (thread-local triplets + RHS) ----
+          std::vector<std::vector<Eigen::Triplet<ScalarType>>> tchunks(static_cast<size_t>(tc));
+          std::vector<std::vector<ScalarType>> rhsChunks(
+            static_cast<size_t>(tc),
+            std::vector<ScalarType>(rows, ScalarType(0))
+          );
+
+          auto sparse_entry =
+            [&](std::vector<Eigen::Triplet<ScalarType>>& localT,
+                std::vector<ScalarType>& localRhs,
+                Index row, Index col, ScalarType val)
+          {
+            if (val == ScalarType(0))
+              return;
+
+            const bool rowFixed = isFixed(row);
+            const bool colFixed = isFixed(col);
+
+            if (rowFixed)
+              return;
+
+            if (colFixed && row != col)
+            {
+              localRhs[static_cast<size_t>(row)] -=
+                val * fixed[static_cast<size_t>(col)];
+              return;
+            }
+
+            localT.emplace_back(row, col, val);
+          };
+
+          // ---------------- Local BFIs ----------------
+          for (auto& bfi : pb.getLocalBFIs())
+          {
+            const auto& attrs = bfi.getAttributes();
+            OpenMPIteration seq(mesh, bfi.getRegion());
+            const Index d = seq.getDimension();
+            const Index count = seq.getCount();
+
+#pragma omp parallel num_threads(tc)
+            {
+              const int tid = omp_get_thread_num();
+              auto& localT = tchunks[static_cast<size_t>(tid)];
+              auto& localRhs = rhsChunks[static_cast<size_t>(tid)];
+
+              std::unique_ptr<LocalBilinearFormIntegratorBaseType> integrator(bfi.copy());
+
+#pragma omp for
+              for (Index p = 0; p < count; ++p)
+              {
+                if (!seq.filter(p)) continue;
+                if (!attrs.empty() && !attrs.count(mesh.getAttribute(d, p))) continue;
+
+                auto it = seq.getIterator(p);
+                integrator->setPolytope(*it);
+
+                const auto& rowsDOF = testFES.getDOFs(d, p);
+                const auto& colsDOF = trialFES.getDOFs(d, p);
+
+                for (size_t i = 0; i < static_cast<size_t>(rowsDOF.size()); ++i)
+                {
+                  const Index I = rowsDOF(i);
+                  for (size_t j = 0; j < static_cast<size_t>(colsDOF.size()); ++j)
+                  {
+                    const Index J = colsDOF(j);
+                    const ScalarType val = Math::conj(integrator->integrate(j, i));
+                    sparse_entry(localT, localRhs, I, J, val);
+                  }
+                }
+              }
+            }
+          }
+
+          // ---------------- Global BFIs ----------------
+          for (auto& bfi : pb.getGlobalBFIs())
+          {
+            const auto& trialAttrs = bfi.getTrialAttributes();
+            const auto& testAttrs  = bfi.getTestAttributes();
+
+            OpenMPIteration trialseq(mesh, bfi.getTrialRegion());
+            OpenMPIteration testseq(mesh, bfi.getTestRegion());
+
+            const Index td = testseq.getDimension();
+            const Index tcount = testseq.getCount();
+
+#pragma omp parallel num_threads(tc)
+            {
+              const int tid = omp_get_thread_num();
+              auto& localT = tchunks[static_cast<size_t>(tid)];
+              auto& localRhs = rhsChunks[static_cast<size_t>(tid)];
+
+              std::unique_ptr<GlobalBilinearFormIntegratorBaseType> integrator(bfi.copy());
+
+#pragma omp for
+              for (Index te = 0; te < tcount; ++te)
+              {
+                if (!testseq.filter(te)) continue;
+                if (!testAttrs.empty() && !testAttrs.count(mesh.getAttribute(td, te))) continue;
+
+                const auto& rowsDOF = testFES.getDOFs(td, te);
+
+                const Index rd = trialseq.getDimension();
+                const Index rcount = trialseq.getCount();
+
+                for (Index tr = 0; tr < rcount; ++tr)
+                {
+                  if (!trialseq.filter(tr)) continue;
+                  if (!trialAttrs.empty() && !trialAttrs.count(mesh.getAttribute(rd, tr))) continue;
+
+                  const auto& colsDOF = trialFES.getDOFs(rd, tr);
+
+                  auto teIt = testseq.getIterator(te);
+                  auto trIt = trialseq.getIterator(tr);
+
+                  integrator->setPolytope(*trIt, *teIt);
+
+                  for (size_t i = 0; i < static_cast<size_t>(rowsDOF.size()); ++i)
+                  {
+                    const Index I = rowsDOF(i);
+                    for (size_t j = 0; j < static_cast<size_t>(colsDOF.size()); ++j)
+                    {
+                      const Index J = colsDOF(j);
+                      const ScalarType val = Math::conj(integrator->integrate(j, i));
+                      sparse_entry(localT, localRhs, I, J, val);
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          // ---------------- Preassembled bilinear forms ----------------
+          for (auto& bf : pb.getBFs())
+          {
+            const auto& op = bf.getOperator();
+            for (int k = 0; k < op.outerSize(); ++k)
+              for (typename OperatorType::InnerIterator it(op, k); it; ++it)
+                sparse_entry(tchunks[0], rhsChunks[0], it.row(), it.col(), it.value());
+          }
+
+          // ---------------- LFIs ----------------
+          for (auto& lfi : pb.getLFIs())
+          {
+            const auto& attrs = lfi.getAttributes();
+            OpenMPIteration seq(mesh, lfi.getRegion());
+            const Index d = seq.getDimension();
+            const Index count = seq.getCount();
+
+#pragma omp parallel num_threads(tc)
+            {
+              const int tid = omp_get_thread_num();
+              auto& localRhs = rhsChunks[static_cast<size_t>(tid)];
+
+              std::unique_ptr<LinearFormIntegratorBaseType> integrator(lfi.copy());
+
+#pragma omp for
+              for (Index p = 0; p < count; ++p)
+              {
+                if (!seq.filter(p)) continue;
+                if (!attrs.empty() && !attrs.count(mesh.getAttribute(d, p))) continue;
+
+                auto it = seq.getIterator(p);
+                integrator->setPolytope(*it);
+
+                const auto& dofs = testFES.getDOFs(d, p);
+                for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
+                {
+                  const Index I = dofs(l);
+                  localRhs[static_cast<size_t>(I)] -= integrator->integrate(l);
+                }
+              }
+            }
+          }
+
+          // Preassembled linear forms (serial)
+          for (auto& lf : pb.getLFs())
+            b -= lf.getVector();
+
+          // ---------------- Reduce RHS chunks into b ----------------
+          for (int tid = 0; tid < tc; ++tid)
+          {
+            const auto& localRhs = rhsChunks[static_cast<size_t>(tid)];
+            for (size_t i = 0; i < rows; ++i)
+              b.coeffRef(i) += localRhs[i];
+          }
+
+          // ---------------- Merge triplets ----------------
+          size_t totalTriplets = 0;
+          for (auto& v0 : tchunks) totalTriplets += v0.size();
+
+          std::vector<Eigen::Triplet<ScalarType>> all;
+          all.reserve(totalTriplets + rows);
+
+          for (auto& v0 : tchunks)
+          {
+            all.insert(all.end(),
+                       std::make_move_iterator(v0.begin()),
+                       std::make_move_iterator(v0.end()));
+            v0.clear();
+          }
+
+          // Inject identity rows for fixed dofs
+          for (Index i = 0; i < static_cast<Index>(rows); ++i)
+          {
+            if (isFixed(i))
+            {
+              all.emplace_back(i, i, ScalarType(1));
+              b.coeffRef(static_cast<size_t>(i)) = fixed[static_cast<size_t>(i)];
+            }
+          }
+
+          A.resize(rows, cols);
+          A.setFromTriplets(all.begin(), all.end());
+        }
+        else
+        {
+          // ---- Dense path: assemble then eliminate afterwards ----
+          A.resize(rows, cols);
+          A.setZero();
+
+          std::vector<OperatorType> Achunks(static_cast<size_t>(tc));
+          std::vector<std::vector<ScalarType>> rhsChunks(
+            static_cast<size_t>(tc),
+            std::vector<ScalarType>(rows, ScalarType(0))
+          );
+
+          for (int tid = 0; tid < tc; ++tid)
+          {
+            Achunks[static_cast<size_t>(tid)].resize(rows, cols);
+            Achunks[static_cast<size_t>(tid)].setZero();
+          }
+
+          // Local BFIs
+          for (auto& bfi : pb.getLocalBFIs())
+          {
+            const auto& attrs = bfi.getAttributes();
+            OpenMPIteration seq(mesh, bfi.getRegion());
+            const Index d = seq.getDimension();
+            const Index count = seq.getCount();
+
+#pragma omp parallel num_threads(tc)
+            {
+              const int tid = omp_get_thread_num();
+              auto& Alocal = Achunks[static_cast<size_t>(tid)];
+
+              std::unique_ptr<LocalBilinearFormIntegratorBaseType> integrator(bfi.copy());
+
+#pragma omp for
+              for (Index p = 0; p < count; ++p)
+              {
+                if (!seq.filter(p)) continue;
+                if (!attrs.empty() && !attrs.count(mesh.getAttribute(d, p))) continue;
+
+                auto it = seq.getIterator(p);
+                integrator->setPolytope(*it);
+
+                const auto& rowsDOF = testFES.getDOFs(d, p);
+                const auto& colsDOF = trialFES.getDOFs(d, p);
+
+                for (size_t i = 0; i < static_cast<size_t>(rowsDOF.size()); ++i)
+                {
+                  const Index I = rowsDOF(i);
+                  for (size_t j = 0; j < static_cast<size_t>(colsDOF.size()); ++j)
+                  {
+                    const Index J = colsDOF(j);
+                    const ScalarType val = Math::conj(integrator->integrate(j, i));
+                    if (val != ScalarType(0))
+                      Alocal(I, J) += val;
+                  }
+                }
+              }
+            }
+          }
+
+          // Global BFIs
+          for (auto& bfi : pb.getGlobalBFIs())
+          {
+            const auto& trialAttrs = bfi.getTrialAttributes();
+            const auto& testAttrs  = bfi.getTestAttributes();
+
+            OpenMPIteration trialseq(mesh, bfi.getTrialRegion());
+            OpenMPIteration testseq(mesh, bfi.getTestRegion());
+
+            const Index td = testseq.getDimension();
+            const Index tcount = testseq.getCount();
+
+#pragma omp parallel num_threads(tc)
+            {
+              const int tid = omp_get_thread_num();
+              auto& Alocal = Achunks[static_cast<size_t>(tid)];
+
+              std::unique_ptr<GlobalBilinearFormIntegratorBaseType> integrator(bfi.copy());
+
+#pragma omp for
+              for (Index te = 0; te < tcount; ++te)
+              {
+                if (!testseq.filter(te)) continue;
+                if (!testAttrs.empty() && !testAttrs.count(mesh.getAttribute(td, te))) continue;
+
+                const auto& rowsDOF = testFES.getDOFs(td, te);
+
+                const Index rd = trialseq.getDimension();
+                const Index rcount = trialseq.getCount();
+
+                for (Index tr = 0; tr < rcount; ++tr)
+                {
+                  if (!trialseq.filter(tr)) continue;
+                  if (!trialAttrs.empty() && !trialAttrs.count(mesh.getAttribute(rd, tr))) continue;
+
+                  const auto& colsDOF = trialFES.getDOFs(rd, tr);
+
+                  auto teIt = testseq.getIterator(te);
+                  auto trIt = trialseq.getIterator(tr);
+
+                  integrator->setPolytope(*trIt, *teIt);
+
+                  for (size_t i = 0; i < static_cast<size_t>(rowsDOF.size()); ++i)
+                  {
+                    const Index I = rowsDOF(i);
+                    for (size_t j = 0; j < static_cast<size_t>(colsDOF.size()); ++j)
+                    {
+                      const Index J = colsDOF(j);
+                      const ScalarType val = Math::conj(integrator->integrate(j, i));
+                      if (val != ScalarType(0))
+                        Alocal(I, J) += val;
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          // Preassembled bilinear forms (serial)
+          for (auto& bf : pb.getBFs())
+            A += bf.getOperator();
+
+          // Reduce dense matrices
+          for (int tid = 0; tid < tc; ++tid)
+            A += Achunks[static_cast<size_t>(tid)];
+
+          // LFIs
+          for (auto& lfi : pb.getLFIs())
+          {
+            const auto& attrs = lfi.getAttributes();
+            OpenMPIteration seq(mesh, lfi.getRegion());
+            const Index d = seq.getDimension();
+            const Index count = seq.getCount();
+
+#pragma omp parallel num_threads(tc)
+            {
+              const int tid = omp_get_thread_num();
+              auto& localRhs = rhsChunks[static_cast<size_t>(tid)];
+
+              std::unique_ptr<LinearFormIntegratorBaseType> integrator(lfi.copy());
+
+#pragma omp for
+              for (Index p = 0; p < count; ++p)
+              {
+                if (!seq.filter(p)) continue;
+                if (!attrs.empty() && !attrs.count(mesh.getAttribute(d, p))) continue;
+
+                auto it = seq.getIterator(p);
+                integrator->setPolytope(*it);
+
+                const auto& dofs = testFES.getDOFs(d, p);
+                for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
+                  localRhs[static_cast<size_t>(dofs(l))] -= integrator->integrate(l);
+              }
+            }
+          }
+
+          // Reduce RHS chunks into b
+          for (int tid = 0; tid < tc; ++tid)
+          {
+            const auto& localRhs = rhsChunks[static_cast<size_t>(tid)];
+            for (size_t i = 0; i < rows; ++i)
+              b.coeffRef(i) += localRhs[i];
+          }
+
+          // Preassembled linear forms (serial)
+          for (auto& lf : pb.getLFs())
+            b -= lf.getVector();
+
+          // Dense elimination afterwards
+          for (Index idx = 0; idx < static_cast<Index>(rows); ++idx)
+          {
+            if (!isFixed(idx))
+              continue;
+
+            const ScalarType value = fixed[static_cast<size_t>(idx)];
+
+            for (size_t r = 0; r < rows; ++r)
+            {
+              if (r == static_cast<size_t>(idx)) continue;
+              b.coeffRef(r) -= A(r, idx) * value;
+              A(r, idx) = ScalarType(0);
+            }
+
+            for (size_t c = 0; c < cols; ++c)
+            {
+              if (c == static_cast<size_t>(idx)) continue;
+              A(idx, c) = ScalarType(0);
+            }
+
+            A(idx, idx) = ScalarType(1);
+            b.coeffRef(static_cast<size_t>(idx)) = value;
+          }
+        }
+      }
+
+      OpenMP* copy() const noexcept override { return new OpenMP(*this); }
+
+    private:
+      std::optional<size_t> m_threadCount;
+  };
+
+  template <class LinearSystem, class U1, class U2, class U3, class ... Us>
+  class OpenMP<
+    LinearSystem,
+    Variational::Problem<LinearSystem, U1, U2, U3, Us...>> final
+    : public AssemblyBase<
+        LinearSystem,
+        Variational::Problem<LinearSystem, U1, U2, U3, Us...>>
+  {
+    public:
+      using LinearSystemType = LinearSystem;
+
+      using Parent =
+        AssemblyBase<
+          LinearSystemType,
+          Variational::Problem<LinearSystemType, U1, U2, U3, Us...>>;
+
+      using InputType = typename Parent::InputType;
+
+      using OperatorType =
+        typename FormLanguage::Traits<LinearSystemType>::OperatorType;
+
+      using VectorType =
+        typename FormLanguage::Traits<LinearSystemType>::VectorType;
+
+      using ScalarType =
+        typename FormLanguage::Traits<LinearSystemType>::ScalarType;
+
+      using LocalBilinearFormIntegratorBaseType =
+        Variational::LocalBilinearFormIntegratorBase<ScalarType>;
+
+      using GlobalBilinearFormIntegratorBaseType =
+        Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
+
+      using LinearFormIntegratorBaseType =
+        Variational::LinearFormIntegratorBase<ScalarType>;
+
+      OpenMP() = default;
+
+      OpenMP(const OpenMP& other)
+        : Parent(other),
+          m_threadCount(other.m_threadCount)
+      {}
+
+      OpenMP(OpenMP&& other)
+        : Parent(std::move(other)),
+          m_threadCount(other.m_threadCount)
+      {}
+
+      void execute(LinearSystemType& axb, const InputType& input) const override
+      {
+        auto& A = axb.getOperator();
+        auto& b = axb.getVector();
+
+        auto& pb = input.getProblemBody();
+        auto&       us           = input.getTrialFunctions();
+        auto&       vs           = input.getTestFunctions();
+        const auto& trialOffsets = input.getTrialOffsets();
+        const auto& testOffsets  = input.getTestOffsets();
+        auto&       trialUUIDMap = input.getTrialUUIDMap();
+        auto&       testUUIDMap  = input.getTestUUIDMap();
+
+        const size_t ncols = input.getTotalTrialSize();
+        const size_t nrows = input.getTotalTestSize();
+
+        b.resize(nrows);
+        b.setZero();
+
+        constexpr bool IsSparse =
+          std::is_base_of_v<Eigen::SparseMatrixBase<OperatorType>, OperatorType>;
+
+        const int tc =
+          m_threadCount.has_value()
+            ? static_cast<int>(m_threadCount.value())
+            : omp_get_max_threads();
+
+        const auto findTrialBlock = [&](const auto& uuid) -> size_t
+        {
+          auto it = trialUUIDMap.left.find(uuid);
+          assert(it != trialUUIDMap.left.end());
+          return it->second;
+        };
+
+        const auto findTestBlock = [&](const auto& uuid) -> size_t
+        {
+          auto it = testUUIDMap.left.find(uuid);
+          assert(it != testUUIDMap.left.end());
+          return it->second;
+        };
+
+        // Mesh (assume common)
+        const auto& mesh = [&]() -> const auto&
+        {
+          const void* addr = nullptr;
+          us.apply([&](const auto& uref)
+          {
+            if (!addr)
+              addr = static_cast<const void*>(&uref.get().getFiniteElementSpace().getMesh());
+          });
+          assert(addr);
+          return *static_cast<
+            const std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace().getMesh())>*
+          >(addr);
+        }();
+
+        // ------------------------------------------------------------------
+        // Dirichlet: NaN sentinel (global indices!)
+        // ------------------------------------------------------------------
+        const size_t ndofs = std::max(nrows, ncols);
+        std::vector<ScalarType> fixed(ndofs, Math::nan<ScalarType>());
+
+        auto isFixed = [&](Index I) -> bool
+        {
+          const size_t k = static_cast<size_t>(I);
+          return k < fixed.size() && !Math::isNaN(fixed[k]);
+        };
+
+        for (auto& dbc : pb.getDBCs())
+        {
+          const auto uUUID = dbc.getOperand().getUUID();
+          const size_t uBlock = findTrialBlock(uUUID);
+          const size_t uOff   = trialOffsets[uBlock];
+
+          dbc.assemble();
+          for (const auto& [local, value] : dbc.getDOFs())
+          {
+            const Index I = static_cast<Index>(uOff + static_cast<size_t>(local));
+            fixed[static_cast<size_t>(I)] = static_cast<ScalarType>(value);
+          }
+        }
+
+        // ------------------------------------------------------------------
+        // Thread-local accumulators
+        // ------------------------------------------------------------------
+        std::vector<std::vector<Eigen::Triplet<ScalarType>>> tchunks(static_cast<size_t>(tc));
+        std::vector<std::vector<ScalarType>> rhsChunks(
+          static_cast<size_t>(tc),
+          std::vector<ScalarType>(nrows, ScalarType(0))
+        );
+
+        std::vector<OperatorType> Achunks;
+        if constexpr (!IsSparse)
+        {
+          Achunks.resize(static_cast<size_t>(tc));
+          for (int tid = 0; tid < tc; ++tid)
+          {
+            Achunks[static_cast<size_t>(tid)].resize(nrows, ncols);
+            Achunks[static_cast<size_t>(tid)].setZero();
+          }
+        }
+        else
+        {
+          if constexpr (IsSparse)
+            tchunks.shrink_to_fit(); // no-op typically; keeps symmetry with dense path
+        }
+
+        auto sparse_entry = [&](int tid, Index row, Index col, ScalarType val)
+        {
+          if (val == ScalarType(0))
+            return;
+
+          const bool rowFixed = isFixed(row);
+          const bool colFixed = isFixed(col);
+
+          if (rowFixed)
+            return;
+
+          if (colFixed && row != col)
+          {
+            rhsChunks[static_cast<size_t>(tid)][static_cast<size_t>(row)] -=
+              val * fixed[static_cast<size_t>(col)];
+            return;
+          }
+
+          tchunks[static_cast<size_t>(tid)].emplace_back(row, col, val);
+        };
+
+        // ------------------------------------------------------------------
+        // Local BFIs (BUGFIX: type-safe per-block FES access; no casts)
+        // ------------------------------------------------------------------
+        for (auto& bfi : pb.getLocalBFIs())
+        {
+          const auto uUUID = bfi.getTrialFunction().getUUID();
+          const auto vUUID = bfi.getTestFunction().getUUID();
+
+          const size_t uBlock = findTrialBlock(uUUID);
+          const size_t vBlock = findTestBlock(vUUID);
+
+          const size_t uOff = trialOffsets[uBlock];
+          const size_t vOff = testOffsets[vBlock];
+
+          const auto& attrs = bfi.getAttributes();
+          OpenMPIteration seq(mesh, bfi.getRegion());
+          const Index d = seq.getDimension();
+          const Index count = seq.getCount();
+
+          us.iapply([&](size_t ui, const auto& uref)
+          {
+            if (ui != uBlock) return;
+            const auto& uFES = uref.get().getFiniteElementSpace();
+
+            vs.iapply([&](size_t vi, const auto& vref)
+            {
+              if (vi != vBlock) return;
+              const auto& vFES = vref.get().getFiniteElementSpace();
+
+#pragma omp parallel num_threads(tc)
+              {
+                const int tid = omp_get_thread_num();
+
+                std::unique_ptr<LocalBilinearFormIntegratorBaseType> integrator(bfi.copy());
+                OperatorType* Alocal = nullptr;
+                if constexpr (!IsSparse)
+                  Alocal = &Achunks[static_cast<size_t>(tid)];
+
+#pragma omp for
+                for (Index p = 0; p < count; ++p)
+                {
+                  if (!seq.filter(p)) continue;
+                  if (!attrs.empty() && !attrs.count(mesh.getAttribute(d, p))) continue;
+
+                  auto it = seq.getIterator(p);
+                  integrator->setPolytope(*it);
+
+                  const auto& rows = vFES.getDOFs(d, p);
+                  const auto& cols = uFES.getDOFs(d, p);
+
+                  for (size_t i = 0; i < static_cast<size_t>(rows.size()); ++i)
+                  {
+                    const Index I = static_cast<Index>(vOff + static_cast<size_t>(rows(i)));
+                    for (size_t j = 0; j < static_cast<size_t>(cols.size()); ++j)
+                    {
+                      const Index J = static_cast<Index>(uOff + static_cast<size_t>(cols(j)));
+                      const ScalarType val = Math::conj(integrator->integrate(j, i));
+                      if (val == ScalarType(0))
+                        continue;
+
+                      if constexpr (IsSparse)
+                        sparse_entry(tid, I, J, val);
+                      else
+                        (*Alocal)(I, J) += val;
+                    }
+                  }
+                }
+              } // omp parallel
+            });
+          });
+        }
+
+        // ------------------------------------------------------------------
+        // Global BFIs (BUGFIX: type-safe per-block FES access; no casts)
+        // ------------------------------------------------------------------
+        for (auto& bfi : pb.getGlobalBFIs())
+        {
+          const auto uUUID = bfi.getTrialFunction().getUUID();
+          const auto vUUID = bfi.getTestFunction().getUUID();
+
+          const size_t uBlock = findTrialBlock(uUUID);
+          const size_t vBlock = findTestBlock(vUUID);
+
+          const size_t uOff = trialOffsets[uBlock];
+          const size_t vOff = testOffsets[vBlock];
+
+          const auto& trialAttrs = bfi.getTrialAttributes();
+          const auto& testAttrs  = bfi.getTestAttributes();
+
+          OpenMPIteration trialseq(mesh, bfi.getTrialRegion());
+          OpenMPIteration testseq(mesh, bfi.getTestRegion());
+
+          const Index td = testseq.getDimension();
+          const Index tcount = testseq.getCount();
+
+          us.iapply([&](size_t ui, const auto& uref)
+          {
+            if (ui != uBlock) return;
+            const auto& uFES = uref.get().getFiniteElementSpace();
+
+            vs.iapply([&](size_t vi, const auto& vref)
+            {
+              if (vi != vBlock) return;
+              const auto& vFES = vref.get().getFiniteElementSpace();
+
+#pragma omp parallel num_threads(tc)
+              {
+                const int tid = omp_get_thread_num();
+
+                std::unique_ptr<GlobalBilinearFormIntegratorBaseType> integrator(bfi.copy());
+                OperatorType* Alocal = nullptr;
+                if constexpr (!IsSparse)
+                  Alocal = &Achunks[static_cast<size_t>(tid)];
+
+#pragma omp for
+                for (Index te = 0; te < tcount; ++te)
+                {
+                  if (!testseq.filter(te)) continue;
+                  if (!testAttrs.empty() && !testAttrs.count(mesh.getAttribute(td, te))) continue;
+
+                  const auto& rows = vFES.getDOFs(td, te);
+
+                  const Index rd = trialseq.getDimension();
+                  const Index rcount = trialseq.getCount();
+
+                  for (Index tr = 0; tr < rcount; ++tr)
+                  {
+                    if (!trialseq.filter(tr)) continue;
+                    if (!trialAttrs.empty() && !trialAttrs.count(mesh.getAttribute(rd, tr))) continue;
+
+                    const auto& cols = uFES.getDOFs(rd, tr);
+
+                    auto teIt = testseq.getIterator(te);
+                    auto trIt = trialseq.getIterator(tr);
+
+                    integrator->setPolytope(*trIt, *teIt);
+
+                    for (size_t i = 0; i < static_cast<size_t>(rows.size()); ++i)
+                    {
+                      const Index I = static_cast<Index>(vOff + static_cast<size_t>(rows(i)));
+                      for (size_t j = 0; j < static_cast<size_t>(cols.size()); ++j)
+                      {
+                        const Index J = static_cast<Index>(uOff + static_cast<size_t>(cols(j)));
+                        const ScalarType val = Math::conj(integrator->integrate(j, i));
+                        if (val == ScalarType(0))
+                          continue;
+
+                        if constexpr (IsSparse)
+                          sparse_entry(tid, I, J, val);
+                        else
+                          (*Alocal)(I, J) += val;
+                      }
+                    }
+                  }
+                }
+              } // omp parallel
+            });
+          });
+        }
+
+        // ------------------------------------------------------------------
+        // LFIs (type-safe test FES; thread-local rhs)
+        // ------------------------------------------------------------------
+        for (auto& lfi : pb.getLFIs())
+        {
+          const auto vUUID = lfi.getTestFunction().getUUID();
+          const size_t vBlock = findTestBlock(vUUID);
+          const size_t vOff   = testOffsets[vBlock];
+
+          const auto& attrs = lfi.getAttributes();
+          OpenMPIteration seq(mesh, lfi.getRegion());
+          const Index d = seq.getDimension();
+          const Index count = seq.getCount();
+
+          vs.iapply([&](size_t vi, const auto& vref)
+          {
+            if (vi != vBlock) return;
+            const auto& vFES = vref.get().getFiniteElementSpace();
+
+#pragma omp parallel num_threads(tc)
+            {
+              const int tid = omp_get_thread_num();
+              auto& localRhs = rhsChunks[static_cast<size_t>(tid)];
+
+              std::unique_ptr<LinearFormIntegratorBaseType> integrator(lfi.copy());
+
+#pragma omp for
+              for (Index p = 0; p < count; ++p)
+              {
+                if (!seq.filter(p)) continue;
+                if (!attrs.empty() && !attrs.count(mesh.getAttribute(d, p))) continue;
+
+                auto it = seq.getIterator(p);
+                integrator->setPolytope(*it);
+
+                const auto& dofs = vFES.getDOFs(d, p);
+                for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
+                {
+                  const Index I = static_cast<Index>(vOff + static_cast<size_t>(dofs(l)));
+                  localRhs[static_cast<size_t>(I)] -= integrator->integrate(l);
+                }
+              }
+            } // omp parallel
+          });
+        }
+
+        // ------------------------------------------------------------------
+        // Reduce RHS chunks into b
+        // ------------------------------------------------------------------
+        for (int tid = 0; tid < tc; ++tid)
+        {
+          const auto& localRhs = rhsChunks[static_cast<size_t>(tid)];
+          for (size_t i = 0; i < nrows; ++i)
+            b.coeffRef(i) += localRhs[i];
+        }
+
+        // Preassembled LFs (serial)
+        for (auto& lf : pb.getLFs())
+          b -= lf.getVector();
+
+        // ------------------------------------------------------------------
+        // Finalize operator
+        // ------------------------------------------------------------------
+        if constexpr (IsSparse)
+        {
+          // Preassembled BFs -> apply elimination through sparse_entry (tid=0)
+          for (auto& bf : pb.getBFs())
+          {
+            const auto& op = bf.getOperator();
+            for (int k = 0; k < op.outerSize(); ++k)
+              for (typename OperatorType::InnerIterator it(op, k); it; ++it)
+                sparse_entry(0, it.row(), it.col(), it.value());
+          }
+
+          // Merge triplets
+          size_t totalTriplets = 0;
+          for (auto& v0 : tchunks) totalTriplets += v0.size();
+
+          std::vector<Eigen::Triplet<ScalarType>> all;
+          all.reserve(totalTriplets + nrows);
+
+          for (auto& v0 : tchunks)
+          {
+            all.insert(all.end(),
+                       std::make_move_iterator(v0.begin()),
+                       std::make_move_iterator(v0.end()));
+            v0.clear();
+          }
+
+          // Identity rows for fixed dofs
+          for (Index I = 0; I < static_cast<Index>(nrows); ++I)
+          {
+            if (isFixed(I))
+            {
+              all.emplace_back(I, I, ScalarType(1));
+              b.coeffRef(static_cast<size_t>(I)) = fixed[static_cast<size_t>(I)];
+            }
+          }
+
+          A.resize(nrows, ncols);
+          A.setFromTriplets(all.begin(), all.end());
+        }
+        else
+        {
+          // Reduce dense thread-local matrices
+          A.resize(nrows, ncols);
+          A.setZero();
+          for (int tid = 0; tid < tc; ++tid)
+            A += Achunks[static_cast<size_t>(tid)];
+
+          // Add preassembled dense BFs (serial)
+          for (auto& bf : pb.getBFs())
+            A += bf.getOperator();
+
+          // Dense elimination after assembly
+          for (Index idx = 0; idx < static_cast<Index>(nrows); ++idx)
+          {
+            if (!isFixed(idx))
+              continue;
+
+            const ScalarType value = fixed[static_cast<size_t>(idx)];
+
+            for (size_t r = 0; r < nrows; ++r)
+            {
+              if (r == static_cast<size_t>(idx)) continue;
+              b.coeffRef(r) -= A(r, idx) * value;
+              A(r, idx) = ScalarType(0);
+            }
+
+            for (size_t c = 0; c < ncols; ++c)
+            {
+              if (c == static_cast<size_t>(idx)) continue;
+              A(idx, c) = ScalarType(0);
+            }
+
+            A(idx, idx) = ScalarType(1);
+            b.coeffRef(static_cast<size_t>(idx)) = value;
+          }
+        }
+      }
+
+
+      OpenMP* copy() const noexcept override { return new OpenMP(*this); }
+
+    private:
+      std::optional<size_t> m_threadCount;
+  };
 }
 
 #endif

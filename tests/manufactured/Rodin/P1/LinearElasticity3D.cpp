@@ -88,6 +88,43 @@ namespace Rodin::Tests::Manufactured::LinearElasticity3D
   using Hex16    = Elasticity3DFixture<Polytope::Type::Hexahedron,   16>;
   using Tetra32 = Elasticity3DFixture<Polytope::Type::Tetrahedron, 32>;
 
+  TEST_F(Tetra8, LinearElasticity3D_P1ExactResidual)
+  {
+    const Real lambda = 1.0, mu = 1.0;
+    const size_t dim = mesh().getSpaceDimension();
+
+    P1 vh(mesh(), dim);
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+
+    VectorFunction u_exact{ F::x + 1, 2 * F::y - 1, 3 * F::z + 2 };
+    VectorFunction f_body{ Zero(), Zero(), Zero() };
+
+    Problem elasticity(u, v);
+    elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
+               - Integral(f_body, v)
+               + DirichletBC(u, u_exact);
+
+    CG(elasticity).solve();
+
+    GridFunction u_gf(vh);
+    u_gf = u_exact;
+
+    auto& A = elasticity.getLinearSystem().getOperator();
+    auto& b = elasticity.getLinearSystem().getVector();
+    auto& x = elasticity.getLinearSystem().getSolution();
+
+    auto r = A * x - b;
+    auto re = A * u_gf.getData() - b;
+
+    const Real scale = std::max<Real>(b.norm(), 1);
+    EXPECT_NEAR(r.norm() / scale, 0, 1e-10);
+    EXPECT_NEAR(re.norm() / scale, 0, 1e-12);
+
+    const Real rel = relL2Frob(mesh(), u.getSolution(), u_exact);
+    EXPECT_NEAR(rel, 0.0, 1e-12);
+  }
+
   // ------------------------------------------------------------
   // Affine cases: -div(sigma(u)) = 0 (constant strain => div sigma = 0)
   // These are "exact" PDE solutions with f = 0.

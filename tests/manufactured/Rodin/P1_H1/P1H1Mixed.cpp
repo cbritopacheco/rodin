@@ -5,6 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
+#include <algorithm>
 #include <type_traits>
 
 #include "Rodin/Assembly.h"
@@ -83,10 +84,68 @@ namespace Rodin::Tests::Manufactured::P1H1
     Manufactured_P1H1_Mixed_Test<10, 10, 1, 1>;
   using Manufactured_P1H1_Mixed_Test_10x10_K2 =
     Manufactured_P1H1_Mixed_Test<10, 10, 1, 2>;
-  using Manufactured_P1H1_Mixed_Test_16x16x16_K1 =
-    Manufactured_P1H1_Mixed_Test<16, 16, 16, 1>;
+  using Manufactured_P1H1_Mixed_Test_20_K1 =
+    Manufactured_P1H1_Mixed_Test<20, 20, 20, 1>;
   using Manufactured_P1H1_Mixed_Test_6x6x6_K2 =
     Manufactured_P1H1_Mixed_Test<6, 6, 6, 2>;
+
+  TEST_P(Manufactured_P1H1_Mixed_Test_10x10_K1, P1H1_Mixed_P1ExactManufacturedSolution)
+  {
+    const auto& mesh = getMesh();
+
+    P1 p1h(mesh);
+    H1 h1(std::integral_constant<size_t, K>{}, mesh);
+
+    auto exact_solution = 2 * F::x + 3 * F::y + 1; // affine P1 field to exercise constant gradients
+    // Mixed saddle-point system weakly enforces u ≈ p and p ≈ exact_solution; picking
+    // exact_solution as the forcing makes (u, p) = (exact_solution, exact_solution)
+    // the exact discrete solution when combined with the Dirichlet conditions below.
+
+    TrialFunction u(h1);
+    TrialFunction p(p1h);
+    TestFunction  v(h1);
+    TestFunction  q(p1h);
+
+    Problem mixed(u, p, v, q);
+    mixed = Integral(u, v)
+          - Integral(p, v)
+          + Integral(p, q)
+          - Integral(exact_solution, q)
+          + DirichletBC(u, exact_solution)
+          + DirichletBC(p, exact_solution);
+
+    BiCGSTAB(mixed).solve();
+
+    GridFunction u_exact_coeffs(h1); // grid-function coefficients of the exact solution for u
+    u_exact_coeffs = exact_solution;
+    GridFunction p_exact_coeffs(p1h); // grid-function coefficients of the exact solution for p
+    p_exact_coeffs = exact_solution;
+
+    auto& A = mixed.getLinearSystem().getOperator();
+    auto& b = mixed.getLinearSystem().getVector();
+    auto& x = mixed.getLinearSystem().getSolution();
+
+    auto x_exact = x;
+    const auto uSize = u_exact_coeffs.getData().size();
+    const auto pSize = p_exact_coeffs.getData().size();
+    x_exact.head(uSize) = u_exact_coeffs.getData();
+    x_exact.tail(pSize) = p_exact_coeffs.getData();
+
+    auto r = A * x - b;
+    auto re = A * x_exact - b;
+
+    const Real scale = std::max<Real>(b.norm(), 1);
+    EXPECT_NEAR(r.norm() / scale, 0, 1e-10);
+    EXPECT_NEAR(re.norm() / scale, 0, 1e-12);
+
+    GridFunction diff_u(h1);
+    diff_u = Pow(u.getSolution() - exact_solution, 2);
+    EXPECT_NEAR(Integral(diff_u).compute(), 0, 1e-12);
+
+    GridFunction diff_p(p1h);
+    diff_p = Pow(p.getSolution() - exact_solution, 2);
+    EXPECT_NEAR(Integral(diff_p).compute(), 0, 1e-12);
+  }
 
   template <class Fixture, class FHandle>
   void runMixedTest(const Fixture& fixture, const FHandle& rhs)
@@ -107,11 +166,11 @@ namespace Rodin::Tests::Manufactured::P1H1
 
     Problem p_l2(p, q);
     p_l2 = Integral(p, q) - Integral(f, q);
-    CG(p_l2).solve();
+    BiCGSTAB(p_l2).solve();
 
     Problem u_l2(u0, v);
     u_l2 = Integral(u0, v) - Integral(p.getSolution(), v);
-    CG(u_l2).solve();
+    BiCGSTAB(u_l2).solve();
 
     Problem mixed(u, p, v, q);
     mixed = Integral(u, v)
@@ -133,12 +192,12 @@ namespace Rodin::Tests::Manufactured::P1H1
     runMixedTest(*this, rhs_polynomial_2d);
   }
 
-  TEST_P(Manufactured_P1H1_Mixed_Test_16x16x16_K1, P1H1_Mixed_PolynomialRHS_3D)
+  TEST_P(Manufactured_P1H1_Mixed_Test_20_K1, P1H1_Mixed_PolynomialRHS_3D)
   {
     runMixedTest(*this, rhs_polynomial_3d);
   }
 
-  TEST_P(Manufactured_P1H1_Mixed_Test_16x16x16_K1, P1H1_Mixed_SineRHS_3D)
+  TEST_P(Manufactured_P1H1_Mixed_Test_20_K1, P1H1_Mixed_SineRHS_3D)
   {
     runMixedTest(*this, rhs_sine_3d);
   }
@@ -169,7 +228,7 @@ namespace Rodin::Tests::Manufactured::P1H1
 
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D_K1,
-    Manufactured_P1H1_Mixed_Test_16x16x16_K1,
+    Manufactured_P1H1_Mixed_Test_20_K1,
     ::testing::Values(
       Polytope::Type::Tetrahedron,
       Polytope::Type::Hexahedron,

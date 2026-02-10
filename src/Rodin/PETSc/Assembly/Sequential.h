@@ -4,6 +4,7 @@
 #include <petsc.h>
 #include <petscsys.h>
 #include <petscsystypes.h>
+#include <optional>
 
 #include "Rodin/Assembly/AssemblyBase.h"
 #include "Rodin/Assembly/Sequential.h"
@@ -113,9 +114,6 @@ namespace Rodin::Assembly
         ierr = MatSetSizes(res, m, n, PETSC_DETERMINE, PETSC_DETERMINE);
         assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatSeqAIJSetPreallocation(res, PETSC_DETERMINE, PETSC_NULLPTR);
-        assert(ierr == PETSC_SUCCESS);
-
         ierr = MatSetFromOptions(res);
         assert(ierr == PETSC_SUCCESS);
 
@@ -198,6 +196,264 @@ namespace Rodin::Assembly
       }
   };
 
+  // Sequential assembly for single-variable Problem (PETSc)
+  template <class U, class V>
+  class Sequential<
+      Rodin::PETSc::Math::LinearSystem,
+      Rodin::Variational::Problem<Rodin::PETSc::Math::LinearSystem, U, V>> final
+    : public AssemblyBase<
+        Rodin::PETSc::Math::LinearSystem,
+        Rodin::Variational::Problem<Rodin::PETSc::Math::LinearSystem, U, V>>
+  {
+    public:
+      using LinearSystemType = Rodin::PETSc::Math::LinearSystem;
+      using ProblemType =
+        Rodin::Variational::Problem<LinearSystemType, U, V>;
+      using Parent = AssemblyBase<LinearSystemType, ProblemType>;
+      using InputType = typename Parent::InputType;
+
+      using OperatorType = typename Rodin::FormLanguage::Traits<LinearSystemType>::OperatorType; // ::Mat
+      using VectorType   = typename Rodin::FormLanguage::Traits<LinearSystemType>::VectorType;   // ::Vec
+      using ScalarType   = typename Rodin::FormLanguage::Traits<LinearSystemType>::ScalarType;   // PetscScalar
+      using TrialFESType = typename Rodin::FormLanguage::Traits<U>::FESType;
+      using TrialMeshType = typename Rodin::FormLanguage::Traits<TrialFESType>::MeshType;
+      using TrialMeshContextType = typename Rodin::FormLanguage::Traits<TrialMeshType>::ContextType;
+
+      void execute(LinearSystemType& axb, const InputType& input) const override
+      {
+        static_assert(std::is_same_v<TrialMeshContextType, Rodin::Context::Local>,
+          "PETSc sequential assembly should only be used with Local mesh context.");
+
+        auto& A = axb.getOperator();
+        auto& b = axb.getVector();
+
+        auto& pb = input.getProblemBody();
+        const auto& u = input.getTrialFunction();
+        const auto& v = input.getTestFunction();
+
+        const auto& trialFES = u.getFiniteElementSpace();
+        const auto& testFES  = v.getFiniteElementSpace();
+        const auto& mesh     = trialFES.getMesh();
+
+        const size_t cols = static_cast<size_t>(trialFES.getSize());
+        const size_t rows = static_cast<size_t>(testFES.getSize());
+
+        PetscErrorCode ierr;
+
+        // Matrix setup
+        assert(A);
+        ierr = MatSetSizes(A,
+                           static_cast<PetscInt>(rows),
+                           static_cast<PetscInt>(cols),
+                           PETSC_DETERMINE,
+                           PETSC_DETERMINE);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = MatSetType(A, MATSEQAIJ);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = MatSetUp(A);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = MatZeroEntries(A);
+        assert(ierr == PETSC_SUCCESS);
+
+        // Vector setup
+        assert(b);
+        ierr = VecSetSizes(b, static_cast<PetscInt>(rows), PETSC_DECIDE);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecSetType(b, VECSEQ);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecSetFromOptions(b);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecZeroEntries(b);
+        assert(ierr == PETSC_SUCCESS);
+
+        auto& x = axb.getSolution();
+        assert(x);
+        ierr = VecSetSizes(x, static_cast<PetscInt>(cols), PETSC_DECIDE);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecSetType(x, VECSEQ);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecSetFromOptions(x);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecZeroEntries(x);
+        assert(ierr == PETSC_SUCCESS);
+
+        // Local BFIs
+        using MeshType = std::decay_t<decltype(mesh)>;
+
+        for (auto& bfi : pb.getLocalBFIs())
+        {
+          const auto& attrs = bfi.getAttributes();
+          SequentialIteration<MeshType> seq(mesh, bfi.getRegion());
+          for (auto it = seq.getIterator(); it; ++it)
+          {
+            if (!attrs.empty() && !attrs.count(it->getAttribute()))
+              continue;
+
+            const size_t d = it->getDimension();
+            const Index  p = it->getIndex();
+
+            bfi.setPolytope(*it);
+
+            const auto& rowsDOF = testFES.getDOFs(d, p);
+            const auto& colsDOF = trialFES.getDOFs(d, p);
+
+            for (PetscInt i = 0; i < static_cast<PetscInt>(rowsDOF.size()); ++i)
+            {
+              for (PetscInt j = 0; j < static_cast<PetscInt>(colsDOF.size()); ++j)
+              {
+                const PetscScalar val = PetscScalar(bfi.integrate(j, i));
+                if (val != PetscScalar(0))
+                {
+                  ierr = MatSetValue(A, rowsDOF[i], colsDOF[j], val, ADD_VALUES);
+                  assert(ierr == PETSC_SUCCESS);
+                }
+              }
+            }
+          }
+        }
+
+        // Global BFIs
+        for (auto& bfi : pb.getGlobalBFIs())
+        {
+          const auto& trialAttrs = bfi.getTrialAttributes();
+          const auto& testAttrs  = bfi.getTestAttributes();
+          SequentialIteration<MeshType> trialseq(mesh, bfi.getTrialRegion());
+          SequentialIteration<MeshType> testseq(mesh, bfi.getTestRegion());
+
+          for (auto teIt = testseq.getIterator(); teIt; ++teIt)
+          {
+            if (!testAttrs.empty() && !testAttrs.count(teIt->getAttribute()))
+              continue;
+
+            const auto& rowsDOF = testFES.getDOFs(teIt->getDimension(), teIt->getIndex());
+
+            for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
+            {
+              if (!trialAttrs.empty() && !trialAttrs.count(trIt->getAttribute()))
+                continue;
+
+              const auto& colsDOF = trialFES.getDOFs(trIt->getDimension(), trIt->getIndex());
+
+              bfi.setPolytope(*trIt, *teIt);
+
+              for (PetscInt i = 0; i < static_cast<PetscInt>(rowsDOF.size()); ++i)
+              {
+                for (PetscInt j = 0; j < static_cast<PetscInt>(colsDOF.size()); ++j)
+                {
+                  const PetscScalar val = PetscScalar(bfi.integrate(j, i));
+                  if (val != PetscScalar(0))
+                  {
+                    ierr = MatSetValue(A, rowsDOF[i], colsDOF[j], val, ADD_VALUES);
+                    assert(ierr == PETSC_SUCCESS);
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        // Preassembled bilinear forms
+        for (auto& bf : pb.getBFs())
+        {
+          const auto& op = bf.getOperator();
+          ierr = MatAXPY(A, 1.0, op, DIFFERENT_NONZERO_PATTERN);
+          assert(ierr == PETSC_SUCCESS);
+        }
+
+        // Linear forms
+        for (auto& lfi : pb.getLFIs())
+        {
+          const auto& attrs = lfi.getAttributes();
+          SequentialIteration<MeshType> seq(mesh, lfi.getRegion());
+          for (auto it = seq.getIterator(); it; ++it)
+          {
+            if (!attrs.empty() && !attrs.count(it->getAttribute()))
+              continue;
+
+            lfi.setPolytope(*it);
+            const auto& dofs = testFES.getDOFs(it->getDimension(), it->getIndex());
+            for (PetscInt l = 0; l < static_cast<PetscInt>(dofs.size()); ++l)
+            {
+              const PetscScalar val = PetscScalar(lfi.integrate(l));
+              ierr = VecSetValue(b, dofs[l], -val, ADD_VALUES);
+              assert(ierr == PETSC_SUCCESS);
+            }
+          }
+        }
+
+        // Preassembled linear forms
+        for (auto& lf : pb.getLFs())
+        {
+          ierr = VecAXPY(b, -1.0, lf.getVector());
+          assert(ierr == PETSC_SUCCESS);
+        }
+
+        // Assemble A and b
+        ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
+        assert(ierr == PETSC_SUCCESS);
+
+        ierr = VecAssemblyBegin(b);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecAssemblyEnd(b);
+        assert(ierr == PETSC_SUCCESS);
+
+        // Dirichlet BCs
+        std::vector<PetscInt> bcIdx;
+        std::vector<PetscScalar> bcVals;
+        for (auto& dbc : pb.getDBCs())
+        {
+          if (dbc.getOperand().getUUID() != u.getUUID())
+            continue;
+          dbc.assemble();
+          const auto& dofs = dbc.getDOFs();
+          for (const auto& [local, value] : dofs)
+          {
+            bcIdx.push_back(static_cast<PetscInt>(local));
+            bcVals.push_back(static_cast<PetscScalar>(value));
+          }
+        }
+
+        if (!bcIdx.empty())
+        {
+          Vec bcVec;
+          ierr = VecDuplicate(b, &bcVec);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecZeroEntries(bcVec);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecSetValues(
+              bcVec,
+              static_cast<PetscInt>(bcIdx.size()),
+              bcIdx.data(),
+              bcVals.data(),
+              INSERT_VALUES);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecAssemblyBegin(bcVec);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecAssemblyEnd(bcVec);
+          assert(ierr == PETSC_SUCCESS);
+
+          ierr = MatZeroRowsColumns(
+              A,
+              static_cast<PetscInt>(bcIdx.size()),
+              bcIdx.data(),
+              1.0,
+              bcVec,
+              b);
+          assert(ierr == PETSC_SUCCESS);
+
+          ierr = VecDestroy(&bcVec);
+          assert(ierr == PETSC_SUCCESS);
+        }
+      }
+
+      Sequential* copy() const noexcept override
+      {
+        return new Sequential(*this);
+      }
+  };
+
   template <class U1, class U2, class U3, class ... Us>
   class Sequential<
       Rodin::PETSc::Math::LinearSystem,
@@ -237,6 +493,15 @@ namespace Rodin::Assembly
         const size_t ncols = input.getTotalTrialSize();
         const size_t nrows = input.getTotalTestSize();
 
+        using FirstTrialMeshType =
+          std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace().getMesh())>;
+        using MeshContextType =
+          typename Rodin::FormLanguage::Traits<FirstTrialMeshType>::ContextType;
+
+        static_assert(
+          std::is_same_v<MeshContextType, Rodin::Context::Local>,
+          "PETSc sequential assembly supports only Local mesh context.");
+
         PetscErrorCode ierr;
 
         // ------------------------
@@ -254,15 +519,13 @@ namespace Rodin::Assembly
         ierr = MatSetType(A, MATSEQAIJ);
         assert(ierr == PETSC_SUCCESS);
 
-        // Cheap preallocation (works; not optimal). You can improve with nnz estimates later.
-        ierr = MatSeqAIJSetPreallocation(A, PETSC_DETERMINE, PETSC_NULLPTR);
-        assert(ierr == PETSC_SUCCESS);
-
         ierr = MatSetUp(A);
         assert(ierr == PETSC_SUCCESS);
 
         ierr = MatZeroEntries(A);
         assert(ierr == PETSC_SUCCESS);
+
+        MatSetOption(A, MAT_IGNORE_ZERO_ENTRIES, PETSC_TRUE);
 
         // ------------------------
         // Allocate / reset b (Seq Vec)
@@ -278,6 +541,17 @@ namespace Rodin::Assembly
         assert(ierr == PETSC_SUCCESS);
 
         ierr = VecZeroEntries(b);
+        assert(ierr == PETSC_SUCCESS);
+
+        auto& x = axb.getSolution();
+        assert(x);
+        ierr = VecSetSizes(x, static_cast<PetscInt>(ncols), PETSC_DECIDE);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecSetType(x, VECSEQ);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecSetFromOptions(x);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecZeroEntries(x);
         assert(ierr == PETSC_SUCCESS);
 
         // ------------------------
@@ -297,48 +571,49 @@ namespace Rodin::Assembly
           return it->second;
         };
 
-        // Retrieve a reference to the FES by UUID (trial)
-        const auto& getTrialFESByUUID = [&](const auto& uuid) -> const auto&
+        const auto withTrialFES = [&](const auto& uuid, auto&& fn)
         {
           const size_t k = findTrialBlock(uuid);
-          // us is a Tuple of reference_wrappers; index access is via iapply/map in your Tuple
-          // We implement a scan to avoid relying on tuple operator[].
-          const void* addr = nullptr;
+          bool found = false;
           us.iapply([&](size_t i, const auto& uref)
           {
             if (i == k)
-              addr = static_cast<const void*>(&uref.get().getFiniteElementSpace());
+            {
+              fn(uref.get().getFiniteElementSpace());
+              found = true;
+            }
           });
-          assert(addr);
-          return *static_cast<const std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace())>*>(addr);
+          assert(found);
         };
 
-        // Retrieve a reference to the FES by UUID (test)
-        const auto& getTestFESByUUID = [&](const auto& uuid) -> const auto&
+        const auto withTestFES = [&](const auto& uuid, auto&& fn)
         {
           const size_t k = findTestBlock(uuid);
-          const void* addr = nullptr;
+          bool found = false;
           vs.iapply([&](size_t i, const auto& vref)
           {
             if (i == k)
-              addr = static_cast<const void*>(&vref.get().getFiniteElementSpace());
+            {
+              fn(vref.get().getFiniteElementSpace());
+              found = true;
+            }
           });
-          assert(addr);
-          return *static_cast<const std::decay_t<decltype(vs.template get<0>().get().getFiniteElementSpace())>*>(addr);
+          assert(found);
         };
 
-        // Mesh: take it from the first trial FES
-        const auto& mesh = [&]() -> const auto&
+        using MeshType0 =
+          std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace().getMesh())>;
+        std::optional<std::reference_wrapper<const MeshType0>> meshRef;
+        us.apply([&](const auto& uref)
         {
-          const void* addr = nullptr;
-          us.apply([&](const auto& uref)
-          {
-            if (!addr)
-              addr = static_cast<const void*>(&uref.get().getFiniteElementSpace().getMesh());
-          });
-          assert(addr);
-          return *static_cast<const std::decay_t<decltype(us.template get<0>().get().getFiniteElementSpace().getMesh())>*>(addr);
-        }();
+          using MeshT = std::decay_t<decltype(uref.get().getFiniteElementSpace().getMesh())>;
+          static_assert(std::is_same_v<MeshT, MeshType0>,
+            "Mixed mesh types are not supported in PETSc multi-field sequential assembly.");
+          if (!meshRef)
+            meshRef = std::cref(uref.get().getFiniteElementSpace().getMesh());
+        });
+        assert(meshRef.has_value());
+        const MeshType0& mesh = meshRef->get();
 
         // ------------------------
         // Assemble bilinear terms into A
@@ -355,37 +630,72 @@ namespace Rodin::Assembly
           const size_t uOff = trialOffsets[uBlock];
           const size_t vOff = testOffsets[vBlock];
 
-          const auto& uFES = getTrialFESByUUID(uUUID);
-          const auto& vFES = getTestFESByUUID(vUUID);
-
           const auto& attrs = bfi.getAttributes();
           SequentialIteration seq(mesh, bfi.getRegion());
 
-          for (auto it = seq.getIterator(); it; ++it)
+          withTrialFES(uUUID, [&](const auto& uFES)
           {
-            if (!attrs.empty() && !attrs.count(it->getAttribute()))
-              continue;
-
-            const size_t d = it->getDimension();
-            const Index  p = it->getIndex();
-
-            bfi.setPolytope(*it);
-
-            const auto& rows = vFES.getDOFs(d, p);
-            const auto& cols = uFES.getDOFs(d, p);
-
-            for (PetscInt i = 0; i < static_cast<PetscInt>(rows.size()); ++i)
+            withTestFES(vUUID, [&](const auto& vFES)
             {
-              const PetscInt I = static_cast<PetscInt>(vOff + static_cast<size_t>(rows[i]));
-              for (PetscInt j = 0; j < static_cast<PetscInt>(cols.size()); ++j)
+              // Reusable buffers to avoid realloc each cell
+              std::vector<PetscInt>    Iidx;
+              std::vector<PetscInt>    Jidx;
+              std::vector<PetscScalar> Ke; // row-major (i * nc + j)
+
+              for (auto it = seq.getIterator(); it; ++it)
               {
-                const PetscInt J = static_cast<PetscInt>(uOff + static_cast<size_t>(cols[j]));
-                const PetscScalar val = static_cast<PetscScalar>(bfi.integrate(j, i));
-                ierr = MatSetValue(A, I, J, val, ADD_VALUES);
+                if (!attrs.empty() && !attrs.count(it->getAttribute()))
+                  continue;
+
+                const size_t d = it->getDimension();
+                const Index  p = it->getIndex();
+
+                bfi.setPolytope(*it);
+
+                const auto& rows = vFES.getDOFs(d, p);
+                const auto& cols = uFES.getDOFs(d, p);
+
+                const PetscInt nr = static_cast<PetscInt>(rows.size());
+                const PetscInt nc = static_cast<PetscInt>(cols.size());
+
+                Iidx.resize(static_cast<size_t>(nr));
+                Jidx.resize(static_cast<size_t>(nc));
+                Ke.resize(static_cast<size_t>(nr) * static_cast<size_t>(nc));
+
+                // Map DOFs -> global indices once
+                for (PetscInt i = 0; i < nr; ++i)
+                {
+                  Iidx[static_cast<size_t>(i)] =
+                    static_cast<PetscInt>(vOff + static_cast<size_t>(rows[static_cast<size_t>(i)]));
+                }
+
+                for (PetscInt j = 0; j < nc; ++j)
+                {
+                  Jidx[static_cast<size_t>(j)] =
+                    static_cast<PetscInt>(uOff + static_cast<size_t>(cols[static_cast<size_t>(j)]));
+                }
+
+                // Build element matrix (row-major)
+                for (PetscInt i = 0; i < nr; ++i)
+                {
+                  for (PetscInt j = 0; j < nc; ++j)
+                  {
+                    Ke[static_cast<size_t>(i) * static_cast<size_t>(nc) + static_cast<size_t>(j)] =
+                      static_cast<PetscScalar>(bfi.integrate(static_cast<size_t>(j), static_cast<size_t>(i)));
+                  }
+                }
+
+                // One PETSc call per element (instead of nr*nc calls)
+                ierr = MatSetValues(
+                  A,
+                  nr, Iidx.data(),
+                  nc, Jidx.data(),
+                  Ke.data(),
+                  ADD_VALUES);
                 assert(ierr == PETSC_SUCCESS);
               }
-            }
-          }
+            });
+          });
         }
 
         // Global BFIs
@@ -400,44 +710,47 @@ namespace Rodin::Assembly
           const size_t uOff = trialOffsets[uBlock];
           const size_t vOff = testOffsets[vBlock];
 
-          const auto& uFES = getTrialFESByUUID(uUUID);
-          const auto& vFES = getTestFESByUUID(vUUID);
-
           const auto& trialAttrs = bfi.getTrialAttributes();
           const auto& testAttrs  = bfi.getTestAttributes();
 
           SequentialIteration trialseq(mesh, bfi.getTrialRegion());
           SequentialIteration testseq(mesh, bfi.getTestRegion());
 
-          for (auto teIt = testseq.getIterator(); teIt; ++teIt)
+          withTrialFES(uUUID, [&](const auto& uFES)
           {
-            if (!testAttrs.empty() && !testAttrs.count(teIt->getAttribute()))
-              continue;
-
-            const auto& rows = vFES.getDOFs(teIt.getDimension(), teIt->getIndex());
-
-            for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
+            withTestFES(vUUID, [&](const auto& vFES)
             {
-              if (!trialAttrs.empty() && !trialAttrs.count(trIt->getAttribute()))
-                continue;
-
-              const auto& cols = uFES.getDOFs(trIt.getDimension(), trIt->getIndex());
-
-              bfi.setPolytope(*trIt, *teIt);
-
-              for (PetscInt i = 0; i < static_cast<PetscInt>(rows.size()); ++i)
+              for (auto teIt = testseq.getIterator(); teIt; ++teIt)
               {
-                const PetscInt I = static_cast<PetscInt>(vOff + static_cast<size_t>(rows[i]));
-                for (PetscInt j = 0; j < static_cast<PetscInt>(cols.size()); ++j)
+                if (!testAttrs.empty() && !testAttrs.count(teIt->getAttribute()))
+                  continue;
+
+                const auto& rows = vFES.getDOFs(teIt.getDimension(), teIt->getIndex());
+
+                for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
                 {
-                  const PetscInt J = static_cast<PetscInt>(uOff + static_cast<size_t>(cols[j]));
-                  const PetscScalar val = static_cast<PetscScalar>(bfi.integrate(j, i));
-                  ierr = MatSetValue(A, I, J, val, ADD_VALUES);
-                  assert(ierr == PETSC_SUCCESS);
+                  if (!trialAttrs.empty() && !trialAttrs.count(trIt->getAttribute()))
+                    continue;
+
+                  const auto& cols = uFES.getDOFs(trIt.getDimension(), trIt->getIndex());
+
+                  bfi.setPolytope(*trIt, *teIt);
+
+                  for (PetscInt i = 0; i < static_cast<PetscInt>(rows.size()); ++i)
+                  {
+                    const PetscInt I = static_cast<PetscInt>(vOff + static_cast<size_t>(rows[i]));
+                    for (PetscInt j = 0; j < static_cast<PetscInt>(cols.size()); ++j)
+                    {
+                      const PetscInt J = static_cast<PetscInt>(uOff + static_cast<size_t>(cols[j]));
+                      const PetscScalar val = static_cast<PetscScalar>(bfi.integrate(j, i));
+                      ierr = MatSetValue(A, I, J, val, ADD_VALUES);
+                      assert(ierr == PETSC_SUCCESS);
+                    }
+                  }
                 }
               }
-            }
-          }
+            });
+          });
         }
 
         ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
@@ -454,27 +767,28 @@ namespace Rodin::Assembly
           const size_t vBlock = findTestBlock(vUUID);
           const size_t vOff   = testOffsets[vBlock];
 
-          const auto& vFES = getTestFESByUUID(vUUID);
-
           const auto& attrs = lfi.getAttributes();
           SequentialIteration seq(mesh, lfi.getRegion());
 
-          for (auto it = seq.getIterator(); it; ++it)
+          withTestFES(vUUID, [&](const auto& vFES)
           {
-            if (!attrs.empty() && !attrs.count(it->getAttribute()))
-              continue;
-
-            lfi.setPolytope(*it);
-
-            const auto& dofs = vFES.getDOFs(it.getDimension(), it->getIndex());
-            for (PetscInt l = 0; l < static_cast<PetscInt>(dofs.size()); ++l)
+            for (auto it = seq.getIterator(); it; ++it)
             {
-              const PetscInt I = static_cast<PetscInt>(vOff + static_cast<size_t>(dofs[l]));
-              const PetscScalar val = static_cast<PetscScalar>(lfi.integrate(l));
-              ierr = VecSetValue(b, I, val, ADD_VALUES);
-              assert(ierr == PETSC_SUCCESS);
+              if (!attrs.empty() && !attrs.count(it->getAttribute()))
+                continue;
+
+              lfi.setPolytope(*it);
+
+              const auto& dofs = vFES.getDOFs(it.getDimension(), it->getIndex());
+              for (PetscInt l = 0; l < static_cast<PetscInt>(dofs.size()); ++l)
+              {
+                const PetscInt I = static_cast<PetscInt>(vOff + static_cast<size_t>(dofs[l]));
+                const PetscScalar val = static_cast<PetscScalar>(lfi.integrate(l));
+                ierr = VecSetValue(b, I, -val, ADD_VALUES);
+                assert(ierr == PETSC_SUCCESS);
+              }
             }
-          }
+          });
         }
 
         ierr = VecAssemblyBegin(b);
@@ -483,12 +797,10 @@ namespace Rodin::Assembly
         assert(ierr == PETSC_SUCCESS);
 
         // ------------------------
-        // Impose Dirichlet BCs (delegated to LinearSystem eliminate)
+        // Impose Dirichlet BCs via MatZeroRowsColumns
         // ------------------------
-        // Assumes:
-        //   - dbc.getOperand() is a TrialFunction-like object with UUID
-        //   - dbc.assemble() populates dbc.getDOFs()
-        //   - axb.eliminate(dofs, offset) exists and acts on A and b
+        std::vector<PetscInt> bcIdx;
+        std::vector<PetscScalar> bcVals;
         for (auto& dbc : pb.getDBCs())
         {
           const auto uUUID = dbc.getOperand().getUUID();
@@ -497,7 +809,46 @@ namespace Rodin::Assembly
 
           dbc.assemble();
           const auto& dofs = dbc.getDOFs();
-          axb.eliminate(dofs, uOff);
+          for (const auto& [local, value] : dofs)
+          {
+            bcIdx.push_back(static_cast<PetscInt>(uOff + local));
+            bcVals.push_back(static_cast<PetscScalar>(value));
+          }
+        }
+
+        if (!bcIdx.empty())
+        {
+          Vec bcVec;
+          ierr = VecDuplicate(b, &bcVec);
+          assert(ierr == PETSC_SUCCESS);
+
+          ierr = VecZeroEntries(bcVec);
+          assert(ierr == PETSC_SUCCESS);
+
+          ierr = VecSetValues(
+              bcVec,
+              static_cast<PetscInt>(bcIdx.size()),
+              bcIdx.data(),
+              bcVals.data(),
+              INSERT_VALUES);
+          assert(ierr == PETSC_SUCCESS);
+
+          ierr = VecAssemblyBegin(bcVec);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecAssemblyEnd(bcVec);
+          assert(ierr == PETSC_SUCCESS);
+
+          ierr = MatZeroRowsColumns(
+              A,
+              static_cast<PetscInt>(bcIdx.size()),
+              bcIdx.data(),
+              1.0,
+              bcVec,
+              b);
+          assert(ierr == PETSC_SUCCESS);
+
+          ierr = VecDestroy(&bcVec);
+          assert(ierr == PETSC_SUCCESS);
         }
       }
 
@@ -515,4 +866,3 @@ namespace Rodin::PETSc::Assembly
 }
 
 #endif // RODIN_ASSEMBLY_SEQUENTIAL_PETSC_H
-

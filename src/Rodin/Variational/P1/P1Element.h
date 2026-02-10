@@ -227,7 +227,9 @@ namespace Rodin::Variational
           {}
 
           constexpr
-          BasisFunction(const BasisFunction&) = delete;
+          BasisFunction(const BasisFunction& other)
+            : m_local(other.m_local), m_g(other.m_g)
+          {}
 
           constexpr
           ReturnType operator()(const Math::SpatialPoint& r) const;

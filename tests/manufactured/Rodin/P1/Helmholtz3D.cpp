@@ -66,6 +66,45 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
   using Hex16   = Helmholtz3DFixture<Polytope::Type::Hexahedron,  16>;
   using Tetra32 = Helmholtz3DFixture<Polytope::Type::Tetrahedron, 32>;
 
+  TEST_F(Tetra8, Helmholtz_P1ExactResidual_Tetrahedron)
+  {
+    const Real kappa = 1.0;
+
+    P1 vh(mesh());
+
+    auto u_expr = F::x + F::y + F::z + 1;
+    auto f = -kappa * kappa * u_expr;
+
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+
+    Problem helmholtz(u, v);
+    helmholtz = Integral(Grad(u), Grad(v))
+              - kappa * kappa * Integral(u, v)
+              - Integral(f, v)
+              + DirichletBC(u, u_expr);
+
+    CG(helmholtz).solve();
+
+    GridFunction u_exact(vh);
+    u_exact = u_expr;
+
+    auto& A = helmholtz.getLinearSystem().getOperator();
+    auto& b = helmholtz.getLinearSystem().getVector();
+    auto& x = helmholtz.getLinearSystem().getSolution();
+
+    auto r = A * x - b;
+    auto re = A * u_exact.getData() - b;
+
+    const Real scale = std::max<Real>(b.norm(), 1);
+    EXPECT_NEAR(r.norm() / scale, 0, 1e-10);
+    EXPECT_NEAR(re.norm() / scale, 0, 1e-12);
+
+    GridFunction diff(vh);
+    diff = Pow(u.getSolution() - u_expr, 2);
+    EXPECT_NEAR(Integral(diff).compute(), 0, 1e-12);
+  }
+
   // ---------------------------------------------------------------------------
   // u = sin(pi x) sin(pi y) sin(pi z)
   // Δu = -3 pi^2 u
@@ -96,7 +135,7 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - u_expr, 2);
     const Real error = Integral(diff).compute();
-    EXPECT_NEAR(0.7 * error, 0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(0.1 * error, 0, RODIN_FUZZY_CONSTANT);
   }
 
   TEST_F(Hex16, SimpleSine_Hexahedron)

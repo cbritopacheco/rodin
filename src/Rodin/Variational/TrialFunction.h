@@ -180,10 +180,15 @@ namespace Rodin::Variational
         return m_ref.get().getSolution();
       }
 
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      TrialFunctionReference& setName(const std::string& name)
       {
-        return m_ref.get().getOrder(poly);
+        m_ref.get().setName(name);
+        return *this;
+      }
+
+      Optional<StringView> getName() const override
+      {
+        return m_ref.get().getName();
       }
 
       /**
@@ -368,7 +373,24 @@ namespace Rodin::Variational
         return m_gf;
       }
 
+      TrialFunction& setName(const std::string& name)
+      {
+        m_name = name;
+        return *this;
+      }
+
+      Optional<StringView> getName() const override
+      {
+        return m_name;
+      }
+
+       /**
+       * @brief Creates a copy of this trial function.
+       * @returns Pointer to newly allocated copy
+       */
+
     private:
+      std::string m_name; ///< Optional name for the trial function
       SolutionType m_gf;
   };
 

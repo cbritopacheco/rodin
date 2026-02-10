@@ -63,6 +63,43 @@ namespace Rodin::Tests::Manufactured::LinearElasticity
   using Manufactured_LinearElasticity_Test_64x64 =
     Rodin::Tests::Manufactured::LinearElasticity::Manufactured_LinearElasticity_Test<64>;
 
+  TEST_P(Manufactured_LinearElasticity_Test_16x16, LinearElasticity_P1ExactResidual)
+  {
+    Mesh mesh = this->getMesh();
+    const Real lambda = 1.0, mu = 1.0;
+    const size_t dim = mesh.getSpaceDimension();
+    P1 vh(mesh, dim);
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+
+    auto u_exact = VectorFunction{ F::x + 1, 2 * F::y - 1 };
+
+    Problem elasticity(u, v);
+    elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
+               + DirichletBC(u, u_exact);
+    CG(elasticity).solve();
+
+    GridFunction u_gf(vh);
+    u_gf = u_exact;
+
+    auto& A = elasticity.getLinearSystem().getOperator();
+    auto& b = elasticity.getLinearSystem().getVector();
+    auto& x = elasticity.getLinearSystem().getSolution();
+
+    auto r = A * x - b;
+    auto re = A * u_gf.getData() - b;
+
+    const Real scale = std::max<Real>(b.norm(), 1);
+    EXPECT_NEAR(r.norm() / scale, 0, 1e-10);
+    EXPECT_NEAR(re.norm() / scale, 0, 1e-12);
+
+    P1 scalar(mesh);
+    GridFunction err2(scalar);
+    err2 = Pow(Frobenius(u.getSolution() - u_exact), 2);
+    const Real L2error = Integral(err2).compute();
+    EXPECT_NEAR(L2error, 0.0, 1e-12);
+  }
+
   /**
    * @brief Affine manufactured solution
    *

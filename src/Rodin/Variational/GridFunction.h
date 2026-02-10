@@ -530,12 +530,12 @@ namespace Rodin::Variational
               static_cast<const Derived&>(*this)).print(output);
             break;
           }
-          case IO::FileFormat::ENSIGHT6:
-          {
-            IO::GridFunctionPrinter<IO::FileFormat::ENSIGHT6, FESType, DataType>(
-              static_cast<const Derived&>(*this)).print(output);
-            break;
-          }
+          // case IO::FileFormat::ENSIGHT6:
+          // {
+          //   IO::GridFunctionPrinter<IO::FileFormat::ENSIGHT6, FESType, DataType>(
+          //     static_cast<const Derived&>(*this)).print(output);
+          //   break;
+          // }
           default:
           {
             Alert::MemberFunctionException(*this, __func__)

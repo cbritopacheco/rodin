@@ -4,6 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <algorithm>
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
@@ -46,6 +47,43 @@ namespace Rodin::Tests::Manufactured::H1Poisson3D
 
   using Manufactured_Poisson3D_H1_Test_16 =
     Rodin::Tests::Manufactured::H1Poisson3D::Manufactured_Poisson3D_H1_Test<16>;
+
+  TEST_F(Manufactured_Poisson3D_H1_Test_8, Poisson3D_P1ExactResidual_H1)
+  {
+    constexpr auto order = std::integral_constant<size_t, 1>{};
+    const auto& mesh = this->getMesh();
+    H1 vh(order, mesh);
+
+    auto solution = F::x + F::y + F::z + 1;
+    auto f = Zero();
+
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, solution);
+    CG(poisson).solve();
+
+    GridFunction u_exact(vh);
+    u_exact = solution;
+
+    auto& A = poisson.getLinearSystem().getOperator();
+    auto& b = poisson.getLinearSystem().getVector();
+    auto& x = poisson.getLinearSystem().getSolution();
+
+    auto r = A * x - b;
+    auto re = A * u_exact.getData() - b;
+
+    const Real scale = std::max<Real>(b.norm(), 1);
+    EXPECT_NEAR(r.norm() / scale, 0, 1e-10);
+    EXPECT_NEAR(re.norm() / scale, 0, 1e-12);
+
+    GridFunction diff(vh);
+    diff = Pow(u.getSolution() - solution, 2);
+    EXPECT_NEAR(Integral(diff).compute(), 0, 1e-12);
+  }
 
   TEST_F(Manufactured_Poisson3D_H1_Test_8, Manufactured_Poisson3D_H1_2)
   {

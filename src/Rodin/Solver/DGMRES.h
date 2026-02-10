@@ -82,8 +82,7 @@ namespace Rodin::Solver
       {}
 
       DGMRES(const DGMRES& other)
-        : Parent(other),
-          m_solver(other.m_solver)
+        : Parent(other)
       {}
 
       DGMRES(DGMRES&& other)
@@ -119,9 +118,9 @@ namespace Rodin::Solver
        *
        * Larger values may improve convergence but increase overhead.
        */
-      DGMRES& setDeflationSize(size_t d)
+      DGMRES& setEigenv(size_t d)
       {
-        m_solver.set_d(d);
+        m_solver.setEigenv(d);
         return *this;
       }
 

@@ -61,6 +61,45 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion3D
   using Hex16   = ReactionDiffusion3DFixture<Polytope::Type::Hexahedron,  16>;
   using Tetra32 = ReactionDiffusion3DFixture<Polytope::Type::Tetrahedron, 32>;
 
+  TEST_F(Tetra8, ReactionDiffusion_P1ExactResidual)
+  {
+    const Real alpha = 1.0;
+
+    P1 vh(mesh());
+
+    auto u_expr = F::x + F::y + F::z + 1;
+    auto f = alpha * u_expr;
+
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+
+    Problem rd(u, v);
+    rd = Integral(Grad(u), Grad(v))
+       + alpha * Integral(u, v)
+       - Integral(f, v)
+       + DirichletBC(u, u_expr);
+
+    CG(rd).solve();
+
+    GridFunction u_exact(vh);
+    u_exact = u_expr;
+
+    auto& A = rd.getLinearSystem().getOperator();
+    auto& b = rd.getLinearSystem().getVector();
+    auto& x = rd.getLinearSystem().getSolution();
+
+    auto r = A * x - b;
+    auto re = A * u_exact.getData() - b;
+
+    const Real scale = std::max<Real>(b.norm(), 1);
+    EXPECT_NEAR(r.norm() / scale, 0, 1e-10);
+    EXPECT_NEAR(re.norm() / scale, 0, 1e-12);
+
+    GridFunction diff(vh);
+    diff = Pow(u.getSolution() - u_expr, 2);
+    EXPECT_NEAR(Integral(diff).compute(), 0, 1e-12);
+  }
+
   // ---------------------------------------------------------------------------
   // u = sin(pi x) sin(pi y) sin(pi z)
   // Δu = -3 pi^2 u
@@ -90,7 +129,7 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion3D
 
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - u_expr, 2);
-    EXPECT_NEAR(Integral(diff).compute(), 0.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(0.5 * Integral(diff).compute(), 0.0, RODIN_FUZZY_CONSTANT);
   }
 
   TEST_F(Hex16, SimpleSine_Hexahedron)

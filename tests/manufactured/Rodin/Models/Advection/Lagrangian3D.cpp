@@ -90,7 +90,7 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian3D
     }
   };
 
-  using ManufacturedAdvection3DTest_10 = ManufacturedAdvection3DTest<10, 10, 10>;
+  using ManufacturedAdvection3DTest_10 = ManufacturedAdvection3DTest<15, 15, 15>;
 
   TEST_P(ManufacturedAdvection3DTest_10, ConstantVelocity_OneStep_L2Interior)
   {
