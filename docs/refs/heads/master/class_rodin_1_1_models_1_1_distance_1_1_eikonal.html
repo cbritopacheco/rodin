@@ -94,8 +94,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md142">Mathematical Background</a></li>
-            <li><a href="#autotoc_md143">Usage Example</a></li>
+            <li><a href="#autotoc_md139">Mathematical Background</a></li>
+            <li><a href="#autotoc_md140">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -126,7 +126,7 @@ $ |\nabla d| = 1 $
 <use x='26.007973' y='0' xlink:href='#eq1-g2-61'/>
 <use x='38.433454' y='0' xlink:href='#eq1-g2-49'/>
 </g>
-</svg> to compute distance functions on meshes using the Fast Marching Method. It can optionally compute signed distance functions by specifying interior regions.</p><section id="autotoc_md142"><h3><a href="#autotoc_md142">Mathematical Background</a></h3><p>The <a href="class_rodin_1_1_models_1_1_distance_1_1_eikonal.html" class="m-doc">Eikonal</a> equation describes the propagation of wavefronts with unit speed, which is equivalent to computing distances. The Fast Marching Method solves this equation efficiently on unstructured meshes.</p></section><section id="autotoc_md143"><h3><a href="#autotoc_md143">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">fes</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg> to compute distance functions on meshes using the Fast Marching Method. It can optionally compute signed distance functions by specifying interior regions.</p><section id="autotoc_md139"><h3><a href="#autotoc_md139">Mathematical Background</a></h3><p>The <a href="class_rodin_1_1_models_1_1_distance_1_1_eikonal.html" class="m-doc">Eikonal</a> equation describes the propagation of wavefronts with unit speed, which is equivalent to computing distances. The Fast Marching Method solves this equation efficiently on unstructured meshes.</p></section><section id="autotoc_md140"><h3><a href="#autotoc_md140">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">fes</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">GridFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">fes</span><span class="p">);</span>
 <span class="n">Eikonal</span><span class="w"> </span><span class="nf">eikonal</span><span class="p">(</span><span class="n">u</span><span class="p">);</span>
 <span class="n">eikonal</span><span class="p">.</span><span class="n">setInterface</span><span class="p">(</span><span class="n">interfaceAttr</span><span class="p">)</span>

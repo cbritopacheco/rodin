@@ -77,8 +77,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md384">Quadrature Strategies</a></li>
-            <li><a href="#autotoc_md385">Supported Integrands</a></li>
+            <li><a href="#autotoc_md381">Quadrature Strategies</a></li>
+            <li><a href="#autotoc_md382">Supported Integrands</a></li>
             <li>
               Reference
               <ul>
@@ -88,7 +88,7 @@
             </li>
           </ul>
         </nav>
-<p>This file provides specialized quadrature rules for P1 spaces that exploit the constant gradient property of P1 basis functions to achieve exact integration with minimal quadrature points.</p><section id="autotoc_md384"><h3><a href="#autotoc_md384">Quadrature Strategies</a></h3><ul><li><strong>Centroid quadrature</strong>: Uses single point at element barycenter</li><li><strong>Exact for P1 bilinear forms</strong>: <svg class="m-math" style="width: 6.213em; height: 1.384em; vertical-align: -0.382em;" viewBox="0 -9.630618 59.643684 13.283652">
+<p>This file provides specialized quadrature rules for P1 spaces that exploit the constant gradient property of P1 basis functions to achieve exact integration with minimal quadrature points.</p><section id="autotoc_md381"><h3><a href="#autotoc_md381">Quadrature Strategies</a></h3><ul><li><strong>Centroid quadrature</strong>: Uses single point at element barycenter</li><li><strong>Exact for P1 bilinear forms</strong>: <svg class="m-math" style="width: 6.213em; height: 1.384em; vertical-align: -0.382em;" viewBox="0 -9.630618 59.643684 13.283652">
 <title>
 $ \int \nabla \phi_i \cdot \nabla \phi_j $
 </title>
@@ -110,7 +110,7 @@ $ \int \nabla \phi_i \cdot \nabla \phi_j $
 <use x='48.831557' y='0' xlink:href='#eq1-g3-30'/>
 <use x='55.759659' y='1.793263' xlink:href='#eq1-g2-106'/>
 </g>
-</svg></li><li><strong>Reduced integration</strong>: Enables efficient assembly</li></ul></section><section id="autotoc_md385"><h3><a href="#autotoc_md385">Supported Integrands</a></h3><ul><li>Scalar P1 shape functions: <svg class="m-math" style="width: 3.206em; height: 1.384em; vertical-align: -0.382em;" viewBox="0 -9.630618 30.778121 13.283652">
+</svg></li><li><strong>Reduced integration</strong>: Enables efficient assembly</li></ul></section><section id="autotoc_md382"><h3><a href="#autotoc_md382">Supported Integrands</a></h3><ul><li>Scalar P1 shape functions: <svg class="m-math" style="width: 3.206em; height: 1.384em; vertical-align: -0.382em;" viewBox="0 -9.630618 30.778121 13.283652">
 <title>
 $ \int v \, dx $
 </title>
@@ -247,7 +247,7 @@ $ \int \mathbf{J}u : \mathbf{J}v \, dx $
 <use x='48.49147' y='0' xlink:href='#eq7-g2-100'/>
 <use x='54.574163' y='0' xlink:href='#eq7-g2-120'/>
 </g>
-</svg></li><li>Potential operators for boundary elements</li></ul><aside class="m-note m-default"><h4>See also</h4><p>P1, QuadratureFormula, Integral</p></aside></section>
+</svg></li><li>Potential operators for boundary elements</li></ul><p>These specializations mirror the generic quadrature rules in <code><a href="_quadrature_rule_8h.html" class="m-doc">Rodin/<wbr />Variational/<wbr />QuadratureRule.h</a></code> but collapse to a single centroid evaluation when possible. Mixed trial/test P1 spaces are supported for the mass, stiffness, and Jacobian forms.</p><aside class="m-note m-default"><h4>See also</h4><p>P1, QuadratureFormula, Integral</p></aside></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
@@ -295,6 +295,11 @@ $ \int \mathbf{J}u : \mathbf{J}v \, dx $
               class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_mult_3_01d326a36961f4b3297fd56929cd2fbaaf.html" class="m-doc">Rodin::Variational::QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Mult&lt;FunctionBase&lt;CoefficientDerived&gt;, ShapeFunctionBase&lt;Jacobian&lt;ShapeFunction&lt;LHSDerived, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;&gt;, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;&gt;, P1&lt;LHSRange, LHSMesh&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;Jacobian&lt;ShapeFunction&lt;RHSDerived, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;&gt;, P1&lt;RHSRange, RHSMesh&gt;, TestSpace&gt;&gt;&gt;</a>
             </dt>
             <dd>Integration of the anisotropic <a href="class_rodin_1_1_variational_1_1_frobenius.html" class="m-doc">Frobenius</a> inner product two instances of the <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> of <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Kernel, class Range, class Mesh, class LHSDerived, class RHSDerived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_potential_3_01_kernel_00_01_shape_de91a31bb3bb0fb2d09facc0f5bea563.html" class="m-doc">Rodin::Variational::QuadratureRule&lt;Dot&lt;Potential&lt;Kernel, ShapeFunctionBase&lt;LHSDerived, P1&lt;Range, Mesh&gt;, TrialSpace&gt;&gt;, ShapeFunctionBase&lt;RHSDerived, P1&lt;Range, Mesh&gt;, TestSpace&gt;&gt;&gt;</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_variational_1_1_potential.html" class="m-doc">Potential</a> operator specialization evaluated at the centroid pair.</dd>
           </dl>
         </section>
       </div>

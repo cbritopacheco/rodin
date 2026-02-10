@@ -78,9 +78,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md151">Mathematical Properties</a></li>
-            <li><a href="#autotoc_md152">References</a></li>
-            <li><a href="#autotoc_md153">Usage Example</a></li>
+            <li><a href="#autotoc_md148">Mathematical Properties</a></li>
+            <li><a href="#autotoc_md149">References</a></li>
+            <li><a href="#autotoc_md150">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -168,7 +168,7 @@ $ d $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-100'/>
 </g>
-</svg> is the normalized approximate signed distance.</p><section id="autotoc_md151"><h3><a href="#autotoc_md151">Mathematical Properties</a></h3><ul><li>Preserves the zero level set: <svg class="m-math" style="width: 12.777em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 122.658435 11.955168">
+</svg> is the normalized approximate signed distance.</p><section id="autotoc_md148"><h3><a href="#autotoc_md148">Mathematical Properties</a></h3><ul><li>Preserves the zero level set: <svg class="m-math" style="width: 12.777em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 122.658435 11.955168">
 <title>
 $ d(x) = 0 \iff u(x) = 0 $
 </title>
@@ -231,7 +231,7 @@ $ \text{sign}(d) = \text{sign}(u) $
 <use x='75.344507' y='0' xlink:href='#eq5-g0-117'/>
 <use x='82.006946' y='0' xlink:href='#eq5-g4-41'/>
 </g>
-</svg></li><li>Better gradient normalization than simple <a href="class_rodin_1_1_models_1_1_distance_1_1_rvachev.html" class="m-doc">Rvachev</a> method</li><li>More accurate near the interface</li></ul></section><section id="autotoc_md152"><h3><a href="#autotoc_md152">References</a></h3><p><a href="citelist.html#CITEREF_belyaev2015variational" class="m-doc">[2]</a> <a href="citelist.html#CITEREF_spalding1994calculation" class="m-doc">[9]</a> <a href="citelist.html#CITEREF_tucker1998assessment" class="m-doc">[10]</a></p></section><section id="autotoc_md153"><h3><a href="#autotoc_md153">Usage Example</a></h3><pre class="m-code"><span class="n">GridFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">fes</span><span class="p">);</span><span class="w">  </span><span class="c1">// Some level set function</span>
+</svg></li><li>Better gradient normalization than simple <a href="class_rodin_1_1_models_1_1_distance_1_1_rvachev.html" class="m-doc">Rvachev</a> method</li><li>More accurate near the interface</li></ul></section><section id="autotoc_md149"><h3><a href="#autotoc_md149">References</a></h3><p><a href="citelist.html#CITEREF_belyaev2015variational" class="m-doc">[2]</a> <a href="citelist.html#CITEREF_spalding1994calculation" class="m-doc">[9]</a> <a href="citelist.html#CITEREF_tucker1998assessment" class="m-doc">[10]</a></p></section><section id="autotoc_md150"><h3><a href="#autotoc_md150">Usage Example</a></h3><pre class="m-code"><span class="n">GridFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">fes</span><span class="p">);</span><span class="w">  </span><span class="c1">// Some level set function</span>
 <span class="n">SpaldingTucker</span><span class="w"> </span><span class="n">st</span><span class="p">;</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">dist</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">st</span><span class="p">(</span><span class="n">u</span><span class="p">);</span><span class="w">  </span><span class="c1">// Normalized distance approximation</span></pre></section>
         <section id="pub-methods">

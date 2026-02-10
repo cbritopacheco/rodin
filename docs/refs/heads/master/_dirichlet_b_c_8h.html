@@ -77,9 +77,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md249">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md250">Implementation</a></li>
-            <li><a href="#autotoc_md251">Usage Example</a></li>
+            <li><a href="#autotoc_md246">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md247">Implementation</a></li>
+            <li><a href="#autotoc_md248">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -89,7 +89,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines classes for imposing Dirichlet (essential) boundary conditions in finite element problems. Dirichlet conditions prescribe the solution values on specified boundaries.</p><section id="autotoc_md249"><h3><a href="#autotoc_md249">Mathematical Foundation</a></h3><p>A Dirichlet boundary condition specifies:</p><div class="m-math"><svg style="width: 8.209em; height: 1.093em;" viewBox="154.619776 -10.493961 78.805284 10.493973">
+<p>This file defines classes for imposing Dirichlet (essential) boundary conditions in finite element problems. Dirichlet conditions prescribe the solution values on specified boundaries.</p><section id="autotoc_md246"><h3><a href="#autotoc_md246">Mathematical Foundation</a></h3><p>A Dirichlet boundary condition specifies:</p><div class="m-math"><svg style="width: 8.209em; height: 1.093em;" viewBox="154.619776 -10.493961 78.805284 10.493973">
 <title>
 \[
   u = g \quad \text{on} \quad \Gamma_D
@@ -145,7 +145,7 @@ $ \Gamma_D $
 <use x='0' y='0' xlink:href='#eq4-g1-0'/>
 <use x='7.314174' y='1.793263' xlink:href='#eq4-g0-68'/>
 </g>
-</svg> is a portion of the domain boundary.</p></section><section id="autotoc_md250"><h3><a href="#autotoc_md250">Implementation</a></h3><p>Dirichlet conditions are typically enforced by:</p><ol><li>Identifying boundary degrees of freedom</li><li>Setting their values to <svg class="m-math" style="width: 0.629em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 6.03426 7.47198">
+</svg> is a portion of the domain boundary.</p></section><section id="autotoc_md247"><h3><a href="#autotoc_md247">Implementation</a></h3><p>Dirichlet conditions are typically enforced by:</p><ol><li>Identifying boundary degrees of freedom</li><li>Setting their values to <svg class="m-math" style="width: 0.629em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 6.03426 7.47198">
 <title>
 $ g $
 </title>
@@ -155,7 +155,7 @@ $ g $
 <g id='eq5-page1'>
 <use x='0' y='0' xlink:href='#eq5-g0-103'/>
 </g>
-</svg></li><li>Modifying the system matrix and right-hand side</li></ol></section><section id="autotoc_md251"><h3><a href="#autotoc_md251">Usage Example</a></h3><pre class="m-code"><span class="c1">// Homogeneous Dirichlet BC (u = 0 on boundary)</span>
+</svg></li><li>Modifying the system matrix and right-hand side</li></ol></section><section id="autotoc_md248"><h3><a href="#autotoc_md248">Usage Example</a></h3><pre class="m-code"><span class="c1">// Homogeneous Dirichlet BC (u = 0 on boundary)</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">bc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">Zero</span><span class="p">());</span>
 
 <span class="c1">// Inhomogeneous Dirichlet BC</span>

@@ -78,8 +78,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md100">EnSight6 Format</a></li>
-            <li><a href="#autotoc_md101">Usage Example</a></li>
+            <li><a href="#autotoc_md97">EnSight6 Format</a></li>
+            <li><a href="#autotoc_md98">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -89,7 +89,7 @@
             </li>
           </ul>
         </nav>
-<p>This printer writes mesh data in the EnSight6 geometry file format, which is widely used for post-processing and visualization in engineering applications.</p><section id="autotoc_md100"><h3><a href="#autotoc_md100">EnSight6 Format</a></h3><p>The format uses ASCII text and includes:</p><ul><li>Description line</li><li>Node ID specification</li><li>Element ID specification<br /></li><li>Coordinate data (X, Y, Z components)</li><li>Element connectivity by type</li></ul></section><section id="autotoc_md101"><h3><a href="#autotoc_md101">Usage Example</a></h3><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="n">Mesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getMesh</span><span class="p">();</span>
+<p>This printer writes mesh data in the EnSight6 geometry file format, which is widely used for post-processing and visualization in engineering applications.</p><section id="autotoc_md97"><h3><a href="#autotoc_md97">EnSight6 Format</a></h3><p>The format uses ASCII text and includes:</p><ul><li>Description line</li><li>Node ID specification</li><li>Element ID specification<br /></li><li>Coordinate data (X, Y, Z components)</li><li>Element connectivity by type</li></ul></section><section id="autotoc_md98"><h3><a href="#autotoc_md98">Usage Example</a></h3><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="n">Mesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getMesh</span><span class="p">();</span>
 <span class="n">MeshPrinter</span><span class="o">&lt;</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">ENSIGHT6</span><span class="p">,</span><span class="w"> </span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">printer</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">std</span><span class="o">::</span><span class="n">ofstream</span><span class="w"> </span><span class="n">file</span><span class="p">(</span><span class="s">&quot;mesh.geo&quot;</span><span class="p">);</span>
 <span class="n">printer</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="n">file</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_mesh_loader.html" class="m-doc">MeshLoader</a></p></aside></section>

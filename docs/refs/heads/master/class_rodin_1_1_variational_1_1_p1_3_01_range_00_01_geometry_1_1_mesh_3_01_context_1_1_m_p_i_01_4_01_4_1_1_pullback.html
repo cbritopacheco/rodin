@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Assembly::Generic class | Rodin</title>
+  <title>Rodin::Variational::P1&lt;Range, Geometry::Mesh&lt;Context::MPI&gt;&gt;::Pullback class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -71,23 +71,20 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_rodin_2_assembly_2_forward_decls_8h.html">&lt;Rodin/Assembly/ForwardDecls.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class ... Ts&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>Generic <span class="m-thin">class</span>
+          <div class="m-doc-template">template&lt;class FunctionDerived&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_p1_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4.html">P1&lt;Range, Geometry::Mesh&lt;Context::MPI&gt;&gt;</a>::<wbr/></span>Pullback <span class="m-thin">class</span>
         </h1>
-        <p><a href="class_rodin_1_1_assembly_1_1_generic.html" class="m-doc">Generic</a> problem assembly implementation.</p>
-        <table class="m-table m-fullwidth m-flat">
-          <thead>
-            <tr><th colspan="2">Template parameters</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="width: 1%">Ts</td>
-              <td>Type parameters for problem assembly</td>
-            </tr>
-          </tbody>
-        </table>
-<p>Provides a complete assembly implementation for variational problems, handling both bilinear and linear forms along with boundary conditions.</p>
+        <p>Mapping for the scalar/complex <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> space.</p>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_finite_element_space_pullback_base.html" class="m-doc">FiniteElementSpacePullbackBase&lt;Pullback&lt;FunctionDerived&gt;&gt;</a>
+            </dt>
+            <dd>Base class for mappings taking functions defined on physical elements to reference elements.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

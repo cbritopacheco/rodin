@@ -90,10 +90,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md310">Mathematical Properties</a></li>
-            <li><a href="#autotoc_md311">Convergence Rates</a></li>
-            <li><a href="#autotoc_md312">Basis Function Construction</a></li>
-            <li><a href="#autotoc_md313">Usage Example</a></li>
+            <li><a href="#autotoc_md307">Mathematical Properties</a></li>
+            <li><a href="#autotoc_md308">Convergence Rates</a></li>
+            <li><a href="#autotoc_md309">Basis Function Construction</a></li>
+            <li><a href="#autotoc_md310">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -132,7 +132,7 @@ $ \phi_i(x_j) = \delta_{ij} $
 <use x='51.379235' y='1.793263' xlink:href='#eq1-g0-105'/>
 <use x='54.262375' y='1.793263' xlink:href='#eq1-g0-106'/>
 </g>
-</svg>.</p><aside class="m-note m-info"><h4>Note</h4><p>For an overview of all the possible specializations of the <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> class, please see <a href="group___h1_element_specializations.html" class="m-doc">H1Element Template Specializations</a>.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="group___h1_element_specializations.html" class="m-doc">H1Element Template Specializations</a></p></aside><p>The <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a> provides a k-th order finite element with Lagrange basis functions. This is a high-order-stable H1-conforming element family.</p><section id="autotoc_md310"><h3><a href="#autotoc_md310">Mathematical Properties</a></h3><ul><li><strong>DOF count</strong>: Depends on geometry and polynomial degree K<ul><li>Segment: K+1</li><li>Triangle: (K+1)(K+2)/2</li><li>Quadrilateral: (K+1)²</li><li>Tetrahedron: (K+1)(K+2)(K+3)/6</li><li>Wedge: (K+1)·(K+1)(K+2)/2</li></ul></li><li><strong>Basis functions</strong>: Lagrange polynomials of degree K satisfying the Lagrange property: <svg class="m-math" style="width: 6.057em; height: 1.282em; vertical-align: -0.350em;" viewBox="0 -8.966376 58.1464 12.309385">
+</svg>.</p><aside class="m-note m-info"><h4>Note</h4><p>For an overview of all the possible specializations of the <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> class, please see <a href="group___h1_element_specializations.html" class="m-doc">H1Element Template Specializations</a>.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="group___h1_element_specializations.html" class="m-doc">H1Element Template Specializations</a></p></aside><p>The <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a> provides a k-th order finite element with Lagrange basis functions. This is a high-order-stable H1-conforming element family.</p><section id="autotoc_md307"><h3><a href="#autotoc_md307">Mathematical Properties</a></h3><ul><li><strong>DOF count</strong>: Depends on geometry and polynomial degree K<ul><li>Segment: K+1</li><li>Triangle: (K+1)(K+2)/2</li><li>Quadrilateral: (K+1)²</li><li>Tetrahedron: (K+1)(K+2)(K+3)/6</li><li>Wedge: (K+1)·(K+1)(K+2)/2</li></ul></li><li><strong>Basis functions</strong>: Lagrange polynomials of degree K satisfying the Lagrange property: <svg class="m-math" style="width: 6.057em; height: 1.282em; vertical-align: -0.350em;" viewBox="0 -8.966376 58.1464 12.309385">
 <title>
 $ \phi_i(x_j) = \delta_{ij} $
 </title>
@@ -211,7 +211,7 @@ $ x $
 <g id='eq5-page1'>
 <use x='0' y='0' xlink:href='#eq5-g0-120'/>
 </g>
-</svg></li><li><strong>Continuity</strong>: Global C⁰ continuity across element interfaces (H¹-conforming)</li></ul></section><section id="autotoc_md311"><h3><a href="#autotoc_md311">Convergence Rates</a></h3><p>For smooth solutions, <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> elements of degree k provide k-th order convergence:</p><ul><li><strong>L² norm</strong>: <svg class="m-math" style="width: 11.717em; height: 1.340em; vertical-align: -0.312em;" viewBox="0 -9.873238 112.479379 12.86203">
+</svg></li><li><strong>Continuity</strong>: Global C⁰ continuity across element interfaces (H¹-conforming)</li></ul></section><section id="autotoc_md308"><h3><a href="#autotoc_md308">Convergence Rates</a></h3><p>For smooth solutions, <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> elements of degree k provide k-th order convergence:</p><ul><li><strong>L² norm</strong>: <svg class="m-math" style="width: 11.717em; height: 1.340em; vertical-align: -0.312em;" viewBox="0 -9.873238 112.479379 12.86203">
 <title>
 $ \|u - u_h\|_{L^2} = O(h^{k+1}) $
 </title>
@@ -283,7 +283,7 @@ $ \|u - u_h\|_{H^1} = O(h^k) $
 <use x='93.797878' y='-4.338437' xlink:href='#eq7-g1-107'/>
 <use x='98.917625' y='0' xlink:href='#eq7-g4-41'/>
 </g>
-</svg></li></ul></section><section id="autotoc_md312"><h3><a href="#autotoc_md312">Basis Function Construction</a></h3><ul><li><strong>1D (Segment)</strong>: Classical Lagrange interpolation <svg class="m-math" style="width: 10.332em; height: 1.812em; vertical-align: -0.680em;" viewBox="0 -10.898781 99.185888 17.398807">
+</svg></li></ul></section><section id="autotoc_md309"><h3><a href="#autotoc_md309">Basis Function Construction</a></h3><ul><li><strong>1D (Segment)</strong>: Classical Lagrange interpolation <svg class="m-math" style="width: 10.332em; height: 1.812em; vertical-align: -0.680em;" viewBox="0 -10.898781 99.185888 17.398807">
 <title>
 $ L_i^K(x) = \prod_{j \neq i} \frac{x - x_j}{x_i - x_j} $
 </title>
@@ -373,7 +373,7 @@ $ L_n^K(\lambda) = \prod_{m=0}^{n-1} \frac{K\lambda - m}{m+1} $
 <use x='92.830646' y='4.122632' xlink:href='#eq9-g4-43'/>
 <use x='99.417152' y='4.122632' xlink:href='#eq9-g4-49'/>
 </g>
-</svg></li><li><strong>Tensor Products</strong>: For quadrilaterals and wedges, tensor product of lower-dimensional bases</li></ul></section><section id="autotoc_md313"><h3><a href="#autotoc_md313">Usage Example</a></h3><pre class="m-code"><span class="c1">// H1 element of degree 3 on triangle - 10 DOFs</span>
+</svg></li><li><strong>Tensor Products</strong>: For quadrilaterals and wedges, tensor product of lower-dimensional bases</li></ul></section><section id="autotoc_md310"><h3><a href="#autotoc_md310">Usage Example</a></h3><pre class="m-code"><span class="c1">// H1 element of degree 3 on triangle - 10 DOFs</span>
 <span class="n">RealH1Element</span><span class="o">&lt;</span><span class="mi">3</span><span class="o">&gt;</span><span class="w"> </span><span class="n">h1_tri</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">);</span>
 <span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">h1_tri</span><span class="p">.</span><span class="n">getCount</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w">  </span><span class="c1">// Output: 10</span>
 
