@@ -181,28 +181,22 @@ if (RODIN_LTO)
   rodin_add_compile_options(LANG CXX C OPTIONS -flto)
 endif()
 
-if (RODIN_CODE_COVERAGE)
-  add_link_options(--coverage)
-  add_compile_options(--coverage)
-  rodin_add_compile_options(LANG CXX C OPTIONS
-    -fprofile-update=atomic
-    -fprofile-arcs
-    -ftest-coverage)
-  find_program(LCOV lcov REQUIRED)
-  if(DEFINED ENV{GCOV} AND NOT "$ENV{GCOV}" STREQUAL "")
-    # Try finding the tool using the environment variable name
-    find_program(GCOV "$ENV{GCOV}" REQUIRED)
-  else()
-    find_program(GCOV gcov REQUIRED)
-  endif()
-  string(REPLACE " " ";" RODIN_LCOV_FLAGS_LIST "${RODIN_LCOV_FLAGS}")
-  add_custom_target(RodinCoverage
-    COMMAND ${LCOV} ${RODIN_LCOV_FLAGS_LIST} --gcov-tool ${GCOV} --capture --directory src --directory tests --output-file RodinCoverage.base.info
-    COMMAND ${LCOV} ${RODIN_LCOV_FLAGS_LIST} --gcov-tool ${GCOV} --remove RodinCoverage.base.info '/usr/*' '/opt/*' '*/tests/*' '*/third-party/*' '/Library/*' '/Applications/*' --output-file RodinCoverage.info
-    COMMAND rm -f RodinCoverage.base.info
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-  )
-endif()
+add_custom_target(RodinCoverage
+  COMMAND ${LCOV} ${RODIN_LCOV_FLAGS_LIST}
+          --gcov-tool ${GCOV}
+          --capture
+          --directory ${CMAKE_BINARY_DIR}
+          --base-directory ${CMAKE_SOURCE_DIR}
+          --output-file RodinCoverage.base.info
+  COMMAND ${LCOV} ${RODIN_LCOV_FLAGS_LIST}
+          --gcov-tool ${GCOV}
+          --remove RodinCoverage.base.info
+          '/usr/*' '/opt/*' '/Library/*' '/Applications/*'
+          '*/tests/*' '*/third-party/*'
+          --output-file RodinCoverage.info
+  COMMAND rm -f RodinCoverage.base.info
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+)
 
 if (RODIN_BUILD_SRC)
   # ---- Find and build dependencies -----------------------------------------
