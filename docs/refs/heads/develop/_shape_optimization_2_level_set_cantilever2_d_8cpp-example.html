@@ -227,9 +227,9 @@
 
 <span class="w">    </span><span class="n">GridFunction</span><span class="w"> </span><span class="n">dist</span><span class="p">(</span><span class="n">sh</span><span class="p">);</span>
 <span class="w">    </span><span class="n">Models</span><span class="o">::</span><span class="n">Distance</span><span class="o">::</span><span class="n">Eikonal</span><span class="p">(</span><span class="n">dist</span><span class="p">).</span><span class="n">setInterior</span><span class="p">(</span><span class="n">interior</span><span class="p">)</span>
-<span class="w">                                                 </span><span class="p">.</span><span class="n">setInterface</span><span class="p">(</span><span class="n">Gamma</span><span class="p">)</span>
-<span class="w">                                                 </span><span class="p">.</span><span class="n">solve</span><span class="p">()</span>
-<span class="w">                                                 </span><span class="p">.</span><span class="n">sign</span><span class="p">();</span>
+<span class="w">                                   </span><span class="p">.</span><span class="n">setInterface</span><span class="p">(</span><span class="n">Gamma</span><span class="p">)</span>
+<span class="w">                                   </span><span class="p">.</span><span class="n">solve</span><span class="p">()</span>
+<span class="w">                                   </span><span class="p">.</span><span class="n">sign</span><span class="p">();</span>
 
 <span class="w">    </span><span class="c1">// Advect the level set function</span>
 <span class="w">    </span><span class="n">Alert</span><span class="o">::</span><span class="n">Info</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;   | Advecting the distance function.&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Alert</span><span class="o">::</span><span class="n">Raise</span><span class="p">;</span>
@@ -239,7 +239,6 @@
 
 <span class="w">    </span><span class="n">TrialFunction</span><span class="w"> </span><span class="n">advect</span><span class="p">(</span><span class="n">sh</span><span class="p">);</span>
 <span class="w">    </span><span class="n">TestFunction</span><span class="w"> </span><span class="n">test</span><span class="p">(</span><span class="n">sh</span><span class="p">);</span>
-
 
 <span class="w">    </span><span class="n">th</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;distance.mesh&quot;</span><span class="p">);</span>
 <span class="w">    </span><span class="n">dist</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;dist.gf&quot;</span><span class="p">);</span>
