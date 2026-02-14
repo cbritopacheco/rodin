@@ -4,11 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include "Rodin/Geometry/Types.h"
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
 #include <RodinExternal/MMG.h>
+#include <Rodin/Models/Distance/Eikonal.h>
+#include <Rodin/Models/Advection/Lagrangian.h>
 
 using namespace Rodin;
 using namespace Rodin::External;
@@ -17,10 +20,10 @@ using namespace Rodin::Variational;
 
 
 // Define interior and exterior for level set discretization
-static constexpr int Interior = 3, Exterior = 2;
+static constexpr Attribute Interior = 3, Exterior = 2;
 
 // Define boundary attributes
-static constexpr int GammaD = 999, GammaN = 2, Gamma = 10, Gamma0 = 666;
+static constexpr Attribute GammaD = 999, GammaN = 2, Gamma = 10, Gamma0 = 666;
 
 // Lamé coefficients
 static constexpr double mu = 0.3846;
@@ -91,8 +94,12 @@ int main(int, char**)
     P1 vh(th, d);
 
     Alert::Info() << "   | Distancing domain." << Alert::Raise;
-    auto dist = MMG::Distancer(sh).setInteriorDomain(Interior)
-                                  .distance(th);
+
+    GridFunction dist(sh);
+    Models::Distance::Eikonal(dist).setInterior(Interior)
+                                   .setInterface(Gamma)
+                                   .solve()
+                                   .sign();
 
     P1 shInt(trimmed);
     P1 vhInt(trimmed, d);
@@ -142,7 +149,16 @@ int main(int, char**)
     norm = Frobenius(dJ);
     dJ /= norm.max();
 
-    MMG::Advect(dist, dJ).step(dt);
+    TrialFunction advect(sh);
+    TestFunction test(sh);
+
+    th.save("distance.mesh");
+    dist.save("dist.gf");
+
+    Models::Advection::Lagrangian(advect, test, dist, dJ).step(dt);
+
+    th.save("advect.mesh");
+    advect.getSolution().save("advect.gf");
 
     // Recover the implicit domain
     Alert::Info() << "   | Meshing the domain." << Alert::Raise;

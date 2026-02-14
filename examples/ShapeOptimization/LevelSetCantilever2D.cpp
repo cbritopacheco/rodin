@@ -148,9 +148,9 @@ int main(int, char**)
 
     GridFunction dist(sh);
     Models::Distance::Eikonal(dist).setInterior(interior)
-                                                 .setInterface(Gamma)
-                                                 .solve()
-                                                 .sign();
+                                   .setInterface(Gamma)
+                                   .solve()
+                                   .sign();
 
     // Advect the level set function
     Alert::Info() << "   | Advecting the distance function." << Alert::Raise;
@@ -160,7 +160,6 @@ int main(int, char**)
 
     TrialFunction advect(sh);
     TestFunction test(sh);
-
 
     th.save("distance.mesh");
     dist.save("dist.gf");
