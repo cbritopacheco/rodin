@@ -181,26 +181,45 @@ if (RODIN_LTO)
   rodin_add_compile_options(LANG CXX C OPTIONS -flto)
 endif()
 
-if (RODIN_CODE_COVERAGE)
+if(RODIN_CODE_COVERAGE)
+  add_compile_options(--coverage -fprofile-update=atomic -fprofile-arcs -ftest-coverage)
   add_link_options(--coverage)
-  add_compile_options(--coverage)
-  rodin_add_compile_options(LANG CXX C OPTIONS
-    -fprofile-update=atomic
-    -fprofile-arcs
-    -ftest-coverage)
+
   find_program(LCOV lcov REQUIRED)
+
+  # Prefer GCOV from env, else gcov-14, else gcov. Never gcov-tool.
   if(DEFINED ENV{GCOV} AND NOT "$ENV{GCOV}" STREQUAL "")
-    # Try finding the tool using the environment variable name
     find_program(GCOV "$ENV{GCOV}" REQUIRED)
   else()
-    find_program(GCOV gcov REQUIRED)
+    find_program(GCOV gcov-14)
+    if(NOT GCOV)
+      find_program(GCOV gcov REQUIRED)
+    endif()
   endif()
+
+  get_filename_component(GCOV_NAME "${GCOV}" NAME)
+  if(GCOV_NAME STREQUAL "gcov-tool")
+    message(FATAL_ERROR "GCOV resolved to gcov-tool (${GCOV}). Set GCOV to gcov or gcov-14.")
+  endif()
+
+  # RODIN_LCOV_FLAGS is already a cache var in CI; make list
   string(REPLACE " " ";" RODIN_LCOV_FLAGS_LIST "${RODIN_LCOV_FLAGS}")
+
   add_custom_target(RodinCoverage
-    COMMAND ${LCOV} ${RODIN_LCOV_FLAGS_LIST} --gcov-tool ${GCOV} --capture --directory src --directory tests --output-file RodinCoverage.base.info
-    COMMAND ${LCOV} ${RODIN_LCOV_FLAGS_LIST} --gcov-tool ${GCOV} --remove RodinCoverage.base.info '/usr/*' '/opt/*' '*/tests/*' '*/third-party/*' '/Library/*' '/Applications/*' --output-file RodinCoverage.info
+    COMMAND ${LCOV} ${RODIN_LCOV_FLAGS_LIST}
+            --gcov-tool ${GCOV}
+            --capture
+            --directory ${CMAKE_BINARY_DIR}
+            --base-directory ${CMAKE_SOURCE_DIR}
+            --output-file RodinCoverage.base.info
+    COMMAND ${LCOV} ${RODIN_LCOV_FLAGS_LIST}
+            --gcov-tool ${GCOV}
+            --remove RodinCoverage.base.info
+            '/usr/*' '/opt/*' '/Library/*' '/Applications/*'
+            '*/tests/*' '*/third-party/*'
+            --output-file RodinCoverage.info
     COMMAND rm -f RodinCoverage.base.info
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
   )
 endif()
 
