@@ -13,7 +13,7 @@
 
 #include "MMG5.h"
 
-namespace Rodin::External::MMG
+namespace Rodin::MMG
 {
   class Adapt : public MMG5
   {

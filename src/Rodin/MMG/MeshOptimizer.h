@@ -13,7 +13,7 @@
 #include "Mesh.h"
 #include "MMG5.h"
 
-namespace Rodin::External::MMG
+namespace Rodin::MMG
 {
   /**
    * @brief Improves the mesh quality, mantaining the mean edge lenghts of the mesh.

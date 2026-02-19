@@ -12,7 +12,7 @@
 #include "MMG5.h"
 #include "Common.h"
 
-namespace Rodin::External::MMG
+namespace Rodin::MMG
 {
   /**
    * @brief Class to perform the discretization and optimization of a

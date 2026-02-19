@@ -4,5 +4,5 @@ target_link_libraries(SpaldingTucker
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational
-  Rodin::External::MMG
+  Rodin::MMG
   )

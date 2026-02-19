@@ -32,7 +32,7 @@
 #undef I
 #endif
 
-namespace Rodin::External::MMG
+namespace Rodin::MMG
 {
   /**
   * @brief Empty class tag to specify that a material reference should not be

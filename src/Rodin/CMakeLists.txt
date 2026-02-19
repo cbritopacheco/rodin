@@ -64,6 +64,8 @@ add_subdirectory(Variational)
 add_subdirectory(FormLanguage)
 add_subdirectory(Serialization)
 
+add_subdirectory(MMG)
+
 if (RODIN_WITH_PLOT)
   add_subdirectory(Plot)
 endif()

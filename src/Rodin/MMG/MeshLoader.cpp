@@ -12,7 +12,7 @@
 
 #include "MeshLoader.h"
 
-namespace Rodin::External::MMG
+namespace Rodin::MMG
 {
   void MeshLoader::load(std::istream& is)
   {

@@ -6,7 +6,7 @@
  */
 #include "Mesh.h"
 
-namespace Rodin::External::MMG
+namespace Rodin::MMG
 {
   Mesh::Builder& Mesh::Builder::operator=(Mesh::Builder&& other)
   {

@@ -6,7 +6,7 @@
  */
 #include "MeshOptimizer.h"
 
-namespace Rodin::External::MMG
+namespace Rodin::MMG
 {
   int Optimizer::optimizeMMG2D(MMG5_pMesh mesh)
   {

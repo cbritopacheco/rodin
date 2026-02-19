@@ -11,9 +11,9 @@
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/P1.h"
 
-namespace Rodin::External::MMG
+namespace Rodin::MMG
 {
-  /// GridFunction class for use with the Rodin::External::MMG module.
+  /// GridFunction class for use with the Rodin::MMG module.
   template <class Range>
   using GridFunction = Variational::GridFunction<
         Variational::P1<Range, Geometry::Mesh<Context::Local>>, Math::Vector<Real>>;

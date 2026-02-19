@@ -11,7 +11,7 @@
 
 #include "Mesh.h"
 
-namespace Rodin::External::MMG
+namespace Rodin::MMG
 {
   /**
    * @brief Class used to print objects of type MMG::Mesh.

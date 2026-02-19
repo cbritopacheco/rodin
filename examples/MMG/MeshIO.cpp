@@ -7,11 +7,10 @@
 #include <iostream>
 
 #include <Rodin/Geometry.h>
-#include <RodinExternal/MMG.h>
+#include <Rodin/MMG.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
-using namespace Rodin::External;
 using namespace Rodin::Variational;
 
 int main(int, char**)

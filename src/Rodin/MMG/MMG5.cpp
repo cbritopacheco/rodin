@@ -13,7 +13,7 @@
 
 #include "MMG5.h"
 
-namespace Rodin::External::MMG
+namespace Rodin::MMG
 {
   MMG5::MMG5()
     : m_ridgeDetection(true)

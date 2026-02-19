@@ -5,10 +5,9 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <Rodin/Geometry.h>
-#include <RodinExternal/MMG.h>
+#include <Rodin/MMG.h>
 
 using namespace Rodin;
-using namespace Rodin::External;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 

@@ -10,7 +10,7 @@
 #include "MeshLoader.h"
 #include "MeshPrinter.h"
 
-namespace Rodin::External::MMG
+namespace Rodin::MMG
 {
   Mesh& Mesh::setCorner(Index vertexIdx)
   {

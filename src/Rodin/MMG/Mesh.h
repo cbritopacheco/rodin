@@ -9,7 +9,7 @@
 
 #include "Rodin/Geometry.h"
 
-namespace Rodin::External::MMG
+namespace Rodin::MMG
 {
   /**
    * @brief Mesh class which has support for MMG functionalities.

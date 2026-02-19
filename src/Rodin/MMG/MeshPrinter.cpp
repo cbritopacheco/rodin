@@ -10,7 +10,7 @@
 
 #include "MeshPrinter.h"
 
-namespace Rodin::External::MMG
+namespace Rodin::MMG
 {
   void MeshPrinter::print(std::ostream& os)
   {

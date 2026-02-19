@@ -10,12 +10,11 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
-#include <RodinExternal/MMG.h>
+#include <Rodin/MMG.h>
 #include <Rodin/Models/Distance/Eikonal.h>
 #include <Rodin/Models/Advection/Lagrangian.h>
 
 using namespace Rodin;
-using namespace Rodin::External;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 

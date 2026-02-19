@@ -11,7 +11,7 @@
 
 #include "Mesh.h"
 
-namespace Rodin::External::MMG
+namespace Rodin::MMG
 {
   class MeshLoader : public IO::MeshLoader<IO::FileFormat::MEDIT, Context::Local>
   {

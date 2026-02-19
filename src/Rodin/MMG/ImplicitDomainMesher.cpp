@@ -3,7 +3,7 @@
 
 #include "ImplicitDomainMesher.h"
 
-namespace Rodin::External::MMG
+namespace Rodin::MMG
 {
   ImplicitDomainMesher& ImplicitDomainMesher::surface(bool meshTheSurface)
   {

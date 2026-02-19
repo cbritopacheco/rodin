@@ -8,7 +8,7 @@
 #include <Rodin/Assembly.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
-#include <RodinExternal/MMG.h>
+#include <Rodin/MMG.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -30,9 +30,9 @@ int main(int, char**)
   const char* meshFile = "../resources/examples/DensityOptimization/TemperatureMinimization.mfem.mesh";
 
   // Load mesh
-  External::MMG::Mesh Omega;
+  MMG::Mesh Omega;
   Omega.load(meshFile);
-  External::MMG::Optimizer().setHMax(0.005).setHMin(0.001).optimize(Omega);
+  MMG::Optimizer().setHMax(0.005).setHMin(0.001).optimize(Omega);
 
   Omega.save("outDensity/gamma.mesh");
 

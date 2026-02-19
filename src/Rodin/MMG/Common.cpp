@@ -6,7 +6,7 @@
  */
 #include "Common.h"
 
-namespace Rodin::External::MMG
+namespace Rodin::MMG
 {
   const char* getISCDMshdistExecutable()
   {

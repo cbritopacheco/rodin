@@ -8,7 +8,7 @@ Distributed under the Boost Software License, Version 1.0.
 include (ExternalProject)
 
 # ---- Add main targets ------------------------------------------------------
-set(RodinExternalMMG_HEADERS
+set(RodinMMG_HEADERS
   MMG5.h
   Mesh.h
   Adapt.h
@@ -19,7 +19,7 @@ set(RodinExternalMMG_HEADERS
   ImplicitDomainMesher.h
   )
 
-set(RodinExternalMMG_SRCS
+set(RodinMMG_SRCS
   MMG5.cpp
   Mesh.cpp
   Common.cpp
@@ -49,9 +49,9 @@ rodin_add_compile_options(
   -Wno-error=extra
   -Wno-error=pedantic)
 
-add_library(RodinExternalMMG
-  ${RodinExternalMMG_HEADERS} ${RodinExternalMMG_SRCS})
-add_library(Rodin::External::MMG ALIAS RodinExternalMMG)
+add_library(RodinMMG
+  ${RodinMMG_HEADERS} ${RodinMMG_SRCS})
+add_library(Rodin::MMG ALIAS RodinMMG)
 
 # ---- MMG ----
 message(STATUS "Configuring mmg ...")
@@ -75,14 +75,14 @@ endif()
 
 configure_file(Configure.h.in Configure.h @ONLY)
 
-target_include_directories(RodinExternalMMG
+target_include_directories(RodinMMG
   PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/third-party/mmg/src>
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/third-party/mmg/include>
-  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/RodinExternal/MMG>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/Rodin/MMG>
 )
-target_link_libraries(RodinExternalMMG
+target_link_libraries(RodinMMG
   PUBLIC
   Mmg::libmmg_a
   Mmg::libmmg2d_a
@@ -93,17 +93,17 @@ target_link_libraries(RodinExternalMMG
   Rodin::Variational
   ${CMAKE_THREAD_LIBS_INIT})
 
-# Note: RodinExternalMMG is not exported because it depends on MMG which is built
+# Note: RodinMMG is not exported because it depends on MMG which is built
 # from source. Users who want MMG support should build Rodin from source.
-# install(TARGETS RodinExternalMMG
+# install(TARGETS RodinMMG
 #   EXPORT       RodinTargets
 #   RUNTIME      DESTINATION ${RODIN_INSTALL_BINARY_PATH}
 #   LIBRARY      DESTINATION ${RODIN_INSTALL_LIBRARY_PATH}
 #   ARCHIVE      DESTINATION ${RODIN_INSTALL_LIBRARY_PATH}
-#   INCLUDES     DESTINATION ${RODIN_INSTALL_INCLUDE_PATH}/RodinExternal/MMG
+#   INCLUDES     DESTINATION ${RODIN_INSTALL_INCLUDE_PATH}/Rodin/MMG
 # )
 
 # rodin_install_headers(
 #   DIRECTORIES .
-#   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/RodinExternal/MMG
+#   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Rodin/MMG
 # )

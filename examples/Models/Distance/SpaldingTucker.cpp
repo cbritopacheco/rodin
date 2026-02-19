@@ -14,10 +14,9 @@
 #include <Rodin/Models/Distance/SpaldingTucker.h>
 #include <Rodin/Models/Distance/Rvachev.h>
 
-#include <RodinExternal/MMG.h>
+#include <Rodin/MMG.h>
 
 using namespace Rodin;
-using namespace Rodin::External;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 

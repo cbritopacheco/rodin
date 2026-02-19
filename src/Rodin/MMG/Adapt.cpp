@@ -1,6 +1,6 @@
 #include "Adapt.h"
 
-namespace Rodin::External::MMG
+namespace Rodin::MMG
 {
   void Adapt::adapt(MMG::Mesh& mesh, const RealGridFunction& sizeMap)
   {

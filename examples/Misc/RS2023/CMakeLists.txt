@@ -4,7 +4,7 @@ target_link_libraries(RS2023_Domain
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational
-  Rodin::External::MMG
+  Rodin::MMG
   )
 
 add_executable(RS2023_CellFunction CellFunction.cpp)
@@ -13,7 +13,7 @@ target_link_libraries(RS2023_CellFunction
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational
-  Rodin::External::MMG
+  Rodin::MMG
   )
 
 add_subdirectory(Conductivity)

@@ -7,7 +7,7 @@
 #ifndef RODIN_RODININTEGRATION_MMG_FORWARDDECLS_H
 #define RODIN_RODININTEGRATION_MMG_FORWARDDECLS_H
 
-namespace Rodin::External::MMG
+namespace Rodin::MMG
 {
   class MMG5;
 

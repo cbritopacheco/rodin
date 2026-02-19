@@ -14,6 +14,6 @@ target_link_libraries(RS2023_Conductivity_Perturbed
   Rodin::Assembly
   Rodin::Solver
   Rodin::Variational
-  Rodin::External::MMG
+  Rodin::MMG
   )
 

@@ -11,10 +11,10 @@
 
 /**
  * @file MMG/Configure.h.in
- * @brief Header containing preprocessor directives for Rodin::External::MMG.
+ * @brief Header containing preprocessor directives for Rodin::MMG.
  */
 
-namespace Rodin::External::MMG
+namespace Rodin::MMG
 {
   /**
    * @brief Path to the ISCD Mshdist executable.

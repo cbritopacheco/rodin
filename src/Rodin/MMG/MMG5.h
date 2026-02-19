@@ -19,7 +19,7 @@
 #include "ForwardDecls.h"
 #include "GridFunction.h"
 
-namespace Rodin::External::MMG
+namespace Rodin::MMG
 {
   template <class FuncName>
   class MMG5Exception : public Alert::Exception
