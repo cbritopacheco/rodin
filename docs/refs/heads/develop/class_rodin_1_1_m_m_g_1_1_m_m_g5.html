@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::External::MMG::MMG5 class | Rodin</title>
+  <title>Rodin::MMG::MMG5 class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -71,9 +71,9 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external.html">External</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external_1_1_m_m_g.html">MMG</a>::<wbr/></span>MMG5 <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_m_m_g.html">MMG</a>::<wbr/></span>MMG5 <span class="m-thin">class</span>
         </h1>
-        <p>Class representing <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a> objects utilized in the <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG</a> framework.</p>
+        <p>Class representing <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a> objects utilized in the MMG framework.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -88,16 +88,16 @@
             </li>
           </ul>
         </nav>
-<p>This class is used for wrappping the functionality of the <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG</a> library.</p>
+<p>This class is used for wrappping the functionality of the MMG library.</p>
         <section id="derived-classes">
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>
+              class <a href="class_rodin_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>
             </dt>
             <dd>Class to perform the discretization and optimization of a surface implicitly defined by a level set function.</dd>
             <dt>
-              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a>
+              class <a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a>
             </dt>
             <dd>Improves the mesh quality, mantaining the mean edge lenghts of the mesh.</dd>
           </dl>
@@ -108,11 +108,11 @@
             <dt id="ab9bd883b7f95228226fd6f267d044287">
               <span class="m-doc-wrap-bumper">static auto <a href="#ab9bd883b7f95228226fd6f267d044287" class="m-doc-self">rodinToMesh</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a2e85a5056404a8833600ced8a9fc603f" class="m-doc">Rodin::<wbr />Geometry::<wbr />LocalMesh</a>&amp; src) -&gt; MMG5_pMesh</span>
             </dt>
-            <dd>Converts an <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> object to a MMG5_pMesh object.</dd>
+            <dd>Converts an <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> object to a MMG5_pMesh object.</dd>
             <dt id="a417246fbd6a72f45ccc4274a5e6f981c">
-              <span class="m-doc-wrap-bumper">static auto <a href="#a417246fbd6a72f45ccc4274a5e6f981c" class="m-doc-self">meshToRodin</a>(</span><span class="m-doc-wrap">const MMG5_pMesh src) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a></span>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a417246fbd6a72f45ccc4274a5e6f981c" class="m-doc-self">meshToRodin</a>(</span><span class="m-doc-wrap">const MMG5_pMesh src) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a></span>
             </dt>
-            <dd>Converts an MMG5_pMesh object to a <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> object.</dd>
+            <dd>Converts an MMG5_pMesh object to a <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> object.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -128,19 +128,19 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a5c965e72a992adc183c1ecbf4c69be9d" class="m-doc">setHMin</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hmin) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5c965e72a992adc183c1ecbf4c69be9d" class="m-doc">setHMin</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hmin) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>&amp;</span>
             </dt>
             <dd>Sets the minimal edge size.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a16569a7911a8f59e616307ec73e12843" class="m-doc">setHMax</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hmax) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a16569a7911a8f59e616307ec73e12843" class="m-doc">setHMax</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hmax) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>&amp;</span>
             </dt>
             <dd>Sets the maximal edge size parameter.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab2f8fcbe1872632142aa47611d755c11" class="m-doc">setHausdorff</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hausd) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab2f8fcbe1872632142aa47611d755c11" class="m-doc">setHausdorff</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hausd) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>&amp;</span>
             </dt>
             <dd>Sets the Hausdorff parameter.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a88e958fa45ea13ad3b7a0b0be667b586" class="m-doc">setGradation</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hgrad) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a88e958fa45ea13ad3b7a0b0be667b586" class="m-doc">setGradation</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hgrad) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>&amp;</span>
             </dt>
             <dd>Sets the gradation parameter.</dd>
           </dl>
@@ -149,7 +149,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a5c965e72a992adc183c1ecbf4c69be9d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5c965e72a992adc183c1ecbf4c69be9d" class="m-doc-self">setHMin</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hmin)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>&amp; Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5c965e72a992adc183c1ecbf4c69be9d" class="m-doc-self">setHMin</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hmin)</span></span>
             </h3>
             <p>Sets the minimal edge size.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -173,7 +173,7 @@
           </div></section>
           <section class="m-doc-details" id="a16569a7911a8f59e616307ec73e12843"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a16569a7911a8f59e616307ec73e12843" class="m-doc-self">setHMax</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hmax)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>&amp; Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a16569a7911a8f59e616307ec73e12843" class="m-doc-self">setHMax</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hmax)</span></span>
             </h3>
             <p>Sets the maximal edge size parameter.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -197,7 +197,7 @@
           </div></section>
           <section class="m-doc-details" id="ab2f8fcbe1872632142aa47611d755c11"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab2f8fcbe1872632142aa47611d755c11" class="m-doc-self">setHausdorff</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hausd)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>&amp; Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab2f8fcbe1872632142aa47611d755c11" class="m-doc-self">setHausdorff</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hausd)</span></span>
             </h3>
             <p>Sets the Hausdorff parameter.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -221,7 +221,7 @@
           </div></section>
           <section class="m-doc-details" id="a88e958fa45ea13ad3b7a0b0be667b586"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a88e958fa45ea13ad3b7a0b0be667b586" class="m-doc-self">setGradation</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hgrad)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>&amp; Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a88e958fa45ea13ad3b7a0b0be667b586" class="m-doc-self">setGradation</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hgrad)</span></span>
             </h3>
             <p>Sets the gradation parameter.</p>
             <table class="m-table m-fullwidth m-flat">

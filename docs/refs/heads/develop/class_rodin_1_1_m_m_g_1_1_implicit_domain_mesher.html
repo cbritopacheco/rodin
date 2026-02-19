@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::External::MMG::ImplicitDomainMesher class | Rodin</title>
+  <title>Rodin::MMG::ImplicitDomainMesher class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -71,7 +71,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external.html">External</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_external_1_1_m_m_g.html">MMG</a>::<wbr/></span>ImplicitDomainMesher <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_m_m_g.html">MMG</a>::<wbr/></span>ImplicitDomainMesher <span class="m-thin">class</span>
         </h1>
         <p>Class to perform the discretization and optimization of a surface implicitly defined by a level set function.</p>
         <nav class="m-block m-default">
@@ -208,9 +208,9 @@ $ \Omega $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>
+              class <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>
             </dt>
-            <dd>Class representing <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a> objects utilized in the <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG</a> framework.</dd>
+            <dd>Class representing <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a> objects utilized in the MMG framework.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -226,15 +226,15 @@ $ \Omega $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac8bef5aaadbd335fdf2e37ab9a6c13c0" class="m-doc">setLevelSet</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> ls) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac8bef5aaadbd335fdf2e37ab9a6c13c0" class="m-doc">setLevelSet</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> ls) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>&amp;</span>
             </dt>
             <dd>Specifies the level set to discretize.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae611b0671cd7435708e91db2d675b89a" class="m-doc">setRMC</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> rmc = 1e-5) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae611b0671cd7435708e91db2d675b89a" class="m-doc">setRMC</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> rmc = 1e-5) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>&amp;</span>
             </dt>
             <dd>Specifies the removal of small parasitic components.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a4681927c9d261888759885bed337e9f4" class="m-doc">setBoundaryReference</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; ref) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4681927c9d261888759885bed337e9f4" class="m-doc">setBoundaryReference</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; ref) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>&amp;</span>
             </dt>
             <dd>Sets the material reference for the discretized boundary <svg class="m-math" style="width: 1.592em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 15.284187 8.302191">
 <title>
@@ -250,20 +250,20 @@ $ \partial \Omega $
 </g>
 </svg>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a35a2383688e4c1b9464c9f3a14cbd7e6" class="m-doc">setSplit</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc">SplitMap</a>&amp; split) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a35a2383688e4c1b9464c9f3a14cbd7e6" class="m-doc">setSplit</a>(</span><span class="m-doc-wrap">const SplitMap&amp; split) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>&amp;</span>
             </dt>
             <dd>Specifies how to split the materials into an interior and exterior domains.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a5c23d0d77c8ee19d600a6d6f9142a9ec" class="m-doc">split</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; ref,
-              const <a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_split.html" class="m-doc">Split</a>&amp; s) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>&amp;</span>
+              const <a href="struct_rodin_1_1_m_m_g_1_1_split.html" class="m-doc">Split</a>&amp; s) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>&amp;</span>
             </dt>
             <dd>Indicates that a material reference should be split.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aff1412e32e23dba92b8a109ec4bad8ae" class="m-doc">noSplit</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; ref) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aff1412e32e23dba92b8a109ec4bad8ae" class="m-doc">noSplit</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; ref) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>&amp;</span>
             </dt>
             <dd>Indicates that a material reference should not be split.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a82f47c875e92ce44fb1edf0530cc2c03" class="m-doc">discretize</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a5b080db16bbb2ed744518df89ccd8d06" class="m-doc">MMG::<wbr />RealGridFunction</a>&amp; ls) -&gt; <a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a82f47c875e92ce44fb1edf0530cc2c03" class="m-doc">discretize</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">MMG::<wbr />RealGridFunction</a>&amp; ls) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a></span>
             </dt>
             <dd>Discretizes and optimizes an implicitly defined surface defined by a level set function.</dd>
           </dl>
@@ -272,7 +272,7 @@ $ \partial \Omega $
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="ac8bef5aaadbd335fdf2e37ab9a6c13c0"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />ImplicitDomainMesher::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac8bef5aaadbd335fdf2e37ab9a6c13c0" class="m-doc-self">setLevelSet</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> ls)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>&amp; Rodin::<wbr />MMG::<wbr />ImplicitDomainMesher::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac8bef5aaadbd335fdf2e37ab9a6c13c0" class="m-doc-self">setLevelSet</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> ls)</span></span>
             </h3>
             <p>Specifies the level set to discretize.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -287,7 +287,7 @@ $ \partial \Omega $
           </div></section>
           <section class="m-doc-details" id="ae611b0671cd7435708e91db2d675b89a"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />ImplicitDomainMesher::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae611b0671cd7435708e91db2d675b89a" class="m-doc-self">setRMC</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> rmc = 1e-5)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>&amp; Rodin::<wbr />MMG::<wbr />ImplicitDomainMesher::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae611b0671cd7435708e91db2d675b89a" class="m-doc-self">setRMC</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> rmc = 1e-5)</span></span>
             </h3>
             <p>Specifies the removal of small parasitic components.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -301,7 +301,7 @@ $ \partial \Omega $
           </div></section>
           <section class="m-doc-details" id="a4681927c9d261888759885bed337e9f4"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />ImplicitDomainMesher::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4681927c9d261888759885bed337e9f4" class="m-doc-self">setBoundaryReference</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; ref)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>&amp; Rodin::<wbr />MMG::<wbr />ImplicitDomainMesher::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4681927c9d261888759885bed337e9f4" class="m-doc-self">setBoundaryReference</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; ref)</span></span>
             </h3>
             <p>Sets the material reference for the discretized boundary <svg class="m-math" style="width: 1.592em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 15.284187 8.302191">
 <title>
@@ -340,7 +340,7 @@ $ \partial \Omega $
           </div></section>
           <section class="m-doc-details" id="a35a2383688e4c1b9464c9f3a14cbd7e6"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />ImplicitDomainMesher::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a35a2383688e4c1b9464c9f3a14cbd7e6" class="m-doc-self">setSplit</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc">SplitMap</a>&amp; split)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>&amp; Rodin::<wbr />MMG::<wbr />ImplicitDomainMesher::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a35a2383688e4c1b9464c9f3a14cbd7e6" class="m-doc-self">setSplit</a>(</span><span class="m-doc-wrap">const SplitMap&amp; split)</span></span>
             </h3>
             <p>Specifies how to split the materials into an interior and exterior domains.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -355,8 +355,8 @@ $ \partial \Omega $
           </div></section>
           <section class="m-doc-details" id="a5c23d0d77c8ee19d600a6d6f9142a9ec"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />ImplicitDomainMesher::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5c23d0d77c8ee19d600a6d6f9142a9ec" class="m-doc-self">split</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; ref,
-              const <a href="struct_rodin_1_1_external_1_1_m_m_g_1_1_split.html" class="m-doc">Split</a>&amp; s)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>&amp; Rodin::<wbr />MMG::<wbr />ImplicitDomainMesher::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5c23d0d77c8ee19d600a6d6f9142a9ec" class="m-doc-self">split</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; ref,
+              const <a href="struct_rodin_1_1_m_m_g_1_1_split.html" class="m-doc">Split</a>&amp; s)</span></span>
             </h3>
             <p>Indicates that a material reference should be split.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -383,7 +383,7 @@ $ \partial \Omega $
           </div></section>
           <section class="m-doc-details" id="aff1412e32e23dba92b8a109ec4bad8ae"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>&amp; Rodin::<wbr />External::<wbr />MMG::<wbr />ImplicitDomainMesher::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aff1412e32e23dba92b8a109ec4bad8ae" class="m-doc-self">noSplit</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; ref)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_implicit_domain_mesher.html" class="m-doc">ImplicitDomainMesher</a>&amp; Rodin::<wbr />MMG::<wbr />ImplicitDomainMesher::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aff1412e32e23dba92b8a109ec4bad8ae" class="m-doc-self">noSplit</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; ref)</span></span>
             </h3>
             <p>Indicates that a material reference should not be split.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -406,7 +406,7 @@ $ \partial \Omega $
           </div></section>
           <section class="m-doc-details" id="a82f47c875e92ce44fb1edf0530cc2c03"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_external_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> Rodin::<wbr />External::<wbr />MMG::<wbr />ImplicitDomainMesher::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a82f47c875e92ce44fb1edf0530cc2c03" class="m-doc-self">discretize</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_external_1_1_m_m_g.html#a5b080db16bbb2ed744518df89ccd8d06" class="m-doc">MMG::<wbr />RealGridFunction</a>&amp; ls)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> Rodin::<wbr />MMG::<wbr />ImplicitDomainMesher::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a82f47c875e92ce44fb1edf0530cc2c03" class="m-doc-self">discretize</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">MMG::<wbr />RealGridFunction</a>&amp; ls)</span></span>
             </h3>
             <p>Discretizes and optimizes an implicitly defined surface defined by a level set function.</p>
             <table class="m-table m-fullwidth m-flat">
