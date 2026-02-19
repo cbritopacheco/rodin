@@ -34,14 +34,14 @@ target_link_libraries(LevelSetCantilever3D
 #   Rodin::External::MMG
 #   )
 # 
-# add_executable(LevelSetArch2D LevelSetArch2D.cpp)
-# target_link_libraries(LevelSetArch2D
-#   PUBLIC
-#   Rodin::Geometry
-#   Rodin::Solver
-#   Rodin::Variational
-#   Rodin::External::MMG
-#   )
+add_executable(LevelSetArch2D LevelSetArch2D.cpp)
+target_link_libraries(LevelSetArch2D
+  PUBLIC
+  Rodin::Geometry
+  Rodin::Solver
+  Rodin::Variational
+  Rodin::External::MMG
+  )
 
 # Commented out because it breaks CI
 # add_executable(LevelSetEigenvalue2D LevelSetEigenvalue2D.cpp)
