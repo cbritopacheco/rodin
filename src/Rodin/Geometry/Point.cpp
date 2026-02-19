@@ -258,31 +258,56 @@ namespace Rodin::Geometry
       return *m_distortion;
 
     const auto& J = this->getJacobian();
-    const auto m = J.rows();
-    const auto n = J.cols();
+    const int m = J.rows(); // physical dim
+    const int n = J.cols(); // reference dim
 
+    // Expected: 0 <= m,n <= 3 (as per your constraints)
     Real dist = 0;
 
+    // 0D measure convention: a point has measure 1
+    if (n == 0)
+    {
+      dist = 1;
+      return m_distortion.emplace(dist);
+    }
+
+    // Prefer explicit low-dim formulas where they are cheap/stable.
     if (m == n)
     {
-      // Integration measure for volume/area: |det J|
+      // Square: length/area/volume element = |det J|
+      // (Eigen defines det of 1x1,2x2,3x3; 0x0 handled above)
       dist = Math::abs(this->getJacobianDeterminant());
+      return m_distortion.emplace(dist);
     }
-    else if (m == 2 && n == 1)
-    {
-      // Curve in 2D: ||dX/ds||
-      const Real a = J(0, 0);
-      const Real b = J(1, 0);
-      dist = Math::sqrt(a * a + b * b);
-    }
-    else
-    {
-      // General k-dimensional measure: sqrt(det(J^T J))
-      const Real detG = (J.transpose() * J).determinant();
 
-      // Numerical guard: detG should be >= 0; clamp tiny negatives due to roundoff
-      dist = Math::sqrt(detG >= 0 ? detG : 0);
+    // Embedded measures with explicit formulas (more stable than det(J^T J))
+    if (n == 1)
+    {
+      // Curve in mD: ||dX/dξ||
+      dist = (m > 0) ? J.col(0).norm() : Real(0);
+      return m_distortion.emplace(dist);
     }
+
+    if (n == 2)
+    {
+      if (m == 3)
+      {
+        // Surface in 3D: ||a x b||
+        const auto a = J.col(0);
+        const auto b = J.col(1);
+        dist = a.cross(b).norm();
+        return m_distortion.emplace(dist);
+      }
+      // For m==0,1 the generic path below yields 0 anyway (rank deficiency),
+      // for m==2 it would have been caught by m==n above.
+    }
+
+    // Fully generic k-dimensional measure: sqrt(det(J^T J))
+    // Works for any 0<=m,n<=3, including m<n (det will go to 0 if rank-deficient).
+    const Real detG = (J.transpose() * J).determinant();
+
+    // Numerical guard: detG should be >= 0; clamp tiny negatives due to roundoff
+    dist = Math::sqrt(detG >= 0 ? detG : 0);
 
     return m_distortion.emplace(dist);
   }

@@ -166,7 +166,6 @@ namespace Rodin::External::MMG
     if (m_meshTheSurface)
     {
       MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_isosurf, 1);
-      // MMG3D_Set_iparameter(mesh, sol, MMG3D_IPARAM_opnbdy, 1);
     }
     else
     {
