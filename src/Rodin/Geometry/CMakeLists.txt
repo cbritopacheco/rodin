@@ -12,6 +12,7 @@ set(RodinGeometry_HEADERS
   Connectivity.h
   PolytopeIterator.h
   PolytopeTransformation.h
+  MarchingTetrahedra.h
 )
 
 set(RodinGeometry_SRCS

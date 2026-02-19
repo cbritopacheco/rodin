@@ -105,3 +105,15 @@ gtest_discover_tests(RodinGeometryPointTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinGeometryMarchingTetrahedraTest MarchingTetrahedraTest.cpp)
+target_link_libraries(RodinGeometryMarchingTetrahedraTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometryMarchingTetrahedraTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)
