@@ -11,8 +11,11 @@
 #include <array>
 #include <cmath>
 #include <map>
-#include <tuple>
+#include <optional>
 #include <set>
+#include <tuple>
+#include <type_traits>
+#include <variant>
 #include <vector>
 
 #include "Rodin/Alert/MemberFunctionException.h"
@@ -25,6 +28,17 @@ namespace Rodin::Geometry
   class MarchingTetrahedra
   {
     public:
+      struct NoSplitT {};
+      static constexpr NoSplitT NoSplit{};
+
+      struct Split
+      {
+        Attribute negative;
+        Attribute positive;
+      };
+
+      using SplitMap = std::map<Attribute, std::variant<Split, NoSplitT>>;
+
       MarchingTetrahedra() = default;
 
       MarchingTetrahedra& setNegativeAttribute(Attribute attr)
@@ -42,6 +56,60 @@ namespace Rodin::Geometry
       MarchingTetrahedra& setInterfaceAttribute(Attribute attr)
       {
         m_interfaceAttribute = attr;
+        return *this;
+      }
+
+      MarchingTetrahedra& setCellSplit(const SplitMap& split)
+      {
+        m_cellSplit = split;
+        return *this;
+      }
+
+      MarchingTetrahedra& setFaceSplit(const SplitMap& split)
+      {
+        m_faceSplit = split;
+        return *this;
+      }
+
+      MarchingTetrahedra& setEdgeSplit(const SplitMap& split)
+      {
+        m_edgeSplit = split;
+        return *this;
+      }
+
+      MarchingTetrahedra& splitCell(Attribute attr, const Split& split)
+      {
+        m_cellSplit[attr] = split;
+        return *this;
+      }
+
+      MarchingTetrahedra& splitFace(Attribute attr, const Split& split)
+      {
+        m_faceSplit[attr] = split;
+        return *this;
+      }
+
+      MarchingTetrahedra& splitEdge(Attribute attr, const Split& split)
+      {
+        m_edgeSplit[attr] = split;
+        return *this;
+      }
+
+      MarchingTetrahedra& noSplitCell(Attribute attr)
+      {
+        m_cellSplit[attr] = NoSplit;
+        return *this;
+      }
+
+      MarchingTetrahedra& noSplitFace(Attribute attr)
+      {
+        m_faceSplit[attr] = NoSplit;
+        return *this;
+      }
+
+      MarchingTetrahedra& noSplitEdge(Attribute attr)
+      {
+        m_edgeSplit[attr] = NoSplit;
         return *this;
       }
 
@@ -77,6 +145,8 @@ namespace Rodin::Geometry
         {
           std::array<Index, 4> v;
           Attribute attr;
+          Attribute sourceAttr;
+          enum class Sign { Negative, Positive, Unknown } sign;
         };
 
         std::vector<Point> vertices;
@@ -98,12 +168,57 @@ namespace Rodin::Geometry
           return u.dot(v.cross(w));
         };
 
-        auto makeTetrahedron = [&](Index a, Index b, Index c, Index d, Attribute attr, std::vector<Tet>& tets)
+        auto makeTetrahedron = [&](Index a, Index b, Index c, Index d, Attribute attr, Attribute sourceAttr, Tet::Sign sign, std::vector<Tet>& tets)
         {
-          Tet t{ { a, b, c, d }, attr };
+          Tet t{ { a, b, c, d }, attr, sourceAttr, sign };
           if (signedVolume(a, b, c, d) < 0)
             std::swap(t.v[1], t.v[2]);
           tets.push_back(t);
+        };
+
+        auto getSplitLabel = [&](Attribute baseAttr, Tet::Sign sign, const SplitMap& splitMap)
+        {
+          const auto getDefault = [&]()
+          {
+            if (sign == Tet::Sign::Negative)
+              return m_negativeAttribute;
+            if (sign == Tet::Sign::Positive)
+              return m_positiveAttribute;
+            return baseAttr;
+          };
+          if (splitMap.size() == 0)
+            return getDefault();
+          const auto it = splitMap.find(baseAttr);
+          if (it == splitMap.end())
+            return baseAttr;
+          return std::visit(
+            [&](const auto& value) -> Attribute
+            {
+              using T = std::decay_t<decltype(value)>;
+              if constexpr (std::is_same_v<T, NoSplitT>)
+              {
+                return baseAttr;
+              }
+              else
+              {
+                if (sign == Tet::Sign::Negative)
+                  return value.negative;
+                if (sign == Tet::Sign::Positive)
+                  return value.positive;
+                return baseAttr;
+              }
+            },
+            it->second);
+        };
+
+        auto shouldSplit = [&](Attribute baseAttr, const SplitMap& splitMap)
+        {
+          if (splitMap.size() == 0)
+            return true;
+          const auto it = splitMap.find(baseAttr);
+          if (it == splitMap.end())
+            return false;
+          return std::holds_alternative<Split>(it->second);
         };
 
         auto edgePair = [](Index i, Index j)
@@ -201,18 +316,29 @@ namespace Rodin::Geometry
           const auto& tv = it->getVertices();
           std::array<Index, 4> v{ tv(0), tv(1), tv(2), tv(3) };
           std::array<Real, 4> phi{ ls[v[0]], ls[v[1]], ls[v[2]], ls[v[3]] };
+          const auto sourceAttr = it->getAttribute();
           size_t nneg = 0;
           for (size_t i = 0; i < 4; ++i)
             nneg += isNegative(phi[i]) ? 1 : 0;
 
           if (nneg == 0)
           {
-            makeTetrahedron(v[0], v[1], v[2], v[3], m_positiveAttribute, outTetrahedra);
+            makeTetrahedron(v[0], v[1], v[2], v[3],
+                getSplitLabel(sourceAttr, Tet::Sign::Positive, m_cellSplit),
+                sourceAttr, Tet::Sign::Positive, outTetrahedra);
             continue;
           }
           if (nneg == 4)
           {
-            makeTetrahedron(v[0], v[1], v[2], v[3], m_negativeAttribute, outTetrahedra);
+            makeTetrahedron(v[0], v[1], v[2], v[3],
+                getSplitLabel(sourceAttr, Tet::Sign::Negative, m_cellSplit),
+                sourceAttr, Tet::Sign::Negative, outTetrahedra);
+            continue;
+          }
+
+          if (!shouldSplit(sourceAttr, m_cellSplit))
+          {
+            makeTetrahedron(v[0], v[1], v[2], v[3], sourceAttr, sourceAttr, Tet::Sign::Unknown, outTetrahedra);
             continue;
           }
 
@@ -292,9 +418,10 @@ namespace Rodin::Geometry
             centroid /= static_cast<Real>(regionVertices.size());
             const auto c = addVertex(centroid);
 
-            const auto attr = negative ? m_negativeAttribute : m_positiveAttribute;
+            const auto sign = negative ? Tet::Sign::Negative : Tet::Sign::Positive;
+            const auto attr = getSplitLabel(sourceAttr, sign, m_cellSplit);
             for (const auto& t : boundaryTriangles)
-              makeTetrahedron(c, t[0], t[1], t[2], attr, outTetrahedra);
+              makeTetrahedron(c, t[0], t[1], t[2], attr, sourceAttr, sign, outTetrahedra);
           };
 
           buildRegion(true);
@@ -315,10 +442,66 @@ namespace Rodin::Geometry
 
         auto out = builder.finalize();
         out.getConnectivity().compute(2, 3);
-        out.trace(Map<std::pair<Attribute, Attribute>, Attribute>{
-          { {m_negativeAttribute, m_positiveAttribute}, m_interfaceAttribute },
-          { {m_positiveAttribute, m_negativeAttribute}, m_interfaceAttribute }
-        });
+        out.getConnectivity().compute(1, 3);
+
+        const auto& conn = out.getConnectivity();
+        for (auto fit = out.getFace(); !fit.end(); ++fit)
+        {
+          const auto fidx = fit->getIndex();
+          const auto& inc = conn.getIncidence({2, 3}, fidx);
+          bool hasNeg = false;
+          bool hasPos = false;
+          std::optional<Attribute> sourceAttr;
+          for (const auto cidx : inc)
+          {
+            const auto& t = outTetrahedra[cidx];
+            hasNeg = hasNeg || (t.sign == Tet::Sign::Negative);
+            hasPos = hasPos || (t.sign == Tet::Sign::Positive);
+            if (!sourceAttr)
+              sourceAttr = t.sourceAttr;
+            else if (*sourceAttr != t.sourceAttr)
+              sourceAttr = std::nullopt;
+          }
+          if (hasNeg && hasPos)
+          {
+            out.setAttribute({2, fidx}, m_interfaceAttribute);
+          }
+          else if (sourceAttr)
+          {
+            const auto sign = hasNeg ? Tet::Sign::Negative :
+                              hasPos ? Tet::Sign::Positive : Tet::Sign::Unknown;
+            out.setAttribute({2, fidx}, getSplitLabel(*sourceAttr, sign, m_faceSplit));
+          }
+        }
+
+        for (auto eit = out.getPolytope(1); !eit.end(); ++eit)
+        {
+          const auto eidx = eit->getIndex();
+          const auto& inc = conn.getIncidence({1, 3}, eidx);
+          bool hasNeg = false;
+          bool hasPos = false;
+          std::optional<Attribute> sourceAttr;
+          for (const auto cidx : inc)
+          {
+            const auto& t = outTetrahedra[cidx];
+            hasNeg = hasNeg || (t.sign == Tet::Sign::Negative);
+            hasPos = hasPos || (t.sign == Tet::Sign::Positive);
+            if (!sourceAttr)
+              sourceAttr = t.sourceAttr;
+            else if (*sourceAttr != t.sourceAttr)
+              sourceAttr = std::nullopt;
+          }
+          if (hasNeg && hasPos)
+          {
+            out.setAttribute({1, eidx}, m_interfaceAttribute);
+          }
+          else if (sourceAttr)
+          {
+            const auto sign = hasNeg ? Tet::Sign::Negative :
+                              hasPos ? Tet::Sign::Positive : Tet::Sign::Unknown;
+            out.setAttribute({1, eidx}, getSplitLabel(*sourceAttr, sign, m_edgeSplit));
+          }
+        }
         return out;
       }
 
@@ -326,6 +509,9 @@ namespace Rodin::Geometry
       Attribute m_negativeAttribute = 1;
       Attribute m_positiveAttribute = 2;
       Attribute m_interfaceAttribute = 10;
+      SplitMap m_cellSplit;
+      SplitMap m_faceSplit;
+      SplitMap m_edgeSplit;
   };
 }
 

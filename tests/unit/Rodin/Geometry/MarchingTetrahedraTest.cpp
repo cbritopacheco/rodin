@@ -21,6 +21,7 @@ namespace Rodin::Tests::Unit
       .vertex({0.0, 1.0, 0.0})
       .vertex({0.0, 0.0, 1.0})
       .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
+      .attribute({3, 0}, 5)
       .finalize();
 
     P1 fes(mesh);
@@ -58,5 +59,67 @@ namespace Rodin::Tests::Unit
         interfaceCount++;
     }
     EXPECT_GT(interfaceCount, 0);
+  }
+
+  TEST(Rodin_Geometry_MarchingTetrahedra, NoSplitCellAttributeKeepsElement)
+  {
+    Mesh mesh =
+      Mesh<Rodin::Context::Local>::Builder()
+      .initialize(3)
+      .nodes(4)
+      .vertex({0.0, 0.0, 0.0})
+      .vertex({1.0, 0.0, 0.0})
+      .vertex({0.0, 1.0, 0.0})
+      .vertex({0.0, 0.0, 1.0})
+      .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
+      .attribute({3, 0}, 5)
+      .finalize();
+
+    P1 fes(mesh);
+    GridFunction ls(fes);
+    ls[0] = -1.0;
+    ls[1] = 1.0;
+    ls[2] = 1.0;
+    ls[3] = 1.0;
+
+    MarchingTetrahedra mt;
+    mt.noSplitCell(5);
+    const auto split = mt.discretize(ls);
+
+    ASSERT_EQ(split.getCellCount(), 1);
+    EXPECT_EQ(split.getCell(0)->getAttribute(), 5);
+  }
+
+  TEST(Rodin_Geometry_MarchingTetrahedra, SplitFaceAndEdgeAttributesBySign)
+  {
+    Mesh mesh =
+      Mesh<Rodin::Context::Local>::Builder()
+      .initialize(3)
+      .nodes(4)
+      .vertex({0.0, 0.0, 0.0})
+      .vertex({1.0, 0.0, 0.0})
+      .vertex({0.0, 1.0, 0.0})
+      .vertex({0.0, 0.0, 1.0})
+      .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
+      .attribute({3, 0}, 5)
+      .finalize();
+
+    P1 fes(mesh);
+    GridFunction ls(fes);
+    ls[0] = -1.0;
+    ls[1] = -1.0;
+    ls[2] = -1.0;
+    ls[3] = -1.0;
+
+    MarchingTetrahedra mt;
+    mt.splitCell(5, {7, 8})
+      .splitFace(5, {50, 60})
+      .splitEdge(5, {70, 80});
+    const auto split = mt.discretize(ls);
+
+    for (auto it = split.getFace(); !it.end(); ++it)
+      EXPECT_EQ(it->getAttribute(), 50);
+    for (auto it = split.getPolytope(1); !it.end(); ++it)
+      EXPECT_EQ(it->getAttribute(), 70);
   }
 }
