@@ -23,7 +23,7 @@ using namespace Rodin::Variational;
 static constexpr Attribute Interior = 3, Exterior = 2;
 
 // Define boundary attributes
-static constexpr Attribute GammaD = 4, GammaN = 7, Gamma = 2, Gamma0 = 3;
+static constexpr Attribute GammaD = 4, GammaN = 7, Gamma = 10, Gamma0 = 3;
 
 // Lamé coefficients
 static constexpr Real mu = 0.3846;
@@ -35,9 +35,9 @@ static constexpr Real eps = 1e-12;
 static constexpr Real hgrad = 1.6;
 static constexpr Real ell = 0.1;
 static Real elementStep = 0.5;
-static Real hmax = 0.1;
+static Real hmax = 0.2;
 static Real hmin = 0.1 * hmax;
-static Real hausd = 0.5 * hmin;
+static Real hausd = 0.2 * hmin;
 static size_t hmaxIt = maxIt / 2;
 const Real k = 1;
 const Real dt = k * (hmax - hmin);
@@ -80,8 +80,8 @@ int main(int, char**)
     Alert::Info() << "   | Optimizing the domain..." << Alert::Raise;
     MMG::Optimizer().setHMax(hmax)
                     .setHMin(hmin)
-                    .setHausdorff(hausd)
                     .setGradation(1.2)
+                    .setHausdorff(hausd)
                     .setAngleDetection(false)
                     .optimize(th);
 
@@ -122,7 +122,7 @@ int main(int, char**)
     // Elasticity equation
     Problem elasticity(u, v);
     elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
-               - BoundaryIntegral(VectorFunction{0, 0, -1}, v).over(GammaN)
+               - BoundaryIntegral(f, v).over(GammaN)
                + DirichletBC(u, VectorFunction{0, 0, 0}).on(GammaD);
     auto cg = Solver::CG(elasticity);
     cg.solve();
@@ -179,7 +179,7 @@ int main(int, char**)
 
     th = MMG::ImplicitDomainMesher().split(Interior, {Interior, Exterior})
                                     .split(Exterior, {Interior, Exterior})
-                                    .setRMC(1e-5)
+                                    .setRMC(1e-4)
                                     .setHMax(hmax)
                                     .setHMin(hmin)
                                     .setGradation(1.2)
@@ -187,7 +187,7 @@ int main(int, char**)
                                     .setAngleDetection(false)
                                     .setBoundaryReference(Gamma)
                                     .setBaseReferences(GammaD)
-                                    .discretize(dist);
+                                    .discretize(advect.getSolution());
 
     th.save("Omega.mesh", IO::FileFormat::MEDIT);
     // std::exit(1);
