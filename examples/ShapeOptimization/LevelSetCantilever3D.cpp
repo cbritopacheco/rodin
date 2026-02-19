@@ -13,6 +13,7 @@
 #include <Rodin/MMG.h>
 #include <Rodin/Models/Distance/Eikonal.h>
 #include <Rodin/Models/Advection/Lagrangian.h>
+#include <Rodin/Geometry/MarchingTetrahedra.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -176,18 +177,26 @@ int main(int, char**)
 
     // Recover the implicit domain
     Alert::Info() << "   | Meshing the domain." << Alert::Raise;
+    th = MarchingTetrahedra().setInterfaceAttribute(Gamma)
+                             .setNegativeAttribute(Interior)
+                             .setPositiveAttribute(Exterior)
+                             .noSplitFace(GammaD)
+                             .noSplitFace(GammaN)
+                             .setFallbackFaceAttribute(23)
+                             .setFallbackEdgeAttribute(24)
+                             .discretize(advect.getSolution());
 
-    th = MMG::ImplicitDomainMesher().split(Interior, {Interior, Exterior})
-                                    .split(Exterior, {Interior, Exterior})
-                                    .setRMC(1e-4)
-                                    .setHMax(hmax)
-                                    .setHMin(hmin)
-                                    .setGradation(1.2)
-                                    .setHausdorff(hausd)
-                                    .setAngleDetection(false)
-                                    .setBoundaryReference(Gamma)
-                                    .setBaseReferences(GammaD)
-                                    .discretize(advect.getSolution());
+    // th = MMG::ImplicitDomainMesher().split(Interior, {Interior, Exterior})
+    //                                 .split(Exterior, {Interior, Exterior})
+    //                                 .setRMC(1e-4)
+    //                                 .setHMax(hmax)
+    //                                 .setHMin(hmin)
+    //                                 .setGradation(1.2)
+    //                                 .setHausdorff(hausd)
+    //                                 .setAngleDetection(false)
+    //                                 .setBoundaryReference(Gamma)
+    //                                 .setBaseReferences(GammaD)
+    //                                 .discretize(advect.getSolution());
 
     th.save("Omega.mesh", IO::FileFormat::MEDIT);
     // std::exit(1);
