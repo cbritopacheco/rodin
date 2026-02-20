@@ -26,7 +26,6 @@
 #include <boost/filesystem.hpp>
 #include <boost/serialization/access.hpp>
 
-#include "Rodin/Math/PointMatrix.h"
 #include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Types.h"
 #include "Rodin/Math/Vector.h"
@@ -43,6 +42,7 @@
 #include "ForwardDecls.h"
 #include "Connectivity.h"
 #include "Point.h"
+#include "PointCloud.h"
 #include "Polytope.h"
 #include "PolytopeIterator.h"
 #include "PolytopeTransformation.h"
@@ -929,14 +929,14 @@ namespace Rodin::Geometry
            * @param[in] vertices Point matrix containing vertex coordinates
            * @returns Reference to this builder
            */
-          Builder& setVertices(const Math::PointMatrix& vertices);
+          Builder& setVertices(const PointCloud& vertices);
 
           /**
            * @brief Sets the vertex coordinates (move).
            * @param[in] vertices Point matrix containing vertex coordinates
            * @returns Reference to this builder
            */
-          Builder& setVertices(Math::PointMatrix&& vertices);
+          Builder& setVertices(PointCloud&& vertices);
 
           /**
            * @brief Sets the mesh connectivity.
@@ -975,7 +975,7 @@ namespace Rodin::Geometry
           size_t m_sdim;
           size_t m_nodes;
 
-          Math::PointMatrix m_vertices;
+          PointCloud m_vertices;
           Connectivity<Context> m_connectivity;
 
           AttributeIndex m_attributes;
@@ -1325,7 +1325,7 @@ namespace Rodin::Geometry
         return m_transformations;
       }
 
-      const Math::PointMatrix& getVertices() const
+      const PointCloud& getVertices() const
       {
         return m_vertices;
       }
@@ -1416,7 +1416,7 @@ namespace Rodin::Geometry
     private:
       size_t m_sdim;
 
-      Math::PointMatrix m_vertices;
+      PointCloud m_vertices;
       Connectivity<Context> m_connectivity;
 
       AttributeIndex m_attributes;

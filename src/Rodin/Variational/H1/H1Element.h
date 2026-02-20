@@ -31,7 +31,6 @@
 
 #include <boost/serialization/access.hpp>
 
-#include "Rodin/Math/PointMatrix.h"
 #include "Rodin/Types.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/Vector.h"

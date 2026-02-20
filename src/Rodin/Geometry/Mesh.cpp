@@ -319,7 +319,7 @@ namespace Rodin::Geometry
     {
       Variational::RealP1Element fe(Polytope::Type::Point);
       const size_t sdim = getSpaceDimension();
-      Math::PointMatrix pm(sdim, 1);
+      PointCloud pm(sdim, 1);
       for (size_t i = 0; i < sdim; ++i)
         pm(i, 0) = m_vertices(i, idx);
       return new IsoparametricTransformation(std::move(pm), std::move(fe));
@@ -329,7 +329,7 @@ namespace Rodin::Geometry
       auto g = getGeometry(dimension, idx);
       const size_t sdim = getSpaceDimension();
       const size_t n = Polytope::Traits(g).getVertexCount();
-      Math::PointMatrix pm(sdim, n);
+      PointCloud pm(sdim, n);
       const auto& polytope = getConnectivity().getPolytope(dimension, idx);
       assert(n == static_cast<size_t>(polytope.size()));
       for (const auto& v : polytope | boost::adaptors::indexed())

@@ -1,4 +1,3 @@
-#include "Rodin/Math/PointMatrix.h"
 #include <gtest/gtest.h>
 
 #include <Rodin/Geometry.h>
@@ -16,7 +15,7 @@ namespace Rodin::Tests::Unit
     constexpr const size_t sdim = 2;
     constexpr const size_t n = 3;
 
-    Math::PointMatrix pm(sdim, n);
+    PointCloud pm(sdim, n);
     pm(0,0) = 0; pm(0,1) = 1; pm(0,2) = 0;
     pm(1,0) = 0; pm(1,1) = 0; pm(1,2) = 1;
 
@@ -41,7 +40,7 @@ namespace Rodin::Tests::Unit
     constexpr const size_t sdim = 2;
     constexpr const size_t n = 3;
 
-    Math::PointMatrix pm(sdim, n);
+    PointCloud pm(sdim, n);
     pm(0,0) = -1; pm(0,1) = 1; pm(0,2) = 0;
     pm(1,0) = -1; pm(1,1) = 1; pm(1,2) = 1;
 

@@ -31,11 +31,11 @@ namespace Rodin::Tests::Unit
     ls[2] = 1.0;
     ls[3] = 1.0;
 
-    MarchingTetrahedra mt;
-    mt.setNegativeAttribute(7)
-      .setPositiveAttribute(8)
-      .setInterfaceAttribute(42);
-    const auto split = mt.discretize(ls);
+    MarchingTetrahedra mt(ls);
+    mt.setNegative(7)
+      .setPositive(8)
+      .setInterface(42);
+    const auto split = mt.discretize();
 
     EXPECT_GT(split.getCellCount(), 1);
 
@@ -82,9 +82,9 @@ namespace Rodin::Tests::Unit
     ls[2] = 1.0;
     ls[3] = 1.0;
 
-    MarchingTetrahedra mt;
-    mt.noSplitCell(5);
-    const auto split = mt.discretize(ls);
+    MarchingTetrahedra mt(ls);
+    mt.noSplit(3, 5);
+    const auto split = mt.discretize();
 
     ASSERT_EQ(split.getCellCount(), 1);
     EXPECT_EQ(split.getCell(0)->getAttribute(), 5);
@@ -111,11 +111,11 @@ namespace Rodin::Tests::Unit
     ls[2] = -1.0;
     ls[3] = -1.0;
 
-    MarchingTetrahedra mt;
-    mt.splitCell(5, {7, 8})
-      .splitFace(5, {50, 60})
-      .splitEdge(5, {70, 80});
-    const auto split = mt.discretize(ls);
+    MarchingTetrahedra mt(ls);
+    mt.split(3, 5, {7, 8})
+      .split(2, 5, {50, 60})
+      .split(1, 5, {70, 80});
+    const auto split = mt.discretize();
 
     for (auto it = split.getFace(); !it.end(); ++it)
       EXPECT_EQ(it->getAttribute(), 50);

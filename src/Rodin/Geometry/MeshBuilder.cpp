@@ -7,6 +7,7 @@
 #include "Rodin/Alert/MemberFunctionException.h"
 
 #include "Mesh.h"
+#include "Rodin/Geometry/PointCloud.h"
 #include "Rodin/Math/Vector.h"
 
 namespace Rodin::Geometry
@@ -124,14 +125,14 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Local>::Builder&
-  Mesh<Context::Local>::Builder::setVertices(const Math::PointMatrix& vertices)
+  Mesh<Context::Local>::Builder::setVertices(const PointCloud& vertices)
   {
     m_vertices = vertices;
     return *this;
   }
 
   Mesh<Context::Local>::Builder&
-  Mesh<Context::Local>::Builder::setVertices(Math::PointMatrix&& vertices)
+  Mesh<Context::Local>::Builder::setVertices(PointCloud&& vertices)
   {
     m_vertices = std::move(vertices);
     return *this;

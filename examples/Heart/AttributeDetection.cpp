@@ -22,7 +22,7 @@ int main(int argc, char** argv)
 
   std::cout << "Cell attributes in mesh:" << std::endl;
   for (const auto& attr : attrs)
-    std::cout << attr << std::endl;
+    std::cout << attr << ", ";
 
   attrs.clear();
 
@@ -31,7 +31,9 @@ int main(int argc, char** argv)
 
   std::cout << "\nFace attributes in mesh:" << std::endl;
   for (const auto& attr : attrs)
-    std::cout << attr << std::endl;
+    std::cout << attr << ", ";
+
+  std::cout << std::endl;
 
   return 0;
 }

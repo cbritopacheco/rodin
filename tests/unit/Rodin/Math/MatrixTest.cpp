@@ -7,7 +7,6 @@
 #include <gtest/gtest.h>
 
 #include "Rodin/Math/Matrix.h"
-#include "Rodin/Math/PointMatrix.h"
 #include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/Types.h"
 
@@ -170,25 +169,6 @@ TEST_F(MatrixTest, SpatialMatrix)
         EXPECT_DOUBLE_EQ(sm(i, j), 0.0);
     }
   }
-}
-
-// Test PointMatrix functionality
-TEST_F(MatrixTest, PointMatrix)
-{
-  PointMatrix pm(3, 4);  // 3D points, 4 of them
-  pm.setZero();
-
-  EXPECT_EQ(pm.rows(), 3);
-  EXPECT_EQ(pm.cols(), 4);
-
-  // Set some point coordinates
-  pm(0, 0) = 1.0; // x-coord of first point
-  pm(1, 0) = 2.0; // y-coord of first point
-  pm(2, 0) = 3.0; // z-coord of first point
-
-  EXPECT_DOUBLE_EQ(pm(0, 0), 1.0);
-  EXPECT_DOUBLE_EQ(pm(1, 0), 2.0);
-  EXPECT_DOUBLE_EQ(pm(2, 0), 3.0);
 }
 
 // Test complex matrix operations

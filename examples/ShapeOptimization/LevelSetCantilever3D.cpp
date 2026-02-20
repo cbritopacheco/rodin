@@ -177,14 +177,15 @@ int main(int, char**)
 
     // Recover the implicit domain
     Alert::Info() << "   | Meshing the domain." << Alert::Raise;
-    th = MarchingTetrahedra().setInterfaceAttribute(Gamma)
-                             .setNegativeAttribute(Interior)
-                             .setPositiveAttribute(Exterior)
-                             .noSplitFace(GammaD)
-                             .noSplitFace(GammaN)
-                             .setFallbackFaceAttribute(23)
-                             .setFallbackEdgeAttribute(24)
-                             .discretize(advect.getSolution());
+    // th = MarchingTetrahedra(advect.getSolution())
+    //                          .setInterface(Gamma)
+    //                          .setNegative(Interior)
+    //                          .setPositive(Exterior)
+    //                          .noSplit(2, GammaD)
+    //                          .noSplit(2, GammaN)
+    //                          // .setFallbackFaceAttribute(23)
+    //                          // .setFallbackEdgeAttribute(24)
+    //                          .discretize();
 
     // th = MMG::ImplicitDomainMesher().split(Interior, {Interior, Exterior})
     //                                 .split(Exterior, {Interior, Exterior})

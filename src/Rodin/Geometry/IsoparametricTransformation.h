@@ -16,11 +16,11 @@
 #include <boost/serialization/base_object.hpp>
 
 #include "Rodin/Geometry/Polytope.h"
+#include "Rodin/Geometry/PointCloud.h"
 
 #include "PolytopeTransformation.h"
 
 #include "ForwardDecls.h"
-#include "Rodin/Math/PointMatrix.h"
 #include "Rodin/Math/Vector.h"
 
 namespace Rodin::Geometry
@@ -77,7 +77,7 @@ namespace Rodin::Geometry
        *            is the spatial dimension and @f$ n @f$ is the number of DOFs
        * @param[in] fe Finite element providing basis functions
        */
-      IsoparametricTransformation(Math::PointMatrix&& pm, FE&& fe)
+      IsoparametricTransformation(Geometry::PointCloud&& pm, FE&& fe)
         : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
           m_pm(std::move(pm)),
           m_fe(std::move(fe))
@@ -91,7 +91,7 @@ namespace Rodin::Geometry
        * @param[in] pm Point matrix of size @f$ s \times n @f$
        * @param[in] fe Finite element providing basis functions
        */
-      IsoparametricTransformation(const Math::PointMatrix& pm, const FE& fe)
+      IsoparametricTransformation(const Geometry::PointCloud& pm, const FE& fe)
         : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
           m_pm(pm),
           m_fe(fe)
@@ -105,7 +105,7 @@ namespace Rodin::Geometry
        * @param[in] pm Point matrix (move)
        * @param[in] fe Finite element (copy)
        */
-      IsoparametricTransformation(Math::PointMatrix&& pm, const FE& fe)
+      IsoparametricTransformation(Geometry::PointCloud&& pm, const FE& fe)
         : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
           m_pm(std::move(pm)),
           m_fe(fe)
@@ -119,7 +119,7 @@ namespace Rodin::Geometry
        * @param[in] pm Point matrix (copy)
        * @param[in] fe Finite element (move)
        */
-      IsoparametricTransformation(const Math::PointMatrix& pm, FE&& fe)
+      IsoparametricTransformation(const PointCloud& pm, FE&& fe)
         : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
           m_pm(pm),
           m_fe(std::move(fe))
@@ -216,7 +216,7 @@ namespace Rodin::Geometry
        * The returned matrix has size @f$ s \times n @f$ where @f$ s @f$ is
        * the spatial dimension and @f$ n @f$ is the number of degrees of freedom.
        */
-      const Math::PointMatrix& getPointMatrix() const
+      const PointCloud& getPointMatrix() const
       {
         return m_pm;
       }
@@ -244,7 +244,7 @@ namespace Rodin::Geometry
       }
 
     private:
-      Math::PointMatrix m_pm; ///< Point matrix (spatial_dim x num_dofs)
+      PointCloud m_pm; ///< Point matrix (spatial_dim x num_dofs)
       FE m_fe;                ///< Finite element providing basis functions
   };
 }
