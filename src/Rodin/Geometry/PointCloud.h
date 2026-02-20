@@ -74,6 +74,12 @@ namespace Rodin::Geometry
       }
 
       [[nodiscard]] inline
+      size_t cols() const noexcept
+      {
+        return m_pts.size();
+      }
+
+      [[nodiscard]] inline
       Index size() const noexcept
       {
         return static_cast<Index>(m_pts.size());
