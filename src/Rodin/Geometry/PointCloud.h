@@ -154,7 +154,7 @@ namespace Rodin::Geometry
       [[nodiscard]] inline
       Scalar& operator()(std::uint8_t i, size_t j) noexcept
       {
-        assert(i < m_rows);
+        assert(i < m_dimension);
         assert(j >= 0 && j < getCount());
         return m_pts[j][static_cast<size_t>(i)];
       }
@@ -162,7 +162,7 @@ namespace Rodin::Geometry
       [[nodiscard]] inline
       const Scalar& operator()(std::uint8_t i, size_t j) const noexcept
       {
-        assert(i < m_rows);
+        assert(i < m_dimension);
         assert(j >= 0 && j < getCount());
         return m_pts[j][i];
       }
@@ -264,7 +264,7 @@ namespace Rodin::Geometry
       [[nodiscard]] inline
       Scalar dot(const PointCloud& other) const noexcept
       {
-        assert(m_rows == other.m_rows);
+        assert(m_dimension == other.m_dimension);
         assert(getCount() == other.getCount());
         if (m_dimension == 0 || getCount() == 0)
           return Scalar(0);
@@ -275,7 +275,7 @@ namespace Rodin::Geometry
       [[nodiscard]] inline
       Scalar dot(const Eigen::MatrixBase<EigenDerived>& other) const noexcept
       {
-        assert(static_cast<std::uint8_t>(other.rows()) == m_rows);
+        assert(static_cast<std::uint8_t>(other.rows()) == m_dimension);
         assert(static_cast<Eigen::Index>(other.cols()) == getCount());
         if (m_dimension == 0 || getCount() == 0)
           return Scalar(0);
