@@ -79,18 +79,27 @@ int main(int, char**)
     Alert::Info() << "----- Iteration: " << i << Alert::Raise;
 
     Alert::Info() << "   | Optimizing the domain..." << Alert::Raise;
-    MMG::Optimizer().setHMax(hmax)
-                    .setHMin(hmin)
-                    .setGradation(1.2)
-                    .setHausdorff(hausd)
-                    .setAngleDetection(false)
-                    .optimize(th);
+    // MMG::Optimizer().setHMax(hmax)
+    //                 .setHMin(hmin)
+    //                 .setGradation(1.2)
+    //                 .setHausdorff(hausd)
+    //                 .setAngleDetection(false)
+    //                 .optimize(th);
 
     th.save("Optimized.mesh", IO::FileFormat::MEDIT);
 
     Alert::Info() << "   | Computing connectivity." << Alert::Raise;
-    th.getConnectivity().compute(th.getDimension() - 1, th.getDimension());
-    th.getConnectivity().compute(0, 0);
+    auto& conn = th.getConnectivity();
+
+    conn.discover(3, 1);
+    conn.discover(3, 2);
+
+    conn.discover(1, 0);
+    conn.discover(2, 0);
+
+    conn.restrict(2, 3);
+
+    conn.discover(0, 0);
 
     Alert::Info() << "   | Trimming mesh." << Alert::Raise;
     SubMesh trimmed = th.trim(Exterior);
@@ -177,29 +186,17 @@ int main(int, char**)
 
     // Recover the implicit domain
     Alert::Info() << "   | Meshing the domain." << Alert::Raise;
-    // th = MarchingTetrahedra(advect.getSolution())
-    //                          .setInterface(Gamma)
-    //                          .setNegative(Interior)
-    //                          .setPositive(Exterior)
-    //                          .noSplit(2, GammaD)
-    //                          .noSplit(2, GammaN)
-    //                          // .setFallbackFaceAttribute(23)
-    //                          // .setFallbackEdgeAttribute(24)
-    //                          .discretize();
+    auto th2 = MarchingTetrahedra(advect.getSolution())
+                             .setInterface(Gamma)
+                             .setNegative(Interior)
+                             .setPositive(Exterior)
+                             .noSplit(2, GammaD)
+                             .noSplit(2, GammaN)
+                             // .setFallbackFaceAttribute(23)
+                             // .setFallbackEdgeAttribute(24)
+                             .discretize();
 
-    // th = MMG::ImplicitDomainMesher().split(Interior, {Interior, Exterior})
-    //                                 .split(Exterior, {Interior, Exterior})
-    //                                 .setRMC(1e-4)
-    //                                 .setHMax(hmax)
-    //                                 .setHMin(hmin)
-    //                                 .setGradation(1.2)
-    //                                 .setHausdorff(hausd)
-    //                                 .setAngleDetection(false)
-    //                                 .setBoundaryReference(Gamma)
-    //                                 .setBaseReferences(GammaD)
-    //                                 .discretize(advect.getSolution());
-
-    th.save("Omega.mesh", IO::FileFormat::MEDIT);
+    th2.save("Omega.mesh", IO::FileFormat::MEDIT);
     // std::exit(1);
   }
 

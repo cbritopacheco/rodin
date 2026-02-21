@@ -497,6 +497,10 @@ namespace Rodin::Geometry
        */
       Connectivity& compute(size_t d, size_t dp, Mode mode = Mode::Discover);
 
+      Connectivity& discover(size_t d, size_t dp);
+
+      Connectivity& restrict(size_t d, size_t dp);
+
       /**
        * @brief Transposes a connectivity relation.
        * @param[in] d First dimension

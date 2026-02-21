@@ -187,6 +187,16 @@ namespace Rodin::Geometry
     return *this;
   }
 
+  Connectivity<Context::Local>& Connectivity<Context::Local>::discover(size_t d, size_t dp)
+  {
+    return this->compute(d, dp, Mode::Discover);
+  }
+
+  Connectivity<Context::Local>& Connectivity<Context::Local>::restrict(size_t d, size_t dp)
+  {
+    return this->compute(d, dp, Mode::Restrict);
+  }
+
   Connectivity<Context::Local>&
   Connectivity<Context::Local>::compute(size_t d, size_t dp, Mode mode)
   {

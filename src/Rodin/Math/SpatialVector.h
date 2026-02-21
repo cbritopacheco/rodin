@@ -115,7 +115,7 @@ namespace Rodin::Math
 
       constexpr
       SpatialVector(SpatialVector&& other) noexcept
-        : m_size(other.m_size),
+        : m_size(std::move(other.m_size)),
           m_data(std::move(other.m_data))
       {}
 

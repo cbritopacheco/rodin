@@ -289,7 +289,7 @@ namespace Rodin::Geometry
 
   Math::SpatialPoint Mesh<Context::Local>::getVertexCoordinates(Index idx) const
   {
-    return m_vertices.col(idx);
+    return m_vertices[idx];
   }
 
   size_t Mesh<Context::Local>::getDimension() const

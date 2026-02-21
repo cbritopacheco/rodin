@@ -792,7 +792,8 @@ namespace Rodin::Geometry
            * @brief Default constructor.
            */
           Builder()
-            : m_initialized(false)
+            : m_initialized(false),
+              m_nodes(0)
           {}
 
           virtual ~Builder() = default;

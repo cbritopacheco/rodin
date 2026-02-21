@@ -34,8 +34,7 @@ namespace Rodin::Geometry
       static constexpr std::uint8_t MaxRows = RODIN_MAXIMAL_SPACE_DIMENSION;
       static_assert(MaxRows == 3, "RODIN_MAXIMAL_SPACE_DIMENSION must be equal to 3.");
 
-      using Index  = Eigen::Index;
-      using Point3 = std::array<Scalar, 3>;
+      using Data = std::vector<std::array<Scalar, 3>>;
 
       // Map types with explicit stride (AoS -> column-major 3xN)
       using StrideType = Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>;
@@ -49,13 +48,13 @@ namespace Rodin::Geometry
         0, StrideType>;
 
       PointCloud() noexcept
-        : m_rows(0),
+        : m_dimension(0),
           m_pts()
       {}
 
       explicit
-      PointCloud(std::uint8_t rows, Index n)
-        : m_rows(rows),
+      PointCloud(std::uint8_t rows, size_t n)
+        : m_dimension(rows),
           m_pts(static_cast<size_t>(n))
       {
         assert(rows <= MaxRows);
@@ -63,14 +62,23 @@ namespace Rodin::Geometry
       }
 
       PointCloud(const PointCloud&) = default;
+
       PointCloud(PointCloud&&) = default;
+
       PointCloud& operator=(const PointCloud&) = default;
+
       PointCloud& operator=(PointCloud&&) = default;
+
+      [[nodiscard]] constexpr
+      std::uint8_t getDimension() const noexcept
+      {
+        return m_dimension;
+      }
 
       [[nodiscard]] constexpr
       std::uint8_t rows() const noexcept
       {
-        return m_rows;
+        return m_dimension;
       }
 
       [[nodiscard]] inline
@@ -80,26 +88,26 @@ namespace Rodin::Geometry
       }
 
       [[nodiscard]] inline
-      Index size() const noexcept
+      size_t getCount() const noexcept
       {
-        return static_cast<Index>(m_pts.size());
+        return m_pts.size();
       }
 
-      void setRows(std::uint8_t r) noexcept
+      void setDimension(std::uint8_t r) noexcept
       {
         assert(r <= MaxRows);
-        m_rows = r;
+        m_dimension = r;
       }
 
-      void resize(std::uint8_t r, Index n)
+      void resize(std::uint8_t r, size_t n)
       {
         assert(r <= MaxRows);
         assert(n >= 0);
-        m_rows = r;
+        m_dimension = r;
         m_pts.resize(static_cast<size_t>(n));
       }
 
-      void reserve(Index n)
+      void reserve(size_t n)
       {
         assert(n >= 0);
         m_pts.reserve(static_cast<size_t>(n));
@@ -110,20 +118,28 @@ namespace Rodin::Geometry
         m_pts.clear();
       }
 
-      void push_back(const Point3& p)
+      void push_back(const std::array<Scalar, 1>& p)
       {
-        m_pts.push_back(p);
+        assert(m_dimension == 1);
+        m_pts.push_back({ p[0], 0, 0 });
       }
 
-      void push_back(Real x, Real y = 0, Real z = 0)
+      void push_back(const std::array<Real, 2>& p)
       {
-        m_pts.push_back({ x, y, z });
+        assert(m_dimension == 2);
+        m_pts.push_back({ p[0], p[1], 0 });
+      }
+
+      void push_back(const std::array<Scalar, 3>& p)
+      {
+        assert(m_dimension == 3);
+        m_pts.push_back(p);
       }
 
       void push_back(const Math::SpatialPoint& p)
       {
         assert(p.size() <= MaxRows);
-        Point3 pt = { 0, 0, 0 };
+        std::array<Scalar, 3> pt = { 0, 0, 0 };
         switch (p.size())
         {
           case 3: pt[2] = p(2); [[fallthrough]];
@@ -139,40 +155,39 @@ namespace Rodin::Geometry
       Scalar& operator()(std::uint8_t i, size_t j) noexcept
       {
         assert(i < m_rows);
-        assert(j >= 0 && j < size());
-        return m_pts[j][static_cast<Index>(i)];
+        assert(j >= 0 && j < getCount());
+        return m_pts[j][static_cast<size_t>(i)];
       }
 
       [[nodiscard]] inline
       const Scalar& operator()(std::uint8_t i, size_t j) const noexcept
       {
         assert(i < m_rows);
-        assert(j >= 0 && j < size());
+        assert(j >= 0 && j < getCount());
         return m_pts[j][i];
       }
 
       [[nodiscard]] inline
-      Point3& point3(Index j) noexcept
+      std::array<Scalar, 3>& point3(size_t j) noexcept
       {
-        assert(j >= 0 && j < size());
+        assert(j >= 0 && j < getCount());
         return m_pts[static_cast<size_t>(j)];
       }
 
       [[nodiscard]] inline
-      const Point3& point3(Index j) const noexcept
+      const std::array<Scalar, 3>& point3(size_t j) const noexcept
       {
-        assert(j >= 0 && j < size());
+        assert(j >= 0 && j < getCount());
         return m_pts[static_cast<size_t>(j)];
       }
 
-      // Build a Math::SpatialPoint on-the-fly (copy) with active dimension.
       [[nodiscard]] inline
-      Math::SpatialPoint col(Index j) const noexcept
+      Math::SpatialPoint operator[](size_t j) const noexcept
       {
-        assert(j >= 0 && j < size());
-        Math::SpatialPoint p(m_rows);
-        const auto& v = point3(j);
-        switch (m_rows)
+        assert(j >= 0 && j < getCount());
+        Math::SpatialPoint p(m_dimension);
+        const auto& v = this->point3(j);
+        switch (m_dimension)
         {
           case 3: p(2) = v[2]; [[fallthrough]];
           case 2: p(1) = v[1]; [[fallthrough]];
@@ -183,15 +198,21 @@ namespace Rodin::Geometry
         return p;
       }
 
+      [[nodiscard]] inline
+      auto col(size_t j) const noexcept
+      {
+        return this->operator[](j);
+      }
+
       void setZero() noexcept
       {
         // Fallthrough: touch only the active prefix (keeps inactive components unchanged).
-        if (m_rows == 0 || size() == 0)
+        if (m_dimension == 0 || getCount() == 0)
           return;
 
         for (auto& p : m_pts)
         {
-          switch (m_rows)
+          switch (m_dimension)
           {
             case 3: p[2] = Scalar(0); [[fallthrough]];
             case 2: p[1] = Scalar(0); [[fallthrough]];
@@ -210,13 +231,13 @@ namespace Rodin::Geometry
       [[nodiscard]] inline
       auto getMatrix() noexcept
       {
-        return getPackedMatrix().topRows(static_cast<Index>(m_rows));
+        return getPackedMatrix().topRows(static_cast<Eigen::Index>(m_dimension));
       }
 
       [[nodiscard]] inline
       auto getMatrix() const noexcept
       {
-        return getPackedMatrix().topRows(static_cast<Index>(m_rows));
+        return getPackedMatrix().topRows(static_cast<Eigen::Index>(m_dimension));
       }
 
       /**
@@ -228,14 +249,14 @@ namespace Rodin::Geometry
       MapType3xN getPackedMatrix() noexcept
       {
         const StrideType stride(/*outer*/ MaxRows, /*inner*/ 1);
-        return MapType3xN(rawData(), static_cast<Index>(MaxRows), size(), stride);
+        return MapType3xN(rawData(), static_cast<Eigen::Index>(MaxRows), getCount(), stride);
       }
 
       [[nodiscard]] inline
       ConstMapType3xN getPackedMatrix() const noexcept
       {
         const StrideType stride(/*outer*/ MaxRows, /*inner*/ 1);
-        return ConstMapType3xN(rawData(), static_cast<Index>(MaxRows), size(), stride);
+        return ConstMapType3xN(rawData(), static_cast<Eigen::Index>(MaxRows), getCount(), stride);
       }
 
       // --- norms / dot using views ---
@@ -244,8 +265,8 @@ namespace Rodin::Geometry
       Scalar dot(const PointCloud& other) const noexcept
       {
         assert(m_rows == other.m_rows);
-        assert(size() == other.size());
-        if (m_rows == 0 || size() == 0)
+        assert(getCount() == other.getCount());
+        if (m_dimension == 0 || getCount() == 0)
           return Scalar(0);
         return (this->getMatrix().cwiseProduct(other.getMatrix())).sum();
       }
@@ -255,8 +276,8 @@ namespace Rodin::Geometry
       Scalar dot(const Eigen::MatrixBase<EigenDerived>& other) const noexcept
       {
         assert(static_cast<std::uint8_t>(other.rows()) == m_rows);
-        assert(static_cast<Index>(other.cols()) == size());
-        if (m_rows == 0 || size() == 0)
+        assert(static_cast<Eigen::Index>(other.cols()) == getCount());
+        if (m_dimension == 0 || getCount() == 0)
           return Scalar(0);
         return (this->getMatrix().cwiseProduct(other)).sum();
       }
@@ -264,20 +285,20 @@ namespace Rodin::Geometry
       [[nodiscard]] inline
       Scalar squaredNorm() const noexcept
       {
-        if (m_rows == 0 || size() == 0)
+        if (m_dimension == 0 || getCount() == 0)
           return Scalar(0);
         return this->getMatrix().squaredNorm();
       }
 
       // raw container access (serialization, mesh APIs, etc.)
       [[nodiscard]] inline
-      std::vector<Point3>& getPoints() noexcept
+      std::vector<std::array<Scalar, 3>>& getPoints() noexcept
       {
         return m_pts;
       }
 
       [[nodiscard]] inline
-      const std::vector<Point3>& getPoints() const noexcept
+      const std::vector<std::array<Scalar, 3>>& getPoints() const noexcept
       {
         return m_pts;
       }
@@ -285,19 +306,19 @@ namespace Rodin::Geometry
       void setConstant(const Scalar& v) noexcept
       {
         // Set active prefix; keep inactive components unchanged.
-        if (m_rows == 0 || size() == 0)
+        if (m_dimension == 0 || getCount() == 0)
           return;
         this->getMatrix().setConstant(v);
       }
 
       PointCloud& operator*=(const Scalar& s) noexcept
       {
-        if (m_rows == 0 || size() == 0)
+        if (m_dimension == 0 || getCount() == 0)
           return *this;
 
         for (auto& p : m_pts)
         {
-          switch (m_rows)
+          switch (m_dimension)
           {
             case 3: p[2] *= s; [[fallthrough]];
             case 2: p[1] *= s; [[fallthrough]];
@@ -313,13 +334,13 @@ namespace Rodin::Geometry
       template <class Archive>
       void serialize(Archive& ar, const unsigned int)
       {
-        ar & m_rows;
+        ar & m_dimension;
         ar & m_pts;
       }
 
     private:
-      std::uint8_t m_rows;
-      std::vector<Point3> m_pts;
+      std::uint8_t m_dimension;
+      Data m_pts;
 
       [[nodiscard]] inline
       Scalar* rawData() noexcept
@@ -339,8 +360,8 @@ namespace Rodin::Geometry
   [[nodiscard]] inline
   PointCloud operator*(const Real& s, const PointCloud& A)
   {
-    PointCloud C(A.rows(), A.size());
-    if (A.rows() == 0 || A.size() == 0)
+    PointCloud C(A.rows(), A.getCount());
+    if (A.rows() == 0 || A.getCount() == 0)
       return C;
     C.getPackedMatrix() = A.getPackedMatrix(); // copy all 3 rows
     C.getMatrix() *= s;                        // scale active rows
@@ -357,9 +378,9 @@ namespace Rodin::Geometry
   PointCloud operator+(const PointCloud& A, const PointCloud& B)
   {
     assert(A.rows() == B.rows());
-    assert(A.size() == B.size());
-    PointCloud C(A.rows(), A.size());
-    if (A.rows() == 0 || A.size() == 0)
+    assert(A.getCount() == B.getCount());
+    PointCloud C(A.rows(), A.getCount());
+    if (A.rows() == 0 || A.getCount() == 0)
       return C;
     C.getPackedMatrix() = A.getPackedMatrix();
     C.getMatrix() += B.getMatrix();
@@ -370,9 +391,9 @@ namespace Rodin::Geometry
   PointCloud operator-(const PointCloud& A, const PointCloud& B)
   {
     assert(A.rows() == B.rows());
-    assert(A.size() == B.size());
-    PointCloud C(A.rows(), A.size());
-    if (A.rows() == 0 || A.size() == 0)
+    assert(A.getCount() == B.getCount());
+    PointCloud C(A.rows(), A.getCount());
+    if (A.rows() == 0 || A.getCount() == 0)
       return C;
     C.getPackedMatrix() = A.getPackedMatrix();
     C.getMatrix() -= B.getMatrix();
@@ -383,7 +404,7 @@ namespace Rodin::Geometry
   [[nodiscard]] inline
   auto operator*(const PointCloud& A, const Eigen::MatrixBase<EigenDerived>& B)
   {
-    assert(static_cast<Eigen::Index>(A.size()) == B.rows());
+    assert(static_cast<Eigen::Index>(A.getCount()) == B.rows());
     return A.getMatrix() * B;
   }
 

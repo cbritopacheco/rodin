@@ -127,6 +127,7 @@ namespace Rodin::Geometry
   Mesh<Context::Local>::Builder&
   Mesh<Context::Local>::Builder::setVertices(const PointCloud& vertices)
   {
+    m_nodes = vertices.getCount();
     m_vertices = vertices;
     return *this;
   }
@@ -134,6 +135,7 @@ namespace Rodin::Geometry
   Mesh<Context::Local>::Builder&
   Mesh<Context::Local>::Builder::setVertices(PointCloud&& vertices)
   {
+    m_nodes = vertices.getCount();
     m_vertices = std::move(vertices);
     return *this;
   }
