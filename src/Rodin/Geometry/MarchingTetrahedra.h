@@ -52,6 +52,8 @@ namespace Rodin::Geometry
       MeshType discretize() const override
       {
         const auto& ls   = this->getGridFunction();
+        // Work on a local mesh copy so required incidence computation does not
+        // mutate the connectivity state of the caller's mesh.
         MeshType mesh(ls.getFiniteElementSpace().getMesh());
 
         if (mesh.getDimension() != 3)
@@ -197,6 +199,10 @@ namespace Rodin::Geometry
         };
 
         // ---- Output cells + attributes
+        static constexpr int8_t SideUnknown  = -1;
+        static constexpr int8_t SidePositive = 0;
+        static constexpr int8_t SideNegative = 1;
+
         std::vector<std::array<Index, 4>> outCells;
         std::vector<Attribute> outCellAttr;
         std::vector<Attribute> outCellSourceAttr;
@@ -225,11 +231,11 @@ namespace Rodin::Geometry
                               Attribute aNeg, Attribute aPos,
                               Attribute sourceAttr)
         {
-          emitTet(vN, i0, i1, i2, aNeg, sourceAttr, 1);
+          emitTet(vN, i0, i1, i2, aNeg, sourceAttr, SideNegative);
 
-          emitTet(p0, p1, p2, i0, aPos, sourceAttr, 0);
-          emitTet(p1, p2, i0, i1, aPos, sourceAttr, 0);
-          emitTet(p2, i0, i1, i2, aPos, sourceAttr, 0);
+          emitTet(p0, p1, p2, i0, aPos, sourceAttr, SidePositive);
+          emitTet(p1, p2, i0, i1, aPos, sourceAttr, SidePositive);
+          emitTet(p2, i0, i1, i2, aPos, sourceAttr, SidePositive);
         };
 
         auto split_1pos = [&](Index vP,
@@ -238,11 +244,11 @@ namespace Rodin::Geometry
                               Attribute aNeg, Attribute aPos,
                               Attribute sourceAttr)
         {
-          emitTet(vP, i0, i1, i2, aPos, sourceAttr, 0);
+          emitTet(vP, i0, i1, i2, aPos, sourceAttr, SidePositive);
 
-          emitTet(n0, n1, n2, i0, aNeg, sourceAttr, 1);
-          emitTet(n1, n2, i0, i1, aNeg, sourceAttr, 1);
-          emitTet(n2, i0, i1, i2, aNeg, sourceAttr, 1);
+          emitTet(n0, n1, n2, i0, aNeg, sourceAttr, SideNegative);
+          emitTet(n1, n2, i0, i1, aNeg, sourceAttr, SideNegative);
+          emitTet(n2, i0, i1, i2, aNeg, sourceAttr, SideNegative);
         };
 
         auto minAbsVol6 = [&](const std::array<std::array<Index, 4>, 6>& tets) -> Real
@@ -284,13 +290,13 @@ namespace Rodin::Geometry
 
           const auto& best = (qb > qa) ? B : A;
 
-          emitTet(best[0][0], best[0][1], best[0][2], best[0][3], aNeg, sourceAttr, 1);
-          emitTet(best[1][0], best[1][1], best[1][2], best[1][3], aNeg, sourceAttr, 1);
-          emitTet(best[2][0], best[2][1], best[2][2], best[2][3], aNeg, sourceAttr, 1);
+          emitTet(best[0][0], best[0][1], best[0][2], best[0][3], aNeg, sourceAttr, SideNegative);
+          emitTet(best[1][0], best[1][1], best[1][2], best[1][3], aNeg, sourceAttr, SideNegative);
+          emitTet(best[2][0], best[2][1], best[2][2], best[2][3], aNeg, sourceAttr, SideNegative);
 
-          emitTet(best[3][0], best[3][1], best[3][2], best[3][3], aPos, sourceAttr, 0);
-          emitTet(best[4][0], best[4][1], best[4][2], best[4][3], aPos, sourceAttr, 0);
-          emitTet(best[5][0], best[5][1], best[5][2], best[5][3], aPos, sourceAttr, 0);
+          emitTet(best[3][0], best[3][1], best[3][2], best[3][3], aPos, sourceAttr, SidePositive);
+          emitTet(best[4][0], best[4][1], best[4][2], best[4][3], aPos, sourceAttr, SidePositive);
+          emitTet(best[5][0], best[5][1], best[5][2], best[5][3], aPos, sourceAttr, SidePositive);
         };
 
         // ---- Main loop
@@ -317,18 +323,18 @@ namespace Rodin::Geometry
 
           if (nneg == 0)
           {
-            emitTet(v[0], v[1], v[2], v[3], splitLabel(3, cellAttr, /*negative*/ false), cellAttr, 0);
+            emitTet(v[0], v[1], v[2], v[3], splitLabel(3, cellAttr, /*negative*/ false), cellAttr, SidePositive);
             continue;
           }
           if (nneg == 4)
           {
-            emitTet(v[0], v[1], v[2], v[3], splitLabel(3, cellAttr, /*negative*/ true), cellAttr, 1);
+            emitTet(v[0], v[1], v[2], v[3], splitLabel(3, cellAttr, /*negative*/ true), cellAttr, SideNegative);
             continue;
           }
 
           if (!shouldSplit(3, cellAttr))
           {
-            emitTet(v[0], v[1], v[2], v[3], cellAttr, cellAttr, -1);
+            emitTet(v[0], v[1], v[2], v[3], cellAttr, cellAttr, SideUnknown);
             continue;
           }
 
@@ -382,7 +388,7 @@ namespace Rodin::Geometry
 
           if (blocked)
           {
-            emitTet(v[0], v[1], v[2], v[3], cellAttr, cellAttr, -1);
+            emitTet(v[0], v[1], v[2], v[3], cellAttr, cellAttr, SideUnknown);
             continue;
           }
 
@@ -498,21 +504,20 @@ namespace Rodin::Geometry
         auto out = builder.finalize();
         out.getConnectivity().compute(2, 3);
         out.getConnectivity().compute(1, 3);
-        out.trace(Map<std::pair<Attribute, Attribute>, Attribute>{
-          { {this->getNegative(), this->getPositive()}, this->getInterface() },
-          { {this->getPositive(), this->getNegative()}, this->getInterface() }
-        });
         const auto& oconn = out.getConnectivity();
         for (auto fit = out.getFace(); !fit.end(); ++fit)
         {
           const auto fidx = fit->getIndex();
           const auto& inc = oconn.getIncidence({2, 3}, fidx);
+          // Skip dangling entities defensively.
+          if (inc.empty())
+            continue;
           bool hasNeg = false, hasPos = false, hasUnknown = false;
           for (const auto ci : inc)
           {
-            hasNeg     = hasNeg     || outCellSide[ci] == 1;
-            hasPos     = hasPos     || outCellSide[ci] == 0;
-            hasUnknown = hasUnknown || outCellSide[ci] < 0;
+            hasNeg     = hasNeg     || outCellSide[ci] == SideNegative;
+            hasPos     = hasPos     || outCellSide[ci] == SidePositive;
+            hasUnknown = hasUnknown || outCellSide[ci] == SideUnknown;
           }
           if (hasNeg && hasPos)
           {
@@ -532,12 +537,15 @@ namespace Rodin::Geometry
         {
           const auto eidx = eit->getIndex();
           const auto& inc = oconn.getIncidence({1, 3}, eidx);
+          // Skip dangling entities defensively.
+          if (inc.empty())
+            continue;
           bool hasNeg = false, hasPos = false, hasUnknown = false;
           for (const auto ci : inc)
           {
-            hasNeg     = hasNeg     || outCellSide[ci] == 1;
-            hasPos     = hasPos     || outCellSide[ci] == 0;
-            hasUnknown = hasUnknown || outCellSide[ci] < 0;
+            hasNeg     = hasNeg     || outCellSide[ci] == SideNegative;
+            hasPos     = hasPos     || outCellSide[ci] == SidePositive;
+            hasUnknown = hasUnknown || outCellSide[ci] == SideUnknown;
           }
           if (hasNeg && hasPos)
           {
