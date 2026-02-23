@@ -1544,7 +1544,11 @@ namespace Rodin::Assembly
                 for (Index p = 0; p < count; ++p)
                 {
                   if (!seq.filter(p)) continue;
-                  if (!attrs.empty() && !attrs.count(mesh.getAttribute(d, p))) continue;
+                  if (!attrs.empty())
+                  {
+                    const auto a = mesh.getAttribute(d, p);
+                    if (!a || !attrs.contains(*a)) continue;
+                  }
 
                   auto it = seq.getIterator(p);
                   integrator->setPolytope(*it);
