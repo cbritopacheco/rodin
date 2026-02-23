@@ -71,8 +71,8 @@ namespace Rodin::Geometry
         using Point = Math::SpatialPoint;
         static constexpr Index InvalidIndex = std::numeric_limits<Index>::max();
 
-        // ---- Robust sign classification
         const Real eps = this->getTolerance();
+
         enum class Sign : uint8_t { Negative, Positive, Zero };
 
         auto sgn = [&](Real x) -> Sign
@@ -82,10 +82,7 @@ namespace Rodin::Geometry
           return Sign::Zero;
         };
 
-        auto unwrap = [](const Optional<Attribute>& a, Attribute fallback) -> Attribute
-        {
-          return a ? *a : fallback;
-        };
+        auto finite = [](Real x) -> bool { return std::isfinite(x); };
 
         // ---- SplitMap helpers
         auto isNoSplit = [&](size_t d, const Optional<Attribute>& a) -> bool
@@ -108,19 +105,20 @@ namespace Rodin::Geometry
           return std::holds_alternative<Split>(it->second);
         };
 
+        // Labeling policy:
+        // - If base attribute is missing => use global +/- if provided.
+        // - If base attribute exists and there is an explicit split rule => apply it.
+        // - Otherwise KEEP base attribute (do not override with global +/-).
         auto splitLabel = [&](size_t d, const Optional<Attribute>& base, bool negativeSide)
           -> Optional<Attribute>
         {
-          // No base attribute: only label if global +/- provided
           if (!base)
           {
-            const auto& want = negativeSide ? this->getNegative() : this->getPositive(); // Optional<Attribute>
-            return want; // may be empty => "no attribute"
+            const auto& want = negativeSide ? this->getNegative() : this->getPositive();
+            return want; // may be empty
           }
 
           const auto& sm = this->getSplitMap(d);
-
-          // If there is an explicit rule for this base attr, use it
           if (!sm.empty())
           {
             auto it = sm.find(*base);
@@ -131,7 +129,7 @@ namespace Rodin::Geometry
                 {
                   using T = std::decay_t<decltype(v)>;
                   if constexpr (std::is_same_v<T, NoSplitT>)
-                    return base; // keep original
+                    return base;
                   else
                     return negativeSide ? Optional<Attribute>(v.negative)
                                         : Optional<Attribute>(v.positive);
@@ -140,9 +138,6 @@ namespace Rodin::Geometry
             }
           }
 
-          // No explicit rule: prefer global label if provided, else keep base
-          const auto& want = negativeSide ? this->getNegative() : this->getPositive();
-          if (want) return want;
           return base;
         };
 
@@ -230,7 +225,10 @@ namespace Rodin::Geometry
                                          Index va, Index vb,
                                          Real fa, Real fb) -> Index
         {
-          // Snap to existing mesh vertices when near interface
+          // Prevent NaN propagation to geometry
+          if (!finite(fa) || !finite(fb))
+            return va;
+
           if (std::abs(fa) <= eps) return va;
           if (std::abs(fb) <= eps) return vb;
 
@@ -240,17 +238,12 @@ namespace Rodin::Geometry
 
           const Real denom = (fa - fb);
 
-          // Near-constant along edge: choose the closer endpoint
           if (std::abs(denom) <= eps)
             return (std::abs(fa) < std::abs(fb)) ? va : vb;
 
-          // Linear interpolation
           Real t = fa / denom;
-
-          // Clamp (roundoff safety)
           t = std::min<Real>(Real(1), std::max<Real>(Real(0), t));
 
-          // Snap to endpoint if extremely close
           if (t <= eps)            return va;
           if (t >= Real(1) - eps)  return vb;
 
@@ -269,8 +262,8 @@ namespace Rodin::Geometry
 
         std::vector<std::array<Index, 4>> outCells;
         std::vector<Optional<Attribute>> outCellAttr;
-        std::vector<Optional<Attribute>> outCellSourceAttr; // input CELL attribute
-        std::vector<int8_t> outCellSide;          // neg/pos/unknown
+        std::vector<Optional<Attribute>> outCellSourceAttr;
+        std::vector<int8_t> outCellSide;
 
         outCells.reserve(static_cast<size_t>(mesh.getCellCount()) * 2);
         outCellAttr.reserve(outCells.capacity());
@@ -380,14 +373,21 @@ namespace Rodin::Geometry
 
           const auto& cv = cit->getVertices();
           const std::array<Index, 4> v{{ cv(0), cv(1), cv(2), cv(3) }};
-          const std::array<Real, 4> phi{{ ls[v[0]], ls[v[1]], ls[v[2]], ls[v[3]] }};
-          const std::array<Sign, 4> s{{ sgn(phi[0]), sgn(phi[1]), sgn(phi[2]), sgn(phi[3]) }};
 
+          const std::array<Real, 4> phi{{ ls[v[0]], ls[v[1]], ls[v[2]], ls[v[3]] }};
+          if (!finite(phi[0]) || !finite(phi[1]) || !finite(phi[2]) || !finite(phi[3]))
+          {
+            const auto cellAttr = cit->getAttribute();
+            emitTet(v[0], v[1], v[2], v[3], cellAttr, cellAttr, SideUnknown);
+            continue;
+          }
+
+          const std::array<Sign, 4> s{{ sgn(phi[0]), sgn(phi[1]), sgn(phi[2]), sgn(phi[3]) }};
           const auto cellAttr = cit->getAttribute();
 
           int nneg = 0;
           for (int i = 0; i < 4; ++i)
-            nneg += (s[i] == Sign::Negative);
+            nneg += (s[i] != Sign::Positive); // Negative OR Zero treated as "neg side"
 
           if (nneg == 0)
           {
@@ -407,15 +407,18 @@ namespace Rodin::Geometry
 
           if (!shouldSplit(3, cellAttr))
           {
-            // keep original attribute if present, otherwise no attribute
             emitTet(v[0], v[1], v[2], v[3], cellAttr, cellAttr, SideUnknown);
             continue;
           }
 
-          // Block by noSplit edges/faces (kept as your connectivity-based version)
+          // Block by noSplit edges/faces
           bool blocked = false;
 
+          // RELIES ON DOCUMENTED INVARIANT:
+          // conn.getIncidence({3,1}, ci) ordering for tets is:
+          // 0:(0,1) 1:(0,2) 2:(0,3) 3:(1,2) 4:(1,3) 5:(2,3)
           const auto& eids = conn.getIncidence({3, 1}, ci);
+
           for (Index ei : eids)
           {
             const auto ea = mesh.getAttribute(1, ei);
@@ -476,12 +479,11 @@ namespace Rodin::Geometry
           auto I = [&](int ia, int ib) -> Index
           {
             const int e = edgeIdx(ia, ib);
-            assert(e >= 0);
             const Index eid = eids[static_cast<size_t>(e)];
             const Index va = v[static_cast<size_t>(ia)];
             const Index vb = v[static_cast<size_t>(ib)];
-            const Real fa = phi[static_cast<size_t>(ia)];
-            const Real fb = phi[static_cast<size_t>(ib)];
+            const Real  fa = phi[static_cast<size_t>(ia)];
+            const Real  fb = phi[static_cast<size_t>(ib)];
             return getIntersectionOnEdge(eid, va, vb, fa, fb);
           };
 
@@ -489,7 +491,7 @@ namespace Rodin::Geometry
           {
             int in = -1; int ip[3]; int k = 0;
             for (int i = 0; i < 4; ++i)
-              (s[i] == Sign::Negative) ? (in = i) : (ip[k++] = i);
+              (s[i] != Sign::Positive) ? (in = i) : (ip[k++] = i); // Zero with negative
 
             const Index i0 = I(in, ip[0]);
             const Index i1 = I(in, ip[1]);
@@ -507,7 +509,7 @@ namespace Rodin::Geometry
           {
             int ipos = -1; int ineg[3]; int k = 0;
             for (int i = 0; i < 4; ++i)
-              (s[i] == Sign::Positive) ? (ipos = i) : (ineg[k++] = i);
+              (s[i] == Sign::Positive) ? (ipos = i) : (ineg[k++] = i); // Zero with negative
 
             const Index i0 = I(ipos, ineg[0]);
             const Index i1 = I(ipos, ineg[1]);
@@ -525,7 +527,7 @@ namespace Rodin::Geometry
           {
             int ineg[2]; int ipos[2]; int kn = 0, kp = 0;
             for (int i = 0; i < 4; ++i)
-              (s[i] == Sign::Negative) ? (ineg[kn++] = i) : (ipos[kp++] = i);
+              (s[i] == Sign::Positive) ? (ipos[kp++] = i) : (ineg[kn++] = i); // Zero with negative
 
             const Index a = I(ineg[0], ipos[0]);
             const Index b = I(ineg[0], ipos[1]);
@@ -558,17 +560,20 @@ namespace Rodin::Geometry
         auto out = builder.finalize();
 
         // ---------------------------------------------------------------------
-        // Transfer FACE/EDGE attributes using input maps (robust "fix").
+        // Transfer FACE/EDGE attributes using input maps.
+        // IMPORTANT: do NOT inherit old interface tags (Gamma) from input.
+        // Interface is recomputed from adjacency (hasNeg && hasPos) each time.
         // ---------------------------------------------------------------------
         out.getConnectivity().compute(2, 3);
         out.getConnectivity().compute(1, 3);
         const auto& oconn = out.getConnectivity();
 
+        const auto& ifaceOpt = this->getInterface();
+
         // Faces (triangles only) + interface marking
         for (auto fit = out.getPolytope(2); !fit.end(); ++fit)
         {
-          const auto g = fit->getGeometry();
-          if (g != Polytope::Type::Triangle)
+          if (fit->getGeometry() != Polytope::Type::Triangle)
             continue;
 
           const Index fidx = fit->getIndex();
@@ -586,28 +591,30 @@ namespace Rodin::Geometry
 
           if (hasNeg && hasPos)
           {
-            if (const auto& iface = this->getInterface())
-              out.setAttribute({2, fidx}, *iface);
+            if (ifaceOpt)
+              out.setAttribute({2, fidx}, *ifaceOpt);
             continue;
           }
 
           const auto& fv = fit->getVertices();
-          const bool allOriginal =
-            (fv(0) < nv) && (fv(1) < nv) && (fv(2) < nv);
+          const bool allOriginal = (fv(0) < nv) && (fv(1) < nv) && (fv(2) < nv);
+          if (!allOriginal)
+            continue;
 
-          if (allOriginal)
-          {
-            auto itIn = inFaceAttrByVerts.find(makeFaceKey(fv(0), fv(1), fv(2)));
-            if (itIn != inFaceAttrByVerts.end())
-            {
-              const Attribute baseFaceAttr = itIn->second;
-              if (hasUnknown)
-                out.setAttribute({2, fidx}, baseFaceAttr);
-              else
-                out.setAttribute({2, fidx}, splitLabel(2, baseFaceAttr, /*negative*/ hasNeg));
-              continue;
-            }
-          }
+          auto itIn = inFaceAttrByVerts.find(makeFaceKey(fv(0), fv(1), fv(2)));
+          if (itIn == inFaceAttrByVerts.end())
+            continue;
+
+          const Attribute baseFaceAttr = itIn->second;
+
+          // Do not carry over old interface tag
+          if (ifaceOpt && baseFaceAttr == *ifaceOpt)
+            continue;
+
+          if (hasUnknown)
+            out.setAttribute({2, fidx}, baseFaceAttr);
+          else
+            out.setAttribute({2, fidx}, splitLabel(2, baseFaceAttr, /*negative*/ hasNeg));
         }
 
         // Edges + interface marking
@@ -628,26 +635,30 @@ namespace Rodin::Geometry
 
           if (hasNeg && hasPos)
           {
-            out.setAttribute({1, eidx}, this->getInterface());
+            if (ifaceOpt)
+              out.setAttribute({1, eidx}, *ifaceOpt);
             continue;
           }
 
           const auto& ev = eit->getVertices();
           const bool allOriginal = (ev(0) < nv) && (ev(1) < nv);
+          if (!allOriginal)
+            continue;
 
-          if (allOriginal)
-          {
-            auto itIn = inEdgeAttrByVerts.find(makeEdgeKey(ev(0), ev(1)));
-            if (itIn != inEdgeAttrByVerts.end())
-            {
-              const Attribute baseEdgeAttr = itIn->second;
-              if (hasUnknown)
-                out.setAttribute({1, eidx}, baseEdgeAttr);
-              else
-                out.setAttribute({1, eidx}, splitLabel(1, baseEdgeAttr, /*negative*/ hasNeg));
-              continue;
-            }
-          }
+          auto itIn = inEdgeAttrByVerts.find(makeEdgeKey(ev(0), ev(1)));
+          if (itIn == inEdgeAttrByVerts.end())
+            continue;
+
+          const Attribute baseEdgeAttr = itIn->second;
+
+          // Do not carry over old interface tag
+          if (ifaceOpt && baseEdgeAttr == *ifaceOpt)
+            continue;
+
+          if (hasUnknown)
+            out.setAttribute({1, eidx}, baseEdgeAttr);
+          else
+            out.setAttribute({1, eidx}, splitLabel(1, baseEdgeAttr, /*negative*/ hasNeg));
         }
 
         return out;

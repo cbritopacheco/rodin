@@ -92,8 +92,8 @@ int main(int, char**)
     Alert::Info() << "   | Computing connectivity." << Alert::Raise;
     auto& conn = th.getConnectivity();
 
-    conn.discover(3, 1);
     conn.discover(3, 2);
+    conn.discover(3, 1);
 
     conn.restrict(1, 0);
     conn.restrict(2, 0);
@@ -187,19 +187,19 @@ int main(int, char**)
 
     // Recover the implicit domain
     Alert::Info() << "   | Meshing the domain." << Alert::Raise;
-    auto th2 = MarchingTetrahedra(advect.getSolution())
+    th = MarchingTetrahedra(advect.getSolution())
                              .setInterface(Gamma)
                              .setNegative(Interior)
                              .setPositive(Exterior)
                              .noSplit(2, GammaD)
                              .noSplit(2, GammaN)
+                             .split(2, Gamma0, { Gamma0, Gamma0 })
                              .discretize();
 
-    th2.save("Omega.mesh", IO::FileFormat::MEDIT);
-    // std::exit(1);
+    th.save("Omega.mesh", IO::FileFormat::MEDIT);
   }
 
-  //Alert::Info() << "Saved final mesh to Omega.mesh" << Alert::Raise;
+  Alert::Info() << "Saved final mesh to Omega.mesh" << Alert::Raise;
 
   return 0;
 }
