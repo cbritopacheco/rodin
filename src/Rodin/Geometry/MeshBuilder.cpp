@@ -73,7 +73,7 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Local>::Builder&
-  Mesh<Context::Local>::Builder::attribute(const std::pair<size_t, Index>& p, Attribute attr)
+  Mesh<Context::Local>::Builder::attribute(const std::pair<size_t, Index>& p, const Optional<Attribute>& attr)
   {
     m_attributes.set(p, attr);
     return *this;

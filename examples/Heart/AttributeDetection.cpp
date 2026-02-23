@@ -18,7 +18,11 @@ int main(int argc, char** argv)
 
   std::set<Geometry::Attribute> attrs;
   for (auto it = mesh.getCell(); it; ++it)
-    attrs.insert(it->getAttribute());
+  {
+    auto attr = it->getAttribute();
+    if (attr)
+      attrs.insert(*attr);
+  }
 
   std::cout << "Cell attributes in mesh:" << std::endl;
   for (const auto& attr : attrs)
@@ -27,7 +31,11 @@ int main(int argc, char** argv)
   attrs.clear();
 
   for (auto it = mesh.getFace(); it; ++it)
-    attrs.insert(it->getAttribute());
+  {
+    auto attr = it->getAttribute();
+    if (attr)
+      attrs.insert(*attr);
+  }
 
   std::cout << "\nFace attributes in mesh:" << std::endl;
   for (const auto& attr : attrs)

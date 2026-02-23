@@ -29,6 +29,8 @@
 #include "Rodin/Variational/P1/P1.h"
 #include "Rodin/Variational/H1/H1.h"
 
+#define RODIN_IO_MFEM_DEFAULT_POLYTOPE_ATTRIBUTE 0
+
 namespace Rodin::IO::MFEM
 {
   /**

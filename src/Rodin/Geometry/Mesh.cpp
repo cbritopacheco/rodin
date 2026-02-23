@@ -670,7 +670,7 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Local>&
-  Mesh<Context::Local>::setAttribute(const std::pair<size_t, Index>& p, Attribute attr)
+  Mesh<Context::Local>::setAttribute(const std::pair<size_t, Index>& p, const Optional<Attribute>& attr)
   {
     const size_t dimension = p.first;
     m_attributes.set(p, this->getPolytopeCount(dimension), attr);

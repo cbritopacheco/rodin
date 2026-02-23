@@ -297,7 +297,7 @@ namespace Rodin::IO
             auto coords = it->getCoordinates();
             for (size_t i = 0; i < mesh.getSpaceDimension(); i++)
               os << coords(i) << " ";
-            os << it->getAttribute() << '\n';
+            os << it->getAttribute().value_or(RODIN_IO_MEDIT_DEFAULT_POLYTOPE_ATTRIBUTE) << '\n';
           }
 
           os << '\n';
@@ -396,7 +396,7 @@ namespace Rodin::IO
                     break;
                   }
                 }
-                os << ' ' << it->getAttribute() << '\n';
+                os << ' ' << it->getAttribute().value_or(RODIN_IO_MEDIT_DEFAULT_POLYTOPE_ATTRIBUTE) << '\n';
               }
             }
           }

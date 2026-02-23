@@ -224,12 +224,6 @@
 #define RODIN_MAXIMAL_SPACE_DIMENSION 3
 
 /**
- * @ingroup RodinDirectives
- * @brief Indicates the default polytope attribute.
- */
-#define RODIN_DEFAULT_POLYTOPE_ATTRIBUTE 1
-
-/**
  * @brief Represents the constant used for fuzzy comparison.
  */
 #define RODIN_FUZZY_CONSTANT 1e-5

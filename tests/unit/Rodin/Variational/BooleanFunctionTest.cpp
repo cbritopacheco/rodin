@@ -190,12 +190,15 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_Variational_BooleanFunction, TraceToBoundary)
   {
+    const Attribute interior_attr = 1;
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    for (auto it = mesh.getCell(); !it.end(); ++it)
+      mesh.setAttribute(it.key(), interior_attr);
     const size_t D = mesh.getDimension();
     mesh.getConnectivity().compute(D - 1, D);
 
     BooleanFunction bf(true);
-    auto traced_bf = bf.traceOf(RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
+    auto traced_bf = bf.traceOf(interior_attr);
 
     // Create a boundary point for testing
     auto it = mesh.getPolytope(D - 1, 0);

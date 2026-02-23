@@ -179,16 +179,16 @@ namespace Rodin::Variational
           for (const Index cell : incidence)
           {
             auto pit = mesh.getPolytope(d + 1, cell);
-            if (!traceDomain.contains(pit->getAttribute()))
+
+            const Optional<Geometry::Attribute> ca = pit->getAttribute();
+            if (!ca || !traceDomain.contains(*ca))
               continue;
 
             // `pit` is the chosen adjacent cell that defines "outward"
             const auto& cellPoly = *pit;
 
-            // face point (physical)
             const auto xf = p.getCoordinates();
 
-            // cell interior point (physical)
             const auto rc_cell = Geometry::Polytope::Traits(cellPoly.getGeometry()).getCentroid();
             Geometry::Point pc(cellPoly, rc_cell);
             const auto xc = pc.getCoordinates();

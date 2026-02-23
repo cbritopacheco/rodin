@@ -344,7 +344,7 @@ namespace Rodin::MMG
         const auto& coords = vertex.getCoordinates();
         for (size_t d = 0; d < src.getSpaceDimension(); d++)
           res->point[i].c[d] = coords[d];
-        res->point[i].ref = vertex.getAttribute();
+        res->point[i].ref = vertex.getAttribute().value_or(0);
       }
 
       // Copy edges
@@ -356,7 +356,7 @@ namespace Rodin::MMG
         const auto& vertices = face.getVertices();
         res->edge[i].a = vertices[0] + 1;
         res->edge[i].b = vertices[1] + 1;
-        res->edge[i].ref = face.getAttribute();
+        res->edge[i].ref = face.getAttribute().value_or(0);
       }
 
       // Copy triangles
@@ -370,7 +370,7 @@ namespace Rodin::MMG
         pt->v[0] = vertices[0] + 1;
         pt->v[1] = vertices[1] + 1;
         pt->v[2] = vertices[2] + 1;
-        pt->ref = cell.getAttribute();
+        pt->ref = cell.getAttribute().value_or(0);
       }
     }
     else if (src.getDimension() == 2) // Use MMG2D
@@ -391,7 +391,7 @@ namespace Rodin::MMG
         const auto& coords = vertex.getCoordinates();
         for (size_t d = 0; d < src.getSpaceDimension(); d++)
           res->point[i].c[d] = coords[d];
-        res->point[i].ref = vertex.getAttribute();
+        res->point[i].ref = vertex.getAttribute().value_or(0);
         res->point[i].tag = MG_NUL;
       }
 
@@ -404,7 +404,7 @@ namespace Rodin::MMG
         const auto& vertices = face.getVertices();
         res->edge[i].a = vertices[0] + 1;
         res->edge[i].b = vertices[1] + 1;
-        res->edge[i].ref = face.getAttribute();
+        res->edge[i].ref = face.getAttribute().value_or(0);
         res->edge[i].tag |= MG_REF + MG_BDY;
       }
 
@@ -426,7 +426,7 @@ namespace Rodin::MMG
           pt->v[0] = vertices[0] + 1;
           pt->v[1] = vertices[1] + 1;
           pt->v[2] = vertices[2] + 1;
-          pt->ref = cell.getAttribute();
+          pt->ref = cell.getAttribute().value_or(0);
           res->point[pt->v[0]].tag &= ~MG_NUL;
           res->point[pt->v[1]].tag &= ~MG_NUL;
           res->point[pt->v[2]].tag &= ~MG_NUL;
@@ -467,7 +467,7 @@ namespace Rodin::MMG
         const auto& coords = vertex.getCoordinates();
         for (size_t d = 0; d < src.getSpaceDimension(); d++)
           res->point[i].c[d] = coords[d];
-        res->point[i].ref = vertex.getAttribute();
+        res->point[i].ref = vertex.getAttribute().value_or(0);
         res->point[i].tag = MG_NUL;
       }
 
@@ -480,7 +480,7 @@ namespace Rodin::MMG
         const auto& vertices = segment.getVertices();
         res->edge[i].a = vertices[0] + 1;
         res->edge[i].b = vertices[1] + 1;
-        res->edge[i].ref = segment.getAttribute();
+        res->edge[i].ref = segment.getAttribute().value_or(0);
         res->edge[i].tag |= MG_REF;
       }
 
@@ -495,7 +495,7 @@ namespace Rodin::MMG
         pt->v[0] = vertices[0] + 1;
         pt->v[1] = vertices[1] + 1;
         pt->v[2] = vertices[2] + 1;
-        pt->ref = face.getAttribute();
+        pt->ref = face.getAttribute().value_or(0);
       }
 
       // Copy tetrahedra with correct orientation
@@ -516,7 +516,7 @@ namespace Rodin::MMG
         res->point[pt->v[2]].tag &= ~MG_NUL;
         res->point[pt->v[3]].tag &= ~MG_NUL;
 
-        pt->ref = cell.getAttribute();
+        pt->ref = cell.getAttribute().value_or(0);
         if (MMG5_orvol(res->point, pt->v) < 0.0)
         {
           auto tmp = pt->v[2];

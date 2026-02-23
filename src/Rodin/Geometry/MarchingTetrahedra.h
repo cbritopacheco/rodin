@@ -11,15 +11,12 @@
 #include <array>
 #include <cmath>
 #include <limits>
-#include <map>
-#include <optional>
 #include <tuple>
 #include <type_traits>
 #include <variant>
 #include <vector>
 
 #include "Rodin/Alert/MemberFunctionException.h"
-#include "Rodin/Alert/Warning.h"
 
 #include "MarchingBase.h"
 #include "Mesh.h"
@@ -85,50 +82,68 @@ namespace Rodin::Geometry
           return Sign::Zero;
         };
 
-        // ---- SplitMap helpers
-        auto isNoSplit = [&](size_t d, Attribute a) -> bool
+        auto unwrap = [](const Optional<Attribute>& a, Attribute fallback) -> Attribute
         {
+          return a ? *a : fallback;
+        };
+
+        // ---- SplitMap helpers
+        auto isNoSplit = [&](size_t d, const Optional<Attribute>& a) -> bool
+        {
+          if (!a) return false;
           const auto& sm = this->getSplitMap(d);
           if (sm.empty()) return false;
-          auto it = sm.find(a);
+          auto it = sm.find(*a);
           if (it == sm.end()) return false;
           return std::holds_alternative<NoSplitT>(it->second);
         };
 
-        auto shouldSplit = [&](size_t d, Attribute a) -> bool
+        auto shouldSplit = [&](size_t d, const Optional<Attribute>& a) -> bool
         {
+          if (!a) return true; // no attribute => default behavior: split
           const auto& sm = this->getSplitMap(d);
           if (sm.empty()) return true;      // default: split everything
-          auto it = sm.find(a);
-          if (it == sm.end()) return false; // default: do not split if rule missing
+          auto it = sm.find(*a);
+          if (it == sm.end()) return false; // rule missing => do not split for this attr
           return std::holds_alternative<Split>(it->second);
         };
 
-        auto splitLabel = [&](size_t d, Attribute base, bool negativeSide) -> Attribute
+        auto splitLabel = [&](size_t d, const Optional<Attribute>& base, bool negativeSide)
+          -> Optional<Attribute>
         {
-          const auto def = [&]()
+          // No base attribute: only label if global +/- provided
+          if (!base)
           {
-            return negativeSide ? this->getNegative() : this->getPositive();
-          };
+            const auto& want = negativeSide ? this->getNegative() : this->getPositive(); // Optional<Attribute>
+            return want; // may be empty => "no attribute"
+          }
 
           const auto& sm = this->getSplitMap(d);
-          if (sm.empty())
-            return def();
 
-          auto it = sm.find(base);
-          if (it == sm.end())
-            return base;
-
-          return std::visit(
-            [&](const auto& v) -> Attribute
+          // If there is an explicit rule for this base attr, use it
+          if (!sm.empty())
+          {
+            auto it = sm.find(*base);
+            if (it != sm.end())
             {
-              using T = std::decay_t<decltype(v)>;
-              if constexpr (std::is_same_v<T, NoSplitT>)
-                return base;
-              else
-                return negativeSide ? v.negative : v.positive;
-            },
-            it->second);
+              return std::visit(
+                [&](const auto& v) -> Optional<Attribute>
+                {
+                  using T = std::decay_t<decltype(v)>;
+                  if constexpr (std::is_same_v<T, NoSplitT>)
+                    return base; // keep original
+                  else
+                    return negativeSide ? Optional<Attribute>(v.negative)
+                                        : Optional<Attribute>(v.positive);
+                },
+                it->second);
+            }
+          }
+
+          // No explicit rule: prefer global label if provided, else keep base
+          const auto& want = negativeSide ? this->getNegative() : this->getPositive();
+          if (want) return want;
+          return base;
         };
 
         // ---- Signed volume (6x tetra volume)
@@ -178,7 +193,9 @@ namespace Rodin::Geometry
         for (auto eit = mesh.getPolytope(1); !eit.end(); ++eit)
         {
           const auto& ev = eit->getVertices();
-          inEdgeAttrByVerts[makeEdgeKey(ev(0), ev(1))] = eit->getAttribute();
+          const auto a = eit->getAttribute();
+          if (a)
+            inEdgeAttrByVerts[makeEdgeKey(ev(0), ev(1))] = *a;
         }
 
         for (auto fit = mesh.getPolytope(2); !fit.end(); ++fit)
@@ -187,7 +204,9 @@ namespace Rodin::Geometry
           if (g != Polytope::Type::Triangle)
             continue;
           const auto& fv = fit->getVertices();
-          inFaceAttrByVerts[makeFaceKey(fv(0), fv(1), fv(2))] = fit->getAttribute();
+          const auto a = fit->getAttribute();
+          if (a)
+            inFaceAttrByVerts[makeFaceKey(fv(0), fv(1), fv(2))] = *a;
         }
 
         // ---- Output vertices
@@ -249,8 +268,8 @@ namespace Rodin::Geometry
         static constexpr int8_t SideNegative = 1;
 
         std::vector<std::array<Index, 4>> outCells;
-        std::vector<Attribute> outCellAttr;       // output cell attribute
-        std::vector<Attribute> outCellSourceAttr; // input CELL attribute
+        std::vector<Optional<Attribute>> outCellAttr;
+        std::vector<Optional<Attribute>> outCellSourceAttr; // input CELL attribute
         std::vector<int8_t> outCellSide;          // neg/pos/unknown
 
         outCells.reserve(static_cast<size_t>(mesh.getCellCount()) * 2);
@@ -259,7 +278,9 @@ namespace Rodin::Geometry
         outCellSide.reserve(outCells.capacity());
 
         auto emitTet = [&](Index a, Index b, Index c, Index d,
-                           Attribute outAttr, Attribute sourceAttr, int8_t side)
+                           const Optional<Attribute>& outAttr,
+                           const Optional<Attribute>& sourceAttr,
+                           int8_t side)
         {
           std::array<Index, 4> t{{a, b, c, d}};
           if (signedVolume(t[0], t[1], t[2], t[3]) < 0)
@@ -275,8 +296,9 @@ namespace Rodin::Geometry
         auto split_1neg = [&](Index vN,
                               Index p0, Index p1, Index p2,
                               Index i0, Index i1, Index i2,
-                              Attribute aNeg, Attribute aPos,
-                              Attribute sourceAttr)
+                              const Optional<Attribute>& aNeg,
+                              const Optional<Attribute>& aPos,
+                              const Optional<Attribute>& sourceAttr)
         {
           emitTet(vN, i0, i1, i2, aNeg, sourceAttr, SideNegative);
 
@@ -288,8 +310,9 @@ namespace Rodin::Geometry
         auto split_1pos = [&](Index vP,
                               Index n0, Index n1, Index n2,
                               Index i0, Index i1, Index i2,
-                              Attribute aNeg, Attribute aPos,
-                              Attribute sourceAttr)
+                              const Optional<Attribute>& aNeg,
+                              const Optional<Attribute>& aPos,
+                              const Optional<Attribute>& sourceAttr)
         {
           emitTet(vP, i0, i1, i2, aPos, sourceAttr, SidePositive);
 
@@ -309,8 +332,9 @@ namespace Rodin::Geometry
         auto split_2neg2pos_best = [&](Index n0, Index n1,
                                        Index p0, Index p1,
                                        Index a, Index b, Index c, Index d,
-                                       Attribute aNeg, Attribute aPos,
-                                       Attribute sourceAttr)
+                                       const Optional<Attribute>& aNeg,
+                                       const Optional<Attribute>& aPos,
+                                       const Optional<Attribute>& sourceAttr)
         {
           std::array<std::array<Index, 4>, 6> A = {{
             {{n0, a, b, n1}},
@@ -359,7 +383,7 @@ namespace Rodin::Geometry
           const std::array<Real, 4> phi{{ ls[v[0]], ls[v[1]], ls[v[2]], ls[v[3]] }};
           const std::array<Sign, 4> s{{ sgn(phi[0]), sgn(phi[1]), sgn(phi[2]), sgn(phi[3]) }};
 
-          const Attribute cellAttr = cit->getAttribute();
+          const auto cellAttr = cit->getAttribute();
 
           int nneg = 0;
           for (int i = 0; i < 4; ++i)
@@ -372,6 +396,7 @@ namespace Rodin::Geometry
                     cellAttr, SidePositive);
             continue;
           }
+
           if (nneg == 4)
           {
             emitTet(v[0], v[1], v[2], v[3],
@@ -382,6 +407,7 @@ namespace Rodin::Geometry
 
           if (!shouldSplit(3, cellAttr))
           {
+            // keep original attribute if present, otherwise no attribute
             emitTet(v[0], v[1], v[2], v[3], cellAttr, cellAttr, SideUnknown);
             continue;
           }
@@ -392,7 +418,7 @@ namespace Rodin::Geometry
           const auto& eids = conn.getIncidence({3, 1}, ci);
           for (Index ei : eids)
           {
-            const Attribute ea = mesh.getAttribute(1, ei);
+            const auto ea = mesh.getAttribute(1, ei);
             if (!isNoSplit(1, ea))
               continue;
 
@@ -412,7 +438,7 @@ namespace Rodin::Geometry
             const auto& fids = conn.getIncidence({3, 2}, ci);
             for (Index fi : fids)
             {
-              const Attribute fa = mesh.getAttribute(2, fi);
+              const auto fa = mesh.getAttribute(2, fi);
               if (!isNoSplit(2, fa))
                 continue;
 
@@ -432,8 +458,8 @@ namespace Rodin::Geometry
             continue;
           }
 
-          const Attribute aNeg = splitLabel(3, cellAttr, /*negative*/ true);
-          const Attribute aPos = splitLabel(3, cellAttr, /*negative*/ false);
+          const auto aNeg = splitLabel(3, cellAttr, /*negative*/ true);
+          const auto aPos = splitLabel(3, cellAttr, /*negative*/ false);
 
           auto edgeIdx = [&](int a, int b) -> int
           {
@@ -525,7 +551,8 @@ namespace Rodin::Geometry
         {
           const auto& t = outCells[i];
           builder.tetrahedron(IndexArray{{ t[0], t[1], t[2], t[3] }});
-          builder.attribute({3, static_cast<Index>(i)}, outCellAttr[i]);
+          if (outCellAttr[i])
+            builder.attribute({3, static_cast<Index>(i)}, *outCellAttr[i]);
         }
 
         auto out = builder.finalize();
@@ -559,7 +586,8 @@ namespace Rodin::Geometry
 
           if (hasNeg && hasPos)
           {
-            out.setAttribute({2, fidx}, this->getInterface());
+            if (const auto& iface = this->getInterface())
+              out.setAttribute({2, fidx}, *iface);
             continue;
           }
 
@@ -580,11 +608,6 @@ namespace Rodin::Geometry
               continue;
             }
           }
-
-          // Fallback (optional): label from any incident cell source
-          // If you want "something" on non-original faces, uncomment:
-          // const Attribute src = outCellSourceAttr[*inc.begin()];
-          // out.setAttribute({2, fidx}, hasUnknown ? src : splitLabel(2, src, hasNeg));
         }
 
         // Edges + interface marking
@@ -625,10 +648,6 @@ namespace Rodin::Geometry
               continue;
             }
           }
-
-          // Fallback (optional): same idea as faces
-          // const Attribute src = outCellSourceAttr[*inc.begin()];
-          // out.setAttribute({1, eidx}, hasUnknown ? src : splitLabel(1, src, hasNeg));
         }
 
         return out;

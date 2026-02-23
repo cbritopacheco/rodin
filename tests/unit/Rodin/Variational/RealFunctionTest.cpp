@@ -124,11 +124,14 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_Variational_RealFunction, ConstantFunction_TracedToBoundary)
   {
+    const Attribute interior_attr = 1;
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     const size_t D = mesh.getDimension();
     mesh.getConnectivity().compute(D - 1, D);
+    for (auto it = mesh.getCell(); !it.end(); ++it)
+      mesh.setAttribute(it.key(), interior_attr);
     RealFunction f(5.0);
-    auto traced_f = f.traceOf(RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
+    auto traced_f = f.traceOf(interior_attr);
     // Create a boundary point for testing
     auto it = mesh.getPolytope(D - 1, 0);
     const auto& polytope = *it;

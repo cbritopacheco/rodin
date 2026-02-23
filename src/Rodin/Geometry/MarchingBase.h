@@ -41,9 +41,6 @@ namespace Rodin::Geometry
 
       MarchingBase(const GridFunctionType& gf)
         : m_gf(gf),
-          m_negative(RODIN_DEFAULT_POLYTOPE_ATTRIBUTE),
-          m_positive(RODIN_DEFAULT_POLYTOPE_ATTRIBUTE),
-          m_interface(RODIN_DEFAULT_POLYTOPE_ATTRIBUTE),
           m_eps(1e-12)
       {
         m_split.resize(gf.getFiniteElementSpace().getMesh().getDimension() + 1);
@@ -66,19 +63,19 @@ namespace Rodin::Geometry
         return this->setSplit(d, attr, NoSplit);
       }
 
-      MarchingBase& setNegative(Attribute attr)
+      MarchingBase& setNegative(const Optional<Attribute>& attr)
       {
         m_negative = attr;
         return *this;
       }
 
-      MarchingBase& setPositive(Attribute attr)
+      MarchingBase& setPositive(const Optional<Attribute>& attr)
       {
         m_positive = attr;
         return *this;
       }
 
-      MarchingBase& setInterface(Attribute attr)
+      MarchingBase& setInterface(const Optional<Attribute>& attr)
       {
         m_interface = attr;
         return *this;
@@ -90,17 +87,17 @@ namespace Rodin::Geometry
         return m_split[d];
       }
 
-      Attribute getNegative() const
+      const Optional<Attribute>& getNegative() const
       {
         return m_negative;
       }
 
-      Attribute getPositive() const
+      const Optional<Attribute>& getPositive() const
       {
         return m_positive;
       }
 
-      Attribute getInterface() const
+      const Optional<Attribute>& getInterface() const
       {
         return m_interface;
       }
@@ -126,9 +123,9 @@ namespace Rodin::Geometry
     private:
       std::reference_wrapper<const GridFunctionType> m_gf;
 
-      Attribute m_negative;
-      Attribute m_positive;
-      Attribute m_interface;
+      Optional<Attribute> m_negative;
+      Optional<Attribute> m_positive;
+      Optional<Attribute> m_interface;
 
       Real m_eps;
 

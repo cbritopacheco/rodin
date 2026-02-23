@@ -21,6 +21,8 @@
 #include "Connectivity.h"
 #include "Rodin/Math/SpatialVector.h"
 
+#include "Rodin/Serialization/Optional.h"
+
 namespace Rodin::Geometry
 {
   using MPIMesh = Mesh<Context::MPI>;
@@ -137,9 +139,9 @@ namespace Rodin::Geometry
 
       Polytope::Type getGeometry(size_t dimension, Index globalIdx) const override;
 
-      Attribute getAttribute(size_t dimension, Index globalIdx) const override;
+      Optional<Attribute> getAttribute(size_t dimension, Index globalIdx) const override;
 
-      Mesh& setAttribute(const std::pair<size_t, Index>& p, Attribute attr) override;
+      Mesh& setAttribute(const std::pair<size_t, Index>& p, const Optional<Attribute>& attr) override;
 
       Mesh& setVertexCoordinates(Index globalIdx, Real s, size_t i) override;
 

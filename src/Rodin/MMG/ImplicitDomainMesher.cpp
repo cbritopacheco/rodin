@@ -386,7 +386,7 @@ namespace Rodin::MMG
       {
         const auto& polytope = *it;
         const Index idx = polytope.getIndex();
-        const Geometry::Attribute attr = polytope.getAttribute();
+        const Geometry::Attribute attr = polytope.getAttribute().value_or(0);
         auto attrIt = m_g2om.find(attr);
         if (attrIt != m_g2om.end())
           rodinMesh.setAttribute({ d, idx }, attrIt->second);

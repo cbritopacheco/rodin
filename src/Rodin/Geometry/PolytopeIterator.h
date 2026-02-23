@@ -188,6 +188,11 @@ namespace Rodin::Geometry
         return *m_gen;
       }
 
+      std::pair<size_t, Index> key() const
+      {
+        return { this->getDimension(), *this->getIndexGenerator() };
+      }
+
       /**
        * @brief Generates a polytope at the current iterator position.
        * @returns Pointer to newly created polytope

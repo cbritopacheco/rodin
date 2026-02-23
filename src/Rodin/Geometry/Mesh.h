@@ -701,7 +701,7 @@ namespace Rodin::Geometry
        * @param[in] attr New attribute value
        * @returns Reference to this mesh
        */
-      virtual MeshBase& setAttribute(const std::pair<size_t, Index>& p, Attribute attr) = 0;
+      virtual MeshBase& setAttribute(const std::pair<size_t, Index>& p, const Optional<Attribute>& attr) = 0;
 
       /**
        * @brief Gets reference to mesh connectivity.
@@ -877,7 +877,7 @@ namespace Rodin::Geometry
           /**
            * @brief Sets the attribute of the given polytope.
            */
-          Builder& attribute(const std::pair<size_t, Index>& p, Attribute attr);
+          Builder& attribute(const std::pair<size_t, Index>& p, const Optional<Attribute>& attr);
 
           /**
            * @brief Adds polytope defined by the given vertices.
@@ -919,6 +919,18 @@ namespace Rodin::Geometry
           Builder& tetrahedron(T&& vs)
           {
             return polytope(Polytope::Type::Tetrahedron, std::forward<T>(vs));
+          }
+
+          template <class T>
+          Builder& hexahedron(T&& vs)
+          {
+            return polytope(Polytope::Type::Hexahedron, std::forward<T>(vs));
+          }
+
+          template <class T>
+          Builder& wedge(T&& vs)
+          {
+            return polytope(Polytope::Type::Wedge, std::forward<T>(vs));
           }
 
           /**
@@ -1398,7 +1410,7 @@ namespace Rodin::Geometry
 
       virtual Math::SpatialPoint getVertexCoordinates(Index idx) const override;
 
-      virtual Mesh& setAttribute(const std::pair<size_t, Index>&, Attribute attr) override;
+      virtual Mesh& setAttribute(const std::pair<size_t, Index>&, const Optional<Attribute>& attr) override;
 
       virtual Mesh& setVertexCoordinates(Index idx, Real xi, size_t i) override;
 
