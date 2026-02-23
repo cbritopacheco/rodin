@@ -7,7 +7,7 @@
 #include <gtest/gtest.h>
 #include <cmath>
 
-#include "Rodin/Models/Eikonal/FMM.h"
+#include "Rodin/Eikonal/FMM.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -40,7 +40,7 @@ namespace Rodin::Tests::Unit
     // Constant speed function
     auto speed = [](const Geometry::Point& p) -> Real { return 1.0; };
 
-    Models::Eikonal::FMM fmm(u, speed);
+    Eikonal::FMM fmm(u, speed);
 
     // Set source at center
     std::vector<Index> interface;
@@ -110,7 +110,7 @@ namespace Rodin::Tests::Unit
     // Constant speed function
     auto speed = [](const Geometry::Point& p) -> Real { return 1.0; };
 
-    Models::Eikonal::FMM fmm(u, speed);
+    Eikonal::FMM fmm(u, speed);
 
     // Set source at one corner of the box
     std::vector<Index> interface;
@@ -172,7 +172,7 @@ namespace Rodin::Tests::Unit
     // Constant speed function
     auto speed = [](const Geometry::Point& p) -> Real { return 1.0; };
 
-    Models::Eikonal::FMM fmm(u, speed);
+    Eikonal::FMM fmm(u, speed);
 
     // Set source at center of cube
     std::vector<Index> interface;
@@ -241,7 +241,7 @@ namespace Rodin::Tests::Unit
       return 0.1 + 2.0 * r;  // Speed increases with distance from center
     };
 
-    Models::Eikonal::FMM fmm(u, speed);
+    Eikonal::FMM fmm(u, speed);
 
     // Set source at center
     std::vector<Index> interface;
@@ -287,7 +287,7 @@ namespace Rodin::Tests::Unit
     // Constant speed
     auto speed = [](const Geometry::Point& p) -> Real { return 1.0; };
 
-    Models::Eikonal::FMM fmm(u, speed);
+    Eikonal::FMM fmm(u, speed);
 
     // Set multiple sources at corners
     std::vector<Index> interface;
@@ -356,7 +356,7 @@ namespace Rodin::Tests::Unit
 
     auto speed = [](const Geometry::Point& p) -> Real { return 1.0; };
 
-    Models::Eikonal::FMM fmm(u, speed);
+    Eikonal::FMM fmm(u, speed);
 
     // Empty interface
     std::vector<Index> interface;
@@ -387,7 +387,7 @@ namespace Rodin::Tests::Unit
     // Constant speed function
     auto speed = [](const Geometry::Point& p) -> Real { return 1.0; };
 
-    Models::Eikonal::FMM fmm(u, speed);
+    Eikonal::FMM fmm(u, speed);
 
     // Set interface to boundary vertices (edges of the domain)
     std::vector<Index> interface;
@@ -465,7 +465,7 @@ namespace Rodin::Tests::Unit
     // Constant speed function
     auto speed = [](const Geometry::Point& p) -> Real { return 1.0; };
 
-    Models::Eikonal::FMM fmm(u, speed);
+    Eikonal::FMM fmm(u, speed);
 
     std::vector<Index> interface;
     for (auto it = mesh.getVertex(); !it.end(); ++it)
@@ -580,7 +580,7 @@ namespace Rodin::Tests::Unit
       return 0.5 + 0.5 * std::sin(x) * std::cos(y);
     };
 
-    Models::Eikonal::FMM fmm(u, speed);
+    Eikonal::FMM fmm(u, speed);
 
     // Set multiple sources scattered across the domain
     std::vector<Index> interface;
@@ -647,7 +647,7 @@ namespace Rodin::Tests::Unit
     // Constant speed
     auto speed = [](const Geometry::Point& p) -> Real { return 1.0; };
 
-    Models::Eikonal::FMM fmm(u, speed);
+    Eikonal::FMM fmm(u, speed);
 
     // Create multiple small disconnected circular interfaces
     std::vector<Index> interface;

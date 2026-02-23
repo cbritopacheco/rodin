@@ -4,11 +4,11 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include "Rodin/Geometry/Region.h"
-#include "Rodin/IO/ForwardDecls.h"
-#include "Rodin/Models/Advection/Lagrangian.h"
-#include "Rodin/Models/Distance/Eikonal.h"
-#include "Rodin/Variational/ForwardDecls.h"
+#include <Rodin/Geometry/Region.h>
+#include <Rodin/IO/ForwardDecls.h>
+#include <Rodin/Advection/Lagrangian.h>
+#include <Rodin/Distance/Eikonal.h>
+#include <Rodin/Variational/ForwardDecls.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Assembly.h>
 #include <Rodin/Geometry.h>
@@ -146,7 +146,7 @@ int main(int, char**)
     Alert::Info() << "   | Distancing domain." << Alert::Raise;
 
     GridFunction dist(sh);
-    Models::Distance::Eikonal(dist).setInterior(interior)
+    Distance::Eikonal(dist).setInterior(interior)
                                    .setInterface(Gamma)
                                    .solve()
                                    .sign();
@@ -163,7 +163,7 @@ int main(int, char**)
     th.save("distance.mesh");
     dist.save("dist.gf");
 
-    Models::Advection::Lagrangian(advect, test, dist, dJ).step(dt);
+    Advection::Lagrangian(advect, test, dist, dJ).step(dt);
 
     th.save("advect.mesh");
     advect.getSolution().save("advect.gf");

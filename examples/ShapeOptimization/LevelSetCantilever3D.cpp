@@ -11,8 +11,8 @@
 #include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
 #include <Rodin/MMG.h>
-#include <Rodin/Models/Distance/Eikonal.h>
-#include <Rodin/Models/Advection/Lagrangian.h>
+#include <Rodin/Distance/Eikonal.h>
+#include <Rodin/Advection/Lagrangian.h>
 #include <Rodin/Geometry/MarchingTetrahedra.h>
 
 using namespace Rodin;
@@ -60,7 +60,8 @@ Real compliance(const GridFunction<FES, Data>& w)
 
 int main(int, char**)
 {
-  const char* meshFile = "../resources/examples/ShapeOptimization/LevelSetCantilever3D.medit.mesh";
+  // const char* meshFile = "../resources/examples/ShapeOptimization/LevelSetCantilever3D.medit.mesh";
+  const char* meshFile = "/Users/carlos/Projects/rodin/resources/examples/ShapeOptimization/LevelSetCantilever3D.medit.mesh";
 
   // Load mesh
   MMG::Mesh th;
@@ -113,7 +114,7 @@ int main(int, char**)
     Alert::Info() << "   | Distancing domain." << Alert::Raise;
 
     GridFunction dist(sh);
-    Models::Distance::Eikonal(dist).setInterior(Interior)
+    Distance::Eikonal(dist).setInterior(Interior)
                                    .setInterface(Gamma)
                                    .solve()
                                    .sign();
@@ -179,7 +180,7 @@ int main(int, char**)
     TrialFunction advect(sh);
     TestFunction test(sh);
 
-    Models::Advection::Lagrangian(advect, test, dist, dJ).step(dt);
+    Advection::Lagrangian(advect, test, dist, dJ).step(dt);
 
     th.save("advect.mesh");
     advect.getSolution().save("advect.gf");
@@ -192,8 +193,6 @@ int main(int, char**)
                              .setPositive(Exterior)
                              .noSplit(2, GammaD)
                              .noSplit(2, GammaN)
-                             // .setFallbackFaceAttribute(23)
-                             // .setFallbackEdgeAttribute(24)
                              .discretize();
 
     th2.save("Omega.mesh", IO::FileFormat::MEDIT);

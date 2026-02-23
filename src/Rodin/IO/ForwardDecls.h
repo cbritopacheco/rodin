@@ -39,9 +39,7 @@ namespace Rodin::IO
   enum class FileFormat
   {
     MFEM,     ///< MFEM mesh format - native format for MFEM library
-    GMSH,     ///< GMSH mesh format - popular open-source mesh generator format
     MEDIT,    ///< MEDIT mesh format - used by MMG remeshing software
-    ENSIGHT6  ///< EnSight6 format - widely used in post-processing and visualization
   };
 
   /**
@@ -100,12 +98,8 @@ namespace Rodin::IO
     {
       case FileFormat::MFEM:
         return "MFEM";
-      case FileFormat::GMSH:
-        return "GMSH";
       case FileFormat::MEDIT:
         return "MEDIT";
-      case FileFormat::ENSIGHT6:
-        return "ENSIGHT6";
     }
     return nullptr;
   }

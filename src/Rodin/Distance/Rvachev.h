@@ -19,7 +19,7 @@
 #include "Rodin/Variational/Grad.h"
 #include "Rodin/Variational/GridFunction.h"
 
-namespace Rodin::Models::Distance
+namespace Rodin::Distance
 {
   /**
    * @brief Rvachev normalization for a level set function.

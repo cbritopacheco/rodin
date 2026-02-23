@@ -249,54 +249,44 @@
  */
 
 /**
-  @dir Rodin/Models
-  @brief Namespace @ref Rodin::Models
+  @dir Rodin/Distance
+  @brief Namespace @ref Rodin::Distance
  */
 
 /**
-  @namespace Rodin::Models
-  @brief Module which provides implementation of various variational models.
- */
-
-/**
-  @dir Rodin/Models/Distance
-  @brief Namespace @ref Rodin::Models::Distance
- */
-
-/**
-  @namespace Rodin::Models::Distance
+  @namespace Rodin::Distance
   @brief Module which provides models for computation of the distance function.
  */
 
 /**
-  @dir Rodin/Models/Hilbert
-  @brief Namespace @ref Rodin::Models::Hilbert
+  @dir Rodin/Hilbert
+  @brief Namespace @ref Rodin::Hilbert
  */
 
 /**
-  @namespace Rodin::Models::Hilbert
+  @namespace Rodin::Hilbert
   @brief Module which provides models and tools for the Hilbertian
   extension-regularization procedure.
  */
 
 /**
-  @dir Rodin/Models/Advection
-  @brief Namespace @ref Rodin::Models::Advection
+  @dir Rodin/Advection
+  @brief Namespace @ref Rodin::Advection
  */
 
 /**
-  @namespace Rodin::Models::Advection
+  @namespace Rodin::Advection
   @brief Module which provides models for the resolution of unsteady advection
   equations.
  */
 
 /**
-  @dir Rodin/Models/Eikonal
-  @brief Namespace @ref Rodin::Models::Eikonal
+  @dir Rodin/Eikonal
+  @brief Namespace @ref Rodin::Eikonal
  */
 
 /**
-  @namespace Rodin::Models::Eikonal
+  @namespace Rodin::Eikonal
   @brief Module which provides solvers for the Eikonal equation.
 
   The Eikonal equation is a non-linear partial differential equation of the form:
@@ -310,12 +300,12 @@
  */
 
 /**
-  @dir Rodin/Models/Elasticity
-  @brief Namespace @ref Rodin::Models::Elasticity
+  @dir Rodin/Elasticity
+  @brief Namespace @ref Rodin::Elasticity
  */
 
 /**
-  @namespace Rodin::Models::Elasticity
+  @namespace Rodin::Elasticity
   @brief Module which provides models for solid mechanics and elasticity.
 
   This module implements various elasticity models including linear elasticity

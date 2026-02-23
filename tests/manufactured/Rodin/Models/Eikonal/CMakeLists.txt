@@ -4,7 +4,7 @@ target_link_libraries(RodinManufacturedEikonalFMMTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin
-  Rodin::Models::Eikonal
+  Rodin::Eikonal
 )
 gtest_discover_tests(RodinManufacturedEikonalFMMTest
   PROPERTIES
@@ -17,7 +17,7 @@ target_link_libraries(RodinManufacturedEikonal2D3DTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin
-  Rodin::Models::Eikonal
+  Rodin::Eikonal
 )
 gtest_discover_tests(RodinManufacturedEikonal2D3DTest
   PROPERTIES

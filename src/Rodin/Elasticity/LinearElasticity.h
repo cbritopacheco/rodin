@@ -17,7 +17,7 @@
 #include "Rodin/Solver/CG.h"
 #include "Rodin/Variational/LinearElasticity.h"
 
-namespace Rodin::Models::Elasticity
+namespace Rodin::Elasticity
 {
   /**
    * @brief Linear elasticity system for small deformations.

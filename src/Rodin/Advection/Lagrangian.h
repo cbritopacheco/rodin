@@ -25,7 +25,7 @@
 #include "Rodin/Variational/ProblemBody.h"
 #include <functional>
 
-namespace Rodin::Models::Advection
+namespace Rodin::Advection
 {
   /**
    * @brief First-order boundary policy for Lagrangian advection.

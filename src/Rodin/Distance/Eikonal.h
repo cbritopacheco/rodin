@@ -13,14 +13,14 @@
 #ifndef RODIN_MODELS_DISTANCE_EIKONAL_H
 #define RODIN_MODELS_DISTANCE_EIKONAL_H
 
-#include "Rodin/Geometry/PolytopeIterator.h"
-#include "Rodin/Models/Eikonal/FMM.h"
+#include <functional>
+
+#include "Rodin/Eikonal/FMM.h"
 
 #include "Base.h"
 #include "Rodin/Variational/ForwardDecls.h"
-#include <functional>
 
-namespace Rodin::Models::Distance
+namespace Rodin::Distance
 {
   /**
    * @brief Distance function computation using the Eikonal equation.
@@ -83,36 +83,33 @@ namespace Rodin::Models::Distance
         const auto& interior  = this->getInterior();
         const auto& interface = this->getInterface();
 
-        assert(fes.getSize() == mesh.getVertexCount());
-        assert(fes.getVectorDimension() == 1);
-
-        Models::Eikonal::FMM fmm(u, s_speed);
+        Rodin::Eikonal::FMM fmm(u, s_speed);
 
         m_visited.assign(mesh.getVertexCount(), 0);
         m_seeds.clear();
 
-        Geometry::FaceIterator it;
-        if (interior.empty())
-          it = mesh.getFace();
-        else
-          it = mesh.getBoundary();
-
-        for (; !it.end(); ++it)
+        for (auto it = mesh.getFace(); !it.end(); ++it)
         {
           const auto& face = *it;
           const auto a = face.getAttribute(); // Optional<Attribute>
           if (!a || !interface.contains(*a))
             continue;
 
-          for (const Index vtx : face.getVertices())
+          for (Index vtx : face.getVertices())
           {
             const size_t v = static_cast<size_t>(vtx);
             if (m_visited[v])
               continue;
-
-            m_seeds.push_back(vtx); // vertex index == dof index
+            m_seeds.push_back(vtx);
             m_visited[v] = 1;
           }
+        }
+
+        if (m_seeds.empty())
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "No seed vertices found for the interface. "
+            << Alert::Raise;
         }
 
         fmm.seed(m_seeds).solve();

@@ -64,7 +64,6 @@
 #include "Rodin/Alert/MemberFunctionException.h"
 
 #include "Rodin/IO/ForwardDecls.h"
-#include "Rodin/IO/EnSight6.h"
 #include "Rodin/IO/MEDIT.h"
 #include "Rodin/IO/MFEM.h"
 

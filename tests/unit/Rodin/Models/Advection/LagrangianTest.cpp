@@ -7,12 +7,12 @@
 #include <gtest/gtest.h>
 
 #include "Rodin/Variational.h"
-#include "Rodin/Models/Advection/Lagrangian.h"
+#include "Rodin/Advection/Lagrangian.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
-using namespace Rodin::Models::Advection;
+using namespace Rodin::Advection;
 
 namespace Rodin::Tests::Unit
 {

@@ -11,12 +11,12 @@
 #include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Variational.h"
 #include "Rodin/Variational/Flow.h"
-#include "Rodin/Models/Advection/Lagrangian.h"
+#include "Rodin/Advection/Lagrangian.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
-using namespace Rodin::Models::Advection;
+using namespace Rodin::Advection;
 
 namespace Rodin::Tests::Manufactured::AdvectionLagrangian2D
 {
@@ -119,7 +119,7 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian2D
     TrialFunction u(vh);
     TestFunction  v(vh);
 
-    Models::Advection::Lagrangian lagrangian(u, v, u0, velocity);
+    Advection::Lagrangian lagrangian(u, v, u0, velocity);
     lagrangian.step(dt);
 
    const auto& uh = u.getSolution();
@@ -152,7 +152,7 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian2D
     TrialFunction u2(vh);
     TestFunction  v2(vh);
     {
-      Models::Advection::Lagrangian L(u2, v2, u0, velocity);
+      Advection::Lagrangian L(u2, v2, u0, velocity);
       L.step(0.5 * dt);
       L.step(0.5 * dt);
     }
@@ -161,7 +161,7 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian2D
     TrialFunction u1(vh);
     TestFunction  v1(vh);
     {
-      Models::Advection::Lagrangian L(u1, v1, u0, velocity);
+      Advection::Lagrangian L(u1, v1, u0, velocity);
       L.step(dt);
     }
 
@@ -234,7 +234,7 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian2D
     {
       TrialFunction u(vh);
       TestFunction  v(vh);
-      Models::Advection::Lagrangian L(u, v, u0, velocity);
+      Advection::Lagrangian L(u, v, u0, velocity);
       L.step(dt);
       const auto& uh = u.getSolution();
 
