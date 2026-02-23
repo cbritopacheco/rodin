@@ -50,16 +50,19 @@ namespace Rodin::Geometry
     build.polytope(conn.getGeometry(d, parentIdx), childPolytope);
     const Index childIdx = m_sidx[d];
     const auto [it, inserted] = m_s2ps[d].right.insert(std::pair<Index, Index>{ parentIdx, childIdx });
+    auto attr = parent.getAttribute(d, parentIdx);
     // Add polytope information
     if (inserted) // Polytope was already in the map
     {
       m_s2ps[d].left.push_back(parentIdx);
-      build.attribute(std::pair<Index, Index>{ d, childIdx }, parent.getAttribute(d, parentIdx));
+      if (attr)
+        build.attribute(std::pair<Index, Index>{ d, childIdx }, *attr);
       m_sidx[d] += 1;
     }
     else
     {
-      build.attribute({ d, it->second }, parent.getAttribute(d, parentIdx));
+      if (attr)
+        build.attribute({ d, it->second }, *attr);
     }
     m_dimension = std::max(m_dimension, d);
     return *this;

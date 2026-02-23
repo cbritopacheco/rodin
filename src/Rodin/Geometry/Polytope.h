@@ -310,7 +310,7 @@ namespace Rodin::Geometry
        * Attributes are typically used to mark material regions, boundary
        * conditions, or other domain-specific properties.
        */
-      Attribute getAttribute() const;
+      Optional<Attribute> getAttribute() const;
 
       /**
        * @brief Gets the geometric measure of this polytope.

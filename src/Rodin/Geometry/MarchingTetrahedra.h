@@ -37,13 +37,13 @@ namespace Rodin::Geometry
     public:
       using Parent = MarchingBase<Variational::GridFunction<Variational::P1<Real, Mesh>, Data>>;
 
-      using FESType         = typename Parent::FESType;
-      using MeshType        = typename Parent::MeshType;
-      using GridFunctionType= typename Parent::GridFunctionType;
+      using FESType          = typename Parent::FESType;
+      using MeshType         = typename Parent::MeshType;
+      using GridFunctionType = typename Parent::GridFunctionType;
 
-      using SplitMap        = typename Parent::SplitMap;
-      using NoSplitT        = typename Parent::NoSplitT;
-      using Split           = typename Parent::Split;
+      using SplitMap = typename Parent::SplitMap;
+      using NoSplitT = typename Parent::NoSplitT;
+      using Split    = typename Parent::Split;
 
       MarchingTetrahedra(const GridFunctionType& ls)
         : Parent(ls)
@@ -52,9 +52,12 @@ namespace Rodin::Geometry
       MeshType discretize() const override
       {
         const auto& ls   = this->getGridFunction();
-        // Work on a local mesh copy so required incidence computation does not
-        // mutate the connectivity state of the caller's mesh.
-        MeshType mesh(ls.getFiniteElementSpace().getMesh());
+        const auto& mesh = ls.getFiniteElementSpace().getMesh();
+
+        RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 3, 2);
+        RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 3, 1);
+        RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 2, 0);
+        RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 1, 0);
 
         if (mesh.getDimension() != 3)
         {
@@ -64,10 +67,6 @@ namespace Rodin::Geometry
         }
 
         auto& conn = mesh.getConnectivity();
-        conn.compute(3, 2);
-        conn.compute(3, 1);
-        conn.compute(2, 0);
-        conn.compute(1, 0);
 
         const Index nv = static_cast<Index>(mesh.getVertexCount());
         const Index ne = static_cast<Index>(mesh.getPolytopeCount(1));
@@ -145,6 +144,52 @@ namespace Rodin::Geometry
           return u.dot(v.cross(w));
         };
 
+        // ---------------------------------------------------------------------
+        // Input lookup maps (by vertex sets) to RETAIN original EDGE/FACE attrs.
+        // ---------------------------------------------------------------------
+        struct EdgeKey
+        {
+          Index a, b;
+          bool operator<(const EdgeKey& o) const { return std::tie(a, b) < std::tie(o.a, o.b); }
+        };
+
+        struct FaceKey
+        {
+          Index a, b, c; // sorted triple
+          bool operator<(const FaceKey& o) const { return std::tie(a, b, c) < std::tie(o.a, o.b, o.c); }
+        };
+
+        auto makeEdgeKey = [](Index i, Index j) -> EdgeKey
+        {
+          if (i > j) std::swap(i, j);
+          return { i, j };
+        };
+
+        auto makeFaceKey = [](Index i, Index j, Index k) -> FaceKey
+        {
+          std::array<Index, 3> s{ i, j, k };
+          std::sort(s.begin(), s.end());
+          return { s[0], s[1], s[2] };
+        };
+
+        FlatMap<EdgeKey, Attribute> inEdgeAttrByVerts;
+        FlatMap<FaceKey, Attribute> inFaceAttrByVerts;
+
+        for (auto eit = mesh.getPolytope(1); !eit.end(); ++eit)
+        {
+          const auto& ev = eit->getVertices();
+          inEdgeAttrByVerts[makeEdgeKey(ev(0), ev(1))] = eit->getAttribute();
+        }
+
+        for (auto fit = mesh.getPolytope(2); !fit.end(); ++fit)
+        {
+          const auto g = fit->getGeometry();
+          if (g != Polytope::Type::Triangle)
+            continue;
+          const auto& fv = fit->getVertices();
+          inFaceAttrByVerts[makeFaceKey(fv(0), fv(1), fv(2))] = fit->getAttribute();
+        }
+
         // ---- Output vertices
         PointCloud outVerts;
         outVerts.setDimension(3);
@@ -186,7 +231,7 @@ namespace Rodin::Geometry
           // Clamp (roundoff safety)
           t = std::min<Real>(Real(1), std::max<Real>(Real(0), t));
 
-          // Snap to endpoint if extremely close (uses eps; t is unitless, but eps is your only knob here)
+          // Snap to endpoint if extremely close
           if (t <= eps)            return va;
           if (t >= Real(1) - eps)  return vb;
 
@@ -198,28 +243,30 @@ namespace Rodin::Geometry
           return cached;
         };
 
-        // ---- Output cells + attributes
+        // ---- Output cells + metadata (needed to label faces/edges)
         static constexpr int8_t SideUnknown  = -1;
         static constexpr int8_t SidePositive = 0;
         static constexpr int8_t SideNegative = 1;
 
         std::vector<std::array<Index, 4>> outCells;
-        std::vector<Attribute> outCellAttr;
-        std::vector<Attribute> outCellSourceAttr;
-        std::vector<int8_t> outCellSide;
+        std::vector<Attribute> outCellAttr;       // output cell attribute
+        std::vector<Attribute> outCellSourceAttr; // input CELL attribute
+        std::vector<int8_t> outCellSide;          // neg/pos/unknown
+
         outCells.reserve(static_cast<size_t>(mesh.getCellCount()) * 2);
         outCellAttr.reserve(outCells.capacity());
         outCellSourceAttr.reserve(outCells.capacity());
         outCellSide.reserve(outCells.capacity());
 
-        auto emitTet = [&](Index a, Index b, Index c, Index d, Attribute attr, Attribute sourceAttr, int8_t side)
+        auto emitTet = [&](Index a, Index b, Index c, Index d,
+                           Attribute outAttr, Attribute sourceAttr, int8_t side)
         {
           std::array<Index, 4> t{{a, b, c, d}};
           if (signedVolume(t[0], t[1], t[2], t[3]) < 0)
             std::swap(t[1], t[2]);
 
           outCells.push_back(t);
-          outCellAttr.push_back(attr);
+          outCellAttr.push_back(outAttr);
           outCellSourceAttr.push_back(sourceAttr);
           outCellSide.push_back(side);
         };
@@ -265,7 +312,6 @@ namespace Rodin::Geometry
                                        Attribute aNeg, Attribute aPos,
                                        Attribute sourceAttr)
         {
-          // Candidate A (your original)
           std::array<std::array<Index, 4>, 6> A = {{
             {{n0, a, b, n1}},
             {{a,  b, n1, c}},
@@ -275,7 +321,6 @@ namespace Rodin::Geometry
             {{c,  p1, b, d}}
           }};
 
-          // Candidate B (alternate)
           std::array<std::array<Index, 4>, 6> B = {{
             {{n0, a, b, n1}},
             {{a,  b, n1, d}},
@@ -287,7 +332,6 @@ namespace Rodin::Geometry
 
           const Real qa = minAbsVol6(A);
           const Real qb = minAbsVol6(B);
-
           const auto& best = (qb > qa) ? B : A;
 
           emitTet(best[0][0], best[0][1], best[0][2], best[0][3], aNeg, sourceAttr, SideNegative);
@@ -323,12 +367,16 @@ namespace Rodin::Geometry
 
           if (nneg == 0)
           {
-            emitTet(v[0], v[1], v[2], v[3], splitLabel(3, cellAttr, /*negative*/ false), cellAttr, SidePositive);
+            emitTet(v[0], v[1], v[2], v[3],
+                    splitLabel(3, cellAttr, /*negative*/ false),
+                    cellAttr, SidePositive);
             continue;
           }
           if (nneg == 4)
           {
-            emitTet(v[0], v[1], v[2], v[3], splitLabel(3, cellAttr, /*negative*/ true), cellAttr, SideNegative);
+            emitTet(v[0], v[1], v[2], v[3],
+                    splitLabel(3, cellAttr, /*negative*/ true),
+                    cellAttr, SideNegative);
             continue;
           }
 
@@ -338,7 +386,7 @@ namespace Rodin::Geometry
             continue;
           }
 
-          // Block by noSplit edges/faces
+          // Block by noSplit edges/faces (kept as your connectivity-based version)
           bool blocked = false;
 
           const auto& eids = conn.getIncidence({3, 1}, ci);
@@ -356,11 +404,7 @@ namespace Rodin::Geometry
               (sa == Sign::Negative && sb == Sign::Positive) || (sa == Sign::Positive && sb == Sign::Negative) ||
               (sa == Sign::Zero && sb != Sign::Zero) || (sb == Sign::Zero && sa != Sign::Zero);
 
-            if (cut)
-            {
-              blocked = true;
-              break;
-            }
+            if (cut) { blocked = true; break; }
           }
 
           if (!blocked)
@@ -378,11 +422,7 @@ namespace Rodin::Geometry
               const Sign s2 = sgn(ls[fv[2]]);
 
               const bool uniform = (s0 == s1 && s1 == s2);
-              if (!uniform)
-              {
-                blocked = true;
-                break;
-              }
+              if (!uniform) { blocked = true; break; }
             }
           }
 
@@ -409,7 +449,7 @@ namespace Rodin::Geometry
 
           auto I = [&](int ia, int ib) -> Index
           {
-            int e = edgeIdx(ia, ib);
+            const int e = edgeIdx(ia, ib);
             assert(e >= 0);
             const Index eid = eids[static_cast<size_t>(e)];
             const Index va = v[static_cast<size_t>(ia)];
@@ -423,22 +463,17 @@ namespace Rodin::Geometry
           {
             int in = -1; int ip[3]; int k = 0;
             for (int i = 0; i < 4; ++i)
-            {
-              if (s[i] == Sign::Negative) in = i;
-              else ip[k++] = i;
-            }
+              (s[i] == Sign::Negative) ? (in = i) : (ip[k++] = i);
 
             const Index i0 = I(in, ip[0]);
             const Index i1 = I(in, ip[1]);
             const Index i2 = I(in, ip[2]);
 
-            split_1neg(
-              v[static_cast<size_t>(in)],
-              v[static_cast<size_t>(ip[0])],
-              v[static_cast<size_t>(ip[1])],
-              v[static_cast<size_t>(ip[2])],
-              i0, i1, i2,
-              aNeg, aPos, cellAttr);
+            split_1neg(v[static_cast<size_t>(in)],
+                       v[static_cast<size_t>(ip[0])],
+                       v[static_cast<size_t>(ip[1])],
+                       v[static_cast<size_t>(ip[2])],
+                       i0, i1, i2, aNeg, aPos, cellAttr);
             continue;
           }
 
@@ -446,22 +481,17 @@ namespace Rodin::Geometry
           {
             int ipos = -1; int ineg[3]; int k = 0;
             for (int i = 0; i < 4; ++i)
-            {
-              if (s[i] == Sign::Positive) ipos = i;
-              else ineg[k++] = i;
-            }
+              (s[i] == Sign::Positive) ? (ipos = i) : (ineg[k++] = i);
 
             const Index i0 = I(ipos, ineg[0]);
             const Index i1 = I(ipos, ineg[1]);
             const Index i2 = I(ipos, ineg[2]);
 
-            split_1pos(
-              v[static_cast<size_t>(ipos)],
-              v[static_cast<size_t>(ineg[0])],
-              v[static_cast<size_t>(ineg[1])],
-              v[static_cast<size_t>(ineg[2])],
-              i0, i1, i2,
-              aNeg, aPos, cellAttr);
+            split_1pos(v[static_cast<size_t>(ipos)],
+                       v[static_cast<size_t>(ineg[0])],
+                       v[static_cast<size_t>(ineg[1])],
+                       v[static_cast<size_t>(ineg[2])],
+                       i0, i1, i2, aNeg, aPos, cellAttr);
             continue;
           }
 
@@ -469,98 +499,138 @@ namespace Rodin::Geometry
           {
             int ineg[2]; int ipos[2]; int kn = 0, kp = 0;
             for (int i = 0; i < 4; ++i)
-            {
-              if (s[i] == Sign::Negative) ineg[kn++] = i;
-              else ipos[kp++] = i;
-            }
+              (s[i] == Sign::Negative) ? (ineg[kn++] = i) : (ipos[kp++] = i);
 
-            const Index a = I(ineg[0], ipos[0]); // t_n0p0
-            const Index b = I(ineg[0], ipos[1]); // t_n0p1
-            const Index c = I(ineg[1], ipos[0]); // t_n1p0
-            const Index d = I(ineg[1], ipos[1]); // t_n1p1
+            const Index a = I(ineg[0], ipos[0]);
+            const Index b = I(ineg[0], ipos[1]);
+            const Index c = I(ineg[1], ipos[0]);
+            const Index d = I(ineg[1], ipos[1]);
 
-            split_2neg2pos_best(
-              v[static_cast<size_t>(ineg[0])],
-              v[static_cast<size_t>(ineg[1])],
-              v[static_cast<size_t>(ipos[0])],
-              v[static_cast<size_t>(ipos[1])],
-              a, b, c, d,
-              aNeg, aPos, cellAttr);
+            split_2neg2pos_best(v[static_cast<size_t>(ineg[0])],
+                                v[static_cast<size_t>(ineg[1])],
+                                v[static_cast<size_t>(ipos[0])],
+                                v[static_cast<size_t>(ipos[1])],
+                                a, b, c, d, aNeg, aPos, cellAttr);
             continue;
           }
         }
 
-        // ---- Build output mesh
+        // ---- Build output mesh (cells)
         typename MeshType::Builder builder;
         builder.initialize(3).nodes(outVerts.getCount());
         builder.setVertices(std::move(outVerts));
         builder.reserve(3, outCells.size());
+
         for (size_t i = 0; i < outCells.size(); ++i)
         {
           const auto& t = outCells[i];
           builder.tetrahedron(IndexArray{{ t[0], t[1], t[2], t[3] }});
           builder.attribute({3, static_cast<Index>(i)}, outCellAttr[i]);
         }
+
         auto out = builder.finalize();
+
+        // ---------------------------------------------------------------------
+        // Transfer FACE/EDGE attributes using input maps (robust "fix").
+        // ---------------------------------------------------------------------
         out.getConnectivity().compute(2, 3);
         out.getConnectivity().compute(1, 3);
         const auto& oconn = out.getConnectivity();
-        for (auto fit = out.getFace(); !fit.end(); ++fit)
+
+        // Faces (triangles only) + interface marking
+        for (auto fit = out.getPolytope(2); !fit.end(); ++fit)
         {
-          const auto fidx = fit->getIndex();
+          const auto g = fit->getGeometry();
+          if (g != Polytope::Type::Triangle)
+            continue;
+
+          const Index fidx = fit->getIndex();
           const auto& inc = oconn.getIncidence({2, 3}, fidx);
-          // Skip dangling entities defensively.
           if (inc.empty())
             continue;
+
           bool hasNeg = false, hasPos = false, hasUnknown = false;
           for (const auto ci : inc)
           {
-            hasNeg     = hasNeg     || outCellSide[ci] == SideNegative;
-            hasPos     = hasPos     || outCellSide[ci] == SidePositive;
-            hasUnknown = hasUnknown || outCellSide[ci] == SideUnknown;
+            hasNeg     = hasNeg     || (outCellSide[ci] == SideNegative);
+            hasPos     = hasPos     || (outCellSide[ci] == SidePositive);
+            hasUnknown = hasUnknown || (outCellSide[ci] == SideUnknown);
           }
+
           if (hasNeg && hasPos)
           {
             out.setAttribute({2, fidx}, this->getInterface());
+            continue;
           }
-          else
+
+          const auto& fv = fit->getVertices();
+          const bool allOriginal =
+            (fv(0) < nv) && (fv(1) < nv) && (fv(2) < nv);
+
+          if (allOriginal)
           {
-            const auto ci = *inc.begin();
-            const auto sourceAttr = outCellSourceAttr[ci];
-            if (hasUnknown)
-              out.setAttribute({2, fidx}, sourceAttr);
-            else
-              out.setAttribute({2, fidx}, splitLabel(2, sourceAttr, hasNeg));
+            auto itIn = inFaceAttrByVerts.find(makeFaceKey(fv(0), fv(1), fv(2)));
+            if (itIn != inFaceAttrByVerts.end())
+            {
+              const Attribute baseFaceAttr = itIn->second;
+              if (hasUnknown)
+                out.setAttribute({2, fidx}, baseFaceAttr);
+              else
+                out.setAttribute({2, fidx}, splitLabel(2, baseFaceAttr, /*negative*/ hasNeg));
+              continue;
+            }
           }
+
+          // Fallback (optional): label from any incident cell source
+          // If you want "something" on non-original faces, uncomment:
+          // const Attribute src = outCellSourceAttr[*inc.begin()];
+          // out.setAttribute({2, fidx}, hasUnknown ? src : splitLabel(2, src, hasNeg));
         }
+
+        // Edges + interface marking
         for (auto eit = out.getPolytope(1); !eit.end(); ++eit)
         {
-          const auto eidx = eit->getIndex();
+          const Index eidx = eit->getIndex();
           const auto& inc = oconn.getIncidence({1, 3}, eidx);
-          // Skip dangling entities defensively.
           if (inc.empty())
             continue;
+
           bool hasNeg = false, hasPos = false, hasUnknown = false;
           for (const auto ci : inc)
           {
-            hasNeg     = hasNeg     || outCellSide[ci] == SideNegative;
-            hasPos     = hasPos     || outCellSide[ci] == SidePositive;
-            hasUnknown = hasUnknown || outCellSide[ci] == SideUnknown;
+            hasNeg     = hasNeg     || (outCellSide[ci] == SideNegative);
+            hasPos     = hasPos     || (outCellSide[ci] == SidePositive);
+            hasUnknown = hasUnknown || (outCellSide[ci] == SideUnknown);
           }
+
           if (hasNeg && hasPos)
           {
             out.setAttribute({1, eidx}, this->getInterface());
+            continue;
           }
-          else
+
+          const auto& ev = eit->getVertices();
+          const bool allOriginal = (ev(0) < nv) && (ev(1) < nv);
+
+          if (allOriginal)
           {
-            const auto ci = *inc.begin();
-            const auto sourceAttr = outCellSourceAttr[ci];
-            if (hasUnknown)
-              out.setAttribute({1, eidx}, sourceAttr);
-            else
-              out.setAttribute({1, eidx}, splitLabel(1, sourceAttr, hasNeg));
+            auto itIn = inEdgeAttrByVerts.find(makeEdgeKey(ev(0), ev(1)));
+            if (itIn != inEdgeAttrByVerts.end())
+            {
+              const Attribute baseEdgeAttr = itIn->second;
+              if (hasUnknown)
+                out.setAttribute({1, eidx}, baseEdgeAttr);
+              else
+                out.setAttribute({1, eidx}, splitLabel(1, baseEdgeAttr, /*negative*/ hasNeg));
+              continue;
+            }
           }
+
+          // Fallback (optional): same idea as faces
+          // const Attribute src = outCellSourceAttr[*inc.begin()];
+          // out.setAttribute({1, eidx}, hasUnknown ? src : splitLabel(1, src, hasNeg));
         }
+
         return out;
       }
   };

@@ -94,8 +94,8 @@ int main(int, char**)
     conn.discover(3, 1);
     conn.discover(3, 2);
 
-    conn.discover(1, 0);
-    conn.discover(2, 0);
+    conn.restrict(1, 0);
+    conn.restrict(2, 0);
 
     conn.restrict(2, 3);
 

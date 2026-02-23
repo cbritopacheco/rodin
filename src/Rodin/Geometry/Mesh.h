@@ -26,6 +26,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/serialization/access.hpp>
 
+#include "Rodin/Pair.h"
 #include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Types.h"
 #include "Rodin/Math/Vector.h"
@@ -393,9 +394,9 @@ namespace Rodin::Geometry
        * @param[in] index Face index
        * @returns Attribute value
        */
-      Attribute getFaceAttribute(Index index) const
+      Optional<Attribute> getFaceAttribute(Index index) const
       {
-        return getAttribute(getDimension() - 1, index);
+        return this->getAttribute(getDimension() - 1, index);
       }
 
       /**
@@ -403,9 +404,9 @@ namespace Rodin::Geometry
        * @param[in] index Cell index
        * @returns Attribute value
        */
-      Attribute getCellAttribute(Index index) const
+      Optional<Attribute> getCellAttribute(Index index) const
       {
-        return getAttribute(getDimension(), index);
+        return this->getAttribute(getDimension(), index);
       }
 
       /**
@@ -692,7 +693,7 @@ namespace Rodin::Geometry
        * @param[in] index Polytope index
        * @returns Attribute value
        */
-      virtual Attribute getAttribute(size_t dimension, Index index) const = 0;
+      virtual Optional<Attribute> getAttribute(size_t dimension, Index index) const = 0;
 
       /**
        * @brief Sets attribute of a polytope.
@@ -1137,27 +1138,35 @@ namespace Rodin::Geometry
       template <class BinaryPredicate>
       CCL ccl(const BinaryPredicate& p) const
       {
-        return ccl(getDimension(), p, [](const Polytope&) { return true; });
+        return this->ccl(getDimension(), p, [](const Polytope&) { return true; });
       }
 
       template <class BinaryPredicate>
       CCL ccl(size_t d, const BinaryPredicate& p) const
       {
-        return ccl(d, p, [](const Polytope&) { return true; });
+        return this->ccl(d, p, [](const Polytope&) { return true; });
       }
 
       template <class BinaryPredicate>
       CCL ccl(size_t d, const BinaryPredicate& p, Attribute attr) const
       {
-        return ccl(d, p,
+        return this->ccl(d, p,
           [attr](const Polytope& polytope) { return attr == polytope.getAttribute(); });
       }
 
       template <class BinaryPredicate>
       CCL ccl(size_t d, const BinaryPredicate& p, const FlatSet<Attribute>& attrs) const
       {
-        return ccl(d, p,
-          [&attrs](const Polytope& polytope) { return attrs.size() == 0 || attrs.contains(polytope.getAttribute()); });
+        return this->ccl(d, p,
+          [&attrs](const Polytope& polytope)
+          {
+            auto attr = polytope.getAttribute();
+            bool res = attrs.size() == 0;
+            if (attr)
+              return res || attrs.contains(*attr);
+            else
+              return res;
+          });
       }
 
       template <class BinaryPredicate, class UnitaryPredicate>
@@ -1272,17 +1281,17 @@ namespace Rodin::Geometry
       */
       virtual SubMesh<Context> keep(const FlatSet<Attribute>& attrs) const;
 
-      Mesh& trace(const Map<std::pair<Attribute, Attribute>, Attribute>& tmap)
+      Mesh& trace(const Map<Pair<Attribute, Attribute>, Attribute>& tmap)
       {
-        return trace(tmap, FlatSet<Attribute>{});
+        return this->trace(tmap, FlatSet<Attribute>{});
       }
 
-      Mesh& trace(const Map<std::pair<Attribute, Attribute>, Attribute>& tmap, Attribute attr)
+      Mesh& trace(const Map<Pair<Attribute, Attribute>, Attribute>& tmap, Attribute attr)
       {
-        return trace(tmap, FlatSet<Attribute>{ attr });
+        return this->trace(tmap, FlatSet<Attribute>{ attr });
       }
 
-      virtual Mesh& trace(const Map<std::pair<Attribute, Attribute>, Attribute>& tmap, const FlatSet<Attribute>& attrs);
+      virtual Mesh& trace(const Map<Pair<Attribute, Attribute>, Attribute>& tmap, const FlatSet<Attribute>& attrs);
 
       Mesh& trace(const Map<Attribute, Attribute>& tmap)
       {
@@ -1375,7 +1384,7 @@ namespace Rodin::Geometry
 
       virtual Polytope::Type getGeometry(size_t dimension, Index idx) const override;
 
-      virtual Attribute getAttribute(size_t dimension, Index index) const override;
+      virtual Optional<Attribute> getAttribute(size_t dimension, Index index) const override;
 
       virtual Connectivity<Context>& getConnectivity() override
       {
