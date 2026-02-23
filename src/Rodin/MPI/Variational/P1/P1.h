@@ -6,7 +6,6 @@
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_free.hpp>
-#include <boost/serialization/optional.hpp>
 
 #include "Rodin/MPI/Geometry/Mesh.h"
 #include "Rodin/MPI/Variational/FiniteElementSpace.h"

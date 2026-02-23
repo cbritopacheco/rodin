@@ -34,7 +34,6 @@
 #include <boost/container/flat_map.hpp>
 #include <boost/container/deque.hpp>
 #include <boost/container/list.hpp>
-#include <boost/serialization/optional.hpp>
 
 #include <Eigen/Core>
 
