@@ -572,7 +572,7 @@ namespace Rodin::Variational
       constexpr
       auto getBasis(size_t local) const
       {
-        const auto& p = getIntegrationPoint();
+        const auto& p = this->getIntegrationPoint();
         return this->object(this->getLHS().getBasis(local)) * this->object(this->getRHS().getValue(p.getPoint()));
       }
 
