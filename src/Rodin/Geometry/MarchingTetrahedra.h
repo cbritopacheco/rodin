@@ -330,6 +330,27 @@ namespace Rodin::Geometry
           outCellAttr.push_back(outAttr);
           outCellSide.push_back(side);
         };
+        auto minAbsVol4 = [&](const std::array<std::array<Index, 4>, 4>& tets) -> Real
+        {
+          Real minAbsVolume = std::numeric_limits<Real>::infinity();
+          for (const auto& T : tets)
+            minAbsVolume = std::min(minAbsVolume, std::abs(signedVolume(T[0], T[1], T[2], T[3])));
+          return minAbsVolume;
+        };
+        auto bestOf3ByMinAbsVol4 = [&](const std::array<std::array<Index, 4>, 4>& A,
+                                       const std::array<std::array<Index, 4>, 4>& B,
+                                       const std::array<std::array<Index, 4>, 4>& C)
+          -> const std::array<std::array<Index, 4>, 4>&
+        {
+          const Real qa = minAbsVol4(A);
+          const Real qb = minAbsVol4(B);
+          const Real qc = minAbsVol4(C);
+          const std::array<std::array<Index, 4>, 4>* best = &A;
+          Real qbest = qa;
+          if (qb > qbest) { best = &B; qbest = qb; }
+          if (qc > qbest) { best = &C; qbest = qc; }
+          return *best;
+        };
 
         auto split_1neg = [&](Index vN,
                               Index p0, Index p1, Index p2,
@@ -337,10 +358,29 @@ namespace Rodin::Geometry
                               const Optional<Attribute>& aNeg,
                               const Optional<Attribute>& aPos)
         {
-          emitTet(vN, i0, i1, i2, aNeg, SideNegative);
-          emitTet(p0, p1, p2, i0, aPos, SidePositive);
-          emitTet(p1, p2, i0, i1, aPos, SidePositive);
-          emitTet(p2, i0, i1, i2, aPos, SidePositive);
+          std::array<std::array<Index, 4>, 4> A = {{
+            {{vN, i0, i1, i2}},
+            {{p0, p1, p2, i0}},
+            {{p1, p2, i0, i1}},
+            {{p2, i0, i1, i2}}
+          }};
+          std::array<std::array<Index, 4>, 4> B = {{
+            {{vN, i0, i1, i2}},
+            {{p0, p1, p2, i1}},
+            {{p0, p2, i1, i2}},
+            {{p0, i0, i1, i2}}
+          }};
+          std::array<std::array<Index, 4>, 4> C = {{
+            {{vN, i0, i1, i2}},
+            {{p0, p1, p2, i2}},
+            {{p0, p1, i0, i2}},
+            {{p1, i0, i1, i2}}
+          }};
+          const auto& best = bestOf3ByMinAbsVol4(A, B, C);
+          emitTet(best[0][0], best[0][1], best[0][2], best[0][3], aNeg, SideNegative);
+          emitTet(best[1][0], best[1][1], best[1][2], best[1][3], aPos, SidePositive);
+          emitTet(best[2][0], best[2][1], best[2][2], best[2][3], aPos, SidePositive);
+          emitTet(best[3][0], best[3][1], best[3][2], best[3][3], aPos, SidePositive);
         };
 
         auto split_1pos = [&](Index vP,
@@ -349,10 +389,29 @@ namespace Rodin::Geometry
                               const Optional<Attribute>& aNeg,
                               const Optional<Attribute>& aPos)
         {
-          emitTet(vP, i0, i1, i2, aPos, SidePositive);
-          emitTet(n0, n1, n2, i0, aNeg, SideNegative);
-          emitTet(n1, n2, i0, i1, aNeg, SideNegative);
-          emitTet(n2, i0, i1, i2, aNeg, SideNegative);
+          std::array<std::array<Index, 4>, 4> A = {{
+            {{vP, i0, i1, i2}},
+            {{n0, n1, n2, i0}},
+            {{n1, n2, i0, i1}},
+            {{n2, i0, i1, i2}}
+          }};
+          std::array<std::array<Index, 4>, 4> B = {{
+            {{vP, i0, i1, i2}},
+            {{n0, n1, n2, i1}},
+            {{n0, n2, i1, i2}},
+            {{n0, i0, i1, i2}}
+          }};
+          std::array<std::array<Index, 4>, 4> C = {{
+            {{vP, i0, i1, i2}},
+            {{n0, n1, n2, i2}},
+            {{n0, n1, i0, i2}},
+            {{n1, i0, i1, i2}}
+          }};
+          const auto& best = bestOf3ByMinAbsVol4(A, B, C);
+          emitTet(best[0][0], best[0][1], best[0][2], best[0][3], aPos, SidePositive);
+          emitTet(best[1][0], best[1][1], best[1][2], best[1][3], aNeg, SideNegative);
+          emitTet(best[2][0], best[2][1], best[2][2], best[2][3], aNeg, SideNegative);
+          emitTet(best[3][0], best[3][1], best[3][2], best[3][3], aNeg, SideNegative);
         };
 
         auto minAbsVol6 = [&](const std::array<std::array<Index, 4>, 6>& tets) -> Real
@@ -362,7 +421,6 @@ namespace Rodin::Geometry
             m = std::min(m, std::abs(signedVolume(T[0], T[1], T[2], T[3])));
           return m;
         };
-
         auto split_2neg2pos_best = [&](Index n0, Index n1,
                                        Index p0, Index p1,
                                        Index a, Index b, Index c, Index d,

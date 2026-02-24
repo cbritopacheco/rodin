@@ -23,6 +23,10 @@ namespace Rodin::Tests::Unit
       .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
       .attribute({3, 0}, 5)
       .finalize();
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(3, 1);
+    mesh.getConnectivity().compute(2, 0);
+    mesh.getConnectivity().compute(1, 0);
 
     P1 fes(mesh);
     GridFunction ls(fes);
@@ -73,6 +77,10 @@ namespace Rodin::Tests::Unit
       .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
       .attribute({3, 0}, 5)
       .finalize();
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(3, 1);
+    mesh.getConnectivity().compute(2, 0);
+    mesh.getConnectivity().compute(1, 0);
 
     P1 fes(mesh);
     GridFunction ls(fes);
@@ -102,6 +110,10 @@ namespace Rodin::Tests::Unit
       .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
       .attribute({3, 0}, 5)
       .finalize();
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(3, 1);
+    mesh.getConnectivity().compute(2, 0);
+    mesh.getConnectivity().compute(1, 0);
 
     P1 fes(mesh);
     GridFunction ls(fes);
