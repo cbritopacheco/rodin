@@ -58,7 +58,6 @@ namespace Rodin::Geometry
           m_pts(static_cast<size_t>(n))
       {
         assert(rows <= MaxRows);
-        assert(n >= 0);
       }
 
       PointCloud(const PointCloud&) = default;
@@ -102,14 +101,12 @@ namespace Rodin::Geometry
       void resize(std::uint8_t r, size_t n)
       {
         assert(r <= MaxRows);
-        assert(n >= 0);
         m_dimension = r;
         m_pts.resize(static_cast<size_t>(n));
       }
 
       void reserve(size_t n)
       {
-        assert(n >= 0);
         m_pts.reserve(static_cast<size_t>(n));
       }
 
