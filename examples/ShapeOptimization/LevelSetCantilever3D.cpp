@@ -36,7 +36,7 @@ static constexpr Real eps = 1e-12;
 static constexpr Real hgrad = 1.6;
 static constexpr Real ell = 0.1;
 static Real elementStep = 0.5;
-static Real hmax = 0.2;
+static Real hmax = 0.1;
 static Real hmin = 0.1 * hmax;
 static Real hausd = 0.2 * hmin;
 static size_t hmaxIt = maxIt / 2;
@@ -79,12 +79,12 @@ int main(int, char**)
     Alert::Info() << "----- Iteration: " << i << Alert::Raise;
 
     Alert::Info() << "   | Optimizing the domain..." << Alert::Raise;
-    // MMG::Optimizer().setHMax(hmax)
-    //                 .setHMin(hmin)
-    //                 .setGradation(1.2)
-    //                 .setHausdorff(hausd)
-    //                 .setAngleDetection(false)
-    //                 .optimize(th);
+    MMG::Optimizer().setHMax(hmax)
+                    .setHMin(hmin)
+                    //.setGradation(1.1)
+                    // .setHausdorff(hausd)
+                    .setAngleDetection(false)
+                    .optimize(th);
 
     th.save("Optimized.mesh", IO::FileFormat::MEDIT);
 
@@ -179,7 +179,6 @@ int main(int, char**)
     TrialFunction advect(sh);
     TestFunction test(sh);
 
-    // advect.getSolution() = dist;
     Advection::Lagrangian(advect, test, dist, dJ).step(dt);
 
     th.save("advect.mesh");
@@ -187,8 +186,10 @@ int main(int, char**)
 
     // Recover the implicit domain
     Alert::Info() << "   | Meshing the domain." << Alert::Raise;
+
     th = MarchingTetrahedra(advect.getSolution())
-                             .setInterface(Gamma)
+                             .setFallback(2, Gamma0)
+                             .setInterface(2, Gamma)
                              .split(3, Interior, { Interior, Exterior })
                              .split(3, Exterior, { Interior, Exterior })
                              .noSplit(2, GammaD)

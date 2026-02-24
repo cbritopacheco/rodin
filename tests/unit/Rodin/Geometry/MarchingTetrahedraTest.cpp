@@ -33,7 +33,7 @@ namespace Rodin::Tests::Unit
 
     MarchingTetrahedra mt(ls);
     mt.split(3, 5, {7, 8})
-      .setInterface(42);
+      .setInterface(2, 42);
     const auto split = mt.discretize();
 
     EXPECT_GT(split.getCellCount(), 1);

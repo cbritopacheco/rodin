@@ -326,7 +326,7 @@ namespace Rodin::Geometry
         auto out = builder.finalize();
         out.getConnectivity().compute(1, 2);
         const auto& oconn = out.getConnectivity();
-        const auto& ifaceOpt = this->getInterface();
+        const auto& ifaceOpt = this->getInterface(2);
 
         auto isFittedZeroV = [&](Index vi) -> bool
         {
@@ -349,7 +349,8 @@ namespace Rodin::Geometry
           const bool fittedInterface = allOriginal && isFittedZeroV(ev(0)) && isFittedZeroV(ev(1));
           if ((hasNeg && hasPos) || fittedInterface)
           {
-            if (ifaceOpt) out.setAttribute({1, eidx}, *ifaceOpt);
+            if (this->getInterface(1))
+              out.setAttribute({1, eidx}, *this->getInterface(1));
             continue;
           }
 

@@ -106,10 +106,6 @@ namespace Rodin::Geometry
         const auto& ls   = this->getGridFunction();
         const auto& mesh = ls.getFiniteElementSpace().getMesh();
 
-        // We require adjacency/incidence needed for:
-        // - reading boundary constraints (noSplit on edges/faces),
-        // - identifying original boundary entities by vertices,
-        // - rebuilding interface tagging by adjacency in the output.
         RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 3, 2);
         RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 3, 1);
         RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 2, 0);
@@ -130,32 +126,21 @@ namespace Rodin::Geometry
         using Point = Math::SpatialPoint;
         static constexpr Index InvalidIndex = std::numeric_limits<Index>::max();
 
-        // User-configured tolerances:
-        // - eps_sign_user: classification threshold for deciding sign/zero.
-        // - eps_snap_user: snapping threshold for edge intersections (avoid tiny slivers).
         const Real eps_sign_user = this->getSignTolerance();
         const Real eps_snap_user = this->getSnapTolerance();
 
         auto finite = [](Real x) -> bool { return std::isfinite(x); };
 
-        // “cut” predicate consistent with legacy behavior:
-        // - if both ends are classified as zero, no cut
-        // - otherwise, any sign difference (including zero vs nonzero) is a cut.
         auto isCut = [&](int sa, int sb) -> bool
         {
           if (sa == 0 && sb == 0) return false;
           return sa != sb;
         };
 
-        // Per-output-cell side (used for interface tagging in the output):
-        // - Unknown: not confidently classified (or blocked from splitting)
-        // - Positive: phi > 0 side
-        // - Negative: phi < 0 side
         static constexpr int8_t SideUnknown  = -1;
         static constexpr int8_t SidePositive = 0;
         static constexpr int8_t SideNegative = 1;
 
-        // Determine cell-side label from vertex signs (ignoring zero only through classification).
         auto sideFromSigns = [&](const int ss[4]) -> int8_t
         {
           bool hasNeg = false, hasPos = false;
@@ -170,11 +155,7 @@ namespace Rodin::Geometry
           return SideUnknown;
         };
 
-        // --------------------------
         // SplitMap helpers
-        // --------------------------
-
-        // Return true if attribute a is explicitly configured as NoSplit at dimension d.
         auto isNoSplit = [&](size_t d, const Optional<Attribute>& a) -> bool
         {
           if (!a) return false;
@@ -185,29 +166,20 @@ namespace Rodin::Geometry
           return std::holds_alternative<NoSplitT>(it->second);
         };
 
-        // Return true if we are allowed to split elements with attribute a at dimension d.
-        // Policy:
-        // - empty map => split allowed
-        // - missing attribute => split allowed (default)
-        // - present:
-        //   * Split => allowed
-        //   * NoSplit => blocked
         auto shouldSplit = [&](size_t d, const Optional<Attribute>& a) -> bool
         {
           const auto& sm = this->getSplitMap(d);
           if (sm.empty()) return true;
-          if (!a) return true; // no provenance => still split geometry
+          if (!a) return true;
           auto it = sm.find(*a);
-          if (it == sm.end()) return true; // default: split
+          if (it == sm.end()) return true;
           return std::holds_alternative<Split>(it->second);
         };
 
-        // Infer output label from an input attribute and a side.
-        // If base is not in SplitMap, the attribute is kept unchanged.
         auto inferLabel = [&](size_t d, const Optional<Attribute>& base, bool negativeSide)
           -> Optional<Attribute>
         {
-          if (!base) return {}; // no provenance => cannot label
+          if (!base) return {};
           const auto& sm = this->getSplitMap(d);
           if (!sm.empty())
           {
@@ -230,7 +202,6 @@ namespace Rodin::Geometry
           return base;
         };
 
-        // Signed volume (6x actual tetra volume). Used to enforce orientation and quality choice.
         auto signedVolume = [&](Index a, Index b, Index c, Index d) -> Real
         {
           const auto A = mesh.getVertexCoordinates(a);
@@ -243,18 +214,15 @@ namespace Rodin::Geometry
           return u.dot(v.cross(w));
         };
 
-        // ------------------------------------------------------------
-        // Attribute provenance maps for original edges/faces
-        // ------------------------------------------------------------
+        // ---- provenance maps for ORIGINAL edges/faces only
         struct EdgeKey
         {
           Index a, b;
           bool operator<(const EdgeKey& o) const { return std::tie(a, b) < std::tie(o.a, o.b); }
         };
-
         struct FaceKey
         {
-          Index a, b, c; // sorted triple
+          Index a, b, c;
           bool operator<(const FaceKey& o) const { return std::tie(a, b, c) < std::tie(o.a, o.b, o.c); }
         };
 
@@ -263,7 +231,6 @@ namespace Rodin::Geometry
           if (i > j) std::swap(i, j);
           return { i, j };
         };
-
         auto makeFaceKey = [](Index i, Index j, Index k) -> FaceKey
         {
           std::array<Index, 3> s{ i, j, k };
@@ -274,7 +241,6 @@ namespace Rodin::Geometry
         FlatMap<EdgeKey, Attribute> inEdgeAttrByVerts;
         FlatMap<FaceKey, Attribute> inFaceAttrByVerts;
 
-        // Record attributes only for ORIGINAL edges/faces (in the input mesh).
         for (auto eit = mesh.getPolytope(1); !eit.end(); ++eit)
         {
           const auto& ev = eit->getVertices();
@@ -290,14 +256,11 @@ namespace Rodin::Geometry
           if (a) inFaceAttrByVerts[makeFaceKey(fv(0), fv(1), fv(2))] = *a;
         }
 
-        // ------------------------------------------------------------
-        // Output vertex set + edge intersection cache
-        // ------------------------------------------------------------
+        // ---- output vertices + edge intersection cache
         PointCloud outVerts;
         outVerts.setDimension(3);
         outVerts.reserve(static_cast<size_t>(nv) + static_cast<size_t>(ne / 4));
 
-        // First, copy original vertices 1:1.
         for (Index i = 0; i < nv; ++i)
           outVerts.push_back(mesh.getVertexCoordinates(i));
 
@@ -307,28 +270,8 @@ namespace Rodin::Geometry
           return static_cast<Index>(outVerts.getCount() - 1);
         };
 
-        // Cache intersection vertex per input edge id. This enforces topological consistency:
-        // the same input edge is intersected once and reused across all incident cells.
         std::vector<Index> isect(static_cast<size_t>(ne), InvalidIndex);
 
-        /**
-         * @brief Compute (or reuse) the intersection vertex on an input edge.
-         *
-         * The intersection is computed by linear interpolation of the P1 level-set:
-         * @f$\phi((1-t)\,a + t\,b) = 0@f$.
-         *
-         * Robustness:
-         * - snap to endpoints if |phi| <= epsS,
-         * - clamp and snap the interpolation parameter,
-         * - if phi(a) and phi(b) are nearly symmetric around zero, snap to mid-edge.
-         *
-         * @param edgeIdx Input edge index (for caching).
-         * @param va,vb Input vertex indices (original vertices).
-         * @param fa,fb Level-set values at va and vb.
-         * @param eps0 Per-cell classification tolerance.
-         * @param eps_snap Per-cell snapping tolerance (>= eps0).
-         * @return Index of the intersection vertex in the output vertex array.
-         */
         auto getIntersectionOnEdge = [&](Index edgeIdx,
                                          Index va, Index vb,
                                          Real fa, Real fb,
@@ -350,15 +293,12 @@ namespace Rodin::Geometry
           if (std::abs(denom) <= epsS)
             return (std::abs(fa) < std::abs(fb)) ? va : vb;
 
-          // (1-t)*fa + t*fb = 0 => t = fa/(fa-fb)
           Real t = fa / denom;
           t = std::min<Real>(Real(1), std::max<Real>(Real(0), t));
 
-          // snap parameter close to endpoints
           if (t <= epsS)           return va;
           if (t >= Real(1) - epsS) return vb;
 
-          // symmetric near-zero case => stabilize to mid-edge
           if (std::abs(fa + fb) <= Real(4) * eps0)
             t = Real(0.5);
 
@@ -370,9 +310,7 @@ namespace Rodin::Geometry
           return cached;
         };
 
-        // ------------------------------------------------------------
-        // Output cells + metadata
-        // ------------------------------------------------------------
+        // ---- output cells + metadata
         std::vector<std::array<Index, 4>> outCells;
         std::vector<Optional<Attribute>>  outCellAttr;
         std::vector<int8_t>               outCellSide;
@@ -381,7 +319,6 @@ namespace Rodin::Geometry
         outCellAttr.reserve(outCells.capacity());
         outCellSide.reserve(outCells.capacity());
 
-        // Emit a tetrahedron with consistent orientation (positive signed volume).
         auto emitTet = [&](Index a, Index b, Index c, Index d,
                            const Optional<Attribute>& outAttr,
                            int8_t side)
@@ -394,7 +331,6 @@ namespace Rodin::Geometry
           outCellSide.push_back(side);
         };
 
-        // Split templates (standard marching tetrahedra patterns).
         auto split_1neg = [&](Index vN,
                               Index p0, Index p1, Index p2,
                               Index i0, Index i1, Index i2,
@@ -419,7 +355,6 @@ namespace Rodin::Geometry
           emitTet(n2, i0, i1, i2, aNeg, SideNegative);
         };
 
-        // Quality proxy: maximize the minimum absolute signed volume among generated tets.
         auto minAbsVol6 = [&](const std::array<std::array<Index, 4>, 6>& tets) -> Real
         {
           Real m = std::numeric_limits<Real>::infinity();
@@ -428,7 +363,6 @@ namespace Rodin::Geometry
           return m;
         };
 
-        // 2-neg/2-pos split: choose between two valid decompositions based on minAbsVol6.
         auto split_2neg2pos_best = [&](Index n0, Index n1,
                                        Index p0, Index p1,
                                        Index a, Index b, Index c, Index d,
@@ -470,7 +404,6 @@ namespace Rodin::Geometry
           {0, 1}, {0, 2}, {0, 3}, {1, 2}, {1, 3}, {2, 3}
         }};
 
-        // Detect a strict sign change ignoring “zero” vertices (zeros are handled by tie-break).
         auto hasStrictCutNonZero = [&](const int ss[4]) -> bool
         {
           for (const auto& [a,b] : TetEdges)
@@ -486,9 +419,7 @@ namespace Rodin::Geometry
           return (ss[0] == 0) || (ss[1] == 0) || (ss[2] == 0) || (ss[3] == 0);
         };
 
-        // ------------------------------------------------------------
-        // Main loop over input tetrahedra
-        // ------------------------------------------------------------
+        // ---- main loop
         for (auto cit = mesh.getCell(); !cit.end(); ++cit)
         {
           const Index ci = cit->getIndex();
@@ -505,24 +436,18 @@ namespace Rodin::Geometry
           const std::array<Real, 4> phi{{ ls[v[0]], ls[v[1]], ls[v[2]], ls[v[3]] }};
           const auto cellAttr = cit->getAttribute();
 
-          // Non-finite values => do not split, keep cell as unknown.
           if (!finite(phi[0]) || !finite(phi[1]) || !finite(phi[2]) || !finite(phi[3]))
           {
             emitTet(v[0], v[1], v[2], v[3], cellAttr, SideUnknown);
             continue;
           }
 
-          // Adaptive classification tolerance without needing h or grad(phi):
-          // eps0 = max(user_eps_sign, rel0 * max(|phi_i|)).
           const Real phi_scale = std::max(std::max(std::abs(phi[0]), std::abs(phi[1])),
                                 std::max(std::abs(phi[2]), std::abs(phi[3])));
           const Real rel0 = Real(1e-10);
           const Real eps0 = std::max(eps_sign_user, rel0 * phi_scale);
-
-          // Per-cell snap tolerance is at least eps0.
           const Real eps_snap = std::max(eps_snap_user, eps0);
 
-          // Initial strict sign classification using eps0.
           int ss[4] = {
             (phi[0] < -eps0) ? -1 : (phi[0] > eps0 ? +1 : 0),
             (phi[1] < -eps0) ? -1 : (phi[1] > eps0 ? +1 : 0),
@@ -530,8 +455,6 @@ namespace Rodin::Geometry
             (phi[3] < -eps0) ? -1 : (phi[3] > eps0 ? +1 : 0)
           };
 
-          // Deterministic tie-break for near-zero vertices: assign zeros to a stable sign.
-          // This prevents “random” patterns of zeros causing topological noise.
           const bool anyZero = hasAnyZero(ss);
           if (anyZero)
           {
@@ -557,9 +480,6 @@ namespace Rodin::Geometry
           }
 
           const int8_t side0 = sideFromSigns(ss);
-
-          // Decide whether to split geometrically:
-          // if no strict cut remains => do not split.
           const bool doSplitGeom = hasStrictCutNonZero(ss);
 
           if (!doSplitGeom)
@@ -573,19 +493,15 @@ namespace Rodin::Geometry
             continue;
           }
 
-          // Split allowed by SplitMap?
           if (!shouldSplit(3, cellAttr))
           {
             emitTet(v[0], v[1], v[2], v[3], cellAttr, SideUnknown);
             continue;
           }
 
-          // Block splitting if a noSplit edge/face is actually crossed by the interface.
           bool blocked = false;
-
           const auto& eids = conn.getIncidence({3, 1}, ci);
 
-          // Use the same eps0 as classification to decide cuts for noSplit constraints.
           auto sstrict_cell = [&](Real x) -> int
           {
             if (x < -eps0) return -1;
@@ -627,11 +543,9 @@ namespace Rodin::Geometry
             continue;
           }
 
-          // Determine output labels on each side.
           const auto aNeg = inferLabel(3, cellAttr, true);
           const auto aPos = inferLabel(3, cellAttr, false);
 
-          // Map local edge (ia,ib) to local edge index [0..5] in the incidence list.
           auto edgeIdx = [&](int a, int b) -> int
           {
             if (a > b) std::swap(a, b);
@@ -644,7 +558,6 @@ namespace Rodin::Geometry
             return -1;
           };
 
-          // Retrieve/create intersection vertex on the corresponding input edge.
           auto I = [&](int ia, int ib) -> Index
           {
             const int e = edgeIdx(ia, ib);
@@ -659,7 +572,6 @@ namespace Rodin::Geometry
           int nneg = 0;
           for (int i = 0; i < 4; ++i) nneg += (ss[i] < 0);
 
-          // Fully classified after tie-break: handle degenerate cases defensively.
           if (nneg == 0)
           {
             emitTet(v[0], v[1], v[2], v[3], aPos, SidePositive);
@@ -724,9 +636,7 @@ namespace Rodin::Geometry
           }
         }
 
-        // ------------------------------------------------------------
-        // Build output mesh (cells)
-        // ------------------------------------------------------------
+        // ---- build output mesh (cells)
         typename MeshType::Builder builder;
         builder.initialize(3).nodes(outVerts.getCount());
         builder.setVertices(std::move(outVerts));
@@ -743,22 +653,31 @@ namespace Rodin::Geometry
         auto out = builder.finalize();
 
         // ------------------------------------------------------------
-        // Attribute transfer / interface marking
+        // Attribute transfer / interface marking (+ m_old, m_fallback policy)
+        //
+        // Cases handled:
+        //  (A) Interface face/edge: mark with ifaceOpt (if configured).
+        //  (B) Original (allOriginal) non-interface:
+        //      - if input base == ifaceOpt:
+        //          * if m_old set -> set to *m_old
+        //          * else -> leave nullopt (legacy “drop old interface tag”)
+        //      - else: map with inferLabel(...) and set if not nullopt.
+        //  (C) Created (NOT allOriginal) non-interface:
+        //      - if m_fallback set -> set to *m_fallback
+        //      - else -> leave nullopt (legacy behavior)
         // ------------------------------------------------------------
         out.getConnectivity().compute(2, 3);
         out.getConnectivity().compute(1, 3);
         const auto& oconn = out.getConnectivity();
 
-        const auto& ifaceOpt = this->getInterface();
+        const auto& ifaceOpt = this->getInterface(2);
 
-        // Fitted interface detection uses the *global* sign tolerance to preserve user expectation.
         auto isFittedZeroV = [&](Index vi) -> bool
         {
           return (vi < nv) && (std::abs(ls[vi]) <= eps_sign_user);
         };
 
-        // Faces: mark interface if adjacent to both sides OR fitted to zero;
-        // otherwise, transfer attribute only if face is original.
+        // Faces
         for (auto fit = out.getPolytope(2); !fit.end(); ++fit)
         {
           if (fit->getGeometry() != Polytope::Type::Triangle)
@@ -780,14 +699,19 @@ namespace Rodin::Geometry
           const bool fittedInterface =
             allOriginal && isFittedZeroV(fv(0)) && isFittedZeroV(fv(1)) && isFittedZeroV(fv(2));
 
-          if ((hasNeg && hasPos) || fittedInterface)
+          const bool isInterface = (hasNeg && hasPos) || fittedInterface;
+          if (isInterface)
           {
             if (ifaceOpt) out.setAttribute({2, fidx}, *ifaceOpt);
             continue;
           }
 
           if (!allOriginal)
+          {
+            if (m_fallback[2])
+              out.setAttribute({2, fidx}, *m_fallback[2]);
             continue;
+          }
 
           auto itIn = inFaceAttrByVerts.find(makeFaceKey(fv(0), fv(1), fv(2)));
           if (itIn == inFaceAttrByVerts.end())
@@ -795,16 +719,19 @@ namespace Rodin::Geometry
 
           const Attribute base = itIn->second;
 
-          // Never carry the old interface tag as a “material” label.
           if (ifaceOpt && base == *ifaceOpt)
+          {
+            if (m_old[2])
+              out.setAttribute({2, fidx}, *m_old[2]);
             continue;
+          }
 
           const Optional<Attribute> mapped = inferLabel(2, Optional<Attribute>(base), /*neg*/ hasNeg);
           if (mapped)
             out.setAttribute({2, fidx}, *mapped);
         }
 
-        // Edges: same policy as faces.
+        // Edges
         for (auto eit = out.getPolytope(1); !eit.end(); ++eit)
         {
           const Index eidx = eit->getIndex();
@@ -823,14 +750,20 @@ namespace Rodin::Geometry
           const bool fittedInterface =
             allOriginal && isFittedZeroV(ev(0)) && isFittedZeroV(ev(1));
 
-          if ((hasNeg && hasPos) || fittedInterface)
+          const bool isInterface = (hasNeg && hasPos) || fittedInterface;
+          if (isInterface)
           {
-            if (ifaceOpt) out.setAttribute({1, eidx}, *ifaceOpt);
+            if (this->getInterface(1))
+              out.setAttribute({1, eidx}, *this->getInterface(1));
             continue;
           }
 
           if (!allOriginal)
+          {
+            if (m_fallback[1])
+              out.setAttribute({1, eidx}, *m_fallback[1]);
             continue;
+          }
 
           auto itIn = inEdgeAttrByVerts.find(makeEdgeKey(ev(0), ev(1)));
           if (itIn == inEdgeAttrByVerts.end())
@@ -839,7 +772,11 @@ namespace Rodin::Geometry
           const Attribute base = itIn->second;
 
           if (ifaceOpt && base == *ifaceOpt)
+          {
+            if (m_old[1])
+              out.setAttribute({1, eidx}, *m_old[1]);
             continue;
+          }
 
           const Optional<Attribute> mapped = inferLabel(1, Optional<Attribute>(base), /*neg*/ hasNeg);
           if (mapped)
@@ -891,12 +828,29 @@ namespace Rodin::Geometry
         return m_snap_tolerance;
       }
 
+      MarchingTetrahedra& setOld(size_t d, const Optional<Attribute>& a)
+      {
+        m_old[d] = a;
+        return *this;
+      }
+
+      MarchingTetrahedra& setFallback(size_t d, const Optional<Attribute>& a)
+      {
+        m_fallback[d] = a;
+        return *this;
+      }
+
+
     private:
       /// User sign tolerance (see setSignTolerance()).
       Real m_sign_tolerance;
 
       /// User snap tolerance (see setSnapTolerance()).
       Real m_snap_tolerance;
+
+      std::array<Optional<Attribute>, 4> m_old;
+
+      std::array<Optional<Attribute>, 4> m_fallback;
   };
 
   template <class Mesh, class Data>

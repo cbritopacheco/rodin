@@ -30,8 +30,8 @@ namespace Rodin::Tests::Unit
     ls[2] = 1.0;
 
     MarchingTriangles mt(ls);
-    mt.split(2, 5, {7, 8})
-      .setInterface(42);
+    mt.setInterface(2, 42)
+      .split(2, 5, {7, 8});
     const auto split = mt.discretize();
 
     EXPECT_GT(split.getCellCount(), 1);

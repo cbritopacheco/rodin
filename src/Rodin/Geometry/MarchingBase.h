@@ -167,25 +167,6 @@ namespace Rodin::Geometry
       }
 
       /**
-       * @brief Set the attribute used to mark the extracted interface.
-       *
-       * The derived algorithm may mark interface entities (typically faces in 3D,
-       * edges in 2D) with this attribute when they lie on, or separate, the
-       * negative and positive side.
-       *
-       * If unset (nullopt), the derived algorithm should not assign a dedicated
-       * interface attribute.
-       *
-       * @param attr Optional interface attribute.
-       * @return *this
-       */
-      MarchingBase& setInterface(const Optional<Attribute>& attr)
-      {
-        m_interface = attr;
-        return *this;
-      }
-
-      /**
        * @brief Access the SplitMap for a given topological dimension.
        *
        * @param d Topological dimension (0..mesh_dim).
@@ -198,13 +179,32 @@ namespace Rodin::Geometry
       }
 
       /**
+       * @brief Set the attribute used to mark the extracted interface.
+       *
+       * The derived algorithm may mark interface entities (typically faces in 3D,
+       * edges in 2D) with this attribute when they lie on, or separate, the
+       * negative and positive side.
+       *
+       * If unset (nullopt), the derived algorithm should not assign a dedicated
+       * interface attribute.
+       *
+       * @param attr Optional interface attribute.
+       * @return *this
+       */
+      MarchingBase& setInterface(size_t d, const Optional<Attribute>& attr)
+      {
+        m_interface[d] = attr;
+        return *this;
+      }
+
+      /**
        * @brief Get the configured interface attribute.
        *
        * @return Optional interface attribute (may be nullopt).
        */
-      const Optional<Attribute>& getInterface() const
+      const Optional<Attribute>& getInterface(size_t d) const
       {
-        return m_interface;
+        return m_interface[d];
       }
 
       /**
@@ -232,11 +232,11 @@ namespace Rodin::Geometry
       /// Reference to the input grid function (level-set).
       std::reference_wrapper<const GridFunctionType> m_gf;
 
-      /// Optional attribute used to mark interface entities in the output.
-      Optional<Attribute> m_interface;
-
       /// Per-dimension split configuration maps (indexed by topological dimension).
       std::vector<SplitMap> m_split;
+
+      /// Optional attribute used to mark interface entities in the output.
+      std::array<Optional<Attribute>, 4> m_interface;
   };
 }
 
