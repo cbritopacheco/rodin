@@ -60,8 +60,7 @@ Real compliance(const GridFunction<FES, Data>& w)
 
 int main(int, char**)
 {
-  // const char* meshFile = "../resources/examples/ShapeOptimization/LevelSetCantilever3D.medit.mesh";
-  const char* meshFile = "/Users/carlos/Projects/rodin/resources/examples/ShapeOptimization/LevelSetCantilever3D.medit.mesh";
+  const char* meshFile = "../resources/examples/ShapeOptimization/LevelSetCantilever3D.medit.mesh";
 
   // Load mesh
   MMG::Mesh th;
@@ -115,9 +114,9 @@ int main(int, char**)
 
     GridFunction dist(sh);
     Distance::Eikonal(dist).setInterior(Interior)
-                                   .setInterface(Gamma)
-                                   .solve()
-                                   .sign();
+                           .setInterface(Gamma)
+                           .solve()
+                           .sign();
 
     dist.getFiniteElementSpace().getMesh().save("distance.mesh");
     dist.save("dist.gf");
@@ -180,6 +179,7 @@ int main(int, char**)
     TrialFunction advect(sh);
     TestFunction test(sh);
 
+    // advect.getSolution() = dist;
     Advection::Lagrangian(advect, test, dist, dJ).step(dt);
 
     th.save("advect.mesh");
@@ -189,8 +189,8 @@ int main(int, char**)
     Alert::Info() << "   | Meshing the domain." << Alert::Raise;
     th = MarchingTetrahedra(advect.getSolution())
                              .setInterface(Gamma)
-                             .setNegative(Interior)
-                             .setPositive(Exterior)
+                             .split(3, Interior, { Interior, Exterior })
+                             .split(3, Exterior, { Interior, Exterior })
                              .noSplit(2, GammaD)
                              .noSplit(2, GammaN)
                              .split(2, Gamma0, { Gamma0, Gamma0 })

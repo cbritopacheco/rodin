@@ -32,8 +32,7 @@ namespace Rodin::Tests::Unit
     ls[3] = 1.0;
 
     MarchingTetrahedra mt(ls);
-    mt.setNegative(7)
-      .setPositive(8)
+    mt.split(3, 5, {7, 8})
       .setInterface(42);
     const auto split = mt.discretize();
 
