@@ -42,6 +42,9 @@ namespace Rodin::Geometry
 
       MarchingTriangles(const GridFunctionType& ls)
         : Parent(ls),
+          // Defaults mirror MarchingTetrahedra and can be tuned by callers.
+          // - sign tolerance: classify near-zero level-set values.
+          // - snap tolerance: snap edge intersections close to endpoints.
           m_sign_tolerance(1e-12),
           m_snap_tolerance(1e-12)
       {}
@@ -154,6 +157,8 @@ namespace Rodin::Geometry
 
         PointCloud outVerts;
         outVerts.setDimension(mesh.getSpaceDimension());
+        // Typical cut patterns create O(number_of_edges) intersections;
+        // reserving half the edge count keeps growth amortized without over-allocation.
         outVerts.reserve(static_cast<size_t>(nv) + static_cast<size_t>(ne / 2));
         for (Index i = 0; i < nv; ++i)
           outVerts.push_back(mesh.getVertexCoordinates(i));
