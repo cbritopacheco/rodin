@@ -385,7 +385,6 @@ namespace Rodin::Geometry
           if (qc > qbest) { best = &C; qbest = qc; }
           return {best, qbest};
         };
-        static constexpr Real qualityFloor = Real(1e-10);
         auto split_1neg = [&](Index vN,
                               Index p0, Index p1, Index p2,
                               Index i0, Index i1, Index i2,
@@ -413,7 +412,7 @@ namespace Rodin::Geometry
             {{p1, i0, i1, i2}}
           }};
           const auto [best, bestQuality] = bestAndQualityOf3ByMinQuality4(A, B, C);
-          if (allowLocalNoSplit && bestQuality < qualityFloor)
+          if (allowLocalNoSplit && !finite(bestQuality))
             return false;
           emitTet((*best)[0][0], (*best)[0][1], (*best)[0][2], (*best)[0][3], aNeg, SideNegative);
           emitTet((*best)[1][0], (*best)[1][1], (*best)[1][2], (*best)[1][3], aPos, SidePositive);
@@ -449,7 +448,7 @@ namespace Rodin::Geometry
             {{n1, i0, i1, i2}}
           }};
           const auto [best, bestQuality] = bestAndQualityOf3ByMinQuality4(A, B, C);
-          if (allowLocalNoSplit && bestQuality < qualityFloor)
+          if (allowLocalNoSplit && !finite(bestQuality))
             return false;
           emitTet((*best)[0][0], (*best)[0][1], (*best)[0][2], (*best)[0][3], aPos, SidePositive);
           emitTet((*best)[1][0], (*best)[1][1], (*best)[1][2], (*best)[1][3], aNeg, SideNegative);
@@ -494,7 +493,7 @@ namespace Rodin::Geometry
           const Real qa = minQuality6(A);
           const Real qb = minQuality6(B);
           const auto& best = (qb > qa) ? B : A;
-          if (allowLocalNoSplit && std::max(qa, qb) < qualityFloor)
+          if (allowLocalNoSplit && !finite(std::max(qa, qb)))
             return false;
 
           emitTet(best[0][0], best[0][1], best[0][2], best[0][3], aNeg, SideNegative);
