@@ -378,14 +378,11 @@ namespace Rodin::Geometry
           if (qc > qbest) { best = &C; qbest = qc; }
           return *best;
         };
-        static constexpr Real qualityFloor = Real(1e-10);
-
         auto split_1neg = [&](Index vN,
                               Index p0, Index p1, Index p2,
                               Index i0, Index i1, Index i2,
                               const Optional<Attribute>& aNeg,
                               const Optional<Attribute>& aPos)
-          -> bool
         {
           std::array<std::array<Index, 4>, 4> A = {{
             {{vN, i0, i1, i2}},
@@ -406,13 +403,10 @@ namespace Rodin::Geometry
             {{p1, i0, i1, i2}}
           }};
           const auto& best = bestOf3ByMinQuality4(A, B, C);
-          if (minQuality4(best) < qualityFloor)
-            return false;
           emitTet(best[0][0], best[0][1], best[0][2], best[0][3], aNeg, SideNegative);
           emitTet(best[1][0], best[1][1], best[1][2], best[1][3], aPos, SidePositive);
           emitTet(best[2][0], best[2][1], best[2][2], best[2][3], aPos, SidePositive);
           emitTet(best[3][0], best[3][1], best[3][2], best[3][3], aPos, SidePositive);
-          return true;
         };
 
         auto split_1pos = [&](Index vP,
@@ -420,7 +414,6 @@ namespace Rodin::Geometry
                               Index i0, Index i1, Index i2,
                               const Optional<Attribute>& aNeg,
                               const Optional<Attribute>& aPos)
-          -> bool
         {
           std::array<std::array<Index, 4>, 4> A = {{
             {{vP, i0, i1, i2}},
@@ -441,13 +434,10 @@ namespace Rodin::Geometry
             {{n1, i0, i1, i2}}
           }};
           const auto& best = bestOf3ByMinQuality4(A, B, C);
-          if (minQuality4(best) < qualityFloor)
-            return false;
           emitTet(best[0][0], best[0][1], best[0][2], best[0][3], aPos, SidePositive);
           emitTet(best[1][0], best[1][1], best[1][2], best[1][3], aNeg, SideNegative);
           emitTet(best[2][0], best[2][1], best[2][2], best[2][3], aNeg, SideNegative);
           emitTet(best[3][0], best[3][1], best[3][2], best[3][3], aNeg, SideNegative);
-          return true;
         };
 
         auto minQuality6 = [&](const std::array<std::array<Index, 4>, 6>& tets) -> Real
@@ -461,7 +451,7 @@ namespace Rodin::Geometry
                                        Index p0, Index p1,
                                        Index a, Index b, Index c, Index d,
                                        const Optional<Attribute>& aNeg,
-                                       const Optional<Attribute>& aPos) -> bool
+                                       const Optional<Attribute>& aPos)
         {
           std::array<std::array<Index, 4>, 6> A = {{
             {{n0, a, b, n1}},
@@ -484,8 +474,6 @@ namespace Rodin::Geometry
           const Real qa = minQuality6(A);
           const Real qb = minQuality6(B);
           const auto& best = (qb > qa) ? B : A;
-          if (std::max(qa, qb) < qualityFloor)
-            return false;
 
           emitTet(best[0][0], best[0][1], best[0][2], best[0][3], aNeg, SideNegative);
           emitTet(best[1][0], best[1][1], best[1][2], best[1][3], aNeg, SideNegative);
@@ -494,7 +482,6 @@ namespace Rodin::Geometry
           emitTet(best[3][0], best[3][1], best[3][2], best[3][3], aPos, SidePositive);
           emitTet(best[4][0], best[4][1], best[4][2], best[4][3], aPos, SidePositive);
           emitTet(best[5][0], best[5][1], best[5][2], best[5][3], aPos, SidePositive);
-          return true;
         };
 
         static constexpr std::array<std::pair<int,int>, 6> TetEdges = {{
@@ -688,20 +675,11 @@ namespace Rodin::Geometry
             const Index i0 = I(in, ip[0]);
             const Index i1 = I(in, ip[1]);
             const Index i2 = I(in, ip[2]);
-            if (i0 == i1 || i0 == i2 || i1 == i2)
-            {
-              emitTet(v[0], v[1], v[2], v[3], cellAttr, SideUnknown);
-              continue;
-            }
-
-            if (!split_1neg(v[static_cast<size_t>(in)],
-                            v[static_cast<size_t>(ip[0])],
-                            v[static_cast<size_t>(ip[1])],
-                            v[static_cast<size_t>(ip[2])],
-                            i0, i1, i2, aNeg, aPos))
-            {
-              emitTet(v[0], v[1], v[2], v[3], cellAttr, SideUnknown);
-            }
+            split_1neg(v[static_cast<size_t>(in)],
+                       v[static_cast<size_t>(ip[0])],
+                       v[static_cast<size_t>(ip[1])],
+                       v[static_cast<size_t>(ip[2])],
+                       i0, i1, i2, aNeg, aPos);
             continue;
           }
 
@@ -713,20 +691,11 @@ namespace Rodin::Geometry
             const Index i0 = I(ipos, ineg[0]);
             const Index i1 = I(ipos, ineg[1]);
             const Index i2 = I(ipos, ineg[2]);
-            if (i0 == i1 || i0 == i2 || i1 == i2)
-            {
-              emitTet(v[0], v[1], v[2], v[3], cellAttr, SideUnknown);
-              continue;
-            }
-
-            if (!split_1pos(v[static_cast<size_t>(ipos)],
-                            v[static_cast<size_t>(ineg[0])],
-                            v[static_cast<size_t>(ineg[1])],
-                            v[static_cast<size_t>(ineg[2])],
-                            i0, i1, i2, aNeg, aPos))
-            {
-              emitTet(v[0], v[1], v[2], v[3], cellAttr, SideUnknown);
-            }
+            split_1pos(v[static_cast<size_t>(ipos)],
+                       v[static_cast<size_t>(ineg[0])],
+                       v[static_cast<size_t>(ineg[1])],
+                       v[static_cast<size_t>(ineg[2])],
+                       i0, i1, i2, aNeg, aPos);
             continue;
           }
 
@@ -739,20 +708,11 @@ namespace Rodin::Geometry
             const Index b = I(ineg[0], ipos[1]);
             const Index c = I(ineg[1], ipos[0]);
             const Index d = I(ineg[1], ipos[1]);
-            if (a == b || a == c || a == d || b == c || b == d || c == d)
-            {
-              emitTet(v[0], v[1], v[2], v[3], cellAttr, SideUnknown);
-              continue;
-            }
-
-            if (!split_2neg2pos_best(v[static_cast<size_t>(ineg[0])],
-                                     v[static_cast<size_t>(ineg[1])],
-                                     v[static_cast<size_t>(ipos[0])],
-                                     v[static_cast<size_t>(ipos[1])],
-                                     a, b, c, d, aNeg, aPos))
-            {
-              emitTet(v[0], v[1], v[2], v[3], cellAttr, SideUnknown);
-            }
+            split_2neg2pos_best(v[static_cast<size_t>(ineg[0])],
+                                v[static_cast<size_t>(ineg[1])],
+                                v[static_cast<size_t>(ipos[0])],
+                                v[static_cast<size_t>(ipos[1])],
+                                a, b, c, d, aNeg, aPos);
             continue;
           }
         }
