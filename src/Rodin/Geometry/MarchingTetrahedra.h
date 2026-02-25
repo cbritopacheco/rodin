@@ -202,18 +202,6 @@ namespace Rodin::Geometry
           return base;
         };
 
-        auto signedVolume = [&](Index a, Index b, Index c, Index d) -> Real
-        {
-          const auto A = mesh.getVertexCoordinates(a);
-          const auto B = mesh.getVertexCoordinates(b);
-          const auto C = mesh.getVertexCoordinates(c);
-          const auto D = mesh.getVertexCoordinates(d);
-          const auto u = B - A;
-          const auto v = C - A;
-          const auto w = D - A;
-          return u.dot(v.cross(w));
-        };
-
         // ---- provenance maps for ORIGINAL edges/faces only
         struct EdgeKey
         {
@@ -293,14 +281,13 @@ namespace Rodin::Geometry
           if (std::abs(denom) <= epsS)
             return (std::abs(fa) < std::abs(fb)) ? va : vb;
 
+          static constexpr Real tminFrac = Real(1e-2);
           Real t = fa / denom;
-          t = std::min<Real>(Real(1), std::max<Real>(Real(0), t));
-
-          if (t <= epsS)           return va;
-          if (t >= Real(1) - epsS) return vb;
 
           if (std::abs(fa + fb) <= Real(4) * eps0)
             t = Real(0.5);
+          else
+            t = std::min<Real>(Real(1) - tminFrac, std::max<Real>(tminFrac, t));
 
           const auto pa = outVerts[va];
           const auto pb = outVerts[vb];
@@ -319,6 +306,46 @@ namespace Rodin::Geometry
         outCellAttr.reserve(outCells.capacity());
         outCellSide.reserve(outCells.capacity());
 
+        auto signedVolume = [&](Index a, Index b, Index c, Index d) -> Real
+        {
+          const auto A = outVerts[a];
+          const auto B = outVerts[b];
+          const auto C = outVerts[c];
+          const auto D = outVerts[d];
+          const auto u = B - A;
+          const auto v = C - A;
+          const auto w = D - A;
+          return u.dot(v.cross(w));
+        };
+        auto tetQuality = [&](Index a, Index b, Index c, Index d) -> Real
+        {
+          // Lower bound for denominator in the scale-normalized quality metric.
+          // Kept very small to avoid perturbing quality ordering while preventing
+          // division by zero in highly collapsed configurations.
+          // Safety factor chosen to keep denominator strictly positive while
+          // remaining close to machine precision for normalized coordinates.
+          static constexpr Real epsilonSafetyFactor = Real(100);
+          const Real minQualityDivisor =
+            epsilonSafetyFactor * std::numeric_limits<Real>::epsilon();
+          const Real absoluteVolume = std::abs(signedVolume(a, b, c, d));
+          const auto A = outVerts[a];
+          const auto B = outVerts[b];
+          const auto C = outVerts[c];
+          const auto D = outVerts[d];
+          const Real l01 = (A - B).norm();
+          const Real l02 = (A - C).norm();
+          const Real l03 = (A - D).norm();
+          const Real l12 = (B - C).norm();
+          const Real l13 = (B - D).norm();
+          const Real l23 = (C - D).norm();
+          Real h = std::max(l01, l02);
+          h = std::max(h, l03);
+          h = std::max(h, l12);
+          h = std::max(h, l13);
+          h = std::max(h, l23);
+          h = std::max(h, minQualityDivisor);
+          return absoluteVolume / (h * h * h);
+        };
         auto emitTet = [&](Index a, Index b, Index c, Index d,
                            const Optional<Attribute>& outAttr,
                            int8_t side)
@@ -330,21 +357,21 @@ namespace Rodin::Geometry
           outCellAttr.push_back(outAttr);
           outCellSide.push_back(side);
         };
-        auto minAbsVol4 = [&](const std::array<std::array<Index, 4>, 4>& tets) -> Real
+        auto minQuality4 = [&](const std::array<std::array<Index, 4>, 4>& tets) -> Real
         {
-          Real minAbsVolume = std::numeric_limits<Real>::infinity();
-          for (const auto& T : tets)
-            minAbsVolume = std::min(minAbsVolume, std::abs(signedVolume(T[0], T[1], T[2], T[3])));
-          return minAbsVolume;
+          Real minQuality = std::numeric_limits<Real>::infinity();
+          for (const auto& tet : tets)
+            minQuality = std::min(minQuality, tetQuality(tet[0], tet[1], tet[2], tet[3]));
+          return minQuality;
         };
-        auto bestOf3ByMinAbsVol4 = [&](const std::array<std::array<Index, 4>, 4>& A,
-                                       const std::array<std::array<Index, 4>, 4>& B,
-                                       const std::array<std::array<Index, 4>, 4>& C)
+        auto bestOf3ByMinQuality4 = [&](const std::array<std::array<Index, 4>, 4>& A,
+                                        const std::array<std::array<Index, 4>, 4>& B,
+                                        const std::array<std::array<Index, 4>, 4>& C)
           -> const std::array<std::array<Index, 4>, 4>&
         {
-          const Real qa = minAbsVol4(A);
-          const Real qb = minAbsVol4(B);
-          const Real qc = minAbsVol4(C);
+          const Real qa = minQuality4(A);
+          const Real qb = minQuality4(B);
+          const Real qc = minQuality4(C);
           const std::array<std::array<Index, 4>, 4>* best = &A;
           Real qbest = qa;
           if (qb > qbest) { best = &B; qbest = qb; }
@@ -376,7 +403,7 @@ namespace Rodin::Geometry
             {{p0, p1, i0, i2}},
             {{p1, i0, i1, i2}}
           }};
-          const auto& best = bestOf3ByMinAbsVol4(A, B, C);
+          const auto& best = bestOf3ByMinQuality4(A, B, C);
           emitTet(best[0][0], best[0][1], best[0][2], best[0][3], aNeg, SideNegative);
           emitTet(best[1][0], best[1][1], best[1][2], best[1][3], aPos, SidePositive);
           emitTet(best[2][0], best[2][1], best[2][2], best[2][3], aPos, SidePositive);
@@ -407,19 +434,19 @@ namespace Rodin::Geometry
             {{n0, n1, i0, i2}},
             {{n1, i0, i1, i2}}
           }};
-          const auto& best = bestOf3ByMinAbsVol4(A, B, C);
+          const auto& best = bestOf3ByMinQuality4(A, B, C);
           emitTet(best[0][0], best[0][1], best[0][2], best[0][3], aPos, SidePositive);
           emitTet(best[1][0], best[1][1], best[1][2], best[1][3], aNeg, SideNegative);
           emitTet(best[2][0], best[2][1], best[2][2], best[2][3], aNeg, SideNegative);
           emitTet(best[3][0], best[3][1], best[3][2], best[3][3], aNeg, SideNegative);
         };
 
-        auto minAbsVol6 = [&](const std::array<std::array<Index, 4>, 6>& tets) -> Real
+        auto minQuality6 = [&](const std::array<std::array<Index, 4>, 6>& tets) -> Real
         {
-          Real m = std::numeric_limits<Real>::infinity();
-          for (const auto& T : tets)
-            m = std::min(m, std::abs(signedVolume(T[0], T[1], T[2], T[3])));
-          return m;
+          Real minQuality = std::numeric_limits<Real>::infinity();
+          for (const auto& tet : tets)
+            minQuality = std::min(minQuality, tetQuality(tet[0], tet[1], tet[2], tet[3]));
+          return minQuality;
         };
         auto split_2neg2pos_best = [&](Index n0, Index n1,
                                        Index p0, Index p1,
@@ -445,8 +472,8 @@ namespace Rodin::Geometry
             {{a,  p1, b, d}}
           }};
 
-          const Real qa = minAbsVol6(A);
-          const Real qb = minAbsVol6(B);
+          const Real qa = minQuality6(A);
+          const Real qb = minQuality6(B);
           const auto& best = (qb > qa) ? B : A;
 
           emitTet(best[0][0], best[0][1], best[0][2], best[0][3], aNeg, SideNegative);
@@ -649,6 +676,11 @@ namespace Rodin::Geometry
             const Index i0 = I(in, ip[0]);
             const Index i1 = I(in, ip[1]);
             const Index i2 = I(in, ip[2]);
+            if (i0 == i1 || i0 == i2 || i1 == i2)
+            {
+              emitTet(v[0], v[1], v[2], v[3], cellAttr, SideUnknown);
+              continue;
+            }
 
             split_1neg(v[static_cast<size_t>(in)],
                        v[static_cast<size_t>(ip[0])],
@@ -666,6 +698,11 @@ namespace Rodin::Geometry
             const Index i0 = I(ipos, ineg[0]);
             const Index i1 = I(ipos, ineg[1]);
             const Index i2 = I(ipos, ineg[2]);
+            if (i0 == i1 || i0 == i2 || i1 == i2)
+            {
+              emitTet(v[0], v[1], v[2], v[3], cellAttr, SideUnknown);
+              continue;
+            }
 
             split_1pos(v[static_cast<size_t>(ipos)],
                        v[static_cast<size_t>(ineg[0])],
@@ -684,6 +721,11 @@ namespace Rodin::Geometry
             const Index b = I(ineg[0], ipos[1]);
             const Index c = I(ineg[1], ipos[0]);
             const Index d = I(ineg[1], ipos[1]);
+            if (a == b || a == c || a == d || b == c || b == d || c == d)
+            {
+              emitTet(v[0], v[1], v[2], v[3], cellAttr, SideUnknown);
+              continue;
+            }
 
             split_2neg2pos_best(v[static_cast<size_t>(ineg[0])],
                                 v[static_cast<size_t>(ineg[1])],
