@@ -188,7 +188,7 @@ int main(int, char**)
     Alert::Info() << "   | Meshing the domain." << Alert::Raise;
 
     th = MarchingTetrahedra(advect.getSolution())
-                             .setFallback(2, Gamma0)
+                             .setFallback(2, 23)
                              .setInterface(2, Gamma)
                              .split(3, Interior, { Interior, Exterior })
                              .split(3, Exterior, { Interior, Exterior })
@@ -196,6 +196,20 @@ int main(int, char**)
                              .noSplit(2, GammaN)
                              .split(2, Gamma0, { Gamma0, Gamma0 })
                              .discretize();
+
+    for (auto it = th.getBoundary(); it; ++it)
+    {
+      const auto attr = it->getAttribute();
+      if (attr)
+      {
+        if (*attr == 23)
+          th.setAttribute(it.key(), 50);
+      }
+      else
+      {
+        th.setAttribute(it.key(), {});
+      }
+    }
 
     th.save("Omega.mesh", IO::FileFormat::MEDIT);
   }
