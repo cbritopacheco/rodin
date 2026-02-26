@@ -258,10 +258,20 @@ namespace Rodin::Geometry
           return static_cast<Index>(outVerts.getCount() - 1);
         };
 
-        std::vector<Index> isect(static_cast<size_t>(ne), InvalidIndex);
+        // Relative scale used to derive a single global sign threshold from level-set magnitude.
+        // Kept aligned with the prior per-cell relative sign tolerance.
+        const Real rel0_global = Real(1e-10);
+        Real globalPhiScale = Real(0);
+        for (Index i = 0; i < nv; ++i)
+          globalPhiScale = std::max(globalPhiScale, std::abs(ls[i]));
+        const Real eps0_global = std::max(eps_sign_user, rel0_global * globalPhiScale);
+        std::vector<int8_t> vSign(static_cast<size_t>(nv), SidePositive);
+        for (Index i = 0; i < nv; ++i)
+          vSign[static_cast<size_t>(i)] = (ls[i] < -eps0_global) ? int8_t(-1) : int8_t(+1);
 
-        auto getIntersectionOnEdge = [&](Index edgeIdx,
-                                         Index va, Index vb,
+        FlatMap<EdgeKey, Index> edgeVertexPairToIntersection;
+
+        auto getIntersectionOnEdge = [&](Index va, Index vb,
                                          Real fa, Real fb,
                                          Real eps0, Real eps_snap) -> Index
         {
@@ -273,9 +283,10 @@ namespace Rodin::Geometry
           if (std::abs(fa) <= epsS) return va;
           if (std::abs(fb) <= epsS) return vb;
 
-          Index& cached = isect[static_cast<size_t>(edgeIdx)];
-          if (cached != InvalidIndex)
-            return cached;
+          const EdgeKey ek = makeEdgeKey(va, vb);
+          auto it = edgeVertexPairToIntersection.find(ek);
+          if (it != edgeVertexPairToIntersection.end())
+            return it->second;
 
           const Real denom = (fa - fb);
           if (std::abs(denom) <= epsS)
@@ -293,8 +304,9 @@ namespace Rodin::Geometry
           const auto pb = outVerts[vb];
           const auto p  = pa + t * (pb - pa);
 
-          cached = addVertex(p);
-          return cached;
+          const Index vi = addVertex(p);
+          edgeVertexPairToIntersection[ek] = vi;
+          return vi;
         };
 
         // ---- output cells + metadata
@@ -457,19 +469,11 @@ namespace Rodin::Geometry
           return true;
         };
 
-        auto minQuality6 = [&](const std::array<std::array<Index, 4>, 6>& tets) -> Real
-        {
-          Real minQuality = std::numeric_limits<Real>::infinity();
-          for (const auto& tet : tets)
-            minQuality = std::min(minQuality, tetQuality(tet[0], tet[1], tet[2], tet[3]));
-          return minQuality;
-        };
         auto split_2neg2pos_best = [&](Index n0, Index n1,
                                        Index p0, Index p1,
                                        Index a, Index b, Index c, Index d,
                                        const Optional<Attribute>& aNeg,
-                                       const Optional<Attribute>& aPos,
-                                       bool allowLocalNoSplit)
+                                       const Optional<Attribute>& aPos)
           -> bool
         {
           std::array<std::array<Index, 4>, 6> A = {{
@@ -490,11 +494,18 @@ namespace Rodin::Geometry
             {{a,  p1, b, d}}
           }};
 
-          const Real qa = minQuality6(A);
-          const Real qb = minQuality6(B);
-          const auto& best = (qb > qa) ? B : A;
-          if (allowLocalNoSplit && !finite(std::max(qa, qb)))
-            return false;
+          std::array<Index, 4> q = {a, b, c, d};
+          std::sort(q.begin(), q.end());
+          // Large odd constants used to symmetrically mix sorted ids and pick a stable diagonal.
+          static constexpr uint64_t kMix0 = 11400714819323198485ull;
+          static constexpr uint64_t kMix1 = 14029467366897019727ull;
+          static constexpr uint64_t kMix2 =  1609587929392839161ull;
+          static constexpr uint64_t kMix3 =  9650029242287828579ull;
+          const uint64_t h = static_cast<uint64_t>(q[0]) * kMix0
+                           ^ static_cast<uint64_t>(q[1]) * kMix1
+                           ^ static_cast<uint64_t>(q[2]) * kMix2
+                           ^ static_cast<uint64_t>(q[3]) * kMix3;
+          const auto& best = ((h & 1ull) == 0ull) ? A : B;
 
           emitTet(best[0][0], best[0][1], best[0][2], best[0][3], aNeg, SideNegative);
           emitTet(best[1][0], best[1][1], best[1][2], best[1][3], aNeg, SideNegative);
@@ -518,11 +529,6 @@ namespace Rodin::Geometry
             if (ss[a] * ss[b] == -1) return true;
           }
           return false;
-        };
-
-        auto hasAnyZero = [&](const int ss[4]) -> bool
-        {
-          return (ss[0] == 0) || (ss[1] == 0) || (ss[2] == 0) || (ss[3] == 0);
         };
 
         // ---- main loop
@@ -555,35 +561,11 @@ namespace Rodin::Geometry
           const Real eps_snap = std::max(eps_snap_user, eps0);
 
           int ss[4] = {
-            (phi[0] < -eps0) ? -1 : (phi[0] > eps0 ? +1 : 0),
-            (phi[1] < -eps0) ? -1 : (phi[1] > eps0 ? +1 : 0),
-            (phi[2] < -eps0) ? -1 : (phi[2] > eps0 ? +1 : 0),
-            (phi[3] < -eps0) ? -1 : (phi[3] > eps0 ? +1 : 0)
+            vSign[static_cast<size_t>(v[0])],
+            vSign[static_cast<size_t>(v[1])],
+            vSign[static_cast<size_t>(v[2])],
+            vSign[static_cast<size_t>(v[3])]
           };
-
-          const bool anyZero = hasAnyZero(ss);
-          if (anyZero)
-          {
-            const Real phi_avg = (phi[0] + phi[1] + phi[2] + phi[3]) / Real(4);
-            int fallbackSign = 0;
-
-            if (phi_avg > eps0) fallbackSign = +1;
-            else if (phi_avg < -eps0) fallbackSign = -1;
-            else
-            {
-              int imax = 0;
-              Real amax = std::abs(phi[0]);
-              for (int i = 1; i < 4; ++i)
-              {
-                const Real ai = std::abs(phi[static_cast<size_t>(i)]);
-                if (ai > amax) { amax = ai; imax = i; }
-              }
-              fallbackSign = (phi[static_cast<size_t>(imax)] >= Real(0)) ? +1 : -1;
-            }
-
-            for (int i = 0; i < 4; ++i)
-              if (ss[i] == 0) ss[i] = fallbackSign;
-          }
 
           const int8_t side0 = sideFromSigns(ss);
           const bool doSplitGeom = hasStrictCutNonZero(ss);
@@ -672,7 +654,7 @@ namespace Rodin::Geometry
             const Index vb = v[static_cast<size_t>(ib)];
             const Real  fa = phi[static_cast<size_t>(ia)];
             const Real  fb = phi[static_cast<size_t>(ib)];
-            return getIntersectionOnEdge(eid, va, vb, fa, fb, eps0, eps_snap);
+            return getIntersectionOnEdge(va, vb, fa, fb, eps0, eps_snap);
           };
 
           int nneg = 0;
@@ -752,7 +734,7 @@ namespace Rodin::Geometry
                                      v[static_cast<size_t>(ineg[1])],
                                      v[static_cast<size_t>(ipos[0])],
                                      v[static_cast<size_t>(ipos[1])],
-                                     a, b, c, d, aNeg, aPos, allowLocalNoSplit))
+                                     a, b, c, d, aNeg, aPos))
             {
               emitTet(v[0], v[1], v[2], v[3], cellAttr, SideUnknown);
             }
