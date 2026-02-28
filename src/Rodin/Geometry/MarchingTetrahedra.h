@@ -106,56 +106,34 @@ namespace Rodin::Geometry
         const auto& ls   = this->getGridFunction();
         const auto& mesh = ls.getFiniteElementSpace().getMesh();
 
-        RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 3, 2);
-        RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 3, 1);
-        RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 2, 0);
-        RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 1, 0);
-
         if (mesh.getDimension() != 3)
-        {
           Alert::MemberFunctionException(*this, __func__)
-            << "MarchingTetrahedra expects a 3D volume mesh."
-            << Alert::Raise;
-        }
+            << "Expected 3D mesh." << Alert::Raise;
 
         auto& conn = mesh.getConnectivity();
 
-        const Index nv = static_cast<Index>(mesh.getVertexCount());
-        const Index ne = static_cast<Index>(mesh.getPolytopeCount(1));
+        RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 3, 1);
+        RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 3, 2);
+        RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 2, 1);
+        RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 1, 0);
 
         using Point = Math::SpatialPoint;
-        static constexpr Index InvalidIndex = std::numeric_limits<Index>::max();
+        auto finite = [](Real x) { return std::isfinite(x); };
+
+        static constexpr Index INVALID = std::numeric_limits<Index>::max();
 
         const Real eps_sign_user = this->getSignTolerance();
         const Real eps_snap_user = this->getSnapTolerance();
 
-        auto finite = [](Real x) -> bool { return std::isfinite(x); };
+        const Index nv = static_cast<Index>(mesh.getVertexCount());
 
-        auto isCut = [&](int sa, int sb) -> bool
-        {
-          if (sa == 0 && sb == 0) return false;
-          return sa != sb;
-        };
-
+        // ============================================================
+        // Attribute / SplitMap helpers (original semantics)
+        // ============================================================
         static constexpr int8_t SideUnknown  = -1;
-        static constexpr int8_t SidePositive = 0;
-        static constexpr int8_t SideNegative = 1;
+        static constexpr int8_t SidePositive =  0;
+        static constexpr int8_t SideNegative =  1;
 
-        auto sideFromSigns = [&](const int ss[4]) -> int8_t
-        {
-          bool hasNeg = false, hasPos = false;
-          for (int i = 0; i < 4; ++i)
-          {
-            hasNeg = hasNeg || (ss[i] < 0);
-            hasPos = hasPos || (ss[i] > 0);
-          }
-          if (hasNeg && hasPos) return SideUnknown;
-          if (hasNeg)           return SideNegative;
-          if (hasPos)           return SidePositive;
-          return SideUnknown;
-        };
-
-        // SplitMap helpers
         auto isNoSplit = [&](size_t d, const Optional<Attribute>& a) -> bool
         {
           if (!a) return false;
@@ -202,7 +180,9 @@ namespace Rodin::Geometry
           return base;
         };
 
-        // ---- provenance maps for ORIGINAL edges/faces only
+        // ============================================================
+        // Provenance maps for ORIGINAL edges/faces only (from discretizeBad)
+        // ============================================================
         struct EdgeKey
         {
           Index a, b;
@@ -244,10 +224,35 @@ namespace Rodin::Geometry
           if (a) inFaceAttrByVerts[makeFaceKey(fv(0), fv(1), fv(2))] = *a;
         }
 
-        // ---- output vertices + edge intersection cache
+        // ============================================================
+        // Global tolerance (consistent across shared edges)
+        // ============================================================
+        static constexpr Real rel0_global = Real(1e-10);
+        Real globalPhiScale = Real(0);
+        for (Index i = 0; i < nv; ++i)
+          if (finite(ls[i]))
+            globalPhiScale = std::max(globalPhiScale, std::abs(ls[i]));
+
+        const Real eps0_global = std::max(eps_sign_user, rel0_global * globalPhiScale);
+        const Real eps_snap    = std::max(eps_snap_user, eps0_global);
+
+        // ------------------------------------------------------------
+        // 1) Global per-vertex sign (deterministic w/ tolerance)
+        // ------------------------------------------------------------
+        std::vector<int8_t> vsgn(static_cast<size_t>(nv), 0);
+        for (Index i = 0; i < nv; ++i)
+        {
+          const Real p = ls[i];
+          if (!finite(p)) { vsgn[(size_t)i] = 0; continue; }
+          vsgn[(size_t)i] = (p < -eps0_global) ? int8_t(-1) : int8_t(+1);
+        }
+
+        // ------------------------------------------------------------
+        // 2) Output vertices
+        // ------------------------------------------------------------
         PointCloud outVerts;
         outVerts.setDimension(3);
-        outVerts.reserve(static_cast<size_t>(nv) + static_cast<size_t>(ne / 4));
+        outVerts.reserve(static_cast<size_t>(nv) + static_cast<size_t>(conn.getCount(1)));
 
         for (Index i = 0; i < nv; ++i)
           outVerts.push_back(mesh.getVertexCoordinates(i));
@@ -258,368 +263,335 @@ namespace Rodin::Geometry
           return static_cast<Index>(outVerts.getCount() - 1);
         };
 
-        // Relative scale used to derive a single global sign threshold from level-set magnitude.
-        // Kept aligned with the prior per-cell relative sign tolerance.
-        const Real rel0_global = Real(1e-10);
-        Real globalPhiScale = Real(0);
-        for (Index i = 0; i < nv; ++i)
-          globalPhiScale = std::max(globalPhiScale, std::abs(ls[i]));
-        const Real eps0_global = std::max(eps_sign_user, rel0_global * globalPhiScale);
-        std::vector<int8_t> vSign(static_cast<size_t>(nv), SidePositive);
-        for (Index i = 0; i < nv; ++i)
-          vSign[static_cast<size_t>(i)] = (ls[i] < -eps0_global) ? int8_t(-1) : int8_t(+1);
-
-        FlatMap<EdgeKey, Index> edgeVertexPairToIntersection;
-
-        auto getIntersectionOnEdge = [&](Index va, Index vb,
-                                         Real fa, Real fb,
-                                         Real eps0, Real eps_snap) -> Index
+        // ------------------------------------------------------------
+        // Helpers for deterministic triangulation / guards
+        // ------------------------------------------------------------
+        auto sortedPair = [](Index i, Index j) -> std::pair<Index,Index>
         {
-          if (!finite(fa) || !finite(fb))
-            return va;
-
-          const Real epsS = std::max(eps_snap, eps0);
-
-          if (std::abs(fa) <= epsS) return va;
-          if (std::abs(fb) <= epsS) return vb;
-
-          const EdgeKey ek = makeEdgeKey(va, vb);
-          auto it = edgeVertexPairToIntersection.find(ek);
-          if (it != edgeVertexPairToIntersection.end())
-            return it->second;
-
-          const Real denom = (fa - fb);
-          if (std::abs(denom) <= epsS)
-            return (std::abs(fa) < std::abs(fb)) ? va : vb;
-
-          static constexpr Real tminFrac = Real(1e-2);
-          Real t = fa / denom;
-
-          if (std::abs(fa + fb) <= Real(4) * eps0)
-            t = Real(0.5);
-          else
-            t = std::min<Real>(Real(1) - tminFrac, std::max<Real>(tminFrac, t));
-
-          const auto pa = outVerts[va];
-          const auto pb = outVerts[vb];
-          const auto p  = pa + t * (pb - pa);
-
-          const Index vi = addVertex(p);
-          edgeVertexPairToIntersection[ek] = vi;
-          return vi;
+          if (i > j) std::swap(i, j);
+          return {i, j};
         };
 
-        // ---- output cells + metadata
-        std::vector<std::array<Index, 4>> outCells;
-        std::vector<Optional<Attribute>>  outCellAttr;
-        std::vector<int8_t>               outCellSide;
+        auto triPush = [](std::vector<std::array<Index,3>>& L, Index a, Index b, Index c)
+        {
+          if (a==b || a==c || b==c) return;
+          L.push_back({{a,b,c}});
+        };
 
-        outCells.reserve(static_cast<size_t>(mesh.getCellCount()) * 2);
+        auto triangulateQuad =
+          [&](Index q0, Index q1, Index q2, Index q3, std::vector<std::array<Index,3>>& outTris)
+        {
+          const auto d02 = sortedPair(q0,q2);
+          const auto d13 = sortedPair(q1,q3);
+          if (d02 < d13)
+          {
+            triPush(outTris, q0,q1,q2);
+            triPush(outTris, q0,q2,q3);
+          }
+          else
+          {
+            triPush(outTris, q1,q2,q3);
+            triPush(outTris, q1,q3,q0);
+          }
+        };
+
+        // ------------------------------------------------------------
+        // 3) Edge intersection cache by EDGE INDEX (global snap)
+        // ------------------------------------------------------------
+        const Index ne = static_cast<Index>(conn.getCount(1));
+        std::vector<Index> edgeIsect(static_cast<size_t>(ne), INVALID);
+
+        auto getIsectOnEdge = [&](Index eid, Index va, Index vb, Real fa, Real fb) -> Index
+        {
+          if (finite(fa) && std::abs(fa) <= eps_snap) return va;
+          if (finite(fb) && std::abs(fb) <= eps_snap) return vb;
+
+          Index& slot = edgeIsect[(size_t)eid];
+          if (slot != INVALID)
+            return slot;
+
+          if (!finite(fa) || !finite(fb))
+          {
+            slot = va;
+            return slot;
+          }
+
+          const Real denom = (fa - fb);
+          if (std::abs(denom) <= eps_snap)
+          {
+            slot = (std::abs(fa) < std::abs(fb)) ? va : vb;
+            return slot;
+          }
+
+          Real t = fa / denom; // fast path (unclamped)
+          const auto pa = outVerts[va];
+          const auto pb = outVerts[vb];
+          slot = addVertex(pa + t * (pb - pa));
+          return slot;
+        };
+
+        // ------------------------------------------------------------
+        // 4) Face split cache by FACE INDEX
+        // ------------------------------------------------------------
+        struct FaceSplit
+        {
+          std::vector<std::array<Index,3>> neg;
+          std::vector<std::array<Index,3>> pos;
+        };
+
+        const Index nf = static_cast<Index>(conn.getCount(2));
+        std::vector<uint8_t> faceDone(static_cast<size_t>(nf), 0);
+        std::vector<FaceSplit> faceSplit(static_cast<size_t>(nf));
+
+        auto getFaceSplitById = [&](Index fid) -> const FaceSplit&
+        {
+          if (faceDone[(size_t)fid])
+            return faceSplit[(size_t)fid];
+
+          faceDone[(size_t)fid] = 1;
+          FaceSplit& fs = faceSplit[(size_t)fid];
+
+          const auto& fv = conn.getPolytope(2, fid); // 3 vertices (a,b,c)
+          const Index a = fv.coeff(0);
+          const Index b = fv.coeff(1);
+          const Index c = fv.coeff(2);
+
+          const Real fa = ls[a], fb = ls[b], fc = ls[c];
+          if (!finite(fa) || !finite(fb) || !finite(fc))
+            return fs;
+
+          const int sa = (int)vsgn[(size_t)a];
+          const int sb = (int)vsgn[(size_t)b];
+          const int sc = (int)vsgn[(size_t)c];
+
+          if (sa==0 || sb==0 || sc==0)
+            return fs;
+
+          if (sa==sb && sb==sc)
+          {
+            if (sa < 0) triPush(fs.neg, a,b,c);
+            else        triPush(fs.pos, a,b,c);
+            return fs;
+          }
+
+          const auto& feids = conn.getIncidence({2,1}, fid); // 3 edges
+
+          Index eAB = INVALID, eBC = INVALID, eCA = INVALID;
+          for (Index eid : feids)
+          {
+            const auto& ev = conn.getIncidence({1,0}, eid);
+            const Index x = ev[0], y = ev[1];
+
+            if ((x==a && y==b) || (x==b && y==a)) eAB = eid;
+            else if ((x==b && y==c) || (x==c && y==b)) eBC = eid;
+            else if ((x==c && y==a) || (x==a && y==c)) eCA = eid;
+          }
+
+          auto edgeOf = [&](Index x, Index y) -> Index
+          {
+            if ((x==a && y==b) || (x==b && y==a)) return eAB;
+            if ((x==b && y==c) || (x==c && y==b)) return eBC;
+            if ((x==c && y==a) || (x==a && y==c)) return eCA;
+            Alert::MemberFunctionException(*this, __func__)
+              << "Face edge mismatch for fid=" << fid << " edge (" << x << "," << y << ")."
+              << Alert::Raise;
+            return INVALID;
+          };
+
+          auto I = [&](Index x, Index y, Real fx, Real fy) -> Index
+          {
+            const Index eid = edgeOf(x, y);
+            return getIsectOnEdge(eid, x, y, fx, fy);
+          };
+
+          auto handleOneTwo =
+            [&](Index lone, Index s0, Index s1, Real flone, Real fs0, Real fs1, bool loneIsNeg)
+          {
+            if (s0 > s1) { std::swap(s0,s1); std::swap(fs0,fs1); }
+
+            const Index p0 = I(lone, s0, flone, fs0);
+            const Index p1 = I(lone, s1, flone, fs1);
+
+            if (loneIsNeg) triPush(fs.neg, lone, p0, p1);
+            else           triPush(fs.pos, lone, p0, p1);
+
+            if (loneIsNeg) triangulateQuad(s0, s1, p1, p0, fs.pos);
+            else           triangulateQuad(s0, s1, p1, p0, fs.neg);
+          };
+
+          if (sa!=sb && sa!=sc)      handleOneTwo(a, b, c, fa, fb, fc, sa<0);
+          else if (sb!=sa && sb!=sc) handleOneTwo(b, a, c, fb, fa, fc, sb<0);
+          else                       handleOneTwo(c, a, b, fc, fa, fb, sc<0);
+
+          return fs;
+        };
+
+        // ------------------------------------------------------------
+        // 5) Emission (cells + per-cell attributes + per-cell side)
+        // ------------------------------------------------------------
+        auto signedVolume = [&](Index a, Index b, Index c, Index d) -> long double
+        {
+          const auto A = outVerts[a];
+          const auto B = outVerts[b];
+          const auto C = outVerts[c];
+          const auto D = outVerts[d];
+          return (long double)(B - A).dot((C - A).cross(D - A));
+        };
+
+        std::vector<std::array<Index,4>> outCells;
+        std::vector<Optional<Attribute>> outCellAttr;
+        std::vector<int8_t>             outCellSide;
+
+        outCells.reserve(static_cast<size_t>(mesh.getCellCount()) * 6);
         outCellAttr.reserve(outCells.capacity());
         outCellSide.reserve(outCells.capacity());
 
-        std::vector<Index> edgeCellDegree(static_cast<size_t>(mesh.getPolytopeCount(1)), 0);
-        for (auto cit = mesh.getCell(); !cit.end(); ++cit)
-        {
-          for (const auto ei : conn.getIncidence({3, 1}, cit->getIndex()))
-            edgeCellDegree[static_cast<size_t>(ei)]++;
-        }
-
-        auto signedVolume = [&](Index a, Index b, Index c, Index d) -> Real
-        {
-          const auto A = outVerts[a];
-          const auto B = outVerts[b];
-          const auto C = outVerts[c];
-          const auto D = outVerts[d];
-          const auto u = B - A;
-          const auto v = C - A;
-          const auto w = D - A;
-          return u.dot(v.cross(w));
-        };
-        auto tetQuality = [&](Index a, Index b, Index c, Index d) -> Real
-        {
-          // Lower bound for denominator in the scale-normalized quality metric.
-          // Kept very small to avoid perturbing quality ordering while preventing
-          // division by zero in highly collapsed configurations.
-          // Safety factor chosen to keep denominator strictly positive while
-          // remaining close to machine precision for normalized coordinates.
-          static constexpr Real epsilonSafetyFactor = Real(100);
-          const Real minQualityDivisor =
-            epsilonSafetyFactor * std::numeric_limits<Real>::epsilon();
-          const Real absoluteVolume = std::abs(signedVolume(a, b, c, d));
-          const auto A = outVerts[a];
-          const auto B = outVerts[b];
-          const auto C = outVerts[c];
-          const auto D = outVerts[d];
-          const Real l01 = (A - B).norm();
-          const Real l02 = (A - C).norm();
-          const Real l03 = (A - D).norm();
-          const Real l12 = (B - C).norm();
-          const Real l13 = (B - D).norm();
-          const Real l23 = (C - D).norm();
-          Real h = std::max(l01, l02);
-          h = std::max(h, l03);
-          h = std::max(h, l12);
-          h = std::max(h, l13);
-          h = std::max(h, l23);
-          h = std::max(h, minQualityDivisor);
-          return absoluteVolume / (h * h * h);
-        };
         auto emitTet = [&](Index a, Index b, Index c, Index d,
-                           const Optional<Attribute>& outAttr,
+                           const Optional<Attribute>& attr,
                            int8_t side)
         {
-          std::array<Index, 4> t{{a, b, c, d}};
-          if (signedVolume(t[0], t[1], t[2], t[3]) < 0)
-            std::swap(t[1], t[2]);
+          if (a==b || a==c || a==d || b==c || b==d || c==d) return;
+          std::array<Index,4> t{{a,b,c,d}};
+          if (signedVolume(t[0],t[1],t[2],t[3]) < (long double)0) std::swap(t[1],t[2]);
           outCells.push_back(t);
-          outCellAttr.push_back(outAttr);
+          outCellAttr.push_back(attr);
           outCellSide.push_back(side);
         };
-        auto minQuality4 = [&](const std::array<std::array<Index, 4>, 4>& tets) -> Real
+
+        auto conePolyhedron =
+          [&](const std::vector<std::array<Index,3>>& boundaryTris,
+              const Optional<Attribute>& attr,
+              int8_t side) -> void
         {
-          Real minQuality = std::numeric_limits<Real>::infinity();
-          for (const auto& tet : tets)
-            minQuality = std::min(minQuality, tetQuality(tet[0], tet[1], tet[2], tet[3]));
-          return minQuality;
-        };
-        auto bestAndQualityOf3ByMinQuality4 = [&](const std::array<std::array<Index, 4>, 4>& A,
-                                                  const std::array<std::array<Index, 4>, 4>& B,
-                                                  const std::array<std::array<Index, 4>, 4>& C)
-          -> std::pair<const std::array<std::array<Index, 4>, 4>*, Real>
-        {
-          const Real qa = minQuality4(A);
-          const Real qb = minQuality4(B);
-          const Real qc = minQuality4(C);
-          const std::array<std::array<Index, 4>, 4>* best = &A;
-          Real qbest = qa;
-          if (qb > qbest) { best = &B; qbest = qb; }
-          if (qc > qbest) { best = &C; qbest = qc; }
-          return {best, qbest};
-        };
-        auto split_1neg = [&](Index vN,
-                              Index p0, Index p1, Index p2,
-                              Index i0, Index i1, Index i2,
-                              const Optional<Attribute>& aNeg,
-                              const Optional<Attribute>& aPos,
-                              bool allowLocalNoSplit)
-          -> bool
-        {
-          std::array<std::array<Index, 4>, 4> A = {{
-            {{vN, i0, i1, i2}},
-            {{p0, p1, p2, i0}},
-            {{p1, p2, i0, i1}},
-            {{p2, i0, i1, i2}}
-          }};
-          std::array<std::array<Index, 4>, 4> B = {{
-            {{vN, i0, i1, i2}},
-            {{p0, p1, p2, i1}},
-            {{p0, p2, i1, i2}},
-            {{p0, i0, i1, i2}}
-          }};
-          std::array<std::array<Index, 4>, 4> C = {{
-            {{vN, i0, i1, i2}},
-            {{p0, p1, p2, i2}},
-            {{p0, p1, i0, i2}},
-            {{p1, i0, i1, i2}}
-          }};
-          const auto [best, bestQuality] = bestAndQualityOf3ByMinQuality4(A, B, C);
-          if (allowLocalNoSplit && !finite(bestQuality))
-            return false;
-          emitTet((*best)[0][0], (*best)[0][1], (*best)[0][2], (*best)[0][3], aNeg, SideNegative);
-          emitTet((*best)[1][0], (*best)[1][1], (*best)[1][2], (*best)[1][3], aPos, SidePositive);
-          emitTet((*best)[2][0], (*best)[2][1], (*best)[2][2], (*best)[2][3], aPos, SidePositive);
-          emitTet((*best)[3][0], (*best)[3][1], (*best)[3][2], (*best)[3][3], aPos, SidePositive);
-          return true;
-        };
+          if (boundaryTris.empty()) return;
 
-        auto split_1pos = [&](Index vP,
-                              Index n0, Index n1, Index n2,
-                              Index i0, Index i1, Index i2,
-                              const Optional<Attribute>& aNeg,
-                              const Optional<Attribute>& aPos,
-                              bool allowLocalNoSplit)
-          -> bool
-        {
-          std::array<std::array<Index, 4>, 4> A = {{
-            {{vP, i0, i1, i2}},
-            {{n0, n1, n2, i0}},
-            {{n1, n2, i0, i1}},
-            {{n2, i0, i1, i2}}
-          }};
-          std::array<std::array<Index, 4>, 4> B = {{
-            {{vP, i0, i1, i2}},
-            {{n0, n1, n2, i1}},
-            {{n0, n2, i1, i2}},
-            {{n0, i0, i1, i2}}
-          }};
-          std::array<std::array<Index, 4>, 4> C = {{
-            {{vP, i0, i1, i2}},
-            {{n0, n1, n2, i2}},
-            {{n0, n1, i0, i2}},
-            {{n1, i0, i1, i2}}
-          }};
-          const auto [best, bestQuality] = bestAndQualityOf3ByMinQuality4(A, B, C);
-          if (allowLocalNoSplit && !finite(bestQuality))
-            return false;
-          emitTet((*best)[0][0], (*best)[0][1], (*best)[0][2], (*best)[0][3], aPos, SidePositive);
-          emitTet((*best)[1][0], (*best)[1][1], (*best)[1][2], (*best)[1][3], aNeg, SideNegative);
-          emitTet((*best)[2][0], (*best)[2][1], (*best)[2][2], (*best)[2][3], aNeg, SideNegative);
-          emitTet((*best)[3][0], (*best)[3][1], (*best)[3][2], (*best)[3][3], aNeg, SideNegative);
-          return true;
-        };
+          boost::unordered_set<Index> uniq;
+          uniq.reserve(boundaryTris.size()*2);
 
-        auto split_2neg2pos_best = [&](Index n0, Index n1,
-                                       Index p0, Index p1,
-                                       Index a, Index b, Index c, Index d,
-                                       const Optional<Attribute>& aNeg,
-                                       const Optional<Attribute>& aPos)
-          -> bool
-        {
-          std::array<std::array<Index, 4>, 6> A = {{
-            {{n0, a, b, n1}},
-            {{a,  b, n1, c}},
-            {{b,  n1, c,  d}},
-            {{p0, a, c,  p1}},
-            {{a,  c, p1, b}},
-            {{c,  p1, b, d}}
-          }};
-
-          std::array<std::array<Index, 4>, 6> B = {{
-            {{n0, a, b, n1}},
-            {{a,  b, n1, d}},
-            {{a,  n1, c,  d}},
-            {{p0, a, c,  p1}},
-            {{a,  c, p1, d}},
-            {{a,  p1, b, d}}
-          }};
-
-          std::array<Index, 4> q = {a, b, c, d};
-          std::sort(q.begin(), q.end());
-          // Large odd constants used to symmetrically mix sorted ids and pick a stable diagonal.
-          static constexpr uint64_t kMix0 = 11400714819323198485ull;
-          static constexpr uint64_t kMix1 = 14029467366897019727ull;
-          static constexpr uint64_t kMix2 =  1609587929392839161ull;
-          static constexpr uint64_t kMix3 =  9650029242287828579ull;
-          const uint64_t h = static_cast<uint64_t>(q[0]) * kMix0
-                           ^ static_cast<uint64_t>(q[1]) * kMix1
-                           ^ static_cast<uint64_t>(q[2]) * kMix2
-                           ^ static_cast<uint64_t>(q[3]) * kMix3;
-          const auto& best = ((h & 1ull) == 0ull) ? A : B;
-
-          emitTet(best[0][0], best[0][1], best[0][2], best[0][3], aNeg, SideNegative);
-          emitTet(best[1][0], best[1][1], best[1][2], best[1][3], aNeg, SideNegative);
-          emitTet(best[2][0], best[2][1], best[2][2], best[2][3], aNeg, SideNegative);
-
-          emitTet(best[3][0], best[3][1], best[3][2], best[3][3], aPos, SidePositive);
-          emitTet(best[4][0], best[4][1], best[4][2], best[4][3], aPos, SidePositive);
-          emitTet(best[5][0], best[5][1], best[5][2], best[5][3], aPos, SidePositive);
-          return true;
-        };
-
-        static constexpr std::array<std::pair<int,int>, 6> TetEdges = {{
-          {0, 1}, {0, 2}, {0, 3}, {1, 2}, {1, 3}, {2, 3}
-        }};
-
-        auto hasStrictCutNonZero = [&](const int ss[4]) -> bool
-        {
-          for (const auto& [a,b] : TetEdges)
+          Point c(3); c.setZero();
+          size_t cnt = 0;
+          for (const auto& tri : boundaryTris)
           {
-            if (ss[a] == 0 || ss[b] == 0) continue;
-            if (ss[a] * ss[b] == -1) return true;
+            for (int k=0; k<3; ++k)
+            {
+              const Index vi = tri[(size_t)k];
+              if (uniq.insert(vi).second)
+              {
+                c += outVerts[vi];
+                cnt++;
+              }
+            }
           }
-          return false;
+          if (cnt == 0) return;
+          c /= Real(cnt);
+
+          const Index center = addVertex(c);
+
+          for (const auto& tri : boundaryTris)
+            emitTet(center, tri[0], tri[1], tri[2], attr, side);
         };
 
-        // ---- main loop
-        for (auto cit = mesh.getCell(); !cit.end(); ++cit)
+        // ------------------------------------------------------------
+        // 6) Main loop (fast geometry) + NoSplit blocking + material split
+        // ------------------------------------------------------------
+        auto sstrict = [&](Real x) -> int
         {
-          const Index ci = cit->getIndex();
+          if (!finite(x)) return 0;
+          if (x < -eps0_global) return -1;
+          if (x >  eps0_global) return +1;
+          return 0;
+        };
+
+        auto isCutStrict = [&](int sa, int sb) -> bool
+        {
+          if (sa == 0 && sb == 0) return false;
+          return sa != sb;
+        };
+
+        Index cellIdx = 0;
+        for (auto cit = mesh.getCell(); !cit.end(); ++cit, ++cellIdx)
+        {
           if (cit->getGeometry() != Polytope::Type::Tetrahedron)
-          {
             Alert::MemberFunctionException(*this, __func__)
-              << "MarchingTetrahedra only supports tetrahedral meshes."
-              << Alert::Raise;
-          }
+              << "Only tetrahedral meshes are supported." << Alert::Raise;
+
+          const Optional<Attribute> cellAttr = cit->getAttribute();
 
           const auto& cv = cit->getVertices();
-          const std::array<Index, 4> v{{ cv(0), cv(1), cv(2), cv(3) }};
+          const std::array<Index,4> v{{cv(0),cv(1),cv(2),cv(3)}};
 
-          const std::array<Real, 4> phi{{ ls[v[0]], ls[v[1]], ls[v[2]], ls[v[3]] }};
-          const auto cellAttr = cit->getAttribute();
-
+          const std::array<Real,4> phi{{ ls[v[0]], ls[v[1]], ls[v[2]], ls[v[3]] }};
           if (!finite(phi[0]) || !finite(phi[1]) || !finite(phi[2]) || !finite(phi[3]))
           {
             emitTet(v[0], v[1], v[2], v[3], cellAttr, SideUnknown);
             continue;
           }
 
-          const Real phi_scale = std::max(std::max(std::abs(phi[0]), std::abs(phi[1])),
-                                std::max(std::abs(phi[2]), std::abs(phi[3])));
-          const Real rel0 = Real(1e-10);
-          const Real eps0 = std::max(eps_sign_user, rel0 * phi_scale);
-          const Real eps_snap = std::max(eps_snap_user, eps0);
-
           int ss[4] = {
-            vSign[static_cast<size_t>(v[0])],
-            vSign[static_cast<size_t>(v[1])],
-            vSign[static_cast<size_t>(v[2])],
-            vSign[static_cast<size_t>(v[3])]
+            (int)vsgn[(size_t)v[0]],
+            (int)vsgn[(size_t)v[1]],
+            (int)vsgn[(size_t)v[2]],
+            (int)vsgn[(size_t)v[3]]
           };
 
-          const int8_t side0 = sideFromSigns(ss);
-          const bool doSplitGeom = hasStrictCutNonZero(ss);
-
-          if (!doSplitGeom)
+          if (ss[0]==0 || ss[1]==0 || ss[2]==0 || ss[3]==0)
           {
-            if (side0 == SideNegative)
-              emitTet(v[0], v[1], v[2], v[3], inferLabel(3, cellAttr, true), SideNegative);
-            else if (side0 == SidePositive)
-              emitTet(v[0], v[1], v[2], v[3], inferLabel(3, cellAttr, false), SidePositive);
-            else
-              emitTet(v[0], v[1], v[2], v[3], cellAttr, SideUnknown);
+            emitTet(v[0], v[1], v[2], v[3], cellAttr, SideUnknown);
             continue;
           }
 
+          // cut check
+          static constexpr int E[6][2] = {{0,1},{0,2},{0,3},{1,2},{1,3},{2,3}};
+          bool hasCut = false;
+          for (int e=0; e<6; ++e)
+            if (ss[E[e][0]] != ss[E[e][1]]) { hasCut = true; break; }
+
+          if (!hasCut)
+          {
+            const bool neg = (ss[0] < 0);
+            const Optional<Attribute> a = inferLabel(3, cellAttr, neg);
+            emitTet(v[0], v[1], v[2], v[3], a, neg ? SideNegative : SidePositive);
+            continue;
+          }
+
+          // if cell is configured as "do not split", keep it unsplit
           if (!shouldSplit(3, cellAttr))
           {
             emitTet(v[0], v[1], v[2], v[3], cellAttr, SideUnknown);
             continue;
           }
 
+          // cell edges (needed for NoSplit blocking and for localEdgeId)
+          const auto& ceids = conn.getIncidence({3,1}, cellIdx);
+
+          // ---- NoSplit blocking (restore discretizeBad semantics)
           bool blocked = false;
-          const auto& eids = conn.getIncidence({3, 1}, ci);
 
-          auto sstrict_cell = [&](Real x) -> int
+          // (1) block if any NoSplit EDGE (d=1) is cut
+          for (Index eid : ceids)
           {
-            if (x < -eps0) return -1;
-            if (x >  eps0) return +1;
-            return 0;
-          };
-
-          for (Index ei : eids)
-          {
-            const auto ea = mesh.getAttribute(1, ei);
+            const auto ea = mesh.getAttribute(1, eid);
             if (!isNoSplit(1, ea)) continue;
 
-            const auto& ev = conn.getIncidence({1, 0}, ei);
-            const int sa = sstrict_cell(ls[ev[0]]);
-            const int sb = sstrict_cell(ls[ev[1]]);
-            if (isCut(sa, sb)) { blocked = true; break; }
+            const auto& ev = conn.getIncidence({1,0}, eid);
+            const int sa = sstrict(ls[ev[0]]);
+            const int sb = sstrict(ls[ev[1]]);
+            if (isCutStrict(sa, sb)) { blocked = true; break; }
           }
 
+          // (2) block if any NoSplit FACE (d=2) is non-uniform
           if (!blocked)
           {
-            const auto& fids = conn.getIncidence({3, 2}, ci);
-            for (Index fi : fids)
+            const auto& cfids_block = conn.getIncidence({3,2}, cellIdx);
+            for (Index fid : cfids_block)
             {
-              const auto fa = mesh.getAttribute(2, fi);
+              const auto fa = mesh.getAttribute(2, fid);
               if (!isNoSplit(2, fa)) continue;
 
-              const auto& fv = conn.getIncidence({2, 0}, fi);
-              const int s0 = sstrict_cell(ls[fv[0]]);
-              const int s1 = sstrict_cell(ls[fv[1]]);
-              const int s2 = sstrict_cell(ls[fv[2]]);
+              const auto& fv = conn.getPolytope(2, fid);
+              const int s0 = sstrict(ls[fv.coeff(0)]);
+              const int s1 = sstrict(ls[fv.coeff(1)]);
+              const int s2 = sstrict(ls[fv.coeff(2)]);
               const bool uniform = (s0 == s1 && s1 == s2);
               if (!uniform) { blocked = true; break; }
             }
@@ -631,118 +603,138 @@ namespace Rodin::Geometry
             continue;
           }
 
-          const auto aNeg = inferLabel(3, cellAttr, true);
-          const auto aPos = inferLabel(3, cellAttr, false);
+          const Optional<Attribute> aNeg = inferLabel(3, cellAttr, true);
+          const Optional<Attribute> aPos = inferLabel(3, cellAttr, false);
 
-          auto edgeIdx = [&](int a, int b) -> int
-          {
-            if (a > b) std::swap(a, b);
-            if (a == 0 && b == 1) return 0;
-            if (a == 0 && b == 2) return 1;
-            if (a == 0 && b == 3) return 2;
-            if (a == 1 && b == 2) return 3;
-            if (a == 1 && b == 3) return 4;
-            if (a == 2 && b == 3) return 5;
-            return -1;
-          };
+          // Build localEdgeId (O(6) per cell, then O(1) queries)
+          Index localEdgeId[4][4];
+          for (int i=0;i<4;++i)
+            for (int j=0;j<4;++j)
+              localEdgeId[i][j] = INVALID;
 
-          auto I = [&](int ia, int ib) -> Index
+          for (Index eid : ceids)
           {
-            const int e = edgeIdx(ia, ib);
-            const Index eid = eids[static_cast<size_t>(e)];
-            const Index va = v[static_cast<size_t>(ia)];
-            const Index vb = v[static_cast<size_t>(ib)];
-            const Real  fa = phi[static_cast<size_t>(ia)];
-            const Real  fb = phi[static_cast<size_t>(ib)];
-            return getIntersectionOnEdge(va, vb, fa, fb, eps0, eps_snap);
-          };
+            const auto& ev = conn.getIncidence({1,0}, eid);
+            const Index a = ev[0];
+            const Index b = ev[1];
 
-          int nneg = 0;
-          for (int i = 0; i < 4; ++i) nneg += (ss[i] < 0);
-          bool allowLocalNoSplit = true;
-          for (size_t ei = 0; ei < TetEdges.size(); ++ei)
-          {
-            const auto [ea, eb] = TetEdges[ei];
-            if (ss[ea] * ss[eb] != -1)
-              continue;
-            if (edgeCellDegree[static_cast<size_t>(eids[ei])] > 1)
+            int ia = -1, ib = -1;
+            for (int i=0;i<4;++i)
             {
-              allowLocalNoSplit = false;
+              if (v[(size_t)i] == a) ia = i;
+              if (v[(size_t)i] == b) ib = i;
+            }
+            if (ia >= 0 && ib >= 0)
+            {
+              localEdgeId[ia][ib] = eid;
+              localEdgeId[ib][ia] = eid;
+            }
+          }
+
+          std::vector<std::array<Index,3>> negB, posB;
+          negB.reserve(16);
+          posB.reserve(16);
+
+          bool fallback = false;
+
+          // (A) split triangles on the 4 original faces using CELL->FACE ids
+          const auto& cfids = conn.getIncidence({3,2}, cellIdx);
+          for (Index fid : cfids)
+          {
+            const auto& fs = getFaceSplitById(fid);
+            if (fs.neg.empty() && fs.pos.empty())
+            {
+              fallback = true;
               break;
             }
+            negB.insert(negB.end(), fs.neg.begin(), fs.neg.end());
+            posB.insert(posB.end(), fs.pos.begin(), fs.pos.end());
           }
 
-          if (nneg == 0)
+          if (fallback)
           {
-            emitTet(v[0], v[1], v[2], v[3], aPos, SidePositive);
-            continue;
-          }
-          if (nneg == 4)
-          {
-            emitTet(v[0], v[1], v[2], v[3], aNeg, SideNegative);
+            emitTet(v[0], v[1], v[2], v[3], cellAttr, SideUnknown);
             continue;
           }
 
-          if (nneg == 1)
+          // (B) interface triangles inside tet (uses localEdgeId => O(1))
           {
-            int in = -1; int ip[3]; int k = 0;
-            for (int i = 0; i < 4; ++i) (ss[i] < 0) ? (in = i) : (ip[k++] = i);
-
-            const Index i0 = I(in, ip[0]);
-            const Index i1 = I(in, ip[1]);
-            const Index i2 = I(in, ip[2]);
-            if (!split_1neg(v[static_cast<size_t>(in)],
-                            v[static_cast<size_t>(ip[0])],
-                            v[static_cast<size_t>(ip[1])],
-                            v[static_cast<size_t>(ip[2])],
-                            i0, i1, i2, aNeg, aPos, allowLocalNoSplit))
+            auto I = [&](int ia, int ib) -> Index
             {
-              emitTet(v[0], v[1], v[2], v[3], cellAttr, SideUnknown);
-            }
-            continue;
-          }
+              const Index eid = localEdgeId[ia][ib];
+              if (eid == INVALID)
+              {
+                Alert::MemberFunctionException(*this, __func__)
+                  << "localEdgeId missing for cell " << cellIdx
+                  << " local edge (" << ia << "," << ib << ")."
+                  << Alert::Raise;
+              }
+              return getIsectOnEdge(eid,
+                                    v[(size_t)ia], v[(size_t)ib],
+                                    phi[(size_t)ia], phi[(size_t)ib]);
+            };
 
-          if (nneg == 3)
-          {
-            int ipos = -1; int ineg[3]; int k = 0;
-            for (int i = 0; i < 4; ++i) (ss[i] > 0) ? (ipos = i) : (ineg[k++] = i);
-
-            const Index i0 = I(ipos, ineg[0]);
-            const Index i1 = I(ipos, ineg[1]);
-            const Index i2 = I(ipos, ineg[2]);
-            if (!split_1pos(v[static_cast<size_t>(ipos)],
-                            v[static_cast<size_t>(ineg[0])],
-                            v[static_cast<size_t>(ineg[1])],
-                            v[static_cast<size_t>(ineg[2])],
-                            i0, i1, i2, aNeg, aPos, allowLocalNoSplit))
+            const int nneg = (ss[0]<0) + (ss[1]<0) + (ss[2]<0) + (ss[3]<0);
+            if (nneg != 0 && nneg != 4)
             {
-              emitTet(v[0], v[1], v[2], v[3], cellAttr, SideUnknown);
+              if (nneg==1 || nneg==3)
+              {
+                const bool loneIsNeg = (nneg==1);
+                int lone = -1;
+                int others[3]; int k=0;
+                for (int i=0;i<4;++i)
+                {
+                  const bool isNeg = (ss[i] < 0);
+                  if (isNeg == loneIsNeg) lone = i;
+                  else others[k++] = i;
+                }
+
+                Index p[3] = { I(lone, others[0]), I(lone, others[1]), I(lone, others[2]) };
+
+                if (p[0]>p[1]) std::swap(p[0],p[1]);
+                if (p[1]>p[2]) std::swap(p[1],p[2]);
+                if (p[0]>p[1]) std::swap(p[0],p[1]);
+
+                triPush(negB, p[0], p[1], p[2]);
+                triPush(posB, p[0], p[1], p[2]);
+              }
+              else // nneg == 2
+              {
+                int ineg[2], ipos[2], kn=0, kp=0;
+                for (int i=0;i<4;++i) (ss[i]<0) ? (ineg[kn++]=i) : (ipos[kp++]=i);
+
+                Index n0 = v[(size_t)ineg[0]], n1 = v[(size_t)ineg[1]];
+                Index p0 = v[(size_t)ipos[0]], p1 = v[(size_t)ipos[1]];
+
+                if (n0 > n1) std::swap(ineg[0], ineg[1]), std::swap(n0,n1);
+                if (p0 > p1) std::swap(ipos[0], ipos[1]), std::swap(p0,p1);
+
+                const Index a = I(ineg[0], ipos[0]);
+                const Index b = I(ineg[0], ipos[1]);
+                const Index d = I(ineg[1], ipos[1]);
+                const Index c = I(ineg[1], ipos[0]);
+
+                std::vector<std::array<Index,3>> qTris;
+                qTris.reserve(2);
+                triangulateQuad(a,b,d,c, qTris);
+
+                for (const auto& tri : qTris)
+                {
+                  triPush(negB, tri[0], tri[1], tri[2]);
+                  triPush(posB, tri[0], tri[1], tri[2]);
+                }
+              }
             }
-            continue;
           }
 
-          // nneg == 2
-          {
-            int ineg[2]; int ipos[2]; int kn = 0, kp = 0;
-            for (int i = 0; i < 4; ++i) (ss[i] > 0) ? (ipos[kp++] = i) : (ineg[kn++] = i);
-
-            const Index a = I(ineg[0], ipos[0]);
-            const Index b = I(ineg[0], ipos[1]);
-            const Index c = I(ineg[1], ipos[0]);
-            const Index d = I(ineg[1], ipos[1]);
-            if (!split_2neg2pos_best(v[static_cast<size_t>(ineg[0])],
-                                     v[static_cast<size_t>(ineg[1])],
-                                     v[static_cast<size_t>(ipos[0])],
-                                     v[static_cast<size_t>(ipos[1])],
-                                     a, b, c, d, aNeg, aPos))
-            {
-              emitTet(v[0], v[1], v[2], v[3], cellAttr, SideUnknown);
-            }
-            continue;
-          }
+          // (C) cone each side polyhedron (emit with side + mapped cell attr)
+          conePolyhedron(negB, aNeg, SideNegative);
+          conePolyhedron(posB, aPos, SidePositive);
         }
 
-        // ---- build output mesh (cells)
+        // ------------------------------------------------------------
+        // 7) Build output mesh (cells + cell attributes)
+        // ------------------------------------------------------------
         typename MeshType::Builder builder;
         builder.initialize(3).nodes(outVerts.getCount());
         builder.setVertices(std::move(outVerts));
@@ -751,36 +743,26 @@ namespace Rodin::Geometry
         for (size_t i = 0; i < outCells.size(); ++i)
         {
           const auto& t = outCells[i];
-          builder.tetrahedron(IndexArray{{ t[0], t[1], t[2], t[3] }});
+          builder.tetrahedron(IndexArray{{t[0], t[1], t[2], t[3]}});
           if (outCellAttr[i])
             builder.attribute({3, static_cast<Index>(i)}, *outCellAttr[i]);
         }
 
         auto out = builder.finalize();
 
-        // ------------------------------------------------------------
-        // Attribute transfer / interface marking (+ m_old, m_fallback policy)
-        //
-        // Cases handled:
-        //  (A) Interface face/edge: mark with ifaceOpt (if configured).
-        //  (B) Original (allOriginal) non-interface:
-        //      - if input base == ifaceOpt:
-        //          * if m_old set -> set to *m_old
-        //          * else -> leave nullopt (legacy “drop old interface tag”)
-        //      - else: map with inferLabel(...) and set if not nullopt.
-        //  (C) Created (NOT allOriginal) non-interface:
-        //      - if m_fallback set -> set to *m_fallback
-        //      - else -> leave nullopt (legacy behavior)
-        // ------------------------------------------------------------
+        // ============================================================
+        // 8) Attribute transfer / interface marking (faces + edges)
+        // ============================================================
         out.getConnectivity().compute(2, 3);
         out.getConnectivity().compute(1, 3);
         const auto& oconn = out.getConnectivity();
 
-        const auto& ifaceOpt = this->getInterface(2);
+        const auto& ifaceOpt2 = this->getInterface(2);
+        const auto& ifaceOpt1 = this->getInterface(1);
 
         auto isFittedZeroV = [&](Index vi) -> bool
         {
-          return (vi < nv) && (std::abs(ls[vi]) <= eps_sign_user);
+          return (vi < nv) && finite(ls[vi]) && (std::abs(ls[vi]) <= eps_sign_user);
         };
 
         // Faces
@@ -798,8 +780,8 @@ namespace Rodin::Geometry
           bool hasNeg = false, hasPos = false;
           for (const auto ci : inc)
           {
-            hasNeg = hasNeg || (outCellSide[ci] == SideNegative);
-            hasPos = hasPos || (outCellSide[ci] == SidePositive);
+            hasNeg = hasNeg || (outCellSide[(size_t)ci] == SideNegative);
+            hasPos = hasPos || (outCellSide[(size_t)ci] == SidePositive);
           }
 
           const bool fittedInterface =
@@ -808,7 +790,7 @@ namespace Rodin::Geometry
           const bool isInterface = (hasNeg && hasPos) || fittedInterface;
           if (isInterface)
           {
-            if (ifaceOpt) out.setAttribute({2, fidx}, *ifaceOpt);
+            if (ifaceOpt2) out.setAttribute({2, fidx}, *ifaceOpt2);
             continue;
           }
 
@@ -825,14 +807,16 @@ namespace Rodin::Geometry
 
           const Attribute base = itIn->second;
 
-          if (ifaceOpt && base == *ifaceOpt)
+          if (ifaceOpt2 && base == *ifaceOpt2)
           {
             if (m_old[2])
               out.setAttribute({2, fidx}, *m_old[2]);
             continue;
           }
 
-          const Optional<Attribute> mapped = inferLabel(2, Optional<Attribute>(base), /*neg*/ hasNeg);
+          const Optional<Attribute> mapped =
+            inferLabel(2, Optional<Attribute>(base), /*negativeSide*/ hasNeg);
+
           if (mapped)
             out.setAttribute({2, fidx}, *mapped);
         }
@@ -849,8 +833,8 @@ namespace Rodin::Geometry
           bool hasNeg = false, hasPos = false;
           for (const auto ci : inc)
           {
-            hasNeg = hasNeg || (outCellSide[ci] == SideNegative);
-            hasPos = hasPos || (outCellSide[ci] == SidePositive);
+            hasNeg = hasNeg || (outCellSide[(size_t)ci] == SideNegative);
+            hasPos = hasPos || (outCellSide[(size_t)ci] == SidePositive);
           }
 
           const bool fittedInterface =
@@ -859,8 +843,7 @@ namespace Rodin::Geometry
           const bool isInterface = (hasNeg && hasPos) || fittedInterface;
           if (isInterface)
           {
-            if (this->getInterface(1))
-              out.setAttribute({1, eidx}, *this->getInterface(1));
+            if (ifaceOpt1) out.setAttribute({1, eidx}, *ifaceOpt1);
             continue;
           }
 
@@ -877,14 +860,17 @@ namespace Rodin::Geometry
 
           const Attribute base = itIn->second;
 
-          if (ifaceOpt && base == *ifaceOpt)
+          // "old interface" cleanup: accept either configured interface tag (d=1 or d=2)
+          if ((ifaceOpt1 && base == *ifaceOpt1) || (ifaceOpt2 && base == *ifaceOpt2))
           {
             if (m_old[1])
               out.setAttribute({1, eidx}, *m_old[1]);
             continue;
           }
 
-          const Optional<Attribute> mapped = inferLabel(1, Optional<Attribute>(base), /*neg*/ hasNeg);
+          const Optional<Attribute> mapped =
+            inferLabel(1, Optional<Attribute>(base), /*negativeSide*/ hasNeg);
+
           if (mapped)
             out.setAttribute({1, eidx}, *mapped);
         }

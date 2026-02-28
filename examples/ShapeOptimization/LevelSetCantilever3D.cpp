@@ -36,7 +36,7 @@ static constexpr Real eps = 1e-12;
 static constexpr Real hgrad = 1.6;
 static constexpr Real ell = 0.1;
 static Real elementStep = 0.5;
-static Real hmax = 0.1;
+static Real hmax = 0.2;
 static Real hmin = 0.1 * hmax;
 static Real hausd = 0.2 * hmin;
 static size_t hmaxIt = maxIt / 2;
@@ -71,6 +71,9 @@ int main(int, char**)
 
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
+
+  th.save("Omega0.mesh", IO::FileFormat::MEDIT);
+
   // Optimization loop
   std::vector<double> obj;
   std::ofstream fObj("obj.txt");
@@ -81,8 +84,8 @@ int main(int, char**)
     Alert::Info() << "   | Optimizing the domain..." << Alert::Raise;
     MMG::Optimizer().setHMax(hmax)
                     .setHMin(hmin)
-                    //.setGradation(1.1)
-                    // .setHausdorff(hausd)
+                    .setGradation(1.1)
+                    .setHausdorff(hausd)
                     .setAngleDetection(false)
                     .optimize(th);
 
@@ -100,6 +103,8 @@ int main(int, char**)
     conn.restrict(2, 3);
 
     conn.discover(0, 0);
+
+    conn.discover(2, 1);
 
     Alert::Info() << "   | Trimming mesh." << Alert::Raise;
     SubMesh trimmed = th.trim(Exterior);
@@ -197,17 +202,24 @@ int main(int, char**)
                              .split(2, Gamma0, { Gamma0, Gamma0 })
                              .discretize();
 
-    for (auto it = th.getBoundary(); it; ++it)
+    th.getConnectivity().discover(2, 3);
+
+    for (auto it = th.getFace(); it; ++it)
     {
+      if (it->isBoundary())
+        th.setAttribute(it.key(), 50);
+      continue;
       const auto attr = it->getAttribute();
       if (attr)
       {
-        if (*attr == 23)
-          th.setAttribute(it.key(), 50);
-      }
-      else
-      {
-        th.setAttribute(it.key(), {});
+        if (*attr == 23 && it->isBoundary())
+        {
+          th.setAttribute(it.key(), Gamma0);
+        }
+        else if (*attr == 23)
+        {
+          th.setAttribute(it.key(), {});
+        }
       }
     }
 
