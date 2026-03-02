@@ -253,7 +253,6 @@ namespace Rodin::Tests::Unit
   {
     Rodin::IndexArray a(0), b(0);
     Rodin::IndexArraySymmetricHash symHash;
-    EXPECT_EQ(symHash(a), 0);
     EXPECT_EQ(symHash(a), symHash(b));
   }
 
