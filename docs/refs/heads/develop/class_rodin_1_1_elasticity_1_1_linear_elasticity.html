@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Models::Elasticity::LinearElasticity class | Rodin</title>
+  <title>Rodin::Elasticity::LinearElasticity class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -71,17 +71,17 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_models_2_elasticity_2_linear_elasticity_8h.html">&lt;Rodin/Models/Elasticity/LinearElasticity.h&gt;</a></div>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_elasticity_2_linear_elasticity_8h.html">&lt;Rodin/Elasticity/LinearElasticity.h&gt;</a></div>
           <div class="m-doc-template">template&lt;class FES, class Lambda, class Mu&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_models.html">Models</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_models_1_1_elasticity.html">Elasticity</a>::<wbr/></span>LinearElasticity <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_elasticity.html">Elasticity</a>::<wbr/></span>LinearElasticity <span class="m-thin">class</span>
         </h1>
         <p>Linear elasticity system for small deformations.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md152">Parameters</a></li>
-            <li><a href="#autotoc_md153">Material Relations</a></li>
-            <li><a href="#autotoc_md154">Usage Example</a></li>
+            <li><a href="#autotoc_md36">Parameters</a></li>
+            <li><a href="#autotoc_md37">Material Relations</a></li>
+            <li><a href="#autotoc_md38">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -217,7 +217,7 @@ $ \mathbf{f} $
 <use x='243.609733' y='-13.136848' xlink:href='#eq5-g3-84'/>
 <use x='250.214224' y='-8.200662' xlink:href='#eq5-g4-41'/>
 </g>
-</svg></div><section id="autotoc_md152"><h3><a href="#autotoc_md152">Parameters</a></h3><ul><li><svg class="m-math" style="width: 0.711em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.828489 8.302191">
+</svg></div><section id="autotoc_md36"><h3><a href="#autotoc_md36">Parameters</a></h3><ul><li><svg class="m-math" style="width: 0.711em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.828489 8.302191">
 <title>
 $ \lambda $
 </title>
@@ -237,7 +237,7 @@ $ \mu $
 <g id='eq7-page1'>
 <use x='0' y='0' xlink:href='#eq7-g0-22'/>
 </g>
-</svg>: Lamé&#x27;s second parameter (shear modulus)</li></ul></section><section id="autotoc_md153"><h3><a href="#autotoc_md153">Material Relations</a></h3><p>The Lamé parameters can be expressed in terms of Young&#x27;s modulus <svg class="m-math" style="width: 0.976em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 9.366198 8.169366">
+</svg>: Lamé&#x27;s second parameter (shear modulus)</li></ul></section><section id="autotoc_md37"><h3><a href="#autotoc_md37">Material Relations</a></h3><p>The Lamé parameters can be expressed in terms of Young&#x27;s modulus <svg class="m-math" style="width: 0.976em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 9.366198 8.169366">
 <title>
 $ E $
 </title>
@@ -307,7 +307,7 @@ $ \nu $
 <use x='275.478674' y='-2.988792' xlink:href='#eq10-g1-23'/>
 <use x='282.016607' y='-2.988792' xlink:href='#eq10-g2-41'/>
 </g>
-</svg></div></section><section id="autotoc_md154"><h3><a href="#autotoc_md154">Usage Example</a></h3><pre class="m-code"><span class="c1">// Vector-valued FE space for displacement</span>
+</svg></div></section><section id="autotoc_md38"><h3><a href="#autotoc_md38">Usage Example</a></h3><pre class="m-code"><span class="c1">// Vector-valued FE space for displacement</span>
 <span class="n">VectorP1</span><span class="w"> </span><span class="nf">fes</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">RealFunction</span><span class="w"> </span><span class="nf">lambda</span><span class="p">(</span><span class="mf">1.0</span><span class="p">);</span>
 <span class="n">RealFunction</span><span class="w"> </span><span class="nf">mu</span><span class="p">(</span><span class="mf">0.5</span><span class="p">);</span>
@@ -337,7 +337,7 @@ $ \nu $
               <div class="m-doc-template">
                 template&lt;class FES, class Lambda, class Mu&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Models::<wbr />Elasticity::<wbr />LinearElasticity&lt;FES, Lambda, Mu&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aacdc7794a47251a196001d1ce0c5458d" class="m-doc-self">LinearElasticity</a>(</span><span class="m-doc-wrap">const Lambda&amp; l,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Elasticity::<wbr />LinearElasticity&lt;FES, Lambda, Mu&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aacdc7794a47251a196001d1ce0c5458d" class="m-doc-self">LinearElasticity</a>(</span><span class="m-doc-wrap">const Lambda&amp; l,
               const Mu&amp; m,
               const FES&amp; fes)</span></span>
             </h3>
@@ -388,7 +388,7 @@ $ \mu $
                 template&lt;class FES, class Lambda, class Mu&gt;
                 template&lt;class MuDerived, class LambdaDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Models::<wbr />Elasticity::<wbr />LinearElasticity&lt;FES, Lambda, Mu&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a71258e45343375dec176568312d7267b" class="m-doc-self">LinearElasticity</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">Variational::<wbr />FunctionBase</a>&lt;LambdaDerived&gt;&amp; lambda,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Elasticity::<wbr />LinearElasticity&lt;FES, Lambda, Mu&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a71258e45343375dec176568312d7267b" class="m-doc-self">LinearElasticity</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">Variational::<wbr />FunctionBase</a>&lt;LambdaDerived&gt;&amp; lambda,
               const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">Variational::<wbr />FunctionBase</a>&lt;MuDerived&gt;&amp; mu,
               const FES&amp; fes)</span></span>
             </h3>

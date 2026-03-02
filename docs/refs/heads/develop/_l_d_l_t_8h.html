@@ -77,9 +77,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md195">Algorithm</a></li>
-            <li><a href="#autotoc_md196">Applicability</a></li>
-            <li><a href="#autotoc_md197">Usage Example</a></li>
+            <li><a href="#autotoc_md198">Algorithm</a></li>
+            <li><a href="#autotoc_md199">Applicability</a></li>
+            <li><a href="#autotoc_md200">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -89,7 +89,7 @@
             </li>
           </ul>
         </nav>
-<p>This header provides the LDLT solver class for dense matrices, implementing Cholesky decomposition with pivoting for numerical stability.</p><section id="autotoc_md195"><h3><a href="#autotoc_md195">Algorithm</a></h3><p>The solver computes:</p><div class="m-math"><svg style="width: 8.495em; height: 1.082em;" viewBox="153.248332 -10.382422 81.548191 10.382422">
+<p>This header provides the LDLT solver class for dense matrices, implementing Cholesky decomposition with pivoting for numerical stability.</p><section id="autotoc_md198"><h3><a href="#autotoc_md198">Algorithm</a></h3><p>The solver computes:</p><div class="m-math"><svg style="width: 8.495em; height: 1.082em;" viewBox="153.248332 -10.382422 81.548191 10.382422">
 <title>
 \[
   PAP^T = LDL^T
@@ -144,7 +144,7 @@ $ D $
 <g id='eq4-page1'>
 <use x='0' y='0' xlink:href='#eq4-g0-68'/>
 </g>
-</svg> is diagonal. Pivoting improves numerical stability.</p></section><section id="autotoc_md196"><h3><a href="#autotoc_md196">Applicability</a></h3><ul><li>Symmetric indefinite dense matrices</li><li>When numerical stability is critical</li><li>Small to medium-sized systems</li><li>Systems requiring robust factorization</li></ul></section><section id="autotoc_md197"><h3><a href="#autotoc_md197">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+</svg> is diagonal. Pivoting improves numerical stability.</p></section><section id="autotoc_md199"><h3><a href="#autotoc_md199">Applicability</a></h3><ul><li>Symmetric indefinite dense matrices</li><li>When numerical stability is critical</li><li>Small to medium-sized systems</li><li>Systems requiring robust factorization</li></ul></section><section id="autotoc_md200"><h3><a href="#autotoc_md200">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 
 <span class="n">Solver</span><span class="o">::</span><span class="n">LDLT</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>

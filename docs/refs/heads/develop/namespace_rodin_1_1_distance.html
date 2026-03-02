@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin/Models/Elasticity/LinearElasticity.h file | Rodin</title>
+  <title>Rodin::Distance namespace | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -71,41 +71,49 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_5ed5bd20e7b55e8c0db0dae066728d9f.html">Models</a>/</span><span class="m-breadcrumb"><a href="dir_ae0f46bd0882f51d0f2a6bcd2fd45b37.html">Elasticity</a>/</span>LinearElasticity.h <span class="m-thin">file</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Distance <span class="m-thin">namespace</span>
         </h1>
-        <p>Linear elasticity model for solid mechanics.</p>
+        <p>Module which provides models for computation of the distance function.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#namespaces">Namespaces</a></li>
                 <li><a href="#nested-classes">Classes</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>This file provides the LinearElasticity class, which implements the linear elasticity equations for small deformation analysis in solid mechanics.</p>
-        <section id="namespaces">
-          <h2><a href="#namespaces">Namespaces</a></h2>
-          <dl class="m-doc">
-            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for Shape and Topology Optimization.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_models.html" class="m-doc">Rodin::Models</a></dt>
-            <dd>Module which provides implementation of various variational models.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_models_1_1_elasticity.html" class="m-doc">Rodin::Models::Elasticity</a></dt>
-            <dd>Module which provides models for solid mechanics and elasticity.</dd>
-          </dl>
-        </section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class FES, class Lambda, class Mu&gt;</div>
-              class <a href="class_rodin_1_1_models_1_1_elasticity_1_1_linear_elasticity.html" class="m-doc">Rodin::Models::Elasticity::LinearElasticity</a>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              class <a href="class_rodin_1_1_distance_1_1_base.html" class="m-doc">Base</a>
             </dt>
-            <dd>Linear elasticity system for small deformations.</dd>
+            <dd><a href="class_rodin_1_1_distance_1_1_base.html" class="m-doc">Base</a> class for distance function computation models using CRTP.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
+              class <a href="class_rodin_1_1_distance_1_1_eikonal.html" class="m-doc">Eikonal</a>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_distance.html" class="m-doc">Distance</a> function computation using the <a href="class_rodin_1_1_distance_1_1_eikonal.html" class="m-doc">Eikonal</a> equation.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_distance_1_1_poisson.html" class="m-doc">Poisson</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_distance_1_1_poisson.html" class="m-doc">Poisson</a> approximation to the distance function.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_distance_1_1_rvachev.html" class="m-doc">Rvachev</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_distance_1_1_rvachev.html" class="m-doc">Rvachev</a> normalization for a level set function.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_distance_1_1_signed_poisson.html" class="m-doc">SignedPoisson</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_distance_1_1_poisson.html" class="m-doc">Poisson</a> approximation to the signed distance function.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_distance_1_1_spalding_tucker.html" class="m-doc">SpaldingTucker</a>
+            </dt>
+            <dd>Spalding-Tucker normalization for a level set function.</dd>
           </dl>
         </section>
       </div>

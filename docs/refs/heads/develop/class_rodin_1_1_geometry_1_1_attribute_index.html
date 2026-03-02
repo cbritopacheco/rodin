@@ -74,10 +74,15 @@
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>AttributeIndex <span class="m-thin">class</span>
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_attribute_index_8h.html">&lt;Rodin/Geometry/AttributeIndex.h&gt;</a></div>
         </h1>
-        <p>Manages attribute assignments for mesh polytopes.</p>
+        <p>Attribute indexing for mesh polytopes.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
+            <li><a href="#autotoc_md54">Data layout</a></li>
+            <li><a href="#autotoc_md55">Thread-Safety Model</a></li>
+            <li><a href="#autotoc_md56">Structural Immutability</a></li>
+            <li><a href="#autotoc_md57">Copy and Move Semantics</a></li>
+            <li><a href="#autotoc_md58">Usage Contract</a></li>
             <li>
               Reference
               <ul>
@@ -87,24 +92,24 @@
             </li>
           </ul>
         </nav>
-<p>This class maintains a mapping from polytopes (identified by dimension and index) to their associated attributes. Attributes are typically used to identify material regions, boundary markers, or other domain-specific properties.</p><p>The class is thread-safe for concurrent access through the use of shared mutexes for each dimension.</p><aside class="m-note m-info"><h4>Note</h4><p>This class supports Boost serialization for saving and loading mesh attribute information.</p></aside>
+<p>This class stores, for each topological dimension <code>d</code>, an array of optional attributes indexed by polytope index. Attributes are typically used as material-region ids, boundary markers, or any other user-defined tags.</p><section id="autotoc_md54"><h3><a href="#autotoc_md54">Data layout</a></h3><p>The storage is organized by dimension:</p><ul><li>For each <code>d</code> in [0, meshDim], a Dimension stores:<ul><li><code>slots:</code> a vector of <code>Optional&lt;Attribute&gt;</code>, indexed by polytope index.</li><li><code>mutex:</code> a <code>std::shared_mutex</code> protecting accesses to <code>slots</code>.</li></ul></li></ul></section><section id="autotoc_md55"><h3><a href="#autotoc_md55">Thread-Safety Model</a></h3><p>This class provides fine-grained thread-safety at the level of individual dimensions:</p><ul><li>Each dimension owns an independent <code>std::shared_mutex</code>.</li><li>Operations that read/write attributes in a given dimension synchronize using that dimension&#x27;s mutex.</li></ul><p>After initialization, concurrent calls to the following methods are safe w.r.t. each other (subject to each method&#x27;s preconditions):</p><ul><li><a href="#aacead788d9511da9aac886f19c4b966f" class="m-doc">resize(size_<wbr />t,size_<wbr />t)</a></li><li>set(const std::pair&lt;size_t,Index&gt;&amp;,Attribute)</li><li>set(const std::pair&lt;size_t,Index&gt;&amp;,size_t,Attribute)</li><li><a href="#a286c6601a055b29be8fc642881c8ba9c" class="m-doc">unset(const std::<wbr />pair&lt;size_t,Index&gt;&amp;,size_t)</a></li><li><a href="#a7b1d700027d13dd3c0d01ba92e45ec1f" class="m-doc">get(const std::<wbr />pair&lt;size_t,Index&gt;&amp;,size_t) const</a></li><li><a href="#a57cb0d488137c714837aef2837441e9f" class="m-doc">getAttributes(size_<wbr />t) const</a></li></ul></section><section id="autotoc_md56"><h3><a href="#autotoc_md56">Structural Immutability</a></h3><p>After <a href="#a77a1d55dead131c3707395c06f7b0b2b" class="m-doc">initialize()</a> completes, the number of stored dimensions (i.e. <code>m_dimensions.size()</code>) is immutable for the lifetime of the object. This avoids requiring a global lock on the dimension vector itself.</p><p>Therefore:</p><ul><li><a href="#a77a1d55dead131c3707395c06f7b0b2b" class="m-doc">initialize()</a> must be called before any concurrent access.</li><li><a href="#a77a1d55dead131c3707395c06f7b0b2b" class="m-doc">initialize()</a> is not thread-safe and must not be called concurrently.</li><li>The mesh dimension must remain constant for the lifetime of the object.</li></ul></section><section id="autotoc_md57"><h3><a href="#autotoc_md57">Copy and Move Semantics</a></h3><p>Copy construction:</p><ul><li>Copies per-dimension storage using the source per-dimension locks.</li></ul><p>Copy assignment:</p><ul><li>Requires both objects to be initialized with the same number of dimensions.</li><li>Copies per dimension using the per-dimension locks.</li><li>Is NOT an atomic snapshot across all dimensions: a concurrent reader may observe a mix of old and new dimension contents while assignment is in progress.</li></ul><p>Move construction / move assignment:</p><ul><li>Transfer ownership of the internal dimension vector.</li><li>Require external synchronization: no other thread may access either object concurrently with the move.</li></ul></section><section id="autotoc_md58"><h3><a href="#autotoc_md58">Usage Contract</a></h3><ol><li>Call initialize(meshDim) exactly once (or idempotently with the same value) before any concurrent use.</li><li>Do not change the mesh dimension after initialization.</li><li>Ensure storage exists (via <a href="#aacead788d9511da9aac886f19c4b966f" class="m-doc">resize()</a> or via <a href="#ae2c5ae1e43c31e7358688d2c41c3fd0e" class="m-doc">set()</a>) before relying on reads returning non-null values.</li><li>Provide external synchronization around move operations.</li></ol></section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="ae5616d80c022bd11074f35de5568d948">
-              <span class="m-doc-wrap-bumper"><a href="#ae5616d80c022bd11074f35de5568d948" class="m-doc-self">AttributeIndex</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ae5616d80c022bd11074f35de5568d948" class="m-doc">AttributeIndex</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Default constructor.</dd>
             <dt id="a749108214d6f5baf68fd74294ae241cc">
               <span class="m-doc-wrap-bumper"><a href="#a749108214d6f5baf68fd74294ae241cc" class="m-doc-self">~AttributeIndex</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Destructor.</dd>
-            <dt id="ac4c61f9bb45928113140158ee50ce612">
-              <span class="m-doc-wrap-bumper"><a href="#ac4c61f9bb45928113140158ee50ce612" class="m-doc-self">AttributeIndex</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_attribute_index.html" class="m-doc">AttributeIndex</a>&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ac4c61f9bb45928113140158ee50ce612" class="m-doc">AttributeIndex</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_attribute_index.html" class="m-doc">AttributeIndex</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a70350396ca1f778d966cf61522a257fb">
-              <span class="m-doc-wrap-bumper"><a href="#a70350396ca1f778d966cf61522a257fb" class="m-doc-self">AttributeIndex</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_attribute_index.html" class="m-doc">AttributeIndex</a>&amp;&amp; other) <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a70350396ca1f778d966cf61522a257fb" class="m-doc">AttributeIndex</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_attribute_index.html" class="m-doc">AttributeIndex</a>&amp;&amp; other) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -112,43 +117,48 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a78134cb306e2e961174a5d1539caae9b">
-              <span class="m-doc-wrap-bumper">auto <a href="#a78134cb306e2e961174a5d1539caae9b" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_attribute_index.html" class="m-doc">AttributeIndex</a>&amp;) -&gt; <a href="class_rodin_1_1_geometry_1_1_attribute_index.html" class="m-doc">AttributeIndex</a>&amp; <span class="m-label m-flat m-danger">deleted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4f749c4cf8d1c63e403bf5b8897240d5" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_attribute_index.html" class="m-doc">AttributeIndex</a>&amp; other) -&gt; <a href="class_rodin_1_1_geometry_1_1_attribute_index.html" class="m-doc">AttributeIndex</a>&amp;</span>
             </dt>
-            <dd>Copy assignment operator (deleted).</dd>
-            <dt id="a81d3450255206ec86309d1d64a233391">
-              <span class="m-doc-wrap-bumper">auto <a href="#a81d3450255206ec86309d1d64a233391" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_attribute_index.html" class="m-doc">AttributeIndex</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_geometry_1_1_attribute_index.html" class="m-doc">AttributeIndex</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dd>Copy assignment operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a81d3450255206ec86309d1d64a233391" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_attribute_index.html" class="m-doc">AttributeIndex</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_geometry_1_1_attribute_index.html" class="m-doc">AttributeIndex</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a77a1d55dead131c3707395c06f7b0b2b" class="m-doc">initialize</a>(</span><span class="m-doc-wrap">size_t meshDim)</span>
             </dt>
-            <dd>Initializes the attribute index for a mesh of given dimension.</dd>
+            <dd>Initializes the index for a mesh of topological dimension <code>meshDim</code>.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#aacead788d9511da9aac886f19c4b966f" class="m-doc">resize</a>(</span><span class="m-doc-wrap">size_t d,
               size_t count)</span>
             </dt>
-            <dd>Resizes the storage for polytopes of dimension <code>d</code>.</dd>
+            <dd>Ensures storage capacity for dimension <code>d</code>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#ae91ad8419d78d52ac3599f864a04ee5d" class="m-doc">set</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
-              <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr)</span>
+              <span class="m-doc-wrap-bumper">void <a href="#ae2c5ae1e43c31e7358688d2c41c3fd0e" class="m-doc">set</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attr)</span>
             </dt>
             <dd>Sets the attribute for a polytope.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a33dc125f746d737a16f68f03641c28fc" class="m-doc">set</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              <span class="m-doc-wrap-bumper">void <a href="#a450936c754394940738b55219749bb2b" class="m-doc">set</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
               size_t count,
-              <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr)</span>
+              const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attr)</span>
             </dt>
-            <dd>Sets the attribute for a polytope with known count.</dd>
+            <dd>Sets the attribute for a polytope assuming a known count.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa0b991e04a4bf80ec50df35652ad28e5" class="m-doc">get</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
-              size_t count) const -&gt; <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a286c6601a055b29be8fc642881c8ba9c" class="m-doc">unset</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              size_t count)</span>
+            </dt>
+            <dd>Clears (unsets) the attribute for a polytope.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7b1d700027d13dd3c0d01ba92e45ec1f" class="m-doc">get</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              size_t count) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;</span>
             </dt>
             <dd>Gets the attribute for a polytope.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a57cb0d488137c714837aef2837441e9f" class="m-doc">getAttributes</a>(</span><span class="m-doc-wrap">size_t d) const -&gt; <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;</span>
             </dt>
-            <dd>Gets all unique attributes in a given dimension.</dd>
+            <dd>Returns the set of all attributes present in dimension <code>d</code>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Archive&gt;</div>
               <span class="m-doc-wrap-bumper">void <a href="#af0dd9205158ccf7bcfcd8ff81f79c927" class="m-doc">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
@@ -159,11 +169,46 @@
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ae5616d80c022bd11074f35de5568d948"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />AttributeIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae5616d80c022bd11074f35de5568d948" class="m-doc-self">AttributeIndex</a>(</span><span class="m-doc-wrap">) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Default constructor.</p>
+<p>Constructs an uninitialized index. Call <a href="#a77a1d55dead131c3707395c06f7b0b2b" class="m-doc">initialize()</a> before use.</p>
+          </div></section>
+          <section class="m-doc-details" id="ac4c61f9bb45928113140158ee50ce612"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />AttributeIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac4c61f9bb45928113140158ee50ce612" class="m-doc-self">AttributeIndex</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_attribute_index.html" class="m-doc">AttributeIndex</a>&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+<p>Copies all dimensions from <code>other</code>.</p><p>Thread-safety:</p><ul><li>Safe if <code>other</code> is not being moved concurrently.</li><li>Copy is not a globally atomic snapshot across dimensions.</li></ul>
+          </div></section>
+          <section class="m-doc-details" id="a70350396ca1f778d966cf61522a257fb"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />AttributeIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a70350396ca1f778d966cf61522a257fb" class="m-doc-self">AttributeIndex</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_attribute_index.html" class="m-doc">AttributeIndex</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+<p>Transfers internal dimension storage from <code>other</code>.</p><p>Thread-safety:</p><ul><li>Requires external synchronization: no concurrent access to either object.</li></ul>
+          </div></section>
+          <section class="m-doc-details" id="a4f749c4cf8d1c63e403bf5b8897240d5"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_attribute_index.html" class="m-doc">AttributeIndex</a>&amp; Rodin::<wbr />Geometry::<wbr />AttributeIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f749c4cf8d1c63e403bf5b8897240d5" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_attribute_index.html" class="m-doc">AttributeIndex</a>&amp; other)</span></span>
+            </h3>
+            <p>Copy assignment operator.</p>
+<p>Copies all dimensions from <code>other</code> into <code>*this</code>.</p><p>Preconditions:</p><ul><li>Both objects must already be initialized with the same mesh dimension (i.e. same <code>m_dimensions.size()</code>).</li></ul><p>Thread-safety:</p><ul><li>Uses per-dimension locks.</li><li>Not an atomic snapshot across dimensions.</li></ul>
+          </div></section>
+          <section class="m-doc-details" id="a81d3450255206ec86309d1d64a233391"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_attribute_index.html" class="m-doc">AttributeIndex</a>&amp; Rodin::<wbr />Geometry::<wbr />AttributeIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a81d3450255206ec86309d1d64a233391" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_attribute_index.html" class="m-doc">AttributeIndex</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Move assignment operator.</p>
+<p>Transfers internal dimension storage from <code>other</code> into <code>*this</code>.</p><p>Thread-safety:</p><ul><li>Requires external synchronization: no concurrent access to either object.</li></ul>
+          </div></section>
           <section class="m-doc-details" id="a77a1d55dead131c3707395c06f7b0b2b"><div>
             <h3>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />AttributeIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a77a1d55dead131c3707395c06f7b0b2b" class="m-doc-self">initialize</a>(</span><span class="m-doc-wrap">size_t meshDim)</span></span>
             </h3>
-            <p>Initializes the attribute index for a mesh of given dimension.</p>
+            <p>Initializes the index for a mesh of topological dimension <code>meshDim</code>.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -171,18 +216,18 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">meshDim&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Topological dimension of the mesh</td>
+                  <td>Topological dimension of the mesh.</td>
                 </tr>
               </tbody>
             </table>
-<p>Must be called once before any concurrent access. Allocates storage for dimensions 0 through <code>meshDim</code>.</p>
+<p>Allocates per-dimension storage for dimensions <code>0</code>..meshDim.</p><p>Structural immutability:</p><ul><li>After initialization, the dimension count is immutable.</li><li>Calling initialize again is only valid if called idempotently with the same <code>meshDim</code>.</li></ul><p>Thread-safety:</p><ul><li>Not thread-safe. Must be called before any concurrent access.</li></ul>
           </div></section>
           <section class="m-doc-details" id="aacead788d9511da9aac886f19c4b966f"><div>
             <h3>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />AttributeIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aacead788d9511da9aac886f19c4b966f" class="m-doc-self">resize</a>(</span><span class="m-doc-wrap">size_t d,
               size_t count)</span></span>
             </h3>
-            <p>Resizes the storage for polytopes of dimension <code>d</code>.</p>
+            <p>Ensures storage capacity for dimension <code>d</code>.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -190,20 +235,20 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Dimension of polytopes</td>
+                  <td>Dimension of polytopes.</td>
                 </tr>
                 <tr>
                   <td>count&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Number of polytopes to allocate space for</td>
+                  <td>Minimum number of slots to allocate.</td>
                 </tr>
               </tbody>
             </table>
-<p>Ensures that the internal storage can hold at least <code>count</code> polytopes of dimension <code>d</code>.</p>
+<p>Grows the slot vector for dimension <code>d</code> to at least <code>count</code>, filling new entries with <code>std::nullopt</code>.</p><p>Thread-safety:</p><ul><li>Thread-safe w.r.t. other operations on the same dimension (protected by that dimension&#x27;s mutex).</li></ul>
           </div></section>
-          <section class="m-doc-details" id="ae91ad8419d78d52ac3599f864a04ee5d"><div>
+          <section class="m-doc-details" id="ae2c5ae1e43c31e7358688d2c41c3fd0e"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />AttributeIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae91ad8419d78d52ac3599f864a04ee5d" class="m-doc-self">set</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
-              <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />AttributeIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae2c5ae1e43c31e7358688d2c41c3fd0e" class="m-doc-self">set</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attr)</span></span>
             </h3>
             <p>Sets the attribute for a polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -213,23 +258,23 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> of (dimension, index) identifying the polytope</td>
+                  <td><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> (dimension, index) identifying the polytope.</td>
                 </tr>
                 <tr>
                   <td>attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Attribute value to assign</td>
+                  <td>Attribute value to assign.</td>
                 </tr>
               </tbody>
             </table>
-<p>Automatically resizes storage if needed to accommodate the polytope.</p>
+<p>If storage is insufficient, grows the slot vector to include <code>idx</code> and assigns <code>attr</code>.</p><p>Thread-safety:</p><ul><li>Thread-safe (dimension-level exclusive lock).</li></ul>
           </div></section>
-          <section class="m-doc-details" id="a33dc125f746d737a16f68f03641c28fc"><div>
+          <section class="m-doc-details" id="a450936c754394940738b55219749bb2b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />AttributeIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a33dc125f746d737a16f68f03641c28fc" class="m-doc-self">set</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />AttributeIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a450936c754394940738b55219749bb2b" class="m-doc-self">set</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
               size_t count,
-              <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr)</span></span>
+              const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attr)</span></span>
             </h3>
-            <p>Sets the attribute for a polytope with known count.</p>
+            <p>Sets the attribute for a polytope assuming a known count.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -237,23 +282,46 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> of (dimension, index) identifying the polytope</td>
+                  <td><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> (dimension, index) identifying the polytope.</td>
                 </tr>
                 <tr>
                   <td>count&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Expected number of polytopes in this dimension</td>
+                  <td>Expected number of polytopes in this dimension.</td>
                 </tr>
                 <tr>
                   <td>attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Attribute value to assign</td>
+                  <td>Attribute value to assign.</td>
                 </tr>
               </tbody>
             </table>
-<p>More efficient than <a href="#ae91ad8419d78d52ac3599f864a04ee5d" class="m-doc">set()</a> when the total count is known in advance.</p>
+<p>Ensures the dimension has at least <code>count</code> slots (growing if necessary), then assigns <code>attr</code> at <code>idx</code>.</p><p>Preconditions:</p><ul><li><code>idx</code> &lt; <code>count</code>.</li></ul><p>Thread-safety:</p><ul><li>Thread-safe (dimension-level exclusive lock).</li></ul>
           </div></section>
-          <section class="m-doc-details" id="aa0b991e04a4bf80ec50df35652ad28e5"><div>
+          <section class="m-doc-details" id="a286c6601a055b29be8fc642881c8ba9c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> Rodin::<wbr />Geometry::<wbr />AttributeIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa0b991e04a4bf80ec50df35652ad28e5" class="m-doc-self">get</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />AttributeIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a286c6601a055b29be8fc642881c8ba9c" class="m-doc-self">unset</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              size_t count)</span></span>
+            </h3>
+            <p>Clears (unsets) the attribute for a polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> (dimension, index) identifying the polytope.</td>
+                </tr>
+                <tr>
+                  <td>count&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Expected number of polytopes in this dimension.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Ensures the dimension has at least <code>count</code> slots (growing if necessary), then resets the entry at <code>idx</code> to <code>std::nullopt</code>.</p><p>Thread-safety:</p><ul><li>Thread-safe (dimension-level exclusive lock).</li></ul>
+          </div></section>
+          <section class="m-doc-details" id="a7b1d700027d13dd3c0d01ba92e45ec1f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt; Rodin::<wbr />Geometry::<wbr />AttributeIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7b1d700027d13dd3c0d01ba92e45ec1f" class="m-doc-self">get</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
               size_t count) const</span></span>
             </h3>
             <p>Gets the attribute for a polytope.</p>
@@ -264,27 +332,27 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> of (dimension, index) identifying the polytope</td>
+                  <td><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> (dimension, index) identifying the polytope.</td>
                 </tr>
                 <tr>
                   <td>count&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Expected number of polytopes in this dimension</td>
+                  <td>Expected number of polytopes in this dimension.</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>The attribute value</td>
+                  <td>The optional attribute value.</td>
                 </tr>
               </tfoot>
             </table>
-<p>Returns the current value, growing storage to <code>count</code> if needed. Uses shared locking for read access, upgrading to exclusive locking only if resizing is required.</p>
+<p>Reads the slot at <code>idx</code> under a shared lock.</p><p>Notes:</p><ul><li>This method does not resize. If <code>idx</code> is out of range, returns <code>std::nullopt</code>.</li></ul><p>Preconditions:</p><ul><li><code>idx</code> &lt; <code>count</code> (debug-checked).</li></ul><p>Thread-safety:</p><ul><li>Thread-safe (dimension-level shared lock).</li></ul>
           </div></section>
           <section class="m-doc-details" id="a57cb0d488137c714837aef2837441e9f"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt; Rodin::<wbr />Geometry::<wbr />AttributeIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a57cb0d488137c714837aef2837441e9f" class="m-doc-self">getAttributes</a>(</span><span class="m-doc-wrap">size_t d) const</span></span>
             </h3>
-            <p>Gets all unique attributes in a given dimension.</p>
+            <p>Returns the set of all attributes present in dimension <code>d</code>.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -292,17 +360,17 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Dimension of polytopes</td>
+                  <td>Dimension of polytopes.</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>Set of all unique attribute values</td>
+                  <td>A flat set of unique attribute values.</td>
                 </tr>
               </tfoot>
             </table>
-<p>Useful for identifying all material regions or markers present in the mesh.</p>
+<p>Iterates over all slots in dimension <code>d</code> and collects all engaged attributes.</p><p>Thread-safety:</p><ul><li>Thread-safe (dimension-level shared lock).</li></ul>
           </div></section>
           <section class="m-doc-details" id="af0dd9205158ccf7bcfcd8ff81f79c927"><div>
             <h3>

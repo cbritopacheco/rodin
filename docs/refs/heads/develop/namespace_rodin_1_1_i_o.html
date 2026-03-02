@@ -182,11 +182,6 @@
             <dd><a href="class_rodin_1_1_i_o_1_1_printer.html" class="m-doc">Printer</a> template for meshes with specific file format and context.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_e_n_s_i_g_h_t6_00_01_context_1_1_local_01_4.html" class="m-doc">MeshPrinter&lt;FileFormat::ENSIGHT6, Context::Local&gt;</a>
-            </dt>
-            <dd>Specialization for printing sequential meshes in EnSight6 format.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_m_f_e_m_00_01_context_1_1_local_01_4.html" class="m-doc">MeshPrinter&lt;FileFormat::MFEM, Context::Local&gt;</a>
             </dt>
             <dd>Specialization for printing sequential meshes in MFEM format.</dd>
@@ -207,9 +202,7 @@
           <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper">enum class <a href="#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> { </span><span class="m-doc-wrap"><a href="#a610845e6f56e545283af144cbbb99cfead2fc2ac95a0b62e13572a658cf6390af" class="m-doc">MFEM</a>,
-              <a href="#a610845e6f56e545283af144cbbb99cfead8e85cdb6ef83caac7fa35c22dda2153" class="m-doc">GMSH</a>,
-              <a href="#a610845e6f56e545283af144cbbb99cfeae902e98da70b5998f60fb4cd62826def" class="m-doc">MEDIT</a>,
-              <a href="#a610845e6f56e545283af144cbbb99cfea6aac387f34d5c0cad7b1137d9806ca37" class="m-doc">ENSIGHT6</a> }</span>
+              <a href="#a610845e6f56e545283af144cbbb99cfeae902e98da70b5998f60fb4cd62826def" class="m-doc">MEDIT</a> }</span>
             </dt>
             <dd>Enumeration of supported file formats for mesh and grid function I/O.</dd>
           </dl>
@@ -246,21 +239,9 @@
                   </td>
                 </tr>
                 <tr>
-                  <td><a href="#a610845e6f56e545283af144cbbb99cfead8e85cdb6ef83caac7fa35c22dda2153" class="m-doc-self" id="a610845e6f56e545283af144cbbb99cfead8e85cdb6ef83caac7fa35c22dda2153">GMSH</a></td>
-                  <td>
-                  <p>GMSH mesh format - popular open-source mesh generator format.</p>
-                  </td>
-                </tr>
-                <tr>
                   <td><a href="#a610845e6f56e545283af144cbbb99cfeae902e98da70b5998f60fb4cd62826def" class="m-doc-self" id="a610845e6f56e545283af144cbbb99cfeae902e98da70b5998f60fb4cd62826def">MEDIT</a></td>
                   <td>
                   <p>MEDIT mesh format - used by MMG remeshing software.</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td><a href="#a610845e6f56e545283af144cbbb99cfea6aac387f34d5c0cad7b1137d9806ca37" class="m-doc-self" id="a610845e6f56e545283af144cbbb99cfea6aac387f34d5c0cad7b1137d9806ca37">ENSIGHT6</a></td>
-                  <td>
-                  <p>EnSight6 format - widely used in post-processing and visualization.</p>
                   </td>
                 </tr>
               </tbody>
@@ -291,7 +272,7 @@
                 </tr>
               </tfoot>
             </table>
-<h5 id="autotoc_md99">Example</h5><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">toCharString</span><span class="p">(</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">);</span><span class="w">  </span><span class="c1">// Returns &quot;MFEM&quot;</span></pre>
+<h5 id="autotoc_md122">Example</h5><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">toCharString</span><span class="p">(</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">);</span><span class="w">  </span><span class="c1">// Returns &quot;MFEM&quot;</span></pre>
           </div></section>
           <section class="m-doc-details" id="ad0f93b34d031c8b01811ac194b93bee1"><div>
             <h3>
@@ -320,7 +301,7 @@
                 </tr>
               </tfoot>
             </table>
-<p>Writes the string representation of the file format to the stream.</p><h5 id="autotoc_md100">Example</h5><pre class="m-code"><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MEDIT</span><span class="p">;</span><span class="w">  </span><span class="c1">// Outputs &quot;MEDIT&quot;</span></pre>
+<p>Writes the string representation of the file format to the stream.</p><h5 id="autotoc_md123">Example</h5><pre class="m-code"><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MEDIT</span><span class="p">;</span><span class="w">  </span><span class="c1">// Outputs &quot;MEDIT&quot;</span></pre>
           </div></section>
         </section>
       </div>

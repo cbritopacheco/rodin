@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Models::Advection::Lagrangian&lt;Variational::TrialFunction&lt;Variational::GridFunction&lt;FES, Data&gt;, FES&gt;, Variational::TestFunction&lt;FES&gt;, Initial, VectorField, Step&gt; class | Rodin</title>
+  <title>Rodin::Advection::Lagrangian&lt;Variational::TrialFunction&lt;Variational::GridFunction&lt;FES, Data&gt;, FES&gt;, Variational::TestFunction&lt;FES&gt;, Initial, VectorField, Step&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -71,11 +71,11 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_lagrangian_8h.html">&lt;Rodin/Models/Advection/Lagrangian.h&gt;</a></div>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_lagrangian_8h.html">&lt;Rodin/Advection/Lagrangian.h&gt;</a></div>
           <div class="m-doc-template">template&lt;class FES, class Data, class Initial, class VectorField, class Step&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_models.html">Models</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_models_1_1_advection.html">Advection</a>::<wbr/></span>Lagrangian&lt;Variational::TrialFunction&lt;Variational::GridFunction&lt;FES, Data&gt;, FES&gt;, Variational::TestFunction&lt;FES&gt;, Initial, VectorField, Step&gt; <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_advection.html">Advection</a>::<wbr/></span>Lagrangian&lt;Variational::TrialFunction&lt;Variational::GridFunction&lt;FES, Data&gt;, FES&gt;, Variational::TestFunction&lt;FES&gt;, Initial, VectorField, Step&gt; <span class="m-thin">class</span>
         </h1>
-        <p><a href="class_rodin_1_1_models_1_1_advection_1_1_lagrangian.html" class="m-doc">Lagrangian</a> advection specialization for trial/test function formulation.</p>
+        <p><a href="class_rodin_1_1_advection_1_1_lagrangian.html" class="m-doc">Lagrangian</a> advection specialization for trial/test function formulation.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -164,7 +164,7 @@
               VVel&amp;&amp; vel,
               S&amp;&amp; st = S{})</span>
             </dt>
-            <dd>Constructs a <a href="class_rodin_1_1_models_1_1_advection_1_1_lagrangian.html" class="m-doc">Lagrangian</a> advection solver.</dd>
+            <dd>Constructs a <a href="class_rodin_1_1_advection_1_1_lagrangian.html" class="m-doc">Lagrangian</a> advection solver.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -184,13 +184,13 @@
                 template&lt;class FES, class Data, class Initial, class VectorField, class Step&gt;
                 template&lt;class U0, class VVel, class S = <a href="#af64c5a2aace3ee109b0b08713933ec73" class="m-doc">StepType</a>&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Models::<wbr />Advection::<wbr />Lagrangian&lt;Variational::<wbr />TrialFunction&lt;Variational::<wbr />GridFunction&lt;FES, Data&gt;, FES&gt;, Variational::<wbr />TestFunction&lt;FES&gt;, Initial, VectorField, Step&gt;&lt;FES, Data, Initial, VectorField, Step&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a796f39d712dc8b329cde9c0abbee057c" class="m-doc-self">Lagrangian</a>(</span><span class="m-doc-wrap"><a href="#a93f1359d04cd3f2b35b3277350a4a2aa" class="m-doc">TrialFunctionType</a>&amp; u,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Advection::<wbr />Lagrangian&lt;Variational::<wbr />TrialFunction&lt;Variational::<wbr />GridFunction&lt;FES, Data&gt;, FES&gt;, Variational::<wbr />TestFunction&lt;FES&gt;, Initial, VectorField, Step&gt;&lt;FES, Data, Initial, VectorField, Step&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a796f39d712dc8b329cde9c0abbee057c" class="m-doc-self">Lagrangian</a>(</span><span class="m-doc-wrap"><a href="#a93f1359d04cd3f2b35b3277350a4a2aa" class="m-doc">TrialFunctionType</a>&amp; u,
               <a href="#a473b98a93bed175048946215edcc6a61" class="m-doc">TestFunctionType</a>&amp; v,
               U0&amp;&amp; u0,
               VVel&amp;&amp; vel,
               S&amp;&amp; st = S{})</span></span>
             </h3>
-            <p>Constructs a <a href="class_rodin_1_1_models_1_1_advection_1_1_lagrangian.html" class="m-doc">Lagrangian</a> advection solver.</p>
+            <p>Constructs a <a href="class_rodin_1_1_advection_1_1_lagrangian.html" class="m-doc">Lagrangian</a> advection solver.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Template parameters</th></tr>
@@ -241,7 +241,7 @@
               <div class="m-doc-template">
                 template&lt;class FES, class Data, class Initial, class VectorField, class Step&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Models::<wbr />Advection::<wbr />Lagrangian&lt;Variational::<wbr />TrialFunction&lt;Variational::<wbr />GridFunction&lt;FES, Data&gt;, FES&gt;, Variational::<wbr />TestFunction&lt;FES&gt;, Initial, VectorField, Step&gt;&lt;FES, Data, Initial, VectorField, Step&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7d88e8792ffeba2ce921ba374e2ac73e" class="m-doc-self">step</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; dt)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Advection::<wbr />Lagrangian&lt;Variational::<wbr />TrialFunction&lt;Variational::<wbr />GridFunction&lt;FES, Data&gt;, FES&gt;, Variational::<wbr />TestFunction&lt;FES&gt;, Initial, VectorField, Step&gt;&lt;FES, Data, Initial, VectorField, Step&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7d88e8792ffeba2ce921ba374e2ac73e" class="m-doc-self">step</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; dt)</span></span>
             </h3>
             <p>Advances the solution by one time step.</p>
             <table class="m-table m-fullwidth m-flat">

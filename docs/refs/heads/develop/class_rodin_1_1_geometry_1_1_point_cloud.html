@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin/Models/Distance/Base.h file | Rodin</title>
+  <title>Rodin::Geometry::PointCloud class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -71,42 +71,43 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_5ed5bd20e7b55e8c0db0dae066728d9f.html">Models</a>/</span><span class="m-breadcrumb"><a href="dir_cbe926da86c50aa603e7c83d7c6ba296.html">Distance</a>/</span>Base.h <span class="m-thin">file</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>PointCloud <span class="m-thin">class</span>
         </h1>
-        <p>Base class for distance function computation models.</p>
+        <p><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> cloud with a point-centric API and Eigen &quot;matrix&quot; views.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#namespaces">Namespaces</a></li>
-                <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>This file provides the Base class template, which serves as a foundation for various distance function computation methods by managing interior and interface regions of the computational domain.</p>
-        <section id="namespaces">
-          <h2><a href="#namespaces">Namespaces</a></h2>
+<p>Ownership: std::vector&lt;Eigen::Vector3&lt;Real&gt;&gt; (always 3 scalars per point). Active dimension: m_rows in {0,1,2,3} tells which prefix is meaningful.</p><p>Views:</p><ul><li><a href="#a0deb49315b381bd264f6a11c6f6aa691" class="m-doc">getMatrix()</a>: (rows x N) view for computations in the active dimension.</li><li><a href="#a2c36c280b7f1868b329a837548803667" class="m-doc">getPackedMatrix()</a>: (3 x N) full view of the underlying packed storage.</li></ul><p>Storage layout (AoS): [x0 y0 z0][x1 y1 z1]...</p><p>We map it as a column-major 3xN matrix with outer stride 3 and inner stride 1.</p>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for Shape and Topology Optimization.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_models.html" class="m-doc">Rodin::Models</a></dt>
-            <dd>Module which provides implementation of various variational models.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_models_1_1_distance.html" class="m-doc">Rodin::Models::Distance</a></dt>
-            <dd>Module which provides models for computation of the distance function.</dd>
+            <dt id="a0deb49315b381bd264f6a11c6f6aa691">
+              <span class="m-doc-wrap-bumper">auto <a href="#a0deb49315b381bd264f6a11c6f6aa691" class="m-doc-self">getMatrix</a>(</span><span class="m-doc-wrap">) -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a (rows x N) matrix view of the active coordinates.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2c36c280b7f1868b329a837548803667" class="m-doc">getPackedMatrix</a>(</span><span class="m-doc-wrap">) -&gt; MapType3xN <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a (3 x N) matrix view of the underlying packed storage.</dd>
           </dl>
         </section>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_models_1_1_distance_1_1_base.html" class="m-doc">Rodin::Models::Distance::Base</a>
-            </dt>
-            <dd><a href="class_rodin_1_1_models_1_1_distance_1_1_base.html" class="m-doc">Base</a> class for distance function computation models using CRTP.</dd>
-          </dl>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a2c36c280b7f1868b329a837548803667"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">MapType3xN Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2c36c280b7f1868b329a837548803667" class="m-doc-self">getPackedMatrix</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a (3 x N) matrix view of the underlying packed storage.</p>
+<p>Naming rationale: this is the raw, packed, always-3D storage view.</p>
+          </div></section>
         </section>
       </div>
     </div>

@@ -79,9 +79,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md132">Type Safety</a></li>
-            <li><a href="#autotoc_md133">Arithmetic Operations</a></li>
-            <li><a href="#autotoc_md134">Example Usage</a></li>
+            <li><a href="#autotoc_md155">Type Safety</a></li>
+            <li><a href="#autotoc_md156">Arithmetic Operations</a></li>
+            <li><a href="#autotoc_md157">Example Usage</a></li>
             <li>
               Reference
               <ul>
@@ -92,7 +92,7 @@
             </li>
           </ul>
         </nav>
-<p>This class provides a generic base for creating type-safe units with value semantics and arithmetic operations. It uses the Curiously Recurring Template Pattern (CRTP) to enable derived classes to return their own type from operations.</p><section id="autotoc_md132"><h3><a href="#autotoc_md132">Type Safety</a></h3><p>Units provide compile-time type safety, preventing accidental mixing of incompatible units (e.g., adding radians to meters).</p></section><section id="autotoc_md133"><h3><a href="#autotoc_md133">Arithmetic Operations</a></h3><p>All standard arithmetic operations are supported:</p><ul><li>Addition/subtraction: <svg class="m-math" style="width: 3.844em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 36.903201 8.767119">
+<p>This class provides a generic base for creating type-safe units with value semantics and arithmetic operations. It uses the Curiously Recurring Template Pattern (CRTP) to enable derived classes to return their own type from operations.</p><section id="autotoc_md155"><h3><a href="#autotoc_md155">Type Safety</a></h3><p>Units provide compile-time type safety, preventing accidental mixing of incompatible units (e.g., adding radians to meters).</p></section><section id="autotoc_md156"><h3><a href="#autotoc_md156">Arithmetic Operations</a></h3><p>All standard arithmetic operations are supported:</p><ul><li>Addition/subtraction: <svg class="m-math" style="width: 3.844em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 36.903201 8.767119">
 <title>
 $ u_1 \pm u_2 $
 </title>
@@ -167,7 +167,7 @@ $ -u $
 <use x='0' y='0' xlink:href='#eq5-g0-0'/>
 <use x='9.298497' y='0' xlink:href='#eq5-g1-117'/>
 </g>
-</svg></li><li>Compound assignments: +=, -=, *=, /=</li><li>Comparison: ==, !=, &lt;, &gt;, &lt;=, &gt;=</li></ul></section><section id="autotoc_md134"><h3><a href="#autotoc_md134">Example Usage</a></h3><pre class="m-code"><span class="c1">// Creating a derived unit class</span>
+</svg></li><li>Compound assignments: +=, -=, *=, /=</li><li>Comparison: ==, !=, &lt;, &gt;, &lt;=, &gt;=</li></ul></section><section id="autotoc_md157"><h3><a href="#autotoc_md157">Example Usage</a></h3><pre class="m-code"><span class="c1">// Creating a derived unit class</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Meter</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Unit</span><span class="o">&lt;</span><span class="n">Meter</span><span class="p">,</span><span class="w"> </span><span class="n">Real</span><span class="o">&gt;</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="k">public</span><span class="o">:</span>

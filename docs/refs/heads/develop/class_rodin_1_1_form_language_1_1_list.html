@@ -90,9 +90,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md25">Features</a></li>
-            <li><a href="#autotoc_md26">Memory Management</a></li>
-            <li><a href="#autotoc_md27">Complexity</a></li>
+            <li><a href="#autotoc_md45">Features</a></li>
+            <li><a href="#autotoc_md46">Memory Management</a></li>
+            <li><a href="#autotoc_md47">Complexity</a></li>
             <li>
               Reference
               <ul>
@@ -105,7 +105,7 @@
           </ul>
         </nav>
 <p>Polymorphic container for form language objects.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a></p></aside>
-<p><a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a> provides a dynamic container for storing polymorphic form language objects with value semantics. The container manages object lifetimes through unique pointers and provides deep copying capabilities.</p><section id="autotoc_md25"><h3><a href="#autotoc_md25">Features</a></h3><ul><li><strong>Polymorphic Storage</strong>: Stores derived types through base class pointers</li><li><strong>Value Semantics</strong>: Copy constructor and assignment perform deep copies</li><li><strong><a href="class_rodin_1_1_form_language_1_1_list_1_1_iterator.html" class="m-doc">Iterator</a> Support</strong>: Provides standard forward iterators</li><li><strong>Type Safety</strong>: Elements are accessed through their stored type T</li></ul></section><section id="autotoc_md26"><h3><a href="#autotoc_md26">Memory Management</a></h3><ul><li>Elements are stored as std::unique_ptr&lt;T&gt;</li><li>Copy operations use the polymorphic <a href="#a14c77fd551eec7aae97831ef36e8aac7" class="m-doc">copy()</a> method</li><li>Automatic cleanup on destruction</li></ul></section><section id="autotoc_md27"><h3><a href="#autotoc_md27">Complexity</a></h3><ul><li>Access: <svg class="m-math" style="width: 2.524em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.22889 11.955168">
+<p><a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a> provides a dynamic container for storing polymorphic form language objects with value semantics. The container manages object lifetimes through unique pointers and provides deep copying capabilities.</p><section id="autotoc_md45"><h3><a href="#autotoc_md45">Features</a></h3><ul><li><strong>Polymorphic Storage</strong>: Stores derived types through base class pointers</li><li><strong>Value Semantics</strong>: Copy constructor and assignment perform deep copies</li><li><strong><a href="class_rodin_1_1_form_language_1_1_list_1_1_iterator.html" class="m-doc">Iterator</a> Support</strong>: Provides standard forward iterators</li><li><strong>Type Safety</strong>: Elements are accessed through their stored type T</li></ul></section><section id="autotoc_md46"><h3><a href="#autotoc_md46">Memory Management</a></h3><ul><li>Elements are stored as std::unique_ptr&lt;T&gt;</li><li>Copy operations use the polymorphic <a href="#a14c77fd551eec7aae97831ef36e8aac7" class="m-doc">copy()</a> method</li><li>Automatic cleanup on destruction</li></ul></section><section id="autotoc_md47"><h3><a href="#autotoc_md47">Complexity</a></h3><ul><li>Access: <svg class="m-math" style="width: 2.524em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.22889 11.955168">
 <title>
 $ O(1) $
 </title>

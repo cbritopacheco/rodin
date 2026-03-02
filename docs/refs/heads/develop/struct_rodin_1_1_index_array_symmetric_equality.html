@@ -75,59 +75,7 @@
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_array_8h.html">&lt;Rodin/Array.h&gt;</a></div>
         </h1>
         <p>Functor for comparing two index arrays for symmetric equality.</p>
-        <nav class="m-block m-default">
-          <h3>Contents</h3>
-          <ul>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#pub-methods">Public functions</a></li>
-              </ul>
-            </li>
-          </ul>
-        </nav>
 <p>This functor compares two index arrays and considers them equal if they contain the same elements, regardless of their order. For arrays of size 1 and 2, special cases are handled explicitly for efficiency. For larger arrays, std::is_permutation is used.</p>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a642c3f34a3d5bf988d426ff21a97178f" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; lhs,
-              const <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; rhs) const -&gt; bool</span>
-            </dt>
-            <dd>Compares two index arrays for symmetric equality.</dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a642c3f34a3d5bf988d426ff21a97178f"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />IndexArraySymmetricEquality::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a642c3f34a3d5bf988d426ff21a97178f" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; lhs,
-              const <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; rhs) const</span></span>
-            </h3>
-            <p>Compares two index arrays for symmetric equality.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">lhs</td>
-                  <td>The left-hand side index array.</td>
-                </tr>
-                <tr>
-                  <td>rhs</td>
-                  <td>The right-hand side index array.</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>true if the arrays are symmetric equal, false otherwise.</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-        </section>
       </div>
     </div>
   </div>

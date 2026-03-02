@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Math::PointMatrix class | Rodin</title>
+  <title>Rodin/Advection/ directory | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -71,36 +71,25 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_math.html">Math</a>::<wbr/></span>PointMatrix <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span>Advection<span class="m-breadcrumb">/</span> <span class="m-thin">directory</span>
         </h1>
-        <p>Point matrix with bounded maximum number of rows (space dimension).</p>
+        <p>Namespace <a href="namespace_rodin_1_1_advection.html" class="m-doc">Rodin::<wbr />Advection</a>.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#files">Files</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>This type encodes the invariant: rows &lt;= RODIN_MAXIMAL_SPACE_DIMENSION (==3), while allowing an arbitrary number of columns (dynamic).</p><p>Typical uses:</p><ul><li>Point sets stored as columns (3 x N, 2 x N, 1 x N)</li><li>Jacobians where the codomain is embedded in R^3 (3 x k, k dynamic)</li></ul>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
+        <section id="files">
+          <h2><a href="#files">Files</a></h2>
           <dl class="m-doc">
-            <dt id="a382fcc3d19492a446800de21fe376553">
-              <span class="m-doc-wrap-bumper">auto <a href="#a382fcc3d19492a446800de21fe376553" class="m-doc-self">dot</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_point_matrix.html" class="m-doc">PointMatrix</a>&amp; other) const -&gt; Scalar <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Frobenius dot product with another <a href="class_rodin_1_1_math_1_1_point_matrix.html" class="m-doc">PointMatrix</a> of same runtime size.</dd>
-            <dt id="a9761af29ab42b8766e6c69e2cb3f3766">
-              <span class="m-doc-wrap-bumper">auto <a href="#a9761af29ab42b8766e6c69e2cb3f3766" class="m-doc-self">transpose</a>(</span><span class="m-doc-wrap">) const -&gt; Eigen::Matrix&lt;Scalar, Eigen::Dynamic, Eigen::Dynamic, 0, Eigen::Dynamic, MaxRows&gt;</span>
-            </dt>
-            <dd>Transpose (cols x rows). Since rows&lt;=3, result has at most 3 columns.</dd>
-            <dt id="a570b7e520b25b75c66a83f05102c2376">
-              <span class="m-doc-wrap-bumper">auto <a href="#a570b7e520b25b75c66a83f05102c2376" class="m-doc-self">adjoint</a>(</span><span class="m-doc-wrap">) const -&gt; Eigen::Matrix&lt;Scalar, Eigen::Dynamic, Eigen::Dynamic, 0, Eigen::Dynamic, MaxRows&gt;</span>
-            </dt>
-            <dd>Adjoint (conjugate transpose), consistent with Eigen semantics.</dd>
+            <dt>file <a href="_lagrangian_8h.html" class="m-doc">Lagrangian.h</a></dt>
+            <dd>Lagrangian variational advection for scalar fields.</dd>
           </dl>
         </section>
       </div>

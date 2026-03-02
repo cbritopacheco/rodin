@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Models::Eikonal::FMM&lt;Variational::GridFunction&lt;Variational::P1&lt;Real, Geometry::Mesh&lt;Context::Local&gt;&gt;, Data&gt;, SpeedFunction&gt; class | Rodin</title>
+  <title>Rodin::Eikonal::FMM&lt;Variational::GridFunction&lt;Variational::P1&lt;Real, Geometry::Mesh&lt;Context::Local&gt;&gt;, Data&gt;, SpeedFunction&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -71,11 +71,11 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_f_m_m_8h.html">&lt;Rodin/Models/Eikonal/FMM.h&gt;</a></div>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_f_m_m_8h.html">&lt;Rodin/Eikonal/FMM.h&gt;</a></div>
           <div class="m-doc-template">template&lt;class Data, class SpeedFunction&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_models.html">Models</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_models_1_1_eikonal.html">Eikonal</a>::<wbr/></span>FMM&lt;Variational::GridFunction&lt;Variational::P1&lt;Real, Geometry::Mesh&lt;Context::Local&gt;&gt;, Data&gt;, SpeedFunction&gt; <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_eikonal.html">Eikonal</a>::<wbr/></span>FMM&lt;Variational::GridFunction&lt;Variational::P1&lt;Real, Geometry::Mesh&lt;Context::Local&gt;&gt;, Data&gt;, SpeedFunction&gt; <span class="m-thin">class</span>
         </h1>
-        <p><a href="class_rodin_1_1_models_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a> specialization for P1 finite elements on local meshes.</p>
+        <p><a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a> specialization for P1 finite elements on local meshes.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -113,7 +113,7 @@
               <a href="#a292e6792084beec58825c5c5abc5ce49aec17516130082d92b59c2d09499ce2fc" class="m-doc">Considered</a>,
               <a href="#a292e6792084beec58825c5c5abc5ce49a382ab522931673c11e398ead1b7b1678" class="m-doc">Accepted</a> }</span>
             </dt>
-            <dd>Label for mesh vertices during <a href="class_rodin_1_1_models_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a> propagation.</dd>
+            <dd>Label for mesh vertices during <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a> propagation.</dd>
             <dt id="a515179486a633cd3bd8acc6d313ed50d">
               using <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc-self">ScalarType</a> = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>
             </dt>
@@ -156,13 +156,13 @@
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class Seed&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8213e76260eacc950aa49acedfce3cd3" class="m-doc">seed</a>(</span><span class="m-doc-wrap">Seed&amp;&amp; seed) -&gt; <a href="class_rodin_1_1_models_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8213e76260eacc950aa49acedfce3cd3" class="m-doc">seed</a>(</span><span class="m-doc-wrap">Seed&amp;&amp; seed) -&gt; <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a>&amp;</span>
             </dt>
-            <dd>Seeds the <a href="class_rodin_1_1_models_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a> with initial points.</dd>
+            <dd>Seeds the <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a> with initial points.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc">solve</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
-            <dd>Solves the <a href="namespace_rodin_1_1_models_1_1_eikonal.html" class="m-doc">Eikonal</a> equation using the Fast Marching Method.</dd>
+            <dd>Solves the <a href="namespace_rodin_1_1_eikonal.html" class="m-doc">Eikonal</a> equation using the Fast Marching Method.</dd>
           </dl>
         </section>
         <section>
@@ -172,9 +172,9 @@
               <div class="m-doc-template">
                 template&lt;class Data, class SpeedFunction&gt;
               </div>
-              enum class Rodin::<wbr />Models::<wbr />Eikonal::<wbr />FMM&lt;Variational::<wbr />GridFunction&lt;Variational::<wbr />P1&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Data&gt;, SpeedFunction&gt;&lt;Data, SpeedFunction&gt;::<wbr /><a href="#a292e6792084beec58825c5c5abc5ce49" class="m-doc-self">Label</a>: uint8_t
+              enum class Rodin::<wbr />Eikonal::<wbr />FMM&lt;Variational::<wbr />GridFunction&lt;Variational::<wbr />P1&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Data&gt;, SpeedFunction&gt;&lt;Data, SpeedFunction&gt;::<wbr /><a href="#a292e6792084beec58825c5c5abc5ce49" class="m-doc-self">Label</a>: uint8_t
             </h3>
-            <p>Label for mesh vertices during <a href="class_rodin_1_1_models_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a> propagation.</p>
+            <p>Label for mesh vertices during <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a> propagation.</p>
 <p>Vertices are classified into three states:</p><ul><li>Far: Not yet visited</li><li>Considered: In priority queue, being considered</li><li>Accepted: Finalized arrival time</li></ul>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
@@ -209,7 +209,7 @@
                 template&lt;class Data, class SpeedFunction&gt;
                 template&lt;class Callable&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Models::<wbr />Eikonal::<wbr />FMM&lt;Variational::<wbr />GridFunction&lt;Variational::<wbr />P1&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Data&gt;, SpeedFunction&gt;&lt;Data, SpeedFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a73d89b63b13fdd0797eef84d05c3a1e9" class="m-doc-self">FMM</a>(</span><span class="m-doc-wrap"><a href="#a74ae29eb8b79f954ffb79cd860e6211b" class="m-doc">SolutionType</a>&amp; u,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Eikonal::<wbr />FMM&lt;Variational::<wbr />GridFunction&lt;Variational::<wbr />P1&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Data&gt;, SpeedFunction&gt;&lt;Data, SpeedFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a73d89b63b13fdd0797eef84d05c3a1e9" class="m-doc-self">FMM</a>(</span><span class="m-doc-wrap"><a href="#a74ae29eb8b79f954ffb79cd860e6211b" class="m-doc">SolutionType</a>&amp; u,
               Callable&amp;&amp; speed)</span></span>
             </h3>
             <p>Constructs a Fast Marching Method solver.</p>
@@ -260,9 +260,9 @@ $ F(x) $
                 template&lt;class Data, class SpeedFunction&gt;
                 template&lt;class Seed&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_models_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a>&amp; Rodin::<wbr />Models::<wbr />Eikonal::<wbr />FMM&lt;Variational::<wbr />GridFunction&lt;Variational::<wbr />P1&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Data&gt;, SpeedFunction&gt;&lt;Data, SpeedFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8213e76260eacc950aa49acedfce3cd3" class="m-doc-self">seed</a>(</span><span class="m-doc-wrap">Seed&amp;&amp; seed)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a>&amp; Rodin::<wbr />Eikonal::<wbr />FMM&lt;Variational::<wbr />GridFunction&lt;Variational::<wbr />P1&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Data&gt;, SpeedFunction&gt;&lt;Data, SpeedFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8213e76260eacc950aa49acedfce3cd3" class="m-doc-self">seed</a>(</span><span class="m-doc-wrap">Seed&amp;&amp; seed)</span></span>
             </h3>
-            <p>Seeds the <a href="class_rodin_1_1_models_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a> with initial points.</p>
+            <p>Seeds the <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a> with initial points.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Template parameters</th></tr>
@@ -285,7 +285,7 @@ $ F(x) $
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>Reference to this <a href="class_rodin_1_1_models_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a> object for method chaining</td>
+                  <td>Reference to this <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a> object for method chaining</td>
                 </tr>
               </tfoot>
             </table>
@@ -296,10 +296,10 @@ $ F(x) $
               <div class="m-doc-template">
                 template&lt;class Data, class SpeedFunction&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Models::<wbr />Eikonal::<wbr />FMM&lt;Variational::<wbr />GridFunction&lt;Variational::<wbr />P1&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Data&gt;, SpeedFunction&gt;&lt;Data, SpeedFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Eikonal::<wbr />FMM&lt;Variational::<wbr />GridFunction&lt;Variational::<wbr />P1&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Data&gt;, SpeedFunction&gt;&lt;Data, SpeedFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
-            <p>Solves the <a href="namespace_rodin_1_1_models_1_1_eikonal.html" class="m-doc">Eikonal</a> equation using the Fast Marching Method.</p>
-<p>Propagates the solution from seed points throughout the domain by repeatedly accepting the vertex with the smallest arrival time from the priority queue and updating its neighbors.</p><h5 id="autotoc_md151">Algorithm</h5><ol><li>Initialize: seed points have time 0, all others have time ∞</li><li>Extract vertex with minimum arrival time from priority queue</li><li>Mark it as Accepted</li><li>Update arrival times of neighboring vertices</li><li>Repeat until priority queue is empty</li></ol><aside class="m-note m-info"><h4>Note</h4><p>The <a href="#a8213e76260eacc950aa49acedfce3cd3" class="m-doc">seed()</a> method must be called before <a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc">solve()</a>.</p></aside>
+            <p>Solves the <a href="namespace_rodin_1_1_eikonal.html" class="m-doc">Eikonal</a> equation using the Fast Marching Method.</p>
+<p>Propagates the solution from seed points throughout the domain by repeatedly accepting the vertex with the smallest arrival time from the priority queue and updating its neighbors.</p><h5 id="autotoc_md35">Algorithm</h5><ol><li>Initialize: seed points have time 0, all others have time ∞</li><li>Extract vertex with minimum arrival time from priority queue</li><li>Mark it as Accepted</li><li>Update arrival times of neighboring vertices</li><li>Repeat until priority queue is empty</li></ol><aside class="m-note m-info"><h4>Note</h4><p>The <a href="#a8213e76260eacc950aa49acedfce3cd3" class="m-doc">seed()</a> method must be called before <a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc">solve()</a>.</p></aside>
           </div></section>
         </section>
       </div>
