@@ -82,7 +82,6 @@ namespace Rodin::Geometry
           m_pm(std::move(pm)),
           m_fe(std::move(fe))
       {
-        assert(m_pm.cols() >= 0);
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
@@ -96,7 +95,6 @@ namespace Rodin::Geometry
           m_pm(pm),
           m_fe(fe)
       {
-        assert(m_pm.cols() >= 0);
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
@@ -110,7 +108,6 @@ namespace Rodin::Geometry
           m_pm(std::move(pm)),
           m_fe(fe)
       {
-        assert(m_pm.cols() >= 0);
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
@@ -124,7 +121,6 @@ namespace Rodin::Geometry
           m_pm(pm),
           m_fe(std::move(fe))
       {
-        assert(m_pm.cols() >= 0);
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
@@ -136,7 +132,6 @@ namespace Rodin::Geometry
           m_pm(other.m_pm),
           m_fe(other.m_fe)
       {
-        assert(m_pm.cols() >= 0);
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
@@ -148,7 +143,6 @@ namespace Rodin::Geometry
           m_pm(std::move(other.m_pm)),
           m_fe(std::move(other.m_fe))
       {
-        assert(m_pm.cols() >= 0);
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
@@ -171,7 +165,6 @@ namespace Rodin::Geometry
       void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc) const override
       {
         const size_t pdim = getPhysicalDimension();
-        assert(rc.size() >= 0);
         assert(static_cast<size_t>(rc.size()) == getReferenceDimension());
         pc.resize(pdim);
         pc.setZero();
@@ -192,7 +185,6 @@ namespace Rodin::Geometry
       void jacobian(Math::SpatialMatrix<Real>& pc, const Math::SpatialPoint& rc) const override
       {
         const size_t rdim = getReferenceDimension();
-        assert(rc.size() >= 0);
         assert(static_cast<size_t>(rc.size()) == rdim);
         const size_t pdim = getPhysicalDimension();
         pc.resize(pdim, rdim);
