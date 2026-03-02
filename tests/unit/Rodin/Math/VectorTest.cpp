@@ -235,6 +235,13 @@ TEST_F(VectorTest, SpatialPointNormalizeInPlace)
   EXPECT_NEAR(p.x(), 0.6, RODIN_FUZZY_CONSTANT);
   EXPECT_NEAR(p.y(), 0.8, RODIN_FUZZY_CONSTANT);
   EXPECT_NEAR(p.norm(), 1.0, RODIN_FUZZY_CONSTANT);
+
+  SpatialPoint q{{1.0, 2.0, 2.0}};
+  q.normalize();
+  EXPECT_NEAR(q.x(), 1.0 / 3.0, RODIN_FUZZY_CONSTANT);
+  EXPECT_NEAR(q.y(), 2.0 / 3.0, RODIN_FUZZY_CONSTANT);
+  EXPECT_NEAR(q.z(), 2.0 / 3.0, RODIN_FUZZY_CONSTANT);
+  EXPECT_NEAR(q.norm(), 1.0, RODIN_FUZZY_CONSTANT);
 }
 
 // Test complex vector operations
