@@ -1158,7 +1158,7 @@ namespace Rodin::Assembly
                 {
                   const PetscInt I = static_cast<PetscInt>(vOff + static_cast<size_t>(dofs[l]));
                   const PetscScalar val = static_cast<PetscScalar>(integrator->integrate(l));
-                  local[static_cast<size_t>(I)] += val;
+                  local[static_cast<size_t>(I)] += (-val);
                 }
               });
             }

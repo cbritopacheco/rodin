@@ -914,7 +914,7 @@ namespace Rodin::Assembly
               const PetscScalar val = static_cast<PetscScalar>(lfi.integrate(static_cast<PetscInt>(l)));
               if (val != PetscScalar(0))
               {
-                ierr = VecSetValue(b, I, val, ADD_VALUES);
+                ierr = VecSetValue(b, I, -val, ADD_VALUES);
                 assert(ierr == PETSC_SUCCESS);
               }
             }
