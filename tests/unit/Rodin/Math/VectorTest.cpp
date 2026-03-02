@@ -216,6 +216,27 @@ TEST_F(VectorTest, SpatialPointCoordinates)
   EXPECT_NEAR(normalized.norm(), 1.0, RODIN_FUZZY_CONSTANT);
 }
 
+TEST_F(VectorTest, SpatialPointDotAndCross)
+{
+  SpatialPoint p{{1.0, 2.0, 3.0}};
+  SpatialPoint q{{4.0, 5.0, 6.0}};
+
+  EXPECT_DOUBLE_EQ(p.dot(q), 32.0);
+  const auto cross = p.cross(q);
+  EXPECT_DOUBLE_EQ(cross[0], -3.0);
+  EXPECT_DOUBLE_EQ(cross[1], 6.0);
+  EXPECT_DOUBLE_EQ(cross[2], -3.0);
+}
+
+TEST_F(VectorTest, SpatialPointNormalizeInPlace)
+{
+  SpatialPoint p{{3.0, 4.0}};
+  p.normalize();
+  EXPECT_NEAR(p.x(), 0.6, RODIN_FUZZY_CONSTANT);
+  EXPECT_NEAR(p.y(), 0.8, RODIN_FUZZY_CONSTANT);
+  EXPECT_NEAR(p.norm(), 1.0, RODIN_FUZZY_CONSTANT);
+}
+
 // Test complex vector operations
 TEST_F(VectorTest, ComplexVector)
 {
