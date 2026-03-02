@@ -152,7 +152,7 @@ namespace Rodin::Geometry
       Scalar& operator()(std::uint8_t i, size_t j) noexcept
       {
         assert(i < m_dimension);
-        assert(j >= 0 && j < getCount());
+        assert(j < getCount());
         return m_pts[j][static_cast<size_t>(i)];
       }
 
@@ -160,28 +160,28 @@ namespace Rodin::Geometry
       const Scalar& operator()(std::uint8_t i, size_t j) const noexcept
       {
         assert(i < m_dimension);
-        assert(j >= 0 && j < getCount());
+        assert(j < getCount());
         return m_pts[j][i];
       }
 
       [[nodiscard]] inline
       std::array<Scalar, 3>& point3(size_t j) noexcept
       {
-        assert(j >= 0 && j < getCount());
+        assert(j < getCount());
         return m_pts[static_cast<size_t>(j)];
       }
 
       [[nodiscard]] inline
       const std::array<Scalar, 3>& point3(size_t j) const noexcept
       {
-        assert(j >= 0 && j < getCount());
+        assert(j < getCount());
         return m_pts[static_cast<size_t>(j)];
       }
 
       [[nodiscard]] inline
       Math::SpatialPoint operator[](size_t j) const noexcept
       {
-        assert(j >= 0 && j < getCount());
+        assert(j < getCount());
         Math::SpatialPoint p(m_dimension);
         const auto& v = this->point3(j);
         switch (m_dimension)
