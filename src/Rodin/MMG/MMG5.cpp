@@ -688,7 +688,7 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
   }
 
 
-  MMG3D_saveMesh(res, "debug.mesh");
+  // MMG3D_saveMesh(res, "debug.mesh");
   return res;
 }
 

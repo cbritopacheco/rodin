@@ -4,16 +4,13 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include "Rodin/Geometry/Polytope.h"
-#include "Rodin/Geometry/Types.h"
+#include <Rodin/MMG.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
-#include <Rodin/MMG.h>
 #include <Rodin/Distance/Eikonal.h>
 #include <Rodin/Advection/Lagrangian.h>
-#include <Rodin/Geometry/MarchingTetrahedra.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -36,12 +33,12 @@ static constexpr Real eps = 1e-12;
 static constexpr Real hgrad = 1.6;
 static constexpr Real ell = 0.1;
 static Real elementStep = 0.5;
-static Real hmax = 0.2;
+static Real hmax = 0.1;
 static Real hmin = 0.1 * hmax;
 static Real hausd = 0.2 * hmin;
 static size_t hmaxIt = maxIt / 2;
-const Real k = 1;
-const Real dt = k * (hmax - hmin);
+const Real k = 0.5;
+const Real dt = k * (hmax - hmin) / 2;
 static Real alpha = dt;
 
 using FES = VectorP1<Mesh<Context::Local>>;
@@ -84,7 +81,7 @@ int main(int, char**)
     Alert::Info() << "   | Optimizing the domain..." << Alert::Raise;
     MMG::Optimizer().setHMax(hmax)
                     .setHMin(hmin)
-                    .setGradation(1.1)
+                    // .setGradation(1.1)
                     .setHausdorff(hausd)
                     .setAngleDetection(false)
                     .optimize(th);
@@ -123,8 +120,8 @@ int main(int, char**)
                            .solve()
                            .sign();
 
-    dist.getFiniteElementSpace().getMesh().save("distance.mesh");
-    dist.save("dist.gf");
+    dist.getFiniteElementSpace().getMesh().save("Distance.mesh");
+    dist.save("Distance.gf");
 
     P1 shInt(trimmed);
     P1 vhInt(trimmed, d);
@@ -142,8 +139,8 @@ int main(int, char**)
     auto cg = Solver::CG(elasticity);
     cg.solve();
 
-    u.getSolution().save("state.gf");
-    u.getSolution().getFiniteElementSpace().getMesh().save("state.mesh");
+    u.getSolution().save("State.gf");
+    u.getSolution().getFiniteElementSpace().getMesh().save("State.mesh");
 
     Alert::Info() << "   | Computing shape gradient." << Alert::Raise;
     auto jac = Jacobian(u.getSolution());
@@ -186,42 +183,19 @@ int main(int, char**)
 
     Advection::Lagrangian(advect, test, dist, dJ).step(dt);
 
-    th.save("advect.mesh");
-    advect.getSolution().save("advect.gf");
+    th.save("Advect.mesh");
+    advect.getSolution().save("Advect.gf");
 
     // Recover the implicit domain
     Alert::Info() << "   | Meshing the domain." << Alert::Raise;
-
-    th = MarchingTetrahedra(advect.getSolution())
-                             .setFallback(2, 23)
-                             .setInterface(2, Gamma)
-                             .split(3, Interior, { Interior, Exterior })
-                             .split(3, Exterior, { Interior, Exterior })
-                             .noSplit(2, GammaD)
-                             .noSplit(2, GammaN)
-                             .split(2, Gamma0, { Gamma0, Gamma0 })
-                             .discretize();
-
-    th.getConnectivity().discover(2, 3);
-
-    for (auto it = th.getFace(); it; ++it)
-    {
-      if (it->isBoundary())
-        th.setAttribute(it.key(), 50);
-      continue;
-      const auto attr = it->getAttribute();
-      if (attr)
-      {
-        if (*attr == 23 && it->isBoundary())
-        {
-          th.setAttribute(it.key(), Gamma0);
-        }
-        else if (*attr == 23)
-        {
-          th.setAttribute(it.key(), {});
-        }
-      }
-    }
+    th = MMG::LevelSetDiscretizer().setHMax(hmax)
+                                    .setHMin(hmin)
+                                    .setHausdorff(hausd)
+                                    .setAngleDetection(false)
+                                    .setRMC(1e-5)
+                                    .setBaseReferences(GammaD)
+                                    .setBoundaryReference(Gamma)
+                                    .discretize(advect.getSolution());
 
     th.save("Omega.mesh", IO::FileFormat::MEDIT);
   }

@@ -229,290 +229,405 @@ namespace Rodin::Variational
           m_p(std::exchange(other.m_p, nullptr))
       {}
 
-      Trace trace(const Geometry::Point& p) const
+Trace trace(const Geometry::Point& p) const
+{
+  struct Hit
+  {
+    Real t;
+    size_t j;    // local face index in current cell
+    Real ndv;    // n·vref at start point
+    Index fid;   // global face id
+  };
+
+  const size_t ZERO_HOPS_MAX = 1000; // chained zero-time crossings per event
+  const int    MAX_BISECT    = 32;   // event-location refinement iterations
+
+  // thread-local scratch
+  static thread_local Index s_cell;
+  static thread_local Math::SpatialPoint s_rc{{}}, s_rc1{{}}, s_rc_tmp{{}}, s_pc{{}}, s_r_eval{{}};
+  static thread_local std::vector<Hit> s_cand;
+  static thread_local std::vector<size_t> s_faceset;
+
+  const auto& poly0 = p.getPolytope();
+  const auto& mesh  = poly0.getMesh();
+  const size_t cd   = mesh.getDimension();
+  const auto& conn  = mesh.getConnectivity();
+
+  Real tau = std::abs(m_t);
+  const Real sgn = Math::sgn(m_t);
+
+  // ---- locate starting cell / reference coords
+  if (poly0.getDimension() == cd)
+  {
+    s_cell = poly0.getIndex();
+    s_rc   = p.getReferenceCoordinates();
+  }
+  else if (poly0.getDimension() == cd - 1)
+  {
+    const Index f = poly0.getIndex();
+    const auto& adj = conn.getIncidence(cd - 1, cd).at(f);
+
+    if (mesh.isBoundary(f))
+    {
+      assert(adj.size() > 0);
+      const Index c = adj[0];
+      mesh.getPolytopeTransformation(cd, c).inverse(s_rc_tmp, p.getPhysicalCoordinates());
+      Geometry::Polytope::Project(mesh.getGeometry(cd, c)).cell(s_rc, s_rc_tmp);
+      s_cell = c;
+    }
+    else
+    {
+      assert(adj.size() > 0);
+      const Index c0 = adj[0];
+      mesh.getPolytopeTransformation(cd, c0).inverse(s_rc_tmp, p.getPhysicalCoordinates());
+      const auto it0 = mesh.getPolytope(cd, c0);
+      const auto& cell0 = *it0;
+      const Geometry::Point q0(cell0, s_rc_tmp, p.getPhysicalCoordinates());
+      const auto a0 = sgn * (q0.getJacobianInverse() * m_velocity(q0)).col(0);
+
+      const auto& faces0 = conn.getIncidence(cd, cd - 1).at(c0);
+      size_t j0 = faces0.size();
+      for (size_t k = 0; k < faces0.size(); ++k)
+        if (faces0[k] == f) { j0 = k; break; }
+      assert(j0 < faces0.size());
+
+      const auto g0 = mesh.getGeometry(cd, c0);
+      const auto& hs = Geometry::Polytope::Traits(g0).getHalfSpace();
+      const Math::SpatialVector<Real> nref = hs.matrix.row(j0); // outward in ref(c0)
+
+      if (nref.dot(a0) < 0)
       {
-        struct Hit
+        Geometry::Polytope::Project(g0).cell(s_rc, s_rc_tmp);
+        s_cell = c0;
+      }
+      else
+      {
+        assert(adj.size() > 1);
+        const Index c1 = adj[1];
+        mesh.getPolytopeTransformation(cd, c1).inverse(s_rc_tmp, p.getPhysicalCoordinates());
+        Geometry::Polytope::Project(mesh.getGeometry(cd, c1)).cell(s_rc, s_rc_tmp);
+        s_cell = c1;
+      }
+    }
+  }
+  else
+  {
+    assert(false);
+    return Trace{ true, 0, p };
+  }
+
+  s_rc1.resize(s_rc.size());
+  s_rc_tmp.resize(s_rc.size());
+  s_r_eval.resize(s_rc.size());
+  s_pc.resize(p.getPhysicalCoordinates().size());
+
+  // --- scaled tolerances (Change #3)
+  const Real eps_machine = std::numeric_limits<Real>::epsilon();
+  const Real eps_ref_base = std::sqrt(eps_machine); // scale-free baseline
+
+  auto norm2 = [](const auto& v) -> Real { return v.dot(v); };
+  auto norm  = [&](const auto& v) -> Real { return std::sqrt(std::max<Real>(0, norm2(v))); };
+
+  // Hysteresis: last crossed local face index in current cell
+  std::optional<size_t> last_face;
+
+  while (tau > 0)
+  {
+    const auto itc = mesh.getPolytope(cd, s_cell);
+    const auto& cell = *itc;
+    const auto g = mesh.getGeometry(cd, s_cell);
+    const auto& faces = conn.getIncidence(cd, cd - 1).at(s_cell);
+    const auto& hs = Geometry::Polytope::Traits(g).getHalfSpace();
+
+    // vref(r): reference velocity (sgn * J^{-1} v) at (cell,r)
+    auto vref = [&](const Math::SpatialPoint& r) -> Math::SpatialVector<Real>
+    {
+      const Geometry::Point qp(cell, r);
+      return (sgn * qp.getJacobianInverse() * m_velocity(qp)).col(0);
+    };
+
+    const Math::SpatialVector<Real> v0 = vref(s_rc);
+    const Real vmag = norm(v0);
+
+    const Real eps_ref = eps_ref_base * (1 + norm(s_rc));
+    const Real eps_ndv = eps_ref * (1 + vmag);                 // denom/velocity alignment tol
+    const Real eps_tpos = eps_ref / std::max<Real>(1, vmag);   // positive time tol
+    const Real eps_g = Real(10) * eps_ref;                     // “on face” tol in ref
+    const Real eps_phi = eps_g;                                // event-location target
+
+    auto phi_face = [&](size_t j, const Math::SpatialPoint& r) -> Real
+    {
+      // phi = b - n·r ; interior => phi > 0
+      const auto n = hs.matrix.row(j);
+      const Real b = hs.vector[j];
+      return b - r.dot(n);
+    };
+
+    auto ndv_face = [&](size_t j, const Math::SpatialPoint& r) -> Real
+    {
+      const auto n = hs.matrix.row(j);
+      return vref(r).dot(n);
+    };
+
+    auto advance = [&](Math::SpatialPoint& rout, Real dt, const Math::SpatialPoint& rin)
+    {
+      m_step.step(rout, dt, rin, [&](const Math::SpatialPoint& rr) -> Math::SpatialVector<Real>
+      {
+        return vref(rr);
+      });
+    };
+
+    // ---- collect candidate face hits by linear predictor
+    s_cand.clear();
+    s_cand.reserve(faces.size());
+
+    for (size_t i = 0; i < faces.size(); ++i)
+    {
+      if (last_face && i == *last_face)
+        continue;
+
+      const Real g0 = phi_face(i, s_rc);
+      if (g0 <= eps_g) // treat near/outside as not a valid interior departure
+        continue;
+
+      const Real ndv = vref(s_rc).dot(hs.matrix.row(i));
+      if (ndv <= eps_ndv) // not moving toward that face (robust denom)
+        continue;
+
+      const Real ti = g0 / ndv;
+      if (ti > eps_tpos && ti <= tau)
+        s_cand.push_back({ ti, i, ndv, faces[i] });
+    }
+
+    if (s_cand.empty())
+    {
+      // advance remaining time in this cell
+      advance(s_rc1, tau, s_rc);
+      s_rc = s_rc1;
+
+      // Optional invariant clamp: keep inside (robustness aid without changing semantics)
+      // Clamp by projecting to cell if we numerically drifted out.
+      bool violated = false;
+      for (size_t i = 0; i < faces.size(); ++i)
+        if (phi_face(i, s_rc) < -eps_g) { violated = true; break; }
+      if (violated)
+      {
+        Geometry::Polytope::Project(g).cell(s_rc1, s_rc);
+        s_rc = s_rc1;
+      }
+      break;
+    }
+
+    // pick earliest; tie-break by more transversal; then by global face id
+    auto itmin =
+      std::min_element(
+        s_cand.begin(), s_cand.end(),
+        [](const Hit& a, const Hit& b)
         {
-          Real t;
-          size_t j;
-          Real ndv;
-        };
+          if (a.t != b.t) return a.t < b.t;
+          if (a.ndv != b.ndv) return a.ndv > b.ndv;
+          return a.fid < b.fid;
+        });
 
-        const size_t ZERO_HOPS_MAX = 1000; // chained zero-time crossings per event
-        const Real eps_denom = 1e-14;
-        const Real eps_tpos  = 1e-14;
-        const Real eps_g     = 1e-12; // “on face” tolerance in ref
+    const Real t_pred = itmin->t;
+    const size_t jhit = itmin->j;
+    assert(jhit < faces.size());
+    const Index face_hit = faces[jhit];
 
-        // thread-local scratch
-        static thread_local Index s_cell;
-        static thread_local Math::SpatialPoint s_rc{{}}, s_rc1{{}}, s_rc_tmp{{}}, s_pc{{}};
-        static thread_local std::vector<Hit> s_cand;
+    // ---- event-location refinement (Change #1)
+    // Refine hit time so that phi_face(jhit, r(t)) ~= 0 using bisection.
+    Real thit = t_pred;
 
-        const auto& poly0 = p.getPolytope();
-        const auto& mesh = poly0.getMesh();
-        const size_t cd = mesh.getDimension();
-        const auto& conn = mesh.getConnectivity();
+    // Evaluate at predicted time
+    advance(s_r_eval, t_pred, s_rc);
+    const Real phi_pred = phi_face(jhit, s_r_eval);
 
-        Real tau = std::abs(m_t);
-        const Real sgn = Math::sgn(m_t);
+    if (phi_pred > eps_phi)
+    {
+      // RK step did not reach/cross the face; keep linear predictor (best effort)
+      // (common when v varies strongly; still safer than “no hit”)
+      thit = t_pred;
+    }
+    else
+    {
+      Real lo = 0;
+      Real hi = t_pred;
+      // phi(lo) = phi(s_rc) should be > 0 (interior), but allow small drift
+      Real phi_lo = phi_face(jhit, s_rc);
+      Real phi_hi = phi_pred;
 
-        // ---- locate starting cell / reference coords
-        if (poly0.getDimension() == cd)
+      // Ensure a valid bracket; if not, skip refinement
+      if (phi_lo > 0 && phi_hi <= 0)
+      {
+        for (int it = 0; it < MAX_BISECT; ++it)
         {
-          s_cell = poly0.getIndex();
-          s_rc = p.getReferenceCoordinates();
-        }
-        else if (poly0.getDimension() == cd - 1)
-        {
-          const Index f = poly0.getIndex();
-          const auto& adj = conn.getIncidence(cd - 1, cd).at(f);
+          const Real mid = Real(0.5) * (lo + hi);
+          advance(s_r_eval, mid, s_rc);
+          const Real phi_mid = phi_face(jhit, s_r_eval);
 
-          if (mesh.isBoundary(f))
+          if (std::abs(phi_mid) <= eps_phi)
           {
-            assert(adj.size() > 0);
-            const Index c = adj[0];
-            mesh.getPolytopeTransformation(cd, c).inverse(s_rc_tmp, p.getPhysicalCoordinates());
-            Geometry::Polytope::Project(mesh.getGeometry(cd, c)).cell(s_rc, s_rc_tmp);
-            s_cell = c;
-          }
-          else
-          {
-            assert(adj.size() > 0);
-            const Index c0 = adj[0];
-            mesh.getPolytopeTransformation(cd, c0).inverse(s_rc_tmp, p.getPhysicalCoordinates());
-            const auto it0 = mesh.getPolytope(cd, c0);
-            const auto& cell0 = *it0;
-            const Geometry::Point q0(cell0, s_rc_tmp, p.getPhysicalCoordinates());
-            const auto a0 = sgn * (q0.getJacobianInverse() * m_velocity(q0)).col(0);
-
-            const auto& faces0 = conn.getIncidence(cd, cd - 1).at(c0);
-            size_t j0 = faces0.size();
-            for (size_t k = 0; k < faces0.size(); ++k)
-              if (faces0[k] == f) { j0 = k; break; }
-            assert(j0 < faces0.size());
-
-            const auto g0 = mesh.getGeometry(cd, c0);
-            const auto& hs = Geometry::Polytope::Traits(g0).getHalfSpace();
-            const Math::SpatialVector<Real> nref = hs.matrix.row(j0); // outward in ref(c0)
-
-            if (nref.dot(a0) < 0)
-            {
-              Geometry::Polytope::Project(g0).cell(s_rc, s_rc_tmp);
-              s_cell = c0;
-            }
-            else
-            {
-              assert(adj.size() > 1);
-              const Index c1 = adj[1];
-              mesh.getPolytopeTransformation(cd, c1).inverse(s_rc_tmp, p.getPhysicalCoordinates());
-              Geometry::Polytope::Project(mesh.getGeometry(cd, c1)).cell(s_rc, s_rc_tmp);
-              s_cell = c1;
-            }
-          }
-        }
-        else
-        {
-          assert(false);
-          return Trace{ true, 0, p };
-        }
-
-        s_rc1.resize(s_rc.size());
-        s_rc_tmp.resize(s_rc.size());
-        s_pc.resize(p.getPhysicalCoordinates().size());
-
-        // Hysteresis: last crossed local face index in current cell
-        std::optional<size_t> last_face;
-        while (tau > 0)
-        {
-          const auto itc = mesh.getPolytope(cd, s_cell);
-          const auto& cell = *itc;
-          const auto g = mesh.getGeometry(cd, s_cell);
-          const auto& faces = conn.getIncidence(cd, cd - 1).at(s_cell);
-          const auto& hs = Geometry::Polytope::Traits(g).getHalfSpace();
-
-          const auto vref = [&](const Math::SpatialPoint& r) -> decltype(auto)
-          {
-            static thread_local Math::SpatialVector<Real> s_v;
-            const Geometry::Point qp(cell, r);
-            s_v = (sgn * qp.getJacobianInverse() * m_velocity(qp)).col(0);
-            return s_v;
-          };
-
-          s_cand.clear();
-          s_cand.reserve(faces.size());
-
-          // collect face hits by linear predictor
-          for (size_t i = 0; i < faces.size(); ++i)
-          {
-            if (last_face)
-            {
-              if (i == *last_face)
-                continue;
-            }
-
-            assert(i < hs.matrix.rows());
-            const auto n = hs.matrix.row(i);
-
-            assert(i < hs.vector.size());
-            const Real b = hs.vector[i];
-
-            assert(n.size() == s_rc.size());
-            const Real g0 = b - s_rc.dot(n);
-            if (g0 <= 0) // interior requires g0 > 0
-              continue;
-
-            const Real ndv = vref(s_rc).dot(n);
-            if (ndv <= eps_denom) // not moving toward that face
-              continue;
-
-            const Real ti = g0 / ndv;
-            if (ti > eps_tpos && ti <= tau)
-              s_cand.push_back({ ti, i, ndv });
-          }
-
-          if (s_cand.empty())
-          {
-            // advance remaining time in this cell
-            m_step.step(s_rc1, tau, s_rc, vref);
-            s_rc = s_rc1;
+            thit = mid;
             break;
           }
 
-          // pick earliest; tie-break by more transversal
-          auto itmin =
-            std::min_element(
-              s_cand.begin(), s_cand.end(),
-              [](const Hit& a, const Hit& b)
-              {
-                if (a.t != b.t)
-                  return a.t < b.t;
-                else
-                  return a.ndv > b.ndv;
-              });
-
-          const Real thit = itmin->t;
-          const size_t jhit = itmin->j;
-          assert(jhit < faces.size());
-          const Index face_hit = faces[jhit];
-
-          // advance to the face
-          m_step.step(s_rc1, thit, s_rc, vref);
-          Geometry::Polytope::Project(g).face(jhit, s_rc, s_rc1);
-          s_rc = s_rc1;
-          tau -= thit;
-
-          // same-phys chained crossings at t=0 (vertex/edge events)
-          mesh.getPolytopeTransformation(cd, s_cell).transform(s_pc, s_rc); // phys @ face
-
-          // first hop across the hit face if not boundary
-          if (mesh.isBoundary(face_hit))
+          if (phi_mid > 0)
           {
-            if (!m_bp(BoundaryHit{tau, s_cell, s_rc, jhit}))
-              return Trace{ true, tau, Geometry::Point(*itc, s_rc) };
-            last_face.reset();
+            lo = mid;
+            phi_lo = phi_mid;
           }
           else
           {
-            // interior hop across face_hit
-            const auto& nbrs = conn.getIncidence(cd - 1, cd).at(face_hit);
-            assert(nbrs.size() == 2);
-            s_cell = (nbrs[0] == s_cell) ? nbrs[1] : nbrs[0];
-
-            // map same phys point into new cell
-            mesh.getPolytopeTransformation(cd, s_cell).inverse(s_rc, s_pc);
-            Geometry::Polytope::Project(mesh.getGeometry(cd, s_cell)).cell(s_rc1, s_rc);
-            s_rc = s_rc1;
-
-            // hysteresis: set the opposite face in new cell
-            const auto& faces_new = conn.getIncidence(cd, cd - 1).at(s_cell);
-            last_face.reset();
-            for (size_t i = 0; i < faces_new.size(); ++i)
-            {
-              if (faces_new[i] == face_hit)
-              {
-                last_face = i;
-                break;
-              }
-            }
-
-            // now repeatedly cross any other face(s) containing this phys point
-            size_t zero_hops = 0;
-            while (zero_hops++ < ZERO_HOPS_MAX)
-            {
-              // recompute in new cell
-              const auto itz = mesh.getPolytope(cd, s_cell);
-              const auto& cellz = *itz;
-              const auto gz = mesh.getGeometry(cd, s_cell);
-              const auto& hsz = Geometry::Polytope::Traits(gz).getHalfSpace();
-              const auto& facesz = conn.getIncidence(cd, cd - 1).at(s_cell);
-              const auto vz = [&] (const Math::SpatialPoint& r)
-              {
-                static thread_local Math::SpatialVector<Real> s_v;
-                const Geometry::Point qp(cellz, r);
-                s_v = (sgn * qp.getJacobianInverse() * m_velocity(qp)).col(0);
-                return s_v;
-              };
-
-              // find another face k with |g_k| <= eps_g and n_k·v_on > 0, excluding hysteresis face
-              size_t kface = facesz.size();
-              for (size_t i = 0; i < facesz.size(); ++i)
-              {
-                if (last_face && i == *last_face)
-                  continue;
-                const auto n = hsz.matrix.row(i);
-                assert(i < hsz.vector.size());
-                const Real b = hsz.vector[i];
-                assert(n.size() == s_rc.size());
-                const Real gi = b - s_rc.dot(n);
-                if (std::abs(gi) <= eps_g && vz(s_rc).dot(n) > eps_denom)
-                {
-                  kface = i;
-                  break;
-                }
-              }
-
-              if (kface == facesz.size())
-                break; // strictly interior now
-
-              // boundary on the same phys point?
-              assert(kface < facesz.size());
-              const Index f2 = facesz[kface];
-              if (mesh.isBoundary(f2))
-              {
-                if (!m_bp(BoundaryHit{tau, s_cell, s_rc, kface}))
-                  return Trace{ true, tau, Geometry::Point(*itz, s_rc) };
-                last_face.reset();
-                break;
-              }
-
-              // hop across kface at t=0
-              mesh.getPolytopeTransformation(cd, s_cell).transform(s_pc, s_rc);
-              const auto& nbr2 = conn.getIncidence(cd - 1, cd).at(f2);
-              assert(nbr2.size() == 2);
-              s_cell = (nbr2[0] == s_cell) ? nbr2[1] : nbr2[0];
-
-              mesh.getPolytopeTransformation(cd, s_cell).inverse(s_rc, s_pc);
-              Geometry::Polytope::Project(mesh.getGeometry(cd, s_cell)).cell(s_rc1, s_rc);
-              s_rc = s_rc1;
-
-              // update hysteresis to the face we just crossed
-              const auto& faces_next = conn.getIncidence(cd, cd - 1).at(s_cell);
-              last_face.reset();
-              for (size_t i = 0; i < faces_next.size(); ++i)
-              {
-                if (faces_next[i] == f2)
-                {
-                  last_face = i;
-                  break;
-                }
-              }
-            }
+            hi = mid;
+            phi_hi = phi_mid;
           }
+
+          thit = hi; // earliest time that is (weakly) outside
+        }
+      }
+    }
+
+    // advance to refined hit time and project onto face
+    advance(s_rc1, thit, s_rc);
+    Geometry::Polytope::Project(g).face(jhit, s_rc, s_rc1);
+    s_rc = s_rc1;
+    tau -= thit;
+
+    // same-phys point at face
+    mesh.getPolytopeTransformation(cd, s_cell).transform(s_pc, s_rc);
+
+    // ---- cross face or apply boundary policy
+    if (mesh.isBoundary(face_hit))
+    {
+      if (!m_bp(BoundaryHit{tau, s_cell, s_rc, jhit}))
+        return Trace{ true, tau, Geometry::Point(*itc, s_rc) };
+      last_face.reset();
+    }
+    else
+    {
+      // interior hop across face_hit
+      const auto& nbrs = conn.getIncidence(cd - 1, cd).at(face_hit);
+      assert(nbrs.size() == 2);
+      s_cell = (nbrs[0] == s_cell) ? nbrs[1] : nbrs[0];
+
+      // map same phys point into new cell
+      mesh.getPolytopeTransformation(cd, s_cell).inverse(s_rc, s_pc);
+      Geometry::Polytope::Project(mesh.getGeometry(cd, s_cell)).cell(s_rc1, s_rc);
+      s_rc = s_rc1;
+
+      // hysteresis: set opposite face in new cell
+      const auto& faces_new = conn.getIncidence(cd, cd - 1).at(s_cell);
+      last_face.reset();
+      for (size_t i = 0; i < faces_new.size(); ++i)
+      {
+        if (faces_new[i] == face_hit)
+        {
+          last_face = i;
+          break;
+        }
+      }
+
+      // ---- chained zero-time crossings: deterministic multi-face selection (Change #2)
+      size_t zero_hops = 0;
+      while (zero_hops++ < ZERO_HOPS_MAX)
+      {
+        const auto itz = mesh.getPolytope(cd, s_cell);
+        const auto& cellz = *itz;
+        const auto gz = mesh.getGeometry(cd, s_cell);
+        const auto& hsz = Geometry::Polytope::Traits(gz).getHalfSpace();
+        const auto& facesz = conn.getIncidence(cd, cd - 1).at(s_cell);
+
+        auto vrefz = [&](const Math::SpatialPoint& r) -> Math::SpatialVector<Real>
+        {
+          const Geometry::Point qp(cellz, r);
+          return (sgn * qp.getJacobianInverse() * m_velocity(qp)).col(0);
+        };
+
+        auto phi_face_z = [&](size_t j, const Math::SpatialPoint& r) -> Real
+        {
+          const auto n = hsz.matrix.row(j);
+          const Real b = hsz.vector[j];
+          return b - r.dot(n);
+        };
+
+        // collect ALL faces that contain this phys point (|phi| small) and are being exited (n·v > tol)
+        s_faceset.clear();
+        for (size_t i = 0; i < facesz.size(); ++i)
+        {
+          if (last_face && i == *last_face)
+            continue;
+
+          const Real gi = phi_face_z(i, s_rc);
+          if (std::abs(gi) > eps_g)
+            continue;
+
+          const Real ndv = vrefz(s_rc).dot(hsz.matrix.row(i));
+          if (ndv <= eps_ndv)
+            continue;
+
+          s_faceset.push_back(i);
         }
 
-        const auto itf = mesh.getPolytope(cd, s_cell);
-        return Trace{ false, tau, Geometry::Point(*itf, s_rc) };
+        if (s_faceset.empty())
+          break; // strictly interior now
+
+        // deterministic choice:
+        // 1) smallest |gi|, 2) largest ndv, 3) smallest global face id
+        auto best = s_faceset.front();
+        auto best_key = [&](size_t i)
+        {
+          const Real gi  = phi_face_z(i, s_rc);
+          const Real ndv = vrefz(s_rc).dot(hsz.matrix.row(i));
+          const Index fid = facesz[i];
+          return std::tuple<Real, Real, Index>(std::abs(gi), -ndv, fid);
+        };
+        for (size_t k = 1; k < s_faceset.size(); ++k)
+        {
+          const size_t cand = s_faceset[k];
+          if (best_key(cand) < best_key(best))
+            best = cand;
+        }
+
+        const size_t kface = best;
+        const Index f2 = facesz[kface];
+
+        // boundary at same phys point?
+        if (mesh.isBoundary(f2))
+        {
+          if (!m_bp(BoundaryHit{tau, s_cell, s_rc, kface}))
+            return Trace{ true, tau, Geometry::Point(*itz, s_rc) };
+          last_face.reset();
+          break;
+        }
+
+        // hop across kface at t=0
+        mesh.getPolytopeTransformation(cd, s_cell).transform(s_pc, s_rc);
+        const auto& nbr2 = conn.getIncidence(cd - 1, cd).at(f2);
+        assert(nbr2.size() == 2);
+        s_cell = (nbr2[0] == s_cell) ? nbr2[1] : nbr2[0];
+
+        mesh.getPolytopeTransformation(cd, s_cell).inverse(s_rc, s_pc);
+        Geometry::Polytope::Project(mesh.getGeometry(cd, s_cell)).cell(s_rc1, s_rc);
+        s_rc = s_rc1;
+
+        // update hysteresis to the face we just crossed
+        const auto& faces_next = conn.getIncidence(cd, cd - 1).at(s_cell);
+        last_face.reset();
+        for (size_t i = 0; i < faces_next.size(); ++i)
+        {
+          if (faces_next[i] == f2)
+          {
+            last_face = i;
+            break;
+          }
+        }
       }
+    }
+  }
+
+  const auto itf = mesh.getPolytope(cd, s_cell);
+  return Trace{ false, tau, Geometry::Point(*itf, s_rc) };
+}
 
       constexpr
       auto getValue(const Geometry::Point& p) const

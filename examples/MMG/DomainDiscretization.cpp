@@ -39,7 +39,7 @@ int main(int, char**)
   gf.save("LevelSet.gf");
   mesh.save("Domain.mesh");
 
-  MMG::ImplicitDomainMesher().split(interior, { interior, exterior })
+  MMG::LevelSetDiscretizer().split(interior, { interior, exterior })
                              .setBoundaryReference(boundary)
                              .setHMax(hmax)
                              .discretize(gf)

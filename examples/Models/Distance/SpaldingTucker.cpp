@@ -42,7 +42,7 @@ int main(int, char**)
       return d;
     };
 
-    mesh = MMG::ImplicitDomainMesher().setBoundaryReference(5)
+    mesh = MMG::LevelSetDiscretizer().setBoundaryReference(5)
       .setAngleDetection().setHMax(0.02).discretize(dist);
     mesh.save("implicit.mesh", IO::FileFormat::MEDIT);
   }

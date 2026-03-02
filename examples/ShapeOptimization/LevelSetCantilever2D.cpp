@@ -171,7 +171,7 @@ int main(int, char**)
     // Recover the implicit domain
     Alert::Info() << "   | Meshing the domain." << Alert::Raise;
 
-    th = MMG::ImplicitDomainMesher().split(interior, {interior, exterior})
+    th = MMG::LevelSetDiscretizer().split(interior, {interior, exterior})
                                     .split(exterior, {interior, exterior})
                                     .setRMC(1e-6)
                                     .setHMax(hmax)

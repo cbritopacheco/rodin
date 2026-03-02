@@ -17,7 +17,7 @@ namespace Rodin::MMG
 
   class Optimizer;
 
-  class ImplicitDomainMesher;
+  class LevelSetDiscretizer;
 }
 
 #endif

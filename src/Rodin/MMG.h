@@ -13,6 +13,6 @@
 #include "MMG/Adapt.h"
 #include "MMG/GridFunction.h"
 #include "MMG/MeshOptimizer.h"
-#include "MMG/ImplicitDomainMesher.h"
+#include "MMG/LevelSetDiscretizer.h"
 
 #endif
