@@ -96,7 +96,8 @@ namespace Rodin::Variational
           for (auto& idx : inc)
           {
             const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
-            if (traceDomain.count(tracePolytope->getAttribute()))
+            const auto a = tracePolytope->getAttribute();
+            if (a && traceDomain.count(*a))
             {
               Math::SpatialPoint rc;
               tracePolytope->getTransformation().inverse(rc, pc);

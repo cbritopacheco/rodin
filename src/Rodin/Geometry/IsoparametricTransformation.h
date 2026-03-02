@@ -16,11 +16,11 @@
 #include <boost/serialization/base_object.hpp>
 
 #include "Rodin/Geometry/Polytope.h"
+#include "Rodin/Geometry/PointCloud.h"
 
 #include "PolytopeTransformation.h"
 
 #include "ForwardDecls.h"
-#include "Rodin/Math/PointMatrix.h"
 #include "Rodin/Math/Vector.h"
 
 namespace Rodin::Geometry
@@ -77,12 +77,11 @@ namespace Rodin::Geometry
        *            is the spatial dimension and @f$ n @f$ is the number of DOFs
        * @param[in] fe Finite element providing basis functions
        */
-      IsoparametricTransformation(Math::PointMatrix&& pm, FE&& fe)
+      IsoparametricTransformation(Geometry::PointCloud&& pm, FE&& fe)
         : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
           m_pm(std::move(pm)),
           m_fe(std::move(fe))
       {
-        assert(m_pm.cols() >= 0);
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
@@ -91,12 +90,11 @@ namespace Rodin::Geometry
        * @param[in] pm Point matrix of size @f$ s \times n @f$
        * @param[in] fe Finite element providing basis functions
        */
-      IsoparametricTransformation(const Math::PointMatrix& pm, const FE& fe)
+      IsoparametricTransformation(const Geometry::PointCloud& pm, const FE& fe)
         : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
           m_pm(pm),
           m_fe(fe)
       {
-        assert(m_pm.cols() >= 0);
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
@@ -105,12 +103,11 @@ namespace Rodin::Geometry
        * @param[in] pm Point matrix (move)
        * @param[in] fe Finite element (copy)
        */
-      IsoparametricTransformation(Math::PointMatrix&& pm, const FE& fe)
+      IsoparametricTransformation(Geometry::PointCloud&& pm, const FE& fe)
         : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
           m_pm(std::move(pm)),
           m_fe(fe)
       {
-        assert(m_pm.cols() >= 0);
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
@@ -119,12 +116,11 @@ namespace Rodin::Geometry
        * @param[in] pm Point matrix (copy)
        * @param[in] fe Finite element (move)
        */
-      IsoparametricTransformation(const Math::PointMatrix& pm, FE&& fe)
+      IsoparametricTransformation(const PointCloud& pm, FE&& fe)
         : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
           m_pm(pm),
           m_fe(std::move(fe))
       {
-        assert(m_pm.cols() >= 0);
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
@@ -136,7 +132,6 @@ namespace Rodin::Geometry
           m_pm(other.m_pm),
           m_fe(other.m_fe)
       {
-        assert(m_pm.cols() >= 0);
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
@@ -148,7 +143,6 @@ namespace Rodin::Geometry
           m_pm(std::move(other.m_pm)),
           m_fe(std::move(other.m_fe))
       {
-        assert(m_pm.cols() >= 0);
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
@@ -171,14 +165,13 @@ namespace Rodin::Geometry
       void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc) const override
       {
         const size_t pdim = getPhysicalDimension();
-        assert(rc.size() >= 0);
         assert(static_cast<size_t>(rc.size()) == getReferenceDimension());
         pc.resize(pdim);
         pc.setZero();
         for (size_t local = 0; local < m_fe.getCount(); local++)
         {
-          assert(pc.size() == m_pm.col(local).size());
-          pc += m_pm.col(local) * m_fe.getBasis(local)(rc);
+          assert(pc.size() == m_pm[local].size());
+          pc += m_pm[local] * m_fe.getBasis(local)(rc);
         }
       }
 
@@ -192,7 +185,6 @@ namespace Rodin::Geometry
       void jacobian(Math::SpatialMatrix<Real>& pc, const Math::SpatialPoint& rc) const override
       {
         const size_t rdim = getReferenceDimension();
-        assert(rc.size() >= 0);
         assert(static_cast<size_t>(rc.size()) == rdim);
         const size_t pdim = getPhysicalDimension();
         pc.resize(pdim, rdim);
@@ -216,7 +208,7 @@ namespace Rodin::Geometry
        * The returned matrix has size @f$ s \times n @f$ where @f$ s @f$ is
        * the spatial dimension and @f$ n @f$ is the number of degrees of freedom.
        */
-      const Math::PointMatrix& getPointMatrix() const
+      const PointCloud& getPointMatrix() const
       {
         return m_pm;
       }
@@ -244,7 +236,7 @@ namespace Rodin::Geometry
       }
 
     private:
-      Math::PointMatrix m_pm; ///< Point matrix (spatial_dim x num_dofs)
+      PointCloud m_pm; ///< Point matrix (spatial_dim x num_dofs)
       FE m_fe;                ///< Finite element providing basis functions
   };
 }

@@ -16,7 +16,7 @@ set(RodinMMG_HEADERS
   MeshLoader.h
   MeshPrinter.h
   MeshOptimizer.h
-  ImplicitDomainMesher.h
+  LevelSetDiscretizer.h
   )
 
 set(RodinMMG_SRCS
@@ -28,7 +28,7 @@ set(RodinMMG_SRCS
   MeshBuilder.cpp
   MeshPrinter.cpp
   MeshOptimizer.cpp
-  ImplicitDomainMesher.cpp
+  LevelSetDiscretizer.cpp
   )
 
 # ---- Set compile options for all the submodules ----------------------------

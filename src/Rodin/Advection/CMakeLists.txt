@@ -5,47 +5,47 @@ Distributed under the Boost Software License, Version 1.0.
          https://www.boost.org/LICENSE_1_0.txt)
 ]]
 
-set(RodinModelsEikonal_HEADERS
-  FMM.h
+set(RodinAdvection_HEADERS
+  Lagrangian.h
 )
 
 # Header-only / interface library
-add_library(RodinModelsEikonal INTERFACE)
-add_library(Rodin::Models::Eikonal ALIAS RodinModelsEikonal)
-set_target_properties(RodinModelsEikonal PROPERTIES EXPORT_NAME ModelsEikonal)
+add_library(RodinAdvection INTERFACE)
+add_library(Rodin::Advection ALIAS RodinAdvection)
+set_target_properties(RodinAdvection PROPERTIES EXPORT_NAME Advection)
 
 # ---- Includes / defs -------------------------------------------------------
-target_include_directories(RodinModelsEikonal
+target_include_directories(RodinAdvection
   INTERFACE
     $<TARGET_PROPERTY:Rodin,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
-target_compile_definitions(RodinModelsEikonal
+target_compile_definitions(RodinAdvection
   INTERFACE
     $<TARGET_PROPERTY:Rodin,INTERFACE_COMPILE_DEFINITIONS>
 )
 
 # ---- Link targets ----------------------------------------------------------
-target_link_libraries(RodinModelsEikonal
+target_link_libraries(RodinAdvection
   INTERFACE
     Rodin::Geometry
     Rodin::Variational
 )
 
 # Expose headers for IDEs in build tree
-foreach(_h IN LISTS RodinModelsEikonal_HEADERS)
-  target_sources(RodinModelsEikonal INTERFACE
+foreach(_h IN LISTS RodinAdvection_HEADERS)
+  target_sources(RodinAdvection INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${_h}>
   )
 endforeach()
 
 # ---- Install target --------------------------------------------------------
 install(
-  TARGETS RodinModelsEikonal
+  TARGETS RodinAdvection
   EXPORT RodinTargets
 )
 
 rodin_install_headers(
   DIRECTORIES .
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Rodin/Models/Eikonal
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Rodin//Advection
 )

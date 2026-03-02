@@ -4,6 +4,7 @@
 #include "Rodin/Serialization/BitSet.h"
 #include "Rodin/Serialization/FlatMap.h"
 #include "Rodin/Serialization/FlatSet.h"
+#include "Rodin/Serialization/Optional.h"
 
 #include "Sharder.h"
 

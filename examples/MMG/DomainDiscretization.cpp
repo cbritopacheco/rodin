@@ -13,6 +13,7 @@ using namespace Rodin::Variational;
 
 static constexpr Attribute interior = 1;
 static constexpr Attribute exterior = 2;
+static constexpr Attribute boundary = 2;
 static constexpr Real hmax = 0.1;
 static constexpr Real radius = 0.1;
 
@@ -22,6 +23,11 @@ int main(int, char**)
   MMG::Mesh mesh;
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
   mesh.scale(1. / (n - 1));
+
+  for (auto it = mesh.getCell(); it; ++it)
+  {
+    mesh.setAttribute({ it->getDimension(), it->getIndex() }, interior);
+  }
 
   P1 fes(mesh);
   MMG::RealGridFunction gf(fes);
@@ -33,8 +39,8 @@ int main(int, char**)
   gf.save("LevelSet.gf");
   mesh.save("Domain.mesh");
 
-  MMG::ImplicitDomainMesher().split(RODIN_DEFAULT_POLYTOPE_ATTRIBUTE, { interior, exterior })
-                             .setBoundaryReference(RODIN_DEFAULT_POLYTOPE_ATTRIBUTE)
+  MMG::LevelSetDiscretizer().split(interior, { interior, exterior })
+                             .setBoundaryReference(boundary)
                              .setHMax(hmax)
                              .discretize(gf)
                              .save("Discretized.mesh", IO::FileFormat::MEDIT);

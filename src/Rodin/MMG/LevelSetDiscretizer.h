@@ -31,18 +31,18 @@ namespace Rodin::MMG
    *  \right.
    * @f]
    */
-  class ImplicitDomainMesher : public MMG5
+  class LevelSetDiscretizer : public MMG5
   {
     public:
       /**
        * @brief Default constructor.
        */
-      ImplicitDomainMesher()
+      LevelSetDiscretizer()
         : m_ls(0.0),
           m_meshTheSurface(false)
       {}
 
-      ImplicitDomainMesher& surface(bool meshTheSurface = true);
+      LevelSetDiscretizer& surface(bool meshTheSurface = true);
 
       /**
        * @brief Specifies the level set to discretize.
@@ -51,20 +51,20 @@ namespace Rodin::MMG
        *
        * @returns Reference to self (for method chaining)
        */
-      ImplicitDomainMesher& setLevelSet(Real ls);
+      LevelSetDiscretizer& setLevelSet(Real ls);
 
       /**
        * @brief Specifies the removal of small parasitic components.
        * @returns Reference to self (for method chaining)
        */
-      ImplicitDomainMesher& setRMC(Real rmc = 1e-5);
+      LevelSetDiscretizer& setRMC(Real rmc = 1e-5);
 
-      ImplicitDomainMesher& setBaseReferences(Geometry::Attribute ref)
+      LevelSetDiscretizer& setBaseReferences(Geometry::Attribute ref)
       {
         return setBaseReferences(FlatSet<Geometry::Attribute>{ref});
       }
 
-      ImplicitDomainMesher& setBaseReferences(const FlatSet<Geometry::Attribute>& refs);
+      LevelSetDiscretizer& setBaseReferences(const FlatSet<Geometry::Attribute>& refs);
 
       /**
        * @brief Sets the material reference for the discretized boundary
@@ -75,7 +75,7 @@ namespace Rodin::MMG
        *
        * @returns Reference to self (for method chaining)
        */
-      ImplicitDomainMesher& setBoundaryReference(const Geometry::Attribute& ref);
+      LevelSetDiscretizer& setBoundaryReference(const Geometry::Attribute& ref);
 
       /**
        * @brief Specifies how to split the materials into an interior and
@@ -88,7 +88,7 @@ namespace Rodin::MMG
        *
        * @returns Reference to self (for method chaining)
        */
-      ImplicitDomainMesher& setSplit(const SplitMap& split);
+      LevelSetDiscretizer& setSplit(const SplitMap& split);
 
       /**
        * @brief Indicates that a material reference should be split.
@@ -96,14 +96,14 @@ namespace Rodin::MMG
        * @param[in] s Interior and exterior labels
        * @returns Reference to self (for method chaining)
        */
-      ImplicitDomainMesher& split(const Geometry::Attribute& ref, const Split& s);
+      LevelSetDiscretizer& split(const Geometry::Attribute& ref, const Split& s);
 
       /**
        * @brief Indicates that a material reference should not be split.
        * @param[in] ref Material reference that should not be split
        * @returns Reference to self (for method chaining)
        */
-      ImplicitDomainMesher& noSplit(const Geometry::Attribute& ref);
+      LevelSetDiscretizer& noSplit(const Geometry::Attribute& ref);
 
       /**
        * @brief Discretizes and optimizes an implicitly defined surface defined
@@ -114,31 +114,31 @@ namespace Rodin::MMG
        */
       MMG::Mesh discretize(const MMG::RealGridFunction& ls);
 
-      ImplicitDomainMesher& setAngleDetection(bool enable = true)
+      LevelSetDiscretizer& setAngleDetection(bool enable = true)
       {
         MMG5::setAngleDetection(enable);
         return *this;
       }
 
-      ImplicitDomainMesher& setHMin(Real hmin)
+      LevelSetDiscretizer& setHMin(Real hmin)
       {
         MMG5::setHMin(hmin);
         return *this;
       }
 
-      ImplicitDomainMesher& setHMax(Real hmax)
+      LevelSetDiscretizer& setHMax(Real hmax)
       {
         MMG5::setHMax(hmax);
         return *this;
       }
 
-      ImplicitDomainMesher& setHausdorff(Real hausd)
+      LevelSetDiscretizer& setHausdorff(Real hausd)
       {
         MMG5::setHausdorff(hausd);
         return *this;
       }
 
-      ImplicitDomainMesher& setGradation(Real hgrad)
+      LevelSetDiscretizer& setGradation(Real hgrad)
       {
         MMG5::setGradation(hgrad);
         return *this;

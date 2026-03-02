@@ -4,7 +4,7 @@ target_link_libraries(RodinAdvectionLagrangianTest
   GTest::gtest
   GTest::gtest_main
   Rodin::Rodin
-  Rodin::Models::Advection)
+  Rodin::Advection)
 gtest_discover_tests(RodinAdvectionLagrangianTest
   PROPERTIES
     LABELS unit

@@ -364,17 +364,17 @@ namespace Rodin::Variational
 
       size_t getDOFs(const Geometry::Polytope& element) const
       {
-        return getRHS().getDOFs(element);
+        return this->getRHS().getDOFs(element);
       }
 
       const FESType& getFiniteElementSpace() const
       {
-        return getRHS().getFiniteElementSpace();
+        return this->getRHS().getFiniteElementSpace();
       }
 
       const IntegrationPoint& getIntegrationPoint() const
       {
-        return getRHS().getIntegrationPoint();
+        return this->getRHS().getIntegrationPoint();
       }
 
       Dot& setIntegrationPoint(const IntegrationPoint& ip)
@@ -386,7 +386,7 @@ namespace Rodin::Variational
       constexpr
       auto getBasis(size_t local) const
       {
-        const auto& ip = getRHS().getIntegrationPoint();
+        const auto& ip = this->getRHS().getIntegrationPoint();
         return Math::dot(this->object(getLHS().getValue(ip.getPoint())), this->object(getRHS().getBasis(local)));
       }
 

@@ -27,7 +27,7 @@
 #include "Rodin/Variational/P1/P1.h"
 #include "Rodin/Variational/GridFunction.h"
 
-namespace Rodin::Models::Eikonal
+namespace Rodin::Eikonal
 {
   /**
    * @brief Fast marching method for solving the Eikonal equation.

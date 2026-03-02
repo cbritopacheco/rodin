@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include "MFEM.h"
 #include "Rodin/Geometry/AttributeIndex.h"
+#include "MFEM.h"
 
 namespace Rodin::IO::MFEM
 {
@@ -267,7 +267,7 @@ namespace Rodin::IO
           << it->getGeometry() << "."
           << Alert::Raise;
       }
-      os << it->getAttribute() << ' ' << *g << ' ';
+      os << it->getAttribute().value_or(RODIN_IO_MFEM_DEFAULT_POLYTOPE_ATTRIBUTE) << ' ' << *g << ' ';
 
       const auto& vertices = it->getVertices();
       switch (it->getGeometry())
@@ -324,7 +324,7 @@ namespace Rodin::IO
           << it->getGeometry() << "."
           << Alert::Raise;
       }
-      os << it->getAttribute() << ' ' << *g << ' ';
+      os << it->getAttribute().value_or(RODIN_IO_MFEM_DEFAULT_POLYTOPE_ATTRIBUTE) << ' ' << *g << ' ';
 
       const auto& vertices = it->getVertices();
       switch (it->getGeometry())

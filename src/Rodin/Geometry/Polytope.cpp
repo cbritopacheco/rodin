@@ -405,21 +405,21 @@ namespace Rodin::Geometry
 
   // ---- Polytope -----------------------------------------------------------
 
-  Attribute Polytope::getAttribute() const
+  Optional<Attribute> Polytope::getAttribute() const
   {
-    return getMesh().getAttribute(getDimension(), getIndex());
+    return this->getMesh().getAttribute(getDimension(), getIndex());
   }
 
   Polytope::Type Polytope::getGeometry() const
   {
-    return getMesh().getGeometry(getDimension(), getIndex());
+    return this->getMesh().getGeometry(getDimension(), getIndex());
   }
 
   VertexIterator Polytope::getVertex() const
   {
     const auto& vertices = getVertices();
     return VertexIterator(
-        getMesh(), IteratorIndexGenerator(vertices.begin(), vertices.end()));
+        this->getMesh(), IteratorIndexGenerator(vertices.begin(), vertices.end()));
   }
 
   const Array<Index>& Polytope::getVertices() const

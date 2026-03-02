@@ -161,7 +161,7 @@ namespace Rodin::Geometry
        * @brief Parent mesh type.
        */
       using Parent = Mesh<Rodin::Context::Local>;
-      
+
       /**
        * @brief Context type.
        */

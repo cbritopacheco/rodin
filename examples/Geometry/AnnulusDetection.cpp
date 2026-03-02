@@ -10,35 +10,44 @@
 using namespace Rodin;
 using namespace Rodin::Geometry;
 
-static std::set<Attribute> s_epicardium = { 100, 101, 102, 103, 104, 200, 300 } ;
-static std::set<Attribute> s_endocardium = { 666 } ;
+static std::set<Attribute> s_epicardium = { 1, 2, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14, 15, 17, } ;
+static std::set<Attribute> s_endocardium = { 3, 7 } ;
 
-template <class Mesh>
-bool isAnnulus(const Mesh& mesh, Index edgeIdx)
+template <class MeshT>
+bool isAnnulus(const MeshT& mesh, Index edgeIdx)
 {
   const auto& inc = mesh.getConnectivity().getIncidence({ 1, 2 }, edgeIdx);
+
   bool boundary = false;
   bool endocardium = false;
   bool different = false;
+
   for (const auto& j : inc)
   {
-    if (mesh.isBoundary(j))
-      boundary = true;
-    else
-      break;
-    if (s_endocardium.contains(mesh.getAttribute(2, j)))
+    if (!mesh.isBoundary(j))
+      break;                 // keep your "must be boundary" convention
+    boundary = true;
+
+    const auto attr = mesh.getAttribute(2, j); // Optional<Attribute>
+    if (!attr)
+      continue; // no attribute => cannot be in endocardium set, also cannot mark different
+
+    if (s_endocardium.contains(*attr))
       endocardium = true;
     else
       different = true;
   }
+
   return boundary && endocardium && different;
 }
 
 int main(int, char**)
 {
   Mesh mesh;
-  mesh.load("LeftAtrium__tetra_layers_1.mesh", IO::FileFormat::MEDIT);
-
+  mesh.load("BiEllipsoid.mesh", IO::FileFormat::MEDIT);
+  mesh.scale(10);
+  mesh.save("BiEllipsoid_scaled.mesh", IO::FileFormat::MEDIT);
+  std::exit(1);
 
   mesh.getConnectivity().compute(2, 3);
   mesh.getConnectivity().compute(1, 2);

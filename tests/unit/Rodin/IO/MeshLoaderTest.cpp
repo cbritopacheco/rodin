@@ -38,10 +38,10 @@ namespace Rodin::Tests::Unit
     size_t d = 0;
     EXPECT_EQ(mesh.getPolytopeCount(d), 4);
     EXPECT_EQ(mesh.getPolytopeCount(d), mesh.getVertexCount());
-    EXPECT_EQ(mesh.getAttribute(d, 0), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
-    EXPECT_EQ(mesh.getAttribute(d, 1), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
-    EXPECT_EQ(mesh.getAttribute(d, 2), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
-    EXPECT_EQ(mesh.getAttribute(d, 3), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
+    EXPECT_EQ(mesh.getAttribute(d, 0), 1);
+    EXPECT_EQ(mesh.getAttribute(d, 1), 1);
+    EXPECT_EQ(mesh.getAttribute(d, 2), 1);
+    EXPECT_EQ(mesh.getAttribute(d, 3), 1);
 
     d = 1;
     EXPECT_EQ(mesh.getPolytopeCount(d), 5);
@@ -73,10 +73,10 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mesh.getPolytopeCount(d), mesh.getVertexCount());
 
     // MFEM format does not support vertex attributes
-    EXPECT_EQ(mesh.getAttribute(d, 0), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
-    EXPECT_EQ(mesh.getAttribute(d, 1), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
-    EXPECT_EQ(mesh.getAttribute(d, 2), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
-    EXPECT_EQ(mesh.getAttribute(d, 3), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
+    EXPECT_EQ(mesh.getAttribute(d, 0), std::nullopt);
+    EXPECT_EQ(mesh.getAttribute(d, 1), std::nullopt);
+    EXPECT_EQ(mesh.getAttribute(d, 2), std::nullopt);
+    EXPECT_EQ(mesh.getAttribute(d, 3), std::nullopt);
 
     d = 1;
     EXPECT_EQ(mesh.getPolytopeCount(d), 5);
@@ -114,7 +114,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mesh.getPolytopeCount(d), mesh.getVertexCount());
 
     for (size_t i = 0; i < vcount; i++)
-      EXPECT_EQ(mesh.getAttribute(d, i), RODIN_DEFAULT_POLYTOPE_ATTRIBUTE);
+      EXPECT_EQ(mesh.getAttribute(d, i), std::nullopt);
 
     d = 2;
     for (size_t i = 0; i < ecount; i++)

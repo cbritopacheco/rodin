@@ -10,17 +10,17 @@
  * @f]
  * where @f$ d @f$ is the distance function.
  */
-#ifndef RODIN_MODELS_DITANCE_EIKONAL_H
-#define RODIN_MODELS_DITANCE_EIKONAL_H
+#ifndef RODIN_MODELS_DISTANCE_EIKONAL_H
+#define RODIN_MODELS_DISTANCE_EIKONAL_H
 
-#include "Rodin/Geometry/PolytopeIterator.h"
-#include "Rodin/Models/Eikonal/FMM.h"
+#include <functional>
+
+#include "Rodin/Eikonal/FMM.h"
 
 #include "Base.h"
 #include "Rodin/Variational/ForwardDecls.h"
-#include <functional>
 
-namespace Rodin::Models::Distance
+namespace Rodin::Distance
 {
   /**
    * @brief Distance function computation using the Eikonal equation.
@@ -78,43 +78,43 @@ namespace Rodin::Models::Distance
           [](const Geometry::Point&) -> Real { return 1.0; };
 
         auto& u = m_u.get();
-        const auto& fes = u.getFiniteElementSpace();
-        const auto& interior = this->getInterior();
-        const auto& interface = this->getInterface();
+        const auto& fes  = u.getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
+        const auto& interior  = this->getInterior();
+        const auto& interface = this->getInterface();
 
-        Models::Eikonal::FMM fmm(u, s_speed);
+        Rodin::Eikonal::FMM fmm(u, s_speed);
 
-        m_visited.resize(mesh.getVertexCount(), false);
+        m_visited.assign(mesh.getVertexCount(), 0);
+        m_seeds.clear();
 
-        Geometry::FaceIterator it;
-        if (interior.empty())
-          it = mesh.getFace();
-        else
-          it = mesh.getBoundary();
         for (auto it = mesh.getFace(); !it.end(); ++it)
         {
           const auto& face = *it;
-          if (interface.find(face.getAttribute()) == interface.end())
+          const auto a = face.getAttribute(); // Optional<Attribute>
+          if (!a || !interface.contains(*a))
             continue;
-          for (const auto& vertex : face.getVertices())
+
+          for (Index vtx : face.getVertices())
           {
-            if (m_visited[vertex])
-            {
+            const size_t v = static_cast<size_t>(vtx);
+            if (m_visited[v])
               continue;
-            }
-            else
-            {
-              m_seeds.push_back(vertex);
-              m_visited[vertex] = true;
-            }
+            m_seeds.push_back(vtx);
+            m_visited[v] = 1;
           }
         }
 
-        fmm.seed(m_seeds).solve();
+        if (m_seeds.empty())
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "No seed vertices found for the interface. "
+            << Alert::Raise;
+        }
 
+        fmm.seed(m_seeds).solve();
         return *this;
-      };
+      }
 
       /**
        * @brief Computes the sign of the distance function.
@@ -131,31 +131,33 @@ namespace Rodin::Models::Distance
       Eikonal& sign()
       {
         auto& u = m_u.get();
-        const auto& fes = u.getFiniteElementSpace();
+        const auto& fes  = u.getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
-        const size_t d = mesh.getDimension();
-        std::fill(m_visited.begin(), m_visited.end(), false);
+        const auto& interior = this->getInterior();
+
+        assert(fes.getSize() == mesh.getVertexCount());
+        assert(fes.getVectorDimension() == 1);
+
+        m_visited.assign(mesh.getVertexCount(), 0);
+
         for (auto it = mesh.getCell(); !it.end(); ++it)
         {
           const auto& cell = *it;
-          const auto cellAttr = cell.getAttribute();
-          const bool isInterior = this->getInterior().contains(cellAttr);
-          if (isInterior)
+          const auto a = cell.getAttribute();
+          if (!a || !interior.contains(*a))
+            continue;
+
+          for (const Index vtx : cell.getVertices())
           {
-            for (const auto& vertex : cell.getVertices())
-            {
-              decltype(auto) fe = fes.getFiniteElement(d, vertex);
-              for (size_t local = 0; local < fe.getCount(); local++)
-              {
-                const Index global = fes.getGlobalIndex({d, cell.getIndex()}, local);
-                if (m_visited[global])
-                  continue;
-                u[global] *= -1;
-                m_visited[global] = true;
-              }
-            }
+            const size_t v = static_cast<size_t>(vtx);
+            if (m_visited[v])
+              continue;
+
+            u[vtx] *= -1;      // dof == vertex
+            m_visited[v] = 1;
           }
         }
+
         return *this;
       }
 

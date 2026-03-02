@@ -1,64 +1,64 @@
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Utility/Overloaded.h"
 
-#include "ImplicitDomainMesher.h"
+#include "LevelSetDiscretizer.h"
 
 namespace Rodin::MMG
 {
-  ImplicitDomainMesher& ImplicitDomainMesher::surface(bool meshTheSurface)
+  LevelSetDiscretizer& LevelSetDiscretizer::surface(bool meshTheSurface)
   {
     m_meshTheSurface = meshTheSurface;
     return *this;
   }
 
-  ImplicitDomainMesher& ImplicitDomainMesher::setLevelSet(Real ls)
+  LevelSetDiscretizer& LevelSetDiscretizer::setLevelSet(Real ls)
   {
     m_ls = ls;
     return *this;
   }
 
-  ImplicitDomainMesher& ImplicitDomainMesher::setRMC(Real rmc)
+  LevelSetDiscretizer& LevelSetDiscretizer::setRMC(Real rmc)
   {
     m_rmc = rmc;
     return *this;
   }
 
-  ImplicitDomainMesher& ImplicitDomainMesher::setBaseReferences(
+  LevelSetDiscretizer& LevelSetDiscretizer::setBaseReferences(
     const FlatSet<Geometry::Attribute>& refs)
   {
     m_lsBaseReferences = refs;
     return *this;
   }
 
-  ImplicitDomainMesher& ImplicitDomainMesher::setBoundaryReference(
+  LevelSetDiscretizer& LevelSetDiscretizer::setBoundaryReference(
     const Geometry::Attribute& ref)
   {
     m_isoref = ref;
     return *this;
   }
 
-  ImplicitDomainMesher& ImplicitDomainMesher::split(
+  LevelSetDiscretizer& LevelSetDiscretizer::split(
     const Geometry::Attribute& ref, const Split& s)
   {
     m_split[ref] = s;
     return *this;
   }
 
-  ImplicitDomainMesher& ImplicitDomainMesher::noSplit(
+  LevelSetDiscretizer& LevelSetDiscretizer::noSplit(
     const Geometry::Attribute& ref)
   {
     m_split[ref] = NoSplit;
     return *this;
   }
 
-  ImplicitDomainMesher& ImplicitDomainMesher::setSplit(const SplitMap& split)
+  LevelSetDiscretizer& LevelSetDiscretizer::setSplit(const SplitMap& split)
   {
     assert(split.size() > 0);
     m_split = split;
     return *this;
   }
 
-  ReturnCode ImplicitDomainMesher::discretizeMMG2D(MMG5_pMesh mesh, MMG5_pSol sol)
+  ReturnCode LevelSetDiscretizer::discretizeMMG2D(MMG5_pMesh mesh, MMG5_pSol sol)
   {
     if (m_rmc)
       MMG2D_Set_dparameter(mesh, sol, MMG2D_DPARAM_rmc, *m_rmc);
@@ -113,7 +113,7 @@ namespace Rodin::MMG
     return MMG2D_mmg2dls(mesh, sol, nullptr);
   }
 
-  ReturnCode ImplicitDomainMesher::discretizeMMG3D(MMG5_pMesh mesh, MMG5_pSol sol)
+  ReturnCode LevelSetDiscretizer::discretizeMMG3D(MMG5_pMesh mesh, MMG5_pSol sol)
   {
     if (m_rmc)
       MMG3D_Set_dparameter(mesh, sol, MMG3D_DPARAM_rmc, *m_rmc);
@@ -177,7 +177,7 @@ namespace Rodin::MMG
     return MMG3D_mmg3dls(mesh, sol, nullptr);
   }
 
-  int ImplicitDomainMesher::discretizeMMGS(MMG5_pMesh mesh, MMG5_pSol sol)
+  int LevelSetDiscretizer::discretizeMMGS(MMG5_pMesh mesh, MMG5_pSol sol)
   {
     if (m_rmc)
       Alert::Warning() << "Warning RMC option is not supported for surfaces." << Alert::Raise;
@@ -203,7 +203,7 @@ namespace Rodin::MMG
     return MMGS_mmgsls(mesh, sol, nullptr);
   }
 
-  void ImplicitDomainMesher::generateUniqueSplit(const FlatSet<Geometry::Attribute>& attrs)
+  void LevelSetDiscretizer::generateUniqueSplit(const FlatSet<Geometry::Attribute>& attrs)
   {
     m_uniqueSplit.clear();
 
@@ -261,7 +261,7 @@ namespace Rodin::MMG
     }
   }
 
-  void ImplicitDomainMesher::deleteBoundaryRef(MMG5_pMesh mesh, Geometry::Attribute ref)
+  void LevelSetDiscretizer::deleteBoundaryRef(MMG5_pMesh mesh, Geometry::Attribute ref)
   {
     if (m_meshTheSurface || MMG5::isSurfaceMesh(mesh) || mesh->dim == 2)
     {
@@ -311,7 +311,7 @@ namespace Rodin::MMG
     }
   }
 
-  MMG::Mesh ImplicitDomainMesher::discretize(const MMG::RealGridFunction& ls)
+  MMG::Mesh LevelSetDiscretizer::discretize(const MMG::RealGridFunction& ls)
   {
     const auto& fes = ls.getFiniteElementSpace();
     const auto& mesh = fes.getMesh();
@@ -386,7 +386,7 @@ namespace Rodin::MMG
       {
         const auto& polytope = *it;
         const Index idx = polytope.getIndex();
-        const Geometry::Attribute attr = polytope.getAttribute();
+        const Geometry::Attribute attr = polytope.getAttribute().value_or(0);
         auto attrIt = m_g2om.find(attr);
         if (attrIt != m_g2om.end())
           rodinMesh.setAttribute({ d, idx }, attrIt->second);

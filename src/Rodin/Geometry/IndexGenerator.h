@@ -29,7 +29,7 @@ namespace Rodin
    * @brief Sentinel type for default-constructed iterators.
    */
   struct DefaultSentinelT {};
-  
+
   /**
    * @brief Default sentinel value.
    */
@@ -54,31 +54,31 @@ namespace Rodin::Geometry
        * @brief Virtual destructor.
        */
       virtual ~IndexGeneratorBase() = default;
-      
+
       /**
        * @brief Checks if the generator has reached the end.
        * @returns True if at the end, false otherwise
        */
       virtual bool end() const = 0;
-      
+
       /**
        * @brief Advances to the next index.
        * @returns Reference to this generator
        */
       virtual IndexGeneratorBase& operator++() = 0;
-      
+
       /**
        * @brief Dereferences to get the current index.
        * @returns Current index value
        */
       virtual Index operator*() const noexcept = 0;
-      
+
       /**
        * @brief Creates a copy of this generator.
        * @returns Pointer to a new generator
        */
       virtual IndexGeneratorBase* copy() const noexcept override = 0;
-      
+
       /**
        * @brief Creates a moved copy of this generator.
        * @returns Pointer to a new generator

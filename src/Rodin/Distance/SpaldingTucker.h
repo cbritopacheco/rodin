@@ -17,7 +17,7 @@
 
 #include "Rodin/Variational/GridFunction.h"
 
-namespace Rodin::Models::Distance
+namespace Rodin::Distance
 {
   /**
    * @brief Spalding-Tucker normalization for a level set function.

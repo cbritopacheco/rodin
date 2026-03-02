@@ -9,10 +9,10 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
-#include <Rodin/Models/Distance/Poisson.h>
-#include <Rodin/Models/Distance/SignedPoisson.h>
-#include <Rodin/Models/Distance/SpaldingTucker.h>
-#include <Rodin/Models/Distance/Rvachev.h>
+#include <Rodin/Distance/Poisson.h>
+#include <Rodin/Distance/SignedPoisson.h>
+#include <Rodin/Distance/SpaldingTucker.h>
+#include <Rodin/Distance/Rvachev.h>
 
 #include <Rodin/MMG.h>
 
@@ -42,7 +42,7 @@ int main(int, char**)
       return d;
     };
 
-    mesh = MMG::ImplicitDomainMesher().setBoundaryReference(5)
+    mesh = MMG::LevelSetDiscretizer().setBoundaryReference(5)
       .setAngleDetection().setHMax(0.02).discretize(dist);
     mesh.save("implicit.mesh", IO::FileFormat::MEDIT);
   }
@@ -51,8 +51,8 @@ int main(int, char**)
   mesh.getConnectivity().compute(1, 2);
 
   P1 vh(mesh);
-  auto ls = Models::Distance::SignedPoisson()(5, 3, vh);
-  auto dist = Models::Distance::SpaldingTucker()(ls);
+  auto ls = Distance::SignedPoisson()(5, 3, vh);
+  auto dist = Distance::SpaldingTucker()(ls);
 
   dist.save("miaow.gf");
   mesh.save("miaow.mesh");

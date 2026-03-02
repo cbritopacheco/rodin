@@ -23,7 +23,7 @@
 
 #include "Rodin/Alert/MemberFunctionException.h"
 
-namespace Rodin::Models::Distance
+namespace Rodin::Distance
 {
   /**
    * @brief Poisson approximation to the signed distance function.

@@ -6,7 +6,6 @@
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_free.hpp>
-#include <boost/serialization/optional.hpp>
 
 #include "Rodin/MPI/Geometry/Mesh.h"
 #include "Rodin/MPI/Variational/FiniteElementSpace.h"
@@ -341,7 +340,7 @@ namespace Rodin::Variational
         const auto& comm = ctx.getCommunicator();
         const auto& shard = mesh.getShard();
         const auto localIdx = mesh.getLocalIndex(d, globalIdx);
-        boost::optional<ElementType> send;
+        Optional<ElementType> send;
         if (localIdx)
         {
           const Index owner = shard.getOwner(d).at(*localIdx);
@@ -381,7 +380,7 @@ namespace Rodin::Variational
         const auto& comm = ctx.getCommunicator();
         const auto& shard = mesh.getShard();
         const auto localIdx = mesh.getLocalIndex(d, globalIdx);
-        boost::optional<IndexArray> send;
+        Optional<IndexArray> send;
         if (localIdx)
         {
           const Index& owner = shard.getOwner(d).at(*localIdx);
@@ -408,7 +407,7 @@ namespace Rodin::Variational
         const auto& shard = mesh.getShard();
         const auto& fes = getShard();
         const auto localIdx = mesh.getLocalIndex(d, globalIdx);
-        boost::optional<Index> send;
+        Optional<Index> send;
         if (localIdx)
         {
           const Index& owner = shard.getOwner(d).at(*localIdx);

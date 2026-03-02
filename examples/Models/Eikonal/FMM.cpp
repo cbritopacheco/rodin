@@ -9,7 +9,7 @@
 #include <Rodin/Math.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
-#include <Rodin/Models/Eikonal/FMM.h>
+#include <Rodin/Eikonal/FMM.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -39,7 +39,7 @@ int main(int, char**)
     // Define speed function (constant speed = 1)
     auto f = [](const Geometry::Point& p) -> Real { return 1.0; };
 
-    Models::Eikonal::FMM fmm(u, f);
+    Eikonal::FMM fmm(u, f);
 
     // Set interface: center point as source
     std::vector<Index> interface;
@@ -89,7 +89,7 @@ int main(int, char**)
       return 0.5 + 1.5 * std::exp(-2.0 * r * r); // Gaussian speed profile
     };
 
-    Models::Eikonal::FMM fmm(u, varying_speed);
+    Eikonal::FMM fmm(u, varying_speed);
 
     // Set interface: corner point as source
     std::set<Index> s;

@@ -105,3 +105,4 @@ gtest_discover_tests(RodinGeometryPointTest
   PROPERTIES
     LABELS unit
 )
+

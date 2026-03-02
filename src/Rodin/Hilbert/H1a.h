@@ -16,7 +16,7 @@
 
 #include "Rodin/Alert/MemberFunctionException.h"
 
-namespace Rodin::Models::Hilbert
+namespace Rodin::Hilbert
 {
   /**
    * @brief Hilbertian @f$ H^1 @f$ extension-regularization procedure with

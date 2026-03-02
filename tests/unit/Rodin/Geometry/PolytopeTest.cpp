@@ -86,9 +86,9 @@ namespace Rodin::Tests::Unit
     ASSERT_FALSE(it.end());
 
     Polytope edge = *it;
-    Attribute attr = edge.getAttribute();
+    Optional<Attribute> attr = edge.getAttribute();
 
-    EXPECT_GE(attr, 0);
+    EXPECT_FALSE(attr.has_value());
   }
 
   TEST(Geometry_Polytope, PolytopeDimension)
@@ -194,7 +194,7 @@ namespace Rodin::Tests::Unit
     {
       Polytope p2 = *it;
       p2 = p1;  // Copy assignment
-  
+
       EXPECT_EQ(p1.getIndex(), p2.getIndex());
     }
   }

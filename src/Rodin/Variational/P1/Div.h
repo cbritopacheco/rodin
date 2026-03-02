@@ -94,8 +94,8 @@ namespace Rodin::Variational
       void interpolate(ScalarType& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
-        const auto& d = polytope.getDimension();
-        const auto& i = polytope.getIndex();
+        const auto d = polytope.getDimension();
+        const auto i = polytope.getIndex();
         const auto& mesh = polytope.getMesh();
         const size_t meshDim = mesh.getDimension();
 
@@ -130,7 +130,8 @@ namespace Rodin::Variational
             for (auto& idx : inc)
             {
               const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
-              if (traceDomain.count(tracePolytope->getAttribute()))
+              const auto a = tracePolytope->getAttribute();
+              if (a && traceDomain.count(*a))
               {
                 Math::SpatialPoint rc;
                 tracePolytope->getTransformation().inverse(rc, pc);
@@ -169,8 +170,7 @@ namespace Rodin::Variational
         for (size_t v = 0; v < nv; ++v)
         {
           // ∇_hat φ_v
-          Math::SpatialVector<ScalarType> ghat;
-          ghat.resize(d);
+          Math::SpatialVector<ScalarType> ghat(d);
           for (size_t k = 0; k < d; ++k)
             ghat(k) = fe_scalar.getBasis(v).template getDerivative<1>(k)(rc);
 

@@ -11,7 +11,7 @@
 
 #include "Rodin/Geometry/Types.h"
 
-namespace Rodin::Models::Distance
+namespace Rodin::Distance
 {
   /**
    * @brief Base class for distance function computation models using CRTP.
