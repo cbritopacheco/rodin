@@ -172,6 +172,24 @@ TEST_F(MatrixTest, SpatialMatrix)
   }
 }
 
+TEST_F(MatrixTest, SpatialMatrixInverse)
+{
+  SpatialMatrix<Real> sm(2, 2);
+  sm(0, 0) = 4.0;
+  sm(0, 1) = 7.0;
+  sm(1, 0) = 2.0;
+  sm(1, 1) = 6.0;
+
+  const auto inv = sm.inverse();
+  const auto id = sm * inv;
+
+  EXPECT_NEAR(sm.determinant(), 10.0, RODIN_FUZZY_CONSTANT);
+  EXPECT_NEAR(id(0, 0), 1.0, RODIN_FUZZY_CONSTANT);
+  EXPECT_NEAR(id(0, 1), 0.0, RODIN_FUZZY_CONSTANT);
+  EXPECT_NEAR(id(1, 0), 0.0, RODIN_FUZZY_CONSTANT);
+  EXPECT_NEAR(id(1, 1), 1.0, RODIN_FUZZY_CONSTANT);
+}
+
 // Test PointMatrix functionality
 TEST_F(MatrixTest, PointMatrix)
 {
@@ -189,6 +207,22 @@ TEST_F(MatrixTest, PointMatrix)
   EXPECT_DOUBLE_EQ(pm(0, 0), 1.0);
   EXPECT_DOUBLE_EQ(pm(1, 0), 2.0);
   EXPECT_DOUBLE_EQ(pm(2, 0), 3.0);
+}
+
+TEST_F(MatrixTest, PointCloudColumns)
+{
+  PointMatrix cloud(3, 2);
+  cloud(0, 0) = 1.0; cloud(1, 0) = 2.0; cloud(2, 0) = 3.0;
+  cloud(0, 1) = 4.0; cloud(1, 1) = 5.0; cloud(2, 1) = 6.0;
+
+  EXPECT_DOUBLE_EQ(cloud.squaredNorm(), 91.0);
+  EXPECT_DOUBLE_EQ(cloud.dot(cloud), 91.0);
+
+  const auto transposed = cloud.transpose();
+  EXPECT_EQ(transposed.rows(), 2);
+  EXPECT_EQ(transposed.cols(), 3);
+  EXPECT_DOUBLE_EQ(transposed(0, 2), 3.0);
+  EXPECT_DOUBLE_EQ(transposed(1, 2), 6.0);
 }
 
 // Test complex matrix operations

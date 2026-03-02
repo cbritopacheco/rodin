@@ -205,6 +205,17 @@ TEST_F(VectorTest, SpatialVector)
   EXPECT_DOUBLE_EQ(sp[2], 6.0);
 }
 
+TEST_F(VectorTest, SpatialPointCoordinates)
+{
+  SpatialPoint sp{{1.0, 2.0, 2.0}};
+  EXPECT_DOUBLE_EQ(sp.x(), 1.0);
+  EXPECT_DOUBLE_EQ(sp.y(), 2.0);
+  EXPECT_DOUBLE_EQ(sp.z(), 2.0);
+
+  const auto normalized = sp.normalized();
+  EXPECT_NEAR(normalized.norm(), 1.0, RODIN_FUZZY_CONSTANT);
+}
+
 // Test complex vector operations
 TEST_F(VectorTest, ComplexVector)
 {
