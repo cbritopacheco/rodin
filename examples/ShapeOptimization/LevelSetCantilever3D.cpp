@@ -101,8 +101,6 @@ int main(int, char**)
 
     conn.discover(0, 0);
 
-    conn.discover(2, 1);
-
     Alert::Info() << "   | Trimming mesh." << Alert::Raise;
     SubMesh trimmed = th.trim(Exterior);
     trimmed.save("Trimmed.mesh", IO::FileFormat::MEDIT);

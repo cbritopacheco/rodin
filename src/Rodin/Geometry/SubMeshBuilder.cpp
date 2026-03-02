@@ -38,7 +38,7 @@ namespace Rodin::Geometry
     // First time we see this entity: create child index now
     const Index childIdx = m_sidx[d];
     m_s2ps[d].left.push_back(parentIdx);
-    m_s2ps[d].right.insert({ parentIdx, childIdx });
+    m_s2ps[d].right.insert(std::pair<Index, Index>{ parentIdx, childIdx });
     ++m_sidx[d];
 
     // Remap vertices and emit polytope ONCE
@@ -50,7 +50,7 @@ namespace Rodin::Geometry
       const Index pv = parentPolytope.coeff(i);
 
       // Vertex map check (same idea can be optimized further; see section 2)
-      auto [vit, vinserted] = m_s2ps[0].right.insert({ pv, m_sidx[0] });
+      auto [vit, vinserted] = m_s2ps[0].right.insert(std::pair<Index, Index>{ pv, m_sidx[0] });
       if (vinserted)
       {
         m_s2ps[0].left.push_back(pv);
