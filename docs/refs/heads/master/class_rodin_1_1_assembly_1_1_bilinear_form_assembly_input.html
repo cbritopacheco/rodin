@@ -94,8 +94,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md0">Local vs Global Integrators</a></li>
-            <li><a href="#autotoc_md1">Usage Example</a></li>
+            <li><a href="#autotoc_md3">Local vs Global Integrators</a></li>
+            <li><a href="#autotoc_md4">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -126,7 +126,7 @@ $ a(u,v) $
 <use x='22.603868' y='0' xlink:href='#eq1-g0-118'/>
 <use x='28.692087' y='0' xlink:href='#eq1-g1-41'/>
 </g>
-</svg> into a matrix operator. It stores references to the trial and test finite element spaces, as well as lists of local and global bilinear form integrators.</p><section id="autotoc_md0"><h3><a href="#autotoc_md0">Local vs Global Integrators</a></h3><ul><li><strong>Local integrators</strong>: Operate on individual elements <svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
+</svg> into a matrix operator. It stores references to the trial and test finite element spaces, as well as lists of local and global bilinear form integrators.</p><section id="autotoc_md3"><h3><a href="#autotoc_md3">Local vs Global Integrators</a></h3><ul><li><strong>Local integrators</strong>: Operate on individual elements <svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
 <title>
 $ K $
 </title>
@@ -172,7 +172,7 @@ $ K $
 <g id='eq4-page1'>
 <use x='0' y='0' xlink:href='#eq4-g0-75'/>
 </g>
-</svg>.</li><li><strong>Global integrators</strong>: Couple multiple elements, useful for non-local operators or interface conditions.</li></ul></section><section id="autotoc_md1"><h3><a href="#autotoc_md1">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Uh</span><span class="p">(</span><span class="n">mesh</span><span class="p">),</span><span class="w"> </span><span class="n">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg>.</li><li><strong>Global integrators</strong>: Couple multiple elements, useful for non-local operators or interface conditions.</li></ul></section><section id="autotoc_md4"><h3><a href="#autotoc_md4">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Uh</span><span class="p">(</span><span class="n">mesh</span><span class="p">),</span><span class="w"> </span><span class="n">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">lbfis</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="c1">// list of local integrators</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">gbfis</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="c1">// list of global integrators  </span>
 <span class="n">BilinearFormAssemblyInput</span><span class="w"> </span><span class="n">input</span><span class="p">(</span><span class="n">Uh</span><span class="p">,</span><span class="w"> </span><span class="n">Vh</span><span class="p">,</span><span class="w"> </span><span class="n">lbfis</span><span class="p">,</span><span class="w"> </span><span class="n">gbfis</span><span class="p">);</span></pre></section>

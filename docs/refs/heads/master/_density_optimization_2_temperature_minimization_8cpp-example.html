@@ -86,7 +86,7 @@
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Assembly.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Variational.h&gt;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;RodinExternal/MMG.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/MMG.h&gt;</span>
 
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="p">;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Geometry</span><span class="p">;</span>
@@ -108,9 +108,9 @@
 <span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">meshFile</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;../resources/examples/DensityOptimization/TemperatureMinimization.mfem.mesh&quot;</span><span class="p">;</span>
 
 <span class="w">  </span><span class="c1">// Load mesh</span>
-<span class="w">  </span><span class="n">External</span><span class="o">::</span><span class="n">MMG</span><span class="o">::</span><span class="n">Mesh</span><span class="w"> </span><span class="n">Omega</span><span class="p">;</span>
+<span class="w">  </span><span class="n">MMG</span><span class="o">::</span><span class="n">Mesh</span><span class="w"> </span><span class="n">Omega</span><span class="p">;</span>
 <span class="w">  </span><span class="n">Omega</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">meshFile</span><span class="p">);</span>
-<span class="w">  </span><span class="n">External</span><span class="o">::</span><span class="n">MMG</span><span class="o">::</span><span class="n">Optimizer</span><span class="p">().</span><span class="n">setHMax</span><span class="p">(</span><span class="mf">0.005</span><span class="p">).</span><span class="n">setHMin</span><span class="p">(</span><span class="mf">0.001</span><span class="p">).</span><span class="n">optimize</span><span class="p">(</span><span class="n">Omega</span><span class="p">);</span>
+<span class="w">  </span><span class="n">MMG</span><span class="o">::</span><span class="n">Optimizer</span><span class="p">().</span><span class="n">setHMax</span><span class="p">(</span><span class="mf">0.005</span><span class="p">).</span><span class="n">setHMin</span><span class="p">(</span><span class="mf">0.001</span><span class="p">).</span><span class="n">optimize</span><span class="p">(</span><span class="n">Omega</span><span class="p">);</span>
 
 <span class="w">  </span><span class="n">Omega</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;outDensity/gamma.mesh&quot;</span><span class="p">);</span>
 

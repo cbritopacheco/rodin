@@ -97,7 +97,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md4">Parallel Assembly Algorithm</a></li>
+            <li><a href="#autotoc_md7">Parallel Assembly Algorithm</a></li>
             <li>
               Reference
               <ul>
@@ -127,7 +127,7 @@ $ a(u,v) $
 <use x='22.603868' y='0' xlink:href='#eq1-g0-118'/>
 <use x='28.692087' y='0' xlink:href='#eq1-g1-41'/>
 </g>
-</svg> using OpenMP parallelization. The assembly process distributes element computations across multiple threads and uses sparse matrix triplets for thread-safe accumulation.</p><section id="autotoc_md4"><h3><a href="#autotoc_md4">Parallel Assembly Algorithm</a></h3><ol><li><strong>Element Distribution</strong>: Distribute elements across OpenMP threads</li><li><strong>Local <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a></strong>: Each thread computes local element matrices independently</li><li><strong>Triplet Accumulation</strong>: Store contributions as Eigen triplets for thread safety</li><li><strong>Global <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a></strong>: Combine triplets into final sparse matrix</li></ol><p>This approach minimizes synchronization overhead while ensuring correctness.</p></section>
+</svg> using OpenMP parallelization. The assembly process distributes element computations across multiple threads and uses sparse matrix triplets for thread-safe accumulation.</p><section id="autotoc_md7"><h3><a href="#autotoc_md7">Parallel Assembly Algorithm</a></h3><ol><li><strong>Element Distribution</strong>: Distribute elements across OpenMP threads</li><li><strong>Local <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a></strong>: Each thread computes local element matrices independently</li><li><strong>Triplet Accumulation</strong>: Store contributions as Eigen triplets for thread safety</li><li><strong>Global <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a></strong>: Combine triplets into final sparse matrix</li></ol><p>This approach minimizes synchronization overhead while ensuring correctness.</p></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">

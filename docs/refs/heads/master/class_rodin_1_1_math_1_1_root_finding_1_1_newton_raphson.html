@@ -79,10 +79,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md117">Algorithm</a></li>
-            <li><a href="#autotoc_md118">Robustness Features</a></li>
-            <li><a href="#autotoc_md119">Convergence Criteria</a></li>
-            <li><a href="#autotoc_md120">Example Usage</a></li>
+            <li><a href="#autotoc_md140">Algorithm</a></li>
+            <li><a href="#autotoc_md141">Robustness Features</a></li>
+            <li><a href="#autotoc_md142">Convergence Criteria</a></li>
+            <li><a href="#autotoc_md143">Example Usage</a></li>
             <li>
               Reference
               <ul>
@@ -112,7 +112,7 @@ $ f(x) = 0 $
 <use x='26.124005' y='0' xlink:href='#eq1-g1-61'/>
 <use x='38.549485' y='0' xlink:href='#eq1-g1-48'/>
 </g>
-</svg>. The method combines Newton&#x27;s method with interval bracketing and automatic fallbacks to ensure convergence.</p><section id="autotoc_md117"><h3><a href="#autotoc_md117">Algorithm</a></h3><p>The Newton-Raphson iteration is:</p><div class="m-math"><svg style="width: 10.228em; height: 2.942em;" viewBox="144.580853 -28.243589 98.185766 28.243589">
+</svg>. The method combines Newton&#x27;s method with interval bracketing and automatic fallbacks to ensure convergence.</p><section id="autotoc_md140"><h3><a href="#autotoc_md140">Algorithm</a></h3><p>The Newton-Raphson iteration is:</p><div class="m-math"><svg style="width: 10.228em; height: 2.942em;" viewBox="144.580853 -28.243589 98.185766 28.243589">
 <title>
 \[
   x_{n+1} = x_n - \frac{f(x_n)}{f&#x27;(x_n)}
@@ -152,7 +152,7 @@ $ f(x) = 0 $
 <use x='232.577959' y='-1.195529' xlink:href='#eq2-g2-110'/>
 <use x='238.214294' y='-2.988792' xlink:href='#eq2-g5-41'/>
 </g>
-</svg></div></section><section id="autotoc_md118"><h3><a href="#autotoc_md118">Robustness Features</a></h3><ul><li><strong>Interval bracketing</strong>: Maintains a bracket <svg class="m-math" style="width: 2.382em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 22.869531 11.955168">
+</svg></div></section><section id="autotoc_md141"><h3><a href="#autotoc_md141">Robustness Features</a></h3><ul><li><strong>Interval bracketing</strong>: Maintains a bracket <svg class="m-math" style="width: 2.382em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 22.869531 11.955168">
 <title>
 $ [a, b] $
 </title>
@@ -195,7 +195,7 @@ $ f(a)f(b) \leq 0 $
 <use x='46.745055' y='0' xlink:href='#eq4-g0-20'/>
 <use x='59.364382' y='0' xlink:href='#eq4-g2-48'/>
 </g>
-</svg></li><li><strong>Safeguards</strong>: Falls back to bisection if Newton step goes outside bracket</li><li><strong>Secant fallback</strong>: Uses secant method if derivative is too small</li><li><strong>Convergence checks</strong>: Multiple criteria for termination</li></ul></section><section id="autotoc_md119"><h3><a href="#autotoc_md119">Convergence Criteria</a></h3><p>The algorithm terminates when any of these conditions are met:</p><ol><li><strong>Function tolerance</strong>: <svg class="m-math" style="width: 6.384em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 61.281867 11.955168">
+</svg></li><li><strong>Safeguards</strong>: Falls back to bisection if Newton step goes outside bracket</li><li><strong>Secant fallback</strong>: Uses secant method if derivative is too small</li><li><strong>Convergence checks</strong>: Multiple criteria for termination</li></ul></section><section id="autotoc_md142"><h3><a href="#autotoc_md142">Convergence Criteria</a></h3><p>The algorithm terminates when any of these conditions are met:</p><ol><li><strong>Function tolerance</strong>: <svg class="m-math" style="width: 6.384em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 61.281867 11.955168">
 <title>
 $ |f(x)| &lt; \varepsilon_{\text{abs}} $
 </title>
@@ -264,7 +264,7 @@ $ |b - a| &lt; \varepsilon_{\text{abs}} + \varepsilon_{\text{rel}} |x| $
 <use x='96.845775' y='0' xlink:href='#eq6-g4-120'/>
 <use x='103.497862' y='0' xlink:href='#eq6-g3-106'/>
 </g>
-</svg></li><li><strong>Maximum iterations</strong>: Iteration count exceeds maximum</li></ol></section><section id="autotoc_md120"><h3><a href="#autotoc_md120">Example Usage</a></h3><pre class="m-code"><span class="c1">// Find root of f(x) = x^2 - 2 in [1, 2]</span>
+</svg></li><li><strong>Maximum iterations</strong>: Iteration count exceeds maximum</li></ol></section><section id="autotoc_md143"><h3><a href="#autotoc_md143">Example Usage</a></h3><pre class="m-code"><span class="c1">// Find root of f(x) = x^2 - 2 in [1, 2]</span>
 <span class="n">NewtonRaphson</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">solver</span><span class="p">(</span><span class="mf">1e-12</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-9</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-12</span><span class="p">,</span><span class="w"> </span><span class="mi">25</span><span class="p">);</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="n">Real</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">make_pair</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="o">*</span><span class="n">x</span><span class="p">);</span><span class="w">  </span><span class="c1">// (f, f&#39;)</span>

@@ -83,22 +83,21 @@
 <span class="cm"> *       (See accompanying file LICENSE or copy at</span>
 <span class="cm"> *          https://www.boost.org/LICENSE_1_0.txt)</span>
 <span class="cm"> */</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;Rodin/Geometry/Region.h&quot;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;Rodin/IO/ForwardDecls.h&quot;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;Rodin/Models/Advection/Lagrangian.h&quot;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;Rodin/Models/Distance/Eikonal.h&quot;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;Rodin/Variational/ForwardDecls.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry/Region.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/IO/ForwardDecls.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Advection/Lagrangian.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Distance/Eikonal.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Variational/ForwardDecls.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solver.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Assembly.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Variational.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Variational/LinearElasticity.h&gt;</span>
 
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;RodinExternal/MMG.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/MMG.h&gt;</span>
 
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="p">;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Geometry</span><span class="p">;</span>
-<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">External</span><span class="p">;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Variational</span><span class="p">;</span>
 
 <span class="k">using</span><span class="w"> </span><span class="n">FES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VectorP1</span><span class="o">&lt;</span><span class="n">Mesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;&gt;</span><span class="p">;</span>
@@ -226,10 +225,10 @@
 <span class="w">    </span><span class="n">Alert</span><span class="o">::</span><span class="n">Info</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;   | Distancing domain.&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Alert</span><span class="o">::</span><span class="n">Raise</span><span class="p">;</span>
 
 <span class="w">    </span><span class="n">GridFunction</span><span class="w"> </span><span class="n">dist</span><span class="p">(</span><span class="n">sh</span><span class="p">);</span>
-<span class="w">    </span><span class="n">Models</span><span class="o">::</span><span class="n">Distance</span><span class="o">::</span><span class="n">Eikonal</span><span class="p">(</span><span class="n">dist</span><span class="p">).</span><span class="n">setInterior</span><span class="p">(</span><span class="n">interior</span><span class="p">)</span>
-<span class="w">                                   </span><span class="p">.</span><span class="n">setInterface</span><span class="p">(</span><span class="n">Gamma</span><span class="p">)</span>
-<span class="w">                                   </span><span class="p">.</span><span class="n">solve</span><span class="p">()</span>
-<span class="w">                                   </span><span class="p">.</span><span class="n">sign</span><span class="p">();</span>
+<span class="w">    </span><span class="n">Distance</span><span class="o">::</span><span class="n">Eikonal</span><span class="p">(</span><span class="n">dist</span><span class="p">).</span><span class="n">setInterior</span><span class="p">(</span><span class="n">interior</span><span class="p">)</span>
+<span class="w">                           </span><span class="p">.</span><span class="n">setInterface</span><span class="p">(</span><span class="n">Gamma</span><span class="p">)</span>
+<span class="w">                           </span><span class="p">.</span><span class="n">solve</span><span class="p">()</span>
+<span class="w">                           </span><span class="p">.</span><span class="n">sign</span><span class="p">();</span>
 
 <span class="w">    </span><span class="c1">// Advect the level set function</span>
 <span class="w">    </span><span class="n">Alert</span><span class="o">::</span><span class="n">Info</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;   | Advecting the distance function.&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Alert</span><span class="o">::</span><span class="n">Raise</span><span class="p">;</span>
@@ -243,7 +242,7 @@
 <span class="w">    </span><span class="n">th</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;distance.mesh&quot;</span><span class="p">);</span>
 <span class="w">    </span><span class="n">dist</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;dist.gf&quot;</span><span class="p">);</span>
 
-<span class="w">    </span><span class="n">Models</span><span class="o">::</span><span class="n">Advection</span><span class="o">::</span><span class="n">Lagrangian</span><span class="p">(</span><span class="n">advect</span><span class="p">,</span><span class="w"> </span><span class="n">test</span><span class="p">,</span><span class="w"> </span><span class="n">dist</span><span class="p">,</span><span class="w"> </span><span class="n">dJ</span><span class="p">).</span><span class="n">step</span><span class="p">(</span><span class="n">dt</span><span class="p">);</span>
+<span class="w">    </span><span class="n">Advection</span><span class="o">::</span><span class="n">Lagrangian</span><span class="p">(</span><span class="n">advect</span><span class="p">,</span><span class="w"> </span><span class="n">test</span><span class="p">,</span><span class="w"> </span><span class="n">dist</span><span class="p">,</span><span class="w"> </span><span class="n">dJ</span><span class="p">).</span><span class="n">step</span><span class="p">(</span><span class="n">dt</span><span class="p">);</span>
 
 <span class="w">    </span><span class="n">th</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;advect.mesh&quot;</span><span class="p">);</span>
 <span class="w">    </span><span class="n">advect</span><span class="p">.</span><span class="n">getSolution</span><span class="p">().</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;advect.gf&quot;</span><span class="p">);</span>
@@ -251,7 +250,7 @@
 <span class="w">    </span><span class="c1">// Recover the implicit domain</span>
 <span class="w">    </span><span class="n">Alert</span><span class="o">::</span><span class="n">Info</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;   | Meshing the domain.&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Alert</span><span class="o">::</span><span class="n">Raise</span><span class="p">;</span>
 
-<span class="w">    </span><span class="n">th</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MMG</span><span class="o">::</span><span class="n">ImplicitDomainMesher</span><span class="p">().</span><span class="n">split</span><span class="p">(</span><span class="n">interior</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="n">interior</span><span class="p">,</span><span class="w"> </span><span class="n">exterior</span><span class="p">})</span>
+<span class="w">    </span><span class="n">th</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MMG</span><span class="o">::</span><span class="n">LevelSetDiscretizer</span><span class="p">().</span><span class="n">split</span><span class="p">(</span><span class="n">interior</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="n">interior</span><span class="p">,</span><span class="w"> </span><span class="n">exterior</span><span class="p">})</span>
 <span class="w">                                    </span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="n">exterior</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="n">interior</span><span class="p">,</span><span class="w"> </span><span class="n">exterior</span><span class="p">})</span>
 <span class="w">                                    </span><span class="p">.</span><span class="n">setRMC</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">)</span>
 <span class="w">                                    </span><span class="p">.</span><span class="n">setHMax</span><span class="p">(</span><span class="n">hmax</span><span class="p">)</span>
@@ -268,7 +267,7 @@
 <span class="w">                    </span><span class="p">.</span><span class="n">setAngleDetection</span><span class="p">(</span><span class="nb">false</span><span class="p">)</span>
 <span class="w">                    </span><span class="p">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">th</span><span class="p">);</span>
 
-<span class="w">    </span><span class="n">th</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;out/Omega.&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">to_string</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;.mesh&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">th</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;out/Omega.&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">to_string</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;.mesh&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MEDIT</span><span class="p">);</span>
 <span class="w">  </span><span class="p">}</span>
 
 <span class="w">  </span><span class="n">Alert</span><span class="o">::</span><span class="n">Info</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Saved final mesh to Omega.mesh&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Alert</span><span class="o">::</span><span class="n">Raise</span><span class="p">;</span>

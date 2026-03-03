@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Advection::FirstOrderBoundaryPolicy class | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_lagrangian_8h.html">&lt;Rodin/Advection/Lagrangian.h&gt;</a></div>
+          <div class="m-doc-template">template&lt;class Velocity&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_advection.html">Advection</a>::<wbr/></span>FirstOrderBoundaryPolicy <span class="m-thin">class</span>
+        </h1>
+        <p>First-order boundary policy for <a href="class_rodin_1_1_advection_1_1_lagrangian.html" class="m-doc">Lagrangian</a> advection.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">Velocity</td>
+              <td>Type of the velocity field</td>
+            </tr>
+          </tbody>
+        </table>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li><a href="#autotoc_md0">Mathematical Background</a></li>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>This class implements a boundary handling policy for semi-Lagrangian advection, ensuring that characteristics (particle trajectories) properly interact with domain boundaries.</p><section id="autotoc_md0"><h3><a href="#autotoc_md0">Mathematical Background</a></h3><p>In semi-Lagrangian methods, we trace characteristics backwards in time:</p><div class="m-math"><svg style="width: 8.177em; height: 2.562em;" viewBox="155.620813 -24.590612 78.496885 24.590612">
+<title>
+\[
+  \frac{d\mathbf{X}}{dt} = -\mathbf{v}(\mathbf{X}, t)
+\]
+</title>
+<defs>
+<path id='eq1-g1-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
+<path id='eq1-g3-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq1-g3-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq1-g3-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq1-g0-88' d='M5.618929-4.734247L7.639352-7.436115C7.758904-7.591532 7.806725-7.615442 8.201245-7.651308C8.51208-7.687173 8.5599-7.687173 8.9066-7.687173H9.217435V-8.201245C8.942466-8.177335 7.986052-8.177335 7.651308-8.177335C7.280697-8.177335 6.240598-8.177335 5.941719-8.201245V-7.687173C6.085181-7.687173 6.670984-7.687173 7.029639-7.543711L5.284184-5.200498L3.502864-7.687173H4.495143V-8.201245C4.064757-8.177335 2.940971-8.177335 2.450809-8.177335C2.044334-8.177335 .860772-8.177335 .537983-8.201245V-7.687173H1.697634L4.351681-3.969116L1.948692-.765131C1.841096-.621669 1.80523-.585803 1.3868-.549938C1.08792-.526027 1.028144-.514072 .6934-.514072H.37061V0C.645579-.02391 1.613948-.02391 1.948692-.02391C2.319303-.02391 3.347447-.02391 3.646326 0V-.514072C3.514819-.514072 2.905106-.514072 2.558406-.657534L4.686426-3.502864L6.838356-.514072H5.846077V0C6.228643-.02391 7.424159-.02391 7.878456-.02391C8.261021-.02391 9.492403-.02391 9.791283 0V-.514072H8.643587L5.618929-4.734247Z'/>
+<path id='eq1-g0-118' d='M5.917808-4.519054C6.001494-4.698381 6.049315-4.794022 6.802491-4.794022V-5.308095C6.372105-5.284184 6.348194-5.284184 5.858032-5.284184C5.535243-5.284184 5.511333-5.284184 4.829888-5.308095V-4.794022C5.152677-4.794022 5.415691-4.734247 5.415691-4.65056C5.415691-4.638605 5.415691-4.62665 5.355915-4.507098L3.957161-1.43462L2.414944-4.794022H3.072478V-5.308095C2.797509-5.284184 1.960648-5.284184 1.637858-5.284184C1.291158-5.284184 .597758-5.284184 .286924-5.308095V-4.794022H1.0401L3.144209-.227148C3.251806 0 3.275716 .059776 3.550685 .059776C3.741968 .059776 3.837609 .035866 3.945205-.203238L5.917808-4.519054Z'/>
+<path id='eq1-g2-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='eq1-g2-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+<path id='eq1-g2-116' d='M2.402989-4.805978H3.502864C3.730012-4.805978 3.849564-4.805978 3.849564-5.021171C3.849564-5.152677 3.777833-5.152677 3.53873-5.152677H2.486675L2.929016-6.898132C2.976837-7.065504 2.976837-7.089415 2.976837-7.173101C2.976837-7.364384 2.82142-7.47198 2.666002-7.47198C2.570361-7.47198 2.295392-7.436115 2.199751-7.053549L1.733499-5.152677H.609714C.37061-5.152677 .263014-5.152677 .263014-4.925529C.263014-4.805978 .3467-4.805978 .573848-4.805978H1.637858L.848817-1.649813C.753176-1.231382 .71731-1.111831 .71731-.956413C.71731-.394521 1.111831 .119552 1.78132 .119552C2.988792 .119552 3.634371-1.625903 3.634371-1.709589C3.634371-1.78132 3.58655-1.817186 3.514819-1.817186C3.490909-1.817186 3.443088-1.817186 3.419178-1.769365C3.407223-1.75741 3.395268-1.745455 3.311582-1.554172C3.060523-.956413 2.510585-.119552 1.817186-.119552C1.458531-.119552 1.43462-.418431 1.43462-.681445C1.43462-.6934 1.43462-.920548 1.470486-1.06401L2.402989-4.805978Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='155.620813' y='-16.288421' xlink:href='#eq1-g2-100'/>
+<use x='161.703506' y='-16.288421' xlink:href='#eq1-g0-88'/>
+<rect x='155.620813' y='-11.428548' height='.478187' width='16.239046'/>
+<use x='158.585419' y='0' xlink:href='#eq1-g2-100'/>
+<use x='164.668112' y='0' xlink:href='#eq1-g2-116'/>
+<use x='176.376202' y='-8.200662' xlink:href='#eq1-g3-61'/>
+<use x='188.801683' y='-8.200662' xlink:href='#eq1-g1-0'/>
+<use x='198.10018' y='-8.200662' xlink:href='#eq1-g0-118'/>
+<use x='205.385361' y='-8.200662' xlink:href='#eq1-g3-40'/>
+<use x='209.937686' y='-8.200662' xlink:href='#eq1-g0-88'/>
+<use x='220.094054' y='-8.200662' xlink:href='#eq1-g2-59'/>
+<use x='225.338213' y='-8.200662' xlink:href='#eq1-g2-116'/>
+<use x='229.565373' y='-8.200662' xlink:href='#eq1-g3-41'/>
+</g>
+</svg></div><p>This policy handles cases where characteristics intersect boundaries.</p></section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#af1df5f8da2c43d7184de6452dcf3f440" class="m-doc">FirstOrderBoundaryPolicy</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> dt,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&amp; mesh,
+              const Velocity&amp; velocity,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> eps = 1e-12)</span>
+            </dt>
+            <dd>Constructs a boundary policy.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a67ad93beff1ca7f2e732ea49f3f02b52" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_variational_1_1_boundary_hit.html" class="m-doc">Variational::<wbr />BoundaryHit</a>&amp; hit) const -&gt; bool</span>
+            </dt>
+            <dd>Applies boundary policy at a characteristic footpoint.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="af1df5f8da2c43d7184de6452dcf3f440"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Velocity&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Advection::<wbr />FirstOrderBoundaryPolicy&lt;Velocity&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af1df5f8da2c43d7184de6452dcf3f440" class="m-doc-self">FirstOrderBoundaryPolicy</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> dt,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&amp; mesh,
+              const Velocity&amp; velocity,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> eps = 1e-12)</span></span>
+            </h3>
+            <p>Constructs a boundary policy.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">dt&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Time step size</td>
+                </tr>
+                <tr>
+                  <td>mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Computational mesh</td>
+                </tr>
+                <tr>
+                  <td>velocity&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Velocity field</td>
+                </tr>
+                <tr>
+                  <td>eps&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Tolerance parameter for boundary treatment (default: 1e-12)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a67ad93beff1ca7f2e732ea49f3f02b52"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Velocity&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Advection::<wbr />FirstOrderBoundaryPolicy&lt;Velocity&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a67ad93beff1ca7f2e732ea49f3f02b52" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_variational_1_1_boundary_hit.html" class="m-doc">Variational::<wbr />BoundaryHit</a>&amp; hit) const</span></span>
+            </h3>
+            <p>Applies boundary policy at a characteristic footpoint.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>True if boundary treatment was successful, false otherwise</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Adjusts the characteristic footpoint when it would exit the domain, projecting it back onto the boundary with appropriate handling.</p>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

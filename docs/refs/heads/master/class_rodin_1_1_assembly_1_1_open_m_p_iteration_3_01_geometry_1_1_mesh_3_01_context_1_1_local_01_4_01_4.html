@@ -78,7 +78,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md3">Parallelization Strategy</a></li>
+            <li><a href="#autotoc_md6">Parallelization Strategy</a></li>
             <li>
               Reference
               <ul>
@@ -89,7 +89,7 @@
             </li>
           </ul>
         </nav>
-<p>OpenMPIteration provides a parallel iteration strategy over mesh elements using OpenMP threading for assembly operations. This class manages the distribution of mesh elements across multiple threads while ensuring thread-safe access to mesh data structures.</p><section id="autotoc_md3"><h3><a href="#autotoc_md3">Parallelization Strategy</a></h3><p>The implementation uses OpenMP to parallelize element-wise assembly:</p><ul><li>Each thread processes a subset of mesh elements</li><li>Local contributions are computed independently</li><li>Synchronization occurs only during global assembly</li></ul></section>
+<p>OpenMPIteration provides a parallel iteration strategy over mesh elements using OpenMP threading for assembly operations. This class manages the distribution of mesh elements across multiple threads while ensuring thread-safe access to mesh data structures.</p><section id="autotoc_md6"><h3><a href="#autotoc_md6">Parallelization Strategy</a></h3><p>The implementation uses OpenMP to parallelize element-wise assembly:</p><ul><li>Each thread processes a subset of mesh elements</li><li>Local contributions are computed independently</li><li>Synchronization occurs only during global assembly</li></ul></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">

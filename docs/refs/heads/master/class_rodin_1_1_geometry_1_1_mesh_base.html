@@ -78,8 +78,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md65">Inheritance Hierarchy</a></li>
-            <li><a href="#autotoc_md66">Thread Safety</a></li>
+            <li><a href="#autotoc_md90">Inheritance Hierarchy</a></li>
+            <li><a href="#autotoc_md91">Thread Safety</a></li>
             <li>
               Reference
               <ul>
@@ -90,7 +90,7 @@
             </li>
           </ul>
         </nav>
-<p><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a> provides the common interface for all mesh types in <a href="namespace_rodin.html" class="m-doc">Rodin</a>, defining fundamental operations such as:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> inclusion testing</li><li>Basic mesh properties (dimension, vertex count, etc.)</li><li><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> access through iterators</li><li><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> I/O operations</li><li><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a> queries</li></ul><section id="autotoc_md65"><h2><a href="#autotoc_md65">Inheritance Hierarchy</a></h2><p>All concrete mesh implementations derive from this base class:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">Mesh&lt;Context::<wbr />Local&gt;</a>: Sequential (non-distributed) meshes</li><li><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">SubMesh&lt;Context::<wbr />Local&gt;</a>: Submeshes representing subregions</li><li><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a>: Distributed mesh shards for parallel computing</li></ul></section><section id="autotoc_md66"><h2><a href="#autotoc_md66">Thread Safety</a></h2><p><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a> and derived classes are not thread-safe during construction. Once finalized, read-only operations are thread-safe.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>, <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>, <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a></p></aside></section>
+<p><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a> provides the common interface for all mesh types in <a href="namespace_rodin.html" class="m-doc">Rodin</a>, defining fundamental operations such as:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> inclusion testing</li><li>Basic mesh properties (dimension, vertex count, etc.)</li><li><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> access through iterators</li><li><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> I/O operations</li><li><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a> queries</li></ul><section id="autotoc_md90"><h2><a href="#autotoc_md90">Inheritance Hierarchy</a></h2><p>All concrete mesh implementations derive from this base class:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">Mesh&lt;Context::<wbr />Local&gt;</a>: Sequential (non-distributed) meshes</li><li><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">SubMesh&lt;Context::<wbr />Local&gt;</a>: Submeshes representing subregions</li><li><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a>: Distributed mesh shards for parallel computing</li></ul></section><section id="autotoc_md91"><h2><a href="#autotoc_md91">Thread Safety</a></h2><p><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a> and derived classes are not thread-safe during construction. Once finalized, read-only operations are thread-safe.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>, <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>, <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a></p></aside></section>
         <section id="derived-classes">
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
@@ -146,11 +146,11 @@
             </dt>
             <dd>Gets the number of cells.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad566759fa5a85f0a8a232f8715bfc081" class="m-doc">getFaceAttribute</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index) const -&gt; <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1a93f6a1a2e97911722772d5429a79b1" class="m-doc">getFaceAttribute</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;</span>
             </dt>
             <dd>Gets face attribute.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af7ceb15628f753b8ac8b4d0dff5abcab" class="m-doc">getCellAttribute</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index) const -&gt; <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9000ddf38d8d853cbde9005de9efcafb" class="m-doc">getCellAttribute</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;</span>
             </dt>
             <dd>Gets cell attribute.</dd>
             <dt>
@@ -309,13 +309,13 @@
             </dt>
             <dd>Gets geometry type of a polytope.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9c9006f94dfd29097ada2d4ffa627c3f" class="m-doc">getAttribute</a>(</span><span class="m-doc-wrap">size_t dimension,
-              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index) const -&gt; <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2bfd306710910a94bab24d67336ba14c" class="m-doc">getAttribute</a>(</span><span class="m-doc-wrap">size_t dimension,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets attribute of a polytope.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a89603d455722b2c553cf08d12c4dab63" class="m-doc">setAttribute</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
-              <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5a22eb336f4cd59b30157ef348b19dc3" class="m-doc">setAttribute</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attr) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Sets attribute of a polytope.</dd>
             <dt>
@@ -491,9 +491,9 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="ad566759fa5a85f0a8a232f8715bfc081"><div>
+          <section class="m-doc-details" id="a1a93f6a1a2e97911722772d5429a79b1"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad566759fa5a85f0a8a232f8715bfc081" class="m-doc-self">getFaceAttribute</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1a93f6a1a2e97911722772d5429a79b1" class="m-doc-self">getFaceAttribute</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index) const</span></span>
             </h3>
             <p>Gets face attribute.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -514,9 +514,9 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="af7ceb15628f753b8ac8b4d0dff5abcab"><div>
+          <section class="m-doc-details" id="a9000ddf38d8d853cbde9005de9efcafb"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7ceb15628f753b8ac8b4d0dff5abcab" class="m-doc-self">getCellAttribute</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9000ddf38d8d853cbde9005de9efcafb" class="m-doc-self">getCellAttribute</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index) const</span></span>
             </h3>
             <p>Gets cell attribute.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1350,9 +1350,9 @@ $ x: K \rightarrow \tau $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a9c9006f94dfd29097ada2d4ffa627c3f"><div>
+          <section class="m-doc-details" id="a2bfd306710910a94bab24d67336ba14c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9c9006f94dfd29097ada2d4ffa627c3f" class="m-doc-self">getAttribute</a>(</span><span class="m-doc-wrap">size_t dimension,
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2bfd306710910a94bab24d67336ba14c" class="m-doc-self">getAttribute</a>(</span><span class="m-doc-wrap">size_t dimension,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> index) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Gets attribute of a polytope.</p>
@@ -1378,10 +1378,10 @@ $ x: K \rightarrow \tau $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a89603d455722b2c553cf08d12c4dab63"><div>
+          <section class="m-doc-details" id="a5a22eb336f4cd59b30157ef348b19dc3"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a89603d455722b2c553cf08d12c4dab63" class="m-doc-self">setAttribute</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
-              <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a> attr) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5a22eb336f4cd59b30157ef348b19dc3" class="m-doc-self">setAttribute</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attr) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Sets attribute of a polytope.</p>
             <table class="m-table m-fullwidth m-flat">

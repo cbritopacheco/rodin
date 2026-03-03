@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Eikonal::FMM&lt;Variational::GridFunction&lt;Variational::P1&lt;Real, Geometry::Mesh&lt;Context::Local&gt;&gt;, Data&gt;, SpeedFunction&gt; class | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_f_m_m_8h.html">&lt;Rodin/Eikonal/FMM.h&gt;</a></div>
+          <div class="m-doc-template">template&lt;class Data, class SpeedFunction&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_eikonal.html">Eikonal</a>::<wbr/></span>FMM&lt;Variational::GridFunction&lt;Variational::P1&lt;Real, Geometry::Mesh&lt;Context::Local&gt;&gt;, Data&gt;, SpeedFunction&gt; <span class="m-thin">class</span>
+        </h1>
+        <p><a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a> specialization for P1 finite elements on local meshes.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">Data</td>
+              <td>Data storage type for the solution</td>
+            </tr>
+            <tr>
+              <td>SpeedFunction</td>
+              <td>Type of the speed function</td>
+            </tr>
+          </tbody>
+        </table>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>This specialization implements the Fast Marching Method for piecewise linear (P1) finite elements on local (non-distributed) meshes.</p>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">enum class <a href="#a292e6792084beec58825c5c5abc5ce49" class="m-doc">Label</a>: uint8_t { </span><span class="m-doc-wrap"><a href="#a292e6792084beec58825c5c5abc5ce49acfcd41f0c1804fb7778f8f01301223f6" class="m-doc">Far</a>,
+              <a href="#a292e6792084beec58825c5c5abc5ce49aec17516130082d92b59c2d09499ce2fc" class="m-doc">Considered</a>,
+              <a href="#a292e6792084beec58825c5c5abc5ce49a382ab522931673c11e398ead1b7b1678" class="m-doc">Accepted</a> }</span>
+            </dt>
+            <dd>Label for mesh vertices during <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a> propagation.</dd>
+            <dt id="a515179486a633cd3bd8acc6d313ed50d">
+              using <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc-self">ScalarType</a> = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>
+            </dt>
+            <dd>Scalar type for computations.</dd>
+            <dt id="a278dcde0fa42c2714861999da25abbd2">
+              using <a href="#a278dcde0fa42c2714861999da25abbd2" class="m-doc-self">Context</a> = <a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>
+            </dt>
+            <dd>Computation context (local, non-distributed)</dd>
+            <dt id="abcc8463dd31a437948ed9c8d7268156b">
+              using <a href="#abcc8463dd31a437948ed9c8d7268156b" class="m-doc-self">Mesh</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="#a278dcde0fa42c2714861999da25abbd2" class="m-doc">Context</a>&gt;
+            </dt>
+            <dd>Mesh type.</dd>
+            <dt id="aa4004319189a3b8631174afc2901a486">
+              using <a href="#aa4004319189a3b8631174afc2901a486" class="m-doc-self">FES</a> = <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">Variational::<wbr />P1</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>, <a href="#abcc8463dd31a437948ed9c8d7268156b" class="m-doc">Mesh</a>&gt;
+            </dt>
+            <dd>Finite element space type (P1)</dd>
+            <dt id="a74ae29eb8b79f954ffb79cd860e6211b">
+              using <a href="#a74ae29eb8b79f954ffb79cd860e6211b" class="m-doc-self">SolutionType</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;<a href="#aa4004319189a3b8631174afc2901a486" class="m-doc">FES</a>, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;&gt;
+            </dt>
+            <dd>Solution type: grid function storing arrival times.</dd>
+            <dt id="a0f9a347a53d2169da74827130e17e6ff">
+              using <a href="#a0f9a347a53d2169da74827130e17e6ff" class="m-doc-self">SpeedFunctionType</a> = SpeedFunction
+            </dt>
+            <dd>Speed function type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Callable&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a73d89b63b13fdd0797eef84d05c3a1e9" class="m-doc">FMM</a>(</span><span class="m-doc-wrap"><a href="#a74ae29eb8b79f954ffb79cd860e6211b" class="m-doc">SolutionType</a>&amp; u,
+              Callable&amp;&amp; speed)</span>
+            </dt>
+            <dd>Constructs a Fast Marching Method solver.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Seed&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8213e76260eacc950aa49acedfce3cd3" class="m-doc">seed</a>(</span><span class="m-doc-wrap">Seed&amp;&amp; seed) -&gt; <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a>&amp;</span>
+            </dt>
+            <dd>Seeds the <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a> with initial points.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc">solve</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Solves the <a href="namespace_rodin_1_1_eikonal.html" class="m-doc">Eikonal</a> equation using the Fast Marching Method.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Enum documentation</h2>
+          <section class="m-doc-details" id="a292e6792084beec58825c5c5abc5ce49"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Data, class SpeedFunction&gt;
+              </div>
+              enum class Rodin::<wbr />Eikonal::<wbr />FMM&lt;Variational::<wbr />GridFunction&lt;Variational::<wbr />P1&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Data&gt;, SpeedFunction&gt;&lt;Data, SpeedFunction&gt;::<wbr /><a href="#a292e6792084beec58825c5c5abc5ce49" class="m-doc-self">Label</a>: uint8_t
+            </h3>
+            <p>Label for mesh vertices during <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a> propagation.</p>
+<p>Vertices are classified into three states:</p><ul><li>Far: Not yet visited</li><li>Considered: In priority queue, being considered</li><li>Accepted: Finalized arrival time</li></ul>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="#a292e6792084beec58825c5c5abc5ce49acfcd41f0c1804fb7778f8f01301223f6" class="m-doc-self" id="a292e6792084beec58825c5c5abc5ce49acfcd41f0c1804fb7778f8f01301223f6">Far</a></td>
+                  <td>
+                  <p>Vertex not yet visited.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a292e6792084beec58825c5c5abc5ce49aec17516130082d92b59c2d09499ce2fc" class="m-doc-self" id="a292e6792084beec58825c5c5abc5ce49aec17516130082d92b59c2d09499ce2fc">Considered</a></td>
+                  <td>
+                  <p>Vertex in priority queue.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a292e6792084beec58825c5c5abc5ce49a382ab522931673c11e398ead1b7b1678" class="m-doc-self" id="a292e6792084beec58825c5c5abc5ce49a382ab522931673c11e398ead1b7b1678">Accepted</a></td>
+                  <td>
+                  <p>Vertex with finalized arrival time.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a73d89b63b13fdd0797eef84d05c3a1e9"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Data, class SpeedFunction&gt;
+                template&lt;class Callable&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Eikonal::<wbr />FMM&lt;Variational::<wbr />GridFunction&lt;Variational::<wbr />P1&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Data&gt;, SpeedFunction&gt;&lt;Data, SpeedFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a73d89b63b13fdd0797eef84d05c3a1e9" class="m-doc-self">FMM</a>(</span><span class="m-doc-wrap"><a href="#a74ae29eb8b79f954ffb79cd860e6211b" class="m-doc">SolutionType</a>&amp; u,
+              Callable&amp;&amp; speed)</span></span>
+            </h3>
+            <p>Constructs a Fast Marching Method solver.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Callable</td>
+                  <td>Type of the speed function (deduced)</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>u&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>Grid function to store the solution (arrival times)</td>
+                </tr>
+                <tr>
+                  <td>speed&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Speed function <svg class="m-math" style="width: 2.600em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.960354 11.955168">
+<title>
+$ F(x) $
+</title>
+<defs>
+<path id='eq1-g1-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq1-g1-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq1-g0-70' d='M3.550685-3.897385H4.698381C5.606974-3.897385 5.678705-3.694147 5.678705-3.347447C5.678705-3.19203 5.654795-3.024658 5.595019-2.761644C5.571108-2.713823 5.559153-2.654047 5.559153-2.630137C5.559153-2.546451 5.606974-2.49863 5.69066-2.49863C5.786301-2.49863 5.798257-2.546451 5.846077-2.737733L6.539477-5.523288C6.539477-5.571108 6.503611-5.642839 6.419925-5.642839C6.312329-5.642839 6.300374-5.595019 6.252553-5.391781C6.001494-4.495143 5.762391-4.244085 4.722291-4.244085H3.634371L4.411457-7.340473C4.519054-7.758904 4.542964-7.79477 5.033126-7.79477H6.635118C8.129514-7.79477 8.344707-7.352428 8.344707-6.503611C8.344707-6.43188 8.344707-6.168867 8.308842-5.858032C8.296887-5.810212 8.272976-5.654795 8.272976-5.606974C8.272976-5.511333 8.332752-5.475467 8.404483-5.475467C8.488169-5.475467 8.53599-5.523288 8.5599-5.738481L8.810959-7.830635C8.810959-7.866501 8.834869-7.986052 8.834869-8.009963C8.834869-8.141469 8.727273-8.141469 8.51208-8.141469H2.84533C2.618182-8.141469 2.49863-8.141469 2.49863-7.926276C2.49863-7.79477 2.582316-7.79477 2.785554-7.79477C3.526775-7.79477 3.526775-7.711083 3.526775-7.579577C3.526775-7.519801 3.514819-7.47198 3.478954-7.340473L1.865006-.884682C1.75741-.466252 1.733499-.3467 .896638-.3467C.669489-.3467 .549938-.3467 .549938-.131507C.549938 0 .657534 0 .729265 0C.956413 0 1.195517-.02391 1.422665-.02391H2.976837C3.239851-.02391 3.526775 0 3.789788 0C3.897385 0 4.040847 0 4.040847-.215193C4.040847-.3467 3.969116-.3467 3.706102-.3467C2.761644-.3467 2.737733-.430386 2.737733-.609714C2.737733-.669489 2.761644-.765131 2.785554-.848817L3.550685-3.897385Z'/>
+<path id='eq1-g0-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g0-70'/>
+<use x='9.203615' y='0' xlink:href='#eq1-g1-40'/>
+<use x='13.755941' y='0' xlink:href='#eq1-g0-120'/>
+<use x='20.408028' y='0' xlink:href='#eq1-g1-41'/>
+</g>
+</svg> defining propagation velocity</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8213e76260eacc950aa49acedfce3cd3"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Data, class SpeedFunction&gt;
+                template&lt;class Seed&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a>&amp; Rodin::<wbr />Eikonal::<wbr />FMM&lt;Variational::<wbr />GridFunction&lt;Variational::<wbr />P1&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Data&gt;, SpeedFunction&gt;&lt;Data, SpeedFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8213e76260eacc950aa49acedfce3cd3" class="m-doc-self">seed</a>(</span><span class="m-doc-wrap">Seed&amp;&amp; seed)</span></span>
+            </h3>
+            <p>Seeds the <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a> with initial points.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Seed</td>
+                  <td>Type of seed container (e.g., std::vector&lt;Index&gt;)</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>seed&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Container of vertex indices to use as seeds</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a> object for method chaining</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Seeds are the starting vertices where the arrival time is set to zero. The method will propagate from these points throughout the domain.</p><aside class="m-note m-info"><h4>Note</h4><p>This method must be called before <a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc">solve()</a>.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="af7d39f0eac0af0ed5785935ac72a1e7d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Data, class SpeedFunction&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Eikonal::<wbr />FMM&lt;Variational::<wbr />GridFunction&lt;Variational::<wbr />P1&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Data&gt;, SpeedFunction&gt;&lt;Data, SpeedFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Solves the <a href="namespace_rodin_1_1_eikonal.html" class="m-doc">Eikonal</a> equation using the Fast Marching Method.</p>
+<p>Propagates the solution from seed points throughout the domain by repeatedly accepting the vertex with the smallest arrival time from the priority queue and updating its neighbors.</p><h5 id="autotoc_md35">Algorithm</h5><ol><li>Initialize: seed points have time 0, all others have time ∞</li><li>Extract vertex with minimum arrival time from priority queue</li><li>Mark it as Accepted</li><li>Update arrival times of neighboring vertices</li><li>Repeat until priority queue is empty</li></ol><aside class="m-note m-info"><h4>Note</h4><p>The <a href="#a8213e76260eacc950aa49acedfce3cd3" class="m-doc">seed()</a> method must be called before <a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc">solve()</a>.</p></aside>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

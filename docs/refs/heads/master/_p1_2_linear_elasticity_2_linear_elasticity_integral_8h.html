@@ -77,8 +77,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md372">Bilinear Form</a></li>
-            <li><a href="#autotoc_md373">Usage</a></li>
+            <li><a href="#autotoc_md375">Bilinear Form</a></li>
+            <li><a href="#autotoc_md376">Usage</a></li>
             <li>
               Reference
               <ul>
@@ -88,7 +88,7 @@
             </li>
           </ul>
         </nav>
-<p>This file provides an optimized implementation of the linear elasticity integrator for P1 vector finite element spaces.</p><section id="autotoc_md372"><h3><a href="#autotoc_md372">Bilinear Form</a></h3><p>The integrator assembles the elasticity bilinear form:</p><div class="m-math"><svg style="width: 25.289em; height: 2.819em;" viewBox="72.885432 -27.065451 242.772107 27.065451">
+<p>This file provides an optimized implementation of the linear elasticity integrator for P1 vector finite element spaces.</p><section id="autotoc_md375"><h3><a href="#autotoc_md375">Bilinear Form</a></h3><p>The integrator assembles the elasticity bilinear form:</p><div class="m-math"><svg style="width: 25.289em; height: 2.819em;" viewBox="72.885432 -27.065451 242.772107 27.065451">
 <title>
 \[
   a(\mathbf{u}, \mathbf{v}) = \int_\Omega 2\mu \, \boldsymbol{\varepsilon}(\mathbf{u}) : \boldsymbol{\varepsilon}(\mathbf{v}) + \lambda (\nabla \cdot \mathbf{u})(\nabla \cdot \mathbf{v}) \, dx
@@ -151,7 +151,7 @@
 <use x='302.922759' y='-10.793007' xlink:href='#eq1-g4-100'/>
 <use x='309.005452' y='-10.793007' xlink:href='#eq1-g4-120'/>
 </g>
-</svg></div><p>For P1 elements, this uses centroid quadrature (exact for the bilinear form) and exploits the constant gradient property of P1 basis functions.</p></section><section id="autotoc_md373"><h3><a href="#autotoc_md373">Usage</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="w"> </span><span class="n">spaceDim</span><span class="p">);</span><span class="w">  </span><span class="c1">// Vector P1 space</span>
+</svg></div><p>For P1 elements, this uses centroid quadrature (exact for the bilinear form) and exploits the constant gradient property of P1 basis functions.</p></section><section id="autotoc_md376"><h3><a href="#autotoc_md376">Usage</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="w"> </span><span class="n">spaceDim</span><span class="p">);</span><span class="w">  </span><span class="c1">// Vector P1 space</span>
 <span class="n">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="n">TestFunction</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 
