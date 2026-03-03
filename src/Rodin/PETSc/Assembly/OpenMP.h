@@ -419,7 +419,7 @@ namespace Rodin::Assembly
 
         auto& x = axb.getSolution();
         assert(x);
-        ierr = VecSetSizes(x, static_cast<PetscInt>(nrows), PETSC_DECIDE);
+        ierr = VecSetSizes(x, static_cast<PetscInt>(ncols), PETSC_DECIDE);
         assert(ierr == PETSC_SUCCESS);
         ierr = VecSetType(x, VECSEQ);
         assert(ierr == PETSC_SUCCESS);
@@ -851,6 +851,17 @@ namespace Rodin::Assembly
         ierr = VecZeroEntries(b);
         assert(ierr == PETSC_SUCCESS);
 
+        auto& x = axb.getSolution();
+        assert(x);
+        ierr = VecSetSizes(x, static_cast<PetscInt>(ncols), PETSC_DECIDE);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecSetType(x, VECSEQ);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecSetFromOptions(x);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecZeroEntries(x);
+        assert(ierr == PETSC_SUCCESS);
+
         // ------------------------
         // Helpers (same as your sequential)
         // ------------------------
@@ -1147,7 +1158,7 @@ namespace Rodin::Assembly
                 {
                   const PetscInt I = static_cast<PetscInt>(vOff + static_cast<size_t>(dofs[l]));
                   const PetscScalar val = static_cast<PetscScalar>(integrator->integrate(l));
-                  local[static_cast<size_t>(I)] += val;
+                  local[static_cast<size_t>(I)] += (-val);
                 }
               });
             }

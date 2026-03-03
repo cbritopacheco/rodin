@@ -721,6 +721,18 @@ namespace Rodin::Assembly
         ierr = VecZeroEntries(b);
         assert(ierr == PETSC_SUCCESS);
 
+        auto& x = axb.getSolution();
+        assert(x);
+        ierr = VecSetSizes(
+            x,
+            static_cast<PetscInt>(localCols),
+            static_cast<PetscInt>(ncols));
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecSetFromOptions(x);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecZeroEntries(x);
+        assert(ierr == PETSC_SUCCESS);
+
         // ------------------------
         // Assemble bilinear terms into A
         // - For each integrator, only assemble contributions associated to an owned "assembly entity":
@@ -902,7 +914,7 @@ namespace Rodin::Assembly
               const PetscScalar val = static_cast<PetscScalar>(lfi.integrate(static_cast<PetscInt>(l)));
               if (val != PetscScalar(0))
               {
-                ierr = VecSetValue(b, I, val, ADD_VALUES);
+                ierr = VecSetValue(b, I, -val, ADD_VALUES);
                 assert(ierr == PETSC_SUCCESS);
               }
             }
