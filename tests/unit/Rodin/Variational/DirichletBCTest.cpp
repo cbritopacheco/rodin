@@ -33,9 +33,14 @@ namespace Rodin::Tests::Unit
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 16, 16 });
     const size_t D = mesh.getDimension();
-    const Attribute attr = RODIN_DEFAULT_POLYTOPE_ATTRIBUTE;
+    const Attribute attr = 1;
 
     mesh.getConnectivity().compute(D - 1, D);
+
+    for (auto it = mesh.getBoundary(); !it.end(); ++it)
+    {
+      mesh.setAttribute(it.key(), attr);
+    }
 
     P1 fes(mesh);
 

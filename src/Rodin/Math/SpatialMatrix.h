@@ -523,61 +523,135 @@ namespace Rodin::Math
       SpatialMatrix<ScalarType> transpose() const noexcept
       {
         SpatialMatrix<ScalarType> T(m_cols, m_rows);
+        const auto r = m_rows;
+        const auto c = m_cols;
+        const auto& A = m_data;
 
-        if (m_rows == 3 && m_cols == 3)
+        switch (static_cast<unsigned>(r) * 4u + static_cast<unsigned>(c))
         {
-          T(0,0) = m_data(0,0); T(0,1) = m_data(1,0); T(0,2) = m_data(2,0);
-          T(1,0) = m_data(0,1); T(1,1) = m_data(1,1); T(1,2) = m_data(2,1);
-          T(2,0) = m_data(0,2); T(2,1) = m_data(1,2); T(2,2) = m_data(2,2);
-          return T;
-        }
+          // any 0×c or r×0: nothing to write
+          case 0u: case 1u: case 2u: case 3u:
+          case 4u: case 8u: case 12u:
+            return T;
 
-        if (m_rows == 2 && m_cols == 2)
-        {
-          T(0,0) = m_data(0,0); T(0,1) = m_data(1,0);
-          T(1,0) = m_data(0,1); T(1,1) = m_data(1,1);
-          return T;
-        }
+          case 5u: // 1x1
+            T(0, 0) = A(0, 0); return T;
 
-        if (m_rows == 1 && m_cols == 1)
-        {
-          T(0,0) = m_data(0,0);
-          return T;
-        }
+          case 6u: // 1x2 -> 2x1
+            T(0, 0) = A(0, 0);
+            T(1, 0) = A(0, 1);
+            return T;
 
-        assert(false);
-        return T;
+          case 7u: // 1x3 -> 3x1
+            T(0, 0) = A(0, 0);
+            T(1, 0) = A(0, 1);
+            T(2, 0) = A(0, 2);
+            return T;
+
+          case 9u: // 2x1 -> 1x2
+            T(0, 0) = A(0, 0);
+            T(0, 1) = A(1, 0);
+            return T;
+
+          case 10u: // 2x2
+            T(0, 0) = A(0, 0); T(0, 1) = A(1, 0);
+            T(1, 0) = A(0, 1); T(1, 1) = A(1, 1);
+            return T;
+
+          case 11u: // 2x3 -> 3x2
+            T(0, 0) = A(0, 0); T(0, 1) = A(1, 0);
+            T(1, 0) = A(0, 1); T(1, 1) = A(1, 1);
+            T(2, 0) = A(0, 2); T(2, 1) = A(1, 2);
+            return T;
+
+          case 13u: // 3x1 -> 1x3
+            T(0, 0) = A(0, 0);
+            T(0, 1) = A(1, 0);
+            T(0, 2) = A(2, 0);
+            return T;
+
+          case 14u: // 3x2 -> 2x3
+            T(0, 0) = A(0, 0); T(0, 1) = A(1, 0); T(0, 2) = A(2, 0);
+            T(1, 0) = A(0, 1); T(1, 1) = A(1, 1); T(1, 2) = A(2, 1);
+            return T;
+
+          case 15u: // 3x3
+            T(0, 0) = A(0, 0); T(0, 1) = A(1, 0); T(0, 2) = A(2, 0);
+            T(1, 0) = A(0, 1); T(1, 1) = A(1, 1); T(1, 2) = A(2, 1);
+            T(2, 0) = A(0, 2); T(2, 1) = A(1, 2); T(2, 2) = A(2, 2);
+            return T;
+
+          default:
+            assert(false);
+            return T;
+        }
       }
 
       constexpr
       SpatialMatrix<ScalarType> adjoint() const noexcept
       {
-        // Eigen semantics: adjoint() = conjugate().transpose()
-        SpatialMatrix<ScalarType> A(m_cols, m_rows);
+        SpatialMatrix<ScalarType> Aout(m_cols, m_rows);
+        const auto r = m_rows;
+        const auto c = m_cols;
+        const auto& A = m_data;
 
-        if (m_rows == 3 && m_cols == 3)
+        switch (static_cast<unsigned>(r) * 4u + static_cast<unsigned>(c))
         {
-          A(0,0) = conj(m_data(0,0)); A(0,1) = conj(m_data(1,0)); A(0,2) = conj(m_data(2,0));
-          A(1,0) = conj(m_data(0,1)); A(1,1) = conj(m_data(1,1)); A(1,2) = conj(m_data(2,1));
-          A(2,0) = conj(m_data(0,2)); A(2,1) = conj(m_data(1,2)); A(2,2) = conj(m_data(2,2));
-          return A;
-        }
+          case 0u: case 1u: case 2u: case 3u:
+          case 4u: case 8u: case 12u:
+            return Aout;
 
-        if (m_rows == 2 && m_cols == 2)
-        {
-          A(0,0) = conj(m_data(0,0)); A(0,1) = conj(m_data(1,0));
-          A(1,0) = conj(m_data(0,1)); A(1,1) = conj(m_data(1,1));
-          return A;
-        }
+          case 5u: // 1x1
+            Aout(0, 0) = conj(A(0, 0)); return Aout;
 
-        if (m_rows == 1 && m_cols == 1)
-        {
-          A(0,0) = conj(m_data(0,0));
-          return A;
-        }
+          case 6u: // 1x2 -> 2x1
+            Aout(0, 0) = conj(A(0, 0));
+            Aout(1, 0) = conj(A(0, 1));
+            return Aout;
 
-        assert(false);
-        return A;
+          case 7u: // 1x3 -> 3x1
+            Aout(0, 0) = conj(A(0, 0));
+            Aout(1, 0) = conj(A(0, 1));
+            Aout(2, 0) = conj(A(0, 2));
+            return Aout;
+
+          case 9u: // 2x1 -> 1x2
+            Aout(0, 0) = conj(A(0, 0));
+            Aout(0, 1) = conj(A(1, 0));
+            return Aout;
+
+          case 10u: // 2x2
+            Aout(0, 0) = conj(A(0, 0)); Aout(0, 1) = conj(A(1, 0));
+            Aout(1, 0) = conj(A(0, 1)); Aout(1, 1) = conj(A(1, 1));
+            return Aout;
+
+          case 11u: // 2x3 -> 3x2
+            Aout(0, 0) = conj(A(0, 0)); Aout(0, 1) = conj(A(1, 0));
+            Aout(1, 0) = conj(A(0, 1)); Aout(1, 1) = conj(A(1, 1));
+            Aout(2, 0) = conj(A(0, 2)); Aout(2, 1) = conj(A(1, 2));
+            return Aout;
+
+          case 13u: // 3x1 -> 1x3
+            Aout(0, 0) = conj(A(0, 0));
+            Aout(0, 1) = conj(A(1, 0));
+            Aout(0, 2) = conj(A(2, 0));
+            return Aout;
+
+          case 14u: // 3x2 -> 2x3
+            Aout(0, 0) = conj(A(0, 0)); Aout(0, 1) = conj(A(1, 0)); Aout(0, 2) = conj(A(2, 0));
+            Aout(1, 0) = conj(A(0, 1)); Aout(1, 1) = conj(A(1, 1)); Aout(1, 2) = conj(A(2, 1));
+            return Aout;
+
+          case 15u: // 3x3
+            Aout(0, 0) = conj(A(0, 0)); Aout(0, 1) = conj(A(1, 0)); Aout(0, 2) = conj(A(2, 0));
+            Aout(1, 0) = conj(A(0, 1)); Aout(1, 1) = conj(A(1, 1)); Aout(1, 2) = conj(A(2, 1));
+            Aout(2, 0) = conj(A(0, 2)); Aout(2, 1) = conj(A(1, 2)); Aout(2, 2) = conj(A(2, 2));
+            return Aout;
+
+          default:
+            assert(false);
+            return Aout;
+        }
       }
 
       constexpr
@@ -589,11 +663,11 @@ namespace Rodin::Math
           case 0:
             return ScalarType(0);
           case 1:
-            return m_data(0,0);
+            return m_data(0, 0);
           case 2:
-            return m_data(0,0) + m_data(1,1);
+            return m_data(0, 0) + m_data(1, 1);
           case 3:
-            return m_data(0,0) + m_data(1,1) + m_data(2,2);
+            return m_data(0, 0) + m_data(1, 1) + m_data(2, 2);
           default:
             assert(false);
             return ScalarType(0);
@@ -814,7 +888,7 @@ namespace Rodin::Math
       }
 
       constexpr
-      SpatialVector<Scalar> row(std::uint8_t i) noexcept
+      SpatialVector<Scalar> row(std::uint8_t i) const noexcept
       {
         assert(i < m_rows);
         SpatialVector<Scalar> v(m_cols);
@@ -838,7 +912,7 @@ namespace Rodin::Math
       }
 
       constexpr
-      SpatialVector<Scalar> col(std::uint8_t j) noexcept
+      SpatialVector<Scalar> col(std::uint8_t j) const noexcept
       {
         assert(j < m_cols);
         SpatialVector<Scalar> v(m_rows);
@@ -907,33 +981,52 @@ namespace Rodin::Math
   operator*(const Scalar& s, const SpatialMatrix<Scalar>& A) noexcept
   {
     SpatialMatrix<Scalar> C(A.rows(), A.cols());
-
     const auto r = A.rows();
     const auto c = A.cols();
 
-    if (r == 3 && c == 3)
-    {
-      C(0, 0) = s * A(0, 0); C(0, 1) = s * A(0, 1); C(0, 2) = s * A(0,2);
-      C(1, 0) = s * A(1, 0); C(1, 1) = s * A(1, 1); C(1, 2) = s * A(1,2);
-      C(2, 0) = s * A(2, 0); C(2, 1) = s * A(2, 1); C(2, 2) = s * A(2,2);
-      return C;
-    }
+    // any 0-dimension => nothing to write
+    if (r == 0 || c == 0) return C;
 
-    if (r == 2 && c == 2)
+    switch (static_cast<unsigned>(r)  *  4u + static_cast<unsigned>(c))
     {
-      C(0, 0) = s * A(0, 0); C(0, 1) = s * A(0, 1);
-      C(1, 0) = s * A(1, 0); C(1, 1) = s * A(1, 1);
-      return C;
-    }
+      case 5u:  C(0, 0) = s * A(0, 0); return C;
 
-    if (r == 1 && c == 1)
-    {
-      C(0,0) = s * A(0,0);
-      return C;
-    }
+      case 6u:  C(0, 0) = s * A(0, 0); C(0, 1) = s * A(0, 1); return C;
+      case 7u:  C(0, 0) = s * A(0, 0); C(0, 1) = s * A(0, 1); C(0, 2) = s * A(0, 2); return C;
 
-    assert(false && "Unsupported SpatialMatrix size (expected 1..3)");
-    return C;
+      case 9u:  C(0, 0) = s * A(0, 0); C(1, 0) = s * A(1, 0); return C;
+
+      case 10u:
+        C(0, 0) = s * A(0, 0); C(0, 1) = s * A(0, 1);
+        C(1, 0) = s * A(1, 0); C(1, 1) = s * A(1, 1);
+        return C;
+
+      case 11u:
+        C(0, 0) = s * A(0, 0); C(0, 1) = s * A(0, 1); C(0, 2) = s * A(0, 2);
+        C(1, 0) = s * A(1, 0); C(1, 1) = s * A(1, 1); C(1, 2) = s * A(1, 2);
+        return C;
+
+      case 13u:
+        C(0, 0) = s * A(0, 0); C(1, 0) = s * A(1, 0); C(2, 0) = s * A(2, 0);
+        return C;
+
+      case 14u:
+        C(0, 0) = s * A(0, 0); C(0, 1) = s * A(0, 1);
+        C(1, 0) = s * A(1, 0); C(1, 1) = s * A(1, 1);
+        C(2, 0) = s * A(2, 0); C(2, 1) = s * A(2, 1);
+        return C;
+
+      case 15u:
+        C(0, 0) = s * A(0, 0); C(0, 1) = s * A(0, 1); C(0, 2) = s * A(0, 2);
+        C(1, 0) = s * A(1, 0); C(1, 1) = s * A(1, 1); C(1, 2) = s * A(1, 2);
+        C(2, 0) = s * A(2, 0); C(2, 1) = s * A(2, 1); C(2, 2) = s * A(2, 2);
+        return C;
+
+      default:
+        // remaining keys are 0×c / r×0 already returned above
+        assert(false);
+        return C;
+    }
   }
 
   template <class LHSScalar, class RHSScalar>
@@ -1065,32 +1158,69 @@ namespace Rodin::Math
   {
     SpatialMatrix<Scalar> C(A.rows(), A.cols());
 
-    const auto r = A.rows();
-    const auto c = A.cols();
+    const std::uint8_t r = A.rows();
+    const std::uint8_t c = A.cols();
 
-    if (r == 3 && c == 3)
-    {
-      C(0, 0) = A(0, 0) * s; C(0,1) = A(0, 1) * s; C(0, 2) = A(0, 2) * s;
-      C(1, 0) = A(1, 0) * s; C(1,1) = A(1, 1) * s; C(1, 2) = A(1, 2) * s;
-      C(2, 0) = A(2, 0) * s; C(2,1) = A(2, 1) * s; C(2, 2) = A(2, 2) * s;
+    // Any 0-dimension => nothing to write (result is correctly sized)
+    if (r == 0 || c == 0)
       return C;
-    }
 
-    if (r == 2 && c == 2)
+    // key in [0..15] for r, c in [0..3]
+    switch (static_cast<unsigned>(r) * 4u + static_cast<unsigned>(c))
     {
-      C(0, 0) = A(0, 0) * s; C(0, 1) = A(0, 1) * s;
-      C(1, 0) = A(1, 0) * s; C(1, 1) = A(1, 1) * s;
-      return C;
-    }
+      case 5u: // 1x1
+        C(0, 0) = A(0, 0) * s;
+        return C;
 
-    if (r == 1 && c == 1)
-    {
-      C(0,0) = A(0,0) * s;
-      return C;
-    }
+      case 6u: // 1x2
+        C(0, 0) = A(0, 0) * s;
+        C(0, 1) = A(0, 1) * s;
+        return C;
 
-    assert(false && "Unsupported SpatialMatrix size (expected 1..3)");
-    return C;
+      case 7u: // 1x3
+        C(0, 0) = A(0, 0) * s;
+        C(0, 1) = A(0, 1) * s;
+        C(0, 2) = A(0, 2) * s;
+        return C;
+
+      case 9u: // 2x1
+        C(0, 0) = A(0, 0) * s;
+        C(1, 0) = A(1, 0) * s;
+        return C;
+
+      case 10u: // 2x2
+        C(0, 0) = A(0, 0) * s; C(0, 1) = A(0, 1) * s;
+        C(1, 0) = A(1, 0) * s; C(1, 1) = A(1, 1) * s;
+        return C;
+
+      case 11u: // 2x3
+        C(0, 0) = A(0, 0) * s; C(0, 1) = A(0, 1) * s; C(0, 2) = A(0, 2) * s;
+        C(1, 0) = A(1, 0) * s; C(1, 1) = A(1, 1) * s; C(1, 2) = A(1, 2) * s;
+        return C;
+
+      case 13u: // 3x1
+        C(0, 0) = A(0, 0) * s;
+        C(1, 0) = A(1, 0) * s;
+        C(2, 0) = A(2, 0) * s;
+        return C;
+
+      case 14u: // 3x2
+        C(0, 0) = A(0, 0) * s; C(0, 1) = A(0, 1) * s;
+        C(1, 0) = A(1, 0) * s; C(1, 1) = A(1, 1) * s;
+        C(2, 0) = A(2, 0) * s; C(2, 1) = A(2, 1) * s;
+        return C;
+
+      case 15u: // 3x3
+        C(0, 0) = A(0, 0) * s; C(0, 1) = A(0, 1) * s; C(0, 2) = A(0, 2) * s;
+        C(1, 0) = A(1, 0) * s; C(1, 1) = A(1, 1) * s; C(1, 2) = A(1, 2) * s;
+        C(2, 0) = A(2, 0) * s; C(2, 1) = A(2, 1) * s; C(2, 2) = A(2, 2) * s;
+        return C;
+
+      default:
+        // Remaining keys are 0×c / r×0,  already returned above.
+        assert(false);
+        return C;
+    }
   }
 
   template <class Scalar>
@@ -1100,47 +1230,219 @@ namespace Rodin::Math
   {
     assert(A.cols() == B.rows());
 
-    const auto r = A.rows();
-    const auto k = A.cols();
-    const auto c = B.cols();
+    const std::uint8_t r = A.rows();
+    const std::uint8_t k = A.cols();
+    const std::uint8_t c = B.cols();
 
     SpatialMatrix<Scalar> C(r, c);
 
-    // ---------- 3 × 3 ----------
-    if (r == 3 && k == 3 && c == 3)
-    {
-      C(0,0)=A(0,0)*B(0,0)+A(0,1)*B(1,0)+A(0,2)*B(2,0);
-      C(0,1)=A(0,0)*B(0,1)+A(0,1)*B(1,1)+A(0,2)*B(2,1);
-      C(0,2)=A(0,0)*B(0,2)+A(0,1)*B(1,2)+A(0,2)*B(2,2);
-
-      C(1,0)=A(1,0)*B(0,0)+A(1,1)*B(1,0)+A(1,2)*B(2,0);
-      C(1,1)=A(1,0)*B(0,1)+A(1,1)*B(1,1)+A(1,2)*B(2,1);
-      C(1,2)=A(1,0)*B(0,2)+A(1,1)*B(1,2)+A(1,2)*B(2,2);
-
-      C(2,0)=A(2,0)*B(0,0)+A(2,1)*B(1,0)+A(2,2)*B(2,0);
-      C(2,1)=A(2,0)*B(0,1)+A(2,1)*B(1,1)+A(2,2)*B(2,1);
-      C(2,2)=A(2,0)*B(0,2)+A(2,1)*B(1,2)+A(2,2)*B(2,2);
+    // Any zero dimension => empty product (correctly sized)
+    if (r == 0 || k == 0 || c == 0)
       return C;
-    }
-    // ---------- 2 × 2 ----------
-    else if (r == 2 && k == 2 && c == 2)
-    {
-      C(0,0)=A(0,0)*B(0,0)+A(0,1)*B(1,0);
-      C(0,1)=A(0,0)*B(0,1)+A(0,1)*B(1,1);
 
-      C(1,0)=A(1,0)*B(0,0)+A(1,1)*B(1,0);
-      C(1,1)=A(1,0)*B(0,1)+A(1,1)*B(1,1);
-      return C;
-    }
-    // ---------- 1 × 1 ----------
-    else if (r == 1 && k == 1 && c == 1)
-    {
-      C(0,0) = A(0,0) * B(0,0);
-      return C;
-    }
+    // key in [0..63] for (r,k,c) in [0..3]^3
+    const unsigned key = static_cast<unsigned>(r) * 16u
+                       + static_cast<unsigned>(k) *  4u
+                       + static_cast<unsigned>(c);
 
-    assert(false);
-    return C;
+    switch (key)
+    {
+      // -------------------- k = 1 --------------------
+      // r x 1  times  1 x c  => outer product
+
+      case 1u * 16u + 1u * 4u + 1u: // 1x1 * 1x1 => 1x1
+        C(0, 0) = A(0, 0) * B(0, 0);
+        return C;
+
+      case 1u * 16u + 1u * 4u + 2u: // 1x1 * 1x2 => 1x2
+        C(0, 0) = A(0, 0) * B(0, 0);
+        C(0, 1) = A(0, 0) * B(0, 1);
+        return C;
+
+      case 1u * 16u + 1u * 4u + 3u: // 1x1 * 1x3 => 1x3
+        C(0, 0) = A(0, 0) * B(0, 0);
+        C(0, 1) = A(0, 0) * B(0, 1);
+        C(0, 2) = A(0, 0) * B(0, 2);
+        return C;
+
+      case 2u * 16u + 1u * 4u + 1u: // 2x1 * 1x1 => 2x1
+        C(0, 0) = A(0, 0) * B(0, 0);
+        C(1, 0) = A(1, 0) * B(0, 0);
+        return C;
+
+      case 2u * 16u + 1u * 4u + 2u: // 2x1 * 1x2 => 2x2
+        C(0, 0) = A(0, 0) * B(0, 0);  C(0, 1) = A(0, 0) * B(0, 1);
+        C(1, 0) = A(1, 0) * B(0, 0);  C(1, 1) = A(1, 0) * B(0, 1);
+        return C;
+
+      case 2u * 16u + 1u * 4u + 3u: // 2x1 * 1x3 => 2x3
+        C(0, 0) = A(0, 0) * B(0, 0);  C(0, 1) = A(0, 0) * B(0, 1);  C(0, 2) = A(0, 0) * B(0, 2);
+        C(1, 0) = A(1, 0) * B(0, 0);  C(1, 1) = A(1, 0) * B(0, 1);  C(1, 2) = A(1, 0) * B(0, 2);
+        return C;
+
+      case 3u * 16u + 1u * 4u + 1u: // 3x1 * 1x1 => 3x1
+        C(0, 0) = A(0, 0) * B(0, 0);
+        C(1, 0) = A(1, 0) * B(0, 0);
+        C(2, 0) = A(2, 0) * B(0, 0);
+        return C;
+
+      case 3u * 16u + 1u * 4u + 2u: // 3x1 * 1x2 => 3x2
+        C(0, 0) = A(0, 0) * B(0, 0);  C(0, 1) = A(0, 0) * B(0, 1);
+        C(1, 0) = A(1, 0) * B(0, 0);  C(1, 1) = A(1, 0) * B(0, 1);
+        C(2, 0) = A(2, 0) * B(0, 0);  C(2, 1) = A(2, 0) * B(0, 1);
+        return C;
+
+      case 3u * 16u + 1u * 4u + 3u: // 3x1 * 1x3 => 3x3
+        C(0, 0) = A(0, 0) * B(0, 0);  C(0, 1) = A(0, 0) * B(0, 1);  C(0, 2) = A(0, 0) * B(0, 2);
+        C(1, 0) = A(1, 0) * B(0, 0);  C(1, 1) = A(1, 0) * B(0, 1);  C(1, 2) = A(1, 0) * B(0, 2);
+        C(2, 0) = A(2, 0) * B(0, 0);  C(2, 1) = A(2, 0) * B(0, 1);  C(2, 2) = A(2, 0) * B(0, 2);
+        return C;
+
+      // -------------------- k = 2 --------------------
+
+      case 1u  *  16u + 2u  *  4u + 1u: // 1x2  *  2x1 => 1x1
+        C(0, 0) = A(0, 0) * B(0, 0) + A(0, 1) * B(1, 0);
+        return C;
+
+      case 1u  *  16u + 2u  *  4u + 2u: // 1x2  *  2x2 => 1x2
+        C(0, 0) = A(0, 0) * B(0, 0) + A(0, 1) * B(1, 0);
+        C(0, 1) = A(0, 0) * B(0, 1) + A(0, 1) * B(1, 1);
+        return C;
+
+      case 1u  *  16u + 2u  *  4u + 3u: // 1x2  *  2x3 => 1x3
+        C(0, 0) = A(0, 0) * B(0, 0) + A(0, 1) * B(1, 0);
+        C(0, 1) = A(0, 0) * B(0, 1) + A(0, 1) * B(1, 1);
+        C(0, 2) = A(0, 0) * B(0, 2) + A(0, 1) * B(1, 2);
+        return C;
+
+      case 2u  *  16u + 2u  *  4u + 1u: // 2x2  *  2x1 => 2x1
+        C(0, 0) = A(0, 0) * B(0, 0) + A(0, 1) * B(1, 0);
+        C(1, 0) = A(1, 0) * B(0, 0) + A(1, 1) * B(1, 0);
+        return C;
+
+      case 2u  *  16u + 2u  *  4u + 2u: // 2x2  *  2x2 => 2x2
+        C(0, 0) = A(0, 0) * B(0, 0) + A(0, 1) * B(1, 0);
+        C(0, 1) = A(0, 0) * B(0, 1) + A(0, 1) * B(1, 1);
+        C(1, 0) = A(1, 0) * B(0, 0) + A(1, 1) * B(1, 0);
+        C(1, 1) = A(1, 0) * B(0, 1) + A(1, 1) * B(1, 1);
+        return C;
+
+      case 2u  *  16u + 2u  *  4u + 3u: // 2x2  *  2x3 => 2x3
+        C(0, 0) = A(0, 0) * B(0, 0) + A(0, 1) * B(1, 0);
+        C(0, 1) = A(0, 0) * B(0, 1) + A(0, 1) * B(1, 1);
+        C(0, 2) = A(0, 0) * B(0, 2) + A(0, 1) * B(1, 2);
+
+        C(1, 0) = A(1, 0) * B(0, 0) + A(1, 1) * B(1, 0);
+        C(1, 1) = A(1, 0) * B(0, 1) + A(1, 1) * B(1, 1);
+        C(1, 2) = A(1, 0) * B(0, 2) + A(1, 1) * B(1, 2);
+        return C;
+
+      case 3u  *  16u + 2u  *  4u + 1u: // 3x2  *  2x1 => 3x1
+        C(0, 0) = A(0, 0) * B(0, 0) + A(0, 1) * B(1, 0);
+        C(1, 0) = A(1, 0) * B(0, 0) + A(1, 1) * B(1, 0);
+        C(2, 0) = A(2, 0) * B(0, 0) + A(2, 1) * B(1, 0);
+        return C;
+
+      case 3u  *  16u + 2u  *  4u + 2u: // 3x2  *  2x2 => 3x2
+        C(0, 0) = A(0, 0) * B(0, 0) + A(0, 1) * B(1, 0);
+        C(0, 1) = A(0, 0) * B(0, 1) + A(0, 1) * B(1, 1);
+
+        C(1, 0) = A(1, 0) * B(0, 0) + A(1, 1) * B(1, 0);
+        C(1, 1) = A(1, 0) * B(0, 1) + A(1, 1) * B(1, 1);
+
+        C(2, 0) = A(2, 0) * B(0, 0) + A(2, 1) * B(1, 0);
+        C(2, 1) = A(2, 0) * B(0, 1) + A(2, 1) * B(1, 1);
+        return C;
+
+      case 3u  *  16u + 2u  *  4u + 3u: // 3x2  *  2x3 => 3x3
+        C(0, 0) = A(0, 0) * B(0, 0) + A(0, 1) * B(1, 0);
+        C(0, 1) = A(0, 0) * B(0, 1) + A(0, 1) * B(1, 1);
+        C(0, 2) = A(0, 0) * B(0, 2) + A(0, 1) * B(1, 2);
+
+        C(1, 0) = A(1, 0) * B(0, 0) + A(1, 1) * B(1, 0);
+        C(1, 1) = A(1, 0) * B(0, 1) + A(1, 1) * B(1, 1);
+        C(1, 2) = A(1, 0) * B(0, 2) + A(1, 1) * B(1, 2);
+
+        C(2, 0) = A(2, 0) * B(0, 0) + A(2, 1) * B(1, 0);
+        C(2, 1) = A(2, 0) * B(0, 1) + A(2, 1) * B(1, 1);
+        C(2, 2) = A(2, 0) * B(0, 2) + A(2, 1) * B(1, 2);
+        return C;
+
+      // -------------------- k = 3 --------------------
+
+      case 1u  *  16u + 3u  *  4u + 1u: // 1x3  *  3x1 => 1x1
+        C(0, 0) = A(0, 0) * B(0, 0) + A(0, 1) * B(1, 0) + A(0, 2) * B(2, 0);
+        return C;
+
+      case 1u  *  16u + 3u  *  4u + 2u: // 1x3  *  3x2 => 1x2
+        C(0, 0) = A(0, 0) * B(0, 0) + A(0, 1) * B(1, 0) + A(0, 2) * B(2, 0);
+        C(0, 1) = A(0, 0) * B(0, 1) + A(0, 1) * B(1, 1) + A(0, 2) * B(2, 1);
+        return C;
+
+      case 1u  *  16u + 3u  *  4u + 3u: // 1x3  *  3x3 => 1x3
+        C(0, 0) = A(0, 0) * B(0, 0) + A(0, 1) * B(1, 0) + A(0, 2) * B(2, 0);
+        C(0, 1) = A(0, 0) * B(0, 1) + A(0, 1) * B(1, 1) + A(0, 2) * B(2, 1);
+        C(0, 2) = A(0, 0) * B(0, 2) + A(0, 1) * B(1, 2) + A(0, 2) * B(2, 2);
+        return C;
+
+      case 2u  *  16u + 3u  *  4u + 1u: // 2x3  *  3x1 => 2x1
+        C(0, 0) = A(0, 0) * B(0, 0) + A(0, 1) * B(1, 0) + A(0, 2) * B(2, 0);
+        C(1, 0) = A(1, 0) * B(0, 0) + A(1, 1) * B(1, 0) + A(1, 2) * B(2, 0);
+        return C;
+
+      case 2u  *  16u + 3u  *  4u + 2u: // 2x3  *  3x2 => 2x2
+        C(0, 0) = A(0, 0) * B(0, 0) + A(0, 1) * B(1, 0) + A(0, 2) * B(2, 0);
+        C(0, 1) = A(0, 0) * B(0, 1) + A(0, 1) * B(1, 1) + A(0, 2) * B(2, 1);
+
+        C(1, 0) = A(1, 0) * B(0, 0) + A(1, 1) * B(1, 0) + A(1, 2) * B(2, 0);
+        C(1, 1) = A(1, 0) * B(0, 1) + A(1, 1) * B(1, 1) + A(1, 2) * B(2, 1);
+        return C;
+
+      case 2u  *  16u + 3u  *  4u + 3u: // 2x3  *  3x3 => 2x3
+        C(0, 0) = A(0, 0) * B(0, 0) + A(0, 1) * B(1, 0) + A(0, 2) * B(2, 0);
+        C(0, 1) = A(0, 0) * B(0, 1) + A(0, 1) * B(1, 1) + A(0, 2) * B(2, 1);
+        C(0, 2) = A(0, 0) * B(0, 2) + A(0, 1) * B(1, 2) + A(0, 2) * B(2, 2);
+
+        C(1, 0) = A(1, 0) * B(0, 0) + A(1, 1) * B(1, 0) + A(1, 2) * B(2, 0);
+        C(1, 1) = A(1, 0) * B(0, 1) + A(1, 1) * B(1, 1) + A(1, 2) * B(2, 1);
+        C(1, 2) = A(1, 0) * B(0, 2) + A(1, 1) * B(1, 2) + A(1, 2) * B(2, 2);
+        return C;
+
+      case 3u  *  16u + 3u  *  4u + 1u: // 3x3  *  3x1 => 3x1
+        C(0, 0) = A(0, 0) * B(0, 0) + A(0, 1) * B(1, 0) + A(0, 2) * B(2, 0);
+        C(1, 0) = A(1, 0) * B(0, 0) + A(1, 1) * B(1, 0) + A(1, 2) * B(2, 0);
+        C(2, 0) = A(2, 0) * B(0, 0) + A(2, 1) * B(1, 0) + A(2, 2) * B(2, 0);
+        return C;
+
+      case 3u  *  16u + 3u  *  4u + 2u: // 3x3  *  3x2 => 3x2
+        C(0, 0) = A(0, 0) * B(0, 0) + A(0, 1) * B(1, 0) + A(0, 2) * B(2, 0);
+        C(0, 1) = A(0, 0) * B(0, 1) + A(0, 1) * B(1, 1) + A(0, 2) * B(2, 1);
+
+        C(1, 0) = A(1, 0) * B(0, 0) + A(1, 1) * B(1, 0) + A(1, 2) * B(2, 0);
+        C(1, 1) = A(1, 0) * B(0, 1) + A(1, 1) * B(1, 1) + A(1, 2) * B(2, 1);
+
+        C(2, 0) = A(2, 0) * B(0, 0) + A(2, 1) * B(1, 0) + A(2, 2) * B(2, 0);
+        C(2, 1) = A(2, 0) * B(0, 1) + A(2, 1) * B(1, 1) + A(2, 2) * B(2, 1);
+        return C;
+
+      case 3u  *  16u + 3u  *  4u + 3u: // 3x3  *  3x3 => 3x3
+        C(0, 0) = A(0, 0) * B(0, 0) + A(0, 1) * B(1, 0) + A(0, 2) * B(2, 0);
+        C(0, 1) = A(0, 0) * B(0, 1) + A(0, 1) * B(1, 1) + A(0, 2) * B(2, 1);
+        C(0, 2) = A(0, 0) * B(0, 2) + A(0, 1) * B(1, 2) + A(0, 2) * B(2, 2);
+
+        C(1, 0) = A(1, 0) * B(0, 0) + A(1, 1) * B(1, 0) + A(1, 2) * B(2, 0);
+        C(1, 1) = A(1, 0) * B(0, 1) + A(1, 1) * B(1, 1) + A(1, 2) * B(2, 1);
+        C(1, 2) = A(1, 0) * B(0, 2) + A(1, 1) * B(1, 2) + A(1, 2) * B(2, 2);
+
+        C(2, 0) = A(2, 0) * B(0, 0) + A(2, 1) * B(1, 0) + A(2, 2) * B(2, 0);
+        C(2, 1) = A(2, 0) * B(0, 1) + A(2, 1) * B(1, 1) + A(2, 2) * B(2, 1);
+        C(2, 2) = A(2, 0) * B(0, 2) + A(2, 1) * B(1, 2) + A(2, 2) * B(2, 2);
+        return C;
+
+      default:
+        assert(false);
+        return C;
+    }
   }
 
   template <class Scalar>
@@ -1152,31 +1454,55 @@ namespace Rodin::Math
     assert(A.cols() == B.cols());
 
     SpatialMatrix<Scalar> C(A.rows(), A.cols());
-
     const auto r = A.rows();
     const auto c = A.cols();
 
-    if (r == 3 && c == 3)
-    {
-      C(0, 0) = A(0,0) + B(0,0); C(0,1) = A(0,1) + B(0,1); C(0,2) = A(0,2) + B(0,2);
-      C(1, 0) = A(1,0) + B(1,0); C(1,1) = A(1,1) + B(1,1); C(1,2) = A(1,2) + B(1,2);
-      C(2, 0) = A(2,0) + B(2,0); C(2,1) = A(2,1) + B(2,1); C(2,2) = A(2,2) + B(2,2);
-      return C;
-    }
-    else if (r == 2 && c == 2)
-    {
-      C(0, 0) = A(0,0) + B(0,0); C(0,1) = A(0,1) + B(0,1);
-      C(1, 0) = A(1,0) + B(1,0); C(1,1) = A(1,1) + B(1,1);
-      return C;
-    }
-    else if (r == 1 && c == 1)
-    {
-      C(0, 0) = A(0, 0) + B(0, 0);
-      return C;
-    }
+    if (r == 0 || c == 0) return C;
 
-    assert(false);
-    return C;
+    switch (static_cast<unsigned>(r) * 4u + static_cast<unsigned>(c))
+    {
+      case 5u:
+        C(0, 0) = A(0, 0) + B(0, 0); return C;
+
+      case 6u:
+        C(0, 0) = A(0, 0) + B(0, 0); C(0, 1) = A(0, 1) + B(0, 1); return C;
+
+      case 7u:
+        C(0, 0) = A(0, 0) + B(0, 0); C(0, 1) = A(0, 1) + B(0, 1); C(0, 2) = A(0, 2) + B(0, 2); return C;
+
+      case 9u:
+        C(0, 0) = A(0, 0) + B(0, 0); C(1, 0) = A(1, 0) + B(1, 0); return C;
+
+      case 10u:
+        C(0, 0) = A(0, 0) + B(0, 0); C(0, 1) = A(0, 1) + B(0, 1);
+        C(1, 0) = A(1, 0) + B(1, 0); C(1, 1) = A(1, 1) + B(1, 1);
+        return C;
+
+      case 11u:
+        C(0, 0) = A(0, 0) + B(0, 0); C(0, 1) = A(0, 1) + B(0, 1); C(0, 2) = A(0, 2) + B(0, 2);
+        C(1, 0) = A(1, 0) + B(1, 0); C(1, 1) = A(1, 1) + B(1, 1); C(1, 2) = A(1, 2) + B(1, 2);
+        return C;
+
+      case 13u:
+        C(0, 0) = A(0, 0) + B(0, 0); C(1, 0) = A(1, 0) + B(1, 0); C(2, 0) = A(2, 0) + B(2, 0);
+        return C;
+
+      case 14u:
+        C(0, 0) = A(0, 0) + B(0, 0); C(0, 1) = A(0, 1) + B(0, 1);
+        C(1, 0) = A(1, 0) + B(1, 0); C(1, 1) = A(1, 1) + B(1, 1);
+        C(2, 0) = A(2, 0) + B(2, 0); C(2, 1) = A(2, 1) + B(2, 1);
+        return C;
+
+      case 15u:
+        C(0, 0) = A(0, 0) + B(0, 0); C(0, 1) = A(0, 1) + B(0, 1); C(0, 2) = A(0, 2) + B(0, 2);
+        C(1, 0) = A(1, 0) + B(1, 0); C(1, 1) = A(1, 1) + B(1, 1); C(1, 2) = A(1, 2) + B(1, 2);
+        C(2, 0) = A(2, 0) + B(2, 0); C(2, 1) = A(2, 1) + B(2, 1); C(2, 2) = A(2, 2) + B(2, 2);
+        return C;
+
+      default:
+        assert(false);
+        return C;
+    }
   }
 
   template <class LHSScalar, class RHSScalar>
@@ -1184,34 +1510,107 @@ namespace Rodin::Math
   SpatialVector<typename FormLanguage::Mult<LHSScalar, RHSScalar>::Type>
   operator*(const SpatialMatrix<LHSScalar>& A, const SpatialVector<RHSScalar>& x) noexcept
   {
+    using Out = typename FormLanguage::Mult<LHSScalar, RHSScalar>::Type;
+
     assert(A.cols() == x.size());
-    SpatialVector<typename FormLanguage::Mult<LHSScalar, RHSScalar>::Type> y(A.rows());
 
-    const auto r = A.rows();
-    const auto c = A.cols();
+    const std::uint8_t r = A.rows();
+    const std::uint8_t c = A.cols();
 
-    // Small-dim kernels: avoid Eigen expressions and avoid loops when possible.
-    if (r == 3 && c == 3)
-    {
-      y[0] = A(0, 0) * x[0] + A(0, 1) * x[1] + A(0, 2) * x[2];
-      y[1] = A(1, 0) * x[0] + A(1, 1) * x[1] + A(1, 2) * x[2];
-      y[2] = A(2, 0) * x[0] + A(2, 1) * x[1] + A(2, 2) * x[2];
-      return y;
-    }
-    else if (r == 2 && c == 2)
-    {
-      y[0] = A(0, 0) * x[0] + A(0, 1) * x[1];
-      y[1] = A(1, 0) * x[0] + A(1, 1) * x[1];
-      return y;
-    }
-    else if (r == 1 && c == 1)
-    {
-      y[0] = A(0, 0) * x[0];
-      return y;
-    }
+    SpatialVector<Out> y(r);
+    if (r == 0) return y;
 
-    assert(false);
-    return y;
+    // default init (only needed if your SpatialVector doesn't default-initialize)
+    for (std::uint8_t i = 0; i < r; ++i) y[i] = Out(0);
+
+    switch (c)
+    {
+      case 0:
+        return y;
+
+      case 1:
+      {
+        const Out x0 = static_cast<Out>(x[0]);
+        switch (r)
+        {
+          case 1: y[0] = static_cast<Out>(A(0, 0)) * x0; return y;
+          case 2:
+            y[0] = static_cast<Out>(A(0, 0)) * x0;
+            y[1] = static_cast<Out>(A(1, 0)) * x0;
+            return y;
+          case 3:
+            y[0] = static_cast<Out>(A(0, 0)) * x0;
+            y[1] = static_cast<Out>(A(1, 0)) * x0;
+            y[2] = static_cast<Out>(A(2, 0)) * x0;
+            return y;
+          case 0: return y;
+          default: assert(false); return y;
+        }
+      }
+
+      case 2:
+      {
+        const Out x0 = static_cast<Out>(x[0]);
+        const Out x1 = static_cast<Out>(x[1]);
+        switch (r)
+        {
+          case 1:
+            y[0] = static_cast<Out>(A(0, 0)) * x0 + static_cast<Out>(A(0, 1)) * x1;
+            return y;
+          case 2:
+            y[0] = static_cast<Out>(A(0, 0)) * x0 + static_cast<Out>(A(0, 1)) * x1;
+            y[1] = static_cast<Out>(A(1, 0)) * x0 + static_cast<Out>(A(1, 1)) * x1;
+            return y;
+          case 3:
+            y[0] = static_cast<Out>(A(0, 0)) * x0 + static_cast<Out>(A(0, 1)) * x1;
+            y[1] = static_cast<Out>(A(1, 0)) * x0 + static_cast<Out>(A(1, 1)) * x1;
+            y[2] = static_cast<Out>(A(2, 0)) * x0 + static_cast<Out>(A(2, 1)) * x1;
+            return y;
+          case 0: return y;
+          default: assert(false); return y;
+        }
+      }
+
+      case 3:
+      {
+        const Out x0 = static_cast<Out>(x[0]);
+        const Out x1 = static_cast<Out>(x[1]);
+        const Out x2 = static_cast<Out>(x[2]);
+        switch (r)
+        {
+          case 1:
+            y[0] = static_cast<Out>(A(0, 0)) * x0
+                 + static_cast<Out>(A(0, 1)) * x1
+                 + static_cast<Out>(A(0, 2)) * x2;
+            return y;
+          case 2:
+            y[0] = static_cast<Out>(A(0, 0)) * x0
+                 + static_cast<Out>(A(0, 1)) * x1
+                 + static_cast<Out>(A(0, 2)) * x2;
+            y[1] = static_cast<Out>(A(1, 0)) * x0
+                 + static_cast<Out>(A(1, 1)) * x1
+                 + static_cast<Out>(A(1, 2)) * x2;
+            return y;
+          case 3:
+            y[0] = static_cast<Out>(A(0, 0)) * x0
+                 + static_cast<Out>(A(0, 1)) * x1
+                 + static_cast<Out>(A(0, 2)) * x2;
+            y[1] = static_cast<Out>(A(1, 0)) * x0
+                 + static_cast<Out>(A(1, 1)) * x1
+                 + static_cast<Out>(A(1, 2)) * x2;
+            y[2] = static_cast<Out>(A(2, 0)) * x0
+                 + static_cast<Out>(A(2, 1)) * x1
+                 + static_cast<Out>(A(2, 2)) * x2;
+            return y;
+          case 0: return y;
+          default: assert(false); return y;
+        }
+      }
+
+      default:
+        assert(false);
+        return y;
+    }
   }
 
   template <class Scalar>

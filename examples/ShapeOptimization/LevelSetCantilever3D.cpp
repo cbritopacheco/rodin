@@ -4,17 +4,15 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include "Rodin/Geometry/Types.h"
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
-#include <RodinExternal/MMG.h>
-#include <Rodin/Models/Distance/Eikonal.h>
-#include <Rodin/Models/Advection/Lagrangian.h>
+#include <Rodin/Distance/Eikonal.h>
+#include <Rodin/Advection/Lagrangian.h>
+#include <Rodin/MMG.h>
 
 using namespace Rodin;
-using namespace Rodin::External;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
@@ -23,25 +21,25 @@ using namespace Rodin::Variational;
 static constexpr Attribute Interior = 3, Exterior = 2;
 
 // Define boundary attributes
-static constexpr Attribute GammaD = 999, GammaN = 2, Gamma = 10, Gamma0 = 666;
+static constexpr Attribute GammaD = 4, GammaN = 7, Gamma = 10, Gamma0 = 3;
 
 // Lamé coefficients
-static constexpr double mu = 0.3846;
-static constexpr double lambda = 0.5769;
+static constexpr Real mu = 0.3846;
+static constexpr Real lambda = 0.5769;
 
 // Optimization parameters
 static constexpr size_t maxIt = 300;
-static constexpr double eps = 1e-12;
-static constexpr double hgrad = 1.6;
-static constexpr double ell = 0.1;
-static double elementStep = 0.5;
-static double hmax = 0.1;
-static double hmin = 0.1 * hmax;
-static double hausd = 0.5 * hmin;
+static constexpr Real eps = 1e-12;
+static constexpr Real hgrad = 1.6;
+static constexpr Real ell = 0.1;
+static Real elementStep = 0.5;
+static Real hmax = 0.5;
+static Real hmin = 0.1 * hmax;
+static Real hausd = 0.2 * hmin;
 static size_t hmaxIt = maxIt / 2;
-const Real k = 1;
-const Real dt = k * (hmax - hmin);
-static double alpha = dt;
+const Real k = 0.5;
+const Real dt = k * (hmax - hmin) / 2;
+static Real alpha = dt;
 
 using FES = VectorP1<Mesh<Context::Local>>;
 
@@ -53,19 +51,25 @@ Real compliance(const GridFunction<FES, Data>& w)
   TestFunction  v(vh);
   BilinearForm  bf(u, v);
   bf = LinearElasticityIntegral(u, v)(lambda, mu);
+  bf.assemble();
   return bf(w, w);
 };
 
 int main(int, char**)
 {
-  const char* meshFile = "step.0.o.mesh";
+  const char* meshFile = "../resources/examples/ShapeOptimization/LevelSetCantilever3D.medit.mesh";
 
   // Load mesh
   MMG::Mesh th;
   th.load(meshFile, IO::FileFormat::MEDIT);
 
-  th.save("Omega0.mesh");
+  P1 sh(th);
+  GridFunction dist(sh);
+
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
+
+
+  th.save("Omega0.mesh", IO::FileFormat::MEDIT);
 
   // Optimization loop
   std::vector<double> obj;
@@ -74,19 +78,32 @@ int main(int, char**)
   {
     Alert::Info() << "----- Iteration: " << i << Alert::Raise;
 
-    Alert::Info() << "Optimizing the domain..." << Alert::Raise;
+    Alert::Info() << "   | Optimizing the domain..." << Alert::Raise;
     MMG::Optimizer().setHMax(hmax)
                     .setHMin(hmin)
+                    // .setGradation(1.1)
                     .setHausdorff(hausd)
-                    .setGradation(1.2)
                     .setAngleDetection(false)
                     .optimize(th);
 
-    th.getConnectivity().compute(th.getDimension() - 1, th.getDimension());
+    th.save("Optimized.mesh", IO::FileFormat::MEDIT);
+
+    Alert::Info() << "   | Computing connectivity." << Alert::Raise;
+    auto& conn = th.getConnectivity();
+
+    conn.discover(3, 2);
+    conn.discover(3, 1);
+
+    conn.restrict(1, 0);
+    conn.restrict(2, 0);
+
+    conn.restrict(2, 3);
+
+    conn.discover(0, 0);
 
     Alert::Info() << "   | Trimming mesh." << Alert::Raise;
     SubMesh trimmed = th.trim(Exterior);
-    trimmed.save("Omega.mesh", IO::FileFormat::MEDIT);
+    trimmed.save("Trimmed.mesh", IO::FileFormat::MEDIT);
 
     Alert::Info() << "   | Building finite element spaces." << Alert::Raise;
     const size_t d = th.getSpaceDimension();
@@ -96,10 +113,13 @@ int main(int, char**)
     Alert::Info() << "   | Distancing domain." << Alert::Raise;
 
     GridFunction dist(sh);
-    Models::Distance::Eikonal(dist).setInterior(Interior)
-                                   .setInterface(Gamma)
-                                   .solve()
-                                   .sign();
+    Distance::Eikonal(dist).setInterior(Interior)
+                           .setInterface(Gamma)
+                           .solve()
+                           .sign();
+
+    dist.getFiniteElementSpace().getMesh().save("Distance.mesh");
+    dist.save("Distance.gf");
 
     P1 shInt(trimmed);
     P1 vhInt(trimmed, d);
@@ -114,7 +134,11 @@ int main(int, char**)
     elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
                - BoundaryIntegral(f, v).over(GammaN)
                + DirichletBC(u, VectorFunction{0, 0, 0}).on(GammaD);
-    Solver::CG(elasticity).solve();
+    auto cg = Solver::CG(elasticity);
+    cg.solve();
+
+    u.getSolution().save("State.gf");
+    u.getSolution().getFiniteElementSpace().getMesh().save("State.mesh");
 
     Alert::Info() << "   | Computing shape gradient." << Alert::Raise;
     auto jac = Jacobian(u.getSolution());
@@ -136,6 +160,9 @@ int main(int, char**)
 
     auto& dJ = g.getSolution();
 
+    vh.getMesh().save("dJ.mesh");
+    dJ.save("dJ.gf");
+
     // Update objective
     double objective = compliance(u.getSolution()) + ell * th.getVolume(Interior);
     obj.push_back(objective);
@@ -152,28 +179,23 @@ int main(int, char**)
     TrialFunction advect(sh);
     TestFunction test(sh);
 
-    th.save("distance.mesh");
-    dist.save("dist.gf");
+    Advection::Lagrangian(advect, test, dist, dJ).step(dt);
 
-    Models::Advection::Lagrangian(advect, test, dist, dJ).step(dt);
-
-    th.save("advect.mesh");
-    advect.getSolution().save("advect.gf");
+    th.save("Advect.mesh");
+    advect.getSolution().save("Advect.gf");
 
     // Recover the implicit domain
     Alert::Info() << "   | Meshing the domain." << Alert::Raise;
-
-    th = MMG::ImplicitDomainMesher().split(Interior, {Interior, Exterior})
-                                    .split(Exterior, {Interior, Exterior})
-                                    .setRMC(1e-5)
-                                    .setHMax(hmax)
+    th = MMG::LevelSetDiscretizer().setHMax(hmax)
                                     .setHMin(hmin)
-                                    .setGradation(1.2)
                                     .setHausdorff(hausd)
                                     .setAngleDetection(false)
-                                    .setBoundaryReference(Gamma)
+                                    .setRMC(1e-5)
                                     .setBaseReferences(GammaD)
-                                    .discretize(dist);
+                                    .setBoundaryReference(Gamma)
+                                    .discretize(advect.getSolution());
+
+    th.save("Omega.mesh", IO::FileFormat::MEDIT);
   }
 
   Alert::Info() << "Saved final mesh to Omega.mesh" << Alert::Raise;

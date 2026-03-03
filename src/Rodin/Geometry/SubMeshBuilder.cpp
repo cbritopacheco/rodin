@@ -23,44 +23,47 @@ namespace Rodin::Geometry
   SubMesh<Context::Local>::Builder&
   SubMesh<Context::Local>::Builder::include(size_t d, Index parentIdx)
   {
-    auto& build = m_build;
     assert(m_parent.has_value());
     const auto& parent = m_parent.value().get();
-    const auto& conn = parent.getConnectivity();
+    const auto& conn   = parent.getConnectivity();
+
+    // Fast path: entity already included -> only ensure attribute (optional), then return.
+    if (auto it = m_s2ps[d].right.find(parentIdx); it != m_s2ps[d].right.end())
+    {
+      if (auto attr = parent.getAttribute(d, parentIdx))
+        m_build.attribute({ d, it->second }, *attr);
+      return *this;
+    }
+
+    // First time we see this entity: create child index now
+    const Index childIdx = m_sidx[d];
+    m_s2ps[d].left.push_back(parentIdx);
+    m_s2ps[d].right.insert(std::pair<Index, Index>{ parentIdx, childIdx });
+    ++m_sidx[d];
+
+    // Remap vertices and emit polytope ONCE
     const auto& parentPolytope = conn.getPolytope(d, parentIdx);
     IndexArray childPolytope(parentPolytope.size());
-    assert(childPolytope.size() >= 0);
-    for (size_t i = 0; i < static_cast<size_t>(childPolytope.size()); i++)
+
+    for (size_t i = 0; i < static_cast<size_t>(childPolytope.size()); ++i)
     {
-      const Index parentVertex = parentPolytope.coeff(i);
-      const Index childVertex = m_sidx[0];
-      const auto [it, inserted] = m_s2ps[0].right.insert(std::pair<Index, Index>{ parentVertex, childVertex });
-      if (inserted) // Vertex was not already in the map
+      const Index pv = parentPolytope.coeff(i);
+
+      // Vertex map check (same idea can be optimized further; see section 2)
+      auto [vit, vinserted] = m_s2ps[0].right.insert(std::pair<Index, Index>{ pv, m_sidx[0] });
+      if (vinserted)
       {
-        m_s2ps[0].left.push_back(parentVertex);
-        childPolytope.coeffRef(i) = childVertex;
-        m_sidx[0] += 1;
+        m_s2ps[0].left.push_back(pv);
+        ++m_sidx[0];
       }
-      else // Vertex was already in the map
-      {
-        childPolytope.coeffRef(i) = it->second;
-      }
+      childPolytope.coeffRef(i) = vit->second;
     }
-    // Add polytope with original geometry and new vertex ordering
-    build.polytope(conn.getGeometry(d, parentIdx), childPolytope);
-    const Index childIdx = m_sidx[d];
-    const auto [it, inserted] = m_s2ps[d].right.insert(std::pair<Index, Index>{ parentIdx, childIdx });
-    // Add polytope information
-    if (inserted) // Polytope was already in the map
-    {
-      m_s2ps[d].left.push_back(parentIdx);
-      build.attribute(std::pair<Index, Index>{ d, childIdx }, parent.getAttribute(d, parentIdx));
-      m_sidx[d] += 1;
-    }
-    else
-    {
-      build.attribute({ d, it->second }, parent.getAttribute(d, parentIdx));
-    }
+
+    m_build.polytope(conn.getGeometry(d, parentIdx), std::move(childPolytope));
+
+    if (auto attr = parent.getAttribute(d, parentIdx))
+      m_build.attribute({ d, childIdx }, *attr);
+
     m_dimension = std::max(m_dimension, d);
     return *this;
   }

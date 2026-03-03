@@ -6,12 +6,11 @@
  */
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
-#include <RodinExternal/MMG.h>
+#include <Rodin/MMG.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
-using namespace Rodin::External;
 
 static constexpr Attribute interior = 1;
 static constexpr Attribute exterior = 2;

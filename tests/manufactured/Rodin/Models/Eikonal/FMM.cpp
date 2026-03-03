@@ -9,7 +9,7 @@
 
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/VectorFunction.h"
-#include "Rodin/Models/Eikonal/FMM.h"
+#include "Rodin/Eikonal/FMM.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -65,7 +65,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     ASSERT_FALSE(interface.empty())
       << "Interface should not be empty";
 
-    Models::Eikonal::FMM fmm(u, speed);
+    Rodin::Eikonal::FMM fmm(u, speed);
     fmm.seed(interface).solve();
 
     // Verify against analytical solution: u(x,y) = sqrt(x^2 + y^2)
@@ -121,7 +121,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     ASSERT_FALSE(interface.empty())
       << "Interface should not be empty";
 
-    Models::Eikonal::FMM fmm(u, speed);
+    Rodin::Eikonal::FMM fmm(u, speed);
     fmm.seed(interface).solve();
 
     // For radial speed s(r) = 1 + r, the analytical solution is:
@@ -178,7 +178,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     // Constant speed
     auto speed = [](const Geometry::Point& p) -> Real { return 1.0; };
 
-    Models::Eikonal::FMM fmm(u, speed);
+    Rodin::Eikonal::FMM fmm(u, speed);
 
     // Set source near one face center (e.g., x = 1 face center)
     std::vector<Index> interface;
@@ -252,7 +252,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     // Constant speed on sphere surface
     auto speed = [](const Geometry::Point& p) -> Real { return 1.0; };
 
-    Models::Eikonal::FMM fmm(u, speed);
+    Rodin::Eikonal::FMM fmm(u, speed);
 
     // Set source at one point on the sphere (e.g., (1, 0, 0))
     std::vector<Index> interface;
@@ -323,7 +323,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     // Constant speed
     auto speed = [](const Geometry::Point& p) -> Real { return 1.0; };
 
-    Models::Eikonal::FMM fmm(u, speed);
+    Rodin::Eikonal::FMM fmm(u, speed);
 
     // Set source at center (0, 0, 0)
     std::vector<Index> interface;
@@ -388,7 +388,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
       return 1.0 + 10.0 * std::abs(x) + 1.0 * std::abs(y);  // Varies with position
     };
 
-    Models::Eikonal::FMM fmm(u, speed);
+    Rodin::Eikonal::FMM fmm(u, speed);
 
     // Set source at origin
     std::vector<Index> interface;
@@ -445,7 +445,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     // Constant speed
     auto speed = [](const Geometry::Point& p) -> Real { return 1.0; };
 
-    Models::Eikonal::FMM fmm(u, speed);
+    Rodin::Eikonal::FMM fmm(u, speed);
 
     // Set line source along x-axis: y = 0, x ∈ [-0.5, 0.5]
     std::vector<Index> interface;
@@ -521,7 +521,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     // Constant speed
     auto speed = [](const Geometry::Point& p) -> Real { return 1.0; };
 
-    Models::Eikonal::FMM fmm(u, speed);
+    Rodin::Eikonal::FMM fmm(u, speed);
 
     // Set circular ring source: radius = 0.5, centered at origin
     const Real ring_radius = 0.5;
@@ -614,7 +614,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     // Constant speed
     auto speed = [](const Geometry::Point& p) -> Real { return 1.0; };
 
-    Models::Eikonal::FMM fmm(u, speed);
+    Rodin::Eikonal::FMM fmm(u, speed);
 
     // Set interface to left boundary (x = 0)
     std::vector<Index> interface;
@@ -688,7 +688,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     // Constant speed
     auto speed = [](const Geometry::Point& p) -> Real { return 1.0; };
 
-    Models::Eikonal::FMM fmm(u, speed);
+    Rodin::Eikonal::FMM fmm(u, speed);
 
     // Set square interface in interior: [-0.2, 0.2] x [-0.2, 0.2]
     std::vector<Index> interface;
@@ -786,7 +786,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
       return (x < 0.0) ? 2.0 : 0.5;  // Fast left, slow right
     };
 
-    Models::Eikonal::FMM fmm(u, speed);
+    Rodin::Eikonal::FMM fmm(u, speed);
 
     // Set source at left boundary
     std::vector<Index> interface;

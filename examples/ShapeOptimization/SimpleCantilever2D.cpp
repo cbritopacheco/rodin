@@ -9,10 +9,9 @@
 #include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
 #include <Rodin/Variational/LinearElasticity.h>
-#include <RodinExternal/MMG.h>
+#include <Rodin/MMG.h>
 
 using namespace Rodin;
-using namespace Rodin::External;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 

@@ -26,6 +26,8 @@
 #include "Rodin/Variational/P1/ForwardDecls.h"
 #include "Rodin/Variational/H1/ForwardDecls.h"
 
+#define RODIN_IO_MEDIT_DEFAULT_POLYTOPE_ATTRIBUTE 0
+
 namespace Rodin::IO::MEDIT
 {
   /**

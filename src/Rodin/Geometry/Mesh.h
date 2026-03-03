@@ -26,7 +26,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/serialization/access.hpp>
 
-#include "Rodin/Math/PointMatrix.h"
+#include "Rodin/Pair.h"
 #include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Types.h"
 #include "Rodin/Math/Vector.h"
@@ -43,6 +43,7 @@
 #include "ForwardDecls.h"
 #include "Connectivity.h"
 #include "Point.h"
+#include "PointCloud.h"
 #include "Polytope.h"
 #include "PolytopeIterator.h"
 #include "PolytopeTransformation.h"
@@ -393,9 +394,9 @@ namespace Rodin::Geometry
        * @param[in] index Face index
        * @returns Attribute value
        */
-      Attribute getFaceAttribute(Index index) const
+      Optional<Attribute> getFaceAttribute(Index index) const
       {
-        return getAttribute(getDimension() - 1, index);
+        return this->getAttribute(getDimension() - 1, index);
       }
 
       /**
@@ -403,9 +404,9 @@ namespace Rodin::Geometry
        * @param[in] index Cell index
        * @returns Attribute value
        */
-      Attribute getCellAttribute(Index index) const
+      Optional<Attribute> getCellAttribute(Index index) const
       {
-        return getAttribute(getDimension(), index);
+        return this->getAttribute(getDimension(), index);
       }
 
       /**
@@ -692,7 +693,7 @@ namespace Rodin::Geometry
        * @param[in] index Polytope index
        * @returns Attribute value
        */
-      virtual Attribute getAttribute(size_t dimension, Index index) const = 0;
+      virtual Optional<Attribute> getAttribute(size_t dimension, Index index) const = 0;
 
       /**
        * @brief Sets attribute of a polytope.
@@ -700,7 +701,7 @@ namespace Rodin::Geometry
        * @param[in] attr New attribute value
        * @returns Reference to this mesh
        */
-      virtual MeshBase& setAttribute(const std::pair<size_t, Index>& p, Attribute attr) = 0;
+      virtual MeshBase& setAttribute(const std::pair<size_t, Index>& p, const Optional<Attribute>& attr) = 0;
 
       /**
        * @brief Gets reference to mesh connectivity.
@@ -792,7 +793,8 @@ namespace Rodin::Geometry
            * @brief Default constructor.
            */
           Builder()
-            : m_initialized(false)
+            : m_initialized(false),
+              m_nodes(0)
           {}
 
           virtual ~Builder() = default;
@@ -875,7 +877,7 @@ namespace Rodin::Geometry
           /**
            * @brief Sets the attribute of the given polytope.
            */
-          Builder& attribute(const std::pair<size_t, Index>& p, Attribute attr);
+          Builder& attribute(const std::pair<size_t, Index>& p, const Optional<Attribute>& attr);
 
           /**
            * @brief Adds polytope defined by the given vertices.
@@ -919,6 +921,18 @@ namespace Rodin::Geometry
             return polytope(Polytope::Type::Tetrahedron, std::forward<T>(vs));
           }
 
+          template <class T>
+          Builder& hexahedron(T&& vs)
+          {
+            return polytope(Polytope::Type::Hexahedron, std::forward<T>(vs));
+          }
+
+          template <class T>
+          Builder& wedge(T&& vs)
+          {
+            return polytope(Polytope::Type::Wedge, std::forward<T>(vs));
+          }
+
           /**
            * @brief Finalizes construction of the Mesh<Context::Local> object.
            */
@@ -929,14 +943,14 @@ namespace Rodin::Geometry
            * @param[in] vertices Point matrix containing vertex coordinates
            * @returns Reference to this builder
            */
-          Builder& setVertices(const Math::PointMatrix& vertices);
+          Builder& setVertices(const PointCloud& vertices);
 
           /**
            * @brief Sets the vertex coordinates (move).
            * @param[in] vertices Point matrix containing vertex coordinates
            * @returns Reference to this builder
            */
-          Builder& setVertices(Math::PointMatrix&& vertices);
+          Builder& setVertices(PointCloud&& vertices);
 
           /**
            * @brief Sets the mesh connectivity.
@@ -975,7 +989,7 @@ namespace Rodin::Geometry
           size_t m_sdim;
           size_t m_nodes;
 
-          Math::PointMatrix m_vertices;
+          PointCloud m_vertices;
           Connectivity<Context> m_connectivity;
 
           AttributeIndex m_attributes;
@@ -1136,27 +1150,35 @@ namespace Rodin::Geometry
       template <class BinaryPredicate>
       CCL ccl(const BinaryPredicate& p) const
       {
-        return ccl(getDimension(), p, [](const Polytope&) { return true; });
+        return this->ccl(getDimension(), p, [](const Polytope&) { return true; });
       }
 
       template <class BinaryPredicate>
       CCL ccl(size_t d, const BinaryPredicate& p) const
       {
-        return ccl(d, p, [](const Polytope&) { return true; });
+        return this->ccl(d, p, [](const Polytope&) { return true; });
       }
 
       template <class BinaryPredicate>
       CCL ccl(size_t d, const BinaryPredicate& p, Attribute attr) const
       {
-        return ccl(d, p,
+        return this->ccl(d, p,
           [attr](const Polytope& polytope) { return attr == polytope.getAttribute(); });
       }
 
       template <class BinaryPredicate>
       CCL ccl(size_t d, const BinaryPredicate& p, const FlatSet<Attribute>& attrs) const
       {
-        return ccl(d, p,
-          [&attrs](const Polytope& polytope) { return attrs.size() == 0 || attrs.contains(polytope.getAttribute()); });
+        return this->ccl(d, p,
+          [&attrs](const Polytope& polytope)
+          {
+            auto attr = polytope.getAttribute();
+            bool res = attrs.size() == 0;
+            if (attr)
+              return res || attrs.contains(*attr);
+            else
+              return res;
+          });
       }
 
       template <class BinaryPredicate, class UnitaryPredicate>
@@ -1271,17 +1293,17 @@ namespace Rodin::Geometry
       */
       virtual SubMesh<Context> keep(const FlatSet<Attribute>& attrs) const;
 
-      Mesh& trace(const Map<std::pair<Attribute, Attribute>, Attribute>& tmap)
+      Mesh& trace(const Map<Pair<Attribute, Attribute>, Attribute>& tmap)
       {
-        return trace(tmap, FlatSet<Attribute>{});
+        return this->trace(tmap, FlatSet<Attribute>{});
       }
 
-      Mesh& trace(const Map<std::pair<Attribute, Attribute>, Attribute>& tmap, Attribute attr)
+      Mesh& trace(const Map<Pair<Attribute, Attribute>, Attribute>& tmap, Attribute attr)
       {
-        return trace(tmap, FlatSet<Attribute>{ attr });
+        return this->trace(tmap, FlatSet<Attribute>{ attr });
       }
 
-      virtual Mesh& trace(const Map<std::pair<Attribute, Attribute>, Attribute>& tmap, const FlatSet<Attribute>& attrs);
+      virtual Mesh& trace(const Map<Pair<Attribute, Attribute>, Attribute>& tmap, const FlatSet<Attribute>& attrs);
 
       Mesh& trace(const Map<Attribute, Attribute>& tmap)
       {
@@ -1325,7 +1347,7 @@ namespace Rodin::Geometry
         return m_transformations;
       }
 
-      const Math::PointMatrix& getVertices() const
+      const PointCloud& getVertices() const
       {
         return m_vertices;
       }
@@ -1374,7 +1396,7 @@ namespace Rodin::Geometry
 
       virtual Polytope::Type getGeometry(size_t dimension, Index idx) const override;
 
-      virtual Attribute getAttribute(size_t dimension, Index index) const override;
+      virtual Optional<Attribute> getAttribute(size_t dimension, Index index) const override;
 
       virtual Connectivity<Context>& getConnectivity() override
       {
@@ -1388,7 +1410,7 @@ namespace Rodin::Geometry
 
       virtual Math::SpatialPoint getVertexCoordinates(Index idx) const override;
 
-      virtual Mesh& setAttribute(const std::pair<size_t, Index>&, Attribute attr) override;
+      virtual Mesh& setAttribute(const std::pair<size_t, Index>&, const Optional<Attribute>& attr) override;
 
       virtual Mesh& setVertexCoordinates(Index idx, Real xi, size_t i) override;
 
@@ -1416,7 +1438,7 @@ namespace Rodin::Geometry
     private:
       size_t m_sdim;
 
-      Math::PointMatrix m_vertices;
+      PointCloud m_vertices;
       Connectivity<Context> m_connectivity;
 
       AttributeIndex m_attributes;

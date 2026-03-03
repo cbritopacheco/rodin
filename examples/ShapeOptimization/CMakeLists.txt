@@ -4,7 +4,7 @@ target_link_libraries(SimpleCantilever2D
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational
-  Rodin::External::MMG
+  Rodin::MMG
   )
 
 add_executable(LevelSetCantilever2D LevelSetCantilever2D.cpp)
@@ -13,7 +13,7 @@ target_link_libraries(LevelSetCantilever2D
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational
-  Rodin::External::MMG
+  Rodin::MMG
   )
 
 add_executable(LevelSetCantilever3D LevelSetCantilever3D.cpp)
@@ -22,7 +22,7 @@ target_link_libraries(LevelSetCantilever3D
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational
-  Rodin::External::MMG
+  Rodin::MMG
   )
 
 # add_executable(LevelSetMast2D LevelSetMast2D.cpp)
@@ -31,7 +31,7 @@ target_link_libraries(LevelSetCantilever3D
 #   Rodin::Geometry
 #   Rodin::Solver
 #   Rodin::Variational
-#   Rodin::External::MMG
+#   Rodin::MMG
 #   )
 # 
 # add_executable(LevelSetArch2D LevelSetArch2D.cpp)
@@ -40,7 +40,7 @@ target_link_libraries(LevelSetCantilever3D
 #   Rodin::Geometry
 #   Rodin::Solver
 #   Rodin::Variational
-#   Rodin::External::MMG
+#   Rodin::MMG
 #   )
 
 # Commented out because it breaks CI
@@ -50,7 +50,7 @@ target_link_libraries(LevelSetCantilever3D
 #   Rodin::Geometry
 #   Rodin::Solver
 #   Rodin::Variational
-#   Rodin::External::MMG
+#   Rodin::MMG
 #   Eigen3::Eigen
 #   Spectra::Spectra
 #   )

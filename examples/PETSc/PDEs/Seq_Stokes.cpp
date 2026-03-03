@@ -411,6 +411,7 @@ int main(int argc, char** argv)
     p.getSolution().save("Stokes_pressure.gf");
 
 
+    u_e.save("Stokes_velocity_exact.gf");
 
     PrintVecStats("x_exact", xe);
     const double rel_res_exact = RelativeResidual(A, xe, b);

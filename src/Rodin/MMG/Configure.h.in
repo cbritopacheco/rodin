@@ -1,0 +1,45 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+#ifndef RODIN_RODINEXTERNAL_MMG_CONFIGURE_H
+#define RODIN_RODINEXTERNAL_MMG_CONFIGURE_H
+
+#include "Rodin/Configure.h"
+
+/**
+ * @file MMG/Configure.h.in
+ * @brief Header containing preprocessor directives for Rodin::MMG.
+ */
+
+namespace Rodin::MMG
+{
+  /**
+   * @brief Path to the ISCD Mshdist executable.
+   */
+  inline constexpr const char* ISCD_MSHDIST_EXECUTABLE =
+    "@RODIN_ISCD_MSHDIST_EXECUTABLE@";
+
+  inline constexpr const char* MSHDIST_EXECUTABLE =
+    "@RODIN_ISCD_MSHDIST_EXECUTABLE@";
+
+  /**
+   * @brief Path to the ISCD Mshdist executable.
+   */
+  inline constexpr const char* ISCD_ADVECTION_EXECUTABLE =
+    "@RODIN_ISCD_ADVECTION_EXECUTABLE@";
+
+  inline constexpr const char* ADVECTION_EXECUTABLE =
+    "@RODIN_ISCD_ADVECTION_EXECUTABLE@";
+
+  /**
+   * @brief Verbosity level for MMG console output.
+   *
+   * Ranges from -1 to INT_MAX. A higher number means more verbose output.
+   */
+  inline constexpr const int VERBOSITY_LEVEL = @RODIN_MMG_VERBOSITY_LEVEL@;
+}
+
+#endif

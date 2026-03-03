@@ -67,17 +67,20 @@ namespace Rodin::Assembly
             const Index idx = it->getIndex();
             if (shard.isGhost(d, idx))
               continue;
-            if (attrs.empty() || attrs.count(it->getAttribute()))
+            if (!attrs.empty())
             {
-              lfi.setPolytope(*it);
-              const auto& dofs = fes.getShard().getDOFs(d, idx);
-              for (PetscInt i = 0; i < dofs.size(); ++i)
-              {
-                const Index r = fes.getGlobalIndex(dofs[i]);
-                const PetscScalar v = lfi.integrate(i);
-                ierr = VecSetValue(res, r, v, ADD_VALUES);
-                assert(ierr == PETSC_SUCCESS);
-              }
+              const auto a = it->getAttribute();
+              if (!a || !attrs.count(*a))
+                continue;
+            }
+            lfi.setPolytope(*it);
+            const auto& dofs = fes.getShard().getDOFs(d, idx);
+            for (PetscInt i = 0; i < dofs.size(); ++i)
+            {
+              const Index r = fes.getGlobalIndex(dofs[i]);
+              const PetscScalar v = lfi.integrate(i);
+              ierr = VecSetValue(res, r, v, ADD_VALUES);
+              assert(ierr == PETSC_SUCCESS);
             }
           }
         }
@@ -160,21 +163,24 @@ namespace Rodin::Assembly
             const Index idx = it->getIndex();
             if (shard.isGhost(d, idx))
               continue;
-            if (attrs.empty() || attrs.count(it->getAttribute()))
+            if (!attrs.empty())
             {
-              bfi.setPolytope(*it);
-              const auto& rows = testFES.getShard().getDOFs(d, idx);
-              const auto& cols = trialFES.getShard().getDOFs(d, idx);
-              for (Index i = 0; i < rows.size(); ++i)
+              const auto a = it->getAttribute();
+              if (!a || !attrs.count(*a))
+                continue;
+            }
+            bfi.setPolytope(*it);
+            const auto& rows = testFES.getShard().getDOFs(d, idx);
+            const auto& cols = trialFES.getShard().getDOFs(d, idx);
+            for (Index i = 0; i < rows.size(); ++i)
+            {
+              const Index r = testFES.getGlobalIndex(rows[i]);
+              for (Index j = 0; j < cols.size(); ++j)
               {
-                const Index r = testFES.getGlobalIndex(rows[i]);
-                for (Index j = 0; j < cols.size(); ++j)
-                {
-                  const Index c = trialFES.getGlobalIndex(cols[j]);
-                  PetscScalar v = bfi.integrate(j, i);
-                  ierr = MatSetValue(res, r, c, v, ADD_VALUES);
-                  assert(ierr == PETSC_SUCCESS);
-                }
+                const Index c = trialFES.getGlobalIndex(cols[j]);
+                PetscScalar v = bfi.integrate(j, i);
+                ierr = MatSetValue(res, r, c, v, ADD_VALUES);
+                assert(ierr == PETSC_SUCCESS);
               }
             }
           }
@@ -319,8 +325,12 @@ namespace Rodin::Assembly
             if (shard.isGhost(d, idx))
               continue;
 
-            if (!attrs.empty() && !attrs.count(it->getAttribute()))
-              continue;
+            if (!attrs.empty())
+            {
+              const auto a = it->getAttribute();
+              if (!a || !attrs.count(*a))
+                continue;
+            }
 
             bfi.setPolytope(*it);
 
@@ -365,8 +375,12 @@ namespace Rodin::Assembly
             if (shard.isGhost(td, tidx))
               continue;
 
-            if (!testAttrs.empty() && !testAttrs.count(teIt->getAttribute()))
-              continue;
+            if (!testAttrs.empty())
+            {
+              const auto a = teIt->getAttribute();
+              if (!a || !testAttrs.count(*a))
+                continue;
+            }
 
             const auto& rowsDOF = testFES.getShard().getDOFs(td, tidx);
 
@@ -375,8 +389,12 @@ namespace Rodin::Assembly
               const size_t rd   = trIt->getDimension();
               const Index  ridx = trIt->getIndex();
 
-              if (!trialAttrs.empty() && !trialAttrs.count(trIt->getAttribute()))
-                continue;
+              if (!trialAttrs.empty())
+              {
+                const auto a = trIt->getAttribute();
+                if (!a || !trialAttrs.count(*a))
+                  continue;
+              }
 
               // NOTE: do NOT skip ghost trial entities here: they still contribute to
               // owned test rows, producing off-process columns in MatSetValue.
@@ -433,8 +451,12 @@ namespace Rodin::Assembly
             if (shard.isGhost(d, idx))
               continue;
 
-            if (!attrs.empty() && !attrs.count(it->getAttribute()))
-              continue;
+            if (!attrs.empty())
+            {
+              const auto a = it->getAttribute();
+              if (!a || !attrs.count(*a))
+                continue;
+            }
 
             lfi.setPolytope(*it);
 
@@ -699,6 +721,18 @@ namespace Rodin::Assembly
         ierr = VecZeroEntries(b);
         assert(ierr == PETSC_SUCCESS);
 
+        auto& x = axb.getSolution();
+        assert(x);
+        ierr = VecSetSizes(
+            x,
+            static_cast<PetscInt>(localCols),
+            static_cast<PetscInt>(ncols));
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecSetFromOptions(x);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecZeroEntries(x);
+        assert(ierr == PETSC_SUCCESS);
+
         // ------------------------
         // Assemble bilinear terms into A
         // - For each integrator, only assemble contributions associated to an owned "assembly entity":
@@ -731,8 +765,12 @@ namespace Rodin::Assembly
             if (shard.isGhost(d, idx))
               continue;
 
-            if (!attrs.empty() && !attrs.count(it->getAttribute()))
-              continue;
+            if (!attrs.empty())
+            {
+              const auto a = it->getAttribute();
+              if (!a || !attrs.count(*a))
+                continue;
+            }
 
             bfi.setPolytope(*it);
 
@@ -785,8 +823,12 @@ namespace Rodin::Assembly
             if (shard.isGhost(td, tidx))
               continue;
 
-            if (!testAttrs.empty() && !testAttrs.count(teIt->getAttribute()))
-              continue;
+            if (!testAttrs.empty())
+            {
+              const auto a = teIt->getAttribute();
+              if (!a || !testAttrs.count(*a))
+                continue;
+            }
 
             const auto& rows = vFES.getShard().getDOFs(td, tidx);
 
@@ -795,8 +837,12 @@ namespace Rodin::Assembly
               const size_t rd   = trIt->getDimension();
               const Index  ridx = trIt->getIndex();
 
-              if (!trialAttrs.empty() && !trialAttrs.count(trIt->getAttribute()))
-                continue;
+              if (!trialAttrs.empty())
+              {
+                const auto a = trIt->getAttribute();
+                if (!a || !trialAttrs.count(*a))
+                  continue;
+              }
 
               // do not skip ghost trial entity: off-proc columns are fine
               const auto& cols = uFES.getShard().getDOFs(rd, ridx);
@@ -852,8 +898,12 @@ namespace Rodin::Assembly
             if (shard.isGhost(d, idx))
               continue;
 
-            if (!attrs.empty() && !attrs.count(it->getAttribute()))
-              continue;
+            if (!attrs.empty())
+            {
+              const auto a = it->getAttribute();
+              if (!a || !attrs.count(*a))
+                continue;
+            }
 
             lfi.setPolytope(*it);
 
@@ -864,7 +914,7 @@ namespace Rodin::Assembly
               const PetscScalar val = static_cast<PetscScalar>(lfi.integrate(static_cast<PetscInt>(l)));
               if (val != PetscScalar(0))
               {
-                ierr = VecSetValue(b, I, val, ADD_VALUES);
+                ierr = VecSetValue(b, I, -val, ADD_VALUES);
                 assert(ierr == PETSC_SUCCESS);
               }
             }

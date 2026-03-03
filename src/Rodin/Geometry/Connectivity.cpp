@@ -187,6 +187,16 @@ namespace Rodin::Geometry
     return *this;
   }
 
+  Connectivity<Context::Local>& Connectivity<Context::Local>::discover(size_t d, size_t dp)
+  {
+    return this->compute(d, dp, Mode::Discover);
+  }
+
+  Connectivity<Context::Local>& Connectivity<Context::Local>::restrict(size_t d, size_t dp)
+  {
+    return this->compute(d, dp, Mode::Restrict);
+  }
+
   Connectivity<Context::Local>&
   Connectivity<Context::Local>::compute(size_t d, size_t dp, Mode mode)
   {
@@ -210,7 +220,7 @@ namespace Rodin::Geometry
     {
       if (d < dp)
       {
-        compute(dp, d).transpose(d, dp);
+        compute(dp, d, mode).transpose(d, dp);
       }
       else
       {
@@ -219,7 +229,7 @@ namespace Rodin::Geometry
           dpp = D;
         else
           dpp = 0;
-        compute(d, dpp).compute(dpp, dp).intersection(d, dp, dpp);
+        compute(d, dpp).compute(dpp, dp, mode).intersection(d, dp, dpp);
       }
     }
     m_dirty[d][dp] = false;

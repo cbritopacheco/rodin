@@ -5,7 +5,7 @@ target_link_libraries(RodinManufacturedAdvectionLagrangian2DTest
   GTest::gtest_main
   Rodin::Rodin
   Rodin::Variational
-  Rodin::Models::Advection
+  Rodin::Advection
 )
 gtest_discover_tests(RodinManufacturedAdvectionLagrangian2DTest
   PROPERTIES
@@ -19,7 +19,7 @@ target_link_libraries(RodinManufacturedAdvectionLagrangian3DTest
   GTest::gtest_main
   Rodin::Rodin
   Rodin::Variational
-  Rodin::Models::Advection
+  Rodin::Advection
 )
 gtest_discover_tests(RodinManufacturedAdvectionLagrangian3DTest
   PROPERTIES

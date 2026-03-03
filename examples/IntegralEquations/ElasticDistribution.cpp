@@ -9,12 +9,11 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
-#include <RodinExternal/MMG.h>
+#include <Rodin/MMG.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
-using namespace Rodin::External;
 
 const Real E = 100;
 const Real nu = 0.48;

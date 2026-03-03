@@ -7,7 +7,7 @@
 #include <gtest/gtest.h>
 
 #include "Rodin/Variational.h"
-#include "Rodin/Models/Eikonal/FMM.h"
+#include "Rodin/Eikonal/FMM.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -84,7 +84,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
 
     ASSERT_FALSE(interface.empty());
 
-    Models::Eikonal::FMM fmm(u, speed);
+    Rodin::Eikonal::FMM fmm(u, speed);
     fmm.seed(interface).solve();
 
     const Real tol = 5e-2;
@@ -112,13 +112,10 @@ namespace Rodin::Tests::Manufactured::Eikonal
     }
     ASSERT_FALSE(interface.empty());
 
-    Models::Eikonal::FMM fmm(u, speed);
+    Rodin::Eikonal::FMM fmm(u, speed);
 
     fmm.seed(interface);
     fmm.solve();
-
-    u.save("u.gf");
-    mesh.save("u.mesh");
 
     const Real tol = 9e-2;
     checkDistance(mesh, u, tol);

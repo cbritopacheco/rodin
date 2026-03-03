@@ -9,15 +9,13 @@
 #include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
 
-#include <RodinExternal/MMG.h>
+#include <Rodin/MMG.h>
 
 using namespace Rodin;
 using namespace Rodin::Math;
 using namespace Rodin::Solver;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
-
-using namespace Rodin::External;
 
 static constexpr Real hmax = 0.01; // Maximal size of a triangle's edge
 static constexpr Real hmin = 0.1 * hmax;

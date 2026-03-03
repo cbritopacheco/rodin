@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
+#include "Rodin/Serialization/Optional.h"
 
 #include "Rodin/Geometry/Mesh.h"
 

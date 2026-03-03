@@ -159,14 +159,16 @@ namespace Rodin::Variational
               for (auto& idx : inc)
               {
                 const auto& tracePolytope = mesh.getPolytope(meshDim - 1, idx);
-                if (traceDomain.count(tracePolytope->getAttribute()))
-                {
-                  Math::SpatialPoint rc;
-                  tracePolytope->getTransformation().inverse(rc, pc);
-                  const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
-                  interpolate(res, np);
-                  return;
-                }
+
+                const Optional<Geometry::Attribute> a = tracePolytope->getAttribute();
+                if (!a || !traceDomain.contains(*a)) // or traceDomain.count(*a)
+                  continue;
+
+                Math::SpatialPoint rc;
+                tracePolytope->getTransformation().inverse(rc, pc);
+                const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
+                interpolate(res, np);
+                return;
               }
               UndeterminedTraceDomainException(
                   *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()) << Alert::Raise;

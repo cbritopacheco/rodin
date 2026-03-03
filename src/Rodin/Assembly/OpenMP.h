@@ -206,7 +206,12 @@ namespace Rodin::Assembly
             for (Index i = 0; i < count; ++i)
             {
               if (!seq.filter(i)) continue;
-              if (!attrs.empty() && !attrs.count(mesh.getAttribute(d, i))) continue;
+              if (!attrs.empty())
+              {
+                const auto a = mesh.getAttribute(d, i); // Optional<Attribute>
+                if (!a || !attrs.contains(*a))
+                  continue;
+              }
 
               auto it = seq.getIterator(i);
               integrator->setPolytope(*it);
@@ -447,7 +452,11 @@ namespace Rodin::Assembly
             for (Index i = 0; i < count; ++i)
             {
               if (!seq.filter(i)) continue;
-              if (!attrs.empty() && !attrs.count(mesh.getAttribute(d, i))) continue;
+              if (!attrs.empty())
+              {
+                const auto a = mesh.getAttribute(d, i);
+                if (!a || !attrs.contains(*a)) continue; // or attrs.count(*a)==0
+              }
 
               auto it = seq.getIterator(i);
               lbfi->setPolytope(*it);
@@ -492,14 +501,22 @@ namespace Rodin::Assembly
             for (Index i = 0; i < count; ++i)
             {
               if (!testseq.filter(i)) continue;
-              if (!testAttrs.empty() && !testAttrs.count(mesh.getAttribute(d, i))) continue;
+              if (!testAttrs.empty())
+              {
+                const auto a = mesh.getAttribute(d, i);
+                if (!a || !testAttrs.contains(*a)) continue;
+              }
 
               auto teIt = testseq.getIterator(i);
               SequentialIteration trialseq{ mesh, gbfi->getTrialRegion() };
 
               for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
               {
-                if (!trialAttrs.empty() && !trialAttrs.count(trIt->getAttribute())) continue;
+                if (!trialAttrs.empty())
+                {
+                  const auto a = trIt->getAttribute(); // Optional<Attribute>
+                  if (!a || !trialAttrs.contains(*a)) continue; // or trialAttrs.count(*a)==0
+                }
 
                 gbfi->setPolytope(*trIt, *teIt);
 
@@ -606,7 +623,11 @@ namespace Rodin::Assembly
             for (Index i = 0; i < count; ++i)
             {
               if (!seq.filter(i)) continue;
-              if (!attrs.empty() && !attrs.count(mesh.getAttribute(d, i))) continue;
+              if (!attrs.empty())
+              {
+                const auto a = mesh.getAttribute(d, i);
+                if (!a || !attrs.contains(*a)) continue; // or attrs.count(*a)==0
+              }
 
               auto it = seq.getIterator(i);
               integrator->setPolytope(*it);
@@ -709,7 +730,11 @@ namespace Rodin::Assembly
           for (Index i = 0; i < faceCount; ++i)
           {
             if (!mesh.isBoundary(i)) continue;
-            if (!essBdr.empty() && !essBdr.count(mesh.getAttribute(faceDim, i))) continue;
+            if (!essBdr.empty())
+            {
+              const auto a = mesh.getAttribute(faceDim, i);
+              if (!a || !essBdr.contains(*a)) continue; // or essBdr.count(*a)==0
+            }
 
             const auto& fe = fes.getFiniteElement(faceDim, i);
             const auto& mapping = fes.getPullback({ faceDim, i }, value);
@@ -904,7 +929,11 @@ namespace Rodin::Assembly
               for (Index p = 0; p < count; ++p)
               {
                 if (!seq.filter(p)) continue;
-                if (!attrs.empty() && !attrs.count(mesh.getAttribute(d, p))) continue;
+                if (!attrs.empty())
+                {
+                  const auto a = mesh.getAttribute(d, p);
+                  if (!a || !attrs.contains(*a)) continue; // or attrs.count(*a)==0
+                }
 
                 auto it = seq.getIterator(p);
                 integrator->setPolytope(*it);
@@ -950,7 +979,11 @@ namespace Rodin::Assembly
               for (Index te = 0; te < tcount; ++te)
               {
                 if (!testseq.filter(te)) continue;
-                if (!testAttrs.empty() && !testAttrs.count(mesh.getAttribute(td, te))) continue;
+                if (!testAttrs.empty())
+                {
+                  const auto a = mesh.getAttribute(td, te);
+                  if (!a || !testAttrs.contains(*a)) continue; // or attrs.count(*a)==0
+                }
 
                 const auto& rowsDOF = testFES.getDOFs(td, te);
 
@@ -960,7 +993,11 @@ namespace Rodin::Assembly
                 for (Index tr = 0; tr < rcount; ++tr)
                 {
                   if (!trialseq.filter(tr)) continue;
-                  if (!trialAttrs.empty() && !trialAttrs.count(mesh.getAttribute(rd, tr))) continue;
+                  if (!trialAttrs.empty())
+                  {
+                    const auto a = mesh.getAttribute(rd, tr);
+                    if (!a || !trialAttrs.contains(*a)) continue; // or attrs.count(*a)==0
+                  }
 
                   const auto& colsDOF = trialFES.getDOFs(rd, tr);
 
@@ -1012,7 +1049,11 @@ namespace Rodin::Assembly
               for (Index p = 0; p < count; ++p)
               {
                 if (!seq.filter(p)) continue;
-                if (!attrs.empty() && !attrs.count(mesh.getAttribute(d, p))) continue;
+                if (!attrs.empty())
+                {
+                  const auto a = mesh.getAttribute(d, p);
+                  if (!a || !attrs.contains(*a)) continue; // or attrs.count(*a)==0
+                }
 
                 auto it = seq.getIterator(p);
                 integrator->setPolytope(*it);
@@ -1104,7 +1145,11 @@ namespace Rodin::Assembly
               for (Index p = 0; p < count; ++p)
               {
                 if (!seq.filter(p)) continue;
-                if (!attrs.empty() && !attrs.count(mesh.getAttribute(d, p))) continue;
+                if (!attrs.empty())
+                {
+                  const auto a = mesh.getAttribute(d, p);
+                  if (!a || !attrs.contains(*a)) continue; // or attrs.count(*a)==0
+                }
 
                 auto it = seq.getIterator(p);
                 integrator->setPolytope(*it);
@@ -1150,7 +1195,11 @@ namespace Rodin::Assembly
               for (Index te = 0; te < tcount; ++te)
               {
                 if (!testseq.filter(te)) continue;
-                if (!testAttrs.empty() && !testAttrs.count(mesh.getAttribute(td, te))) continue;
+                if (!testAttrs.empty())
+                {
+                  const auto a = mesh.getAttribute(td, te);
+                  if (!a || !testAttrs.contains(*a)) continue; // or testAttrs.count(*a)==0
+                }
 
                 const auto& rowsDOF = testFES.getDOFs(td, te);
 
@@ -1160,7 +1209,11 @@ namespace Rodin::Assembly
                 for (Index tr = 0; tr < rcount; ++tr)
                 {
                   if (!trialseq.filter(tr)) continue;
-                  if (!trialAttrs.empty() && !trialAttrs.count(mesh.getAttribute(rd, tr))) continue;
+                  if (!trialAttrs.empty())
+                  {
+                    const auto a = mesh.getAttribute(rd, tr);
+                    if (!a || !trialAttrs.contains(*a)) continue;
+                  }
 
                   const auto& colsDOF = trialFES.getDOFs(rd, tr);
 
@@ -1212,7 +1265,11 @@ namespace Rodin::Assembly
               for (Index p = 0; p < count; ++p)
               {
                 if (!seq.filter(p)) continue;
-                if (!attrs.empty() && !attrs.count(mesh.getAttribute(d, p))) continue;
+                if (!attrs.empty())
+                {
+                  const auto a = mesh.getAttribute(d, p);
+                  if (!a || !attrs.contains(*a)) continue;
+                }
 
                 auto it = seq.getIterator(p);
                 integrator->setPolytope(*it);
@@ -1266,7 +1323,7 @@ namespace Rodin::Assembly
       OpenMP* copy() const noexcept override { return new OpenMP(*this); }
 
     private:
-      std::optional<size_t> m_threadCount;
+      Optional<size_t> m_threadCount;
   };
 
   template <class LinearSystem, class U1, class U2, class U3, class ... Us>
@@ -1487,7 +1544,11 @@ namespace Rodin::Assembly
                 for (Index p = 0; p < count; ++p)
                 {
                   if (!seq.filter(p)) continue;
-                  if (!attrs.empty() && !attrs.count(mesh.getAttribute(d, p))) continue;
+                  if (!attrs.empty())
+                  {
+                    const auto a = mesh.getAttribute(d, p);
+                    if (!a || !attrs.contains(*a)) continue;
+                  }
 
                   auto it = seq.getIterator(p);
                   integrator->setPolytope(*it);
@@ -1563,7 +1624,11 @@ namespace Rodin::Assembly
                 for (Index te = 0; te < tcount; ++te)
                 {
                   if (!testseq.filter(te)) continue;
-                  if (!testAttrs.empty() && !testAttrs.count(mesh.getAttribute(td, te))) continue;
+                  if (!testAttrs.empty())
+                  {
+                    const auto a = mesh.getAttribute(td, te);
+                    if (!a || !testAttrs.contains(*a)) continue;
+                  }
 
                   const auto& rows = vFES.getDOFs(td, te);
 
@@ -1573,7 +1638,11 @@ namespace Rodin::Assembly
                   for (Index tr = 0; tr < rcount; ++tr)
                   {
                     if (!trialseq.filter(tr)) continue;
-                    if (!trialAttrs.empty() && !trialAttrs.count(mesh.getAttribute(rd, tr))) continue;
+                    if (!trialAttrs.empty())
+                    {
+                      const auto a = mesh.getAttribute(rd, tr);
+                      if (!a || !trialAttrs.contains(*a)) continue;
+                    }
 
                     const auto& cols = uFES.getDOFs(rd, tr);
 
@@ -1635,7 +1704,11 @@ namespace Rodin::Assembly
               for (Index p = 0; p < count; ++p)
               {
                 if (!seq.filter(p)) continue;
-                if (!attrs.empty() && !attrs.count(mesh.getAttribute(d, p))) continue;
+                if (!attrs.empty())
+                {
+                  const auto a = mesh.getAttribute(d, p);
+                  if (!a || !attrs.contains(*a)) continue;
+                }
 
                 auto it = seq.getIterator(p);
                 integrator->setPolytope(*it);
@@ -1750,7 +1823,7 @@ namespace Rodin::Assembly
       OpenMP* copy() const noexcept override { return new OpenMP(*this); }
 
     private:
-      std::optional<size_t> m_threadCount;
+      Optional<size_t> m_threadCount;
   };
 }
 

@@ -54,7 +54,6 @@ add_subdirectory(IO)
 add_subdirectory(Test)
 add_subdirectory(Alert)
 add_subdirectory(Solver)
-add_subdirectory(Models)
 add_subdirectory(Utility)
 add_subdirectory(Context)
 add_subdirectory(Threads)
@@ -63,6 +62,12 @@ add_subdirectory(Assembly)
 add_subdirectory(Variational)
 add_subdirectory(FormLanguage)
 add_subdirectory(Serialization)
+
+add_subdirectory(Advection)
+add_subdirectory(Eikonal)
+
+add_subdirectory(MMG)
+
 
 if (RODIN_WITH_PLOT)
   add_subdirectory(Plot)

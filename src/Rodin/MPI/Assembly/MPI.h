@@ -84,25 +84,29 @@ namespace Rodin::Assembly
         {
           if (shard.isGhost(faceDim, i))
             continue;
-          if (shard.isBoundary(i))
+          if (!shard.isBoundary(i))
+            continue;
+
+          if (!essBdr.empty())
           {
-            if (essBdr.size() == 0 || essBdr.count(shard.getAttribute(faceDim, i)))
+            const auto a = shard.getAttribute(faceDim, i); // Optional<Attribute>
+            if (!a || !essBdr.contains(*a))
+              continue;
+          }
+
+          const auto& fe = fes.getShard().getFiniteElement(faceDim, i);
+          const auto& mapping = fes.getShard().getPullback({ faceDim, i }, value);
+
+          for (Index local = 0; local < fe.getCount(); ++local)
+          {
+            const Index global =
+              fes.getGlobalIndex(fes.getShard().getGlobalIndex({ faceDim, i }, local));
+
+            auto it = res.find(global);
+            if (it == res.end())
             {
-              const auto& fe = fes.getShard().getFiniteElement(faceDim, i);
-              const auto& mapping =
-                fes.getShard().getPullback({ faceDim, i }, value);
-              for (Index local = 0; local < fe.getCount(); local++)
-              {
-                const Index global = fes.getGlobalIndex(
-                    fes.getShard().getGlobalIndex({ faceDim, i }, local));
-                auto find = res.find(global);
-                if (find == res.end())
-                {
-                  const auto& lf = fe.getLinearForm(local);
-                  const auto s = lf(mapping);
-                  res.emplace_hint(find, global, s);
-                }
-              }
+              const auto s = fe.getLinearForm(local)(mapping);
+              res.emplace_hint(it, global, s);
             }
           }
         }

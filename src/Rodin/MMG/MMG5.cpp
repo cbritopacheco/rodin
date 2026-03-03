@@ -1,0 +1,990 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+#include <boost/range/adaptor/indexed.hpp>
+
+#include "Rodin/Alert.h"
+#include "Rodin/IO/MeshLoader.h"
+
+#include "Mesh.h"
+#include "libmmg3d.h"
+#include "mmg2d/libmmg2d.h"
+
+#include "MMG5.h"
+
+namespace Rodin::MMG
+{
+  MMG5::MMG5()
+    : m_ridgeDetection(true)
+  {}
+
+  MMG5_pMesh MMG5::createMesh(size_t version, size_t dim, Optional<size_t> spaceDim)
+  {
+    MMG5_pMesh res;
+    MMG5_SAFE_CALLOC(res, 1, MMG5_Mesh,
+      MMG5Exception(__func__) << "Failed to allocate memory for the mesh." << Alert::Raise);
+    assert(dim > 0);
+    if (!spaceDim)
+      spaceDim = dim;
+    assert(spaceDim > 0);
+    const bool isSurface = (*spaceDim - 1) == dim;
+    assert(isSurface || (dim == *spaceDim));
+    if (isSurface)
+    {
+      MMGS_Set_commonFunc();
+      MMGS_Init_parameters(res);
+    }
+    else if (dim == 2)
+    {
+      MMG2D_Set_commonFunc();
+      MMG2D_Init_parameters(res);
+    }
+    else if (dim == 3)
+    {
+      MMG3D_Set_commonFunc();
+      MMG3D_Init_parameters(res);
+    }
+    else
+    {
+      MMG5Exception(__func__) << "Unhandled case." << Alert::Raise;
+      return nullptr;
+    }
+    res->np = 0;
+    res->npmax = std::max({MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
+    res->ver = version;
+    res->dim = *spaceDim;
+    res->info.imprim = getMMGVerbosityLevel();
+    return res;
+  }
+
+  bool MMG5::isSurfaceMesh(const MMG5_pMesh mesh)
+  {
+    assert(mesh->dim >= 2);
+    switch (mesh->dim)
+    {
+      case 2:
+        return mesh->nt == 0;
+      case 3:
+        return mesh->ne == 0;
+      default:
+        return false;
+    }
+  }
+
+  void MMG5::copyMesh(const MMG5_pMesh src, MMG5_pMesh dst)
+  {
+    assert(src);
+    assert(dst);
+
+    // Copy all non-pointer fields
+    *dst = *src;
+
+    // Fields which have been deprecated (or seem to have anyways)
+    dst->ipar = nullptr;
+
+    // int* : mesh->adja
+    if (src->adja)
+    {
+      MMG5_SAFE_CALLOC(dst->adja, 4 * src->ne + 5, int, /* No op */);
+      std::copy(src->adja, src->adja + 4 * src->ne + 5, dst->adja);
+    }
+    else
+      dst->adja = nullptr;
+
+    // int* : mesh->adjt
+    if (src->adjt)
+    {
+      MMG5_SAFE_CALLOC(dst->adjt, 3 * src->nt + 4, int, /* No op */);
+      std::copy(
+        src->adjt, src->adjt + 3 * src->nt + 4,
+        dst->adjt);
+    }
+    else
+      dst->adjt = nullptr;
+
+    // int* : mesh->adjapr
+    if (src->adjapr)
+    {
+      MMG5_SAFE_CALLOC(dst->adjapr, 5 * src->nprism + 6, int, /* No op */);
+      std::copy(
+        src->adjapr, src->adjapr + 5 * src->nprism + 6,
+        dst->adjapr);
+    }
+    else
+      dst->adjapr = nullptr;
+
+    // int* : mesh->adjq
+    if (src->adjq)
+    {
+      MMG5_SAFE_CALLOC(dst->adjq, 4 * src->nquad + 5, int, /* No op */);
+      std::copy(
+        src->adjq, src->adjq + 4 * src->nquad + 5,
+        dst->adjq);
+    }
+    else
+      dst->adjq = nullptr;
+
+    // MMG5_pPoint : mesh->point
+    if (src->point)
+    {
+      /* Why MMG fields are 1-indexed is beyond me, but it does not pose so much
+      * difficulty. We will copy from the 0-index, if it contains garbage then
+      * it should not matter because MMG code should only access memory from the
+      * 1-index.
+      */
+      MMG5_SAFE_CALLOC(dst->point, src->np + 1, MMG5_Point, /* No op */);
+      std::copy(src->point, src->point + src->np + 1, dst->point);
+    }
+    else
+      dst->point = nullptr;
+
+    // MMG5_pxPoint : mesh->xpoint
+    if (src->xpoint)
+    {
+      MMG5_SAFE_CALLOC(dst->xpoint, src->xp + 1, MMG5_xPoint, /* No op */);
+      std::copy(src->xpoint, src->xpoint + src->xp + 1, dst->xpoint);
+    }
+    else
+      dst->xpoint = nullptr;
+
+    // MMG5_pTetra : mesh->tetra
+    if (src->tetra)
+    {
+      MMG5_SAFE_CALLOC(dst->tetra, src->ne + 1, MMG5_Tetra, /* No op */);
+      std::copy(src->tetra, src->tetra + src->ne + 1, dst->tetra);
+    }
+    else
+      dst->tetra = nullptr;
+
+    // MMG5_pxTetra : mesh->xtetra
+    if (src->tetra)
+    {
+      MMG5_SAFE_CALLOC(dst->xtetra, src->xt + 1, MMG5_xTetra, /* No op */);
+      std::copy(src->xtetra, src->xtetra + src->xt + 1, dst->xtetra);
+    }
+    else
+      dst->xtetra = nullptr;
+
+    // MMG5_pPrism : mesh->prism
+    if (src->prism)
+    {
+      MMG5_SAFE_CALLOC(dst->prism, src->nprism + 1, MMG5_Prism, /* No op */);
+      std::copy(src->prism, src->prism + src->nprism + 1, dst->prism);
+    }
+    else
+      dst->prism = nullptr;
+
+    // MMG5_pxprism : mesh->xprism
+    if (src->xprism)
+    {
+      MMG5_SAFE_CALLOC(dst->xprism, src->nprism + 1, MMG5_xPrism, /* No op */);
+      std::copy(src->xprism, src->xprism + src->nprism + 1, dst->xprism);
+    }
+    else
+      dst->xprism = nullptr;
+
+    // MMG5_pTria : mesh->tria
+    if (src->tria)
+    {
+      MMG5_SAFE_CALLOC(dst->tria, src->nt + 1, MMG5_Tria, /* No op */);
+      std::copy(src->tria, src->tria + src->nt + 1, dst->tria);
+    }
+    else
+      dst->tria = nullptr;
+
+    // MMG5_pQuad : mesh->quadra
+    if (src->quadra)
+    {
+      MMG5_SAFE_CALLOC(dst->quadra, src->nquad + 1, MMG5_Quad, /* No op */);
+      std::copy(src->quadra, src->quadra + src->nquad + 1, dst->quadra);
+    }
+    else
+      dst->quadra = nullptr;
+
+    // MMG5_pEdge : mesh->edge
+    if (src->edge)
+    {
+      MMG5_SAFE_CALLOC(dst->edge, src->na + 1, MMG5_Edge, /* No op */);
+      std::copy(src->edge, src->edge + src->na + 1, dst->edge);
+    }
+    else
+      dst->edge = nullptr;
+
+    // MMG5_HGeom : mesh->htab
+    dst->htab = src->htab;
+
+    // MMG5_hgeom : mesh->htab.geom
+    if (src->htab.geom)
+    {
+      MMG5_SAFE_CALLOC(dst->htab.geom, src->htab.max + 1, MMG5_hgeom, /* No op */);
+      std::copy(src->htab.geom, src->htab.geom + src->htab.max + 1, dst->htab.geom);
+    }
+    else
+      dst->htab.geom = nullptr;
+
+    // MMG5_Info : mesh->info
+    dst->info = src->info;
+
+    // MMG5_Par : mesh->par
+    if (src->info.par)
+    {
+      MMG5_SAFE_CALLOC(dst->info.par, src->info.npar, MMG5_Par, /* No op */);
+      std::copy(src->info.par, src->info.par + src->info.npar, dst->info.par);
+    }
+    else
+      dst->info.par = nullptr;
+
+    // int* : mesh->info.br
+    if (src->info.br)
+    {
+      MMG5_SAFE_CALLOC(dst->info.br, src->info.nbr, int, /* No op */);
+      std::copy(src->info.br, src->info.br + src->info.nbr, dst->info.br);
+    }
+    else
+      dst->info.br = nullptr;
+
+    // MMG5_Mat : mesh->info.mat
+    if (src->info.mat)
+    {
+      MMG5_SAFE_CALLOC(dst->info.mat, src->info.nmat, MMG5_Mat, /* No op */);
+      std::copy(src->info.mat, src->info.mat + src->info.nmat, dst->info.mat);
+    }
+    else
+      dst->info.mat = nullptr;
+
+    // MMG5_Info : mesh->info.invmat.lookup
+    if (src->info.invmat.lookup)
+    {
+      MMG5_SAFE_CALLOC(dst->info.invmat.lookup, src->info.invmat.size, int, /* No op */);
+      std::copy(
+        src->info.invmat.lookup,
+        src->info.invmat.lookup + src->info.invmat.size,
+        dst->info.invmat.lookup
+        );
+    }
+    else
+      dst->info.invmat.lookup = nullptr;
+
+    // char* : mesh->namein
+    MMG5_SAFE_CALLOC(dst->namein, std::strlen(src->namein), char, /* No op */);
+    std::strcpy(dst->namein, src->namein);
+
+    // char* : mesh->nameout
+    MMG5_SAFE_CALLOC(dst->nameout, std::strlen(src->nameout), char, /* No op */);
+    std::strcpy(dst->nameout, src->nameout);
+  }
+
+  MMG5_pSol MMG5::createSolution(MMG5_pMesh mesh, size_t vdim)
+  {
+    assert(mesh);
+    if (vdim < 1 || vdim > 3)
+      return nullptr;
+    MMG5_pSol res = nullptr;
+    MMG5_SAFE_CALLOC(res, 1, MMG5_Sol,
+      MMG5Exception(__func__) << "Failed to allocate memory for MMG5_pSol." << Alert::Raise);
+    res->ver  = mesh->ver;
+    res->size = vdim;
+    if (vdim == 1)
+      res->type = MMG5_Scalar;
+    else
+      res->type = MMG5_Vector;
+    res->dim = mesh->dim;
+    res->np  = mesh->np;
+    res->npi = 0;
+    res->npmax = mesh->npmax;
+    if (res->np)
+    {
+      // So (res->size + 1) * (res->np + 1) seems to work for most
+      // applications
+      MMG5_SAFE_CALLOC(res->m, (res->size + 1) * (res->npmax + 1), Real,
+        MMG5Exception(__func__) << "Failed to allocate memory for MMG5_pSol->m" << Alert::Raise);
+    }
+    else
+    {
+      res->m = nullptr;
+    }
+
+    return res;
+  }
+
+MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
+{
+  bool isSurface = src.isSurface();
+  assert(isSurface || (src.getSpaceDimension() == src.getDimension()));
+
+  MMG5_pMesh res = createMesh(
+      s_meshVersionFormatted, src.getDimension(), src.getSpaceDimension());
+
+  res->npi = 0;
+  res->nai = 0;
+  res->nti = 0;
+  res->nei = 0;
+  res->xp  = 0;
+
+  // Always convert vertices
+  res->np = src.getVertexCount();
+
+  // Remaps (Rodin index -> MMG dense 1-based index; 0 => filtered out / not present)
+  std::vector<Index> edgeRemap; // for segments (surface/2D/3D)
+  std::vector<Index> triRemap;  // for 3D boundary triangles (if filtered)
+
+  if (isSurface) // Use MMGS
+  {
+    // Always convert cells (triangles)
+    res->nt = src.getCellCount();
+
+    // Only convert edges (segments) if they have an attribute
+    {
+      size_t na = 0;
+      for (auto it = src.getFace(); !it.end(); ++it)
+        if ((*it).getAttribute().has_value())
+          ++na;
+      res->na = na;
+
+      edgeRemap.assign(src.getFaceCount(), 0);
+    }
+
+    res->nti   = res->nt;
+    res->npi   = res->np;
+    res->nquad = 0;
+
+    MMGS_Set_commonFunc();
+    if (!MMGS_zaldy(res))
+      MMG5Exception(__func__) << "Memory allocation for MMG5_pMesh failed." << Alert::Raise;
+
+    // Copy points (always)
+    for (auto it = src.getVertex(); !it.end(); ++it)
+    {
+      const auto& vertex = *it;
+      assert(vertex.getGeometry() == Geometry::Polytope::Type::Point);
+      const Index i = vertex.getIndex() + 1;
+      const auto& coords = vertex.getCoordinates();
+      for (size_t d = 0; d < src.getSpaceDimension(); d++)
+        res->point[i].c[d] = coords[d];
+      res->point[i].ref = vertex.getAttribute().value_or(0);
+    }
+
+    // Copy edges (only attributed) + dense indexing
+    Index mmgEdge = 0;
+    for (auto it = src.getFace(); !it.end(); ++it)
+    {
+      const auto& face = *it;
+      assert(face.getGeometry() == Geometry::Polytope::Type::Segment);
+
+      if (!face.getAttribute().has_value())
+        continue;
+
+      const Index old = face.getIndex();
+      const Index i = ++mmgEdge; // 1..res->na
+      edgeRemap[old] = i;
+
+      const auto& vertices = face.getVertices();
+      res->edge[i].a = vertices[0] + 1;
+      res->edge[i].b = vertices[1] + 1;
+      res->edge[i].ref = *face.getAttribute();
+    }
+
+    // Copy triangles (cells) (always)
+    for (auto it = src.getCell(); !it.end(); ++it)
+    {
+      const auto& cell = *it;
+      const Index i = cell.getIndex() + 1;
+      assert(cell.getGeometry() == Geometry::Polytope::Type::Triangle);
+      MMG5_pTria pt = &res->tria[i];
+      const auto& vertices = cell.getVertices();
+      pt->v[0] = vertices[0] + 1;
+      pt->v[1] = vertices[1] + 1;
+      pt->v[2] = vertices[2] + 1;
+      pt->ref = cell.getAttribute().value_or(0);
+    }
+  }
+  else if (src.getDimension() == 2) // Use MMG2D
+  {
+    // Always convert cells (triangles)
+    res->nt = src.getCellCount();
+
+    // Only convert edges (segments) if they have an attribute
+    {
+      size_t na = 0;
+      for (auto it = src.getFace(); !it.end(); ++it)
+        if ((*it).getAttribute().has_value())
+          ++na;
+      res->na = na;
+
+      edgeRemap.assign(src.getFaceCount(), 0);
+    }
+
+    MMG2D_Set_commonFunc();
+    if (!MMG2D_zaldy(res))
+      MMG5Exception(__func__) << "Memory allocation for MMG5_pMesh failed." << Alert::Raise;
+
+    // Copy points (always)
+    for (auto it = src.getVertex(); !it.end(); ++it)
+    {
+      const auto& vertex = *it;
+      assert(vertex.getGeometry() == Geometry::Polytope::Type::Point);
+      const Index i = vertex.getIndex() + 1;
+      const auto& coords = vertex.getCoordinates();
+      for (size_t d = 0; d < src.getSpaceDimension(); d++)
+        res->point[i].c[d] = coords[d];
+      res->point[i].ref = vertex.getAttribute().value_or(0);
+      res->point[i].tag = MG_NUL;
+    }
+
+    // Copy edges (only attributed) + dense indexing
+    Index mmgEdge = 0;
+    for (auto it = src.getFace(); !it.end(); ++it)
+    {
+      const auto& face = *it;
+      assert(face.getGeometry() == Geometry::Polytope::Type::Segment);
+
+      if (!face.getAttribute().has_value())
+        continue;
+
+      const Index old = face.getIndex();
+      const Index i = ++mmgEdge; // 1..res->na
+      edgeRemap[old] = i;
+
+      const auto& vertices = face.getVertices();
+      res->edge[i].a = vertices[0] + 1;
+      res->edge[i].b = vertices[1] + 1;
+      res->edge[i].ref = *face.getAttribute();
+      res->edge[i].tag |= MG_REF + MG_BDY;
+    }
+
+    // Copy triangles with correct orientation (cells always)
+    if (src.getCellCount() == 0)
+    {
+      for (size_t i = 1; i <= res->np; i++)
+        res->point[i].tag &= ~MG_NUL;
+    }
+    else
+    {
+      for (auto it = src.getCell(); !it.end(); ++it)
+      {
+        const auto& cell = *it;
+        const Index i = cell.getIndex() + 1;
+        assert(cell.getGeometry() == Geometry::Polytope::Type::Triangle);
+
+        MMG5_pTria pt = &res->tria[i];
+        const auto& vertices = cell.getVertices();
+        pt->v[0] = vertices[0] + 1;
+        pt->v[1] = vertices[1] + 1;
+        pt->v[2] = vertices[2] + 1;
+
+        pt->ref = cell.getAttribute().value_or(0);
+
+        res->point[pt->v[0]].tag &= ~MG_NUL;
+        res->point[pt->v[1]].tag &= ~MG_NUL;
+        res->point[pt->v[2]].tag &= ~MG_NUL;
+
+        pt->edg[0] = 0;
+        pt->edg[1] = 0;
+        pt->edg[2] = 0;
+
+        auto orientation = MMG2D_quickarea(
+            res->point[pt->v[0]].c,
+            res->point[pt->v[1]].c,
+            res->point[pt->v[2]].c);
+
+        if (orientation < 0)
+        {
+          auto tmp = pt->v[2];
+          pt->v[2] = pt->v[1];
+          pt->v[1] = tmp;
+        }
+      }
+    }
+  }
+  else if (src.getDimension() == 3) // Use MMG3D
+  {
+    constexpr size_t edgeDim = 1;
+
+    // Always convert cells (tets)
+    res->ne = src.getCellCount();
+
+    // Only convert edges (segments) if they have an attribute
+    {
+      const auto rodinEdgeCount = src.getPolytopeCount(edgeDim);
+      size_t na = 0;
+      for (auto it = src.getPolytope(edgeDim); !it.end(); ++it)
+        if ((*it).getAttribute().has_value())
+          ++na;
+      res->na = na;
+
+      edgeRemap.assign(rodinEdgeCount, 0);
+    }
+
+    // Only convert boundary triangles if they have an attribute
+    {
+      size_t nt = 0;
+      for (auto it = src.getFace(); !it.end(); ++it)
+        if ((*it).getAttribute().has_value())
+          ++nt;
+      res->nt = nt;
+
+      triRemap.assign(src.getFaceCount(), 0);
+    }
+
+    MMG3D_Set_commonFunc();
+    if (!MMG3D_zaldy(res))
+      MMG5Exception(__func__) << "Memory allocation for MMG5_pMesh failed." << Alert::Raise;
+
+    // Copy points (always)
+    for (auto it = src.getVertex(); !it.end(); ++it)
+    {
+      const auto& vertex = *it;
+      assert(vertex.getGeometry() == Geometry::Polytope::Type::Point);
+      const Index i = vertex.getIndex() + 1;
+      const auto& coords = vertex.getCoordinates();
+      for (size_t d = 0; d < src.getSpaceDimension(); d++)
+        res->point[i].c[d] = coords[d];
+      res->point[i].ref = vertex.getAttribute().value_or(0);
+      res->point[i].tag = MG_NUL;
+    }
+
+    // Copy edges (only attributed) + dense indexing
+    Index mmgEdge = 0;
+    for (auto it = src.getPolytope(edgeDim); !it.end(); ++it)
+    {
+      const auto& segment = *it;
+      assert(segment.getGeometry() == Geometry::Polytope::Type::Segment);
+
+      if (!segment.getAttribute().has_value())
+        continue;
+
+      const Index old = segment.getIndex();
+      const Index i = ++mmgEdge; // 1..res->na
+      if (old >= 0 && (size_t)old < edgeRemap.size())
+        edgeRemap[old] = i;
+
+      const auto& vertices = segment.getVertices();
+      res->edge[i].a = vertices[0] + 1;
+      res->edge[i].b = vertices[1] + 1;
+      res->edge[i].ref = *segment.getAttribute();
+      res->edge[i].tag |= MG_REF;
+    }
+
+    // Copy triangles (only attributed) + dense indexing
+    Index mmgTri = 0;
+    for (auto it = src.getFace(); !it.end(); ++it)
+    {
+      const auto& face = *it;
+      assert(face.getGeometry() == Geometry::Polytope::Type::Triangle);
+
+      if (!face.getAttribute().has_value())
+        continue;
+
+      const Index old = face.getIndex();
+      const Index i = ++mmgTri; // 1..res->nt
+      if (old >= 0 && (size_t)old < triRemap.size())
+        triRemap[old] = i;
+
+      MMG5_pTria pt = &res->tria[i];
+      const auto& vertices = face.getVertices();
+      pt->v[0] = vertices[0] + 1;
+      pt->v[1] = vertices[1] + 1;
+      pt->v[2] = vertices[2] + 1;
+      pt->ref = *face.getAttribute();
+    }
+
+    // Copy tetrahedra with correct orientation (cells always)
+    for (auto it = src.getCell(); !it.end(); ++it)
+    {
+      const auto& cell = *it;
+      const Index i = cell.getIndex() + 1;
+      assert(cell.getGeometry() == Geometry::Polytope::Type::Tetrahedron);
+
+      MMG5_pTetra pt = &res->tetra[i];
+      const auto& vertices = cell.getVertices();
+      pt->v[0] = vertices[0] + 1;
+      pt->v[1] = vertices[1] + 1;
+      pt->v[2] = vertices[2] + 1;
+      pt->v[3] = vertices[3] + 1;
+
+      res->point[pt->v[0]].tag &= ~MG_NUL;
+      res->point[pt->v[1]].tag &= ~MG_NUL;
+      res->point[pt->v[2]].tag &= ~MG_NUL;
+      res->point[pt->v[3]].tag &= ~MG_NUL;
+
+      pt->ref = cell.getAttribute().value_or(0);
+
+      if (MMG5_orvol(res->point, pt->v) < 0.0)
+      {
+        auto tmp = pt->v[2];
+        pt->v[2] = pt->v[3];
+        pt->v[3] = tmp;
+      }
+    }
+  }
+  else
+  {
+    MMG5Exception(__func__) << "Unhandled case." << Alert::Raise;
+    return nullptr;
+  }
+
+  const auto* ptr = dynamic_cast<const MMG::Mesh*>(&src);
+  if (ptr)
+  {
+    // Tag corners (vertices always exist)
+    for (const auto& c : ptr->getCorners())
+    {
+      assert(c >= 0);
+      assert(c <= res->np);
+      res->point[c + 1].tag |= MG_CRN;
+    }
+
+    // Tag ridges (edges may be filtered out now)
+    for (const auto& r : ptr->getRidges())
+    {
+      assert(r >= 0);
+      const Index old = r;
+
+      if (!edgeRemap.empty() && old >= 0 && (size_t)old < edgeRemap.size())
+      {
+        const Index i = edgeRemap[old];
+        if (i > 0)
+          res->edge[i].tag |= MG_GEO;
+      }
+      else
+      {
+        // Backward-compatible fallback if no remap is available (should not happen here)
+        if (old + 1 <= res->na)
+          res->edge[old + 1].tag |= MG_GEO;
+      }
+    }
+
+    // Tag required vertices (vertices always exist)
+    for (const auto& c : ptr->getRequiredVertices())
+    {
+      assert(c >= 0);
+      assert(c <= res->np);
+      res->point[c + 1].tag |= MG_REQ;
+      res->point[c + 1].tag &= ~MG_NUL;
+    }
+
+    // Tag required edges (edges may be filtered out now)
+    for (const auto& r : ptr->getRequiredEdges())
+    {
+      assert(r >= 0);
+      const Index old = r;
+
+      if (!edgeRemap.empty() && old >= 0 && (size_t)old < edgeRemap.size())
+      {
+        const Index i = edgeRemap[old];
+        if (i > 0)
+          res->edge[i].tag |= MG_REQ;
+      }
+      else
+      {
+        // Backward-compatible fallback if no remap is available (should not happen here)
+        if (old + 1 <= res->na)
+          res->edge[old + 1].tag |= MG_REQ;
+      }
+    }
+  }
+
+
+  // MMG3D_saveMesh(res, "debug.mesh");
+  return res;
+}
+
+  MMG::Mesh MMG5::meshToRodin(const MMG5_pMesh src)
+  {
+    assert(src);
+    MMG::Mesh::Builder build;
+    const size_t sdim = src->dim;
+    assert(sdim > 0);
+    build.initialize(sdim).reserve(0, src->np).nodes(src->np);
+    switch (sdim) // Switch over space dimension
+    {
+      case 1:
+      {
+        for (int i = 1; i <= src->np; i++)
+        {
+          build.vertex({ src->point[i].c[0] });
+          build.attribute({ 0, i - 1 }, src->point[i].ref);
+          if (src->point[i].tag & MG_CRN)
+            build.corner(i - 1);
+          if (src->point[i].tag & MG_REQ)
+            build.requiredVertex(i - 1);
+        }
+        break;
+      }
+      case 2:
+      {
+        for (int i = 1; i <= src->np; i++)
+        {
+          build.vertex({ src->point[i].c[0], src->point[i].c[1] });
+          build.attribute({ 0, i - 1 }, src->point[i].ref);
+          if (src->point[i].tag & MG_CRN)
+            build.corner(i - 1);
+          if (src->point[i].tag & MG_REQ)
+            build.requiredVertex(i - 1);
+        }
+        break;
+      }
+      case 3:
+      {
+        for (int i = 1; i <= src->np; i++)
+        {
+          build.vertex({ src->point[i].c[0], src->point[i].c[1], src->point[i].c[2] });
+          build.attribute({ 0, i - 1 }, src->point[i].ref);
+          if (src->point[i].tag & MG_CRN)
+            build.corner(i - 1);
+          if (src->point[i].tag & MG_REQ)
+            build.requiredVertex(i - 1);
+        }
+        break;
+      }
+      default:
+      {
+        MMG5Exception(__func__) << "Space dimension greater than 3 not supported." << Alert::Raise;
+        break;
+      }
+    }
+    // Add edges
+    build.reserve(1, src->na);
+    for (int i = 1; i <= src->na; i++)
+    {
+      assert(src->edge[i].a >= 1);
+      assert(src->edge[i].b >= 1);
+      build.polytope(Geometry::Polytope::Type::Segment,
+          { static_cast<size_t>(src->edge[i].a - 1),
+            static_cast<size_t>(src->edge[i].b - 1) });
+      build.attribute({ 1, i - 1 }, src->edge[i].ref );
+      if (src->edge[i].tag & MG_GEO)
+        build.ridge(i - 1);
+      if (src->edge[i].tag & MG_REQ)
+        build.requiredEdge(i - 1);
+    }
+    // Add triangles
+    build.reserve(2, src->nt);
+    for (int i = 1; i <= src->nt; i++)
+    {
+      assert(src->tria[i].v[0] >= 1);
+      assert(src->tria[i].v[1] >= 1);
+      assert(src->tria[i].v[2] >= 1);
+      build.polytope(Geometry::Polytope::Type::Triangle,
+          { static_cast<size_t>(src->tria[i].v[0] - 1),
+            static_cast<size_t>(src->tria[i].v[1] - 1),
+            static_cast<size_t>(src->tria[i].v[2] - 1) });
+      build.attribute({ 2, i - 1 }, src->tria[i].ref );
+    }
+    // Add tetrahedra
+    build.reserve(3, src->ne);
+    for (int i = 1; i <= src->ne; i++)
+    {
+      assert(src->tetra[i].v[0] >= 1);
+      assert(src->tetra[i].v[1] >= 1);
+      assert(src->tetra[i].v[2] >= 1);
+      assert(src->tetra[i].v[3] >= 1);
+      build.polytope(Geometry::Polytope::Type::Tetrahedron,
+          { static_cast<size_t>(src->tetra[i].v[0] - 1),
+            static_cast<size_t>(src->tetra[i].v[1] - 1),
+            static_cast<size_t>(src->tetra[i].v[2] - 1),
+            static_cast<size_t>(src->tetra[i].v[3] - 1) });
+      build.attribute({ 3, i - 1 }, src->tetra[i].ref );
+    }
+    return build.finalize();
+  }
+
+  void MMG5::copySolution(const MMG5_pSol src, MMG5_pSol dst)
+  {
+    assert(src);
+    assert(dst);
+
+    // Copy all non-pointer fields
+    *dst = *src;
+
+    if (dst->np)
+    {
+      MMG5_SAFE_CALLOC(dst->m, dst->size * (dst->npmax + 1), Real,
+        MMG5Exception(__func__) << "Failed to allocate memory for the MMG5_pSol->m." << Alert::Raise);
+      std::copy(src->m, src->m + dst->size * (dst->np + 1), dst->m);
+    }
+    else
+    {
+      dst->m = nullptr;
+    }
+
+    if (src->namein)
+    {
+      auto nameInLength = std::strlen(src->namein);
+      MMG5_SAFE_CALLOC(dst->namein, nameInLength, char,
+          MMG5Exception(__func__) << "Failed to allocate memory for the MMG5_pSol->namein." << Alert::Raise);
+      std::memcpy(dst->namein, src->namein, nameInLength + 1);
+    }
+    else
+    {
+      dst->namein = nullptr;
+    }
+
+    if (src->nameout)
+    {
+      auto nameOutLength = std::strlen(src->nameout);
+      MMG5_SAFE_CALLOC(dst->nameout, nameOutLength, char,
+          MMG5Exception(__func__) << "Failed to allocate memory for the MMG5_pSol->nameout." << Alert::Raise);
+      std::memcpy(dst->nameout, src->nameout, nameOutLength + 1);
+    }
+    else
+    {
+      dst->nameout = nullptr;
+    }
+  }
+
+  void MMG5::swapSolution(MMG5_pSol a, MMG5_pSol b)
+  {
+    assert(a);
+    assert(b);
+    std::swap(a->dim, b->dim);
+    std::swap(a->entities, b->entities);
+    std::swap(a->m, b->m);
+    std::swap(a->namein, b->namein);
+    std::swap(a->nameout, b->nameout);
+    std::swap(a->np, b->np);
+    std::swap(a->npi, b->npi);
+    std::swap(a->npmax, b->npmax);
+    std::swap(a->size, b->size);
+    std::swap(a->type, b->type);
+    std::swap(a->umax, b->umax);
+    std::swap(a->umin, b->umin);
+    std::swap(a->ver, b->ver);
+  }
+
+  void MMG5::destroySolution(MMG5_pSol sol)
+  {
+    if (sol)
+    {
+      if (sol->m)
+        MMG5_SAFE_FREE(sol->m);
+      if (sol->namein)
+        MMG5_SAFE_FREE(sol->namein);
+      if (sol->nameout)
+        MMG5_SAFE_FREE(sol->nameout);
+      MMG5_SAFE_FREE(sol);
+    }
+    sol = nullptr;
+  }
+
+  void MMG5::destroyMesh(MMG5_pMesh mesh)
+  {
+    assert(mesh);
+    if (isSurfaceMesh(mesh))
+    {
+      MMGS_Free_all(MMG5_ARG_start, MMG5_ARG_ppMesh, &mesh, MMG5_ARG_end);
+    }
+    else if (mesh->dim == 2)
+    {
+      MMG2D_Free_all(MMG5_ARG_start, MMG5_ARG_ppMesh, &mesh, MMG5_ARG_end);
+    }
+    else if (mesh->dim == 3)
+    {
+      MMG3D_Free_all(MMG5_ARG_start, MMG5_ARG_ppMesh, &mesh, MMG5_ARG_end);
+    }
+    else
+    {
+      assert(false);
+    }
+  }
+
+  MMG5& MMG5::setParameters(MMG5_pMesh mesh)
+  {
+    assert(mesh);
+    bool isSurface = isSurfaceMesh(mesh);
+    switch(mesh->dim)
+    {
+      case 2:
+      {
+        assert(!isSurface);
+        if (m_hmin)
+        {
+          MMG2D_Set_dparameter(
+            mesh, nullptr, MMG2D_DPARAM_hmin, *m_hmin);
+        }
+        if (m_hmax)
+        {
+          MMG2D_Set_dparameter(
+            mesh, nullptr, MMG2D_DPARAM_hmax, *m_hmax);
+        }
+        if (m_hgrad)
+        {
+          MMG2D_Set_dparameter(
+            mesh, nullptr, MMG2D_DPARAM_hgrad, *m_hgrad);
+        }
+        if (m_hausd)
+        {
+          MMG2D_Set_dparameter(
+            mesh, nullptr, MMG2D_DPARAM_hausd, *m_hausd);
+        }
+        MMG2D_Set_iparameter(
+            mesh, nullptr, MMG2D_IPARAM_angle, static_cast<int>(m_ridgeDetection));
+        break;
+      }
+      case 3:
+      {
+        if (isSurface)
+        {
+          if (m_hmin)
+          {
+            MMGS_Set_dparameter(
+              mesh, nullptr, MMGS_DPARAM_hmin, *m_hmin);
+          }
+          if (m_hmax)
+          {
+            MMGS_Set_dparameter(
+              mesh, nullptr, MMGS_DPARAM_hmax, *m_hmax);
+          }
+          if (m_hgrad)
+          {
+            MMGS_Set_dparameter(
+              mesh, nullptr, MMGS_DPARAM_hgrad, *m_hgrad);
+          }
+          if (m_hausd)
+          {
+            MMGS_Set_dparameter(
+              mesh, nullptr, MMGS_DPARAM_hausd, *m_hausd);
+          }
+          MMGS_Set_iparameter(
+              mesh, nullptr, MMGS_IPARAM_angle, static_cast<int>(m_ridgeDetection));
+        }
+        else
+        {
+          if (m_hmin)
+          {
+            MMG3D_Set_dparameter(
+              mesh, nullptr, MMG3D_DPARAM_hmin, *m_hmin);
+          }
+          if (m_hmax)
+          {
+            MMG3D_Set_dparameter(
+              mesh, nullptr, MMG3D_DPARAM_hmax, *m_hmax);
+          }
+          if (m_hgrad)
+          {
+            MMG3D_Set_dparameter(
+              mesh, nullptr, MMG3D_DPARAM_hgrad, *m_hgrad);
+          }
+          if (m_hausd)
+          {
+            MMG3D_Set_dparameter(
+              mesh, nullptr, MMG3D_DPARAM_hausd, *m_hausd);
+          }
+          MMG3D_Set_iparameter(
+              mesh, nullptr, MMG3D_IPARAM_angle, static_cast<int>(m_ridgeDetection));
+        }
+        break;
+      }
+      default:
+      {
+        MMG5Exception(__func__) << "Unhandled case." << Alert::Raise;
+        break;
+      }
+    }
+    return *this;
+  }
+}
+

@@ -15,7 +15,6 @@
 
 #include "Rodin/IO/MFEM.h"
 #include "Rodin/IO/MEDIT.h"
-#include "Rodin/IO/EnSight6.h"
 
 #include "Mesh.h"
 #include "SubMesh.h"
@@ -118,12 +117,6 @@ namespace Rodin::Geometry
         printer.print(ofs);
         break;
       }
-      case IO::FileFormat::ENSIGHT6:
-      {
-        IO::MeshPrinter<IO::FileFormat::ENSIGHT6, Context> printer(*this);
-        printer.print(ofs);
-        break;
-      }
       default:
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -136,27 +129,43 @@ namespace Rodin::Geometry
 
   SubMesh<Context::Local> Mesh<Context::Local>::keep(Attribute attr) const
   {
-    return keep(FlatSet<Attribute>{attr});
+    return this->keep(FlatSet<Attribute>{attr});
   }
 
   SubMesh<Context::Local> Mesh<Context::Local>::keep(const FlatSet<Attribute>& attrs) const
   {
-    const size_t D = getDimension();
+    const size_t D = this->getDimension();
+
     SubMesh<Context>::Builder build;
     build.initialize(*this);
-    for (Index i = 0; i < getCellCount(); i++)
+
+    for (Index i = 0; i < getCellCount(); ++i)
     {
-      if (attrs.count(getAttribute(D, i)))
+      bool keepCell = false;
+
+      if (attrs.size() == 0)
       {
-        build.include(D, i);
-        for (size_t d = 1; d <= D - 1; d++)
-        {
-          const auto& inc = getConnectivity().getIncidence(D, d);
-          if (inc.size() > 0)
-            build.include(d, inc.at(i));
-        }
+        keepCell = true;
+      }
+      else
+      {
+        const auto a = getAttribute(D, i);
+        keepCell = a && attrs.count(*a);
+      }
+
+      if (!keepCell)
+        continue;
+
+      build.include(D, i);
+
+      for (size_t d = 1; d <= D - 1; ++d)
+      {
+        const auto& inc = this->getConnectivity().getIncidence(D, d);
+        if (inc.size() > 0)
+          build.include(d, inc.at(i));
       }
     }
+
     return build.finalize();
   }
 
@@ -187,80 +196,123 @@ namespace Rodin::Geometry
 
   SubMesh<Context::Local> Mesh<Context::Local>::trim(const FlatSet<Attribute>& attrs) const
   {
-    const size_t D = getDimension();
+    const size_t D = this->getDimension();
+
     SubMesh<Context>::Builder build;
     build.initialize(*this);
-    for (Index i = 0; i < getCellCount(); i++)
+
+    for (Index i = 0; i < getCellCount(); ++i)
     {
-      if (!attrs.count(getAttribute(D, i)))
+      bool keepCell = true;
+
+      if (attrs.size() != 0)
       {
-        build.include(D, i);
-        for (size_t d = 1; d <= D - 1; d++)
-        {
-          const auto& inc = getConnectivity().getIncidence(D, d);
-          if (inc.size() > 0)
-            build.include(d, inc.at(i));
-        }
+        const auto a = getAttribute(D, i);
+        // If attribute exists and is in attrs -> trim it (do not keep).
+        if (a && attrs.count(*a))
+          keepCell = false;
+        // If no attribute -> keepCell stays true.
+      }
+
+      if (!keepCell)
+        continue;
+
+      build.include(D, i);
+
+      for (size_t d = 1; d <= D - 1; ++d)
+      {
+        const auto& inc = this->getConnectivity().getIncidence(D, d);
+        if (inc.size() > 0)
+          build.include(d, inc.at(i));
       }
     }
+
     return build.finalize();
   }
-
 
   Mesh<Context::Local>& Mesh<Context::Local>::trace(
       const Map<Attribute, Attribute>& interface, const FlatSet<Attribute>& attrs)
   {
     const size_t D = getDimension();
     RODIN_GEOMETRY_MESH_REQUIRE_INCIDENCE(D - 1, D);
+
     const auto& conn = getConnectivity();
+
     for (auto it = getFace(); it; ++it)
     {
-      if (attrs.size() == 0 || attrs.count(it->getAttribute()))
-      {
-        assert(it->getDimension() == D - 1);
-        const auto& inc = conn.getIncidence({ D - 1, D }, it->getIndex());
-        if (inc.size() == 1)
-        {
-          auto el = getCell(*inc.begin());
-          auto find = interface.find(el->getAttribute());
-          if (find != interface.end())
-            setAttribute({ D - 1, it->getIndex() }, find->second);
-        }
-      }
+      const Index f = it->getIndex();
+
+      // Filter on current face attribute (if any).
+      const auto fAttr = getAttribute(D - 1, f);
+      const bool selected =
+        attrs.size() == 0 ||
+        (fAttr && attrs.count(*fAttr));
+
+      if (!selected)
+        continue;
+
+      const auto& inc = conn.getIncidence({D - 1, D}, f);
+      if (inc.size() != 1)
+        continue;
+
+      const Index c = *inc.begin();
+
+      // Need a cell attribute to look up boundary mapping.
+      const auto cAttr = getAttribute(D, c);
+      if (!cAttr)
+        continue;
+
+      auto find = interface.find(*cAttr);
+      if (find != interface.end())
+        setAttribute({D - 1, f}, find->second);
     }
+
     return *this;
   }
 
   Mesh<Context::Local>& Mesh<Context::Local>::trace(
-      const Map<std::pair<Attribute, Attribute>, Attribute>& interface, const FlatSet<Attribute>& attrs)
+      const Map<Pair<Attribute, Attribute>, Attribute>& interface,
+      const FlatSet<Attribute>& attrs)
   {
     const size_t D = getDimension();
     RODIN_GEOMETRY_MESH_REQUIRE_INCIDENCE(D - 1, D);
+
     const auto& conn = getConnectivity();
+
     for (auto it = getFace(); it; ++it)
     {
-      if (attrs.size() == 0 || attrs.count(it->getAttribute()))
+      const Index f = it->getIndex();
+
+      const auto fAttr = getAttribute(D - 1, f);
+      const bool selected =
+        attrs.size() == 0 ||
+        (fAttr && attrs.count(*fAttr));
+
+      if (!selected)
+        continue;
+
+      const auto& inc = conn.getIncidence({ D - 1, D }, f);
+      if (inc.size() != 2)
+        continue;
+
+      const Index c1 = *inc.begin();
+      const Index c2 = *std::next(inc.begin());
+
+      const auto a1 = getAttribute(D, c1);
+      const auto a2 = getAttribute(D, c2);
+      if (!a1 || !a2)
+        continue;
+
+      if (auto find = interface.find({ *a1, *a2 }); find != interface.end())
       {
-        assert(it->getDimension() == D - 1);
-        const auto& inc = conn.getIncidence({ D - 1, D }, it->getIndex());
-        if (inc.size() == 2)
-        {
-          auto el1 = getCell(*inc.begin());
-          auto el2 = getCell(*std::next(inc.begin()));
-          auto find = interface.find({ el1->getAttribute(), el2->getAttribute() });
-          if (find != interface.end())
-          {
-            setAttribute({ D - 1, it->getIndex() }, find->second);
-          }
-          else
-          {
-            find = interface.find({ el2->getAttribute(), el1->getAttribute() });
-            if (find != interface.end())
-              setAttribute({ D - 1, it->getIndex() }, find->second);
-          }
-        }
+        setAttribute({D - 1, f}, find->second);
+      }
+      else if (auto find2 = interface.find({*a2, *a1}); find2 != interface.end())
+      {
+        setAttribute({D - 1, f}, find2->second);
       }
     }
+
     return *this;
   }
 
@@ -289,7 +341,7 @@ namespace Rodin::Geometry
 
   Math::SpatialPoint Mesh<Context::Local>::getVertexCoordinates(Index idx) const
   {
-    return m_vertices.col(idx);
+    return m_vertices[idx];
   }
 
   size_t Mesh<Context::Local>::getDimension() const
@@ -319,7 +371,7 @@ namespace Rodin::Geometry
     {
       Variational::RealP1Element fe(Polytope::Type::Point);
       const size_t sdim = getSpaceDimension();
-      Math::PointMatrix pm(sdim, 1);
+      PointCloud pm(sdim, 1);
       for (size_t i = 0; i < sdim; ++i)
         pm(i, 0) = m_vertices(i, idx);
       return new IsoparametricTransformation(std::move(pm), std::move(fe));
@@ -329,7 +381,7 @@ namespace Rodin::Geometry
       auto g = getGeometry(dimension, idx);
       const size_t sdim = getSpaceDimension();
       const size_t n = Polytope::Traits(g).getVertexCount();
-      Math::PointMatrix pm(sdim, n);
+      PointCloud pm(sdim, n);
       const auto& polytope = getConnectivity().getPolytope(dimension, idx);
       assert(n == static_cast<size_t>(polytope.size()));
       for (const auto& v : polytope | boost::adaptors::indexed())
@@ -378,8 +430,12 @@ namespace Rodin::Geometry
     Real totalVolume = 0;
     for (auto it = getPolytope(3); !it.end(); ++it)
     {
-      if (attrs.contains(it->getAttribute()))
-        totalVolume += it->getMeasure();
+      const auto attr = it->getAttribute();
+      if (attr)
+      {
+        if (attrs.contains(*attr))
+          totalVolume += it->getMeasure();
+      }
     }
     return totalVolume;
   }
@@ -408,8 +464,12 @@ namespace Rodin::Geometry
     Real totalPerimeter = 0;
     for (auto it = getBoundary(); !it.end(); ++it)
     {
-      if (attrs.contains(it->getAttribute()))
-        totalPerimeter += it->getMeasure();
+      const auto attr = it->getAttribute();
+      if (attr)
+      {
+        if (attrs.contains(*attr))
+          totalPerimeter += it->getMeasure();
+      }
     }
     return totalPerimeter;
   }
@@ -438,8 +498,12 @@ namespace Rodin::Geometry
     Real totalArea = 0;
     for (auto it = getPolytope(2); !it.end(); ++it)
     {
-      if (attrs.contains(it->getAttribute()))
-        totalArea += it->getMeasure();
+      const auto attr = it->getAttribute();
+      if (attr)
+      {
+        if (attrs.contains(*attr))
+          totalArea += it->getMeasure();
+      }
     }
     return totalArea;
   }
@@ -468,8 +532,12 @@ namespace Rodin::Geometry
     Real totalMeasure = 0;
     for (auto it = getPolytope(d); !it.end(); ++it)
     {
-      if (attrs.contains(it->getAttribute()))
-        totalMeasure += it->getMeasure();
+      const auto attr = it->getAttribute();
+      if (attr)
+      {
+        if (attrs.contains(*attr))
+          totalMeasure += it->getMeasure();
+      }
     }
     return totalMeasure;
   }
@@ -589,13 +657,13 @@ namespace Rodin::Geometry
     return m_connectivity.getGeometry(dimension, idx);
   }
 
-  Attribute Mesh<Context::Local>::getAttribute(size_t dimension, Index index) const
+  Optional<Attribute> Mesh<Context::Local>::getAttribute(size_t dimension, Index index) const
   {
     return m_attributes.get({ dimension, index }, this->getPolytopeCount(dimension));
   }
 
   Mesh<Context::Local>&
-  Mesh<Context::Local>::setAttribute(const std::pair<size_t, Index>& p, Attribute attr)
+  Mesh<Context::Local>::setAttribute(const std::pair<size_t, Index>& p, const Optional<Attribute>& attr)
   {
     const size_t dimension = p.first;
     m_attributes.set(p, this->getPolytopeCount(dimension), attr);

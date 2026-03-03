@@ -18,4 +18,4 @@ target_link_libraries(P1GridFunctionGradient PUBLIC Rodin::Variational)
 
 add_executable(P1Potential P1Potential.cpp)
 target_link_libraries(P1Potential
-  PUBLIC Rodin::Variational Rodin::External::MMG)
+  PUBLIC Rodin::Variational Rodin::MMG)

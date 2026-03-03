@@ -78,7 +78,9 @@ namespace Rodin::Geometry
       if (inserted) // Vertex was not already in the map
       {
         m_s2ps[0].left.push_back(parentIdx);
-        build.attribute({ 0, childIdx }, parent.getAttribute(0, parentIdx));
+        auto attr = parent.getAttribute(0, parentIdx);
+        if (attr)
+          build.attribute({ 0, childIdx }, *attr);
         m_flags[0].push_back(flags);
         m_sidx[0] += 1;
       }
@@ -95,7 +97,9 @@ namespace Rodin::Geometry
       if (inserted) // Polytope was not already in the map
       {
         m_s2ps[d].left.push_back(parentIdx);
-        build.attribute({ d, childIdx }, parent.getAttribute(d, parentIdx));
+        auto attr = parent.getAttribute(d, parentIdx);
+        if (attr)
+          build.attribute({ d, childIdx }, *attr);
         m_flags[d].push_back(flags);
         m_sidx[d] += 1;
         for (size_t i = 0; i < static_cast<size_t>(childPolytope.size()); i++)

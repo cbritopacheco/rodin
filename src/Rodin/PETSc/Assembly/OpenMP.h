@@ -109,7 +109,11 @@ namespace Rodin::Assembly
             for (PetscInt i = 0; i < cnt; ++i)
             {
               if (!seq.filter(i)) continue;
-              if (!attrs.empty() && !attrs.count(mesh.getAttribute(dim, i))) continue;
+              if (!attrs.empty())
+              {
+                const auto a = mesh.getAttribute(dim, i);
+                if (!a || !attrs.count(*a)) continue;
+              }
 
               auto it = seq.getIterator(i);
               integrator->setPolytope(*it);
@@ -256,7 +260,11 @@ namespace Rodin::Assembly
             for (PetscInt i = 0; i < cnt; ++i)
             {
               if (!seq.filter(i)) continue;
-              if (!attrs.empty() && !attrs.count(mesh.getAttribute(dim, i))) continue;
+              if (!attrs.empty())
+              {
+                const auto a = mesh.getAttribute(dim, i);
+                if (!a || !attrs.count(*a)) continue;
+              }
 
               auto it = seq.getIterator(i);
               integrator->setPolytope(*it);
@@ -411,7 +419,7 @@ namespace Rodin::Assembly
 
         auto& x = axb.getSolution();
         assert(x);
-        ierr = VecSetSizes(x, static_cast<PetscInt>(nrows), PETSC_DECIDE);
+        ierr = VecSetSizes(x, static_cast<PetscInt>(ncols), PETSC_DECIDE);
         assert(ierr == PETSC_SUCCESS);
         ierr = VecSetType(x, VECSEQ);
         assert(ierr == PETSC_SUCCESS);
@@ -449,7 +457,11 @@ namespace Rodin::Assembly
             for (PetscInt k = 0; k < cnt; ++k)
             {
               if (!seq.filter(k)) continue;
-              if (!attrs.empty() && !attrs.count(mesh.getAttribute(dim, k))) continue;
+              if (!attrs.empty())
+              {
+                const auto a = mesh.getAttribute(dim, k);
+                if (!a || !attrs.count(*a)) continue;
+              }
 
               auto it = seq.getIterator(k);
               integrator->setPolytope(*it);
@@ -518,7 +530,11 @@ namespace Rodin::Assembly
             for (PetscInt te = 0; te < tcnt; ++te)
             {
               if (!testseq.filter(te)) continue;
-              if (!testAttrs.empty() && !testAttrs.count(mesh.getAttribute(tdim, te))) continue;
+              if (!testAttrs.empty())
+              {
+                const auto a = mesh.getAttribute(tdim, te);
+                if (!a || !testAttrs.count(*a)) continue;
+              }
 
               auto teIt = testseq.getIterator(te);
               const auto& rowsDOF = testFES.getDOFs(tdim, te);
@@ -526,7 +542,11 @@ namespace Rodin::Assembly
               for (PetscInt tr = 0; tr < rcnt; ++tr)
               {
                 if (!trialseq.filter(tr)) continue;
-                if (!trialAttrs.empty() && !trialAttrs.count(mesh.getAttribute(rdim, tr))) continue;
+                if (!trialAttrs.empty())
+                {
+                  const auto a = mesh.getAttribute(rdim, tr);
+                  if (!a || !trialAttrs.count(*a)) continue;
+                }
 
                 auto trIt = trialseq.getIterator(tr);
                 const auto& colsDOF = trialFES.getDOFs(rdim, tr);
@@ -603,7 +623,11 @@ namespace Rodin::Assembly
             for (PetscInt k = 0; k < cnt; ++k)
             {
               if (!seq.filter(k)) continue;
-              if (!attrs.empty() && !attrs.count(mesh.getAttribute(dim, k))) continue;
+              if (!attrs.empty())
+              {
+                const auto a = mesh.getAttribute(dim, k);
+                if (!a || !attrs.count(*a)) continue;
+              }
 
               auto it = seq.getIterator(k);
               integrator->setPolytope(*it);
@@ -827,6 +851,17 @@ namespace Rodin::Assembly
         ierr = VecZeroEntries(b);
         assert(ierr == PETSC_SUCCESS);
 
+        auto& x = axb.getSolution();
+        assert(x);
+        ierr = VecSetSizes(x, static_cast<PetscInt>(ncols), PETSC_DECIDE);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecSetType(x, VECSEQ);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecSetFromOptions(x);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecZeroEntries(x);
+        assert(ierr == PETSC_SUCCESS);
+
         // ------------------------
         // Helpers (same as your sequential)
         // ------------------------
@@ -926,7 +961,11 @@ namespace Rodin::Assembly
             for (PetscInt k = 0; k < cnt; ++k)
             {
               if (!seq.filter(k)) continue;
-              if (!attrs.empty() && !attrs.count(mesh.getAttribute(dim, k))) continue;
+              if (!attrs.empty())
+              {
+                const auto a = mesh.getAttribute(dim, k);
+                if (!a || !attrs.count(*a)) continue;
+              }
 
               auto it = seq.getIterator(k);
               withTrialFES(uUUID, [&](const auto& uFES)
@@ -1007,7 +1046,11 @@ namespace Rodin::Assembly
             for (PetscInt te = 0; te < tcnt; ++te)
             {
               if (!testseq.filter(te)) continue;
-              if (!testAttrs.empty() && !testAttrs.count(mesh.getAttribute(tdim, te))) continue;
+              if (!testAttrs.empty())
+              {
+                const auto a = mesh.getAttribute(tdim, te);
+                if (!a || !testAttrs.count(*a)) continue;
+              }
 
               auto teIt = testseq.getIterator(te);
               withTrialFES(uUUID, [&](const auto& uFES)
@@ -1019,7 +1062,11 @@ namespace Rodin::Assembly
                   for (PetscInt tr = 0; tr < rcnt; ++tr)
                   {
                     if (!trialseq.filter(tr)) continue;
-                    if (!trialAttrs.empty() && !trialAttrs.count(mesh.getAttribute(rdim, tr))) continue;
+                    if (!trialAttrs.empty())
+                    {
+                      const auto a = mesh.getAttribute(rdim, tr);
+                      if (!a || !trialAttrs.count(*a)) continue;
+                    }
 
                     auto trIt = trialseq.getIterator(tr);
                     const auto& cols = uFES.getDOFs(rdim, tr);
@@ -1096,7 +1143,11 @@ namespace Rodin::Assembly
             for (PetscInt k = 0; k < cnt; ++k)
             {
               if (!seq.filter(k)) continue;
-              if (!attrs.empty() && !attrs.count(mesh.getAttribute(dim, k))) continue;
+              if (!attrs.empty())
+              {
+                const auto a = mesh.getAttribute(dim, k);
+                if (!a || !attrs.count(*a)) continue;
+              }
 
               auto it = seq.getIterator(k);
               withTestFES(vUUID, [&](const auto& vFES)
@@ -1107,7 +1158,7 @@ namespace Rodin::Assembly
                 {
                   const PetscInt I = static_cast<PetscInt>(vOff + static_cast<size_t>(dofs[l]));
                   const PetscScalar val = static_cast<PetscScalar>(integrator->integrate(l));
-                  local[static_cast<size_t>(I)] += val;
+                  local[static_cast<size_t>(I)] += (-val);
                 }
               });
             }
