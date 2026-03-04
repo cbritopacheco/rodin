@@ -448,21 +448,6 @@ namespace Rodin::Variational
             return b - r.dot(n); // interior => > 0
           };
 
-          auto vref = [&](const Math::SpatialPoint& r) -> Math::SpatialVector<Real>
-          {
-            const Geometry::Point qp(cell, r);
-            return (sgn * qp.getJacobianInverse() * vphys_of(qp));
-          };
-
-          auto advance = [&](Math::SpatialPoint& rout, Real dt, const Math::SpatialPoint& rin)
-          {
-            m_step.step(rout, dt, rin,
-              [&](const Math::SpatialPoint& rr) -> Math::SpatialVector<Real>
-              {
-                return vref(rr);
-              });
-          };
-
           auto x_of = [&](Math::SpatialPoint& xout, const Math::SpatialPoint& r)
           {
             mesh.getPolytopeTransformation(cd, s_cell).transform(xout, r);
@@ -476,16 +461,32 @@ namespace Rodin::Variational
             x_of(s_x_in, s_r_in);
           }
 
+          // Jacobian inverse (constant for affine/P1 cells) — compute once per cell
+          const Geometry::Point qJ(cell, s_r_in, s_x_in);
+          const auto Jinv  = qJ.getJacobianInverse();
+          const auto JinvT = Jinv.transpose();
+
+          auto vref = [&](const Math::SpatialPoint& r) -> Math::SpatialVector<Real>
+          {
+            const Geometry::Point qp(cell, r);
+            return (sgn * Jinv * vphys_of(qp));
+          };
+
+          auto advance = [&](Math::SpatialPoint& rout, Real dt, const Math::SpatialPoint& rin)
+          {
+            m_step.step(rout, dt, rin,
+              [&](const Math::SpatialPoint& rr) -> Math::SpatialVector<Real>
+              {
+                return vref(rr);
+              });
+          };
+
           // Current physical point
           x_of(s_x, s_rc);
 
           // Build oriented physical planes, indexed EXACTLY by local face index j.
           planes.clear();
           planes.resize(faces.size());
-
-          const Geometry::Point qJ(cell, s_r_in, s_x_in);
-          const auto Jinv  = qJ.getJacobianInverse();
-          const auto JinvT = Jinv.transpose();
 
           for (size_t j = 0; j < faces.size(); ++j)
           {
@@ -879,12 +880,6 @@ namespace Rodin::Variational
               return b - r.dot(n);
             };
 
-            auto vrefz = [&](const Math::SpatialPoint& r) -> Math::SpatialVector<Real>
-            {
-              const Geometry::Point qp(cellz, r);
-              return (sgn * qp.getJacobianInverse() * vphys_of(qp));
-            };
-
             auto x_of_z = [&](Math::SpatialPoint& xout, const Math::SpatialPoint& r)
             {
               mesh.getPolytopeTransformation(cd, s_cell).transform(xout, r);
@@ -898,12 +893,19 @@ namespace Rodin::Variational
             s_r_in = rcent;
             x_of_z(s_x_in, s_r_in);
 
-            planes.clear();
-            planes.resize(facesz.size());
-
+            // Jacobian inverse (constant for affine/P1 cells) — compute once per zero-hop cell
             const Geometry::Point qJz(cellz, s_r_in, s_x_in);
             const auto Jinvz  = qJz.getJacobianInverse();
             const auto JinvTz = Jinvz.transpose();
+
+            auto vrefz = [&](const Math::SpatialPoint& r) -> Math::SpatialVector<Real>
+            {
+              const Geometry::Point qp(cellz, r);
+              return (sgn * Jinvz * vphys_of(qp));
+            };
+
+            planes.clear();
+            planes.resize(facesz.size());
 
             for (size_t j = 0; j < facesz.size(); ++j)
             {

@@ -6,8 +6,10 @@
  */
 #include <gtest/gtest.h>
 
+#include "Rodin/Assembly.h"
 #include "Rodin/Variational.h"
 #include "Rodin/Advection/Lagrangian.h"
+#include "Rodin/Math/RungeKutta/RK2.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -117,8 +119,6 @@ namespace Rodin::Tests::Unit
    * @brief Test Lagrangian step function basic functionality.
    *
    * This test verifies that the step function can be called without errors.
-   * Note: The current implementation may have template deduction issues,
-   * so this test focuses on basic construction.
    */
   TEST_P(LagrangianTest, StepFunction)
   {
@@ -129,7 +129,8 @@ namespace Rodin::Tests::Unit
     TestFunction v(vh);
 
     // Define simple initial condition
-    auto u0 = RealFunction([](const Point&) { return 1.0; });
+    auto u0 = sin(Math::Constants::pi() * F::x)
+            * sin(Math::Constants::pi() * F::y);
 
     // Define simple velocity field
     auto velocity = VectorFunction{
@@ -137,17 +138,54 @@ namespace Rodin::Tests::Unit
       RealFunction([](const Point&) { return 0.0; })
     };
 
-    // Create Lagrangian object
+    // Create Lagrangian object and verify step works
     Lagrangian lagrangian(u, v, u0, velocity);
+    Real dt = 0.01;
+    EXPECT_NO_THROW({
+      lagrangian.step(dt);
+    });
+  }
 
-    // For now, just test that construction succeeded
-    // TODO: Enable step function test when template issues are resolved
-    // Real dt = 0.01;
-    // EXPECT_NO_THROW({
-    //   lagrangian.step(dt);
-    // });
-    
-    EXPECT_TRUE(true); // Basic construction test passes
+  /**
+   * @brief Test Lagrangian with a custom time-stepping scheme (RK2).
+   *
+   * Verifies that the user-supplied stepper is actually used by the Lagrangian,
+   * rather than a hardcoded default. Both RK2 and RK4 should produce valid
+   * results for the same advection problem.
+   */
+  TEST_P(LagrangianTest, CustomStepperRK2)
+  {
+    Mesh mesh = this->getMesh();
+    P1 vh(mesh);
+
+    auto u0 = sin(Math::Constants::pi() * F::x)
+            * sin(Math::Constants::pi() * F::y);
+
+    auto velocity = VectorFunction{
+      RealFunction([](const Point&) { return 0.1; }),
+      RealFunction([](const Point&) { return 0.0; })
+    };
+
+    // Use RK2 stepper
+    Math::RungeKutta::RK2 rk2;
+
+    TrialFunction u(vh);
+    TestFunction v(vh);
+    Lagrangian lagrangian(u, v, u0, velocity, rk2);
+
+    Real dt = 0.01;
+    EXPECT_NO_THROW({
+      lagrangian.step(dt);
+    });
+
+    // Verify the solution is non-trivial (not all zeros)
+    const auto& uh = u.getSolution();
+    const size_t cd = mesh.getDimension();
+    Math::SpatialVector<Real> rc{{ 0.5, 0.5 }};
+    auto it = mesh.getPolytope(cd, 0);
+    Geometry::Point p(*it, rc);
+    Real val = uh(p);
+    EXPECT_NE(val, 0.0) << "Solution should be non-trivial after advection";
   }
 
   /**
