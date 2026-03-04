@@ -240,40 +240,46 @@ namespace Rodin::Variational
 
       Trace trace(const Geometry::Point& p) const
       {
-        // Robust affine/P1 tracer (production-oriented):
-        // - physical oriented face planes per cell (built from fixed anchor + fixed face points)
-        // - event bracketing on "reached band" (sd <= eps_hit)
-        // - deterministic active-set selection with SOFT hysteresis
-        // - chained zero-hop across edges/vertices with same rule
+        //  - deterministically handles many crossings per step (repeat: find earliest face-crossing, hop, continue)
+        //  - robust on bad/sliver elements via per-cell dt cap + adaptive substepping on bracketing failure
+        //  - never bisects a non-monotone predicate: always bisects a single face function phi_j(t)
+        //  - deterministic zero-hop chaining (edge/vertex) with soft hysteresis
+        //  - invariant “inside” clamp after every integrate step (only if violated)
         //
-        // Assumptions:
-        // - cell maps are affine (P1 geometry) so J^{-1} is constant per cell.
-        // - face ordering contract: hs.row(j) corresponds to faces[j] (per getSubPolytopes order).
+        // Requirements (must hold for ALL polytope types):
+        //   * hs: phi_j(r)=b_j - n_j·r, interior iff phi_j(r) >= 0 for all j
+        //   * faces[j] corresponds to hs.row(j)
+        //   * Project(g).face(j, out, r) puts out on face j and inside other faces (up to tol)
+        //   * Project(g).cell(out, r) clamps inside (up to tol)
+        //
+        // NOTE about velocity return type:
+        //   If m_velocity(qp) returns a vector, use "return m_velocity(qp);"
+        //   If it returns a (dim x 1) matrix/expression, use "return m_velocity(qp).col(0);"
+        //
+        // This code assumes affine cell maps (J^{-1} constant per cell). It still works if you evaluate
+        // J^{-1} at qp each time (you already do), but guarantees are best for P1 geometry.
 
-        struct Plane
+        struct Candidate
         {
-          Math::SpatialVector<Real> n_u;   // unnormalized physical normal (J^{-T} nref_col)
-          Math::SpatialVector<Real> nref;  // PATCH: store as COLUMN reference normal (consistent dot(vref,nref))
-          Real c_u;                        // plane constant: sd_u(x) = c_u - n_u·x
-          Real nn;                         // ||n_u||
-          Index fid;                       // global face id
-          bool ok;                         // nn finite and >0
+          Real   tlin;   // linear predictor time
+          size_t j;      // local face index
+          Real   ndv;    // nref · vref at start
+          Real   phi0;   // phi_j(r0)
+          Index  fid;    // global face id
         };
-
-        struct Cand
-        {
-          size_t j;        // local face index
-          Real   sd;       // signed distance (physical) to oriented plane
-          Real   ndv;      // vref · nref (reference space)
-          Index  fid;      // global face id
-          bool   is_last;  // whether j == last_face
-        };
-
-        enum class PickMode { Strict, NdvPos, Overshot };
 
         const size_t ZERO_HOPS_MAX = m_maxZeroHops;
         const int    MAX_BISECT    = static_cast<int>(m_maxBisectionIterations);
         const int    MAX_SUBDIV    = static_cast<int>(m_maxSubdivisionIterations);
+
+        // Bracketing knobs (safe defaults)
+        const int   K_TRY     = 6;          // how many smallest-tlin faces to try first
+        const Real  GAMMA     = Real(2.0);  // bracket expansion factor
+        const int   EXPANDS   = 3;          // #expansions per face
+        const Real  ETA_CAP   = Real(0.5);  // dt cap factor based on cell size (sliver robustness)
+        const Real  C_EPS     = Real(50);   // sqrt(eps) multiplier for reference tolerances
+        const Real  C_VIOL    = Real(10);   // “outside” margin before clamping
+        const Real  C_DTMIN   = Real(10);   // dt_min scaling
 
         const auto& poly0 = p.getPolytope();
         const auto& mesh  = poly0.getMesh();
@@ -283,42 +289,38 @@ namespace Rodin::Variational
         Real tau = std::abs(m_t);
         const Real sgn = Math::sgn(m_t);
 
-        // Scratch
-        Index s_cell = Index(-1);
-
-        Math::SpatialPoint s_rc{{}}, s_rc1{{}}, s_rc_tmp{{}}, s_r_eval{{}}, s_r_in{{}};
-        Math::SpatialPoint s_pc{{}}, s_x{{}}, s_x_eval{{}}, s_x_in{{}}, s_x_face{{}};
-
-        std::vector<Plane> planes; planes.reserve(16);
-        std::vector<Cand>  cand;   cand.reserve(16);
-
         const Real eps_machine = std::numeric_limits<Real>::epsilon();
         const Real sqrt_eps    = std::sqrt(eps_machine);
         const Real v_floor     = std::numeric_limits<Real>::min();
 
-        auto dot = [](const auto& a, const auto& b) -> Real { return a.dot(b); };
         auto is_finite = [](Real v) -> bool { return std::isfinite(v); };
 
-        // PATCH: single, consistent norm2 helper to avoid type/shape drift.
+        auto dot = [](const auto& a, const auto& b) -> Real { return b.dot(a); };
+
         auto norm2 = [&](const auto& v) -> Real
         {
           const Real v2 = dot(v, v);
           return std::max<Real>(Real(0), v2);
         };
 
-        // PATCH: normalize “velocity type” once.
-        // If m_velocity(qp) already returns a vector-like type, keep this.
-        // If it returns a (dim x 1) matrix, use .col(0) here and nowhere else.
+        // Normalize velocity return type in ONE place.
         auto vphys_of = [&](const Geometry::Point& qp) -> Math::SpatialVector<Real>
         {
-          // ----- choose ONE, matching your m_velocity return type -----
-          // return m_velocity(qp);          // vector-like
-          return m_velocity(qp).col(0);      // matrix-like (dim x 1)
+          // ---- choose ONE ----
+          // return m_velocity(qp);          // if vector-like
+          return m_velocity(qp).col(0);      // if (dim x 1) matrix-like
         };
 
-        // ---------------------------------------------------------------------------
-        // Locate starting cell / reference coords (handles starting on a face)
-        // ---------------------------------------------------------------------------
+        // -------------------- scratch (thread-local to reduce allocations) --------------------
+        static thread_local Index s_cell;
+        static thread_local Math::SpatialPoint s_rc{{}}, s_rc1{{}}, s_rc_tmp{{}}, s_r_eval{{}}, s_r_in{{}};
+        static thread_local Math::SpatialPoint s_pc{{}}, s_x{{}}, s_x_in{{}}, s_x_face{{}};
+        static thread_local std::vector<Candidate> s_cand;
+        static thread_local std::vector<size_t> s_faceset;
+
+        // -------------------- locate starting cell / reference coords --------------------
+        s_cell = Index(-1);
+
         if (poly0.getDimension() == cd)
         {
           s_cell = poly0.getIndex();
@@ -331,7 +333,6 @@ namespace Rodin::Variational
 
           if (mesh.isBoundary(f))
           {
-            assert(!adj.empty());
             const Index c = adj[0];
             mesh.getPolytopeTransformation(cd, c).inverse(s_rc_tmp, p.getPhysicalCoordinates());
             Geometry::Polytope::Project(mesh.getGeometry(cd, c)).cell(s_rc, s_rc_tmp);
@@ -339,11 +340,10 @@ namespace Rodin::Variational
           }
           else
           {
-            assert(adj.size() >= 2);
+            // Project into both adjacent cells; decide by flow direction; fallback by interior score.
             const Index c0 = adj[0];
             const Index c1 = adj[1];
 
-            // Project into both adjacent cells (affine => robust)
             mesh.getPolytopeTransformation(cd, c0).inverse(s_rc_tmp, p.getPhysicalCoordinates());
             Geometry::Polytope::Project(mesh.getGeometry(cd, c0)).cell(s_rc1, s_rc_tmp);
             const Math::SpatialPoint rc0 = s_rc1;
@@ -352,25 +352,21 @@ namespace Rodin::Variational
             Geometry::Polytope::Project(mesh.getGeometry(cd, c1)).cell(s_rc1, s_rc_tmp);
             const Math::SpatialPoint rc1 = s_rc1;
 
-            // Identify local face index of f in c0
             const auto& faces0 = conn.getIncidence(cd, cd - 1).at(c0);
             size_t j0 = faces0.size();
             for (size_t k = 0; k < faces0.size(); ++k)
               if (faces0[k] == f) { j0 = k; break; }
-            assert(j0 < faces0.size());
 
-            // Outward reference normal for that face in ref(c0)
             const auto g0 = mesh.getGeometry(cd, c0);
             const auto& hs0 = Geometry::Polytope::Traits(g0).getHalfSpace();
-            // PATCH: column normal (consistent with later code)
             const Math::SpatialVector<Real> nref0 = hs0.matrix.row(j0).transpose();
 
             const auto it0 = mesh.getPolytope(cd, c0);
             const auto& cell0 = *it0;
             const Geometry::Point q0(cell0, rc0, p.getPhysicalCoordinates());
             const auto vref0 = (sgn * q0.getJacobianInverse() * vphys_of(q0));
+            const Real ndv0 = dot(nref0, vref0);
 
-            // Fallback: if ambiguous, pick side where projected point is "more interior"
             auto interior_score = [&](Index c, const Math::SpatialPoint& rproj) -> Real
             {
               const auto gc = mesh.getGeometry(cd, c);
@@ -385,16 +381,17 @@ namespace Rodin::Variational
               return s;
             };
 
-            const Real ndv = dot(nref0, vref0);
-            if (std::abs(ndv) <= Real(10) * sqrt_eps)
+            const Real eps_ndv0 = Real(10) * sqrt_eps;
+            if (std::abs(ndv0) <= eps_ndv0)
             {
               const Real s0 = interior_score(c0, rc0);
               const Real s1 = interior_score(c1, rc1);
               if (s1 > s0) { s_cell = c1; s_rc = rc1; }
               else         { s_cell = c0; s_rc = rc0; }
             }
-            else if (ndv > 0)
+            else if (ndv0 > 0)
             {
+              // moving out of c0 through face f -> start in c1
               s_cell = c1;
               s_rc   = rc1;
             }
@@ -407,11 +404,10 @@ namespace Rodin::Variational
         }
         else
         {
-          assert(false);
-          return Trace{ true, 0, p };
+          return Trace{ true, Real(0), p };
         }
 
-        // Resize buffers once (invariants)
+        // Resize buffers
         s_rc1.resize(s_rc.size());
         s_rc_tmp.resize(s_rc.size());
         s_r_eval.resize(s_rc.size());
@@ -419,15 +415,39 @@ namespace Rodin::Variational
 
         s_pc.resize(p.getPhysicalCoordinates().size());
         s_x.resize(s_pc.size());
-        s_x_eval.resize(s_pc.size());
         s_x_in.resize(s_pc.size());
         s_x_face.resize(s_pc.size());
 
-        Optional<size_t> last_face;
+        // Soft hysteresis: avoid immediate backtracking if alternatives exist.
+        std::optional<size_t> last_face;
 
-        // ---------------------------------------------------------------------------
-        // Main tracing loop
-        // ---------------------------------------------------------------------------
+        // -------------------- helpers --------------------
+        auto phi_face = [&](const auto& hs, size_t j, const Math::SpatialPoint& r) -> Real
+        {
+          const auto n = hs.matrix.row(j);
+          const Real b = hs.vector[j];
+          return b - r.dot(n); // interior => >= 0
+        };
+
+        auto clamp_if_outside = [&](const auto& hs, const auto& g, Math::SpatialPoint& r, Real eps_phi) -> void
+        {
+          bool violated = false;
+          for (int j = 0; j < hs.vector.size(); ++j)
+          {
+            if (phi_face(hs, static_cast<size_t>(j), r) < -C_VIOL * eps_phi)
+            {
+              violated = true;
+              break;
+            }
+          }
+          if (violated)
+          {
+            Geometry::Polytope::Project(g).cell(s_rc1, r);
+            r = s_rc1;
+          }
+        };
+
+        // -------------------- main loop: keep consuming tau --------------------
         while (tau > 0)
         {
           const auto itc = mesh.getPolytope(cd, s_cell);
@@ -437,23 +457,14 @@ namespace Rodin::Variational
           const auto& faces = conn.getIncidence(cd, cd - 1).at(s_cell);
           const auto& hs = Geometry::Polytope::Traits(g).getHalfSpace();
 
-          // Hard invariants
-          assert(static_cast<size_t>(hs.matrix.rows()) == faces.size());
-          assert(static_cast<size_t>(hs.vector.size()) == faces.size());
-
-          auto phi_face = [&](size_t j, const Math::SpatialPoint& r) -> Real
-          {
-            const auto n = hs.matrix.row(j);
-            const Real b = hs.vector[j];
-            return b - r.dot(n); // interior => > 0
-          };
-
+          // Reference velocity vref(r) = sgn * J^{-1}(r) * vphys(r)
           auto vref = [&](const Math::SpatialPoint& r) -> Math::SpatialVector<Real>
           {
             const Geometry::Point qp(cell, r);
             return (sgn * qp.getJacobianInverse() * vphys_of(qp));
           };
 
+          // Integrate in reference
           auto advance = [&](Math::SpatialPoint& rout, Real dt, const Math::SpatialPoint& rin)
           {
             m_step.step(rout, dt, rin,
@@ -463,383 +474,372 @@ namespace Rodin::Variational
               });
           };
 
-          auto x_of = [&](Math::SpatialPoint& xout, const Math::SpatialPoint& r)
-          {
-            mesh.getPolytopeTransformation(cd, s_cell).transform(xout, r);
-          };
-
-          // Interior anchor in reference (Traits uses [0,1]^d conventions)
-          {
-            const auto rcent = Geometry::Polytope::Traits(g).getCentroid();
-            assert(static_cast<size_t>(rcent.size()) == cd);
-            s_r_in = rcent;
-            x_of(s_x_in, s_r_in);
-          }
-
           // Current physical point
-          x_of(s_x, s_rc);
+          mesh.getPolytopeTransformation(cd, s_cell).transform(s_x, s_rc);
 
-          // Build oriented physical planes, indexed EXACTLY by local face index j.
-          planes.clear();
-          planes.resize(faces.size());
-
-          const Geometry::Point qJ(cell, s_r_in, s_x_in);
-          const auto Jinv  = qJ.getJacobianInverse();
-          const auto JinvT = Jinv.transpose();
-
-          for (size_t j = 0; j < faces.size(); ++j)
-          {
-            Plane pl;
-            pl.fid  = faces[j];
-
-            // PATCH: column reference normal (no row-expression ambiguity / transpose gymnastics).
-            pl.nref = hs.matrix.row(j).transpose();
-
-            pl.n_u = JinvT * pl.nref;
-
-            const Real nn2 = norm2(pl.n_u);
-            pl.nn = std::sqrt(nn2);
-            pl.ok = (pl.nn > Real(0)) && is_finite(pl.nn);
-
-            // Define c_u from a fixed point on the face: Project(face)(anchor).
-            Geometry::Polytope::Project(g).face(j, s_rc_tmp, s_r_in);
-
-#ifndef NDEBUG
-            // Scale-aware smoke test: phi(face_j) ~ 0 at projected point.
-            const Real ph = phi_face(j, s_rc_tmp);
-            const auto nrow = hs.matrix.row(j);
-            const Real nrm  = std::sqrt(std::max<Real>(0, dot(nrow, nrow)));
-            const Real rrm  = std::sqrt(std::max<Real>(0, dot(s_rc_tmp, s_rc_tmp)));
-            const Real scale = Real(1) + std::abs(hs.vector[j]) + nrm * rrm;
-            const Real tol = Real(1e3) * sqrt_eps * scale;
-            assert(std::abs(ph) <= tol);
-#endif
-
-            x_of(s_x_face, s_rc_tmp);
-            pl.c_u = dot(pl.n_u, s_x_face);
-
-            // PATCH: robust orientation (only flip when clearly negative).
-            // Avoid arbitrary flips when sd_in ~ 0 due to noise/slivers/tangency.
-            const Real sd_in  = pl.c_u - dot(pl.n_u, s_x_in);
-            const Real tol_in = Real(10) * sqrt_eps * std::max<Real>(Real(1), std::abs(pl.c_u));
-            if (sd_in < -tol_in)
-            {
-              pl.n_u = -pl.n_u;
-              pl.c_u = -pl.c_u;
-            }
-            // else keep as-is
-
-            planes[j] = pl;
-          }
-
-          auto sd_u_at = [&](const Plane& pl, const Math::SpatialPoint& x) -> Real
-          {
-            return pl.c_u - dot(pl.n_u, x);
-          };
-
-          auto sd_at = [&](const Plane& pl, const Math::SpatialPoint& x) -> Real
-          {
-            if (!pl.ok) return std::numeric_limits<Real>::infinity();
-            return sd_u_at(pl, x) / pl.nn; // signed distance in physical units
-          };
-
-          // Geometry scale from interior anchor distances (stable near boundaries)
-          Real h_scale = Real(0);
-          for (size_t j = 0; j < planes.size(); ++j)
-          {
-            const Plane& pl = planes[j];
-            if (!pl.ok) continue;
-            const Real d = sd_at(pl, s_x_in);
-            if (is_finite(d)) h_scale = std::max(h_scale, d);
-          }
-          if (!(h_scale > Real(0)) || !is_finite(h_scale))
-          {
-            // Degenerate geometry: stop safely
-            return Trace{ false, tau, Geometry::Point(*itc, s_rc) };
-          }
-
-          // Tolerances
-          constexpr Real C_HIT = Real(100);
-          constexpr Real C_NDV = Real(50);
-          constexpr Real C_SUB = Real(0.25); // dt_stop <= C_SUB * tau
-
-          const Real eps_hit_phys = C_HIT * sqrt_eps * h_scale;
-
+          // Reference eps model (scale-aware)
+          const Real rnorm = std::sqrt(norm2(s_rc));
           const auto v0 = vref(s_rc);
           const Real vref_mag = std::sqrt(norm2(v0));
-          const Real eps_ndv = C_NDV * sqrt_eps * (Real(1) + vref_mag);
 
-          // PATCH: dt_stop sanitization against NaN/Inf (and >0 guarantee)
-          Real vphys_mag = Real(0);
+          const Real eps_phi = C_EPS * sqrt_eps * (Real(1) + rnorm);
+          const Real eps_ndv = C_EPS * sqrt_eps * (Real(1) + vref_mag);
+
+          // Per-cell dt cap based on physical size (robust on slivers)
+          Real dt_cap = tau;
           {
-            const Geometry::Point qp(cell, s_rc, s_x);
-            const auto vphys = vphys_of(qp);
-            vphys_mag = std::sqrt(norm2(vphys));
-            if (!is_finite(vphys_mag)) vphys_mag = Real(0);
+            const auto rcent = Geometry::Polytope::Traits(g).getCentroid();
+            s_r_in = rcent;
+            mesh.getPolytopeTransformation(cd, s_cell).transform(s_x_in, s_r_in);
+
+            const Geometry::Point qJ(cell, s_r_in, s_x_in);
+            const auto JinvT = qJ.getJacobianInverse().transpose();
+
+            Real h_scale = Real(0);
+
+            for (size_t j = 0; j < faces.size(); ++j)
+            {
+              const Math::SpatialVector<Real> nref = hs.matrix.row(j).transpose();
+              auto n_u = JinvT * nref;
+              const Real nn = std::sqrt(std::max<Real>(Real(0), dot(n_u, n_u)));
+              if (!(nn > Real(0)) || !is_finite(nn)) continue;
+
+              // anchor point on face: project centroid to face in reference, then map to x
+              Geometry::Polytope::Project(g).face(j, s_rc_tmp, s_r_in);
+              mesh.getPolytopeTransformation(cd, s_cell).transform(s_x_face, s_rc_tmp);
+
+              Real c_u = dot(n_u, s_x_face);
+              const Real sd_in = c_u - dot(n_u, s_x_in);
+              if (sd_in < 0) { n_u = -n_u; c_u = -c_u; }
+
+              const Real d = (c_u - dot(n_u, s_x_in)) / nn;
+              if (is_finite(d)) h_scale = std::max(h_scale, d);
+            }
+
+            Real vphys_mag = Real(0);
+            {
+              const Geometry::Point qp(cell, s_rc, s_x);
+              const auto vphys = vphys_of(qp);
+              vphys_mag = std::sqrt(norm2(vphys));
+              if (!is_finite(vphys_mag)) vphys_mag = Real(0);
+            }
+
+            if (h_scale > Real(0) && is_finite(h_scale))
+            {
+              dt_cap = std::min(dt_cap, ETA_CAP * h_scale / std::max<Real>(vphys_mag, v_floor));
+            }
+            if (!(dt_cap > Real(0)) || !is_finite(dt_cap))
+              dt_cap = tau;
           }
 
-          Real dt_geom = eps_hit_phys / std::max<Real>(vphys_mag, v_floor);
-          if (!is_finite(dt_geom) || !(dt_geom > Real(0)))
-            dt_geom = C_SUB * tau;
+          // Minimum dt to prevent infinite substepping near tangency/noise
+          const Real dt_min = C_DTMIN * sqrt_eps * (Real(1) + rnorm) / std::max<Real>(Real(1), vref_mag);
 
-          Real dt_stop = std::min(C_SUB * tau, dt_geom);
-          if (!is_finite(dt_stop) || !(dt_stop > Real(0)))
-            dt_stop = C_SUB * tau;
-
-          // Predicate: reached band (or overshot) at time dt
-          auto reached = [&](Real dt) -> bool
+          // ------------------------------------------------------------
+          // Zero-hop / on-edge cleanup (dt = 0) BEFORE searching events.
+          // Deterministic selection among active faces with soft hysteresis.
+          // ------------------------------------------------------------
+          auto do_zero_hops = [&]() -> bool
           {
-            advance(s_r_eval, dt, s_rc);
-            x_of(s_x_eval, s_r_eval);
-
-            for (size_t j = 0; j < planes.size(); ++j)
+            size_t hops = 0;
+            while (hops++ < ZERO_HOPS_MAX)
             {
-              const Plane& pl = planes[j];
-              if (!pl.ok) continue;
-              const Real d = sd_at(pl, s_x_eval);
-              if (!is_finite(d)) continue;
-              if (d <= eps_hit_phys) return true;
+              const auto vz = vref(s_rc);
+
+              // Find all faces with |phi| small AND exiting (ndv > eps_ndv)
+              s_faceset.clear();
+              s_faceset.reserve(faces.size());
+
+              bool have_non_last = false;
+              for (size_t j = 0; j < faces.size(); ++j)
+              {
+                const Real ph = phi_face(hs, j, s_rc);
+                if (std::abs(ph) > eps_phi) continue;
+
+                const Math::SpatialVector<Real> nref = hs.matrix.row(j).transpose();
+                const Real ndv = dot(nref, vz);
+                if (!(ndv > eps_ndv)) continue;
+
+                const bool is_last = (last_face && j == *last_face);
+                if (!is_last) have_non_last = true;
+
+                s_faceset.push_back(j);
+              }
+
+              if (s_faceset.empty())
+                break;
+
+              auto key = [&](size_t j) -> std::tuple<Real, Real, Index>
+              {
+                const Real ph = phi_face(hs, j, s_rc);
+                const auto vz2 = vref(s_rc);
+                const Real ndv = vz2.dot(hs.matrix.row(j).transpose());
+                const Index fid = faces[j];
+                return { std::abs(ph), -ndv, fid };
+              };
+
+              // Soft hysteresis: if alternatives exist, drop last_face
+              size_t best = size_t(-1);
+              bool have = false;
+              for (size_t jj : s_faceset)
+              {
+                if (have_non_last && last_face && jj == *last_face) continue;
+                if (!have) { best = jj; have = true; }
+                else if (key(jj) < key(best)) { best = jj; }
+              }
+              if (!have)
+                break;
+
+              const Index f = faces[best];
+
+              // boundary?
+              if (mesh.isBoundary(f))
+              {
+                if (!m_bp(BoundaryHit{tau, s_cell, s_rc, best}))
+                  return false;
+                last_face.reset();
+                break;
+              }
+
+              // hop across face at t=0
+              mesh.getPolytopeTransformation(cd, s_cell).transform(s_pc, s_rc);
+              const auto& nbrs = conn.getIncidence(cd - 1, cd).at(f);
+              if (nbrs.size() != 2) // defensive
+                return false;
+              s_cell = (nbrs[0] == s_cell) ? nbrs[1] : nbrs[0];
+
+              mesh.getPolytopeTransformation(cd, s_cell).inverse(s_rc, s_pc);
+              Geometry::Polytope::Project(mesh.getGeometry(cd, s_cell)).cell(s_rc1, s_rc);
+              s_rc = s_rc1;
+
+              // update last_face in new cell
+              const auto& faces_new = conn.getIncidence(cd, cd - 1).at(s_cell);
+              last_face.reset();
+              for (size_t j = 0; j < faces_new.size(); ++j)
+                if (faces_new[j] == f) { last_face = j; break; }
+
+              // We changed cell: caller must restart outer iteration
+              return true;
             }
+            return false; // no cell change
+          };
+
+          // If zero-hops moved us, restart with refreshed hs/faces/g for new cell
+          if (do_zero_hops())
+            continue;
+
+          // ------------------------------------------------------------
+          // Attempt to find an event within tau_cell using bracketing+bisection.
+          // If bracketing fails, adaptive substep: tau_cell *= 0.5 and retry.
+          // ------------------------------------------------------------
+          Real tau_cell = std::min(tau, dt_cap);
+
+          bool found_event = false;
+          size_t j_star = 0;
+          Real hi_star = Real(0);
+
+          auto phi_at_time = [&](size_t j, Real t, Math::SpatialPoint& r_out) -> Real
+          {
+            advance(r_out, t, s_rc);
+            return phi_face(hs, j, r_out);
+          };
+
+          auto try_bracket_face = [&](size_t j, Real t0, Real& hi_out) -> bool
+          {
+            Real t = std::min(t0, tau_cell);
+            if (!(t > Real(0)) || !is_finite(t)) return false;
+
+            Real ph = phi_at_time(j, t, s_r_eval);
+            if (!is_finite(ph)) return false;
+
+            if (ph <= Real(0)) { hi_out = t; return true; }
+
+            Real texp = t;
+            for (int k = 0; k < EXPANDS; ++k)
+            {
+              const Real tnext = std::min(tau_cell, GAMMA * texp);
+              if (!(tnext > texp)) break;
+
+              texp = tnext;
+              ph = phi_at_time(j, texp, s_r_eval);
+              if (!is_finite(ph)) return false;
+
+              if (ph <= Real(0)) { hi_out = texp; return true; }
+            }
+
+            // last chance: tau_cell
+            if (texp < tau_cell)
+            {
+              ph = phi_at_time(j, tau_cell, s_r_eval);
+              if (is_finite(ph) && ph <= Real(0)) { hi_out = tau_cell; return true; }
+            }
+
             return false;
           };
 
-          // Build candidates at (r_hit, x_hit) using signed distance band + SOFT hysteresis
-          auto build_candidates_at = [&](const Math::SpatialPoint& r_hit,
-                                         const Math::SpatialPoint& x_hit,
-                                         std::vector<Cand>& out)
+          for (int subdiv = 0; subdiv <= MAX_SUBDIV; ++subdiv)
           {
-            out.clear();
-            out.reserve(planes.size());
+            // Build linear candidates within tau_cell
+            s_cand.clear();
+            s_cand.reserve(faces.size());
 
-            const auto vr = vref(r_hit);
-
-            bool have_non_last = false;
-            for (size_t j = 0; j < planes.size(); ++j)
+            for (size_t j = 0; j < faces.size(); ++j)
             {
-              const Plane& pl = planes[j];
-              if (!pl.ok) continue;
+              const Real phi0 = phi_face(hs, j, s_rc);
 
-              const Real sd = sd_at(pl, x_hit);
-              if (!is_finite(sd)) continue;
-              if (!(sd <= eps_hit_phys)) continue;  // active band, signed
+              // If on/outside, zero-hop should have handled it; don't use as forward event.
+              if (!(phi0 > eps_phi)) continue;
 
-              const Real ndv = dot(vr, pl.nref);
-              const bool is_last = (last_face && j == *last_face);
-              if (!is_last) have_non_last = true;
+              const Math::SpatialVector<Real> nref = hs.matrix.row(j).transpose();
+              const Real ndv = dot(nref, v0);
+              if (!(ndv > eps_ndv)) continue;
 
-              out.push_back(Cand{ j, sd, ndv, pl.fid, is_last });
+              const Real tlin = phi0 / ndv;
+              if (!(tlin > Real(0)) || !is_finite(tlin)) continue;
+              if (tlin > tau_cell) continue;
+
+              s_cand.push_back(Candidate{ tlin, j, ndv, phi0, faces[j] });
             }
 
-            // PATCH (soft hysteresis): drop last-face only if there is an alternative
-            if (have_non_last)
+            if (s_cand.empty())
             {
-              size_t w = 0;
-              for (size_t k = 0; k < out.size(); ++k)
-                if (!out[k].is_last) out[w++] = out[k];
-              out.resize(w);
+              found_event = false;
+              break;
             }
-          };
 
-          // Deterministic selection with fallbacks + mode
-          auto pick_best_exit = [&](const std::vector<Cand>& in, size_t& jhit, PickMode& mode) -> bool
-          {
-            auto key = [](const Cand& c)
+            std::sort(s_cand.begin(), s_cand.end(),
+              [](const Candidate& a, const Candidate& b)
+              {
+                if (a.tlin != b.tlin) return a.tlin < b.tlin;
+                if (a.ndv  != b.ndv ) return a.ndv  > b.ndv;
+                return a.fid < b.fid;
+              });
+
+            // Scan some best candidates first, then all if needed.
+            const int ntry = std::min<int>(K_TRY, static_cast<int>(s_cand.size()));
+
+            auto consider = [&](int begin, int end)
             {
-              return std::tuple<Real, Real, Index>(c.sd, -c.ndv, c.fid);
+              for (int k = begin; k < end; ++k)
+              {
+                const auto& c = s_cand[static_cast<size_t>(k)];
+
+                // soft hysteresis: skip last_face only if there are other faces to try
+                if (last_face && c.j == *last_face && s_cand.size() > 1)
+                  continue;
+
+                Real hi = Real(0);
+                if (!try_bracket_face(c.j, c.tlin, hi)) continue;
+
+                if (!found_event || hi < hi_star)
+                {
+                  found_event = true;
+                  j_star = c.j;
+                  hi_star = hi;
+                }
+              }
             };
 
-            bool have = false;
-            Cand best{0,0,0,0,false};
+            found_event = false;
+            consider(0, ntry);
+            if (!found_event)
+              consider(ntry, static_cast<int>(s_cand.size()));
 
-            // Strict: ndv > eps_ndv
-            for (const auto& c : in)
-            {
-              if (!(c.ndv > eps_ndv)) continue;
-              if (!have) { best = c; have = true; continue; }
-              if (key(c) < key(best)) best = c;
-            }
-            if (have) { jhit = best.j; mode = PickMode::Strict; return true; }
+            if (found_event)
+              break;
 
-            // Fallback 1: ndv > 0
-            have = false;
-            for (const auto& c : in)
-            {
-              if (!(c.ndv > Real(0))) continue;
-              if (!have) { best = c; have = true; continue; }
-              if (key(c) < key(best)) best = c;
-            }
-            if (have) { jhit = best.j; mode = PickMode::NdvPos; return true; }
-
-            // Fallback 2: overshot (sd < 0), choose most negative sd then fid
-            have = false;
-            for (const auto& c : in)
-            {
-              if (!(c.sd < Real(0))) continue;
-              if (!have) { best = c; have = true; continue; }
-              if (std::tuple<Real,Index>(c.sd,c.fid) < std::tuple<Real,Index>(best.sd,best.fid))
-                best = c;
-            }
-            if (have) { jhit = best.j; mode = PickMode::Overshot; return true; }
-
-            return false;
-          };
-
-          // Event finder: bracket earliest dt where reached(dt) becomes true
-          auto find_event = [&](Real dt_max, Real& thit, size_t& jhit, PickMode& mode) -> bool
-          {
-            if (!(dt_max > Real(0))) return false;
-            if (!reached(dt_max))    return false;
-
-            Real lo = Real(0);
-            Real hi = dt_max;
-
-            for (int s = 0; s < MAX_SUBDIV; ++s)
-            {
-              if (hi - lo <= dt_stop) break;
-              const Real mid = Real(0.5) * (lo + hi);
-              if (reached(mid)) hi = mid;
-              else             lo = mid;
-            }
-
-            for (int it = 0; it < MAX_BISECT; ++it)
-            {
-              if (hi - lo <= dt_stop) break;
-              const Real mid = Real(0.5) * (lo + hi);
-              if (reached(mid)) hi = mid;
-              else             lo = mid;
-            }
-
-            // PATCH: non-monotone reached guard.
-            // If reached(lo) became true due to noise, do NOT abort hard; be conservative:
-            // use thit = lo (or 0) and try to select a face at that state.
-            if (lo > Real(0) && reached(lo))
-              thit = lo;
-            else
-              thit = hi;
-
-            // Recompute state at thit (reached() overwrote scratch)
-            advance(s_r_eval, thit, s_rc);
-            x_of(s_x_eval, s_r_eval);
-
-            // PATCH: defensive “reached(thit)” check on the recomputed state
-            bool ok_reach = false;
-            for (size_t j = 0; j < planes.size(); ++j)
-            {
-              const Plane& pl = planes[j];
-              if (!pl.ok) continue;
-              const Real d = sd_at(pl, s_x_eval);
-              if (is_finite(d) && d <= eps_hit_phys) { ok_reach = true; break; }
-            }
-            if (!ok_reach) return false;
-
-            build_candidates_at(s_r_eval, s_x_eval, cand);
-            if (cand.empty()) return false;
-            if (!pick_best_exit(cand, jhit, mode)) return false;
-
-            // PATCH: mode-aware validation (selection/validation must agree)
-            {
-              const Plane& pl = planes[jhit];
-              if (!pl.ok) return false;
-
-              const Real d = sd_at(pl, s_x_eval);
-              if (!is_finite(d) || !(d <= eps_hit_phys)) return false;
-
-              const auto vr = vref(s_r_eval);
-              const Real ndv = dot(vr, pl.nref);
-              if (!is_finite(ndv)) return false;
-
-              switch (mode)
-              {
-                case PickMode::Strict:
-                  if (!(ndv > eps_ndv)) return false;
-                  break;
-                case PickMode::NdvPos:
-                  if (!(ndv > Real(0))) return false;
-                  break;
-                case PickMode::Overshot:
-                  // accept only if “meaningfully overshot”, and allow slight negative ndv
-                  if (!(d < -Real(0.1) * eps_hit_phys)) return false;
-                  if (!(ndv >= -eps_ndv)) return false;
-                  break;
-              }
-            }
-
-            return true;
-          };
-
-          // -------------------------------------------------------------------------
-          // One step: event or no-event
-          // -------------------------------------------------------------------------
-          Real thit = 0;
-          size_t jhit = 0;
-          PickMode mode = PickMode::Strict;
-
-          const bool have_event = find_event(tau, thit, jhit, mode);
-
-          if (!have_event)
-          {
-            // Advance full tau
-            advance(s_rc1, tau, s_rc);
-            s_rc = s_rc1;
-
-            // Drift clamp only if slightly outside (physical)
-            x_of(s_x, s_rc);
-            bool outside = false;
-            for (size_t j = 0; j < planes.size(); ++j)
-            {
-              const Plane& pl = planes[j];
-              if (!pl.ok) continue;
-              const Real d = sd_at(pl, s_x);
-              if (is_finite(d) && d < Real(0)) { outside = true; break; }
-            }
-            if (outside)
-            {
-              Geometry::Polytope::Project(g).cell(s_rc1, s_rc);
-              s_rc = s_rc1;
-            }
-
-            tau = Real(0);
-            break;
+            // Adaptive substep if bracketing failed
+            tau_cell *= Real(0.5);
+            if (tau_cell <= dt_min || !is_finite(tau_cell))
+              break;
           }
 
-          // Advance to event and project onto hit face (reference)
-          if (!(thit >= Real(0)) || !(thit <= tau) || !is_finite(thit))
+          if (!found_event)
           {
+            // No event found robustly within tau_cell: advance tau_cell and clamp if needed.
+            // This is safe and stable; accuracy depends on dt_cap and mesh quality.
+            advance(s_rc1, tau_cell, s_rc);
+            s_rc = s_rc1;
+
+            clamp_if_outside(hs, g, s_rc, eps_phi);
+
+            tau -= tau_cell;
+            continue;
+          }
+
+          // ------------------------------------------------------------
+          // Bisection on single face j_star: phi_j(t)=0 with bracket [0, hi_star]
+          // ------------------------------------------------------------
+          const Real phi0_star = phi_face(hs, j_star, s_rc);
+          if (!(phi0_star > Real(0)))
+          {
+            // Degenerate start; clamp and restart
             Geometry::Polytope::Project(g).cell(s_rc1, s_rc);
             s_rc = s_rc1;
-            break;
+            continue;
           }
 
-          advance(s_rc1, thit, s_rc);
-          Geometry::Polytope::Project(g).face(jhit, s_rc, s_rc1);
-          s_rc = s_rc1;
-          tau -= thit;
+          // dt tolerance scaled by "speed toward face"
+          const Real ndv0 = dot(hs.matrix.row(j_star).transpose(), v0);
+          const Real dt_tol = std::max<Real>(Real(1e-12), eps_phi / std::max<Real>(ndv0, v_floor));
 
-          // Micro inside clamp to kill jitter
+          Real lo = Real(0);
+          Real hi = hi_star;
+
+          for (int it = 0; it < MAX_BISECT; ++it)
+          {
+            if (hi - lo <= dt_tol) break;
+
+            const Real mid = Real(0.5) * (lo + hi);
+            const Real phm = phi_at_time(j_star, mid, s_r_eval);
+
+            if (!is_finite(phm))
+            {
+              // shrink conservatively
+              hi = mid;
+              continue;
+            }
+
+            if (phm > Real(0))
+              lo = mid;
+            else
+              hi = mid;
+          }
+
+          const Real thit = hi;
+
+          // Advance to thit, then project onto hit face, then clamp inside
+          advance(s_rc1, thit, s_rc);
+          Geometry::Polytope::Project(g).face(j_star, s_rc, s_rc1);
+          s_rc = s_rc1;
+
           Geometry::Polytope::Project(g).cell(s_rc1, s_rc);
           s_rc = s_rc1;
 
-          const Index face_hit = faces[jhit];
+          tau -= thit;
 
-          // Physical point at face
-          x_of(s_pc, s_rc);
+          const Index face_hit = faces[j_star];
 
-          // -------------------------------------------------------------------------
+          // physical point at face for mapping
+          mesh.getPolytopeTransformation(cd, s_cell).transform(s_pc, s_rc);
+
+          // ------------------------------------------------------------
           // Boundary vs interior hop
-          // -------------------------------------------------------------------------
+          // ------------------------------------------------------------
           if (mesh.isBoundary(face_hit))
           {
-            if (!m_bp(BoundaryHit{tau, s_cell, s_rc, jhit}))
+            if (!m_bp(BoundaryHit{tau, s_cell, s_rc, j_star}))
               return Trace{ true, tau, Geometry::Point(*itc, s_rc) };
 
             last_face.reset();
             continue;
           }
 
-          // Interior hop across face_hit
+          // Hop across face_hit
           {
             const auto& nbrs = conn.getIncidence(cd - 1, cd).at(face_hit);
-            assert(nbrs.size() == 2);
+            if (nbrs.size() != 2)
+              return Trace{ true, tau, Geometry::Point(*itc, s_rc) };
             s_cell = (nbrs[0] == s_cell) ? nbrs[1] : nbrs[0];
           }
 
@@ -848,7 +848,7 @@ namespace Rodin::Variational
           Geometry::Polytope::Project(mesh.getGeometry(cd, s_cell)).cell(s_rc1, s_rc);
           s_rc = s_rc1;
 
-          // Update hysteresis local face index in new cell
+          // Update hysteresis in new cell: mark the face we just crossed
           {
             const auto& faces_new = conn.getIncidence(cd, cd - 1).at(s_cell);
             last_face.reset();
@@ -856,219 +856,7 @@ namespace Rodin::Variational
               if (faces_new[j] == face_hit) { last_face = j; break; }
           }
 
-          // -------------------------------------------------------------------------
-          // Zero-hop chain (edge/vertex): repeat face selection at dt=0
-          // -------------------------------------------------------------------------
-          size_t zero_hops = 0;
-          while (zero_hops++ < ZERO_HOPS_MAX)
-          {
-            const auto itz = mesh.getPolytope(cd, s_cell);
-            const auto& cellz = *itz;
-
-            const auto gz = mesh.getGeometry(cd, s_cell);
-            const auto& facesz = conn.getIncidence(cd, cd - 1).at(s_cell);
-            const auto& hsz = Geometry::Polytope::Traits(gz).getHalfSpace();
-
-            assert(static_cast<size_t>(hsz.matrix.rows()) == facesz.size());
-            assert(static_cast<size_t>(hsz.vector.size()) == facesz.size());
-
-            auto phi_face_z = [&](size_t j, const Math::SpatialPoint& r) -> Real
-            {
-              const auto n = hsz.matrix.row(j);
-              const Real b = hsz.vector[j];
-              return b - r.dot(n);
-            };
-
-            auto vrefz = [&](const Math::SpatialPoint& r) -> Math::SpatialVector<Real>
-            {
-              const Geometry::Point qp(cellz, r);
-              return (sgn * qp.getJacobianInverse() * vphys_of(qp));
-            };
-
-            auto x_of_z = [&](Math::SpatialPoint& xout, const Math::SpatialPoint& r)
-            {
-              mesh.getPolytopeTransformation(cd, s_cell).transform(xout, r);
-            };
-
-            // Build planes for this cell (same indexing)
-            x_of_z(s_x, s_rc);
-
-            const auto rcent = Geometry::Polytope::Traits(gz).getCentroid();
-            assert(static_cast<size_t>(rcent.size()) == cd);
-            s_r_in = rcent;
-            x_of_z(s_x_in, s_r_in);
-
-            planes.clear();
-            planes.resize(facesz.size());
-
-            const Geometry::Point qJz(cellz, s_r_in, s_x_in);
-            const auto Jinvz  = qJz.getJacobianInverse();
-            const auto JinvTz = Jinvz.transpose();
-
-            for (size_t j = 0; j < facesz.size(); ++j)
-            {
-              Plane pl;
-              pl.fid  = facesz[j];
-              pl.nref = hsz.matrix.row(j).transpose(); // PATCH: column
-              pl.n_u  = JinvTz * pl.nref;
-
-              const Real nn2 = norm2(pl.n_u);
-              pl.nn = std::sqrt(nn2);
-              pl.ok = (pl.nn > Real(0)) && is_finite(pl.nn);
-
-              Geometry::Polytope::Project(gz).face(j, s_rc_tmp, s_r_in);
-
-#ifndef NDEBUG
-              const Real ph = phi_face_z(j, s_rc_tmp);
-              const auto nrow = hsz.matrix.row(j);
-              const Real nrm  = std::sqrt(std::max<Real>(0, dot(nrow, nrow)));
-              const Real rrm  = std::sqrt(std::max<Real>(0, dot(s_rc_tmp, s_rc_tmp)));
-              const Real scale = Real(1) + std::abs(hsz.vector[j]) + nrm * rrm;
-              const Real tol = Real(1e3) * sqrt_eps * scale;
-              assert(std::abs(ph) <= tol);
-#endif
-
-              x_of_z(s_x_face, s_rc_tmp);
-              pl.c_u = dot(pl.n_u, s_x_face);
-
-              // PATCH: robust orientation
-              const Real sd_in  = pl.c_u - dot(pl.n_u, s_x_in);
-              const Real tol_in = Real(10) * sqrt_eps * std::max<Real>(Real(1), std::abs(pl.c_u));
-              if (sd_in < -tol_in)
-              {
-                pl.n_u = -pl.n_u;
-                pl.c_u = -pl.c_u;
-              }
-
-              planes[j] = pl;
-            }
-
-            // eps_hit_phys for this cell
-            Real h_scale_z = Real(0);
-            for (size_t j = 0; j < planes.size(); ++j)
-            {
-              const Plane& pl = planes[j];
-              if (!pl.ok) continue;
-              const Real d = (pl.c_u - dot(pl.n_u, s_x_in)) / pl.nn;
-              if (is_finite(d)) h_scale_z = std::max(h_scale_z, d);
-            }
-            if (!(h_scale_z > Real(0)) || !is_finite(h_scale_z))
-              break;
-
-            const Real eps_hit_phys_z = C_HIT * sqrt_eps * h_scale_z;
-
-            // candidates at t=0
-            cand.clear();
-            cand.reserve(planes.size());
-
-            const auto vz = vrefz(s_rc);
-            const Real vrefz_mag = std::sqrt(norm2(vz));
-            const Real eps_ndv_z = C_NDV * sqrt_eps * (Real(1) + vrefz_mag);
-
-            bool have_non_last = false;
-            for (size_t j = 0; j < planes.size(); ++j)
-            {
-              const Plane& pl = planes[j];
-              if (!pl.ok) continue;
-
-              const Real sd = (pl.c_u - dot(pl.n_u, s_x)) / pl.nn;
-              if (!is_finite(sd)) continue;
-              if (!(sd <= eps_hit_phys_z)) continue;
-
-              const Real ndv = dot(vz, pl.nref);
-              const bool is_last = (last_face && j == *last_face);
-              if (!is_last) have_non_last = true;
-
-              cand.push_back(Cand{ j, sd, ndv, pl.fid, is_last });
-            }
-
-            // PATCH: soft hysteresis in zero-hop too
-            if (have_non_last)
-            {
-              size_t w = 0;
-              for (size_t k = 0; k < cand.size(); ++k)
-                if (!cand[k].is_last) cand[w++] = cand[k];
-              cand.resize(w);
-            }
-
-            if (cand.empty())
-              break;
-
-            // deterministic pick (same policy, but using eps_ndv_z)
-            auto pick_best_zero = [&](size_t& jhit0, PickMode& mode0) -> bool
-            {
-              auto key = [](const Cand& c)
-              {
-                return std::tuple<Real, Real, Index>(c.sd, -c.ndv, c.fid);
-              };
-
-              bool have = false;
-              Cand best = cand.front();
-
-              for (const auto& c : cand)
-              {
-                if (!(c.ndv > eps_ndv_z)) continue;
-                if (!have) { best = c; have = true; continue; }
-                if (key(c) < key(best)) best = c;
-              }
-              if (have) { jhit0 = best.j; mode0 = PickMode::Strict; return true; }
-
-              have = false;
-              for (const auto& c : cand)
-              {
-                if (!(c.ndv > Real(0))) continue;
-                if (!have) { best = c; have = true; continue; }
-                if (key(c) < key(best)) best = c;
-              }
-              if (have) { jhit0 = best.j; mode0 = PickMode::NdvPos; return true; }
-
-              have = false;
-              for (const auto& c : cand)
-              {
-                if (!(c.sd < Real(0))) continue;
-                if (!have) { best = c; have = true; continue; }
-                if (std::tuple<Real,Index>(c.sd,c.fid) < std::tuple<Real,Index>(best.sd,best.fid))
-                  best = c;
-              }
-              if (have) { jhit0 = best.j; mode0 = PickMode::Overshot; return true; }
-
-              return false;
-            };
-
-            size_t jbest = 0;
-            PickMode m = PickMode::Strict;
-            if (!pick_best_zero(jbest, m))
-              break;
-
-            const Index f2 = facesz[jbest];
-
-            // boundary?
-            if (mesh.isBoundary(f2))
-            {
-              if (!m_bp(BoundaryHit{tau, s_cell, s_rc, jbest}))
-                return Trace{ true, tau, Geometry::Point(*itz, s_rc) };
-
-              last_face.reset();
-              break;
-            }
-
-            // hop across f2 at t=0
-            x_of_z(s_pc, s_rc);
-
-            const auto& nbr2 = conn.getIncidence(cd - 1, cd).at(f2);
-            assert(nbr2.size() == 2);
-            s_cell = (nbr2[0] == s_cell) ? nbr2[1] : nbr2[0];
-
-            mesh.getPolytopeTransformation(cd, s_cell).inverse(s_rc, s_pc);
-            Geometry::Polytope::Project(mesh.getGeometry(cd, s_cell)).cell(s_rc1, s_rc);
-            s_rc = s_rc1;
-
-            // update hysteresis in new cell
-            const auto& faces_next = conn.getIncidence(cd, cd - 1).at(s_cell);
-            last_face.reset();
-            for (size_t j = 0; j < faces_next.size(); ++j)
-              if (faces_next[j] == f2) { last_face = j; break; }
-          }
+          // Loop continues; next iteration will zero-hop if we landed on an edge/vertex
         }
 
         const auto itf = mesh.getPolytope(cd, s_cell);
