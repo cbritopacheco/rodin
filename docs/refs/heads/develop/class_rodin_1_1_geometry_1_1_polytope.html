@@ -78,9 +78,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md98">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md99">Hierarchy</a></li>
-            <li><a href="#autotoc_md100">Usage</a></li>
+            <li><a href="#autotoc_md97">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md98">Hierarchy</a></li>
+            <li><a href="#autotoc_md99">Usage</a></li>
             <li>
               Reference
               <ul>
@@ -93,7 +93,7 @@
             </li>
           </ul>
         </nav>
-<p>A <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> represents a geometric entity in a finite element mesh, ranging from vertices (0D) to cells (highest dimension). Polytopes are the building blocks of mesh topology and provide the geometric foundation for finite element computations.</p><section id="autotoc_md98"><h2><a href="#autotoc_md98">Mathematical Foundation</a></h2><p>Each polytope <svg class="m-math" style="width: 0.669em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.418941 5.147373">
+<p>A <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> represents a geometric entity in a finite element mesh, ranging from vertices (0D) to cells (highest dimension). Polytopes are the building blocks of mesh topology and provide the geometric foundation for finite element computations.</p><section id="autotoc_md97"><h2><a href="#autotoc_md97">Mathematical Foundation</a></h2><p>Each polytope <svg class="m-math" style="width: 0.669em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.418941 5.147373">
 <title>
 $ \tau $
 </title>
@@ -163,7 +163,7 @@ $ x: K \rightarrow \tau $
 <use x='30.683916' y='0' xlink:href='#eq6-g0-33'/>
 <use x='45.959948' y='0' xlink:href='#eq6-g1-28'/>
 </g>
-</svg> mapping reference to physical coordinates</li></ul></section><section id="autotoc_md99"><h2><a href="#autotoc_md99">Hierarchy</a></h2><p>The <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> class serves as the base for specialized classes:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_cell.html" class="m-doc">Cell</a>: Highest-dimensional elements (e.g., tetrahedra in 3D, triangles in 2D)</li><li><a href="class_rodin_1_1_geometry_1_1_face.html" class="m-doc">Face</a>: Codimension-1 elements (e.g., triangles in 3D, edges in 2D)</li><li><a href="class_rodin_1_1_geometry_1_1_vertex.html" class="m-doc">Vertex</a>: 0-dimensional points</li></ul></section><section id="autotoc_md100"><h2><a href="#autotoc_md100">Usage</a></h2><p>Polytopes are typically obtained through iterators:</p><pre class="m-code"><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getCell</span><span class="p">();</span><span class="w"> </span><span class="n">it</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">it</span><span class="p">)</span>
+</svg> mapping reference to physical coordinates</li></ul></section><section id="autotoc_md98"><h2><a href="#autotoc_md98">Hierarchy</a></h2><p>The <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> class serves as the base for specialized classes:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_cell.html" class="m-doc">Cell</a>: Highest-dimensional elements (e.g., tetrahedra in 3D, triangles in 2D)</li><li><a href="class_rodin_1_1_geometry_1_1_face.html" class="m-doc">Face</a>: Codimension-1 elements (e.g., triangles in 3D, edges in 2D)</li><li><a href="class_rodin_1_1_geometry_1_1_vertex.html" class="m-doc">Vertex</a>: 0-dimensional points</li></ul></section><section id="autotoc_md99"><h2><a href="#autotoc_md99">Usage</a></h2><p>Polytopes are typically obtained through iterators:</p><pre class="m-code"><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getCell</span><span class="p">();</span><span class="w"> </span><span class="n">it</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">it</span><span class="p">)</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">Cell</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cell</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">it</span><span class="p">;</span>
 <span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Cell &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">cell</span><span class="p">.</span><span class="n">getIndex</span><span class="p">()</span><span class="w"> </span>

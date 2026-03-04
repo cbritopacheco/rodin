@@ -78,8 +78,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md30">Variants</a></li>
-            <li><a href="#autotoc_md31">Usage Example</a></li>
+            <li><a href="#autotoc_md29">Variants</a></li>
+            <li><a href="#autotoc_md30">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -156,7 +156,7 @@ $ \Gamma $
 <g id='eq4-page1'>
 <use x='0' y='0' xlink:href='#eq4-g0-0'/>
 </g>
-</svg> is the interface.</p><section id="autotoc_md30"><h3><a href="#autotoc_md30">Variants</a></h3><p>This class provides two operator() overloads:</p><ol><li>Unsigned distance (full domain)</li><li>Signed distance (with specified interior/interface regions)</li></ol></section><section id="autotoc_md31"><h3><a href="#autotoc_md31">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">fes</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg> is the interface.</p><section id="autotoc_md29"><h3><a href="#autotoc_md29">Variants</a></h3><p>This class provides two operator() overloads:</p><ol><li>Unsigned distance (full domain)</li><li>Signed distance (with specified interior/interface regions)</li></ol></section><section id="autotoc_md30"><h3><a href="#autotoc_md30">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">fes</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">SignedPoisson</span><span class="w"> </span><span class="n">signedDist</span><span class="p">;</span>
 <span class="c1">// Signed distance with regions:</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">signedDist</span><span class="p">(</span><span class="n">interfaceAttr</span><span class="p">,</span><span class="w"> </span><span class="n">interiorAttr</span><span class="p">,</span><span class="w"> </span><span class="n">fes</span><span class="p">);</span></pre></section>
