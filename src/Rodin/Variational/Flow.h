@@ -198,7 +198,10 @@ namespace Rodin::Variational
            const Operand& u,
            VVel&& vel,
            S&& st=S{}, B&& bp=B{}, T&& tp=T{})
-        : m_t(t),
+        : m_maxZeroHops(128),
+          m_maxBisectionIterations(16),
+          m_maxSubdivisionIterations(8),
+          m_t(t),
           m_operand(u.copy()),
           m_velocity(std::forward<VVel>(vel)),
           m_step(std::forward<S>(st)),
@@ -209,6 +212,9 @@ namespace Rodin::Variational
 
       Flow(const Flow& other)
         : Parent(other),
+          m_maxZeroHops(other.m_maxZeroHops),
+          m_maxBisectionIterations(other.m_maxBisectionIterations),
+          m_maxSubdivisionIterations(other.m_maxSubdivisionIterations),
           m_t(other.m_t),
           m_operand(other.m_operand->copy()),
           m_velocity(other.m_velocity),
@@ -220,6 +226,9 @@ namespace Rodin::Variational
 
       Flow(Flow&& other)
         : Parent(std::move(other)),
+          m_maxZeroHops(std::move(other.m_maxZeroHops)),
+          m_maxBisectionIterations(std::move(other.m_maxBisectionIterations)),
+          m_maxSubdivisionIterations(std::move(other.m_maxSubdivisionIterations)),
           m_t(std::move(other.m_t)),
           m_operand(std::move(other.m_operand)),
           m_velocity(std::move(other.m_velocity)),
@@ -229,405 +238,842 @@ namespace Rodin::Variational
           m_p(std::exchange(other.m_p, nullptr))
       {}
 
-Trace trace(const Geometry::Point& p) const
-{
-  struct Hit
-  {
-    Real t;
-    size_t j;    // local face index in current cell
-    Real ndv;    // n·vref at start point
-    Index fid;   // global face id
-  };
-
-  const size_t ZERO_HOPS_MAX = 1000; // chained zero-time crossings per event
-  const int    MAX_BISECT    = 32;   // event-location refinement iterations
-
-  // thread-local scratch
-  static thread_local Index s_cell;
-  static thread_local Math::SpatialPoint s_rc{{}}, s_rc1{{}}, s_rc_tmp{{}}, s_pc{{}}, s_r_eval{{}};
-  static thread_local std::vector<Hit> s_cand;
-  static thread_local std::vector<size_t> s_faceset;
-
-  const auto& poly0 = p.getPolytope();
-  const auto& mesh  = poly0.getMesh();
-  const size_t cd   = mesh.getDimension();
-  const auto& conn  = mesh.getConnectivity();
-
-  Real tau = std::abs(m_t);
-  const Real sgn = Math::sgn(m_t);
-
-  // ---- locate starting cell / reference coords
-  if (poly0.getDimension() == cd)
-  {
-    s_cell = poly0.getIndex();
-    s_rc   = p.getReferenceCoordinates();
-  }
-  else if (poly0.getDimension() == cd - 1)
-  {
-    const Index f = poly0.getIndex();
-    const auto& adj = conn.getIncidence(cd - 1, cd).at(f);
-
-    if (mesh.isBoundary(f))
-    {
-      assert(adj.size() > 0);
-      const Index c = adj[0];
-      mesh.getPolytopeTransformation(cd, c).inverse(s_rc_tmp, p.getPhysicalCoordinates());
-      Geometry::Polytope::Project(mesh.getGeometry(cd, c)).cell(s_rc, s_rc_tmp);
-      s_cell = c;
-    }
-    else
-    {
-      assert(adj.size() > 0);
-      const Index c0 = adj[0];
-      mesh.getPolytopeTransformation(cd, c0).inverse(s_rc_tmp, p.getPhysicalCoordinates());
-      const auto it0 = mesh.getPolytope(cd, c0);
-      const auto& cell0 = *it0;
-      const Geometry::Point q0(cell0, s_rc_tmp, p.getPhysicalCoordinates());
-      const auto a0 = sgn * (q0.getJacobianInverse() * m_velocity(q0)).col(0);
-
-      const auto& faces0 = conn.getIncidence(cd, cd - 1).at(c0);
-      size_t j0 = faces0.size();
-      for (size_t k = 0; k < faces0.size(); ++k)
-        if (faces0[k] == f) { j0 = k; break; }
-      assert(j0 < faces0.size());
-
-      const auto g0 = mesh.getGeometry(cd, c0);
-      const auto& hs = Geometry::Polytope::Traits(g0).getHalfSpace();
-      const Math::SpatialVector<Real> nref = hs.matrix.row(j0); // outward in ref(c0)
-
-      if (nref.dot(a0) < 0)
+      Trace trace(const Geometry::Point& p) const
       {
-        Geometry::Polytope::Project(g0).cell(s_rc, s_rc_tmp);
-        s_cell = c0;
-      }
-      else
-      {
-        assert(adj.size() > 1);
-        const Index c1 = adj[1];
-        mesh.getPolytopeTransformation(cd, c1).inverse(s_rc_tmp, p.getPhysicalCoordinates());
-        Geometry::Polytope::Project(mesh.getGeometry(cd, c1)).cell(s_rc, s_rc_tmp);
-        s_cell = c1;
-      }
-    }
-  }
-  else
-  {
-    assert(false);
-    return Trace{ true, 0, p };
-  }
+        // Robust affine/P1 tracer (production-oriented):
+        // - physical oriented face planes per cell (built from fixed anchor + fixed face points)
+        // - event bracketing on "reached band" (sd <= eps_hit)
+        // - deterministic active-set selection with SOFT hysteresis
+        // - chained zero-hop across edges/vertices with same rule
+        //
+        // Assumptions:
+        // - cell maps are affine (P1 geometry) so J^{-1} is constant per cell.
+        // - face ordering contract: hs.row(j) corresponds to faces[j] (per getSubPolytopes order).
 
-  s_rc1.resize(s_rc.size());
-  s_rc_tmp.resize(s_rc.size());
-  s_r_eval.resize(s_rc.size());
-  s_pc.resize(p.getPhysicalCoordinates().size());
-
-  // --- scaled tolerances (Change #3)
-  const Real eps_machine = std::numeric_limits<Real>::epsilon();
-  const Real eps_ref_base = std::sqrt(eps_machine); // scale-free baseline
-
-  auto norm2 = [](const auto& v) -> Real { return v.dot(v); };
-  auto norm  = [&](const auto& v) -> Real { return std::sqrt(std::max<Real>(0, norm2(v))); };
-
-  // Hysteresis: last crossed local face index in current cell
-  std::optional<size_t> last_face;
-
-  while (tau > 0)
-  {
-    const auto itc = mesh.getPolytope(cd, s_cell);
-    const auto& cell = *itc;
-    const auto g = mesh.getGeometry(cd, s_cell);
-    const auto& faces = conn.getIncidence(cd, cd - 1).at(s_cell);
-    const auto& hs = Geometry::Polytope::Traits(g).getHalfSpace();
-
-    // vref(r): reference velocity (sgn * J^{-1} v) at (cell,r)
-    auto vref = [&](const Math::SpatialPoint& r) -> Math::SpatialVector<Real>
-    {
-      const Geometry::Point qp(cell, r);
-      return (sgn * qp.getJacobianInverse() * m_velocity(qp)).col(0);
-    };
-
-    const Math::SpatialVector<Real> v0 = vref(s_rc);
-    const Real vmag = norm(v0);
-
-    const Real eps_ref = eps_ref_base * (1 + norm(s_rc));
-    const Real eps_ndv = eps_ref * (1 + vmag);                 // denom/velocity alignment tol
-    const Real eps_tpos = eps_ref / std::max<Real>(1, vmag);   // positive time tol
-    const Real eps_g = Real(10) * eps_ref;                     // “on face” tol in ref
-    const Real eps_phi = eps_g;                                // event-location target
-
-    auto phi_face = [&](size_t j, const Math::SpatialPoint& r) -> Real
-    {
-      // phi = b - n·r ; interior => phi > 0
-      const auto n = hs.matrix.row(j);
-      const Real b = hs.vector[j];
-      return b - r.dot(n);
-    };
-
-    auto ndv_face = [&](size_t j, const Math::SpatialPoint& r) -> Real
-    {
-      const auto n = hs.matrix.row(j);
-      return vref(r).dot(n);
-    };
-
-    auto advance = [&](Math::SpatialPoint& rout, Real dt, const Math::SpatialPoint& rin)
-    {
-      m_step.step(rout, dt, rin, [&](const Math::SpatialPoint& rr) -> Math::SpatialVector<Real>
-      {
-        return vref(rr);
-      });
-    };
-
-    // ---- collect candidate face hits by linear predictor
-    s_cand.clear();
-    s_cand.reserve(faces.size());
-
-    for (size_t i = 0; i < faces.size(); ++i)
-    {
-      if (last_face && i == *last_face)
-        continue;
-
-      const Real g0 = phi_face(i, s_rc);
-      if (g0 <= eps_g) // treat near/outside as not a valid interior departure
-        continue;
-
-      const Real ndv = vref(s_rc).dot(hs.matrix.row(i));
-      if (ndv <= eps_ndv) // not moving toward that face (robust denom)
-        continue;
-
-      const Real ti = g0 / ndv;
-      if (ti > eps_tpos && ti <= tau)
-        s_cand.push_back({ ti, i, ndv, faces[i] });
-    }
-
-    if (s_cand.empty())
-    {
-      // advance remaining time in this cell
-      advance(s_rc1, tau, s_rc);
-      s_rc = s_rc1;
-
-      // Optional invariant clamp: keep inside (robustness aid without changing semantics)
-      // Clamp by projecting to cell if we numerically drifted out.
-      bool violated = false;
-      for (size_t i = 0; i < faces.size(); ++i)
-        if (phi_face(i, s_rc) < -eps_g) { violated = true; break; }
-      if (violated)
-      {
-        Geometry::Polytope::Project(g).cell(s_rc1, s_rc);
-        s_rc = s_rc1;
-      }
-      break;
-    }
-
-    // pick earliest; tie-break by more transversal; then by global face id
-    auto itmin =
-      std::min_element(
-        s_cand.begin(), s_cand.end(),
-        [](const Hit& a, const Hit& b)
+        struct Plane
         {
-          if (a.t != b.t) return a.t < b.t;
-          if (a.ndv != b.ndv) return a.ndv > b.ndv;
-          return a.fid < b.fid;
-        });
+          Math::SpatialVector<Real> n_u;   // unnormalized physical normal (J^{-T} nref_col)
+          Math::SpatialVector<Real> nref;  // PATCH: store as COLUMN reference normal (consistent dot(vref,nref))
+          Real c_u;                        // plane constant: sd_u(x) = c_u - n_u·x
+          Real nn;                         // ||n_u||
+          Index fid;                       // global face id
+          bool ok;                         // nn finite and >0
+        };
 
-    const Real t_pred = itmin->t;
-    const size_t jhit = itmin->j;
-    assert(jhit < faces.size());
-    const Index face_hit = faces[jhit];
-
-    // ---- event-location refinement (Change #1)
-    // Refine hit time so that phi_face(jhit, r(t)) ~= 0 using bisection.
-    Real thit = t_pred;
-
-    // Evaluate at predicted time
-    advance(s_r_eval, t_pred, s_rc);
-    const Real phi_pred = phi_face(jhit, s_r_eval);
-
-    if (phi_pred > eps_phi)
-    {
-      // RK step did not reach/cross the face; keep linear predictor (best effort)
-      // (common when v varies strongly; still safer than “no hit”)
-      thit = t_pred;
-    }
-    else
-    {
-      Real lo = 0;
-      Real hi = t_pred;
-      // phi(lo) = phi(s_rc) should be > 0 (interior), but allow small drift
-      Real phi_lo = phi_face(jhit, s_rc);
-      Real phi_hi = phi_pred;
-
-      // Ensure a valid bracket; if not, skip refinement
-      if (phi_lo > 0 && phi_hi <= 0)
-      {
-        for (int it = 0; it < MAX_BISECT; ++it)
+        struct Cand
         {
-          const Real mid = Real(0.5) * (lo + hi);
-          advance(s_r_eval, mid, s_rc);
-          const Real phi_mid = phi_face(jhit, s_r_eval);
+          size_t j;        // local face index
+          Real   sd;       // signed distance (physical) to oriented plane
+          Real   ndv;      // vref · nref (reference space)
+          Index  fid;      // global face id
+          bool   is_last;  // whether j == last_face
+        };
 
-          if (std::abs(phi_mid) <= eps_phi)
-          {
-            thit = mid;
-            break;
-          }
+        enum class PickMode { Strict, NdvPos, Overshot };
 
-          if (phi_mid > 0)
+        const size_t ZERO_HOPS_MAX = m_maxZeroHops;
+        const int    MAX_BISECT    = static_cast<int>(m_maxBisectionIterations);
+        const int    MAX_SUBDIV    = static_cast<int>(m_maxSubdivisionIterations);
+
+        const auto& poly0 = p.getPolytope();
+        const auto& mesh  = poly0.getMesh();
+        const size_t cd   = mesh.getDimension();
+        const auto& conn  = mesh.getConnectivity();
+
+        Real tau = std::abs(m_t);
+        const Real sgn = Math::sgn(m_t);
+
+        // Scratch
+        Index s_cell = Index(-1);
+
+        Math::SpatialPoint s_rc{{}}, s_rc1{{}}, s_rc_tmp{{}}, s_r_eval{{}}, s_r_in{{}};
+        Math::SpatialPoint s_pc{{}}, s_x{{}}, s_x_eval{{}}, s_x_in{{}}, s_x_face{{}};
+
+        std::vector<Plane> planes; planes.reserve(16);
+        std::vector<Cand>  cand;   cand.reserve(16);
+
+        const Real eps_machine = std::numeric_limits<Real>::epsilon();
+        const Real sqrt_eps    = std::sqrt(eps_machine);
+        const Real v_floor     = std::numeric_limits<Real>::min();
+
+        auto dot = [](const auto& a, const auto& b) -> Real { return a.dot(b); };
+        auto is_finite = [](Real v) -> bool { return std::isfinite(v); };
+
+        // PATCH: single, consistent norm2 helper to avoid type/shape drift.
+        auto norm2 = [&](const auto& v) -> Real
+        {
+          const Real v2 = dot(v, v);
+          return std::max<Real>(Real(0), v2);
+        };
+
+        // PATCH: normalize “velocity type” once.
+        // If m_velocity(qp) already returns a vector-like type, keep this.
+        // If it returns a (dim x 1) matrix, use .col(0) here and nowhere else.
+        auto vphys_of = [&](const Geometry::Point& qp) -> Math::SpatialVector<Real>
+        {
+          // ----- choose ONE, matching your m_velocity return type -----
+          // return m_velocity(qp);          // vector-like
+          return m_velocity(qp).col(0);      // matrix-like (dim x 1)
+        };
+
+        // ---------------------------------------------------------------------------
+        // Locate starting cell / reference coords (handles starting on a face)
+        // ---------------------------------------------------------------------------
+        if (poly0.getDimension() == cd)
+        {
+          s_cell = poly0.getIndex();
+          s_rc   = p.getReferenceCoordinates();
+        }
+        else if (poly0.getDimension() == cd - 1)
+        {
+          const Index f = poly0.getIndex();
+          const auto& adj = conn.getIncidence(cd - 1, cd).at(f);
+
+          if (mesh.isBoundary(f))
           {
-            lo = mid;
-            phi_lo = phi_mid;
+            assert(!adj.empty());
+            const Index c = adj[0];
+            mesh.getPolytopeTransformation(cd, c).inverse(s_rc_tmp, p.getPhysicalCoordinates());
+            Geometry::Polytope::Project(mesh.getGeometry(cd, c)).cell(s_rc, s_rc_tmp);
+            s_cell = c;
           }
           else
           {
-            hi = mid;
-            phi_hi = phi_mid;
+            assert(adj.size() >= 2);
+            const Index c0 = adj[0];
+            const Index c1 = adj[1];
+
+            // Project into both adjacent cells (affine => robust)
+            mesh.getPolytopeTransformation(cd, c0).inverse(s_rc_tmp, p.getPhysicalCoordinates());
+            Geometry::Polytope::Project(mesh.getGeometry(cd, c0)).cell(s_rc1, s_rc_tmp);
+            const Math::SpatialPoint rc0 = s_rc1;
+
+            mesh.getPolytopeTransformation(cd, c1).inverse(s_rc_tmp, p.getPhysicalCoordinates());
+            Geometry::Polytope::Project(mesh.getGeometry(cd, c1)).cell(s_rc1, s_rc_tmp);
+            const Math::SpatialPoint rc1 = s_rc1;
+
+            // Identify local face index of f in c0
+            const auto& faces0 = conn.getIncidence(cd, cd - 1).at(c0);
+            size_t j0 = faces0.size();
+            for (size_t k = 0; k < faces0.size(); ++k)
+              if (faces0[k] == f) { j0 = k; break; }
+            assert(j0 < faces0.size());
+
+            // Outward reference normal for that face in ref(c0)
+            const auto g0 = mesh.getGeometry(cd, c0);
+            const auto& hs0 = Geometry::Polytope::Traits(g0).getHalfSpace();
+            // PATCH: column normal (consistent with later code)
+            const Math::SpatialVector<Real> nref0 = hs0.matrix.row(j0).transpose();
+
+            const auto it0 = mesh.getPolytope(cd, c0);
+            const auto& cell0 = *it0;
+            const Geometry::Point q0(cell0, rc0, p.getPhysicalCoordinates());
+            const auto vref0 = (sgn * q0.getJacobianInverse() * vphys_of(q0));
+
+            // Fallback: if ambiguous, pick side where projected point is "more interior"
+            auto interior_score = [&](Index c, const Math::SpatialPoint& rproj) -> Real
+            {
+              const auto gc = mesh.getGeometry(cd, c);
+              const auto& hsc = Geometry::Polytope::Traits(gc).getHalfSpace();
+              Real s = std::numeric_limits<Real>::infinity();
+              for (int j = 0; j < hsc.vector.size(); ++j)
+              {
+                const auto n = hsc.matrix.row(j);
+                const Real b = hsc.vector[j];
+                s = std::min(s, b - rproj.dot(n));
+              }
+              return s;
+            };
+
+            const Real ndv = dot(nref0, vref0);
+            if (std::abs(ndv) <= Real(10) * sqrt_eps)
+            {
+              const Real s0 = interior_score(c0, rc0);
+              const Real s1 = interior_score(c1, rc1);
+              if (s1 > s0) { s_cell = c1; s_rc = rc1; }
+              else         { s_cell = c0; s_rc = rc0; }
+            }
+            else if (ndv > 0)
+            {
+              s_cell = c1;
+              s_rc   = rc1;
+            }
+            else
+            {
+              s_cell = c0;
+              s_rc   = rc0;
+            }
+          }
+        }
+        else
+        {
+          assert(false);
+          return Trace{ true, 0, p };
+        }
+
+        // Resize buffers once (invariants)
+        s_rc1.resize(s_rc.size());
+        s_rc_tmp.resize(s_rc.size());
+        s_r_eval.resize(s_rc.size());
+        s_r_in.resize(s_rc.size());
+
+        s_pc.resize(p.getPhysicalCoordinates().size());
+        s_x.resize(s_pc.size());
+        s_x_eval.resize(s_pc.size());
+        s_x_in.resize(s_pc.size());
+        s_x_face.resize(s_pc.size());
+
+        Optional<size_t> last_face;
+
+        // ---------------------------------------------------------------------------
+        // Main tracing loop
+        // ---------------------------------------------------------------------------
+        while (tau > 0)
+        {
+          const auto itc = mesh.getPolytope(cd, s_cell);
+          const auto& cell = *itc;
+
+          const auto g = mesh.getGeometry(cd, s_cell);
+          const auto& faces = conn.getIncidence(cd, cd - 1).at(s_cell);
+          const auto& hs = Geometry::Polytope::Traits(g).getHalfSpace();
+
+          // Hard invariants
+          assert(static_cast<size_t>(hs.matrix.rows()) == faces.size());
+          assert(static_cast<size_t>(hs.vector.size()) == faces.size());
+
+          auto phi_face = [&](size_t j, const Math::SpatialPoint& r) -> Real
+          {
+            const auto n = hs.matrix.row(j);
+            const Real b = hs.vector[j];
+            return b - r.dot(n); // interior => > 0
+          };
+
+          auto vref = [&](const Math::SpatialPoint& r) -> Math::SpatialVector<Real>
+          {
+            const Geometry::Point qp(cell, r);
+            return (sgn * qp.getJacobianInverse() * vphys_of(qp));
+          };
+
+          auto advance = [&](Math::SpatialPoint& rout, Real dt, const Math::SpatialPoint& rin)
+          {
+            m_step.step(rout, dt, rin,
+              [&](const Math::SpatialPoint& rr) -> Math::SpatialVector<Real>
+              {
+                return vref(rr);
+              });
+          };
+
+          auto x_of = [&](Math::SpatialPoint& xout, const Math::SpatialPoint& r)
+          {
+            mesh.getPolytopeTransformation(cd, s_cell).transform(xout, r);
+          };
+
+          // Interior anchor in reference (Traits uses [0,1]^d conventions)
+          {
+            const auto rcent = Geometry::Polytope::Traits(g).getCentroid();
+            assert(static_cast<size_t>(rcent.size()) == cd);
+            s_r_in = rcent;
+            x_of(s_x_in, s_r_in);
           }
 
-          thit = hi; // earliest time that is (weakly) outside
-        }
-      }
-    }
+          // Current physical point
+          x_of(s_x, s_rc);
 
-    // advance to refined hit time and project onto face
-    advance(s_rc1, thit, s_rc);
-    Geometry::Polytope::Project(g).face(jhit, s_rc, s_rc1);
-    s_rc = s_rc1;
-    tau -= thit;
+          // Build oriented physical planes, indexed EXACTLY by local face index j.
+          planes.clear();
+          planes.resize(faces.size());
 
-    // same-phys point at face
-    mesh.getPolytopeTransformation(cd, s_cell).transform(s_pc, s_rc);
+          const Geometry::Point qJ(cell, s_r_in, s_x_in);
+          const auto Jinv  = qJ.getJacobianInverse();
+          const auto JinvT = Jinv.transpose();
 
-    // ---- cross face or apply boundary policy
-    if (mesh.isBoundary(face_hit))
-    {
-      if (!m_bp(BoundaryHit{tau, s_cell, s_rc, jhit}))
-        return Trace{ true, tau, Geometry::Point(*itc, s_rc) };
-      last_face.reset();
-    }
-    else
-    {
-      // interior hop across face_hit
-      const auto& nbrs = conn.getIncidence(cd - 1, cd).at(face_hit);
-      assert(nbrs.size() == 2);
-      s_cell = (nbrs[0] == s_cell) ? nbrs[1] : nbrs[0];
-
-      // map same phys point into new cell
-      mesh.getPolytopeTransformation(cd, s_cell).inverse(s_rc, s_pc);
-      Geometry::Polytope::Project(mesh.getGeometry(cd, s_cell)).cell(s_rc1, s_rc);
-      s_rc = s_rc1;
-
-      // hysteresis: set opposite face in new cell
-      const auto& faces_new = conn.getIncidence(cd, cd - 1).at(s_cell);
-      last_face.reset();
-      for (size_t i = 0; i < faces_new.size(); ++i)
-      {
-        if (faces_new[i] == face_hit)
-        {
-          last_face = i;
-          break;
-        }
-      }
-
-      // ---- chained zero-time crossings: deterministic multi-face selection (Change #2)
-      size_t zero_hops = 0;
-      while (zero_hops++ < ZERO_HOPS_MAX)
-      {
-        const auto itz = mesh.getPolytope(cd, s_cell);
-        const auto& cellz = *itz;
-        const auto gz = mesh.getGeometry(cd, s_cell);
-        const auto& hsz = Geometry::Polytope::Traits(gz).getHalfSpace();
-        const auto& facesz = conn.getIncidence(cd, cd - 1).at(s_cell);
-
-        auto vrefz = [&](const Math::SpatialPoint& r) -> Math::SpatialVector<Real>
-        {
-          const Geometry::Point qp(cellz, r);
-          return (sgn * qp.getJacobianInverse() * m_velocity(qp)).col(0);
-        };
-
-        auto phi_face_z = [&](size_t j, const Math::SpatialPoint& r) -> Real
-        {
-          const auto n = hsz.matrix.row(j);
-          const Real b = hsz.vector[j];
-          return b - r.dot(n);
-        };
-
-        // collect ALL faces that contain this phys point (|phi| small) and are being exited (n·v > tol)
-        s_faceset.clear();
-        for (size_t i = 0; i < facesz.size(); ++i)
-        {
-          if (last_face && i == *last_face)
-            continue;
-
-          const Real gi = phi_face_z(i, s_rc);
-          if (std::abs(gi) > eps_g)
-            continue;
-
-          const Real ndv = vrefz(s_rc).dot(hsz.matrix.row(i));
-          if (ndv <= eps_ndv)
-            continue;
-
-          s_faceset.push_back(i);
-        }
-
-        if (s_faceset.empty())
-          break; // strictly interior now
-
-        // deterministic choice:
-        // 1) smallest |gi|, 2) largest ndv, 3) smallest global face id
-        auto best = s_faceset.front();
-        auto best_key = [&](size_t i)
-        {
-          const Real gi  = phi_face_z(i, s_rc);
-          const Real ndv = vrefz(s_rc).dot(hsz.matrix.row(i));
-          const Index fid = facesz[i];
-          return std::tuple<Real, Real, Index>(std::abs(gi), -ndv, fid);
-        };
-        for (size_t k = 1; k < s_faceset.size(); ++k)
-        {
-          const size_t cand = s_faceset[k];
-          if (best_key(cand) < best_key(best))
-            best = cand;
-        }
-
-        const size_t kface = best;
-        const Index f2 = facesz[kface];
-
-        // boundary at same phys point?
-        if (mesh.isBoundary(f2))
-        {
-          if (!m_bp(BoundaryHit{tau, s_cell, s_rc, kface}))
-            return Trace{ true, tau, Geometry::Point(*itz, s_rc) };
-          last_face.reset();
-          break;
-        }
-
-        // hop across kface at t=0
-        mesh.getPolytopeTransformation(cd, s_cell).transform(s_pc, s_rc);
-        const auto& nbr2 = conn.getIncidence(cd - 1, cd).at(f2);
-        assert(nbr2.size() == 2);
-        s_cell = (nbr2[0] == s_cell) ? nbr2[1] : nbr2[0];
-
-        mesh.getPolytopeTransformation(cd, s_cell).inverse(s_rc, s_pc);
-        Geometry::Polytope::Project(mesh.getGeometry(cd, s_cell)).cell(s_rc1, s_rc);
-        s_rc = s_rc1;
-
-        // update hysteresis to the face we just crossed
-        const auto& faces_next = conn.getIncidence(cd, cd - 1).at(s_cell);
-        last_face.reset();
-        for (size_t i = 0; i < faces_next.size(); ++i)
-        {
-          if (faces_next[i] == f2)
+          for (size_t j = 0; j < faces.size(); ++j)
           {
-            last_face = i;
+            Plane pl;
+            pl.fid  = faces[j];
+
+            // PATCH: column reference normal (no row-expression ambiguity / transpose gymnastics).
+            pl.nref = hs.matrix.row(j).transpose();
+
+            pl.n_u = JinvT * pl.nref;
+
+            const Real nn2 = norm2(pl.n_u);
+            pl.nn = std::sqrt(nn2);
+            pl.ok = (pl.nn > Real(0)) && is_finite(pl.nn);
+
+            // Define c_u from a fixed point on the face: Project(face)(anchor).
+            Geometry::Polytope::Project(g).face(j, s_rc_tmp, s_r_in);
+
+#ifndef NDEBUG
+            // Scale-aware smoke test: phi(face_j) ~ 0 at projected point.
+            const Real ph = phi_face(j, s_rc_tmp);
+            const auto nrow = hs.matrix.row(j);
+            const Real nrm  = std::sqrt(std::max<Real>(0, dot(nrow, nrow)));
+            const Real rrm  = std::sqrt(std::max<Real>(0, dot(s_rc_tmp, s_rc_tmp)));
+            const Real scale = Real(1) + std::abs(hs.vector[j]) + nrm * rrm;
+            const Real tol = Real(1e3) * sqrt_eps * scale;
+            assert(std::abs(ph) <= tol);
+#endif
+
+            x_of(s_x_face, s_rc_tmp);
+            pl.c_u = dot(pl.n_u, s_x_face);
+
+            // PATCH: robust orientation (only flip when clearly negative).
+            // Avoid arbitrary flips when sd_in ~ 0 due to noise/slivers/tangency.
+            const Real sd_in  = pl.c_u - dot(pl.n_u, s_x_in);
+            const Real tol_in = Real(10) * sqrt_eps * std::max<Real>(Real(1), std::abs(pl.c_u));
+            if (sd_in < -tol_in)
+            {
+              pl.n_u = -pl.n_u;
+              pl.c_u = -pl.c_u;
+            }
+            // else keep as-is
+
+            planes[j] = pl;
+          }
+
+          auto sd_u_at = [&](const Plane& pl, const Math::SpatialPoint& x) -> Real
+          {
+            return pl.c_u - dot(pl.n_u, x);
+          };
+
+          auto sd_at = [&](const Plane& pl, const Math::SpatialPoint& x) -> Real
+          {
+            if (!pl.ok) return std::numeric_limits<Real>::infinity();
+            return sd_u_at(pl, x) / pl.nn; // signed distance in physical units
+          };
+
+          // Geometry scale from interior anchor distances (stable near boundaries)
+          Real h_scale = Real(0);
+          for (size_t j = 0; j < planes.size(); ++j)
+          {
+            const Plane& pl = planes[j];
+            if (!pl.ok) continue;
+            const Real d = sd_at(pl, s_x_in);
+            if (is_finite(d)) h_scale = std::max(h_scale, d);
+          }
+          if (!(h_scale > Real(0)) || !is_finite(h_scale))
+          {
+            // Degenerate geometry: stop safely
+            return Trace{ false, tau, Geometry::Point(*itc, s_rc) };
+          }
+
+          // Tolerances
+          constexpr Real C_HIT = Real(100);
+          constexpr Real C_NDV = Real(50);
+          constexpr Real C_SUB = Real(0.25); // dt_stop <= C_SUB * tau
+
+          const Real eps_hit_phys = C_HIT * sqrt_eps * h_scale;
+
+          const auto v0 = vref(s_rc);
+          const Real vref_mag = std::sqrt(norm2(v0));
+          const Real eps_ndv = C_NDV * sqrt_eps * (Real(1) + vref_mag);
+
+          // PATCH: dt_stop sanitization against NaN/Inf (and >0 guarantee)
+          Real vphys_mag = Real(0);
+          {
+            const Geometry::Point qp(cell, s_rc, s_x);
+            const auto vphys = vphys_of(qp);
+            vphys_mag = std::sqrt(norm2(vphys));
+            if (!is_finite(vphys_mag)) vphys_mag = Real(0);
+          }
+
+          Real dt_geom = eps_hit_phys / std::max<Real>(vphys_mag, v_floor);
+          if (!is_finite(dt_geom) || !(dt_geom > Real(0)))
+            dt_geom = C_SUB * tau;
+
+          Real dt_stop = std::min(C_SUB * tau, dt_geom);
+          if (!is_finite(dt_stop) || !(dt_stop > Real(0)))
+            dt_stop = C_SUB * tau;
+
+          // Predicate: reached band (or overshot) at time dt
+          auto reached = [&](Real dt) -> bool
+          {
+            advance(s_r_eval, dt, s_rc);
+            x_of(s_x_eval, s_r_eval);
+
+            for (size_t j = 0; j < planes.size(); ++j)
+            {
+              const Plane& pl = planes[j];
+              if (!pl.ok) continue;
+              const Real d = sd_at(pl, s_x_eval);
+              if (!is_finite(d)) continue;
+              if (d <= eps_hit_phys) return true;
+            }
+            return false;
+          };
+
+          // Build candidates at (r_hit, x_hit) using signed distance band + SOFT hysteresis
+          auto build_candidates_at = [&](const Math::SpatialPoint& r_hit,
+                                         const Math::SpatialPoint& x_hit,
+                                         std::vector<Cand>& out)
+          {
+            out.clear();
+            out.reserve(planes.size());
+
+            const auto vr = vref(r_hit);
+
+            bool have_non_last = false;
+            for (size_t j = 0; j < planes.size(); ++j)
+            {
+              const Plane& pl = planes[j];
+              if (!pl.ok) continue;
+
+              const Real sd = sd_at(pl, x_hit);
+              if (!is_finite(sd)) continue;
+              if (!(sd <= eps_hit_phys)) continue;  // active band, signed
+
+              const Real ndv = dot(vr, pl.nref);
+              const bool is_last = (last_face && j == *last_face);
+              if (!is_last) have_non_last = true;
+
+              out.push_back(Cand{ j, sd, ndv, pl.fid, is_last });
+            }
+
+            // PATCH (soft hysteresis): drop last-face only if there is an alternative
+            if (have_non_last)
+            {
+              size_t w = 0;
+              for (size_t k = 0; k < out.size(); ++k)
+                if (!out[k].is_last) out[w++] = out[k];
+              out.resize(w);
+            }
+          };
+
+          // Deterministic selection with fallbacks + mode
+          auto pick_best_exit = [&](const std::vector<Cand>& in, size_t& jhit, PickMode& mode) -> bool
+          {
+            auto key = [](const Cand& c)
+            {
+              return std::tuple<Real, Real, Index>(c.sd, -c.ndv, c.fid);
+            };
+
+            bool have = false;
+            Cand best{0,0,0,0,false};
+
+            // Strict: ndv > eps_ndv
+            for (const auto& c : in)
+            {
+              if (!(c.ndv > eps_ndv)) continue;
+              if (!have) { best = c; have = true; continue; }
+              if (key(c) < key(best)) best = c;
+            }
+            if (have) { jhit = best.j; mode = PickMode::Strict; return true; }
+
+            // Fallback 1: ndv > 0
+            have = false;
+            for (const auto& c : in)
+            {
+              if (!(c.ndv > Real(0))) continue;
+              if (!have) { best = c; have = true; continue; }
+              if (key(c) < key(best)) best = c;
+            }
+            if (have) { jhit = best.j; mode = PickMode::NdvPos; return true; }
+
+            // Fallback 2: overshot (sd < 0), choose most negative sd then fid
+            have = false;
+            for (const auto& c : in)
+            {
+              if (!(c.sd < Real(0))) continue;
+              if (!have) { best = c; have = true; continue; }
+              if (std::tuple<Real,Index>(c.sd,c.fid) < std::tuple<Real,Index>(best.sd,best.fid))
+                best = c;
+            }
+            if (have) { jhit = best.j; mode = PickMode::Overshot; return true; }
+
+            return false;
+          };
+
+          // Event finder: bracket earliest dt where reached(dt) becomes true
+          auto find_event = [&](Real dt_max, Real& thit, size_t& jhit, PickMode& mode) -> bool
+          {
+            if (!(dt_max > Real(0))) return false;
+            if (!reached(dt_max))    return false;
+
+            Real lo = Real(0);
+            Real hi = dt_max;
+
+            for (int s = 0; s < MAX_SUBDIV; ++s)
+            {
+              if (hi - lo <= dt_stop) break;
+              const Real mid = Real(0.5) * (lo + hi);
+              if (reached(mid)) hi = mid;
+              else             lo = mid;
+            }
+
+            for (int it = 0; it < MAX_BISECT; ++it)
+            {
+              if (hi - lo <= dt_stop) break;
+              const Real mid = Real(0.5) * (lo + hi);
+              if (reached(mid)) hi = mid;
+              else             lo = mid;
+            }
+
+            // PATCH: non-monotone reached guard.
+            // If reached(lo) became true due to noise, do NOT abort hard; be conservative:
+            // use thit = lo (or 0) and try to select a face at that state.
+            if (lo > Real(0) && reached(lo))
+              thit = lo;
+            else
+              thit = hi;
+
+            // Recompute state at thit (reached() overwrote scratch)
+            advance(s_r_eval, thit, s_rc);
+            x_of(s_x_eval, s_r_eval);
+
+            // PATCH: defensive “reached(thit)” check on the recomputed state
+            bool ok_reach = false;
+            for (size_t j = 0; j < planes.size(); ++j)
+            {
+              const Plane& pl = planes[j];
+              if (!pl.ok) continue;
+              const Real d = sd_at(pl, s_x_eval);
+              if (is_finite(d) && d <= eps_hit_phys) { ok_reach = true; break; }
+            }
+            if (!ok_reach) return false;
+
+            build_candidates_at(s_r_eval, s_x_eval, cand);
+            if (cand.empty()) return false;
+            if (!pick_best_exit(cand, jhit, mode)) return false;
+
+            // PATCH: mode-aware validation (selection/validation must agree)
+            {
+              const Plane& pl = planes[jhit];
+              if (!pl.ok) return false;
+
+              const Real d = sd_at(pl, s_x_eval);
+              if (!is_finite(d) || !(d <= eps_hit_phys)) return false;
+
+              const auto vr = vref(s_r_eval);
+              const Real ndv = dot(vr, pl.nref);
+              if (!is_finite(ndv)) return false;
+
+              switch (mode)
+              {
+                case PickMode::Strict:
+                  if (!(ndv > eps_ndv)) return false;
+                  break;
+                case PickMode::NdvPos:
+                  if (!(ndv > Real(0))) return false;
+                  break;
+                case PickMode::Overshot:
+                  // accept only if “meaningfully overshot”, and allow slight negative ndv
+                  if (!(d < -Real(0.1) * eps_hit_phys)) return false;
+                  if (!(ndv >= -eps_ndv)) return false;
+                  break;
+              }
+            }
+
+            return true;
+          };
+
+          // -------------------------------------------------------------------------
+          // One step: event or no-event
+          // -------------------------------------------------------------------------
+          Real thit = 0;
+          size_t jhit = 0;
+          PickMode mode = PickMode::Strict;
+
+          const bool have_event = find_event(tau, thit, jhit, mode);
+
+          if (!have_event)
+          {
+            // Advance full tau
+            advance(s_rc1, tau, s_rc);
+            s_rc = s_rc1;
+
+            // Drift clamp only if slightly outside (physical)
+            x_of(s_x, s_rc);
+            bool outside = false;
+            for (size_t j = 0; j < planes.size(); ++j)
+            {
+              const Plane& pl = planes[j];
+              if (!pl.ok) continue;
+              const Real d = sd_at(pl, s_x);
+              if (is_finite(d) && d < Real(0)) { outside = true; break; }
+            }
+            if (outside)
+            {
+              Geometry::Polytope::Project(g).cell(s_rc1, s_rc);
+              s_rc = s_rc1;
+            }
+
+            tau = Real(0);
             break;
           }
-        }
-      }
-    }
-  }
 
-  const auto itf = mesh.getPolytope(cd, s_cell);
-  return Trace{ false, tau, Geometry::Point(*itf, s_rc) };
-}
+          // Advance to event and project onto hit face (reference)
+          if (!(thit >= Real(0)) || !(thit <= tau) || !is_finite(thit))
+          {
+            Geometry::Polytope::Project(g).cell(s_rc1, s_rc);
+            s_rc = s_rc1;
+            break;
+          }
+
+          advance(s_rc1, thit, s_rc);
+          Geometry::Polytope::Project(g).face(jhit, s_rc, s_rc1);
+          s_rc = s_rc1;
+          tau -= thit;
+
+          // Micro inside clamp to kill jitter
+          Geometry::Polytope::Project(g).cell(s_rc1, s_rc);
+          s_rc = s_rc1;
+
+          const Index face_hit = faces[jhit];
+
+          // Physical point at face
+          x_of(s_pc, s_rc);
+
+          // -------------------------------------------------------------------------
+          // Boundary vs interior hop
+          // -------------------------------------------------------------------------
+          if (mesh.isBoundary(face_hit))
+          {
+            if (!m_bp(BoundaryHit{tau, s_cell, s_rc, jhit}))
+              return Trace{ true, tau, Geometry::Point(*itc, s_rc) };
+
+            last_face.reset();
+            continue;
+          }
+
+          // Interior hop across face_hit
+          {
+            const auto& nbrs = conn.getIncidence(cd - 1, cd).at(face_hit);
+            assert(nbrs.size() == 2);
+            s_cell = (nbrs[0] == s_cell) ? nbrs[1] : nbrs[0];
+          }
+
+          // Map same physical point into new cell and clamp
+          mesh.getPolytopeTransformation(cd, s_cell).inverse(s_rc, s_pc);
+          Geometry::Polytope::Project(mesh.getGeometry(cd, s_cell)).cell(s_rc1, s_rc);
+          s_rc = s_rc1;
+
+          // Update hysteresis local face index in new cell
+          {
+            const auto& faces_new = conn.getIncidence(cd, cd - 1).at(s_cell);
+            last_face.reset();
+            for (size_t j = 0; j < faces_new.size(); ++j)
+              if (faces_new[j] == face_hit) { last_face = j; break; }
+          }
+
+          // -------------------------------------------------------------------------
+          // Zero-hop chain (edge/vertex): repeat face selection at dt=0
+          // -------------------------------------------------------------------------
+          size_t zero_hops = 0;
+          while (zero_hops++ < ZERO_HOPS_MAX)
+          {
+            const auto itz = mesh.getPolytope(cd, s_cell);
+            const auto& cellz = *itz;
+
+            const auto gz = mesh.getGeometry(cd, s_cell);
+            const auto& facesz = conn.getIncidence(cd, cd - 1).at(s_cell);
+            const auto& hsz = Geometry::Polytope::Traits(gz).getHalfSpace();
+
+            assert(static_cast<size_t>(hsz.matrix.rows()) == facesz.size());
+            assert(static_cast<size_t>(hsz.vector.size()) == facesz.size());
+
+            auto phi_face_z = [&](size_t j, const Math::SpatialPoint& r) -> Real
+            {
+              const auto n = hsz.matrix.row(j);
+              const Real b = hsz.vector[j];
+              return b - r.dot(n);
+            };
+
+            auto vrefz = [&](const Math::SpatialPoint& r) -> Math::SpatialVector<Real>
+            {
+              const Geometry::Point qp(cellz, r);
+              return (sgn * qp.getJacobianInverse() * vphys_of(qp));
+            };
+
+            auto x_of_z = [&](Math::SpatialPoint& xout, const Math::SpatialPoint& r)
+            {
+              mesh.getPolytopeTransformation(cd, s_cell).transform(xout, r);
+            };
+
+            // Build planes for this cell (same indexing)
+            x_of_z(s_x, s_rc);
+
+            const auto rcent = Geometry::Polytope::Traits(gz).getCentroid();
+            assert(static_cast<size_t>(rcent.size()) == cd);
+            s_r_in = rcent;
+            x_of_z(s_x_in, s_r_in);
+
+            planes.clear();
+            planes.resize(facesz.size());
+
+            const Geometry::Point qJz(cellz, s_r_in, s_x_in);
+            const auto Jinvz  = qJz.getJacobianInverse();
+            const auto JinvTz = Jinvz.transpose();
+
+            for (size_t j = 0; j < facesz.size(); ++j)
+            {
+              Plane pl;
+              pl.fid  = facesz[j];
+              pl.nref = hsz.matrix.row(j).transpose(); // PATCH: column
+              pl.n_u  = JinvTz * pl.nref;
+
+              const Real nn2 = norm2(pl.n_u);
+              pl.nn = std::sqrt(nn2);
+              pl.ok = (pl.nn > Real(0)) && is_finite(pl.nn);
+
+              Geometry::Polytope::Project(gz).face(j, s_rc_tmp, s_r_in);
+
+#ifndef NDEBUG
+              const Real ph = phi_face_z(j, s_rc_tmp);
+              const auto nrow = hsz.matrix.row(j);
+              const Real nrm  = std::sqrt(std::max<Real>(0, dot(nrow, nrow)));
+              const Real rrm  = std::sqrt(std::max<Real>(0, dot(s_rc_tmp, s_rc_tmp)));
+              const Real scale = Real(1) + std::abs(hsz.vector[j]) + nrm * rrm;
+              const Real tol = Real(1e3) * sqrt_eps * scale;
+              assert(std::abs(ph) <= tol);
+#endif
+
+              x_of_z(s_x_face, s_rc_tmp);
+              pl.c_u = dot(pl.n_u, s_x_face);
+
+              // PATCH: robust orientation
+              const Real sd_in  = pl.c_u - dot(pl.n_u, s_x_in);
+              const Real tol_in = Real(10) * sqrt_eps * std::max<Real>(Real(1), std::abs(pl.c_u));
+              if (sd_in < -tol_in)
+              {
+                pl.n_u = -pl.n_u;
+                pl.c_u = -pl.c_u;
+              }
+
+              planes[j] = pl;
+            }
+
+            // eps_hit_phys for this cell
+            Real h_scale_z = Real(0);
+            for (size_t j = 0; j < planes.size(); ++j)
+            {
+              const Plane& pl = planes[j];
+              if (!pl.ok) continue;
+              const Real d = (pl.c_u - dot(pl.n_u, s_x_in)) / pl.nn;
+              if (is_finite(d)) h_scale_z = std::max(h_scale_z, d);
+            }
+            if (!(h_scale_z > Real(0)) || !is_finite(h_scale_z))
+              break;
+
+            const Real eps_hit_phys_z = C_HIT * sqrt_eps * h_scale_z;
+
+            // candidates at t=0
+            cand.clear();
+            cand.reserve(planes.size());
+
+            const auto vz = vrefz(s_rc);
+            const Real vrefz_mag = std::sqrt(norm2(vz));
+            const Real eps_ndv_z = C_NDV * sqrt_eps * (Real(1) + vrefz_mag);
+
+            bool have_non_last = false;
+            for (size_t j = 0; j < planes.size(); ++j)
+            {
+              const Plane& pl = planes[j];
+              if (!pl.ok) continue;
+
+              const Real sd = (pl.c_u - dot(pl.n_u, s_x)) / pl.nn;
+              if (!is_finite(sd)) continue;
+              if (!(sd <= eps_hit_phys_z)) continue;
+
+              const Real ndv = dot(vz, pl.nref);
+              const bool is_last = (last_face && j == *last_face);
+              if (!is_last) have_non_last = true;
+
+              cand.push_back(Cand{ j, sd, ndv, pl.fid, is_last });
+            }
+
+            // PATCH: soft hysteresis in zero-hop too
+            if (have_non_last)
+            {
+              size_t w = 0;
+              for (size_t k = 0; k < cand.size(); ++k)
+                if (!cand[k].is_last) cand[w++] = cand[k];
+              cand.resize(w);
+            }
+
+            if (cand.empty())
+              break;
+
+            // deterministic pick (same policy, but using eps_ndv_z)
+            auto pick_best_zero = [&](size_t& jhit0, PickMode& mode0) -> bool
+            {
+              auto key = [](const Cand& c)
+              {
+                return std::tuple<Real, Real, Index>(c.sd, -c.ndv, c.fid);
+              };
+
+              bool have = false;
+              Cand best = cand.front();
+
+              for (const auto& c : cand)
+              {
+                if (!(c.ndv > eps_ndv_z)) continue;
+                if (!have) { best = c; have = true; continue; }
+                if (key(c) < key(best)) best = c;
+              }
+              if (have) { jhit0 = best.j; mode0 = PickMode::Strict; return true; }
+
+              have = false;
+              for (const auto& c : cand)
+              {
+                if (!(c.ndv > Real(0))) continue;
+                if (!have) { best = c; have = true; continue; }
+                if (key(c) < key(best)) best = c;
+              }
+              if (have) { jhit0 = best.j; mode0 = PickMode::NdvPos; return true; }
+
+              have = false;
+              for (const auto& c : cand)
+              {
+                if (!(c.sd < Real(0))) continue;
+                if (!have) { best = c; have = true; continue; }
+                if (std::tuple<Real,Index>(c.sd,c.fid) < std::tuple<Real,Index>(best.sd,best.fid))
+                  best = c;
+              }
+              if (have) { jhit0 = best.j; mode0 = PickMode::Overshot; return true; }
+
+              return false;
+            };
+
+            size_t jbest = 0;
+            PickMode m = PickMode::Strict;
+            if (!pick_best_zero(jbest, m))
+              break;
+
+            const Index f2 = facesz[jbest];
+
+            // boundary?
+            if (mesh.isBoundary(f2))
+            {
+              if (!m_bp(BoundaryHit{tau, s_cell, s_rc, jbest}))
+                return Trace{ true, tau, Geometry::Point(*itz, s_rc) };
+
+              last_face.reset();
+              break;
+            }
+
+            // hop across f2 at t=0
+            x_of_z(s_pc, s_rc);
+
+            const auto& nbr2 = conn.getIncidence(cd - 1, cd).at(f2);
+            assert(nbr2.size() == 2);
+            s_cell = (nbr2[0] == s_cell) ? nbr2[1] : nbr2[0];
+
+            mesh.getPolytopeTransformation(cd, s_cell).inverse(s_rc, s_pc);
+            Geometry::Polytope::Project(mesh.getGeometry(cd, s_cell)).cell(s_rc1, s_rc);
+            s_rc = s_rc1;
+
+            // update hysteresis in new cell
+            const auto& faces_next = conn.getIncidence(cd, cd - 1).at(s_cell);
+            last_face.reset();
+            for (size_t j = 0; j < faces_next.size(); ++j)
+              if (faces_next[j] == f2) { last_face = j; break; }
+          }
+        }
+
+        const auto itf = mesh.getPolytope(cd, s_cell);
+        return Trace{ false, tau, Geometry::Point(*itf, s_rc) };
+      }
 
       constexpr
       auto getValue(const Geometry::Point& p) const
@@ -669,12 +1115,34 @@ Trace trace(const Geometry::Point& p) const
         return m_tp;
       }
 
+      Flow& setMaximumZeroHops(size_t maxHops)
+      {
+        m_maxZeroHops = maxHops;
+        return *this;
+      }
+
+      Flow& setMaximumBisections(size_t maxIters)
+      {
+        m_maxBisectionIterations = maxIters;
+        return *this;
+      }
+
+      Flow& setMaximumSubdivisions(size_t maxIters)
+      {
+        m_maxSubdivisionIterations = maxIters;
+        return *this;
+      }
+
       virtual Flow* copy() const noexcept override
       {
         return new Flow(*this);
       }
 
     private:
+      size_t m_maxZeroHops;
+      size_t m_maxBisectionIterations;
+      size_t m_maxSubdivisionIterations;
+
       const Real m_t;
       std::unique_ptr<Operand> m_operand;
       VectorFieldType m_velocity;
