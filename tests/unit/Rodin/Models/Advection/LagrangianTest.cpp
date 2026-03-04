@@ -185,7 +185,7 @@ namespace Rodin::Tests::Unit
     auto it = mesh.getPolytope(cd, 0);
     Geometry::Point p(*it, rc);
     Real val = uh(p);
-    EXPECT_NE(val, 0.0) << "Solution should be non-trivial after advection";
+    EXPECT_GT(std::abs(val), 1e-10) << "Solution should be non-trivial after advection";
   }
 
   /**
