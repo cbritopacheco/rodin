@@ -34,6 +34,7 @@
 #include "ForwardDecls.h"
 
 #include <type_traits>
+#include <utility>
 
 #include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/Geometry/Mesh.h"
@@ -120,6 +121,9 @@ namespace Rodin::Variational
         return true;
       }
   };
+
+  template <class>
+  struct DependentFalse : std::false_type {};
 
   /**
    * @ingroup RodinVariational
@@ -328,7 +332,8 @@ namespace Rodin::Variational
           }
           else
           {
-            return Math::SpatialVector<Real>(vraw);
+            static_assert(DependentFalse<VRaw>::value,
+              "Unsupported velocity return type for Flow (expected Math::SpatialVector<Real> or Eigen column vector / matrix expression)");
           }
         };
 

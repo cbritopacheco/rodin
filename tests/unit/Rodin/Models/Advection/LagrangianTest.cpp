@@ -159,19 +159,19 @@ namespace Rodin::Tests::Unit
     TrialFunction u(vh);
     TestFunction v(vh);
 
-    auto calls = std::make_shared<std::size_t>(0);
+    std::size_t calls = 0;
 
+    // Minimal stepper that counts calls for verification.
     struct CountingStep
     {
-      std::shared_ptr<std::size_t> counter;
+      std::size_t& counter;
 
-      template <class T, class G, class F>
-      void step(T& q, Real dt, const G& p, const F& f) const
+      // Conforms to the stepper interface expected by Flow/Lagrangian.
+      template <class StateType, class PositionType, class FieldType>
+      void step(StateType& state, [[maybe_unused]] Real dt, const PositionType& p, [[maybe_unused]] const FieldType& field) const
       {
-        (void)dt;
-        (void)f;
-        ++(*counter);
-        q = p;
+        ++counter;
+        state = p;
       }
     };
 
@@ -187,7 +187,7 @@ namespace Rodin::Tests::Unit
 
     Real dt = 0.01;
     EXPECT_NO_THROW(lagrangian.step(dt));
-    EXPECT_GT(*calls, 0u);
+    EXPECT_GT(calls, 0u);
   }
 
   /**
