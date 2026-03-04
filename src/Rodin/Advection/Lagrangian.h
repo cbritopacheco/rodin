@@ -278,7 +278,7 @@ namespace Rodin::Advection
         const auto& mesh = fes.getMesh();
 
         const FirstOrderBoundaryPolicy bp(-dt, mesh, m_velocity);
-        const Math::RungeKutta::RK4 step;
+        auto& step = m_step;
         const DefaultTangentPolicy tp;
 
         Problem pb(u, v);

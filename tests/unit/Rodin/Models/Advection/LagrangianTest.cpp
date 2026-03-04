@@ -5,6 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
+#include <memory>
 
 #include "Rodin/Variational.h"
 #include "Rodin/Advection/Lagrangian.h"
@@ -148,6 +149,45 @@ namespace Rodin::Tests::Unit
     // });
     
     EXPECT_TRUE(true); // Basic construction test passes
+  }
+
+  TEST_P(LagrangianTest, CustomStepperIsUsed)
+  {
+    Mesh mesh = this->getMesh();
+    P1 vh(mesh);
+
+    TrialFunction u(vh);
+    TestFunction v(vh);
+
+    auto calls = std::make_shared<std::size_t>(0);
+
+    struct CountingStep
+    {
+      std::shared_ptr<std::size_t> counter;
+
+      template <class T, class G, class F>
+      void step(T& q, Real dt, const G& p, const F& f) const
+      {
+        (void)dt;
+        (void)f;
+        ++(*counter);
+        q = p;
+      }
+    };
+
+    CountingStep stepper{calls};
+
+    auto u0 = RealFunction([](const Point&) { return 1.0; });
+    auto velocity = VectorFunction{
+      RealFunction([](const Point&) { return 0.0; }),
+      RealFunction([](const Point&) { return 0.0; })
+    };
+
+    Lagrangian lagrangian(u, v, u0, velocity, stepper);
+
+    Real dt = 0.01;
+    EXPECT_NO_THROW(lagrangian.step(dt));
+    EXPECT_GT(*calls, 0u);
   }
 
   /**

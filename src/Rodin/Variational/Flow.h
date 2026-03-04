@@ -33,6 +33,8 @@
 
 #include "ForwardDecls.h"
 
+#include <type_traits>
+
 #include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/Point.h"
@@ -307,13 +309,27 @@ namespace Rodin::Variational
         };
 
         // PATCH: normalize “velocity type” once.
-        // If m_velocity(qp) already returns a vector-like type, keep this.
-        // If it returns a (dim x 1) matrix, use .col(0) here and nowhere else.
+        // Accept SpatialVector, Eigen vector, or (dim x 1) matrix without extra heap work.
         auto vphys_of = [&](const Geometry::Point& qp) -> Math::SpatialVector<Real>
         {
-          // ----- choose ONE, matching your m_velocity return type -----
-          // return m_velocity(qp);          // vector-like
-          return m_velocity(qp).col(0);      // matrix-like (dim x 1)
+          auto&& vraw = m_velocity(qp);
+          using VRaw = std::decay_t<decltype(vraw)>;
+
+          if constexpr (std::is_same_v<VRaw, Math::SpatialVector<Real>>)
+          {
+            return vraw;
+          }
+          else if constexpr (std::is_base_of_v<Eigen::MatrixBase<VRaw>, VRaw>)
+          {
+            if constexpr (VRaw::ColsAtCompileTime == 1)
+              return Math::SpatialVector<Real>(vraw);
+            else
+              return Math::SpatialVector<Real>(vraw.col(0));
+          }
+          else
+          {
+            return Math::SpatialVector<Real>(vraw);
+          }
         };
 
         // ---------------------------------------------------------------------------

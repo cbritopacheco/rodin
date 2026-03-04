@@ -157,6 +157,28 @@ namespace Rodin::Tests::Unit
     EXPECT_LE(physCoords[1], 1.0);
   }
 
+  TEST_P(FlowTest, SpatialVectorVelocity)
+  {
+    Mesh mesh = this->getMesh();
+    P1 vh(mesh);
+
+    TrialFunction u(vh);
+    TestFunction v(vh);
+    GridFunction sol(vh);
+    sol = Zero();
+
+    auto velocity = [](const Point&) -> Math::SpatialVector<Real>
+    {
+      return Math::SpatialVector<Real>{{0.0, 0.0}};
+    };
+
+    Geometry::Point p(*mesh.getPolytope(2, 0), Math::SpatialVector<Real>{{0.2, 0.2}});
+
+    EXPECT_NO_THROW({
+      Flow(0.0, sol, velocity).getValue(p);
+    });
+  }
+
   INSTANTIATE_TEST_SUITE_P(
     FlowMeshParams,
     FlowTest,
