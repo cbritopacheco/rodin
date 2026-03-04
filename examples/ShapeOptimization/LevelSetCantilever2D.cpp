@@ -147,9 +147,9 @@ int main(int, char**)
 
     GridFunction dist(sh);
     Distance::Eikonal(dist).setInterior(interior)
-                                   .setInterface(Gamma)
-                                   .solve()
-                                   .sign();
+                           .setInterface(Gamma)
+                           .solve()
+                           .sign();
 
     // Advect the level set function
     Alert::Info() << "   | Advecting the distance function." << Alert::Raise;

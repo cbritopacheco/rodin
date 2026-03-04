@@ -79,57 +79,70 @@ namespace Rodin::Advection
        */
       bool operator()(const Variational::BoundaryHit& hit) const
       {
-        static thread_local Math::Vector<Real> s_nphys_u;
-        static thread_local Math::SpatialPoint s_rtmp;
-        static thread_local Math::SpatialPoint s_xint;
-
-        const Real trace_sign = (m_dt >= 0) ? 1.0 : -1.0;
+        static thread_local Math::SpatialPoint s_rc;
+        static thread_local Math::SpatialPoint s_x;     // physical point buffer (optional)
 
         if (hit.tau <= 0)
           return true;
 
         const auto& mesh = m_mesh.get();
         const size_t cd = mesh.getDimension();
-        const auto g = mesh.getGeometry(cd, hit.cell);
+
+        const auto g  = mesh.getGeometry(cd, hit.cell);
         const auto& hs = Geometry::Polytope::Traits(g).getHalfSpace();
 
-        const size_t j = hit.face; // local
+        const size_t j = hit.face;
+        assert(j < static_cast<size_t>(hs.vector.size()));
+
+        // Half-space: phi(r) = b - n·r ; interior => phi > 0
         const auto nref = hs.matrix.row(j).transpose();
-        const Real b = hs.vector[j];
+        const Real b    = hs.vector[j];
 
-        const auto itc = mesh.getPolytope(cd, hit.cell);
-        const auto& cellO = *itc;
-        const Geometry::Point qface(cellO, hit.rref);
+        // 1) Ensure the current reference point is clamped into the cell.
+        // (Even if trace() projected to the face, a robust policy should tolerate small drift.)
+        Geometry::Polytope::Project(g).cell(s_rc, hit.rref);
+        hit.rref = s_rc;
 
-        const auto& Jinv = qface.getJacobianInverse();
-        s_nphys_u = Jinv.transpose() * nref;
-        const Real nlen = s_nphys_u.norm();
-        if (nlen == 0)
+        // 2) Compute signed margin w.r.t. the hit face.
+        // If we're on the face, phi ~ 0. If slightly outside, phi < 0.
+        Real phi = b - hit.rref.dot(nref);
+
+        const Real nn = nref.dot(nref);
+        if (nn <= Real(0))
         {
           hit.tau = 0;
           return true;
         }
 
-        const auto nphys = trace_sign * s_nphys_u / nlen;
-        decltype(auto) vphys = m_vel(qface);
-        const Real vn = vphys.dot(nphys);
-        const Real h = std::max<Real>(0, vn) * hit.tau;
-        const auto& xface = qface.getPhysicalCoordinates();
-        s_xint = xface + (-h - m_eps) * nphys;
+        // 3) Choose a small target interior margin in *reference* units.
+        // Use a scale-aware epsilon: eps_ref = max(m_eps, c*sqrt(eps_machine)).
+        const Real eps_machine = std::numeric_limits<Real>::epsilon();
+        const Real eps_ref = std::max<Real>(m_eps, Real(50) * std::sqrt(eps_machine));
 
-        mesh.getPolytopeTransformation(cd, hit.cell).inverse(s_rtmp, s_xint);
-        Geometry::Polytope::Project(g).cell(s_rtmp, s_rtmp);
-        hit.rref = s_rtmp;
-
-        const Real gcur = b - hit.rref.dot(nref);
-        const Real ndn = nref.dot(nref);
-        if (ndn > 0)
+        // If already strictly inside by >= eps_ref, keep it.
+        // Otherwise, push inward along -nref so that phi becomes eps_ref.
+        if (phi < eps_ref)
         {
-          const Real target = std::max(m_eps, gcur + m_eps);
-          const Real alpha = (gcur - target) / ndn;
+          // We want: b - (r + alpha nref)·nref = eps_ref
+          // => phi - alpha*||n||^2 = eps_ref
+          // => alpha = (phi - eps_ref)/||n||^2   (negative if phi < eps_ref)
+          const Real alpha = (phi - eps_ref) / nn;
           hit.rref += alpha * nref;
+
+          // Clamp again to guarantee we're in the cell, then re-enforce margin if clamp put us back on face.
+          Geometry::Polytope::Project(g).cell(s_rc, hit.rref);
+          hit.rref = s_rc;
+
+          phi = b - hit.rref.dot(nref);
+          if (phi < eps_ref)
+          {
+            // Force the margin again (this time without a cell clamp afterwards).
+            const Real alpha2 = (phi - eps_ref) / nn;
+            hit.rref += alpha2 * nref;
+          }
         }
 
+        // 4) Stop tracing after boundary handling.
         hit.tau = 0;
         return true;
       }

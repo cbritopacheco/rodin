@@ -4,13 +4,13 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include <Rodin/MMG.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
 #include <Rodin/Distance/Eikonal.h>
 #include <Rodin/Advection/Lagrangian.h>
+#include <Rodin/MMG.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -35,7 +35,7 @@ static constexpr Real ell = 0.1;
 static Real elementStep = 0.5;
 static Real hmax = 0.5;
 static Real hmin = 0.1 * hmax;
-static Real hausd = 0.2 * hmin;
+static Real hausd = 0.1 * hmin;
 static size_t hmaxIt = maxIt / 2;
 const Real k = 0.5;
 const Real dt = k * (hmax - hmin) / 2;
