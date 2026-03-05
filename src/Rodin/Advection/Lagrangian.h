@@ -519,7 +519,9 @@ namespace Rodin::Advection
         }
         else
         {
-          const StopInsideBoundaryPolicy bp(-dt, mesh);
+          GridFunction u0(fes);
+          u0 = m_initial;
+          const TaylorBoundaryShiftPolicy bp(-dt, mesh, u0);
           pb = Integral(u, v)
              - Integral(Flow(-dt, m_initial, m_velocity, step, bp, tp), v);
           Solver::CG(pb).solve();
