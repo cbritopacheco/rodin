@@ -515,15 +515,15 @@ namespace Rodin::Advection
           const TaylorBoundaryShiftPolicy bp(-dt, mesh, u.getSolution());
           pb = Integral(u, v)
              - Integral(Flow(-dt, u.getSolution(), m_velocity, step, bp, tp), v);
+          Solver::CG(pb).solve();
         }
         else
         {
           const StopInsideBoundaryPolicy bp(-dt, mesh);
           pb = Integral(u, v)
              - Integral(Flow(-dt, m_initial, m_velocity, step, bp, tp), v);
+          Solver::CG(pb).solve();
         }
-
-        Solver::CG(pb).solve();
 
         m_t += dt;
       }
