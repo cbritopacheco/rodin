@@ -14,15 +14,18 @@
 #ifndef RODIN_MODELS_ADVECTION_LAGRANGIAN_H
 #define RODIN_MODELS_ADVECTION_LAGRANGIAN_H
 
+#include <functional>
+
 #include "Rodin/Variational/Flow.h"
 
 #include "Rodin/Math/RungeKutta/RK4.h"
 #include "Rodin/Solver/CG.h"
 
+#include "Rodin/Variational/ProblemBody.h"
 #include "Rodin/Variational/BoundaryNormal.h"
 #include "Rodin/Variational/BoundaryIntegral.h"
-#include "Rodin/Variational/ProblemBody.h"
-#include <functional>
+
+#include "Rodin/Variational/Grad.h"
 
 namespace Rodin::Advection
 {
@@ -89,7 +92,6 @@ namespace Rodin::Advection
    * @par Complexity
    * Constant time per boundary hit: one projection to cell + face, a few transforms, and a clamp.
    */
-  template <class Velocity>
   class StopInsideBoundaryPolicy
   {
     public:
@@ -104,11 +106,8 @@ namespace Rodin::Advection
       StopInsideBoundaryPolicy(
           Real dt,
           const Geometry::Mesh<Context::Local>& mesh,
-          const Velocity& velocity,
           Real eps_in_phys = Real(1e-12))
-        : m_dt(dt),
-          m_mesh(mesh),
-          m_vel(velocity),
+        : m_mesh(mesh),
           m_eps_in_phys(eps_in_phys)
       {}
 
@@ -205,9 +204,182 @@ namespace Rodin::Advection
       }
 
     private:
+      std::reference_wrapper<const Geometry::Mesh<Context::Local>> m_mesh;
+      const Real m_eps_in_phys;
+  };
+
+  /**
+   * @brief First-order boundary-hit handler for semi-Lagrangian tracing with an inward shift.
+   *
+   * This boundary policy is meant to be used with `Variational::Flow` (and therefore with
+   * semi-Lagrangian / characteristic-based schemes) when a traced characteristic hits a
+   * boundary face before the remaining time `hit.tau` is consumed.
+   *
+   * The policy enforces an "always-sample-inside" rule:
+   *  - the reported hit point is sanitized to lie on the hit face and inside the cell,
+   *  - the physical outward unit normal at the face is computed,
+   *  - the point is nudged by a small *physical* distance into the domain,
+   *  - tracing is terminated for the current step (`hit.tau = 0`).
+   *
+   * In addition, the policy provides a *first-order value correction* for a scalar field
+   * `phi` using a Taylor expansion at the (unshifted) hit location. This is useful when:
+   *  - you want the traced point to be strictly interior for evaluation/interpolation stability,
+   *    but
+   *  - you want the value that corresponds (approximately) to the true boundary hit location.
+   *
+   * More precisely, letting:
+   *  - @f$ x_{\text{hit}} @f$ be the physical boundary hit point,
+   *  - @f$ x_{\text{new}} = x_{\text{hit}} - \varepsilon\,n_D @f$ be the inward-shifted point
+   *    (with outward unit normal @f$ n_D @f$),
+   * this policy will make the tracer evaluate `phi` at @f$ x_{\text{new}} @f$ (by updating
+   * `hit.rref` to the shifted point), and will add the correction
+   *
+   * @f[
+   *   \phi(x_{\text{hit}}) \approx \phi(x_{\text{new}}) + \nabla\phi(x_{\text{hit}})\cdot(x_{\text{hit}}-x_{\text{new}}).
+   * @f]
+   *
+   * The correction is accumulated into `hit.correction`, and the `Flow` operator applies it via
+   * `u(Φ(p)) + correction`.
+   *
+   * @tparam Phi A scalar function-like type compatible with `Variational::Grad(Phi).getValue(Point)`.
+   *
+   * @warning This is a *geometric* boundary treatment. It does not impose a physical inflow
+   *          boundary condition, does not extend data outside the domain, and does not reflect
+   *          characteristics. If your PDE requires inflow data, you need a different modeling choice.
+   *
+   * @par When it helps
+   * - Level-set advection or any scalar transport where you want robust interior sampling near
+   *   boundaries but reduced bias from the inward shift.
+   * - Situations where evaluation exactly on the boundary can be numerically fragile (face/edge
+   *   degeneracies, interpolation issues, etc.).
+   *
+   * @par Assumptions and limitations
+   * - The cell mapping is regular enough that @f$ J^{-T}n_{\text{ref}} @f$ provides a meaningful
+   *   physical normal direction on the hit face.
+   * - The correction uses @f$ \nabla\phi(x_{\text{hit}}) @f$ (computed at the hit point geometry),
+   *   so accuracy depends on the quality of the gradient approximation.
+   * - This is first-order in the shift distance @f$ \varepsilon @f$; if @f$ \varepsilon @f$ is
+   *   too large relative to local mesh size or curvature of `phi`, the correction will be poor.
+   *
+   * @par Parameters
+   * - `dt`: Signed step size of the tracer (kept for API symmetry; not used directly here).
+   * - `mesh`: Mesh on which tracing occurs.
+   * - `phi`: Scalar field/function to correct (typically the advected field itself in level-set use).
+   * - `eps_in_phys`: Desired inward physical offset. The effective shift is
+   *   `max(eps_in_phys, 50*sqrt(machine_epsilon))`.
+   */
+  template <class Field>
+  class TaylorBoundaryShiftPolicy
+  {
+    public:
+      TaylorBoundaryShiftPolicy(
+          Real dt,
+          const Geometry::Mesh<Context::Local>& mesh,
+          const Field& phi,
+          Real eps_in_phys = Real(1e-12))
+        : m_dt(dt),
+          m_mesh(mesh),
+          m_phi(phi),
+          m_eps_in_phys(eps_in_phys)
+      {}
+
+      bool operator()(const Variational::BoundaryHit& hit) const
+      {
+        if (!(hit.tau > Real(0)))
+          return true;
+
+        const auto& mesh = m_mesh.get();
+        const size_t cd  = mesh.getDimension();
+        const Index  c   = hit.cell;
+
+        const auto g   = mesh.getGeometry(cd, c);
+        const auto& hs = Geometry::Polytope::Traits(g).getHalfSpace();
+
+        const size_t j = hit.face;
+        if (j >= static_cast<size_t>(hs.vector.size()))
+        {
+          hit.tau = 0;
+          return true;
+        }
+
+        // ---- (1) sanitize reference point: inside + on face
+        Math::SpatialPoint r = hit.rref;
+        Math::SpatialPoint rtmp;
+        Geometry::Polytope::Project(g).cell(rtmp, r);
+        Geometry::Polytope::Project(g).face(j, r, rtmp);
+
+        // ---- (2) physical boundary point x_hit
+        Math::SpatialPoint x_hit;
+        mesh.getPolytopeTransformation(cd, c).transform(x_hit, r);
+
+        // ---- (3) outward unit normal on ∂D in physical space
+        const auto nref = hs.matrix.row(j).transpose();
+
+        const auto itc   = mesh.getPolytope(cd, c);
+        const auto& cell = *itc;
+
+        Geometry::Point q_hit(cell, r, x_hit);
+        const auto JinvT = q_hit.getJacobianInverse().transpose();
+
+        Math::SpatialVector<Real> nu = JinvT * nref; // unnormalized physical normal
+        const Real nn = nu.dot(nu);
+        if (!(nn > Real(0)) || !std::isfinite(nn))
+        {
+          hit.rref = r;
+          hit.tau  = 0;
+          return true;
+        }
+
+        Math::SpatialVector<Real> nD = nu / std::sqrt(nn);
+
+        // orient nD so centroid is interior: (nD·x_face - nD·x_centroid) >= 0
+        const auto rcent = Geometry::Polytope::Traits(g).getCentroid();
+        Math::SpatialPoint xc;
+        mesh.getPolytopeTransformation(cd, c).transform(xc, rcent);
+
+        const Real cplane = nD.dot(x_hit);
+        const Real sd_in  = cplane - nD.dot(xc);
+        if (sd_in < Real(0))
+          nD = -nD;
+
+        // ---- (4) inward nudge: x_new = x_hit - eps_in * nD
+        const Real eps_machine = std::numeric_limits<Real>::epsilon();
+        const Real eps_floor   = Real(50) * std::sqrt(eps_machine);
+        const Real eps_in      = std::max<Real>(m_eps_in_phys, eps_floor);
+
+        Math::SpatialPoint x_new = x_hit;
+        x_new -= eps_in * nD;
+
+        // ---- (5) value correction via first-order Taylor to recover phi(x_hit) from phi(x_new)
+        //
+        // We will evaluate phi at the nudged point x_new (since we set hit.rref to it).
+        // To approximate the *unshifted* hit value, use:
+        //   phi(x_hit) ≈ phi(x_new) + gradphi · (x_hit - x_new)
+        const auto gphi = Variational::Grad(m_phi.get()).getValue(q_hit);
+
+        // dx = x_hit - x_new  (NOTE THE SIGN)
+        Math::SpatialVector<Real> dx;
+        dx.resize(gphi.size());
+        for (int k = 0; k < dx.size(); ++k)
+          dx[k] = x_hit[k] - x_new[k];
+
+        const Real dphi = dx.dot(gphi);
+        if (std::isfinite(dphi))
+          hit.correction += dphi;
+
+        // ---- (6) map back + clamp
+        mesh.getPolytopeTransformation(cd, c).inverse(rtmp, x_new);
+        Geometry::Polytope::Project(g).cell(r, rtmp);
+
+        hit.rref = r;
+        hit.tau  = 0;
+        return true;
+      }
+
+    private:
       const Real m_dt;
       std::reference_wrapper<const Geometry::Mesh<Context::Local>> m_mesh;
-      std::reference_wrapper<const Velocity> m_vel; // kept for symmetry; not used here
+      std::reference_wrapper<const Field> m_phi;
       const Real m_eps_in_phys;
   };
 
@@ -334,18 +506,19 @@ namespace Rodin::Advection
         const auto& fes = u.getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
 
-        const StopInsideBoundaryPolicy bp(-dt, mesh, m_velocity);
         const Math::RungeKutta::RK4 step;
         const DefaultTangentPolicy tp;
 
         Problem pb(u, v);
         if (m_t > 0)
         {
+          const TaylorBoundaryShiftPolicy bp(-dt, mesh, u.getSolution());
           pb = Integral(u, v)
              - Integral(Flow(-dt, u.getSolution(), m_velocity, step, bp, tp), v);
         }
         else
         {
+          const StopInsideBoundaryPolicy bp(-dt, mesh);
           pb = Integral(u, v)
              - Integral(Flow(-dt, m_initial, m_velocity, step, bp, tp), v);
         }

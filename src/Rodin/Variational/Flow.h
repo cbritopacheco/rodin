@@ -78,6 +78,7 @@ namespace Rodin::Variational
     Index& cell; ///< Cell index where boundary was hit
     Math::SpatialPoint& rref; ///< Reference coordinates where boundary was hit
     size_t face; ///< Local face index where boundary was hit
+    Real& correction;
   };
 
   /**
@@ -165,8 +166,8 @@ namespace Rodin::Variational
       class Trace
       {
         public:
-          Trace(bool exited, Real time, const Geometry::Point& p)
-            : m_exited(exited), m_time(time), m_point(p)
+          Trace(bool exited, Real time, const Geometry::Point& p, Real correction)
+            : m_exited(exited), m_time(time), m_point(p), m_correction(correction)
           {}
 
           Real getTime() const
@@ -184,10 +185,16 @@ namespace Rodin::Variational
             return m_exited;
           }
 
+          Real getCorrection() const
+          {
+            return m_correction;
+          }
+
         private:
           bool m_exited;
           Real m_time;
           Geometry::Point m_point;
+          Real m_correction;
       };
 
       template <
@@ -285,6 +292,8 @@ namespace Rodin::Variational
         const auto& mesh  = poly0.getMesh();
         const size_t cd   = mesh.getDimension();
         const auto& conn  = mesh.getConnectivity();
+
+        Real correction = Real(0);
 
         Real tau = std::abs(m_t);
         const Real sgn = Math::sgn(m_t);
@@ -404,7 +413,7 @@ namespace Rodin::Variational
         }
         else
         {
-          return Trace{ true, Real(0), p };
+          return Trace{ true, Real(0), p, correction };
         }
 
         // Resize buffers
@@ -535,6 +544,8 @@ namespace Rodin::Variational
           // Minimum dt to prevent infinite substepping near tangency/noise
           const Real dt_min = C_DTMIN * sqrt_eps * (Real(1) + rnorm) / std::max<Real>(Real(1), vref_mag);
 
+          std::optional<Trace> exit_trace;
+
           // ------------------------------------------------------------
           // Zero-hop / on-edge cleanup (dt = 0) BEFORE searching events.
           // Deterministic selection among active faces with soft hysteresis.
@@ -595,8 +606,12 @@ namespace Rodin::Variational
               // boundary?
               if (mesh.isBoundary(f))
               {
-                if (!m_bp(BoundaryHit{tau, s_cell, s_rc, best}))
-                  return false;
+                BoundaryHit bh{tau, s_cell, s_rc, best, correction};
+                if (!m_bp(bh))
+                {
+                  exit_trace.emplace(true, tau, Geometry::Point(cell, s_rc), correction);
+                  return false; // no cell change, but we want to abort
+                }
                 last_face.reset();
                 break;
               }
@@ -627,6 +642,9 @@ namespace Rodin::Variational
           // If zero-hops moved us, restart with refreshed hs/faces/g for new cell
           if (do_zero_hops())
             continue;
+
+          if (exit_trace)
+            return *exit_trace;
 
           // ------------------------------------------------------------
           // Attempt to find an event within tau_cell using bracketing+bisection.
@@ -828,8 +846,9 @@ namespace Rodin::Variational
           // ------------------------------------------------------------
           if (mesh.isBoundary(face_hit))
           {
-            if (!m_bp(BoundaryHit{tau, s_cell, s_rc, j_star}))
-              return Trace{ true, tau, Geometry::Point(*itc, s_rc) };
+            BoundaryHit bh{tau, s_cell, s_rc, j_star, correction};
+            if (!m_bp(bh))
+              return Trace{ true, tau, Geometry::Point(*itc, s_rc), correction };
 
             last_face.reset();
             continue;
@@ -839,7 +858,7 @@ namespace Rodin::Variational
           {
             const auto& nbrs = conn.getIncidence(cd - 1, cd).at(face_hit);
             if (nbrs.size() != 2)
-              return Trace{ true, tau, Geometry::Point(*itc, s_rc) };
+              return Trace{ true, tau, Geometry::Point(*itc, s_rc), correction };
             s_cell = (nbrs[0] == s_cell) ? nbrs[1] : nbrs[0];
           }
 
@@ -860,15 +879,16 @@ namespace Rodin::Variational
         }
 
         const auto itf = mesh.getPolytope(cd, s_cell);
-        return Trace{ false, tau, Geometry::Point(*itf, s_rc) };
+        return Trace{ false, tau, Geometry::Point(*itf, s_rc), correction };
       }
 
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        const auto& trace = this->trace(p);
-        const bool b = !trace.exited();
-        return b * m_operand->getValue(trace.getPoint());
+        const auto tr = this->trace(p);
+        if (tr.exited())
+          return Real(0);
+        return m_operand->getValue(tr.getPoint()) + tr.getCorrection();
       }
 
       constexpr
