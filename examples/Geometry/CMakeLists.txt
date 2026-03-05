@@ -59,6 +59,11 @@ target_link_libraries(BalancedCompactPartitioner
   PUBLIC
   Rodin::Geometry)
 
+add_executable(Scale Scale.cpp)
+target_link_libraries(Scale
+  PUBLIC
+  Rodin::Geometry)
+
 add_executable(AnnulusDetection AnnulusDetection.cpp)
 target_link_libraries(AnnulusDetection PUBLIC Rodin::Geometry)
 
