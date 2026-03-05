@@ -71,22 +71,10 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_lagrangian_8h.html">&lt;Rodin/Advection/Lagrangian.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class Velocity&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_advection.html">Advection</a>::<wbr/></span>StopInsideBoundaryPolicy <span class="m-thin">class</span>
+          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_lagrangian_8h.html">&lt;Rodin/Advection/Lagrangian.h&gt;</a></div>
         </h1>
         <p>Boundary policy for characteristic tracing: stop-at-boundary with inward offset.</p>
-        <table class="m-table m-fullwidth m-flat">
-          <thead>
-            <tr><th colspan="2">Template parameters</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="width: 1%">Velocity</td>
-              <td>Type of the velocity field functor used by the tracer.</td>
-            </tr>
-          </tbody>
-        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -126,9 +114,8 @@ $ J^{-T} n_{\mathrm{ref}} $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a681c79810bdbd6e883fe444721a456f1" class="m-doc">StopInsideBoundaryPolicy</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> dt,
+              <span class="m-doc-wrap-bumper"><a href="#a52e882110023c721757c62ff7f7ecba1" class="m-doc">StopInsideBoundaryPolicy</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> dt,
               const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&amp; mesh,
-              const Velocity&amp; velocity,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> eps_in_phys = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>(1e-12))</span>
             </dt>
             <dd>Constructs the boundary policy.</dd>
@@ -145,14 +132,10 @@ $ J^{-T} n_{\mathrm{ref}} $
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a681c79810bdbd6e883fe444721a456f1"><div>
+          <section class="m-doc-details" id="a52e882110023c721757c62ff7f7ecba1"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Velocity&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Advection::<wbr />StopInsideBoundaryPolicy&lt;Velocity&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a681c79810bdbd6e883fe444721a456f1" class="m-doc-self">StopInsideBoundaryPolicy</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> dt,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Advection::<wbr />StopInsideBoundaryPolicy::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a52e882110023c721757c62ff7f7ecba1" class="m-doc-self">StopInsideBoundaryPolicy</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> dt,
               const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&amp; mesh,
-              const Velocity&amp; velocity,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> eps_in_phys = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>(1e-12))</span></span>
             </h3>
             <p>Constructs the boundary policy.</p>
@@ -170,10 +153,6 @@ $ J^{-T} n_{\mathrm{ref}} $
                   <td>Mesh on which tracing occurs.</td>
                 </tr>
                 <tr>
-                  <td>velocity&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Velocity field functor (kept for API symmetry; not used by this policy).</td>
-                </tr>
-                <tr>
                   <td>eps_in_phys&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Inward physical offset used to place the footpoint strictly inside.</td>
                 </tr>
@@ -182,10 +161,7 @@ $ J^{-T} n_{\mathrm{ref}} $
           </div></section>
           <section class="m-doc-details" id="a67ad93beff1ca7f2e732ea49f3f02b52"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Velocity&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Advection::<wbr />StopInsideBoundaryPolicy&lt;Velocity&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a67ad93beff1ca7f2e732ea49f3f02b52" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_variational_1_1_boundary_hit.html" class="m-doc">Variational::<wbr />BoundaryHit</a>&amp; hit) const</span></span>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Advection::<wbr />StopInsideBoundaryPolicy::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a67ad93beff1ca7f2e732ea49f3f02b52" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_variational_1_1_boundary_hit.html" class="m-doc">Variational::<wbr />BoundaryHit</a>&amp; hit) const</span></span>
             </h3>
             <p>Handles a boundary hit during characteristic tracing.</p>
             <table class="m-table m-fullwidth m-flat">
