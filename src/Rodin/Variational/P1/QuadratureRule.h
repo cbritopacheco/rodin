@@ -146,11 +146,9 @@ namespace Rodin::Variational
           m_p.emplace(polytope, m_qf->getPoint(0));
           m_weight = m_qf->getWeight(0);
           const auto& rc = m_qf->getPoint(0);
-          const size_t d = polytope.getDimension();
-          const Index idx = polytope.getIndex();
           const auto& integrand = getIntegrand();
           const auto& fes = integrand.getFiniteElementSpace();
-          const auto& fe = fes.getFiniteElement(d, idx);
+          const P1Element<ScalarType> fe(geometry);
           m_basis.resize(fe.getCount());
           for (size_t i = 0; i < fe.getCount(); i++)
             m_basis[i] = fe.getBasis(i)(rc);
@@ -502,8 +500,6 @@ namespace Rodin::Variational
         m_p.emplace(polytope, m_qf->getPoint(0));
         m_weight = m_qf->getWeight(0);
         m_distortion = m_p->getDistortion();
-        const size_t d = polytope.getDimension();
-        const Index idx = polytope.getIndex();
         const auto& integrand = getIntegrand();
         const auto& lhs = integrand.getLHS();
         const auto& coeff = lhs.getDerived().getLHS();
@@ -517,7 +513,13 @@ namespace Rodin::Variational
         if (trialfes == testfes)
         {
           const auto& fes = trialfes;
-          const auto& fe = fes.getFiniteElement(d, idx);
+          P1Element<RHSRangeType> fe;
+          if constexpr (std::is_same_v<RHSRangeType, ScalarType>)
+            fe = P1Element<RHSRangeType>(geometry);
+          else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>)
+            fe = P1Element<RHSRangeType>(geometry, fes.getVectorDimension());
+          else
+            assert(false);
           m_matrix.resize(fe.getCount(), fe.getCount());
           if constexpr (std::is_same_v<CoefficientRangeType, ScalarType>)
           {
@@ -584,8 +586,21 @@ namespace Rodin::Variational
         }
         else
         {
-          const auto& trialfe = trialfes.getFiniteElement(d, idx);
-          const auto& testfe = testfes.getFiniteElement(d, idx);
+          P1Element<MultiplicandRangeType> trialfe;
+          if constexpr (std::is_same_v<MultiplicandRangeType, ScalarType>)
+            trialfe = P1Element<MultiplicandRangeType>(geometry);
+          else if constexpr (std::is_same_v<MultiplicandRangeType, Math::Vector<ScalarType>>)
+            trialfe = P1Element<MultiplicandRangeType>(geometry, trialfes.getVectorDimension());
+          else
+            assert(false);
+
+          P1Element<RHSRangeType> testfe;
+          if constexpr (std::is_same_v<RHSRangeType, ScalarType>)
+            testfe = P1Element<RHSRangeType>(geometry);
+          else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>)
+            testfe = P1Element<RHSRangeType>(geometry, testfes.getVectorDimension());
+          else
+            assert(false);
           m_matrix.resize(testfe.getCount(), trialfe.getCount());
           assert(m_qf);
           const auto& rc = m_qf->getPoint(0);
@@ -1076,7 +1091,6 @@ namespace Rodin::Variational
         m_polytope = polytope;
         const auto& geometry = polytope.getGeometry();
         const size_t d = polytope.getDimension();
-        const Index idx = polytope.getIndex();
         const auto& integrand = getIntegrand();
         const auto& lhs = integrand.getLHS();
         const auto& rhs = integrand.getRHS();
@@ -1084,8 +1098,8 @@ namespace Rodin::Variational
         const auto& multiplicand = lhs.getDerived().getRHS();
         const auto& trialfes = lhs.getFiniteElementSpace();
         const auto& testfes = rhs.getFiniteElementSpace();
-        const auto& trialfe = trialfes.getFiniteElement(d, idx);
-        const auto& testfe = testfes.getFiniteElement(d, idx);
+        const P1Element<ScalarType> trialfe(geometry);
+        const P1Element<ScalarType> testfe(geometry);
         const bool recompute = !m_set || m_geometry != geometry;
 
         if (recompute)
@@ -1306,7 +1320,6 @@ namespace Rodin::Variational
         m_weight = m_qf->getWeight(0);
         m_distortion = m_p->getDistortion();
         const size_t d = polytope.getDimension();
-        const Index idx = polytope.getIndex();
         const auto& integrand = getIntegrand();
         const auto& lhs = integrand.getLHS();
         const auto& rhs = integrand.getRHS();
@@ -1318,7 +1331,7 @@ namespace Rodin::Variational
         {
           Math::SpatialMatrix<ScalarType> jac(d, d);
 
-          const auto& fe = trialfes.getFiniteElement(d, idx);
+          const P1Element<LHSOperandRangeType> fe(polytope.getGeometry(), trialfes.getVectorDimension());
           m_matrix.resize(fe.getCount(), fe.getCount());
 
           m_jac1.resize(fe.getCount());
@@ -1347,7 +1360,8 @@ namespace Rodin::Variational
           Math::SpatialMatrix<ScalarType> trialJac(d, d);
           Math::SpatialMatrix<ScalarType> testJac(d, d);
 
-          const auto& trialfe = lhs.getFiniteElementSpace().getFiniteElement(d, idx);
+          const P1Element<LHSOperandRangeType> trialfe(
+            polytope.getGeometry(), lhs.getFiniteElementSpace().getVectorDimension());
           m_jac1.resize(trialfe.getCount());
           for (size_t i = 0; i < trialfe.getCount(); i++)
           {
@@ -1360,7 +1374,8 @@ namespace Rodin::Variational
             m_jac1[i] = trialJac * p.getJacobianInverse();
           }
 
-          const auto& testfe = rhs.getFiniteElementSpace().getFiniteElement(d, idx);
+          const P1Element<RHSOperandRangeType> testfe(
+            polytope.getGeometry(), rhs.getFiniteElementSpace().getVectorDimension());
           m_jac2.resize(testfe.getCount());
           for (size_t i = 0; i < testfe.getCount(); i++)
           {
@@ -1563,7 +1578,6 @@ namespace Rodin::Variational
         m_weight = m_qf->getWeight(0);
         m_distortion = m_p->getDistortion();
         const size_t d = polytope.getDimension();
-        const Index idx = polytope.getIndex();
         const auto& integrand = getIntegrand();
         const auto& lhs = integrand.getLHS();
         const auto& rhs = integrand.getRHS();
@@ -1576,7 +1590,7 @@ namespace Rodin::Variational
         if (trialfes == testfes)
         {
           Math::SpatialMatrix<ScalarType> jac(d, d);
-          const auto& fe = trialfes.getFiniteElement(d, idx);
+          const P1Element<LHSOperandRangeType> fe(polytope.getGeometry(), trialfes.getVectorDimension());
           m_matrix.resize(fe.getCount(), fe.getCount());
           m_jac1.resize(fe.getCount());
           for (size_t i = 0; i < fe.getCount(); i++)
@@ -1623,8 +1637,10 @@ namespace Rodin::Variational
           m_trialJac.resize(d, d);
           m_testJac.resize(d, d);
 
-          const auto& trialfe = lhs.getFiniteElementSpace().getFiniteElement(d, idx);
-          const auto& testfe = rhs.getFiniteElementSpace().getFiniteElement(d, idx);
+          const P1Element<LHSOperandRangeType> trialfe(
+            polytope.getGeometry(), lhs.getFiniteElementSpace().getVectorDimension());
+          const P1Element<RHSOperandRangeType> testfe(
+            polytope.getGeometry(), rhs.getFiniteElementSpace().getVectorDimension());
           m_matrix.resize(testfe.getCount(), trialfe.getCount());
 
           m_jac1.resize(trialfe.getCount());
@@ -1803,9 +1819,21 @@ namespace Rodin::Variational
         const auto& lhs = integrand.getLHS();
         const auto& rhs = integrand.getRHS();
         const auto& trialfes = lhs.getOperand().getFiniteElementSpace();
-        const auto& trialfe = trialfes.getFiniteElement(trp.getDimension(), trp.getIndex());
         const auto& testfes = rhs.getFiniteElementSpace();
-        const auto& testfe = testfes.getFiniteElement(tep.getDimension(), tep.getIndex());
+        P1Element<LHSRangeType> trialfe;
+        if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
+          trialfe = P1Element<LHSRangeType>(trp.getGeometry());
+        else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>)
+          trialfe = P1Element<LHSRangeType>(trp.getGeometry(), trialfes.getVectorDimension());
+        else
+          assert(false);
+        P1Element<RHSRangeType> testfe;
+        if constexpr (std::is_same_v<RHSRangeType, ScalarType>)
+          testfe = P1Element<RHSRangeType>(tep.getGeometry());
+        else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>)
+          testfe = P1Element<RHSRangeType>(tep.getGeometry(), testfes.getVectorDimension());
+        else
+          assert(false);
         const auto& kernel = lhs.getKernel();
         if (trp == tep)
         {
