@@ -4,6 +4,9 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include "Rodin/Alert/Exception.h"
+#include "Rodin/Alert/Success.h"
+#include "Rodin/Alert/Warning.h"
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Assembly.h>
@@ -33,7 +36,8 @@ static constexpr Real eps = 1e-12;
 static constexpr Real hgrad = 1.6;
 static constexpr Real ell = 0.1;
 static Real elementStep = 0.5;
-static Real hmax = 0.4;
+static Real hmax0 = 0.4;
+static Real hmax = hmax0;
 static Real hmin = 0.1 * hmax;
 static Real hausd = 0.1 * hmin;
 static size_t hmaxIt = maxIt / 2;
@@ -68,23 +72,38 @@ int main(int, char**)
 
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
-
   th.save("Omega0.mesh", IO::FileFormat::MEDIT);
 
   // Optimization loop
   std::vector<double> obj;
   std::ofstream fObj("obj.txt");
-  for (size_t i = 0; i < maxIt; i++)
+  size_t i = 0;
+  while (i < maxIt)
   {
     Alert::Info() << "----- Iteration: " << i << Alert::Raise;
 
     Alert::Info() << "   | Optimizing the domain..." << Alert::Raise;
-    MMG::Optimizer().setHMax(hmax)
-                    .setHMin(hmin)
-                    // .setGradation(1.1)
-                    // .setHausdorff(hausd)
-                    .setAngleDetection(false)
-                    .optimize(th);
+
+    try
+    {
+      MMG::Optimizer().setHMax(hmax)
+                      .setHMin(hmin)
+                      // .setGradation(1.1)
+                      // .setHausdorff(hausd)
+                      .setAngleDetection(false)
+                      .optimize(th);
+
+      hmax = hmax0;
+      hmin = 0.1 * hmax;
+    }
+    catch (const Alert::Exception& e)
+    {
+      hmax /= 2;
+      hmin = 0.1 * hmax;
+      Alert::Warning() << "Mesh optimization failed at iteration " << i
+        << ". Reducing hmax to " << hmax << " and retrying." << Alert::Raise;
+      continue;
+    }
 
     th.save("Optimized.mesh", IO::FileFormat::MEDIT);
 
@@ -186,19 +205,35 @@ int main(int, char**)
 
     // Recover the implicit domain
     Alert::Info() << "   | Meshing the domain." << Alert::Raise;
-    th = MMG::LevelSetDiscretizer().setHMax(hmax)
-                                   .setHMin(hmin)
-                                   // .setHausdorff(hausd)
-                                   .setAngleDetection(false)
-                                   .setRMC(1e-5)
-                                   .setBaseReferences(GammaD)
-                                   .setBoundaryReference(Gamma)
-                                   .discretize(advect.getSolution());
+    try
+    {
+      th = MMG::LevelSetDiscretizer().setHMax(hmax)
+                                     .setHMin(hmin)
+                                     // .setHausdorff(hausd)
+                                     .setAngleDetection(false)
+                                     .setRMC(1e-5)
+                                     .setBaseReferences(GammaD)
+                                     .setBoundaryReference(Gamma)
+                                     .discretize(advect.getSolution());
+
+      hmax = hmax0;
+      hmin = 0.1 * hmax;
+    }
+    catch (const Alert::Exception& e)
+    {
+      hmax /= 2;
+      hmin = 0.1 * hmax;
+      Alert::Warning() << "Meshing failed at iteration " << i
+        << ". Reducing hmax to " << hmax << " and retrying." << Alert::Raise;
+      continue;
+    }
+
+    i++;
 
     th.save("Omega.mesh", IO::FileFormat::MEDIT);
   }
 
-  Alert::Info() << "Saved final mesh to Omega.mesh" << Alert::Raise;
+  Alert::Success() << "Saved final mesh to Omega.mesh" << Alert::Raise;
 
   return 0;
 }

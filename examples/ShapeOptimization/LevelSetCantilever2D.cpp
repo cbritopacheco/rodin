@@ -30,17 +30,18 @@ static constexpr Attribute interior = 1, exterior = 2;
 static constexpr Attribute Gamma0 = 1, GammaD = 2, GammaN = 3, Gamma = 4;
 
 // Lamé coefficients
-static constexpr double mu = 0.3846;
-static constexpr double lambda = 0.5769;
+static constexpr Real mu = 0.3846;
+static constexpr Real lambda = 0.5769;
 
 // Optimization parameters
-static constexpr size_t maxIt = 300;
-static constexpr double hmax = 0.05;
-static constexpr double hmin = 0.1 * hmax;
-static constexpr double hausd = 0.5 * hmin;
-static constexpr double ell = 0.4;
-const constexpr Real dt = 0.5 * (hmax - hmin);
-static constexpr double alpha = 0.1;
+static size_t maxIt = 300;
+static Real hmax0 = 0.05;
+static Real hmax = 0.05;
+static Real hmin = 0.1 * hmax;
+static Real hausd = 0.5 * hmin;
+static Real ell = 0.4;
+const Real dt = 0.5 * (hmax - hmin);
+static Real alpha = 0.1;
 
 // Compliance
 template <class Data>
@@ -71,8 +72,29 @@ int main(int, char**)
   // Optimization loop
   std::vector<double> obj;
   std::ofstream fObj("obj.txt");
-  for (size_t i = 0; i < maxIt; i++)
+  size_t i = 0;
+  while (i < maxIt)
   {
+    try
+    {
+      MMG::Optimizer().setHMax(hmax)
+                      .setHMin(hmin)
+                      .setHausdorff(hausd)
+                      .setAngleDetection(false)
+                      .optimize(th);
+
+      hmax = hmax0;
+      hmin = 0.1 * hmax;
+    }
+    catch (const Alert::Exception& e)
+    {
+      hmax /= 2;
+      hmin = 0.1 * hmax;
+      Alert::Warning() << "Meshing failed at iteration " << i
+        << ". Reducing hmax to " << hmax << " and retrying." << Alert::Raise;
+      continue;
+    }
+
     th.getConnectivity().compute(1, 2);
     th.getConnectivity().compute(0, 0);
 
@@ -102,9 +124,8 @@ int main(int, char**)
                + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
     Solver::CG(elasticity).solve();
 
-
-    u.getSolution().save("u.gf");
-    trimmed.save("u.mesh");
+    u.getSolution().save("State.gf");
+    trimmed.save("State.mesh");
 
     Alert::Info() << "   | Computing shape gradient." << Alert::Raise;
     auto jac = Jacobian(u.getSolution());
@@ -113,15 +134,6 @@ int main(int, char**)
     auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
     auto n = FaceNormal(th);
     n.traceOf(interior);
-
-    GridFunction miaow(vh);
-    miaow.project(Geometry::Region::Faces, n, Gamma);
-    miaow.save("n.gf");
-    vh.getMesh().save("n.mesh");
-
-    // GridFunction miaow(shInt);
-    // miaow = Dot(Ae, e);
-    // miaow.save("u.gf");
 
     // Hilbert extension-regularization procedure
     TrialFunction g(vh);
@@ -151,6 +163,9 @@ int main(int, char**)
                            .solve()
                            .sign();
 
+    th.save("Distance.mesh");
+    dist.save("Distance.gf");
+
     // Advect the level set function
     Alert::Info() << "   | Advecting the distance function." << Alert::Raise;
     GridFunction norm(sh);
@@ -160,38 +175,44 @@ int main(int, char**)
     TrialFunction advect(sh);
     TestFunction test(sh);
 
-    th.save("distance.mesh");
-    dist.save("dist.gf");
-
     Advection::Lagrangian(advect, test, dist, dJ).step(dt);
 
-    th.save("advect.mesh");
-    advect.getSolution().save("advect.gf");
+    th.save("Advect.mesh");
+    advect.getSolution().save("Advect.gf");
 
     // Recover the implicit domain
     Alert::Info() << "   | Meshing the domain." << Alert::Raise;
 
-    th = MMG::LevelSetDiscretizer().split(interior, {interior, exterior})
-                                    .split(exterior, {interior, exterior})
-                                    .setRMC(1e-6)
-                                    .setHMax(hmax)
-                                    .setHMin(hmin)
-                                    .setHausdorff(hausd)
-                                    .setAngleDetection(false)
-                                    .setBoundaryReference(Gamma)
-                                    .setBaseReferences(GammaD)
-                                    .discretize(advect.getSolution());
+    try
+    {
+      th = MMG::LevelSetDiscretizer().split(interior, {interior, exterior})
+                                      .split(exterior, {interior, exterior})
+                                      .setRMC(1e-6)
+                                      .setHMax(hmax)
+                                      .setHMin(hmin)
+                                      .setHausdorff(hausd)
+                                      .setAngleDetection(false)
+                                      .setBoundaryReference(Gamma)
+                                      .setBaseReferences(GammaD)
+                                      .discretize(advect.getSolution());
 
-    MMG::Optimizer().setHMax(hmax)
-                    .setHMin(hmin)
-                    .setHausdorff(hausd)
-                    .setAngleDetection(false)
-                    .optimize(th);
+      hmax = hmax0;
+      hmin = 0.1 * hmax;
+    }
+    catch (const Alert::Exception& e)
+    {
+      hmax /= 2;
+      hmin = 0.1 * hmax;
+      Alert::Warning() << "Meshing failed at iteration " << i
+        << ". Reducing hmax to " << hmax << " and retrying." << Alert::Raise;
+      continue;
+    }
 
+    i++;
     th.save("out/Omega." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
   }
 
-  Alert::Info() << "Saved final mesh to Omega.mesh" << Alert::Raise;
+  Alert::Success() << "Saved final mesh to Omega.mesh" << Alert::Raise;
 
   return 0;
 }
