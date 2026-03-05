@@ -1703,6 +1703,21 @@ namespace Rodin::Math
   }
 
   template <class Scalar>
+  [[nodiscard]] inline
+  auto operator*(const SpatialMatrix<Scalar>& m, const Math::Vector<Scalar>& v)
+  {
+    Math::Vector<Scalar> result(m.rows());
+    for (std::uint8_t i = 0; i < m.rows(); ++i)
+    {
+      Scalar sum = Scalar(0);
+      for (std::uint8_t j = 0; j < m.cols(); ++j)
+        sum += m(i, j) * v[j];
+      result[i] = sum;
+    }
+    return result;
+  }
+
+  template <class Scalar>
   std::ostream& operator<<(std::ostream& os, const SpatialMatrix<Scalar>& m)
   {
     os << m.getData().topLeftCorner(
