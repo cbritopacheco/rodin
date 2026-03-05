@@ -89,7 +89,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md125">Usage Example</a></li>
+            <li><a href="#autotoc_md124">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -101,7 +101,7 @@
             </li>
           </ul>
         </nav>
-<p>Abstract base class template for loading objects from streams or files.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">Loader</a></p></aside><p>The <a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">Loader</a> class provides a common interface for reading objects of type <code>T</code> from input streams or files. This class serves as the foundation for specialized loaders that handle different file formats and object types.</p><p>Derived classes must implement:</p><ul><li><a href="#a4a361edaafdca57b230ccf5f8bc6479a" class="m-doc">load(std::<wbr />istream&amp;)</a> - Load object from an input stream</li><li><a href="#aa4f907de0650109219ed913846b7d85f" class="m-doc">getObject()</a> - Access the object being loaded</li></ul><section id="autotoc_md125"><h3><a href="#autotoc_md125">Usage Example</a></h3><pre class="m-code"><span class="k">class</span><span class="w"> </span><span class="nc">MyObjectLoader</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Loader</span><span class="o">&lt;</span><span class="n">MyObject</span><span class="o">&gt;</span>
+<p>Abstract base class template for loading objects from streams or files.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">Loader</a></p></aside><p>The <a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">Loader</a> class provides a common interface for reading objects of type <code>T</code> from input streams or files. This class serves as the foundation for specialized loaders that handle different file formats and object types.</p><p>Derived classes must implement:</p><ul><li><a href="#a4a361edaafdca57b230ccf5f8bc6479a" class="m-doc">load(std::<wbr />istream&amp;)</a> - Load object from an input stream</li><li><a href="#aa4f907de0650109219ed913846b7d85f" class="m-doc">getObject()</a> - Access the object being loaded</li></ul><section id="autotoc_md124"><h3><a href="#autotoc_md124">Usage Example</a></h3><pre class="m-code"><span class="k">class</span><span class="w"> </span><span class="nc">MyObjectLoader</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Loader</span><span class="o">&lt;</span><span class="n">MyObject</span><span class="o">&gt;</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
 <span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">load</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">istream</span><span class="o">&amp;</span><span class="w"> </span><span class="n">is</span><span class="p">)</span><span class="w"> </span><span class="k">override</span>

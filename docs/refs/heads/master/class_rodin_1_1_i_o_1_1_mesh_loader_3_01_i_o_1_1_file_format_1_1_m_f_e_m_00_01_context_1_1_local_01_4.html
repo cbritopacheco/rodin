@@ -78,8 +78,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md128">MFEM Format Structure</a></li>
-            <li><a href="#autotoc_md129">Usage Example</a></li>
+            <li><a href="#autotoc_md127">MFEM Format Structure</a></li>
+            <li><a href="#autotoc_md128">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -90,7 +90,7 @@
             </li>
           </ul>
         </nav>
-<p>This loader reads mesh data from the MFEM mesh file format, a text-based format used by the MFEM library. It supports various element types and can handle 2D and 3D meshes.</p><section id="autotoc_md128"><h3><a href="#autotoc_md128">MFEM Format Structure</a></h3><p>The MFEM mesh format consists of several sections:</p><ul><li>Header: &quot;MFEM mesh v1.0&quot; with version information</li><li>dimension: Spatial dimension of the mesh</li><li>elements: Element connectivity and attributes</li><li>boundary: Boundary element information</li><li>vertices: Vertex coordinates</li></ul></section><section id="autotoc_md129"><h3><a href="#autotoc_md129">Usage Example</a></h3><pre class="m-code"><span class="n">Mesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+<p>This loader reads mesh data from the MFEM mesh file format, a text-based format used by the MFEM library. It supports various element types and can handle 2D and 3D meshes.</p><section id="autotoc_md127"><h3><a href="#autotoc_md127">MFEM Format Structure</a></h3><p>The MFEM mesh format consists of several sections:</p><ul><li>Header: &quot;MFEM mesh v1.0&quot; with version information</li><li>dimension: Spatial dimension of the mesh</li><li>elements: Element connectivity and attributes</li><li>boundary: Boundary element information</li><li>vertices: Vertex coordinates</li></ul></section><section id="autotoc_md128"><h3><a href="#autotoc_md128">Usage Example</a></h3><pre class="m-code"><span class="n">Mesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
 <span class="n">MeshLoader</span><span class="o">&lt;</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">,</span><span class="w"> </span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">loader</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">loader</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;mesh.mfem&quot;</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_mesh_printer.html" class="m-doc">MeshPrinter</a></p></aside></section>
         <section id="base-classes">

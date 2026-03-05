@@ -77,10 +77,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md187">Algorithm</a></li>
-            <li><a href="#autotoc_md188">Applicability</a></li>
-            <li><a href="#autotoc_md189">Notes</a></li>
-            <li><a href="#autotoc_md190">Usage Example</a></li>
+            <li><a href="#autotoc_md186">Algorithm</a></li>
+            <li><a href="#autotoc_md187">Applicability</a></li>
+            <li><a href="#autotoc_md188">Notes</a></li>
+            <li><a href="#autotoc_md189">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -108,7 +108,7 @@
 <use x='194.944339' y='0' xlink:href='#eq1-g1-61'/>
 <use x='207.36982' y='0' xlink:href='#eq1-g0-98'/>
 </g>
-</svg></div><p>for general (possibly non-symmetric) matrices.</p><section id="autotoc_md187"><h3><a href="#autotoc_md187">Algorithm</a></h3><p>GMRES builds a Krylov subspace and computes the iterate that minimizes the residual norm over that subspace.</p></section><section id="autotoc_md188"><h3><a href="#autotoc_md188">Applicability</a></h3><ul><li>Non-symmetric or indefinite matrices</li><li>Large sparse systems</li><li>Convection-diffusion, saddle-point systems (when used appropriately)</li></ul></section><section id="autotoc_md189"><h3><a href="#autotoc_md189">Notes</a></h3><ul><li>Restarted GMRES is typically used to bound memory; Eigen&#x27;s GMRES supports restart.</li></ul></section><section id="autotoc_md190"><h3><a href="#autotoc_md190">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+</svg></div><p>for general (possibly non-symmetric) matrices.</p><section id="autotoc_md186"><h3><a href="#autotoc_md186">Algorithm</a></h3><p>GMRES builds a Krylov subspace and computes the iterate that minimizes the residual norm over that subspace.</p></section><section id="autotoc_md187"><h3><a href="#autotoc_md187">Applicability</a></h3><ul><li>Non-symmetric or indefinite matrices</li><li>Large sparse systems</li><li>Convection-diffusion, saddle-point systems (when used appropriately)</li></ul></section><section id="autotoc_md188"><h3><a href="#autotoc_md188">Notes</a></h3><ul><li>Restarted GMRES is typically used to bound memory; Eigen&#x27;s GMRES supports restart.</li></ul></section><section id="autotoc_md189"><h3><a href="#autotoc_md189">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 
 <span class="n">Solver</span><span class="o">::</span><span class="n">GMRES</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>

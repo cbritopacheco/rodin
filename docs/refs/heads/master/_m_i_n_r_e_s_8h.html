@@ -77,10 +77,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md204">Algorithm</a></li>
-            <li><a href="#autotoc_md205">Applicability</a></li>
-            <li><a href="#autotoc_md206">Notes</a></li>
-            <li><a href="#autotoc_md207">Usage Example</a></li>
+            <li><a href="#autotoc_md203">Algorithm</a></li>
+            <li><a href="#autotoc_md204">Applicability</a></li>
+            <li><a href="#autotoc_md205">Notes</a></li>
+            <li><a href="#autotoc_md206">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -118,7 +118,7 @@ $ A $
 <g id='eq2-page1'>
 <use x='0' y='0' xlink:href='#eq2-g0-65'/>
 </g>
-</svg> is symmetric (and may be indefinite).</p><section id="autotoc_md204"><h3><a href="#autotoc_md204">Algorithm</a></h3><p>MINRES is a Lanczos-based Krylov method that minimizes the residual norm over the generated Krylov subspace, while preserving short recurrences for symmetric operators.</p></section><section id="autotoc_md205"><h3><a href="#autotoc_md205">Applicability</a></h3><ul><li>Symmetric positive definite (works, but CG is usually preferable)</li><li>Symmetric indefinite systems (e.g., some mixed formulations, saddle-point after suitable transformations, Helmholtz-type operators, etc.)</li></ul></section><section id="autotoc_md206"><h3><a href="#autotoc_md206">Notes</a></h3><ul><li>This implementation uses Eigen&#x27;s unsupported MINRES.</li></ul></section><section id="autotoc_md207"><h3><a href="#autotoc_md207">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+</svg> is symmetric (and may be indefinite).</p><section id="autotoc_md203"><h3><a href="#autotoc_md203">Algorithm</a></h3><p>MINRES is a Lanczos-based Krylov method that minimizes the residual norm over the generated Krylov subspace, while preserving short recurrences for symmetric operators.</p></section><section id="autotoc_md204"><h3><a href="#autotoc_md204">Applicability</a></h3><ul><li>Symmetric positive definite (works, but CG is usually preferable)</li><li>Symmetric indefinite systems (e.g., some mixed formulations, saddle-point after suitable transformations, Helmholtz-type operators, etc.)</li></ul></section><section id="autotoc_md205"><h3><a href="#autotoc_md205">Notes</a></h3><ul><li>This implementation uses Eigen&#x27;s unsupported MINRES.</li></ul></section><section id="autotoc_md206"><h3><a href="#autotoc_md206">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 
 <span class="n">Solver</span><span class="o">::</span><span class="n">MINRES</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
