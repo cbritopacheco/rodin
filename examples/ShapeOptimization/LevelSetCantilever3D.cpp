@@ -33,7 +33,7 @@ static constexpr Real eps = 1e-12;
 static constexpr Real hgrad = 1.6;
 static constexpr Real ell = 0.1;
 static Real elementStep = 0.5;
-static Real hmax = 0.5;
+static Real hmax = 0.4;
 static Real hmin = 0.1 * hmax;
 static Real hausd = 0.1 * hmin;
 static size_t hmaxIt = maxIt / 2;
@@ -82,7 +82,7 @@ int main(int, char**)
     MMG::Optimizer().setHMax(hmax)
                     .setHMin(hmin)
                     // .setGradation(1.1)
-                    .setHausdorff(hausd)
+                    // .setHausdorff(hausd)
                     .setAngleDetection(false)
                     .optimize(th);
 
@@ -187,13 +187,13 @@ int main(int, char**)
     // Recover the implicit domain
     Alert::Info() << "   | Meshing the domain." << Alert::Raise;
     th = MMG::LevelSetDiscretizer().setHMax(hmax)
-                                    .setHMin(hmin)
-                                    .setHausdorff(hausd)
-                                    .setAngleDetection(false)
-                                    .setRMC(1e-5)
-                                    .setBaseReferences(GammaD)
-                                    .setBoundaryReference(Gamma)
-                                    .discretize(advect.getSolution());
+                                   .setHMin(hmin)
+                                   // .setHausdorff(hausd)
+                                   .setAngleDetection(false)
+                                   .setRMC(1e-5)
+                                   .setBaseReferences(GammaD)
+                                   .setBoundaryReference(Gamma)
+                                   .discretize(advect.getSolution());
 
     th.save("Omega.mesh", IO::FileFormat::MEDIT);
   }

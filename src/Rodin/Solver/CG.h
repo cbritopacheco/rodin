@@ -286,7 +286,7 @@ namespace Rodin::Solver
        */
       void solve(LinearSystemType& axb) override
       {
-        axb.getSolution() = m_solver.compute(axb.getOperator()).solve(axb.getVector());
+        axb.getSolution() = m_solver.compute(axb.getOperator()).solveWithGuess(axb.getVector(), axb.getSolution());
       }
 
       /**
