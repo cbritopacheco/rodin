@@ -737,18 +737,19 @@ namespace Rodin::Variational
       ShapeFunctionBase<
         Grad<ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>>, P1<LHSRange, LHSMesh>, TrialSpace>,
       ShapeFunctionBase<
-        Grad<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>,  P1<RHSRange, RHSMesh>, TestSpace>>>
+        Grad<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>, P1<RHSRange, RHSMesh>, TestSpace>>>
     : public LocalBilinearFormIntegratorBase<
         typename FormLanguage::Traits<
           Dot<
             ShapeFunctionBase<
               Grad<ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>>, P1<LHSRange, LHSMesh>, TrialSpace>,
             ShapeFunctionBase<
-              Grad<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>,  P1<RHSRange, RHSMesh>, TestSpace>>>
+              Grad<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>, P1<RHSRange, RHSMesh>, TestSpace>>>
         ::ScalarType>
   {
     public:
       using LHSFESType = P1<LHSRange, LHSMesh>;
+
       using RHSFESType = P1<RHSRange, RHSMesh>;
 
       using LHSType =
@@ -770,37 +771,27 @@ namespace Rodin::Variational
         typename FormLanguage::Traits<RHSOperandType>::RangeType;
 
       using IntegrandType = Dot<LHSType, RHSType>;
-      using ScalarType    = typename FormLanguage::Traits<IntegrandType>::ScalarType;
+
+      using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
 
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
       static_assert(std::is_same_v<LHSOperandRangeType, ScalarType>);
+
       static_assert(std::is_same_v<RHSOperandRangeType, ScalarType>);
 
       constexpr
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
-          m_weight(0),
-          m_distortion(0),
-          m_set(false),
-          m_geometry(Geometry::Polytope::Type::Point) // defined initial value
+          m_set(false)
       {}
 
       constexpr
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
-          m_polytope(other.m_polytope),
-          m_qf(other.m_qf),
-          m_p(other.m_p),
-          m_weight(other.m_weight),
-          m_distortion(other.m_distortion),
-          m_trialGrad(other.m_trialGrad),
-          m_testGrad(other.m_testGrad),
-          m_matrix(other.m_matrix),
-          m_set(other.m_set),
-          m_geometry(other.m_geometry)
+          m_set(false)
       {}
 
       constexpr
@@ -834,64 +825,51 @@ namespace Rodin::Variational
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = polytope;
-
-        const auto geometry = polytope.getGeometry();
-        const bool recompute = !m_set || (m_geometry != geometry);
-
+        const auto& geometry = polytope.getGeometry();
+        const bool recompute = !m_set || m_geometry != geometry;
         if (recompute)
         {
           const size_t d = polytope.getDimension();
-
-          // Build reference P1 elements directly from geometry (no entity index needed)
-          const Variational::P1Element<ScalarType> trialfe(geometry);
-          const Variational::P1Element<ScalarType> testfe(geometry);
-
+          const Index idx = polytope.getIndex();
+          const auto& integrand = getIntegrand();
+          const auto& lhs = integrand.getLHS();
+          const auto& rhs = integrand.getRHS();
+          const auto& trialfes = lhs.getFiniteElementSpace();
+          const auto& testfes = rhs.getFiniteElementSpace();
+          const auto& trialfe = trialfes.getFiniteElement(d, idx);
+          const auto& testfe = testfes.getFiniteElement(d, idx);
           m_qf.emplace(geometry);
           assert(m_qf->getSize() == 1);
-
           m_p.emplace(polytope, m_qf->getPoint(0));
           m_weight = m_qf->getWeight(0);
-
           const auto& rc = m_qf->getPoint(0);
-          const auto& p  = *m_p;
-
+          const auto& p = *m_p;
           m_matrix.resize(testfe.getCount(), trialfe.getCount());
           m_trialGrad.resize(trialfe.getCount());
           m_testGrad.resize(testfe.getCount());
-
           Math::SpatialVector<ScalarType> grad(d);
-
-          for (size_t local = 0; local < trialfe.getCount(); ++local)
+          for (size_t local = 0; local < trialfe.getCount(); local++)
           {
             const auto& basis = trialfe.getBasis(local);
-            for (size_t j = 0; j < d; ++j)
+            for (size_t j = 0; j < d; j++)
               grad(j) = basis.template getDerivative<1>(j)(rc);
-
             m_trialGrad[local] = p.getJacobianInverse().transpose() * grad;
           }
-
-          for (size_t local = 0; local < testfe.getCount(); ++local)
+          for (size_t local = 0; local < testfe.getCount(); local++)
           {
             const auto& basis = testfe.getBasis(local);
-            for (size_t j = 0; j < d; ++j)
+            for (size_t j = 0; j < d; j++)
               grad(j) = basis.template getDerivative<1>(j)(rc);
-
             m_testGrad[local] = p.getJacobianInverse().transpose() * grad;
           }
-
-          for (size_t te = 0; te < testfe.getCount(); ++te)
-            for (size_t tr = 0; tr < trialfe.getCount(); ++tr)
+          for (size_t te = 0; te < testfe.getCount(); te++)
+            for (size_t tr = 0; tr < trialfe.getCount(); tr++)
               m_matrix(te, tr) = Math::dot(m_testGrad[te], m_trialGrad[tr]);
-
-          // Persist invariants for later calls
-          m_geometry = geometry;
-          m_set = true;
         }
-
         assert(m_p);
-        m_p->setPolytope(polytope);
+        auto& p = *m_p;
+        p.setPolytope(polytope);
         m_distortion = m_p->getDistortion();
-
         return *this;
       }
 
@@ -901,6 +879,7 @@ namespace Rodin::Variational
       }
 
       virtual Geometry::Region getRegion() const override = 0;
+
       virtual QuadratureRule* copy() const noexcept override = 0;
 
     private:
@@ -912,7 +891,6 @@ namespace Rodin::Variational
 
       Real m_weight;
       Real m_distortion;
-
       std::vector<Math::SpatialVector<ScalarType>> m_trialGrad;
       std::vector<Math::SpatialVector<ScalarType>> m_testGrad;
 
