@@ -1,3 +1,4 @@
+#include "Rodin/Alert/Raise.h"
 #include "Rodin/PETSc/Variational/GridFunction.h"
 #include <boost/mpi/environment.hpp>
 #include <boost/mpi/communicator.hpp>
@@ -10,6 +11,7 @@
 #include <Rodin/Assembly.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
+#include <Rodin/Alert.h>
 
 namespace mpi = boost::mpi;
 
@@ -34,24 +36,37 @@ int main(int argc, char** argv)
   if (world.rank() == ROOT_RANK)
   {
     Geometry::LocalMesh mesh;
-    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Quadrilateral, { 16, 16 });
-    mesh.getConnectivity().compute(2, 2);
-    mesh.getConnectivity().compute(1, 2);
-    mesh.save("Poisson.mesh");
+    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Hexahedron, { 64, 64, 64 });
+    mesh.scale(1.0 / 63.0);
+    Alert::Info() << "Computing mesh connectivity..." << Alert::Raise;
+    const size_t cellDim = mesh.getDimension();
+    mesh.getConnectivity().compute(cellDim, cellDim);
+    mesh.getConnectivity().compute(cellDim - 1, cellDim);
+    Alert::Info() << "Partitioning mesh..." << Alert::Raise;
     Geometry::BalancedCompactPartitioner partitioner(mesh);
     partitioner.partition(world.size());
-    sharder.shard(partitioner).scatter(ROOT_RANK);
+    Alert::Info() << "Sharding mesh..." << Alert::Raise;
+    sharder.shard(partitioner);
+    Alert::Info() << "Scattering mesh to all processes..." << Alert::Raise;
+    sharder.scatter(ROOT_RANK);
+    Alert::Info() << "Mesh partitioned and scattered to all processes." << Alert::Raise;
   }
 
+  PetscPrintf(world, "Gathering mesh on root process for visualization.\n");
   auto mesh = sharder.gather(ROOT_RANK);
+  PetscPrintf(world, "Gathered mesh on root process.\n");
 
   char filename[32];
   std::snprintf(filename, sizeof(filename), "mesh.%06d", world.rank());
+  PetscPrintf(world, "Saving mesh to %s.\n", filename);
   mesh.save(filename);
+  PetscPrintf(world, "Saved mesh to %s.\n", filename);
 
   RealFunction f = 1;
 
+  PetscPrintf(world, "Constructing finite element space.\n");
   P1 vh(mesh);
+  PetscPrintf(world, "Constructed finite element space.\n");
 
   {
     PETSc::Variational::TrialFunction u(vh);
@@ -62,7 +77,12 @@ int main(int argc, char** argv)
     poisson = Integral(Grad(u), Grad(v))
             - Integral(f, v)
             + DirichletBC(u, Zero());
+    PetscPrintf(world, "Assembling.\n");
+    poisson.assemble();
+    PetscPrintf(world, "Assembled linear system.\n");
+    PetscPrintf(world, "Solving.\n");
     CG(poisson).solve();
+    PetscPrintf(world, "Solved linear system.\n");
 
     std::snprintf(filename, sizeof(filename), "sol.%06d", world.rank());
     u.getSolution().save(filename);

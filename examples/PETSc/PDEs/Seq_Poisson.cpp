@@ -24,8 +24,9 @@ int main(int argc, char** argv)
 
   // Build a mesh
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
-  mesh.getConnectivity().compute(1, 2);
+  mesh = mesh.UniformGrid(Polytope::Type::Hexahedron, { 16, 16, 16 });
+  mesh.scale(1.0 / 127.0);
+  mesh.getConnectivity().compute(2, 3);
 
   RealFunction f = 1;
 
@@ -40,7 +41,12 @@ int main(int argc, char** argv)
     poisson = Integral(Grad(u), Grad(v))
             - Integral(f, v)
             + DirichletBC(u, Zero());
+    std::cout << "Assembling..." << std::endl;
+    poisson.assemble();
+
+    std::cout << "Solving..." << std::endl;
     CG(poisson).solve();
+
 
     // Save solution
     u.getSolution().save("Poisson.gf");

@@ -36,6 +36,7 @@ if (RODIN_USE_MPI)
     Rodin::Geometry
     Rodin::Solver
     Rodin::Variational
+    Rodin::Alert
     Rodin::Math
     Rodin::MPI
     Rodin::PETSc)
