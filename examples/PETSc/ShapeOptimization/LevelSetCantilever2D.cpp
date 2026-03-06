@@ -1,9 +1,92 @@
 /*
- *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
  * Distributed under the Boost Software License, Version 1.0.
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @example PETSc/ShapeOptimization/LevelSetCantilever2D.cpp
+ * @brief Level-set based cantilever shape optimization in 2D using PETSc and MMG.
+ *
+ * This example solves a compliance minimization problem with perimeter penalization
+ * by combining:
+ * - linear elasticity for the state equation,
+ * - a Hilbert-regularized shape gradient,
+ * - level set advection,
+ * - signed-distance reinitialization,
+ * - remeshing with MMG.
+ *
+ * At each iteration, the code:
+ * 1. optimizes the current mesh,
+ * 2. trims the exterior subdomain,
+ * 3. solves the elasticity state equation on the current shape,
+ * 4. computes a regularized shape gradient,
+ * 5. advects the level set function,
+ * 6. reconstructs the domain with MMG,
+ * 7. updates and records the objective value.
+ *
+ * The objective written to @c obj.txt is
+ * @f[
+ *   J(\Omega) = \text{compliance}(\Omega) + \ell |\Omega|,
+ * @f]
+ * where @f$\ell@f$ is the area penalization coefficient.
+ *
+ * @section input Input mesh
+ * The example expects the initial mesh
+ * @code
+ * ../resources/examples/ShapeOptimization/LevelSetCantilever2D.mfem.mesh
+ * @endcode
+ *
+ * @section usage Usage
+ * Build the examples, then run for instance:
+ *
+ * @code
+ * OMP_NUM_THREADS=8 ./examples/PETSc/ShapeOptimization/PETSc_LevelSetCantilever2D \
+ *   -ksp_type cg \
+ *   -pc_type gamg \
+ *   -ksp_rtol 1e-8 \
+ *   -ksp_max_it 1000 \
+ *   -ksp_converged_reason \
+ *   -ksp_monitor \
+ *   -mat_block_size 2 \
+ *   -pc_gamg_threshold 0.01
+ * @endcode
+ *
+ * PETSc options are forwarded to the linear solves used for:
+ * - the elasticity state equation,
+ * - the Hilbert extension / regularization problem.
+ *
+ * A common alternative is to test without monitoring:
+ *
+ * @code
+ * OMP_NUM_THREADS=8 ./examples/PETSc/ShapeOptimization/PETSc_LevelSetCantilever2D \
+ *   -ksp_type cg -pc_type gamg -ksp_rtol 1e-8
+ * @endcode
+ *
+ * @section output Output files
+ * During the optimization, the program writes intermediate files such as:
+ * - @c Omega0.mesh       : initial optimized mesh,
+ * - @c Omega.mesh        : current trimmed domain,
+ * - @c State.mesh        : mesh used for the state solve,
+ * - @c State.gf          : state displacement,
+ * - @c dJ.mesh           : mesh for the shape gradient,
+ * - @c dJ.gf             : regularized shape gradient,
+ * - @c Distance.mesh     : mesh for the signed-distance function,
+ * - @c Distance.gf       : signed-distance function,
+ * - @c Advect.mesh       : mesh after advection,
+ * - @c Advect.gf         : advected level set,
+ * - @c out/Omega.<k>.mesh: reconstructed domain at iteration @c k,
+ * - @c obj.txt           : objective history.
+ *
+ * @section notes Notes
+ * - The example uses PETSc for the linear algebra back-end.
+ * - MMG is used both for mesh optimization and for level-set based remeshing.
+ * - If remeshing fails at some iteration, the code reduces @c hmax and retries.
+ * - The directory @c out/ should exist before running if you want to keep the
+ *   saved iteration meshes.
+ */
+
 #include <Rodin/MMG.h>
 #include <Rodin/PETSc.h>
 #include <Rodin/Solver.h>
