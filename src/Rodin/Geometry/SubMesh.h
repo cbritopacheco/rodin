@@ -43,7 +43,7 @@ namespace Rodin::Geometry
       struct PolytopeMap
       {
         std::vector<Index> left;        ///< Submesh index to parent index
-        FlatMap<Index, Index> right;    ///< Parent index to submesh index
+        UnorderedMap<Index, Index> right;    ///< Parent index to submesh index
       };
 
       /**

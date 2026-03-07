@@ -35,25 +35,25 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  FlatMap<Index, Index>& Shard::Builder::getOwner(size_t d)
+  UnorderedMap<Index, Index>& Shard::Builder::getOwner(size_t d)
   {
     assert(d < m_owner.size());
     return m_owner[d];
   }
 
-  FlatMap<Index, IndexSet>& Shard::Builder::getHalo(size_t d)
+  UnorderedMap<Index, IndexSet>& Shard::Builder::getHalo(size_t d)
   {
     assert(d < m_halo.size());
     return m_halo[d];
   }
 
-  const FlatMap<Index, Index>& Shard::Builder::getOwner(size_t d) const
+  const UnorderedMap<Index, Index>& Shard::Builder::getOwner(size_t d) const
   {
     assert(d < m_owner.size());
     return m_owner[d];
   }
 
-  const FlatMap<Index, IndexSet>& Shard::Builder::getHalo(size_t d) const
+  const UnorderedMap<Index, IndexSet>& Shard::Builder::getHalo(size_t d) const
   {
     assert(d < m_halo.size());
     return m_halo[d];
@@ -208,13 +208,13 @@ namespace Rodin::Geometry
     return m_flags[d][idx] & Shard::Flags::Owned;
   }
 
-  const FlatMap<Index, Index>& Shard::getOwner(size_t d) const
+  const UnorderedMap<Index, Index>& Shard::getOwner(size_t d) const
   {
     assert(d < m_owner.size());
     return m_owner[d];
   }
 
-  const FlatMap<Index, IndexSet>& Shard::getHalo(size_t d) const
+  const UnorderedMap<Index, IndexSet>& Shard::getHalo(size_t d) const
   {
     assert(d < m_halo.size());
     return m_halo[d];
