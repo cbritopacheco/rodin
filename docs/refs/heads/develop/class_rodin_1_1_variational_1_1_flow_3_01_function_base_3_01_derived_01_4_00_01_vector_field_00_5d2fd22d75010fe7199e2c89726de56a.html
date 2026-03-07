@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy, TangentPolicy&gt; class | Rodin</title>
+  <title>Rodin::Variational::Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -72,8 +72,8 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_flow_8h.html">&lt;Rodin/Variational/Flow.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy, class TangentPolicy&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy, TangentPolicy&gt; <span class="m-thin">class</span>
+          <div class="m-doc-template">template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt; <span class="m-thin">class</span>
         </h1>
         <p><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a> map operator for functions.</p>
         <table class="m-table m-fullwidth m-flat">
@@ -96,10 +96,6 @@
             <tr>
               <td>BoundaryPolicy</td>
               <td>Policy for handling domain boundaries</td>
-            </tr>
-            <tr>
-              <td>TangentPolicy</td>
-              <td>Policy for tangent vector computation</td>
             </tr>
           </tbody>
         </table>
@@ -166,7 +162,7 @@ $ \Phi $
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase&lt;Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy, TangentPolicy&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase&lt;Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&gt;</a>
             </dt>
             <dd>Base class for function objects which can be evaluated over a mesh.</dd>
           </dl>
@@ -194,9 +190,9 @@ $ \Phi $
           <section class="m-doc-details" id="a9cbedfa50f978f7c4362783ce540f542"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy, class TangentPolicy&gt;
+                template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>* Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy, TangentPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy, TangentPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9cbedfa50f978f7c4362783ce540f542" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>* Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9cbedfa50f978f7c4362783ce540f542" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of this object.</p>
             <table class="m-table m-fullwidth m-flat">
