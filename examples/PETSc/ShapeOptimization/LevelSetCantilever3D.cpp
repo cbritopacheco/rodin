@@ -318,8 +318,9 @@ int main(int argc, char** argv)
       continue;
     }
 
+    trimmed.save("out/Omega." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
+
     i++;
-    th.save("Omega.mesh", IO::FileFormat::MEDIT);
   }
 
   Alert::Success() << "Saved final mesh to Omega.mesh" << Alert::Raise;

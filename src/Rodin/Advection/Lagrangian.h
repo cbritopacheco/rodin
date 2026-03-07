@@ -507,14 +507,13 @@ namespace Rodin::Advection
         const auto& mesh = fes.getMesh();
 
         const Math::RungeKutta::RK4 step;
-        const DefaultTangentPolicy tp;
 
         Problem pb(u, v);
         if (m_t > 0)
         {
           const TaylorBoundaryShiftPolicy bp(-dt, mesh, u.getSolution());
           pb = Integral(u, v)
-             - Integral(Flow(-dt, u.getSolution(), m_velocity, step, bp, tp), v);
+             - Integral(Flow(-dt, u.getSolution(), m_velocity, step, bp), v);
           Solver::CG(pb).solve();
         }
         else
@@ -523,7 +522,7 @@ namespace Rodin::Advection
           u0 = m_initial;
           const TaylorBoundaryShiftPolicy bp(-dt, mesh, u0);
           pb = Integral(u, v)
-             - Integral(Flow(-dt, m_initial, m_velocity, step, bp, tp), v);
+             - Integral(Flow(-dt, m_initial, m_velocity, step, bp), v);
           Solver::CG(pb).solve();
         }
 

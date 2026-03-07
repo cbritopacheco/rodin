@@ -54,13 +54,12 @@ namespace Rodin::FormLanguage
     class FES,
     class VectorField,
     class Step,
-    class BoundaryPolicy,
-    class TangentPolicy
+    class BoundaryPolicy
   >
   struct Traits<
     Variational::Flow<
       Variational::ShapeFunctionBase<Derived, FES, Variational::TestSpace>,
-      VectorField, Step, BoundaryPolicy, TangentPolicy>>
+      VectorField, Step, BoundaryPolicy>>
   {
     using FESType = FES;
     static constexpr Variational::ShapeFunctionSpaceType SpaceType = Variational::TestSpace;
@@ -102,25 +101,6 @@ namespace Rodin::Variational
   };
 
   /**
-   * @brief Default tangent policy for flow maps.
-   *
-   * This policy allows tangent vectors to be computed at all points.
-   */
-  class DefaultTangentPolicy
-  {
-    public:
-      /**
-       * @brief Called to determine if tangent computation is allowed.
-       * @returns true (always allow tangent computation)
-       */
-      constexpr
-      bool operator()(const BoundaryHit&) const
-      {
-        return true;
-      }
-  };
-
-  /**
    * @ingroup RodinVariational
    * @brief Flow map operator for functions.
    *
@@ -138,10 +118,9 @@ namespace Rodin::Variational
     class Derived,
     class VectorField,
     class Step,
-    class BoundaryPolicy,
-    class TangentPolicy>
-  class Flow<FunctionBase<Derived>, VectorField, Step, BoundaryPolicy, TangentPolicy>
-    : public FunctionBase<Flow<FunctionBase<Derived>, VectorField, Step, BoundaryPolicy, TangentPolicy>>
+    class BoundaryPolicy>
+  class Flow<FunctionBase<Derived>, VectorField, Step, BoundaryPolicy>
+    : public FunctionBase<Flow<FunctionBase<Derived>, VectorField, Step, BoundaryPolicy>>
   {
     public:
       /// @brief Type of the operand function
@@ -157,11 +136,8 @@ namespace Rodin::Variational
       using BoundaryPolicyType =
         BoundaryPolicy;
 
-      using TangentPolicyType =
-        TangentPolicy;
-
       using Parent =
-        FunctionBase<Flow<FunctionBase<Derived>, VectorField, Step, BoundaryPolicy, TangentPolicy>>;
+        FunctionBase<Flow<FunctionBase<Derived>, VectorField, Step, BoundaryPolicy>>;
 
       class Trace
       {
@@ -200,11 +176,11 @@ namespace Rodin::Variational
       template <
         class VVel,
         class S = StepType,
-        class B = BoundaryPolicy, class T = TangentPolicy>
+        class B = BoundaryPolicy>
       Flow(const Real& t,
            const Operand& u,
            VVel&& vel,
-           S&& st=S{}, B&& bp=B{}, T&& tp=T{})
+           S&& st=S{}, B&& bp=B{})
         : m_maxZeroHops(128),
           m_maxBisectionIterations(16),
           m_maxSubdivisionIterations(8),
@@ -213,7 +189,6 @@ namespace Rodin::Variational
           m_velocity(std::forward<VVel>(vel)),
           m_step(std::forward<S>(st)),
           m_bp(std::forward<B>(bp)),
-          m_tp(std::forward<T>(tp)),
           m_p(nullptr)
       {}
 
@@ -227,7 +202,6 @@ namespace Rodin::Variational
           m_velocity(other.m_velocity),
           m_step(other.m_step),
           m_bp(other.m_bp),
-          m_tp(other.m_tp),
           m_p(other.m_p)
       {}
 
@@ -241,7 +215,6 @@ namespace Rodin::Variational
           m_velocity(std::move(other.m_velocity)),
           m_step(std::move(other.m_step)),
           m_bp(std::move(other.m_bp)),
-          m_tp(std::move(other.m_tp)),
           m_p(std::exchange(other.m_p, nullptr))
       {}
 
@@ -918,11 +891,6 @@ namespace Rodin::Variational
         return m_bp;
       }
 
-      const auto& getTangentPolicy() const
-      {
-        return m_tp;
-      }
-
       Flow& setMaximumZeroHops(size_t maxHops)
       {
         m_maxZeroHops = maxHops;
@@ -956,7 +924,6 @@ namespace Rodin::Variational
       VectorFieldType m_velocity;
       Step m_step;
       BoundaryPolicy m_bp;
-      TangentPolicy m_tp;
       const Geometry::Point* m_p;
   };
 
@@ -966,8 +933,7 @@ namespace Rodin::Variational
          FunctionBase<Derived>,
          Velocity,                       // keep T or T&
          Math::RungeKutta::RK4,      // value default
-         DefaultBoundaryPolicy,
-         DefaultTangentPolicy>;
+         DefaultBoundaryPolicy>;
 
   template <class Derived, class Velocity, class Step>
   Flow(const Real&, const FunctionBase<Derived>&, Velocity&&, Step&&)
@@ -975,14 +941,13 @@ namespace Rodin::Variational
          FunctionBase<Derived>,
          Velocity,
          Step,
-         DefaultBoundaryPolicy,
-         DefaultTangentPolicy>;
+         DefaultBoundaryPolicy>;
 
   template <
     class Derived,
-    class Velocity, class Step, class BBP, class TTP>
-  Flow(const Real&, const FunctionBase<Derived>&, Velocity&&, Step&&, BBP&&, TTP&&)
-    -> Flow<FunctionBase<Derived>, Velocity, Step, BBP, TTP>;
+    class Velocity, class Step, class BBP>
+  Flow(const Real&, const FunctionBase<Derived>&, Velocity&&, Step&&, BBP&&)
+    -> Flow<FunctionBase<Derived>, Velocity, Step, BBP>;
 }
 
 #endif
