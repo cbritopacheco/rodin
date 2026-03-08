@@ -311,11 +311,11 @@ namespace Rodin::Variational
       virtual QuadratureRule* copy() const noexcept override = 0;
 
     private:
-      std::reference_wrapper<const GridFunction<FES, Data>>   m_u;
-      TestFunction<FES>                                 m_v;
+      std::reference_wrapper<const GridFunction<FES, Data>> m_u;
+      TestFunction<FES> m_v;
 
-      FlatSet<Geometry::Attribute>                  m_attrs;
-      LinearForm<FES, Math::Vector<ScalarType>>     m_lf;
+      FlatSet<Geometry::Attribute> m_attrs;
+      LinearForm<FES, Data> m_lf;
 
       Optional<ScalarType> m_value;
   };

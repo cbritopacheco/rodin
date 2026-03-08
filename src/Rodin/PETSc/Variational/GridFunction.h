@@ -158,6 +158,7 @@ namespace Rodin::Variational
         {
           assert(false);
         }
+        (void) ierr;
       }
 
       GridFunction(const GridFunction& other)
@@ -843,6 +844,12 @@ namespace Rodin::Variational
       const ArrayWrite& getArrayWrite() const
       {
         return m_write;
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope&) const
+      {
+        return std::nullopt;
       }
 
     private:

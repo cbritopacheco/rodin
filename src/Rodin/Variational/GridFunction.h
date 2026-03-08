@@ -1059,6 +1059,7 @@ namespace Rodin::Variational
         return m_data;
       }
 
+      constexpr
       Optional<size_t> getOrder(const Geometry::Polytope&) const
       {
         return std::nullopt;

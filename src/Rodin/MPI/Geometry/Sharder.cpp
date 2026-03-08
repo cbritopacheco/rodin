@@ -151,8 +151,7 @@ namespace Rodin::Geometry
         continue;
       reqs[i] = comm.isend(i, tag, m_shards[i]);
     }
-    for (auto& req : reqs)
-      req.wait();
+    boost::mpi::wait_all(reqs.begin(), reqs.end());
     return *this;
   }
 

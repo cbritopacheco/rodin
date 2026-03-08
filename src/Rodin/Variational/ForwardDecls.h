@@ -1099,8 +1099,7 @@ namespace Rodin::Variational
     class Operand,
     class VectorField,
     class Step,
-    class BoundaryPolicy,
-    class TangentPolicy
+    class BoundaryPolicy
   > class Flow;
 }
 

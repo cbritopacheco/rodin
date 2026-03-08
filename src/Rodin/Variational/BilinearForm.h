@@ -136,6 +136,28 @@ namespace Rodin::Variational
           m_gbfis(std::move(other.m_gbfis))
       {}
 
+      constexpr
+      BilinearFormBase& operator=(const BilinearFormBase& other)
+      {
+        if (this != &other)
+        {
+          m_lbfis = other.m_lbfis;
+          m_gbfis = other.m_gbfis;
+        }
+        return *this;
+      }
+
+      constexpr
+      BilinearFormBase& operator=(BilinearFormBase&& other) noexcept
+      {
+        if (this != &other)
+        {
+          m_lbfis = std::move(other.m_lbfis);
+          m_gbfis = std::move(other.m_gbfis);
+        }
+        return *this;
+      }
+
       /**
        * @brief Gets the list of local integrators.
        * @return Reference to the list of local element integrators

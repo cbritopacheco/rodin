@@ -79,7 +79,7 @@ namespace Rodin::Geometry
         friend class boost::serialization::access;
 
         std::vector<Index> left;        ///< Shard index to parent index
-        FlatMap<Index, Index> right;    ///< Parent index to shard index
+        UnorderedMap<Index, Index> right;    ///< Parent index to shard index
 
         /**
          * @brief Serialization method.
@@ -265,28 +265,28 @@ namespace Rodin::Geometry
            * @param[in] d Dimension
            * @returns Map from ghost index to owning process
            */
-          FlatMap<Index, Index>& getOwner(size_t d);
+          UnorderedMap<Index, Index>& getOwner(size_t d);
 
           /**
            * @brief Gets halo map for a dimension (mutable).
            * @param[in] d Dimension
            * @returns Map from owned index to processes needing it
            */
-          FlatMap<Index, IndexSet>& getHalo(size_t d);
+          UnorderedMap<Index, IndexSet>& getHalo(size_t d);
 
           /**
            * @brief Gets owner map for a dimension (const).
            * @param[in] d Dimension
            * @returns Map from ghost index to owning process
            */
-          const FlatMap<Index, Index>& getOwner(size_t d) const;
+          const UnorderedMap<Index, Index>& getOwner(size_t d) const;
 
           /**
            * @brief Gets halo map for a dimension (const).
            * @param[in] d Dimension
            * @returns Map from owned index to processes needing it
            */
-          const FlatMap<Index, IndexSet>& getHalo(size_t d) const;
+          const UnorderedMap<Index, IndexSet>& getHalo(size_t d) const;
 
         private:
           Optional<std::reference_wrapper<const Mesh<Context>>> m_parent;
@@ -294,8 +294,8 @@ namespace Rodin::Geometry
           std::vector<Index> m_sidx;
           std::vector<PolytopeMap> m_s2ps;
           std::vector<std::vector<Flags>> m_flags;
-          std::vector<FlatMap<Index, IndexSet>> m_halo;
-          std::vector<FlatMap<Index, Index>> m_owner;
+          std::vector<UnorderedMap<Index, IndexSet>> m_halo;
+          std::vector<UnorderedMap<Index, Index>> m_owner;
           size_t m_dimension;
       };
 
@@ -349,7 +349,7 @@ namespace Rodin::Geometry
        * @param[in] d Dimension
        * @returns Map from ghost polytope index to owning process ID
        */
-      const FlatMap<Index, Index>& getOwner(size_t d) const;
+      const UnorderedMap<Index, Index>& getOwner(size_t d) const;
 
       /**
        * @brief Gets the halo map for a dimension.
@@ -359,7 +359,7 @@ namespace Rodin::Geometry
        * The halo identifies which neighboring processes need ghost copies
        * of this shard's owned elements.
        */
-      const FlatMap<Index, IndexSet>& getHalo(size_t d) const;
+      const UnorderedMap<Index, IndexSet>& getHalo(size_t d) const;
 
       /**
        * @brief Gets the polytope index map for a dimension.
@@ -387,8 +387,8 @@ namespace Rodin::Geometry
     private:
       std::vector<PolytopeMap> m_s2ps;                  ///< Index mappings per dimension
       std::vector<std::vector<Flags>> m_flags;          ///< Ownership flags per dimension
-      std::vector<FlatMap<Index, Index>> m_owner;       ///< Ghost to owner process map
-      std::vector<FlatMap<Index, IndexSet>> m_halo;     ///< Owned to needing processes map
+      std::vector<UnorderedMap<Index, Index>> m_owner;       ///< Ghost to owner process map
+      std::vector<UnorderedMap<Index, IndexSet>> m_halo;     ///< Owned to needing processes map
   };
 }
 
