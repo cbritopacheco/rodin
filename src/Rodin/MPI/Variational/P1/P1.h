@@ -466,13 +466,13 @@ namespace Rodin::Variational
       }
 
       template <class CallableType>
-      auto getPushforward(const std::pair<size_t, Index>& idx, const CallableType& v) const
+      auto getPushforward(const std::pair<size_t, Index>&, const CallableType& v) const
       {
         return typename FESType::template Pushforward<CallableType>(v);
       }
 
       template <class CallableType>
-      auto getPushforward(const Geometry::Polytope& polytope, const CallableType& v) const
+      auto getPushforward(const Geometry::Polytope&, const CallableType& v) const
       {
         return typename FESType::Pushforward(v);
       }
