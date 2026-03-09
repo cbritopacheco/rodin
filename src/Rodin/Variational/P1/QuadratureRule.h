@@ -777,7 +777,6 @@ namespace Rodin::Variational
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
       static_assert(std::is_same_v<LHSOperandRangeType, ScalarType>);
-
       static_assert(std::is_same_v<RHSOperandRangeType, ScalarType>);
 
       constexpr
@@ -803,8 +802,7 @@ namespace Rodin::Variational
           m_p(std::move(other.m_p)),
           m_weight(std::move(other.m_weight)),
           m_distortion(std::move(other.m_distortion)),
-          m_trialGrad(std::move(other.m_trialGrad)),
-          m_testGrad(std::move(other.m_testGrad)),
+          m_grad(std::move(other.m_grad)),
           m_matrix(std::move(other.m_matrix)),
           m_set(std::move(other.m_set)),
           m_geometry(std::move(other.m_geometry))
@@ -827,49 +825,57 @@ namespace Rodin::Variational
         m_polytope = polytope;
         const auto& geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_geometry != geometry;
+
         if (recompute)
         {
+          m_set = true;
+          m_geometry = geometry;
+
           const size_t d = polytope.getDimension();
-          const Index idx = polytope.getIndex();
-          const auto& integrand = getIntegrand();
-          const auto& lhs = integrand.getLHS();
-          const auto& rhs = integrand.getRHS();
-          const auto& trialfes = lhs.getFiniteElementSpace();
-          const auto& testfes = rhs.getFiniteElementSpace();
-          const auto& trialfe = trialfes.getFiniteElement(d, idx);
-          const auto& testfe = testfes.getFiniteElement(d, idx);
+          const P1Element<ScalarType> fe(geometry);
+          const size_t n = fe.getCount();
+
           m_qf.emplace(geometry);
           assert(m_qf->getSize() == 1);
+
           m_p.emplace(polytope, m_qf->getPoint(0));
           m_weight = m_qf->getWeight(0);
+
           const auto& rc = m_qf->getPoint(0);
-          const auto& p = *m_p;
-          m_matrix.resize(testfe.getCount(), trialfe.getCount());
-          m_trialGrad.resize(trialfe.getCount());
-          m_testGrad.resize(testfe.getCount());
-          Math::SpatialVector<ScalarType> grad(d);
-          for (size_t local = 0; local < trialfe.getCount(); local++)
+
+          m_grad.resize(n);
+          m_matrix.resize(n, n);
+
+          for (size_t local = 0; local < n; ++local)
           {
-            const auto& basis = trialfe.getBasis(local);
-            for (size_t j = 0; j < d; j++)
-              grad(j) = basis.template getDerivative<1>(j)(rc);
-            m_trialGrad[local] = p.getJacobianInverse().transpose() * grad;
+            auto& g = m_grad[local];
+            g.resize(d);
+            const auto& basis = fe.getBasis(local);
+            for (size_t j = 0; j < d; ++j)
+              g(j) = basis.template getDerivative<1>(j)(rc);
           }
-          for (size_t local = 0; local < testfe.getCount(); local++)
-          {
-            const auto& basis = testfe.getBasis(local);
-            for (size_t j = 0; j < d; j++)
-              grad(j) = basis.template getDerivative<1>(j)(rc);
-            m_testGrad[local] = p.getJacobianInverse().transpose() * grad;
-          }
-          for (size_t te = 0; te < testfe.getCount(); te++)
-            for (size_t tr = 0; tr < trialfe.getCount(); tr++)
-              m_matrix(te, tr) = Math::dot(m_testGrad[te], m_trialGrad[tr]);
         }
+
         assert(m_p);
         auto& p = *m_p;
         p.setPolytope(polytope);
-        m_distortion = m_p->getDistortion();
+
+        const auto& Jinv = p.getJacobianInverse();
+        const auto G = Jinv * Jinv.transpose();
+
+        const size_t n = m_grad.size();
+
+        for (size_t i = 0; i < n; ++i)
+        {
+          m_matrix(i, i) = Math::dot(m_grad[i], G * m_grad[i]);
+          for (size_t j = 0; j < i; ++j)
+            m_matrix(i, j) = Math::dot(m_grad[i], G * m_grad[j]);
+        }
+
+        m_matrix.template triangularView<Eigen::Upper>() =
+          m_matrix.template triangularView<Eigen::Lower>().transpose();
+
+        m_distortion = p.getDistortion();
         return *this;
       }
 
@@ -891,9 +897,8 @@ namespace Rodin::Variational
 
       Real m_weight;
       Real m_distortion;
-      std::vector<Math::SpatialVector<ScalarType>> m_trialGrad;
-      std::vector<Math::SpatialVector<ScalarType>> m_testGrad;
 
+      std::vector<Math::SpatialVector<ScalarType>> m_grad;
       Math::Matrix<ScalarType> m_matrix;
 
       bool m_set;

@@ -311,9 +311,6 @@ namespace Rodin::Variational
 
       Grad& setIntegrationPoint(const IntegrationPoint& ip)
       {
-        // Keep operand aligned (also lets operand reuse its own cache elsewhere)
-        m_u.get().setIntegrationPoint(ip);
-
         m_ip = &ip;
 
         const auto& pt   = ip.getPoint();

@@ -191,6 +191,8 @@ namespace Rodin::Assembly
 
         ierr = MatAssemblyEnd(res, MAT_FINAL_ASSEMBLY);
         assert(ierr == PETSC_SUCCESS);
+
+        (void) ierr;
       }
 
       MPI* copy() const noexcept override
@@ -982,6 +984,8 @@ namespace Rodin::Assembly
           ierr = VecDestroy(&bcVec);
           assert(ierr == PETSC_SUCCESS);
         }
+
+        (void) ierr;
       }
 
       MPI* copy() const noexcept override
