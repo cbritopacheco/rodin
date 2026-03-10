@@ -131,44 +131,71 @@ namespace Rodin::Geometry
   Shard Shard::Builder::finalize()
   {
     assert(m_parent.has_value());
-    const auto& parent = m_parent.value().get();
-    auto& conn = m_build.getConnectivity();
-    const size_t cellDim = parent.getDimension();
-    const auto& pconn = parent.getConnectivity();
-    for (size_t d = 0; d <= cellDim; ++d)
+    const auto& parent = m_parent->get();
+    const auto& pconn  = parent.getConnectivity();
+    const size_t D     = parent.getDimension();
+
+    auto& cconn = m_build.getConnectivity();
+
+    // --------------------------------------------------------------------------
+    // Rebuild all incidences on the local shard by filtering parent incidences
+    // through the shard-local polytope maps.
+    // --------------------------------------------------------------------------
+    for (size_t d = 0; d <= D; ++d)
     {
-      for (size_t dp = 0; dp <= cellDim; ++dp)
+      const auto& dmap = m_s2ps[d];
+      const size_t nd  = dmap.left.size();
+      if (nd == 0)
+        continue;
+
+      for (size_t dp = 0; dp <= D; ++dp)
       {
         const auto& pInc = pconn.getIncidence(d, dp);
         if (pInc.empty())
           continue;
-        Incidence cInc(m_s2ps[d].left.size());
-        for (size_t i = 0; i < m_s2ps[d].left.size(); ++i)
+
+        const auto& dpmap = m_s2ps[dp].right;
+        Incidence cInc(nd);
+
+        for (Index ci = 0; ci < static_cast<Index>(nd); ++ci)
         {
-          const Index& cIdx = i;
-          const Index& pIdx = m_s2ps[d].left[i];
-          cInc[cIdx].reserve(pInc.at(pIdx).size());
-          for (Index pNbr : pInc.at(pIdx))
+          const Index pi = dmap.left[ci];
+          const auto& pinc = pInc.at(pi);
+
+          auto& cinc = cInc[ci];
+          cinc.reserve(pinc.size());
+
+          for (const Index pj : pinc)
           {
-            const auto found = m_s2ps[dp].right.find(pNbr);
-            if (found != m_s2ps[dp].right.end())
-              cInc[cIdx].push_back(found->second);
+            auto it = dpmap.find(pj);
+            if (it != dpmap.end())
+              cinc.push_back(it->second);
           }
         }
-        conn.setIncidence({ d, dp }, std::move(cInc));
+
+        cconn.setIncidence({ d, dp }, std::move(cInc));
       }
     }
 
-    m_build.nodes(m_sidx[0]);
-    for (const Index& pIdx: m_s2ps[0].left)
-      m_build.vertex(parent.getVertexCoordinates(pIdx));
+    // --------------------------------------------------------------------------
+    // Rebuild vertex coordinates in shard-local order.
+    // Vertices are emitted in the same order as m_s2ps[0].left.
+    // --------------------------------------------------------------------------
+    const auto& vmap = m_s2ps[0].left;
+    m_build.nodes(vmap.size());
+    for (const Index pvid : vmap)
+      m_build.vertex(parent.getVertexCoordinates(pvid));
 
+    // --------------------------------------------------------------------------
+    // Finalize the local mesh and move shard metadata.
+    // --------------------------------------------------------------------------
     Shard res;
     res.Parent::operator=(m_build.finalize());
-    res.m_s2ps = std::move(m_s2ps);
+    res.m_s2ps  = std::move(m_s2ps);
     res.m_flags = std::move(m_flags);
     res.m_owner = std::move(m_owner);
-    res.m_halo = std::move(m_halo);
+    res.m_halo  = std::move(m_halo);
+
     return res;
   }
 

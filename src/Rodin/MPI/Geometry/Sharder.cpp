@@ -22,119 +22,193 @@ namespace Rodin::Geometry
   Sharder<Context::MPI>& Sharder<Context::MPI>::shard(Partitioner& partitioner)
   {
     m_shards.clear();
+
     const auto& mesh = partitioner.getMesh();
     const auto& conn = mesh.getConnectivity();
-    const size_t cellDim = mesh.getDimension();
+
+    const size_t D         = mesh.getDimension();
     const size_t numShards = partitioner.getCount();
-    assert(m_context.getCommunicator().size() >= 0);
-    assert(partitioner.getCount() == static_cast<size_t>(m_context.getCommunicator().size()));
+
+    assert(numShards == static_cast<size_t>(comm.size()));
     assert(numShards > 0);
+
+    const size_t numCells = mesh.getCellCount();
+
+    // --------------------------------------------------------------------------
+    // Cache global counts and cell partition once
+    // --------------------------------------------------------------------------
+    std::vector<size_t> polytopeCount(D + 1);
+    for (size_t d = 0; d <= D; ++d)
+      polytopeCount[d] = mesh.getPolytopeCount(d);
+
+    std::vector<size_t> cellPartition(numCells);
+#pragma omp parallel for schedule(static)
+    for (Index c = 0; c < static_cast<Index>(numCells); ++c)
+      cellPartition[c] = partitioner.getPartition(c);
+
+    // Cache D->d incidences used in hot loops
+    std::vector<const Incidence*> cellTo(D);
+    for (size_t d = 0; d < D; ++d)
+    {
+      const auto& inc = conn.getIncidence(D, d);
+      cellTo[d] = inc.empty() ? nullptr : &inc;
+    }
+
+    const auto& cellNbr = conn.getIncidence(D, D);
+
+    // --------------------------------------------------------------------------
+    // Builders
+    // --------------------------------------------------------------------------
     std::vector<Shard::Builder> sbs(numShards);
     for (auto& sb : sbs)
       sb.initialize(mesh);
-    std::vector<std::vector<Index>> owner(cellDim + 1);     // Owner of each polytope
-    std::vector<std::vector<Index>> local(cellDim + 1);     // Owning shard index for each polytope
-    std::vector<std::vector<IndexSet>> halo(cellDim + 1);   // Halo information for each polytope
-    std::vector<std::vector<uint8_t>> visited(cellDim + 1); // Visited polytopes
 
-    for (size_t d = 0; d < cellDim + 1; d++)
+    // --------------------------------------------------------------------------
+    // Global bookkeeping
+    // owner[d][g] = owner shard of global polytope g in dimension d
+    // local[d][g] = local index of g inside owner shard
+    // halo[d][g]  = set of shards that need g as ghost
+    // visited[d][g] = ownership assigned
+    // --------------------------------------------------------------------------
+    std::vector<std::vector<Index>> owner(D + 1);
+    std::vector<std::vector<Index>> local(D + 1);
+    std::vector<std::vector<IndexSet>> halo(D + 1);
+    std::vector<std::vector<uint8_t>> visited(D + 1);
+
+    for (size_t d = 0; d <= D; ++d)
     {
-      owner[d].resize(mesh.getPolytopeCount(d));
-      local[d].resize(mesh.getPolytopeCount(d));
-      halo[d].resize(mesh.getPolytopeCount(d));
-      visited[d].resize(mesh.getPolytopeCount(d), false);
+      owner[d].resize(polytopeCount[d]);
+      local[d].resize(polytopeCount[d]);
+      halo[d].resize(polytopeCount[d]);
+      visited[d].assign(polytopeCount[d], uint8_t{0});
     }
 
-    for (Index cellIdx = 0; cellIdx < mesh.getCellCount(); cellIdx++)
+    // Track only actually owned global entities so we do not rescan all globals.
+    std::vector<std::vector<Index>> ownedGlobals(D + 1);
+    for (size_t d = 0; d <= D; ++d)
+      ownedGlobals[d].reserve(polytopeCount[d] / numShards + 1024);
+
+    // --------------------------------------------------------------------------
+    // Pass 1: assign owned entities from owned cells
+    // --------------------------------------------------------------------------
+    for (Index cellIdx = 0; cellIdx < static_cast<Index>(numCells); ++cellIdx)
     {
-      const size_t partition = partitioner.getPartition(cellIdx);
-      for (size_t d = 0; d <= cellDim - 1; d++)
+      const size_t part = cellPartition[cellIdx];
+      auto& sb = sbs[part];
+
+      for (size_t d = 0; d < D; ++d)
       {
-        const auto& inc = conn.getIncidence(cellDim, d);
-        if (inc.empty())
+        const Incidence* inc = cellTo[d];
+        if (!inc)
           continue;
-        for (const Index& idx : inc.at(cellIdx))
+
+        for (const Index g : inc->at(cellIdx))
         {
-          if (visited[d][idx])
+          if (visited[d][g])
           {
-            if (owner[d][idx] != partition)
-              halo[d][idx].insert(partition);
+            if (owner[d][g] != static_cast<Index>(part))
+              halo[d][g].insert(part);
+
             const auto [localIdx, inserted] =
-              sbs[partition].include({ d, idx }, Shard::Flags::None);
+              sb.include({ d, g }, Shard::Flags::None);
+
             if (inserted)
-              sbs[partition].getOwner(d)[localIdx] = owner[d][idx];
+              sb.getOwner(d)[localIdx] = owner[d][g];
           }
           else
           {
             const auto [localIdx, inserted] =
-              sbs[partition].include({ d, idx }, Shard::Flags::Owned);
+              sb.include({ d, g }, Shard::Flags::Owned);
             assert(inserted);
-            owner[d][idx] = partition;
-            local[d][idx] = localIdx;
-            visited[d][idx] = true;
+
+            owner[d][g]   = static_cast<Index>(part);
+            local[d][g]   = localIdx;
+            visited[d][g] = 1;
+            ownedGlobals[d].push_back(g);
           }
         }
       }
-      assert(!visited[cellDim][cellIdx]);
-      const auto [localIdx, inserted] =
-        sbs[partition].include({ cellDim, cellIdx }, Shard::Flags::Owned);
-      assert(inserted);
-      owner[cellDim][cellIdx] = partition;
-      local[cellDim][cellIdx] = localIdx;
-      visited[cellDim][cellIdx] = true;
+
+      assert(!visited[D][cellIdx]);
+      {
+        const auto [localIdx, inserted] =
+          sb.include({ D, cellIdx }, Shard::Flags::Owned);
+        assert(inserted);
+
+        owner[D][cellIdx]   = static_cast<Index>(part);
+        local[D][cellIdx]   = localIdx;
+        visited[D][cellIdx] = 1;
+        ownedGlobals[D].push_back(cellIdx);
+      }
     }
 
-    for (Index cellIdx = 0; cellIdx < mesh.getCellCount(); cellIdx++)
+    // --------------------------------------------------------------------------
+    // Pass 2: add ghost closure from neighboring cells in other partitions
+    // --------------------------------------------------------------------------
+    for (Index cellIdx = 0; cellIdx < static_cast<Index>(numCells); ++cellIdx)
     {
-      const size_t partition = partitioner.getPartition(cellIdx);
-      for (const Index& nbr : conn.getIncidence({ cellDim, cellDim }, cellIdx))
+      const size_t part = cellPartition[cellIdx];
+      auto& sb = sbs[part];
+
+      for (const Index nbr : cellNbr.at(cellIdx))
       {
-        if (partition == partitioner.getPartition(nbr))
+        const size_t nbrPart = cellPartition[nbr];
+        if (nbrPart == part)
           continue;
-        for (size_t d = 0; d <= cellDim - 1; d++)
+
+        for (size_t d = 0; d < D; ++d)
         {
-          const auto& inc = conn.getIncidence(cellDim, d);
-          if (inc.empty())
+          const Incidence* inc = cellTo[d];
+          if (!inc)
             continue;
-          for (const Index idx : inc.at(nbr))
+
+          for (const Index g : inc->at(nbr))
           {
-            auto find = sbs[partition].getPolytopeMap(d).right.find(idx);
-            if (find == sbs[partition].getPolytopeMap(d).right.end())
+            auto find = sb.getPolytopeMap(d).right.find(g);
+            if (find == sb.getPolytopeMap(d).right.end())
             {
-              halo[d][idx].insert(partition);
+              halo[d][g].insert(part);
               const auto [localIdx, inserted] =
-                sbs[partition].include({ d, idx }, Shard::Flags::Ghost);
+                sb.include({ d, g }, Shard::Flags::Ghost);
               if (inserted)
-                sbs[partition].getOwner(d)[localIdx] = owner[d][idx];
+                sb.getOwner(d)[localIdx] = owner[d][g];
             }
           }
         }
-        halo[cellDim][nbr].insert(partition);
+
+        halo[D][nbr].insert(part);
         const auto [localIdx, inserted] =
-          sbs[partition].include({ cellDim, nbr }, Shard::Flags::Ghost);
+          sb.include({ D, nbr }, Shard::Flags::Ghost);
         if (inserted)
-          sbs[partition].getOwner(cellDim)[localIdx] = owner[cellDim][nbr];
+          sb.getOwner(D)[localIdx] = owner[D][nbr];
       }
     }
 
-    // Now move the halo information into the shards
-    for (size_t d = 0; d < cellDim + 1; d++)
+    // --------------------------------------------------------------------------
+    // Move halo information only for actually owned entities
+    // --------------------------------------------------------------------------
+    for (size_t d = 0; d <= D; ++d)
     {
-      for (size_t i = 0; i < mesh.getPolytopeCount(d); i++)
+      for (const Index g : ownedGlobals[d])
       {
-        if (!visited[d][i])
-          continue;
-        auto& hm = sbs[owner[d][i]].getHalo(d);
-        const size_t k = local[d][i];
-        auto [it, inserted] = hm.try_emplace(k, std::move(halo[d][i]));
+        auto& hm = sbs[owner[d][g]].getHalo(d);
+        const Index k = local[d][g];
+
+        auto [it, inserted] = hm.try_emplace(k, std::move(halo[d][g]));
         if (!inserted)
-          it->second.insert(halo[d][i].begin(), halo[d][i].end());
+          it->second.insert(halo[d][g].begin(), halo[d][g].end());
       }
     }
 
+    // --------------------------------------------------------------------------
+    // Finalize shards in parallel
+    // This is safe because each builder is independent.
+    // --------------------------------------------------------------------------
     m_shards.resize(numShards);
-    for (size_t i = 0; i < numShards; i++)
-      m_shards[i] = sbs[i].finalize();
+
+#pragma omp parallel for schedule(dynamic, 1)
+    for (Index p = 0; p < static_cast<Index>(numShards); ++p)
+      m_shards[p] = sbs[p].finalize();
 
     return *this;
   }

@@ -1,4 +1,3 @@
-#include <memory>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_free.hpp>
@@ -30,13 +29,13 @@ namespace Rodin::Geometry
 
   MPIMesh& MPIMesh::scale(Real c)
   {
-    getShard().scale(c);
+    this->getShard().scale(c);
     return *this;
   }
 
   void MPIMesh::flush()
   {
-    getShard().flush();
+    this->getShard().flush();
   }
 
   bool MPIMesh::isSubMesh() const
@@ -46,12 +45,12 @@ namespace Rodin::Geometry
 
   size_t MPIMesh::getDimension() const
   {
-    return getShard().getDimension();
+    return this->getShard().getDimension();
   }
 
   size_t MPIMesh::getSpaceDimension() const
   {
-    return getShard().getSpaceDimension();
+    return this->getShard().getSpaceDimension();
   }
 
   const Context::MPI& MPIMesh::getContext() const
@@ -119,57 +118,54 @@ namespace Rodin::Geometry
 
   CellIterator MPIMesh::getCell() const
   {
-    return getCell(0);
+    return this->getCell(0);
   }
 
   FaceIterator MPIMesh::getFace() const
   {
-    return getFace(0);
+    return this->getFace(0);
   }
 
   VertexIterator MPIMesh::getVertex() const
   {
-    return getVertex(0);
+    return this->getVertex(0);
   }
 
   PolytopeIterator MPIMesh::getPolytope(size_t dimension) const
   {
-    return getPolytope(dimension, 0);
+    return this->getPolytope(dimension, 0);
   }
 
-  CellIterator MPIMesh::getCell(Index globalIdx) const
+  CellIterator MPIMesh::getCell(Index localIdx) const
   {
-    return CellIterator(*this, BoundedIndexGenerator(globalIdx, getCellCount()));
+    return CellIterator(*this, BoundedIndexGenerator(localIdx, this->getShard().getCellCount()));
   }
 
-  FaceIterator MPIMesh::getFace(Index globalIdx) const
+  FaceIterator MPIMesh::getFace(Index localIdx) const
   {
-    return FaceIterator(*this, BoundedIndexGenerator(globalIdx, getFaceCount()));
+    return FaceIterator(*this, BoundedIndexGenerator(localIdx, this->getShard().getFaceCount()));
   }
 
-  VertexIterator MPIMesh::getVertex(Index globalIdx) const
+  VertexIterator MPIMesh::getVertex(Index localIdx) const
   {
-    return VertexIterator(*this, BoundedIndexGenerator(globalIdx, getVertexCount()));
+    return VertexIterator(*this, BoundedIndexGenerator(localIdx, this->getShard().getVertexCount()));
   }
 
-  PolytopeIterator MPIMesh::getPolytope(size_t dimension, Index globalIdx) const
+  PolytopeIterator MPIMesh::getPolytope(size_t dimension, Index localIdx) const
   {
-    return PolytopeIterator(dimension, *this, BoundedIndexGenerator(globalIdx, getPolytopeCount(dimension)));
+    return PolytopeIterator(dimension, *this, BoundedIndexGenerator(localIdx, this->getShard().getPolytopeCount(dimension)));
   }
 
   FaceIterator MPIMesh::getBoundary() const
   {
     std::vector<Index> indices;
-    const size_t count = this->getFaceCount();
-    for (Index i = 0; i < count; i++)
+    const auto& shard = getShard();
+    const size_t d = getDimension() - 1;
+    const size_t count = shard.getFaceCount();
+    for (Index i = 0; i < count; ++i)
     {
-      if (isBoundary(i))
+      if (shard.isOwned(d, i) && shard.isBoundary(i))
         indices.push_back(i);
-    }
-    if (indices.size() == 0)
-    {
-      Alert::MemberFunctionException(*this, __func__)
-        << "Mesh has an empty boundary." << Alert::Raise;
     }
     return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
   }
@@ -177,48 +173,31 @@ namespace Rodin::Geometry
   FaceIterator MPIMesh::getInterface() const
   {
     std::vector<Index> indices;
-    const size_t count = this->getFaceCount();
-    for (Index i = 0; i < count; i++)
+    const auto& shard = getShard();
+    const size_t d = getDimension() - 1;
+    const size_t count = shard.getFaceCount();
+    for (Index i = 0; i < count; ++i)
     {
-      if (isInterface(i))
+      if (shard.isOwned(d, i) && shard.isInterface(i))
         indices.push_back(i);
-    }
-    if (indices.size() == 0)
-    {
-      Alert::MemberFunctionException(*this, __func__)
-        << "Mesh has an empty interface." << Alert::Raise;
     }
     return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
   }
 
-  bool MPIMesh::isInterface(Index faceIdx) const
-  {
-    const auto& comm = m_context.getCommunicator();
-    const auto& shard = this->getShard();
-    bool local = false;
-    const size_t d = this->getDimension() - 1;
-    const auto idx = this->getLocalIndex(d, faceIdx);
-    if (idx)
-    {
-      if (shard.isOwned(d, *idx))
-        local = shard.isInterface(*idx);
-    }
-    return boost::mpi::all_reduce(comm, local, std::logical_or<bool>());
-  }
-
   bool MPIMesh::isBoundary(Index faceIdx) const
   {
-    const auto& comm = m_context.getCommunicator();
-    const auto& shard = this->getShard();
-    bool local = false;
-    const size_t d = this->getDimension() - 1;
-    const auto idx = this->getLocalIndex(d, faceIdx);
-    if (idx)
-    {
-      if (shard.isOwned(d, *idx))
-        local = shard.isBoundary(*idx);
-    }
-    return boost::mpi::all_reduce(comm, local, std::logical_or<bool>());
+    const auto& shard = getShard();
+    const size_t d = getDimension() - 1;
+    assert(faceIdx < shard.getPolytopeCount(d));
+    return shard.isOwned(d, faceIdx) && shard.isBoundary(faceIdx);
+  }
+
+  bool MPIMesh::isInterface(Index faceIdx) const
+  {
+    const auto& shard = getShard();
+    const size_t d = getDimension() - 1;
+    assert(faceIdx < shard.getPolytopeCount(d));
+    return shard.isOwned(d, faceIdx) && shard.isInterface(faceIdx);
   }
 
   Real MPIMesh::getVolume() const
@@ -273,50 +252,34 @@ namespace Rodin::Geometry
   Real MPIMesh::getPerimeter() const
   {
     const auto& comm = m_context.getCommunicator();
-    const auto& shard = this->getShard();
     Real local = 0;
-    for (auto it = shard.getBoundary(); it; ++it)
-    {
-      if (shard.isOwned(it->getDimension(), it->getIndex()))
-        local += it->getMeasure();
-    }
+    for (auto it = this->getBoundary(); it; ++it)
+      local += it->getMeasure();
     return boost::mpi::all_reduce(comm, local, std::plus<Real>());
   }
 
   Real MPIMesh::getPerimeter(Attribute attr) const
   {
     const auto& comm = m_context.getCommunicator();
-    const auto& shard = this->getShard();
     Real local = 0;
-    for (auto it = shard.getBoundary(); it; ++it)
+    for (auto it = this->getBoundary(); it; ++it)
     {
       if (it->getAttribute() == attr)
-      {
-        if (shard.isOwned(it->getDimension(), it->getIndex()))
-          local += it->getMeasure();
-      }
+        local += it->getMeasure();
     }
     return boost::mpi::all_reduce(comm, local, std::plus<Real>());
   }
 
   Real MPIMesh::getPerimeter(const FlatSet<Attribute>& attrs) const
   {
-    const auto& comm  = m_context.getCommunicator();
-    const auto& shard = this->getShard();
-
+    const auto& comm = m_context.getCommunicator();
     Real local = 0;
-    for (auto it = shard.getBoundary(); it; ++it)
+    for (auto it = this->getBoundary(); it; ++it)
     {
-      const auto d   = it->getDimension();
-      const Index i  = it->getIndex();
-      if (!shard.isOwned(d, i))
-        continue;
-
-      const Optional<Attribute> a = it->getAttribute(); // Optional<Attribute>
+      const Optional<Attribute> a = it->getAttribute();
       if (a && attrs.contains(*a))
         local += it->getMeasure();
     }
-
     return boost::mpi::all_reduce(comm, local, std::plus<Real>());
   }
 
@@ -419,89 +382,61 @@ namespace Rodin::Geometry
   }
 
   const PolytopeTransformation& MPIMesh::getPolytopeTransformation(
-      size_t dimension, Index globalIdx) const
+      size_t dimension, Index localIdx) const
   {
-    auto idx = this->getLocalIndex(dimension, globalIdx);
-    const auto& comm = m_context.getCommunicator();
     const auto& shard = this->getShard();
-    PolytopeTransformation* local = nullptr;
-    if (idx)
-    {
-      if (shard.isOwned(dimension, *idx))
-        local = shard.getPolytopeTransformation(dimension, *idx).copy();
-    }
-    auto res = boost::mpi::all_reduce(
-        comm, local, [](auto const& a, auto const& b) { return a ? a : b; });
-    assert(res);
-    m_transformations.set({ dimension, globalIdx }, std::unique_ptr<PolytopeTransformation>(local));
-    return *res;
+    assert(localIdx < shard.getPolytopeCount(dimension));
+    return shard.getPolytopeTransformation(dimension, localIdx);
   }
 
-  Polytope::Type MPIMesh::getGeometry(size_t dimension, Index globalIdx) const
+  Polytope::Type MPIMesh::getGeometry(size_t dimension, Index localIdx) const
   {
-    auto idx = this->getLocalIndex(dimension, globalIdx);
-    const auto& comm = m_context.getCommunicator();
     const auto& shard = this->getShard();
-    Optional<Polytope::Type> local;
-    if (idx)
-    {
-      if (shard.isOwned(dimension, *idx))
-        local = shard.getGeometry(dimension, *idx);
-    }
-    auto res = boost::mpi::all_reduce(
-        comm, local, [](auto const& a, auto const& b) { return a ? a : b; });
-    assert(res);
-    return *res;
+    assert(localIdx < shard.getPolytopeCount(dimension));
+    return shard.getGeometry(dimension, localIdx);
   }
 
-  Optional<Attribute> MPIMesh::getAttribute(size_t dimension, Index globalIdx) const
+  Optional<Attribute> MPIMesh::getAttribute(size_t dimension, Index localIdx) const
   {
-    const auto idx   = this->getLocalIndex(dimension, globalIdx);
-    const auto& comm = m_context.getCommunicator();
     const auto& shard = this->getShard();
-
-    Optional<Attribute> local = std::nullopt;
-    if (idx && shard.isOwned(dimension, *idx))
-      local = shard.getAttribute(dimension, *idx); // Optional<Attribute>
-
-    return boost::mpi::all_reduce(
-      comm, local,
-      [](const Optional<Attribute>& a, const Optional<Attribute>& b)
-      {
-        return a ? a : b;
-      });
+    assert(localIdx < shard.getPolytopeCount(dimension));
+    return shard.getAttribute(dimension, localIdx);
   }
 
-  MPIMesh& MPIMesh::setAttribute(const std::pair<size_t, Index>& p, const Optional<Attribute>& attr)
+  MPIMesh& MPIMesh::setAttribute(
+      const std::pair<size_t, Index>& p,
+      const Optional<Attribute>& attr)
   {
-    auto local = getLocalIndex(p.first, p.second);
-    if (local)
-      this->getShard().setAttribute({ p.first, *local }, attr);
+    const auto& [d, localIdx] = p;
+    auto& shard = this->getShard();
+    assert(localIdx < shard.getPolytopeCount(d));
+    shard.setAttribute({ d, localIdx }, attr);
     return *this;
   }
 
-  MPIMesh& MPIMesh::setVertexCoordinates(Index globalIdx, Real s, size_t i)
+  MPIMesh& MPIMesh::setVertexCoordinates(Index localIdx, Real s, size_t i)
   {
-    auto local = getLocalIndex(0, globalIdx);
-    if (local)
-      this->getShard().setVertexCoordinates(*local, s, i);
+    auto& shard = this->getShard();
+    assert(localIdx < shard.getVertexCount());
+    shard.setVertexCoordinates(localIdx, s, i);
     return *this;
   }
 
-  MPIMesh& MPIMesh::setVertexCoordinates(Index globalIdx, const Math::SpatialVector<Real>& coords)
+  MPIMesh& MPIMesh::setVertexCoordinates(Index localIdx, const Math::SpatialPoint& coords)
   {
-    auto local = getLocalIndex(0, globalIdx);
-    if (local)
-      this->getShard().setVertexCoordinates(*local, coords);
+    auto& shard = this->getShard();
+    assert(localIdx < shard.getVertexCount());
+    shard.setVertexCoordinates(localIdx, coords);
     return *this;
   }
 
   MPIMesh& MPIMesh::setPolytopeTransformation(
       const std::pair<size_t, Index> p, PolytopeTransformation* trans)
   {
-    auto local = getLocalIndex(p.first, p.second);
-    if (local)
-      this->getShard().setPolytopeTransformation({ p.first, *local }, trans);
+    const auto& [d, localIdx] = p;
+    auto& shard = this->getShard();
+    assert(localIdx < shard.getPolytopeCount(d));
+    shard.setPolytopeTransformation({ d, localIdx }, trans);
     return *this;
   }
 
@@ -518,22 +453,11 @@ namespace Rodin::Geometry
     shard.save(filename, fmt);
   }
 
-  Math::SpatialPoint MPIMesh::getVertexCoordinates(Index globalIdx) const
+  Math::SpatialPoint MPIMesh::getVertexCoordinates(Index localIdx) const
   {
-    auto idx = this->getLocalIndex(0, globalIdx);
-    const auto& shard = getShard();
-    const auto& comm = m_context.getCommunicator();
-    Math::SpatialPoint local;
-    if (idx)
-    {
-      if (shard.isOwned(0, *idx))
-        local = shard.getVertexCoordinates(*idx);
-    }
-    assert(local.size() >= 0);
-    assert(static_cast<size_t>(local.size()) == getSpaceDimension());
-    auto res = boost::mpi::all_reduce(
-        comm, local, [](auto const& a, auto const& b) { return a.size() > 0 ? a : b; });
-    return res;
+    const auto& shard = this->getShard();
+    assert(localIdx < shard.getVertexCount());
+    return shard.getVertexCoordinates(localIdx);
   }
 }
 

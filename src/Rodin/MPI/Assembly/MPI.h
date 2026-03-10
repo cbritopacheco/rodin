@@ -77,36 +77,32 @@ namespace Rodin::Assembly
         const auto& essBdr = input.getEssentialBoundary();
         const auto& fes = u.getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
-        const auto& shard = mesh.getShard();
-        const size_t faceDim = shard.getDimension() - 1;
-        const size_t faceCount = shard.getFaceCount();
-        for (Index i = 0; i < faceCount; ++i)
+        const size_t faceDim = mesh.getDimension() - 1;
+
+        for (auto it = mesh.getBoundary(); it; ++it)
         {
-          if (shard.isGhost(faceDim, i))
-            continue;
-          if (!shard.isBoundary(i))
-            continue;
+          const auto& face = *it;
+          const Index i = face.getIndex();
 
           if (!essBdr.empty())
           {
-            const auto a = shard.getAttribute(faceDim, i); // Optional<Attribute>
+            const auto a = face.getAttribute();
             if (!a || !essBdr.contains(*a))
               continue;
           }
 
-          const auto& fe = fes.getShard().getFiniteElement(faceDim, i);
-          const auto& mapping = fes.getShard().getPullback({ faceDim, i }, value);
+          const auto& fe = fes.getFiniteElement(faceDim, i);
+          const auto mapping = fes.getPullback({ faceDim, i }, value);
+          const auto& dofs = fes.getDOFs(faceDim, i);
 
           for (Index local = 0; local < fe.getCount(); ++local)
           {
-            const Index global =
-              fes.getGlobalIndex(fes.getShard().getGlobalIndex({ faceDim, i }, local));
-
-            auto it = res.find(global);
-            if (it == res.end())
+            const Index global = dofs[local];
+            auto pos = res.find(global);
+            if (pos == res.end())
             {
               const auto s = fe.getLinearForm(local)(mapping);
-              res.emplace_hint(it, global, s);
+              res.emplace_hint(pos, global, s);
             }
           }
         }

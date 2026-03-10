@@ -584,30 +584,46 @@ namespace Rodin::Variational
         return s_out;
       }
 
-      /**
-       * @brief Interpolates the GridFunction at the given point.
-       *
-       * @note Can be overriden.
-       */
       constexpr
       void interpolate(RangeType& res, const Geometry::Point& p) const
       {
-        static_cast<const Derived&>(*this).interpolate(res, p);
+        const auto& fes = this->getFiniteElementSpace();
+        const auto& polytope = p.getPolytope();
+        const size_t d = polytope.getDimension();
+        const Index  i = polytope.getIndex();
+
+        const auto& fe = fes.getFiniteElement(d, i);
+        const size_t count = fe.getCount();
+        for (Index local = 0; local < count; ++local)
+        {
+          const auto mapping = fes.getPushforward({ d, i }, fe.getBasis(local));
+          const auto k = this->operator[](fes.getGlobalIndex({ d, i }, local)) * mapping(p);
+          if (local == 0)
+            res = k;
+          else
+            res += k;
+        }
       }
 
-      void project(const std::pair<size_t, Index>& p, const RangeType& v)
-      {
-        static_cast<Derived&>(*this).project(p,
-            [&](RangeType& out, const Geometry::Point& pt){ out = v; });
-      }
-
-      /**
-       * @note CRTP function to be overriden in Derived class.
-       */
       template <class Function>
-      void project(const std::pair<size_t, Index>& p, const Function& fn)
+      Derived& project(const std::pair<size_t, Index>& p, const Function& fn)
       {
-        static_cast<Derived&>(*this).project(fn, p);
+        const auto& fes = this->getFiniteElementSpace();
+        const auto& [d, i] = p;
+        const auto& fe = fes.getFiniteElement(d, i);
+        const auto mapping = fes.getPullback({ d, i }, fn);
+        for (Index local = 0; local < fe.getCount(); local++)
+        {
+          const Index global = fes.getGlobalIndex({ d, i }, local);
+          this->operator[](global) = fe.getLinearForm(local)(mapping);
+        }
+        return static_cast<Derived&>(*this);
+      }
+
+      Derived& project(const std::pair<size_t, Index>& p, const RangeType& v)
+      {
+        return static_cast<Derived&>(*this).project(
+            p, [&](RangeType& out, const Geometry::Point&){ out = v; });
       }
 
       template <class T>
@@ -957,31 +973,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /**
-       * @brief Interpolates the GridFunction at the given point.
-       *
-       * @note Can be overriden.
-       */
-      constexpr
-      void interpolate(RangeType& res, const Geometry::Point& p) const
-      {
-        const auto& fes = this->getFiniteElementSpace();
-        const auto& polytope = p.getPolytope();
-        const size_t d = polytope.getDimension();
-        const Index  i = polytope.getIndex();
-        const auto& fe = fes.getFiniteElement(d, i);
-        const size_t count = fe.getCount();
-        for (Index local = 0; local < count; ++local)
-        {
-          const auto mapping = fes.getPushforward({ d, i }, fe.getBasis(local));
-          const auto k = this->operator[](fes.getGlobalIndex({ d, i }, local)) * mapping(p);
-          if (local == 0)
-            res = k; // Initializes the result (resizes)
-          else
-            res += k; // Accumulates the result (does not resize)
-        }
-      }
-
       template <class Function, class Pred>
       GridFunction& project(
           const Geometry::Region& region, const Function& v, const Pred& pred)
@@ -1023,20 +1014,6 @@ namespace Rodin::Variational
         }
 
         return *this;
-      }
-
-      template <class Function>
-      void project(const std::pair<size_t, Index>& p, const Function& fn)
-      {
-        const auto& fes = this->getFiniteElementSpace();
-        const auto& [d, i] = p;
-        const auto& fe = fes.getFiniteElement(d, i);
-        const auto mapping = fes.getPullback({ d, i }, fn);
-        for (Index local = 0; local < fe.getCount(); local++)
-        {
-          const Index global = fes.getGlobalIndex({ d, i }, local);
-          this->operator[](global) = fe.getLinearForm(local)(mapping);
-        }
       }
 
       GridFunction& setData(const DataType& data, size_t offset = 0)

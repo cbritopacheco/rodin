@@ -31,6 +31,7 @@
 
 #include "Jacobian.h"
 #include "GridFunction.h"
+#include "Rodin/Types.h"
 #include "TestFunction.h"
 #include "TrialFunction.h"
 #include "RealFunction.h"
@@ -159,6 +160,11 @@ namespace Rodin::Variational
       void interpolate(ScalarType& out, const Geometry::Point& p) const
       {
         static_cast<const Derived&>(*this).interpolate(out, p);
+      }
+
+      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        return static_cast<const Derived&>(*this).getOrder(poly);
       }
 
       /**

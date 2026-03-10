@@ -36,6 +36,7 @@
 #include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/Point.h"
+#include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Geometry/Region.h"
 
 #include "Rodin/Math/SpatialVector.h"
@@ -907,6 +908,11 @@ namespace Rodin::Variational
       {
         m_maxSubdivisionIterations = maxIters;
         return *this;
+      }
+
+      Optional<size_t> getOrder(const Geometry::Polytope&) const
+      {
+        return {};
       }
 
       virtual Flow* copy() const noexcept override

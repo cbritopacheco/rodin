@@ -70,6 +70,11 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
+      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        return static_cast<const Derived&>(*this).getOrder(poly);
+      }
+
       virtual ComplexFunctionBase* copy() const noexcept override = 0;
   };
 
@@ -112,6 +117,11 @@ namespace Rodin::Variational
       Complex getValue(const Geometry::Point&) const
       {
         return Complex(m_x, 0);
+      }
+
+      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      {
+        return 0;
       }
 
       ComplexFunction* copy() const noexcept override
@@ -164,6 +174,11 @@ namespace Rodin::Variational
       Complex getValue(const Geometry::Point&) const
       {
         return Complex(m_x, 0);
+      }
+
+      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      {
+        return 0;
       }
 
       ComplexFunction* copy() const noexcept override
@@ -220,6 +235,11 @@ namespace Rodin::Variational
       Complex getValue(const Geometry::Point&) const
       {
         return m_x;
+      }
+
+      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      {
+        return 0;
       }
 
       ComplexFunction* copy() const noexcept override
@@ -280,6 +300,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        return m_nested->getOrder(poly);
+      }
+
       ComplexFunction* copy() const noexcept override
       {
         return new ComplexFunction(*this);
@@ -316,15 +341,18 @@ namespace Rodin::Variational
         typename FormLanguage::Traits<ImagFunctionType>::RangeType;
 
       using Parent =
-        ComplexFunctionBase<ComplexFunction<RealFunctionType, ImagFunctionType>>;
+        ComplexFunctionBase<
+          ComplexFunction<
+            FunctionBase<RealNestedDerived>,
+            FunctionBase<ImagNestedDerived>>>;
 
       using Parent::traceOf;
 
       using Parent::operator();
 
-      static_assert(std::is_same_v<RealFunctionType, Real>);
+      static_assert(std::is_same_v<RealFunctionRangeType, Real>);
 
-      static_assert(std::is_same_v<ImagFunctionType, Real>);
+      static_assert(std::is_same_v<ImagFunctionRangeType, Real>);
 
       ComplexFunction(const RealFunctionType& re, const ImagFunctionType& imag)
         : m_re(re.copy()), m_imag(imag.copy())
@@ -355,6 +383,17 @@ namespace Rodin::Variational
         return *this;
       }
 
+      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        const auto reOrder = m_re->getOrder(geom);
+        const auto imOrder = m_imag->getOrder(geom);
+
+        if (!reOrder || !imOrder)
+          return std::nullopt;
+
+        return std::max(*reOrder, *imOrder);
+      }
+
       ComplexFunction* copy() const noexcept override
       {
         return new ComplexFunction(*this);
@@ -362,7 +401,7 @@ namespace Rodin::Variational
 
     private:
       std::unique_ptr<RealFunctionType> m_re;
-      std::unique_ptr<RealFunctionType> m_imag;
+      std::unique_ptr<ImagFunctionType> m_imag;
   };
 
   /**
@@ -406,6 +445,11 @@ namespace Rodin::Variational
       Complex getValue(const Geometry::Point& v) const
       {
         return m_f(v);
+      }
+
+      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      {
+        return std::nullopt;
       }
 
       ComplexFunction* copy() const noexcept override
@@ -456,6 +500,11 @@ namespace Rodin::Variational
       Complex getValue(const Geometry::Point& p) const
       {
         return { m_re->getValue(p), m_imag->getValue(p) };
+      }
+
+      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      {
+        return std::nullopt;
       }
 
       ComplexFunction* copy() const noexcept override

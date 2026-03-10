@@ -40,7 +40,6 @@ namespace Rodin::Assembly
         const auto& mesh = fes.getMesh();
         const auto& shard = mesh.getShard();
         const auto& ctx = mesh.getContext();
-        const auto& comm = ctx.getCommunicator();
         const size_t globalSize = fes.getSize();
 
         size_t begin, end;
@@ -65,19 +64,23 @@ namespace Rodin::Assembly
           {
             const size_t d = it->getDimension();
             const Index idx = it->getIndex();
-            if (shard.isGhost(d, idx))
+
+            if (!shard.isOwned(d, idx))
               continue;
+
             if (!attrs.empty())
             {
               const auto a = it->getAttribute();
               if (!a || !attrs.count(*a))
                 continue;
             }
+
             lfi.setPolytope(*it);
-            const auto& dofs = fes.getShard().getDOFs(d, idx);
-            for (PetscInt i = 0; i < dofs.size(); ++i)
+            const auto& dofs = fes.getDOFs(d, idx);
+
+            for (PetscInt i = 0; i < static_cast<PetscInt>(dofs.size()); ++i)
             {
-              const Index r = fes.getGlobalIndex(dofs[i]);
+              const PetscInt r = static_cast<PetscInt>(dofs[i]);
               const PetscScalar v = lfi.integrate(i);
               ierr = VecSetValue(res, r, v, ADD_VALUES);
               assert(ierr == PETSC_SUCCESS);
@@ -90,6 +93,8 @@ namespace Rodin::Assembly
 
         ierr = VecAssemblyEnd(res);
         assert(ierr == PETSC_SUCCESS);
+
+        (void) ierr;
       }
 
       MPI* copy() const noexcept override
@@ -126,7 +131,6 @@ namespace Rodin::Assembly
         const auto& mesh = trialFES.getMesh();
         const auto& shard = mesh.getShard();
         const auto& ctx = mesh.getContext();
-        const auto& comm = ctx.getCommunicator();
 
         size_t rbegin, rend;
         testFES.getOwnershipRange(rbegin, rend);
@@ -161,24 +165,28 @@ namespace Rodin::Assembly
           {
             const size_t d = it->getDimension();
             const Index idx = it->getIndex();
-            if (shard.isGhost(d, idx))
+
+            if (!shard.isOwned(d, idx))
               continue;
+
             if (!attrs.empty())
             {
               const auto a = it->getAttribute();
               if (!a || !attrs.count(*a))
                 continue;
             }
+
             bfi.setPolytope(*it);
-            const auto& rows = testFES.getShard().getDOFs(d, idx);
-            const auto& cols = trialFES.getShard().getDOFs(d, idx);
+            const auto& rows = testFES.getDOFs(d, idx);
+            const auto& cols = trialFES.getDOFs(d, idx);
+
             for (Index i = 0; i < rows.size(); ++i)
             {
-              const Index r = testFES.getGlobalIndex(rows[i]);
+              const PetscInt r = static_cast<PetscInt>(rows[i]);
               for (Index j = 0; j < cols.size(); ++j)
               {
-                const Index c = trialFES.getGlobalIndex(cols[j]);
-                PetscScalar v = bfi.integrate(j, i);
+                const PetscInt c = static_cast<PetscInt>(cols[j]);
+                const PetscScalar v = bfi.integrate(j, i);
                 ierr = MatSetValue(res, r, c, v, ADD_VALUES);
                 assert(ierr == PETSC_SUCCESS);
               }
@@ -246,7 +254,6 @@ namespace Rodin::Assembly
         const auto& mesh  = trialFES.getMesh();
         const auto& shard = mesh.getShard();
         const auto& ctx   = mesh.getContext();
-        const auto& comm  = ctx.getCommunicator();
 
         const size_t globalCols = trialFES.getSize();
         const size_t globalRows = testFES.getSize();
@@ -324,7 +331,7 @@ namespace Rodin::Assembly
             const size_t d   = it->getDimension();
             const Index  idx = it->getIndex();
 
-            if (shard.isGhost(d, idx))
+            if (!shard.isOwned(d, idx))
               continue;
 
             if (!attrs.empty())
@@ -336,16 +343,16 @@ namespace Rodin::Assembly
 
             bfi.setPolytope(*it);
 
-            const auto& rowsDOF = testFES.getShard().getDOFs(d, idx);
-            const auto& colsDOF = trialFES.getShard().getDOFs(d, idx);
+            const auto& rowsDOF = testFES.getDOFs(d, idx);
+            const auto& colsDOF = trialFES.getDOFs(d, idx);
 
             for (Index i = 0; i < rowsDOF.size(); ++i)
             {
-              const PetscInt I = static_cast<PetscInt>(testFES.getGlobalIndex(rowsDOF[i]));
+              const PetscInt I = rowsDOF[i];
               for (Index j = 0; j < colsDOF.size(); ++j)
               {
-                const PetscInt J = static_cast<PetscInt>(trialFES.getGlobalIndex(colsDOF[j]));
-                const PetscScalar val = static_cast<PetscScalar>(bfi.integrate(j, i));
+                const PetscInt J = colsDOF[j];
+                const PetscScalar val = bfi.integrate(j, i);
                 if (val != PetscScalar(0))
                 {
                   ierr = MatSetValue(A, I, J, val, ADD_VALUES);
@@ -374,7 +381,7 @@ namespace Rodin::Assembly
             const size_t td   = teIt->getDimension();
             const Index  tidx = teIt->getIndex();
 
-            if (shard.isGhost(td, tidx))
+            if (!shard.isOwned(td, tidx))
               continue;
 
             if (!testAttrs.empty())
@@ -384,7 +391,7 @@ namespace Rodin::Assembly
                 continue;
             }
 
-            const auto& rowsDOF = testFES.getShard().getDOFs(td, tidx);
+            const auto& rowsDOF = testFES.getDOFs(td, tidx);
 
             for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
             {
@@ -400,17 +407,17 @@ namespace Rodin::Assembly
 
               // NOTE: do NOT skip ghost trial entities here: they still contribute to
               // owned test rows, producing off-process columns in MatSetValue.
-              const auto& colsDOF = trialFES.getShard().getDOFs(rd, ridx);
+              const auto& colsDOF = trialFES.getDOFs(rd, ridx);
 
               bfi.setPolytope(*trIt, *teIt);
 
               for (Index i = 0; i < rowsDOF.size(); ++i)
               {
-                const PetscInt I = static_cast<PetscInt>(testFES.getGlobalIndex(rowsDOF[i]));
+                const PetscInt I = rowsDOF[i];
                 for (Index j = 0; j < colsDOF.size(); ++j)
                 {
-                  const PetscInt J = static_cast<PetscInt>(trialFES.getGlobalIndex(colsDOF[j]));
-                  const PetscScalar val = static_cast<PetscScalar>(bfi.integrate(j, i));
+                  const PetscInt J = colsDOF[j];
+                  const PetscScalar val = bfi.integrate(j, i);
                   if (val != PetscScalar(0))
                   {
                     ierr = MatSetValue(A, I, J, val, ADD_VALUES);
@@ -450,7 +457,7 @@ namespace Rodin::Assembly
             const size_t d   = it->getDimension();
             const Index  idx = it->getIndex();
 
-            if (shard.isGhost(d, idx))
+            if (!shard.isOwned(d, idx))
               continue;
 
             if (!attrs.empty())
@@ -462,11 +469,11 @@ namespace Rodin::Assembly
 
             lfi.setPolytope(*it);
 
-            const auto& dofs = testFES.getShard().getDOFs(d, idx);
+            const auto& dofs = testFES.getDOFs(d, idx);
             for (Index l = 0; l < dofs.size(); ++l)
             {
-              const PetscInt I = static_cast<PetscInt>(testFES.getGlobalIndex(dofs[l]));
-              const PetscScalar val = static_cast<PetscScalar>(lfi.integrate(static_cast<PetscInt>(l)));
+              const PetscInt I = dofs[l];
+              const PetscScalar val = lfi.integrate(l);
               if (val != PetscScalar(0))
               {
                 ierr = VecSetValue(b, I, -val, ADD_VALUES);
@@ -548,6 +555,8 @@ namespace Rodin::Assembly
           ierr = VecDestroy(&bcVec);
           assert(ierr == PETSC_SUCCESS);
         }
+
+        (void) ierr;
       }
 
       MPI* copy() const noexcept override
@@ -764,7 +773,7 @@ namespace Rodin::Assembly
             const size_t d   = it->getDimension();
             const Index  idx = it->getIndex();
 
-            if (shard.isGhost(d, idx))
+            if (!shard.isOwned(d, idx))
               continue;
 
             if (!attrs.empty())
@@ -776,17 +785,16 @@ namespace Rodin::Assembly
 
             bfi.setPolytope(*it);
 
-            const auto& rows = vFES.getShard().getDOFs(d, idx);
-            const auto& cols = uFES.getShard().getDOFs(d, idx);
+            const auto& rows = vFES.getDOFs(d, idx);
+            const auto& cols = uFES.getDOFs(d, idx);
 
             for (Index i = 0; i < rows.size(); ++i)
             {
-              const PetscInt I = static_cast<PetscInt>(vOff + static_cast<size_t>(vFES.getGlobalIndex(rows[i])));
+              const PetscInt I = vOff + rows[i];
               for (Index j = 0; j < cols.size(); ++j)
               {
-                const PetscInt J = static_cast<PetscInt>(uOff + static_cast<size_t>(uFES.getGlobalIndex(cols[j])));
-                const PetscScalar val = static_cast<PetscScalar>(bfi.integrate(static_cast<PetscInt>(j),
-                                                                              static_cast<PetscInt>(i)));
+                const PetscInt J = uOff + cols[j];
+                const PetscScalar val = bfi.integrate(j, i);
                 if (val != PetscScalar(0))
                 {
                   ierr = MatSetValue(A, I, J, val, ADD_VALUES);
@@ -822,7 +830,7 @@ namespace Rodin::Assembly
             const size_t td   = teIt->getDimension();
             const Index  tidx = teIt->getIndex();
 
-            if (shard.isGhost(td, tidx))
+            if (!shard.isOwned(td, tidx))
               continue;
 
             if (!testAttrs.empty())
@@ -832,7 +840,7 @@ namespace Rodin::Assembly
                 continue;
             }
 
-            const auto& rows = vFES.getShard().getDOFs(td, tidx);
+            const auto& rows = vFES.getDOFs(td, tidx);
 
             for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
             {
@@ -847,18 +855,17 @@ namespace Rodin::Assembly
               }
 
               // do not skip ghost trial entity: off-proc columns are fine
-              const auto& cols = uFES.getShard().getDOFs(rd, ridx);
+              const auto& cols = uFES.getDOFs(rd, ridx);
 
               bfi.setPolytope(*trIt, *teIt);
 
               for (Index i = 0; i < rows.size(); ++i)
               {
-                const PetscInt I = static_cast<PetscInt>(vOff + static_cast<size_t>(vFES.getGlobalIndex(rows[i])));
+                const PetscInt I = vOff + rows[i];
                 for (Index j = 0; j < cols.size(); ++j)
                 {
-                  const PetscInt J = static_cast<PetscInt>(uOff + static_cast<size_t>(uFES.getGlobalIndex(cols[j])));
-                  const PetscScalar val = static_cast<PetscScalar>(bfi.integrate(static_cast<PetscInt>(j),
-                                                                                static_cast<PetscInt>(i)));
+                  const PetscInt J = uOff + cols[j];
+                  const PetscScalar val = bfi.integrate(j, i);
                   if (val != PetscScalar(0))
                   {
                     ierr = MatSetValue(A, I, J, val, ADD_VALUES);
@@ -897,7 +904,7 @@ namespace Rodin::Assembly
             const size_t d   = it->getDimension();
             const Index  idx = it->getIndex();
 
-            if (shard.isGhost(d, idx))
+            if (!shard.isOwned(d, idx))
               continue;
 
             if (!attrs.empty())
@@ -909,11 +916,11 @@ namespace Rodin::Assembly
 
             lfi.setPolytope(*it);
 
-            const auto& dofs = vFES.getShard().getDOFs(d, idx);
+            const auto& dofs = vFES.getDOFs(d, idx);
             for (Index l = 0; l < dofs.size(); ++l)
             {
-              const PetscInt I = static_cast<PetscInt>(vOff + static_cast<size_t>(vFES.getGlobalIndex(dofs[l])));
-              const PetscScalar val = static_cast<PetscScalar>(lfi.integrate(static_cast<PetscInt>(l)));
+              const PetscInt I = vOff + dofs[l];
+              const PetscScalar val = lfi.integrate(l);
               if (val != PetscScalar(0))
               {
                 ierr = VecSetValue(b, I, -val, ADD_VALUES);
@@ -945,8 +952,8 @@ namespace Rodin::Assembly
           const auto& dofs = dbc.getDOFs();
           for (const auto& [local, value] : dofs)
           {
-            bcIdx.push_back(static_cast<PetscInt>(uOff + local));
-            bcVals.push_back(static_cast<PetscScalar>(value));
+            bcIdx.push_back(uOff + local);
+            bcVals.push_back(value);
           }
         }
 

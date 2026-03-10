@@ -163,25 +163,30 @@ namespace Rodin::Variational
 
       GridFunction(const GridFunction& other)
         : Parent(other.getFiniteElementSpace()),
-          m_data(other.getData()),
           m_begin(other.m_begin),
           m_end(other.m_end),
           m_ghosts(other.m_ghosts),
-          m_read{.acquired = false, .raw = PETSC_NULLPTR},
-          m_write{.acquired = false, .raw = PETSC_NULLPTR}
-      {}
+          m_read{.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR},
+          m_write{.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR}
+      {
+        PetscErrorCode ierr = VecDuplicate(other.m_data, &m_data);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = VecCopy(other.m_data, m_data);
+        assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
+      }
 
       GridFunction(GridFunction&& other) noexcept
-        : Parent(other.getFiniteElementSpace(), std::exchange(other.getData(), nullptr)),
-          m_data(std::move(other.getData())),
+        : Parent(std::move(other)),
+          m_data(std::exchange(other.m_data, PETSC_NULLPTR)),
           m_begin(std::exchange(other.m_begin, 0)),
           m_end(std::exchange(other.m_end, 0)),
-          m_ghosts(std::move(other.m_ghosts))
+          m_ghosts(std::move(other.m_ghosts)),
+          m_read(other.m_read),
+          m_write(other.m_write)
       {
-        m_read.acquired = std::exchange(other.m_read, false);
-        m_read.raw = std::exchange(other.m_read.raw, PETSC_NULLPTR);
-        m_write.acquired = std::exchange(other.m_write, false);
-        m_write.raw = std::exchange(other.m_write.raw, PETSC_NULLPTR);
+        other.m_read = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
+        other.m_write = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
       }
 
       GridFunction& operator=(const GridFunction& other) = delete;
@@ -473,90 +478,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      constexpr
-      void interpolate(RangeType& res, const Geometry::Point& p) const
-      {
-        const auto& fes = this->getFiniteElementSpace();
-        const auto& polytope = p.getPolytope();
-        const size_t d = polytope.getDimension();
-        const Index  i = polytope.getIndex();
-
-        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
-        {
-          const auto& fe = fes.getFiniteElement(d, i);
-          const size_t count = fe.getCount();
-          RangeType v;
-          for (Index local = 0; local < count; ++local)
-          {
-            const auto mapping = fes.getPushforward({ d, i }, fe.getBasis(local));
-            const auto k = this->operator[](fes.getGlobalIndex({ d, i }, local)) * mapping(p);
-            if (local == 0)
-              res = k; // Initializes the result (resizes)
-            else
-              res += k; // Accumulates the result (does not resize)
-          }
-        }
-        else if (std::is_same_v<FESMeshContextType, Context::MPI>)
-        {
-          const auto& shard = fes.getShard();
-          const auto& fe = shard.getFiniteElement(d, i);
-          const size_t count = fe.getCount();
-          RangeType v;
-          for (Index local = 0; local < count; ++local)
-          {
-            const auto mapping = fes.getPushforward({ d, i }, fe.getBasis(local));
-            const auto k = this->operator[](fes.getGlobalIndex({ d, i }, local)) * mapping(p);
-            if (local == 0)
-              res = k; // Initializes the result (resizes)
-            else
-              res += k; // Accumulates the result (does not resize)
-          }
-        }
-        else
-        {
-          assert(false);
-        }
-      }
-
-      template <class NestedDerived, class Predicate>
-      GridFunction& projectOnCells(const FunctionBase<NestedDerived>& fn, const Predicate& pred)
-      {
-        this->acquire();
-
-        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
-        {
-          const auto& fes = this->getFiniteElementSpace();
-          const auto& mesh = fes.getMesh();
-          for (auto it = mesh.getCell(); it; ++it)
-          {
-            const auto& polytope = *it;
-            if (pred(polytope))
-              this->project(fn, { polytope.getDimension(), polytope.getIndex() });
-          }
-        }
-        else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
-        {
-          const auto& fes = this->getFiniteElementSpace();
-          const auto& shard = fes.getShard();
-          const auto& mesh = shard.getMesh();
-          for (Index i = 0; i < mesh.getCellCount(); ++i)
-          {
-            const auto it = mesh.getCell(i);
-            const auto& polytope = *it;
-            if (pred(polytope))
-              this->project(fn, { polytope.getDimension(), polytope.getIndex() });
-          }
-        }
-        else
-        {
-          assert(false);
-        }
-
-        this->flush();
-
-        return *this;
-      }
-
       template <class Function, class Pred>
       GridFunction& project(const Geometry::Region& region, const Function& v, const Pred& pred)
       {
@@ -567,57 +488,17 @@ namespace Rodin::Variational
         switch (region)
         {
           case Geometry::Region::Cells:
-          {
-            if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
-            {
-              it = mesh.getCell();
-            }
-            else
-            {
-              static_assert(std::is_same_v<FESMeshContextType, Context::MPI>);
-              it = mesh.getShard().getCell();
-            }
+            it = mesh.getCell();
             break;
-          }
           case Geometry::Region::Faces:
-          {
-            if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
-            {
-              it = mesh.getFace();
-            }
-            else
-            {
-              static_assert(std::is_same_v<FESMeshContextType, Context::MPI>);
-              it = mesh.getShard().getFace();
-            }
+            it = mesh.getFace();
             break;
-          }
           case Geometry::Region::Boundary:
-          {
-            if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
-            {
-              it = mesh.getBoundary();
-            }
-            else
-            {
-              static_assert(std::is_same_v<FESMeshContextType, Context::MPI>);
-              it = mesh.getShard().getBoundary();
-            }
+            it = mesh.getBoundary();
             break;
-          }
           case Geometry::Region::Interface:
-          {
-            if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
-            {
-              it = mesh.getInterface();
-            }
-            else
-            {
-              static_assert(std::is_same_v<FESMeshContextType, Context::MPI>);
-              it = mesh.getShard().getInterface();
-            }
+            it = mesh.getInterface();
             break;
-          }
         }
 
         this->acquire();
@@ -633,37 +514,6 @@ namespace Rodin::Variational
         this->flush();
 
         return *this;
-      }
-
-      template <class Function>
-      void project(const std::pair<size_t, Index>& p, const Function& fn)
-      {
-        const auto& fes = this->getFiniteElementSpace();
-        const auto& [d, i] = p;
-        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
-        {
-          const auto& fe = fes.getFiniteElement(d, i);
-          const auto mapping = fes.getPullback({ d, i }, fn);
-          for (Index local = 0; local < fe.getCount(); local++)
-          {
-            const Index global = fes.getGlobalIndex({ d, i }, local);
-            this->operator[](global) = fe.getLinearForm(local)(mapping);
-          }
-        }
-        else
-        {
-          static_assert(std::is_same_v<FESMeshContextType, Context::MPI>);
-          const auto& shard = fes.getShard();
-          const auto& fe = shard.getFiniteElement(d, i);
-          const auto mapping = shard.getPullback({ d, i }, fn);
-          for (Index local = 0; local < fe.getCount(); local++)
-          {
-            const Index global =
-              fes.getGlobalIndex(
-                  shard.getGlobalIndex({ d, i }, local));
-            this->operator[](global) = fe.getLinearForm(local)(mapping);
-          }
-        }
       }
 
       GridFunction& acquire()
@@ -807,12 +657,6 @@ namespace Rodin::Variational
             assert(ierr == PETSC_SUCCESS);
 
             ierr = VecGhostRestoreLocalForm(m_data, &m_read.ghost);
-            assert(ierr == PETSC_SUCCESS);
-
-            ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_REVERSE);
-            assert(ierr == PETSC_SUCCESS);
-
-            ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_REVERSE);
             assert(ierr == PETSC_SUCCESS);
 
             m_read.acquired = false;

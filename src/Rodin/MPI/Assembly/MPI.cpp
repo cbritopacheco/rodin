@@ -12,25 +12,17 @@ namespace Rodin::Assembly
     switch (m_region)
     {
       case Geometry::Region::Cells:
-      {
-        it = m_mesh.get().getShard().getCell();
+        it = m_mesh.get().getCell();
         break;
-      }
       case Geometry::Region::Faces:
-      {
-        it = m_mesh.get().getShard().getFace();
+        it = m_mesh.get().getFace();
         break;
-      }
       case Geometry::Region::Boundary:
-      {
-        it = m_mesh.get().getShard().getBoundary();
+        it = m_mesh.get().getBoundary();
         break;
-      }
       case Geometry::Region::Interface:
-      {
-        it = m_mesh.get().getShard().getInterface();
+        it = m_mesh.get().getInterface();
         break;
-      }
     }
     return it;
   }

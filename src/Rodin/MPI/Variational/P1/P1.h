@@ -6,6 +6,7 @@
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_free.hpp>
+#include "Rodin/Serialization/Optional.h"
 
 #include "Rodin/MPI/Geometry/Mesh.h"
 #include "Rodin/MPI/Variational/FiniteElementSpace.h"
@@ -51,7 +52,18 @@ namespace Rodin::Variational
       using Parent::getGlobalIndex;
 
       /**
-       * @brief Mapping for the scalar/complex P1 space.
+       * @brief Pullback of a function to the reference polytope.
+       *
+       * Given a function @f$ v @f$ defined on the physical polytope @f$ K @f$, this
+       * class defines the function @f$ \hat v @f$ on the reference polytope
+       * @f$ \hat K @f$ by
+       *
+       * @f[
+       *   \hat v(\hat x) = v(x(\hat x)),
+       * @f]
+       *
+       * where @f$ x(\hat x) @f$ is the point of @f$ K @f$ with reference coordinates
+       * @f$ \hat x @f$.
        */
       template <class FunctionDerived>
       class Pullback : public FiniteElementSpacePullbackBase<Pullback<FunctionDerived>>
@@ -91,7 +103,18 @@ namespace Rodin::Variational
       };
 
       /**
-       * @brief Inverse mapping for the scalar/complex P1 space.
+       * @brief Pushforward of a function from the reference polytope.
+       *
+       * Given a function @f$ \hat v @f$ defined on the reference polytope
+       * @f$ \hat K @f$, this class defines the function @f$ v @f$ on the
+       * physical polytope @f$ K @f$ by
+       *
+       * @f[
+       *   v(x) = \hat v(\hat x)
+       * @f]
+       *
+       * where @f$ \hat x @f$ are the reference coordinates of the physical
+       * point @f$ x @f$.
        */
       template <class CallableType>
       class Pushforward : public FiniteElementSpacePushforwardBase<Pushforward<CallableType>>
@@ -99,10 +122,6 @@ namespace Rodin::Variational
         public:
           using FunctionType = CallableType;
 
-          /**
-           * @param[in] v Reference to the function defined on the reference
-           * space.
-           */
           Pushforward(const FunctionType& v)
             : m_v(v)
           {}
@@ -131,6 +150,21 @@ namespace Rodin::Variational
           const FunctionType m_v;
       };
 
+      /**
+       * @brief Constructs a distributed scalar P1 finite element space on the given mesh.
+       *
+       * This constructor builds the local shard P1 space and assigns a global
+       * distributed numbering to its degrees of freedom. For scalar P1 elements,
+       * degrees of freedom are associated with mesh vertices.
+       *
+       * Each rank numbers its owned vertex degrees of freedom contiguously, then
+       * exchanges this numbering with neighboring ranks so that ghost vertices are
+       * assigned the global indices of their owners. The resulting maps store the
+       * correspondence between local shard degrees of freedom and global distributed
+       * degrees of freedom.
+       *
+       * @param[in] mesh Distributed mesh on which the space is defined.
+       */
       P1(const MeshType& mesh)
         : m_mesh(mesh),
           m_fes(mesh.getShard())
@@ -231,7 +265,7 @@ namespace Rodin::Variational
         // 6) Build left in one linear pass.
         // For scalar P1 on the local shard, local DOF count should be shard vertex count.
         const size_t localDofCount = shard.getVertexCount();
-        m_local_to_global.left.assign(localDofCount, Index(-1));
+        m_local_to_global.left.assign(localDofCount, std::numeric_limits<Index>::max());
 
         for (const auto& [global, local] : m_local_to_global.right)
         {
@@ -252,7 +286,8 @@ namespace Rodin::Variational
         const auto& halo = shard.getHalo(0);
         const auto& owner = shard.getOwner(0);
 
-        m_owned = halo.size();
+        const size_t nv = halo.size();
+        m_owned = nv * vdim;
         const size_t inclusive = boost::mpi::scan(comm, m_owned, std::plus<size_t>());
         m_offset = inclusive - m_owned;
 
@@ -290,8 +325,6 @@ namespace Rodin::Variational
           }
         }
 
-        assert(m_owned == dofIdx);
-
         std::vector<boost::mpi::request> irecv;
         for (auto& [owner, requested] : pull)
           irecv.push_back(comm.irecv(owner, 0, pull[owner]));
@@ -320,6 +353,15 @@ namespace Rodin::Variational
             }
           }
         }
+
+        const size_t localDofCount = m_fes.getSize();
+        m_local_to_global.left.assign(localDofCount, 0);
+
+        for (const auto& [global, local] : m_local_to_global.right)
+        {
+          assert(local < localDofCount);
+          m_local_to_global.left[local] = global;
+        }
       }
 
       P1(const P1& other) = default;
@@ -328,11 +370,24 @@ namespace Rodin::Variational
 
       P1& operator=(P1&& other) = default;
 
+      /**
+       * @brief Returns the local shard finite element space.
+       *
+       * The distributed P1 space is constructed from the P1 space defined on the
+       * local mesh shard. This method provides access to that underlying local
+       * finite element space.
+       */
       const FESType& getShard() const
       {
         return m_fes;
       }
 
+      /**
+       * @brief Returns the global ownership range of this rank.
+       *
+       * The interval @f$ [\text{begin}, \text{end}) @f$ identifies the global
+       * degrees of freedom owned by the current MPI rank.
+       */
       void getOwnershipRange(Index& begin, Index& end) const
       {
         begin = m_offset;
@@ -340,8 +395,11 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Returns the global distributed index of the given local
-       * distributed index.
+       * @brief Returns the global distributed index corresponding to a local
+       * shard degree of freedom.
+       *
+       * @param[in] localIdx Local shard degree of freedom index.
+       * @return Global distributed degree of freedom index.
        */
       Index getGlobalIndex(Index localIdx) const
       {
@@ -349,8 +407,13 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Returns the local distributed index of the given global
-       * distributed index.
+       * @brief Returns the local shard index of a global distributed degree of freedom.
+       *
+       * If the global degree of freedom is present on this rank (owned or ghost),
+       * its local shard index is returned.
+       *
+       * @param[in] globalIdx Global distributed degree of freedom index.
+       * @return Local shard index if present, otherwise `std::nullopt`.
        */
       Optional<Index> getLocalIndex(Index globalIdx) const
       {
@@ -362,107 +425,98 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Returns the global finite element for the given global index.
-       * @param[in] d Dimension of the element
-       * @param[in] globalIdx Global distributed index of the polytope in the
-       * distributed mesh
+       * @brief Returns the finite element associated with the local shard polytope @f$(d,i)@f$.
+       *
+       * The key @f$(d,i)@f$ refers to a polytope in the local mesh shard of this MPI rank.
+       * Finite elements are therefore retrieved directly from the underlying shard
+       * finite element space.
+       *
+       * @param[in] d Topological dimension of the polytope.
+       * @param[in] i Local index of the polytope within the shard.
+       *
+       * @pre @f$0 \le i < |\mathcal{T}_d^{(loc)}|@f$.
        */
-      const auto& getFiniteElement(size_t d, Index globalIdx) const
+      const ElementType& getFiniteElement(size_t d, Index i) const
       {
-        static thread_local ElementType s_element;
-        const auto& mesh = getMesh();
-        const auto& ctx = mesh.getContext();
-        const auto& comm = ctx.getCommunicator();
-        const auto& shard = mesh.getShard();
-        const auto localIdx = mesh.getLocalIndex(d, globalIdx);
-        Optional<ElementType> send;
-        if (localIdx)
-        {
-          const Index owner = shard.getOwner(d).at(*localIdx);
-          if (owner == comm.rank())
-            send = m_fes.getFiniteElement(*localIdx, globalIdx);
-        }
-        auto recv =
-          boost::mpi::all_reduce(
-              comm, send, [](const auto& a, const auto& b) { return a ? a : b; });
-        assert(recv);
-        s_element = *recv;
-        return s_element;
+        assert(i < this->getMesh().getShard();.getPolytopeCount(d));
+        return m_fes.getFiniteElement(d, i);
       }
 
+      /**
+       * @brief Returns the global number of degrees of freedom of the distributed P1 space.
+       *
+       * For a P1 space, degrees of freedom are associated with mesh vertices. If the
+       * vector dimension is @f$k@f$, the global dimension of the space is
+       *
+       * @f[
+       *   \dim(V_h) = N_v \, k
+       * @f]
+       *
+       * where @f$N_v@f$ is the global number of mesh vertices.
+       *
+       * @return Global number of degrees of freedom.
+       */
       size_t getSize() const override
       {
         const auto& mesh = getMesh();
         return mesh.getVertexCount() * getVectorDimension();
       }
 
+      /**
+       * @brief Returns the vector dimension of the finite element space.
+       *
+       * For scalar P1 spaces this value is @f$ 1 @f$. For vector-valued spaces
+       * it corresponds to the number of components carried by each degree of
+       * freedom.
+       *
+       * @return Vector dimension of the space.
+       */
       size_t getVectorDimension() const override
       {
         const auto& fes = this->getShard();
         return fes.getVectorDimension();
       }
 
+      /**
+       * @brief Returns the distributed mesh on which the finite element space
+       * is defined.
+       *
+       * @return Reference to the distributed mesh.
+       */
       const MeshType& getMesh() const override
       {
         return m_mesh.get();
       }
 
-      const IndexArray& getDOFs(size_t d, Index globalIdx) const override
+      const IndexArray& getDOFs(size_t d, Index i) const override
       {
         static thread_local IndexArray s_dofs;
-        const auto& mesh = getMesh();
-        const auto& ctx = mesh.getContext();
-        const auto& comm = ctx.getCommunicator();
-        const auto& shard = mesh.getShard();
-        const auto localIdx = mesh.getLocalIndex(d, globalIdx);
-        Optional<IndexArray> send;
-        if (localIdx)
-        {
-          const Index& owner = shard.getOwner(d).at(*localIdx);
-          assert(comm.rank() >= 0);
-          if (owner == static_cast<Index>(comm.rank()))
-            send = m_fes.getDOFs(*localIdx, globalIdx);
-        }
-        auto recv =
-          boost::mpi::all_reduce(
-              comm, send, [](const auto& a, const auto& b) { return a ? a : b; });
-        assert(recv);
-        s_dofs = *recv;
+        const auto& shard = getMesh().getShard();
+        assert(i < shard.getPolytopeCount(d));
+
+        s_dofs = m_fes.getDOFs(d, i);
         for (auto& dof : s_dofs)
-          dof = getGlobalIndex(dof);
+          dof = this->getGlobalIndex(dof);
+
         return s_dofs;
       }
 
       Index getGlobalIndex(const std::pair<size_t, Index>& p, Index localDof) const override
       {
-        const auto& [d, globalIdx] = p;
-        const auto& mesh = getMesh();
-        const auto& ctx = mesh.getContext();
-        const auto& comm = ctx.getCommunicator();
-        const auto& shard = mesh.getShard();
-        const auto& fes = getShard();
-        const auto localIdx = mesh.getLocalIndex(d, globalIdx);
-        Optional<Index> send;
-        if (localIdx)
-        {
-          const Index& owner = shard.getOwner(d).at(*localIdx);
-          assert(comm.rank() >= 0);
-          if (owner == static_cast<Index>(comm.rank()))
-            send = fes.getGlobalIndex({ d, *localIdx }, localDof);
-        }
-        auto recv =
-          boost::mpi::all_reduce(
-              comm, send, [](const auto& a, const auto& b) { return a ? a : b; });
-        assert(recv);
-        return *recv;
+        const auto& [d, i] = p;
+        const auto& shard = getMesh().getShard();
+        assert(i < shard.getPolytopeCount(d));
+
+        const Index local = m_fes.getGlobalIndex({ d, i }, localDof);
+        return getGlobalIndex(local);
       }
 
       template <class FunctionDerived>
       auto getPullback(const std::pair<size_t, Index>& p, const FunctionBase<FunctionDerived>& v) const
       {
-        const auto& [d, globalIdx] = p;
+        const auto& [d, i] = p;
         const auto& mesh = getMesh();
-        return Pullback<FunctionDerived>(*mesh.getPolytope(d, globalIdx), v);
+        return Pullback<FunctionDerived>(*mesh.getPolytope(d, i), v);
       }
 
       template <class CallableType>

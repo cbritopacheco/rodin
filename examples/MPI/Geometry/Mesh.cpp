@@ -73,7 +73,6 @@ int main(int argc, char** argv)
   std::cout << "Gathering\n";
   auto mpiMesh = sharder.gather(0);
   mpiMesh.getShard().save(
-      "Gathered" + std::to_string(world.rank()) + ".mesh",
+      "Gathered." + std::to_string(world.rank()) + ".mesh",
       IO::FileFormat::MEDIT);
-  // mpiMesh.save("Gathered" + std::to_string(world.rank()) + ".mesh", IO::FileFormat::MEDIT);
 }
