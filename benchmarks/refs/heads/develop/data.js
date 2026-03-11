@@ -98,12 +98,6 @@ window.BENCHMARK_DATA = {
             "extra": "iterations: 46219\ncpu: 15126.843938639951 ns\nthreads: 1"
           },
           {
-            "name": "MeshIO/Load_MEDIT_2D_Box",
-            "value": 168332519.19999838,
-            "unit": "ns/iter",
-            "extra": "iterations: 5\ncpu: 168317820.00000006 ns\nthreads: 1"
-          },
-          {
             "name": "UniformGrid/Triangular_16x16",
             "value": 126749.27098060088,
             "unit": "ns/iter",
@@ -228,12 +222,6 @@ window.BENCHMARK_DATA = {
             "value": 20841.131015970463,
             "unit": "ns/iter",
             "extra": "iterations: 36507\ncpu: 20611.04171802668 ns\nthreads: 1"
-          },
-          {
-            "name": "MeshIO/Load_MEDIT_2D_Box",
-            "value": 203856251.4999853,
-            "unit": "ns/iter",
-            "extra": "iterations: 4\ncpu: 203251025.00000015 ns\nthreads: 1"
           },
           {
             "name": "UniformGrid/Triangular_16x16",
@@ -362,12 +350,6 @@ window.BENCHMARK_DATA = {
             "extra": "iterations: 35389\ncpu: 19992.531577608865 ns\nthreads: 1"
           },
           {
-            "name": "MeshIO/Load_MEDIT_2D_Box",
-            "value": 196085903.7500029,
-            "unit": "ns/iter",
-            "extra": "iterations: 4\ncpu: 196058349.99999994 ns\nthreads: 1"
-          },
-          {
             "name": "UniformGrid/Triangular_16x16",
             "value": 156936.13232757823,
             "unit": "ns/iter",
@@ -492,12 +474,6 @@ window.BENCHMARK_DATA = {
             "value": 15463.26856226155,
             "unit": "ns/iter",
             "extra": "iterations: 45509\ncpu: 15358.041266562637 ns\nthreads: 1"
-          },
-          {
-            "name": "MeshIO/Load_MEDIT_2D_Box",
-            "value": 170007640.19999224,
-            "unit": "ns/iter",
-            "extra": "iterations: 5\ncpu: 169983340.0000003 ns\nthreads: 1"
           },
           {
             "name": "UniformGrid/Triangular_16x16",
@@ -626,12 +602,6 @@ window.BENCHMARK_DATA = {
             "extra": "iterations: 46075\ncpu: 15214.48941942486 ns\nthreads: 1"
           },
           {
-            "name": "MeshIO/Load_MEDIT_2D_Box",
-            "value": 157668139.80000052,
-            "unit": "ns/iter",
-            "extra": "iterations: 5\ncpu: 157656840.0000003 ns\nthreads: 1"
-          },
-          {
             "name": "UniformGrid/Triangular_16x16",
             "value": 126892.09522938896,
             "unit": "ns/iter",
@@ -756,12 +726,6 @@ window.BENCHMARK_DATA = {
             "value": 14867.982605563018,
             "unit": "ns/iter",
             "extra": "iterations: 47199\ncpu: 14753.698171571426 ns\nthreads: 1"
-          },
-          {
-            "name": "MeshIO/Load_MEDIT_2D_Box",
-            "value": 173768932.99999666,
-            "unit": "ns/iter",
-            "extra": "iterations: 5\ncpu: 173752840.0000002 ns\nthreads: 1"
           },
           {
             "name": "UniformGrid/Triangular_16x16",
@@ -890,12 +854,6 @@ window.BENCHMARK_DATA = {
             "extra": "iterations: 37737\ncpu: 18481.36576834406 ns\nthreads: 1"
           },
           {
-            "name": "MeshIO/Load_MEDIT_2D_Box",
-            "value": 229992124.50000072,
-            "unit": "ns/iter",
-            "extra": "iterations: 4\ncpu: 229967400.00000003 ns\nthreads: 1"
-          },
-          {
             "name": "UniformGrid/Triangular_16x16",
             "value": 172817.0061394901,
             "unit": "ns/iter",
@@ -1020,12 +978,6 @@ window.BENCHMARK_DATA = {
             "value": 15101.935709861535,
             "unit": "ns/iter",
             "extra": "iterations: 46819\ncpu: 14992.943035946919 ns\nthreads: 1"
-          },
-          {
-            "name": "MeshIO/Load_MEDIT_2D_Box",
-            "value": 159372633.20000738,
-            "unit": "ns/iter",
-            "extra": "iterations: 5\ncpu: 159363919.99999982 ns\nthreads: 1"
           },
           {
             "name": "UniformGrid/Triangular_16x16",
