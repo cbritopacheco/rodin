@@ -233,8 +233,7 @@ namespace Rodin::Variational
           template <class T>
           ScalarType operator()(const T& v) const
           {
-            const auto& node = H1Element<K, Scalar>::getNodes(m_g)[m_i];;
-            return v(node);
+            return v(H1Element<K, Scalar>::getNodes(m_g)[m_i]);
           }
 
         private:
@@ -774,8 +773,7 @@ namespace Rodin::Variational
           ScalarType operator()(const T& v) const
           {
             static thread_local RangeType s_out;
-            const auto& node = H1Element<K, ScalarType>(m_g).getNode(m_local / m_vdim);
-            s_out = v(node);
+            s_out = v(H1Element<K, ScalarType>::getNodes(m_g)[m_local / m_vdim]);
             return s_out.coeff(m_local % m_vdim);
           }
 
@@ -888,7 +886,7 @@ namespace Rodin::Variational
 
           constexpr
           BasisFunction(size_t vdim, size_t local, Geometry::Polytope::Type g)
-            : m_vdim(vdim), m_local(local), m_g(g)
+            : m_vdim(vdim), m_local(local), m_g(g), m_jac(vdim, local, g)
           {}
 
           constexpr
@@ -914,15 +912,16 @@ namespace Rodin::Variational
           }
 
           constexpr
-          JacobianFunction getJacobian() const
+          const JacobianFunction& getJacobian() const
           {
-            return JacobianFunction(m_vdim, m_local, m_g);
+            return m_jac;
           }
 
         private:
           const size_t m_vdim;
           const size_t m_local;
           const Geometry::Polytope::Type m_g;
+          const JacobianFunction m_jac;
       };
 
       H1Element()
@@ -977,7 +976,25 @@ namespace Rodin::Variational
       constexpr
       size_t getCount() const
       {
-        return m_vdim * H1Element<K, ScalarType>(this->getGeometry()).getCount();
+        switch (this->getGeometry())
+        {
+          case Geometry::Polytope::Type::Point:
+            return m_vdim * 1;
+          case Geometry::Polytope::Type::Segment:
+            return m_vdim * (K + 1);
+          case Geometry::Polytope::Type::Triangle:
+            return m_vdim * ((K + 1) * (K + 2) / 2);
+          case Geometry::Polytope::Type::Quadrilateral:
+            return m_vdim * ((K + 1) * (K + 1));
+          case Geometry::Polytope::Type::Tetrahedron:
+            return m_vdim * ((K + 1) * (K + 2) * (K + 3) / 6);
+          case Geometry::Polytope::Type::Wedge:
+            return m_vdim * ((K + 1) * (K + 1) * (K + 2) / 2);
+          case Geometry::Polytope::Type::Hexahedron:
+            return m_vdim * ((K + 1) * (K + 1) * (K + 1));
+        }
+        assert(false);
+        return 0;
       }
 
       constexpr
@@ -995,7 +1012,7 @@ namespace Rodin::Variational
       constexpr
       const Math::SpatialPoint& getNode(size_t local) const
       {
-        return H1Element<K, ScalarType>(this->getGeometry()).getNode(local / m_vdim);
+        return H1Element<K, ScalarType>::getNodes(this->getGeometry())[local / m_vdim];
       }
 
       constexpr
