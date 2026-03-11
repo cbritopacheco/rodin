@@ -24,6 +24,9 @@ using namespace Rodin::Variational;
 
 static constexpr int ROOT_RANK = 0;
 
+static constexpr int n = 64;
+
+
 int main(int argc, char** argv)
 {
   mpi::environment env(argc, argv);
@@ -38,10 +41,10 @@ int main(int argc, char** argv)
   if (world.rank() == ROOT_RANK)
   {
     Geometry::LocalMesh mesh;
-    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Tetrahedron, { 32, 32, 32 });
+    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Tetrahedron, { n, n, n });
     Alert::Info() << "Number of cells in the mesh: " << mesh.getCellCount() << Alert::Raise;
     Alert::Info() << "Number of vertices in the mesh: " << mesh.getVertexCount() << Alert::Raise;
-    mesh.scale(1.0 / 63.0);
+    mesh.scale(1.0 / (n - 1));
     Alert::Info() << "Computing mesh connectivity..." << Alert::Raise;
     auto t0 = std::chrono::high_resolution_clock::now();
     const size_t cellDim = mesh.getDimension();

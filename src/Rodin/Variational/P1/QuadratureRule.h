@@ -189,7 +189,7 @@ namespace Rodin::Variational
       std::vector<ScalarType> m_basis;
 
       bool m_set;
-      Geometry::Polytope::Type m_geometry;
+      Optional<Geometry::Polytope::Type> m_geometry;
   };
 
   /**
@@ -370,7 +370,7 @@ namespace Rodin::Variational
       std::vector<ScalarType> m_dot;
 
       bool m_set;
-      Geometry::Polytope::Type m_geometry;
+      Optional<Geometry::Polytope::Type> m_geometry;
   };
 
   /**
@@ -682,7 +682,7 @@ namespace Rodin::Variational
       Math::Matrix<ScalarType> m_matrix;
 
       bool m_set;
-      Geometry::Polytope::Type m_geometry;
+      Optional<Geometry::Polytope::Type> m_geometry;
   };
 
   template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Number, class Mesh>
@@ -905,7 +905,7 @@ namespace Rodin::Variational
       Math::Matrix<ScalarType> m_matrix;
 
       bool m_set;
-      Geometry::Polytope::Type m_geometry;
+      Optional<Geometry::Polytope::Type> m_geometry;
   };
 
   template <class LHSDerived, class RHSDerived, class Range, class Mesh>
@@ -1234,7 +1234,7 @@ namespace Rodin::Variational
       Math::Matrix<ScalarType> m_matrix;
 
       bool m_set;
-      Geometry::Polytope::Type m_geometry;
+      Optional<Geometry::Polytope::Type> m_geometry;
   };
 
   /**
@@ -1512,7 +1512,7 @@ namespace Rodin::Variational
       Math::Matrix<ScalarType> m_matrix;
 
       bool m_set;
-      Geometry::Polytope::Type m_geometry;
+      Optional<Geometry::Polytope::Type> m_geometry;
   };
 
   /**
@@ -1857,7 +1857,7 @@ namespace Rodin::Variational
       Math::Matrix<ScalarType> m_matrix;
 
       bool m_set;
-      Geometry::Polytope::Type m_geometry;
+      Optional<Geometry::Polytope::Type> m_geometry;
   };
 
   /**
