@@ -438,7 +438,7 @@ namespace Rodin::Variational
        */
       const ElementType& getFiniteElement(size_t d, Index i) const
       {
-        assert(i < this->getMesh().getShard();.getPolytopeCount(d));
+        assert(i < this->getMesh().getShard().getPolytopeCount(d));
         return m_fes.getFiniteElement(d, i);
       }
 

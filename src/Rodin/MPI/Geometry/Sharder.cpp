@@ -29,7 +29,7 @@ namespace Rodin::Geometry
     const size_t D         = mesh.getDimension();
     const size_t numShards = partitioner.getCount();
 
-    assert(numShards == static_cast<size_t>(comm.size()));
+    assert(numShards == static_cast<size_t>(m_context.getCommunicator().size()));
     assert(numShards > 0);
 
     const size_t numCells = mesh.getCellCount();
@@ -42,6 +42,7 @@ namespace Rodin::Geometry
       polytopeCount[d] = mesh.getPolytopeCount(d);
 
     std::vector<size_t> cellPartition(numCells);
+
 #pragma omp parallel for schedule(static)
     for (Index c = 0; c < static_cast<Index>(numCells); ++c)
       cellPartition[c] = partitioner.getPartition(c);
