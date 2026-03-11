@@ -236,32 +236,9 @@ if (RODIN_BUILD_SRC)
     )
   include_directories(${Boost_INCLUDE_DIRS})
 
-  # ---- Corrade ----
-  message(STATUS "Configuring Corrade...")
-  add_subdirectory(third-party/corrade EXCLUDE_FROM_ALL)
-  find_package(Corrade REQUIRED Utility)
-  set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
-
   # ---- Eigen ----
   message(STATUS "Configuring Eigen3...")
   find_package(Eigen3 CONFIG REQUIRED NO_MODULE)
-
-  if (RODIN_WITH_PLOT)
-    # ---- Magnum ----
-    message(STATUS "Configuring Magnum...")
-    set(WITH_SDL2APPLICATION ON CACHE BOOL "" FORCE)
-    add_subdirectory(third-party/magnum EXCLUDE_FROM_ALL)
-    find_package(Magnum REQUIRED GL Shaders Sdl2Application)
-    set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
-
-    # ---- Magnum-Eigen integration ----
-    message(STATUS "Configuring Magnum-Eigen integration...")
-    set(EIGEN3_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/third-party/eigen)
-    list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/third-party/eigen/cmake)
-    set(MAGNUM_WITH_EIGEN ON CACHE BOOL "" FORCE)
-    add_subdirectory(third-party/magnum-integration EXCLUDE_FROM_ALL)
-    find_package(MagnumIntegration REQUIRED Eigen)
-  endif()
 
   add_subdirectory(src)
 
