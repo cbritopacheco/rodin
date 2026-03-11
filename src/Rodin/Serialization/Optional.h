@@ -2,6 +2,7 @@
 #define RODIN_SERIALIZATION_OPTIONAL_H
 
 #include <optional>
+#include <boost/serialization/version.hpp>
 #include <boost/serialization/split_free.hpp>
 
 namespace boost::serialization
