@@ -77,9 +77,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md237">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md238">Applications</a></li>
-            <li><a href="#autotoc_md239">Usage Example</a></li>
+            <li><a href="#autotoc_md234">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md235">Applications</a></li>
+            <li><a href="#autotoc_md236">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -89,7 +89,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the BoundaryIntegral classes which represent integrals over the domain boundary in finite element formulations. Boundary integrals are essential for imposing natural (Neumann) boundary conditions and boundary terms in weak formulations.</p><section id="autotoc_md237"><h3><a href="#autotoc_md237">Mathematical Foundation</a></h3><p>Boundary integrals compute:</p><div class="m-math"><svg style="width: 5.893em; height: 2.819em;" viewBox="165.985297 -27.065451 56.572388 27.065451">
+<p>This file defines the BoundaryIntegral classes which represent integrals over the domain boundary in finite element formulations. Boundary integrals are essential for imposing natural (Neumann) boundary conditions and boundary terms in weak formulations.</p><section id="autotoc_md234"><h3><a href="#autotoc_md234">Mathematical Foundation</a></h3><p>Boundary integrals compute:</p><div class="m-math"><svg style="width: 5.893em; height: 2.819em;" viewBox="165.985297 -27.065451 56.572388 27.065451">
 <title>
 \[
   \int_{\partial\Omega} f(x) \, ds
@@ -141,7 +141,7 @@ $ ds $
 <use x='0' y='0' xlink:href='#eq3-g0-100'/>
 <use x='6.082693' y='0' xlink:href='#eq3-g0-115'/>
 </g>
-</svg> is the surface measure.</p></section><section id="autotoc_md238"><h3><a href="#autotoc_md238">Applications</a></h3><ul><li><strong>Neumann boundary conditions</strong>: <svg class="m-math" style="width: 5.697em; height: 1.575em; vertical-align: -0.574em;" viewBox="0 -9.630618 54.694614 15.121213">
+</svg> is the surface measure.</p></section><section id="autotoc_md235"><h3><a href="#autotoc_md235">Applications</a></h3><ul><li><strong>Neumann boundary conditions</strong>: <svg class="m-math" style="width: 5.697em; height: 1.575em; vertical-align: -0.574em;" viewBox="0 -9.630618 54.694614 15.121213">
 <title>
 $ \int_{\Gamma_N} g \cdot v \, ds $
 </title>
@@ -197,7 +197,7 @@ $ \int_{\Gamma_R} (\alpha u - \beta) v \, ds $
 <use x='70.717027' y='0' xlink:href='#eq5-g3-100'/>
 <use x='76.79972' y='0' xlink:href='#eq5-g3-115'/>
 </g>
-</svg></li><li><strong>Weak boundary terms</strong>: Integration by parts produces boundary integrals</li><li><strong>Flux calculations</strong>: Computing normal fluxes across boundaries</li></ul></section><section id="autotoc_md239"><h3><a href="#autotoc_md239">Usage Example</a></h3><pre class="m-code"><span class="c1">// Neumann BC: ∫_Γ g·v ds</span>
+</svg></li><li><strong>Weak boundary terms</strong>: Integration by parts produces boundary integrals</li><li><strong>Flux calculations</strong>: Computing normal fluxes across boundaries</li></ul></section><section id="autotoc_md236"><h3><a href="#autotoc_md236">Usage Example</a></h3><pre class="m-code"><span class="c1">// Neumann BC: ∫_Γ g·v ds</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">neumann</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BoundaryIntegral</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">).</span><span class="n">on</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span><span class="w">  </span><span class="c1">// On boundary attribute 2</span>
 
 <span class="c1">// Robin BC: ∫_Γ (αu - β)v ds</span>
