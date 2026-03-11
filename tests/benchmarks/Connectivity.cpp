@@ -28,15 +28,7 @@ namespace Rodin::Tests::Benchmarks
         size_t topologicalDimension;
       };
 
-      static constexpr MeshSpec kMeshes[] =
-      {
-        { Polytope::Type::Segment,       "Edge",          { 4096, 1, 1 }, 1 },
-        { Polytope::Type::Triangle,      "Triangle",      {   64, 64, 1 }, 2 },
-        { Polytope::Type::Quadrilateral, "Quadrilateral", {   64, 64, 1 }, 2 },
-        { Polytope::Type::Tetrahedron,   "Tetrahedron",   {    16,  16, 16 }, 3 },
-        { Polytope::Type::Hexahedron,    "Hexahedron",    {    16,  16, 16 }, 3 },
-        { Polytope::Type::Wedge,         "Wedge",         {    16,  16, 16 }, 3 }
-      };
+      static MeshSpec kMeshes[];
 
       static LocalMesh makeMesh(const MeshSpec& spec)
       {
@@ -349,7 +341,16 @@ namespace Rodin::Tests::Benchmarks
       }
   };
 
-  constexpr ConnectivityBenchmark::MeshSpec ConnectivityBenchmark::kMeshes[];
+  ConnectivityBenchmark::MeshSpec ConnectivityBenchmark::kMeshes[] =
+  {
+    { Polytope::Type::Segment,       "Edge",          { 4096, 1, 1 }, 1 },
+    { Polytope::Type::Triangle,      "Triangle",      {   64, 64, 1 }, 2 },
+    { Polytope::Type::Quadrilateral, "Quadrilateral", {   64, 64, 1 }, 2 },
+    { Polytope::Type::Tetrahedron,   "Tetrahedron",   {    16,  16, 16 }, 3 },
+    { Polytope::Type::Hexahedron,    "Hexahedron",    {    16,  16, 16 }, 3 },
+    { Polytope::Type::Wedge,         "Wedge",         {    16,  16, 16 }, 3 }
+  };
+
 
   // --------------------------------------------------------------------------
   // 1D: EDGE / SEGMENT
