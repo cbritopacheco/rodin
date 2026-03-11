@@ -233,7 +233,7 @@ namespace Rodin::Variational
           template <class T>
           ScalarType operator()(const T& v) const
           {
-            const auto& node = H1Element<K, Scalar>(m_g).getNode(m_i);
+            const auto& node = H1Element<K, Scalar>::getNodes(m_g)[m_i];;
             return v(node);
           }
 
