@@ -4,6 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include "Rodin/Alert/Raise.h"
+#include "Rodin/Alert/Success.h"
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Assembly.h>
@@ -45,11 +47,14 @@ int main(int argc, char** argv)
              - BoundaryIntegral(f, v).over(GammaN)
              + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
 
+  Alert::Info() << "Assembling and solving the system..." << Alert::Raise;
   Solver::CG(elasticity).solve();
 
   // Save solution
   u.getSolution().save("Elasticity.gf");
   mesh.save("Elasticity.mesh");
+
+  Alert::Success() << "Mesh and solution saved to Elasticity.mesh and Elasticity.gf" << Alert::Raise;
 
   return 0;
 }

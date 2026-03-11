@@ -1,3 +1,5 @@
+#include "Rodin/Alert/Success.h"
+#include "Rodin/IO/ForwardDecls.h"
 #include <boost/mpi/environment.hpp>
 #include <boost/mpi/communicator.hpp>
 
@@ -11,6 +13,8 @@ namespace mpi = boost::mpi;
 
 using namespace Rodin;
 
+static constexpr int ROOT_RANK = 0;
+
 int main(int argc, char** argv)
 {
   mpi::environment env(argc, argv);
@@ -22,11 +26,21 @@ int main(int argc, char** argv)
   {
     Geometry::LocalMesh mesh;
     auto t0 = std::chrono::high_resolution_clock::now();
-    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Tetrahedron, { 64, 64, 64 });
-    mesh.getConnectivity().compute(2, 2);
+    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Tetrahedron, { 32, 32, 32 });
     auto t1 = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
     Alert::Info() << "Mesh generation time: " << duration << " ms" << Alert::Raise;
+
+    Alert::Info() << "Number of cells in the mesh: " << mesh.getCellCount() << Alert::Raise;
+    Alert::Info() << "Number of vertices in the mesh: " << mesh.getVertexCount() << Alert::Raise;
+
+    t0 = std::chrono::high_resolution_clock::now();
+    Alert::Info() << "Computing mesh connectivity..." << Alert::Raise;
+    const size_t cellDim = mesh.getDimension();
+    mesh.getConnectivity().compute(cellDim, cellDim);
+    t1 = std::chrono::high_resolution_clock::now();
+    duration = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
+    Alert::Info() << "Computed mesh connectivity in " << duration << " ms." << Alert::Raise;
 
     t0 = std::chrono::high_resolution_clock::now();
     Geometry::BalancedCompactPartitioner partitioner(mesh);
@@ -44,15 +58,21 @@ int main(int argc, char** argv)
     Alert::Info() << "Sharding time: " << duration << " ms" << Alert::Raise;
 
     t0 = std::chrono::high_resolution_clock::now();
-    sharder.scatter(0);
+    sharder.scatter(ROOT_RANK);
     t1 = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
 
     Alert::Info() << "Scattering time: " << duration << " ms" << Alert::Raise;
   }
 
-  Geometry::MPIMesh mesh = sharder.gather(0);
+  if (world.rank() == ROOT_RANK)
+    Alert::Info() << "Gathering mesh on all processes..." << Alert::Raise;
 
-  mesh.getShard().save("Shard" + std::to_string(world.rank()) + ".mesh");
+  auto mesh = sharder.gather(0);
+
+  mesh.getShard().save("Shard." + std::to_string(world.rank()) + ".mesh", IO::FileFormat::MEDIT);
+
+  if (world.rank() == ROOT_RANK)
+    Alert::Success() << "Saved shard meshes as Shard.x.mesh (MEDIT)" << Alert::Raise;
 }
 

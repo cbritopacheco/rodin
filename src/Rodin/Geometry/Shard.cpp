@@ -17,7 +17,7 @@ namespace Rodin::Geometry
 
   size_t Shard::Builder::getPolytopeCount(size_t d) const
   {
-    assert(m_s2ps[d].left.size() == m_s2ps[d].right.size());
+    assert(m_s2ds[d].left.size() == m_s2ds[d].right.size());
     return m_s2ds[d].left.size();
   }
 
@@ -179,7 +179,7 @@ namespace Rodin::Geometry
 
     // --------------------------------------------------------------------------
     // Rebuild vertex coordinates in shard-local order.
-    // Vertices are emitted in the same order as m_s2ps[0].left.
+    // Vertices are emitted in the same order as m_s2ds[0].left.
     // --------------------------------------------------------------------------
     const auto& vmap = m_s2ds[0].left;
     m_build.nodes(vmap.size());

@@ -4,41 +4,17 @@
 #include "PolytopeIterator.h"
 #include <queue>
 #include <vector>
-#include <cmath>
 #include <limits>
 
 namespace Rodin::Geometry
 {
   using MeshType = Mesh<Context::Local>;
 
-  // Helper: Compute the centroid of a polytope (cell) of dimension d.
-  // The centroid is computed as the average of the vertex coordinates.
-  static Math::SpatialVector<Real> computePolytopeCentroid(const MeshBase& mesh, size_t d, Index polyIndex)
-  {
-    auto poly = mesh.getPolytope(d, polyIndex);
-    const auto& vertices = poly->getVertices();
-    size_t spaceDim = mesh.getSpaceDimension();
-    Math::SpatialVector<Real> centroid(spaceDim);
-    centroid.setZero();
-    for (size_t i = 0; i < static_cast<size_t>(vertices.size()); ++i)
-    {
-      centroid += mesh.getVertexCoordinates(vertices[i]);
-    }
-    centroid /= vertices.size();
-    return centroid;
-  }
-
-  // Structure to hold cluster (seed) information.
-  struct ClusterInfo
-  {
-    size_t size;                        // Number of cells already assigned.
-    Math::SpatialVector<Real> centroid; // Running centroid of the cluster.
-    Real radius;                        // Maximum distance of any assigned cell from centroid.
-  };
-
   BalancedCompactPartitioner::BalancedCompactPartitioner(const MeshType& mesh)
     : m_mesh(mesh)
-  {}
+  {
+    RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, mesh.getDimension(), mesh.getDimension());
+  }
 
   const Mesh<Context::Local>& BalancedCompactPartitioner::getMesh() const
   {
@@ -52,6 +28,29 @@ namespace Rodin::Geometry
   // the cluster's current centroid is more than compactFactor times the cluster's radius.
   void BalancedCompactPartitioner::partition(size_t numClusters, size_t d)
   {
+    // Structure to hold cluster (seed) information.
+    struct ClusterInfo
+    {
+      size_t size;                        // Number of cells already assigned.
+      Math::SpatialVector<Real> centroid; // Running centroid of the cluster.
+      Real radius;                        // Maximum distance of any assigned cell from centroid.
+    };
+
+    const auto computePolytopeCentroid = [](const MeshBase& mesh, size_t d, Index polyIndex)
+    {
+      auto poly = mesh.getPolytope(d, polyIndex);
+      const auto& vertices = poly->getVertices();
+      size_t spaceDim = mesh.getSpaceDimension();
+      Math::SpatialVector<Real> centroid(spaceDim);
+      centroid.setZero();
+      for (size_t i = 0; i < static_cast<size_t>(vertices.size()); ++i)
+      {
+        centroid += mesh.getVertexCoordinates(vertices[i]);
+      }
+      centroid /= vertices.size();
+      return centroid;
+    };
+
     m_count = numClusters;
     const MeshBase& mesh = getMesh();
     size_t n = mesh.getPolytopeCount(d);
@@ -59,7 +58,8 @@ namespace Rodin::Geometry
       return;
 
     // --- Seed Selection: Furthest–Point Sampling ---
-    struct SeedItem {
+    struct SeedItem
+    {
       Index polyIndex;
       Math::SpatialVector<Real> centroid;
     };
@@ -67,7 +67,7 @@ namespace Rodin::Geometry
     std::vector<bool> seedChosen(n, false);
 
     // Choose the first seed arbitrarily (cell 0).
-    seeds.push_back({0, computePolytopeCentroid(mesh, d, 0)});
+    seeds.push_back({ 0, computePolytopeCentroid(mesh, d, 0) });
     seedChosen[0] = true;
 
     for (size_t s = 1; s < numClusters; s++)
@@ -114,12 +114,15 @@ namespace Rodin::Geometry
     const Real compactFactor = 2.0;
 
     // PQ item holds a candidate cell assignment.
-    struct PQItem {
+    struct PQItem
+    {
       Index polyIndex;
       size_t seedId;
       Real distance; // Distance from the cluster's current centroid.
     };
-    struct ComparePQItem {
+
+    struct ComparePQItem
+    {
       bool operator()(const PQItem& a, const PQItem& b)
       {
         return a.distance > b.distance;

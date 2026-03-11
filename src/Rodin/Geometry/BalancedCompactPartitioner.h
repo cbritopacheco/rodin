@@ -72,7 +72,7 @@ namespace Rodin::Geometry
        */
       void partition(size_t maxPartitionSize)
       {
-        partition(maxPartitionSize, getMesh().getDimension());
+        this->partition(maxPartitionSize, getMesh().getDimension());
       }
 
       /**

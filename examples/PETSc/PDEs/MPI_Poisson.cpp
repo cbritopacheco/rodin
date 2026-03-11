@@ -22,7 +22,7 @@ using namespace Rodin::Math;
 using namespace Rodin::Solver;
 using namespace Rodin::Variational;
 
-static constexpr Index ROOT_RANK = 0;
+static constexpr int ROOT_RANK = 0;
 
 int main(int argc, char** argv)
 {
