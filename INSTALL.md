@@ -37,7 +37,7 @@ git clone --recursive https://github.com/cbritopacheco/rodin.git
 cd rodin
 ```
 
-**Important:** Use `--recursive` to initialize git submodules (corrade, eigen, googletest, etc.).
+**Important:** Use `--recursive` to initialize git submodules (eigen, googletest, etc.).
 
 If you've already cloned without `--recursive`, run:
 

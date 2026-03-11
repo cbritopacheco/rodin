@@ -4,7 +4,6 @@ set(Rodin_HEADERS
   Math.h
   Alert.h
   Geometry.h
-  Plot.h
   Solver.h
   Variational.h
 )
@@ -67,11 +66,6 @@ add_subdirectory(Advection)
 add_subdirectory(Eikonal)
 
 add_subdirectory(MMG)
-
-
-if (RODIN_WITH_PLOT)
-  add_subdirectory(Plot)
-endif()
 
 if (RODIN_USE_SCOTCH)
   add_subdirectory(Scotch)

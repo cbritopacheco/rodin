@@ -28,7 +28,7 @@ echo "=========================================="
 cd "${REPO_ROOT}"
 
 # Check if submodules are already initialized
-if [ -z "$(ls -A third-party/corrade 2>/dev/null)" ]; then
+if [ -z "$(ls -A third-party/benchmark 2>/dev/null)" ]; then
   echo "Initializing submodules..."
   git submodule update --init --recursive
   echo "✓ Submodules initialized"
