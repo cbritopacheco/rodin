@@ -12,13 +12,13 @@ namespace Rodin::Geometry
 
   const Shard::PolytopeMap& Shard::Builder::getPolytopeMap(size_t d) const
   {
-    return m_s2ps[d];
+    return m_s2ds[d];
   }
 
   size_t Shard::Builder::getPolytopeCount(size_t d) const
   {
     assert(m_s2ps[d].left.size() == m_s2ps[d].right.size());
-    return m_s2ps[d].left.size();
+    return m_s2ds[d].left.size();
   }
 
   Shard::Builder& Shard::Builder::initialize(const Mesh<Context>& parent)
@@ -27,7 +27,7 @@ namespace Rodin::Geometry
     const size_t sdim = parent.getSpaceDimension();
     m_parent = parent;
     m_build.initialize(sdim);
-    m_s2ps.resize(dim + 1);
+    m_s2ds.resize(dim + 1);
     m_flags.resize(dim + 1);
     m_owner.resize(dim + 1);
     m_halo.resize(dim + 1);
@@ -74,10 +74,10 @@ namespace Rodin::Geometry
     if (d == 0)
     {
       const Index childIdx = m_sidx[0];
-      const auto [it, inserted] = m_s2ps[0].right.insert(std::pair<Index, Index>{ parentIdx, childIdx });
+      const auto [it, inserted] = m_s2ds[0].right.insert(std::pair<Index, Index>{ parentIdx, childIdx });
       if (inserted) // Vertex was not already in the map
       {
-        m_s2ps[0].left.push_back(parentIdx);
+        m_s2ds[0].left.push_back(parentIdx);
         auto attr = parent.getAttribute(0, parentIdx);
         if (attr)
           build.attribute({ 0, childIdx }, *attr);
@@ -90,13 +90,13 @@ namespace Rodin::Geometry
     else
     {
       const Index childIdx = m_sidx[d];
-      const auto [it, inserted] = m_s2ps[d].right.insert(std::pair<Index, Index>{ parentIdx, childIdx });
+      const auto [it, inserted] = m_s2ds[d].right.insert(std::pair<Index, Index>{ parentIdx, childIdx });
       assert(parentPolytope.size());
       IndexArray childPolytope(parentPolytope.size());
       // Add polytope information
       if (inserted) // Polytope was not already in the map
       {
-        m_s2ps[d].left.push_back(parentIdx);
+        m_s2ds[d].left.push_back(parentIdx);
         auto attr = parent.getAttribute(d, parentIdx);
         if (attr)
           build.attribute({ d, childIdx }, *attr);
@@ -105,8 +105,8 @@ namespace Rodin::Geometry
         for (size_t i = 0; i < static_cast<size_t>(childPolytope.size()); i++)
         {
           const Index parentVertex = parentPolytope.coeff(i);
-          const auto find = m_s2ps[0].right.find(parentVertex);
-          if (find != m_s2ps[0].right.end()) // Vertex is in the map
+          const auto find = m_s2ds[0].right.find(parentVertex);
+          if (find != m_s2ds[0].right.end()) // Vertex is in the map
           {
             childPolytope.coeffRef(i) = find->second;
           }
@@ -143,7 +143,7 @@ namespace Rodin::Geometry
     // --------------------------------------------------------------------------
     for (size_t d = 0; d <= D; ++d)
     {
-      const auto& dmap = m_s2ps[d];
+      const auto& dmap = m_s2ds[d];
       const size_t nd  = dmap.left.size();
       if (nd == 0)
         continue;
@@ -154,7 +154,7 @@ namespace Rodin::Geometry
         if (pInc.empty())
           continue;
 
-        const auto& dpmap = m_s2ps[dp].right;
+        const auto& dpmap = m_s2ds[dp].right;
         Incidence cInc(nd);
 
         for (Index ci = 0; ci < static_cast<Index>(nd); ++ci)
@@ -181,7 +181,7 @@ namespace Rodin::Geometry
     // Rebuild vertex coordinates in shard-local order.
     // Vertices are emitted in the same order as m_s2ps[0].left.
     // --------------------------------------------------------------------------
-    const auto& vmap = m_s2ps[0].left;
+    const auto& vmap = m_s2ds[0].left;
     m_build.nodes(vmap.size());
     for (const Index pvid : vmap)
       m_build.vertex(parent.getVertexCoordinates(pvid));
@@ -191,7 +191,7 @@ namespace Rodin::Geometry
     // --------------------------------------------------------------------------
     Shard res;
     res.Parent::operator=(m_build.finalize());
-    res.m_s2ps  = std::move(m_s2ps);
+    res.m_s2ds  = std::move(m_s2ds);
     res.m_flags = std::move(m_flags);
     res.m_owner = std::move(m_owner);
     res.m_halo  = std::move(m_halo);
@@ -201,7 +201,7 @@ namespace Rodin::Geometry
 
   Shard::Shard(const Shard& other)
     : Parent(other),
-      m_s2ps(other.m_s2ps),
+      m_s2ds(other.m_s2ds),
       m_flags(other.m_flags),
       m_owner(other.m_owner),
       m_halo(other.m_halo)
@@ -209,7 +209,7 @@ namespace Rodin::Geometry
 
   Shard::Shard(Shard&& other)
     : Parent(std::move(other)),
-      m_s2ps(std::move(other.m_s2ps)),
+      m_s2ds(std::move(other.m_s2ds)),
       m_flags(std::move(other.m_flags)),
       m_owner(std::move(other.m_owner)),
       m_halo(std::move(other.m_halo))
@@ -218,7 +218,7 @@ namespace Rodin::Geometry
   Shard& Shard::operator=(Shard&& other)
   {
     Parent::operator=(std::move(other));
-    m_s2ps = std::move(other.m_s2ps);
+    m_s2ds = std::move(other.m_s2ds);
     m_flags = std::move(other.m_flags);
     m_owner = std::move(other.m_owner);
     m_halo = std::move(other.m_halo);
@@ -249,7 +249,34 @@ namespace Rodin::Geometry
 
   const Shard::PolytopeMap& Shard::getPolytopeMap(size_t d) const
   {
-    return m_s2ps[d];
+    return m_s2ds[d];
+  }
+
+  UnorderedMap<Index, Index>& Shard::getOwner(size_t d)
+  {
+    assert(d < m_owner.size());
+    return m_owner[d];
+  }
+
+  UnorderedMap<Index, IndexSet>& Shard::getHalo(size_t d)
+  {
+    assert(d < m_halo.size());
+    return m_halo[d];
+  }
+
+  Shard::PolytopeMap& Shard::getPolytopeMap(size_t d)
+  {
+    return m_s2ds[d];
+  }
+
+  const std::vector<Shard::Flags>& Shard::getFlags(size_t d) const
+  {
+    return m_flags[d];
+  }
+
+  std::vector<Shard::Flags>& Shard::getFlags(size_t d)
+  {
+    return m_flags[d];
   }
 }
 

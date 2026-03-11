@@ -5,6 +5,7 @@
 #include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Geometry/PolytopeTransformation.h"
+#include "Rodin/Types.h"
 
 #include "Mesh.h"
 
@@ -458,6 +459,348 @@ namespace Rodin::Geometry
     const auto& shard = this->getShard();
     assert(localIdx < shard.getVertexCount());
     return shard.getVertexCoordinates(localIdx);
+  }
+
+  Connectivity<Context::Local>& MPIMesh::getConnectivity()
+  {
+    return m_shard.getConnectivity();
+  }
+
+  const Connectivity<Context::Local>& MPIMesh::getConnectivity() const
+  {
+    return m_shard.getConnectivity();
+  }
+
+  Mesh<Context::MPI>& MPIMesh::reconcile(size_t d)
+  {
+    auto& shard = this->getShard();
+    auto& conn  = shard.getConnectivity();
+
+    const auto& ctx  = m_context;
+    const auto& comm = ctx.getCommunicator();
+
+    const int rank = comm.rank();
+    const size_t D = shard.getDimension();
+
+    assert(d <= D);
+
+    // Vertices and cells are assumed to have already been reconciled by sharding.
+    if (d == 0 || d == D)
+      return *this;
+
+    const auto& D2d = conn.getIncidence(D, d);
+    const auto& d20 = conn.getIncidence(d, 0);
+
+    const size_t nd = shard.getPolytopeCount(d);
+    const size_t nc = shard.getPolytopeCount(D);
+
+    if (nd == 0)
+      return *this;
+
+    // --------------------------------------------------------------------------
+    // Build cell communication stencil from the existing shard metadata.
+    // --------------------------------------------------------------------------
+    UnorderedSet<int> neighbors;
+
+    {
+      const auto& cellHalo  = shard.getHalo(D);   // owned cell -> remote ranks
+      const auto& cellOwner = shard.getOwner(D);  // ghost cell -> owner rank
+
+      for (const auto& [cell, rs] : cellHalo)
+      {
+        (void) cell;
+        for (const auto r : rs)
+          if (static_cast<int>(r) != rank)
+            neighbors.insert(static_cast<int>(r));
+      }
+
+      for (const auto& [cell, r] : cellOwner)
+      {
+        (void) cell;
+        if (static_cast<int>(r) != rank)
+          neighbors.insert(static_cast<int>(r));
+      }
+    }
+
+    // --------------------------------------------------------------------------
+    // Per-entity local classification from local cell incidences.
+    //
+    // ownedIncident[i] : entity i touches at least one owned cell
+    // ghostIncident[i] : entity i touches at least one ghost cell
+    // minGhostOwner[i] : minimum owner rank among incident ghost cells
+    // --------------------------------------------------------------------------
+    std::vector<uint8_t> ownedIncident(nd, 0);
+    std::vector<uint8_t> ghostIncident(nd, 0);
+    std::vector<int> minGhostOwner(nd, std::numeric_limits<int>::max());
+
+    for (Index cell = 0; cell < static_cast<Index>(nc); ++cell)
+    {
+      const bool owned = shard.isOwned(D, cell);
+      const bool ghost = shard.isGhost(D, cell);
+
+      int gOwner = std::numeric_limits<int>::max();
+      if (ghost)
+      {
+        const auto it = shard.getOwner(D).find(cell);
+        assert(it != shard.getOwner(D).end());
+        gOwner = static_cast<int>(it->second);
+      }
+
+      for (const Index e : D2d[cell])
+      {
+        if (owned)
+          ownedIncident[e] = 1;
+
+        if (ghost)
+        {
+          ghostIncident[e] = 1;
+          minGhostOwner[e] = std::min(minGhostOwner[e], gOwner);
+        }
+      }
+    }
+
+    // --------------------------------------------------------------------------
+    // Canonical key for each local entity of dimension d.
+    //
+    // The key is:
+    //   [ geometry_code, sorted(distributed_vertex_ids...) ]
+    //
+    // This assumes vertex distributed ids are already valid.
+    // --------------------------------------------------------------------------
+    std::vector<std::vector<Index>> keys(nd);
+    UnorderedMap<std::vector<Index>, Index> key2local;
+
+    for (Index i = 0; i < static_cast<Index>(nd); ++i)
+    {
+      const auto g = shard.getGeometry(d, i);
+      const auto& lv = d20[i];
+
+      std::vector<Index> key;
+      key.reserve(lv.size() + 1);
+      key.push_back(static_cast<Index>(g));
+
+      for (const Index localVertex : lv)
+      {
+        const Index distributedVertex = shard.getPolytopeMap(0).left.at(localVertex);
+        key.push_back(distributedVertex);
+      }
+
+      std::sort(key.begin() + 1, key.end());
+
+      keys[i] = key;
+      key2local.emplace(keys[i], i);
+    }
+
+    // --------------------------------------------------------------------------
+    // Candidate entities for distributed exchange:
+    // anything touching at least one ghost cell.
+    //
+    // Internal entities (owned-only, no ghost incidence) are purely local.
+    // --------------------------------------------------------------------------
+    std::vector<std::vector<Index>> localCandidateKeys;
+    localCandidateKeys.reserve(nd);
+
+    for (Index i = 0; i < static_cast<Index>(nd); ++i)
+    {
+      if (ghostIncident[i])
+        localCandidateKeys.push_back(keys[i]);
+    }
+
+    // Sharer sets: ranks known to contain the same distributed entity.
+    std::vector<UnorderedSet<int>> sharers(nd);
+
+    for (Index i = 0; i < static_cast<Index>(nd); ++i)
+    {
+      if (ownedIncident[i])
+        sharers[i].insert(rank);
+    }
+
+    // --------------------------------------------------------------------------
+    // Phase 1: exchange candidate keys with neighbors and discover sharers.
+    // --------------------------------------------------------------------------
+    const int tagKeys = 1000 + static_cast<int>(d);
+    {
+      std::vector<boost::mpi::request> sends;
+      sends.reserve(neighbors.size());
+
+      for (const int nbr : neighbors)
+        sends.push_back(comm.isend(nbr, tagKeys, localCandidateKeys));
+
+      for (const int nbr : neighbors)
+      {
+        std::vector<std::vector<Index>> remoteKeys;
+        comm.recv(nbr, tagKeys, remoteKeys);
+
+        for (const auto& key : remoteKeys)
+        {
+          const auto it = key2local.find(key);
+          if (it != key2local.end())
+            sharers[it->second].insert(nbr);
+        }
+      }
+
+      boost::mpi::wait_all(sends.begin(), sends.end());
+    }
+
+    // --------------------------------------------------------------------------
+    // Decide owner rank for each local entity.
+    //
+    // Rules:
+    // - internal owned-only entity: owner = self
+    // - shared entity: owner = min(sharers U ghost-cell-owners)
+    // - ghost-only entity: owner = min incident ghost-cell-owner, refined by matches
+    // --------------------------------------------------------------------------
+    std::vector<int> ownerRank(nd, std::numeric_limits<int>::max());
+
+    for (Index i = 0; i < static_cast<Index>(nd); ++i)
+    {
+      int o = std::numeric_limits<int>::max();
+
+      if (ownedIncident[i])
+        o = std::min(o, rank);
+
+      if (minGhostOwner[i] != std::numeric_limits<int>::max())
+        o = std::min(o, minGhostOwner[i]);
+
+      for (const int r : sharers[i])
+        o = std::min(o, r);
+
+      assert(o != std::numeric_limits<int>::max());
+      ownerRank[i] = o;
+    }
+
+    // --------------------------------------------------------------------------
+    // Assign distributed ids to locally owned entities.
+    //
+    // Ownership now means: ownerRank[i] == rank.
+    // --------------------------------------------------------------------------
+    std::vector<Index> distId(nd, std::numeric_limits<Index>::max());
+    std::vector<Index> locallyOwned;
+    locallyOwned.reserve(nd);
+
+    for (Index i = 0; i < static_cast<Index>(nd); ++i)
+    {
+      if (ownerRank[i] == rank)
+        locallyOwned.push_back(i);
+    }
+
+    const size_t localOwnedCount = locallyOwned.size();
+    std::vector<size_t> ownedCounts;
+    boost::mpi::all_gather(comm, localOwnedCount, ownedCounts);
+
+    size_t offset = 0;
+    for (int r = 0; r < rank; ++r)
+      offset += ownedCounts[r];
+
+    for (size_t k = 0; k < locallyOwned.size(); ++k)
+      distId[locallyOwned[k]] = static_cast<Index>(offset + k);
+
+    // --------------------------------------------------------------------------
+    // Phase 2: owners send back distributed ids to neighbors that also contain
+    // the entity.
+    // --------------------------------------------------------------------------
+    const int tagIds = 2000 + static_cast<int>(d);
+    {
+      UnorderedMap<int, std::vector<std::pair<std::vector<Index>, Index>>> sendIds;
+
+      for (Index i = 0; i < static_cast<Index>(nd); ++i)
+      {
+        if (ownerRank[i] != rank)
+          continue;
+
+        for (const int r : sharers[i])
+        {
+          if (r == rank)
+            continue;
+          sendIds[r].push_back({ keys[i], distId[i] });
+        }
+      }
+
+      std::vector<boost::mpi::request> sends;
+      sends.reserve(sendIds.size());
+
+      for (const auto& [nbr, payload] : sendIds)
+        sends.push_back(comm.isend(nbr, tagIds, payload));
+
+      for (const int nbr : neighbors)
+      {
+        std::vector<std::pair<std::vector<Index>, Index>> remoteIds;
+        comm.recv(nbr, tagIds, remoteIds);
+
+        for (const auto& [key, gid] : remoteIds)
+        {
+          const auto it = key2local.find(key);
+          if (it != key2local.end())
+          {
+            const Index i = it->second;
+            if (ownerRank[i] != rank)
+            {
+              distId[i] = gid;
+              ownerRank[i] = nbr;
+            }
+          }
+        }
+      }
+
+      boost::mpi::wait_all(sends.begin(), sends.end());
+    }
+
+    for (Index i = 0; i < static_cast<Index>(nd); ++i)
+      assert(distId[i] != std::numeric_limits<Index>::max());
+
+    // --------------------------------------------------------------------------
+    // Rewrite shard metadata for dimension d.
+    // --------------------------------------------------------------------------
+    {
+      // distributed-index map
+      auto& map = shard.getPolytopeMap(d);
+      map.left.resize(nd);
+      map.right.clear();
+      map.right.reserve(nd);
+
+      for (Index i = 0; i < static_cast<Index>(nd); ++i)
+      {
+        map.left[i] = distId[i];
+        const auto [it, inserted] = map.right.insert({ distId[i], i });
+        (void) it;
+        assert(inserted);
+      }
+
+      // flags
+      auto& flags = shard.getFlags(d);
+      flags.assign(nd, Shard::Flags::None);
+
+      // owner / halo
+      auto& owner = shard.getOwner(d);
+      auto& halo  = shard.getHalo(d);
+      owner.clear();
+      halo.clear();
+
+      for (Index i = 0; i < static_cast<Index>(nd); ++i)
+      {
+        if (ownerRank[i] == rank)
+        {
+          flags[i] = Shard::Flags::Owned;
+
+          IndexSet rs;
+          for (const int r : sharers[i])
+          {
+            if (r != rank)
+              rs.insert(static_cast<Index>(r));
+          }
+
+          if (!rs.empty())
+            halo.emplace(i, std::move(rs));
+        }
+        else
+        {
+          flags[i] = Shard::Flags::Ghost;
+          owner.emplace(i, static_cast<Index>(ownerRank[i]));
+        }
+      }
+    }
+
+    return *this;
   }
 }
 

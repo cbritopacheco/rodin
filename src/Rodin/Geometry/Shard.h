@@ -22,26 +22,26 @@ namespace Rodin::Geometry
    * The class derives from `Mesh<Context::Local>` because, once constructed,
    * a shard behaves as an ordinary local mesh for geometric and topological
    * queries. What makes it special is the additional metadata describing how
-   * its local entities relate to the global parent mesh and to neighboring
+   * its local entities relate to the global distributed mesh and to neighboring
    * partitions.
    *
-   * ## Local vs parent indices
+   * ## Local vs distributed indices
    *
    * Every entity stored in a shard has a **local shard index**. This is the
    * index used by the inherited local mesh API.
    *
-   * In addition, each shard entity corresponds to an entity of the parent mesh.
+   * In addition, each shard entity corresponds to an entity of the global mesh.
    * For every topological dimension @f$ d @f$, `Shard` stores a bidirectional map
    *
    * @f[
-   *   i_{\mathrm{local}} \leftrightarrow i_{\mathrm{parent}}
+   *   i_{\mathrm{local}} \leftrightarrow i_{\mathrm{distributed}}
    * @f]
    *
    * through `PolytopeMap`.
    *
    * Therefore:
    * - all inherited `Mesh<Context::Local>` methods use **local shard indices**,
-   * - `getPolytopeMap(d)` is used to recover the corresponding **parent index**.
+   * - `getPolytopeMap(d)` is used to recover the corresponding **distributed index**.
    *
    * ## Ownership semantics
    *
@@ -109,7 +109,7 @@ namespace Rodin::Geometry
    * In particular, a finalized shard may contain:
    * - owned entities,
    * - ghost entities,
-   * - local incidences inherited from the parent mesh and filtered to the local
+   * - local incidences inherited from the distributed mesh and filtered to the local
    *   shard content.
    *
    * Thus `Shard` is intended to be a self-consistent local mesh with overlap.
@@ -183,8 +183,8 @@ namespace Rodin::Geometry
       {
         friend class boost::serialization::access;
 
-        std::vector<Index> left;        ///< Shard index to parent index
-        UnorderedMap<Index, Index> right;    ///< Parent index to shard index
+        std::vector<Index> left;        ///< Shard index to distributed index
+        UnorderedMap<Index, Index> right;    ///< Distributed index to shard index
 
         /**
          * @brief Serialization method.
@@ -429,7 +429,7 @@ namespace Rodin::Geometry
           Optional<std::reference_wrapper<const Mesh<Context>>> m_parent;
           Mesh<Context>::Builder m_build;
           std::vector<Index> m_sidx;
-          std::vector<PolytopeMap> m_s2ps;
+          std::vector<PolytopeMap> m_s2ds;
           std::vector<std::vector<Flags>> m_flags;
           std::vector<UnorderedMap<Index, IndexSet>> m_halo;
           std::vector<UnorderedMap<Index, Index>> m_owner;
@@ -488,6 +488,8 @@ namespace Rodin::Geometry
        */
       const UnorderedMap<Index, Index>& getOwner(size_t d) const;
 
+      UnorderedMap<Index, Index>& getOwner(size_t d);
+
       /**
        * @brief Gets the halo map for a dimension.
        * @param[in] d Dimension
@@ -498,12 +500,20 @@ namespace Rodin::Geometry
        */
       const UnorderedMap<Index, IndexSet>& getHalo(size_t d) const;
 
+      UnorderedMap<Index, IndexSet>& getHalo(size_t d);
+
+      const std::vector<Flags>& getFlags(size_t d) const;
+
+      std::vector<Flags>& getFlags(size_t d);
+
       /**
        * @brief Gets the polytope index map for a dimension.
        * @param[in] d Dimension
        * @returns Bidirectional mapping between shard and parent indices
        */
       const PolytopeMap& getPolytopeMap(size_t d) const;
+
+      PolytopeMap& getPolytopeMap(size_t d);
 
       /**
        * @brief Serialization method for Boost.Serialization.
@@ -515,14 +525,14 @@ namespace Rodin::Geometry
       void serialize(Archive& ar, const unsigned int version)
       {
         ar & boost::serialization::base_object<Mesh<Context>>(*this);
-        ar & m_s2ps;
+        ar & m_s2ds;
         ar & m_flags;
         ar & m_owner;
         ar & m_halo;
       }
 
     private:
-      std::vector<PolytopeMap> m_s2ps;                  ///< Index mappings per dimension
+      std::vector<PolytopeMap> m_s2ds;                  ///< Index mappings per dimension
       std::vector<std::vector<Flags>> m_flags;          ///< Ownership flags per dimension
       std::vector<UnorderedMap<Index, Index>> m_owner;       ///< Ghost to owner process map
       std::vector<UnorderedMap<Index, IndexSet>> m_halo;     ///< Owned to needing processes map

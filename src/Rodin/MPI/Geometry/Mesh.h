@@ -19,7 +19,6 @@
 
 #include "Rodin/MPI/Context/MPI.h"
 
-#include "Connectivity.h"
 #include "Rodin/Math/SpatialVector.h"
 
 namespace Rodin::Geometry
@@ -650,15 +649,44 @@ namespace Rodin::Geometry
         throw std::runtime_error("asSubMesh() not implemented");
       }
 
-      Connectivity<Context::MPI>& getConnectivity() override
-      {
-        throw std::runtime_error("getConnectivity() not implemented");
-      }
+      Connectivity<Context::Local>& getConnectivity() override;
 
-      const Connectivity<Context::MPI>& getConnectivity() const override
-      {
-        throw std::runtime_error("getConnectivity() not implemented");
-      }
+      const Connectivity<Context::Local>& getConnectivity() const override;
+
+      /**
+       * @brief Reconciles entities of dimension @p d across MPI ranks.
+       *
+       * After a local connectivity computation, entities of dimension @p d
+       * discovered independently on neighboring shards may not yet have
+       * consistent distributed indices or ownership. This method resolves that
+       * inconsistency.
+       *
+       * The reconciliation step:
+       * - identifies entities shared across ranks,
+       * - assigns a unique distributed index,
+       * - determines a unique owner rank,
+       * - updates shard metadata (ownership flags, owner and halo maps, and
+       *   shard-to-distributed index mapping).
+       *
+       * This method is typically called after local connectivity discovery:
+       *
+       * @code{.cpp}
+       * mesh.getConnectivity().compute(d, dp);
+       * mesh.reconcile(d);
+       * @endcode
+       *
+       * Shared entities are identified through their vertex sets, therefore
+       * vertices must already have consistent distributed indices.
+       *
+       * Communication is restricted to neighboring ranks that may share
+       * entities of dimension @p d. Interior entities remain purely local.
+       *
+       * Only shard metadata is modified; the local mesh topology is unchanged.
+       *
+       * @param[in] d Topological dimension of the entities to reconcile.
+       * @return Reference to the mesh.
+       */
+      Mesh& reconcile(size_t d);
 
     private:
       Context::MPI m_context;
