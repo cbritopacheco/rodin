@@ -482,6 +482,8 @@ namespace Rodin::Geometry
     const int rank = comm.rank();
     const size_t D = shard.getDimension();
 
+    comm.barrier();
+
     assert(d <= D);
 
     // Vertices and cells are assumed to have already been reconciled by sharding.

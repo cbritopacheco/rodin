@@ -305,7 +305,11 @@ namespace Rodin::Variational
        */
       const IndexArray& getDOFs(size_t d, Index i) const override
       {
-        return getMesh().getConnectivity().getPolytope(d, i);
+        static thread_local IndexArray s_dofs;
+        const auto& key = getMesh().getConnectivity().getPolytope(d, i);
+        s_dofs.resize(key.size());
+        std::copy(key.begin(), key.end(), s_dofs.begin());
+        return s_dofs;
       }
 
       /**

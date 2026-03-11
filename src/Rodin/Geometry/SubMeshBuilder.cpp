@@ -47,7 +47,7 @@ namespace Rodin::Geometry
 
     for (size_t i = 0; i < static_cast<size_t>(childPolytope.size()); ++i)
     {
-      const Index pv = parentPolytope.coeff(i);
+      const Index pv = parentPolytope(i);
 
       // Vertex map check (same idea can be optimized further; see section 2)
       auto [vit, vinserted] = m_s2ps[0].right.insert(std::pair<Index, Index>{ pv, m_sidx[0] });

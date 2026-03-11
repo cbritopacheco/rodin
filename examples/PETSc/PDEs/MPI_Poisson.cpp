@@ -38,7 +38,7 @@ int main(int argc, char** argv)
   if (world.rank() == ROOT_RANK)
   {
     Geometry::LocalMesh mesh;
-    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Tetrahedron, { 64, 64, 64 });
+    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Tetrahedron, { 32, 32, 32 });
     Alert::Info() << "Number of cells in the mesh: " << mesh.getCellCount() << Alert::Raise;
     Alert::Info() << "Number of vertices in the mesh: " << mesh.getVertexCount() << Alert::Raise;
     mesh.scale(1.0 / 63.0);
@@ -46,7 +46,6 @@ int main(int argc, char** argv)
     auto t0 = std::chrono::high_resolution_clock::now();
     const size_t cellDim = mesh.getDimension();
     mesh.getConnectivity().compute(cellDim, cellDim);
-    mesh.getConnectivity().compute(cellDim - 1, cellDim);
     auto t1 = std::chrono::high_resolution_clock::now();
 
     Alert::Success() << "Computed mesh connectivity in "
@@ -92,6 +91,15 @@ int main(int argc, char** argv)
   if (world.rank() == ROOT_RANK)
     Alert::Info() << "Saving mesh to " << "mesh.xxxxxx" << "." << Alert::Raise;
   mesh.save(filename);
+
+  if (world.rank() == ROOT_RANK)
+    Alert::Info() << "Computing mesh connectivity..." << Alert::Raise;
+  mesh.getConnectivity().compute(2, 3);
+
+  if (world.rank() == ROOT_RANK)
+    Alert::Info() << "Reconciling." << Alert::Raise;
+  mesh.reconcile(2);
+
   if (world.rank() == ROOT_RANK)
     Alert::Success() << "Saved mesh to " << "mesh.xxxxxx" << "." << Alert::Raise;
 
@@ -143,6 +151,7 @@ int main(int argc, char** argv)
     u.getSolution().save(filename);
   }
 
+  (void) ierr;
   PetscFinalize();
 }
 

@@ -119,6 +119,8 @@ namespace Rodin::Geometry
    */
   class MeshBase;
 
+  class ConnectivityBase;
+
   /**
    * @brief Template for connectivity information.
    * @tparam ContextType Context type (Local, MPI, etc.)

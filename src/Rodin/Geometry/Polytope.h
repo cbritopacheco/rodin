@@ -61,12 +61,92 @@ namespace Rodin::Geometry
    *             << " has measure " << cell.getMeasure() << std::endl;
    * }
    * @endcode
-   *
+   *S 
    * @see Cell, Face, Vertex, PolytopeIterator
    */
   class Polytope
   {
     public:
+      class Key
+      {
+        public:
+          using Vertices = std::array<Index, RODIN_MAXIMUM_POLYTOPE_VERTICES>;
+          static_assert(RODIN_MAXIMUM_POLYTOPE_VERTICES == 8);
+
+          using iterator = Vertices::iterator;
+          using const_iterator = Vertices::const_iterator;
+          using value_type = Index;
+          using reference = Index&;
+          using const_reference = const Index&;
+          using size_type = std::uint8_t;
+
+          struct SymmetricEquality
+          {
+            bool operator()(const Key& a, const Key& b) const;
+          };
+
+          struct SymmetricHash
+          {
+            std::size_t operator()(const Key& poly) const;
+          };
+
+          constexpr
+          static inline std::uint64_t sm64(std::uint64_t x)
+          {
+            x += 0x9e3779b97f4a7c15ull;
+            x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ull;
+            x = (x ^ (x >> 27)) * 0x94d049bb133111ebull;
+            x ^= (x >> 31);
+            return x;
+          }
+
+          constexpr
+          static inline void cswap(Index& a, Index& b)
+          {
+            if (b < a)
+              std::swap(a, b);
+          }
+
+          Key();
+
+          Key(std::uint8_t n);
+
+          Key(std::initializer_list<Index> vertices);
+
+          Index& operator()(std::uint8_t i);
+
+          const Index& operator()(std::uint8_t i) const;
+
+          Index& operator[](std::uint8_t i);
+
+          const Index& operator[](std::uint8_t i) const;
+
+          Key& resize(std::uint8_t n);
+
+          std::uint8_t size() const;
+
+          const Vertices& getVertices() const;
+
+          Vertices::iterator begin();
+
+          Vertices::iterator end();
+
+          Vertices::const_iterator begin() const;
+
+          Vertices::const_iterator end() const;
+
+          template <class Archive>
+          void serialize(Archive& ar, const unsigned int)
+          {
+            ar & m_n;
+            ar & m_vertices;
+          }
+
+        private:
+          std::uint8_t m_n;
+          Vertices m_vertices;
+      };
+
       /**
        * @brief Enumeration of supported polytope geometries.
        *
@@ -346,7 +426,7 @@ namespace Rodin::Geometry
        * @brief Gets the vertex indices defining this polytope.
        * @returns Array of vertex indices
        */
-      const Array<Index>& getVertices() const;
+      const Key& getVertices() const;
 
       /**
        * @brief Gets an iterator over polytopes adjacent to this one.

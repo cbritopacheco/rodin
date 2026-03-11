@@ -2,6 +2,7 @@
 
 #include "Rodin/Configure.h"
 
+#include "Rodin/Geometry/Connectivity.h"
 #include "Rodin/Math/SpatialVector.h"
 #include "Rodin/QF/GenericPolytopeQuadrature.h"
 
@@ -12,6 +13,626 @@
 
 namespace Rodin::Geometry
 {
+  Polytope::Key::Key()
+    : m_n(0)
+  {}
+
+  Polytope::Key::Key(std::uint8_t n)
+    : m_n(n)
+  {
+    assert(n <= RODIN_MAXIMUM_POLYTOPE_VERTICES);
+  }
+
+  Polytope::Key::Key(std::initializer_list<Index> vertices)
+    : m_n(vertices.size())
+  {
+    assert(vertices.size() <= RODIN_MAXIMUM_POLYTOPE_VERTICES);
+    std::copy(vertices.begin(), vertices.end(), m_vertices.begin());
+  }
+
+  Polytope::Key& Polytope::Key::resize(std::uint8_t n)
+  {
+    assert(n <= RODIN_MAXIMUM_POLYTOPE_VERTICES);
+    m_n = n;
+    return *this;
+  }
+
+  const Index& Polytope::Key::operator()(std::uint8_t i) const
+  {
+    assert(i < m_n);
+    return m_vertices[i];
+  }
+
+  Index& Polytope::Key::operator()(std::uint8_t i)
+  {
+    assert(i < m_n);
+    return m_vertices[i];
+  }
+
+  const Index& Polytope::Key::operator[](std::uint8_t i) const
+  {
+    assert(i < m_n);
+    return m_vertices[i];
+  }
+
+  Index& Polytope::Key::operator[](std::uint8_t i)
+  {
+    assert(i < m_n);
+    return m_vertices[i];
+  }
+
+  std::uint8_t Polytope::Key::size() const
+  {
+    return m_n;
+  }
+
+  const Polytope::Key::Vertices&
+  Polytope::Key::getVertices() const
+  {
+    return m_vertices;
+  }
+
+  Polytope::Key::Vertices::iterator
+  Polytope::Key::begin()
+  {
+    return m_vertices.begin();
+  }
+
+  Polytope::Key::Vertices::iterator
+  Polytope::Key::end()
+  {
+    return m_vertices.begin() + m_n;
+  }
+
+  Polytope::Key::Vertices::const_iterator
+  Polytope::Key::begin() const
+  {
+    return m_vertices.begin();
+  }
+
+  Polytope::Key::Vertices::const_iterator
+  Polytope::Key::end() const
+  {
+    return m_vertices.begin() + m_n;
+  }
+
+  bool Polytope::Key::SymmetricEquality::operator()(const Key& a, const Key& b) const
+  {
+    if (a.m_n != b.m_n)
+      return false;
+
+    switch (a.m_n)
+    {
+      case 0:
+        return true;
+
+      case 1:
+      {
+        return a.m_vertices[0] == b.m_vertices[0];
+      }
+
+      case 2:
+      {
+        Index a0 = a.m_vertices[0];
+        Index a1 = a.m_vertices[1];
+        Index b0 = b.m_vertices[0];
+        Index b1 = b.m_vertices[1];
+
+        cswap(a0, a1);
+        cswap(b0, b1);
+
+        return a0 == b0
+            && a1 == b1;
+      }
+
+      case 3:
+      {
+        Index a0 = a.m_vertices[0];
+        Index a1 = a.m_vertices[1];
+        Index a2 = a.m_vertices[2];
+
+        Index b0 = b.m_vertices[0];
+        Index b1 = b.m_vertices[1];
+        Index b2 = b.m_vertices[2];
+
+        cswap(a0, a1);
+        cswap(a1, a2);
+        cswap(a0, a1);
+
+        cswap(b0, b1);
+        cswap(b1, b2);
+        cswap(b0, b1);
+
+        return a0 == b0
+            && a1 == b1
+            && a2 == b2;
+      }
+
+      case 4:
+      {
+        Index a0 = a.m_vertices[0];
+        Index a1 = a.m_vertices[1];
+        Index a2 = a.m_vertices[2];
+        Index a3 = a.m_vertices[3];
+
+        Index b0 = b.m_vertices[0];
+        Index b1 = b.m_vertices[1];
+        Index b2 = b.m_vertices[2];
+        Index b3 = b.m_vertices[3];
+
+        cswap(a0, a1);
+        cswap(a2, a3);
+        cswap(a0, a2);
+        cswap(a1, a3);
+        cswap(a1, a2);
+
+        cswap(b0, b1);
+        cswap(b2, b3);
+        cswap(b0, b2);
+        cswap(b1, b3);
+        cswap(b1, b2);
+
+        return a0 == b0
+            && a1 == b1
+            && a2 == b2
+            && a3 == b3;
+      }
+
+      case 5:
+      {
+        Index a0 = a.m_vertices[0];
+        Index a1 = a.m_vertices[1];
+        Index a2 = a.m_vertices[2];
+        Index a3 = a.m_vertices[3];
+        Index a4 = a.m_vertices[4];
+
+        Index b0 = b.m_vertices[0];
+        Index b1 = b.m_vertices[1];
+        Index b2 = b.m_vertices[2];
+        Index b3 = b.m_vertices[3];
+        Index b4 = b.m_vertices[4];
+
+        cswap(a0, a1);
+        cswap(a3, a4);
+        cswap(a2, a4);
+        cswap(a2, a3);
+        cswap(a1, a4);
+        cswap(a0, a3);
+        cswap(a0, a2);
+        cswap(a1, a3);
+        cswap(a1, a2);
+
+        cswap(b0, b1);
+        cswap(b3, b4);
+        cswap(b2, b4);
+        cswap(b2, b3);
+        cswap(b1, b4);
+        cswap(b0, b3);
+        cswap(b0, b2);
+        cswap(b1, b3);
+        cswap(b1, b2);
+
+        return a0 == b0
+            && a1 == b1
+            && a2 == b2
+            && a3 == b3
+            && a4 == b4;
+      }
+
+      case 6:
+      {
+        Index a0 = a.m_vertices[0];
+        Index a1 = a.m_vertices[1];
+        Index a2 = a.m_vertices[2];
+        Index a3 = a.m_vertices[3];
+        Index a4 = a.m_vertices[4];
+        Index a5 = a.m_vertices[5];
+
+        Index b0 = b.m_vertices[0];
+        Index b1 = b.m_vertices[1];
+        Index b2 = b.m_vertices[2];
+        Index b3 = b.m_vertices[3];
+        Index b4 = b.m_vertices[4];
+        Index b5 = b.m_vertices[5];
+
+        cswap(a1, a2);
+        cswap(a4, a5);
+        cswap(a0, a2);
+        cswap(a3, a5);
+        cswap(a0, a1);
+        cswap(a3, a4);
+        cswap(a2, a5);
+        cswap(a0, a3);
+        cswap(a1, a4);
+        cswap(a2, a4);
+        cswap(a1, a3);
+        cswap(a2, a3);
+
+        cswap(b1, b2);
+        cswap(b4, b5);
+        cswap(b0, b2);
+        cswap(b3, b5);
+        cswap(b0, b1);
+        cswap(b3, b4);
+        cswap(b2, b5);
+        cswap(b0, b3);
+        cswap(b1, b4);
+        cswap(b2, b4);
+        cswap(b1, b3);
+        cswap(b2, b3);
+
+        return a0 == b0
+            && a1 == b1
+            && a2 == b2
+            && a3 == b3
+            && a4 == b4
+            && a5 == b5;
+      }
+
+      case 7:
+      {
+        Index a0 = a.m_vertices[0];
+        Index a1 = a.m_vertices[1];
+        Index a2 = a.m_vertices[2];
+        Index a3 = a.m_vertices[3];
+        Index a4 = a.m_vertices[4];
+        Index a5 = a.m_vertices[5];
+        Index a6 = a.m_vertices[6];
+
+        Index b0 = b.m_vertices[0];
+        Index b1 = b.m_vertices[1];
+        Index b2 = b.m_vertices[2];
+        Index b3 = b.m_vertices[3];
+        Index b4 = b.m_vertices[4];
+        Index b5 = b.m_vertices[5];
+        Index b6 = b.m_vertices[6];
+
+        cswap(a1, a2);
+        cswap(a4, a5);
+        cswap(a0, a2);
+        cswap(a3, a5);
+        cswap(a0, a1);
+        cswap(a3, a4);
+        cswap(a2, a5);
+        cswap(a0, a3);
+        cswap(a1, a4);
+        cswap(a2, a4);
+        cswap(a1, a3);
+        cswap(a2, a3);
+        cswap(a5, a6);
+        cswap(a4, a5);
+        cswap(a3, a4);
+        cswap(a2, a3);
+        cswap(a1, a2);
+        cswap(a0, a1);
+
+        cswap(b1, b2);
+        cswap(b4, b5);
+        cswap(b0, b2);
+        cswap(b3, b5);
+        cswap(b0, b1);
+        cswap(b3, b4);
+        cswap(b2, b5);
+        cswap(b0, b3);
+        cswap(b1, b4);
+        cswap(b2, b4);
+        cswap(b1, b3);
+        cswap(b2, b3);
+        cswap(b5, b6);
+        cswap(b4, b5);
+        cswap(b3, b4);
+        cswap(b2, b3);
+        cswap(b1, b2);
+        cswap(b0, b1);
+
+        return a0 == b0
+            && a1 == b1
+            && a2 == b2
+            && a3 == b3
+            && a4 == b4
+            && a5 == b5
+            && a6 == b6;
+      }
+
+      case 8:
+      {
+        Index a0 = a.m_vertices[0];
+        Index a1 = a.m_vertices[1];
+        Index a2 = a.m_vertices[2];
+        Index a3 = a.m_vertices[3];
+        Index a4 = a.m_vertices[4];
+        Index a5 = a.m_vertices[5];
+        Index a6 = a.m_vertices[6];
+        Index a7 = a.m_vertices[7];
+
+        Index b0 = b.m_vertices[0];
+        Index b1 = b.m_vertices[1];
+        Index b2 = b.m_vertices[2];
+        Index b3 = b.m_vertices[3];
+        Index b4 = b.m_vertices[4];
+        Index b5 = b.m_vertices[5];
+        Index b6 = b.m_vertices[6];
+        Index b7 = b.m_vertices[7];
+
+        cswap(a0, a1);
+        cswap(a2, a3);
+        cswap(a4, a5);
+        cswap(a6, a7);
+        cswap(a0, a2);
+        cswap(a1, a3);
+        cswap(a4, a6);
+        cswap(a5, a7);
+        cswap(a1, a2);
+        cswap(a5, a6);
+        cswap(a0, a4);
+        cswap(a1, a5);
+        cswap(a2, a6);
+        cswap(a3, a7);
+        cswap(a2, a4);
+        cswap(a3, a5);
+        cswap(a1, a2);
+        cswap(a3, a4);
+        cswap(a5, a6);
+
+        cswap(b0, b1);
+        cswap(b2, b3);
+        cswap(b4, b5);
+        cswap(b6, b7);
+        cswap(b0, b2);
+        cswap(b1, b3);
+        cswap(b4, b6);
+        cswap(b5, b7);
+        cswap(b1, b2);
+        cswap(b5, b6);
+        cswap(b0, b4);
+        cswap(b1, b5);
+        cswap(b2, b6);
+        cswap(b3, b7);
+        cswap(b2, b4);
+        cswap(b3, b5);
+        cswap(b1, b2);
+        cswap(b3, b4);
+        cswap(b5, b6);
+
+        return a0 == b0
+            && a1 == b1
+            && a2 == b2
+            && a3 == b3
+            && a4 == b4
+            && a5 == b5
+            && a6 == b6
+            && a7 == b7;
+      }
+    }
+
+    return false;
+  }
+
+  std::size_t Polytope::Key::SymmetricHash::operator()(
+      const Key& key) const
+  {
+    using U64 = std::uint64_t;
+
+    switch (key.m_n)
+    {
+      case 0:
+      {
+        return static_cast<std::size_t>(sm64(0x6eed0e9da4d94a4full));
+      }
+
+      case 1:
+      {
+        const U64 x0 = static_cast<U64>(key.m_vertices[0]);
+
+        U64 h = 0x243f6a8885a308d3ull;
+        h ^= sm64(0x01ull);
+        h ^= sm64(x0 + 0x9e3779b97f4a7c15ull);
+        return static_cast<std::size_t>(sm64(h));
+      }
+
+      case 2:
+      {
+        Index x0 = key.m_vertices[0];
+        Index x1 = key.m_vertices[1];
+        cswap(x0, x1);
+
+        U64 h = 0x243f6a8885a308d3ull;
+        h ^= sm64(0x02ull);
+        h ^= sm64(static_cast<U64>(x0) + 0x9e3779b97f4a7c15ull);
+        h ^= sm64(static_cast<U64>(x1) + 0xbf58476d1ce4e5b9ull);
+        return static_cast<std::size_t>(sm64(h));
+      }
+
+      case 3:
+      {
+        Index x0 = key.m_vertices[0];
+        Index x1 = key.m_vertices[1];
+        Index x2 = key.m_vertices[2];
+
+        cswap(x0, x1);
+        cswap(x1, x2);
+        cswap(x0, x1);
+
+        U64 h = 0x243f6a8885a308d3ull;
+        h ^= sm64(0x03ull);
+        h ^= sm64(static_cast<U64>(x0) + 0x9e3779b97f4a7c15ull);
+        h ^= sm64(static_cast<U64>(x1) + 0xbf58476d1ce4e5b9ull);
+        h ^= sm64(static_cast<U64>(x2) + 0x94d049bb133111ebull);
+        return static_cast<std::size_t>(sm64(h));
+      }
+
+      case 4:
+      {
+        Index x0 = key.m_vertices[0];
+        Index x1 = key.m_vertices[1];
+        Index x2 = key.m_vertices[2];
+        Index x3 = key.m_vertices[3];
+
+        cswap(x0, x1);
+        cswap(x2, x3);
+        cswap(x0, x2);
+        cswap(x1, x3);
+        cswap(x1, x2);
+
+        U64 h = 0x243f6a8885a308d3ull;
+        h ^= sm64(0x04ull);
+        h ^= sm64(static_cast<U64>(x0) + 0x9e3779b97f4a7c15ull);
+        h ^= sm64(static_cast<U64>(x1) + 0xbf58476d1ce4e5b9ull);
+        h ^= sm64(static_cast<U64>(x2) + 0x94d049bb133111ebull);
+        h ^= sm64(static_cast<U64>(x3) + 0xd6e8feb86659fd93ull);
+        return static_cast<std::size_t>(sm64(h));
+      }
+
+      case 5:
+      {
+        Index x0 = key.m_vertices[0];
+        Index x1 = key.m_vertices[1];
+        Index x2 = key.m_vertices[2];
+        Index x3 = key.m_vertices[3];
+        Index x4 = key.m_vertices[4];
+
+        cswap(x0, x1);
+        cswap(x3, x4);
+        cswap(x2, x4);
+        cswap(x2, x3);
+        cswap(x1, x4);
+        cswap(x0, x3);
+        cswap(x0, x2);
+        cswap(x1, x3);
+        cswap(x1, x2);
+
+        U64 h = 0x243f6a8885a308d3ull;
+        h ^= sm64(0x05ull);
+        h ^= sm64(static_cast<U64>(x0) + 0x9e3779b97f4a7c15ull);
+        h ^= sm64(static_cast<U64>(x1) + 0xbf58476d1ce4e5b9ull);
+        h ^= sm64(static_cast<U64>(x2) + 0x94d049bb133111ebull);
+        h ^= sm64(static_cast<U64>(x3) + 0xd6e8feb86659fd93ull);
+        h ^= sm64(static_cast<U64>(x4) + 0xa0761d6478bd642full);
+        return static_cast<std::size_t>(sm64(h));
+      }
+
+      case 6:
+      {
+        Index x0 = key.m_vertices[0];
+        Index x1 = key.m_vertices[1];
+        Index x2 = key.m_vertices[2];
+        Index x3 = key.m_vertices[3];
+        Index x4 = key.m_vertices[4];
+        Index x5 = key.m_vertices[5];
+
+        cswap(x1, x2);
+        cswap(x4, x5);
+        cswap(x0, x2);
+        cswap(x3, x5);
+        cswap(x0, x1);
+        cswap(x3, x4);
+        cswap(x2, x5);
+        cswap(x0, x3);
+        cswap(x1, x4);
+        cswap(x2, x4);
+        cswap(x1, x3);
+        cswap(x2, x3);
+
+        U64 h = 0x243f6a8885a308d3ull;
+        h ^= sm64(0x06ull);
+        h ^= sm64(static_cast<U64>(x0) + 0x9e3779b97f4a7c15ull);
+        h ^= sm64(static_cast<U64>(x1) + 0xbf58476d1ce4e5b9ull);
+        h ^= sm64(static_cast<U64>(x2) + 0x94d049bb133111ebull);
+        h ^= sm64(static_cast<U64>(x3) + 0xd6e8feb86659fd93ull);
+        h ^= sm64(static_cast<U64>(x4) + 0xa0761d6478bd642full);
+        h ^= sm64(static_cast<U64>(x5) + 0xe7037ed1a0b428dbull);
+        return static_cast<std::size_t>(sm64(h));
+      }
+
+      case 7:
+      {
+        Index x0 = key.m_vertices[0];
+        Index x1 = key.m_vertices[1];
+        Index x2 = key.m_vertices[2];
+        Index x3 = key.m_vertices[3];
+        Index x4 = key.m_vertices[4];
+        Index x5 = key.m_vertices[5];
+        Index x6 = key.m_vertices[6];
+
+        cswap(x1, x2);
+        cswap(x4, x5);
+        cswap(x0, x2);
+        cswap(x3, x5);
+        cswap(x0, x1);
+        cswap(x3, x4);
+        cswap(x2, x5);
+        cswap(x0, x3);
+        cswap(x1, x4);
+        cswap(x2, x4);
+        cswap(x1, x3);
+        cswap(x2, x3);
+        cswap(x5, x6);
+        cswap(x4, x5);
+        cswap(x3, x4);
+        cswap(x2, x3);
+        cswap(x1, x2);
+        cswap(x0, x1);
+
+        U64 h = 0x243f6a8885a308d3ull;
+        h ^= sm64(0x07ull);
+        h ^= sm64(static_cast<U64>(x0) + 0x9e3779b97f4a7c15ull);
+        h ^= sm64(static_cast<U64>(x1) + 0xbf58476d1ce4e5b9ull);
+        h ^= sm64(static_cast<U64>(x2) + 0x94d049bb133111ebull);
+        h ^= sm64(static_cast<U64>(x3) + 0xd6e8feb86659fd93ull);
+        h ^= sm64(static_cast<U64>(x4) + 0xa0761d6478bd642full);
+        h ^= sm64(static_cast<U64>(x5) + 0xe7037ed1a0b428dbull);
+        h ^= sm64(static_cast<U64>(x6) + 0x8ebc6af09c88c6e3ull);
+        return static_cast<std::size_t>(sm64(h));
+      }
+
+      case 8:
+      {
+        Index x0 = key.m_vertices[0];
+        Index x1 = key.m_vertices[1];
+        Index x2 = key.m_vertices[2];
+        Index x3 = key.m_vertices[3];
+        Index x4 = key.m_vertices[4];
+        Index x5 = key.m_vertices[5];
+        Index x6 = key.m_vertices[6];
+        Index x7 = key.m_vertices[7];
+
+        cswap(x0, x1);
+        cswap(x2, x3);
+        cswap(x4, x5);
+        cswap(x6, x7);
+        cswap(x0, x2);
+        cswap(x1, x3);
+        cswap(x4, x6);
+        cswap(x5, x7);
+        cswap(x1, x2);
+        cswap(x5, x6);
+        cswap(x0, x4);
+        cswap(x1, x5);
+        cswap(x2, x6);
+        cswap(x3, x7);
+        cswap(x2, x4);
+        cswap(x3, x5);
+        cswap(x1, x2);
+        cswap(x3, x4);
+        cswap(x5, x6);
+
+        U64 h = 0x243f6a8885a308d3ull;
+        h ^= sm64(0x08ull);
+        h ^= sm64(static_cast<U64>(x0) + 0x9e3779b97f4a7c15ull);
+        h ^= sm64(static_cast<U64>(x1) + 0xbf58476d1ce4e5b9ull);
+        h ^= sm64(static_cast<U64>(x2) + 0x94d049bb133111ebull);
+        h ^= sm64(static_cast<U64>(x3) + 0xd6e8feb86659fd93ull);
+        h ^= sm64(static_cast<U64>(x4) + 0xa0761d6478bd642full);
+        h ^= sm64(static_cast<U64>(x5) + 0xe7037ed1a0b428dbull);
+        h ^= sm64(static_cast<U64>(x6) + 0x8ebc6af09c88c6e3ull);
+        h ^= sm64(static_cast<U64>(x7) + 0x589965cc75374cc3ull);
+        return static_cast<std::size_t>(sm64(h));
+      }
+    }
+
+    return 0;
+  }
+
   Polytope::Traits::Traits(Type g)
     : m_g(g)
   {}
@@ -422,7 +1043,7 @@ namespace Rodin::Geometry
         this->getMesh(), IteratorIndexGenerator(vertices.begin(), vertices.end()));
   }
 
-  const Array<Index>& Polytope::getVertices() const
+  const Polytope::Key& Polytope::getVertices() const
   {
     return m_mesh.get().getConnectivity().getPolytope(getDimension(), getIndex());
   }

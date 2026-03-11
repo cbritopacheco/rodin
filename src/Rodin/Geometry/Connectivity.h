@@ -26,9 +26,10 @@
 
 #include "ForwardDecls.h"
 
-#include "Types.h"
 #include "Polytope.h"
 #include "GeometryIndexed.h"
+
+#include "Types.h"
 
 namespace Rodin::Geometry
 {
@@ -55,7 +56,7 @@ namespace Rodin::Geometry
        * @param[in] idx Index of the polytope
        * @returns Array of vertex indices
        */
-      virtual const Array<Index>& getPolytope(size_t d, Index idx) const = 0;
+      virtual const Polytope::Key& getPolytope(size_t d, Index idx) const = 0;
 
       /**
        * @brief Gets the count of polytopes in a dimension.
@@ -283,8 +284,8 @@ namespace Rodin::Geometry
         friend class boost::serialization::access;
 
         public:
-          std::vector<const IndexArray*> left;  ///< Index to vertex array mapping
-          UnorderedMap<IndexArray, Index, IndexArraySymmetricHash, IndexArraySymmetricEquality> right;  ///< Vertex array to index mapping
+          std::vector<const Polytope::Key*> left;  ///< Index to vertex array mapping
+          UnorderedMap<Polytope::Key, Index, Polytope::Key::SymmetricHash, Polytope::Key::SymmetricEquality> right;  ///< Vertex array to index mapping
 
           /**
            * @brief Serialization save method.
@@ -294,9 +295,9 @@ namespace Rodin::Geometry
           void save(Archive& ar, const unsigned int /*version*/) const
           {
             ar & right;
-            std::vector<IndexArray> left_keys;
+            std::vector<Polytope::Key> left_keys;
             left_keys.reserve(left.size());
-            for (const IndexArray* p : left)
+            for (const Polytope::Key* p : left)
               left_keys.push_back(*p);
             ar & left_keys;
           }
@@ -309,7 +310,7 @@ namespace Rodin::Geometry
           void load(Archive& ar, const unsigned int /*version*/)
           {
             ar & right;
-            std::vector<IndexArray> left_keys;
+            std::vector<Polytope::Key> left_keys;
             ar & left_keys;
             left.clear();
             left.reserve(left_keys.size());
@@ -330,7 +331,7 @@ namespace Rodin::Geometry
       struct SubPolytope
       {
         Polytope::Type geometry;  ///< Geometry type of the sub-polytope
-        Array<Index> vertices;    ///< Vertex indices defining the sub-polytope
+        Polytope::Key vertices;    ///< Vertex indices defining the sub-polytope
       };
 
       /**
@@ -403,9 +404,16 @@ namespace Rodin::Geometry
       Connectivity& polytope(
           Geometry::Polytope::Type t, std::initializer_list<Index> p)
       {
-        Array<Index> arr(p.size());
-        std::copy(p.begin(), p.end(), arr.begin());
-        return polytope(t, std::move(arr));
+        return this->polytope(t, Polytope::Key(p));
+      }
+
+      Connectivity& polytope(
+          Geometry::Polytope::Type t, const IndexArray& polytope)
+      {
+        assert(polytope.size() <= RODIN_MAXIMUM_POLYTOPE_VERTICES);
+        Polytope::Key key(polytope.size());
+        std::copy(polytope.begin(), polytope.end(), key.begin());
+        return this->polytope(t, std::move(key));
       }
 
       /**
@@ -415,10 +423,10 @@ namespace Rodin::Geometry
        * @returns Reference to this object for method chaining
        */
       Connectivity& polytope(
-          Geometry::Polytope::Type t, const Array<Index>& polytope);
+          Geometry::Polytope::Type t, const Polytope::Key& polytope);
 
       Connectivity& polytope(
-          Geometry::Polytope::Type t, Array<Index>&& polytope);
+          Geometry::Polytope::Type t, Polytope::Key&& polytope);
 
       /**
        * @brief Computes the entities of dimension @f$ d @f$ of each cell and
@@ -545,7 +553,7 @@ namespace Rodin::Geometry
        * @param[in] key Array of vertex indices defining the polytope
        * @returns Optional index if found, empty otherwise
        */
-      const Optional<Index> getIndex(size_t dim, const IndexArray& key) const;
+      const Optional<Index> getIndex(size_t dim, const Polytope::Key& key) const;
 
       /**
        * @brief Sets the incidence relation for a dimension pair.
@@ -563,7 +571,7 @@ namespace Rodin::Geometry
 
       Polytope::Type getGeometry(size_t d, Index idx) const override;
 
-      const Array<Index>& getPolytope(size_t d, Index idx) const override;
+      const Polytope::Key& getPolytope(size_t d, Index idx) const override;
 
       const Incidence& getIncidence(size_t d, size_t dp) const override;
 
@@ -573,6 +581,7 @@ namespace Rodin::Geometry
       void serialize(Archive& ar, const unsigned int version)
       {
         ar & m_maximalDimension;
+        ar & m_dimension;
         ar & m_count;
         ar & m_gcount;
         ar & m_index;
@@ -583,6 +592,7 @@ namespace Rodin::Geometry
 
     private:
       size_t m_maximalDimension;
+      size_t m_dimension;
       std::vector<size_t> m_count;
       GeometryIndexed<size_t> m_gcount;
       std::vector<PolytopeIndex> m_index;

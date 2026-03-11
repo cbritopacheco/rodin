@@ -104,7 +104,7 @@ namespace Rodin::Geometry
         m_sidx[d] += 1;
         for (size_t i = 0; i < static_cast<size_t>(childPolytope.size()); i++)
         {
-          const Index parentVertex = parentPolytope.coeff(i);
+          const Index parentVertex = parentPolytope(i);
           const auto find = m_s2ds[0].right.find(parentVertex);
           if (find != m_s2ds[0].right.end()) // Vertex is in the map
           {
