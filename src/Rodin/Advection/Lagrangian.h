@@ -137,7 +137,8 @@ namespace Rodin::Advection
         const Index  c   = hit.cell;
 
         const auto g   = mesh.getGeometry(cd, c);
-        const auto& hs = Geometry::Polytope::Traits(g).getHalfSpace();
+        Geometry::Polytope::Traits ts(g);
+        const auto& hs = ts.getHalfSpace();
 
         const size_t j = hit.face;
         if (j >= static_cast<size_t>(hs.vector.size()))
@@ -178,7 +179,7 @@ namespace Rodin::Advection
 
         // Orient nhat so the cell centroid is on the "interior" side:
         // interior condition: (nhat·x_face - nhat·x_centroid) >= 0
-        const auto rcent = Geometry::Polytope::Traits(g).getCentroid();
+        const auto& rcent = ts.getCentroid();
         Math::SpatialPoint xc;
         mesh.getPolytopeTransformation(cd, c).transform(xc, rcent);
 
@@ -293,7 +294,8 @@ namespace Rodin::Advection
         const Index  c   = hit.cell;
 
         const auto g   = mesh.getGeometry(cd, c);
-        const auto& hs = Geometry::Polytope::Traits(g).getHalfSpace();
+        Geometry::Polytope::Traits ts(g);
+        const auto& hs = ts.getHalfSpace();
 
         const size_t j = hit.face;
         if (j >= static_cast<size_t>(hs.vector.size()))
@@ -333,7 +335,7 @@ namespace Rodin::Advection
         Math::SpatialVector<Real> nD = nu / std::sqrt(nn);
 
         // orient nD so centroid is interior: (nD·x_face - nD·x_centroid) >= 0
-        const auto rcent = Geometry::Polytope::Traits(g).getCentroid();
+        const auto rcent = ts.getCentroid();
         Math::SpatialPoint xc;
         mesh.getPolytopeTransformation(cd, c).transform(xc, rcent);
 
