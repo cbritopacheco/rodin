@@ -26,5 +26,7 @@
 #include "IO/ForwardDecls.h"
 #include "IO/Loader.h"
 #include "IO/Printer.h"
+#include "IO/HDF5.h"
+#include "IO/XDMF.h"
 
 #endif

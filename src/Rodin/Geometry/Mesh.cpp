@@ -15,6 +15,7 @@
 
 #include "Rodin/IO/MFEM.h"
 #include "Rodin/IO/MEDIT.h"
+#include "Rodin/IO/HDF5.h"
 
 #include "Mesh.h"
 #include "SubMesh.h"
@@ -96,25 +97,37 @@ namespace Rodin::Geometry
   void Mesh<Context::Local>::save(
       const boost::filesystem::path& filename, IO::FileFormat fmt) const
   {
-    std::ofstream ofs(filename.c_str());
-    if (!ofs)
-    {
-      Alert::MemberFunctionException(*this, __func__)
-        << "Failed to open " << filename << " for writing."
-        << Alert::Raise;
-    }
     switch (fmt)
     {
       case IO::FileFormat::MFEM:
       {
+        std::ofstream ofs(filename.c_str());
+        if (!ofs)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Failed to open " << filename << " for writing."
+            << Alert::Raise;
+        }
         IO::MeshPrinter<IO::FileFormat::MFEM, Context> printer(*this);
         printer.print(ofs);
         break;
       }
       case IO::FileFormat::MEDIT:
       {
+        std::ofstream ofs(filename.c_str());
+        if (!ofs)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Failed to open " << filename << " for writing."
+            << Alert::Raise;
+        }
         IO::MeshPrinter<IO::FileFormat::MEDIT, Context> printer(*this);
         printer.print(ofs);
+        break;
+      }
+      case IO::FileFormat::HDF5:
+      {
+        IO::HDF5::saveMesh(*this, filename);
         break;
       }
       default:
@@ -124,7 +137,6 @@ namespace Rodin::Geometry
           << Alert::Raise;
       }
     }
-    ofs.close();
   }
 
   SubMesh<Context::Local> Mesh<Context::Local>::keep(Attribute attr) const
@@ -1451,4 +1463,3 @@ namespace Rodin::Geometry
     }
   }
 }
-

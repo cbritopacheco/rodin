@@ -66,6 +66,7 @@
 #include "Rodin/IO/ForwardDecls.h"
 #include "Rodin/IO/MEDIT.h"
 #include "Rodin/IO/MFEM.h"
+#include "Rodin/IO/HDF5.h"
 
 #include "ForwardDecls.h"
 
@@ -505,28 +506,41 @@ namespace Rodin::Variational
           const boost::filesystem::path& filename,
           IO::FileFormat fmt = IO::FileFormat::MFEM) const
       {
-        std::ofstream output(filename.c_str());
-        if (!output)
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "Failed to open output file stream." << Alert::NewLine
-            << "Filename: \"" << filename << "\"" << Alert::NewLine
-            << "Please check if the path is valid and writable."
-            << Alert::Raise;
-        }
-
         switch (fmt)
         {
           case IO::FileFormat::MFEM:
           {
+            std::ofstream output(filename.c_str());
+            if (!output)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "Failed to open output file stream." << Alert::NewLine
+                << "Filename: \"" << filename << "\"" << Alert::NewLine
+                << "Please check if the path is valid and writable."
+                << Alert::Raise;
+            }
             IO::GridFunctionPrinter<IO::FileFormat::MFEM, FESType, DataType>(
               static_cast<const Derived&>(*this)).print(output);
             break;
           }
           case IO::FileFormat::MEDIT:
           {
+            std::ofstream output(filename.c_str());
+            if (!output)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "Failed to open output file stream." << Alert::NewLine
+                << "Filename: \"" << filename << "\"" << Alert::NewLine
+                << "Please check if the path is valid and writable."
+                << Alert::Raise;
+            }
             IO::GridFunctionPrinter<IO::FileFormat::MEDIT, FESType, DataType>(
               static_cast<const Derived&>(*this)).print(output);
+            break;
+          }
+          case IO::FileFormat::HDF5:
+          {
+            IO::HDF5::saveGridFunction(static_cast<const Derived&>(*this), filename);
             break;
           }
           // case IO::FileFormat::ENSIGHT6:
@@ -543,7 +557,6 @@ namespace Rodin::Variational
               << Alert::Raise;
           }
         }
-        output.close();
       }
 
       /**

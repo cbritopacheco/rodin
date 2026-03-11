@@ -40,6 +40,7 @@ namespace Rodin::IO
   {
     MFEM,     ///< MFEM mesh format - native format for MFEM library
     MEDIT,    ///< MEDIT mesh format - used by MMG remeshing software
+    HDF5,     ///< HDF5 hierarchical binary format for raw mesh/function storage
   };
 
   /**
@@ -100,6 +101,8 @@ namespace Rodin::IO
         return "MFEM";
       case FileFormat::MEDIT:
         return "MEDIT";
+      case FileFormat::HDF5:
+        return "HDF5";
     }
     return nullptr;
   }
@@ -126,4 +129,3 @@ namespace Rodin::IO
 }
 
 #endif
-
