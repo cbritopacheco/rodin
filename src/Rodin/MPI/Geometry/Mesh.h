@@ -9,7 +9,6 @@
 
 #include <mpi.h>
 #include <type_traits>
-#include <boost/serialization/optional.hpp>
 
 #include "Rodin/Configure.h"
 
@@ -20,6 +19,8 @@
 #include "Rodin/MPI/Context/MPI.h"
 
 #include "Rodin/Math/SpatialVector.h"
+
+#include "Rodin/Serialization/Optional.h"
 
 namespace Rodin::Geometry
 {
