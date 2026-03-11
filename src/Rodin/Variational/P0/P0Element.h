@@ -128,7 +128,7 @@ namespace Rodin::Variational
           constexpr
           ScalarType operator()(const T& v) const
           {
-            return v(P0Element<ScalarType>(m_g).getNode(0));
+            return v(Geometry::Polytope::Traits(m_g).getCentroid());
           }
 
         private:
@@ -234,48 +234,7 @@ namespace Rodin::Variational
 
       const Math::SpatialVector<Real>& getNode(size_t i) const
       {
-        assert(i == 0); // P0 element has only one node
-        switch (this->getGeometry())
-        {
-          case Geometry::Polytope::Type::Point:
-          {
-            static thread_local const Math::SpatialVector<Real> s_node{};
-            return s_node;
-          }
-          case Geometry::Polytope::Type::Segment:
-          {
-            static thread_local const Math::SpatialVector<Real> s_node{ 0.5 };
-            return s_node;
-          }
-          case Geometry::Polytope::Type::Triangle:
-          {
-            static thread_local const Math::SpatialVector<Real> s_node{{ Real(1) / Real(3), Real(1) / Real(3) }};
-            return s_node;
-          }
-          case Geometry::Polytope::Type::Quadrilateral:
-          {
-            static thread_local const Math::SpatialVector<Real> s_node{{ 0.5, 0.5 }};
-            return s_node;
-          }
-          case Geometry::Polytope::Type::Tetrahedron:
-          {
-            static thread_local const Math::SpatialVector<Real> s_node{{ 0.25, 0.25, 0.25 }};
-            return s_node;
-          }
-          case Geometry::Polytope::Type::Wedge:
-          {
-            static thread_local const Math::SpatialVector<Real> s_node{{ Real(1) / Real(3), Real(1) / Real(3), 0.5 }};
-            return s_node;
-          }
-          case Geometry::Polytope::Type::Hexahedron:
-          {
-            static thread_local const Math::SpatialVector<Real> s_node{{ 0.5, 0.5, 0.5 }};
-            return s_node;
-          }
-        }
-        assert(false); // Unsupported geometry
-        static thread_local const Math::SpatialVector<Real> s_null{};
-        return s_null;
+        return Geometry::Polytope::Traits(this->getGeometry()).getCentroid();
       }
 
       constexpr
@@ -367,8 +326,7 @@ namespace Rodin::Variational
           ScalarType operator()(const T& v) const
           {
             static thread_local RangeType s_out;
-            const auto& vtx = P0Element<ScalarType>(m_g).getNode(m_local / m_vdim);
-            s_out = v(vtx);
+            s_out = v(Geometry::Polytope::Traits(m_g).getCentroid());
             return s_out.coeff(m_local % m_vdim);
           }
 
@@ -562,13 +520,13 @@ namespace Rodin::Variational
       }
 
       constexpr
-      auto getLinearForm(size_t local) const
+      const auto& getLinearForm(size_t local) const
       {
         return m_lfs[local];
       }
 
       constexpr
-      BasisFunction getBasis(size_t local) const
+      const BasisFunction& getBasis(size_t local) const
       {
         return m_bs[local];
       }
@@ -576,7 +534,7 @@ namespace Rodin::Variational
       constexpr
       const Math::SpatialVector<Real>& getNode(size_t local) const
       {
-        return P1Element<ScalarType>(this->getGeometry()).getNode(local / m_vdim);
+        return Geometry::Polytope::Traits(this->getGeometry()).getCentroid();
       }
 
       constexpr

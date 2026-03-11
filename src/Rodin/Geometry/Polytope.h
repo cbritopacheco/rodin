@@ -273,7 +273,7 @@ namespace Rodin::Geometry
            */
           const HalfSpace& getHalfSpace() const;
 
-          Math::SpatialPoint getCentroid() const;
+          const Math::SpatialPoint& getCentroid() const;
 
         private:
           const Type m_g;
