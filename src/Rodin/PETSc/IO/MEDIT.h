@@ -66,11 +66,12 @@ namespace Rodin::IO
         //   - Vector: print vdim values per vertex line (same line)
         //
         // So we must print with spaces, NOT one-per-line-per-component.
+        const Geometry::Polytope::Traits ts(Geometry::Polytope::Type::Point);
         for (auto it = mesh.getVertex(); !it.end(); ++it)
         {
           const Geometry::Point p(
             *it,
-            Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+            ts.getVertex(0),
             it->getCoordinates());
 
           const auto val = gf(p);
