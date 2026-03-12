@@ -125,7 +125,6 @@ namespace Rodin::Variational
           LinearForm(const LinearForm&) = default;
 
           template <class T>
-          constexpr
           ScalarType operator()(const T& v) const
           {
             const Geometry::Polytope::Traits ts(m_g);
