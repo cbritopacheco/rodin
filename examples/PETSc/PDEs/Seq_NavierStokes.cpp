@@ -60,6 +60,7 @@ int main(int argc, char** argv)
   constexpr Attribute wall = 3;
 
   const Real R = 1.5;
+  // Kept to mirror the reference parameter set from the FreeFEM setup.
   [[maybe_unused]] const Real r = 5.0;
   const Real rho = 1.0;
   const Real mu = 0.035;
@@ -104,6 +105,12 @@ int main(int argc, char** argv)
 
   std::ofstream fluxFile("flux.txt");
   std::ofstream pressureFile("pressure.txt");
+  if (!fluxFile || !pressureFile)
+  {
+    std::cerr << "Failed to open diagnostic output files flux.txt / pressure.txt.\n";
+    PetscFinalize();
+    return 1;
+  }
 
   Real pout = pd;
   Real t = 0.0;
@@ -121,7 +128,8 @@ int main(int argc, char** argv)
     tauK = [&](const Point& x)
     {
       const Real umag2 = uoldNorm2(x);
-      // TODO: replace hK proxy by a proper cell diameter estimate.
+      // TODO: replace hK = sqrt(|K|) by a directional cell diameter
+      // (e.g. max edge length) once a mesh-quality diameter utility is exposed.
       const Real hK = std::sqrt(x.getPolytope().getMeasure());
       const Real hK2 = hK * hK;
       const Real denom = std::sqrt(4.0 * umag2 / hK2 + 16.0 * mu * mu / (hK2 * hK2));
