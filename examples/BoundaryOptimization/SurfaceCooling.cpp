@@ -221,11 +221,12 @@ int main(int, char**)
       topo = u.getSolution() * p.getSolution();
 
       Alert::Info() << "Computing nucleation locations..." << Alert::Raise;
+      const Polytope::Traits ts(Polytope::Type::Point);
       const Real tc = topo.min();
       std::vector<Point> cs;
       for (auto it = dOmega.getVertex(); !it.end(); ++it)
       {
-        const Point p(*it, Polytope::Traits(Polytope::Type::Point).getVertex(0), it->getCoordinates());
+        const Point p(*it, ts.getVertex(0), it->getCoordinates());
         const Real tp = topo(p);
         if (Math::abs(1 - tc / tp) < 1e-5)
           cs.emplace_back(std::move(p));
@@ -285,4 +286,3 @@ int main(int, char**)
 
   return 0;
 }
-

@@ -125,10 +125,10 @@ namespace Rodin::Variational
           LinearForm(const LinearForm&) = default;
 
           template <class T>
-          constexpr
           ScalarType operator()(const T& v) const
           {
-            return v(Geometry::Polytope::Traits(m_g).getCentroid());
+            const Geometry::Polytope::Traits ts(m_g);
+            return v(ts.getCentroid());
           }
 
         private:
@@ -326,7 +326,8 @@ namespace Rodin::Variational
           ScalarType operator()(const T& v) const
           {
             static thread_local RangeType s_out;
-            s_out = v(Geometry::Polytope::Traits(m_g).getCentroid());
+            const Geometry::Polytope::Traits ts(m_g);
+            s_out = v(ts.getCentroid());
             return s_out.coeff(m_local % m_vdim);
           }
 

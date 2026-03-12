@@ -12,10 +12,11 @@ namespace Rodin::Examples::BoundaryOptimization
   std::vector<Geometry::Point> locations(const TopologicalFunction& tf)
   {
     const Real tc = tf.max();
+    const Geometry::Polytope::Traits ts(Geometry::Polytope::Type::Point);
     std::vector<Geometry::Point> cs;
     for (auto it = tf.getFiniteElementSpace().getMesh().getVertex(); !it.end(); ++it)
     {
-      const Geometry::Point p(*it, Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0), it->getCoordinates());
+      const Geometry::Point p(*it, ts.getVertex(0), it->getCoordinates());
       const Real tp = tf(p);
       if (tp > 1e-12 && (tp / tc) > (1 - 1e-12))
       {

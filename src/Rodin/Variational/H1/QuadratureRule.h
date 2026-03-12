@@ -461,8 +461,9 @@ namespace Rodin::Variational
 
         // --- infer vdim from your H1Element<K, Math::Vector<Scalar>> convention ---
         // scalarCount is purely geometry+K (no vdim)
-        const size_t scalarCount =
-          H1Element<K, ScalarType>(polytope.getGeometry()).getCount();
+        const H1Element<K, ScalarType> trialScalarElement(polytope.getGeometry());
+        const H1Element<K, ScalarType> testScalarElement(polytope.getGeometry());
+        const size_t scalarCount = trialScalarElement.getCount();
 
         assert(scalarCount > 0);
         assert(ntr % scalarCount == 0);
@@ -481,8 +482,8 @@ namespace Rodin::Variational
         ScalarType* A = m_mat.data(); // row-major (rows=test, cols=trial)
 
         // Use scalar tabulations (fast, cached in your H1Element<K, Scalar>::getTabulation)
-        const auto& trTabS = H1Element<K, ScalarType>(polytope.getGeometry()).getTabulation(*m_qf);
-        const auto& teTabS = H1Element<K, ScalarType>(polytope.getGeometry()).getTabulation(*m_qf);
+        const auto& trTabS = trialScalarElement.getTabulation(*m_qf);
+        const auto& teTabS = testScalarElement.getTabulation(*m_qf);
 
         static thread_local std::vector<Math::SpatialVector<ScalarType>> GtrS;
         static thread_local std::vector<Math::SpatialVector<ScalarType>> GteS;
@@ -662,4 +663,3 @@ namespace Rodin::Variational
 }
 
 #endif
-
