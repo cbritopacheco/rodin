@@ -30,10 +30,10 @@ namespace Rodin::Solver
    * where @f$ A @f$ is the operator (matrix), @f$ x @f$ is the solution vector,
    * and @f$ b @f$ is the right-hand side vector.
    *
-   * @see SolverBase for the full implementation.
+   * @see LinearSolverBase for the full implementation.
    */
   template <class LinearSystem>
-  class SolverBase;
+  class LinearSolverBase;
 
   /**
    * @brief Wrapper class for any Eigen sparse solver.

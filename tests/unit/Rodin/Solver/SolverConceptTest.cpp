@@ -13,8 +13,8 @@
 
 using namespace Rodin;
 
-// Simple concrete test class that would inherit from SolverBase
-// We can't test SolverBase directly since it's abstract, but we can test
+// Simple concrete test class that would inherit from LinearSolverBase
+// We can't test LinearSolverBase directly since it's abstract, but we can test
 // the concepts and type system it uses
 template <class LinearSystem>
 class TestSolver

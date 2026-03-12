@@ -90,7 +90,7 @@ namespace Rodin::Solver
    */
   template <class Scalar>
   class UMFPack<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
-    : public SolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
+    : public LinearSolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       /// Type of scalar values in the system
@@ -109,7 +109,7 @@ namespace Rodin::Solver
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
 
       /// Parent class type
-      using Parent = SolverBase<LinearSystemType>;
+      using Parent = LinearSolverBase<LinearSystemType>;
 
       using Parent::solve;
 

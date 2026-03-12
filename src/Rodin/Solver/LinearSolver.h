@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_SOLVER_SOLVER_H
-#define RODIN_SOLVER_SOLVER_H
+#ifndef RODIN_SOLVER_LINEARSOLVER_H
+#define RODIN_SOLVER_LINEARSOLVER_H
 
 #include "Rodin/Configure.h"
 #include "Rodin/Copyable.h"
@@ -36,7 +36,7 @@ namespace Rodin::Solver
    * @tparam LinearSystem Type of linear system to solve
    */
   template <class LinearSystem>
-  class SolverBase : public Copyable
+  class LinearSolverBase : public Copyable
   {
     public:
       /// Scalar type used in the linear system
@@ -61,13 +61,13 @@ namespace Rodin::Solver
       /**
        * @brief Default virtual destructor.
        */
-      virtual ~SolverBase() = default;
+      virtual ~LinearSolverBase() = default;
 
       /**
        * @brief Constructs a solver for the given problem.
        * @param pb Reference to the problem to solve
        */
-      SolverBase(ProblemBaseType& pb)
+      LinearSolverBase(ProblemBaseType& pb)
         : m_pb(pb)
       {}
 
@@ -75,7 +75,7 @@ namespace Rodin::Solver
        * @brief Copy constructor.
        * @param other Solver to copy from
        */
-      SolverBase(const SolverBase& other)
+      LinearSolverBase(const LinearSolverBase& other)
         : Parent(other),
           m_pb(other.m_pb)
       {}
@@ -84,7 +84,7 @@ namespace Rodin::Solver
        * @brief Move constructor.
        * @param other Solver to move from  
        */
-      SolverBase(SolverBase&& other)
+      LinearSolverBase(LinearSolverBase&& other)
         : Parent(other),
           m_pb(std::move(other.m_pb))
       {}

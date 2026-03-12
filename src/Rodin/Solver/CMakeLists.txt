@@ -6,7 +6,7 @@ Distributed under the Boost Software License, Version 1.0.
 ]]
 
 set(RodinSolver_HEADERS
-  Solver.h
+  LinearSolver.h
   CG.h
 )
 

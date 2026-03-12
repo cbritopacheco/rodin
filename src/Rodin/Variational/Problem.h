@@ -34,7 +34,7 @@
 #include "Rodin/Assembly/Input.h"
 #include "Rodin/Assembly/Sequential.h"
 
-#include "Rodin/Solver/Solver.h"
+#include "Rodin/Solver/LinearSolver.h"
 
 #include "Rodin/FormLanguage/Base.h"
 
@@ -135,7 +135,7 @@ namespace Rodin::Variational
        * Solves the discrete system @f$ Au = b @f$ using the provided solver.
        * The problem must be assembled before calling this method.
        */
-      virtual void solve(Solver::SolverBase<LinearSystem>& solver) = 0;
+      virtual void solve(Solver::LinearSolverBase<LinearSystem>& solver) = 0;
 
       /**
        * @brief Assembles the underlying linear system to solve.
@@ -189,7 +189,7 @@ namespace Rodin::Variational
         LinearSystem;
 
       using SolverBaseType =
-        Solver::SolverBase<LinearSystem>;
+        Solver::LinearSolverBase<LinearSystem>;
 
       using SolutionType =
         typename FormLanguage::Traits<TrialFunctionType>::SolutionType;
@@ -325,7 +325,7 @@ namespace Rodin::Variational
         LinearSystem;
 
       using SolverBaseType =
-        Solver::SolverBase<LinearSystemType>;
+        Solver::LinearSolverBase<LinearSystemType>;
 
       using OperatorType =
         typename FormLanguage::Traits<LinearSystem>::OperatorType;
@@ -761,7 +761,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      void solve(Solver::SolverBase<LinearSystemType>& solver) override
+      void solve(Solver::LinearSolverBase<LinearSystemType>& solver) override
       {
         auto& axb = getLinearSystem();
         if (!m_assembled)
