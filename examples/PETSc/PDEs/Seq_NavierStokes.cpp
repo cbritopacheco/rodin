@@ -179,8 +179,9 @@ int main(int argc, char** argv)
 
     Solver::KSP(flow).solve();
 
-    u_old = u.getSolution();
-    p_old = p.getSolution();
+    // Use setData to copy PETSc vector entries without re-creating GridFunction storage.
+    u_old.setData(u.getSolution().getData());
+    p_old.setData(p.getSolution().getData());
 
     fluxForm = BoundaryIntegral(u_old.y(), qFlux).over(outlet);
     fluxForm.assemble();
