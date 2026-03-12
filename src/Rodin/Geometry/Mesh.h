@@ -1080,12 +1080,13 @@ namespace Rodin::Geometry
       Mesh& displace(const Variational::FunctionBase<FunctionDerived>& u)
       {
         Math::SpatialPoint pc;
+        const Polytope::Traits ts(Polytope::Type::Point);
         for (auto it = getVertex(); !it.end(); ++it)
         {
           pc = this->getVertexCoordinates(it->getIndex());
           const Geometry::Point p(
               *it,
-              Polytope::Traits(Polytope::Type::Point).getVertex(0),
+              ts.getVertex(0),
               pc);
           for (size_t i = 0; i < m_sdim; ++i)
             m_vertices(i, it->getIndex()) += u(p)[i];

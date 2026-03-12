@@ -8,7 +8,6 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
-#include <Rodin/Variational/LinearElasticity.h>
 #include <Rodin/Solver/UMFPack.h>
 
 #include <Rodin/Assembly/Sequential.h>

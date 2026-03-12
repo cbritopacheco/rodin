@@ -105,8 +105,8 @@ namespace Rodin::Variational
           template <class T>
           ScalarType operator()(const T& v) const
           {
-            const auto& vtx = Geometry::Polytope::Traits(m_g).getVertex(m_i);
-            return v(vtx);
+            const Geometry::Polytope::Traits ts(m_g);
+            return v(ts.getVertex(m_i));
           }
 
         private:
@@ -831,8 +831,8 @@ namespace Rodin::Variational
           ScalarType operator()(const T& v) const
           {
             static thread_local RangeType s_out;
-            const auto& vtx = P1Element<ScalarType>(m_g).getNode(m_local / m_vdim);
-            s_out = v(vtx);
+            const Geometry::Polytope::Traits ts(m_g);
+            s_out = v(ts.getVertex(m_local / m_vdim));
             return s_out.coeff(m_local % m_vdim);
           }
 
@@ -1058,7 +1058,7 @@ namespace Rodin::Variational
       constexpr
       const Math::SpatialPoint& getNode(size_t local) const
       {
-        return P1Element<ScalarType>(this->getGeometry()).getNode(local / m_vdim);
+        return Geometry::Polytope::Traits(this->getGeometry()).getVertex(local / m_vdim);
       }
 
       constexpr

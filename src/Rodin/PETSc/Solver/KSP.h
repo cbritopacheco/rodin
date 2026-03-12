@@ -9,7 +9,7 @@
 
 #include <petscksp.h>
 #include "Rodin/PETSc/Math/LinearSystem.h"
-#include "Rodin/Solver/Solver.h"
+#include "Rodin/Solver/LinearSolver.h"
 #include "Rodin/PETSc/Object.h"
 #include "Rodin/PETSc/Math/Matrix.h"
 #include "Rodin/PETSc/Math/Vector.h"
@@ -20,13 +20,13 @@ namespace Rodin::Solver
   /**
    * @brief PETSc KSP (Krylov) linear solver wrapper.
    *
-   * Inherits SolverBase<Mat,Vec,PetscScalar> for the generic interface,
+   * Inherits LinearSolverBase<Mat,Vec,PetscScalar> for the generic interface,
    * and PETSc::Object for automatic cleanup of any forgotten handles.
    *
    * Combines programmatic configuration with command‐line overrides.
    */
   class KSP
-    : public SolverBase<PETSc::Math::LinearSystem>, public PETSc::Object<::KSP>
+    : public LinearSolverBase<PETSc::Math::LinearSystem>, public PETSc::Object<::KSP>
   {
     public:
       using HandleType = ::KSP;
@@ -35,7 +35,7 @@ namespace Rodin::Solver
       using VectorType   = ::Vec;
       using LinearSystemType = PETSc::Math::LinearSystem;
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
-      using Parent = SolverBase<LinearSystemType>;
+      using Parent = LinearSolverBase<LinearSystemType>;
       using Parent::solve;
       /**
        * @brief Construct and create the PETSc KSP object.

@@ -24,7 +24,7 @@
  * @see Rodin::Solver namespace for all solver classes
  */
 
-#include "Solver/Solver.h"
+#include "Solver/LinearSolver.h"
 
 #include "Solver/LDLT.h"
 

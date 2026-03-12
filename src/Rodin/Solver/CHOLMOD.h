@@ -58,7 +58,7 @@
 #include "Rodin/Math/SparseMatrix.h"
 
 #include "ForwardDecls.h"
-#include "Solver.h"
+#include "LinearSolver.h"
 
 namespace Rodin::Solver::CHOLMOD
 {
@@ -87,7 +87,7 @@ namespace Rodin::Solver::CHOLMOD
    */
   template <class Scalar>
   class SupernodalLLT<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
-    : public SolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>>
+    : public LinearSolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>, Scalar>>
   {
     public:
       /// Type of scalar values in the system
@@ -106,7 +106,7 @@ namespace Rodin::Solver::CHOLMOD
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
 
       /// Parent class type
-      using Parent = SolverBase<LinearSystemType>;
+      using Parent = LinearSolverBase<LinearSystemType>;
 
       using Parent::solve;
 

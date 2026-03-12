@@ -32,7 +32,7 @@ namespace Rodin::Variational
         PETSc::Math::LinearSystem;
 
       using SolverBaseType =
-        Solver::SolverBase<LinearSystemType>;
+        Solver::LinearSolverBase<LinearSystemType>;
 
       using OperatorType =
         typename FormLanguage::Traits<LinearSystemType>::OperatorType;
@@ -297,7 +297,7 @@ namespace Rodin::Variational
           ::template Type<LinearSystemType, Problem>;
 
       using SolverBaseType =
-        Solver::SolverBase<LinearSystemType>;
+        Solver::LinearSolverBase<LinearSystemType>;
 
       using AssemblyInput =
         Assembly::ProblemAssemblyInput<ProblemBodyType, U1, U2, U3, Us...>;

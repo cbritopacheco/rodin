@@ -720,40 +720,49 @@ namespace Rodin::Geometry
     return 0;
   }
 
-  Math::SpatialPoint Polytope::Traits::getCentroid() const
+  const Math::SpatialPoint& Polytope::Traits::getCentroid() const
   {
     switch (m_g)
     {
-      case Type::Point:
+      case Geometry::Polytope::Type::Point:
       {
-        return Math::SpatialPoint{ 0 };
+        static thread_local const Math::SpatialVector<Real> s_node{};
+        return s_node;
       }
-      case Type::Segment:
+      case Geometry::Polytope::Type::Segment:
       {
-        return Math::SpatialPoint{ 0.5 };
+        static thread_local const Math::SpatialVector<Real> s_node{ 0.5 };
+        return s_node;
       }
-      case Type::Triangle:
+      case Geometry::Polytope::Type::Triangle:
       {
-        return Math::SpatialPoint{{ 1.0 / 3.0, 1.0 / 3.0 }};
+        static thread_local const Math::SpatialVector<Real> s_node{{ Real(1) / Real(3), Real(1) / Real(3) }};
+        return s_node;
       }
-      case Type::Quadrilateral:
+      case Geometry::Polytope::Type::Quadrilateral:
       {
-        return Math::SpatialPoint{{ 0.5, 0.5 }};
+        static thread_local const Math::SpatialVector<Real> s_node{{ 0.5, 0.5 }};
+        return s_node;
       }
-      case Type::Tetrahedron:
+      case Geometry::Polytope::Type::Tetrahedron:
       {
-        return Math::SpatialPoint{{ 0.25, 0.25, 0.25 }};
+        static thread_local const Math::SpatialVector<Real> s_node{{ 0.25, 0.25, 0.25 }};
+        return s_node;
       }
-      case Type::Hexahedron:
+      case Geometry::Polytope::Type::Wedge:
       {
-        return Math::SpatialPoint{{ 0.5, 0.5, 0.5 }};
+        static thread_local const Math::SpatialVector<Real> s_node{{ Real(1) / Real(3), Real(1) / Real(3), 0.5 }};
+        return s_node;
       }
-      case Type::Wedge:
+      case Geometry::Polytope::Type::Hexahedron:
       {
-        return Math::SpatialPoint{{ 1.0 / 3.0, 1.0 / 3.0, 0.5 }};
+        static thread_local const Math::SpatialVector<Real> s_node{{ 0.5, 0.5, 0.5 }};
+        return s_node;
       }
     }
-    return Math::SpatialPoint{};
+    assert(false); // Unsupported geometry
+    static thread_local const Math::SpatialVector<Real> s_null{};
+    return s_null;
   }
 
   const Math::SpatialPoint& Polytope::Traits::getVertex(size_t i) const
