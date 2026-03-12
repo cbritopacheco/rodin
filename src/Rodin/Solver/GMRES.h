@@ -54,7 +54,7 @@
 
 #include "ForwardDecls.h"
 #include "Rodin/Types.h"
-#include "Solver.h"
+#include "LinearSolver.h"
 
 namespace Rodin::Solver
 {
@@ -79,7 +79,7 @@ namespace Rodin::Solver
    */
   template <class Scalar>
   class GMRES<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>> final
-    : public SolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
+    : public LinearSolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       using ScalarType = Scalar;
@@ -87,7 +87,7 @@ namespace Rodin::Solver
       using OperatorType = Math::SparseMatrix<ScalarType>;
       using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
-      using Parent = SolverBase<LinearSystemType>;
+      using Parent = LinearSolverBase<LinearSystemType>;
 
       using Parent::solve;
 
@@ -156,7 +156,7 @@ namespace Rodin::Solver
    */
   template <class Scalar>
   class GMRES<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>> final
-    : public SolverBase<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>
+    : public LinearSolverBase<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       using ScalarType = Scalar;
@@ -164,7 +164,7 @@ namespace Rodin::Solver
       using OperatorType = Math::Matrix<ScalarType>;
       using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
       using ProblemType = Variational::ProblemBase<LinearSystemType>;
-      using Parent = SolverBase<LinearSystemType>;
+      using Parent = LinearSolverBase<LinearSystemType>;
 
       using Parent::solve;
 

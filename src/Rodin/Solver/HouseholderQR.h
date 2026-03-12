@@ -46,7 +46,7 @@
 #include "Rodin/Math/SparseMatrix.h"
 
 #include "ForwardDecls.h"
-#include "Solver.h"
+#include "LinearSolver.h"
 
 namespace Rodin::Solver
 {
@@ -70,7 +70,7 @@ namespace Rodin::Solver
    */
   template <class Scalar>
   class HouseholderQR<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>> final
-    : public SolverBase<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>
+    : public LinearSolverBase<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       using ScalarType = Scalar;
@@ -83,7 +83,7 @@ namespace Rodin::Solver
 
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
 
-      using Parent = SolverBase<LinearSystemType>;
+      using Parent = LinearSolverBase<LinearSystemType>;
 
       using Parent::solve;
 
