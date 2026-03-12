@@ -341,7 +341,8 @@ namespace Rodin::Variational
               if (faces0[k] == f) { j0 = k; break; }
 
             const auto g0 = mesh.getGeometry(cd, c0);
-            const auto& hs0 = Geometry::Polytope::Traits(g0).getHalfSpace();
+            const Geometry::Polytope::Traits ts0(g0);
+            const auto& hs0 = ts0.getHalfSpace();
             const Math::SpatialVector<Real> nref0 = hs0.matrix.row(j0).transpose();
 
             const auto it0 = mesh.getPolytope(cd, c0);
@@ -353,7 +354,8 @@ namespace Rodin::Variational
             auto interior_score = [&](Index c, const Math::SpatialPoint& rproj) -> Real
             {
               const auto gc = mesh.getGeometry(cd, c);
-              const auto& hsc = Geometry::Polytope::Traits(gc).getHalfSpace();
+              const Geometry::Polytope::Traits tsc(gc);
+              const auto& hsc = tsc.getHalfSpace();
               Real s = std::numeric_limits<Real>::infinity();
               for (int j = 0; j < hsc.vector.size(); ++j)
               {
@@ -437,8 +439,9 @@ namespace Rodin::Variational
           const auto& cell = *itc;
 
           const auto g = mesh.getGeometry(cd, s_cell);
+          const Geometry::Polytope::Traits ts(g);
           const auto& faces = conn.getIncidence(cd, cd - 1).at(s_cell);
-          const auto& hs = Geometry::Polytope::Traits(g).getHalfSpace();
+          const auto& hs = ts.getHalfSpace();
 
           // Reference velocity vref(r) = sgn * J^{-1}(r) * vphys(r)
           auto vref = [&](const Math::SpatialPoint& r) -> Math::SpatialVector<Real>
@@ -471,7 +474,7 @@ namespace Rodin::Variational
           // Per-cell dt cap based on physical size (robust on slivers)
           Real dt_cap = tau;
           {
-            const auto rcent = Geometry::Polytope::Traits(g).getCentroid();
+            const auto rcent = ts.getCentroid();
             s_r_in = rcent;
             mesh.getPolytopeTransformation(cd, s_cell).transform(s_x_in, s_r_in);
 

@@ -19,6 +19,8 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  const Geometry::Polytope::Traits pointTraits(Geometry::Polytope::Type::Point);
+
   TEST(Rodin_Variational_H1_Space, Triangle_VertexNodes_MatchConnectivity)
   {
     Mesh mesh =
@@ -152,7 +154,7 @@ namespace Rodin::Tests::Unit
       auto vit = mesh.getVertex(vtx);
       Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
 
       Real val = mapping(p);
@@ -1453,12 +1455,12 @@ namespace Rodin::Tests::Unit
       decltype(auto) fe = fes.getFiniteElement(0, vtx);
 
       EXPECT_EQ(dofs_vertex.size(), fe.getCount());
-      EXPECT_NEAR(fe.getBasis(0)(Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0)), 1.0, 1e-12);
+      EXPECT_NEAR(fe.getBasis(0)(pointTraits.getVertex(0)), 1.0, 1e-12);
 
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
 
       Real expected = exact(p);
@@ -1502,7 +1504,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -1539,7 +1541,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -1576,7 +1578,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -1615,7 +1617,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -1743,7 +1745,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -1816,7 +1818,7 @@ namespace Rodin::Tests::Unit
         const auto vit = mesh.getVertex(vtx);
         const Geometry::Point p(
             *vit,
-            Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+            pointTraits.getVertex(0),
             vit->getCoordinates());
         Math::Vector<Real> expected = exact(p);
         Math::Vector<Real> value = gf(p);
@@ -3275,7 +3277,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -3324,7 +3326,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -3374,7 +3376,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -3413,7 +3415,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -3448,7 +3450,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -3485,7 +3487,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -3525,7 +3527,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -3561,7 +3563,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -3600,7 +3602,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -3640,7 +3642,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -3676,7 +3678,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -3715,7 +3717,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -3755,7 +3757,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -3791,7 +3793,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -3830,7 +3832,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -3869,7 +3871,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -3904,7 +3906,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -3941,7 +3943,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -3981,7 +3983,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -4016,7 +4018,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -4074,7 +4076,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -4127,7 +4129,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -4164,7 +4166,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -4210,7 +4212,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -4248,7 +4250,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -4286,7 +4288,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -4326,7 +4328,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -4360,7 +4362,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -4397,7 +4399,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -4432,7 +4434,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -4468,7 +4470,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -4505,7 +4507,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -4540,7 +4542,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -4578,7 +4580,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -4614,7 +4616,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -4651,7 +4653,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -4689,7 +4691,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -4725,7 +4727,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -4763,7 +4765,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -4800,7 +4802,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -4842,7 +4844,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -4883,7 +4885,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -4924,7 +4926,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -4964,7 +4966,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -5005,7 +5007,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -5046,7 +5048,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -5093,7 +5095,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -5133,7 +5135,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -5176,7 +5178,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -5216,7 +5218,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
@@ -5257,7 +5259,7 @@ namespace Rodin::Tests::Unit
       const auto vit = mesh.getVertex(vtx);
       const Geometry::Point p(
           *vit,
-          Geometry::Polytope::Traits(Geometry::Polytope::Type::Point).getVertex(0),
+          pointTraits.getVertex(0),
           vit->getCoordinates());
       Real expected = exact(p);
       Real value = gf(p);
