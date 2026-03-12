@@ -24,7 +24,7 @@ using namespace Rodin::Variational;
 
 static constexpr int ROOT_RANK = 0;
 
-static constexpr int n = 64;
+static constexpr int n = 128;
 
 
 int main(int argc, char** argv)
