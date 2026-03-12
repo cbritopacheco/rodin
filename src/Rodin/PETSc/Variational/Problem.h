@@ -9,6 +9,8 @@
 #include <petscmat.h>
 #include <petscvec.h>
 
+#include "Rodin/Alert/MemberFunctionException.h"
+#include "Rodin/Alert/Raise.h"
 #include "Rodin/Context/Local.h"
 #include "Rodin/MPI/Context/MPI.h"
 #include "Rodin/PETSc/Variational/TestFunction.h"
@@ -465,6 +467,15 @@ namespace Rodin::Variational
 
       void setFieldSplits()
       {
+        if (!m_assembled)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "setFieldSplits() can only be called after assemble()."
+            << Alert::Raise;
+        }
+
+        assert(m_assembled);
+
         PetscErrorCode ierr;
 
         using Split = typename LinearSystemType::FieldSplits::Split;

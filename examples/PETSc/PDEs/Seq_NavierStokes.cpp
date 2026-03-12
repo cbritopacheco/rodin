@@ -60,8 +60,7 @@ int main(int argc, char** argv)
   constexpr Attribute wall = 3;
 
   const Real R = 1.5;
-  // Kept to mirror the reference parameter set from the FreeFEM setup.
-  [[maybe_unused]] const Real r = 5.0;
+  const Real r = 5.0;
   const Real rho = 1.0;
   const Real mu = 0.035;
   const Real T = 12.0;
@@ -153,8 +152,6 @@ int main(int argc, char** argv)
     const auto conv_v = Mult(Jacobian(v), u_old);
     const auto grad_p = Grad(p);
     const auto grad_q = Grad(q);
-    const auto R_trial = conv_u + grad_p;
-    const auto R_test  = conv_v + grad_q;
 
     Problem flow(u, p, v, q);
     flow =
@@ -165,14 +162,21 @@ int main(int argc, char** argv)
       - Integral(p, Div(v))
       + Integral(Div(u), q)
       + 0.5 * Integral(Div(u_old) * Dot(u, v))
-      - BoundaryIntegral(pout, v.y()).over(outlet)
+      - BoundaryIntegral(pout * v.y()).over(outlet)
       + BoundaryIntegral(0.5 * rho * beta * Dot(u, v)).over(outlet)
-      + Integral(tauK * Dot(R_trial, R_test))
-      + DirichletBC(u, Math::Vector<Real>{{0.0, 0.0}}).on(wall)
+
+        // SUPG / PSPG expanded
+      + Integral(tauK * Dot(conv_u, conv_v))
+      + Integral(tauK * Dot(conv_u, grad_q))
+      + Integral(tauK * Dot(grad_p, conv_v))
+      + Integral(tauK * Dot(grad_p, grad_q))
+
+      + DirichletBC(u, Zero(dim)).on(wall)
       + DirichletBC(u, inletProfile).on(inlet);
 
     flow.assemble();
     flow.setFieldSplits();
+
     Solver::KSP(flow).solve();
 
     u_old = u.getSolution();
