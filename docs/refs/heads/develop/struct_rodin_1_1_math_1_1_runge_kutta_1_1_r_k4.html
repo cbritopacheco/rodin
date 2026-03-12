@@ -78,11 +78,11 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md151">Algorithm</a></li>
-            <li><a href="#autotoc_md152">Properties</a></li>
-            <li><a href="#autotoc_md153">Advantages</a></li>
-            <li><a href="#autotoc_md154">Typical Use Cases</a></li>
-            <li><a href="#autotoc_md155">Example Usage</a></li>
+            <li><a href="#autotoc_md155">Algorithm</a></li>
+            <li><a href="#autotoc_md156">Properties</a></li>
+            <li><a href="#autotoc_md157">Advantages</a></li>
+            <li><a href="#autotoc_md158">Typical Use Cases</a></li>
+            <li><a href="#autotoc_md159">Example Usage</a></li>
             <li>
               Reference
               <ul>
@@ -121,7 +121,7 @@
 <use x='216.032377' y='-8.200662' xlink:href='#eq1-g0-116'/>
 <use x='220.259537' y='-8.200662' xlink:href='#eq1-g1-41'/>
 </g>
-</svg></div><section id="autotoc_md151"><h3><a href="#autotoc_md151">Algorithm</a></h3><p>Given a time step <svg class="m-math" style="width: 1.456em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 13.982143 8.169366">
+</svg></div><section id="autotoc_md155"><h3><a href="#autotoc_md155">Algorithm</a></h3><p>Given a time step <svg class="m-math" style="width: 1.456em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 13.982143 8.169366">
 <title>
 $ \Delta t $
 </title>
@@ -277,7 +277,7 @@ $ q_{n+1} $
 <use x='278.165817' y='-6.407399' xlink:href='#eq5-g2-52'/>
 <use x='282.898132' y='-8.200662' xlink:href='#eq5-g3-41'/>
 </g>
-</svg></div></section><section id="autotoc_md152"><h3><a href="#autotoc_md152">Properties</a></h3><ul><li><strong>Order of accuracy</strong>: 4 (error <svg class="m-math" style="width: 5.178em; height: 1.298em; vertical-align: -0.312em;" viewBox="0 -9.474739 49.709684 12.463531">
+</svg></div></section><section id="autotoc_md156"><h3><a href="#autotoc_md156">Properties</a></h3><ul><li><strong>Order of accuracy</strong>: 4 (error <svg class="m-math" style="width: 5.178em; height: 1.298em; vertical-align: -0.312em;" viewBox="0 -9.474739 49.709684 12.463531">
 <title>
 $ \sim O(\Delta t^5) $
 </title>
@@ -299,7 +299,7 @@ $ \sim O(\Delta t^5) $
 <use x='40.425043' y='-4.338437' xlink:href='#eq6-g2-53'/>
 <use x='45.157358' y='0' xlink:href='#eq6-g3-41'/>
 </g>
-</svg> per step)</li><li><strong>Stages</strong>: 4 function evaluations per step</li><li><strong>Stability</strong>: Good stability properties for moderate time steps</li></ul></section><section id="autotoc_md153"><h3><a href="#autotoc_md153">Advantages</a></h3><ul><li>High accuracy with relatively few function evaluations</li><li>Well-balanced between accuracy and computational cost</li><li>Suitable for smooth solutions</li></ul></section><section id="autotoc_md154"><h3><a href="#autotoc_md154">Typical Use Cases</a></h3><ul><li>Celestial mechanics and orbital dynamics</li><li>Chemical kinetics</li><li>Time-dependent PDEs requiring high accuracy</li><li>General-purpose ODE integration</li></ul></section><section id="autotoc_md155"><h3><a href="#autotoc_md155">Example Usage</a></h3><pre class="m-code"><span class="n">RK4</span><span class="w"> </span><span class="n">integrator</span><span class="p">;</span>
+</svg> per step)</li><li><strong>Stages</strong>: 4 function evaluations per step</li><li><strong>Stability</strong>: Good stability properties for moderate time steps</li></ul></section><section id="autotoc_md157"><h3><a href="#autotoc_md157">Advantages</a></h3><ul><li>High accuracy with relatively few function evaluations</li><li>Well-balanced between accuracy and computational cost</li><li>Suitable for smooth solutions</li></ul></section><section id="autotoc_md158"><h3><a href="#autotoc_md158">Typical Use Cases</a></h3><ul><li>Celestial mechanics and orbital dynamics</li><li>Chemical kinetics</li><li>Time-dependent PDEs requiring high accuracy</li><li>General-purpose ODE integration</li></ul></section><section id="autotoc_md159"><h3><a href="#autotoc_md159">Example Usage</a></h3><pre class="m-code"><span class="n">RK4</span><span class="w"> </span><span class="n">integrator</span><span class="p">;</span>
 <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">q</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">initial_state</span><span class="p">;</span>
 <span class="n">Real</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.01</span><span class="p">;</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">state</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">compute_derivative</span><span class="p">(</span><span class="n">state</span><span class="p">);</span><span class="w"> </span><span class="p">};</span>
