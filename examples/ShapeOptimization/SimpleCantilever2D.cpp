@@ -8,7 +8,7 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
-#include <Rodin/Variational/LinearElasticity.h>
+#include <Rodin/LinearElasticity.h>
 #include <Rodin/MMG.h>
 
 using namespace Rodin;

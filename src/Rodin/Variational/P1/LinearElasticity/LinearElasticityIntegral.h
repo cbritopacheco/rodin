@@ -31,7 +31,7 @@
  * @see LinearElasticityIntegral, P1
  */
 
-#include "Rodin/Variational/LinearElasticity/LinearElasticityIntegral.h"
+#include "Rodin/LinearElasticity/LinearElasticityIntegral.h"
 #include "Rodin/Variational/P1/ForwardDecls.h"
 #include "Rodin/Variational/P1/P1.h"
 #include "Rodin/QF/Centroid.h"

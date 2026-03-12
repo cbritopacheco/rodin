@@ -47,7 +47,6 @@ set(RodinVariational_HEADERS
   OR.h
   AND.h
   Tangent.h
-  LinearElasticity/LinearElasticityIntegral.h
 )
 
 set(RodinVariational_SRCS
