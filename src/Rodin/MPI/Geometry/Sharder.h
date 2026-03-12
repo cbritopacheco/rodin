@@ -16,9 +16,11 @@ namespace Rodin::Geometry
    * the local mesh on each rank.
    */
   template <>
-  class Sharder<Context::MPI>
+  class Sharder<Context::MPI> : public SharderBase<Context::MPI>
   {
     public:
+      using Parent = SharderBase<Context::MPI>;
+
       /**
        * @brief Construct a Sharder with the given MPI context.
        * @param context The MPI context (communicator and environment).
@@ -35,17 +37,6 @@ namespace Rodin::Geometry
        * @return The local MPI mesh built from the received shard.
        */
       Mesh<Context::MPI> distribute(Partitioner& p, int root);
-
-      /**
-       * @brief Split the global mesh into per-rank shards (ghost layers included).
-       *
-       * Each cell of the global mesh is assigned to a shard builder
-       * based on the partitioner, then each builder is finalized into a Shard.
-       *
-       * @param partitioner The mesh partitioner with `getCount()==comm.size()`.
-       * @return Reference to this object for chaining.
-       */
-      Sharder& shard(Partitioner& partitioner);
 
       /**
        * @brief Scatter shards from the root rank to all ranks.
@@ -68,16 +59,6 @@ namespace Rodin::Geometry
        * @return The local MPI mesh built from the received shard.
        */
       Mesh<Context::MPI> gather(int root);
-
-      Shard& getShard(size_t i);
-
-      const Shard& getShard(size_t i) const;
-
-      const Context::MPI& getContext() const;
-
-    private:
-      Context::MPI m_context;
-      std::vector<Shard> m_shards;
   };
 }
 
