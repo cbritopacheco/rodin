@@ -77,8 +77,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md47">Design Pattern</a></li>
-            <li><a href="#autotoc_md48">Usage</a></li>
+            <li><a href="#autotoc_md44">Design Pattern</a></li>
+            <li><a href="#autotoc_md45">Usage</a></li>
             <li>
               Reference
               <ul>
@@ -87,7 +87,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the Traits template, which provides a uniform interface for querying type information and properties of form language objects. Specialized versions of Traits are defined throughout the library for specific form language types.</p><section id="autotoc_md47"><h3><a href="#autotoc_md47">Design Pattern</a></h3><p>The Traits system follows the trait-based design pattern common in C++ template metaprogramming. Each form language type can specialize the Traits template to expose:</p><ul><li>Associated types (e.g., scalar type, function space type)</li><li>Compile-time properties (e.g., space type, dimension)</li><li>Type transformations</li></ul></section><section id="autotoc_md48"><h3><a href="#autotoc_md48">Usage</a></h3><pre class="m-code"><span class="c1">// Query traits of a form language object</span>
+<p>This file defines the Traits template, which provides a uniform interface for querying type information and properties of form language objects. Specialized versions of Traits are defined throughout the library for specific form language types.</p><section id="autotoc_md44"><h3><a href="#autotoc_md44">Design Pattern</a></h3><p>The Traits system follows the trait-based design pattern common in C++ template metaprogramming. Each form language type can specialize the Traits template to expose:</p><ul><li>Associated types (e.g., scalar type, function space type)</li><li>Compile-time properties (e.g., space type, dimension)</li><li>Type transformations</li></ul></section><section id="autotoc_md45"><h3><a href="#autotoc_md45">Usage</a></h3><pre class="m-code"><span class="c1">// Query traits of a form language object</span>
 <span class="k">using</span><span class="w"> </span><span class="n">MyFES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">Traits</span><span class="o">&lt;</span><span class="n">MyFormObject</span><span class="o">&gt;::</span><span class="n">FESType</span><span class="p">;</span>
 <span class="k">constexpr</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">space</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Traits</span><span class="o">&lt;</span><span class="n">MyFormObject</span><span class="o">&gt;::</span><span class="n">SpaceType</span><span class="p">;</span></pre></section>
         <section id="namespaces">

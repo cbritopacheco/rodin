@@ -78,9 +78,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md378">Properties</a></li>
-            <li><a href="#autotoc_md379">Use Cases</a></li>
-            <li><a href="#autotoc_md380">Example</a></li>
+            <li><a href="#autotoc_md379">Properties</a></li>
+            <li><a href="#autotoc_md380">Use Cases</a></li>
+            <li><a href="#autotoc_md381">Example</a></li>
             <li>
               Reference
               <ul>
@@ -183,7 +183,7 @@ $ d $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-100'/>
 </g>
-</svg> is the vector dimension (typically the spatial dimension).</p><section id="autotoc_md378"><h3><a href="#autotoc_md378">Properties</a></h3><ul><li><strong>DOF count</strong>: <svg class="m-math" style="width: 4.833em; height: 1.063em; vertical-align: -0.199em;" viewBox="0 -8.302191 46.400283 10.202651">
+</svg> is the vector dimension (typically the spatial dimension).</p><section id="autotoc_md379"><h3><a href="#autotoc_md379">Properties</a></h3><ul><li><strong>DOF count</strong>: <svg class="m-math" style="width: 4.833em; height: 1.063em; vertical-align: -0.199em;" viewBox="0 -8.302191 46.400283 10.202651">
 <title>
 $ d \cdot n_{\text{vertices}} $
 </title>
@@ -255,7 +255,7 @@ $ \boldsymbol{\phi}_{i,j}(x) = \phi_i(x) \mathbf{e}_j $
 <use x='75.704781' y='0' xlink:href='#eq6-g1-101'/>
 <use x='81.841494' y='1.793263' xlink:href='#eq6-g2-106'/>
 </g>
-</svg></li></ul></section><section id="autotoc_md379"><h3><a href="#autotoc_md379">Use Cases</a></h3><ul><li>Displacement fields in elasticity</li><li>Velocity fields in fluid mechanics</li><li>Vector-valued PDEs requiring H¹ conformity</li></ul></section><section id="autotoc_md380"><h3><a href="#autotoc_md380">Example</a></h3><pre class="m-code"><span class="n">Mesh</span><span class="w"> </span><span class="n">Th</span><span class="p">;</span>
+</svg></li></ul></section><section id="autotoc_md380"><h3><a href="#autotoc_md380">Use Cases</a></h3><ul><li>Displacement fields in elasticity</li><li>Velocity fields in fluid mechanics</li><li>Vector-valued PDEs requiring H¹ conformity</li></ul></section><section id="autotoc_md381"><h3><a href="#autotoc_md381">Example</a></h3><pre class="m-code"><span class="n">Mesh</span><span class="w"> </span><span class="n">Th</span><span class="p">;</span>
 <span class="n">Th</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Th</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">});</span>
 <span class="kt">size_t</span><span class="w"> </span><span class="n">vdim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">  </span><span class="c1">// 2D displacement</span>
 <span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">Th</span><span class="p">,</span><span class="w"> </span><span class="n">vdim</span><span class="p">);</span><span class="w">  </span><span class="c1">// Vector P1 space</span>

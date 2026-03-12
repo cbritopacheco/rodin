@@ -201,17 +201,6 @@
             </dt>
             <dd>Gets the interpolated value at the point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a86092c214e872b8e109dce71824c1255" class="m-doc">interpolate</a>(</span><span class="m-doc-wrap"><a href="#a5c7fc1cee1343f294d68ab9388bbfe78" class="m-doc">RangeType</a>&amp; res,
-              <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">constexpr</a> <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">void</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Interpolates the <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> at the given point.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;<a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">class</a> <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2ef52d705ad8212d37c1ae03c2827687" class="m-doc">project</a>(</span><span class="m-doc-wrap"><a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">const</a> std::pair&lt;<a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">size_<wbr />t</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
-              <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&amp; fn) -&gt; <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">void</a></span>
-            </dt>
-            <dd></dd>
-            <dt>
               <div class="m-doc-template">template&lt;<a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">class</a> <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>, <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">class</a> <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">Pred</a>&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#add293b7fe39a85c6b22e0ae915bb9456" class="m-doc">project</a>(</span><span class="m-doc-wrap"><a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">const</a> <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
               <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&amp; fn,
@@ -728,28 +717,6 @@ $ \mathbf{u} $
               </tfoot>
             </table>
 <p>Reads DOF data from a file in the specified format. Supported formats include MFEM, EnSight, and MEDIT.</p>
-          </div></section>
-          <section class="m-doc-details" id="a86092c214e872b8e109dce71824c1255"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;<a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">class</a> <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">Derived</a> _1, <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">class</a> FES, <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">class</a> Data&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">constexpr</a> <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">void</a> Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;_1, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a86092c214e872b8e109dce71824c1255" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#a5c7fc1cee1343f294d68ab9388bbfe78" class="m-doc">RangeType</a>&amp; res,
-              <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">const</a> <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
-            </h3>
-            <p>Interpolates the <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> at the given point.</p>
-<aside class="m-note m-info"><h4>Note</h4><p>Can be overriden.</p></aside>
-          </div></section>
-          <section class="m-doc-details" id="a2ef52d705ad8212d37c1ae03c2827687"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;<a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">class</a> <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">Derived</a> _1, <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">class</a> FES, <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">class</a> Data&gt;
-                template&lt;<a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">class</a> <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">void</a> Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;_1, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2ef52d705ad8212d37c1ae03c2827687" class="m-doc-self">project</a>(</span><span class="m-doc-wrap"><a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">const</a> std::pair&lt;<a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">size_<wbr />t</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
-              <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&amp; fn)</span></span>
-            </h3>
-<aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in Derived class.</p></aside>
           </div></section>
           <section class="m-doc-details" id="add293b7fe39a85c6b22e0ae915bb9456"><div>
             <h3>

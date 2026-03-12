@@ -71,7 +71,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_geometry_2_connectivity_8h.html">&lt;Rodin/Geometry/Connectivity.h&gt;</a></div>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_connectivity_8h.html">&lt;Rodin/Geometry/Connectivity.h&gt;</a></div>
           <div class="m-doc-template">template&lt;&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>Connectivity&lt;Context::Local&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
@@ -79,17 +79,17 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md58">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md55">Mathematical Foundation</a></li>
             <li>
-              <a href="#autotoc_md59">Usage</a>
+              <a href="#autotoc_md56">Usage</a>
               <ul>
-                <li><a href="#autotoc_md60">Basic Connectivity Computation</a></li>
-                <li><a href="#autotoc_md61">Mode Parameter</a></li>
-                <li><a href="#autotoc_md62">Common Connectivity Patterns</a></li>
+                <li><a href="#autotoc_md57">Basic Connectivity Computation</a></li>
+                <li><a href="#autotoc_md58">Mode Parameter</a></li>
+                <li><a href="#autotoc_md59">Common Connectivity Patterns</a></li>
               </ul>
             </li>
-            <li><a href="#autotoc_md63">Storage Efficiency</a></li>
-            <li><a href="#autotoc_md64">Thread Safety</a></li>
+            <li><a href="#autotoc_md60">Storage Efficiency</a></li>
+            <li><a href="#autotoc_md61">Thread Safety</a></li>
             <li>
               Reference
               <ul>
@@ -116,7 +116,7 @@ $ d \rightarrow d&#x27; $
 <use x='24.679554' y='0' xlink:href='#eq1-g2-100'/>
 <use x='30.762247' y='-4.338437' xlink:href='#eq1-g0-48'/>
 </g>
-</svg> between polytopes</li><li><a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> types for all polytopes</li></ul><section id="autotoc_md58"><h2><a href="#autotoc_md58">Mathematical Foundation</a></h2><p>For a mesh with topological dimension <svg class="m-math" style="width: 1.046em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.044475 8.169366">
+</svg> between polytopes</li><li><a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> types for all polytopes</li></ul><section id="autotoc_md55"><h2><a href="#autotoc_md55">Mathematical Foundation</a></h2><p>For a mesh with topological dimension <svg class="m-math" style="width: 1.046em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.044475 8.169366">
 <title>
 $ D $
 </title>
@@ -195,11 +195,11 @@ $ d&#x27; $
 <use x='0' y='0' xlink:href='#eq6-g1-100'/>
 <use x='6.082693' y='-4.338437' xlink:href='#eq6-g0-48'/>
 </g>
-</svg>-dimensional polytopes.</p></section><section id="autotoc_md59"><h2><a href="#autotoc_md59">Usage</a></h2><section id="autotoc_md60"><h3><a href="#autotoc_md60">Basic Connectivity Computation</a></h3><p><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a> must be computed before use. The <a href="#a9ec2ec9cd836d6d86d5f1415e9197c1e" class="m-doc">compute()</a> method accepts an optional Mode parameter to control how missing polytopes are handled:</p><pre class="m-code"><span class="c1">// Compute face-to-cell incidence (edges to cells in 2D)</span>
+</svg>-dimensional polytopes.</p></section><section id="autotoc_md56"><h2><a href="#autotoc_md56">Usage</a></h2><section id="autotoc_md57"><h3><a href="#autotoc_md57">Basic Connectivity Computation</a></h3><p><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a> must be computed before use. The <a href="#a9ec2ec9cd836d6d86d5f1415e9197c1e" class="m-doc">compute()</a> method accepts an optional Mode parameter to control how missing polytopes are handled:</p><pre class="m-code"><span class="c1">// Compute face-to-cell incidence (edges to cells in 2D)</span>
 <span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
 
 <span class="c1">// Compute with explicit mode (default is Mode::Discover)</span>
-<span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">Connectivity</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;::</span><span class="n">Mode</span><span class="o">::</span><span class="n">Discover</span><span class="p">);</span></pre></section><section id="autotoc_md61"><h3><a href="#autotoc_md61">Mode Parameter</a></h3><p>The Mode parameter controls how connectivity computation handles missing polytopes:</p><ul><li><strong><a href="#a46c8a310cf4c094f8c80e1cb8dc1f911aabfc3a65538a6ec86502b2b498b6b4a6" class="m-doc">Mode::<wbr />Discover</a></strong> (default): Automatically discovers and creates missing sub-polytopes (e.g., edges, faces) during computation. This is the most common mode and ensures all necessary polytopes exist.</li><li><strong><a href="#a46c8a310cf4c094f8c80e1cb8dc1f911a034d70b46e41ec9d0306b0001e04cae7" class="m-doc">Mode::<wbr />Restrict</a></strong>: Only uses polytopes that already exist in the connectivity. Missing polytopes are not created. This mode is useful when you want to restrict connectivity to a specific subset of polytopes or when all required polytopes have been pre-computed.</li></ul><p>Example demonstrating the difference:</p><pre class="m-code"><span class="n">Connectivity</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">connectivity</span><span class="p">;</span>
+<span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">Connectivity</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;::</span><span class="n">Mode</span><span class="o">::</span><span class="n">Discover</span><span class="p">);</span></pre></section><section id="autotoc_md58"><h3><a href="#autotoc_md58">Mode Parameter</a></h3><p>The Mode parameter controls how connectivity computation handles missing polytopes:</p><ul><li><strong><a href="#a46c8a310cf4c094f8c80e1cb8dc1f911aabfc3a65538a6ec86502b2b498b6b4a6" class="m-doc">Mode::<wbr />Discover</a></strong> (default): Automatically discovers and creates missing sub-polytopes (e.g., edges, faces) during computation. This is the most common mode and ensures all necessary polytopes exist.</li><li><strong><a href="#a46c8a310cf4c094f8c80e1cb8dc1f911a034d70b46e41ec9d0306b0001e04cae7" class="m-doc">Mode::<wbr />Restrict</a></strong>: Only uses polytopes that already exist in the connectivity. Missing polytopes are not created. This mode is useful when you want to restrict connectivity to a specific subset of polytopes or when all required polytopes have been pre-computed.</li></ul><p>Example demonstrating the difference:</p><pre class="m-code"><span class="n">Connectivity</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">connectivity</span><span class="p">;</span>
 <span class="n">connectivity</span><span class="p">.</span><span class="n">initialize</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 <span class="w">            </span><span class="p">.</span><span class="n">nodes</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 <span class="w">            </span><span class="p">.</span><span class="n">polytope</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">})</span>
@@ -212,7 +212,7 @@ $ d&#x27; $
 <span class="c1">// Mode::Restrict only uses existing edges</span>
 <span class="n">connectivity</span><span class="p">.</span><span class="n">clear</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
 <span class="n">connectivity</span><span class="p">.</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">Connectivity</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;::</span><span class="n">Mode</span><span class="o">::</span><span class="n">Restrict</span><span class="p">);</span>
-<span class="c1">// Uses only edges that already exist (all 5 from previous computation)</span></pre></section><section id="autotoc_md62"><h3><a href="#autotoc_md62">Common Connectivity Patterns</a></h3><pre class="m-code"><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">conn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">();</span>
+<span class="c1">// Uses only edges that already exist (all 5 from previous computation)</span></pre></section><section id="autotoc_md59"><h3><a href="#autotoc_md59">Common Connectivity Patterns</a></h3><pre class="m-code"><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">conn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">();</span>
 
 <span class="c1">// Compute cell-to-vertex connectivity</span>
 <span class="n">conn</span><span class="p">.</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
@@ -225,7 +225,7 @@ $ d&#x27; $
 
 <span class="c1">// Get the edges of a specific cell</span>
 <span class="n">conn</span><span class="p">.</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
-<span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">edges</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">conn</span><span class="p">.</span><span class="n">getIncidence</span><span class="p">({</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span><span class="w"> </span><span class="n">cellIndex</span><span class="p">);</span></pre></section></section><section id="autotoc_md63"><h2><a href="#autotoc_md63">Storage Efficiency</a></h2><p>The implementation is based on the efficient connectivity storage scheme described in <a href="citelist.html#CITEREF_logg2009efficient" class="m-doc">[6]</a>, which minimizes memory usage while enabling fast queries.</p></section><section id="autotoc_md64"><h2><a href="#autotoc_md64">Thread Safety</a></h2><p><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a> objects are not thread-safe during construction. Once finalized, read-only access is thread-safe.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_connectivity_base.html" class="m-doc">ConnectivityBase</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>, <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911" class="m-doc">Mode</a></p></aside></section>
+<span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">edges</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">conn</span><span class="p">.</span><span class="n">getIncidence</span><span class="p">({</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span><span class="w"> </span><span class="n">cellIndex</span><span class="p">);</span></pre></section></section><section id="autotoc_md60"><h2><a href="#autotoc_md60">Storage Efficiency</a></h2><p>The implementation is based on the efficient connectivity storage scheme described in <a href="citelist.html#CITEREF_logg2009efficient" class="m-doc">[6]</a>, which minimizes memory usage while enabling fast queries.</p></section><section id="autotoc_md61"><h2><a href="#autotoc_md61">Thread Safety</a></h2><p><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a> objects are not thread-safe during construction. Once finalized, read-only access is thread-safe.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_connectivity_base.html" class="m-doc">ConnectivityBase</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>, <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911" class="m-doc">Mode</a></p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -307,8 +307,8 @@ $ d&#x27; $
             </dt>
             <dd>Adds a polytope from an initializer list.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa2cbcb7e866042e69ddb93841911c698" class="m-doc">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
-              const <a href="namespace_rodin.html#ad1992f32ef98176d3cac1ed3dd4132be" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; polytope) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af4230fc5d5fb7151edcd8e335fca8ee6" class="m-doc">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
+              const <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Polytope::<wbr />Key</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp;</span>
             </dt>
             <dd>Adds a polytope to the mesh.</dd>
             <dt>
@@ -360,8 +360,8 @@ $ d $
             </dt>
             <dd>Gets the index mapping for a given dimension.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a37e809e56e56cb214aef97df05504012" class="m-doc">getIndex</a>(</span><span class="m-doc-wrap">size_t dim,
-              const <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; key) const -&gt; const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a772803ad1318e4eb4e9cd7213d3fd73d" class="m-doc">getIndex</a>(</span><span class="m-doc-wrap">size_t dim,
+              const <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Polytope::<wbr />Key</a>&amp; key) const -&gt; const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;</span>
             </dt>
             <dd>Gets the index for a polytope defined by a set of vertices.</dd>
             <dt>
@@ -387,8 +387,8 @@ $ d $
             </dt>
             <dd>Gets the geometry type of a polytope.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a5a107e6fb068cb649bcb754febe9ab0a" class="m-doc">getPolytope</a>(</span><span class="m-doc-wrap">size_t d,
-              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; const <a href="namespace_rodin.html#ad1992f32ef98176d3cac1ed3dd4132be" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aac212244257c63d25888d1d0599eeb2c" class="m-doc">getPolytope</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Polytope::<wbr />Key</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the vertex indices defining a polytope.</dd>
             <dt>
@@ -428,8 +428,8 @@ $ d \rightarrow d&#x27; $
               enum class Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /><a href="#a46c8a310cf4c094f8c80e1cb8dc1f911" class="m-doc-self">Mode</a>
             </h3>
             <p>Mode for connectivity construction.</p>
-<p>Controls how connectivity computation handles missing polytopes during the computation of incidence relations. This affects whether new sub-polytopes (edges, faces, etc.) are automatically created or only existing polytopes are used.</p><h4 id="autotoc_md65">Mode::Discover</h4><p>Automatically discovers and inserts missing polytopes during connectivity computation. This is the default and most commonly used mode.</p><p><strong>Behavior:</strong></p><ul><li>When computing connectivity from dimension <code>d</code> to dimension <code>dp</code>, any missing polytopes of dimension <code>dp</code> that are incident to polytopes of dimension <code>d</code> are automatically created and inserted.</li><li>Edge and face counts will increase as new entities are discovered.</li><li>Ensures complete connectivity information.</li></ul><p><strong>Use when:</strong></p><ul><li>Building connectivity for a new mesh</li><li>You need all sub-polytopes (edges, faces) to be available</li><li>Standard mesh operations that require complete connectivity</li></ul><p><strong>Example:</strong></p><pre class="m-code"><span class="n">connectivity</span><span class="p">.</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">Mode</span><span class="o">::</span><span class="n">Discover</span><span class="p">);</span>
-<span class="c1">// Creates all edges of cells automatically</span></pre><h4 id="autotoc_md66">Mode::Restrict</h4><p>Only uses polytopes that already exist in the connectivity without creating new ones.</p><p><strong>Behavior:</strong></p><ul><li>Only references polytopes of dimension <code>dp</code> that have been previously added to the connectivity.</li><li><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> counts remain unchanged.</li><li>Missing polytopes are silently skipped.</li><li>Useful for partial connectivity or working with pre-defined subsets.</li></ul><p><strong>Use when:</strong></p><ul><li>All required polytopes have been pre-computed</li><li>You want to restrict connectivity to a specific subset of polytopes</li><li>Re-computing connectivity relations after clearing them</li><li>Performance is critical and you&#x27;ve already built necessary polytopes</li></ul><p><strong>Example:</strong></p><pre class="m-code"><span class="c1">// First, build edges with Discover mode</span>
+<p>Controls how connectivity computation handles missing polytopes during the computation of incidence relations. This affects whether new sub-polytopes (edges, faces, etc.) are automatically created or only existing polytopes are used.</p><h4 id="autotoc_md62">Mode::Discover</h4><p>Automatically discovers and inserts missing polytopes during connectivity computation. This is the default and most commonly used mode.</p><p><strong>Behavior:</strong></p><ul><li>When computing connectivity from dimension <code>d</code> to dimension <code>dp</code>, any missing polytopes of dimension <code>dp</code> that are incident to polytopes of dimension <code>d</code> are automatically created and inserted.</li><li>Edge and face counts will increase as new entities are discovered.</li><li>Ensures complete connectivity information.</li></ul><p><strong>Use when:</strong></p><ul><li>Building connectivity for a new mesh</li><li>You need all sub-polytopes (edges, faces) to be available</li><li>Standard mesh operations that require complete connectivity</li></ul><p><strong>Example:</strong></p><pre class="m-code"><span class="n">connectivity</span><span class="p">.</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">Mode</span><span class="o">::</span><span class="n">Discover</span><span class="p">);</span>
+<span class="c1">// Creates all edges of cells automatically</span></pre><h4 id="autotoc_md63">Mode::Restrict</h4><p>Only uses polytopes that already exist in the connectivity without creating new ones.</p><p><strong>Behavior:</strong></p><ul><li>Only references polytopes of dimension <code>dp</code> that have been previously added to the connectivity.</li><li><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> counts remain unchanged.</li><li>Missing polytopes are silently skipped.</li><li>Useful for partial connectivity or working with pre-defined subsets.</li></ul><p><strong>Use when:</strong></p><ul><li>All required polytopes have been pre-computed</li><li>You want to restrict connectivity to a specific subset of polytopes</li><li>Re-computing connectivity relations after clearing them</li><li>Performance is critical and you&#x27;ve already built necessary polytopes</li></ul><p><strong>Example:</strong></p><pre class="m-code"><span class="c1">// First, build edges with Discover mode</span>
 <span class="n">connectivity</span><span class="p">.</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">Mode</span><span class="o">::</span><span class="n">Discover</span><span class="p">);</span>
 <span class="c1">// Later, rebuild the relation using existing edges</span>
 <span class="n">connectivity</span><span class="p">.</span><span class="n">clear</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
@@ -628,13 +628,13 @@ $ d \rightarrow d&#x27; $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="aa2cbcb7e866042e69ddb93841911c698"><div>
+          <section class="m-doc-details" id="af4230fc5d5fb7151edcd8e335fca8ee6"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa2cbcb7e866042e69ddb93841911c698" class="m-doc-self">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
-              const <a href="namespace_rodin.html#ad1992f32ef98176d3cac1ed3dd4132be" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; polytope)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af4230fc5d5fb7151edcd8e335fca8ee6" class="m-doc-self">polytope</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
+              const <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Polytope::<wbr />Key</a>&amp; polytope)</span></span>
             </h3>
             <p>Adds a polytope to the mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -842,7 +842,7 @@ $ D \longrightarrow D $
                 </tr>
               </tfoot>
             </table>
-<p>Computes the incidence relation from polytopes of dimension <code>d</code> to polytopes of dimension <code>dp</code>. This establishes which polytopes of dimension <code>dp</code> are incident to each polytope of dimension <code>d</code>.</p><h4 id="autotoc_md67">Common Use Cases</h4><ul><li><code>compute(2, 0)</code>: Cell-to-vertex connectivity</li><li><code>compute(2, 1)</code>: Cell-to-edge connectivity (in 2D) or Cell-to-face connectivity (in 3D)</li><li><code>compute(1, 2)</code>: Edge-to-cell connectivity (useful for boundary detection)</li><li><code>compute(2, 2)</code>: Cell-to-cell connectivity (neighboring cells)</li></ul><h4 id="autotoc_md68">Mode Selection</h4><p>Use <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911aabfc3a65538a6ec86502b2b498b6b4a6" class="m-doc">Mode::<wbr />Discover</a> when:</p><ul><li>Computing connectivity for the first time</li><li>You want all sub-polytopes to be automatically created</li><li>Working with a new mesh where edges/faces haven&#x27;t been generated</li></ul><p>Use <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911a034d70b46e41ec9d0306b0001e04cae7" class="m-doc">Mode::<wbr />Restrict</a> when:</p><ul><li>All required polytopes already exist</li><li>You want to limit connectivity to a specific subset</li><li>Re-computing connectivity after clearing previous relations</li></ul><aside class="m-note m-info"><h4>Note</h4><p><a href="#a46c8a310cf4c094f8c80e1cb8dc1f911a034d70b46e41ec9d0306b0001e04cae7" class="m-doc">Mode::<wbr />Restrict</a> requires that polytopes of the target dimension already exist. If they don&#x27;t exist, they will not be referenced in the resulting connectivity.</p></aside>
+<p>Computes the incidence relation from polytopes of dimension <code>d</code> to polytopes of dimension <code>dp</code>. This establishes which polytopes of dimension <code>dp</code> are incident to each polytope of dimension <code>d</code>.</p><h4 id="autotoc_md64">Common Use Cases</h4><ul><li><code>compute(2, 0)</code>: Cell-to-vertex connectivity</li><li><code>compute(2, 1)</code>: Cell-to-edge connectivity (in 2D) or Cell-to-face connectivity (in 3D)</li><li><code>compute(1, 2)</code>: Edge-to-cell connectivity (useful for boundary detection)</li><li><code>compute(2, 2)</code>: Cell-to-cell connectivity (neighboring cells)</li></ul><h4 id="autotoc_md65">Mode Selection</h4><p>Use <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911aabfc3a65538a6ec86502b2b498b6b4a6" class="m-doc">Mode::<wbr />Discover</a> when:</p><ul><li>Computing connectivity for the first time</li><li>You want all sub-polytopes to be automatically created</li><li>Working with a new mesh where edges/faces haven&#x27;t been generated</li></ul><p>Use <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911a034d70b46e41ec9d0306b0001e04cae7" class="m-doc">Mode::<wbr />Restrict</a> when:</p><ul><li>All required polytopes already exist</li><li>You want to limit connectivity to a specific subset</li><li>Re-computing connectivity after clearing previous relations</li></ul><aside class="m-note m-info"><h4>Note</h4><p><a href="#a46c8a310cf4c094f8c80e1cb8dc1f911a034d70b46e41ec9d0306b0001e04cae7" class="m-doc">Mode::<wbr />Restrict</a> requires that polytopes of the target dimension already exist. If they don&#x27;t exist, they will not be referenced in the resulting connectivity.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a3d9805ae5291f69eb462820b75af03ba"><div>
             <h3>
@@ -1001,13 +1001,13 @@ $ dp \to dpp $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a37e809e56e56cb214aef97df05504012"><div>
+          <section class="m-doc-details" id="a772803ad1318e4eb4e9cd7213d3fd73d"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a37e809e56e56cb214aef97df05504012" class="m-doc-self">getIndex</a>(</span><span class="m-doc-wrap">size_t dim,
-              const <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; key) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a772803ad1318e4eb4e9cd7213d3fd73d" class="m-doc-self">getIndex</a>(</span><span class="m-doc-wrap">size_t dim,
+              const <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Polytope::<wbr />Key</a>&amp; key) const</span></span>
             </h3>
             <p>Gets the index for a polytope defined by a set of vertices.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1173,12 +1173,12 @@ $ D $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a5a107e6fb068cb649bcb754febe9ab0a"><div>
+          <section class="m-doc-details" id="aac212244257c63d25888d1d0599eeb2c"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin.html#ad1992f32ef98176d3cac1ed3dd4132be" class="m-doc">Array</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5a107e6fb068cb649bcb754febe9ab0a" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">size_t d,
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Polytope::<wbr />Key</a>&amp; Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aac212244257c63d25888d1d0599eeb2c" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets the vertex indices defining a polytope.</p>

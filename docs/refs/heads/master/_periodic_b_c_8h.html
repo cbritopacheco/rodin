@@ -77,10 +77,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md392">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md393">Applications</a></li>
-            <li><a href="#autotoc_md394">Implementation</a></li>
-            <li><a href="#autotoc_md395">Usage Example</a></li>
+            <li><a href="#autotoc_md393">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md394">Applications</a></li>
+            <li><a href="#autotoc_md395">Implementation</a></li>
+            <li><a href="#autotoc_md396">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -90,7 +90,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines classes for imposing periodic boundary conditions in finite element problems. Periodic conditions enforce that the solution values match across opposite boundaries of the domain.</p><section id="autotoc_md392"><h3><a href="#autotoc_md392">Mathematical Foundation</a></h3><p>A periodic boundary condition specifies:</p><div class="m-math"><svg style="width: 16.198em; height: 1.245em;" viewBox="116.27065 -11.955168 155.503566 11.955168">
+<p>This file defines classes for imposing periodic boundary conditions in finite element problems. Periodic conditions enforce that the solution values match across opposite boundaries of the domain.</p><section id="autotoc_md393"><h3><a href="#autotoc_md393">Mathematical Foundation</a></h3><p>A periodic boundary condition specifies:</p><div class="m-math"><svg style="width: 16.198em; height: 1.245em;" viewBox="116.27065 -11.955168 155.503566 11.955168">
 <title>
 \[
   u(x + L) = u(x) \quad \text{for} \quad x \in \Gamma_-
@@ -165,7 +165,7 @@ $ L $
 <g id='eq4-page1'>
 <use x='0' y='0' xlink:href='#eq4-g0-76'/>
 </g>
-</svg>.</p></section><section id="autotoc_md393"><h3><a href="#autotoc_md393">Applications</a></h3><ul><li>Crystal lattice simulations</li><li>Unit cell problems in homogenization</li><li>Fluid flow in periodic geometries</li><li>Wave propagation in periodic media</li></ul></section><section id="autotoc_md394"><h3><a href="#autotoc_md394">Implementation</a></h3><p>Periodic conditions are enforced by:</p><ol><li>Identifying matching DOF pairs on opposite boundaries</li><li>Constraining one DOF to equal its periodic partner</li><li>Eliminating dependent DOFs from the system</li></ol></section><section id="autotoc_md395"><h3><a href="#autotoc_md395">Usage Example</a></h3><pre class="m-code"><span class="c1">// Periodic BC between boundaries 1 and 2</span>
+</svg>.</p></section><section id="autotoc_md394"><h3><a href="#autotoc_md394">Applications</a></h3><ul><li>Crystal lattice simulations</li><li>Unit cell problems in homogenization</li><li>Fluid flow in periodic geometries</li><li>Wave propagation in periodic media</li></ul></section><section id="autotoc_md395"><h3><a href="#autotoc_md395">Implementation</a></h3><p>Periodic conditions are enforced by:</p><ol><li>Identifying matching DOF pairs on opposite boundaries</li><li>Constraining one DOF to equal its periodic partner</li><li>Eliminating dependent DOFs from the system</li></ol></section><section id="autotoc_md396"><h3><a href="#autotoc_md396">Usage Example</a></h3><pre class="m-code"><span class="c1">// Periodic BC between boundaries 1 and 2</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">pbc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PeriodicBC</span><span class="p">(</span><span class="n">u</span><span class="p">).</span><span class="n">from</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="n">to</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span></pre></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>

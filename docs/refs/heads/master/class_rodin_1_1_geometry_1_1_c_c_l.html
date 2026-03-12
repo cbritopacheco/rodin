@@ -79,16 +79,16 @@
           <h3>Contents</h3>
           <ul>
             <li>
-              <a href="#autotoc_md82">Key Components</a>
+              <a href="#autotoc_md79">Key Components</a>
               <ul>
-                <li><a href="#autotoc_md83">Mesh Data Structures</a></li>
-                <li><a href="#autotoc_md84">Connectivity Management</a></li>
-                <li><a href="#autotoc_md85">Geometric Transformations</a></li>
-                <li><a href="#autotoc_md86">Mesh Generation</a></li>
-                <li><a href="#autotoc_md87">Partitioning</a></li>
+                <li><a href="#autotoc_md80">Mesh Data Structures</a></li>
+                <li><a href="#autotoc_md81">Connectivity Management</a></li>
+                <li><a href="#autotoc_md82">Geometric Transformations</a></li>
+                <li><a href="#autotoc_md83">Mesh Generation</a></li>
+                <li><a href="#autotoc_md84">Partitioning</a></li>
               </ul>
             </li>
-            <li><a href="#autotoc_md88">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md85">Mathematical Foundation</a></li>
             <li>
               Reference
               <ul>
@@ -99,7 +99,7 @@
             </li>
           </ul>
         </nav>
-<p>The <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> module provides comprehensive support for mesh generation, manipulation, and geometric computations in finite element analysis. It includes data structures for representing meshes, connectivity information, geometric transformations, and algorithms for mesh processing.</p><section id="autotoc_md82"><h2><a href="#autotoc_md82">Key Components</a></h2><section id="autotoc_md83"><h3><a href="#autotoc_md83">Mesh Data Structures</a></h3><ul><li><strong><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a></strong>: Core unstructured mesh class with support for mixed element types</li><li><strong><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a></strong>: <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> representing a subregion of a parent mesh</li><li><strong><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a></strong>: <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> shard for distributed parallel computing</li></ul></section><section id="autotoc_md84"><h3><a href="#autotoc_md84">Connectivity Management</a></h3><ul><li>Automatic computation of incidence relations <svg class="m-math" style="width: 3.444em; height: 0.913em; vertical-align: -0.000em;" viewBox="0 -8.76629 33.059191 8.76629">
+<p>The <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> module provides comprehensive support for mesh generation, manipulation, and geometric computations in finite element analysis. It includes data structures for representing meshes, connectivity information, geometric transformations, and algorithms for mesh processing.</p><section id="autotoc_md79"><h2><a href="#autotoc_md79">Key Components</a></h2><section id="autotoc_md80"><h3><a href="#autotoc_md80">Mesh Data Structures</a></h3><ul><li><strong><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a></strong>: Core unstructured mesh class with support for mixed element types</li><li><strong><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a></strong>: <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> representing a subregion of a parent mesh</li><li><strong><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a></strong>: <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> shard for distributed parallel computing</li></ul></section><section id="autotoc_md81"><h3><a href="#autotoc_md81">Connectivity Management</a></h3><ul><li>Automatic computation of incidence relations <svg class="m-math" style="width: 3.444em; height: 0.913em; vertical-align: -0.000em;" viewBox="0 -8.76629 33.059191 8.76629">
 <title>
 $ d \rightarrow d&#x27; $
 </title>
@@ -114,7 +114,7 @@ $ d \rightarrow d&#x27; $
 <use x='24.679554' y='0' xlink:href='#eq1-g2-100'/>
 <use x='30.762247' y='-4.338437' xlink:href='#eq1-g0-48'/>
 </g>
-</svg></li><li>Efficient storage using sparse data structures</li><li>Support for arbitrary polytope dimensions</li></ul></section><section id="autotoc_md85"><h3><a href="#autotoc_md85">Geometric Transformations</a></h3><ul><li>Reference-to-physical element mappings</li><li>Isoparametric transformations</li><li>Jacobian computations</li></ul></section><section id="autotoc_md86"><h3><a href="#autotoc_md86">Mesh Generation</a></h3><ul><li>Structured mesh generation (uniform grids)</li><li>Support for various file formats (MFEM, GMSH, MEDIT)</li><li><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> refinement and coarsening</li></ul></section><section id="autotoc_md87"><h3><a href="#autotoc_md87">Partitioning</a></h3><ul><li>Domain decomposition for parallel computing</li><li>Ghost polytope tracking</li><li>Load balancing strategies</li></ul></section></section><section id="autotoc_md88"><h2><a href="#autotoc_md88">Mathematical Foundation</a></h2><p>A mesh <svg class="m-math" style="width: 1.187em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169354 11.391224 9.962617">
+</svg></li><li>Efficient storage using sparse data structures</li><li>Support for arbitrary polytope dimensions</li></ul></section><section id="autotoc_md82"><h3><a href="#autotoc_md82">Geometric Transformations</a></h3><ul><li>Reference-to-physical element mappings</li><li>Isoparametric transformations</li><li>Jacobian computations</li></ul></section><section id="autotoc_md83"><h3><a href="#autotoc_md83">Mesh Generation</a></h3><ul><li>Structured mesh generation (uniform grids)</li><li>Support for various file formats (MFEM, GMSH, MEDIT)</li><li><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> refinement and coarsening</li></ul></section><section id="autotoc_md84"><h3><a href="#autotoc_md84">Partitioning</a></h3><ul><li>Domain decomposition for parallel computing</li><li>Ghost polytope tracking</li><li>Load balancing strategies</li></ul></section></section><section id="autotoc_md85"><h2><a href="#autotoc_md85">Mathematical Foundation</a></h2><p>A mesh <svg class="m-math" style="width: 1.187em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169354 11.391224 9.962617">
 <title>
 $ \mathcal{T}_h $
 </title>

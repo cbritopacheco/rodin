@@ -94,8 +94,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md100">Usage Example</a></li>
-            <li><a href="#autotoc_md101">Thread Safety</a></li>
+            <li><a href="#autotoc_md97">Usage Example</a></li>
+            <li><a href="#autotoc_md98">Thread Safety</a></li>
             <li>
               Reference
               <ul>
@@ -105,12 +105,12 @@
             </li>
           </ul>
         </nav>
-<p>This CRTP (Curiously Recurring Template Pattern) base class provides common iterator functionality for traversing polytopes in a mesh.</p><section id="autotoc_md100"><h2><a href="#autotoc_md100">Usage Example</a></h2><pre class="m-code"><span class="c1">// Iterate over all cells in a mesh</span>
+<p>This CRTP (Curiously Recurring Template Pattern) base class provides common iterator functionality for traversing polytopes in a mesh.</p><section id="autotoc_md97"><h2><a href="#autotoc_md97">Usage Example</a></h2><pre class="m-code"><span class="c1">// Iterate over all cells in a mesh</span>
 <span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getCell</span><span class="p">();</span><span class="w"> </span><span class="n">it</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">it</span><span class="p">)</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">Cell</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cell</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">it</span><span class="p">;</span>
 <span class="w">  </span><span class="c1">// Process cell...</span>
-<span class="p">}</span></pre></section><section id="autotoc_md101"><h2><a href="#autotoc_md101">Thread Safety</a></h2><p><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> iterators are <strong>not</strong> thread-safe. Each thread should use its own iterator instance.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a>, <a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a>, <a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a>, <a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a></p></aside></section>
+<span class="p">}</span></pre></section><section id="autotoc_md98"><h2><a href="#autotoc_md98">Thread Safety</a></h2><p><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> iterators are <strong>not</strong> thread-safe. Each thread should use its own iterator instance.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a>, <a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a>, <a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a>, <a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a></p></aside></section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">

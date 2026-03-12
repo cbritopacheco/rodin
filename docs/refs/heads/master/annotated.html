@@ -322,11 +322,11 @@
                   </li>
                   <li>class <a href="class_rodin_1_1_geometry_1_1_set_index_generator.html" class="m-doc">SetIndexGenerator</a> <span class="m-doc">Index generator backed by a set of indices.</span></li>
                   <li class="m-doc-collapsible collapsed">
-                    <a href="#" onclick="return toggle(this)">class</a> <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a> <span class="m-doc">Advanced mesh shard for distributed parallel computing.</span>
+                    <a href="#" onclick="return toggle(this)">class</a> <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a> <span class="m-doc">Local view of a distributed mesh partition.</span>
                     <ul class="m-doc">
-                      <li>class <a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Builder</a> <span class="m-doc"><a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Builder</a> for constructing <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a> instances.</span></li>
+                      <li>class <a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Builder</a> <span class="m-doc">Incremental builder for <code><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a></code>.</span></li>
                       <li>class <a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a> <span class="m-doc">Bitmask flags indicating polytope state.</span></li>
-                      <li>struct <a href="struct_rodin_1_1_geometry_1_1_shard_1_1_polytope_map.html" class="m-doc">PolytopeMap</a> <span class="m-doc">Bidirectional polytope index mapping.</span></li>
+                      <li>struct <a href="struct_rodin_1_1_geometry_1_1_shard_1_1_polytope_map.html" class="m-doc">PolytopeMap</a> <span class="m-doc">Bidirectional correspondence between shard-local and parent indices.</span></li>
                     </ul>
                   </li>
                   <li>class <a href="class_rodin_1_1_geometry_1_1_sharder.html" class="m-doc">Sharder</a> <span class="m-doc">Interface for mesh sharding algorithms.</span></li>
@@ -432,33 +432,22 @@
                       <li>namespace <a href="namespace_rodin_1_1_plot_1_1_artist_1_1_axes.html" class="m-doc">Axes</a> <span class="m-doc">Contains artist functionality for <a href="namespace_rodin_1_1_plot_1_1_artist_1_1_axes.html" class="m-doc">Axes</a>.</span></li>
                       <li>namespace <a href="namespace_rodin_1_1_plot_1_1_artist_1_1_axis.html" class="m-doc">Axis</a> <span class="m-doc">Contains artist functionality for <a href="namespace_rodin_1_1_plot_1_1_artist_1_1_axis.html" class="m-doc">Axis</a>.</span></li>
                       <li>namespace <a href="namespace_rodin_1_1_plot_1_1_artist_1_1_lines.html" class="m-doc">Lines</a> <span class="m-doc">Contains artist functionality for <a href="namespace_rodin_1_1_plot_1_1_artist_1_1_lines.html" class="m-doc">Lines</a>.</span></li>
-                      <li>class <a href="class_rodin_1_1_plot_1_1_artist_1_1_figure.html" class="m-doc">Figure</a> <span class="m-doc">Represents a figure plot.</span></li>
                     </ul>
                   </li>
                   <li class="m-doc-collapsible collapsed">
                     <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_plot_1_1_backend.html" class="m-doc">Backend</a> <span class="m-doc">Module for the <a href="namespace_rodin_1_1_plot.html" class="m-doc">Rodin::<wbr />Plot</a> backend.</span>
                     <ul class="m-doc">
-                      <li class="m-doc-collapsible collapsed">
-                        <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_plot_1_1_backend_1_1_bases.html" class="m-doc">Bases</a> <span class="m-doc">Contains base backend functionality.</span>
-                        <ul class="m-doc">
-                          <li>class <a href="class_rodin_1_1_plot_1_1_backend_1_1_bases_1_1_base_artist2_d.html" class="m-doc">BaseArtist2D</a> <span class="m-doc">Base class for artists in 2D.</span></li>
-                          <li>class <a href="class_rodin_1_1_plot_1_1_backend_1_1_bases_1_1_base_drawable2_d.html" class="m-doc">BaseDrawable2D</a> <span class="m-doc">Base class for drawables.</span></li>
-                          <li>class <a href="class_rodin_1_1_plot_1_1_backend_1_1_bases_1_1_base_figure.html" class="m-doc">BaseFigure</a> <span class="m-doc">Base class for figures.</span></li>
-                        </ul>
-                      </li>
+                      <li>namespace <a href="namespace_rodin_1_1_plot_1_1_backend_1_1_bases.html" class="m-doc">Bases</a> <span class="m-doc">Contains base backend functionality.</span></li>
                       <li>namespace <a href="namespace_rodin_1_1_plot_1_1_backend_1_1_event.html" class="m-doc">Event</a> <span class="m-doc">Contains backend event functionality.</span></li>
                       <li class="m-doc-collapsible collapsed">
                         <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_plot_1_1_backend_1_1_renderer.html" class="m-doc">Renderer</a> <span class="m-doc">Contains backend renderer functionality.</span>
                         <ul class="m-doc">
                           <li>namespace <a href="namespace_rodin_1_1_plot_1_1_backend_1_1_renderer_1_1_drawables.html" class="m-doc">Drawables</a> <span class="m-doc">Contains backend renderer for drawables.</span></li>
-                          <li>class <a href="class_rodin_1_1_plot_1_1_backend_1_1_renderer_1_1_camera2_d.html" class="m-doc">Camera2D</a> <span class="m-doc">Represents a camera in 2D.</span></li>
                         </ul>
                       </li>
                     </ul>
                   </li>
                   <li>namespace <a href="namespace_rodin_1_1_plot_1_1_g_u_i.html" class="m-doc">GUI</a> <span class="m-doc">Contains <a href="namespace_rodin_1_1_plot_1_1_g_u_i.html" class="m-doc">GUI</a> functionality.</span></li>
-                  <li>class <a href="class_rodin_1_1_plot_1_1_configuration.html" class="m-doc">Configuration</a> <span class="m-doc">Represents the configuration parameters to use for plotting.</span></li>
-                  <li>class <a href="class_rodin_1_1_plot_1_1_plot.html" class="m-doc">Plot</a> <span class="m-doc">Main plotting interface for finite element visualization.</span></li>
                 </ul>
               </li>
               <li class="m-doc-collapsible collapsed">
@@ -502,13 +491,13 @@
                   <li>class <a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html" class="m-doc">LeastSquaresCG</a> <span class="m-doc">Least-squares conjugate gradient solver.</span></li>
                   <li>class <a href="class_rodin_1_1_solver_1_1_least_squares_c_g_3_01_math_1_1_linear_system_3_01_math_1_1_matrix_3_11a3f85e3632b6a54f981496138a48a6.html" class="m-doc">LeastSquaresCG&lt;Math::LinearSystem&lt;Math::Matrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">Least-squares conjugate gradient solver for dense systems.</span></li>
                   <li>class <a href="class_rodin_1_1_solver_1_1_least_squares_c_g_3_01_math_1_1_linear_system_3_01_math_1_1_sparse_mafc60ae01e8632722bca7ae1b93892333.html" class="m-doc">LeastSquaresCG&lt;Math::LinearSystem&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">Least-squares conjugate gradient solver for sparse systems.</span></li>
+                  <li>class <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">LinearSolverBase</a> <span class="m-doc">Abstract base class for linear system solvers.</span></li>
                   <li>class <a href="class_rodin_1_1_solver_1_1_m_i_n_r_e_s_3_01_math_1_1_linear_system_3_01_math_1_1_matrix_3_01_scae6360e13a1df75f352930829c5698bb9.html" class="m-doc">MINRES&lt;Math::LinearSystem&lt;Math::Matrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">MINRES solver for symmetric dense systems.</span></li>
                   <li>class <a href="class_rodin_1_1_solver_1_1_m_i_n_r_e_s_3_01_math_1_1_linear_system_3_01_math_1_1_sparse_matrix_3e99a3bb6569edadfe0405a4bafdc55c9.html" class="m-doc">MINRES&lt;Math::LinearSystem&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">MINRES solver for symmetric sparse systems.</span></li>
                   <li>class <a href="class_rodin_1_1_solver_1_1_simplicial_l_d_l_t.html" class="m-doc">SimplicialLDLT</a> <span class="m-doc">Direct sparse <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> Cholesky factorization solver.</span></li>
                   <li>class <a href="class_rodin_1_1_solver_1_1_simplicial_l_d_l_t_3_01_math_1_1_linear_system_3_01_math_1_1_sparse_m409307278b47390e9c22e5e8b5e51940.html" class="m-doc">SimplicialLDLT&lt;Math::LinearSystem&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">Simplicial <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> Cholesky factorization without square root.</span></li>
                   <li>class <a href="class_rodin_1_1_solver_1_1_simplicial_l_l_t.html" class="m-doc">SimplicialLLT</a> <span class="m-doc">Direct sparse LLT Cholesky factorization solver.</span></li>
                   <li>class <a href="class_rodin_1_1_solver_1_1_simplicial_l_l_t_3_01_math_1_1_linear_system_3_01_math_1_1_sparse_mat6cf2d17e83f6f1976d3fcdf5fe578bef.html" class="m-doc">SimplicialLLT&lt;Math::LinearSystem&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">Simplicial LLT Cholesky factorization for sparse SPD matrices.</span></li>
-                  <li>class <a href="class_rodin_1_1_solver_1_1_solver_base.html" class="m-doc">SolverBase</a> <span class="m-doc">Abstract base class for linear system solvers.</span></li>
                   <li>class <a href="class_rodin_1_1_solver_1_1_sparse_l_u.html" class="m-doc">SparseLU</a> <span class="m-doc">Sparse supernodal LU factorization for general matrices.</span></li>
                   <li>class <a href="class_rodin_1_1_solver_1_1_sparse_l_u_3_01_math_1_1_linear_system_3_01_math_1_1_sparse_matrix_3_e6695eaf9bd116f720f78ee93a159f3e.html" class="m-doc">SparseLU&lt;Math::LinearSystem&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">Sparse supernodal LU factorization solver for general sparse matrices.</span></li>
                   <li>class <a href="class_rodin_1_1_solver_1_1_sparse_q_r.html" class="m-doc">SparseQR</a> <span class="m-doc">Sparse QR factorization with column pivoting.</span></li>
@@ -989,9 +978,6 @@
               <li>struct <a href="struct_rodin_1_1_default_sentinel_t.html" class="m-doc">DefaultSentinelT</a> <span class="m-doc">Sentinel type for default-constructed iterators.</span></li>
               <li>class <a href="class_rodin_1_1_identifiable.html" class="m-doc">Identifiable</a> <span class="m-doc">Abstract base class for objects that can be copied.</span></li>
               <li>struct <a href="struct_rodin_1_1_index_array_equality.html" class="m-doc">IndexArrayEquality</a> <span class="m-doc">Functor for comparing two index arrays for equality.</span></li>
-              <li>struct <a href="struct_rodin_1_1_index_array_hash.html" class="m-doc">IndexArrayHash</a> <span class="m-doc">Functor for computing a hash value for an index array.</span></li>
-              <li>struct <a href="struct_rodin_1_1_index_array_symmetric_equality.html" class="m-doc">IndexArraySymmetricEquality</a> <span class="m-doc">Functor for comparing two index arrays for symmetric equality.</span></li>
-              <li>struct <a href="struct_rodin_1_1_index_array_symmetric_hash.html" class="m-doc">IndexArraySymmetricHash</a> <span class="m-doc">Functor for computing a symmetric hash value for an index array.</span></li>
               <li>struct <a href="struct_rodin_1_1_index_set_equality.html" class="m-doc">IndexSetEquality</a> <span class="m-doc">Functor for comparing two IndexSet objects for equality.</span></li>
               <li>struct <a href="struct_rodin_1_1_index_set_hash.html" class="m-doc">IndexSetHash</a> <span class="m-doc">Functor for computing a hash value for an IndexSet.</span></li>
               <li>class <a href="class_rodin_1_1_moveable.html" class="m-doc">Moveable</a> <span class="m-doc">Abstract base class for objects that can be moved.</span></li>
