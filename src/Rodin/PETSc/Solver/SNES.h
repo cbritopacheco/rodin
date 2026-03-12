@@ -46,7 +46,7 @@ namespace Rodin::Solver
       ::SNESType m_type;
       PetscReal m_abstol, m_rtol, m_stol;
       PetscInt m_maxIt, m_maxF;
-      KSPType m_ksp;
+      KSPType m_kspHandle;
   };
 }
 

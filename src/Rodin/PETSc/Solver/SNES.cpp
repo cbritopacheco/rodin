@@ -7,13 +7,13 @@ namespace Rodin::Solver
 {
   SNES::SNES(MPI_Comm comm)
     : m_snes(PETSC_NULLPTR),
-      m_type(PETSC_NULLPTR),
+      m_type(SNESNEWTONLS),
       m_abstol(PETSC_DECIDE),
       m_rtol(PETSC_DECIDE),
       m_stol(PETSC_DECIDE),
       m_maxIt(PETSC_DECIDE),
       m_maxF(PETSC_DECIDE),
-      m_ksp(PETSC_NULLPTR)
+      m_kspHandle(PETSC_NULLPTR)
   {
     PetscErrorCode ierr = SNESCreate(comm, &m_snes);
     assert(ierr == PETSC_SUCCESS);
@@ -50,7 +50,7 @@ namespace Rodin::Solver
 
   SNES& SNES::setKSP(KSPType ksp) noexcept
   {
-    m_ksp = ksp;
+    m_kspHandle = ksp;
     return *this;
   }
 
@@ -64,9 +64,9 @@ namespace Rodin::Solver
     ierr = SNESSetTolerances(m_snes, m_abstol, m_rtol, m_stol, m_maxIt, m_maxF);
     assert(ierr == PETSC_SUCCESS);
 
-    if (m_ksp)
+    if (m_kspHandle)
     {
-      ierr = SNESSetKSP(m_snes, m_ksp);
+      ierr = SNESSetKSP(m_snes, m_kspHandle);
       assert(ierr == PETSC_SUCCESS);
     }
 
