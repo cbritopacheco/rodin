@@ -25,10 +25,9 @@
 #include "Rodin/IO/MeshPrinter.h"
 #include "Rodin/IO/GridFunctionLoader.h"
 #include "Rodin/IO/GridFunctionPrinter.h"
+#include "Rodin/FormLanguage/Traits.h"
 
-#if defined(RODIN_IO_HAS_HDF5) && RODIN_IO_HAS_HDF5
-  #include <hdf5.h>
-#endif
+#include <hdf5.h>
 
 namespace Rodin::IO
 {
@@ -67,7 +66,6 @@ namespace Rodin::IO
       template <class MeshType>
       static void saveMesh(const MeshType& mesh, const boost::filesystem::path& filename)
       {
-#if defined(RODIN_IO_HAS_HDF5) && RODIN_IO_HAS_HDF5
         const auto file = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
         check(file >= 0, "Failed to create HDF5 file.");
 
@@ -107,17 +105,11 @@ namespace Rodin::IO
         saveAttributes(file, mesh);
 
         H5Fclose(file);
-#else
-        (void)mesh;
-        (void)filename;
-        Alert::Exception() << "Rodin was built without HDF5 support." << Alert::Raise;
-#endif
       }
 
       template <class MeshType>
       static void loadMesh(MeshType& mesh, const boost::filesystem::path& filename)
       {
-#if defined(RODIN_IO_HAS_HDF5) && RODIN_IO_HAS_HDF5
         const auto file = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
         check(file >= 0, "Failed to open HDF5 file.");
 
@@ -125,7 +117,7 @@ namespace Rodin::IO
             readScalarDataset<unsigned long long>(file, Keyword::SpaceDimension, H5T_NATIVE_ULLONG));
 
         auto vertices = readVertices(file);
-        auto connectivity = loadConnectivity<typename MeshType::ContextType>(file);
+        auto connectivity = loadConnectivity<typename FormLanguage::Traits<MeshType>::ContextType>(file);
         auto attributes = loadAttributes(file, connectivity);
 
         Geometry::PolytopeTransformationIndex transformations;
@@ -142,11 +134,6 @@ namespace Rodin::IO
           .finalize();
 
         H5Fclose(file);
-#else
-        (void)mesh;
-        (void)filename;
-        Alert::Exception() << "Rodin was built without HDF5 support." << Alert::Raise;
-#endif
       }
 
       template <class GridFunctionType>
@@ -154,7 +141,6 @@ namespace Rodin::IO
           const GridFunctionType& gf,
           const boost::filesystem::path& filename)
       {
-#if defined(RODIN_IO_HAS_HDF5) && RODIN_IO_HAS_HDF5
         const auto file = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
         check(file >= 0, "Failed to create HDF5 file.");
 
@@ -184,11 +170,6 @@ namespace Rodin::IO
         writeScalarDataset(file, Keyword::GridFunctionMetaDimension, H5T_NATIVE_ULLONG, vectorDim);
 
         H5Fclose(file);
-#else
-        (void)gf;
-        (void)filename;
-        Alert::Exception() << "Rodin was built without HDF5 support." << Alert::Raise;
-#endif
       }
 
       template <class GridFunctionType>
@@ -196,7 +177,6 @@ namespace Rodin::IO
           GridFunctionType& gf,
           const boost::filesystem::path& filename)
       {
-#if defined(RODIN_IO_HAS_HDF5) && RODIN_IO_HAS_HDF5
         const auto file = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
         check(file >= 0, "Failed to open HDF5 file.");
 
@@ -214,15 +194,9 @@ namespace Rodin::IO
           data[i] = static_cast<typename std::remove_reference_t<decltype(data[0])>>(values[i]);
 
         H5Fclose(file);
-#else
-        (void)gf;
-        (void)filename;
-        Alert::Exception() << "Rodin was built without HDF5 support." << Alert::Raise;
-#endif
       }
 
     private:
-#if defined(RODIN_IO_HAS_HDF5) && RODIN_IO_HAS_HDF5
       // Sentinel value used in serialized attribute arrays to encode "no attribute".
       static constexpr unsigned long long NullAttributeMarker = std::numeric_limits<unsigned long long>::max();
 
@@ -531,12 +505,11 @@ namespace Rodin::IO
           {
             const auto value = serialized[static_cast<size_t>(i)];
             if (value != NullAttributeMarker)
-              attrs.set({ d, i }, Optional<Attribute>(static_cast<Attribute>(value)));
+              attrs.set({ d, i }, Optional<Geometry::Attribute>(static_cast<Geometry::Attribute>(value)));
           }
         }
         return attrs;
       }
-#endif
   };
 
   template <>

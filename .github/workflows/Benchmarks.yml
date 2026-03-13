@@ -40,6 +40,7 @@ jobs:
           libgl1-mesa-dev
           lcov
           libeigen3-dev
+          libhdf5-dev
           libsdl2-dev
           libglfw3-dev
           libopenal-dev
@@ -77,4 +78,3 @@ jobs:
           comment-on-alert: true
           alert-threshold: "150%"
           benchmark-data-dir-path: benchmarks/${{ github.ref }}
-
