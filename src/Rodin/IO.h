@@ -18,7 +18,6 @@
  * Supported formats include:
  * - MEDIT (.mesh)
  * - MFEM (.mfem)
- * - EnSight (.case)
  *
  * @see Rodin::IO
  */

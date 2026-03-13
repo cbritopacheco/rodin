@@ -120,7 +120,7 @@ namespace Rodin::Variational
    * ## Key Features
    * - **DOF Management**: Automatic handling of degrees of freedom storage
    * - **Function Evaluation**: Point-wise evaluation via finite element interpolation
-   * - **I/O Support**: Export to various visualization formats (EnSight, MEDIT, MFEM)
+   * - **I/O Support**: Export to various visualization formats (MEDIT, MFEM)
    * - **Space Association**: Strong association with underlying finite element space
    */
 
@@ -461,7 +461,7 @@ namespace Rodin::Variational
        * @return Reference to this grid function
        *
        * Reads DOF data from a file in the specified format. Supported formats
-       * include MFEM, EnSight, and MEDIT.
+       * include MFEM, and MEDIT.
        */
       Derived& load(
           const boost::filesystem::path& filename,
@@ -558,12 +558,6 @@ namespace Rodin::Variational
               static_cast<const Derived&>(*this)).print(filename);
             break;
           }
-          // case IO::FileFormat::ENSIGHT6:
-          // {
-          //   IO::GridFunctionPrinter<IO::FileFormat::ENSIGHT6, FESType, DataType>(
-          //     static_cast<const Derived&>(*this)).print(output);
-          //   break;
-          // }
           default:
           {
             Alert::MemberFunctionException(*this, __func__)
