@@ -62,3 +62,29 @@ target_link_libraries(RodinManufacturedH1LinearElasticity3D
 gtest_discover_tests(RodinManufacturedH1LinearElasticity3D
     PROPERTIES
     LABELS manufactured)
+
+add_executable(RodinManufacturedH1NavierStokes NavierStokes.cpp)
+target_link_libraries(RodinManufacturedH1NavierStokes
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solver
+  )
+gtest_discover_tests(RodinManufacturedH1NavierStokes
+    PROPERTIES
+    LABELS manufactured)
+
+add_executable(RodinManufacturedH1NavierStokes3D NavierStokes3D.cpp)
+target_link_libraries(RodinManufacturedH1NavierStokes3D
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solver
+  )
+gtest_discover_tests(RodinManufacturedH1NavierStokes3D
+    PROPERTIES
+    LABELS manufactured)
