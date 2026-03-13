@@ -42,6 +42,7 @@ jobs:
           sudo apt-get update && sudo apt-get install -y
           libboost1.74-all-dev
           libeigen3-dev
+          libhdf5-dev
           libomp-dev
           libsuitesparse-dev
           mpich
@@ -94,6 +95,7 @@ jobs:
             boost \
             boost-mpi \
             eigen \
+            hdf5 \
             libomp \
             open-mpi \
             petsc \
@@ -117,5 +119,4 @@ jobs:
           -DRODIN_USE_PETSC=${{ matrix.petsc }}
       - name: Build
         run: cmake --build ${{github.workspace}}/build
-
 

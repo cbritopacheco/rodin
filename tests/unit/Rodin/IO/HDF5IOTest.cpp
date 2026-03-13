@@ -15,9 +15,7 @@
 #include <Rodin/Variational.h>
 #include <Rodin/IO.h>
 
-#if defined(RODIN_IO_HAS_HDF5) && RODIN_IO_HAS_HDF5
-  #include <hdf5.h>
-#endif
+#include <hdf5.h>
 
 using namespace Rodin;
 using namespace Rodin::IO;
@@ -28,9 +26,6 @@ namespace Rodin::Tests::Unit
 {
   TEST(Rodin_IO_HDF5, SaveMeshGridFunctionAndXDMF)
   {
-#if !(defined(RODIN_IO_HAS_HDF5) && RODIN_IO_HAS_HDF5)
-    GTEST_SKIP() << "Rodin was built without HDF5 support.";
-#else
     const std::string meshFile = "/tmp/rodin_hdf5_mesh.h5";
     const std::string gfFile = "/tmp/rodin_hdf5_gf.h5";
     const std::string xdmfFile = "/tmp/rodin_hdf5.xdmf";
@@ -123,6 +118,5 @@ namespace Rodin::Tests::Unit
     std::remove(meshFile.c_str());
     std::remove(gfFile.c_str());
     std::remove(xdmfFile.c_str());
-#endif
   }
 }

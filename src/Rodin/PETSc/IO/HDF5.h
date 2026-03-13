@@ -18,9 +18,7 @@
 #include "Rodin/IO/HDF5.h"
 #include "Rodin/Alert.h"
 
-#if defined(RODIN_IO_HAS_HDF5) && RODIN_IO_HAS_HDF5
 #include <hdf5.h>
-#endif
 
 namespace Rodin::IO
 {
@@ -73,7 +71,6 @@ namespace Rodin::IO
       return values;
     }
 
-#if defined(RODIN_IO_HAS_HDF5) && RODIN_IO_HAS_HDF5
     inline void writeScalarULL(hid_t file, const char* path, unsigned long long value)
     {
       const auto space = H5Screate(H5S_SCALAR);
@@ -116,7 +113,6 @@ namespace Rodin::IO
       H5Dclose(ds);
       return value;
     }
-#endif
 
     inline void scatterIntoPETScVector(::Vec& vec, const std::vector<double>& values)
     {
@@ -173,7 +169,6 @@ namespace Rodin::IO
 
       void load(const boost::filesystem::path& filename) override
       {
-#if defined(RODIN_IO_HAS_HDF5) && RODIN_IO_HAS_HDF5
         auto& gf = this->getObject();
         auto& vec = gf.getData();
 
@@ -214,10 +209,6 @@ namespace Rodin::IO
         Internal::assertCondition(bcastErr == MPI_SUCCESS, "Failed to broadcast HDF5 GridFunction data.");
 
         Internal::scatterIntoPETScVector(vec, values);
-#else
-        (void)filename;
-        Alert::Exception() << "Rodin was built without HDF5 support." << Alert::Raise;
-#endif
       }
   };
 
@@ -243,7 +234,6 @@ namespace Rodin::IO
 
       void print(const boost::filesystem::path& filename) const
       {
-#if defined(RODIN_IO_HAS_HDF5) && RODIN_IO_HAS_HDF5
         const auto& gf = this->getObject();
         const auto& vec = gf.getData();
 
@@ -291,10 +281,6 @@ namespace Rodin::IO
 
           H5Fclose(file);
         }
-#else
-        (void)filename;
-        Alert::Exception() << "Rodin was built without HDF5 support." << Alert::Raise;
-#endif
       }
 
   };

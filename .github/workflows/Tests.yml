@@ -43,6 +43,7 @@ jobs:
           sudo apt-get update && sudo apt-get install -y
           lcov
           libeigen3-dev
+          libhdf5-dev
           libomp-dev
           libgl1-mesa-dev
           libsdl2-dev
@@ -118,6 +119,7 @@ jobs:
           sudo apt-get update && sudo apt-get install -y
           lcov
           libeigen3-dev
+          libhdf5-dev
           libomp-dev
           libgl1-mesa-dev
           libsdl2-dev
@@ -197,6 +199,7 @@ jobs:
           gcc-14 g++-14
           lcov
           libeigen3-dev
+          libhdf5-dev
           libomp-dev
           libgl1-mesa-dev
           libsdl2-dev

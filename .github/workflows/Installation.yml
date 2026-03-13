@@ -41,6 +41,7 @@ jobs:
           sudo apt-get install -y \
             libboost-all-dev \
             libeigen3-dev \
+            libhdf5-dev \
             libomp-dev
             
       - name: Run installation test
@@ -79,7 +80,7 @@ jobs:
           
       - name: Install dependencies
         run: |
-          brew install boost eigen libomp
+          brew install boost eigen hdf5 libomp
           
       - name: Link libomp
         run: |
