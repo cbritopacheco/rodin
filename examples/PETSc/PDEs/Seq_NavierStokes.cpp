@@ -16,6 +16,7 @@
  *   -ksp_type fgmres -pc_type fieldsplit
  */
 
+#include "Rodin/IO/ForwardDecls.h"
 #include <Rodin/PETSc.h>
 
 #include <Rodin/Types.h>
@@ -73,11 +74,8 @@ int main(int argc, char** argv)
   const Real freq = 50.0 / 60.0;
 
   Mesh mesh;
-  mesh.load("../resources/examples/PDEs/NavierStokes.medit.mesh");
+  mesh.load("../resources/examples/PDEs/NavierStokes.medit.mesh", IO::FileFormat::MEDIT);
   mesh.getConnectivity().compute(1, 2);
-  mesh.getConnectivity().compute(2, 1);
-  mesh.getConnectivity().compute(1, 0);
-  mesh.getConnectivity().compute(0, 1);
   mesh.save("NavierStokes.mesh");
 
   const size_t dim = mesh.getSpaceDimension();
