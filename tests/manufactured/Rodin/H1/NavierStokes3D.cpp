@@ -54,18 +54,18 @@ namespace Rodin::Tests::Manufactured::NavierStokes3D
     H1 sh(std::integral_constant<size_t, 1>{}, mesh);
 
     VectorFunction u_exact{
-      Sin(pi * F::x) * Cos(pi * F::y) * Cos(pi * F::z),
-      -Cos(pi * F::x) * Sin(pi * F::y) * Cos(pi * F::z),
+      sin(pi * F::x) * cos(pi * F::y) * cos(pi * F::z),
+      -cos(pi * F::x) * sin(pi * F::y) * cos(pi * F::z),
       Zero()
     };
     RealFunction p_exact = 0.0;
 
     VectorFunction f{
-      3 * nu * pi * pi * Sin(pi * F::x) * Cos(pi * F::y) * Cos(pi * F::z)
-      + 0.5 * pi * Sin(2 * pi * F::x) * Pow(Cos(pi * F::z), 2),
+      3 * nu * pi * pi * sin(pi * F::x) * cos(pi * F::y) * cos(pi * F::z)
+      + 0.5 * pi * sin(2 * pi * F::x) * Pow(cos(pi * F::z), 2),
 
-      -3 * nu * pi * pi * Cos(pi * F::x) * Sin(pi * F::y) * Cos(pi * F::z)
-      + 0.5 * pi * Sin(2 * pi * F::y) * Pow(Cos(pi * F::z), 2),
+      -3 * nu * pi * pi * cos(pi * F::x) * sin(pi * F::y) * cos(pi * F::z)
+      + 0.5 * pi * sin(2 * pi * F::y) * Pow(cos(pi * F::z), 2),
 
       Zero()
     };
