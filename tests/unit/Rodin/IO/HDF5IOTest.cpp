@@ -36,6 +36,9 @@ namespace Rodin::Tests::Unit
     const std::string xdmfFile = "/tmp/rodin_hdf5.xdmf";
 
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 2);
     P1 fes(mesh);
     GridFunction gf(fes);
     gf = [](const Geometry::Point& p) { return p.x() + p.y(); };
@@ -58,6 +61,21 @@ namespace Rodin::Tests::Unit
     H5Sclose(vspace);
     H5Dclose(vertices);
     H5Fclose(h5);
+
+    Mesh loaded;
+    loaded.load(meshFile, FileFormat::HDF5);
+    EXPECT_EQ(loaded.getSpaceDimension(), mesh.getSpaceDimension());
+    EXPECT_EQ(loaded.getDimension(), mesh.getDimension());
+    EXPECT_EQ(loaded.getVertexCount(), mesh.getVertexCount());
+    EXPECT_EQ(loaded.getCellCount(), mesh.getCellCount());
+    for (size_t d = 0; d <= mesh.getDimension(); ++d)
+      EXPECT_EQ(loaded.getPolytopeCount(d), mesh.getPolytopeCount(d));
+    EXPECT_EQ(
+        loaded.getConnectivity().getIncidence(2, 1).size(),
+        mesh.getConnectivity().getIncidence(2, 1).size());
+    EXPECT_EQ(
+        loaded.getConnectivity().getIncidence(1, 2).size(),
+        mesh.getConnectivity().getIncidence(1, 2).size());
 
     h5 = H5Fopen(gfFile.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
     ASSERT_GE(h5, 0);

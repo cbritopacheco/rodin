@@ -186,6 +186,7 @@ namespace Rodin::Geometry
     assert(d < m_connectivity.size());
     assert(dp < m_connectivity[d].size());
     m_connectivity[d][dp] = std::move(inc);
+    m_dirty[d][dp] = false;
     return *this;
   }
 

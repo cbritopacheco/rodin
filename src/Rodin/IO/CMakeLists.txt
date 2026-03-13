@@ -54,7 +54,21 @@ target_link_libraries(RodinIO
 )
 
 find_package(HDF5 COMPONENTS C QUIET)
+set(RODIN_IO_ENABLE_HDF5 OFF)
 if (HDF5_FOUND)
+  include(CheckCSourceCompiles)
+  set(CMAKE_REQUIRED_INCLUDES ${HDF5_INCLUDE_DIRS})
+  check_c_source_compiles(
+    "#include <hdf5.h>\nint main(void){return 0;}"
+    RODIN_IO_HDF5_HEADER_USABLE)
+  unset(CMAKE_REQUIRED_INCLUDES)
+
+  if (RODIN_IO_HDF5_HEADER_USABLE)
+    set(RODIN_IO_ENABLE_HDF5 ON)
+  endif()
+endif()
+
+if (RODIN_IO_ENABLE_HDF5)
   target_compile_definitions(RodinIO PUBLIC RODIN_IO_HAS_HDF5=1)
   if (TARGET HDF5::HDF5)
     target_link_libraries(RodinIO PUBLIC HDF5::HDF5)

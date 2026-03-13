@@ -21,6 +21,17 @@ namespace Rodin::IO
   class XDMF
   {
     public:
+      struct Keyword
+      {
+        static constexpr const char* Xdmf = "Xdmf";
+        static constexpr const char* Domain = "Domain";
+        static constexpr const char* Grid = "Grid";
+        static constexpr const char* Topology = "Topology";
+        static constexpr const char* Geometry = "Geometry";
+        static constexpr const char* Attribute = "Attribute";
+        static constexpr const char* DataItem = "DataItem";
+      };
+
       template <class MeshType>
       XDMF(const MeshType& mesh, const boost::filesystem::path& h5MeshFile)
         : m_h5MeshFile(h5MeshFile),
@@ -57,35 +68,17 @@ namespace Rodin::IO
 
         os << "<?xml version=\"1.0\" ?>\n";
         os << "<!DOCTYPE Xdmf SYSTEM \"Xdmf.dtd\" []>\n";
-        os << "<Xdmf Version=\"3.0\">\n";
-        os << "  <Domain>\n";
-        os << "    <Grid Name=\"RodinMesh\" GridType=\"Uniform\">\n";
-        os << "      <Topology TopologyType=\"Mixed\" NumberOfElements=\"" << m_cellCount << "\">\n";
-        os << "        <DataItem Format=\"HDF\" DataType=\"Int\" Dimensions=\"" << m_xdmfTopologySize << "\">"
-           << m_h5MeshFile.string() << ":/Mesh/XDMFTopology</DataItem>\n";
-        os << "      </Topology>\n";
+        os << "<" << Keyword::Xdmf << " Version=\"3.0\">\n";
+        os << "  <" << Keyword::Domain << ">\n";
+        os << "    <" << Keyword::Grid << " Name=\"RodinMesh\" GridType=\"Uniform\">\n";
 
-        os << "      <Geometry GeometryType=\"" << geometryType() << "\">\n";
-        os << "        <DataItem Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" Dimensions=\""
-           << m_vertexCount << " " << m_spaceDimension << "\">"
-           << m_h5MeshFile.string() << ":/Mesh/Vertices</DataItem>\n";
-        os << "      </Geometry>\n";
+        writeTopology(os);
+        writeGeometry(os);
+        writeAttributes(os);
 
-        for (const auto& attr : m_attributes)
-        {
-          os << "      <Attribute Name=\"" << attr.name << "\" AttributeType=\"" << attributeType(attr.components)
-             << "\" Center=\"Node\">\n";
-          os << "        <DataItem Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" Dimensions=\""
-             << attr.dofCount;
-          if (attr.components > 1)
-            os << " " << attr.components;
-          os << "\">" << attr.h5File.string() << ":" << attr.datasetPath << "</DataItem>\n";
-          os << "      </Attribute>\n";
-        }
-
-        os << "    </Grid>\n";
-        os << "  </Domain>\n";
-        os << "</Xdmf>\n";
+        os << "    </" << Keyword::Grid << ">\n";
+        os << "  </" << Keyword::Domain << ">\n";
+        os << "</" << Keyword::Xdmf << ">\n";
       }
 
     private:
@@ -106,6 +99,43 @@ namespace Rodin::IO
       const char* attributeType(size_t components) const
       {
         return components > 1 ? "Vector" : "Scalar";
+      }
+
+      void writeTopology(std::ostream& os) const
+      {
+        os << "      <" << Keyword::Topology
+           << " TopologyType=\"Mixed\" NumberOfElements=\"" << m_cellCount << "\">\n";
+        os << "        <" << Keyword::DataItem
+           << " Format=\"HDF\" DataType=\"Int\" Dimensions=\"" << m_xdmfTopologySize << "\">"
+           << m_h5MeshFile.string() << ":/Mesh/XDMFTopology</" << Keyword::DataItem << ">\n";
+        os << "      </" << Keyword::Topology << ">\n";
+      }
+
+      void writeGeometry(std::ostream& os) const
+      {
+        os << "      <" << Keyword::Geometry << " GeometryType=\"" << geometryType() << "\">\n";
+        os << "        <" << Keyword::DataItem
+           << " Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" Dimensions=\""
+           << m_vertexCount << " " << m_spaceDimension << "\">"
+           << m_h5MeshFile.string() << ":/Mesh/Vertices</" << Keyword::DataItem << ">\n";
+        os << "      </" << Keyword::Geometry << ">\n";
+      }
+
+      void writeAttributes(std::ostream& os) const
+      {
+        for (const auto& attr : m_attributes)
+        {
+          os << "      <" << Keyword::Attribute << " Name=\"" << attr.name
+             << "\" AttributeType=\"" << attributeType(attr.components) << "\" Center=\"Node\">\n";
+          os << "        <" << Keyword::DataItem
+             << " Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" Dimensions=\""
+             << attr.dofCount;
+          if (attr.components > 1)
+            os << " " << attr.components;
+          os << "\">" << attr.h5File.string() << ":" << attr.datasetPath
+             << "</" << Keyword::DataItem << ">\n";
+          os << "      </" << Keyword::Attribute << ">\n";
+        }
       }
 
       boost::filesystem::path m_h5MeshFile;

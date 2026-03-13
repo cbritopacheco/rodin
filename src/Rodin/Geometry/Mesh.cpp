@@ -62,25 +62,37 @@ namespace Rodin::Geometry
   Mesh<Context::Local>&
   Mesh<Context::Local>::load(const boost::filesystem::path& filename, IO::FileFormat fmt)
   {
-    std::ifstream input(filename.c_str());
-    if (!input)
-    {
-      Alert::MemberFunctionException(*this, __func__)
-        << "Failed to open " << filename << " for reading."
-        << Alert::Raise;
-    }
     switch (fmt)
     {
       case IO::FileFormat::MFEM:
       {
+        std::ifstream input(filename.c_str());
+        if (!input)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Failed to open " << filename << " for reading."
+            << Alert::Raise;
+        }
         IO::MeshLoader<IO::FileFormat::MFEM, Context> loader(*this);
         loader.load(input);
         break;
       }
       case IO::FileFormat::MEDIT:
       {
+        std::ifstream input(filename.c_str());
+        if (!input)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Failed to open " << filename << " for reading."
+            << Alert::Raise;
+        }
         IO::MeshLoader<IO::FileFormat::MEDIT, Context> loader(*this);
         loader.load(input);
+        break;
+      }
+      case IO::FileFormat::HDF5:
+      {
+        IO::HDF5::loadMesh(*this, filename);
         break;
       }
       default:
