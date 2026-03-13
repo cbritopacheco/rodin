@@ -16,7 +16,7 @@
 #include <limits>
 
 #include "Rodin/IO/HDF5.h"
-#include "Rodin/Alert/Alert.h"
+#include "Rodin/Alert.h"
 
 #if defined(RODIN_IO_HAS_HDF5) && RODIN_IO_HAS_HDF5
 #include <hdf5.h>
