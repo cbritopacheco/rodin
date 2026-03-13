@@ -11,6 +11,8 @@
 #include <string>
 #include <vector>
 #include <limits>
+#include <functional>
+#include <type_traits>
 
 #include <boost/filesystem/path.hpp>
 
@@ -21,6 +23,8 @@
 #include "Rodin/Geometry/PolytopeTransformationIndex.h"
 #include "Rodin/IO/MeshLoader.h"
 #include "Rodin/IO/MeshPrinter.h"
+#include "Rodin/IO/GridFunctionLoader.h"
+#include "Rodin/IO/GridFunctionPrinter.h"
 
 #if defined(RODIN_IO_HAS_HDF5) && RODIN_IO_HAS_HDF5
   #include <hdf5.h>
@@ -52,7 +56,12 @@ namespace Rodin::IO
         static constexpr const char* Attributes = "/Mesh/Attributes";
 
         static constexpr const char* GridFunction = "/GridFunction";
+        static constexpr const char* GridFunctionMeta = "/GridFunction/Meta";
+        static constexpr const char* GridFunctionMetaName = "/GridFunction/Meta/Name";
+        static constexpr const char* GridFunctionMetaSize = "/GridFunction/Meta/Size";
+        static constexpr const char* GridFunctionMetaDimension = "/GridFunction/Meta/Dimension";
         static constexpr const char* GridFunctionValues = "/GridFunction/Values";
+        static constexpr const char* GridFunctionValuesData = "/GridFunction/Values/Data";
       };
 
       template <class MeshType>
@@ -153,18 +162,56 @@ namespace Rodin::IO
         check(group >= 0, "Failed to create /GridFunction group.");
         H5Gclose(group);
 
+        const auto metaGroup = H5Gcreate2(file, Keyword::GridFunctionMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        check(metaGroup >= 0, "Failed to create /GridFunction/Meta group.");
+        H5Gclose(metaGroup);
+
+        const auto valuesGroup = H5Gcreate2(file, Keyword::GridFunctionValues, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        check(valuesGroup >= 0, "Failed to create /GridFunction/Values group.");
+        H5Gclose(valuesGroup);
+
         const auto& data = gf.getData();
         std::vector<double> values(static_cast<size_t>(data.size()));
         for (size_t i = 0; i < values.size(); ++i)
           values[i] = static_cast<double>(data[i]);
 
         const hsize_t dims[1] = { static_cast<hsize_t>(values.size()) };
-        writeDataset(file, Keyword::GridFunctionValues, H5T_NATIVE_DOUBLE, dims, 1, values.data());
+        writeDataset(file, Keyword::GridFunctionValuesData, H5T_NATIVE_DOUBLE, dims, 1, values.data());
 
         const unsigned long long dofCount = static_cast<unsigned long long>(gf.getSize());
         const unsigned long long vectorDim = static_cast<unsigned long long>(gf.getDimension());
-        writeScalarAttribute(file, Keyword::GridFunctionValues, "DofCount", H5T_NATIVE_ULLONG, &dofCount);
-        writeScalarAttribute(file, Keyword::GridFunctionValues, "VectorDimension", H5T_NATIVE_ULLONG, &vectorDim);
+        writeScalarDataset(file, Keyword::GridFunctionMetaSize, H5T_NATIVE_ULLONG, dofCount);
+        writeScalarDataset(file, Keyword::GridFunctionMetaDimension, H5T_NATIVE_ULLONG, vectorDim);
+
+        H5Fclose(file);
+#else
+        (void)gf;
+        (void)filename;
+        Alert::Exception() << "Rodin was built without HDF5 support." << Alert::Raise;
+#endif
+      }
+
+      template <class GridFunctionType>
+      static void loadGridFunction(
+          GridFunctionType& gf,
+          const boost::filesystem::path& filename)
+      {
+#if defined(RODIN_IO_HAS_HDF5) && RODIN_IO_HAS_HDF5
+        const auto file = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+        check(file >= 0, "Failed to open HDF5 file.");
+
+        const auto values = readVectorDataset<double>(file, Keyword::GridFunctionValuesData, H5T_NATIVE_DOUBLE);
+        const auto dofCount = static_cast<size_t>(
+            readScalarDataset<unsigned long long>(file, Keyword::GridFunctionMetaSize, H5T_NATIVE_ULLONG));
+        const auto vectorDim = static_cast<size_t>(
+            readScalarDataset<unsigned long long>(file, Keyword::GridFunctionMetaDimension, H5T_NATIVE_ULLONG));
+        check(values.size() == gf.getData().size(), "Invalid GridFunction data size.");
+        check(dofCount == gf.getSize(), "GridFunction size mismatch.");
+        check(vectorDim == gf.getDimension(), "GridFunction dimension mismatch.");
+
+        auto& data = gf.getData();
+        for (size_t i = 0; i < values.size(); ++i)
+          data[i] = static_cast<typename std::remove_reference_t<decltype(data[0])>>(values[i]);
 
         H5Fclose(file);
 #else
@@ -540,6 +587,59 @@ namespace Rodin::IO
       {
         HDF5::saveMesh(this->getObject(), filename);
       }
+  };
+
+  template <class FES, class Scalar>
+  class GridFunctionLoader<FileFormat::HDF5, FES, Math::Vector<Scalar>>
+    : public GridFunctionLoaderBase<FES, Math::Vector<Scalar>>
+  {
+    public:
+      using DataType = Math::Vector<Scalar>;
+      using ObjectType = Variational::GridFunction<FES, DataType>;
+      using Parent = GridFunctionLoaderBase<FES, DataType>;
+
+      GridFunctionLoader(ObjectType& gf)
+        : Parent(gf)
+      {}
+
+      void load(std::istream&) override
+      {
+        Alert::Exception()
+          << "HDF5 GridFunction loading requires file-path based loading."
+          << Alert::Raise;
+      }
+
+      void load(const boost::filesystem::path& filename) override
+      {
+        HDF5::loadGridFunction(this->getObject(), filename);
+      }
+  };
+
+  template <class FES, class Scalar>
+  class GridFunctionPrinter<FileFormat::HDF5, FES, Math::Vector<Scalar>> final
+  {
+    public:
+      using DataType = Math::Vector<Scalar>;
+      using ObjectType = Variational::GridFunction<FES, DataType>;
+
+      GridFunctionPrinter(const ObjectType& gf)
+        : m_gf(gf)
+      {}
+
+      void print(std::ostream&) const
+      {
+        Alert::Exception()
+          << "HDF5 GridFunction printing requires file-path based printing."
+          << Alert::Raise;
+      }
+
+      void print(const boost::filesystem::path& filename) const
+      {
+        HDF5::saveGridFunction(m_gf.get(), filename);
+      }
+
+    private:
+      std::reference_wrapper<const ObjectType> m_gf;
   };
 }
 

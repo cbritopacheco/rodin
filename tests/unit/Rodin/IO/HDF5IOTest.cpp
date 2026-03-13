@@ -88,7 +88,13 @@ namespace Rodin::Tests::Unit
 
     h5 = H5Fopen(gfFile.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
     ASSERT_GE(h5, 0);
-    hid_t values = H5Dopen2(h5, "/GridFunction/Values", H5P_DEFAULT);
+    hid_t metaSize = H5Dopen2(h5, "/GridFunction/Meta/Size", H5P_DEFAULT);
+    ASSERT_GE(metaSize, 0);
+    H5Dclose(metaSize);
+    hid_t metaDimension = H5Dopen2(h5, "/GridFunction/Meta/Dimension", H5P_DEFAULT);
+    ASSERT_GE(metaDimension, 0);
+    H5Dclose(metaDimension);
+    hid_t values = H5Dopen2(h5, "/GridFunction/Values/Data", H5P_DEFAULT);
     ASSERT_GE(values, 0);
     hid_t dspace = H5Dget_space(values);
     ASSERT_GE(dspace, 0);
@@ -112,7 +118,7 @@ namespace Rodin::Tests::Unit
     const auto text = buffer.str();
     EXPECT_NE(text.find(meshFile + ":/Mesh/XDMF/Topology"), std::string::npos);
     EXPECT_NE(text.find(meshFile + ":/Mesh/Geometry/Vertices"), std::string::npos);
-    EXPECT_NE(text.find(gfFile + ":/GridFunction/Values"), std::string::npos);
+    EXPECT_NE(text.find(gfFile + ":/GridFunction/Values/Data"), std::string::npos);
 
     std::remove(meshFile.c_str());
     std::remove(gfFile.c_str());

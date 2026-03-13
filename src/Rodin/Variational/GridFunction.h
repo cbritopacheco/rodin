@@ -467,28 +467,42 @@ namespace Rodin::Variational
           const boost::filesystem::path& filename,
           IO::FileFormat fmt = IO::FileFormat::MFEM)
       {
-        std::ifstream input(filename.c_str());
-        if (!input)
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "Failed to open input file stream." << Alert::NewLine
-            << "Filename: \"" << filename << "\"" << Alert::NewLine
-            << "Please check if the file exists and is accessible."
-            << Alert::Raise;
-        }
-
         switch (fmt)
         {
           case IO::FileFormat::MFEM:
           {
+            std::ifstream input(filename.c_str());
+            if (!input)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "Failed to open input file stream." << Alert::NewLine
+                << "Filename: \"" << filename << "\"" << Alert::NewLine
+                << "Please check if the file exists and is accessible."
+                << Alert::Raise;
+            }
             IO::GridFunctionLoader<IO::FileFormat::MFEM, FESType, DataType>(
               static_cast<Derived&>(*this)).load(input);
             break;
           }
           case IO::FileFormat::MEDIT:
           {
+            std::ifstream input(filename.c_str());
+            if (!input)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "Failed to open input file stream." << Alert::NewLine
+                << "Filename: \"" << filename << "\"" << Alert::NewLine
+                << "Please check if the file exists and is accessible."
+                << Alert::Raise;
+            }
             IO::GridFunctionLoader<IO::FileFormat::MEDIT, FES, DataType>(
               static_cast<Derived&>(*this)).load(input);
+            break;
+          }
+          case IO::FileFormat::HDF5:
+          {
+            IO::GridFunctionLoader<IO::FileFormat::HDF5, FESType, DataType>(
+              static_cast<Derived&>(*this)).load(filename);
             break;
           }
           default:
@@ -540,7 +554,8 @@ namespace Rodin::Variational
           }
           case IO::FileFormat::HDF5:
           {
-            IO::HDF5::saveGridFunction(static_cast<const Derived&>(*this), filename);
+            IO::GridFunctionPrinter<IO::FileFormat::HDF5, FESType, DataType>(
+              static_cast<const Derived&>(*this)).print(filename);
             break;
           }
           // case IO::FileFormat::ENSIGHT6:

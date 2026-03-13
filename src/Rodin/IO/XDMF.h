@@ -53,7 +53,7 @@ namespace Rodin::IO
         Attribute attr;
         attr.name = name;
         attr.h5File = h5File;
-        attr.datasetPath = "/GridFunction/Values";
+        attr.datasetPath = "/GridFunction/Values/Data";
         attr.dofCount = gf.getSize();
         attr.components = gf.getDimension();
         m_attributes.push_back(std::move(attr));
