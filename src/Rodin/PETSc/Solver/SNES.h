@@ -38,6 +38,10 @@ namespace Rodin::Solver
           void* ctx = PETSC_NULLPTR,
           VectorType residual = PETSC_NULLPTR);
 
+      SNES& setFunction(
+          FunctionCallbackType f,
+          VectorType residual);
+
       template <class Context>
       SNES& setFunction(
           FunctionCallbackType f,
@@ -50,6 +54,10 @@ namespace Rodin::Solver
       SNES& setJacobian(JacobianCallbackType j,
                         void* ctx = PETSC_NULLPTR,
                         MatrixType jacobian = PETSC_NULLPTR,
+                        MatrixType preconditioner = PETSC_NULLPTR);
+
+      SNES& setJacobian(JacobianCallbackType j,
+                        MatrixType jacobian,
                         MatrixType preconditioner = PETSC_NULLPTR);
 
       template <class Context>

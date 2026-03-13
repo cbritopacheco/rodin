@@ -81,6 +81,13 @@ namespace Rodin::Solver
     return *this;
   }
 
+  SNES& SNES::setFunction(
+      FunctionCallbackType f,
+      VectorType residual)
+  {
+    return setFunction(f, PETSC_NULLPTR, residual);
+  }
+
   SNES& SNES::setJacobian(
       JacobianCallbackType j,
       void* ctx,
@@ -102,6 +109,14 @@ namespace Rodin::Solver
     assert(ierr == PETSC_SUCCESS);
     (void) ierr;
     return *this;
+  }
+
+  SNES& SNES::setJacobian(
+      JacobianCallbackType j,
+      MatrixType jacobian,
+      MatrixType preconditioner)
+  {
+    return setJacobian(j, PETSC_NULLPTR, jacobian, preconditioner);
   }
 
   void SNES::solve(VectorType b, VectorType x)
