@@ -9,6 +9,7 @@ set(RodinPETSc_HEADERS
   ForwardDecls.h
   Object.h
   IO/GridFunctionPrinter.h
+  IO/HDF5.h
   Solver/KSP.h
   Solver/CG.h
   Solver/GMRES.h
