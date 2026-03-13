@@ -1,6 +1,7 @@
 #ifndef RODIN_SOLVER_PETSC_SNES_H
 #define RODIN_SOLVER_PETSC_SNES_H
 
+#include <functional>
 #include <petscsnes.h>
 
 #include "Rodin/PETSc/Object.h"
@@ -13,7 +14,13 @@ namespace Rodin::Solver
     public:
       using HandleType = ::SNES;
       using KSPType = ::KSP;
+      using MatrixType = ::Mat;
       using VectorType = ::Vec;
+      using FunctionType =
+        std::function<PetscErrorCode(HandleType, VectorType, VectorType)>;
+      using JacobianType =
+        // (snes, x, A, P): A is Jacobian operator, P is preconditioner operator.
+        std::function<PetscErrorCode(HandleType, VectorType, MatrixType, MatrixType)>;
       using Parent = PETSc::Object<HandleType>;
 
       explicit SNES(MPI_Comm comm = PETSC_COMM_WORLD);
@@ -29,6 +36,12 @@ namespace Rodin::Solver
                           PetscInt maxF) noexcept;
 
       SNES& setKSP(KSPType ksp) noexcept;
+
+      SNES& setFunction(FunctionType f, VectorType residual = PETSC_NULLPTR);
+
+      SNES& setJacobian(JacobianType j,
+                        MatrixType jacobian = PETSC_NULLPTR,
+                        MatrixType preconditioner = PETSC_NULLPTR);
 
       void solve(VectorType b, VectorType x);
 
@@ -47,6 +60,17 @@ namespace Rodin::Solver
       PetscReal m_abstol, m_rtol, m_stol;
       PetscInt m_maxIt, m_maxF;
       KSPType m_kspHandle;
+      FunctionType m_function;
+      JacobianType m_jacobian;
+      VectorType m_residual;
+      MatrixType m_jacobianOperator;
+      MatrixType m_preconditionerOperator;
+
+      static PetscErrorCode FunctionCallback(
+          ::SNES snes, ::Vec x, ::Vec f, void* ctx);
+
+      static PetscErrorCode JacobianCallback(
+          ::SNES snes, ::Vec x, ::Mat A, ::Mat P, void* ctx);
   };
 }
 

@@ -1,5 +1,6 @@
 #include <cassert>
 #include <petsc.h>
+#include <utility>
 
 #include "SNES.h"
 
@@ -13,7 +14,10 @@ namespace Rodin::Solver
       m_stol(PETSC_DECIDE),
       m_maxIt(PETSC_DECIDE),
       m_maxF(PETSC_DECIDE),
-      m_kspHandle(PETSC_NULLPTR)
+      m_kspHandle(PETSC_NULLPTR),
+      m_residual(PETSC_NULLPTR),
+      m_jacobianOperator(PETSC_NULLPTR),
+      m_preconditionerOperator(PETSC_NULLPTR)
   {
     PetscErrorCode ierr = SNESCreate(comm, &m_snes);
     assert(ierr == PETSC_SUCCESS);
@@ -54,6 +58,41 @@ namespace Rodin::Solver
     return *this;
   }
 
+  SNES& SNES::setFunction(FunctionType f, VectorType residual)
+  {
+    assert(static_cast<bool>(f));
+    if (!f)
+      return *this;
+    m_function = std::move(f);
+    m_residual = residual;
+    PetscErrorCode ierr = SNESSetFunction(m_snes, m_residual, &SNES::FunctionCallback, this);
+    assert(ierr == PETSC_SUCCESS);
+    (void) ierr;
+    return *this;
+  }
+
+  SNES& SNES::setJacobian(
+      JacobianType j,
+      MatrixType jacobian,
+      MatrixType preconditioner)
+  {
+    assert(static_cast<bool>(j));
+    if (!j)
+      return *this;
+    m_jacobian = std::move(j);
+    m_jacobianOperator = jacobian;
+    m_preconditionerOperator = preconditioner;
+    PetscErrorCode ierr = SNESSetJacobian(
+        m_snes,
+        m_jacobianOperator,
+        m_preconditionerOperator,
+        &SNES::JacobianCallback,
+        this);
+    assert(ierr == PETSC_SUCCESS);
+    (void) ierr;
+    return *this;
+  }
+
   void SNES::solve(VectorType b, VectorType x)
   {
     PetscErrorCode ierr;
@@ -86,5 +125,27 @@ namespace Rodin::Solver
   const ::SNES& SNES::getHandle() const noexcept
   {
     return m_snes;
+  }
+
+  PetscErrorCode SNES::FunctionCallback(
+      ::SNES snes, ::Vec x, ::Vec f, void* ctx)
+  {
+    auto* self = static_cast<SNES*>(ctx);
+    if (!self)
+      return PETSC_ERR_ARG_NULL;
+    if (!self->m_function)
+      return PETSC_ERR_ARG_WRONGSTATE;
+    return self->m_function(snes, x, f);
+  }
+
+  PetscErrorCode SNES::JacobianCallback(
+      ::SNES snes, ::Vec x, ::Mat A, ::Mat P, void* ctx)
+  {
+    auto* self = static_cast<SNES*>(ctx);
+    if (!self)
+      return PETSC_ERR_ARG_NULL;
+    if (!self->m_jacobian)
+      return PETSC_ERR_ARG_WRONGSTATE;
+    return self->m_jacobian(snes, x, A, P);
   }
 }
