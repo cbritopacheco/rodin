@@ -149,6 +149,7 @@ namespace Rodin::IO
 
     private:
 #if defined(RODIN_IO_HAS_HDF5) && RODIN_IO_HAS_HDF5
+      // Sentinel value used in serialized attribute arrays to encode "no attribute".
       static constexpr unsigned long long NullAttributeMarker = std::numeric_limits<unsigned long long>::max();
 
       static void check(bool condition, const char* msg)

@@ -186,6 +186,8 @@ namespace Rodin::Geometry
     assert(d < m_connectivity.size());
     assert(dp < m_connectivity[d].size());
     m_connectivity[d][dp] = std::move(inc);
+    // This incidence relation is now explicitly provided (e.g. from serialized IO),
+    // so it must not be considered stale and recomputed on next access.
     m_dirty[d][dp] = false;
     return *this;
   }
