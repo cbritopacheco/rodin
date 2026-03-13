@@ -6,18 +6,64 @@
  */
 
 /**
- * @example Transient 2D Navier–Stokes / Oseen-like problem with PETSc mixed assembly
+ * @example Transient 2D incompressible Navier–Stokes with Taylor–Hood elements and PETSc
+ *
+ * This example solves a transient incompressible flow problem in 2D using:
+ *   - a mixed finite element discretization,
+ *   - Taylor–Hood spaces (quadratic velocity, linear pressure),
+ *   - a semi-implicit Oseen / Picard linearization of the convective term,
+ *   - backward Euler time stepping,
+ *   - PETSc for linear algebra and iterative solution.
+ *
+ * The weak problem solved at each time step is:
+ *   Find (u^{n+1}, p^{n+1}) such that, for all test functions (v, q),
+ *
+ *     (rho / dt) (u^{n+1}, v)
+ *   + rho ((u^n · ∇) u^{n+1}, v)
+ *   + (rho / 2) ((∇ · u^n) u^{n+1}, v)
+ *   + mu (∇u^{n+1}, ∇v)
+ *   - (p^{n+1}, ∇ · v)
+ *   + (∇ · u^{n+1}, q)
+ *
+ *   = (rho / dt) (u^n, v)
+ *   - <p_out, v · n>_{Γ_out}
+ *   + <(rho / 2) beta u^{n+1}, v>_{Γ_out},
+ *
+ * where:
+ *   - u^n is the velocity from the previous time step,
+ *   - the convective term is linearized by freezing the transport velocity at u^n,
+ *   - the additional (∇·u^n) term yields the skew-symmetric Oseen form,
+ *   - beta = max(-(u^n · n), 0) penalizes backflow at the outlet.
+ *
+ * Boundary conditions:
+ *   - inlet: prescribed pulsatile parabolic velocity profile,
+ *   - wall: homogeneous Dirichlet condition,
+ *   - outlet: prescribed normal traction through a Windkessel-like resistance law
+ *             p_out = p_d - R_d * Q_out.
+ *
+ * Notes:
+ *   - This example intentionally uses a stable Taylor–Hood pair, so no PSPG/SUPG
+ *     stabilization is required.
+ *   - The nonlinear term is not fully iterated inside each time step: one Oseen
+ *     solve is performed per time level using the previous velocity as the
+ *     convecting field.
+ *   - The outlet model here is a simple resistance closure driven by the current
+ *     volumetric flux.
  *
  * Mesh:
  *   ../resources/examples/PDEs/NavierStokes.medit.mesh
+ *
+ * Output:
+ *   - NavierStokes.mesh
+ *   - NavierStokes_velocity_XXXXXX.gf
+ *   - NavierStokes_pressure_XXXXXX.gf
+ *   - flux.txt
+ *   - pressure.txt
  *
  * Suggested PETSc options:
  *   -ksp_type gmres -pc_type lu
  *   -ksp_type fgmres -pc_type fieldsplit
  */
-
-#include "Rodin/IO/ForwardDecls.h"
-#include <Rodin/PETSc.h>
 
 #include <Rodin/Types.h>
 #include <Rodin/Solver.h>
@@ -25,9 +71,8 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 
-#include <petscksp.h>
+#include <Rodin/PETSc.h>
 
-#include <algorithm>
 #include <array>
 #include <cmath>
 #include <fstream>
@@ -41,6 +86,16 @@ using namespace Rodin::Solver;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
+/**
+ * @brief Returns a half-wave sinusoidal inlet pulse.
+ *
+ * Over each period, the inflow is sinusoidal during the first half-period
+ * and zero during the second half-period.
+ *
+ * @param t Current physical time.
+ * @param freq Pulse frequency.
+ * @return Instantaneous pulse amplitude.
+ */
 static Real InletPulse(const Real t, const Real freq)
 {
   const Real period = 1.0 / freq;
@@ -56,50 +111,70 @@ int main(int argc, char** argv)
 {
   PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
 
+  // Boundary attribute tags as stored in the input mesh.
   constexpr Attribute outlet = 0;
-  constexpr Attribute inlet = 1;
-  constexpr Attribute wall = 3;
+  constexpr Attribute inlet  = 1;
+  constexpr Attribute wall   = 3;
 
-  const Real R = 1.5;
-  const Real r = 5.0;
-  const Real rho = 1.0;
-  const Real mu = 0.035;
-  const Real T = 12.0;
-  const Index Nt = 200;
-  const Real dt = T / Nt;
+  // Geometric / physical parameters.
+  const Real R   = 1.5;    // Inlet radius used in the parabolic profile.
+  const Real rho = 1.0;    // Fluid density.
+  const Real mu  = 0.035;  // Viscosity coefficient.
+
+  // Time discretization parameters.
+  const Real T   = 12.0;   // Final time.
+  const Index Nt = 200;    // Number of time steps.
+  const Real dt  = T / Nt; // Time step size.
+
+  // Outlet pressure model:
+  //   p_out = p_d - R_d * Q_out
+  // where p_d is a distal pressure and R_d is a resistance parameter.
   const Real pd = 8.0 * 13332.2;
   const std::array<Real, 5> RdValues{{0.0, 100.0, 200.0, 300.0, 800.0}};
   const Index idxRd = 4;
   const Real Rd = RdValues[idxRd];
+
+  // Pulse frequency for the inlet waveform.
   const Real freq = 50.0 / 60.0;
 
+  // Load the mesh and compute boundary-to-cell connectivity.
   Mesh mesh;
   mesh.load("../resources/examples/PDEs/NavierStokes.medit.mesh", IO::FileFormat::MEDIT);
   mesh.getConnectivity().compute(1, 2);
-  mesh.save("NavierStokes.mesh");
+
+  // Save the mesh once for post-processing convenience.
+  mesh.save("NavierStokes.mesh", IO::FileFormat::MEDIT);
 
   const size_t dim = mesh.getSpaceDimension();
-  P1 uh(mesh, dim);
-  P1 ph(mesh);
-  P0 kh(mesh);
 
+  // Taylor–Hood discretization:
+  //   velocity in H1 of degree 2,
+  //   pressure in H1 of degree 1.
+  //
+  // This is an inf-sup stable mixed pair for incompressible flow,
+  // so no pressure stabilization is needed here.
+  H1 uh(std::integral_constant<size_t, 2>{}, mesh, dim);
+  H1 ph(std::integral_constant<size_t, 1>{}, mesh);
+
+  // Unknowns and test functions.
   PETSc::Variational::TrialFunction u(uh); u.setName("u");
   PETSc::Variational::TrialFunction p(ph); p.setName("p");
   PETSc::Variational::TestFunction  v(uh);
   PETSc::Variational::TestFunction  q(ph);
 
+  // Solution fields from the previous time step.
   PETSc::Variational::GridFunction u_old(uh);
   PETSc::Variational::GridFunction p_old(ph);
-  PETSc::Variational::GridFunction tauK(kh);
-  PETSc::Variational::GridFunction beta(kh);
+
+  // Time-dependent inlet velocity profile.
   PETSc::Variational::GridFunction inletProfile(uh);
 
+  // Initial conditions: fluid initially at rest and zero pressure.
   u_old = Math::Vector<Real>{{0.0, 0.0}};
   p_old = 0.0;
-  tauK = 0.0;
-  beta = 0.0;
   inletProfile = Math::Vector<Real>{{0.0, 0.0}};
 
+  // Diagnostic output files.
   std::ofstream fluxFile("flux.txt");
   std::ofstream pressureFile("pressure.txt");
   if (!fluxFile || !pressureFile)
@@ -109,36 +184,33 @@ int main(int argc, char** argv)
     return 1;
   }
 
+  // Current outlet pressure used in the traction boundary condition.
   Real pout = pd;
+
+  // Current simulation time.
   Real t = 0.0;
 
+  // Helper objects for computing the outlet volumetric flow rate:
+  //   Q_out = ∫_{Γ_out} u · n
   PETSc::Variational::GridFunction one(ph);
   one = 1.0;
   PETSc::Variational::TestFunction qFlux(ph);
   LinearForm fluxForm(qFlux);
 
-  for (Index n = 0; n < Nt; n++)
+  // Outward unit normal on boundary faces.
+  auto n = BoundaryNormal(mesh);
+
+  for (Index k = 0; k < Nt; k++)
   {
     t += dt;
 
-    const auto uoldNorm2 = Dot(u_old, u_old);
-    tauK = [&](const Point& x)
-    {
-      const Real umag2 = uoldNorm2(x);
-      // TODO: replace hK = sqrt(|K|) by a directional cell diameter
-      // (e.g. max edge length) once a mesh-quality diameter utility is exposed.
-      const Real hK = std::sqrt(x.getPolytope().getMeasure());
-      const Real hK2 = hK * hK;
-      const Real denom = std::sqrt(4.0 * umag2 / hK2 + 16.0 * mu * mu / (hK2 * hK2));
-      return (denom > 0.0) ? 0.1 / denom : 0.0;
-    };
-
-    const auto uyOld = u_old.y();
-    beta = [&](const Point& x)
-    {
-      return std::max(-uyOld(x), Real(0));
-    };
-
+    // Build the prescribed pulsatile inlet profile at the current time.
+    //
+    // Here the inflow is vertical and parabolic in x:
+    //   u_in(x, t) = (0, g(t) * (R^2 - x^2) / R^2)
+    //
+    // This assumes the inlet cross section and coordinate convention of the
+    // supplied mesh. If the geometry changes, this profile may need revision.
     const Real gt = InletPulse(t, freq);
     inletProfile = [&](const Point& x)
     {
@@ -146,53 +218,108 @@ int main(int argc, char** argv)
       return Math::Vector<Real>{{0.0, uy}};
     };
 
+    // Semi-implicit Oseen / Picard linearization:
+    //
+    // The nonlinear convective term (u · ∇)u is replaced by
+    //   (u_old · ∇)u
+    // at the new time step.
+    //
+    // In Rodin notation:
+    //   Jacobian(u) * u_old = (u_old · ∇)u.
     const auto conv_u = Mult(Jacobian(u), u_old);
-    const auto conv_v = Mult(Jacobian(v), u_old);
-    const auto grad_p = Grad(p);
-    const auto grad_q = Grad(q);
 
+    // Divergence of the frozen transport velocity.
+    //
+    // This is used in the skew-symmetric correction
+    //   0.5 * (div u_old) * u · v
+    // to obtain an energy-friendlier Oseen form.
+    const auto div_u_old = Div(u_old);
+
+    // Backflow coefficient at the outlet:
+    //   beta = max(-(u_old · n), 0)
+    //
+    // When the flow tries to re-enter through the outlet, beta becomes positive
+    // and activates an additional boundary damping term.
+    const auto beta = Max(-Dot(u_old, n), 0.0);
+
+    // Mixed Oseen problem at the current time step.
     Problem flow(u, p, v, q);
     flow =
-        (1.0 / dt) * Integral(u, v)
-      - (1.0 / dt) * Integral(u_old, v)
-      + Integral(Dot(conv_u, v))
+        // Backward Euler time derivative:
+        //   (rho / dt) (u - u_old, v)
+        (rho / dt) * Integral(u, v)
+      - (rho / dt) * Integral(u_old, v)
+
+        // Linearized convection:
+        //   rho ((u_old · ∇)u, v)
+      + rho * Integral(Dot(conv_u, v))
+
+        // Skew-symmetric correction:
+        //   (rho / 2) ((div u_old) u, v)
+      + 0.5 * rho * Integral(div_u_old * Dot(u, v))
+
+        // Viscous term:
+        //   mu (∇u, ∇v)
       + mu * Integral(Jacobian(u), Jacobian(v))
+
+        // Pressure-velocity coupling:
+        //   -(p, div v)
       - Integral(p, Div(v))
+
+        // Incompressibility constraint:
+        //   (div u, q)
       + Integral(Div(u), q)
-      + 0.5 * Integral(Div(u_old) * Dot(u, v))
-      - BoundaryIntegral(pout * v.y()).over(outlet)
+
+        // Outlet pressure traction:
+        //   -<p_out, v · n>_{Γ_out}
+      - BoundaryIntegral(pout * Dot(v, n)).over(outlet)
+
+        // Backflow damping on the outlet:
+        //   <(rho / 2) beta u, v>_{Γ_out}
       + BoundaryIntegral(0.5 * rho * beta * Dot(u, v)).over(outlet)
 
-        // SUPG / PSPG expanded
-      + Integral(tauK * Dot(conv_u, conv_v))
-      + Integral(tauK * Dot(conv_u, grad_q))
-      + Integral(tauK * Dot(grad_p, conv_v))
-      + Integral(tauK * Dot(grad_p, grad_q))
-
+        // No-slip wall condition.
       + DirichletBC(u, Zero(dim)).on(wall)
+
+        // Prescribed inlet velocity.
       + DirichletBC(u, inletProfile).on(inlet);
 
-    flow.assemble();
-    flow.setFieldSplits();
+    std::cout << "Assembling linear system for time step " << k + 1 << " / " << Nt << "...\n";
 
+    // Assemble the linear system and define PETSc field splits for the mixed
+    // velocity-pressure block structure.
+    flow.assemble();//.setFieldSplits();
+
+    std::cout << "Solving linear system for time step " << k + 1 << " / " << Nt << "...\n";
+    // Solve the assembled linear system.
     Solver::KSP(flow).solve();
 
-    // Use setData to copy PETSc vector entries without re-creating GridFunction storage.
+    // Advance the time history by copying the newly computed solution into
+    // the "old" fields used by the next step.
     u_old.setData(u.getSolution().getData());
     p_old.setData(p.getSolution().getData());
 
-    fluxForm = BoundaryIntegral(u_old.y(), qFlux).over(outlet);
+    // Compute the outlet flow rate
+    //   Q_out = ∫_{Γ_out} u · n
+    fluxForm = BoundaryIntegral(Dot(u_old, n), qFlux).over(outlet);
     fluxForm.assemble();
     const Real qout = fluxForm(one);
+
+    // Update the outlet pressure through the resistance law:
+    //   p_out = p_d - R_d * Q_out
+    //
+    // This is a simple lumped downstream model.
     pout = pd - Rd * qout;
 
+    // Save scalar diagnostics for later plotting.
     fluxFile << t << " " << qout << "\n";
     pressureFile << t << " " << pout << "\n";
 
+    // Save solution snapshots at every time step.
     std::ostringstream id;
-    id << std::setfill('0') << std::setw(6) << n;
-    u_old.save("NavierStokes_velocity_" + id.str() + ".gf");
-    p_old.save("NavierStokes_pressure_" + id.str() + ".gf");
+    id << std::setfill('0') << std::setw(6) << k;
+    u_old.save("NavierStokes_velocity_" + id.str() + ".gf", IO::FileFormat::MEDIT);
+    p_old.save("NavierStokes_pressure_" + id.str() + ".gf", IO::FileFormat::MEDIT);
   }
 
   PetscFinalize();
