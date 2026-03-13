@@ -48,7 +48,7 @@ namespace Rodin::Tests::Unit
 
     hid_t h5 = H5Fopen(meshFile.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
     ASSERT_GE(h5, 0);
-    hid_t vertices = H5Dopen2(h5, "/Mesh/Vertices", H5P_DEFAULT);
+    hid_t vertices = H5Dopen2(h5, "/Mesh/Geometry/Vertices", H5P_DEFAULT);
     ASSERT_GE(vertices, 0);
     hid_t vspace = H5Dget_space(vertices);
     ASSERT_GE(vspace, 0);
@@ -60,6 +60,19 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(static_cast<size_t>(dims[1]), mesh.getSpaceDimension());
     H5Sclose(vspace);
     H5Dclose(vertices);
+
+    hid_t d0Types = H5Dopen2(h5, "/Mesh/Connectivity/D_0/Types", H5P_DEFAULT);
+    ASSERT_GE(d0Types, 0);
+    H5Dclose(d0Types);
+    hid_t d0Offsets = H5Dopen2(h5, "/Mesh/Connectivity/D_0/Offsets", H5P_DEFAULT);
+    ASSERT_GE(d0Offsets, 0);
+    H5Dclose(d0Offsets);
+    hid_t d0Indices = H5Dopen2(h5, "/Mesh/Connectivity/D_0/Indices", H5P_DEFAULT);
+    ASSERT_GE(d0Indices, 0);
+    H5Dclose(d0Indices);
+    hid_t xdmfTopology = H5Dopen2(h5, "/Mesh/XDMF/Topology", H5P_DEFAULT);
+    ASSERT_GE(xdmfTopology, 0);
+    H5Dclose(xdmfTopology);
     H5Fclose(h5);
 
     Mesh loaded;
@@ -68,14 +81,10 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(loaded.getDimension(), mesh.getDimension());
     EXPECT_EQ(loaded.getVertexCount(), mesh.getVertexCount());
     EXPECT_EQ(loaded.getCellCount(), mesh.getCellCount());
-    for (size_t d = 0; d <= mesh.getDimension(); ++d)
-      EXPECT_EQ(loaded.getPolytopeCount(d), mesh.getPolytopeCount(d));
+    EXPECT_EQ(loaded.getPolytopeCount(0), mesh.getPolytopeCount(0));
     EXPECT_EQ(
-        loaded.getConnectivity().getIncidence(2, 1).size(),
-        mesh.getConnectivity().getIncidence(2, 1).size());
-    EXPECT_EQ(
-        loaded.getConnectivity().getIncidence(1, 2).size(),
-        mesh.getConnectivity().getIncidence(1, 2).size());
+        loaded.getPolytopeCount(mesh.getDimension()),
+        mesh.getPolytopeCount(mesh.getDimension()));
 
     h5 = H5Fopen(gfFile.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
     ASSERT_GE(h5, 0);
@@ -101,8 +110,8 @@ namespace Rodin::Tests::Unit
     std::ostringstream buffer;
     buffer << ifs.rdbuf();
     const auto text = buffer.str();
-    EXPECT_NE(text.find(meshFile + ":/Mesh/XDMFTopology"), std::string::npos);
-    EXPECT_NE(text.find(meshFile + ":/Mesh/Vertices"), std::string::npos);
+    EXPECT_NE(text.find(meshFile + ":/Mesh/XDMF/Topology"), std::string::npos);
+    EXPECT_NE(text.find(meshFile + ":/Mesh/Geometry/Vertices"), std::string::npos);
     EXPECT_NE(text.find(gfFile + ":/GridFunction/Values"), std::string::npos);
 
     std::remove(meshFile.c_str());

@@ -92,7 +92,8 @@ namespace Rodin::Geometry
       }
       case IO::FileFormat::HDF5:
       {
-        IO::HDF5::loadMesh(*this, filename);
+        IO::MeshLoader<IO::FileFormat::HDF5, Context> loader(*this);
+        loader.load(filename);
         break;
       }
       default:
@@ -139,7 +140,8 @@ namespace Rodin::Geometry
       }
       case IO::FileFormat::HDF5:
       {
-        IO::HDF5::saveMesh(*this, filename);
+        IO::MeshPrinter<IO::FileFormat::HDF5, Context> printer(*this);
+        printer.print(filename);
         break;
       }
       default:

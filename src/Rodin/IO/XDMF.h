@@ -41,7 +41,7 @@ namespace Rodin::IO
           m_xdmfTopologySize(0)
       {
         for (auto it = mesh.getCell(); !it.end(); ++it)
-          m_xdmfTopologySize += 1 + it->getVertices().size();
+          m_xdmfTopologySize += xdmfCellWordCount(it->getGeometry(), it->getVertices().size());
       }
 
       template <class GridFunctionType>
@@ -107,7 +107,7 @@ namespace Rodin::IO
            << " TopologyType=\"Mixed\" NumberOfElements=\"" << m_cellCount << "\">\n";
         os << "        <" << Keyword::DataItem
            << " Format=\"HDF\" DataType=\"Int\" Dimensions=\"" << m_xdmfTopologySize << "\">"
-           << m_h5MeshFile.string() << ":/Mesh/XDMFTopology</" << Keyword::DataItem << ">\n";
+           << m_h5MeshFile.string() << ":/Mesh/XDMF/Topology</" << Keyword::DataItem << ">\n";
         os << "      </" << Keyword::Topology << ">\n";
       }
 
@@ -117,8 +117,21 @@ namespace Rodin::IO
         os << "        <" << Keyword::DataItem
            << " Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" Dimensions=\""
            << m_vertexCount << " " << m_spaceDimension << "\">"
-           << m_h5MeshFile.string() << ":/Mesh/Vertices</" << Keyword::DataItem << ">\n";
+           << m_h5MeshFile.string() << ":/Mesh/Geometry/Vertices</" << Keyword::DataItem << ">\n";
         os << "      </" << Keyword::Geometry << ">\n";
+      }
+
+      static size_t xdmfCellWordCount(Geometry::Polytope::Type g, size_t vertexCount)
+      {
+        switch (g)
+        {
+          case Geometry::Polytope::Type::Segment:
+            // In XDMF Mixed topology, polyline entries carry the vertex-count
+            // field explicitly: [2, count, v0, ..., v(count-1)].
+            return 2 + vertexCount;
+          default:
+            return 1 + vertexCount;
+        }
       }
 
       void writeAttributes(std::ostream& os) const

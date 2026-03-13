@@ -19,6 +19,8 @@
 #include "Rodin/Geometry/Connectivity.h"
 #include "Rodin/Geometry/AttributeIndex.h"
 #include "Rodin/Geometry/PolytopeTransformationIndex.h"
+#include "Rodin/IO/MeshLoader.h"
+#include "Rodin/IO/MeshPrinter.h"
 
 #if defined(RODIN_IO_HAS_HDF5) && RODIN_IO_HAS_HDF5
   #include <hdf5.h>
@@ -33,11 +35,19 @@ namespace Rodin::IO
       {
         static constexpr const char* Mesh = "/Mesh";
         static constexpr const char* SpaceDimension = "/Mesh/SpaceDimension";
-        static constexpr const char* Vertices = "/Mesh/Vertices";
+        static constexpr const char* Geometry = "/Mesh/Geometry";
+        static constexpr const char* Vertices = "/Mesh/Geometry/Vertices";
 
         static constexpr const char* Connectivity = "/Mesh/Connectivity";
-        static constexpr const char* ConnectivityMaximalDimension = "/Mesh/Connectivity/MaximalDimension";
+        static constexpr const char* ConnectivityD0 = "/Mesh/Connectivity/D_0";
+        static constexpr const char* ConnectivityTopologicalDimension = "/Mesh/Connectivity/TopologicalDimension";
         static constexpr const char* ConnectivityCounts = "/Mesh/Connectivity/Counts";
+        static constexpr const char* ConnectivityD0Types = "/Mesh/Connectivity/D_0/Types";
+        static constexpr const char* ConnectivityD0Offsets = "/Mesh/Connectivity/D_0/Offsets";
+        static constexpr const char* ConnectivityD0Indices = "/Mesh/Connectivity/D_0/Indices";
+
+        static constexpr const char* XDMF = "/Mesh/XDMF";
+        static constexpr const char* XDMFTopology = "/Mesh/XDMF/Topology";
 
         static constexpr const char* Attributes = "/Mesh/Attributes";
 
@@ -56,6 +66,22 @@ namespace Rodin::IO
         check(meshGroup >= 0, "Failed to create /Mesh group.");
         H5Gclose(meshGroup);
 
+        const auto geometryGroup = H5Gcreate2(file, Keyword::Geometry, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        check(geometryGroup >= 0, "Failed to create /Mesh/Geometry group.");
+        H5Gclose(geometryGroup);
+
+        const auto connectivityGroup = H5Gcreate2(file, Keyword::Connectivity, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        check(connectivityGroup >= 0, "Failed to create /Mesh/Connectivity group.");
+        H5Gclose(connectivityGroup);
+
+        const auto d0Group = H5Gcreate2(file, Keyword::ConnectivityD0, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        check(d0Group >= 0, "Failed to create /Mesh/Connectivity/D_0 group.");
+        H5Gclose(d0Group);
+
+        const auto xdmfGroup = H5Gcreate2(file, Keyword::XDMF, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        check(xdmfGroup >= 0, "Failed to create /Mesh/XDMF group.");
+        H5Gclose(xdmfGroup);
+
         const auto attributesGroup = H5Gcreate2(file, Keyword::Attributes, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         check(attributesGroup >= 0, "Failed to create /Mesh/Attributes group.");
         H5Gclose(attributesGroup);
@@ -68,6 +94,7 @@ namespace Rodin::IO
 
         writeVertices(file, mesh);
         saveConnectivity(file, mesh.getConnectivity());
+        saveXDMFTopology(file, mesh.getConnectivity());
         saveAttributes(file, mesh);
 
         H5Fclose(file);
@@ -163,20 +190,31 @@ namespace Rodin::IO
         return H5Lexists(file, path.c_str(), H5P_DEFAULT) > 0;
       }
 
-      static std::string polytopePath(size_t d, const char* suffix)
-      {
-        return std::string(Keyword::Connectivity) + "/Polytopes/d" + std::to_string(d) + "/" + suffix;
-      }
-
-      static std::string incidencePath(size_t d, size_t dp, const char* suffix)
-      {
-        return std::string(Keyword::Connectivity) + "/Incidence/d" + std::to_string(d) + "_d"
-             + std::to_string(dp) + "/" + suffix;
-      }
-
       static std::string attributePath(size_t d)
       {
         return std::string(Keyword::Attributes) + "/d" + std::to_string(d);
+      }
+
+      static int xdmfCellTypeId(Geometry::Polytope::Type t)
+      {
+        switch (t)
+        {
+          case Geometry::Polytope::Type::Triangle:
+            return 4;
+          case Geometry::Polytope::Type::Quadrilateral:
+            return 5;
+          case Geometry::Polytope::Type::Tetrahedron:
+            return 6;
+          case Geometry::Polytope::Type::Wedge:
+            return 8;
+          case Geometry::Polytope::Type::Hexahedron:
+            return 9;
+          case Geometry::Polytope::Type::Segment:
+            return 2;
+          case Geometry::Polytope::Type::Point:
+            return 1;
+        }
+        return -1;
       }
 
       static void writeDataset(
@@ -314,62 +352,35 @@ namespace Rodin::IO
       template <class ConnectivityType>
       static void saveConnectivity(hid_t file, const ConnectivityType& connectivity)
       {
-        const auto group = H5Gcreate2(file, Keyword::Connectivity, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-        check(group >= 0, "Failed to create /Mesh/Connectivity group.");
-        H5Gclose(group);
-
         const size_t D = connectivity.getDimension();
         writeScalarDataset(
             file,
-            Keyword::ConnectivityMaximalDimension,
+            Keyword::ConnectivityTopologicalDimension,
             H5T_NATIVE_ULLONG,
             static_cast<unsigned long long>(D));
 
         std::vector<unsigned long long> counts(D + 1, 0);
-        for (size_t d = 0; d <= D; ++d)
-          counts[d] = static_cast<unsigned long long>(connectivity.getCount(d));
+        counts[0] = static_cast<unsigned long long>(connectivity.getCount(0));
+        counts[D] = static_cast<unsigned long long>(connectivity.getCount(D));
         writeVectorDataset(file, Keyword::ConnectivityCounts, H5T_NATIVE_ULLONG, counts);
 
-        for (size_t d = 1; d <= D; ++d)
+        const auto& d0 = connectivity.getIncidence(D, 0);
+        check(d0.size() == connectivity.getCount(D), "Missing canonical D_0 connectivity.");
+        std::vector<int> types;
+        std::vector<unsigned long long> offsets(1, 0);
+        std::vector<unsigned long long> indices;
+        types.reserve(connectivity.getCount(D));
+        for (Index i = 0; i < static_cast<Index>(connectivity.getCount(D)); ++i)
         {
-          std::vector<int> geometry;
-          std::vector<unsigned long long> offsets(1, 0);
-          std::vector<unsigned long long> data;
-          geometry.reserve(static_cast<size_t>(connectivity.getCount(d)));
-          for (Index i = 0; i < static_cast<Index>(connectivity.getCount(d)); ++i)
-          {
-            const auto& key = connectivity.getPolytope(d, i);
-            geometry.push_back(static_cast<int>(connectivity.getGeometry(d, i)));
-            for (size_t j = 0; j < key.size(); ++j)
-              data.push_back(static_cast<unsigned long long>(key[j]));
-            offsets.push_back(static_cast<unsigned long long>(data.size()));
-          }
-
-          writeVectorDataset(file, polytopePath(d, "Geometry"), H5T_NATIVE_INT, geometry);
-          writeVectorDataset(file, polytopePath(d, "Offsets"), H5T_NATIVE_ULLONG, offsets);
-          writeVectorDataset(file, polytopePath(d, "Data"), H5T_NATIVE_ULLONG, data);
+          types.push_back(static_cast<int>(connectivity.getGeometry(D, i)));
+          for (const auto v : d0[static_cast<size_t>(i)])
+            indices.push_back(static_cast<unsigned long long>(v));
+          offsets.push_back(static_cast<unsigned long long>(indices.size()));
         }
 
-        for (size_t d = 0; d <= D; ++d)
-        {
-          for (size_t dp = 0; dp <= D; ++dp)
-          {
-            const auto& inc = connectivity.getIncidence(d, dp);
-            if (inc.size() != connectivity.getCount(d))
-              continue;
-            std::vector<unsigned long long> offsets(1, 0);
-            std::vector<unsigned long long> data;
-            offsets.reserve(inc.size() + 1);
-            for (const auto& row : inc)
-            {
-              for (const auto i : row)
-                data.push_back(static_cast<unsigned long long>(i));
-              offsets.push_back(static_cast<unsigned long long>(data.size()));
-            }
-            writeVectorDataset(file, incidencePath(d, dp, "Offsets"), H5T_NATIVE_ULLONG, offsets);
-            writeVectorDataset(file, incidencePath(d, dp, "Data"), H5T_NATIVE_ULLONG, data);
-          }
-        }
+        writeVectorDataset(file, Keyword::ConnectivityD0Types, H5T_NATIVE_INT, types);
+        writeVectorDataset(file, Keyword::ConnectivityD0Offsets, H5T_NATIVE_ULLONG, offsets);
+        writeVectorDataset(file, Keyword::ConnectivityD0Indices, H5T_NATIVE_ULLONG, indices);
       }
 
       template <class ContextType>
@@ -380,66 +391,56 @@ namespace Rodin::IO
         const size_t D = static_cast<size_t>(
             readScalarDataset<unsigned long long>(
                 file,
-                Keyword::ConnectivityMaximalDimension,
+                Keyword::ConnectivityTopologicalDimension,
                 H5T_NATIVE_ULLONG));
         connectivity.initialize(D);
 
-        const auto counts = readVectorDataset<unsigned long long>(file, Keyword::ConnectivityCounts, H5T_NATIVE_ULLONG);
+        auto counts = readVectorDataset<unsigned long long>(file, Keyword::ConnectivityCounts, H5T_NATIVE_ULLONG);
         check(counts.size() == D + 1, "Invalid /Mesh/Connectivity/Counts size.");
         connectivity.nodes(static_cast<size_t>(counts[0]));
+        const auto types = readVectorDataset<int>(file, Keyword::ConnectivityD0Types, H5T_NATIVE_INT);
+        const auto offsets = readVectorDataset<unsigned long long>(file, Keyword::ConnectivityD0Offsets, H5T_NATIVE_ULLONG);
+        const auto indices = readVectorDataset<unsigned long long>(file, Keyword::ConnectivityD0Indices, H5T_NATIVE_ULLONG);
+        check(offsets.size() == types.size() + 1, "Invalid /Mesh/Connectivity/D_0 offsets size.");
+        counts[D] = static_cast<unsigned long long>(types.size());
         for (size_t d = 1; d <= D; ++d)
           connectivity.reserve(d, static_cast<size_t>(counts[d]));
-
-        for (size_t d = 1; d <= D; ++d)
+        for (size_t i = 0; i < types.size(); ++i)
         {
-          const auto geometry = readVectorDataset<int>(file, polytopePath(d, "Geometry"), H5T_NATIVE_INT);
-          const auto offsets = readVectorDataset<unsigned long long>(file, polytopePath(d, "Offsets"), H5T_NATIVE_ULLONG);
-          const auto data = readVectorDataset<unsigned long long>(file, polytopePath(d, "Data"), H5T_NATIVE_ULLONG);
-          check(geometry.size() == static_cast<size_t>(counts[d]), "Invalid connectivity geometry dataset size.");
-          check(offsets.size() == static_cast<size_t>(counts[d]) + 1, "Invalid connectivity offsets dataset size.");
-
-          for (size_t i = 0; i < static_cast<size_t>(counts[d]); ++i)
-          {
-            const auto begin = static_cast<size_t>(offsets[i]);
-            const auto end = static_cast<size_t>(offsets[i + 1]);
-            check(end >= begin && end <= data.size(), "Invalid connectivity polytope offsets.");
-            Geometry::Polytope::Key key(end - begin);
-            for (size_t j = 0; j < end - begin; ++j)
-              key[j] = static_cast<Index>(data[begin + j]);
-            connectivity.polytope(static_cast<Geometry::Polytope::Type>(geometry[i]), std::move(key));
-          }
-        }
-
-        for (size_t d = 0; d <= D; ++d)
-        {
-          for (size_t dp = 0; dp <= D; ++dp)
-          {
-            const auto offsetsPath = incidencePath(d, dp, "Offsets");
-            const auto dataPath = incidencePath(d, dp, "Data");
-            if (!hasPath(file, offsetsPath) || !hasPath(file, dataPath))
-              continue;
-
-            const auto offsets = readVectorDataset<unsigned long long>(file, offsetsPath, H5T_NATIVE_ULLONG);
-            const auto data = readVectorDataset<unsigned long long>(file, dataPath, H5T_NATIVE_ULLONG);
-            check(offsets.size() == static_cast<size_t>(counts[d]) + 1, "Invalid incidence offsets size.");
-
-            typename Geometry::Connectivity<ContextType>::Incidence incidence;
-            incidence.resize(static_cast<size_t>(counts[d]));
-            for (size_t i = 0; i < static_cast<size_t>(counts[d]); ++i)
-            {
-              const auto begin = static_cast<size_t>(offsets[i]);
-              const auto end = static_cast<size_t>(offsets[i + 1]);
-              check(end >= begin && end <= data.size(), "Invalid incidence offsets.");
-              auto& row = incidence[i];
-              row.reserve(end - begin);
-              for (size_t j = begin; j < end; ++j)
-                row.push_back(static_cast<Index>(data[j]));
-            }
-            connectivity.setIncidence({ d, dp }, std::move(incidence));
-          }
+          const auto begin = static_cast<size_t>(offsets[i]);
+          const auto end = static_cast<size_t>(offsets[i + 1]);
+          check(end >= begin && end <= indices.size(), "Invalid /Mesh/Connectivity/D_0 offsets.");
+          Geometry::Polytope::Key key(end - begin);
+          for (size_t j = 0; j < end - begin; ++j)
+            key[j] = static_cast<Index>(indices[begin + j]);
+          connectivity.polytope(static_cast<Geometry::Polytope::Type>(types[i]), std::move(key));
         }
 
         return connectivity;
+      }
+
+      template <class ConnectivityType>
+      static void saveXDMFTopology(hid_t file, const ConnectivityType& connectivity)
+      {
+        const size_t D = connectivity.getDimension();
+        const auto& d0 = connectivity.getIncidence(D, 0);
+        check(d0.size() == connectivity.getCount(D), "Missing canonical D_0 connectivity.");
+
+        std::vector<int> topology;
+        for (Index i = 0; i < static_cast<Index>(connectivity.getCount(D)); ++i)
+        {
+          const auto t = connectivity.getGeometry(D, i);
+          const int xdmfType = xdmfCellTypeId(t);
+          check(xdmfType >= 0, "Unsupported geometry type for XDMF mixed topology.");
+          topology.push_back(xdmfType);
+
+          if (t == Geometry::Polytope::Type::Segment)
+            topology.push_back(static_cast<int>(d0[static_cast<size_t>(i)].size()));
+
+          for (const auto v : d0[static_cast<size_t>(i)])
+            topology.push_back(static_cast<int>(v));
+        }
+        writeVectorDataset(file, Keyword::XDMFTopology, H5T_NATIVE_INT, topology);
       }
 
       template <class MeshType>
@@ -449,6 +450,8 @@ namespace Rodin::IO
         const size_t D = connectivity.getDimension();
         for (size_t d = 0; d <= D; ++d)
         {
+          if (d != 0 && d != D)
+            continue;
           std::vector<unsigned long long> attrs(connectivity.getCount(d), NullAttributeMarker);
           for (Index i = 0; i < static_cast<Index>(connectivity.getCount(d)); ++i)
           {
@@ -487,6 +490,56 @@ namespace Rodin::IO
         return attrs;
       }
 #endif
+  };
+
+  template <>
+  class MeshLoader<FileFormat::HDF5, Context::Local>
+    : public MeshLoaderBase<Context::Local>
+  {
+    public:
+      using ObjectType = Geometry::Mesh<Context::Local>;
+      using Parent = MeshLoaderBase<Context::Local>;
+
+      MeshLoader(ObjectType& mesh)
+        : Parent(mesh)
+      {}
+
+      void load(std::istream&) override
+      {
+        Alert::Exception()
+          << "HDF5 mesh loading requires file-path based loading."
+          << Alert::Raise;
+      }
+
+      void load(const boost::filesystem::path& filename) override
+      {
+        HDF5::loadMesh(this->getObject(), filename);
+      }
+  };
+
+  template <>
+  class MeshPrinter<FileFormat::HDF5, Context::Local>
+    : public MeshPrinterBase<Context::Local>
+  {
+    public:
+      using ObjectType = Geometry::Mesh<Context::Local>;
+      using Parent = MeshPrinterBase<Context::Local>;
+
+      MeshPrinter(const ObjectType& mesh)
+        : Parent(mesh)
+      {}
+
+      void print(std::ostream&) override
+      {
+        Alert::Exception()
+          << "HDF5 mesh printing requires file-path based printing."
+          << Alert::Raise;
+      }
+
+      void print(const boost::filesystem::path& filename) const
+      {
+        HDF5::saveMesh(this->getObject(), filename);
+      }
   };
 }
 
