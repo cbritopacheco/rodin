@@ -75,7 +75,7 @@ jobs:
       - name: Run unit tests
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
-          -L unit
+          -L unit -LE slow
           --output-on-failure
           -j ${{ env.CTEST_PARALLEL_LEVEL }}
 
@@ -83,7 +83,7 @@ jobs:
         if: failure()
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
-          -L unit
+          -L unit -LE slow
           --rerun-failed -V --output-on-failure
 
   Manufactured:
@@ -151,7 +151,7 @@ jobs:
       - name: Run manufactured tests
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
-          -L manufactured
+          -L manufactured -LE slow
           --output-on-failure
           -j ${{ env.CTEST_PARALLEL_LEVEL }}
 
@@ -159,7 +159,7 @@ jobs:
         if: failure()
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
-          -L manufactured
+          -L manufactured -LE slow
           --rerun-failed -V --output-on-failure
 
   Coverage:

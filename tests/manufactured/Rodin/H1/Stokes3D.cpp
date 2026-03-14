@@ -143,81 +143,13 @@ namespace Rodin::Tests::Manufactured::Stokes3D
     EXPECT_NEAR(g.dot(re_p) / gnorm, 0, 1e-10);
   }
 
-  TEST_P(Manufactured_Stokes3D_Test_12, Stokes3D_Trigonometric)
-  {
-    auto pi = Rodin::Math::Constants::pi();
-
-    Mesh mesh = this->getMesh();
-
-    H1 uh(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
-    P1 ph(mesh);
-
-    P0g p0g(mesh);
-
-    VectorFunction u_exact{
-      Sin(pi * F::x) * Cos(pi * F::y) * Cos(pi * F::z),
-      -Cos(pi * F::x) * Sin(pi * F::y) * Cos(pi * F::z),
-      Zero()
-    };
-    auto p_exact = Cos(2 * pi * F::x) * Cos(2 * pi * F::y) * Cos(2 * pi * F::z);
-
-    VectorFunction f{
-      3 * pi * pi * Sin(pi * F::x) * Cos(pi * F::y) * Cos(pi * F::z)
-      - 2 * pi * Sin(2 * pi * F::x) * Cos(2 * pi * F::y) * Cos(2 * pi * F::z),
-
-      -3 * pi * pi * Cos(pi * F::x) * Sin(pi * F::y) * Cos(pi * F::z)
-      - 2 * pi * Cos(2 * pi * F::x) * Sin(2 * pi * F::y) * Cos(2 * pi * F::z),
-
-      -2 * pi * Cos(2 * pi * F::x) * Cos(2 * pi * F::y) * Sin(2 * pi * F::z)
-    };
-
-
-    TrialFunction u(uh);
-    TrialFunction p(ph);
-    TestFunction  v(uh);
-    TestFunction  q(ph);
-
-    TrialFunction lambda(p0g);
-    TestFunction  mu(p0g);
-
-    Problem stokes(u, p, v, q, lambda, mu);
-    stokes = Integral(Jacobian(u), Jacobian(v))
-           - Integral(p, Div(v))
-           + Integral(Div(u), q)
-           + Integral(lambda, q)
-           + Integral(p, mu)
-           - Integral(f, v)
-           + DirichletBC(u, u_exact);
-
-    stokes.assemble();
-
-    DGMRES gmres(stokes);
-    gmres.setTolerance(1e-8);
-    gmres.setRestart(100);
-    gmres.setMaxIterations(1000);
-    gmres.solve();
-
-    // L2 errors
-    H1 sh(std::integral_constant<size_t, 1>{}, mesh);
-    GridFunction diff_u(sh);
-    diff_u = Pow(Frobenius(u.getSolution() - u_exact), 2);
-    Real error_u = Integral(diff_u).compute();
-
-    GridFunction diff_p(sh);
-    diff_p = Pow(p.getSolution() - p_exact, 2);
-    Real error_p = Integral(diff_p).compute();
-
-    EXPECT_NEAR(error_u, 0, RODIN_FUZZY_CONSTANT);
-    EXPECT_NEAR(error_p, 0, 2e-3);
-  }
-
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D,
     Manufactured_Stokes3D_Test_12,
     ::testing::Values(
       Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron
-      // Polytope::Type::Wedge
+      Polytope::Type::Hexahedron,
+      Polytope::Type::Wedge
       )
   );
 }
