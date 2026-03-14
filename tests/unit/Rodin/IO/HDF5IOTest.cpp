@@ -103,7 +103,7 @@ namespace Rodin::Tests::Unit
     H5Fclose(h5);
 
     XDMF xdmf(mesh, meshFile);
-    xdmf.addGridFunction("u", gf, gfFile);
+    xdmf.add("u", gf, gfFile);
     xdmf.save(xdmfFile);
 
     std::ifstream ifs(xdmfFile);
