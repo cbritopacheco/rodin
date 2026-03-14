@@ -143,6 +143,11 @@ namespace Rodin::Solver
     (void) ierr;
   }
 
+  void SNES::solve(LinearSystemType& system)
+  {
+    solve(system.getVector(), system.getSolution());
+  }
+
   ::SNES& SNES::getHandle() noexcept
   {
     return m_snes;

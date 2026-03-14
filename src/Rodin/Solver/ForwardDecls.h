@@ -36,6 +36,13 @@ namespace Rodin::Solver
   class LinearSolverBase;
 
   /**
+   * @brief Abstract base class for Newton-type nonlinear solvers.
+   * @tparam NonlinearSystem Type of nonlinear system to solve.
+   */
+  template <class NonlinearSystem>
+  class NewtonSolverBase;
+
+  /**
    * @brief Wrapper class for any Eigen sparse solver.
    * @tparam EigenSolverType Type of the underlying Eigen solver
    * @tparam OperatorType Type of operator (matrix)

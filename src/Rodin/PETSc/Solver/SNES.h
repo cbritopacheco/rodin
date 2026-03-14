@@ -4,20 +4,26 @@
 #include <petscsnes.h>
 
 #include "Rodin/PETSc/Object.h"
+#include "Rodin/PETSc/Math/LinearSystem.h"
+#include "Rodin/Solver/NewtonSolver.h"
 #include "KSP.h"
 
 namespace Rodin::Solver
 {
-  class SNES : public PETSc::Object<::SNES>
+  class SNES
+    : public PETSc::Object<::SNES>, public NewtonSolverBase<PETSc::Math::LinearSystem>
   {
     public:
       using HandleType = ::SNES;
       using KSPType = ::KSP;
       using MatrixType = ::Mat;
       using VectorType = ::Vec;
+      using LinearSystemType = PETSc::Math::LinearSystem;
       using FunctionCallbackType = ::SNESFunctionFn*;
       using JacobianCallbackType = ::SNESJacobianFn*;
-      using Parent = PETSc::Object<HandleType>;
+      using PetscParent = PETSc::Object<HandleType>;
+      using NewtonParent = NewtonSolverBase<LinearSystemType>;
+      using NewtonParent::solve;
 
       explicit SNES(MPI_Comm comm = PETSC_COMM_WORLD);
 
@@ -70,12 +76,13 @@ namespace Rodin::Solver
       }
 
       void solve(VectorType b, VectorType x);
+      void solve(LinearSystemType& system) override;
 
       HandleType& getHandle() noexcept override;
 
       const HandleType& getHandle() const noexcept override;
 
-      virtual SNES* copy() const noexcept
+      virtual SNES* copy() const noexcept override
       {
         return new SNES(*this);
       }
