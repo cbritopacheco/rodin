@@ -128,6 +128,11 @@ namespace Rodin::Solver
 
       ~NewtonSolver() override = default;
 
+      NewtonSolver* copy() const noexcept override
+      {
+        return new NewtonSolver(*this);
+      }
+
       NewtonSolver& setFunction(const ResidualAssembly& f)
       {
         m_function = f;
