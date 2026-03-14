@@ -20,7 +20,7 @@ target_link_libraries(RodinSolverConceptTest
   Rodin::Rodin
   Rodin::Solver
 )
-gtest_discover_tests(RodinNewtonSolverTest
+gtest_discover_tests(RodinSolverConceptTest
    PROPERTIES
      LABELS unit
  )

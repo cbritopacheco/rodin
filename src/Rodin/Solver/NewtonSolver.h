@@ -298,6 +298,24 @@ namespace Rodin::Solver
       Real m_rtol;
       Real m_alpha;
   };
+
+  /**
+   * @ingroup RodinCTAD
+   * @brief CTAD guide for NewtonSolver from a Rodin linear solver instance.
+   *
+   * Deduces:
+   * - SolutionType = LinearSolver::VectorType
+   * - FunctionType = LinearSolver::VectorType
+   * - JacobianType = LinearSolver::OperatorType
+   * - LinearSolverType = LinearSolver
+   */
+  template <class LinearSolver>
+  NewtonSolver(const LinearSolver&)
+    -> NewtonSolver<
+      typename LinearSolver::VectorType,
+      typename LinearSolver::VectorType,
+      typename LinearSolver::OperatorType,
+      LinearSolver>;
 }
 
 #endif
