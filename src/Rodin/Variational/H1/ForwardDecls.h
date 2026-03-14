@@ -92,6 +92,51 @@ namespace Rodin::Variational
    */
   template <size_t K>
   using ComplexVectorH1Element = H1Element<K, Math::Vector<Complex>>;
+
+  template <size_t K>
+  class GLL;
+
+  template <size_t K>
+  class LegendrePolynomial;
+
+  template <size_t K>
+  class LagrangeBasis1D;
+
+  template <size_t K>
+  class LagrangeBasisPoint;
+
+  template <size_t K>
+  class LagrangeBasisSegment;
+
+  template <size_t K>
+  class LagrangeBasisTriangle;
+
+  template <size_t K>
+  class LagrangeBasisTetrahedron;
+
+  template <size_t K>
+  class LagrangeBasisQuadrilateral;
+
+  template <size_t K>
+  class LagrangeBasisWedge;
+
+  template <size_t K>
+  class DubinerTriangle;
+
+  template <size_t K>
+  class DubinerTetrahedron;
+
+  template <size_t K>
+  class FeketeTriangle;
+
+  template <size_t K>
+  class FeketeTetrahedron;
+
+  template <size_t K>
+  class VandermondeTriangle;
+
+  template <size_t K>
+  class VandermondeTetrahedron;
 }
 
 #endif

@@ -1138,7 +1138,7 @@ namespace Rodin::Variational
 
               // Triangle-local barycentric integers (a_t,b_t,c_t)
               // for vertices 0,1,2 of that triangle:
-              const size_t a_t = abc[ triToCanon[0] ];
+              // const size_t a_t = abc[ triToCanon[0] ];
               const size_t b_t = abc[ triToCanon[1] ];
               const size_t c_t = abc[ triToCanon[2] ];
 
@@ -1455,15 +1455,15 @@ namespace Rodin::Variational
         };
 
         // All 24 permutations of 4 vertices
-        static constexpr int perms4[24][4] =
-        {
-          {0,1,2,3}, {0,1,3,2}, {0,2,1,3}, {0,2,3,1},
-          {0,3,1,2}, {0,3,2,1}, {1,0,2,3}, {1,0,3,2},
-          {1,2,0,3}, {1,2,3,0}, {1,3,0,2}, {1,3,2,0},
-          {2,0,1,3}, {2,0,3,1}, {2,1,0,3}, {2,1,3,0},
-          {2,3,0,1}, {2,3,1,0}, {3,0,1,2}, {3,0,2,1},
-          {3,1,0,2}, {3,1,2,0}, {3,2,0,1}, {3,2,1,0}
-        };
+        // static constexpr int perms4[24][4] =
+        // {
+        //   {0,1,2,3}, {0,1,3,2}, {0,2,1,3}, {0,2,3,1},
+        //   {0,3,1,2}, {0,3,2,1}, {1,0,2,3}, {1,0,3,2},
+        //   {1,2,0,3}, {1,2,3,0}, {1,3,0,2}, {1,3,2,0},
+        //   {2,0,1,3}, {2,0,3,1}, {2,1,0,3}, {2,1,3,0},
+        //   {2,3,0,1}, {2,3,1,0}, {3,0,1,2}, {3,0,2,1},
+        //   {3,1,0,2}, {3,1,2,0}, {3,2,0,1}, {3,2,1,0}
+        // };
 
         // For lf in {0,4}: find the triangle entity in 'inc' that matches
         // the canonical face, and the permutation mapping canonical
@@ -1547,7 +1547,7 @@ namespace Rodin::Variational
               const size_t abc[3] = { a, b, c };
 
               // Triangle-local barycentric integers for its vertices 0,1,2:
-              const size_t a_t = abc[ triToCanon[0] ];
+              // const size_t a_t = abc[ triToCanon[0] ];
               const size_t b_t = abc[ triToCanon[1] ];
               const size_t c_t = abc[ triToCanon[2] ];
 

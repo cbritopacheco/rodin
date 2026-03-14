@@ -470,7 +470,7 @@ namespace Rodin::Variational
         assert(nte % scalarCount == 0);
 
         const size_t vdim_tr = ntr / scalarCount;
-        const size_t vdim_te = nte / scalarCount;
+        // const size_t vdim_te = nte / scalarCount;
         assert(vdim_tr == vdim_te);
         const size_t vdim = vdim_tr;
 

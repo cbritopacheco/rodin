@@ -40,7 +40,7 @@ namespace Rodin::Assembly
 
         PetscErrorCode ierr;
 
-        ierr = VecSetSizes(res, n, PETSC_DECIDE);
+        ierr = VecSetSizes(res, n, n);
         assert(ierr == PETSC_SUCCESS);
 
         ierr = VecSetFromOptions(res);
@@ -114,7 +114,7 @@ namespace Rodin::Assembly
         const size_t n = input.getTrialFES().getSize();
 
         PetscErrorCode ierr;
-        ierr = MatSetSizes(res, m, n, PETSC_DETERMINE, PETSC_DETERMINE);
+        ierr = MatSetSizes(res, m, n, m, n);
         assert(ierr == PETSC_SUCCESS);
 
         ierr = MatSetFromOptions(res);
@@ -254,38 +254,43 @@ namespace Rodin::Assembly
 
         // Matrix setup
         assert(A);
-        ierr = MatSetSizes(A,
-                           static_cast<PetscInt>(rows),
-                           static_cast<PetscInt>(cols),
-                           PETSC_DETERMINE,
-                           PETSC_DETERMINE);
+        ierr = MatSetSizes(A, rows, cols, rows, cols);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = MatSetType(A, MATSEQAIJ);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = MatSetUp(A);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = MatZeroEntries(A);
         assert(ierr == PETSC_SUCCESS);
 
         // Vector setup
         assert(b);
-        ierr = VecSetSizes(b, static_cast<PetscInt>(rows), PETSC_DECIDE);
+        ierr = VecSetSizes(b, rows, rows);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = VecSetType(b, VECSEQ);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = VecSetFromOptions(b);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = VecZeroEntries(b);
         assert(ierr == PETSC_SUCCESS);
 
         auto& x = axb.getSolution();
         assert(x);
-        ierr = VecSetSizes(x, static_cast<PetscInt>(cols), PETSC_DECIDE);
+        ierr = VecSetSizes(x, cols, cols);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = VecSetType(x, VECSEQ);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = VecSetFromOptions(x);
         assert(ierr == PETSC_SUCCESS);
+
         ierr = VecZeroEntries(x);
         assert(ierr == PETSC_SUCCESS);
 
@@ -536,11 +541,7 @@ namespace Rodin::Assembly
         // Allocate / reset A (SeqAIJ)
         // ------------------------
         assert(A);
-        ierr = MatSetSizes(A,
-                           static_cast<PetscInt>(nrows),
-                           static_cast<PetscInt>(ncols),
-                           PETSC_DETERMINE,
-                           PETSC_DETERMINE);
+        ierr = MatSetSizes(A, nrows, ncols, nrows, ncols);
         assert(ierr == PETSC_SUCCESS);
 
         // Keep it explicitly AIJ (sequential) for now
@@ -559,7 +560,7 @@ namespace Rodin::Assembly
         // Allocate / reset b (Seq Vec)
         // ------------------------
         assert(b);
-        ierr = VecSetSizes(b, static_cast<PetscInt>(nrows), PETSC_DECIDE);
+        ierr = VecSetSizes(b, nrows, nrows);
         assert(ierr == PETSC_SUCCESS);
 
         ierr = VecSetType(b, VECSEQ);
@@ -573,7 +574,7 @@ namespace Rodin::Assembly
 
         auto& x = axb.getSolution();
         assert(x);
-        ierr = VecSetSizes(x, static_cast<PetscInt>(ncols), PETSC_DECIDE);
+        ierr = VecSetSizes(x, ncols, ncols);
         assert(ierr == PETSC_SUCCESS);
         ierr = VecSetType(x, VECSEQ);
         assert(ierr == PETSC_SUCCESS);

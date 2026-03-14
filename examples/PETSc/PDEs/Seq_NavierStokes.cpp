@@ -60,9 +60,12 @@
  *   - flux.txt
  *   - pressure.txt
  *
- * Suggested PETSc options:
- *   -ksp_type gmres -pc_type lu
- *   -ksp_type fgmres -pc_type fieldsplit
+ * Suggested command:
+ * VECLIB_MAXIMUM_THREADS=1 OPENBLAS_NUM_THREADS=8 OMP_NUM_THREADS=8 \
+ * ./examples/PETSc/PDEs/PETSc_Seq_NavierStokes \
+ * -ksp_type preonly -pc_type lu -ksp_rtol 1e-6 \
+ * -ksp_monitor -ksp_converged_reason \
+ * -pc_factor_shift_type nonzero  -pc_factor_shift_amount 1e-10
  */
 
 #include <Rodin/Types.h>
@@ -76,9 +79,7 @@
 #include <array>
 #include <cmath>
 #include <fstream>
-#include <iomanip>
 #include <iostream>
-#include <sstream>
 
 using namespace Rodin;
 using namespace Rodin::Math;
@@ -103,9 +104,11 @@ static Real InletPulse(const Real t, const Real freq)
   const Real tm = std::fmod(t, period);
   const Real pi = Constants::pi();
   if (tm < halfPeriod)
-    return 200.0 * std::sin(2.0 * pi * freq * t);
+    return 200 * std::sin(2.0 * pi * freq * t);
   return 0.0;
 }
+
+static const char* filename = "../resources/examples/PDEs/NavierStokes.medit.mesh";
 
 int main(int argc, char** argv)
 {
@@ -139,7 +142,7 @@ int main(int argc, char** argv)
 
   // Load the mesh and compute boundary-to-cell connectivity.
   Mesh mesh;
-  mesh.load("../resources/examples/PDEs/NavierStokes.medit.mesh", IO::FileFormat::MEDIT);
+  mesh.load(filename, IO::FileFormat::MEDIT);
   mesh.getConnectivity().compute(1, 2);
 
   // Save the mesh once for post-processing convenience.
@@ -195,7 +198,7 @@ int main(int argc, char** argv)
   PETSc::Variational::GridFunction one(ph);
   one = 1.0;
   PETSc::Variational::TestFunction qFlux(ph);
-  LinearForm fluxForm(qFlux);
+  LinearForm flux(qFlux);
 
   // Outward unit normal on boundary faces.
   auto n = BoundaryNormal(mesh);
@@ -278,6 +281,11 @@ int main(int argc, char** argv)
         //   <(rho / 2) beta u, v>_{Γ_out}
       + BoundaryIntegral(0.5 * rho * beta * Dot(u, v)).over(outlet)
 
+      // Tiny pressure-block diagonal filler used to
+      // improve robustness of sparse direct factorization
+      // for the mixed system.
+      + 1e-12 * Integral(p, q)
+
         // No-slip wall condition.
       + DirichletBC(u, Zero(dim)).on(wall)
 
@@ -288,7 +296,7 @@ int main(int argc, char** argv)
 
     // Assemble the linear system and define PETSc field splits for the mixed
     // velocity-pressure block structure.
-    flow.assemble();//.setFieldSplits();
+    flow.assemble().setFieldSplits();
 
     std::cout << "Solving linear system for time step " << k + 1 << " / " << Nt << "...\n";
     // Solve the assembled linear system.
@@ -296,14 +304,14 @@ int main(int argc, char** argv)
 
     // Advance the time history by copying the newly computed solution into
     // the "old" fields used by the next step.
-    u_old.setData(u.getSolution().getData());
-    p_old.setData(p.getSolution().getData());
+    u_old = u.getSolution();
+    p_old = p.getSolution();
 
     // Compute the outlet flow rate
     //   Q_out = ∫_{Γ_out} u · n
-    fluxForm = BoundaryIntegral(Dot(u_old, n), qFlux).over(outlet);
-    fluxForm.assemble();
-    const Real qout = fluxForm(one);
+    flux = BoundaryIntegral(Dot(u_old, n), qFlux).over(outlet);
+    flux.assemble();
+    const Real qout = flux(one);
 
     // Update the outlet pressure through the resistance law:
     //   p_out = p_d - R_d * Q_out
@@ -316,10 +324,9 @@ int main(int argc, char** argv)
     pressureFile << t << " " << pout << "\n";
 
     // Save solution snapshots at every time step.
-    std::ostringstream id;
-    id << std::setfill('0') << std::setw(6) << k;
-    u_old.save("NavierStokes_velocity_" + id.str() + ".gf", IO::FileFormat::MEDIT);
-    p_old.save("NavierStokes_pressure_" + id.str() + ".gf", IO::FileFormat::MEDIT);
+    mesh.save("NavierStokes." + std::to_string(k) + ".mesh", IO::FileFormat::MEDIT);
+    u_old.save("NavierStokes." + std::to_string(k) + ".sol", IO::FileFormat::MEDIT);
+    // p_old.save("NavierStokes_pressure_" + std::to_string(k) + ".sol", IO::FileFormat::MEDIT);
   }
 
   PetscFinalize();

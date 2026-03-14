@@ -130,6 +130,8 @@ int main(int argc, char** argv)
       + Integral(Div(u), q)
       + Integral(l, q)
       + Integral(p, m)
+      + 1e-12 * Integral(p, q)
+      + 1e-12 * Integral(l, m)
       - Integral(f, v)
       + DirichletBC(u, u_exact);
 
