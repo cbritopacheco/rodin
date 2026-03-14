@@ -59,7 +59,7 @@ jobs:
           -DRODIN_USE_MCSS=OFF
           -DRODIN_BUILD_SRC=ON
           -DRODIN_BUILD_EXAMPLES=ON
-          -DRODIN_BUILD_MULTITHREADED=${{ matrix.multithreaded }}
+          -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
           -DRODIN_USE_MPI=${{ matrix.mpi }}
           -DRODIN_USE_PETSC=${{ matrix.petsc }}
       - name: Build
@@ -108,9 +108,10 @@ jobs:
           -DRODIN_BUILD_SRC=ON
           -DRODIN_BUILD_EXAMPLES=ON
           -DCMAKE_POLICY_VERSION_MINIMUM=3.5
-          -DRODIN_BUILD_MULTITHREADED=${{ matrix.multithreaded }}
+          -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
           -DRODIN_USE_MPI=${{ matrix.mpi }}
           -DRODIN_USE_PETSC=${{ matrix.petsc }}
+          -DOpenMP_ROOT=/opt/homebrew/opt/libomp
       - name: Build
         run: cmake --build ${{github.workspace}}/build
 
