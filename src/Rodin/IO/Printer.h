@@ -8,6 +8,9 @@
 #define RODIN_IO_PRINTER_H
 
 #include <ostream>
+#include <fstream>
+
+#include <boost/filesystem/path.hpp>
 
 #include "ForwardDecls.h"
 

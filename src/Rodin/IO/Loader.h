@@ -7,7 +7,6 @@
 #ifndef RODIN_IO_LOADER_H
 #define RODIN_IO_LOADER_H
 
-#include <iostream>
 #include <istream>
 #include <fstream>
 
