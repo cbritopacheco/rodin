@@ -124,7 +124,7 @@ namespace Rodin::QF
       if (n == 0)
       {
         for (size_t s = 0; s <= RODIN_QF_GRUNDMANNMOLLER_MAX_S; s++)
-          res[0][s] = { Math::SpatialVector<Real>{{0}} };
+          res[0][s] = { Math::SpatialVector<Real>{ 0 } };
         continue;
       }
 

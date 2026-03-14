@@ -61,6 +61,10 @@ else()
   target_link_libraries(RodinIO PUBLIC ${HDF5_LIBRARIES})
 endif()
 
+if (RODIN_USE_MPI)
+  target_link_libraries(RodinIO PUBLIC RodinMPI)
+endif()
+
 # ---- Install target --------------------------------------------------------
 install(
   TARGETS RodinIO
