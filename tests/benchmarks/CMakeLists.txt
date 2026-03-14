@@ -11,7 +11,6 @@ target_link_libraries(RodinBenchmarks
   PRIVATE
   Rodin::Variational
   Rodin::Solver
-  Rodin::Threads
   benchmark::benchmark
   benchmark::benchmark_main)
 

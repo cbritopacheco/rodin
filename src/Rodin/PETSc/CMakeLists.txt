@@ -52,8 +52,6 @@ target_compile_definitions(RodinPETSc
 )
 
 # ---- Dependencies ----------------------------------------------------------
-find_package(PETSc REQUIRED)
-
 target_link_libraries(RodinPETSc
   PUBLIC
     Rodin::Geometry
@@ -70,7 +68,6 @@ if (RODIN_USE_MPI)
 endif()
 
 if (RODIN_USE_OPENMP)
-  find_package(OpenMP REQUIRED)
   target_sources(RodinPETSc PRIVATE Assembly/OpenMP.cpp)
   target_link_libraries(RodinPETSc PUBLIC OpenMP::OpenMP_CXX)
 endif()

@@ -36,7 +36,6 @@ target_link_libraries(RodinAssembly
 
 if (RODIN_USE_OPENMP)
   target_sources(RodinAssembly PRIVATE OpenMP.cpp)
-  find_package(OpenMP REQUIRED)
   target_link_libraries(RodinAssembly PUBLIC OpenMP::OpenMP_CXX)
 endif()
 

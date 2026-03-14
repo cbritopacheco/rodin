@@ -53,13 +53,7 @@ target_link_libraries(RodinIO
     Boost::filesystem
 )
 
-find_package(HDF5 REQUIRED COMPONENTS C)
-if (TARGET HDF5::HDF5)
-  target_link_libraries(RodinIO PUBLIC HDF5::HDF5)
-else()
-  target_include_directories(RodinIO PUBLIC ${HDF5_INCLUDE_DIRS})
-  target_link_libraries(RodinIO PUBLIC ${HDF5_LIBRARIES})
-endif()
+target_link_libraries(RodinIO PUBLIC HDF5::HDF5)
 
 if (RODIN_USE_MPI)
   target_link_libraries(RodinIO PUBLIC RodinMPI)

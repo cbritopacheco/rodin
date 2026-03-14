@@ -41,19 +41,15 @@ jobs:
         run: >-
           sudo apt-get update && sudo apt-get install -y
           libboost1.74-all-dev
+          libsuitesparse-dev
           libeigen3-dev
+          libscotch-dev
+          libmetis-dev
           libhdf5-dev
           libomp-dev
-          libsuitesparse-dev
-          mpich
           petsc-dev
-          libmetis-dev
+          mpich
           lcov
-          libgl1-mesa-dev
-          libsdl2-dev
-          libglfw3-dev
-          libopenal-dev
-          libvulkan-dev
       - name: Configure CMake
         run: >
           cmake
@@ -92,18 +88,16 @@ jobs:
         run: |
           brew update
           brew install \
-            boost \
-            boost-mpi \
-            eigen \
-            hdf5 \
-            libomp \
-            open-mpi \
-            petsc \
+            boost boost-mpi \
             suitesparse \
-            mesa-glu \
-            lcov \
-            sdl2 glfw openal-soft vulkan-headers molten-vk
-            brew link --force --overwrite libomp openal-soft
+            eigen \
+            scotch \
+            metis \
+            hdf5-mpi \
+            libomp \
+            petsc \
+            open-mpi \
+            lcov
       - name: Configure CMake
         run: >
           cmake

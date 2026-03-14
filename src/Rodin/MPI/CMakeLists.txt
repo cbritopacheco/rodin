@@ -37,8 +37,6 @@ target_compile_definitions(RodinMPI
 )
 
 # ---- Dependencies ----------------------------------------------------------
-find_package(Boost REQUIRED COMPONENTS mpi)
-
 target_link_libraries(RodinMPI
   PUBLIC
     Rodin::Geometry
