@@ -140,22 +140,27 @@ namespace Rodin::Geometry
 
   CellIterator MPIMesh::getCell(Index localIdx) const
   {
-    return CellIterator(*this, BoundedIndexGenerator(localIdx, this->getShard().getCellCount()));
+    const auto& shard = this->getShard();
+    return CellIterator(shard, BoundedIndexGenerator(localIdx, shard.getCellCount()));
   }
 
   FaceIterator MPIMesh::getFace(Index localIdx) const
   {
-    return FaceIterator(*this, BoundedIndexGenerator(localIdx, this->getShard().getFaceCount()));
+    const auto& shard = this->getShard();
+    return FaceIterator(shard, BoundedIndexGenerator(localIdx, shard.getFaceCount()));
   }
 
   VertexIterator MPIMesh::getVertex(Index localIdx) const
   {
-    return VertexIterator(*this, BoundedIndexGenerator(localIdx, this->getShard().getVertexCount()));
+    const auto& shard = this->getShard();
+    return VertexIterator(shard, BoundedIndexGenerator(localIdx, shard.getVertexCount()));
   }
 
   PolytopeIterator MPIMesh::getPolytope(size_t dimension, Index localIdx) const
   {
-    return PolytopeIterator(dimension, *this, BoundedIndexGenerator(localIdx, this->getShard().getPolytopeCount(dimension)));
+    const auto& shard = this->getShard();
+    return PolytopeIterator(
+        dimension, shard, BoundedIndexGenerator(localIdx, shard.getPolytopeCount(dimension)));
   }
 
   FaceIterator MPIMesh::getBoundary() const
@@ -169,7 +174,7 @@ namespace Rodin::Geometry
       if (shard.isOwned(d, i) && shard.isBoundary(i))
         indices.push_back(i);
     }
-    return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
+    return FaceIterator(shard, VectorIndexGenerator(std::move(indices)));
   }
 
   FaceIterator MPIMesh::getInterface() const
@@ -183,7 +188,7 @@ namespace Rodin::Geometry
       if (shard.isOwned(d, i) && shard.isInterface(i))
         indices.push_back(i);
     }
-    return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
+    return FaceIterator(shard, VectorIndexGenerator(std::move(indices)));
   }
 
   bool MPIMesh::isBoundary(Index faceIdx) const

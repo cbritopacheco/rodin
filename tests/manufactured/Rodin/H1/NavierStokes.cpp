@@ -42,7 +42,7 @@ namespace Rodin::Tests::Manufactured::NavierStokes
   {
     constexpr Real nu = 1.0;
     // Keep the same Picard guard style as Stokes.cpp/NavierStokes_Picard_TaylorGreen.
-    constexpr size_t maxIts = 50;
+    constexpr size_t maxIts = 12;
     constexpr Real tol = 1e-10;
     const auto pi = Rodin::Math::Constants::pi();
 
@@ -218,10 +218,8 @@ namespace Rodin::Tests::Manufactured::NavierStokes
          - Integral(f, v)
          + DirichletBC(u, u_exact);
 
-      GMRES gmres(ns);
-      gmres.setTolerance(1e-12);
-      gmres.setMaxIterations(1000);
-      gmres.solve();
+      SparseLU solver(ns);
+      solver.solve();
 
       GridFunction diff_iter(sh);
       diff_iter = Pow(Frobenius(u.getSolution() - u_picard), 2);
@@ -247,7 +245,7 @@ namespace Rodin::Tests::Manufactured::NavierStokes
     const Real error_p = Integral(diff_p).compute();
 
     EXPECT_NEAR(error_u, 0, RODIN_FUZZY_CONSTANT);
-    EXPECT_NEAR(error_p, 0, 1e-4);
+    EXPECT_NEAR(error_p, 0, 1e-8);
   }
 
   INSTANTIATE_TEST_SUITE_P(

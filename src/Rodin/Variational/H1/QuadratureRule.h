@@ -471,7 +471,7 @@ namespace Rodin::Variational
 
         const size_t vdim_tr = ntr / scalarCount;
         // const size_t vdim_te = nte / scalarCount;
-        assert(vdim_tr == vdim_te);
+        assert(vdim_tr == nte / scalarCount);
         const size_t vdim = vdim_tr;
 
         const bool symmetric =

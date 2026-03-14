@@ -11,7 +11,7 @@
 #include "Rodin/Assembly.h"
 #include "Rodin/Variational.h"
 #include "Rodin/Variational/H1.h"
-#include "Rodin/Solver/DGMRES.h"
+#include "Rodin/Solver/SparseLU.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -37,10 +37,10 @@ namespace Rodin::Tests::Manufactured::NavierStokes3D
       }
   };
 
-  using Manufactured_NavierStokes3D_Test_5 =
-    Manufactured_NavierStokes3D_Test<5, 5, 5>;
+  using Manufactured_NavierStokes3D_Test_8 =
+    Manufactured_NavierStokes3D_Test<8, 8, 8>;
 
-  TEST_P(Manufactured_NavierStokes3D_Test_5, NavierStokes3D_Picard_TaylorGreen)
+  TEST_P(Manufactured_NavierStokes3D_Test_8, NavierStokes3D_Picard_TaylorGreen)
   {
     constexpr Real nu = 1.0;
     constexpr size_t maxIts = 20;
@@ -100,11 +100,8 @@ namespace Rodin::Tests::Manufactured::NavierStokes3D
          - Integral(f, v)
          + DirichletBC(u, u_exact);
 
-      DGMRES gmres(ns);
-      gmres.setTolerance(1e-10);
-      gmres.setRestart(100);
-      gmres.setMaxIterations(2000);
-      gmres.solve();
+      SparseLU solver(ns);
+      solver.solve();
 
       GridFunction u_new(uh);
       u_new.setData(u.getSolution().getData());
@@ -141,8 +138,8 @@ namespace Rodin::Tests::Manufactured::NavierStokes3D
     const Real error_p = Integral(diff_p).compute();
 
     // 3D Picard solve is validated with practical tolerances on tetra/hex meshes.
-    EXPECT_NEAR(error_u, 0, 2e-4);
-    EXPECT_NEAR(error_p, 0, 2e-2);
+    EXPECT_NEAR(error_u, 0, 2e-6);
+    EXPECT_NEAR(error_p, 0, 2e-4);
 
     GridFunction w_final(uh);
     w_final.setData(u_prev.getData());
@@ -158,11 +155,8 @@ namespace Rodin::Tests::Manufactured::NavierStokes3D
              - Integral(f, v)
              + DirichletBC(u, u_exact);
 
-    DGMRES gmres_final(ns_final);
-    gmres_final.setTolerance(1e-10);
-    gmres_final.setRestart(100);
-    gmres_final.setMaxIterations(2000);
-    gmres_final.solve();
+    SparseLU solver(ns_final);
+    solver.solve();
 
     auto& ls = ns_final.getLinearSystem();
     auto& A = ls.getOperator();
@@ -189,10 +183,10 @@ namespace Rodin::Tests::Manufactured::NavierStokes3D
     GridFunction dp_fp(sh);
     dp_fp = Pow((p_final - mean_fp_diff) - p_prev, 2);
     const Real fixedPointPressureDefect = std::sqrt(Integral(dp_fp).compute());
-    EXPECT_LT(fixedPointPressureDefect, 2e-2);
+    EXPECT_LT(fixedPointPressureDefect, 1e-6);
   }
 
-  TEST_P(Manufactured_NavierStokes3D_Test_5, NavierStokes3D_Picard_PolynomialVortex)
+  TEST_P(Manufactured_NavierStokes3D_Test_8, NavierStokes3D_Picard_PolynomialVortex)
   {
     constexpr size_t maxPicardIters = 8;
     constexpr Real picardTol = 1e-9;
@@ -231,11 +225,8 @@ namespace Rodin::Tests::Manufactured::NavierStokes3D
          - Integral(f, v)
          + DirichletBC(u, u_exact);
 
-      DGMRES gmres(ns);
-      gmres.setTolerance(1e-10);
-      gmres.setRestart(100);
-      gmres.setMaxIterations(2000);
-      gmres.solve();
+      SparseLU solver(ns);
+      solver.solve();
 
       GridFunction diff_iter(sh);
       diff_iter = Pow(Frobenius(u.getSolution() - u_picard), 2);
@@ -261,12 +252,12 @@ namespace Rodin::Tests::Manufactured::NavierStokes3D
     const Real error_p = Integral(diff_p).compute();
 
     EXPECT_NEAR(error_u, 0, 1e-8);
-    EXPECT_NEAR(error_p, 0, 1e-3);
+    EXPECT_NEAR(error_p, 0, 1e-5);
   }
 
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D,
-    Manufactured_NavierStokes3D_Test_5,
+    Manufactured_NavierStokes3D_Test_8,
     ::testing::Values(
       Polytope::Type::Tetrahedron,
       Polytope::Type::Hexahedron
