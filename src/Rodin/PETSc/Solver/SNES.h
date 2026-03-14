@@ -11,7 +11,7 @@
 namespace Rodin::Solver
 {
   class SNES
-    : public PETSc::Object<::SNES>, public NewtonSolverBase<PETSc::Math::LinearSystem>
+    : public PETSc::Object<::SNES>, public NewtonSolverBase<::Vec, ::Vec, ::Mat, ::KSP>
   {
     public:
       using HandleType = ::SNES;
@@ -22,7 +22,9 @@ namespace Rodin::Solver
       using FunctionCallbackType = ::SNESFunctionFn*;
       using JacobianCallbackType = ::SNESJacobianFn*;
       using PetscParent = PETSc::Object<HandleType>;
-      using NewtonParent = NewtonSolverBase<LinearSystemType>;
+      using NewtonParent = NewtonSolverBase<VectorType, VectorType, MatrixType, KSPType>;
+      using ResidualAssembly = typename NewtonParent::ResidualAssembly;
+      using JacobianAssembly = typename NewtonParent::JacobianAssembly;
       using NewtonParent::solve;
 
       explicit SNES(MPI_Comm comm = PETSC_COMM_WORLD);
@@ -38,6 +40,12 @@ namespace Rodin::Solver
                           PetscInt maxF) noexcept;
 
       SNES& setKSP(KSPType ksp) noexcept;
+
+      template <class KSPSubclass>
+      SNES& setKSP(KSPSubclass& ksp) noexcept
+      {
+        return setKSP(ksp.getHandle());
+      }
 
       SNES& setFunction(
           FunctionCallbackType f,
@@ -76,7 +84,16 @@ namespace Rodin::Solver
       }
 
       void solve(VectorType b, VectorType x);
-      void solve(LinearSystemType& system) override;
+      void solve(VectorType& x) override;
+      void solve(LinearSystemType& system);
+
+      const ResidualAssembly& getFunction() const override;
+
+      const JacobianAssembly& getJacobian() const override;
+
+      const KSPType& getLinearSolver() const override;
+
+      KSPType& getLinearSolver() override;
 
       HandleType& getHandle() noexcept override;
 
@@ -97,6 +114,8 @@ namespace Rodin::Solver
       JacobianCallbackType m_jacobianCallback;
       void* m_functionContext;
       void* m_jacobianContext;
+      ResidualAssembly m_functionAssembly;
+      JacobianAssembly m_jacobianAssembly;
       VectorType m_residual;
       MatrixType m_jacobianOperator;
       MatrixType m_preconditionerOperator;

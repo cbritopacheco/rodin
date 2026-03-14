@@ -14,6 +14,7 @@
 #include "Rodin/Alert/Raise.h"
 #include "Rodin/Copyable.h"
 #include "Rodin/Math/ForwardDecls.h"
+#include "Rodin/Math/LinearSystem.h"
 #include "Rodin/Types.h"
 
 namespace Rodin::Solver
@@ -97,13 +98,13 @@ namespace Rodin::Solver
     public:
       using Parent = NewtonSolverBase<Solution, Function, Jacobian, LinearSolver>;
 
-      using SolutionType = typename Parent::SolutionType;
-      using FunctionType = typename Parent::FunctionType;
-      using JacobianType = typename Parent::JacobianType;
-      using LinearSolverType = typename Parent::LinearSolverType;
+      using SolutionType = Solution;
+      using FunctionType = Function;
+      using JacobianType = Jacobian;
+      using LinearSolverType = LinearSolver;
 
-      using ResidualAssembly = typename Parent::ResidualAssembly;
-      using JacobianAssembly = typename Parent::JacobianAssembly;
+      using ResidualAssembly = std::function<void(FunctionType&, const SolutionType&)>;
+      using JacobianAssembly = std::function<void(JacobianType&, const SolutionType&)>;
       using ResidualNorm = std::function<double(const FunctionType&)>;
 
       /**
@@ -240,7 +241,7 @@ namespace Rodin::Solver
         }
 
         SolutionType xCurr = x;
-        LinearSystemType system;
+        LinearSystemType linearSystem;
 
         FunctionType F;
         m_function(F, xCurr);
@@ -254,15 +255,15 @@ namespace Rodin::Solver
 
         for (size_t it = 0; it < m_maxIt; ++it)
         {
-          auto& J = system.getOperator();
+          auto& J = linearSystem.getOperator();
           m_jacobian(J, xCurr);
 
-          auto& rhs = system.getVector();
+          auto& rhs = linearSystem.getVector();
           rhs = F;
 
-          m_linearSolver.solve(system);
+          m_linearSolver.solve(linearSystem);
 
-          xCurr = xCurr - m_alpha * system.getSolution();
+          xCurr = xCurr - m_alpha * linearSystem.getSolution();
 
           m_function(F, xCurr);
           const Real r = F.norm();
