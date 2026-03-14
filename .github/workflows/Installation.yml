@@ -36,13 +36,18 @@ jobs:
           cmake: true
 
       - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libboost-all-dev \
-            libeigen3-dev \
-            libhdf5-dev \
-            libomp-dev
+        run: >-
+          sudo apt-get update && sudo apt-get install -y
+          libboost-all-dev
+          libsuitesparse-dev
+          libeigen3-dev
+          libscotch-dev
+          libmetis-dev
+          libhdf5-dev
+          libomp-dev
+          petsc-dev
+          mpich
+          lcov
 
       - name: Run installation test
         run: bash tests/installation/test_installation.sh

@@ -249,11 +249,6 @@ if (RODIN_BUILD_SRC)
     find_package(Threads REQUIRED)
   endif()
 
-  # ---- OpenMP ----
-  if (RODIN_USE_OPENMP)
-    find_package(OpenMP REQUIRED)
-  endif()
-
   # ---- MPI ----
   if (RODIN_USE_MPI)
     find_package(Boost REQUIRED COMPONENTS mpi)
@@ -280,6 +275,11 @@ if (RODIN_BUILD_SRC)
 
   if (RODIN_USE_CHOLMOD)
     find_package(SuiteSparse REQUIRED COMPONENTS CHOLMOD)
+  endif()
+
+  # ---- OpenMP ----
+  if (RODIN_USE_OPENMP)
+    find_package(OpenMP REQUIRED)
   endif()
 
   add_subdirectory(src)
