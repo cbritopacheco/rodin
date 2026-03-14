@@ -10,6 +10,7 @@
 #include <boost/filesystem.hpp>
 
 #include "ForwardDecls.h"
+#include "Rodin/Variational/ForwardDecls.h"
 
 namespace Rodin::IO
 {
@@ -27,7 +28,30 @@ namespace Rodin::IO
    * @see GridFunctionPrinter
    */
   template <FileFormat Fmt, class FES, class Data>
-  class GridFunctionPrinterBase;
+  class GridFunctionPrinterBase : public IO::Printer<Variational::GridFunction<FES, Data>>
+  {
+    public:
+      using FESType = FES;
+
+      using DataType = Data;
+
+      /**
+       * @brief Type of mesh object being printed.
+       */
+      using ObjectType = Variational::GridFunction<FES, Data>;
+
+      GridFunctionPrinterBase(const ObjectType& gf)
+        : m_gf(gf)
+      {}
+
+      const ObjectType& getObject() const override
+      {
+        return m_gf.get();
+      }
+
+    private:
+      std::reference_wrapper<const ObjectType> m_gf;
+  };
 }
 
 #endif

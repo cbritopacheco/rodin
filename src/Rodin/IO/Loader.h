@@ -83,7 +83,7 @@ namespace Rodin::IO
       virtual void load(const boost::filesystem::path& is)
       {
         std::ifstream in(is.c_str());
-        load(in);
+        this->load(in);
       }
 
     protected:

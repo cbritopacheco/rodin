@@ -21,6 +21,34 @@ namespace Rodin::IO
   class XDMF
   {
     public:
+      enum class Topology
+      {
+        POLYVERTEX      = 1,
+        POLYLINE        = 2,
+        POLYGON         = 3,
+        TRIANGLE        = 4,
+        QUADRILATERAL   = 5,
+        TETRAHEDRON     = 6,
+        PYRAMID         = 7,
+        WEDGE           = 8,
+        HEXAHEDRON      = 9,
+
+        POLYHEDRON      = 16,
+
+        EDGE_3          = 34,
+        QUADRILATERAL_9 = 35,
+        TRIANGLE_6      = 36,
+        QUADRILATERAL_8 = 37,
+        TETRAHEDRON_10  = 38,
+        PYRAMID_13      = 39,
+        WEDGE_15        = 40,
+        WEDGE_18        = 41,
+
+        HEXAHEDRON_20   = 48,
+        HEXAHEDRON_24   = 49,
+        HEXAHEDRON_27   = 50
+      };
+
       struct Keyword
       {
         static constexpr const char* Xdmf = "Xdmf";
@@ -31,6 +59,61 @@ namespace Rodin::IO
         static constexpr const char* Attribute = "Attribute";
         static constexpr const char* DataItem = "DataItem";
       };
+
+      inline
+      Optional<Topology> getTopology(Geometry::Polytope::Type geometry)
+      {
+        using PT = Geometry::Polytope::Type;
+
+        switch (geometry)
+        {
+          case PT::Point:         return Topology::POLYVERTEX;
+          case PT::Segment:       return Topology::POLYLINE;
+          case PT::Triangle:      return Topology::TRIANGLE;
+          case PT::Quadrilateral: return Topology::QUADRILATERAL;
+          case PT::Tetrahedron:   return Topology::TETRAHEDRON;
+          case PT::Wedge:         return Topology::WEDGE;
+          case PT::Hexahedron:    return Topology::HEXAHEDRON;
+        }
+
+        return {};
+      }
+
+      inline
+      Optional<Geometry::Polytope::Type> getGeometry(Topology gt)
+      {
+        using PT = Geometry::Polytope::Type;
+
+        switch (gt)
+        {
+          case Topology::POLYVERTEX:      return PT::Point;
+          case Topology::POLYLINE:        return PT::Segment;
+          case Topology::TRIANGLE:        return PT::Triangle;
+          case Topology::QUADRILATERAL:   return PT::Quadrilateral;
+          case Topology::TETRAHEDRON:     return PT::Tetrahedron;
+          case Topology::WEDGE:           return PT::Wedge;
+          case Topology::HEXAHEDRON:      return PT::Hexahedron;
+
+          case Topology::PYRAMID:
+
+          case Topology::EDGE_3:
+          case Topology::QUADRILATERAL_9:
+          case Topology::TRIANGLE_6:
+          case Topology::QUADRILATERAL_8:
+          case Topology::TETRAHEDRON_10:
+          case Topology::PYRAMID_13:
+          case Topology::WEDGE_15:
+          case Topology::WEDGE_18:
+          case Topology::HEXAHEDRON_20:
+          case Topology::HEXAHEDRON_24:
+          case Topology::HEXAHEDRON_27:
+          case Topology::POLYHEDRON:
+          case Topology::POLYGON:
+            return {};
+        }
+
+        return {};
+      }
 
       template <class MeshType>
       XDMF(const MeshType& mesh, const boost::filesystem::path& h5MeshFile)
@@ -45,7 +128,7 @@ namespace Rodin::IO
       }
 
       template <class GridFunctionType>
-      XDMF& addGridFunction(
+      XDMF& add(
           const std::string& name,
           const GridFunctionType& gf,
           const boost::filesystem::path& h5File)
@@ -72,9 +155,9 @@ namespace Rodin::IO
         os << "  <" << Keyword::Domain << ">\n";
         os << "    <" << Keyword::Grid << " Name=\"RodinMesh\" GridType=\"Uniform\">\n";
 
-        writeTopology(os);
-        writeGeometry(os);
-        writeAttributes(os);
+        this->writeTopology(os);
+        this->writeGeometry(os);
+        this->writeAttributes(os);
 
         os << "    </" << Keyword::Grid << ">\n";
         os << "  </" << Keyword::Domain << ">\n";

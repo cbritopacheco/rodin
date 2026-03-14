@@ -80,6 +80,12 @@ namespace Rodin::IO
        */
       virtual void print(std::ostream& os) = 0;
 
+      virtual void print(const boost::filesystem::path& filename)
+      {
+        std::ofstream os(filename.string());
+        this->print(os);
+      }
+
       /**
        * @brief Gets a const reference to the object being printed.
        * @returns Const reference to the object
