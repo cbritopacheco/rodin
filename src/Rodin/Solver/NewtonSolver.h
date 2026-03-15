@@ -62,7 +62,6 @@ namespace Rodin::Solver
        */
       virtual void solve(SolutionType& x) = 0;
 
-    protected:
       ProblemBaseType& getProblem() noexcept
       {
         return m_pb.get();
@@ -116,7 +115,7 @@ namespace Rodin::Solver
 
       explicit NewtonSolver(ProblemBaseType& pb, const LinearSolver& linearSolver)
         : Parent(pb),
-          m_linearSolver(linearSolver),
+          m_linear(linearSolver),
           m_maxIt(100),
           m_atol(1e-12),
           m_rtol(1e-8),
@@ -132,7 +131,7 @@ namespace Rodin::Solver
 
       NewtonSolver& setLinearSolver(const LinearSolver& linearSolver)
       {
-        m_linearSolver = linearSolver;
+        m_linear = linearSolver;
         return *this;
       }
 
@@ -161,12 +160,12 @@ namespace Rodin::Solver
 
       const LinearSolver& getLinearSolver() const override
       {
-        return m_linearSolver;
+        return m_linear;
       }
 
       LinearSolver& getLinearSolver() override
       {
-        return m_linearSolver;
+        return m_linear;
       }
 
       Real getAbsoluteTolerance() const
@@ -221,23 +220,8 @@ namespace Rodin::Solver
             return;
           }
 
-          // Prefer the ProblemBase-driven solve() interface (LinearSolverBase style),
-          // while preserving support for custom solvers that only expose solve(system).
-          // The requires-expression performs compile-time dispatch to whichever
-          // solver API is available on LinearSolver.
-          if constexpr (requires (LinearSolver& s) { s.solve(); })
-          {
-            m_linearSolver.solve();
-          }
-          else if constexpr (requires (LinearSolver& s, LinearSystemType& ls) { s.solve(ls); })
-          {
-            m_linearSolver.solve(linearSystem);
-          }
-          else
-          {
-            static_assert(std::is_same_v<LinearSolver, void>,
-              "LinearSolver must implement either solve() or solve(LinearSystem&) interface.");
-          }
+          m_linear.solve();
+
           x += m_alpha * linearSystem.getSolution();
         }
       }
@@ -249,7 +233,7 @@ namespace Rodin::Solver
       }
 
     private:
-      LinearSolver m_linearSolver;
+      LinearSolver m_linear;
       size_t m_maxIt;
       Real m_atol;
       Real m_rtol;

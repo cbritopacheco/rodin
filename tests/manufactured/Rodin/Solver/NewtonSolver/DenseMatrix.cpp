@@ -21,12 +21,13 @@ namespace Rodin::Tests::Manufactured
 {
   using DenseLinearSystem = Math::LinearSystem<Math::Matrix<Real>, Math::Vector<Real>>;
 
-  struct DenseLinearSolver
+  class DenseLinearSolver : public Solver::LinearSolverBase<DenseLinearSystem>
   {
-    void solve(DenseLinearSystem& system)
-    {
-      system.getSolution() = system.getOperator().fullPivLu().solve(system.getVector());
-    }
+    public:
+      void solve(DenseLinearSystem& system)
+      {
+        system.getSolution() = system.getOperator().fullPivLu().solve(system.getVector());
+      }
   };
 
   class ManufacturedDenseProblem final : public Variational::ProblemBase<DenseLinearSystem>

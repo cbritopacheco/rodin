@@ -24,14 +24,15 @@ namespace Rodin::Tests::Manufactured
 {
   using SparseLinearSystem = Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
 
-  struct SparseLinearSolver
+  class SparseLinearSolver : public Solver::LinearSolverBase<SparseLinearSystem>
   {
-    void solve(SparseLinearSystem& system)
-    {
-      Eigen::SimplicialLDLT<Math::SparseMatrix<Real>> linearSolver;
-      linearSolver.compute(system.getOperator());
-      system.getSolution() = linearSolver.solve(system.getVector());
-    }
+    public:
+      void solve(SparseLinearSystem& system) override
+      {
+        Eigen::SimplicialLDLT<Math::SparseMatrix<Real>> linearSolver;
+        linearSolver.compute(system.getOperator());
+        system.getSolution() = linearSolver.solve(system.getVector());
+      }
   };
 
   class ManufacturedSparseProblem final : public Variational::ProblemBase<SparseLinearSystem>

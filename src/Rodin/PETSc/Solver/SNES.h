@@ -16,21 +16,31 @@ namespace Rodin::Solver
   {
     public:
       using HandleType = ::SNES;
+
       using KSPType = ::KSP;
+
       using MatrixType = ::Mat;
+
       using VectorType = ::Vec;
+
       using LinearSystemType = PETSc::Math::LinearSystem;
+
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+
       using PetscParent = PETSc::Object<HandleType>;
-      using NewtonParent = NewtonSolverBase<LinearSystemType, KSPType>;
-      using NewtonParent::solve;
+
+      using NewtonSolverParent = NewtonSolverBase<LinearSystemType, KSPType>;
+
+      using NewtonSolverParent::solve;
+
+      using NewtonSolverParent::getLinearSolver;
 
       /**
        * @brief Construct SNES from a variational problem.
        * @param pb Variational problem associated to this Newton solver.
        * @param comm PETSc communicator used to create the SNES handle.
        */
-      explicit SNES(ProblemBaseType& pb, MPI_Comm comm = PETSC_COMM_WORLD);
+      explicit SNES(ProblemBaseType& pb);
 
       virtual ~SNES() override;
 
@@ -50,9 +60,7 @@ namespace Rodin::Solver
         return setKSP(ksp.getHandle());
       }
 
-      void solve(VectorType b, VectorType x);
       void solve(VectorType& x) override;
-      void solve(LinearSystemType& system);
 
       const KSPType& getLinearSolver() const override;
 
@@ -68,8 +76,8 @@ namespace Rodin::Solver
       }
 
     private:
-      static PetscErrorCode assembleResidual(::SNES snes, ::Vec x, ::Vec f, void* ctx);
-      static PetscErrorCode assembleJacobian(::SNES snes, ::Vec x, ::Mat J, ::Mat P, void* ctx);
+      static PetscErrorCode Residual(::SNES snes, ::Vec x, ::Vec f, void* ctx);
+      static PetscErrorCode Jacobian(::SNES snes, ::Vec x, ::Mat J, ::Mat P, void* ctx);
 
     private:
       HandleType m_snes;

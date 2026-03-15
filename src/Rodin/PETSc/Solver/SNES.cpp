@@ -1,12 +1,16 @@
 #include <cassert>
 #include <petsc.h>
+#include <petscsnes.h>
+
+#include "Rodin/Variational/Problem.h"
+#include "Rodin/PETSc/Variational/Problem.h"
 
 #include "SNES.h"
 
 namespace Rodin::Solver
 {
-  SNES::SNES(ProblemBaseType& pb, MPI_Comm comm)
-    : NewtonParent(pb),
+  SNES::SNES(ProblemBaseType& pb)
+    : NewtonSolverParent(pb),
       m_snes(PETSC_NULLPTR),
       m_type(SNESNEWTONLS),
       m_abstol(PETSC_DECIDE),
@@ -16,14 +20,16 @@ namespace Rodin::Solver
       m_maxF(PETSC_DECIDE),
       m_kspHandle(PETSC_NULLPTR)
   {
+    auto& system = pb.getLinearSystem();
+    const auto& comm = system.getCommunicator();
+
     PetscErrorCode ierr = SNESCreate(comm, &m_snes);
     assert(ierr == PETSC_SUCCESS);
 
-    auto& system = getProblem().getLinearSystem();
     ierr = SNESSetFunction(
       m_snes,
       PETSC_NULLPTR,
-      &SNES::assembleResidual,
+      &SNES::Residual,
       this);
     assert(ierr == PETSC_SUCCESS);
 
@@ -31,7 +37,7 @@ namespace Rodin::Solver
       m_snes,
       system.getOperator(),
       system.getOperator(),
-      &SNES::assembleJacobian,
+      &SNES::Jacobian,
       this);
     assert(ierr == PETSC_SUCCESS);
     (void) ierr;
@@ -71,7 +77,7 @@ namespace Rodin::Solver
     return *this;
   }
 
-  PetscErrorCode SNES::assembleResidual(::SNES, ::Vec x, ::Vec f, void* ctx)
+  PetscErrorCode SNES::Residual(::SNES, ::Vec x, ::Vec f, void* ctx)
   {
     auto* self = static_cast<SNES*>(ctx);
     assert(self);
@@ -89,7 +95,7 @@ namespace Rodin::Solver
     return ierr;
   }
 
-  PetscErrorCode SNES::assembleJacobian(::SNES, ::Vec x, ::Mat J, ::Mat P, void* ctx)
+  PetscErrorCode SNES::Jacobian(::SNES, ::Vec x, ::Mat J, ::Mat P, void* ctx)
   {
     auto* self = static_cast<SNES*>(ctx);
     assert(self);
@@ -118,8 +124,13 @@ namespace Rodin::Solver
     return ierr;
   }
 
-  void SNES::solve(VectorType b, VectorType x)
+  void SNES::solve(VectorType& x)
   {
+    auto& pb = this->getProblem();
+    auto& system = pb.getLinearSystem();
+    auto& b = system.getVector();
+    auto& x0 = system.getSolution();
+
     PetscErrorCode ierr;
 
     ierr = SNESSetType(m_snes, m_type);
@@ -127,6 +138,8 @@ namespace Rodin::Solver
 
     ierr = SNESSetTolerances(m_snes, m_abstol, m_rtol, m_stol, m_maxIt, m_maxF);
     assert(ierr == PETSC_SUCCESS);
+
+    ierr = SNESSetInitialFunction(m_snes, x0);
 
     if (m_kspHandle)
     {
@@ -140,16 +153,6 @@ namespace Rodin::Solver
     ierr = SNESSolve(m_snes, b, x);
     assert(ierr == PETSC_SUCCESS);
     (void) ierr;
-  }
-
-  void SNES::solve(VectorType& x)
-  {
-    solve(PETSC_NULLPTR, x);
-  }
-
-  void SNES::solve(LinearSystemType& system)
-  {
-    solve(system.getVector(), system.getSolution());
   }
 
   const SNES::KSPType& SNES::getLinearSolver() const
