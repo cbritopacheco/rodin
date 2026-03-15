@@ -12,6 +12,7 @@
 #include "Rodin/Math/LinearSystem.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/Vector.h"
+#include "Rodin/Solver/LinearSolver.h"
 #include "Rodin/Solver/NewtonSolver.h"
 #include "Rodin/Variational/Problem.h"
 
@@ -21,12 +22,27 @@ namespace Rodin::Tests::Manufactured
 {
   using DenseLinearSystem = Math::LinearSystem<Math::Matrix<Real>, Math::Vector<Real>>;
 
-  struct DenseLinearSolver
+  class DenseLinearSolver final : public Solver::LinearSolverBase<DenseLinearSystem>
   {
-    void solve(DenseLinearSystem& system)
-    {
-      system.getSolution() = system.getOperator().fullPivLu().solve(system.getVector());
-    }
+    public:
+      using Parent = Solver::LinearSolverBase<DenseLinearSystem>;
+      using ProblemBaseType = typename Parent::ProblemBaseType;
+
+      using Parent::solve;
+
+      explicit DenseLinearSolver(ProblemBaseType& pb)
+        : Parent(pb)
+      {}
+
+      void solve(DenseLinearSystem& system) override
+      {
+        system.getSolution() = system.getOperator().fullPivLu().solve(system.getVector());
+      }
+
+      DenseLinearSolver* copy() const noexcept override
+      {
+        return new DenseLinearSolver(*this);
+      }
   };
 
   class ManufacturedDenseProblem final : public Variational::ProblemBase<DenseLinearSystem>
@@ -170,7 +186,8 @@ namespace Rodin::Tests::Manufactured
     x << 0.9, -0.8;
     ManufacturedDenseProblem pb(x, A, b);
 
-    Solver::NewtonSolver solver(pb, DenseLinearSolver{});
+    DenseLinearSolver linearSolver(pb);
+    Solver::NewtonSolver solver(pb, linearSolver);
     solver.setMaxIterations(30)
       .setAbsoluteTolerance(1e-12)
       .setRelativeTolerance(1e-12);
@@ -187,7 +204,8 @@ namespace Rodin::Tests::Manufactured
     x << 0.7, 0.3;
     StrongNonlinearDenseProblem pb(x);
 
-    Solver::NewtonSolver solver(pb, DenseLinearSolver{});
+    DenseLinearSolver linearSolver(pb);
+    Solver::NewtonSolver solver(pb, linearSolver);
     solver.setMaxIterations(40)
       .setAbsoluteTolerance(1e-12)
       .setRelativeTolerance(1e-12);

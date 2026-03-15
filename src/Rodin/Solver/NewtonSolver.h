@@ -9,7 +9,6 @@
 
 #include <cstddef>
 #include <functional>
-#include <type_traits>
 #include <utility>
 
 #include "Rodin/Alert/MemberFunctionException.h"
@@ -221,23 +220,7 @@ namespace Rodin::Solver
             return;
           }
 
-          // Prefer the ProblemBase-driven solve() interface (LinearSolverBase style),
-          // while preserving support for custom solvers that only expose solve(system).
-          // The requires-expression performs compile-time dispatch to whichever
-          // solver API is available on LinearSolver.
-          if constexpr (requires (LinearSolver& s) { s.solve(); })
-          {
-            m_linearSolver.solve();
-          }
-          else if constexpr (requires (LinearSolver& s, LinearSystemType& ls) { s.solve(ls); })
-          {
-            m_linearSolver.solve(linearSystem);
-          }
-          else
-          {
-            static_assert(std::is_same_v<LinearSolver, void>,
-              "LinearSolver must implement either solve() or solve(LinearSystem&) interface.");
-          }
+          m_linearSolver.solve();
           x += m_alpha * linearSystem.getSolution();
         }
       }

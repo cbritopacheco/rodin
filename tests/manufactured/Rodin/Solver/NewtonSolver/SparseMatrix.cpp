@@ -15,6 +15,7 @@
 #include "Rodin/Math/LinearSystem.h"
 #include "Rodin/Math/SparseMatrix.h"
 #include "Rodin/Math/Vector.h"
+#include "Rodin/Solver/LinearSolver.h"
 #include "Rodin/Solver/NewtonSolver.h"
 #include "Rodin/Variational/Problem.h"
 
@@ -24,14 +25,29 @@ namespace Rodin::Tests::Manufactured
 {
   using SparseLinearSystem = Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
 
-  struct SparseLinearSolver
+  class SparseLinearSolver final : public Solver::LinearSolverBase<SparseLinearSystem>
   {
-    void solve(SparseLinearSystem& system)
-    {
-      Eigen::SimplicialLDLT<Math::SparseMatrix<Real>> linearSolver;
-      linearSolver.compute(system.getOperator());
-      system.getSolution() = linearSolver.solve(system.getVector());
-    }
+    public:
+      using Parent = Solver::LinearSolverBase<SparseLinearSystem>;
+      using ProblemBaseType = typename Parent::ProblemBaseType;
+
+      using Parent::solve;
+
+      explicit SparseLinearSolver(ProblemBaseType& pb)
+        : Parent(pb)
+      {}
+
+      void solve(SparseLinearSystem& system) override
+      {
+        Eigen::SimplicialLDLT<Math::SparseMatrix<Real>> linearSolver;
+        linearSolver.compute(system.getOperator());
+        system.getSolution() = linearSolver.solve(system.getVector());
+      }
+
+      SparseLinearSolver* copy() const noexcept override
+      {
+        return new SparseLinearSolver(*this);
+      }
   };
 
   class ManufacturedSparseProblem final : public Variational::ProblemBase<SparseLinearSystem>
@@ -183,7 +199,8 @@ namespace Rodin::Tests::Manufactured
     x << 0.9, -0.8;
     ManufacturedSparseProblem pb(x, A, b);
 
-    Solver::NewtonSolver solver(pb, SparseLinearSolver{});
+    SparseLinearSolver linearSolver(pb);
+    Solver::NewtonSolver solver(pb, linearSolver);
     solver.setMaxIterations(30)
       .setAbsoluteTolerance(1e-12)
       .setRelativeTolerance(1e-12);
@@ -200,7 +217,8 @@ namespace Rodin::Tests::Manufactured
     x << 0.7, 0.3;
     StrongNonlinearSparseProblem pb(x);
 
-    Solver::NewtonSolver solver(pb, SparseLinearSolver{});
+    SparseLinearSolver linearSolver(pb);
+    Solver::NewtonSolver solver(pb, linearSolver);
     solver.setMaxIterations(40)
       .setAbsoluteTolerance(1e-12)
       .setRelativeTolerance(1e-12);
