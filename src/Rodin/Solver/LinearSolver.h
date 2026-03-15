@@ -15,6 +15,15 @@
 
 #include "ForwardDecls.h"
 
+namespace Rodin::FormLanguage
+{
+  template <class LinearSystem>
+  struct Traits<Solver::LinearSolverBase<LinearSystem>>
+  {
+    using LinearSystemType = LinearSystem;
+  };
+}
+
 namespace Rodin::Solver
 {
   /**

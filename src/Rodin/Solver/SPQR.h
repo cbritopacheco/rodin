@@ -59,6 +59,15 @@
 #include "ForwardDecls.h"
 #include "LinearSolver.h"
 
+namespace Rodin::FormLanguage
+{
+  template <class LinearSystem>
+  struct Traits<Solver::SPQR<LinearSystem>>
+  {
+    using LinearSystemType = LinearSystem;
+  };
+}
+
 namespace Rodin::Solver
 {
   /**
@@ -194,7 +203,3 @@ namespace Rodin::Solver
 
 #endif
 #endif
-
-
-
-

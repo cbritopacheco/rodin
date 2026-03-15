@@ -46,6 +46,15 @@
 #include "ForwardDecls.h"
 #include "LinearSolver.h"
 
+namespace Rodin::FormLanguage
+{
+  template <class LinearSystem>
+  struct Traits<Solver::LeastSquaresCG<LinearSystem>>
+  {
+    using LinearSystemType = LinearSystem;
+  };
+}
+
 namespace Rodin::Solver
 {
   /**
