@@ -26,6 +26,20 @@ gtest_discover_tests(RodinManufacturedPoisson3D
     LABELS manufactured
 )
 
+add_executable(RodinManufacturedNonLinearPoisson NonLinearPoisson.cpp)
+target_link_libraries(RodinManufacturedNonLinearPoisson
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solver
+)
+gtest_discover_tests(RodinManufacturedNonLinearPoisson
+  PROPERTIES
+    LABELS manufactured
+)
+
 add_executable(RodinManufacturedConductivity Conductivity.cpp)
 target_link_libraries(RodinManufacturedConductivity
   PUBLIC
