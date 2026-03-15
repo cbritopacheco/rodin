@@ -299,6 +299,7 @@ namespace Rodin::Variational
        */
       GridFunctionBase(const GridFunctionBase& other)
         : Parent(std::cref(*this)),
+          m_name(other.m_name),
           m_fes(other.m_fes)
       {}
 
@@ -308,6 +309,7 @@ namespace Rodin::Variational
        */
       GridFunctionBase(GridFunctionBase&& other)
         : Parent(std::cref(*this)),
+          m_name(std::move(other.m_name)),
           m_fes(std::move(other.m_fes))
       {}
 
@@ -320,6 +322,7 @@ namespace Rodin::Variational
        */
       GridFunctionBase& operator=(GridFunctionBase&& other)
       {
+        m_name = std::move(other.m_name);
         m_fes = std::move(other.m_fes);
         return *this;
       }
@@ -333,6 +336,7 @@ namespace Rodin::Variational
       {
         if (this != &other)
         {
+          m_name = other.m_name;
           m_fes = other.m_fes;
         }
         return *this;

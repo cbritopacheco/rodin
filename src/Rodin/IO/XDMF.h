@@ -11,12 +11,17 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include <functional>
 #include <boost/filesystem/path.hpp>
 
 #include "Rodin/Types.h"
+#include "Rodin/Alert/Exception.h"
 #include "Rodin/Alert/MemberFunctionException.h"
+#include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Geometry/ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
+
+#include "ForwardDecls.h"
 
 namespace Rodin::IO
 {
@@ -475,7 +480,8 @@ namespace Rodin::IO
       {
         std::string name;
         Center center = Center::Node;
-        const void* object = nullptr;
+        size_t dimension = 1;
+        std::function<void(const boost::filesystem::path&)> save;
       };
 
       struct SnapshotRecord
@@ -503,6 +509,82 @@ namespace Rodin::IO
       size_t m_snapshotCount = 0;
       std::vector<GridRecord> m_grids;
   };
+
+  // ---- template method implementations ------------------------------------
+
+  template <class MeshType>
+  XDMF::Grid& XDMF::Grid::setMesh(const MeshType& mesh, MeshPolicy policy)
+  {
+    auto& gr = m_owner->m_grids[m_index];
+    gr.mesh = &mesh;
+    gr.options.meshPolicy = policy;
+    gr.staticMeshWritten = false;
+    gr.staticMeshFile.clear();
+    return *this;
+  }
+
+  template <class GridFunctionType>
+  XDMF::Grid& XDMF::Grid::add(const GridFunctionType& gf, Center center)
+  {
+    const auto name = gf.getName();
+    if (!name)
+    {
+      Alert::Exception()
+        << "Grid function has no name. Use the overload that takes an explicit name."
+        << Alert::Raise;
+    }
+    return add(std::string(name->data(), name->size()), gf, center);
+  }
+
+  template <class GridFunctionType>
+  XDMF::Grid& XDMF::Grid::add(
+      const std::string& name,
+      const GridFunctionType& gf,
+      Center center)
+  {
+    auto& gr = m_owner->m_grids[m_index];
+    if (gr.mesh && gr.mesh != &gf.getFiniteElementSpace().getMesh())
+    {
+      Alert::Exception()
+        << "Attribute mesh does not match the grid mesh."
+        << Alert::Raise;
+    }
+
+    AttributeRecord rec;
+    rec.name = name;
+    rec.center = center;
+    rec.dimension = gf.getDimension();
+    rec.save = [&gf](const boost::filesystem::path& path)
+    {
+      gf.save(path, FileFormat::HDF5);
+    };
+    gr.attributes.push_back(std::move(rec));
+    return *this;
+  }
+
+  template <class MeshType>
+  XDMF& XDMF::setMesh(const MeshType& mesh, MeshPolicy policy)
+  {
+    grid().setMesh(mesh, policy);
+    return *this;
+  }
+
+  template <class GridFunctionType>
+  XDMF& XDMF::add(const GridFunctionType& gf, Center center)
+  {
+    grid().add(gf, center);
+    return *this;
+  }
+
+  template <class GridFunctionType>
+  XDMF& XDMF::add(
+      const std::string& name,
+      const GridFunctionType& gf,
+      Center center)
+  {
+    grid().add(name, gf, center);
+    return *this;
+  }
 }
 
 #endif

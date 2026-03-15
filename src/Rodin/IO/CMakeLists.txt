@@ -21,6 +21,7 @@ set(RodinIO_HEADERS
 set(RodinIO_SRCS
   MFEM.cpp
   MEDIT.cpp
+  XDMF.cpp
   MeshLoader.cpp
   MeshPrinter.cpp
   GridFunctionLoader.cpp

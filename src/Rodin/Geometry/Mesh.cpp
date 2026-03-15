@@ -34,14 +34,16 @@ namespace Rodin::Geometry
 
   // ---- Mesh<Context::Local> ----------------------------------------------
   Mesh<Context::Local>::Mesh(const Mesh& other)
-    : m_sdim(other.m_sdim),
+    : MeshBase(other),
+      m_sdim(other.m_sdim),
       m_vertices(other.m_vertices),
       m_connectivity(other.m_connectivity),
       m_attributes(other.m_attributes)
   {}
 
   Mesh<Context::Local>::Mesh(Mesh&& other)
-    : m_sdim(std::move(other.m_sdim)),
+    : MeshBase(std::move(other)),
+      m_sdim(std::move(other.m_sdim)),
       m_vertices(std::move(other.m_vertices)),
       m_connectivity(std::move(other.m_connectivity)),
       m_attributes(std::move(other.m_attributes)),
