@@ -148,6 +148,24 @@ namespace Rodin::IO
     return m_owner->m_grids[m_index].attributes.size();
   }
 
+  XDMF::Grid& XDMF::Grid::reset()
+  {
+    auto& gr = m_owner->m_grids[m_index];
+    gr.mesh = nullptr;
+    gr.options = GridOptions{};
+    gr.staticMeshWritten = false;
+    gr.staticMeshFile.clear();
+    gr.attributes.clear();
+    gr.snapshots.clear();
+    return *this;
+  }
+
+  XDMF::Grid& XDMF::Grid::clear()
+  {
+    m_owner->m_grids[m_index].attributes.clear();
+    return *this;
+  }
+
   // ---- XDMF ----------------------------------------------------------------
 
   XDMF::XDMF(const boost::filesystem::path& stem)

@@ -232,6 +232,9 @@ namespace Rodin::IO
 
           size_t getAttributeCount() const noexcept;
 
+          Grid& reset();
+          Grid& clear();
+
         private:
           friend class XDMF;
 
