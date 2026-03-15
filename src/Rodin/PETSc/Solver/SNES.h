@@ -6,12 +6,13 @@
 #include "Rodin/PETSc/Object.h"
 #include "Rodin/PETSc/Math/LinearSystem.h"
 #include "Rodin/Solver/NewtonSolver.h"
+#include "Rodin/Variational/ForwardDecls.h"
 #include "KSP.h"
 
 namespace Rodin::Solver
 {
   class SNES
-    : public PETSc::Object<::SNES>, public NewtonSolverBase<::Vec, ::Vec, ::Mat, ::KSP>
+    : public PETSc::Object<::SNES>, public NewtonSolverBase<PETSc::Math::LinearSystem, ::KSP>
   {
     public:
       using HandleType = ::SNES;
@@ -19,15 +20,21 @@ namespace Rodin::Solver
       using MatrixType = ::Mat;
       using VectorType = ::Vec;
       using LinearSystemType = PETSc::Math::LinearSystem;
-      using FunctionCallbackType = ::SNESFunctionFn*;
-      using JacobianCallbackType = ::SNESJacobianFn*;
+      using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+      // (snes, x, f, ctx): assemble residual f = F(x)
+      using FunctionCallbackType = PetscErrorCode (*)(::SNES, ::Vec, ::Vec, void*);
+      // (snes, x, J, P, ctx): assemble Jacobian/preconditioner operators
+      using JacobianCallbackType = PetscErrorCode (*)(::SNES, ::Vec, ::Mat, ::Mat, void*);
       using PetscParent = PETSc::Object<HandleType>;
-      using NewtonParent = NewtonSolverBase<VectorType, VectorType, MatrixType, KSPType>;
-      using ResidualAssembly = typename NewtonParent::ResidualAssembly;
-      using JacobianAssembly = typename NewtonParent::JacobianAssembly;
+      using NewtonParent = NewtonSolverBase<LinearSystemType, KSPType>;
       using NewtonParent::solve;
 
-      explicit SNES(MPI_Comm comm = PETSC_COMM_WORLD);
+      /**
+       * @brief Construct SNES from a variational problem.
+       * @param pb Variational problem associated to this Newton solver.
+       * @param comm PETSc communicator used to create the SNES handle.
+       */
+      explicit SNES(ProblemBaseType& pb, MPI_Comm comm = PETSC_COMM_WORLD);
 
       virtual ~SNES() override;
 
@@ -87,10 +94,6 @@ namespace Rodin::Solver
       void solve(VectorType& x) override;
       void solve(LinearSystemType& system);
 
-      const ResidualAssembly& getFunction() const override;
-
-      const JacobianAssembly& getJacobian() const override;
-
       const KSPType& getLinearSolver() const override;
 
       KSPType& getLinearSolver() override;
@@ -114,8 +117,6 @@ namespace Rodin::Solver
       JacobianCallbackType m_jacobianCallback;
       void* m_functionContext;
       void* m_jacobianContext;
-      ResidualAssembly m_functionAssembly;
-      JacobianAssembly m_jacobianAssembly;
       VectorType m_residual;
       MatrixType m_jacobianOperator;
       MatrixType m_preconditionerOperator;

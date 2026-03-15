@@ -37,12 +37,10 @@ namespace Rodin::Solver
 
   /**
    * @brief Abstract base class for Newton-type nonlinear solvers.
-   * @tparam Solution Type of the nonlinear state.
-   * @tparam Function Type of the nonlinear residual.
-   * @tparam Jacobian Type of the Jacobian operator.
+   * @tparam LinearSystem Type of linear system assembled at each Newton step.
    * @tparam LinearSolver Type of the linear solver.
    */
-  template <class Solution, class Function, class Jacobian, class LinearSolver>
+  template <class LinearSystem, class LinearSolver>
   class NewtonSolverBase;
 
   /**

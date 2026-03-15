@@ -5,8 +5,9 @@
 
 namespace Rodin::Solver
 {
-  SNES::SNES(MPI_Comm comm)
-    : m_snes(PETSC_NULLPTR),
+  SNES::SNES(ProblemBaseType& pb, MPI_Comm comm)
+    : NewtonParent(pb),
+      m_snes(PETSC_NULLPTR),
       m_type(SNESNEWTONLS),
       m_abstol(PETSC_DECIDE),
       m_rtol(PETSC_DECIDE),
@@ -18,8 +19,6 @@ namespace Rodin::Solver
       m_jacobianCallback(PETSC_NULLPTR),
       m_functionContext(PETSC_NULLPTR),
       m_jacobianContext(PETSC_NULLPTR),
-      m_functionAssembly(),
-      m_jacobianAssembly(),
       m_residual(PETSC_NULLPTR),
       m_jacobianOperator(PETSC_NULLPTR),
       m_preconditionerOperator(PETSC_NULLPTR)
@@ -73,19 +72,6 @@ namespace Rodin::Solver
     m_functionCallback = f;
     m_functionContext = ctx;
     m_residual = residual;
-    m_functionAssembly =
-      [this](VectorType& residual, const VectorType& x)
-      {
-        if (!m_functionCallback)
-          return;
-        PetscErrorCode ierr = m_functionCallback(
-            m_snes,
-            const_cast<VectorType>(x),
-            residual,
-            m_functionContext);
-        assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
-      };
     PetscErrorCode ierr = SNESSetFunction(
         m_snes,
         m_residual,
@@ -115,23 +101,6 @@ namespace Rodin::Solver
     m_jacobianContext = ctx;
     m_jacobianOperator = jacobian;
     m_preconditionerOperator = preconditioner;
-    m_jacobianAssembly =
-      [this](MatrixType& jacobian, const VectorType& x)
-      {
-        if (!m_jacobianCallback)
-          return;
-        const MatrixType preconditioner = m_preconditionerOperator
-          ? m_preconditionerOperator
-          : jacobian;
-        PetscErrorCode ierr = m_jacobianCallback(
-            m_snes,
-            const_cast<VectorType>(x),
-            jacobian,
-            preconditioner,
-            m_jacobianContext);
-        assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
-      };
     PetscErrorCode ierr = SNESSetJacobian(
         m_snes,
         m_jacobianOperator,
@@ -183,16 +152,6 @@ namespace Rodin::Solver
   void SNES::solve(LinearSystemType& system)
   {
     solve(system.getVector(), system.getSolution());
-  }
-
-  const SNES::ResidualAssembly& SNES::getFunction() const
-  {
-    return m_functionAssembly;
-  }
-
-  const SNES::JacobianAssembly& SNES::getJacobian() const
-  {
-    return m_jacobianAssembly;
   }
 
   const SNES::KSPType& SNES::getLinearSolver() const

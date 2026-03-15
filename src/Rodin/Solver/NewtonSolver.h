@@ -9,6 +9,7 @@
 
 #include <cstddef>
 #include <functional>
+#include <utility>
 
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Alert/Raise.h"
@@ -16,42 +17,39 @@
 #include "Rodin/Math/ForwardDecls.h"
 #include "Rodin/Math/LinearSystem.h"
 #include "Rodin/Types.h"
+#include "Rodin/Variational/ForwardDecls.h"
 
 namespace Rodin::Solver
 {
   /**
    * @brief Base interface for Newton-type nonlinear solvers.
    *
-   * Newton solver class for solving nonlinear systems of the form
+   * Newton solver class for solving nonlinear systems through a
+   * Variational::ProblemBase that assembles the tangent system at each iterate:
    * @f[
-   * F(x) = 0,
+   * J(u^k)\,\delta u^k = -F(u^k), \qquad
+   * u^{k + 1} = u^k + \delta u^k.
    * @f]
-   * where @f$ F @f$ is a possibly non-linear, differentiable function.
    *
-   * @tparam Solution Type of the nonlinear state.
-   * @tparam Function Type of the residual vector.
-   * @tparam Jacobian Type of the Jacobian operator.
+   * @tparam LinearSystem Type of linear system assembled at each Newton step.
    * @tparam LinearSolver Type of the linear solver used at each Newton step.
    */
-  template <class Solution, class Function, class Jacobian, class LinearSolver>
+  template <class LinearSystem, class LinearSolver>
   class NewtonSolverBase : public Copyable
   {
     public:
-      using SolutionType = Solution;
-      using FunctionType = Function;
-      using JacobianType = Jacobian;
+      using LinearSystemType = LinearSystem;
       using LinearSolverType = LinearSolver;
-
-      using ResidualAssembly = std::function<void(Function&, const Solution&)>;
-      using JacobianAssembly = std::function<void(Jacobian&, const Solution&)>;
+      using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+      using SolutionType = typename FormLanguage::Traits<LinearSystemType>::VectorType;
 
       using Parent = Copyable;
 
       virtual ~NewtonSolverBase() = default;
 
-      virtual const ResidualAssembly& getFunction() const = 0;
-
-      virtual const JacobianAssembly& getJacobian() const = 0;
+      explicit NewtonSolverBase(ProblemBaseType& pb)
+        : m_pb(pb)
+      {}
 
       virtual const LinearSolver& getLinearSolver() const = 0;
 
@@ -61,7 +59,21 @@ namespace Rodin::Solver
        * @brief Solve a nonlinear system starting from the initial guess stored in @p x.
        * @param[in,out] x On entry: initial guess. On exit: final Newton iterate.
        */
-      virtual void solve(Solution& x) = 0;
+      virtual void solve(SolutionType& x) = 0;
+
+    protected:
+      ProblemBaseType& getProblem() noexcept
+      {
+        return m_pb.get();
+      }
+
+      const ProblemBaseType& getProblem() const noexcept
+      {
+        return m_pb.get();
+      }
+
+    private:
+      std::reference_wrapper<ProblemBaseType> m_pb;
   };
 
   /**
@@ -70,11 +82,11 @@ namespace Rodin::Solver
    * The nonlinear residual is assembled as F(x), the Newton system is solved
    * as:
    * @f[
-   *   J(x) dx = F(x),
+   *   J(x) dx = -F(x),
    * @f]
    * and the state is updated with:
    * @f[
-   *   x^{k + 1} = x^k - dx,
+   *   x^{k + 1} = x^k + dx,
    * @f]
    * with @f$ x^0 @f$ given by the initial guess.
    *
@@ -86,40 +98,24 @@ namespace Rodin::Solver
    *   \|F(x^k)\| \le \text{rtol} \, \|F(x^0)\|.
    * @f]
    *
-   * @tparam Solution Type of the nonlinear state.
-   * @tparam Function Type of the residual vector.
-   * @tparam Jacobian Type of the Jacobian operator.
+   * @tparam LinearSystem Type of linear system assembled at each Newton step.
    * @tparam LinearSolver Type of the linear solver used at each Newton step.
    */
-  template <class Solution, class Function, class Jacobian, class LinearSolver>
+  template <class LinearSystem, class LinearSolver>
   class NewtonSolver final
-    : public NewtonSolverBase<Solution, Function, Jacobian, LinearSolver>
+    : public NewtonSolverBase<LinearSystem, LinearSolver>
   {
     public:
-      using Parent = NewtonSolverBase<Solution, Function, Jacobian, LinearSolver>;
+      using Parent = NewtonSolverBase<LinearSystem, LinearSolver>;
 
-      using SolutionType = Solution;
-      using FunctionType = Function;
-      using JacobianType = Jacobian;
+      using LinearSystemType = LinearSystem;
+      using ProblemBaseType = typename Parent::ProblemBaseType;
+      using SolutionType = typename Parent::SolutionType;
       using LinearSolverType = LinearSolver;
 
-      using ResidualAssembly = std::function<void(FunctionType&, const SolutionType&)>;
-      using JacobianAssembly = std::function<void(JacobianType&, const SolutionType&)>;
-      using ResidualNorm = std::function<double(const FunctionType&)>;
-
-      /**
-       * Assumes the linear system stores:
-       *   - operator: Jacobian
-       *   - rhs/vector: residual F(x)
-       *   - solution: Newton correction dx
-       *
-       * If Rodin's LinearSystem uses a different convention, this alias should be
-       * adjusted accordingly.
-       */
-      using LinearSystemType = Math::LinearSystem<JacobianType, FunctionType>;
-
-      explicit NewtonSolver(const LinearSolver& linearSolver)
-        : m_linearSolver(linearSolver),
+      explicit NewtonSolver(ProblemBaseType& pb, const LinearSolver& linearSolver)
+        : Parent(pb),
+          m_linearSolver(linearSolver),
           m_maxIt(100),
           m_atol(1e-12),
           m_rtol(1e-8),
@@ -131,18 +127,6 @@ namespace Rodin::Solver
       NewtonSolver* copy() const noexcept override
       {
         return new NewtonSolver(*this);
-      }
-
-      NewtonSolver& setFunction(const ResidualAssembly& f)
-      {
-        m_function = f;
-        return *this;
-      }
-
-      NewtonSolver& setJacobian(const JacobianAssembly& J)
-      {
-        m_jacobian = J;
-        return *this;
       }
 
       NewtonSolver& setLinearSolver(const LinearSolver& linearSolver)
@@ -172,16 +156,6 @@ namespace Rodin::Solver
       Real getDampingFactor() const
       {
         return m_alpha;
-      }
-
-      const ResidualAssembly& getFunction() const override
-      {
-        return m_function;
-      }
-
-      const JacobianAssembly& getJacobian() const override
-      {
-        return m_jacobian;
       }
 
       const LinearSolver& getLinearSolver() const override
@@ -215,22 +189,8 @@ namespace Rodin::Solver
         return m_maxIt;
       }
 
-      void solve(Solution& x) override
+      void solve(SolutionType& x) override
       {
-        if (!m_function)
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "Residual assembly not set."
-            << Alert::Raise;
-        }
-
-        if (!m_jacobian)
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "Jacobian assembly not set."
-            << Alert::Raise;
-        }
-
         if (m_atol < 0.0)
         {
             Alert::MemberFunctionException(*this, __func__)
@@ -245,42 +205,26 @@ namespace Rodin::Solver
               << Alert::Raise;
         }
 
-        SolutionType xCurr = x;
-        LinearSystemType linearSystem;
-
-        FunctionType F;
-        m_function(F, xCurr);
-
-        const Real r0 = F.norm();
-        if (converged(r0, r0))
-        {
-          x = xCurr;
-          return;
-        }
-
+        Real r0 = 0.0;
         for (size_t it = 0; it < m_maxIt; ++it)
         {
-          auto& J = linearSystem.getOperator();
-          m_jacobian(J, xCurr);
-
-          auto& rhs = linearSystem.getVector();
-          rhs = F;
-
-          m_linearSolver.solve(linearSystem);
-
-          xCurr = xCurr - m_alpha * linearSystem.getSolution();
-
-          m_function(F, xCurr);
-          const Real r = F.norm();
+          auto& pb = this->getProblem();
+          pb.assemble();
+          auto& linearSystem = pb.getLinearSystem();
+          auto& residual = linearSystem.getVector();
+          const Real r = residual.norm();
+          if (it == 0)
+            r0 = r;
 
           if (converged(r, r0))
           {
-            x = xCurr;
             return;
           }
-        }
 
-        x = xCurr;
+          linearSystem.getVector() *= static_cast<Real>(-1.0);
+          m_linearSolver.solve(linearSystem);
+          x += m_alpha * linearSystem.getSolution();
+        }
       }
 
     private:
@@ -290,8 +234,6 @@ namespace Rodin::Solver
       }
 
     private:
-      ResidualAssembly m_function;
-      JacobianAssembly m_jacobian;
       LinearSolver m_linearSolver;
       size_t m_maxIt;
       Real m_atol;
@@ -301,21 +243,15 @@ namespace Rodin::Solver
 
   /**
    * @ingroup RodinCTAD
-   * @brief CTAD guide for NewtonSolver from a Rodin linear solver instance.
+   * @brief CTAD guide for NewtonSolver from a Rodin problem and linear solver.
    *
    * Deduces:
-   * - SolutionType = LinearSolver::VectorType
-   * - FunctionType = LinearSolver::VectorType
-   * - JacobianType = LinearSolver::OperatorType
+   * - LinearSystemType = LinearSystem
    * - LinearSolverType = LinearSolver
    */
-  template <class LinearSolver>
-  NewtonSolver(const LinearSolver&)
-    -> NewtonSolver<
-      typename LinearSolver::VectorType,
-      typename LinearSolver::VectorType,
-      typename LinearSolver::OperatorType,
-      LinearSolver>;
+  template <class LinearSystem, class LinearSolver>
+  NewtonSolver(Variational::ProblemBase<LinearSystem>&, const LinearSolver&)
+    -> NewtonSolver<LinearSystem, LinearSolver>;
 }
 
 #endif

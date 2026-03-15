@@ -6,183 +6,155 @@
  */
 #include <gtest/gtest.h>
 #include <cmath>
+#include <functional>
+#include <stdexcept>
 #include <type_traits>
 #include <utility>
 
 #include "Rodin/Math/LinearSystem.h"
 #include "Rodin/Math/Matrix.h"
-#include "Rodin/Math/SparseMatrix.h"
 #include "Rodin/Math/Vector.h"
-#include "Rodin/Solver/SparseLU.h"
 #include "Rodin/Solver/NewtonSolver.h"
-#include "Rodin/Types.h"
+#include "Rodin/Variational/Problem.h"
 
 using namespace Rodin;
 
 namespace
 {
+  using DenseLinearSystem = Math::LinearSystem<Math::Matrix<Real>, Math::Vector<Real>>;
+
   struct DenseLinearSolver
   {
-    using MatrixType = Math::Matrix<Real>;
-    using OperatorType = MatrixType;
-    using VectorType = Math::Vector<Real>;
-    using LinearSystemType = Math::LinearSystem<MatrixType, VectorType>;
-
-    void solve(LinearSystemType& system)
+    void solve(DenseLinearSystem& system)
     {
       system.getSolution() = system.getOperator().fullPivLu().solve(system.getVector());
     }
   };
 
-  Math::Vector<Real> expectedRoot()
+  class ScalarNonlinearProblem final : public Variational::ProblemBase<DenseLinearSystem>
   {
-    Math::Vector<Real> root(2);
-    root << 1.0, -1.0;
-    return root;
-  }
+    public:
+      using Parent = Variational::ProblemBase<DenseLinearSystem>;
+      using ProblemBodyType = typename Parent::ProblemBodyType;
 
-  Math::Matrix<Real> baseOperator()
+      explicit ScalarNonlinearProblem(Math::Vector<Real>& u)
+        : m_solution(u)
+      {}
+
+      Parent& operator=(const ProblemBodyType&) override
+      {
+        return *this;
+      }
+
+      void solve(Solver::LinearSolverBase<DenseLinearSystem>& solver) override
+      {
+        assemble();
+        solver.solve(m_system);
+      }
+
+      ScalarNonlinearProblem& assemble() override
+      {
+        m_system.getOperator().resize(1, 1);
+        m_system.getVector().resize(1);
+        m_system.getSolution().resize(1);
+
+        const Real u = m_solution.get()(0);
+        m_system.getOperator()(0, 0) = 2.0 * u;
+        m_system.getVector()(0) = u * u - 2.0;
+        return *this;
+      }
+
+      DenseLinearSystem& getLinearSystem() override
+      {
+        return m_system;
+      }
+
+      const DenseLinearSystem& getLinearSystem() const override
+      {
+        return m_system;
+      }
+
+      ScalarNonlinearProblem* copy() const noexcept override
+      {
+        return new ScalarNonlinearProblem(*this);
+      }
+
+    private:
+      std::reference_wrapper<Math::Vector<Real>> m_solution;
+      DenseLinearSystem m_system;
+  };
+
+  class FailingAssembleProblem final : public Variational::ProblemBase<DenseLinearSystem>
   {
-    Math::Matrix<Real> A(2, 2);
-    A << 4.0, 1.0,
-         1.0, 3.0;
-    return A;
-  }
+    public:
+      using Parent = Variational::ProblemBase<DenseLinearSystem>;
+      using ProblemBodyType = typename Parent::ProblemBodyType;
+
+      Parent& operator=(const ProblemBodyType&) override
+      {
+        return *this;
+      }
+
+      void solve(Solver::LinearSolverBase<DenseLinearSystem>&) override
+      {}
+
+      FailingAssembleProblem& assemble() override
+      {
+        throw std::runtime_error("Assembly failed");
+      }
+
+      DenseLinearSystem& getLinearSystem() override
+      {
+        return m_system;
+      }
+
+      const DenseLinearSystem& getLinearSystem() const override
+      {
+        return m_system;
+      }
+
+      FailingAssembleProblem* copy() const noexcept override
+      {
+        return new FailingAssembleProblem(*this);
+      }
+
+    private:
+      DenseLinearSystem m_system;
+  };
 }
 
-TEST(NewtonSolverTest, SolvesManufacturedDenseSystem)
+TEST(NewtonSolverTest, SolvesScalarProblemUsingProblemAssembly)
 {
-  const auto xStar = expectedRoot();
-  const auto A = baseOperator();
-  const Math::Vector<Real> b = A * xStar;
+  Math::Vector<Real> u(1);
+  u << 1.5;
 
-  Solver::NewtonSolver<Math::Vector<Real>, Math::Vector<Real>, Math::Matrix<Real>, DenseLinearSolver>
-    solver(DenseLinearSolver{});
-
-  /*
-   * Residual:
-   *   F_1(x) = (Ax - b)_1 + 0.2 (x_1^2 - 1)
-   *   F_2(x) = (Ax - b)_2 + 0.15 (x_2^2 - 1)
-   *
-   * Jacobian:
-   *   J(x) = A + diag(0.4 x_1, 0.3 x_2)
-   *
-   * Initial guess:
-   *   x^(0) = [0.8, -0.8]^T
-   */
-  solver.setFunction(
-      [A, b](Math::Vector<Real>& residual, const Math::Vector<Real>& x)
-      {
-        residual = A * x - b;
-        residual(0) += 0.2 * (x(0) * x(0) - 1.0);
-        residual(1) += 0.15 * (x(1) * x(1) - 1.0);
-      })
-    .setJacobian(
-      [A](Math::Matrix<Real>& J, const Math::Vector<Real>& x)
-      {
-        J = A;
-        J(0, 0) += 0.4 * x(0);
-        J(1, 1) += 0.3 * x(1);
-      })
-    .setMaxIterations(30)
+  ScalarNonlinearProblem pb(u);
+  Solver::NewtonSolver solver(pb, DenseLinearSolver{});
+  solver.setMaxIterations(30)
     .setAbsoluteTolerance(1e-12)
     .setRelativeTolerance(1e-12);
 
-  Math::Vector<Real> x0(2);
-  x0 << 0.8, -0.8;
-  solver.solve(x0);
+  solver.solve(u);
 
-  EXPECT_NEAR(x0(0), xStar(0), 1e-10);
-  EXPECT_NEAR(x0(1), xStar(1), 1e-10);
+  EXPECT_NEAR(u(0), std::sqrt(2.0), 1e-10);
 }
 
-TEST(NewtonSolverTest, SolvesTrulyNonlinearDenseSystem)
+TEST(NewtonSolverTest, CTADDeductionGuideFromProblemAndLinearSolver)
 {
-  auto solver = Solver::NewtonSolver(DenseLinearSolver{});
-
-  /*
-   * Residual:
-   *   F_1(x) = sin(x_1) + x_2 - sin(1)
-   *   F_2(x) = x_1^2 + x_2^2 - 1
-   *
-   * Jacobian:
-   *   J(x) = [ cos(x_1)   1     ]
-   *          [ 2 x_1      2 x_2 ]
-   *
-   * Initial guess:
-   *   x^(0) = [0.7, 0.3]^T
-   */
-  solver.setFunction(
-      [](Math::Vector<Real>& residual, const Math::Vector<Real>& x)
-      {
-        residual.resize(2);
-        residual(0) = std::sin(x(0)) + x(1) - std::sin(1.0);
-        residual(1) = x(0) * x(0) + x(1) * x(1) - 1.0;
-      })
-    .setJacobian(
-      [](Math::Matrix<Real>& J, const Math::Vector<Real>& x)
-      {
-        J.resize(2, 2);
-        J(0, 0) = std::cos(x(0));
-        J(0, 1) = 1.0;
-        J(1, 0) = 2.0 * x(0);
-        J(1, 1) = 2.0 * x(1);
-      })
-    .setMaxIterations(40)
-    .setAbsoluteTolerance(1e-12)
-    .setRelativeTolerance(1e-12);
-
-  Math::Vector<Real> x(2);
-  x << 0.7, 0.3;
-  solver.solve(x);
-
-  EXPECT_NEAR(x(0), 1.0, 1e-10);
-  EXPECT_NEAR(x(1), 0.0, 1e-10);
-}
-
-TEST(NewtonSolverTest, CTADDeductionGuideForRodinLinearSolver)
-{
-  using SparseSystem = Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
-  using RodinSparseLU = Solver::SparseLU<SparseSystem>;
-  using DeducedSolverType = decltype(Solver::NewtonSolver(std::declval<const RodinSparseLU&>()));
-  using ExpectedSolverType = Solver::NewtonSolver<
-    Math::Vector<Real>,
-    Math::Vector<Real>,
-    Math::SparseMatrix<Real>,
-    RodinSparseLU>;
+  using DeducedSolverType =
+    decltype(Solver::NewtonSolver(std::declval<ScalarNonlinearProblem&>(), std::declval<const DenseLinearSolver&>()));
+  using ExpectedSolverType = Solver::NewtonSolver<DenseLinearSystem, DenseLinearSolver>;
 
   static_assert(std::is_same_v<DeducedSolverType, ExpectedSolverType>);
   SUCCEED();
 }
 
-TEST(NewtonSolverTest, ThrowsWhenResidualNotSet)
+TEST(NewtonSolverTest, PropagatesAssemblyFailure)
 {
-  Solver::NewtonSolver<Math::Vector<Real>, Math::Vector<Real>, Math::Matrix<Real>, DenseLinearSolver>
-    solver(DenseLinearSolver{});
+  FailingAssembleProblem pb;
+  Solver::NewtonSolver solver(pb, DenseLinearSolver{});
 
-  solver.setJacobian(
-    [](Math::Matrix<Real>& J, const Math::Vector<Real>&)
-    {
-      J = Math::Matrix<Real>::Identity(1, 1);
-    });
-
-  Math::Vector<Real> x(1);
-  x << 0.0;
-  EXPECT_ANY_THROW(solver.solve(x));
-}
-
-TEST(NewtonSolverTest, ThrowsWhenJacobianNotSet)
-{
-  Solver::NewtonSolver<Math::Vector<Real>, Math::Vector<Real>, Math::Matrix<Real>, DenseLinearSolver>
-    solver(DenseLinearSolver{});
-
-  solver.setFunction(
-    [](Math::Vector<Real>& residual, const Math::Vector<Real>& x)
-    {
-      residual = x;
-    });
-
-  Math::Vector<Real> x(1);
-  x << 1.0;
-  EXPECT_ANY_THROW(solver.solve(x));
+  Math::Vector<Real> u(1);
+  u << 1.0;
+  EXPECT_THROW(solver.solve(u), std::runtime_error);
 }
