@@ -10,6 +10,7 @@
 #include <string>
 
 #include <gtest/gtest.h>
+#include <boost/filesystem.hpp>
 
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
@@ -108,7 +109,10 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_IO_HDF5, XDMFWriteAndClose)
   {
-    const boost::filesystem::path stem = "/tmp/rodin_xdmf_test";
+    // Use a dedicated subdirectory for test output
+    const boost::filesystem::path testDir = "/tmp/rodin_xdmf_test_dir";
+    boost::filesystem::create_directories(testDir);
+    const boost::filesystem::path stem = testDir / "output";
 
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
     mesh.getConnectivity().compute(2, 1);
@@ -134,7 +138,7 @@ namespace Rodin::Tests::Unit
     }
 
     // Verify the XDMF XML file was written
-    const std::string xdmfFile = stem.string() + ".xdmf";
+    const auto xdmfFile = stem.string() + ".xdmf";
     std::ifstream ifs(xdmfFile);
     ASSERT_TRUE(ifs.good());
     std::ostringstream buffer;
@@ -149,19 +153,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NE(text.find("/GridFunction/Values/Data"), std::string::npos);
     EXPECT_NE(text.find("temperature"), std::string::npos);
 
-    // Clean up: remove generated files
-    std::remove(xdmfFile.c_str());
-
-    // Remove HDF5 files (static mesh + 2 attribute snapshots)
-    namespace fs = boost::filesystem;
-    for (fs::directory_iterator it("/tmp"), end; it != end; ++it)
-    {
-      const auto fname = it->path().filename().string();
-      if (fname.find("rodin_xdmf_test") != std::string::npos &&
-          (fname.find(".h5") != std::string::npos))
-      {
-        std::remove(it->path().c_str());
-      }
-    }
+    // Clean up the dedicated test directory
+    boost::filesystem::remove_all(testDir);
   }
 }
