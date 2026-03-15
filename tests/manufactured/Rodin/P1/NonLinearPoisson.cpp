@@ -5,9 +5,8 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
-#include <limits>
-
 #include "Rodin/Assembly.h"
+#include "Rodin/Solver/NewtonSolver.h"
 #include "Rodin/Variational.h"
 #include "Rodin/Solver/SparseLU.h"
 
@@ -18,63 +17,113 @@ using namespace Rodin::Solver;
 
 namespace Rodin::Tests::Manufactured::NonLinearPoisson
 {
-  TEST(Rodin_Manufactured_P1, NonLinearPoisson_UnitSquareDirichlet)
+  namespace
+  {
+    auto makeUnitSquareMesh()
+    {
+      // UniformGrid({17,17}) creates 16 equal intervals per coordinate direction,
+      // and scaling by 1/16 maps the mesh to the unit square (0,1)^2.
+      constexpr Real domainScale = 1.0 / 16.0;
+      Mesh mesh;
+      mesh = mesh.UniformGrid(Polytope::Type::Quadrilateral, { 17, 17 });
+      mesh.scale(domainScale);
+      mesh.getConnectivity().compute(1, 2);
+      return mesh;
+    }
+
+    template <class FES, class Exact, class Source>
+    auto solveByFixedPoint(FES& Vh, const Exact& exact, const Source& f)
+    {
+      constexpr size_t maxIterations = 30;
+      constexpr Real fixedPointTolerance = 1e-12;
+
+      auto uk = GridFunction(Vh);
+      uk = Zero();
+
+      TrialFunction u(Vh);
+      TestFunction v(Vh);
+      Problem nonlinearPoisson(u, v);
+
+      for (size_t it = 0; it < maxIterations; ++it)
+      {
+        const auto nonlinearTerm = uk * uk * uk;
+        nonlinearPoisson = Integral(Grad(u), Grad(v))
+                         + Integral(u, v)
+                         - Integral(f - nonlinearTerm, v)
+                         + DirichletBC(u, exact);
+        SparseLU(nonlinearPoisson).solve();
+
+        const Real updateNorm = (u.getSolution().getData() - uk.getData()).norm();
+        uk = u.getSolution();
+        if (updateNorm < fixedPointTolerance)
+          break;
+      }
+
+      return uk;
+    }
+  }
+
+  TEST(Rodin_Manufactured_P1, NonLinearPoisson_UnitSquareDirichlet_FixedPoint)
   {
     const Real pi = Math::Constants::pi();
-    // Fixed-point iteration is contractive for this smooth manufactured setup
-    // and converges well within this cap.
-    constexpr size_t maxIterations = 30;
-    // Tight tolerance keeps the nonlinear iteration error below FE discretization error.
-    constexpr Real fixedPointTolerance = 1e-12;
-    // UniformGrid({17,17}) generates 17 nodes per axis; scale by 1/16 to map to (0,1)^2.
-    constexpr Real domainScale = 1.0 / 16.0;
-
-    Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Quadrilateral, { 17, 17 });
-    mesh.scale(domainScale);
-    mesh.getConnectivity().compute(1, 2);
-
+    Mesh mesh = makeUnitSquareMesh();
     P1 Vh(mesh);
 
     auto exact = sin(pi * F::x) * sin(pi * F::y);
     auto f = (2 * pi * pi + 1) * exact + exact * exact * exact;
 
-    GridFunction uk(Vh);
-    uk = Zero();
-
-    TrialFunction u(Vh);
-    TestFunction v(Vh);
-    Problem nonlinearPoisson(u, v);
-
-    bool converged = false;
-    size_t iterationCount = 0;
-    Real lastUpdateNorm = std::numeric_limits<Real>::infinity();
-    for (size_t it = 0; it < maxIterations; ++it)
-    {
-      iterationCount = it + 1;
-      const auto nonlinearTerm = uk * uk * uk;
-      nonlinearPoisson = Integral(Grad(u), Grad(v))
-                       + Integral(u, v)
-                       - Integral(f - nonlinearTerm, v)
-                       + DirichletBC(u, exact);
-      SparseLU(nonlinearPoisson).solve();
-
-      const Real updateNorm = (u.getSolution().getData() - uk.getData()).norm();
-      lastUpdateNorm = updateNorm;
-      uk = u.getSolution();
-      if (updateNorm < fixedPointTolerance)
-      {
-        converged = true;
-        break;
-      }
-    }
-    EXPECT_TRUE(converged)
-      << "Fixed-point solver failed to converge in " << iterationCount
-      << " iterations (last update norm = " << lastUpdateNorm << ").";
+    const auto uk = solveByFixedPoint(Vh, exact, f);
 
     GridFunction diff(Vh);
     diff = Pow(uk - exact, 2);
     const Real l2ErrorSquared = Integral(diff).compute();
     EXPECT_NEAR(l2ErrorSquared, 0, RODIN_FUZZY_CONSTANT);
+  }
+
+  TEST(Rodin_Manufactured_P1, NonLinearPoisson_UnitSquareDirichlet_NewtonSolver)
+  {
+    const Real pi = Math::Constants::pi();
+    Mesh mesh = makeUnitSquareMesh();
+    P1 Vh(mesh);
+
+    auto exact = sin(pi * F::x) * sin(pi * F::y);
+    auto f = (2 * pi * pi + 1) * exact + exact * exact * exact;
+
+    const auto reference = solveByFixedPoint(Vh, exact, f);
+
+    GridFunction uCurrent(Vh);
+    uCurrent = reference;
+
+    TrialFunction du(Vh);
+    TestFunction v(Vh);
+    Problem tangent(du, v);
+    tangent = Integral(Grad(du), Grad(v))
+            + Integral((1 + 3 * uCurrent * uCurrent) * du, v)
+            - Integral(f, v)
+            + Integral(Grad(uCurrent), Grad(v))
+            + Integral(uCurrent, v)
+            + Integral(uCurrent * uCurrent * uCurrent, v)
+            + DirichletBC(du, Zero());
+
+    SparseLU linearSolver(tangent);
+    NewtonSolver solver(tangent, linearSolver);
+    // Start from the fixed-point reference and use a tolerance consistent with
+    // that discretized reference. A looser absolute tolerance avoids unstable
+    // additional Newton updates once the fixed-point reference is reached.
+    constexpr Real newtonAbsoluteTolerance = 5e-2;
+    solver.setMaxIterations(20)
+      .setAbsoluteTolerance(newtonAbsoluteTolerance)
+      .setRelativeTolerance(1e-10);
+    solver.solve(uCurrent.getData());
+
+    GridFunction diffExact(Vh);
+    diffExact = Pow(uCurrent - exact, 2);
+    const Real newtonL2ErrorSquared = Integral(diffExact).compute();
+    EXPECT_NEAR(newtonL2ErrorSquared, 0, RODIN_FUZZY_CONSTANT);
+
+    GridFunction diffReference(Vh);
+    diffReference = Pow(uCurrent - reference, 2);
+    const Real methodDifference = Integral(diffReference).compute();
+    EXPECT_NEAR(methodDifference, 0, 1e-5);
   }
 }

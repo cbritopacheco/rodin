@@ -14,16 +14,25 @@ namespace Rodin::Solver
       m_stol(PETSC_DECIDE),
       m_maxIt(PETSC_DECIDE),
       m_maxF(PETSC_DECIDE),
-      m_kspHandle(PETSC_NULLPTR),
-      m_functionCallback(PETSC_NULLPTR),
-      m_jacobianCallback(PETSC_NULLPTR),
-      m_functionContext(PETSC_NULLPTR),
-      m_jacobianContext(PETSC_NULLPTR),
-      m_residual(PETSC_NULLPTR),
-      m_jacobianOperator(PETSC_NULLPTR),
-      m_preconditionerOperator(PETSC_NULLPTR)
+      m_kspHandle(PETSC_NULLPTR)
   {
     PetscErrorCode ierr = SNESCreate(comm, &m_snes);
+    assert(ierr == PETSC_SUCCESS);
+
+    auto& system = getProblem().getLinearSystem();
+    ierr = SNESSetFunction(
+      m_snes,
+      PETSC_NULLPTR,
+      &SNES::assembleResidual,
+      this);
+    assert(ierr == PETSC_SUCCESS);
+
+    ierr = SNESSetJacobian(
+      m_snes,
+      system.getOperator(),
+      system.getOperator(),
+      &SNES::assembleJacobian,
+      this);
     assert(ierr == PETSC_SUCCESS);
     (void) ierr;
   }
@@ -62,62 +71,51 @@ namespace Rodin::Solver
     return *this;
   }
 
-  SNES& SNES::setFunction(
-      FunctionCallbackType f,
-      void* ctx,
-      VectorType residual)
+  PetscErrorCode SNES::assembleResidual(::SNES, ::Vec x, ::Vec f, void* ctx)
   {
-    if (!f)
-      return *this;
-    m_functionCallback = f;
-    m_functionContext = ctx;
-    m_residual = residual;
-    PetscErrorCode ierr = SNESSetFunction(
-        m_snes,
-        m_residual,
-        m_functionCallback,
-        m_functionContext);
+    auto* self = static_cast<SNES*>(ctx);
+    assert(self);
+
+    auto& system = self->getProblem().getLinearSystem();
+    system.getSolution() = x;
+    self->getProblem().assemble();
+
+    PetscErrorCode ierr = VecCopy(system.getVector(), f);
     assert(ierr == PETSC_SUCCESS);
-    (void) ierr;
-    return *this;
-  }
-
-  SNES& SNES::setFunction(
-      FunctionCallbackType f,
-      VectorType residual)
-  {
-    return setFunction(f, PETSC_NULLPTR, residual);
-  }
-
-  SNES& SNES::setJacobian(
-      JacobianCallbackType j,
-      void* ctx,
-      MatrixType jacobian,
-      MatrixType preconditioner)
-  {
-    if (!j)
-      return *this;
-    m_jacobianCallback = j;
-    m_jacobianContext = ctx;
-    m_jacobianOperator = jacobian;
-    m_preconditionerOperator = preconditioner;
-    PetscErrorCode ierr = SNESSetJacobian(
-        m_snes,
-        m_jacobianOperator,
-        m_preconditionerOperator,
-        m_jacobianCallback,
-        m_jacobianContext);
+    if (ierr != PETSC_SUCCESS)
+      return ierr;
+    ierr = VecScale(f, -1.0);
     assert(ierr == PETSC_SUCCESS);
-    (void) ierr;
-    return *this;
+    return ierr;
   }
 
-  SNES& SNES::setJacobian(
-      JacobianCallbackType j,
-      MatrixType jacobian,
-      MatrixType preconditioner)
+  PetscErrorCode SNES::assembleJacobian(::SNES, ::Vec x, ::Mat J, ::Mat P, void* ctx)
   {
-    return setJacobian(j, PETSC_NULLPTR, jacobian, preconditioner);
+    auto* self = static_cast<SNES*>(ctx);
+    assert(self);
+
+    auto& system = self->getProblem().getLinearSystem();
+    system.getSolution() = x;
+    self->getProblem().assemble();
+
+    const auto& assembledJ = system.getOperator();
+    PetscErrorCode ierr = PETSC_SUCCESS;
+    // PETSc may pass callback workspace matrices distinct from the problem-managed
+    // operator; copy assembled data when handles differ.
+    if (J != assembledJ)
+    {
+      ierr = MatCopy(assembledJ, J, DIFFERENT_NONZERO_PATTERN);
+      assert(ierr == PETSC_SUCCESS);
+    }
+
+    // Keep preconditioner matrix synchronized as well when PETSc uses a
+    // separate handle for P.
+    if (P && P != J && P != assembledJ)
+    {
+      ierr = MatCopy(assembledJ, P, DIFFERENT_NONZERO_PATTERN);
+      assert(ierr == PETSC_SUCCESS);
+    }
+    return ierr;
   }
 
   void SNES::solve(VectorType b, VectorType x)

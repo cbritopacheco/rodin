@@ -21,10 +21,6 @@ namespace Rodin::Solver
       using VectorType = ::Vec;
       using LinearSystemType = PETSc::Math::LinearSystem;
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
-      // (snes, x, f, ctx): assemble residual f = F(x)
-      using FunctionCallbackType = PetscErrorCode (*)(::SNES, ::Vec, ::Vec, void*);
-      // (snes, x, J, P, ctx): assemble Jacobian/preconditioner operators
-      using JacobianCallbackType = PetscErrorCode (*)(::SNES, ::Vec, ::Mat, ::Mat, void*);
       using PetscParent = PETSc::Object<HandleType>;
       using NewtonParent = NewtonSolverBase<LinearSystemType, KSPType>;
       using NewtonParent::solve;
@@ -54,42 +50,6 @@ namespace Rodin::Solver
         return setKSP(ksp.getHandle());
       }
 
-      SNES& setFunction(
-          FunctionCallbackType f,
-          void* ctx = PETSC_NULLPTR,
-          VectorType residual = PETSC_NULLPTR);
-
-      SNES& setFunction(
-          FunctionCallbackType f,
-          VectorType residual);
-
-      template <class Context>
-      SNES& setFunction(
-          FunctionCallbackType f,
-          Context& ctx,
-          VectorType residual = PETSC_NULLPTR)
-      {
-        return setFunction(f, static_cast<void*>(&ctx), residual);
-      }
-
-      SNES& setJacobian(JacobianCallbackType j,
-                        void* ctx = PETSC_NULLPTR,
-                        MatrixType jacobian = PETSC_NULLPTR,
-                        MatrixType preconditioner = PETSC_NULLPTR);
-
-      SNES& setJacobian(JacobianCallbackType j,
-                        MatrixType jacobian,
-                        MatrixType preconditioner = PETSC_NULLPTR);
-
-      template <class Context>
-      SNES& setJacobian(JacobianCallbackType j,
-                        Context& ctx,
-                        MatrixType jacobian = PETSC_NULLPTR,
-                        MatrixType preconditioner = PETSC_NULLPTR)
-      {
-        return setJacobian(j, static_cast<void*>(&ctx), jacobian, preconditioner);
-      }
-
       void solve(VectorType b, VectorType x);
       void solve(VectorType& x) override;
       void solve(LinearSystemType& system);
@@ -108,18 +68,15 @@ namespace Rodin::Solver
       }
 
     private:
+      static PetscErrorCode assembleResidual(::SNES snes, ::Vec x, ::Vec f, void* ctx);
+      static PetscErrorCode assembleJacobian(::SNES snes, ::Vec x, ::Mat J, ::Mat P, void* ctx);
+
+    private:
       HandleType m_snes;
       ::SNESType m_type;
       PetscReal m_abstol, m_rtol, m_stol;
       PetscInt m_maxIt, m_maxF;
       KSPType m_kspHandle;
-      FunctionCallbackType m_functionCallback;
-      JacobianCallbackType m_jacobianCallback;
-      void* m_functionContext;
-      void* m_jacobianContext;
-      VectorType m_residual;
-      MatrixType m_jacobianOperator;
-      MatrixType m_preconditionerOperator;
   };
 }
 
