@@ -577,6 +577,12 @@ namespace Rodin::Geometry
 
       const IndexVector& getIncidence(const std::pair<size_t, size_t> p, Index idx) const override;
 
+      bool isDirty(size_t d, size_t dp) const;
+
+      Connectivity& setDirty(size_t d, size_t dp, bool dirty = true);
+
+      size_t getMaximalDimension() const;
+
       template<class Archive>
       void serialize(Archive& ar, const unsigned int version)
       {

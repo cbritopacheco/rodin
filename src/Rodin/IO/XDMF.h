@@ -1,5 +1,5 @@
 /*
- *          Copyright Carlos BRITO PACHECO 2021 - 2022.
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
  * Distributed under the Boost Software License, Version 1.0.
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
@@ -7,20 +7,42 @@
 #ifndef RODIN_IO_XDMF_H
 #define RODIN_IO_XDMF_H
 
+#include <cstddef>
 #include <string>
+#include <string_view>
 #include <vector>
-#include <fstream>
-#include <utility>
 #include <boost/filesystem/path.hpp>
 
-#include "Rodin/Alert/Exception.h"
-#include "Rodin/Geometry/Polytope.h"
+#include "Rodin/Types.h"
+#include "Rodin/Alert/MemberFunctionException.h"
+#include "Rodin/Geometry/ForwardDecls.h"
+#include "Rodin/Variational/ForwardDecls.h"
 
 namespace Rodin::IO
 {
+  /**
+   * @brief XDMF domain writer for static or transient visualization output.
+   *
+   * This class builds an XDMF 3 document referencing HDF5 heavy data.
+   *
+   * Conceptually:
+   * - one XDMF object corresponds to one XDMF Domain,
+   * - the domain contains one or more named grids,
+   * - each grid owns one observed mesh and zero or more observed attributes,
+   * - each call to write(...) appends one temporal snapshot for every configured grid.
+   *
+   * The writer is RAII-based:
+   * - write(...) exports one new snapshot,
+   * - close() finalizes the XML document,
+   * - destruction closes automatically if necessary.
+   *
+   * Heavy data is stored in HDF5 files.
+   * The XML document only references those files.
+   */
   class XDMF
   {
     public:
+
       enum class Topology
       {
         POLYVERTEX      = 1,
@@ -115,131 +137,371 @@ namespace Rodin::IO
         return {};
       }
 
-      template <class MeshType>
-      XDMF(const MeshType& mesh, const boost::filesystem::path& h5MeshFile)
-        : m_h5MeshFile(h5MeshFile),
-          m_vertexCount(mesh.getVertexCount()),
-          m_spaceDimension(mesh.getSpaceDimension()),
-          m_cellCount(mesh.getCellCount()),
-          m_xdmfTopologySize(0)
+      /**
+       * @brief Mesh export policy.
+       *
+       * Static:
+       * - the mesh is exported once and reused by all later snapshots of the same grid.
+       *
+       * Transient:
+       * - the mesh is exported at every snapshot,
+       * - intended for moving meshes or remeshing workflows.
+       */
+      enum class MeshPolicy
       {
-        for (auto it = mesh.getCell(); !it.end(); ++it)
-          m_xdmfTopologySize += xdmfCellWordCount(it->getGeometry(), it->getVertices().size());
-      }
+        Static,
+        Transient
+      };
 
+      /**
+       * @brief Attribute location in the XDMF sense.
+       *
+       * Node:
+       * - export as nodal visualization data,
+       * - by default this means evaluating/interpolating the field at mesh vertices.
+       *
+       * Cell:
+       * - export as cell-centered data.
+       */
+      enum class Center
+      {
+        Node,
+        Cell
+      };
+
+      /**
+       * @brief File naming patterns used by the writer.
+       *
+       * Supported placeholders:
+       * - {stem}  : writer stem
+       * - {grid}  : grid name
+       * - {name}  : attribute name
+       * - {index} : snapshot index with zero padding
+       *
+       * Intended use:
+       * - static mesh file pattern,
+       * - transient mesh file pattern,
+       * - attribute file pattern,
+       * - final xdmf file pattern.
+       */
+      struct FilePatterns
+      {
+        std::string xdmf          = "{stem}.xdmf";
+        std::string staticMesh    = "{stem}.{grid}.mesh.h5";
+        std::string transientMesh = "{stem}.{grid}.mesh.{index}.h5";
+        std::string attribute     = "{stem}.{grid}.{name}.{index}.h5";
+      };
+
+      /**
+       * @brief Per-grid export options.
+       *
+       * These override the global writer defaults for one grid only.
+       */
+      struct GridOptions
+      {
+        MeshPolicy meshPolicy = MeshPolicy::Static;
+        FilePatterns patterns = {};
+      };
+
+      /**
+       * @brief Handle to one named grid inside the XDMF domain.
+       *
+       * A grid corresponds to one XDMF Grid family:
+       * - it stores one observed mesh,
+       * - it stores a set of observed attributes,
+       * - it records temporal snapshots across successive write(...) calls.
+       *
+       * The handle is lightweight and non-owning.
+       */
+      class Grid
+      {
+        public:
+          Grid(const Grid&) = default;
+          Grid& operator=(const Grid&) = default;
+
+          /**
+           * @brief Gets the grid name.
+           */
+          std::string_view getName() const noexcept;
+
+          /**
+           * @brief Sets the mesh observed by this grid.
+           * @param[in] mesh Mesh to export
+           * @param[in] policy Mesh export policy
+           * @returns Reference to this grid handle
+           *
+           * Behaviour:
+           * - stores a non-owning reference to @p mesh,
+           * - resets mesh export state for this grid,
+           * - later write(...) calls will export this mesh according to @p policy.
+           *
+           * The mesh name used in XML defaults to:
+           * - mesh.getName() if available,
+           * - otherwise the grid name.
+           */
+          template <class MeshType>
+          Grid& setMesh(const MeshType& mesh, MeshPolicy policy = MeshPolicy::Static);
+
+          /**
+           * @brief Sets per-grid export options.
+           * @param[in] options Options to apply
+           * @returns Reference to this grid handle
+           *
+           * Behaviour:
+           * - replaces the current per-grid options,
+           * - affects subsequent write(...) calls only.
+           */
+          Grid& setOptions(const GridOptions& options);
+
+          /**
+           * @brief Gets the current per-grid options.
+           */
+          const GridOptions& getOptions() const noexcept;
+
+          /**
+           * @brief Adds an attribute using the field's own name.
+           * @param[in] gf Grid function to observe
+           * @param[in] center Export center
+           * @returns Reference to this grid handle
+           *
+           * Behaviour:
+           * - the attribute name is taken from gf.getName(),
+           * - throws if the field has no name,
+           * - stores a non-owning reference to the field,
+           * - validates that the field mesh is the same mesh as this grid.
+           *
+           * The field is not exported immediately.
+           * Its current value is exported on each write(...).
+           */
+          template <class GridFunctionType>
+          Grid& add(const GridFunctionType& gf, Center center = Center::Node);
+
+          /**
+           * @brief Adds an attribute with an explicit name.
+           * @param[in] name Attribute name
+           * @param[in] gf Grid function to observe
+           * @param[in] center Export center
+           * @returns Reference to this grid handle
+           *
+           * Behaviour:
+           * - same as add(gf, center), but uses @p name instead of gf.getName().
+           */
+          template <class GridFunctionType>
+          Grid& add(
+              const std::string& name,
+              const GridFunctionType& gf,
+              Center center = Center::Node);
+
+          /**
+           * @brief Returns true if this grid already has an observed mesh.
+           */
+          bool hasMesh() const noexcept;
+
+          /**
+           * @brief Returns the number of registered attributes.
+           */
+          size_t getAttributeCount() const noexcept;
+
+        private:
+          friend class XDMF;
+
+          Grid(XDMF& owner, size_t index) noexcept;
+
+          XDMF* m_owner = nullptr;
+          size_t m_index = 0;
+      };
+
+      /**
+       * @brief Constructs an XDMF writer.
+       * @param[in] stem Output stem
+       *
+       * The stem is the base used to build the XML and HDF5 filenames.
+       */
+      explicit
+      XDMF(const boost::filesystem::path& stem);
+
+      XDMF(const XDMF&) = delete;
+      XDMF& operator=(const XDMF&) = delete;
+      XDMF(XDMF&&) = default;
+      XDMF& operator=(XDMF&&) = default;
+
+      /**
+       * @brief Destructor.
+       *
+       * Behaviour:
+       * - if the writer is not closed yet, close() is called automatically.
+       */
+      ~XDMF();
+
+      /**
+       * @brief Gets the output stem.
+       */
+      const boost::filesystem::path& getStem() const noexcept;
+
+      /**
+       * @brief Sets global file naming patterns.
+       * @param[in] patterns New patterns
+       * @returns Reference to this writer
+       *
+       * These defaults are used by all grids unless a grid overrides them
+       * through Grid::setOptions(...).
+       */
+      XDMF& setFilePatterns(const FilePatterns& patterns);
+
+      /**
+       * @brief Gets the global file naming patterns.
+       */
+      const FilePatterns& getFilePatterns() const noexcept;
+
+      /**
+       * @brief Sets the zero-padding width used for {index}.
+       * @param[in] digits Padding width
+       * @returns Reference to this writer
+       */
+      XDMF& setPadding(size_t digits);
+
+      /**
+       * @brief Gets the current zero-padding width.
+       */
+      size_t getPadding() const noexcept;
+
+      /**
+       * @brief Returns the default grid.
+       *
+       * This is the shorthand for the common single-mesh workflow.
+       * The default grid name is implementation-defined but stable.
+       */
+      Grid grid();
+
+      /**
+       * @brief Returns the named grid, creating it if necessary.
+       * @param[in] name Grid name
+       * @returns Grid handle
+       */
+      Grid grid(const std::string& name);
+
+      /**
+       * @brief Convenience wrapper on the default grid.
+       * @param[in] mesh Mesh to export
+       * @param[in] policy Mesh policy
+       * @returns Reference to this writer
+       */
+      template <class MeshType>
+      XDMF& setMesh(const MeshType& mesh, MeshPolicy policy = MeshPolicy::Static);
+
+      /**
+       * @brief Convenience wrapper on the default grid.
+       * @param[in] options Per-grid options for the default grid
+       * @returns Reference to this writer
+       */
+      XDMF& setOptions(const GridOptions& options);
+
+      /**
+       * @brief Convenience wrapper on the default grid.
+       * @param[in] gf Grid function to export
+       * @param[in] center Export center
+       * @returns Reference to this writer
+       */
+      template <class GridFunctionType>
+      XDMF& add(const GridFunctionType& gf, Center center = Center::Node);
+
+      /**
+       * @brief Convenience wrapper on the default grid.
+       * @param[in] name Attribute name
+       * @param[in] gf Grid function to export
+       * @param[in] center Export center
+       * @returns Reference to this writer
+       */
       template <class GridFunctionType>
       XDMF& add(
           const std::string& name,
           const GridFunctionType& gf,
-          const boost::filesystem::path& h5File)
-      {
-        Attribute attr;
-        attr.name = name;
-        attr.h5File = h5File;
-        attr.datasetPath = "/GridFunction/Values/Data";
-        attr.dofCount = gf.getSize();
-        attr.components = gf.getDimension();
-        m_attributes.push_back(std::move(attr));
-        return *this;
-      }
+          Center center = Center::Node);
 
-      void save(const boost::filesystem::path& filename) const
-      {
-        std::ofstream os(filename.c_str());
-        if (!os)
-          Alert::Exception() << "Failed to open XDMF output file." << Alert::Raise;
+      /**
+       * @brief Writes one snapshot using the current snapshot index as time.
+       * @returns Reference to this writer
+       *
+       * Behaviour:
+       * - increments the snapshot index,
+       * - for each configured grid:
+       *   - verifies that a mesh is set,
+       *   - exports the mesh according to its mesh policy,
+       *   - exports all registered attributes,
+       *   - records one temporal snapshot with time equal to the snapshot index.
+       */
+      XDMF& write();
 
-        os << "<?xml version=\"1.0\" ?>\n";
-        os << "<!DOCTYPE Xdmf SYSTEM \"Xdmf.dtd\" []>\n";
-        os << "<" << Keyword::Xdmf << " Version=\"3.0\">\n";
-        os << "  <" << Keyword::Domain << ">\n";
-        os << "    <" << Keyword::Grid << " Name=\"RodinMesh\" GridType=\"Uniform\">\n";
+      /**
+       * @brief Writes one snapshot at the given physical time.
+       * @param[in] time Snapshot time
+       * @returns Reference to this writer
+       *
+       * Behaviour:
+       * - increments the snapshot index,
+       * - for each configured grid:
+       *   - verifies that a mesh is set,
+       *   - exports the mesh according to its mesh policy,
+       *   - exports all registered attributes,
+       *   - records one temporal snapshot with the given @p time.
+       */
+      XDMF& write(Real time);
 
-        this->writeTopology(os);
-        this->writeGeometry(os);
-        this->writeAttributes(os);
+      /**
+       * @brief Finalizes the XML document and writes it to disk.
+       *
+       * The output filename is generated from the current xdmf file pattern.
+       * After close(), further write(...) calls are invalid.
+       */
+      void close();
 
-        os << "    </" << Keyword::Grid << ">\n";
-        os << "  </" << Keyword::Domain << ">\n";
-        os << "</" << Keyword::Xdmf << ">\n";
-      }
+      /**
+       * @brief Returns true if the writer has been closed.
+       */
+      bool isClosed() const noexcept;
+
+      /**
+       * @brief Returns the number of snapshots already written.
+       */
+      size_t getSnapshotCount() const noexcept;
+
+      /**
+       * @brief Returns the number of configured grids.
+       */
+      size_t getGridCount() const noexcept;
 
     private:
-      struct Attribute
+      struct AttributeRecord
       {
         std::string name;
-        boost::filesystem::path h5File;
-        std::string datasetPath;
-        size_t dofCount;
-        size_t components;
+        Center center = Center::Node;
+        const void* object = nullptr;
       };
 
-      const char* geometryType() const
+      struct SnapshotRecord
       {
-        return m_spaceDimension >= 3 ? "XYZ" : "XY";
-      }
+        Real time = 0;
+        boost::filesystem::path meshFile;
+        std::vector<boost::filesystem::path> attributeFiles;
+      };
 
-      const char* attributeType(size_t components) const
+      struct GridRecord
       {
-        return components > 1 ? "Vector" : "Scalar";
-      }
+        std::string name;
+        const Geometry::MeshBase* mesh = nullptr;
+        GridOptions options;
+        bool staticMeshWritten = false;
+        boost::filesystem::path staticMeshFile;
+        std::vector<AttributeRecord> attributes;
+        std::vector<SnapshotRecord> snapshots;
+      };
 
-      void writeTopology(std::ostream& os) const
-      {
-        os << "      <" << Keyword::Topology
-           << " TopologyType=\"Mixed\" NumberOfElements=\"" << m_cellCount << "\">\n";
-        os << "        <" << Keyword::DataItem
-           << " Format=\"HDF\" DataType=\"Int\" Dimensions=\"" << m_xdmfTopologySize << "\">"
-           << m_h5MeshFile.string() << ":/Mesh/XDMF/Topology</" << Keyword::DataItem << ">\n";
-        os << "      </" << Keyword::Topology << ">\n";
-      }
-
-      void writeGeometry(std::ostream& os) const
-      {
-        os << "      <" << Keyword::Geometry << " GeometryType=\"" << geometryType() << "\">\n";
-        os << "        <" << Keyword::DataItem
-           << " Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" Dimensions=\""
-           << m_vertexCount << " " << m_spaceDimension << "\">"
-           << m_h5MeshFile.string() << ":/Mesh/Geometry/Vertices</" << Keyword::DataItem << ">\n";
-        os << "      </" << Keyword::Geometry << ">\n";
-      }
-
-      static size_t xdmfCellWordCount(Geometry::Polytope::Type g, size_t vertexCount)
-      {
-        switch (g)
-        {
-          case Geometry::Polytope::Type::Segment:
-            // In XDMF Mixed topology, polyline entries carry the vertex-count
-            // field explicitly: [2, count, v0, ..., v(count-1)].
-            return 2 + vertexCount;
-          default:
-            return 1 + vertexCount;
-        }
-      }
-
-      void writeAttributes(std::ostream& os) const
-      {
-        for (const auto& attr : m_attributes)
-        {
-          os << "      <" << Keyword::Attribute << " Name=\"" << attr.name
-             << "\" AttributeType=\"" << attributeType(attr.components) << "\" Center=\"Node\">\n";
-          os << "        <" << Keyword::DataItem
-             << " Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" Dimensions=\""
-             << attr.dofCount;
-          if (attr.components > 1)
-            os << " " << attr.components;
-          os << "\">" << attr.h5File.string() << ":" << attr.datasetPath
-             << "</" << Keyword::DataItem << ">\n";
-          os << "      </" << Keyword::Attribute << ">\n";
-        }
-      }
-
-      boost::filesystem::path m_h5MeshFile;
-      size_t m_vertexCount;
-      size_t m_spaceDimension;
-      size_t m_cellCount;
-      size_t m_xdmfTopologySize;
-      std::vector<Attribute> m_attributes;
+      boost::filesystem::path m_stem;
+      FilePatterns m_patterns;
+      size_t m_padding = 6;
+      bool m_closed = false;
+      size_t m_snapshotCount = 0;
+      std::vector<GridRecord> m_grids;
   };
 }
 

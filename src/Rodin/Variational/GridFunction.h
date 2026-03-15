@@ -860,8 +860,24 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getOrder(geom);
       }
 
+      Optional<StringView> getName() const override
+      {
+        if (m_name)
+          return StringView(m_name->c_str(), m_name->size());
+        else
+          return std::nullopt;
+      }
+
+      GridFunctionBase& setName(const std::string& name)
+      {
+        m_name = name;
+        return *this;
+      }
+
     private:
+      Optional<std::string> m_name;
       std::reference_wrapper<const FESType> m_fes;
+
   };
 
   template <class FES>

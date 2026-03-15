@@ -19,25 +19,25 @@ int main(int, char**)
 {
   Mesh mesh;
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
-  mesh.getConnectivity().compute(1, 2); // Compute boundary
+  // mesh.getConnectivity().compute(1, 2); // Compute boundary
 
-  P1 vh(mesh);
+  // P1 vh(mesh);
 
-  TrialFunction u(vh);
-  TestFunction  v(vh);
+  // TrialFunction u(vh);
+  // TestFunction  v(vh);
 
-  RealFunction f = 1;
+  // RealFunction f = 1;
 
-  // Apply Dirichlet conditions on the entire boundary.
-  Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, Zero());
-  CG(poisson).solve();
+  // // Apply Dirichlet conditions on the entire boundary.
+  // Problem poisson(u, v);
+  // poisson = Integral(Grad(u), Grad(v))
+  //         - Integral(f, v)
+  //         + DirichletBC(u, Zero());
+  // CG(poisson).solve();
 
   // Save solution
-  u.getSolution().save("Poisson.gf");
-  mesh.save("Poisson.mesh");
+  // u.getSolution().save("Poisson.gf", IO::FileFormat::HDF5);
+  mesh.save("Poisson.mesh", IO::FileFormat::MFEM);
 
   return 0;
 }

@@ -759,6 +759,29 @@ namespace Rodin::Geometry
        * uses another execution model.
        */
       virtual const Context::Base& getContext() const = 0;
+
+      Optional<StringView> getName() const
+      {
+        if (m_name)
+          return StringView(m_name->c_str(), m_name->size());
+        else
+          return std::nullopt;
+      }
+
+      MeshBase& setName(const std::string& name)
+      {
+        m_name = name;
+        return *this;
+      }
+
+      template<class Archive>
+      void serialize(Archive& ar, const unsigned int)
+      {
+        ar & m_name;
+      }
+
+    private:
+      Optional<std::string> m_name;
   };
 
   /// Type alias for Mesh<Context::Local>
@@ -1428,6 +1451,7 @@ namespace Rodin::Geometry
       template<class Archive>
       void serialize(Archive& ar, const unsigned int)
       {
+        ar & boost::serialization::base_object<MeshBase>(*this);
         ar & m_sdim;
         ar & m_vertices;
         ar & m_connectivity;
