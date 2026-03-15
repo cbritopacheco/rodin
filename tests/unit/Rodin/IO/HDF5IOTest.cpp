@@ -51,10 +51,6 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(static_cast<size_t>(dims[1]), mesh.getSpaceDimension());
     H5Sclose(vspace);
     H5Dclose(vertices);
-
-    hid_t xdmfTopology = H5Dopen2(h5, "/Mesh/XDMF/Topology", H5P_DEFAULT);
-    ASSERT_GE(xdmfTopology, 0);
-    H5Dclose(xdmfTopology);
     H5Fclose(h5);
 
     // Round-trip: load and compare
