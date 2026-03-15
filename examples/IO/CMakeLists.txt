@@ -9,3 +9,9 @@ target_link_libraries(RodinIOMFEM
   Rodin::IO
   Rodin::Variational)
 
+add_executable(RodinIOXDMF XDMF.cpp)
+target_link_libraries(RodinIOXDMF
+  PUBLIC
+  Rodin::IO
+  Rodin::Variational)
+

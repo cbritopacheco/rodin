@@ -25,6 +25,8 @@
 #include "Rodin/Geometry/Connectivity.h"
 #include "Rodin/Geometry/AttributeIndex.h"
 #include "Rodin/Geometry/PolytopeTransformationIndex.h"
+#include "Rodin/Geometry/Mesh.h"
+#include "Rodin/Geometry/Point.h"
 #include "Rodin/IO/MeshLoader.h"
 #include "Rodin/IO/MeshPrinter.h"
 #include "Rodin/IO/GridFunctionLoader.h"
@@ -41,6 +43,12 @@ namespace Rodin::IO
     using U8  = unsigned char;
 
     static constexpr U64 NullAttributeMarker = std::numeric_limits<U64>::max();
+
+    enum class Center
+    {
+      Node,
+      Cell
+    };
 
     namespace Path
     {
@@ -296,6 +304,21 @@ namespace Rodin::IO
         << Alert::Raise;
     }
 
+    inline
+    size_t getXDMFMixedTopologySize(const Geometry::MeshBase& mesh)
+    {
+      size_t size = 0;
+      for (auto it = mesh.getCell(); !it.end(); ++it)
+      {
+        const auto geometry = it->getGeometry();
+        const size_t nv = it->getVertices().size();
+        size += 1 + nv;
+        if (geometry == Geometry::Polytope::Type::Segment)
+          size += 1;
+      }
+      return size;
+    }
+
     template <class T>
     std::vector<T> readVectorDataset(hid_t file, const std::string& path)
     {
@@ -537,6 +560,220 @@ namespace Rodin::IO
 
       return dims;
     }
+
+    template <class GridFunctionType>
+    void writeXDMFNodeAttribute(const GridFunctionType& gf, const boost::filesystem::path& filename)
+    {
+      using FESType = typename FormLanguage::Traits<GridFunctionType>::FESType;
+      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
+      const auto& fes = gf.getFiniteElementSpace();
+      const auto& mesh = fes.getMesh();
+
+      const size_t nv = mesh.getVertexCount();
+      const size_t vdim = gf.getDimension();
+
+      const auto file = HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+      if (!file)
+      {
+        Alert::Exception()
+          << "Failed to create HDF5 XDMF node attribute file: " << filename
+          << Alert::Raise;
+      }
+
+      {
+        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunction, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        if (!group)
+        {
+          Alert::Exception()
+            << "Failed to create /GridFunction group."
+            << Alert::Raise;
+        }
+      }
+      {
+        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunctionMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        if (!group)
+        {
+          Alert::Exception()
+            << "Failed to create /GridFunction/Meta group."
+            << Alert::Raise;
+        }
+      }
+      {
+        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunctionValues, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        if (!group)
+        {
+          Alert::Exception()
+            << "Failed to create /GridFunction/Values group."
+            << Alert::Raise;
+        }
+      }
+
+      HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaSize, static_cast<HDF5::U64>(nv));
+      HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaDimension, static_cast<HDF5::U64>(vdim));
+
+      const Geometry::Polytope::Traits ts(Geometry::Polytope::Type::Point);
+
+      if constexpr (std::is_same_v<RangeType, ScalarType>)
+      {
+        std::vector<HDF5::F64> values(nv);
+        for (auto it = mesh.getVertex(); !it.end(); ++it)
+        {
+          const Index i = it->getIndex();
+          const Geometry::Point p(*it, ts.getVertex(0), it->getCoordinates());
+          values[static_cast<size_t>(i)] = static_cast<HDF5::F64>(gf(p));
+        }
+
+        HDF5::writeVectorDataset(file.get(), Path::GridFunctionValuesData, values);
+      }
+      else
+      {
+        std::vector<HDF5::F64> values(nv * vdim);
+        for (auto it = mesh.getVertex(); !it.end(); ++it)
+        {
+          const Index i = it->getIndex();
+          const Geometry::Point p(*it, ts.getVertex(0), it->getCoordinates());
+          const auto value = gf(p);
+
+          for (size_t c = 0; c < vdim; ++c)
+            values[static_cast<size_t>(i) * vdim + c] = static_cast<HDF5::F64>(value[c]);
+        }
+
+        HDF5::writeMatrixDataset(
+            file.get(),
+            Path::GridFunctionValuesData,
+            values,
+            static_cast<hsize_t>(nv),
+            static_cast<hsize_t>(vdim));
+      }
+    }
+
+    template <class GridFunctionType>
+    void writeXDMFCellAttribute(
+        const GridFunctionType& gf, const boost::filesystem::path& filename)
+    {
+      using FESType = typename FormLanguage::Traits<GridFunctionType>::FESType;
+      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
+      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
+
+      const auto& fes = gf.getFiniteElementSpace();
+      const auto& mesh = fes.getMesh();
+
+      const size_t nc = mesh.getCellCount();
+      const size_t vdim = gf.getDimension();
+      const size_t D = mesh.getDimension();
+      const auto& c2v = mesh.getConnectivity().getIncidence(D, 0);
+
+      const auto file = HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+      if (!file)
+      {
+        Alert::Exception()
+          << "Failed to create HDF5 XDMF cell attribute file: " << filename
+          << Alert::Raise;
+      }
+
+      {
+        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunction, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        if (!group)
+        {
+          Alert::Exception()
+            << "Failed to create /GridFunction group."
+            << Alert::Raise;
+        }
+      }
+      {
+        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunctionMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        if (!group)
+        {
+          Alert::Exception()
+            << "Failed to create /GridFunction/Meta group."
+            << Alert::Raise;
+        }
+      }
+      {
+        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunctionValues, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        if (!group)
+        {
+          Alert::Exception()
+            << "Failed to create /GridFunction/Values group."
+            << Alert::Raise;
+        }
+      }
+
+      HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaSize, static_cast<HDF5::U64>(nc));
+      HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaDimension, static_cast<HDF5::U64>(vdim));
+
+      const Geometry::Polytope::Traits ts(Geometry::Polytope::Type::Point);
+
+      if constexpr (std::is_same_v<RangeType, ScalarType>)
+      {
+        std::vector<HDF5::F64> values(nc, 0.0);
+
+        for (Index cell = 0; cell < static_cast<Index>(nc); ++cell)
+        {
+          const auto& vertices = c2v[cell];
+          if (vertices.size() == 0)
+          {
+            Alert::Exception()
+              << "Cell with no vertices encountered during XDMF cell export."
+              << Alert::Raise;
+          }
+
+          ScalarType accum = ScalarType(0);
+          for (size_t k = 0; k < vertices.size(); ++k)
+          {
+            const auto vit = mesh.getVertex(vertices[k]);
+            const Geometry::Point p(*vit, ts.getVertex(0), vit->getCoordinates());
+            accum += gf(p);
+          }
+
+          values[static_cast<size_t>(cell)] =
+            static_cast<HDF5::F64>(accum / static_cast<Real>(vertices.size()));
+        }
+
+        HDF5::writeVectorDataset(file.get(), Path::GridFunctionValuesData, values);
+      }
+      else
+      {
+        std::vector<HDF5::F64> values(nc * vdim, 0.0);
+
+        for (Index cell = 0; cell < static_cast<Index>(nc); ++cell)
+        {
+          const auto& vertices = c2v[cell];
+          if (vertices.size() == 0)
+          {
+            Alert::Exception()
+              << "Cell with no vertices encountered during XDMF cell export."
+              << Alert::Raise;
+          }
+
+          std::vector<ScalarType> accum(vdim, ScalarType(0));
+          for (size_t k = 0; k < vertices.size(); ++k)
+          {
+            const auto vit = mesh.getVertex(vertices[k]);
+            const Geometry::Point p(*vit, ts.getVertex(0), vit->getCoordinates());
+            const auto value = gf(p);
+
+            for (size_t c = 0; c < vdim; ++c)
+              accum[c] += value[c];
+          }
+
+          for (size_t c = 0; c < vdim; ++c)
+          {
+            values[static_cast<size_t>(cell) * vdim + c] =
+              static_cast<HDF5::F64>(accum[c] / static_cast<Real>(vertices.size()));
+          }
+        }
+
+        HDF5::writeMatrixDataset(
+            file.get(),
+            Path::GridFunctionValuesData,
+            values,
+            static_cast<hsize_t>(nc),
+            static_cast<hsize_t>(vdim));
+      }
+    }
   }
 
   template <>
@@ -678,12 +915,8 @@ namespace Rodin::IO
           }
         }
 
-        const auto present = HDF5::readVectorDataset<HDF5::U8>(
-            file,
-            HDF5::Path::MeshConnectivityStatePresent);
-        const auto dirty = HDF5::readVectorDataset<HDF5::U8>(
-            file,
-            HDF5::Path::MeshConnectivityStateDirty);
+        const auto present = HDF5::readVectorDataset<HDF5::U8>(file, HDF5::Path::MeshConnectivityStatePresent);
+        const auto dirty = HDF5::readVectorDataset<HDF5::U8>(file, HDF5::Path::MeshConnectivityStateDirty);
 
         if (present.size() != (Dmax + 1) * (Dmax + 1))
         {
@@ -708,12 +941,8 @@ namespace Rodin::IO
             if (!present[flat])
               continue;
 
-            const auto offsets = HDF5::readVectorDataset<HDF5::U64>(
-                file,
-                HDF5::incidenceOffsetsPath(d, dp));
-            const auto indices = HDF5::readVectorDataset<HDF5::U64>(
-                file,
-                HDF5::incidenceIndicesPath(d, dp));
+            const auto offsets = HDF5::readVectorDataset<HDF5::U64>(file, HDF5::incidenceOffsetsPath(d, dp));
+            const auto indices = HDF5::readVectorDataset<HDF5::U64>(file, HDF5::incidenceIndicesPath(d, dp));
 
             if (offsets.size() != connectivity.getCount(d) + 1)
             {
@@ -802,8 +1031,20 @@ namespace Rodin::IO
 
       explicit
       MeshPrinter(const ObjectType& mesh)
-        : Parent(mesh)
+        : Parent(mesh),
+          m_xdmf(false)
       {}
+
+      MeshPrinter& setXDMF(bool output = true)
+      {
+        m_xdmf = output;
+        return *this;
+      }
+
+      bool isXDMF() const
+      {
+        return m_xdmf;
+      }
 
       void print(std::ostream&) override
       {
@@ -815,8 +1056,6 @@ namespace Rodin::IO
       void print(const boost::filesystem::path& filename) override
       {
         const auto& mesh = this->getObject();
-        const auto& connectivity = mesh.getConnectivity();
-        const size_t D = connectivity.getDimension();
 
         const auto file = HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
         if (!file)
@@ -826,114 +1065,7 @@ namespace Rodin::IO
             << Alert::Raise;
         }
 
-        {
-          const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::Mesh, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-          if (!g)
-          {
-            Alert::MemberFunctionException(*this, __func__)
-              << "Failed to create /Mesh group."
-              << Alert::Raise;
-          }
-        }
-        {
-          const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::MeshMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-          if (!g)
-          {
-            Alert::MemberFunctionException(*this, __func__)
-              << "Failed to create /Mesh/Meta group."
-              << Alert::Raise;
-          }
-        }
-        {
-          const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::MeshGeometry, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-          if (!g)
-          {
-            Alert::MemberFunctionException(*this, __func__)
-              << "Failed to create /Mesh/Geometry group."
-              << Alert::Raise;
-          }
-        }
-        {
-          const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::MeshConnectivity, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-          if (!g)
-          {
-            Alert::MemberFunctionException(*this, __func__)
-              << "Failed to create /Mesh/Connectivity group."
-              << Alert::Raise;
-          }
-        }
-        {
-          const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::MeshConnectivityMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-          if (!g)
-          {
-            Alert::MemberFunctionException(*this, __func__)
-              << "Failed to create /Mesh/Connectivity/Meta group."
-              << Alert::Raise;
-          }
-        }
-        {
-          const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::MeshConnectivityCounts, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-          if (!g)
-          {
-            Alert::MemberFunctionException(*this, __func__)
-              << "Failed to create /Mesh/Connectivity/Counts group."
-              << Alert::Raise;
-          }
-        }
-        {
-          const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::MeshConnectivityEntities, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-          if (!g)
-          {
-            Alert::MemberFunctionException(*this, __func__)
-              << "Failed to create /Mesh/Connectivity/Entities group."
-              << Alert::Raise;
-          }
-        }
-        {
-          const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::MeshConnectivityState, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-          if (!g)
-          {
-            Alert::MemberFunctionException(*this, __func__)
-              << "Failed to create /Mesh/Connectivity/State group."
-              << Alert::Raise;
-          }
-        }
-        {
-          const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::MeshConnectivityIncidence, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-          if (!g)
-          {
-            Alert::MemberFunctionException(*this, __func__)
-              << "Failed to create /Mesh/Connectivity/Incidence group."
-              << Alert::Raise;
-          }
-        }
-        {
-          const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::MeshAttributes, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-          if (!g)
-          {
-            Alert::MemberFunctionException(*this, __func__)
-              << "Failed to create /Mesh/Attributes group."
-              << Alert::Raise;
-          }
-        }
-        {
-          const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::MeshTransformations, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-          if (!g)
-          {
-            Alert::MemberFunctionException(*this, __func__)
-              << "Failed to create /Mesh/Transformations group."
-              << Alert::Raise;
-          }
-        }
-        {
-          const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::MeshXDMF, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-          if (!g)
-          {
-            Alert::MemberFunctionException(*this, __func__)
-              << "Failed to create /Mesh/XDMF group."
-              << Alert::Raise;
-          }
-        }
+        this->createBaseGroups(file.get());
 
         HDF5::writeScalarDataset(
             file.get(),
@@ -944,18 +1076,77 @@ namespace Rodin::IO
         this->writeConnectivity(file.get());
         this->writeAttributes(file.get());
         this->writeTransformations(file.get());
-        this->writeXDMFTopology(file.get());
+
+        if (m_xdmf)
+        {
+          const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::MeshXDMF, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          if (!g)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Failed to create /Mesh/XDMF group."
+              << Alert::Raise;
+          }
+
+          this->writeXDMFTopology(file.get());
+        }
       }
 
     private:
+      void createBaseGroups(hid_t file) const
+      {
+        {
+          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::Mesh, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          if (!g) { Alert::Exception() << "Failed to create /Mesh group." << Alert::Raise; }
+        }
+        {
+          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          if (!g) { Alert::Exception() << "Failed to create /Mesh/Meta group." << Alert::Raise; }
+        }
+        {
+          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshGeometry, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          if (!g) { Alert::Exception() << "Failed to create /Mesh/Geometry group." << Alert::Raise; }
+        }
+        {
+          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivity, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          if (!g) { Alert::Exception() << "Failed to create /Mesh/Connectivity group." << Alert::Raise; }
+        }
+        {
+          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivityMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          if (!g) { Alert::Exception() << "Failed to create /Mesh/Connectivity/Meta group." << Alert::Raise; }
+        }
+        {
+          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivityCounts, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          if (!g) { Alert::Exception() << "Failed to create /Mesh/Connectivity/Counts group." << Alert::Raise; }
+        }
+        {
+          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivityEntities, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          if (!g) { Alert::Exception() << "Failed to create /Mesh/Connectivity/Entities group." << Alert::Raise; }
+        }
+        {
+          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivityState, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          if (!g) { Alert::Exception() << "Failed to create /Mesh/Connectivity/State group." << Alert::Raise; }
+        }
+        {
+          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivityIncidence, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          if (!g) { Alert::Exception() << "Failed to create /Mesh/Connectivity/Incidence group." << Alert::Raise; }
+        }
+        {
+          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshAttributes, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          if (!g) { Alert::Exception() << "Failed to create /Mesh/Attributes group." << Alert::Raise; }
+        }
+        {
+          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshTransformations, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          if (!g) { Alert::Exception() << "Failed to create /Mesh/Transformations group." << Alert::Raise; }
+        }
+      }
+
       void writeVertices(hid_t file) const
       {
         const auto& mesh = this->getObject();
         const size_t nv = mesh.getVertexCount();
         const size_t sdim = mesh.getSpaceDimension();
 
-        std::vector<HDF5::F64> packed;
-        packed.resize(nv * sdim);
+        std::vector<HDF5::F64> packed(nv * sdim);
         for (Index i = 0; i < static_cast<Index>(nv); ++i)
         {
           const auto x = mesh.getVertexCoordinates(i);
@@ -978,14 +1169,8 @@ namespace Rodin::IO
         const size_t Dmax = connectivity.getMaximalDimension();
         const size_t D = connectivity.getDimension();
 
-        HDF5::writeScalarDataset(
-            file,
-            HDF5::Path::MeshConnectivityMetaMaximalDimension,
-            static_cast<HDF5::U64>(Dmax));
-        HDF5::writeScalarDataset(
-            file,
-            HDF5::Path::MeshConnectivityMetaDimension,
-            static_cast<HDF5::U64>(D));
+        HDF5::writeScalarDataset(file, HDF5::Path::MeshConnectivityMetaMaximalDimension, static_cast<HDF5::U64>(Dmax));
+        HDF5::writeScalarDataset(file, HDF5::Path::MeshConnectivityMetaDimension, static_cast<HDF5::U64>(D));
 
         std::vector<HDF5::U64> byDimension(Dmax + 1, 0);
         for (size_t d = 0; d <= Dmax; ++d)
@@ -993,8 +1178,6 @@ namespace Rodin::IO
         HDF5::writeVectorDataset(file, HDF5::Path::MeshConnectivityCountsByDimension, byDimension);
 
         std::vector<HDF5::U64> byGeometry(HDF5::getGeometryCountArraySize(), 0);
-        for (size_t i = 0; i < byGeometry.size(); ++i)
-          byGeometry[i] = 0;
         byGeometry[static_cast<size_t>(Geometry::Polytope::Type::Point)] =
           static_cast<HDF5::U64>(connectivity.getCount(Geometry::Polytope::Type::Point));
         byGeometry[static_cast<size_t>(Geometry::Polytope::Type::Segment)] =
@@ -1013,12 +1196,7 @@ namespace Rodin::IO
 
         for (size_t d = 1; d <= Dmax; ++d)
         {
-          const auto group = HDF5::Group(H5Gcreate2(
-              file,
-              HDF5::entityGroupPath(d).c_str(),
-              H5P_DEFAULT,
-              H5P_DEFAULT,
-              H5P_DEFAULT));
+          const auto group = HDF5::Group(H5Gcreate2(file, HDF5::entityGroupPath(d).c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!group)
           {
             Alert::MemberFunctionException(*this, __func__)
@@ -1061,18 +1239,8 @@ namespace Rodin::IO
           }
         }
 
-        HDF5::writeMatrixDataset(
-            file,
-            HDF5::Path::MeshConnectivityStatePresent,
-            present,
-            static_cast<hsize_t>(Dmax + 1),
-            static_cast<hsize_t>(Dmax + 1));
-        HDF5::writeMatrixDataset(
-            file,
-            HDF5::Path::MeshConnectivityStateDirty,
-            dirty,
-            static_cast<hsize_t>(Dmax + 1),
-            static_cast<hsize_t>(Dmax + 1));
+        HDF5::writeMatrixDataset(file, HDF5::Path::MeshConnectivityStatePresent, present, static_cast<hsize_t>(Dmax + 1), static_cast<hsize_t>(Dmax + 1));
+        HDF5::writeMatrixDataset(file, HDF5::Path::MeshConnectivityStateDirty, dirty, static_cast<hsize_t>(Dmax + 1), static_cast<hsize_t>(Dmax + 1));
 
         for (size_t d = 0; d <= Dmax; ++d)
         {
@@ -1082,12 +1250,7 @@ namespace Rodin::IO
             if (!present[flat])
               continue;
 
-            const auto group = HDF5::Group(H5Gcreate2(
-                file,
-                HDF5::incidenceGroupPath(d, dp).c_str(),
-                H5P_DEFAULT,
-                H5P_DEFAULT,
-                H5P_DEFAULT));
+            const auto group = HDF5::Group(H5Gcreate2(file, HDF5::incidenceGroupPath(d, dp).c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
             if (!group)
             {
               Alert::MemberFunctionException(*this, __func__)
@@ -1138,17 +1301,11 @@ namespace Rodin::IO
       {
         const auto& mesh = this->getObject();
         const auto& connectivity = mesh.getConnectivity();
-        const size_t D = connectivity.getDimension();
         const size_t Dmax = connectivity.getMaximalDimension();
 
         for (size_t d = 0; d <= Dmax; ++d)
         {
-          const auto group = HDF5::Group(H5Gcreate2(
-              file,
-              HDF5::transformationGroupPath(d).c_str(),
-              H5P_DEFAULT,
-              H5P_DEFAULT,
-              H5P_DEFAULT));
+          const auto group = HDF5::Group(H5Gcreate2(file, HDF5::transformationGroupPath(d).c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!group)
           {
             Alert::MemberFunctionException(*this, __func__)
@@ -1168,6 +1325,8 @@ namespace Rodin::IO
         const size_t D = connectivity.getDimension();
 
         std::vector<HDF5::U64> topology;
+        topology.reserve(HDF5::getXDMFMixedTopologySize(mesh));
+
         for (Index i = 0; i < static_cast<Index>(connectivity.getCount(D)); ++i)
         {
           const auto geometry = connectivity.getGeometry(D, i);
@@ -1183,11 +1342,11 @@ namespace Rodin::IO
         }
 
         HDF5::writeVectorDataset(file, HDF5::Path::MeshXDMFTopology, topology);
-        HDF5::writeScalarDataset(
-            file,
-            HDF5::Path::MeshXDMFTopologySize,
-            static_cast<HDF5::U64>(topology.size()));
+        HDF5::writeScalarDataset(file, HDF5::Path::MeshXDMFTopologySize, static_cast<HDF5::U64>(topology.size()));
       }
+
+    private:
+      bool m_xdmf;
   };
 
   template <class FES, class Scalar>
@@ -1264,8 +1423,32 @@ namespace Rodin::IO
 
       explicit
       GridFunctionPrinter(const ObjectType& gf)
-        : Parent(gf)
+        : Parent(gf),
+          m_xdmf(false),
+          m_center(HDF5::Center::Node)
       {}
+
+      GridFunctionPrinter& setXDMF(bool output = true)
+      {
+        m_xdmf = output;
+        return *this;
+      }
+
+      bool isXDMF() const
+      {
+        return m_xdmf;
+      }
+
+      GridFunctionPrinter& setCenter(HDF5::Center center)
+      {
+        m_center = center;
+        return *this;
+      }
+
+      HDF5::Center getCenter() const
+      {
+        return m_center;
+      }
 
       void print(std::ostream&) override
       {
@@ -1277,6 +1460,19 @@ namespace Rodin::IO
       void print(const boost::filesystem::path& filename) override
       {
         const auto& gf = this->getObject();
+
+        if (m_xdmf)
+        {
+          switch (m_center)
+          {
+            case HDF5::Center::Node:
+              HDF5::writeXDMFNodeAttribute(gf, filename);
+              return;
+            case HDF5::Center::Cell:
+              HDF5::writeXDMFCellAttribute(gf, filename);
+              return;
+          }
+        }
 
         const auto file = HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
         if (!file)
@@ -1323,6 +1519,10 @@ namespace Rodin::IO
         HDF5::writeScalarDataset(file.get(), HDF5::Path::GridFunctionMetaSize, static_cast<HDF5::U64>(gf.getSize()));
         HDF5::writeScalarDataset(file.get(), HDF5::Path::GridFunctionMetaDimension, static_cast<HDF5::U64>(gf.getDimension()));
       }
+
+    private:
+      bool m_xdmf;
+      HDF5::Center m_center;
   };
 }
 

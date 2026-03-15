@@ -15,6 +15,7 @@
 
 #include <boost/filesystem/path.hpp>
 
+#include "Rodin/IO/HDF5.h"
 #include "Rodin/Types.h"
 #include "Rodin/Alert/Exception.h"
 #include "Rodin/Alert/MemberFunctionException.h"
@@ -296,7 +297,7 @@ namespace Rodin::IO
         std::string name;
         Center center = Center::Node;
         size_t dimension = 1;
-        std::function<void(const boost::filesystem::path&)> save;
+        std::function<void(const boost::filesystem::path&, Center)> write;
       };
 
       struct SnapshotRecord
@@ -381,9 +382,16 @@ namespace Rodin::IO
     rec.name = name;
     rec.center = center;
     rec.dimension = gf.getDimension();
-    rec.save = [&gf](const boost::filesystem::path& path)
+    rec.write = [&gf](const boost::filesystem::path& path, Center center)
     {
-      gf.save(path, FileFormat::HDF5);
+      IO::GridFunctionPrinter<
+          IO::FileFormat::HDF5,
+          typename std::remove_cvref_t<GridFunctionType>::FESType,
+          typename std::remove_cvref_t<GridFunctionType>::DataType>(gf)
+        .setXDMF(true)
+        .setCenter(center == Center::Node ? IO::HDF5::Center::Node
+                                          : IO::HDF5::Center::Cell)
+        .print(path);
     };
     gr.attributes.push_back(std::move(rec));
     return *this;

@@ -37,6 +37,7 @@ namespace Rodin::IO
       const std::string& index)
   {
     std::string result = pattern;
+
     auto replace = [&](const std::string& placeholder, const std::string& value)
     {
       for (std::string::size_type pos = 0; ;)
@@ -48,10 +49,29 @@ namespace Rodin::IO
         pos += value.size();
       }
     };
+
     replace("{stem}", stem);
     replace("{grid}", grid);
     replace("{name}", name);
     replace("{index}", index);
+
+    // Normalize separators when some placeholders are empty.
+    while (result.find("..") != std::string::npos)
+      result.replace(result.find(".."), 2, ".");
+
+    // Remove "/./" if patterns ever introduce it.
+    while (result.find("/./") != std::string::npos)
+      result.replace(result.find("/./"), 3, "/");
+
+    // Remove a trailing dot before an extension, e.g. "foo..h5" -> "foo.h5".
+    const auto dotExt = result.find(".h5");
+    if (dotExt != std::string::npos && dotExt > 0 && result[dotExt - 1] == '.')
+      result.erase(dotExt - 1, 1);
+
+    // More generally, avoid trailing separators.
+    if (!result.empty() && result.back() == '.')
+      result.pop_back();
+
     return result;
   }
 
@@ -93,22 +113,6 @@ namespace Rodin::IO
     }
     assert(false);
     return nullptr;
-  }
-
-  static
-  size_t getMixedTopologySize(const Geometry::MeshBase& mesh)
-  {
-    size_t size = 0;
-    for (auto it = mesh.getCell(); !it.end(); ++it)
-    {
-      const auto geometry = it->getGeometry();
-      const auto vertexCount = it->getVertices().size();
-
-      size += 1 + vertexCount;
-      if (geometry == Geometry::Polytope::Type::Segment)
-        size += 1;
-    }
-    return size;
   }
 
   // ---- XDMF::Grid ----------------------------------------------------------
@@ -194,7 +198,7 @@ namespace Rodin::IO
 
   XDMF::Grid XDMF::grid()
   {
-    return grid("default");
+    return grid("");
   }
 
   XDMF::Grid XDMF::grid(const std::string& name)
@@ -260,7 +264,10 @@ namespace Rodin::IO
               "");
           const auto meshPath = m_stem.parent_path() / meshFile;
 
-          gr.mesh->save(meshPath, IO::FileFormat::HDF5);
+          IO::MeshPrinter<IO::FileFormat::HDF5, Context::Local>(
+              static_cast<const Geometry::Mesh<Context::Local>&>(*gr.mesh))
+            .setXDMF(true)
+            .print(meshPath);
           gr.staticMeshFile = meshFile;
           gr.staticMeshWritten = true;
         }
@@ -277,7 +284,10 @@ namespace Rodin::IO
             indexStr);
         const auto meshPath = m_stem.parent_path() / meshFile;
 
-        gr.mesh->save(meshPath, IO::FileFormat::HDF5);
+      IO::MeshPrinter<IO::FileFormat::HDF5, Context::Local>(
+          static_cast<const Geometry::Mesh<Context::Local>&>(*gr.mesh))
+        .setXDMF(true)
+        .print(meshPath);
         snapshot.meshFile = meshFile;
       }
 
@@ -292,7 +302,7 @@ namespace Rodin::IO
             indexStr);
         const auto attrPath = m_stem.parent_path() / attrFile;
 
-        attr.save(attrPath);
+        attr.write(attrPath, attr.center);
         snapshot.attributeFiles.push_back(attrFile);
       }
 
@@ -334,7 +344,7 @@ namespace Rodin::IO
       for (const auto& snap : gr.snapshots)
       {
         const auto meshH5 = snap.meshFile.string();
-        const auto topologySize = getMixedTopologySize(*gr.mesh);
+        const auto topologySize = HDF5::getXDMFMixedTopologySize(*gr.mesh);
 
         os << indent(3) << "<Grid Name=\"" << gr.name << "\" GridType=\"Uniform\">\n";
 
