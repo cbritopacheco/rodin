@@ -8,12 +8,12 @@
 #include <fstream>
 #include <iomanip>
 #include <sstream>
-#include <algorithm>
 #include <stdexcept>
 
 #include "XDMF.h"
 #include "HDF5.h"
 #include "Rodin/Alert/Exception.h"
+#include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Geometry/Mesh.h"
 
 namespace Rodin::IO
@@ -75,7 +75,43 @@ namespace Rodin::IO
     return std::string(level * 2, ' ');
   }
 
-  // ---- XDMF::Grid ---------------------------------------------------------
+  static
+  const char* getGeometryType(size_t sdim)
+  {
+    switch (sdim)
+    {
+      case 1:
+        return "X";
+      case 2:
+        return "XY";
+      case 3:
+        return "XYZ";
+      default:
+        Alert::Exception()
+          << "Unsupported space dimension for XDMF geometry: " << sdim
+          << Alert::Raise;
+    }
+    assert(false);
+    return nullptr;
+  }
+
+  static
+  size_t getMixedTopologySize(const Geometry::MeshBase& mesh)
+  {
+    size_t size = 0;
+    for (auto it = mesh.getCell(); !it.end(); ++it)
+    {
+      const auto geometry = it->getGeometry();
+      const auto vertexCount = it->getVertices().size();
+
+      size += 1 + vertexCount;
+      if (geometry == Geometry::Polytope::Type::Segment)
+        size += 1;
+    }
+    return size;
+  }
+
+  // ---- XDMF::Grid ----------------------------------------------------------
 
   XDMF::Grid::Grid(XDMF& owner, size_t index) noexcept
     : m_owner(&owner),
@@ -187,62 +223,75 @@ namespace Rodin::IO
 
   XDMF& XDMF::write(Real time)
   {
-    assert(!m_closed);
     if (m_closed)
     {
-      Alert::Exception()
+      Alert::MemberFunctionException(*this, __func__)
         << "Cannot write to a closed XDMF writer."
         << Alert::Raise;
     }
 
-    const std::string stemStr = m_stem.filename().string();
+    const std::string stemStr  = m_stem.filename().string();
     const std::string indexStr = padIndex(m_snapshotCount, m_padding);
 
     for (auto& gr : m_grids)
     {
       if (!gr.mesh)
       {
-        Alert::Exception()
+        Alert::MemberFunctionException(*this, __func__)
           << "Grid \"" << gr.name << "\" has no mesh set."
           << Alert::Raise;
       }
 
-      const auto& patterns = gr.options.patterns.xdmf.empty()
-        ? m_patterns
-        : gr.options.patterns;
+      const auto& patterns = gr.options.patterns ? *gr.options.patterns : m_patterns;
 
       SnapshotRecord snapshot;
       snapshot.time = time;
 
-      // --- export mesh ---
+      // --- export mesh ------------------------------------------------------
       if (gr.options.meshPolicy == MeshPolicy::Static)
       {
         if (!gr.staticMeshWritten)
         {
           const auto meshFile = expandPattern(
-              patterns.staticMesh, stemStr, gr.name, "", "");
+              patterns.staticMesh,
+              stemStr,
+              gr.name,
+              "",
+              "");
           const auto meshPath = m_stem.parent_path() / meshFile;
+
           gr.mesh->save(meshPath, IO::FileFormat::HDF5);
           gr.staticMeshFile = meshFile;
           gr.staticMeshWritten = true;
         }
+
         snapshot.meshFile = gr.staticMeshFile;
       }
       else
       {
         const auto meshFile = expandPattern(
-            patterns.transientMesh, stemStr, gr.name, "", indexStr);
+            patterns.transientMesh,
+            stemStr,
+            gr.name,
+            "",
+            indexStr);
         const auto meshPath = m_stem.parent_path() / meshFile;
+
         gr.mesh->save(meshPath, IO::FileFormat::HDF5);
         snapshot.meshFile = meshFile;
       }
 
-      // --- export attributes ---
+      // --- export attributes ------------------------------------------------
       for (const auto& attr : gr.attributes)
       {
         const auto attrFile = expandPattern(
-            patterns.attribute, stemStr, gr.name, attr.name, indexStr);
+            patterns.attribute,
+            stemStr,
+            gr.name,
+            attr.name,
+            indexStr);
         const auto attrPath = m_stem.parent_path() / attrFile;
+
         attr.save(attrPath);
         snapshot.attributeFiles.push_back(attrFile);
       }
@@ -268,7 +317,7 @@ namespace Rodin::IO
     std::ofstream os(xdmfPath.string());
     if (!os)
     {
-      Alert::Exception()
+      Alert::MemberFunctionException(*this, __func__)
         << "Failed to open XDMF output file: " << xdmfPath
         << Alert::Raise;
     }
@@ -278,47 +327,43 @@ namespace Rodin::IO
 
     for (const auto& gr : m_grids)
     {
-      // Each grid family is a Grid of GridType="Collection" with CollectionType="Temporal"
-      os << indent(2) << "<Grid Name=\"" << gr.name << "\" GridType=\"Collection\" CollectionType=\"Temporal\">\n";
+      os << indent(2)
+         << "<Grid Name=\"" << gr.name
+         << "\" GridType=\"Collection\" CollectionType=\"Temporal\">\n";
 
       for (const auto& snap : gr.snapshots)
       {
+        const auto meshH5 = snap.meshFile.string();
+        const auto topologySize = getMixedTopologySize(*gr.mesh);
+
         os << indent(3) << "<Grid Name=\"" << gr.name << "\" GridType=\"Uniform\">\n";
 
-        // Time
         os << indent(4) << "<Time Value=\"" << snap.time << "\" />\n";
 
-        // Topology - reference mixed topology dataset from HDF5 mesh file
-        const auto meshH5 = snap.meshFile.string();
         os << indent(4) << "<Topology TopologyType=\"Mixed\" NumberOfElements=\""
            << gr.mesh->getCellCount() << "\">\n";
-        os << indent(5) << "<DataItem Format=\"HDF\" DataType=\"UInt\" Dimensions=\"\">"
+        os << indent(5) << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Dimensions=\""
+           << topologySize << "\">"
            << meshH5 << ":" << HDF5::Path::MeshXDMFTopology
            << "</DataItem>\n";
         os << indent(4) << "</Topology>\n";
 
-        // Geometry
-        os << indent(4) << "<Geometry GeometryType=\"XYZ\">\n";
-        os << indent(5) << "<DataItem Format=\"HDF\" DataType=\"Float\" Dimensions=\""
+        os << indent(4) << "<Geometry GeometryType=\""
+           << getGeometryType(gr.mesh->getSpaceDimension()) << "\">\n";
+        os << indent(5) << "<DataItem Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" Dimensions=\""
            << gr.mesh->getVertexCount() << " " << gr.mesh->getSpaceDimension()
            << "\">"
            << meshH5 << ":" << HDF5::Path::MeshGeometryVertices
            << "</DataItem>\n";
         os << indent(4) << "</Geometry>\n";
 
-        // Attributes
         for (size_t a = 0; a < gr.attributes.size(); ++a)
         {
           const auto& attr = gr.attributes[a];
           const auto attrH5 = snap.attributeFiles[a].string();
           const char* centerStr = (attr.center == Center::Node) ? "Node" : "Cell";
-          const char* attrType = (attr.dimension == 1) ? "Scalar" : "Vector";
+          const char* attrType  = (attr.dimension == 1) ? "Scalar" : "Vector";
 
-          os << indent(4) << "<Attribute Name=\"" << attr.name
-             << "\" AttributeType=\"" << attrType
-             << "\" Center=\"" << centerStr << "\">\n";
-
-          // Determine dimensions string
           std::ostringstream dimStr;
           if (attr.center == Center::Node)
           {
@@ -335,7 +380,10 @@ namespace Rodin::IO
               dimStr << gr.mesh->getCellCount() << " " << attr.dimension;
           }
 
-          os << indent(5) << "<DataItem Format=\"HDF\" DataType=\"Float\" Dimensions=\""
+          os << indent(4) << "<Attribute Name=\"" << attr.name
+             << "\" AttributeType=\"" << attrType
+             << "\" Center=\"" << centerStr << "\">\n";
+          os << indent(5) << "<DataItem Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" Dimensions=\""
              << dimStr.str() << "\">"
              << attrH5 << ":" << HDF5::Path::GridFunctionValuesData
              << "</DataItem>\n";

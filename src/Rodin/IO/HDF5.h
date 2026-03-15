@@ -72,6 +72,7 @@ namespace Rodin::IO
 
       static constexpr const char* MeshXDMF = "/Mesh/XDMF";
       static constexpr const char* MeshXDMFTopology = "/Mesh/XDMF/Topology";
+      static constexpr const char* MeshXDMFTopologySize = "/Mesh/XDMF/TopologySize";
 
       static constexpr const char* GridFunction = "/GridFunction";
       static constexpr const char* GridFunctionMeta = "/GridFunction/Meta";
@@ -494,6 +495,48 @@ namespace Rodin::IO
 
       return { dims[0], dims[1] };
     }
+
+    inline
+    std::vector<hsize_t> readDatasetShape(hid_t file, const std::string& path)
+    {
+      const auto dset = DataSet(H5Dopen2(file, path.c_str(), H5P_DEFAULT));
+      if (!dset)
+      {
+        Alert::Exception()
+          << "Failed to open HDF5 dataset: " << path
+          << Alert::Raise;
+      }
+
+      const auto space = Space(H5Dget_space(dset.get()));
+      if (!space)
+      {
+        Alert::Exception()
+          << "Failed to open HDF5 dataspace: " << path
+          << Alert::Raise;
+      }
+
+      const int rank = H5Sget_simple_extent_ndims(space.get());
+      if (rank < 0)
+      {
+        Alert::Exception()
+          << "Failed to read rank of HDF5 dataset: " << path
+          << Alert::Raise;
+      }
+
+      std::vector<hsize_t> dims(static_cast<size_t>(rank), 0);
+      if (rank > 0)
+      {
+        const auto status = H5Sget_simple_extent_dims(space.get(), dims.data(), nullptr);
+        if (status < 0)
+        {
+          Alert::Exception()
+            << "Failed to read shape of HDF5 dataset: " << path
+            << Alert::Raise;
+        }
+      }
+
+      return dims;
+    }
   }
 
   template <>
@@ -593,7 +636,7 @@ namespace Rodin::IO
         connectivity.initialize(Dmax);
         connectivity.nodes(static_cast<size_t>(byDimension[0]));
 
-        for (size_t d = 1; d <= D; ++d)
+        for (size_t d = 1; d <= Dmax; ++d)
         {
           const auto types = HDF5::readVectorDataset<HDF5::I32>(file, HDF5::entityTypesPath(d));
           const auto offsets = HDF5::readVectorDataset<HDF5::U64>(file, HDF5::entityOffsetsPath(d));
@@ -968,7 +1011,7 @@ namespace Rodin::IO
           static_cast<HDF5::U64>(connectivity.getCount(Geometry::Polytope::Type::Hexahedron));
         HDF5::writeVectorDataset(file, HDF5::Path::MeshConnectivityCountsByGeometry, byGeometry);
 
-        for (size_t d = 1; d <= D; ++d)
+        for (size_t d = 1; d <= Dmax; ++d)
         {
           const auto group = HDF5::Group(H5Gcreate2(
               file,
@@ -1125,16 +1168,25 @@ namespace Rodin::IO
         const size_t D = connectivity.getDimension();
 
         std::vector<HDF5::U64> topology;
-        topology.reserve(connectivity.getCount(D) * 8);
         for (Index i = 0; i < static_cast<Index>(connectivity.getCount(D)); ++i)
         {
-          topology.push_back(HDF5::getXDMFMixedTopologyId(connectivity.getGeometry(D, i)));
+          const auto geometry = connectivity.getGeometry(D, i);
           const auto& key = connectivity.getPolytope(D, i);
+
+          topology.push_back(HDF5::getXDMFMixedTopologyId(geometry));
+
+          if (geometry == Geometry::Polytope::Type::Segment)
+            topology.push_back(static_cast<HDF5::U64>(key.size()));
+
           for (size_t k = 0; k < key.size(); ++k)
             topology.push_back(static_cast<HDF5::U64>(key[k]));
         }
 
         HDF5::writeVectorDataset(file, HDF5::Path::MeshXDMFTopology, topology);
+        HDF5::writeScalarDataset(
+            file,
+            HDF5::Path::MeshXDMFTopologySize,
+            static_cast<HDF5::U64>(topology.size()));
       }
   };
 
