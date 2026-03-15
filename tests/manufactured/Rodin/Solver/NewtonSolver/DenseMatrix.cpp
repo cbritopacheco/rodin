@@ -64,9 +64,9 @@ namespace Rodin::Tests::Manufactured
         J(0, 0) += 0.4 * x(0);
         J(1, 1) += 0.3 * x(1);
 
-        F = m_A * x - m_b;
-        F(0) += 0.2 * (x(0) * x(0) - 1.0);
-        F(1) += 0.15 * (x(1) * x(1) - 1.0);
+        F = m_b - m_A * x;
+        F(0) -= 0.2 * (x(0) * x(0) - 1.0);
+        F(1) -= 0.15 * (x(1) * x(1) - 1.0);
 
         du.resize(2);
         return *this;
@@ -129,8 +129,8 @@ namespace Rodin::Tests::Manufactured
         J(1, 1) = 2.0 * x(1);
 
         F.resize(2);
-        F(0) = std::sin(x(0)) + x(1) - std::sin(1.0);
-        F(1) = x(0) * x(0) + x(1) * x(1) - 1.0;
+        F(0) = std::sin(1.0) - std::sin(x(0)) - x(1);
+        F(1) = 1.0 - x(0) * x(0) - x(1) * x(1);
 
         du.resize(2);
         return *this;

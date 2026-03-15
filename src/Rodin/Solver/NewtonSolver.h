@@ -79,12 +79,12 @@ namespace Rodin::Solver
   /**
    * @brief Newton solver for nonlinear systems.
    *
-   * The nonlinear residual is assembled as F(x), the Newton system is solved
-   * as:
-   * @f[
-   *   J(x) dx = -F(x),
-   * @f]
-   * and the state is updated with:
+    * The tangent linear system is assembled from the associated
+    * Variational::ProblemBase as:
+    * @f[
+    *   J(x) dx = -F(x),
+    * @f]
+    * and the state is updated with:
    * @f[
    *   x^{k + 1} = x^k + dx,
    * @f]
@@ -211,8 +211,7 @@ namespace Rodin::Solver
           auto& pb = this->getProblem();
           pb.assemble();
           auto& linearSystem = pb.getLinearSystem();
-          auto& residual = linearSystem.getVector();
-          const Real r = residual.norm();
+          const Real r = linearSystem.getVector().norm();
           if (it == 0)
             r0 = r;
 
@@ -221,7 +220,6 @@ namespace Rodin::Solver
             return;
           }
 
-          linearSystem.getVector() *= static_cast<Real>(-1.0);
           m_linearSolver.solve(linearSystem);
           x += m_alpha * linearSystem.getSolution();
         }

@@ -60,7 +60,7 @@ namespace
 
         const Real u = m_solution.get()(0);
         m_system.getOperator()(0, 0) = 2.0 * u;
-        m_system.getVector()(0) = u * u - 2.0;
+        m_system.getVector()(0) = 2.0 - u * u;
         return *this;
       }
 
