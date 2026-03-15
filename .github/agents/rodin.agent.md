@@ -49,6 +49,9 @@ make -j4
 
 ## Testing Process
 
+Prefer individual test suites for faster feedback during development. For
+comprehensive validation, run all tests after significant changes.
+
 ### Running All Tests
 ```bash
 cd build
