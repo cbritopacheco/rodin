@@ -7,10 +7,10 @@
 #ifndef RODIN_VARIATIONAL_GRIDFUNCTIONPRINTER_H
 #define RODIN_VARIATIONAL_GRIDFUNCTIONPRINTER_H
 
-#include <cassert>
 #include <functional>
 #include <boost/filesystem.hpp>
 
+#include "Rodin/Alert/Exception.h"
 #include "ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
 
@@ -25,6 +25,11 @@ namespace Rodin::IO
    * does not fail with "implicit instantiation of undefined template" when
    * GridFunctionBase::save() is compiled for FES/Data combinations that do not
    * have a matching partial specialization for a given file format.
+   *
+   * @note An exception is raised at runtime if this primary template is
+   *       actually invoked.
+   *
+   * @see GridFunctionLoader
    */
   template <FileFormat Fmt, class FES, class Data>
   class GridFunctionPrinter : public IO::Printer<Variational::GridFunction<FES, Data>>
@@ -38,7 +43,9 @@ namespace Rodin::IO
 
       void print(std::ostream&) override
       {
-        assert(false && "No GridFunctionPrinter specialization for this format/FES/Data combination.");
+        Alert::Exception()
+          << "No GridFunctionPrinter specialization for this format/FES/Data combination."
+          << Alert::Raise;
       }
 
       const ObjectType& getObject() const override { return m_gf.get(); }

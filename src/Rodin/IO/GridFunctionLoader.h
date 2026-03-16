@@ -7,9 +7,9 @@
 #ifndef RODIN_VARIATIONAL_GRIDFUNCTIONLOADER_H
 #define RODIN_VARIATIONAL_GRIDFUNCTIONLOADER_H
 
-#include <cassert>
 #include <functional>
 
+#include "Rodin/Alert/Exception.h"
 #include "Rodin/Variational/ForwardDecls.h"
 
 #include "ForwardDecls.h"
@@ -19,29 +19,6 @@
 namespace Rodin::IO
 {
   /**
-   * @brief Base class for loading grid functions from files or streams.
-   *
-   * GridFunctionLoaderBase provides the foundation for loading finite element
-   * solution data in different file formats. It extends the generic Loader class
-   * to handle grid function-specific operations.
-   *
-   * @tparam FES Finite element space type
-   * @tparam Data Data storage type (typically a vector type)
-   *
-   * Specialized loaders for specific file formats should derive from this class
-   * and implement the load(std::istream&) method to parse their respective formats.
-   *
-   * ## Usage Example
-   * ```cpp
-   * P1<Real> Vh(mesh);
-   * GridFunction<P1<Real>> u(Vh);
-   * GridFunctionLoader<FileFormat::MFEM, P1<Real>, Vector<Real>> loader(u);
-   * loader.load("solution.gf");
-   * ```
-   *
-   * @see Loader, GridFunctionPrinter
-   */
-  /**
    * @brief Primary template for GridFunctionLoader.
    *
    * This primary template provides a default definition so that the compiler
@@ -50,9 +27,12 @@ namespace Rodin::IO
    * have a matching partial specialization for a given file format.
    *
    * @note If you reach this template at runtime it means no specialization
-   *       exists for the requested format/FES/Data triple.  A runtime error
-   *       is raised instead of a hard static_assert so that the unused switch
-   *       branches in GridFunctionBase::load() remain compilable.
+   *       exists for the requested format/FES/Data triple.  An exception is
+   *       raised so that the unused switch branches in
+   *       GridFunctionBase::load() remain compilable while still producing a
+   *       clear error at runtime.
+   *
+   * @see Loader, GridFunctionPrinter
    */
   template <FileFormat Fmt, class FES, class Data>
   class GridFunctionLoader : public IO::Loader<Variational::GridFunction<FES, Data>>
@@ -66,7 +46,9 @@ namespace Rodin::IO
 
       void load(std::istream&) override
       {
-        assert(false && "No GridFunctionLoader specialization for this format/FES/Data combination.");
+        Alert::Exception()
+          << "No GridFunctionLoader specialization for this format/FES/Data combination."
+          << Alert::Raise;
       }
 
     protected:
