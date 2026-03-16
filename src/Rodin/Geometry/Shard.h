@@ -48,16 +48,16 @@ namespace Rodin::Geometry
    * Each local shard entity is tagged with one of the following logical states:
    *
    * - **Owned**:
-   *   this partition is the designated owner of the entity.
+   *   This partition is the designated owner of the entity.
    *   Owned entities are the ones on which assembly, counting, and reductions
    *   should typically be performed.
    *
    * - **Ghost**:
-   *   this entity is present locally only because it is needed by an owned
+   *   This entity is present locally only because it is needed by an owned
    *   neighboring entity. A ghost entity is owned by another partition.
    *
    * - **None**:
-   *   this flag is used only during shard construction. It means that the
+   *   This flag is used only during shard construction. It means that the
    *   entity is inserted in the current shard without changing the previously
    *   established ownership. In practice this occurs when an entity has already
    *   been assigned an owner and must simply be made present in another shard.

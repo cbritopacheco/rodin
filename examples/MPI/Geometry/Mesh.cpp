@@ -36,34 +36,35 @@ int main(int argc, char** argv)
     std::cout << "Sharding into " << partitioner.getCount() << "...\n";
 
     sharder.shard(partitioner);
+    auto& shards = sharder.getShards();
 
     std::cout << "Shard 1\n";
     for (size_t s = 0; s < world.size(); s++)
     {
-      for (auto it = sharder.getShard(s).getCell(); it; ++it)
+      for (auto it = shards[s].getCell(); it; ++it)
       {
-        if (sharder.getShard(s).isGhost(it->getDimension(), it->getIndex()))
-          sharder.getShard(s).setAttribute({ it->getDimension(), it->getIndex() }, 4);
-        else if (sharder.getShard(s).isOwned(it->getDimension(), it->getIndex()))
-          sharder.getShard(s).setAttribute({ it->getDimension(), it->getIndex() }, 8);
+        if (shards[s].isGhost(it->getDimension(), it->getIndex()))
+          shards[s].setAttribute({ it->getDimension(), it->getIndex() }, 4);
+        else if (shards[s].isOwned(it->getDimension(), it->getIndex()))
+          shards[s].setAttribute({ it->getDimension(), it->getIndex() }, 8);
       }
 
-      for (auto it = sharder.getShard(s).getFace(); it; ++it)
+      for (auto it = shards[s].getFace(); it; ++it)
       {
-        if (sharder.getShard(s).isGhost(it->getDimension(), it->getIndex()))
-          sharder.getShard(s).setAttribute({ it->getDimension(), it->getIndex() }, 4);
-        else if (sharder.getShard(s).isOwned(it->getDimension(), it->getIndex()))
-          sharder.getShard(s).setAttribute({ it->getDimension(), it->getIndex() }, 8);
+        if (shards[s].isGhost(it->getDimension(), it->getIndex()))
+          shards[s].setAttribute({ it->getDimension(), it->getIndex() }, 4);
+        else if (shards[s].isOwned(it->getDimension(), it->getIndex()))
+          shards[s].setAttribute({ it->getDimension(), it->getIndex() }, 8);
       }
 
-      for (auto it = sharder.getShard(s).getVertex(); it; ++it)
+      for (auto it = shards[s].getVertex(); it; ++it)
       {
-        if (sharder.getShard(s).isGhost(it->getDimension(), it->getIndex()))
-          sharder.getShard(s).setAttribute({ it->getDimension(), it->getIndex() }, 4);
-        else if (sharder.getShard(s).isOwned(it->getDimension(), it->getIndex()))
-          sharder.getShard(s).setAttribute({ it->getDimension(), it->getIndex() }, 8);
+        if (shards[s].isGhost(it->getDimension(), it->getIndex()))
+          shards[s].setAttribute({ it->getDimension(), it->getIndex() }, 4);
+        else if (shards[s].isOwned(it->getDimension(), it->getIndex()))
+          shards[s].setAttribute({ it->getDimension(), it->getIndex() }, 8);
       }
-      sharder.getShard(s).save("Shard." + std::to_string(s) + ".mesh", IO::FileFormat::MEDIT);
+      shards[s].save("Shard." + std::to_string(s) + ".mesh", IO::FileFormat::MEDIT);
     }
 
     std::cout << "Scattering\n";

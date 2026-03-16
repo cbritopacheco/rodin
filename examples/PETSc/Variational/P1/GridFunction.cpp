@@ -40,7 +40,8 @@ int main(int argc, char** argv)
     mesh.save("Poisson.mesh");
     Geometry::BalancedCompactPartitioner partitioner(mesh);
     partitioner.partition(world.size());
-    sharder.shard(partitioner).scatter(ROOT_RANK);
+    sharder.shard(partitioner);
+    sharder.scatter(ROOT_RANK);
   }
 
   auto mesh = sharder.gather(ROOT_RANK);
