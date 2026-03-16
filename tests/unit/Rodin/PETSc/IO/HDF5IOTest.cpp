@@ -92,7 +92,7 @@ namespace
     P1 fes(mesh);
 
     // Create a PETSc-backed grid function using sequential communicator
-    Rodin::PETSc::Variational::GridFunction<P1<Scalar, Mesh<Context::Local>>, ::Vec> gf(fes);
+    Rodin::PETSc::Variational::GridFunction gf(fes);
 
     // Set values
     PetscScalar* array = nullptr;
@@ -144,7 +144,7 @@ namespace
     auto mesh = makeMesh(type);
     P1 fes(mesh);
 
-    Rodin::PETSc::Variational::GridFunction<P1<Scalar, Mesh<Context::Local>>, ::Vec> gf(fes);
+    Rodin::PETSc::Variational::GridFunction gf(fes);
 
     // Fill with known values
     PetscScalar* array = nullptr;
@@ -182,7 +182,7 @@ namespace
     H5Fclose(h5);
 
     // Round-trip: load into a new grid function
-    Rodin::PETSc::Variational::GridFunction<P1<Scalar, Mesh<Context::Local>>, ::Vec> loaded(fes);
+    Rodin::PETSc::Variational::GridFunction loaded(fes);
     loaded.load(gfFile, FileFormat::HDF5);
 
     // Compare sizes
