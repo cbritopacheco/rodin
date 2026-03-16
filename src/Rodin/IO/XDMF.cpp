@@ -27,6 +27,12 @@ namespace Rodin::IO
   }
 
   static
+  std::string makeRankSuffix(const std::string& rank)
+  {
+    return rank.empty() ? std::string() : ".r" + rank;
+  }
+
+  static
   std::string expandPattern(
       const std::string& pattern,
       const std::string& stem,
@@ -54,13 +60,19 @@ namespace Rodin::IO
     replace("{name}", name);
     replace("{index}", index);
     replace("{rank}", rank);
+    replace("{rank_suffix}", makeRankSuffix(rank));
 
+    // Normalize repeated separators introduced by empty placeholders.
     while (result.find("..") != std::string::npos)
       result.replace(result.find(".."), 2, ".");
 
     while (result.find("/./") != std::string::npos)
       result.replace(result.find("/./"), 3, "/");
 
+    while (result.find("//") != std::string::npos)
+      result.replace(result.find("//"), 2, "/");
+
+    // Remove a remaining dot just before ".h5"
     const auto dotExt = result.find(".h5");
     if (dotExt != std::string::npos && dotExt > 0 && result[dotExt - 1] == '.')
       result.erase(dotExt - 1, 1);
@@ -244,9 +256,11 @@ namespace Rodin::IO
       m_numRanks(numRanks),
       m_rootRank(rootRank)
   {
-    m_patterns.staticMesh    = "{stem}.{grid}.r{rank}.mesh.h5";
-    m_patterns.transientMesh = "{stem}.{grid}.r{rank}.mesh.{index}.h5";
-    m_patterns.attribute     = "{stem}.{grid}.{name}.r{rank}.{index}.h5";
+    // Use {rank_suffix} so that the same expansion logic can omit the rank
+    // cleanly when rank == "".
+    m_patterns.staticMesh    = "{stem}.{grid}{rank_suffix}.mesh.h5";
+    m_patterns.transientMesh = "{stem}.{grid}{rank_suffix}.mesh.{index}.h5";
+    m_patterns.attribute     = "{stem}.{grid}.{name}{rank_suffix}.{index}.h5";
   }
 
   XDMF::~XDMF()
@@ -330,7 +344,7 @@ namespace Rodin::IO
 
     const std::string stemStr  = m_stem.filename().string();
     const std::string indexStr = padIndex(m_snapshotCount, m_padding);
-    const std::string rankStr  = std::to_string(m_rank);
+    const std::string rankStr  = m_distributed ? std::to_string(m_rank) : std::string();
 
     for (auto& gr : m_grids)
     {
@@ -440,6 +454,9 @@ namespace Rodin::IO
 
     os << indent(bi + 1) << "<Topology TopologyType=\"Mixed\" NumberOfElements=\""
        << snap.cellCount << "\">\n";
+    // Precision="8" is required here because the HDF5 topology dataset is U64.
+    // Without Precision, some XDMF readers may assume 32-bit UInt and misread
+    // the dataset.
     os << indent(bi + 2) << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Precision=\"8\" Dimensions=\""
        << snap.topologySize << "\">"
        << meshH5 << ":" << HDF5::Path::MeshXDMFTopology
@@ -463,6 +480,7 @@ namespace Rodin::IO
 
       os << indent(bi + 1) << "<Attribute Name=\"" << attr.name
          << "\" AttributeType=\"Scalar\" Center=\"" << centerStr << "\">\n";
+      // Same reason as topology: Region is stored as U64 in HDF5.
       os << indent(bi + 2) << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Precision=\"8\" Dimensions=\""
          << dimStr.str() << "\">"
          << meshH5 << ":" << HDF5::attributePath(attr.topologicalDimension)
@@ -557,17 +575,10 @@ namespace Rodin::IO
           {
             const std::string rStr = std::to_string(r);
 
-            std::string meshH5;
-            if (gr.options.meshPolicy == MeshPolicy::Static)
-            {
-              meshH5 = expandPattern(
-                  patterns.staticMesh, stemStr, gr.name, "", "", rStr);
-            }
-            else
-            {
-              meshH5 = expandPattern(
-                  patterns.transientMesh, stemStr, gr.name, "", indexStr, rStr);
-            }
+            const std::string meshH5 =
+              (gr.options.meshPolicy == MeshPolicy::Static)
+              ? expandPattern(patterns.staticMesh, stemStr, gr.name, "", "", rStr)
+              : expandPattern(patterns.transientMesh, stemStr, gr.name, "", indexStr, rStr);
 
             const auto meshPath = m_stem.parent_path() / meshH5;
             const auto meta = readXDMFMeshMeta(meshPath);

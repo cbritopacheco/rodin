@@ -117,7 +117,6 @@ int main(int argc, char** argv)
   IO::XDMF xdmf("mpi/Poisson", world.rank(), world.size());
 
   xdmf.setMesh(mesh);
-  xdmf.write().flush();
 
   if (world.rank() == ROOT_RANK)
     Alert::Success() << "Constructed finite element space." << Alert::Raise;
@@ -159,6 +158,9 @@ int main(int argc, char** argv)
                 << " ms." << Alert::Raise;
 
     std::snprintf(filename, sizeof(filename), "sol.%06d", world.rank());
+
+
+    xdmf.write();
     u.getSolution().save(filename);
   }
 

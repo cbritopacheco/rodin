@@ -266,21 +266,6 @@ namespace Rodin::IO
       {
         MeshPolicy meshPolicy = MeshPolicy::Static;  ///< Mesh export policy for this grid.
         Optional<FilePatterns> patterns;               ///< Per-grid file pattern overrides (empty = use writer defaults).
-
-        /**
-         * @brief Whether to include ghost cells in visualization output.
-         *
-         * When `true` (the default), all cells in the mesh are exported,
-         * including ghost cells from neighboring MPI partitions.  When
-         * `false`, cells flagged as ghost in a `Geometry::Shard` are
-         * excluded from the XDMF topology.
-         *
-         * @note Ghost filtering is only meaningful for shard-based MPI
-         *       meshes.  For plain local meshes this flag has no effect.
-         *       Full ghost filtering support will be added when the XDMF
-         *       MPI visualization pipeline is fully integrated.
-         */
-        bool exportGhosts = true;
       };
 
       /**

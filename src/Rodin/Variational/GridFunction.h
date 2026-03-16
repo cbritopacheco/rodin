@@ -174,6 +174,12 @@ namespace Rodin::Variational
       GridFunctionBaseReference& operator=(GridFunctionBaseReference&&) = delete;
 
       constexpr
+      decltype(auto) operator()(const Geometry::Point& p) const
+      {
+        return m_ref.get().getValue(p);
+      }
+
+      constexpr
       decltype(auto) getValue(const Geometry::Point& p) const
       {
         return m_ref.get().getValue(p);
