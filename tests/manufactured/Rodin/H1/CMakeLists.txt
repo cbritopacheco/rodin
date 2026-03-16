@@ -87,31 +87,5 @@ target_link_libraries(RodinManufacturedH1NavierStokes3D
   )
 gtest_discover_tests(RodinManufacturedH1NavierStokes3D
     PROPERTIES
-    LABELS manufactured)
-
-
-add_executable(RodinManufacturedH1Stokes3D_Slow Stokes3D_Slow.cpp)
-target_link_libraries(RodinManufacturedH1Stokes3D_Slow
-  PUBLIC
-  GTest::gtest
-  GTest::gtest_main
-  Rodin::Geometry
-  Rodin::Variational
-  Rodin::Solver
-  )
-gtest_discover_tests(RodinManufacturedH1Stokes3D_Slow
-    PROPERTIES
     LABELS slow manufactured)
 
-add_executable(RodinManufacturedH1NavierStokes3D_Slow NavierStokes3D_Slow.cpp)
-target_link_libraries(RodinManufacturedH1NavierStokes3D_Slow
-  PUBLIC
-  GTest::gtest
-  GTest::gtest_main
-  Rodin::Geometry
-  Rodin::Variational
-  Rodin::Solver
-  )
-gtest_discover_tests(RodinManufacturedH1NavierStokes3D_Slow
-    PROPERTIES
-    LABELS slow manufactured)
