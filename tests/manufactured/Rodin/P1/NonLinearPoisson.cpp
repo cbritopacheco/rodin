@@ -105,8 +105,8 @@ namespace Rodin::Tests::Manufactured::NonLinearPoisson
             + Integral(uCurrent * uCurrent * uCurrent, v)
             + DirichletBC(du, Zero());
 
-    SparseLU linearSolver(tangent);
-    NewtonSolver solver(tangent, linearSolver);
+    using SparseLinearSystem = Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
+    NewtonSolver<SparseLU<SparseLinearSystem>> solver(tangent);
     // Start from the fixed-point reference and use a tolerance consistent with
     // that discretized reference. A looser absolute tolerance avoids unstable
     // additional Newton updates once the fixed-point reference is reached.

@@ -49,6 +49,19 @@ namespace Rodin::Tests::Manufactured
         return new SparseLinearSolver(*this);
       }
   };
+}
+
+namespace Rodin::FormLanguage
+{
+  template <>
+  struct Traits<Tests::Manufactured::SparseLinearSolver>
+  {
+    using LinearSystemType = Tests::Manufactured::SparseLinearSystem;
+  };
+}
+
+namespace Rodin::Tests::Manufactured
+{
 
   class ManufacturedSparseProblem final : public Variational::ProblemBase<SparseLinearSystem>
   {
@@ -199,8 +212,7 @@ namespace Rodin::Tests::Manufactured
     x << 0.9, -0.8;
     ManufacturedSparseProblem pb(x, A, b);
 
-    SparseLinearSolver linearSolver(pb);
-    Solver::NewtonSolver solver(pb, linearSolver);
+    Solver::NewtonSolver<SparseLinearSolver> solver(pb);
     solver.setMaxIterations(30)
       .setAbsoluteTolerance(1e-12)
       .setRelativeTolerance(1e-12);
@@ -217,8 +229,7 @@ namespace Rodin::Tests::Manufactured
     x << 0.7, 0.3;
     StrongNonlinearSparseProblem pb(x);
 
-    SparseLinearSolver linearSolver(pb);
-    Solver::NewtonSolver solver(pb, linearSolver);
+    Solver::NewtonSolver<SparseLinearSolver> solver(pb);
     solver.setMaxIterations(40)
       .setAbsoluteTolerance(1e-12)
       .setRelativeTolerance(1e-12);

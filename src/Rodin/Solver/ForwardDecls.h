@@ -37,10 +37,9 @@ namespace Rodin::Solver
 
   /**
    * @brief Abstract base class for Newton-type nonlinear solvers.
-   * @tparam LinearSystem Type of linear system assembled at each Newton step.
    * @tparam LinearSolver Type of the linear solver.
    */
-  template <class LinearSystem, class LinearSolver>
+  template <class LinearSolver>
   class NewtonSolverBase;
 
   /**

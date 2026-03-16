@@ -31,15 +31,15 @@ namespace Rodin::Solver
    * u^{k + 1} = u^k + \delta u^k.
    * @f]
    *
-   * @tparam LinearSystem Type of linear system assembled at each Newton step.
    * @tparam LinearSolver Type of the linear solver used at each Newton step.
+   *   Must have a FormLanguage::Traits specialization providing LinearSystemType.
    */
-  template <class LinearSystem, class LinearSolver>
+  template <class LinearSolver>
   class NewtonSolverBase : public Copyable
   {
     public:
-      using LinearSystemType = LinearSystem;
       using LinearSolverType = LinearSolver;
+      using LinearSystemType = typename FormLanguage::Traits<LinearSolver>::LinearSystemType;
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
       using SolutionType = typename FormLanguage::Traits<LinearSystemType>::VectorType;
 
@@ -98,24 +98,24 @@ namespace Rodin::Solver
    *   \|F(x^k)\| \le \text{rtol} \, \|F(x^0)\|.
    * @f]
    *
-   * @tparam LinearSystem Type of linear system assembled at each Newton step.
    * @tparam LinearSolver Type of the linear solver used at each Newton step.
+   *   Must have a FormLanguage::Traits specialization providing LinearSystemType.
    */
-  template <class LinearSystem, class LinearSolver>
+  template <class LinearSolver>
   class NewtonSolver final
-    : public NewtonSolverBase<LinearSystem, LinearSolver>
+    : public NewtonSolverBase<LinearSolver>
   {
     public:
-      using Parent = NewtonSolverBase<LinearSystem, LinearSolver>;
+      using Parent = NewtonSolverBase<LinearSolver>;
 
-      using LinearSystemType = LinearSystem;
+      using LinearSystemType = typename Parent::LinearSystemType;
       using ProblemBaseType = typename Parent::ProblemBaseType;
       using SolutionType = typename Parent::SolutionType;
       using LinearSolverType = LinearSolver;
 
-      explicit NewtonSolver(ProblemBaseType& pb, const LinearSolver& linearSolver)
+      explicit NewtonSolver(ProblemBaseType& pb)
         : Parent(pb),
-          m_solver(linearSolver),
+          m_solver(pb),
           m_maxIt(100),
           m_atol(1e-12),
           m_rtol(1e-8),
@@ -127,12 +127,6 @@ namespace Rodin::Solver
       NewtonSolver* copy() const noexcept override
       {
         return new NewtonSolver(*this);
-      }
-
-      NewtonSolver& setLinearSolver(const LinearSolver& linearSolver)
-      {
-        m_solver = linearSolver;
-        return *this;
       }
 
       NewtonSolver& setAbsoluteTolerance(Real atol)
@@ -238,18 +232,6 @@ namespace Rodin::Solver
       Real m_rtol;
       Real m_alpha;
   };
-
-  /**
-   * @ingroup RodinCTAD
-   * @brief CTAD guide for NewtonSolver from a Rodin problem and linear solver.
-   *
-   * Deduces:
-   * - LinearSystemType = LinearSystem
-   * - LinearSolverType = LinearSolver
-   */
-  template <class LinearSystem, class LinearSolver>
-  NewtonSolver(Variational::ProblemBase<LinearSystem>&, const LinearSolver&)
-    -> NewtonSolver<LinearSystem, LinearSolver>;
 }
 
 #endif

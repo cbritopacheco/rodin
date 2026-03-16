@@ -20,7 +20,7 @@
 
 using namespace Rodin;
 
-namespace
+namespace Rodin::Tests::Unit::NewtonSolverTestHelpers
 {
   using DenseLinearSystem = Math::LinearSystem<Math::Matrix<Real>, Math::Vector<Real>>;
 
@@ -139,14 +139,24 @@ namespace
   };
 }
 
+namespace Rodin::FormLanguage
+{
+  template <>
+  struct Traits<Tests::Unit::NewtonSolverTestHelpers::DenseLinearSolver>
+  {
+    using LinearSystemType = Tests::Unit::NewtonSolverTestHelpers::DenseLinearSystem;
+  };
+}
+
+using namespace Rodin::Tests::Unit::NewtonSolverTestHelpers;
+
 TEST(NewtonSolverTest, SolvesScalarProblemUsingProblemAssembly)
 {
   Math::Vector<Real> u(1);
   u << 1.5;
 
   ScalarNonlinearProblem pb(u);
-  DenseLinearSolver linearSolver(pb);
-  Solver::NewtonSolver solver(pb, linearSolver);
+  Solver::NewtonSolver<DenseLinearSolver> solver(pb);
   solver.setMaxIterations(30)
     .setAbsoluteTolerance(1e-12)
     .setRelativeTolerance(1e-12);
@@ -156,21 +166,17 @@ TEST(NewtonSolverTest, SolvesScalarProblemUsingProblemAssembly)
   EXPECT_NEAR(u(0), std::sqrt(2.0), 1e-10);
 }
 
-TEST(NewtonSolverTest, CTADDeductionGuideFromProblemAndLinearSolver)
+TEST(NewtonSolverTest, SingleTemplateParameterDeducesLinearSystem)
 {
-  using DeducedSolverType =
-    decltype(Solver::NewtonSolver(std::declval<ScalarNonlinearProblem&>(), std::declval<const DenseLinearSolver&>()));
-  using ExpectedSolverType = Solver::NewtonSolver<DenseLinearSystem, DenseLinearSolver>;
-
-  static_assert(std::is_same_v<DeducedSolverType, ExpectedSolverType>);
+  using SolverType = Solver::NewtonSolver<DenseLinearSolver>;
+  static_assert(std::is_same_v<SolverType::LinearSystemType, DenseLinearSystem>);
   SUCCEED();
 }
 
 TEST(NewtonSolverTest, PropagatesAssemblyFailure)
 {
   FailingAssembleProblem pb;
-  DenseLinearSolver linearSolver(pb);
-  Solver::NewtonSolver solver(pb, linearSolver);
+  Solver::NewtonSolver<DenseLinearSolver> solver(pb);
 
   Math::Vector<Real> u(1);
   u << 1.0;

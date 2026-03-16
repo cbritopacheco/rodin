@@ -44,6 +44,19 @@ namespace Rodin::Tests::Manufactured
         return new DenseLinearSolver(*this);
       }
   };
+}
+
+namespace Rodin::FormLanguage
+{
+  template <>
+  struct Traits<Tests::Manufactured::DenseLinearSolver>
+  {
+    using LinearSystemType = Tests::Manufactured::DenseLinearSystem;
+  };
+}
+
+namespace Rodin::Tests::Manufactured
+{
 
   class ManufacturedDenseProblem final : public Variational::ProblemBase<DenseLinearSystem>
   {
@@ -186,8 +199,7 @@ namespace Rodin::Tests::Manufactured
     x << 0.9, -0.8;
     ManufacturedDenseProblem pb(x, A, b);
 
-    DenseLinearSolver linearSolver(pb);
-    Solver::NewtonSolver solver(pb, linearSolver);
+    Solver::NewtonSolver<DenseLinearSolver> solver(pb);
     solver.setMaxIterations(30)
       .setAbsoluteTolerance(1e-12)
       .setRelativeTolerance(1e-12);
@@ -204,8 +216,7 @@ namespace Rodin::Tests::Manufactured
     x << 0.7, 0.3;
     StrongNonlinearDenseProblem pb(x);
 
-    DenseLinearSolver linearSolver(pb);
-    Solver::NewtonSolver solver(pb, linearSolver);
+    Solver::NewtonSolver<DenseLinearSolver> solver(pb);
     solver.setMaxIterations(40)
       .setAbsoluteTolerance(1e-12)
       .setRelativeTolerance(1e-12);

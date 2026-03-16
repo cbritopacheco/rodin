@@ -3,16 +3,32 @@
 
 #include <petscsnes.h>
 
+#include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/PETSc/Object.h"
 #include "Rodin/PETSc/Math/LinearSystem.h"
 #include "Rodin/Solver/NewtonSolver.h"
 #include "Rodin/Variational/ForwardDecls.h"
 #include "KSP.h"
 
+namespace Rodin::FormLanguage
+{
+  /**
+   * @brief Traits specialization for raw PETSc KSP handle.
+   *
+   * Maps the PETSc KSP handle type to the PETSc linear system type so that
+   * NewtonSolverBase<::KSP> can deduce its LinearSystemType.
+   */
+  template <>
+  struct Traits<::KSP>
+  {
+    using LinearSystemType = PETSc::Math::LinearSystem;
+  };
+}
+
 namespace Rodin::Solver
 {
   class SNES
-    : public PETSc::Object<::SNES>, public NewtonSolverBase<PETSc::Math::LinearSystem, ::KSP>
+    : public PETSc::Object<::SNES>, public NewtonSolverBase<::KSP>
   {
     public:
       using HandleType = ::SNES;
@@ -29,7 +45,7 @@ namespace Rodin::Solver
 
       using PetscParent = PETSc::Object<HandleType>;
 
-      using NewtonSolverParent = NewtonSolverBase<LinearSystemType, KSPType>;
+      using NewtonSolverParent = NewtonSolverBase<KSPType>;
 
       using NewtonSolverParent::solve;
 
