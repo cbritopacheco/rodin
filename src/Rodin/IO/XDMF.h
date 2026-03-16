@@ -17,6 +17,13 @@
  * - One HDF5 file per grid function attribute per snapshot
  * - One XDMF XML file referencing all HDF5 files
  *
+ * In distributed (MPI) mode, each rank writes its own rank-specific HDF5
+ * visualization files using `{rank}` in the file patterns. Only the root
+ * rank (configurable, default 0) writes the master `.xdmf` XML file that
+ * references all rank-local piece files as a Spatial collection. For
+ * transient output, the master XDMF uses a Temporal collection of Spatial
+ * collections.
+ *
  * ## Typical Workflow
  *
  * ```cpp
@@ -240,6 +247,7 @@ namespace Rodin::IO
        * - {grid}  : grid name
        * - {name}  : attribute name
        * - {index} : snapshot index with zero padding
+       * - {rank}  : MPI rank (only meaningful in distributed mode)
        */
       struct FilePatterns
       {
@@ -381,7 +389,7 @@ namespace Rodin::IO
       };
 
       /**
-       * @brief Constructs an XDMF writer with the given stem path.
+       * @brief Constructs an XDMF writer with the given stem path (serial mode).
        * @param[in] stem  Base path for output files. The directory component
        *                  determines where files are written; the filename
        *                  component is used as `{stem}` in file patterns.
@@ -394,6 +402,34 @@ namespace Rodin::IO
        */
       explicit
       XDMF(const boost::filesystem::path& stem);
+
+      /**
+       * @brief Constructs an XDMF writer in distributed (MPI) mode.
+       *
+       * In distributed mode:
+       * - Each rank writes its own rank-specific HDF5 visualization files
+       *   (using `{rank}` in the file patterns).
+       * - Only the root rank writes the master `.xdmf` XML file that
+       *   references all per-rank piece files as a Spatial collection.
+       * - For transient output, the master XDMF contains a Temporal
+       *   collection of Spatial collections.
+       *
+       * @param[in] stem      Base path for output files.
+       * @param[in] rank      This process's rank.
+       * @param[in] numRanks  Total number of ranks.
+       * @param[in] rootRank  Rank that writes the master XDMF XML (default 0).
+       *
+       * ## Example
+       * ```cpp
+       * IO::XDMF xdmf("output/Poisson", comm.rank(), comm.size());
+       * xdmf.setMesh(mpiMesh);
+       * xdmf.add("u", u, IO::XDMF::Center::Node);
+       * xdmf.write(0.0);
+       * xdmf.close();
+       * ```
+       */
+      XDMF(const boost::filesystem::path& stem,
+           size_t rank, size_t numRanks, size_t rootRank = 0);
 
       XDMF(const XDMF&) = delete;        ///< Non-copyable.
       XDMF& operator=(const XDMF&) = delete;  ///< Non-copyable.
@@ -544,6 +580,30 @@ namespace Rodin::IO
        */
       size_t getGridCount() const noexcept;
 
+      /**
+       * @brief Tests whether the writer is in distributed (MPI) mode.
+       * @returns `true` if constructed with rank/numRanks.
+       */
+      bool isDistributed() const noexcept;
+
+      /**
+       * @brief Returns this process's rank.
+       * @returns Rank (0 in serial mode).
+       */
+      size_t getRank() const noexcept;
+
+      /**
+       * @brief Returns the total number of ranks.
+       * @returns Number of ranks (1 in serial mode).
+       */
+      size_t getNumRanks() const noexcept;
+
+      /**
+       * @brief Returns the root rank that writes the master XDMF XML.
+       * @returns Root rank (0 in serial mode).
+       */
+      size_t getRootRank() const noexcept;
+
       void flush() const;
 
     private:
@@ -605,6 +665,19 @@ namespace Rodin::IO
       bool m_closed = false;              ///< Whether close() has been called.
       size_t m_snapshotCount = 0;         ///< Total snapshots written.
       std::vector<GridRecord> m_grids;    ///< All grids in this domain.
+
+      // --- MPI distributed mode -----------------------------------------------
+      bool m_distributed = false;         ///< Whether the writer is in distributed mode.
+      size_t m_rank = 0;                  ///< This process's rank.
+      size_t m_numRanks = 1;              ///< Total number of ranks.
+      size_t m_rootRank = 0;              ///< Root rank that writes master XDMF XML.
+
+      /// @brief Writes a single Uniform grid XML element.
+      void writeUniformGrid(
+          std::ostream& os,
+          const std::string& gridName,
+          const SnapshotRecord& snap,
+          size_t baseIndent) const;
   };
 
   // ---- template method implementations ------------------------------------

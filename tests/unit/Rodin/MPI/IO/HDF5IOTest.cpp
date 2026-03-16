@@ -409,4 +409,128 @@ namespace
           Polytope::Type::Wedge
       ),
       MPIPolytopeNameGenerator());
+
+  // ===========================================================================
+  // Distributed XDMF file-per-rank tests (simulated with local meshes)
+  // ===========================================================================
+
+  /**
+   * Parameterized test: simulates a 2-rank MPI XDMF export using the
+   * distributed XDMF constructor. Each "rank" writes its own rank-specific
+   * HDF5 file, and only the root rank writes the master XDMF XML.
+   */
+  class MPIDistributedXDMF : public ::testing::TestWithParam<Polytope::Type> {};
+
+  TEST_P(MPIDistributedXDMF, FilePerRankVisualization)
+  {
+    const auto type = GetParam();
+    const boost::filesystem::path testDir =
+        "/tmp/rodin_mpi_dist_xdmf_" + polytopeLabel(type);
+    boost::filesystem::create_directories(testDir);
+    const boost::filesystem::path stem = testDir / "sim";
+
+    auto localMesh = makeMesh(type);
+    const size_t numRanks = 2;
+
+    // Simulate both ranks
+    for (size_t r = 0; r < numRanks; ++r)
+    {
+      XDMF xdmf(stem, r, numRanks, /*rootRank=*/0);
+      xdmf.setMesh(localMesh);
+      xdmf.write(0.0);
+      xdmf.close();
+    }
+
+    // Verify per-rank HDF5 files
+    for (size_t r = 0; r < numRanks; ++r)
+    {
+      const auto meshH5 = testDir / ("sim.r" + std::to_string(r) + ".mesh.h5");
+      ASSERT_TRUE(boost::filesystem::exists(meshH5)) << "Missing " << meshH5;
+
+      hid_t h5 = H5Fopen(meshH5.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+      ASSERT_GE(h5, 0);
+
+      // Visualization data
+      EXPECT_GE(H5Lexists(h5, "/Mesh/Geometry/Vertices", H5P_DEFAULT), 1);
+      EXPECT_GE(H5Lexists(h5, "/Mesh/XDMF/Topology", H5P_DEFAULT), 1);
+
+      // No persistence data
+      EXPECT_EQ(H5Lexists(h5, "/Mesh/Connectivity", H5P_DEFAULT), 0);
+
+      H5Fclose(h5);
+    }
+
+    // Verify master XDMF XML
+    const auto xdmfFile = testDir / "sim.xdmf";
+    ASSERT_TRUE(boost::filesystem::exists(xdmfFile));
+
+    std::ifstream ifs(xdmfFile.string());
+    std::ostringstream buf;
+    buf << ifs.rdbuf();
+    const auto xml = buf.str();
+
+    EXPECT_NE(xml.find("CollectionType=\"Spatial\""), std::string::npos);
+    EXPECT_NE(xml.find("sim.r0.mesh.h5"), std::string::npos);
+    EXPECT_NE(xml.find("sim.r1.mesh.h5"), std::string::npos);
+
+    boost::filesystem::remove_all(testDir);
+  }
+
+  TEST_P(MPIDistributedXDMF, FilePerRankWithAttributes)
+  {
+    const auto type = GetParam();
+    const boost::filesystem::path testDir =
+        "/tmp/rodin_mpi_dist_xdmf_attr_" + polytopeLabel(type);
+    boost::filesystem::create_directories(testDir);
+    const boost::filesystem::path stem = testDir / "field";
+
+    auto localMesh = makeMesh(type);
+    P1 fes(localMesh);
+    GridFunction gf(fes);
+    gf.setName("u");
+    gf = [](const Geometry::Point& p) { return p.x(); };
+
+    const size_t numRanks = 2;
+
+    for (size_t r = 0; r < numRanks; ++r)
+    {
+      XDMF xdmf(stem, r, numRanks);
+      xdmf.setMesh(localMesh);
+      xdmf.add("u", gf, XDMF::Center::Node);
+      xdmf.write(0.0);
+      xdmf.close();
+    }
+
+    // Verify rank-specific attribute files
+    for (size_t r = 0; r < numRanks; ++r)
+    {
+      const auto attrH5 = testDir / ("field.u.r" + std::to_string(r) + ".000000.h5");
+      EXPECT_TRUE(boost::filesystem::exists(attrH5)) << "Missing " << attrH5;
+    }
+
+    // XDMF references attribute files
+    const auto xdmfFile = testDir / "field.xdmf";
+    ASSERT_TRUE(boost::filesystem::exists(xdmfFile));
+    std::ifstream ifs(xdmfFile.string());
+    std::ostringstream buf;
+    buf << ifs.rdbuf();
+    const auto xml = buf.str();
+    EXPECT_NE(xml.find("field.u.r0.000000.h5"), std::string::npos);
+    EXPECT_NE(xml.find("field.u.r1.000000.h5"), std::string::npos);
+
+    boost::filesystem::remove_all(testDir);
+  }
+
+  INSTANTIATE_TEST_SUITE_P(
+      AllDimensions,
+      MPIDistributedXDMF,
+      ::testing::Values(
+          Polytope::Type::Segment,
+          Polytope::Type::Triangle,
+          Polytope::Type::Quadrilateral,
+          Polytope::Type::Tetrahedron,
+          Polytope::Type::Hexahedron,
+          Polytope::Type::Wedge
+      ),
+      MPIPolytopeNameGenerator());
 }
