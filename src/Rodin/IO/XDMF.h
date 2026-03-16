@@ -529,7 +529,7 @@ namespace Rodin::IO
        */
       size_t getGridCount() const noexcept;
 
-      void persist() const;
+      void flush() const;
 
     private:
       /// @brief Internal record for one registered attribute.

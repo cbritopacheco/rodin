@@ -73,10 +73,10 @@ int main(int, char**)
   // XDMF output
   IO::XDMF xdmf("out/ShapeOptimization");
 
-  auto domainGrid = xdmf.grid("domain");
-  // auto stateGrid  = xdmf.grid("state");
+  auto domain = xdmf.grid("domain");
+  domain.setMesh(th, IO::XDMF::MeshPolicy::Transient);
 
-  // 'th' is the same l-value during the whole loop, so set it once.
+  auto state  = xdmf.grid("state");
 
   // Optimization loop
   std::vector<double> obj;
@@ -106,8 +106,6 @@ int main(int, char**)
 
     th.getConnectivity().compute(1, 2);
     th.getConnectivity().compute(0, 0);
-
-    // domainGrid.setMesh(th, IO::XDMF::MeshPolicy::Transient);
 
     Alert::Info() << "----- Iteration: " << i << Alert::Raise;
 
@@ -196,17 +194,17 @@ int main(int, char**)
     // ------------------------------------------------------------------------
 
     // Full evolving mesh 'th'
-    // domainGrid.clear();
-    // domainGrid.add("dJ", dJ, IO::XDMF::Center::Node);
-    // domainGrid.add("dist", dist, IO::XDMF::Center::Node);
-    // domainGrid.add("advect", advect.getSolution(), IO::XDMF::Center::Node);
+    domain.clear();
+    domain.add("dJ", dJ, IO::XDMF::Center::Node);
+    domain.add("dist", dist, IO::XDMF::Center::Node);
+    domain.add("advect", advect.getSolution(), IO::XDMF::Center::Node);
 
     // Trimmed mesh and state field
-    // stateGrid.reset();
-    // stateGrid.setMesh(trimmed, IO::XDMF::MeshPolicy::Transient);
-    // stateGrid.add("u", u.getSolution(), IO::XDMF::Center::Node);
+    state.clear();
+    state.setMesh(trimmed, IO::XDMF::MeshPolicy::Transient);
+    state.add("u", u.getSolution(), IO::XDMF::Center::Node);
 
-    // xdmf.write(static_cast<Real>(i));
+    xdmf.write(i).flush();
 
     // Recover the implicit domain
     Alert::Info() << "   | Meshing the domain." << Alert::Raise;

@@ -344,13 +344,10 @@ namespace Rodin::IO
 
     ++m_snapshotCount;
 
-    // Persist the XML domain after every snapshot.
-    persist();
-
     return *this;
   }
 
-  void XDMF::persist() const
+  void XDMF::flush() const
   {
     const std::string stemStr = m_stem.filename().string();
     const auto xdmfFile = expandPattern(m_patterns.xdmf, stemStr, "", "", "");
@@ -474,7 +471,7 @@ namespace Rodin::IO
     if (m_closed)
       return;
 
-    persist();
+    flush();
     m_closed = true;
   }
 
