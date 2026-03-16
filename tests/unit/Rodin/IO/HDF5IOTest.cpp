@@ -761,7 +761,7 @@ namespace
 
     const size_t numRanks = 2;
 
-    // Simulate rank 1 first (non-root writes data only, no XDMF)
+    // Simulate rank 1 first (non-root writes HDF5 data only, not the master XDMF)
     {
       XDMF xdmf(stem, /*rank=*/1, numRanks, /*rootRank=*/0);
       xdmf.setMesh(mesh);
@@ -769,7 +769,7 @@ namespace
       xdmf.close();
     }
 
-    // Simulate rank 0 (root — writes data + master XDMF referencing all ranks)
+    // Simulate rank 0 (root writes HDF5 data + master XDMF referencing all ranks)
     {
       XDMF xdmf(stem, /*rank=*/0, numRanks, /*rootRank=*/0);
       xdmf.setMesh(mesh);
