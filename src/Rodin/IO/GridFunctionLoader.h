@@ -7,6 +7,9 @@
 #ifndef RODIN_VARIATIONAL_GRIDFUNCTIONLOADER_H
 #define RODIN_VARIATIONAL_GRIDFUNCTIONLOADER_H
 
+#include <cassert>
+#include <functional>
+
 #include "Rodin/Variational/ForwardDecls.h"
 
 #include "ForwardDecls.h"
@@ -38,6 +41,41 @@ namespace Rodin::IO
    *
    * @see Loader, GridFunctionPrinter
    */
+  /**
+   * @brief Primary template for GridFunctionLoader.
+   *
+   * This primary template provides a default definition so that the compiler
+   * does not fail with "implicit instantiation of undefined template" when
+   * GridFunctionBase::load() is compiled for FES/Data combinations that do not
+   * have a matching partial specialization for a given file format.
+   *
+   * @note If you reach this template at runtime it means no specialization
+   *       exists for the requested format/FES/Data triple.  A runtime error
+   *       is raised instead of a hard static_assert so that the unused switch
+   *       branches in GridFunctionBase::load() remain compilable.
+   */
+  template <FileFormat Fmt, class FES, class Data>
+  class GridFunctionLoader : public IO::Loader<Variational::GridFunction<FES, Data>>
+  {
+    public:
+      using ObjectType = Variational::GridFunction<FES, Data>;
+
+      GridFunctionLoader(ObjectType& gf)
+        : m_gf(gf)
+      {}
+
+      void load(std::istream&) override
+      {
+        assert(false && "No GridFunctionLoader specialization for this format/FES/Data combination.");
+      }
+
+    protected:
+      ObjectType& getObject() override { return m_gf.get(); }
+
+    private:
+      std::reference_wrapper<ObjectType> m_gf;
+  };
+
   template <class FES, class Data>
   class GridFunctionLoaderBase : public IO::Loader<Variational::GridFunction<FES, Data>>
   {
