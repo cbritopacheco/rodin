@@ -113,6 +113,13 @@ namespace Rodin::Solver
       using SolutionType = typename Parent::SolutionType;
       using LinearSolverType = LinearSolver;
 
+      /**
+       * @brief Constructs a NewtonSolver for the given problem.
+       * @param pb The variational problem whose tangent system will be assembled at each iterate.
+       *
+       * The LinearSolver is constructed internally from @p pb; this requires that
+       * LinearSolver is constructible from ProblemBaseType&.
+       */
       explicit NewtonSolver(ProblemBaseType& pb)
         : Parent(pb),
           m_solver(pb),
