@@ -16,7 +16,8 @@
  *   attributes, and polytope transformations.
  * - Standalone grid function field-file serialization (one `.h5` per grid
  *   function), without mesh or finite element space embedding.
- * - Derived XDMF mixed-topology datasets for visualization export.
+ * - Utility functions for XDMF mixed-topology stream generation, used by
+ *   the IO::XDMF visualization writer.
  *
  * ## HDF5 Mesh Layout
  *
@@ -46,9 +47,14 @@
  *   /Attributes/{d}                   [n_d] (U64)
  *   /Transformations/{d}
  *     Kind                            [n_d] (I32)
- *   /XDMF                             (only when setXDMF(true))
- *     Topology                        [mixed_stream_size] (U64)
- *     TopologySize                    scalar (U64)
+ * ```
+ *
+ * ## XDMF Derived Datasets (written by IO::XDMF, not by MeshPrinter)
+ *
+ * ```
+ * /Mesh/XDMF                         (appended to mesh file by XDMF writer)
+ *   Topology                          [mixed_stream_size] (U64)
+ *   TopologySize                      scalar (U64)
  * ```
  *
  * ## HDF5 GridFunction Layout (standalone field file)
@@ -132,18 +138,6 @@ namespace Rodin::IO
      * this marker are left unset.
      */
     static constexpr U64 NullAttributeMarker = std::numeric_limits<U64>::max();
-
-    /**
-     * @brief Data centering policy for XDMF attribute export.
-     *
-     * Determines whether grid function values are exported as nodal
-     * (vertex-centered) or cell-centered data in XDMF visualization files.
-     */
-    enum class Center
-    {
-      Node,   ///< Vertex-centered (nodal) data.
-      Cell    ///< Cell-centered data.
-    };
 
     /**
      * @brief HDF5 dataset path constants for the mesh and grid function
@@ -853,6 +847,68 @@ namespace Rodin::IO
     }
 
     /**
+     * @brief Writes the XDMF mixed-topology stream to an existing HDF5 file.
+     *
+     * Opens the given HDF5 file for read/write access, creates the
+     * `/Mesh/XDMF` group, and writes the mixed-topology dataset at
+     * `/Mesh/XDMF/Topology` and its size at `/Mesh/XDMF/TopologySize`.
+     *
+     * This function is used by the XDMF visualization pipeline to append
+     * derived topology data to a mesh file that was previously written by
+     * the canonical `MeshPrinter<HDF5>` path.
+     *
+     * @param[in] filename  Path to an existing HDF5 mesh file.
+     * @param[in] mesh      Mesh whose cells provide the topology data.
+     */
+    inline
+    void writeXDMFTopology(
+        const boost::filesystem::path& filename,
+        const Geometry::MeshBase& mesh)
+    {
+      const auto file = File(H5Fopen(filename.c_str(), H5F_ACC_RDWR, H5P_DEFAULT));
+      if (!file)
+      {
+        Alert::Exception()
+          << "Failed to open HDF5 file for XDMF topology: " << filename
+          << Alert::Raise;
+      }
+
+      {
+        const auto g = Group(H5Gcreate2(file.get(), Path::MeshXDMF, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        if (!g)
+        {
+          Alert::Exception()
+            << "Failed to create /Mesh/XDMF group."
+            << Alert::Raise;
+        }
+      }
+
+      const auto& connectivity =
+          static_cast<const Geometry::Mesh<Context::Local>&>(mesh).getConnectivity();
+      const size_t D = connectivity.getDimension();
+
+      std::vector<U64> topology;
+      topology.reserve(getXDMFMixedTopologySize(mesh));
+
+      for (Index i = 0; i < static_cast<Index>(connectivity.getCount(D)); ++i)
+      {
+        const auto geometry = connectivity.getGeometry(D, i);
+        const auto& key = connectivity.getPolytope(D, i);
+
+        topology.push_back(getXDMFMixedTopologyId(geometry));
+
+        if (geometry == Geometry::Polytope::Type::Segment)
+          topology.push_back(static_cast<U64>(key.size()));
+
+        for (size_t k = 0; k < key.size(); ++k)
+          topology.push_back(static_cast<U64>(key[k]));
+      }
+
+      writeVectorDataset(file.get(), Path::MeshXDMFTopology, topology);
+      writeScalarDataset(file.get(), Path::MeshXDMFTopologySize, static_cast<U64>(topology.size()));
+    }
+
+    /**
      * @brief Writes a grid function as vertex-centered (nodal) data to an
      *        HDF5 file for XDMF visualization.
      *
@@ -1384,10 +1440,10 @@ namespace Rodin::IO
    * - Vertex geometry (`/Mesh/Geometry/Vertices`)
    * - Full connectivity (entity CSR per dimension, incidence CSR, state flags)
    * - Polytope attributes and transformations
-   * - Optionally, a derived XDMF mixed-topology stream (`/Mesh/XDMF/Topology`)
    *
-   * The XDMF topology is only written when `setXDMF(true)` is called prior
-   * to printing. This is done automatically by the XDMF writer class.
+   * This printer is strictly for canonical Rodin mesh persistence. It does
+   * not write any XDMF-specific datasets. The XDMF visualization path
+   * (IO::XDMF) handles its own derived topology generation separately.
    *
    * Stream-based printing is not supported; only file-path printing is available.
    *
@@ -1420,30 +1476,8 @@ namespace Rodin::IO
        */
       explicit
       MeshPrinter(const ObjectType& mesh)
-        : Parent(mesh),
-          m_xdmf(false)
+        : Parent(mesh)
       {}
-
-      /**
-       * @brief Enables or disables XDMF mixed-topology output.
-       * @param[in] output  If `true`, the `/Mesh/XDMF/Topology` dataset
-       *                    will be generated alongside the canonical mesh data.
-       * @returns Reference to `*this` for method chaining.
-       */
-      MeshPrinter& setXDMF(bool output = true)
-      {
-        m_xdmf = output;
-        return *this;
-      }
-
-      /**
-       * @brief Queries whether XDMF topology output is enabled.
-       * @returns `true` if `/Mesh/XDMF/Topology` will be written.
-       */
-      bool isXDMF() const
-      {
-        return m_xdmf;
-      }
 
       /**
        * @brief Stream-based printing is not supported for HDF5.
@@ -1461,9 +1495,8 @@ namespace Rodin::IO
        * @brief Writes the mesh to an HDF5 file.
        * @param[in] filename  Output HDF5 file path.
        *
-       * Creates the file, writes all mesh groups and datasets, and
-       * optionally writes the XDMF mixed topology if `setXDMF(true)`
-       * was called.
+       * Creates the file and writes all canonical mesh groups and datasets
+       * (geometry, connectivity, attributes, transformations).
        */
       void print(const boost::filesystem::path& filename) override
       {
@@ -1488,19 +1521,6 @@ namespace Rodin::IO
         this->writeConnectivity(file.get());
         this->writeAttributes(file.get());
         this->writeTransformations(file.get());
-
-        if (m_xdmf)
-        {
-          const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::MeshXDMF, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-          if (!g)
-          {
-            Alert::MemberFunctionException(*this, __func__)
-              << "Failed to create /Mesh/XDMF group."
-              << Alert::Raise;
-          }
-
-          this->writeXDMFTopology(file.get());
-        }
       }
 
     private:
@@ -1729,36 +1749,6 @@ namespace Rodin::IO
           HDF5::writeVectorDataset(file, HDF5::transformationKindPath(d), kind);
         }
       }
-
-      void writeXDMFTopology(hid_t file) const
-      {
-        const auto& mesh = this->getObject();
-        const auto& connectivity = mesh.getConnectivity();
-        const size_t D = connectivity.getDimension();
-
-        std::vector<HDF5::U64> topology;
-        topology.reserve(HDF5::getXDMFMixedTopologySize(mesh));
-
-        for (Index i = 0; i < static_cast<Index>(connectivity.getCount(D)); ++i)
-        {
-          const auto geometry = connectivity.getGeometry(D, i);
-          const auto& key = connectivity.getPolytope(D, i);
-
-          topology.push_back(HDF5::getXDMFMixedTopologyId(geometry));
-
-          if (geometry == Geometry::Polytope::Type::Segment)
-            topology.push_back(static_cast<HDF5::U64>(key.size()));
-
-          for (size_t k = 0; k < key.size(); ++k)
-            topology.push_back(static_cast<HDF5::U64>(key[k]));
-        }
-
-        HDF5::writeVectorDataset(file, HDF5::Path::MeshXDMFTopology, topology);
-        HDF5::writeScalarDataset(file, HDF5::Path::MeshXDMFTopologySize, static_cast<HDF5::U64>(topology.size()));
-      }
-
-    private:
-      bool m_xdmf;
   };
 
   /**
@@ -1885,10 +1875,10 @@ namespace Rodin::IO
    * /GridFunction/Values/Data      — raw DOF vector
    * ```
    *
-   * When XDMF mode is enabled (`setXDMF(true)`), the printer instead
-   * evaluates the grid function at vertices (Node center) or cell centroids
-   * (Cell center) and writes visualization-ready data suitable for
-   * XDMF attribute referencing.
+   * This printer is strictly for canonical Rodin grid function persistence.
+   * It writes the raw DOF vector only. The XDMF visualization path
+   * (IO::XDMF) handles evaluation at vertices/cells separately using
+   * `HDF5::writeXDMFNodeAttribute` / `HDF5::writeXDMFCellAttribute`.
    *
    * Stream-based printing is not supported; only file-path printing is available.
    *
@@ -1924,51 +1914,8 @@ namespace Rodin::IO
        */
       explicit
       GridFunctionPrinter(const ObjectType& gf)
-        : Parent(gf),
-          m_xdmf(false),
-          m_center(HDF5::Center::Node)
+        : Parent(gf)
       {}
-
-      /**
-       * @brief Enables or disables XDMF visualization mode.
-       * @param[in] output  If `true`, writes evaluated vertex/cell data
-       *                    instead of raw DOFs.
-       * @returns Reference to `*this` for method chaining.
-       */
-      GridFunctionPrinter& setXDMF(bool output = true)
-      {
-        m_xdmf = output;
-        return *this;
-      }
-
-      /**
-       * @brief Queries whether XDMF visualization mode is enabled.
-       * @returns `true` if XDMF mode is active.
-       */
-      bool isXDMF() const
-      {
-        return m_xdmf;
-      }
-
-      /**
-       * @brief Sets the data centering for XDMF export.
-       * @param[in] center  Node for vertex-centered or Cell for cell-centered.
-       * @returns Reference to `*this` for method chaining.
-       */
-      GridFunctionPrinter& setCenter(HDF5::Center center)
-      {
-        m_center = center;
-        return *this;
-      }
-
-      /**
-       * @brief Returns the current data centering setting.
-       * @returns The Center value (Node or Cell).
-       */
-      HDF5::Center getCenter() const
-      {
-        return m_center;
-      }
 
       /**
        * @brief Stream-based printing is not supported for HDF5.
@@ -1986,25 +1933,11 @@ namespace Rodin::IO
        * @brief Writes the grid function to a standalone HDF5 field file.
        * @param[in] filename  Output HDF5 file path.
        *
-       * In XDMF mode, writes evaluated vertex/cell data. Otherwise,
-       * writes the raw DOF vector and metadata.
+       * Writes the raw DOF vector and metadata.
        */
       void print(const boost::filesystem::path& filename) override
       {
         const auto& gf = this->getObject();
-
-        if (m_xdmf)
-        {
-          switch (m_center)
-          {
-            case HDF5::Center::Node:
-              HDF5::writeXDMFNodeAttribute(gf, filename);
-              return;
-            case HDF5::Center::Cell:
-              HDF5::writeXDMFCellAttribute(gf, filename);
-              return;
-          }
-        }
 
         const auto file = HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
         if (!file)
@@ -2051,10 +1984,6 @@ namespace Rodin::IO
         HDF5::writeScalarDataset(file.get(), HDF5::Path::GridFunctionMetaSize, static_cast<HDF5::U64>(gf.getSize()));
         HDF5::writeScalarDataset(file.get(), HDF5::Path::GridFunctionMetaDimension, static_cast<HDF5::U64>(gf.getDimension()));
       }
-
-    private:
-      bool m_xdmf;
-      HDF5::Center m_center;
   };
 }
 

@@ -649,14 +649,15 @@ namespace Rodin::IO
     rec.dimension = gf.getDimension();
     rec.write = [&gf](const boost::filesystem::path& path, Center center)
     {
-      IO::GridFunctionPrinter<
-          IO::FileFormat::HDF5,
-          typename std::remove_cvref_t<GridFunctionType>::FESType,
-          typename std::remove_cvref_t<GridFunctionType>::DataType>(gf)
-        .setXDMF(true)
-        .setCenter(center == Center::Node ? IO::HDF5::Center::Node
-                                          : IO::HDF5::Center::Cell)
-        .print(path);
+      switch (center)
+      {
+        case Center::Node:
+          HDF5::writeXDMFNodeAttribute(gf, path);
+          return;
+        case Center::Cell:
+          HDF5::writeXDMFCellAttribute(gf, path);
+          return;
+      }
     };
     gr.attributes.push_back(std::move(rec));
     return *this;
