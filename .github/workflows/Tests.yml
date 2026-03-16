@@ -237,7 +237,7 @@ jobs:
       - name: Run manufactured tests (coverage build)
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
-          -L manufactured
+          -L manufactured -LE slow
           --output-on-failure
           -j 1
 
