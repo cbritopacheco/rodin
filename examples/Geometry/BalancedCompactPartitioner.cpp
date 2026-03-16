@@ -21,7 +21,7 @@ int main()
     mesh.setAttribute({ 2, idx }, part + 1);
   }
 
-  mesh.save("Partitioned.mesh");
+  mesh.save("Partitioned.mesh", IO::FileFormat::MFEM);
 
   return 0;
 }

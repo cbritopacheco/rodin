@@ -48,7 +48,7 @@ int main(int, char**)
   // Define mesh
   MMG::Mesh mesh;
   mesh.load("Q1.medit.mesh", IO::FileFormat::MEDIT);
-  mesh.save("Q.mesh");
+  mesh.save("Q.mesh", IO::FileFormat::MFEM);
 
   // Define finite element spaces
   P1 vh(mesh);
@@ -73,10 +73,10 @@ int main(int, char**)
 
   GridFunction conductivity(vh);
   conductivity = gamma;
-  conductivity.save("Conductivity.gf");
+  conductivity.save("Conductivity.gf", IO::FileFormat::MFEM);
 
   conductivity = gamma_e;
-  conductivity.save("Conductivity_E.gf");
+  conductivity.save("Conductivity_E.gf", IO::FileFormat::MFEM);
 
   RealFunction phi = 1;
 
@@ -99,12 +99,12 @@ int main(int, char**)
   SparseLU(poisson).solve();
   const auto u0 = u.getSolution();
 
-  u0.save("Background.gf");
+  u0.save("Background.gf", IO::FileFormat::MFEM);
 
   Alert::Info() << "Computing its gradient." << Alert::Raise;
   GridFunction g0(gh);
   g0 = Grad(u0);
-  g0.save("BackgroundGradient.gf");
+  g0.save("BackgroundGradient.gf", IO::FileFormat::MFEM);
 
   // Solve the perturbed problem
   Alert::Info() << "Solving perturbed equation." << Alert::Raise;
@@ -112,11 +112,11 @@ int main(int, char**)
   SparseLU(perturbed).solve();
   const auto u_e = u.getSolution();
   GridFunction g_e(gh);
-  u_e.save("Perturbed.gf");
+  u_e.save("Perturbed.gf", IO::FileFormat::MFEM);
 
   Alert::Info() << "Computing its gradient." << Alert::Raise;
   g_e = Grad(u_e);
-  g_e.save("PerturbedGradient.gf");
+  g_e.save("PerturbedGradient.gf", IO::FileFormat::MFEM);
 
   GridFunction diff(vh);
   GridFunction gdiff(gh);

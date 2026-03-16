@@ -94,7 +94,7 @@ int main(int argc, char** argv)
   std::snprintf(filename, sizeof(filename), "mesh.%06d", world.rank());
   if (world.rank() == ROOT_RANK)
     Alert::Info() << "Saving mesh to " << "mesh.xxxxxx" << "." << Alert::Raise;
-  mesh.save(filename);
+  mesh.save(filename, IO::FileFormat::MFEM);
 
   if (world.rank() == ROOT_RANK)
     Alert::Info() << "Computing mesh connectivity..." << Alert::Raise;
@@ -161,7 +161,7 @@ int main(int argc, char** argv)
 
 
     xdmf.write();
-    u.getSolution().save(filename);
+    u.getSolution().save(filename, IO::FileFormat::MFEM);
   }
 
   xdmf.close();

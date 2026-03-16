@@ -238,7 +238,7 @@ int main(int, char**)
         });
 
     dOmega.save("dOmega.mesh", IO::FileFormat::MEDIT);
-    dOmega.save("dOmega.mfem.mesh");
+    dOmega.save("dOmega.mfem.mesh", IO::FileFormat::MFEM);
 
     Alert::Info() << "Building finite element spaces..." << Alert::Raise;
     RealFES sfes(mesh);
@@ -280,8 +280,8 @@ int main(int, char**)
           ;
     Solver::CG(state).solve();
 
-    u.getSolution().save("u.gf");
-    mesh.save("u.mesh");
+    u.getSolution().save("u.gf", IO::FileFormat::MFEM);
+    mesh.save("u.mesh", IO::FileFormat::MFEM);
 
     Alert::Info() << "Solving adjoint equation..." << Alert::Raise;
     TrialFunction p(vfes);
@@ -292,8 +292,8 @@ int main(int, char**)
             + BoundaryIntegral(he * p, q);
     Solver::CG(adjoint).solve();
 
-    p.getSolution().save("p.gf");
-    mesh.save("p.mesh");
+    p.getSolution().save("p.gf", IO::FileFormat::MFEM);
+    mesh.save("p.mesh", IO::FileFormat::MFEM);
 
     Alert::Info() << "Computing objective..." << Alert::Raise;
     RealGridFunction j(sfes);
@@ -323,8 +323,8 @@ int main(int, char**)
            + tgv * Integral(s, t).over(Support, Unsupported);
       Solver::CG(topo).solve();
 
-      s.getSolution().save("Topo.gf");
-      dsfes.getMesh().save("Topo.mesh");
+      s.getSolution().save("Topo.gf", IO::FileFormat::MFEM);
+      dsfes.getMesh().save("Topo.mesh", IO::FileFormat::MFEM);
 
       Alert::Info() << "Computing nucleation locations..." << Alert::Raise;
       auto cs = locations(s.getSolution());
@@ -341,8 +341,8 @@ int main(int, char**)
       GridFunction conormal(dvfes);
       conormal = Grad(dist);
 
-      conormal.getFiniteElementSpace().getMesh().save("Conormal.mesh");
-      conormal.save("Conormal.gf");
+      conormal.getFiniteElementSpace().getMesh().save("Conormal.mesh", IO::FileFormat::MFEM);
+      conormal.save("Conormal.gf", IO::FileFormat::MFEM);
 
       Alert::Info() << "Computing shape gradient..." << Alert::Raise;
 
@@ -363,15 +363,15 @@ int main(int, char**)
       norm = Frobenius(theta.getSolution());
       theta.getSolution() /= norm.max();
 
-      dOmega.save("Theta.mesh");
-      theta.getSolution().save("Theta.gf");
+      dOmega.save("Theta.mesh", IO::FileFormat::MFEM);
+      theta.getSolution().save("Theta.gf", IO::FileFormat::MFEM);
 
       Alert::Info() << "Advecting support..." << Alert::Raise;
       MMG::Advect(dist, theta.getSolution()).step(dt);
     }
 
-    dist.save("dist.gf");
-    dist.getFiniteElementSpace().getMesh().save("dist.mesh");
+    dist.save("dist.gf", IO::FileFormat::MFEM);
+    dist.getFiniteElementSpace().getMesh().save("dist.mesh", IO::FileFormat::MFEM);
 
     Alert::Info() << "Meshing the support..." << Alert::Raise;
     try
@@ -397,8 +397,8 @@ int main(int, char**)
       continue;
     }
 
-    dist.save("dist.gf");
-    dist.getFiniteElementSpace().getMesh().save("dist.mesh");
+    dist.save("dist.gf", IO::FileFormat::MFEM);
+    dist.getFiniteElementSpace().getMesh().save("dist.mesh", IO::FileFormat::MFEM);
 
     Alert::Info() << "Saving files..." << Alert::Raise;
     mesh.save("Omega.mesh", IO::FileFormat::MEDIT);

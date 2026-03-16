@@ -52,8 +52,8 @@ int main(int, char**)
 
   // Load mesh
   MMG::Mesh Omega;
-  Omega.load(meshFile);
-  Omega.save("Omega0.mesh");
+  Omega.load(meshFile, IO::FileFormat::MFEM);
+  Omega.save("Omega0.mesh", IO::FileFormat::MFEM);
 
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
@@ -95,8 +95,8 @@ int main(int, char**)
     Solver::SparseLU(hilbert).solve();
 
 
-    g.getSolution().save("Theta.gf");
-    Omega.save("Theta.mesh");
+    g.getSolution().save("Theta.gf", IO::FileFormat::MFEM);
+    Omega.save("Theta.mesh", IO::FileFormat::MFEM);
 
     const auto& dJ = g.getSolution();
 
@@ -114,7 +114,7 @@ int main(int, char**)
     MMG::Optimizer().setHMax(hmax).setHMin(hmin).optimize(Omega);
 
     // Save mesh
-    Omega.save("Omega.mesh");
+    Omega.save("Omega.mesh", IO::FileFormat::MFEM);
   }
 
   Alert::Info() << "Saved final mesh to Omega.mesh" << Alert::Raise;

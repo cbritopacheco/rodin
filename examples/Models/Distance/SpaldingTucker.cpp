@@ -54,8 +54,8 @@ int main(int, char**)
   auto ls = Distance::SignedPoisson()(5, 3, vh);
   auto dist = Distance::SpaldingTucker()(ls);
 
-  dist.save("miaow.gf");
-  mesh.save("miaow.mesh");
+  dist.save("miaow.gf", IO::FileFormat::MFEM);
+  mesh.save("miaow.mesh", IO::FileFormat::MFEM);
 
   return 0;
 }

@@ -237,8 +237,8 @@ int main(int, char**)
     Alert::Info() << "Solving state equation..." << Alert::Raise;
     Solver::CG(state).solve();
 
-    u.getSolution().save("u.gf");
-    mesh.save("u.mesh");
+    u.getSolution().save("u.gf", IO::FileFormat::MFEM);
+    mesh.save("u.mesh", IO::FileFormat::MFEM);
 
     Alert::Info() << "Solving adjoint equation..." << Alert::Raise;
     TrialFunction p(vfes);
@@ -249,8 +249,8 @@ int main(int, char**)
             - BoundaryIntegral(heClamp * p, q).over(Gamma, Clamp);
     Solver::CG(adjoint).solve();
 
-    p.getSolution().save("p.gf");
-    mesh.save("p.mesh");
+    p.getSolution().save("p.gf", IO::FileFormat::MFEM);
+    mesh.save("p.mesh", IO::FileFormat::MFEM);
 
     Alert::Info() << "Computing objective..." << Alert::Raise;
     RealGridFunction j(sfes);
@@ -281,8 +281,8 @@ int main(int, char**)
            + tgv * Integral(s, t).over(Fixed, GammaT, Clamp, Locator);
       Solver::CG(topo).solve();
 
-      s.getSolution().save("s.gf");
-      dsfes.getMesh().save("s.mesh");
+      s.getSolution().save("s.gf", IO::FileFormat::MFEM);
+      dsfes.getMesh().save("s.mesh", IO::FileFormat::MFEM);
 
       Alert::Info() << "Computing nucleation locations..." << Alert::Raise;
       auto cs = locations(s.getSolution());
@@ -302,8 +302,8 @@ int main(int, char**)
            + tgv * Integral(s, t).over(Fixed, GammaT, Clamp, Locator);
       Solver::CG(topo).solve();
 
-      s.getSolution().save("s.gf");
-      dsfes.getMesh().save("s.mesh");
+      s.getSolution().save("s.gf", IO::FileFormat::MFEM);
+      dsfes.getMesh().save("s.mesh", IO::FileFormat::MFEM);
 
       Alert::Info() << "Computing nucleation locations..." << Alert::Raise;
       auto cs = locations(s.getSolution());
@@ -338,8 +338,8 @@ int main(int, char**)
       norm = Frobenius(theta.getSolution());
       theta.getSolution() /= norm.max();
 
-      dOmega.save("Theta.mesh");
-      theta.getSolution().save("Theta.gf");
+      dOmega.save("Theta.mesh", IO::FileFormat::MFEM);
+      theta.getSolution().save("Theta.gf", IO::FileFormat::MFEM);
 
       if (geometricStepLocator)
       {

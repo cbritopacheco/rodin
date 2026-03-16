@@ -93,8 +93,8 @@ int main(int argc, char** argv)
 
     Alert::Info() << "Saving solution and mesh..." << Alert::Raise;
 
-    u.getSolution().save("Poisson.gf");
-    mesh.save("Poisson.mesh");
+    u.getSolution().save("Poisson.gf", IO::FileFormat::MFEM);
+    mesh.save("Poisson.mesh", IO::FileFormat::MFEM);
 
     Alert::Success() << "Saved solution and mesh to Poisson.gf and Poisson.mesh." << Alert::Raise;
   }

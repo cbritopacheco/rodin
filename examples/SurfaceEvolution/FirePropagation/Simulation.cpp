@@ -236,13 +236,13 @@ class Environment
       std::cout << "advect: " << dt << "\n";
       MMG::Advect(m_fireDist, m_flame.getDirection()).step(dt);
 
-      m_fireDist.save("dist.gf");
-      m_topography.save("dist.mesh");
+      m_fireDist.save("dist.gf", IO::FileFormat::MFEM);
+      m_topography.save("dist.mesh", IO::FileFormat::MFEM);
       GridFunction grad(m_vfes);
       grad = Grad(m_fireDist);
       m_curvature = Div(grad);
-      m_curvature.save("curvature.gf");
-      m_curvature.getFiniteElementSpace().getMesh().save("curvature.mesh");
+      m_curvature.save("curvature.gf", IO::FileFormat::MFEM);
+      m_curvature.getFiniteElementSpace().getMesh().save("curvature.mesh", IO::FileFormat::MFEM);
 
       std::cout << "mmgls\n";
       m_topography = MMG::ImplicitDomainMesher().setHMax(hmax)
@@ -327,7 +327,7 @@ int main()
 {
   MMG::Mesh topography;
   // topography.load("/Users/carlos/Projects/rodin/build/Topography.mesh");
-  topography.load(meshfile);
+  topography.load(meshfile, IO::FileFormat::MFEM);
 
   topography.getConnectivity().compute(1, 0);
 
@@ -442,7 +442,7 @@ int main()
   Real t = 0;
   for (int i = 0; i < std::numeric_limits<int>::max(); i++)
   {
-    topography.save("FirePropagation.mfem.mesh");
+    topography.save("FirePropagation.mfem.mesh", IO::FileFormat::MFEM);
     Alert::Info info;
     info << "i: " << i << " | "
          << "t: " << (t / 60) << "m";

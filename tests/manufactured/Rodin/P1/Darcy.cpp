@@ -184,8 +184,8 @@ namespace Rodin::Tests::Manufactured::Darcy
 
     // Compute the L^2 error for pressure.
     GridFunction diff_p(ph);
-    p.getSolution().save("p.gf");
-    mesh.save("mesh.mesh");
+    p.getSolution().save("p.gf", IO::FileFormat::MFEM);
+    mesh.save("mesh.mesh", IO::FileFormat::MFEM);
     std::exit(1);
     diff_p = Pow(p.getSolution() - p_exact, 2);
     diff_p.setWeights();

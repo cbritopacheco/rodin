@@ -63,7 +63,7 @@ int main(int, char**)
 
   // Load mesh
   MMG::Mesh th;
-  th.load(meshFile);
+  th.load(meshFile, IO::FileFormat::MFEM);
 
   MMG::Optimizer().setHMax(hmax).setHMin(hmin).optimize(th);
 
@@ -111,7 +111,7 @@ int main(int, char**)
 
     Alert::Info() << "   | Trimming mesh." << Alert::Raise;
     SubMesh trimmed = th.trim(exterior);
-    trimmed.save("Omega.mesh");
+    trimmed.save("Omega.mesh", IO::FileFormat::MFEM);
 
     Alert::Info() << "   | Building finite element spaces." << Alert::Raise;
     const size_t d = th.getSpaceDimension();
@@ -133,8 +133,8 @@ int main(int, char**)
                + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
     Solver::CG(elasticity).solve();
 
-    u.getSolution().save("State.gf");
-    trimmed.save("State.mesh");
+    u.getSolution().save("State.gf", IO::FileFormat::MFEM);
+    trimmed.save("State.mesh", IO::FileFormat::MFEM);
 
     Alert::Info() << "   | Computing shape gradient." << Alert::Raise;
     auto jac = Jacobian(u.getSolution());
@@ -155,8 +155,8 @@ int main(int, char**)
     Solver::CG(hilbert).solve();
 
     auto& dJ = g.getSolution();
-    dJ.save("dJ.gf");
-    vh.getMesh().save("dJ.mesh");
+    dJ.save("dJ.gf", IO::FileFormat::MFEM);
+    vh.getMesh().save("dJ.mesh", IO::FileFormat::MFEM);
 
     // Update objective
     double objective = compliance(u.getSolution()) + ell * th.getArea(interior);
@@ -172,8 +172,8 @@ int main(int, char**)
                            .solve()
                            .sign();
 
-    th.save("Distance.mesh");
-    dist.save("Distance.gf");
+    th.save("Distance.mesh", IO::FileFormat::MFEM);
+    dist.save("Distance.gf", IO::FileFormat::MFEM);
 
     // Advect the level set function
     Alert::Info() << "   | Advecting the distance function." << Alert::Raise;
@@ -186,8 +186,8 @@ int main(int, char**)
 
     Advection::Lagrangian(advect, test, dist, dJ).step(dt);
 
-    th.save("Advect.mesh");
-    advect.getSolution().save("Advect.gf");
+    th.save("Advect.mesh", IO::FileFormat::MFEM);
+    advect.getSolution().save("Advect.gf", IO::FileFormat::MFEM);
 
     // ------------------------------------------------------------------------
     // XDMF snapshot for the current iteration

@@ -14,7 +14,7 @@ int main(int, char**)
 {
   const char* filename = "../resources/examples/Geometry/CCL.mfem.mesh";
   Mesh mesh;
-  mesh.load(filename);
+  mesh.load(filename, IO::FileFormat::MFEM);
   mesh.getConnectivity().compute(2, 2);
 
   Alert::Info() << "Performing CCL on mesh attributes..." << Alert::Raise;
@@ -37,7 +37,7 @@ int main(int, char**)
 
   Alert::Info() << "Saved mesh to CCL.mesh" << Alert::Raise;
 
-  mesh.save("CCL.mesh");
+  mesh.save("CCL.mesh", IO::FileFormat::MFEM);
 
   return 0;
 }

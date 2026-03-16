@@ -475,7 +475,7 @@ namespace Rodin::Variational
        */
       Derived& load(
           const boost::filesystem::path& filename,
-          IO::FileFormat fmt = IO::FileFormat::MFEM)
+          IO::FileFormat fmt)
       {
         switch (fmt)
         {
@@ -528,7 +528,7 @@ namespace Rodin::Variational
 
       void save(
           const boost::filesystem::path& filename,
-          IO::FileFormat fmt = IO::FileFormat::MFEM) const
+          IO::FileFormat fmt) const
       {
         switch (fmt)
         {
