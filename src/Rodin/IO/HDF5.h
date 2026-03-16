@@ -16,8 +16,13 @@
  *   attributes, and polytope transformations.
  * - Standalone grid function field-file serialization (one `.h5` per grid
  *   function), without mesh or finite element space embedding.
- * - Utility functions for XDMF mixed-topology stream generation, used by
- *   the IO::XDMF visualization writer.
+ * - Utility functions for XDMF mixed-topology stream generation and
+ *   minimal visualization mesh export, used by the IO::XDMF writer.
+ *   These helpers (`writeXDMFMesh`, `writeXDMFTopology`, `writeXDMFVertices`,
+ *   `writeXDMFRegionAttribute`, `writeXDMFNodeAttribute`,
+ *   `writeXDMFCellAttribute`) write only the minimal HDF5 datasets needed
+ *   by ParaView/XDMF, and are completely separate from the canonical
+ *   persistence path.
  *
  * ## HDF5 Mesh Layout
  *
@@ -49,12 +54,16 @@
  *     Kind                            [n_d] (I32)
  * ```
  *
- * ## XDMF Derived Datasets (written by IO::XDMF, not by MeshPrinter)
+ * ## XDMF Visualization Datasets (written by IO::XDMF via writeXDMFMesh)
  *
  * ```
- * /Mesh/XDMF                         (appended to mesh file by XDMF writer)
- *   Topology                          [mixed_stream_size] (U64)
- *   TopologySize                      scalar (U64)
+ * /Mesh                               (visualization-only file, no canonical persistence)
+ *   /Geometry
+ *     Vertices                          [nv × sdim] (F64)
+ *   /XDMF
+ *     Topology                          [mixed_stream_size] (U64)
+ *     TopologySize                      scalar (U64)
+ *   /Attributes/{d}                     [n_d] (U64)
  * ```
  *
  * ## HDF5 GridFunction Layout (standalone field file)
@@ -847,37 +856,22 @@ namespace Rodin::IO
     }
 
     /**
-     * @brief Writes the XDMF mixed-topology stream to an existing HDF5 file.
+     * @brief Writes the XDMF mixed-topology stream to an open HDF5 file.
      *
-     * Opens the given HDF5 file for read/write access, creates the
-     * `/Mesh/XDMF` group, and writes the mixed-topology dataset at
-     * `/Mesh/XDMF/Topology` and its size at `/Mesh/XDMF/TopologySize`.
-     *
-     * This function is used by the XDMF visualization pipeline to append
-     * derived topology data to a mesh file that was previously written by
-     * the canonical `MeshPrinter<HDF5>` path.
+     * Creates the `/Mesh/XDMF` group and writes the mixed-topology dataset
+     * at `/Mesh/XDMF/Topology` and its size at `/Mesh/XDMF/TopologySize`.
      *
      * @note Only local (sequential) meshes are supported. The mesh parameter
      *       is internally cast to `Geometry::Mesh<Context::Local>`.
      *
-     * @param[in] filename  Path to an existing HDF5 mesh file.
-     * @param[in] mesh      Local mesh whose cells provide the topology data.
+     * @param[in] file  Open HDF5 file identifier with write access.
+     * @param[in] mesh  Local mesh whose cells provide the topology data.
      */
     inline
-    void writeXDMFTopology(
-        const boost::filesystem::path& filename,
-        const Geometry::MeshBase& mesh)
+    void writeXDMFTopology(hid_t file, const Geometry::MeshBase& mesh)
     {
-      const auto file = File(H5Fopen(filename.c_str(), H5F_ACC_RDWR, H5P_DEFAULT));
-      if (!file)
       {
-        Alert::Exception()
-          << "Failed to open HDF5 file for XDMF topology: " << filename
-          << Alert::Raise;
-      }
-
-      {
-        const auto g = Group(H5Gcreate2(file.get(), Path::MeshXDMF, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto g = Group(H5Gcreate2(file, Path::MeshXDMF, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         if (!g)
         {
           Alert::Exception()
@@ -907,8 +901,167 @@ namespace Rodin::IO
           topology.push_back(static_cast<U64>(key[k]));
       }
 
-      writeVectorDataset(file.get(), Path::MeshXDMFTopology, topology);
-      writeScalarDataset(file.get(), Path::MeshXDMFTopologySize, static_cast<U64>(topology.size()));
+      writeVectorDataset(file, Path::MeshXDMFTopology, topology);
+      writeScalarDataset(file, Path::MeshXDMFTopologySize, static_cast<U64>(topology.size()));
+    }
+
+    /**
+     * @brief Writes the XDMF mixed-topology stream to an existing HDF5 file.
+     *
+     * Opens the given HDF5 file for read/write access, creates the
+     * `/Mesh/XDMF` group, and writes the mixed-topology dataset at
+     * `/Mesh/XDMF/Topology` and its size at `/Mesh/XDMF/TopologySize`.
+     *
+     * @note Only local (sequential) meshes are supported. The mesh parameter
+     *       is internally cast to `Geometry::Mesh<Context::Local>`.
+     *
+     * @param[in] filename  Path to an existing HDF5 mesh file.
+     * @param[in] mesh      Local mesh whose cells provide the topology data.
+     */
+    inline
+    void writeXDMFTopology(
+        const boost::filesystem::path& filename,
+        const Geometry::MeshBase& mesh)
+    {
+      const auto file = File(H5Fopen(filename.c_str(), H5F_ACC_RDWR, H5P_DEFAULT));
+      if (!file)
+      {
+        Alert::Exception()
+          << "Failed to open HDF5 file for XDMF topology: " << filename
+          << Alert::Raise;
+      }
+
+      writeXDMFTopology(file.get(), mesh);
+    }
+
+    /**
+     * @brief Writes vertex coordinate data to an open HDF5 file for XDMF
+     *        visualization.
+     *
+     * Creates the `/Mesh/Geometry` group and writes the vertex coordinate
+     * matrix at `/Mesh/Geometry/Vertices` as a `[nv × sdim]` dataset.
+     *
+     * @param[in] file  Open HDF5 file identifier with write access.
+     * @param[in] mesh  Local mesh whose vertex coordinates are exported.
+     */
+    inline
+    void writeXDMFVertices(hid_t file, const Geometry::MeshBase& mesh)
+    {
+      {
+        const auto g = Group(H5Gcreate2(file, Path::MeshGeometry, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        if (!g)
+        {
+          Alert::Exception()
+            << "Failed to create /Mesh/Geometry group."
+            << Alert::Raise;
+        }
+      }
+
+      const auto& localMesh = static_cast<const Geometry::Mesh<Context::Local>&>(mesh);
+      const size_t nv = localMesh.getVertexCount();
+      const size_t sdim = localMesh.getSpaceDimension();
+
+      std::vector<F64> packed(nv * sdim);
+      for (Index i = 0; i < static_cast<Index>(nv); ++i)
+      {
+        const auto x = localMesh.getVertexCoordinates(i);
+        for (size_t d = 0; d < sdim; ++d)
+          packed[static_cast<size_t>(i) * sdim + d] = static_cast<F64>(x(d));
+      }
+
+      writeMatrixDataset(
+          file,
+          Path::MeshGeometryVertices,
+          packed,
+          static_cast<hsize_t>(nv),
+          static_cast<hsize_t>(sdim));
+    }
+
+    /**
+     * @brief Writes polytope region attributes to an open HDF5 file for
+     *        XDMF visualization.
+     *
+     * Creates the `/Mesh/Attributes` group and writes an attribute array
+     * for each topological dimension from 0 to the mesh dimension.
+     *
+     * @param[in] file  Open HDF5 file identifier with write access.
+     * @param[in] mesh  Local mesh whose attributes are exported.
+     */
+    inline
+    void writeXDMFRegionAttribute(hid_t file, const Geometry::MeshBase& mesh)
+    {
+      {
+        const auto g = Group(H5Gcreate2(file, Path::MeshAttributes, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        if (!g)
+        {
+          Alert::Exception()
+            << "Failed to create /Mesh/Attributes group."
+            << Alert::Raise;
+        }
+      }
+
+      const auto& localMesh = static_cast<const Geometry::Mesh<Context::Local>&>(mesh);
+      const auto& connectivity = localMesh.getConnectivity();
+      const size_t D = connectivity.getDimension();
+
+      for (size_t d = 0; d <= D; ++d)
+      {
+        std::vector<U64> attrs(connectivity.getCount(d), NullAttributeMarker);
+        for (Index i = 0; i < static_cast<Index>(connectivity.getCount(d)); ++i)
+        {
+          if (const auto attr = localMesh.getAttribute(d, i))
+            attrs[static_cast<size_t>(i)] = static_cast<U64>(*attr);
+        }
+        writeVectorDataset(file, attributePath(d), attrs);
+      }
+    }
+
+    /**
+     * @brief Writes a minimal XDMF visualization mesh file.
+     *
+     * Creates a new HDF5 file containing only the datasets required for
+     * XDMF/ParaView visualization:
+     * - `/Mesh/Geometry/Vertices` — vertex coordinates
+     * - `/Mesh/XDMF/Topology` — XDMF mixed-topology stream
+     * - `/Mesh/XDMF/TopologySize` — length of the topology stream
+     * - `/Mesh/Attributes/{d}` — polytope region labels
+     *
+     * This function does **not** write the full canonical Rodin persistence
+     * data (connectivity CSR, incidence, state, transformations). Use
+     * `MeshPrinter<FileFormat::HDF5>` for full persistence.
+     *
+     * @param[in] filename  Output HDF5 file path.
+     * @param[in] mesh      Local mesh to export for visualization.
+     *
+     * @see writeXDMFTopology, writeXDMFVertices, writeXDMFRegionAttribute,
+     *      MeshPrinter<FileFormat::HDF5, Context::Local>
+     */
+    inline
+    void writeXDMFMesh(
+        const boost::filesystem::path& filename,
+        const Geometry::MeshBase& mesh)
+    {
+      const auto file = File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+      if (!file)
+      {
+        Alert::Exception()
+          << "Failed to create HDF5 file for XDMF mesh: " << filename
+          << Alert::Raise;
+      }
+
+      {
+        const auto g = Group(H5Gcreate2(file.get(), Path::Mesh, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        if (!g)
+        {
+          Alert::Exception()
+            << "Failed to create /Mesh group."
+            << Alert::Raise;
+        }
+      }
+
+      writeXDMFVertices(file.get(), mesh);
+      writeXDMFTopology(file.get(), mesh);
+      writeXDMFRegionAttribute(file.get(), mesh);
     }
 
     /**

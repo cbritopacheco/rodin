@@ -158,8 +158,8 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_IO_HDF5, XDMFVisualizationTopology)
   {
-    // The XDMF visualization path must write /Mesh/XDMF/Topology
-    // to the mesh HDF5 file (separate from canonical persistence).
+    // The XDMF visualization path must write only minimal visualization data
+    // to the mesh HDF5 file — not the full canonical Rodin persistence.
     const boost::filesystem::path testDir = "/tmp/rodin_xdmf_topo_test";
     boost::filesystem::create_directories(testDir);
     const boost::filesystem::path stem = testDir / "vis";
@@ -180,14 +180,20 @@ namespace Rodin::Tests::Unit
     hid_t h5 = H5Fopen(meshH5.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
     ASSERT_GE(h5, 0);
 
-    // Canonical mesh data should be present (written by MeshPrinter)
+    // Visualization-only data should be present
+    EXPECT_GE(H5Lexists(h5, "/Mesh", H5P_DEFAULT), 1);
+    EXPECT_GE(H5Lexists(h5, "/Mesh/Geometry", H5P_DEFAULT), 1);
     EXPECT_GE(H5Lexists(h5, "/Mesh/Geometry/Vertices", H5P_DEFAULT), 1);
-    EXPECT_GE(H5Lexists(h5, "/Mesh/Connectivity", H5P_DEFAULT), 1);
-
-    // XDMF-specific topology should ALSO be present (written by XDMF pipeline)
     EXPECT_GE(H5Lexists(h5, "/Mesh/XDMF", H5P_DEFAULT), 1);
     EXPECT_GE(H5Lexists(h5, "/Mesh/XDMF/Topology", H5P_DEFAULT), 1);
     EXPECT_GE(H5Lexists(h5, "/Mesh/XDMF/TopologySize", H5P_DEFAULT), 1);
+    EXPECT_GE(H5Lexists(h5, "/Mesh/Attributes", H5P_DEFAULT), 1);
+
+    // Canonical persistence data must NOT be present — XDMF files are
+    // visualization-only and do not contain full Rodin persistence.
+    EXPECT_EQ(H5Lexists(h5, "/Mesh/Connectivity", H5P_DEFAULT), 0);
+    EXPECT_EQ(H5Lexists(h5, "/Mesh/Transformations", H5P_DEFAULT), 0);
+    EXPECT_EQ(H5Lexists(h5, "/Mesh/Meta", H5P_DEFAULT), 0);
 
     H5Fclose(h5);
     boost::filesystem::remove_all(testDir);

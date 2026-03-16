@@ -13,7 +13,6 @@
 #include "HDF5.h"
 #include "Rodin/Alert/Exception.h"
 #include "Rodin/Alert/MemberFunctionException.h"
-#include "Rodin/Geometry/Mesh.h"
 
 namespace Rodin::IO
 {
@@ -282,13 +281,8 @@ namespace Rodin::IO
               "");
           const auto meshPath = m_stem.parent_path() / meshFile;
 
-          // Write canonical mesh persistence data
-          IO::MeshPrinter<IO::FileFormat::HDF5, Context::Local>(
-              static_cast<const Geometry::Mesh<Context::Local>&>(*gr.mesh))
-            .print(meshPath);
-
-          // Append XDMF-specific derived topology for visualization
-          HDF5::writeXDMFTopology(meshPath, *gr.mesh);
+          // Write minimal XDMF visualization mesh (vertices + topology + attributes)
+          HDF5::writeXDMFMesh(meshPath, *gr.mesh);
 
           gr.staticMeshFile = meshFile;
           gr.staticMeshWritten = true;
@@ -306,13 +300,8 @@ namespace Rodin::IO
             indexStr);
         const auto meshPath = m_stem.parent_path() / meshFile;
 
-        // Write canonical mesh persistence data
-        IO::MeshPrinter<IO::FileFormat::HDF5, Context::Local>(
-            static_cast<const Geometry::Mesh<Context::Local>&>(*gr.mesh))
-          .print(meshPath);
-
-        // Append XDMF-specific derived topology for visualization
-        HDF5::writeXDMFTopology(meshPath, *gr.mesh);
+        // Write minimal XDMF visualization mesh (vertices + topology + attributes)
+        HDF5::writeXDMFMesh(meshPath, *gr.mesh);
 
         snapshot.meshFile = meshFile;
       }
