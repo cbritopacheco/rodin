@@ -99,6 +99,22 @@ namespace Rodin::Solver
       {}
 
       /**
+       * @brief Returns the associated problem.
+       */
+      ProblemBaseType& getProblem() noexcept
+      {
+        return m_pb.get();
+      }
+
+      /**
+       * @brief Returns the associated problem (const).
+       */
+      const ProblemBaseType& getProblem() const noexcept
+      {
+        return m_pb.get();
+      }
+
+      /**
        * @brief Solves the associated problem.
        *
        * This method delegates solving to the problem's solve method,

@@ -13,13 +13,13 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Traits specialization for raw PETSc KSP handle.
+   * @brief Traits specialization for Rodin PETSc KSP wrapper.
    *
-   * Maps the PETSc KSP handle type to the PETSc linear system type so that
-   * NewtonSolverBase<::KSP> can deduce its LinearSystemType.
+   * Maps the Rodin KSP wrapper type to the PETSc linear system type so that
+   * NewtonSolverBase<Rodin::Solver::KSP> can deduce its LinearSystemType.
    */
   template <>
-  struct Traits<::KSP>
+  struct Traits<Solver::KSP>
   {
     using LinearSystemType = PETSc::Math::LinearSystem;
   };
@@ -28,35 +28,29 @@ namespace Rodin::FormLanguage
 namespace Rodin::Solver
 {
   class SNES
-    : public PETSc::Object<::SNES>, public NewtonSolverBase<::KSP>
+    : public PETSc::Object<::SNES>, public NewtonSolverBase<KSP>
   {
     public:
       using HandleType = ::SNES;
 
-      using KSPType = ::KSP;
-
-      using MatrixType = ::Mat;
+      using LinearSystemType = PETSc::Math::LinearSystem;
 
       using VectorType = ::Vec;
-
-      using LinearSystemType = PETSc::Math::LinearSystem;
 
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
 
       using PetscParent = PETSc::Object<HandleType>;
 
-      using NewtonSolverParent = NewtonSolverBase<KSPType>;
+      using NewtonSolverParent = NewtonSolverBase<KSP>;
 
       using NewtonSolverParent::solve;
 
-      using NewtonSolverParent::getLinearSolver;
-
       /**
-       * @brief Construct SNES from a variational problem.
-       * @param pb Variational problem associated to this Newton solver.
-       * @param comm PETSc communicator used to create the SNES handle.
+       * @brief Construct SNES from a Rodin KSP linear solver.
+       * @param ksp Rodin KSP wrapper; the associated ProblemBase is
+       *   obtained via ksp.getProblem().
        */
-      explicit SNES(ProblemBaseType& pb);
+      explicit SNES(KSP& ksp);
 
       virtual ~SNES() override;
 
@@ -68,19 +62,7 @@ namespace Rodin::Solver
                           PetscInt maxIt,
                           PetscInt maxF) noexcept;
 
-      SNES& setKSP(KSPType ksp) noexcept;
-
-      template <class KSPSubclass>
-      SNES& setKSP(KSPSubclass& ksp) noexcept
-      {
-        return setKSP(ksp.getHandle());
-      }
-
       void solve(VectorType& x) override;
-
-      const KSPType& getLinearSolver() const override;
-
-      KSPType& getLinearSolver() override;
 
       HandleType& getHandle() noexcept override;
 
@@ -100,7 +82,6 @@ namespace Rodin::Solver
       ::SNESType m_type;
       PetscReal m_abstol, m_rtol, m_stol;
       PetscInt m_maxIt, m_maxF;
-      KSPType m_kspHandle;
   };
 }
 

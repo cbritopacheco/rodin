@@ -31,6 +31,10 @@ namespace Rodin::Solver
    * u^{k + 1} = u^k + \delta u^k.
    * @f]
    *
+   * The linear solver is passed by reference at construction time.
+   * The associated ProblemBase is obtained from the solver via
+   * LinearSolverBase::getProblem().
+   *
    * @tparam LinearSolver Type of the linear solver used at each Newton step.
    *   Must have a FormLanguage::Traits specialization providing LinearSystemType.
    */
@@ -47,13 +51,30 @@ namespace Rodin::Solver
 
       virtual ~NewtonSolverBase() = default;
 
-      explicit NewtonSolverBase(ProblemBaseType& pb)
-        : m_pb(pb)
+      /**
+       * @brief Constructs the base from a linear solver reference.
+       * @param solver The linear solver whose associated ProblemBase will
+       *   be used for tangent assembly at each Newton iteration.
+       */
+      explicit NewtonSolverBase(LinearSolver& solver)
+        : m_solver(solver)
       {}
 
-      virtual const LinearSolver& getLinearSolver() const = 0;
+      /**
+       * @brief Returns the associated linear solver.
+       */
+      const LinearSolver& getLinearSolver() const noexcept
+      {
+        return m_solver.get();
+      }
 
-      virtual LinearSolver& getLinearSolver() = 0;
+      /**
+       * @brief Returns the associated linear solver.
+       */
+      LinearSolver& getLinearSolver() noexcept
+      {
+        return m_solver.get();
+      }
 
       /**
        * @brief Solve a nonlinear system starting from the initial guess stored in @p x.
@@ -64,16 +85,16 @@ namespace Rodin::Solver
     protected:
       ProblemBaseType& getProblem() noexcept
       {
-        return m_pb.get();
+        return m_solver.get().getProblem();
       }
 
       const ProblemBaseType& getProblem() const noexcept
       {
-        return m_pb.get();
+        return m_solver.get().getProblem();
       }
 
     private:
-      std::reference_wrapper<ProblemBaseType> m_pb;
+      std::reference_wrapper<LinearSolver> m_solver;
   };
 
   /**
@@ -114,15 +135,13 @@ namespace Rodin::Solver
       using LinearSolverType = LinearSolver;
 
       /**
-       * @brief Constructs a NewtonSolver for the given problem.
-       * @param pb The variational problem whose tangent system will be assembled at each iterate.
-       *
-       * The LinearSolver is constructed internally from @p pb; this requires that
-       * LinearSolver is constructible from ProblemBaseType&.
+       * @brief Constructs a NewtonSolver from a linear solver reference.
+       * @param solver The linear solver used at each Newton step. The
+       *   associated ProblemBase is obtained from the solver via
+       *   LinearSolverBase::getProblem().
        */
-      explicit NewtonSolver(ProblemBaseType& pb)
-        : Parent(pb),
-          m_solver(pb),
+      explicit NewtonSolver(LinearSolver& solver)
+        : Parent(solver),
           m_maxIt(100),
           m_atol(1e-12),
           m_rtol(1e-8),
@@ -157,16 +176,6 @@ namespace Rodin::Solver
       Real getDampingFactor() const
       {
         return m_alpha;
-      }
-
-      const LinearSolver& getLinearSolver() const override
-      {
-        return m_solver;
-      }
-
-      LinearSolver& getLinearSolver() override
-      {
-        return m_solver;
       }
 
       Real getAbsoluteTolerance() const
@@ -221,7 +230,7 @@ namespace Rodin::Solver
             return;
           }
 
-          m_solver.solve();
+          this->getLinearSolver().solve();
           x += m_alpha * linearSystem.getSolution();
         }
       }
@@ -233,12 +242,24 @@ namespace Rodin::Solver
       }
 
     private:
-      LinearSolver m_solver;
       size_t m_maxIt;
       Real m_atol;
       Real m_rtol;
       Real m_alpha;
   };
+
+  /**
+   * @ingroup RodinCTAD
+   * @brief CTAD (Class Template Argument Deduction) guide for NewtonSolver.
+   *
+   * Allows writing:
+   * @code{.cpp}
+   * SparseLU solver(tangent);
+   * NewtonSolver newton(solver);
+   * @endcode
+   */
+  template <class LS>
+  NewtonSolver(LS&) -> NewtonSolver<LS>;
 }
 
 #endif

@@ -212,12 +212,13 @@ namespace Rodin::Tests::Manufactured
     x << 0.9, -0.8;
     ManufacturedSparseProblem pb(x, A, b);
 
-    Solver::NewtonSolver<SparseLinearSolver> solver(pb);
-    solver.setMaxIterations(30)
+    SparseLinearSolver linearSolver(pb);
+    Solver::NewtonSolver newton(linearSolver);
+    newton.setMaxIterations(30)
       .setAbsoluteTolerance(1e-12)
       .setRelativeTolerance(1e-12);
 
-    solver.solve(x);
+    newton.solve(x);
 
     EXPECT_NEAR(x(0), xStar(0), 1e-10);
     EXPECT_NEAR(x(1), xStar(1), 1e-10);
@@ -229,12 +230,13 @@ namespace Rodin::Tests::Manufactured
     x << 0.7, 0.3;
     StrongNonlinearSparseProblem pb(x);
 
-    Solver::NewtonSolver<SparseLinearSolver> solver(pb);
-    solver.setMaxIterations(40)
+    SparseLinearSolver linearSolver(pb);
+    Solver::NewtonSolver newton(linearSolver);
+    newton.setMaxIterations(40)
       .setAbsoluteTolerance(1e-12)
       .setRelativeTolerance(1e-12);
 
-    solver.solve(x);
+    newton.solve(x);
 
     EXPECT_NEAR(x(0), 1.0, 1e-10);
     EXPECT_NEAR(x(1), 0.0, 1e-10);

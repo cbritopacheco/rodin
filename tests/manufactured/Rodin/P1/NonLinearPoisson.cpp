@@ -105,16 +105,16 @@ namespace Rodin::Tests::Manufactured::NonLinearPoisson
             + Integral(uCurrent * uCurrent * uCurrent, v)
             + DirichletBC(du, Zero());
 
-    using SparseLinearSystem = Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
-    NewtonSolver<SparseLU<SparseLinearSystem>> solver(tangent);
+    SparseLU solver(tangent);
+    NewtonSolver newton(solver);
     // Start from the fixed-point reference and use a tolerance consistent with
     // that discretized reference. A looser absolute tolerance avoids unstable
     // additional Newton updates once the fixed-point reference is reached.
     constexpr Real newtonAbsoluteTolerance = 5e-2;
-    solver.setMaxIterations(20)
+    newton.setMaxIterations(20)
       .setAbsoluteTolerance(newtonAbsoluteTolerance)
       .setRelativeTolerance(1e-10);
-    solver.solve(uCurrent.getData());
+    newton.solve(uCurrent.getData());
 
     GridFunction diffExact(Vh);
     diffExact = Pow(uCurrent - exact, 2);

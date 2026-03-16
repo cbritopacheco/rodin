@@ -156,12 +156,13 @@ TEST(NewtonSolverTest, SolvesScalarProblemUsingProblemAssembly)
   u << 1.5;
 
   ScalarNonlinearProblem pb(u);
-  Solver::NewtonSolver<DenseLinearSolver> solver(pb);
-  solver.setMaxIterations(30)
+  DenseLinearSolver linearSolver(pb);
+  Solver::NewtonSolver newton(linearSolver);
+  newton.setMaxIterations(30)
     .setAbsoluteTolerance(1e-12)
     .setRelativeTolerance(1e-12);
 
-  solver.solve(u);
+  newton.solve(u);
 
   EXPECT_NEAR(u(0), std::sqrt(2.0), 1e-10);
 }
@@ -176,9 +177,10 @@ TEST(NewtonSolverTest, SingleTemplateParameterDeducesLinearSystem)
 TEST(NewtonSolverTest, PropagatesAssemblyFailure)
 {
   FailingAssembleProblem pb;
-  Solver::NewtonSolver<DenseLinearSolver> solver(pb);
+  DenseLinearSolver linearSolver(pb);
+  Solver::NewtonSolver newton(linearSolver);
 
   Math::Vector<Real> u(1);
   u << 1.0;
-  EXPECT_THROW(solver.solve(u), std::runtime_error);
+  EXPECT_THROW(newton.solve(u), std::runtime_error);
 }

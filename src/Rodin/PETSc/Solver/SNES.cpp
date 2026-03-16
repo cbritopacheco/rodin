@@ -9,17 +9,17 @@
 
 namespace Rodin::Solver
 {
-  SNES::SNES(ProblemBaseType& pb)
-    : NewtonSolverParent(pb),
+  SNES::SNES(KSP& ksp)
+    : NewtonSolverParent(ksp),
       m_snes(PETSC_NULLPTR),
       m_type(SNESNEWTONLS),
       m_abstol(PETSC_DECIDE),
       m_rtol(PETSC_DECIDE),
       m_stol(PETSC_DECIDE),
       m_maxIt(PETSC_DECIDE),
-      m_maxF(PETSC_DECIDE),
-      m_kspHandle(PETSC_NULLPTR)
+      m_maxF(PETSC_DECIDE)
   {
+    auto& pb = ksp.getProblem();
     auto& system = pb.getLinearSystem();
     const auto& comm = system.getCommunicator();
 
@@ -39,6 +39,10 @@ namespace Rodin::Solver
       system.getOperator(),
       &SNES::Jacobian,
       this);
+    assert(ierr == PETSC_SUCCESS);
+
+    // Use the user-provided KSP handle as the SNES sub-solver
+    ierr = SNESSetKSP(m_snes, ksp.getHandle());
     assert(ierr == PETSC_SUCCESS);
     (void) ierr;
   }
@@ -68,12 +72,6 @@ namespace Rodin::Solver
     m_stol = stol;
     m_maxIt = maxIt;
     m_maxF = maxF;
-    return *this;
-  }
-
-  SNES& SNES::setKSP(KSPType ksp) noexcept
-  {
-    m_kspHandle = ksp;
     return *this;
   }
 
@@ -141,28 +139,12 @@ namespace Rodin::Solver
 
     ierr = SNESSetInitialFunction(m_snes, x0);
 
-    if (m_kspHandle)
-    {
-      ierr = SNESSetKSP(m_snes, m_kspHandle);
-      assert(ierr == PETSC_SUCCESS);
-    }
-
     ierr = SNESSetFromOptions(m_snes);
     assert(ierr == PETSC_SUCCESS);
 
     ierr = SNESSolve(m_snes, b, x);
     assert(ierr == PETSC_SUCCESS);
     (void) ierr;
-  }
-
-  const SNES::KSPType& SNES::getLinearSolver() const
-  {
-    return m_kspHandle;
-  }
-
-  SNES::KSPType& SNES::getLinearSolver()
-  {
-    return m_kspHandle;
   }
 
   ::SNES& SNES::getHandle() noexcept
