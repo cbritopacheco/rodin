@@ -743,15 +743,26 @@ namespace Rodin::IO
     rec.name = name;
     rec.center = center;
     rec.dimension = gf.getDimension();
-    rec.write = [&gf](const boost::filesystem::path& path, Center center)
+    // Capture the effective visualization mesh (shard for MPI, local mesh
+    // for serial). The attribute write helpers iterate over this mesh's
+    // vertices/cells, not over gf.getFiniteElementSpace().getMesh(), which
+    // may be a distributed MPI mesh with global counts.
+    const auto* visMesh = gr.mesh;
+    rec.write = [&gf, visMesh](const boost::filesystem::path& path, Center center)
     {
       switch (center)
       {
         case Center::Node:
-          HDF5::writeXDMFNodeAttribute(gf, path);
+          if (visMesh)
+            HDF5::writeXDMFNodeAttribute(gf, *visMesh, path);
+          else
+            HDF5::writeXDMFNodeAttribute(gf, path);
           return;
         case Center::Cell:
-          HDF5::writeXDMFCellAttribute(gf, path);
+          if (visMesh)
+            HDF5::writeXDMFCellAttribute(gf, *visMesh, path);
+          else
+            HDF5::writeXDMFCellAttribute(gf, path);
           return;
       }
     };

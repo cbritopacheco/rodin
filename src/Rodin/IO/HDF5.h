@@ -1378,6 +1378,246 @@ namespace Rodin::IO
             static_cast<hsize_t>(vdim));
       }
     }
+    /**
+     * @brief Writes a grid function as vertex-centered (nodal) data to an
+     *        HDF5 file for XDMF visualization, evaluated on an explicit mesh.
+     *
+     * This overload allows the grid function to be evaluated on a mesh that
+     * differs from `gf.getFiniteElementSpace().getMesh()`. This is essential
+     * for distributed (MPI) visualization where the grid function is defined
+     * on a distributed mesh but visualization data must be written per-shard.
+     *
+     * @tparam GridFunctionType  Concrete grid function type.
+     * @param[in] gf        Grid function to export.
+     * @param[in] visMesh   Mesh to iterate over for vertex coordinates.
+     * @param[in] filename  Output HDF5 file path.
+     */
+    template <class GridFunctionType>
+    void writeXDMFNodeAttribute(
+        const GridFunctionType& gf,
+        const Geometry::MeshBase& visMesh,
+        const boost::filesystem::path& filename)
+    {
+      using FESType = typename FormLanguage::Traits<GridFunctionType>::FESType;
+      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
+      const size_t nv = visMesh.getVertexCount();
+      const size_t vdim = gf.getDimension();
+
+      const auto file = HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+      if (!file)
+      {
+        Alert::Exception()
+          << "Failed to create HDF5 XDMF node attribute file: " << filename
+          << Alert::Raise;
+      }
+
+      {
+        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunction, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        if (!group)
+        {
+          Alert::Exception()
+            << "Failed to create /GridFunction group."
+            << Alert::Raise;
+        }
+      }
+      {
+        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunctionMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        if (!group)
+        {
+          Alert::Exception()
+            << "Failed to create /GridFunction/Meta group."
+            << Alert::Raise;
+        }
+      }
+      {
+        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunctionValues, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        if (!group)
+        {
+          Alert::Exception()
+            << "Failed to create /GridFunction/Values group."
+            << Alert::Raise;
+        }
+      }
+
+      HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaSize, static_cast<HDF5::U64>(nv));
+      HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaDimension, static_cast<HDF5::U64>(vdim));
+
+      const Geometry::Polytope::Traits ts(Geometry::Polytope::Type::Point);
+
+      if constexpr (std::is_same_v<RangeType, ScalarType>)
+      {
+        std::vector<HDF5::F64> values(nv);
+        for (auto it = visMesh.getVertex(); !it.end(); ++it)
+        {
+          const Index i = it->getIndex();
+          const Geometry::Point p(*it, ts.getVertex(0), it->getCoordinates());
+          values[static_cast<size_t>(i)] = static_cast<HDF5::F64>(gf(p));
+        }
+
+        HDF5::writeVectorDataset(file.get(), Path::GridFunctionValuesData, values);
+      }
+      else
+      {
+        std::vector<HDF5::F64> values(nv * vdim);
+        for (auto it = visMesh.getVertex(); !it.end(); ++it)
+        {
+          const Index i = it->getIndex();
+          const Geometry::Point p(*it, ts.getVertex(0), it->getCoordinates());
+          const auto value = gf(p);
+
+          for (size_t c = 0; c < vdim; ++c)
+            values[static_cast<size_t>(i) * vdim + c] = static_cast<HDF5::F64>(value[c]);
+        }
+
+        HDF5::writeMatrixDataset(
+            file.get(),
+            Path::GridFunctionValuesData,
+            values,
+            static_cast<hsize_t>(nv),
+            static_cast<hsize_t>(vdim));
+      }
+    }
+
+    /**
+     * @brief Writes a grid function as cell-centered data to an HDF5 file
+     *        for XDMF visualization, evaluated on an explicit mesh.
+     *
+     * This overload allows the grid function to be evaluated on a mesh that
+     * differs from `gf.getFiniteElementSpace().getMesh()`. This is essential
+     * for distributed (MPI) visualization where the grid function is defined
+     * on a distributed mesh but visualization data must be written per-shard.
+     *
+     * @tparam GridFunctionType  Concrete grid function type.
+     * @param[in] gf        Grid function to export.
+     * @param[in] visMesh   Mesh to iterate over for cell topology.
+     * @param[in] filename  Output HDF5 file path.
+     */
+    template <class GridFunctionType>
+    void writeXDMFCellAttribute(
+        const GridFunctionType& gf,
+        const Geometry::MeshBase& visMesh,
+        const boost::filesystem::path& filename)
+    {
+      using FESType = typename FormLanguage::Traits<GridFunctionType>::FESType;
+      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
+      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
+
+      const size_t nc = visMesh.getCellCount();
+      const size_t vdim = gf.getDimension();
+      const size_t D = visMesh.getDimension();
+      const auto& c2v = visMesh.getConnectivity().getIncidence(D, 0);
+
+      const auto file = HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+      if (!file)
+      {
+        Alert::Exception()
+          << "Failed to create HDF5 XDMF cell attribute file: " << filename
+          << Alert::Raise;
+      }
+
+      {
+        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunction, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        if (!group)
+        {
+          Alert::Exception()
+            << "Failed to create /GridFunction group."
+            << Alert::Raise;
+        }
+      }
+      {
+        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunctionMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        if (!group)
+        {
+          Alert::Exception()
+            << "Failed to create /GridFunction/Meta group."
+            << Alert::Raise;
+        }
+      }
+      {
+        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunctionValues, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        if (!group)
+        {
+          Alert::Exception()
+            << "Failed to create /GridFunction/Values group."
+            << Alert::Raise;
+        }
+      }
+
+      HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaSize, static_cast<HDF5::U64>(nc));
+      HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaDimension, static_cast<HDF5::U64>(vdim));
+
+      const Geometry::Polytope::Traits ts(Geometry::Polytope::Type::Point);
+
+      if constexpr (std::is_same_v<RangeType, ScalarType>)
+      {
+        std::vector<HDF5::F64> values(nc, 0.0);
+
+        for (Index cell = 0; cell < static_cast<Index>(nc); ++cell)
+        {
+          const auto& vertices = c2v[cell];
+          if (vertices.size() == 0)
+          {
+            Alert::Exception()
+              << "Cell with no vertices encountered during XDMF cell export."
+              << Alert::Raise;
+          }
+
+          ScalarType accum = ScalarType(0);
+          for (size_t k = 0; k < vertices.size(); ++k)
+          {
+            const auto vit = visMesh.getVertex(vertices[k]);
+            const Geometry::Point p(*vit, ts.getVertex(0), vit->getCoordinates());
+            accum += gf(p);
+          }
+
+          values[static_cast<size_t>(cell)] =
+            static_cast<HDF5::F64>(accum / static_cast<Real>(vertices.size()));
+        }
+
+        HDF5::writeVectorDataset(file.get(), Path::GridFunctionValuesData, values);
+      }
+      else
+      {
+        std::vector<HDF5::F64> values(nc * vdim, 0.0);
+
+        for (Index cell = 0; cell < static_cast<Index>(nc); ++cell)
+        {
+          const auto& vertices = c2v[cell];
+          if (vertices.size() == 0)
+          {
+            Alert::Exception()
+              << "Cell with no vertices encountered during XDMF cell export."
+              << Alert::Raise;
+          }
+
+          std::vector<ScalarType> accum(vdim, ScalarType(0));
+          for (size_t k = 0; k < vertices.size(); ++k)
+          {
+            const auto vit = visMesh.getVertex(vertices[k]);
+            const Geometry::Point p(*vit, ts.getVertex(0), vit->getCoordinates());
+            const auto value = gf(p);
+
+            for (size_t c = 0; c < vdim; ++c)
+              accum[c] += value[c];
+          }
+
+          for (size_t c = 0; c < vdim; ++c)
+          {
+            values[static_cast<size_t>(cell) * vdim + c] =
+              static_cast<HDF5::F64>(accum[c] / static_cast<Real>(vertices.size()));
+          }
+        }
+
+        HDF5::writeMatrixDataset(
+            file.get(),
+            Path::GridFunctionValuesData,
+            values,
+            static_cast<hsize_t>(nc),
+            static_cast<hsize_t>(vdim));
+      }
+    }
   }
 
   /**

@@ -761,17 +761,17 @@ namespace
 
     const size_t numRanks = 2;
 
-    // Simulate rank 0
+    // Simulate rank 1 first (non-root writes data only, no XDMF)
     {
-      XDMF xdmf(stem, /*rank=*/0, numRanks, /*rootRank=*/0);
+      XDMF xdmf(stem, /*rank=*/1, numRanks, /*rootRank=*/0);
       xdmf.setMesh(mesh);
       xdmf.write(0.0);
       xdmf.close();
     }
 
-    // Simulate rank 1
+    // Simulate rank 0 (root — writes data + master XDMF referencing all ranks)
     {
-      XDMF xdmf(stem, /*rank=*/1, numRanks, /*rootRank=*/0);
+      XDMF xdmf(stem, /*rank=*/0, numRanks, /*rootRank=*/0);
       xdmf.setMesh(mesh);
       xdmf.write(0.0);
       xdmf.close();
@@ -905,10 +905,21 @@ namespace
 
     const size_t numRanks = 3;
 
-    // Simulate all ranks writing 2 snapshots
-    for (size_t r = 0; r < numRanks; ++r)
+    // Simulate non-root ranks first so their data files exist
+    // before root's close/flush reads metadata from all rank files
+    for (size_t r = 1; r < numRanks; ++r)
     {
       XDMF xdmf(stem, r, numRanks, /*rootRank=*/0);
+      xdmf.setMesh(mesh);
+      xdmf.add("u", gf, XDMF::Center::Node);
+      xdmf.write(0.0);
+      xdmf.write(1.5);
+      xdmf.close();
+    }
+
+    // Root rank last — its close() writes the master XDMF
+    {
+      XDMF xdmf(stem, 0, numRanks, /*rootRank=*/0);
       xdmf.setMesh(mesh);
       xdmf.add("u", gf, XDMF::Center::Node);
       xdmf.write(0.0);
@@ -956,18 +967,36 @@ namespace
     Mesh<Context::Local> mesh;
     mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Segment, { 5 });
 
-    // Construct with rank 42, numRanks 100
-    XDMF xdmf(stem, /*rank=*/42, /*numRanks=*/100, /*rootRank=*/42);
-    xdmf.setMesh(mesh);
-    xdmf.write(0.0);
-    xdmf.close();
+    // Simulate a 2-rank setup — write non-root first, then root
+    {
+      XDMF xdmf(stem, /*rank=*/1, /*numRanks=*/2, /*rootRank=*/0);
+      xdmf.setMesh(mesh);
+      xdmf.write(0.0);
+      xdmf.close();
+    }
+    {
+      XDMF xdmf(stem, /*rank=*/0, /*numRanks=*/2, /*rootRank=*/0);
+      xdmf.setMesh(mesh);
+      xdmf.write(0.0);
+      xdmf.close();
+    }
 
-    // Rank-specific mesh file should have "r42" in name
-    const auto meshH5 = testDir / "ph.r42.mesh.h5";
-    EXPECT_TRUE(boost::filesystem::exists(meshH5)) << "Missing " << meshH5;
+    // Rank-specific mesh files should have correct rank in name
+    EXPECT_TRUE(boost::filesystem::exists(testDir / "ph.r0.mesh.h5"))
+        << "Missing rank 0 mesh file";
+    EXPECT_TRUE(boost::filesystem::exists(testDir / "ph.r1.mesh.h5"))
+        << "Missing rank 1 mesh file";
 
-    // Since rootRank=42 and we are rank 42, XDMF should be written
+    // Root rank wrote the XDMF master file
     EXPECT_TRUE(boost::filesystem::exists(testDir / "ph.xdmf"));
+
+    // Master XDMF should reference both rank files
+    std::ifstream ifs((testDir / "ph.xdmf").string());
+    std::ostringstream buf;
+    buf << ifs.rdbuf();
+    const auto xml = buf.str();
+    EXPECT_NE(xml.find("ph.r0.mesh.h5"), std::string::npos);
+    EXPECT_NE(xml.find("ph.r1.mesh.h5"), std::string::npos);
 
     boost::filesystem::remove_all(testDir);
   }
