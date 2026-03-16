@@ -89,6 +89,15 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(H5Lexists(h5, "/Mesh/XDMF", H5P_DEFAULT), 0);
 
     H5Fclose(h5);
+
+    // Verify the canonical persistence data can be loaded back
+    Mesh loaded;
+    loaded.load(meshFile, FileFormat::HDF5);
+    EXPECT_EQ(loaded.getSpaceDimension(), mesh.getSpaceDimension());
+    EXPECT_EQ(loaded.getDimension(), mesh.getDimension());
+    EXPECT_EQ(loaded.getVertexCount(), mesh.getVertexCount());
+    EXPECT_EQ(loaded.getCellCount(), mesh.getCellCount());
+
     std::remove(meshFile.c_str());
   }
 

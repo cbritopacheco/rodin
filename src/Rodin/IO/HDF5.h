@@ -857,8 +857,11 @@ namespace Rodin::IO
      * derived topology data to a mesh file that was previously written by
      * the canonical `MeshPrinter<HDF5>` path.
      *
+     * @note Only local (sequential) meshes are supported. The mesh parameter
+     *       is internally cast to `Geometry::Mesh<Context::Local>`.
+     *
      * @param[in] filename  Path to an existing HDF5 mesh file.
-     * @param[in] mesh      Mesh whose cells provide the topology data.
+     * @param[in] mesh      Local mesh whose cells provide the topology data.
      */
     inline
     void writeXDMFTopology(
