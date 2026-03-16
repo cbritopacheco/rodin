@@ -4,6 +4,71 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file HDF5.h
+ * @brief HDF5-based mesh and grid function persistence for Rodin.
+ *
+ * This file provides the HDF5 storage backend for Rodin meshes and grid
+ * functions using the official HDF5 C API. It implements:
+ *
+ * - Full mesh persistence and direct reconstruction from disk, including
+ *   vertex geometry, full connectivity (entities, incidences, state),
+ *   attributes, and polytope transformations.
+ * - Standalone grid function field-file serialization (one `.h5` per grid
+ *   function), without mesh or finite element space embedding.
+ * - Derived XDMF mixed-topology datasets for visualization export.
+ *
+ * ## HDF5 Mesh Layout
+ *
+ * ```
+ * /Mesh
+ *   /Meta
+ *     SpaceDimension                  scalar (U64)
+ *   /Geometry
+ *     Vertices                        [nv × sdim] (F64)
+ *   /Connectivity
+ *     /Meta
+ *       MaximalDimension              scalar (U64)
+ *       Dimension                     scalar (U64)
+ *     /Counts
+ *       ByDimension                   [Dmax+1] (U64)
+ *       ByGeometry                    [num_types] (U64)
+ *     /Entities/{d}
+ *       Types                         [n_d] (I32)
+ *       Offsets                        [n_d+1] (U64)
+ *       Indices                        [nnz] (U64)
+ *     /State
+ *       Present                       [(Dmax+1)×(Dmax+1)] (U8)
+ *       Dirty                         [(Dmax+1)×(Dmax+1)] (U8)
+ *     /Incidence/{d}_{dp}
+ *       Offsets                        [n_d+1] (U64)
+ *       Indices                        [nnz] (U64)
+ *   /Attributes/{d}                   [n_d] (U64)
+ *   /Transformations/{d}
+ *     Kind                            [n_d] (I32)
+ *   /XDMF                             (only when setXDMF(true))
+ *     Topology                        [mixed_stream_size] (U64)
+ *     TopologySize                    scalar (U64)
+ * ```
+ *
+ * ## HDF5 GridFunction Layout (standalone field file)
+ *
+ * ```
+ * /GridFunction
+ *   /Meta
+ *     Size                            scalar (U64)
+ *     Dimension                       scalar (U64)
+ *   /Values
+ *     Data                            [N] (F64)
+ * ```
+ *
+ * The IO classes follow the MeshLoader/MeshPrinter and
+ * GridFunctionLoader/GridFunctionPrinter API patterns established by the
+ * MFEM and MEDIT format specializations.
+ *
+ * @see IO::MeshLoader, IO::MeshPrinter, IO::GridFunctionLoader,
+ *      IO::GridFunctionPrinter, IO::XDMF
+ */
 #ifndef RODIN_IO_HDF5_H
 #define RODIN_IO_HDF5_H
 
@@ -35,70 +100,135 @@
 
 namespace Rodin::IO
 {
+  /**
+   * @brief HDF5 utility namespace providing type aliases, path constants,
+   *        RAII handle wrappers, and low-level dataset read/write helpers.
+   *
+   * This namespace contains all HDF5-specific helpers used by the MeshLoader,
+   * MeshPrinter, GridFunctionLoader, and GridFunctionPrinter specializations
+   * for the HDF5 file format. It wraps the HDF5 C API in a type-safe,
+   * RAII-managed interface.
+   */
   namespace HDF5
   {
+    /// @brief Unsigned 64-bit integer type used for HDF5 dataset storage.
     using U64 = unsigned long long;
+
+    /// @brief Signed 32-bit integer type used for HDF5 dataset storage.
     using I32 = int;
+
+    /// @brief 64-bit floating point type used for HDF5 dataset storage.
     using F64 = double;
+
+    /// @brief Unsigned 8-bit integer type used for boolean flag datasets.
     using U8  = unsigned char;
 
+    /**
+     * @brief Sentinel value used to represent the absence of an attribute
+     *        in HDF5 attribute datasets.
+     *
+     * Polytopes without an assigned attribute are stored as this value
+     * in the `/Mesh/Attributes/{d}` arrays. On load, entries equal to
+     * this marker are left unset.
+     */
     static constexpr U64 NullAttributeMarker = std::numeric_limits<U64>::max();
 
+    /**
+     * @brief Data centering policy for XDMF attribute export.
+     *
+     * Determines whether grid function values are exported as nodal
+     * (vertex-centered) or cell-centered data in XDMF visualization files.
+     */
     enum class Center
     {
-      Node,
-      Cell
+      Node,   ///< Vertex-centered (nodal) data.
+      Cell    ///< Cell-centered data.
     };
 
+    /**
+     * @brief HDF5 dataset path constants for the mesh and grid function
+     *        storage layouts.
+     *
+     * All paths are absolute within their respective HDF5 file. Mesh
+     * datasets live under `/Mesh/...` and grid function datasets under
+     * `/GridFunction/...`. The XDMF-specific derived topology lives
+     * under `/Mesh/XDMF/...`.
+     */
     namespace Path
     {
-      static constexpr const char* Mesh = "/Mesh";
+      static constexpr const char* Mesh = "/Mesh";  ///< Root mesh group.
 
-      static constexpr const char* MeshMeta = "/Mesh/Meta";
-      static constexpr const char* MeshMetaSpaceDimension = "/Mesh/Meta/SpaceDimension";
+      static constexpr const char* MeshMeta = "/Mesh/Meta";  ///< Mesh metadata group.
+      static constexpr const char* MeshMetaSpaceDimension = "/Mesh/Meta/SpaceDimension";  ///< Spatial embedding dimension (scalar).
 
-      static constexpr const char* MeshGeometry = "/Mesh/Geometry";
-      static constexpr const char* MeshGeometryVertices = "/Mesh/Geometry/Vertices";
+      static constexpr const char* MeshGeometry = "/Mesh/Geometry";  ///< Geometry group.
+      static constexpr const char* MeshGeometryVertices = "/Mesh/Geometry/Vertices";  ///< Vertex coordinate matrix [nv × sdim].
 
-      static constexpr const char* MeshConnectivity = "/Mesh/Connectivity";
-      static constexpr const char* MeshConnectivityMeta = "/Mesh/Connectivity/Meta";
-      static constexpr const char* MeshConnectivityMetaMaximalDimension = "/Mesh/Connectivity/Meta/MaximalDimension";
-      static constexpr const char* MeshConnectivityMetaDimension = "/Mesh/Connectivity/Meta/Dimension";
+      static constexpr const char* MeshConnectivity = "/Mesh/Connectivity";  ///< Connectivity root group.
+      static constexpr const char* MeshConnectivityMeta = "/Mesh/Connectivity/Meta";  ///< Connectivity metadata group.
+      static constexpr const char* MeshConnectivityMetaMaximalDimension = "/Mesh/Connectivity/Meta/MaximalDimension";  ///< Maximal topological dimension.
+      static constexpr const char* MeshConnectivityMetaDimension = "/Mesh/Connectivity/Meta/Dimension";  ///< Top-dimensional cell dimension.
 
-      static constexpr const char* MeshConnectivityCounts = "/Mesh/Connectivity/Counts";
-      static constexpr const char* MeshConnectivityCountsByDimension = "/Mesh/Connectivity/Counts/ByDimension";
-      static constexpr const char* MeshConnectivityCountsByGeometry = "/Mesh/Connectivity/Counts/ByGeometry";
+      static constexpr const char* MeshConnectivityCounts = "/Mesh/Connectivity/Counts";  ///< Count arrays group.
+      static constexpr const char* MeshConnectivityCountsByDimension = "/Mesh/Connectivity/Counts/ByDimension";  ///< Entity counts per dimension [Dmax+1].
+      static constexpr const char* MeshConnectivityCountsByGeometry = "/Mesh/Connectivity/Counts/ByGeometry";  ///< Entity counts per geometry type.
 
-      static constexpr const char* MeshConnectivityEntities = "/Mesh/Connectivity/Entities";
-      static constexpr const char* MeshConnectivityState = "/Mesh/Connectivity/State";
-      static constexpr const char* MeshConnectivityStatePresent = "/Mesh/Connectivity/State/Present";
-      static constexpr const char* MeshConnectivityStateDirty = "/Mesh/Connectivity/State/Dirty";
-      static constexpr const char* MeshConnectivityIncidence = "/Mesh/Connectivity/Incidence";
+      static constexpr const char* MeshConnectivityEntities = "/Mesh/Connectivity/Entities";  ///< CSR entity groups per dimension.
+      static constexpr const char* MeshConnectivityState = "/Mesh/Connectivity/State";  ///< Incidence state group.
+      static constexpr const char* MeshConnectivityStatePresent = "/Mesh/Connectivity/State/Present";  ///< Incidence present flags [(Dmax+1)²].
+      static constexpr const char* MeshConnectivityStateDirty = "/Mesh/Connectivity/State/Dirty";  ///< Incidence dirty flags [(Dmax+1)²].
+      static constexpr const char* MeshConnectivityIncidence = "/Mesh/Connectivity/Incidence";  ///< CSR incidence groups.
 
-      static constexpr const char* MeshAttributes = "/Mesh/Attributes";
-      static constexpr const char* MeshTransformations = "/Mesh/Transformations";
+      static constexpr const char* MeshAttributes = "/Mesh/Attributes";  ///< Polytope attribute arrays group.
+      static constexpr const char* MeshTransformations = "/Mesh/Transformations";  ///< Polytope transformation groups.
 
-      static constexpr const char* MeshXDMF = "/Mesh/XDMF";
-      static constexpr const char* MeshXDMFTopology = "/Mesh/XDMF/Topology";
-      static constexpr const char* MeshXDMFTopologySize = "/Mesh/XDMF/TopologySize";
+      static constexpr const char* MeshXDMF = "/Mesh/XDMF";  ///< XDMF-specific derived data group.
+      static constexpr const char* MeshXDMFTopology = "/Mesh/XDMF/Topology";  ///< XDMF mixed topology stream.
+      static constexpr const char* MeshXDMFTopologySize = "/Mesh/XDMF/TopologySize";  ///< Length of the mixed topology stream.
 
-      static constexpr const char* GridFunction = "/GridFunction";
-      static constexpr const char* GridFunctionMeta = "/GridFunction/Meta";
-      static constexpr const char* GridFunctionMetaName = "/GridFunction/Meta/Name";
-      static constexpr const char* GridFunctionMetaSize = "/GridFunction/Meta/Size";
-      static constexpr const char* GridFunctionMetaDimension = "/GridFunction/Meta/Dimension";
-      static constexpr const char* GridFunctionValues = "/GridFunction/Values";
-      static constexpr const char* GridFunctionValuesData = "/GridFunction/Values/Data";
+      static constexpr const char* GridFunction = "/GridFunction";  ///< Root grid function group.
+      static constexpr const char* GridFunctionMeta = "/GridFunction/Meta";  ///< Grid function metadata group.
+      static constexpr const char* GridFunctionMetaName = "/GridFunction/Meta/Name";  ///< Optional name string.
+      static constexpr const char* GridFunctionMetaSize = "/GridFunction/Meta/Size";  ///< Number of DOFs (scalar).
+      static constexpr const char* GridFunctionMetaDimension = "/GridFunction/Meta/Dimension";  ///< Vector dimension (scalar).
+      static constexpr const char* GridFunctionValues = "/GridFunction/Values";  ///< Values group.
+      static constexpr const char* GridFunctionValuesData = "/GridFunction/Values/Data";  ///< Raw DOF data vector.
     }
 
+    /**
+     * @brief RAII wrapper for HDF5 identifier handles.
+     *
+     * Manages the lifetime of an HDF5 `hid_t` identifier by calling the
+     * appropriate close function (e.g. `H5Fclose`, `H5Gclose`, `H5Dclose`,
+     * `H5Sclose`) on destruction or reset. Move-only; copying is disabled.
+     *
+     * Use the factory functions File(), Group(), DataSet(), and Space()
+     * to construct handles with the correct close function.
+     *
+     * ## Usage Example
+     * ```cpp
+     * auto file = HDF5::File(H5Fcreate("out.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+     * if (!file)
+     *   // handle error ...
+     *
+     * auto group = HDF5::Group(H5Gcreate2(file.get(), "/Data", ...));
+     * // group is automatically closed when it goes out of scope.
+     * ```
+     */
     class Handle
     {
       public:
+        /// @brief Default constructor; creates an invalid handle.
         Handle()
           : m_id(-1),
             m_close(nullptr)
         {}
 
+        /**
+         * @brief Constructs a handle wrapping the given HDF5 identifier.
+         * @param[in] id       HDF5 identifier (`hid_t`) to manage.
+         * @param[in] closeFn  HDF5 close function matching the identifier type.
+         */
         Handle(hid_t id, herr_t (*closeFn)(hid_t))
           : m_id(id),
             m_close(closeFn)
@@ -133,6 +263,7 @@ namespace Rodin::IO
           reset();
         }
 
+        /// @brief Releases the managed identifier by calling its close function.
         void reset()
         {
           if (m_id >= 0 && m_close)
@@ -141,11 +272,19 @@ namespace Rodin::IO
           m_close = nullptr;
         }
 
+        /**
+         * @brief Returns the raw HDF5 identifier.
+         * @returns The managed `hid_t` value, or a negative value if invalid.
+         */
         hid_t get() const
         {
           return m_id;
         }
 
+        /**
+         * @brief Tests whether this handle holds a valid HDF5 identifier.
+         * @returns `true` if the identifier is non-negative (valid).
+         */
         explicit operator bool() const
         {
           return m_id >= 0;
@@ -156,30 +295,55 @@ namespace Rodin::IO
         herr_t (*m_close)(hid_t);
     };
 
+    /**
+     * @brief Creates a Handle for an HDF5 file identifier.
+     * @param[in] id  File identifier returned by `H5Fcreate` or `H5Fopen`.
+     * @returns Handle that calls `H5Fclose` on destruction.
+     */
     inline
     Handle File(hid_t id)
     {
       return Handle(id, H5Fclose);
     }
 
+    /**
+     * @brief Creates a Handle for an HDF5 group identifier.
+     * @param[in] id  Group identifier returned by `H5Gcreate2` or `H5Gopen2`.
+     * @returns Handle that calls `H5Gclose` on destruction.
+     */
     inline
     Handle Group(hid_t id)
     {
       return Handle(id, H5Gclose);
     }
 
+    /**
+     * @brief Creates a Handle for an HDF5 dataset identifier.
+     * @param[in] id  Dataset identifier returned by `H5Dcreate2` or `H5Dopen2`.
+     * @returns Handle that calls `H5Dclose` on destruction.
+     */
     inline
     Handle DataSet(hid_t id)
     {
       return Handle(id, H5Dclose);
     }
 
+    /**
+     * @brief Creates a Handle for an HDF5 dataspace identifier.
+     * @param[in] id  Dataspace identifier returned by `H5Screate_simple` etc.
+     * @returns Handle that calls `H5Sclose` on destruction.
+     */
     inline
     Handle Space(hid_t id)
     {
       return Handle(id, H5Sclose);
     }
 
+    /**
+     * @brief Returns the HDF5 native memory type corresponding to `T`.
+     * @tparam T  One of U64, I32, F64, or U8.
+     * @returns The HDF5 native type identifier for use with `H5Dread`/`H5Dwrite`.
+     */
     template <class T>
     hid_t getNativeType();
 
@@ -211,72 +375,135 @@ namespace Rodin::IO
       return H5T_NATIVE_UCHAR;
     }
 
+    /**
+     * @brief Tests whether an HDF5 link exists at the given path.
+     * @param[in] loc   HDF5 location identifier (file or group).
+     * @param[in] path  Absolute or relative path to test.
+     * @returns `true` if the link exists.
+     */
     inline
     bool exists(hid_t loc, const std::string& path)
     {
       return H5Lexists(loc, path.c_str(), H5P_DEFAULT) > 0;
     }
 
+    /**
+     * @brief Returns the HDF5 group path for entities of dimension `d`.
+     * @param[in] d  Topological dimension.
+     * @returns Path string, e.g. `"/Mesh/Connectivity/Entities/2"`.
+     */
     inline
     std::string entityGroupPath(size_t d)
     {
       return std::string(Path::MeshConnectivityEntities) + "/" + std::to_string(d);
     }
 
+    /**
+     * @brief Returns the dataset path for entity type codes of dimension `d`.
+     * @param[in] d  Topological dimension.
+     * @returns Path string, e.g. `"/Mesh/Connectivity/Entities/2/Types"`.
+     */
     inline
     std::string entityTypesPath(size_t d)
     {
       return entityGroupPath(d) + "/Types";
     }
 
+    /**
+     * @brief Returns the dataset path for entity CSR offsets of dimension `d`.
+     * @param[in] d  Topological dimension.
+     * @returns Path string, e.g. `"/Mesh/Connectivity/Entities/2/Offsets"`.
+     */
     inline
     std::string entityOffsetsPath(size_t d)
     {
       return entityGroupPath(d) + "/Offsets";
     }
 
+    /**
+     * @brief Returns the dataset path for entity CSR vertex indices of dimension `d`.
+     * @param[in] d  Topological dimension.
+     * @returns Path string, e.g. `"/Mesh/Connectivity/Entities/2/Indices"`.
+     */
     inline
     std::string entityIndicesPath(size_t d)
     {
       return entityGroupPath(d) + "/Indices";
     }
 
+    /**
+     * @brief Returns the HDF5 group path for the incidence relation `d → dp`.
+     * @param[in] d   Source topological dimension.
+     * @param[in] dp  Target topological dimension.
+     * @returns Path string, e.g. `"/Mesh/Connectivity/Incidence/2_0"`.
+     */
     inline
     std::string incidenceGroupPath(size_t d, size_t dp)
     {
       return std::string(Path::MeshConnectivityIncidence) + "/" + std::to_string(d) + "_" + std::to_string(dp);
     }
 
+    /**
+     * @brief Returns the dataset path for incidence CSR offsets.
+     * @param[in] d   Source topological dimension.
+     * @param[in] dp  Target topological dimension.
+     * @returns Path string, e.g. `"/Mesh/Connectivity/Incidence/2_0/Offsets"`.
+     */
     inline
     std::string incidenceOffsetsPath(size_t d, size_t dp)
     {
       return incidenceGroupPath(d, dp) + "/Offsets";
     }
 
+    /**
+     * @brief Returns the dataset path for incidence CSR indices.
+     * @param[in] d   Source topological dimension.
+     * @param[in] dp  Target topological dimension.
+     * @returns Path string, e.g. `"/Mesh/Connectivity/Incidence/2_0/Indices"`.
+     */
     inline
     std::string incidenceIndicesPath(size_t d, size_t dp)
     {
       return incidenceGroupPath(d, dp) + "/Indices";
     }
 
+    /**
+     * @brief Returns the dataset path for polytope attributes of dimension `d`.
+     * @param[in] d  Topological dimension.
+     * @returns Path string, e.g. `"/Mesh/Attributes/2"`.
+     */
     inline
     std::string attributePath(size_t d)
     {
       return std::string(Path::MeshAttributes) + "/" + std::to_string(d);
     }
 
+    /**
+     * @brief Returns the HDF5 group path for polytope transformations of dimension `d`.
+     * @param[in] d  Topological dimension.
+     * @returns Path string, e.g. `"/Mesh/Transformations/2"`.
+     */
     inline
     std::string transformationGroupPath(size_t d)
     {
       return std::string(Path::MeshTransformations) + "/" + std::to_string(d);
     }
 
+    /**
+     * @brief Returns the dataset path for transformation kind values of dimension `d`.
+     * @param[in] d  Topological dimension.
+     * @returns Path string, e.g. `"/Mesh/Transformations/2/Kind"`.
+     */
     inline
     std::string transformationKindPath(size_t d)
     {
       return transformationGroupPath(d) + "/Kind";
     }
 
+    /**
+     * @brief Returns the size of the geometry-count array.
+     * @returns Number of slots needed to index by `Polytope::Type`.
+     */
     inline
     size_t getGeometryCountArraySize()
     {
@@ -284,6 +511,14 @@ namespace Rodin::IO
       return static_cast<size_t>(PT::Hexahedron) + 1;
     }
 
+    /**
+     * @brief Maps a Rodin polytope type to its XDMF mixed-topology type id.
+     * @param[in] t  Polytope geometry type.
+     * @returns XDMF type id (e.g. Triangle=4, Quadrilateral=5, Tetrahedron=6).
+     *
+     * @see <a href="https://www.xdmf.org/index.php/XDMF_Model_and_Format">
+     *      XDMF Model and Format Specification</a>
+     */
     inline
     U64 getXDMFMixedTopologyId(Geometry::Polytope::Type t)
     {
@@ -304,6 +539,14 @@ namespace Rodin::IO
         << Alert::Raise;
     }
 
+    /**
+     * @brief Computes the total length of the XDMF mixed-topology stream
+     *        for the given mesh.
+     * @param[in] mesh  Mesh whose cells contribute to the stream.
+     * @returns Total number of entries in the mixed topology array.
+     *
+     * Each cell contributes: 1 (type id) + optional count + number of vertices.
+     */
     inline
     size_t getXDMFMixedTopologySize(const Geometry::MeshBase& mesh)
     {
@@ -319,6 +562,13 @@ namespace Rodin::IO
       return size;
     }
 
+    /**
+     * @brief Reads a 1D HDF5 dataset into a `std::vector`.
+     * @tparam T    Element type (must be one of U64, I32, F64, U8).
+     * @param[in] file  Open HDF5 file identifier.
+     * @param[in] path  Absolute dataset path within the file.
+     * @returns Vector containing all elements of the dataset.
+     */
     template <class T>
     std::vector<T> readVectorDataset(hid_t file, const std::string& path)
     {
@@ -359,6 +609,13 @@ namespace Rodin::IO
       return values;
     }
 
+    /**
+     * @brief Reads a scalar (single-element) HDF5 dataset.
+     * @tparam T    Element type (must be one of U64, I32, F64, U8).
+     * @param[in] file  Open HDF5 file identifier.
+     * @param[in] path  Absolute dataset path within the file.
+     * @returns The single scalar value stored in the dataset.
+     */
     template <class T>
     T readScalarDataset(hid_t file, const std::string& path)
     {
@@ -372,6 +629,13 @@ namespace Rodin::IO
       return values[0];
     }
 
+    /**
+     * @brief Writes a `std::vector` as a 1D HDF5 dataset.
+     * @tparam T        Element type (must be one of U64, I32, F64, U8).
+     * @param[in] file    Open HDF5 file identifier (writable).
+     * @param[in] path    Absolute dataset path to create.
+     * @param[in] values  Data to write.
+     */
     template <class T>
     void writeVectorDataset(hid_t file, const std::string& path, const std::vector<T>& values)
     {
@@ -417,12 +681,28 @@ namespace Rodin::IO
       }
     }
 
+    /**
+     * @brief Writes a single scalar value as a 1D dataset of length 1.
+     * @tparam T       Element type.
+     * @param[in] file   Open HDF5 file identifier (writable).
+     * @param[in] path   Absolute dataset path to create.
+     * @param[in] value  Scalar value to write.
+     */
     template <class T>
     void writeScalarDataset(hid_t file, const std::string& path, const T& value)
     {
       writeVectorDataset(file, path, std::vector<T>{ value });
     }
 
+    /**
+     * @brief Writes a row-major packed vector as a 2D HDF5 dataset.
+     * @tparam T        Element type.
+     * @param[in] file    Open HDF5 file identifier (writable).
+     * @param[in] path    Absolute dataset path to create.
+     * @param[in] values  Row-major packed matrix data (`rows × cols` elements).
+     * @param[in] rows    Number of rows.
+     * @param[in] cols    Number of columns.
+     */
     template <class T>
     void writeMatrixDataset(
         hid_t file,
@@ -480,6 +760,12 @@ namespace Rodin::IO
       }
     }
 
+    /**
+     * @brief Reads the shape (rows, cols) of a rank-2 HDF5 dataset.
+     * @param[in] file  Open HDF5 file identifier.
+     * @param[in] path  Absolute dataset path.
+     * @returns Pair of `(rows, cols)`.
+     */
     inline
     std::pair<hsize_t, hsize_t> readMatrixShape(hid_t file, const std::string& path)
     {
@@ -519,6 +805,12 @@ namespace Rodin::IO
       return { dims[0], dims[1] };
     }
 
+    /**
+     * @brief Reads the full shape of an HDF5 dataset as a vector of dimensions.
+     * @param[in] file  Open HDF5 file identifier.
+     * @param[in] path  Absolute dataset path.
+     * @returns Vector of dimension sizes (length equals the dataset rank).
+     */
     inline
     std::vector<hsize_t> readDatasetShape(hid_t file, const std::string& path)
     {
@@ -561,6 +853,19 @@ namespace Rodin::IO
       return dims;
     }
 
+    /**
+     * @brief Writes a grid function as vertex-centered (nodal) data to an
+     *        HDF5 file for XDMF visualization.
+     *
+     * Evaluates the grid function at each vertex of the mesh and stores
+     * the result in the `/GridFunction/Values/Data` dataset. For scalar
+     * functions, a flat `[nv]` vector is written; for vector functions, a
+     * `[nv × vdim]` matrix is written.
+     *
+     * @tparam GridFunctionType  Concrete grid function type.
+     * @param[in] gf        Grid function to export.
+     * @param[in] filename  Output HDF5 file path.
+     */
     template <class GridFunctionType>
     void writeXDMFNodeAttribute(const GridFunctionType& gf, const boost::filesystem::path& filename)
     {
@@ -649,6 +954,18 @@ namespace Rodin::IO
       }
     }
 
+    /**
+     * @brief Writes a grid function as cell-centered data to an HDF5 file
+     *        for XDMF visualization.
+     *
+     * Evaluates the grid function at the vertices of each cell and averages
+     * the values to produce a single value per cell. The result is stored in
+     * the `/GridFunction/Values/Data` dataset.
+     *
+     * @tparam GridFunctionType  Concrete grid function type.
+     * @param[in] gf        Grid function to export.
+     * @param[in] filename  Output HDF5 file path.
+     */
     template <class GridFunctionType>
     void writeXDMFCellAttribute(
         const GridFunctionType& gf, const boost::filesystem::path& filename)
@@ -776,20 +1093,53 @@ namespace Rodin::IO
     }
   }
 
+  /**
+   * @brief HDF5 mesh loader specialization for local (sequential) meshes.
+   *
+   * Reconstructs a complete Geometry::Mesh from an HDF5 file previously
+   * created by MeshPrinter<FileFormat::HDF5, Context::Local>. The loader
+   * reads vertex geometry, full connectivity (entity CSR and incidence CSR),
+   * attributes, and transformation indices.
+   *
+   * Stream-based loading is not supported; only file-path loading is available.
+   *
+   * ## Usage Example
+   * ```cpp
+   * Geometry::Mesh<Context::Local> mesh;
+   * IO::MeshLoader<IO::FileFormat::HDF5, Context::Local> loader(mesh);
+   * loader.load("output.h5");
+   * ```
+   *
+   * @see MeshPrinter<FileFormat::HDF5, Context::Local>
+   */
   template <>
   class MeshLoader<FileFormat::HDF5, Context::Local>
     : public MeshLoaderBase<Context::Local>
   {
     public:
+      /// @brief Context type for this loader.
       using ContextType = Context::Local;
+
+      /// @brief Type of mesh object being loaded.
       using ObjectType = Geometry::Mesh<ContextType>;
+
+      /// @brief Parent loader class type.
       using Parent = MeshLoaderBase<ContextType>;
 
+      /**
+       * @brief Constructs a mesh loader for the given mesh object.
+       * @param[in,out] mesh  Mesh to be populated with data read from HDF5.
+       */
       explicit
       MeshLoader(ObjectType& mesh)
         : Parent(mesh)
       {}
 
+      /**
+       * @brief Stream-based loading is not supported for HDF5.
+       *
+       * Always raises an exception. Use the file-path overload instead.
+       */
       void load(std::istream&) override
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -797,6 +1147,14 @@ namespace Rodin::IO
           << Alert::Raise;
       }
 
+      /**
+       * @brief Loads a mesh from an HDF5 file.
+       * @param[in] filename  Path to the HDF5 mesh file.
+       *
+       * Reads all mesh components (vertices, connectivity, incidences,
+       * attributes, transformations) and rebuilds the mesh via the
+       * Mesh::Build() pipeline.
+       */
       void load(const boost::filesystem::path& filename) override
       {
         const auto file = HDF5::File(H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
@@ -1020,32 +1378,79 @@ namespace Rodin::IO
       }
   };
 
+  /**
+   * @brief HDF5 mesh printer specialization for local (sequential) meshes.
+   *
+   * Serializes a complete Geometry::Mesh to an HDF5 file including:
+   * - Vertex geometry (`/Mesh/Geometry/Vertices`)
+   * - Full connectivity (entity CSR per dimension, incidence CSR, state flags)
+   * - Polytope attributes and transformations
+   * - Optionally, a derived XDMF mixed-topology stream (`/Mesh/XDMF/Topology`)
+   *
+   * The XDMF topology is only written when `setXDMF(true)` is called prior
+   * to printing. This is done automatically by the XDMF writer class.
+   *
+   * Stream-based printing is not supported; only file-path printing is available.
+   *
+   * ## Usage Example
+   * ```cpp
+   * const Geometry::Mesh<Context::Local>& mesh = ...;
+   * IO::MeshPrinter<IO::FileFormat::HDF5, Context::Local>(mesh)
+   *   .print("output.h5");
+   * ```
+   *
+   * @see MeshLoader<FileFormat::HDF5, Context::Local>, IO::XDMF
+   */
   template <>
   class MeshPrinter<FileFormat::HDF5, Context::Local>
     : public MeshPrinterBase<Context::Local>
   {
     public:
+      /// @brief Context type for this printer.
       using ContextType = Context::Local;
+
+      /// @brief Type of mesh object being printed.
       using ObjectType = Geometry::Mesh<ContextType>;
+
+      /// @brief Parent printer class type.
       using Parent = MeshPrinterBase<ContextType>;
 
+      /**
+       * @brief Constructs a mesh printer for the given mesh.
+       * @param[in] mesh  Mesh to serialize to HDF5.
+       */
       explicit
       MeshPrinter(const ObjectType& mesh)
         : Parent(mesh),
           m_xdmf(false)
       {}
 
+      /**
+       * @brief Enables or disables XDMF mixed-topology output.
+       * @param[in] output  If `true`, the `/Mesh/XDMF/Topology` dataset
+       *                    will be generated alongside the canonical mesh data.
+       * @returns Reference to `*this` for method chaining.
+       */
       MeshPrinter& setXDMF(bool output = true)
       {
         m_xdmf = output;
         return *this;
       }
 
+      /**
+       * @brief Queries whether XDMF topology output is enabled.
+       * @returns `true` if `/Mesh/XDMF/Topology` will be written.
+       */
       bool isXDMF() const
       {
         return m_xdmf;
       }
 
+      /**
+       * @brief Stream-based printing is not supported for HDF5.
+       *
+       * Always raises an exception. Use the file-path overload instead.
+       */
       void print(std::ostream&) override
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -1053,6 +1458,14 @@ namespace Rodin::IO
           << Alert::Raise;
       }
 
+      /**
+       * @brief Writes the mesh to an HDF5 file.
+       * @param[in] filename  Output HDF5 file path.
+       *
+       * Creates the file, writes all mesh groups and datasets, and
+       * optionally writes the XDMF mixed topology if `setXDMF(true)`
+       * was called.
+       */
       void print(const boost::filesystem::path& filename) override
       {
         const auto& mesh = this->getObject();
@@ -1349,20 +1762,61 @@ namespace Rodin::IO
       bool m_xdmf;
   };
 
+  /**
+   * @brief HDF5 grid function loader for local grid functions backed by
+   *        `Math::Vector<Scalar>`.
+   *
+   * Reads a standalone grid function field file (one `.h5` per grid
+   * function) and populates the DOF vector. The file is expected to
+   * contain `/GridFunction/Meta/{Size,Dimension}` and
+   * `/GridFunction/Values/Data`.
+   *
+   * The grid function must already be attached to a finite element space
+   * of matching size and dimension before loading.
+   *
+   * Stream-based loading is not supported; only file-path loading is available.
+   *
+   * @tparam FES     Finite element space type.
+   * @tparam Scalar  Scalar element type of the data vector.
+   *
+   * ## Usage Example
+   * ```cpp
+   * P1 Vh(mesh);
+   * GridFunction u(Vh);
+   * IO::GridFunctionLoader<IO::FileFormat::HDF5, P1, Math::Vector<Real>> loader(u);
+   * loader.load("field.h5");
+   * ```
+   *
+   * @see GridFunctionPrinter<FileFormat::HDF5, FES, Math::Vector<Scalar>>
+   */
   template <class FES, class Scalar>
   class GridFunctionLoader<FileFormat::HDF5, FES, Math::Vector<Scalar>>
     : public GridFunctionLoaderBase<FES, Math::Vector<Scalar>>
   {
     public:
+      /// @brief Data storage type.
       using DataType = Math::Vector<Scalar>;
+
+      /// @brief Grid function type being loaded.
       using ObjectType = Variational::GridFunction<FES, DataType>;
+
+      /// @brief Parent loader class type.
       using Parent = GridFunctionLoaderBase<FES, DataType>;
 
+      /**
+       * @brief Constructs a loader for the given grid function.
+       * @param[in,out] gf  Grid function to be populated with loaded data.
+       */
       explicit
       GridFunctionLoader(ObjectType& gf)
         : Parent(gf)
       {}
 
+      /**
+       * @brief Stream-based loading is not supported for HDF5.
+       *
+       * Always raises an exception. Use the file-path overload instead.
+       */
       void load(std::istream&) override
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -1370,6 +1824,13 @@ namespace Rodin::IO
           << Alert::Raise;
       }
 
+      /**
+       * @brief Loads a grid function from a standalone HDF5 field file.
+       * @param[in] filename  Path to the HDF5 field file.
+       *
+       * Reads the raw DOF vector from `/GridFunction/Values/Data` and
+       * validates size/dimension against the attached finite element space.
+       */
       void load(const boost::filesystem::path& filename) override
       {
         auto& gf = this->getObject();
@@ -1412,15 +1873,56 @@ namespace Rodin::IO
       }
   };
 
+  /**
+   * @brief HDF5 grid function printer for local grid functions backed by
+   *        `Math::Vector<Scalar>`.
+   *
+   * Serializes a grid function to a standalone HDF5 field file (one file per
+   * grid function, no mesh or FES embedding). The output layout is:
+   *
+   * ```
+   * /GridFunction/Meta/Size        — number of DOFs
+   * /GridFunction/Meta/Dimension   — vector dimension
+   * /GridFunction/Values/Data      — raw DOF vector
+   * ```
+   *
+   * When XDMF mode is enabled (`setXDMF(true)`), the printer instead
+   * evaluates the grid function at vertices (Node center) or cell centroids
+   * (Cell center) and writes visualization-ready data suitable for
+   * XDMF attribute referencing.
+   *
+   * Stream-based printing is not supported; only file-path printing is available.
+   *
+   * @tparam FES     Finite element space type.
+   * @tparam Scalar  Scalar element type of the data vector.
+   *
+   * ## Usage Example
+   * ```cpp
+   * const GridFunction& u = ...;
+   * IO::GridFunctionPrinter<IO::FileFormat::HDF5, P1, Math::Vector<Real>>(u)
+   *   .print("field.h5");
+   * ```
+   *
+   * @see GridFunctionLoader<FileFormat::HDF5, FES, Math::Vector<Scalar>>
+   */
   template <class FES, class Scalar>
   class GridFunctionPrinter<FileFormat::HDF5, FES, Math::Vector<Scalar>> final
     : public GridFunctionPrinterBase<FileFormat::HDF5, FES, Math::Vector<Scalar>>
   {
     public:
+      /// @brief Data storage type.
       using DataType = Math::Vector<Scalar>;
+
+      /// @brief Grid function type being printed.
       using ObjectType = Variational::GridFunction<FES, DataType>;
+
+      /// @brief Parent printer class type.
       using Parent = GridFunctionPrinterBase<FileFormat::HDF5, FES, DataType>;
 
+      /**
+       * @brief Constructs a printer for the given grid function.
+       * @param[in] gf  Grid function to serialize.
+       */
       explicit
       GridFunctionPrinter(const ObjectType& gf)
         : Parent(gf),
@@ -1428,28 +1930,52 @@ namespace Rodin::IO
           m_center(HDF5::Center::Node)
       {}
 
+      /**
+       * @brief Enables or disables XDMF visualization mode.
+       * @param[in] output  If `true`, writes evaluated vertex/cell data
+       *                    instead of raw DOFs.
+       * @returns Reference to `*this` for method chaining.
+       */
       GridFunctionPrinter& setXDMF(bool output = true)
       {
         m_xdmf = output;
         return *this;
       }
 
+      /**
+       * @brief Queries whether XDMF visualization mode is enabled.
+       * @returns `true` if XDMF mode is active.
+       */
       bool isXDMF() const
       {
         return m_xdmf;
       }
 
+      /**
+       * @brief Sets the data centering for XDMF export.
+       * @param[in] center  Node for vertex-centered or Cell for cell-centered.
+       * @returns Reference to `*this` for method chaining.
+       */
       GridFunctionPrinter& setCenter(HDF5::Center center)
       {
         m_center = center;
         return *this;
       }
 
+      /**
+       * @brief Returns the current data centering setting.
+       * @returns The Center value (Node or Cell).
+       */
       HDF5::Center getCenter() const
       {
         return m_center;
       }
 
+      /**
+       * @brief Stream-based printing is not supported for HDF5.
+       *
+       * Always raises an exception. Use the file-path overload instead.
+       */
       void print(std::ostream&) override
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -1457,6 +1983,13 @@ namespace Rodin::IO
           << Alert::Raise;
       }
 
+      /**
+       * @brief Writes the grid function to a standalone HDF5 field file.
+       * @param[in] filename  Output HDF5 file path.
+       *
+       * In XDMF mode, writes evaluated vertex/cell data. Otherwise,
+       * writes the raw DOF vector and metadata.
+       */
       void print(const boost::filesystem::path& filename) override
       {
         const auto& gf = this->getObject();
