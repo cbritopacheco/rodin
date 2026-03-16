@@ -13,10 +13,10 @@
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Traits specialization for Rodin PETSc KSP wrapper.
+   * @brief Traits specialization for Solver::KSP (Rodin wrapper for PETSc KSP).
    *
-   * Maps the Rodin KSP wrapper type to the PETSc linear system type so that
-   * NewtonSolverBase<Rodin::Solver::KSP> can deduce its LinearSystemType.
+   * Maps Solver::KSP to the PETSc linear system type so that
+   * NewtonSolverBase<Solver::KSP> can deduce its LinearSystemType.
    */
   template <>
   struct Traits<Solver::KSP>

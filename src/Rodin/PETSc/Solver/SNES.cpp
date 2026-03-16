@@ -19,8 +19,8 @@ namespace Rodin::Solver
       m_maxIt(PETSC_DECIDE),
       m_maxF(PETSC_DECIDE)
   {
-    auto& pb = ksp.getProblem();
-    auto& system = pb.getLinearSystem();
+    auto& problem = ksp.getProblem();
+    auto& system = problem.getLinearSystem();
     const auto& comm = system.getCommunicator();
 
     PetscErrorCode ierr = SNESCreate(comm, &m_snes);
