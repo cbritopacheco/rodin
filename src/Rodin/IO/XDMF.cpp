@@ -8,7 +8,6 @@
 #include <fstream>
 #include <iomanip>
 #include <sstream>
-#include <stdexcept>
 
 #include "XDMF.h"
 #include "HDF5.h"
@@ -55,20 +54,16 @@ namespace Rodin::IO
     replace("{name}", name);
     replace("{index}", index);
 
-    // Normalize separators when some placeholders are empty.
     while (result.find("..") != std::string::npos)
       result.replace(result.find(".."), 2, ".");
 
-    // Remove "/./" if patterns ever introduce it.
     while (result.find("/./") != std::string::npos)
       result.replace(result.find("/./"), 3, "/");
 
-    // Remove a trailing dot before an extension, e.g. "foo..h5" -> "foo.h5".
     const auto dotExt = result.find(".h5");
     if (dotExt != std::string::npos && dotExt > 0 && result[dotExt - 1] == '.')
       result.erase(dotExt - 1, 1);
 
-    // More generally, avoid trailing separators.
     if (!result.empty() && result.back() == '.')
       result.pop_back();
 
@@ -268,6 +263,11 @@ namespace Rodin::IO
 
       SnapshotRecord snapshot;
       snapshot.time = time;
+      snapshot.vertexCount = gr.mesh->getVertexCount();
+      snapshot.cellCount = gr.mesh->getCellCount();
+      snapshot.meshDimension = gr.mesh->getDimension();
+      snapshot.spaceDimension = gr.mesh->getSpaceDimension();
+      snapshot.topologySize = HDF5::getXDMFMixedTopologySize(*gr.mesh);
 
       // --- export mesh ------------------------------------------------------
       if (gr.options.meshPolicy == MeshPolicy::Static)
@@ -286,6 +286,7 @@ namespace Rodin::IO
               static_cast<const Geometry::Mesh<Context::Local>&>(*gr.mesh))
             .setXDMF(true)
             .print(meshPath);
+
           gr.staticMeshFile = meshFile;
           gr.staticMeshWritten = true;
         }
@@ -302,14 +303,27 @@ namespace Rodin::IO
             indexStr);
         const auto meshPath = m_stem.parent_path() / meshFile;
 
-      IO::MeshPrinter<IO::FileFormat::HDF5, Context::Local>(
-          static_cast<const Geometry::Mesh<Context::Local>&>(*gr.mesh))
-        .setXDMF(true)
-        .print(meshPath);
+        IO::MeshPrinter<IO::FileFormat::HDF5, Context::Local>(
+            static_cast<const Geometry::Mesh<Context::Local>&>(*gr.mesh))
+          .setXDMF(true)
+          .print(meshPath);
+
         snapshot.meshFile = meshFile;
       }
 
+      // --- register mesh labels --------------------------------------------
+      {
+        SnapshotRecord::MeshAttributeRecord meshAttr;
+        meshAttr.name = "Region";
+        meshAttr.center = Center::Cell;
+        meshAttr.topologicalDimension = snapshot.meshDimension;
+        snapshot.meshAttributes.push_back(std::move(meshAttr));
+      }
+
       // --- export attributes ------------------------------------------------
+      snapshot.attributes.clear();
+      snapshot.attributes.reserve(gr.attributes.size());
+
       for (const auto& attr : gr.attributes)
       {
         const auto attrFile = expandPattern(
@@ -321,28 +335,33 @@ namespace Rodin::IO
         const auto attrPath = m_stem.parent_path() / attrFile;
 
         attr.write(attrPath, attr.center);
-        snapshot.attributeFiles.push_back(attrFile);
+
+        SnapshotRecord::AttributeRecord snapAttr;
+        snapAttr.name = attr.name;
+        snapAttr.center = attr.center;
+        snapAttr.dimension = attr.dimension;
+        snapAttr.file = attrFile;
+        snapshot.attributes.push_back(std::move(snapAttr));
       }
 
       gr.snapshots.push_back(std::move(snapshot));
     }
 
     ++m_snapshotCount;
+
+    // Persist the XML domain after every snapshot.
+    persist();
+
     return *this;
   }
 
-  void XDMF::close()
+  void XDMF::persist() const
   {
-    if (m_closed)
-      return;
-
-    m_closed = true;
-
     const std::string stemStr = m_stem.filename().string();
     const auto xdmfFile = expandPattern(m_patterns.xdmf, stemStr, "", "", "");
     const auto xdmfPath = m_stem.parent_path() / xdmfFile;
 
-    std::ofstream os(xdmfPath.string());
+    std::ofstream os(xdmfPath.string(), std::ios::out | std::ios::trunc);
     if (!os)
     {
       Alert::MemberFunctionException(*this, __func__)
@@ -362,33 +381,52 @@ namespace Rodin::IO
       for (const auto& snap : gr.snapshots)
       {
         const auto meshH5 = snap.meshFile.string();
-        const auto topologySize = HDF5::getXDMFMixedTopologySize(*gr.mesh);
 
         os << indent(3) << "<Grid Name=\"" << gr.name << "\" GridType=\"Uniform\">\n";
 
         os << indent(4) << "<Time Value=\"" << snap.time << "\" />\n";
 
         os << indent(4) << "<Topology TopologyType=\"Mixed\" NumberOfElements=\""
-           << gr.mesh->getCellCount() << "\">\n";
+           << snap.cellCount << "\">\n";
         os << indent(5) << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Dimensions=\""
-           << topologySize << "\">"
+           << snap.topologySize << "\">"
            << meshH5 << ":" << HDF5::Path::MeshXDMFTopology
            << "</DataItem>\n";
         os << indent(4) << "</Topology>\n";
 
         os << indent(4) << "<Geometry GeometryType=\""
-           << getGeometryType(gr.mesh->getSpaceDimension()) << "\">\n";
+           << getGeometryType(snap.spaceDimension) << "\">\n";
         os << indent(5) << "<DataItem Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" Dimensions=\""
-           << gr.mesh->getVertexCount() << " " << gr.mesh->getSpaceDimension()
+           << snap.vertexCount << " " << snap.spaceDimension
            << "\">"
            << meshH5 << ":" << HDF5::Path::MeshGeometryVertices
            << "</DataItem>\n";
         os << indent(4) << "</Geometry>\n";
 
-        for (size_t a = 0; a < gr.attributes.size(); ++a)
+        // --- mesh attributes (labels/regions) -------------------------------
+        for (const auto& attr : snap.meshAttributes)
         {
-          const auto& attr = gr.attributes[a];
-          const auto attrH5 = snap.attributeFiles[a].string();
+          const char* centerStr = (attr.center == Center::Node) ? "Node" : "Cell";
+
+          std::ostringstream dimStr;
+          if (attr.center == Center::Node)
+            dimStr << snap.vertexCount;
+          else
+            dimStr << snap.cellCount;
+
+          os << indent(4) << "<Attribute Name=\"" << attr.name
+             << "\" AttributeType=\"Scalar\" Center=\"" << centerStr << "\">\n";
+          os << indent(5) << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Dimensions=\""
+             << dimStr.str() << "\">"
+             << meshH5 << ":" << HDF5::attributePath(attr.topologicalDimension)
+             << "</DataItem>\n";
+          os << indent(4) << "</Attribute>\n";
+        }
+
+        // --- grid function attributes ---------------------------------------
+        for (const auto& attr : snap.attributes)
+        {
+          const auto attrH5 = attr.file.string();
           const char* centerStr = (attr.center == Center::Node) ? "Node" : "Cell";
           const char* attrType  = (attr.dimension == 1) ? "Scalar" : "Vector";
 
@@ -396,16 +434,16 @@ namespace Rodin::IO
           if (attr.center == Center::Node)
           {
             if (attr.dimension == 1)
-              dimStr << gr.mesh->getVertexCount();
+              dimStr << snap.vertexCount;
             else
-              dimStr << gr.mesh->getVertexCount() << " " << attr.dimension;
+              dimStr << snap.vertexCount << " " << attr.dimension;
           }
           else
           {
             if (attr.dimension == 1)
-              dimStr << gr.mesh->getCellCount();
+              dimStr << snap.cellCount;
             else
-              dimStr << gr.mesh->getCellCount() << " " << attr.dimension;
+              dimStr << snap.cellCount << " " << attr.dimension;
           }
 
           os << indent(4) << "<Attribute Name=\"" << attr.name
@@ -426,6 +464,23 @@ namespace Rodin::IO
 
     os << indent(1) << "</Domain>\n";
     writeXMLFooter(os);
+    os.flush();
+
+    if (!os)
+    {
+      Alert::MemberFunctionException(*this, __func__)
+        << "Failed while writing XDMF output file: " << xdmfPath
+        << Alert::Raise;
+    }
+  }
+
+  void XDMF::close()
+  {
+    if (m_closed)
+      return;
+
+    persist();
+    m_closed = true;
   }
 
   bool XDMF::isClosed() const noexcept

@@ -507,8 +507,7 @@ namespace Rodin::IO
     inline
     size_t getGeometryCountArraySize()
     {
-      using PT = Geometry::Polytope::Type;
-      return static_cast<size_t>(PT::Hexahedron) + 1;
+      return Geometry::Polytope::Types.size();
     }
 
     /**

@@ -6,6 +6,7 @@
  */
 #include <Rodin/Geometry/Region.h>
 #include <Rodin/IO/ForwardDecls.h>
+#include <Rodin/IO/XDMF.h>
 #include <Rodin/Advection/Lagrangian.h>
 #include <Rodin/Distance/Eikonal.h>
 #include <Rodin/Variational/ForwardDecls.h>
@@ -54,7 +55,7 @@ Real compliance(const GridFunction<FES, Data>& w)
   bf = LinearElasticityIntegral(u, v)(lambda, mu);
   bf.assemble();
   return bf(w, w);
-};
+}
 
 int main(int, char**)
 {
@@ -68,6 +69,14 @@ int main(int, char**)
 
   th.save("Omega0.mesh", IO::FileFormat::MEDIT);
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
+
+  // XDMF output
+  IO::XDMF xdmf("out/ShapeOptimization");
+
+  auto domainGrid = xdmf.grid("domain");
+  // auto stateGrid  = xdmf.grid("state");
+
+  // 'th' is the same l-value during the whole loop, so set it once.
 
   // Optimization loop
   std::vector<double> obj;
@@ -97,6 +106,8 @@ int main(int, char**)
 
     th.getConnectivity().compute(1, 2);
     th.getConnectivity().compute(0, 0);
+
+    // domainGrid.setMesh(th, IO::XDMF::MeshPolicy::Transient);
 
     Alert::Info() << "----- Iteration: " << i << Alert::Raise;
 
@@ -180,21 +191,38 @@ int main(int, char**)
     th.save("Advect.mesh");
     advect.getSolution().save("Advect.gf");
 
+    // ------------------------------------------------------------------------
+    // XDMF snapshot for the current iteration
+    // ------------------------------------------------------------------------
+
+    // Full evolving mesh 'th'
+    // domainGrid.clear();
+    // domainGrid.add("dJ", dJ, IO::XDMF::Center::Node);
+    // domainGrid.add("dist", dist, IO::XDMF::Center::Node);
+    // domainGrid.add("advect", advect.getSolution(), IO::XDMF::Center::Node);
+
+    // Trimmed mesh and state field
+    // stateGrid.reset();
+    // stateGrid.setMesh(trimmed, IO::XDMF::MeshPolicy::Transient);
+    // stateGrid.add("u", u.getSolution(), IO::XDMF::Center::Node);
+
+    // xdmf.write(static_cast<Real>(i));
+
     // Recover the implicit domain
     Alert::Info() << "   | Meshing the domain." << Alert::Raise;
 
     try
     {
       th = MMG::LevelSetDiscretizer().split(interior, {interior, exterior})
-                                      .split(exterior, {interior, exterior})
-                                      .setRMC(1e-6)
-                                      .setHMax(hmax)
-                                      .setHMin(hmin)
-                                      .setHausdorff(hausd)
-                                      .setAngleDetection(false)
-                                      .setBoundaryReference(Gamma)
-                                      .setBaseReferences(GammaD)
-                                      .discretize(advect.getSolution());
+                                     .split(exterior, {interior, exterior})
+                                     .setRMC(1e-6)
+                                     .setHMax(hmax)
+                                     .setHMin(hmin)
+                                     .setHausdorff(hausd)
+                                     .setAngleDetection(false)
+                                     .setBoundaryReference(Gamma)
+                                     .setBaseReferences(GammaD)
+                                     .discretize(advect.getSolution());
 
       hmax = hmax0;
       hmin = 0.1 * hmax;
@@ -212,8 +240,9 @@ int main(int, char**)
     th.save("out/Omega." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
   }
 
+  xdmf.close();
+
   Alert::Success() << "Saved final mesh to Omega.mesh" << Alert::Raise;
 
   return 0;
 }
-

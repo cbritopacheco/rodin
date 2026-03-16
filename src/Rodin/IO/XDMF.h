@@ -529,6 +529,8 @@ namespace Rodin::IO
        */
       size_t getGridCount() const noexcept;
 
+      void persist() const;
+
     private:
       /// @brief Internal record for one registered attribute.
       struct AttributeRecord
@@ -542,9 +544,31 @@ namespace Rodin::IO
       /// @brief Internal record for one temporal snapshot.
       struct SnapshotRecord
       {
-        Real time = 0;                               ///< Physical time value.
-        boost::filesystem::path meshFile;             ///< Relative path to mesh HDF5 file.
-        std::vector<boost::filesystem::path> attributeFiles;  ///< Relative paths to attribute files.
+        struct AttributeRecord
+        {
+          std::string name;
+          Center center = Center::Node;
+          size_t dimension = 1;
+          boost::filesystem::path file;
+        };
+
+        struct MeshAttributeRecord
+        {
+          std::string name;
+          Center center = Center::Cell;
+          size_t topologicalDimension = 0;
+        };
+
+        Real time = 0;
+        boost::filesystem::path meshFile;
+        std::vector<AttributeRecord> attributes;
+        std::vector<MeshAttributeRecord> meshAttributes;
+
+        size_t vertexCount = 0;
+        size_t cellCount = 0;
+        size_t meshDimension = 0;
+        size_t spaceDimension = 0;
+        size_t topologySize = 0;
       };
 
       /// @brief Internal record for one named grid.
