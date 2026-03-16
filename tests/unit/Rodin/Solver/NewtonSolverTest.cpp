@@ -14,6 +14,7 @@
 #include "Rodin/Math/LinearSystem.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/Vector.h"
+#include "Rodin/Solver/LinearSolver.h"
 #include "Rodin/Solver/NewtonSolver.h"
 #include "Rodin/Variational/Problem.h"
 
@@ -23,12 +24,27 @@ namespace
 {
   using DenseLinearSystem = Math::LinearSystem<Math::Matrix<Real>, Math::Vector<Real>>;
 
-  struct DenseLinearSolver
+  class DenseLinearSolver final : public Solver::LinearSolverBase<DenseLinearSystem>
   {
-    void solve(DenseLinearSystem& system)
-    {
-      system.getSolution() = system.getOperator().fullPivLu().solve(system.getVector());
-    }
+    public:
+      using Parent = Solver::LinearSolverBase<DenseLinearSystem>;
+      using ProblemBaseType = typename Parent::ProblemBaseType;
+
+      using Parent::solve;
+
+      explicit DenseLinearSolver(ProblemBaseType& pb)
+        : Parent(pb)
+      {}
+
+      void solve(DenseLinearSystem& system) override
+      {
+        system.getSolution() = system.getOperator().fullPivLu().solve(system.getVector());
+      }
+
+      DenseLinearSolver* copy() const noexcept override
+      {
+        return new DenseLinearSolver(*this);
+      }
   };
 
   class ScalarNonlinearProblem final : public Variational::ProblemBase<DenseLinearSystem>
@@ -129,7 +145,8 @@ TEST(NewtonSolverTest, SolvesScalarProblemUsingProblemAssembly)
   u << 1.5;
 
   ScalarNonlinearProblem pb(u);
-  Solver::NewtonSolver solver(pb, DenseLinearSolver{});
+  DenseLinearSolver linearSolver(pb);
+  Solver::NewtonSolver solver(pb, linearSolver);
   solver.setMaxIterations(30)
     .setAbsoluteTolerance(1e-12)
     .setRelativeTolerance(1e-12);
@@ -152,7 +169,8 @@ TEST(NewtonSolverTest, CTADDeductionGuideFromProblemAndLinearSolver)
 TEST(NewtonSolverTest, PropagatesAssemblyFailure)
 {
   FailingAssembleProblem pb;
-  Solver::NewtonSolver solver(pb, DenseLinearSolver{});
+  DenseLinearSolver linearSolver(pb);
+  Solver::NewtonSolver solver(pb, linearSolver);
 
   Math::Vector<Real> u(1);
   u << 1.0;

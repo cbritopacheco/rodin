@@ -9,7 +9,6 @@
 
 #include <cstddef>
 #include <functional>
-#include <type_traits>
 #include <utility>
 
 #include "Rodin/Alert/MemberFunctionException.h"
@@ -62,6 +61,7 @@ namespace Rodin::Solver
        */
       virtual void solve(SolutionType& x) = 0;
 
+    protected:
       ProblemBaseType& getProblem() noexcept
       {
         return m_pb.get();
@@ -115,7 +115,7 @@ namespace Rodin::Solver
 
       explicit NewtonSolver(ProblemBaseType& pb, const LinearSolver& linearSolver)
         : Parent(pb),
-          m_linear(linearSolver),
+          m_solver(linearSolver),
           m_maxIt(100),
           m_atol(1e-12),
           m_rtol(1e-8),
@@ -131,7 +131,7 @@ namespace Rodin::Solver
 
       NewtonSolver& setLinearSolver(const LinearSolver& linearSolver)
       {
-        m_linear = linearSolver;
+        m_solver = linearSolver;
         return *this;
       }
 
@@ -160,12 +160,12 @@ namespace Rodin::Solver
 
       const LinearSolver& getLinearSolver() const override
       {
-        return m_linear;
+        return m_solver;
       }
 
       LinearSolver& getLinearSolver() override
       {
-        return m_linear;
+        return m_solver;
       }
 
       Real getAbsoluteTolerance() const
@@ -220,8 +220,7 @@ namespace Rodin::Solver
             return;
           }
 
-          m_linear.solve();
-
+          m_solver.solve();
           x += m_alpha * linearSystem.getSolution();
         }
       }
@@ -233,7 +232,7 @@ namespace Rodin::Solver
       }
 
     private:
-      LinearSolver m_linear;
+      LinearSolver m_solver;
       size_t m_maxIt;
       Real m_atol;
       Real m_rtol;
