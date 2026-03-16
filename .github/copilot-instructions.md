@@ -32,6 +32,8 @@ Rodin uses **CMake 3.16+** as its build system.
 
 ### Standard Build Process
 
+Make sure to initialize the submodules when cloning:
+
 ```bash
 # Clone with submodules
 git clone --recursive https://github.com/cbritopacheco/rodin
