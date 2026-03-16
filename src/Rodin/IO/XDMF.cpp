@@ -33,7 +33,7 @@ namespace Rodin::IO
       const std::string& grid,
       const std::string& name,
       const std::string& index,
-      const std::string& rank = "")
+      const std::string& rank = "")  // Empty means no {rank} substitution
   {
     std::string result = pattern;
 
