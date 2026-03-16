@@ -14,6 +14,7 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 #include <Rodin/Alert.h>
+#include <Rodin/IO/XDMF.h>
 
 namespace mpi = boost::mpi;
 
@@ -24,7 +25,7 @@ using namespace Rodin::Variational;
 
 static constexpr int ROOT_RANK = 0;
 
-static constexpr int n = 64;
+static constexpr int n = 16;
 
 
 int main(int argc, char** argv)
@@ -113,12 +114,19 @@ int main(int argc, char** argv)
 
   P1 vh(mesh);
 
+  IO::XDMF xdmf("mpi/Poisson", world.rank(), world.size());
+
+  xdmf.setMesh(mesh);
+  xdmf.write().flush();
+
   if (world.rank() == ROOT_RANK)
     Alert::Success() << "Constructed finite element space." << Alert::Raise;
 
   {
     PETSc::Variational::TrialFunction u(vh);
     PETSc::Variational::TestFunction  v(vh);
+
+    xdmf.add("u", u.getSolution());
 
     // Define problem
     Problem poisson(u, v);
@@ -153,6 +161,8 @@ int main(int argc, char** argv)
     std::snprintf(filename, sizeof(filename), "sol.%06d", world.rank());
     u.getSolution().save(filename);
   }
+
+  xdmf.close();
 
   (void) ierr;
   PetscFinalize();

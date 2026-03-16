@@ -727,4 +727,14 @@ namespace Rodin::PETSc::Variational
   GridFunction(const FES&) -> GridFunction<FES>;
 }
 
+namespace Rodin::FormLanguage
+{
+  template <class FES>
+  struct Traits<PETSc::Variational::GridFunction<FES>>
+  {
+    using FESType = FES;
+    using DataType = ::Vec;
+  };
+}
+
 #endif

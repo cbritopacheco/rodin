@@ -33,7 +33,7 @@ namespace Rodin::IO
       const std::string& grid,
       const std::string& name,
       const std::string& index,
-      const std::string& rank = "")  // Empty means no {rank} substitution
+      const std::string& rank = "")
   {
     std::string result = pattern;
 
@@ -111,6 +111,73 @@ namespace Rodin::IO
     return nullptr;
   }
 
+  struct XDMFMeshMeta
+  {
+    size_t vertexCount = 0;
+    size_t cellCount = 0;
+    size_t meshDimension = 0;
+    size_t spaceDimension = 0;
+    size_t topologySize = 0;
+  };
+
+  static
+  XDMFMeshMeta readXDMFMeshMeta(const boost::filesystem::path& filename)
+  {
+    XDMFMeshMeta meta;
+
+    const auto file = HDF5::File(H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+    if (!file)
+    {
+      Alert::Exception()
+        << "Failed to open HDF5 XDMF mesh file: " << filename
+        << Alert::Raise;
+    }
+
+    {
+      const auto shape = HDF5::readMatrixShape(file.get(), HDF5::Path::MeshGeometryVertices);
+      meta.vertexCount = static_cast<size_t>(shape.first);
+      meta.spaceDimension = static_cast<size_t>(shape.second);
+    }
+
+    meta.topologySize = static_cast<size_t>(
+        HDF5::readScalarDataset<HDF5::U64>(file.get(), HDF5::Path::MeshXDMFTopologySize));
+
+    size_t maxDim = 0;
+    for (;;)
+    {
+      const auto path = HDF5::attributePath(maxDim);
+      if (!HDF5::exists(file.get(), path))
+        break;
+      ++maxDim;
+    }
+
+    if (maxDim == 0)
+    {
+      Alert::Exception()
+        << "Failed to infer mesh dimension from HDF5 attributes in file: " << filename
+        << Alert::Raise;
+    }
+
+    meta.meshDimension = maxDim - 1;
+
+    {
+      const auto attrs = HDF5::readVectorDataset<HDF5::U64>(
+          file.get(),
+          HDF5::attributePath(meta.meshDimension));
+      meta.cellCount = attrs.size();
+    }
+
+    return meta;
+  }
+
+  static
+  std::string makeGridPieceName(const std::string& gridName, size_t rank)
+  {
+    if (gridName.empty())
+      return "r" + std::to_string(rank);
+    return gridName + "_r" + std::to_string(rank);
+  }
+
   // ---- XDMF::Grid ----------------------------------------------------------
 
   XDMF::Grid::Grid(XDMF& owner, size_t index) noexcept
@@ -170,14 +237,13 @@ namespace Rodin::IO
   {}
 
   XDMF::XDMF(const boost::filesystem::path& stem,
-               size_t rank, size_t numRanks, size_t rootRank)
+             size_t rank, size_t numRanks, size_t rootRank)
     : m_stem(stem),
       m_distributed(true),
       m_rank(rank),
       m_numRanks(numRanks),
       m_rootRank(rootRank)
   {
-    // In distributed mode, default patterns include {rank} to avoid file collisions
     m_patterns.staticMesh    = "{stem}.{grid}.r{rank}.mesh.h5";
     m_patterns.transientMesh = "{stem}.{grid}.r{rank}.mesh.{index}.h5";
     m_patterns.attribute     = "{stem}.{grid}.{name}.r{rank}.{index}.h5";
@@ -193,7 +259,6 @@ namespace Rodin::IO
       }
       catch (...)
       {
-        // Suppress exceptions in destructor.
       }
     }
   }
@@ -286,7 +351,6 @@ namespace Rodin::IO
       snapshot.spaceDimension = gr.mesh->getSpaceDimension();
       snapshot.topologySize = HDF5::getXDMFMixedTopologySize(*gr.mesh);
 
-      // --- export mesh ------------------------------------------------------
       if (gr.options.meshPolicy == MeshPolicy::Static)
       {
         if (!gr.staticMeshWritten)
@@ -300,7 +364,6 @@ namespace Rodin::IO
               rankStr);
           const auto meshPath = m_stem.parent_path() / meshFile;
 
-          // Write minimal XDMF visualization mesh (vertices + topology + attributes)
           HDF5::writeXDMFMesh(meshPath, *gr.mesh);
 
           gr.staticMeshFile = meshFile;
@@ -320,13 +383,11 @@ namespace Rodin::IO
             rankStr);
         const auto meshPath = m_stem.parent_path() / meshFile;
 
-        // Write minimal XDMF visualization mesh (vertices + topology + attributes)
         HDF5::writeXDMFMesh(meshPath, *gr.mesh);
 
         snapshot.meshFile = meshFile;
       }
 
-      // --- register mesh labels --------------------------------------------
       {
         SnapshotRecord::MeshAttributeRecord meshAttr;
         meshAttr.name = "Region";
@@ -335,7 +396,6 @@ namespace Rodin::IO
         snapshot.meshAttributes.push_back(std::move(meshAttr));
       }
 
-      // --- export attributes ------------------------------------------------
       snapshot.attributes.clear();
       snapshot.attributes.reserve(gr.attributes.size());
 
@@ -364,7 +424,6 @@ namespace Rodin::IO
     }
 
     ++m_snapshotCount;
-
     return *this;
   }
 
@@ -381,7 +440,7 @@ namespace Rodin::IO
 
     os << indent(bi + 1) << "<Topology TopologyType=\"Mixed\" NumberOfElements=\""
        << snap.cellCount << "\">\n";
-    os << indent(bi + 2) << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Dimensions=\""
+    os << indent(bi + 2) << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Precision=\"8\" Dimensions=\""
        << snap.topologySize << "\">"
        << meshH5 << ":" << HDF5::Path::MeshXDMFTopology
        << "</DataItem>\n";
@@ -404,7 +463,7 @@ namespace Rodin::IO
 
       os << indent(bi + 1) << "<Attribute Name=\"" << attr.name
          << "\" AttributeType=\"Scalar\" Center=\"" << centerStr << "\">\n";
-      os << indent(bi + 2) << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Dimensions=\""
+      os << indent(bi + 2) << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Precision=\"8\" Dimensions=\""
          << dimStr.str() << "\">"
          << meshH5 << ":" << HDF5::attributePath(attr.topologicalDimension)
          << "</DataItem>\n";
@@ -440,7 +499,6 @@ namespace Rodin::IO
 
   void XDMF::flush() const
   {
-    // In distributed mode, only the root rank writes the master XDMF XML.
     if (m_distributed && m_rank != m_rootRank)
       return;
 
@@ -461,35 +519,30 @@ namespace Rodin::IO
 
     if (!m_distributed)
     {
-      // --- Serial mode: Temporal collection of Uniform grids ----------------
       for (const auto& gr : m_grids)
       {
+        const std::string gridName = gr.name.empty() ? "mesh" : gr.name;
+
         os << indent(2)
-           << "<Grid Name=\"" << gr.name
+           << "<Grid Name=\"" << gridName
            << "\" GridType=\"Collection\" CollectionType=\"Temporal\">\n";
 
         for (const auto& snap : gr.snapshots)
-          writeUniformGrid(os, gr.name, snap, 3);
+          writeUniformGrid(os, gridName, snap, 3);
 
         os << indent(2) << "</Grid>\n";
       }
     }
     else
     {
-      // --- Distributed mode: Temporal collection of Spatial collections ----
-      //
-      // For each grid, we produce a Temporal collection.  Each snapshot
-      // becomes a Spatial collection containing one Uniform grid per rank.
-      // The root rank recorded its own snapshot data during write(); now
-      // it reconstructs per-rank file paths by re-expanding the patterns
-      // with each rank index.
       for (const auto& gr : m_grids)
       {
-        os << indent(2)
-           << "<Grid Name=\"" << gr.name
-           << "\" GridType=\"Collection\" CollectionType=\"Temporal\">\n";
-
+        const std::string gridName = gr.name.empty() ? "mesh" : gr.name;
         const auto& patterns = gr.options.patterns ? *gr.options.patterns : m_patterns;
+
+        os << indent(2)
+           << "<Grid Name=\"" << gridName
+           << "\" GridType=\"Collection\" CollectionType=\"Temporal\">\n";
 
         for (size_t s = 0; s < gr.snapshots.size(); ++s)
         {
@@ -504,7 +557,6 @@ namespace Rodin::IO
           {
             const std::string rStr = std::to_string(r);
 
-            // Reconstruct the mesh filename for rank r
             std::string meshH5;
             if (gr.options.meshPolicy == MeshPolicy::Static)
             {
@@ -517,45 +569,44 @@ namespace Rodin::IO
                   patterns.transientMesh, stemStr, gr.name, "", indexStr, rStr);
             }
 
-            os << indent(5) << "<Grid Name=\"" << gr.name << "_r" << r
+            const auto meshPath = m_stem.parent_path() / meshH5;
+            const auto meta = readXDMFMeshMeta(meshPath);
+
+            os << indent(5) << "<Grid Name=\"" << makeGridPieceName(gridName, r)
                << "\" GridType=\"Uniform\">\n";
 
-            // Topology
             os << indent(6) << "<Topology TopologyType=\"Mixed\" NumberOfElements=\""
-               << snap.cellCount << "\">\n";
-            os << indent(7) << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Dimensions=\""
-               << snap.topologySize << "\">"
+               << meta.cellCount << "\">\n";
+            os << indent(7) << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Precision=\"8\" Dimensions=\""
+               << meta.topologySize << "\">"
                << meshH5 << ":" << HDF5::Path::MeshXDMFTopology
                << "</DataItem>\n";
             os << indent(6) << "</Topology>\n";
 
-            // Geometry
             os << indent(6) << "<Geometry GeometryType=\""
-               << getGeometryType(snap.spaceDimension) << "\">\n";
+               << getGeometryType(meta.spaceDimension) << "\">\n";
             os << indent(7) << "<DataItem Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" Dimensions=\""
-               << snap.vertexCount << " " << snap.spaceDimension
+               << meta.vertexCount << " " << meta.spaceDimension
                << "\">"
                << meshH5 << ":" << HDF5::Path::MeshGeometryVertices
                << "</DataItem>\n";
             os << indent(6) << "</Geometry>\n";
 
-            // Mesh attributes (labels/regions)
             for (const auto& attr : snap.meshAttributes)
             {
               const char* centerStr = (attr.center == Center::Node) ? "Node" : "Cell";
               std::ostringstream dimStr;
-              dimStr << ((attr.center == Center::Node) ? snap.vertexCount : snap.cellCount);
+              dimStr << ((attr.center == Center::Node) ? meta.vertexCount : meta.cellCount);
 
               os << indent(6) << "<Attribute Name=\"" << attr.name
                  << "\" AttributeType=\"Scalar\" Center=\"" << centerStr << "\">\n";
-              os << indent(7) << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Dimensions=\""
+              os << indent(7) << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Precision=\"8\" Dimensions=\""
                  << dimStr.str() << "\">"
                  << meshH5 << ":" << HDF5::attributePath(attr.topologicalDimension)
                  << "</DataItem>\n";
               os << indent(6) << "</Attribute>\n";
             }
 
-            // Grid function attributes
             for (const auto& attr : snap.attributes)
             {
               const auto attrH5 = expandPattern(
@@ -566,7 +617,7 @@ namespace Rodin::IO
 
               std::ostringstream dimStr;
               const size_t count = (attr.center == Center::Node)
-                  ? snap.vertexCount : snap.cellCount;
+                  ? meta.vertexCount : meta.cellCount;
               if (attr.dimension == 1)
                 dimStr << count;
               else
