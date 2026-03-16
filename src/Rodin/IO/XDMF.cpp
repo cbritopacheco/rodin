@@ -146,6 +146,7 @@ namespace Rodin::IO
   {
     auto& gr = m_owner->m_grids[m_index];
     gr.mesh = nullptr;
+    gr.sourceMesh = nullptr;
     gr.options = GridOptions{};
     gr.staticMeshWritten = false;
     gr.staticMeshFile.clear();

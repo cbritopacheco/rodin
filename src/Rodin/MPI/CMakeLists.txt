@@ -9,6 +9,7 @@ set(RodinMPI_HEADERS
   Geometry/Mesh.h
   Geometry/Sharder.h
   Assembly/MPI.h
+  IO/HDF5.h
 )
 
 set(RodinMPI_SRCS
@@ -41,6 +42,7 @@ target_link_libraries(RodinMPI
   PUBLIC
     Rodin::Geometry
     Rodin::Alert
+    Rodin::IO
     Boost::mpi
     MPI::MPI_CXX
 )

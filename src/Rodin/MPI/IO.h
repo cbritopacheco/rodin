@@ -2,5 +2,6 @@
 #define RODIN_MPI_IO_H
 
 #include "IO/MFEM.h"
+#include "IO/HDF5.h"
 
 #endif

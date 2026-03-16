@@ -168,46 +168,66 @@ namespace Rodin::IO
 
       void load(const boost::filesystem::path& filename) override
       {
-        // auto& gf = this->getObject();
-        // auto& vec = gf.getData();
+        auto& gf = this->getObject();
+        auto& vec = gf.getData();
 
-        // MPI_Comm comm = MPI_COMM_NULL;
-        // PetscErrorCode ierr = PetscObjectGetComm(reinterpret_cast<PetscObject>(vec), &comm);
-        // assert(ierr == PETSC_SUCCESS);
+        MPI_Comm comm = MPI_COMM_NULL;
+        PetscErrorCode ierr = PetscObjectGetComm(reinterpret_cast<PetscObject>(vec), &comm);
+        assert(ierr == PETSC_SUCCESS);
 
-        // int rank = 0;
-        // const auto mpiErr = MPI_Comm_rank(comm, &rank);
-        // assert(mpiErr == MPI_SUCCESS);
+        int rank = 0;
+        const auto mpiErr = MPI_Comm_rank(comm, &rank);
+        assert(mpiErr == MPI_SUCCESS);
 
-        // std::vector<double> values;
-        // if (rank == 0)
-        // {
-        //   const auto file = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
-        //   assert(file >= 0);
-        //   values = Internal::readVectorDouble(file, "/GridFunction/Values/Data");
-        //   const auto dofCount = static_cast<size_t>(Internal::readScalarULL(file, "/GridFunction/Meta/Size"));
-        //   const auto vectorDim = static_cast<size_t>(Internal::readScalarULL(file, "/GridFunction/Meta/Dimension"));
-        //   assert(dofCount == gf.getSize());
-        //   assert(vectorDim == gf.getDimension());
-        //   H5Fclose(file);
-        // }
+        std::vector<double> values;
+        if (rank == 0)
+        {
+          const auto file = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+          if (file < 0)
+          {
+            Alert::Exception()
+              << "Failed to open HDF5 file for reading: " << filename
+              << Alert::Raise;
+          }
+          values = Internal::readVectorDouble(file, "/GridFunction/Values/Data");
+          const auto dofCount = static_cast<size_t>(
+              Internal::readScalarULL(file, "/GridFunction/Meta/Size"));
+          const auto vectorDim = static_cast<size_t>(
+              Internal::readScalarULL(file, "/GridFunction/Meta/Dimension"));
+          if (dofCount != gf.getSize())
+          {
+            H5Fclose(file);
+            Alert::Exception()
+              << "DOF count mismatch: file has " << dofCount
+              << ", grid function has " << gf.getSize() << "."
+              << Alert::Raise;
+          }
+          if (vectorDim != gf.getDimension())
+          {
+            H5Fclose(file);
+            Alert::Exception()
+              << "Dimension mismatch: file has " << vectorDim
+              << ", grid function has " << gf.getDimension() << "."
+              << Alert::Raise;
+          }
+          H5Fclose(file);
+        }
 
-        // PetscInt globalN = 0;
-        // ierr = VecGetSize(vec, &globalN);
-        // assert(ierr == PETSC_SUCCESS);
-        // if (static_cast<size_t>(globalN) > static_cast<size_t>(std::numeric_limits<int>::max()))
-        // {
-        //   Alert::Exception()
-        //     << "GridFunction vector too large for MPI_Bcast count: size is " << globalN
-        //     << ", maximum is " << std::numeric_limits<int>::max() << "."
-        //     << Alert::Raise;
-        // }
-        // if (rank != 0)
-        //   values.resize(static_cast<size_t>(globalN));
-        // const auto bcastErr = MPI_Bcast(values.data(), static_cast<int>(values.size()), MPI_DOUBLE, 0, comm);
-        // assert(bcastErr == MPI_SUCCESS);
+        PetscInt globalN = 0;
+        ierr = VecGetSize(vec, &globalN);
+        assert(ierr == PETSC_SUCCESS);
+        if (static_cast<size_t>(globalN) > static_cast<size_t>(std::numeric_limits<int>::max()))
+        {
+          Alert::Exception()
+            << "GridFunction vector too large for MPI_Bcast count: size is " << globalN
+            << ", maximum is " << std::numeric_limits<int>::max() << "."
+            << Alert::Raise;
+        }
+        if (rank != 0)
+          values.resize(static_cast<size_t>(globalN));
+        MPI_Bcast(values.data(), static_cast<int>(values.size()), MPI_DOUBLE, 0, comm);
 
-        // Internal::scatterIntoPETScVector(vec, values);
+        Internal::scatterIntoPETScVector(vec, values);
       }
   };
 
@@ -234,59 +254,66 @@ namespace Rodin::IO
           << Alert::Raise;
       }
 
-      void print(const boost::filesystem::path& filename)
+      void print(const boost::filesystem::path& filename) override
       {
-        // const auto& gf = this->getObject();
-        // const auto& vec = gf.getData();
+        const auto& gf = this->getObject();
+        const auto& vec = gf.getData();
 
-        // MPI_Comm comm = MPI_COMM_NULL;
-        // PetscErrorCode ierr = PetscObjectGetComm(reinterpret_cast<PetscObject>(vec), &comm);
-        // assert(ierr == PETSC_SUCCESS);
+        MPI_Comm comm = MPI_COMM_NULL;
+        PetscErrorCode ierr = PetscObjectGetComm(reinterpret_cast<PetscObject>(vec), &comm);
+        assert(ierr == PETSC_SUCCESS);
 
-        // int rank = 0;
-        // const auto mpiErr = MPI_Comm_rank(comm, &rank);
-        // assert(mpiErr == MPI_SUCCESS);
+        int rank = 0;
+        const auto mpiErr = MPI_Comm_rank(comm, &rank);
+        assert(mpiErr == MPI_SUCCESS);
 
-        // const auto values = Internal::gatherPETScVector(vec);
-        // if (rank == 0)
-        // {
-        //   const auto file = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-        //   assert(file >= 0);
+        const auto values = Internal::gatherPETScVector(vec);
+        if (rank == 0)
+        {
+          const auto file = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+          if (file < 0)
+          {
+            Alert::Exception()
+              << "Failed to create HDF5 file: " << filename
+              << Alert::Raise;
+          }
 
-        //   const auto gfGroup = H5Gcreate2(file, "/GridFunction", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-        //   assert(gfGroup >= 0);
+          const auto gfGroup = H5Gcreate2(file, "/GridFunction", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+          assert(gfGroup >= 0);
+          H5Gclose(gfGroup);
 
-        //   H5Gclose(gfGroup);
-        //   const auto metaGroup = H5Gcreate2(file, "/GridFunction/Meta", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-        //   assert(metaGroup >= 0);
+          const auto metaGroup = H5Gcreate2(file, "/GridFunction/Meta", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+          assert(metaGroup >= 0);
+          H5Gclose(metaGroup);
 
-        //   H5Gclose(metaGroup);
-        //   const auto valuesGroup = H5Gcreate2(file, "/GridFunction/Values", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-        //   assert(valuesGroup >= 0);
+          const auto valuesGroup = H5Gcreate2(file, "/GridFunction/Values", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+          assert(valuesGroup >= 0);
+          H5Gclose(valuesGroup);
 
-        //   H5Gclose(valuesGroup);
+          const hsize_t dims[1] = { static_cast<hsize_t>(values.size()) };
+          const auto dataSpace = H5Screate_simple(1, dims, nullptr);
+          assert(dataSpace >= 0);
 
-        //   const hsize_t dims[1] = { static_cast<hsize_t>(values.size()) };
-        //   const auto dataSpace = H5Screate_simple(1, dims, nullptr);
-        //   assert(dataSpace >= 0);
+          const auto dataSet = H5Dcreate2(
+              file, "/GridFunction/Values/Data", H5T_NATIVE_DOUBLE, dataSpace,
+              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+          assert(dataSet >= 0);
 
-        //   const auto dataSet = H5Dcreate2(file, "/GridFunction/Values/Data", H5T_NATIVE_DOUBLE, dataSpace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-        //   assert(dataSet >= 0);
+          if (!values.empty())
+          {
+            assert(H5Dwrite(dataSet, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,
+                            H5P_DEFAULT, values.data()) >= 0);
+          }
+          H5Dclose(dataSet);
+          H5Sclose(dataSpace);
 
-        //   if (!values.empty())
-        //   {
-        //     assert(H5Dwrite(dataSet, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, values.data()) >= 0);
-        //   }
-        //   H5Dclose(dataSet);
-        //   H5Sclose(dataSpace);
+          Internal::writeScalarULL(file, "/GridFunction/Meta/Size",
+              static_cast<unsigned long long>(gf.getSize()));
+          Internal::writeScalarULL(file, "/GridFunction/Meta/Dimension",
+              static_cast<unsigned long long>(gf.getDimension()));
 
-        //   Internal::writeScalarULL(file, "/GridFunction/Meta/Size",
-        //     static_cast<unsigned long long>(gf.getSize()));
-        //   Internal::writeScalarULL(file, "/GridFunction/Meta/Dimension",
-        //     static_cast<unsigned long long>(gf.getDimension()));
-
-        //   H5Fclose(file);
-        // }
+          H5Fclose(file);
+        }
       }
 
   };

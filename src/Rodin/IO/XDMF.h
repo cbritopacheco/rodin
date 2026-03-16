@@ -575,7 +575,8 @@ namespace Rodin::IO
       struct GridRecord
       {
         std::string name;                             ///< Grid name.
-        const Geometry::MeshBase* mesh = nullptr;     ///< Observed mesh (non-owning).
+        const Geometry::MeshBase* mesh = nullptr;     ///< Effective mesh for visualization (shard for MPI).
+        const Geometry::MeshBase* sourceMesh = nullptr; ///< Original mesh for identity checks.
         GridOptions options;                          ///< Per-grid export options.
         bool staticMeshWritten = false;               ///< Whether the static mesh has been exported.
         boost::filesystem::path staticMeshFile;       ///< Path to the static mesh file.
@@ -597,7 +598,14 @@ namespace Rodin::IO
   XDMF::Grid& XDMF::Grid::setMesh(const MeshType& mesh, MeshPolicy policy)
   {
     auto& gr = m_owner->m_grids[m_index];
-    gr.mesh = &mesh;
+    // For distributed (MPI) meshes, store the shard for visualization
+    // since the writeXDMF helpers require a local mesh. The original mesh
+    // pointer is kept in sourceMesh for identity checks in add().
+    if constexpr (requires { mesh.getShard(); })
+      gr.mesh = &mesh.getShard();
+    else
+      gr.mesh = &mesh;
+    gr.sourceMesh = &mesh;
     gr.options.meshPolicy = policy;
     gr.staticMeshWritten = false;
     gr.staticMeshFile.clear();
@@ -625,7 +633,7 @@ namespace Rodin::IO
   {
     auto& gr = m_owner->m_grids[m_index];
 
-    if (gr.mesh && gr.mesh != &gf.getFiniteElementSpace().getMesh())
+    if (gr.sourceMesh && gr.sourceMesh != &gf.getFiniteElementSpace().getMesh())
     {
       Alert::Exception()
         << "Attribute mesh does not match the grid mesh."
