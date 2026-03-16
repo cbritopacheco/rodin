@@ -10,6 +10,8 @@ set(RodinMPI_HEADERS
   Geometry/Sharder.h
   Assembly/MPI.h
   IO/HDF5.h
+  IO/MFEM.h
+  IO/MEDIT.h
 )
 
 set(RodinMPI_SRCS

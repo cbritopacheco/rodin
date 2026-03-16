@@ -217,6 +217,178 @@ namespace
     boost::filesystem::remove_all(testDir);
   }
 
+  // --- Shard metadata HDF5 dataset structure verification --------------------
+
+  /**
+   * Verifies that the `/Shard` group hierarchy written by the MPI printer
+   * has the expected layout.  Because MPI is not available in the unit-test
+   * environment we create the datasets directly using the HDF5 path helpers
+   * and then verify them with raw HDF5 API calls.
+   */
+  TEST(ShardMetadata, GroupAndDatasetLayout)
+  {
+    const std::string testFile = "/tmp/rodin_shard_meta_layout.h5";
+
+    // -- Write phase: create a file with the shard layout -------------------
+    {
+      const auto file = HDF5::File(
+          H5Fcreate(testFile.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+      ASSERT_TRUE(file);
+
+      // Create the group hierarchy for dimension 0
+      {
+        const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::Shard,
+                                               H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        ASSERT_TRUE(g);
+      }
+      {
+        const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::ShardFlags,
+                                               H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        ASSERT_TRUE(g);
+      }
+      {
+        const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::ShardPolytopeMap,
+                                               H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        ASSERT_TRUE(g);
+      }
+      {
+        const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::ShardOwner,
+                                               H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        ASSERT_TRUE(g);
+      }
+      {
+        const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::ShardHalo,
+                                               H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        ASSERT_TRUE(g);
+      }
+
+      // /Shard/Flags/0 — ownership flags (U8)
+      {
+        std::vector<HDF5::U8> flags = { 1, 1, 2, 0 };
+        HDF5::writeVectorDataset(file.get(), HDF5::shardFlagsPath(0), flags);
+      }
+
+      // /Shard/PolytopeMap/0
+      {
+        const auto g = HDF5::Group(
+            H5Gcreate2(file.get(), HDF5::shardPolytopeMapGroupPath(0).c_str(),
+                       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        ASSERT_TRUE(g);
+      }
+      {
+        std::vector<HDF5::U64> left = { 10, 20, 30, 40 };
+        HDF5::writeVectorDataset(file.get(), HDF5::shardPolytopeMapLeftPath(0), left);
+      }
+      {
+        const auto g = HDF5::Group(
+            H5Gcreate2(file.get(), HDF5::shardPolytopeMapRightGroupPath(0).c_str(),
+                       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        ASSERT_TRUE(g);
+      }
+      {
+        std::vector<HDF5::U64> keys = { 10, 20, 30, 40 };
+        std::vector<HDF5::U64> vals = { 0, 1, 2, 3 };
+        HDF5::writeVectorDataset(file.get(), HDF5::shardPolytopeMapRightGroupPath(0) + "/Keys", keys);
+        HDF5::writeVectorDataset(file.get(), HDF5::shardPolytopeMapRightGroupPath(0) + "/Values", vals);
+      }
+
+      // /Shard/Owner/0
+      {
+        const auto g = HDF5::Group(
+            H5Gcreate2(file.get(), HDF5::shardOwnerGroupPath(0).c_str(),
+                       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        ASSERT_TRUE(g);
+      }
+      {
+        std::vector<HDF5::U64> keys = { 2 };
+        std::vector<HDF5::U64> vals = { 3 };
+        HDF5::writeVectorDataset(file.get(), HDF5::shardOwnerGroupPath(0) + "/Keys", keys);
+        HDF5::writeVectorDataset(file.get(), HDF5::shardOwnerGroupPath(0) + "/Values", vals);
+      }
+
+      // /Shard/Halo/0  (CSR: keys=[0,1], offsets=[0,1,3], indices=[1,2,3])
+      {
+        const auto g = HDF5::Group(
+            H5Gcreate2(file.get(), HDF5::shardHaloGroupPath(0).c_str(),
+                       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        ASSERT_TRUE(g);
+      }
+      {
+        std::vector<HDF5::U64> keys    = { 0, 1 };
+        std::vector<HDF5::U64> offsets  = { 0, 1, 3 };
+        std::vector<HDF5::U64> indices  = { 1, 2, 3 };
+        HDF5::writeVectorDataset(file.get(), HDF5::shardHaloGroupPath(0) + "/Keys", keys);
+        HDF5::writeVectorDataset(file.get(), HDF5::shardHaloGroupPath(0) + "/Offsets", offsets);
+        HDF5::writeVectorDataset(file.get(), HDF5::shardHaloGroupPath(0) + "/Indices", indices);
+      }
+    }
+
+    // -- Read-back phase: verify all groups/datasets exist -------------------
+    {
+      hid_t h5 = H5Fopen(testFile.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+      ASSERT_GE(h5, 0);
+
+      EXPECT_TRUE(HDF5::exists(h5, HDF5::Path::Shard));
+      EXPECT_TRUE(HDF5::exists(h5, HDF5::Path::ShardFlags));
+      EXPECT_TRUE(HDF5::exists(h5, HDF5::shardFlagsPath(0)));
+      EXPECT_TRUE(HDF5::exists(h5, HDF5::shardPolytopeMapLeftPath(0)));
+      EXPECT_TRUE(HDF5::exists(h5, HDF5::shardPolytopeMapRightGroupPath(0) + "/Keys"));
+      EXPECT_TRUE(HDF5::exists(h5, HDF5::shardPolytopeMapRightGroupPath(0) + "/Values"));
+      EXPECT_TRUE(HDF5::exists(h5, HDF5::shardOwnerGroupPath(0) + "/Keys"));
+      EXPECT_TRUE(HDF5::exists(h5, HDF5::shardOwnerGroupPath(0) + "/Values"));
+      EXPECT_TRUE(HDF5::exists(h5, HDF5::shardHaloGroupPath(0) + "/Keys"));
+      EXPECT_TRUE(HDF5::exists(h5, HDF5::shardHaloGroupPath(0) + "/Offsets"));
+      EXPECT_TRUE(HDF5::exists(h5, HDF5::shardHaloGroupPath(0) + "/Indices"));
+
+      // Verify data round-trip for flags
+      {
+        auto flags = HDF5::readVectorDataset<HDF5::U8>(h5, HDF5::shardFlagsPath(0));
+        ASSERT_EQ(flags.size(), 4u);
+        EXPECT_EQ(flags[0], 1);
+        EXPECT_EQ(flags[1], 1);
+        EXPECT_EQ(flags[2], 2);
+        EXPECT_EQ(flags[3], 0);
+      }
+
+      // Verify data round-trip for polytope map left
+      {
+        auto left = HDF5::readVectorDataset<HDF5::U64>(h5, HDF5::shardPolytopeMapLeftPath(0));
+        ASSERT_EQ(left.size(), 4u);
+        EXPECT_EQ(left[0], 10u);
+        EXPECT_EQ(left[3], 40u);
+      }
+
+      // Verify halo CSR structure
+      {
+        auto keys    = HDF5::readVectorDataset<HDF5::U64>(h5, HDF5::shardHaloGroupPath(0) + "/Keys");
+        auto offsets = HDF5::readVectorDataset<HDF5::U64>(h5, HDF5::shardHaloGroupPath(0) + "/Offsets");
+        auto indices = HDF5::readVectorDataset<HDF5::U64>(h5, HDF5::shardHaloGroupPath(0) + "/Indices");
+        ASSERT_EQ(keys.size(), 2u);
+        ASSERT_EQ(offsets.size(), 3u);
+        ASSERT_EQ(indices.size(), 3u);
+        EXPECT_EQ(offsets[0], 0u);
+        EXPECT_EQ(offsets[2], 3u);
+      }
+
+      H5Fclose(h5);
+    }
+
+    std::remove(testFile.c_str());
+  }
+
+  // --- Shard path helpers ---------------------------------------------------
+
+  TEST(ShardMetadata, PathHelpers)
+  {
+    EXPECT_EQ(HDF5::shardFlagsPath(0), "/Shard/Flags/0");
+    EXPECT_EQ(HDF5::shardFlagsPath(2), "/Shard/Flags/2");
+    EXPECT_EQ(HDF5::shardPolytopeMapGroupPath(1), "/Shard/PolytopeMap/1");
+    EXPECT_EQ(HDF5::shardPolytopeMapLeftPath(3), "/Shard/PolytopeMap/3/Left");
+    EXPECT_EQ(HDF5::shardPolytopeMapRightGroupPath(0), "/Shard/PolytopeMap/0/Right");
+    EXPECT_EQ(HDF5::shardOwnerGroupPath(2), "/Shard/Owner/2");
+    EXPECT_EQ(HDF5::shardHaloGroupPath(1), "/Shard/Halo/1");
+  }
+
   struct MPIPolytopeNameGenerator
   {
     std::string operator()(const ::testing::TestParamInfo<Polytope::Type>& info) const

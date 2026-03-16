@@ -189,6 +189,12 @@ namespace Rodin::IO
       static constexpr const char* MeshXDMFTopology = "/Mesh/XDMF/Topology";  ///< XDMF mixed topology stream.
       static constexpr const char* MeshXDMFTopologySize = "/Mesh/XDMF/TopologySize";  ///< Length of the mixed topology stream.
 
+      static constexpr const char* Shard = "/Shard";  ///< Root shard metadata group.
+      static constexpr const char* ShardFlags = "/Shard/Flags";  ///< Ownership flags per dimension.
+      static constexpr const char* ShardPolytopeMap = "/Shard/PolytopeMap";  ///< Index maps per dimension.
+      static constexpr const char* ShardOwner = "/Shard/Owner";  ///< Ghost-to-owner map per dimension.
+      static constexpr const char* ShardHalo = "/Shard/Halo";  ///< Owned-to-halo map per dimension.
+
       static constexpr const char* GridFunction = "/GridFunction";  ///< Root grid function group.
       static constexpr const char* GridFunctionMeta = "/GridFunction/Meta";  ///< Grid function metadata group.
       static constexpr const char* GridFunctionMetaName = "/GridFunction/Meta/Name";  ///< Optional name string.
@@ -502,6 +508,76 @@ namespace Rodin::IO
     {
       return transformationGroupPath(d) + "/Kind";
     }
+
+    // ---- Shard metadata path helpers ----------------------------------------
+
+    /**
+     * @brief Returns the dataset path for shard ownership flags of dimension `d`.
+     * @param[in] d  Topological dimension.
+     * @returns Path string, e.g. `"/Shard/Flags/2"`.
+     */
+    inline
+    std::string shardFlagsPath(size_t d)
+    {
+      return std::string(Path::ShardFlags) + "/" + std::to_string(d);
+    }
+
+    /**
+     * @brief Returns the group path for shard polytope map of dimension `d`.
+     * @param[in] d  Topological dimension.
+     * @returns Path string, e.g. `"/Shard/PolytopeMap/2"`.
+     */
+    inline
+    std::string shardPolytopeMapGroupPath(size_t d)
+    {
+      return std::string(Path::ShardPolytopeMap) + "/" + std::to_string(d);
+    }
+
+    /**
+     * @brief Returns the dataset path for shard-to-distributed index mapping.
+     * @param[in] d  Topological dimension.
+     * @returns Path string, e.g. `"/Shard/PolytopeMap/2/Left"`.
+     */
+    inline
+    std::string shardPolytopeMapLeftPath(size_t d)
+    {
+      return shardPolytopeMapGroupPath(d) + "/Left";
+    }
+
+    /**
+     * @brief Returns the group path for distributed-to-shard index mapping.
+     * @param[in] d  Topological dimension.
+     * @returns Path string, e.g. `"/Shard/PolytopeMap/2/Right"`.
+     */
+    inline
+    std::string shardPolytopeMapRightGroupPath(size_t d)
+    {
+      return shardPolytopeMapGroupPath(d) + "/Right";
+    }
+
+    /**
+     * @brief Returns the group path for ghost-to-owner map of dimension `d`.
+     * @param[in] d  Topological dimension.
+     * @returns Path string, e.g. `"/Shard/Owner/2"`.
+     */
+    inline
+    std::string shardOwnerGroupPath(size_t d)
+    {
+      return std::string(Path::ShardOwner) + "/" + std::to_string(d);
+    }
+
+    /**
+     * @brief Returns the group path for owned-to-halo map of dimension `d`.
+     * @param[in] d  Topological dimension.
+     * @returns Path string, e.g. `"/Shard/Halo/2"`.
+     */
+    inline
+    std::string shardHaloGroupPath(size_t d)
+    {
+      return std::string(Path::ShardHalo) + "/" + std::to_string(d);
+    }
+
+    // ---- end shard metadata path helpers ------------------------------------
 
     /**
      * @brief Returns the size of the geometry-count array.
