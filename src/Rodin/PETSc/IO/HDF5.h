@@ -225,7 +225,8 @@ namespace Rodin::IO
         }
         if (rank != 0)
           values.resize(static_cast<size_t>(globalN));
-        MPI_Bcast(values.data(), static_cast<int>(values.size()), MPI_DOUBLE, 0, comm);
+        const auto bcastErr = MPI_Bcast(values.data(), static_cast<int>(values.size()), MPI_DOUBLE, 0, comm);
+        assert(bcastErr == MPI_SUCCESS);
 
         Internal::scatterIntoPETScVector(vec, values);
       }
