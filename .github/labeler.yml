@@ -12,39 +12,90 @@ unit-tests:
 
 cmake:
 - any: ['cmake/**/*']
+- any: ['src/CMakeLists.txt']
+- any: ['src/Rodin/**/CMakeLists.txt']
 
-mmg:
-- any: ['src/RodinExternal/MMG/**/*']
-
-geometry:
-- any: ['src/Rodin/Geometry/**/*']
-
-variational:
-- any: ['src/Rodin/Variational/**/*']
-
-solver:
-- any: ['src/Rodin/Solver/**/*']
-
-utility:
-- any: ['src/Rodin/Utility/**/*']
-
-context:
-- any: ['src/Rodin/Context/**/*']
-
-form-language:
-- any: ['src/Rodin/FormLanguage/**/*']
-
-math:
-- any: ['src/Rodin/Math/**/*']
-
-io:
-- any: ['src/Rodin/IO/**/*']
+advection:
+- any: ['src/Rodin/Advection/**/*']
 
 alerts:
 - any: ['src/Rodin/Alert/**/*']
+- any: ['src/Rodin/Alert.h']
+
+assembly:
+- any: ['src/Rodin/Assembly/**/*']
+- any: ['src/Rodin/Assembly.h']
+
+context:
+- any: ['src/Rodin/Context/**/*']
+- any: ['src/Rodin/Context.h']
+
+distance:
+- any: ['src/Rodin/Distance/**/*']
+
+eikonal:
+- any: ['src/Rodin/Eikonal/**/*']
+
+form-language:
+- any: ['src/Rodin/FormLanguage/**/*']
+- any: ['src/Rodin/FormLanguage.h']
+
+geometry:
+- any: ['src/Rodin/Geometry/**/*']
+- any: ['src/Rodin/Geometry.h']
+
+hilbert:
+- any: ['src/Rodin/Hilbert/**/*']
+
+io:
+- any: ['src/Rodin/IO/**/*']
+- any: ['src/Rodin/IO.h']
+
+linear-elasticity:
+- any: ['src/Rodin/LinearElasticity/**/*']
+- any: ['src/Rodin/LinearElasticity.h']
+
+math:
+- any: ['src/Rodin/Math/**/*']
+- any: ['src/Rodin/Math.h']
+
+mfem:
+- any: ['src/Rodin/MFEM/**/*']
+
+mmg:
+- any: ['src/Rodin/MMG/**/*']
+- any: ['src/Rodin/MMG.h']
+
+mpi:
+- any: ['src/Rodin/MPI/**/*']
+- any: ['src/Rodin/MPI.h']
+
+petsc:
+- any: ['src/Rodin/PETSc/**/*']
+- any: ['src/Rodin/PETSc.h']
 
 qf:
 - any: ['src/Rodin/QF/**/*']
+- any: ['src/Rodin/QF.h']
 
-plot:
-- any: ['src/Rodin/Plot/**/*']
+scotch:
+- any: ['src/Rodin/Scotch/**/*']
+
+serialization:
+- any: ['src/Rodin/Serialization/**/*']
+
+solver:
+- any: ['src/Rodin/Solver/**/*']
+- any: ['src/Rodin/Solver.h']
+
+test:
+- any: ['src/Rodin/Test/**/*']
+- any: ['src/Rodin/Test.h']
+
+utility:
+- any: ['src/Rodin/Utility/**/*']
+- any: ['src/Rodin/Utility.h']
+
+variational:
+- any: ['src/Rodin/Variational/**/*']
+- any: ['src/Rodin/Variational.h']
