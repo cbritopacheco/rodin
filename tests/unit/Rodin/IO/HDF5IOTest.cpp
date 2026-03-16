@@ -367,6 +367,7 @@ namespace
       case Polytope::Type::Wedge:
         return LocalMesh::UniformGrid(type, { 3, 3, 3 });
       default:
+        ADD_FAILURE() << "Unsupported polytope type for makeMesh";
         return Geometry::Mesh<Context::Local>();
     }
   }
