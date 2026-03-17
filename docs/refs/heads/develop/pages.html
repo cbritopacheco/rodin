@@ -31,6 +31,8 @@
               <ol>
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -46,6 +48,7 @@
               <ol>
                 <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
                 <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
                 <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
                 <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
                 <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
@@ -78,24 +81,43 @@
             <ul class="m-doc">
               <li><a href="examples-pdes-poisson.html" class="m-doc">Solving the Poisson equation</a> <span class="m-doc">Resolution of the Poisson equation using <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</span></li>
               <li><a href="examples-pdes-elasticity.html" class="m-doc">Solving the elasticity equation</a> <span class="m-doc">Showcases the resolution of the elasticity system.</span></li>
+              <li><a href="examples-pdes-helmholtz.html" class="m-doc">Solving the Helmholtz equation</a> <span class="m-doc">Resolution of the complex-valued Helmholtz equation using <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</span></li>
+              <li><a href="examples-pdes-navierstokes.html" class="m-doc">Solving the Navier-Stokes equations</a> <span class="m-doc">Steady incompressible Navier-Stokes with Picard iteration.</span></li>
+              <li><a href="examples-pdes-periodic.html" class="m-doc">Poisson equation with periodic boundary conditions</a> <span class="m-doc">Solving the Poisson equation on a periodic domain.</span></li>
+              <li><a href="examples-pdes-surfacemesh.html" class="m-doc">Solving PDEs on surface meshes</a> <span class="m-doc">Reaction-diffusion equation on a 3D surface mesh.</span></li>
             </ul>
           </li>
           <li class="m-doc-collapsible">
             <a href="#" onclick="return toggle(this)"></a><a href="examples-index.html" class="m-doc">Examples and tutorials</a> <span class="m-doc">Examples utilizing the <a href="namespace_rodin.html" class="m-doc">Rodin</a> library.</span>
             <ul class="m-doc">
               <li class="m-doc-collapsible">
+                <a href="#" onclick="return toggle(this)"></a><a href="examples-io-index.html" class="m-doc">Input/Output examples</a> <span class="m-doc">Examples demonstrating I/O capabilities.</span>
+                <ul class="m-doc">
+                  <li><a href="examples-io-xdmf.html" class="m-doc">XDMF time-evolution output</a> <span class="m-doc">Exporting time-dependent data with XDMF for visualization in ParaView.</span></li>
+                  <li><a href="examples-io-mfem.html" class="m-doc">MFEM format</a> <span class="m-doc">How to read and write meshes and grid functions in MFEM format.</span></li>
+                  <li><a href="examples-io-medit.html" class="m-doc">MEDIT format</a> <span class="m-doc">How to load and convert MEDIT-format meshes.</span></li>
+                </ul>
+              </li>
+              <li class="m-doc-collapsible">
+                <a href="#" onclick="return toggle(this)"></a><a href="examples-geometry-index.html" class="m-doc">Mesh geometry examples</a> <span class="m-doc">Examples demonstrating mesh creation and geometric operations.</span>
+                <ul class="m-doc">
+                  <li><a href="examples-geometry-uniformgrid.html" class="m-doc">Generating uniform grids</a> <span class="m-doc">Creating structured meshes with UniformGrid.</span></li>
+                  <li><a href="examples-geometry-connectivity.html" class="m-doc">Computing mesh connectivity</a> <span class="m-doc">How to compute and use topological connectivity.</span></li>
+                </ul>
+              </li>
+              <li class="m-doc-collapsible">
                 <a href="#" onclick="return toggle(this)"></a><a href="examples-mmg-index.html" class="m-doc">Working with MMG</a> <span class="m-doc">Showcases the usage of the <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">Rodin::<wbr />External::<wbr />MMG</a> module.</span>
                 <ul class="m-doc">
-                  <li><a href="examples-mmg-simple_io.html" class="m-doc">Simple input/output of MMG objects</a> <span class="m-doc">How to read and write MMG objects.</span></li>
-                  <li><a href="examples-mmg-mesh_optimization.html" class="m-doc">Optimizing the mesh</a> <span class="m-doc">How to optimize the mesh.</span></li>
-                  <li><a href="examples-mmg-mesh_adaptation.html" class="m-doc">Adapting the mesh</a> <span class="m-doc">How to adapt the mesh.</span></li>
+                  <li><a href="examples-mmg-simple_io.html" class="m-doc">Simple input/output of MMG objects</a> <span class="m-doc">How to read and write MMG meshes in MFEM and MEDIT formats.</span></li>
+                  <li><a href="examples-mmg-mesh_optimization.html" class="m-doc">Optimizing the mesh</a> <span class="m-doc">How to optimize a mesh using the MMG remesher.</span></li>
+                  <li><a href="examples-mmg-mesh_adaptation.html" class="m-doc">Adapting the mesh</a> <span class="m-doc">How to adapt a mesh based on a solution field.</span></li>
                   <li><a href="examples-mmg-casting.html" class="m-doc">Casting between MMG and Rodin</a> <span class="m-doc">How to convert from MMG to <a href="namespace_rodin.html" class="m-doc">Rodin</a> objects and vice-versa.</span></li>
                 </ul>
               </li>
               <li class="m-doc-collapsible">
                 <a href="#" onclick="return toggle(this)"></a><a href="examples-density_optimization-index.html" class="m-doc">Density optimization examples</a> <span class="m-doc">Implementation of density optimization algorithms.</span>
                 <ul class="m-doc">
-                  <li><a href="examples-density_optimization-simp_temperature_minimization.html" class="m-doc">Temperature minimization</a> <span class="m-doc">Temperature.</span></li>
+                  <li><a href="examples-density_optimization-simp_temperature_minimization.html" class="m-doc">Temperature minimization</a> <span class="m-doc">Density-based topology optimization to minimize average temperature.</span></li>
                 </ul>
               </li>
               <li class="m-doc-collapsible">
@@ -107,6 +129,7 @@
               </li>
             </ul>
           </li>
+          <li><a href="gallery.html" class="m-doc">Gallery</a> <span class="m-doc">A visual showcase of simulations and results produced with <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</span></li>
           <li class="m-doc-collapsible">
             <a href="#" onclick="return toggle(this)"></a><a href="guides-index.html" class="m-doc">General concepts</a> <span class="m-doc">General concepts and design of <a href="namespace_rodin.html" class="m-doc">Rodin</a> features.</span>
             <ul class="m-doc">
@@ -125,10 +148,22 @@
                   <li><a href="guides-meshes-utilities.html" class="m-doc">Advanced Utilities</a> <span class="m-doc">Advanced mesh operations and transformations.</span></li>
                 </ul>
               </li>
-              <li><a href="guides-polytopes.html" class="m-doc">Polytopes</a> <span class="m-doc">How to use the polytopes defined in <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</span></li>
-              <li><a href="guides-connectivity.html" class="m-doc">Connectivity</a> <span class="m-doc"></span></li>
-              <li><a href="fem-ciarlet.html" class="m-doc">Ciarlet’s definition of a finite element</a> <span class="m-doc">The Ciarlet finite element.</span></li>
-              <li><a href="fem-spaces.html" class="m-doc">Finite element spaces</a> <span class="m-doc">Spaces in <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</span></li>
+              <li><a href="guides-polytopes.html" class="m-doc">Polytopes</a> <span class="m-doc">Understanding the geometric elements in <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</span></li>
+              <li><a href="guides-connectivity.html" class="m-doc">Connectivity</a> <span class="m-doc">Understanding mesh connectivity in <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</span></li>
+              <li><a href="fem-ciarlet.html" class="m-doc">Ciarlet&#x27;s definition of a finite element</a> <span class="m-doc">The mathematical foundation of finite elements.</span></li>
+              <li><a href="fem-spaces.html" class="m-doc">Finite element spaces</a> <span class="m-doc">Overview of the finite element spaces available in <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</span></li>
+              <li><a href="guides-variational.html" class="m-doc">Variational formulations in Rodin</a> <span class="m-doc">How to define, assemble, and solve variational problems.</span></li>
+              <li><a href="guides-weak-formulations.html" class="m-doc">Weak Formulations</a> <span class="m-doc">Understanding and implementing weak formulations in <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</span></li>
+              <li><a href="guides-boundary-conditions.html" class="m-doc">Boundary Conditions</a> <span class="m-doc">Guide to applying boundary conditions in <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</span></li>
+              <li><a href="guides-solvers.html" class="m-doc">Solvers</a> <span class="m-doc">Guide to linear and nonlinear solvers in <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</span></li>
+              <li class="m-doc-collapsible">
+                <a href="#" onclick="return toggle(this)"></a><a href="guides-io.html" class="m-doc">I/O in Rodin</a> <span class="m-doc">Comprehensive guide to input and output in <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</span>
+                <ul class="m-doc">
+                  <li><a href="guides-io-xdmf.html" class="m-doc">XDMF Format</a> <span class="m-doc">Using the XDMF format for visualization and time series data.</span></li>
+                  <li><a href="guides-io-gridfunctions.html" class="m-doc">Grid Function I/O</a> <span class="m-doc">Saving and loading grid functions in <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</span></li>
+                  <li><a href="guides-io-meshformats.html" class="m-doc">Mesh File Formats</a> <span class="m-doc">MFEM and MEDIT mesh file formats.</span></li>
+                </ul>
+              </li>
             </ul>
           </li>
           <li><a href="notation-index.html" class="m-doc">Notation</a> <span class="m-doc">Explanation of the notation used throughout the documentation.</span></li>

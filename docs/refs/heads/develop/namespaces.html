@@ -31,6 +31,8 @@
               <ol>
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -46,6 +48,7 @@
               <ol>
                 <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
                 <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
                 <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
                 <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
                 <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
@@ -73,11 +76,11 @@
         <h1>Namespaces</h1>
         <ul class="m-doc">
           <li class="m-doc-collapsible">
-            <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin.html" class="m-doc">Rodin</a> <span class="m-doc">The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for Shape and Topology Optimization.</span>
+            <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin.html" class="m-doc">Rodin</a> <span class="m-doc">The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</span>
             <ul class="m-doc">
               <li>namespace <a href="namespace_rodin_1_1_advection.html" class="m-doc">Advection</a> <span class="m-doc">Module which provides models for the resolution of unsteady advection equations.</span></li>
               <li class="m-doc-collapsible">
-                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_alert.html" class="m-doc">Alert</a> <span class="m-doc">Module to handle alerts.</span>
+                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_alert.html" class="m-doc">Alert</a> <span class="m-doc">Module to handle alerts, exceptions, and diagnostic messages.</span>
                 <ul class="m-doc">
                   <li>namespace <a href="namespace_rodin_1_1_alert_1_1_identifier.html" class="m-doc">Identifier</a> <span class="m-doc">Namespace containing factory functions for code identifiers.</span></li>
                 </ul>
@@ -96,14 +99,14 @@
               </li>
               <li>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a> <span class="m-doc">Module for writing high level abstract expressions.</span></li>
               <li class="m-doc-collapsible">
-                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> <span class="m-doc">Module for dealing with geometries.</span>
+                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> <span class="m-doc">Module for dealing with meshes, polytopes, and geometric operations.</span>
                 <ul class="m-doc">
                   <li>namespace <a href="namespace_rodin_1_1_geometry_1_1_euclidean.html" class="m-doc">Euclidean</a> <span class="m-doc">Module for dealing with <a href="namespace_rodin_1_1_geometry_1_1_euclidean.html" class="m-doc">Euclidean</a> geometries.</span></li>
                 </ul>
               </li>
               <li>namespace <a href="namespace_rodin_1_1_hilbert.html" class="m-doc">Hilbert</a> <span class="m-doc">Module which provides models and tools for the Hilbertian extension-regularization procedure.</span></li>
               <li class="m-doc-collapsible">
-                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_i_o.html" class="m-doc">IO</a> <span class="m-doc">Module for dealing with I/O functionality.</span>
+                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_i_o.html" class="m-doc">IO</a> <span class="m-doc">Module for mesh and grid function input/output.</span>
                 <ul class="m-doc">
                   <li class="m-doc-collapsible">
                     <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> <span class="m-doc"><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> utility namespace providing type aliases, path constants, RAII handle wrappers, and low-level dataset read/write helpers.</span>
@@ -142,7 +145,7 @@
                 </ul>
               </li>
               <li>namespace <a href="namespace_rodin_1_1_q_f.html" class="m-doc">QF</a> <span class="m-doc">Module for defining quadrature formulae.</span></li>
-              <li>namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a> <span class="m-doc">Module for linear algebra systems.</span></li>
+              <li>namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a> <span class="m-doc">Module for solving linear and nonlinear systems.</span></li>
               <li>namespace <a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> <span class="m-doc">Module containing various utilities and classes for writing tests.</span></li>
               <li class="m-doc-collapsible">
                 <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> <span class="m-doc">Tests of the <a href="namespace_rodin.html" class="m-doc">Rodin</a> library</span>
@@ -171,7 +174,7 @@
               <li>namespace <a href="namespace_rodin_1_1_traits.html" class="m-doc">Traits</a> <span class="m-doc">Module containing metaprogramming facilities.</span></li>
               <li>namespace <a href="namespace_rodin_1_1_utility.html" class="m-doc">Utility</a> <span class="m-doc">Module containing general purpose and language support utility classes.</span></li>
               <li class="m-doc-collapsible">
-                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> <span class="m-doc">Module which provides the necessary tools for constructing variational problems.</span>
+                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> <span class="m-doc">Module which provides the necessary tools for constructing and solving variational problems.</span>
                 <ul class="m-doc">
                   <li>namespace <a href="namespace_rodin_1_1_variational_1_1_f.html" class="m-doc">F</a> <span class="m-doc">Contains built-in coordinate functions.</span></li>
                 </ul>

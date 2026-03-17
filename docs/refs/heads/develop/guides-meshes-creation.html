@@ -32,6 +32,8 @@
               <ol>
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -47,6 +49,7 @@
               <ol>
                 <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
                 <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
                 <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
                 <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
                 <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
@@ -174,8 +177,7 @@ $ [0,1]^3 $
 <use x='20.201801' y='0' xlink:href='#eq2-g2-93'/>
 <use x='23.453462' y='-4.338437' xlink:href='#eq2-g1-51'/>
 </g>
-</svg>. The grid parameters specify the number of subdivisions in each direction.</p></section></section><section id="guides-meshes-creation-files"><h2><a href="#guides-meshes-creation-files">Loading from Files</a></h2><p><a href="namespace_rodin.html" class="m-doc">Rodin</a> supports loading meshes from various file formats.</p><section id="guides-meshes-creation-files-formats"><h3><a href="#guides-meshes-creation-files-formats">Supported Formats</a></h3><ul><li><strong>MFEM</strong> (<code>.mesh</code>) - MFEM native format (default)</li><li><strong>MEDIT</strong> (<code>.mesh</code>) - MEDIT format from INRIA</li><li><strong>GMSH</strong> (<code>.msh</code>, <code>.gmsh</code>) - Gmsh format</li></ul></section><section id="guides-meshes-creation-files-loading"><h3><a href="#guides-meshes-creation-files-loading">Loading Meshes</a></h3><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/IO.h&gt;</span>
+</svg>. The grid parameters specify the number of subdivisions in each direction.</p></section></section><section id="guides-meshes-creation-files"><h2><a href="#guides-meshes-creation-files">Loading from Files</a></h2><p><a href="namespace_rodin.html" class="m-doc">Rodin</a> supports loading meshes from various file formats.</p><section id="guides-meshes-creation-files-formats"><h3><a href="#guides-meshes-creation-files-formats">Supported Formats</a></h3><ul><li><strong>MFEM</strong> (<code>.mesh</code>) - MFEM native format</li><li><strong>MEDIT</strong> (<code>.mesh</code>) - MEDIT format from INRIA (used by MMG)</li></ul></section><section id="guides-meshes-creation-files-loading"><h3><a href="#guides-meshes-creation-files-loading">Loading Meshes</a></h3><p>Use Mesh::load() with an explicit <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a>:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
 
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="p">;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Geometry</span><span class="p">;</span>
@@ -183,15 +185,11 @@ $ [0,1]^3 $
 <span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
 
-<span class="w">  </span><span class="c1">// Load from MFEM format (default)</span>
-<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;domain.mesh&quot;</span><span class="p">);</span>
-
-<span class="w">  </span><span class="c1">// Explicitly specify format</span>
+<span class="w">  </span><span class="c1">// Load from MFEM format</span>
 <span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;domain.mesh&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">);</span>
-<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;domain.msh&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">GMSH</span><span class="p">);</span>
 
-<span class="w">  </span><span class="c1">// Alternatively, use constructor</span>
-<span class="w">  </span><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh2</span><span class="p">(</span><span class="s">&quot;domain.mesh&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">);</span>
+<span class="w">  </span><span class="c1">// Load from MEDIT format</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;domain.mesh&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MEDIT</span><span class="p">);</span>
 
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="p">}</span></pre></section></section><section id="guides-meshes-creation-builder"><h2><a href="#guides-meshes-creation-builder">Building Custom Meshes</a></h2><p>For complete control, use the <code>Mesh::Builder</code> to construct meshes programmatically.</p><section id="guides-meshes-creation-builder-simple"><h3><a href="#guides-meshes-creation-builder-simple">Simple Example</a></h3><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>

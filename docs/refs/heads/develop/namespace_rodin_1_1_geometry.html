@@ -31,6 +31,8 @@
               <ol>
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -46,6 +48,7 @@
               <ol>
                 <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
                 <li><a href="namespace_rodin_1_1_geometry.html" id="m-navbar-current">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
                 <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
                 <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
                 <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
@@ -73,7 +76,7 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Geometry <span class="m-thin">namespace</span>
         </h1>
-        <p>Module for dealing with geometries.</p>
+        <p>Module for dealing with meshes, polytopes, and geometric operations.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -89,6 +92,9 @@
             </li>
           </ul>
         </nav>
+<p>The <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> module provides the core data structures for finite element meshes. Key classes include:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> — The primary mesh class supporting triangular, quadrilateral, tetrahedral, and hexahedral meshes</li><li><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> — Geometric entities (vertices, edges, faces, cells) with type enumeration</li><li><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a> — Incidence relations between polytopes of different dimensions</li><li><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> — Evaluation point for grid functions</li></ul><p>Meshes can be generated or loaded from files:</p><pre class="m-code"><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+<span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">});</span>
+<span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w"> </span><span class="c1">// Compute face-to-cell connectivity</span></pre>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">

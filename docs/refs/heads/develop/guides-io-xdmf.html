@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>General concepts &raquo; I/O in Rodin &raquo; XDMF Format | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <link rel="next" href="guides-io-gridfunctions.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="guides-index.html">General concepts</a> &raquo;</span>
+          <span class="m-breadcrumb"><a href="guides-io.html">I/O in Rodin</a> &raquo;</span>
+          XDMF Format
+        </h1>
+        <p>Using the XDMF format for visualization and time series data.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li><a href="#guides-io-xdmf-intro">Introduction</a></li>
+            <li>
+              <a href="#guides-io-xdmf-class">The XDMF Class</a>
+              <ul>
+                <li><a href="#guides-io-xdmf-class-basic">Basic Usage</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#guides-io-xdmf-guide-grids">Working with Grids</a>
+              <ul>
+                <li><a href="#guides-io-xdmf-guide-grids-mesh">Setting the Mesh</a></li>
+                <li><a href="#guides-io-xdmf-guide-grids-fields">Adding Fields</a></li>
+              </ul>
+            </li>
+            <li><a href="#guides-io-xdmf-static">Static Output</a></li>
+            <li>
+              <a href="#guides-io-xdmf-temporal">Time-Dependent Output</a>
+              <ul>
+                <li><a href="#guides-io-xdmf-temporal-mesh">Mesh Policy</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#guides-io-xdmf-fields">Field Types</a>
+              <ul>
+                <li><a href="#guides-io-xdmf-fields-scalar">Scalar Fields</a></li>
+                <li><a href="#guides-io-xdmf-fields-vector">Vector Fields</a></li>
+              </ul>
+            </li>
+            <li><a href="#guides-io-xdmf-patterns">File Patterns</a></li>
+            <li><a href="#guides-io-xdmf-guide-paraview">Opening Files in ParaView</a></li>
+            <li><a href="#guides-io-xdmf-example">Complete Example</a></li>
+            <li><a href="#guides-io-xdmf-see-also">See Also</a></li>
+          </ul>
+        </nav>
+<section id="guides-io-xdmf-intro"><h2><a href="#guides-io-xdmf-intro">Introduction</a></h2><p>The eXtensible Data Model and Format (XDMF) is a data format designed for scientific computing. It uses a split-file architecture:</p><ul><li>An <strong>XML file</strong> (<code>.xdmf</code>) that describes the structure of the data</li><li>One or more <strong>HDF5 files</strong> (<code>.h5</code>) that store the actual numerical data</li></ul><p>This design combines human-readable metadata with efficient binary storage, making it ideal for large-scale simulations. XDMF files can be directly opened in <a href="https://www.paraview.org/">ParaView</a> for visualization.</p></section><section id="guides-io-xdmf-class"><h2><a href="#guides-io-xdmf-class">The XDMF Class</a></h2><p>The <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">Rodin::<wbr />IO::<wbr />XDMF</a> class provides a high-level interface for writing XDMF files. It follows a grid-based approach where you:</p><ol><li>Create an XDMF writer</li><li>Associate a mesh with a named grid</li><li>Add fields (scalar, vector, tensor) to the grid</li><li>Write snapshots, optionally with time stamps</li></ol><section id="guides-io-xdmf-class-basic"><h3><a href="#guides-io-xdmf-class-basic">Basic Usage</a></h3><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Variational.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/IO/XDMF.h&gt;</span>
+
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Geometry</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Variational</span><span class="p">;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+<span class="w">  </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">});</span>
+
+<span class="w">  </span><span class="n">P1</span><span class="w"> </span><span class="n">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<span class="w">  </span><span class="n">GridFunction</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
+<span class="w">  </span><span class="n">u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="n">Point</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">x</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">y</span><span class="p">();</span><span class="w"> </span><span class="p">};</span>
+
+<span class="w">  </span><span class="n">IO</span><span class="o">::</span><span class="n">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="s">&quot;MyOutput&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="n">xdmf</span><span class="p">.</span><span class="n">grid</span><span class="p">().</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">).</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;u&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">);</span>
+<span class="w">  </span><span class="n">xdmf</span><span class="p">.</span><span class="n">write</span><span class="p">();</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></pre><p>This creates:</p><ul><li><code>MyOutput.xdmf</code> — XML metadata file (open this in ParaView)</li><li><code>MyOutput.Grid.mesh.h5</code> — HDF5 file containing the mesh data</li><li><code>MyOutput.Grid.u.0.h5</code> — HDF5 file containing the field data</li></ul></section></section><section id="guides-io-xdmf-guide-grids"><h2><a href="#guides-io-xdmf-guide-grids">Working with Grids</a></h2><p>A grid in XDMF is a named collection of a mesh and associated fields. You obtain a grid handle from the XDMF writer:</p><pre class="m-code"><span class="n">IO</span><span class="o">::</span><span class="n">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="s">&quot;Simulation&quot;</span><span class="p">);</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">grid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xdmf</span><span class="p">.</span><span class="n">grid</span><span class="p">();</span><span class="w">          </span><span class="c1">// default grid name</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">grid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xdmf</span><span class="p">.</span><span class="n">grid</span><span class="p">(</span><span class="s">&quot;Domain&quot;</span><span class="p">);</span><span class="w">  </span><span class="c1">// named grid</span></pre><section id="guides-io-xdmf-guide-grids-mesh"><h3><a href="#guides-io-xdmf-guide-grids-mesh">Setting the Mesh</a></h3><p>Each grid must have a mesh associated with it before writing:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">grid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xdmf</span><span class="p">.</span><span class="n">grid</span><span class="p">();</span>
+<span class="n">grid</span><span class="p">.</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span></pre></section><section id="guides-io-xdmf-guide-grids-fields"><h3><a href="#guides-io-xdmf-guide-grids-fields">Adding Fields</a></h3><p>Fields are added using the <code>add()</code> method. The field can be a named GridFunction or provided with an explicit name:</p><pre class="m-code"><span class="c1">// Option 1: Name the grid function and add it</span>
+<span class="n">GridFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
+<span class="n">u</span><span class="p">.</span><span class="n">setName</span><span class="p">(</span><span class="s">&quot;velocity&quot;</span><span class="p">);</span>
+<span class="n">grid</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">u</span><span class="p">);</span>
+
+<span class="c1">// Option 2: Provide a name when adding</span>
+<span class="n">grid</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;pressure&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">);</span></pre></section></section><section id="guides-io-xdmf-static"><h2><a href="#guides-io-xdmf-static">Static Output</a></h2><p>For a single snapshot (no time evolution), simply call <code>write()</code> without a time parameter:</p><pre class="m-code"><span class="n">IO</span><span class="o">::</span><span class="n">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="s">&quot;StaticResult&quot;</span><span class="p">);</span>
+<span class="n">xdmf</span><span class="p">.</span><span class="n">grid</span><span class="p">().</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">).</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;solution&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">);</span>
+<span class="n">xdmf</span><span class="p">.</span><span class="n">write</span><span class="p">();</span></pre></section><section id="guides-io-xdmf-temporal"><h2><a href="#guides-io-xdmf-temporal">Time-Dependent Output</a></h2><p>XDMF excels at storing time-dependent data. Call <code>write(t)</code> with a time value for each snapshot:</p><pre class="m-code"><span class="n">IO</span><span class="o">::</span><span class="n">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="s">&quot;TimeEvolution&quot;</span><span class="p">);</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">grid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xdmf</span><span class="p">.</span><span class="n">grid</span><span class="p">();</span>
+<span class="n">grid</span><span class="p">.</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<span class="n">grid</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">u</span><span class="p">);</span>
+
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">numSteps</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">k</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">Real</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dt</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Update your solution...</span>
+<span class="w">  </span><span class="n">u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">t</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="n">Point</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">sin</span><span class="p">(</span><span class="n">Math</span><span class="o">::</span><span class="n">Constants</span><span class="o">::</span><span class="n">pi</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">x</span><span class="p">())</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">t</span><span class="p">);</span>
+<span class="w">  </span><span class="p">};</span>
+
+<span class="w">  </span><span class="c1">// Write snapshot at time t</span>
+<span class="w">  </span><span class="n">xdmf</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">t</span><span class="p">);</span>
+<span class="p">}</span></pre><p>When opened in ParaView, you can use the time controls to step through the evolution of the solution.</p><section id="guides-io-xdmf-temporal-mesh"><h3><a href="#guides-io-xdmf-temporal-mesh">Mesh Policy</a></h3><p>By default, the mesh is considered static (exported once). If your mesh changes over time (e.g., mesh adaptation), you can configure the writer to export the mesh at each time step:</p><pre class="m-code"><span class="n">IO</span><span class="o">::</span><span class="n">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="s">&quot;AdaptiveSim&quot;</span><span class="p">);</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">grid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xdmf</span><span class="p">.</span><span class="n">grid</span><span class="p">();</span>
+<span class="n">grid</span><span class="p">.</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">XDMF</span><span class="o">::</span><span class="n">MeshPolicy</span><span class="o">::</span><span class="n">Transient</span><span class="p">);</span>
+<span class="n">grid</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">u</span><span class="p">);</span></pre></section></section><section id="guides-io-xdmf-fields"><h2><a href="#guides-io-xdmf-fields">Field Types</a></h2><p>XDMF supports different types of fields:</p><section id="guides-io-xdmf-fields-scalar"><h3><a href="#guides-io-xdmf-fields-scalar">Scalar Fields</a></h3><p>Scalar fields have one component per node:</p><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w">                 </span><span class="c1">// scalar P1 space</span>
+<span class="n">GridFunction</span><span class="w"> </span><span class="nf">temperature</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
+<span class="n">temperature</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="n">Point</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">x</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">y</span><span class="p">();</span><span class="w"> </span><span class="p">};</span>
+
+<span class="n">grid</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;temperature&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">temperature</span><span class="p">);</span></pre></section><section id="guides-io-xdmf-fields-vector"><h3><a href="#guides-io-xdmf-fields-vector">Vector Fields</a></h3><p>Vector fields have multiple components per node. Create the finite element space with the number of components:</p><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w">              </span><span class="c1">// 2D vector P1 space</span>
+<span class="n">GridFunction</span><span class="w"> </span><span class="nf">velocity</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
+<span class="n">velocity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="n">Point</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">{{</span><span class="w"> </span><span class="o">-</span><span class="n">p</span><span class="p">.</span><span class="n">y</span><span class="p">(),</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">x</span><span class="p">()</span><span class="w"> </span><span class="p">}};</span>
+<span class="p">};</span>
+
+<span class="n">grid</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;velocity&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">velocity</span><span class="p">);</span></pre></section></section><section id="guides-io-xdmf-patterns"><h2><a href="#guides-io-xdmf-patterns">File Patterns</a></h2><p>The XDMF writer uses customizable file naming patterns. The default patterns are:</p><table class="m-table"><thead><tr><th>File</th><th>Default Pattern</th><th>Example</th></tr></thead><tbody><tr><td>XDMF XML</td><td><code>{stem}.xdmf</code></td><td><code>MyOutput.xdmf</code></td></tr><tr><td>Mesh HDF5</td><td><code>{stem}.{grid}.mesh.h5</code></td><td><code>MyOutput.Grid.mesh.h5</code></td></tr><tr><td>Field HDF5</td><td><code>{stem}.{grid}.{name}.{index}.h5</code></td><td><code>MyOutput.Grid.u.0.h5</code></td></tr></tbody></table><p>Available placeholders:</p><ul><li><code>{stem}</code> — The base name passed to the XDMF constructor</li><li><code>{grid}</code> — The name of the grid</li><li><code>{name}</code> — The name of the field</li><li><code>{index}</code> — The time step index</li><li><code>{rank}</code> — The MPI rank (for distributed output)</li></ul></section><section id="guides-io-xdmf-guide-paraview"><h2><a href="#guides-io-xdmf-guide-paraview">Opening Files in ParaView</a></h2><p>To visualize XDMF output in ParaView:</p><ol><li>Open ParaView</li><li>Use <strong>File &gt; Open</strong> and select the <code>.xdmf</code> file</li><li>Click <strong>Apply</strong> in the Properties panel</li><li>Select a field from the dropdown menu to colorize the mesh</li><li>For time-dependent data, use the time controls at the top</li></ol></section><section id="guides-io-xdmf-example"><h2><a href="#guides-io-xdmf-example">Complete Example</a></h2><p>Here is a complete example that solves the Poisson equation and exports the result using XDMF:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solver.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Variational.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/IO/XDMF.h&gt;</span>
+
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Geometry</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Variational</span><span class="p">;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="c1">// Create mesh</span>
+<span class="w">  </span><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+<span class="w">  </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">32</span><span class="p">,</span><span class="w"> </span><span class="mi">32</span><span class="p">});</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Setup problem</span>
+<span class="w">  </span><span class="n">P1</span><span class="w"> </span><span class="n">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<span class="w">  </span><span class="n">TrialFunction</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
+<span class="w">  </span><span class="n">TestFunction</span><span class="w">  </span><span class="n">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
+
+<span class="w">  </span><span class="n">Problem</span><span class="w"> </span><span class="n">poisson</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+<span class="w">  </span><span class="n">poisson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+<span class="w">          </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">RealFunction</span><span class="p">(</span><span class="mf">1.0</span><span class="p">),</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
+<span class="w">          </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">Zero</span><span class="p">());</span>
+
+<span class="w">  </span><span class="c1">// Solve</span>
+<span class="w">  </span><span class="n">Solver</span><span class="o">::</span><span class="n">CG</span><span class="p">(</span><span class="n">poisson</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span>
+
+<span class="w">  </span><span class="c1">// Export to XDMF</span>
+<span class="w">  </span><span class="n">IO</span><span class="o">::</span><span class="n">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="s">&quot;PoissonResult&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="n">xdmf</span><span class="p">.</span><span class="n">grid</span><span class="p">().</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">).</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;solution&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">());</span>
+<span class="w">  </span><span class="n">xdmf</span><span class="p">.</span><span class="n">write</span><span class="p">();</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></pre></section><section id="guides-io-xdmf-see-also"><h2><a href="#guides-io-xdmf-see-also">See Also</a></h2><ul><li><a href="guides-io.html" class="m-doc">I/O in Rodin overview</a></li><li><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF class reference</a></li><li><a href="examples-io-xdmf.html" class="m-doc">XDMF example</a></li><li><a href="examples-io-index.html" class="m-doc">I/O examples</a></li></ul></section>
+        <div class="m-note m-dim m-thin m-text-center"><a href="guides-io.html" class="m-doc">I/O in Rodin</a> | <a href="guides-io-gridfunctions.html" class="m-doc">Grid Function I/O &raquo;</a></div>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

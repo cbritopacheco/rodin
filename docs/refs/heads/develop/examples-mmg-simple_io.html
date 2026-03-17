@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <link rel="next" href="examples-mmg-mesh_optimization.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -31,6 +32,8 @@
               <ol>
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -46,6 +49,7 @@
               <ol>
                 <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
                 <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
                 <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
                 <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
                 <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
@@ -75,7 +79,45 @@
           <span class="m-breadcrumb"><a href="examples-mmg-index.html">Working with MMG</a> &raquo;</span>
           Simple input/output of MMG objects
         </h1>
-        <p>How to read and write MMG objects.</p>
+        <p>How to read and write MMG meshes in MFEM and MEDIT formats.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li><a href="#examples-mmg-io-intro">Introduction</a></li>
+            <li><a href="#examples-mmg-io-create">Creating an MMG Mesh</a></li>
+            <li><a href="#examples-mmg-io-save">Saving in MEDIT Format</a></li>
+            <li><a href="#examples-mmg-io-load">Loading and Re-saving</a></li>
+            <li><a href="#examples-mmg-io-full">Full Source Code</a></li>
+            <li><a href="#examples-mmg-io-see-also">See Also</a></li>
+          </ul>
+        </nav>
+<section id="examples-mmg-io-intro"><h2><a href="#examples-mmg-io-intro">Introduction</a></h2><p>The <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG</a> module provides a mesh class (<code>MMG::Mesh</code>) that extends the standard <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> with remeshing capabilities. This example shows how to load and save MMG meshes in the supported formats.</p></section><section id="examples-mmg-io-create"><h2><a href="#examples-mmg-io-create">Creating an MMG Mesh</a></h2><p>An <code>MMG::Mesh</code> can be created using the same UniformGrid() method as a regular mesh. The key difference is that <code>MMG::Mesh</code> stores additional metadata (corners, ridges) that MMG uses during remeshing:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/MMG.h&gt;</span>
+
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Geometry</span><span class="p">;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">MMG</span><span class="o">::</span><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+<span class="w">  </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="w"> </span><span class="p">});</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Mark corners (points that must be preserved during remeshing)</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">setCorner</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">setCorner</span><span class="p">(</span><span class="mi">15</span><span class="p">);</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">setCorner</span><span class="p">(</span><span class="mi">240</span><span class="p">);</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">setCorner</span><span class="p">(</span><span class="mi">255</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Mark boundary edges as ridges (sharp features)</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getBoundary</span><span class="p">();</span><span class="w"> </span><span class="o">!</span><span class="n">it</span><span class="p">.</span><span class="n">end</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">it</span><span class="p">)</span>
+<span class="w">    </span><span class="n">mesh</span><span class="p">.</span><span class="n">setRidge</span><span class="p">(</span><span class="n">it</span><span class="o">-&gt;</span><span class="n">getIndex</span><span class="p">());</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></pre></section><section id="examples-mmg-io-save"><h2><a href="#examples-mmg-io-save">Saving in MEDIT Format</a></h2><p>The MEDIT format (<code>.mesh</code>) is the native format for MMG. Use <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat::<wbr />MEDIT</a>:</p><pre class="m-code"><span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;output.medit.mesh&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MEDIT</span><span class="p">);</span></pre></section><section id="examples-mmg-io-load"><h2><a href="#examples-mmg-io-load">Loading and Re-saving</a></h2><p>Loading is symmetric:</p><pre class="m-code"><span class="n">MMG</span><span class="o">::</span><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh2</span><span class="p">;</span>
+<span class="n">mesh2</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;output.medit.mesh&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MEDIT</span><span class="p">);</span>
+<span class="n">mesh2</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;copy.medit.mesh&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MEDIT</span><span class="p">);</span></pre><aside class="m-note m-info"><h4>Note</h4><p>The file format must always be specified explicitly — there is no default format parameter.</p></aside></section><section id="examples-mmg-io-full"><h2><a href="#examples-mmg-io-full">Full Source Code</a></h2><ul><li><a href="_m_m_g_2_mesh_i_o_8cpp-example.html" class="m-doc">MeshIO.cpp</a></li></ul></section><section id="examples-mmg-io-see-also"><h2><a href="#examples-mmg-io-see-also">See Also</a></h2><ul><li><a href="examples-mmg-mesh_optimization.html" class="m-doc">Mesh optimization</a> — Remeshing with MMG</li><li><a href="guides-io.html" class="m-doc">I/O in Rodin</a> — Format reference</li><li><a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG namespace</a></li></ul></section>
+        <div class="m-note m-dim m-thin m-text-center"><a href="examples-mmg-index.html" class="m-doc">Working with MMG</a> | <a href="examples-mmg-mesh_optimization.html" class="m-doc">Optimizing the mesh &raquo;</a></div>
       </div>
     </div>
   </div>
