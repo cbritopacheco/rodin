@@ -62,7 +62,6 @@ option(RODIN_BUILD_UNIT_TESTS         "Build Rodin unit tests"                  
 option(RODIN_BUILD_MANUFACTURED_TESTS "Build Rodin manufactured solution tests"   OFF)
 option(RODIN_BUILD_BENCHMARKS         "Build Rodin benchmarks"                    OFF)
 option(RODIN_BUILD_DOC                "Build the Rodin documentation"             OFF)
-option(RODIN_WITH_PLOT                "Build the Rodin::Plot module"              OFF)
 option(RODIN_WITH_PY                  "Build Python bindings"                     OFF)
 option(RODIN_USE_MCSS                 "Build documentation with m.css"            OFF)
 option(RODIN_USE_MPI                  "Use Rodin with MPI support"                OFF)

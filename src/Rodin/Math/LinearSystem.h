@@ -8,9 +8,9 @@
 #define RODIN_MATH_LINEARSYSTEM_H
 
 #include "Rodin/Array.h"
-#include "Rodin/Math/SparseMatrix.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/Vector.h"
+#include "Rodin/Math/SparseMatrix.h"
 
 #include "ForwardDecls.h"
 

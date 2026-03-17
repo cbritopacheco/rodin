@@ -920,11 +920,13 @@ namespace Rodin::Variational
       }
 
       GridFunction(const GridFunction& other)
-        : Parent(other)
+        : Parent(other),
+          m_data(other.m_data)
       {}
 
       GridFunction(GridFunction&& other)
-        : Parent(std::move(other))
+        : Parent(std::move(other)),
+          m_data(std::move(other.m_data))
       {}
 
       GridFunction& operator=(GridFunction&& other)
