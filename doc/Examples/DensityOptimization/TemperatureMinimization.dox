@@ -1,21 +1,144 @@
 /**
   @page examples-density_optimization-simp_temperature_minimization Temperature minimization
-  @brief Temperature
+  @brief Density-based topology optimization to minimize average temperature
 
   @image html SIMPTemperatureMinimization.png width=410px
 
-  @m_keywords{Temperature}
+  @m_keywords{Temperature, Density, SIMP, Topology Optimization}
 
   @tableofcontents
 
   @m_footernavigation
 
+  @section examples-densopt-temp-intro Introduction
 
-  The full source code may be found below:
+  This example demonstrates **density-based topology optimization** using the
+  SIMP (Solid Isotropic Material with Penalization) method. The goal is to
+  find an optimal material distribution @f$ \gamma : \Omega \to [0, 1] @f$
+  that minimizes the **average temperature** in a domain heated by a uniform
+  source.
+
+  The optimization problem reads:
+
+  @f[
+    \min_\gamma \; J(\gamma) = \frac{1}{|\Omega|} \int_\Omega u_\gamma \, dx
+  @f]
+
+  subject to the state equation (a Poisson problem with SIMP-interpolated
+  conductivity):
+
+  @f[
+    -\nabla \cdot \bigl[ \kappa(\gamma) \nabla u \bigr] = f
+    \quad \text{in } \Omega, \qquad
+    u = 0 \quad \text{on } \Gamma_D
+  @f]
+
+  where the conductivity is interpolated as
+  @f$ \kappa(\gamma) = \kappa_{\min} + (\kappa_{\max} - \kappa_{\min})
+  \gamma^3 @f$.
+
+  @section examples-densopt-temp-setup Setup
+
+  @subsection examples-densopt-temp-setup-params Parameters
+
+  @code{.cpp}
+  static constexpr int Gamma0 = 1, GammaD = 2;
+
+  static constexpr double ell   = 4;       // Lagrange multiplier
+  static constexpr double mu    = 0.2;     // Step size
+  static constexpr double gmin  = 0.0001;  // Minimum conductivity
+  static constexpr double gmax  = 1;       // Maximum conductivity
+  static constexpr double alpha = 0.05;    // Regularization parameter
+  static constexpr size_t maxIterations = 5000;
+  @endcode
+
+  @subsection examples-densopt-temp-setup-mesh Mesh and Initial Density
+
+  The mesh is loaded and optimized with @ref Rodin::External::MMG
+  "MMG::Optimizer":
+
+  @code{.cpp}
+  MMG::Mesh Omega;
+  Omega.load(meshFile, IO::FileFormat::MFEM);
+  MMG::Optimizer().setHMax(0.005).setHMin(0.001).optimize(Omega);
+
+  P1 vh(Omega);
+  P1 ph(Omega);
+
+  GridFunction gamma(ph);
+  gamma = 0.9;  // Initial density: nearly full material
+  @endcode
+
+  @section examples-densopt-temp-loop Optimization Loop
+
+  Each iteration consists of three PDE solves:
+
+  @subsection examples-densopt-temp-loop-state Step 1 — State Equation
+
+  The temperature field @f$ u @f$ is the solution of a Poisson problem
+  with SIMP-interpolated conductivity @f$ \kappa(\gamma) @f$:
+
+  @code{.cpp}
+  TrialFunction u(vh);
+  TestFunction  v(vh);
+  Problem poisson(u, v);
+  poisson = Integral((gmin + (gmax - gmin) * Pow(gamma, 3)) * Grad(u), Grad(v))
+          - Integral(f * v)
+          + DirichletBC(u, RealFunction(0.0)).on(GammaD);
+  Solver::SparseLU(poisson).solve();
+  @endcode
+
+  @subsection examples-densopt-temp-loop-adjoint Step 2 — Adjoint Equation
+
+  The adjoint problem is similar to the state equation but with a different
+  right-hand side arising from the derivative of the objective:
+
+  @code{.cpp}
+  TrialFunction p(vh);
+  TestFunction  q(vh);
+  Problem adjoint(p, q);
+  adjoint = Integral((gmin + (gmax - gmin) * Pow(gamma, 3)) * Grad(p), Grad(q))
+          + Integral(RealFunction(1.0 / vol), q)
+          + DirichletBC(p, RealFunction(0.0)).on(GammaD);
+  Solver::SparseLU(adjoint).solve();
+  @endcode
+
+  @subsection examples-densopt-temp-loop-gradient Step 3 — Gradient and Update
+
+  The topological gradient is smoothed via a **Hilbert extension-regularization**
+  solve. The density @f$ \gamma @f$ is then updated and projected to @f$ [0, 1] @f$:
+
+  @code{.cpp}
+  TrialFunction g(vh);
+  TestFunction  w(vh);
+  Problem hilbert(g, w);
+  hilbert = Integral(alpha * Grad(g), Grad(w))
+          + Integral(g, w)
+          - Integral(
+              ell + 3 * (gmax - gmin) * Pow(gamma, 2)
+                  * Dot(Grad(u.getSolution()), Grad(p.getSolution())), w)
+          + DirichletBC(g, RealFunction(0.0)).on(GammaD);
+  Solver::SparseLU(hilbert).solve();
+
+  GridFunction step(ph);
+  step = mu * g.getSolution();
+  gamma -= step;
+  gamma = Min(1.0, Max(0.0, gamma));
+  @endcode
+
+  @section examples-densopt-temp-full Full Source Code
+
+  The complete source code is:
   -   @ref DensityOptimization/TemperatureMinimization.cpp "TemperatureMinimization.cpp"
+
+  @section examples-densopt-temp-see-also See Also
+
+  - @ref examples-pdes-poisson "Poisson equation" — The underlying PDE
+  - @ref examples-shapeoptimization-simple_cantilever "Shape optimization" —
+    Boundary-variation approach
+  - @ref gallery "Gallery"
 
   @example DensityOptimization/TemperatureMinimization.cpp
   @m_examplenavigation{examples-density_optimization-simp_temperature_minimization,DensityOptimization/}
   @m_footernavigation
   */
-

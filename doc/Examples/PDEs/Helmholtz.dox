@@ -2,6 +2,8 @@
   @page examples-pdes-helmholtz Solving the Helmholtz equation
   @brief Resolution of the complex-valued Helmholtz equation using Rodin
 
+  @image html PDEs/Helmholtz_placeholder.png width=410px
+
   @m_keywords{Helmholtz, Wave, Complex}
 
   @tableofcontents
@@ -52,6 +54,21 @@
 
   @section examples-pdes-helmholtz-impl Implementation
 
+  @subsection examples-pdes-helmholtz-includes Includes and Namespaces
+
+  We include the standard Rodin modules plus the math constants for @f$ \pi @f$:
+
+  @code{.cpp}
+  #include <Rodin/Solver.h>
+  #include <Rodin/Geometry.h>
+  #include <Rodin/Assembly.h>
+  #include <Rodin/Variational.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
+  @endcode
+
   @subsection examples-pdes-helmholtz-mesh Mesh and Parameters
 
   We use a fine mesh (@f$ 64 \times 64 @f$) to adequately resolve the wave,
@@ -84,17 +101,40 @@
   TestFunction  v(vh);
   @endcode
 
+  @subsection examples-pdes-helmholtz-exact Manufactured Exact Solution
+
+  For verification we use a manufactured exact solution and compute the
+  corresponding right-hand side @f$ f @f$:
+
+  @code{.cpp}
+  // Exact solution: u_ex(x,y) = exp(i k (x cos(theta) + y sin(theta)))
+  ComplexFunction u_ex =
+    [&](const Geometry::Point& p) -> Complex
+    {
+      const Real x = p.x(), y = p.y();
+      return std::exp(Complex(0, waveNumber * (x * cosTheta + y * sinTheta)));
+    };
+
+  // Right-hand side computed from u_ex
+  ComplexFunction f =
+    [&](const Geometry::Point& p) -> Complex
+    {
+      const Real x = p.x(), y = p.y();
+      return /* ... manufactured source term ... */;
+    };
+  @endcode
+
   @subsection examples-pdes-helmholtz-problem Problem Definition
 
   The @ref Rodin::Variational::Problem "Problem" is assembled using the
-  same form language as for real-valued PDEs:
+  same form language as for real-valued PDEs. The key terms are:
 
   @code{.cpp}
   Problem helmholtz(u, v);
-  helmholtz = Integral(Grad(u), Grad(v))
-            - waveNumber * waveNumber * Integral(u, v)
-            - Integral(f, v)
-            + DirichletBC(u, u_ex);
+  helmholtz = Integral(Grad(u), Grad(v))                   // stiffness
+            - waveNumber * waveNumber * Integral(u, v)      // mass (shift)
+            - Integral(f, v)                                // load
+            + DirichletBC(u, u_ex);                         // boundary data
   @endcode
 
   Here:
@@ -104,6 +144,15 @@
     @f$ k^2 \int_\Omega u v \, dx @f$
   - `Integral(f, v)` is the right-hand side
   - `DirichletBC(u, u_ex)` imposes the exact solution on the boundary
+
+  @subsection examples-pdes-helmholtz-solve Solving the System
+
+  Because the system is complex-valued and symmetric but **not** positive-definite
+  (the bilinear form is indefinite), we use a direct solver:
+
+  @code{.cpp}
+  Solver::SparseLU(helmholtz).solve();
+  @endcode
 
   @subsection examples-pdes-helmholtz-extract Extracting Real and Imaginary Parts
 
@@ -127,6 +176,13 @@
 
   The complete source code is:
   -   @ref PDEs/Helmholtz.cpp "Helmholtz.cpp"
+
+  @section examples-pdes-helmholtz-see-also See Also
+
+  - @ref examples-pdes-poisson "Poisson equation" — Simplest real-valued PDE
+  - @ref fem-spaces "Finite element spaces" — Complex-valued spaces
+  - @ref guides-variational "Variational formulations"
+  - @ref gallery "Gallery" — Visual results
 
   @example PDEs/Helmholtz.cpp @m_examplenavigation{examples-pdes-helmholtz,PDEs/} @m_footernavigation
   */

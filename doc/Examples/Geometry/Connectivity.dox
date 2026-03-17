@@ -1,0 +1,85 @@
+/**
+  @page examples-geometry-connectivity Computing mesh connectivity
+  @brief How to compute and use topological connectivity
+
+  @m_keywords{Connectivity, Incidence, Boundary, Adjacency, Performance}
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section examples-geom-conn-intro Introduction
+
+  Mesh connectivity describes how polytopes of different dimensions relate
+  to each other. This example demonstrates computing various incidence
+  relations and measuring the performance.
+
+  @section examples-geom-conn-compute Computing Connectivity
+
+  The @ref Rodin::Geometry::Connectivity::compute "Connectivity::compute(d1, d2)"
+  method computes the incidence mapping from polytopes of dimension @f$ d_1 @f$
+  to polytopes of dimension @f$ d_2 @f$:
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+
+  int main()
+  {
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 1024, 1024 });
+
+    // Compute various connectivity relations
+    mesh.getConnectivity().compute(1, 2);  // edges → cells
+    mesh.getConnectivity().compute(2, 1);  // cells → edges
+    mesh.getConnectivity().compute(1, 1);  // edge adjacency
+
+    return 0;
+  }
+  @endcode
+
+  @section examples-geom-conn-common Common Relations
+
+  | Relation | Use Case |
+  |----------|----------|
+  | `compute(1, 2)` | **Required** for boundary detection and Dirichlet BC |
+  | `compute(0, 2)` | Vertex-to-cell: which cells share a vertex |
+  | `compute(2, 1)` | Cell-to-edge: enumerate edges of each cell |
+  | `compute(1, 1)` | Edge adjacency: which edges share a vertex |
+
+  @section examples-geom-conn-boundary Why Boundary Detection Needs Connectivity
+
+  The @f$ (d{-}1, d) @f$ connectivity tells us which faces belong to
+  exactly one cell — those are the boundary faces. This is why you must
+  call `compute(1, 2)` before using `DirichletBC` on a 2D mesh:
+
+  @code{.cpp}
+  mesh.getConnectivity().compute(1, 2);
+
+  P1 vh(mesh);
+  TrialFunction u(vh);
+  TestFunction  v(vh);
+
+  Problem poisson(u, v);
+  poisson = Integral(Grad(u), Grad(v))
+          - Integral(RealFunction(1.0), v)
+          + DirichletBC(u, Zero());  // needs (1,2) connectivity
+  Solver::CG(poisson).solve();
+  @endcode
+
+  @section examples-geom-conn-full Full Source Code
+
+  -   @ref Geometry/Connectivity.cpp "Connectivity.cpp"
+
+  @section examples-geom-conn-see-also See Also
+
+  - @ref guides-connectivity "Connectivity guide"
+  - @ref guides-polytopes "Polytopes"
+  - @ref examples-geometry-uniformgrid "UniformGrid"
+
+  @example Geometry/Connectivity.cpp
+  @m_examplenavigation{examples-geometry-connectivity,Geometry/}
+  @m_footernavigation
+  */

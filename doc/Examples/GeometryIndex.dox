@@ -1,0 +1,8 @@
+/**
+  @page examples-geometry-index Mesh geometry examples
+  @brief Examples demonstrating mesh creation and geometric operations
+
+  - @subpage examples-geometry-uniformgrid
+  - @subpage examples-geometry-connectivity
+
+  */

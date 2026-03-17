@@ -2,6 +2,8 @@
   @page examples-pdes-navierstokes Solving the Navier-Stokes equations
   @brief Steady incompressible Navier-Stokes with Picard iteration
 
+  @image html PDEs/NavierStokes_placeholder.png width=410px
+
   @m_keywords{Navier-Stokes, Stokes, Picard, Taylor-Green, Fluid, Incompressible}
 
   @tableofcontents

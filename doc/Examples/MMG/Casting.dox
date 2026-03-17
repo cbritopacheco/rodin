@@ -2,4 +2,79 @@
   @page examples-mmg-casting Casting between MMG and Rodin
   @brief How to convert from MMG to Rodin objects and vice-versa
 
+  @m_keywords{MMG, Casting, Conversion, Interop}
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section examples-mmg-cast-intro Introduction
+
+  The @ref Rodin::External::MMG "MMG::Mesh" class extends
+  @ref Rodin::Geometry::Mesh "Mesh<Context::Local>" and can be used wherever
+  a regular mesh is expected. This section explains how to work with both
+  types interchangeably.
+
+  @section examples-mmg-cast-create Creating an MMG Mesh
+
+  An `MMG::Mesh` is created the same way as a standard mesh:
+
+  @code{.cpp}
+  // Standard Rodin mesh
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+
+  // MMG mesh (supports remeshing operations)
+  MMG::Mesh mmgMesh;
+  mmgMesh = mmgMesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+  @endcode
+
+  @section examples-mmg-cast-fes Using MMG Meshes with FE Spaces
+
+  Since `MMG::Mesh` inherits from @ref Rodin::Geometry::Mesh "Mesh",
+  finite element spaces and all variational tools work transparently:
+
+  @code{.cpp}
+  MMG::Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+  mesh.getConnectivity().compute(1, 2);
+
+  // Create P1 space directly on MMG mesh
+  P1 vh(mesh);
+  TrialFunction u(vh);
+  TestFunction  v(vh);
+
+  Problem poisson(u, v);
+  poisson = Integral(Grad(u), Grad(v))
+          - Integral(RealFunction(1.0), v)
+          + DirichletBC(u, Zero());
+  Solver::CG(poisson).solve();
+
+  // Now remesh for the next iteration
+  MMG::Optimizer().setHMax(0.1).optimize(mesh);
+  @endcode
+
+  @section examples-mmg-cast-io Loading and Saving
+
+  Both mesh types support the same I/O formats. The format must be specified
+  explicitly via @ref Rodin::IO::FileFormat "IO::FileFormat":
+
+  @code{.cpp}
+  // Save in MFEM format
+  mmgMesh.save("output.mesh", IO::FileFormat::MFEM);
+
+  // Save in MEDIT format (native for MMG)
+  mmgMesh.save("output.medit.mesh", IO::FileFormat::MEDIT);
+
+  // Load back
+  MMG::Mesh loaded;
+  loaded.load("output.medit.mesh", IO::FileFormat::MEDIT);
+  @endcode
+
+  @section examples-mmg-cast-see-also See Also
+
+  - @ref examples-mmg-simple_io "MMG I/O" — File I/O details
+  - @ref examples-mmg-mesh_optimization "Mesh optimization" — Remeshing
+  - @ref Rodin::External::MMG "MMG namespace"
+
   */

@@ -48,6 +48,8 @@
   - **See examples**: Browse the @ref examples-index "examples and tutorials"
     including the @ref examples-pdes-poisson "Poisson equation" and
     @ref examples-pdes-elasticity "linear elasticity"
+  - **Visual showcase**: Visit the @ref gallery "Gallery" for images and
+    descriptions of simulations built with Rodin
   - **I/O and visualization**: Learn how to export results using
     @ref guides-io "XDMF for ParaView visualization"
 
