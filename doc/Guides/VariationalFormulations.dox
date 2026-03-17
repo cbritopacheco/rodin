@@ -255,12 +255,40 @@
   }
   @endcode
 
+  @section guides-variational-mixed Mixed Formulations
+
+  Some problems require solving for multiple unknowns simultaneously, such as
+  velocity and pressure in the
+  @ref examples-pdes-navierstokes "Navier-Stokes equations". Rodin's
+  @ref Rodin::Variational::Problem "Problem" class supports mixed formulations
+  with multiple trial/test function pairs:
+
+  @code{.cpp}
+  // Taylor-Hood finite element spaces
+  H1 uh(std::integral_constant<size_t, 2>{}, mesh, d);  // P2 velocity
+  H1 ph(std::integral_constant<size_t, 1>{}, mesh);      // P1 pressure
+
+  TrialFunction u(uh);  // Velocity
+  TrialFunction p(ph);  // Pressure
+  TestFunction  v(uh);
+  TestFunction  q(ph);
+
+  // Mixed problem with multiple trial/test pairs
+  Problem stokes(u, p, v, q);
+  stokes = nu * Integral(Jacobian(u), Jacobian(v))
+         - Integral(p, Div(v))
+         + Integral(Div(u), q)
+         - Integral(f, v)
+         + DirichletBC(u, g);
+  @endcode
+
   @section guides-variational-see-also See Also
 
-  - @ref fem-spaces "Finite element spaces" — Available spaces
+  - @ref fem-spaces "Finite element spaces" — Available spaces (P0, P1, H1)
   - @ref fem-ciarlet "Ciarlet's definition" — Mathematical foundations
   - @ref guides-io "I/O in Rodin" — Saving and visualizing results
   - @ref examples-pdes-poisson "Poisson example"
   - @ref examples-pdes-elasticity "Elasticity example"
+  - @ref examples-pdes-navierstokes "Navier-Stokes example" — Mixed formulation
 
   */

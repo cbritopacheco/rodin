@@ -62,15 +62,16 @@
 
   @subsection guides-meshes-creation-files-formats Supported Formats
 
-  - **MFEM** (`.mesh`) - MFEM native format (default)
-  - **MEDIT** (`.mesh`) - MEDIT format from INRIA
-  - **GMSH** (`.msh`, `.gmsh`) - Gmsh format
+  - **MFEM** (`.mesh`) - MFEM native format
+  - **MEDIT** (`.mesh`) - MEDIT format from INRIA (used by MMG)
 
   @subsection guides-meshes-creation-files-loading Loading Meshes
 
+  Use @ref Rodin::Geometry::Mesh::load "Mesh::load()" with an explicit
+  @ref Rodin::IO::FileFormat "IO::FileFormat":
+
   @code{.cpp}
   #include <Rodin/Geometry.h>
-  #include <Rodin/IO.h>
 
   using namespace Rodin;
   using namespace Rodin::Geometry;
@@ -78,15 +79,11 @@
   int main() {
     Mesh mesh;
 
-    // Load from MFEM format (default)
-    mesh.load("domain.mesh");
-
-    // Explicitly specify format
+    // Load from MFEM format
     mesh.load("domain.mesh", IO::FileFormat::MFEM);
-    mesh.load("domain.msh", IO::FileFormat::GMSH);
 
-    // Alternatively, use constructor
-    Mesh mesh2("domain.mesh", IO::FileFormat::MFEM);
+    // Load from MEDIT format
+    mesh.load("domain.mesh", IO::FileFormat::MEDIT);
 
     return 0;
   }

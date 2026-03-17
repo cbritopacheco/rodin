@@ -25,6 +25,7 @@
   | @f$ - \Delta u = f @f$                          | @ref examples-pdes-poisson |
   | @f$ - \nabla \cdot \sigma (u ) = 0  @f$         | @ref examples-pdes-elasticity |
   | @f$ - \Delta u - k^2 u = f @f$                  | @ref examples-pdes-helmholtz |
+  | @f$ -\nu \Delta \mathbf{u} + (\mathbf{u} \cdot \nabla)\mathbf{u} + \nabla p = \mathbf{f} @f$ | @ref examples-pdes-navierstokes |
 
   @section examples-index-io Input/Output
 

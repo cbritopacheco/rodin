@@ -2,7 +2,7 @@
   @page guides-io I/O in Rodin
   @brief Comprehensive guide to input and output in Rodin
 
-  @m_keywords{IO, Input, Output, XDMF, HDF5, MEDIT, MFEM, GMSH, File Format}
+  @m_keywords{IO, Input, Output, XDMF, HDF5, MEDIT, MFEM, File Format}
 
   @tableofcontents
 
@@ -14,7 +14,7 @@
   writing meshes, grid functions, and simulation data in various file formats.
   Proper I/O is essential for:
 
-  - **Pre-processing**: Loading meshes from external generators (Gmsh, MMG)
+  - **Pre-processing**: Loading meshes from external generators (MMG)
   - **Post-processing**: Saving solutions for visualization in tools like
     [ParaView](https://www.paraview.org/)
   - **Checkpointing**: Saving and restoring simulation state
@@ -22,22 +22,24 @@
 
   @section guides-io-formats Supported File Formats
 
-  Rodin supports several file formats for meshes and grid functions:
+  Rodin supports several file formats for meshes and grid functions. The
+  format is specified explicitly via the @ref Rodin::IO::FileFormat "IO::FileFormat"
+  enumeration:
 
-  | Format | Extension | Use Case | Module |
-  |--------|-----------|----------|--------|
-  | MFEM   | `.mesh`, `.gf` | MFEM-compatible workflows | @ref Rodin::IO |
-  | MEDIT  | `.mesh`   | INRIA tools, MMG | @ref Rodin::IO |
-  | GMSH   | `.msh`    | Gmsh mesh generator | @ref Rodin::IO |
-  | HDF5   | `.h5`     | High-performance binary I/O | @ref Rodin::IO |
-  | XDMF   | `.xdmf`, `.h5` | Scientific visualization (ParaView) | @ref Rodin::IO::XDMF |
+  | Format | Extension | Enum Value | Use Case |
+  |--------|-----------|------------|----------|
+  | MFEM   | `.mesh`, `.gf` | `IO::FileFormat::MFEM` | MFEM-compatible workflows |
+  | MEDIT  | `.mesh`   | `IO::FileFormat::MEDIT` | INRIA tools, MMG integration |
+  | HDF5   | `.h5`     | `IO::FileFormat::HDF5` | High-performance binary I/O |
+  | XDMF   | `.xdmf`, `.h5` | — (via @ref Rodin::IO::XDMF "IO::XDMF" class) | Scientific visualization (ParaView) |
 
   @section guides-io-mesh-io Mesh I/O
 
   @subsection guides-io-mesh-loading Loading Meshes
 
-  Meshes can be loaded from files in supported formats. The file format must be
-  explicitly specified:
+  Meshes can be loaded from files in supported formats using the
+  @ref Rodin::Geometry::Mesh::load "Mesh::load()" method. The file format
+  must be explicitly specified via @ref Rodin::IO::FileFormat "IO::FileFormat":
 
   @code{.cpp}
   #include <Rodin/Geometry.h>
@@ -54,9 +56,6 @@
 
     // Load MEDIT format (commonly used with MMG)
     mesh.load("domain.mesh", IO::FileFormat::MEDIT);
-
-    // Load GMSH format
-    mesh.load("domain.msh", IO::FileFormat::GMSH);
 
     return 0;
   }
@@ -289,21 +288,10 @@
 
   @section guides-io-external External Mesh Generators
 
-  @subsection guides-io-external-gmsh Using Gmsh
-
-  [Gmsh](https://gmsh.info/) is a popular open-source mesh generator. After
-  creating and meshing geometry in Gmsh, export to `.msh` format and load
-  in Rodin:
-
-  @code{.cpp}
-  Mesh mesh;
-  mesh.load("gmsh_output.msh", IO::FileFormat::GMSH);
-  @endcode
-
   @subsection guides-io-external-mmg Using MMG
 
   [MMG](https://www.mmgtools.org/) is used for mesh adaptation and
-  optimization. MMG uses the MEDIT format:
+  optimization. MMG uses the MEDIT format, which Rodin supports natively:
 
   @code{.cpp}
   Mesh mesh;
@@ -311,7 +299,7 @@
   @endcode
 
   See the @ref examples-mmg-index "MMG examples" for more details on using
-  Rodin's MMG integration.
+  Rodin's @ref Rodin::External::MMG "MMG" integration.
 
   @section guides-io-workflow Recommended Workflow
 

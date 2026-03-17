@@ -10,7 +10,18 @@
 
 /**
   @namespace Rodin
-  @brief The Rodin library for Shape and Topology Optimization
+  @brief The Rodin library for finite element methods and shape optimization.
+
+  Rodin is a lightweight and modular C++20 finite element framework providing
+  tools for solving partial differential equations and performing shape and
+  topology optimization. Key modules include:
+
+  - @ref Rodin::Geometry "Geometry" — Meshes, polytopes, and connectivity
+  - @ref Rodin::Variational "Variational" — Finite element spaces, trial/test
+    functions, and variational problem formulation
+  - @ref Rodin::IO "IO" — Input/output in MFEM, MEDIT, HDF5, and XDMF formats
+  - @ref Rodin::Solver "Solver" — Linear and iterative solvers (CG, GMRES, SparseLU)
+  - @ref Rodin::Assembly "Assembly" — Assembly of stiffness matrices and load vectors
  */
 
 /**
@@ -30,8 +41,7 @@
 
   ## Supported Contexts
   - **Local Context**: Single-machine execution with shared memory
-  - **Distributed Context**: Multi-node execution with message passing
-  - **GPU Context**: Accelerated computing on graphics processing units
+  - **Distributed Context**: Multi-node execution with message passing (MPI)
  */
 
 /**
@@ -41,11 +51,17 @@
 
 /**
   @namespace Rodin::Alert
-  @brief Module to handle alerts
+  @brief Module to handle alerts, exceptions, and diagnostic messages.
 
   The Alert module provides a comprehensive system for handling exceptions,
   warnings, informational messages, and success notifications with colored
   terminal output and formatted messaging capabilities.
+
+  Example usage:
+  @code{.cpp}
+  Alert::Info() << "Assembling the system..." << Alert::Raise;
+  Alert::Success() << "Solution computed successfully." << Alert::Raise;
+  @endcode
  */
 
 /**
@@ -55,7 +71,25 @@
 
 /**
   @namespace Rodin::Geometry
-  @brief Module for dealing with geometries.
+  @brief Module for dealing with meshes, polytopes, and geometric operations.
+
+  The Geometry module provides the core data structures for finite element
+  meshes. Key classes include:
+
+  - @ref Rodin::Geometry::Mesh "Mesh" — The primary mesh class supporting
+    triangular, quadrilateral, tetrahedral, and hexahedral meshes
+  - @ref Rodin::Geometry::Polytope "Polytope" — Geometric entities (vertices,
+    edges, faces, cells) with type enumeration
+  - @ref Rodin::Geometry::Connectivity "Connectivity" — Incidence relations
+    between polytopes of different dimensions
+  - @ref Rodin::Geometry::Point "Point" — Evaluation point for grid functions
+
+  Meshes can be generated or loaded from files:
+  @code{.cpp}
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+  mesh.getConnectivity().compute(1, 2); // Compute face-to-cell connectivity
+  @endcode
  */
 
 /**
@@ -74,11 +108,12 @@
   different operator types and finite element spaces.
 
   ## Key Features
-  - **Bilinear Form Assembly**: Efficient assembly of stiffness matrices
-  - **Linear Form Assembly**: Assembly of load vectors and right-hand sides  
-  - **Parallel Assembly**: Support for OpenMP-based parallel assembly
-  - **Template Specialization**: Optimized assembly for different operator types
-  - **Mixed Formulations**: Support for mixed finite element problems
+  - **Bilinear Form Assembly**: Assembly of stiffness matrices from expressions
+    like `Integral(Grad(u), Grad(v))`
+  - **Linear Form Assembly**: Assembly of load vectors from expressions
+    like `Integral(f, v)`
+  - **Parallel Assembly**: OpenMP-based parallel assembly
+  - **Mixed Formulations**: Support for saddle-point problems (e.g. Stokes)
  */
 
 /**
@@ -108,7 +143,27 @@
 
 /**
   @namespace Rodin::IO
-  @brief Module for dealing with I/O functionality.
+  @brief Module for mesh and grid function input/output.
+
+  The IO module provides facilities for reading and writing meshes and grid
+  functions in several formats:
+
+  - **MFEM** (`IO::FileFormat::MFEM`) — Native MFEM mesh and grid function format
+  - **MEDIT** (`IO::FileFormat::MEDIT`) — MEDIT format used by MMG and INRIA tools
+  - **HDF5** (`IO::FileFormat::HDF5`) — High-performance binary format
+
+  Additionally, the @ref Rodin::IO::XDMF "XDMF" class provides XDMF 3.0
+  output for scientific visualization in [ParaView](https://www.paraview.org/),
+  supporting time series and multiple fields.
+
+  File format is specified explicitly via the @ref Rodin::IO::FileFormat
+  "FileFormat" enumeration:
+  @code{.cpp}
+  mesh.save("output.mesh", IO::FileFormat::MFEM);
+  mesh.load("domain.mesh", IO::FileFormat::MEDIT);
+  @endcode
+
+  @see @ref guides-io "I/O in Rodin" for a comprehensive guide.
  */
 
 /**
@@ -229,23 +284,68 @@
 
 /**
   @namespace Rodin::Variational
-  @brief Module which provides the necessary tools for constructing variational problems.
+  @brief Module which provides the necessary tools for constructing and
+  solving variational problems.
 
-  The Rodin::Variational module aids in the general construction of variational
-  problems:
+  The Variational module is the core of the Rodin finite element framework.
+  It provides classes for defining finite element spaces, trial and test
+  functions, variational forms, boundary conditions, and problems.
 
+  ## Finite Element Spaces
+
+  - @ref Rodin::Variational::P0 "P0" — Piecewise constant (discontinuous)
+    finite element space
+  - @ref Rodin::Variational::P1 "P1" — Piecewise linear (continuous)
+    finite element space
+  - @ref Rodin::Variational::H1 "H1" — Higher-order @f$ H^1 @f$-conforming
+    finite element space (arbitrary polynomial order)
+
+  ## Functions
+
+  - @ref Rodin::Variational::TrialFunction "TrialFunction" — Represents the
+    unknown solution @f$ u @f$ in a variational formulation
+  - @ref Rodin::Variational::TestFunction "TestFunction" — Represents the
+    weighting function @f$ v @f$
+  - @ref Rodin::Variational::GridFunction "GridFunction" — A concrete function
+    storing DOF values in a finite element space
+
+  ## Variational Forms
+
+  The module supports building variational problems of the form:
   @f[
     \text{Find} \quad u \in U \quad \text{ s.t. } \quad \forall v \in V \quad
     a(u, v) = b(v) \ ,
   @f]
+  which are translated into linear algebra problems @f$ \mathbf{A}\mathbf{x}
+  = \mathbf{b} @f$.
 
-  which then can be translated into linear algebra problems of the type:
+  Key expression classes:
+  - `Integral(A, B)` — Domain integrals (bilinear or linear forms)
+  - `BoundaryIntegral(A, B)` — Boundary integrals
+  - `Grad(u)` — Gradient operator
+  - `Div(u)` — Divergence operator
+  - `Jacobian(u)` — Jacobian operator
+  - `DirichletBC(u, g)` — Dirichlet boundary conditions
 
-  @f[
-    \mathbf{A} \mathbf{x} = \mathbf{b}
-  @f]
+  ## Problem
 
-  where @f$ \mathbf{A} @f$ represents the stiffness operator.
+  The @ref Rodin::Variational::Problem "Problem" class assembles all forms
+  and boundary conditions into a solvable linear system.
+
+  @code{.cpp}
+  P1 Vh(mesh);
+  TrialFunction u(Vh);
+  TestFunction  v(Vh);
+
+  Problem poisson(u, v);
+  poisson = Integral(Grad(u), Grad(v))
+          - Integral(f, v)
+          + DirichletBC(u, Zero());
+
+  Solver::CG(poisson).solve();
+  @endcode
+
+  @see @ref guides-variational "Variational Formulations Guide"
  */
 
 /**
@@ -309,8 +409,12 @@
   @brief Module which provides models for solid mechanics and elasticity.
 
   This module implements various elasticity models including linear elasticity
-  for small deformations. The models support both isotropic and anisotropic
-  materials with spatially varying material parameters.
+  for small deformations. Key functionality:
+
+  - `LinearElasticityIntegral(u, v)(lambda, mu)` — Assembles the bilinear form
+    for linearized elasticity with Lamé parameters @f$ \lambda @f$ and @f$ \mu @f$
+
+  @see @ref examples-pdes-elasticity "Elasticity example"
  */
 
 /**
@@ -341,10 +445,16 @@
   @namespace Rodin::FormLanguage
   @brief Module for writing high level abstract expressions.
 
-  The FormLanguage module provides a comprehensive framework for expressing
-  variational forms, mathematical expressions, and finite element operations
-  using a high-level, expressive domain-specific language. This module forms
-  the foundation for Rodin's symbolic computation capabilities.
+  The FormLanguage module provides the expression template infrastructure
+  underlying Rodin's variational form language. It enables composing
+  mathematical expressions that are lazily evaluated during assembly:
+
+  @code{.cpp}
+  auto stiffness = Integral(Grad(u), Grad(v)); // expression, not yet evaluated
+  auto load = Integral(f, v);                   // another expression
+  Problem p(u, v);
+  p = stiffness - load + DirichletBC(u, Zero()); // combined expression
+  @endcode
  */
 
 /**
@@ -355,6 +465,13 @@
 /**
   @namespace Rodin::Math
   @brief Module for general mathematical operations.
+
+  Provides mathematical constants, vector/matrix types, and utility functions.
+  Key items include:
+
+  - `Math::Constants::pi()` — The constant @f$ \pi @f$
+  - `Math::Vector<Real>` — Dense vector type
+  - `Math::Matrix<Real>` — Dense matrix type
  */
 
 
@@ -365,7 +482,26 @@
 
 /**
   @namespace Rodin::Solver
-  @brief Module for linear algebra systems.
+  @brief Module for solving linear and nonlinear systems.
+
+  The Solver module provides linear solvers for the systems arising from
+  finite element discretizations. Available solvers include:
+
+  - @ref Rodin::Solver::CG "CG" — Conjugate Gradient (for SPD systems)
+  - @ref Rodin::Solver::GMRES "GMRES" — Generalized Minimum Residual
+  - @ref Rodin::Solver::SparseLU "SparseLU" — Direct sparse LU factorization
+  - @ref Rodin::Solver::UMFPack "UMFPack" — UMFPACK direct solver
+
+  Usage:
+  @code{.cpp}
+  // Iterative solver
+  Solver::CG(problem).solve();
+
+  // Direct solver
+  Solver::SparseLU(problem).solve();
+  @endcode
+
+  @see @ref guides-variational "Variational Formulations Guide"
  */
 
 /**
@@ -422,6 +558,8 @@
   optimization of the mesh, to implicit domain meshing. It provides many C++
   wrappers to execute the functionality of the [Mmg
   Platform](https://www.mmgtools.org/).
+
+  @see @ref examples-mmg-index "MMG examples"
  */
 
 /**
@@ -468,4 +606,3 @@
   @dir Rodin/tests/benchmarks
   @brief Namespace @ref Rodin::Tests::Benchmarks
  */
-

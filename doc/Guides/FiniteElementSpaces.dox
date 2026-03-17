@@ -34,6 +34,7 @@
   |-------|------------------|------------|-------------|
   | @ref Rodin::Variational::P0 "P0" | 0 (constant) | Discontinuous | Piecewise constant quantities, indicators |
   | @ref Rodin::Variational::P1 "P1" | 1 (linear) | @f$ C^0 @f$ (continuous) | Most PDEs: Poisson, elasticity, heat |
+  | @ref Rodin::Variational::H1 "H1" | Arbitrary (order @f$ k @f$) | @f$ C^0 @f$ (continuous) | Higher-order methods, mixed problems (e.g. Taylor-Hood for Navier-Stokes) |
 
   @section fem-spaces-p0 P0: Piecewise Constant Space
 
@@ -96,11 +97,34 @@
   TestFunction  v(Vh);
   @endcode
 
+  @section fem-spaces-h1 H1: Higher-Order Space
+
+  The @ref Rodin::Variational::H1 "H1" space provides @f$ H^1 @f$-conforming
+  finite elements of **arbitrary polynomial order**. This is useful for
+  problems requiring higher accuracy or mixed formulations (e.g. Taylor-Hood
+  elements for the @ref examples-pdes-navierstokes "Navier-Stokes equations").
+
+  The polynomial order is specified as a compile-time constant:
+
+  @code{.cpp}
+  #include <Rodin/Variational/H1.h>
+
+  // Quadratic scalar space (order 2)
+  H1 Vh(std::integral_constant<size_t, 2>{}, mesh);
+
+  // Quadratic vector space (order 2, d components)
+  H1 Uh(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+  @endcode
+
+  A common application is the **Taylor-Hood** pair for incompressible flow:
+  - P2 velocity (order 2): `H1 uh(std::integral_constant<size_t, 2>{}, mesh, d)`
+  - P1 pressure (order 1): `H1 ph(std::integral_constant<size_t, 1>{}, mesh)`
+
   @section fem-spaces-vector Vector-Valued Spaces
 
-  Both P0 and P1 support **vector-valued** function spaces by specifying the
-  number of components. This is essential for problems involving vector fields
-  such as displacement (elasticity) or velocity (fluid dynamics).
+  P0, P1, and H1 all support **vector-valued** function spaces by specifying
+  the number of components. This is essential for problems involving vector
+  fields such as displacement (elasticity) or velocity (fluid dynamics).
 
   @code{.cpp}
   Mesh mesh;
@@ -193,6 +217,7 @@
   | Vector PDE (elasticity) | `P1(mesh, d)` | Vector-valued @f$ H^1 @f$ |
   | Wave problems | `P1<Complex>` | Complex-valued fields |
   | Material indicators | `P0` | Piecewise constant |
+  | Incompressible flow (Navier-Stokes) | `H1` order 2 (velocity) + `H1` order 1 (pressure) | Taylor-Hood pair satisfying the inf-sup condition |
 
   @section fem-spaces-see-also See Also
 

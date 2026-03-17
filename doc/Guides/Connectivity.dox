@@ -1,7 +1,108 @@
 /**
   @page guides-connectivity Connectivity
+  @brief Understanding mesh connectivity in Rodin
+
+  @m_keywords{Connectivity, Incidence, Boundary, Adjacency}
 
   @tableofcontents
+
+  @m_footernavigation
+
+  @section guides-connectivity-intro Introduction
+
+  **Connectivity** (or incidence) information describes how the polytopes
+  (vertices, edges, faces, cells) in a mesh relate to each other. In Rodin,
+  this is managed by the @ref Rodin::Geometry::Connectivity "Connectivity"
+  class, which is accessed through
+  @ref Rodin::Geometry::Mesh::getConnectivity "Mesh::getConnectivity()".
+
+  Connectivity is essential for:
+  - Identifying boundary entities for imposing boundary conditions
+  - Traversing mesh topology during assembly
+  - Finding neighbors and adjacencies
+
+  @section guides-connectivity-notation Notation
+
+  Connectivity is described as a relation between polytopes of dimension
+  @f$ d_1 @f$ and dimension @f$ d_2 @f$. We write this as the
+  @f$ (d_1, d_2) @f$-connectivity.
+
+  For a 2D triangular mesh:
+  - @f$ d = 2 @f$ (cells are triangles)
+  - @f$ d = 1 @f$ (edges)
+  - @f$ d = 0 @f$ (vertices)
+
+  Common connectivity relations:
+
+  | Relation | Meaning | Use Case |
+  |----------|---------|----------|
+  | @f$ (0, 2) @f$ | Vertices → Cells | Which cells share a vertex |
+  | @f$ (1, 2) @f$ | Edges → Cells | Boundary detection (edges with 1 cell) |
+  | @f$ (2, 0) @f$ | Cells → Vertices | Cell vertex lookup |
+  | @f$ (2, 1) @f$ | Cells → Edges | Cell edge lookup |
+
+  @section guides-connectivity-compute Computing Connectivity
+
+  Connectivity relations are computed on demand using the
+  @ref Rodin::Geometry::Connectivity::compute "compute()" method:
+
+  @code{.cpp}
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+
+  // Compute edge-to-cell connectivity (required for boundary detection)
+  mesh.getConnectivity().compute(1, 2);
+  @endcode
+
+  @note The @f$ (1, 2) @f$ connectivity (edges → cells in 2D, or faces →
+  cells in 3D) is required before imposing `DirichletBC`, since boundary
+  detection relies on finding entities that belong to only one cell.
+
+  @section guides-connectivity-boundary Boundary Detection
+
+  Once the @f$ (d-1, d) @f$ connectivity is computed (where @f$ d @f$ is the
+  mesh dimension), Rodin can identify boundary entities — those that are
+  incident to exactly one cell. This is how `DirichletBC` finds the boundary
+  DOFs automatically.
+
+  @code{.cpp}
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+  mesh.getConnectivity().compute(1, 2);  // Required for boundary detection
+
+  P1 Vh(mesh);
+  TrialFunction u(Vh);
+  TestFunction  v(Vh);
+
+  Problem poisson(u, v);
+  poisson = Integral(Grad(u), Grad(v))
+          - Integral(f, v)
+          + DirichletBC(u, Zero());  // Automatically detects boundary
+  @endcode
+
+  @section guides-connectivity-attributes Boundary Attributes
+
+  Different parts of the boundary can be distinguished by **attributes**
+  (integer labels). This is useful when different boundary conditions are
+  applied to different segments:
+
+  @code{.cpp}
+  Attribute GammaD = 2, GammaN = 3;
+
+  // Apply Dirichlet BC only on boundary with attribute GammaD
+  DirichletBC(u, Zero()).on(GammaD)
+
+  // Apply Neumann BC only on boundary with attribute GammaN
+  BoundaryIntegral(g, v).over(GammaN)
+  @endcode
+
+  Boundary attributes are typically set when loading a mesh from a file or
+  when building a mesh programmatically.
+
+  @section guides-connectivity-see-also See Also
+
+  - @ref guides-polytopes "Polytopes" — The geometric entities
+  - @ref guides-meshes "Meshes" — Working with meshes
+  - @ref Rodin::Geometry::Connectivity "Connectivity class reference"
+
   */
-
-

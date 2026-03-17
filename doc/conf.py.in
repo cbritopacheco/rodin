@@ -15,6 +15,7 @@ LINKS_NAVBAR1 = [
     ("Pages", 'pages', [
         ('General concepts', 'guides-index'),
         ('Examples and tutorials', 'examples-index'),
+        ('I/O in Rodin', 'guides-io'),
         ('Notation', 'notation-index'),
         ('Credits', 'credits-index')]),
     ("Modules", 'modules', [

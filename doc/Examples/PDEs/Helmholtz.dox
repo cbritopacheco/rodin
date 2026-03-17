@@ -28,8 +28,10 @@
   is a known exact solution imposed on the boundary.
 
   This example demonstrates several important Rodin features:
-  - **Complex-valued** finite element spaces (`P1<Complex>`)
-  - Extracting **real and imaginary parts** of complex grid functions
+  - **Complex-valued** finite element spaces
+    (@ref Rodin::Variational::P1 "P1<Complex>")
+  - Extracting **real and imaginary parts** of complex
+    @ref Rodin::Variational::GridFunction "GridFunction" objects
   - The Helmholtz bilinear form combining stiffness and mass terms
 
   @section examples-pdes-helmholtz-weak Weak Formulation
@@ -44,9 +46,9 @@
      = \int_{\Omega} f \, v \ dx
   @f]
 
-  Note the key difference from the Poisson equation: the presence of the
-  **mass term** @f$ -k^2 \int u v \, dx @f$, which makes the bilinear form
-  indefinite for sufficiently large @f$ k @f$.
+  Note the key difference from the @ref examples-pdes-poisson "Poisson equation":
+  the presence of the **mass term** @f$ -k^2 \int u v \, dx @f$, which makes
+  the bilinear form indefinite for sufficiently large @f$ k @f$.
 
   @section examples-pdes-helmholtz-impl Implementation
 
@@ -54,7 +56,9 @@
 
   We use a fine mesh (@f$ 64 \times 64 @f$) to adequately resolve the wave,
   following the rule of thumb that the mesh size @f$ h @f$ should satisfy
-  @f$ k h \lesssim 1 @f$:
+  @f$ k h \lesssim 1 @f$. The mesh is created using
+  @ref Rodin::Geometry::Mesh::UniformGrid "Mesh::UniformGrid()" and scaled
+  to the unit domain via @ref Rodin::Geometry::Mesh::scale "Mesh::scale()":
 
   @code{.cpp}
   static constexpr Real waveLength = 0.5;
@@ -69,7 +73,9 @@
   @subsection examples-pdes-helmholtz-complex Complex Finite Element Space
 
   The Helmholtz equation naturally involves complex-valued fields. Rodin
-  supports this through template-parameterized finite element spaces:
+  supports this through template-parameterized finite element spaces. Using
+  @ref Rodin::Variational::P1 "P1<Complex>" creates a space where each DOF
+  is a complex number:
 
   @code{.cpp}
   P1<Complex> vh(mesh);
@@ -80,7 +86,8 @@
 
   @subsection examples-pdes-helmholtz-problem Problem Definition
 
-  The variational formulation is expressed with the Rodin form language:
+  The @ref Rodin::Variational::Problem "Problem" is assembled using the
+  same form language as for real-valued PDEs:
 
   @code{.cpp}
   Problem helmholtz(u, v);
@@ -101,7 +108,9 @@
   @subsection examples-pdes-helmholtz-extract Extracting Real and Imaginary Parts
 
   Since standard visualization tools typically work with real-valued data, we
-  extract the real and imaginary parts of the solution:
+  extract the real and imaginary parts of the solution into separate
+  real-valued @ref Rodin::Variational::GridFunction "GridFunction" objects
+  using `Re()` and `Im()`:
 
   @code{.cpp}
   P1<Real> rh(mesh);

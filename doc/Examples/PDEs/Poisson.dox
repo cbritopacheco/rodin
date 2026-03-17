@@ -42,10 +42,12 @@
   @section examples-pdes-poisson-preamble Includes and Namespaces
 
   We need the following Rodin modules:
-  - @ref Rodin::Geometry "Geometry" — for the mesh
-  - @ref Rodin::Variational "Variational" — for trial/test functions and the
-    problem formulation
-  - @ref Rodin::Solver "Solver" — for solving the linear system
+  - @ref Rodin::Geometry "Geometry" — for the @ref Rodin::Geometry::Mesh "Mesh" class
+  - @ref Rodin::Variational "Variational" — for @ref Rodin::Variational::P1 "P1",
+    @ref Rodin::Variational::TrialFunction "TrialFunction",
+    @ref Rodin::Variational::TestFunction "TestFunction", and the
+    @ref Rodin::Variational::Problem "Problem" class
+  - @ref Rodin::Solver "Solver" — for the @ref Rodin::Solver::CG "CG" iterative solver
   - @ref Rodin::IO::XDMF "IO::XDMF" — for exporting results to ParaView
 
   @code{.cpp}
@@ -62,10 +64,13 @@
 
   @section examples-pdes-poisson-mesh Creating the Mesh
 
-  We create a triangular mesh on the unit square using a @f$ 16 \times 16 @f$
-  uniform grid. We also compute the face-to-cell connectivity (dimension 1 to
-  dimension 2), which is needed to identify boundary faces for imposing
-  Dirichlet conditions:
+  We create a triangular mesh on the unit square using
+  @ref Rodin::Geometry::Mesh::UniformGrid "Mesh::UniformGrid()" with a
+  @f$ 16 \times 16 @f$ grid. We also compute the face-to-cell connectivity
+  (dimension 1 to dimension 2) via
+  @ref Rodin::Geometry::Connectivity::compute "Connectivity::compute()",
+  which is needed to identify boundary faces for imposing Dirichlet
+  conditions:
 
   @code{.cpp}
   Mesh mesh;
@@ -78,8 +83,10 @@
 
   @section examples-pdes-poisson-space Finite Element Space
 
-  We define a P1 (piecewise linear, continuous) finite element space on the
-  mesh, and create the trial and test functions:
+  We define a @ref Rodin::Variational::P1 "P1" (piecewise linear, continuous)
+  finite element space on the mesh, and create the
+  @ref Rodin::Variational::TrialFunction "TrialFunction" and
+  @ref Rodin::Variational::TestFunction "TestFunction":
 
   @code{.cpp}
   P1 vh(mesh);
@@ -89,12 +96,15 @@
   @endcode
 
   The trial function @f$ u @f$ represents the unknown solution, and the test
-  function @f$ v @f$ is used to express the weak formulation.
+  function @f$ v @f$ is used to express the weak formulation. After solving,
+  the computed solution coefficients are accessible via
+  @ref Rodin::Variational::TrialFunction::getSolution "u.getSolution()".
 
   @section examples-pdes-poisson-problem Problem Formulation
 
-  The variational problem is assembled using Rodin's form language. The code
-  closely mirrors the mathematical notation:
+  The variational problem is assembled using Rodin's form language through
+  the @ref Rodin::Variational::Problem "Problem" class. The code closely
+  mirrors the mathematical notation:
 
   @code{.cpp}
   RealFunction f = 1;
@@ -114,19 +124,22 @@
 
   @section examples-pdes-poisson-solve Solving
 
-  We solve the problem using the Conjugate Gradient (CG) iterative solver,
-  which is well-suited for symmetric positive definite systems like the one
-  arising from the Poisson equation:
+  We solve the problem using the @ref Rodin::Solver::CG "CG" (Conjugate
+  Gradient) iterative solver, which is well-suited for symmetric positive
+  definite systems like the one arising from the Poisson equation:
 
   @code{.cpp}
   CG(poisson).solve();
   @endcode
 
+  Alternative solvers include @ref Rodin::Solver::SparseLU "SparseLU" (direct)
+  and @ref Rodin::Solver::GMRES "GMRES" (for non-symmetric systems).
+
   @section examples-pdes-poisson-output Exporting to XDMF
 
-  After solving, we export the mesh and solution using the XDMF format. The
-  resulting files can be opened directly in
-  [ParaView](https://www.paraview.org/) for visualization:
+  After solving, we export the mesh and solution using the
+  @ref Rodin::IO::XDMF "IO::XDMF" class. The resulting files can be opened
+  directly in [ParaView](https://www.paraview.org/) for visualization:
 
   @code{.cpp}
   IO::XDMF xdmf("Poisson");
