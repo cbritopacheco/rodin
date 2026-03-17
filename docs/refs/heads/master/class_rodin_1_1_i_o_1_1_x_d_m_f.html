@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::IO::XDMF class | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_i_o.html">IO</a>::<wbr/></span>XDMF <span class="m-thin">class</span>
+          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_x_d_m_f_8h.html">&lt;Rodin/IO/XDMF.h&gt;</a></div>
+        </h1>
+        <p><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> domain writer for static or transient visualization output.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#pub-static-methods">Public static functions</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>This class builds an <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> 3 document referencing <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> heavy data.</p><p>Conceptually:</p><ul><li>one <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> object corresponds to one <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> Domain,</li><li>the domain contains one or more named grids,</li><li>each grid owns one observed mesh and zero or more observed attributes,</li><li>each call to write(...) appends one temporal snapshot for every configured grid.</li></ul><p>The writer is RAII-based:</p><ul><li>write(...) exports one new snapshot,</li><li><a href="#a5ae591df94fc66ccb85cbb6565368bca" class="m-doc">close()</a> finalizes the XML document,</li><li>destruction closes automatically if necessary.</li></ul><p>Heavy data is stored in <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> files. The XML document only references those files.</p>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt>
+              struct <a href="struct_rodin_1_1_i_o_1_1_x_d_m_f_1_1_file_patterns.html" class="m-doc">FilePatterns</a>
+            </dt>
+            <dd>File naming patterns used by the writer.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">Grid</a>
+            </dt>
+            <dd>Handle to one named grid inside the <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> domain.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid_options.html" class="m-doc">GridOptions</a>
+            </dt>
+            <dd>Per-grid export options.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_i_o_1_1_x_d_m_f_1_1_keyword.html" class="m-doc">Keyword</a>
+            </dt>
+            <dd>XML element names used in the <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> 3 document format.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">enum class <a href="#a792b863d65377a27df2e4de6285e7d1d" class="m-doc">Topology</a> { </span><span class="m-doc-wrap"><a href="#a792b863d65377a27df2e4de6285e7d1dade941160e308f3473977f60a03bf5005" class="m-doc">POLYVERTEX</a> = 1,
+              <a href="#a792b863d65377a27df2e4de6285e7d1daeaa8e11478ccd5c257fe6f8bb5591c89" class="m-doc">POLYLINE</a> = 2,
+              <a href="#a792b863d65377a27df2e4de6285e7d1daecdc92bf56d960b73b02ee40125758bc" class="m-doc">POLYGON</a> = 3,
+              <a href="#a792b863d65377a27df2e4de6285e7d1da9bcd89070cae224dce305f5011659ef4" class="m-doc">TRIANGLE</a> = 4,
+              <a href="#a792b863d65377a27df2e4de6285e7d1dac9736a37691f2901057c38a5490dc10c" class="m-doc">QUADRILATERAL</a> = 5,
+              <a href="#a792b863d65377a27df2e4de6285e7d1da921725623efcb888f85a941eb29906a9" class="m-doc">TETRAHEDRON</a> = 6,
+              <a href="#a792b863d65377a27df2e4de6285e7d1dacd996d3184761601a0e44e587a012d4f" class="m-doc">PYRAMID</a> = 7,
+              <a href="#a792b863d65377a27df2e4de6285e7d1da42bd365c1ecdb0302894b3ff434de056" class="m-doc">WEDGE</a> = 8,
+              <a href="#a792b863d65377a27df2e4de6285e7d1da8efa397d080e415a2a4b45794abc1f76" class="m-doc">HEXAHEDRON</a> = 9,
+              <a href="#a792b863d65377a27df2e4de6285e7d1da0fc6833ef0fef62f1b80d37303f6dd74" class="m-doc">POLYHEDRON</a> = 16,
+              <a href="#a792b863d65377a27df2e4de6285e7d1da74646ce5a3afb8e9824ef2a2ee97c371" class="m-doc">EDGE_3</a> = 34,
+              <a href="#a792b863d65377a27df2e4de6285e7d1da24c3387cd92ffd22a7e17a11e19ece0f" class="m-doc">QUADRILATERAL_9</a> = 35,
+              <a href="#a792b863d65377a27df2e4de6285e7d1da1d0f740258b838b49e3cb0cd46cae8d1" class="m-doc">TRIANGLE_6</a> = 36,
+              <a href="#a792b863d65377a27df2e4de6285e7d1dafe26ef995309ae0caf6f1936367d35b0" class="m-doc">QUADRILATERAL_8</a> = 37,
+              <a href="#a792b863d65377a27df2e4de6285e7d1da0007a2a1cd159742244084614d891a26" class="m-doc">TETRAHEDRON_10</a> = 38,
+              <a href="#a792b863d65377a27df2e4de6285e7d1da135e19dbd04ffcd393f16fc29321dbe4" class="m-doc">PYRAMID_13</a> = 39,
+              <a href="#a792b863d65377a27df2e4de6285e7d1da17a4a8420d1b8abbfea8755b5353ab2e" class="m-doc">WEDGE_15</a> = 40,
+              <a href="#a792b863d65377a27df2e4de6285e7d1daf9033c673f130fe3285bc76858995e01" class="m-doc">WEDGE_18</a> = 41,
+              <a href="#a792b863d65377a27df2e4de6285e7d1da8f790ba716a927d2ddc79a4ada448bf8" class="m-doc">HEXAHEDRON_20</a> = 48,
+              <a href="#a792b863d65377a27df2e4de6285e7d1da4968f77eb48e29b32004684e5bf874e6" class="m-doc">HEXAHEDRON_24</a> = 49,
+              <a href="#a792b863d65377a27df2e4de6285e7d1da709837d6eeb0308cd1815ba9867d81f3" class="m-doc">HEXAHEDRON_27</a> = 50 }</span>
+            </dt>
+            <dd><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> topology type identifiers.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">enum class <a href="#a5852c3f28e31c45bb2a2091948923b00" class="m-doc">MeshPolicy</a> { </span><span class="m-doc-wrap"><a href="#a5852c3f28e31c45bb2a2091948923b00a84a8921b25f505d0d2077aeb5db4bc16" class="m-doc">Static</a>,
+              <a href="#a5852c3f28e31c45bb2a2091948923b00ab1f023eff9a6b5308d6024e4c6b3d475" class="m-doc">Transient</a> }</span>
+            </dt>
+            <dd>Mesh export policy.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">enum class <a href="#a42b56788639363ade366287d21b793bc" class="m-doc">Center</a> { </span><span class="m-doc-wrap"><a href="#a42b56788639363ade366287d21b793bca6c3a6944a808a7c0bbb6788dbec54a9f" class="m-doc">Node</a>,
+              <a href="#a42b56788639363ade366287d21b793bca1a66ab62bfc858b7bcf9e01aa9cd1841" class="m-doc">Cell</a> }</span>
+            </dt>
+            <dd>Attribute location in the <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> sense.</dd>
+          </dl>
+        </section>
+        <section id="pub-static-methods">
+          <h2><a href="#pub-static-methods">Public static functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a3998b9bc88b2d3e22711853846f259bc" class="m-doc">getTopology</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="#a792b863d65377a27df2e4de6285e7d1d" class="m-doc">Topology</a>&gt;</span>
+            </dt>
+            <dd>Maps a <a href="namespace_rodin.html" class="m-doc">Rodin</a> polytope type to the corresponding <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> topology type.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a9ec8ce1460c5042336b8b79d2f49cb4e" class="m-doc">getGeometry</a>(</span><span class="m-doc-wrap"><a href="#a792b863d65377a27df2e4de6285e7d1d" class="m-doc">Topology</a> gt) -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a>&gt;</span>
+            </dt>
+            <dd>Maps an <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> topology type back to a <a href="namespace_rodin.html" class="m-doc">Rodin</a> polytope type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#acfe4c565fead651d42cba472f16ffa06" class="m-doc">XDMF</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; stem) <span class="m-label m-flat m-info">explicit</span> </span>
+            </dt>
+            <dd>Constructs an <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> writer with the given stem path (serial mode).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a2504044d67f6395f69eb0cfb8090f497" class="m-doc">XDMF</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; stem,
+              size_t rank,
+              size_t numRanks,
+              size_t rootRank = 0)</span>
+            </dt>
+            <dd>Constructs an <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> writer in distributed (MPI) mode.</dd>
+            <dt id="ae31dd3c02ea7d8deb2a1b5b3bd62ba0a">
+              <span class="m-doc-wrap-bumper"><a href="#ae31dd3c02ea7d8deb2a1b5b3bd62ba0a" class="m-doc-self">XDMF</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp;) <span class="m-label m-flat m-danger">deleted</span></span>
+            </dt>
+            <dd>Non-copyable.</dd>
+            <dt id="a334007009b7b2b2d5e8fd72d1a94f443">
+              <span class="m-doc-wrap-bumper"><a href="#a334007009b7b2b2d5e8fd72d1a94f443" class="m-doc-self">XDMF</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Move constructible.</dd>
+            <dt id="a92ade727bb3344ca0df6924c3ec60ab4">
+              <span class="m-doc-wrap-bumper"><a href="#a92ade727bb3344ca0df6924c3ec60ab4" class="m-doc-self">~XDMF</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Destructor; calls <a href="#a5ae591df94fc66ccb85cbb6565368bca" class="m-doc">close()</a> if not already closed.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="ad59d75b71a1bdc1be26669452ce5eacb">
+              <span class="m-doc-wrap-bumper">auto <a href="#ad59d75b71a1bdc1be26669452ce5eacb" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp;) -&gt; <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp; <span class="m-label m-flat m-danger">deleted</span></span>
+            </dt>
+            <dd>Non-copyable.</dd>
+            <dt id="a24861fc85d09547b92938124ef806151">
+              <span class="m-doc-wrap-bumper">auto <a href="#a24861fc85d09547b92938124ef806151" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp;&amp;) -&gt; <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Move assignable.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa7cc609300c24284b3786339a5581805" class="m-doc">getStem</a>(</span><span class="m-doc-wrap">) const -&gt; const boost::filesystem::path&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the stem path set at construction.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a43e3e4eef907a81a218e4fd4db302a02" class="m-doc">setFilePatterns</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_i_o_1_1_x_d_m_f_1_1_file_patterns.html" class="m-doc">FilePatterns</a>&amp; patterns) -&gt; <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp;</span>
+            </dt>
+            <dd>Sets the global file naming patterns.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a197c57bbee740a6be7e43910908d671f" class="m-doc">getFilePatterns</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="struct_rodin_1_1_i_o_1_1_x_d_m_f_1_1_file_patterns.html" class="m-doc">FilePatterns</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the current global file patterns.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af8b202377d57e46a9da887fc7ce9c690" class="m-doc">setPadding</a>(</span><span class="m-doc-wrap">size_t digits) -&gt; <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp;</span>
+            </dt>
+            <dd>Sets the zero-padding width for <code>{index}</code> expansion.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a84963fc4987069806ef548038038574e" class="m-doc">getPadding</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the current index padding width.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9ebfee58ae8df14422e9574a83ce9afc" class="m-doc">grid</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">Grid</a></span>
+            </dt>
+            <dd>Returns a handle to the default (unnamed) grid.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa24eba431a4288c11ef24bf39dc70bdc" class="m-doc">grid</a>(</span><span class="m-doc-wrap">const std::string&amp; name) -&gt; <a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">Grid</a></span>
+            </dt>
+            <dd>Returns a handle to a named grid.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class MeshType&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#aaa80607b6d5a28d916ff01285dec8839" class="m-doc">setMesh</a>(</span><span class="m-doc-wrap">const MeshType&amp; mesh,
+              <a href="#a5852c3f28e31c45bb2a2091948923b00" class="m-doc">MeshPolicy</a> policy = <a href="#a5852c3f28e31c45bb2a2091948923b00a84a8921b25f505d0d2077aeb5db4bc16" class="m-doc">MeshPolicy::<wbr />Static</a>) -&gt; <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp;</span>
+            </dt>
+            <dd>Sets the mesh on the default grid.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4978b75b841de5d39a659d4ab8d25a46" class="m-doc">setOptions</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid_options.html" class="m-doc">GridOptions</a>&amp; options) -&gt; <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp;</span>
+            </dt>
+            <dd>Sets export options on the default grid.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class GridFunctionType&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9edfb0402b91b96b346d4c1d7d2d9e34" class="m-doc">add</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
+              <a href="#a42b56788639363ade366287d21b793bc" class="m-doc">Center</a> center = <a href="#a42b56788639363ade366287d21b793bca6c3a6944a808a7c0bbb6788dbec54a9f" class="m-doc">Center::<wbr />Node</a>) -&gt; <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp;</span>
+            </dt>
+            <dd>Adds a named grid function attribute to the default grid.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class GridFunctionType&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad9e2b05da28b6bb18bd5433846ae6415" class="m-doc">add</a>(</span><span class="m-doc-wrap">const std::string&amp; name,
+              const GridFunctionType&amp; gf,
+              <a href="#a42b56788639363ade366287d21b793bc" class="m-doc">Center</a> center = <a href="#a42b56788639363ade366287d21b793bca6c3a6944a808a7c0bbb6788dbec54a9f" class="m-doc">Center::<wbr />Node</a>) -&gt; <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp;</span>
+            </dt>
+            <dd>Adds a grid function attribute with an explicit name to the default grid.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4241c0d0f7c3a62b3f49e6f8edce1a1f" class="m-doc">write</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp;</span>
+            </dt>
+            <dd>Writes one temporal snapshot for all configured grids.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa28194ca33a89713a991e4974b79e96c" class="m-doc">write</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> time) -&gt; <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp;</span>
+            </dt>
+            <dd>Writes one temporal snapshot at the given time value.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a5ae591df94fc66ccb85cbb6565368bca" class="m-doc">close</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Finalizes the <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> XML document and writes it to disk.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af95ac6249dae44e919fcee9669eb6730" class="m-doc">isClosed</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> whether the writer has been closed.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#afa2e63a40101b5e3118d168798d61855" class="m-doc">getSnapshotCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the total number of snapshots written so far.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a22269ba3381ff9fee9609b57dd7ec7a2" class="m-doc">getGridCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the number of grids in this domain.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a96692d2ad8bbf35f4513f238194436f3" class="m-doc">isDistributed</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> whether the writer is in distributed (MPI) mode.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8a1f56914b35cd103f63bb1e12e61ecc" class="m-doc">getRank</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns this process&#x27;s rank.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa97cc1bff3c6961395ff57aedc64f5b1" class="m-doc">getNumRanks</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the total number of ranks.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6bbdb8f6d788b6b6282d5e18de013d95" class="m-doc">getRootRank</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the root rank that writes the master <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> XML.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Enum documentation</h2>
+          <section class="m-doc-details" id="a792b863d65377a27df2e4de6285e7d1d"><div>
+            <h3>
+              enum class Rodin::<wbr />IO::<wbr />XDMF::<wbr /><a href="#a792b863d65377a27df2e4de6285e7d1d" class="m-doc-self">Topology</a>
+            </h3>
+            <p><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> topology type identifiers.</p>
+<p>These values correspond to the <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> specification&#x27;s topology type codes used in mixed-topology streams. Each cell in the flat topology array is prefixed by its type id.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.xdmf.org/index.php/XDMF_Model_and_Format">XDMF Specification</a></p></aside>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="#a792b863d65377a27df2e4de6285e7d1dade941160e308f3473977f60a03bf5005" class="m-doc-self" id="a792b863d65377a27df2e4de6285e7d1dade941160e308f3473977f60a03bf5005">POLYVERTEX</a></td>
+                  <td>
+                  <p>Single vertex (0D).</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a792b863d65377a27df2e4de6285e7d1daeaa8e11478ccd5c257fe6f8bb5591c89" class="m-doc-self" id="a792b863d65377a27df2e4de6285e7d1daeaa8e11478ccd5c257fe6f8bb5591c89">POLYLINE</a></td>
+                  <td>
+                  <p>Line segment (1D).</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a792b863d65377a27df2e4de6285e7d1daecdc92bf56d960b73b02ee40125758bc" class="m-doc-self" id="a792b863d65377a27df2e4de6285e7d1daecdc92bf56d960b73b02ee40125758bc">POLYGON</a></td>
+                  <td>
+                  <p>General polygon (2D).</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a792b863d65377a27df2e4de6285e7d1da9bcd89070cae224dce305f5011659ef4" class="m-doc-self" id="a792b863d65377a27df2e4de6285e7d1da9bcd89070cae224dce305f5011659ef4">TRIANGLE</a></td>
+                  <td>
+                  <p>Triangle (2D, 3 vertices).</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a792b863d65377a27df2e4de6285e7d1dac9736a37691f2901057c38a5490dc10c" class="m-doc-self" id="a792b863d65377a27df2e4de6285e7d1dac9736a37691f2901057c38a5490dc10c">QUADRILATERAL</a></td>
+                  <td>
+                  <p>Quadrilateral (2D, 4 vertices).</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a792b863d65377a27df2e4de6285e7d1da921725623efcb888f85a941eb29906a9" class="m-doc-self" id="a792b863d65377a27df2e4de6285e7d1da921725623efcb888f85a941eb29906a9">TETRAHEDRON</a></td>
+                  <td>
+                  <p>Tetrahedron (3D, 4 vertices).</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a792b863d65377a27df2e4de6285e7d1dacd996d3184761601a0e44e587a012d4f" class="m-doc-self" id="a792b863d65377a27df2e4de6285e7d1dacd996d3184761601a0e44e587a012d4f">PYRAMID</a></td>
+                  <td>
+                  <p>Pyramid (3D, 5 vertices).</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a792b863d65377a27df2e4de6285e7d1da42bd365c1ecdb0302894b3ff434de056" class="m-doc-self" id="a792b863d65377a27df2e4de6285e7d1da42bd365c1ecdb0302894b3ff434de056">WEDGE</a></td>
+                  <td>
+                  <p>Wedge / triangular prism (3D, 6 vertices).</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a792b863d65377a27df2e4de6285e7d1da8efa397d080e415a2a4b45794abc1f76" class="m-doc-self" id="a792b863d65377a27df2e4de6285e7d1da8efa397d080e415a2a4b45794abc1f76">HEXAHEDRON</a></td>
+                  <td>
+                  <p>Hexahedron (3D, 8 vertices).</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a792b863d65377a27df2e4de6285e7d1da0fc6833ef0fef62f1b80d37303f6dd74" class="m-doc-self" id="a792b863d65377a27df2e4de6285e7d1da0fc6833ef0fef62f1b80d37303f6dd74">POLYHEDRON</a></td>
+                  <td>
+                  <p>General polyhedron (3D).</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a792b863d65377a27df2e4de6285e7d1da74646ce5a3afb8e9824ef2a2ee97c371" class="m-doc-self" id="a792b863d65377a27df2e4de6285e7d1da74646ce5a3afb8e9824ef2a2ee97c371">EDGE_3</a></td>
+                  <td>
+                  <p>Quadratic edge (3 nodes).</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a792b863d65377a27df2e4de6285e7d1da24c3387cd92ffd22a7e17a11e19ece0f" class="m-doc-self" id="a792b863d65377a27df2e4de6285e7d1da24c3387cd92ffd22a7e17a11e19ece0f">QUADRILATERAL_9</a></td>
+                  <td>
+                  <p>Biquadratic quadrilateral (9 nodes).</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a792b863d65377a27df2e4de6285e7d1da1d0f740258b838b49e3cb0cd46cae8d1" class="m-doc-self" id="a792b863d65377a27df2e4de6285e7d1da1d0f740258b838b49e3cb0cd46cae8d1">TRIANGLE_6</a></td>
+                  <td>
+                  <p>Quadratic triangle (6 nodes).</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a792b863d65377a27df2e4de6285e7d1dafe26ef995309ae0caf6f1936367d35b0" class="m-doc-self" id="a792b863d65377a27df2e4de6285e7d1dafe26ef995309ae0caf6f1936367d35b0">QUADRILATERAL_8</a></td>
+                  <td>
+                  <p>Serendipity quadrilateral (8 nodes).</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a792b863d65377a27df2e4de6285e7d1da0007a2a1cd159742244084614d891a26" class="m-doc-self" id="a792b863d65377a27df2e4de6285e7d1da0007a2a1cd159742244084614d891a26">TETRAHEDRON_10</a></td>
+                  <td>
+                  <p>Quadratic tetrahedron (10 nodes).</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a792b863d65377a27df2e4de6285e7d1da135e19dbd04ffcd393f16fc29321dbe4" class="m-doc-self" id="a792b863d65377a27df2e4de6285e7d1da135e19dbd04ffcd393f16fc29321dbe4">PYRAMID_13</a></td>
+                  <td>
+                  <p>Quadratic pyramid (13 nodes).</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a792b863d65377a27df2e4de6285e7d1da17a4a8420d1b8abbfea8755b5353ab2e" class="m-doc-self" id="a792b863d65377a27df2e4de6285e7d1da17a4a8420d1b8abbfea8755b5353ab2e">WEDGE_15</a></td>
+                  <td>
+                  <p>Quadratic wedge (15 nodes).</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a792b863d65377a27df2e4de6285e7d1daf9033c673f130fe3285bc76858995e01" class="m-doc-self" id="a792b863d65377a27df2e4de6285e7d1daf9033c673f130fe3285bc76858995e01">WEDGE_18</a></td>
+                  <td>
+                  <p>Biquadratic wedge (18 nodes).</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a792b863d65377a27df2e4de6285e7d1da8f790ba716a927d2ddc79a4ada448bf8" class="m-doc-self" id="a792b863d65377a27df2e4de6285e7d1da8f790ba716a927d2ddc79a4ada448bf8">HEXAHEDRON_20</a></td>
+                  <td>
+                  <p>Serendipity hexahedron (20 nodes).</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a792b863d65377a27df2e4de6285e7d1da4968f77eb48e29b32004684e5bf874e6" class="m-doc-self" id="a792b863d65377a27df2e4de6285e7d1da4968f77eb48e29b32004684e5bf874e6">HEXAHEDRON_24</a></td>
+                  <td>
+                  <p>Biquadratic hexahedron (24 nodes).</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a792b863d65377a27df2e4de6285e7d1da709837d6eeb0308cd1815ba9867d81f3" class="m-doc-self" id="a792b863d65377a27df2e4de6285e7d1da709837d6eeb0308cd1815ba9867d81f3">HEXAHEDRON_27</a></td>
+                  <td>
+                  <p>Triquadratic hexahedron (27 nodes).</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5852c3f28e31c45bb2a2091948923b00"><div>
+            <h3>
+              enum class Rodin::<wbr />IO::<wbr />XDMF::<wbr /><a href="#a5852c3f28e31c45bb2a2091948923b00" class="m-doc-self">MeshPolicy</a>
+            </h3>
+            <p>Mesh export policy.</p>
+<p>Static:</p><ul><li>the mesh is exported once and reused by all later snapshots of the same grid.</li></ul><p>Transient:</p><ul><li>the mesh is exported at every snapshot,</li><li>intended for moving meshes or remeshing workflows.</li></ul>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="#a5852c3f28e31c45bb2a2091948923b00a84a8921b25f505d0d2077aeb5db4bc16" class="m-doc-self" id="a5852c3f28e31c45bb2a2091948923b00a84a8921b25f505d0d2077aeb5db4bc16">Static</a></td>
+                  <td>
+                  <p>Mesh exported once, reused by all snapshots of the grid.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a5852c3f28e31c45bb2a2091948923b00ab1f023eff9a6b5308d6024e4c6b3d475" class="m-doc-self" id="a5852c3f28e31c45bb2a2091948923b00ab1f023eff9a6b5308d6024e4c6b3d475">Transient</a></td>
+                  <td>
+                  <p>Mesh exported at every snapshot (for moving meshes).</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a42b56788639363ade366287d21b793bc"><div>
+            <h3>
+              enum class Rodin::<wbr />IO::<wbr />XDMF::<wbr /><a href="#a42b56788639363ade366287d21b793bc" class="m-doc-self">Center</a>
+            </h3>
+            <p>Attribute location in the <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> sense.</p>
+<p>Node:</p><ul><li>export as nodal visualization data.</li></ul><p>Cell:</p><ul><li>export as cell-centered data.</li></ul>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="#a42b56788639363ade366287d21b793bca6c3a6944a808a7c0bbb6788dbec54a9f" class="m-doc-self" id="a42b56788639363ade366287d21b793bca6c3a6944a808a7c0bbb6788dbec54a9f">Node</a></td>
+                  <td>
+                  <p>Vertex-centered (nodal) visualization data.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a42b56788639363ade366287d21b793bca1a66ab62bfc858b7bcf9e01aa9cd1841" class="m-doc-self" id="a42b56788639363ade366287d21b793bca1a66ab62bfc858b7bcf9e01aa9cd1841">Cell</a></td>
+                  <td>
+                  <p>Cell-centered visualization data.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a3998b9bc88b2d3e22711853846f259bc"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="#a792b863d65377a27df2e4de6285e7d1d" class="m-doc">Topology</a>&gt; Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3998b9bc88b2d3e22711853846f259bc" class="m-doc-self">getTopology</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry)</span></span>
+            </h3>
+            <p>Maps a <a href="namespace_rodin.html" class="m-doc">Rodin</a> polytope type to the corresponding <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> topology type.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">geometry&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="namespace_rodin.html" class="m-doc">Rodin</a> polytope geometry type.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> Topology value, or empty if the type is unsupported.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9ec8ce1460c5042336b8b79d2f49cb4e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">static <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a>&gt; Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9ec8ce1460c5042336b8b79d2f49cb4e" class="m-doc-self">getGeometry</a>(</span><span class="m-doc-wrap"><a href="#a792b863d65377a27df2e4de6285e7d1d" class="m-doc">Topology</a> gt)</span></span>
+            </h3>
+            <p>Maps an <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> topology type back to a <a href="namespace_rodin.html" class="m-doc">Rodin</a> polytope type.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">gt&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> topology type code.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> Polytope::Type, or empty if the type is unsupported.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="acfe4c565fead651d42cba472f16ffa06"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acfe4c565fead651d42cba472f16ffa06" class="m-doc-self">XDMF</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; stem) <span class="m-label m-info">explicit</span> </span></span>
+            </h3>
+            <p>Constructs an <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> writer with the given stem path (serial mode).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">stem&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Base path for output files. The directory component determines where files are written; the filename component is used as <code>{stem}</code> in file patterns.</td>
+                </tr>
+              </tbody>
+            </table>
+<h5 id="autotoc_md147">Example</h5><pre class="m-code"><span class="n">IO</span><span class="o">::</span><span class="n">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="s">&quot;output/simulation&quot;</span><span class="p">);</span>
+<span class="c1">// produces: output/simulation.xdmf, output/simulation.*.h5, ...</span></pre>
+          </div></section>
+          <section class="m-doc-details" id="a2504044d67f6395f69eb0cfb8090f497"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2504044d67f6395f69eb0cfb8090f497" class="m-doc-self">XDMF</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; stem,
+              size_t rank,
+              size_t numRanks,
+              size_t rootRank = 0)</span></span>
+            </h3>
+            <p>Constructs an <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> writer in distributed (MPI) mode.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">stem&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Base path for output files.</td>
+                </tr>
+                <tr>
+                  <td>rank&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>This process&#x27;s rank.</td>
+                </tr>
+                <tr>
+                  <td>numRanks&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Total number of ranks.</td>
+                </tr>
+                <tr>
+                  <td>rootRank&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Rank that writes the master <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> XML (default 0).</td>
+                </tr>
+              </tbody>
+            </table>
+<p>In distributed mode:</p><ul><li>Each rank writes its own rank-specific <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> visualization files (using <code>{rank}</code> in the file patterns).</li><li>Only the root rank writes the master <code>.xdmf</code> XML file that references all per-rank piece files as a Spatial collection.</li><li>For transient output, the master <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> contains a Temporal collection of Spatial collections.</li></ul><h5 id="autotoc_md148">Example</h5><pre class="m-code"><span class="n">IO</span><span class="o">::</span><span class="n">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="s">&quot;output/Poisson&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">comm</span><span class="p">.</span><span class="n">rank</span><span class="p">(),</span><span class="w"> </span><span class="n">comm</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+<span class="n">xdmf</span><span class="p">.</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mpiMesh</span><span class="p">);</span>
+<span class="n">xdmf</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;u&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">XDMF</span><span class="o">::</span><span class="n">Center</span><span class="o">::</span><span class="n">Node</span><span class="p">);</span>
+<span class="n">xdmf</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="mf">0.0</span><span class="p">);</span>
+<span class="n">xdmf</span><span class="p">.</span><span class="n">close</span><span class="p">();</span></pre>
+          </div></section>
+          <section class="m-doc-details" id="aa7cc609300c24284b3786339a5581805"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const boost::filesystem::path&amp; Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa7cc609300c24284b3786339a5581805" class="m-doc-self">getStem</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the stem path set at construction.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Const reference to the stem path.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a43e3e4eef907a81a218e4fd4db302a02"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp; Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a43e3e4eef907a81a218e4fd4db302a02" class="m-doc-self">setFilePatterns</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_i_o_1_1_x_d_m_f_1_1_file_patterns.html" class="m-doc">FilePatterns</a>&amp; patterns)</span></span>
+            </h3>
+            <p>Sets the global file naming patterns.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">patterns&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>File patterns with <code>{stem}</code>, <code>{grid}</code>, <code>{name}</code>, and <code>{index}</code> placeholders.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to <code>*this</code> for method chaining.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a197c57bbee740a6be7e43910908d671f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="struct_rodin_1_1_i_o_1_1_x_d_m_f_1_1_file_patterns.html" class="m-doc">FilePatterns</a>&amp; Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a197c57bbee740a6be7e43910908d671f" class="m-doc-self">getFilePatterns</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the current global file patterns.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Const reference to the <a href="struct_rodin_1_1_i_o_1_1_x_d_m_f_1_1_file_patterns.html" class="m-doc">FilePatterns</a> struct.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af8b202377d57e46a9da887fc7ce9c690"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp; Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af8b202377d57e46a9da887fc7ce9c690" class="m-doc-self">setPadding</a>(</span><span class="m-doc-wrap">size_t digits)</span></span>
+            </h3>
+            <p>Sets the zero-padding width for <code>{index}</code> expansion.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">digits&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Number of digits for zero-padded indices (default: 6).</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to <code>*this</code> for method chaining.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a84963fc4987069806ef548038038574e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a84963fc4987069806ef548038038574e" class="m-doc-self">getPadding</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the current index padding width.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Number of zero-padding digits.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9ebfee58ae8df14422e9574a83ce9afc"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">Grid</a> Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9ebfee58ae8df14422e9574a83ce9afc" class="m-doc-self">grid</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Returns a handle to the default (unnamed) grid.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td><a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">Grid</a> handle for the default grid.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Creates the default grid if it does not yet exist.</p>
+          </div></section>
+          <section class="m-doc-details" id="aa24eba431a4288c11ef24bf39dc70bdc"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">Grid</a> Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa24eba431a4288c11ef24bf39dc70bdc" class="m-doc-self">grid</a>(</span><span class="m-doc-wrap">const std::string&amp; name)</span></span>
+            </h3>
+            <p>Returns a handle to a named grid.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">name&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">Grid</a> name (used in file patterns as <code>{grid}</code>).</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">Grid</a> handle for the named grid.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Creates the grid if it does not yet exist. Subsequent calls with the same name return a handle to the same grid.</p>
+          </div></section>
+          <section class="m-doc-details" id="aaa80607b6d5a28d916ff01285dec8839"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class MeshType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp; Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaa80607b6d5a28d916ff01285dec8839" class="m-doc-self">setMesh</a>(</span><span class="m-doc-wrap">const MeshType&amp; mesh,
+              <a href="#a5852c3f28e31c45bb2a2091948923b00" class="m-doc">MeshPolicy</a> policy = <a href="#a5852c3f28e31c45bb2a2091948923b00a84a8921b25f505d0d2077aeb5db4bc16" class="m-doc">MeshPolicy::<wbr />Static</a>)</span></span>
+            </h3>
+            <p>Sets the mesh on the default grid.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">MeshType</td>
+                  <td>Concrete mesh type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Mesh to observe.</td>
+                </tr>
+                <tr>
+                  <td>policy&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Export policy (Static or Transient).</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to <code>*this</code> for method chaining.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4978b75b841de5d39a659d4ab8d25a46"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp; Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4978b75b841de5d39a659d4ab8d25a46" class="m-doc-self">setOptions</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid_options.html" class="m-doc">GridOptions</a>&amp; options)</span></span>
+            </h3>
+            <p>Sets export options on the default grid.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">options&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">Grid</a> options.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to <code>*this</code> for method chaining.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9edfb0402b91b96b346d4c1d7d2d9e34"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class GridFunctionType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp; Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9edfb0402b91b96b346d4c1d7d2d9e34" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
+              <a href="#a42b56788639363ade366287d21b793bc" class="m-doc">Center</a> center = <a href="#a42b56788639363ade366287d21b793bca6c3a6944a808a7c0bbb6788dbec54a9f" class="m-doc">Center::<wbr />Node</a>)</span></span>
+            </h3>
+            <p>Adds a named grid function attribute to the default grid.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">GridFunctionType</td>
+                  <td>Concrete grid function type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>gf&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">Grid</a> function to export (must have a name).</td>
+                </tr>
+                <tr>
+                  <td>center&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Data centering (Node or Cell).</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to <code>*this</code> for method chaining.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad9e2b05da28b6bb18bd5433846ae6415"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class GridFunctionType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp; Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad9e2b05da28b6bb18bd5433846ae6415" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const std::string&amp; name,
+              const GridFunctionType&amp; gf,
+              <a href="#a42b56788639363ade366287d21b793bc" class="m-doc">Center</a> center = <a href="#a42b56788639363ade366287d21b793bca6c3a6944a808a7c0bbb6788dbec54a9f" class="m-doc">Center::<wbr />Node</a>)</span></span>
+            </h3>
+            <p>Adds a grid function attribute with an explicit name to the default grid.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">GridFunctionType</td>
+                  <td>Concrete grid function type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>name&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Attribute name.</td>
+                </tr>
+                <tr>
+                  <td>gf&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">Grid</a> function to export.</td>
+                </tr>
+                <tr>
+                  <td>center&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Data centering (Node or Cell).</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to <code>*this</code> for method chaining.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4241c0d0f7c3a62b3f49e6f8edce1a1f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp; Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4241c0d0f7c3a62b3f49e6f8edce1a1f" class="m-doc-self">write</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Writes one temporal snapshot for all configured grids.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to <code>*this</code> for method chaining.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Uses the current snapshot count as the time value.</p>
+          </div></section>
+          <section class="m-doc-details" id="aa28194ca33a89713a991e4974b79e96c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp; Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa28194ca33a89713a991e4974b79e96c" class="m-doc-self">write</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> time)</span></span>
+            </h3>
+            <p>Writes one temporal snapshot at the given time value.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">time&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Physical time associated with this snapshot.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to <code>*this</code> for method chaining.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>For each grid, exports the mesh (if needed) and all registered attributes to <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> files, and records the snapshot for the final <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> XML output.</p>
+          </div></section>
+          <section class="m-doc-details" id="a5ae591df94fc66ccb85cbb6565368bca"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5ae591df94fc66ccb85cbb6565368bca" class="m-doc-self">close</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Finalizes the <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> XML document and writes it to disk.</p>
+<p>Generates the complete <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> 3 XML referencing all recorded snapshots and their <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> data files. This method is idempotent; subsequent calls are no-ops. The destructor calls <a href="#a5ae591df94fc66ccb85cbb6565368bca" class="m-doc">close()</a> automatically.</p>
+          </div></section>
+          <section class="m-doc-details" id="af95ac6249dae44e919fcee9669eb6730"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af95ac6249dae44e919fcee9669eb6730" class="m-doc-self">isClosed</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p><a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> whether the writer has been closed.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td><code>true</code> if <a href="#a5ae591df94fc66ccb85cbb6565368bca" class="m-doc">close()</a> has been called.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="afa2e63a40101b5e3118d168798d61855"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afa2e63a40101b5e3118d168798d61855" class="m-doc-self">getSnapshotCount</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the total number of snapshots written so far.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Snapshot count.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a22269ba3381ff9fee9609b57dd7ec7a2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a22269ba3381ff9fee9609b57dd7ec7a2" class="m-doc-self">getGridCount</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the number of grids in this domain.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td><a href="class_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid.html" class="m-doc">Grid</a> count.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a96692d2ad8bbf35f4513f238194436f3"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a96692d2ad8bbf35f4513f238194436f3" class="m-doc-self">isDistributed</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p><a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> whether the writer is in distributed (MPI) mode.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td><code>true</code> if constructed with rank/numRanks.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8a1f56914b35cd103f63bb1e12e61ecc"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8a1f56914b35cd103f63bb1e12e61ecc" class="m-doc-self">getRank</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns this process&#x27;s rank.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Rank (0 in serial mode).</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa97cc1bff3c6961395ff57aedc64f5b1"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa97cc1bff3c6961395ff57aedc64f5b1" class="m-doc-self">getNumRanks</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the total number of ranks.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Number of ranks (1 in serial mode).</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a6bbdb8f6d788b6b6282d5e18de013d95"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6bbdb8f6d788b6b6282d5e18de013d95" class="m-doc-self">getRootRank</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the root rank that writes the master <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> XML.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Root rank (0 in serial mode).</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

@@ -80,6 +80,7 @@
             <li>
               Reference
               <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
                 <li><a href="#nested-classes">Classes</a></li>
                 <li><a href="#enum-members">Enums</a></li>
                 <li><a href="#func-members">Functions</a></li>
@@ -87,6 +88,13 @@
             </li>
           </ul>
         </nav>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a></dt>
+            <dd><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> utility namespace providing type aliases, path constants, RAII handle wrappers, and low-level dataset read/write helpers.</dd>
+          </dl>
+        </section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
@@ -95,6 +103,11 @@
               class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html" class="m-doc">GridFunctionLoader</a>
             </dt>
             <dd><a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">Loader</a> template for grid functions with specific file format.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES, class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_h_d_f5_00_01_f_e_s_00_01_math_dc6de039808d71549c96625799a50b75.html" class="m-doc">GridFunctionLoader&lt;FileFormat::HDF5, FES, Math::Vector&lt;Scalar&gt;&gt;</a>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> grid function loader for local grid functions backed by <code><a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;</code>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t K, class Range&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_f_e_m_00_01_variational_1_1_e25ce5570c0c5790351369eb032d2a12.html" class="m-doc">GridFunctionLoader&lt;FileFormat::MFEM, Variational::H1&lt;K, Range, Geometry::Mesh&lt;Context::Local&gt;&gt;, Math::Vector&lt;typename FormLanguage::Traits&lt;Range&gt;::ScalarType&gt;&gt;</a>
@@ -111,15 +124,15 @@
             </dt>
             <dd>Specialization for loading P1 grid functions from MFEM format.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
-              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_base.html" class="m-doc">GridFunctionLoaderBase</a>
-            </dt>
-            <dd>Base class for loading grid functions from files or streams.</dd>
-            <dt>
               <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html" class="m-doc">GridFunctionPrinter</a>
             </dt>
             <dd><a href="class_rodin_1_1_i_o_1_1_printer.html" class="m-doc">Printer</a> template for grid functions with specific file format.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES, class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_3_01_file_format_1_1_h_d_f5_00_01_f_e_s_00_01_math68cb348ce8bf27093bff6c8086fbdd6f.html" class="m-doc">GridFunctionPrinter&lt;FileFormat::HDF5, FES, Math::Vector&lt;Scalar&gt;&gt;</a>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> grid function printer for local grid functions backed by <code><a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;</code>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FES, class Scalar&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_3_01_file_format_1_1_m_f_e_m_00_01_f_e_s_00_01_mata6ca80a751fa9ee6d15bb619b9a7f426.html" class="m-doc">GridFunctionPrinter&lt;FileFormat::MFEM, FES, Math::Vector&lt;Scalar&gt;&gt;</a>
@@ -130,11 +143,6 @@
               class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_3_01_file_format_1_1_m_f_e_m_00_01_variational_1_154340b82701ef2fbaf99c4ee98756e99.html" class="m-doc">GridFunctionPrinter&lt;FileFormat::MFEM, Variational::H1&lt;K, Range, Geometry::Mesh&lt;Context::Local&gt;&gt;, Math::Vector&lt;Scalar&gt;&gt;</a>
             </dt>
             <dd>Specialization for printing H1 grid functions with vector data in MFEM format.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;</div>
-              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base.html" class="m-doc">GridFunctionPrinterBase</a>
-            </dt>
-            <dd>Forward declaration of base class for printing grid functions.</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t K, class Range, class Context, class Data&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base_3_01_file_format_1_1_m_f_e_m_00_01_variationaa0f7bcc6d6b9a8ad6e584b65ca4654c5.html" class="m-doc">GridFunctionPrinterBase&lt;FileFormat::MFEM, Variational::H1&lt;K, Range, Geometry::Mesh&lt;Context&gt;&gt;, Data&gt;</a>
@@ -162,6 +170,16 @@
             <dd><a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">Loader</a> template for meshes with specific file format and context.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_mesh_loader_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html" class="m-doc">MeshLoader&lt;FileFormat::HDF5, Context::Local&gt;</a>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> mesh loader specialization for local (sequential) meshes.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_mesh_loader_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_m_p_i_01_4.html" class="m-doc">MeshLoader&lt;FileFormat::HDF5, Context::MPI&gt;</a>
+            </dt>
+            <dd>Loads a distributed MPI mesh from an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_mesh_loader_3_01_i_o_1_1_file_format_1_1_m_e_d_i_t_00_01_context_1_1_local_01_4.html" class="m-doc">MeshLoader&lt;IO::FileFormat::MEDIT, Context::Local&gt;</a>
             </dt>
             <dd>Specialization for loading Sequential meshes in the MEDIT file format.</dd>
@@ -182,6 +200,16 @@
             <dd><a href="class_rodin_1_1_i_o_1_1_printer.html" class="m-doc">Printer</a> template for meshes with specific file format and context.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html" class="m-doc">MeshPrinter&lt;FileFormat::HDF5, Context::Local&gt;</a>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> mesh printer specialization for local (sequential) meshes.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_m_p_i_01_4.html" class="m-doc">MeshPrinter&lt;FileFormat::HDF5, Context::MPI&gt;</a>
+            </dt>
+            <dd>Prints a distributed MPI mesh to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_m_f_e_m_00_01_context_1_1_local_01_4.html" class="m-doc">MeshPrinter&lt;FileFormat::MFEM, Context::Local&gt;</a>
             </dt>
             <dd>Specialization for printing sequential meshes in MFEM format.</dd>
@@ -195,6 +223,10 @@
               class <a href="class_rodin_1_1_i_o_1_1_printer.html" class="m-doc">Printer</a>
             </dt>
             <dd>Base template for printing objects to streams.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> domain writer for static or transient visualization output.</dd>
           </dl>
         </section>
         <section id="enum-members">
@@ -202,7 +234,8 @@
           <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper">enum class <a href="#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> { </span><span class="m-doc-wrap"><a href="#a610845e6f56e545283af144cbbb99cfead2fc2ac95a0b62e13572a658cf6390af" class="m-doc">MFEM</a>,
-              <a href="#a610845e6f56e545283af144cbbb99cfeae902e98da70b5998f60fb4cd62826def" class="m-doc">MEDIT</a> }</span>
+              <a href="#a610845e6f56e545283af144cbbb99cfeae902e98da70b5998f60fb4cd62826def" class="m-doc">MEDIT</a>,
+              <a href="#a610845e6f56e545283af144cbbb99cfea86459eb6a9c3edb9d09e9d6fe8d5b9fa" class="m-doc">HDF5</a> }</span>
             </dt>
             <dd>Enumeration of supported file formats for mesh and grid function I/O.</dd>
           </dl>
@@ -242,6 +275,12 @@
                   <td><a href="#a610845e6f56e545283af144cbbb99cfeae902e98da70b5998f60fb4cd62826def" class="m-doc-self" id="a610845e6f56e545283af144cbbb99cfeae902e98da70b5998f60fb4cd62826def">MEDIT</a></td>
                   <td>
                   <p>MEDIT mesh format - used by MMG remeshing software.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a610845e6f56e545283af144cbbb99cfea86459eb6a9c3edb9d09e9d6fe8d5b9fa" class="m-doc-self" id="a610845e6f56e545283af144cbbb99cfea86459eb6a9c3edb9d09e9d6fe8d5b9fa">HDF5</a></td>
+                  <td>
+                  <p><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> hierarchical binary format for raw mesh/function storage.</p>
                   </td>
                 </tr>
               </tbody>

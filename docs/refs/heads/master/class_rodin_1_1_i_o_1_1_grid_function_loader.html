@@ -94,7 +94,90 @@
             </tr>
           </tbody>
         </table>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html" class="m-doc">GridFunctionLoader</a></p></aside>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#pro-methods">Protected functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>Primary template for <a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html" class="m-doc">GridFunctionLoader</a>.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html" class="m-doc">GridFunctionLoader</a></p></aside><p>This primary template provides a default definition so that the compiler does not fail with &quot;implicit instantiation of undefined template&quot; when GridFunctionBase::load() is compiled for FES/Data combinations that do not have a matching partial specialization for a given file format.</p><aside class="m-note m-info"><h4>Note</h4><p>If you reach this template at runtime it means no specialization exists for the requested format/FES/Data triple. An exception is raised so that the unused switch branches in GridFunctionBase::load() remain compilable while still producing a clear error at runtime.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">Loader</a>, <a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html" class="m-doc">GridFunctionPrinter</a></p></aside>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">Loader&lt;Variational::GridFunction&lt;FES, Data&gt;&gt;</a>
+            </dt>
+            <dd>Base template for loading objects from files or streams.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a8546f878fca73682edd9c742edd7f2a0" class="m-doc">load</a>(</span><span class="m-doc-wrap">std::istream&amp; is) <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Loads object from an input stream.</dd>
+          </dl>
+        </section>
+        <section id="pro-methods">
+          <h2><a href="#pro-methods">Protected functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6c83de099561717325b0b3a729cfeb1f" class="m-doc">getObject</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">ObjectType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets a reference to the object being loaded.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a8546f878fca73682edd9c742edd7f2a0"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />GridFunctionLoader&lt;Fmt, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8546f878fca73682edd9c742edd7f2a0" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">std::istream&amp; is) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Loads object from an input stream.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">is&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Input stream to read from</td>
+                </tr>
+              </tbody>
+            </table>
+<p>This pure virtual method must be implemented by derived classes to read the object data from the provided stream.</p>
+          </div></section>
+          <section class="m-doc-details" id="a6c83de099561717325b0b3a729cfeb1f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">ObjectType</a>&amp; Rodin::<wbr />IO::<wbr />GridFunctionLoader&lt;Fmt, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6c83de099561717325b0b3a729cfeb1f" class="m-doc-self">getObject</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span> <span class="m-label m-warning">protected</span></span></span>
+            </h3>
+            <p>Gets a reference to the object being loaded.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to the object</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>This method provides access to the object being populated during loading. Derived classes must implement this to return their internal object reference.</p>
+          </div></section>
+        </section>
       </div>
     </div>
   </div>

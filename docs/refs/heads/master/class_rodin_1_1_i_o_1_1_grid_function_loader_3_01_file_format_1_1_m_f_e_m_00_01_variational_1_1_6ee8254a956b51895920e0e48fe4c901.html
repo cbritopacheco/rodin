@@ -89,32 +89,21 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md135">Expected MFEM Format</a></li>
-            <li><a href="#autotoc_md136">Usage Example</a></li>
+            <li><a href="#autotoc_md142">Expected MFEM Format</a></li>
+            <li><a href="#autotoc_md143">Usage Example</a></li>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>Loads discontinuous finite element solutions from MFEM format. P0 spaces have one DOF per element, stored in element order.</p><section id="autotoc_md135"><h3><a href="#autotoc_md135">Expected MFEM Format</a></h3><ul><li>Header: FiniteElementSpace</li><li>FiniteElementCollection: L2_&lt;dim&gt;D_P0</li><li>VDim: vector dimension</li><li>Ordering: data layout (Nodes=0 or VectorDimension=1)</li><li>Coefficient data values (one per element, in element order)</li></ul></section><section id="autotoc_md136"><h3><a href="#autotoc_md136">Usage Example</a></h3><pre class="m-code"><span class="n">P0</span><span class="w"> </span><span class="nf">fes</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<p>Loads discontinuous finite element solutions from MFEM format. P0 spaces have one DOF per element, stored in element order.</p><section id="autotoc_md142"><h3><a href="#autotoc_md142">Expected MFEM Format</a></h3><ul><li>Header: FiniteElementSpace</li><li>FiniteElementCollection: L2_&lt;dim&gt;D_P0</li><li>VDim: vector dimension</li><li>Ordering: data layout (Nodes=0 or VectorDimension=1)</li><li>Coefficient data values (one per element, in element order)</li></ul></section><section id="autotoc_md143"><h3><a href="#autotoc_md143">Usage Example</a></h3><pre class="m-code"><span class="n">P0</span><span class="w"> </span><span class="nf">fes</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">GridFunction</span><span class="w"> </span><span class="nf">gf</span><span class="p">(</span><span class="n">fes</span><span class="p">);</span>
 <span class="n">GridFunctionLoader</span><span class="o">&lt;</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">,</span><span class="w"> </span><span class="n">P0</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">loader</span><span class="p">(</span><span class="n">gf</span><span class="p">);</span>
 <span class="n">loader</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;solution.gf&quot;</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html" class="m-doc">GridFunctionPrinter</a></p></aside></section>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
-              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_base.html" class="m-doc">GridFunctionLoaderBase&lt;Variational::P0&lt;Range, Geometry::Mesh&lt;Context::Local&gt;&gt;, Math::Vector&lt;FormLanguage::Traits&lt;Range&gt;::ScalarType&gt;&gt;</a>
-            </dt>
-            <dd>Base class for loading grid functions from files or streams.</dd>
-          </dl>
-        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">

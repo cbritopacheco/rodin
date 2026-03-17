@@ -94,7 +94,84 @@
             </tr>
           </tbody>
         </table>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html" class="m-doc">GridFunctionPrinter</a></p></aside>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>Primary template for <a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html" class="m-doc">GridFunctionPrinter</a>.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html" class="m-doc">GridFunctionPrinter</a></p></aside><p>This primary template provides a default definition so that the compiler does not fail with &quot;implicit instantiation of undefined template&quot; when GridFunctionBase::save() is compiled for FES/Data combinations that do not have a matching partial specialization for a given file format.</p><aside class="m-note m-info"><h4>Note</h4><p>An exception is raised at runtime if this primary template is actually invoked.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html" class="m-doc">GridFunctionLoader</a></p></aside>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_printer.html" class="m-doc">Printer&lt;Variational::GridFunction&lt;FES, Data&gt;&gt;</a>
+            </dt>
+            <dd>Base template for printing objects to streams.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a7c84cfa9805fac76a8f3f3600270724b" class="m-doc">print</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Prints object to an output stream.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a11c4ca84d818b4c96f829e779509de85" class="m-doc">getObject</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">ObjectType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets a const reference to the object being printed.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a7c84cfa9805fac76a8f3f3600270724b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />GridFunctionPrinter&lt;Fmt, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7c84cfa9805fac76a8f3f3600270724b" class="m-doc-self">print</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Prints object to an output stream.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>Output stream to write to</td>
+                </tr>
+              </tbody>
+            </table>
+<p>This pure virtual method must be implemented by derived classes to write the object data to the provided stream.</p>
+          </div></section>
+          <section class="m-doc-details" id="a11c4ca84d818b4c96f829e779509de85"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">ObjectType</a>&amp; Rodin::<wbr />IO::<wbr />GridFunctionPrinter&lt;Fmt, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a11c4ca84d818b4c96f829e779509de85" class="m-doc-self">getObject</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets a const reference to the object being printed.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Const reference to the object</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>This method provides read-only access to the object being written. Derived classes must implement this to return their internal object reference.</p>
+          </div></section>
+        </section>
       </div>
     </div>
   </div>
