@@ -1,0 +1,146 @@
+/**
+  @page examples-pdes-surfacemesh Solving PDEs on surface meshes
+  @brief Reaction-diffusion equation on a 3D surface mesh
+
+  @m_keywords{Surface, Manifold, Reaction-Diffusion, H1, 3D}
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section examples-pdes-surface-intro Introduction
+
+  Rodin can solve PDEs not only on 2D planar domains or 3D volumes, but
+  also on **surface meshes** — 2D manifolds embedded in 3D space. This is
+  useful for modeling phenomena on shells, biological membranes, or
+  curved interfaces.
+
+  This example solves a **reaction-diffusion** steady-state problem on a
+  surface mesh:
+
+  @f[
+    \left\{
+    \begin{aligned}
+      -\Delta_\Gamma u + u &= f && \text{on } \Gamma \\
+    \end{aligned}
+    \right.
+  @f]
+
+  where @f$ \Delta_\Gamma @f$ is the **Laplace–Beltrami operator** (the
+  surface Laplacian) and @f$ \Gamma @f$ is a curved surface in
+  @f$ \mathbb{R}^3 @f$.
+
+  The weak formulation is identical to the planar case — Rodin handles
+  the surface geometry automatically through the mesh metric:
+
+  @f[
+    \int_\Gamma \nabla_\Gamma u \cdot \nabla_\Gamma v \, ds
+    + \int_\Gamma u \, v \, ds
+    = \int_\Gamma f \, v \, ds
+  @f]
+
+  @section examples-pdes-surface-impl Implementation
+
+  @subsection examples-pdes-surface-mesh Loading the Surface Mesh
+
+  The surface mesh is loaded from an MFEM file. The mesh has topological
+  dimension 2 (triangles) but space dimension 3 (vertices live in
+  @f$ \mathbb{R}^3 @f$):
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+  #include <Rodin/Assembly.h>
+  #include <Rodin/Solver.h>
+  #include <Rodin/Variational.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
+
+  Mesh Omega;
+  Omega.load("surface-meshes-example.mesh", IO::FileFormat::MFEM);
+  @endcode
+
+  @subsection examples-pdes-surface-space Finite Element Space
+
+  We use @ref Rodin::Variational::H1 "H1" elements (higher-order continuous
+  Lagrange elements) to better approximate the solution on the curved
+  surface:
+
+  @code{.cpp}
+  H1 Vh(Omega);
+  TrialFunction u(Vh);
+  TestFunction  v(Vh);
+  @endcode
+
+  @subsection examples-pdes-surface-rhs Right-Hand Side
+
+  The source term is defined in terms of the 3D coordinates of points on
+  the surface:
+
+  @code{.cpp}
+  auto f = RealFunction(
+    [](const Point& x)
+    {
+      double l2 = x(0) * x(0) + x(1) * x(1) + x(2) * x(2);
+      return 7 * x(0) * x(1) / l2;
+    });
+  @endcode
+
+  @subsection examples-pdes-surface-problem Problem Assembly
+
+  The problem is assembled exactly as in the planar case. The
+  `Integral(Grad(u), Grad(v))` automatically uses the surface gradient:
+
+  @code{.cpp}
+  Solver::CG cg;
+  cg.setMaxIterations(200);
+  cg.setRelativeTolerance(1e-12);
+  cg.printIterations(true);
+
+  Problem rd(u, v);
+  rd = Integral(Grad(u), Grad(v))    // Surface stiffness: ∫_Γ ∇_Γ u · ∇_Γ v ds
+     + Integral(u, v)                // Mass term: ∫_Γ u v ds
+     - Integral(f, v);               // Load: ∫_Γ f v ds
+  rd.solve(cg);
+  @endcode
+
+  @note No boundary conditions are needed here because the surface
+  @f$ \Gamma @f$ has no boundary (it is a closed manifold). The mass term
+  @f$ \int u \, v \, ds @f$ makes the bilinear form coercive.
+
+  @subsection examples-pdes-surface-save Saving Results
+
+  @code{.cpp}
+  u.getSolution().save("u.gf", IO::FileFormat::MFEM);
+  Omega.save("Omega.mesh", IO::FileFormat::MFEM);
+  @endcode
+
+  @section examples-pdes-surface-key Key Observations
+
+  - **No special operators needed**: Rodin automatically computes the
+    surface gradient @f$ \nabla_\Gamma @f$ from the mesh geometry. The
+    code is identical to the planar case.
+  - **H1 elements on surfaces**: Higher-order elements are recommended
+    on curved surfaces for better geometric approximation.
+  - **Boundary-free manifolds**: Closed surfaces have no boundary, so
+    no boundary conditions are required. The mass term provides
+    coercivity.
+  - **Surface integrals**: The `Integral(...)` operator automatically
+    uses the surface measure @f$ ds @f$ instead of @f$ dx @f$.
+
+  @section examples-pdes-surface-full Full Source Code
+
+  The complete source code is:
+  -   @ref PDEs/SurfaceMesh.cpp "SurfaceMesh.cpp"
+
+  @section examples-pdes-surface-see-also See Also
+
+  - @ref examples-pdes-poisson "Poisson equation" — Planar equivalent
+  - @ref fem-spaces "Finite element spaces" — H1 elements
+  - @ref guides-solvers "Solvers guide"
+
+  @example PDEs/SurfaceMesh.cpp
+  @m_examplenavigation{examples-pdes-surfacemesh,PDEs/}
+  @m_footernavigation
+  */

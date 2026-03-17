@@ -1,0 +1,142 @@
+/**
+  @page gallery Gallery
+  @brief A visual showcase of simulations and results produced with Rodin
+
+  @m_keywords{Gallery, Showcase, Visualization, Results, Examples}
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section gallery-intro Overview
+
+  This gallery showcases results from simulations built with the Rodin
+  framework. Each entry links to the corresponding example or tutorial page
+  where you can find the full source code and step-by-step explanations.
+
+  @section gallery-pdes Partial Differential Equations
+
+  @subsection gallery-pdes-poisson Poisson Equation
+
+  @image html PDEs/Poisson.png width=360px
+
+  The @ref examples-pdes-poisson "Poisson equation" example solves the
+  classic scalar PDE @f$ -\Delta u = f @f$ on the unit square with
+  homogeneous Dirichlet boundary conditions, using
+  @ref Rodin::Variational::P1 "P1" finite elements and the
+  @ref Rodin::Solver::CG "CG" solver.
+
+  @subsection gallery-pdes-elasticity Linear Elasticity
+
+  @image html Elasticity.png width=360px
+
+  The @ref examples-pdes-elasticity "elasticity" example solves the
+  linearized elasticity system @f$ -\nabla \cdot \sigma(u) = 0 @f$
+  with mixed Dirichlet/Neumann boundary conditions. It demonstrates
+  vector-valued @ref Rodin::Variational::P1 "P1" spaces and the
+  `LinearElasticityIntegral` bilinear form.
+
+  @subsection gallery-pdes-helmholtz Helmholtz Equation
+
+  @image html PDEs/Helmholtz_placeholder.png width=360px
+
+  The @ref examples-pdes-helmholtz "Helmholtz equation" example solves
+  the complex-valued PDE @f$ -\Delta u - k^2 u = f @f$ using
+  @ref Rodin::Variational::P1 "P1<Complex>" finite element spaces.
+  This demonstrates Rodin's support for complex-valued computations.
+
+  @subsection gallery-pdes-navierstokes Navier–Stokes Equations
+
+  @image html PDEs/NavierStokes_placeholder.png width=360px
+
+  The @ref examples-pdes-navierstokes "Navier–Stokes" tutorial covers the
+  steady incompressible Navier–Stokes equations using Taylor–Hood elements
+  (@ref Rodin::Variational::H1 "H1" order 2 for velocity, order 1 for
+  pressure) with Picard iteration.
+
+  @subsection gallery-pdes-periodic Periodic Poisson Equation
+
+  The @ref examples-pdes-periodic "periodic Poisson" example demonstrates
+  how to impose periodic boundary conditions using `PeriodicBC` and a DOF
+  correspondence map. The solution on opposite edges of the domain is
+  constrained to be equal, simulating a tiling pattern.
+
+  @subsection gallery-pdes-surface Reaction-Diffusion on a Surface
+
+  The @ref examples-pdes-surfacemesh "surface mesh" example solves a
+  reaction-diffusion equation @f$ -\Delta_\Gamma u + u = f @f$ on a
+  curved 3D manifold. It demonstrates that Rodin handles surface PDEs
+  transparently — the same `Integral(Grad(u), Grad(v))` syntax
+  automatically computes the surface gradient.
+
+  @section gallery-optimization Optimization
+
+  @subsection gallery-shapeopt-cantilever Shape Optimization: Cantilever
+
+  @image html SimpleCantilever.png width=360px
+
+  The @ref examples-shapeoptimization-simple_cantilever "simple cantilever"
+  example performs boundary-variation shape optimization of a cantilever
+  beam, minimizing the compliance (structural stiffness) subject to a
+  volume constraint. The shape gradient is computed and regularized via the
+  Hilbert extension-regularization procedure, and the mesh is updated using
+  the @ref Rodin::External::MMG "MMG" remesher.
+
+  @subsection gallery-shapeopt-levelset Level-Set Shape Optimization
+
+  @image html LevelSetCantilever.png width=360px
+
+  The @ref examples-shapeoptimization-levelset_cantilever "level-set
+  cantilever" example combines body-fitted meshing with level-set
+  techniques. The optimizer advects a signed-distance function and recovers
+  the implicit domain at each iteration using the
+  @ref Rodin::External::MMG "MMG" level-set discretizer.
+
+  @subsection gallery-density-temp Density Optimization: Temperature
+
+  @image html SIMPTemperatureMinimization.png width=360px
+
+  The @ref examples-density_optimization-simp_temperature_minimization
+  "temperature minimization" example uses the SIMP (Solid Isotropic
+  Material with Penalization) approach to find an optimal material
+  distribution that minimizes the average temperature in a domain.
+
+  @section gallery-geometry Mesh Geometry and Utilities
+
+  Rodin provides a rich set of geometric operations for creating,
+  transforming, and querying meshes:
+
+  - **UniformGrid**: Generate structured meshes of triangles, quads,
+    tetrahedra, hexahedra, or wedges in any dimension. See
+    @ref examples-geometry-uniformgrid "UniformGrid example".
+  - **Scale and displace**: Transform mesh coordinates with
+    `mesh.scale()` and `mesh.displace()`.
+  - **Trim**: Remove cells by attribute to extract subdomains.
+  - **Skin**: Extract the boundary surface of a volumetric mesh.
+  - **CCL**: Connected component labeling for domain decomposition.
+  - **Connectivity**: Compute topological incidence relations between
+    mesh entities of any dimension. See
+    @ref examples-geometry-connectivity "Connectivity example".
+
+  @section gallery-io Visualization and I/O
+
+  Rodin supports exporting simulation data in the
+  @ref Rodin::IO::XDMF "XDMF" format, which can be opened directly in
+  [ParaView](https://www.paraview.org/) for advanced 3D visualization
+  including time-series animation, vector glyphs, and surface warping.
+
+  See the @ref examples-io-xdmf "XDMF example" for a complete guide.
+
+  The supported mesh file formats are:
+  - **MFEM** (`IO::FileFormat::MFEM`): Text-based, used by the MFEM library
+  - **MEDIT** (`IO::FileFormat::MEDIT`): Native for MMG/INRIA tools
+  - **HDF5** (`IO::FileFormat::HDF5`): Binary, for large-scale simulations
+
+  @section gallery-see-also See Also
+
+  - @ref examples-index "Examples and tutorials"
+  - @ref guides-io "I/O in Rodin"
+  - @ref guides-weak-formulations "Weak formulations"
+  - @ref notation-index "Notation reference"
+
+  */

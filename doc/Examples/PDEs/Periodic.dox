@@ -1,0 +1,139 @@
+/**
+  @page examples-pdes-periodic Poisson equation with periodic boundary conditions
+  @brief Solving the Poisson equation on a periodic domain
+
+  @m_keywords{Poisson, Periodic, Boundary Conditions, PeriodicBC}
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section examples-pdes-periodic-intro Introduction
+
+  This example solves the Poisson equation on the square
+  @f$ [0, 2\pi]^2 @f$ with **periodic boundary conditions** instead of
+  the usual Dirichlet conditions. Periodicity means the solution on the
+  left edge equals the solution on the right edge, and similarly for the
+  top and bottom edges:
+
+  @f[
+    \left\{
+    \begin{aligned}
+      -\Delta u &= f && \text{in } (0, 2\pi)^2 \\
+      u(0, y)   &= u(2\pi, y) && \text{for all } y \\
+      u(x, 0)   &= u(x, 2\pi) && \text{for all } x
+    \end{aligned}
+    \right.
+  @f]
+
+  Periodic boundary conditions are fundamental in:
+  - **Homogenization** of composite materials (solving cell problems)
+  - **Wave propagation** in periodic media (photonic/phononic crystals)
+  - **Computational physics** (periodic unit cells)
+
+  @section examples-pdes-periodic-implementation Implementation
+
+  @subsection examples-pdes-periodic-mesh Mesh Creation
+
+  We build a fine triangular mesh on a grid of @f$ n \times n @f$ points,
+  then scale it to the domain @f$ [0, 2\pi]^2 @f$:
+
+  @code{.cpp}
+  #include <Rodin/Solver.h>
+  #include <Rodin/Geometry.h>
+  #include <Rodin/Variational.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
+
+  const size_t n = 200;
+
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+  mesh.getConnectivity().compute(1, 2);
+  mesh.scale(1.0 / (n - 1));    // Normalize to [0, 1]^2
+  mesh.scale(2 * M_PI);         // Stretch to [0, 2π]^2
+  @endcode
+
+  @subsection examples-pdes-periodic-source Source Term
+
+  We use a smooth source function:
+
+  @code{.cpp}
+  RealFunction f =
+    [](const Point& p)
+    {
+      return sin(p.x() + M_PI / 4) * cos(p.y() + M_PI / 4);
+    };
+  @endcode
+
+  @subsection examples-pdes-periodic-dofmap Building the DOF Correspondence Map
+
+  The key step for periodic conditions is building an `IndexMap` that pairs
+  the DOF indices on opposite boundaries. For a uniform @f$ n \times n @f$
+  grid, the DOF layout is row-major. We pair:
+
+  - **Left ↔ Right**: DOF @f$ i \cdot n @f$ with DOF @f$ i \cdot n + (n-1) @f$,
+    for each row @f$ i @f$.
+  - **Bottom ↔ Top**: DOF @f$ j @f$ with DOF @f$ j + n(n-1) @f$, for each
+    column @f$ j @f$.
+
+  @code{.cpp}
+  P1 vh(mesh);
+
+  IndexMap<IndexSet> dofs;
+
+  // Left ↔ Right (pair first DOF in each row with last DOF in same row)
+  for (Index i = 0; i < vh.getSize(); i += n)
+    dofs[i].insert(i + n - 1);
+
+  // Bottom ↔ Top (pair DOF j in first row with DOF j in last row)
+  for (Index i = 0; i < n; i++)
+    dofs[i].insert(i + n * (n - 1));
+  @endcode
+
+  @subsection examples-pdes-periodic-solve Problem Assembly and Solving
+
+  The problem is assembled identically to a standard Poisson equation,
+  except that `PeriodicBC` replaces `DirichletBC`:
+
+  @code{.cpp}
+  TrialFunction u(vh);
+  TestFunction  v(vh);
+
+  Problem poisson(u, v);
+  poisson = Integral(Grad(u), Grad(v))
+          - Integral(f, v)
+          + PeriodicBC(u, dofs);
+
+  Solver::SparseLU(poisson).solve();
+  @endcode
+
+  @note A direct solver (SparseLU) is used here because the resulting
+  system is singular (the constant function is in the kernel). CG requires
+  the system to be positive definite, which periodic problems are not
+  without additional constraints.
+
+  @subsection examples-pdes-periodic-save Saving Results
+
+  @code{.cpp}
+  u.getSolution().save("Periodic.gf", IO::FileFormat::MFEM);
+  mesh.save("Periodic.mesh", IO::FileFormat::MFEM);
+  @endcode
+
+  @section examples-pdes-periodic-full Full Source Code
+
+  The complete source code is:
+  -   @ref PDEs/Periodic.cpp "Periodic.cpp"
+
+  @section examples-pdes-periodic-see-also See Also
+
+  - @ref examples-pdes-poisson "Poisson equation" — Standard Dirichlet version
+  - @ref guides-boundary-conditions "Boundary conditions guide"
+  - @ref guides-weak-formulations "Weak formulations"
+
+  @example PDEs/Periodic.cpp
+  @m_examplenavigation{examples-pdes-periodic,PDEs/}
+  @m_footernavigation
+  */

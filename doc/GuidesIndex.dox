@@ -68,11 +68,37 @@
 
   @section guides-fem-index The finite element method
 
-  - @subpage fem-ciarlet
+  These guides cover the mathematical foundations of the finite element method
+  and how they are implemented in Rodin:
 
-  - @subpage fem-spaces
+  - @subpage fem-ciarlet - The formal definition of a finite element
+
+  - @subpage fem-spaces - Overview of available finite element spaces (P0, P1,
+    vector-valued, complex-valued)
 
   @section guides-variational-index Weak formulations and variational problems
+
+  Understand how to translate PDEs into variational problems that can be
+  solved using the finite element method:
+
+  - @subpage guides-variational - Defining bilinear forms, linear forms,
+    boundary conditions, and solving variational problems
+
+  - @subpage guides-weak-formulations - From strong form to weak form
+
+  - @subpage guides-boundary-conditions - Applying Dirichlet, Neumann, and
+    mixed boundary conditions
+
+  - @subpage guides-solvers - Direct and iterative solvers for the assembled
+    linear systems
+
+  @section guides-io-index I/O in Rodin
+
+  Rodin provides flexible I/O capabilities for reading and writing meshes,
+  grid functions, and simulation data in various formats:
+
+  - @subpage guides-io - Comprehensive guide to input and output, including
+    XDMF, MFEM, and MEDIT formats
 
   */
 

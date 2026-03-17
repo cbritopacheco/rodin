@@ -1,8 +1,174 @@
 /**
-  @page fem-ciarlet Ciarlet’s definition of a finite element
-  @brief The Ciarlet finite element
+  @page fem-ciarlet Ciarlet's definition of a finite element
+  @brief The mathematical foundation of finite elements
 
-  TODO: Explain this and how it relates to the FiniteElement class
+  @m_keywords{Ciarlet, Finite Element, Basis Functions, Reference Element}
+
+  @tableofcontents
 
   @m_footernavigation
+
+  @section fem-ciarlet-intro Introduction
+
+  The finite element method (FEM) is a powerful technique for numerically
+  solving partial differential equations. At its heart lies the concept of a
+  **finite element**, which provides a systematic way to construct
+  piecewise-polynomial approximations on a mesh.
+
+  The most widely used formal definition of a finite element was introduced by
+  Philippe G. Ciarlet. This definition provides a clean mathematical
+  framework that separates the geometric, functional, and algebraic aspects
+  of finite element construction.
+
+  @section fem-ciarlet-definition The Ciarlet Triple
+
+  A **finite element** in the sense of Ciarlet is defined as a triple
+  @f$ (K, P, \Sigma) @f$ where:
+
+  - @f$ K @f$ is a **geometric domain** — a compact, connected subset of
+    @f$ \mathbb{R}^d @f$ with nonempty interior (e.g. a triangle,
+    tetrahedron, quadrilateral). This is also called the **reference element**.
+
+  - @f$ P @f$ is a finite-dimensional **function space** defined on @f$ K @f$
+    — typically a space of polynomials of a certain degree. For instance,
+    @f$ P = \mathbb{P}_k(K) @f$, the space of polynomials of degree at most
+    @f$ k @f$.
+
+  - @f$ \Sigma = \{ \sigma_1, \sigma_2, \ldots, \sigma_n \} @f$ is a set of
+    **degrees of freedom** (DOFs) — linear functionals
+    @f$ \sigma_i : P \to \mathbb{R} @f$ — such that any function
+    @f$ p \in P @f$ is uniquely determined by the values
+    @f$ \sigma_1(p), \ldots, \sigma_n(p) @f$.
+
+  The key requirement is that the DOFs must form a **basis** for the dual
+  space @f$ P' @f$. This means @f$ \dim(P) = n @f$, and the map
+  @f[
+    p \mapsto (\sigma_1(p), \ldots, \sigma_n(p))
+  @f]
+  is an isomorphism from @f$ P @f$ to @f$ \mathbb{R}^n @f$.
+
+  @section fem-ciarlet-basis Basis Functions
+
+  Given a Ciarlet triple @f$ (K, P, \Sigma) @f$, there exists a unique set of
+  **basis functions** @f$ \{ \phi_1, \ldots, \phi_n \} \subset P @f$ such that:
+
+  @f[
+    \sigma_i(\phi_j) = \delta_{ij}
+  @f]
+
+  where @f$ \delta_{ij} @f$ is the Kronecker delta. This is called the
+  **nodal basis** of the finite element. These basis functions are the shape
+  functions that are used to represent any function in the finite element
+  space.
+
+  Any function @f$ p \in P @f$ can then be written as:
+
+  @f[
+    p = \sum_{i=1}^{n} \sigma_i(p) \, \phi_i
+  @f]
+
+  @section fem-ciarlet-examples Common Finite Elements
+
+  @subsection fem-ciarlet-p1 P1 (Piecewise Linear) Elements
+
+  The simplest and most widely used finite element is the **P1 element**
+  on a triangle:
+
+  - @f$ K @f$ = a triangle with vertices @f$ a_1, a_2, a_3 @f$
+  - @f$ P = \mathbb{P}_1(K) @f$ = polynomials of degree @f$ \leq 1 @f$
+    (i.e. @f$ p(x, y) = \alpha + \beta x + \gamma y @f$)
+  - @f$ \Sigma = \{ \sigma_1, \sigma_2, \sigma_3 \} @f$ where
+    @f$ \sigma_i(p) = p(a_i) @f$ (point evaluations at vertices)
+
+  The basis functions are the **barycentric coordinates**
+  @f$ \lambda_1, \lambda_2, \lambda_3 @f$, satisfying
+  @f$ \lambda_i(a_j) = \delta_{ij} @f$.
+
+  In Rodin, a P1 finite element space is created with:
+
+  @code{.cpp}
+  P1 Vh(mesh);
+  @endcode
+
+  @subsection fem-ciarlet-p0 P0 (Piecewise Constant) Elements
+
+  An even simpler element is the **P0 element**, used for discontinuous
+  quantities:
+
+  - @f$ K @f$ = a polytope (triangle, tetrahedron, etc.)
+  - @f$ P = \mathbb{P}_0(K) @f$ = constant functions
+  - @f$ \Sigma = \{ \sigma_1 \} @f$ where @f$ \sigma_1(p) @f$ is the value
+    of the constant, often defined as the average over @f$ K @f$
+
+  In Rodin:
+
+  @code{.cpp}
+  P0 Wh(mesh);
+  @endcode
+
+  @section fem-ciarlet-global From Local to Global
+
+  The Ciarlet definition describes a **local** finite element on a single
+  reference cell. To construct a **global** finite element space on an entire
+  mesh @f$ \mathcal{T}_h @f$, we:
+
+  1. Define a reference element @f$ (\hat{K}, \hat{P}, \hat{\Sigma}) @f$
+  2. Map it to each cell @f$ K \in \mathcal{T}_h @f$ using a geometric
+     transformation @f$ F_K : \hat{K} \to K @f$
+  3. Assemble local DOFs into global DOFs, enforcing continuity conditions
+     at shared entities (vertices, edges, faces)
+
+  The result is a finite-dimensional subspace @f$ V_h @f$ of the function
+  space in which we seek our approximate solution.
+
+  @section fem-ciarlet-conformity Conformity
+
+  Different types of inter-element continuity give rise to different types
+  of conforming finite element spaces:
+
+  | Conformity | Continuity Requirement | Typical Use |
+  |------------|----------------------|-------------|
+  | @f$ H^1 @f$-conforming | Continuous across element boundaries | Scalar PDEs (Poisson, heat) |
+  | @f$ H(\mathrm{div}) @f$-conforming | Normal component continuous | Mixed methods, fluid flow |
+  | @f$ H(\mathrm{curl}) @f$-conforming | Tangential component continuous | Electromagnetics |
+  | @f$ L^2 @f$ (no conformity) | No continuity required | Discontinuous Galerkin |
+
+  Rodin's P1 element is @f$ H^1 @f$-conforming — the assembled global
+  functions are continuous across element boundaries.
+
+  @section fem-ciarlet-rodin Connection to Rodin
+
+  In Rodin, the Ciarlet definition is realized through the interaction of
+  several classes:
+
+  - The @ref Rodin::Geometry::Mesh "Mesh" provides the geometric cells
+    @f$ K @f$
+  - Finite element spaces like @ref Rodin::Variational::P1 "P1" define
+    the polynomial space @f$ P @f$ and degrees of freedom @f$ \Sigma @f$
+  - @ref Rodin::Variational::TrialFunction "TrialFunction" and
+    @ref Rodin::Variational::TestFunction "TestFunction" represent functions
+    in the global finite element space @f$ V_h @f$
+
+  @code{.cpp}
+  // The mesh provides the cells K
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+
+  // P1 defines the local element (K, P1, point evaluations at vertices)
+  // and assembles them into a global space
+  P1 Vh(mesh);
+
+  // Trial and test functions live in this global space
+  TrialFunction u(Vh);
+  TestFunction  v(Vh);
+  @endcode
+
+  @section fem-ciarlet-see-also See Also
+
+  - @ref fem-spaces "Finite element spaces" — Available spaces in Rodin
+  - @ref guides-getting-started-core-concepts "Core Concepts" — Practical
+    guide to using finite elements in Rodin
+  - @ref guides-polytopes "Polytopes" — Geometric shapes used as reference
+    elements
+
   */

@@ -1,5 +1,90 @@
 /**
   @page examples-mmg-mesh_optimization Optimizing the mesh
-  @brief How to optimize the mesh
+  @brief How to optimize a mesh using the MMG remesher
 
+  @m_keywords{MMG, Remesh, Optimize, Mesh Quality}
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section examples-mmg-meshopt-intro Introduction
+
+  Mesh quality is critical for accurate finite element solutions. The
+  @ref Rodin::External::MMG "MMG::Optimizer" provides automatic mesh
+  improvement: it refines, coarsens, and improves element shapes according
+  to user-specified size parameters.
+
+  @section examples-mmg-meshopt-basic Basic Usage
+
+  The simplest workflow is to create a mesh, mark its geometric features
+  (corners and ridges), and optimize:
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+  #include <Rodin/MMG.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+
+  int main()
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+
+    // Mark corner vertices (preserved exactly during remeshing)
+    mesh.setCorner(0);
+    mesh.setCorner(15);
+    mesh.setCorner(240);
+    mesh.setCorner(255);
+
+    // Mark all boundary edges as ridges (sharp features)
+    for (auto it = mesh.getBoundary(); !it.end(); ++it)
+      mesh.setRidge(it->getIndex());
+
+    // Optimize with target edge length ≤ 0.5
+    MMG::Optimizer().setHMax(0.5).optimize(mesh);
+
+    mesh.save("Optimized.mesh", IO::FileFormat::MFEM);
+
+    return 0;
+  }
+  @endcode
+
+  @section examples-mmg-meshopt-params Optimizer Parameters
+
+  The @ref Rodin::External::MMG "MMG::Optimizer" supports several parameters:
+
+  | Method | Description |
+  |--------|-------------|
+  | `setHMax(h)` | Maximum edge length |
+  | `setHMin(h)` | Minimum edge length |
+  | `setHausdorff(h)` | Hausdorff distance for curved boundaries |
+  | `setAngleDetection(b)` | Enable/disable automatic ridge detection |
+
+  Typical settings for shape optimization:
+
+  @code{.cpp}
+  MMG::Optimizer()
+    .setHMax(0.05)
+    .setHMin(0.005)
+    .setHausdorff(0.0025)
+    .setAngleDetection(false)
+    .optimize(mesh);
+  @endcode
+
+  @section examples-mmg-meshopt-full Full Source Code
+
+  -   @ref MMG/MeshOptimization.cpp "MeshOptimization.cpp"
+
+  @section examples-mmg-meshopt-see-also See Also
+
+  - @ref examples-mmg-simple_io "MMG I/O" — Loading and saving MMG meshes
+  - @ref examples-shapeoptimization-simple_cantilever "Shape optimization" —
+    Uses MMG in an optimization loop
+  - @ref Rodin::External::MMG "MMG namespace"
+
+  @example MMG/MeshOptimization.cpp
+  @m_examplenavigation{examples-mmg-mesh_optimization,MMG/}
+  @m_footernavigation
   */

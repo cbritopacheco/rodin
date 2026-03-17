@@ -1,0 +1,320 @@
+/**
+  @page guides-weak-formulations Weak Formulations
+  @brief Understanding and implementing weak formulations in Rodin
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section guides-weak-intro Introduction
+
+  The **weak formulation** (also called variational formulation) is the
+  foundation of the finite element method. Instead of solving a PDE in its
+  classical (strong) form, we reformulate it in a weaker sense that is more
+  amenable to numerical approximation.
+
+  The general idea is to multiply the PDE by a test function, integrate over
+  the domain, and apply integration by parts. This process:
+  - Reduces the regularity requirements on the solution
+  - Naturally incorporates certain boundary conditions
+  - Leads to a well-posed problem suitable for discretization
+
+  @section guides-weak-procedure Derivation Procedure
+
+  Consider a general second-order PDE on a domain @f$ \Omega @f$:
+
+  @f[
+    \mathcal{L} u = f \quad \text{in } \Omega
+  @f]
+
+  To derive the weak formulation:
+
+  1. **Multiply** by a test function @f$ v @f$ from an appropriate space
+  2. **Integrate** over @f$ \Omega @f$:
+     @f$ \int_\Omega (\mathcal{L} u) \, v \, dx = \int_\Omega f \, v \, dx @f$
+  3. **Integrate by parts** to transfer derivatives from @f$ u @f$ to @f$ v @f$
+  4. **Apply boundary conditions** (essential or natural)
+
+  @section guides-weak-poisson Example: The Poisson Equation
+
+  @subsection guides-weak-poisson-strong Strong Form
+
+  The Poisson equation with homogeneous Dirichlet boundary conditions:
+
+  @f[
+    \left\{
+    \begin{aligned}
+      -\Delta u &= f && \text{in } \Omega \\
+      u &= 0 && \text{on } \partial\Omega
+    \end{aligned}
+    \right.
+  @f]
+
+  @subsection guides-weak-poisson-deriv Derivation
+
+  Multiply by @f$ v \in H^1_0(\Omega) @f$ and integrate:
+
+  @f[
+    -\int_\Omega \Delta u \, v \, dx = \int_\Omega f \, v \, dx
+  @f]
+
+  Apply Green's formula (integration by parts):
+
+  @f[
+    \int_\Omega \nabla u \cdot \nabla v \, dx
+    - \underbrace{\int_{\partial\Omega} \frac{\partial u}{\partial n} v \, ds}_{= 0 \text{ (since } v = 0 \text{ on } \partial\Omega)}
+    = \int_\Omega f \, v \, dx
+  @f]
+
+  @subsection guides-weak-poisson-result Weak Formulation
+
+  Find @f$ u \in H^1_0(\Omega) @f$ such that for all
+  @f$ v \in H^1_0(\Omega) @f$:
+
+  @f[
+    \int_\Omega \nabla u \cdot \nabla v \, dx = \int_\Omega f \, v \, dx
+  @f]
+
+  @subsection guides-weak-poisson-rodin Implementation in Rodin
+
+  The implementation in Rodin closely mirrors the mathematical notation:
+
+  @code{.cpp}
+  #include <Rodin/Solver.h>
+  #include <Rodin/Geometry.h>
+  #include <Rodin/Variational.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
+
+  int main()
+  {
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+    mesh.getConnectivity().compute(1, 2);
+
+    P1 Vh(mesh);
+    TrialFunction u(Vh);
+    TestFunction  v(Vh);
+
+    RealFunction f = 1;
+
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))   // ∫ ∇u · ∇v dx
+            - Integral(f, v)               // ∫ f v dx
+            + DirichletBC(u, Zero());      // u = 0 on ∂Ω
+
+    Solver::CG(poisson).solve();
+
+    return 0;
+  }
+  @endcode
+
+  @section guides-weak-elasticity Example: Linearized Elasticity
+
+  @subsection guides-weak-elasticity-strong Strong Form
+
+  The linearized elasticity system governs the displacement @f$ \mathbf{u}
+  : \Omega \to \mathbb{R}^d @f$ of an elastic body:
+
+  @f[
+    \left\{
+    \begin{aligned}
+      -\nabla \cdot \sigma(\mathbf{u}) &= \mathbf{0} && \text{in } \Omega \\
+      \mathbf{u} &= \mathbf{0} && \text{on } \Gamma_D \\
+      \sigma(\mathbf{u}) \, \mathbf{n} &= \mathbf{f} && \text{on } \Gamma_N
+    \end{aligned}
+    \right.
+  @f]
+
+  where @f$ \sigma(\mathbf{u}) = 2\mu \, e(\mathbf{u}) + \lambda \,
+  \mathrm{tr}(e(\mathbf{u})) \, I @f$ is the Cauchy stress tensor
+  (Hooke's law) and @f$ e(\mathbf{u}) = \frac{1}{2}(\nabla \mathbf{u}
+  + \nabla \mathbf{u}^T) @f$ is the linearized strain tensor.
+
+  @subsection guides-weak-elasticity-deriv Derivation
+
+  Multiply by @f$ \mathbf{v} \in [H^1_0(\Omega)]^d @f$, integrate, and
+  use the divergence theorem. The boundary integral on @f$ \Gamma_N @f$
+  produces the traction term:
+
+  @f[
+    \int_\Omega \sigma(\mathbf{u}) : e(\mathbf{v}) \, dx
+    = \int_{\Gamma_N} \mathbf{f} \cdot \mathbf{v} \, ds
+  @f]
+
+  @subsection guides-weak-elasticity-rodin Implementation
+
+  Rodin provides a convenient `LinearElasticityIntegral` that assembles the
+  bilinear form for the Hooke tensor. The Lamé parameters @f$ \lambda @f$
+  and @f$ \mu @f$ are passed as arguments:
+
+  @code{.cpp}
+  #include <Rodin/Solver.h>
+  #include <Rodin/Geometry.h>
+  #include <Rodin/Variational.h>
+  #include <Rodin/LinearElasticity.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
+
+  int main()
+  {
+    Mesh mesh;
+    mesh.load("beam.mesh", IO::FileFormat::MFEM);
+    mesh.getConnectivity().compute(1, 2);
+
+    const size_t d = mesh.getSpaceDimension();
+    const Real lambda = 0.5769, mu = 0.3846;
+
+    P1 Vh(mesh, d);  // Vector-valued P1 space
+    TrialFunction u(Vh);
+    TestFunction  v(Vh);
+
+    VectorFunction load{0, -1};  // Downward force
+
+    Problem elasticity(u, v);
+    elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
+               - BoundaryIntegral(load, v).over(GammaN)
+               + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
+
+    Solver::CG(elasticity).solve();
+
+    return 0;
+  }
+  @endcode
+
+  @section guides-weak-general General Structure
+
+  Most weak formulations in Rodin follow this pattern:
+
+  @f[
+    \text{Find } u \in V \text{ s.t. } \forall v \in V: \quad
+    a(u, v) = \ell(v)
+  @f]
+
+  where:
+  - @f$ a(u, v) @f$ is a **bilinear form** (depends on both @f$ u @f$ and @f$ v @f$)
+  - @f$ \ell(v) @f$ is a **linear form** (depends only on @f$ v @f$)
+
+  In Rodin, the problem is defined by moving everything to one side:
+
+  @code{.cpp}
+  Problem problem(u, v);
+  problem = [bilinear terms] - [linear terms] + [boundary conditions];
+  @endcode
+
+  @section guides-weak-bilinear Bilinear Forms
+
+  Bilinear forms involve both the trial and test functions. Common examples:
+
+  | Mathematical Expression | Rodin Code |
+  |-------------------------|------------|
+  | @f$ \int_\Omega \nabla u \cdot \nabla v \, dx @f$ | `Integral(Grad(u), Grad(v))` |
+  | @f$ \int_\Omega u \, v \, dx @f$ | `Integral(u, v)` |
+  | @f$ \int_\Omega \lambda \nabla u \cdot \nabla v \, dx @f$ | `Integral(lambda * Grad(u), Grad(v))` |
+  | @f$ \int_\Omega \lambda (\nabla \cdot u)(\nabla \cdot v) \, dx @f$ | `Integral(lambda * Div(u), Div(v))` |
+
+  @section guides-weak-linear Linear Forms
+
+  Linear forms involve only the test function. Common examples:
+
+  | Mathematical Expression | Rodin Code |
+  |-------------------------|------------|
+  | @f$ \int_\Omega f \, v \, dx @f$ | `Integral(f, v)` |
+  | @f$ \int_{\Gamma_N} g \, v \, ds @f$ | `BoundaryIntegral(g, v).over(GammaN)` |
+  | @f$ \int_\Omega \mathbf{f} \cdot \mathbf{v} \, dx @f$ | `Integral(f, v)` |
+
+  @section guides-weak-bc Boundary Conditions in Weak Form
+
+  @subsection guides-weak-bc-dirichlet Dirichlet (Essential) Conditions
+
+  Dirichlet conditions are imposed directly on the function space:
+
+  @code{.cpp}
+  // u = 0 on entire boundary
+  DirichletBC(u, Zero())
+
+  // u = g on specific boundary
+  DirichletBC(u, g).on(boundaryAttribute)
+  @endcode
+
+  @subsection guides-weak-bc-neumann Neumann (Natural) Conditions
+
+  Neumann conditions appear as boundary integrals in the weak formulation:
+
+  @code{.cpp}
+  // ∂u/∂n = g on boundary with attribute 2
+  BoundaryIntegral(g, v).over(2)
+  @endcode
+
+  @subsection guides-weak-bc-periodic Periodic Boundary Conditions
+
+  Periodic conditions tie DOFs on opposite boundary segments using an
+  `IndexMap`. See the @ref examples-pdes-periodic "periodic Poisson example"
+  for a complete walkthrough.
+
+  @code{.cpp}
+  // Build a DOF correspondence map: left edge ↔ right edge
+  IndexMap<IndexSet> dofs;
+  for (Index i = 0; i < Vh.getSize(); i += n)
+    dofs[i].insert(i + n - 1);
+
+  Problem problem(u, v);
+  problem = Integral(Grad(u), Grad(v))
+          - Integral(f, v)
+          + PeriodicBC(u, dofs);
+  @endcode
+
+  @section guides-weak-mixed Mixed Formulations
+
+  Some PDEs involve multiple unknowns from different spaces. The
+  @ref examples-pdes-navierstokes "Navier–Stokes example" uses
+  Taylor–Hood elements with separate trial and test functions for
+  velocity and pressure:
+
+  @code{.cpp}
+  H1 Vh(mesh, d, 2);  // Velocity: vector H1, order 2
+  H1 Qh(mesh, 1, 1);  // Pressure: scalar H1, order 1
+
+  TrialFunction u(Vh);  TestFunction v(Vh);   // Velocity pair
+  TrialFunction p(Qh);  TestFunction q(Qh);   // Pressure pair
+
+  Problem stokes(u, p, v, q);
+  stokes = Integral(Grad(u), Grad(v))     // viscous term
+         - Integral(p, Div(v))            // pressure–velocity coupling
+         + Integral(Div(u), q)            // incompressibility constraint
+         - Integral(f, v)                 // body force
+         + DirichletBC(u, uD);           // velocity BC
+  @endcode
+
+  @section guides-weak-well-posedness Well-Posedness
+
+  The **Lax-Milgram theorem** guarantees existence and uniqueness of the
+  solution when:
+  - The bilinear form @f$ a(\cdot, \cdot) @f$ is **continuous** and
+    **coercive** on the function space @f$ V @f$
+  - The linear form @f$ \ell(\cdot) @f$ is **continuous** on @f$ V @f$
+
+  For the Poisson equation, the bilinear form @f$ a(u, v) = \int_\Omega
+  \nabla u \cdot \nabla v \, dx @f$ is coercive on @f$ H^1_0(\Omega) @f$
+  by the Poincaré inequality.
+
+  For mixed formulations (saddle-point problems), the Brezzi conditions
+  (inf-sup stability) replace coercivity. Taylor–Hood elements satisfy
+  the inf-sup condition, making them a standard choice for Stokes-type
+  problems.
+
+  @section guides-weak-see-also See Also
+
+  - @ref notation-index "Notation reference"
+  - @ref guides-getting-started-first-problem "Your first problem"
+  - @ref guides-boundary-conditions "Boundary conditions in detail"
+  - @ref guides-solvers "Solvers"
+  - @ref examples-pdes-poisson "Poisson example"
+  - @ref examples-pdes-elasticity "Elasticity example"
+  - @ref examples-pdes-navierstokes "Navier–Stokes example"
+
+  */

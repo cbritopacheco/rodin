@@ -37,6 +37,22 @@
   interfaces, Rodin also builds upon many of the already existing functionality
   to provide common features without the need to reimplement these yourself.
 
+  @section where-to-start Where to start?
+
+  - **New users**: Start with the @ref guides-getting-started-installation
+    "Installation guide" and the @ref guides-getting-started-first-steps
+    "First Steps" tutorial
+  - **Learn the concepts**: Read about @ref fem-ciarlet
+    "finite elements", @ref fem-spaces "finite element spaces", and
+    @ref guides-variational "variational formulations"
+  - **See examples**: Browse the @ref examples-index "examples and tutorials"
+    including the @ref examples-pdes-poisson "Poisson equation" and
+    @ref examples-pdes-elasticity "linear elasticity"
+  - **Visual showcase**: Visit the @ref gallery "Gallery" for images and
+    descriptions of simulations built with Rodin
+  - **I/O and visualization**: Learn how to export results using
+    @ref guides-io "XDMF for ParaView visualization"
+
   @section rodin-philosophy Philosophy behind Rodin
 
   From its inception, Rodin was built with a ["batteries included, but screws

@@ -1,0 +1,296 @@
+/**
+  @page examples-pdes-navierstokes Solving the Navier-Stokes equations
+  @brief Steady incompressible Navier-Stokes with Picard iteration
+
+  @image html PDEs/NavierStokes_placeholder.png width=410px
+
+  @m_keywords{Navier-Stokes, Stokes, Picard, Taylor-Green, Fluid, Incompressible}
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section examples-pdes-navierstokes-intro Introduction
+
+  The incompressible Navier-Stokes equations describe the motion of viscous
+  fluids. In the steady-state case, they read:
+
+  @f[
+  \left\{
+    \begin{aligned}
+      -\nu \Delta \mathbf{u} + (\mathbf{u} \cdot \nabla)\mathbf{u}
+        + \nabla p &= \mathbf{f}
+        && \mathrm{in} \ \Omega \\
+      \nabla \cdot \mathbf{u} &= 0
+        && \mathrm{in} \ \Omega \\
+      \mathbf{u} &= \mathbf{g}
+        && \mathrm{on} \ \partial \Omega
+    \end{aligned}
+  \right.
+  @f]
+
+  where:
+  - @f$ \mathbf{u} : \Omega \to \mathbb{R}^d @f$ is the **velocity** field
+  - @f$ p : \Omega \to \mathbb{R} @f$ is the **pressure** field
+  - @f$ \nu > 0 @f$ is the **kinematic viscosity**
+  - @f$ \mathbf{f} @f$ is a body force
+  - @f$ \mathbf{g} @f$ is the prescribed velocity on the boundary
+
+  The Navier-Stokes system is a mixed problem: we solve simultaneously for
+  the velocity @f$ \mathbf{u} @f$ and pressure @f$ p @f$. The incompressibility
+  constraint @f$ \nabla \cdot \mathbf{u} = 0 @f$ acts as a coupling condition.
+
+  @section examples-pdes-navierstokes-stokes The Stokes Problem
+
+  When the nonlinear convective term @f$ (\mathbf{u} \cdot \nabla)\mathbf{u}
+  @f$ is dropped, we obtain the **Stokes equations**, which are linear:
+
+  @f[
+  \left\{
+    \begin{aligned}
+      -\nu \Delta \mathbf{u} + \nabla p &= \mathbf{f}
+        && \mathrm{in} \ \Omega \\
+      \nabla \cdot \mathbf{u} &= 0
+        && \mathrm{in} \ \Omega
+    \end{aligned}
+  \right.
+  @f]
+
+  The Stokes problem serves as the foundation for the Navier-Stokes solver and
+  is also an important model in its own right (for very viscous or slow flows).
+
+  @section examples-pdes-navierstokes-weak Weak Formulation
+
+  The weak formulation seeks @f$ (\mathbf{u}, p) \in \mathbf{V} \times Q @f$
+  such that for all @f$ (\mathbf{v}, q) \in \mathbf{V}_0 \times Q @f$:
+
+  @f[
+    \nu \int_\Omega \nabla \mathbf{u} : \nabla \mathbf{v} \, dx
+    + \int_\Omega (\mathbf{w} \cdot \nabla)\mathbf{u} \cdot \mathbf{v} \, dx
+    - \int_\Omega p \, \nabla \cdot \mathbf{v} \, dx
+    + \int_\Omega q \, \nabla \cdot \mathbf{u} \, dx
+    = \int_\Omega \mathbf{f} \cdot \mathbf{v} \, dx
+  @f]
+
+  where @f$ \mathbf{w} @f$ is the convective velocity (equal to @f$ \mathbf{u}
+  @f$ at convergence). The mixed finite element spaces must satisfy the
+  **inf-sup (LBB) condition**. A classical choice is the **Taylor-Hood** pair:
+  - **Velocity**: @f$ \mathbf{V} = [H^1_h(\Omega)]^d @f$ with polynomial
+    order 2 (quadratic)
+  - **Pressure**: @f$ Q = H^1_h(\Omega) @f$ with polynomial order 1 (linear)
+
+  @subsection examples-pdes-navierstokes-pressure Pressure Uniqueness
+
+  The pressure is determined only up to a constant (only its gradient appears
+  in the momentum equation). To fix the solution uniquely, we add a
+  **mean-pressure constraint** @f$ \int_\Omega p \, dx = 0 @f$ using a
+  Lagrange multiplier @f$ \lambda @f$ from a @ref Rodin::Variational::P0
+  "P0" space.
+
+  @section examples-pdes-navierstokes-picard Picard Iteration (Oseen Linearization)
+
+  The nonlinear term @f$ (\mathbf{u} \cdot \nabla)\mathbf{u} @f$ is handled
+  by **Picard iteration** (also known as Oseen linearization). At each
+  iteration @f$ k @f$:
+
+  1. Fix the convective velocity @f$ \mathbf{w} = \mathbf{u}^{k-1} @f$ from
+     the previous iteration
+  2. Solve the **linearized (Oseen) problem** for @f$ (\mathbf{u}^k, p^k) @f$:
+     @f[
+       \nu \int_\Omega \nabla \mathbf{u}^k : \nabla \mathbf{v} \, dx
+       + \int_\Omega (\mathbf{w} \cdot \nabla)\mathbf{u}^k \cdot \mathbf{v} \, dx
+       - \int_\Omega p^k \, \nabla \cdot \mathbf{v} \, dx
+       + \int_\Omega q \, \nabla \cdot \mathbf{u}^k \, dx
+       = \int_\Omega \mathbf{f} \cdot \mathbf{v} \, dx
+     @f]
+  3. Repeat until convergence: @f$ \|\mathbf{u}^k - \mathbf{u}^{k-1}\|
+     < \varepsilon @f$
+
+  @section examples-pdes-navierstokes-impl Implementation in Rodin
+
+  This example uses the Taylor-Green vortex as a manufactured solution.
+  The code uses the @ref Rodin::Variational::H1 "H1" finite element space
+  for higher-order elements.
+
+  @subsection examples-pdes-navierstokes-impl-setup Setup
+
+  @code{.cpp}
+  #include <Rodin/Assembly.h>
+  #include <Rodin/Variational.h>
+  #include <Rodin/Variational/H1.h>
+  #include <Rodin/Solver/SparseLU.h>
+  #include <Rodin/IO/XDMF.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
+  using namespace Rodin::Solver;
+  @endcode
+
+  @subsection examples-pdes-navierstokes-impl-mesh Mesh and Spaces
+
+  We create a mesh on @f$ [0,1]^2 @f$ and define the Taylor-Hood finite element
+  spaces. The @ref Rodin::Variational::H1 "H1" class supports arbitrary
+  polynomial order via an `std::integral_constant` template parameter:
+
+  @code{.cpp}
+  constexpr Real nu = 1.0;      // Kinematic viscosity
+  constexpr size_t maxIts = 12; // Max Picard iterations
+  constexpr Real tol = 1e-10;   // Convergence tolerance
+
+  const auto pi = Math::Constants::pi();
+
+  // Create mesh on unit square
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+  mesh.scale(1.0 / 15.0);
+  mesh.getConnectivity().compute(1, 2);
+
+  // Taylor-Hood spaces: P2 for velocity, P1 for pressure
+  H1 uh(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+  H1 ph(std::integral_constant<size_t, 1>{}, mesh);
+
+  // Lagrange multiplier for mean-pressure constraint
+  P0g p0g(mesh);
+  @endcode
+
+  @subsection examples-pdes-navierstokes-impl-exact Manufactured Solution
+
+  The Taylor-Green vortex provides an exact solution for verification:
+
+  @code{.cpp}
+  VectorFunction u_exact{
+    sin(pi * F::x) * cos(pi * F::y),
+    -cos(pi * F::x) * sin(pi * F::y)
+  };
+
+  auto p_exact = -0.25 * (cos(2 * pi * F::x) + cos(2 * pi * F::y));
+
+  VectorFunction f{
+    2 * nu * pi * pi * sin(pi * F::x) * cos(pi * F::y)
+      + pi * sin(2 * pi * F::x),
+    -2 * nu * pi * pi * cos(pi * F::x) * sin(pi * F::y)
+      + pi * sin(2 * pi * F::y)
+  };
+  @endcode
+
+  Here `F::x` and `F::y` are symbolic coordinate functions that allow
+  building expressions.
+
+  @subsection examples-pdes-navierstokes-impl-trial Trial and Test Functions
+
+  The @ref Rodin::Variational::Problem "Problem" class supports multiple
+  trial/test function pairs for mixed formulations. We define pairs for
+  velocity, pressure, and the Lagrange multiplier:
+
+  @code{.cpp}
+  TrialFunction u(uh);       // Velocity (vector)
+  TrialFunction p(ph);       // Pressure (scalar)
+  TrialFunction lambda(p0g); // Mean-pressure Lagrange multiplier
+
+  TestFunction  v(uh);       // Velocity test function
+  TestFunction  q(ph);       // Pressure test function
+  TestFunction  mu(p0g);     // Lagrange multiplier test function
+  @endcode
+
+  @subsection examples-pdes-navierstokes-impl-picard Picard Iteration Loop
+
+  The convective velocity @f$ \mathbf{w} @f$ is stored as a
+  @ref Rodin::Variational::GridFunction "GridFunction" and updated after each
+  solve. The convective term is computed using `Mult` (matrix-vector product)
+  and `Dot`:
+
+  @code{.cpp}
+  GridFunction w(uh);
+  w = VectorFunction{ Zero(), Zero() };  // Initial guess: zero velocity
+
+  GridFunction u_prev(uh);
+  u_prev = VectorFunction{ Zero(), Zero() };
+
+  for (size_t k = 0; k < maxIts; ++k)
+  {
+    // Build the linearized (Oseen) problem
+    Problem ns(u, p, lambda, v, q, mu);
+    const auto conv_u = Mult(Jacobian(u), w);  // (w · ∇)u
+
+    ns = nu * Integral(Jacobian(u), Jacobian(v))  // Viscous term
+       + Integral(Dot(conv_u, v))                  // Convective term
+       - Integral(p, Div(v))                       // Pressure-velocity coupling
+       + Integral(Div(u), q)                       // Incompressibility
+       + Integral(lambda, q)                       // Mean-pressure constraint
+       + Integral(p, mu)                           // (symmetric counterpart)
+       - Integral(f, v)                            // Body force
+       + DirichletBC(u, u_exact);                  // Boundary conditions
+
+    SparseLU solver(ns);
+    solver.solve();
+
+    // Check convergence
+    P1 sh(mesh);
+    GridFunction du(sh);
+    du = Pow(Frobenius(u.getSolution() - u_prev), 2);
+    Real updateNorm = std::sqrt(Integral(du).compute());
+
+    // Update convective velocity for next iteration
+    w.setData(u.getSolution().getData());
+    u_prev.setData(u.getSolution().getData());
+
+    if (updateNorm < tol)
+      break;
+  }
+  @endcode
+
+  Key Rodin expressions used:
+  - `Jacobian(u)` — the gradient matrix @f$ \nabla \mathbf{u} @f$
+  - `Mult(Jacobian(u), w)` — the product @f$ (\nabla \mathbf{u}) \mathbf{w}
+    @f$, representing the convective term
+  - `Div(v)` — the divergence @f$ \nabla \cdot \mathbf{v} @f$
+  - `Frobenius(...)` — the Frobenius norm for measuring convergence
+
+  @subsection examples-pdes-navierstokes-impl-output XDMF Output
+
+  After convergence, export the velocity and pressure fields using the
+  @ref Rodin::IO::XDMF "IO::XDMF" class:
+
+  @code{.cpp}
+  IO::XDMF xdmf("NavierStokes");
+  xdmf.grid().setMesh(mesh)
+    .add("velocity", u.getSolution())
+    .add("pressure", p.getSolution());
+  xdmf.write();
+  @endcode
+
+  Open `NavierStokes.xdmf` in [ParaView](https://www.paraview.org/) to
+  visualize the velocity vectors and pressure contours.
+
+  @section examples-pdes-navierstokes-theory Theoretical Notes
+
+  @subsection examples-pdes-navierstokes-theory-lbb Inf-Sup Stability
+
+  Not every combination of velocity and pressure spaces is stable. The spaces
+  must satisfy the **inf-sup (LBB) condition**:
+  @f[
+    \inf_{q \in Q_h \setminus \{0\}} \sup_{\mathbf{v} \in \mathbf{V}_h
+    \setminus \{0\}} \frac{\int_\Omega q \, \nabla \cdot \mathbf{v} \, dx}
+    {\|\mathbf{v}\|_{H^1} \|q\|_{L^2}} \geq \beta > 0
+  @f]
+
+  The Taylor-Hood pair (P2 velocity / P1 pressure) satisfies this condition
+  and is one of the most widely used choices.
+
+  @subsection examples-pdes-navierstokes-theory-convergence Picard Convergence
+
+  Picard iteration converges for sufficiently small Reynolds numbers
+  @f$ \mathrm{Re} = U L / \nu @f$. For high Reynolds number flows, Newton's
+  method provides faster convergence but requires computing the Jacobian of
+  the nonlinear system.
+
+  @section examples-pdes-navierstokes-see-also See Also
+
+  - @ref examples-pdes-poisson "Poisson equation" — Simplest PDE example
+  - @ref examples-pdes-elasticity "Linear elasticity" — Another vector-valued
+    PDE
+  - @ref fem-spaces "Finite element spaces" — Available spaces including H1
+  - @ref guides-variational "Variational formulations" — General guide
+
+  */

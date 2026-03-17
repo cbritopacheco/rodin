@@ -7,21 +7,71 @@
 
   @tableofcontents
 
-  ## Notation regarding geometry
+  @section notation-geometry Notation regarding geometry
 
   Please see the table below for a description of the symbols used for
   geometric objects:
 
 | Notation          | Description                                            |
 | ----------------- | ------------------------------------------------------ |
-| @f$ \Omega @f$    | Denotes a domain with Lipschitz domain.                |
-| @f$ \partial \Omega @f$ | Denotes the Lipschitz boundary of the Lipschitz domain @f$ \Omega @f$. |
-| @f$ \mathcal{T}_h @f$ | Denotes a polyhedral complex which represents the domain @f$ \Omega @f$. |
-| @f$ \mathcal{F}_h @f$ | Represents the faces of the domain @f$ \Omega @f$. |
-| @f$ \mathcal{B}_h @f$ | Represents the boundary faces of the domain @f$ \Omega @f$. |
-| @f$ \mathcal{I}_h @f$ | Represents the interfaces of the domain @f$ \Omega @f$. |
+| @f$ \Omega @f$    | Denotes a domain with Lipschitz boundary.              |
+| @f$ \partial \Omega @f$ | Denotes the Lipschitz boundary of the domain @f$ \Omega @f$. |
+| @f$ \Gamma_D @f$  | The Dirichlet part of the boundary where essential conditions are imposed. |
+| @f$ \Gamma_N @f$  | The Neumann part of the boundary where natural conditions are imposed. |
+| @f$ \mathcal{T}_h @f$ | Denotes a polyhedral complex (mesh) which discretizes the domain @f$ \Omega @f$. The subscript @f$ h @f$ refers to the mesh size parameter. |
+| @f$ \mathcal{F}_h @f$ | Represents the set of all faces in the mesh @f$ \mathcal{T}_h @f$. |
+| @f$ \mathcal{B}_h @f$ | Represents the boundary faces of the mesh @f$ \mathcal{T}_h @f$. |
+| @f$ \mathcal{I}_h @f$ | Represents the interior faces (interfaces) of the mesh @f$ \mathcal{T}_h @f$. |
+| @f$ K @f$         | A single cell (element) of the mesh @f$ \mathcal{T}_h @f$. |
+| @f$ h @f$         | Mesh size parameter: the maximum diameter over all cells @f$ K \in \mathcal{T}_h @f$. |
+| @f$ d @f$         | The spatial dimension (typically 2 or 3). |
+| @f$ \mathbf{n} @f$ | The outward unit normal vector on @f$ \partial \Omega @f$ or on a face. |
 
-  ## Notation regarding variational methods
+  @section notation-spaces Notation regarding function spaces
+
+| Notation          | Description                                            |
+| ----------------- | ------------------------------------------------------ |
+| @f$ L^2(\Omega) @f$       | The space of square-integrable functions on @f$ \Omega @f$. |
+| @f$ H^1(\Omega) @f$       | The Sobolev space of functions in @f$ L^2(\Omega) @f$ whose gradient is also in @f$ L^2(\Omega) @f$. |
+| @f$ H^1_0(\Omega) @f$     | The subspace of @f$ H^1(\Omega) @f$ with zero trace on @f$ \partial \Omega @f$ (homogeneous Dirichlet). |
+| @f$ V_h @f$               | A finite element space built on the mesh @f$ \mathcal{T}_h @f$. Subscript @f$ h @f$ indicates discrete. |
+| @f$ \mathbb{P}_k @f$      | The space of polynomials of total degree at most @f$ k @f$. |
+| @f$ P_0 @f$               | Piecewise constant functions on each cell (@ref Rodin::Variational::P0 "P0" in Rodin). |
+| @f$ P_1 @f$               | Piecewise linear, globally continuous functions (@ref Rodin::Variational::P1 "P1" in Rodin). |
+
+  @section notation-variational Notation regarding variational methods
+
+| Notation          | Description                                            |
+| ----------------- | ------------------------------------------------------ |
+| @f$ u @f$         | The trial function (unknown, sought solution). Corresponds to @ref Rodin::Variational::TrialFunction "TrialFunction" in Rodin. |
+| @f$ v @f$         | The test function (weighting function). Corresponds to @ref Rodin::Variational::TestFunction "TestFunction" in Rodin. |
+| @f$ a(u, v) @f$   | A bilinear form: linear in both @f$ u @f$ and @f$ v @f$. Assembled by the @ref Rodin::Variational::BilinearForm "BilinearForm" class. |
+| @f$ \ell(v) @f$   | A linear form: linear in @f$ v @f$ only. Assembled by the @ref Rodin::Variational::LinearForm "LinearForm" class. |
+| @f$ f @f$         | A source term or right-hand-side function. |
+| @f$ g @f$         | A boundary data function (Dirichlet or Neumann data). |
+
+  @section notation-operators Notation regarding differential operators
+
+| Notation          | Rodin code | Description                                  |
+| ----------------- | ---------- | -------------------------------------------- |
+| @f$ \nabla u @f$  | `Grad(u)`  | Gradient of a scalar field. Returns a vector. |
+| @f$ \nabla \cdot \mathbf{u} @f$ | `Div(u)` | Divergence of a vector field. Returns a scalar. |
+| @f$ \Delta u @f$  | —          | Laplacian. Not used directly; appears via integration by parts as `Integral(Grad(u), Grad(v))`. |
+| @f$ \nabla \mathbf{u} @f$ | `Jacobian(u)` | Jacobian (gradient) of a vector field. Returns a matrix. |
+| @f$ \nabla \mathbf{u}^T @f$ | `Jacobian(u).T()` | Transpose of the Jacobian. |
+| @f$ e(\mathbf{u}) @f$ | `0.5 * (Jacobian(u) + Jacobian(u).T())` | Symmetric gradient (linearized strain tensor). |
+| @f$ \mathrm{tr}(A) @f$ | `Trace(A)` | Trace of a matrix. |
+| @f$ A : B @f$    | `Dot(A, B)` | Frobenius (double-contraction) inner product of two matrices. |
+
+  @section notation-integrals Notation regarding integrals
+
+| Notation                                           | Rodin code | Description |
+| -------------------------------------------------- | ---------- | ----------- |
+| @f$ \int_\Omega f \, v \, dx @f$                   | `Integral(f, v)` | Domain integral of @f$ f \cdot v @f$. |
+| @f$ \int_\Omega \nabla u \cdot \nabla v \, dx @f$  | `Integral(Grad(u), Grad(v))` | Stiffness integral. |
+| @f$ \int_\Omega u \, v \, dx @f$                   | `Integral(u, v)` | Mass integral. |
+| @f$ \int_{\Gamma_N} g \, v \, ds @f$               | `BoundaryIntegral(g, v).over(GammaN)` | Boundary integral on @f$ \Gamma_N @f$. |
+| @f$ \int_\Gamma h \, v \, ds @f$                   | `FaceIntegral(h, v).over(Gamma)` | Face integral on an internal interface @f$ \Gamma @f$. |
 
   */
 

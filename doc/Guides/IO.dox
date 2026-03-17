@@ -1,0 +1,369 @@
+/**
+  @page guides-io I/O in Rodin
+  @brief Comprehensive guide to input and output in Rodin
+
+  @m_keywords{IO, Input, Output, XDMF, HDF5, MEDIT, MFEM, File Format}
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section guides-io-intro Introduction
+
+  The @ref Rodin::IO "IO" module in Rodin provides facilities for reading and
+  writing meshes, grid functions, and simulation data in various file formats.
+  Proper I/O is essential for:
+
+  - **Pre-processing**: Loading meshes from external generators (MMG)
+  - **Post-processing**: Saving solutions for visualization in tools like
+    [ParaView](https://www.paraview.org/)
+  - **Checkpointing**: Saving and restoring simulation state
+  - **Data exchange**: Converting between file formats
+
+  @section guides-io-formats Supported File Formats
+
+  Rodin supports several file formats for meshes and grid functions. The
+  format is specified explicitly via the @ref Rodin::IO::FileFormat "IO::FileFormat"
+  enumeration:
+
+  | Format | Extension | Enum Value | Use Case |
+  |--------|-----------|------------|----------|
+  | MFEM   | `.mesh`, `.gf` | `IO::FileFormat::MFEM` | MFEM-compatible workflows |
+  | MEDIT  | `.mesh`   | `IO::FileFormat::MEDIT` | INRIA tools, MMG integration |
+  | HDF5   | `.h5`     | `IO::FileFormat::HDF5` | High-performance binary I/O |
+  | XDMF   | `.xdmf`, `.h5` | — (via @ref Rodin::IO::XDMF "IO::XDMF" class) | Scientific visualization (ParaView) |
+
+  @section guides-io-mesh-io Mesh I/O
+
+  @subsection guides-io-mesh-loading Loading Meshes
+
+  Meshes can be loaded from files in supported formats using the
+  @ref Rodin::Geometry::Mesh::load "Mesh::load()" method. The file format
+  must be explicitly specified via @ref Rodin::IO::FileFormat "IO::FileFormat":
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+
+  int main()
+  {
+    Mesh mesh;
+
+    // Load MFEM format
+    mesh.load("domain.mesh", IO::FileFormat::MFEM);
+
+    // Load MEDIT format (commonly used with MMG)
+    mesh.load("domain.mesh", IO::FileFormat::MEDIT);
+
+    return 0;
+  }
+  @endcode
+
+  @subsection guides-io-mesh-saving Saving Meshes
+
+  Meshes can be saved in any of the supported formats:
+
+  @code{.cpp}
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+
+  // Save in MFEM format
+  mesh.save("output.mesh", IO::FileFormat::MFEM);
+
+  // Save in MEDIT format
+  mesh.save("output.mesh", IO::FileFormat::MEDIT);
+  @endcode
+
+  @subsection guides-io-mesh-conversion Format Conversion
+
+  A common workflow is to convert meshes between formats. For example, loading
+  a MEDIT mesh (from MMG) and saving it in MFEM format:
+
+  @code{.cpp}
+  Mesh mesh;
+  mesh.load("input.mesh", IO::FileFormat::MEDIT);
+  mesh.save("output.mesh", IO::FileFormat::MFEM);
+  @endcode
+
+  @section guides-io-gf Grid Function I/O
+
+  Grid functions (finite element solutions) can also be saved and loaded:
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+  #include <Rodin/Variational.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
+
+  int main()
+  {
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+
+    P1 Vh(mesh);
+    GridFunction gf(Vh);
+    gf = [](const Geometry::Point& p) { return p.x() + p.y(); };
+
+    // Save mesh and grid function
+    mesh.save("mesh.mesh", IO::FileFormat::MFEM);
+    gf.save("solution.gf", IO::FileFormat::MFEM);
+
+    return 0;
+  }
+  @endcode
+
+  @section guides-io-xdmf-overview XDMF Output for Visualization
+
+  The @ref Rodin::IO::XDMF "XDMF" class provides a powerful and modern way to
+  export simulation data for visualization in tools like
+  [ParaView](https://www.paraview.org/). XDMF (eXtensible Data Model and
+  Format) stores heavy data (coordinates, connectivity, field values) in HDF5
+  files and lightweight metadata in an XML file.
+
+  @subsection guides-io-xdmf-overview-why Why Use XDMF?
+
+  XDMF has several advantages over other formats:
+
+  - **Efficient**: Uses HDF5 for binary storage, leading to compact files and
+    fast read/write
+  - **Scalable**: Supports very large datasets without excessive memory usage
+  - **ParaView compatible**: Directly loadable in ParaView for advanced 3D
+    visualization
+  - **Time series**: Built-in support for time-dependent data with temporal
+    collections
+  - **Multiple fields**: Export several grid functions (velocity, pressure,
+    temperature, etc.) in a single output
+
+  @subsection guides-io-xdmf-overview-basic Basic XDMF Usage
+
+  The simplest use case is to export a mesh and solution at a single time step:
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+  #include <Rodin/Variational.h>
+  #include <Rodin/IO/XDMF.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
+
+  int main()
+  {
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+    mesh.getConnectivity().compute(1, 2);
+
+    P1 Vh(mesh);
+    TrialFunction u(Vh);
+    TestFunction  v(Vh);
+
+    // ... solve a problem ...
+
+    // Export to XDMF for visualization in ParaView
+    IO::XDMF xdmf("MySimulation");
+    xdmf.grid().setMesh(mesh).add("u", u.getSolution());
+    xdmf.write();
+
+    return 0;
+  }
+  @endcode
+
+  This produces:
+  - `MySimulation.xdmf` — XML metadata file (open this in ParaView)
+  - `MySimulation.*.h5` — HDF5 data files with mesh and field data
+
+  @subsection guides-io-xdmf-overview-time Time-Dependent Output
+
+  One of the most powerful features of XDMF is its ability to record
+  time-evolving data. Use `write(time)` to record snapshots at different
+  time values:
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+  #include <Rodin/Variational.h>
+  #include <Rodin/IO/XDMF.h>
+  #include <Rodin/Math/Constants.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
+
+  int main()
+  {
+    const Real dt = 0.05;
+    const size_t Nt = 40;
+    const size_t Nc = 32;
+
+    // Create mesh
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { Nc, Nc });
+    mesh.scale(1.0 / (Nc - 1));
+
+    // Create finite element space (vector-valued, 2 components)
+    P1 fes(mesh, 2);
+
+    // Evolving field
+    GridFunction u(fes);
+    u.setName("u");
+
+    // Setup XDMF writer
+    IO::XDMF xdmf("TimeEvolution");
+    auto grid = xdmf.grid();
+    grid.setMesh(mesh);
+    grid.add(u);   // register the vector field
+
+    // Time loop
+    for (size_t k = 0; k < Nt; ++k)
+    {
+      const Real t = k * dt;
+
+      // Update the field at current time
+      u = [t](const Geometry::Point& p)
+      {
+        const Real x = p.x();
+        const Real y = p.y();
+        return Math::Vector<Real>{{
+          std::sin(2.0 * Math::Constants::pi() * (x + t)),
+          std::cos(2.0 * Math::Constants::pi() * (y - t))
+        }};
+      };
+
+      // Write snapshot at time t
+      xdmf.write(t);
+    }
+
+    return 0;
+  }
+  @endcode
+
+  When opened in ParaView, this produces a time slider that lets you animate
+  the field evolution.
+
+  @subsection guides-io-xdmf-overview-multiple Multiple Fields
+
+  You can export several fields (scalar, vector) at once:
+
+  @code{.cpp}
+  IO::XDMF xdmf("MultiField");
+  auto grid = xdmf.grid();
+  grid.setMesh(mesh);
+  grid.add("velocity", velocity);
+  grid.add("pressure", pressure);
+  grid.add("temperature", temperature);
+  xdmf.write(t);
+  @endcode
+
+  @subsection guides-io-xdmf-overview-grids Multiple Grids
+
+  You can also work with multiple named grids, each with its own mesh and
+  attributes:
+
+  @code{.cpp}
+  IO::XDMF xdmf("MultiGrid");
+
+  auto fluidGrid = xdmf.grid("Fluid");
+  fluidGrid.setMesh(fluidMesh);
+  fluidGrid.add("velocity", velocity);
+
+  auto solidGrid = xdmf.grid("Solid");
+  solidGrid.setMesh(solidMesh);
+  solidGrid.add("displacement", displacement);
+
+  xdmf.write(t);
+  @endcode
+
+  @subsection guides-io-xdmf-overview-paraview Viewing XDMF Files in ParaView
+
+  To visualize XDMF output in [ParaView](https://www.paraview.org/):
+
+  1. Open ParaView
+  2. Click **File → Open** and select the `.xdmf` file
+  3. Click **Apply** in the Properties panel
+  4. Select the field to display from the dropdown menu
+  5. For time-dependent data, use the play/timeline controls to animate
+
+  @section guides-io-external External Mesh Generators
+
+  @subsection guides-io-external-mmg Using MMG
+
+  [MMG](https://www.mmgtools.org/) is used for mesh adaptation and
+  optimization. MMG uses the MEDIT format, which Rodin supports natively:
+
+  @code{.cpp}
+  Mesh mesh;
+  mesh.load("mmg_output.mesh", IO::FileFormat::MEDIT);
+  @endcode
+
+  See the @ref examples-mmg-index "MMG examples" for more details on using
+  Rodin's @ref Rodin::External::MMG "MMG" integration.
+
+  @section guides-io-workflow Recommended Workflow
+
+  For a typical simulation workflow, we recommend using XDMF for output:
+
+  @code{.cpp}
+  #include <Rodin/Solver.h>
+  #include <Rodin/Geometry.h>
+  #include <Rodin/Variational.h>
+  #include <Rodin/IO/XDMF.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Solver;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
+
+  int main()
+  {
+    // 1. Create or load the mesh
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {32, 32});
+    mesh.getConnectivity().compute(1, 2);
+
+    // 2. Define the finite element space and problem
+    P1 Vh(mesh);
+    TrialFunction u(Vh);
+    TestFunction  v(Vh);
+
+    RealFunction f = 1;
+
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, Zero());
+
+    // 3. Solve
+    CG(poisson).solve();
+
+    // 4. Export results via XDMF
+    IO::XDMF xdmf("Results");
+    xdmf.grid().setMesh(mesh).add("u", u.getSolution());
+    xdmf.write();
+
+    return 0;
+  }
+  @endcode
+
+  This workflow produces files that can be directly opened in ParaView for
+  visualization and analysis.
+
+  @section guides-io-detailed Detailed Format Guides
+
+  For in-depth information on each format, see:
+
+  - @subpage guides-io-xdmf - XDMF format for visualization and time series
+  - @subpage guides-io-gridfunctions - Saving and loading grid functions
+  - @subpage guides-io-meshformats - MFEM and MEDIT mesh file formats
+
+  @section guides-io-see-also See Also
+
+  - @ref guides-meshes-io "Mesh Input/Output" — Detailed mesh I/O guide
+  - @ref Rodin::IO "IO namespace reference"
+  - @ref Rodin::IO::XDMF "XDMF class reference"
+  - @ref examples-io-xdmf "XDMF time-evolution example"
+  - @ref examples-pdes-poisson "Poisson example (uses XDMF)"
+
+  */

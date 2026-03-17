@@ -47,14 +47,15 @@
   Here's the complete program to solve the Poisson equation:
 
   @code{.cpp}
+  #include <Rodin/Solver.h>
   #include <Rodin/Geometry.h>
   #include <Rodin/Variational.h>
-  #include <Rodin/Solver.h>
+  #include <Rodin/IO/XDMF.h>
 
   using namespace Rodin;
+  using namespace Rodin::Solver;
   using namespace Rodin::Geometry;
   using namespace Rodin::Variational;
-  using namespace Rodin::Solver;
 
   int main() {
     // 1. Create a mesh
@@ -72,7 +73,7 @@
     TestFunction v(Vh);
 
     // 5. Define the source term f = 1
-    RealFunction f = 1.0;
+    RealFunction f = 1;
 
     // 6. Define the problem
     Problem poisson(u, v);
@@ -83,9 +84,10 @@
     // 7. Solve the problem
     CG(poisson).solve();
 
-    // 8. Save the solution
-    u.getSolution().save("solution.gf");
-    mesh.save("mesh.mesh");
+    // 8. Export results using XDMF (open in ParaView)
+    IO::XDMF xdmf("Poisson");
+    xdmf.grid().setMesh(mesh).add("u", u.getSolution());
+    xdmf.write();
 
     return 0;
   }
@@ -155,16 +157,17 @@
   - For symmetric positive definite systems (like the Poisson equation)
   - Alternative solvers: `SparseLU`, `BiCGSTAB`, etc.
 
-  @subsection guides-getting-started-first-problem-output Step 8: Save Results
+  @subsection guides-getting-started-first-problem-output Step 8: Export Results
 
   @code{.cpp}
-  u.getSolution().save("solution.gf");
-  mesh.save("mesh.mesh");
+  IO::XDMF xdmf("Poisson");
+  xdmf.grid().setMesh(mesh).add("u", u.getSolution());
+  xdmf.write();
   @endcode
 
-  - Saves the solution in MFEM GridFunction format
-  - Saves the mesh in MEDIT format
-  - Can be visualized with tools like [GLVis](https://glvis.org/)
+  - Exports the mesh and solution in XDMF format (XML + HDF5)
+  - Produces `Poisson.xdmf` and associated `.h5` data files
+  - Can be visualized with [ParaView](https://www.paraview.org/)
 
   @section guides-getting-started-first-problem-build Building and Running
 
@@ -184,6 +187,7 @@
     Rodin::Geometry
     Rodin::Variational
     Rodin::Solver
+    Rodin::IO
   )
   @endcode
 
@@ -197,11 +201,13 @@
 
   @section guides-getting-started-first-problem-visualize Visualizing the Solution
 
-  If you have [GLVis](https://glvis.org/) installed, visualize the solution:
+  Open the generated `Poisson.xdmf` file in
+  [ParaView](https://www.paraview.org/):
 
-  @code{.bash}
-  glvis -m mesh.mesh -g solution.gf
-  @endcode
+  1. **File → Open** and select `Poisson.xdmf`
+  2. Click **Apply**
+  3. Select "u" from the field dropdown
+  4. Optionally, apply the **Warp By Scalar** filter for a 3D surface view
 
   You should see a smooth solution that represents the deflection of a
   membrane under uniform load.

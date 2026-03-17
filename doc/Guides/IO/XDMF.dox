@@ -1,0 +1,263 @@
+/**
+  @page guides-io-xdmf XDMF Format
+  @brief Using the XDMF format for visualization and time series data
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section guides-io-xdmf-intro Introduction
+
+  The eXtensible Data Model and Format (XDMF) is a data format designed for
+  scientific computing. It uses a split-file architecture:
+
+  - An **XML file** (`.xdmf`) that describes the structure of the data
+  - One or more **HDF5 files** (`.h5`) that store the actual numerical data
+
+  This design combines human-readable metadata with efficient binary storage,
+  making it ideal for large-scale simulations. XDMF files can be directly
+  opened in [ParaView](https://www.paraview.org/) for visualization.
+
+  @section guides-io-xdmf-class The XDMF Class
+
+  The @ref Rodin::IO::XDMF class provides a high-level interface for writing
+  XDMF files. It follows a grid-based approach where you:
+
+  1. Create an XDMF writer
+  2. Associate a mesh with a named grid
+  3. Add fields (scalar, vector, tensor) to the grid
+  4. Write snapshots, optionally with time stamps
+
+  @subsection guides-io-xdmf-class-basic Basic Usage
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+  #include <Rodin/Variational.h>
+  #include <Rodin/IO/XDMF.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
+
+  int main()
+  {
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+
+    P1 Vh(mesh);
+    GridFunction u(Vh);
+    u = [](const Geometry::Point& p) { return p.x() * p.y(); };
+
+    IO::XDMF xdmf("MyOutput");
+    xdmf.grid().setMesh(mesh).add("u", u);
+    xdmf.write();
+
+    return 0;
+  }
+  @endcode
+
+  This creates:
+  - `MyOutput.xdmf` — XML metadata file (open this in ParaView)
+  - `MyOutput.Grid.mesh.h5` — HDF5 file containing the mesh data
+  - `MyOutput.Grid.u.0.h5` — HDF5 file containing the field data
+
+  @section guides-io-xdmf-guide-grids Working with Grids
+
+  A grid in XDMF is a named collection of a mesh and associated fields. You
+  obtain a grid handle from the XDMF writer:
+
+  @code{.cpp}
+  IO::XDMF xdmf("Simulation");
+  auto grid = xdmf.grid();          // default grid name
+  auto grid = xdmf.grid("Domain");  // named grid
+  @endcode
+
+  @subsection guides-io-xdmf-guide-grids-mesh Setting the Mesh
+
+  Each grid must have a mesh associated with it before writing:
+
+  @code{.cpp}
+  auto grid = xdmf.grid();
+  grid.setMesh(mesh);
+  @endcode
+
+  @subsection guides-io-xdmf-guide-grids-fields Adding Fields
+
+  Fields are added using the `add()` method. The field can be a named
+  GridFunction or provided with an explicit name:
+
+  @code{.cpp}
+  // Option 1: Name the grid function and add it
+  GridFunction u(Vh);
+  u.setName("velocity");
+  grid.add(u);
+
+  // Option 2: Provide a name when adding
+  grid.add("pressure", p);
+  @endcode
+
+  @section guides-io-xdmf-static Static Output
+
+  For a single snapshot (no time evolution), simply call `write()` without
+  a time parameter:
+
+  @code{.cpp}
+  IO::XDMF xdmf("StaticResult");
+  xdmf.grid().setMesh(mesh).add("solution", u);
+  xdmf.write();
+  @endcode
+
+  @section guides-io-xdmf-temporal Time-Dependent Output
+
+  XDMF excels at storing time-dependent data. Call `write(t)` with a time
+  value for each snapshot:
+
+  @code{.cpp}
+  IO::XDMF xdmf("TimeEvolution");
+  auto grid = xdmf.grid();
+  grid.setMesh(mesh);
+  grid.add(u);
+
+  for (size_t k = 0; k < numSteps; ++k)
+  {
+    Real t = k * dt;
+
+    // Update your solution...
+    u = [t](const Geometry::Point& p)
+    {
+      return std::sin(Math::Constants::pi() * p.x()) * std::exp(-t);
+    };
+
+    // Write snapshot at time t
+    xdmf.write(t);
+  }
+  @endcode
+
+  When opened in ParaView, you can use the time controls to step through
+  the evolution of the solution.
+
+  @subsection guides-io-xdmf-temporal-mesh Mesh Policy
+
+  By default, the mesh is considered static (exported once). If your mesh
+  changes over time (e.g., mesh adaptation), you can configure the writer
+  to export the mesh at each time step:
+
+  @code{.cpp}
+  IO::XDMF xdmf("AdaptiveSim");
+  auto grid = xdmf.grid();
+  grid.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
+  grid.add(u);
+  @endcode
+
+  @section guides-io-xdmf-fields Field Types
+
+  XDMF supports different types of fields:
+
+  @subsection guides-io-xdmf-fields-scalar Scalar Fields
+
+  Scalar fields have one component per node:
+
+  @code{.cpp}
+  P1 Vh(mesh);                 // scalar P1 space
+  GridFunction temperature(Vh);
+  temperature = [](const Geometry::Point& p) { return p.x() + p.y(); };
+
+  grid.add("temperature", temperature);
+  @endcode
+
+  @subsection guides-io-xdmf-fields-vector Vector Fields
+
+  Vector fields have multiple components per node. Create the finite element
+  space with the number of components:
+
+  @code{.cpp}
+  P1 Vh(mesh, 2);              // 2D vector P1 space
+  GridFunction velocity(Vh);
+  velocity = [](const Geometry::Point& p)
+  {
+    return Math::Vector<Real>{{ -p.y(), p.x() }};
+  };
+
+  grid.add("velocity", velocity);
+  @endcode
+
+  @section guides-io-xdmf-patterns File Patterns
+
+  The XDMF writer uses customizable file naming patterns. The default
+  patterns are:
+
+  | File | Default Pattern | Example |
+  |------|----------------|---------|
+  | XDMF XML | `{stem}.xdmf` | `MyOutput.xdmf` |
+  | Mesh HDF5 | `{stem}.{grid}.mesh.h5` | `MyOutput.Grid.mesh.h5` |
+  | Field HDF5 | `{stem}.{grid}.{name}.{index}.h5` | `MyOutput.Grid.u.0.h5` |
+
+  Available placeholders:
+  - `{stem}` — The base name passed to the XDMF constructor
+  - `{grid}` — The name of the grid
+  - `{name}` — The name of the field
+  - `{index}` — The time step index
+  - `{rank}` — The MPI rank (for distributed output)
+
+  @section guides-io-xdmf-guide-paraview Opening Files in ParaView
+
+  To visualize XDMF output in ParaView:
+
+  1. Open ParaView
+  2. Use **File > Open** and select the `.xdmf` file
+  3. Click **Apply** in the Properties panel
+  4. Select a field from the dropdown menu to colorize the mesh
+  5. For time-dependent data, use the time controls at the top
+
+  @section guides-io-xdmf-example Complete Example
+
+  Here is a complete example that solves the Poisson equation and exports
+  the result using XDMF:
+
+  @code{.cpp}
+  #include <Rodin/Solver.h>
+  #include <Rodin/Geometry.h>
+  #include <Rodin/Variational.h>
+  #include <Rodin/IO/XDMF.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
+
+  int main()
+  {
+    // Create mesh
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {32, 32});
+    mesh.getConnectivity().compute(1, 2);
+
+    // Setup problem
+    P1 Vh(mesh);
+    TrialFunction u(Vh);
+    TestFunction  v(Vh);
+
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(RealFunction(1.0), v)
+            + DirichletBC(u, Zero());
+
+    // Solve
+    Solver::CG(poisson).solve();
+
+    // Export to XDMF
+    IO::XDMF xdmf("PoissonResult");
+    xdmf.grid().setMesh(mesh).add("solution", u.getSolution());
+    xdmf.write();
+
+    return 0;
+  }
+  @endcode
+
+  @section guides-io-xdmf-see-also See Also
+
+  - @ref guides-io "I/O in Rodin overview"
+  - @ref Rodin::IO::XDMF "XDMF class reference"
+  - @ref examples-io-xdmf "XDMF example"
+  - @ref examples-io-index "I/O examples"
+
+  */

@@ -1,0 +1,294 @@
+/**
+  @page guides-variational Variational formulations in Rodin
+  @brief How to define, assemble, and solve variational problems
+
+  @m_keywords{Variational, Weak Formulation, Bilinear Form, Linear Form,
+    Problem, Integral, Boundary Condition}
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section guides-variational-intro Introduction
+
+  The finite element method works by converting a partial differential equation
+  (PDE) from its **strong form** into a **weak (variational) form**. Rodin's
+  @ref Rodin::Variational "Variational" module provides a form language that
+  lets you express these variational formulations in C++ code that closely
+  mirrors the mathematical notation.
+
+  @section guides-variational-weak From Strong to Weak Form
+
+  Consider a generic second-order PDE in its strong form:
+
+  @f[
+    \mathcal{L} u = f \quad \text{in } \Omega
+  @f]
+
+  with boundary conditions on @f$ \partial\Omega @f$. The standard procedure
+  to obtain the weak form is:
+
+  1. **Multiply** by a test function @f$ v @f$
+  2. **Integrate** over the domain @f$ \Omega @f$
+  3. **Integrate by parts** to reduce the order of derivatives on @f$ u @f$
+  4. **Apply boundary conditions**
+
+  This produces a variational problem of the form:
+
+  @f[
+    \text{Find } u \in V \text{ s.t. } \forall v \in V, \quad
+    a(u, v) = \ell(v)
+  @f]
+
+  where @f$ a(u, v) @f$ is a **bilinear form** and @f$ \ell(v) @f$ is a
+  **linear form**.
+
+  @subsection guides-variational-weak-example Example: The Poisson Equation
+
+  The Poisson equation @f$ -\Delta u = f @f$ with @f$ u = 0 @f$ on
+  @f$ \partial\Omega @f$ has the weak form:
+
+  @f[
+    \int_\Omega \nabla u \cdot \nabla v \, dx = \int_\Omega f v \, dx
+  @f]
+
+  In Rodin, this translates directly to:
+
+  @code{.cpp}
+  Problem poisson(u, v);
+  poisson = Integral(Grad(u), Grad(v))   // a(u,v) = integral of grad(u) . grad(v)
+          - Integral(f, v)                // l(v)   = integral of f * v
+          + DirichletBC(u, Zero());       // u = 0 on the boundary
+  @endcode
+
+  @section guides-variational-forms Forms in Rodin
+
+  @subsection guides-variational-forms-bilinear Bilinear Forms
+
+  A bilinear form @f$ a(u, v) @f$ involves both the trial function @f$ u @f$
+  and the test function @f$ v @f$. In Rodin, bilinear forms are created using
+  `Integral` with both trial and test function arguments:
+
+  @code{.cpp}
+  // Stiffness: integral of grad(u) . grad(v)
+  Integral(Grad(u), Grad(v))
+
+  // Mass: integral of u * v
+  Integral(u, v)
+
+  // Scaled: integral of k * u * v
+  Integral(k * u, v)
+  @endcode
+
+  @subsection guides-variational-forms-linear Linear Forms
+
+  A linear form @f$ \ell(v) @f$ involves only the test function @f$ v @f$:
+
+  @code{.cpp}
+  // Load: integral of f * v
+  Integral(f, v)
+
+  // Boundary load: integral of g * v over a boundary
+  BoundaryIntegral(g, v).over(GammaN)
+  @endcode
+
+  @subsection guides-variational-forms-assembly Problem Assembly
+
+  The @ref Rodin::Variational::Problem "Problem" class assembles bilinear
+  and linear forms into a linear system @f$ Ax = b @f$:
+
+  @code{.cpp}
+  TrialFunction u(Vh);
+  TestFunction  v(Vh);
+
+  Problem problem(u, v);
+  problem = Integral(Grad(u), Grad(v))   // bilinear form (goes into A)
+          - Integral(f, v)                // linear form (goes into b)
+          + DirichletBC(u, Zero());       // modifies A and b
+  @endcode
+
+  Note the sign convention: bilinear forms are added with `+`, while linear
+  forms are subtracted with `-`. This corresponds to moving everything to the
+  left-hand side:
+
+  @f[
+    a(u, v) - \ell(v) = 0
+  @f]
+
+  @section guides-variational-operators Differential Operators
+
+  Rodin provides standard differential operators that work on trial and
+  test functions:
+
+  | Operator | Mathematical Meaning | Code |
+  |----------|---------------------|------|
+  | Gradient | @f$ \nabla u @f$ | `Grad(u)` |
+  | Divergence | @f$ \nabla \cdot u @f$ | `Div(u)` |
+  | Jacobian | @f$ \nabla u @f$ (matrix) | `Jacobian(u)` |
+  | Transpose | @f$ (\nabla u)^T @f$ | `Jacobian(u).T()` |
+
+  @code{.cpp}
+  // Laplacian-like term
+  Integral(Grad(u), Grad(v))
+
+  // Divergence term (for vector fields)
+  Integral(Div(u), Div(v))
+
+  // Elasticity strain energy
+  Integral(Jacobian(u) + Jacobian(u).T(), Jacobian(v) + Jacobian(v).T())
+  @endcode
+
+  @section guides-variational-bc Boundary Conditions
+
+  @subsection guides-variational-bc-dirichlet Dirichlet Conditions
+
+  **Dirichlet** (essential) boundary conditions fix the value of the solution
+  on part of the boundary:
+
+  @code{.cpp}
+  // Homogeneous: u = 0 on entire boundary
+  DirichletBC(u, Zero())
+
+  // Non-homogeneous: u = g on entire boundary
+  DirichletBC(u, g)
+
+  // On specific boundary segment (by attribute)
+  DirichletBC(u, Zero()).on(1)
+
+  // Vector-valued: u = (0, 0) on a segment
+  DirichletBC(u, VectorFunction{0, 0}).on(GammaD)
+  @endcode
+
+  @subsection guides-variational-bc-neumann Neumann Conditions
+
+  **Neumann** (natural) boundary conditions specify the flux or traction on
+  part of the boundary. They appear as boundary integrals in the variational
+  formulation:
+
+  @code{.cpp}
+  // Scalar Neumann: integral of g * v over boundary segment
+  BoundaryIntegral(g, v).over(GammaN)
+
+  // Vector Neumann (traction): integral of f . v over boundary segment
+  BoundaryIntegral(f, v).over(GammaN)
+  @endcode
+
+  @section guides-variational-solvers Solving the Problem
+
+  After defining a problem, use a solver from the @ref Rodin::Solver "Solver"
+  module to solve the resulting linear system:
+
+  @code{.cpp}
+  // Conjugate Gradient (for SPD systems)
+  Solver::CG(problem).solve();
+
+  // Direct sparse LU factorization
+  Solver::SparseLU(problem).solve();
+  @endcode
+
+  The solution is then accessible via the trial function:
+
+  @code{.cpp}
+  auto& solution = u.getSolution();
+  @endcode
+
+  @section guides-variational-output Saving and Visualizing Results
+
+  After solving, export the results using XDMF for visualization in
+  ParaView:
+
+  @code{.cpp}
+  #include <Rodin/IO/XDMF.h>
+
+  // Export to XDMF
+  IO::XDMF xdmf("Results");
+  xdmf.grid().setMesh(mesh).add("u", u.getSolution());
+  xdmf.write();
+  @endcode
+
+  @section guides-variational-complete Complete Example
+
+  Here is a complete example that defines and solves the Poisson equation,
+  then exports the result using XDMF:
+
+  @code{.cpp}
+  #include <Rodin/Solver.h>
+  #include <Rodin/Geometry.h>
+  #include <Rodin/Variational.h>
+  #include <Rodin/IO/XDMF.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Solver;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
+
+  int main()
+  {
+    // 1. Mesh
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+    mesh.getConnectivity().compute(1, 2);
+
+    // 2. Finite element space
+    P1 Vh(mesh);
+    TrialFunction u(Vh);
+    TestFunction  v(Vh);
+
+    // 3. Source term
+    RealFunction f = 1;
+
+    // 4. Variational problem
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, Zero());
+
+    // 5. Solve
+    CG(poisson).solve();
+
+    // 6. Output
+    IO::XDMF xdmf("Poisson");
+    xdmf.grid().setMesh(mesh).add("u", u.getSolution());
+    xdmf.write();
+
+    return 0;
+  }
+  @endcode
+
+  @section guides-variational-mixed Mixed Formulations
+
+  Some problems require solving for multiple unknowns simultaneously, such as
+  velocity and pressure in the
+  @ref examples-pdes-navierstokes "Navier-Stokes equations". Rodin's
+  @ref Rodin::Variational::Problem "Problem" class supports mixed formulations
+  with multiple trial/test function pairs:
+
+  @code{.cpp}
+  // Taylor-Hood finite element spaces
+  H1 uh(std::integral_constant<size_t, 2>{}, mesh, d);  // P2 velocity
+  H1 ph(std::integral_constant<size_t, 1>{}, mesh);      // P1 pressure
+
+  TrialFunction u(uh);  // Velocity
+  TrialFunction p(ph);  // Pressure
+  TestFunction  v(uh);
+  TestFunction  q(ph);
+
+  // Mixed problem with multiple trial/test pairs
+  Problem stokes(u, p, v, q);
+  stokes = nu * Integral(Jacobian(u), Jacobian(v))
+         - Integral(p, Div(v))
+         + Integral(Div(u), q)
+         - Integral(f, v)
+         + DirichletBC(u, g);
+  @endcode
+
+  @section guides-variational-see-also See Also
+
+  - @ref fem-spaces "Finite element spaces" — Available spaces (P0, P1, H1)
+  - @ref fem-ciarlet "Ciarlet's definition" — Mathematical foundations
+  - @ref guides-io "I/O in Rodin" — Saving and visualizing results
+  - @ref examples-pdes-poisson "Poisson example"
+  - @ref examples-pdes-elasticity "Elasticity example"
+  - @ref examples-pdes-navierstokes "Navier-Stokes example" — Mixed formulation
+
+  */

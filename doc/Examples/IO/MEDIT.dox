@@ -1,0 +1,86 @@
+/**
+  @page examples-io-medit MEDIT format
+  @brief How to load and convert MEDIT-format meshes
+
+  @m_keywords{MEDIT, Mesh, I/O, MMG, Format Conversion}
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section examples-io-medit-intro Introduction
+
+  The MEDIT format (`.mesh`) is developed by INRIA and is the native format
+  for the [MMG](https://www.mmgtools.org/) mesh tools. It stores vertex
+  coordinates, element connectivity, and integer attributes (material tags,
+  boundary labels).
+
+  Use @ref Rodin::IO::FileFormat "IO::FileFormat::MEDIT" when saving or loading.
+
+  @section examples-io-medit-load Loading a MEDIT Mesh
+
+  A mesh in MEDIT format can be loaded into either a standard
+  @ref Rodin::Geometry::Mesh "Mesh" or an @ref Rodin::External::MMG
+  "MMG::Mesh":
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+
+  int main(int, char** argv)
+  {
+    Mesh mesh;
+    mesh.load(argv[1], IO::FileFormat::MEDIT);
+
+    std::cout << "Loaded mesh with "
+              << mesh.getVertexCount() << " vertices and "
+              << mesh.getCellCount() << " cells" << std::endl;
+
+    return 0;
+  }
+  @endcode
+
+  @section examples-io-medit-convert Format Conversion
+
+  A common workflow is to convert a MEDIT mesh produced by MMG into MFEM
+  format for use with other tools:
+
+  @code{.cpp}
+  Mesh mesh;
+  mesh.load("input.medit.mesh", IO::FileFormat::MEDIT);
+  mesh.save("output.mfem.mesh", IO::FileFormat::MFEM);
+  @endcode
+
+  @section examples-io-medit-mmg Using with MMG
+
+  When working with the @ref Rodin::External::MMG "MMG" module, MEDIT is the
+  recommended format because it preserves MMG-specific metadata:
+
+  @code{.cpp}
+  #include <Rodin/MMG.h>
+
+  MMG::Mesh mesh;
+  mesh.load("domain.medit.mesh", IO::FileFormat::MEDIT);
+
+  // Optimize and save
+  MMG::Optimizer().setHMax(0.1).optimize(mesh);
+  mesh.save("optimized.medit.mesh", IO::FileFormat::MEDIT);
+  @endcode
+
+  @section examples-io-medit-full Full Source Code
+
+  -   @ref IO/MEDIT.cpp "MEDIT.cpp"
+
+  @section examples-io-medit-see-also See Also
+
+  - @ref examples-io-mfem "MFEM format" — Alternative text format
+  - @ref examples-io-xdmf "XDMF format" — Recommended for visualization
+  - @ref examples-mmg-simple_io "MMG I/O" — MMG-specific I/O
+  - @ref guides-io "I/O in Rodin"
+
+  @example IO/MEDIT.cpp
+  @m_examplenavigation{examples-io-medit,IO/}
+  @m_footernavigation
+  */

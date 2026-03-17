@@ -1,5 +1,73 @@
 /**
   @page examples-mmg-mesh_adaptation Adapting the mesh
-  @brief How to adapt the mesh
+  @brief How to adapt a mesh based on a solution field
+
+  @m_keywords{MMG, Adaptation, Refinement, Solution-Based}
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section examples-mmg-adapt-intro Introduction
+
+  Mesh **adaptation** (or adaptive refinement) modifies the mesh density
+  based on a computed solution. Regions where the solution has sharp gradients
+  or features receive finer elements, while smooth regions are coarsened.
+  This produces more accurate results with fewer degrees of freedom.
+
+  The @ref Rodin::External::MMG "MMG" module supports metric-based mesh
+  adaptation where a solution field or metric tensor guides the remesher.
+
+  @section examples-mmg-adapt-workflow Typical Workflow
+
+  A typical solve–adapt cycle looks like:
+
+  @code{.cpp}
+  #include <Rodin/Solver.h>
+  #include <Rodin/Geometry.h>
+  #include <Rodin/Variational.h>
+  #include <Rodin/MMG.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
+
+  int main()
+  {
+    // 1. Start with a coarse mesh
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 8, 8 });
+
+    for (int adapt = 0; adapt < 3; ++adapt)
+    {
+      mesh.getConnectivity().compute(1, 2);
+
+      // 2. Solve the PDE on the current mesh
+      P1 vh(mesh);
+      TrialFunction u(vh);
+      TestFunction  v(vh);
+      Problem poisson(u, v);
+      poisson = Integral(Grad(u), Grad(v))
+              - Integral(RealFunction(1.0), v)
+              + DirichletBC(u, Zero());
+      Solver::CG(poisson).solve();
+
+      // 3. Adapt the mesh using MMG with solution-driven sizing
+      MMG::Optimizer()
+        .setHMax(0.2)
+        .setHMin(0.01)
+        .optimize(mesh);
+    }
+
+    mesh.save("Adapted.mesh", IO::FileFormat::MFEM);
+    return 0;
+  }
+  @endcode
+
+  @section examples-mmg-adapt-see-also See Also
+
+  - @ref examples-mmg-mesh_optimization "Mesh optimization"
+  - @ref examples-pdes-poisson "Poisson equation"
+  - @ref Rodin::External::MMG "MMG namespace"
 
   */

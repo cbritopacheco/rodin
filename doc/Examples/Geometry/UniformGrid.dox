@@ -1,0 +1,96 @@
+/**
+  @page examples-geometry-uniformgrid Generating uniform grids
+  @brief Creating structured meshes with UniformGrid
+
+  @m_keywords{Mesh, UniformGrid, Triangle, Quadrilateral, Tetrahedron, Wedge}
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section examples-geom-ug-intro Introduction
+
+  The @ref Rodin::Geometry::Mesh::UniformGrid "Mesh::UniformGrid()" method
+  creates structured grids of various polytope types. This is the quickest
+  way to get started with Rodin — no mesh files needed.
+
+  @section examples-geom-ug-2d 2D Grids
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+
+  int main()
+  {
+    Mesh mesh;
+
+    // Triangular grid: 16×16 subdivisions → 512 triangles, 289 vertices
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+
+    // Quadrilateral grid: 32×32 subdivisions → 1024 quads, 1089 vertices
+    mesh = mesh.UniformGrid(Polytope::Type::Quadrilateral, { 32, 32 });
+
+    return 0;
+  }
+  @endcode
+
+  The grid is created on the unit square @f$ [0, N_x] \times [0, N_y] @f$
+  where @f$ N_x, N_y @f$ are the subdivision counts. Use
+  @ref Rodin::Geometry::Mesh::scale "Mesh::scale()" to rescale to a
+  different domain:
+
+  @code{.cpp}
+  // Create grid on [0,1]^2
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 32, 32 });
+  mesh.scale(1.0 / 31.0);  // Normalize to unit square
+  @endcode
+
+  @section examples-geom-ug-3d 3D Grids
+
+  @code{.cpp}
+  // Tetrahedral grid: 8×8×8 subdivisions
+  mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { 8, 8, 8 });
+
+  // Hexahedral grid: 16×16×16 subdivisions
+  mesh = mesh.UniformGrid(Polytope::Type::Hexahedron, { 16, 16, 16 });
+
+  // Wedge (prism) grid: 4×4×4 subdivisions
+  mesh = mesh.UniformGrid(Polytope::Type::Wedge, { 4, 4, 4 });
+  @endcode
+
+  @section examples-geom-ug-connectivity Computing Connectivity
+
+  After creating a mesh, compute the boundary connectivity before defining
+  boundary conditions:
+
+  @code{.cpp}
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+  mesh.getConnectivity().compute(1, 2);  // edges → cells (required for BC)
+  @endcode
+
+  @section examples-geom-ug-queries Mesh Queries
+
+  @code{.cpp}
+  std::cout << "Vertices: " << mesh.getVertexCount() << std::endl;
+  std::cout << "Cells:    " << mesh.getCellCount() << std::endl;
+  std::cout << "Volume:   " << mesh.getVolume() << std::endl;
+  std::cout << "Perimeter: " << mesh.getPerimeter() << std::endl;
+  @endcode
+
+  @section examples-geom-ug-full Full Source Code
+
+  -   @ref Geometry/UniformGrid.cpp "UniformGrid.cpp"
+
+  @section examples-geom-ug-see-also See Also
+
+  - @ref guides-meshes "Meshes guide" — Full mesh documentation
+  - @ref guides-polytopes "Polytopes" — Element types
+  - @ref guides-connectivity "Connectivity" — Incidence relations
+  - @ref examples-pdes-poisson "Poisson example" — Uses UniformGrid
+
+  @example Geometry/UniformGrid.cpp
+  @m_examplenavigation{examples-geometry-uniformgrid,Geometry/}
+  @m_footernavigation
+  */

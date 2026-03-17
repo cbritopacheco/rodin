@@ -4,15 +4,22 @@
 
   @tableofcontents
 
+  @section examples-index-gallery Gallery
+
+  For a visual overview of what Rodin can do, visit the @ref gallery "Gallery".
+
   @section examples-index-variational Variational methods and weak formulations
 
-  The Rodin::Variational module is mostly used when dealing with to variational
-  problems of the form:
+  The @ref Rodin::Variational "Variational" module is used when dealing with
+  variational problems of the form:
 
   @f[
     \text{Find} \quad u \in U \quad \text{ s.t. } \quad \forall v \in V \quad
     a(u, v) = b(v) \ .
   @f]
+
+  See the @ref guides-variational "variational formulations guide" for the
+  mathematical background.
 
   @section examples-index-pdes Solving PDEs
 
@@ -24,27 +31,33 @@
   | ----------------------------------------------- | --------------- |
   | @f$ - \Delta u = f @f$                          | @ref examples-pdes-poisson |
   | @f$ - \nabla \cdot \sigma (u ) = 0  @f$         | @ref examples-pdes-elasticity |
+  | @f$ - \Delta u - k^2 u = f @f$                  | @ref examples-pdes-helmholtz |
+  | @f$ -\nu \Delta \mathbf{u} + (\mathbf{u} \cdot \nabla)\mathbf{u} + \nabla p = \mathbf{f} @f$ | @ref examples-pdes-navierstokes |
+  | @f$ - \Delta u = f @f$ (periodic)               | @ref examples-pdes-periodic |
+  | @f$ - \Delta_\Gamma u + u = f @f$ (surface)     | @ref examples-pdes-surfacemesh |
 
-  @section examples-index-solver Solving linear systems
+  @section examples-index-io Input/Output
 
-  Rodin::Solver
+  Rodin supports several I/O formats for meshes, grid functions, and simulation
+  data. The supported formats are @ref Rodin::IO::FileFormat "MFEM", MEDIT,
+  and HDF5. The @ref Rodin::IO::XDMF "XDMF" format is recommended for
+  exporting results for visualization in ParaView:
 
-  In progress.
+  - @subpage examples-io-index
 
-  @section examples-index-geometry Mesh geometry
+  @section examples-index-geometry Mesh Geometry
 
-  Rodin::Geometry
+  The @ref Rodin::Geometry "Geometry" module provides mesh creation,
+  topological connectivity, and geometric operations:
 
-  In progress.
+  - @subpage examples-geometry-index
 
   @section examples-index-mmg Working with MMG
 
-  The Rodin::External::MMG module has a wide variety of uses which ranges from
-  optimization of the mesh, to implicit domain meshing. It provides many C++
-  wrappers to execute the functionality of the [Mmg
-  Platform](https://www.mmgtools.org/).
-
-  For the complete list of examples go to the link below:
+  The @ref Rodin::External::MMG "MMG" module has a wide variety of uses which
+  ranges from optimization of the mesh, to implicit domain meshing. It provides
+  many C++ wrappers to execute the functionality of the [Mmg
+  Platform](https://www.mmgtools.org/):
 
   - @subpage examples-mmg-index
 

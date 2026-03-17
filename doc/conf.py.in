@@ -15,6 +15,8 @@ LINKS_NAVBAR1 = [
     ("Pages", 'pages', [
         ('General concepts', 'guides-index'),
         ('Examples and tutorials', 'examples-index'),
+        ('Gallery', 'gallery'),
+        ('I/O in Rodin', 'guides-io'),
         ('Notation', 'notation-index'),
         ('Credits', 'credits-index')]),
     ("Modules", 'modules', [
@@ -23,6 +25,7 @@ LINKS_NAVBAR1 = [
     ("Namespaces", 'namespaces', [
         ('Assembly', 'namespace_rodin_1_1_assembly'),
         ('Geometry', 'namespace_rodin_1_1_geometry'),
+        ('IO', 'namespace_rodin_1_1_i_o'),
         ('Math', 'namespace_rodin_1_1_math'),
         ('Quadrature formulae', 'namespace_rodin_1_1_q_f'),
         ('Solver', 'namespace_rodin_1_1_solver'),

@@ -1,6 +1,127 @@
 /**
   @page guides-polytopes Polytopes
-  @brief How to use the polytopes defined in Rodin
+  @brief Understanding the geometric elements in Rodin
+
+  @m_keywords{Polytope, Triangle, Quadrilateral, Tetrahedron, Hexahedron,
+    Wedge, Segment, Point, Element}
 
   @tableofcontents
+
+  @m_footernavigation
+
+  @section guides-polytopes-intro Introduction
+
+  In finite element analysis, a **polytope** is a geometric primitive that
+  forms the building block of a mesh. A mesh is a collection of polytopes
+  of various dimensions that together partition a domain @f$ \Omega @f$.
+
+  In Rodin, polytopes are represented by the
+  @ref Rodin::Geometry::Polytope "Polytope" class and its associated
+  @ref Rodin::Geometry::Polytope::Type "Polytope::Type" enumeration.
+
+  @section guides-polytopes-dimensions Polytope Dimensions
+
+  Polytopes exist in different dimensions, each with a specific role in the
+  mesh:
+
+  | Dimension | Name | Role | Example |
+  |-----------|------|------|---------|
+  | 0 | **Vertex** (Point) | Mesh nodes | Corner of a triangle |
+  | 1 | **Edge** (Segment) | Connections between vertices | Side of a triangle, boundary in 2D |
+  | 2 | **Face** | Surface elements | Triangle, Quadrilateral |
+  | 3 | **Cell** | Volume elements | Tetrahedron, Hexahedron, Wedge |
+
+  The **cells** are the highest-dimensional polytopes in a mesh and correspond
+  to the elements over which the finite element approximation is constructed.
+  In a 2D mesh, the cells are faces (triangles or quadrilaterals); in 3D,
+  the cells are volumes.
+
+  @section guides-polytopes-types Available Polytope Types
+
+  The @ref Rodin::Geometry::Polytope::Type "Polytope::Type" enumeration
+  defines the available element types:
+
+  | Type | Dimension | Vertices | Description |
+  |------|-----------|----------|-------------|
+  | `Polytope::Type::Point` | 0 | 1 | A single vertex |
+  | `Polytope::Type::Segment` | 1 | 2 | A line segment (edge) |
+  | `Polytope::Type::Triangle` | 2 | 3 | A triangular element |
+  | `Polytope::Type::Quadrilateral` | 2 | 4 | A quadrilateral element |
+  | `Polytope::Type::Tetrahedron` | 3 | 4 | A tetrahedral element |
+  | `Polytope::Type::Hexahedron` | 3 | 8 | A hexahedral (brick) element |
+  | `Polytope::Type::Wedge` | 3 | 6 | A prismatic (wedge) element |
+
+  @section guides-polytopes-meshgen Using Polytopes for Mesh Generation
+
+  The polytope type determines the element shapes when generating uniform
+  meshes via @ref Rodin::Geometry::Mesh::UniformGrid "Mesh::UniformGrid()":
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+  using namespace Rodin::Geometry;
+
+  Mesh mesh;
+
+  // 2D meshes
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+  mesh = mesh.UniformGrid(Polytope::Type::Quadrilateral, {16, 16});
+
+  // 3D meshes
+  mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, {8, 8, 8});
+  mesh = mesh.UniformGrid(Polytope::Type::Hexahedron, {8, 8, 8});
+  mesh = mesh.UniformGrid(Polytope::Type::Wedge, {8, 8, 8});
+  @endcode
+
+  @section guides-polytopes-sub Sub-Entities
+
+  Every polytope has **sub-entities** of lower dimension. For example, a
+  triangle has 3 edges and 3 vertices; a tetrahedron has 4 faces, 6 edges,
+  and 4 vertices. These relationships are captured by the
+  @ref Rodin::Geometry::Connectivity "Connectivity" class.
+
+  To access sub-entity relationships, first compute the connectivity:
+
+  @code{.cpp}
+  mesh.getConnectivity().compute(1, 2); // edges → cells
+  mesh.getConnectivity().compute(0, 2); // vertices → cells
+  @endcode
+
+  @section guides-polytopes-iteration Iterating Over Polytopes
+
+  You can iterate over polytopes of a given dimension using the mesh
+  iterator interface:
+
+  @code{.cpp}
+  // Iterate over cells (highest dimension)
+  for (auto it = mesh.getCell(); !it.end(); ++it)
+  {
+    auto idx = it->getIndex();
+    auto attr = it->getAttribute();
+    // ... process cell ...
+  }
+
+  // Iterate over vertices
+  for (auto it = mesh.getVertex(); !it.end(); ++it)
+  {
+    auto coords = it->getCoordinates();
+    // ... process vertex ...
+  }
+  @endcode
+
+  @section guides-polytopes-choosing Choosing the Right Element Type
+
+  | Problem | Recommended Type | Reason |
+  |---------|-----------------|--------|
+  | General 2D PDEs | `Triangle` | Flexible, good for complex geometries |
+  | Structured 2D grids | `Quadrilateral` | Better accuracy on rectangular domains |
+  | General 3D PDEs | `Tetrahedron` | Handles complex 3D geometries |
+  | Structured 3D grids | `Hexahedron` | Higher accuracy per DOF |
+
+  @section guides-polytopes-see-also See Also
+
+  - @ref guides-meshes "Meshes" — Working with meshes
+  - @ref guides-connectivity "Connectivity" — Relationships between polytopes
+  - @ref fem-ciarlet "Ciarlet's definition" — The reference element @f$ K @f$
+  - @ref Rodin::Geometry::Polytope "Polytope class reference"
+
   */

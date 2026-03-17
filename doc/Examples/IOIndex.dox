@@ -1,0 +1,32 @@
+/**
+  @page examples-io-index Input/Output examples
+  @brief Examples demonstrating I/O capabilities
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  This section contains examples demonstrating the various I/O capabilities
+  of Rodin, including mesh import/export, grid function storage, and
+  visualization output.
+
+  @section examples-io-index-xdmf XDMF Output
+
+  The XDMF format is recommended for visualization. It produces files
+  compatible with [ParaView](https://www.paraview.org/):
+
+  - @subpage examples-io-xdmf - Time-dependent vector field export
+
+  @section examples-io-index-mesh Mesh Formats
+
+  Examples demonstrating mesh I/O and format conversion:
+
+  - @subpage examples-io-mfem - Building a mesh programmatically and saving in MFEM format
+  - @subpage examples-io-medit - Loading a MEDIT mesh and converting to MFEM format
+
+  @section examples-io-index-see-also See Also
+
+  - @ref guides-io "I/O in Rodin" — Comprehensive I/O guide
+  - @ref guides-io-xdmf "XDMF format guide"
+
+  */

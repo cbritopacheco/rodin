@@ -4,5 +4,9 @@
 
   - @subpage examples-pdes-poisson
   - @subpage examples-pdes-elasticity
+  - @subpage examples-pdes-helmholtz
+  - @subpage examples-pdes-navierstokes
+  - @subpage examples-pdes-periodic
+  - @subpage examples-pdes-surfacemesh
 
   */

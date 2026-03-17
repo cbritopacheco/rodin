@@ -1,8 +1,319 @@
 /**
   @page fem-spaces Finite element spaces
-  @brief Spaces in Rodin
+  @brief Overview of the finite element spaces available in Rodin
 
-  TODO: Explain this and how it relates to the available finite element spaces
-  in Rodin
+  @m_keywords{Finite Element Space, P0, P1, FES, DOF, Function Space}
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section fem-spaces-intro Introduction
+
+  A **finite element space** @f$ V_h @f$ is a finite-dimensional subspace of
+  a function space (such as @f$ H^1(\Omega) @f$ or @f$ L^2(\Omega) @f$) that
+  is constructed by assembling local finite elements on a mesh. In Rodin,
+  finite element spaces are the bridge between the mesh geometry and the
+  variational formulation of a PDE.
+
+  Every finite element computation in Rodin begins by choosing a mesh and a
+  finite element space defined on that mesh:
+
+  @code{.cpp}
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+
+  P1 Vh(mesh);  // Creates a P1 finite element space
+  @endcode
+
+  @section fem-spaces-available Available Spaces
+
+  Rodin provides several standard finite element spaces:
+
+  | Space | Polynomial Degree | Continuity | Typical Use |
+  |-------|------------------|------------|-------------|
+  | @ref Rodin::Variational::P0 "P0" | 0 (constant) | Discontinuous | Piecewise constant quantities, indicators |
+  | @ref Rodin::Variational::P1 "P1" | 1 (linear) | @f$ C^0 @f$ (continuous) | Most PDEs: Poisson, elasticity, heat |
+  | @ref Rodin::Variational::H1 "H1" | Arbitrary (order @f$ k @f$) | @f$ C^0 @f$ (continuous) | Higher-order methods, mixed problems (e.g. Taylor-Hood for Navier-Stokes) |
+
+  @section fem-spaces-p0 P0: Piecewise Constant Space
+
+  The **P0** space consists of functions that are constant on each cell of the
+  mesh. Functions in P0 are generally discontinuous across cell boundaries.
+
+  @f[
+    V_h^0 = \{ v \in L^2(\Omega) : v|_K \in \mathbb{P}_0(K), \
+    \forall K \in \mathcal{T}_h \}
+  @f]
+
+  **Properties:**
+  - One DOF per cell (the cell-average value)
+  - Number of DOFs = number of cells
+  - Discontinuous across cell boundaries
+  - Used for piecewise constant approximations (e.g. material properties,
+    indicator functions)
+
+  @code{.cpp}
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {8, 8});
+
+  P0 Wh(mesh);
+  std::cout << "P0 DOFs: " << Wh.getSize() << std::endl;
+  // For an 8x8 grid of triangles: 128 DOFs (= 128 cells)
+
+  GridFunction indicator(Wh);
+  indicator = [](const Geometry::Point& p) {
+    return (p.x() < 0.5) ? 1.0 : 0.0;
+  };
+  @endcode
+
+  @section fem-spaces-p1 P1: Piecewise Linear Space
+
+  The **P1** space is the most commonly used finite element space. It consists
+  of continuous functions that are linear on each cell.
+
+  @f[
+    V_h^1 = \{ v \in H^1(\Omega) : v|_K \in \mathbb{P}_1(K), \
+    \forall K \in \mathcal{T}_h \}
+  @f]
+
+  **Properties:**
+  - One DOF per vertex (the function value at the vertex)
+  - Number of DOFs = number of vertices
+  - Continuous across cell boundaries (@f$ H^1 @f$-conforming)
+  - Approximation error: @f$ \|u - u_h\|_{H^1} = O(h) @f$ where @f$ h @f$
+    is the mesh size
+
+  @code{.cpp}
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {8, 8});
+
+  P1 Vh(mesh);
+  std::cout << "P1 DOFs: " << Vh.getSize() << std::endl;
+  // For an 8x8 grid: 81 DOFs (= 9x9 = 81 vertices)
+
+  // P1 is the default choice for most scalar PDEs
+  TrialFunction u(Vh);
+  TestFunction  v(Vh);
+  @endcode
+
+  @section fem-spaces-h1 H1: Higher-Order Space
+
+  The @ref Rodin::Variational::H1 "H1" space provides @f$ H^1 @f$-conforming
+  finite elements of **arbitrary polynomial order**. This is useful for
+  problems requiring higher accuracy or mixed formulations (e.g. Taylor-Hood
+  elements for the @ref examples-pdes-navierstokes "Navier-Stokes equations").
+
+  The polynomial order is specified as a compile-time constant:
+
+  @code{.cpp}
+  #include <Rodin/Variational/H1.h>
+
+  // Quadratic scalar space (order 2)
+  H1 Vh(std::integral_constant<size_t, 2>{}, mesh);
+
+  // Quadratic vector space (order 2, d components)
+  H1 Uh(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+  @endcode
+
+  A common application is the **Taylor-Hood** pair for incompressible flow:
+  - P2 velocity (order 2): `H1 uh(std::integral_constant<size_t, 2>{}, mesh, d)`
+  - P1 pressure (order 1): `H1 ph(std::integral_constant<size_t, 1>{}, mesh)`
+
+  @section fem-spaces-vector Vector-Valued Spaces
+
+  P0, P1, and H1 all support **vector-valued** function spaces by specifying
+  the number of components. This is essential for problems involving vector
+  fields such as displacement (elasticity) or velocity (fluid dynamics).
+
+  @code{.cpp}
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+
+  // Scalar space (default, 1 component)
+  P1 scalarVh(mesh);
+
+  // 2D vector space (2 components)
+  P1 vectorVh(mesh, 2);
+
+  // 3D vector space (3 components)
+  P1 vector3Vh(mesh, 3);
+  @endcode
+
+  For the elasticity equation, a vector-valued P1 space represents the
+  displacement field @f$ u : \Omega \to \mathbb{R}^d @f$:
+
+  @code{.cpp}
+  size_t d = mesh.getSpaceDimension();
+  P1 Vh(mesh, d);
+
+  TrialFunction u(Vh);  // u is a vector function
+  TestFunction  v(Vh);  // v is a vector function
+  @endcode
+
+  @section fem-spaces-complex Complex-Valued Spaces
+
+  Rodin supports complex-valued finite element spaces using C++ complex types.
+  This is useful for problems in wave propagation, acoustics, and
+  electromagnetics:
+
+  @code{.cpp}
+  // Complex-valued P1 space
+  P1<Complex> Vh(mesh);
+
+  GridFunction gf(Vh);
+  gf = [](const Geometry::Point& p) {
+    return Complex(p.x(), p.y());  // real + imaginary
+  };
+
+  // Extract real and imaginary parts for output
+  P1<Real> realVh(mesh);
+  GridFunction gfRe(realVh), gfIm(realVh);
+  gfRe = Re(gf);
+  gfIm = Im(gf);
+  @endcode
+
+  @section fem-spaces-gridfunctions Grid Functions
+
+  A @ref Rodin::Variational::GridFunction "GridFunction" is a concrete
+  function living in a finite element space. It stores the coefficients
+  (DOF values) and can be evaluated, saved, and loaded.
+
+  @subsection fem-spaces-gf-creation Creating and Projecting
+
+  Grid functions are created by associating them with a finite element
+  space. They can be initialized from lambda functions, constants, or
+  other grid functions:
+
+  @code{.cpp}
+  P1 Vh(mesh);
+
+  // Create a grid function in the P1 space
+  GridFunction gf(Vh);
+
+  // Project a smooth function onto the FE space
+  gf = [](const Geometry::Point& p) {
+    return std::sin(M_PI * p.x()) * std::sin(M_PI * p.y());
+  };
+
+  // Project from a constant
+  GridFunction constant(Vh);
+  constant = 1.0;
+  @endcode
+
+  For P0 (piecewise constant) spaces, the projection computes cell
+  averages:
+
+  @code{.cpp}
+  P0 Wh(mesh);
+  GridFunction indicator(Wh);
+  indicator = [](const Point& p) {
+    return p.x() * p.x() + p.y() * p.y();
+  };
+  @endcode
+
+  @subsection fem-spaces-gf-gradient Computing Gradients
+
+  The gradient of a scalar grid function can be projected into a
+  vector-valued space:
+
+  @code{.cpp}
+  P1 scalarVh(mesh);
+  GridFunction temperature(scalarVh);
+  temperature = [](const Point& p) {
+    return 1 - (p.x() - 0.5) * (p.x() - 0.5)
+             - (p.y() - 0.5) * (p.y() - 0.5);
+  };
+
+  // Project the gradient into a vector P1 space
+  size_t d = mesh.getSpaceDimension();
+  P1 vectorVh(mesh, d);
+
+  GridFunction grad(vectorVh);
+  grad = Grad(temperature);
+  @endcode
+
+  The `Grad()` operator computes the element-wise gradient. For
+  face-based trace evaluation (needed in shape optimization), use
+  `traceOf()`:
+
+  @code{.cpp}
+  GridFunction trace(vectorVh);
+  trace.project(Region::Faces, Grad(temperature).traceOf(1));
+  @endcode
+
+  @subsection fem-spaces-gf-solution Accessing Solutions
+
+  After solving a problem, the solution is stored as a grid function
+  accessible via the trial function:
+
+  @code{.cpp}
+  TrialFunction u(Vh);
+  TestFunction  v(Vh);
+
+  Problem poisson(u, v);
+  // ... define problem ...
+  Solver::CG(poisson).solve();
+
+  // Access the solution grid function
+  auto& solution = u.getSolution();
+  @endcode
+
+  @subsection fem-spaces-gf-boolean Boolean Operations on Grid Functions
+
+  Grid functions support boolean comparison operators, which produce
+  piecewise constant (0 or 1) results useful for indicator functions:
+
+  @code{.cpp}
+  P1 Vh(mesh);
+
+  auto f = cos(2 * pi() * F::x + pi() / 2) * sin(2 * pi() * F::y);
+  auto g = sin(2 * pi() * F::x) * sin(2 * pi() * F::y);
+
+  GridFunction gf(Vh);
+  gf = f > g;         // 1 where f > g, 0 otherwise
+  gf = f < g;         // 1 where f < g, 0 otherwise
+  gf = (f > g) || (f < g);  // Logical OR
+  gf = (f > g) && (f < g);  // Logical AND (always 0 here)
+  @endcode
+
+  @subsection fem-spaces-gf-io Saving and Loading
+
+  Grid functions can be saved and loaded in MFEM format:
+
+  @code{.cpp}
+  // Save
+  gf.save("temperature.gf", IO::FileFormat::MFEM);
+
+  // Load
+  GridFunction loaded(Vh);
+  loaded.load("temperature.gf", IO::FileFormat::MFEM);
+  @endcode
+
+  For visualization, use the @ref Rodin::IO::XDMF "XDMF" format:
+
+  @code{.cpp}
+  IO::XDMF xdmf("output");
+  xdmf.grid().setMesh(mesh).add("temperature", gf);
+  xdmf.write();
+  @endcode
+
+  @section fem-spaces-choosing Choosing the Right Space
+
+  | Problem Type | Recommended Space | Reason |
+  |-------------|-------------------|--------|
+  | Scalar PDE (Poisson, heat) | `P1` | Standard @f$ H^1 @f$ conforming |
+  | Vector PDE (elasticity) | `P1(mesh, d)` | Vector-valued @f$ H^1 @f$ |
+  | Wave problems | `P1<Complex>` | Complex-valued fields |
+  | Material indicators | `P0` | Piecewise constant |
+  | Incompressible flow (Navier-Stokes) | `H1` order 2 (velocity) + `H1` order 1 (pressure) | Taylor-Hood pair satisfying the inf-sup condition |
+
+  @section fem-spaces-see-also See Also
+
+  - @ref fem-ciarlet "Ciarlet's definition" — Mathematical foundations
+  - @ref guides-getting-started-core-concepts "Core Concepts" — Practical
+    guide
+  - @ref examples-pdes-poisson "Poisson example" — Using P1 in practice
+  - @ref examples-pdes-elasticity "Elasticity example" — Vector-valued spaces
 
   */
