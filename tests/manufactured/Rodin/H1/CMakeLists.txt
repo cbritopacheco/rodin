@@ -13,7 +13,9 @@ set(RodinManufacturedStokes_SLOW_TESTS
 list(JOIN RodinManufacturedStokes_SLOW_TESTS ":" RodinManufacturedStokes_SLOW_TESTS)
 gtest_discover_tests(RodinManufacturedStokes
   TEST_FILTER
-    "-${RodinManufacturedStokes_SLOW_TESTS}")
+    "-${RodinManufacturedStokes_SLOW_TESTS}"
+  PROPERTIES
+    LABELS manufactured)
 gtest_discover_tests(RodinManufacturedStokes
   TEST_FILTER
     "${RodinManufacturedStokes_SLOW_TESTS}"
@@ -139,11 +141,11 @@ set(RodinManufacturedH1NavierStokes3D_SLOW_TESTS
 list(JOIN RodinManufacturedH1NavierStokes3D_SLOW_TESTS ":" RodinManufacturedH1NavierStokes3D_SLOW_TESTS)
 gtest_discover_tests(RodinManufacturedH1NavierStokes3D
     TEST_FILTER
-      "-${RodinManufacturedH1NavierStokes3D_SLOW_TESTS}"
+    "-${RodinManufacturedH1NavierStokes3D_SLOW_TESTS}"
     PROPERTIES
-      LABELS manufactured)
+    LABELS manufactured)
 gtest_discover_tests(RodinManufacturedH1NavierStokes3D
     TEST_FILTER
-      "${RodinManufacturedH1NavierStokes3D_SLOW_TESTS}"
+    "${RodinManufacturedH1NavierStokes3D_SLOW_TESTS}"
     PROPERTIES
-      LABELS "manufactured;slow")
+    LABELS "manufactured;slow")
