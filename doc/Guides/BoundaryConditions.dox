@@ -22,6 +22,9 @@
     the solution on the boundary. These appear naturally in the weak
     formulation as boundary integrals.
 
+  A third type, **periodic conditions**, ties degrees of freedom on opposite
+  sides of the domain.
+
   @section guides-bc-dirichlet Dirichlet Boundary Conditions
 
   Dirichlet conditions specify the value of the solution on the boundary:
@@ -48,7 +51,7 @@
   // Using a constant
   DirichletBC(u, RealFunction(1.0))
 
-  // Using a function
+  // Using a spatial function
   RealFunction g([](const Geometry::Point& p) {
     return p.x() * p.x();
   });
@@ -66,10 +69,14 @@
 
   // Apply u = g only on boundary with attribute 2
   DirichletBC(u, g).on(2)
+
+  // Apply on multiple boundary attributes at once
+  DirichletBC(u, Zero()).on({1, 3})
   @endcode
 
   Boundary attributes are integers associated with boundary elements in
-  the mesh. They are typically set during mesh generation.
+  the mesh. They are typically set during mesh generation or loaded from
+  a mesh file.
 
   @subsection guides-bc-dirichlet-vector Vector Dirichlet Conditions
 
@@ -78,6 +85,10 @@
   @code{.cpp}
   // Fix displacement to zero (clamped boundary)
   DirichletBC(u, VectorFunction{0, 0}).on(GammaD)
+
+  // Prescribe a specific displacement
+  VectorFunction prescribed{0.1, 0};
+  DirichletBC(u, prescribed).on(GammaD)
   @endcode
 
   @section guides-bc-neumann Neumann Boundary Conditions
@@ -116,6 +127,65 @@
   Homogeneous Neumann conditions (@f$ \partial u / \partial n = 0 @f$) are
   the "default" — they are automatically satisfied when no boundary integral
   is added and no Dirichlet condition is imposed on that part of the boundary.
+
+  @subsection guides-bc-neumann-vector Vector Neumann (Traction)
+
+  In elasticity, a Neumann condition corresponds to an applied traction
+  (force per unit area). The traction vector @f$ \mathbf{f} @f$ is
+  prescribed on the loaded boundary:
+
+  @code{.cpp}
+  VectorFunction traction{0, -1};   // Downward pull
+
+  Problem elasticity(u, v);
+  elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
+             - BoundaryIntegral(traction, v).over(GammaN)
+             + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
+  @endcode
+
+  @section guides-bc-periodic Periodic Boundary Conditions
+
+  Periodic conditions enforce that the solution on one boundary equals the
+  solution on the opposite boundary. They are used for problems on domains
+  that tile (e.g.\ unit cells in homogenization):
+
+  @f[
+    u(0, y) = u(2\pi, y), \quad
+    u(x, 0) = u(x, 2\pi)
+  @f]
+
+  In Rodin, periodic conditions are imposed by building an `IndexMap` that
+  pairs the DOF indices on opposite boundaries, then passing it to
+  @ref Rodin::Variational::PeriodicBC "PeriodicBC":
+
+  @code{.cpp}
+  const size_t n = 200;
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+  mesh.getConnectivity().compute(1, 2);
+  mesh.scale(1.0 / (n - 1));
+  mesh.scale(2 * M_PI);   // Scale to [0, 2π]^2
+
+  P1 vh(mesh);
+
+  // Build DOF correspondence: left ↔ right, bottom ↔ top
+  IndexMap<IndexSet> dofs;
+  for (Index i = 0; i < vh.getSize(); i += n)
+    dofs[i].insert(i + n - 1);        // left ↔ right
+  for (Index i = 0; i < n; i++)
+    dofs[i].insert(i + n * (n - 1));  // bottom ↔ top
+
+  TrialFunction u(vh);
+  TestFunction  v(vh);
+
+  Problem problem(u, v);
+  problem = Integral(Grad(u), Grad(v))
+          - Integral(f, v)
+          + PeriodicBC(u, dofs);
+  @endcode
+
+  See the @ref examples-pdes-periodic "periodic Poisson example" for a
+  complete walkthrough.
 
   @section guides-bc-mixed Mixed Boundary Conditions
 
@@ -184,6 +254,7 @@
   | Dirichlet | @f$ u = g @f$ on @f$ \Gamma_D @f$ | `DirichletBC(u, g).on(GammaD)` | System modification |
   | Neumann | @f$ \partial u / \partial n = h @f$ on @f$ \Gamma_N @f$ | `BoundaryIntegral(h, v).over(GammaN)` | Weak formulation |
   | Homogeneous Neumann | @f$ \partial u / \partial n = 0 @f$ | (nothing needed) | Default |
+  | Periodic | @f$ u(x_L) = u(x_R) @f$ | `PeriodicBC(u, dofMap)` | System modification |
 
   @section guides-bc-see-also See Also
 
@@ -191,5 +262,6 @@
   - @ref guides-getting-started-core-concepts "Core concepts"
   - @ref examples-pdes-poisson "Poisson example"
   - @ref examples-pdes-elasticity "Elasticity example"
+  - @ref examples-pdes-periodic "Periodic Poisson example"
 
   */

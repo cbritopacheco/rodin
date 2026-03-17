@@ -111,6 +111,81 @@
   }
   @endcode
 
+  @section guides-weak-elasticity Example: Linearized Elasticity
+
+  @subsection guides-weak-elasticity-strong Strong Form
+
+  The linearized elasticity system governs the displacement @f$ \mathbf{u}
+  : \Omega \to \mathbb{R}^d @f$ of an elastic body:
+
+  @f[
+    \left\{
+    \begin{aligned}
+      -\nabla \cdot \sigma(\mathbf{u}) &= \mathbf{0} && \text{in } \Omega \\
+      \mathbf{u} &= \mathbf{0} && \text{on } \Gamma_D \\
+      \sigma(\mathbf{u}) \, \mathbf{n} &= \mathbf{f} && \text{on } \Gamma_N
+    \end{aligned}
+    \right.
+  @f]
+
+  where @f$ \sigma(\mathbf{u}) = 2\mu \, e(\mathbf{u}) + \lambda \,
+  \mathrm{tr}(e(\mathbf{u})) \, I @f$ is the Cauchy stress tensor
+  (Hooke's law) and @f$ e(\mathbf{u}) = \frac{1}{2}(\nabla \mathbf{u}
+  + \nabla \mathbf{u}^T) @f$ is the linearized strain tensor.
+
+  @subsection guides-weak-elasticity-deriv Derivation
+
+  Multiply by @f$ \mathbf{v} \in [H^1_0(\Omega)]^d @f$, integrate, and
+  use the divergence theorem. The boundary integral on @f$ \Gamma_N @f$
+  produces the traction term:
+
+  @f[
+    \int_\Omega \sigma(\mathbf{u}) : e(\mathbf{v}) \, dx
+    = \int_{\Gamma_N} \mathbf{f} \cdot \mathbf{v} \, ds
+  @f]
+
+  @subsection guides-weak-elasticity-rodin Implementation
+
+  Rodin provides a convenient `LinearElasticityIntegral` that assembles the
+  bilinear form for the Hooke tensor. The Lamé parameters @f$ \lambda @f$
+  and @f$ \mu @f$ are passed as arguments:
+
+  @code{.cpp}
+  #include <Rodin/Solver.h>
+  #include <Rodin/Geometry.h>
+  #include <Rodin/Variational.h>
+  #include <Rodin/LinearElasticity.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
+
+  int main()
+  {
+    Mesh mesh;
+    mesh.load("beam.mesh", IO::FileFormat::MFEM);
+    mesh.getConnectivity().compute(1, 2);
+
+    const size_t d = mesh.getSpaceDimension();
+    const Real lambda = 0.5769, mu = 0.3846;
+
+    P1 Vh(mesh, d);  // Vector-valued P1 space
+    TrialFunction u(Vh);
+    TestFunction  v(Vh);
+
+    VectorFunction load{0, -1};  // Downward force
+
+    Problem elasticity(u, v);
+    elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
+               - BoundaryIntegral(load, v).over(GammaN)
+               + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
+
+    Solver::CG(elasticity).solve();
+
+    return 0;
+  }
+  @endcode
+
   @section guides-weak-general General Structure
 
   Most weak formulations in Rodin follow this pattern:
@@ -175,6 +250,46 @@
   BoundaryIntegral(g, v).over(2)
   @endcode
 
+  @subsection guides-weak-bc-periodic Periodic Boundary Conditions
+
+  Periodic conditions tie DOFs on opposite boundary segments using an
+  `IndexMap`. See the @ref examples-pdes-periodic "periodic Poisson example"
+  for a complete walkthrough.
+
+  @code{.cpp}
+  // Build a DOF correspondence map: left edge ↔ right edge
+  IndexMap<IndexSet> dofs;
+  for (Index i = 0; i < Vh.getSize(); i += n)
+    dofs[i].insert(i + n - 1);
+
+  Problem problem(u, v);
+  problem = Integral(Grad(u), Grad(v))
+          - Integral(f, v)
+          + PeriodicBC(u, dofs);
+  @endcode
+
+  @section guides-weak-mixed Mixed Formulations
+
+  Some PDEs involve multiple unknowns from different spaces. The
+  @ref examples-pdes-navierstokes "Navier–Stokes example" uses
+  Taylor–Hood elements with separate trial and test functions for
+  velocity and pressure:
+
+  @code{.cpp}
+  H1 Vh(mesh, d, 2);  // Velocity: vector H1, order 2
+  H1 Qh(mesh, 1, 1);  // Pressure: scalar H1, order 1
+
+  TrialFunction u(Vh);  TestFunction v(Vh);   // Velocity pair
+  TrialFunction p(Qh);  TestFunction q(Qh);   // Pressure pair
+
+  Problem stokes(u, p, v, q);
+  stokes = Integral(Grad(u), Grad(v))     // viscous term
+         - Integral(p, Div(v))            // pressure–velocity coupling
+         + Integral(Div(u), q)            // incompressibility constraint
+         - Integral(f, v)                 // body force
+         + DirichletBC(u, uD);           // velocity BC
+  @endcode
+
   @section guides-weak-well-posedness Well-Posedness
 
   The **Lax-Milgram theorem** guarantees existence and uniqueness of the
@@ -187,11 +302,19 @@
   \nabla u \cdot \nabla v \, dx @f$ is coercive on @f$ H^1_0(\Omega) @f$
   by the Poincaré inequality.
 
+  For mixed formulations (saddle-point problems), the Brezzi conditions
+  (inf-sup stability) replace coercivity. Taylor–Hood elements satisfy
+  the inf-sup condition, making them a standard choice for Stokes-type
+  problems.
+
   @section guides-weak-see-also See Also
 
+  - @ref notation-index "Notation reference"
   - @ref guides-getting-started-first-problem "Your first problem"
   - @ref guides-boundary-conditions "Boundary conditions in detail"
   - @ref guides-solvers "Solvers"
   - @ref examples-pdes-poisson "Poisson example"
+  - @ref examples-pdes-elasticity "Elasticity example"
+  - @ref examples-pdes-navierstokes "Navier–Stokes example"
 
   */

@@ -179,20 +179,70 @@
   function living in a finite element space. It stores the coefficients
   (DOF values) and can be evaluated, saved, and loaded.
 
+  @subsection fem-spaces-gf-creation Creating and Projecting
+
+  Grid functions are created by associating them with a finite element
+  space. They can be initialized from lambda functions, constants, or
+  other grid functions:
+
   @code{.cpp}
   P1 Vh(mesh);
 
   // Create a grid function in the P1 space
   GridFunction gf(Vh);
 
-  // Set values via a lambda function
+  // Project a smooth function onto the FE space
   gf = [](const Geometry::Point& p) {
     return std::sin(M_PI * p.x()) * std::sin(M_PI * p.y());
   };
 
-  // Give it a name (useful for XDMF output)
-  gf.setName("temperature");
+  // Project from a constant
+  GridFunction constant(Vh);
+  constant = 1.0;
   @endcode
+
+  For P0 (piecewise constant) spaces, the projection computes cell
+  averages:
+
+  @code{.cpp}
+  P0 Wh(mesh);
+  GridFunction indicator(Wh);
+  indicator = [](const Point& p) {
+    return p.x() * p.x() + p.y() * p.y();
+  };
+  @endcode
+
+  @subsection fem-spaces-gf-gradient Computing Gradients
+
+  The gradient of a scalar grid function can be projected into a
+  vector-valued space:
+
+  @code{.cpp}
+  P1 scalarVh(mesh);
+  GridFunction temperature(scalarVh);
+  temperature = [](const Point& p) {
+    return 1 - (p.x() - 0.5) * (p.x() - 0.5)
+             - (p.y() - 0.5) * (p.y() - 0.5);
+  };
+
+  // Project the gradient into a vector P1 space
+  size_t d = mesh.getSpaceDimension();
+  P1 vectorVh(mesh, d);
+
+  GridFunction grad(vectorVh);
+  grad = Grad(temperature);
+  @endcode
+
+  The `Grad()` operator computes the element-wise gradient. For
+  face-based trace evaluation (needed in shape optimization), use
+  `traceOf()`:
+
+  @code{.cpp}
+  GridFunction trace(vectorVh);
+  trace.project(Region::Faces, Grad(temperature).traceOf(1));
+  @endcode
+
+  @subsection fem-spaces-gf-solution Accessing Solutions
 
   After solving a problem, the solution is stored as a grid function
   accessible via the trial function:
@@ -203,10 +253,49 @@
 
   Problem poisson(u, v);
   // ... define problem ...
-  CG(poisson).solve();
+  Solver::CG(poisson).solve();
 
   // Access the solution grid function
   auto& solution = u.getSolution();
+  @endcode
+
+  @subsection fem-spaces-gf-boolean Boolean Operations on Grid Functions
+
+  Grid functions support boolean comparison operators, which produce
+  piecewise constant (0 or 1) results useful for indicator functions:
+
+  @code{.cpp}
+  P1 Vh(mesh);
+
+  auto f = cos(2 * pi() * F::x + pi() / 2) * sin(2 * pi() * F::y);
+  auto g = sin(2 * pi() * F::x) * sin(2 * pi() * F::y);
+
+  GridFunction gf(Vh);
+  gf = f > g;         // 1 where f > g, 0 otherwise
+  gf = f < g;         // 1 where f < g, 0 otherwise
+  gf = (f > g) || (f < g);  // Logical OR
+  gf = (f > g) && (f < g);  // Logical AND (always 0 here)
+  @endcode
+
+  @subsection fem-spaces-gf-io Saving and Loading
+
+  Grid functions can be saved and loaded in MFEM format:
+
+  @code{.cpp}
+  // Save
+  gf.save("temperature.gf", IO::FileFormat::MFEM);
+
+  // Load
+  GridFunction loaded(Vh);
+  loaded.load("temperature.gf", IO::FileFormat::MFEM);
+  @endcode
+
+  For visualization, use the @ref Rodin::IO::XDMF "XDMF" format:
+
+  @code{.cpp}
+  IO::XDMF xdmf("output");
+  xdmf.grid().setMesh(mesh).add("temperature", gf);
+  xdmf.write();
   @endcode
 
   @section fem-spaces-choosing Choosing the Right Space

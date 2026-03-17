@@ -33,6 +33,8 @@
   | @f$ - \nabla \cdot \sigma (u ) = 0  @f$         | @ref examples-pdes-elasticity |
   | @f$ - \Delta u - k^2 u = f @f$                  | @ref examples-pdes-helmholtz |
   | @f$ -\nu \Delta \mathbf{u} + (\mathbf{u} \cdot \nabla)\mathbf{u} + \nabla p = \mathbf{f} @f$ | @ref examples-pdes-navierstokes |
+  | @f$ - \Delta u = f @f$ (periodic)               | @ref examples-pdes-periodic |
+  | @f$ - \Delta_\Gamma u + u = f @f$ (surface)     | @ref examples-pdes-surfacemesh |
 
   @section examples-index-io Input/Output
 

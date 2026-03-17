@@ -54,6 +54,21 @@
   (@ref Rodin::Variational::H1 "H1" order 2 for velocity, order 1 for
   pressure) with Picard iteration.
 
+  @subsection gallery-pdes-periodic Periodic Poisson Equation
+
+  The @ref examples-pdes-periodic "periodic Poisson" example demonstrates
+  how to impose periodic boundary conditions using `PeriodicBC` and a DOF
+  correspondence map. The solution on opposite edges of the domain is
+  constrained to be equal, simulating a tiling pattern.
+
+  @subsection gallery-pdes-surface Reaction-Diffusion on a Surface
+
+  The @ref examples-pdes-surfacemesh "surface mesh" example solves a
+  reaction-diffusion equation @f$ -\Delta_\Gamma u + u = f @f$ on a
+  curved 3D manifold. It demonstrates that Rodin handles surface PDEs
+  transparently — the same `Integral(Grad(u), Grad(v))` syntax
+  automatically computes the surface gradient.
+
   @section gallery-optimization Optimization
 
   @subsection gallery-shapeopt-cantilever Shape Optimization: Cantilever
@@ -86,6 +101,23 @@
   Material with Penalization) approach to find an optimal material
   distribution that minimizes the average temperature in a domain.
 
+  @section gallery-geometry Mesh Geometry and Utilities
+
+  Rodin provides a rich set of geometric operations for creating,
+  transforming, and querying meshes:
+
+  - **UniformGrid**: Generate structured meshes of triangles, quads,
+    tetrahedra, hexahedra, or wedges in any dimension. See
+    @ref examples-geometry-uniformgrid "UniformGrid example".
+  - **Scale and displace**: Transform mesh coordinates with
+    `mesh.scale()` and `mesh.displace()`.
+  - **Trim**: Remove cells by attribute to extract subdomains.
+  - **Skin**: Extract the boundary surface of a volumetric mesh.
+  - **CCL**: Connected component labeling for domain decomposition.
+  - **Connectivity**: Compute topological incidence relations between
+    mesh entities of any dimension. See
+    @ref examples-geometry-connectivity "Connectivity example".
+
   @section gallery-io Visualization and I/O
 
   Rodin supports exporting simulation data in the
@@ -95,10 +127,16 @@
 
   See the @ref examples-io-xdmf "XDMF example" for a complete guide.
 
+  The supported mesh file formats are:
+  - **MFEM** (`IO::FileFormat::MFEM`): Text-based, used by the MFEM library
+  - **MEDIT** (`IO::FileFormat::MEDIT`): Native for MMG/INRIA tools
+  - **HDF5** (`IO::FileFormat::HDF5`): Binary, for large-scale simulations
+
   @section gallery-see-also See Also
 
   - @ref examples-index "Examples and tutorials"
   - @ref guides-io "I/O in Rodin"
-  - @ref guides-variational "Variational formulations"
+  - @ref guides-weak-formulations "Weak formulations"
+  - @ref notation-index "Notation reference"
 
   */
