@@ -90,8 +90,10 @@
 
   @subsection examples-pdes-elasticity-impl-setup Setup
 
-  We load the mesh, define the vector-valued P1 finite element space, and
-  set the material parameters:
+  We load the mesh using @ref Rodin::Geometry::Mesh::load "Mesh::load()",
+  define a vector-valued @ref Rodin::Variational::P1 "P1" finite element
+  space with @f$ d @f$ components (one per spatial dimension), and set the
+  material parameters:
 
   @code{.cpp}
   #include <Rodin/Solver.h>
@@ -124,9 +126,12 @@
 
   @subsection examples-pdes-elasticity-impl-problem Problem Formulation
 
-  The variational problem is expressed using Rodin's
-  `LinearElasticityIntegral`, which provides a convenient shorthand for the
-  elasticity bilinear form:
+  The variational problem is expressed through the
+  @ref Rodin::Variational::Problem "Problem" class. The
+  `LinearElasticityIntegral` provides a convenient shorthand for the full
+  elasticity bilinear form. `BoundaryIntegral` applies the traction load
+  on boundary segment @f$ \Gamma_N @f$, and `DirichletBC` fixes the
+  displacement on @f$ \Gamma_D @f$:
 
   @code{.cpp}
   TrialFunction u(fes);
@@ -140,7 +145,8 @@
 
   @subsection examples-pdes-elasticity-impl-solve Solving and Output
 
-  We solve with the CG solver and save the results:
+  We solve with the @ref Rodin::Solver::CG "CG" solver and save the results
+  using @ref Rodin::IO::FileFormat "IO::FileFormat::MFEM":
 
   @code{.cpp}
   Solver::CG(elasticity).solve();
@@ -150,7 +156,8 @@
   mesh.save("Elasticity.mesh", IO::FileFormat::MFEM);
   @endcode
 
-  For visualization in ParaView, you can also export using XDMF:
+  For visualization in ParaView, export using
+  @ref Rodin::IO::XDMF "IO::XDMF":
 
   @code{.cpp}
   #include <Rodin/IO/XDMF.h>

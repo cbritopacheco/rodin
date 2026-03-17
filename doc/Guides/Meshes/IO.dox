@@ -6,7 +6,8 @@
 
   @m_footernavigation
 
-  Rodin supports reading and writing meshes in various file formats.
+  Rodin supports reading and writing meshes in various file formats through
+  the @ref Rodin::IO "IO" module.
 
   @section guides-meshes-io-intro Introduction
 
@@ -18,21 +19,24 @@
 
   @section guides-meshes-io-formats Supported Formats
 
-  Rodin supports several mesh file formats:
+  The file format is specified explicitly via the
+  @ref Rodin::IO::FileFormat "IO::FileFormat" enumeration:
 
   | Format | Extension | Description |
   |--------|-----------|-------------|
-  | MFEM | `.mesh` | MFEM native format (default) |
-  | MEDIT | `.mesh` | MEDIT format from INRIA |
-  | GMSH | `.msh`, `.gmsh` | Gmsh mesh format |
+  | MFEM | `.mesh` | MFEM native format |
+  | MEDIT | `.mesh` | MEDIT format from INRIA (used by MMG) |
+  | HDF5 | `.h5` | High-performance binary format |
 
   @section guides-meshes-io-loading Loading Meshes
 
   @subsection guides-meshes-io-loading-basic Basic Loading
 
+  Use @ref Rodin::Geometry::Mesh::load "Mesh::load()" with an explicit
+  @ref Rodin::IO::FileFormat "IO::FileFormat":
+
   @code{.cpp}
   #include <Rodin/Geometry.h>
-  #include <Rodin/IO.h>
 
   using namespace Rodin;
   using namespace Rodin::Geometry;
@@ -40,51 +44,39 @@
   int main() {
     Mesh mesh;
 
-    // Load with default format (MFEM)
-    mesh.load("domain.mesh");
-
-    // Explicitly specify format
+    // Load MFEM format
     mesh.load("domain.mesh", IO::FileFormat::MFEM);
-    mesh.load("domain.msh", IO::FileFormat::GMSH);
+
+    // Load MEDIT format
+    mesh.load("domain.mesh", IO::FileFormat::MEDIT);
 
     return 0;
   }
-  @endcode
-
-  @subsection guides-meshes-io-loading-constructor Constructor Loading
-
-  @code{.cpp}
-  // Load during construction
-  Mesh mesh("domain.mesh", IO::FileFormat::MFEM);
-
-  // Mesh is ready to use
-  std::cout << "Loaded mesh with " << mesh.getCellCount() 
-            << " cells" << std::endl;
   @endcode
 
   @section guides-meshes-io-saving Saving Meshes
 
   @subsection guides-meshes-io-saving-basic Basic Saving
 
+  Use @ref Rodin::Geometry::Mesh::save "Mesh::save()" with an explicit format:
+
   @code{.cpp}
   Mesh mesh;
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
 
-  // Save with default format (MFEM)
-  mesh.save("output.mesh");
-
-  // Explicitly specify format
+  // Save in MFEM format
   mesh.save("output.mesh", IO::FileFormat::MFEM);
-  mesh.save("output.msh", IO::FileFormat::GMSH);
+
+  // Save in MEDIT format
+  mesh.save("output.mesh", IO::FileFormat::MEDIT);
   @endcode
 
   @subsection guides-meshes-io-saving-medit MEDIT Format
 
-  The MEDIT format is commonly used with MMG and ISCD tools:
+  The MEDIT format is commonly used with the
+  @ref Rodin::External::MMG "MMG" mesh adaptation tools:
 
   @code{.cpp}
-  #include <Rodin/IO.h>
-
   mesh.save("domain.mesh", IO::FileFormat::MEDIT);
   @endcode
 
@@ -92,7 +84,6 @@
 
   @code{.cpp}
   #include <Rodin/Geometry.h>
-  #include <Rodin/IO.h>
 
   using namespace Rodin;
   using namespace Rodin::Geometry;
@@ -125,68 +116,26 @@
 
   @section guides-meshes-io-external External Mesh Generators
 
-  @subsection guides-meshes-io-external-gmsh Gmsh
-
-  [Gmsh](https://gmsh.info/) is a popular open-source mesh generator:
-
-  1. Create geometry in Gmsh
-  2. Generate mesh
-  3. Export as `.msh` file
-  4. Load in Rodin:
-
-  @code{.cpp}
-  Mesh mesh;
-  mesh.load("gmsh_output.msh", IO::FileFormat::GMSH);
-  @endcode
-
   @subsection guides-meshes-io-external-mmg MMG
 
-  [MMG](https://www.mmgtools.org/) is used for mesh adaptation:
-
-  @code{.cpp}
-  // Rodin can work with MMG through RodinExternal::MMG
-  // See MMG examples for details
-  @endcode
+  [MMG](https://www.mmgtools.org/) is used for mesh adaptation and
+  optimization. Rodin integrates directly with MMG through the
+  @ref Rodin::External::MMG "External::MMG" module. See the
+  @ref examples-mmg-index "MMG examples" for details.
 
   @section guides-meshes-io-paths File Paths
 
   @subsection guides-meshes-io-paths-absolute Absolute Paths
 
   @code{.cpp}
-  mesh.load("/home/user/meshes/domain.mesh");
+  mesh.load("/home/user/meshes/domain.mesh", IO::FileFormat::MFEM);
   @endcode
 
   @subsection guides-meshes-io-paths-relative Relative Paths
 
   @code{.cpp}
-  mesh.load("../data/domain.mesh");
-  mesh.save("./output/result.mesh");
-  @endcode
-
-  @section guides-meshes-io-workflow Typical Workflow
-
-  @subsection guides-meshes-io-workflow-generation Generation and Storage
-
-  @code{.cpp}
-  // Generate mesh
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {64, 64});
-
-  // Save for later use
-  mesh.save("fine_mesh.mesh");
-  @endcode
-
-  @subsection guides-meshes-io-workflow-simulation Simulation Workflow
-
-  @code{.cpp}
-  // Load pre-generated mesh
-  Mesh mesh("fine_mesh.mesh");
-
-  // Setup and solve problem
-  // ...
-
-  // Save solution (grid functions saved separately)
-  // solution.save("solution.gf");
+  mesh.load("../data/domain.mesh", IO::FileFormat::MFEM);
+  mesh.save("./output/result.mesh", IO::FileFormat::MFEM);
   @endcode
 
   @section guides-meshes-io-considerations Format Considerations
@@ -195,7 +144,6 @@
 
   - **MFEM**: Best for MFEM-based workflows
   - **MEDIT**: Required for MMG tools
-  - **GMSH**: For Gmsh-generated meshes
 
   @subsection guides-meshes-io-considerations-attributes Attributes
 
@@ -207,9 +155,9 @@
 
   @section guides-meshes-io-see-also See Also
 
+  - @ref guides-io "I/O in Rodin" — Comprehensive I/O guide including XDMF
   - @ref guides-meshes-creation "Mesh creation"
   - @ref guides-meshes "Meshes overview"
   - @ref Rodin::IO "I/O namespace"
-  - Examples: @ref examples/MMG/MeshIO.cpp
 
   */
