@@ -284,8 +284,9 @@
 
   6. **Post-Process**
      @code{.cpp}
-     u.getSolution().save("solution.gf");
-     mesh.save("mesh.mesh");
+     IO::XDMF xdmf("Results");
+     xdmf.grid().setMesh(mesh).add("u", u.getSolution());
+     xdmf.write();
      @endcode
 
   @section guides-getting-started-core-concepts-next What's Next?
@@ -307,5 +308,7 @@
   - @ref guides-polytopes - Detailed information about polytopes
   - @ref guides-connectivity - Understanding connectivity in depth
   - @ref fem-ciarlet - Mathematical foundations of finite elements
+  - @ref guides-io - Input/output and XDMF visualization
+  - @ref guides-variational - Variational formulations in detail
 
   */
