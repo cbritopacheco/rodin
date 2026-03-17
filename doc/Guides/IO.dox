@@ -117,7 +117,7 @@
   }
   @endcode
 
-  @section guides-io-xdmf XDMF Output for Visualization
+  @section guides-io-xdmf-overview XDMF Output for Visualization
 
   The @ref Rodin::IO::XDMF "XDMF" class provides a powerful and modern way to
   export simulation data for visualization in tools like
@@ -125,7 +125,7 @@
   Format) stores heavy data (coordinates, connectivity, field values) in HDF5
   files and lightweight metadata in an XML file.
 
-  @subsection guides-io-xdmf-why Why Use XDMF?
+  @subsection guides-io-xdmf-overview-why Why Use XDMF?
 
   XDMF has several advantages over other formats:
 
@@ -139,7 +139,7 @@
   - **Multiple fields**: Export several grid functions (velocity, pressure,
     temperature, etc.) in a single output
 
-  @subsection guides-io-xdmf-basic Basic XDMF Usage
+  @subsection guides-io-xdmf-overview-basic Basic XDMF Usage
 
   The simplest use case is to export a mesh and solution at a single time step:
 
@@ -177,7 +177,7 @@
   - `MySimulation.xdmf` — XML metadata file (open this in ParaView)
   - `MySimulation.*.h5` — HDF5 data files with mesh and field data
 
-  @subsection guides-io-xdmf-time Time-Dependent Output
+  @subsection guides-io-xdmf-overview-time Time-Dependent Output
 
   One of the most powerful features of XDMF is its ability to record
   time-evolving data. Use `write(time)` to record snapshots at different
@@ -244,7 +244,7 @@
   When opened in ParaView, this produces a time slider that lets you animate
   the field evolution.
 
-  @subsection guides-io-xdmf-multiple Multiple Fields
+  @subsection guides-io-xdmf-overview-multiple Multiple Fields
 
   You can export several fields (scalar, vector) at once:
 
@@ -258,7 +258,7 @@
   xdmf.write(t);
   @endcode
 
-  @subsection guides-io-xdmf-grids Multiple Grids
+  @subsection guides-io-xdmf-overview-grids Multiple Grids
 
   You can also work with multiple named grids, each with its own mesh and
   attributes:
@@ -277,7 +277,7 @@
   xdmf.write(t);
   @endcode
 
-  @subsection guides-io-xdmf-paraview Viewing XDMF Files in ParaView
+  @subsection guides-io-xdmf-overview-paraview Viewing XDMF Files in ParaView
 
   To visualize XDMF output in [ParaView](https://www.paraview.org/):
 
