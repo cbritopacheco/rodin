@@ -45,10 +45,25 @@ target_link_libraries(RodinManufacturedH1Poisson3D
   Rodin::Variational
   Rodin::Solver
   )
-
+set(RodinManufacturedH1Poisson3D_SLOW_TESTS
+  "PolytopeCoverage3D/Manufactured_Poisson3D_H1_Test_8.Manufactured_Poisson3D_H1_4/Tetrahedron"
+  "PolytopeCoverage3D/Manufactured_Poisson3D_H1_Test_8.Manufactured_Poisson3D_H1_4/Hexahedron"
+  "PolytopeCoverage3D/Manufactured_Poisson3D_H1_Test_8.Manufactured_Poisson3D_H1_4/Wedge"
+  "PolytopeCoverage3D/Manufactured_Poisson3D_H1_Test_8.Manufactured_Poisson3D_H1_5/Tetrahedron"
+  "PolytopeCoverage3D/Manufactured_Poisson3D_H1_Test_8.Manufactured_Poisson3D_H1_5/Hexahedron"
+  "PolytopeCoverage3D/Manufactured_Poisson3D_H1_Test_8.Manufactured_Poisson3D_H1_5/Wedge"
+  "PolytopeCoverage3D/Manufactured_Poisson3D_H1_Test_16.Manufactured_Poisson3D_H1_2_RefinedMesh/Hexahedron")
+list(JOIN RodinManufacturedH1Poisson3D_SLOW_TESTS ":" RodinManufacturedH1Poisson3D_SLOW_TESTS)
 gtest_discover_tests(RodinManufacturedH1Poisson3D
+    TEST_FILTER
+      "-${RodinManufacturedH1Poisson3D_SLOW_TESTS}"
     PROPERTIES
     LABELS manufactured)
+gtest_discover_tests(RodinManufacturedH1Poisson3D
+    TEST_FILTER
+      "${RodinManufacturedH1Poisson3D_SLOW_TESTS}"
+    PROPERTIES
+      LABELS "manufactured;slow")
 
 add_executable(RodinManufacturedH1LinearElasticity3D LinearElasticity3D.cpp)
 target_link_libraries(RodinManufacturedH1LinearElasticity3D
@@ -59,9 +74,18 @@ target_link_libraries(RodinManufacturedH1LinearElasticity3D
   Rodin::Variational
   Rodin::Solver
   )
+set(RodinManufacturedH1LinearElasticity3D_SLOW_TESTS
+  "Manufactured_LinearElasticity3D_H1_Test_8.Manufactured_LinearElasticity3D_H1_2:Constant_LinearElasticity3D_H1_Test_16.ConstantSolution_H1_2")
 gtest_discover_tests(RodinManufacturedH1LinearElasticity3D
+    TEST_FILTER
+      "-${RodinManufacturedH1LinearElasticity3D_SLOW_TESTS}"
     PROPERTIES
     LABELS manufactured)
+gtest_discover_tests(RodinManufacturedH1LinearElasticity3D
+    TEST_FILTER
+      "${RodinManufacturedH1LinearElasticity3D_SLOW_TESTS}"
+    PROPERTIES
+      LABELS "manufactured;slow")
 
 add_executable(RodinManufacturedH1NavierStokes NavierStokes.cpp)
 target_link_libraries(RodinManufacturedH1NavierStokes
@@ -87,5 +111,4 @@ target_link_libraries(RodinManufacturedH1NavierStokes3D
   )
 gtest_discover_tests(RodinManufacturedH1NavierStokes3D
     PROPERTIES
-    LABELS slow manufactured)
-
+    LABELS manufactured)

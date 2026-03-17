@@ -21,7 +21,20 @@ target_link_libraries(RodinManufacturedAdvectionLagrangian3DTest
   Rodin::Variational
   Rodin::Advection
 )
+set(RodinManufacturedAdvectionLagrangian3DTest_SLOW_TESTS
+  "PolytopeCoverage3D/ManufacturedAdvection3DTest_10.ConstantVelocity_OneStep_L2Interior/Tetrahedron"
+  "PolytopeCoverage3D/ManufacturedAdvection3DTest_10.ConstantVelocity_OneStep_L2Interior/Hexahedron"
+  "PolytopeCoverage3D/ManufacturedAdvection3DTest_10.ConstantVelocity_OneStep_L2Interior/Wedge")
+list(JOIN RodinManufacturedAdvectionLagrangian3DTest_SLOW_TESTS ":" RodinManufacturedAdvectionLagrangian3DTest_SLOW_TESTS)
 gtest_discover_tests(RodinManufacturedAdvectionLagrangian3DTest
+  TEST_FILTER
+    "-${RodinManufacturedAdvectionLagrangian3DTest_SLOW_TESTS}"
   PROPERTIES
     LABELS manufactured
+)
+gtest_discover_tests(RodinManufacturedAdvectionLagrangian3DTest
+  TEST_FILTER
+    "${RodinManufacturedAdvectionLagrangian3DTest_SLOW_TESTS}"
+  PROPERTIES
+    LABELS "manufactured;slow"
 )
