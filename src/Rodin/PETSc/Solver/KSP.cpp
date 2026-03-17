@@ -6,6 +6,7 @@
  */
 #include <cassert>
 #include <petsc.h>
+#include <petscksp.h>
 
 #include "Rodin/Variational/Problem.h"
 
@@ -60,9 +61,6 @@ namespace Rodin::Solver
     ierr = KSPSetInitialGuessNonzero(m_ksp, PETSC_TRUE);
     assert(ierr == PETSC_SUCCESS);
 
-    ierr = KSPSetType(m_ksp, m_type);
-    assert(ierr == PETSC_SUCCESS);
-
     ierr = KSPSetTolerances(m_ksp, m_rtol, m_abstol, m_dtol, m_maxIt);
     assert(ierr == PETSC_SUCCESS);
 
@@ -102,6 +100,12 @@ namespace Rodin::Solver
 
     ierr = KSPSetFromOptions(m_ksp);
     assert(ierr == PETSC_SUCCESS);
+
+    if (m_type)
+    {
+      ierr = KSPSetType(m_ksp, m_type);
+      assert(ierr == PETSC_SUCCESS);
+    }
 
     ierr = KSPSolve(m_ksp, b, x);
     assert(ierr == PETSC_SUCCESS);

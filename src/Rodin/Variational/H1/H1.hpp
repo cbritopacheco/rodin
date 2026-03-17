@@ -1138,7 +1138,7 @@ namespace Rodin::Variational
 
               // Triangle-local barycentric integers (a_t,b_t,c_t)
               // for vertices 0,1,2 of that triangle:
-              const size_t a_t = abc[ triToCanon[0] ];
+              // const size_t a_t = abc[ triToCanon[0] ];
               const size_t b_t = abc[ triToCanon[1] ];
               const size_t c_t = abc[ triToCanon[2] ];
 
@@ -1371,17 +1371,17 @@ namespace Rodin::Variational
         //   Local 1 : Quad     (0,1,4,3)
         //   Local 2 : Quad     (1,2,5,4)
         //   Local 3 : Quad     (2,0,3,5)
-        //   Local 4 : Triangle (3,4,5)  (canonical wedge top)
-        //
-        // The actual Triangle / Quad entities in 'inc' may have these
-        // vertex sets but in a permuted order. We match them combinatorially.
+        //   Local 4 : Triangle (3,4,5)      canonical top
         const auto& inc = conn.getIncidence({ d, d - 1 }, idx);
         assert(inc.size() == 5);
 
         using WedgeCochain = Cochain<Geometry::Polytope::Type::Wedge>;
         using TriCochain   = Cochain<Geometry::Polytope::Type::Triangle>;
+        using QuadCochain  = Cochain<Geometry::Polytope::Type::Quadrilateral>;
 
-        constexpr size_t TriCount = TriCochain::Count;
+        constexpr size_t TriCount  = TriCochain::Count;
+        constexpr size_t QuadCount = QuadCochain::Count;
+        constexpr size_t N1        = K + 1;
 
         std::array<uint8_t, WedgeCochain::Count> used{};
         used.fill(0);
@@ -1410,51 +1410,37 @@ namespace Rodin::Variational
           return a;
         };
 
-        // Canonical triangular faces in terms of the cell vertices:
-        //   lf = 0 -> bottom: (0,1,2)
-        //   lf = 4 -> top   : (3,4,5)
         auto canonicalTriFaceVerts = [&](size_t lf) -> std::array<Index,3>
         {
           switch (lf)
           {
-            case 0: // bottom
-              return { v[0], v[1], v[2] };
-            case 4: // top (canonical orientation (3,4,5))
-              return { v[3], v[4], v[5] };
+            case 0: return { v[0], v[1], v[2] }; // bottom
+            case 4: return { v[3], v[4], v[5] }; // top, canonical
             default:
               assert(false && "Invalid local triangular face index for wedge.");
               return { 0, 0, 0 };
           }
         };
 
-        // Canonical quadrilateral faces:
-        //   lf = 1 -> (0,1,4,3)
-        //   lf = 2 -> (1,2,5,4)
-        //   lf = 3 -> (2,0,3,5)
         auto canonicalQuadFaceVerts = [&](size_t lf) -> std::array<Index,4>
         {
           switch (lf)
           {
-            case 1:
-              return { v[0], v[1], v[4], v[3] };
-            case 2:
-              return { v[1], v[2], v[5], v[4] };
-            case 3:
-              return { v[2], v[0], v[3], v[5] };
+            case 1: return { v[0], v[1], v[4], v[3] };
+            case 2: return { v[1], v[2], v[5], v[4] };
+            case 3: return { v[2], v[0], v[3], v[5] };
             default:
               assert(false && "Invalid local quadrilateral face index for wedge.");
               return { 0, 0, 0, 0 };
           }
         };
 
-        // All 6 permutations of 3 vertices
         static constexpr int perms3[6][3] =
         {
           {0,1,2}, {1,2,0}, {2,0,1},
           {0,2,1}, {2,1,0}, {1,0,2}
         };
 
-        // All 24 permutations of 4 vertices
         static constexpr int perms4[24][4] =
         {
           {0,1,2,3}, {0,1,3,2}, {0,2,1,3}, {0,2,3,1},
@@ -1465,15 +1451,10 @@ namespace Rodin::Variational
           {3,1,0,2}, {3,1,2,0}, {3,2,0,1}, {3,2,1,0}
         };
 
-        // For lf in {0,4}: find the triangle entity in 'inc' that matches
-        // the canonical face, and the permutation mapping canonical
-        // face vertices -> triangle local vertices.
         auto getTriFaceEntityAndPerm =
-          [&](size_t lf, std::array<int,3>& canonToTri) -> std::optional<Index>
+          [&](size_t lf, std::array<int,3>& canonToTri) -> Index
         {
-          const auto wanted  = canonicalTriFaceVerts(lf);
-          const auto wantedS = sort3(wanted);
-          (void)wantedS; // currently unused (kept for symmetry with quad logic)
+          const auto wanted = canonicalTriFaceVerts(lf);
 
           for (Index f : inc)
           {
@@ -1482,13 +1463,13 @@ namespace Rodin::Variational
 
             const auto& fVertsIA = conn.getPolytope(d - 1, f);
             assert(fVertsIA.size() == 3);
+
             std::array<Index,3> tv = {
               fVertsIA(0),
               fVertsIA(1),
               fVertsIA(2)
             };
 
-            // Match up to permutation
             for (int pi = 0; pi < 6; ++pi)
             {
               const int a = perms3[pi][0];
@@ -1499,9 +1480,6 @@ namespace Rodin::Variational
                   tv[b] == wanted[1] &&
                   tv[c] == wanted[2])
               {
-                // canonical vertex 0 -> triangle local a
-                // canonical vertex 1 -> triangle local b
-                // canonical vertex 2 -> triangle local c
                 canonToTri[0] = a;
                 canonToTri[1] = b;
                 canonToTri[2] = c;
@@ -1511,51 +1489,36 @@ namespace Rodin::Variational
           }
 
           assert(false && "Could not match wedge triangular face to incident triangle entity.");
-          return std::nullopt;
+          return -1;
         };
 
-        // Build a face DOF array in *canonical* FeketeTriangle<K> ordering
-        // for this triangular face, given the triangle entity index fIdx
-        // and the permutation canonToTri (canonical -> tri-local).
-        auto buildCanonicalFace =
+        auto buildCanonicalTriFace =
           [&](Index fIdx,
               const std::array<int,3>& canonToTri,
               IndexArray& faceCanon)
         {
-          const auto& faceLocal = m_closure[d - 1][fIdx]; // triangle DOFs as built
+          const auto& faceLocal = m_closure[d - 1][fIdx];
           faceCanon.resize(TriCochain::Count);
 
-          // Inverse permutation: triangle local vertex q -> canonical vertex p
-          std::array<int,3> triToCanon;
+          std::array<int,3> triToCanon{};
           for (int p = 0; p < 3; ++p)
-          {
-            const int q = canonToTri[p];
-            triToCanon[q] = p;
-          }
+            triToCanon[canonToTri[p]] = p;
 
           size_t canonIdx = 0;
           for (size_t j2 = 0; j2 <= K; ++j2)
           {
             for (size_t i2 = 0; i2 <= K - j2; ++i2, ++canonIdx)
             {
-              // Canonical integer barycentric (a,b,c) for FeketeTriangle
-              // w.r.t. vertices (0,1,2) of the reference triangle:
-              //   a = K - i2 - j2,  b = i2,  c = j2
               const size_t a = K - i2 - j2;
               const size_t b = i2;
               const size_t c = j2;
               const size_t abc[3] = { a, b, c };
 
-              // Triangle-local barycentric integers for its vertices 0,1,2:
-              const size_t a_t = abc[ triToCanon[0] ];
-              const size_t b_t = abc[ triToCanon[1] ];
-              const size_t c_t = abc[ triToCanon[2] ];
+              const size_t b_t = abc[triToCanon[1]];
+              const size_t c_t = abc[triToCanon[2]];
 
-              // Back to triangle's Fekete enumeration:
-              //   i_loc = b_t,  j_loc = c_t
               const size_t i_loc = b_t;
               const size_t j_loc = c_t;
-
               const size_t rowStartLoc =
                   j_loc * (K + 1) - (j_loc * (j_loc - 1)) / 2;
               const size_t locIdx = rowStartLoc + i_loc;
@@ -1565,21 +1528,145 @@ namespace Rodin::Variational
           }
         };
 
-        // -------------------------------------------------------------------
-        // 1) Triangular faces: bottom (lf=0, k=0) and top (lf=4, k=K)
-        // -------------------------------------------------------------------
+        auto getQuadFaceEntityAndPerm =
+          [&](size_t lf, std::array<int,4>& canonToQuad) -> Index
+        {
+          const auto wanted = canonicalQuadFaceVerts(lf);
+          const auto wantedS = sort4(wanted);
 
-        // Bottom triangular face (k = 0)
+          for (Index f : inc)
+          {
+            if (conn.getGeometry(d - 1, f) != Geometry::Polytope::Type::Quadrilateral)
+              continue;
+
+            const auto& fVertsIA = conn.getPolytope(d - 1, f);
+            assert(fVertsIA.size() == 4);
+
+            std::array<Index,4> qv = {
+              fVertsIA(0),
+              fVertsIA(1),
+              fVertsIA(2),
+              fVertsIA(3)
+            };
+
+            if (sort4(qv) != wantedS)
+              continue;
+
+            for (int pi = 0; pi < 24; ++pi)
+            {
+              const int a = perms4[pi][0];
+              const int b = perms4[pi][1];
+              const int c = perms4[pi][2];
+              const int d4 = perms4[pi][3];
+
+              if (qv[a] == wanted[0] &&
+                  qv[b] == wanted[1] &&
+                  qv[c] == wanted[2] &&
+                  qv[d4] == wanted[3])
+              {
+                canonToQuad[0] = a;
+                canonToQuad[1] = b;
+                canonToQuad[2] = c;
+                canonToQuad[3] = d4;
+                return f;
+              }
+            }
+          }
+
+          assert(false && "Could not match wedge quadrilateral face to incident quadrilateral entity.");
+          return -1;
+        };
+
+        auto vertCornerCoords = [](int vidx) -> std::pair<size_t,size_t>
+        {
+          switch (vidx)
+          {
+            case 0: return { 0, 0 };
+            case 1: return { static_cast<size_t>(K), 0 };
+            case 2: return { static_cast<size_t>(K), static_cast<size_t>(K) };
+            case 3: return { 0, static_cast<size_t>(K) };
+            default:
+              assert(false && "Invalid quad vertex index for corner coords.");
+              return { 0, 0 };
+          }
+        };
+
+        auto applyTransform = [](int tid, size_t i, size_t j) -> std::pair<size_t,size_t>
+        {
+          switch (tid)
+          {
+            case 0: return { i, j };
+            case 1: return { j, static_cast<size_t>(K) - i };
+            case 2: return { static_cast<size_t>(K) - i, static_cast<size_t>(K) - j };
+            case 3: return { static_cast<size_t>(K) - j, i };
+            case 4: return { i, static_cast<size_t>(K) - j };
+            case 5: return { static_cast<size_t>(K) - i, j };
+            case 6: return { j, i };
+            case 7: return { static_cast<size_t>(K) - j, static_cast<size_t>(K) - i };
+            default:
+              assert(false && "Invalid transform id.");
+              return { i, j };
+          }
+        };
+
+        auto buildCanonicalQuadFace =
+          [&](Index fIdx,
+              const std::array<int,4>& canonToQuad,
+              IndexArray& faceCanon)
+        {
+          const IndexArray& faceLocal = m_closure[d - 1][fIdx];
+          assert(faceLocal.size() == QuadCount);
+
+          faceCanon.resize(QuadCount);
+
+          std::pair<size_t,size_t> oldCorners[4];
+          for (int kCorner = 0; kCorner < 4; ++kCorner)
+            oldCorners[kCorner] = vertCornerCoords(canonToQuad[kCorner]);
+
+          int chosenT = -1;
+          for (int tid = 0; tid < 8; ++tid)
+          {
+            auto p0 = applyTransform(tid, 0, 0);
+            auto p1 = applyTransform(tid, static_cast<size_t>(K), 0);
+            auto p2 = applyTransform(tid, static_cast<size_t>(K), static_cast<size_t>(K));
+            auto p3 = applyTransform(tid, 0, static_cast<size_t>(K));
+
+            if (p0 == oldCorners[0] &&
+                p1 == oldCorners[1] &&
+                p2 == oldCorners[2] &&
+                p3 == oldCorners[3])
+            {
+              chosenT = tid;
+              break;
+            }
+          }
+
+          assert(chosenT >= 0 && "Could not determine wedge quad face transform.");
+
+          for (size_t j = 0; j < N1; ++j)
+          {
+            for (size_t i = 0; i < N1; ++i)
+            {
+              const size_t qCanon = j * N1 + i;
+              auto pOld = applyTransform(chosenT, i, j);
+              const size_t iOld = pOld.first;
+              const size_t jOld = pOld.second;
+              const size_t qOld = jOld * N1 + iOld;
+              faceCanon[qCanon] = faceLocal[qOld];
+            }
+          }
+        };
+
+        // -------------------------------------------------------------------
+        // 1) Triangular faces
+        // -------------------------------------------------------------------
         {
           std::array<int,3> canonToTri{};
-          auto fOpt = getTriFaceEntityAndPerm(0, canonToTri);
-          assert(fOpt.has_value());
-          const Index f = *fOpt;
-
+          const Index f = getTriFaceEntityAndPerm(0, canonToTri);
           this->getClosure(d - 1, f);
 
           IndexArray faceCanon;
-          buildCanonicalFace(f, canonToTri, faceCanon);
+          buildCanonicalTriFace(f, canonToTri, faceCanon);
 
           Utility::ForIndex<TriCount>([&](auto ii)
           {
@@ -1590,17 +1677,13 @@ namespace Rodin::Variational
           });
         }
 
-        // Top triangular face (k = K)
         {
           std::array<int,3> canonToTri{};
-          auto fOpt = getTriFaceEntityAndPerm(4, canonToTri);
-          assert(fOpt.has_value());
-          const Index f = *fOpt;
-
+          const Index f = getTriFaceEntityAndPerm(4, canonToTri);
           this->getClosure(d - 1, f);
 
           IndexArray faceCanon;
-          buildCanonicalFace(f, canonToTri, faceCanon);
+          buildCanonicalTriFace(f, canonToTri, faceCanon);
 
           Utility::ForIndex<TriCount>([&](auto ii)
           {
@@ -1612,107 +1695,52 @@ namespace Rodin::Variational
         }
 
         // -------------------------------------------------------------------
-        // 2) Quadrilateral faces: fill side faces without overriding
-        //    DOFs already set by the triangular faces (especially vertices).
+        // 2) Quadrilateral faces, now canonicalized before injection
         // -------------------------------------------------------------------
-
-        // Local 1: Quad (0,1,4,3): extrude edge 0->1 in z
         {
-          const auto wanted  = canonicalQuadFaceVerts(1);
-          const auto wantedS = sort4(wanted);
-
-          std::optional<Index> fOpt;
-          for (Index cand : inc)
-          {
-            if (conn.getGeometry(d - 1, cand) != Geometry::Polytope::Type::Quadrilateral)
-              continue;
-            const auto& qVertsIA = conn.getPolytope(d - 1, cand);
-            assert(qVertsIA.size() == 4);
-            std::array<Index,4> qv = {
-              qVertsIA(0),
-              qVertsIA(1),
-              qVertsIA(2),
-              qVertsIA(3)
-            };
-            if (sort4(qv) == wantedS)
-            {
-              fOpt = cand;
-              break;
-            }
-          }
-
-          assert(fOpt.has_value() && "Could not match wedge quad face 1.");
-          const Index f = *fOpt;
-
+          std::array<int,4> canonToQuad{};
+          const Index f = getQuadFaceEntityAndPerm(1, canonToQuad);
           this->getClosure(d - 1, f);
-          const auto& quad = m_closure[d - 1][f];
 
-          Utility::ForIndex<K + 1>([&](auto jj)
-          {
-            constexpr size_t j = jj.value; // layer 0..K
-            Utility::ForIndex<K + 1>([&](auto ii)
-            {
-              constexpr size_t i = ii.value; // 0..K along edge 0->1
-
-              constexpr size_t quadIdx = j * (K + 1) + i;
-              // triangle edge 0->1 corresponds to triEdgeIdx = i
-              constexpr size_t triEdgeIdx = i;
-              constexpr size_t wedgeIdx   = j * TriCount + triEdgeIdx;
-
-              if (!used[wedgeIdx])
-              {
-                local[wedgeIdx] = quad[quadIdx];
-                used[wedgeIdx]  = 1;
-              }
-            });
-          });
-        }
-
-        // Local 2: Quad (1,2,5,4): extrude edge 1->2
-        {
-          const auto wanted  = canonicalQuadFaceVerts(2);
-          const auto wantedS = sort4(wanted);
-
-          std::optional<Index> fOpt;
-          for (Index cand : inc)
-          {
-            if (conn.getGeometry(d - 1, cand) != Geometry::Polytope::Type::Quadrilateral)
-              continue;
-            const auto& qVertsIA = conn.getPolytope(d - 1, cand);
-            assert(qVertsIA.size() == 4);
-            std::array<Index,4> qv = {
-              qVertsIA(0),
-              qVertsIA(1),
-              qVertsIA(2),
-              qVertsIA(3)
-            };
-            if (sort4(qv) == wantedS)
-            {
-              fOpt = cand;
-              break;
-            }
-          }
-
-          assert(fOpt.has_value() && "Could not match wedge quad face 2.");
-          const Index f = *fOpt;
-
-          this->getClosure(d - 1, f);
-          const auto& quad = m_closure[d - 1][f];
+          IndexArray faceCanon;
+          buildCanonicalQuadFace(f, canonToQuad, faceCanon);
 
           Utility::ForIndex<K + 1>([&](auto jj)
           {
             constexpr size_t j = jj.value;
             Utility::ForIndex<K + 1>([&](auto ii)
             {
-              constexpr size_t i = ii.value; // 0..K along edge 1->2
+              constexpr size_t i = ii.value;
+              constexpr size_t quadIdx    = j * (K + 1) + i;
+              constexpr size_t triEdgeIdx = i;
+              constexpr size_t wedgeIdx   = j * TriCount + triEdgeIdx;
 
+              if (!used[wedgeIdx])
+              {
+                local[wedgeIdx] = faceCanon[quadIdx];
+                used[wedgeIdx]  = 1;
+              }
+            });
+          });
+        }
+
+        {
+          std::array<int,4> canonToQuad{};
+          const Index f = getQuadFaceEntityAndPerm(2, canonToQuad);
+          this->getClosure(d - 1, f);
+
+          IndexArray faceCanon;
+          buildCanonicalQuadFace(f, canonToQuad, faceCanon);
+
+          Utility::ForIndex<K + 1>([&](auto jj)
+          {
+            constexpr size_t j = jj.value;
+            Utility::ForIndex<K + 1>([&](auto ii)
+            {
+              constexpr size_t i = ii.value;
               constexpr size_t quadIdx = j * (K + 1) + i;
 
-              // triangle edge 1->2 (Segment->Triangle Local=1):
-              //  r = i
-              //  rowStart = r*(K+1) - r*(r-1)/2
-              //  triEdgeIdx = rowStart + (K - r)
-              constexpr size_t r        = i;
+              constexpr size_t r = i;
               constexpr size_t rowStart =
                   r * (K + 1) - (r * (r - 1)) / 2;
               constexpr size_t triEdgeIdx = rowStart + (K - r);
@@ -1720,58 +1748,29 @@ namespace Rodin::Variational
 
               if (!used[wedgeIdx])
               {
-                local[wedgeIdx] = quad[quadIdx];
+                local[wedgeIdx] = faceCanon[quadIdx];
                 used[wedgeIdx]  = 1;
               }
             });
           });
         }
 
-        // Local 3: Quad (2,0,3,5): extrude edge 2->0
         {
-          const auto wanted  = canonicalQuadFaceVerts(3);
-          const auto wantedS = sort4(wanted);
-
-          std::optional<Index> fOpt;
-          for (Index cand : inc)
-          {
-            if (conn.getGeometry(d - 1, cand) != Geometry::Polytope::Type::Quadrilateral)
-              continue;
-            const auto& qVertsIA = conn.getPolytope(d - 1, cand);
-            assert(qVertsIA.size() == 4);
-            std::array<Index,4> qv = {
-              qVertsIA(0),
-              qVertsIA(1),
-              qVertsIA(2),
-              qVertsIA(3)
-            };
-            if (sort4(qv) == wantedS)
-            {
-              fOpt = cand;
-              break;
-            }
-          }
-
-          assert(fOpt.has_value() && "Could not match wedge quad face 3.");
-          const Index f = *fOpt;
-
+          std::array<int,4> canonToQuad{};
+          const Index f = getQuadFaceEntityAndPerm(3, canonToQuad);
           this->getClosure(d - 1, f);
-          const auto& quad = m_closure[d - 1][f];
+
+          IndexArray faceCanon;
+          buildCanonicalQuadFace(f, canonToQuad, faceCanon);
 
           Utility::ForIndex<K + 1>([&](auto jj)
           {
             constexpr size_t j = jj.value;
             Utility::ForIndex<K + 1>([&](auto ii)
             {
-              constexpr size_t i = ii.value; // 0..K along edge 2->0
-
+              constexpr size_t i = ii.value;
               constexpr size_t quadIdx = j * (K + 1) + i;
 
-              // triangle edge 2->0 (Segment->Triangle Local=2):
-              //  r      = i
-              //  j_edge = K - r
-              //  rowStart = j_edge*(K+1) - j_edge*(j_edge-1)/2
-              //  triEdgeIdx = rowStart (i=0 on that row)
               constexpr size_t r      = i;
               constexpr size_t j_edge = K - r;
               constexpr size_t rowStart =
@@ -1781,7 +1780,7 @@ namespace Rodin::Variational
 
               if (!used[wedgeIdx])
               {
-                local[wedgeIdx] = quad[quadIdx];
+                local[wedgeIdx] = faceCanon[quadIdx];
                 used[wedgeIdx]  = 1;
               }
             });
@@ -1789,7 +1788,7 @@ namespace Rodin::Variational
         }
 
         // -------------------------------------------------------------------
-        // 3) Interior wedge DOFs (not on any face)
+        // 3) Interior wedge DOFs
         // -------------------------------------------------------------------
         for (size_t wId = 0; wId < WedgeCochain::Count; ++wId)
         {
