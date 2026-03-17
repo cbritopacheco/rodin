@@ -61,7 +61,7 @@
   - `MyOutput.Grid.mesh.h5` — HDF5 file containing the mesh data
   - `MyOutput.Grid.u.0.h5` — HDF5 file containing the field data
 
-  @section guides-io-xdmf-grids Working with Grids
+  @section guides-io-xdmf-guide-grids Working with Grids
 
   A grid in XDMF is a named collection of a mesh and associated fields. You
   obtain a grid handle from the XDMF writer:
@@ -72,7 +72,7 @@
   auto grid = xdmf.grid("Domain");  // named grid
   @endcode
 
-  @subsection guides-io-xdmf-grids-mesh Setting the Mesh
+  @subsection guides-io-xdmf-guide-grids-mesh Setting the Mesh
 
   Each grid must have a mesh associated with it before writing:
 
@@ -81,7 +81,7 @@
   grid.setMesh(mesh);
   @endcode
 
-  @subsection guides-io-xdmf-grids-fields Adding Fields
+  @subsection guides-io-xdmf-guide-grids-fields Adding Fields
 
   Fields are added using the `add()` method. The field can be a named
   GridFunction or provided with an explicit name:
@@ -199,7 +199,7 @@
   - `{index}` — The time step index
   - `{rank}` — The MPI rank (for distributed output)
 
-  @section guides-io-xdmf-paraview Opening Files in ParaView
+  @section guides-io-xdmf-guide-paraview Opening Files in ParaView
 
   To visualize XDMF output in ParaView:
 
