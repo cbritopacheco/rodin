@@ -152,7 +152,7 @@ namespace Rodin::Geometry
    *
    * ## Mesh Generation
    * - Structured mesh generation (uniform grids)
-   * - Support for various file formats (MFEM, GMSH, MEDIT)
+   * - Support for various file formats (MFEM, XDMF, MEDIT, HDF5)
    * - Mesh refinement and coarsening
    *
    * ## Partitioning
@@ -421,7 +421,7 @@ namespace Rodin::Geometry
       /**
        * @brief Loads mesh from file.
        * @param[in] filename Path to mesh file
-       * @param[in] fmt File format (MFEM, GMSH, etc.)
+       * @param[in] fmt File format (MFEM, MEDIT, etc.)
        * @returns Reference to this mesh
        */
       virtual MeshBase& load(
