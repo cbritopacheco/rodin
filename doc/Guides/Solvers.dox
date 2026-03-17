@@ -1,0 +1,154 @@
+/**
+  @page guides-solvers Solvers
+  @brief Guide to linear and nonlinear solvers in Rodin
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section guides-solvers-intro Introduction
+
+  After assembling a finite element problem, the resulting linear system
+
+  @f[
+    A \mathbf{x} = \mathbf{b}
+  @f]
+
+  must be solved. Rodin provides several solvers in the @ref Rodin::Solver
+  namespace, ranging from direct methods to iterative solvers.
+
+  @section guides-solvers-available Available Solvers
+
+  | Solver | Type | Best For | Symmetric Required |
+  |--------|------|----------|-------------------|
+  | @ref Rodin::Solver::SparseLU "SparseLU" | Direct | Small to medium problems | No |
+  | @ref Rodin::Solver::CG "CG" | Iterative | Large SPD systems | Yes |
+  | @ref Rodin::Solver::UMFPack "UMFPack" | Direct | General sparse systems | No |
+
+  @section guides-solvers-direct Direct Solvers
+
+  Direct solvers compute the exact solution (up to floating-point precision)
+  by factoring the system matrix. They are reliable but can be expensive
+  for very large systems.
+
+  @subsection guides-solvers-direct-sparselu SparseLU
+
+  A sparse LU decomposition solver. Works for any non-singular matrix:
+
+  @code{.cpp}
+  #include <Rodin/Solver.h>
+
+  using namespace Rodin::Solver;
+
+  // Solve the problem
+  SparseLU().solve(problem);
+  @endcode
+
+  SparseLU is a good default choice when:
+  - The system is not too large (up to ~100,000 DOFs)
+  - You need a robust solver that works for any matrix
+  - The matrix is non-symmetric
+
+  @section guides-solvers-iterative Iterative Solvers
+
+  Iterative solvers approximate the solution through successive iterations.
+  They are more efficient for large systems but may require tuning.
+
+  @subsection guides-solvers-iterative-cg Conjugate Gradient (CG)
+
+  The Conjugate Gradient method is optimal for **symmetric positive definite**
+  (SPD) systems, which arise from many common PDEs (Poisson, elasticity, heat):
+
+  @code{.cpp}
+  // Basic usage
+  CG(problem).solve();
+
+  // With options
+  CG solver(problem);
+  solver.setMaxIterations(1000);
+  solver.setRelativeTolerance(1e-10);
+  solver.solve();
+  @endcode
+
+  CG is the recommended solver when:
+  - The system matrix is symmetric positive definite
+  - The system is large (100,000+ DOFs)
+  - You want efficient iterative solving
+
+  @section guides-solvers-usage Usage Patterns
+
+  @subsection guides-solvers-usage-inline Inline Solving
+
+  For quick usage, create and invoke the solver inline:
+
+  @code{.cpp}
+  Solver::CG(poisson).solve();
+  @endcode
+
+  @subsection guides-solvers-usage-configured Configured Solving
+
+  For more control, create the solver separately:
+
+  @code{.cpp}
+  Solver::CG solver(poisson);
+  solver.setMaxIterations(500);
+  solver.setRelativeTolerance(1e-12);
+  solver.solve();
+  @endcode
+
+  @section guides-solvers-choosing Choosing a Solver
+
+  | Criterion | Recommended Solver |
+  |-----------|-------------------|
+  | Small system, any matrix | SparseLU |
+  | Large symmetric system | CG |
+  | Non-symmetric system | SparseLU or UMFPack |
+  | Need guaranteed convergence | Direct solver |
+  | Memory-constrained | CG |
+
+  @section guides-solvers-example Complete Example
+
+  @code{.cpp}
+  #include <Rodin/Solver.h>
+  #include <Rodin/Geometry.h>
+  #include <Rodin/Variational.h>
+  #include <Rodin/IO/XDMF.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
+
+  int main()
+  {
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {32, 32});
+    mesh.getConnectivity().compute(1, 2);
+
+    P1 Vh(mesh);
+    TrialFunction u(Vh);
+    TestFunction  v(Vh);
+
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(RealFunction(1.0), v)
+            + DirichletBC(u, Zero());
+
+    // Solve with CG
+    Solver::CG(poisson).solve();
+
+    // Export result
+    IO::XDMF xdmf("SolverExample");
+    xdmf.grid().setMesh(mesh).add("u", u.getSolution());
+    xdmf.write();
+
+    return 0;
+  }
+  @endcode
+
+  @section guides-solvers-see-also See Also
+
+  - @ref Rodin::Solver "Solver namespace reference"
+  - @ref guides-weak-formulations "Weak formulations"
+  - @ref examples-pdes-poisson "Poisson example"
+
+  */

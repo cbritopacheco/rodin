@@ -1,0 +1,60 @@
+/**
+  @page examples-io-medit MEDIT Format Conversion
+  @brief Loading and converting meshes with MEDIT format
+
+  @m_keywords{MEDIT, Mesh, Format Conversion}
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section examples-io-medit-intro Introduction
+
+  This example demonstrates how to load a mesh in MEDIT format (commonly used
+  with the [MMG](https://www.mmgtools.org/) remeshing tools) and save it in
+  MFEM format.
+
+  The MEDIT format (`.mesh`) is a text-based format developed at INRIA and is
+  widely used in the French computational mechanics community.
+
+  @section examples-io-medit-impl Implementation
+
+  The implementation is straightforward — load in one format and save in
+  another:
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+
+  int main(int, char** argv)
+  {
+    Mesh mesh;
+    mesh.load(argv[1], IO::FileFormat::MEDIT);
+
+    mesh.save("mfem.mesh", IO::FileFormat::MFEM);
+  }
+  @endcode
+
+  @section examples-io-medit-usage Usage
+
+  Run the example with a MEDIT mesh file as argument:
+
+  @code{.bash}
+  ./Rodin_IO_MEDIT input.mesh
+  @endcode
+
+  @section examples-io-medit-full Full Source Code
+
+  The complete source code is:
+  -   @ref IO/MEDIT.cpp "MEDIT.cpp"
+
+  @section examples-io-medit-see-also See Also
+
+  - @ref guides-io "I/O in Rodin"
+  - @ref guides-io-meshformats "Mesh file formats"
+  - @ref examples-mmg-index "MMG examples"
+
+  @example IO/MEDIT.cpp @m_examplenavigation{examples-io-medit,IO/} @m_footernavigation
+  */

@@ -1,0 +1,195 @@
+/**
+  @page guides-boundary-conditions Boundary Conditions
+  @brief Guide to applying boundary conditions in Rodin
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section guides-bc-intro Introduction
+
+  Boundary conditions specify the behavior of the solution on the boundary
+  @f$ \partial \Omega @f$ of the computational domain. They are essential for
+  obtaining a well-posed problem.
+
+  In the finite element method, boundary conditions are classified into two
+  main types:
+
+  - **Essential (Dirichlet) conditions**: Directly prescribe the value of
+    the solution on the boundary. These are imposed by modifying the finite
+    element space or the assembled linear system.
+  - **Natural (Neumann) conditions**: Prescribe the flux or derivative of
+    the solution on the boundary. These appear naturally in the weak
+    formulation as boundary integrals.
+
+  @section guides-bc-dirichlet Dirichlet Boundary Conditions
+
+  Dirichlet conditions specify the value of the solution on the boundary:
+  @f[
+    u = g \quad \text{on } \Gamma_D \subseteq \partial\Omega
+  @f]
+
+  @subsection guides-bc-dirichlet-homogeneous Homogeneous Dirichlet (@f$ g = 0 @f$)
+
+  The most common case sets the solution to zero on the boundary:
+
+  @code{.cpp}
+  Problem problem(u, v);
+  problem = Integral(Grad(u), Grad(v))
+          - Integral(f, v)
+          + DirichletBC(u, Zero());       // u = 0 on entire boundary
+  @endcode
+
+  @subsection guides-bc-dirichlet-nonhomogeneous Non-Homogeneous Dirichlet
+
+  To prescribe a non-zero value:
+
+  @code{.cpp}
+  // Using a constant
+  DirichletBC(u, RealFunction(1.0))
+
+  // Using a function
+  RealFunction g([](const Geometry::Point& p) {
+    return p.x() * p.x();
+  });
+  DirichletBC(u, g)
+  @endcode
+
+  @subsection guides-bc-dirichlet-partial Partial Boundary Conditions
+
+  To apply Dirichlet conditions only on a specific part of the boundary,
+  use the `.on()` method with a boundary attribute:
+
+  @code{.cpp}
+  // Apply u = 0 only on boundary with attribute 1
+  DirichletBC(u, Zero()).on(1)
+
+  // Apply u = g only on boundary with attribute 2
+  DirichletBC(u, g).on(2)
+  @endcode
+
+  Boundary attributes are integers associated with boundary elements in
+  the mesh. They are typically set during mesh generation.
+
+  @subsection guides-bc-dirichlet-vector Vector Dirichlet Conditions
+
+  For vector-valued problems (e.g., elasticity), use vector functions:
+
+  @code{.cpp}
+  // Fix displacement to zero (clamped boundary)
+  DirichletBC(u, VectorFunction{0, 0}).on(GammaD)
+  @endcode
+
+  @section guides-bc-neumann Neumann Boundary Conditions
+
+  Neumann conditions prescribe the normal derivative (or flux) on the
+  boundary:
+  @f[
+    \frac{\partial u}{\partial n} = g \quad \text{on } \Gamma_N
+  @f]
+
+  These arise naturally from integration by parts in the weak formulation
+  and appear as **boundary integrals**:
+
+  @code{.cpp}
+  // ∫_ΓN g v ds
+  BoundaryIntegral(g, v).over(GammaN)
+  @endcode
+
+  @subsection guides-bc-neumann-example Example: Neumann on One Side
+
+  @code{.cpp}
+  int GammaD = 1;  // Dirichlet boundary
+  int GammaN = 2;  // Neumann boundary
+
+  RealFunction g = 1.0;  // Prescribed flux
+
+  Problem problem(u, v);
+  problem = Integral(Grad(u), Grad(v))
+          - Integral(f, v)
+          - BoundaryIntegral(g, v).over(GammaN)
+          + DirichletBC(u, Zero()).on(GammaD);
+  @endcode
+
+  @subsection guides-bc-neumann-natural Homogeneous Neumann (Natural)
+
+  Homogeneous Neumann conditions (@f$ \partial u / \partial n = 0 @f$) are
+  the "default" — they are automatically satisfied when no boundary integral
+  is added and no Dirichlet condition is imposed on that part of the boundary.
+
+  @section guides-bc-mixed Mixed Boundary Conditions
+
+  In practice, different parts of the boundary often have different
+  conditions. For example, in elasticity:
+
+  @code{.cpp}
+  int GammaD = 1;  // Clamped (fixed) boundary
+  int GammaN = 2;  // Loaded boundary
+  // Remaining boundary: traction-free (homogeneous Neumann)
+
+  VectorFunction load{0, -1};  // Downward force
+
+  Problem elasticity(u, v);
+  elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
+             - BoundaryIntegral(load, v).over(GammaN)
+             + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
+  @endcode
+
+  @section guides-bc-complete Complete Example
+
+  Here is a complete example with mixed boundary conditions:
+
+  @code{.cpp}
+  #include <Rodin/Solver.h>
+  #include <Rodin/Geometry.h>
+  #include <Rodin/Variational.h>
+  #include <Rodin/IO/XDMF.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
+
+  int main()
+  {
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+    mesh.getConnectivity().compute(1, 2);
+
+    P1 Vh(mesh);
+    TrialFunction u(Vh);
+    TestFunction  v(Vh);
+
+    RealFunction f = 1;
+
+    Problem problem(u, v);
+    problem = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, Zero());
+
+    Solver::CG(problem).solve();
+
+    // Export to XDMF
+    IO::XDMF xdmf("BoundaryConditions");
+    xdmf.grid().setMesh(mesh).add("u", u.getSolution());
+    xdmf.write();
+
+    return 0;
+  }
+  @endcode
+
+  @section guides-bc-summary Summary Table
+
+  | Type | Math | Rodin Code | Appears In |
+  |------|------|------------|------------|
+  | Dirichlet | @f$ u = g @f$ on @f$ \Gamma_D @f$ | `DirichletBC(u, g).on(GammaD)` | System modification |
+  | Neumann | @f$ \partial u / \partial n = h @f$ on @f$ \Gamma_N @f$ | `BoundaryIntegral(h, v).over(GammaN)` | Weak formulation |
+  | Homogeneous Neumann | @f$ \partial u / \partial n = 0 @f$ | (nothing needed) | Default |
+
+  @section guides-bc-see-also See Also
+
+  - @ref guides-weak-formulations "Weak formulations"
+  - @ref guides-getting-started-core-concepts "Core concepts"
+  - @ref examples-pdes-poisson "Poisson example"
+  - @ref examples-pdes-elasticity "Elasticity example"
+
+  */

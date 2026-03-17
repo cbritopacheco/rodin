@@ -1,0 +1,65 @@
+/**
+  @page examples-io-mfem MFEM Format I/O
+  @brief Building a mesh and saving in MFEM format
+
+  @m_keywords{MFEM, Mesh, GridFunction, Save}
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section examples-io-mfem-intro Introduction
+
+  This example demonstrates how to build a mesh programmatically using the
+  mesh builder API and save both the mesh and a grid function in MFEM format.
+
+  @section examples-io-mfem-build Building a Mesh
+
+  The mesh builder provides a step-by-step interface for constructing a mesh
+  from scratch:
+
+  @code{.cpp}
+  Mesh mesh =
+    Mesh<Rodin::Context::Local>::Builder()
+    .initialize(2)
+    .nodes(4)
+    .vertex({0, 0})
+    .vertex({1, 0})
+    .vertex({0, 1})
+    .vertex({1, 1})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .polytope(Polytope::Type::Triangle, {1, 3, 2})
+    .finalize();
+  @endcode
+
+  This creates a 2D mesh with 4 vertices and 2 triangles forming a unit
+  square.
+
+  @section examples-io-mfem-gf Creating and Saving a Grid Function
+
+  Once the mesh is created, we can define a finite element space and a grid
+  function on it, then save both:
+
+  @code{.cpp}
+  P1 fes(mesh);
+  GridFunction gf(fes);
+
+  RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); });
+  gf = c;
+
+  mesh.save("output.mesh", IO::FileFormat::MFEM);
+  gf.save("output.gf", IO::FileFormat::MFEM);
+  @endcode
+
+  @section examples-io-mfem-full Full Source Code
+
+  The complete source code is:
+  -   @ref IO/MFEM.cpp "MFEM.cpp"
+
+  @section examples-io-mfem-see-also See Also
+
+  - @ref guides-io "I/O in Rodin"
+  - @ref guides-io-meshformats "Mesh file formats"
+
+  @example IO/MFEM.cpp @m_examplenavigation{examples-io-mfem,IO/} @m_footernavigation
+  */

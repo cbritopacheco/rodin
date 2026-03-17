@@ -78,18 +78,27 @@
 
   @section guides-variational-index Weak formulations and variational problems
 
-  Learn how to translate mathematical variational formulations into Rodin code:
+  Understand how to translate PDEs into variational problems that can be
+  solved using the finite element method:
 
   - @subpage guides-variational - Defining bilinear forms, linear forms,
     boundary conditions, and solving variational problems
 
-  @section guides-io-index Input and output
+  - @subpage guides-weak-formulations - From strong form to weak form
 
-  Rodin supports reading and writing data in various formats for pre-processing,
-  post-processing, and visualization:
+  - @subpage guides-boundary-conditions - Applying Dirichlet, Neumann, and
+    mixed boundary conditions
 
-  - @subpage guides-io - Comprehensive guide to all I/O formats including MFEM,
-    MEDIT, GMSH, HDF5, and XDMF for ParaView visualization
+  - @subpage guides-solvers - Direct and iterative solvers for the assembled
+    linear systems
+
+  @section guides-io-index I/O in Rodin
+
+  Rodin provides flexible I/O capabilities for reading and writing meshes,
+  grid functions, and simulation data in various formats:
+
+  - @subpage guides-io - Comprehensive guide to input and output, including
+    XDMF, MFEM, and MEDIT formats
 
   */
 
