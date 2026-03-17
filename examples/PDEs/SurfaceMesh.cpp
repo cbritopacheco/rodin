@@ -13,7 +13,7 @@ int main(int, char**)
 
   // Load mesh
   Mesh Omega;
-  Omega.load(meshFile);
+  Omega.load(meshFile, IO::FileFormat::MFEM);
 
   // Functions
   H1 Vh(Omega);
@@ -39,6 +39,6 @@ int main(int, char**)
   rd.solve(cg);
 
   // Save solution
-  u.getSolution().save("u.gf");
-  Omega.save("Omega.mesh");
+  u.getSolution().save("u.gf", IO::FileFormat::MFEM);
+  Omega.save("Omega.mesh", IO::FileFormat::MFEM);
 }

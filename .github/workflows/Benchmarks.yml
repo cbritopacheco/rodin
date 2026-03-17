@@ -37,16 +37,16 @@ jobs:
       - name: Install dependencies
         run: >-
           sudo apt-get update && sudo apt-get install -y
-          libgl1-mesa-dev
-          lcov
-          libeigen3-dev
-          libsdl2-dev
-          libglfw3-dev
-          libopenal-dev
-          libvulkan-dev
-          libsuitesparse-dev
-          libmetis-dev
           libboost1.74-all-dev
+          libsuitesparse-dev
+          libeigen3-dev
+          libscotch-dev
+          libmetis-dev
+          libhdf5-dev
+          libomp-dev
+          petsc-dev
+          mpich
+          lcov
       - name: Configure CMake
         run: >
           cmake
@@ -77,4 +77,3 @@ jobs:
           comment-on-alert: true
           alert-threshold: "150%"
           benchmark-data-dir-path: benchmarks/${{ github.ref }}
-

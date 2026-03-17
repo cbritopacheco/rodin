@@ -7,6 +7,9 @@
 #ifndef RODIN_VARIATIONAL_GRIDFUNCTIONLOADER_H
 #define RODIN_VARIATIONAL_GRIDFUNCTIONLOADER_H
 
+#include <functional>
+
+#include "Rodin/Alert/Exception.h"
 #include "Rodin/Variational/ForwardDecls.h"
 
 #include "ForwardDecls.h"
@@ -16,28 +19,45 @@
 namespace Rodin::IO
 {
   /**
-   * @brief Base class for loading grid functions from files or streams.
+   * @brief Primary template for GridFunctionLoader.
    *
-   * GridFunctionLoaderBase provides the foundation for loading finite element
-   * solution data in different file formats. It extends the generic Loader class
-   * to handle grid function-specific operations.
+   * This primary template provides a default definition so that the compiler
+   * does not fail with "implicit instantiation of undefined template" when
+   * GridFunctionBase::load() is compiled for FES/Data combinations that do not
+   * have a matching partial specialization for a given file format.
    *
-   * @tparam FES Finite element space type
-   * @tparam Data Data storage type (typically a vector type)
-   *
-   * Specialized loaders for specific file formats should derive from this class
-   * and implement the load(std::istream&) method to parse their respective formats.
-   *
-   * ## Usage Example
-   * ```cpp
-   * P1<Real> Vh(mesh);
-   * GridFunction<P1<Real>> u(Vh);
-   * GridFunctionLoader<FileFormat::MFEM, P1<Real>, Vector<Real>> loader(u);
-   * loader.load("solution.gf");
-   * ```
+   * @note If you reach this template at runtime it means no specialization
+   *       exists for the requested format/FES/Data triple.  An exception is
+   *       raised so that the unused switch branches in
+   *       GridFunctionBase::load() remain compilable while still producing a
+   *       clear error at runtime.
    *
    * @see Loader, GridFunctionPrinter
    */
+  template <FileFormat Fmt, class FES, class Data>
+  class GridFunctionLoader : public IO::Loader<Variational::GridFunction<FES, Data>>
+  {
+    public:
+      using ObjectType = Variational::GridFunction<FES, Data>;
+
+      GridFunctionLoader(ObjectType& gf)
+        : m_gf(gf)
+      {}
+
+      void load(std::istream&) override
+      {
+        Alert::Exception()
+          << "No GridFunctionLoader specialization for this format/FES/Data combination."
+          << Alert::Raise;
+      }
+
+    protected:
+      ObjectType& getObject() override { return m_gf.get(); }
+
+    private:
+      std::reference_wrapper<ObjectType> m_gf;
+  };
+
   template <class FES, class Data>
   class GridFunctionLoaderBase : public IO::Loader<Variational::GridFunction<FES, Data>>
   {

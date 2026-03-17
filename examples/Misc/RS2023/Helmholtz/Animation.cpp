@@ -81,7 +81,7 @@ void run(int id, const std::vector<Data>& grid)
   // Load mesh
   Mesh mesh;
   mesh.load("Q1.medit.mesh", IO::FileFormat::MEDIT);
-  mesh.save("out/Q.mesh");
+  mesh.save("out/Q.mesh", IO::FileFormat::MFEM);
 
   Alert::Info() << "Grid size: " << grid.size() << Alert::Raise;
 
@@ -177,8 +177,8 @@ void run(int id, const std::vector<Data>& grid)
 
     std::stringstream ss;
     ss << std::setfill('0') << std::setw(4) << i;
-    u0.save("out/Background_" + ss.str() + ".gf");
-    ue.save("out/Perturbed_" + ss.str() + ".gf");
+    u0.save("out/Background_" + ss.str() + ".gf", IO::FileFormat::MFEM);
+    ue.save("out/Perturbed_" + ss.str() + ".gf", IO::FileFormat::MFEM);
 
     i++;
   }

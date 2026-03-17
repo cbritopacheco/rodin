@@ -41,9 +41,9 @@ int main(int, char**)
   GridFunction gfIm(rh);
   gfRe = Re(gf);
   gfIm = Im(gf);
-  gfRe.save("gfRe.gf");
-  gfIm.save("gfIm.gf");
-  mesh.save("Grid.mesh");
+  gfRe.save("gfRe.gf", IO::FileFormat::MFEM);
+  gfIm.save("gfIm.gf", IO::FileFormat::MFEM);
+  mesh.save("Grid.mesh", IO::FileFormat::MFEM);
 
   ComplexFunction f =
     [&](const Point& p)
@@ -85,10 +85,10 @@ int main(int, char**)
   uIm = Im(u.getSolution());
 
   // Save solution
-  uRe.save("uRe.gf");
-  uIm.save("uIm.gf");
+  uRe.save("uRe.gf", IO::FileFormat::MFEM);
+  uIm.save("uIm.gf", IO::FileFormat::MFEM);
 
-  mesh.save("Grid.mesh");
+  mesh.save("Grid.mesh", IO::FileFormat::MFEM);
 
   return 0;
 }

@@ -94,7 +94,7 @@ int main(int argc, char** argv)
 {
   // Load mesh
   MMG::Mesh Omega;
-  Omega.load(meshFile);
+  Omega.load(meshFile, IO::FileFormat::MFEM);
 
   // Solver for hilbertian regularization
   auto solver = Solver::UMFPack();
@@ -184,7 +184,7 @@ int main(int argc, char** argv)
 
    MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
 
-   Omega.save("Omega.mesh");
+   Omega.save("Omega.mesh", IO::FileFormat::MFEM);
 
    // Test for convergence
    if (obj.size() >= 2 && abs(obj[i] - obj[i - 1]) < eps)

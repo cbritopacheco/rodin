@@ -426,7 +426,7 @@ namespace Rodin::Geometry
        */
       virtual MeshBase& load(
         const boost::filesystem::path& filename,
-        IO::FileFormat fmt = IO::FileFormat::MFEM) = 0;
+        IO::FileFormat fmt) = 0;
 
       /**
        * @brief Saves mesh to file.
@@ -435,7 +435,7 @@ namespace Rodin::Geometry
        */
       virtual void save(
         const boost::filesystem::path& filename,
-        IO::FileFormat fmt = IO::FileFormat::MFEM) const = 0;
+        IO::FileFormat fmt) const = 0;
 
       /**
        * @brief Flushes cached mesh data.
@@ -759,6 +759,29 @@ namespace Rodin::Geometry
        * uses another execution model.
        */
       virtual const Context::Base& getContext() const = 0;
+
+      Optional<StringView> getName() const
+      {
+        if (m_name)
+          return StringView(m_name->c_str(), m_name->size());
+        else
+          return std::nullopt;
+      }
+
+      MeshBase& setName(const std::string& name)
+      {
+        m_name = name;
+        return *this;
+      }
+
+      template<class Archive>
+      void serialize(Archive& ar, const unsigned int)
+      {
+        ar & m_name;
+      }
+
+    private:
+      Optional<std::string> m_name;
   };
 
   /// Type alias for Mesh<Context::Local>
@@ -1036,7 +1059,7 @@ namespace Rodin::Geometry
         : m_sdim(0)
       {}
 
-      Mesh(const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM)
+      Mesh(const boost::filesystem::path& filename, IO::FileFormat fmt)
       {
         load(filename, fmt);
       }
@@ -1325,7 +1348,7 @@ namespace Rodin::Geometry
       */
       virtual Mesh& load(
         const boost::filesystem::path& filename,
-        IO::FileFormat fmt = IO::FileFormat::MFEM) override;
+        IO::FileFormat fmt) override;
 
       /**
       * @brief Saves a mesh to file in the given format.
@@ -1334,7 +1357,7 @@ namespace Rodin::Geometry
       */
       virtual void save(
         const boost::filesystem::path& filename,
-        IO::FileFormat fmt = IO::FileFormat::MFEM) const override;
+        IO::FileFormat fmt) const override;
 
       virtual Mesh& scale(Real c) override;
 
@@ -1428,6 +1451,7 @@ namespace Rodin::Geometry
       template<class Archive>
       void serialize(Archive& ar, const unsigned int)
       {
+        ar & boost::serialization::base_object<MeshBase>(*this);
         ar & m_sdim;
         ar & m_vertices;
         ar & m_connectivity;

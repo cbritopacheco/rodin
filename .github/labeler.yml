@@ -1,8 +1,13 @@
 docs:
-- any: ['doc/**/*']
+- any:
+  - 'doc/**/*'
+  - '*.md'
+  - '*.cff'
 
 examples:
-- any: ['examples/**/*']
+- any:
+  - 'examples/**/*'
+  - 'resources/examples/**/*'
 
 benchmarks:
 - any: ['tests/benchmarks/**/*']
@@ -10,41 +15,122 @@ benchmarks:
 unit-tests:
 - any: ['tests/unit/**/*']
 
+manufactured-tests:
+- any: ['tests/manufactured/**/*']
+
 cmake:
-- any: ['cmake/**/*']
+- any:
+  - 'CMakeLists.txt'
+  - 'cmake/**/*'
+  - 'doc/CMakeLists.txt'
+  - 'examples/CMakeLists.txt'
+  - 'py/CMakeLists.txt'
+  - 'src/CMakeLists.txt'
+  - 'src/Rodin/CMakeLists.txt'
+  - 'src/Rodin/**/CMakeLists.txt'
+  - 'tests/CMakeLists.txt'
+  - 'tests/**/CMakeLists.txt'
+  - 'third-party/**/CMakeLists.txt'
 
-mmg:
-- any: ['src/RodinExternal/MMG/**/*']
-
-geometry:
-- any: ['src/Rodin/Geometry/**/*']
-
-variational:
-- any: ['src/Rodin/Variational/**/*']
-
-solver:
-- any: ['src/Rodin/Solver/**/*']
-
-utility:
-- any: ['src/Rodin/Utility/**/*']
-
-context:
-- any: ['src/Rodin/Context/**/*']
-
-form-language:
-- any: ['src/Rodin/FormLanguage/**/*']
-
-math:
-- any: ['src/Rodin/Math/**/*']
-
-io:
-- any: ['src/Rodin/IO/**/*']
+advection:
+- any: ['src/Rodin/Advection/**/*']
 
 alerts:
-- any: ['src/Rodin/Alert/**/*']
+- any:
+  - 'src/Rodin/Alert/**/*'
+  - 'src/Rodin/Alert.h'
+
+assembly:
+- any:
+  - 'src/Rodin/Assembly/**/*'
+  - 'src/Rodin/Assembly.h'
+
+context:
+- any:
+  - 'src/Rodin/Context/**/*'
+  - 'src/Rodin/Context.h'
+
+distance:
+- any: ['src/Rodin/Distance/**/*']
+
+eikonal:
+- any: ['src/Rodin/Eikonal/**/*']
+
+form-language:
+- any:
+  - 'src/Rodin/FormLanguage/**/*'
+  - 'src/Rodin/FormLanguage.h'
+
+geometry:
+- any:
+  - 'src/Rodin/Geometry/**/*'
+  - 'src/Rodin/Geometry.h'
+
+hilbert:
+- any: ['src/Rodin/Hilbert/**/*']
+
+io:
+- any:
+  - 'src/Rodin/IO/**/*'
+  - 'src/Rodin/IO.h'
+
+linear-elasticity:
+- any:
+  - 'src/Rodin/LinearElasticity/**/*'
+  - 'src/Rodin/LinearElasticity.h'
+
+math:
+- any:
+  - 'src/Rodin/Math/**/*'
+  - 'src/Rodin/Math.h'
+
+mfem:
+- any: ['src/Rodin/MFEM/**/*']
+
+mmg:
+- any:
+  - 'src/Rodin/MMG/**/*'
+  - 'src/Rodin/MMG.h'
+  - 'third-party/mmg/**/*'
+
+mpi:
+- any:
+  - 'src/Rodin/MPI/**/*'
+  - 'src/Rodin/MPI.h'
+
+petsc:
+- any:
+  - 'src/Rodin/PETSc/**/*'
+  - 'src/Rodin/PETSc.h'
 
 qf:
-- any: ['src/Rodin/QF/**/*']
+- any:
+  - 'src/Rodin/QF/**/*'
+  - 'src/Rodin/QF.h'
 
-plot:
-- any: ['src/Rodin/Plot/**/*']
+scotch:
+- any:
+  - 'src/Rodin/Scotch/**/*'
+
+serialization:
+- any: ['src/Rodin/Serialization/**/*']
+
+solver:
+- any:
+  - 'src/Rodin/Solver/**/*'
+  - 'src/Rodin/Solver.h'
+
+test:
+- any:
+  - 'src/Rodin/Test/**/*'
+  - 'src/Rodin/Test.h'
+
+utility:
+- any:
+  - 'src/Rodin/Utility/**/*'
+  - 'src/Rodin/Utility.h'
+
+variational:
+- any:
+  - 'src/Rodin/Variational/**/*'
+  - 'src/Rodin/Variational.h'

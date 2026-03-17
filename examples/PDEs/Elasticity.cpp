@@ -25,7 +25,7 @@ int main(int argc, char** argv)
 
   // Load mesh
   Mesh mesh;
-  mesh.load(meshFile);
+  mesh.load(meshFile, IO::FileFormat::MFEM);
   mesh.getConnectivity().compute(1, 2);
 
   // Functions
@@ -51,8 +51,8 @@ int main(int argc, char** argv)
   Solver::CG(elasticity).solve();
 
   // Save solution
-  u.getSolution().save("Elasticity.gf");
-  mesh.save("Elasticity.mesh");
+  u.getSolution().save("Elasticity.gf", IO::FileFormat::MFEM);
+  mesh.save("Elasticity.mesh", IO::FileFormat::MFEM);
 
   Alert::Success() << "Mesh and solution saved to Elasticity.mesh and Elasticity.gf" << Alert::Raise;
 

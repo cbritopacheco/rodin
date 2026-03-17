@@ -25,6 +25,7 @@
  */
 
 #include "Solver/LinearSolver.h"
+#include "Solver/NewtonSolver.h"
 
 #include "Solver/LDLT.h"
 

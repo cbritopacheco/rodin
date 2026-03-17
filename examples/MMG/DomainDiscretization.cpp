@@ -36,8 +36,8 @@ int main(int, char**)
          return (p.x() - 0.5) * (p.x() - 0.5) + (p.y() - 0.5) * (p.y() - 0.5) - radius;
        };
 
-  gf.save("LevelSet.gf");
-  mesh.save("Domain.mesh");
+  gf.save("LevelSet.gf", IO::FileFormat::MFEM);
+  mesh.save("Domain.mesh", IO::FileFormat::MFEM);
 
   MMG::LevelSetDiscretizer().split(interior, { interior, exterior })
                              .setBoundaryReference(boundary)

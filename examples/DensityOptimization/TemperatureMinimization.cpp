@@ -31,10 +31,10 @@ int main(int, char**)
 
   // Load mesh
   MMG::Mesh Omega;
-  Omega.load(meshFile);
+  Omega.load(meshFile, IO::FileFormat::MFEM);
   MMG::Optimizer().setHMax(0.005).setHMin(0.001).optimize(Omega);
 
-  Omega.save("outDensity/gamma.mesh");
+  Omega.save("outDensity/gamma.mesh", IO::FileFormat::MFEM);
 
   // Build finite element space
   P1 vh(Omega);
@@ -88,13 +88,13 @@ int main(int, char**)
     gamma -= step;
     gamma = Min(1.0, Max(0.0, gamma));
 
-    Omega.save("gamma.mesh");
-    gamma.save("gamma.gf");
-    gamma.save("outDensity/gamma." + std::to_string(i) + ".gf");
+    Omega.save("gamma.mesh", IO::FileFormat::MFEM);
+    gamma.save("gamma.gf", IO::FileFormat::MFEM);
+    gamma.save("outDensity/gamma." + std::to_string(i) + ".gf", IO::FileFormat::MFEM);
   }
 
-  Omega.save("gamma.mesh");
-  gamma.save("gamma.gf");
+  Omega.save("gamma.mesh", IO::FileFormat::MFEM);
+  gamma.save("gamma.gf", IO::FileFormat::MFEM);
 
   return 0;
 }

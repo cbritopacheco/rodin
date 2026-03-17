@@ -8,6 +8,7 @@
 #include "Rodin/Configure.h"
 #include "Rodin/Context/Local.h"
 #include "Rodin/Geometry/Polytope.h"
+#include "Rodin/Alert/MemberFunctionException.h"
 
 namespace Rodin::Geometry
 {
@@ -186,6 +187,9 @@ namespace Rodin::Geometry
     assert(d < m_connectivity.size());
     assert(dp < m_connectivity[d].size());
     m_connectivity[d][dp] = std::move(inc);
+    // This incidence relation is now explicitly provided (e.g. from serialized IO),
+    // so it must not be considered stale and recomputed on next access.
+    m_dirty[d][dp] = false;
     return *this;
   }
 
@@ -778,5 +782,33 @@ namespace Rodin::Geometry
     m_dirty[d][dp] = true;
     m_connectivity[d][dp].clear();
     return *this;
+  }
+
+  Connectivity<Context::Local>& Connectivity<Context::Local>::setDirty(size_t d, size_t dp, bool dirty)
+  {
+    if (d >= m_dirty.size() || dp >= m_dirty[d].size())
+    {
+      Alert::MemberFunctionException(*this, __func__)
+        << "Invalid dimensions for setting dirty flag: " << d << " -> " << dp
+        << Alert::Raise;
+    }
+    m_dirty[d][dp] = dirty;
+    return *this;
+  }
+
+  bool Connectivity<Context::Local>::isDirty(size_t d, size_t dp) const
+  {
+    if (d >= m_dirty.size() || dp >= m_dirty[d].size())
+    {
+      Alert::MemberFunctionException(*this, __func__)
+        << "Invalid dimensions for checking dirty flag: " << d << " -> " << dp
+        << Alert::Raise;
+    }
+    return m_dirty[d][dp];
+  }
+
+  size_t Connectivity<Context::Local>::getMaximalDimension() const
+  {
+    return m_maximalDimension;
   }
 }

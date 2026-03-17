@@ -14,7 +14,7 @@ namespace Rodin::MMG
 {
   void MeshPrinter::print(std::ostream& os)
   {
-    m_printer.print(os, false);
+    m_printer.printMesh(os, false);
     printCorners(os);
     printRidges(os);
     printRequiredVertices(os);

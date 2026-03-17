@@ -27,8 +27,8 @@ int main(int, char**)
   GridFunction gf(fes);
   gf.project(Region::Boundary, BoundaryNormal(mesh));
 
-  mesh.save("Normal.mesh");
-  gf.save("Normal.gf");
+  mesh.save("Normal.mesh", IO::FileFormat::MFEM);
+  gf.save("Normal.gf", IO::FileFormat::MFEM);
 }
 
 

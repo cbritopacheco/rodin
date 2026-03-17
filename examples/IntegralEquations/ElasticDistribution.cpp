@@ -54,7 +54,7 @@ int main(int, char**)
 
   MMG::Mesh mesh;
   mesh.load("D1.o.mesh", IO::FileFormat::MEDIT);
-  mesh.save("D1.mfem.mesh");
+  mesh.save("D1.mfem.mesh", IO::FileFormat::MFEM);
 
   VectorFunction e1{1, 0, 0};
   VectorFunction e2{0, 1, 0};
@@ -100,15 +100,15 @@ int main(int, char**)
       Alert::Info() << "Solving." << Alert::Raise;
       Solver::CG(eq).solve();
 
-      mesh.save("u.mesh");
-      u.getSolution().save("u.gf");
+      mesh.save("u.mesh", IO::FileFormat::MFEM);
+      u.getSolution().save("u.gf", IO::FileFormat::MFEM);
 
       GridFunction frob(sfes);
       frob = Frobenius(u.getSolution());
       u.getSolution() /= 10 * frob.max();
 
-      mesh.save("scaled.mesh");
-      u.getSolution().save("scaled.gf");
+      mesh.save("scaled.mesh", IO::FileFormat::MFEM);
+      u.getSolution().save("scaled.gf", IO::FileFormat::MFEM);
       std::exit(1);
 
       Alert::Info() << "Getting data." << Alert::Raise;

@@ -1,9 +1,5 @@
 if (RODIN_BUILD_EXAMPLES)
   add_subdirectory(IO)
-  if (RODIN_WITH_PLOT)
-    add_subdirectory(Plot)
-  endif()
-
   add_subdirectory(Alert)
   add_subdirectory(Context)
   add_subdirectory(Geometry)

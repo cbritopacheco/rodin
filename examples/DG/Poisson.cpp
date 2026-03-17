@@ -42,8 +42,8 @@ int main(int, char**)
   poisson.solve(solver);
 
   // Save solution
-  u.getSolution().save("Poisson.gf");
-  mesh.save("Poisson.mesh");
+  u.getSolution().save("Poisson.gf", IO::FileFormat::MFEM);
+  mesh.save("Poisson.mesh", IO::FileFormat::MFEM);
 
   return 0;
 }

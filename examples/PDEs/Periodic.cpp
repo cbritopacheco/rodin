@@ -60,8 +60,8 @@ int main(int, char**)
   Solver::SparseLU(poisson).solve();
 
   // Save solution
-  u.getSolution().save("Periodic.gf");
-  mesh.save("Periodic.mesh");
+  u.getSolution().save("Periodic.gf", IO::FileFormat::MFEM);
+  mesh.save("Periodic.mesh", IO::FileFormat::MFEM);
 
   return 0;
 }

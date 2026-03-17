@@ -182,8 +182,8 @@ namespace Rodin::Variational
           m_begin(std::exchange(other.m_begin, 0)),
           m_end(std::exchange(other.m_end, 0)),
           m_ghosts(std::move(other.m_ghosts)),
-          m_read(other.m_read),
-          m_write(other.m_write)
+          m_read{.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR},
+          m_write{.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR}
       {
         other.m_read = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
         other.m_write = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
@@ -229,8 +229,8 @@ namespace Rodin::Variational
         m_end = std::exchange(other.m_end, 0);
         m_ghosts = std::move(other.m_ghosts);
 
-        m_read = other.m_read;
-        m_write = other.m_write;
+        m_read = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
+        m_write = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
 
         other.m_read = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
         other.m_write = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
@@ -708,6 +708,65 @@ namespace Rodin::Variational
         return std::nullopt;
       }
 
+      decltype(auto) operator()(const Geometry::Point& p) const
+      {
+        return this->getValue(p);
+      }
+
+      decltype(auto) getValue(const Geometry::Point& p) const
+      {
+        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
+        {
+          return Parent::getValue(p);
+        }
+        else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        {
+          static thread_local RangeType s_out;
+
+          const auto& fes = this->getFiniteElementSpace();
+          const auto& mesh = fes.getMesh();
+          const auto& shard = mesh.getShard();
+          const auto& polytope = p.getPolytope();
+          const auto& polytopeMesh = polytope.getMesh();
+
+          if (polytopeMesh == shard)
+          {
+            this->interpolate(s_out, p);
+            return s_out;
+          }
+
+          if (const auto inclusion = shard.inclusion(p))
+          {
+            this->interpolate(s_out, *inclusion);
+            return s_out;
+          }
+
+          if (shard.isSubMesh())
+          {
+            const auto& submesh = shard.asSubMesh();
+            if (const auto restriction = submesh.restriction(p))
+            {
+              this->interpolate(s_out, *restriction);
+              return s_out;
+            }
+          }
+
+          Alert::MemberFunctionException(*this, __func__)
+            << "Point does not belong to the PETSc GridFunction shard."
+            << Alert::Raise;
+
+          assert(false);
+          return s_out;
+        }
+        else
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Unsupported mesh context type for PETSc GridFunction."
+            << Alert::Raise;
+          return Parent::getValue(p);
+        }
+      }
+
       void release()
       {
         PetscErrorCode ierr;
@@ -728,6 +787,7 @@ namespace Rodin::Variational
             ierr = VecGhostRestoreLocalForm(m_data, &m_read.ghost);
             assert(ierr == PETSC_SUCCESS);
           }
+
           m_read.acquired = false;
           m_read.raw = PETSC_NULLPTR;
           m_read.ghost = PETSC_NULLPTR;
@@ -755,6 +815,7 @@ namespace Rodin::Variational
             ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_REVERSE);
             assert(ierr == PETSC_SUCCESS);
           }
+
           m_write.acquired = false;
           m_write.raw = PETSC_NULLPTR;
           m_write.ghost = PETSC_NULLPTR;
@@ -799,6 +860,16 @@ namespace Rodin::PETSc::Variational
 
   template <class FES>
   GridFunction(const FES&) -> GridFunction<FES>;
+}
+
+namespace Rodin::FormLanguage
+{
+  template <class FES>
+  struct Traits<PETSc::Variational::GridFunction<FES>>
+  {
+    using FESType = FES;
+    using DataType = ::Vec;
+  };
 }
 
 #endif

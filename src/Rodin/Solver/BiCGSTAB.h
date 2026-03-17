@@ -40,8 +40,6 @@
 #ifndef RODIN_SOLVER_BiCGSTAB_H
 #define RODIN_SOLVER_BiCGSTAB_H
 
-#include <optional>
-#include <functional>
 #include <Eigen/SparseCholesky>
 
 #include "Rodin/Math/Vector.h"
@@ -49,6 +47,15 @@
 
 #include "ForwardDecls.h"
 #include "LinearSolver.h"
+
+namespace Rodin::FormLanguage
+{
+  template <class LinearSystem>
+  struct Traits<Solver::BiCGSTAB<LinearSystem>>
+  {
+    using LinearSystemType = LinearSystem;
+  };
+}
 
 namespace Rodin::Solver
 {

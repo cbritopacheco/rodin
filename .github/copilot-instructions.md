@@ -32,6 +32,8 @@ Rodin uses **CMake 3.16+** as its build system.
 
 ### Standard Build Process
 
+Make sure to initialize the submodules when cloning:
+
 ```bash
 # Clone with submodules
 git clone --recursive https://github.com/cbritopacheco/rodin
@@ -212,6 +214,9 @@ When working on code changes, use this workflow:
    bash tests/installation/test_installation.sh
    ```
 
+   Whenever possible try to use targeted tests to verify your changes instead
+   of running the full suite, which can be time-consuming.
+
 ### CMake Integration for Downstream Projects
 
 When a downstream project uses `find_package(Rodin REQUIRED)`, these targets become available:
@@ -234,7 +239,6 @@ When a downstream project uses `find_package(Rodin REQUIRED)`, these targets bec
 - `Rodin::Threads` - Threading support
 
 **Optional Targets** (when enabled with corresponding CMake flags):
-- `Rodin::Plot` - Plotting (requires `RODIN_WITH_PLOT=ON`)
 - `Rodin::PETSc` - PETSc integration (requires `RODIN_USE_PETSC=ON`)
 - `Rodin::MPI` - MPI support (requires `RODIN_USE_MPI=ON`)
 
@@ -302,7 +306,7 @@ int main(int, char**)
   problem = Integral(Grad(u), Grad(v))
           - Integral(v)
           + DirichletBC(u, Zero());
-  
+
   Solver::SparseLU solver;
   problem.solve(solver);
 
@@ -373,5 +377,5 @@ All PRs should pass CI checks before merging.
 
 - The repository uses git submodules for third-party dependencies
 - Always clone with `--recursive` or run `git submodule update --init --recursive`
-- Parallel builds recommended: use `-j4` or higher
+- Parallel builds recommended: use `-j2` or higher
 - Test environment variables: `OMP_NUM_THREADS=2` for threading tests

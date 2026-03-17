@@ -612,20 +612,20 @@ namespace Rodin::Geometry
        * @return Reference to the mesh.
        */
       MPIMesh& load(
-        const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM) override;
+        const boost::filesystem::path& filename, IO::FileFormat fmt) override;
 
       template <class Filename, typename = std::enable_if_t<std::is_invocable_v<Filename, int>>>
-      MPIMesh& load(const Filename& filename, IO::FileFormat fmt = IO::FileFormat::MFEM)
+      MPIMesh& load(const Filename& filename, IO::FileFormat fmt)
       {
         const auto& comm = m_context.getCommunicator();
         const boost::filesystem::path& path(filename(comm.rank()));
         return this->load(path, fmt);
       }
 
-      void save(const boost::filesystem::path& filename, IO::FileFormat fmt = IO::FileFormat::MFEM) const override;
+      void save(const boost::filesystem::path& filename, IO::FileFormat fmt) const override;
 
       template <class Filename, typename = std::enable_if_t<std::is_invocable_v<Filename, int>>>
-      void save(const Filename& filename, IO::FileFormat fmt = IO::FileFormat::MFEM)
+      void save(const Filename& filename, IO::FileFormat fmt)
       {
         const auto& comm = m_context.getCommunicator();
         const boost::filesystem::path& path(filename(comm.rank()));

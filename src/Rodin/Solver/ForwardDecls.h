@@ -36,6 +36,13 @@ namespace Rodin::Solver
   class LinearSolverBase;
 
   /**
+   * @brief Abstract base class for Newton-type nonlinear solvers.
+   * @tparam LinearSolver Type of the linear solver.
+   */
+  template <class LinearSolver>
+  class NewtonSolverBase;
+
+  /**
    * @brief Wrapper class for any Eigen sparse solver.
    * @tparam EigenSolverType Type of the underlying Eigen solver
    * @tparam OperatorType Type of operator (matrix)
@@ -168,6 +175,9 @@ namespace Rodin::Solver
 
   template <class LinearSystem>
   class IDRS;
+
+  template <class LinearSystem>
+  class MINRES;
 
   /**
    * @brief IDR(s)STABL iterative solver.

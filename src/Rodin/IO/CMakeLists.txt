@@ -8,6 +8,8 @@ Distributed under the Boost Software License, Version 1.0.
 set(RodinIO_HEADERS
   MFEM.h
   MEDIT.h
+  HDF5.h
+  XDMF.h
   Loader.h
   Printer.h
   MeshLoader.h
@@ -19,6 +21,7 @@ set(RodinIO_HEADERS
 set(RodinIO_SRCS
   MFEM.cpp
   MEDIT.cpp
+  XDMF.cpp
   MeshLoader.cpp
   MeshPrinter.cpp
   GridFunctionLoader.cpp
@@ -50,6 +53,12 @@ target_link_libraries(RodinIO
     Rodin::Variational
     Boost::filesystem
 )
+
+target_link_libraries(RodinIO PUBLIC HDF5::HDF5)
+
+if (RODIN_USE_MPI)
+  target_link_libraries(RodinIO PUBLIC RodinMPI)
+endif()
 
 # ---- Install target --------------------------------------------------------
 install(

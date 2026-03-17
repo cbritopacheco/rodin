@@ -26,7 +26,7 @@ int main(int, char**)
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
   mesh.getConnectivity().compute(1, 2);
   mesh.scale(1.0 / (n - 1));
-  mesh.save("Cell.mesh");
+  mesh.save("Cell.mesh", IO::FileFormat::MFEM);
 
   Alert::Info() << "Number of mesh elements: " << n << "."
                 << Alert::NewLine
@@ -61,7 +61,7 @@ int main(int, char**)
 
   GridFunction conductivity(vh);
   conductivity = gamma;
-  conductivity.save("Conductivity.gf");
+  conductivity.save("Conductivity.gf", IO::FileFormat::MFEM);
 
   Alert::Info() << "Saved conductivity coefficient to Conductivity.gf" << Alert::Raise;
 
@@ -86,19 +86,19 @@ int main(int, char**)
 
   Alert::Info() << "Solving for first component..." << Alert::Raise;
   Solver::SparseLU(poisson1).solve();
-  psi1.getSolution().save("CellFunction1.gf");
+  psi1.getSolution().save("CellFunction1.gf", IO::FileFormat::MFEM);
   Alert::Success() << "Done! Saved to CellFunction1.gf" << Alert::Raise;
 
   Alert::Info() << "Solving for second component..." << Alert::Raise;
   Solver::SparseLU(poisson2).solve();
-  psi2.getSolution().save("CellFunction2.gf");
+  psi2.getSolution().save("CellFunction2.gf", IO::FileFormat::MFEM);
   Alert::Success() << "Done! Saved to CellFunction2.gf" << Alert::Raise;
 
   P1 gh(mesh, 2);
 
   GridFunction psi(gh);
   psi = VectorFunction{ psi1.getSolution(), psi2.getSolution() };
-  psi.save("CellFunction.gf");
+  psi.save("CellFunction.gf", IO::FileFormat::MFEM);
   Alert::Success() << "Saved cell function to CellFunction.gf" << Alert::Raise;
 
   Alert::Info() << "Computing homogenized coefficient..." << Alert::Raise;

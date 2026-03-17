@@ -4,6 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include "Rodin/IO/XDMF.h"
 #include <Rodin/Types.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
@@ -36,8 +37,9 @@ int main(int, char**)
   CG(poisson).solve();
 
   // Save solution
-  u.getSolution().save("Poisson.gf");
-  mesh.save("Poisson.mesh");
+  IO::XDMF xdmf("Poisson");
+  xdmf.grid().setMesh(mesh).add("u", u.getSolution());
+  xdmf.write();
 
   return 0;
 }

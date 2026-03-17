@@ -227,7 +227,7 @@ void run(size_t experimentId, const std::vector<Experiment>& experiments)
                    .setHausdorff(experiment.hausd)
                    .optimize(th);
 
-    th.save("out/SphereCap.mfem." + std::to_string(i) + ".mesh");
+    th.save("out/SphereCap.mfem." + std::to_string(i) + ".mesh", IO::FileFormat::MFEM);
     th.save("out/SphereCap.medit." + std::to_string(i) + ".mesh", IO::FileFormat::MEDIT);
 
     if (t + std::numeric_limits<double>::epsilon() > experiment.T)

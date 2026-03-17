@@ -21,9 +21,9 @@ int main(int, char**)
   auto displacement =
     VectorFunction{0, [&](const Geometry::Point& p) { return (0.5 - p.x()) * (0.5 - p.x()); }};
 
-  mesh.save("Original.mesh");
+  mesh.save("Original.mesh", IO::FileFormat::MFEM);
   mesh.displace(displacement);
-  mesh.save("Displaced.mesh");
+  mesh.save("Displaced.mesh", IO::FileFormat::MFEM);
 }
 
 
