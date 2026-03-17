@@ -1,0 +1,127 @@
+/**
+  @page guides-io-gridfunctions Grid Function I/O
+  @brief Saving and loading grid functions in Rodin
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section guides-io-gridfunctions-intro Introduction
+
+  Grid functions represent the discrete solution of a finite element problem.
+  They associate numerical values (degrees of freedom) with a finite element
+  space. Saving and loading grid functions is essential for:
+
+  - Storing computed solutions
+  - Post-processing and visualization
+  - Checkpoint/restart of simulations
+  - Transferring data between different analyses
+
+  @section guides-io-gridfunctions-save Saving Grid Functions
+
+  @subsection guides-io-gridfunctions-save-mfem MFEM Format
+
+  The MFEM format stores grid functions as text files:
+
+  @code{.cpp}
+  #include <Rodin/Geometry.h>
+  #include <Rodin/Variational.h>
+
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
+
+  int main()
+  {
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+
+    P1 Vh(mesh);
+    GridFunction u(Vh);
+    u = [](const Geometry::Point& p) { return p.x() * p.y(); };
+
+    // Save grid function and mesh
+    u.save("solution.gf", IO::FileFormat::MFEM);
+    mesh.save("mesh.mesh", IO::FileFormat::MFEM);
+
+    return 0;
+  }
+  @endcode
+
+  @subsection guides-io-gridfunctions-save-xdmf XDMF Format (Recommended)
+
+  For visualization, the XDMF format is recommended. It stores both mesh
+  and field data together and can be opened directly in ParaView:
+
+  @code{.cpp}
+  #include <Rodin/IO/XDMF.h>
+
+  // After computing the solution...
+  IO::XDMF xdmf("Output");
+  xdmf.grid().setMesh(mesh).add("solution", u);
+  xdmf.write();
+  @endcode
+
+  @section guides-io-gridfunctions-load Loading Grid Functions
+
+  @subsection guides-io-gridfunctions-load-mfem From MFEM Format
+
+  To load a grid function from MFEM format, you need the mesh and finite
+  element space already set up:
+
+  @code{.cpp}
+  // Load mesh
+  Mesh mesh;
+  mesh.load("mesh.mesh", IO::FileFormat::MFEM);
+
+  // Create FE space on loaded mesh
+  P1 Vh(mesh);
+
+  // Load grid function
+  GridFunction u(Vh);
+  u.load("solution.gf", IO::FileFormat::MFEM);
+  @endcode
+
+  @section guides-io-gridfunctions-multiple Multiple Fields
+
+  When dealing with multiple fields, you can export them all in one XDMF
+  file:
+
+  @code{.cpp}
+  IO::XDMF xdmf("MultiField");
+  auto grid = xdmf.grid();
+  grid.setMesh(mesh);
+  grid.add("temperature", temperature);
+  grid.add("velocity", velocity);
+  grid.add("pressure", pressure);
+  xdmf.write();
+  @endcode
+
+  All fields will be available for selection in ParaView.
+
+  @section guides-io-gridfunctions-vector Vector-Valued Fields
+
+  Vector-valued grid functions are defined on finite element spaces with
+  multiple components:
+
+  @code{.cpp}
+  // Create a vector P1 space (2 components)
+  P1 Vh(mesh, 2);
+  GridFunction velocity(Vh);
+  velocity = [](const Geometry::Point& p)
+  {
+    return Math::Vector<Real>{{ -p.y(), p.x() }};
+  };
+
+  IO::XDMF xdmf("VectorField");
+  xdmf.grid().setMesh(mesh).add("velocity", velocity);
+  xdmf.write();
+  @endcode
+
+  @section guides-io-gridfunctions-see-also See Also
+
+  - @ref guides-io "I/O in Rodin overview"
+  - @ref guides-io-xdmf "XDMF format guide"
+  - @ref examples-io-index "I/O examples"
+
+  */

@@ -362,6 +362,14 @@
   This workflow produces files that can be directly opened in ParaView for
   visualization and analysis.
 
+  @section guides-io-detailed Detailed Format Guides
+
+  For in-depth information on each format, see:
+
+  - @subpage guides-io-xdmf - XDMF format for visualization and time series
+  - @subpage guides-io-gridfunctions - Saving and loading grid functions
+  - @subpage guides-io-meshformats - MFEM and MEDIT mesh file formats
+
   @section guides-io-see-also See Also
 
   - @ref guides-meshes-io "Mesh Input/Output" — Detailed mesh I/O guide

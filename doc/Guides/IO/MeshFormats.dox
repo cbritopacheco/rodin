@@ -1,0 +1,101 @@
+/**
+  @page guides-io-meshformats Mesh File Formats
+  @brief MFEM and MEDIT mesh file formats
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section guides-io-meshformats-intro Introduction
+
+  Rodin supports several mesh file formats for reading and writing meshes.
+  Each format has its own strengths and is suited to different workflows.
+
+  @section guides-io-meshformats-mfem MFEM Format
+
+  The MFEM format is a text-based mesh format used by the
+  [MFEM](https://mfem.org/) finite element library.
+
+  @subsection guides-io-meshformats-mfem-save Saving
+
+  @code{.cpp}
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+  mesh.save("output.mesh", IO::FileFormat::MFEM);
+  @endcode
+
+  @subsection guides-io-meshformats-mfem-load Loading
+
+  @code{.cpp}
+  Mesh mesh;
+  mesh.load("input.mesh", IO::FileFormat::MFEM);
+  @endcode
+
+  @section guides-io-meshformats-medit MEDIT Format
+
+  The MEDIT format (also known as `.mesh` format from INRIA) is commonly used
+  with the [MMG](https://www.mmgtools.org/) remeshing platform and other INRIA
+  tools.
+
+  @subsection guides-io-meshformats-medit-save Saving
+
+  @code{.cpp}
+  mesh.save("output.mesh", IO::FileFormat::MEDIT);
+  @endcode
+
+  @subsection guides-io-meshformats-medit-load Loading
+
+  @code{.cpp}
+  Mesh mesh;
+  mesh.load("input.mesh", IO::FileFormat::MEDIT);
+  @endcode
+
+  @subsection guides-io-meshformats-medit-mmg Using with MMG
+
+  When working with the MMG remeshing tools through Rodin's
+  @ref Rodin::External::MMG module, the MEDIT format is used for mesh
+  exchange:
+
+  @code{.cpp}
+  #include <RodinExternal/MMG.h>
+
+  // Load mesh in MEDIT format
+  MMG::Mesh mesh;
+  mesh.load("domain.mesh", IO::FileFormat::MEDIT);
+
+  // ... perform remeshing operations ...
+
+  // Save result
+  mesh.save("remeshed.mesh", IO::FileFormat::MEDIT);
+  @endcode
+
+  @section guides-io-meshformats-conversion Format Conversion
+
+  Converting between formats is straightforward — simply load in one format
+  and save in another:
+
+  @code{.cpp}
+  Mesh mesh;
+  mesh.load("input.mesh", IO::FileFormat::MEDIT);
+  mesh.save("output.mesh", IO::FileFormat::MFEM);
+  @endcode
+
+  @section guides-io-meshformats-comparison Comparison
+
+  | Feature | MFEM | MEDIT |
+  |---------|------|-------|
+  | Format | Text | Text |
+  | Extension | `.mesh` | `.mesh` |
+  | Vertices | Yes | Yes |
+  | Elements | Yes | Yes |
+  | Boundary markers | Attributes | References |
+  | Region markers | Attributes | References |
+  | Best for | MFEM workflows | MMG, INRIA tools |
+
+  @section guides-io-meshformats-see-also See Also
+
+  - @ref guides-io "I/O in Rodin overview"
+  - @ref guides-meshes-io "Mesh I/O operations"
+  - @ref guides-meshes "Meshes overview"
+
+  */
