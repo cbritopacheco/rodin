@@ -68,6 +68,7 @@
  * -pc_factor_shift_type nonzero  -pc_factor_shift_amount 1e-10
  */
 
+#include "Rodin/IO/XDMF.h"
 #include <Rodin/Types.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Assembly.h>
@@ -126,7 +127,7 @@ int main(int argc, char** argv)
 
   // Time discretization parameters.
   const Real T   = 12.0;   // Final time.
-  const Index Nt = 200;    // Number of time steps.
+  const Index Nt = 400;    // Number of time steps.
   const Real dt  = T / Nt; // Time step size.
 
   // Outlet pressure model:
@@ -138,7 +139,7 @@ int main(int argc, char** argv)
   const Real Rd = RdValues[idxRd];
 
   // Pulse frequency for the inlet waveform.
-  const Real freq = 50.0 / 60.0;
+  const Real freq = 30.0 / 60.0;
 
   // Load the mesh and compute boundary-to-cell connectivity.
   Mesh mesh;
@@ -146,7 +147,12 @@ int main(int argc, char** argv)
   mesh.getConnectivity().compute(1, 2);
 
   // Save the mesh once for post-processing convenience.
+  Alert::Info() << "Saving MEDIT mesh to NavierStokes.mesh..." << Alert::Raise;
   mesh.save("NavierStokes.mesh", IO::FileFormat::MEDIT);
+
+  Alert::Info() << "Setting up NavierStokes.xdmf ..." << Alert::Raise;
+  IO::XDMF xdmf("NavierStokes");
+  xdmf.setMesh(mesh);
 
   const size_t dim = mesh.getSpaceDimension();
 
@@ -159,176 +165,187 @@ int main(int argc, char** argv)
   H1 uh(std::integral_constant<size_t, 2>{}, mesh, dim);
   H1 ph(std::integral_constant<size_t, 1>{}, mesh);
 
-  // Unknowns and test functions.
-  PETSc::Variational::TrialFunction u(uh); u.setName("u");
-  PETSc::Variational::TrialFunction p(ph); p.setName("p");
-  PETSc::Variational::TestFunction  v(uh);
-  PETSc::Variational::TestFunction  q(ph);
-
-  // Solution fields from the previous time step.
-  PETSc::Variational::GridFunction u_old(uh);
-  PETSc::Variational::GridFunction p_old(ph);
-
-  // Time-dependent inlet velocity profile.
-  PETSc::Variational::GridFunction inletProfile(uh);
-
-  // Initial conditions: fluid initially at rest and zero pressure.
-  u_old = Math::Vector<Real>{{0.0, 0.0}};
-  p_old = 0.0;
-  inletProfile = Math::Vector<Real>{{0.0, 0.0}};
-
-  // Diagnostic output files.
-  std::ofstream fluxFile("flux.txt");
-  std::ofstream pressureFile("pressure.txt");
-  if (!fluxFile || !pressureFile)
   {
-    std::cerr << "Failed to open diagnostic output files flux.txt / pressure.txt.\n";
-    PetscFinalize();
-    return 1;
-  }
+    // Unknowns and test functions.
+    PETSc::Variational::TrialFunction u(uh); u.setName("u");
+    PETSc::Variational::TrialFunction p(ph); p.setName("p");
+    PETSc::Variational::TestFunction  v(uh);
+    PETSc::Variational::TestFunction  q(ph);
 
-  // Current outlet pressure used in the traction boundary condition.
-  Real pout = pd;
+    xdmf.add("velocity", u.getSolution());
+    xdmf.add("pressure", p.getSolution());
 
-  // Current simulation time.
-  Real t = 0.0;
+    // Solution fields from the previous time step.
+    PETSc::Variational::GridFunction u_old(uh);
+    PETSc::Variational::GridFunction p_old(ph);
 
-  // Helper objects for computing the outlet volumetric flow rate:
-  //   Q_out = ∫_{Γ_out} u · n
-  PETSc::Variational::GridFunction one(ph);
-  one = 1.0;
-  PETSc::Variational::TestFunction qFlux(ph);
-  LinearForm flux(qFlux);
+    // Time-dependent inlet velocity profile.
+    PETSc::Variational::GridFunction inletProfile(uh);
 
-  // Outward unit normal on boundary faces.
-  auto n = BoundaryNormal(mesh);
+    // Initial conditions: fluid initially at rest and zero pressure.
+    u_old = Math::Vector<Real>{{0.0, 0.0}};
+    p_old = 0.0;
+    inletProfile = Math::Vector<Real>{{0.0, 0.0}};
 
-  for (Index k = 0; k < Nt; k++)
-  {
-    t += dt;
-
-    // Build the prescribed pulsatile inlet profile at the current time.
-    //
-    // Here the inflow is vertical and parabolic in x:
-    //   u_in(x, t) = (0, g(t) * (R^2 - x^2) / R^2)
-    //
-    // This assumes the inlet cross section and coordinate convention of the
-    // supplied mesh. If the geometry changes, this profile may need revision.
-    const Real gt = InletPulse(t, freq);
-    inletProfile = [&](const Point& x)
+    // Diagnostic output files.
+    std::ofstream fluxFile("flux.txt");
+    std::ofstream pressureFile("pressure.txt");
+    if (!fluxFile || !pressureFile)
     {
-      const Real uy = gt * (R * R - x.x() * x.x()) / (R * R);
-      return Math::Vector<Real>{{0.0, uy}};
-    };
+      std::cerr << "Failed to open diagnostic output files flux.txt / pressure.txt.\n";
+      PetscFinalize();
+      return 1;
+    }
 
-    // Semi-implicit Oseen / Picard linearization:
-    //
-    // The nonlinear convective term (u · ∇)u is replaced by
-    //   (u_old · ∇)u
-    // at the new time step.
-    //
-    // In Rodin notation:
-    //   Jacobian(u) * u_old = (u_old · ∇)u.
-    const auto conv_u = Mult(Jacobian(u), u_old);
+    // Current outlet pressure used in the traction boundary condition.
+    Real pout = pd;
 
-    // Divergence of the frozen transport velocity.
-    //
-    // This is used in the skew-symmetric correction
-    //   0.5 * (div u_old) * u · v
-    // to obtain an energy-friendlier Oseen form.
-    const auto div_u_old = Div(u_old);
+    // Current simulation time.
+    Real t = 0.0;
 
-    // Backflow coefficient at the outlet:
-    //   beta = max(-(u_old · n), 0)
-    //
-    // When the flow tries to re-enter through the outlet, beta becomes positive
-    // and activates an additional boundary damping term.
-    const auto beta = Max(-Dot(u_old, n), 0.0);
-
-    // Mixed Oseen problem at the current time step.
-    Problem flow(u, p, v, q);
-    flow =
-        // Backward Euler time derivative:
-        //   (rho / dt) (u - u_old, v)
-        (rho / dt) * Integral(u, v)
-      - (rho / dt) * Integral(u_old, v)
-
-        // Linearized convection:
-        //   rho ((u_old · ∇)u, v)
-      + rho * Integral(Dot(conv_u, v))
-
-        // Skew-symmetric correction:
-        //   (rho / 2) ((div u_old) u, v)
-      + 0.5 * rho * Integral(div_u_old * Dot(u, v))
-
-        // Viscous term:
-        //   mu (∇u, ∇v)
-      + mu * Integral(Jacobian(u), Jacobian(v))
-
-        // Pressure-velocity coupling:
-        //   -(p, div v)
-      - Integral(p, Div(v))
-
-        // Incompressibility constraint:
-        //   (div u, q)
-      + Integral(Div(u), q)
-
-        // Outlet pressure traction:
-        //   -<p_out, v · n>_{Γ_out}
-      - BoundaryIntegral(pout * Dot(v, n)).over(outlet)
-
-        // Backflow damping on the outlet:
-        //   <(rho / 2) beta u, v>_{Γ_out}
-      + BoundaryIntegral(0.5 * rho * beta * Dot(u, v)).over(outlet)
-
-      // Tiny pressure-block diagonal filler used to
-      // improve robustness of sparse direct factorization
-      // for the mixed system.
-      + 1e-12 * Integral(p, q)
-
-        // No-slip wall condition.
-      + DirichletBC(u, Zero(dim)).on(wall)
-
-        // Prescribed inlet velocity.
-      + DirichletBC(u, inletProfile).on(inlet);
-
-    std::cout << "Assembling linear system for time step " << k + 1 << " / " << Nt << "...\n";
-
-    // Assemble the linear system and define PETSc field splits for the mixed
-    // velocity-pressure block structure.
-    flow.assemble().setFieldSplits();
-
-    std::cout << "Solving linear system for time step " << k + 1 << " / " << Nt << "...\n";
-    // Solve the assembled linear system.
-    Solver::KSP(flow).solve();
-
-    // Advance the time history by copying the newly computed solution into
-    // the "old" fields used by the next step.
-    u_old = u.getSolution();
-    p_old = p.getSolution();
-
-    // Compute the outlet flow rate
+    // Helper objects for computing the outlet volumetric flow rate:
     //   Q_out = ∫_{Γ_out} u · n
-    flux = BoundaryIntegral(Dot(u_old, n), qFlux).over(outlet);
-    flux.assemble();
-    const Real qout = flux(one);
+    PETSc::Variational::GridFunction one(ph);
+    one = 1.0;
+    PETSc::Variational::TestFunction qFlux(ph);
+    LinearForm flux(qFlux);
 
-    // Update the outlet pressure through the resistance law:
-    //   p_out = p_d - R_d * Q_out
-    //
-    // This is a simple lumped downstream model.
-    pout = pd - Rd * qout;
+    // Outward unit normal on boundary faces.
+    auto n = BoundaryNormal(mesh);
 
-    // Save scalar diagnostics for later plotting.
-    fluxFile << t << " " << qout << "\n";
-    pressureFile << t << " " << pout << "\n";
+    for (Index k = 0; k < Nt; k++)
+    {
+      t += dt;
 
-    // Save solution snapshots at every time step.
-    mesh.save("NavierStokes." + std::to_string(k) + ".mesh", IO::FileFormat::MEDIT);
-    u_old.save("NavierStokes." + std::to_string(k) + ".sol", IO::FileFormat::MEDIT);
-    // p_old.save("NavierStokes_pressure_" + std::to_string(k) + ".sol", IO::FileFormat::MEDIT);
+      // Build the prescribed pulsatile inlet profile at the current time.
+      //
+      // Here the inflow is vertical and parabolic in x:
+      //   u_in(x, t) = (0, g(t) * (R^2 - x^2) / R^2)
+      //
+      // This assumes the inlet cross section and coordinate convention of the
+      // supplied mesh. If the geometry changes, this profile may need revision.
+      const Real gt = InletPulse(t, freq);
+      inletProfile = [&](const Point& x)
+      {
+        const Real uy = gt * (R * R - x.x() * x.x()) / (R * R);
+        return Math::Vector<Real>{{0.0, uy}};
+      };
+
+      // Semi-implicit Oseen / Picard linearization:
+      //
+      // The nonlinear convective term (u · ∇)u is replaced by
+      //   (u_old · ∇)u
+      // at the new time step.
+      //
+      // In Rodin notation:
+      //   Jacobian(u) * u_old = (u_old · ∇)u.
+      const auto conv_u = Mult(Jacobian(u), u_old);
+
+      // Divergence of the frozen transport velocity.
+      //
+      // This is used in the skew-symmetric correction
+      //   0.5 * (div u_old) * u · v
+      // to obtain an energy-friendlier Oseen form.
+      const auto div_u_old = Div(u_old);
+
+      // Backflow coefficient at the outlet:
+      //   beta = max(-(u_old · n), 0)
+      //
+      // When the flow tries to re-enter through the outlet, beta becomes positive
+      // and activates an additional boundary damping term.
+      const auto beta = Max(-Dot(u_old, n), 0.0);
+
+      // Mixed Oseen problem at the current time step.
+      Problem flow(u, p, v, q);
+      flow =
+          // Backward Euler time derivative:
+          //   (rho / dt) (u - u_old, v)
+          (rho / dt) * Integral(u, v)
+        - (rho / dt) * Integral(u_old, v)
+
+          // Linearized convection:
+          //   rho ((u_old · ∇)u, v)
+        + rho * Integral(Dot(conv_u, v))
+
+          // Skew-symmetric correction:
+          //   (rho / 2) ((div u_old) u, v)
+        + 0.5 * rho * Integral(div_u_old * Dot(u, v))
+
+          // Viscous term:
+          //   mu (∇u, ∇v)
+        + mu * Integral(Jacobian(u), Jacobian(v))
+
+          // Pressure-velocity coupling:
+          //   -(p, div v)
+        - Integral(p, Div(v))
+
+          // Incompressibility constraint:
+          //   (div u, q)
+        + Integral(Div(u), q)
+
+          // Outlet pressure traction:
+          //   -<p_out, v · n>_{Γ_out}
+        - BoundaryIntegral(pout * Dot(v, n)).over(outlet)
+
+          // Backflow damping on the outlet:
+          //   <(rho / 2) beta u, v>_{Γ_out}
+        + BoundaryIntegral(0.5 * rho * beta * Dot(u, v)).over(outlet)
+
+        // Tiny pressure-block diagonal filler used to
+        // improve robustness of sparse direct factorization
+        // for the mixed system.
+        + 1e-6 * Integral(p, q)
+
+          // No-slip wall condition.
+        + DirichletBC(u, Zero(dim)).on(wall)
+
+          // Prescribed inlet velocity.
+        + DirichletBC(u, inletProfile).on(inlet);
+
+      Alert::Info() << "Assembling linear system for time step " << k + 1 << " / " << Nt << "..."
+        << Alert::Raise;
+
+      // Assemble the linear system and define PETSc field splits for the mixed
+      // velocity-pressure block structure.
+      flow.assemble().setFieldSplits();
+
+      Alert::Info() << "Solving linear system for time step " << k + 1 << " / " << Nt << "..."
+        << Alert::Raise;
+
+      // Solve the assembled linear system.
+      Solver::KSP(flow).solve();
+
+      // Advance the time history by copying the newly computed solution into
+      // the "old" fields used by the next step.
+      u_old = u.getSolution();
+      p_old = p.getSolution();
+
+      // Compute the outlet flow rate
+      //   Q_out = ∫_{Γ_out} u · n
+      flux = BoundaryIntegral(Dot(u_old, n), qFlux).over(outlet);
+      flux.assemble();
+      const Real qout = flux(one);
+
+      // Update the outlet pressure through the resistance law:
+      //   p_out = p_d - R_d * Q_out
+      //
+      // This is a simple lumped downstream model.
+      pout = pd - Rd * qout;
+
+      // Save scalar diagnostics for later plotting.
+      fluxFile << t << " " << qout << "\n";
+      pressureFile << t << " " << pout << "\n";
+
+      // Save solution snapshots at every time step.
+      xdmf.write(t).flush();
+    }
   }
+
+  Alert::Success() << "Simulation completed. Closing XDMF file..." << Alert::Raise;
+
+  xdmf.close();
 
   PetscFinalize();
+
   return 0;
 }
