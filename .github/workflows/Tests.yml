@@ -41,18 +41,16 @@ jobs:
       - name: Install dependencies
         run: >-
           sudo apt-get update && sudo apt-get install -y
-          lcov
+          libboost1.74-all-dev
+          libsuitesparse-dev
           libeigen3-dev
+          libscotch-dev
+          libmetis-dev
           libhdf5-dev
           libomp-dev
-          libgl1-mesa-dev
-          libsdl2-dev
-          libglfw3-dev
-          libopenal-dev
-          libvulkan-dev
-          libsuitesparse-dev
-          libmetis-dev
-          libboost1.74-all-dev
+          petsc-dev
+          mpich
+          lcov
 
       - name: Configure CMake
         run: >
@@ -194,18 +192,16 @@ jobs:
         run: >-
           sudo apt-get update && sudo apt-get install -y
           gcc-14 g++-14
-          lcov
+          libboost1.74-all-dev
+          libsuitesparse-dev
           libeigen3-dev
+          libscotch-dev
+          libmetis-dev
           libhdf5-dev
           libomp-dev
-          libgl1-mesa-dev
-          libsdl2-dev
-          libglfw3-dev
-          libopenal-dev
-          libvulkan-dev
-          libsuitesparse-dev
-          libmetis-dev
-          libboost1.74-all-dev
+          petsc-dev
+          mpich
+          lcov
 
       - name: Configure CMake (coverage)
         run: >
