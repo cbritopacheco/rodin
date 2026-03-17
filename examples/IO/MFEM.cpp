@@ -26,7 +26,7 @@ int main(int, char** argv)
   RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
   gf = c;
 
-  mesh.save("miaow.mesh");
-  gf.save("miaow.gf");
+  mesh.save("miaow.mesh", IO::FileFormat::MFEM);
+  gf.save("miaow.gf", IO::FileFormat::MFEM);
 }
 

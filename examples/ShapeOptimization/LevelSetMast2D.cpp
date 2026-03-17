@@ -39,10 +39,10 @@ int main(int, char**)
 
   // Load mesh
   MMG::Mesh Omega;
-  Omega.load(meshFile);
+  Omega.load(meshFile, IO::FileFormat::MFEM);
   MMG::MeshOptimizer().setHMax(hmax / 2.0).optimize(Omega);
 
-  Omega.save("Omega0.mesh");
+  Omega.save("Omega0.mesh", IO::FileFormat::MFEM);
 
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
@@ -127,7 +127,7 @@ int main(int, char**)
    MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
 
    // Save mesh
-   Omega.save("Omega.mesh");
+   Omega.save("Omega.mesh", IO::FileFormat::MFEM);
 
    // Test for convergence
    if (obj.size() >= 2 && abs(obj[i] - obj[i - 1]) < eps)

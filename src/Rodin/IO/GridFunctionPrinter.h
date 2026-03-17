@@ -7,27 +7,78 @@
 #ifndef RODIN_VARIATIONAL_GRIDFUNCTIONPRINTER_H
 #define RODIN_VARIATIONAL_GRIDFUNCTIONPRINTER_H
 
+#include <functional>
 #include <boost/filesystem.hpp>
 
+#include "Rodin/Alert/Exception.h"
 #include "ForwardDecls.h"
+#include "Rodin/Variational/ForwardDecls.h"
+
+#include "Printer.h"
 
 namespace Rodin::IO
 {
   /**
-   * @brief Forward declaration of base class for printing grid functions.
+   * @brief Primary template for GridFunctionPrinter.
    *
-   * GridFunctionPrinterBase provides the foundation for writing finite element
-   * solution data in different file formats. Specialized implementations exist
-   * for each supported file format.
+   * This primary template provides a default definition so that the compiler
+   * does not fail with "implicit instantiation of undefined template" when
+   * GridFunctionBase::save() is compiled for FES/Data combinations that do not
+   * have a matching partial specialization for a given file format.
    *
-   * @tparam Fmt File format to use for printing
-   * @tparam FES Finite element space type
-   * @tparam Data Data storage type (typically a vector type)
+   * @note An exception is raised at runtime if this primary template is
+   *       actually invoked.
    *
-   * @see GridFunctionPrinter
+   * @see GridFunctionLoader
    */
   template <FileFormat Fmt, class FES, class Data>
-  class GridFunctionPrinterBase;
+  class GridFunctionPrinter : public IO::Printer<Variational::GridFunction<FES, Data>>
+  {
+    public:
+      using ObjectType = Variational::GridFunction<FES, Data>;
+
+      GridFunctionPrinter(const ObjectType& gf)
+        : m_gf(gf)
+      {}
+
+      void print(std::ostream&) override
+      {
+        Alert::Exception()
+          << "No GridFunctionPrinter specialization for this format/FES/Data combination."
+          << Alert::Raise;
+      }
+
+      const ObjectType& getObject() const override { return m_gf.get(); }
+
+    private:
+      std::reference_wrapper<const ObjectType> m_gf;
+  };
+
+  template <FileFormat Fmt, class FES, class Data>
+  class GridFunctionPrinterBase : public IO::Printer<Variational::GridFunction<FES, Data>>
+  {
+    public:
+      using FESType = FES;
+
+      using DataType = Data;
+
+      /**
+       * @brief Type of mesh object being printed.
+       */
+      using ObjectType = Variational::GridFunction<FES, Data>;
+
+      GridFunctionPrinterBase(const ObjectType& gf)
+        : m_gf(gf)
+      {}
+
+      const ObjectType& getObject() const override
+      {
+        return m_gf.get();
+      }
+
+    private:
+      std::reference_wrapper<const ObjectType> m_gf;
+  };
 }
 
 #endif

@@ -33,7 +33,7 @@ int main(int, char**)
   };
 
   Mesh topography;
-  topography.load(meshfile);
+  topography.load(meshfile, IO::FileFormat::MFEM);
 
   srand(std::time(0));
   FastNoiseLite gen(rand());
@@ -78,8 +78,8 @@ int main(int, char**)
   GridFunction h(sh);
   h = [](const Point& p) { return p.z(); };
 
-  topography.save("Topography.mesh");
-  h.save("Topography.gf");
+  topography.save("Topography.mesh", IO::FileFormat::MFEM);
+  h.save("Topography.gf", IO::FileFormat::MFEM);
 
   return 0;
 }

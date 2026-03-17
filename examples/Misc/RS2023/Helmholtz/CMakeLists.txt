@@ -5,8 +5,6 @@ target_link_libraries(RS2023_Helmholtz_NoScreen
   Rodin::Geometry
   Rodin::Assembly
   Rodin::Variational
-  PRIVATE
-  Rodin::Threads
   )
 
 add_executable(RS2023_Helmholtz_Perturbed Perturbed.cpp)
@@ -25,8 +23,6 @@ target_link_libraries(RS2023_Helmholtz_Simulation
   Rodin::Geometry
   Rodin::Assembly
   Rodin::Variational
-  PRIVATE
-  Rodin::Threads
   )
 
 add_executable(RS2023_Helmholtz_Animation Animation.cpp)

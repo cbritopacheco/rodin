@@ -18,7 +18,6 @@
  * Supported formats include:
  * - MEDIT (.mesh)
  * - MFEM (.mfem)
- * - EnSight (.case)
  *
  * @see Rodin::IO
  */
@@ -26,5 +25,7 @@
 #include "IO/ForwardDecls.h"
 #include "IO/Loader.h"
 #include "IO/Printer.h"
+#include "IO/HDF5.h"
+#include "IO/XDMF.h"
 
 #endif

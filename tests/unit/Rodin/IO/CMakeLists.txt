@@ -34,3 +34,16 @@ gtest_discover_tests(RodinIOP1GridFunctionIOTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinIOHDF5IOTest HDF5IOTest.cpp)
+target_link_libraries(RodinIOHDF5IOTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::IO)
+gtest_discover_tests(RodinIOHDF5IOTest
+  PROPERTIES
+    LABELS unit
+)

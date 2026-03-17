@@ -66,6 +66,7 @@
 #include "Rodin/IO/ForwardDecls.h"
 #include "Rodin/IO/MEDIT.h"
 #include "Rodin/IO/MFEM.h"
+#include "Rodin/IO/HDF5.h"
 
 #include "ForwardDecls.h"
 
@@ -119,7 +120,7 @@ namespace Rodin::Variational
    * ## Key Features
    * - **DOF Management**: Automatic handling of degrees of freedom storage
    * - **Function Evaluation**: Point-wise evaluation via finite element interpolation
-   * - **I/O Support**: Export to various visualization formats (EnSight, MEDIT, MFEM)
+   * - **I/O Support**: Export to various visualization formats (MEDIT, MFEM)
    * - **Space Association**: Strong association with underlying finite element space
    */
 
@@ -171,6 +172,12 @@ namespace Rodin::Variational
       GridFunctionBaseReference& operator=(const GridFunctionBaseReference&) = delete;
 
       GridFunctionBaseReference& operator=(GridFunctionBaseReference&&) = delete;
+
+      constexpr
+      decltype(auto) operator()(const Geometry::Point& p) const
+      {
+        return m_ref.get().getValue(p);
+      }
 
       constexpr
       decltype(auto) getValue(const Geometry::Point& p) const
@@ -298,6 +305,7 @@ namespace Rodin::Variational
        */
       GridFunctionBase(const GridFunctionBase& other)
         : Parent(std::cref(*this)),
+          m_name(other.m_name),
           m_fes(other.m_fes)
       {}
 
@@ -307,6 +315,7 @@ namespace Rodin::Variational
        */
       GridFunctionBase(GridFunctionBase&& other)
         : Parent(std::cref(*this)),
+          m_name(std::move(other.m_name)),
           m_fes(std::move(other.m_fes))
       {}
 
@@ -319,6 +328,7 @@ namespace Rodin::Variational
        */
       GridFunctionBase& operator=(GridFunctionBase&& other)
       {
+        m_name = std::move(other.m_name);
         m_fes = std::move(other.m_fes);
         return *this;
       }
@@ -332,6 +342,7 @@ namespace Rodin::Variational
       {
         if (this != &other)
         {
+          m_name = other.m_name;
           m_fes = other.m_fes;
         }
         return *this;
@@ -460,34 +471,48 @@ namespace Rodin::Variational
        * @return Reference to this grid function
        *
        * Reads DOF data from a file in the specified format. Supported formats
-       * include MFEM, EnSight, and MEDIT.
+       * include MFEM, and MEDIT.
        */
       Derived& load(
           const boost::filesystem::path& filename,
-          IO::FileFormat fmt = IO::FileFormat::MFEM)
+          IO::FileFormat fmt)
       {
-        std::ifstream input(filename.c_str());
-        if (!input)
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "Failed to open input file stream." << Alert::NewLine
-            << "Filename: \"" << filename << "\"" << Alert::NewLine
-            << "Please check if the file exists and is accessible."
-            << Alert::Raise;
-        }
-
         switch (fmt)
         {
           case IO::FileFormat::MFEM:
           {
+            std::ifstream input(filename.c_str());
+            if (!input)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "Failed to open input file stream." << Alert::NewLine
+                << "Filename: \"" << filename << "\"" << Alert::NewLine
+                << "Please check if the file exists and is accessible."
+                << Alert::Raise;
+            }
             IO::GridFunctionLoader<IO::FileFormat::MFEM, FESType, DataType>(
               static_cast<Derived&>(*this)).load(input);
             break;
           }
           case IO::FileFormat::MEDIT:
           {
+            std::ifstream input(filename.c_str());
+            if (!input)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "Failed to open input file stream." << Alert::NewLine
+                << "Filename: \"" << filename << "\"" << Alert::NewLine
+                << "Please check if the file exists and is accessible."
+                << Alert::Raise;
+            }
             IO::GridFunctionLoader<IO::FileFormat::MEDIT, FES, DataType>(
               static_cast<Derived&>(*this)).load(input);
+            break;
+          }
+          case IO::FileFormat::HDF5:
+          {
+            IO::GridFunctionLoader<IO::FileFormat::HDF5, FESType, DataType>(
+              static_cast<Derived&>(*this)).load(filename);
             break;
           }
           default:
@@ -503,38 +528,46 @@ namespace Rodin::Variational
 
       void save(
           const boost::filesystem::path& filename,
-          IO::FileFormat fmt = IO::FileFormat::MFEM) const
+          IO::FileFormat fmt) const
       {
-        std::ofstream output(filename.c_str());
-        if (!output)
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "Failed to open output file stream." << Alert::NewLine
-            << "Filename: \"" << filename << "\"" << Alert::NewLine
-            << "Please check if the path is valid and writable."
-            << Alert::Raise;
-        }
-
         switch (fmt)
         {
           case IO::FileFormat::MFEM:
           {
+            std::ofstream output(filename.c_str());
+            if (!output)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "Failed to open output file stream." << Alert::NewLine
+                << "Filename: \"" << filename << "\"" << Alert::NewLine
+                << "Please check if the path is valid and writable."
+                << Alert::Raise;
+            }
             IO::GridFunctionPrinter<IO::FileFormat::MFEM, FESType, DataType>(
               static_cast<const Derived&>(*this)).print(output);
             break;
           }
           case IO::FileFormat::MEDIT:
           {
+            std::ofstream output(filename.c_str());
+            if (!output)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "Failed to open output file stream." << Alert::NewLine
+                << "Filename: \"" << filename << "\"" << Alert::NewLine
+                << "Please check if the path is valid and writable."
+                << Alert::Raise;
+            }
             IO::GridFunctionPrinter<IO::FileFormat::MEDIT, FESType, DataType>(
               static_cast<const Derived&>(*this)).print(output);
             break;
           }
-          // case IO::FileFormat::ENSIGHT6:
-          // {
-          //   IO::GridFunctionPrinter<IO::FileFormat::ENSIGHT6, FESType, DataType>(
-          //     static_cast<const Derived&>(*this)).print(output);
-          //   break;
-          // }
+          case IO::FileFormat::HDF5:
+          {
+            IO::GridFunctionPrinter<IO::FileFormat::HDF5, FESType, DataType>(
+              static_cast<const Derived&>(*this)).print(filename);
+            break;
+          }
           default:
           {
             Alert::MemberFunctionException(*this, __func__)
@@ -543,7 +576,6 @@ namespace Rodin::Variational
               << Alert::Raise;
           }
         }
-        output.close();
       }
 
       /**
@@ -838,8 +870,24 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getOrder(geom);
       }
 
+      Optional<StringView> getName() const override
+      {
+        if (m_name)
+          return StringView(m_name->c_str(), m_name->size());
+        else
+          return std::nullopt;
+      }
+
+      GridFunctionBase& setName(const std::string& name)
+      {
+        m_name = name;
+        return *this;
+      }
+
     private:
+      Optional<std::string> m_name;
       std::reference_wrapper<const FESType> m_fes;
+
   };
 
   template <class FES>

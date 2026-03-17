@@ -630,11 +630,10 @@ namespace Rodin::IO
 
       void print(std::ostream& os) override
       {
-        print(os, true);
+        printMesh(os, true);
       }
 
-      void print(std::ostream& os, bool printEnd);
-
+      void printMesh(std::ostream& os, bool printEnd);
       void printVersion(std::ostream& os);
       void printDimension(std::ostream& os);
       void printEntities(std::ostream& os);

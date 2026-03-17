@@ -29,7 +29,7 @@ int main(int, char**)
 
   MMG::Optimizer().setHMax(0.5).optimize(mesh);
 
-  mesh.save("Optimized.mesh");
+  mesh.save("Optimized.mesh", IO::FileFormat::MFEM);
 
   return 0;
 }

@@ -72,6 +72,7 @@ option(RODIN_USE_PASTIX               "Use Rodin with PaStiX support"           
 option(RODIN_USE_KLU                  "Use Rodin with KLU support"                OFF)
 option(RODIN_USE_SUPERLU              "Use Rodin with SuperLU support"            OFF)
 option(RODIN_USE_SPQR                 "Use Rodin with SPQR support"               OFF)
+option(RODIN_USE_CHOLMOD              "Use Rodin with CHOLMOD support"            OFF)
 option(RODIN_USE_PARDISO              "Use Rodin with Pardiso support"            OFF)
 option(RODIN_USE_APPLE_ACCELERATE     "Use Rodin with Apple Accelerate support"   OFF)
 option(RODIN_USE_SCOTCH               "Use Rodin with Scotch support"             OFF)
@@ -237,8 +238,49 @@ if (RODIN_BUILD_SRC)
   include_directories(${Boost_INCLUDE_DIRS})
 
   # ---- Eigen ----
-  message(STATUS "Configuring Eigen3...")
   find_package(Eigen3 CONFIG REQUIRED NO_MODULE)
+
+  # ---- HDF5 ----
+  find_package(HDF5 REQUIRED COMPONENTS C)
+
+  # ---- Threads ----
+  if (RODIN_MULTITHREADED)
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
+    find_package(Threads REQUIRED)
+  endif()
+
+  # ---- MPI ----
+  if (RODIN_USE_MPI)
+    find_package(Boost REQUIRED COMPONENTS mpi)
+  endif()
+
+  # ---- PETSc ----
+  if (RODIN_USE_PETSC)
+    find_package(PETSc REQUIRED)
+  endif()
+
+  # ---- Scotch ----
+  if (RODIN_USE_SCOTCH)
+    find_package(Scotch REQUIRED)
+  endif()
+
+  # ---- UMFPACK, SPQR, CHOLMOD ----
+  if (RODIN_USE_UMFPACK)
+    find_package(SuiteSparse REQUIRED COMPONENTS UMFPACK)
+  endif()
+
+  if (RODIN_USE_SPQR)
+    find_package(SuiteSparse REQUIRED COMPONENTS SPQR)
+  endif()
+
+  if (RODIN_USE_CHOLMOD)
+    find_package(SuiteSparse REQUIRED COMPONENTS CHOLMOD)
+  endif()
+
+  # ---- OpenMP ----
+  if (RODIN_USE_OPENMP)
+    find_package(OpenMP REQUIRED)
+  endif()
 
   add_subdirectory(src)
 

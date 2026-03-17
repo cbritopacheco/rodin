@@ -21,7 +21,7 @@ int main(int argc, char** argv)
   {
 
     Geometry::LocalMesh mesh;
-    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Triangle, { 64, 64 });
+    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Triangle, { 32, 32 });
     mesh.getConnectivity().compute(2, 2);
     mesh.getConnectivity().compute(2, 1);
     std::cout << mesh.getFaceCount() << std::endl;

@@ -9,6 +9,9 @@ set(RodinMPI_HEADERS
   Geometry/Mesh.h
   Geometry/Sharder.h
   Assembly/MPI.h
+  IO/HDF5.h
+  IO/MFEM.h
+  IO/MEDIT.h
 )
 
 set(RodinMPI_SRCS
@@ -37,12 +40,11 @@ target_compile_definitions(RodinMPI
 )
 
 # ---- Dependencies ----------------------------------------------------------
-find_package(Boost REQUIRED COMPONENTS mpi)
-
 target_link_libraries(RodinMPI
   PUBLIC
     Rodin::Geometry
     Rodin::Alert
+    Rodin::IO
     Boost::mpi
     MPI::MPI_CXX
 )

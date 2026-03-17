@@ -64,17 +64,17 @@ int main(int, char**)
   std::cout << Eigen::nbThreads() << std::endl;
 
   MMG::Mesh miaow;
-  miaow.load("Scattered.mesh");
+  miaow.load("Scattered.mesh", IO::FileFormat::MFEM);
 
 
   P1 fes(miaow);
   GridFunction gf(fes);
-  gf.load("Scattered.gf");
+  gf.load("Scattered.gf", IO::FileFormat::MFEM);
 
   GridFunction diff(fes);
 
   diff = abs(gf - 1);
-  diff.save("Diff.gf");
+  diff.save("Diff.gf", IO::FileFormat::MFEM);
 
 
   std::exit(1);
@@ -158,20 +158,20 @@ int main(int, char**)
     VectorFES drvfes(dOmega, mesh.getSpaceDimension());
 
     GridFunction phi(rfes);
-    phi.getFiniteElementSpace().getMesh().save("Phi.mesh");
+    phi.getFiniteElementSpace().getMesh().save("Phi.mesh", IO::FileFormat::MFEM);
 
     phi = Re(wave);
-    phi.save("PhiRe.gf");
+    phi.save("PhiRe.gf", IO::FileFormat::MFEM);
 
     phi = Im(wave);
-    phi.save("PhiIm.gf");
+    phi.save("PhiIm.gf", IO::FileFormat::MFEM);
 
     Alert::Info() << "Distancing absorbing domain..." << Alert::Raise;
     auto dist = MMG::Distancer(drfes).setInteriorDomain(SoundSoft)
                                      .distance(dOmega);
 
-    dist.save("Dist.gf");
-    dist.getFiniteElementSpace().getMesh().save("Dist.mesh");
+    dist.save("Dist.gf", IO::FileFormat::MFEM);
+    dist.getFiniteElementSpace().getMesh().save("Dist.mesh", IO::FileFormat::MFEM);
 
     Alert::Info() << "Assembling state equation..." << Alert::Raise;
     TrialFunction u(cfes);
@@ -198,16 +198,16 @@ int main(int, char**)
       return std::norm(wave(x)+ u.getSolution()(x));
     };
 
-    total.save("Total.gf");
-    rfes.getMesh().save("Total.mesh");
+    total.save("Total.gf", IO::FileFormat::MFEM);
+    rfes.getMesh().save("Total.mesh", IO::FileFormat::MFEM);
 
     GridFunction pressure(rfes);
     pressure = [&](const Point& x)
     {
       return std::norm(u.getSolution()(x));
     };
-    pressure.save("Scattered.gf");
-    rfes.getMesh().save("Scattered.mesh");
+    pressure.save("Scattered.gf", IO::FileFormat::MFEM);
+    rfes.getMesh().save("Scattered.mesh", IO::FileFormat::MFEM);
 
     Alert::Info() << "Computing objective..." << Alert::Raise;
     const Real J = 0.5 * Integral(pressure).compute() / mesh.getVolume();
@@ -245,8 +245,8 @@ int main(int, char**)
     solve(adjoint);
 
     pressure = [&](const Point& x) { return std::norm(p.getSolution()(x)); };
-    pressure.save("Adjoint.gf");
-    p.getSolution().getFiniteElementSpace().getMesh().save("Adjoint.mesh");
+    pressure.save("Adjoint.gf", IO::FileFormat::MFEM);
+    p.getSolution().getFiniteElementSpace().getMesh().save("Adjoint.mesh", IO::FileFormat::MFEM);
 
     if (topologicalStep)
     {
@@ -270,8 +270,8 @@ int main(int, char**)
       norm = Abs(s.getSolution());
       s.getSolution() /= norm.max();
 
-      s.getSolution().save("Topo.gf");
-      drfes.getMesh().save("Topo.mesh");
+      s.getSolution().save("Topo.gf", IO::FileFormat::MFEM);
+      drfes.getMesh().save("Topo.mesh", IO::FileFormat::MFEM);
 
       Alert::Info() << "Computing nucleation locations..." << Alert::Raise;
       auto cs = locations(s.getSolution());
@@ -288,8 +288,8 @@ int main(int, char**)
       GridFunction conormal(drvfes);
       conormal.project(Region::Cells, Grad(dist), { SoundSoft, SoundHard });
 
-      conormal.getFiniteElementSpace().getMesh().save("Conormal.mesh");
-      conormal.save("Conormal.gf");
+      conormal.getFiniteElementSpace().getMesh().save("Conormal.mesh", IO::FileFormat::MFEM);
+      conormal.save("Conormal.gf", IO::FileFormat::MFEM);
 
       Alert::Info() << "Computing shape gradient..." << Alert::Raise;
 
@@ -312,15 +312,15 @@ int main(int, char**)
       norm = Frobenius(theta.getSolution());
       theta.getSolution() /= norm.max();
 
-      theta.getFiniteElementSpace().getMesh().save("Theta.mesh");
-      theta.getSolution().save("Theta.gf");
+      theta.getFiniteElementSpace().getMesh().save("Theta.mesh", IO::FileFormat::MFEM);
+      theta.getSolution().save("Theta.gf", IO::FileFormat::MFEM);
 
       Alert::Info() << "Advecting support..." << Alert::Raise;
       MMG::Advect(dist, theta.getSolution()).step(dt);
     }
 
-    dist.save("Dist.gf");
-    dist.getFiniteElementSpace().getMesh().save("Dist.mesh");
+    dist.save("Dist.gf", IO::FileFormat::MFEM);
+    dist.getFiniteElementSpace().getMesh().save("Dist.mesh", IO::FileFormat::MFEM);
 
     Alert::Info() << "Meshing the support..." << Alert::Raise;
     RealFES workaroundfes(mesh);

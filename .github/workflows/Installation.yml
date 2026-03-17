@@ -28,24 +28,30 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-          
+
       - name: Setup Cpp (C++ / C)
         uses: aminya/setup-cpp@v1
         with:
           compiler: ${{ matrix.compiler }}
           cmake: true
-          
+
       - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libboost-all-dev \
-            libeigen3-dev \
-            libomp-dev
-            
+        run: >-
+          sudo apt-get update && sudo apt-get install -y
+          libboost-all-dev
+          libsuitesparse-dev
+          libeigen3-dev
+          libscotch-dev
+          libmetis-dev
+          libhdf5-dev
+          libomp-dev
+          petsc-dev
+          mpich
+          lcov
+
       - name: Run installation test
         run: bash tests/installation/test_installation.sh
-        
+
       - name: Archive installation artifacts on failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -69,22 +75,22 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-          
+
       - name: Setup Python
         run: |
           brew list -1 | grep python | while read formula; do brew unlink $formula; brew link --overwrite $formula; done || true
-          
+
       - name: Update Homebrew
         run: brew update
-          
+
       - name: Install dependencies
         run: |
-          brew install boost eigen libomp
-          
+          brew install boost eigen hdf5 libomp
+
       - name: Link libomp
         run: |
           brew link --force --overwrite libomp
-          
+
       - name: Verify dependencies
         run: |
           echo "Boost location:"
@@ -93,10 +99,10 @@ jobs:
           brew --prefix eigen
           echo "OpenMP location:"
           brew --prefix libomp
-          
+
       - name: Run installation test
         run: bash tests/installation/test_installation.sh
-        
+
       - name: Archive installation artifacts on failure
         if: failure()
         uses: actions/upload-artifact@v4

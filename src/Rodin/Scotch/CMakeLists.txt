@@ -32,8 +32,6 @@ target_compile_definitions(RodinScotch
 )
 
 # ---- Dependencies ----------------------------------------------------------
-find_package(Scotch REQUIRED)
-
 target_link_libraries(RodinScotch
   PUBLIC
     Rodin::Geometry

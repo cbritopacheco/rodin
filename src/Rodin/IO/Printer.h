@@ -8,6 +8,9 @@
 #define RODIN_IO_PRINTER_H
 
 #include <ostream>
+#include <fstream>
+
+#include <boost/filesystem/path.hpp>
 
 #include "ForwardDecls.h"
 
@@ -79,6 +82,12 @@ namespace Rodin::IO
        * write the object data to the provided stream.
        */
       virtual void print(std::ostream& os) = 0;
+
+      virtual void print(const boost::filesystem::path& filename)
+      {
+        std::ofstream os(filename.string());
+        this->print(os);
+      }
 
       /**
        * @brief Gets a const reference to the object being printed.

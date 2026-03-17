@@ -20,8 +20,8 @@ int main(int, char**)
   GridFunction gf(fes);
   gf = [](const Geometry::Point& p) { return Math::Vector<Real>{{p.x(), p.y()}}; };
 
-  mesh.save("function.mesh");
-  gf.save("function.gf");
+  mesh.save("function.mesh", IO::FileFormat::MFEM);
+  gf.save("function.gf", IO::FileFormat::MFEM);
 
   return 0;
 }

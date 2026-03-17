@@ -152,7 +152,7 @@ void run(size_t experimentId, const std::vector<Experiment>& experiments)
 
   // Load mesh
   MMG::Mesh th;
-  th.load(meshFile);
+  th.load(meshFile, IO::FileFormat::MFEM);
   th.scale(1. / 5e4);
   th.displace(VectorFunction{-0.5, -0.5, 0});
 

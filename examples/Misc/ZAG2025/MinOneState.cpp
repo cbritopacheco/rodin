@@ -38,7 +38,7 @@ int main()
   size_t width = 16;
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, { width, width } );
   mesh.scale(1.0 / (width - 1.0));
-  mesh.save("Omega.mesh");
+  mesh.save("Omega.mesh", IO::FileFormat::MFEM);
 
   // MMG::Optimizer().setHMax(hmax)
   //                 .setHMin(hmin)
@@ -117,7 +117,7 @@ int main()
     adjun01.assemble();
     CG(adjun01).solve();
 
-    p.getSolution().save("p.gf");
+    p.getSolution().save("p.gf", IO::FileFormat::MFEM);
 
     // Compute fluxes
     sigma1 = a11 * Dx(u.getSolution()) + a12 * Dy(u.getSolution());
@@ -130,13 +130,13 @@ int main()
     M12 = -(sigma1 * tau2 + sigma2 * tau1) * 0.5;
     M22 = -sigma2 * tau2;
 
-    a11.save("a11.gf");
-    a12.save("a12.gf");
-    a22.save("a22.gf");
-    Case.save("Case.gf");
-    theta.save("theta.gf");
-    u.getSolution().save("u.gf");
-    p.getSolution().save("p.gf");
+    a11.save("a11.gf", IO::FileFormat::MFEM);
+    a12.save("a12.gf", IO::FileFormat::MFEM);
+    a22.save("a22.gf", IO::FileFormat::MFEM);
+    Case.save("Case.gf", IO::FileFormat::MFEM);
+    theta.save("theta.gf", IO::FileFormat::MFEM);
+    u.getSolution().save("u.gf", IO::FileFormat::MFEM);
+    p.getSolution().save("p.gf", IO::FileFormat::MFEM);
 
     compliance = f * u.getSolution();
     objective = f * u.getSolution() + lagr + theta;

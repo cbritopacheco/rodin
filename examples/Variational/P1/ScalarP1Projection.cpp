@@ -21,8 +21,8 @@ int main(int, char**)
 
   gf = [](const Geometry::Point& p) { return p.x() * p.x() +  p.y() * p.y(); };
 
-  mesh.save("Projection.mesh");
-  gf.save("Projection.gf");
+  mesh.save("Projection.mesh", IO::FileFormat::MFEM);
+  gf.save("Projection.gf", IO::FileFormat::MFEM);
 }
 
 

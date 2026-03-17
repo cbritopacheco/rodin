@@ -18,6 +18,7 @@
 #include <functional>
 
 #include "Rodin/Geometry/Polytope.h"
+#include "Rodin/Types.h"
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
@@ -375,13 +376,13 @@ namespace Rodin::Variational
 
       TrialFunction& setName(const std::string& name)
       {
-        m_name = name;
+        m_gf.setName(name);
         return *this;
       }
 
       Optional<StringView> getName() const override
       {
-        return m_name;
+        return m_gf.getName();
       }
 
        /**
@@ -390,7 +391,6 @@ namespace Rodin::Variational
        */
 
     private:
-      std::string m_name; ///< Optional name for the trial function
       SolutionType m_gf;
   };
 

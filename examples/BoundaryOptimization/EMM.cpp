@@ -109,7 +109,7 @@ int main(int, char**)
     mesh.getConnectivity().compute(2, 2);
     mesh.getConnectivity().compute(1, 2);
 
-    mesh.save("Omega.mfem.mesh");
+    mesh.save("Omega.mfem.mesh", IO::FileFormat::MFEM);
 
     Alert::Info() << "RMC..." << Alert::Raise;
     regionCount = rmc(mesh, { Cathode, Anode }, Gamma);
@@ -172,7 +172,7 @@ int main(int, char**)
 
     Alert::Info() << "Solving state equation..." << Alert::Raise;
     Solver::CG(state).solve();
-    u.getSolution().save("U.gf");
+    u.getSolution().save("U.gf", IO::FileFormat::MFEM);
 
     TrialFunction gtr(vfes);
     TestFunction gte(vfes);
@@ -183,7 +183,7 @@ int main(int, char**)
               ;
     Solver::CG(potential).solve();
 
-    gtr.getSolution().save("miaow.gf");
+    gtr.getSolution().save("miaow.gf", IO::FileFormat::MFEM);
 
     GridFunction miaow(vfes);
     miaow = VectorFunction{0, 0, 0};
@@ -197,7 +197,7 @@ int main(int, char**)
 
     Alert::Info() << "Solving adjoint equation..." << Alert::Raise;
     Solver::CG(adjoint).solve();
-    p.getSolution().save("P.gf");
+    p.getSolution().save("P.gf", IO::FileFormat::MFEM);
 
     Alert::Info() << "Computing objective..." << Alert::Raise;
     GridFunction j(sfes);
@@ -226,8 +226,8 @@ int main(int, char**)
            + tgv * Integral(s, t).over(Inlet, Cathode, Anode, FixedAnode, FixedCathode);
       Solver::CG(topo).solve();
 
-      dOmega.save("sA.mesh");
-      s.getSolution().save("sA.gf");
+      dOmega.save("sA.mesh", IO::FileFormat::MFEM);
+      s.getSolution().save("sA.gf", IO::FileFormat::MFEM);
 
       Alert::Info() << "Computing nucleation locations..." << Alert::Raise;
       auto cs = locations(s.getSolution());
@@ -247,8 +247,8 @@ int main(int, char**)
            + tgv * Integral(s, t).over(Inlet, Cathode, Anode, FixedAnode, FixedCathode);
       Solver::CG(topo).solve();
 
-      dOmega.save("sC.mesh");
-      s.getSolution().save("sC.gf");
+      dOmega.save("sC.mesh", IO::FileFormat::MFEM);
+      s.getSolution().save("sC.gf", IO::FileFormat::MFEM);
 
       Alert::Info() << "Computing nucleation locations..." << Alert::Raise;
       auto cs = locations(s.getSolution());
@@ -288,8 +288,8 @@ int main(int, char**)
       norm = Frobenius(theta.getSolution());
       theta.getSolution() /= norm.max();
 
-      dOmega.save("Theta.mesh");
-      theta.getSolution().save("Theta.gf");
+      dOmega.save("Theta.mesh", IO::FileFormat::MFEM);
+      theta.getSolution().save("Theta.gf", IO::FileFormat::MFEM);
 
       if (geometricStepAnode)
       {
