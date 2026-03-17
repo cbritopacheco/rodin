@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::IO::GridFunctionPrinterBase class | Rodin</title>
+  <title>Rodin/MPI/IO/HDF5.h file | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -71,30 +71,46 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_i_o.html">IO</a>::<wbr/></span>GridFunctionPrinterBase <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_e290bfab8759f47931d844dd05a08f1b.html">MPI</a>/</span><span class="m-breadcrumb"><a href="dir_3d2cbac321e646db37d2d0ce714b4b14.html">IO</a>/</span>HDF5.h <span class="m-thin">file</span>
         </h1>
-        <p>Forward declaration of base class for printing grid functions.</p>
-        <table class="m-table m-fullwidth m-flat">
-          <thead>
-            <tr><th colspan="2">Template parameters</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="width: 1%">Fmt</td>
-              <td>File format to use for printing</td>
-            </tr>
-            <tr>
-              <td>FES</td>
-              <td>Finite element space type</td>
-            </tr>
-            <tr>
-              <td>Data</td>
-              <td>Data storage type (typically a vector type)</td>
-            </tr>
-          </tbody>
-        </table>
-<p><a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base.html" class="m-doc">GridFunctionPrinterBase</a> provides the foundation for writing finite element solution data in different file formats. Specialized implementations exist for each supported file format.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html" class="m-doc">GridFunctionPrinter</a></p></aside>
+        <p>HDF5 mesh persistence specializations for distributed MPI meshes.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>Provides MeshPrinter and MeshLoader specializations for <code>Mesh&lt;Context::MPI&gt;</code> using the HDF5 file format.</p><p>Each MPI rank persists its own local shard independently: the printer delegates to <code>MeshPrinter&lt;FileFormat::HDF5, Context::Local&gt;</code> to write the base mesh topology and then appends shard-specific metadata (ownership flags, polytope index maps, ghost-to-owner maps, and halo CSR) under the <code>/Shard/...</code> HDF5 group.</p><p>The loader delegates to <code>MeshLoader&lt;FileFormat::HDF5, Context::Local&gt;</code> to restore the base mesh. Shard metadata restoration from HDF5 is not yet implemented because the <code>Shard</code> class does not expose a public API for resizing its internal metadata vectors after construction. Full shard round-trips should use Boost.Serialization; the HDF5 shard datasets are available for custom tooling and post-processing.</p><aside class="m-note m-default"><h4>See also</h4><p>MeshPrinter</p><p>MeshLoader</p><p>Geometry::Mesh&lt;Context::MPI&gt;</p><p>Geometry::Shard</p></aside>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
+            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for Shape and Topology Optimization.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_i_o.html" class="m-doc">Rodin::IO</a></dt>
+            <dd>Module for dealing with I/O functionality.</dd>
+          </dl>
+        </section>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_mesh_loader_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_m_p_i_01_4.html" class="m-doc">Rodin::IO::MeshLoader&lt;FileFormat::HDF5, Context::MPI&gt;</a>
+            </dt>
+            <dd>Loads a distributed MPI mesh from an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_m_p_i_01_4.html" class="m-doc">Rodin::IO::MeshPrinter&lt;FileFormat::HDF5, Context::MPI&gt;</a>
+            </dt>
+            <dd>Prints a distributed MPI mesh to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

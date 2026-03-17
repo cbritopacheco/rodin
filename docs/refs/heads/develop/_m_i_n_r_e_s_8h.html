@@ -77,10 +77,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md208">Algorithm</a></li>
-            <li><a href="#autotoc_md209">Applicability</a></li>
-            <li><a href="#autotoc_md210">Notes</a></li>
-            <li><a href="#autotoc_md211">Usage Example</a></li>
+            <li><a href="#autotoc_md218">Algorithm</a></li>
+            <li><a href="#autotoc_md219">Applicability</a></li>
+            <li><a href="#autotoc_md220">Notes</a></li>
+            <li><a href="#autotoc_md221">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -118,7 +118,7 @@ $ A $
 <g id='eq2-page1'>
 <use x='0' y='0' xlink:href='#eq2-g0-65'/>
 </g>
-</svg> is symmetric (and may be indefinite).</p><section id="autotoc_md208"><h3><a href="#autotoc_md208">Algorithm</a></h3><p>MINRES is a Lanczos-based Krylov method that minimizes the residual norm over the generated Krylov subspace, while preserving short recurrences for symmetric operators.</p></section><section id="autotoc_md209"><h3><a href="#autotoc_md209">Applicability</a></h3><ul><li>Symmetric positive definite (works, but CG is usually preferable)</li><li>Symmetric indefinite systems (e.g., some mixed formulations, saddle-point after suitable transformations, Helmholtz-type operators, etc.)</li></ul></section><section id="autotoc_md210"><h3><a href="#autotoc_md210">Notes</a></h3><ul><li>This implementation uses Eigen&#x27;s unsupported MINRES.</li></ul></section><section id="autotoc_md211"><h3><a href="#autotoc_md211">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+</svg> is symmetric (and may be indefinite).</p><section id="autotoc_md218"><h3><a href="#autotoc_md218">Algorithm</a></h3><p>MINRES is a Lanczos-based Krylov method that minimizes the residual norm over the generated Krylov subspace, while preserving short recurrences for symmetric operators.</p></section><section id="autotoc_md219"><h3><a href="#autotoc_md219">Applicability</a></h3><ul><li>Symmetric positive definite (works, but CG is usually preferable)</li><li>Symmetric indefinite systems (e.g., some mixed formulations, saddle-point after suitable transformations, Helmholtz-type operators, etc.)</li></ul></section><section id="autotoc_md220"><h3><a href="#autotoc_md220">Notes</a></h3><ul><li>This implementation uses Eigen&#x27;s unsupported MINRES.</li></ul></section><section id="autotoc_md221"><h3><a href="#autotoc_md221">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 
 <span class="n">Solver</span><span class="o">::</span><span class="n">MINRES</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
@@ -131,6 +131,8 @@ $ A $
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for Shape and Topology Optimization.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
+            <dd>Module for writing high level abstract expressions.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Rodin::Solver</a></dt>
             <dd>Module for linear algebra systems.</dd>
           </dl>
@@ -142,12 +144,12 @@ $ A $
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_m_i_n_r_e_s_3_01_math_1_1_linear_system_3_01_math_1_1_sparse_matrix_3e99a3bb6569edadfe0405a4bafdc55c9.html" class="m-doc">Rodin::Solver::MINRES&lt;Math::LinearSystem&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a>
             </dt>
-            <dd>MINRES solver for symmetric sparse systems.</dd>
+            <dd><a href="class_rodin_1_1_solver_1_1_m_i_n_r_e_s.html" class="m-doc">MINRES</a> solver for symmetric sparse systems.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_m_i_n_r_e_s_3_01_math_1_1_linear_system_3_01_math_1_1_matrix_3_01_scae6360e13a1df75f352930829c5698bb9.html" class="m-doc">Rodin::Solver::MINRES&lt;Math::LinearSystem&lt;Math::Matrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a>
             </dt>
-            <dd>MINRES solver for symmetric dense systems.</dd>
+            <dd><a href="class_rodin_1_1_solver_1_1_m_i_n_r_e_s.html" class="m-doc">MINRES</a> solver for symmetric dense systems.</dd>
           </dl>
         </section>
       </div>

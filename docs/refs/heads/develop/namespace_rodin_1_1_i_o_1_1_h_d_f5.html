@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::IO::HDF5 namespace | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_i_o.html">IO</a>::<wbr/></span>HDF5 <span class="m-thin">namespace</span>
+        </h1>
+        <p><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> utility namespace providing type aliases, path constants, RAII handle wrappers, and low-level dataset read/write helpers.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#typedef-members">Typedefs</a></li>
+                <li><a href="#func-members">Functions</a></li>
+                <li><a href="#var-members">Variables</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>This namespace contains all HDF5-specific helpers used by the <a href="class_rodin_1_1_i_o_1_1_mesh_loader.html" class="m-doc">MeshLoader</a>, <a href="class_rodin_1_1_i_o_1_1_mesh_printer.html" class="m-doc">MeshPrinter</a>, <a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html" class="m-doc">GridFunctionLoader</a>, and <a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html" class="m-doc">GridFunctionPrinter</a> specializations for the <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file format. It wraps the <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> C API in a type-safe, RAII-managed interface.</p>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5_1_1_path.html" class="m-doc">Path</a></dt>
+            <dd><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> dataset path constants for the mesh and grid function storage layouts.</dd>
+          </dl>
+        </section>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              class <a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a>
+            </dt>
+            <dd>RAII wrapper for <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> identifier handles.</dd>
+          </dl>
+        </section>
+        <section id="typedef-members">
+          <h2><a href="#typedef-members">Typedefs</a></h2>
+          <dl class="m-doc">
+            <dt>
+              using <a href="#a4faf74064d8a0c88f84babb222296663" class="m-doc">U64</a> = unsigned long long
+            </dt>
+            <dd>Unsigned 64-bit integer type used for <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> dataset storage.</dd>
+            <dt>
+              using <a href="#aeacb184b234f079f542f2d30b6832879" class="m-doc">I32</a> = int
+            </dt>
+            <dd>Signed 32-bit integer type used for <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> dataset storage.</dd>
+            <dt>
+              using <a href="#abd1aa6b0328fed075078fd9fb91774b1" class="m-doc">F64</a> = double
+            </dt>
+            <dd>64-bit floating point type used for <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> dataset storage.</dd>
+            <dt>
+              using <a href="#a1639ed6de1db2efbf1d55925ac560b6b" class="m-doc">U8</a> = unsigned char
+            </dt>
+            <dd>Unsigned 8-bit integer type used for boolean flag datasets.</dd>
+          </dl>
+        </section>
+        <section id="func-members">
+          <h2><a href="#func-members">Functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a915b66dcbe18d8dab563880d55e14b9f" class="m-doc">File</a>(</span><span class="m-doc-wrap">hid_t id) -&gt; <a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a></span>
+            </dt>
+            <dd>Creates a <a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a> for an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file identifier.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5baebbf4547ace64f0834ba5d164d7e0" class="m-doc">Group</a>(</span><span class="m-doc-wrap">hid_t id) -&gt; <a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a></span>
+            </dt>
+            <dd>Creates a <a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a> for an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> group identifier.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5a39497219f310ca12a35bb9db916e37" class="m-doc">DataSet</a>(</span><span class="m-doc-wrap">hid_t id) -&gt; <a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a></span>
+            </dt>
+            <dd>Creates a <a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a> for an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> dataset identifier.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4d538f2f08b1f5a0456a2f17d498a9d9" class="m-doc">Space</a>(</span><span class="m-doc-wrap">hid_t id) -&gt; <a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a></span>
+            </dt>
+            <dd>Creates a <a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a> for an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> dataspace identifier.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9ac2f735f5bfa26e6435600854526bbb" class="m-doc">getNativeType</a>(</span><span class="m-doc-wrap">) -&gt; hid_t</span>
+            </dt>
+            <dd>Returns the <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> native memory type corresponding to <code>T</code>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4e821cc5909d152f34aa7b963d89bdf9" class="m-doc">exists</a>(</span><span class="m-doc-wrap">hid_t loc,
+              const std::string&amp; path) -&gt; bool</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> whether an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> link exists at the given path.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a286c9ca94ab806ce2ae95a3d59fa8888" class="m-doc">entityGroupPath</a>(</span><span class="m-doc-wrap">size_t d) -&gt; std::string</span>
+            </dt>
+            <dd>Returns the <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> group path for entities of dimension <code>d</code>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab173e07f5b303da27f4ea7dc187acd0f" class="m-doc">entityTypesPath</a>(</span><span class="m-doc-wrap">size_t d) -&gt; std::string</span>
+            </dt>
+            <dd>Returns the dataset path for entity type codes of dimension <code>d</code>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a85b225c9811ea8001e52c3f9b77d7b0b" class="m-doc">entityOffsetsPath</a>(</span><span class="m-doc-wrap">size_t d) -&gt; std::string</span>
+            </dt>
+            <dd>Returns the dataset path for entity CSR offsets of dimension <code>d</code>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aaa4c400b19dc63f473f515a88dcf99cf" class="m-doc">entityIndicesPath</a>(</span><span class="m-doc-wrap">size_t d) -&gt; std::string</span>
+            </dt>
+            <dd>Returns the dataset path for entity CSR vertex indices of dimension <code>d</code>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9a8154a7b88898458e6dcd4ccf42708d" class="m-doc">incidenceGroupPath</a>(</span><span class="m-doc-wrap">size_t d,
+              size_t dp) -&gt; std::string</span>
+            </dt>
+            <dd>Returns the <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> group path for the incidence relation <code>d → dp</code>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8ce5fba430d7137647be12ad21036f27" class="m-doc">incidenceOffsetsPath</a>(</span><span class="m-doc-wrap">size_t d,
+              size_t dp) -&gt; std::string</span>
+            </dt>
+            <dd>Returns the dataset path for incidence CSR offsets.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a810c3455f9619d2876fd8b805510b4ef" class="m-doc">incidenceIndicesPath</a>(</span><span class="m-doc-wrap">size_t d,
+              size_t dp) -&gt; std::string</span>
+            </dt>
+            <dd>Returns the dataset path for incidence CSR indices.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#adc1dc7e6d76708c67b203200d5e59c64" class="m-doc">attributePath</a>(</span><span class="m-doc-wrap">size_t d) -&gt; std::string</span>
+            </dt>
+            <dd>Returns the dataset path for polytope attributes of dimension <code>d</code>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8d35829781e8976061350168ac3dc418" class="m-doc">transformationGroupPath</a>(</span><span class="m-doc-wrap">size_t d) -&gt; std::string</span>
+            </dt>
+            <dd>Returns the <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> group path for polytope transformations of dimension <code>d</code>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4150f93dcf3c653b8aa08e2a5e83332c" class="m-doc">transformationKindPath</a>(</span><span class="m-doc-wrap">size_t d) -&gt; std::string</span>
+            </dt>
+            <dd>Returns the dataset path for transformation kind values of dimension <code>d</code>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0929c57e679ffac5c1ae2662cf8b7ae9" class="m-doc">shardFlagsPath</a>(</span><span class="m-doc-wrap">size_t d) -&gt; std::string</span>
+            </dt>
+            <dd>Returns the dataset path for shard ownership flags of dimension <code>d</code>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9948e7c7b21171c1e27611b44e164152" class="m-doc">shardPolytopeMapGroupPath</a>(</span><span class="m-doc-wrap">size_t d) -&gt; std::string</span>
+            </dt>
+            <dd>Returns the group path for shard polytope map of dimension <code>d</code>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a831545c580c9f861edd5a53985eb9de2" class="m-doc">shardPolytopeMapLeftPath</a>(</span><span class="m-doc-wrap">size_t d) -&gt; std::string</span>
+            </dt>
+            <dd>Returns the dataset path for shard-to-distributed index mapping.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab302386212f3d1ba0188e0994a2371ab" class="m-doc">shardPolytopeMapRightGroupPath</a>(</span><span class="m-doc-wrap">size_t d) -&gt; std::string</span>
+            </dt>
+            <dd>Returns the group path for distributed-to-shard index mapping.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1900ef305653b66dccdd7a385a4b9f01" class="m-doc">shardOwnerGroupPath</a>(</span><span class="m-doc-wrap">size_t d) -&gt; std::string</span>
+            </dt>
+            <dd>Returns the group path for ghost-to-owner map of dimension <code>d</code>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad08f9195c4399e36b44e0e5e79c4b260" class="m-doc">shardHaloGroupPath</a>(</span><span class="m-doc-wrap">size_t d) -&gt; std::string</span>
+            </dt>
+            <dd>Returns the group path for owned-to-halo map of dimension <code>d</code>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a319355bab276471e7fb97f11383d1e69" class="m-doc">getGeometryCountArraySize</a>(</span><span class="m-doc-wrap">) -&gt; size_t</span>
+            </dt>
+            <dd>Returns the size of the geometry-count array.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8062d9726dcf6e604159b225a7364c60" class="m-doc">getXDMFMixedTopologyId</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t) -&gt; <a href="#a4faf74064d8a0c88f84babb222296663" class="m-doc">U64</a></span>
+            </dt>
+            <dd>Maps a <a href="namespace_rodin.html" class="m-doc">Rodin</a> polytope type to its <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> mixed-topology type id.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#adf88451bafe58d725ca7e5fbb0d1c4bd" class="m-doc">getXDMFMixedTopologySize</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh) -&gt; size_t</span>
+            </dt>
+            <dd>Computes the total length of the <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> mixed-topology stream for the given mesh.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6fff8af24d63c6f3e320fa8c2d779e65" class="m-doc">readVectorDataset</a>(</span><span class="m-doc-wrap">hid_t file,
+              const std::string&amp; path) -&gt; std::vector&lt;T&gt;</span>
+            </dt>
+            <dd>Reads a 1D <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> dataset into a <code>std::vector</code>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a28b391bea8b28e86311f6b8934aa5f61" class="m-doc">readScalarDataset</a>(</span><span class="m-doc-wrap">hid_t file,
+              const std::string&amp; path) -&gt; T</span>
+            </dt>
+            <dd>Reads a scalar (single-element) <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> dataset.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a8e220dc0a8cdf9d63fafec0311de8c76" class="m-doc">writeVectorDataset</a>(</span><span class="m-doc-wrap">hid_t file,
+              const std::string&amp; path,
+              const std::vector&lt;T&gt;&amp; values)</span>
+            </dt>
+            <dd>Writes a <code>std::vector</code> as a 1D <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> dataset.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a61b9d78d3e2e2be11b83b0a3213e77dd" class="m-doc">writeScalarDataset</a>(</span><span class="m-doc-wrap">hid_t file,
+              const std::string&amp; path,
+              const T&amp; value)</span>
+            </dt>
+            <dd>Writes a single scalar value as a 1D dataset of length 1.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a6cd1932d8db41129204c3038fbd9faa3" class="m-doc">writeMatrixDataset</a>(</span><span class="m-doc-wrap">hid_t file,
+              const std::string&amp; path,
+              const std::vector&lt;T&gt;&amp; values,
+              hsize_t rows,
+              hsize_t cols)</span>
+            </dt>
+            <dd>Writes a row-major packed vector as a 2D <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> dataset.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac5ef11270094c2d08238cf5964cf2eed" class="m-doc">readMatrixShape</a>(</span><span class="m-doc-wrap">hid_t file,
+              const std::string&amp; path) -&gt; std::pair&lt;hsize_t, hsize_t&gt;</span>
+            </dt>
+            <dd>Reads the shape (rows, cols) of a rank-2 <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> dataset.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac37b5ce0ed5b1bf7ed1f9c7ab5da33ee" class="m-doc">readDatasetShape</a>(</span><span class="m-doc-wrap">hid_t file,
+              const std::string&amp; path) -&gt; std::vector&lt;hsize_t&gt;</span>
+            </dt>
+            <dd>Reads the full shape of an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> dataset as a vector of dimensions.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a78de307532ec54af170b29f28467d28a" class="m-doc">writeXDMFTopology</a>(</span><span class="m-doc-wrap">hid_t file,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span>
+            </dt>
+            <dd>Writes the <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> mixed-topology stream to an open <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a8ce512b794dc20751458531b9ebd4c8f" class="m-doc">writeXDMFTopology</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span>
+            </dt>
+            <dd>Writes the <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> mixed-topology stream to an existing <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a52bf1791ca96c8240cd08505a21e6183" class="m-doc">writeXDMFVertices</a>(</span><span class="m-doc-wrap">hid_t file,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span>
+            </dt>
+            <dd>Writes vertex coordinate data to an open <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file for <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#abba74fe87c69c400fe3e55613fbe9d1a" class="m-doc">writeXDMFRegionAttribute</a>(</span><span class="m-doc-wrap">hid_t file,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span>
+            </dt>
+            <dd>Writes polytope region attributes to an open <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file for <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a1c1068399e04ee68f35b203a71eee71a" class="m-doc">writeXDMFMesh</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span>
+            </dt>
+            <dd>Writes a minimal <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization mesh file.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class GridFunctionType&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a69bcbfb344ddb4070284591b8344f31e" class="m-doc">writeXDMFNodeAttribute</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
+              const boost::filesystem::path&amp; filename)</span>
+            </dt>
+            <dd>Writes a grid function as vertex-centered (nodal) data to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file for <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class GridFunctionType&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#af6fbd161163fe2d6697ac8a08e298a8c" class="m-doc">writeXDMFCellAttribute</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
+              const boost::filesystem::path&amp; filename)</span>
+            </dt>
+            <dd>Writes a grid function as cell-centered data to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file for <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class GridFunctionType&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a202d14641e452ff224b15cf7e9db3fa9" class="m-doc">writeXDMFNodeAttribute</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; visMesh,
+              const boost::filesystem::path&amp; filename)</span>
+            </dt>
+            <dd>Writes a grid function as vertex-centered (nodal) data to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file for <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization, evaluated on an explicit mesh.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class GridFunctionType&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a62dcf1eb08b2f13cd8c5dbc56cf08c61" class="m-doc">writeXDMFCellAttribute</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; visMesh,
+              const boost::filesystem::path&amp; filename)</span>
+            </dt>
+            <dd>Writes a grid function as cell-centered data to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file for <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization, evaluated on an explicit mesh.</dd>
+          </dl>
+        </section>
+        <section id="var-members">
+          <h2><a href="#var-members">Variables</a></h2>
+          <dl class="m-doc">
+            <dt>
+              static <a href="#a4faf74064d8a0c88f84babb222296663" class="m-doc">U64</a> <a href="#a149b538958dc9b79168209090ad8bc94" class="m-doc">NullAttributeMarker</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Sentinel value used to represent the absence of an attribute in <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> attribute datasets.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Typedef documentation</h2>
+          <section class="m-doc-details" id="a4faf74064d8a0c88f84babb222296663"><div>
+            <h3>
+              using Rodin::<wbr />IO::<wbr />HDF5::<wbr /><a href="#a4faf74064d8a0c88f84babb222296663" class="m-doc-self">U64</a> = unsigned long long
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Unsigned 64-bit integer type used for <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> dataset storage.</p>
+          </div></section>
+          <section class="m-doc-details" id="aeacb184b234f079f542f2d30b6832879"><div>
+            <h3>
+              using Rodin::<wbr />IO::<wbr />HDF5::<wbr /><a href="#aeacb184b234f079f542f2d30b6832879" class="m-doc-self">I32</a> = int
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Signed 32-bit integer type used for <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> dataset storage.</p>
+          </div></section>
+          <section class="m-doc-details" id="abd1aa6b0328fed075078fd9fb91774b1"><div>
+            <h3>
+              using Rodin::<wbr />IO::<wbr />HDF5::<wbr /><a href="#abd1aa6b0328fed075078fd9fb91774b1" class="m-doc-self">F64</a> = double
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>64-bit floating point type used for <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> dataset storage.</p>
+          </div></section>
+          <section class="m-doc-details" id="a1639ed6de1db2efbf1d55925ac560b6b"><div>
+            <h3>
+              using Rodin::<wbr />IO::<wbr />HDF5::<wbr /><a href="#a1639ed6de1db2efbf1d55925ac560b6b" class="m-doc-self">U8</a> = unsigned char
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Unsigned 8-bit integer type used for boolean flag datasets.</p>
+          </div></section>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a915b66dcbe18d8dab563880d55e14b9f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a> Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a915b66dcbe18d8dab563880d55e14b9f" class="m-doc-self">File</a>(</span><span class="m-doc-wrap">hid_t id)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Creates a <a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a> for an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file identifier.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">id&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>File identifier returned by <code>H5Fcreate</code> or <code>H5Fopen</code>.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a> that calls <code>H5Fclose</code> on destruction.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5baebbf4547ace64f0834ba5d164d7e0"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a> Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5baebbf4547ace64f0834ba5d164d7e0" class="m-doc-self">Group</a>(</span><span class="m-doc-wrap">hid_t id)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Creates a <a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a> for an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> group identifier.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">id&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Group identifier returned by <code>H5Gcreate2</code> or <code>H5Gopen2</code>.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a> that calls <code>H5Gclose</code> on destruction.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5a39497219f310ca12a35bb9db916e37"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a> Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5a39497219f310ca12a35bb9db916e37" class="m-doc-self">DataSet</a>(</span><span class="m-doc-wrap">hid_t id)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Creates a <a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a> for an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> dataset identifier.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">id&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Dataset identifier returned by <code>H5Dcreate2</code> or <code>H5Dopen2</code>.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a> that calls <code>H5Dclose</code> on destruction.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4d538f2f08b1f5a0456a2f17d498a9d9"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a> Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4d538f2f08b1f5a0456a2f17d498a9d9" class="m-doc-self">Space</a>(</span><span class="m-doc-wrap">hid_t id)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Creates a <a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a> for an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> dataspace identifier.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">id&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Dataspace identifier returned by <code>H5Screate_simple</code> etc.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a> that calls <code>H5Sclose</code> on destruction.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9ac2f735f5bfa26e6435600854526bbb"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">hid_t Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9ac2f735f5bfa26e6435600854526bbb" class="m-doc-self">getNativeType</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Returns the <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> native memory type corresponding to <code>T</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">T</td>
+                  <td>One of U64, I32, F64, or U8.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> native type identifier for use with <code>H5Dread</code>/<code>H5Dwrite</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4e821cc5909d152f34aa7b963d89bdf9"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4e821cc5909d152f34aa7b963d89bdf9" class="m-doc-self">exists</a>(</span><span class="m-doc-wrap">hid_t loc,
+              const std::string&amp; path)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p><a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> whether an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> link exists at the given path.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">loc&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> location identifier (file or group).</td>
+                </tr>
+                <tr>
+                  <td>path&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Absolute or relative path to test.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><code>true</code> if the link exists.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a286c9ca94ab806ce2ae95a3d59fa8888"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::string Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a286c9ca94ab806ce2ae95a3d59fa8888" class="m-doc-self">entityGroupPath</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Returns the <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> group path for entities of dimension <code>d</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Topological dimension.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5_1_1_path.html" class="m-doc">Path</a> string, e.g. <code>&quot;/Mesh/Connectivity/Entities/2&quot;</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab173e07f5b303da27f4ea7dc187acd0f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::string Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab173e07f5b303da27f4ea7dc187acd0f" class="m-doc-self">entityTypesPath</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Returns the dataset path for entity type codes of dimension <code>d</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Topological dimension.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5_1_1_path.html" class="m-doc">Path</a> string, e.g. <code>&quot;/Mesh/Connectivity/Entities/2/Types&quot;</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a85b225c9811ea8001e52c3f9b77d7b0b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::string Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a85b225c9811ea8001e52c3f9b77d7b0b" class="m-doc-self">entityOffsetsPath</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Returns the dataset path for entity CSR offsets of dimension <code>d</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Topological dimension.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5_1_1_path.html" class="m-doc">Path</a> string, e.g. <code>&quot;/Mesh/Connectivity/Entities/2/Offsets&quot;</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aaa4c400b19dc63f473f515a88dcf99cf"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::string Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaa4c400b19dc63f473f515a88dcf99cf" class="m-doc-self">entityIndicesPath</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Returns the dataset path for entity CSR vertex indices of dimension <code>d</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Topological dimension.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5_1_1_path.html" class="m-doc">Path</a> string, e.g. <code>&quot;/Mesh/Connectivity/Entities/2/Indices&quot;</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9a8154a7b88898458e6dcd4ccf42708d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::string Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9a8154a7b88898458e6dcd4ccf42708d" class="m-doc-self">incidenceGroupPath</a>(</span><span class="m-doc-wrap">size_t d,
+              size_t dp)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Returns the <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> group path for the incidence relation <code>d → dp</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Source topological dimension.</td>
+                </tr>
+                <tr>
+                  <td>dp&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Target topological dimension.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5_1_1_path.html" class="m-doc">Path</a> string, e.g. <code>&quot;/Mesh/Connectivity/Incidence/2_0&quot;</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8ce5fba430d7137647be12ad21036f27"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::string Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ce5fba430d7137647be12ad21036f27" class="m-doc-self">incidenceOffsetsPath</a>(</span><span class="m-doc-wrap">size_t d,
+              size_t dp)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Returns the dataset path for incidence CSR offsets.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Source topological dimension.</td>
+                </tr>
+                <tr>
+                  <td>dp&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Target topological dimension.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5_1_1_path.html" class="m-doc">Path</a> string, e.g. <code>&quot;/Mesh/Connectivity/Incidence/2_0/Offsets&quot;</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a810c3455f9619d2876fd8b805510b4ef"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::string Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a810c3455f9619d2876fd8b805510b4ef" class="m-doc-self">incidenceIndicesPath</a>(</span><span class="m-doc-wrap">size_t d,
+              size_t dp)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Returns the dataset path for incidence CSR indices.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Source topological dimension.</td>
+                </tr>
+                <tr>
+                  <td>dp&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Target topological dimension.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5_1_1_path.html" class="m-doc">Path</a> string, e.g. <code>&quot;/Mesh/Connectivity/Incidence/2_0/Indices&quot;</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="adc1dc7e6d76708c67b203200d5e59c64"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::string Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adc1dc7e6d76708c67b203200d5e59c64" class="m-doc-self">attributePath</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Returns the dataset path for polytope attributes of dimension <code>d</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Topological dimension.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5_1_1_path.html" class="m-doc">Path</a> string, e.g. <code>&quot;/Mesh/Attributes/2&quot;</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8d35829781e8976061350168ac3dc418"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::string Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8d35829781e8976061350168ac3dc418" class="m-doc-self">transformationGroupPath</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Returns the <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> group path for polytope transformations of dimension <code>d</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Topological dimension.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5_1_1_path.html" class="m-doc">Path</a> string, e.g. <code>&quot;/Mesh/Transformations/2&quot;</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4150f93dcf3c653b8aa08e2a5e83332c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::string Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4150f93dcf3c653b8aa08e2a5e83332c" class="m-doc-self">transformationKindPath</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Returns the dataset path for transformation kind values of dimension <code>d</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Topological dimension.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5_1_1_path.html" class="m-doc">Path</a> string, e.g. <code>&quot;/Mesh/Transformations/2/Kind&quot;</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0929c57e679ffac5c1ae2662cf8b7ae9"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::string Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0929c57e679ffac5c1ae2662cf8b7ae9" class="m-doc-self">shardFlagsPath</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Returns the dataset path for shard ownership flags of dimension <code>d</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Topological dimension.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5_1_1_path.html" class="m-doc">Path</a> string, e.g. <code>&quot;/Shard/Flags/2&quot;</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9948e7c7b21171c1e27611b44e164152"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::string Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9948e7c7b21171c1e27611b44e164152" class="m-doc-self">shardPolytopeMapGroupPath</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Returns the group path for shard polytope map of dimension <code>d</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Topological dimension.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5_1_1_path.html" class="m-doc">Path</a> string, e.g. <code>&quot;/Shard/PolytopeMap/2&quot;</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a831545c580c9f861edd5a53985eb9de2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::string Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a831545c580c9f861edd5a53985eb9de2" class="m-doc-self">shardPolytopeMapLeftPath</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Returns the dataset path for shard-to-distributed index mapping.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Topological dimension.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5_1_1_path.html" class="m-doc">Path</a> string, e.g. <code>&quot;/Shard/PolytopeMap/2/Left&quot;</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab302386212f3d1ba0188e0994a2371ab"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::string Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab302386212f3d1ba0188e0994a2371ab" class="m-doc-self">shardPolytopeMapRightGroupPath</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Returns the group path for distributed-to-shard index mapping.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Topological dimension.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5_1_1_path.html" class="m-doc">Path</a> string, e.g. <code>&quot;/Shard/PolytopeMap/2/Right&quot;</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1900ef305653b66dccdd7a385a4b9f01"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::string Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1900ef305653b66dccdd7a385a4b9f01" class="m-doc-self">shardOwnerGroupPath</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Returns the group path for ghost-to-owner map of dimension <code>d</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Topological dimension.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5_1_1_path.html" class="m-doc">Path</a> string, e.g. <code>&quot;/Shard/Owner/2&quot;</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad08f9195c4399e36b44e0e5e79c4b260"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::string Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad08f9195c4399e36b44e0e5e79c4b260" class="m-doc-self">shardHaloGroupPath</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Returns the group path for owned-to-halo map of dimension <code>d</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Topological dimension.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5_1_1_path.html" class="m-doc">Path</a> string, e.g. <code>&quot;/Shard/Halo/2&quot;</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a319355bab276471e7fb97f11383d1e69"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a319355bab276471e7fb97f11383d1e69" class="m-doc-self">getGeometryCountArraySize</a>(</span><span class="m-doc-wrap">)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Returns the size of the geometry-count array.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Number of slots needed to index by <code>Polytope::Type</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8062d9726dcf6e604159b225a7364c60"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="#a4faf74064d8a0c88f84babb222296663" class="m-doc">U64</a> Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8062d9726dcf6e604159b225a7364c60" class="m-doc-self">getXDMFMixedTopologyId</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Maps a <a href="namespace_rodin.html" class="m-doc">Rodin</a> polytope type to its <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> mixed-topology type id.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">t&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Polytope geometry type.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> type id (e.g. Triangle=4, Quadrilateral=5, Tetrahedron=6).</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.xdmf.org/index.php/XDMF_Model_and_Format">XDMF Model and Format Specification</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="adf88451bafe58d725ca7e5fbb0d1c4bd"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adf88451bafe58d725ca7e5fbb0d1c4bd" class="m-doc-self">getXDMFMixedTopologySize</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Computes the total length of the <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> mixed-topology stream for the given mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Mesh whose cells contribute to the stream.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Total number of entries in the mixed topology array.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Each cell contributes: 1 (type id) + optional count + number of vertices.</p>
+          </div></section>
+          <section class="m-doc-details" id="a6fff8af24d63c6f3e320fa8c2d779e65"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::vector&lt;T&gt; Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6fff8af24d63c6f3e320fa8c2d779e65" class="m-doc-self">readVectorDataset</a>(</span><span class="m-doc-wrap">hid_t file,
+              const std::string&amp; path)</span></span>
+            </h3>
+            <p>Reads a 1D <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> dataset into a <code>std::vector</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">T</td>
+                  <td>Element type (must be one of U64, I32, F64, U8).</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>file&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Open <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file identifier.</td>
+                </tr>
+                <tr>
+                  <td>path&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Absolute dataset path within the file.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Vector containing all elements of the dataset.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a28b391bea8b28e86311f6b8934aa5f61"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">T Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a28b391bea8b28e86311f6b8934aa5f61" class="m-doc-self">readScalarDataset</a>(</span><span class="m-doc-wrap">hid_t file,
+              const std::string&amp; path)</span></span>
+            </h3>
+            <p>Reads a scalar (single-element) <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> dataset.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">T</td>
+                  <td>Element type (must be one of U64, I32, F64, U8).</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>file&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Open <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file identifier.</td>
+                </tr>
+                <tr>
+                  <td>path&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Absolute dataset path within the file.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The single scalar value stored in the dataset.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8e220dc0a8cdf9d63fafec0311de8c76"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8e220dc0a8cdf9d63fafec0311de8c76" class="m-doc-self">writeVectorDataset</a>(</span><span class="m-doc-wrap">hid_t file,
+              const std::string&amp; path,
+              const std::vector&lt;T&gt;&amp; values)</span></span>
+            </h3>
+            <p>Writes a <code>std::vector</code> as a 1D <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> dataset.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">T</td>
+                  <td>Element type (must be one of U64, I32, F64, U8).</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>file&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Open <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file identifier (writable).</td>
+                </tr>
+                <tr>
+                  <td>path&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Absolute dataset path to create.</td>
+                </tr>
+                <tr>
+                  <td>values&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Data to write.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a61b9d78d3e2e2be11b83b0a3213e77dd"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a61b9d78d3e2e2be11b83b0a3213e77dd" class="m-doc-self">writeScalarDataset</a>(</span><span class="m-doc-wrap">hid_t file,
+              const std::string&amp; path,
+              const T&amp; value)</span></span>
+            </h3>
+            <p>Writes a single scalar value as a 1D dataset of length 1.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">T</td>
+                  <td>Element type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>file&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Open <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file identifier (writable).</td>
+                </tr>
+                <tr>
+                  <td>path&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Absolute dataset path to create.</td>
+                </tr>
+                <tr>
+                  <td>value&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Scalar value to write.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a6cd1932d8db41129204c3038fbd9faa3"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6cd1932d8db41129204c3038fbd9faa3" class="m-doc-self">writeMatrixDataset</a>(</span><span class="m-doc-wrap">hid_t file,
+              const std::string&amp; path,
+              const std::vector&lt;T&gt;&amp; values,
+              hsize_t rows,
+              hsize_t cols)</span></span>
+            </h3>
+            <p>Writes a row-major packed vector as a 2D <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> dataset.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">T</td>
+                  <td>Element type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>file&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Open <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file identifier (writable).</td>
+                </tr>
+                <tr>
+                  <td>path&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Absolute dataset path to create.</td>
+                </tr>
+                <tr>
+                  <td>values&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Row-major packed matrix data (<code>rows × cols</code> elements).</td>
+                </tr>
+                <tr>
+                  <td>rows&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Number of rows.</td>
+                </tr>
+                <tr>
+                  <td>cols&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Number of columns.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac5ef11270094c2d08238cf5964cf2eed"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::pair&lt;hsize_t, hsize_t&gt; Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac5ef11270094c2d08238cf5964cf2eed" class="m-doc-self">readMatrixShape</a>(</span><span class="m-doc-wrap">hid_t file,
+              const std::string&amp; path)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Reads the shape (rows, cols) of a rank-2 <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> dataset.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">file&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Open <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file identifier.</td>
+                </tr>
+                <tr>
+                  <td>path&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Absolute dataset path.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> of <code>(rows, cols)</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac37b5ce0ed5b1bf7ed1f9c7ab5da33ee"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;hsize_t&gt; Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac37b5ce0ed5b1bf7ed1f9c7ab5da33ee" class="m-doc-self">readDatasetShape</a>(</span><span class="m-doc-wrap">hid_t file,
+              const std::string&amp; path)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Reads the full shape of an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> dataset as a vector of dimensions.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">file&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Open <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file identifier.</td>
+                </tr>
+                <tr>
+                  <td>path&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Absolute dataset path.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Vector of dimension sizes (length equals the dataset rank).</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a78de307532ec54af170b29f28467d28a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a78de307532ec54af170b29f28467d28a" class="m-doc-self">writeXDMFTopology</a>(</span><span class="m-doc-wrap">hid_t file,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Writes the <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> mixed-topology stream to an open <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">file&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Open <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file identifier with write access.</td>
+                </tr>
+                <tr>
+                  <td>mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Local mesh whose cells provide the topology data.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Creates the <code>/Mesh/XDMF</code> group and writes the mixed-topology dataset at <code>/Mesh/XDMF/Topology</code> and its size at <code>/Mesh/XDMF/TopologySize</code>.</p><aside class="m-note m-info"><h4>Note</h4><p>Only local (sequential) meshes are supported. The mesh parameter is internally cast to <code><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;</code>.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a8ce512b794dc20751458531b9ebd4c8f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ce512b794dc20751458531b9ebd4c8f" class="m-doc-self">writeXDMFTopology</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Writes the <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> mixed-topology stream to an existing <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5_1_1_path.html" class="m-doc">Path</a> to an existing <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> mesh file.</td>
+                </tr>
+                <tr>
+                  <td>mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Local mesh whose cells provide the topology data.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Opens the given <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file for read/write access, creates the <code>/Mesh/XDMF</code> group, and writes the mixed-topology dataset at <code>/Mesh/XDMF/Topology</code> and its size at <code>/Mesh/XDMF/TopologySize</code>.</p><aside class="m-note m-info"><h4>Note</h4><p>Only local (sequential) meshes are supported. The mesh parameter is internally cast to <code><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;</code>.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a52bf1791ca96c8240cd08505a21e6183"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a52bf1791ca96c8240cd08505a21e6183" class="m-doc-self">writeXDMFVertices</a>(</span><span class="m-doc-wrap">hid_t file,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Writes vertex coordinate data to an open <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file for <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">file&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Open <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file identifier with write access.</td>
+                </tr>
+                <tr>
+                  <td>mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Local mesh whose vertex coordinates are exported.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Creates the <code>/Mesh/Geometry</code> group and writes the vertex coordinate matrix at <code>/Mesh/Geometry/Vertices</code> as a <code>[nv × sdim]</code> dataset.</p>
+          </div></section>
+          <section class="m-doc-details" id="abba74fe87c69c400fe3e55613fbe9d1a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abba74fe87c69c400fe3e55613fbe9d1a" class="m-doc-self">writeXDMFRegionAttribute</a>(</span><span class="m-doc-wrap">hid_t file,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Writes polytope region attributes to an open <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file for <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">file&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Open <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file identifier with write access.</td>
+                </tr>
+                <tr>
+                  <td>mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Local mesh whose attributes are exported.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Creates the <code>/Mesh/Attributes</code> group and writes an attribute array for each topological dimension from 0 to the mesh dimension.</p>
+          </div></section>
+          <section class="m-doc-details" id="a1c1068399e04ee68f35b203a71eee71a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c1068399e04ee68f35b203a71eee71a" class="m-doc-self">writeXDMFMesh</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Writes a minimal <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization mesh file.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Output <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file path.</td>
+                </tr>
+                <tr>
+                  <td>mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Local mesh to export for visualization.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Creates a new <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file containing only the datasets required for XDMF/ParaView visualization:</p><ul><li><code>/Mesh/Geometry/Vertices</code> — vertex coordinates</li><li><code>/Mesh/XDMF/Topology</code> — <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> mixed-topology stream</li><li><code>/Mesh/XDMF/TopologySize</code> — length of the topology stream</li><li><code>/Mesh/Attributes/{d}</code> — polytope region labels</li></ul><p>This function does <strong>not</strong> write the full canonical <a href="namespace_rodin.html" class="m-doc">Rodin</a> persistence data (connectivity CSR, incidence, state, transformations). Use <code><a href="class_rodin_1_1_i_o_1_1_mesh_printer.html" class="m-doc">MeshPrinter</a>&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfea86459eb6a9c3edb9d09e9d6fe8d5b9fa" class="m-doc">FileFormat::<wbr />HDF5</a>&gt;</code> for full persistence.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="#a78de307532ec54af170b29f28467d28a" class="m-doc">writeXDMFTopology</a>, <a href="#a52bf1791ca96c8240cd08505a21e6183" class="m-doc">writeXDMFVertices</a>, <a href="#abba74fe87c69c400fe3e55613fbe9d1a" class="m-doc">writeXDMFRegionAttribute</a>, <a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html" class="m-doc">MeshPrinter&lt;FileFormat::<wbr />HDF5, Context::<wbr />Local&gt;</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a69bcbfb344ddb4070284591b8344f31e"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class GridFunctionType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a69bcbfb344ddb4070284591b8344f31e" class="m-doc-self">writeXDMFNodeAttribute</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
+              const boost::filesystem::path&amp; filename)</span></span>
+            </h3>
+            <p>Writes a grid function as vertex-centered (nodal) data to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file for <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">GridFunctionType</td>
+                  <td>Concrete grid function type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>gf&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Grid function to export.</td>
+                </tr>
+                <tr>
+                  <td>filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Output <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file path.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Evaluates the grid function at each vertex of the mesh and stores the result in the <code>/GridFunction/Values/Data</code> dataset. For scalar functions, a flat <code>[nv]</code> vector is written; for vector functions, a <code>[nv × vdim]</code> matrix is written.</p>
+          </div></section>
+          <section class="m-doc-details" id="af6fbd161163fe2d6697ac8a08e298a8c"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class GridFunctionType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af6fbd161163fe2d6697ac8a08e298a8c" class="m-doc-self">writeXDMFCellAttribute</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
+              const boost::filesystem::path&amp; filename)</span></span>
+            </h3>
+            <p>Writes a grid function as cell-centered data to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file for <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">GridFunctionType</td>
+                  <td>Concrete grid function type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>gf&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Grid function to export.</td>
+                </tr>
+                <tr>
+                  <td>filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Output <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file path.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Evaluates the grid function at the vertices of each cell and averages the values to produce a single value per cell. The result is stored in the <code>/GridFunction/Values/Data</code> dataset.</p>
+          </div></section>
+          <section class="m-doc-details" id="a202d14641e452ff224b15cf7e9db3fa9"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class GridFunctionType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a202d14641e452ff224b15cf7e9db3fa9" class="m-doc-self">writeXDMFNodeAttribute</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; visMesh,
+              const boost::filesystem::path&amp; filename)</span></span>
+            </h3>
+            <p>Writes a grid function as vertex-centered (nodal) data to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file for <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization, evaluated on an explicit mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">GridFunctionType</td>
+                  <td>Concrete grid function type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>gf&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Grid function to export.</td>
+                </tr>
+                <tr>
+                  <td>visMesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Mesh to iterate over for vertex coordinates.</td>
+                </tr>
+                <tr>
+                  <td>filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Output <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file path.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>This overload allows the grid function to be evaluated on a mesh that differs from <code>gf.getFiniteElementSpace().getMesh()</code>. This is essential for distributed (MPI) visualization where the grid function is defined on a distributed mesh but visualization data must be written per-shard.</p>
+          </div></section>
+          <section class="m-doc-details" id="a62dcf1eb08b2f13cd8c5dbc56cf08c61"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class GridFunctionType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a62dcf1eb08b2f13cd8c5dbc56cf08c61" class="m-doc-self">writeXDMFCellAttribute</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; visMesh,
+              const boost::filesystem::path&amp; filename)</span></span>
+            </h3>
+            <p>Writes a grid function as cell-centered data to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file for <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization, evaluated on an explicit mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">GridFunctionType</td>
+                  <td>Concrete grid function type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>gf&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Grid function to export.</td>
+                </tr>
+                <tr>
+                  <td>visMesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Mesh to iterate over for cell topology.</td>
+                </tr>
+                <tr>
+                  <td>filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Output <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file path.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>This overload allows the grid function to be evaluated on a mesh that differs from <code>gf.getFiniteElementSpace().getMesh()</code>. This is essential for distributed (MPI) visualization where the grid function is defined on a distributed mesh but visualization data must be written per-shard.</p>
+          </div></section>
+        </section>
+        <section>
+          <h2>Variable documentation</h2>
+          <section class="m-doc-details" id="a149b538958dc9b79168209090ad8bc94"><div>
+            <h3>
+              static <a href="#a4faf74064d8a0c88f84babb222296663" class="m-doc">U64</a> Rodin::<wbr />IO::<wbr />HDF5::<wbr /><a href="#a149b538958dc9b79168209090ad8bc94" class="m-doc-self">NullAttributeMarker</a> <span class="m-label m-primary">constexpr</span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Sentinel value used to represent the absence of an attribute in <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> attribute datasets.</p>
+<p>Polytopes without an assigned attribute are stored as this value in the <code>/Mesh/Attributes/{d}</code> arrays. On load, entries equal to this marker are left unset.</p>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

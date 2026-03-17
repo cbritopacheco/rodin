@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::IO::GridFunctionLoaderBase class | Rodin</title>
+  <title>Rodin::IO::MeshLoader&lt;FileFormat::HDF5, Context::Local&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -71,29 +71,15 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_i_o.html">IO</a>::<wbr/></span>GridFunctionLoaderBase <span class="m-thin">class</span>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+          <div class="m-doc-template">template&lt;&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_i_o.html">IO</a>::<wbr/></span>MeshLoader&lt;FileFormat::HDF5, Context::Local&gt; <span class="m-thin">class</span>
         </h1>
-        <p>Base class for loading grid functions from files or streams.</p>
-        <table class="m-table m-fullwidth m-flat">
-          <thead>
-            <tr><th colspan="2">Template parameters</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="width: 1%">FES</td>
-              <td>Finite element space type</td>
-            </tr>
-            <tr>
-              <td>Data</td>
-              <td>Data storage type (typically a vector type)</td>
-            </tr>
-          </tbody>
-        </table>
+        <p><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> mesh loader specialization for local (sequential) meshes.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md124">Usage Example</a></li>
+            <li><a href="#autotoc_md127">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -105,99 +91,110 @@
             </li>
           </ul>
         </nav>
-<p><a href="class_rodin_1_1_i_o_1_1_grid_function_loader_base.html" class="m-doc">GridFunctionLoaderBase</a> provides the foundation for loading finite element solution data in different file formats. It extends the generic <a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">Loader</a> class to handle grid function-specific operations.</p><p>Specialized loaders for specific file formats should derive from this class and implement the <a href="class_rodin_1_1_i_o_1_1_loader.html#a4a361edaafdca57b230ccf5f8bc6479a" class="m-doc">load(std::<wbr />istream&amp;)</a> method to parse their respective formats.</p><section id="autotoc_md124"><h3><a href="#autotoc_md124">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
-<span class="n">GridFunction</span><span class="o">&lt;</span><span class="n">P1</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
-<span class="n">GridFunctionLoader</span><span class="o">&lt;</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">,</span><span class="w"> </span><span class="n">P1</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">loader</span><span class="p">(</span><span class="n">u</span><span class="p">);</span>
-<span class="n">loader</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;solution.gf&quot;</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">Loader</a>, <a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html" class="m-doc">GridFunctionPrinter</a></p></aside></section>
+<p>Reconstructs a complete <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a> from an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file previously created by <a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html" class="m-doc">MeshPrinter&lt;FileFormat::<wbr />HDF5, Context::<wbr />Local&gt;</a>. The loader reads vertex geometry, full connectivity (entity CSR and incidence CSR), attributes, and transformation indices.</p><p>Stream-based loading is not supported; only file-path loading is available.</p><section id="autotoc_md127"><h3><a href="#autotoc_md127">Usage Example</a></h3><pre class="m-code"><span class="n">Geometry</span><span class="o">::</span><span class="n">Mesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+<span class="n">IO</span><span class="o">::</span><span class="n">MeshLoader</span><span class="o">&lt;</span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">HDF5</span><span class="p">,</span><span class="w"> </span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">loader</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<span class="n">loader</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;output.h5&quot;</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html" class="m-doc">MeshPrinter&lt;FileFormat::<wbr />HDF5, Context::<wbr />Local&gt;</a></p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class T&gt;</div>
-              class <a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">Loader&lt;Variational::GridFunction&lt;FES, Data&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class Context&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_mesh_loader_base.html" class="m-doc">MeshLoaderBase&lt;Context::Local&gt;</a>
             </dt>
-            <dd>Base template for loading objects from files or streams.</dd>
+            <dd>Base class for loading meshes from files or streams.</dd>
           </dl>
         </section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt id="aeb764ef99b9fe43949b7e3d34f279e53">
-              using <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc-self">FESType</a> = FES
+            <dt id="a4a1c0b519f1e883b370f4fd6c3b76ee5">
+              using <a href="#a4a1c0b519f1e883b370f4fd6c3b76ee5" class="m-doc-self">ContextType</a> = <a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>
             </dt>
-            <dd>Finite element space type.</dd>
-            <dt id="aee60825459fdaf14377eb17bc437a934">
-              using <a href="#aee60825459fdaf14377eb17bc437a934" class="m-doc-self">DataType</a> = Data
+            <dd><a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a> type for this loader.</dd>
+            <dt id="a0aa213e4c6f5333c6f41f8e57fd9ac5c">
+              using <a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc-self">ObjectType</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="#a4a1c0b519f1e883b370f4fd6c3b76ee5" class="m-doc">ContextType</a>&gt;
             </dt>
-            <dd>Data storage type.</dd>
-            <dt id="a1d2aea1ff2717bab02cb10d6bee48d01">
-              using <a href="#a1d2aea1ff2717bab02cb10d6bee48d01" class="m-doc-self">ObjectType</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, Data&gt;
+            <dd>Type of mesh object being loaded.</dd>
+            <dt id="a43d336dce70d5f6c43a0a94e9b7a9a29">
+              using <a href="#a43d336dce70d5f6c43a0a94e9b7a9a29" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_i_o_1_1_mesh_loader_base.html" class="m-doc">MeshLoaderBase</a>&lt;<a href="#a4a1c0b519f1e883b370f4fd6c3b76ee5" class="m-doc">ContextType</a>&gt;
             </dt>
-            <dd>Type of grid function object being loaded.</dd>
-            <dt id="af9494f24173605303862e0395041b453">
-              using <a href="#af9494f24173605303862e0395041b453" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">IO::<wbr />Loader</a>&lt;<a href="#a1d2aea1ff2717bab02cb10d6bee48d01" class="m-doc">ObjectType</a>&gt;
-            </dt>
-            <dd>Parent <a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">Loader</a> class type.</dd>
+            <dd>Parent loader class type.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#aeb50d0422572cebcbee75b5f0034ca49" class="m-doc">GridFunctionLoaderBase</a>(</span><span class="m-doc-wrap"><a href="#a1d2aea1ff2717bab02cb10d6bee48d01" class="m-doc">ObjectType</a>&amp; gf)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a3238d396f9f9e4a8512bae21b4c6aaab" class="m-doc">MeshLoader</a>(</span><span class="m-doc-wrap"><a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&amp; mesh) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
-            <dd>Constructs a grid function loader for the given grid function.</dd>
+            <dd>Constructs a mesh loader for the given mesh object.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6c83de099561717325b0b3a729cfeb1f" class="m-doc">getObject</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a1d2aea1ff2717bab02cb10d6bee48d01" class="m-doc">ObjectType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a8546f878fca73682edd9c742edd7f2a0" class="m-doc">load</a>(</span><span class="m-doc-wrap">std::istream&amp;) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Gets a reference to the grid function being loaded.</dd>
+            <dd>Stream-based loading is not supported for <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aaf8f2181bfec879c94a4de41ae30b55c" class="m-doc">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Loads a mesh from an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="aeb50d0422572cebcbee75b5f0034ca49"><div>
+          <section class="m-doc-details" id="a3238d396f9f9e4a8512bae21b4c6aaab"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class FES, class Data&gt;
+                template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />GridFunctionLoaderBase&lt;FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeb50d0422572cebcbee75b5f0034ca49" class="m-doc-self">GridFunctionLoaderBase</a>(</span><span class="m-doc-wrap"><a href="#a1d2aea1ff2717bab02cb10d6bee48d01" class="m-doc">ObjectType</a>&amp; gf)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />MeshLoader&lt;FileFormat::<wbr />HDF5, Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3238d396f9f9e4a8512bae21b4c6aaab" class="m-doc-self">MeshLoader</a>(</span><span class="m-doc-wrap"><a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&amp; mesh) <span class="m-label m-info">explicit</span> </span></span>
             </h3>
-            <p>Constructs a grid function loader for the given grid function.</p>
+            <p>Constructs a mesh loader for the given mesh object.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">gf&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
-                  <td>Grid function object to be populated with loaded data</td>
+                  <td style="width: 1%">mesh&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>Mesh to be populated with data read from <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a>.</td>
                 </tr>
               </tbody>
             </table>
-<p>The grid function is stored by reference and will be modified during loading.</p>
           </div></section>
-          <section class="m-doc-details" id="a6c83de099561717325b0b3a729cfeb1f"><div>
+          <section class="m-doc-details" id="a8546f878fca73682edd9c742edd7f2a0"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class FES, class Data&gt;
+                template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#a1d2aea1ff2717bab02cb10d6bee48d01" class="m-doc">ObjectType</a>&amp; Rodin::<wbr />IO::<wbr />GridFunctionLoaderBase&lt;FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6c83de099561717325b0b3a729cfeb1f" class="m-doc-self">getObject</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />MeshLoader&lt;FileFormat::<wbr />HDF5, Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8546f878fca73682edd9c742edd7f2a0" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">std::istream&amp;) <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Gets a reference to the grid function being loaded.</p>
+            <p>Stream-based loading is not supported for <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a>.</p>
+<p>Always raises an exception. Use the file-path overload instead.</p>
+          </div></section>
+          <section class="m-doc-details" id="aaf8f2181bfec879c94a4de41ae30b55c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />MeshLoader&lt;FileFormat::<wbr />HDF5, Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaf8f2181bfec879c94a4de41ae30b55c" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Loads a mesh from an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file.</p>
             <table class="m-table m-fullwidth m-flat">
-              <tfoot>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
                 <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Reference to the grid function object</td>
+                  <td style="width: 1%">filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Path to the <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> mesh file.</td>
                 </tr>
-              </tfoot>
+              </tbody>
             </table>
-<p>Provides access to the grid function for derived classes to populate during loading.</p>
+<p>Reads all mesh components (vertices, connectivity, incidences, attributes, transformations) and rebuilds the mesh via the Mesh::Build() pipeline.</p>
           </div></section>
         </section>
       </div>

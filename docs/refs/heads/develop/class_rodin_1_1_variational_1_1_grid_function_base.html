@@ -192,8 +192,8 @@
             </dt>
             <dd>Gets the vector dimension of the grid function.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aece46f87b2f217e4c695daac0549b9ea" class="m-doc">load</a>(</span><span class="m-doc-wrap"><a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">const</a> boost::filesystem::path&amp; filename,
-              <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt = <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfead2fc2ac95a0b62e13572a658cf6390af" class="m-doc">IO::<wbr />FileFormat::<wbr />MFEM</a>) -&gt; <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">Derived</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8988d177e65dc802b5e4b03bfdb47d55" class="m-doc">load</a>(</span><span class="m-doc-wrap"><a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">const</a> boost::filesystem::path&amp; filename,
+              <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt) -&gt; <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">Derived</a>&amp;</span>
             </dt>
             <dd>Loads grid function data from a file.</dd>
             <dt id="a475059e0c5d98a64868dd42f48abb39d">
@@ -263,6 +263,10 @@
               <span class="m-doc-wrap-bumper">auto <a href="#abf23c8e7fae54d0548c0a3acb064f981" class="m-doc">operator/=</a>(</span><span class="m-doc-wrap"><a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp; rhs) -&gt; <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">Derived</a>&amp;</span>
             </dt>
             <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a55906fdb64ef621b6b153e7d8d8adf35" class="m-doc">getName</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;StringView&gt; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets the human-readable name of this object.</dd>
           </dl>
         </section>
         <section>
@@ -686,13 +690,13 @@ $ \mathbf{u} $
             </table>
 <p>For scalar functions, returns 1. For vector-valued functions, returns the space dimension.</p>
           </div></section>
-          <section class="m-doc-details" id="aece46f87b2f217e4c695daac0549b9ea"><div>
+          <section class="m-doc-details" id="a8988d177e65dc802b5e4b03bfdb47d55"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;<a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">class</a> <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">Derived</a> _1, <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">class</a> FES, <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">class</a> Data&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">Derived</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;_1, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aece46f87b2f217e4c695daac0549b9ea" class="m-doc-self">load</a>(</span><span class="m-doc-wrap"><a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">const</a> boost::filesystem::path&amp; filename,
-              <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt = <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfead2fc2ac95a0b62e13572a658cf6390af" class="m-doc">IO::<wbr />FileFormat::<wbr />MFEM</a>)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">Derived</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;_1, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8988d177e65dc802b5e4b03bfdb47d55" class="m-doc-self">load</a>(</span><span class="m-doc-wrap"><a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">const</a> boost::filesystem::path&amp; filename,
+              <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt)</span></span>
             </h3>
             <p>Loads grid function data from a file.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -716,7 +720,7 @@ $ \mathbf{u} $
                 </tr>
               </tfoot>
             </table>
-<p>Reads DOF data from a file in the specified format. Supported formats include MFEM, EnSight, and MEDIT.</p>
+<p>Reads DOF data from a file in the specified format. Supported formats include MFEM, and MEDIT.</p>
           </div></section>
           <section class="m-doc-details" id="add293b7fe39a85c6b22e0ae915bb9456"><div>
             <h3>
@@ -873,6 +877,24 @@ $ \mathbf{u} $
               <span class="m-doc-wrap-bumper"><a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">Derived</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;_1, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abf23c8e7fae54d0548c0a3acb064f981" class="m-doc-self">operator/=</a>(</span><span class="m-doc-wrap"><a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp; rhs)</span></span>
             </h3>
 <aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in Derived class.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a55906fdb64ef621b6b153e7d8d8adf35"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;<a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">class</a> <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">Derived</a> _1, <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">class</a> FES, <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">class</a> Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;StringView&gt; Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;_1, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a55906fdb64ef621b6b153e7d8d8adf35" class="m-doc-self">getName</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets the human-readable name of this object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>const char* Object name string, or nullptr if no name is set</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Returns a string representation of the object type or expression. Derived classes should override this method to provide meaningful names for debugging and diagnostic purposes.</p>
           </div></section>
         </section>
       </div>

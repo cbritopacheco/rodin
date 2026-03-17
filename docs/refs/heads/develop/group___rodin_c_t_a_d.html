@@ -136,7 +136,12 @@
               <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
               <span class="m-doc-wrap-bumper"><a href="#gac30491445370c67c57ba28133378f602" class="m-doc">MINRES</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystem&gt;&amp;) -&gt; MINRES&lt; LinearSystem &gt;</span>
             </dt>
-            <dd>CTAD (Class Template Argument Deduction) guide for MINRES.</dd>
+            <dd>CTAD (Class Template Argument Deduction) guide for <a href="class_rodin_1_1_solver_1_1_m_i_n_r_e_s.html" class="m-doc">MINRES</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LS&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#ga613faf81ffcc1e24f4fded42df7ca789" class="m-doc">NewtonSolver</a>(</span><span class="m-doc-wrap">LS&amp;) -&gt; NewtonSolver&lt; LS &gt;</span>
+            </dt>
+            <dd>CTAD (Class Template Argument Deduction) guide for <a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LinearSystemType&gt;</div>
               <span class="m-doc-wrap-bumper"><a href="#gacc677f2e577625039f0ec3b2cbd8e875" class="m-doc">SimplicialLDLT</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystemType&gt;&amp;) -&gt; SimplicialLDLT&lt; LinearSystemType &gt;</span>
@@ -337,7 +342,18 @@
               </div>
               <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gac30491445370c67c57ba28133378f602" class="m-doc-self">MINRES</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystem&gt;&amp;) -&gt; MINRES&lt; LinearSystem &gt;</span></span>
             </h3>
-            <p>CTAD (Class Template Argument Deduction) guide for MINRES.</p>
+            <p>CTAD (Class Template Argument Deduction) guide for <a href="class_rodin_1_1_solver_1_1_m_i_n_r_e_s.html" class="m-doc">MINRES</a>.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga613faf81ffcc1e24f4fded42df7ca789"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LS&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga613faf81ffcc1e24f4fded42df7ca789" class="m-doc-self">NewtonSolver</a>(</span><span class="m-doc-wrap">LS&amp;) -&gt; NewtonSolver&lt; LS &gt;</span></span>
+            </h3>
+            <p>CTAD (Class Template Argument Deduction) guide for <a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a>.</p>
+<p>Allows writing:</p><pre class="m-code"><span class="n">SparseLU</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">tangent</span><span class="p">);</span>
+<span class="n">NewtonSolver</span><span class="w"> </span><span class="nf">newton</span><span class="p">(</span><span class="n">solver</span><span class="p">);</span></pre>
           </div></section>
           <section class="m-doc-details" id="gacc677f2e577625039f0ec3b2cbd8e875"><div>
             <h3>
