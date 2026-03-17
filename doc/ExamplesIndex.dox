@@ -24,6 +24,15 @@
   | ----------------------------------------------- | --------------- |
   | @f$ - \Delta u = f @f$                          | @ref examples-pdes-poisson |
   | @f$ - \nabla \cdot \sigma (u ) = 0  @f$         | @ref examples-pdes-elasticity |
+  | @f$ - \Delta u - k^2 u = f @f$                  | @ref examples-pdes-helmholtz |
+
+  @section examples-index-io Input/Output
+
+  Rodin supports several I/O formats for meshes, grid functions, and simulation
+  data. The XDMF format is recommended for exporting results for visualization
+  in ParaView:
+
+  - @subpage examples-io-index
 
   @section examples-index-solver Solving linear systems
 

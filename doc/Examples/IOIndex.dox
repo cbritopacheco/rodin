@@ -1,0 +1,7 @@
+/**
+  @page examples-io-index Input/Output examples
+  @brief Examples demonstrating I/O capabilities
+
+  - @subpage examples-io-xdmf
+
+  */

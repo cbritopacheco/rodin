@@ -1,0 +1,118 @@
+/**
+  @page examples-io-xdmf XDMF time-evolution output
+  @brief Exporting time-dependent data with XDMF for visualization in ParaView
+
+  @m_keywords{XDMF, HDF5, ParaView, Time Series, Visualization, IO}
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section examples-io-xdmf-intro Introduction
+
+  This example demonstrates how to use the @ref Rodin::IO::XDMF "XDMF" class
+  to export time-dependent simulation data. XDMF (eXtensible Data Model and
+  Format) is a widely-used format for scientific visualization that combines
+  lightweight XML metadata with efficient HDF5 binary storage.
+
+  The output files can be opened directly in
+  [ParaView](https://www.paraview.org/) to animate the time evolution of the
+  field.
+
+  @section examples-io-xdmf-setup Setup
+
+  We create a triangular mesh on the unit square and define a vector-valued
+  P1 finite element space with 2 components:
+
+  @code{.cpp}
+  const Real dt = 0.05;
+  const size_t Nt = 40;
+  const size_t Nc = 32;
+
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { Nc, Nc });
+  mesh.scale(1.0 / (Nc - 1));
+
+  P1 fes(mesh, 2);   // vector-valued, 2 components
+
+  GridFunction u(fes);
+  u.setName("u");     // name appears in ParaView
+  @endcode
+
+  Note the call to `setName("u")` — this name is used as the attribute label
+  in the XDMF file, and will appear as the field name in ParaView.
+
+  @section examples-io-xdmf-writer Setting Up the XDMF Writer
+
+  The @ref Rodin::IO::XDMF "XDMF" object is created with a stem name that
+  determines the output file names. A **grid** is configured with the mesh
+  and the grid function to export:
+
+  @code{.cpp}
+  IO::XDMF xdmf("TimeEvolution");
+
+  auto grid = xdmf.grid();
+  grid.setMesh(mesh);
+  grid.add(u);
+  @endcode
+
+  The `grid()` method returns a handle to the default grid. You can register
+  multiple fields with `add()` — they will all be exported at each time step.
+
+  @section examples-io-xdmf-timeloop Time Loop
+
+  At each time step, we update the grid function and call `write(t)` with the
+  current simulation time:
+
+  @code{.cpp}
+  for (size_t k = 0; k < Nt; ++k)
+  {
+    const Real t = k * dt;
+
+    // Update the vector field at current time
+    u = [t](const Geometry::Point& p)
+    {
+      const Real x = p.x();
+      const Real y = p.y();
+      return Math::Vector<Real>{{
+        std::sin(2.0 * Math::Constants::pi() * (x + t)),
+        std::cos(2.0 * Math::Constants::pi() * (y - t))
+      }};
+    };
+
+    // Write snapshot at time t
+    xdmf.write(t);
+  }
+  @endcode
+
+  Each call to `write(t)` records the current state of all registered grid
+  functions at time @f$ t @f$. The XDMF writer automatically manages the
+  underlying HDF5 files.
+
+  @section examples-io-xdmf-output Output Files
+
+  Running this example produces:
+  - `TimeEvolution.xdmf` — XML metadata file describing the temporal
+    collection of grids
+  - `TimeEvolution.*.h5` — HDF5 files containing mesh geometry, topology,
+    and field data for each snapshot
+
+  @section examples-io-xdmf-paraview Viewing in ParaView
+
+  To visualize the time evolution:
+
+  1. Open ParaView
+  2. **File → Open** and select `TimeEvolution.xdmf`
+  3. Click **Apply** in the Properties panel
+  4. Select "u" from the field dropdown (it appears as a vector field)
+  5. Apply **Glyph** filter to display arrows, or use the magnitude
+     coloring mode
+  6. Use the **Play** button or timeline slider to animate through time steps
+
+  @section examples-io-xdmf-full Full Source Code
+
+  The complete source code is:
+  -   @ref IO/XDMF.cpp "XDMF.cpp"
+
+  @example IO/XDMF.cpp @m_examplenavigation{examples-io-xdmf,IO/} @m_footernavigation
+  */
