@@ -29,7 +29,9 @@ namespace Rodin::IO
       assert(space >= 0);
       const auto ds = H5Dcreate2(file, path, H5T_NATIVE_ULLONG, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
       assert(ds >= 0);
-      assert(H5Dwrite(ds, H5T_NATIVE_ULLONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, &value) >= 0);
+      const auto writeStatus = H5Dwrite(ds, H5T_NATIVE_ULLONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, &value);
+      assert(writeStatus >= 0);
+      (void) writeStatus;
       H5Dclose(ds);
       H5Sclose(space);
     }
@@ -41,12 +43,18 @@ namespace Rodin::IO
       const auto space = H5Dget_space(ds);
       assert(space >= 0);
       hsize_t dims[1] = {0};
-      assert(H5Sget_simple_extent_ndims(space) == 1);
-      assert(H5Sget_simple_extent_dims(space, dims, nullptr) >= 0);
+      const auto ndims = H5Sget_simple_extent_ndims(space);
+      assert(ndims == 1);
+      (void) ndims;
+      const auto dimStatus = H5Sget_simple_extent_dims(space, dims, nullptr);
+      assert(dimStatus >= 0);
+      (void) dimStatus;
       std::vector<double> v(static_cast<size_t>(dims[0]));
       if (!v.empty())
       {
-        assert(H5Dread(ds, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, v.data()) >= 0);
+        const auto readStatus = H5Dread(ds, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, v.data());
+        assert(readStatus >= 0);
+        (void) readStatus;
       }
       H5Sclose(space);
       H5Dclose(ds);
@@ -58,7 +66,9 @@ namespace Rodin::IO
       const auto ds = H5Dopen2(file, path, H5P_DEFAULT);
       assert(ds >= 0);
       unsigned long long value = 0;
-      assert(H5Dread(ds, H5T_NATIVE_ULLONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, &value) >= 0);
+      const auto readStatus = H5Dread(ds, H5T_NATIVE_ULLONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, &value);
+      assert(readStatus >= 0);
+      (void) readStatus;
       H5Dclose(ds);
       return value;
     }
@@ -211,8 +221,10 @@ namespace Rodin::IO
 
         if (!values.empty())
         {
-          assert(H5Dwrite(dataSet, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,
-                          H5P_DEFAULT, values.data()) >= 0);
+          const auto writeStatus = H5Dwrite(dataSet, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,
+                          H5P_DEFAULT, values.data());
+          assert(writeStatus >= 0);
+          (void) writeStatus;
         }
         H5Dclose(dataSet);
         H5Sclose(dataSpace);
