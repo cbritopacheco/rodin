@@ -416,7 +416,7 @@ namespace Rodin::IO
     os << '\n' << IO::MEDIT::Keyword::End;
   }
 
-  void MeshPrinter<FileFormat::MEDIT, Context::Local>::print(std::ostream& os, bool pEnd)
+  void MeshPrinter<FileFormat::MEDIT, Context::Local>::printMesh(std::ostream& os, bool pEnd)
   {
     printVersion(os);
     printDimension(os);

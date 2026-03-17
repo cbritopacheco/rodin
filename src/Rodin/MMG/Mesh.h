@@ -220,11 +220,11 @@ namespace Rodin::MMG
 
       void save(
          const boost::filesystem::path& filename,
-         IO::FileFormat fmt = IO::FileFormat::MFEM) const override;
+         IO::FileFormat fmt) const override;
 
       Mesh& load(
          const boost::filesystem::path& filename,
-         IO::FileFormat fmt = IO::FileFormat::MFEM) override;
+         IO::FileFormat fmt) override;
 
     private:
       CornerIndex m_cornerIndex;

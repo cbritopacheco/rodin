@@ -18,7 +18,7 @@ int main(int, char**)
   Mesh mesh;
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
   mesh.scale(1.0 / (n - 1));
-  mesh.save("Square.mesh");
+  mesh.save("Square.mesh", IO::FileFormat::MFEM);
 
   P1 fes(mesh);
   GridFunction gf(fes);
@@ -27,19 +27,19 @@ int main(int, char**)
 
   gf = f > g;
 
-  gf.save("GT.gf");
+  gf.save("GT.gf", IO::FileFormat::MFEM);
 
   gf = f < g;
 
-  gf.save("LT.gf");
+  gf.save("LT.gf", IO::FileFormat::MFEM);
 
   gf = (f > g) || (f < g);
 
-  gf.save("OR.gf");
+  gf.save("OR.gf", IO::FileFormat::MFEM);
 
   gf = (f > g) && (f < g);
 
-  gf.save("AND.gf");
+  gf.save("AND.gf", IO::FileFormat::MFEM);
 
   return 0;
 }

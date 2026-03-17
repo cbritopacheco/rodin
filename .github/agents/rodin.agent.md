@@ -14,8 +14,14 @@ You are the Rodin agent for the Rodin finite element framework. Your primary res
 ## Build Process
 
 ### Initial Setup
-When working with the Rodin codebase, always start by:
+When working with the Rodin codebase, try to follow these steps for the initial
+setup and build:
 ```bash
+
+# Clone with submodules
+git clone --recursive https://github.com/cbritopacheco/rodin
+cd rodin
+
 # From repository root
 mkdir -p build && cd build
 
@@ -48,6 +54,9 @@ make -j4
 - `CMAKE_BUILD_TYPE=Debug` - Debug build (or Release for optimized)
 
 ## Testing Process
+
+Prefer individual test suites for faster feedback during development. For
+comprehensive validation, run all tests after significant changes.
 
 ### Running All Tests
 ```bash

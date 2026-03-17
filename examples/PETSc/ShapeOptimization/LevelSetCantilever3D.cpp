@@ -228,8 +228,8 @@ int main(int argc, char** argv)
                            .solve()
                            .sign();
 
-    dist.getFiniteElementSpace().getMesh().save("Distance.mesh");
-    dist.save("Distance.gf");
+    dist.getFiniteElementSpace().getMesh().save("Distance.mesh", IO::FileFormat::MFEM);
+    dist.save("Distance.gf", IO::FileFormat::MFEM);
 
     Alert::Info() << "   | Solving state equation." << Alert::Raise;
     auto f = VectorFunction{0, 0, -1};
@@ -243,8 +243,8 @@ int main(int argc, char** argv)
                + DirichletBC(u, VectorFunction{0, 0, 0}).on(GammaD);
     Solver::KSP(elasticity).solve();
 
-    u.getSolution().save("State.gf");
-    trimmed.save("State.mesh");
+    u.getSolution().save("State.gf", IO::FileFormat::MFEM);
+    trimmed.save("State.mesh", IO::FileFormat::MFEM);
 
     Alert::Info() << "   | Computing shape gradient." << Alert::Raise;
     auto jac = Jacobian(u.getSolution());
@@ -267,8 +267,8 @@ int main(int argc, char** argv)
     Solver::KSP(hilbert).solve();
 
     auto& dJ = g.getSolution();
-    vh.getMesh().save("dJ.mesh");
-    dJ.save("dJ.gf");
+    vh.getMesh().save("dJ.mesh", IO::FileFormat::MFEM);
+    dJ.save("dJ.gf", IO::FileFormat::MFEM);
 
     // Update objective
     double objective = compliance(u.getSolution()) + ell * th.getVolume(Interior);
@@ -289,8 +289,8 @@ int main(int argc, char** argv)
 
     Advection::Lagrangian(advect, test, dist, dJ).step(dt);
 
-    th.save("Advect.mesh");
-    advect.getSolution().save("Advect.gf");
+    th.save("Advect.mesh", IO::FileFormat::MFEM);
+    advect.getSolution().save("Advect.gf", IO::FileFormat::MFEM);
 
     // Recover the implicit domain
     Alert::Info() << "   | Meshing the domain." << Alert::Raise;

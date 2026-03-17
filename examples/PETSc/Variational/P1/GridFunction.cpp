@@ -37,7 +37,7 @@ int main(int argc, char** argv)
     mesh = mesh.UniformGrid(Geometry::Polytope::Type::Quadrilateral, { 16, 16 });
     mesh.getConnectivity().compute(2, 2);
     mesh.getConnectivity().compute(1, 2);
-    mesh.save("Poisson.mesh");
+    mesh.save("Poisson.mesh", IO::FileFormat::MFEM);
     Geometry::BalancedCompactPartitioner partitioner(mesh);
     partitioner.partition(world.size());
     sharder.shard(partitioner);
@@ -48,7 +48,7 @@ int main(int argc, char** argv)
 
   char filename[32];
   std::snprintf(filename, sizeof(filename), "mesh.%06d", world.rank());
-  mesh.save(filename);
+  mesh.save(filename, IO::FileFormat::MFEM);
 
   RealFunction f = [](const Geometry::Point& p) { return p.x() * p.y(); };
 
@@ -58,7 +58,7 @@ int main(int argc, char** argv)
     PETSc::Variational::GridFunction u(vh);
     u = f;
     std::snprintf(filename, sizeof(filename), "sol.%06d", world.rank());
-    u.save(filename);
+    u.save(filename, IO::FileFormat::MFEM);
   }
 
   PetscFinalize();

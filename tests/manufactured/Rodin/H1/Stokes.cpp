@@ -609,8 +609,8 @@ namespace Rodin::Tests::Manufactured::Stokes
            + DirichletBC(u, u_exact);
 
     // Solve the system
-    GMRES gmres(stokes);
-    gmres.setTolerance(1e-12);
+    SparseLU gmres(stokes);
+    // gmres.setTolerance(1e-12);
     gmres.solve();
 
     // Compute the L^2 error for velocity
@@ -635,6 +635,190 @@ namespace Rodin::Tests::Manufactured::Stokes
 
     EXPECT_NEAR(error_u, 0, RODIN_FUZZY_CONSTANT);
     EXPECT_NEAR(error_p, 0, RODIN_FUZZY_CONSTANT);
+  }
+
+  TEST_P(Manufactured_Stokes_Test_32x32, NavierStokes_Picard_TaylorGreen)
+  {
+    const Real pi = Rodin::Math::Constants::pi();
+    const Real nu = 1.0;
+
+    Mesh mesh = this->getMesh();
+
+    // Taylor–Hood
+    H1 uh(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    H1 ph(std::integral_constant<size_t, 1>{}, mesh);
+    P0g p0g(mesh);
+
+    // Exact steady Navier–Stokes solution on [0,1]^2
+    VectorFunction u_exact{
+      sin(pi * F::x) * cos(pi * F::y),
+     -cos(pi * F::x) * sin(pi * F::y)
+    };
+
+    const auto p_exact =
+      -0.25 * (cos(2 * pi * F::x) + cos(2 * pi * F::y));
+
+    VectorFunction f{
+      2 * nu * pi * pi * sin(pi * F::x) * cos(pi * F::y)
+        + pi * sin(2 * pi * F::x),
+     -2 * nu * pi * pi * cos(pi * F::x) * sin(pi * F::y)
+        + pi * sin(2 * pi * F::y)
+    };
+
+    // Unknowns / tests
+    TrialFunction u(uh);
+    TrialFunction p(ph);
+    TrialFunction lambda(p0g);
+
+    TestFunction v(uh);
+    TestFunction q(ph);
+    TestFunction mu(p0g);
+
+    // Picard iterate w
+    GridFunction w(uh);
+    w = VectorFunction{ Zero(), Zero() };
+
+    // Previous iterate
+    GridFunction u_prev(uh);
+    u_prev = VectorFunction{ Zero(), Zero() };
+
+    GridFunction p_prev(ph);
+    p_prev = 0.0;
+
+    constexpr size_t maxIts = 50;
+    const Real tol = 1e-10;
+
+    Real updateNorm = std::numeric_limits<Real>::infinity();
+    size_t picardIts = 0;
+
+    // Reusable scalar space for error / norm integrals
+    P1 sh(mesh);
+
+    for (size_t k = 0; k < maxIts; k++)
+    {
+      Problem ns(u, p, lambda, v, q, mu);
+
+      // Frozen convection: (w · ∇)u = J(u) * w
+      const auto conv_u = Mult(Jacobian(u), w);
+
+      ns =
+          nu * Integral(Jacobian(u), Jacobian(v))
+        + Integral(Dot(conv_u, v))
+        - Integral(p, Div(v))
+        + Integral(Div(u), q)
+        + Integral(lambda, q)   // gauge coupling
+        + Integral(p, mu)       // mean(p)=0
+        - Integral(f, v)
+        + DirichletBC(u, u_exact);
+
+      SparseLU solver(ns);
+      solver.solve();
+
+      GridFunction u_new(uh);
+      u_new.setData(u.getSolution().getData());
+
+      GridFunction p_new(ph);
+      p_new.setData(p.getSolution().getData());
+
+      // Picard increment in L2
+      GridFunction du(sh);
+      du = Pow(Frobenius(u_new - u_prev), 2);
+      updateNorm = std::sqrt(Integral(du).compute());
+
+      // Prepare next iteration
+      w.setData(u_new.getData());
+      u_prev.setData(u_new.getData());
+      p_prev.setData(p_new.getData());
+
+      picardIts = k + 1;
+      if (updateNorm < tol)
+        break;
+    }
+
+    // 1) Picard should converge in a reasonable number of iterations
+    EXPECT_LT(picardIts, maxIts);
+
+    // 2) Final Picard increment should be small
+    EXPECT_LT(updateNorm, 1e-8);
+
+    // 3) Velocity error against exact solution
+    GridFunction diff_u(sh);
+    diff_u = Pow(Frobenius(u_prev - u_exact), 2);
+    const Real error_u = Integral(diff_u).compute();
+
+    // 4) Pressure error against exact solution, modulo constant
+    const Real vol = mesh.getMeasure(mesh.getDimension());
+
+    GridFunction mean(sh);
+    mean = p_prev - p_exact;
+    const Real mean_diff = Integral(mean).compute() / vol;
+
+    GridFunction diff_p(sh);
+    diff_p = Pow((p_prev - mean_diff) - p_exact, 2);
+    const Real error_p = Integral(diff_p).compute();
+
+    EXPECT_NEAR(error_u, 0, 1e-8);
+    EXPECT_NEAR(error_p, 0, 1e-6);
+
+    // 5) Residual check for the final frozen Oseen problem
+    //
+    // Reassemble once with w = u_prev and verify that the solved mixed system
+    // has a tiny algebraic residual.
+    GridFunction w_final(uh);
+    w_final.setData(u_prev.getData());
+
+    Problem ns_final(u, p, lambda, v, q, mu);
+    const auto conv_u_final = Mult(Jacobian(u), w_final);
+
+    ns_final =
+        nu * Integral(Jacobian(u), Jacobian(v))
+      + Integral(Dot(conv_u_final, v))
+      - Integral(p, Div(v))
+      + Integral(Div(u), q)
+      + Integral(lambda, q)
+      + Integral(p, mu)
+      - Integral(f, v)
+      + DirichletBC(u, u_exact);
+
+    SparseLU solver_final(ns_final);
+    solver_final.solve();
+
+    {
+      auto& ls = ns_final.getLinearSystem();
+      auto& A  = ls.getOperator();
+      auto& b  = ls.getVector();
+      auto& x  = ls.getSolution();
+
+      auto r = (A * x - b).eval();
+      const Real scale = std::max<Real>(b.norm(), 1);
+      EXPECT_NEAR(r.norm() / scale, 0, 1e-12);
+    }
+
+    // Read back final Oseen solve to compare with previous Picard iterate
+    GridFunction u_final(uh);
+    u_final.setData(u.getSolution().getData());
+
+    GridFunction p_final(ph);
+    p_final.setData(p.getSolution().getData());
+
+    // 6) Fixed-point defect proxy:
+    // one extra Picard step should barely move the solution.
+    GridFunction du_fp(sh);
+    du_fp = Pow(Frobenius(u_final - u_prev), 2);
+    const Real fixedPointVelocityDefect = std::sqrt(Integral(du_fp).compute());
+
+    EXPECT_LT(fixedPointVelocityDefect, 1e-8);
+
+    // Optional pressure fixed-point defect, modulo constant
+    GridFunction mean_fp(sh);
+    mean_fp = p_final - p_prev;
+    const Real mean_fp_diff = Integral(mean_fp).compute() / vol;
+
+    GridFunction dp_fp(sh);
+    dp_fp = Pow((p_final - mean_fp_diff) - p_prev, 2);
+    const Real fixedPointPressureDefect = std::sqrt(Integral(dp_fp).compute());
+
+    EXPECT_LT(fixedPointPressureDefect, 1e-6);
   }
 
   INSTANTIATE_TEST_SUITE_P(

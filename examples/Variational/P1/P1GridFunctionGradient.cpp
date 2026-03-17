@@ -47,10 +47,10 @@ int main(int, char**)
   GridFunction trace(vfes);
   trace.project(Region::Faces, Grad(gf).traceOf(1));
 
-  mesh.save("Grid.mesh");
-  gf.save("Function.gf");
-  grad.save("Gradient.gf");
-  trace.save("Trace.gf");
+  mesh.save("Grid.mesh", IO::FileFormat::MFEM);
+  gf.save("Function.gf", IO::FileFormat::MFEM);
+  grad.save("Gradient.gf", IO::FileFormat::MFEM);
+  trace.save("Trace.gf", IO::FileFormat::MFEM);
 
 }
 

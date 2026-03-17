@@ -45,7 +45,7 @@ int main(int, char**)
   }
   mesh.flush();
 
-  mesh.save("D1.mesh");
+  mesh.save("D1.mesh", IO::FileFormat::MFEM);
 
   P1 fes(mesh);
   // GridFunction f(fes);
@@ -58,14 +58,14 @@ int main(int, char**)
   Potential sl(K, f);
   GridFunction u(fes);
   u = sl;
-  u.save("u.gf");
+  u.save("u.gf", IO::FileFormat::MFEM);
 
   Alert::Info() << Integral(u).compute() << Alert::Raise;
   Alert::Info() << mesh.getVolume() << Alert::Raise;
 
   GridFunction fn(fes);
   fn = f;
-  fn.save("f.gf");
+  fn.save("f.gf", IO::FileFormat::MFEM);
   Alert::Info() << Integral(fn).compute() << Alert::Raise;
 
   return 0;

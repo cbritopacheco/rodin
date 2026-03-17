@@ -7,7 +7,19 @@ target_link_libraries(RodinManufacturedP1H1Mixed
   Rodin::Variational
   Rodin::Solver
 )
+set(RodinManufacturedP1H1Mixed_SLOW_TESTS
+  "PolytopeCoverage3D_K1/Manufactured_P1H1_Mixed_Test_20_K1.P1H1_Mixed_PolynomialRHS_3D/Hexahedron"
+  "PolytopeCoverage3D_K1/Manufactured_P1H1_Mixed_Test_20_K1.P1H1_Mixed_SineRHS_3D/Hexahedron")
+list(JOIN RodinManufacturedP1H1Mixed_SLOW_TESTS ":" RodinManufacturedP1H1Mixed_SLOW_TESTS)
 gtest_discover_tests(RodinManufacturedP1H1Mixed
+  TEST_FILTER
+    "-${RodinManufacturedP1H1Mixed_SLOW_TESTS}"
   PROPERTIES
     LABELS manufactured
+)
+gtest_discover_tests(RodinManufacturedP1H1Mixed
+  TEST_FILTER
+    "${RodinManufacturedP1H1Mixed_SLOW_TESTS}"
+  PROPERTIES
+    LABELS "manufactured;slow"
 )

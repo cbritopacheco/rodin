@@ -15,6 +15,15 @@
 
 #include "ForwardDecls.h"
 
+namespace Rodin::FormLanguage
+{
+  template <class LinearSystem>
+  struct Traits<Solver::LinearSolverBase<LinearSystem>>
+  {
+    using LinearSystemType = LinearSystem;
+  };
+}
+
 namespace Rodin::Solver
 {
   /**
@@ -88,6 +97,22 @@ namespace Rodin::Solver
         : Parent(other),
           m_pb(std::move(other.m_pb))
       {}
+
+      /**
+       * @brief Returns the associated problem.
+       */
+      ProblemBaseType& getProblem() noexcept
+      {
+        return m_pb.get();
+      }
+
+      /**
+       * @brief Returns the associated problem (const).
+       */
+      const ProblemBaseType& getProblem() const noexcept
+      {
+        return m_pb.get();
+      }
 
       /**
        * @brief Solves the associated problem.

@@ -33,11 +33,6 @@ target_compile_definitions(RodinFormLanguage
     $<TARGET_PROPERTY:Rodin,INTERFACE_COMPILE_DEFINITIONS>
 )
 
-target_link_libraries(RodinFormLanguage
-  PUBLIC
-    Rodin::Threads
-)
-
 # ---- Install target --------------------------------------------------------
 install(
   TARGETS RodinFormLanguage

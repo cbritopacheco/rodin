@@ -32,7 +32,7 @@ int main(int, char**)
   // Eigen::setNbThreads(8);
   // Threads::getGlobalThreadPool().reset(8);
   MMG::Mesh mesh;
-  mesh.load("D1.mesh");
+  mesh.load("D1.mesh", IO::FileFormat::MFEM);
 
   mesh.getConnectivity().compute(1, 0);
 
@@ -90,8 +90,8 @@ int main(int, char**)
       Alert::Info() << "Solving." << Alert::Raise;
       Solver::CG(eq).solve();
 
-      mesh.save("u.mesh");
-      u.getSolution().save("u.gf");
+      mesh.save("u.mesh", IO::FileFormat::MFEM);
+      u.getSolution().save("u.gf", IO::FileFormat::MFEM);
 
 
       GridFunction trunc(fes);
@@ -113,8 +113,8 @@ int main(int, char**)
           return max;
       };
 
-      trunc.save("trunc.gf");
-      mesh.save("trunc.mesh");
+      trunc.save("trunc.gf", IO::FileFormat::MFEM);
+      mesh.save("trunc.mesh", IO::FileFormat::MFEM);
 
       GridFunction uEx(fes);
       uEx = [&](const Point& p)
@@ -134,8 +134,8 @@ int main(int, char**)
         else
           return max;
       };
-      uEx.save("uEx.gf");
-      mesh.save("uEx.mesh");
+      uEx.save("uEx.gf", IO::FileFormat::MFEM);
+      mesh.save("uEx.mesh", IO::FileFormat::MFEM);
       std::exit(1);
 
       Alert::Info() << "Getting data." << Alert::Raise;

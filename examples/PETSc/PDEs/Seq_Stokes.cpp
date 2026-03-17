@@ -130,6 +130,8 @@ int main(int argc, char** argv)
       + Integral(Div(u), q)
       + Integral(l, q)
       + Integral(p, m)
+      + 1e-12 * Integral(p, q)
+      + 1e-12 * Integral(l, m)
       - Integral(f, v)
       + DirichletBC(u, u_exact);
 
@@ -146,14 +148,14 @@ int main(int argc, char** argv)
     Solver::KSP(stokes).solve();
 
     // Save solution
-    mesh.save("Stokes.mesh");
-    u.getSolution().save("Stokes_velocity.gf");
-    p.getSolution().save("Stokes_pressure.gf");
+    mesh.save("Stokes.mesh", IO::FileFormat::MFEM);
+    u.getSolution().save("Stokes_velocity.gf", IO::FileFormat::MFEM);
+    p.getSolution().save("Stokes_pressure.gf", IO::FileFormat::MFEM);
 
     // Save interpolated exact velocity for visualization
     PETSc::Variational::GridFunction u_e(uh);
     u_e = u_exact;
-    u_e.save("Stokes_velocity_exact.gf");
+    u_e.save("Stokes_velocity_exact.gf", IO::FileFormat::MFEM);
   }
 
   PetscFinalize();

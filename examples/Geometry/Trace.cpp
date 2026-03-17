@@ -14,7 +14,7 @@ int main(int, char**)
 {
   const char* meshFile = "../resources/examples/Geometry/Skinning.mesh";
   Mesh mesh;
-  mesh.load(meshFile);
+  mesh.load(meshFile, IO::FileFormat::MFEM);
   mesh.getConnectivity().compute(2, 3);
   // mesh.getConnectivity().compute(2, 3);
   auto d = mesh.skin();

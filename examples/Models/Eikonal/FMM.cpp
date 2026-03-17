@@ -53,8 +53,8 @@ int main(int, char**)
 
     fmm.seed(interface).solve();
 
-    u.save("eikonal_2d.gf");
-    mesh.save("eikonal_2d.mesh");
+    u.save("eikonal_2d.gf", IO::FileFormat::MFEM);
+    mesh.save("eikonal_2d.mesh", IO::FileFormat::MFEM);
     std::cout << "2D example completed successfully!" << std::endl;
   }
 
@@ -111,8 +111,8 @@ int main(int, char**)
 
     fmm.seed(interface).solve();
 
-    u.save("eikonal_surface.gf");
-    mesh.save("eikonal_surface.mesh");
+    u.save("eikonal_surface.gf", IO::FileFormat::MFEM);
+    mesh.save("eikonal_surface.mesh", IO::FileFormat::MFEM);
     std::cout << "Surface example completed successfully!" << std::endl;
   }
 

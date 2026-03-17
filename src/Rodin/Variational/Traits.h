@@ -136,6 +136,13 @@ namespace Rodin::FormLanguage
       Math::Vector<Scalar>;
   };
 
+  template <class Scalar>
+  struct RangeOf<Math::SpatialVector<Scalar>>
+  {
+    using Type =
+      Math::Vector<Scalar>;
+  };
+
   /**
    * @brief Range type for Eigen matrices
    * @tparam Scalar Scalar type

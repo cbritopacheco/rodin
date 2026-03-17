@@ -494,14 +494,14 @@ int main(int argc, char** argv)
 
     if (save_last && lev == levels - 1)
     {
-      mesh.save("StokesConvergence.mesh");
-      uh_sol.save("StokesConvergence_velocity.gf");
-      ph_sol.save("StokesConvergence_pressure.gf");
+      mesh.save("StokesConvergence.mesh", IO::FileFormat::MFEM);
+      uh_sol.save("StokesConvergence_velocity.gf", IO::FileFormat::MFEM);
+      ph_sol.save("StokesConvergence_pressure.gf", IO::FileFormat::MFEM);
 
       PETSc::Variational::GridFunction u_e(uh); u_e = u_exact;
       PETSc::Variational::GridFunction p_e(ph); p_e = p_exact;
-      u_e.save("StokesConvergence_velocity_exact.gf");
-      p_e.save("StokesConvergence_pressure_exact.gf");
+      u_e.save("StokesConvergence_velocity_exact.gf", IO::FileFormat::MFEM);
+      p_e.save("StokesConvergence_pressure_exact.gf", IO::FileFormat::MFEM);
     }
 
     CheckPetsc(MatNullSpaceDestroy(&nsp));

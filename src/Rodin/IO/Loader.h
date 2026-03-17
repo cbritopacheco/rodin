@@ -7,7 +7,6 @@
 #ifndef RODIN_IO_LOADER_H
 #define RODIN_IO_LOADER_H
 
-#include <iostream>
 #include <istream>
 #include <fstream>
 
@@ -83,7 +82,7 @@ namespace Rodin::IO
       virtual void load(const boost::filesystem::path& is)
       {
         std::ifstream in(is.c_str());
-        load(in);
+        this->load(in);
       }
 
     protected:

@@ -43,11 +43,11 @@ int main(int, char**)
 
   // Load mesh
   MMG::Mesh Omega;
-  Omega.load(meshFile);
+  Omega.load(meshFile, IO::FileFormat::MFEM);
 
   MMG::MeshOptimizer().setHMax(hmax / 2.0).optimize(Omega);
 
-  Omega.save("Omega0.mesh");
+  Omega.save("Omega0.mesh", IO::FileFormat::MFEM);
 
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
 
@@ -98,8 +98,8 @@ int main(int, char**)
         - FaceIntegral(Dot(Ae, e) - ell, Dot(n, v)).over(Gamma)
         + DirichletBC(g, VectorFunction{0, 0}).on(GammaN);
    hilbert.solve(solver);
-   g.getSolution().save("g.gf");
-   Omega.save("g.mesh");
+   g.getSolution().save("g.gf", IO::FileFormat::MFEM);
+   Omega.save("g.mesh", IO::FileFormat::MFEM);
 
    // Update objective
    obj.push_back(
@@ -135,7 +135,7 @@ int main(int, char**)
    MMG::MeshOptimizer().setHMax(hmax).optimize(Omega);
 
    // Save mesh
-   Omega.save("Omega.mesh");
+   Omega.save("Omega.mesh", IO::FileFormat::MFEM);
 
    // Test for convergence
    if (obj.size() >= 2 && abs(obj[i] - obj[i - 1]) < eps)

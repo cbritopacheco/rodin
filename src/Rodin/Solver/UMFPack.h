@@ -57,6 +57,15 @@
 
 #include "ForwardDecls.h"
 
+namespace Rodin::FormLanguage
+{
+  template <class LinearSystem>
+  struct Traits<Solver::UMFPack<LinearSystem>>
+  {
+    using LinearSystemType = LinearSystem;
+  };
+}
+
 namespace Rodin::Solver
 {
   /**

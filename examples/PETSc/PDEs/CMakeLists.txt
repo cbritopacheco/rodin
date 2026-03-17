@@ -28,6 +28,25 @@ target_link_libraries(PETSc_Seq_Validation_Stokes
   Rodin::PETSc
   )
 
+add_executable(PETSc_Seq_NavierStokes Seq_NavierStokes.cpp)
+target_link_libraries(PETSc_Seq_NavierStokes
+  PUBLIC
+  Rodin::Math
+  Rodin::Solver
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::PETSc
+  )
+
+add_executable(PETSc_Seq_LidDrivenCavity Seq_LidDrivenCavity.cpp)
+target_link_libraries(PETSc_Seq_LidDrivenCavity
+  PUBLIC
+  Rodin::Math
+  Rodin::Solver
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::PETSc
+  )
 
 if (RODIN_USE_MPI)
   add_executable(PETSc_MPI_Poisson MPI_Poisson.cpp)

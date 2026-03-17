@@ -9,7 +9,9 @@ set(RodinPETSc_HEADERS
   ForwardDecls.h
   Object.h
   IO/GridFunctionPrinter.h
+  IO/HDF5.h
   Solver/KSP.h
+  Solver/SNES.h
   Solver/CG.h
   Solver/GMRES.h
   Math/Vector.h
@@ -23,6 +25,7 @@ set(RodinPETSc_HEADERS
 set(RodinPETSc_SRCS
   IO/GridFunctionPrinter.cpp
   Solver/KSP.cpp
+  Solver/SNES.cpp
   Solver/CG.cpp
   Solver/GMRES.cpp
   Assembly/MPI.cpp
@@ -51,8 +54,6 @@ target_compile_definitions(RodinPETSc
 )
 
 # ---- Dependencies ----------------------------------------------------------
-find_package(PETSc REQUIRED)
-
 target_link_libraries(RodinPETSc
   PUBLIC
     Rodin::Geometry
@@ -69,7 +70,6 @@ if (RODIN_USE_MPI)
 endif()
 
 if (RODIN_USE_OPENMP)
-  find_package(OpenMP REQUIRED)
   target_sources(RodinPETSc PRIVATE Assembly/OpenMP.cpp)
   target_link_libraries(RodinPETSc PUBLIC OpenMP::OpenMP_CXX)
 endif()

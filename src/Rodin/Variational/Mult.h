@@ -786,4 +786,55 @@ namespace Rodin::Variational
   }
 }
 
+namespace Rodin::Variational
+{
+  template <
+    class CoeffDerived,
+    class TrialDerived, class TrialFES,
+    class TestDerived,  class TestFES>
+  constexpr
+  auto operator*(
+      const FunctionBase<CoeffDerived>& coeff,
+      const Dot<
+        ShapeFunctionBase<TrialDerived, TrialFES, TrialSpace>,
+        ShapeFunctionBase<TestDerived,  TestFES,  TestSpace>>& dot)
+  {
+    using CoeffType = FunctionBase<CoeffDerived>;
+    using CoeffRangeType = typename FormLanguage::Traits<CoeffType>::RangeType;
+    using TrialScalarType = typename FormLanguage::Traits<TrialFES>::ScalarType;
+
+    static_assert(
+        std::is_same_v<CoeffRangeType, TrialScalarType>,
+        "Coefficient multiplying a bilinear Dot expression must be scalar-valued "
+        "with the same scalar type as the FE space.");
+
+    // Important: attach on the LEFT to preserve the complex-dot convention:
+    // dot(z1, z2) = z1 * conj(z2)
+    return Dot(coeff * dot.getLHS(), dot.getRHS());
+  }
+
+  template <
+    class TrialDerived, class TrialFES,
+    class TestDerived,  class TestFES,
+    class CoeffDerived>
+  constexpr
+  auto operator*(
+      const Dot<
+        ShapeFunctionBase<TrialDerived, TrialFES, TrialSpace>,
+        ShapeFunctionBase<TestDerived,  TestFES,  TestSpace>>& dot,
+      const FunctionBase<CoeffDerived>& coeff)
+  {
+    using CoeffType = FunctionBase<CoeffDerived>;
+    using CoeffRangeType = typename FormLanguage::Traits<CoeffType>::RangeType;
+    using TrialScalarType = typename FormLanguage::Traits<TrialFES>::ScalarType;
+
+    static_assert(
+        std::is_same_v<CoeffRangeType, TrialScalarType>,
+        "Coefficient multiplying a bilinear Dot expression must be scalar-valued "
+        "with the same scalar type as the FE space.");
+
+    return Dot(coeff * dot.getLHS(), dot.getRHS());
+  }
+}
+
 #endif

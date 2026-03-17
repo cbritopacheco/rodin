@@ -41,18 +41,15 @@ jobs:
         run: >-
           sudo apt-get update && sudo apt-get install -y
           libboost1.74-all-dev
-          libeigen3-dev
-          libomp-dev
           libsuitesparse-dev
-          mpich
-          petsc-dev
+          libeigen3-dev
+          libscotch-dev
           libmetis-dev
+          libhdf5-dev
+          libomp-dev
+          petsc-dev
+          mpich
           lcov
-          libgl1-mesa-dev
-          libsdl2-dev
-          libglfw3-dev
-          libopenal-dev
-          libvulkan-dev
       - name: Configure CMake
         run: >
           cmake
@@ -62,7 +59,7 @@ jobs:
           -DRODIN_USE_MCSS=OFF
           -DRODIN_BUILD_SRC=ON
           -DRODIN_BUILD_EXAMPLES=ON
-          -DRODIN_BUILD_MULTITHREADED=${{ matrix.multithreaded }}
+          -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
           -DRODIN_USE_MPI=${{ matrix.mpi }}
           -DRODIN_USE_PETSC=${{ matrix.petsc }}
       - name: Build
@@ -81,7 +78,7 @@ jobs:
       MAKEFLAGS: "-j2"
     steps:
       - name: Checkout repository and submodules
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: actions/setup-python#577
@@ -91,17 +88,16 @@ jobs:
         run: |
           brew update
           brew install \
-            boost \
-            boost-mpi \
-            eigen \
-            libomp \
-            open-mpi \
-            petsc \
+            boost boost-mpi \
             suitesparse \
-            mesa-glu \
-            lcov \
-            sdl2 glfw openal-soft vulkan-headers molten-vk
-            brew link --force --overwrite libomp openal-soft
+            eigen \
+            scotch \
+            metis \
+            hdf5-mpi \
+            libomp \
+            petsc \
+            open-mpi \
+            lcov
       - name: Configure CMake
         run: >
           cmake
@@ -112,10 +108,10 @@ jobs:
           -DRODIN_BUILD_SRC=ON
           -DRODIN_BUILD_EXAMPLES=ON
           -DCMAKE_POLICY_VERSION_MINIMUM=3.5
-          -DRODIN_BUILD_MULTITHREADED=${{ matrix.multithreaded }}
+          -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
           -DRODIN_USE_MPI=${{ matrix.mpi }}
           -DRODIN_USE_PETSC=${{ matrix.petsc }}
+          -DOpenMP_ROOT=/opt/homebrew/opt/libomp
       - name: Build
         run: cmake --build ${{github.workspace}}/build
-
 

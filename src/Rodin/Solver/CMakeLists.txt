@@ -7,6 +7,7 @@ Distributed under the Boost Software License, Version 1.0.
 
 set(RodinSolver_HEADERS
   LinearSolver.h
+  NewtonSolver.h
   CG.h
 )
 
@@ -23,17 +24,14 @@ endif()
 
 # ---- SuiteSparse -----------------------------------------------------------
 if (RODIN_USE_UMFPACK)
-  find_package(SuiteSparse REQUIRED COMPONENTS UMFPACK)
   target_link_libraries(RodinSolver INTERFACE SuiteSparse::UMFPACK)
 endif()
 
 if (RODIN_USE_SPQR)
-  find_package(SuiteSparse REQUIRED COMPONENTS SPQR)
   target_link_libraries(RodinSolver INTERFACE SuiteSparse::SPQR)
 endif()
 
 if (RODIN_USE_CHOLMOD)
-  find_package(SuiteSparse REQUIRED COMPONENTS CHOLMOD)
   target_link_libraries(RodinSolver INTERFACE SuiteSparse::CHOLMOD)
 endif()
 

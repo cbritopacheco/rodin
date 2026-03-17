@@ -56,7 +56,7 @@ int main(int, char**)
   std::stringstream filename;
   filename << "hmax" << std::setw(4) << hmax << "_"
            << "gammaek" << gamma_ek;
-  mesh.save("Q_" + filename.str() + ".mesh");
+  mesh.save("Q_" + filename.str() + ".mesh", IO::FileFormat::MFEM);
   std::ofstream out("L2_Grid_" + filename.str() + ".live.csv");
 
   for (auto m : ms)

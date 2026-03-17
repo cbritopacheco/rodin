@@ -182,53 +182,65 @@ namespace Rodin::Variational
           m_begin(std::exchange(other.m_begin, 0)),
           m_end(std::exchange(other.m_end, 0)),
           m_ghosts(std::move(other.m_ghosts)),
-          m_read(other.m_read),
-          m_write(other.m_write)
+          m_read{.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR},
+          m_write{.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR}
       {
         other.m_read = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
         other.m_write = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
       }
 
-      GridFunction& operator=(const GridFunction& other) = delete;
+      GridFunction& operator=(const GridFunction& other)
+      {
+        if (this == &other)
+          return *this;
+
+        assert(&this->getFiniteElementSpace() == &other.getFiniteElementSpace());
+
+        this->release();
+
+        m_begin = other.m_begin;
+        m_end = other.m_end;
+        m_ghosts = other.m_ghosts;
+
+        m_read = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
+        m_write = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
+
+        PetscErrorCode ierr = VecDuplicate(other.m_data, &m_data);
+        assert(ierr == PETSC_SUCCESS);
+
+        ierr = VecCopy(other.m_data, m_data);
+        assert(ierr == PETSC_SUCCESS);
+
+        (void) ierr;
+        return *this;
+      }
 
       GridFunction& operator=(GridFunction&& other) noexcept
       {
-        if (this != &other)
-        {
-          Parent::operator=(std::move(other));
-          m_data = std::move(other.m_data);
-          m_begin = std::exchange(other.m_begin, 0);
-          m_end = std::exchange(other.m_end, 0);
-          m_ghosts = std::move(other.m_ghosts);
-          m_read.acquired = std::exchange(other.m_read, false);
-          m_read.raw = std::exchange(other.m_read.raw, PETSC_NULLPTR);
-          m_write.acquired = std::exchange(other.m_write, false);
-          m_write.raw = std::exchange(other.m_write.raw, PETSC_NULLPTR);
-        }
+        if (this == &other)
+          return *this;
+
+        assert(&this->getFiniteElementSpace() == &other.getFiniteElementSpace());
+
+        this->release();
+
+        m_data = std::exchange(other.m_data, PETSC_NULLPTR);
+        m_begin = std::exchange(other.m_begin, 0);
+        m_end = std::exchange(other.m_end, 0);
+        m_ghosts = std::move(other.m_ghosts);
+
+        m_read = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
+        m_write = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
+
+        other.m_read = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
+        other.m_write = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
+
         return *this;
       }
 
       virtual ~GridFunction()
       {
-        PetscErrorCode ierr;
-        if (m_read.acquired)
-        {
-          assert(m_read.raw);
-          ierr = VecRestoreArrayRead(m_data, &m_read.raw);
-          assert(ierr == PETSC_SUCCESS);
-          m_read.acquired = false;
-        }
-        if (m_write.acquired)
-        {
-          assert(m_write.raw);
-          ierr = VecRestoreArrayWrite(m_data, &m_write.raw);
-          assert(ierr == PETSC_SUCCESS);
-          m_write.acquired = false;
-        }
-        ierr = VecDestroy(&m_data);
-        assert(ierr == PETSC_SUCCESS);
-        m_data = PETSC_NULLPTR;
-        (void) ierr;
+        this->release();
       }
 
       constexpr
@@ -696,6 +708,129 @@ namespace Rodin::Variational
         return std::nullopt;
       }
 
+      decltype(auto) operator()(const Geometry::Point& p) const
+      {
+        return this->getValue(p);
+      }
+
+      decltype(auto) getValue(const Geometry::Point& p) const
+      {
+        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
+        {
+          return Parent::getValue(p);
+        }
+        else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        {
+          static thread_local RangeType s_out;
+
+          const auto& fes = this->getFiniteElementSpace();
+          const auto& mesh = fes.getMesh();
+          const auto& shard = mesh.getShard();
+          const auto& polytope = p.getPolytope();
+          const auto& polytopeMesh = polytope.getMesh();
+
+          if (polytopeMesh == shard)
+          {
+            this->interpolate(s_out, p);
+            return s_out;
+          }
+
+          if (const auto inclusion = shard.inclusion(p))
+          {
+            this->interpolate(s_out, *inclusion);
+            return s_out;
+          }
+
+          if (shard.isSubMesh())
+          {
+            const auto& submesh = shard.asSubMesh();
+            if (const auto restriction = submesh.restriction(p))
+            {
+              this->interpolate(s_out, *restriction);
+              return s_out;
+            }
+          }
+
+          Alert::MemberFunctionException(*this, __func__)
+            << "Point does not belong to the PETSc GridFunction shard."
+            << Alert::Raise;
+
+          assert(false);
+          return s_out;
+        }
+        else
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Unsupported mesh context type for PETSc GridFunction."
+            << Alert::Raise;
+          return Parent::getValue(p);
+        }
+      }
+
+      void release()
+      {
+        PetscErrorCode ierr;
+
+        if (m_read.acquired)
+        {
+          assert(m_read.raw);
+          if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
+          {
+            ierr = VecRestoreArrayRead(m_data, &m_read.raw);
+            assert(ierr == PETSC_SUCCESS);
+          }
+          else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+          {
+            ierr = VecRestoreArrayRead(m_read.ghost, &m_read.raw);
+            assert(ierr == PETSC_SUCCESS);
+
+            ierr = VecGhostRestoreLocalForm(m_data, &m_read.ghost);
+            assert(ierr == PETSC_SUCCESS);
+          }
+
+          m_read.acquired = false;
+          m_read.raw = PETSC_NULLPTR;
+          m_read.ghost = PETSC_NULLPTR;
+        }
+
+        if (m_write.acquired)
+        {
+          assert(m_write.raw);
+          if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
+          {
+            ierr = VecRestoreArrayWrite(m_data, &m_write.raw);
+            assert(ierr == PETSC_SUCCESS);
+          }
+          else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+          {
+            ierr = VecRestoreArrayWrite(m_write.ghost, &m_write.raw);
+            assert(ierr == PETSC_SUCCESS);
+
+            ierr = VecGhostRestoreLocalForm(m_data, &m_write.ghost);
+            assert(ierr == PETSC_SUCCESS);
+
+            ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_REVERSE);
+            assert(ierr == PETSC_SUCCESS);
+
+            ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_REVERSE);
+            assert(ierr == PETSC_SUCCESS);
+          }
+
+          m_write.acquired = false;
+          m_write.raw = PETSC_NULLPTR;
+          m_write.ghost = PETSC_NULLPTR;
+        }
+
+        if (m_data)
+        {
+          ierr = VecDestroy(&m_data);
+          assert(ierr == PETSC_SUCCESS);
+          m_data = PETSC_NULLPTR;
+        }
+
+        (void) ierr;
+      }
+
     private:
       DataType m_data;
       size_t m_begin, m_end;
@@ -716,6 +851,8 @@ namespace Rodin::PETSc::Variational
       using Parent = Rodin::Variational::GridFunction<FES, ::Vec>;
       using Parent::Parent;
       using Parent::operator[];
+      using Parent::operator();
+      using Parent::getValue;
       using Parent::operator=;
       using Parent::operator+=;
       using Parent::operator-=;
@@ -725,6 +862,16 @@ namespace Rodin::PETSc::Variational
 
   template <class FES>
   GridFunction(const FES&) -> GridFunction<FES>;
+}
+
+namespace Rodin::FormLanguage
+{
+  template <class FES>
+  struct Traits<PETSc::Variational::GridFunction<FES>>
+  {
+    using FESType = FES;
+    using DataType = ::Vec;
+  };
 }
 
 #endif

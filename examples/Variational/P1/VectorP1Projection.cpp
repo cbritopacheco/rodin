@@ -24,7 +24,7 @@ int main(int, char**)
 
   gf = [](const Geometry::Point& p) { return Math::Vector<Real>{{ p.y() - 0.5, -p.x() + 0.5 }}; };
 
-  mesh.save("Projection.mesh");
-  gf.save("Projection.gf");
+  mesh.save("Projection.mesh", IO::FileFormat::MFEM);
+  gf.save("Projection.gf", IO::FileFormat::MFEM);
 }
 
