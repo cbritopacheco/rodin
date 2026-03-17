@@ -433,9 +433,17 @@ namespace
     const size_t numRanks = 2;
 
     // Simulate both ranks
-    for (size_t r = 0; r < numRanks; ++r)
+    // Non-root ranks must run first so their mesh files exist before root's
+    // close()/flush() reads all rank files.
+    for (size_t r = 1; r < numRanks; ++r)
     {
       XDMF xdmf(stem, r, numRanks, /*rootRank=*/0);
+      xdmf.setMesh(localMesh);
+      xdmf.write(0.0);
+      xdmf.close();
+    }
+    {
+      XDMF xdmf(stem, /*rank=*/0, numRanks, /*rootRank=*/0);
       xdmf.setMesh(localMesh);
       xdmf.write(0.0);
       xdmf.close();
@@ -492,9 +500,17 @@ namespace
 
     const size_t numRanks = 2;
 
-    for (size_t r = 0; r < numRanks; ++r)
+    // Write non-root ranks first so root's close()/flush() can read their files.
+    for (size_t r = 1; r < numRanks; ++r)
     {
       XDMF xdmf(stem, r, numRanks);
+      xdmf.setMesh(localMesh);
+      xdmf.add("u", gf, XDMF::Center::Node);
+      xdmf.write(0.0);
+      xdmf.close();
+    }
+    {
+      XDMF xdmf(stem, /*rank=*/0, numRanks);
       xdmf.setMesh(localMesh);
       xdmf.add("u", gf, XDMF::Center::Node);
       xdmf.write(0.0);

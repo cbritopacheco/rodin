@@ -851,6 +851,8 @@ namespace Rodin::PETSc::Variational
       using Parent = Rodin::Variational::GridFunction<FES, ::Vec>;
       using Parent::Parent;
       using Parent::operator[];
+      using Parent::operator();
+      using Parent::getValue;
       using Parent::operator=;
       using Parent::operator+=;
       using Parent::operator-=;
