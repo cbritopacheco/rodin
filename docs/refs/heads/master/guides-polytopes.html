@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <link rel="prev" href="guides-meshes.html" />
+  <link rel="next" href="guides-connectivity.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -31,6 +33,8 @@
               <ol>
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -46,6 +50,7 @@
               <ol>
                 <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
                 <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
                 <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
                 <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
                 <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
@@ -74,7 +79,68 @@
           <span class="m-breadcrumb"><a href="guides-index.html">General concepts</a> &raquo;</span>
           Polytopes
         </h1>
-        <p>How to use the polytopes defined in <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</p>
+        <p>Understanding the geometric elements in <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li><a href="#guides-polytopes-intro">Introduction</a></li>
+            <li><a href="#guides-polytopes-dimensions">Polytope Dimensions</a></li>
+            <li><a href="#guides-polytopes-types">Available Polytope Types</a></li>
+            <li><a href="#guides-polytopes-meshgen">Using Polytopes for Mesh Generation</a></li>
+            <li><a href="#guides-polytopes-sub">Sub-Entities</a></li>
+            <li><a href="#guides-polytopes-iteration">Iterating Over Polytopes</a></li>
+            <li><a href="#guides-polytopes-choosing">Choosing the Right Element Type</a></li>
+            <li><a href="#guides-polytopes-see-also">See Also</a></li>
+          </ul>
+        </nav>
+<section id="guides-polytopes-intro"><h2><a href="#guides-polytopes-intro">Introduction</a></h2><p>In finite element analysis, a <strong>polytope</strong> is a geometric primitive that forms the building block of a mesh. A mesh is a collection of polytopes of various dimensions that together partition a domain <svg class="m-math" style="width: 0.881em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.454319 8.169366">
+<title>
+$ \Omega $
+</title>
+<defs>
+<path id='eq1-g0-10' d='M7.914321-1.865006H7.651308C7.591532-1.554172 7.531756-1.243337 7.436115-.992279C7.376339-.800996 7.340473-.705355 6.647073-.705355H5.702615C5.846077-1.374844 6.192777-1.948692 6.682939-2.689913C7.244832-3.56264 7.79477-4.435367 7.79477-5.427646C7.79477-7.07746 6.216687-8.416438 4.220174-8.416438C2.211706-8.416438 .645579-7.065504 .645579-5.427646C.645579-4.447323 1.183562-3.58655 1.745455-2.713823C2.247572-1.936737 2.606227-1.374844 2.737733-.705355H1.793275C1.099875-.705355 1.06401-.800996 1.004234-.980324C.908593-1.231382 .848817-1.578082 .789041-1.865006H.526027L.908593 0H2.761644C3.024658 0 3.048568 0 3.048568-.215193C3.048568-1.06401 2.666002-2.10411 2.426899-2.713823C2.080199-3.658281 1.75741-4.531009 1.75741-5.439601C1.75741-7.280697 3.036613-8.177335 4.220174-8.177335S6.682939-7.280697 6.682939-5.439601C6.682939-4.531009 6.348194-3.634371 6.01345-2.749689C5.810212-2.175841 5.391781-1.075965 5.391781-.227148C5.391781 0 5.427646 0 5.69066 0H7.531756L7.914321-1.865006Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g0-10'/>
+</g>
+</svg>.</p><p>In <a href="namespace_rodin.html" class="m-doc">Rodin</a>, polytopes are represented by the <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> class and its associated <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> enumeration.</p></section><section id="guides-polytopes-dimensions"><h2><a href="#guides-polytopes-dimensions">Polytope Dimensions</a></h2><p>Polytopes exist in different dimensions, each with a specific role in the mesh:</p><table class="m-table"><thead><tr><th>Dimension</th><th>Name</th><th>Role</th><th>Example</th></tr></thead><tbody><tr><td>0</td><td><strong>Vertex</strong> (Point)</td><td>Mesh nodes</td><td>Corner of a triangle</td></tr><tr><td>1</td><td><strong>Edge</strong> (Segment)</td><td>Connections between vertices</td><td>Side of a triangle, boundary in 2D</td></tr><tr><td>2</td><td><strong>Face</strong></td><td>Surface elements</td><td>Triangle, Quadrilateral</td></tr><tr><td>3</td><td><strong>Cell</strong></td><td>Volume elements</td><td>Tetrahedron, Hexahedron, Wedge</td></tr></tbody></table><p>The <strong>cells</strong> are the highest-dimensional polytopes in a mesh and correspond to the elements over which the finite element approximation is constructed. In a 2D mesh, the cells are faces (triangles or quadrilaterals); in 3D, the cells are volumes.</p></section><section id="guides-polytopes-types"><h2><a href="#guides-polytopes-types">Available Polytope Types</a></h2><p>The <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> enumeration defines the available element types:</p><table class="m-table"><thead><tr><th>Type</th><th>Dimension</th><th>Vertices</th><th>Description</th></tr></thead><tbody><tr><td><code>Polytope::Type::Point</code></td><td>0</td><td>1</td><td>A single vertex</td></tr><tr><td><code>Polytope::Type::Segment</code></td><td>1</td><td>2</td><td>A line segment (edge)</td></tr><tr><td><code>Polytope::Type::Triangle</code></td><td>2</td><td>3</td><td>A triangular element</td></tr><tr><td><code>Polytope::Type::Quadrilateral</code></td><td>2</td><td>4</td><td>A quadrilateral element</td></tr><tr><td><code>Polytope::Type::Tetrahedron</code></td><td>3</td><td>4</td><td>A tetrahedral element</td></tr><tr><td><code>Polytope::Type::Hexahedron</code></td><td>3</td><td>8</td><td>A hexahedral (brick) element</td></tr><tr><td><code>Polytope::Type::Wedge</code></td><td>3</td><td>6</td><td>A prismatic (wedge) element</td></tr></tbody></table></section><section id="guides-polytopes-meshgen"><h2><a href="#guides-polytopes-meshgen">Using Polytopes for Mesh Generation</a></h2><p>The polytope type determines the element shapes when generating uniform meshes via Mesh::UniformGrid():</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Geometry</span><span class="p">;</span>
+
+<span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+
+<span class="c1">// 2D meshes</span>
+<span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">});</span>
+<span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Quadrilateral</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">});</span>
+
+<span class="c1">// 3D meshes</span>
+<span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Tetrahedron</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">});</span>
+<span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Hexahedron</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">});</span>
+<span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Wedge</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">});</span></pre></section><section id="guides-polytopes-sub"><h2><a href="#guides-polytopes-sub">Sub-Entities</a></h2><p>Every polytope has <strong>sub-entities</strong> of lower dimension. For example, a triangle has 3 edges and 3 vertices; a tetrahedron has 4 faces, 6 edges, and 4 vertices. These relationships are captured by the <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a> class.</p><p>To access sub-entity relationships, first compute the connectivity:</p><pre class="m-code"><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w"> </span><span class="c1">// edges → cells</span>
+<span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w"> </span><span class="c1">// vertices → cells</span></pre></section><section id="guides-polytopes-iteration"><h2><a href="#guides-polytopes-iteration">Iterating Over Polytopes</a></h2><p>You can iterate over polytopes of a given dimension using the mesh iterator interface:</p><pre class="m-code"><span class="c1">// Iterate over cells (highest dimension)</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getCell</span><span class="p">();</span><span class="w"> </span><span class="o">!</span><span class="n">it</span><span class="p">.</span><span class="n">end</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">it</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">it</span><span class="o">-&gt;</span><span class="n">getIndex</span><span class="p">();</span>
+<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">attr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">it</span><span class="o">-&gt;</span><span class="n">getAttribute</span><span class="p">();</span>
+<span class="w">  </span><span class="c1">// ... process cell ...</span>
+<span class="p">}</span>
+
+<span class="c1">// Iterate over vertices</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getVertex</span><span class="p">();</span><span class="w"> </span><span class="o">!</span><span class="n">it</span><span class="p">.</span><span class="n">end</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">it</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">coords</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">it</span><span class="o">-&gt;</span><span class="n">getCoordinates</span><span class="p">();</span>
+<span class="w">  </span><span class="c1">// ... process vertex ...</span>
+<span class="p">}</span></pre></section><section id="guides-polytopes-choosing"><h2><a href="#guides-polytopes-choosing">Choosing the Right Element Type</a></h2><table class="m-table"><thead><tr><th>Problem</th><th>Recommended Type</th><th>Reason</th></tr></thead><tbody><tr><td>General 2D PDEs</td><td><code>Triangle</code></td><td>Flexible, good for complex geometries</td></tr><tr><td>Structured 2D grids</td><td><code>Quadrilateral</code></td><td>Better accuracy on rectangular domains</td></tr><tr><td>General 3D PDEs</td><td><code>Tetrahedron</code></td><td>Handles complex 3D geometries</td></tr><tr><td>Structured 3D grids</td><td><code>Hexahedron</code></td><td>Higher accuracy per DOF</td></tr></tbody></table></section><section id="guides-polytopes-see-also"><h2><a href="#guides-polytopes-see-also">See Also</a></h2><ul><li><a href="guides-meshes.html" class="m-doc">Meshes</a> — Working with meshes</li><li><a href="guides-connectivity.html" class="m-doc">Connectivity</a> — Relationships between polytopes</li><li><a href="fem-ciarlet.html" class="m-doc">Ciarlet&#x27;s definition</a> — The reference element <svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
+<title>
+$ K $
+</title>
+<defs>
+<path id='eq2-g0-75' d='M5.977584-4.829888C5.965629-4.865753 5.917808-4.961395 5.917808-4.99726C5.917808-5.009215 5.929763-5.021171 6.133001-5.176588L7.292653-6.085181C8.894645-7.328518 9.420672-7.746949 10.245579-7.81868C10.329265-7.830635 10.448817-7.830635 10.448817-8.033873C10.448817-8.105604 10.412951-8.16538 10.31731-8.16538C10.185803-8.16538 10.042341-8.141469 9.910834-8.141469H9.456538C9.085928-8.141469 8.691407-8.16538 8.332752-8.16538C8.249066-8.16538 8.105604-8.16538 8.105604-7.950187C8.105604-7.830635 8.18929-7.81868 8.261021-7.81868C8.392528-7.806725 8.547945-7.758904 8.547945-7.591532C8.547945-7.352428 8.18929-7.065504 8.093649-6.993773L3.407223-3.347447L4.399502-7.292653C4.507098-7.699128 4.531009-7.81868 5.379826-7.81868C5.606974-7.81868 5.71457-7.81868 5.71457-8.045828C5.71457-8.16538 5.595019-8.16538 5.535243-8.16538C5.32005-8.16538 5.068991-8.141469 4.841843-8.141469H3.431133C3.21594-8.141469 2.952927-8.16538 2.737733-8.16538C2.642092-8.16538 2.510585-8.16538 2.510585-7.938232C2.510585-7.81868 2.618182-7.81868 2.797509-7.81868C3.526775-7.81868 3.526775-7.723039 3.526775-7.591532C3.526775-7.567621 3.526775-7.49589 3.478954-7.316563L1.865006-.884682C1.75741-.466252 1.733499-.3467 .896638-.3467C.669489-.3467 .549938-.3467 .549938-.131507C.549938 0 .657534 0 .729265 0C.956413 0 1.195517-.02391 1.422665-.02391H2.82142C3.048568-.02391 3.299626 0 3.526775 0C3.622416 0 3.753923 0 3.753923-.227148C3.753923-.3467 3.646326-.3467 3.466999-.3467C2.737733-.3467 2.737733-.442341 2.737733-.561893C2.737733-.645579 2.809465-.944458 2.857285-1.135741L3.323537-2.988792L5.140722-4.411457C5.487422-3.646326 6.121046-2.116065 6.611208-.944458C6.647073-.872727 6.670984-.800996 6.670984-.71731C6.670984-.358655 6.192777-.3467 6.085181-.3467S5.858032-.3467 5.858032-.119552C5.858032 0 5.989539 0 6.025405 0C6.443836 0 6.886177-.02391 7.304608-.02391H7.878456C8.057783-.02391 8.261021 0 8.440349 0C8.51208 0 8.643587 0 8.643587-.227148C8.643587-.3467 8.53599-.3467 8.416438-.3467C7.974097-.358655 7.81868-.454296 7.639352-.884682L5.977584-4.829888Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g0-75'/>
+</g>
+</svg></li><li><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope class reference</a></li></ul></section>
+        <div class="m-note m-dim m-thin m-text-center"><a href="guides-meshes.html" class="m-doc">&laquo; Meshes</a> | <a href="guides-index.html" class="m-doc">General concepts</a> | <a href="guides-connectivity.html" class="m-doc">Connectivity &raquo;</a></div>
       </div>
     </div>
   </div>

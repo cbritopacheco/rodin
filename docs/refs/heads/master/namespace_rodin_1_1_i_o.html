@@ -31,6 +31,8 @@
               <ol>
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -46,6 +48,7 @@
               <ol>
                 <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
                 <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html" id="m-navbar-current">Rodin::IO</a></li>
                 <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
                 <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
                 <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
@@ -73,7 +76,7 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>IO <span class="m-thin">namespace</span>
         </h1>
-        <p>Module for dealing with I/O functionality.</p>
+        <p>Module for mesh and grid function input/output.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -88,6 +91,8 @@
             </li>
           </ul>
         </nav>
+<p>The <a href="namespace_rodin_1_1_i_o.html" class="m-doc">IO</a> module provides facilities for reading and writing meshes and grid functions in several formats:</p><ul><li><strong>MFEM</strong> (<code><a href="#a610845e6f56e545283af144cbbb99cfead2fc2ac95a0b62e13572a658cf6390af" class="m-doc">IO::<wbr />FileFormat::<wbr />MFEM</a></code>) — Native MFEM mesh and grid function format</li><li><strong>MEDIT</strong> (<code><a href="#a610845e6f56e545283af144cbbb99cfeae902e98da70b5998f60fb4cd62826def" class="m-doc">IO::<wbr />FileFormat::<wbr />MEDIT</a></code>) — MEDIT format used by MMG and INRIA tools</li><li><strong><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a></strong> (<code><a href="#a610845e6f56e545283af144cbbb99cfea86459eb6a9c3edb9d09e9d6fe8d5b9fa" class="m-doc">IO::<wbr />FileFormat::<wbr />HDF5</a></code>) — High-performance binary format</li></ul><p>Additionally, the <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> class provides <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> 3.0 output for scientific visualization in <a href="https://www.paraview.org/">ParaView</a>, supporting time series and multiple fields.</p><p>File format is specified explicitly via the <a href="#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> enumeration:</p><pre class="m-code"><span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;output.mesh&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">);</span>
+<span class="n">mesh</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;domain.mesh&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MEDIT</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="guides-io.html" class="m-doc">I/O in Rodin</a> for a comprehensive guide.</p></aside>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">

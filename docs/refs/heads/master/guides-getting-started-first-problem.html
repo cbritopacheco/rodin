@@ -33,6 +33,8 @@
               <ol>
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -48,6 +50,7 @@
               <ol>
                 <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
                 <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
                 <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
                 <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
                 <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
@@ -95,7 +98,7 @@
                 <li><a href="#guides-getting-started-first-problem-source">Step 5: Define Source Term</a></li>
                 <li><a href="#guides-getting-started-first-problem-formulation">Step 6: Formulate the Problem</a></li>
                 <li><a href="#guides-getting-started-first-problem-solve">Step 7: Solve the System</a></li>
-                <li><a href="#guides-getting-started-first-problem-output">Step 8: Save Results</a></li>
+                <li><a href="#guides-getting-started-first-problem-output">Step 8: Export Results</a></li>
               </ul>
             </li>
             <li><a href="#guides-getting-started-first-problem-build">Building and Running</a></li>
@@ -285,14 +288,15 @@ $ v \in H^1_0(\Omega) $
 <use x='246.608038' y='-10.793007' xlink:href='#eq8-g2-100'/>
 <use x='252.690731' y='-10.793007' xlink:href='#eq8-g2-120'/>
 </g>
-</svg></div><p>This is the form that finite element methods work with, and it&#x27;s exactly what we&#x27;ll implement in <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</p></section></section><section id="guides-getting-started-first-problem-code"><h2><a href="#guides-getting-started-first-problem-code">The Complete Code</a></h2><p>Here&#x27;s the complete program to solve the Poisson equation:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
+</svg></div><p>This is the form that finite element methods work with, and it&#x27;s exactly what we&#x27;ll implement in <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</p></section></section><section id="guides-getting-started-first-problem-code"><h2><a href="#guides-getting-started-first-problem-code">The Complete Code</a></h2><p>Here&#x27;s the complete program to solve the Poisson equation:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solver.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Variational.h&gt;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solver.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/IO/XDMF.h&gt;</span>
 
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Solver</span><span class="p">;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Geometry</span><span class="p">;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Variational</span><span class="p">;</span>
-<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Solver</span><span class="p">;</span>
 
 <span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="c1">// 1. Create a mesh</span>
@@ -310,7 +314,7 @@ $ v \in H^1_0(\Omega) $
 <span class="w">  </span><span class="n">TestFunction</span><span class="w"> </span><span class="n">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 
 <span class="w">  </span><span class="c1">// 5. Define the source term f = 1</span>
-<span class="w">  </span><span class="n">RealFunction</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+<span class="w">  </span><span class="n">RealFunction</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
 
 <span class="w">  </span><span class="c1">// 6. Define the problem</span>
 <span class="w">  </span><span class="n">Problem</span><span class="w"> </span><span class="n">poisson</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
@@ -321,9 +325,10 @@ $ v \in H^1_0(\Omega) $
 <span class="w">  </span><span class="c1">// 7. Solve the problem</span>
 <span class="w">  </span><span class="n">CG</span><span class="p">(</span><span class="n">poisson</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span>
 
-<span class="w">  </span><span class="c1">// 8. Save the solution</span>
-<span class="w">  </span><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">().</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;solution.gf&quot;</span><span class="p">);</span>
-<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;mesh.mesh&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="c1">// 8. Export results using XDMF (open in ParaView)</span>
+<span class="w">  </span><span class="n">IO</span><span class="o">::</span><span class="n">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="s">&quot;Poisson&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="n">xdmf</span><span class="p">.</span><span class="n">grid</span><span class="p">().</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">).</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;u&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">());</span>
+<span class="w">  </span><span class="n">xdmf</span><span class="p">.</span><span class="n">write</span><span class="p">();</span>
 
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="p">}</span></pre></section><section id="guides-getting-started-first-problem-breakdown"><h2><a href="#guides-getting-started-first-problem-breakdown">Code Breakdown</a></h2><p>Let&#x27;s understand each part of the code:</p><section id="guides-getting-started-first-problem-mesh"><h3><a href="#guides-getting-started-first-problem-mesh">Step 1-2: Create the Mesh</a></h3><pre class="m-code"><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
@@ -406,8 +411,9 @@ $ u = 0 $
 <use x='9.983269' y='0' xlink:href='#eq12-g1-61'/>
 <use x='22.40875' y='0' xlink:href='#eq12-g1-48'/>
 </g>
-</svg> on the boundary</li></ul><p>Note how the code closely resembles the mathematical notation!</p></section><section id="guides-getting-started-first-problem-solve"><h3><a href="#guides-getting-started-first-problem-solve">Step 7: Solve the System</a></h3><pre class="m-code"><span class="n">CG</span><span class="p">(</span><span class="n">poisson</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre><ul><li>Uses the Conjugate Gradient (CG) iterative solver</li><li>For symmetric positive definite systems (like the Poisson equation)</li><li>Alternative solvers: <code>SparseLU</code>, <code>BiCGSTAB</code>, etc.</li></ul></section><section id="guides-getting-started-first-problem-output"><h3><a href="#guides-getting-started-first-problem-output">Step 8: Save Results</a></h3><pre class="m-code"><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">().</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;solution.gf&quot;</span><span class="p">);</span>
-<span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;mesh.mesh&quot;</span><span class="p">);</span></pre><ul><li>Saves the solution in MFEM GridFunction format</li><li>Saves the mesh in MEDIT format</li><li>Can be visualized with tools like <a href="https://glvis.org/">GLVis</a></li></ul></section></section><section id="guides-getting-started-first-problem-build"><h2><a href="#guides-getting-started-first-problem-build">Building and Running</a></h2><p>Save the code as <code>poisson.cpp</code> and create a <code>CMakeLists.txt</code>:</p><pre class="m-code"><span class="nb">cmake_minimum_required</span><span class="p">(</span><span class="s">VERSION</span><span class="w"> </span><span class="s">3.16</span><span class="p">)</span>
+</svg> on the boundary</li></ul><p>Note how the code closely resembles the mathematical notation!</p></section><section id="guides-getting-started-first-problem-solve"><h3><a href="#guides-getting-started-first-problem-solve">Step 7: Solve the System</a></h3><pre class="m-code"><span class="n">CG</span><span class="p">(</span><span class="n">poisson</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre><ul><li>Uses the Conjugate Gradient (CG) iterative solver</li><li>For symmetric positive definite systems (like the Poisson equation)</li><li>Alternative solvers: <code>SparseLU</code>, <code>BiCGSTAB</code>, etc.</li></ul></section><section id="guides-getting-started-first-problem-output"><h3><a href="#guides-getting-started-first-problem-output">Step 8: Export Results</a></h3><pre class="m-code"><span class="n">IO</span><span class="o">::</span><span class="n">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="s">&quot;Poisson&quot;</span><span class="p">);</span>
+<span class="n">xdmf</span><span class="p">.</span><span class="n">grid</span><span class="p">().</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">).</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;u&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">());</span>
+<span class="n">xdmf</span><span class="p">.</span><span class="n">write</span><span class="p">();</span></pre><ul><li>Exports the mesh and solution in XDMF format (XML + HDF5)</li><li>Produces <code>Poisson.xdmf</code> and associated <code>.h5</code> data files</li><li>Can be visualized with <a href="https://www.paraview.org/">ParaView</a></li></ul></section></section><section id="guides-getting-started-first-problem-build"><h2><a href="#guides-getting-started-first-problem-build">Building and Running</a></h2><p>Save the code as <code>poisson.cpp</code> and create a <code>CMakeLists.txt</code>:</p><pre class="m-code"><span class="nb">cmake_minimum_required</span><span class="p">(</span><span class="s">VERSION</span><span class="w"> </span><span class="s">3.16</span><span class="p">)</span>
 <span class="nb">project</span><span class="p">(</span><span class="s">PoissonExample</span><span class="w"> </span><span class="s">CXX</span><span class="p">)</span>
 
 <span class="nb">set</span><span class="p">(</span><span class="s">CMAKE_CXX_STANDARD</span><span class="w"> </span><span class="s">20</span><span class="p">)</span>
@@ -420,9 +426,10 @@ $ u = 0 $
 <span class="w">  </span><span class="s">Rodin::Geometry</span>
 <span class="w">  </span><span class="s">Rodin::Variational</span>
 <span class="w">  </span><span class="s">Rodin::Solver</span>
+<span class="w">  </span><span class="s">Rodin::IO</span>
 <span class="p">)</span></pre><p>Build and run:</p><pre class="m-code">cmake<span class="w"> </span>.
 make
-./poisson</pre></section><section id="guides-getting-started-first-problem-visualize"><h2><a href="#guides-getting-started-first-problem-visualize">Visualizing the Solution</a></h2><p>If you have <a href="https://glvis.org/">GLVis</a> installed, visualize the solution:</p><pre class="m-code">glvis<span class="w"> </span>-m<span class="w"> </span>mesh.mesh<span class="w"> </span>-g<span class="w"> </span>solution.gf</pre><p>You should see a smooth solution that represents the deflection of a membrane under uniform load.</p></section><section id="guides-getting-started-first-problem-variations"><h2><a href="#guides-getting-started-first-problem-variations">Common Variations</a></h2><section id="guides-getting-started-first-problem-non-homogeneous"><h3><a href="#guides-getting-started-first-problem-non-homogeneous">Non-Homogeneous Boundary Conditions</a></h3><p>To set <svg class="m-math" style="width: 2.963em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 28.44301 7.47198">
+./poisson</pre></section><section id="guides-getting-started-first-problem-visualize"><h2><a href="#guides-getting-started-first-problem-visualize">Visualizing the Solution</a></h2><p>Open the generated <code>Poisson.xdmf</code> file in <a href="https://www.paraview.org/">ParaView</a>:</p><ol><li><strong>File → Open</strong> and select <code>Poisson.xdmf</code></li><li>Click <strong>Apply</strong></li><li>Select &quot;u&quot; from the field dropdown</li><li>Optionally, apply the <strong>Warp By Scalar</strong> filter for a 3D surface view</li></ol><p>You should see a smooth solution that represents the deflection of a membrane under uniform load.</p></section><section id="guides-getting-started-first-problem-variations"><h2><a href="#guides-getting-started-first-problem-variations">Common Variations</a></h2><section id="guides-getting-started-first-problem-non-homogeneous"><h3><a href="#guides-getting-started-first-problem-non-homogeneous">Non-Homogeneous Boundary Conditions</a></h3><p>To set <svg class="m-math" style="width: 2.963em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 28.44301 7.47198">
 <title>
 $ u = g $
 </title>

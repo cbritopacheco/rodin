@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <link rel="prev" href="examples-mmg-mesh_optimization.html" />
+  <link rel="next" href="examples-mmg-casting.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
 </head>
@@ -31,6 +33,8 @@
               <ol>
                 <li><a href="guides-index.html">General concepts</a></li>
                 <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
                 <li><a href="notation-index.html">Notation</a></li>
                 <li><a href="credits-index.html">Credits</a></li>
               </ol>
@@ -46,6 +50,7 @@
               <ol>
                 <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
                 <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
                 <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
                 <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
                 <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
@@ -75,7 +80,55 @@
           <span class="m-breadcrumb"><a href="examples-mmg-index.html">Working with MMG</a> &raquo;</span>
           Adapting the mesh
         </h1>
-        <p>How to adapt the mesh.</p>
+        <p>How to adapt a mesh based on a solution field.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li><a href="#examples-mmg-adapt-intro">Introduction</a></li>
+            <li><a href="#examples-mmg-adapt-workflow">Typical Workflow</a></li>
+            <li><a href="#examples-mmg-adapt-see-also">See Also</a></li>
+          </ul>
+        </nav>
+<section id="examples-mmg-adapt-intro"><h2><a href="#examples-mmg-adapt-intro">Introduction</a></h2><p>Mesh <strong>adaptation</strong> (or adaptive refinement) modifies the mesh density based on a computed solution. Regions where the solution has sharp gradients or features receive finer elements, while smooth regions are coarsened. This produces more accurate results with fewer degrees of freedom.</p><p>The <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG</a> module supports metric-based mesh adaptation where a solution field or metric tensor guides the remesher.</p></section><section id="examples-mmg-adapt-workflow"><h2><a href="#examples-mmg-adapt-workflow">Typical Workflow</a></h2><p>A typical solve–adapt cycle looks like:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solver.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Variational.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/MMG.h&gt;</span>
+
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Geometry</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Variational</span><span class="p">;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="c1">// 1. Start with a coarse mesh</span>
+<span class="w">  </span><span class="n">MMG</span><span class="o">::</span><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+<span class="w">  </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="w"> </span><span class="p">});</span>
+
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">adapt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">adapt</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">adapt</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// 2. Solve the PDE on the current mesh</span>
+<span class="w">    </span><span class="n">P1</span><span class="w"> </span><span class="n">vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<span class="w">    </span><span class="n">TrialFunction</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">vh</span><span class="p">);</span>
+<span class="w">    </span><span class="n">TestFunction</span><span class="w">  </span><span class="n">v</span><span class="p">(</span><span class="n">vh</span><span class="p">);</span>
+<span class="w">    </span><span class="n">Problem</span><span class="w"> </span><span class="n">poisson</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+<span class="w">    </span><span class="n">poisson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">RealFunction</span><span class="p">(</span><span class="mf">1.0</span><span class="p">),</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
+<span class="w">            </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">Zero</span><span class="p">());</span>
+<span class="w">    </span><span class="n">Solver</span><span class="o">::</span><span class="n">CG</span><span class="p">(</span><span class="n">poisson</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// 3. Adapt the mesh using MMG with solution-driven sizing</span>
+<span class="w">    </span><span class="n">MMG</span><span class="o">::</span><span class="n">Optimizer</span><span class="p">()</span>
+<span class="w">      </span><span class="p">.</span><span class="n">setHMax</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+<span class="w">      </span><span class="p">.</span><span class="n">setHMin</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
+<span class="w">      </span><span class="p">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;Adapted.mesh&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">);</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></pre></section><section id="examples-mmg-adapt-see-also"><h2><a href="#examples-mmg-adapt-see-also">See Also</a></h2><ul><li><a href="examples-mmg-mesh_optimization.html" class="m-doc">Mesh optimization</a></li><li><a href="examples-pdes-poisson.html" class="m-doc">Poisson equation</a></li><li><a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG namespace</a></li></ul></section>
+        <div class="m-note m-dim m-thin m-text-center"><a href="examples-mmg-mesh_optimization.html" class="m-doc">&laquo; Optimizing the mesh</a> | <a href="examples-mmg-index.html" class="m-doc">Working with MMG</a> | <a href="examples-mmg-casting.html" class="m-doc">Casting between MMG and Rodin &raquo;</a></div>
       </div>
     </div>
   </div>
