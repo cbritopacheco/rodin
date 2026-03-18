@@ -388,6 +388,244 @@ namespace Rodin::Variational
 
   /**
    * @ingroup QuadratureRuleSpecializations
+   * @brief Integration of the isotropic Dot product of two instances of the
+   * P1 ShapeFunction.
+   *
+   * This class represents the CTAD for the expression:
+   * @f[
+   * \int u \cdot v \ dx \: ,
+   * @f]
+   * where @f$ u \in \mathbb{P}_1 @f$ and @f$ v \in \mathbb{P}_1 @f$.
+   *
+   * The specialization evaluates the integrand at the element centroid and
+   * supports distinct P1 trial and test spaces.
+   */
+  template <
+    class LHSDerived, class RHSDerived,
+    class LHSRange, class RHSRange, class LHSMesh, class RHSMesh>
+  class QuadratureRule<
+    Dot<
+      ShapeFunctionBase<
+        ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>,
+        P1<LHSRange, LHSMesh>, TrialSpace>,
+      ShapeFunctionBase<
+        ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>,
+        P1<RHSRange, RHSMesh>, TestSpace>>>
+    : public LocalBilinearFormIntegratorBase<
+        typename FormLanguage::Traits<
+          Dot<
+            ShapeFunctionBase<
+              ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>>,
+            ShapeFunctionBase<
+              ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>>>::ScalarType>
+  {
+    public:
+      using LHSFESType = P1<LHSRange, LHSMesh>;
+
+      using RHSFESType = P1<RHSRange, RHSMesh>;
+
+      using LHSType =
+        ShapeFunctionBase<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>;
+
+      using RHSType =
+        ShapeFunctionBase<ShapeFunction<RHSDerived, RHSFESType, TestSpace>>;
+
+      using IntegrandType = Dot<LHSType, RHSType>;
+
+      using LHSRangeType =
+        typename FormLanguage::Traits<LHSType>::RangeType;
+
+      using RHSRangeType =
+        typename FormLanguage::Traits<RHSType>::RangeType;
+
+      using ScalarType =
+        typename FormLanguage::Traits<IntegrandType>::ScalarType;
+
+      using Parent =
+        LocalBilinearFormIntegratorBase<ScalarType>;
+
+      static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
+
+      constexpr
+      QuadratureRule(const IntegrandType& integrand)
+        : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
+          m_integrand(integrand.copy()),
+          m_distortion(Math::nan<ScalarType>()),
+          m_weight(Math::nan<ScalarType>()),
+          m_set(false)
+      {}
+
+      constexpr
+      QuadratureRule(const QuadratureRule& other)
+        : Parent(other),
+          m_integrand(other.m_integrand->copy()),
+          m_distortion(Math::nan<ScalarType>()),
+          m_weight(Math::nan<ScalarType>()),
+          m_set(false)
+      {}
+
+      constexpr
+      QuadratureRule(QuadratureRule&& other)
+        : Parent(std::move(other)),
+          m_integrand(std::move(other.m_integrand)),
+          m_polytope(std::move(other.m_polytope)),
+          m_qf(std::move(other.m_qf)),
+          m_p(std::move(other.m_p)),
+          m_distortion(std::move(other.m_distortion)),
+          m_weight(std::move(other.m_weight)),
+          m_trialBasis(std::move(other.m_trialBasis)),
+          m_testBasis(std::move(other.m_testBasis)),
+          m_matrix(std::move(other.m_matrix)),
+          m_set(std::move(other.m_set)),
+          m_geometry(std::move(other.m_geometry))
+      {}
+
+      constexpr
+      const IntegrandType& getIntegrand() const
+      {
+        assert(m_integrand);
+        return *m_integrand;
+      }
+
+      const Geometry::Polytope& getPolytope() const final override
+      {
+        return m_polytope.value().get();
+      }
+
+      QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
+      {
+        m_polytope = polytope;
+        const auto& geometry = polytope.getGeometry();
+        const bool recompute = !m_set || m_geometry != geometry;
+
+        const auto& integrand = getIntegrand();
+        const auto& lhs = integrand.getLHS();
+        const auto& rhs = integrand.getRHS();
+        const auto& trialfes = lhs.getFiniteElementSpace();
+        const auto& testfes = rhs.getFiniteElementSpace();
+
+        if (recompute)
+        {
+          m_set = true;
+          m_geometry = geometry;
+
+          m_qf.emplace(geometry);
+          assert(m_qf->getSize() == 1);
+
+          m_p.emplace(polytope, m_qf->getPoint(0));
+          m_weight = m_qf->getWeight(0);
+
+          const auto& rc = m_qf->getPoint(0);
+
+          if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
+          {
+            const P1Element<LHSRangeType> trialfe(geometry);
+            m_trialBasis.resize(trialfe.getCount());
+            for (size_t i = 0; i < trialfe.getCount(); ++i)
+              m_trialBasis[i] = trialfe.getBasis(i)(rc);
+          }
+          else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>)
+          {
+            const P1Element<LHSRangeType> trialfe(geometry, trialfes.getVectorDimension());
+            m_trialBasis.resize(trialfe.getCount());
+            for (size_t i = 0; i < trialfe.getCount(); ++i)
+              m_trialBasis[i] = trialfe.getBasis(i)(rc);
+          }
+          else
+          {
+            assert(false);
+          }
+
+          if (trialfes == testfes)
+          {
+            m_testBasis = m_trialBasis;
+          }
+          else
+          {
+            if constexpr (std::is_same_v<RHSRangeType, ScalarType>)
+            {
+              const P1Element<RHSRangeType> testfe(geometry);
+              m_testBasis.resize(testfe.getCount());
+              for (size_t i = 0; i < testfe.getCount(); ++i)
+                m_testBasis[i] = testfe.getBasis(i)(rc);
+            }
+            else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>)
+            {
+              const P1Element<RHSRangeType> testfe(geometry, testfes.getVectorDimension());
+              m_testBasis.resize(testfe.getCount());
+              for (size_t i = 0; i < testfe.getCount(); ++i)
+                m_testBasis[i] = testfe.getBasis(i)(rc);
+            }
+            else
+            {
+              assert(false);
+            }
+          }
+
+          m_matrix.resize(m_testBasis.size(), m_trialBasis.size());
+        }
+
+        assert(m_p);
+        auto& p = *m_p;
+        p.setPolytope(polytope);
+        m_distortion = p.getDistortion();
+
+        const size_t ntr = m_trialBasis.size();
+        const size_t nte = m_testBasis.size();
+
+        for (size_t te = 0; te < nte; ++te)
+          for (size_t tr = 0; tr < ntr; ++tr)
+          {
+            if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
+              m_matrix(te, tr) = m_testBasis[te] * m_trialBasis[tr];
+            else
+              m_matrix(te, tr) = Math::dot(m_testBasis[te], m_trialBasis[tr]);
+          }
+
+        return *this;
+      }
+
+      ScalarType integrate(size_t tr, size_t te) final override
+      {
+        return m_weight * m_distortion * m_matrix(te, tr);
+      }
+
+      virtual Geometry::Region getRegion() const override = 0;
+
+      virtual QuadratureRule* copy() const noexcept override = 0;
+
+    private:
+      std::unique_ptr<IntegrandType> m_integrand;
+
+      Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
+      Optional<QF::Centroid> m_qf;
+      Optional<Geometry::Point> m_p;
+
+      Real m_distortion;
+      Real m_weight;
+
+      std::vector<LHSRangeType> m_trialBasis;
+      std::vector<RHSRangeType> m_testBasis;
+      Math::Matrix<ScalarType> m_matrix;
+
+      bool m_set;
+      Optional<Geometry::Polytope::Type> m_geometry;
+  };
+
+  template <class LHSDerived, class RHSDerived, class Range, class Mesh>
+  QuadratureRule(
+    const Dot<
+      ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>,
+      ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>&)
+    -> QuadratureRule<
+        Dot<
+          ShapeFunctionBase<
+            ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>,
+          ShapeFunctionBase<
+            ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>;
+
+  /**
+   * @ingroup QuadratureRuleSpecializations
    * @brief Integration of the anisotropic Dot product of two instances of the
    * P1 ShapeFunction.
    *
@@ -484,8 +722,8 @@ namespace Rodin::Variational
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
-          m_distortion(Math::nan<Real>()),
-          m_weight(Math::nan<Real>()),
+          m_distortion(Math::nan<ScalarType>()),
+          m_weight(Math::nan<ScalarType>()),
           m_set(false)
       {}
 
@@ -493,8 +731,8 @@ namespace Rodin::Variational
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
-          m_distortion(Math::nan<Real>()),
-          m_weight(Math::nan<Real>()),
+          m_distortion(Math::nan<ScalarType>()),
+          m_weight(Math::nan<ScalarType>()),
           m_set(false)
       {}
 
@@ -1250,10 +1488,646 @@ namespace Rodin::Variational
         ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&)
     -> QuadratureRule<
           Dot<ShapeFunctionBase<
-            Mult<
-              FunctionBase<LHSFunctionDerived>,
-              ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>>>,
+           Mult<
+             FunctionBase<LHSFunctionDerived>,
+             ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>>>,
           ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
+
+  /**
+   * @brief Centroid quadrature for a scalar coefficient multiplying a P1 mass
+   * matrix.
+   */
+  template <
+    class CoefficientDerived, class LHSDerived, class RHSDerived,
+    class LHSRange, class RHSRange, class LHSMesh, class RHSMesh>
+  class QuadratureRule<
+    Mult<
+      FunctionBase<CoefficientDerived>,
+      Dot<
+        ShapeFunctionBase<
+          ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>,
+          P1<LHSRange, LHSMesh>, TrialSpace>,
+        ShapeFunctionBase<
+          ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>,
+          P1<RHSRange, RHSMesh>, TestSpace>>>>
+    : public LocalBilinearFormIntegratorBase<
+        typename FormLanguage::Traits<
+          Dot<
+            ShapeFunctionBase<
+              ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>>,
+            ShapeFunctionBase<
+              ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>>>::ScalarType>
+  {
+    public:
+      using LHSFESType = P1<LHSRange, LHSMesh>;
+      using RHSFESType = P1<RHSRange, RHSMesh>;
+
+      using CoefficientType = FunctionBase<CoefficientDerived>;
+
+      using LHSType =
+        ShapeFunctionBase<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>;
+
+      using RHSType =
+        ShapeFunctionBase<ShapeFunction<RHSDerived, RHSFESType, TestSpace>>;
+
+      using InnerIntegrandType = Dot<LHSType, RHSType>;
+      using IntegrandType = Mult<CoefficientType, InnerIntegrandType>;
+
+      using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
+      using ScalarType   = typename FormLanguage::Traits<InnerIntegrandType>::ScalarType;
+
+      using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
+
+      static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
+
+      constexpr
+      QuadratureRule(const IntegrandType& integrand)
+        : Parent(integrand.getRHS().getLHS().getLeaf(), integrand.getRHS().getRHS().getLeaf()),
+          m_integrand(integrand.copy()),
+          m_distortion(Math::nan<Real>()),
+          m_weight(Math::nan<Real>()),
+          m_set(false)
+      {}
+
+      constexpr
+      QuadratureRule(const QuadratureRule& other)
+        : Parent(other),
+          m_integrand(other.m_integrand->copy()),
+          m_distortion(Math::nan<Real>()),
+          m_weight(Math::nan<Real>()),
+          m_set(false)
+      {}
+
+      constexpr
+      QuadratureRule(QuadratureRule&& other)
+        : Parent(std::move(other)),
+          m_integrand(std::move(other.m_integrand)),
+          m_polytope(std::move(other.m_polytope)),
+          m_qf(std::move(other.m_qf)),
+          m_p(std::move(other.m_p)),
+          m_distortion(std::move(other.m_distortion)),
+          m_weight(std::move(other.m_weight)),
+          m_trialBasis(std::move(other.m_trialBasis)),
+          m_testBasis(std::move(other.m_testBasis)),
+          m_matrix(std::move(other.m_matrix)),
+          m_set(std::move(other.m_set)),
+          m_geometry(std::move(other.m_geometry))
+      {}
+
+      constexpr
+      const IntegrandType& getIntegrand() const
+      {
+        assert(m_integrand);
+        return *m_integrand;
+      }
+
+      const Geometry::Polytope& getPolytope() const final override
+      {
+        return m_polytope.value().get();
+      }
+
+      QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
+      {
+        m_polytope = polytope;
+        const auto& geometry = polytope.getGeometry();
+        const bool recompute = !m_set || m_geometry != geometry;
+
+        const auto& integrand = getIntegrand();
+        const auto& coeff = integrand.getLHS();
+        const auto& inner = integrand.getRHS();
+        const auto& lhs = inner.getLHS();
+        const auto& rhs = inner.getRHS();
+        const auto& trialfes = lhs.getFiniteElementSpace();
+        const auto& testfes = rhs.getFiniteElementSpace();
+
+        if (recompute)
+        {
+          m_set = true;
+          m_geometry = geometry;
+
+          m_qf.emplace(geometry);
+          assert(m_qf->getSize() == 1);
+
+          m_p.emplace(polytope, m_qf->getPoint(0));
+          m_weight = m_qf->getWeight(0);
+
+          const auto& rc = m_qf->getPoint(0);
+
+          if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
+          {
+            const P1Element<LHSRangeType> trialfe(geometry);
+            m_trialBasis.resize(trialfe.getCount());
+            for (size_t i = 0; i < trialfe.getCount(); ++i)
+              m_trialBasis[i] = trialfe.getBasis(i)(rc);
+          }
+          else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>)
+          {
+            const P1Element<LHSRangeType> trialfe(geometry, trialfes.getVectorDimension());
+            m_trialBasis.resize(trialfe.getCount());
+            for (size_t i = 0; i < trialfe.getCount(); ++i)
+              m_trialBasis[i] = trialfe.getBasis(i)(rc);
+          }
+          else
+          {
+            assert(false);
+          }
+
+          if (trialfes == testfes)
+          {
+            m_testBasis = m_trialBasis;
+          }
+          else
+          {
+            if constexpr (std::is_same_v<RHSRangeType, ScalarType>)
+            {
+              const P1Element<RHSRangeType> testfe(geometry);
+              m_testBasis.resize(testfe.getCount());
+              for (size_t i = 0; i < testfe.getCount(); ++i)
+                m_testBasis[i] = testfe.getBasis(i)(rc);
+            }
+            else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>)
+            {
+              const P1Element<RHSRangeType> testfe(geometry, testfes.getVectorDimension());
+              m_testBasis.resize(testfe.getCount());
+              for (size_t i = 0; i < testfe.getCount(); ++i)
+                m_testBasis[i] = testfe.getBasis(i)(rc);
+            }
+            else
+            {
+              assert(false);
+            }
+          }
+
+          m_matrix.resize(m_testBasis.size(), m_trialBasis.size());
+        }
+
+        assert(m_p);
+        auto& p = *m_p;
+        p.setPolytope(polytope);
+        m_distortion = p.getDistortion();
+
+        const ScalarType csv = coeff(p);
+
+        const size_t ntr = m_trialBasis.size();
+        const size_t nte = m_testBasis.size();
+
+        for (size_t te = 0; te < nte; ++te)
+          for (size_t tr = 0; tr < ntr; ++tr)
+          {
+            if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
+              m_matrix(te, tr) = csv * m_testBasis[te] * m_trialBasis[tr];
+            else
+              m_matrix(te, tr) = csv * Math::dot(m_testBasis[te], m_trialBasis[tr]);
+          }
+
+        return *this;
+      }
+
+      ScalarType integrate(size_t tr, size_t te) final override
+      {
+        return m_weight * m_distortion * m_matrix(te, tr);
+      }
+
+      virtual Geometry::Region getRegion() const override = 0;
+      virtual QuadratureRule* copy() const noexcept override = 0;
+
+    private:
+      std::unique_ptr<IntegrandType> m_integrand;
+
+      Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
+      Optional<QF::Centroid> m_qf;
+      Optional<Geometry::Point> m_p;
+
+      Real m_distortion;
+      Real m_weight;
+
+      std::vector<LHSRangeType> m_trialBasis;
+      std::vector<RHSRangeType> m_testBasis;
+      Math::Matrix<ScalarType> m_matrix;
+
+      bool m_set;
+      Optional<Geometry::Polytope::Type> m_geometry;
+  };
+
+  template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Range, class Mesh>
+  QuadratureRule(
+    const Mult<
+      FunctionBase<CoefficientDerived>,
+      Dot<
+        ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>,
+        ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&)
+    -> QuadratureRule<
+        Mult<
+          FunctionBase<CoefficientDerived>,
+          Dot<
+            ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>,
+            ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
+
+  /**
+   * @brief Centroid quadrature for the mixed divergence-pressure term
+   * \f$\int (\nabla \cdot u)\, q \f$ with P1 spaces.
+   */
+  template <
+    class LHSDerived, class RHSDerived,
+    class LHSMesh, class RHSMesh>
+  class QuadratureRule<
+    Dot<
+      ShapeFunctionBase<
+        Div<ShapeFunction<LHSDerived, P1<Math::Vector<Real>, LHSMesh>, TrialSpace>>,
+        P1<Math::Vector<Real>, LHSMesh>, TrialSpace>,
+      ShapeFunctionBase<
+        ShapeFunction<RHSDerived, P1<Real, RHSMesh>, TestSpace>,
+        P1<Real, RHSMesh>, TestSpace>>>
+    : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType>
+  {
+    public:
+      using ScalarType = typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType;
+      using TrialFESType = P1<Math::Vector<Real>, LHSMesh>;
+      using TestFESType  = P1<Real, RHSMesh>;
+
+      using LHSType = ShapeFunctionBase<
+        Div<ShapeFunction<LHSDerived, TrialFESType, TrialSpace>>,
+        TrialFESType, TrialSpace>;
+
+      using RHSType = ShapeFunctionBase<
+        ShapeFunction<RHSDerived, TestFESType, TestSpace>,
+        TestFESType, TestSpace>;
+
+      using IntegrandType = Dot<LHSType, RHSType>;
+      using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
+
+      constexpr
+      QuadratureRule(const IntegrandType& integrand)
+        : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
+          m_integrand(integrand.copy()),
+          m_distortion(Math::nan<Real>()),
+          m_weight(Math::nan<Real>()),
+          m_set(false)
+      {}
+
+      constexpr
+      QuadratureRule(const QuadratureRule& other)
+        : Parent(other),
+          m_integrand(other.m_integrand->copy()),
+          m_distortion(Math::nan<Real>()),
+          m_weight(Math::nan<Real>()),
+          m_set(false)
+      {}
+
+      constexpr
+      QuadratureRule(QuadratureRule&& other)
+        : Parent(std::move(other)),
+          m_integrand(std::move(other.m_integrand)),
+          m_polytope(std::move(other.m_polytope)),
+          m_qf(std::move(other.m_qf)),
+          m_p(std::move(other.m_p)),
+          m_distortion(std::move(other.m_distortion)),
+          m_weight(std::move(other.m_weight)),
+          m_trialDiv(std::move(other.m_trialDiv)),
+          m_testBasis(std::move(other.m_testBasis)),
+          m_matrix(std::move(other.m_matrix)),
+          m_set(std::move(other.m_set)),
+          m_geometry(std::move(other.m_geometry))
+      {}
+
+      constexpr
+      const IntegrandType& getIntegrand() const
+      {
+        assert(m_integrand);
+        return *m_integrand;
+      }
+
+      const Geometry::Polytope& getPolytope() const final override
+      {
+        return m_polytope.value().get();
+      }
+
+      QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
+      {
+        m_polytope = polytope;
+        const auto& geometry = polytope.getGeometry();
+        const bool recompute = !m_set || m_geometry != geometry;
+
+        const auto& integrand = getIntegrand();
+        const auto& lhs = integrand.getLHS();
+        const auto& rhs = integrand.getRHS();
+        const auto& trialfes = lhs.getFiniteElementSpace();
+        const auto& testfes  = rhs.getFiniteElementSpace();
+
+        if (recompute)
+        {
+          m_set = true;
+          m_geometry = geometry;
+
+          m_qf.emplace(geometry);
+          assert(m_qf->getSize() == 1);
+
+          m_p.emplace(polytope, m_qf->getPoint(0));
+          m_weight = m_qf->getWeight(0);
+
+          const auto& rc = m_qf->getPoint(0);
+
+          const P1Element<Math::Vector<Real>> trialfe(geometry, trialfes.getVectorDimension());
+          const P1Element<Real> testfe(geometry);
+
+          m_trialDiv.resize(trialfe.getCount());
+          m_testBasis.resize(testfe.getCount());
+          for (size_t i = 0; i < testfe.getCount(); ++i)
+            m_testBasis[i] = testfe.getBasis(i)(rc);
+
+          m_matrix.resize(m_testBasis.size(), m_trialDiv.size());
+
+          // precompute reference gradients for divergence
+          m_refGrad.resize(trialfe.getCount());
+          for (size_t i = 0; i < trialfe.getCount(); ++i)
+          {
+            auto& refg = m_refGrad[i];
+            refg.resize(trialfes.getVectorDimension());
+            for (size_t comp = 0; comp < trialfes.getVectorDimension(); ++comp)
+            {
+              refg[comp].resize(polytope.getDimension());
+              const auto& basis = trialfe.getBasis(i);
+              for (size_t j = 0; j < polytope.getDimension(); ++j)
+                refg[comp](j) = basis.template getDerivative<1>(comp, j)(rc);
+            }
+          }
+        }
+
+        assert(m_p);
+        auto& p = *m_p;
+        p.setPolytope(polytope);
+        m_distortion = p.getDistortion();
+
+        const auto& Jinv = p.getJacobianInverse();
+        const size_t d = polytope.getDimension();
+        const size_t vdim = m_refGrad.empty() ? 0 : m_refGrad.front().size();
+
+        for (size_t i = 0; i < m_refGrad.size(); ++i)
+        {
+          ScalarType div = 0;
+          for (size_t comp = 0; comp < std::min(vdim, d); ++comp)
+          {
+            ScalarType physComp = 0;
+            for (size_t j = 0; j < d; ++j)
+              physComp += Jinv(comp, j) * m_refGrad[i][comp](j);
+            div += physComp;
+          }
+          m_trialDiv[i] = div;
+        }
+
+        const size_t ntr = m_trialDiv.size();
+        const size_t nte = m_testBasis.size();
+        for (size_t te = 0; te < nte; ++te)
+          for (size_t tr = 0; tr < ntr; ++tr)
+            m_matrix(te, tr) = m_testBasis[te] * m_trialDiv[tr];
+
+        return *this;
+      }
+
+      ScalarType integrate(size_t tr, size_t te) final override
+      {
+        return m_weight * m_distortion * m_matrix(te, tr);
+      }
+
+      virtual Geometry::Region getRegion() const override = 0;
+      virtual QuadratureRule* copy() const noexcept override = 0;
+
+    private:
+      std::unique_ptr<IntegrandType> m_integrand;
+
+      Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
+      Optional<QF::Centroid> m_qf;
+      Optional<Geometry::Point> m_p;
+
+      ScalarType m_distortion;
+      ScalarType m_weight;
+
+      std::vector<ScalarType> m_trialDiv;
+      std::vector<ScalarType> m_testBasis;
+      Math::Matrix<ScalarType> m_matrix;
+
+      std::vector<std::vector<Math::SpatialVector<ScalarType>>> m_refGrad;
+
+      bool m_set;
+      Optional<Geometry::Polytope::Type> m_geometry;
+  };
+
+  template <class LHSDerived, class RHSDerived, class LHSMesh, class RHSMesh>
+  QuadratureRule(
+    const Dot<
+      ShapeFunctionBase<
+        Div<ShapeFunction<LHSDerived, P1<Math::Vector<Real>, LHSMesh>, TrialSpace>>>,
+      ShapeFunctionBase<
+        ShapeFunction<RHSDerived, P1<Real, RHSMesh>, TestSpace>>>&)
+    -> QuadratureRule<
+         Dot<
+           ShapeFunctionBase<
+             Div<ShapeFunction<LHSDerived, P1<Math::Vector<Real>, LHSMesh>, TrialSpace>>>,
+           ShapeFunctionBase<
+             ShapeFunction<RHSDerived, P1<Real, RHSMesh>, TestSpace>>>>;
+
+  /**
+   * @brief Centroid quadrature for the transpose divergence term
+   * \f$\int p \, (\nabla \cdot v)\f$ with P1 spaces.
+   */
+  template <
+    class LHSDerived, class RHSDerived,
+    class LHSMesh, class RHSMesh>
+  class QuadratureRule<
+    Dot<
+      ShapeFunctionBase<
+        ShapeFunction<LHSDerived, P1<Real, LHSMesh>, TrialSpace>,
+        P1<Real, LHSMesh>, TrialSpace>,
+      ShapeFunctionBase<
+        Div<ShapeFunction<RHSDerived, P1<Math::Vector<Real>, RHSMesh>, TestSpace>>,
+        P1<Math::Vector<Real>, RHSMesh>, TestSpace>>>
+    : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType>
+  {
+    public:
+      using ScalarType = typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType;
+      using TrialFESType = P1<Real, LHSMesh>;
+      using TestFESType  = P1<Math::Vector<Real>, RHSMesh>;
+
+      using LHSType = ShapeFunctionBase<
+        ShapeFunction<LHSDerived, TrialFESType, TrialSpace>,
+        TrialFESType, TrialSpace>;
+
+      using RHSType = ShapeFunctionBase<
+        Div<ShapeFunction<RHSDerived, TestFESType, TestSpace>>,
+        TestFESType, TestSpace>;
+
+      using IntegrandType = Dot<LHSType, RHSType>;
+      using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
+
+      constexpr
+      QuadratureRule(const IntegrandType& integrand)
+        : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
+          m_integrand(integrand.copy()),
+          m_distortion(Math::nan<Real>()),
+          m_weight(Math::nan<Real>()),
+          m_set(false)
+      {}
+
+      constexpr
+      QuadratureRule(const QuadratureRule& other)
+        : Parent(other),
+          m_integrand(other.m_integrand->copy()),
+          m_distortion(Math::nan<Real>()),
+          m_weight(Math::nan<Real>()),
+          m_set(false)
+      {}
+
+      constexpr
+      QuadratureRule(QuadratureRule&& other)
+        : Parent(std::move(other)),
+          m_integrand(std::move(other.m_integrand)),
+          m_polytope(std::move(other.m_polytope)),
+          m_qf(std::move(other.m_qf)),
+          m_p(std::move(other.m_p)),
+          m_distortion(std::move(other.m_distortion)),
+          m_weight(std::move(other.m_weight)),
+          m_trialBasis(std::move(other.m_trialBasis)),
+          m_testDiv(std::move(other.m_testDiv)),
+          m_matrix(std::move(other.m_matrix)),
+          m_set(std::move(other.m_set)),
+          m_geometry(std::move(other.m_geometry))
+      {}
+
+      constexpr
+      const IntegrandType& getIntegrand() const
+      {
+        assert(m_integrand);
+        return *m_integrand;
+      }
+
+      const Geometry::Polytope& getPolytope() const final override
+      {
+        return m_polytope.value().get();
+      }
+
+      QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
+      {
+        m_polytope = polytope;
+        const auto& geometry = polytope.getGeometry();
+        const bool recompute = !m_set || m_geometry != geometry;
+
+        const auto& integrand = getIntegrand();
+        const auto& lhs = integrand.getLHS();
+        const auto& rhs = integrand.getRHS();
+        const auto& trialfes = lhs.getFiniteElementSpace();
+        const auto& testfes  = rhs.getFiniteElementSpace();
+
+        if (recompute)
+        {
+          m_set = true;
+          m_geometry = geometry;
+
+          m_qf.emplace(geometry);
+          assert(m_qf->getSize() == 1);
+
+          m_p.emplace(polytope, m_qf->getPoint(0));
+          m_weight = m_qf->getWeight(0);
+
+          const auto& rc = m_qf->getPoint(0);
+
+          const P1Element<Real> trialfe(geometry);
+          const P1Element<Math::Vector<Real>> testfe(geometry, testfes.getVectorDimension());
+
+          m_trialBasis.resize(trialfe.getCount());
+          for (size_t i = 0; i < trialfe.getCount(); ++i)
+            m_trialBasis[i] = trialfe.getBasis(i)(rc);
+
+          m_testDiv.resize(testfe.getCount());
+          m_matrix.resize(m_testDiv.size(), m_trialBasis.size());
+
+          m_refGrad.resize(testfe.getCount());
+          for (size_t i = 0; i < testfe.getCount(); ++i)
+          {
+            auto& refg = m_refGrad[i];
+            refg.resize(testfes.getVectorDimension());
+            for (size_t comp = 0; comp < testfes.getVectorDimension(); ++comp)
+            {
+              refg[comp].resize(polytope.getDimension());
+              const auto& basis = testfe.getBasis(i);
+              for (size_t j = 0; j < polytope.getDimension(); ++j)
+                refg[comp](j) = basis.template getDerivative<1>(comp, j)(rc);
+            }
+          }
+        }
+
+        assert(m_p);
+        auto& p = *m_p;
+        p.setPolytope(polytope);
+        m_distortion = p.getDistortion();
+
+        const auto& Jinv = p.getJacobianInverse();
+        const size_t d = polytope.getDimension();
+        const size_t vdim = m_refGrad.empty() ? 0 : m_refGrad.front().size();
+
+        for (size_t i = 0; i < m_refGrad.size(); ++i)
+        {
+          ScalarType div = 0;
+          for (size_t comp = 0; comp < std::min(vdim, d); ++comp)
+          {
+            ScalarType physComp = 0;
+            for (size_t j = 0; j < d; ++j)
+              physComp += Jinv(comp, j) * m_refGrad[i][comp](j);
+            div += physComp;
+          }
+          m_testDiv[i] = div;
+        }
+
+        const size_t ntr = m_trialBasis.size();
+        const size_t nte = m_testDiv.size();
+        for (size_t te = 0; te < nte; ++te)
+          for (size_t tr = 0; tr < ntr; ++tr)
+            m_matrix(te, tr) = m_trialBasis[tr] * m_testDiv[te];
+
+        return *this;
+      }
+
+      ScalarType integrate(size_t tr, size_t te) final override
+      {
+        return m_weight * m_distortion * m_matrix(te, tr);
+      }
+
+      virtual Geometry::Region getRegion() const override = 0;
+      virtual QuadratureRule* copy() const noexcept override = 0;
+
+    private:
+      std::unique_ptr<IntegrandType> m_integrand;
+
+      Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
+      Optional<QF::Centroid> m_qf;
+      Optional<Geometry::Point> m_p;
+
+      ScalarType m_distortion;
+      ScalarType m_weight;
+
+      std::vector<ScalarType> m_trialBasis;
+      std::vector<ScalarType> m_testDiv;
+      Math::Matrix<ScalarType> m_matrix;
+
+      std::vector<std::vector<Math::SpatialVector<ScalarType>>> m_refGrad;
+
+      bool m_set;
+      Optional<Geometry::Polytope::Type> m_geometry;
+  };
+
+  template <class LHSDerived, class RHSDerived, class LHSMesh, class RHSMesh>
+  QuadratureRule(
+    const Dot<
+      ShapeFunctionBase<
+        ShapeFunction<LHSDerived, P1<Real, LHSMesh>, TrialSpace>>,
+      ShapeFunctionBase<
+        Div<ShapeFunction<RHSDerived, P1<Math::Vector<Real>, RHSMesh>, TestSpace>>>&)
+    -> QuadratureRule<
+         Dot<
+           ShapeFunctionBase<
+             ShapeFunction<LHSDerived, P1<Real, LHSMesh>, TrialSpace>>,
+           ShapeFunctionBase<
+             Div<ShapeFunction<RHSDerived, P1<Math::Vector<Real>, RHSMesh>, TestSpace>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations

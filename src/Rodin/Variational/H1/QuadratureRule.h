@@ -9,35 +9,36 @@
 namespace Rodin::Variational
 {
   template <
-    size_t K,
+    size_t KTrial, size_t KTest,
     class LHSDerived, class RHSDerived,
     class Scalar, class Mesh>
   class QuadratureRule<
     Dot<
       ShapeFunctionBase<
-        Grad<ShapeFunction<LHSDerived, H1<K, Scalar, Mesh>, TrialSpace>>,
-        H1<K, Scalar, Mesh>, TrialSpace>,
+        Grad<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+        H1<KTrial, Scalar, Mesh>, TrialSpace>,
       ShapeFunctionBase<
-        Grad<ShapeFunction<RHSDerived, H1<K, Scalar, Mesh>, TestSpace>>,
-        H1<K, Scalar, Mesh>, TestSpace>>>
+        Grad<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
+        H1<KTest, Scalar, Mesh>, TestSpace>>>
     : public LocalBilinearFormIntegratorBase<
         typename FormLanguage::Traits<
           Dot<
             ShapeFunctionBase<
-              Grad<ShapeFunction<LHSDerived, H1<K, Scalar, Mesh>, TrialSpace>>,
-              H1<K, Scalar, Mesh>, TrialSpace>,
+              Grad<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+              H1<KTrial, Scalar, Mesh>, TrialSpace>,
             ShapeFunctionBase<
-              Grad<ShapeFunction<RHSDerived, H1<K, Scalar, Mesh>, TestSpace>>,
-              H1<K, Scalar, Mesh>, TestSpace>>>::ScalarType>
+              Grad<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
+              H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
   {
     public:
-      using FESType = H1<K, Scalar, Mesh>;
+      using TrialFESType = H1<KTrial, Scalar, Mesh>;
+      using TestFESType  = H1<KTest, Scalar, Mesh>;
 
       using LHSType =
-        ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, FESType, TrialSpace>>, FESType, TrialSpace>;
+        ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, TrialFESType, TrialSpace>>, TrialFESType, TrialSpace>;
 
       using RHSType =
-        ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, FESType, TestSpace>>,  FESType, TestSpace>;
+        ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, TestFESType, TestSpace>>,  TestFESType, TestSpace>;
 
       using IntegrandType = Dot<LHSType, RHSType>;
 
@@ -317,58 +318,59 @@ namespace Rodin::Variational
     };
 
   // CTAD helper
-  template <size_t K, class LHSDerived, class RHSDerived, class Scalar, class Mesh>
+  template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived, class Scalar, class Mesh>
   QuadratureRule(
     const Dot<
       ShapeFunctionBase<
-        Grad<ShapeFunction<LHSDerived, H1<K, Scalar, Mesh>, TrialSpace>>,
-        H1<K, Scalar, Mesh>, TrialSpace>,
+        Grad<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+        H1<KTrial, Scalar, Mesh>, TrialSpace>,
       ShapeFunctionBase<
-        Grad<ShapeFunction<RHSDerived, H1<K, Scalar, Mesh>, TestSpace>>,
-        H1<K, Scalar, Mesh>, TestSpace>>&)
+        Grad<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
+        H1<KTest, Scalar, Mesh>, TestSpace>>&)
   -> QuadratureRule<
        Dot<
          ShapeFunctionBase<
-           Grad<ShapeFunction<LHSDerived, H1<K, Scalar, Mesh>, TrialSpace>>,
-           H1<K, Scalar, Mesh>, TrialSpace>,
+           Grad<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+           H1<KTrial, Scalar, Mesh>, TrialSpace>,
          ShapeFunctionBase<
-           Grad<ShapeFunction<RHSDerived, H1<K, Scalar, Mesh>, TestSpace>>,
-           H1<K, Scalar, Mesh>, TestSpace>>>;
+           Grad<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
+           H1<KTest, Scalar, Mesh>, TestSpace>>>;
 
   template <
-    size_t K,
+    size_t KTrial, size_t KTest,
     class LHSDerived, class RHSDerived,
     class Scalar, class Mesh>
   class QuadratureRule<
     Dot<
       ShapeFunctionBase<
-        Jacobian<ShapeFunction<LHSDerived, H1<K, Scalar, Mesh>, TrialSpace>>,
-        H1<K, Scalar, Mesh>, TrialSpace>,
+        Jacobian<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+        H1<KTrial, Scalar, Mesh>, TrialSpace>,
       ShapeFunctionBase<
-        Jacobian<ShapeFunction<RHSDerived, H1<K, Scalar, Mesh>, TestSpace>>,
-        H1<K, Scalar, Mesh>, TestSpace>>>
+        Jacobian<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
+        H1<KTest, Scalar, Mesh>, TestSpace>>>
     : public LocalBilinearFormIntegratorBase<
         typename FormLanguage::Traits<
           Dot<
             ShapeFunctionBase<
-              Jacobian<ShapeFunction<LHSDerived, H1<K, Scalar, Mesh>, TrialSpace>>,
-              H1<K, Scalar, Mesh>, TrialSpace>,
+              Jacobian<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+              H1<KTrial, Scalar, Mesh>, TrialSpace>,
             ShapeFunctionBase<
-              Jacobian<ShapeFunction<RHSDerived, H1<K, Scalar, Mesh>, TestSpace>>,
-              H1<K, Scalar, Mesh>, TestSpace>>>::ScalarType>
+              Jacobian<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
+              H1<KTest, Scalar, Mesh>, TestSpace>>>::ScalarType>
   {
     public:
-      using FESType = H1<K, Scalar, Mesh>;
+      using TrialFESType = H1<KTrial, Scalar, Mesh>;
+      using TestFESType  = H1<KTest, Scalar, Mesh>;
 
       using LHSType =
         ShapeFunctionBase<
-          Jacobian<ShapeFunction<LHSDerived, FESType, TrialSpace>>,
-          FESType, TrialSpace>;
+          Jacobian<ShapeFunction<LHSDerived, TrialFESType, TrialSpace>>,
+          TrialFESType, TrialSpace>;
 
       using RHSType =
         ShapeFunctionBase<
-          Jacobian<ShapeFunction<RHSDerived, FESType, TestSpace>>,
-          FESType, TestSpace>;
+          Jacobian<ShapeFunction<RHSDerived, TestFESType, TestSpace>>,
+          TestFESType, TestSpace>;
 
       using IntegrandType = Dot<LHSType, RHSType>;
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
@@ -461,8 +463,8 @@ namespace Rodin::Variational
 
         // --- infer vdim from your H1Element<K, Math::Vector<Scalar>> convention ---
         // scalarCount is purely geometry+K (no vdim)
-        const H1Element<K, ScalarType> trialScalarElement(polytope.getGeometry());
-        const H1Element<K, ScalarType> testScalarElement(polytope.getGeometry());
+        const H1Element<KTrial, ScalarType> trialScalarElement(polytope.getGeometry());
+        const H1Element<KTest,   ScalarType> testScalarElement(polytope.getGeometry());
         const size_t scalarCount = trialScalarElement.getCount();
 
         assert(scalarCount > 0);
@@ -643,23 +645,23 @@ namespace Rodin::Variational
   };
 
   // CTAD helper
-  template <size_t K, class LHSDerived, class RHSDerived, class Scalar, class Mesh>
+  template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived, class Scalar, class Mesh>
   QuadratureRule(
     const Dot<
       ShapeFunctionBase<
-        Jacobian<ShapeFunction<LHSDerived, H1<K, Scalar, Mesh>, TrialSpace>>,
-        H1<K, Scalar, Mesh>, TrialSpace>,
+        Jacobian<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+        H1<KTrial, Scalar, Mesh>, TrialSpace>,
       ShapeFunctionBase<
-        Jacobian<ShapeFunction<RHSDerived, H1<K, Scalar, Mesh>, TestSpace>>,
-        H1<K, Scalar, Mesh>, TestSpace>>&)
+        Jacobian<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
+        H1<KTest, Scalar, Mesh>, TestSpace>>&)
   -> QuadratureRule<
        Dot<
          ShapeFunctionBase<
-           Jacobian<ShapeFunction<LHSDerived, H1<K, Scalar, Mesh>, TrialSpace>>,
-           H1<K, Scalar, Mesh>, TrialSpace>,
+           Jacobian<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
+           H1<KTrial, Scalar, Mesh>, TrialSpace>,
          ShapeFunctionBase<
-           Jacobian<ShapeFunction<RHSDerived, H1<K, Scalar, Mesh>, TestSpace>>,
-           H1<K, Scalar, Mesh>, TestSpace>>>;
+           Jacobian<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
+           H1<KTest, Scalar, Mesh>, TestSpace>>>;
 }
 
 #endif
