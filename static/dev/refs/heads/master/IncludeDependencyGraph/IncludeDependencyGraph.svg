@@ -5790,7 +5790,7 @@
 <g id="node335" class="node">
 <title>Rodin/Variational/P1/P1Element.hpp</title>
 <ellipse fill="#66c2a5" stroke="black" cx="12212.42" cy="-1332" rx="72" ry="72"/>
-<text text-anchor="middle" x="12212.42" y="-1330.4" font-family="Times,serif" font-size="7.00">Rodin/Variational/P1/P1Element.hpp</text>
+<text text-anchor="middle" x="12212.42" y="-1330.1" font-family="Times,serif" font-size="8.00">Rodin/Variational/P1/P1Element.hpp</text>
 </g>
 <!-- Rodin/Variational/P1/P1Element.h&#45;&gt;Rodin/Variational/P1/P1Element.hpp -->
 <g id="edge923" class="edge">
@@ -5964,7 +5964,7 @@
 <g id="node328" class="node">
 <title>Rodin/Variational/H1/Fekete.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="6096.42" cy="-1728" rx="72" ry="72"/>
-<text text-anchor="middle" x="6096.42" y="-1726.1" font-family="Times,serif" font-size="8.00">Rodin/Variational/H1/Fekete.h</text>
+<text text-anchor="middle" x="6096.42" y="-1726.4" font-family="Times,serif" font-size="7.00">Rodin/Variational/H1/Fekete.h</text>
 </g>
 <!-- Rodin/Variational/H1/H1.h&#45;&gt;Rodin/Variational/H1/Fekete.h -->
 <g id="edge814" class="edge">
@@ -6324,7 +6324,7 @@
 <g id="node211" class="node">
 <title>Rodin/PETSc/Math.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="686.42" cy="-4680" rx="72" ry="72"/>
-<text text-anchor="middle" x="686.42" y="-4678.1" font-family="Times,serif" font-size="8.00">Rodin/PETSc/Math.h</text>
+<text text-anchor="middle" x="686.42" y="-4678.4" font-family="Times,serif" font-size="7.00">Rodin/PETSc/Math.h</text>
 </g>
 <!-- Rodin/PETSc.h&#45;&gt;Rodin/PETSc/Math.h -->
 <g id="edge410" class="edge">
@@ -8700,7 +8700,7 @@
 <g id="node342" class="node">
 <title>Rodin/Variational/H1/WarpBlend.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="5382.42" cy="-1512" rx="72" ry="72"/>
-<text text-anchor="middle" x="5382.42" y="-1510.1" font-family="Times,serif" font-size="8.00">Rodin/Variational/H1/WarpBlend.h</text>
+<text text-anchor="middle" x="5382.42" y="-1510.4" font-family="Times,serif" font-size="7.00">Rodin/Variational/H1/WarpBlend.h</text>
 </g>
 <!-- Rodin/Variational/H1/Fekete.h&#45;&gt;Rodin/Variational/H1/WarpBlend.h -->
 <g id="edge989" class="edge">
