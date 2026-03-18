@@ -46,7 +46,7 @@ target_link_libraries(RodinManufacturedStokes3DSlow
   )
 gtest_discover_tests(RodinManufacturedStokes3DSlow
   PROPERTIES
-    LABELS "manufactured;slow")
+    LABELS slow manufactured)
 
 add_executable(RodinManufacturedH1Poisson Poisson.cpp)
 target_link_libraries(RodinManufacturedH1Poisson
