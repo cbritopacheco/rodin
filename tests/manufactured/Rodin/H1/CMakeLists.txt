@@ -99,6 +99,7 @@ target_link_libraries(RodinManufacturedH1LinearElasticity3D
 set(RodinManufacturedH1LinearElasticity3D_SLOW_TESTS
   "*Manufactured_LinearElasticity3D_H1_Test_8.Manufactured_LinearElasticity3D_H1_2*"
   "*Constant_LinearElasticity3D_H1_Test_16.ConstantSolution_H1_2*")
+list(JOIN RodinManufacturedH1LinearElasticity3D_SLOW_TESTS ":" RodinManufacturedH1LinearElasticity3D_SLOW_TESTS)
 gtest_discover_tests(RodinManufacturedH1LinearElasticity3D
     TEST_FILTER
       "-${RodinManufacturedH1LinearElasticity3D_SLOW_TESTS}"
