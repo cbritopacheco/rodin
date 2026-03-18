@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "Rodin/Variational.h"
+#include "Rodin/Assembly/Default.h"
 #include "Rodin/Geometry/Mesh.h"
 
 using namespace Rodin;
@@ -12,8 +13,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_H1QuadratureRule, MixedOrder_GradGrad_Assembles)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
-    H1<2> fesTr(mesh);
-    H1<1> fesTe(mesh);
+    H1<2, Real> fesTr(std::integral_constant<size_t, 2>{}, mesh);
+    H1<1, Real> fesTe(std::integral_constant<size_t, 1>{}, mesh);
 
     TrialFunction u(fesTr);
     TestFunction v(fesTe);
@@ -32,8 +33,8 @@ namespace Rodin::Tests::Unit
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     const size_t vdim = 2;
-    H1<2, Math::Vector<Real>> fesTr(mesh, vdim);
-    H1<1, Math::Vector<Real>> fesTe(mesh, vdim);
+    H1<2, Math::Vector<Real>> fesTr(std::integral_constant<size_t, 2>{}, mesh, vdim);
+    H1<1, Math::Vector<Real>> fesTe(std::integral_constant<size_t, 1>{}, mesh, vdim);
 
     TrialFunction u(fesTr);
     TestFunction v(fesTe);

@@ -450,8 +450,8 @@ namespace Rodin::Variational
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
-          m_distortion(Math::nan<ScalarType>()),
-          m_weight(Math::nan<ScalarType>()),
+          m_distortion(Math::nan<Real>()),
+          m_weight(Math::nan<Real>()),
           m_set(false)
       {}
 
@@ -459,8 +459,8 @@ namespace Rodin::Variational
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
-          m_distortion(Math::nan<ScalarType>()),
-          m_weight(Math::nan<ScalarType>()),
+          m_distortion(Math::nan<Real>()),
+          m_weight(Math::nan<Real>()),
           m_set(false)
       {}
 
@@ -722,8 +722,8 @@ namespace Rodin::Variational
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
-          m_distortion(Math::nan<ScalarType>()),
-          m_weight(Math::nan<ScalarType>()),
+          m_distortion(Math::nan<Real>()),
+          m_weight(Math::nan<Real>()),
           m_set(false)
       {}
 
@@ -731,8 +731,8 @@ namespace Rodin::Variational
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
-          m_distortion(Math::nan<ScalarType>()),
-          m_weight(Math::nan<ScalarType>()),
+          m_distortion(Math::nan<Real>()),
+          m_weight(Math::nan<Real>()),
           m_set(false)
       {}
 
@@ -1914,18 +1914,18 @@ namespace Rodin::Variational
   };
 
   template <class LHSDerived, class RHSDerived, class LHSMesh, class RHSMesh>
-  QuadratureRule(
-    const Dot<
+  using P1DivTrialIntegrand =
+    Dot<
       ShapeFunctionBase<
-        Div<ShapeFunction<LHSDerived, P1<Math::Vector<Real>, LHSMesh>, TrialSpace>>>,
+        Div<ShapeFunction<LHSDerived, P1<Math::Vector<Real>, LHSMesh>, TrialSpace>>,
+        P1<Math::Vector<Real>, LHSMesh>, TrialSpace>,
       ShapeFunctionBase<
-        ShapeFunction<RHSDerived, P1<Real, RHSMesh>, TestSpace>>>&)
-    -> QuadratureRule<
-         Dot<
-           ShapeFunctionBase<
-             Div<ShapeFunction<LHSDerived, P1<Math::Vector<Real>, LHSMesh>, TrialSpace>>>,
-           ShapeFunctionBase<
-             ShapeFunction<RHSDerived, P1<Real, RHSMesh>, TestSpace>>>>;
+        ShapeFunction<RHSDerived, P1<Real, RHSMesh>, TestSpace>,
+        P1<Real, RHSMesh>, TestSpace>>;
+
+  template <class LHSDerived, class RHSDerived, class LHSMesh, class RHSMesh>
+  QuadratureRule(const P1DivTrialIntegrand<LHSDerived, RHSDerived, LHSMesh, RHSMesh>&)
+    -> QuadratureRule<P1DivTrialIntegrand<LHSDerived, RHSDerived, LHSMesh, RHSMesh>>;
 
   /**
    * @brief Centroid quadrature for the transpose divergence term
@@ -2116,18 +2116,18 @@ namespace Rodin::Variational
   };
 
   template <class LHSDerived, class RHSDerived, class LHSMesh, class RHSMesh>
-  QuadratureRule(
-    const Dot<
+  using P1DivTestIntegrand =
+    Dot<
       ShapeFunctionBase<
-        ShapeFunction<LHSDerived, P1<Real, LHSMesh>, TrialSpace>>,
+        ShapeFunction<LHSDerived, P1<Real, LHSMesh>, TrialSpace>,
+        P1<Real, LHSMesh>, TrialSpace>,
       ShapeFunctionBase<
-        Div<ShapeFunction<RHSDerived, P1<Math::Vector<Real>, RHSMesh>, TestSpace>>>&)
-    -> QuadratureRule<
-         Dot<
-           ShapeFunctionBase<
-             ShapeFunction<LHSDerived, P1<Real, LHSMesh>, TrialSpace>>,
-           ShapeFunctionBase<
-             Div<ShapeFunction<RHSDerived, P1<Math::Vector<Real>, RHSMesh>, TestSpace>>>>;
+        Div<ShapeFunction<RHSDerived, P1<Math::Vector<Real>, RHSMesh>, TestSpace>>,
+        P1<Math::Vector<Real>, RHSMesh>, TestSpace>>;
+
+  template <class LHSDerived, class RHSDerived, class LHSMesh, class RHSMesh>
+  QuadratureRule(const P1DivTestIntegrand<LHSDerived, RHSDerived, LHSMesh, RHSMesh>&)
+    -> QuadratureRule<P1DivTestIntegrand<LHSDerived, RHSDerived, LHSMesh, RHSMesh>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations

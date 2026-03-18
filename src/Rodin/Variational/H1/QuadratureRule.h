@@ -151,7 +151,7 @@ namespace Rodin::Variational
 
         // Symmetry applicability for this specialization:
         const bool symmetric =
-          (&trialfes == &testfes) && (ntr == nte);
+          (&trialfes.getMesh() == &testfes.getMesh()) && (ntr == nte);
         // If you can assert stronger (same FE object / same ordering), do it here.
 
         // Row-major local matrix for fast row writes.
@@ -477,7 +477,7 @@ namespace Rodin::Variational
         const size_t vdim = vdim_tr;
 
         const bool symmetric =
-          (&trialfes == &testfes) && (ntr == nte);
+          (&trialfes.getMesh() == &testfes.getMesh()) && (ntr == nte);
 
         m_mat.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
         m_mat.setZero();
