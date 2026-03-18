@@ -4,9 +4,104 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include "Rodin/Alert/Exception.h"
-#include "Rodin/Alert/Success.h"
-#include "Rodin/Alert/Warning.h"
+
+/**
+ * @example ShapeOptimization/LevelSetCantilever3D.cpp
+ * @brief 3D cantilever shape optimization using level sets, MMG, elasticity, and XDMF output.
+ *
+ * This example solves a compliance minimization problem with volume
+ * penalization using a level-set representation of the domain.
+ *
+ * The algorithm combines:
+ *  - linear elasticity for the state equation,
+ *  - a Hilbert-regularized shape gradient,
+ *  - signed-distance reconstruction of the level set,
+ *  - semi-Lagrangian level set advection,
+ *  - remeshing with MMG,
+ *  - transient XDMF output for visualization.
+ *
+ * At each optimization iteration the program:
+ *  1. optimizes the current mesh with MMG,
+ *  2. computes the required mesh connectivity,
+ *  3. trims the exterior subdomain,
+ *  4. reconstructs a signed-distance function,
+ *  5. solves the elasticity state equation,
+ *  6. computes a regularized shape gradient,
+ *  7. advects the level set function,
+ *  8. writes XDMF snapshots for visualization,
+ *  9. reconstructs the domain with MMG,
+ * 10. evaluates and records the objective.
+ *
+ * The objective recorded in @c obj.txt is
+ *
+ * @f[
+ *   J(\Omega) = \text{compliance}(\Omega) + \ell |\Omega|
+ * @f]
+ *
+ * where @f$\ell@f$ is the volume penalization parameter.
+ *
+ * @section input Input mesh
+ *
+ * The program expects the initial mesh:
+ *
+ * @code
+ * ../resources/examples/ShapeOptimization/LevelSetCantilever3D.medit.mesh
+ * @endcode
+ *
+ * This mesh contains:
+ *  - interior and exterior region labels,
+ *  - boundary attributes for Dirichlet and Neumann boundaries.
+ *
+ * @section usage Usage
+ *
+ * Build the Rodin examples and run for instance:
+ *
+ * @code
+ * ./examples/ShapeOptimization/LevelSetCantilever3D
+ * @endcode
+ *
+ * @section output Output files
+ *
+ * During the optimization the following files are produced:
+ *
+ * - @c Omega0.mesh              : initial mesh
+ * - @c Optimized.mesh           : mesh after MMG optimization
+ * - @c Trimmed.mesh             : mesh restricted to the current domain
+ * - @c State.mesh               : mesh used for the elasticity solve
+ * - @c State.gf                 : displacement field
+ * - @c dJ.mesh                  : mesh used for the shape gradient
+ * - @c dJ.gf                    : regularized shape gradient
+ * - @c Distance.mesh            : mesh for the signed-distance field
+ * - @c Distance.gf              : signed-distance function
+ * - @c Advect.mesh              : mesh used for the advected level set
+ * - @c Advect.gf                : advected level-set function
+ * - @c Omega.mesh               : reconstructed domain
+ * - @c out/ShapeOptimization3D.xdmf : transient XDMF output
+ * - @c obj.txt                  : objective history
+ *
+ * The XDMF output contains:
+ * - a @c domain grid on the full evolving mesh with:
+ *   - @c dJ
+ *   - @c dist
+ *   - @c advect
+ * - a @c state grid on the trimmed mesh with:
+ *   - @c u
+ *
+ * @section notes Notes
+ *
+ * - MMG is used both for mesh optimization and level-set discretization.
+ * - If remeshing fails at some iteration, the algorithm reduces @c hmax
+ *   and retries with a finer mesh.
+ * - The elasticity and Hilbert-extension problems are solved with the
+ *   conjugate-gradient solver.
+ * - The XDMF output is intended for temporal visualization of the optimization.
+ */
+
+#include <Rodin/Alert/Exception.h>
+#include <Rodin/Alert/Success.h>
+#include <Rodin/Alert/Warning.h>
+
+#include <Rodin/IO/XDMF.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Assembly.h>
@@ -18,7 +113,6 @@
 using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
-
 
 // Define interior and exterior for level set discretization
 static constexpr Attribute Interior = 3, Exterior = 2;
@@ -57,7 +151,7 @@ Real compliance(const GridFunction<FES, Data>& w)
   bf = LinearElasticityIntegral(u, v)(lambda, mu);
   bf.assemble();
   return bf(w, w);
-};
+}
 
 int main(int, char**)
 {
@@ -70,8 +164,17 @@ int main(int, char**)
   P1 sh(th);
 
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
-
   th.save("Omega0.mesh", IO::FileFormat::MEDIT);
+
+  // --------------------------------------------------------------------------
+  // XDMF output
+  // --------------------------------------------------------------------------
+  IO::XDMF xdmf("out/ShapeOptimization3D");
+
+  auto domain = xdmf.grid("domain");
+  domain.setMesh(th, IO::XDMF::MeshPolicy::Transient);
+
+  auto state = xdmf.grid("state");
 
   // Optimization loop
   std::vector<double> obj;
@@ -80,7 +183,6 @@ int main(int, char**)
   while (i < maxIt)
   {
     Alert::Info() << "----- Iteration: " << i << Alert::Raise;
-
     Alert::Info() << "   | Optimizing the domain..." << Alert::Raise;
 
     try
@@ -100,7 +202,8 @@ int main(int, char**)
       hmax /= 2;
       hmin = 0.1 * hmax;
       Alert::Warning() << "Mesh optimization failed at iteration " << i
-        << ". Reducing hmax to " << hmax << " and retrying." << Alert::Raise;
+                       << ". Reducing hmax to " << hmax
+                       << " and retrying." << Alert::Raise;
       continue;
     }
 
@@ -202,6 +305,23 @@ int main(int, char**)
     th.save("Advect.mesh", IO::FileFormat::MFEM);
     advect.getSolution().save("Advect.gf", IO::FileFormat::MFEM);
 
+    // ------------------------------------------------------------------------
+    // XDMF snapshot for the current iteration
+    // ------------------------------------------------------------------------
+
+    // Full evolving mesh th
+    domain.clear();
+    domain.add("dJ", dJ, IO::XDMF::Center::Node);
+    domain.add("dist", dist, IO::XDMF::Center::Node);
+    domain.add("advect", advect.getSolution(), IO::XDMF::Center::Node);
+
+    // Trimmed mesh and state field
+    state.clear();
+    state.setMesh(trimmed, IO::XDMF::MeshPolicy::Transient);
+    state.add("u", u.getSolution(), IO::XDMF::Center::Node);
+
+    xdmf.write(i).flush();
+
     // Recover the implicit domain
     Alert::Info() << "   | Meshing the domain." << Alert::Raise;
     try
@@ -223,17 +343,18 @@ int main(int, char**)
       hmax /= 2;
       hmin = 0.1 * hmax;
       Alert::Warning() << "Meshing failed at iteration " << i
-        << ". Reducing hmax to " << hmax << " and retrying." << Alert::Raise;
+                       << ". Reducing hmax to " << hmax
+                       << " and retrying." << Alert::Raise;
       continue;
     }
 
     i++;
-
     th.save("Omega.mesh", IO::FileFormat::MEDIT);
   }
+
+  xdmf.close();
 
   Alert::Success() << "Saved final mesh to Omega.mesh" << Alert::Raise;
 
   return 0;
 }
-

@@ -7,7 +7,7 @@
 
 /**
  * @example PETSc/ShapeOptimization/LevelSetCantilever3D.cpp
- * @brief 3D cantilever shape optimization using level sets, PETSc, and MMG.
+ * @brief 3D cantilever shape optimization using level sets, PETSc, MMG, and XDMF output.
  *
  * This example solves a compliance minimization problem with volume
  * penalization using a level-set representation of the domain.
@@ -17,7 +17,8 @@
  *  - a Hilbert-regularized shape gradient,
  *  - signed-distance reconstruction of the level set,
  *  - semi-Lagrangian level set advection,
- *  - remeshing with MMG.
+ *  - remeshing with MMG,
+ *  - transient XDMF output for visualization.
  *
  * At each optimization iteration the program:
  *  1. optimizes the current mesh with MMG,
@@ -26,7 +27,8 @@
  *  4. computes a regularized shape gradient,
  *  5. advects the level set function,
  *  6. reconstructs the domain using MMG,
- *  7. evaluates the objective.
+ *  7. evaluates the objective,
+ *  8. writes XDMF snapshots for visualization.
  *
  * The objective recorded in @c obj.txt is
  *
@@ -71,19 +73,28 @@
  *
  * During the optimization the following files are produced:
  *
- * - @c Omega0.mesh      : initial mesh
- * - @c Optimized.mesh   : mesh after MMG optimization
- * - @c Trimmed.mesh     : mesh restricted to the current domain
- * - @c State.mesh       : mesh used for the elasticity solve
- * - @c State.gf         : displacement field
- * - @c dJ.mesh          : mesh used for the shape gradient
- * - @c dJ.gf            : regularized shape gradient
- * - @c Distance.mesh    : mesh for the signed-distance field
- * - @c Distance.gf      : signed-distance function
- * - @c Advect.mesh      : mesh after advection
- * - @c Advect.gf        : advected level set
- * - @c Omega.mesh       : reconstructed domain
- * - @c obj.txt          : objective history
+ * - @c Omega0.mesh            : initial mesh
+ * - @c Optimized.mesh         : mesh after MMG optimization
+ * - @c Trimmed.mesh           : mesh restricted to the current domain
+ * - @c State.mesh             : mesh used for the elasticity solve
+ * - @c State.gf               : displacement field
+ * - @c dJ.mesh                : mesh used for the shape gradient
+ * - @c dJ.gf                  : regularized shape gradient
+ * - @c Distance.mesh          : mesh for the signed-distance field
+ * - @c Distance.gf            : signed-distance function
+ * - @c Advect.mesh            : mesh after advection
+ * - @c Advect.gf              : advected level set
+ * - @c out/Omega.<it>.mesh    : trimmed mesh history in MEDIT format
+ * - @c out/ShapeOptimization3D.xdmf : transient XDMF output
+ * - @c obj.txt                : objective history
+ *
+ * The XDMF output contains:
+ * - a @c domain grid on the full evolving mesh with:
+ *   - @c dJ
+ *   - @c dist
+ *   - @c advect
+ * - a @c state grid on the trimmed mesh with:
+ *   - @c u
  *
  * @section notes Notes
  *
@@ -91,12 +102,12 @@
  * - MMG is used for mesh optimization and level-set discretization.
  * - If remeshing fails at some iteration, the algorithm reduces @c hmax
  *   and retries with a finer mesh.
- * - For visualization, the mesh and grid functions can be opened with
- *   tools supporting the MEDIT format.
+ * - The XDMF output is intended for temporal visualization of the optimization.
  */
 
 #include <Rodin/MMG.h>
 #include <Rodin/PETSc.h>
+#include <Rodin/IO/XDMF.h>
 
 #include <Rodin/Solver.h>
 #include <Rodin/Assembly.h>
@@ -128,9 +139,9 @@ static constexpr Real eps = 1e-12;
 static constexpr Real hgrad = 1.6;
 static constexpr Real ell = 0.1;
 static Real elementStep = 0.5;
-static Real hmax0 = 0.1;
+static Real hmax0 = 0.5;
 static Real hmax = hmax0;
-static Real hmin = 0.1 * hmax;
+static Real hmin = 0.01 * hmax;
 static Real hausd = 0.1 * hmin;
 static size_t hmaxIt = maxIt / 2;
 const Real k = 0.5;
@@ -166,6 +177,16 @@ int main(int argc, char** argv)
   Alert::Info() << "Saved initial mesh to Omega0.mesh" << Alert::Raise;
   th.save("Omega0.mesh", IO::FileFormat::MEDIT);
 
+  // --------------------------------------------------------------------------
+  // XDMF output
+  // --------------------------------------------------------------------------
+  IO::XDMF xdmf("out/ShapeOptimization3D");
+
+  auto domain = xdmf.grid("domain");
+  domain.setMesh(th, IO::XDMF::MeshPolicy::Transient);
+
+  auto state = xdmf.grid("state");
+
   // Optimization loop
   std::vector<double> obj;
   std::ofstream fObj("obj.txt");
@@ -190,7 +211,7 @@ int main(int argc, char** argv)
     catch (const Alert::Exception& e)
     {
       hmax /= 2;
-      hmin = 0.1 * hmax;
+      hmin = 0.01 * hmax;
       Alert::Warning() << "Mesh optimization failed at iteration " << i
                        << ". Reducing hmax to " << hmax
                        << " and retrying." << Alert::Raise;
@@ -292,6 +313,23 @@ int main(int argc, char** argv)
     th.save("Advect.mesh", IO::FileFormat::MFEM);
     advect.getSolution().save("Advect.gf", IO::FileFormat::MFEM);
 
+    // ------------------------------------------------------------------------
+    // XDMF snapshot for the current iteration
+    // ------------------------------------------------------------------------
+
+    // Full evolving mesh
+    domain.clear();
+    domain.add("dJ", dJ, IO::XDMF::Center::Node);
+    domain.add("dist", dist, IO::XDMF::Center::Node);
+    domain.add("advect", advect.getSolution(), IO::XDMF::Center::Node);
+
+    // Trimmed mesh and state field
+    state.clear();
+    state.setMesh(trimmed, IO::XDMF::MeshPolicy::Transient);
+    state.add("u", u.getSolution(), IO::XDMF::Center::Node);
+
+    xdmf.write(i).flush();
+
     // Recover the implicit domain
     Alert::Info() << "   | Meshing the domain." << Alert::Raise;
     try
@@ -306,12 +344,12 @@ int main(int argc, char** argv)
                                      .discretize(advect.getSolution());
 
       hmax = hmax0;
-      hmin = 0.1 * hmax;
+      hmin = 0.01 * hmax;
     }
     catch (const Alert::Exception& e)
     {
       hmax /= 2;
-      hmin = 0.1 * hmax;
+      hmin = 0.01 * hmax;
       Alert::Warning() << "Meshing failed at iteration " << i
                        << ". Reducing hmax to " << hmax
                        << " and retrying." << Alert::Raise;
@@ -322,6 +360,8 @@ int main(int argc, char** argv)
 
     i++;
   }
+
+  xdmf.close();
 
   Alert::Success() << "Saved final mesh to Omega.mesh" << Alert::Raise;
 
