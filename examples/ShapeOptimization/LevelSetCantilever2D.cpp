@@ -4,6 +4,97 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @example ShapeOptimization/LevelSetCantilever2D.cpp
+ * @brief 2D cantilever shape optimization using level sets, MMG, elasticity, and XDMF output.
+ *
+ * This example solves a compliance minimization problem with area penalization
+ * using a level-set representation of the domain.
+ *
+ * The algorithm combines:
+ *  - linear elasticity for the state equation,
+ *  - a Hilbert-regularized shape gradient,
+ *  - signed-distance reconstruction of the level set,
+ *  - semi-Lagrangian level set advection,
+ *  - remeshing with MMG,
+ *  - transient XDMF output for visualization.
+ *
+ * At each optimization iteration the program:
+ *  1. optimizes the current mesh with MMG,
+ *  2. trims the exterior subdomain,
+ *  3. solves the elasticity state equation,
+ *  4. computes a regularized shape gradient,
+ *  5. reconstructs a signed-distance function,
+ *  6. advects the level set,
+ *  7. reconstructs the domain with MMG,
+ *  8. evaluates the objective,
+ *  9. writes XDMF snapshots for visualization.
+ *
+ * The objective recorded in @c obj.txt is
+ *
+ * @f[
+ *   J(\Omega) = \text{compliance}(\Omega) + \ell |\Omega|
+ * @f]
+ *
+ * where @f$\ell@f$ is the area penalization parameter.
+ *
+ * @section input Input mesh
+ *
+ * The program expects the initial mesh:
+ *
+ * @code
+ * ../resources/examples/ShapeOptimization/LevelSetCantilever2D.mfem.mesh
+ * @endcode
+ *
+ * This mesh contains:
+ *  - interior and exterior region labels,
+ *  - boundary attributes for Dirichlet and Neumann boundaries.
+ *
+ * @section usage Usage
+ *
+ * Build the Rodin examples and run for instance:
+ *
+ * @code
+ * ./examples/ShapeOptimization/LevelSetCantilever2D
+ * @endcode
+ *
+ * @section output Output files
+ *
+ * During the optimization the following files are produced:
+ *
+ * - @c Omega0.mesh              : initial mesh after the first MMG optimization
+ * - @c Omega.mesh               : trimmed domain mesh in MFEM format
+ * - @c State.mesh               : mesh used for the elasticity solve
+ * - @c State.gf                 : displacement field
+ * - @c dJ.mesh                  : mesh used for the shape gradient
+ * - @c dJ.gf                    : regularized shape gradient
+ * - @c Distance.mesh            : mesh for the signed-distance field
+ * - @c Distance.gf              : signed-distance function
+ * - @c Advect.mesh              : mesh used for the advected level set
+ * - @c Advect.gf                : advected level-set function
+ * - @c out/Omega.<it>.mesh      : domain history in MEDIT format
+ * - @c out/ShapeOptimization.xdmf : transient XDMF output
+ * - @c obj.txt                  : objective history
+ *
+ * The XDMF output contains:
+ * - a @c domain grid on the full evolving mesh with:
+ *   - @c dJ
+ *   - @c dist
+ *   - @c advect
+ * - a @c state grid on the trimmed mesh with:
+ *   - @c u
+ *
+ * @section notes Notes
+ *
+ * - MMG is used both for mesh optimization and level-set discretization.
+ * - If remeshing fails at some iteration, the algorithm reduces @c hmax
+ *   and retries with a finer mesh.
+ * - The elasticity and Hilbert-extension problems are solved with the
+ *   conjugate-gradient solver.
+ * - The XDMF output is intended for temporal visualization of the optimization.
+ */
+
 #include <Rodin/Geometry/Region.h>
 #include <Rodin/IO/ForwardDecls.h>
 #include <Rodin/IO/XDMF.h>

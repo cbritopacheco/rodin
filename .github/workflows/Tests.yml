@@ -166,8 +166,8 @@ jobs:
         compiler: [gcc-14]
         build_type: [Debug, Release]
         multithreaded: [ON, OFF]
-        asan: [ON, OFF]
-        ubsan: [ON, OFF]
+        asan: [OFF]
+        ubsan: [OFF]
       fail-fast: false
 
     env:

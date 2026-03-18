@@ -22,7 +22,7 @@ target_link_libraries(RodinManufacturedPoisson3D
   Rodin::Solver
 )
 set(RodinManufacturedPoisson3D_SLOW_TESTS
-  "Manufactured_Poisson3D_Test_32.VectorPoisson3D_SimpleSine:Manufactured_Poisson3D_Test_32.VectorPoisson3D_NonhomogeneousDirichlet")
+  "*Manufactured_Poisson3D_Test_32.VectorPoisson3D_SimpleSine*:*Manufactured_Poisson3D_Test_32.VectorPoisson3D_NonhomogeneousDirichlet*")
 gtest_discover_tests(RodinManufacturedPoisson3D
   TEST_FILTER
     "-${RodinManufacturedPoisson3D_SLOW_TESTS}"
@@ -33,7 +33,7 @@ gtest_discover_tests(RodinManufacturedPoisson3D
   TEST_FILTER
     "${RodinManufacturedPoisson3D_SLOW_TESTS}"
   PROPERTIES
-    LABELS "manufactured;slow"
+    LABELS slow manufactured
 )
 
 add_executable(RodinManufacturedNonLinearPoisson NonLinearPoisson.cpp)
@@ -158,7 +158,7 @@ target_link_libraries(RodinManufacturedLinearElasticity3D
   Rodin::Solver
 )
 set(RodinManufacturedLinearElasticity3D_SLOW_TESTS
-  "Tetra32.MixedComponents_Tetrahedron")
+  "*MixedComponents_Tetrahedron*")
 gtest_discover_tests(RodinManufacturedLinearElasticity3D
   TEST_FILTER
     "-${RodinManufacturedLinearElasticity3D_SLOW_TESTS}"
@@ -169,5 +169,5 @@ gtest_discover_tests(RodinManufacturedLinearElasticity3D
   TEST_FILTER
     "${RodinManufacturedLinearElasticity3D_SLOW_TESTS}"
   PROPERTIES
-    LABELS "manufactured;slow"
+    LABELS slow manufactured
 )
