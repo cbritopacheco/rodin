@@ -34,5 +34,5 @@ gtest_discover_tests(RodinManufacturedAdvectionLagrangian3DTest
   TEST_FILTER
     "${RodinManufacturedAdvectionLagrangian3DTest_SLOW_TESTS}"
   PROPERTIES
-    LABELS "manufactured\;slow"
+    LABELS slow manufactured
 )

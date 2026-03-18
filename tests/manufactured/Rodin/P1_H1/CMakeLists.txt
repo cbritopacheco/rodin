@@ -21,5 +21,5 @@ gtest_discover_tests(RodinManufacturedP1H1Mixed
   TEST_FILTER
     "${RodinManufacturedP1H1Mixed_SLOW_TESTS}"
   PROPERTIES
-    LABELS "manufactured\;slow"
+    LABELS slow manufactured
 )

@@ -20,7 +20,7 @@ gtest_discover_tests(RodinManufacturedStokes
   TEST_FILTER
     "${RodinManufacturedStokes_SLOW_TESTS}"
   PROPERTIES
-    LABELS "manufactured\;slow")
+    LABELS slow manufactured)
 
 add_executable(RodinManufacturedStokes3D Stokes3D.cpp)
 target_link_libraries(RodinManufacturedStokes3D
@@ -85,7 +85,7 @@ gtest_discover_tests(RodinManufacturedH1Poisson3D
     TEST_FILTER
       "${RodinManufacturedH1Poisson3D_SLOW_TESTS}"
     PROPERTIES
-      LABELS "manufactured\;slow")
+      LABELS slow manufactured)
 
 add_executable(RodinManufacturedH1LinearElasticity3D LinearElasticity3D.cpp)
 target_link_libraries(RodinManufacturedH1LinearElasticity3D
@@ -109,7 +109,7 @@ gtest_discover_tests(RodinManufacturedH1LinearElasticity3D
     TEST_FILTER
       "${RodinManufacturedH1LinearElasticity3D_SLOW_TESTS}"
     PROPERTIES
-      LABELS "manufactured\;slow")
+      LABELS slow manufactured)
 
 add_executable(RodinManufacturedH1NavierStokes NavierStokes.cpp)
 target_link_libraries(RodinManufacturedH1NavierStokes
@@ -146,4 +146,4 @@ gtest_discover_tests(RodinManufacturedH1NavierStokes3D
     TEST_FILTER
     "${RodinManufacturedH1NavierStokes3D_SLOW_TESTS}"
     PROPERTIES
-    LABELS "manufactured\;slow")
+    LABELS slow manufactured)

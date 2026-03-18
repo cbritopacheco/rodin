@@ -33,7 +33,7 @@ gtest_discover_tests(RodinManufacturedPoisson3D
   TEST_FILTER
     "${RodinManufacturedPoisson3D_SLOW_TESTS}"
   PROPERTIES
-    LABELS "manufactured\;slow"
+    LABELS slow manufactured
 )
 
 add_executable(RodinManufacturedNonLinearPoisson NonLinearPoisson.cpp)
@@ -169,5 +169,5 @@ gtest_discover_tests(RodinManufacturedLinearElasticity3D
   TEST_FILTER
     "${RodinManufacturedLinearElasticity3D_SLOW_TESTS}"
   PROPERTIES
-    LABELS "manufactured\;slow"
+    LABELS slow manufactured
 )
