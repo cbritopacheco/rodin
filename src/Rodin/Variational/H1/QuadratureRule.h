@@ -30,6 +30,7 @@ namespace Rodin::Variational
       using FESType = H1<K, Scalar, Mesh>;
       using IntegrandType =
         ShapeFunctionBase<ShapeFunction<NestedDerived, FESType, TestSpace>, FESType, TestSpace>;
+      using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
       using Parent = LinearFormIntegratorBase<ScalarType>;
 
@@ -125,8 +126,27 @@ namespace Rodin::Variational
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
-          for (size_t local = 0; local < nte; ++local)
-            m_vec(local) += wdet * tab.getBasis(qp, local);
+          if constexpr (std::is_same_v<IntegrandRangeType, ScalarType>)
+          {
+            for (size_t local = 0; local < nte; ++local)
+              m_vec(local) += wdet * tab.getBasis(qp, local);
+          }
+          else if constexpr (std::is_same_v<IntegrandRangeType, Math::Vector<ScalarType>>)
+          {
+            const size_t scalarCount = scalarFE.getCount();
+            const size_t vdim = fes.getVectorDimension();
+            assert(nte == scalarCount * vdim);
+
+            for (size_t local = 0; local < nte; ++local)
+            {
+              const size_t scalarLocal = local / vdim;
+              m_vec(local) += wdet * tab.getBasis(qp, scalarLocal);
+            }
+          }
+          else
+          {
+            assert(false);
+          }
         }
 
         return *this;
@@ -301,8 +321,28 @@ namespace Rodin::Variational
 
           const LHSRangeType fval = f(p);
 
-          for (size_t local = 0; local < nte; ++local)
-            m_vec(local) += wdet * fval * tab.getBasis(qp, local);
+          if constexpr (std::is_same_v<RHSRangeType, ScalarType>)
+          {
+            for (size_t local = 0; local < nte; ++local)
+              m_vec(local) += wdet * fval * tab.getBasis(qp, local);
+          }
+          else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>)
+          {
+            const size_t scalarCount = scalarFE.getCount();
+            const size_t vdim = fes.getVectorDimension();
+            assert(nte == scalarCount * vdim);
+
+            for (size_t local = 0; local < nte; ++local)
+            {
+              const size_t scalarLocal = local / vdim;
+              const size_t comp = local % vdim;
+              m_vec(local) += wdet * fval.coeff(comp) * tab.getBasis(qp, scalarLocal);
+            }
+          }
+          else
+          {
+            assert(false);
+          }
         }
 
         return *this;
