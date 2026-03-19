@@ -1494,8 +1494,25 @@ namespace Rodin::Variational
           ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
 
   /**
-   * @brief Centroid quadrature for a scalar coefficient multiplying a P1 mass
-   * matrix.
+   * @ingroup QuadratureRuleSpecializations
+   * @brief Specialization for @f$\int c \, (u \cdot v) \ dx@f$ in the case of P1 shape functions.
+   *
+   * This class represents the CTAD for the expression:
+   * @f[
+   * \int c \, (u \cdot v) \ dx \: ,
+   * @f]
+   * where @f$ u, v \in \mathbb{P}_1 @f$ and @f$ c @f$ is a coefficient function.
+   *
+   * Judgement
+   * ---------
+   *
+   * The following judgement specifies that the expression is a well formed type
+   * of QuadratureRule.
+   * @f[
+   * \dfrac
+   * {\vdash \int c \, (u \cdot v) \ dx : \texttt{QuadratureRule}}
+   * {\vdash u, v : \mathbb{P}_1}
+   * @f]
    */
   template <
     class CoefficientDerived, class LHSDerived, class RHSDerived,
@@ -1725,8 +1742,25 @@ namespace Rodin::Variational
             ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
 
   /**
-   * @brief Centroid quadrature for the mixed divergence-pressure term
-   * \f$\int (\nabla \cdot u)\, q \f$ with P1 spaces.
+   * @ingroup QuadratureRuleSpecializations
+   * @brief Specialization for @f$\int (\nabla \cdot u)\, q \ dx@f$ in the case of P1 shape functions.
+   *
+   * This class represents the CTAD for the expression:
+   * @f[
+   * \int (\nabla \cdot u)\, q \ dx \: ,
+   * @f]
+   * where @f$ u \in \mathbb{P}_1 @f$ (vector-valued) and @f$ q \in \mathbb{P}_1 @f$ (scalar-valued).
+   *
+   * Judgement
+   * ---------
+   *
+   * The following judgement specifies that the expression is a well formed type
+   * of QuadratureRule.
+   * @f[
+   * \dfrac
+   * {\vdash \int (\nabla \cdot u)\, q \ dx : \texttt{QuadratureRule}}
+   * {\vdash u, q : \mathbb{P}_1}
+   * @f]
    */
   template <
     class LHSDerived, class RHSDerived,
@@ -1928,8 +1962,25 @@ namespace Rodin::Variational
     -> QuadratureRule<P1DivTrialIntegrand<LHSDerived, RHSDerived, LHSMesh, RHSMesh>>;
 
   /**
-   * @brief Centroid quadrature for the transpose divergence term
-   * \f$\int p \, (\nabla \cdot v)\f$ with P1 spaces.
+   * @ingroup QuadratureRuleSpecializations
+   * @brief Specialization for @f$\int p \, (\nabla \cdot v)\, dx@f$ in the case of P1 shape functions.
+   *
+   * This class represents the CTAD for the expression:
+   * @f[
+   * \int p \, (\nabla \cdot v)\, dx \: ,
+   * @f]
+   * where @f$ p \in \mathbb{P}_1 @f$ (scalar-valued) and @f$ v \in \mathbb{P}_1 @f$ (vector-valued).
+   *
+   * Judgement
+   * ---------
+   *
+   * The following judgement specifies that the expression is a well formed type
+   * of QuadratureRule.
+   * @f[
+   * \dfrac
+   * {\vdash \int p \, (\nabla \cdot v)\, dx : \texttt{QuadratureRule}}
+   * {\vdash p, v : \mathbb{P}_1}
+   * @f]
    */
   template <
     class LHSDerived, class RHSDerived,
@@ -2758,7 +2809,25 @@ namespace Rodin::Variational
         Jacobian<ShapeFunction<RHSDerived, P1<Math::Vector<Real>, Mesh>, TestSpace>>>>>;
 
   /**
-   * @brief Potential operator specialization evaluated at the centroid pair.
+   * @ingroup QuadratureRuleSpecializations
+   * @brief Specialization for @f$\int \mathcal{K}(u) \cdot v@f$ in the case of P1 trial/test shape functions.
+   *
+   * This class represents the CTAD for the expression:
+   * @f[
+   * \int \mathcal{K}(u) \cdot v \: ,
+   * @f]
+   * where @f$ u, v \in \mathbb{P}_1 @f$ and @f$\mathcal{K}@f$ is a potential kernel operator.
+   *
+   * Judgement
+   * ---------
+   *
+   * The following judgement specifies that the expression is a well formed type
+   * of QuadratureRule.
+   * @f[
+   * \dfrac
+   * {\vdash \int \mathcal{K}(u) \cdot v : \texttt{QuadratureRule}}
+   * {\vdash u, v : \mathbb{P}_1}
+   * @f]
    *
    * When the trial and test polytopes coincide, triangles use the optimized
    * six-point construction; all other geometries fall back to a single centroid

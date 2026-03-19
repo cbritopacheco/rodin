@@ -12,9 +12,27 @@
 
 namespace Rodin::Variational
 {
-  // --------------------------------------------------------------------------
-  // Specialization #1: Linear form — ∫ v dx (H1 test function)
-  // --------------------------------------------------------------------------
+  /**
+   * @ingroup QuadratureRuleSpecializations
+   * @brief Specialization for @f$\int v \ dx@f$ with an H1 test shape function.
+   *
+   * This class represents the CTAD for the expression:
+   * @f[
+   * \int v \ dx \: ,
+   * @f]
+   * where @f$ v @f$ is an H1 shape function of order @f$K@f$.
+   *
+   * Judgement
+   * ---------
+   *
+   * The following judgement specifies that the expression is a well formed type
+   * of QuadratureRule.
+   * @f[
+   * \dfrac
+   * {\vdash \int v \ dx : \texttt{QuadratureRule}}
+   * {\vdash v : \texttt{H1}<K>}
+   * @f]
+   */
   template <size_t K, class NestedDerived, class Scalar, class Mesh>
   class QuadratureRule<
     ShapeFunctionBase<
@@ -187,9 +205,27 @@ namespace Rodin::Variational
           ShapeFunction<NestedDerived, H1<K, Scalar, Mesh>, TestSpace>,
           H1<K, Scalar, Mesh>, TestSpace>>;
 
-  // --------------------------------------------------------------------------
-  // Specialization #2: Linear form — ∫ f·v dx (H1 test function)
-  // --------------------------------------------------------------------------
+  /**
+   * @ingroup QuadratureRuleSpecializations
+   * @brief Specialization for @f$\int f \cdot v \ dx@f$ with an H1 test shape function.
+   *
+   * This class represents the CTAD for the expression:
+   * @f[
+   * \int f \cdot v \ dx \: ,
+   * @f]
+   * where @f$ v @f$ is an H1 shape function of order @f$K@f$.
+   *
+   * Judgement
+   * ---------
+   *
+   * The following judgement specifies that the expression is a well formed type
+   * of QuadratureRule.
+   * @f[
+   * \dfrac
+   * {\vdash \int f \cdot v \ dx : \texttt{QuadratureRule}}
+   * {\vdash v : \texttt{H1}<K>}
+   * @f]
+   */
   template <size_t K, class LHSDerived, class RHSDerived, class Scalar, class Mesh>
   class QuadratureRule<
     ShapeFunctionBase<
@@ -394,9 +430,27 @@ namespace Rodin::Variational
               H1<K, Scalar, Mesh>, TestSpace>>,
           H1<K, Scalar, Mesh>, TestSpace>>;
 
-  // --------------------------------------------------------------------------
-  // Specialization #3: Mass form — ∫ u·v dx (H1 trial × H1 test)
-  // --------------------------------------------------------------------------
+  /**
+   * @ingroup QuadratureRuleSpecializations
+   * @brief Specialization for @f$\int u \cdot v \ dx@f$ with H1 trial and test shape functions.
+   *
+   * This class represents the CTAD for the expression:
+   * @f[
+   * \int u \cdot v \ dx \: ,
+   * @f]
+   * where @f$ u @f$ and @f$ v @f$ are H1 shape functions.
+   *
+   * Judgement
+   * ---------
+   *
+   * The following judgement specifies that the expression is a well formed type
+   * of QuadratureRule.
+   * @f[
+   * \dfrac
+   * {\vdash \int u \cdot v \ dx : \texttt{QuadratureRule}}
+   * {\vdash u : \texttt{H1}<K_{\mathrm{trial}}>, \ \vdash v : \texttt{H1}<K_{\mathrm{test}}>}
+   * @f]
+   */
   template <
     size_t KTrial, size_t KTest,
     class LHSDerived, class RHSDerived,
@@ -633,9 +687,27 @@ namespace Rodin::Variational
             ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
             H1<KTest, Scalar, Mesh>, TestSpace>>>;
 
-  // --------------------------------------------------------------------------
-  // Specialization #4: Weighted mass — ∫ (A·u)·v dx
-  // --------------------------------------------------------------------------
+  /**
+   * @ingroup QuadratureRuleSpecializations
+   * @brief Specialization for @f$\int (A u) \cdot v \ dx@f$ with H1 trial and test shape functions.
+   *
+   * This class represents the CTAD for the expression:
+   * @f[
+   * \int (A u) \cdot v \ dx \: ,
+   * @f]
+   * where @f$u@f$ and @f$v@f$ are H1 shape functions and @f$A@f$ is a coefficient function.
+   *
+   * Judgement
+   * ---------
+   *
+   * The following judgement specifies that the expression is a well formed type
+   * of QuadratureRule.
+   * @f[
+   * \dfrac
+   * {\vdash \int (A u) \cdot v \ dx : \texttt{QuadratureRule}}
+   * {\vdash u : \texttt{H1}<K_{\mathrm{trial}}>, \ \vdash v : \texttt{H1}<K_{\mathrm{test}}>}
+   * @f]
+   */
   template <
     size_t KTrial, size_t KTest,
     class CoefficientDerived, class LHSDerived, class RHSDerived,
@@ -892,9 +964,27 @@ namespace Rodin::Variational
             ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
             H1<KTest, Scalar, Mesh>, TestSpace>>>;
 
-  // --------------------------------------------------------------------------
-  // Specialization #6: Weighted stiffness — ∫ (A∇u)·∇v dx
-  // --------------------------------------------------------------------------
+  /**
+   * @ingroup QuadratureRuleSpecializations
+   * @brief Specialization for @f$\int (A \nabla u) \cdot \nabla v \ dx@f$ with H1 trial and test shape functions.
+   *
+   * This class represents the CTAD for the expression:
+   * @f[
+   * \int (A \nabla u) \cdot \nabla v \ dx \: ,
+   * @f]
+   * where @f$u@f$ and @f$v@f$ are H1 shape functions and @f$A@f$ is a coefficient function.
+   *
+   * Judgement
+   * ---------
+   *
+   * The following judgement specifies that the expression is a well formed type
+   * of QuadratureRule.
+   * @f[
+   * \dfrac
+   * {\vdash \int (A \nabla u) \cdot \nabla v \ dx : \texttt{QuadratureRule}}
+   * {\vdash u : \texttt{H1}<K_{\mathrm{trial}}>, \ \vdash v : \texttt{H1}<K_{\mathrm{test}}>}
+   * @f]
+   */
   template <
     size_t KTrial, size_t KTest,
     class CoefficientDerived, class LHSDerived, class RHSDerived,
@@ -1212,9 +1302,27 @@ namespace Rodin::Variational
             Grad<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
             H1<KTest, Scalar, Mesh>, TestSpace>>>;
 
-  // --------------------------------------------------------------------------
-  // Specialization #7: Scalar-weighted mass — ∫ c·(u·v) dx
-  // --------------------------------------------------------------------------
+  /**
+   * @ingroup QuadratureRuleSpecializations
+   * @brief Specialization for @f$\int c \, (u \cdot v) \ dx@f$ with H1 trial and test shape functions.
+   *
+   * This class represents the CTAD for the expression:
+   * @f[
+   * \int c \, (u \cdot v) \ dx \: ,
+   * @f]
+   * where @f$u@f$ and @f$v@f$ are H1 shape functions and @f$c@f$ is a scalar coefficient function.
+   *
+   * Judgement
+   * ---------
+   *
+   * The following judgement specifies that the expression is a well formed type
+   * of QuadratureRule.
+   * @f[
+   * \dfrac
+   * {\vdash \int c \, (u \cdot v) \ dx : \texttt{QuadratureRule}}
+   * {\vdash u : \texttt{H1}<K_{\mathrm{trial}}>, \ \vdash v : \texttt{H1}<K_{\mathrm{test}}>}
+   * @f]
+   */
   template <
     size_t KTrial, size_t KTest,
     class CoefficientDerived, class LHSDerived, class RHSDerived,
@@ -1437,9 +1545,27 @@ namespace Rodin::Variational
               ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
               H1<KTest, Scalar, Mesh>, TestSpace>>>>;
 
-  // --------------------------------------------------------------------------
-  // Specialization #8: Div trial — ∫ div(u)·q dx
-  // --------------------------------------------------------------------------
+  /**
+   * @ingroup QuadratureRuleSpecializations
+   * @brief Specialization for @f$\int \nabla \cdot u \, q \ dx@f$ with H1 trial and test shape functions.
+   *
+   * This class represents the CTAD for the expression:
+   * @f[
+   * \int \nabla \cdot u \, q \ dx \: ,
+   * @f]
+   * where @f$u@f$ is an H1 trial shape function and @f$q@f$ is an H1 test shape function.
+   *
+   * Judgement
+   * ---------
+   *
+   * The following judgement specifies that the expression is a well formed type
+   * of QuadratureRule.
+   * @f[
+   * \dfrac
+   * {\vdash \int \nabla \cdot u \, q \ dx : \texttt{QuadratureRule}}
+   * {\vdash u : \texttt{H1}<K_{\mathrm{trial}}>, \ \vdash q : \texttt{H1}<K_{\mathrm{test}}>}
+   * @f]
+   */
   template <
     size_t KTrial, size_t KTest,
     class LHSDerived, class RHSDerived,
@@ -1697,9 +1823,27 @@ namespace Rodin::Variational
             ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
             H1<KTest, Scalar, Mesh>, TestSpace>>>;
 
-  // --------------------------------------------------------------------------
-  // Specialization #9: Div test — ∫ p·div(v) dx
-  // --------------------------------------------------------------------------
+  /**
+   * @ingroup QuadratureRuleSpecializations
+   * @brief Specialization for @f$\int p \, \nabla \cdot v \ dx@f$ with H1 trial and test shape functions.
+   *
+   * This class represents the CTAD for the expression:
+   * @f[
+   * \int p \, \nabla \cdot v \ dx \: ,
+   * @f]
+   * where @f$p@f$ is an H1 trial shape function and @f$v@f$ is an H1 test shape function.
+   *
+   * Judgement
+   * ---------
+   *
+   * The following judgement specifies that the expression is a well formed type
+   * of QuadratureRule.
+   * @f[
+   * \dfrac
+   * {\vdash \int p \, \nabla \cdot v \ dx : \texttt{QuadratureRule}}
+   * {\vdash p : \texttt{H1}<K_{\mathrm{trial}}>, \ \vdash v : \texttt{H1}<K_{\mathrm{test}}>}
+   * @f]
+   */
   template <
     size_t KTrial, size_t KTest,
     class LHSDerived, class RHSDerived,
@@ -1956,9 +2100,27 @@ namespace Rodin::Variational
             Div<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
             H1<KTest, Scalar, Mesh>, TestSpace>>>;
 
-  // --------------------------------------------------------------------------
-  // Specialization #11: Weighted Jacobian — ∫ (A·Ju):Jv dx
-  // --------------------------------------------------------------------------
+  /**
+   * @ingroup QuadratureRuleSpecializations
+   * @brief Specialization for @f$\int (A J u) : J v \ dx@f$ with H1 trial and test shape functions.
+   *
+   * This class represents the CTAD for the expression:
+   * @f[
+   * \int (A J u) : J v \ dx \: ,
+   * @f]
+   * where @f$u@f$ and @f$v@f$ are vector-valued H1 shape functions and @f$A@f$ is a coefficient function.
+   *
+   * Judgement
+   * ---------
+   *
+   * The following judgement specifies that the expression is a well formed type
+   * of QuadratureRule.
+   * @f[
+   * \dfrac
+   * {\vdash \int (A J u) : J v \ dx : \texttt{QuadratureRule}}
+   * {\vdash u : \texttt{H1}<K_{\mathrm{trial}}>, \ \vdash v : \texttt{H1}<K_{\mathrm{test}}>}
+   * @f]
+   */
   template <
     size_t KTrial, size_t KTest,
     class CoefficientDerived, class LHSDerived, class RHSDerived,
@@ -2342,9 +2504,27 @@ namespace Rodin::Variational
             Jacobian<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
             H1<KTest, Scalar, Mesh>, TestSpace>>>;
 
-  // --------------------------------------------------------------------------
-  // Specialization #5: Grad-Grad — ∫ ∇u·∇v dx (existing)
-  // --------------------------------------------------------------------------
+  /**
+   * @ingroup QuadratureRuleSpecializations
+   * @brief Specialization for @f$\int \nabla u \cdot \nabla v \ dx@f$ with H1 trial and test shape functions.
+   *
+   * This class represents the CTAD for the expression:
+   * @f[
+   * \int \nabla u \cdot \nabla v \ dx \: ,
+   * @f]
+   * where @f$u@f$ and @f$v@f$ are H1 shape functions.
+   *
+   * Judgement
+   * ---------
+   *
+   * The following judgement specifies that the expression is a well formed type
+   * of QuadratureRule.
+   * @f[
+   * \dfrac
+   * {\vdash \int \nabla u \cdot \nabla v \ dx : \texttt{QuadratureRule}}
+   * {\vdash u : \texttt{H1}<K_{\mathrm{trial}}>, \ \vdash v : \texttt{H1}<K_{\mathrm{test}}>}
+   * @f]
+   */
   template <
     size_t KTrial, size_t KTest,
     class LHSDerived, class RHSDerived,
@@ -2673,6 +2853,27 @@ namespace Rodin::Variational
            Grad<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
            H1<KTest, Scalar, Mesh>, TestSpace>>>;
 
+  /**
+   * @ingroup QuadratureRuleSpecializations
+   * @brief Specialization for @f$\int J u : J v \ dx@f$ with H1 trial and test shape functions.
+   *
+   * This class represents the CTAD for the expression:
+   * @f[
+   * \int J u : J v \ dx \: ,
+   * @f]
+   * where @f$u@f$ and @f$v@f$ are vector-valued H1 shape functions.
+   *
+   * Judgement
+   * ---------
+   *
+   * The following judgement specifies that the expression is a well formed type
+   * of QuadratureRule.
+   * @f[
+   * \dfrac
+   * {\vdash \int J u : J v \ dx : \texttt{QuadratureRule}}
+   * {\vdash u : \texttt{H1}<K_{\mathrm{trial}}>, \ \vdash v : \texttt{H1}<K_{\mathrm{test}}>}
+   * @f]
+   */
   template <
     size_t KTrial, size_t KTest,
     class LHSDerived, class RHSDerived,
