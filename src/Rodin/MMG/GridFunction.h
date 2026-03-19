@@ -19,6 +19,8 @@ namespace Rodin::MMG
 {
   /**
    * @brief Grid function type used by the MMG module.
+   * @tparam Range Value type (`Real` for scalar fields, `Math::Vector<Real>`
+   * for vector fields).
    *
    * MMG workflows in Rodin operate on first-order nodal fields defined on
    * @ref Rodin::Geometry::Mesh<Context::Local> "local meshes". This alias
@@ -32,7 +34,8 @@ namespace Rodin::MMG
   /**
    * @brief Scalar MMG grid function alias.
    *
-   * Commonly used for size maps and level-set values.
+   * Commonly used for size maps and level-set values passed to
+   * @ref Adapt and @ref LevelSetDiscretizer.
    */
   using RealGridFunction = GridFunction<Real>;
 

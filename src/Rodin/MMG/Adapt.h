@@ -27,6 +27,9 @@ namespace Rodin::MMG
    * - MMG3D for volumetric 3D meshes,
    * - MMGS for surface meshes embedded in 3D.
    *
+   * The scalar size-map field encodes target local edge length and is sampled
+   * at mesh vertices.
+   *
    * Parameters inherited from @ref MMG5 (hmin/hmax/hausdorff/gradation/angle)
    * can be configured before calling @ref adapt.
    */

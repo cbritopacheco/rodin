@@ -25,6 +25,9 @@ namespace Rodin::MMG
    * This operator runs MMG optimization mode without prescribing an external
    * metric field. It is useful for improving element shapes while keeping the
    * mesh close to the current local edge-size distribution.
+   *
+   * Typical usage is post-processing after adaptation/imported meshes to remove
+   * poorly shaped elements while preserving geometric features.
    */
   class Optimizer : public MMG5
   {

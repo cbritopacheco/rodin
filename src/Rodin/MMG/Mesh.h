@@ -34,6 +34,7 @@ namespace Rodin::MMG
       /// Parent class
       using Parent = Geometry::Mesh<Rodin::Context::Local>;
 
+      /// Mesh context type (always local for @ref MMG::Mesh).
       using Context = typename Parent::Context;
 
       /// Index set of corner vertices in the mesh.
@@ -110,18 +111,21 @@ namespace Rodin::MMG
 
           /**
            * @brief Finalizes and returns the constructed MMG mesh.
+           * @returns Fully built mesh containing both topology/geometry and
+           * MMG metadata (corners, ridges, required entities).
            */
           Mesh finalize();
 
         private:
-          CornerIndex m_cornerIndex;
-          RidgeIndex  m_ridgeIndex;
-          RequiredVertexIndex m_requiredVertexIndex;
-          RequiredEdgeIndex m_requiredEdgeIndex;
+          CornerIndex m_cornerIndex; ///< Corner vertex set accumulated during build.
+          RidgeIndex  m_ridgeIndex; ///< Ridge edge set accumulated during build.
+          RequiredVertexIndex m_requiredVertexIndex; ///< Required-vertex set accumulated during build.
+          RequiredEdgeIndex m_requiredEdgeIndex; ///< Required-edge set accumulated during build.
       };
 
       /**
        * @brief Creates a builder for constructing an @ref MMG::Mesh instance.
+       * @returns Fresh builder object.
        */
       static MMG::Mesh::Builder Build()
       {
@@ -309,11 +313,11 @@ namespace Rodin::MMG
          IO::FileFormat fmt) override;
 
     private:
-      CornerIndex m_cornerIndex;
-      RequiredVertexIndex m_requiredVertexIndex;
+      CornerIndex m_cornerIndex; ///< Corner vertex indices (`MG_CRN`).
+      RequiredVertexIndex m_requiredVertexIndex; ///< Required vertex indices (`MG_REQ` on vertices).
 
-      RidgeIndex  m_ridgeIndex;
-      RequiredEdgeIndex m_requiredEdgeIndex;
+      RidgeIndex  m_ridgeIndex; ///< Ridge edge indices (`MG_GEO`).
+      RequiredEdgeIndex m_requiredEdgeIndex; ///< Required edge indices (`MG_REQ` on edges).
   };
 }
 

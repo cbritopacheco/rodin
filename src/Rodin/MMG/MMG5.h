@@ -28,6 +28,10 @@ namespace Rodin::MMG
   /**
    * @brief Exception type for MMG wrapper failures.
    * @tparam FuncName Type of the function-name object passed by caller.
+   *
+   * This exception prepends a standardized "class/function" prefix to MMG
+   * diagnostic messages, then can be streamed with additional details before
+   * raising through Rodin's alert system.
    */
   template <class FuncName>
   class MMG5Exception : public Alert::Exception
@@ -45,7 +49,12 @@ namespace Rodin::MMG
       }
   };
 
-  /// Return-code type used by MMG C API calls.
+  /**
+   * @brief Return-code type used by MMG C API calls.
+   *
+   * MMG kernels conventionally return `MMG5_SUCCESS`, `MMG5_LOWFAILURE`, or
+   * `MMG5_STRONGFAILURE`.
+   */
   using ReturnCode = int;
 
   /**
@@ -143,6 +152,9 @@ namespace Rodin::MMG
        * @tparam Range Grid function range type (`Real` or `Math::Vector<Real>`).
        * @param[in] src Source MMG solution.
        * @param[out] dst Destination grid function.
+       *
+       * The transfer preserves MMG node ordering and writes into the matrix
+       * layout used by Rodin's @ref Variational::GridFunction data container.
        */
       template <class Range>
       static void copySolution(const MMG5_pSol src, MMG::GridFunction<Range>& dst)
@@ -184,6 +196,9 @@ namespace Rodin::MMG
        * @tparam Range Grid function range type (`Real` or `Math::Vector<Real>`).
        * @param[in] src Source grid function.
        * @param[out] dst Destination MMG solution.
+       *
+       * Allocates MMG storage buffers when needed and copies nodal values in the
+       * memory layout expected by the selected MMG kernel.
        */
       template <class Range>
       static void copySolution(const MMG::GridFunction<Range>& src, MMG5_pSol dst)

@@ -76,8 +76,8 @@ namespace Rodin::MMG
       }
 
     private:
-      std::reference_wrapper<const MMG::Mesh> m_mesh;
-      IO::MeshPrinter<IO::FileFormat::MEDIT, Context::Local> m_printer;
+      std::reference_wrapper<const MMG::Mesh> m_mesh; ///< Source mesh reference.
+      IO::MeshPrinter<IO::FileFormat::MEDIT, Context::Local> m_printer; ///< Base MEDIT printer.
   };
 }
 

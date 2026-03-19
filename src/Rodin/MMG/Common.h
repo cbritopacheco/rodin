@@ -48,11 +48,19 @@ namespace Rodin::MMG
 
   /**
    * @brief Singleton tag instance for convenience in split configuration.
+   *
+   * Example:
+   * @code
+   * SplitMap split;
+   * split[5] = NoSplit;
+   * @endcode
    */
   static constexpr NoSplitT NoSplit;
 
   /**
    * @brief Interior/exterior labels produced when splitting one material.
+   *
+   * Used as the mapped value in @ref SplitMap.
    */
   struct Split
   {
@@ -66,6 +74,8 @@ namespace Rodin::MMG
    * Keys are input material attributes from the source mesh.
    * Values describe whether each material is split into distinct interior/exterior
    * labels (@ref Split) or kept unchanged (@ref NoSplitT).
+   *
+   * This map is consumed by @ref LevelSetDiscretizer::setSplit.
    */
   using SplitMap = UnorderedMap<Geometry::Attribute, std::variant<Split, NoSplitT>>;
 
