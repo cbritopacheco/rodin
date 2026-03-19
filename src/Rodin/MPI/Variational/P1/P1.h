@@ -47,6 +47,12 @@ namespace Rodin::Variational
        */
       struct IndexBimap
       {
+        /**
+         * @note The names `left` and `right` mirror bidirectional-map
+         * terminology:
+         * - `left[local] = global`
+         * - `right[global] = local`
+         */
         /// Local-to-global mapping (indexed by local dof).
         std::vector<Index> left;
         /// Global-to-local mapping (keyed by global dof).
@@ -583,7 +589,7 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Returns global dof indices attached to local polytope @f$(d,i)@f$.
+       * @brief Returns global dof indices attached to local polytope @f$(d, i)@f$.
        *
        * The local shard dof list is retrieved from the underlying shard P1
        * space and mapped to distributed global indices.
@@ -608,9 +614,9 @@ namespace Rodin::Variational
       /**
        * @brief Returns the global dof index associated with local basis function @p localDof.
        *
-       * The polytope key @f$(d,i)@f$ is interpreted in local shard indexing.
+       * The polytope pair @f$(d, i)@f$ is interpreted in local shard indexing.
        *
-       * @param[in] p Pair @f$(d,i)@f$ identifying a local shard polytope.
+       * @param[in] p Pair @f$(d, i)@f$ identifying a local shard polytope.
        * @param[in] localDof Local basis-function index on the polytope.
        * @return Global distributed dof index.
        */
@@ -625,10 +631,10 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Returns a pullback wrapper for a function on local polytope @f$(d,i)@f$.
+       * @brief Returns a pullback wrapper for a function on local polytope @f$(d, i)@f$.
        *
        * @tparam FunctionDerived Function expression type.
-       * @param[in] p Local polytope key.
+       * @param[in] p Local polytope pair @f$(d, i)@f$.
        * @param[in] v Function defined on physical coordinates.
        * @return Pullback wrapper mapping reference points to physical evaluation.
        */
@@ -641,7 +647,7 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Returns a pushforward wrapper on local polytope @f$(d,i)@f$.
+       * @brief Returns a pushforward wrapper on local polytope @f$(d, i)@f$.
        *
        * @tparam CallableType Callable defined on reference coordinates.
        * @param[in] v Reference-space callable.
