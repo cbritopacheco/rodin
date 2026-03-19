@@ -1,6 +1,16 @@
 #ifndef RODIN_MPI_VARIATIONAL_P1_P1_H
 #define RODIN_MPI_VARIATIONAL_P1_P1_H
 
+/**
+ * @file
+ * @brief Distributed P1 finite element space specialization on MPI meshes.
+ *
+ * This file provides @ref Rodin::Variational::P1 specialization for
+ * @ref Rodin::Geometry::Mesh<Rodin::Context::MPI>. The implementation builds
+ * a rank-local P1 space on each shard and maintains local/global degree-of-
+ * freedom mappings consistent across ownership and ghost layers.
+ */
+
 #include <mpi.h>
 #include <sys/mman.h>
 
@@ -17,6 +27,15 @@
 
 namespace Rodin::Variational
 {
+  /**
+   * @brief Distributed P1 finite element space for MPI meshes.
+   *
+   * This specialization wraps a local shard P1 space and augments it with
+   * distributed global indexing. Owned degrees of freedom receive contiguous
+   * global ranges per rank, while ghost dofs are synchronized from owner ranks.
+   *
+   * @tparam Range Scalar or vector range descriptor used by P1.
+   */
   template <class Range>
   class P1<Range, Geometry::Mesh<Context::MPI>>
     : public FiniteElementSpace<
@@ -543,6 +562,9 @@ namespace Rodin::Variational
 
 namespace Rodin::MPI
 {
+  /**
+   * @brief Convenience alias for the default distributed scalar P1 space.
+   */
   using P1 = Variational::P1<Real, Geometry::Mesh<Context::MPI>>;
 }
 

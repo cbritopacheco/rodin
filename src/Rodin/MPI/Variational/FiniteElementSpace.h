@@ -1,6 +1,11 @@
 #ifndef RODIN_MPI_VARIATIONAL_FINITEELEMENTSPACE_H
 #define RODIN_MPI_VARIATIONAL_FINITEELEMENTSPACE_H
 
+/**
+ * @file
+ * @brief Base CRTP finite element space interface for MPI meshes.
+ */
+
 #include "Rodin/Variational/FiniteElementSpace.h"
 
 #include "Rodin/MPI/Geometry/Mesh.h"
@@ -8,7 +13,15 @@
 namespace Rodin::Variational
 {
   /**
-   * @brief Represernts a finite element space.
+   * @brief Represents a finite element space defined on a distributed mesh.
+   *
+   * This CRTP base specializes @ref Rodin::Variational::FiniteElementSpace for
+   * @ref Rodin::Geometry::Mesh<Rodin::Context::MPI>. Concrete distributed spaces
+   * (such as MPI @ref Rodin::Variational::P1) provide the implementation for
+   * local-to-global index translation, local finite elements, and geometric
+   * mappings.
+   *
+   * @tparam Derived Concrete finite element space type.
    */
   template <class Derived>
   class FiniteElementSpace<Geometry::Mesh<Context::MPI>, Derived>
@@ -21,18 +34,27 @@ namespace Rodin::Variational
 
       using Parent::getGlobalIndex;
 
+      /**
+       * @brief Returns the global distributed index associated with local dof @p i.
+       * @param[in] i Local shard degree-of-freedom index.
+       * @return Global distributed index.
+       */
       Index getGlobalIndex(Index i) const
       {
         return static_cast<const Derived&>(*this).getGlobalIndex(i);
       }
 
+      /**
+       * @brief Returns the distributed mesh on which the space is defined.
+       */
       const MeshType& getMesh() const override
       {
         return static_cast<const Derived&>(*this).getMesh();
       }
 
       /**
-       * @note CRTP function to be overriden in Derived class.
+       * @brief Returns the finite element attached to local polytope @f$(d,i)@f$.
+       * @note CRTP function to be overridden in the derived class.
        */
       const auto& getFiniteElement(size_t d, Index i) const
       {
@@ -40,8 +62,7 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Returns the mapping of the function from the physical element
-       * to the reference element.
+       * @brief Returns the pullback of a function from physical to reference coordinates.
        * @tparam T Callable type
        * @param[in] p Index of the element in the mesh
        * @param[in] v Function defined on an element of the mesh
@@ -62,7 +83,7 @@ namespace Rodin::Variational
        *  auto operator()(const Geometry::Point&);
        * @endcode
        *
-       * @note CRTP function to be overriden in Derived class.
+       * @note CRTP function to be overridden in the derived class.
        */
       template <class T>
       auto getMapping(const std::pair<size_t, Index>& p, const T& v) const
@@ -71,7 +92,8 @@ namespace Rodin::Variational
       }
 
       /**
-       * @note CRTP function to be overriden in Derived class.
+       * @brief Returns the inverse mapping (pushforward) back to physical coordinates.
+       * @note CRTP function to be overridden in the derived class.
        */
       template <class CallableType>
       auto getInverseMapping(const std::pair<size_t, Index>& idx, const CallableType& v) const
