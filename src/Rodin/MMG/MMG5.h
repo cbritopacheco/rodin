@@ -33,6 +33,10 @@ namespace Rodin::MMG
   class MMG5Exception : public Alert::Exception
   {
     public:
+      /**
+       * @brief Builds an MMG wrapper exception message prefix.
+       * @param[in] funcName Function identifier used in the diagnostic message.
+       */
       MMG5Exception(const FuncName& funcName)
       {
         const auto& className = boost::typeindex::type_id_with_cvr<MMG5>().pretty_name();
@@ -75,9 +79,10 @@ namespace Rodin::MMG
       /**
        * @internal
        * @brief Copies source mesh to a destination mesh.
+       * @param[in] src Source MMG mesh.
+       * @param[out] dst Destination MMG mesh.
        *
-       * This method performs the necessary memory allocations when copying the
-       * data.
+       * Performs deep-copy allocation for dynamically owned MMG arrays.
        */
       static void copyMesh(const MMG5_pMesh src, MMG5_pMesh dst);
 
@@ -255,12 +260,15 @@ namespace Rodin::MMG
       /**
        * @internal
        * @brief Swaps the data between two instances of type MMG5_pSol.
+       * @param[in, out] a First solution.
+       * @param[in, out] b Second solution.
        */
       static void swapSolution(MMG5_pSol a, MMG5_pSol b);
 
       /**
        * @internal
        * @brief Destroys and frees the allocated memory for a MMG5_pSol object.
+       * @param[in] sol MMG solution pointer.
        */
       static void destroySolution(MMG5_pSol sol);
 
@@ -385,11 +393,16 @@ namespace Rodin::MMG
       }
 
     protected:
+      /**
+       * @brief Applies configured remeshing parameters to an MMG mesh.
+       * @param[in, out] mesh Target MMG mesh.
+       * @returns Reference to this object.
+       */
       MMG5& setParameters(MMG5_pMesh mesh);
 
     private:
-      Optional<Real> m_hmin, m_hmax, m_hausd, m_hgrad;
-      bool m_ridgeDetection;
+      Optional<Real> m_hmin, m_hmax, m_hausd, m_hgrad; ///< Optional MMG scalar parameters.
+      bool m_ridgeDetection; ///< Whether ridge angle detection is enabled.
   };
 }
 #endif

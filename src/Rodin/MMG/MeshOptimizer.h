@@ -145,8 +145,23 @@ namespace Rodin::MMG
       }
 
     private:
+      /**
+       * @brief Runs MMG2D optimization kernel.
+       * @param[in, out] mesh MMG2D mesh.
+       * @returns MMG return code.
+       */
       int optimizeMMG2D(MMG5_pMesh mesh);
+      /**
+       * @brief Runs MMG3D optimization kernel.
+       * @param[in, out] mesh MMG3D mesh.
+       * @returns MMG return code.
+       */
       int optimizeMMG3D(MMG5_pMesh mesh);
+      /**
+       * @brief Runs MMGS optimization kernel for surface meshes.
+       * @param[in, out] mesh MMGS mesh.
+       * @returns MMG return code.
+       */
       int optimizeMMGS(MMG5_pMesh mesh);
   };
 }

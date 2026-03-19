@@ -211,6 +211,7 @@ namespace Rodin::MMG
 
       /**
        * @brief Gets the corner index set (const).
+       * @returns Immutable set of corner vertex indices.
        */
       const CornerIndex& getCorners() const
       {
@@ -219,6 +220,7 @@ namespace Rodin::MMG
 
       /**
        * @brief Gets the corner index set.
+       * @returns Mutable set of corner vertex indices.
        */
       CornerIndex& getCorners()
       {
@@ -227,6 +229,7 @@ namespace Rodin::MMG
 
       /**
        * @brief Gets the ridge index set (const).
+       * @returns Immutable set of ridge edge indices.
        */
       const RidgeIndex& getRidges() const
       {
@@ -235,6 +238,7 @@ namespace Rodin::MMG
 
       /**
        * @brief Gets the ridge index set.
+       * @returns Mutable set of ridge edge indices.
        */
       RidgeIndex& getRidges()
       {
@@ -243,6 +247,7 @@ namespace Rodin::MMG
 
       /**
        * @brief Gets the required-edge index set.
+       * @returns Mutable set of required edge indices.
        */
       RequiredEdgeIndex& getRequiredEdges()
       {
@@ -251,6 +256,7 @@ namespace Rodin::MMG
 
       /**
        * @brief Gets the required-edge index set (const).
+       * @returns Immutable set of required edge indices.
        */
       const RequiredEdgeIndex& getRequiredEdges() const
       {
@@ -259,6 +265,7 @@ namespace Rodin::MMG
 
       /**
        * @brief Gets the required-vertex index set.
+       * @returns Mutable set of required vertex indices.
        */
       RequiredVertexIndex& getRequiredVertices()
       {
@@ -267,6 +274,7 @@ namespace Rodin::MMG
 
       /**
        * @brief Gets the required-vertex index set (const).
+       * @returns Immutable set of required vertex indices.
        */
       const RequiredVertexIndex& getRequiredVertices() const
       {

@@ -133,30 +133,55 @@ namespace Rodin::MMG
        */
       MMG::Mesh discretize(const MMG::RealGridFunction& ls);
 
+      /**
+       * @brief Enables/disables ridge angle detection.
+       * @param[in] enable If `true`, enable angle detection.
+       * @returns Reference to this object.
+       */
       LevelSetDiscretizer& setAngleDetection(bool enable = true)
       {
         MMG5::setAngleDetection(enable);
         return *this;
       }
 
+      /**
+       * @brief Sets the minimum edge size constraint.
+       * @param[in] hmin Minimum size.
+       * @returns Reference to this object.
+       */
       LevelSetDiscretizer& setHMin(Real hmin)
       {
         MMG5::setHMin(hmin);
         return *this;
       }
 
+      /**
+       * @brief Sets the maximum edge size constraint.
+       * @param[in] hmax Maximum size.
+       * @returns Reference to this object.
+       */
       LevelSetDiscretizer& setHMax(Real hmax)
       {
         MMG5::setHMax(hmax);
         return *this;
       }
 
+      /**
+       * @brief Sets the Hausdorff tolerance controlling boundary approximation.
+       * @param[in] hausd Hausdorff value.
+       * @returns Reference to this object.
+       */
       LevelSetDiscretizer& setHausdorff(Real hausd)
       {
         MMG5::setHausdorff(hausd);
         return *this;
       }
 
+      /**
+       * @brief Sets the allowed gradation between adjacent edge sizes.
+       * @param[in] hgrad Gradation ratio.
+       * @returns Reference to this object.
+       */
       LevelSetDiscretizer& setGradation(Real hgrad)
       {
         MMG5::setGradation(hgrad);
@@ -173,22 +198,49 @@ namespace Rodin::MMG
       }
 
     private:
+      /**
+       * @brief Runs MMG2D level-set discretization kernel.
+       * @param[in, out] mesh MMG2D mesh.
+       * @param[in, out] sol MMG level-set solution.
+       * @returns MMG return code.
+       */
       ReturnCode discretizeMMG2D(MMG5_pMesh mesh, MMG5_pSol sol);
+      /**
+       * @brief Runs MMG3D level-set discretization kernel.
+       * @param[in, out] mesh MMG3D mesh.
+       * @param[in, out] sol MMG level-set solution.
+       * @returns MMG return code.
+       */
       ReturnCode discretizeMMG3D(MMG5_pMesh mesh, MMG5_pSol sol);
+      /**
+       * @brief Runs MMGS level-set discretization kernel for surface meshes.
+       * @param[in, out] mesh MMGS mesh.
+       * @param[in, out] sol MMG level-set solution.
+       * @returns MMG return code.
+       */
       ReturnCode discretizeMMGS(MMG5_pMesh mesh, MMG5_pSol sol);
 
+      /**
+       * @brief Builds unique temporary split labels to avoid attribute collisions.
+       * @param[in] attr Existing mesh attributes.
+       */
       void generateUniqueSplit(const FlatSet<Geometry::Attribute>& attr);
 
+      /**
+       * @brief Removes boundary entities carrying a specific attribute.
+       * @param[in, out] mesh MMG mesh to edit.
+       * @param[in] ref Boundary attribute to remove.
+       */
       void deleteBoundaryRef(MMG5_pMesh mesh, Geometry::Attribute ref);
 
-      Real m_ls;
-      SplitMap m_split;
-      bool m_meshTheSurface;
-      Optional<Real> m_rmc;
-      FlatSet<Geometry::Attribute> m_lsBaseReferences;
-      Optional<Geometry::Attribute> m_isoref;
+      Real m_ls; ///< Target level-set value defining the interface.
+      SplitMap m_split; ///< User-provided material split policy.
+      bool m_meshTheSurface; ///< If true, extract/mesh the isosurface.
+      Optional<Real> m_rmc; ///< Optional removal threshold for small components.
+      FlatSet<Geometry::Attribute> m_lsBaseReferences; ///< Optional base references for LS mode.
+      Optional<Geometry::Attribute> m_isoref; ///< Optional boundary attribute for extracted interface.
 
-      SplitMap m_uniqueSplit;
+      SplitMap m_uniqueSplit; ///< Collision-free split policy passed to MMG.
 
       /**
        * @internal

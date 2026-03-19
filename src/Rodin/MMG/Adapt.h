@@ -104,8 +104,26 @@ namespace Rodin::MMG
       }
 
     private:
+      /**
+       * @brief Runs MMG2D adaptation kernel.
+       * @param[in, out] mesh MMG2D mesh.
+       * @param[in, out] size MMG size-map solution.
+       * @returns MMG return code.
+       */
       ReturnCode adaptMMG2D(MMG5_pMesh mesh, MMG5_pSol size);
+      /**
+       * @brief Runs MMG3D adaptation kernel.
+       * @param[in, out] mesh MMG3D mesh.
+       * @param[in, out] size MMG size-map solution.
+       * @returns MMG return code.
+       */
       ReturnCode adaptMMG3D(MMG5_pMesh mesh, MMG5_pSol size);
+      /**
+       * @brief Runs MMGS adaptation kernel for surface meshes.
+       * @param[in, out] mesh MMGS mesh.
+       * @param[in, out] size MMG size-map solution.
+       * @returns MMG return code.
+       */
       ReturnCode adaptMMGS(MMG5_pMesh mesh, MMG5_pSol size);
   };
 }
