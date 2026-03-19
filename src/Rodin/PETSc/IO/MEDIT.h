@@ -40,17 +40,24 @@ namespace Rodin::IO
     : public GridFunctionPrinterBase<FileFormat::MEDIT, FES, ::Vec>
   {
     public:
+      /// @brief Finite element space type.
       using FESType   = FES;
+      /// @brief PETSc vector data type (`::Vec`).
       using DataType  = ::Vec;
+      /// @brief Parent printer base class.
       using Parent    = GridFunctionPrinterBase<FileFormat::MEDIT, FES, DataType>;
 
+      /// @brief Range type of the finite element space (scalar or vector).
       using RangeType  = typename FormLanguage::Traits<FESType>::RangeType;
+      /// @brief Scalar type underlying the range (`PetscScalar`).
       using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
 
       static_assert(std::is_same_v<ScalarType, PetscScalar>,
         "PETSc MEDIT printer: FES scalar type must be PetscScalar.");
 
+      /// @brief Mesh type associated with the finite element space.
       using MeshType        = typename FormLanguage::Traits<FESType>::MeshType;
+      /// @brief Context type (Local or MPI) of the mesh.
       using MeshContextType = typename FormLanguage::Traits<MeshType>::ContextType;
 
       using Parent::Parent;

@@ -8,8 +8,28 @@
 #define RODIN_PETSC_IO_HDF5_H
 
 /**
- * @file
+ * @file HDF5.h
  * @brief HDF5 IO support for PETSc-backed grid functions.
+ *
+ * Provides `GridFunctionPrinter` and `GridFunctionLoader` specializations
+ * that serialise the locally-owned portion of a PETSc `Vec` to/from HDF5
+ * files.  This enables checkpoint/restart workflows and post-processing
+ * with external HDF5-compatible tools.
+ *
+ * ## HDF5 File Layout
+ *
+ * ```
+ * /GridFunction/
+ * ├── Meta/
+ * │   ├── Size       (unsigned long long — number of local DOFs)
+ * │   └── Dimension  (unsigned long long — vector dimension)
+ * └── Values/
+ *     └── Data       (1-D array of double — DOF coefficients)
+ * ```
+ *
+ * @see Rodin::IO::GridFunctionPrinter,
+ *      Rodin::IO::GridFunctionLoader,
+ *      Rodin::PETSc::Variational::GridFunction
  */
 
 #include <petscvec.h>
@@ -125,8 +145,11 @@ namespace Rodin::IO
     : public GridFunctionLoaderBase<FES, ::Vec>
   {
     public:
+      /// @brief PETSc vector data type (`::Vec`).
       using DataType = ::Vec;
+      /// @brief Grid function type being loaded.
       using ObjectType = Variational::GridFunction<FES, DataType>;
+      /// @brief Parent loader base class.
       using Parent = GridFunctionLoaderBase<FES, DataType>;
 
       /**
@@ -219,8 +242,11 @@ namespace Rodin::IO
     : public GridFunctionPrinterBase<FileFormat::HDF5, FES, ::Vec>
   {
     public:
+      /// @brief PETSc vector data type (`::Vec`).
       using DataType = ::Vec;
+      /// @brief Grid function type being printed.
       using ObjectType = Variational::GridFunction<FES, DataType>;
+      /// @brief Parent printer base class.
       using Parent = GridFunctionPrinterBase<FileFormat::HDF5, FES, DataType>;
 
       /**
