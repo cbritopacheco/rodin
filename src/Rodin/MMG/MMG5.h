@@ -92,7 +92,7 @@ namespace Rodin::MMG
       /**
        * @internal
        * @brief Destroys the mesh object and frees the allocated memory.
-       * @param[in] Pointer to mesh.
+       * @param[in] mesh Pointer to mesh.
        */
       static void destroyMesh(MMG5_pMesh);
 

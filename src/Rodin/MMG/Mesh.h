@@ -204,10 +204,10 @@ namespace Rodin::MMG
 
       /**
        * @brief Marks a vertex as required.
-       * @param[in] edgeIdx Vertex index.
+       * @param[in] vertexIdx Vertex index.
        * @returns Reference to this mesh.
        */
-      Mesh& setRequiredVertex(Index edgeIdx);
+      Mesh& setRequiredVertex(Index vertexIdx);
 
       /**
        * @brief Gets the corner index set (const).
