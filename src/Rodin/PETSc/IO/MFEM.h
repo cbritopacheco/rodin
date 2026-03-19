@@ -30,7 +30,10 @@
 namespace Rodin::IO
 {
   /**
-   * @brief PETSc Vec printer specialization for @ref Rodin::Variational::P0.
+   * @brief MFEM printer for PETSc-backed P0 grid functions.
+   *
+   * @tparam Range Scalar or vector range type.
+   * @tparam Ctx   Mesh context type (Local or MPI).
    */
   // --------------------------------------------------------------------------
   // P0 MFEM printer for PETSc Vec
@@ -105,7 +108,10 @@ namespace Rodin::IO
   // P1 MFEM printer for PETSc Vec
   // --------------------------------------------------------------------------
   /**
-   * @brief PETSc Vec printer specialization for @ref Rodin::Variational::P1.
+   * @brief MFEM printer for PETSc-backed P1 grid functions.
+   *
+   * @tparam Range Scalar or vector range type.
+   * @tparam Ctx   Mesh context type (Local or MPI).
    */
   template <class Range, class Ctx>
   class GridFunctionPrinter<
@@ -176,10 +182,14 @@ namespace Rodin::IO
   // per MFEM scalar node in MFEM node order.
   // --------------------------------------------------------------------------
   /**
-   * @brief PETSc Vec printer specialization for @ref Rodin::Variational::H1.
+   * @brief MFEM printer for PETSc-backed H1 (order @f$ K @f$) grid functions.
    *
-   * Values are written in MFEM node ordering expected by Rodin's MFEM printer
-   * infrastructure, for both local and MPI mesh contexts.
+   * Handles the Rodin-to-MFEM node reordering using Vandermonde change-of-basis
+   * matrices, for both simplex and non-simplex element geometries.
+   *
+   * @tparam K     Polynomial order.
+   * @tparam Range Scalar or vector range type.
+   * @tparam Ctx   Mesh context type (Local or MPI).
    */
   template <size_t K, class Range, class Ctx>
   class GridFunctionPrinter<

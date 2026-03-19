@@ -15,7 +15,13 @@
 namespace Rodin::PETSc::Variational
 {
   /**
-   * @brief PETSc namespace wrapper around @ref Rodin::Variational::TrialFunction.
+   * @brief PETSc-aware trial function wrapper.
+   *
+   * Inherits all functionality from @ref Rodin::Variational::TrialFunction
+   * and triggers PETSc-specific template argument deduction.
+   *
+   * @tparam Solution Solution type (typically a PETSc GridFunction).
+   * @tparam FES      Finite element space type.
    */
   template <class Solution, class FES>
   class TrialFunction : public Rodin::Variational::TrialFunction<Solution, FES>
@@ -30,12 +36,17 @@ namespace Rodin::PETSc::Variational
       using Parent::Parent;
   };
 
+  /**
+   * @ingroup RodinCTAD
+   * @brief Deduction guide for PETSc::Variational::TrialFunction.
+   */
   template <class FES>
   TrialFunction(const FES& fes) -> TrialFunction<GridFunction<FES>, FES>;
 }
 
 namespace Rodin::Variational
 {
+  /// @brief Marks PETSc trial functions as valid trial functions.
   template <class Solution, class FES>
   struct IsTrialFunction<PETSc::Variational::TrialFunction<Solution, FES>>
   {

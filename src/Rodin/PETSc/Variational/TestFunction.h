@@ -13,7 +13,12 @@
 namespace Rodin::PETSc::Variational
 {
   /**
-   * @brief PETSc namespace wrapper around @ref Rodin::Variational::TestFunction.
+   * @brief PETSc-aware test function wrapper.
+   *
+   * Inherits all functionality from @ref Rodin::Variational::TestFunction
+   * and triggers PETSc-specific template argument deduction.
+   *
+   * @tparam FES Finite element space type.
    */
   template <class FES>
   class TestFunction : public Rodin::Variational::TestFunction<FES>
@@ -28,12 +33,17 @@ namespace Rodin::PETSc::Variational
       using Parent::Parent;
   };
 
+  /**
+   * @ingroup RodinCTAD
+   * @brief Deduction guide for PETSc::Variational::TestFunction.
+   */
   template <class FES>
   TestFunction(const FES& fes) -> TestFunction<FES>;
 }
 
 namespace Rodin::Variational
 {
+  /// @brief Marks PETSc test functions as valid test functions.
   template <class FES>
   struct IsTestFunction<PETSc::Variational::TestFunction<FES>>
   {

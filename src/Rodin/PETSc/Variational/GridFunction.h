@@ -43,12 +43,19 @@ namespace Rodin::Variational
     : public GridFunctionBase<GridFunction<FES, ::Vec>>
   {
     public:
+      /**
+       * @brief Bidirectional mapping between global ghost DOF indices and
+       * local ghost offsets within the PETSc ghosted vector.
+       */
       struct GhostBimap
       {
         std::vector<PetscInt> left;
         FlatMap<PetscInt, PetscInt> right;
       };
 
+      /**
+       * @brief State for mutable (write) array access to the PETSc vector.
+       */
       struct ArrayWrite
       {
         Boolean acquired = false;
@@ -56,6 +63,9 @@ namespace Rodin::Variational
         PetscScalar* raw = PETSC_NULLPTR;
       };
 
+      /**
+       * @brief State for read-only array access to the PETSc vector.
+       */
       struct ArrayRead
       {
         Boolean acquired = false;
@@ -96,6 +106,14 @@ namespace Rodin::Variational
           std::is_same_v<FESMeshContextType, Context::Local> ||
           std::is_same_v<FESMeshContextType, Context::MPI>);
 
+      /**
+       * @brief Constructs a zero-initialised grid function on the given space.
+       *
+       * In MPI mode, creates a ghosted PETSc vector with ownership ranges
+       * and ghost indices deduced from the finite element space.
+       *
+       * @param fes The finite element space.
+       */
       GridFunction(const FESType& fes)
         : Parent(fes),
           m_read{.acquired = false, .raw = PETSC_NULLPTR},
@@ -172,6 +190,7 @@ namespace Rodin::Variational
         (void) ierr;
       }
 
+      /// @brief Deep-copy constructor (duplicates the PETSc vector).
       GridFunction(const GridFunction& other)
         : Parent(other.getFiniteElementSpace()),
           m_begin(other.m_begin),
@@ -187,6 +206,7 @@ namespace Rodin::Variational
         (void) ierr;
       }
 
+      /// @brief Move constructor.
       GridFunction(GridFunction&& other) noexcept
         : Parent(std::move(other)),
           m_data(std::exchange(other.m_data, PETSC_NULLPTR)),
@@ -280,6 +300,14 @@ namespace Rodin::Variational
         return res;
       }
 
+      /**
+       * @brief Provides mutable element access by global DOF index.
+       *
+       * Internally acquires the PETSc array on first access.
+       *
+       * @param global Global DOF index.
+       * @returns Reference to the DOF value.
+       */
       ScalarType& operator[](Index global)
       {
         this->acquire();
@@ -303,6 +331,11 @@ namespace Rodin::Variational
         }
       }
 
+      /**
+       * @brief Provides read-only element access by global DOF index.
+       * @param global Global DOF index.
+       * @returns Const reference to the DOF value.
+       */
       const ScalarType& operator[](Index global) const
       {
         this->acquire();
@@ -418,6 +451,12 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Copies data from another PETSc vector into this grid function.
+       * @param data   Source PETSc vector.
+       * @param offset Global index offset in @p data.
+       * @returns Reference to `*this`.
+       */
       GridFunction& setData(const DataType& data, size_t offset = 0)
       {
         this->flush();
@@ -539,6 +578,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Acquires write access to the underlying PETSc array.
+       *
+       * In MPI mode, performs a ghost update and obtains the local form.
+       *
+       * @returns Reference to `*this`.
+       */
       GridFunction& acquire()
       {
         PetscErrorCode ierr;
@@ -579,6 +625,10 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Acquires read-only access to the underlying PETSc array.
+       * @returns Const reference to `*this`.
+       */
       const GridFunction& acquire() const
       {
         PetscErrorCode ierr;
@@ -619,6 +669,10 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Releases write access and scatters ghost values back.
+       * @returns Reference to `*this`.
+       */
       GridFunction& flush()
       {
         PetscErrorCode ierr;
@@ -659,6 +713,10 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Releases read-only access to the PETSc array.
+       * @returns Const reference to `*this`.
+       */
       const GridFunction& flush() const
       {
         PetscErrorCode ierr;
@@ -693,11 +751,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns a mutable reference to the raw PETSc vector.
       auto& getData()
       {
         return m_data;
       }
 
+      /// @brief Returns a read-only reference to the raw PETSc vector.
       const DataType& getData() const
       {
         return m_data;
@@ -778,6 +838,11 @@ namespace Rodin::Variational
         }
       }
 
+      /**
+       * @brief Releases all PETSc array handles and destroys the vector.
+       *
+       * Called by the destructor; can also be called explicitly.
+       */
       void release()
       {
         PetscErrorCode ierr;
@@ -854,6 +919,12 @@ namespace Rodin::Variational
 
 namespace Rodin::PETSc::Variational
 {
+  /**
+   * @brief Convenience wrapper inheriting all
+   * @ref Rodin::Variational::GridFunction<FES, ::Vec> functionality.
+   *
+   * @tparam FES Finite element space type.
+   */
   template <class FES>
   class GridFunction
     : public Rodin::Variational::GridFunction<FES, ::Vec>
@@ -871,6 +942,10 @@ namespace Rodin::PETSc::Variational
       using Parent::operator/=;
   };
 
+  /**
+   * @ingroup RodinCTAD
+   * @brief Deduction guide for PETSc::Variational::GridFunction.
+   */
   template <class FES>
   GridFunction(const FES&) -> GridFunction<FES>;
 }

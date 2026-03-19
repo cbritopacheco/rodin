@@ -58,6 +58,7 @@ namespace Rodin::Variational
         (void) ierr;
       }
 
+      /// @brief Copy constructor (deep-copies the PETSc vector).
       LinearForm(const LinearForm& other)
         : Parent(other),
           m_v(other.m_v),
@@ -81,6 +82,7 @@ namespace Rodin::Variational
         (void) ierr;
       }
 
+      /// @brief Move constructor.
       LinearForm(LinearForm&& other) noexcept
         : Parent(std::move(other)),
           m_v(std::move(other.m_v)),
@@ -90,6 +92,7 @@ namespace Rodin::Variational
         other.m_vector = PETSC_NULLPTR;
       }
 
+      /// @brief Destructor; destroys the owned PETSc vector.
       ~LinearForm() override
       {
         destroy();
@@ -157,17 +160,20 @@ namespace Rodin::Variational
         return result;
       }
 
+      /// @brief Assembles the linear form into the PETSc vector.
       void assemble() override
       {
         const auto& fes = getTestFunction().getFiniteElementSpace();
         m_assembly.execute(this->getVector(), { fes, this->getIntegrators() });
       }
 
+      /// @brief Returns a mutable reference to the assembled PETSc vector.
       VectorType& getVector() override
       {
         return m_vector;
       }
 
+      /// @brief Returns a read-only reference to the assembled PETSc vector.
       const VectorType& getVector() const override
       {
         return m_vector;
@@ -200,12 +206,19 @@ namespace Rodin::Variational
       VectorType m_vector;
   };
 
+  /**
+   * @ingroup RodinCTAD
+   * @brief Deduction guide for PETSc-backed LinearForm.
+   */
   template <class FES>
   LinearForm(const PETSc::Variational::TestFunction<FES>&) -> LinearForm<FES, ::Vec>;
 }
 
 namespace Rodin::PETSc::Variational
 {
+  /**
+   * @brief Convenient PETSc alias for Rodin::Variational::LinearForm.
+   */
   template <class FES>
   using LinearForm = Rodin::Variational::LinearForm<FES, ::Vec>;
 }

@@ -80,6 +80,7 @@ namespace Rodin::Variational
         (void) ierr;
       }
 
+      /// @brief Copy constructor (deep-copies the PETSc matrix).
       BilinearForm(const BilinearForm& other)
         : Parent(other),
           m_u(other.m_u),
@@ -100,6 +101,7 @@ namespace Rodin::Variational
         (void) ierr;
       }
 
+      /// @brief Move constructor.
       BilinearForm(BilinearForm&& other) noexcept
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
@@ -110,6 +112,7 @@ namespace Rodin::Variational
         other.m_operator = PETSC_NULLPTR;
       }
 
+      /// @brief Destructor; destroys the owned PETSc matrix.
       ~BilinearForm() override
       {
         this->destroy();
@@ -201,6 +204,7 @@ namespace Rodin::Variational
         return m_operator;
       }
 
+      /// @brief Assembles the bilinear form into the PETSc matrix.
       void assemble() override
       {
         const auto& trialFES = getTrialFunction().getFiniteElementSpace();
@@ -262,6 +266,10 @@ namespace Rodin::Variational
       OperatorType m_operator;
   };
 
+  /**
+   * @ingroup RodinCTAD
+   * @brief Deduction guide for PETSc-backed BilinearForm.
+   */
   template <class Solution, class TrialFES, class TestFES>
   BilinearForm(
       const PETSc::Variational::TrialFunction<Solution, TrialFES>& u,
@@ -271,6 +279,9 @@ namespace Rodin::Variational
 
 namespace Rodin::PETSc::Variational
 {
+  /**
+   * @brief Convenient PETSc alias for Rodin::Variational::BilinearForm.
+   */
   template <class Solution, class TrialFES, class TestFES>
   using BilinearForm =
     Rodin::Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>;

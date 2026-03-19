@@ -25,9 +25,12 @@
 namespace Rodin::IO
 {
   /**
-   * @brief PETSc Vec printer specialization for MEDIT output.
+   * @brief MEDIT printer for PETSc-backed grid functions.
    *
-   * Writes scalar or vector nodal values in MEDIT-compatible layout.
+   * Writes scalar or vector-valued nodal data in MEDIT-compatible
+   * format, one value (or component tuple) per mesh vertex.
+   *
+   * @tparam FES Finite element space type.
    */
   template <class FES>
   class GridFunctionPrinter<

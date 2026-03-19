@@ -3,7 +3,7 @@
 
 /**
  * @file
- * @brief PETSc specialization of the conjugate-gradient solver.
+ * @brief PETSc specialization of the conjugate gradient (CG) solver.
  */
 
 #include <petscksp.h>
@@ -52,6 +52,8 @@ namespace Rodin::Solver
        */
       CG(CG&& other);
 
+      /// @brief Creates a heap-allocated copy of this CG solver.
+      /// @returns Pointer to the cloned CG instance.
       CG* copy() const noexcept override
       {
         return new CG(*this);

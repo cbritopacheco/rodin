@@ -31,7 +31,14 @@
 namespace Rodin::Variational
 {
   /**
-   * @brief Variational problem specialization assembled into PETSc linear systems.
+   * @brief PETSc variational problem for a single trial/test function pair.
+   *
+   * Assembles the variational formulation into a
+   * @ref Rodin::PETSc::Math::LinearSystem and solves it with a
+   * PETSc-compatible linear solver.
+   *
+   * @tparam U Trial function type.
+   * @tparam V Test function type.
    */
   template <class U, class V>
   class Problem<PETSc::Math::LinearSystem, U, V>
@@ -83,6 +90,11 @@ namespace Rodin::Variational
       static_assert(
           std::is_same_v<TrialFESMeshContextType, TestFESMeshContextType>);
 
+      /**
+       * @brief Constructs the problem from a trial and test function pair.
+       * @param u Trial function.
+       * @param v Test function.
+       */
       Problem(U& u, V& v)
         : Parent(u, v),
           m_axb(
@@ -184,6 +196,10 @@ namespace Rodin::Variational
       AssemblyType m_assembly;
   };
 
+  /**
+   * @ingroup RodinCTAD
+   * @brief Deduction guide for two-field PETSc Problem.
+   */
   template <class Solution, class TrialFES, class TestFES>
   Problem(
       PETSc::Variational::TrialFunction<Solution, TrialFES>&,
@@ -193,6 +209,18 @@ namespace Rodin::Variational
           TrialFunction<Solution, TrialFES>,
           TestFunction<TestFES>>;
 
+  /**
+   * @brief PETSc variational problem for multiple trial/test functions.
+   *
+   * Supports coupled multi-physics systems by accepting an arbitrary
+   * number of PETSc trial and test function arguments. Assembles a
+   * block-structured @ref Rodin::PETSc::Math::LinearSystem.
+   *
+   * @tparam U1  First function type (trial or test).
+   * @tparam U2  Second function type.
+   * @tparam U3  Third function type.
+   * @tparam Us  Additional function types.
+   */
   template <class U1, class U2, class U3, class... Us>
   class Problem<PETSc::Math::LinearSystem, U1, U2, U3, Us...>
     : public ProblemBase<PETSc::Math::LinearSystem>
@@ -473,6 +501,12 @@ namespace Rodin::Variational
         return new Problem(*this);
       }
 
+      /**
+       * @brief Configures PETSc field-split index sets for block preconditioning.
+       *
+       * Must be called after assemble(). Creates one `IS` per trial field
+       * using the computed DOF offsets.
+       */
       void setFieldSplits()
       {
         if (!m_assembled)
@@ -684,6 +718,10 @@ namespace Rodin::Variational
          IsPETScTestFunction<std::decay_t<T>>::value) &&
         AllPETScTrialOrTest<Ts...>::value> {};
 
+  /**
+   * @ingroup RodinCTAD
+   * @brief Deduction guide for multi-field PETSc Problem.
+   */
   // PETSc-only CTAD guide (enabled only if ALL args are PETSc trial/test wrappers)
   template <class U1, class U2, class U3, class... Us>
     requires AllPETScTrialOrTest<U1, U2, U3, Us...>::value
@@ -693,6 +731,9 @@ namespace Rodin::Variational
 
 namespace Rodin::PETSc::Variational
 {
+  /**
+   * @brief Convenient PETSc alias for Rodin::Variational::Problem.
+   */
   template <class ... Us>
   using Problem =
     Rodin::Variational::Problem<PETSc::Math::LinearSystem, Us...>;

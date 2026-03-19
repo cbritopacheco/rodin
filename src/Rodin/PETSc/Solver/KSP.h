@@ -66,12 +66,19 @@ namespace Rodin::Solver
       void solve(LinearSystemType& b) override;
 
       /**
-       * @brief Selects the PETSc KSP algorithm type.
+       * @brief Selects the Krylov subspace method.
+       * @param type PETSc KSP type string (e.g. `KSPCG`, `KSPGMRES`).
+       * @returns Reference to `*this` for method chaining.
        */
       KSP& setType(::KSPType type) noexcept;
 
       /**
-       * @brief Sets PETSc convergence tolerances and iteration cap.
+       * @brief Sets convergence tolerances and maximum iteration count.
+       * @param rtol   Relative decrease in residual norm.
+       * @param abstol Absolute residual norm threshold.
+       * @param dtol   Divergence tolerance.
+       * @param maxIt  Maximum number of iterations.
+       * @returns Reference to `*this`.
        */
       KSP& setTolerances(PetscReal rtol,
                          PetscReal abstol,
@@ -79,27 +86,35 @@ namespace Rodin::Solver
                          PetscInt  maxIt) noexcept;
 
       /**
-       * @brief Sets an explicit preconditioner operator.
+       * @brief Sets an explicit preconditioner matrix.
+       * @param P PETSc matrix to use as preconditioner operator.
+       * @returns Reference to `*this`.
        */
       KSP& setPreconditioner(OperatorType P) noexcept;
 
+      /// @brief Returns a mutable reference to the underlying PETSc KSP handle.
+      /// @returns Mutable reference to the KSP handle.
       HandleType& getHandle() noexcept override;
 
+      /// @brief Returns a read-only reference to the underlying PETSc KSP handle.
+      /// @returns Const reference to the KSP handle.
       const HandleType& getHandle() const noexcept override;
 
+      /// @brief Creates a heap-allocated copy of this solver.
+      /// @returns Pointer to the cloned KSP instance.
       virtual KSP* copy() const noexcept override
       {
         return new KSP(*this);
       }
 
     private:
-      HandleType   m_ksp;
-      ::KSPType    m_type;
-      PetscReal    m_rtol,
-                   m_abstol,
-                   m_dtol;
-      PetscInt     m_maxIt;
-      std::optional<OperatorType> m_preconditioner;
+      HandleType   m_ksp;  ///< Underlying PETSc KSP context.
+      ::KSPType    m_type; ///< Requested KSP algorithm type.
+      PetscReal    m_rtol, ///< Relative convergence tolerance.
+                   m_abstol, ///< Absolute convergence tolerance.
+                   m_dtol; ///< Divergence tolerance.
+      PetscInt     m_maxIt; ///< Maximum iteration count.
+      std::optional<OperatorType> m_preconditioner; ///< Optional preconditioner matrix.
   };
 } // namespace Rodin::Solver
 
