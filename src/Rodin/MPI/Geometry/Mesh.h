@@ -736,7 +736,9 @@ namespace Rodin::Geometry
       Mesh& reconcile(size_t d);
 
     private:
+      /// MPI execution context associated with this distributed mesh.
       Context::MPI m_context;
+      /// Rank-local shard containing geometry, topology, and ownership metadata.
       Shard m_shard;
   };
 }
