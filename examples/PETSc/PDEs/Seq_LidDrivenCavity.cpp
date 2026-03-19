@@ -110,49 +110,53 @@
  * -------------------------
  * Direct-solver diagnostic path:
  *
- *   -ksp_type preonly
- *   -pc_type lu
- *   -pc_factor_shift_type nonzero
- *   -pc_factor_shift_amount 1e-10
+ *  -ksp_type preonly
+ *  -pc_type lu
+ *  -pc_factor_shift_type nonzero
+ *  -pc_factor_shift_amount 1e-10
  *
  * This is useful to verify that the assembled mixed system is solvable and that
  * any remaining issues are more likely due to iterative preconditioning than to
  * the variational formulation itself.
  *
+ * Performant direct solve:
+ *
+ *  -ksp_type preonly
+ *  -pc_type lu
+ *  -pc_factor_mat_solver_type mumps
+ *  -mat_mumps_icntl_7 7
+ *  -ksp_converged_reason
+ *  -pc_factor_shift_type nonzero
+ *  -pc_factor_shift_amount 1e-10
+ *
  * Iterative solver path for mixed systems:
  *
- *   -ksp_type fgmres
- *   -pc_type fieldsplit
- *   -pc_fieldsplit_type schur
- *   -pc_fieldsplit_schur_fact_type lower
- *   -pc_fieldsplit_schur_precondition selfp
- *   -fieldsplit_u_ksp_type preonly
- *   -fieldsplit_u_pc_type gamg
- *   -fieldsplit_p_ksp_type preonly
- *   -fieldsplit_p_pc_type jacobi
- *   -ksp_rtol 1e-6
- *   -ksp_monitor
- *   -ksp_converged_reason
+ *  -ksp_type fgmres
+ *  -pc_type fieldsplit
+ *  -pc_fieldsplit_type schur
+ *  -pc_fieldsplit_schur_fact_type lower
+ *  -pc_fieldsplit_schur_precondition selfp
+ *  -fieldsplit_u_ksp_type preonly
+ *  -fieldsplit_u_pc_type gamg
+ *  -fieldsplit_p_ksp_type preonly
+ *  -fieldsplit_p_pc_type jacobi
+ *  -ksp_rtol 1e-6
+ *  -ksp_monitor
+ *  -ksp_converged_reason
  *
  * The direct-solver path is recommended first when debugging a new example.
  * Once that works, the Schur-complement fieldsplit path is the more natural
  * iterative strategy for the mixed velocity-pressure system.
  */
 
-#include "Rodin/Alert/Info.h"
-#include "Rodin/Alert/Raise.h"
-#include "Rodin/Math/SpatialVector.h"
 #include <Rodin/Types.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Assembly.h>
 #include <Rodin/Geometry.h>
+#include <Rodin/IO/XDMF.h>
 #include <Rodin/Variational.h>
-#include <Rodin/PETSc.h>
 
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <sstream>
+#include <Rodin/PETSc.h>
 
 using namespace Rodin;
 using namespace Rodin::Math;
@@ -197,7 +201,7 @@ int main(int argc, char** argv)
   //
   // The mesh is first generated on an integer grid and then scaled to [0,1]^2.
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+  mesh = mesh.UniformGrid(Polytope::Type::Quadrilateral, { n, n });
   mesh.getConnectivity().compute(1, 2);
   mesh.scale(1.0 / (n - 1));
 
@@ -231,7 +235,9 @@ int main(int argc, char** argv)
     mesh.setAttribute(it.key(), attr);
   }
 
-  mesh.save("LidDrivenCavity.mesh", IO::FileFormat::MEDIT);
+  Alert::Info() << "Setting up LidDrivenCavity.xdmf ..." << Alert::Raise;
+  IO::XDMF xdmf("LidDrivenCavity");
+  xdmf.setMesh(mesh);
 
   const size_t dim = mesh.getSpaceDimension();
 
@@ -241,94 +247,102 @@ int main(int argc, char** argv)
   H1 uh(std::integral_constant<size_t, 2>{}, mesh, dim);
   H1 ph(std::integral_constant<size_t, 1>{}, mesh);
 
-  // Unknowns and test functions.
-  PETSc::Variational::TrialFunction u(uh); u.setName("u");
-  PETSc::Variational::TrialFunction p(ph); p.setName("p");
-  PETSc::Variational::TestFunction  v(uh);
-  PETSc::Variational::TestFunction  q(ph);
 
-  // Solution fields from the previous time step.
-  PETSc::Variational::GridFunction u_old(uh);
-  PETSc::Variational::GridFunction p_old(ph);
-
-  // Initial condition: fluid initially at rest, zero pressure.
-  u_old = Math::Vector<Real>{{0.0, 0.0}};
-  p_old = 0.0;
-
-  // Prescribed lid velocity.
-  const VectorFunction lidVelocity{1.0, 0.0};
-
-  // Time loop.
-  for (Index k = 0; k < Nt; k++)
   {
-    // Oseen / Picard linearization:
-    //   (u_old · ∇)u
-    const auto conv_u = Mult(Jacobian(u), u_old);
+    // Unknowns and test functions.
+    PETSc::Variational::TrialFunction u(uh); u.setName("u");
+    PETSc::Variational::TrialFunction p(ph); p.setName("p");
+    PETSc::Variational::TestFunction  v(uh);
+    PETSc::Variational::TestFunction  q(ph);
 
-    // Divergence of the frozen transport velocity.
-    //
-    // Included in the skew-symmetric linearization:
-    //   ((u_old · ∇)u, v) + 0.5 ((div u_old) u, v)
-    const auto div_u_old = Div(u_old);
+    // Solution fields from the previous time step.
+    PETSc::Variational::GridFunction u_old(uh);
+    PETSc::Variational::GridFunction p_old(ph);
 
-    // Mixed transient Oseen problem at the current time step.
-    Problem flow(u, p, v, q);
-    flow =
-        // Backward Euler time derivative:
-        //   (rho / dt) (u - u_old, v)
-        (rho / dt) * Integral(u, v)
-      - (rho / dt) * Integral(u_old, v)
+    xdmf.add("velocity", u.getSolution());
+    xdmf.add("pressure", p.getSolution());
 
-        // Linearized convection:
-        //   rho ((u_old · ∇)u, v)
-      + rho * Integral(Dot(conv_u, v))
+    // Initial condition: fluid initially at rest, zero pressure.
+    u_old = Math::Vector<Real>{{0.0, 0.0}};
+    p_old = 0.0;
 
-        // Skew-symmetric correction:
-        //   (rho / 2) ((div u_old) u, v)
-      + 0.5 * rho * Integral(div_u_old * Dot(u, v))
+    // Prescribed lid velocity.
 
-        // Viscous term:
-        //   mu (∇u, ∇v)
-      + mu * Integral(Jacobian(u), Jacobian(v))
+    // Time loop.
+    Real t = 0.0;
+    for (Index k = 0; k < Nt; k++)
+    {
+      const VectorFunction lidVelocity{ 20 * Sin(RealFunction(2 * M_PI * t * 50.0 / 60.0)) , 0.0};
 
-        // Pressure-velocity coupling:
-        //   -(p, div v)
-      - Integral(p, Div(v))
+      t += dt;
 
-        // Incompressibility constraint:
-        //   (div u, q)
-      + Integral(Div(u), q)
 
-        // Tiny pressure-block diagonal filler.
-        //
-        // This is not pressure stabilization in the inf-sup sense. It is only a
-        // numerical aid for sparse direct factorization of the mixed system.
-      + 1e-12 * Integral(p, q)
+      // Oseen / Picard linearization:
+      //   (u_old · ∇)u
+      const auto conv_u = Mult(Jacobian(u), u_old);
 
-        // No-slip boundary conditions on the cavity walls.
-      + DirichletBC(u, Zero(dim)).on(left)
-      + DirichletBC(u, Zero(dim)).on(right)
-      + DirichletBC(u, Zero(dim)).on(bottom)
+      // Divergence of the frozen transport velocity.
+      //
+      // Included in the skew-symmetric linearization:
+      //   ((u_old · ∇)u, v) + 0.5 ((div u_old) u, v)
+      const auto div_u_old = Div(u_old);
 
-        // Moving lid on the top boundary.
-      + DirichletBC(u, lidVelocity).on(top);
+      // Mixed transient Oseen problem at the current time step.
+      Problem flow(u, p, v, q);
+      flow =
+          // Backward Euler time derivative:
+          //   (rho / dt) (u - u_old, v)
+          (rho / dt) * Integral(u, v)
+        - (rho / dt) * Integral(u_old, v)
 
-    Alert::Info() << "Assembling time step " << k + 1 << " / " << Nt << "..."
-      << Alert::Raise;
-    flow.assemble().setFieldSplits();
+          // Linearized convection:
+          //   rho ((u_old · ∇)u, v)
+        + rho * Integral(Dot(conv_u, v))
 
-    Alert::Info() << "Solving time step " << k + 1 << " / " << Nt << "..."
-      << Alert::Raise;
-    Solver::KSP(flow).solve();
+          // Skew-symmetric correction:
+          //   (rho / 2) ((div u_old) u, v)
+        + 0.5 * rho * Integral(div_u_old * Dot(u, v))
 
-    // Advance the time history.
-    u_old.setData(u.getSolution().getData());
-    p_old.setData(p.getSolution().getData());
+          // Viscous term:
+          //   mu (∇u, ∇v)
+        + mu * Integral(Jacobian(u), Jacobian(v))
 
-    // Save solution snapshots.
-    mesh.save("LidDrivenCavity." + std::to_string(k) + ".mesh", IO::FileFormat::MEDIT);
-    u_old.save("LidDrivenCavity." + std::to_string(k) + ".sol", IO::FileFormat::MEDIT);
-    // p_old.save("LidDrivenCavity_pressure_" + std::to_string(k) + ".gf", IO::FileFormat::MEDIT);
+          // Pressure-velocity coupling:
+          //   -(p, div v)
+        - Integral(p, Div(v))
+
+          // Incompressibility constraint:
+          //   (div u, q)
+        + Integral(Div(u), q)
+
+          // Tiny pressure-block diagonal filler.
+          //
+          // This is not pressure stabilization in the inf-sup sense. It is only a
+          // numerical aid for sparse direct factorization of the mixed system.
+        + 1e-12 * Integral(p, q)
+
+          // No-slip boundary conditions on the cavity walls.
+        + DirichletBC(u, Zero(dim)).on(left)
+        + DirichletBC(u, Zero(dim)).on(right)
+        + DirichletBC(u, Zero(dim)).on(bottom)
+
+          // Moving lid on the top boundary.
+        + DirichletBC(u, lidVelocity).on(top);
+
+      Alert::Info() << "Assembling time step " << k + 1 << " / " << Nt << "..."
+        << Alert::Raise;
+      flow.assemble().setFieldSplits();
+
+      Alert::Info() << "Solving time step " << k + 1 << " / " << Nt << "..."
+        << Alert::Raise;
+      Solver::KSP(flow).solve();
+
+      // Advance the time history.
+      u_old.setData(u.getSolution().getData());
+      p_old.setData(p.getSolution().getData());
+
+      xdmf.write(t).flush();
+    }
   }
 
   PetscFinalize();

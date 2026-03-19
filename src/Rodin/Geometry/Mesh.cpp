@@ -6,6 +6,7 @@
  */
 #include "Rodin/Alert/MemberFunctionException.h"
 
+#include "Rodin/Alert/NamespacedException.h"
 #include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Variational/P1.h"
 #include "Rodin/Variational/GridFunction.h"
@@ -753,6 +754,15 @@ namespace Rodin::Geometry
   {
     Builder build;
     const size_t dim = Polytope::Traits(g).getDimension();
+
+    if (dimensions.size() != dim)
+    {
+      Alert::NamespacedException("Rodin::Geometry::Mesh<Context::Local>::UniformGrid")
+        << "Expected " << dim << " dimensions for geometry type " << g
+        << ", but got " << dimensions.size() << "."
+        << Alert::Raise;
+    }
+
     switch (g)
     {
       case Polytope::Type::Point:

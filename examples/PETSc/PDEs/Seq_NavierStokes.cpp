@@ -68,19 +68,14 @@
  * -pc_factor_shift_type nonzero  -pc_factor_shift_amount 1e-10
  */
 
-#include "Rodin/IO/XDMF.h"
 #include <Rodin/Types.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Assembly.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
+#include <Rodin/IO/XDMF.h>
 
 #include <Rodin/PETSc.h>
-
-#include <array>
-#include <cmath>
-#include <fstream>
-#include <iostream>
 
 using namespace Rodin;
 using namespace Rodin::Math;
@@ -151,6 +146,7 @@ int main(int argc, char** argv)
   mesh.save("NavierStokes.mesh", IO::FileFormat::MEDIT);
 
   Alert::Info() << "Setting up NavierStokes.xdmf ..." << Alert::Raise;
+
   IO::XDMF xdmf("NavierStokes");
   xdmf.setMesh(mesh);
 
