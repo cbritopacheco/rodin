@@ -73,24 +73,31 @@ namespace Rodin::Variational
         const PetscScalar* raw = PETSC_NULLPTR;
       };
 
+      /// @brief Finite element space type.
       using FESType =
         FES;
 
+      /// @brief Underlying PETSc vector data type.
       using DataType =
         ::Vec;
 
+      /// @brief Scalar type (PETSc scalar).
       using ScalarType =
         PetscScalar;
 
+      /// @brief Range type of the finite element space.
       using RangeType =
         typename FormLanguage::Traits<FESType>::RangeType;
 
+      /// @brief Mesh type associated with the finite element space.
       using FESMeshType =
         typename FormLanguage::Traits<FESType>::MeshType;
 
+      /// @brief Context type (Local or MPI) of the finite element space mesh.
       using FESMeshContextType =
         typename FormLanguage::Traits<FESMeshType>::ContextType;
 
+      /// @brief Parent class type.
       using Parent =
         GridFunctionBase<GridFunction<FESType, DataType>>;
 
@@ -220,6 +227,11 @@ namespace Rodin::Variational
         other.m_write = {.acquired = false, .ghost = PETSC_NULLPTR, .raw = PETSC_NULLPTR};
       }
 
+      /**
+       * @brief Copy assignment operator.
+       * @param[in] other Grid function to copy from.
+       * @return Reference to this grid function.
+       */
       GridFunction& operator=(const GridFunction& other)
       {
         if (this == &other)
@@ -246,6 +258,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Move assignment operator.
+       * @param[in] other Grid function to move from.
+       * @return Reference to this grid function.
+       */
       GridFunction& operator=(GridFunction&& other) noexcept
       {
         if (this == &other)
@@ -269,11 +286,17 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Destructor; releases the PETSc vector and array handles.
       virtual ~GridFunction()
       {
         this->release();
       }
 
+      /**
+       * @brief Finds the minimum value in the grid function.
+       * @param[out] idx Index of the minimum value.
+       * @returns The minimum scalar value.
+       */
       constexpr
       ScalarType min(Index& idx) const
       {
@@ -287,6 +310,11 @@ namespace Rodin::Variational
         return res;
       }
 
+      /**
+       * @brief Finds the maximum value in the grid function.
+       * @param[out] idx Index of the maximum value.
+       * @returns The maximum scalar value.
+       */
       constexpr
       ScalarType max(Index& idx) const
       {
@@ -359,6 +387,11 @@ namespace Rodin::Variational
         }
       }
 
+      /**
+       * @brief Adds a scalar to all DOF values.
+       * @param[in] rhs Scalar to add.
+       * @return Reference to this grid function.
+       */
       GridFunction& operator+=(const ScalarType& rhs)
       {
         static_assert(std::is_same_v<RangeType, ScalarType>);
@@ -371,6 +404,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Subtracts a scalar from all DOF values.
+       * @param[in] rhs Scalar to subtract.
+       * @return Reference to this grid function.
+       */
       GridFunction& operator-=(const ScalarType& rhs)
       {
         static_assert(std::is_same_v<RangeType, ScalarType>);
@@ -383,6 +421,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Scales all DOF values by a scalar.
+       * @param[in] rhs Scalar multiplier.
+       * @return Reference to this grid function.
+       */
       GridFunction& operator*=(const ScalarType& rhs)
       {
         this->flush();
@@ -394,6 +437,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Divides all DOF values by a scalar.
+       * @param[in] rhs Scalar divisor.
+       * @return Reference to this grid function.
+       */
       GridFunction& operator/=(const ScalarType& rhs)
       {
         this->flush();
@@ -405,6 +453,11 @@ namespace Rodin::Variational
         return static_cast<GridFunction&>(*this);
       }
 
+      /**
+       * @brief Component-wise addition of another grid function.
+       * @param[in] rhs Grid function to add.
+       * @return Reference to this grid function.
+       */
       GridFunction& operator+=(const GridFunction& rhs)
       {
         assert(&this->getFiniteElementSpace() == &rhs.getFiniteElementSpace());
@@ -417,6 +470,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Component-wise subtraction of another grid function.
+       * @param[in] rhs Grid function to subtract.
+       * @return Reference to this grid function.
+       */
       GridFunction& operator-=(const GridFunction& rhs)
       {
         assert(&this->getFiniteElementSpace() == &rhs.getFiniteElementSpace());
@@ -429,6 +487,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Component-wise multiplication by another grid function.
+       * @param[in] rhs Grid function to multiply by.
+       * @return Reference to this grid function.
+       */
       GridFunction& operator*=(const GridFunction& rhs)
       {
         this->flush();
@@ -440,6 +503,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Component-wise division by another grid function.
+       * @param[in] rhs Grid function to divide by.
+       * @return Reference to this grid function.
+       */
       GridFunction& operator/=(const GridFunction& rhs)
       {
         this->flush();
@@ -540,6 +608,16 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Projects a function onto the grid function over a mesh region.
+       *
+       * @tparam Function Callable type for the projection.
+       * @tparam Pred     Predicate filtering polytopes.
+       * @param[in] region Mesh region to project over.
+       * @param[in] v      Function to project.
+       * @param[in] pred   Predicate selecting polytopes within the region.
+       * @return Reference to this grid function.
+       */
       template <class Function, class Pred>
       GridFunction& project(const Geometry::Region& region, const Function& v, const Pred& pred)
       {
@@ -763,27 +841,44 @@ namespace Rodin::Variational
         return m_data;
       }
 
+      /// @brief Returns the current read-access state.
       const ArrayRead& getArrayRead() const
       {
         return m_read;
       }
 
+      /// @brief Returns the current write-access state.
       const ArrayWrite& getArrayWrite() const
       {
         return m_write;
       }
 
+      /// @brief Returns the polynomial order on the given polytope, if known.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope&) const
       {
         return std::nullopt;
       }
 
+      /**
+       * @brief Evaluates the grid function at a geometric point.
+       * @param[in] p The evaluation point.
+       * @returns The interpolated value at @p p.
+       */
       decltype(auto) operator()(const Geometry::Point& p) const
       {
         return this->getValue(p);
       }
 
+      /**
+       * @brief Evaluates the grid function at a geometric point.
+       *
+       * In Local mode, delegates to the parent interpolation.
+       * In MPI mode, checks the local shard for the point.
+       *
+       * @param[in] p The evaluation point.
+       * @returns The interpolated value at @p p.
+       */
       decltype(auto) getValue(const Geometry::Point& p) const
       {
         if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
@@ -908,12 +1003,12 @@ namespace Rodin::Variational
       }
 
     private:
-      DataType m_data;
-      size_t m_begin, m_end;
-      GhostBimap m_ghosts;
+      DataType m_data;          ///< Underlying PETSc vector storing DOF values.
+      size_t m_begin, m_end;    ///< Owned DOF range [m_begin, m_end) in MPI mode.
+      GhostBimap m_ghosts;      ///< Ghost DOF index mapping.
 
-      mutable ArrayRead m_read;
-      mutable ArrayWrite m_write;
+      mutable ArrayRead m_read;   ///< Read-access state.
+      mutable ArrayWrite m_write; ///< Write-access state.
   };
 }
 
@@ -930,6 +1025,7 @@ namespace Rodin::PETSc::Variational
     : public Rodin::Variational::GridFunction<FES, ::Vec>
   {
     public:
+      /// @brief Parent class type.
       using Parent = Rodin::Variational::GridFunction<FES, ::Vec>;
       using Parent::Parent;
       using Parent::operator[];
@@ -952,10 +1048,15 @@ namespace Rodin::PETSc::Variational
 
 namespace Rodin::FormLanguage
 {
+  /**
+   * @brief Form-language traits for PETSc grid functions.
+   */
   template <class FES>
   struct Traits<PETSc::Variational::GridFunction<FES>>
   {
+    /// @brief Finite element space type.
     using FESType = FES;
+    /// @brief Data storage type (PETSc vector).
     using DataType = ::Vec;
   };
 }
