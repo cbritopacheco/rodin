@@ -4,6 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file Mesh.h
+ * @brief MMG-aware mesh type extending Rodin local meshes.
+ */
 #ifndef RODIN_EXTERNAL_MMG_MESH_H
 #define RODIN_EXTERNAL_MMG_MESH_H
 
@@ -12,7 +16,17 @@
 namespace Rodin::MMG
 {
   /**
-   * @brief Mesh class which has support for MMG functionalities.
+   * @brief Local mesh enriched with MMG boundary tags and constraints.
+   *
+   * This class extends @ref Rodin::Geometry::Mesh<Context::Local> with index
+   * sets required by MMG workflows:
+   * - corners (`MG_CRN`),
+   * - ridges (`MG_GEO`),
+   * - required vertices (`MG_REQ`),
+   * - required edges (`MG_REQ` on edges).
+   *
+   * These sets are preserved when converting to/from native MMG structures via
+   * @ref MMG5::rodinToMesh and @ref MMG5::meshToRodin.
    */
   class Mesh : public Geometry::Mesh<Context::Local>
   {
@@ -22,14 +36,16 @@ namespace Rodin::MMG
 
       using Context = typename Parent::Context;
 
-      /// Index of corners in the mesh
+      /// Index set of corner vertices in the mesh.
       using CornerIndex = IndexSet;
 
-      /// Index of ridges in the mesh
+      /// Index set of ridge edges in the mesh.
       using RidgeIndex = IndexSet;
 
+      /// Index set of required vertices in the mesh.
       using RequiredVertexIndex = IndexSet;
 
+      /// Index set of required edges in the mesh.
       using RequiredEdgeIndex = IndexSet;
 
       /**
@@ -65,21 +81,35 @@ namespace Rodin::MMG
           Builder& operator=(Builder&& other);
 
           /**
-           * @brief Adds the vertex to the corner index.
+           * @brief Marks a vertex as a corner.
+           * @param[in] vertexIdx Vertex index in the mesh.
+           * @returns Reference to this builder.
            */
           Builder& corner(Index vertexIdx);
 
           /**
-           * @brief Adds the edge to the ridge index.
+           * @brief Marks an edge as a ridge.
+           * @param[in] edgeIdx Edge index in the mesh.
+           * @returns Reference to this builder.
            */
           Builder& ridge(Index edgeIdx);
 
+          /**
+           * @brief Marks an edge as required.
+           * @param[in] edgeIdx Edge index in the mesh.
+           * @returns Reference to this builder.
+           */
           Builder& requiredEdge(Index edgeIdx);
 
+          /**
+           * @brief Marks a vertex as required.
+           * @param[in] vertexIdx Vertex index in the mesh.
+           * @returns Reference to this builder.
+           */
           Builder& requiredVertex(Index vertexIdx);
 
           /**
-           * @brief Finishes construction of the MMG::Mesh and returns it.
+           * @brief Finalizes and returns the constructed MMG mesh.
            */
           Mesh finalize();
 
@@ -91,7 +121,7 @@ namespace Rodin::MMG
       };
 
       /**
-       * @brief Generates a Builder instance to build an MMG::Mesh object.
+       * @brief Creates a builder for constructing an @ref MMG::Mesh instance.
        */
       static MMG::Mesh::Builder Build()
       {
@@ -99,12 +129,12 @@ namespace Rodin::MMG
       }
 
       /**
-      * @brief Constructs an empty mesh with no elements.
-      */
+       * @brief Constructs an empty MMG mesh.
+       */
       Mesh() = default;
 
       /**
-       * @brief Move constructs a Mesh to an MMG::Mesh.
+       * @brief Move-constructs from a base local mesh.
        */
       Mesh(Parent&& other)
         : Parent(std::move(other))
@@ -152,22 +182,35 @@ namespace Rodin::MMG
       }
 
       /**
-       * @brief Adds the vertex to the corner index.
+       * @brief Marks a vertex as a corner.
+       * @param[in] vertexIdx Vertex index.
+       * @returns Reference to this mesh.
        */
       Mesh& setCorner(Index vertexIdx);
 
       /**
-        m_cornerIndex = std::move(other.m_cornerIndex);
-       * @brief Adds the edge to the ridge index.
+       * @brief Marks an edge as a ridge.
+       * @param[in] edgeIdx Edge index.
+       * @returns Reference to this mesh.
        */
       Mesh& setRidge(Index edgeIdx);
 
+      /**
+       * @brief Marks an edge as required.
+       * @param[in] edgeIdx Edge index.
+       * @returns Reference to this mesh.
+       */
       Mesh& setRequiredEdge(Index edgeIdx);
 
+      /**
+       * @brief Marks a vertex as required.
+       * @param[in] edgeIdx Vertex index.
+       * @returns Reference to this mesh.
+       */
       Mesh& setRequiredVertex(Index edgeIdx);
 
       /**
-       * @brief Gets the index of corners.
+       * @brief Gets the corner index set (const).
        */
       const CornerIndex& getCorners() const
       {
@@ -175,7 +218,7 @@ namespace Rodin::MMG
       }
 
       /**
-       * @brief Gets the index of corners.
+       * @brief Gets the corner index set.
        */
       CornerIndex& getCorners()
       {
@@ -183,7 +226,7 @@ namespace Rodin::MMG
       }
 
       /**
-       * @brief Gets the index of ridges.
+       * @brief Gets the ridge index set (const).
        */
       const RidgeIndex& getRidges() const
       {
@@ -191,37 +234,68 @@ namespace Rodin::MMG
       }
 
       /**
-       * @brief Gets the index of ridges.
+       * @brief Gets the ridge index set.
        */
       RidgeIndex& getRidges()
       {
         return m_ridgeIndex;
       }
 
+      /**
+       * @brief Gets the required-edge index set.
+       */
       RequiredEdgeIndex& getRequiredEdges()
       {
         return m_requiredEdgeIndex;
       }
 
+      /**
+       * @brief Gets the required-edge index set (const).
+       */
       const RequiredEdgeIndex& getRequiredEdges() const
       {
         return m_requiredEdgeIndex;
       }
 
+      /**
+       * @brief Gets the required-vertex index set.
+       */
       RequiredVertexIndex& getRequiredVertices()
       {
         return m_requiredVertexIndex;
       }
 
+      /**
+       * @brief Gets the required-vertex index set (const).
+       */
       const RequiredVertexIndex& getRequiredVertices() const
       {
         return m_requiredVertexIndex;
       }
 
+      /**
+       * @brief Saves the mesh to disk.
+       * @param[in] filename Destination path.
+       * @param[in] fmt Explicit file format.
+       *
+       * For @ref Rodin::IO::FileFormat::MEDIT this writes MMG-specific sections
+       * via @ref MeshPrinter. Other formats delegate to the parent mesh
+       * implementation.
+       */
       void save(
          const boost::filesystem::path& filename,
          IO::FileFormat fmt) const override;
 
+      /**
+       * @brief Loads the mesh from disk.
+       * @param[in] filename Source path.
+       * @param[in] fmt Explicit file format.
+       * @returns Reference to this mesh.
+       *
+       * For @ref Rodin::IO::FileFormat::MEDIT this restores MMG-specific
+       * sections via @ref MeshLoader. Other formats delegate to the parent mesh
+       * implementation.
+       */
       Mesh& load(
          const boost::filesystem::path& filename,
          IO::FileFormat fmt) override;

@@ -4,6 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file MMG5.h
+ * @brief Core MMG wrapper utilities for mesh/solution conversion and parameters.
+ */
 #ifndef RODIN_RODINEXTERNAL_MMG_MMG5_H
 #define RODIN_RODINEXTERNAL_MMG_MMG5_H
 
@@ -21,6 +25,10 @@
 
 namespace Rodin::MMG
 {
+  /**
+   * @brief Exception type for MMG wrapper failures.
+   * @tparam FuncName Type of the function-name object passed by caller.
+   */
   template <class FuncName>
   class MMG5Exception : public Alert::Exception
   {
@@ -33,22 +41,34 @@ namespace Rodin::MMG
       }
   };
 
-  /// Type of return code used by the MMG functions.
+  /// Return-code type used by MMG C API calls.
   using ReturnCode = int;
 
   /**
-   * @brief Class representing MMG5 objects utilized in the MMG framework.
+   * @brief Base class for MMG-backed operations in Rodin.
    *
-   * This class is used for wrappping the functionality of the MMG library.
+   * Provides:
+   * - allocation/deallocation helpers for MMG mesh and solution structures,
+   * - conversion between Rodin meshes/grid functions and MMG native data,
+   * - shared remeshing parameter configuration (hmin/hmax/hausd/hgrad/angle).
+   *
+   * High-level operators such as @ref Adapt, @ref Optimizer, and
+   * @ref LevelSetDiscretizer build on this class.
    */
   class MMG5
   {
     public:
+      /// MMG mesh version tag used in generated MMG mesh objects.
       static constexpr int s_meshVersionFormatted = 2;
 
       // ---- Mesh methods ---------------------------------------------------
       /**
        * @internal
+       * @brief Allocates and initializes an MMG mesh object.
+       * @param[in] version MMG mesh version.
+       * @param[in] dim Topological mesh dimension.
+       * @param[in] spaceDim Optional embedding space dimension.
+       * @returns Newly allocated MMG mesh pointer.
        */
       static MMG5_pMesh createMesh(size_t version, size_t dim, Optional<size_t> spaceDim = {});
 
@@ -64,23 +84,32 @@ namespace Rodin::MMG
       /**
        * @internal
        * @brief Determines if a mesh is surface or not.
-       * @param[in] mesh Mesh.
+       * @param[in] mesh Mesh handle.
+       * @returns `true` if the mesh is a surface manifold.
        */
       static bool isSurfaceMesh(const MMG5_pMesh mesh);
 
       /**
        * @internal
        * @brief Destroys the mesh object and frees the allocated memory.
+       * @param[in] Pointer to mesh.
        */
       static void destroyMesh(MMG5_pMesh);
 
       /**
-       * @brief Converts an MMG::Mesh object to a MMG5_pMesh object.
+       * @brief Converts a Rodin local mesh to a native MMG mesh.
+       * @param[in] src Source Rodin mesh.
+       * @returns Newly allocated MMG mesh.
+       *
+       * The conversion preserves MMG-specific tags when `src` is an
+       * @ref MMG::Mesh (corners, ridges, required entities).
        */
       static MMG5_pMesh rodinToMesh(const Rodin::Geometry::LocalMesh& src);
 
       /**
-       * @brief Converts an MMG5_pMesh object to a MMG::Mesh object.
+       * @brief Converts a native MMG mesh to @ref MMG::Mesh.
+       * @param[in] src Source MMG mesh handle.
+       * @returns Converted Rodin mesh.
        */
       static MMG::Mesh meshToRodin(const MMG5_pMesh src);
 
@@ -89,18 +118,26 @@ namespace Rodin::MMG
       /**
        * @internal
        * @brief Constructs a solution and allocates space for it.
+       * @param[in] mesh Owning MMG mesh.
+       * @param[in] vdim Value dimension (`1` for scalar, `>1` for vector).
+       * @returns Newly allocated MMG solution.
        */
       static MMG5_pSol createSolution(MMG5_pMesh mesh, size_t vdim);
 
       /**
        * @internal
+       * @brief Deep-copies an MMG solution.
+       * @param[in] src Source solution.
+       * @param[out] dst Destination solution.
        */
       static void copySolution(const MMG5_pSol src, MMG5_pSol dst);
 
       /**
        * @internal
-       * @brief Copies the solution from MMG5_pSol object to an MMG::GridFunction object.
-       * @tparam Range type of value
+       * @brief Copies values from MMG solution to Rodin MMG grid function.
+       * @tparam Range Grid function range type (`Real` or `Math::Vector<Real>`).
+       * @param[in] src Source MMG solution.
+       * @param[out] dst Destination grid function.
        */
       template <class Range>
       static void copySolution(const MMG5_pSol src, MMG::GridFunction<Range>& dst)
@@ -138,8 +175,10 @@ namespace Rodin::MMG
 
       /**
        * @internal
-       * @brief Copies the solution from MMG::GridFunction object to an MMG5_pSol object.
-       * @tparam Range type of value
+       * @brief Copies values from Rodin MMG grid function to MMG solution.
+       * @tparam Range Grid function range type (`Real` or `Math::Vector<Real>`).
+       * @param[in] src Source grid function.
+       * @param[out] dst Destination MMG solution.
        */
       template <class Range>
       static void copySolution(const MMG::GridFunction<Range>& src, MMG5_pSol dst)
@@ -230,6 +269,11 @@ namespace Rodin::MMG
        */
       MMG5();
 
+      /**
+       * @brief Enables/disables ridge angle detection.
+       * @param[in] b If `true`, enable angle detection.
+       * @returns Reference to this object.
+       */
       MMG5& setAngleDetection(bool b = true)
       {
         m_ridgeDetection = b;

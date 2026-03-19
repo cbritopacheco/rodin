@@ -4,6 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file LevelSetDiscretizer.h
+ * @brief Level-set based implicit-domain discretization utilities.
+ */
 #ifndef RODIN_EXTERNAL_MMG_IMPLICITDOMAINMESHER_H
 #define RODIN_EXTERNAL_MMG_IMPLICITDOMAINMESHER_H
 
@@ -42,6 +46,11 @@ namespace Rodin::MMG
           m_meshTheSurface(false)
       {}
 
+      /**
+       * @brief Selects whether to discretize the surface or a subdomain volume.
+       * @param[in] meshTheSurface If `true`, extract/mesh the isosurface.
+       * @returns Reference to this object.
+       */
       LevelSetDiscretizer& surface(bool meshTheSurface = true);
 
       /**
@@ -59,11 +68,21 @@ namespace Rodin::MMG
        */
       LevelSetDiscretizer& setRMC(Real rmc = 1e-5);
 
+      /**
+       * @brief Restricts level-set splitting to one base material.
+       * @param[in] ref Attribute of the base material to split.
+       * @returns Reference to this object.
+       */
       LevelSetDiscretizer& setBaseReferences(Geometry::Attribute ref)
       {
         return setBaseReferences(FlatSet<Geometry::Attribute>{ref});
       }
 
+      /**
+       * @brief Restricts level-set splitting to a set of base materials.
+       * @param[in] refs Attributes of base materials to split.
+       * @returns Reference to this object.
+       */
       LevelSetDiscretizer& setBaseReferences(const FlatSet<Geometry::Attribute>& refs);
 
       /**
@@ -144,6 +163,10 @@ namespace Rodin::MMG
         return *this;
       }
 
+      /**
+       * @brief Gets the configured material split map.
+       * @returns Immutable split policy map.
+       */
       const SplitMap& getSplitMap() const
       {
         return m_split;
