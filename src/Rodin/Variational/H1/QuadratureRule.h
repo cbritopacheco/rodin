@@ -2268,13 +2268,16 @@ namespace Rodin::Variational
 
         const H1Element<KTrial, ScalarType> trialScalarElement(geometry);
         const H1Element<KTest,  ScalarType> testScalarElement(geometry);
-        const size_t scalarCount = trialScalarElement.getCount();
+        const size_t trialScalarCount = trialScalarElement.getCount();
+        const size_t testScalarCount  = testScalarElement.getCount();
 
-        assert(scalarCount > 0);
-        assert(ntr % scalarCount == 0);
-        assert(nte % scalarCount == 0);
-        const size_t vdim_tr = ntr / scalarCount;
-        assert(vdim_tr == nte / scalarCount);
+        assert(trialScalarCount > 0);
+        assert(testScalarCount  > 0);
+        assert(ntr % trialScalarCount == 0);
+        assert(nte % testScalarCount  == 0);
+        const size_t vdim_tr = ntr / trialScalarCount;
+        const size_t vdim_te = nte / testScalarCount;
+        assert(vdim_tr == vdim_te);
         const size_t vdim = vdim_tr;
 
         const bool symmetric =
@@ -2290,10 +2293,10 @@ namespace Rodin::Variational
         static thread_local std::vector<Math::SpatialVector<ScalarType>> GtrS;
         static thread_local std::vector<Math::SpatialVector<ScalarType>> GteS;
 
-        if (GtrS.size() < scalarCount) GtrS.resize(scalarCount);
-        if (GteS.size() < scalarCount) GteS.resize(scalarCount);
-        for (size_t a = 0; a < scalarCount; ++a) GtrS[a].resize(static_cast<std::uint8_t>(d));
-        for (size_t b = 0; b < scalarCount; ++b) GteS[b].resize(static_cast<std::uint8_t>(d));
+        if (GtrS.size() < trialScalarCount) GtrS.resize(trialScalarCount);
+        if (GteS.size() < testScalarCount)  GteS.resize(testScalarCount);
+        for (size_t a = 0; a < trialScalarCount; ++a) GtrS[a].resize(static_cast<std::uint8_t>(d));
+        for (size_t b = 0; b < testScalarCount;  ++b) GteS[b].resize(static_cast<std::uint8_t>(d));
 
         for (size_t qp = 0; qp < m_ps.size(); ++qp)
         {
@@ -2310,7 +2313,7 @@ namespace Rodin::Variational
             const ScalarType a01 = Jinv(0,1), a11 = Jinv(1,1), a21 = Jinv(2,1);
             const ScalarType a02 = Jinv(0,2), a12 = Jinv(1,2), a22 = Jinv(2,2);
 
-            for (size_t a = 0; a < scalarCount; ++a)
+            for (size_t a = 0; a < trialScalarCount; ++a)
             {
               const auto g = trTabS.getGradient(qp, a);
               const ScalarType gx = g[0], gy = g[1], gz = g[2];
@@ -2318,7 +2321,7 @@ namespace Rodin::Variational
               GtrS[a][1] = a01*gx + a11*gy + a21*gz;
               GtrS[a][2] = a02*gx + a12*gy + a22*gz;
             }
-            for (size_t b = 0; b < scalarCount; ++b)
+            for (size_t b = 0; b < testScalarCount; ++b)
             {
               const auto g = teTabS.getGradient(qp, b);
               const ScalarType gx = g[0], gy = g[1], gz = g[2];
@@ -2332,14 +2335,14 @@ namespace Rodin::Variational
             const ScalarType a00 = Jinv(0,0), a10 = Jinv(1,0);
             const ScalarType a01 = Jinv(0,1), a11 = Jinv(1,1);
 
-            for (size_t a = 0; a < scalarCount; ++a)
+            for (size_t a = 0; a < trialScalarCount; ++a)
             {
               const auto g = trTabS.getGradient(qp, a);
               const ScalarType gx = g[0], gy = g[1];
               GtrS[a][0] = a00*gx + a10*gy;
               GtrS[a][1] = a01*gx + a11*gy;
             }
-            for (size_t b = 0; b < scalarCount; ++b)
+            for (size_t b = 0; b < testScalarCount; ++b)
             {
               const auto g = teTabS.getGradient(qp, b);
               const ScalarType gx = g[0], gy = g[1];
@@ -2350,12 +2353,12 @@ namespace Rodin::Variational
           else if (d == 1)
           {
             const ScalarType a00 = Jinv(0,0);
-            for (size_t a = 0; a < scalarCount; ++a)
+            for (size_t a = 0; a < trialScalarCount; ++a)
             {
               const auto g = trTabS.getGradient(qp, a);
               GtrS[a][0] = a00 * g[0];
             }
-            for (size_t b = 0; b < scalarCount; ++b)
+            for (size_t b = 0; b < testScalarCount; ++b)
             {
               const auto g = teTabS.getGradient(qp, b);
               GteS[b][0] = a00 * g[0];
@@ -2373,7 +2376,7 @@ namespace Rodin::Variational
             // Block-diagonal assembly with scalar coefficient
             if (symmetric)
             {
-              for (size_t ib = 0; ib < scalarCount; ++ib)
+              for (size_t ib = 0; ib < testScalarCount; ++ib)
               {
                 const auto& gb = GteS[ib];
                 for (size_t ia = 0; ia <= ib; ++ia)
@@ -2392,10 +2395,10 @@ namespace Rodin::Variational
             }
             else
             {
-              for (size_t ib = 0; ib < scalarCount; ++ib)
+              for (size_t ib = 0; ib < testScalarCount; ++ib)
               {
                 const auto& gb = GteS[ib];
-                for (size_t ia = 0; ia < scalarCount; ++ia)
+                for (size_t ia = 0; ia < trialScalarCount; ++ia)
                 {
                   const ScalarType kij = wdet * csv * Math::dot(gb, GtrS[ia]);
                   if (kij == ScalarType(0))
@@ -2417,10 +2420,10 @@ namespace Rodin::Variational
             // With matrix coefficient, the Frobenius inner product becomes:
             // (A * J_trial) : J_test = sum_{c,j} A(c,c2) * grad_trial_c2[j] * grad_test_c[j]
             // This breaks block-diagonal structure.
-            for (size_t ib = 0; ib < scalarCount; ++ib)
+            for (size_t ib = 0; ib < testScalarCount; ++ib)
             {
               const auto& gb = GteS[ib];
-              for (size_t ia = 0; ia < scalarCount; ++ia)
+              for (size_t ia = 0; ia < trialScalarCount; ++ia)
               {
                 // grad_tr . grad_te (scalar dot of physical gradients)
                 const ScalarType grad_dot = Math::dot(gb, GtrS[ia]);
@@ -2999,19 +3002,21 @@ namespace Rodin::Variational
         const size_t ntr = lhs.getDOFs(polytope);
         const size_t nte = rhs.getDOFs(polytope);
 
-        // --- infer vdim from your H1Element<K, Math::Vector<Scalar>> convention ---
-        // scalarCount is purely geometry+K (no vdim)
+        // --- infer vdim from H1Element<K, Scalar> conventions ---
+        // Each element's scalar count depends on its polynomial order.
         const H1Element<KTrial, ScalarType> trialScalarElement(polytope.getGeometry());
-        const H1Element<KTest,   ScalarType> testScalarElement(polytope.getGeometry());
-        const size_t scalarCount = trialScalarElement.getCount();
+        const H1Element<KTest,  ScalarType> testScalarElement(polytope.getGeometry());
+        const size_t trialScalarCount = trialScalarElement.getCount();
+        const size_t testScalarCount  = testScalarElement.getCount();
 
-        assert(scalarCount > 0);
-        assert(ntr % scalarCount == 0);
-        assert(nte % scalarCount == 0);
+        assert(trialScalarCount > 0);
+        assert(testScalarCount  > 0);
+        assert(ntr % trialScalarCount == 0);
+        assert(nte % testScalarCount  == 0);
 
-        const size_t vdim_tr = ntr / scalarCount;
-        // const size_t vdim_te = nte / scalarCount;
-        assert(vdim_tr == nte / scalarCount);
+        const size_t vdim_tr = ntr / trialScalarCount;
+        const size_t vdim_te = nte / testScalarCount;
+        assert(vdim_tr == vdim_te);
         const size_t vdim = vdim_tr;
 
         const bool symmetric =
@@ -3021,17 +3026,17 @@ namespace Rodin::Variational
         m_mat.setZero();
         ScalarType* A = m_mat.data(); // row-major (rows=test, cols=trial)
 
-        // Use scalar tabulations (fast, cached in your H1Element<K, Scalar>::getTabulation)
+        // Use scalar tabulations (fast, cached in H1Element<K, Scalar>::getTabulation)
         const auto& trTabS = trialScalarElement.getTabulation(*m_qf);
         const auto& teTabS = testScalarElement.getTabulation(*m_qf);
 
         static thread_local std::vector<Math::SpatialVector<ScalarType>> GtrS;
         static thread_local std::vector<Math::SpatialVector<ScalarType>> GteS;
 
-        if (GtrS.size() < scalarCount) GtrS.resize(scalarCount);
-        if (GteS.size() < scalarCount) GteS.resize(scalarCount);
-        for (size_t a = 0; a < scalarCount; ++a) GtrS[a].resize(static_cast<std::uint8_t>(d));
-        for (size_t b = 0; b < scalarCount; ++b) GteS[b].resize(static_cast<std::uint8_t>(d));
+        if (GtrS.size() < trialScalarCount) GtrS.resize(trialScalarCount);
+        if (GteS.size() < testScalarCount)  GteS.resize(testScalarCount);
+        for (size_t a = 0; a < trialScalarCount; ++a) GtrS[a].resize(static_cast<std::uint8_t>(d));
+        for (size_t b = 0; b < testScalarCount;  ++b) GteS[b].resize(static_cast<std::uint8_t>(d));
 
         for (size_t qp = 0; qp < m_ps.size(); ++qp)
         {
@@ -3048,7 +3053,7 @@ namespace Rodin::Variational
             const ScalarType a01 = Jinv(0,1), a11 = Jinv(1,1), a21 = Jinv(2,1);
             const ScalarType a02 = Jinv(0,2), a12 = Jinv(1,2), a22 = Jinv(2,2);
 
-            for (size_t a = 0; a < scalarCount; ++a)
+            for (size_t a = 0; a < trialScalarCount; ++a)
             {
               const auto g = trTabS.getGradient(qp, a);
               const ScalarType gx = g[0], gy = g[1], gz = g[2];
@@ -3056,7 +3061,7 @@ namespace Rodin::Variational
               GtrS[a][1] = a01*gx + a11*gy + a21*gz;
               GtrS[a][2] = a02*gx + a12*gy + a22*gz;
             }
-            for (size_t b = 0; b < scalarCount; ++b)
+            for (size_t b = 0; b < testScalarCount; ++b)
             {
               const auto g = teTabS.getGradient(qp, b);
               const ScalarType gx = g[0], gy = g[1], gz = g[2];
@@ -3070,14 +3075,14 @@ namespace Rodin::Variational
             const ScalarType a00 = Jinv(0,0), a10 = Jinv(1,0);
             const ScalarType a01 = Jinv(0,1), a11 = Jinv(1,1);
 
-            for (size_t a = 0; a < scalarCount; ++a)
+            for (size_t a = 0; a < trialScalarCount; ++a)
             {
               const auto g = trTabS.getGradient(qp, a);
               const ScalarType gx = g[0], gy = g[1];
               GtrS[a][0] = a00*gx + a10*gy;
               GtrS[a][1] = a01*gx + a11*gy;
             }
-            for (size_t b = 0; b < scalarCount; ++b)
+            for (size_t b = 0; b < testScalarCount; ++b)
             {
               const auto g = teTabS.getGradient(qp, b);
               const ScalarType gx = g[0], gy = g[1];
@@ -3088,12 +3093,12 @@ namespace Rodin::Variational
           else if (d == 1)
           {
             const ScalarType a00 = Jinv(0,0);
-            for (size_t a = 0; a < scalarCount; ++a)
+            for (size_t a = 0; a < trialScalarCount; ++a)
             {
               const auto g = trTabS.getGradient(qp, a);
               GtrS[a][0] = a00 * g[0];
             }
-            for (size_t b = 0; b < scalarCount; ++b)
+            for (size_t b = 0; b < testScalarCount; ++b)
             {
               const auto g = teTabS.getGradient(qp, b);
               GteS[b][0] = a00 * g[0];
@@ -3109,7 +3114,7 @@ namespace Rodin::Variational
           if (symmetric)
           {
             // lower triangle in vector-dof space corresponds to scalar lower + component blocks
-            for (size_t ib = 0; ib < scalarCount; ++ib)
+            for (size_t ib = 0; ib < testScalarCount; ++ib)
             {
               const auto& gb = GteS[ib];
 
@@ -3130,11 +3135,11 @@ namespace Rodin::Variational
           }
           else
           {
-            for (size_t ib = 0; ib < scalarCount; ++ib)
+            for (size_t ib = 0; ib < testScalarCount; ++ib)
             {
               const auto& gb = GteS[ib];
 
-              for (size_t ia = 0; ia < scalarCount; ++ia)
+              for (size_t ia = 0; ia < trialScalarCount; ++ia)
               {
                 const ScalarType kij = wdet * Math::dot(gb, GtrS[ia]);
                 if (kij == ScalarType(0))
