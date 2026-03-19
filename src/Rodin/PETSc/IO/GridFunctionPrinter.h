@@ -7,6 +7,11 @@
 #ifndef RODIN_PETSC_IO_GRIDFUNCTIONPRINTER_H
 #define RODIN_PETSC_IO_GRIDFUNCTIONPRINTER_H
 
+/**
+ * @file
+ * @brief Forward declaration of PETSc-backed grid function printers.
+ */
+
 #include <petscvec.h>
 
 #include "Rodin/Context/Local.h"
@@ -20,8 +25,13 @@
 
 namespace Rodin::IO
 {
+  /**
+   * @brief Forward declaration for grid function printers using PETSc vectors.
+   *
+   * Concrete specializations are provided by PETSc IO backend headers such as
+   * MFEM, MEDIT, and HDF5.
+   */
   template <FileFormat Fmt, class FES>
   class GridFunctionPrinter<Fmt, FES, ::Vec>;
 }
 #endif
-

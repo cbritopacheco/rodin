@@ -7,6 +7,11 @@
 #ifndef RODIN_PETSC_IO_MFEM_H
 #define RODIN_PETSC_IO_MFEM_H
 
+/**
+ * @file
+ * @brief MFEM-format grid function printers for PETSc-backed grid functions.
+ */
+
 #include <petscvec.h>
 
 #include <iomanip>
@@ -24,6 +29,9 @@
 
 namespace Rodin::IO
 {
+  /**
+   * @brief PETSc Vec printer specialization for @ref Rodin::Variational::P0.
+   */
   // --------------------------------------------------------------------------
   // P0 MFEM printer for PETSc Vec
   // --------------------------------------------------------------------------
@@ -96,6 +104,9 @@ namespace Rodin::IO
   // --------------------------------------------------------------------------
   // P1 MFEM printer for PETSc Vec
   // --------------------------------------------------------------------------
+  /**
+   * @brief PETSc Vec printer specialization for @ref Rodin::Variational::P1.
+   */
   template <class Range, class Ctx>
   class GridFunctionPrinter<
       FileFormat::MFEM,
@@ -164,6 +175,12 @@ namespace Rodin::IO
   // Base prints Ordering: VectorDimension (1) for H1, so we emit components
   // per MFEM scalar node in MFEM node order.
   // --------------------------------------------------------------------------
+  /**
+   * @brief PETSc Vec printer specialization for @ref Rodin::Variational::H1.
+   *
+   * Values are written in MFEM node ordering expected by Rodin's MFEM printer
+   * infrastructure, for both local and MPI mesh contexts.
+   */
   template <size_t K, class Range, class Ctx>
   class GridFunctionPrinter<
       FileFormat::MFEM,

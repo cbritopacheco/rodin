@@ -7,6 +7,11 @@
 #ifndef RODIN_PETSC_VARIATIONAL_GRIDFUNCTION_H
 #define RODIN_PETSC_VARIATIONAL_GRIDFUNCTION_H
 
+/**
+ * @file
+ * @brief PETSc specialization of finite element grid functions.
+ */
+
 #include <petsc.h>
 #include <petscmacros.h>
 #include <petscsys.h>
@@ -27,6 +32,12 @@
 
 namespace Rodin::Variational
 {
+  /**
+   * @brief Grid function specialization storing values in a PETSc vector.
+   *
+   * The class provides PETSc-aware data access and synchronization for both
+   * local and distributed mesh contexts.
+   */
   template <class FES>
   class GridFunction<FES, ::Vec>
     : public GridFunctionBase<GridFunction<FES, ::Vec>>

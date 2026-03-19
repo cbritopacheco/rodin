@@ -1,6 +1,11 @@
 #ifndef RODIN_SOLVER_PETSC_CG_H
 #define RODIN_SOLVER_PETSC_CG_H
 
+/**
+ * @file
+ * @brief PETSc specialization of the conjugate-gradient solver.
+ */
+
 #include <petscksp.h>
 
 #include "Rodin/PETSc/Math/LinearSystem.h"
@@ -12,8 +17,10 @@ namespace Rodin::Solver
 {
   /**
    * @ingroup CGSpecializations
-   * @brief Conjugate gradient solver for self-adjoint problems, for use with
-   * PETSc::Matrix and PETSc::Vector.
+   * @brief Conjugate gradient solver for PETSc linear systems.
+   *
+   * This specialization targets @ref Rodin::PETSc::Math::LinearSystem and
+   * configures the underlying PETSc KSP type to `KSPCG`.
    */
   template <>
   class CG<PETSc::Math::LinearSystem> final : public KSP
@@ -54,6 +61,10 @@ namespace Rodin::Solver
 
 namespace Rodin::PETSc::Solver
 {
+  /**
+   * @brief Convenient PETSc alias for
+   * @ref Rodin::Solver::CG<Rodin::PETSc::Math::LinearSystem>.
+   */
   using CG = Rodin::Solver::CG<Math::LinearSystem>;
 }
 

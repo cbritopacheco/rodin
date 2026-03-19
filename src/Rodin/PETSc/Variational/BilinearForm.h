@@ -1,6 +1,11 @@
 #ifndef RODIN_PETSC_VARIATIONAL_BILINEARFORM_H
 #define RODIN_PETSC_VARIATIONAL_BILINEARFORM_H
 
+/**
+ * @file
+ * @brief PETSc specialization of variational bilinear forms.
+ */
+
 #include <petscmacros.h>
 #include <petscsystypes.h>
 
@@ -12,6 +17,9 @@
 
 namespace Rodin::Variational
 {
+  /**
+   * @brief Bilinear form specialization assembled into a PETSc matrix.
+   */
   template <class Solution, class TrialFES, class TestFES>
   class BilinearForm<Solution, TrialFES, TestFES, ::Mat> final
     : public BilinearFormBase<::Mat>
@@ -55,9 +63,9 @@ namespace Rodin::Variational
       using Parent::operator-=;
 
       /**
-       * @brief Constructs a LinearForm with a reference to a TestFunction and
-       * a default constructed vector owned by the LinearForm instance.
-       * @param[in] v Reference to a TestFunction
+       * @brief Constructs a PETSc bilinear form for trial and test functions.
+       * @param[in] u Trial function.
+       * @param[in] v Test function.
        */
       BilinearForm(
         const TrialFunction<SolutionType, TrialFES>& u, const TestFunction<TestFES>& v)

@@ -1,6 +1,11 @@
 #ifndef RODIN_PETSC_VARIATIONAL_PROBLEM_H
 #define RODIN_PETSC_VARIATIONAL_PROBLEM_H
 
+/**
+ * @file
+ * @brief PETSc specialization of variational problems.
+ */
+
 #include <mpi.h>
 #include <petsc.h>
 #include <petscsys.h>
@@ -25,6 +30,9 @@
 
 namespace Rodin::Variational
 {
+  /**
+   * @brief Variational problem specialization assembled into PETSc linear systems.
+   */
   template <class U, class V>
   class Problem<PETSc::Math::LinearSystem, U, V>
     : public Variational::ProblemUVBase<PETSc::Math::LinearSystem, U, V>

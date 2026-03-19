@@ -1,6 +1,11 @@
 #ifndef RODIN_PETSC_VARIATIONAL_TRIALFUNCTION_H
 #define RODIN_PETSC_VARIATIONAL_TRIALFUNCTION_H
 
+/**
+ * @file
+ * @brief PETSc-aware trial function wrappers.
+ */
+
 #include <petsc.h>
 
 #include "Rodin/Variational/TrialFunction.h"
@@ -9,6 +14,9 @@
 
 namespace Rodin::PETSc::Variational
 {
+  /**
+   * @brief PETSc namespace wrapper around @ref Rodin::Variational::TrialFunction.
+   */
   template <class Solution, class FES>
   class TrialFunction : public Rodin::Variational::TrialFunction<Solution, FES>
   {
@@ -37,6 +45,9 @@ namespace Rodin::Variational
 
 namespace Rodin::FormLanguage
 {
+  /**
+   * @brief Form-language traits for PETSc trial functions.
+   */
   template <class Solution, class FES>
   struct Traits<PETSc::Variational::TrialFunction<Solution, FES>>
   {

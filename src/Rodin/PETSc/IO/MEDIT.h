@@ -7,6 +7,11 @@
 #ifndef RODIN_PETSC_IO_MEDIT_H
 #define RODIN_PETSC_IO_MEDIT_H
 
+/**
+ * @file
+ * @brief MEDIT-format grid function printer for PETSc-backed grid functions.
+ */
+
 #include <petscvec.h>
 
 #include <iomanip>
@@ -19,6 +24,11 @@
 
 namespace Rodin::IO
 {
+  /**
+   * @brief PETSc Vec printer specialization for MEDIT output.
+   *
+   * Writes scalar or vector nodal values in MEDIT-compatible layout.
+   */
   template <class FES>
   class GridFunctionPrinter<
     FileFormat::MEDIT,

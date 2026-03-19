@@ -7,6 +7,11 @@
 #ifndef RODIN_ASSEMBLY_OPENMP_PETSC_H
 #define RODIN_ASSEMBLY_OPENMP_PETSC_H
 
+/**
+ * @file
+ * @brief OpenMP assembly specializations targeting PETSc objects.
+ */
+
 #include <omp.h>
 #include <petsc.h>
 #include <petscerror.h>

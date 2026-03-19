@@ -1,6 +1,11 @@
 #ifndef RODIN_SOLVER_PETSC_SNES_H
 #define RODIN_SOLVER_PETSC_SNES_H
 
+/**
+ * @file
+ * @brief PETSc SNES nonlinear solver wrapper for Rodin.
+ */
+
 #include <petscsnes.h>
 
 #include "Rodin/FormLanguage/Traits.h"
@@ -27,6 +32,12 @@ namespace Rodin::FormLanguage
 
 namespace Rodin::Solver
 {
+  /**
+   * @brief PETSc nonlinear solver wrapper based on SNES.
+   *
+   * SNES is coupled to a @ref Rodin::Solver::KSP linear solver used inside the
+   * Newton iterations provided by @ref Rodin::Solver::NewtonSolverBase.
+   */
   class SNES
     : public PETSc::Object<::SNES>, public NewtonSolverBase<KSP>
   {
@@ -54,8 +65,14 @@ namespace Rodin::Solver
 
       virtual ~SNES() override;
 
+      /**
+       * @brief Selects the PETSc SNES algorithm type.
+       */
       SNES& setType(::SNESType type) noexcept;
 
+      /**
+       * @brief Sets nonlinear solver tolerances and limits.
+       */
       SNES& setTolerances(PetscReal abstol,
                           PetscReal rtol,
                           PetscReal stol,
@@ -87,6 +104,9 @@ namespace Rodin::Solver
 
 namespace Rodin::PETSc::Solver
 {
+  /**
+   * @brief PETSc namespace alias to @ref Rodin::Solver::SNES.
+   */
   using SNES = Rodin::Solver::SNES;
 }
 

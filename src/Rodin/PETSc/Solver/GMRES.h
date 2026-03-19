@@ -1,6 +1,11 @@
 #ifndef RODIN_SOLVER_PETSC_GMRES_H
 #define RODIN_SOLVER_PETSC_GMRES_H
 
+/**
+ * @file
+ * @brief PETSc specialization of the GMRES solver.
+ */
+
 #include <petscksp.h>
 
 #include "Rodin/PETSc/Math/LinearSystem.h"
@@ -12,8 +17,10 @@ namespace Rodin::Solver
 {
   /**
    * @ingroup GMRESSpecializations
-   * @brief Conjugate gradient solver for self-adjoint problems, for use with
-   * PETSc::Matrix and PETSc::Vector.
+   * @brief Generalized minimal residual solver for PETSc linear systems.
+   *
+   * This specialization targets @ref Rodin::PETSc::Math::LinearSystem and
+   * configures the underlying PETSc KSP type to `KSPGMRES`.
    */
   template <>
   class GMRES<PETSc::Math::LinearSystem> final : public KSP
@@ -54,8 +61,11 @@ namespace Rodin::Solver
 
 namespace Rodin::PETSc::Solver
 {
+  /**
+   * @brief Convenient PETSc alias for
+   * @ref Rodin::Solver::GMRES<Rodin::PETSc::Math::LinearSystem>.
+   */
   using GMRES = Rodin::Solver::GMRES<Math::LinearSystem>;
 }
 
 #endif // RODIN_SOLVER_PETSC_GMRES_H
-

@@ -1,6 +1,11 @@
 #ifndef RODIN_PETSC_ASSEMBLY_SEQUENTIAL_H
 #define RODIN_PETSC_ASSEMBLY_SEQUENTIAL_H
 
+/**
+ * @file
+ * @brief Sequential assembly specializations targeting PETSc objects.
+ */
+
 #include <petsc.h>
 #include <petscsys.h>
 #include <petscsystypes.h>

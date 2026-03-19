@@ -1,6 +1,11 @@
 #ifndef RODIN_PETSC_VARIATIONAL_LINEARFORM_H
 #define RODIN_PETSC_VARIATIONAL_LINEARFORM_H
 
+/**
+ * @file
+ * @brief PETSc specialization of variational linear forms.
+ */
+
 #include <petscsystypes.h>
 
 #include "Rodin/PETSc/Math/Vector.h"
@@ -10,6 +15,9 @@
 
 namespace Rodin::Variational
 {
+  /**
+   * @brief Linear form specialization assembled into a PETSc vector.
+   */
   template <class FES>
   class LinearForm<FES, ::Vec> final
     : public LinearFormBase<::Vec>
@@ -203,4 +211,3 @@ namespace Rodin::PETSc::Variational
 }
 
 #endif
-

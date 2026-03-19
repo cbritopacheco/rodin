@@ -7,6 +7,11 @@
 #ifndef RODIN_PETSC_IO_HDF5_H
 #define RODIN_PETSC_IO_HDF5_H
 
+/**
+ * @file
+ * @brief HDF5 IO support for PETSc-backed grid functions.
+ */
+
 #include <petscvec.h>
 #include <petscsys.h>
 #include <petscmath.h>
@@ -21,6 +26,9 @@
 
 namespace Rodin::IO
 {
+  /**
+   * @brief Internal helpers for PETSc HDF5 serialization primitives.
+   */
   namespace Internal
   {
     inline void writeScalarULL(hid_t file, const char* path, unsigned long long value)
@@ -84,6 +92,9 @@ namespace Rodin::IO
       using ObjectType = Variational::GridFunction<FES, DataType>;
       using Parent = GridFunctionLoaderBase<FES, DataType>;
 
+      /**
+       * @brief Constructs an HDF5 loader bound to a PETSc-backed grid function.
+       */
       GridFunctionLoader(ObjectType& gf)
         : Parent(gf)
       {}
@@ -155,6 +166,9 @@ namespace Rodin::IO
       using ObjectType = Variational::GridFunction<FES, DataType>;
       using Parent = GridFunctionPrinterBase<FileFormat::HDF5, FES, DataType>;
 
+      /**
+       * @brief Constructs an HDF5 printer bound to a PETSc-backed grid function.
+       */
       GridFunctionPrinter(const ObjectType& gf)
         : Parent(gf)
       {}

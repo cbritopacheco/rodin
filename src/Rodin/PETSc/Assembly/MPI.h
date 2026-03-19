@@ -1,6 +1,11 @@
 #ifndef RODIN_PETSC_ASSEMBLY_MPI_H
 #define RODIN_PETSC_ASSEMBLY_MPI_H
 
+/**
+ * @file
+ * @brief MPI assembly specializations targeting PETSc objects.
+ */
+
 #include <petsc.h>
 #include <petscmacros.h>
 #include <petscmat.h>

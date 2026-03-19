@@ -7,6 +7,11 @@
 #ifndef RODIN_SOLVER_PETSC_KSP_H
 #define RODIN_SOLVER_PETSC_KSP_H
 
+/**
+ * @file
+ * @brief PETSc KSP linear solver wrapper for Rodin variational problems.
+ */
+
 #include <petscksp.h>
 #include "Rodin/PETSc/Math/LinearSystem.h"
 #include "Rodin/Solver/LinearSolver.h"
@@ -60,13 +65,22 @@ namespace Rodin::Solver
        */
       void solve(LinearSystemType& b) override;
 
+      /**
+       * @brief Selects the PETSc KSP algorithm type.
+       */
       KSP& setType(::KSPType type) noexcept;
 
+      /**
+       * @brief Sets PETSc convergence tolerances and iteration cap.
+       */
       KSP& setTolerances(PetscReal rtol,
                          PetscReal abstol,
                          PetscReal dtol,
                          PetscInt  maxIt) noexcept;
 
+      /**
+       * @brief Sets an explicit preconditioner operator.
+       */
       KSP& setPreconditioner(OperatorType P) noexcept;
 
       HandleType& getHandle() noexcept override;
@@ -91,6 +105,9 @@ namespace Rodin::Solver
 
 namespace Rodin::PETSc::Solver
 {
+  /**
+   * @brief PETSc namespace alias to @ref Rodin::Solver::KSP.
+   */
   using KSP = Rodin::Solver::KSP;
 }
 

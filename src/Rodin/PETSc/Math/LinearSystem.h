@@ -7,6 +7,11 @@
 #ifndef RODIN_PETSC_MATH_LINEARSYSTEM_H
 #define RODIN_PETSC_MATH_LINEARSYSTEM_H
 
+/**
+ * @file
+ * @brief PETSc specialization of Rodin linear system containers.
+ */
+
 #include <petsc.h>
 #include <boost/mpi/communicator.hpp>
 #include <petscmat.h>
@@ -18,6 +23,13 @@
 
 namespace Rodin::Math
 {
+  /**
+   * @brief Linear system specialization storing PETSc matrix/vector handles.
+   *
+   * This type couples a PETSc operator, right-hand side vector, and solution
+   * vector into the common @ref Rodin::Math::LinearSystemBase interface used by
+   * Rodin variational problems and solvers.
+   */
   template <>
   class LinearSystem<::Mat, ::Vec>
     : public LinearSystemBase<::Mat, ::Vec, LinearSystem<::Mat, ::Vec>>
@@ -35,6 +47,9 @@ namespace Rodin::Math
       class FieldSplits
       {
         public:
+          /**
+           * @brief Name/index-set pair used for PETSc field-split preconditioners.
+           */
           struct Split
           {
             std::string name;
