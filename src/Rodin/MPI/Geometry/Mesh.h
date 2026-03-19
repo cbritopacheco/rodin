@@ -77,7 +77,9 @@ namespace Rodin::Geometry
           Mesh finalize();
 
         private:
+          /// Rank-local shard that will be moved into the finalized mesh.
           Shard m_shard;
+          /// MPI context bound to the mesh being constructed.
           Context::MPI m_context;
       };
 
@@ -640,6 +642,11 @@ namespace Rodin::Geometry
        *
        * The callable is invoked with the current rank and must return the
        * path from which that rank should load its local shard.
+       *
+       * @tparam Filename Callable type invocable as `filename(int rank)`.
+       * @param[in] filename Rank-dependent path generator.
+       * @param[in] fmt File format used to read the shard file.
+       * @return Reference to the mesh.
        */
       MPIMesh& load(const Filename& filename, IO::FileFormat fmt)
       {
@@ -664,6 +671,10 @@ namespace Rodin::Geometry
        *
        * The callable is invoked with the current rank and must return the
        * path to which that rank should save its local shard.
+       *
+       * @tparam Filename Callable type invocable as `filename(int rank)`.
+       * @param[in] filename Rank-dependent path generator.
+       * @param[in] fmt File format used to write the shard file.
        */
       void save(const Filename& filename, IO::FileFormat fmt)
       {
@@ -680,11 +691,19 @@ namespace Rodin::Geometry
        */
       Math::SpatialPoint getVertexCoordinates(Index localIdx) const override;
 
+      /**
+       * @brief Submesh downcast is unsupported for distributed meshes.
+       * @throws std::runtime_error always.
+       */
       SubMeshBase& asSubMesh() override
       {
         throw std::runtime_error("asSubMesh() not implemented");
       }
 
+      /**
+       * @brief Const submesh downcast is unsupported for distributed meshes.
+       * @throws std::runtime_error always.
+       */
       const SubMeshBase& asSubMesh() const override
       {
         throw std::runtime_error("asSubMesh() not implemented");

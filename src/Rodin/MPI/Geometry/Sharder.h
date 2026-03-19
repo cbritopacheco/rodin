@@ -24,6 +24,9 @@ namespace Rodin::Geometry
   class Sharder<Context::MPI> : public SharderBase<Context::MPI>
   {
     public:
+      /**
+       * @brief Base sharder interface specialized on MPI context.
+       */
       using Parent = SharderBase<Context::MPI>;
 
       /**

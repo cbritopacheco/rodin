@@ -23,6 +23,12 @@ namespace Rodin::Assembly
   class Default<Context::MPI>
   {
     public:
+      /**
+       * @brief Assembly-backend selector for MPI trial/test contexts.
+       *
+       * @tparam LinearAlgebraType Backend linear-algebra container type.
+       * @tparam Object Assembly operand type.
+       */
       template <class LinearAlgebraType, class Object>
       using Type = MPI<LinearAlgebraType, Object>;
   };
@@ -34,6 +40,12 @@ namespace Rodin::Assembly
   class Default<Context::MPI, Context::MPI>
   {
     public:
+      /**
+       * @brief Assembly-backend selector for fully MPI-distributed assembly.
+       *
+       * @tparam LinearAlgebraType Backend linear-algebra container type.
+       * @tparam Object Assembly operand type.
+       */
       template <class LinearAlgebraType, class Object>
       using Type = MPI<LinearAlgebraType, Object>;
   };
