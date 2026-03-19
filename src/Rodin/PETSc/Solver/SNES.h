@@ -46,16 +46,22 @@ namespace Rodin::Solver
     : public PETSc::Object<::SNES>, public NewtonSolverBase<KSP>
   {
     public:
+      /// @brief Handle type for the PETSc SNES context.
       using HandleType = ::SNES;
 
+      /// @brief Linear system type for PETSc solvers.
       using LinearSystemType = PETSc::Math::LinearSystem;
 
+      /// @brief PETSc vector type.
       using VectorType = ::Vec;
 
+      /// @brief Base problem type.
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
 
+      /// @brief PETSc object parent class type.
       using PetscParent = PETSc::Object<HandleType>;
 
+      /// @brief Newton solver parent class type.
       using NewtonSolverParent = NewtonSolverBase<KSP>;
 
       using NewtonSolverParent::solve;

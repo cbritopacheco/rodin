@@ -26,11 +26,17 @@ namespace Rodin::Solver
   class CG<PETSc::Math::LinearSystem> final : public KSP
   {
     public:
+      /// @brief PETSc matrix operator type.
       using OperatorType = ::Mat;
+      /// @brief PETSc vector type.
       using VectorType = ::Vec;
+      /// @brief Scalar type (PETSc scalar).
       using ScalarType = PetscScalar;
+      /// @brief Linear system type for PETSc solvers.
       using LinearSystemType = PETSc::Math::LinearSystem;
+      /// @brief Base problem type.
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+      /// @brief Parent class type.
       using Parent = KSP;
       using Parent::solve;
 

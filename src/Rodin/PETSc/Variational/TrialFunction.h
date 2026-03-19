@@ -27,9 +27,11 @@ namespace Rodin::PETSc::Variational
   class TrialFunction : public Rodin::Variational::TrialFunction<Solution, FES>
   {
     public:
+      /// @brief Finite element space type.
       using FESType =
         FES;
 
+      /// @brief Parent class type.
       using Parent =
         Rodin::Variational::TrialFunction<Solution, FESType>;
 
@@ -62,7 +64,9 @@ namespace Rodin::FormLanguage
   template <class Solution, class FES>
   struct Traits<PETSc::Variational::TrialFunction<Solution, FES>>
   {
+    /// @brief Finite element space type.
     using FESType = FES;
+    /// @brief Solution type.
     using SolutionType = Solution;
   };
 

@@ -24,9 +24,11 @@ namespace Rodin::PETSc::Variational
   class TestFunction : public Rodin::Variational::TestFunction<FES>
   {
     public:
+      /// @brief Finite element space type.
       using FESType =
         FES;
 
+      /// @brief Parent class type.
       using Parent =
         Rodin::Variational::TestFunction<FESType>;
 
@@ -59,6 +61,7 @@ namespace Rodin::FormLanguage
   template <class FES>
   struct Traits<PETSc::Variational::TestFunction<FES>>
   {
+    /// @brief Finite element space type.
     using FESType = FES;
   };
 }

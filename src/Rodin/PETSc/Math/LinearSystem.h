@@ -43,12 +43,15 @@ namespace Rodin::Math
     : public LinearSystemBase<::Mat, ::Vec, LinearSystem<::Mat, ::Vec>>
   {
     public:
+      /// @brief PETSc matrix type.
       using MatrixType =
         ::Mat;
 
+      /// @brief PETSc vector type.
       using VectorType =
         ::Vec;
 
+      /// @brief Parent class type.
       using Parent =
         LinearSystemBase<MatrixType, VectorType, LinearSystem<MatrixType, VectorType>>;
 
@@ -71,26 +74,39 @@ namespace Rodin::Math
             ::IS is = PETSC_NULLPTR; ///< PETSc index set for this field's DOFs.
           };
 
+          /// @brief Default constructor.
           FieldSplits() = default;
 
+          /**
+           * @brief Constructs from a vector of named splits.
+           * @param[in] splits Vector of Split objects.
+           */
           explicit FieldSplits(std::vector<Split> splits)
             : m_splits(std::move(splits))
           {}
 
+          /// @brief Copy constructor (deep-copies PETSc index sets).
           FieldSplits(const FieldSplits& other)
           {
             copyFrom(other);
           }
 
+          /// @brief Move constructor.
           FieldSplits(FieldSplits&& other) noexcept
             : m_splits(std::move(other.m_splits))
           {}
 
+          /// @brief Destructor; destroys owned PETSc index sets.
           ~FieldSplits()
           {
             clear();
           }
 
+          /**
+           * @brief Copy assignment operator.
+           * @param[in] other FieldSplits to copy.
+           * @return Reference to this FieldSplits.
+           */
           FieldSplits& operator=(const FieldSplits& other)
           {
             if (this != &other)
@@ -101,6 +117,11 @@ namespace Rodin::Math
             return *this;
           }
 
+          /**
+           * @brief Move assignment operator.
+           * @param[in] other FieldSplits to move from.
+           * @return Reference to this FieldSplits.
+           */
           FieldSplits& operator=(FieldSplits&& other) noexcept
           {
             if (this != &other)
@@ -111,16 +132,19 @@ namespace Rodin::Math
             return *this;
           }
 
+          /// @brief Returns a mutable reference to the splits vector.
           std::vector<Split>& getSplits() noexcept
           {
             return m_splits;
           }
 
+          /// @brief Returns a read-only reference to the splits vector.
           const std::vector<Split>& getSplits() const noexcept
           {
             return m_splits;
           }
 
+          /// @brief Destroys all owned PETSc index sets and clears the splits.
           void clear() noexcept
           {
             PetscErrorCode ierr;
@@ -137,6 +161,10 @@ namespace Rodin::Math
             (void) ierr;
           }
 
+          /**
+           * @brief Deep-copies splits from another FieldSplits object.
+           * @param[in] other Source FieldSplits to copy from.
+           */
           void copyFrom(const FieldSplits& other)
           {
             PetscErrorCode ierr;
@@ -165,28 +193,40 @@ namespace Rodin::Math
             (void) ierr;
           }
 
+          /**
+           * @brief Returns a mutable reference to the split at index @p i.
+           * @param[in] i Split index.
+           * @returns Reference to the split.
+           */
           Split& operator[](size_t i)
           {
             return m_splits[i];
           }
 
+          /**
+           * @brief Returns a read-only reference to the split at index @p i.
+           * @param[in] i Split index.
+           * @returns Const reference to the split.
+           */
           const Split& operator[](size_t i) const
           {
             return m_splits[i];
           }
 
+          /// @brief Returns the number of splits.
           size_t size() const noexcept
           {
             return m_splits.size();
           }
 
+          /// @brief Returns true if there are no splits.
           bool empty() const noexcept
           {
             return m_splits.empty();
           }
 
         private:
-          std::vector<Split> m_splits;
+          std::vector<Split> m_splits; ///< The stored field splits.
       };
 
       /**
