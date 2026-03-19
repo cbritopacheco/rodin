@@ -45,44 +45,58 @@ namespace Rodin::Variational
     : public Variational::ProblemUVBase<PETSc::Math::LinearSystem, U, V>
   {
     public:
+      /// @brief Type of the PETSc linear system.
       using LinearSystemType =
         PETSc::Math::LinearSystem;
 
+      /// @brief Base solver type for this problem.
       using SolverBaseType =
         Solver::LinearSolverBase<LinearSystemType>;
 
+      /// @brief PETSc matrix operator type.
       using OperatorType =
         typename FormLanguage::Traits<LinearSystemType>::OperatorType;
 
+      /// @brief PETSc vector type.
       using VectorType =
         typename FormLanguage::Traits<LinearSystemType>::VectorType;
 
+      /// @brief PETSc scalar type.
       using ScalarType =
         typename FormLanguage::Traits<LinearSystemType>::ScalarType;
 
+      /// @brief Problem body type encapsulating bilinear/linear forms.
       using ProblemBodyType = Variational::ProblemBody<OperatorType, VectorType, ScalarType>;
 
+      /// @brief Finite element space type for the trial function.
       using TrialFESType =
         typename FormLanguage::Traits<U>::FESType;
 
+      /// @brief Finite element space type for the test function.
       using TestFESType =
         typename FormLanguage::Traits<V>::FESType;
 
+      /// @brief Mesh type for the trial finite element space.
       using TrialFESMeshType =
         typename FormLanguage::Traits<TrialFESType>::MeshType;
 
+      /// @brief Context type (Local or MPI) for the trial mesh.
       using TrialFESMeshContextType =
         typename FormLanguage::Traits<TrialFESMeshType>::ContextType;
 
+      /// @brief Mesh type for the test finite element space.
       using TestFESMeshType =
         typename FormLanguage::Traits<TestFESType>::MeshType;
 
+      /// @brief Context type (Local or MPI) for the test mesh.
       using TestFESMeshContextType =
         typename FormLanguage::Traits<TestFESMeshType>::ContextType;
 
+      /// @brief Parent class type.
       using Parent =
         Variational::ProblemUVBase<LinearSystemType, U, V>;
 
+      /// @brief Assembly type for this problem.
       using AssemblyType =
         typename Assembly::Default<TrialFESMeshContextType, TestFESMeshContextType>
           ::template Type<LinearSystemType, Problem>;
@@ -119,18 +133,25 @@ namespace Rodin::Variational
               }())
       {}
 
+      /// @brief Copy constructor.
       constexpr
       Problem(const Problem& other)
         : Parent(other),
           m_axb(other.m_axb)
       {}
 
+      /// @brief Move constructor.
       constexpr
       Problem(Problem&& other) noexcept
         : Parent(std::move(other)),
           m_axb(std::move(other.m_axb))
       {}
 
+      /**
+       * @brief Copy assignment operator.
+       * @param[in] other Problem to copy.
+       * @return Reference to this problem.
+       */
       Problem& operator=(const Problem& other)
       {
         if (this != &other)
@@ -141,6 +162,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Move assignment operator.
+       * @param[in] other Problem to move from.
+       * @return Reference to this problem.
+       */
       Problem& operator=(Problem&& other) noexcept
       {
         if (this != &other)
@@ -151,6 +177,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Assigns a problem body (bilinear and linear forms).
+       * @param[in] rhs Problem body to assign.
+       * @return Reference to this problem.
+       */
       Problem& operator=(const ProblemBodyType& rhs) override
       {
         m_pb = rhs;
@@ -158,6 +189,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Assembles the variational formulation into the linear system.
       Problem& assemble() override
       {
         m_assembly.execute(m_axb, { m_pb, this->getTrialFunction(), this->getTestFunction() });
@@ -165,6 +197,10 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Solves the assembled linear system and scatters the solution.
+       * @param[in] solver Linear solver to use.
+       */
       void solve(SolverBaseType& solver) override
       {
         auto& axb = this->getLinearSystem();
@@ -174,26 +210,29 @@ namespace Rodin::Variational
         this->getTrialFunction().getSolution().setData(axb.getSolution());
       }
 
+      /// @brief Returns a mutable reference to the linear system.
       LinearSystemType& getLinearSystem() override
       {
         return m_axb;
       }
 
+      /// @brief Returns a read-only reference to the linear system.
       const LinearSystemType& getLinearSystem() const override
       {
         return m_axb;
       }
 
+      /// @brief Creates a heap-allocated copy of this problem.
       Problem* copy() const noexcept override
       {
         return new Problem(*this);
       }
 
     private:
-      Boolean m_assembled;
-      ProblemBodyType m_pb;
-      LinearSystemType m_axb;
-      AssemblyType m_assembly;
+      Boolean m_assembled;       ///< Whether the problem has been assembled.
+      ProblemBodyType m_pb;      ///< The problem body (bilinear/linear forms).
+      LinearSystemType m_axb;    ///< The assembled linear system.
+      AssemblyType m_assembly;   ///< The assembly strategy.
   };
 
   /**
@@ -236,13 +275,19 @@ namespace Rodin::Variational
         Utility::ParameterPack<U1, U2, U3, Us...>::template All<IsTrialOrTestFunction>::Value);
 
     public:
+      /// @brief Type of the PETSc linear system.
       using LinearSystemType = PETSc::Math::LinearSystem;
 
+      /// @brief PETSc matrix operator type.
       using OperatorType = typename FormLanguage::Traits<LinearSystemType>::OperatorType; // ::Mat
+      /// @brief PETSc vector type.
       using VectorType   = typename FormLanguage::Traits<LinearSystemType>::VectorType;   // ::Vec
+      /// @brief PETSc scalar type.
       using ScalarType   = typename FormLanguage::Traits<LinearSystemType>::ScalarType;   // PetscScalar
 
+      /// @brief Problem body type encapsulating forms.
       using ProblemBodyType = ProblemBody<OperatorType, VectorType, ScalarType>;
+      /// @brief Parent class type.
       using Parent          = ProblemBase<LinearSystemType>;
 
     private:
@@ -330,19 +375,29 @@ namespace Rodin::Variational
       using U2FESMeshContextType = typename FormLanguage::Traits<U2FESMeshType>::ContextType;
 
     public:
+      /// @brief Assembly type for this problem.
       using AssemblyType =
         typename Assembly::Default<U1FESMeshContextType, U2FESMeshContextType>
           ::template Type<LinearSystemType, Problem>;
 
+      /// @brief Base solver type for this problem.
       using SolverBaseType =
         Solver::LinearSolverBase<LinearSystemType>;
 
+      /// @brief Input data structure for the assembly pipeline.
       using AssemblyInput =
         Assembly::ProblemAssemblyInput<ProblemBodyType, U1, U2, U3, Us...>;
 
       // --------------------------
       // Ctors / assignment
       // --------------------------
+      /**
+       * @brief Constructs a multi-field problem from trial and test functions.
+       * @param u1 First function (trial or test).
+       * @param u2 Second function.
+       * @param u3 Third function.
+       * @param us Additional functions.
+       */
       Problem(U1& u1, U2& u2, U3& u3, Us&... us)
         : m_assembled(false),
           m_us(AllTuple{std::ref(u1), std::ref(u2), std::ref(u3), std::ref(us)...}
@@ -354,6 +409,7 @@ namespace Rodin::Variational
         buildUUIDMaps();
       }
 
+      /// @brief Copy constructor.
       Problem(const Problem& other)
         : Parent(other),
           m_assembled(other.m_assembled),
@@ -370,6 +426,7 @@ namespace Rodin::Variational
           m_assembly(other.m_assembly)
       {}
 
+      /// @brief Move constructor.
       Problem(Problem&& other) noexcept
         : Parent(std::move(other)),
           m_assembled(std::exchange(other.m_assembled, false)),
@@ -386,6 +443,11 @@ namespace Rodin::Variational
           m_assembly(std::move(other.m_assembly))
       {}
 
+      /**
+       * @brief Copy assignment operator.
+       * @param[in] other Problem to copy.
+       * @return Reference to this problem.
+       */
       Problem& operator=(const Problem& other)
       {
         if (this != &other)
@@ -407,6 +469,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Move assignment operator.
+       * @param[in] other Problem to move from.
+       * @return Reference to this problem.
+       */
       Problem& operator=(Problem&& other) noexcept
       {
         if (this != &other)
@@ -431,6 +498,11 @@ namespace Rodin::Variational
       // --------------------------
       // ProblemBody binding
       // --------------------------
+      /**
+       * @brief Assigns a problem body (bilinear and linear forms).
+       * @param[in] rhs Problem body to assign.
+       * @return Reference to this problem.
+       */
       Problem& operator=(const ProblemBodyType& rhs) override
       {
         m_pb = rhs;
@@ -441,6 +513,7 @@ namespace Rodin::Variational
       // --------------------------
       // Assembly / solve
       // --------------------------
+      /// @brief Assembles the block-structured variational formulation.
       Problem& assemble() override
       {
         computeOffsets();
@@ -458,6 +531,10 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Solves the assembled block system and scatters sub-solutions.
+       * @param[in] solver Linear solver to use.
+       */
       void solve(SolverBaseType& solver) override
       {
         auto& axb = getLinearSystem();
@@ -477,25 +554,34 @@ namespace Rodin::Variational
       // --------------------------
       // Accessors (useful for solvers / debugging)
       // --------------------------
+      /// @brief Returns a mutable reference to the linear system.
       LinearSystemType& getLinearSystem() override
       {
         return m_axb;
       }
 
+      /// @brief Returns a read-only reference to the linear system.
       const LinearSystemType& getLinearSystem() const override
       {
         return m_axb;
       }
 
+      /// @brief Returns the DOF offset array for trial fields.
       const auto& getTrialOffsets() const { return m_trialOffsets; }
+      /// @brief Returns the DOF offset array for test fields.
       const auto& getTestOffsets()  const { return m_testOffsets;  }
 
+      /// @brief Returns the total number of trial DOFs across all fields.
       size_t getTotalTrialSize() const { return m_totalTrial; }
+      /// @brief Returns the total number of test DOFs across all fields.
       size_t getTotalTestSize()  const { return m_totalTest;  }
 
+      /// @brief Returns the UUID-to-index map for trial functions.
       const auto& getTrialUUIDMap() const { return m_trialUUIDMap; }
+      /// @brief Returns the UUID-to-index map for test functions.
       const auto& getTestUUIDMap()  const { return m_testUUIDMap;  }
 
+      /// @brief Creates a heap-allocated copy of this problem.
       Problem* copy() const noexcept override
       {
         return new Problem(*this);
@@ -577,6 +663,7 @@ namespace Rodin::Variational
 
     private:
 
+      /// @brief Builds UUID-to-index maps for all trial and test functions.
       void buildUUIDMaps()
       {
         m_trialUUIDMap.clear();
@@ -595,6 +682,7 @@ namespace Rodin::Variational
           });
       }
 
+      /// @brief Computes DOF offset arrays and totals for trial/test fields.
       void computeOffsets()
       {
         // Trial offsets + total
@@ -636,6 +724,7 @@ namespace Rodin::Variational
         }
       }
 
+      /// @brief Deduces the MPI communicator from the trial mesh contexts.
       MPI_Comm deduceCommunicator() const
       {
         // Take mesh context from the first trial function in the tuple.
@@ -671,24 +760,24 @@ namespace Rodin::Variational
       }
 
     private:
-      Boolean m_assembled = false;
+      Boolean m_assembled = false;  ///< Whether the problem has been assembled.
 
-      TrialFunctionTuple m_us;
-      TestFunctionTuple  m_vs;
+      TrialFunctionTuple m_us;  ///< Tuple of trial function references.
+      TestFunctionTuple  m_vs;  ///< Tuple of test function references.
 
-      ProblemBodyType m_pb;
+      ProblemBodyType m_pb;  ///< The problem body (bilinear/linear forms).
 
-      std::array<size_t, TrialFunctionTuple::Size> m_trialOffsets{};
-      std::array<size_t, TestFunctionTuple::Size>  m_testOffsets{};
+      std::array<size_t, TrialFunctionTuple::Size> m_trialOffsets{};  ///< DOF offsets for trial fields.
+      std::array<size_t, TestFunctionTuple::Size>  m_testOffsets{};   ///< DOF offsets for test fields.
 
-      boost::bimap<FormLanguage::Base::UUID, size_t> m_trialUUIDMap;
-      boost::bimap<FormLanguage::Base::UUID, size_t> m_testUUIDMap;
+      boost::bimap<FormLanguage::Base::UUID, size_t> m_trialUUIDMap;  ///< Trial UUID-to-index map.
+      boost::bimap<FormLanguage::Base::UUID, size_t> m_testUUIDMap;   ///< Test UUID-to-index map.
 
-      size_t m_totalTrial = 0;
-      size_t m_totalTest  = 0;
+      size_t m_totalTrial = 0;  ///< Total trial DOF count.
+      size_t m_totalTest  = 0;  ///< Total test DOF count.
 
-      LinearSystemType m_axb;
-      AssemblyType     m_assembly;
+      LinearSystemType m_axb;    ///< The assembled linear system.
+      AssemblyType     m_assembly;  ///< The assembly strategy.
   };
 
   template <class T>
