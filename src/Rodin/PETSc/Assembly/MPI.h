@@ -23,6 +23,14 @@
 
 namespace Rodin::Assembly
 {
+  /**
+   * @brief MPI-parallel assembly of a PETSc vector from a linear form.
+   *
+   * Each MPI rank assembles contributions from its owned polytopes into
+   * the distributed PETSc vector.
+   *
+   * @tparam FES Finite element space type.
+   */
   template <class FES>
   class MPI<::Vec, Variational::LinearForm<FES, ::Vec>> final
     : public AssemblyBase<::Vec, Variational::LinearForm<FES, ::Vec>>
@@ -108,6 +116,16 @@ namespace Rodin::Assembly
       }
   };
 
+  /**
+   * @brief MPI-parallel assembly of a PETSc matrix from a bilinear form.
+   *
+   * Each MPI rank assembles contributions from its owned polytopes into
+   * the distributed PETSc matrix.
+   *
+   * @tparam Solution Solution type.
+   * @tparam TrialFES Trial finite element space type.
+   * @tparam TestFES  Test finite element space type.
+   */
   template <class Solution, class TrialFES, class TestFES>
   class MPI<::Mat, Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>> final
     : public AssemblyBase<::Mat, Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>>
@@ -214,9 +232,17 @@ namespace Rodin::Assembly
       }
   };
 
-  // ------------------------------------------------------------
+  /**
+   * @brief MPI-parallel assembly of a single-variable PETSc problem.
+   *
+   * Each MPI rank assembles its local contributions to the system matrix
+   * and right-hand side vector of a @ref Rodin::Variational::Problem
+   * backed by PETSc distributed objects.
+   *
+   * @tparam U Trial function type.
+   * @tparam V Test function type.
+   */
   // MPI assembly for single-variable Problem (PETSc)
-  // ------------------------------------------------------------
   template <class U, class V>
   class MPI<
       Rodin::PETSc::Math::LinearSystem,
@@ -571,9 +597,18 @@ namespace Rodin::Assembly
   };
 
 
-  // ------------------------------------------------------------
+  /**
+   * @brief MPI-parallel assembly of a multi-variable PETSc problem.
+   *
+   * Assembles a block-structured @ref Rodin::Variational::Problem backed
+   * by PETSc distributed objects across MPI ranks.
+   *
+   * @tparam U1  First trial/test function type.
+   * @tparam U2  Second trial/test function type.
+   * @tparam U3  Third trial/test function type.
+   * @tparam Us  Additional trial/test function types.
+   */
   // MPI assembly for multi-variable Problem (PETSc)
-  // ------------------------------------------------------------
   template <class U1, class U2, class U3, class ... Us>
   class MPI<
       Rodin::PETSc::Math::LinearSystem,

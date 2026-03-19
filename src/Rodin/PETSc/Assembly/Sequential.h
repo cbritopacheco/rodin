@@ -24,6 +24,15 @@
 
 namespace Rodin::Assembly
 {
+  /**
+   * @brief Sequential assembly of a PETSc vector from a linear form.
+   *
+   * Iterates over mesh polytopes on a single thread, evaluates
+   * @ref Rodin::Variational::LinearFormIntegrator instances, and inserts
+   * entries into the PETSc vector with `VecSetValue`.
+   *
+   * @tparam FES Finite element space type.
+   */
   // Sequential assembly for PETSc Vec (linear form)
   template <class FES>
   class Sequential<::Vec, Variational::LinearForm<FES, ::Vec>> final
@@ -92,6 +101,17 @@ namespace Rodin::Assembly
   };
 
 
+  /**
+   * @brief Sequential assembly of a PETSc matrix from a bilinear form.
+   *
+   * Iterates over mesh polytopes on a single thread, evaluates
+   * bilinear form integrators, and inserts entries into the PETSc matrix
+   * with `MatSetValues`.
+   *
+   * @tparam Solution Solution type.
+   * @tparam TrialFES Trial finite element space type.
+   * @tparam TestFES  Test finite element space type.
+   */
   // Sequential assembly for PETSc Mat (bilinear form)
   template <class Solution, class TrialFES, class TestFES>
   class Sequential<::Mat, Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>> final
@@ -213,6 +233,16 @@ namespace Rodin::Assembly
       }
   };
 
+  /**
+   * @brief Sequential assembly of a single-variable PETSc problem.
+   *
+   * Assembles a @ref Rodin::Variational::Problem backed by PETSc objects
+   * on a single thread, populating both the system matrix and right-hand
+   * side vector.
+   *
+   * @tparam U Trial function type.
+   * @tparam V Test function type.
+   */
   // Sequential assembly for single-variable Problem (PETSc)
   template <class U, class V>
   class Sequential<
@@ -492,6 +522,17 @@ namespace Rodin::Assembly
       }
   };
 
+  /**
+   * @brief Sequential assembly of a multi-variable PETSc problem.
+   *
+   * Assembles a block-structured @ref Rodin::Variational::Problem backed
+   * by PETSc objects on a single thread.
+   *
+   * @tparam U1  First trial/test function type.
+   * @tparam U2  Second trial/test function type.
+   * @tparam U3  Third trial/test function type.
+   * @tparam Us  Additional trial/test function types.
+   */
   template <class U1, class U2, class U3, class ... Us>
   class Sequential<
       Rodin::PETSc::Math::LinearSystem,

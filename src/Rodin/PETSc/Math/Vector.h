@@ -3,7 +3,13 @@
 
 /**
  * @file
- * @brief PETSc vector aliases and traits integration.
+ * @brief PETSc vector type alias and form-language traits.
+ *
+ * Introduces @ref Rodin::PETSc::Math::Vector as an alias for `::Vec` and
+ * provides the @ref Rodin::FormLanguage::Traits specialization so that
+ * Rodin's type-trait machinery recognises PETSc vectors.
+ *
+ * @see Rodin::PETSc::Math::Matrix, Rodin::PETSc::Math::LinearSystem
  */
 
 #include <boost/mpi/communicator.hpp>
@@ -19,10 +25,11 @@
 namespace Rodin::PETSc::Math
 {
   /**
-   * @brief Alias to PETSc dense/distributed vector handle type.
+   * @brief Alias for the PETSc distributed/sequential vector handle.
    *
-   * This alias is used across the PETSc backend so variational forms, assembly,
-   * and solvers can target PETSc vectors through Rodin type traits.
+   * Used as the data type for @ref Rodin::Variational::GridFunction and
+   * @ref Rodin::Variational::LinearForm specializations throughout the
+   * PETSc backend.
    */
   using Vector = ::Vec;
 }
@@ -30,7 +37,9 @@ namespace Rodin::PETSc::Math
 namespace Rodin::FormLanguage
 {
   /**
-   * @brief Form-language traits for PETSc vectors.
+   * @brief Traits specialization for PETSc vectors.
+   *
+   * Allows the form language to deduce the scalar type of a `::Vec`.
    */
   template <>
   struct Traits<::Vec>

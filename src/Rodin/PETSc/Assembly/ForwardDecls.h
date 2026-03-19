@@ -10,7 +10,13 @@ namespace Rodin::PETSc::Assembly
 {
   /**
    * @namespace Rodin::PETSc::Assembly
-   * @brief PETSc-oriented assembly strategies and aliases.
+   * @brief PETSc-specific assembly strategies.
+   *
+   * Provides sequential, MPI, and OpenMP assembly kernels that populate
+   * PETSc vectors (`::Vec`) and matrices (`::Mat`) from Rodin variational
+   * forms.
+   *
+   * @see Rodin::Assembly::Sequential, Rodin::Assembly::MPI
    */
 }
 

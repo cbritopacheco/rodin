@@ -3,7 +3,12 @@
 
 /**
  * @file
- * @brief Base helper for wrappers around PETSc opaque handles.
+ * @brief RAII base class for PETSc opaque handle wrappers.
+ *
+ * Provides a common interface for accessing the underlying PETSc handle
+ * and querying the associated MPI communicator.
+ *
+ * @see Rodin::Solver::KSP, Rodin::Solver::SNES
  */
 
 #include <cassert>
@@ -12,10 +17,14 @@
 namespace Rodin::PETSc
 {
   /**
-   * @brief Base‐class for any wrapper around a PETSc object.
+   * @brief RAII base class for wrappers around PETSc opaque handles.
    *
-   * Each derived instance is automatically tracked in a per‐thread registry,
-   * and any remaining PETSc handles are destroyed at PetscFinalize().
+   * Derived classes (e.g. @ref Rodin::Solver::KSP "KSP",
+   * @ref Rodin::Solver::SNES "SNES") must implement getHandle() to expose
+   * their PETSc object, which is used by getComm() to retrieve the
+   * associated communicator.
+   *
+   * @tparam Handle PETSc handle type (e.g. `::KSP`, `::SNES`).
    */
   template <class Handle>
   class Object
@@ -26,8 +35,8 @@ namespace Rodin::PETSc
       virtual ~Object() = default;
 
       /**
-       * @brief Retrieves the communicator associated with the PETSc handle.
-       * @param[out] comm Output communicator.
+       * @brief Retrieves the MPI communicator associated with the handle.
+       * @param[out] comm Pointer to the output communicator.
        */
       void getComm(MPI_Comm* comm) const
       {
@@ -36,12 +45,12 @@ namespace Rodin::PETSc
       }
 
       /**
-       * @brief Gets read-only access to the wrapped PETSc handle.
+       * @brief Returns a read-only reference to the underlying PETSc handle.
        */
       virtual const Handle& getHandle() const noexcept = 0;
 
       /**
-       * @brief Gets mutable access to the wrapped PETSc handle.
+       * @brief Returns a mutable reference to the underlying PETSc handle.
        */
       virtual Handle& getHandle() noexcept = 0;
   };
