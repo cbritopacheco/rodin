@@ -2810,6 +2810,280 @@ namespace Rodin::Variational
 
   /**
    * @ingroup QuadratureRuleSpecializations
+   * @brief Specialization for ∫ (∇u · f)·v in the case of P1 shape functions
+   *
+   * This class represents the CTAD for the expression:
+   * @f[
+   * \int (\mathbf{J} \: u \cdot f) \cdot v \ dx \: ,
+   * @f]
+   * where @f$ u \in \mathbb{P}_1 @f$ and @f$ v \in \mathbb{P}_1 @f$, and
+   * @f$ f @f$ is a coefficient function.
+   *
+   * Judgement
+   * ---------
+   *
+   * The following judgement specifies that the expression is a well formed type
+   * of QuadratureRule.
+   * @f[
+   * \dfrac
+   * {\vdash \int (\mathbf{J} \: u \cdot f) \cdot v \ dx :
+   * \texttt{QuadratureRule}}
+   * {\vdash u, v : \mathbb{P}_1}
+   * @f]
+   *
+   * Evaluates at the element centroid. Supports distinct P1 trial and test
+   * spaces. Implements the linearized convection term for Navier-Stokes.
+   */
+  template <
+    class CoefficientDerived, class LHSDerived, class RHSDerived,
+    class LHSRange, class RHSRange, class LHSMesh, class RHSMesh>
+  class QuadratureRule<
+    Dot<
+      ShapeFunctionBase<
+        Mult<
+          ShapeFunctionBase<
+            Jacobian<ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>>,
+            P1<LHSRange, LHSMesh>, TrialSpace>,
+          FunctionBase<CoefficientDerived>>,
+        P1<LHSRange, LHSMesh>, TrialSpace>,
+      ShapeFunctionBase<
+        ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>,
+        P1<RHSRange, RHSMesh>, TestSpace>>>
+    : public LocalBilinearFormIntegratorBase<
+        typename FormLanguage::Traits<
+          Dot<
+            ShapeFunctionBase<
+              Mult<
+                ShapeFunctionBase<
+                  Jacobian<ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>>,
+                  P1<LHSRange, LHSMesh>, TrialSpace>,
+                FunctionBase<CoefficientDerived>>,
+              P1<LHSRange, LHSMesh>, TrialSpace>,
+            ShapeFunctionBase<
+              ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>,
+              P1<RHSRange, RHSMesh>, TestSpace>>>::ScalarType>
+  {
+    public:
+      using TrialFESType = P1<LHSRange, LHSMesh>;
+      using TestFESType  = P1<RHSRange, RHSMesh>;
+
+      using TrialSFType =
+        ShapeFunctionBase<
+          Jacobian<ShapeFunction<LHSDerived, TrialFESType, TrialSpace>>,
+          TrialFESType, TrialSpace>;
+
+      using CoefficientType = FunctionBase<CoefficientDerived>;
+
+      using LHSType =
+        ShapeFunctionBase<
+          Mult<TrialSFType, CoefficientType>,
+          TrialFESType, TrialSpace>;
+
+      using RHSType =
+        ShapeFunctionBase<
+          ShapeFunction<RHSDerived, TestFESType, TestSpace>,
+          TestFESType, TestSpace>;
+
+      using IntegrandType = Dot<LHSType, RHSType>;
+
+      using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
+      using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
+
+      constexpr
+      QuadratureRule(const IntegrandType& integrand)
+        : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
+          m_integrand(integrand.copy()),
+          m_distortion(Math::nan<Real>()),
+          m_weight(Math::nan<Real>()),
+          m_set(false)
+      {}
+
+      constexpr
+      QuadratureRule(const QuadratureRule& other)
+        : Parent(other),
+          m_integrand(other.m_integrand->copy()),
+          m_distortion(Math::nan<Real>()),
+          m_weight(Math::nan<Real>()),
+          m_set(false)
+      {}
+
+      constexpr
+      QuadratureRule(QuadratureRule&& other)
+        : Parent(std::move(other)),
+          m_integrand(std::move(other.m_integrand)),
+          m_polytope(std::move(other.m_polytope)),
+          m_qf(std::move(other.m_qf)),
+          m_p(std::move(other.m_p)),
+          m_distortion(std::move(other.m_distortion)),
+          m_weight(std::move(other.m_weight)),
+          m_grad(std::move(other.m_grad)),
+          m_basis(std::move(other.m_basis)),
+          m_matrix(std::move(other.m_matrix)),
+          m_set(std::move(other.m_set)),
+          m_geometry(std::move(other.m_geometry))
+      {}
+
+      constexpr
+      const IntegrandType& getIntegrand() const
+      {
+        assert(m_integrand);
+        return *m_integrand;
+      }
+
+      const Geometry::Polytope& getPolytope() const final override
+      {
+        return m_polytope.value().get();
+      }
+
+      QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
+      {
+        m_polytope = polytope;
+        const auto& geometry = polytope.getGeometry();
+        const bool recompute = !m_set || m_geometry != geometry;
+
+        const auto& integrand = getIntegrand();
+        const auto& lhs = integrand.getLHS();
+        const auto& rhs = integrand.getRHS();
+        const auto& trialfes = lhs.getFiniteElementSpace();
+
+        // The coefficient is the RHS of the Mult node
+        const auto& coeff = lhs.getDerived().getRHS();
+
+        if (recompute)
+        {
+          m_set = true;
+          m_geometry = geometry;
+
+          const size_t d = polytope.getDimension();
+          const P1Element<ScalarType> scalarFe(geometry);
+          const size_t n = scalarFe.getCount();
+
+          m_qf.emplace(geometry);
+          assert(m_qf->getSize() == 1);
+          m_p.emplace(polytope, m_qf->getPoint(0));
+          m_weight = m_qf->getWeight(0);
+
+          const auto& rc = m_qf->getPoint(0);
+
+          // Pre-compute reference gradients of scalar P1 basis
+          m_grad.resize(n);
+          for (size_t a = 0; a < n; ++a)
+          {
+            m_grad[a].resize(d);
+            const auto& basis = scalarFe.getBasis(a);
+            for (size_t j = 0; j < d; ++j)
+              m_grad[a](j) = basis.template getDerivative<1>(j)(rc);
+          }
+
+          // Pre-compute scalar P1 basis values at centroid
+          m_basis.resize(n);
+          for (size_t b = 0; b < n; ++b)
+            m_basis[b] = scalarFe.getBasis(b)(rc);
+        }
+
+        assert(m_p);
+        auto& p = *m_p;
+        p.setPolytope(polytope);
+        m_distortion = p.getDistortion();
+
+        const auto& Jinv = p.getJacobianInverse();
+        const size_t n = m_grad.size();
+
+        // Evaluate the coefficient f at the centroid
+        const auto fval = coeff.getValue(p);
+
+        // Determine vdim
+        const size_t vdim = trialfes.getVectorDimension();
+
+        const size_t ntr = lhs.getDOFs(polytope);
+        const size_t nte = rhs.getDOFs(polytope);
+        m_matrix.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
+        m_matrix.setZero();
+
+        // Compute physical gradients dotted with the coefficient
+        // physGrad[a] = Jinv^T * refGrad[a],  gradDotF[a] = physGrad[a] · f
+        for (size_t a = 0; a < n; ++a)
+        {
+          const auto physGrad = Jinv.transpose() * m_grad[a];
+          const ScalarType gradDotF = Math::dot(physGrad, fval);
+
+          for (size_t b = 0; b < n; ++b)
+          {
+            const ScalarType val = gradDotF * m_basis[b];
+
+            // Fill block-diagonal entries: only (c,c) blocks are non-zero
+            for (size_t c = 0; c < vdim; ++c)
+            {
+              const size_t row = b * vdim + c;
+              const size_t col = a * vdim + c;
+              m_matrix(static_cast<Eigen::Index>(row), static_cast<Eigen::Index>(col)) = val;
+            }
+          }
+        }
+
+        return *this;
+      }
+
+      ScalarType integrate(size_t tr, size_t te) final override
+      {
+        return m_weight * m_distortion * m_matrix(te, tr);
+      }
+
+      virtual Geometry::Region getRegion() const override = 0;
+      virtual QuadratureRule* copy() const noexcept override = 0;
+
+    private:
+      std::unique_ptr<IntegrandType> m_integrand;
+
+      Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
+      Optional<QF::Centroid> m_qf;
+      Optional<Geometry::Point> m_p;
+
+      Real m_distortion;
+      Real m_weight;
+
+      std::vector<Math::SpatialVector<ScalarType>> m_grad;
+      std::vector<ScalarType> m_basis;
+
+      Math::Matrix<ScalarType> m_matrix;
+
+      bool m_set;
+      Optional<Geometry::Polytope::Type> m_geometry;
+  };
+
+  /**
+   * @ingroup RodinCTAD
+   */
+  template <
+    class CoefficientDerived, class LHSDerived, class RHSDerived,
+    class Range, class Mesh>
+  QuadratureRule(
+    const Dot<
+      ShapeFunctionBase<
+        Mult<
+          ShapeFunctionBase<
+            Jacobian<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>,
+            P1<Range, Mesh>, TrialSpace>,
+          FunctionBase<CoefficientDerived>>,
+        P1<Range, Mesh>, TrialSpace>,
+      ShapeFunctionBase<
+        ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>,
+        P1<Range, Mesh>, TestSpace>>&)
+    -> QuadratureRule<
+      Dot<
+        ShapeFunctionBase<
+          Mult<
+            ShapeFunctionBase<
+              Jacobian<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>,
+              P1<Range, Mesh>, TrialSpace>,
+            FunctionBase<CoefficientDerived>>,
+          P1<Range, Mesh>, TrialSpace>,
+        ShapeFunctionBase<
+          ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>,
+          P1<Range, Mesh>, TestSpace>>>;
+
+  /**
+   * @ingroup QuadratureRuleSpecializations
    * @brief Specialization for @f$\int \mathcal{K}(u) \cdot v@f$ in the case of P1 trial/test shape functions.
    *
    * This class represents the CTAD for the expression:
