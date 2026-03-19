@@ -145,7 +145,10 @@ namespace Rodin::Variational
           }
           else
           {
-            assert(false);
+            static_assert(
+              std::is_same_v<IntegrandRangeType, ScalarType>
+              || std::is_same_v<IntegrandRangeType, Math::Vector<ScalarType>>,
+              "Unsupported H1 Integral(v) range type. Expected scalar or vector-valued shape function.");
           }
         }
 
@@ -341,7 +344,10 @@ namespace Rodin::Variational
           }
           else
           {
-            assert(false);
+            static_assert(
+              std::is_same_v<RHSRangeType, ScalarType>
+              || std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>,
+              "Unsupported H1 Integral(f,v) RHS range type. Expected scalar or vector-valued shape function.");
           }
         }
 
