@@ -23,19 +23,26 @@ namespace Rodin::Variational
     : public LinearFormBase<::Vec>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
 
+      /// @brief Mesh type for the finite element space.
       using FESMeshType = typename FormLanguage::Traits<FESType>::MeshType;
 
+      /// @brief Scalar type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief PETSc vector type.
       using VectorType = ::Vec;
 
+      /// @brief Context type (Local or MPI).
       using ContextType = typename FormLanguage::Traits<FESMeshType>::ContextType;
 
+      /// @brief Default assembly type for this linear form.
       using DefaultAssembly =
         typename Assembly::Default<ContextType>::template Type<VectorType, LinearForm>;
 
+      /// @brief Parent class type.
       using Parent = LinearFormBase<VectorType>;
 
       using Parent::operator=;
@@ -98,6 +105,11 @@ namespace Rodin::Variational
         destroy();
       }
 
+      /**
+       * @brief Copy assignment operator.
+       * @param[in] other Linear form to copy.
+       * @return Reference to this linear form.
+       */
       LinearForm& operator=(const LinearForm& other)
       {
         if (this != &other)
@@ -127,6 +139,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Move assignment operator.
+       * @param[in] other Linear form to move from.
+       * @return Reference to this linear form.
+       */
       LinearForm& operator=(LinearForm&& other) noexcept
       {
         if (this != &other)
@@ -179,16 +196,19 @@ namespace Rodin::Variational
         return m_vector;
       }
 
+      /// @brief Returns a reference to the associated test function.
       const TestFunction<FES>& getTestFunction() const override
       {
         return m_v.get();
       }
 
+      /// @brief Creates a heap-allocated copy of this linear form.
       LinearForm* copy() const noexcept override
       {
         return new LinearForm(*this);
       }
 
+      /// @brief Destroys the owned PETSc vector, releasing resources.
       void destroy() noexcept
       {
         if (m_vector)
@@ -201,9 +221,9 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const TestFunction<FES>> m_v;
-      DefaultAssembly m_assembly;
-      VectorType m_vector;
+      std::reference_wrapper<const TestFunction<FES>> m_v; ///< Reference to the test function.
+      DefaultAssembly m_assembly;                          ///< Assembly strategy.
+      VectorType m_vector;                                 ///< Owned PETSc vector.
   };
 
   /**

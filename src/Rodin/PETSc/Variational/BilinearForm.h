@@ -24,36 +24,44 @@ namespace Rodin::Variational
   class BilinearForm<Solution, TrialFES, TestFES, ::Mat> final
     : public BilinearFormBase<::Mat>
   {
+    /// @brief Mesh type for the trial finite element space.
     using TrialFESMeshType =
       typename FormLanguage::Traits<TrialFES>::MeshType;
 
+    /// @brief Mesh type for the test finite element space.
     using TestFESMeshType =
       typename FormLanguage::Traits<TestFES>::MeshType;
 
+    /// @brief Context type (Local or MPI) for the trial mesh.
     using TrialFESMeshContextType =
       typename FormLanguage::Traits<TrialFESMeshType>::ContextType;
 
+    /// @brief Context type (Local or MPI) for the test mesh.
     using TestFESMeshContextType =
       typename FormLanguage::Traits<TestFESMeshType>::ContextType;
 
     public:
+      /// @brief Scalar type (PETSc scalar).
       using ScalarType =
         PetscScalar;
 
+      /// @brief Grid function type template for a given FES.
       template <class FES>
       using GridFunctionType =
         PETSc::Variational::GridFunction<FES>;
 
+      /// @brief Solution type for the trial function.
       using SolutionType = Solution;
 
-      /// Type of operator associated to the bilinear form.
+      /// @brief Type of operator associated to the bilinear form.
       using OperatorType = ::Mat;
 
+      /// @brief Default assembly type for this bilinear form.
       using DefaultAssembly =
         typename Assembly::Default<TrialFESMeshContextType, TestFESMeshContextType>
           ::template Type<OperatorType, BilinearForm>;
 
-      /// Parent class.
+      /// @brief Parent class type.
       using Parent = BilinearFormBase<OperatorType>;
 
       using Parent::operator=;
@@ -118,6 +126,11 @@ namespace Rodin::Variational
         this->destroy();
       }
 
+      /**
+       * @brief Copy assignment operator.
+       * @param[in] other Bilinear form to copy.
+       * @return Reference to this bilinear form.
+       */
       BilinearForm& operator=(const BilinearForm& other)
       {
         if (this != &other)
@@ -144,6 +157,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Move assignment operator.
+       * @param[in] other Bilinear form to move from.
+       * @return Reference to this bilinear form.
+       */
       BilinearForm& operator=(BilinearForm&& other) noexcept
       {
         if (this != &other)
@@ -194,11 +212,13 @@ namespace Rodin::Variational
         return result;
       }
 
+      /// @brief Returns a mutable reference to the assembled PETSc matrix.
       OperatorType& getOperator() override
       {
         return m_operator;
       }
 
+      /// @brief Returns a read-only reference to the assembled PETSc matrix.
       const OperatorType& getOperator() const override
       {
         return m_operator;
@@ -213,21 +233,25 @@ namespace Rodin::Variational
           trialFES, testFES, this->getLocalIntegrators(), this->getGlobalIntegrators() });
       }
 
+      /// @brief Returns a reference to the associated trial function.
       const TrialFunction<SolutionType, TrialFES>& getTrialFunction() const override
       {
         return m_u.get();
       }
 
+      /// @brief Returns a reference to the associated test function.
       const TestFunction<TestFES>& getTestFunction() const override
       {
         return m_v.get();
       }
 
+      /// @brief Creates a heap-allocated copy of this bilinear form.
       BilinearForm* copy() const noexcept override
       {
         return new BilinearForm(*this);
       }
 
+      /// @brief Destroys the owned PETSc matrix, releasing resources.
       void destroy() noexcept
       {
         if (m_operator)
@@ -240,6 +264,12 @@ namespace Rodin::Variational
       }
 
     private:
+      /**
+       * @brief Deduces the MPI communicator from the trial and test meshes.
+       * @param[in] u Trial function reference.
+       * @param[in] v Test function reference.
+       * @returns MPI communicator for PETSc object creation.
+       */
       static MPI_Comm getPETScComm(
           const TrialFunction<SolutionType, TrialFES>& u, const TestFunction<TestFES>& v)
       {
@@ -260,10 +290,10 @@ namespace Rodin::Variational
         }
       }
 
-      std::reference_wrapper<const TrialFunction<SolutionType, TrialFES>> m_u;
-      std::reference_wrapper<const TestFunction<TestFES>> m_v;
-      DefaultAssembly m_assembly;
-      OperatorType m_operator;
+      std::reference_wrapper<const TrialFunction<SolutionType, TrialFES>> m_u; ///< Reference to the trial function.
+      std::reference_wrapper<const TestFunction<TestFES>> m_v;                 ///< Reference to the test function.
+      DefaultAssembly m_assembly;                                              ///< Assembly strategy.
+      OperatorType m_operator;                                                 ///< Owned PETSc matrix.
   };
 
   /**
