@@ -2,8 +2,17 @@
 #define RODIN_SOLVER_PETSC_SNES_H
 
 /**
- * @file
- * @brief PETSc SNES nonlinear solver wrapper for Rodin.
+ * @file SNES.h
+ * @brief PETSc SNES (Scalable Nonlinear Equations Solvers) wrapper for Rodin.
+ *
+ * Wraps the PETSc `SNES` context for solving nonlinear systems
+ * @f$ F(x) = 0 @f$ using Newton-type methods.  At each Newton iteration
+ * the Jacobian system is solved by the associated
+ * @ref Rodin::Solver::KSP linear solver.
+ *
+ * @see Rodin::Solver::KSP,
+ *      Rodin::Solver::NewtonSolverBase,
+ *      Rodin::PETSc::Math::LinearSystem
  */
 
 #include <petscsnes.h>
@@ -36,32 +45,39 @@ namespace Rodin::Solver
    * @brief PETSc SNES (Scalable Nonlinear Equations Solvers) wrapper.
    *
    * Wraps the PETSc `SNES` context for solving nonlinear systems
-   * @f$ F(x) = 0 @f$ using Newton-type methods. The linear sub-problems
-   * arising at each Newton step are solved by the associated
-   * @ref Rodin::Solver::KSP "KSP" solver.
+   * @f$ F(x) = 0 @f$ using Newton-type methods.  Inherits
+   * @ref Rodin::Solver::NewtonSolverBase<KSP> so that the linear
+   * sub-problems arising at each Newton step are solved by the
+   * associated @ref Rodin::Solver::KSP solver, and
+   * @ref Rodin::PETSc::Object<::SNES> for automatic handle cleanup.
    *
-   * @see Rodin::Solver::KSP, Rodin::Solver::NewtonSolverBase
+   * Supports both programmatic configuration (`setType`, `setTolerances`)
+   * and PETSc command-line overrides (`-snes_type`, `-snes_rtol`, …).
+   *
+   * @see Rodin::Solver::KSP,
+   *      Rodin::Solver::NewtonSolverBase,
+   *      Rodin::PETSc::Math::LinearSystem
    */
   class SNES
     : public PETSc::Object<::SNES>, public NewtonSolverBase<KSP>
   {
     public:
-      /// @brief Handle type for the PETSc SNES context.
+      /// @brief Handle type for the raw PETSc `SNES` context pointer.
       using HandleType = ::SNES;
 
-      /// @brief Linear system type for PETSc solvers.
+      /// @brief Linear system type coupling @f$ A @f$, @f$ \mathbf{b} @f$, and @f$ \mathbf{x} @f$.
       using LinearSystemType = PETSc::Math::LinearSystem;
 
-      /// @brief PETSc vector type.
+      /// @brief PETSc vector type (`::Vec`) for the nonlinear residual and solution.
       using VectorType = ::Vec;
 
-      /// @brief Base problem type.
+      /// @brief Base problem type that provides the linear system.
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
 
-      /// @brief PETSc object parent class type.
+      /// @brief Parent class providing PETSc object handle management.
       using PetscParent = PETSc::Object<HandleType>;
 
-      /// @brief Newton solver parent class type.
+      /// @brief Parent class providing the Newton solver interface.
       using NewtonSolverParent = NewtonSolverBase<KSP>;
 
       using NewtonSolverParent::solve;

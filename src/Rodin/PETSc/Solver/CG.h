@@ -2,8 +2,15 @@
 #define RODIN_SOLVER_PETSC_CG_H
 
 /**
- * @file
+ * @file CG.h
  * @brief PETSc specialization of the conjugate gradient (CG) solver.
+ *
+ * Provides the `CG<PETSc::Math::LinearSystem>` specialization that sets
+ * the PETSc KSP type to `KSPCG`.  The conjugate gradient method is
+ * applicable to symmetric positive definite systems
+ * @f$ A\mathbf{x} = \mathbf{b} @f$.
+ *
+ * @see Rodin::Solver::KSP, Rodin::PETSc::Solver::GMRES
  */
 
 #include <petscksp.h>
@@ -19,24 +26,28 @@ namespace Rodin::Solver
    * @ingroup CGSpecializations
    * @brief Conjugate gradient solver for PETSc linear systems.
    *
-   * This specialization targets @ref Rodin::PETSc::Math::LinearSystem and
-   * configures the underlying PETSc KSP type to `KSPCG`.
+   * Specialization of @ref Rodin::Solver::CG that targets
+   * @ref Rodin::PETSc::Math::LinearSystem and sets the underlying KSP
+   * algorithm to `KSPCG`.  Applicable only to symmetric positive definite
+   * (SPD) systems.
+   *
+   * @see Rodin::Solver::KSP, Rodin::PETSc::Solver::CG
    */
   template <>
   class CG<PETSc::Math::LinearSystem> final : public KSP
   {
     public:
-      /// @brief PETSc matrix operator type.
+      /// @brief PETSc matrix type (`::Mat`) for the system operator.
       using OperatorType = ::Mat;
-      /// @brief PETSc vector type.
+      /// @brief PETSc vector type (`::Vec`) for the RHS and solution.
       using VectorType = ::Vec;
-      /// @brief Scalar type (PETSc scalar).
+      /// @brief Scalar type (`PetscScalar`).
       using ScalarType = PetscScalar;
-      /// @brief Linear system type for PETSc solvers.
+      /// @brief Linear system type coupling @f$ A @f$, @f$ \mathbf{b} @f$, and @f$ \mathbf{x} @f$.
       using LinearSystemType = PETSc::Math::LinearSystem;
-      /// @brief Base problem type.
+      /// @brief Base problem type that provides the linear system.
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
-      /// @brief Parent class type.
+      /// @brief Parent class type (@ref Rodin::Solver::KSP).
       using Parent = KSP;
       using Parent::solve;
 

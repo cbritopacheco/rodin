@@ -8,8 +8,25 @@
 #define RODIN_PETSC_MATH_LINEARSYSTEM_H
 
 /**
- * @file
+ * @file LinearSystem.h
  * @brief PETSc specialization of Rodin linear system containers.
+ *
+ * Provides the `LinearSystem<::Mat, ::Vec>` specialization that stores
+ * the system matrix @f$ A @f$, right-hand side vector @f$ \mathbf{b} @f$,
+ * and solution vector @f$ \mathbf{x} @f$ as PETSc handles.  Also defines
+ * the @ref Rodin::Math::LinearSystem<::Mat,::Vec>::FieldSplits inner
+ * class for block-preconditioner support.
+ *
+ * ## Usage
+ *
+ * This class is normally not instantiated directly; instead it is created
+ * internally by @ref Rodin::Variational::Problem specializations.  Solvers
+ * such as @ref Rodin::Solver::KSP receive a reference to the linear
+ * system through the `solve(LinearSystem&)` interface.
+ *
+ * @see Rodin::PETSc::Math::LinearSystem (convenience alias),
+ *      Rodin::Solver::KSP,
+ *      Rodin::PETSc::Variational::Problem
  */
 
 #include <petsc.h>
@@ -24,43 +41,60 @@
 namespace Rodin::Math
 {
   /**
-   * @brief Specialization of @ref Rodin::Math::LinearSystem for PETSc objects.
+   * @brief Specialization of @ref Rodin::Math::LinearSystem for PETSc
+   *        objects (`::Mat` and `::Vec`).
    *
-   * Couples a PETSc operator (@f$ A @f$), right-hand side vector (@f$ b @f$),
-   * and solution vector (@f$ x @f$) into the common
-   * @ref Rodin::Math::LinearSystemBase interface used by Rodin variational
-   * problems and solvers.
+   * Couples a PETSc matrix (operator @f$ A @f$), right-hand side vector
+   * (@f$ \mathbf{b} @f$), and solution vector (@f$ \mathbf{x} @f$) into
+   * the common @ref Rodin::Math::LinearSystemBase interface used by Rodin
+   * variational problems and solvers.
    *
    * ## Implementation Details
    *
-   * The linear system @f$ Ax = b @f$ is stored as three PETSc handles
-   * owned by this object and destroyed in the destructor.
+   * The linear system @f$ A\mathbf{x} = \mathbf{b} @f$ is stored as
+   * three PETSc handles that are allocated in the constructor and
+   * destroyed in the destructor.  The `eliminate()` template method
+   * enforces Dirichlet boundary conditions by zeroing rows of @f$ A @f$
+   * and adjusting @f$ \mathbf{b} @f$ and @f$ \mathbf{x} @f$.
    *
-   * @see Rodin::PETSc::Math::LinearSystem, Rodin::Solver::KSP
+   * ## Field-Split Support
+   *
+   * The inner @ref FieldSplits class stores named PETSc index sets
+   * (`IS`) that can be passed to `PCFIELDSPLIT` for block
+   * preconditioning of multi-field systems.
+   *
+   * @see Rodin::PETSc::Math::LinearSystem (convenience alias),
+   *      Rodin::Solver::KSP
    */
   template <>
   class LinearSystem<::Mat, ::Vec>
     : public LinearSystemBase<::Mat, ::Vec, LinearSystem<::Mat, ::Vec>>
   {
     public:
-      /// @brief PETSc matrix type.
+      /// @brief PETSc matrix type (`::Mat`) for the system operator @f$ A @f$.
       using MatrixType =
         ::Mat;
 
-      /// @brief PETSc vector type.
+      /// @brief PETSc vector type (`::Vec`) for @f$ \mathbf{b} @f$ and @f$ \mathbf{x} @f$.
       using VectorType =
         ::Vec;
 
-      /// @brief Parent class type.
+      /// @brief Parent CRTP base class providing the generic
+      ///        `LinearSystemBase` interface.
       using Parent =
         LinearSystemBase<MatrixType, VectorType, LinearSystem<MatrixType, VectorType>>;
 
       /**
        * @brief Container for named PETSc index sets used with field-split
-       * preconditioners (e.g. `PCFIELDSPLIT`).
+       *        preconditioners (e.g. `PCFIELDSPLIT`).
        *
-       * Each @ref Split pairs a human-readable name with a PETSc `IS` that
-       * identifies the DOF indices belonging to that field.
+       * Each @ref Split pairs a human-readable field name (e.g.
+       * `"velocity"`, `"pressure"`) with a PETSc `IS` that identifies the
+       * DOF indices belonging to that field within the global system.
+       * The class takes ownership of the `IS` handles and destroys them
+       * in its destructor.
+       *
+       * @see Rodin::PETSc::Variational::Problem::setFieldSplits
        */
       class FieldSplits
       {
@@ -251,15 +285,24 @@ namespace Rodin::Math
       LinearSystem& operator=(LinearSystem&& other) noexcept;
 
       /**
-       * @brief Eliminates Dirichlet DOFs from the linear system.
+       * @brief Enforces Dirichlet boundary conditions by eliminating
+       *        constrained DOFs from the linear system.
        *
-       * Zeros the matrix rows corresponding to constrained DOFs and adjusts
-       * the right-hand side vector so that the solution satisfies
-       * @f$ x_i = u_i @f$ for every constrained index @f$ i @f$.
+       * For every entry @f$ (i, u_i) @f$ in @p dofs the method:
+       * 1. Sets @f$ x_i = u_i @f$ in the solution vector.
+       * 2. Zeros row @f$ i @f$ of the matrix and places a @f$ 1 @f$ on
+       *    the diagonal (`MatZeroRows` with `diag = 1.0`).
+       * 3. Adjusts @f$ \mathbf{b} @f$ so that @f$ x_i = u_i @f$ is
+       *    enforced after the solve.
        *
-       * @tparam DOFScalar Scalar type of the prescribed values.
-       * @param  dofs   Map from global DOF index to prescribed value.
-       * @param  offset Global index offset added to every key in @p dofs.
+       * All indices in @p dofs are shifted by @p offset, which is useful
+       * for block systems where each field starts at a non-zero position.
+       *
+       * @tparam DOFScalar Scalar type of the prescribed boundary values.
+       * @param[in] dofs   Map from global DOF index to prescribed value
+       *                   @f$ u_i @f$.
+       * @param[in] offset Global index offset added to every key in
+       *                   @p dofs (default 0).
        * @returns Reference to `*this` for method chaining.
        */
       template <class DOFScalar>

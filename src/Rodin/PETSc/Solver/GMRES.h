@@ -2,8 +2,15 @@
 #define RODIN_SOLVER_PETSC_GMRES_H
 
 /**
- * @file
+ * @file GMRES.h
  * @brief PETSc specialization of the GMRES solver.
+ *
+ * Provides the `GMRES<PETSc::Math::LinearSystem>` specialization that
+ * sets the PETSc KSP type to `KSPGMRES`.  GMRES is applicable to
+ * general (non-symmetric) linear systems
+ * @f$ A\mathbf{x} = \mathbf{b} @f$.
+ *
+ * @see Rodin::Solver::KSP, Rodin::PETSc::Solver::CG
  */
 
 #include <petscksp.h>
@@ -17,26 +24,31 @@ namespace Rodin::Solver
 {
   /**
    * @ingroup GMRESSpecializations
-   * @brief Generalized minimal residual solver for PETSc linear systems.
+   * @brief Generalized minimal residual (GMRES) solver for PETSc linear
+   *        systems.
    *
-   * This specialization targets @ref Rodin::PETSc::Math::LinearSystem and
-   * configures the underlying PETSc KSP type to `KSPGMRES`.
+   * Specialization of @ref Rodin::Solver::GMRES that targets
+   * @ref Rodin::PETSc::Math::LinearSystem and sets the underlying KSP
+   * algorithm to `KSPGMRES`.  Suitable for non-symmetric and
+   * indefinite systems.
+   *
+   * @see Rodin::Solver::KSP, Rodin::PETSc::Solver::GMRES
    */
   template <>
   class GMRES<PETSc::Math::LinearSystem> final : public KSP
   {
     public:
-      /// @brief PETSc matrix operator type.
+      /// @brief PETSc matrix type (`::Mat`) for the system operator.
       using OperatorType = ::Mat;
-      /// @brief PETSc vector type.
+      /// @brief PETSc vector type (`::Vec`) for the RHS and solution.
       using VectorType = ::Vec;
-      /// @brief Scalar type (PETSc scalar).
+      /// @brief Scalar type (`PetscScalar`).
       using ScalarType = PetscScalar;
-      /// @brief Linear system type for PETSc solvers.
+      /// @brief Linear system type coupling @f$ A @f$, @f$ \mathbf{b} @f$, and @f$ \mathbf{x} @f$.
       using LinearSystemType = PETSc::Math::LinearSystem;
-      /// @brief Base problem type.
+      /// @brief Base problem type that provides the linear system.
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
-      /// @brief Parent class type.
+      /// @brief Parent class type (@ref Rodin::Solver::KSP).
       using Parent = KSP;
       using Parent::solve;
 

@@ -2,8 +2,31 @@
 #define RODIN_PETSC_VARIATIONAL_BILINEARFORM_H
 
 /**
- * @file
+ * @file BilinearForm.h
  * @brief PETSc specialization of variational bilinear forms.
+ *
+ * Provides the partial specialization of
+ * @ref Rodin::Variational::BilinearForm that assembles bilinear-form
+ * contributions into a PETSc `Mat`.  The resulting matrix represents
+ * the stiffness (or system) matrix @f$ A @f$ of a discrete finite
+ * element system @f$ A\mathbf{x} = \mathbf{b} @f$.
+ *
+ * ## Mathematical Background
+ *
+ * A bilinear form @f$ a : U_h \times V_h \to \mathbb{R} @f$ acts on
+ * a trial function @f$ u \in U_h @f$ and a test function @f$ v \in V_h @f$.
+ * After discretisation, its entries are:
+ * @f[
+ *   A_{ij} = a(\psi_j, \phi_i), \quad
+ *   i = 1,\ldots,M, \;\; j = 1,\ldots,N
+ * @f]
+ * where @f$ \psi_j @f$ and @f$ \phi_i @f$ are trial and test basis
+ * functions, respectively.
+ *
+ * @see Rodin::PETSc::Variational::LinearForm,
+ *      Rodin::PETSc::Variational::Problem,
+ *      Rodin::PETSc::Variational::TrialFunction,
+ *      Rodin::PETSc::Variational::TestFunction
  */
 
 #include <petscmacros.h>
@@ -18,7 +41,19 @@
 namespace Rodin::Variational
 {
   /**
-   * @brief Bilinear form specialization assembled into a PETSc matrix.
+   * @brief Bilinear form specialization that assembles into a PETSc matrix.
+   *
+   * Owns a PETSc `Mat` representing the system matrix @f$ A @f$.  The
+   * matrix is created in the constructor (using an MPI communicator
+   * deduced from the trial and test meshes) and destroyed in the
+   * destructor.
+   *
+   * @tparam Solution  Solution grid function type for the trial function.
+   * @tparam TrialFES  Finite element space type of the trial function.
+   * @tparam TestFES   Finite element space type of the test function.
+   *
+   * @see Rodin::Variational::BilinearFormBase,
+   *      Rodin::PETSc::Variational::BilinearForm
    */
   template <class Solution, class TrialFES, class TestFES>
   class BilinearForm<Solution, TrialFES, TestFES, ::Mat> final
@@ -32,36 +67,43 @@ namespace Rodin::Variational
     using TestFESMeshType =
       typename FormLanguage::Traits<TestFES>::MeshType;
 
-    /// @brief Context type (Local or MPI) for the trial mesh.
+    /// @brief Context type (either @ref Rodin::Context::Local or
+    ///        @ref Rodin::Context::MPI) for the trial mesh.
     using TrialFESMeshContextType =
       typename FormLanguage::Traits<TrialFESMeshType>::ContextType;
 
-    /// @brief Context type (Local or MPI) for the test mesh.
+    /// @brief Context type (either @ref Rodin::Context::Local or
+    ///        @ref Rodin::Context::MPI) for the test mesh.
     using TestFESMeshContextType =
       typename FormLanguage::Traits<TestFESMeshType>::ContextType;
 
     public:
-      /// @brief Scalar type (PETSc scalar).
+      /// @brief Scalar type (`PetscScalar`) for matrix entries.
       using ScalarType =
         PetscScalar;
 
-      /// @brief Grid function type template for a given FES.
+      /// @brief Template alias mapping a finite element space to its
+      ///        PETSc grid function type.
       template <class FES>
       using GridFunctionType =
         PETSc::Variational::GridFunction<FES>;
 
-      /// @brief Solution type for the trial function.
+      /// @brief Solution (grid function) type associated with the trial
+      ///        function.
       using SolutionType = Solution;
 
-      /// @brief Type of operator associated to the bilinear form.
+      /// @brief PETSc matrix type (`::Mat`) used to store the system
+      ///        matrix @f$ A @f$.
       using OperatorType = ::Mat;
 
-      /// @brief Default assembly type for this bilinear form.
+      /// @brief Default assembly strategy deduced from the trial and test
+      ///        mesh context types.
       using DefaultAssembly =
         typename Assembly::Default<TrialFESMeshContextType, TestFESMeshContextType>
           ::template Type<OperatorType, BilinearForm>;
 
-      /// @brief Parent class type.
+      /// @brief Parent class providing the generic `BilinearFormBase<Mat>`
+      ///        interface.
       using Parent = BilinearFormBase<OperatorType>;
 
       using Parent::operator=;
@@ -179,14 +221,16 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Evaluates the linear form at the functions @f$ u @f$ and @f$
-       * v @f$.
+       * @brief Evaluates the bilinear form at grid functions @f$ u @f$
+       *        and @f$ v @f$.
        *
-       * Given grid functions @f$ u @f$ and @f$ v @f$, this function will
-       * compute the action of the bilinear mapping @f$ a(u, v) @f$.
+       * Computes @f$ a(u, v) = \mathbf{v}^\top A \mathbf{u} @f$ by
+       * performing a matrix–vector product `MatMult(A, u, tmp)` followed
+       * by `VecDot(v, tmp, &result)`.
        *
-       * @returns The action @f$ a(u, v) @f$ which the bilinear form takes
-       * at @f$ ( u, v ) @f$.
+       * @param[in] u Trial grid function @f$ u @f$.
+       * @param[in] v Test grid function @f$ v @f$.
+       * @returns The scalar value @f$ a(u, v) @f$.
        */
       ScalarType operator()(
           const GridFunctionType<TrialFES>& u,
@@ -212,19 +256,20 @@ namespace Rodin::Variational
         return result;
       }
 
-      /// @brief Returns a mutable reference to the assembled PETSc matrix.
+      /// @brief Returns a mutable reference to the assembled PETSc system matrix @f$ A @f$.
       OperatorType& getOperator() override
       {
         return m_operator;
       }
 
-      /// @brief Returns a read-only reference to the assembled PETSc matrix.
+      /// @brief Returns a read-only reference to the assembled PETSc system matrix @f$ A @f$.
       const OperatorType& getOperator() const override
       {
         return m_operator;
       }
 
-      /// @brief Assembles the bilinear form into the PETSc matrix.
+      /// @brief Assembles the bilinear form into the PETSc matrix using the
+      ///        @ref DefaultAssembly strategy with both local and global integrators.
       void assemble() override
       {
         const auto& trialFES = getTrialFunction().getFiniteElementSpace();
@@ -266,6 +311,10 @@ namespace Rodin::Variational
     private:
       /**
        * @brief Deduces the MPI communicator from the trial and test meshes.
+       *
+       * When both meshes use `Context::Local`, returns `PETSC_COMM_SELF`.
+       * Otherwise, returns the communicator from the trial mesh context.
+       *
        * @param[in] u Trial function reference.
        * @param[in] v Test function reference.
        * @returns MPI communicator for PETSc object creation.

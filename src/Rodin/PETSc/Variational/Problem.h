@@ -2,8 +2,26 @@
 #define RODIN_PETSC_VARIATIONAL_PROBLEM_H
 
 /**
- * @file
+ * @file Problem.h
  * @brief PETSc specialization of variational problems.
+ *
+ * Provides two partial specializations of @ref Rodin::Variational::Problem
+ * that assemble into a @ref Rodin::PETSc::Math::LinearSystem:
+ *
+ * 1. **Two-field** (`Problem<LinearSystem, U, V>`): A single trial / test
+ *    function pair producing a scalar linear system @f$ A\mathbf{x} = \mathbf{b} @f$.
+ * 2. **Multi-field** (`Problem<LinearSystem, U1, U2, U3, Us...>`): An
+ *    arbitrary number of coupled trial / test functions producing a
+ *    block-structured linear system suitable for field-split
+ *    preconditioning.
+ *
+ * Both specializations support `Context::Local` (sequential) and
+ * `Context::MPI` (distributed) mesh contexts.
+ *
+ * @see Rodin::PETSc::Variational::TrialFunction,
+ *      Rodin::PETSc::Variational::TestFunction,
+ *      Rodin::PETSc::Math::LinearSystem,
+ *      Rodin::Solver::KSP
  */
 
 #include <mpi.h>
@@ -31,14 +49,20 @@
 namespace Rodin::Variational
 {
   /**
-   * @brief PETSc variational problem for a single trial/test function pair.
+   * @brief PETSc variational problem for a single trial / test function pair.
    *
-   * Assembles the variational formulation into a
-   * @ref Rodin::PETSc::Math::LinearSystem and solves it with a
-   * PETSc-compatible linear solver.
+   * Assembles a variational formulation into a
+   * @ref Rodin::PETSc::Math::LinearSystem containing the system matrix
+   * @f$ A @f$, the right-hand side @f$ \mathbf{b} @f$, and the solution
+   * @f$ \mathbf{x} @f$.  After calling `solve()`, the solution is
+   * automatically scattered back into the trial function's grid function.
    *
-   * @tparam U Trial function type.
-   * @tparam V Test function type.
+   * @tparam U Trial function type (e.g.
+   *           `TrialFunction<GridFunction<P1<…>>, P1<…>>`).
+   * @tparam V Test function type (e.g. `TestFunction<P1<…>>`).
+   *
+   * @see Rodin::PETSc::Variational::Problem (convenience alias),
+   *      Rodin::Solver::KSP
    */
   template <class U, class V>
   class Problem<PETSc::Math::LinearSystem, U, V>
@@ -249,16 +273,40 @@ namespace Rodin::Variational
           TestFunction<TestFES>>;
 
   /**
-   * @brief PETSc variational problem for multiple trial/test functions.
+   * @brief PETSc variational problem for multiple coupled trial / test
+   *        functions.
    *
-   * Supports coupled multi-physics systems by accepting an arbitrary
-   * number of PETSc trial and test function arguments. Assembles a
-   * block-structured @ref Rodin::PETSc::Math::LinearSystem.
+   * Supports coupled multi-physics systems (e.g. Stokes, fluid-structure
+   * interaction) by accepting an arbitrary number of PETSc trial and test
+   * function arguments.  Assembles a block-structured
+   * @ref Rodin::PETSc::Math::LinearSystem whose global matrix and vectors
+   * are partitioned by field DOF offsets.
+   *
+   * After calling `solve()`, the global solution vector is sliced and
+   * scattered back into each trial function's grid function using the
+   * precomputed offset arrays.
+   *
+   * ## Block Structure
+   *
+   * For @f$ K @f$ trial fields with sizes @f$ N_1, \ldots, N_K @f$, the
+   * global system has size @f$ N = \sum_{k=1}^K N_k @f$.  The DOF
+   * offset of the @f$ k @f$-th field is @f$ O_k = \sum_{j=1}^{k-1} N_j @f$
+   * (with @f$ O_1 = 0 @f$).
+   *
+   * ## Field-Split Preconditioning
+   *
+   * Call `setFieldSplits()` after `assemble()` to create PETSc `IS`
+   * objects for each trial field.  These are passed to `PCFIELDSPLIT` so
+   * that the preconditioner can be configured per-block from the command
+   * line or programmatically.
    *
    * @tparam U1  First function type (trial or test).
    * @tparam U2  Second function type.
    * @tparam U3  Third function type.
    * @tparam Us  Additional function types.
+   *
+   * @see Rodin::PETSc::Variational::Problem (convenience alias),
+   *      Rodin::PETSc::Math::LinearSystem::FieldSplits
    */
   template <class U1, class U2, class U3, class... Us>
   class Problem<PETSc::Math::LinearSystem, U1, U2, U3, Us...>
