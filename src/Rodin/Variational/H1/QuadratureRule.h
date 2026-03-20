@@ -151,9 +151,8 @@ namespace Rodin::Variational
           }
           else if constexpr (std::is_same_v<IntegrandRangeType, Math::Vector<ScalarType>>)
           {
-            const size_t scalarCount = scalarFE.getCount();
             const size_t vdim = fes.getVectorDimension();
-            assert(nte == scalarCount * vdim);
+            assert(nte == scalarFE.getCount() * vdim);
 
             for (size_t local = 0; local < nte; ++local)
             {
@@ -367,9 +366,8 @@ namespace Rodin::Variational
           }
           else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>)
           {
-            const size_t scalarCount = scalarFE.getCount();
             const size_t vdim = fes.getVectorDimension();
-            assert(nte == scalarCount * vdim);
+            assert(nte == scalarFE.getCount() * vdim);
 
             for (size_t local = 0; local < nte; ++local)
             {
@@ -582,10 +580,8 @@ namespace Rodin::Variational
 
         assert(scalarCountTr > 0 && ntr % scalarCountTr == 0);
         assert(scalarCountTe > 0 && nte % scalarCountTe == 0);
-        const size_t vdim_tr = ntr / scalarCountTr;
-        const size_t vdim_te = nte / scalarCountTe;
-        assert(vdim_tr == vdim_te);
-        const size_t vdim = vdim_tr;
+        const size_t vdim = ntr / scalarCountTr;
+        assert(vdim == nte / scalarCountTe);
 
         const bool symmetric =
           (&trialfes.getMesh() == &testfes.getMesh()) && (ntr == nte);
@@ -856,10 +852,8 @@ namespace Rodin::Variational
 
         assert(scalarCountTr > 0 && ntr % scalarCountTr == 0);
         assert(scalarCountTe > 0 && nte % scalarCountTe == 0);
-        const size_t vdim_tr = ntr / scalarCountTr;
-        const size_t vdim_te = nte / scalarCountTe;
-        assert(vdim_tr == vdim_te);
-        const size_t vdim = vdim_tr;
+        const size_t vdim = ntr / scalarCountTr;
+        assert(vdim == nte / scalarCountTe);
 
         const auto& trTab = trialScalarFE.getTabulation(*m_qf);
         const auto& teTab = testScalarFE .getTabulation(*m_qf);
@@ -1463,10 +1457,8 @@ namespace Rodin::Variational
 
         assert(scalarCountTr > 0 && ntr % scalarCountTr == 0);
         assert(scalarCountTe > 0 && nte % scalarCountTe == 0);
-        const size_t vdim_tr = ntr / scalarCountTr;
-        const size_t vdim_te = nte / scalarCountTe;
-        assert(vdim_tr == vdim_te);
-        const size_t vdim = vdim_tr;
+        const size_t vdim = ntr / scalarCountTr;
+        assert(vdim == nte / scalarCountTe);
 
         const auto& trTab = trialScalarFE.getTabulation(*m_qf);
         const auto& teTab = testScalarFE .getTabulation(*m_qf);
@@ -2275,10 +2267,8 @@ namespace Rodin::Variational
         assert(testScalarCount  > 0);
         assert(ntr % trialScalarCount == 0);
         assert(nte % testScalarCount  == 0);
-        const size_t vdim_tr = ntr / trialScalarCount;
-        const size_t vdim_te = nte / testScalarCount;
-        assert(vdim_tr == vdim_te);
-        const size_t vdim = vdim_tr;
+        const size_t vdim = ntr / trialScalarCount;
+        assert(vdim == nte / testScalarCount);
 
         const bool symmetric =
           (&trialfes.getMesh() == &testfes.getMesh()) && (ntr == nte);
@@ -3015,8 +3005,7 @@ namespace Rodin::Variational
         assert(nte % testScalarCount  == 0);
 
         const size_t vdim_tr = ntr / trialScalarCount;
-        const size_t vdim_te = nte / testScalarCount;
-        assert(vdim_tr == vdim_te);
+        assert(vdim_tr == nte / testScalarCount);
         const size_t vdim = vdim_tr;
 
         const bool symmetric =
@@ -3379,10 +3368,8 @@ namespace Rodin::Variational
 
         assert(trialScalarCount > 0 && ntr % trialScalarCount == 0);
         assert(testScalarCount  > 0 && nte % testScalarCount  == 0);
-        const size_t vdim_tr = ntr / trialScalarCount;
-        const size_t vdim_te = nte / testScalarCount;
-        assert(vdim_tr == vdim_te);
-        const size_t vdim = vdim_tr;
+        const size_t vdim = ntr / trialScalarCount;
+        assert(vdim == nte / testScalarCount);
 
         const auto& trTab = trialScalarFE.getTabulation(*m_qf);
         const auto& teTab = testScalarFE .getTabulation(*m_qf);
