@@ -7,6 +7,11 @@
 #ifndef RODIN_ASSEMBLY_OPENMP_PETSC_H
 #define RODIN_ASSEMBLY_OPENMP_PETSC_H
 
+/**
+ * @file
+ * @brief OpenMP assembly specializations targeting PETSc objects.
+ */
+
 #include <omp.h>
 #include <petsc.h>
 #include <petscerror.h>
@@ -18,7 +23,12 @@
 namespace Rodin::Assembly
 {
   /**
-   * @brief OpenMP assembly for PETSc Vec (linear form)
+   * @brief OpenMP-parallel assembly of a PETSc vector from a linear form.
+   *
+   * Uses thread-local buffers and barriers to assemble linear form
+   * contributions into a sequential PETSc vector in parallel.
+   *
+   * @tparam FES Finite element space type.
    */
   template <class FES>
   class OpenMP<
@@ -161,7 +171,14 @@ namespace Rodin::Assembly
   };
 
   /**
-   * @brief OpenMP assembly for PETSc Mat (bilinear form)
+   * @brief OpenMP-parallel assembly of a PETSc matrix from a bilinear form.
+   *
+   * Uses thread-local buffers and barriers to assemble bilinear form
+   * contributions into a sequential PETSc matrix in parallel.
+   *
+   * @tparam Solution Solution type.
+   * @tparam TrialFES Trial finite element space type.
+   * @tparam TestFES  Test finite element space type.
    */
   template <class Solution, class TrialFES, class TestFES>
   class OpenMP<
@@ -313,9 +330,17 @@ namespace Rodin::Assembly
       Optional<size_t> m_threadCount;
   };
 
-  // ------------------------------------------------------------
+  /**
+   * @brief OpenMP-parallel assembly of a single-variable PETSc problem.
+   *
+   * Assembles a @ref Rodin::Variational::Problem backed by PETSc objects
+   * using OpenMP threads, populating both the system matrix and right-hand
+   * side vector.
+   *
+   * @tparam U Trial function type.
+   * @tparam V Test function type.
+   */
   // OpenMP assembly for single-variable Problem (PETSc)
-  // ------------------------------------------------------------
   template <class U, class V>
   class OpenMP<
       Rodin::PETSc::Math::LinearSystem,
@@ -740,9 +765,18 @@ namespace Rodin::Assembly
   };
 
 
-  // ------------------------------------------------------------
+  /**
+   * @brief OpenMP-parallel assembly of a multi-variable PETSc problem.
+   *
+   * Assembles a block-structured @ref Rodin::Variational::Problem backed
+   * by PETSc objects using OpenMP threads.
+   *
+   * @tparam U1  First trial/test function type.
+   * @tparam U2  Second trial/test function type.
+   * @tparam U3  Third trial/test function type.
+   * @tparam Us  Additional trial/test function types.
+   */
   // OpenMP assembly for multi-variable Problem (PETSc)
-  // ------------------------------------------------------------
   template <class U1, class U2, class U3, class ... Us>
   class OpenMP<
       Rodin::PETSc::Math::LinearSystem,

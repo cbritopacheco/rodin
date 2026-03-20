@@ -7,6 +7,11 @@
 #ifndef RODIN_PETSC_IO_MFEM_H
 #define RODIN_PETSC_IO_MFEM_H
 
+/**
+ * @file
+ * @brief MFEM-format grid function printers for PETSc-backed grid functions.
+ */
+
 #include <petscvec.h>
 
 #include <iomanip>
@@ -24,6 +29,12 @@
 
 namespace Rodin::IO
 {
+  /**
+   * @brief MFEM printer for PETSc-backed P0 grid functions.
+   *
+   * @tparam Range Scalar or vector range type.
+   * @tparam Ctx   Mesh context type (Local or MPI).
+   */
   // --------------------------------------------------------------------------
   // P0 MFEM printer for PETSc Vec
   // --------------------------------------------------------------------------
@@ -38,11 +49,16 @@ namespace Rodin::IO
         ::Vec>
   {
     public:
+      /// @brief Finite element space type.
       using FESType    = Variational::P0<Range, Geometry::Mesh<Ctx>>;
+      /// @brief PETSc vector data type (`::Vec`).
       using DataType   = ::Vec;
+      /// @brief Grid function type being printed.
       using ObjectType = Variational::GridFunction<FESType, DataType>;
+      /// @brief Parent printer base class.
       using Parent     = GridFunctionPrinterBase<FileFormat::MFEM, FESType, DataType>;
 
+      /// @brief Scalar type underlying the range.
       using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
       static_assert(std::is_same_v<ScalarType, PetscScalar>,
         "PETSc MFEM printer: Range scalar must be PetscScalar.");
@@ -96,6 +112,12 @@ namespace Rodin::IO
   // --------------------------------------------------------------------------
   // P1 MFEM printer for PETSc Vec
   // --------------------------------------------------------------------------
+  /**
+   * @brief MFEM printer for PETSc-backed P1 grid functions.
+   *
+   * @tparam Range Scalar or vector range type.
+   * @tparam Ctx   Mesh context type (Local or MPI).
+   */
   template <class Range, class Ctx>
   class GridFunctionPrinter<
       FileFormat::MFEM,
@@ -107,15 +129,21 @@ namespace Rodin::IO
         ::Vec>
   {
     public:
+      /// @brief Finite element space type.
       using FESType    = Variational::P1<Range, Geometry::Mesh<Ctx>>;
+      /// @brief PETSc vector data type (`::Vec`).
       using DataType   = ::Vec;
+      /// @brief Grid function type being printed.
       using ObjectType = Variational::GridFunction<FESType, DataType>;
+      /// @brief Parent printer base class.
       using Parent     = GridFunctionPrinterBase<FileFormat::MFEM, FESType, DataType>;
 
+      /// @brief Scalar type underlying the range.
       using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
       static_assert(std::is_same_v<ScalarType, PetscScalar>,
         "PETSc MFEM printer: Range scalar must be PetscScalar.");
 
+      /// @brief Context type (Local or MPI) of the finite element space mesh.
       using FESMeshContextType = typename FormLanguage::Traits<typename FESType::MeshType>::ContextType;
 
       GridFunctionPrinter(const ObjectType& gf)
@@ -164,6 +192,16 @@ namespace Rodin::IO
   // Base prints Ordering: VectorDimension (1) for H1, so we emit components
   // per MFEM scalar node in MFEM node order.
   // --------------------------------------------------------------------------
+  /**
+   * @brief MFEM printer for PETSc-backed H1 (order @f$ K @f$) grid functions.
+   *
+   * Handles the Rodin-to-MFEM node reordering using Vandermonde change-of-basis
+   * matrices, for both simplex and non-simplex element geometries.
+   *
+   * @tparam K     Polynomial order.
+   * @tparam Range Scalar or vector range type.
+   * @tparam Ctx   Mesh context type (Local or MPI).
+   */
   template <size_t K, class Range, class Ctx>
   class GridFunctionPrinter<
       FileFormat::MFEM,
@@ -175,11 +213,16 @@ namespace Rodin::IO
         ::Vec>
   {
     public:
+      /// @brief Finite element space type.
       using FESType    = Variational::H1<K, Range, Geometry::Mesh<Ctx>>;
+      /// @brief PETSc vector data type (`::Vec`).
       using DataType   = ::Vec;
+      /// @brief Grid function type being printed.
       using ObjectType = Variational::GridFunction<FESType, DataType>;
+      /// @brief Parent printer base class.
       using Parent     = GridFunctionPrinterBase<FileFormat::MFEM, FESType, DataType>;
 
+      /// @brief Scalar type underlying the range.
       using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
       static_assert(std::is_same_v<ScalarType, PetscScalar>,
         "PETSc MFEM printer: Range scalar must be PetscScalar.");

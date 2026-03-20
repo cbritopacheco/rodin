@@ -1,6 +1,29 @@
 #ifndef RODIN_PETSC_VARIATIONAL_PROBLEM_H
 #define RODIN_PETSC_VARIATIONAL_PROBLEM_H
 
+/**
+ * @file Problem.h
+ * @brief PETSc specialization of variational problems.
+ *
+ * Provides two partial specializations of @ref Rodin::Variational::Problem
+ * that assemble into a @ref Rodin::PETSc::Math::LinearSystem:
+ *
+ * 1. **Two-field** (`Problem<LinearSystem, U, V>`): A single trial / test
+ *    function pair producing a scalar linear system @f$ A\mathbf{x} = \mathbf{b} @f$.
+ * 2. **Multi-field** (`Problem<LinearSystem, U1, U2, U3, Us...>`): An
+ *    arbitrary number of coupled trial / test functions producing a
+ *    block-structured linear system suitable for field-split
+ *    preconditioning.
+ *
+ * Both specializations support `Context::Local` (sequential) and
+ * `Context::MPI` (distributed) mesh contexts.
+ *
+ * @see Rodin::PETSc::Variational::TrialFunction,
+ *      Rodin::PETSc::Variational::TestFunction,
+ *      Rodin::PETSc::Math::LinearSystem,
+ *      Rodin::Solver::KSP
+ */
+
 #include <mpi.h>
 #include <petsc.h>
 #include <petscsys.h>
@@ -25,49 +48,79 @@
 
 namespace Rodin::Variational
 {
+  /**
+   * @brief PETSc variational problem for a single trial / test function pair.
+   *
+   * Assembles a variational formulation into a
+   * @ref Rodin::PETSc::Math::LinearSystem containing the system matrix
+   * @f$ A @f$, the right-hand side @f$ \mathbf{b} @f$, and the solution
+   * @f$ \mathbf{x} @f$.  After calling `solve()`, the solution is
+   * automatically scattered back into the trial function's grid function.
+   *
+   * @tparam U Trial function type (e.g.
+   *           `TrialFunction<GridFunction<P1<…>>, P1<…>>`).
+   * @tparam V Test function type (e.g. `TestFunction<P1<…>>`).
+   *
+   * @see Rodin::PETSc::Variational::Problem (convenience alias),
+   *      Rodin::Solver::KSP
+   */
   template <class U, class V>
   class Problem<PETSc::Math::LinearSystem, U, V>
     : public Variational::ProblemUVBase<PETSc::Math::LinearSystem, U, V>
   {
     public:
+      /// @brief Type of the PETSc linear system.
       using LinearSystemType =
         PETSc::Math::LinearSystem;
 
+      /// @brief Base solver type for this problem.
       using SolverBaseType =
         Solver::LinearSolverBase<LinearSystemType>;
 
+      /// @brief PETSc matrix operator type.
       using OperatorType =
         typename FormLanguage::Traits<LinearSystemType>::OperatorType;
 
+      /// @brief PETSc vector type.
       using VectorType =
         typename FormLanguage::Traits<LinearSystemType>::VectorType;
 
+      /// @brief PETSc scalar type.
       using ScalarType =
         typename FormLanguage::Traits<LinearSystemType>::ScalarType;
 
+      /// @brief Problem body type encapsulating bilinear/linear forms.
       using ProblemBodyType = Variational::ProblemBody<OperatorType, VectorType, ScalarType>;
 
+      /// @brief Finite element space type for the trial function.
       using TrialFESType =
         typename FormLanguage::Traits<U>::FESType;
 
+      /// @brief Finite element space type for the test function.
       using TestFESType =
         typename FormLanguage::Traits<V>::FESType;
 
+      /// @brief Mesh type for the trial finite element space.
       using TrialFESMeshType =
         typename FormLanguage::Traits<TrialFESType>::MeshType;
 
+      /// @brief Context type (Local or MPI) for the trial mesh.
       using TrialFESMeshContextType =
         typename FormLanguage::Traits<TrialFESMeshType>::ContextType;
 
+      /// @brief Mesh type for the test finite element space.
       using TestFESMeshType =
         typename FormLanguage::Traits<TestFESType>::MeshType;
 
+      /// @brief Context type (Local or MPI) for the test mesh.
       using TestFESMeshContextType =
         typename FormLanguage::Traits<TestFESMeshType>::ContextType;
 
+      /// @brief Parent class type.
       using Parent =
         Variational::ProblemUVBase<LinearSystemType, U, V>;
 
+      /// @brief Assembly type for this problem.
       using AssemblyType =
         typename Assembly::Default<TrialFESMeshContextType, TestFESMeshContextType>
           ::template Type<LinearSystemType, Problem>;
@@ -75,6 +128,11 @@ namespace Rodin::Variational
       static_assert(
           std::is_same_v<TrialFESMeshContextType, TestFESMeshContextType>);
 
+      /**
+       * @brief Constructs the problem from a trial and test function pair.
+       * @param u Trial function.
+       * @param v Test function.
+       */
       Problem(U& u, V& v)
         : Parent(u, v),
           m_axb(
@@ -99,18 +157,25 @@ namespace Rodin::Variational
               }())
       {}
 
+      /// @brief Copy constructor.
       constexpr
       Problem(const Problem& other)
         : Parent(other),
           m_axb(other.m_axb)
       {}
 
+      /// @brief Move constructor.
       constexpr
       Problem(Problem&& other) noexcept
         : Parent(std::move(other)),
           m_axb(std::move(other.m_axb))
       {}
 
+      /**
+       * @brief Copy assignment operator.
+       * @param[in] other Problem to copy.
+       * @return Reference to this problem.
+       */
       Problem& operator=(const Problem& other)
       {
         if (this != &other)
@@ -121,6 +186,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Move assignment operator.
+       * @param[in] other Problem to move from.
+       * @return Reference to this problem.
+       */
       Problem& operator=(Problem&& other) noexcept
       {
         if (this != &other)
@@ -131,6 +201,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Assigns a problem body (bilinear and linear forms).
+       * @param[in] rhs Problem body to assign.
+       * @return Reference to this problem.
+       */
       Problem& operator=(const ProblemBodyType& rhs) override
       {
         m_pb = rhs;
@@ -138,6 +213,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Assembles the variational formulation into the linear system.
       Problem& assemble() override
       {
         m_assembly.execute(m_axb, { m_pb, this->getTrialFunction(), this->getTestFunction() });
@@ -145,6 +221,10 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Solves the assembled linear system and scatters the solution.
+       * @param[in] solver Linear solver to use.
+       */
       void solve(SolverBaseType& solver) override
       {
         auto& axb = this->getLinearSystem();
@@ -154,28 +234,35 @@ namespace Rodin::Variational
         this->getTrialFunction().getSolution().setData(axb.getSolution());
       }
 
+      /// @brief Returns a mutable reference to the linear system.
       LinearSystemType& getLinearSystem() override
       {
         return m_axb;
       }
 
+      /// @brief Returns a read-only reference to the linear system.
       const LinearSystemType& getLinearSystem() const override
       {
         return m_axb;
       }
 
+      /// @brief Creates a heap-allocated copy of this problem.
       Problem* copy() const noexcept override
       {
         return new Problem(*this);
       }
 
     private:
-      Boolean m_assembled;
-      ProblemBodyType m_pb;
-      LinearSystemType m_axb;
-      AssemblyType m_assembly;
+      Boolean m_assembled;       ///< Whether the problem has been assembled.
+      ProblemBodyType m_pb;      ///< The problem body (bilinear/linear forms).
+      LinearSystemType m_axb;    ///< The assembled linear system.
+      AssemblyType m_assembly;   ///< The assembly strategy.
   };
 
+  /**
+   * @ingroup RodinCTAD
+   * @brief Deduction guide for two-field PETSc Problem.
+   */
   template <class Solution, class TrialFES, class TestFES>
   Problem(
       PETSc::Variational::TrialFunction<Solution, TrialFES>&,
@@ -185,6 +272,42 @@ namespace Rodin::Variational
           TrialFunction<Solution, TrialFES>,
           TestFunction<TestFES>>;
 
+  /**
+   * @brief PETSc variational problem for multiple coupled trial / test
+   *        functions.
+   *
+   * Supports coupled multi-physics systems (e.g. Stokes, fluid-structure
+   * interaction) by accepting an arbitrary number of PETSc trial and test
+   * function arguments.  Assembles a block-structured
+   * @ref Rodin::PETSc::Math::LinearSystem whose global matrix and vectors
+   * are partitioned by field DOF offsets.
+   *
+   * After calling `solve()`, the global solution vector is sliced and
+   * scattered back into each trial function's grid function using the
+   * precomputed offset arrays.
+   *
+   * ## Block Structure
+   *
+   * For @f$ K @f$ trial fields with sizes @f$ N_1, \ldots, N_K @f$, the
+   * global system has size @f$ N = \sum_{k=1}^K N_k @f$.  The DOF
+   * offset of the @f$ k @f$-th field is @f$ O_k = \sum_{j=1}^{k-1} N_j @f$
+   * (with @f$ O_1 = 0 @f$).
+   *
+   * ## Field-Split Preconditioning
+   *
+   * Call `setFieldSplits()` after `assemble()` to create PETSc `IS`
+   * objects for each trial field.  These are passed to `PCFIELDSPLIT` so
+   * that the preconditioner can be configured per-block from the command
+   * line or programmatically.
+   *
+   * @tparam U1  First function type (trial or test).
+   * @tparam U2  Second function type.
+   * @tparam U3  Third function type.
+   * @tparam Us  Additional function types.
+   *
+   * @see Rodin::PETSc::Variational::Problem (convenience alias),
+   *      Rodin::PETSc::Math::LinearSystem::FieldSplits
+   */
   template <class U1, class U2, class U3, class... Us>
   class Problem<PETSc::Math::LinearSystem, U1, U2, U3, Us...>
     : public ProblemBase<PETSc::Math::LinearSystem>
@@ -200,13 +323,19 @@ namespace Rodin::Variational
         Utility::ParameterPack<U1, U2, U3, Us...>::template All<IsTrialOrTestFunction>::Value);
 
     public:
+      /// @brief Type of the PETSc linear system.
       using LinearSystemType = PETSc::Math::LinearSystem;
 
+      /// @brief PETSc matrix operator type.
       using OperatorType = typename FormLanguage::Traits<LinearSystemType>::OperatorType; // ::Mat
+      /// @brief PETSc vector type.
       using VectorType   = typename FormLanguage::Traits<LinearSystemType>::VectorType;   // ::Vec
+      /// @brief PETSc scalar type.
       using ScalarType   = typename FormLanguage::Traits<LinearSystemType>::ScalarType;   // PetscScalar
 
+      /// @brief Problem body type encapsulating forms.
       using ProblemBodyType = ProblemBody<OperatorType, VectorType, ScalarType>;
+      /// @brief Parent class type.
       using Parent          = ProblemBase<LinearSystemType>;
 
     private:
@@ -294,19 +423,29 @@ namespace Rodin::Variational
       using U2FESMeshContextType = typename FormLanguage::Traits<U2FESMeshType>::ContextType;
 
     public:
+      /// @brief Assembly type for this problem.
       using AssemblyType =
         typename Assembly::Default<U1FESMeshContextType, U2FESMeshContextType>
           ::template Type<LinearSystemType, Problem>;
 
+      /// @brief Base solver type for this problem.
       using SolverBaseType =
         Solver::LinearSolverBase<LinearSystemType>;
 
+      /// @brief Input data structure for the assembly pipeline.
       using AssemblyInput =
         Assembly::ProblemAssemblyInput<ProblemBodyType, U1, U2, U3, Us...>;
 
       // --------------------------
       // Ctors / assignment
       // --------------------------
+      /**
+       * @brief Constructs a multi-field problem from trial and test functions.
+       * @param u1 First function (trial or test).
+       * @param u2 Second function.
+       * @param u3 Third function.
+       * @param us Additional functions.
+       */
       Problem(U1& u1, U2& u2, U3& u3, Us&... us)
         : m_assembled(false),
           m_us(AllTuple{std::ref(u1), std::ref(u2), std::ref(u3), std::ref(us)...}
@@ -318,6 +457,7 @@ namespace Rodin::Variational
         buildUUIDMaps();
       }
 
+      /// @brief Copy constructor.
       Problem(const Problem& other)
         : Parent(other),
           m_assembled(other.m_assembled),
@@ -334,6 +474,7 @@ namespace Rodin::Variational
           m_assembly(other.m_assembly)
       {}
 
+      /// @brief Move constructor.
       Problem(Problem&& other) noexcept
         : Parent(std::move(other)),
           m_assembled(std::exchange(other.m_assembled, false)),
@@ -350,6 +491,11 @@ namespace Rodin::Variational
           m_assembly(std::move(other.m_assembly))
       {}
 
+      /**
+       * @brief Copy assignment operator.
+       * @param[in] other Problem to copy.
+       * @return Reference to this problem.
+       */
       Problem& operator=(const Problem& other)
       {
         if (this != &other)
@@ -371,6 +517,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Move assignment operator.
+       * @param[in] other Problem to move from.
+       * @return Reference to this problem.
+       */
       Problem& operator=(Problem&& other) noexcept
       {
         if (this != &other)
@@ -395,6 +546,11 @@ namespace Rodin::Variational
       // --------------------------
       // ProblemBody binding
       // --------------------------
+      /**
+       * @brief Assigns a problem body (bilinear and linear forms).
+       * @param[in] rhs Problem body to assign.
+       * @return Reference to this problem.
+       */
       Problem& operator=(const ProblemBodyType& rhs) override
       {
         m_pb = rhs;
@@ -405,6 +561,7 @@ namespace Rodin::Variational
       // --------------------------
       // Assembly / solve
       // --------------------------
+      /// @brief Assembles the block-structured variational formulation.
       Problem& assemble() override
       {
         computeOffsets();
@@ -422,6 +579,10 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Solves the assembled block system and scatters sub-solutions.
+       * @param[in] solver Linear solver to use.
+       */
       void solve(SolverBaseType& solver) override
       {
         auto& axb = getLinearSystem();
@@ -441,30 +602,45 @@ namespace Rodin::Variational
       // --------------------------
       // Accessors (useful for solvers / debugging)
       // --------------------------
+      /// @brief Returns a mutable reference to the linear system.
       LinearSystemType& getLinearSystem() override
       {
         return m_axb;
       }
 
+      /// @brief Returns a read-only reference to the linear system.
       const LinearSystemType& getLinearSystem() const override
       {
         return m_axb;
       }
 
+      /// @brief Returns the DOF offset array for trial fields.
       const auto& getTrialOffsets() const { return m_trialOffsets; }
+      /// @brief Returns the DOF offset array for test fields.
       const auto& getTestOffsets()  const { return m_testOffsets;  }
 
+      /// @brief Returns the total number of trial DOFs across all fields.
       size_t getTotalTrialSize() const { return m_totalTrial; }
+      /// @brief Returns the total number of test DOFs across all fields.
       size_t getTotalTestSize()  const { return m_totalTest;  }
 
+      /// @brief Returns the UUID-to-index map for trial functions.
       const auto& getTrialUUIDMap() const { return m_trialUUIDMap; }
+      /// @brief Returns the UUID-to-index map for test functions.
       const auto& getTestUUIDMap()  const { return m_testUUIDMap;  }
 
+      /// @brief Creates a heap-allocated copy of this problem.
       Problem* copy() const noexcept override
       {
         return new Problem(*this);
       }
 
+      /**
+       * @brief Configures PETSc field-split index sets for block preconditioning.
+       *
+       * Must be called after assemble(). Creates one `IS` per trial field
+       * using the computed DOF offsets.
+       */
       void setFieldSplits()
       {
         if (!m_assembled)
@@ -535,6 +711,7 @@ namespace Rodin::Variational
 
     private:
 
+      /// @brief Builds UUID-to-index maps for all trial and test functions.
       void buildUUIDMaps()
       {
         m_trialUUIDMap.clear();
@@ -553,6 +730,7 @@ namespace Rodin::Variational
           });
       }
 
+      /// @brief Computes DOF offset arrays and totals for trial/test fields.
       void computeOffsets()
       {
         // Trial offsets + total
@@ -594,6 +772,7 @@ namespace Rodin::Variational
         }
       }
 
+      /// @brief Deduces the MPI communicator from the trial mesh contexts.
       MPI_Comm deduceCommunicator() const
       {
         // Take mesh context from the first trial function in the tuple.
@@ -629,24 +808,24 @@ namespace Rodin::Variational
       }
 
     private:
-      Boolean m_assembled = false;
+      Boolean m_assembled = false;  ///< Whether the problem has been assembled.
 
-      TrialFunctionTuple m_us;
-      TestFunctionTuple  m_vs;
+      TrialFunctionTuple m_us;  ///< Tuple of trial function references.
+      TestFunctionTuple  m_vs;  ///< Tuple of test function references.
 
-      ProblemBodyType m_pb;
+      ProblemBodyType m_pb;  ///< The problem body (bilinear/linear forms).
 
-      std::array<size_t, TrialFunctionTuple::Size> m_trialOffsets{};
-      std::array<size_t, TestFunctionTuple::Size>  m_testOffsets{};
+      std::array<size_t, TrialFunctionTuple::Size> m_trialOffsets{};  ///< DOF offsets for trial fields.
+      std::array<size_t, TestFunctionTuple::Size>  m_testOffsets{};   ///< DOF offsets for test fields.
 
-      boost::bimap<FormLanguage::Base::UUID, size_t> m_trialUUIDMap;
-      boost::bimap<FormLanguage::Base::UUID, size_t> m_testUUIDMap;
+      boost::bimap<FormLanguage::Base::UUID, size_t> m_trialUUIDMap;  ///< Trial UUID-to-index map.
+      boost::bimap<FormLanguage::Base::UUID, size_t> m_testUUIDMap;   ///< Test UUID-to-index map.
 
-      size_t m_totalTrial = 0;
-      size_t m_totalTest  = 0;
+      size_t m_totalTrial = 0;  ///< Total trial DOF count.
+      size_t m_totalTest  = 0;  ///< Total test DOF count.
 
-      LinearSystemType m_axb;
-      AssemblyType     m_assembly;
+      LinearSystemType m_axb;    ///< The assembled linear system.
+      AssemblyType     m_assembly;  ///< The assembly strategy.
   };
 
   template <class T>
@@ -676,6 +855,10 @@ namespace Rodin::Variational
          IsPETScTestFunction<std::decay_t<T>>::value) &&
         AllPETScTrialOrTest<Ts...>::value> {};
 
+  /**
+   * @ingroup RodinCTAD
+   * @brief Deduction guide for multi-field PETSc Problem.
+   */
   // PETSc-only CTAD guide (enabled only if ALL args are PETSc trial/test wrappers)
   template <class U1, class U2, class U3, class... Us>
     requires AllPETScTrialOrTest<U1, U2, U3, Us...>::value
@@ -685,6 +868,9 @@ namespace Rodin::Variational
 
 namespace Rodin::PETSc::Variational
 {
+  /**
+   * @brief Convenient PETSc alias for Rodin::Variational::Problem.
+   */
   template <class ... Us>
   using Problem =
     Rodin::Variational::Problem<PETSc::Math::LinearSystem, Us...>;

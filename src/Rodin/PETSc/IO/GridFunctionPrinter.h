@@ -7,6 +7,16 @@
 #ifndef RODIN_PETSC_IO_GRIDFUNCTIONPRINTER_H
 #define RODIN_PETSC_IO_GRIDFUNCTIONPRINTER_H
 
+/**
+ * @file
+ * @brief Forward declaration of PETSc grid function printer specializations.
+ *
+ * The concrete specializations are provided in the format-specific headers
+ * (HDF5.h, MFEM.h, MEDIT.h).
+ *
+ * @see Rodin::IO::GridFunctionPrinter
+ */
+
 #include <petscvec.h>
 
 #include "Rodin/Context/Local.h"
@@ -20,8 +30,14 @@
 
 namespace Rodin::IO
 {
+  /**
+   * @brief Partial specialization of @ref Rodin::IO::GridFunctionPrinter
+   * for PETSc vector data (`::Vec`).
+   *
+   * @tparam Fmt  File format enumerator.
+   * @tparam FES  Finite element space type.
+   */
   template <FileFormat Fmt, class FES>
   class GridFunctionPrinter<Fmt, FES, ::Vec>;
 }
 #endif
-

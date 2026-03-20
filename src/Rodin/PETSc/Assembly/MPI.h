@@ -1,6 +1,11 @@
 #ifndef RODIN_PETSC_ASSEMBLY_MPI_H
 #define RODIN_PETSC_ASSEMBLY_MPI_H
 
+/**
+ * @file
+ * @brief MPI assembly specializations targeting PETSc objects.
+ */
+
 #include <petsc.h>
 #include <petscmacros.h>
 #include <petscmat.h>
@@ -18,19 +23,32 @@
 
 namespace Rodin::Assembly
 {
+  /**
+   * @brief MPI-parallel assembly of a PETSc vector from a linear form.
+   *
+   * Each MPI rank assembles contributions from its owned polytopes into
+   * the distributed PETSc vector.
+   *
+   * @tparam FES Finite element space type.
+   */
   template <class FES>
   class MPI<::Vec, Variational::LinearForm<FES, ::Vec>> final
     : public AssemblyBase<::Vec, Variational::LinearForm<FES, ::Vec>>
   {
     public:
+      /// @brief Scalar type of the DOF coefficients (`PetscScalar`).
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
       static_assert(
         std::is_same_v<ScalarType, PetscScalar>,
         "FES::ScalarType must be PetscScalar"
       );
+      /// @brief PETSc vector type (`::Vec`).
       using VectorType     = ::Vec;
+      /// @brief Linear form type being assembled.
       using LinearFormType = Variational::LinearForm<FES, VectorType>;
+      /// @brief Parent assembly base class.
       using Parent         = AssemblyBase<VectorType, LinearFormType>;
+      /// @brief Input data type for the assembly pipeline.
       using InputType      = typename Parent::InputType;
 
       void execute(VectorType& res, const InputType& input) const override
@@ -103,11 +121,22 @@ namespace Rodin::Assembly
       }
   };
 
+  /**
+   * @brief MPI-parallel assembly of a PETSc matrix from a bilinear form.
+   *
+   * Each MPI rank assembles contributions from its owned polytopes into
+   * the distributed PETSc matrix.
+   *
+   * @tparam Solution Solution type.
+   * @tparam TrialFES Trial finite element space type.
+   * @tparam TestFES  Test finite element space type.
+   */
   template <class Solution, class TrialFES, class TestFES>
   class MPI<::Mat, Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>> final
     : public AssemblyBase<::Mat, Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>>
   {
     public:
+      /// @brief Scalar type resulting from the dot product of trial and test scalars.
       using DotType =
         typename FormLanguage::Dot<
           typename FormLanguage::Traits<TrialFES>::ScalarType,
@@ -116,9 +145,13 @@ namespace Rodin::Assembly
         std::is_same_v<DotType, PetscScalar>,
         "DotType must be PetscScalar"
       );
+      /// @brief PETSc matrix type (`::Mat`).
       using OperatorType     = ::Mat;
+      /// @brief Bilinear form type being assembled.
       using BilinearFormType = Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
+      /// @brief Parent assembly base class.
       using Parent           = AssemblyBase<OperatorType, BilinearFormType>;
+      /// @brief Input data type for the assembly pipeline.
       using InputType        = typename Parent::InputType;
 
       void execute(OperatorType& res, const InputType& input) const override
@@ -209,9 +242,17 @@ namespace Rodin::Assembly
       }
   };
 
-  // ------------------------------------------------------------
+  /**
+   * @brief MPI-parallel assembly of a single-variable PETSc problem.
+   *
+   * Each MPI rank assembles its local contributions to the system matrix
+   * and right-hand side vector of a @ref Rodin::Variational::Problem
+   * backed by PETSc distributed objects.
+   *
+   * @tparam U Trial function type.
+   * @tparam V Test function type.
+   */
   // MPI assembly for single-variable Problem (PETSc)
-  // ------------------------------------------------------------
   template <class U, class V>
   class MPI<
       Rodin::PETSc::Math::LinearSystem,
@@ -221,16 +262,25 @@ namespace Rodin::Assembly
         Rodin::Variational::Problem<Rodin::PETSc::Math::LinearSystem, U, V>>
   {
     public:
+      /// @brief PETSc linear system type.
       using LinearSystemType = Rodin::PETSc::Math::LinearSystem;
+      /// @brief Problem type being assembled.
       using ProblemType      = Rodin::Variational::Problem<LinearSystemType, U, V>;
+      /// @brief Parent assembly base class.
       using Parent           = AssemblyBase<LinearSystemType, ProblemType>;
+      /// @brief Input data type for the assembly pipeline.
       using InputType        = typename Parent::InputType;
 
+      /// @brief PETSc matrix type (`::Mat`) for the system operator.
       using OperatorType = typename Rodin::FormLanguage::Traits<LinearSystemType>::OperatorType; // ::Mat
+      /// @brief PETSc vector type (`::Vec`) for the RHS and solution.
       using VectorType   = typename Rodin::FormLanguage::Traits<LinearSystemType>::VectorType;   // ::Vec
 
+      /// @brief Finite element space type for the trial function.
       using TrialFESType  = typename Rodin::FormLanguage::Traits<U>::FESType;
+      /// @brief Mesh type for the trial finite element space.
       using TrialMeshType = typename Rodin::FormLanguage::Traits<TrialFESType>::MeshType;
+      /// @brief Context type (Local or MPI) for the trial mesh.
       using MeshContextType =
         typename Rodin::FormLanguage::Traits<TrialMeshType>::ContextType;
 
@@ -566,9 +616,18 @@ namespace Rodin::Assembly
   };
 
 
-  // ------------------------------------------------------------
+  /**
+   * @brief MPI-parallel assembly of a multi-variable PETSc problem.
+   *
+   * Assembles a block-structured @ref Rodin::Variational::Problem backed
+   * by PETSc distributed objects across MPI ranks.
+   *
+   * @tparam U1  First trial/test function type.
+   * @tparam U2  Second trial/test function type.
+   * @tparam U3  Third trial/test function type.
+   * @tparam Us  Additional trial/test function types.
+   */
   // MPI assembly for multi-variable Problem (PETSc)
-  // ------------------------------------------------------------
   template <class U1, class U2, class U3, class ... Us>
   class MPI<
       Rodin::PETSc::Math::LinearSystem,
@@ -578,13 +637,19 @@ namespace Rodin::Assembly
         Rodin::Variational::Problem<Rodin::PETSc::Math::LinearSystem, U1, U2, U3, Us...>>
   {
     public:
+      /// @brief PETSc linear system type.
       using LinearSystemType = Rodin::PETSc::Math::LinearSystem;
+      /// @brief Multi-field problem type being assembled.
       using ProblemType =
         Rodin::Variational::Problem<LinearSystemType, U1, U2, U3, Us...>;
+      /// @brief Parent assembly base class.
       using Parent    = AssemblyBase<LinearSystemType, ProblemType>;
+      /// @brief Input data type for the assembly pipeline.
       using InputType = typename Parent::InputType;
 
+      /// @brief PETSc matrix type (`::Mat`) for the block system operator.
       using OperatorType = typename Rodin::FormLanguage::Traits<LinearSystemType>::OperatorType; // ::Mat
+      /// @brief PETSc vector type (`::Vec`) for the block RHS and solution.
       using VectorType   = typename Rodin::FormLanguage::Traits<LinearSystemType>::VectorType;   // ::Vec
 
       void execute(LinearSystemType& axb, const InputType& input) const override
