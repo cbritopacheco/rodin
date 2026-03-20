@@ -722,7 +722,7 @@ namespace Rodin::Variational
        * This function will compute the minimum value in the grid function
        * data array.
        *
-       * @section Complexity
+       * @par Complexity
        * The operation is linear in the size of the number of entries in the
        * underlying matrix.
        */
@@ -740,7 +740,7 @@ namespace Rodin::Variational
        * This function will compute the maximum value in the grid function
        * data array.
        *
-       * @section Complexity
+       * @par Complexity
        * The operation is linear in the size of the number of entries in the
        * underlying matrix.
        */
