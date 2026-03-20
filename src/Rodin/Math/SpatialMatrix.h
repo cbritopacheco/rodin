@@ -588,6 +588,74 @@ namespace Rodin::Math
       }
 
       constexpr
+      SpatialMatrix<ScalarType> conjugate() const noexcept
+      {
+        SpatialMatrix<ScalarType> Cout(m_rows, m_cols);
+        const auto r = m_rows;
+        const auto c = m_cols;
+        const auto& A = m_data;
+
+        switch (static_cast<unsigned>(r) * 4u + static_cast<unsigned>(c))
+        {
+          case 0u: case 1u: case 2u: case 3u:
+          case 4u: case 8u: case 12u:
+            return Cout;
+
+          case 5u: // 1x1
+            Cout(0, 0) = conj(A(0, 0));
+            return Cout;
+
+          case 6u: // 1x2
+            Cout(0, 0) = conj(A(0, 0));
+            Cout(0, 1) = conj(A(0, 1));
+            return Cout;
+
+          case 7u: // 1x3
+            Cout(0, 0) = conj(A(0, 0));
+            Cout(0, 1) = conj(A(0, 1));
+            Cout(0, 2) = conj(A(0, 2));
+            return Cout;
+
+          case 9u: // 2x1
+            Cout(0, 0) = conj(A(0, 0));
+            Cout(1, 0) = conj(A(1, 0));
+            return Cout;
+
+          case 10u: // 2x2
+            Cout(0, 0) = conj(A(0, 0)); Cout(0, 1) = conj(A(0, 1));
+            Cout(1, 0) = conj(A(1, 0)); Cout(1, 1) = conj(A(1, 1));
+            return Cout;
+
+          case 11u: // 2x3
+            Cout(0, 0) = conj(A(0, 0)); Cout(0, 1) = conj(A(0, 1)); Cout(0, 2) = conj(A(0, 2));
+            Cout(1, 0) = conj(A(1, 0)); Cout(1, 1) = conj(A(1, 1)); Cout(1, 2) = conj(A(1, 2));
+            return Cout;
+
+          case 13u: // 3x1
+            Cout(0, 0) = conj(A(0, 0));
+            Cout(1, 0) = conj(A(1, 0));
+            Cout(2, 0) = conj(A(2, 0));
+            return Cout;
+
+          case 14u: // 3x2
+            Cout(0, 0) = conj(A(0, 0)); Cout(0, 1) = conj(A(0, 1));
+            Cout(1, 0) = conj(A(1, 0)); Cout(1, 1) = conj(A(1, 1));
+            Cout(2, 0) = conj(A(2, 0)); Cout(2, 1) = conj(A(2, 1));
+            return Cout;
+
+          case 15u: // 3x3
+            Cout(0, 0) = conj(A(0, 0)); Cout(0, 1) = conj(A(0, 1)); Cout(0, 2) = conj(A(0, 2));
+            Cout(1, 0) = conj(A(1, 0)); Cout(1, 1) = conj(A(1, 1)); Cout(1, 2) = conj(A(1, 2));
+            Cout(2, 0) = conj(A(2, 0)); Cout(2, 1) = conj(A(2, 1)); Cout(2, 2) = conj(A(2, 2));
+            return Cout;
+
+          default:
+            assert(false);
+            return Cout;
+        }
+      }
+
+      constexpr
       SpatialMatrix<ScalarType> adjoint() const noexcept
       {
         SpatialMatrix<ScalarType> Aout(m_cols, m_rows);

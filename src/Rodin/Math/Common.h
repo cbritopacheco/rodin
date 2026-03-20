@@ -594,6 +594,34 @@ namespace Rodin::Math
   {
     return lhs.dot(rhs);
   }
+
+  template <class LHSDerived, class RHSScalar>
+  constexpr
+  auto dot(const Eigen::MatrixBase<LHSDerived>& lhs, const Math::SpatialVector<RHSScalar>& rhs)
+  {
+    return lhs.dot(rhs.getData().head(static_cast<Eigen::Index>(rhs.size())));
+  }
+
+  template <class LHSScalar, class RHSDerived>
+  constexpr
+  auto dot(const Math::SpatialVector<LHSScalar>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
+  {
+    return lhs.getData().head(static_cast<Eigen::Index>(lhs.size())).dot(rhs);
+  }
+
+  template <class LHSDerived, class RHSScalar>
+  constexpr
+  auto dot(const Eigen::MatrixBase<LHSDerived>& lhs, const Math::SpatialMatrix<RHSScalar>& rhs)
+  {
+    return lhs.dot(rhs.getData().head(static_cast<Eigen::Index>(rhs.size())));
+  }
+
+  template <class LHSScalar, class RHSDerived>
+  constexpr
+  auto dot(const Math::SpatialMatrix<LHSScalar>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
+  {
+    return lhs.getData().head(static_cast<Eigen::Index>(lhs.size())).dot(rhs);
+  }
 }
 
 #endif

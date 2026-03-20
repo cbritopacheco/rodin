@@ -21,8 +21,6 @@
 #include "ForwardDecls.h"
 
 #include "ForwardDecls.h"
-#include "Matrix.h"
-#include "Vector.h"
 #include "Common.h"
 
 #include "Traits.h"
@@ -667,6 +665,28 @@ namespace Rodin::Math
       const auto& getData() const noexcept
       {
         return m_data;
+      }
+
+      SpatialVector conjugate() const noexcept
+      {
+        SpatialVector r(*this);
+        switch (m_size)
+        {
+          case 3:
+            r.m_data[2] = std::conj(r.m_data[2]);
+            [[fallthrough]];
+          case 2:
+            r.m_data[1] = std::conj(r.m_data[1]);
+            [[fallthrough]];
+          case 1:
+            r.m_data[0] = std::conj(r.m_data[0]);
+            break;
+          case 0:
+            break;
+          default:
+            assert(false);
+        }
+        return r;
       }
 
       template<class Archive>
