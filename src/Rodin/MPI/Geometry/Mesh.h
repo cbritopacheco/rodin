@@ -7,6 +7,15 @@
 #ifndef RODIN_GEOMETRY_MPI_MESH_H
 #define RODIN_GEOMETRY_MPI_MESH_H
 
+/**
+ * @file
+ * @brief Distributed mesh specialization for MPI contexts.
+ *
+ * This file defines @ref Rodin::Geometry::Mesh<Rodin::Context::MPI>, which
+ * stores a rank-local shard together with distributed index mappings and
+ * communication-aware geometric queries.
+ */
+
 #include <mpi.h>
 #include <type_traits>
 
@@ -24,12 +33,18 @@
 
 namespace Rodin::Geometry
 {
+  /**
+   * @brief Convenience alias for the distributed mesh type.
+   */
   using MPIMesh = Mesh<Context::MPI>;
 
   template <>
   class Mesh<Context::MPI> : public MeshBase
   {
     public:
+      /**
+       * @brief Builder used to construct a distributed mesh from a shard.
+       */
       class Builder
       {
         public:
@@ -62,7 +77,9 @@ namespace Rodin::Geometry
           Mesh finalize();
 
         private:
+          /// Rank-local shard that will be moved into the finalized mesh.
           Shard m_shard;
+          /// MPI context bound to the mesh being constructed.
           Context::MPI m_context;
       };
 
@@ -144,6 +161,11 @@ namespace Rodin::Geometry
        */
       Mesh& scale(Real c) override;
 
+      /**
+       * @brief Flushes pending updates on the local shard representation.
+       *
+       * This forwards to the underlying local shard flush logic.
+       */
       void flush() override;
 
       /**
@@ -615,6 +637,17 @@ namespace Rodin::Geometry
         const boost::filesystem::path& filename, IO::FileFormat fmt) override;
 
       template <class Filename, typename = std::enable_if_t<std::is_invocable_v<Filename, int>>>
+      /**
+       * @brief Rank-dependent overload for loading distributed shard files.
+       *
+       * The callable is invoked with the current rank and must return the
+       * path from which that rank should load its local shard.
+       *
+       * @tparam Filename Callable type invocable as `filename(int rank)`.
+       * @param[in] filename Rank-dependent path generator.
+       * @param[in] fmt File format used to read the shard file.
+       * @return Reference to the mesh.
+       */
       MPIMesh& load(const Filename& filename, IO::FileFormat fmt)
       {
         const auto& comm = m_context.getCommunicator();
@@ -622,9 +655,27 @@ namespace Rodin::Geometry
         return this->load(path, fmt);
       }
 
+      /**
+       * @brief Saves the local shard of the distributed mesh to a file.
+       *
+       * Each MPI rank writes its own shard to @p filename using @p fmt.
+       *
+       * @param[in] filename Path to the output file.
+       * @param[in] fmt File format used to write the mesh.
+       */
       void save(const boost::filesystem::path& filename, IO::FileFormat fmt) const override;
 
       template <class Filename, typename = std::enable_if_t<std::is_invocable_v<Filename, int>>>
+      /**
+       * @brief Rank-dependent overload for saving distributed shard files.
+       *
+       * The callable is invoked with the current rank and must return the
+       * path to which that rank should save its local shard.
+       *
+       * @tparam Filename Callable type invocable as `filename(int rank)`.
+       * @param[in] filename Rank-dependent path generator.
+       * @param[in] fmt File format used to write the shard file.
+       */
       void save(const Filename& filename, IO::FileFormat fmt)
       {
         const auto& comm = m_context.getCommunicator();
@@ -640,18 +691,32 @@ namespace Rodin::Geometry
        */
       Math::SpatialPoint getVertexCoordinates(Index localIdx) const override;
 
+      /**
+       * @brief Submesh downcast is unsupported for distributed meshes.
+       * @throws std::runtime_error always.
+       */
       SubMeshBase& asSubMesh() override
       {
         throw std::runtime_error("asSubMesh() not implemented");
       }
 
+      /**
+       * @brief Const submesh downcast is unsupported for distributed meshes.
+       * @throws std::runtime_error always.
+       */
       const SubMeshBase& asSubMesh() const override
       {
         throw std::runtime_error("asSubMesh() not implemented");
       }
 
+      /**
+       * @brief Returns mutable connectivity data of the local shard.
+       */
       Connectivity<Context::Local>& getConnectivity() override;
 
+      /**
+       * @brief Returns const connectivity data of the local shard.
+       */
       const Connectivity<Context::Local>& getConnectivity() const override;
 
       /**
@@ -690,7 +755,9 @@ namespace Rodin::Geometry
       Mesh& reconcile(size_t d);
 
     private:
+      /// MPI execution context associated with this distributed mesh.
       Context::MPI m_context;
+      /// Rank-local shard containing geometry, topology, and ownership metadata.
       Shard m_shard;
   };
 }

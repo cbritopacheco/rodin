@@ -1,6 +1,16 @@
 #ifndef RODIN_MPI_VARIATIONAL_P1_P1_H
 #define RODIN_MPI_VARIATIONAL_P1_P1_H
 
+/**
+ * @file
+ * @brief Distributed P1 finite element space specialization on MPI meshes.
+ *
+ * This file provides @ref Rodin::Variational::P1 specialization for
+ * @ref Rodin::Geometry::Mesh<Rodin::Context::MPI>. The implementation builds
+ * a rank-local P1 space on each shard and maintains local/global degree-of-
+ * freedom mappings consistent across ownership and ghost layers.
+ */
+
 #include <mpi.h>
 #include <sys/mman.h>
 
@@ -17,15 +27,35 @@
 
 namespace Rodin::Variational
 {
+  /**
+   * @brief Distributed P1 finite element space for MPI meshes.
+   *
+   * This specialization wraps a local shard P1 space and augments it with
+   * distributed global indexing. Owned degrees of freedom receive contiguous
+   * global ranges per rank, while ghost dofs are synchronized from owner ranks.
+   *
+   * @tparam Range Scalar or vector range descriptor used by P1.
+   */
   template <class Range>
   class P1<Range, Geometry::Mesh<Context::MPI>>
     : public FiniteElementSpace<
         Geometry::Mesh<Context::MPI>, P1<Range, Geometry::Mesh<Context::MPI>>>
   {
     public:
+      /**
+       * @brief Bidirectional map between local and global dof indices.
+       */
       struct IndexBimap
       {
+        /**
+         * @note The names `left` and `right` mirror bidirectional-map
+         * terminology:
+         * - `left[local] = global`
+         * - `right[global] = local`
+         */
+        /// Local-to-global mapping (indexed by local dof).
         std::vector<Index> left;
+        /// Global-to-local mapping (keyed by global dof).
         FlatMap<Index, Index> right;
       };
 
@@ -35,6 +65,7 @@ namespace Rodin::Variational
       /// Type of the local finite element space
       using FESType = P1<Range, Geometry::Mesh<Context::Local>>;
 
+      /// Scalar type carried by dof values.
       using ScalarType = typename FESType::ScalarType;
 
       /// Range type of value
@@ -69,20 +100,43 @@ namespace Rodin::Variational
       class Pullback : public FiniteElementSpacePullbackBase<Pullback<FunctionDerived>>
       {
         public:
+          /**
+           * @brief Base function interface used by this pullback.
+           */
           using FunctionType = FunctionBase<FunctionDerived>;
 
+          /**
+           * @brief Constructs a pullback on a given physical polytope.
+           * @param[in] polytope Physical polytope where the source function is evaluated.
+           * @param[in] v Source function on physical coordinates.
+           */
           Pullback(const Geometry::Polytope& polytope, const FunctionType& v)
             : m_polytope(polytope), m_v(v.copy())
           {}
 
+          /**
+           * @brief Copy constructor.
+           */
           Pullback(const Pullback&) = default;
 
+          /**
+           * @brief Evaluates the pulled-back function at reference coordinates.
+           * @param[in] r Reference coordinates.
+           * @return Function value at the mapped physical point.
+           */
           auto operator()(const Math::SpatialVector<Real>& r) const
           {
             const Geometry::Point p(m_polytope, r);
             return getFunction()(p);
           }
 
+          /**
+           * @brief Evaluates the pulled-back function into a preallocated result.
+           * @tparam T Result storage type.
+           * @param[out] res Result storage.
+           * @param[in] r Reference coordinates.
+           * @return Value returned by the wrapped function call.
+           */
           template <class T>
           auto operator()(T& res, const Math::SpatialVector<Real>& r) const
           {
@@ -90,6 +144,9 @@ namespace Rodin::Variational
             return getFunction()(res, p);
           }
 
+          /**
+           * @brief Returns the wrapped physical function.
+           */
           constexpr
           const FunctionType& getFunction() const
           {
@@ -120,26 +177,51 @@ namespace Rodin::Variational
       class Pushforward : public FiniteElementSpacePushforwardBase<Pushforward<CallableType>>
       {
         public:
+          /**
+           * @brief Callable type pushed forward to physical coordinates.
+           */
           using FunctionType = CallableType;
 
+          /**
+           * @brief Constructs a pushforward wrapper around a reference-space callable.
+           * @param[in] v Callable on reference coordinates.
+           */
           Pushforward(const FunctionType& v)
             : m_v(v)
           {}
 
+          /**
+           * @brief Copy constructor.
+           */
           Pushforward(const Pushforward&) = default;
 
+          /**
+           * @brief Evaluates the pushed-forward callable at a physical point.
+           * @param[in] p Physical point.
+           * @return Value of the wrapped callable on reference coordinates.
+           */
           constexpr
           auto operator()(const Geometry::Point& p) const
           {
             return getFunction()(p.getReferenceCoordinates());
           }
 
+          /**
+           * @brief Evaluates into preallocated storage at a physical point.
+           * @tparam T Result storage type.
+           * @param[out] res Result storage.
+           * @param[in] p Physical point.
+           * @return Value returned by the wrapped callable.
+           */
           template <class T>
           auto operator()(T& res, const Geometry::Point& p) const
           {
             return getFunction()(res, p.getReferenceCoordinates());
           }
 
+          /**
+           * @brief Returns the wrapped reference-space callable.
+           */
           constexpr
           const FunctionType& getFunction() const
           {
@@ -274,6 +356,15 @@ namespace Rodin::Variational
         }
       }
 
+      /**
+       * @brief Constructs a distributed vector-valued P1 space.
+       *
+       * This overload assigns @p vdim global dofs per mesh vertex and
+       * synchronizes owned/ghost global numbering across neighboring ranks.
+       *
+       * @param[in] mesh Distributed mesh on which the space is defined.
+       * @param[in] vdim Vector dimension (number of components per vertex).
+       */
       P1(const MeshType& mesh, size_t vdim)
         : m_mesh(mesh),
           m_fes(mesh.getShard(), vdim)
@@ -364,10 +455,19 @@ namespace Rodin::Variational
         }
       }
 
+      /**
+       * @brief Copy constructor.
+       */
       P1(const P1& other) = default;
 
+      /**
+       * @brief Move constructor.
+       */
       P1(P1&& other) = default;
 
+      /**
+       * @brief Move assignment operator.
+       */
       P1& operator=(P1&& other) = default;
 
       /**
@@ -488,6 +588,16 @@ namespace Rodin::Variational
         return m_mesh.get();
       }
 
+      /**
+       * @brief Returns global dof indices attached to local polytope @f$(d, i)@f$.
+       *
+       * The local shard dof list is retrieved from the underlying shard P1
+       * space and mapped to distributed global indices.
+       *
+       * @param[in] d Topological dimension of the polytope.
+       * @param[in] i Local polytope index in the shard.
+       * @return Reference to a thread-local array of global dof indices.
+       */
       const IndexArray& getDOFs(size_t d, Index i) const override
       {
         static thread_local IndexArray s_dofs;
@@ -501,6 +611,15 @@ namespace Rodin::Variational
         return s_dofs;
       }
 
+      /**
+       * @brief Returns the global dof index associated with local basis function @p localDof.
+       *
+       * The polytope pair @f$(d, i)@f$ is interpreted in local shard indexing.
+       *
+       * @param[in] p Pair @f$(d, i)@f$ identifying a local shard polytope.
+       * @param[in] localDof Local basis-function index on the polytope.
+       * @return Global distributed dof index.
+       */
       Index getGlobalIndex(const std::pair<size_t, Index>& p, Index localDof) const override
       {
         const auto& [d, i] = p;
@@ -511,6 +630,14 @@ namespace Rodin::Variational
         return getGlobalIndex(local);
       }
 
+      /**
+       * @brief Returns a pullback wrapper for a function on local polytope @f$(d, i)@f$.
+       *
+       * @tparam FunctionDerived Function expression type.
+       * @param[in] p Local polytope pair @f$(d, i)@f$.
+       * @param[in] v Function defined on physical coordinates.
+       * @return Pullback wrapper mapping reference points to physical evaluation.
+       */
       template <class FunctionDerived>
       auto getPullback(const std::pair<size_t, Index>& p, const FunctionBase<FunctionDerived>& v) const
       {
@@ -519,12 +646,26 @@ namespace Rodin::Variational
         return Pullback<FunctionDerived>(*mesh.getPolytope(d, i), v);
       }
 
+      /**
+       * @brief Returns a pushforward wrapper on local polytope @f$(d, i)@f$.
+       *
+       * @tparam CallableType Callable defined on reference coordinates.
+       * @param[in] v Reference-space callable.
+       * @return Pushforward wrapper mapping physical points to reference evaluation.
+       */
       template <class CallableType>
       auto getPushforward(const std::pair<size_t, Index>&, const CallableType& v) const
       {
         return typename FESType::template Pushforward<CallableType>(v);
       }
 
+      /**
+       * @brief Returns a pushforward wrapper for an explicit local polytope object.
+       *
+       * @tparam CallableType Callable defined on reference coordinates.
+       * @param[in] v Reference-space callable.
+       * @return Pushforward wrapper mapping physical points to reference evaluation.
+       */
       template <class CallableType>
       auto getPushforward(const Geometry::Polytope&, const CallableType& v) const
       {
@@ -543,6 +684,9 @@ namespace Rodin::Variational
 
 namespace Rodin::MPI
 {
+  /**
+   * @brief Convenience alias for the default distributed scalar P1 space.
+   */
   using P1 = Variational::P1<Real, Geometry::Mesh<Context::MPI>>;
 }
 

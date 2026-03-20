@@ -68,8 +68,17 @@ namespace Rodin::IO
     : public MeshLoaderBase<Context::MPI>
   {
     public:
+      /**
+       * @brief Distributed context type handled by this loader.
+       */
       using ContextType = Context::MPI;
+      /**
+       * @brief Distributed mesh object type loaded by this specialization.
+       */
       using ObjectType = Geometry::Mesh<ContextType>;
+      /**
+       * @brief Base loader interface specialization.
+       */
       using Parent = MeshLoaderBase<ContextType>;
 
       /**
@@ -150,8 +159,17 @@ namespace Rodin::IO
     : public MeshPrinterBase<Context::MPI>
   {
     public:
+      /**
+       * @brief Distributed context type handled by this printer.
+       */
       using ContextType = Context::MPI;
+      /**
+       * @brief Distributed mesh object type written by this specialization.
+       */
       using ObjectType = Geometry::Mesh<ContextType>;
+      /**
+       * @brief Base printer interface specialization.
+       */
       using Parent = MeshPrinterBase<ContextType>;
 
       /**
