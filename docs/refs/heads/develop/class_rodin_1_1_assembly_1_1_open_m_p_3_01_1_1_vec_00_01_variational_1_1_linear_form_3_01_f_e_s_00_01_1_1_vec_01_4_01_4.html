@@ -74,10 +74,22 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p_e_t_sc_2_assembly_2_open_m_p_8h.html">&lt;Rodin/PETSc/Assembly/OpenMP.h&gt;</a></div>
           <div class="m-doc-template">template&lt;class FES&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>OpenMP&lt;::Vec, Variational::LinearForm&lt;FES, ::Vec&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p>OpenMP assembly for PETSc Vec (linear form)</p>
+        <p>OpenMP-parallel assembly of a <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector from a linear form.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">FES</td>
+              <td>Finite element space type.</td>
+            </tr>
+          </tbody>
+        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -90,6 +102,7 @@
             </li>
           </ul>
         </nav>
+<p>Uses thread-local buffers and barriers to assemble linear form contributions into a sequential <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector in parallel.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">

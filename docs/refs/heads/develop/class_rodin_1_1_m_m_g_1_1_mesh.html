@@ -75,8 +75,9 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_m_m_g.html">MMG</a>::<wbr/></span>Mesh <span class="m-thin">class</span>
+          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_m_g_2_mesh_8h.html">&lt;Rodin/MMG/Mesh.h&gt;</a></div>
         </h1>
-        <p><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a> class which has support for MMG functionalities.</p>
+        <p>Local mesh enriched with MMG boundary tags and constraints.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -92,6 +93,7 @@
             </li>
           </ul>
         </nav>
+<p>This class extends <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;</a> with index sets required by MMG workflows:</p><ul><li>corners (<code>MG_CRN</code>),</li><li>ridges (<code>MG_GEO</code>),</li><li>required vertices (<code>MG_REQ</code>),</li><li>required edges (<code>MG_REQ</code> on edges).</li></ul><p>These sets are preserved when converting to/from native MMG structures via <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#ab9bd883b7f95228226fd6f267d044287" class="m-doc">MMG5::<wbr />rodinToMesh</a> and <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a417246fbd6a72f45ccc4274a5e6f981c" class="m-doc">MMG5::<wbr />meshToRodin</a>.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -113,23 +115,35 @@
               using <a href="#a89c1d83d8324bded6cf429b33480ae21" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Rodin::<wbr />Context::<wbr />Local</a>&gt;
             </dt>
             <dd>Parent class.</dd>
+            <dt id="a5d11968e3ae899be574a41d47a17a36f">
+              using <a href="#a5d11968e3ae899be574a41d47a17a36f" class="m-doc-self">Context</a> = typename Parent::Context
+            </dt>
+            <dd><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a> context type (always local for <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>).</dd>
             <dt id="a748c4cb7eb953682ee130a23771ad367">
               using <a href="#a748c4cb7eb953682ee130a23771ad367" class="m-doc-self">CornerIndex</a> = <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>
             </dt>
-            <dd>Index of corners in the mesh.</dd>
+            <dd>Index set of corner vertices in the mesh.</dd>
             <dt id="a70cdd9fb622ee2942fd08cf918960e30">
               using <a href="#a70cdd9fb622ee2942fd08cf918960e30" class="m-doc-self">RidgeIndex</a> = <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>
             </dt>
-            <dd>Index of ridges in the mesh.</dd>
+            <dd>Index set of ridge edges in the mesh.</dd>
+            <dt id="a03d97325a79a1055b1118aac754d1dde">
+              using <a href="#a03d97325a79a1055b1118aac754d1dde" class="m-doc-self">RequiredVertexIndex</a> = <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>
+            </dt>
+            <dd>Index set of required vertices in the mesh.</dd>
+            <dt id="ab2f9371ffc5d977987f9e254890b3c49">
+              using <a href="#ab2f9371ffc5d977987f9e254890b3c49" class="m-doc-self">RequiredEdgeIndex</a> = <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>
+            </dt>
+            <dd>Index set of required edges in the mesh.</dd>
           </dl>
         </section>
         <section id="pub-static-methods">
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
-            <dt id="a4f87f0175bc4cbe6518ba48a2ed0555c">
-              <span class="m-doc-wrap-bumper">static auto <a href="#a4f87f0175bc4cbe6518ba48a2ed0555c" class="m-doc-self">Build</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh_1_1_builder.html" class="m-doc">MMG::<wbr />Mesh::<wbr />Builder</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a4f87f0175bc4cbe6518ba48a2ed0555c" class="m-doc">Build</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh_1_1_builder.html" class="m-doc">MMG::<wbr />Mesh::<wbr />Builder</a></span>
             </dt>
-            <dd>Generates a <a href="class_rodin_1_1_m_m_g_1_1_mesh_1_1_builder.html" class="m-doc">Builder</a> instance to build an <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> object.</dd>
+            <dd>Creates a builder for constructing an <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> instance.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -138,11 +152,11 @@
             <dt id="a51021126098595338e367d7ee42aa24c">
               <span class="m-doc-wrap-bumper"><a href="#a51021126098595338e367d7ee42aa24c" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
-            <dd>Constructs an empty mesh with no elements.</dd>
+            <dd>Constructs an empty MMG mesh.</dd>
             <dt id="afceeead3b92b95c2a5b054efc880a83e">
               <span class="m-doc-wrap-bumper"><a href="#afceeead3b92b95c2a5b054efc880a83e" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap"><a href="#a89c1d83d8324bded6cf429b33480ae21" class="m-doc">Parent</a>&amp;&amp; other)</span>
             </dt>
-            <dd>Move constructs a <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a> to an <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>.</dd>
+            <dd>Move-constructs from a base local mesh.</dd>
             <dt id="a41e370009465e8495509f5063ff4b656">
               <span class="m-doc-wrap-bumper"><a href="#a41e370009465e8495509f5063ff4b656" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp; other)</span>
             </dt>
@@ -160,57 +174,292 @@
               <span class="m-doc-wrap-bumper">auto <a href="#af26e292ff63011c4a5ab2ec42e731a7b" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
             </dt>
             <dd>Move assignment.</dd>
-            <dt id="aab9ef675634a1eb941561a46056947d9">
-              <span class="m-doc-wrap-bumper">auto <a href="#aab9ef675634a1eb941561a46056947d9" class="m-doc-self">setCorner</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vertexIdx) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aab9ef675634a1eb941561a46056947d9" class="m-doc">setCorner</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vertexIdx) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
             </dt>
-            <dd>Adds the vertex to the corner index.</dd>
+            <dd>Marks a vertex as a corner.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a36486520ad9e99573fcb4ffedcd01b67" class="m-doc">setRidge</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> edgeIdx) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
             </dt>
-            <dd>Adds the edge to the ridge index.</dd>
-            <dt id="a3925af43925006c61ac5d9e5678d425d">
-              <span class="m-doc-wrap-bumper">auto <a href="#a3925af43925006c61ac5d9e5678d425d" class="m-doc-self">getCorners</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a748c4cb7eb953682ee130a23771ad367" class="m-doc">CornerIndex</a>&amp;</span>
+            <dd>Marks an edge as a ridge.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5865a18e254a94a9dea279342546f7da" class="m-doc">setRequiredEdge</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> edgeIdx) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
             </dt>
-            <dd>Gets the index of corners.</dd>
-            <dt id="a1cfe89b7bfa1e8567044cfc541481d2d">
-              <span class="m-doc-wrap-bumper">auto <a href="#a1cfe89b7bfa1e8567044cfc541481d2d" class="m-doc-self">getCorners</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a748c4cb7eb953682ee130a23771ad367" class="m-doc">CornerIndex</a>&amp;</span>
+            <dd>Marks an edge as required.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a660daeaf3faa7b58bbda95c8d9ae8254" class="m-doc">setRequiredVertex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vertexIdx) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
             </dt>
-            <dd>Gets the index of corners.</dd>
-            <dt id="a735cbfcfc7d87fa8e59d1ea6edde26d0">
-              <span class="m-doc-wrap-bumper">auto <a href="#a735cbfcfc7d87fa8e59d1ea6edde26d0" class="m-doc-self">getRidges</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a70cdd9fb622ee2942fd08cf918960e30" class="m-doc">RidgeIndex</a>&amp;</span>
+            <dd>Marks a vertex as required.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3925af43925006c61ac5d9e5678d425d" class="m-doc">getCorners</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a748c4cb7eb953682ee130a23771ad367" class="m-doc">CornerIndex</a>&amp;</span>
             </dt>
-            <dd>Gets the index of ridges.</dd>
-            <dt id="a1ae25c1b3b29b135afa86f3799310873">
-              <span class="m-doc-wrap-bumper">auto <a href="#a1ae25c1b3b29b135afa86f3799310873" class="m-doc-self">getRidges</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a70cdd9fb622ee2942fd08cf918960e30" class="m-doc">RidgeIndex</a>&amp;</span>
+            <dd>Gets the corner index set (const).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1cfe89b7bfa1e8567044cfc541481d2d" class="m-doc">getCorners</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a748c4cb7eb953682ee130a23771ad367" class="m-doc">CornerIndex</a>&amp;</span>
             </dt>
-            <dd>Gets the index of ridges.</dd>
+            <dd>Gets the corner index set.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a735cbfcfc7d87fa8e59d1ea6edde26d0" class="m-doc">getRidges</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a70cdd9fb622ee2942fd08cf918960e30" class="m-doc">RidgeIndex</a>&amp;</span>
+            </dt>
+            <dd>Gets the ridge index set (const).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1ae25c1b3b29b135afa86f3799310873" class="m-doc">getRidges</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a70cdd9fb622ee2942fd08cf918960e30" class="m-doc">RidgeIndex</a>&amp;</span>
+            </dt>
+            <dd>Gets the ridge index set.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a426c5fcff56dbea0c524ecc8f0432221" class="m-doc">getRequiredEdges</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#ab2f9371ffc5d977987f9e254890b3c49" class="m-doc">RequiredEdgeIndex</a>&amp;</span>
+            </dt>
+            <dd>Gets the required-edge index set.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a077fbaf7b5a6b6f8a28276cc62005ae6" class="m-doc">getRequiredEdges</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ab2f9371ffc5d977987f9e254890b3c49" class="m-doc">RequiredEdgeIndex</a>&amp;</span>
+            </dt>
+            <dd>Gets the required-edge index set (const).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac233b71ca7afeae0535518452390bb1b" class="m-doc">getRequiredVertices</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a03d97325a79a1055b1118aac754d1dde" class="m-doc">RequiredVertexIndex</a>&amp;</span>
+            </dt>
+            <dd>Gets the required-vertex index set.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a304f7c8648778d109defd28cacb9a75c" class="m-doc">getRequiredVertices</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a03d97325a79a1055b1118aac754d1dde" class="m-doc">RequiredVertexIndex</a>&amp;</span>
+            </dt>
+            <dd>Gets the required-vertex index set (const).</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#ad362bb3037096ed0a16c3a792dd00ea6" class="m-doc">save</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
               <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt) const <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Saves a mesh to file in the given format.</dd>
+            <dd>Saves the mesh to disk.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aa33c6cf03ddc1a84ed35e9db7d9132ac" class="m-doc">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
               <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Loads a mesh from file in the given format.</dd>
+            <dd>Loads the mesh from disk.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a4f87f0175bc4cbe6518ba48a2ed0555c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_m_m_g_1_1_mesh_1_1_builder.html" class="m-doc">MMG::<wbr />Mesh::<wbr />Builder</a> Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f87f0175bc4cbe6518ba48a2ed0555c" class="m-doc-self">Build</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Creates a builder for constructing an <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> instance.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Fresh builder object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aab9ef675634a1eb941561a46056947d9"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aab9ef675634a1eb941561a46056947d9" class="m-doc-self">setCorner</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vertexIdx)</span></span>
+            </h3>
+            <p>Marks a vertex as a corner.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">vertexIdx&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Vertex index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this mesh.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a36486520ad9e99573fcb4ffedcd01b67"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a36486520ad9e99573fcb4ffedcd01b67" class="m-doc-self">setRidge</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> edgeIdx)</span></span>
             </h3>
-            <p>Adds the edge to the ridge index.</p>
-<p>m_cornerIndex = std::move(other.m_cornerIndex);</p>
+            <p>Marks an edge as a ridge.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">edgeIdx&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Edge index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this mesh.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5865a18e254a94a9dea279342546f7da"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5865a18e254a94a9dea279342546f7da" class="m-doc-self">setRequiredEdge</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> edgeIdx)</span></span>
+            </h3>
+            <p>Marks an edge as required.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">edgeIdx&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Edge index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this mesh.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a660daeaf3faa7b58bbda95c8d9ae8254"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a660daeaf3faa7b58bbda95c8d9ae8254" class="m-doc-self">setRequiredVertex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vertexIdx)</span></span>
+            </h3>
+            <p>Marks a vertex as required.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">vertexIdx&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Vertex index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this mesh.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3925af43925006c61ac5d9e5678d425d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="#a748c4cb7eb953682ee130a23771ad367" class="m-doc">CornerIndex</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3925af43925006c61ac5d9e5678d425d" class="m-doc-self">getCorners</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the corner index set (const).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Immutable set of corner vertex indices.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1cfe89b7bfa1e8567044cfc541481d2d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="#a748c4cb7eb953682ee130a23771ad367" class="m-doc">CornerIndex</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1cfe89b7bfa1e8567044cfc541481d2d" class="m-doc-self">getCorners</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Gets the corner index set.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Mutable set of corner vertex indices.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a735cbfcfc7d87fa8e59d1ea6edde26d0"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="#a70cdd9fb622ee2942fd08cf918960e30" class="m-doc">RidgeIndex</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a735cbfcfc7d87fa8e59d1ea6edde26d0" class="m-doc-self">getRidges</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the ridge index set (const).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Immutable set of ridge edge indices.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1ae25c1b3b29b135afa86f3799310873"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="#a70cdd9fb622ee2942fd08cf918960e30" class="m-doc">RidgeIndex</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ae25c1b3b29b135afa86f3799310873" class="m-doc-self">getRidges</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Gets the ridge index set.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Mutable set of ridge edge indices.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a426c5fcff56dbea0c524ecc8f0432221"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="#ab2f9371ffc5d977987f9e254890b3c49" class="m-doc">RequiredEdgeIndex</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a426c5fcff56dbea0c524ecc8f0432221" class="m-doc-self">getRequiredEdges</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Gets the required-edge index set.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Mutable set of required edge indices.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a077fbaf7b5a6b6f8a28276cc62005ae6"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="#ab2f9371ffc5d977987f9e254890b3c49" class="m-doc">RequiredEdgeIndex</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a077fbaf7b5a6b6f8a28276cc62005ae6" class="m-doc-self">getRequiredEdges</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the required-edge index set (const).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Immutable set of required edge indices.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac233b71ca7afeae0535518452390bb1b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="#a03d97325a79a1055b1118aac754d1dde" class="m-doc">RequiredVertexIndex</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac233b71ca7afeae0535518452390bb1b" class="m-doc-self">getRequiredVertices</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Gets the required-vertex index set.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Mutable set of required vertex indices.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a304f7c8648778d109defd28cacb9a75c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="#a03d97325a79a1055b1118aac754d1dde" class="m-doc">RequiredVertexIndex</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a304f7c8648778d109defd28cacb9a75c" class="m-doc-self">getRequiredVertices</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the required-vertex index set (const).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Immutable set of required vertex indices.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
           <section class="m-doc-details" id="ad362bb3037096ed0a16c3a792dd00ea6"><div>
             <h3>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad362bb3037096ed0a16c3a792dd00ea6" class="m-doc-self">save</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
               <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt) const <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Saves a mesh to file in the given format.</p>
+            <p>Saves the mesh to disk.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -218,21 +467,22 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Name of file to write</td>
+                  <td>Destination path.</td>
                 </tr>
                 <tr>
                   <td>fmt&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a> file format</td>
+                  <td>Explicit file format.</td>
                 </tr>
               </tbody>
             </table>
+<p>For <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfeae902e98da70b5998f60fb4cd62826def" class="m-doc">Rodin::<wbr />IO::<wbr />FileFormat::<wbr />MEDIT</a> this writes MMG-specific sections via <a href="class_rodin_1_1_m_m_g_1_1_mesh_printer.html" class="m-doc">MeshPrinter</a>. Other formats delegate to the parent mesh implementation.</p>
           </div></section>
           <section class="m-doc-details" id="aa33c6cf03ddc1a84ed35e9db7d9132ac"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa33c6cf03ddc1a84ed35e9db7d9132ac" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
               <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt) <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Loads a mesh from file in the given format.</p>
+            <p>Loads the mesh from disk.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -240,20 +490,21 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Name of file to read</td>
+                  <td>Source path.</td>
                 </tr>
                 <tr>
                   <td>fmt&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a> file format</td>
+                  <td>Explicit file format.</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>Reference to this (for method chaining)</td>
+                  <td>Reference to this mesh.</td>
                 </tr>
               </tfoot>
             </table>
+<p>For <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfeae902e98da70b5998f60fb4cd62826def" class="m-doc">Rodin::<wbr />IO::<wbr />FileFormat::<wbr />MEDIT</a> this restores MMG-specific sections via <a href="class_rodin_1_1_m_m_g_1_1_mesh_loader.html" class="m-doc">MeshLoader</a>. Other formats delegate to the parent mesh implementation.</p>
           </div></section>
         </section>
       </div>

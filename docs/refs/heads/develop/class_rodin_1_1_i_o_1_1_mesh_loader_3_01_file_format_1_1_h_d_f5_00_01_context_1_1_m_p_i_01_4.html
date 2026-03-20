@@ -86,6 +86,7 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
@@ -103,11 +104,28 @@
             <dd>Base class for loading meshes from files or streams.</dd>
           </dl>
         </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="abccaffe1f1d9f2b4e323c3f4721a26dd">
+              using <a href="#abccaffe1f1d9f2b4e323c3f4721a26dd" class="m-doc-self">ContextType</a> = <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>
+            </dt>
+            <dd>Distributed context type handled by this loader.</dd>
+            <dt id="a0aa213e4c6f5333c6f41f8e57fd9ac5c">
+              using <a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc-self">ObjectType</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="#abccaffe1f1d9f2b4e323c3f4721a26dd" class="m-doc">ContextType</a>&gt;
+            </dt>
+            <dd>Distributed mesh object type loaded by this specialization.</dd>
+            <dt id="a43d336dce70d5f6c43a0a94e9b7a9a29">
+              using <a href="#a43d336dce70d5f6c43a0a94e9b7a9a29" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_i_o_1_1_mesh_loader_base.html" class="m-doc">MeshLoaderBase</a>&lt;<a href="#abccaffe1f1d9f2b4e323c3f4721a26dd" class="m-doc">ContextType</a>&gt;
+            </dt>
+            <dd>Base loader interface specialization.</dd>
+          </dl>
+        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a3238d396f9f9e4a8512bae21b4c6aaab" class="m-doc">MeshLoader</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">ObjectType</a>&amp; mesh)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a3238d396f9f9e4a8512bae21b4c6aaab" class="m-doc">MeshLoader</a>(</span><span class="m-doc-wrap"><a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&amp; mesh)</span>
             </dt>
             <dd>Constructs a loader for the given distributed mesh.</dd>
           </dl>
@@ -132,7 +150,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />MeshLoader&lt;FileFormat::<wbr />HDF5, Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3238d396f9f9e4a8512bae21b4c6aaab" class="m-doc-self">MeshLoader</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">ObjectType</a>&amp; mesh)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />MeshLoader&lt;FileFormat::<wbr />HDF5, Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3238d396f9f9e4a8512bae21b4c6aaab" class="m-doc-self">MeshLoader</a>(</span><span class="m-doc-wrap"><a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&amp; mesh)</span></span>
             </h3>
             <p>Constructs a loader for the given distributed mesh.</p>
             <table class="m-table m-fullwidth m-flat">

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Variational::Problem&lt;PETSc::Math::LinearSystem, U, V&gt; class | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p_e_t_sc_2_variational_2_problem_8h.html">&lt;Rodin/PETSc/Variational/Problem.h&gt;</a></div>
+          <div class="m-doc-template">template&lt;class U, class V&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Problem&lt;PETSc::Math::LinearSystem, U, V&gt; <span class="m-thin">class</span>
+        </h1>
+        <p><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> variational problem for a single trial / test function pair.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">U</td>
+              <td>Trial function type (e.g. <code><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;…&gt;&gt;, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;…&gt;&gt;</code>).</td>
+            </tr>
+            <tr>
+              <td>V</td>
+              <td><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> function type (e.g. <code><a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;…&gt;&gt;</code>).</td>
+            </tr>
+          </tbody>
+        </table>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>Assembles a variational formulation into a <a href="_p_e_t_sc_2_math_2_linear_system_8h.html#afa0435f07e69ca0a0806164a5b7e897f" class="m-doc">Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem</a> containing the system matrix <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
+<title>
+$ A $
+</title>
+<defs>
+<path id='eq1-g0-65' d='M2.032379-1.327024C1.613948-.621669 1.207472-.382565 .633624-.3467C.502117-.334745 .406476-.334745 .406476-.119552C.406476-.047821 .466252 0 .549938 0C.765131 0 1.303113-.02391 1.518306-.02391C1.865006-.02391 2.247572 0 2.582316 0C2.654047 0 2.797509 0 2.797509-.227148C2.797509-.334745 2.701868-.3467 2.630137-.3467C2.355168-.37061 2.12802-.466252 2.12802-.753176C2.12802-.920548 2.199751-1.052055 2.355168-1.315068L3.263761-2.82142H6.312329C6.324284-2.713823 6.324284-2.618182 6.336239-2.510585C6.372105-2.199751 6.515567-.956413 6.515567-.729265C6.515567-.37061 5.905853-.3467 5.71457-.3467C5.583064-.3467 5.451557-.3467 5.451557-.131507C5.451557 0 5.559153 0 5.630884 0C5.834122 0 6.073225-.02391 6.276463-.02391H6.957908C7.687173-.02391 8.2132 0 8.225156 0C8.308842 0 8.440349 0 8.440349-.227148C8.440349-.3467 8.332752-.3467 8.153425-.3467C7.49589-.3467 7.483935-.454296 7.44807-.812951L6.718804-8.272976C6.694894-8.51208 6.647073-8.53599 6.515567-8.53599C6.396015-8.53599 6.324284-8.51208 6.216687-8.332752L2.032379-1.327024ZM3.466999-3.16812L5.869988-7.185056L6.276463-3.16812H3.466999Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g0-65'/>
+</g>
+</svg>, the right-hand side <svg class="m-math" style="width: 0.778em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 7.47198 8.302191">
+<title>
+$ \mathbf{b} $
+</title>
+<defs>
+<path id='eq2-g0-98' d='M2.486675-8.296887L.418431-8.201245V-7.687173C1.159651-7.687173 1.243337-7.687173 1.243337-7.220922V0H1.745455C1.948692-.227148 2.15193-.454296 2.343213-.6934C2.952927-.059776 3.610461 .071731 4.088667 .071731C5.738481 .071731 7.005729-.932503 7.005729-2.666002C7.005729-4.303861 5.881943-5.379826 4.244085-5.379826C3.53873-5.379826 2.976837-5.152677 2.486675-4.770112V-8.296887ZM2.546451-4.196264C2.964882-4.770112 3.58655-4.985305 4.088667-4.985305C5.571108-4.985305 5.571108-3.466999 5.571108-2.677958C5.571108-2.139975 5.571108-1.458531 5.284184-1.016189C4.913574-.442341 4.351681-.32279 3.969116-.32279C3.156164-.32279 2.713823-.896638 2.546451-1.159651V-4.196264Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g0-98'/>
+</g>
+</svg>, and the solution <svg class="m-math" style="width: 0.739em; height: 0.553em; vertical-align: -0.000em;" viewBox="0 -5.313399 7.098381 5.313399">
+<title>
+$ \mathbf{x} $
+</title>
+<defs>
+<path id='eq3-g0-120' d='M4.028892-2.952927L5.415691-4.542964C5.547198-4.698381 5.654795-4.794022 6.647073-4.794022V-5.308095C5.977584-5.284184 5.953674-5.284184 5.547198-5.284184C5.200498-5.284184 4.686426-5.284184 4.351681-5.308095V-4.794022C4.578829-4.794022 4.829888-4.734247 4.829888-4.65056C4.829888-4.62665 4.770112-4.542964 4.746202-4.519054L3.706102-3.347447L2.52254-4.794022H3.024658V-5.308095C2.749689-5.284184 1.936737-5.284184 1.613948-5.284184C1.255293-5.284184 .609714-5.284184 .274969-5.308095V-4.794022H1.123786L2.988792-2.52254L1.43462-.765131C1.291158-.597758 1.207472-.514072 .215193-.514072V0C.932503-.02391 .956413-.02391 1.327024-.02391C1.673724-.02391 2.175841-.02391 2.510585 0V-.514072C2.283437-.514072 2.032379-.573848 2.032379-.657534C2.032379-.669489 2.032379-.681445 2.116065-.777086L3.311582-2.12802L4.638605-.514072H4.136488V0C4.423412-.02391 5.224408-.02391 5.559153-.02391C5.917808-.02391 6.551432-.02391 6.886177 0V-.514072H6.049315L4.028892-2.952927Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='0' y='0' xlink:href='#eq3-g0-120'/>
+</g>
+</svg>. After calling <code><a href="#a242286126958bec41dec8f80d88b0d54" class="m-doc">solve()</a></code>, the solution is automatically scattered back into the trial function&#x27;s grid function.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="_p_e_t_sc_2_variational_2_problem_8h.html#ae1fbfa50d43bb3e1ed943e7de7f1fb73" class="m-doc">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />Problem</a> (convenience alias), <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">Rodin::<wbr />Solver::<wbr />KSP</a></p></aside>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class LinearSystem, class U, class V&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_problem_u_v_base.html" class="m-doc">ProblemUVBase&lt;PETSc::Math::LinearSystem, U, V&gt;</a>
+            </dt>
+            <dd>General class to assemble linear systems with <code>Operator</code> and <code>Vector</code> generic types in a sequential context.</dd>
+          </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a0e2ed914b272429dbc177e1882a866f1">
+              using <a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc-self">LinearSystemType</a> = <a href="_p_e_t_sc_2_math_2_linear_system_8h.html#afa0435f07e69ca0a0806164a5b7e897f" class="m-doc">PETSc::<wbr />Math::<wbr />LinearSystem</a>
+            </dt>
+            <dd>Type of the <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> linear system.</dd>
+            <dt id="a42202ed1db5760067e78140c3583f06d">
+              using <a href="#a42202ed1db5760067e78140c3583f06d" class="m-doc-self">SolverBaseType</a> = <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">Solver::<wbr />LinearSolverBase</a>&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&gt;
+            </dt>
+            <dd>Base solver type for this problem.</dd>
+            <dt id="a3f02c76806f998a41174a54479486d51">
+              using <a href="#a3f02c76806f998a41174a54479486d51" class="m-doc-self">OperatorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&gt;::OperatorType
+            </dt>
+            <dd><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> matrix operator type.</dd>
+            <dt id="a8d4666f2edbd3de42a6bfbdbec15e536">
+              using <a href="#a8d4666f2edbd3de42a6bfbdbec15e536" class="m-doc-self">VectorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&gt;::VectorType
+            </dt>
+            <dd><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector type.</dd>
+            <dt id="a5584bb04cdb3914f8da2f4904a179ef0">
+              using <a href="#a5584bb04cdb3914f8da2f4904a179ef0" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&gt;::ScalarType
+            </dt>
+            <dd><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> scalar type.</dd>
+            <dt id="af723523eed8a866c8fa646cb4d08f428">
+              using <a href="#af723523eed8a866c8fa646cb4d08f428" class="m-doc-self">ProblemBodyType</a> = <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">Variational::<wbr />ProblemBody</a>&lt;<a href="#a3f02c76806f998a41174a54479486d51" class="m-doc">OperatorType</a>, <a href="#a8d4666f2edbd3de42a6bfbdbec15e536" class="m-doc">VectorType</a>, <a href="#a5584bb04cdb3914f8da2f4904a179ef0" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> body type encapsulating bilinear/linear forms.</dd>
+            <dt id="a358fdd58d7140091d16ab400b3fc3ea5">
+              using <a href="#a358fdd58d7140091d16ab400b3fc3ea5" class="m-doc-self">TrialFESType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;U&gt;::FESType
+            </dt>
+            <dd>Finite element space type for the trial function.</dd>
+            <dt id="af9b0497a2df4b2ec56a12a2e893ab94f">
+              using <a href="#af9b0497a2df4b2ec56a12a2e893ab94f" class="m-doc-self">TestFESType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;V&gt;::FESType
+            </dt>
+            <dd>Finite element space type for the test function.</dd>
+            <dt id="a508421247062fce0082cef624ba91cb7">
+              using <a href="#a508421247062fce0082cef624ba91cb7" class="m-doc-self">TrialFESMeshType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a358fdd58d7140091d16ab400b3fc3ea5" class="m-doc">TrialFESType</a>&gt;::MeshType
+            </dt>
+            <dd>Mesh type for the trial finite element space.</dd>
+            <dt id="ab49846dd94d56f9ec67fb4402be9f401">
+              using <a href="#ab49846dd94d56f9ec67fb4402be9f401" class="m-doc-self">TrialFESMeshContextType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a508421247062fce0082cef624ba91cb7" class="m-doc">TrialFESMeshType</a>&gt;::ContextType
+            </dt>
+            <dd><a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a> type (Local or MPI) for the trial mesh.</dd>
+            <dt id="a5ad12a3c6a7118c030eff9613e2d2467">
+              using <a href="#a5ad12a3c6a7118c030eff9613e2d2467" class="m-doc-self">TestFESMeshType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#af9b0497a2df4b2ec56a12a2e893ab94f" class="m-doc">TestFESType</a>&gt;::MeshType
+            </dt>
+            <dd>Mesh type for the test finite element space.</dd>
+            <dt id="ac4bc1a3f31bd1062c9aee1d256ef4b65">
+              using <a href="#ac4bc1a3f31bd1062c9aee1d256ef4b65" class="m-doc-self">TestFESMeshContextType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a5ad12a3c6a7118c030eff9613e2d2467" class="m-doc">TestFESMeshType</a>&gt;::ContextType
+            </dt>
+            <dd><a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a> type (Local or MPI) for the test mesh.</dd>
+            <dt id="ab48623a8ef35ddaf85afb38affa4fc2b">
+              using <a href="#ab48623a8ef35ddaf85afb38affa4fc2b" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_problem_u_v_base.html" class="m-doc">Variational::<wbr />ProblemUVBase</a>&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>, U, V&gt;
+            </dt>
+            <dd>Parent class type.</dd>
+            <dt id="a42d8ebbdd89a1ddc05c9b2b813886e6c">
+              using <a href="#a42d8ebbdd89a1ddc05c9b2b813886e6c" class="m-doc-self">AssemblyType</a> = typename <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Assembly::<wbr />Default</a>&lt;<a href="#ab49846dd94d56f9ec67fb4402be9f401" class="m-doc">TrialFESMeshContextType</a>, <a href="#ac4bc1a3f31bd1062c9aee1d256ef4b65" class="m-doc">TestFESMeshContextType</a>&gt; ::template Type&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>, <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&gt;
+            </dt>
+            <dd><a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a> type for this problem.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a92a04f56194441a169e751a0ef01f52e" class="m-doc">Problem</a>(</span><span class="m-doc-wrap">U&amp; u,
+              V&amp; v)</span>
+            </dt>
+            <dd>Constructs the problem from a trial and test function pair.</dd>
+            <dt id="ab2b65141b453fe957a35a8eaf0cab162">
+              <span class="m-doc-wrap-bumper"><a href="#ab2b65141b453fe957a35a8eaf0cab162" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="a87d558d57dd62754889d267c9ec61189">
+              <span class="m-doc-wrap-bumper"><a href="#a87d558d57dd62754889d267c9ec61189" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a24f33cae29d53dfaa37b1732bcb0190d" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp;</span>
+            </dt>
+            <dd>Copy assignment operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab01eb0b6bcc53cd8b697a29a141b3b50" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Move assignment operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7f4dd7112c20d7855433d59d50032694" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#af723523eed8a866c8fa646cb4d08f428" class="m-doc">ProblemBodyType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Assigns a problem body (bilinear and linear forms).</dd>
+            <dt id="ade273f2556fd4951a4e7b8dad8006d5f">
+              <span class="m-doc-wrap-bumper">auto <a href="#ade273f2556fd4951a4e7b8dad8006d5f" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Assembles the variational formulation into the linear system.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a242286126958bec41dec8f80d88b0d54" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a42202ed1db5760067e78140c3583f06d" class="m-doc">SolverBaseType</a>&amp; solver) <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Solves the assembled linear system and scatters the solution.</dd>
+            <dt id="a9087a471c7bafaa7b766ab09fb62af93">
+              <span class="m-doc-wrap-bumper">auto <a href="#a9087a471c7bafaa7b766ab09fb62af93" class="m-doc-self">getLinearSystem</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Returns a mutable reference to the linear system.</dd>
+            <dt id="ad7f921c9514ca42c35720eb504e7a479">
+              <span class="m-doc-wrap-bumper">auto <a href="#ad7f921c9514ca42c35720eb504e7a479" class="m-doc-self">getLinearSystem</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Returns a read-only reference to the linear system.</dd>
+            <dt id="ad2429ffd7600bef5051f4fab1a8eb0a5">
+              <span class="m-doc-wrap-bumper">auto <a href="#ad2429ffd7600bef5051f4fab1a8eb0a5" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Creates a heap-allocated copy of this problem.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a92a04f56194441a169e751a0ef01f52e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class U, class V&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U, V&gt;&lt;U, V&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a92a04f56194441a169e751a0ef01f52e" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap">U&amp; u,
+              V&amp; v)</span></span>
+            </h3>
+            <p>Constructs the problem from a trial and test function pair.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">u</td>
+                  <td>Trial function.</td>
+                </tr>
+                <tr>
+                  <td>v</td>
+                  <td><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> function.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a24f33cae29d53dfaa37b1732bcb0190d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class U, class V&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U, V&gt;&lt;U, V&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a24f33cae29d53dfaa37b1732bcb0190d" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; other)</span></span>
+            </h3>
+            <p>Copy assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> to copy.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this problem.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab01eb0b6bcc53cd8b697a29a141b3b50"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class U, class V&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U, V&gt;&lt;U, V&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab01eb0b6bcc53cd8b697a29a141b3b50" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Move assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> to move from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this problem.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7f4dd7112c20d7855433d59d50032694"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class U, class V&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U, V&gt;&lt;U, V&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7f4dd7112c20d7855433d59d50032694" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#af723523eed8a866c8fa646cb4d08f428" class="m-doc">ProblemBodyType</a>&amp; rhs) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Assigns a problem body (bilinear and linear forms).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rhs&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> body to assign.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this problem.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a242286126958bec41dec8f80d88b0d54"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class U, class V&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U, V&gt;&lt;U, V&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a242286126958bec41dec8f80d88b0d54" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a42202ed1db5760067e78140c3583f06d" class="m-doc">SolverBaseType</a>&amp; solver) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Solves the assembled linear system and scatters the solution.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">solver&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Linear solver to use.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

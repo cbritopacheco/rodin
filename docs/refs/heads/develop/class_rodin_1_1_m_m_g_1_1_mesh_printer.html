@@ -75,8 +75,9 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_m_m_g.html">MMG</a>::<wbr/></span>MeshPrinter <span class="m-thin">class</span>
+          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_m_g_2_mesh_printer_8h.html">&lt;Rodin/MMG/MeshPrinter.h&gt;</a></div>
         </h1>
-        <p>Class used to print objects of type <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>.</p>
+        <p>Printer for <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Rodin::<wbr />MMG::<wbr />Mesh</a> in MEDIT/MMG-compatible syntax.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -84,11 +85,13 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
+<p>In addition to standard mesh topology/geometry, this printer serializes MMG-specific sections:</p><ul><li><code>Corners</code></li><li><code>Ridges</code></li><li><code>RequiredVertices</code></li><li><code>RequiredEdges</code></li></ul>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -99,53 +102,161 @@
             <dd>Base template for printing objects to streams.</dd>
           </dl>
         </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#aa8fcfa32ce16a6450a8486c05872715c" class="m-doc">MeshPrinter</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>&amp; mesh)</span>
+            </dt>
+            <dd>Constructs a printer for a given MMG mesh.</dd>
+          </dl>
+        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a2504fad917ab72c2e27e762f99fa6583" class="m-doc">print</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Prints object to an output stream.</dd>
+            <dd>Prints a full MEDIT mesh including MMG-specific sections.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a81b9afc17eccd8c5d97c1330fe6634b1" class="m-doc">printCorners</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span>
+            </dt>
+            <dd>Prints the <code>Corners</code> section.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aee97ab1f3f4dd41870803424fcdab549" class="m-doc">printRidges</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span>
+            </dt>
+            <dd>Prints the <code>Ridges</code> section.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a921aae5521f4f47362922d6ef0e4f800" class="m-doc">printRequiredVertices</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span>
+            </dt>
+            <dd>Prints the <code>RequiredVertices</code> section.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a98f3d70dba95f6d6ed136aca7d38e17f" class="m-doc">printRequiredEdges</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span>
+            </dt>
+            <dd>Prints the <code>RequiredEdges</code> section.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ac9d6bd71c9896bd37bf8a0f6622dc5e4" class="m-doc">getObject</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Gets a const reference to the object being printed.</dd>
+            <dd>Gets the mesh bound to this printer.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a2504fad917ab72c2e27e762f99fa6583"><div>
+          <section class="m-doc-details" id="aa8fcfa32ce16a6450a8486c05872715c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />MMG::<wbr />MeshPrinter::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2504fad917ab72c2e27e762f99fa6583" class="m-doc-self">print</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />MMG::<wbr />MeshPrinter::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa8fcfa32ce16a6450a8486c05872715c" class="m-doc-self">MeshPrinter</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>&amp; mesh)</span></span>
             </h3>
-            <p>Prints object to an output stream.</p>
+            <p>Constructs a printer for a given MMG mesh.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">os&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
-                  <td>Output stream to write to</td>
+                  <td style="width: 1%">mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a> to print.</td>
                 </tr>
               </tbody>
             </table>
-<p>This pure virtual method must be implemented by derived classes to write the object data to the provided stream.</p>
+          </div></section>
+          <section class="m-doc-details" id="a2504fad917ab72c2e27e762f99fa6583"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />MMG::<wbr />MeshPrinter::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2504fad917ab72c2e27e762f99fa6583" class="m-doc-self">print</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Prints a full MEDIT mesh including MMG-specific sections.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os&nbsp;<span class="m-label m-flat m-warning">out</span></td>
+                  <td>Output stream.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a81b9afc17eccd8c5d97c1330fe6634b1"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />MMG::<wbr />MeshPrinter::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a81b9afc17eccd8c5d97c1330fe6634b1" class="m-doc-self">printCorners</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
+            </h3>
+            <p>Prints the <code>Corners</code> section.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os&nbsp;<span class="m-label m-flat m-warning">out</span></td>
+                  <td>Output stream.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aee97ab1f3f4dd41870803424fcdab549"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />MMG::<wbr />MeshPrinter::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aee97ab1f3f4dd41870803424fcdab549" class="m-doc-self">printRidges</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
+            </h3>
+            <p>Prints the <code>Ridges</code> section.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os&nbsp;<span class="m-label m-flat m-warning">out</span></td>
+                  <td>Output stream.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a921aae5521f4f47362922d6ef0e4f800"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />MMG::<wbr />MeshPrinter::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a921aae5521f4f47362922d6ef0e4f800" class="m-doc-self">printRequiredVertices</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
+            </h3>
+            <p>Prints the <code>RequiredVertices</code> section.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os&nbsp;<span class="m-label m-flat m-warning">out</span></td>
+                  <td>Output stream.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a98f3d70dba95f6d6ed136aca7d38e17f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />MMG::<wbr />MeshPrinter::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a98f3d70dba95f6d6ed136aca7d38e17f" class="m-doc-self">printRequiredEdges</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
+            </h3>
+            <p>Prints the <code>RequiredEdges</code> section.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os&nbsp;<span class="m-label m-flat m-warning">out</span></td>
+                  <td>Output stream.</td>
+                </tr>
+              </tbody>
+            </table>
           </div></section>
           <section class="m-doc-details" id="ac9d6bd71c9896bd37bf8a0f6622dc5e4"><div>
             <h3>
               <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>&amp; Rodin::<wbr />MMG::<wbr />MeshPrinter::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac9d6bd71c9896bd37bf8a0f6622dc5e4" class="m-doc-self">getObject</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Gets a const reference to the object being printed.</p>
+            <p>Gets the mesh bound to this printer.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Const reference to the object</td>
+                  <td>The mesh object being serialized.</td>
                 </tr>
               </tfoot>
             </table>
-<p>This method provides read-only access to the object being written. Derived classes must implement this to return their internal object reference.</p>
           </div></section>
         </section>
       </div>

@@ -75,8 +75,9 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_m_m_g.html">MMG</a>::<wbr/></span>LevelSetDiscretizer <span class="m-thin">class</span>
+          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_level_set_discretizer_8h.html">&lt;Rodin/MMG/LevelSetDiscretizer.h&gt;</a></div>
         </h1>
-        <p>Class to perform the discretization and optimization of a surface implicitly defined by a level set function.</p>
+        <p>Discretizes implicit geometry defined by a nodal level-set field.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -90,28 +91,19 @@
             </li>
           </ul>
         </nav>
-<p>This class performs the discretization of a level set function <svg class="m-math" style="width: 5.616em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 53.917077 10.626798">
+<p>Given a scalar function <svg class="m-math" style="width: 0.722em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 6.928102 10.626798">
 <title>
-$\phi : D
-\rightarrow \Omega $
+$\phi$
 </title>
 <defs>
-<path id='eq1-g0-33' d='M9.97061-2.749689C9.313076-2.247572 8.990286-1.75741 8.894645-1.601993C8.356663-.777086 8.261021-.02391 8.261021-.011955C8.261021 .131507 8.404483 .131507 8.500125 .131507C8.703362 .131507 8.715318 .107597 8.763138-.107597C9.038107-1.279203 9.743462-2.283437 11.094396-2.833375C11.237858-2.881196 11.273724-2.905106 11.273724-2.988792S11.201993-3.108344 11.178082-3.120299C10.652055-3.323537 9.205479-3.921295 8.751183-5.929763C8.715318-6.073225 8.703362-6.109091 8.500125-6.109091C8.404483-6.109091 8.261021-6.109091 8.261021-5.965629C8.261021-5.941719 8.368618-5.188543 8.870735-4.387547C9.109838-4.028892 9.456538-3.610461 9.97061-3.227895H1.08792C.872727-3.227895 .657534-3.227895 .657534-2.988792S.872727-2.749689 1.08792-2.749689H9.97061Z'/>
-<path id='eq1-g2-10' d='M7.914321-1.865006H7.651308C7.591532-1.554172 7.531756-1.243337 7.436115-.992279C7.376339-.800996 7.340473-.705355 6.647073-.705355H5.702615C5.846077-1.374844 6.192777-1.948692 6.682939-2.689913C7.244832-3.56264 7.79477-4.435367 7.79477-5.427646C7.79477-7.07746 6.216687-8.416438 4.220174-8.416438C2.211706-8.416438 .645579-7.065504 .645579-5.427646C.645579-4.447323 1.183562-3.58655 1.745455-2.713823C2.247572-1.936737 2.606227-1.374844 2.737733-.705355H1.793275C1.099875-.705355 1.06401-.800996 1.004234-.980324C.908593-1.231382 .848817-1.578082 .789041-1.865006H.526027L.908593 0H2.761644C3.024658 0 3.048568 0 3.048568-.215193C3.048568-1.06401 2.666002-2.10411 2.426899-2.713823C2.080199-3.658281 1.75741-4.531009 1.75741-5.439601C1.75741-7.280697 3.036613-8.177335 4.220174-8.177335S6.682939-7.280697 6.682939-5.439601C6.682939-4.531009 6.348194-3.634371 6.01345-2.749689C5.810212-2.175841 5.391781-1.075965 5.391781-.227148C5.391781 0 5.427646 0 5.69066 0H7.531756L7.914321-1.865006Z'/>
-<path id='eq1-g2-58' d='M2.199751-4.578829C2.199751-4.901619 1.924782-5.152677 1.625903-5.152677C1.279203-5.152677 1.0401-4.877709 1.0401-4.578829C1.0401-4.220174 1.338979-3.993026 1.613948-3.993026C1.936737-3.993026 2.199751-4.244085 2.199751-4.578829ZM2.199751-.585803C2.199751-.908593 1.924782-1.159651 1.625903-1.159651C1.279203-1.159651 1.0401-.884682 1.0401-.585803C1.0401-.227148 1.338979 0 1.613948 0C1.936737 0 2.199751-.251059 2.199751-.585803Z'/>
-<path id='eq1-g1-30' d='M5.140722-8.18929C5.140722-8.296887 5.057036-8.296887 5.021171-8.296887C4.913574-8.296887 4.901619-8.272976 4.853798-8.069738L4.208219-5.499377C4.172354-5.34396 4.160399-5.332005 4.148443-5.32005C4.136488-5.296139 4.052802-5.284184 4.028892-5.284184C2.068244-5.116812 .561893-3.502864 .561893-2.008468C.561893-.71731 1.554172 .071731 2.797509 .143462C2.701868 .514072 2.618182 .896638 2.52254 1.267248C2.355168 1.900872 2.259527 2.295392 2.259527 2.343213C2.259527 2.367123 2.259527 2.438854 2.379078 2.438854C2.414944 2.438854 2.462765 2.438854 2.486675 2.391034C2.510585 2.367123 2.582316 2.080199 2.630137 1.924782L3.072478 .143462C5.116812 .035866 6.670984-1.637858 6.670984-3.144209C6.670984-4.351681 5.762391-5.212453 4.435367-5.296139L5.140722-8.18929ZM4.363636-5.057036C5.152677-5.009215 5.941719-4.566874 5.941719-3.395268C5.941719-2.044334 4.99726-.251059 3.132254-.107597L4.363636-5.057036ZM2.857285-.095641C2.271482-.131507 1.291158-.442341 1.291158-1.75741C1.291158-3.263761 2.379078-4.937484 4.100623-5.045081L2.857285-.095641Z'/>
-<path id='eq1-g1-68' d='M1.876961-.884682C1.769365-.466252 1.745455-.3467 .908593-.3467C.681445-.3467 .561893-.3467 .561893-.131507C.561893 0 .633624 0 .872727 0H4.662516C7.07746 0 9.432628-2.49863 9.432628-5.164633C9.432628-6.886177 8.404483-8.16538 6.694894-8.16538H2.857285C2.630137-8.16538 2.52254-8.16538 2.52254-7.938232C2.52254-7.81868 2.630137-7.81868 2.809465-7.81868C3.53873-7.81868 3.53873-7.723039 3.53873-7.591532C3.53873-7.567621 3.53873-7.49589 3.490909-7.316563L1.876961-.884682ZM4.399502-7.352428C4.507098-7.79477 4.554919-7.81868 5.021171-7.81868H6.336239C7.460025-7.81868 8.488169-7.208966 8.488169-5.559153C8.488169-4.961395 8.249066-2.881196 7.089415-1.566127C6.75467-1.171606 5.846077-.3467 4.471233-.3467H3.108344C2.940971-.3467 2.917061-.3467 2.84533-.358655C2.713823-.37061 2.701868-.394521 2.701868-.490162C2.701868-.573848 2.725778-.645579 2.749689-.753176L4.399502-7.352428Z'/>
+<path id='eq1-g0-30' d='M5.140722-8.18929C5.140722-8.296887 5.057036-8.296887 5.021171-8.296887C4.913574-8.296887 4.901619-8.272976 4.853798-8.069738L4.208219-5.499377C4.172354-5.34396 4.160399-5.332005 4.148443-5.32005C4.136488-5.296139 4.052802-5.284184 4.028892-5.284184C2.068244-5.116812 .561893-3.502864 .561893-2.008468C.561893-.71731 1.554172 .071731 2.797509 .143462C2.701868 .514072 2.618182 .896638 2.52254 1.267248C2.355168 1.900872 2.259527 2.295392 2.259527 2.343213C2.259527 2.367123 2.259527 2.438854 2.379078 2.438854C2.414944 2.438854 2.462765 2.438854 2.486675 2.391034C2.510585 2.367123 2.582316 2.080199 2.630137 1.924782L3.072478 .143462C5.116812 .035866 6.670984-1.637858 6.670984-3.144209C6.670984-4.351681 5.762391-5.212453 4.435367-5.296139L5.140722-8.18929ZM4.363636-5.057036C5.152677-5.009215 5.941719-4.566874 5.941719-3.395268C5.941719-2.044334 4.99726-.251059 3.132254-.107597L4.363636-5.057036ZM2.857285-.095641C2.271482-.131507 1.291158-.442341 1.291158-1.75741C1.291158-3.263761 2.379078-4.937484 4.100623-5.045081L2.857285-.095641Z'/>
 </defs>
 <g id='eq1-page1'>
-<use x='0' y='0' xlink:href='#eq1-g1-30'/>
-<use x='10.248931' y='0' xlink:href='#eq1-g2-58'/>
-<use x='16.821422' y='0' xlink:href='#eq1-g1-68'/>
-<use x='30.186727' y='0' xlink:href='#eq1-g0-33'/>
-<use x='45.462758' y='0' xlink:href='#eq1-g2-10'/>
+<use x='0' y='0' xlink:href='#eq1-g0-30'/>
 </g>
-</svg> defined over a computational mesh <svg class="m-math" style="width: 1.046em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.044475 8.169366">
+</svg> on a background mesh <svg class="m-math" style="width: 1.046em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.044475 8.169366">
 <title>
-$ D $
+$D$
 </title>
 <defs>
 <path id='eq2-g0-68' d='M1.876961-.884682C1.769365-.466252 1.745455-.3467 .908593-.3467C.681445-.3467 .561893-.3467 .561893-.131507C.561893 0 .633624 0 .872727 0H4.662516C7.07746 0 9.432628-2.49863 9.432628-5.164633C9.432628-6.886177 8.404483-8.16538 6.694894-8.16538H2.857285C2.630137-8.16538 2.52254-8.16538 2.52254-7.938232C2.52254-7.81868 2.630137-7.81868 2.809465-7.81868C3.53873-7.81868 3.53873-7.723039 3.53873-7.591532C3.53873-7.567621 3.53873-7.49589 3.490909-7.316563L1.876961-.884682ZM4.399502-7.352428C4.507098-7.79477 4.554919-7.81868 5.021171-7.81868H6.336239C7.460025-7.81868 8.488169-7.208966 8.488169-5.559153C8.488169-4.961395 8.249066-2.881196 7.089415-1.566127C6.75467-1.171606 5.846077-.3467 4.471233-.3467H3.108344C2.940971-.3467 2.917061-.3467 2.84533-.358655C2.713823-.37061 2.701868-.394521 2.701868-.490162C2.701868-.573848 2.725778-.645579 2.749689-.753176L4.399502-7.352428Z'/>
@@ -119,17 +111,23 @@ $ D $
 <g id='eq2-page1'>
 <use x='0' y='0' xlink:href='#eq2-g0-68'/>
 </g>
-</svg> which contains a regular domain <svg class="m-math" style="width: 0.881em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.454319 8.169366">
+</svg>, this class drives MMG level-set mode to construct either:</p><ul><li>a boundary-fitted volume mesh for one side of <svg class="m-math" style="width: 3.182em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 30.543433 10.626798">
 <title>
-$ \Omega $
+$\phi = \mathrm{ls}$
 </title>
 <defs>
-<path id='eq3-g0-10' d='M7.914321-1.865006H7.651308C7.591532-1.554172 7.531756-1.243337 7.436115-.992279C7.376339-.800996 7.340473-.705355 6.647073-.705355H5.702615C5.846077-1.374844 6.192777-1.948692 6.682939-2.689913C7.244832-3.56264 7.79477-4.435367 7.79477-5.427646C7.79477-7.07746 6.216687-8.416438 4.220174-8.416438C2.211706-8.416438 .645579-7.065504 .645579-5.427646C.645579-4.447323 1.183562-3.58655 1.745455-2.713823C2.247572-1.936737 2.606227-1.374844 2.737733-.705355H1.793275C1.099875-.705355 1.06401-.800996 1.004234-.980324C.908593-1.231382 .848817-1.578082 .789041-1.865006H.526027L.908593 0H2.761644C3.024658 0 3.048568 0 3.048568-.215193C3.048568-1.06401 2.666002-2.10411 2.426899-2.713823C2.080199-3.658281 1.75741-4.531009 1.75741-5.439601C1.75741-7.280697 3.036613-8.177335 4.220174-8.177335S6.682939-7.280697 6.682939-5.439601C6.682939-4.531009 6.348194-3.634371 6.01345-2.749689C5.810212-2.175841 5.391781-1.075965 5.391781-.227148C5.391781 0 5.427646 0 5.69066 0H7.531756L7.914321-1.865006Z'/>
+<path id='eq3-g1-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq3-g1-108' d='M2.056289-8.296887L.394521-8.16538V-7.81868C1.207472-7.81868 1.303113-7.734994 1.303113-7.149191V-.884682C1.303113-.3467 1.171606-.3467 .394521-.3467V0C.729265-.02391 1.315068-.02391 1.673724-.02391S2.630137-.02391 2.964882 0V-.3467C2.199751-.3467 2.056289-.3467 2.056289-.884682V-8.296887Z'/>
+<path id='eq3-g1-115' d='M3.921295-5.057036C3.921295-5.272229 3.921295-5.332005 3.801743-5.332005C3.706102-5.332005 3.478954-5.068991 3.395268-4.961395C3.024658-5.260274 2.654047-5.332005 2.271482-5.332005C.824907-5.332005 .394521-4.542964 .394521-3.88543C.394521-3.753923 .394521-3.335492 .848817-2.917061C1.231382-2.582316 1.637858-2.49863 2.187796-2.391034C2.84533-2.259527 3.000747-2.223661 3.299626-1.984558C3.514819-1.80523 3.670237-1.542217 3.670237-1.207472C3.670237-.6934 3.371357-.119552 2.319303-.119552C1.530262-.119552 .956413-.573848 .6934-1.769365C.645579-1.984558 .645579-1.996513 .633624-2.008468C.609714-2.056289 .561893-2.056289 .526027-2.056289C.394521-2.056289 .394521-1.996513 .394521-1.78132V-.155417C.394521 .059776 .394521 .119552 .514072 .119552C.573848 .119552 .585803 .107597 .789041-.143462C.848817-.227148 .848817-.251059 1.028144-.442341C1.482441 .119552 2.12802 .119552 2.331258 .119552C3.58655 .119552 4.208219-.573848 4.208219-1.518306C4.208219-2.163885 3.813699-2.546451 3.706102-2.654047C3.275716-3.024658 2.952927-3.096389 2.163885-3.239851C1.80523-3.311582 .932503-3.478954 .932503-4.196264C.932503-4.566874 1.183562-5.116812 2.259527-5.116812C3.56264-5.116812 3.634371-4.004981 3.658281-3.634371C3.670237-3.53873 3.753923-3.53873 3.789788-3.53873C3.921295-3.53873 3.921295-3.598506 3.921295-3.813699V-5.057036Z'/>
+<path id='eq3-g0-30' d='M5.140722-8.18929C5.140722-8.296887 5.057036-8.296887 5.021171-8.296887C4.913574-8.296887 4.901619-8.272976 4.853798-8.069738L4.208219-5.499377C4.172354-5.34396 4.160399-5.332005 4.148443-5.32005C4.136488-5.296139 4.052802-5.284184 4.028892-5.284184C2.068244-5.116812 .561893-3.502864 .561893-2.008468C.561893-.71731 1.554172 .071731 2.797509 .143462C2.701868 .514072 2.618182 .896638 2.52254 1.267248C2.355168 1.900872 2.259527 2.295392 2.259527 2.343213C2.259527 2.367123 2.259527 2.438854 2.379078 2.438854C2.414944 2.438854 2.462765 2.438854 2.486675 2.391034C2.510585 2.367123 2.582316 2.080199 2.630137 1.924782L3.072478 .143462C5.116812 .035866 6.670984-1.637858 6.670984-3.144209C6.670984-4.351681 5.762391-5.212453 4.435367-5.296139L5.140722-8.18929ZM4.363636-5.057036C5.152677-5.009215 5.941719-4.566874 5.941719-3.395268C5.941719-2.044334 4.99726-.251059 3.132254-.107597L4.363636-5.057036ZM2.857285-.095641C2.271482-.131507 1.291158-.442341 1.291158-1.75741C1.291158-3.263761 2.379078-4.937484 4.100623-5.045081L2.857285-.095641Z'/>
 </defs>
 <g id='eq3-page1'>
-<use x='0' y='0' xlink:href='#eq3-g0-10'/>
+<use x='0' y='0' xlink:href='#eq3-g0-30'/>
+<use x='10.248931' y='0' xlink:href='#eq3-g1-61'/>
+<use x='22.674412' y='0' xlink:href='#eq3-g1-108'/>
+<use x='25.926074' y='0' xlink:href='#eq3-g1-115'/>
 </g>
-</svg>.</p><div class="m-math"><svg style="width: 12.906em; height: 5.230em;" viewBox="131.725694 -50.485895 123.896085 50.212217">
+</svg>, or</li><li>an explicit surface mesh of the isovalue when <a href="#a036c115db34db9f781c9694d4b564f95" class="m-doc">surface</a> is enabled.</li></ul><p>It also supports material-splitting policies (see <a href="_m_m_g_2_common_8h.html#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc">SplitMap</a>) so multi-material meshes can be split into interior/exterior regions with user-defined labels.</p><p>The canonical signed-distance interpretation is:</p><div class="m-math"><svg style="width: 12.906em; height: 5.230em;" viewBox="131.725694 -50.485895 123.896085 50.212217">
 <title>
 \[
  \left\{
@@ -206,14 +204,14 @@ $ \Omega $
 <rect x='247.167459' y='-14.415896' height='.478187' width='8.454319'/>
 <use x='247.167459' y='-4.333785' xlink:href='#eq4-g6-10'/>
 </g>
-</svg></div>
+</svg></div><p>Inherits common remeshing controls from <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a> (hmin/hmax/hausdorff/ gradation/angle detection).</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
               class <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>
             </dt>
-            <dd>Class representing <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a> objects utilized in the MMG framework.</dd>
+            <dd>Base class for MMG-backed operations in <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -229,6 +227,10 @@ $ \Omega $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a036c115db34db9f781c9694d4b564f95" class="m-doc">surface</a>(</span><span class="m-doc-wrap">bool meshTheSurface = true) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
+            </dt>
+            <dd>Selects whether to discretize the surface or a subdomain volume.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a050b631ddc45e7bb91d2baac294529d2" class="m-doc">setLevelSet</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> ls) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
             </dt>
             <dd>Specifies the level set to discretize.</dd>
@@ -236,6 +238,14 @@ $ \Omega $
               <span class="m-doc-wrap-bumper">auto <a href="#a78828aef917eadb1fa07401b8b022b0f" class="m-doc">setRMC</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> rmc = 1e-5) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
             </dt>
             <dd>Specifies the removal of small parasitic components.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3e493e7a4d4fc3307c3096ca413f693c" class="m-doc">setBaseReferences</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> ref) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
+            </dt>
+            <dd>Restricts level-set splitting to one base material.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4d3b9a047891512167798bd00e76506f" class="m-doc">setBaseReferences</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; refs) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
+            </dt>
+            <dd>Restricts level-set splitting to a set of base materials.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ae06c5c2b72b0e432c897a7a093759d0c" class="m-doc">setBoundaryReference</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; ref) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
             </dt>
@@ -253,7 +263,7 @@ $ \partial \Omega $
 </g>
 </svg>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a53e38d7a8b5e750f61d6cd0f17f1132d" class="m-doc">setSplit</a>(</span><span class="m-doc-wrap">const SplitMap&amp; split) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a53e38d7a8b5e750f61d6cd0f17f1132d" class="m-doc">setSplit</a>(</span><span class="m-doc-wrap">const <a href="_m_m_g_2_common_8h.html#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc">SplitMap</a>&amp; split) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
             </dt>
             <dd>Specifies how to split the materials into an interior and exterior domains.</dd>
             <dt>
@@ -266,27 +276,83 @@ $ \partial \Omega $
             </dt>
             <dd>Indicates that a material reference should not be split.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a82f47c875e92ce44fb1edf0530cc2c03" class="m-doc">discretize</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">MMG::<wbr />RealGridFunction</a>&amp; ls) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a82f47c875e92ce44fb1edf0530cc2c03" class="m-doc">discretize</a>(</span><span class="m-doc-wrap">const <a href="_m_m_g_2_grid_function_8h.html#a5b080db16bbb2ed744518df89ccd8d06" class="m-doc">MMG::<wbr />RealGridFunction</a>&amp; ls) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a></span>
             </dt>
             <dd>Discretizes and optimizes an implicitly defined surface defined by a level set function.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a98aa82f90b48db2a73518a7bd4182053" class="m-doc">setAngleDetection</a>(</span><span class="m-doc-wrap">bool enable = true) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
+            </dt>
+            <dd>Enables/disables ridge angle detection.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3d5484c4a8bc9ca2be2c894c19ba3484" class="m-doc">setHMin</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hmin) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
+            </dt>
+            <dd>Sets the minimum edge size constraint.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4bac6ea575d9a47f13f18506cb0413e1" class="m-doc">setHMax</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hmax) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
+            </dt>
+            <dd>Sets the maximum edge size constraint.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a12a3bb803d147506ed142ea38f2c0f43" class="m-doc">setHausdorff</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hausd) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
+            </dt>
+            <dd>Sets the Hausdorff tolerance controlling boundary approximation.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a704e4de3352558aa7a02e08f073eacc6" class="m-doc">setGradation</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hgrad) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
+            </dt>
+            <dd>Sets the allowed gradation between adjacent edge sizes.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac61e13611f13b842d41ad0498cc6621a" class="m-doc">getSplitMap</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="_m_m_g_2_common_8h.html#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc">SplitMap</a>&amp;</span>
+            </dt>
+            <dd>Gets the configured material split map.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a036c115db34db9f781c9694d4b564f95"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a036c115db34db9f781c9694d4b564f95" class="m-doc-self">surface</a>(</span><span class="m-doc-wrap">bool meshTheSurface = true)</span></span>
+            </h3>
+            <p>Selects whether to discretize the surface or a subdomain volume.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">meshTheSurface&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>If <code>true</code>, extract/mesh the isosurface.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a050b631ddc45e7bb91d2baac294529d2"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a050b631ddc45e7bb91d2baac294529d2" class="m-doc-self">setLevelSet</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> ls)</span></span>
             </h3>
             <p>Specifies the level set to discretize.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ls&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Isovalue to extract/discretize.</td>
+                </tr>
+              </tbody>
               <tfoot>
                 <tr>
-                  <th style="width: 1%">Returns</th>
+                  <th>Returns</th>
                   <td>Reference to self (for method chaining)</td>
                 </tr>
               </tfoot>
             </table>
-<p>The default value is 0.</p>
+<p>The default value is <code>0</code>, corresponding to the zero-level set.</p>
           </div></section>
           <section class="m-doc-details" id="a78828aef917eadb1fa07401b8b022b0f"><div>
             <h3>
@@ -294,10 +360,65 @@ $ \partial \Omega $
             </h3>
             <p>Specifies the removal of small parasitic components.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rmc&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Relative volume threshold used by MMG to remove tiny connected components generated by cutting operations.</td>
+                </tr>
+              </tbody>
               <tfoot>
                 <tr>
-                  <th style="width: 1%">Returns</th>
+                  <th>Returns</th>
                   <td>Reference to self (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3e493e7a4d4fc3307c3096ca413f693c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3e493e7a4d4fc3307c3096ca413f693c" class="m-doc-self">setBaseReferences</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> ref)</span></span>
+            </h3>
+            <p>Restricts level-set splitting to one base material.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ref&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Attribute of the base material to split.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4d3b9a047891512167798bd00e76506f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4d3b9a047891512167798bd00e76506f" class="m-doc-self">setBaseReferences</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; refs)</span></span>
+            </h3>
+            <p>Restricts level-set splitting to a set of base materials.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">refs&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Attributes of base materials to split.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object.</td>
                 </tr>
               </tfoot>
             </table>
@@ -320,9 +441,18 @@ $ \partial \Omega $
 </g>
 </svg>.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ref&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Boundary attribute assigned to newly created interface entities.</td>
+                </tr>
+              </tbody>
               <tfoot>
                 <tr>
-                  <th style="width: 1%">Returns</th>
+                  <th>Returns</th>
                   <td>Reference to self (for method chaining)</td>
                 </tr>
               </tfoot>
@@ -343,13 +473,22 @@ $ \partial \Omega $
           </div></section>
           <section class="m-doc-details" id="a53e38d7a8b5e750f61d6cd0f17f1132d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a53e38d7a8b5e750f61d6cd0f17f1132d" class="m-doc-self">setSplit</a>(</span><span class="m-doc-wrap">const SplitMap&amp; split)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a53e38d7a8b5e750f61d6cd0f17f1132d" class="m-doc-self">setSplit</a>(</span><span class="m-doc-wrap">const <a href="_m_m_g_2_common_8h.html#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc">SplitMap</a>&amp; split)</span></span>
             </h3>
             <p>Specifies how to split the materials into an interior and exterior domains.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">split&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Per-material split policy.</td>
+                </tr>
+              </tbody>
               <tfoot>
                 <tr>
-                  <th style="width: 1%">Returns</th>
+                  <th>Returns</th>
                   <td>Reference to self (for method chaining)</td>
                 </tr>
               </tfoot>
@@ -409,7 +548,7 @@ $ \partial \Omega $
           </div></section>
           <section class="m-doc-details" id="a82f47c875e92ce44fb1edf0530cc2c03"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a82f47c875e92ce44fb1edf0530cc2c03" class="m-doc-self">discretize</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">MMG::<wbr />RealGridFunction</a>&amp; ls)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a82f47c875e92ce44fb1edf0530cc2c03" class="m-doc-self">discretize</a>(</span><span class="m-doc-wrap">const <a href="_m_m_g_2_grid_function_8h.html#a5b080db16bbb2ed744518df89ccd8d06" class="m-doc">MMG::<wbr />RealGridFunction</a>&amp; ls)</span></span>
             </h3>
             <p>Discretizes and optimizes an implicitly defined surface defined by a level set function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -419,11 +558,147 @@ $ \partial \Omega $
               <tbody>
                 <tr>
                   <td style="width: 1%">ls&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Level set function</td>
+                  <td>Scalar level-set field defined on a P1 local finite element space over the input mesh.</td>
                 </tr>
               </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Output MMG mesh after cutting/remeshing.</td>
+                </tr>
+              </tfoot>
             </table>
-<p>The material reference of the level set (edge) boundary will be 10.</p>
+<p>The material reference of the generated level-set boundary defaults to <code>10</code> unless changed via <a href="#ae06c5c2b72b0e432c897a7a093759d0c" class="m-doc">setBoundaryReference</a>.</p>
+          </div></section>
+          <section class="m-doc-details" id="a98aa82f90b48db2a73518a7bd4182053"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a98aa82f90b48db2a73518a7bd4182053" class="m-doc-self">setAngleDetection</a>(</span><span class="m-doc-wrap">bool enable = true)</span></span>
+            </h3>
+            <p>Enables/disables ridge angle detection.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">enable&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>If <code>true</code>, enable angle detection.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3d5484c4a8bc9ca2be2c894c19ba3484"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3d5484c4a8bc9ca2be2c894c19ba3484" class="m-doc-self">setHMin</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hmin)</span></span>
+            </h3>
+            <p>Sets the minimum edge size constraint.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">hmin&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Minimum size.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4bac6ea575d9a47f13f18506cb0413e1"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4bac6ea575d9a47f13f18506cb0413e1" class="m-doc-self">setHMax</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hmax)</span></span>
+            </h3>
+            <p>Sets the maximum edge size constraint.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">hmax&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Maximum size.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a12a3bb803d147506ed142ea38f2c0f43"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a12a3bb803d147506ed142ea38f2c0f43" class="m-doc-self">setHausdorff</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hausd)</span></span>
+            </h3>
+            <p>Sets the Hausdorff tolerance controlling boundary approximation.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">hausd&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Hausdorff value.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a704e4de3352558aa7a02e08f073eacc6"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a704e4de3352558aa7a02e08f073eacc6" class="m-doc-self">setGradation</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hgrad)</span></span>
+            </h3>
+            <p>Sets the allowed gradation between adjacent edge sizes.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">hgrad&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Gradation ratio.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac61e13611f13b842d41ad0498cc6621a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="_m_m_g_2_common_8h.html#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc">SplitMap</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac61e13611f13b842d41ad0498cc6621a" class="m-doc-self">getSplitMap</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the configured material split map.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Immutable split policy map.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>This is the user-provided map set by setSplit/ split/<a href="#a81c6ed00a0f1c80f2889a750fde03c0b" class="m-doc">noSplit</a>. Internally, the implementation may derive temporary unique labels, but those are not exposed here.</p>
           </div></section>
         </section>
       </div>

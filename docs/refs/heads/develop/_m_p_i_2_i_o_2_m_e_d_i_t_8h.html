@@ -76,7 +76,7 @@
         <h1>
           <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_e290bfab8759f47931d844dd05a08f1b.html">MPI</a>/</span><span class="m-breadcrumb"><a href="dir_3d2cbac321e646db37d2d0ce714b4b14.html">IO</a>/</span>MEDIT.h <span class="m-thin">file</span>
         </h1>
-        <p>Placeholder for future MEDIT mesh IO specializations for MPI meshes.</p>
+        <p>Placeholder for MEDIT IO specializations on MPI meshes.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -88,6 +88,7 @@
             </li>
           </ul>
         </nav>
+<p>This header reserves the extension point for <code>MeshLoader&lt;FileFormat::MEDIT, Context::MPI&gt;</code> and <code>MeshPrinter&lt;FileFormat::MEDIT, Context::MPI&gt;</code>.</p><p>MPI workflows currently rely on HDF5 support for distributed shard persistence; MEDIT MPI specializations can be added here without changing public include structure.</p>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">

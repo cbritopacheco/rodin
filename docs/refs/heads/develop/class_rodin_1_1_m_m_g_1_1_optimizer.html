@@ -75,8 +75,9 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_m_m_g.html">MMG</a>::<wbr/></span>Optimizer <span class="m-thin">class</span>
+          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_mesh_optimizer_8h.html">&lt;Rodin/MMG/MeshOptimizer.h&gt;</a></div>
         </h1>
-        <p>Improves the mesh quality, mantaining the mean edge lenghts of the mesh.</p>
+        <p>Improves mesh quality while preserving characteristic local sizes.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -90,13 +91,14 @@
             </li>
           </ul>
         </nav>
+<p>This operator runs MMG optimization mode without prescribing an external metric field. It is useful for improving element shapes while keeping the mesh close to the current local edge-size distribution.</p><p>Typical usage is post-processing after adaptation/imported meshes to remove poorly shaped elements while preserving geometric features.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
               class <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>
             </dt>
-            <dd>Class representing <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a> objects utilized in the MMG framework.</dd>
+            <dd>Base class for MMG-backed operations in <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -114,7 +116,27 @@
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a586ab82aa1a8e334464e5935d839bd09" class="m-doc">optimize</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>&amp; mesh)</span>
             </dt>
-            <dd>Performs the optimization of the mesh.</dd>
+            <dd>Optimizes mesh quality in place.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a734ef68ed5ac33264a1aeb7a2e5231fc" class="m-doc">setAngleDetection</a>(</span><span class="m-doc-wrap">bool b = true) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a>&amp;</span>
+            </dt>
+            <dd>Enables/disables ridge angle detection.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a975ebdd0d37d8bb598fb9b73201b7b9f" class="m-doc">setHMin</a>(</span><span class="m-doc-wrap">double hmin) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a>&amp;</span>
+            </dt>
+            <dd>Sets the minimum edge size constraint.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9aa5e009d86a84afa6869b4c249cf281" class="m-doc">setHMax</a>(</span><span class="m-doc-wrap">double hmax) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a>&amp;</span>
+            </dt>
+            <dd>Sets the maximum edge size constraint.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a449754f2afafcc906a776856b02a5b64" class="m-doc">setHausdorff</a>(</span><span class="m-doc-wrap">double hausd) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a>&amp;</span>
+            </dt>
+            <dd>Sets the Hausdorff tolerance controlling boundary approximation.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab8846cd53d2eb25dd9c25469ed5fb3fa" class="m-doc">setGradation</a>(</span><span class="m-doc-wrap">double hgrad) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a>&amp;</span>
+            </dt>
+            <dd>Sets the allowed gradation between adjacent edge sizes.</dd>
           </dl>
         </section>
         <section>
@@ -123,7 +145,7 @@
             <h3>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />MMG::<wbr />Optimizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a586ab82aa1a8e334464e5935d839bd09" class="m-doc-self">optimize</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>&amp; mesh)</span></span>
             </h3>
-            <p>Performs the optimization of the mesh.</p>
+            <p>Optimizes mesh quality in place.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -131,11 +153,126 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">mesh&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
-                  <td><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a> to optimize</td>
+                  <td><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a> to optimize.</td>
                 </tr>
               </tbody>
             </table>
-<aside class="m-note m-info"><h4>Note</h4><p>The mean of the edge lengths is preserved at the vertices. Hence, if the edges passing through a vertex have very different sizes, the resulting mesh may be very different from the initial one.</p></aside>
+<p>Dispatches to MMG2D/MMG3D/MMGS according to mesh type.</p><aside class="m-note m-info"><h4>Note</h4><p>The mean edge length around vertices is preserved. If local sizes vary strongly around a vertex, the optimized mesh can still differ significantly from the initial one.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a734ef68ed5ac33264a1aeb7a2e5231fc"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a>&amp; Rodin::<wbr />MMG::<wbr />Optimizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a734ef68ed5ac33264a1aeb7a2e5231fc" class="m-doc-self">setAngleDetection</a>(</span><span class="m-doc-wrap">bool b = true)</span></span>
+            </h3>
+            <p>Enables/disables ridge angle detection.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">b&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>If <code>true</code>, enable detection.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a975ebdd0d37d8bb598fb9b73201b7b9f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a>&amp; Rodin::<wbr />MMG::<wbr />Optimizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a975ebdd0d37d8bb598fb9b73201b7b9f" class="m-doc-self">setHMin</a>(</span><span class="m-doc-wrap">double hmin)</span></span>
+            </h3>
+            <p>Sets the minimum edge size constraint.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">hmin&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Minimum size.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9aa5e009d86a84afa6869b4c249cf281"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a>&amp; Rodin::<wbr />MMG::<wbr />Optimizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9aa5e009d86a84afa6869b4c249cf281" class="m-doc-self">setHMax</a>(</span><span class="m-doc-wrap">double hmax)</span></span>
+            </h3>
+            <p>Sets the maximum edge size constraint.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">hmax&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Maximum size.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a449754f2afafcc906a776856b02a5b64"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a>&amp; Rodin::<wbr />MMG::<wbr />Optimizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a449754f2afafcc906a776856b02a5b64" class="m-doc-self">setHausdorff</a>(</span><span class="m-doc-wrap">double hausd)</span></span>
+            </h3>
+            <p>Sets the Hausdorff tolerance controlling boundary approximation.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">hausd&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Hausdorff value.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab8846cd53d2eb25dd9c25469ed5fb3fa"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a>&amp; Rodin::<wbr />MMG::<wbr />Optimizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab8846cd53d2eb25dd9c25469ed5fb3fa" class="m-doc-self">setGradation</a>(</span><span class="m-doc-wrap">double hgrad)</span></span>
+            </h3>
+            <p>Sets the allowed gradation between adjacent edge sizes.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">hgrad&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Gradation ratio.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
         </section>
       </div>
