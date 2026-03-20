@@ -525,7 +525,9 @@ namespace
 
 int main(int argc, char** argv)
 {
-  MPI_Init(&argc, &argv);
+  int mpiErr = MPI_Init(&argc, &argv);
+  if (mpiErr != MPI_SUCCESS)
+    return 1;
   ::testing::InitGoogleTest(&argc, argv);
   int result = RUN_ALL_TESTS();
   MPI_Finalize();

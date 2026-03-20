@@ -602,7 +602,7 @@ namespace Rodin::IO
               const char* attrType  = (attr.dimension == 1) ? "Scalar" : "Vector";
 
               std::ostringstream dimStr;
-              const auto count = (attr.center == Center::Node)
+              const std::uint64_t count = (attr.center == Center::Node)
                   ? meta.vertexCount : meta.cellCount;
               if (attr.dimension == 1)
                 dimStr << count;
