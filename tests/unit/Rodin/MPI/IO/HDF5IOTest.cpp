@@ -11,6 +11,7 @@
 
 #include <gtest/gtest.h>
 #include <boost/filesystem.hpp>
+#include <mpi.h>
 
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
@@ -411,13 +412,12 @@ namespace
       MPIPolytopeNameGenerator());
 
   // ===========================================================================
-  // Distributed XDMF file-per-rank tests (simulated with local meshes)
+  // Distributed XDMF tests using MPI_COMM_SELF (single-rank distributed mode)
   // ===========================================================================
 
   /**
-   * Parameterized test: simulates a 2-rank MPI XDMF export using the
-   * distributed XDMF constructor. Each "rank" writes its own rank-specific
-   * HDF5 file, and only the root rank writes the master XDMF XML.
+   * Tests the distributed XDMF code path using MPI_COMM_SELF
+   * (1 rank, exercises the collective logic without multi-process setup).
    */
   class MPIDistributedXDMF : public ::testing::TestWithParam<Polytope::Type> {};
 
@@ -430,31 +430,19 @@ namespace
     const boost::filesystem::path stem = testDir / "sim";
 
     auto localMesh = makeMesh(type);
-    const size_t numRanks = 2;
 
-    // Simulate both ranks
-    // Non-root ranks must run first so their mesh files exist before root's
-    // close()/flush() reads all rank files.
-    for (size_t r = 1; r < numRanks; ++r)
     {
-      XDMF xdmf(stem, r, numRanks, /*rootRank=*/0);
-      xdmf.setMesh(localMesh);
-      xdmf.write(0.0);
-      xdmf.close();
-    }
-    {
-      XDMF xdmf(stem, /*rank=*/0, numRanks, /*rootRank=*/0);
+      XDMF xdmf(MPI_COMM_SELF, stem);
       xdmf.setMesh(localMesh);
       xdmf.write(0.0);
       xdmf.close();
     }
 
-    // Verify per-rank HDF5 files
-    for (size_t r = 0; r < numRanks; ++r)
-    {
-      const auto meshH5 = testDir / ("sim.r" + std::to_string(r) + ".mesh.h5");
-      ASSERT_TRUE(boost::filesystem::exists(meshH5)) << "Missing " << meshH5;
+    // Verify rank 0 HDF5 file
+    const auto meshH5 = testDir / "sim.r0.mesh.h5";
+    ASSERT_TRUE(boost::filesystem::exists(meshH5)) << "Missing " << meshH5;
 
+    {
       hid_t h5 = H5Fopen(meshH5.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
       ASSERT_GE(h5, 0);
 
@@ -479,7 +467,6 @@ namespace
 
     EXPECT_NE(xml.find("CollectionType=\"Spatial\""), std::string::npos);
     EXPECT_NE(xml.find("sim.r0.mesh.h5"), std::string::npos);
-    EXPECT_NE(xml.find("sim.r1.mesh.h5"), std::string::npos);
 
     boost::filesystem::remove_all(testDir);
   }
@@ -498,19 +485,8 @@ namespace
     gf.setName("u");
     gf = [](const Geometry::Point& p) { return p.x(); };
 
-    const size_t numRanks = 2;
-
-    // Write non-root ranks first so root's close()/flush() can read their files.
-    for (size_t r = 1; r < numRanks; ++r)
     {
-      XDMF xdmf(stem, r, numRanks);
-      xdmf.setMesh(localMesh);
-      xdmf.add("u", gf, XDMF::Center::Node);
-      xdmf.write(0.0);
-      xdmf.close();
-    }
-    {
-      XDMF xdmf(stem, /*rank=*/0, numRanks);
+      XDMF xdmf(MPI_COMM_SELF, stem);
       xdmf.setMesh(localMesh);
       xdmf.add("u", gf, XDMF::Center::Node);
       xdmf.write(0.0);
@@ -518,11 +494,8 @@ namespace
     }
 
     // Verify rank-specific attribute files
-    for (size_t r = 0; r < numRanks; ++r)
-    {
-      const auto attrH5 = testDir / ("field.u.r" + std::to_string(r) + ".000000.h5");
-      EXPECT_TRUE(boost::filesystem::exists(attrH5)) << "Missing " << attrH5;
-    }
+    const auto attrH5 = testDir / "field.u.r0.000000.h5";
+    EXPECT_TRUE(boost::filesystem::exists(attrH5)) << "Missing " << attrH5;
 
     // XDMF references attribute files
     const auto xdmfFile = testDir / "field.xdmf";
@@ -532,7 +505,6 @@ namespace
     buf << ifs.rdbuf();
     const auto xml = buf.str();
     EXPECT_NE(xml.find("field.u.r0.000000.h5"), std::string::npos);
-    EXPECT_NE(xml.find("field.u.r1.000000.h5"), std::string::npos);
 
     boost::filesystem::remove_all(testDir);
   }
@@ -549,4 +521,13 @@ namespace
           Polytope::Type::Wedge
       ),
       MPIPolytopeNameGenerator());
+}
+
+int main(int argc, char** argv)
+{
+  MPI_Init(&argc, &argv);
+  ::testing::InitGoogleTest(&argc, argv);
+  int result = RUN_ALL_TESTS();
+  MPI_Finalize();
+  return result;
 }

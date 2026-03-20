@@ -114,7 +114,7 @@ int main(int argc, char** argv)
 
   P1 vh(mesh);
 
-  IO::XDMF xdmf("mpi/Poisson", world.rank(), world.size());
+  IO::XDMF xdmf(MPI_COMM_WORLD, "mpi/Poisson");
 
   xdmf.setMesh(mesh);
 
