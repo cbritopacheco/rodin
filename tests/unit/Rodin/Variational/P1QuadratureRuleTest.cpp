@@ -50,4 +50,64 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mat.cols(), static_cast<Eigen::Index>(fesTr.getSize()));
     EXPECT_GT(mat.norm(), 0.0);
   }
+
+  TEST(Rodin_Variational_P1QuadratureRule, MixedSpaces_VectorMass_NoCoeff_Assembles)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    const size_t vdim = 2;
+    P1<Math::Vector<Real>> fesTr(mesh, vdim);
+    P1<Math::Vector<Real>> fesTe(mesh, vdim);
+
+    TrialFunction u(fesTr);
+    TestFunction v(fesTe);
+
+    BilinearForm bf(u, v);
+    bf = Integral(Dot(u, v));
+    bf.assemble();
+
+    const auto& mat = bf.getOperator();
+    EXPECT_EQ(mat.rows(), static_cast<Eigen::Index>(fesTe.getSize()));
+    EXPECT_EQ(mat.cols(), static_cast<Eigen::Index>(fesTr.getSize()));
+    EXPECT_GT(mat.norm(), 0.0);
+  }
+
+  TEST(Rodin_Variational_P1QuadratureRule, DivergencePressureCoupling_Assembles)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    const size_t vdim = 2;
+    P1<Math::Vector<Real>> vel(mesh, vdim);
+    P1<Real> pres(mesh);
+
+    TrialFunction u(vel);
+    TestFunction q(pres);
+
+    BilinearForm b(u, q);
+    b = Integral(Div(u), q);
+    b.assemble();
+
+    const auto& mat = b.getOperator();
+    EXPECT_EQ(mat.rows(), static_cast<Eigen::Index>(pres.getSize()));
+    EXPECT_EQ(mat.cols(), static_cast<Eigen::Index>(vel.getSize()));
+    EXPECT_NE(mat.norm(), 0.0);
+  }
+
+  TEST(Rodin_Variational_P1QuadratureRule, PressureDivergence_Assembles)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    const size_t vdim = 2;
+    P1<Real> pres(mesh);
+    P1<Math::Vector<Real>> vel(mesh, vdim);
+
+    TrialFunction p(pres);
+    TestFunction v(vel);
+
+    BilinearForm b(p, v);
+    b = Integral(p, Div(v));
+    b.assemble();
+
+    const auto& mat = b.getOperator();
+    EXPECT_EQ(mat.rows(), static_cast<Eigen::Index>(vel.getSize()));
+    EXPECT_EQ(mat.cols(), static_cast<Eigen::Index>(pres.getSize()));
+    EXPECT_NE(mat.norm(), 0.0);
+  }
 }
