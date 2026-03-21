@@ -218,23 +218,6 @@ namespace Rodin::IO
   }
 #endif
 
-  XDMF::~XDMF()
-  {
-    // Auto-close only in serial mode.
-    // In distributed mode, close()/flush() are collective MPI operations
-    // and must not be called from a destructor.
-    if (!m_closed && !m_distributed)
-    {
-      try
-      {
-        close();
-      }
-      catch (...)
-      {
-      }
-    }
-  }
-
   const boost::filesystem::path& XDMF::getStem() const noexcept
   {
     return m_stem;

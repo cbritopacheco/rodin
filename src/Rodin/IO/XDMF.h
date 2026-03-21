@@ -430,8 +430,7 @@ namespace Rodin::IO
       XDMF(XDMF&&) = default;           ///< Move constructible.
       XDMF& operator=(XDMF&&) = default; ///< Move assignable.
 
-      /// @brief Destructor; calls close() if not already closed.
-      ~XDMF();
+      ~XDMF() = default;
 
       /**
        * @brief Returns the stem path set at construction.

@@ -39,9 +39,10 @@ int main(int argc, char** argv)
   //     << Alert::Raise;
   // }
 
-  IO::XDMF xdmf("UniformGrid", world.rank(), world.size());
+  IO::XDMF xdmf(world, "UniformGrid");
   xdmf.grid().setMesh(mesh);
   xdmf.write();
+  xdmf.close();
 
   return 0;
 }
