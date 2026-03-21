@@ -334,10 +334,17 @@ namespace Rodin::Geometry
       class Builder
       {
         public:
+          enum class Mode
+          {
+            None,    ///< Uninitialized builder
+            Parent,  ///< Initialize from parent mesh
+            Direct   ///< Initialize with explicit dimension and shard content
+          };
+
           /**
            * @brief Default constructor.
            */
-          Builder() = default;
+          Builder();
 
           /**
            * @brief Initializes builder with parent mesh.
@@ -345,6 +352,24 @@ namespace Rodin::Geometry
            * @returns Reference to this builder
            */
           Builder& initialize(const Mesh<Context>& parent);
+
+          Builder& initialize(size_t dimension, size_t sdim);
+
+          Index vertex(
+              Index globalIdx,
+              const Math::SpatialPoint& x,
+              const Flags& flags);
+
+          Index polytope(
+              size_t d,
+              Index globalIdx,
+              Polytope::Type g,
+              const IndexArray& vs,
+              const Flags& flags);
+
+          Builder& setOwner(size_t d, Index localIdx, Index ownerRank);
+          Builder& halo(size_t d, Index localIdx, Index neighborRank);
+          Builder& attribute(const std::pair<size_t, Index>& p, const Optional<Attribute>& attr);
 
           /**
            * @brief Inserts a parent entity into the shard.
@@ -434,6 +459,13 @@ namespace Rodin::Geometry
           std::vector<UnorderedMap<Index, IndexSet>> m_halo;
           std::vector<UnorderedMap<Index, Index>> m_owner;
           size_t m_dimension;
+          size_t m_sdim;
+
+          Mode m_mode;
+          PointCloud m_vertices;
+          Connectivity<Context> m_connectivity;
+          AttributeIndex m_attributes;
+          PolytopeTransformationIndex m_transformations;
       };
 
       /**
