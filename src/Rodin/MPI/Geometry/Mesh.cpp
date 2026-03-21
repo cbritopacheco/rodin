@@ -3,6 +3,7 @@
 #include <boost/serialization/split_free.hpp>
 
 #include "Rodin/Geometry/Mesh.h"
+#include "Rodin/Alert/NamespacedException.h"
 #include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Geometry/PolytopeTransformation.h"
@@ -743,6 +744,889 @@ namespace Rodin::Geometry
     }
 
     return *this;
+  }
+
+  MPIMesh MPIMesh::UniformGrid(
+    const Context::MPI& context, Polytope::Type g, const Array<size_t>& shape)
+  {
+    const auto& comm = context.getCommunicator();
+    const int rank = comm.rank();
+    const int size = comm.size();
+
+    const auto makeIndexArray = [](auto... xs)
+    {
+      IndexArray res(sizeof...(xs));
+      const Index data[] = { static_cast<Index>(xs)... };
+      for (size_t i = 0; i < sizeof...(xs); ++i)
+        res(static_cast<Eigen::Index>(i)) = data[i];
+      return res;
+    };
+
+    const auto finish = [&](Shard&& shard) -> MPIMesh
+    {
+      return MPIMesh::Builder(context)
+        .initialize(std::move(shard))
+        .finalize();
+    };
+
+    const auto splitRange = [](size_t n, int r, int p)
+    {
+      struct Interval
+      {
+        size_t begin;
+        size_t end;
+      };
+
+      const size_t q = n / static_cast<size_t>(p);
+      const size_t rem = n % static_cast<size_t>(p);
+      const size_t begin =
+        static_cast<size_t>(r) * q + std::min(static_cast<size_t>(r), rem);
+      const size_t count = q + (static_cast<size_t>(r) < rem ? 1 : 0);
+      return Interval{ begin, begin + count };
+    };
+
+    const auto buildColumnOwner = [&](size_t cx)
+    {
+      std::vector<int> owner(cx, -1);
+      for (int r = 0; r < size; ++r)
+      {
+        const auto I = splitRange(cx, r, size);
+        for (size_t i = I.begin; i < I.end; ++i)
+          owner[i] = r;
+      }
+      return owner;
+    };
+
+    const auto ownerOfVertexX = [](size_t i, const std::vector<int>& cellOwner)
+    {
+      int owner = std::numeric_limits<int>::max();
+
+      if (i > 0 && i - 1 < cellOwner.size())
+        owner = std::min(owner, cellOwner[i - 1]);
+
+      if (i < cellOwner.size())
+        owner = std::min(owner, cellOwner[i]);
+
+      if (owner == std::numeric_limits<int>::max())
+        owner = 0;
+
+      return owner;
+    };
+
+    const auto sharersOfVertexX = [](size_t i, const std::vector<int>& cellOwner)
+    {
+      std::vector<int> res;
+
+      const auto add = [&](int r)
+      {
+        if (r < 0)
+          return;
+        if (std::find(res.begin(), res.end(), r) == res.end())
+          res.push_back(r);
+      };
+
+      if (i > 0 && i - 1 < cellOwner.size())
+        add(cellOwner[i - 1]);
+
+      if (i < cellOwner.size())
+        add(cellOwner[i]);
+
+      std::sort(res.begin(), res.end());
+      return res;
+    };
+
+    const auto sharersOfCellColumn = [](size_t i, const std::vector<int>& cellOwner)
+    {
+      std::vector<int> res;
+      const int owner = cellOwner[i];
+
+      if (i > 0 && cellOwner[i - 1] != owner)
+        res.push_back(cellOwner[i - 1]);
+
+      if (i + 1 < cellOwner.size() && cellOwner[i + 1] != owner)
+      {
+        if (std::find(res.begin(), res.end(), cellOwner[i + 1]) == res.end())
+          res.push_back(cellOwner[i + 1]);
+      }
+
+      std::sort(res.begin(), res.end());
+      return res;
+    };
+
+    const auto sp0 = []()
+    {
+      return Math::SpatialPoint();
+    };
+
+    const auto sp1 = [](Real x0)
+    {
+      Math::SpatialPoint x(1);
+      x(0) = x0;
+      return x;
+    };
+
+    const auto sp2 = [](Real x0, Real x1)
+    {
+      Math::SpatialPoint x(2);
+      x(0) = x0;
+      x(1) = x1;
+      return x;
+    };
+
+    const auto sp3 = [](Real x0, Real x1, Real x2)
+    {
+      Math::SpatialPoint x(3);
+      x(0) = x0;
+      x(1) = x1;
+      x(2) = x2;
+      return x;
+    };
+
+    const auto vid1 = [](size_t i) -> Index
+    {
+      return static_cast<Index>(i);
+    };
+
+    const auto vid2 = [](size_t i, size_t j, size_t nx) -> Index
+    {
+      return static_cast<Index>(i + j * nx);
+    };
+
+    const auto vid3 = [](size_t i, size_t j, size_t k, size_t nx, size_t ny) -> Index
+    {
+      return static_cast<Index>(i + j * nx + k * nx * ny);
+    };
+
+    const auto macroId2 = [](size_t i, size_t j, size_t cx) -> Index
+    {
+      return static_cast<Index>(i + j * cx);
+    };
+
+    const auto macroId3 = [](size_t i, size_t j, size_t k, size_t cx, size_t cy) -> Index
+    {
+      return static_cast<Index>(i + j * cx + k * cx * cy);
+    };
+
+    switch (g)
+    {
+      case Polytope::Type::Point:
+      {
+        if (shape.size() != 0)
+        {
+          Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
+            << "Expected 0 dimensions for geometry type " << g
+            << ", but got " << shape.size() << "."
+            << Alert::Raise;
+        }
+
+        Shard::Builder sb;
+        sb.initialize(/*dimension=*/0, /*sdim=*/0);
+
+        const Shard::Flags flags =
+          (rank == 0 ? Shard::Flags::Owned : Shard::Flags::Ghost);
+
+        const Index lv = sb.vertex(/*globalIdx=*/0, sp0(), flags);
+
+        if (rank == 0)
+        {
+          for (int r = 1; r < size; ++r)
+            sb.halo(0, lv, static_cast<Index>(r));
+        }
+        else
+        {
+          sb.setOwner(0, lv, 0);
+        }
+
+        return finish(sb.finalize());
+      }
+
+      case Polytope::Type::Segment:
+      {
+        if (shape.size() != 1)
+        {
+          Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
+            << "Expected 1 dimension for geometry type " << g
+            << ", but got " << shape.size() << "."
+            << Alert::Raise;
+        }
+
+        const size_t nx = shape.coeff(0);
+        if (nx < 2)
+        {
+          Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
+            << "Segment uniform grid requires at least 2 vertices."
+            << Alert::Raise;
+        }
+
+        const size_t cx = nx - 1;
+        const auto xr = splitRange(cx, rank, size);
+        const std::vector<int> cellOwner = buildColumnOwner(cx);
+
+        size_t gx0 = xr.begin;
+        size_t gx1 = xr.end;
+        if (cx > 0)
+        {
+          if (gx0 > 0) gx0--;
+          if (gx1 < cx) gx1++;
+        }
+
+        Shard::Builder sb;
+        sb.initialize(/*dimension=*/1, /*sdim=*/1);
+
+        UnorderedMap<Index, Index> gv2lv;
+        gv2lv.reserve(gx1 - gx0 + 1);
+
+        for (size_t i = gx0; i <= gx1; ++i)
+        {
+          const Index gvid = vid1(i);
+          const int owner = ownerOfVertexX(i, cellOwner);
+          const Shard::Flags flags =
+            (owner == rank ? Shard::Flags::Owned : Shard::Flags::Ghost);
+
+          const Index lv = sb.vertex(gvid, sp1(static_cast<Real>(i)), flags);
+          gv2lv.emplace(gvid, lv);
+
+          if (owner == rank)
+          {
+            for (const int r : sharersOfVertexX(i, cellOwner))
+            {
+              if (r != rank)
+                sb.halo(0, lv, static_cast<Index>(r));
+            }
+          }
+          else
+          {
+            sb.setOwner(0, lv, static_cast<Index>(owner));
+          }
+        }
+
+        for (size_t i = gx0; i < gx1; ++i)
+        {
+          const int owner = cellOwner[i];
+          const Shard::Flags flags =
+            (owner == rank ? Shard::Flags::Owned : Shard::Flags::Ghost);
+
+          const Index gcid = static_cast<Index>(i);
+          const IndexArray vs = makeIndexArray(
+            gv2lv.at(vid1(i)),
+            gv2lv.at(vid1(i + 1))
+          );
+
+          const Index lc = sb.polytope(1, gcid, Polytope::Type::Segment, vs, flags);
+
+          if (owner == rank)
+          {
+            for (const int r : sharersOfCellColumn(i, cellOwner))
+              sb.halo(1, lc, static_cast<Index>(r));
+          }
+          else
+          {
+            sb.setOwner(1, lc, static_cast<Index>(owner));
+          }
+        }
+
+        return finish(sb.finalize());
+      }
+
+      case Polytope::Type::Triangle:
+      {
+        if (shape.size() != 2)
+        {
+          Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
+            << "Expected 2 dimensions for geometry type " << g
+            << ", but got " << shape.size() << "."
+            << Alert::Raise;
+        }
+
+        const size_t nx = shape.coeff(0);
+        const size_t ny = shape.coeff(1);
+        if (nx < 2 || ny < 2)
+        {
+          Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
+            << "Triangle uniform grid requires at least 2 vertices per direction."
+            << Alert::Raise;
+        }
+
+        const size_t cx = nx - 1;
+        const size_t cy = ny - 1;
+        const auto xr = splitRange(cx, rank, size);
+        const std::vector<int> cellOwner = buildColumnOwner(cx);
+
+        size_t gx0 = xr.begin;
+        size_t gx1 = xr.end;
+        if (cx > 0)
+        {
+          if (gx0 > 0) gx0--;
+          if (gx1 < cx) gx1++;
+        }
+
+        Shard::Builder sb;
+        sb.initialize(/*dimension=*/2, /*sdim=*/2);
+
+        UnorderedMap<Index, Index> gv2lv;
+        gv2lv.reserve((gx1 - gx0 + 1) * ny);
+
+        for (size_t j = 0; j < ny; ++j)
+        {
+          for (size_t i = gx0; i <= gx1; ++i)
+          {
+            const Index gvid = vid2(i, j, nx);
+            const int owner = ownerOfVertexX(i, cellOwner);
+            const Shard::Flags flags =
+              (owner == rank ? Shard::Flags::Owned : Shard::Flags::Ghost);
+
+            const Index lv = sb.vertex(
+              gvid,
+              sp2(static_cast<Real>(i), static_cast<Real>(j)),
+              flags);
+            gv2lv.emplace(gvid, lv);
+
+            if (owner == rank)
+            {
+              for (const int r : sharersOfVertexX(i, cellOwner))
+              {
+                if (r != rank)
+                  sb.halo(0, lv, static_cast<Index>(r));
+              }
+            }
+            else
+            {
+              sb.setOwner(0, lv, static_cast<Index>(owner));
+            }
+          }
+        }
+
+        for (size_t j = 0; j < cy; ++j)
+        {
+          for (size_t i = gx0; i < gx1; ++i)
+          {
+            const Index mid = macroId2(i, j, cx);
+            const int owner = cellOwner[i];
+            const Shard::Flags flags =
+              (owner == rank ? Shard::Flags::Owned : Shard::Flags::Ghost);
+
+            const Index v00 = gv2lv.at(vid2(i,     j,     nx));
+            const Index v10 = gv2lv.at(vid2(i + 1, j,     nx));
+            const Index v01 = gv2lv.at(vid2(i,     j + 1, nx));
+            const Index v11 = gv2lv.at(vid2(i + 1, j + 1, nx));
+
+            {
+              const Index gcid = static_cast<Index>(2 * mid);
+              const IndexArray vs = makeIndexArray(v00, v10, v01);
+              const Index lc = sb.polytope(2, gcid, Polytope::Type::Triangle, vs, flags);
+
+              if (owner == rank)
+              {
+                for (const int r : sharersOfCellColumn(i, cellOwner))
+                  sb.halo(2, lc, static_cast<Index>(r));
+              }
+              else
+              {
+                sb.setOwner(2, lc, static_cast<Index>(owner));
+              }
+            }
+
+            {
+              const Index gcid = static_cast<Index>(2 * mid + 1);
+              const IndexArray vs = makeIndexArray(v10, v11, v01);
+              const Index lc = sb.polytope(2, gcid, Polytope::Type::Triangle, vs, flags);
+
+              if (owner == rank)
+              {
+                for (const int r : sharersOfCellColumn(i, cellOwner))
+                  sb.halo(2, lc, static_cast<Index>(r));
+              }
+              else
+              {
+                sb.setOwner(2, lc, static_cast<Index>(owner));
+              }
+            }
+          }
+        }
+
+        return finish(sb.finalize());
+      }
+
+      case Polytope::Type::Quadrilateral:
+      {
+        if (shape.size() != 2)
+        {
+          Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
+            << "Expected 2 dimensions for geometry type " << g
+            << ", but got " << shape.size() << "."
+            << Alert::Raise;
+        }
+
+        const size_t nx = shape.coeff(0);
+        const size_t ny = shape.coeff(1);
+        if (nx < 2 || ny < 2)
+        {
+          Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
+            << "Quadrilateral uniform grid requires at least 2 vertices per direction."
+            << Alert::Raise;
+        }
+
+        const size_t cx = nx - 1;
+        const size_t cy = ny - 1;
+        const auto xr = splitRange(cx, rank, size);
+        const std::vector<int> cellOwner = buildColumnOwner(cx);
+
+        size_t gx0 = xr.begin;
+        size_t gx1 = xr.end;
+        if (cx > 0)
+        {
+          if (gx0 > 0) gx0--;
+          if (gx1 < cx) gx1++;
+        }
+
+        Shard::Builder sb;
+        sb.initialize(/*dimension=*/2, /*sdim=*/2);
+
+        UnorderedMap<Index, Index> gv2lv;
+        gv2lv.reserve((gx1 - gx0 + 1) * ny);
+
+        for (size_t j = 0; j < ny; ++j)
+        {
+          for (size_t i = gx0; i <= gx1; ++i)
+          {
+            const Index gvid = vid2(i, j, nx);
+            const int owner = ownerOfVertexX(i, cellOwner);
+            const Shard::Flags flags =
+              (owner == rank ? Shard::Flags::Owned : Shard::Flags::Ghost);
+
+            const Index lv = sb.vertex(
+              gvid,
+              sp2(static_cast<Real>(i), static_cast<Real>(j)),
+              flags);
+            gv2lv.emplace(gvid, lv);
+
+            if (owner == rank)
+            {
+              for (const int r : sharersOfVertexX(i, cellOwner))
+              {
+                if (r != rank)
+                  sb.halo(0, lv, static_cast<Index>(r));
+              }
+            }
+            else
+            {
+              sb.setOwner(0, lv, static_cast<Index>(owner));
+            }
+          }
+        }
+
+        for (size_t j = 0; j < cy; ++j)
+        {
+          for (size_t i = gx0; i < gx1; ++i)
+          {
+            const Index gcid = macroId2(i, j, cx);
+            const int owner = cellOwner[i];
+            const Shard::Flags flags =
+              (owner == rank ? Shard::Flags::Owned : Shard::Flags::Ghost);
+
+            const IndexArray vs = makeIndexArray(
+              gv2lv.at(vid2(i,     j,     nx)),
+              gv2lv.at(vid2(i + 1, j,     nx)),
+              gv2lv.at(vid2(i + 1, j + 1, nx)),
+              gv2lv.at(vid2(i,     j + 1, nx))
+            );
+
+            const Index lc = sb.polytope(2, gcid, Polytope::Type::Quadrilateral, vs, flags);
+
+            if (owner == rank)
+            {
+              for (const int r : sharersOfCellColumn(i, cellOwner))
+                sb.halo(2, lc, static_cast<Index>(r));
+            }
+            else
+            {
+              sb.setOwner(2, lc, static_cast<Index>(owner));
+            }
+          }
+        }
+
+        return finish(sb.finalize());
+      }
+
+      case Polytope::Type::Tetrahedron:
+      {
+        if (shape.size() != 3)
+        {
+          Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
+            << "Expected 3 dimensions for geometry type " << g
+            << ", but got " << shape.size() << "."
+            << Alert::Raise;
+        }
+
+        const size_t nx = shape.coeff(0);
+        const size_t ny = shape.coeff(1);
+        const size_t nz = shape.coeff(2);
+        if (nx < 2 || ny < 2 || nz < 2)
+        {
+          Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
+            << "Tetrahedron uniform grid requires at least 2 vertices per direction."
+            << Alert::Raise;
+        }
+
+        const size_t cx = nx - 1;
+        const size_t cy = ny - 1;
+        const size_t cz = nz - 1;
+        const auto xr = splitRange(cx, rank, size);
+        const std::vector<int> cellOwner = buildColumnOwner(cx);
+
+        size_t gx0 = xr.begin;
+        size_t gx1 = xr.end;
+        if (cx > 0)
+        {
+          if (gx0 > 0) gx0--;
+          if (gx1 < cx) gx1++;
+        }
+
+        Shard::Builder sb;
+        sb.initialize(/*dimension=*/3, /*sdim=*/3);
+
+        UnorderedMap<Index, Index> gv2lv;
+        gv2lv.reserve((gx1 - gx0 + 1) * ny * nz);
+
+        for (size_t k = 0; k < nz; ++k)
+        {
+          for (size_t j = 0; j < ny; ++j)
+          {
+            for (size_t i = gx0; i <= gx1; ++i)
+            {
+              const Index gvid = vid3(i, j, k, nx, ny);
+              const int owner = ownerOfVertexX(i, cellOwner);
+              const Shard::Flags flags =
+                (owner == rank ? Shard::Flags::Owned : Shard::Flags::Ghost);
+
+              const Index lv = sb.vertex(
+                gvid,
+                sp3(static_cast<Real>(i), static_cast<Real>(j), static_cast<Real>(k)),
+                flags);
+              gv2lv.emplace(gvid, lv);
+
+              if (owner == rank)
+              {
+                for (const int r : sharersOfVertexX(i, cellOwner))
+                {
+                  if (r != rank)
+                    sb.halo(0, lv, static_cast<Index>(r));
+                }
+              }
+              else
+              {
+                sb.setOwner(0, lv, static_cast<Index>(owner));
+              }
+            }
+          }
+        }
+
+        for (size_t k = 0; k < cz; ++k)
+        {
+          for (size_t j = 0; j < cy; ++j)
+          {
+            for (size_t i = gx0; i < gx1; ++i)
+            {
+              const Index mid = macroId3(i, j, k, cx, cy);
+              const int owner = cellOwner[i];
+              const Shard::Flags flags =
+                (owner == rank ? Shard::Flags::Owned : Shard::Flags::Ghost);
+
+              const Index v000 = gv2lv.at(vid3(i,     j,     k,     nx, ny));
+              const Index v100 = gv2lv.at(vid3(i + 1, j,     k,     nx, ny));
+              const Index v010 = gv2lv.at(vid3(i,     j + 1, k,     nx, ny));
+              const Index v110 = gv2lv.at(vid3(i + 1, j + 1, k,     nx, ny));
+
+              const Index v001 = gv2lv.at(vid3(i,     j,     k + 1, nx, ny));
+              const Index v101 = gv2lv.at(vid3(i + 1, j,     k + 1, nx, ny));
+              const Index v011 = gv2lv.at(vid3(i,     j + 1, k + 1, nx, ny));
+              const Index v111 = gv2lv.at(vid3(i + 1, j + 1, k + 1, nx, ny));
+
+              const IndexArray tet0 = makeIndexArray(v000, v100, v110, v111);
+              const IndexArray tet1 = makeIndexArray(v000, v110, v010, v111);
+              const IndexArray tet2 = makeIndexArray(v000, v010, v011, v111);
+              const IndexArray tet3 = makeIndexArray(v000, v011, v001, v111);
+              const IndexArray tet4 = makeIndexArray(v000, v001, v101, v111);
+              const IndexArray tet5 = makeIndexArray(v000, v101, v100, v111);
+
+              const Index lc0 = sb.polytope(3, static_cast<Index>(6 * mid + 0), Polytope::Type::Tetrahedron, tet0, flags);
+              const Index lc1 = sb.polytope(3, static_cast<Index>(6 * mid + 1), Polytope::Type::Tetrahedron, tet1, flags);
+              const Index lc2 = sb.polytope(3, static_cast<Index>(6 * mid + 2), Polytope::Type::Tetrahedron, tet2, flags);
+              const Index lc3 = sb.polytope(3, static_cast<Index>(6 * mid + 3), Polytope::Type::Tetrahedron, tet3, flags);
+              const Index lc4 = sb.polytope(3, static_cast<Index>(6 * mid + 4), Polytope::Type::Tetrahedron, tet4, flags);
+              const Index lc5 = sb.polytope(3, static_cast<Index>(6 * mid + 5), Polytope::Type::Tetrahedron, tet5, flags);
+
+              if (owner == rank)
+              {
+                const auto rs = sharersOfCellColumn(i, cellOwner);
+                for (const int r : rs)
+                {
+                  sb.halo(3, lc0, static_cast<Index>(r));
+                  sb.halo(3, lc1, static_cast<Index>(r));
+                  sb.halo(3, lc2, static_cast<Index>(r));
+                  sb.halo(3, lc3, static_cast<Index>(r));
+                  sb.halo(3, lc4, static_cast<Index>(r));
+                  sb.halo(3, lc5, static_cast<Index>(r));
+                }
+              }
+              else
+              {
+                const Index ow = static_cast<Index>(owner);
+                sb.setOwner(3, lc0, ow);
+                sb.setOwner(3, lc1, ow);
+                sb.setOwner(3, lc2, ow);
+                sb.setOwner(3, lc3, ow);
+                sb.setOwner(3, lc4, ow);
+                sb.setOwner(3, lc5, ow);
+              }
+            }
+          }
+        }
+
+        return finish(sb.finalize());
+      }
+
+      case Polytope::Type::Hexahedron:
+      {
+        if (shape.size() != 3)
+        {
+          Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
+            << "Expected 3 dimensions for geometry type " << g
+            << ", but got " << shape.size() << "."
+            << Alert::Raise;
+        }
+
+        const size_t nx = shape.coeff(0);
+        const size_t ny = shape.coeff(1);
+        const size_t nz = shape.coeff(2);
+        if (nx < 2 || ny < 2 || nz < 2)
+        {
+          Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
+            << "Hexahedron uniform grid requires at least 2 vertices per direction."
+            << Alert::Raise;
+        }
+
+        const size_t cx = nx - 1;
+        const size_t cy = ny - 1;
+        const size_t cz = nz - 1;
+        const auto xr = splitRange(cx, rank, size);
+        const std::vector<int> cellOwner = buildColumnOwner(cx);
+
+        size_t gx0 = xr.begin;
+        size_t gx1 = xr.end;
+        if (cx > 0)
+        {
+          if (gx0 > 0) gx0--;
+          if (gx1 < cx) gx1++;
+        }
+
+        Shard::Builder sb;
+        sb.initialize(/*dimension=*/3, /*sdim=*/3);
+
+        UnorderedMap<Index, Index> gv2lv;
+        gv2lv.reserve((gx1 - gx0 + 1) * ny * nz);
+
+        for (size_t k = 0; k < nz; ++k)
+        {
+          for (size_t j = 0; j < ny; ++j)
+          {
+            for (size_t i = gx0; i <= gx1; ++i)
+            {
+              const Index gvid = vid3(i, j, k, nx, ny);
+              const int owner = ownerOfVertexX(i, cellOwner);
+              const Shard::Flags flags =
+                (owner == rank ? Shard::Flags::Owned : Shard::Flags::Ghost);
+
+              const Index lv = sb.vertex(
+                gvid,
+                sp3(static_cast<Real>(i), static_cast<Real>(j), static_cast<Real>(k)),
+                flags);
+              gv2lv.emplace(gvid, lv);
+
+              if (owner == rank)
+              {
+                for (const int r : sharersOfVertexX(i, cellOwner))
+                {
+                  if (r != rank)
+                    sb.halo(0, lv, static_cast<Index>(r));
+                }
+              }
+              else
+              {
+                sb.setOwner(0, lv, static_cast<Index>(owner));
+              }
+            }
+          }
+        }
+
+        for (size_t k = 0; k < cz; ++k)
+        {
+          for (size_t j = 0; j < cy; ++j)
+          {
+            for (size_t i = gx0; i < gx1; ++i)
+            {
+              const Index gcid = macroId3(i, j, k, cx, cy);
+              const int owner = cellOwner[i];
+              const Shard::Flags flags =
+                (owner == rank ? Shard::Flags::Owned : Shard::Flags::Ghost);
+
+              const Index v0 = gv2lv.at(vid3(i,     j,     k,     nx, ny));
+              const Index v1 = gv2lv.at(vid3(i + 1, j,     k,     nx, ny));
+              const Index v2 = gv2lv.at(vid3(i + 1, j + 1, k,     nx, ny));
+              const Index v3 = gv2lv.at(vid3(i,     j + 1, k,     nx, ny));
+              const Index v4 = gv2lv.at(vid3(i,     j,     k + 1, nx, ny));
+              const Index v5 = gv2lv.at(vid3(i + 1, j,     k + 1, nx, ny));
+              const Index v6 = gv2lv.at(vid3(i + 1, j + 1, k + 1, nx, ny));
+              const Index v7 = gv2lv.at(vid3(i,     j + 1, k + 1, nx, ny));
+
+              const IndexArray vs = makeIndexArray(v0, v1, v2, v3, v4, v5, v6, v7);
+              const Index lc = sb.polytope(3, gcid, Polytope::Type::Hexahedron, vs, flags);
+
+              if (owner == rank)
+              {
+                for (const int r : sharersOfCellColumn(i, cellOwner))
+                  sb.halo(3, lc, static_cast<Index>(r));
+              }
+              else
+              {
+                sb.setOwner(3, lc, static_cast<Index>(owner));
+              }
+            }
+          }
+        }
+
+        return finish(sb.finalize());
+      }
+
+      case Polytope::Type::Wedge:
+      {
+        if (shape.size() != 3)
+        {
+          Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
+            << "Expected 3 dimensions for geometry type " << g
+            << ", but got " << shape.size() << "."
+            << Alert::Raise;
+        }
+
+        const size_t nx = shape.coeff(0);
+        const size_t ny = shape.coeff(1);
+        const size_t nz = shape.coeff(2);
+        if (nx < 2 || ny < 2 || nz < 2)
+        {
+          Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
+            << "Wedge uniform grid requires at least 2 vertices per direction."
+            << Alert::Raise;
+        }
+
+        const size_t cx = nx - 1;
+        const size_t cy = ny - 1;
+        const size_t cz = nz - 1;
+        const auto xr = splitRange(cx, rank, size);
+        const std::vector<int> cellOwner = buildColumnOwner(cx);
+
+        size_t gx0 = xr.begin;
+        size_t gx1 = xr.end;
+        if (cx > 0)
+        {
+          if (gx0 > 0) gx0--;
+          if (gx1 < cx) gx1++;
+        }
+
+        Shard::Builder sb;
+        sb.initialize(/*dimension=*/3, /*sdim=*/3);
+
+        UnorderedMap<Index, Index> gv2lv;
+        gv2lv.reserve((gx1 - gx0 + 1) * ny * nz);
+
+        for (size_t k = 0; k < nz; ++k)
+        {
+          for (size_t j = 0; j < ny; ++j)
+          {
+            for (size_t i = gx0; i <= gx1; ++i)
+            {
+              const Index gvid = vid3(i, j, k, nx, ny);
+              const int owner = ownerOfVertexX(i, cellOwner);
+              const Shard::Flags flags =
+                (owner == rank ? Shard::Flags::Owned : Shard::Flags::Ghost);
+
+              const Index lv = sb.vertex(
+                gvid,
+                sp3(static_cast<Real>(i), static_cast<Real>(j), static_cast<Real>(k)),
+                flags);
+              gv2lv.emplace(gvid, lv);
+
+              if (owner == rank)
+              {
+                for (const int r : sharersOfVertexX(i, cellOwner))
+                {
+                  if (r != rank)
+                    sb.halo(0, lv, static_cast<Index>(r));
+                }
+              }
+              else
+              {
+                sb.setOwner(0, lv, static_cast<Index>(owner));
+              }
+            }
+          }
+        }
+
+        for (size_t k = 0; k < cz; ++k)
+        {
+          for (size_t j = 0; j < cy; ++j)
+          {
+            for (size_t i = gx0; i < gx1; ++i)
+            {
+              const Index mid = macroId3(i, j, k, cx, cy);
+              const int owner = cellOwner[i];
+              const Shard::Flags flags =
+                (owner == rank ? Shard::Flags::Owned : Shard::Flags::Ghost);
+
+              const Index v0  = gv2lv.at(vid3(i,     j,     k,     nx, ny));
+              const Index v1  = gv2lv.at(vid3(i + 1, j,     k,     nx, ny));
+              const Index v2  = gv2lv.at(vid3(i,     j + 1, k,     nx, ny));
+              const Index v3  = gv2lv.at(vid3(i + 1, j + 1, k,     nx, ny));
+              const Index v0p = gv2lv.at(vid3(i,     j,     k + 1, nx, ny));
+              const Index v1p = gv2lv.at(vid3(i + 1, j,     k + 1, nx, ny));
+              const Index v2p = gv2lv.at(vid3(i,     j + 1, k + 1, nx, ny));
+              const Index v3p = gv2lv.at(vid3(i + 1, j + 1, k + 1, nx, ny));
+
+              const IndexArray w0 = makeIndexArray(v0, v1, v2, v0p, v1p, v2p);
+              const IndexArray w1 = makeIndexArray(v1, v3, v2, v1p, v3p, v2p);
+
+              const Index lc0 = sb.polytope(3, static_cast<Index>(2 * mid + 0), Polytope::Type::Wedge, w0, flags);
+              const Index lc1 = sb.polytope(3, static_cast<Index>(2 * mid + 1), Polytope::Type::Wedge, w1, flags);
+
+              if (owner == rank)
+              {
+                const auto rs = sharersOfCellColumn(i, cellOwner);
+                for (const int r : rs)
+                {
+                  sb.halo(3, lc0, static_cast<Index>(r));
+                  sb.halo(3, lc1, static_cast<Index>(r));
+                }
+              }
+              else
+              {
+                const Index ow = static_cast<Index>(owner);
+                sb.setOwner(3, lc0, ow);
+                sb.setOwner(3, lc1, ow);
+              }
+            }
+          }
+        }
+
+        return finish(sb.finalize());
+      }
+
+      default:
+      {
+        Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
+          << "Unsupported geometry type " << g << "."
+          << Alert::Raise;
+        return MPIMesh(context);
+      }
+    }
   }
 }
 

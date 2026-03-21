@@ -83,6 +83,17 @@ namespace Rodin::Geometry
           Context::MPI m_context;
       };
 
+      static Mesh UniformGrid(
+          const Context::MPI& context, Polytope::Type g, std::initializer_list<size_t> l)
+      {
+        Array<size_t> shape(l.size());
+        std::copy(l.begin(), l.end(), shape.begin());
+        return UniformGrid(context, g, shape);
+      }
+
+      static Mesh UniformGrid(
+          const Context::MPI& context, Polytope::Type g, const Array<size_t>& shape);
+
       /**
        * @brief Constructs an empty distributed mesh associated with the given MPI context.
        *
@@ -665,7 +676,6 @@ namespace Rodin::Geometry
        */
       void save(const boost::filesystem::path& filename, IO::FileFormat fmt) const override;
 
-      template <class Filename, typename = std::enable_if_t<std::is_invocable_v<Filename, int>>>
       /**
        * @brief Rank-dependent overload for saving distributed shard files.
        *
@@ -676,6 +686,7 @@ namespace Rodin::Geometry
        * @param[in] filename Rank-dependent path generator.
        * @param[in] fmt File format used to write the shard file.
        */
+      template <class Filename, typename = std::enable_if_t<std::is_invocable_v<Filename, int>>>
       void save(const Filename& filename, IO::FileFormat fmt)
       {
         const auto& comm = m_context.getCommunicator();
@@ -760,6 +771,8 @@ namespace Rodin::Geometry
       /// Rank-local shard containing geometry, topology, and ownership metadata.
       Shard m_shard;
   };
+
+  Mesh(const Context::MPI& context) -> Mesh<Context::MPI>;
 }
 
 #endif

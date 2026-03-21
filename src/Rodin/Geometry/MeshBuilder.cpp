@@ -129,6 +129,10 @@ namespace Rodin::Geometry
   {
     m_nodes = vertices.getCount();
     m_vertices = vertices;
+    m_sdim = vertices.getDimension();
+    m_connectivity.nodes(m_nodes);
+    m_attributes.resize(0, m_nodes);
+    m_transformations.resize(0, m_nodes);
     return *this;
   }
 
@@ -136,7 +140,11 @@ namespace Rodin::Geometry
   Mesh<Context::Local>::Builder::setVertices(PointCloud&& vertices)
   {
     m_nodes = vertices.getCount();
+    m_sdim = vertices.getDimension();
     m_vertices = std::move(vertices);
+    m_connectivity.nodes(m_nodes);
+    m_attributes.resize(0, m_nodes);
+    m_transformations.resize(0, m_nodes);
     return *this;
   }
 
