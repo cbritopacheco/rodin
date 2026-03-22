@@ -80,9 +80,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md252">Algorithm</a></li>
-            <li><a href="#autotoc_md253">Applicability</a></li>
-            <li><a href="#autotoc_md254">Usage Example</a></li>
+            <li><a href="#autotoc_md250">Algorithm</a></li>
+            <li><a href="#autotoc_md251">Applicability</a></li>
+            <li><a href="#autotoc_md252">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -92,7 +92,7 @@
             </li>
           </ul>
         </nav>
-<p>This header provides the SparseLU solver class, which implements sparse supernodal LU factorization for general (non-symmetric) matrices using Eigen&#x27;s SparseLU solver.</p><section id="autotoc_md252"><h3><a href="#autotoc_md252">Algorithm</a></h3><p>The solver performs LU decomposition:</p><div class="m-math"><svg style="width: 5.298em; height: 0.851em;" viewBox="168.843339 -8.169366 50.856316 8.169366">
+<p>This header provides the SparseLU solver class, which implements sparse supernodal LU factorization for general (non-symmetric) matrices using Eigen&#x27;s SparseLU solver.</p><section id="autotoc_md250"><h3><a href="#autotoc_md250">Algorithm</a></h3><p>The solver performs LU decomposition:</p><div class="m-math"><svg style="width: 5.298em; height: 0.851em;" viewBox="168.843339 -8.169366 50.856316 8.169366">
 <title>
 \[
   PA = LU
@@ -142,7 +142,7 @@ $ U $
 <g id='eq4-page1'>
 <use x='0' y='0' xlink:href='#eq4-g0-85'/>
 </g>
-</svg> is upper triangular.</p></section><section id="autotoc_md253"><h3><a href="#autotoc_md253">Applicability</a></h3><ul><li>General sparse matrices (non-symmetric)</li><li>Problems where iterative solvers fail to converge</li><li>Small to medium-sized systems</li></ul></section><section id="autotoc_md254"><h3><a href="#autotoc_md254">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+</svg> is upper triangular.</p></section><section id="autotoc_md251"><h3><a href="#autotoc_md251">Applicability</a></h3><ul><li>General sparse matrices (non-symmetric)</li><li>Problems where iterative solvers fail to converge</li><li>Small to medium-sized systems</li></ul></section><section id="autotoc_md252"><h3><a href="#autotoc_md252">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">beta</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">gamma</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 
 <span class="n">Solver</span><span class="o">::</span><span class="n">SparseLU</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>

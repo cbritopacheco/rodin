@@ -84,18 +84,30 @@
             <li>
               Reference
               <ul>
+                <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>The builder accumulates a subset of the parent mesh entities together with ownership metadata and finally produces a self-consistent local mesh.</p><p>The builder maintains, per topological dimension:</p><ul><li>the parent-to-shard index maps,</li><li>per-entity ownership flags,</li><li>ghost owner information,</li><li>halo information for owned entities.</li></ul><p><code><a href="#a27061edd5637eaf56d5ffda1e4e78f8e" class="m-doc">include()</a></code> inserts an entity identified by its parent index into the shard if it is not already present, and returns its shard-local index.</p>
+<p>The builder accumulates a subset of mesh entities together with state, owner, and halo metadata, and finally produces a self-consistent local mesh.</p><p>The builder maintains, per topological dimension:</p><ul><li>the distributed-to-shard and shard-to-distributed index maps,</li><li>the per-entity local state,</li><li>owner information for non-owned entities,</li><li>halo information for owned entities.</li></ul><p><code><a href="#aa561081b3602773e24ea29f18ff48c11" class="m-doc">include()</a></code> inserts an entity identified by its parent index into the shard if it is not already present, and returns its shard-local index.</p>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">enum class <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911" class="m-doc">Mode</a> { </span><span class="m-doc-wrap"><a href="#a46c8a310cf4c094f8c80e1cb8dc1f911a6adf97f83acf6453d4a6a4b1070f3754" class="m-doc">None</a>,
+              <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911a30269022e9d8f51beaabb52e5d0de2b7" class="m-doc">Parent</a>,
+              <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911afd1dd0c603be8170f9eae0be9f2f6afb" class="m-doc">Direct</a> }</span>
+            </dt>
+            <dd></dd>
+          </dl>
+        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a127ac7aab5c87bd7df242644885320ac">
-              <span class="m-doc-wrap-bumper"><a href="#a127ac7aab5c87bd7df242644885320ac" class="m-doc-self">Builder</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt id="a4c5b1b5b658880619647b859000724fc">
+              <span class="m-doc-wrap-bumper"><a href="#a4c5b1b5b658880619647b859000724fc" class="m-doc-self">Builder</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
             <dd>Default constructor.</dd>
           </dl>
@@ -106,28 +118,64 @@
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a7a635a5f3a3edabcd23521d5a8e8e68d" class="m-doc">initialize</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context</a>&gt;&amp; parent) -&gt; <a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Builder</a>&amp;</span>
             </dt>
-            <dd>Initializes builder with parent mesh.</dd>
+            <dd>Initializes the builder from a parent mesh.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a27061edd5637eaf56d5ffda1e4e78f8e" class="m-doc">include</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
-              const <a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a>&amp; flags) -&gt; std::pair&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a>&gt;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a39961107adfea077d46438a36384e04c" class="m-doc">initialize</a>(</span><span class="m-doc-wrap">size_t dimension,
+              size_t sdim) -&gt; <a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Builder</a>&amp;</span>
             </dt>
-            <dd>Inserts a parent entity into the shard.</dd>
+            <dd>Initializes the builder for direct construction.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab66a035ebb0e37a3dbaa954d56f8157b" class="m-doc">vertex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> globalIdx,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; x,
+              const <a href="class_rodin_1_1_geometry_1_1_shard.html#ae9c42c594bb848c81ace2ff29f64dc89" class="m-doc">State</a>&amp; state) -&gt; <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a></span>
+            </dt>
+            <dd>Inserts a vertex in direct-construction mode.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a553529984dfce8c0fd5e536f49c5aada" class="m-doc">polytope</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> globalIdx,
+              <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> g,
+              const <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; vs,
+              const <a href="class_rodin_1_1_geometry_1_1_shard.html#ae9c42c594bb848c81ace2ff29f64dc89" class="m-doc">State</a>&amp; state) -&gt; <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a></span>
+            </dt>
+            <dd>Inserts a non-vertex polytope in direct-construction mode.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#acbbc924d5108f0d77495fb1548e2d1c3" class="m-doc">setOwner</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> localIdx,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> ownerRank) -&gt; <a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Builder</a>&amp;</span>
+            </dt>
+            <dd>Records the owner rank of a non-owned local entity.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aca9379fbf69e1a6e4b85fb4e3331585f" class="m-doc">halo</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> localIdx,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> neighborRank) -&gt; <a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Builder</a>&amp;</span>
+            </dt>
+            <dd>Records that an owned local entity is also present on a remote rank.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae879e544e4827f4c686fb93815c9b092" class="m-doc">attribute</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attr) -&gt; <a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Builder</a>&amp;</span>
+            </dt>
+            <dd>Sets the attribute of a local entity.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa561081b3602773e24ea29f18ff48c11" class="m-doc">include</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              const <a href="class_rodin_1_1_geometry_1_1_shard.html#ae9c42c594bb848c81ace2ff29f64dc89" class="m-doc">State</a>&amp; state) -&gt; std::pair&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a>&gt;</span>
+            </dt>
+            <dd>Inserts a parent entity into the shard in parent-based mode.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aeb6108585130c4fd75d0750f344ce406" class="m-doc">finalize</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a></span>
             </dt>
-            <dd>Finalizes construction and returns the shard.</dd>
+            <dd>Finalizes construction and returns the resulting shard.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a9fd3bd8730c34b9a46474d5c992375ce" class="m-doc">getPolytopeMap</a>(</span><span class="m-doc-wrap">size_t d) const -&gt; const <a href="struct_rodin_1_1_geometry_1_1_shard_1_1_polytope_map.html" class="m-doc">PolytopeMap</a>&amp;</span>
             </dt>
-            <dd>Gets polytope map for a dimension (const).</dd>
+            <dd>Returns the local/distributed index map for dimension <code>d</code>.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a3a0c0cc3ccdeca4e84fb59be966e3605" class="m-doc">getPolytopeCount</a>(</span><span class="m-doc-wrap">size_t d) const -&gt; size_t</span>
             </dt>
-            <dd>Gets polytope count for a dimension.</dd>
+            <dd>Returns the number of local entities of dimension <code>d</code>.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a5a057fe5fa1699c82af689c438ad1b83" class="m-doc">getOwner</a>(</span><span class="m-doc-wrap">size_t d) -&gt; <a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp;</span>
             </dt>
-            <dd>Returns the owner-rank map for ghost entities of dimension <code>d</code>.</dd>
+            <dd>Returns the owner map for dimension <code>d</code>.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a8526f79e1b614d4a4bd0d659c92ed104" class="m-doc">getHalo</a>(</span><span class="m-doc-wrap">size_t d) -&gt; <a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>&gt;&amp;</span>
             </dt>
@@ -135,12 +183,43 @@
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a399242681d6f2f49901b9a0145b7ea2c" class="m-doc">getOwner</a>(</span><span class="m-doc-wrap">size_t d) const -&gt; const <a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp;</span>
             </dt>
-            <dd>Gets owner map for a dimension (const).</dd>
+            <dd>Returns the owner map for dimension <code>d</code> (const).</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ab42ea7d224cce1587d7468b6743328ad" class="m-doc">getHalo</a>(</span><span class="m-doc-wrap">size_t d) const -&gt; const <a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>&gt;&amp;</span>
             </dt>
-            <dd>Gets halo map for a dimension (const).</dd>
+            <dd>Returns the halo map for dimension <code>d</code> (const).</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Enum documentation</h2>
+          <section class="m-doc-details" id="a46c8a310cf4c094f8c80e1cb8dc1f911"><div>
+            <h3>
+              enum class Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /><a href="#a46c8a310cf4c094f8c80e1cb8dc1f911" class="m-doc-self">Mode</a>
+            </h3>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="#a46c8a310cf4c094f8c80e1cb8dc1f911a6adf97f83acf6453d4a6a4b1070f3754" class="m-doc-self" id="a46c8a310cf4c094f8c80e1cb8dc1f911a6adf97f83acf6453d4a6a4b1070f3754">None</a></td>
+                  <td>
+                  <p>Uninitialized builder.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a46c8a310cf4c094f8c80e1cb8dc1f911a30269022e9d8f51beaabb52e5d0de2b7" class="m-doc-self" id="a46c8a310cf4c094f8c80e1cb8dc1f911a30269022e9d8f51beaabb52e5d0de2b7">Parent</a></td>
+                  <td>
+                  <p>Initialize from parent mesh.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#a46c8a310cf4c094f8c80e1cb8dc1f911afd1dd0c603be8170f9eae0be9f2f6afb" class="m-doc-self" id="a46c8a310cf4c094f8c80e1cb8dc1f911afd1dd0c603be8170f9eae0be9f2f6afb">Direct</a></td>
+                  <td>
+                  <p>Initialize with explicit dimension and explicit contents.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
         </section>
         <section>
           <h2>Function documentation</h2>
@@ -148,7 +227,7 @@
             <h3>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Builder</a>&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7a635a5f3a3edabcd23521d5a8e8e68d" class="m-doc-self">initialize</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context</a>&gt;&amp; parent)</span></span>
             </h3>
-            <p>Initializes builder with parent mesh.</p>
+            <p>Initializes the builder from a parent mesh.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -156,23 +235,221 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">parent&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Parent mesh to extract shard from</td>
+                  <td>Parent mesh from which shard entities are drawn.</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>Reference to this builder</td>
+                  <td>Reference to this builder.</td>
                 </tr>
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a27061edd5637eaf56d5ffda1e4e78f8e"><div>
+          <section class="m-doc-details" id="a39961107adfea077d46438a36384e04c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">std::pair&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a>&gt; Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a27061edd5637eaf56d5ffda1e4e78f8e" class="m-doc-self">include</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
-              const <a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a>&amp; flags)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Builder</a>&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a39961107adfea077d46438a36384e04c" class="m-doc-self">initialize</a>(</span><span class="m-doc-wrap">size_t dimension,
+              size_t sdim)</span></span>
             </h3>
-            <p>Inserts a parent entity into the shard.</p>
+            <p>Initializes the builder for direct construction.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">dimension&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> topological dimension.</td>
+                </tr>
+                <tr>
+                  <td>sdim&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Ambient space dimension.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this builder.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab66a035ebb0e37a3dbaa954d56f8157b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab66a035ebb0e37a3dbaa954d56f8157b" class="m-doc-self">vertex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> globalIdx,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; x,
+              const <a href="class_rodin_1_1_geometry_1_1_shard.html#ae9c42c594bb848c81ace2ff29f64dc89" class="m-doc">State</a>&amp; state)</span></span>
+            </h3>
+            <p>Inserts a vertex in direct-construction mode.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">globalIdx&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Distributed/global vertex index.</td>
+                </tr>
+                <tr>
+                  <td>x&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_geometry_1_1_vertex.html" class="m-doc">Vertex</a> coordinates.</td>
+                </tr>
+                <tr>
+                  <td>state&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Local shard state.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Local shard vertex index.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a553529984dfce8c0fd5e536f49c5aada"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a553529984dfce8c0fd5e536f49c5aada" class="m-doc-self">polytope</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> globalIdx,
+              <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> g,
+              const <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; vs,
+              const <a href="class_rodin_1_1_geometry_1_1_shard.html#ae9c42c594bb848c81ace2ff29f64dc89" class="m-doc">State</a>&amp; state)</span></span>
+            </h3>
+            <p>Inserts a non-vertex polytope in direct-construction mode.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Topological dimension.</td>
+                </tr>
+                <tr>
+                  <td>globalIdx&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Distributed/global polytope index.</td>
+                </tr>
+                <tr>
+                  <td>g&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> type.</td>
+                </tr>
+                <tr>
+                  <td>vs&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Local shard vertex indices.</td>
+                </tr>
+                <tr>
+                  <td>state&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Local shard state.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Local shard polytope index.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="acbbc924d5108f0d77495fb1548e2d1c3"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Builder</a>&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acbbc924d5108f0d77495fb1548e2d1c3" class="m-doc-self">setOwner</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> localIdx,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> ownerRank)</span></span>
+            </h3>
+            <p>Records the owner rank of a non-owned local entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Topological dimension.</td>
+                </tr>
+                <tr>
+                  <td>localIdx&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Local shard index.</td>
+                </tr>
+                <tr>
+                  <td>ownerRank&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Owning rank.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this builder.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aca9379fbf69e1a6e4b85fb4e3331585f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Builder</a>&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aca9379fbf69e1a6e4b85fb4e3331585f" class="m-doc-self">halo</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> localIdx,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> neighborRank)</span></span>
+            </h3>
+            <p>Records that an owned local entity is also present on a remote rank.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Topological dimension.</td>
+                </tr>
+                <tr>
+                  <td>localIdx&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Local shard index.</td>
+                </tr>
+                <tr>
+                  <td>neighborRank&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Remote rank containing the same entity.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this builder.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae879e544e4827f4c686fb93815c9b092"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Builder</a>&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae879e544e4827f4c686fb93815c9b092" class="m-doc-self">attribute</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Attribute</a>&gt;&amp; attr)</span></span>
+            </h3>
+            <p>Sets the attribute of a local entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> <code>(d, localIdx)</code>.</td>
+                </tr>
+                <tr>
+                  <td>attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Optional attribute.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this builder.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa561081b3602773e24ea29f18ff48c11"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::pair&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a>&gt; Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa561081b3602773e24ea29f18ff48c11" class="m-doc-self">include</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              const <a href="class_rodin_1_1_geometry_1_1_shard.html#ae9c42c594bb848c81ace2ff29f64dc89" class="m-doc">State</a>&amp; state)</span></span>
+            </h3>
+            <p>Inserts a parent entity into the shard in parent-based mode.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -183,8 +460,8 @@
                   <td><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> <code>(d, parentIdx)</code> identifying an entity in the parent mesh.</td>
                 </tr>
                 <tr>
-                  <td>flags&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Local classification to assign if the entity is newly inserted.</td>
+                  <td>state&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Local state to assign if the entity is newly inserted.</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -194,18 +471,18 @@
                 </tr>
               </tfoot>
             </table>
-<p>If the entity already exists in the shard, no duplication occurs and the existing local index is returned.</p><aside class="m-note m-info"><h4>Note</h4><p><code><a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html#aa6f96c6e4473172dcd20bb4abc58a63c" class="m-doc">Flags::<wbr />None</a></code> is meaningful during construction when an entity is required locally but its ownership was already established elsewhere.</p></aside>
+<p>If the entity is already present, no duplication occurs and the existing local index is returned.</p>
           </div></section>
           <section class="m-doc-details" id="aeb6108585130c4fd75d0750f344ce406"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a> Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeb6108585130c4fd75d0750f344ce406" class="m-doc-self">finalize</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
-            <p>Finalizes construction and returns the shard.</p>
+            <p>Finalizes construction and returns the resulting shard.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Newly constructed <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a></td>
+                  <td>Newly constructed shard.</td>
                 </tr>
               </tfoot>
             </table>
@@ -214,7 +491,7 @@
             <h3>
               <span class="m-doc-wrap-bumper">const <a href="struct_rodin_1_1_geometry_1_1_shard_1_1_polytope_map.html" class="m-doc">PolytopeMap</a>&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9fd3bd8730c34b9a46474d5c992375ce" class="m-doc-self">getPolytopeMap</a>(</span><span class="m-doc-wrap">size_t d) const</span></span>
             </h3>
-            <p>Gets polytope map for a dimension (const).</p>
+            <p>Returns the local/distributed index map for dimension <code>d</code>.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -222,13 +499,13 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Dimension</td>
+                  <td>Topological dimension.</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> index mapping</td>
+                  <td>Const reference to the polytope map.</td>
                 </tr>
               </tfoot>
             </table>
@@ -237,7 +514,7 @@
             <h3>
               <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3a0c0cc3ccdeca4e84fb59be966e3605" class="m-doc-self">getPolytopeCount</a>(</span><span class="m-doc-wrap">size_t d) const</span></span>
             </h3>
-            <p>Gets polytope count for a dimension.</p>
+            <p>Returns the number of local entities of dimension <code>d</code>.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -245,13 +522,13 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Dimension</td>
+                  <td>Topological dimension.</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>Number of polytopes</td>
+                  <td>Local entity count.</td>
                 </tr>
               </tfoot>
             </table>
@@ -260,62 +537,63 @@
             <h3>
               <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5a057fe5fa1699c82af689c438ad1b83" class="m-doc-self">getOwner</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
             </h3>
-            <p>Returns the owner-rank map for ghost entities of dimension <code>d</code>.</p>
-<p>The map stores:</p><div class="m-math"><svg style="width: 15.981em; height: 1.122em;" viewBox="117.581773 -10.78278 153.416658 10.773051">
+            <p>Returns the owner map for dimension <code>d</code>.</p>
+<p>The map stores:</p><div class="m-math"><svg style="width: 18.860em; height: 0.868em;" viewBox="103.76159 -8.343928 181.057025 8.33735">
 <title>
 \[
-  \text{ghost local index} \mapsto \text{owner rank}
+  \text{local non-owned index} \mapsto \text{owner rank}
 \]
 </title>
 <defs>
 <path id='eq1-g0-33' d='M9.97061-2.749689C9.313076-2.247572 8.990286-1.75741 8.894645-1.601993C8.356663-.777086 8.261021-.02391 8.261021-.011955C8.261021 .131507 8.404483 .131507 8.500125 .131507C8.703362 .131507 8.715318 .107597 8.763138-.107597C9.038107-1.279203 9.743462-2.283437 11.094396-2.833375C11.237858-2.881196 11.273724-2.905106 11.273724-2.988792S11.201993-3.108344 11.178082-3.120299C10.652055-3.323537 9.205479-3.921295 8.751183-5.929763C8.715318-6.073225 8.703362-6.109091 8.500125-6.109091C8.404483-6.109091 8.261021-6.109091 8.261021-5.965629C8.261021-5.941719 8.368618-5.188543 8.870735-4.387547C9.109838-4.028892 9.456538-3.610461 9.97061-3.227895H1.08792C.872727-3.227895 .657534-3.227895 .657534-2.988792S.872727-2.749689 1.08792-2.749689H9.97061Z'/>
 <path id='eq1-g0-55' d='M1.135741-2.749689C1.207472-2.749689 1.470486-2.749689 1.470486-2.988792S1.207472-3.227895 1.135741-3.227895V-4.794022C1.135741-4.985305 1.135741-5.212453 .896638-5.212453S.657534-4.985305 .657534-4.794022V-1.183562C.657534-.992279 .657534-.765131 .896638-.765131S1.135741-.992279 1.135741-1.183562V-2.749689Z'/>
+<path id='eq1-g3-45' d='M3.394494-2.310638V-3.060999H.46451V-2.310638H3.394494Z'/>
 <path id='eq1-g3-97' d='M5.264443-.47642V-.786093C5.061964-.619346 4.919038-.559794 4.74038-.559794C4.466439-.559794 4.383065-.726541 4.383065-1.250603V-3.573151C4.383065-4.180587 4.323513-4.514081 4.156766-4.788022C3.906645-5.240622 3.394494-5.478832 2.667953-5.478832C2.060517-5.478832 1.488813-5.312085 1.155319-5.038143C.857556-4.788022 .666988-4.442618 .666988-4.144855C.666988-3.870914 .893288-3.632704 1.17914-3.632704S1.715113-3.870914 1.715113-4.132945C1.715113-4.180587 1.703202-4.240139 1.691292-4.323513C1.667471-4.430707 1.65556-4.525991 1.65556-4.609365C1.65556-4.930949 2.036696-5.19298 2.513116-5.19298C3.096731-5.19298 3.418315-4.847575 3.418315-4.204408V-3.477867C1.584097-2.739416 1.381618-2.644132 .869467-2.191533C.607436-1.953323 .440689-1.548365 .440689-1.155319C.440689-.404957 .95284 .119105 1.691292 .119105C2.215354 .119105 2.703684-.131016 3.430225-.750362C3.489778-.119105 3.704167 .119105 4.192497 .119105C4.597454 .119105 4.847575-.023821 5.264443-.47642ZM3.418315-1.464992C3.418315-1.095766 3.358762-.988572 3.108641-.833735C2.822789-.666988 2.489295-.571704 2.239175-.571704C1.822307-.571704 1.488813-.976661 1.488813-1.488813V-1.536455C1.488813-2.239175 1.977144-2.667953 3.418315-3.192015V-1.464992Z'/>
 <path id='eq1-g3-99' d='M4.907128-1.750844L4.74038-1.858039C4.168676-1.024303 3.739898-.738451 3.060999-.738451C1.965233-.738451 1.214871-1.691292 1.214871-3.060999C1.214871-4.299692 1.869949-5.133427 2.8347-5.133427C3.263478-5.133427 3.418315-5.002412 3.53742-4.561723L3.608883-4.299692C3.704167-3.954287 3.918556-3.751809 4.180587-3.751809C4.49026-3.751809 4.74038-3.978108 4.74038-4.25205C4.74038-4.919038 3.906645-5.478832 2.906163-5.478832C2.346369-5.478832 1.774665-5.264443 1.298245-4.871396C.655078-4.335423 .297763-3.513599 .297763-2.525027C.297763-.988572 1.238692 .119105 2.560758 .119105C3.07291 .119105 3.525509-.047642 3.930466-.381136C4.287781-.666988 4.525991-1.012393 4.907128-1.750844Z'/>
 <path id='eq1-g3-100' d='M5.848057-.500241V-.690809C5.633668-.678899 5.609847-.678899 5.574116-.678899C5.145338-.678899 5.050054-.809914 5.050054-1.357797V-8.111053L4.990501-8.134874C4.418797-7.932395 4.001929-7.81329 3.239657-7.610812V-7.420244C3.334941-7.432154 3.406404-7.432154 3.501688-7.432154C3.942377-7.432154 4.049571-7.313049 4.049571-6.824719V-4.96668C3.596972-5.347816 3.275389-5.478832 2.798968-5.478832C1.42926-5.478832 .321584-4.132945 .321584-2.441653C.321584-.917109 1.214871 .119105 2.525027 .119105C3.192015 .119105 3.644614-.119105 4.049571-.678899V.083374L4.097213 .119105L5.848057-.500241ZM4.049571-1.214871C4.049571-1.131498 3.966198-.988572 3.847093-.857556C3.632704-.619346 3.334941-.500241 2.989536-.500241C2.000965-.500241 1.345887-1.453081 1.345887-2.918073C1.345887-4.26396 1.929502-5.145338 2.8347-5.145338C3.465957-5.145338 4.049571-4.585544 4.049571-3.954287V-1.214871Z'/>
 <path id='eq1-g3-101' d='M5.050054-1.869949L4.859486-1.953323C4.287781-1.048124 3.77563-.70272 3.013357-.70272C2.35828-.70272 1.858039-1.012393 1.512634-1.65556C1.274424-2.12007 1.17914-2.536937 1.155319-3.29921H4.823754C4.72847-4.073392 4.609365-4.418797 4.311602-4.799933C3.954287-5.228711 3.406404-5.478832 2.787058-5.478832C1.310155-5.478832 .297763-4.287781 .297763-2.548848C.297763-.905198 1.155319 .119105 2.525027 .119105C3.668435 .119105 4.549812-.583615 5.050054-1.869949ZM3.608883-3.680346H1.17914C1.310155-4.621275 1.715113-5.050054 2.441653-5.050054S3.454046-4.716559 3.608883-3.680346Z'/>
-<path id='eq1-g3-103' d='M5.597937-4.621275V-5.085785H4.680828C4.442618-5.085785 4.26396-5.121517 4.02575-5.20489L3.763719-5.300174C3.442136-5.419279 3.120552-5.478832 2.810879-5.478832C1.703202-5.478832 .821825-4.621275 .821825-3.53742C.821825-2.787058 1.143408-2.334459 1.929502-1.941412L1.41735-1.464992C1.024303-1.119587 .869467-.881377 .869467-.643167C.869467-.393047 1.012393-.250121 1.500723-.011911C.655078 .607436 .333494 1.000482 .333494 1.441171C.333494 2.072428 1.262513 2.59649 2.394011 2.59649C3.287299 2.59649 4.216318 2.286817 4.835665 1.786576C5.288264 1.41735 5.490742 1.036214 5.490742 .583615C5.490742-.154837 4.930949-.655078 4.049571-.690809L2.513116-.762272C1.88186-.786093 1.584097-.893288 1.584097-1.083856C1.584097-1.322066 1.977144-1.738934 2.298727-1.834218C2.405922-1.822307 2.489295-1.810397 2.525027-1.810397C2.751326-1.786576 2.906163-1.774665 2.977626-1.774665C3.418315-1.774665 3.894735-1.953323 4.26396-2.274906C4.657007-2.6084 4.835665-3.025268 4.835665-3.620793C4.835665-3.966198 4.776112-4.240139 4.609365-4.621275H5.597937ZM5.157248 .762272C5.157248 1.453081 4.25205 1.917591 2.906163 1.917591C1.858039 1.917591 1.167229 1.572186 1.167229 1.048124C1.167229 .774183 1.250603 .619346 1.750844 .023821C2.143891 .107195 3.096731 .178658 3.680346 .178658C4.764201 .178658 5.157248 .333494 5.157248 .762272ZM3.918556-3.156283C3.918556-2.489295 3.573151-2.072428 3.025268-2.072428C2.310638-2.072428 1.810397-2.84661 1.810397-3.990019V-4.02575C1.810397-4.72847 2.143891-5.145338 2.691774-5.145338C3.060999-5.145338 3.370673-4.942859 3.561241-4.585544C3.77563-4.168676 3.918556-3.620793 3.918556-3.156283Z'/>
-<path id='eq1-g3-104' d='M5.800415 0V-.178658C5.157248-.297763 5.085785-.393047 5.085785-1.214871V-3.585062C5.085785-4.835665 4.585544-5.478832 3.620793-5.478832C2.918073-5.478832 2.417832-5.19298 1.869949-4.478349V-8.099143L1.810397-8.134874C1.405439-7.991948 1.107677-7.896664 .440689-7.706096L.119105-7.610812V-7.420244C.166747-7.432154 .202479-7.432154 .262031-7.432154C.774183-7.432154 .869467-7.33687 .869467-6.824719V-1.214871C.869467-.381136 .798004-.273942 .107195-.178658V0H2.679863V-.178658C1.989054-.250121 1.869949-.393047 1.869949-1.214871V-4.085303C2.37019-4.633186 2.727505-4.835665 3.192015-4.835665C3.78754-4.835665 4.085303-4.406886 4.085303-3.573151V-1.214871C4.085303-.404957 3.966198-.250121 3.275389-.178658V0H5.800415Z'/>
 <path id='eq1-g3-105' d='M3.013357 0V-.178658C2.227264-.23821 2.13198-.357315 2.13198-1.214871V-5.4431L2.084338-5.478832L.23821-4.823754V-4.645096L.333494-4.657007C.47642-4.680828 .631257-4.692738 .738451-4.692738C1.024303-4.692738 1.131498-4.50217 1.131498-3.978108V-1.214871C1.131498-.357315 1.012393-.2263 .190568-.178658V0H3.013357ZM2.239175-7.527438C2.239175-7.860932 1.977144-8.134874 1.631739-8.134874C1.298245-8.134874 1.024303-7.860932 1.024303-7.527438C1.024303-7.182034 1.298245-6.920003 1.631739-6.920003C1.977144-6.920003 2.239175-7.182034 2.239175-7.527438Z'/>
 <path id='eq1-g3-107' d='M6.014804 0V-.178658C5.490742-.214389 5.121517-.440689 4.621275-1.048124L2.798968-3.358762L3.144373-3.680346C3.990019-4.466439 4.72847-5.014322 5.073875-5.109606C5.252532-5.157248 5.419279-5.181069 5.621758-5.181069H5.717042V-5.359727H3.287299V-5.19298C3.751809-5.181069 3.882824-5.133427 3.882824-4.96668C3.882824-4.871396 3.77563-4.704649 3.608883-4.561723L1.977144-3.108641V-8.111053L1.929502-8.134874L.440689-7.706096L.083374-7.610812V-7.420244C.23821-7.432154 .345405-7.444065 .46451-7.444065C.857556-7.444065 .976661-7.289228 .976661-6.717524V-.976661C.976661-.357315 .94093-.321584 .083374-.178658V0H2.870431V-.178658L2.632221-.190568C2.155801-.214389 1.977144-.381136 1.977144-.798004V-2.989536L3.644614-.762272L3.680346-.71463C3.704167-.678899 3.727988-.643167 3.763719-.607436C3.859003-.488331 3.894735-.416868 3.894735-.357315C3.894735-.250121 3.78754-.178658 3.644614-.178658H3.418315V0H6.014804Z'/>
 <path id='eq1-g3-108' d='M3.060999 0V-.178658C2.298727-.2263 2.167712-.345405 2.167712-1.000482V-8.111053L2.12007-8.134874C1.500723-7.932395 1.048124-7.81329 .2263-7.610812V-7.420244H.297763C.428778-7.432154 .571704-7.444065 .666988-7.444065C1.048124-7.444065 1.167229-7.277318 1.167229-6.717524V-1.036214C1.167229-.393047 1.000482-.23821 .250121-.178658V0H3.060999Z'/>
 <path id='eq1-g3-110' d='M5.776594 0V-.178658C5.19298-.23821 5.050054-.381136 5.050054-.964751V-3.692256C5.050054-4.811844 4.525991-5.478832 3.644614-5.478832C3.096731-5.478832 2.727505-5.276353 1.917591-4.514081V-5.455011L1.834218-5.478832C1.250603-5.264443 .845646-5.133427 .190568-4.942859V-4.74038C.262031-4.776112 .381136-4.788022 .512152-4.788022C.845646-4.788022 .95284-4.609365 .95284-4.02575V-1.071945C.95284-.393047 .821825-.2263 .214389-.178658V0H2.739416V-.178658C2.13198-.2263 1.953323-.369226 1.953323-.798004V-4.144855C2.525027-4.680828 2.787058-4.823754 3.180104-4.823754C3.763719-4.823754 4.049571-4.454528 4.049571-3.668435V-1.17914C4.049571-.428778 3.894735-.2263 3.29921-.178658V0H5.776594Z'/>
 <path id='eq1-g3-111' d='M5.597937-2.787058C5.597937-4.347334 4.50217-5.478832 2.977626-5.478832C1.42926-5.478832 .345405-4.335423 .345405-2.691774C.345405-1.083856 1.453081 .119105 2.953805 .119105S5.597937-1.143408 5.597937-2.787058ZM4.525991-2.37019C4.525991-1.024303 3.990019-.214389 3.096731-.214389C2.632221-.214389 2.191533-.500241 1.941412-.976661C1.607918-1.596007 1.41735-2.429743 1.41735-3.275389C1.41735-4.406886 1.977144-5.145338 2.822789-5.145338C3.823272-5.145338 4.525991-4.001929 4.525991-2.37019Z'/>
 <path id='eq1-g3-114' d='M3.990019-4.847575C3.990019-5.240622 3.739898-5.478832 3.334941-5.478832C2.8347-5.478832 2.489295-5.20489 1.905681-4.359244V-5.455011L1.846128-5.478832C1.214871-5.216801 .786093-5.061964 .083374-4.835665V-4.645096C.250121-4.680828 .357315-4.692738 .500241-4.692738C.798004-4.692738 .905198-4.50217 .905198-3.978108V-1.000482C.905198-.404957 .821825-.321584 .059553-.178658V0H2.918073V-.178658C2.108159-.214389 1.905681-.393047 1.905681-1.071945V-3.751809C1.905681-4.132945 2.417832-4.72847 2.739416-4.72847C2.810879-4.72847 2.918073-4.668917 3.049089-4.549812C3.239657-4.383065 3.370673-4.311602 3.525509-4.311602C3.811361-4.311602 3.990019-4.514081 3.990019-4.847575Z'/>
-<path id='eq1-g3-115' d='M4.144855-1.405439C4.144855-2.000965 3.870914-2.394011 3.144373-2.822789L1.858039-3.585062C1.524544-3.77563 1.345887-4.073392 1.345887-4.394976C1.345887-4.883307 1.715113-5.20489 2.262996-5.20489C2.941894-5.20489 3.29921-4.811844 3.573151-3.739898H3.751809L3.704167-5.359727H3.573151L3.54933-5.335906C3.442136-5.252532 3.430225-5.240622 3.382583-5.240622C3.31112-5.240622 3.192015-5.264443 3.060999-5.323995C2.810879-5.419279 2.536937-5.466921 2.251085-5.466921C1.274424-5.466921 .607436-4.871396 .607436-4.001929C.607436-3.334941 .988572-2.870431 2.000965-2.286817L2.691774-1.89377C3.108641-1.65556 3.31112-1.369708 3.31112-1.000482C3.31112-.47642 2.929984-.142926 2.322548-.142926C1.500723-.142926 1.083856-.595525 .809914-1.810397H.619346V.047642H.774183C.857556-.071463 .905198-.095284 1.048124-.095284C1.17914-.095284 1.310155-.071463 1.596007 0C1.929502 .071463 2.227264 .119105 2.477385 .119105C3.382583 .119105 4.144855-.571704 4.144855-1.405439Z'/>
-<path id='eq1-g3-116' d='M3.323031-.786093L3.168194-.917109C2.906163-.607436 2.715595-.500241 2.453564-.500241C2.012875-.500241 1.834218-.809914 1.834218-1.572186V-4.978591H3.037178V-5.359727H1.834218V-6.741345C1.834218-6.86045 1.810397-6.896182 1.750844-6.896182C1.679381-6.777077 1.596007-6.669882 1.512634-6.562688C1.071945-5.90761 .666988-5.466921 .357315-5.288264C.2263-5.20489 .154837-5.133427 .154837-5.061964C.154837-5.026233 .166747-5.002412 .202479-4.978591H.833735V-1.393529C.833735-.393047 1.19105 .119105 1.88186 .119105C2.477385 .119105 2.929984-.166747 3.323031-.786093Z'/>
 <path id='eq1-g3-119' d='M8.26589-5.181069V-5.359727H6.800898V-5.181069C7.205855-5.097696 7.32496-5.014322 7.32496-4.811844C7.32496-4.633186 7.253497-4.347334 7.122481-4.02575L6.050536-1.381618L5.050054-4.049571C4.847575-4.597454 4.847575-4.597454 4.847575-4.752291C4.847575-5.014322 4.978591-5.097696 5.538384-5.181069V-5.359727H3.120552V-5.181069C3.561241-5.133427 3.704167-5.002412 3.942377-4.359244L4.180587-3.692256L3.096731-1.322066L1.917591-4.430707C1.869949-4.549812 1.846128-4.668917 1.846128-4.788022C1.846128-5.038143 1.989054-5.133427 2.394011-5.181069V-5.359727H.250121V-5.181069C.524062-5.157248 .619346-5.038143 .881377-4.430707L2.489295-.357315C2.632221 0 2.727505 .166747 2.798968 .166747C2.858521 .166747 2.953805 .011911 3.096731-.297763L4.430707-3.156283L5.514563-.345405C5.68131 .095284 5.728952 .166747 5.800415 .166747C5.883789 .166747 5.943341 .059553 6.133909-.416868L7.777559-4.537902C7.991948-5.038143 8.02768-5.097696 8.26589-5.181069Z'/>
 <path id='eq1-g3-120' d='M5.705131 0V-.178658C5.335906-.178658 5.097696-.369226 4.72847-.893288L3.203926-3.227747L4.192497-4.657007C4.418797-4.978591 4.776112-5.169159 5.157248-5.181069V-5.359727H3.275389V-5.181069C3.632704-5.157248 3.751809-5.085785 3.751809-4.919038C3.751809-4.776112 3.608883-4.514081 3.31112-4.144855C3.251568-4.073392 3.108641-3.859003 2.953805-3.620793L2.787058-3.859003C2.453564-4.359244 2.239175-4.764201 2.239175-4.919038C2.239175-5.085785 2.394011-5.169159 2.751326-5.181069V-5.359727H.285852V-5.181069H.393047C.750362-5.181069 .94093-5.026233 1.310155-4.466439L2.429743-2.751326L1.071945-.786093C.71463-.297763 .595525-.214389 .202479-.178658V0H1.929502V-.178658C1.596007-.178658 1.453081-.23821 1.453081-.393047C1.453081-.46451 1.536455-.643167 1.691292-.881377L2.632221-2.346369L3.716077-.678899C3.763719-.607436 3.78754-.535973 3.78754-.46451C3.78754-.250121 3.704167-.202479 3.31112-.178658V0H5.705131Z'/>
 </defs>
 <g id='eq1-page1'>
-<use x='117.581773' y='-2.606224' xlink:href='#eq1-g3-103'/>
-<use x='123.559357' y='-2.606224' xlink:href='#eq1-g3-104'/>
-<use x='129.536942' y='-2.606224' xlink:href='#eq1-g3-111'/>
-<use x='135.514526' y='-2.606224' xlink:href='#eq1-g3-115'/>
-<use x='139.98575' y='-2.606224' xlink:href='#eq1-g3-116'/>
-<use x='146.298077' y='-2.606224' xlink:href='#eq1-g3-108'/>
-<use x='149.621612' y='-2.606224' xlink:href='#eq1-g3-111'/>
-<use x='155.599196' y='-2.606224' xlink:href='#eq1-g3-99'/>
-<use x='160.907294' y='-2.606224' xlink:href='#eq1-g3-97'/>
-<use x='166.215392' y='-2.606224' xlink:href='#eq1-g3-108'/>
-<use x='172.527719' y='-2.606224' xlink:href='#eq1-g3-105'/>
-<use x='175.851254' y='-2.606224' xlink:href='#eq1-g3-110'/>
-<use x='181.828838' y='-2.606224' xlink:href='#eq1-g3-100'/>
-<use x='187.806422' y='-2.606224' xlink:href='#eq1-g3-101'/>
-<use x='192.696091' y='-2.606224' xlink:href='#eq1-g3-120'/>
-<use x='201.994504' y='-2.606224' xlink:href='#eq1-g0-55'/>
-<use x='201.994504' y='-2.606224' xlink:href='#eq1-g0-33'/>
-<use x='217.270536' y='-2.606224' xlink:href='#eq1-g3-111'/>
-<use x='222.829691' y='-2.606224' xlink:href='#eq1-g3-119'/>
-<use x='231.461324' y='-2.606224' xlink:href='#eq1-g3-110'/>
-<use x='237.438908' y='-2.606224' xlink:href='#eq1-g3-101'/>
-<use x='242.747005' y='-2.606224' xlink:href='#eq1-g3-114'/>
-<use x='249.716871' y='-2.606224' xlink:href='#eq1-g3-114'/>
-<use x='253.697944' y='-2.606224' xlink:href='#eq1-g3-97'/>
-<use x='259.006041' y='-2.606224' xlink:href='#eq1-g3-110'/>
-<use x='264.983625' y='-2.606224' xlink:href='#eq1-g3-107'/>
+<use x='103.76159' y='-.167372' xlink:href='#eq1-g3-108'/>
+<use x='107.085125' y='-.167372' xlink:href='#eq1-g3-111'/>
+<use x='113.062709' y='-.167372' xlink:href='#eq1-g3-99'/>
+<use x='118.370807' y='-.167372' xlink:href='#eq1-g3-97'/>
+<use x='123.678904' y='-.167372' xlink:href='#eq1-g3-108'/>
+<use x='129.991232' y='-.167372' xlink:href='#eq1-g3-110'/>
+<use x='135.968816' y='-.167372' xlink:href='#eq1-g3-111'/>
+<use x='141.9464' y='-.167372' xlink:href='#eq1-g3-110'/>
+<use x='147.923984' y='-.167372' xlink:href='#eq1-g3-45'/>
+<use x='151.905057' y='-.167372' xlink:href='#eq1-g3-111'/>
+<use x='157.464212' y='-.167372' xlink:href='#eq1-g3-119'/>
+<use x='166.095845' y='-.167372' xlink:href='#eq1-g3-110'/>
+<use x='172.073429' y='-.167372' xlink:href='#eq1-g3-101'/>
+<use x='177.381526' y='-.167372' xlink:href='#eq1-g3-100'/>
+<use x='186.347903' y='-.167372' xlink:href='#eq1-g3-105'/>
+<use x='189.671438' y='-.167372' xlink:href='#eq1-g3-110'/>
+<use x='195.649022' y='-.167372' xlink:href='#eq1-g3-100'/>
+<use x='201.626606' y='-.167372' xlink:href='#eq1-g3-101'/>
+<use x='206.516274' y='-.167372' xlink:href='#eq1-g3-120'/>
+<use x='215.814688' y='-.167372' xlink:href='#eq1-g0-55'/>
+<use x='215.814688' y='-.167372' xlink:href='#eq1-g0-33'/>
+<use x='231.09072' y='-.167372' xlink:href='#eq1-g3-111'/>
+<use x='236.649875' y='-.167372' xlink:href='#eq1-g3-119'/>
+<use x='245.281507' y='-.167372' xlink:href='#eq1-g3-110'/>
+<use x='251.259091' y='-.167372' xlink:href='#eq1-g3-101'/>
+<use x='256.567189' y='-.167372' xlink:href='#eq1-g3-114'/>
+<use x='263.537054' y='-.167372' xlink:href='#eq1-g3-114'/>
+<use x='267.518127' y='-.167372' xlink:href='#eq1-g3-97'/>
+<use x='272.826225' y='-.167372' xlink:href='#eq1-g3-110'/>
+<use x='278.803809' y='-.167372' xlink:href='#eq1-g3-107'/>
 </g>
-</svg></div><p>and is only meaningful for ghost entities.</p>
+</svg></div><p>and is meaningful for entities in state <code>Shared</code> or <code>Ghost</code>.</p>
           </div></section>
           <section class="m-doc-details" id="a8526f79e1b614d4a4bd0d659c92ed104"><div>
             <h3>
@@ -407,13 +685,13 @@
 <use x='336.463584' y='-2.988792' xlink:href='#eq2-g3-121'/>
 <use x='342.441168' y='-2.988792' xlink:href='#eq2-g0-103'/>
 </g>
-</svg></div><p>and is only meaningful for owned entities.</p>
+</svg></div><p>and is meaningful only for owned local entities.</p>
           </div></section>
           <section class="m-doc-details" id="a399242681d6f2f49901b9a0145b7ea2c"><div>
             <h3>
               <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a399242681d6f2f49901b9a0145b7ea2c" class="m-doc-self">getOwner</a>(</span><span class="m-doc-wrap">size_t d) const</span></span>
             </h3>
-            <p>Gets owner map for a dimension (const).</p>
+            <p>Returns the owner map for dimension <code>d</code> (const).</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -421,13 +699,13 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Dimension</td>
+                  <td>Topological dimension.</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>Map from ghost index to owning process</td>
+                  <td>Const reference to the owner map.</td>
                 </tr>
               </tfoot>
             </table>
@@ -436,7 +714,7 @@
             <h3>
               <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab42ea7d224cce1587d7468b6743328ad" class="m-doc-self">getHalo</a>(</span><span class="m-doc-wrap">size_t d) const</span></span>
             </h3>
-            <p>Gets halo map for a dimension (const).</p>
+            <p>Returns the halo map for dimension <code>d</code> (const).</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -444,13 +722,13 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Dimension</td>
+                  <td>Topological dimension.</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>Map from owned index to processes needing it</td>
+                  <td>Const reference to the halo map.</td>
                 </tr>
               </tfoot>
             </table>

@@ -80,10 +80,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md283">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md284">Coordinate Derivatives</a></li>
-            <li><a href="#autotoc_md285">Applications</a></li>
-            <li><a href="#autotoc_md286">Usage Example</a></li>
+            <li><a href="#autotoc_md281">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md282">Coordinate Derivatives</a></li>
+            <li><a href="#autotoc_md283">Applications</a></li>
+            <li><a href="#autotoc_md284">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -92,7 +92,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the Derivative class, which computes directional derivatives of scalar functions. This generalizes the gradient concept to derivatives in specific directions.</p><section id="autotoc_md283"><h3><a href="#autotoc_md283">Mathematical Foundation</a></h3><p>The directional derivative of a function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
+<p>This file defines the Derivative class, which computes directional derivatives of scalar functions. This generalizes the gradient concept to derivatives in specific directions.</p><section id="autotoc_md281"><h3><a href="#autotoc_md281">Mathematical Foundation</a></h3><p>The directional derivative of a function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
 $ u $
 </title>
@@ -170,7 +170,7 @@ $ \mathbf{v} $
 <rect x='203.215804' y='-11.950729' height='.478187' width='87.891887'/>
 <use x='243.792478' y='-.522181' xlink:href='#eq3-g5-104'/>
 </g>
-</svg></div></section><section id="autotoc_md284"><h3><a href="#autotoc_md284">Coordinate Derivatives</a></h3><p>Special cases are partial derivatives:</p><ul><li><svg class="m-math" style="width: 5.658em; height: 1.623em; vertical-align: -0.558em;" viewBox="1.195514 -10.241927 54.315835 15.579638">
+</svg></div></section><section id="autotoc_md282"><h3><a href="#autotoc_md282">Coordinate Derivatives</a></h3><p>Special cases are partial derivatives:</p><ul><li><svg class="m-math" style="width: 5.658em; height: 1.623em; vertical-align: -0.558em;" viewBox="1.195514 -10.241927 54.315835 15.579638">
 <title>
 $ \frac{\partial u}{\partial x_i} = D_{\mathbf{e}_i} u $
 </title>
@@ -219,7 +219,7 @@ $ i $
 <g id='eq6-page1'>
 <use x='0' y='0' xlink:href='#eq6-g0-105'/>
 </g>
-</svg>-th coordinate direction.</li></ul></section><section id="autotoc_md285"><h3><a href="#autotoc_md285">Applications</a></h3><ul><li>Normal derivatives: <svg class="m-math" style="width: 6.223em; height: 1.496em; vertical-align: -0.431em;" viewBox="1.195514 -10.241927 59.742898 14.364559">
+</svg>-th coordinate direction.</li></ul></section><section id="autotoc_md283"><h3><a href="#autotoc_md283">Applications</a></h3><ul><li>Normal derivatives: <svg class="m-math" style="width: 6.223em; height: 1.496em; vertical-align: -0.431em;" viewBox="1.195514 -10.241927 59.742898 14.364559">
 <title>
 $ \frac{\partial u}{\partial n} = \nabla u \cdot \mathbf{n} $
 </title>
@@ -245,7 +245,7 @@ $ \frac{\partial u}{\partial n} = \nabla u \cdot \mathbf{n} $
 <use x='47.488878' y='0' xlink:href='#eq7-g1-1'/>
 <use x='53.466432' y='0' xlink:href='#eq7-g0-110'/>
 </g>
-</svg></li><li>Material derivatives in fluid dynamics</li><li>Characteristic methods for PDEs</li><li>Shape sensitivity analysis</li></ul></section><section id="autotoc_md286"><h3><a href="#autotoc_md286">Usage Example</a></h3><pre class="m-code"><span class="c1">// Normal derivative on boundary</span>
+</svg></li><li>Material derivatives in fluid dynamics</li><li>Characteristic methods for PDEs</li><li>Shape sensitivity analysis</li></ul></section><section id="autotoc_md284"><h3><a href="#autotoc_md284">Usage Example</a></h3><pre class="m-code"><span class="c1">// Normal derivative on boundary</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BoundaryNormal</span><span class="p">();</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">normal_deriv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Derivative</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">);</span><span class="w">  </span><span class="c1">// ∂u/∂n = ∇u·n</span></pre></section>
         <section id="namespaces">

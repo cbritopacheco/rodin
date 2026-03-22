@@ -345,11 +345,10 @@
                   </li>
                   <li>class <a href="class_rodin_1_1_geometry_1_1_set_index_generator.html" class="m-doc">SetIndexGenerator</a> <span class="m-doc">Index generator backed by a set of indices.</span></li>
                   <li class="m-doc-collapsible collapsed">
-                    <a href="#" onclick="return toggle(this)">class</a> <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a> <span class="m-doc">Local view of a distributed mesh partition.</span>
+                    <a href="#" onclick="return toggle(this)">class</a> <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a> <span class="m-doc">Local view of one partition of a distributed mesh.</span>
                     <ul class="m-doc">
                       <li>class <a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Builder</a> <span class="m-doc">Incremental builder for <code><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a></code>.</span></li>
-                      <li>class <a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Flags</a> <span class="m-doc">Bitmask flags indicating polytope state.</span></li>
-                      <li>struct <a href="struct_rodin_1_1_geometry_1_1_shard_1_1_polytope_map.html" class="m-doc">PolytopeMap</a> <span class="m-doc">Bidirectional correspondence between shard-local and parent indices.</span></li>
+                      <li>struct <a href="struct_rodin_1_1_geometry_1_1_shard_1_1_polytope_map.html" class="m-doc">PolytopeMap</a> <span class="m-doc">Bidirectional correspondence between local shard and distributed indices.</span></li>
                     </ul>
                   </li>
                   <li>class <a href="class_rodin_1_1_geometry_1_1_sharder.html" class="m-doc">Sharder</a> <span class="m-doc">Interface for mesh sharding algorithms.</span></li>
@@ -452,7 +451,12 @@
                       <li>struct <a href="struct_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid_options.html" class="m-doc">GridOptions</a> <span class="m-doc">Per-grid export options.</span></li>
                       <li>struct <a href="struct_rodin_1_1_i_o_1_1_x_d_m_f_1_1_grid_record.html" class="m-doc">GridRecord</a> <span class="m-doc"><a href="namespace_rodin_1_1_i_o_1_1_internal.html" class="m-doc">Internal</a> record for one named grid.</span></li>
                       <li>struct <a href="struct_rodin_1_1_i_o_1_1_x_d_m_f_1_1_keyword.html" class="m-doc">Keyword</a> <span class="m-doc">XML element names used in the <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> 3 document format.</span></li>
-                      <li>struct <a href="struct_rodin_1_1_i_o_1_1_x_d_m_f_1_1_snapshot_record.html" class="m-doc">SnapshotRecord</a> <span class="m-doc"><a href="namespace_rodin_1_1_i_o_1_1_internal.html" class="m-doc">Internal</a> record for one temporal snapshot.</span></li>
+                      <li class="m-doc-collapsible collapsed">
+                        <a href="#" onclick="return toggle(this)">struct</a> <a href="struct_rodin_1_1_i_o_1_1_x_d_m_f_1_1_snapshot_record.html" class="m-doc">SnapshotRecord</a> <span class="m-doc"><a href="namespace_rodin_1_1_i_o_1_1_internal.html" class="m-doc">Internal</a> record for one temporal snapshot.</span>
+                        <ul class="m-doc">
+                          <li>struct <a href="struct_rodin_1_1_i_o_1_1_x_d_m_f_1_1_snapshot_record_1_1_piece_meta.html" class="m-doc">PieceMeta</a> <span class="m-doc">Per-rank mesh metadata cached during <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html#a4241c0d0f7c3a62b3f49e6f8edce1a1f" class="m-doc">write()</a>.</span></li>
+                        </ul>
+                      </li>
                     </ul>
                   </li>
                 </ul>

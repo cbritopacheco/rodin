@@ -169,24 +169,13 @@
             </dt>
             <dd>Constructs an <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> writer with the given stem path (serial mode).</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a2504044d67f6395f69eb0cfb8090f497" class="m-doc">XDMF</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; stem,
-              size_t rank,
-              size_t numRanks,
-              size_t rootRank = 0)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ae31dd3c02ea7d8deb2a1b5b3bd62ba0a" class="m-doc">XDMF</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp;) <span class="m-label m-flat m-danger">deleted</span></span>
             </dt>
             <dd>Constructs an <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> writer in distributed (MPI) mode.</dd>
-            <dt id="ae31dd3c02ea7d8deb2a1b5b3bd62ba0a">
-              <span class="m-doc-wrap-bumper"><a href="#ae31dd3c02ea7d8deb2a1b5b3bd62ba0a" class="m-doc-self">XDMF</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp;) <span class="m-label m-flat m-danger">deleted</span></span>
-            </dt>
-            <dd>Non-copyable.</dd>
             <dt id="a334007009b7b2b2d5e8fd72d1a94f443">
               <span class="m-doc-wrap-bumper"><a href="#a334007009b7b2b2d5e8fd72d1a94f443" class="m-doc-self">XDMF</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Move constructible.</dd>
-            <dt id="a92ade727bb3344ca0df6924c3ec60ab4">
-              <span class="m-doc-wrap-bumper"><a href="#a92ade727bb3344ca0df6924c3ec60ab4" class="m-doc-self">~XDMF</a>(</span><span class="m-doc-wrap">)</span>
-            </dt>
-            <dd>Destructor; calls <a href="#a5ae591df94fc66ccb85cbb6565368bca" class="m-doc">close()</a> if not already closed.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -549,42 +538,16 @@
 <h5 id="autotoc_md147">Example</h5><pre class="m-code"><span class="n">IO</span><span class="o">::</span><span class="n">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="s">&quot;output/simulation&quot;</span><span class="p">);</span>
 <span class="c1">// produces: output/simulation.xdmf, output/simulation.*.h5, ...</span></pre>
           </div></section>
-          <section class="m-doc-details" id="a2504044d67f6395f69eb0cfb8090f497"><div>
+          <section class="m-doc-details" id="ae31dd3c02ea7d8deb2a1b5b3bd62ba0a"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2504044d67f6395f69eb0cfb8090f497" class="m-doc-self">XDMF</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; stem,
-              size_t rank,
-              size_t numRanks,
-              size_t rootRank = 0)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae31dd3c02ea7d8deb2a1b5b3bd62ba0a" class="m-doc-self">XDMF</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp;) <span class="m-label m-danger">deleted</span></span></span>
             </h3>
             <p>Constructs an <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> writer in distributed (MPI) mode.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">stem&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Base path for output files.</td>
-                </tr>
-                <tr>
-                  <td>rank&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>This process&#x27;s rank.</td>
-                </tr>
-                <tr>
-                  <td>numRanks&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Total number of ranks.</td>
-                </tr>
-                <tr>
-                  <td>rootRank&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Rank that writes the master <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> XML (default 0).</td>
-                </tr>
-              </tbody>
-            </table>
-<p>In distributed mode:</p><ul><li>Each rank writes its own rank-specific <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> visualization files (using <code>{rank}</code> in the file patterns).</li><li>Only the root rank writes the master <code>.xdmf</code> XML file that references all per-rank piece files as a Spatial collection.</li><li>For transient output, the master <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> contains a Temporal collection of Spatial collections.</li></ul><h5 id="autotoc_md148">Example</h5><pre class="m-code"><span class="n">IO</span><span class="o">::</span><span class="n">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="s">&quot;output/Poisson&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">comm</span><span class="p">.</span><span class="n">rank</span><span class="p">(),</span><span class="w"> </span><span class="n">comm</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+<p>In distributed mode:</p><ul><li>Each rank writes its own rank-specific <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> visualization files (using <code>{rank}</code> in the file patterns).</li><li>Only the root rank writes the master <code>.xdmf</code> XML file that references all per-rank piece files as a Spatial collection.</li><li>For transient output, the master <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> contains a Temporal collection of Spatial collections.</li><li><a href="#a4241c0d0f7c3a62b3f49e6f8edce1a1f" class="m-doc">write()</a>, flush(), and <a href="#a5ae591df94fc66ccb85cbb6565368bca" class="m-doc">close()</a> are collective operations that must be called by all ranks.</li></ul><h5 id="autotoc_md148">Example</h5><pre class="m-code"><span class="n">IO</span><span class="o">::</span><span class="n">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="n">MPI_COMM_WORLD</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;output/Poisson&quot;</span><span class="p">);</span>
 <span class="n">xdmf</span><span class="p">.</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mpiMesh</span><span class="p">);</span>
 <span class="n">xdmf</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;u&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">XDMF</span><span class="o">::</span><span class="n">Center</span><span class="o">::</span><span class="n">Node</span><span class="p">);</span>
 <span class="n">xdmf</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="mf">0.0</span><span class="p">);</span>
-<span class="n">xdmf</span><span class="p">.</span><span class="n">close</span><span class="p">();</span></pre>
+<span class="n">xdmf</span><span class="p">.</span><span class="n">close</span><span class="p">();</span></pre><p>Non-copyable.</p>
           </div></section>
           <section class="m-doc-details" id="aa7cc609300c24284b3786339a5581805"><div>
             <h3>

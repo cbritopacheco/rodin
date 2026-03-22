@@ -82,8 +82,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md197">Block Structure</a></li>
-            <li><a href="#autotoc_md198">Field-Split Preconditioning</a></li>
+            <li><a href="#autotoc_md195">Block Structure</a></li>
+            <li><a href="#autotoc_md196">Field-Split Preconditioning</a></li>
             <li>
               Reference
               <ul>
@@ -95,7 +95,7 @@
             </li>
           </ul>
         </nav>
-<p>Supports coupled multi-physics systems (e.g. Stokes, fluid-structure interaction) by accepting an arbitrary number of <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> trial and test function arguments. Assembles a block-structured <a href="_p_e_t_sc_2_math_2_linear_system_8h.html#afa0435f07e69ca0a0806164a5b7e897f" class="m-doc">Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem</a> whose global matrix and vectors are partitioned by field DOF offsets.</p><p>After calling <code><a href="#a242286126958bec41dec8f80d88b0d54" class="m-doc">solve()</a></code>, the global solution vector is sliced and scattered back into each trial function&#x27;s grid function using the precomputed offset arrays.</p><section id="autotoc_md197"><h3><a href="#autotoc_md197">Block Structure</a></h3><p>For <svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
+<p>Supports coupled multi-physics systems (e.g. Stokes, fluid-structure interaction) by accepting an arbitrary number of <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> trial and test function arguments. Assembles a block-structured <a href="_p_e_t_sc_2_math_2_linear_system_8h.html#afa0435f07e69ca0a0806164a5b7e897f" class="m-doc">Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem</a> whose global matrix and vectors are partitioned by field DOF offsets.</p><p>After calling <code><a href="#a242286126958bec41dec8f80d88b0d54" class="m-doc">solve()</a></code>, the global solution vector is sliced and scattered back into each trial function&#x27;s grid function using the precomputed offset arrays.</p><section id="autotoc_md195"><h3><a href="#autotoc_md195">Block Structure</a></h3><p>For <svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
 <title>
 $ K $
 </title>
@@ -206,7 +206,7 @@ $ O_1 = 0 $
 <use x='16.999226' y='0' xlink:href='#eq6-g2-61'/>
 <use x='29.424707' y='0' xlink:href='#eq6-g2-48'/>
 </g>
-</svg>).</p></section><section id="autotoc_md198"><h3><a href="#autotoc_md198">Field-Split Preconditioning</a></h3><p>Call <code><a href="#a8e215188d9a565862378069515709696" class="m-doc">setFieldSplits()</a></code> after <code><a href="#ade273f2556fd4951a4e7b8dad8006d5f" class="m-doc">assemble()</a></code> to create <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> <code>IS</code> objects for each trial field. These are passed to <code>PCFIELDSPLIT</code> so that the preconditioner can be configured per-block from the command line or programmatically.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="_p_e_t_sc_2_variational_2_problem_8h.html#ae1fbfa50d43bb3e1ed943e7de7f1fb73" class="m-doc">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />Problem</a> (convenience alias), Rodin::PETSc::Math::LinearSystem::FieldSplits</p></aside></section>
+</svg>).</p></section><section id="autotoc_md196"><h3><a href="#autotoc_md196">Field-Split Preconditioning</a></h3><p>Call <code><a href="#a8e215188d9a565862378069515709696" class="m-doc">setFieldSplits()</a></code> after <code><a href="#ade273f2556fd4951a4e7b8dad8006d5f" class="m-doc">assemble()</a></code> to create <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> <code>IS</code> objects for each trial field. These are passed to <code>PCFIELDSPLIT</code> so that the preconditioner can be configured per-block from the command line or programmatically.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="_p_e_t_sc_2_variational_2_problem_8h.html#ae1fbfa50d43bb3e1ed943e7de7f1fb73" class="m-doc">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />Problem</a> (convenience alias), Rodin::PETSc::Math::LinearSystem::FieldSplits</p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
