@@ -80,8 +80,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md210">Notes</a></li>
-            <li><a href="#autotoc_md211">Usage Example</a></li>
+            <li><a href="#autotoc_md232">Notes</a></li>
+            <li><a href="#autotoc_md233">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -109,7 +109,7 @@
 <use x='194.944339' y='0' xlink:href='#eq1-g1-61'/>
 <use x='207.36982' y='0' xlink:href='#eq1-g0-98'/>
 </g>
-</svg></div><p>for general (possibly non-symmetric) matrices.</p><p>IDRstab(l) is a stabilized variant in the IDR family (similar spirit to BiCGSTAB(l)).</p><section id="autotoc_md210"><h3><a href="#autotoc_md210">Notes</a></h3><ul><li>This implementation uses Eigen&#x27;s unsupported IDRSTABL.</li></ul></section><section id="autotoc_md211"><h3><a href="#autotoc_md211">Usage Example</a></h3><pre class="m-code"><span class="n">Solver</span><span class="o">::</span><span class="n">IDRSTABL</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
+</svg></div><p>for general (possibly non-symmetric) matrices.</p><p>IDRstab(l) is a stabilized variant in the IDR family (similar spirit to BiCGSTAB(l)).</p><section id="autotoc_md232"><h3><a href="#autotoc_md232">Notes</a></h3><ul><li>This implementation uses Eigen&#x27;s unsupported IDRSTABL.</li></ul></section><section id="autotoc_md233"><h3><a href="#autotoc_md233">Usage Example</a></h3><pre class="m-code"><span class="n">Solver</span><span class="o">::</span><span class="n">IDRSTABL</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
 <span class="n">solver</span><span class="p">.</span><span class="n">setTolerance</span><span class="p">(</span><span class="mf">1e-10</span><span class="p">).</span><span class="n">setMaxIterations</span><span class="p">(</span><span class="mi">1000</span><span class="p">).</span><span class="n">setL</span><span class="p">(</span><span class="mi">4</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>

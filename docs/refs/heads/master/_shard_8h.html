@@ -76,7 +76,7 @@
         <h1>
           <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_d1efb67081fb8c17d56b5a2c13c2a510.html">Geometry</a>/</span>Shard.h <span class="m-thin">file</span>
         </h1>
-        <p>Advanced mesh shard with ghost polytope tracking for distributed computing.</p>
+        <p>Local mesh shard with partition, ownership, and overlap metadata.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -104,15 +104,11 @@
             <dt>
               class <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Rodin::Geometry::Shard</a>
             </dt>
-            <dd>Local view of a distributed mesh partition.</dd>
+            <dd>Local view of one partition of a distributed mesh.</dd>
             <dt>
               struct <a href="struct_rodin_1_1_geometry_1_1_shard_1_1_polytope_map.html" class="m-doc">Rodin::Geometry::Shard::PolytopeMap</a>
             </dt>
-            <dd>Bidirectional correspondence between shard-local and parent indices.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_geometry_1_1_shard_1_1_flags.html" class="m-doc">Rodin::Geometry::Shard::Flags</a>
-            </dt>
-            <dd>Bitmask flags indicating polytope state.</dd>
+            <dd>Bidirectional correspondence between local shard and distributed indices.</dd>
             <dt>
               class <a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Rodin::Geometry::Shard::Builder</a>
             </dt>

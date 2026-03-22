@@ -77,14 +77,13 @@
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_geometry_1_1_shard.html">Shard</a>::<wbr/></span>PolytopeMap <span class="m-thin">struct</span>
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_shard_8h.html">&lt;Rodin/Geometry/Shard.h&gt;</a></div>
         </h1>
-        <p>Bidirectional correspondence between shard-local and parent indices.</p>
+        <p>Bidirectional correspondence between local shard and distributed indices.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#pub-methods">Public functions</a></li>
                 <li><a href="#pub-attribs">Public variables</a></li>
               </ul>
             </li>
@@ -100,67 +99,19 @@ $ d $
 <g id='eq1-page1'>
 <use x='0' y='0' xlink:href='#eq1-g0-100'/>
 </g>
-</svg>:</p><ul><li><code>left[local]</code> is the parent index of the local shard entity,</li><li><code>right[parent]</code> is the local shard index of that parent entity, if present in the shard.</li></ul><p>This map does not encode ownership; it only encodes index correspondence.</p>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Archive&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
-              const unsigned int version)</span>
-            </dt>
-            <dd>Serialization method.</dd>
-          </dl>
-        </section>
+</svg>:</p><ul><li><code>left[local]</code> is the distributed index of the local shard entity,</li><li><code>right[distributed]</code> is the local shard index of that distributed entity, if present in the shard.</li></ul><p>This map does not encode ownership; it only encodes index correspondence.</p>
         <section id="pub-attribs">
           <h2><a href="#pub-attribs">Public variables</a></h2>
           <dl class="m-doc">
             <dt id="abb0d0400d15a5c2a739e2f662c8c2fe5">
               std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; <a href="#abb0d0400d15a5c2a739e2f662c8c2fe5" class="m-doc-self">left</a>
             </dt>
-            <dd><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a> index to distributed index.</dd>
+            <dd>Local shard index -&gt; distributed index.</dd>
             <dt id="a030d26d9697d69d03458d1e29da8eeb1">
               <a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; <a href="#a030d26d9697d69d03458d1e29da8eeb1" class="m-doc-self">right</a>
             </dt>
-            <dd>Distributed index to shard index.</dd>
+            <dd>Distributed index -&gt; local shard index.</dd>
           </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a68e832cb064e3b7ca978d8e5911cf700"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class Archive&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />Shard::<wbr />PolytopeMap::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
-              const unsigned int version)</span></span>
-            </h3>
-            <p>Serialization method.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">Archive</td>
-                  <td>Archive type</td>
-                </tr>
-              </tbody>
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>ar&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
-                  <td>Archive object</td>
-                </tr>
-                <tr>
-                  <td>version&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Serialization version</td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
         </section>
       </div>
     </div>

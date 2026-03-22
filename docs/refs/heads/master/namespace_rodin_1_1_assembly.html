@@ -80,7 +80,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md444">Key Features</a></li>
+            <li><a href="#autotoc_md482">Key Features</a></li>
             <li>
               Reference
               <ul>
@@ -90,7 +90,7 @@
             </li>
           </ul>
         </nav>
-<p>The <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a> module provides the core infrastructure for assembling finite element matrices and vectors from variational forms. It supports both sequential and parallel assembly strategies, with specializations for different operator types and finite element spaces.</p><section id="autotoc_md444"><h3><a href="#autotoc_md444">Key Features</a></h3><ul><li><strong>Bilinear Form <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a></strong>: <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a> of stiffness matrices from expressions like <code>Integral(Grad(u), Grad(v))</code></li><li><strong>Linear Form <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a></strong>: <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a> of load vectors from expressions like <code>Integral(f, v)</code></li><li><strong>Parallel <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a></strong>: OpenMP-based parallel assembly</li><li><strong>Mixed Formulations</strong>: Support for saddle-point problems (e.g. Stokes)</li></ul></section>
+<p>The <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a> module provides the core infrastructure for assembling finite element matrices and vectors from variational forms. It supports both sequential and parallel assembly strategies, with specializations for different operator types and finite element spaces.</p><section id="autotoc_md482"><h3><a href="#autotoc_md482">Key Features</a></h3><ul><li><strong>Bilinear Form <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a></strong>: <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a> of stiffness matrices from expressions like <code>Integral(Grad(u), Grad(v))</code></li><li><strong>Linear Form <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a></strong>: <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a> of load vectors from expressions like <code>Integral(f, v)</code></li><li><strong>Parallel <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a></strong>: OpenMP-based parallel assembly</li><li><strong>Mixed Formulations</strong>: Support for saddle-point problems (e.g. Stokes)</li></ul></section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
@@ -135,6 +135,16 @@
             </dt>
             <dd><a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Default</a> assembly strategy for mixed local contexts without OpenMP.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_default_3_01_context_1_1_m_p_i_01_4.html" class="m-doc">Default&lt;Context::MPI&gt;</a>
+            </dt>
+            <dd>Selects MPI assembly when only the trial/test context is MPI.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_default_3_01_context_1_1_m_p_i_00_01_context_1_1_m_p_i_01_4.html" class="m-doc">Default&lt;Context::MPI, Context::MPI&gt;</a>
+            </dt>
+            <dd>Selects MPI assembly when both operand and assembly contexts are MPI.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Scalar, class Solution, class FES, class Value&gt;</div>
               class <a href="class_rodin_1_1_assembly_1_1_dirichlet_b_c_assembly_input.html" class="m-doc">DirichletBCAssemblyInput</a>
             </dt>
@@ -150,15 +160,39 @@
             </dt>
             <dd>Input data for tuple of linear forms assembly.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class U, class V&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_m_p_i_3_01_rodin_1_1_p_e_t_sc_1_1_math_1_1_linear_system_00_01_rodi673e6e13222aecc8dbfe1f222e7bad63.html" class="m-doc">MPI&lt;Rodin::PETSc::Math::LinearSystem, Rodin::Variational::Problem&lt;Rodin::PETSc::Math::LinearSystem, U, V&gt;&gt;</a>
+            </dt>
+            <dd>MPI-parallel assembly of a single-variable <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> problem.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class U1, class U2, class U3, class ... Us&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_m_p_i_3_01_rodin_1_1_p_e_t_sc_1_1_math_1_1_linear_system_00_01_rodie2cf6cfe581c72d462fea0061a1617d3.html" class="m-doc">MPI&lt;Rodin::PETSc::Math::LinearSystem, Rodin::Variational::Problem&lt;Rodin::PETSc::Math::LinearSystem, U1, U2, U3, Us...&gt;&gt;</a>
+            </dt>
+            <dd>MPI-parallel assembly of a multi-variable <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> problem.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Solution, class TrialFES, class TestFES&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_m_p_i_3_1_1_mat_00_01_variational_1_1_bilinear_form_3_01_solution_07cb362fbc7eb27c86030d586b8c3bdac.html" class="m-doc">MPI&lt;::Mat, Variational::BilinearForm&lt;Solution, TrialFES, TestFES, ::Mat&gt;&gt;</a>
+            </dt>
+            <dd>MPI-parallel assembly of a <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> matrix from a bilinear form.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_m_p_i_3_1_1_vec_00_01_variational_1_1_linear_form_3_01_f_e_s_00_01_1_1_vec_01_4_01_4.html" class="m-doc">MPI&lt;::Vec, Variational::LinearForm&lt;FES, ::Vec&gt;&gt;</a>
+            </dt>
+            <dd>MPI-parallel assembly of a <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector from a linear form.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_assembly_1_1_m_p_i_iteration.html" class="m-doc">MPIIteration</a>
+            </dt>
+            <dd>Iteration helper over a region of an MPI mesh shard.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Solution, class TrialFES, class TestFES&gt;</div>
               class <a href="class_rodin_1_1_assembly_1_1_open_m_p_3_01_1_1_mat_00_01_variational_1_1_bilinear_form_3_01_solu5af45a989f73eff35efbca874c481e5a.html" class="m-doc">OpenMP&lt;::Mat, Variational::BilinearForm&lt;Solution, TrialFES, TestFES, ::Mat&gt;&gt;</a>
             </dt>
-            <dd>OpenMP assembly for PETSc Mat (bilinear form)</dd>
+            <dd>OpenMP-parallel assembly of a <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> matrix from a bilinear form.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FES&gt;</div>
               class <a href="class_rodin_1_1_assembly_1_1_open_m_p_3_01_1_1_vec_00_01_variational_1_1_linear_form_3_01_f_e_s_00_01_1_1_vec_01_4_01_4.html" class="m-doc">OpenMP&lt;::Vec, Variational::LinearForm&lt;FES, ::Vec&gt;&gt;</a>
             </dt>
-            <dd>OpenMP assembly for PETSc Vec (linear form)</dd>
+            <dd>OpenMP-parallel assembly of a <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector from a linear form.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Solution, class TrialFES, class TestFES&gt;</div>
               class <a href="class_rodin_1_1_assembly_1_1_open_m_p_3_01_math_1_1_sparse_matrix_3_01typename_01_form_language_d097208cdc4a1c4029889f1e5db0254c.html" class="m-doc">OpenMP&lt;Math::SparseMatrix&lt;typename FormLanguage::Dot&lt;typename FormLanguage::Traits&lt;TrialFES&gt;::ScalarType, typename FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;::Type&gt;, Variational::BilinearForm&lt;Solution, TrialFES, TestFES, Math::SparseMatrix&lt;typename FormLanguage::Dot&lt;typename FormLanguage::Traits&lt;TrialFES&gt;::ScalarType, typename FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;::Type&gt;&gt;&gt;</a>
@@ -169,6 +203,16 @@
               class <a href="class_rodin_1_1_assembly_1_1_open_m_p_3_01_math_1_1_vector_3_01typename_01_form_language_1_1_tra7ad7cdb45420a21a2adcddc3c15da554.html" class="m-doc">OpenMP&lt;Math::Vector&lt;typename FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;, Variational::LinearForm&lt;FES, Math::Vector&lt;typename FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;&gt;&gt;</a>
             </dt>
             <dd>OpenMP assembly of the <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a> associated to a LinearForm object.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class U, class V&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_open_m_p_3_01_rodin_1_1_p_e_t_sc_1_1_math_1_1_linear_system_00_01_rabbb3795a41b5c8bf89b1e3130500f31.html" class="m-doc">OpenMP&lt;Rodin::PETSc::Math::LinearSystem, Rodin::Variational::Problem&lt;Rodin::PETSc::Math::LinearSystem, U, V&gt;&gt;</a>
+            </dt>
+            <dd>OpenMP-parallel assembly of a single-variable <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> problem.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class U1, class U2, class U3, class ... Us&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_open_m_p_3_01_rodin_1_1_p_e_t_sc_1_1_math_1_1_linear_system_00_01_rb2974dee916eda0f6ea7cf5269324799.html" class="m-doc">OpenMP&lt;Rodin::PETSc::Math::LinearSystem, Rodin::Variational::Problem&lt;Rodin::PETSc::Math::LinearSystem, U1, U2, U3, Us...&gt;&gt;</a>
+            </dt>
+            <dd>OpenMP-parallel assembly of a multi-variable <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> problem.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Solution, class TrialFES, class TestFES&gt;</div>
               class <a href="class_rodin_1_1_assembly_1_1_open_m_p_3_01std_1_1vector_3_01_eigen_1_1_triplet_3_01typename_01_fda92335c443c81761c5dfd3a06b561ca.html" class="m-doc">OpenMP&lt;std::vector&lt;Eigen::Triplet&lt;typename FormLanguage::Dot&lt;typename FormLanguage::Traits&lt;TrialFES&gt;::ScalarType, typename FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;::Type&gt;&gt;, Variational::BilinearForm&lt;Solution, TrialFES, TestFES, std::vector&lt;Eigen::Triplet&lt;typename FormLanguage::Dot&lt;typename FormLanguage::Traits&lt;TrialFES&gt;::ScalarType, typename FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;::Type&gt;&gt;&gt;&gt;</a>
@@ -189,6 +233,26 @@
               class <a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Sequential</a>
             </dt>
             <dd><a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Sequential</a> (single-threaded) assembly implementation.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class U, class V&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_sequential_3_01_rodin_1_1_p_e_t_sc_1_1_math_1_1_linear_system_00_016cee3deb2716cb08ae9993188cb53631.html" class="m-doc">Sequential&lt;Rodin::PETSc::Math::LinearSystem, Rodin::Variational::Problem&lt;Rodin::PETSc::Math::LinearSystem, U, V&gt;&gt;</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Sequential</a> assembly of a single-variable <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> problem.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class U1, class U2, class U3, class ... Us&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_sequential_3_01_rodin_1_1_p_e_t_sc_1_1_math_1_1_linear_system_00_010cd6cdea79ec32747fef951da6a6c01f.html" class="m-doc">Sequential&lt;Rodin::PETSc::Math::LinearSystem, Rodin::Variational::Problem&lt;Rodin::PETSc::Math::LinearSystem, U1, U2, U3, Us...&gt;&gt;</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Sequential</a> assembly of a multi-variable <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> problem.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Solution, class TrialFES, class TestFES&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_sequential_3_1_1_mat_00_01_variational_1_1_bilinear_form_3_01_solutd052515a70673841841a5be8fc4567c9.html" class="m-doc">Sequential&lt;::Mat, Variational::BilinearForm&lt;Solution, TrialFES, TestFES, ::Mat&gt;&gt;</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Sequential</a> assembly of a <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> matrix from a bilinear form.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_sequential_3_1_1_vec_00_01_variational_1_1_linear_form_3_01_f_e_s_00_01_1_1_vec_01_4_01_4.html" class="m-doc">Sequential&lt;::Vec, Variational::LinearForm&lt;FES, ::Vec&gt;&gt;</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Sequential</a> assembly of a <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector from a linear form.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Mesh&gt;</div>
               class <a href="class_rodin_1_1_assembly_1_1_sequential_iteration.html" class="m-doc">SequentialIteration</a>

@@ -80,11 +80,11 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md415">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md416">Accuracy</a></li>
-            <li><a href="#autotoc_md417">Common Quadrature Rules</a></li>
-            <li><a href="#autotoc_md418">Applications in FEM</a></li>
-            <li><a href="#autotoc_md419">Usage Example</a></li>
+            <li><a href="#autotoc_md453">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md454">Accuracy</a></li>
+            <li><a href="#autotoc_md455">Common Quadrature Rules</a></li>
+            <li><a href="#autotoc_md456">Applications in FEM</a></li>
+            <li><a href="#autotoc_md457">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -94,7 +94,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the QuadratureRule classes which implement numerical quadrature (integration) rules for evaluating integrals over mesh elements. Quadrature rules are fundamental to finite element assembly.</p><section id="autotoc_md415"><h3><a href="#autotoc_md415">Mathematical Foundation</a></h3><p>A quadrature rule approximates an integral as a weighted sum:</p><div class="m-math"><svg style="width: 13.281em; height: 3.470em;" viewBox="130.520375 -34.503896 127.502229 33.308382">
+<p>This file defines the QuadratureRule classes which implement numerical quadrature (integration) rules for evaluating integrals over mesh elements. Quadrature rules are fundamental to finite element assembly.</p><section id="autotoc_md453"><h3><a href="#autotoc_md453">Mathematical Foundation</a></h3><p>A quadrature rule approximates an integral as a weighted sum:</p><div class="m-math"><svg style="width: 13.281em; height: 3.470em;" viewBox="130.520375 -34.503896 127.502229 33.308382">
 <title>
 \[
   \int_K f(x) \, dx \approx \sum_{i=1}^{n_q} w_i f(x_i)
@@ -177,7 +177,7 @@ $ n_q $
 <use x='0' y='0' xlink:href='#eq4-g1-110'/>
 <use x='6.987606' y='1.793263' xlink:href='#eq4-g0-113'/>
 </g>
-</svg> is the number of quadrature points</li></ul></section><section id="autotoc_md416"><h3><a href="#autotoc_md416">Accuracy</a></h3><p>A quadrature rule is exact for polynomials up to degree <svg class="m-math" style="width: 0.612em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 5.875143 7.47198">
+</svg> is the number of quadrature points</li></ul></section><section id="autotoc_md454"><h3><a href="#autotoc_md454">Accuracy</a></h3><p>A quadrature rule is exact for polynomials up to degree <svg class="m-math" style="width: 0.612em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 5.875143 7.47198">
 <title>
 $ p $
 </title>
@@ -243,7 +243,7 @@ $ p $
 <use x='269.878934' y='-15.032404' xlink:href='#eq6-g0-80'/>
 <use x='277.184888' y='-13.239141' xlink:href='#eq6-g4-112'/>
 </g>
-</svg></div></section><section id="autotoc_md417"><h3><a href="#autotoc_md417">Common Quadrature Rules</a></h3><ul><li><strong>Gauss-Legendre</strong>: Optimal for polynomial integrands</li><li><strong>Gauss-Lobatto</strong>: Includes element vertices</li><li><strong>Vertex quadrature</strong>: Simple but low accuracy</li><li><strong>Midpoint rule</strong>: Single point at element center</li></ul></section><section id="autotoc_md418"><h3><a href="#autotoc_md418">Applications in FEM</a></h3><ul><li>Evaluating stiffness matrix entries: <svg class="m-math" style="width: 11.722em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 112.53409 13.781784">
+</svg></div></section><section id="autotoc_md455"><h3><a href="#autotoc_md455">Common Quadrature Rules</a></h3><ul><li><strong>Gauss-Legendre</strong>: Optimal for polynomial integrands</li><li><strong>Gauss-Lobatto</strong>: Includes element vertices</li><li><strong>Vertex quadrature</strong>: Simple but low accuracy</li><li><strong>Midpoint rule</strong>: Single point at element center</li></ul></section><section id="autotoc_md456"><h3><a href="#autotoc_md456">Applications in FEM</a></h3><ul><li>Evaluating stiffness matrix entries: <svg class="m-math" style="width: 11.722em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 112.53409 13.781784">
 <title>
 $ A_{ij} = \int_K \nabla \phi_i \cdot \nabla \phi_j \, dx $
 </title>
@@ -304,7 +304,7 @@ $ b_i = \int_K f \phi_i \, dx $
 <use x='59.293663' y='0' xlink:href='#eq8-g2-100'/>
 <use x='65.376356' y='0' xlink:href='#eq8-g2-120'/>
 </g>
-</svg></li><li>Computing functionals and error norms</li></ul></section><section id="autotoc_md419"><h3><a href="#autotoc_md419">Usage Example</a></h3><pre class="m-code"><span class="c1">// Quadrature rule automatically selected based on element type</span>
+</svg></li><li>Computing functionals and error norms</li></ul></section><section id="autotoc_md457"><h3><a href="#autotoc_md457">Usage Example</a></h3><pre class="m-code"><span class="c1">// Quadrature rule automatically selected based on element type</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">qr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">QuadratureRule</span><span class="p">(</span><span class="n">integrand</span><span class="p">);</span>
 <span class="n">qr</span><span class="p">.</span><span class="n">setPolytope</span><span class="p">(</span><span class="n">element</span><span class="p">);</span>
 <span class="n">Real</span><span class="w"> </span><span class="n">integral_value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qr</span><span class="p">.</span><span class="n">compute</span><span class="p">();</span></pre></section>

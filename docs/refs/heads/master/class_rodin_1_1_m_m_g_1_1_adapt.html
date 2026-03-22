@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::MMG::Adapt class | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_m_m_g.html">MMG</a>::<wbr/></span>Adapt <span class="m-thin">class</span>
+          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_adapt_8h.html">&lt;Rodin/MMG/Adapt.h&gt;</a></div>
+        </h1>
+        <p>Performs anisotropic/isotropic remeshing from a nodal size map.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>This class wraps MMG adaptation routines and dispatches automatically to:</p><ul><li>MMG2D for planar 2D meshes,</li><li>MMG3D for volumetric 3D meshes,</li><li>MMGS for surface meshes embedded in 3D.</li></ul><p>The scalar size-map field encodes target local edge length and is sampled at mesh vertices.</p><p>Parameters inherited from <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a> (hmin/hmax/hausdorff/gradation/angle) can be configured before calling <a href="#a51b804beced77044afca46839f0c06d5" class="m-doc">adapt</a>.</p>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              class <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>
+            </dt>
+            <dd>Base class for MMG-backed operations in <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a2722a25941a77e1468bd58c863abd8c4">
+              <span class="m-doc-wrap-bumper"><a href="#a2722a25941a77e1468bd58c863abd8c4" class="m-doc-self">Adapt</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Constructs an adaptation operator with default MMG settings.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a51b804beced77044afca46839f0c06d5" class="m-doc">adapt</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>&amp; mesh,
+              const <a href="_m_m_g_2_grid_function_8h.html#a5b080db16bbb2ed744518df89ccd8d06" class="m-doc">RealGridFunction</a>&amp; sizeMap)</span>
+            </dt>
+            <dd>Adapts a mesh according to a scalar nodal size map.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6ebd3d6748a11cf664266bd2e4bc10d2" class="m-doc">setAngleDetection</a>(</span><span class="m-doc-wrap">bool b = true) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">Adapt</a>&amp;</span>
+            </dt>
+            <dd>Enables/disables ridge angle detection.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a909d36e949cd743a55ab766332ac07e7" class="m-doc">setHMin</a>(</span><span class="m-doc-wrap">double hmin) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">Adapt</a>&amp;</span>
+            </dt>
+            <dd>Sets the minimum edge size constraint.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad8ad39104370c574531ae96bb862778c" class="m-doc">setHMax</a>(</span><span class="m-doc-wrap">double hmax) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">Adapt</a>&amp;</span>
+            </dt>
+            <dd>Sets the maximum edge size constraint.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af886f394b39f1e465de037270023770a" class="m-doc">setHausdorff</a>(</span><span class="m-doc-wrap">double hausd) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">Adapt</a>&amp;</span>
+            </dt>
+            <dd>Sets the Hausdorff tolerance controlling boundary approximation.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a26f4f407563c01c9a0304743a939adf5" class="m-doc">setGradation</a>(</span><span class="m-doc-wrap">double hgrad) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">Adapt</a>&amp;</span>
+            </dt>
+            <dd>Sets the allowed gradation between adjacent edge sizes.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a51b804beced77044afca46839f0c06d5"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />MMG::<wbr />Adapt::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a51b804beced77044afca46839f0c06d5" class="m-doc-self">adapt</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>&amp; mesh,
+              const <a href="_m_m_g_2_grid_function_8h.html#a5b080db16bbb2ed744518df89ccd8d06" class="m-doc">RealGridFunction</a>&amp; sizeMap)</span></span>
+            </h3>
+            <p>Adapts a mesh according to a scalar nodal size map.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">mesh&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a> to remesh in place.</td>
+                </tr>
+                <tr>
+                  <td>sizeMap&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Scalar P1 field prescribing local target sizes.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>The input mesh is converted to MMG native structures, remeshed, then converted back to <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>.</p>
+          </div></section>
+          <section class="m-doc-details" id="a6ebd3d6748a11cf664266bd2e4bc10d2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">Adapt</a>&amp; Rodin::<wbr />MMG::<wbr />Adapt::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6ebd3d6748a11cf664266bd2e4bc10d2" class="m-doc-self">setAngleDetection</a>(</span><span class="m-doc-wrap">bool b = true)</span></span>
+            </h3>
+            <p>Enables/disables ridge angle detection.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">b&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>If <code>true</code>, enable detection.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a909d36e949cd743a55ab766332ac07e7"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">Adapt</a>&amp; Rodin::<wbr />MMG::<wbr />Adapt::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a909d36e949cd743a55ab766332ac07e7" class="m-doc-self">setHMin</a>(</span><span class="m-doc-wrap">double hmin)</span></span>
+            </h3>
+            <p>Sets the minimum edge size constraint.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">hmin&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Minimum size.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad8ad39104370c574531ae96bb862778c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">Adapt</a>&amp; Rodin::<wbr />MMG::<wbr />Adapt::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad8ad39104370c574531ae96bb862778c" class="m-doc-self">setHMax</a>(</span><span class="m-doc-wrap">double hmax)</span></span>
+            </h3>
+            <p>Sets the maximum edge size constraint.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">hmax&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Maximum size.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af886f394b39f1e465de037270023770a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">Adapt</a>&amp; Rodin::<wbr />MMG::<wbr />Adapt::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af886f394b39f1e465de037270023770a" class="m-doc-self">setHausdorff</a>(</span><span class="m-doc-wrap">double hausd)</span></span>
+            </h3>
+            <p>Sets the Hausdorff tolerance controlling boundary approximation.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">hausd&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Hausdorff value.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a26f4f407563c01c9a0304743a939adf5"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">Adapt</a>&amp; Rodin::<wbr />MMG::<wbr />Adapt::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a26f4f407563c01c9a0304743a939adf5" class="m-doc-self">setGradation</a>(</span><span class="m-doc-wrap">double hgrad)</span></span>
+            </h3>
+            <p>Sets the allowed gradation between adjacent edge sizes.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">hgrad&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Gradation ratio.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

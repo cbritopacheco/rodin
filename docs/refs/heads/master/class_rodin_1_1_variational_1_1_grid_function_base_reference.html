@@ -75,15 +75,15 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_variational_2_grid_function_8h.html">&lt;Rodin/Variational/GridFunction.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class StrictType&gt;</div>
+          <div class="m-doc-template">template&lt;class Derived&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>GridFunctionBaseReference <span class="m-thin">class</span>
         </h1>
         <p>Base class for discrete finite element functions.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md307">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md308">Key Features</a></li>
+            <li><a href="#autotoc_md329">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md330">Key Features</a></li>
             <li>
               Reference
               <ul>
@@ -95,7 +95,7 @@
             </li>
           </ul>
         </nav>
-<p><a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a> represents discrete functions defined on finite element spaces, where the function is represented as a linear combination of basis functions with scalar coefficients stored in a data vector.</p><section id="autotoc_md307"><h3><a href="#autotoc_md307">Mathematical Foundation</a></h3><p>A grid function represents a discrete finite element approximation:</p><div class="m-math"><svg style="width: 10.304em; height: 3.565em;" viewBox="144.814262 -35.422661 98.914467 34.227147">
+<p><a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a> represents discrete functions defined on finite element spaces, where the function is represented as a linear combination of basis functions with scalar coefficients stored in a data vector.</p><section id="autotoc_md329"><h3><a href="#autotoc_md329">Mathematical Foundation</a></h3><p>A grid function represents a discrete finite element approximation:</p><div class="m-math"><svg style="width: 10.304em; height: 3.565em;" viewBox="144.814262 -35.422661 98.914467 34.227147">
 <title>
 \[
   u_h(x) = \sum_{i=1}^N u_i \phi_i(x)
@@ -181,13 +181,13 @@ $ N $
 <g id='eq5-page1'>
 <use x='0' y='0' xlink:href='#eq5-g0-78'/>
 </g>
-</svg> is the number of degrees of freedom</li></ul></section><section id="autotoc_md308"><h3><a href="#autotoc_md308">Key Features</a></h3><ul><li><strong>DOF Management</strong>: Automatic handling of degrees of freedom storage</li><li><strong><a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a> Evaluation</strong>: Point-wise evaluation via finite element interpolation</li><li><strong>I/O Support</strong>: Export to various visualization formats (MEDIT, MFEM)</li><li><strong>Space Association</strong>: Strong association with underlying finite element space</li></ul></section>
+</svg> is the number of degrees of freedom</li></ul></section><section id="autotoc_md330"><h3><a href="#autotoc_md330">Key Features</a></h3><ul><li><strong>DOF Management</strong>: Automatic handling of degrees of freedom storage</li><li><strong><a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a> Evaluation</strong>: Point-wise evaluation via finite element interpolation</li><li><strong>I/O Support</strong>: Export to various visualization formats (MEDIT, MFEM)</li><li><strong>Space Association</strong>: Strong association with underlying finite element space</li></ul></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase&lt;GridFunctionBaseReference&lt;StrictType&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase&lt;GridFunctionBaseReference&lt;Derived&gt;&gt;</a>
             </dt>
             <dd>Base class for function objects which can be evaluated over a mesh.</dd>
           </dl>
@@ -215,16 +215,16 @@ $ N $
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="aeb1446bb47962aaaea35e2e64a6b9bc3">
-              <span class="m-doc-wrap-bumper"><a href="#aeb1446bb47962aaaea35e2e64a6b9bc3" class="m-doc-self">GridFunctionBaseReference</a>(</span><span class="m-doc-wrap">StrictType&amp;&amp;) <span class="m-label m-flat m-danger">deleted</span></span>
+            <dt id="a47592f1313b0efabee0ff5064f4a1526">
+              <span class="m-doc-wrap-bumper"><a href="#a47592f1313b0efabee0ff5064f4a1526" class="m-doc-self">GridFunctionBaseReference</a>(</span><span class="m-doc-wrap">Derived&amp;&amp;) <span class="m-label m-flat m-danger">deleted</span></span>
             </dt>
             <dd>R-Values are not allowed.</dd>
-            <dt id="ab0cb203d1d86ba4d682fa52a9daf7f44">
-              <span class="m-doc-wrap-bumper"><a href="#ab0cb203d1d86ba4d682fa52a9daf7f44" class="m-doc-self">GridFunctionBaseReference</a>(</span><span class="m-doc-wrap">const StrictType&amp; ref) <span class="m-label m-flat m-danger">deleted</span></span>
+            <dt id="add08368934099eb4d8b13b8fc66e7c31">
+              <span class="m-doc-wrap-bumper"><a href="#add08368934099eb4d8b13b8fc66e7c31" class="m-doc-self">GridFunctionBaseReference</a>(</span><span class="m-doc-wrap">const Derived&amp; ref) <span class="m-label m-flat m-danger">deleted</span></span>
             </dt>
             <dd>Prevent implicit copies.</dd>
-            <dt id="abe56590b1fee69eea9a40788d3421c5e">
-              <span class="m-doc-wrap-bumper"><a href="#abe56590b1fee69eea9a40788d3421c5e" class="m-doc-self">GridFunctionBaseReference</a>(</span><span class="m-doc-wrap">std::reference_wrapper&lt;const StrictType&gt; ref) <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt id="a81c22bdaf4d8d0d19a39f8e59244606e">
+              <span class="m-doc-wrap-bumper"><a href="#a81c22bdaf4d8d0d19a39f8e59244606e" class="m-doc-self">GridFunctionBaseReference</a>(</span><span class="m-doc-wrap">std::reference_wrapper&lt;const Derived&gt; ref) <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs the LazyEvaluator object from a constant reference the data-full object.</dd>
             <dt id="a782d4cfe9e25df7cb65f328034858b94">
@@ -255,9 +255,9 @@ $ N $
           <section class="m-doc-details" id="a992cc9631a9fa2be535cf7e9a6789503"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class StrictType&gt;
+                template&lt;class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html" class="m-doc">GridFunctionBaseReference</a>* Rodin::<wbr />Variational::<wbr />GridFunctionBaseReference&lt;StrictType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a992cc9631a9fa2be535cf7e9a6789503" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html" class="m-doc">GridFunctionBaseReference</a>* Rodin::<wbr />Variational::<wbr />GridFunctionBaseReference&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a992cc9631a9fa2be535cf7e9a6789503" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a polymorphic copy of this object.</p>
             <table class="m-table m-fullwidth m-flat">

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Solver::SNES class | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>SNES <span class="m-thin">class</span>
+          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_s_n_e_s_8h.html">&lt;Rodin/PETSc/Solver/SNES.h&gt;</a></div>
+        </h1>
+        <p><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a> (Scalable Nonlinear Equations Solvers) wrapper.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>Wraps the <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> <code><a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a></code> context for solving nonlinear systems <svg class="m-math" style="width: 4.850em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 46.559654 11.955168">
+<title>
+$ F(x) = 0 $
+</title>
+<defs>
+<path id='eq1-g1-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq1-g1-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq1-g1-48' d='M5.355915-3.825654C5.355915-4.817933 5.296139-5.786301 4.865753-6.694894C4.375592-7.687173 3.514819-7.950187 2.929016-7.950187C2.235616-7.950187 1.3868-7.603487 .944458-6.611208C.609714-5.858032 .490162-5.116812 .490162-3.825654C.490162-2.666002 .573848-1.793275 1.004234-.944458C1.470486-.035866 2.295392 .251059 2.917061 .251059C3.957161 .251059 4.554919-.37061 4.901619-1.06401C5.332005-1.960648 5.355915-3.132254 5.355915-3.825654ZM2.917061 .011955C2.534496 .011955 1.75741-.203238 1.530262-1.506351C1.398755-2.223661 1.398755-3.132254 1.398755-3.969116C1.398755-4.94944 1.398755-5.834122 1.590037-6.539477C1.793275-7.340473 2.402989-7.711083 2.917061-7.711083C3.371357-7.711083 4.064757-7.436115 4.291905-6.40797C4.447323-5.726526 4.447323-4.782067 4.447323-3.969116C4.447323-3.16812 4.447323-2.259527 4.315816-1.530262C4.088667-.215193 3.335492 .011955 2.917061 .011955Z'/>
+<path id='eq1-g1-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq1-g0-70' d='M3.550685-3.897385H4.698381C5.606974-3.897385 5.678705-3.694147 5.678705-3.347447C5.678705-3.19203 5.654795-3.024658 5.595019-2.761644C5.571108-2.713823 5.559153-2.654047 5.559153-2.630137C5.559153-2.546451 5.606974-2.49863 5.69066-2.49863C5.786301-2.49863 5.798257-2.546451 5.846077-2.737733L6.539477-5.523288C6.539477-5.571108 6.503611-5.642839 6.419925-5.642839C6.312329-5.642839 6.300374-5.595019 6.252553-5.391781C6.001494-4.495143 5.762391-4.244085 4.722291-4.244085H3.634371L4.411457-7.340473C4.519054-7.758904 4.542964-7.79477 5.033126-7.79477H6.635118C8.129514-7.79477 8.344707-7.352428 8.344707-6.503611C8.344707-6.43188 8.344707-6.168867 8.308842-5.858032C8.296887-5.810212 8.272976-5.654795 8.272976-5.606974C8.272976-5.511333 8.332752-5.475467 8.404483-5.475467C8.488169-5.475467 8.53599-5.523288 8.5599-5.738481L8.810959-7.830635C8.810959-7.866501 8.834869-7.986052 8.834869-8.009963C8.834869-8.141469 8.727273-8.141469 8.51208-8.141469H2.84533C2.618182-8.141469 2.49863-8.141469 2.49863-7.926276C2.49863-7.79477 2.582316-7.79477 2.785554-7.79477C3.526775-7.79477 3.526775-7.711083 3.526775-7.579577C3.526775-7.519801 3.514819-7.47198 3.478954-7.340473L1.865006-.884682C1.75741-.466252 1.733499-.3467 .896638-.3467C.669489-.3467 .549938-.3467 .549938-.131507C.549938 0 .657534 0 .729265 0C.956413 0 1.195517-.02391 1.422665-.02391H2.976837C3.239851-.02391 3.526775 0 3.789788 0C3.897385 0 4.040847 0 4.040847-.215193C4.040847-.3467 3.969116-.3467 3.706102-.3467C2.761644-.3467 2.737733-.430386 2.737733-.609714C2.737733-.669489 2.761644-.765131 2.785554-.848817L3.550685-3.897385Z'/>
+<path id='eq1-g0-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g0-70'/>
+<use x='9.203615' y='0' xlink:href='#eq1-g1-40'/>
+<use x='13.755941' y='0' xlink:href='#eq1-g0-120'/>
+<use x='20.408028' y='0' xlink:href='#eq1-g1-41'/>
+<use x='28.281183' y='0' xlink:href='#eq1-g1-61'/>
+<use x='40.706664' y='0' xlink:href='#eq1-g1-48'/>
+</g>
+</svg> using Newton-type methods. Inherits <a href="class_rodin_1_1_solver_1_1_newton_solver_base.html" class="m-doc">Rodin::<wbr />Solver::<wbr />NewtonSolverBase&lt;KSP&gt;</a> so that the linear sub-problems arising at each Newton step are solved by the associated <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">Rodin::<wbr />Solver::<wbr />KSP</a> solver, and <a href="class_rodin_1_1_p_e_t_sc_1_1_object.html" class="m-doc">Rodin::<wbr />PETSc::<wbr />Object&lt;::<wbr />SNES&gt;</a> for automatic handle cleanup.</p><p>Supports both programmatic configuration (<code>setType</code>, <code>setTolerances</code>) and <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> command-line overrides (<code>-snes_type</code>, <code>-snes_rtol</code>, …).</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">Rodin::<wbr />Solver::<wbr />KSP</a>, <a href="class_rodin_1_1_solver_1_1_newton_solver_base.html" class="m-doc">Rodin::<wbr />Solver::<wbr />NewtonSolverBase</a>, <a href="_p_e_t_sc_2_math_2_linear_system_8h.html#afa0435f07e69ca0a0806164a5b7e897f" class="m-doc">Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem</a></p></aside>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Handle&gt;</div>
+              class <a href="class_rodin_1_1_p_e_t_sc_1_1_object.html" class="m-doc">Object&lt;::SNES&gt;</a>
+            </dt>
+            <dd>RAII base class for wrappers around <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> opaque handles.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LinearSolver&gt;</div>
+              class <a href="class_rodin_1_1_solver_1_1_newton_solver_base.html" class="m-doc">NewtonSolverBase&lt;KSP&gt;</a>
+            </dt>
+            <dd>Abstract base class for Newton-type nonlinear solvers.</dd>
+          </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a4a28cc1c3b15a047bb0cd8f1eec33b09">
+              using <a href="#a4a28cc1c3b15a047bb0cd8f1eec33b09" class="m-doc-self">HandleType</a> = <a href="#a069afc3a563a7e841ebe5b73daddc53a" class="m-doc">::<wbr />SNES</a>
+            </dt>
+            <dd>Handle type for the raw <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> <code><a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a></code> context pointer.</dd>
+            <dt id="a0e2ed914b272429dbc177e1882a866f1">
+              using <a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc-self">LinearSystemType</a> = <a href="_p_e_t_sc_2_math_2_linear_system_8h.html#afa0435f07e69ca0a0806164a5b7e897f" class="m-doc">PETSc::<wbr />Math::<wbr />LinearSystem</a>
+            </dt>
+            <dd>Linear system type coupling <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
+<title>
+$ A $
+</title>
+<defs>
+<path id='eq2-g0-65' d='M2.032379-1.327024C1.613948-.621669 1.207472-.382565 .633624-.3467C.502117-.334745 .406476-.334745 .406476-.119552C.406476-.047821 .466252 0 .549938 0C.765131 0 1.303113-.02391 1.518306-.02391C1.865006-.02391 2.247572 0 2.582316 0C2.654047 0 2.797509 0 2.797509-.227148C2.797509-.334745 2.701868-.3467 2.630137-.3467C2.355168-.37061 2.12802-.466252 2.12802-.753176C2.12802-.920548 2.199751-1.052055 2.355168-1.315068L3.263761-2.82142H6.312329C6.324284-2.713823 6.324284-2.618182 6.336239-2.510585C6.372105-2.199751 6.515567-.956413 6.515567-.729265C6.515567-.37061 5.905853-.3467 5.71457-.3467C5.583064-.3467 5.451557-.3467 5.451557-.131507C5.451557 0 5.559153 0 5.630884 0C5.834122 0 6.073225-.02391 6.276463-.02391H6.957908C7.687173-.02391 8.2132 0 8.225156 0C8.308842 0 8.440349 0 8.440349-.227148C8.440349-.3467 8.332752-.3467 8.153425-.3467C7.49589-.3467 7.483935-.454296 7.44807-.812951L6.718804-8.272976C6.694894-8.51208 6.647073-8.53599 6.515567-8.53599C6.396015-8.53599 6.324284-8.51208 6.216687-8.332752L2.032379-1.327024ZM3.466999-3.16812L5.869988-7.185056L6.276463-3.16812H3.466999Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g0-65'/>
+</g>
+</svg>, <svg class="m-math" style="width: 0.778em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 7.47198 8.302191">
+<title>
+$ \mathbf{b} $
+</title>
+<defs>
+<path id='eq3-g0-98' d='M2.486675-8.296887L.418431-8.201245V-7.687173C1.159651-7.687173 1.243337-7.687173 1.243337-7.220922V0H1.745455C1.948692-.227148 2.15193-.454296 2.343213-.6934C2.952927-.059776 3.610461 .071731 4.088667 .071731C5.738481 .071731 7.005729-.932503 7.005729-2.666002C7.005729-4.303861 5.881943-5.379826 4.244085-5.379826C3.53873-5.379826 2.976837-5.152677 2.486675-4.770112V-8.296887ZM2.546451-4.196264C2.964882-4.770112 3.58655-4.985305 4.088667-4.985305C5.571108-4.985305 5.571108-3.466999 5.571108-2.677958C5.571108-2.139975 5.571108-1.458531 5.284184-1.016189C4.913574-.442341 4.351681-.32279 3.969116-.32279C3.156164-.32279 2.713823-.896638 2.546451-1.159651V-4.196264Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='0' y='0' xlink:href='#eq3-g0-98'/>
+</g>
+</svg>, and <svg class="m-math" style="width: 0.739em; height: 0.553em; vertical-align: -0.000em;" viewBox="0 -5.313399 7.098381 5.313399">
+<title>
+$ \mathbf{x} $
+</title>
+<defs>
+<path id='eq4-g0-120' d='M4.028892-2.952927L5.415691-4.542964C5.547198-4.698381 5.654795-4.794022 6.647073-4.794022V-5.308095C5.977584-5.284184 5.953674-5.284184 5.547198-5.284184C5.200498-5.284184 4.686426-5.284184 4.351681-5.308095V-4.794022C4.578829-4.794022 4.829888-4.734247 4.829888-4.65056C4.829888-4.62665 4.770112-4.542964 4.746202-4.519054L3.706102-3.347447L2.52254-4.794022H3.024658V-5.308095C2.749689-5.284184 1.936737-5.284184 1.613948-5.284184C1.255293-5.284184 .609714-5.284184 .274969-5.308095V-4.794022H1.123786L2.988792-2.52254L1.43462-.765131C1.291158-.597758 1.207472-.514072 .215193-.514072V0C.932503-.02391 .956413-.02391 1.327024-.02391C1.673724-.02391 2.175841-.02391 2.510585 0V-.514072C2.283437-.514072 2.032379-.573848 2.032379-.657534C2.032379-.669489 2.032379-.681445 2.116065-.777086L3.311582-2.12802L4.638605-.514072H4.136488V0C4.423412-.02391 5.224408-.02391 5.559153-.02391C5.917808-.02391 6.551432-.02391 6.886177 0V-.514072H6.049315L4.028892-2.952927Z'/>
+</defs>
+<g id='eq4-page1'>
+<use x='0' y='0' xlink:href='#eq4-g0-120'/>
+</g>
+</svg>.</dd>
+            <dt id="a1c2b8e781aa99081ace8d8ce8d3790de">
+              using <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc-self">VectorType</a> = ::Vec
+            </dt>
+            <dd><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector type (<code>::Vec</code>) for the nonlinear residual and solution.</dd>
+            <dt id="ab6098d508adace773204c1e42ece893a">
+              using <a href="#ab6098d508adace773204c1e42ece893a" class="m-doc-self">ProblemBaseType</a> = <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Variational::<wbr />ProblemBase</a>&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&gt;
+            </dt>
+            <dd>Base problem type that provides the linear system.</dd>
+            <dt id="ab1699791ec3d0e386e024a16ab8a147f">
+              using <a href="#ab1699791ec3d0e386e024a16ab8a147f" class="m-doc-self">PetscParent</a> = <a href="class_rodin_1_1_p_e_t_sc_1_1_object.html" class="m-doc">PETSc::<wbr />Object</a>&lt;<a href="#a4a28cc1c3b15a047bb0cd8f1eec33b09" class="m-doc">HandleType</a>&gt;
+            </dt>
+            <dd>Parent class providing <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> object handle management.</dd>
+            <dt id="a0c81499dd18116728b3ce8d2667fa482">
+              using <a href="#a0c81499dd18116728b3ce8d2667fa482" class="m-doc-self">NewtonSolverParent</a> = <a href="class_rodin_1_1_solver_1_1_newton_solver_base.html" class="m-doc">NewtonSolverBase</a>&lt;<a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a>&gt;
+            </dt>
+            <dd>Parent class providing the Newton solver interface.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a069afc3a563a7e841ebe5b73daddc53a" class="m-doc">SNES</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a>&amp; ksp) <span class="m-label m-flat m-info">explicit</span> </span>
+            </dt>
+            <dd>Construct <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a> from a <a href="namespace_rodin.html" class="m-doc">Rodin</a> <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a> linear solver.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aad9ff28fcbd28a8c155e4fc50b055429" class="m-doc">setType</a>(</span><span class="m-doc-wrap">::SNESType type) -&gt; <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Selects the nonlinear solver algorithm.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a47285502db3f27b7dc401e97e7a02355" class="m-doc">setTolerances</a>(</span><span class="m-doc-wrap">PetscReal abstol,
+              PetscReal rtol,
+              PetscReal stol,
+              PetscInt maxIt,
+              PetscInt maxF) -&gt; <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Sets nonlinear convergence tolerances and limits.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ab7d0e5809cd6fa1903a32f917e38c96e" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>&amp; x) <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Solves the nonlinear system <svg class="m-math" style="width: 4.850em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 46.559654 11.955168">
+<title>
+$ F(x) = 0 $
+</title>
+<defs>
+<path id='eq5-g1-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq5-g1-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq5-g1-48' d='M5.355915-3.825654C5.355915-4.817933 5.296139-5.786301 4.865753-6.694894C4.375592-7.687173 3.514819-7.950187 2.929016-7.950187C2.235616-7.950187 1.3868-7.603487 .944458-6.611208C.609714-5.858032 .490162-5.116812 .490162-3.825654C.490162-2.666002 .573848-1.793275 1.004234-.944458C1.470486-.035866 2.295392 .251059 2.917061 .251059C3.957161 .251059 4.554919-.37061 4.901619-1.06401C5.332005-1.960648 5.355915-3.132254 5.355915-3.825654ZM2.917061 .011955C2.534496 .011955 1.75741-.203238 1.530262-1.506351C1.398755-2.223661 1.398755-3.132254 1.398755-3.969116C1.398755-4.94944 1.398755-5.834122 1.590037-6.539477C1.793275-7.340473 2.402989-7.711083 2.917061-7.711083C3.371357-7.711083 4.064757-7.436115 4.291905-6.40797C4.447323-5.726526 4.447323-4.782067 4.447323-3.969116C4.447323-3.16812 4.447323-2.259527 4.315816-1.530262C4.088667-.215193 3.335492 .011955 2.917061 .011955Z'/>
+<path id='eq5-g1-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq5-g0-70' d='M3.550685-3.897385H4.698381C5.606974-3.897385 5.678705-3.694147 5.678705-3.347447C5.678705-3.19203 5.654795-3.024658 5.595019-2.761644C5.571108-2.713823 5.559153-2.654047 5.559153-2.630137C5.559153-2.546451 5.606974-2.49863 5.69066-2.49863C5.786301-2.49863 5.798257-2.546451 5.846077-2.737733L6.539477-5.523288C6.539477-5.571108 6.503611-5.642839 6.419925-5.642839C6.312329-5.642839 6.300374-5.595019 6.252553-5.391781C6.001494-4.495143 5.762391-4.244085 4.722291-4.244085H3.634371L4.411457-7.340473C4.519054-7.758904 4.542964-7.79477 5.033126-7.79477H6.635118C8.129514-7.79477 8.344707-7.352428 8.344707-6.503611C8.344707-6.43188 8.344707-6.168867 8.308842-5.858032C8.296887-5.810212 8.272976-5.654795 8.272976-5.606974C8.272976-5.511333 8.332752-5.475467 8.404483-5.475467C8.488169-5.475467 8.53599-5.523288 8.5599-5.738481L8.810959-7.830635C8.810959-7.866501 8.834869-7.986052 8.834869-8.009963C8.834869-8.141469 8.727273-8.141469 8.51208-8.141469H2.84533C2.618182-8.141469 2.49863-8.141469 2.49863-7.926276C2.49863-7.79477 2.582316-7.79477 2.785554-7.79477C3.526775-7.79477 3.526775-7.711083 3.526775-7.579577C3.526775-7.519801 3.514819-7.47198 3.478954-7.340473L1.865006-.884682C1.75741-.466252 1.733499-.3467 .896638-.3467C.669489-.3467 .549938-.3467 .549938-.131507C.549938 0 .657534 0 .729265 0C.956413 0 1.195517-.02391 1.422665-.02391H2.976837C3.239851-.02391 3.526775 0 3.789788 0C3.897385 0 4.040847 0 4.040847-.215193C4.040847-.3467 3.969116-.3467 3.706102-.3467C2.761644-.3467 2.737733-.430386 2.737733-.609714C2.737733-.669489 2.761644-.765131 2.785554-.848817L3.550685-3.897385Z'/>
+<path id='eq5-g0-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+</defs>
+<g id='eq5-page1'>
+<use x='0' y='0' xlink:href='#eq5-g0-70'/>
+<use x='9.203615' y='0' xlink:href='#eq5-g1-40'/>
+<use x='13.755941' y='0' xlink:href='#eq5-g0-120'/>
+<use x='20.408028' y='0' xlink:href='#eq5-g1-41'/>
+<use x='28.281183' y='0' xlink:href='#eq5-g1-61'/>
+<use x='40.706664' y='0' xlink:href='#eq5-g1-48'/>
+</g>
+</svg>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a82c4e061043c378b56ebc8cc84408c84" class="m-doc">getHandle</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a4a28cc1c3b15a047bb0cd8f1eec33b09" class="m-doc">HandleType</a>&amp; <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a mutable reference to the underlying <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a> handle.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad4f4c6d41b1bb245426b426da552f6ca" class="m-doc">getHandle</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a4a28cc1c3b15a047bb0cd8f1eec33b09" class="m-doc">HandleType</a>&amp; <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a read-only reference to the underlying <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a> handle.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5bbd3c81d09b40cbec90d3d4d7ae7358" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Creates a heap-allocated copy of this <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a> solver.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a069afc3a563a7e841ebe5b73daddc53a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a069afc3a563a7e841ebe5b73daddc53a" class="m-doc-self">SNES</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a>&amp; ksp) <span class="m-label m-info">explicit</span> </span></span>
+            </h3>
+            <p>Construct <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a> from a <a href="namespace_rodin.html" class="m-doc">Rodin</a> <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a> linear solver.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ksp</td>
+                  <td><a href="namespace_rodin.html" class="m-doc">Rodin</a> <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a> wrapper; the associated ProblemBase is obtained via ksp.getProblem().</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aad9ff28fcbd28a8c155e4fc50b055429"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a>&amp; Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aad9ff28fcbd28a8c155e4fc50b055429" class="m-doc-self">setType</a>(</span><span class="m-doc-wrap">::SNESType type) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Selects the nonlinear solver algorithm.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">type</td>
+                  <td><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a> type string (e.g. <code>SNESNEWTONLS</code>).</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to <code>*this</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a47285502db3f27b7dc401e97e7a02355"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a>&amp; Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a47285502db3f27b7dc401e97e7a02355" class="m-doc-self">setTolerances</a>(</span><span class="m-doc-wrap">PetscReal abstol,
+              PetscReal rtol,
+              PetscReal stol,
+              PetscInt maxIt,
+              PetscInt maxF) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Sets nonlinear convergence tolerances and limits.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">abstol</td>
+                  <td>Absolute convergence tolerance.</td>
+                </tr>
+                <tr>
+                  <td>rtol</td>
+                  <td>Relative convergence tolerance.</td>
+                </tr>
+                <tr>
+                  <td>stol</td>
+                  <td>Convergence tolerance in terms of step norm.</td>
+                </tr>
+                <tr>
+                  <td>maxIt</td>
+                  <td>Maximum number of nonlinear iterations.</td>
+                </tr>
+                <tr>
+                  <td>maxF</td>
+                  <td>Maximum number of function evaluations.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to <code>*this</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab7d0e5809cd6fa1903a32f917e38c96e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab7d0e5809cd6fa1903a32f917e38c96e" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>&amp; x) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Solves the nonlinear system <svg class="m-math" style="width: 4.850em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 46.559654 11.955168">
+<title>
+$ F(x) = 0 $
+</title>
+<defs>
+<path id='eq5-g1-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq5-g1-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq5-g1-48' d='M5.355915-3.825654C5.355915-4.817933 5.296139-5.786301 4.865753-6.694894C4.375592-7.687173 3.514819-7.950187 2.929016-7.950187C2.235616-7.950187 1.3868-7.603487 .944458-6.611208C.609714-5.858032 .490162-5.116812 .490162-3.825654C.490162-2.666002 .573848-1.793275 1.004234-.944458C1.470486-.035866 2.295392 .251059 2.917061 .251059C3.957161 .251059 4.554919-.37061 4.901619-1.06401C5.332005-1.960648 5.355915-3.132254 5.355915-3.825654ZM2.917061 .011955C2.534496 .011955 1.75741-.203238 1.530262-1.506351C1.398755-2.223661 1.398755-3.132254 1.398755-3.969116C1.398755-4.94944 1.398755-5.834122 1.590037-6.539477C1.793275-7.340473 2.402989-7.711083 2.917061-7.711083C3.371357-7.711083 4.064757-7.436115 4.291905-6.40797C4.447323-5.726526 4.447323-4.782067 4.447323-3.969116C4.447323-3.16812 4.447323-2.259527 4.315816-1.530262C4.088667-.215193 3.335492 .011955 2.917061 .011955Z'/>
+<path id='eq5-g1-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq5-g0-70' d='M3.550685-3.897385H4.698381C5.606974-3.897385 5.678705-3.694147 5.678705-3.347447C5.678705-3.19203 5.654795-3.024658 5.595019-2.761644C5.571108-2.713823 5.559153-2.654047 5.559153-2.630137C5.559153-2.546451 5.606974-2.49863 5.69066-2.49863C5.786301-2.49863 5.798257-2.546451 5.846077-2.737733L6.539477-5.523288C6.539477-5.571108 6.503611-5.642839 6.419925-5.642839C6.312329-5.642839 6.300374-5.595019 6.252553-5.391781C6.001494-4.495143 5.762391-4.244085 4.722291-4.244085H3.634371L4.411457-7.340473C4.519054-7.758904 4.542964-7.79477 5.033126-7.79477H6.635118C8.129514-7.79477 8.344707-7.352428 8.344707-6.503611C8.344707-6.43188 8.344707-6.168867 8.308842-5.858032C8.296887-5.810212 8.272976-5.654795 8.272976-5.606974C8.272976-5.511333 8.332752-5.475467 8.404483-5.475467C8.488169-5.475467 8.53599-5.523288 8.5599-5.738481L8.810959-7.830635C8.810959-7.866501 8.834869-7.986052 8.834869-8.009963C8.834869-8.141469 8.727273-8.141469 8.51208-8.141469H2.84533C2.618182-8.141469 2.49863-8.141469 2.49863-7.926276C2.49863-7.79477 2.582316-7.79477 2.785554-7.79477C3.526775-7.79477 3.526775-7.711083 3.526775-7.579577C3.526775-7.519801 3.514819-7.47198 3.478954-7.340473L1.865006-.884682C1.75741-.466252 1.733499-.3467 .896638-.3467C.669489-.3467 .549938-.3467 .549938-.131507C.549938 0 .657534 0 .729265 0C.956413 0 1.195517-.02391 1.422665-.02391H2.976837C3.239851-.02391 3.526775 0 3.789788 0C3.897385 0 4.040847 0 4.040847-.215193C4.040847-.3467 3.969116-.3467 3.706102-.3467C2.761644-.3467 2.737733-.430386 2.737733-.609714C2.737733-.669489 2.761644-.765131 2.785554-.848817L3.550685-3.897385Z'/>
+<path id='eq5-g0-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+</defs>
+<g id='eq5-page1'>
+<use x='0' y='0' xlink:href='#eq5-g0-70'/>
+<use x='9.203615' y='0' xlink:href='#eq5-g1-40'/>
+<use x='13.755941' y='0' xlink:href='#eq5-g0-120'/>
+<use x='20.408028' y='0' xlink:href='#eq5-g1-41'/>
+<use x='28.281183' y='0' xlink:href='#eq5-g1-61'/>
+<use x='40.706664' y='0' xlink:href='#eq5-g1-48'/>
+</g>
+</svg>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">x&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>Initial guess on input; solution on output.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a82c4e061043c378b56ebc8cc84408c84"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="#a4a28cc1c3b15a047bb0cd8f1eec33b09" class="m-doc">HandleType</a>&amp; Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a82c4e061043c378b56ebc8cc84408c84" class="m-doc-self">getHandle</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a mutable reference to the underlying <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a> handle.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Mutable reference to the <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a> handle.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad4f4c6d41b1bb245426b426da552f6ca"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="#a4a28cc1c3b15a047bb0cd8f1eec33b09" class="m-doc">HandleType</a>&amp; Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad4f4c6d41b1bb245426b426da552f6ca" class="m-doc-self">getHandle</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a read-only reference to the underlying <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a> handle.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Const reference to the <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a> handle.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5bbd3c81d09b40cbec90d3d4d7ae7358"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a>* Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5bbd3c81d09b40cbec90d3d4d7ae7358" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Creates a heap-allocated copy of this <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a> solver.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to the cloned <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a> instance.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>
