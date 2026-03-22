@@ -1444,10 +1444,10 @@ namespace Rodin::IO
       HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaSize, static_cast<HDF5::U64>(nv));
       HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaDimension, static_cast<HDF5::U64>(vdim));
 
-      // Use the grid function's own FES mesh for polytope lookup so the
-      // Point's mesh reference matches the identity check in getValue().
-      // This is essential for distributed (MPI) meshes where visMesh is
-      // the shard but the GF is defined on the parent MPI mesh.
+      // Use the grid function's own FES mesh for polytope lookup so that
+      // polytopeMesh == fesMesh in GridFunctionBase::getValue() succeeds.
+      // This is essential for MPI meshes where visMesh is the shard but
+      // the GF is defined on the parent MPI mesh.
       const auto& gfMesh = gf.getFiniteElementSpace().getMesh();
       const Geometry::Polytope::Traits ts(Geometry::Polytope::Type::Point);
 
@@ -1555,8 +1555,8 @@ namespace Rodin::IO
       HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaSize, static_cast<HDF5::U64>(nc));
       HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaDimension, static_cast<HDF5::U64>(vdim));
 
-      // Use the grid function's own FES mesh for polytope lookup so the
-      // Point's mesh reference matches the identity check in getValue().
+      // Same rationale as writeXDMFNodeAttribute: use the GF's mesh for
+      // polytope lookup so polytopeMesh == fesMesh holds in getValue().
       const auto& gfMesh = gf.getFiniteElementSpace().getMesh();
       const Geometry::Polytope::Traits ts(Geometry::Polytope::Type::Point);
 
