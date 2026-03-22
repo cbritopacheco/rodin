@@ -79,6 +79,10 @@ if (RODIN_USE_PETSC)
   add_subdirectory(PETSc)
 endif()
 
+if (RODIN_USE_T8CODE)
+  add_subdirectory(T8Code)
+endif()
+
 if (RODIN_USE_MPI)
   add_subdirectory(MPI)
 endif()

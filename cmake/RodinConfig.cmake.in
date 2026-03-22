@@ -31,4 +31,8 @@ if(@RODIN_USE_PETSC@)
   find_dependency(PETSc REQUIRED)
 endif()
 
+if(@RODIN_USE_T8CODE@)
+  find_dependency(T8Code REQUIRED)
+endif()
+
 include("${CMAKE_CURRENT_LIST_DIR}/RodinTargets.cmake")

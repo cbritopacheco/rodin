@@ -76,6 +76,7 @@ option(RODIN_USE_PARDISO              "Use Rodin with Pardiso support"          
 option(RODIN_USE_APPLE_ACCELERATE     "Use Rodin with Apple Accelerate support"   OFF)
 option(RODIN_USE_SCOTCH               "Use Rodin with Scotch support"             OFF)
 option(RODIN_USE_PETSC                "Use Rodin with PETSc support"              OFF)
+option(RODIN_USE_T8CODE               "Use Rodin with t8code AMR support"         OFF)
 option(RODIN_SILENCE_WARNINGS         "Silence warnings outputted by Rodin"       OFF)
 option(RODIN_SILENCE_EXCEPTIONS       "Silence exceptions thrown by Rodin"        ON)
 option(RODIN_CODE_COVERAGE            "Compile with code coverage flags"          OFF)
@@ -256,6 +257,11 @@ if (RODIN_BUILD_SRC)
   # ---- PETSc ----
   if (RODIN_USE_PETSC)
     find_package(PETSc REQUIRED)
+  endif()
+
+  # ---- t8code ----
+  if (RODIN_USE_T8CODE)
+    find_package(T8Code REQUIRED)
   endif()
 
   # ---- Scotch ----

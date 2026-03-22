@@ -219,6 +219,20 @@
 
 /**
  * @ingroup RodinDirectives
+ * @brief Indicates if Rodin is built with t8code AMR support.
+ *
+ * # Utilization
+ *
+ * @code{.cpp}
+ * #ifdef RODIN_USE_T8CODE
+ *   // Code that uses t8code for adaptive mesh refinement.
+ * #endif
+ * @endcode
+ */
+#cmakedefine RODIN_USE_T8CODE
+
+/**
+ * @ingroup RodinDirectives
  * @brief Indicates the maximal space dimension.
  */
 #define RODIN_MAXIMAL_SPACE_DIMENSION 3
