@@ -4,6 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file Common.h
+ * @brief Common MMG integration types and utility accessors.
+ */
 #ifndef RODIN_EXTERNAL_MMG_COMMON_H
 #define RODIN_EXTERNAL_MMG_COMMON_H
 
@@ -35,35 +39,62 @@
 namespace Rodin::MMG
 {
   /**
-  * @brief Empty class tag to specify that a material reference should not be
-  * splitted.
-  */
+   * @brief Tag type indicating that a material reference must not be split.
+   *
+   * Used by @ref SplitMap for level-set multi-material workflows in
+   * @ref LevelSetDiscretizer.
+   */
   struct NoSplitT {};
 
   /**
-  * @brief Instance of the empty struct tag NoSplitT.
-  */
+   * @brief Singleton tag instance for convenience in split configuration.
+   *
+   * Example:
+   * @code
+   * SplitMap split;
+   * split[5] = NoSplit;
+   * @endcode
+   */
   static constexpr NoSplitT NoSplit;
 
   /**
-  * @brief Class to specify the interior and exterior material references.
-  */
+   * @brief Interior/exterior labels produced when splitting one material.
+   *
+   * Used as the mapped value in @ref SplitMap.
+   */
   struct Split
   {
-    Geometry::Attribute   interior; /// Reference for the interior domain
-    Geometry::Attribute   exterior; /// Reference for exterior domain
+    Geometry::Attribute   interior; ///< Target attribute for the interior side.
+    Geometry::Attribute   exterior; ///< Target attribute for the exterior side.
   };
 
   /**
-  * @brief Map indicating how a material reference should be split into
-  * exterior and interior material references.
-  */
+   * @brief Material splitting policy map used by level-set discretization.
+   *
+   * Keys are input material attributes from the source mesh.
+   * Values describe whether each material is split into distinct interior/exterior
+   * labels (@ref Split) or kept unchanged (@ref NoSplitT).
+   *
+   * This map is consumed by @ref LevelSetDiscretizer::setSplit.
+   */
   using SplitMap = UnorderedMap<Geometry::Attribute, std::variant<Split, NoSplitT>>;
 
+  /**
+   * @brief Gets the configured path to the `mshdist` executable.
+   * @returns Null-terminated executable path.
+   */
   const char* getISCDMshdistExecutable();
 
+  /**
+   * @brief Gets the configured path to the `advect` executable.
+   * @returns Null-terminated executable path.
+   */
   const char* getISCDAdvectExecutable();
 
+  /**
+   * @brief Gets the MMG verbosity level selected at configuration time.
+   * @returns MMG verbosity value passed to MMG `imprim` settings.
+   */
   int getMMGVerbosityLevel();
 }
 

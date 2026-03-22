@@ -23,8 +23,6 @@
 
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
-#include "GridFunction.h"
-
 namespace Rodin::FormLanguage
 {
   template <class Range, class Data, class Mesh>

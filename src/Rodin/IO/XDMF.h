@@ -51,6 +51,7 @@
 #define RODIN_IO_XDMF_H
 
 #include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <string>
 #include <string_view>
@@ -65,6 +66,10 @@
 #include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Geometry/ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
+
+#ifdef RODIN_USE_MPI
+#include <mpi.h>
+#endif
 
 #include "ForwardDecls.h"
 
@@ -398,31 +403,34 @@ namespace Rodin::IO
        *   references all per-rank piece files as a Spatial collection.
        * - For transient output, the master XDMF contains a Temporal
        *   collection of Spatial collections.
+       * - write(), flush(), and close() are collective operations that
+       *   must be called by all ranks.
        *
+       * @param[in] comm      MPI communicator.
        * @param[in] stem      Base path for output files.
-       * @param[in] rank      This process's rank.
-       * @param[in] numRanks  Total number of ranks.
        * @param[in] rootRank  Rank that writes the master XDMF XML (default 0).
        *
        * ## Example
        * ```cpp
-       * IO::XDMF xdmf("output/Poisson", comm.rank(), comm.size());
+       * IO::XDMF xdmf(MPI_COMM_WORLD, "output/Poisson");
        * xdmf.setMesh(mpiMesh);
        * xdmf.add("u", u, IO::XDMF::Center::Node);
        * xdmf.write(0.0);
        * xdmf.close();
        * ```
        */
-      XDMF(const boost::filesystem::path& stem,
-           size_t rank, size_t numRanks, size_t rootRank = 0);
+#ifdef RODIN_USE_MPI
+      XDMF(MPI_Comm comm,
+           const boost::filesystem::path& stem,
+           size_t rootRank = 0);
+#endif
 
       XDMF(const XDMF&) = delete;        ///< Non-copyable.
       XDMF& operator=(const XDMF&) = delete;  ///< Non-copyable.
       XDMF(XDMF&&) = default;           ///< Move constructible.
       XDMF& operator=(XDMF&&) = default; ///< Move assignable.
 
-      /// @brief Destructor; calls close() if not already closed.
-      ~XDMF();
+      ~XDMF() = default;
 
       /**
        * @brief Returns the stem path set at construction.
@@ -619,6 +627,16 @@ namespace Rodin::IO
           size_t topologicalDimension = 0;
         };
 
+        /// @brief Per-rank mesh metadata cached during write().
+        struct PieceMeta
+        {
+          std::uint64_t vertexCount = 0;
+          std::uint64_t cellCount = 0;
+          std::uint64_t meshDimension = 0;
+          std::uint64_t spaceDimension = 0;
+          std::uint64_t topologySize = 0;
+        };
+
         Real time = 0;
         boost::filesystem::path meshFile;
         std::vector<AttributeRecord> attributes;
@@ -629,6 +647,9 @@ namespace Rodin::IO
         size_t meshDimension = 0;
         size_t spaceDimension = 0;
         size_t topologySize = 0;
+
+        /// @brief Per-rank metadata (size 1 in serial, numRanks on root in distributed).
+        std::vector<PieceMeta> pieces;
       };
 
       /// @brief Internal record for one named grid.
@@ -656,6 +677,9 @@ namespace Rodin::IO
       size_t m_rank = 0;                  ///< This process's rank.
       size_t m_numRanks = 1;              ///< Total number of ranks.
       size_t m_rootRank = 0;              ///< Root rank that writes master XDMF XML.
+#ifdef RODIN_USE_MPI
+      MPI_Comm m_comm = MPI_COMM_NULL;    ///< Non-owning MPI communicator.
+#endif
 
       /// @brief Writes a single Uniform grid XML element.
       void writeUniformGrid(
@@ -663,6 +687,9 @@ namespace Rodin::IO
           const std::string& gridName,
           const SnapshotRecord& snap,
           size_t baseIndent) const;
+
+      /// @brief Gathers per-rank mesh metadata into snap.pieces.
+      void gatherPieceMeta(SnapshotRecord& snap) const;
   };
 
   // ---- template method implementations ------------------------------------

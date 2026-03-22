@@ -7,6 +7,31 @@
 #ifndef RODIN_PETSC_IO_HDF5_H
 #define RODIN_PETSC_IO_HDF5_H
 
+/**
+ * @file HDF5.h
+ * @brief HDF5 IO support for PETSc-backed grid functions.
+ *
+ * Provides `GridFunctionPrinter` and `GridFunctionLoader` specializations
+ * that serialise the locally-owned portion of a PETSc `Vec` to/from HDF5
+ * files.  This enables checkpoint/restart workflows and post-processing
+ * with external HDF5-compatible tools.
+ *
+ * ## HDF5 File Layout
+ *
+ * ```
+ * /GridFunction/
+ * ├── Meta/
+ * │   ├── Size       (unsigned long long — number of local DOFs)
+ * │   └── Dimension  (unsigned long long — vector dimension)
+ * └── Values/
+ *     └── Data       (1-D array of double — DOF coefficients)
+ * ```
+ *
+ * @see Rodin::IO::GridFunctionPrinter,
+ *      Rodin::IO::GridFunctionLoader,
+ *      Rodin::PETSc::Variational::GridFunction
+ */
+
 #include <petscvec.h>
 #include <petscsys.h>
 #include <petscmath.h>
@@ -21,8 +46,17 @@
 
 namespace Rodin::IO
 {
+  /**
+   * @brief Internal helpers for PETSc HDF5 serialization primitives.
+   */
   namespace Internal
   {
+    /**
+     * @brief Writes a single `unsigned long long` scalar to an HDF5 dataset.
+     * @param file  Open HDF5 file handle.
+     * @param path  Dataset path within the file (e.g. `"/GridFunction/Meta/Size"`).
+     * @param value The value to write.
+     */
     inline void writeScalarULL(hid_t file, const char* path, unsigned long long value)
     {
       const auto space = H5Screate(H5S_SCALAR);
@@ -36,6 +70,12 @@ namespace Rodin::IO
       H5Sclose(space);
     }
 
+    /**
+     * @brief Reads a 1-D array of `double` values from an HDF5 dataset.
+     * @param file Open HDF5 file handle.
+     * @param path Dataset path within the file.
+     * @returns Vector of `double` values read from the dataset.
+     */
     inline std::vector<double> readVectorDouble(hid_t file, const char* path)
     {
       const auto ds = H5Dopen2(file, path, H5P_DEFAULT);
@@ -61,6 +101,12 @@ namespace Rodin::IO
       return v;
     }
 
+    /**
+     * @brief Reads a single `unsigned long long` scalar from an HDF5 dataset.
+     * @param file Open HDF5 file handle.
+     * @param path Dataset path within the file.
+     * @returns The scalar value read.
+     */
     inline unsigned long long readScalarULL(hid_t file, const char* path)
     {
       const auto ds = H5Dopen2(file, path, H5P_DEFAULT);
@@ -75,19 +121,48 @@ namespace Rodin::IO
 
   }
 
+  /**
+   * @brief HDF5 loader for PETSc-backed grid functions.
+   *
+   * Reads per-rank DOF values from an HDF5 file into the local portion
+   * of a distributed PETSc vector.
+   *
+   * ## HDF5 Layout
+   *
+   * The expected file structure is:
+   * - `/GridFunction/Values/Data` — 1-D array of DOF values
+   * - `/GridFunction/Meta/Size` — number of DOFs
+   * - `/GridFunction/Meta/Dimension` — vector dimension
+   *
+   * @tparam FES Finite element space type.
+   *
+   * @note Stream-based loading is not supported; use the path-based overload.
+   *
+   * @see GridFunctionPrinter
+   */
   template <class FES>
   class GridFunctionLoader<FileFormat::HDF5, FES, ::Vec>
     : public GridFunctionLoaderBase<FES, ::Vec>
   {
     public:
+      /// @brief PETSc vector data type (`::Vec`).
       using DataType = ::Vec;
+      /// @brief Grid function type being loaded.
       using ObjectType = Variational::GridFunction<FES, DataType>;
+      /// @brief Parent loader base class.
       using Parent = GridFunctionLoaderBase<FES, DataType>;
 
+      /**
+       * @brief Constructs an HDF5 loader bound to a PETSc-backed grid function.
+       */
       GridFunctionLoader(ObjectType& gf)
         : Parent(gf)
       {}
 
+      /**
+       * @brief Stream-based overload — not supported for HDF5.
+       * @throws Alert::MemberFunctionException Always; use load(path) instead.
+       */
       void load(std::istream&) override
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -98,6 +173,10 @@ namespace Rodin::IO
           << Alert::Raise;
       }
 
+      /**
+       * @brief Loads grid function data from an HDF5 file.
+       * @param filename Path to the HDF5 file.
+       */
       void load(const boost::filesystem::path& filename) override
       {
         auto& gf = this->getObject();
@@ -146,19 +225,41 @@ namespace Rodin::IO
       }
   };
 
+  /**
+   * @brief HDF5 printer for PETSc-backed grid functions.
+   *
+   * Writes the local portion of a distributed PETSc vector to an HDF5
+   * file using the same layout expected by @ref GridFunctionLoader.
+   *
+   * @tparam FES Finite element space type.
+   *
+   * @note Stream-based printing is not supported; use the path-based overload.
+   *
+   * @see GridFunctionLoader
+   */
   template <class FES>
   class GridFunctionPrinter<FileFormat::HDF5, FES, ::Vec> final
     : public GridFunctionPrinterBase<FileFormat::HDF5, FES, ::Vec>
   {
     public:
+      /// @brief PETSc vector data type (`::Vec`).
       using DataType = ::Vec;
+      /// @brief Grid function type being printed.
       using ObjectType = Variational::GridFunction<FES, DataType>;
+      /// @brief Parent printer base class.
       using Parent = GridFunctionPrinterBase<FileFormat::HDF5, FES, DataType>;
 
+      /**
+       * @brief Constructs an HDF5 printer bound to a PETSc-backed grid function.
+       */
       GridFunctionPrinter(const ObjectType& gf)
         : Parent(gf)
       {}
 
+      /**
+       * @brief Stream-based overload — not supported for HDF5.
+       * @throws Alert::MemberFunctionException Always; use print(path) instead.
+       */
       void print(std::ostream&) override
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -169,6 +270,10 @@ namespace Rodin::IO
           << Alert::Raise;
       }
 
+      /**
+       * @brief Writes grid function data to an HDF5 file.
+       * @param filename Path for the output HDF5 file.
+       */
       void print(const boost::filesystem::path& filename) override
       {
         const auto& gf = this->getObject();

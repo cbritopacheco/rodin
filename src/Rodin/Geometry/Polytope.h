@@ -18,6 +18,8 @@
 #include "Rodin/Configure.h"
 
 #include "Rodin/Array.h"
+#include "Rodin/Math/Matrix.h"
+#include "Rodin/Math/Vector.h"
 #include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/Math/SpatialVector.h"
 

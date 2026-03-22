@@ -7,6 +7,11 @@
 #ifndef RODIN_PETSC_IO_MEDIT_H
 #define RODIN_PETSC_IO_MEDIT_H
 
+/**
+ * @file
+ * @brief MEDIT-format grid function printer for PETSc-backed grid functions.
+ */
+
 #include <petscvec.h>
 
 #include <iomanip>
@@ -19,6 +24,14 @@
 
 namespace Rodin::IO
 {
+  /**
+   * @brief MEDIT printer for PETSc-backed grid functions.
+   *
+   * Writes scalar or vector-valued nodal data in MEDIT-compatible
+   * format, one value (or component tuple) per mesh vertex.
+   *
+   * @tparam FES Finite element space type.
+   */
   template <class FES>
   class GridFunctionPrinter<
     FileFormat::MEDIT,
@@ -27,17 +40,24 @@ namespace Rodin::IO
     : public GridFunctionPrinterBase<FileFormat::MEDIT, FES, ::Vec>
   {
     public:
+      /// @brief Finite element space type.
       using FESType   = FES;
+      /// @brief PETSc vector data type (`::Vec`).
       using DataType  = ::Vec;
+      /// @brief Parent printer base class.
       using Parent    = GridFunctionPrinterBase<FileFormat::MEDIT, FES, DataType>;
 
+      /// @brief Range type of the finite element space (scalar or vector).
       using RangeType  = typename FormLanguage::Traits<FESType>::RangeType;
+      /// @brief Scalar type underlying the range (`PetscScalar`).
       using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
 
       static_assert(std::is_same_v<ScalarType, PetscScalar>,
         "PETSc MEDIT printer: FES scalar type must be PetscScalar.");
 
+      /// @brief Mesh type associated with the finite element space.
       using MeshType        = typename FormLanguage::Traits<FESType>::MeshType;
+      /// @brief Context type (Local or MPI) of the mesh.
       using MeshContextType = typename FormLanguage::Traits<MeshType>::ContextType;
 
       using Parent::Parent;

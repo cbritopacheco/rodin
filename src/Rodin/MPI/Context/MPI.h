@@ -7,6 +7,11 @@
 #ifndef RODIN_MPI_MPI_H
 #define RODIN_MPI_MPI_H
 
+/**
+ * @file
+ * @brief Definition of the MPI execution context wrapper.
+ */
+
 #include <mpi.h>
 #include <boost/mpi.hpp>
 
@@ -20,6 +25,10 @@ namespace Rodin::Context
    * This class provides an MPI context that wraps the Boost.MPI environment
    * and communicator objects. It serves as the interface for parallel 
    * computations across multiple processes in distributed memory systems.
+   *
+   * The context is passed to distributed mesh, assembly, and finite-element
+   * components so they can access rank-local and collective communication
+   * services in a uniform way.
    */
   class MPI : public Context::Base
   {
@@ -62,4 +71,3 @@ namespace Rodin::Context
 }
 
 #endif
-

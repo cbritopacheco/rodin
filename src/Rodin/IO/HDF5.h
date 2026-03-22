@@ -190,7 +190,7 @@ namespace Rodin::IO
       static constexpr const char* MeshXDMFTopologySize = "/Mesh/XDMF/TopologySize";  ///< Length of the mixed topology stream.
 
       static constexpr const char* Shard = "/Shard";  ///< Root shard metadata group.
-      static constexpr const char* ShardFlags = "/Shard/Flags";  ///< Ownership flags per dimension.
+      static constexpr const char* ShardState = "/Shard/State";  ///< Ownership flags per dimension.
       static constexpr const char* ShardPolytopeMap = "/Shard/PolytopeMap";  ///< Index maps per dimension.
       static constexpr const char* ShardOwner = "/Shard/Owner";  ///< Ghost-to-owner map per dimension.
       static constexpr const char* ShardHalo = "/Shard/Halo";  ///< Owned-to-halo map per dimension.
@@ -514,12 +514,12 @@ namespace Rodin::IO
     /**
      * @brief Returns the dataset path for shard ownership flags of dimension `d`.
      * @param[in] d  Topological dimension.
-     * @returns Path string, e.g. `"/Shard/Flags/2"`.
+     * @returns Path string, e.g. `"/Shard/State/2"`.
      */
     inline
-    std::string shardFlagsPath(size_t d)
+    std::string shardStatePath(size_t d)
     {
-      return std::string(Path::ShardFlags) + "/" + std::to_string(d);
+      return std::string(Path::ShardState) + "/" + std::to_string(d);
     }
 
     /**
@@ -1444,6 +1444,11 @@ namespace Rodin::IO
       HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaSize, static_cast<HDF5::U64>(nv));
       HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaDimension, static_cast<HDF5::U64>(vdim));
 
+      // Use the grid function's own FES mesh for polytope lookup so that
+      // polytopeMesh == fesMesh in GridFunctionBase::getValue() succeeds.
+      // This is essential for MPI meshes where visMesh is the shard but
+      // the GF is defined on the parent MPI mesh.
+      const auto& gfMesh = gf.getFiniteElementSpace().getMesh();
       const Geometry::Polytope::Traits ts(Geometry::Polytope::Type::Point);
 
       if constexpr (std::is_same_v<RangeType, ScalarType>)
@@ -1452,7 +1457,8 @@ namespace Rodin::IO
         for (auto it = visMesh.getVertex(); !it.end(); ++it)
         {
           const Index i = it->getIndex();
-          const Geometry::Point p(*it, ts.getVertex(0), it->getCoordinates());
+          const auto gfVtx = gfMesh.getVertex(i);
+          const Geometry::Point p(*gfVtx, ts.getVertex(0), gfVtx->getCoordinates());
           values[static_cast<size_t>(i)] = static_cast<HDF5::F64>(gf(p));
         }
 
@@ -1464,7 +1470,8 @@ namespace Rodin::IO
         for (auto it = visMesh.getVertex(); !it.end(); ++it)
         {
           const Index i = it->getIndex();
-          const Geometry::Point p(*it, ts.getVertex(0), it->getCoordinates());
+          const auto gfVtx = gfMesh.getVertex(i);
+          const Geometry::Point p(*gfVtx, ts.getVertex(0), gfVtx->getCoordinates());
           const auto value = gf(p);
 
           for (size_t c = 0; c < vdim; ++c)
@@ -1548,6 +1555,9 @@ namespace Rodin::IO
       HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaSize, static_cast<HDF5::U64>(nc));
       HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaDimension, static_cast<HDF5::U64>(vdim));
 
+      // Same rationale as writeXDMFNodeAttribute: use the GF's mesh for
+      // polytope lookup so polytopeMesh == fesMesh holds in getValue().
+      const auto& gfMesh = gf.getFiniteElementSpace().getMesh();
       const Geometry::Polytope::Traits ts(Geometry::Polytope::Type::Point);
 
       if constexpr (std::is_same_v<RangeType, ScalarType>)
@@ -1567,7 +1577,7 @@ namespace Rodin::IO
           ScalarType accum = ScalarType(0);
           for (size_t k = 0; k < vertices.size(); ++k)
           {
-            const auto vit = visMesh.getVertex(vertices[k]);
+            const auto vit = gfMesh.getVertex(vertices[k]);
             const Geometry::Point p(*vit, ts.getVertex(0), vit->getCoordinates());
             accum += gf(p);
           }
@@ -1595,7 +1605,7 @@ namespace Rodin::IO
           std::vector<ScalarType> accum(vdim, ScalarType(0));
           for (size_t k = 0; k < vertices.size(); ++k)
           {
-            const auto vit = visMesh.getVertex(vertices[k]);
+            const auto vit = gfMesh.getVertex(vertices[k]);
             const Geometry::Point p(*vit, ts.getVertex(0), vit->getCoordinates());
             const auto value = gf(p);
 
@@ -1742,8 +1752,6 @@ namespace Rodin::IO
 
         const size_t Dmax = static_cast<size_t>(
             HDF5::readScalarDataset<HDF5::U64>(file, HDF5::Path::MeshConnectivityMetaMaximalDimension));
-        const size_t D = static_cast<size_t>(
-            HDF5::readScalarDataset<HDF5::U64>(file, HDF5::Path::MeshConnectivityMetaDimension));
 
         const auto byDimension = HDF5::readVectorDataset<HDF5::U64>(
             file,
@@ -1910,7 +1918,7 @@ namespace Rodin::IO
    *
    * Serializes a complete Geometry::Mesh to an HDF5 file including:
    * - Vertex geometry (`/Mesh/Geometry/Vertices`)
-   * - Full connectivity (entity CSR per dimension, incidence CSR, state flags)
+   * - Full connectivity (entity CSR per dimension, incidence CSR, state)
    * - Polytope attributes and transformations
    *
    * This printer is strictly for canonical Rodin mesh persistence. It does

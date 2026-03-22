@@ -11,6 +11,7 @@
 
 #include <gtest/gtest.h>
 #include <boost/filesystem.hpp>
+#include <mpi.h>
 
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
@@ -242,7 +243,7 @@ namespace
         ASSERT_TRUE(g);
       }
       {
-        const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::ShardFlags,
+        const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::ShardState,
                                                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         ASSERT_TRUE(g);
       }
@@ -265,7 +266,7 @@ namespace
       // /Shard/Flags/0 — ownership flags (U8)
       {
         std::vector<HDF5::U8> flags = { 1, 1, 2, 0 };
-        HDF5::writeVectorDataset(file.get(), HDF5::shardFlagsPath(0), flags);
+        HDF5::writeVectorDataset(file.get(), HDF5::shardStatePath(0), flags);
       }
 
       // /Shard/PolytopeMap/0
@@ -329,8 +330,8 @@ namespace
       ASSERT_GE(h5, 0);
 
       EXPECT_TRUE(HDF5::exists(h5, HDF5::Path::Shard));
-      EXPECT_TRUE(HDF5::exists(h5, HDF5::Path::ShardFlags));
-      EXPECT_TRUE(HDF5::exists(h5, HDF5::shardFlagsPath(0)));
+      EXPECT_TRUE(HDF5::exists(h5, HDF5::Path::ShardState));
+      EXPECT_TRUE(HDF5::exists(h5, HDF5::shardStatePath(0)));
       EXPECT_TRUE(HDF5::exists(h5, HDF5::shardPolytopeMapLeftPath(0)));
       EXPECT_TRUE(HDF5::exists(h5, HDF5::shardPolytopeMapRightGroupPath(0) + "/Keys"));
       EXPECT_TRUE(HDF5::exists(h5, HDF5::shardPolytopeMapRightGroupPath(0) + "/Values"));
@@ -342,7 +343,7 @@ namespace
 
       // Verify data round-trip for flags
       {
-        auto flags = HDF5::readVectorDataset<HDF5::U8>(h5, HDF5::shardFlagsPath(0));
+        auto flags = HDF5::readVectorDataset<HDF5::U8>(h5, HDF5::shardStatePath(0));
         ASSERT_EQ(flags.size(), 4u);
         EXPECT_EQ(flags[0], 1);
         EXPECT_EQ(flags[1], 1);
@@ -380,8 +381,8 @@ namespace
 
   TEST(ShardMetadata, PathHelpers)
   {
-    EXPECT_EQ(HDF5::shardFlagsPath(0), "/Shard/Flags/0");
-    EXPECT_EQ(HDF5::shardFlagsPath(2), "/Shard/Flags/2");
+    EXPECT_EQ(HDF5::shardStatePath(0), "/Shard/Flags/0");
+    EXPECT_EQ(HDF5::shardStatePath(2), "/Shard/Flags/2");
     EXPECT_EQ(HDF5::shardPolytopeMapGroupPath(1), "/Shard/PolytopeMap/1");
     EXPECT_EQ(HDF5::shardPolytopeMapLeftPath(3), "/Shard/PolytopeMap/3/Left");
     EXPECT_EQ(HDF5::shardPolytopeMapRightGroupPath(0), "/Shard/PolytopeMap/0/Right");
@@ -411,13 +412,12 @@ namespace
       MPIPolytopeNameGenerator());
 
   // ===========================================================================
-  // Distributed XDMF file-per-rank tests (simulated with local meshes)
+  // Distributed XDMF tests using MPI_COMM_SELF (single-rank distributed mode)
   // ===========================================================================
 
   /**
-   * Parameterized test: simulates a 2-rank MPI XDMF export using the
-   * distributed XDMF constructor. Each "rank" writes its own rank-specific
-   * HDF5 file, and only the root rank writes the master XDMF XML.
+   * Tests the distributed XDMF code path using MPI_COMM_SELF
+   * (1 rank, exercises the collective logic without multi-process setup).
    */
   class MPIDistributedXDMF : public ::testing::TestWithParam<Polytope::Type> {};
 
@@ -430,31 +430,19 @@ namespace
     const boost::filesystem::path stem = testDir / "sim";
 
     auto localMesh = makeMesh(type);
-    const size_t numRanks = 2;
 
-    // Simulate both ranks
-    // Non-root ranks must run first so their mesh files exist before root's
-    // close()/flush() reads all rank files.
-    for (size_t r = 1; r < numRanks; ++r)
     {
-      XDMF xdmf(stem, r, numRanks, /*rootRank=*/0);
-      xdmf.setMesh(localMesh);
-      xdmf.write(0.0);
-      xdmf.close();
-    }
-    {
-      XDMF xdmf(stem, /*rank=*/0, numRanks, /*rootRank=*/0);
+      XDMF xdmf(MPI_COMM_SELF, stem);
       xdmf.setMesh(localMesh);
       xdmf.write(0.0);
       xdmf.close();
     }
 
-    // Verify per-rank HDF5 files
-    for (size_t r = 0; r < numRanks; ++r)
-    {
-      const auto meshH5 = testDir / ("sim.r" + std::to_string(r) + ".mesh.h5");
-      ASSERT_TRUE(boost::filesystem::exists(meshH5)) << "Missing " << meshH5;
+    // Verify rank 0 HDF5 file
+    const auto meshH5 = testDir / "sim.r0.mesh.h5";
+    ASSERT_TRUE(boost::filesystem::exists(meshH5)) << "Missing " << meshH5;
 
+    {
       hid_t h5 = H5Fopen(meshH5.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
       ASSERT_GE(h5, 0);
 
@@ -479,7 +467,6 @@ namespace
 
     EXPECT_NE(xml.find("CollectionType=\"Spatial\""), std::string::npos);
     EXPECT_NE(xml.find("sim.r0.mesh.h5"), std::string::npos);
-    EXPECT_NE(xml.find("sim.r1.mesh.h5"), std::string::npos);
 
     boost::filesystem::remove_all(testDir);
   }
@@ -498,19 +485,8 @@ namespace
     gf.setName("u");
     gf = [](const Geometry::Point& p) { return p.x(); };
 
-    const size_t numRanks = 2;
-
-    // Write non-root ranks first so root's close()/flush() can read their files.
-    for (size_t r = 1; r < numRanks; ++r)
     {
-      XDMF xdmf(stem, r, numRanks);
-      xdmf.setMesh(localMesh);
-      xdmf.add("u", gf, XDMF::Center::Node);
-      xdmf.write(0.0);
-      xdmf.close();
-    }
-    {
-      XDMF xdmf(stem, /*rank=*/0, numRanks);
+      XDMF xdmf(MPI_COMM_SELF, stem);
       xdmf.setMesh(localMesh);
       xdmf.add("u", gf, XDMF::Center::Node);
       xdmf.write(0.0);
@@ -518,11 +494,8 @@ namespace
     }
 
     // Verify rank-specific attribute files
-    for (size_t r = 0; r < numRanks; ++r)
-    {
-      const auto attrH5 = testDir / ("field.u.r" + std::to_string(r) + ".000000.h5");
-      EXPECT_TRUE(boost::filesystem::exists(attrH5)) << "Missing " << attrH5;
-    }
+    const auto attrH5 = testDir / "field.u.r0.000000.h5";
+    EXPECT_TRUE(boost::filesystem::exists(attrH5)) << "Missing " << attrH5;
 
     // XDMF references attribute files
     const auto xdmfFile = testDir / "field.xdmf";
@@ -532,7 +505,6 @@ namespace
     buf << ifs.rdbuf();
     const auto xml = buf.str();
     EXPECT_NE(xml.find("field.u.r0.000000.h5"), std::string::npos);
-    EXPECT_NE(xml.find("field.u.r1.000000.h5"), std::string::npos);
 
     boost::filesystem::remove_all(testDir);
   }
@@ -549,4 +521,15 @@ namespace
           Polytope::Type::Wedge
       ),
       MPIPolytopeNameGenerator());
+}
+
+int main(int argc, char** argv)
+{
+  int mpiErr = MPI_Init(&argc, &argv);
+  if (mpiErr != MPI_SUCCESS)
+    return 1;
+  ::testing::InitGoogleTest(&argc, argv);
+  int result = RUN_ALL_TESTS();
+  MPI_Finalize();
+  return result;
 }

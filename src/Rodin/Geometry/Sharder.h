@@ -78,14 +78,14 @@ namespace Rodin::Geometry
                 if (owner[d][idx] != partition)
                   halo[d][idx].insert(partition);
                 const auto [localIdx, inserted] =
-                  sbs[partition].include({ d, idx }, Shard::Flags::None);
+                  sbs[partition].include({ d, idx }, Shard::State::Shared);
                 if (inserted)
                   sbs[partition].getOwner(d)[localIdx] = owner[d][idx];
               }
               else
               {
                 const auto [localIdx, inserted] =
-                  sbs[partition].include({ d, idx }, Shard::Flags::Owned);
+                  sbs[partition].include({ d, idx }, Shard::State::Owned);
                 assert(inserted);
                 owner[d][idx] = partition;
                 local[d][idx] = localIdx;
@@ -95,7 +95,7 @@ namespace Rodin::Geometry
           }
           assert(!visited[cellDim][cellIdx]);
           const auto [localIdx, inserted] =
-            sbs[partition].include({ cellDim, cellIdx }, Shard::Flags::Owned);
+            sbs[partition].include({ cellDim, cellIdx }, Shard::State::Owned);
           assert(inserted);
           owner[cellDim][cellIdx] = partition;
           local[cellDim][cellIdx] = localIdx;
@@ -121,7 +121,7 @@ namespace Rodin::Geometry
                 {
                   halo[d][idx].insert(partition);
                   const auto [localIdx, inserted] =
-                    sbs[partition].include({ d, idx }, Shard::Flags::Ghost);
+                    sbs[partition].include({ d, idx }, Shard::State::Ghost);
                   if (inserted)
                     sbs[partition].getOwner(d)[localIdx] = owner[d][idx];
                 }
@@ -129,7 +129,7 @@ namespace Rodin::Geometry
             }
             halo[cellDim][nbr].insert(partition);
             const auto [localIdx, inserted] =
-              sbs[partition].include({ cellDim, nbr }, Shard::Flags::Ghost);
+              sbs[partition].include({ cellDim, nbr }, Shard::State::Ghost);
             if (inserted)
               sbs[partition].getOwner(cellDim)[localIdx] = owner[cellDim][nbr];
           }

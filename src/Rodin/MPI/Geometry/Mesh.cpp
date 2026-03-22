@@ -3,6 +3,7 @@
 #include <boost/serialization/split_free.hpp>
 
 #include "Rodin/Geometry/Mesh.h"
+#include "Rodin/Alert/NamespacedException.h"
 #include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Geometry/PolytopeTransformation.h"
@@ -141,26 +142,26 @@ namespace Rodin::Geometry
   CellIterator MPIMesh::getCell(Index localIdx) const
   {
     const auto& shard = this->getShard();
-    return CellIterator(shard, BoundedIndexGenerator(localIdx, shard.getCellCount()));
+    return CellIterator(*this, BoundedIndexGenerator(localIdx, shard.getCellCount()));
   }
 
   FaceIterator MPIMesh::getFace(Index localIdx) const
   {
     const auto& shard = this->getShard();
-    return FaceIterator(shard, BoundedIndexGenerator(localIdx, shard.getFaceCount()));
+    return FaceIterator(*this, BoundedIndexGenerator(localIdx, shard.getFaceCount()));
   }
 
   VertexIterator MPIMesh::getVertex(Index localIdx) const
   {
     const auto& shard = this->getShard();
-    return VertexIterator(shard, BoundedIndexGenerator(localIdx, shard.getVertexCount()));
+    return VertexIterator(*this, BoundedIndexGenerator(localIdx, shard.getVertexCount()));
   }
 
   PolytopeIterator MPIMesh::getPolytope(size_t dimension, Index localIdx) const
   {
     const auto& shard = this->getShard();
     return PolytopeIterator(
-        dimension, shard, BoundedIndexGenerator(localIdx, shard.getPolytopeCount(dimension)));
+        dimension, *this, BoundedIndexGenerator(localIdx, shard.getPolytopeCount(dimension)));
   }
 
   FaceIterator MPIMesh::getBoundary() const
@@ -174,7 +175,7 @@ namespace Rodin::Geometry
       if (shard.isOwned(d, i) && shard.isBoundary(i))
         indices.push_back(i);
     }
-    return FaceIterator(shard, VectorIndexGenerator(std::move(indices)));
+    return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
   }
 
   FaceIterator MPIMesh::getInterface() const
@@ -188,7 +189,7 @@ namespace Rodin::Geometry
       if (shard.isOwned(d, i) && shard.isInterface(i))
         indices.push_back(i);
     }
-    return FaceIterator(shard, VectorIndexGenerator(std::move(indices)));
+    return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
   }
 
   bool MPIMesh::isBoundary(Index faceIdx) const
@@ -710,8 +711,8 @@ namespace Rodin::Geometry
         assert(inserted);
       }
 
-      auto& flags = shard.getFlags(d);
-      flags.assign(nd, Shard::Flags::None);
+      auto& state = shard.getState(d);
+      state.assign(nd, Shard::State::Shared);
 
       auto& owner = shard.getOwner(d);
       auto& halo  = shard.getHalo(d);
@@ -722,7 +723,7 @@ namespace Rodin::Geometry
       {
         if (ownerRank[i] == rank)
         {
-          flags[i] = Shard::Flags::Owned;
+          state[i] = Shard::State::Owned;
 
           IndexSet rs;
           for (const int r : participants[i])
@@ -736,7 +737,7 @@ namespace Rodin::Geometry
         }
         else
         {
-          flags[i] = Shard::Flags::Ghost;
+          state[i] = Shard::State::Ghost;
           owner.emplace(i, static_cast<Index>(ownerRank[i]));
         }
       }
@@ -744,5 +745,1052 @@ namespace Rodin::Geometry
 
     return *this;
   }
+
+  MPIMesh MPIMesh::UniformGrid(
+      const Context::MPI& context, Polytope::Type g, const Array<size_t>& shape)
+  {
+    const auto& comm = context.getCommunicator();
+    const int rank = comm.rank();
+    const int size = comm.size();
+
+    struct Interval
+    {
+      size_t begin = 0;
+      size_t end   = 0; // half-open [begin, end)
+
+      size_t size() const
+      {
+        return end >= begin ? end - begin : 0;
+      }
+
+      bool contains(size_t i) const
+      {
+        return begin <= i && i < end;
+      }
+
+      bool empty() const
+      {
+        return begin == end;
+      }
+    };
+
+    const auto makeIndexArray = [](auto... xs)
+    {
+      IndexArray res(sizeof...(xs));
+      const Index data[] = { static_cast<Index>(xs)... };
+      for (size_t i = 0; i < sizeof...(xs); ++i)
+        res(static_cast<Eigen::Index>(i)) = data[i];
+      return res;
+    };
+
+    const auto finish = [&](Shard&& shard) -> MPIMesh
+    {
+      return MPIMesh::Builder(context)
+        .initialize(std::move(shard))
+        .finalize();
+    };
+
+    const auto splitRange = [](size_t n, int r, int p) -> Interval
+    {
+      const size_t q   = n / static_cast<size_t>(p);
+      const size_t rem = n % static_cast<size_t>(p);
+      const size_t b   = static_cast<size_t>(r) * q + std::min(static_cast<size_t>(r), rem);
+      const size_t c   = q + (static_cast<size_t>(r) < rem ? 1 : 0);
+      return Interval{ b, b + c };
+    };
+
+    const auto expandByOne = [](const Interval& I, size_t n) -> Interval
+    {
+      if (I.empty())
+        return I;
+      return Interval{
+        I.begin > 0 ? I.begin - 1 : 0,
+        I.end   < n ? I.end + 1   : n
+      };
+    };
+
+    const auto factorize = [](int n)
+    {
+      std::vector<int> f;
+      for (int p = 2; p * p <= n; ++p)
+      {
+        while (n % p == 0)
+        {
+          f.push_back(p);
+          n /= p;
+        }
+      }
+      if (n > 1)
+        f.push_back(n);
+      std::sort(f.rbegin(), f.rend());
+      return f;
+    };
+
+    const auto chooseProcShape = [&](size_t dim, const std::vector<size_t>& cells)
+    {
+      std::vector<int> ps(dim, 1);
+      auto factors = factorize(size);
+
+      for (int f : factors)
+      {
+        int best = 0;
+        double bestScore = -1.0;
+
+        for (size_t d = 0; d < dim; ++d)
+        {
+          const double score = static_cast<double>(cells[d]) / static_cast<double>(ps[d]);
+          const bool feasible = (static_cast<size_t>(ps[d] * f) <= std::max<size_t>(cells[d], 1));
+          const double adjusted = feasible ? score : 0.5 * score;
+
+          if (adjusted > bestScore)
+          {
+            bestScore = adjusted;
+            best = static_cast<int>(d);
+          }
+        }
+
+        ps[best] *= f;
+      }
+
+      return ps;
+    };
+
+    const auto rankToProcCoord = [](int r, const std::vector<int>& ps)
+    {
+      std::vector<int> c(ps.size(), 0);
+      for (size_t d = 0; d < ps.size(); ++d)
+      {
+        c[d] = r % ps[d];
+        r /= ps[d];
+      }
+      return c;
+    };
+
+    const auto procCoordToRank = [](const std::vector<int>& c, const std::vector<int>& ps)
+    {
+      int r = 0;
+      int stride = 1;
+      for (size_t d = 0; d < ps.size(); ++d)
+      {
+        r += c[d] * stride;
+        stride *= ps[d];
+      }
+      return r;
+    };
+
+    const auto uniqueSort = [](std::vector<int>& v)
+    {
+      std::sort(v.begin(), v.end());
+      v.erase(std::unique(v.begin(), v.end()), v.end());
+    };
+
+    const auto sp0 = []()
+    {
+      return Math::SpatialPoint();
+    };
+
+    const auto sp1 = [](Real x0)
+    {
+      Math::SpatialPoint x(1);
+      x(0) = x0;
+      return x;
+    };
+
+    const auto sp2 = [](Real x0, Real x1)
+    {
+      Math::SpatialPoint x(2);
+      x(0) = x0;
+      x(1) = x1;
+      return x;
+    };
+
+    const auto sp3 = [](Real x0, Real x1, Real x2)
+    {
+      Math::SpatialPoint x(3);
+      x(0) = x0;
+      x(1) = x1;
+      x(2) = x2;
+      return x;
+    };
+
+    const auto vid1 = [](size_t i) -> Index
+    {
+      return static_cast<Index>(i);
+    };
+
+    const auto vid2 = [](size_t i, size_t j, size_t nx) -> Index
+    {
+      return static_cast<Index>(i + j * nx);
+    };
+
+    const auto vid3 = [](size_t i, size_t j, size_t k, size_t nx, size_t ny) -> Index
+    {
+      return static_cast<Index>(i + j * nx + k * nx * ny);
+    };
+
+    const auto macroId2 = [](size_t i, size_t j, size_t cx) -> Index
+    {
+      return static_cast<Index>(i + j * cx);
+    };
+
+    const auto macroId3 = [](size_t i, size_t j, size_t k, size_t cx, size_t cy) -> Index
+    {
+      return static_cast<Index>(i + j * cx + k * cx * cy);
+    };
+
+    switch (g)
+    {
+      case Polytope::Type::Point:
+      {
+        if (shape.size() != 0)
+        {
+          Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
+            << "Expected 0 dimensions for geometry type " << g
+            << ", but got " << shape.size() << "."
+            << Alert::Raise;
+        }
+
+        Shard::Builder sb;
+        sb.initialize(/*dimension=*/0, /*sdim=*/0);
+
+        const Shard::State state =
+          (rank == 0 ? Shard::State::Owned : Shard::State::Ghost);
+
+        const Index lv = sb.vertex(/*globalIdx=*/0, sp0(), state);
+
+        if (rank == 0)
+        {
+          for (int r = 1; r < size; ++r)
+            sb.halo(0, lv, static_cast<Index>(r));
+        }
+        else
+        {
+          sb.setOwner(0, lv, 0);
+        }
+
+        return finish(sb.finalize());
+      }
+
+      case Polytope::Type::Segment:
+      {
+        if (shape.size() != 1)
+        {
+          Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
+            << "Expected 1 dimension for geometry type " << g
+            << ", but got " << shape.size() << "."
+            << Alert::Raise;
+        }
+
+        const size_t nx = shape.coeff(0);
+        if (nx < 2)
+        {
+          Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
+            << "Segment uniform grid requires at least 2 vertices."
+            << Alert::Raise;
+        }
+
+        const size_t dim = 1;
+        const std::vector<size_t> nCells = { nx - 1 };
+        const std::vector<int> procShape = chooseProcShape(dim, nCells);
+        const std::vector<int> procCoord = rankToProcCoord(rank, procShape);
+
+        std::vector<std::vector<Interval>> cellSplits(dim);
+        for (size_t d = 0; d < dim; ++d)
+        {
+          cellSplits[d].resize(procShape[d]);
+          for (int p = 0; p < procShape[d]; ++p)
+            cellSplits[d][p] = splitRange(nCells[d], p, procShape[d]);
+        }
+
+        const Interval ownedCells = cellSplits[0][procCoord[0]];
+        const Interval ghostCells = expandByOne(ownedCells, nCells[0]);
+
+        const Interval localVerts = Interval{
+          ownedCells.begin,
+          ownedCells.empty() ? ownedCells.end : std::min(nx, ownedCells.end + 1)
+        };
+
+        const Interval ghostVerts = Interval{
+          ghostCells.begin,
+          ghostCells.empty() ? ghostCells.end : std::min(nx, ghostCells.end + 1)
+        };
+
+        const auto ownerOfCell = [&](size_t i) -> int
+        {
+          for (int px = 0; px < procShape[0]; ++px)
+          {
+            if (cellSplits[0][px].contains(i))
+              return px;
+          }
+          assert(false);
+          return 0;
+        };
+
+        const auto ownerOfVertex = [&](size_t i) -> int
+        {
+          std::vector<int> rs;
+          if (i > 0 && i - 1 < nCells[0])
+            rs.push_back(ownerOfCell(i - 1));
+          if (i < nCells[0])
+            rs.push_back(ownerOfCell(i));
+          if (rs.empty())
+            rs.push_back(0);
+          uniqueSort(rs);
+          return rs.front();
+        };
+
+        const auto holdersOfVertex = [&](size_t i)
+        {
+          std::vector<int> res;
+          for (int p = 0; p < procShape[0]; ++p)
+          {
+            const Interval Gc = expandByOne(cellSplits[0][p], nCells[0]);
+            const Interval Gv{
+              Gc.begin,
+              Gc.empty() ? Gc.end : std::min(nx, Gc.end + 1)
+            };
+            if (Gv.contains(i))
+              res.push_back(p);
+          }
+          uniqueSort(res);
+          return res;
+        };
+
+        const auto stateOfVertex = [&](size_t i) -> Shard::State
+        {
+          const int owner = ownerOfVertex(i);
+          if (localVerts.contains(i))
+            return owner == rank ? Shard::State::Owned : Shard::State::Shared;
+          return Shard::State::Ghost;
+        };
+
+        const auto holdersOfCell = [&](size_t i)
+        {
+          std::vector<int> res;
+          const int owner = ownerOfCell(i);
+          const std::vector<int> oc = rankToProcCoord(owner, procShape);
+
+          for (int dx = -1; dx <= 1; ++dx)
+          {
+            std::vector<int> pc = oc;
+            pc[0] += dx;
+            if (pc[0] < 0 || pc[0] >= procShape[0])
+              continue;
+
+            const Interval G = expandByOne(cellSplits[0][pc[0]], nCells[0]);
+            if (G.contains(i))
+              res.push_back(procCoordToRank(pc, procShape));
+          }
+
+          uniqueSort(res);
+          return res;
+        };
+
+        Shard::Builder sb;
+        sb.initialize(/*dimension=*/1, /*sdim=*/1);
+
+        UnorderedMap<Index, Index> gv2lv;
+        gv2lv.reserve(ghostVerts.size());
+
+        for (size_t i = ghostVerts.begin; i < ghostVerts.end; ++i)
+        {
+          const Index gvid = vid1(i);
+          const int owner = ownerOfVertex(i);
+          const Shard::State state = stateOfVertex(i);
+
+          const Index lv = sb.vertex(gvid, sp1(static_cast<Real>(i)), state);
+          gv2lv.emplace(gvid, lv);
+
+          if (state == Shard::State::Owned)
+          {
+            for (const int r : holdersOfVertex(i))
+            {
+              if (r != rank)
+                sb.halo(0, lv, static_cast<Index>(r));
+            }
+          }
+          else
+          {
+            sb.setOwner(0, lv, static_cast<Index>(owner));
+          }
+        }
+
+        for (size_t i = ghostCells.begin; i < ghostCells.end; ++i)
+        {
+          const int owner = ownerOfCell(i);
+          const Shard::State state =
+            (owner == rank ? Shard::State::Owned : Shard::State::Ghost);
+
+          const Index gcid = static_cast<Index>(i);
+          const IndexArray vs = makeIndexArray(
+            gv2lv.at(vid1(i)),
+            gv2lv.at(vid1(i + 1))
+          );
+
+          const Index lc = sb.polytope(1, gcid, Polytope::Type::Segment, vs, state);
+
+          if (state == Shard::State::Owned)
+          {
+            for (const int r : holdersOfCell(i))
+            {
+              if (r != rank)
+                sb.halo(1, lc, static_cast<Index>(r));
+            }
+          }
+          else
+          {
+            sb.setOwner(1, lc, static_cast<Index>(owner));
+          }
+        }
+
+        return finish(sb.finalize());
+      }
+
+      case Polytope::Type::Triangle:
+      case Polytope::Type::Quadrilateral:
+      {
+        if (shape.size() != 2)
+        {
+          Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
+            << "Expected 2 dimensions for geometry type " << g
+            << ", but got " << shape.size() << "."
+            << Alert::Raise;
+        }
+
+        const size_t nx = shape.coeff(0);
+        const size_t ny = shape.coeff(1);
+        if (nx < 2 || ny < 2)
+        {
+          Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
+            << "2D uniform grid requires at least 2 vertices per direction."
+            << Alert::Raise;
+        }
+
+        const size_t cx = nx - 1;
+        const size_t cy = ny - 1;
+
+        const size_t dim = 2;
+        const std::vector<size_t> nCells = { cx, cy };
+        const std::vector<int> procShape = chooseProcShape(dim, nCells);
+        const std::vector<int> procCoord = rankToProcCoord(rank, procShape);
+
+        std::vector<std::vector<Interval>> cellSplits(dim);
+        for (size_t d = 0; d < dim; ++d)
+        {
+          cellSplits[d].resize(procShape[d]);
+          for (int p = 0; p < procShape[d]; ++p)
+            cellSplits[d][p] = splitRange(nCells[d], p, procShape[d]);
+        }
+
+        const Interval ownedX = cellSplits[0][procCoord[0]];
+        const Interval ownedY = cellSplits[1][procCoord[1]];
+        const Interval ghostX = expandByOne(ownedX, cx);
+        const Interval ghostY = expandByOne(ownedY, cy);
+
+        const Interval localVertX{
+          ownedX.begin,
+          ownedX.empty() ? ownedX.end : std::min(nx, ownedX.end + 1)
+        };
+        const Interval localVertY{
+          ownedY.begin,
+          ownedY.empty() ? ownedY.end : std::min(ny, ownedY.end + 1)
+        };
+
+        const Interval vertX{
+          ghostX.begin,
+          ghostX.empty() ? ghostX.end : std::min(nx, ghostX.end + 1)
+        };
+        const Interval vertY{
+          ghostY.begin,
+          ghostY.empty() ? ghostY.end : std::min(ny, ghostY.end + 1)
+        };
+
+        const auto ownerOfCell = [&](size_t i, size_t j) -> int
+        {
+          int px = -1, py = -1;
+          for (int p = 0; p < procShape[0]; ++p)
+            if (cellSplits[0][p].contains(i)) { px = p; break; }
+          for (int p = 0; p < procShape[1]; ++p)
+            if (cellSplits[1][p].contains(j)) { py = p; break; }
+          assert(px >= 0 && py >= 0);
+          return procCoordToRank({ px, py }, procShape);
+        };
+
+        const auto ownerOfVertex = [&](size_t i, size_t j) -> int
+        {
+          std::vector<int> rs;
+          const size_t ix0 = (i > 0 ? i - 1 : i);
+          const size_t ix1 = std::min(i, cx ? cx - 1 : 0);
+          const size_t jy0 = (j > 0 ? j - 1 : j);
+          const size_t jy1 = std::min(j, cy ? cy - 1 : 0);
+
+          for (size_t ii : { ix0, ix1 })
+          {
+            if (ii >= cx) continue;
+            for (size_t jj : { jy0, jy1 })
+            {
+              if (jj >= cy) continue;
+              rs.push_back(ownerOfCell(ii, jj));
+            }
+          }
+
+          if (rs.empty())
+            rs.push_back(0);
+          uniqueSort(rs);
+          return rs.front();
+        };
+
+        const auto holdersOfVertex = [&](size_t i, size_t j)
+        {
+          std::vector<int> res;
+          for (int px = 0; px < procShape[0]; ++px)
+          {
+            const Interval Gx = expandByOne(cellSplits[0][px], cx);
+            const Interval Vx{
+              Gx.begin,
+              Gx.empty() ? Gx.end : std::min(nx, Gx.end + 1)
+            };
+            if (!Vx.contains(i))
+              continue;
+
+            for (int py = 0; py < procShape[1]; ++py)
+            {
+              const Interval Gy = expandByOne(cellSplits[1][py], cy);
+              const Interval Vy{
+                Gy.begin,
+                Gy.empty() ? Gy.end : std::min(ny, Gy.end + 1)
+              };
+              if (Vy.contains(j))
+                res.push_back(procCoordToRank({ px, py }, procShape));
+            }
+          }
+          uniqueSort(res);
+          return res;
+        };
+
+        const auto stateOfVertex = [&](size_t i, size_t j) -> Shard::State
+        {
+          const int owner = ownerOfVertex(i, j);
+          if (localVertX.contains(i) && localVertY.contains(j))
+            return owner == rank ? Shard::State::Owned : Shard::State::Shared;
+          return Shard::State::Ghost;
+        };
+
+        const auto holdersOfCell = [&](size_t i, size_t j)
+        {
+          std::vector<int> res;
+          const int owner = ownerOfCell(i, j);
+          const std::vector<int> oc = rankToProcCoord(owner, procShape);
+
+          for (int dx = -1; dx <= 1; ++dx)
+          {
+            for (int dy = -1; dy <= 1; ++dy)
+            {
+              std::vector<int> pc = oc;
+              pc[0] += dx;
+              pc[1] += dy;
+              if (pc[0] < 0 || pc[0] >= procShape[0]) continue;
+              if (pc[1] < 0 || pc[1] >= procShape[1]) continue;
+
+              const Interval GX = expandByOne(cellSplits[0][pc[0]], cx);
+              const Interval GY = expandByOne(cellSplits[1][pc[1]], cy);
+              if (GX.contains(i) && GY.contains(j))
+                res.push_back(procCoordToRank(pc, procShape));
+            }
+          }
+
+          uniqueSort(res);
+          return res;
+        };
+
+        Shard::Builder sb;
+        sb.initialize(/*dimension=*/2, /*sdim=*/2);
+
+        UnorderedMap<Index, Index> gv2lv;
+        gv2lv.reserve(vertX.size() * vertY.size());
+
+        for (size_t j = vertY.begin; j < vertY.end; ++j)
+        {
+          for (size_t i = vertX.begin; i < vertX.end; ++i)
+          {
+            const Index gvid = vid2(i, j, nx);
+            const int owner = ownerOfVertex(i, j);
+            const Shard::State state = stateOfVertex(i, j);
+
+            const Index lv = sb.vertex(
+              gvid,
+              sp2(static_cast<Real>(i), static_cast<Real>(j)),
+              state);
+            gv2lv.emplace(gvid, lv);
+
+            if (state == Shard::State::Owned)
+            {
+              for (const int r : holdersOfVertex(i, j))
+              {
+                if (r != rank)
+                  sb.halo(0, lv, static_cast<Index>(r));
+              }
+            }
+            else
+            {
+              sb.setOwner(0, lv, static_cast<Index>(owner));
+            }
+          }
+        }
+
+        for (size_t j = ghostY.begin; j < ghostY.end; ++j)
+        {
+          for (size_t i = ghostX.begin; i < ghostX.end; ++i)
+          {
+            const Index mid = macroId2(i, j, cx);
+            const int owner = ownerOfCell(i, j);
+            const Shard::State state =
+              (owner == rank ? Shard::State::Owned : Shard::State::Ghost);
+
+            if (g == Polytope::Type::Triangle)
+            {
+              const Index v00 = gv2lv.at(vid2(i,     j,     nx));
+              const Index v10 = gv2lv.at(vid2(i + 1, j,     nx));
+              const Index v01 = gv2lv.at(vid2(i,     j + 1, nx));
+              const Index v11 = gv2lv.at(vid2(i + 1, j + 1, nx));
+
+              const Index lc0 = sb.polytope(
+                2, static_cast<Index>(2 * mid + 0), Polytope::Type::Triangle,
+                makeIndexArray(v00, v10, v01), state);
+
+              const Index lc1 = sb.polytope(
+                2, static_cast<Index>(2 * mid + 1), Polytope::Type::Triangle,
+                makeIndexArray(v10, v11, v01), state);
+
+              if (state == Shard::State::Owned)
+              {
+                for (const int r : holdersOfCell(i, j))
+                {
+                  if (r != rank)
+                  {
+                    sb.halo(2, lc0, static_cast<Index>(r));
+                    sb.halo(2, lc1, static_cast<Index>(r));
+                  }
+                }
+              }
+              else
+              {
+                const Index ow = static_cast<Index>(owner);
+                sb.setOwner(2, lc0, ow);
+                sb.setOwner(2, lc1, ow);
+              }
+            }
+            else
+            {
+              const IndexArray vs = makeIndexArray(
+                gv2lv.at(vid2(i,     j,     nx)),
+                gv2lv.at(vid2(i + 1, j,     nx)),
+                gv2lv.at(vid2(i + 1, j + 1, nx)),
+                gv2lv.at(vid2(i,     j + 1, nx))
+              );
+
+              const Index lc = sb.polytope(2, mid, Polytope::Type::Quadrilateral, vs, state);
+
+              if (state == Shard::State::Owned)
+              {
+                for (const int r : holdersOfCell(i, j))
+                {
+                  if (r != rank)
+                    sb.halo(2, lc, static_cast<Index>(r));
+                }
+              }
+              else
+              {
+                sb.setOwner(2, lc, static_cast<Index>(owner));
+              }
+            }
+          }
+        }
+
+        return finish(sb.finalize());
+      }
+
+      case Polytope::Type::Tetrahedron:
+      case Polytope::Type::Hexahedron:
+      case Polytope::Type::Wedge:
+      {
+        if (shape.size() != 3)
+        {
+          Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
+            << "Expected 3 dimensions for geometry type " << g
+            << ", but got " << shape.size() << "."
+            << Alert::Raise;
+        }
+
+        const size_t nx = shape.coeff(0);
+        const size_t ny = shape.coeff(1);
+        const size_t nz = shape.coeff(2);
+        if (nx < 2 || ny < 2 || nz < 2)
+        {
+          Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
+            << "3D uniform grid requires at least 2 vertices per direction."
+            << Alert::Raise;
+        }
+
+        const size_t cx = nx - 1;
+        const size_t cy = ny - 1;
+        const size_t cz = nz - 1;
+
+        const size_t dim = 3;
+        const std::vector<size_t> nCells = { cx, cy, cz };
+        const std::vector<int> procShape = chooseProcShape(dim, nCells);
+        const std::vector<int> procCoord = rankToProcCoord(rank, procShape);
+
+        std::vector<std::vector<Interval>> cellSplits(dim);
+        for (size_t d = 0; d < dim; ++d)
+        {
+          cellSplits[d].resize(procShape[d]);
+          for (int p = 0; p < procShape[d]; ++p)
+            cellSplits[d][p] = splitRange(nCells[d], p, procShape[d]);
+        }
+
+        const Interval ownedX = cellSplits[0][procCoord[0]];
+        const Interval ownedY = cellSplits[1][procCoord[1]];
+        const Interval ownedZ = cellSplits[2][procCoord[2]];
+
+        const Interval ghostX = expandByOne(ownedX, cx);
+        const Interval ghostY = expandByOne(ownedY, cy);
+        const Interval ghostZ = expandByOne(ownedZ, cz);
+
+        const Interval localVertX{
+          ownedX.begin,
+          ownedX.empty() ? ownedX.end : std::min(nx, ownedX.end + 1)
+        };
+        const Interval localVertY{
+          ownedY.begin,
+          ownedY.empty() ? ownedY.end : std::min(ny, ownedY.end + 1)
+        };
+        const Interval localVertZ{
+          ownedZ.begin,
+          ownedZ.empty() ? ownedZ.end : std::min(nz, ownedZ.end + 1)
+        };
+
+        const Interval vertX{
+          ghostX.begin,
+          ghostX.empty() ? ghostX.end : std::min(nx, ghostX.end + 1)
+        };
+        const Interval vertY{
+          ghostY.begin,
+          ghostY.empty() ? ghostY.end : std::min(ny, ghostY.end + 1)
+        };
+        const Interval vertZ{
+          ghostZ.begin,
+          ghostZ.empty() ? ghostZ.end : std::min(nz, ghostZ.end + 1)
+        };
+
+        const auto ownerOfCell = [&](size_t i, size_t j, size_t k) -> int
+        {
+          int px = -1, py = -1, pz = -1;
+          for (int p = 0; p < procShape[0]; ++p)
+            if (cellSplits[0][p].contains(i)) { px = p; break; }
+          for (int p = 0; p < procShape[1]; ++p)
+            if (cellSplits[1][p].contains(j)) { py = p; break; }
+          for (int p = 0; p < procShape[2]; ++p)
+            if (cellSplits[2][p].contains(k)) { pz = p; break; }
+          assert(px >= 0 && py >= 0 && pz >= 0);
+          return procCoordToRank({ px, py, pz }, procShape);
+        };
+
+        const auto ownerOfVertex = [&](size_t i, size_t j, size_t k) -> int
+        {
+          std::vector<int> rs;
+
+          std::array<size_t, 2> ii = { i > 0 ? i - 1 : i, std::min(i, cx ? cx - 1 : 0) };
+          std::array<size_t, 2> jj = { j > 0 ? j - 1 : j, std::min(j, cy ? cy - 1 : 0) };
+          std::array<size_t, 2> kk = { k > 0 ? k - 1 : k, std::min(k, cz ? cz - 1 : 0) };
+
+          for (size_t a : ii)
+          {
+            if (a >= cx) continue;
+            for (size_t b : jj)
+            {
+              if (b >= cy) continue;
+              for (size_t c : kk)
+              {
+                if (c >= cz) continue;
+                rs.push_back(ownerOfCell(a, b, c));
+              }
+            }
+          }
+
+          if (rs.empty())
+            rs.push_back(0);
+          uniqueSort(rs);
+          return rs.front();
+        };
+
+        const auto holdersOfVertex = [&](size_t i, size_t j, size_t k)
+        {
+          std::vector<int> res;
+          for (int px = 0; px < procShape[0]; ++px)
+          {
+            const Interval Gx = expandByOne(cellSplits[0][px], cx);
+            const Interval Vx{
+              Gx.begin,
+              Gx.empty() ? Gx.end : std::min(nx, Gx.end + 1)
+            };
+            if (!Vx.contains(i))
+              continue;
+
+            for (int py = 0; py < procShape[1]; ++py)
+            {
+              const Interval Gy = expandByOne(cellSplits[1][py], cy);
+              const Interval Vy{
+                Gy.begin,
+                Gy.empty() ? Gy.end : std::min(ny, Gy.end + 1)
+              };
+              if (!Vy.contains(j))
+                continue;
+
+              for (int pz = 0; pz < procShape[2]; ++pz)
+              {
+                const Interval Gz = expandByOne(cellSplits[2][pz], cz);
+                const Interval Vz{
+                  Gz.begin,
+                  Gz.empty() ? Gz.end : std::min(nz, Gz.end + 1)
+                };
+                if (Vz.contains(k))
+                  res.push_back(procCoordToRank({ px, py, pz }, procShape));
+              }
+            }
+          }
+          uniqueSort(res);
+          return res;
+        };
+
+        const auto stateOfVertex = [&](size_t i, size_t j, size_t k) -> Shard::State
+        {
+          const int owner = ownerOfVertex(i, j, k);
+          if (localVertX.contains(i) && localVertY.contains(j) && localVertZ.contains(k))
+            return owner == rank ? Shard::State::Owned : Shard::State::Shared;
+          return Shard::State::Ghost;
+        };
+
+        const auto holdersOfCell = [&](size_t i, size_t j, size_t k)
+        {
+          std::vector<int> res;
+          const int owner = ownerOfCell(i, j, k);
+          const std::vector<int> oc = rankToProcCoord(owner, procShape);
+
+          for (int dx = -1; dx <= 1; ++dx)
+          {
+            for (int dy = -1; dy <= 1; ++dy)
+            {
+              for (int dz = -1; dz <= 1; ++dz)
+              {
+                std::vector<int> pc = oc;
+                pc[0] += dx;
+                pc[1] += dy;
+                pc[2] += dz;
+                if (pc[0] < 0 || pc[0] >= procShape[0]) continue;
+                if (pc[1] < 0 || pc[1] >= procShape[1]) continue;
+                if (pc[2] < 0 || pc[2] >= procShape[2]) continue;
+
+                const Interval GX = expandByOne(cellSplits[0][pc[0]], cx);
+                const Interval GY = expandByOne(cellSplits[1][pc[1]], cy);
+                const Interval GZ = expandByOne(cellSplits[2][pc[2]], cz);
+
+                if (GX.contains(i) && GY.contains(j) && GZ.contains(k))
+                  res.push_back(procCoordToRank(pc, procShape));
+              }
+            }
+          }
+
+          uniqueSort(res);
+          return res;
+        };
+
+        Shard::Builder sb;
+        sb.initialize(/*dimension=*/3, /*sdim=*/3);
+
+        UnorderedMap<Index, Index> gv2lv;
+        gv2lv.reserve(vertX.size() * vertY.size() * vertZ.size());
+
+        for (size_t k = vertZ.begin; k < vertZ.end; ++k)
+        {
+          for (size_t j = vertY.begin; j < vertY.end; ++j)
+          {
+            for (size_t i = vertX.begin; i < vertX.end; ++i)
+            {
+              const Index gvid = vid3(i, j, k, nx, ny);
+              const int owner = ownerOfVertex(i, j, k);
+              const Shard::State state = stateOfVertex(i, j, k);
+
+              const Index lv = sb.vertex(
+                gvid,
+                sp3(static_cast<Real>(i), static_cast<Real>(j), static_cast<Real>(k)),
+                state);
+              gv2lv.emplace(gvid, lv);
+
+              if (state == Shard::State::Owned)
+              {
+                for (const int r : holdersOfVertex(i, j, k))
+                {
+                  if (r != rank)
+                    sb.halo(0, lv, static_cast<Index>(r));
+                }
+              }
+              else
+              {
+                sb.setOwner(0, lv, static_cast<Index>(owner));
+              }
+            }
+          }
+        }
+
+        for (size_t k = ghostZ.begin; k < ghostZ.end; ++k)
+        {
+          for (size_t j = ghostY.begin; j < ghostY.end; ++j)
+          {
+            for (size_t i = ghostX.begin; i < ghostX.end; ++i)
+            {
+              const Index mid = macroId3(i, j, k, cx, cy);
+              const int owner = ownerOfCell(i, j, k);
+              const Shard::State state =
+                (owner == rank ? Shard::State::Owned : Shard::State::Ghost);
+
+              if (g == Polytope::Type::Hexahedron)
+              {
+                const Index v0 = gv2lv.at(vid3(i,     j,     k,     nx, ny));
+                const Index v1 = gv2lv.at(vid3(i + 1, j,     k,     nx, ny));
+                const Index v2 = gv2lv.at(vid3(i + 1, j + 1, k,     nx, ny));
+                const Index v3 = gv2lv.at(vid3(i,     j + 1, k,     nx, ny));
+                const Index v4 = gv2lv.at(vid3(i,     j,     k + 1, nx, ny));
+                const Index v5 = gv2lv.at(vid3(i + 1, j,     k + 1, nx, ny));
+                const Index v6 = gv2lv.at(vid3(i + 1, j + 1, k + 1, nx, ny));
+                const Index v7 = gv2lv.at(vid3(i,     j + 1, k + 1, nx, ny));
+
+                const IndexArray vs = makeIndexArray(v0, v1, v2, v3, v4, v5, v6, v7);
+                const Index lc = sb.polytope(3, mid, Polytope::Type::Hexahedron, vs, state);
+
+                if (state == Shard::State::Owned)
+                {
+                  for (const int r : holdersOfCell(i, j, k))
+                  {
+                    if (r != rank)
+                      sb.halo(3, lc, static_cast<Index>(r));
+                  }
+                }
+                else
+                {
+                  sb.setOwner(3, lc, static_cast<Index>(owner));
+                }
+              }
+              else if (g == Polytope::Type::Wedge)
+              {
+                const Index v0  = gv2lv.at(vid3(i,     j,     k,     nx, ny));
+                const Index v1  = gv2lv.at(vid3(i + 1, j,     k,     nx, ny));
+                const Index v2  = gv2lv.at(vid3(i,     j + 1, k,     nx, ny));
+                const Index v3  = gv2lv.at(vid3(i + 1, j + 1, k,     nx, ny));
+                const Index v0p = gv2lv.at(vid3(i,     j,     k + 1, nx, ny));
+                const Index v1p = gv2lv.at(vid3(i + 1, j,     k + 1, nx, ny));
+                const Index v2p = gv2lv.at(vid3(i,     j + 1, k + 1, nx, ny));
+                const Index v3p = gv2lv.at(vid3(i + 1, j + 1, k + 1, nx, ny));
+
+                const Index lc0 = sb.polytope(
+                  3, static_cast<Index>(2 * mid + 0), Polytope::Type::Wedge,
+                  makeIndexArray(v0, v1, v2, v0p, v1p, v2p), state);
+
+                const Index lc1 = sb.polytope(
+                  3, static_cast<Index>(2 * mid + 1), Polytope::Type::Wedge,
+                  makeIndexArray(v1, v3, v2, v1p, v3p, v2p), state);
+
+                if (state == Shard::State::Owned)
+                {
+                  for (const int r : holdersOfCell(i, j, k))
+                  {
+                    if (r != rank)
+                    {
+                      sb.halo(3, lc0, static_cast<Index>(r));
+                      sb.halo(3, lc1, static_cast<Index>(r));
+                    }
+                  }
+                }
+                else
+                {
+                  const Index ow = static_cast<Index>(owner);
+                  sb.setOwner(3, lc0, ow);
+                  sb.setOwner(3, lc1, ow);
+                }
+              }
+              else // Tetrahedron
+              {
+                const Index v000 = gv2lv.at(vid3(i,     j,     k,     nx, ny));
+                const Index v100 = gv2lv.at(vid3(i + 1, j,     k,     nx, ny));
+                const Index v010 = gv2lv.at(vid3(i,     j + 1, k,     nx, ny));
+                const Index v110 = gv2lv.at(vid3(i + 1, j + 1, k,     nx, ny));
+
+                const Index v001 = gv2lv.at(vid3(i,     j,     k + 1, nx, ny));
+                const Index v101 = gv2lv.at(vid3(i + 1, j,     k + 1, nx, ny));
+                const Index v011 = gv2lv.at(vid3(i,     j + 1, k + 1, nx, ny));
+                const Index v111 = gv2lv.at(vid3(i + 1, j + 1, k + 1, nx, ny));
+
+                const Index lc0 = sb.polytope(
+                  3, static_cast<Index>(6 * mid + 0), Polytope::Type::Tetrahedron,
+                  makeIndexArray(v000, v100, v110, v111), state);
+                const Index lc1 = sb.polytope(
+                  3, static_cast<Index>(6 * mid + 1), Polytope::Type::Tetrahedron,
+                  makeIndexArray(v000, v110, v010, v111), state);
+                const Index lc2 = sb.polytope(
+                  3, static_cast<Index>(6 * mid + 2), Polytope::Type::Tetrahedron,
+                  makeIndexArray(v000, v010, v011, v111), state);
+                const Index lc3 = sb.polytope(
+                  3, static_cast<Index>(6 * mid + 3), Polytope::Type::Tetrahedron,
+                  makeIndexArray(v000, v011, v001, v111), state);
+                const Index lc4 = sb.polytope(
+                  3, static_cast<Index>(6 * mid + 4), Polytope::Type::Tetrahedron,
+                  makeIndexArray(v000, v001, v101, v111), state);
+                const Index lc5 = sb.polytope(
+                  3, static_cast<Index>(6 * mid + 5), Polytope::Type::Tetrahedron,
+                  makeIndexArray(v000, v101, v100, v111), state);
+
+                if (state == Shard::State::Owned)
+                {
+                  for (const int r : holdersOfCell(i, j, k))
+                  {
+                    if (r != rank)
+                    {
+                      sb.halo(3, lc0, static_cast<Index>(r));
+                      sb.halo(3, lc1, static_cast<Index>(r));
+                      sb.halo(3, lc2, static_cast<Index>(r));
+                      sb.halo(3, lc3, static_cast<Index>(r));
+                      sb.halo(3, lc4, static_cast<Index>(r));
+                      sb.halo(3, lc5, static_cast<Index>(r));
+                    }
+                  }
+                }
+                else
+                {
+                  const Index ow = static_cast<Index>(owner);
+                  sb.setOwner(3, lc0, ow);
+                  sb.setOwner(3, lc1, ow);
+                  sb.setOwner(3, lc2, ow);
+                  sb.setOwner(3, lc3, ow);
+                  sb.setOwner(3, lc4, ow);
+                  sb.setOwner(3, lc5, ow);
+                }
+              }
+            }
+          }
+        }
+
+        return finish(sb.finalize());
+      }
+
+      default:
+      {
+        Alert::NamespacedException("Rodin::Geometry::Mesh<Context::MPI>::UniformGrid")
+          << "Unsupported geometry type " << g << "."
+          << Alert::Raise;
+        return MPIMesh(context);
+      }
+    }
+  }
+
 }
 

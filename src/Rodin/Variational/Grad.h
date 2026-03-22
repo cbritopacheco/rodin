@@ -182,7 +182,6 @@ namespace Rodin::Variational
 
         SpatialVectorType out;
 
-        // SpatialVectorType out;
         if (polytopeMesh == fesMesh)
         {
           this->interpolate(out, p);

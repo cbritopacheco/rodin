@@ -1,6 +1,11 @@
 #ifndef RODIN_MPI_GEOMETRY_SHARDER_H
 #define RODIN_MPI_GEOMETRY_SHARDER_H
 
+/**
+ * @file
+ * @brief Mesh sharding and distribution utilities for MPI contexts.
+ */
+
 #include <boost/mpi/config.hpp>
 
 #include "Rodin/Geometry/Sharder.h"
@@ -19,6 +24,9 @@ namespace Rodin::Geometry
   class Sharder<Context::MPI> : public SharderBase<Context::MPI>
   {
     public:
+      /**
+       * @brief Base sharder interface specialized on MPI context.
+       */
       using Parent = SharderBase<Context::MPI>;
 
       /**
@@ -64,6 +72,9 @@ namespace Rodin::Geometry
 
 namespace Rodin::MPI
 {
+  /**
+   * @brief Convenience alias for the MPI mesh sharder specialization.
+   */
   using Sharder = Geometry::Sharder<Context::MPI>;
 }
 

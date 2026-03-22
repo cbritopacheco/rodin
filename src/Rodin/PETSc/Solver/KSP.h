@@ -7,6 +7,27 @@
 #ifndef RODIN_SOLVER_PETSC_KSP_H
 #define RODIN_SOLVER_PETSC_KSP_H
 
+/**
+ * @file KSP.h
+ * @brief PETSc KSP (Krylov subspace) linear solver wrapper for Rodin.
+ *
+ * Wraps the PETSc `KSP` context and implements the Rodin
+ * @ref Rodin::Solver::LinearSolverBase interface so that any PETSc
+ * Krylov solver (CG, GMRES, BiCGStab, …) can be used to solve the
+ * linear system @f$ A\mathbf{x} = \mathbf{b} @f$ assembled by a
+ * Rodin variational problem.
+ *
+ * The class supports:
+ * - Programmatic configuration via `setType()`, `setTolerances()`,
+ *   `setPreconditioner()`.
+ * - Command-line overrides via `KSPSetFromOptions` (called inside `solve`).
+ * - Automatic solution vector allocation when `x == PETSC_NULL`.
+ *
+ * @see Rodin::PETSc::Solver::CG,
+ *      Rodin::PETSc::Solver::GMRES,
+ *      Rodin::PETSc::Solver::SNES
+ */
+
 #include <petscksp.h>
 #include "Rodin/PETSc/Math/LinearSystem.h"
 #include "Rodin/Solver/LinearSolver.h"
@@ -18,23 +39,36 @@
 namespace Rodin::Solver
 {
   /**
-   * @brief PETSc KSP (Krylov) linear solver wrapper.
+   * @brief PETSc KSP (Krylov subspace) linear solver wrapper.
    *
-   * Inherits LinearSolverBase<Mat,Vec,PetscScalar> for the generic interface,
-   * and PETSc::Object for automatic cleanup of any forgotten handles.
+   * Wraps the PETSc `KSP` context and inherits both
+   * @ref Rodin::Solver::LinearSolverBase (for the generic solver interface)
+   * and @ref Rodin::PETSc::Object (for automatic handle cleanup).
    *
-   * Combines programmatic configuration with command‐line overrides.
+   * Combines programmatic configuration (tolerances, type, preconditioner)
+   * with PETSc command-line overrides (`-ksp_type`, `-ksp_rtol`, …).
+   *
+   * @see Rodin::Solver::CG<PETSc::Math::LinearSystem>,
+   *      Rodin::Solver::GMRES<PETSc::Math::LinearSystem>,
+   *      Rodin::Solver::SNES
    */
   class KSP
     : public LinearSolverBase<PETSc::Math::LinearSystem>, public PETSc::Object<::KSP>
   {
     public:
+      /// @brief Handle type for the raw PETSc `KSP` context pointer.
       using HandleType = ::KSP;
+      /// @brief Scalar type (`PetscScalar`) used for residual norms and tolerances.
       using ScalarType   = PetscScalar;
+      /// @brief PETSc matrix type (`::Mat`) for the system operator and preconditioner.
       using OperatorType = ::Mat;
+      /// @brief PETSc vector type (`::Vec`) for the right-hand side and solution.
       using VectorType   = ::Vec;
+      /// @brief Linear system type coupling @f$ A @f$, @f$ \mathbf{b} @f$, and @f$ \mathbf{x} @f$.
       using LinearSystemType = PETSc::Math::LinearSystem;
+      /// @brief Base problem type that provides the linear system to solve.
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+      /// @brief Parent class providing the generic `LinearSolverBase` interface.
       using Parent = LinearSolverBase<LinearSystemType>;
       using Parent::solve;
       /**
@@ -60,37 +94,64 @@ namespace Rodin::Solver
        */
       void solve(LinearSystemType& b) override;
 
+      /**
+       * @brief Selects the Krylov subspace method.
+       * @param type PETSc KSP type string (e.g. `KSPCG`, `KSPGMRES`).
+       * @returns Reference to `*this` for method chaining.
+       */
       KSP& setType(::KSPType type) noexcept;
 
+      /**
+       * @brief Sets convergence tolerances and maximum iteration count.
+       * @param rtol   Relative decrease in residual norm.
+       * @param abstol Absolute residual norm threshold.
+       * @param dtol   Divergence tolerance.
+       * @param maxIt  Maximum number of iterations.
+       * @returns Reference to `*this`.
+       */
       KSP& setTolerances(PetscReal rtol,
                          PetscReal abstol,
                          PetscReal dtol,
                          PetscInt  maxIt) noexcept;
 
+      /**
+       * @brief Sets an explicit preconditioner matrix.
+       * @param P PETSc matrix to use as preconditioner operator.
+       * @returns Reference to `*this`.
+       */
       KSP& setPreconditioner(OperatorType P) noexcept;
 
+      /// @brief Returns a mutable reference to the underlying PETSc KSP handle.
+      /// @returns Mutable reference to the KSP handle.
       HandleType& getHandle() noexcept override;
 
+      /// @brief Returns a read-only reference to the underlying PETSc KSP handle.
+      /// @returns Const reference to the KSP handle.
       const HandleType& getHandle() const noexcept override;
 
+      /// @brief Creates a heap-allocated copy of this solver.
+      /// @returns Pointer to the cloned KSP instance.
       virtual KSP* copy() const noexcept override
       {
         return new KSP(*this);
       }
 
     private:
-      HandleType   m_ksp;
-      ::KSPType    m_type;
-      PetscReal    m_rtol,
-                   m_abstol,
-                   m_dtol;
-      PetscInt     m_maxIt;
-      std::optional<OperatorType> m_preconditioner;
+      HandleType   m_ksp;  ///< Underlying PETSc KSP context.
+      ::KSPType    m_type; ///< Requested KSP algorithm type.
+      PetscReal    m_rtol, ///< Relative convergence tolerance.
+                   m_abstol, ///< Absolute convergence tolerance.
+                   m_dtol; ///< Divergence tolerance.
+      PetscInt     m_maxIt; ///< Maximum iteration count.
+      std::optional<OperatorType> m_preconditioner; ///< Optional preconditioner matrix.
   };
 } // namespace Rodin::Solver
 
 namespace Rodin::PETSc::Solver
 {
+  /**
+   * @brief PETSc namespace alias to @ref Rodin::Solver::KSP.
+   */
   using KSP = Rodin::Solver::KSP;
 }
 

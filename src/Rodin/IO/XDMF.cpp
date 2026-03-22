@@ -5,6 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <cassert>
+#include <cstdint>
 #include <fstream>
 #include <iomanip>
 #include <sstream>
@@ -13,6 +14,11 @@
 #include "HDF5.h"
 #include "Rodin/Alert/Exception.h"
 #include "Rodin/Alert/MemberFunctionException.h"
+
+#ifdef RODIN_USE_MPI
+#include <mpi.h>
+#include <array>
+#endif
 
 namespace Rodin::IO
 {
@@ -123,65 +129,6 @@ namespace Rodin::IO
     return nullptr;
   }
 
-  struct XDMFMeshMeta
-  {
-    size_t vertexCount = 0;
-    size_t cellCount = 0;
-    size_t meshDimension = 0;
-    size_t spaceDimension = 0;
-    size_t topologySize = 0;
-  };
-
-  static
-  XDMFMeshMeta readXDMFMeshMeta(const boost::filesystem::path& filename)
-  {
-    XDMFMeshMeta meta;
-
-    const auto file = HDF5::File(H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
-    if (!file)
-    {
-      Alert::Exception()
-        << "Failed to open HDF5 XDMF mesh file: " << filename
-        << Alert::Raise;
-    }
-
-    {
-      const auto shape = HDF5::readMatrixShape(file.get(), HDF5::Path::MeshGeometryVertices);
-      meta.vertexCount = static_cast<size_t>(shape.first);
-      meta.spaceDimension = static_cast<size_t>(shape.second);
-    }
-
-    meta.topologySize = static_cast<size_t>(
-        HDF5::readScalarDataset<HDF5::U64>(file.get(), HDF5::Path::MeshXDMFTopologySize));
-
-    size_t maxDim = 0;
-    for (;;)
-    {
-      const auto path = HDF5::attributePath(maxDim);
-      if (!HDF5::exists(file.get(), path))
-        break;
-      ++maxDim;
-    }
-
-    if (maxDim == 0)
-    {
-      Alert::Exception()
-        << "Failed to infer mesh dimension from HDF5 attributes in file: " << filename
-        << Alert::Raise;
-    }
-
-    meta.meshDimension = maxDim - 1;
-
-    {
-      const auto attrs = HDF5::readVectorDataset<HDF5::U64>(
-          file.get(),
-          HDF5::attributePath(meta.meshDimension));
-      meta.cellCount = attrs.size();
-    }
-
-    return meta;
-  }
-
   static
   std::string makeGridPieceName(const std::string& gridName, size_t rank)
   {
@@ -248,34 +195,28 @@ namespace Rodin::IO
     : m_stem(stem)
   {}
 
-  XDMF::XDMF(const boost::filesystem::path& stem,
-             size_t rank, size_t numRanks, size_t rootRank)
+#ifdef RODIN_USE_MPI
+  XDMF::XDMF(MPI_Comm comm,
+             const boost::filesystem::path& stem,
+             size_t rootRank)
     : m_stem(stem),
       m_distributed(true),
-      m_rank(rank),
-      m_numRanks(numRanks),
-      m_rootRank(rootRank)
+      m_rootRank(rootRank),
+      m_comm(comm)
   {
+    int rank = 0, numRanks = 0;
+    MPI_Comm_rank(comm, &rank);
+    MPI_Comm_size(comm, &numRanks);
+    m_rank = static_cast<size_t>(rank);
+    m_numRanks = static_cast<size_t>(numRanks);
+
     // Use {rank_suffix} so that the same expansion logic can omit the rank
     // cleanly when rank == "".
     m_patterns.staticMesh    = "{stem}.{grid}{rank_suffix}.mesh.h5";
     m_patterns.transientMesh = "{stem}.{grid}{rank_suffix}.mesh.{index}.h5";
     m_patterns.attribute     = "{stem}.{grid}.{name}{rank_suffix}.{index}.h5";
   }
-
-  XDMF::~XDMF()
-  {
-    if (!m_closed)
-    {
-      try
-      {
-        close();
-      }
-      catch (...)
-      {
-      }
-    }
-  }
+#endif
 
   const boost::filesystem::path& XDMF::getStem() const noexcept
   {
@@ -364,6 +305,8 @@ namespace Rodin::IO
       snapshot.meshDimension = gr.mesh->getDimension();
       snapshot.spaceDimension = gr.mesh->getSpaceDimension();
       snapshot.topologySize = HDF5::getXDMFMixedTopologySize(*gr.mesh);
+
+      gatherPieceMeta(snapshot);
 
       if (gr.options.meshPolicy == MeshPolicy::Static)
       {
@@ -517,8 +460,24 @@ namespace Rodin::IO
 
   void XDMF::flush() const
   {
-    if (m_distributed && m_rank != m_rootRank)
-      return;
+    if (m_distributed)
+    {
+#ifdef RODIN_USE_MPI
+      if (m_comm == MPI_COMM_NULL)
+      {
+        Alert::MemberFunctionException(*this, __func__)
+          << "Distributed flush requires a valid MPI communicator."
+          << Alert::Raise;
+      }
+      MPI_Barrier(m_comm);
+      if (m_rank != m_rootRank)
+        return;
+#else
+      Alert::MemberFunctionException(*this, __func__)
+        << "Distributed XDMF requires MPI support (RODIN_USE_MPI)."
+        << Alert::Raise;
+#endif
+    }
 
     const std::string stemStr = m_stem.filename().string();
     const auto xdmfFile = expandPattern(m_patterns.xdmf, stemStr, "", "", "");
@@ -580,8 +539,7 @@ namespace Rodin::IO
               ? expandPattern(patterns.staticMesh, stemStr, gr.name, "", "", rStr)
               : expandPattern(patterns.transientMesh, stemStr, gr.name, "", indexStr, rStr);
 
-            const auto meshPath = m_stem.parent_path() / meshH5;
-            const auto meta = readXDMFMeshMeta(meshPath);
+            const auto& meta = snap.pieces[r];
 
             os << indent(5) << "<Grid Name=\"" << makeGridPieceName(gridName, r)
                << "\" GridType=\"Uniform\">\n";
@@ -627,7 +585,7 @@ namespace Rodin::IO
               const char* attrType  = (attr.dimension == 1) ? "Scalar" : "Vector";
 
               std::ostringstream dimStr;
-              const size_t count = (attr.center == Center::Node)
+              const std::uint64_t count = (attr.center == Center::Node)
                   ? meta.vertexCount : meta.cellCount;
               if (attr.dimension == 1)
                 dimStr << count;
@@ -708,5 +666,63 @@ namespace Rodin::IO
   size_t XDMF::getRootRank() const noexcept
   {
     return m_rootRank;
+  }
+
+  void XDMF::gatherPieceMeta(SnapshotRecord& snap) const
+  {
+    SnapshotRecord::PieceMeta local;
+    local.vertexCount = static_cast<std::uint64_t>(snap.vertexCount);
+    local.cellCount = static_cast<std::uint64_t>(snap.cellCount);
+    local.meshDimension = static_cast<std::uint64_t>(snap.meshDimension);
+    local.spaceDimension = static_cast<std::uint64_t>(snap.spaceDimension);
+    local.topologySize = static_cast<std::uint64_t>(snap.topologySize);
+
+    if (!m_distributed)
+    {
+      snap.pieces = { local };
+      return;
+    }
+
+#ifdef RODIN_USE_MPI
+    if (m_comm == MPI_COMM_NULL)
+    {
+      Alert::MemberFunctionException(*this, __func__)
+        << "Distributed write requires a valid MPI communicator."
+        << Alert::Raise;
+    }
+
+    // Pack 5 uint64_t values
+    std::array<std::uint64_t, 5> localBuf = {
+      local.vertexCount, local.cellCount, local.meshDimension,
+      local.spaceDimension, local.topologySize
+    };
+
+    std::vector<std::uint64_t> recvBuf;
+    if (m_rank == m_rootRank)
+      recvBuf.resize(5 * m_numRanks);
+
+    MPI_Gather(
+      localBuf.data(), 5, MPI_UINT64_T,
+      recvBuf.data(), 5, MPI_UINT64_T,
+      static_cast<int>(m_rootRank), m_comm);
+
+    if (m_rank == m_rootRank)
+    {
+      snap.pieces.resize(m_numRanks);
+      for (size_t r = 0; r < m_numRanks; ++r)
+      {
+        auto& p = snap.pieces[r];
+        p.vertexCount    = recvBuf[r * 5 + 0];
+        p.cellCount      = recvBuf[r * 5 + 1];
+        p.meshDimension  = recvBuf[r * 5 + 2];
+        p.spaceDimension = recvBuf[r * 5 + 3];
+        p.topologySize   = recvBuf[r * 5 + 4];
+      }
+    }
+#else
+    Alert::MemberFunctionException(*this, __func__)
+      << "Distributed XDMF requires MPI support (RODIN_USE_MPI)."
+      << Alert::Raise;
+#endif
   }
 }
