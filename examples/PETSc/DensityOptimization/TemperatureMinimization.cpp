@@ -129,6 +129,7 @@
  * would require a different optimization strategy.
  */
 
+#include "Rodin/Alert/Success.h"
 #include <Rodin/IO.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Assembly.h>
@@ -137,6 +138,7 @@
 
 #include <Rodin/MPI.h>
 #include <Rodin/PETSc.h>
+#include <petscmat.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -151,7 +153,7 @@ static constexpr Real mu = 0.01;
 static constexpr Real gmin = 0.0001;
 static constexpr Real gmax = 1;
 static constexpr Real alpha = 0.05;
-static constexpr size_t maxIterations = 5000;
+static constexpr size_t maxIterations = 1e4;
 static constexpr Real radius = 0.1;
 
 int main(int argc, char** argv)
@@ -163,8 +165,8 @@ int main(int argc, char** argv)
   boost::mpi::environment env(argc, argv);
   boost::mpi::communicator world(PETSC_COMM_WORLD, boost::mpi::comm_attach);
 
-  constexpr size_t n = 32;
-  constexpr Geometry::Polytope::Type g = Geometry::Polytope::Type::Triangle;
+  constexpr size_t n = 512;
+  constexpr Geometry::Polytope::Type g = Geometry::Polytope::Type::Quadrilateral;
 
   if (world.rank() == 0)
     Alert::Info() << "Generating uniform grid..." << Alert::Raise;
@@ -196,18 +198,20 @@ int main(int argc, char** argv)
     mesh.setAttribute(it.key(), onGammaD ? GammaD : Gamma0);
   }
 
-  IO::XDMF xdmf(world, "TemperatureMinimization_PETSc");
+  const size_t nv = mesh.getVertexCount();
+  const size_t nc = mesh.getCellCount();
+
+  if (world.rank() == 0)
+  {
+    Alert::Success() << "Mesh generated." << Alert::Raise;
+    Alert::Info() << "Vertices: " << nv << Alert::Raise;
+    Alert::Info() << "Cells: " << nc << Alert::Raise;
+  }
+
+  IO::XDMF xdmf(world, "TemperatureMinimization");
   xdmf.grid().setMesh(mesh);
 
   P1 vh(mesh);
-
-  int rank = world.rank();
-  std::cerr << "rank=" << rank
-          << " shard vertices=" << mesh.getShard().getVertexCount()
-          << " global mesh vertices=" << mesh.getVertexCount()
-          << " p1 size=" << vh.getSize()
-          << "\n";
-
 
   {
     PETSc::Variational::TrialFunction u(vh);
@@ -237,7 +241,7 @@ int main(int argc, char** argv)
         Alert::Info() << "Iteration: " << i << Alert::Raise;
 
       const RealFunction f(1.0);
-      const auto a = gmin + (gmax - gmin) * pow(0.9, 3);
+      const auto a = gmin + (gmax - gmin) * Pow(gamma, 3);
 
       Problem poisson(u, v);
       poisson = Integral(a * Grad(u), Grad(v))
@@ -248,6 +252,7 @@ int main(int argc, char** argv)
         Alert::Info() << "Assembling state equation..." << Alert::Raise;
 
       poisson.assemble();
+
       if (world.rank() == 0)
         Alert::Info() << "State equation assembled." << Alert::Raise;
       Solver::KSP(poisson).solve();
@@ -289,7 +294,10 @@ int main(int argc, char** argv)
     }
   }
 
+  Alert::Success() << "Optimization completed." << Alert::Raise;
+
   xdmf.close();
   PetscFinalize();
+
   return 0;
 }
