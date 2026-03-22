@@ -61,10 +61,10 @@ if (T8Code_FOUND)
   set(T8Code_LIBRARIES "${T8Code_LIBRARY}")
 
   if (NOT TARGET T8Code::T8Code)
-    add_library(T8Code::T8Code IMPORTED INTERFACE)
+    add_library(T8Code::T8Code UNKNOWN IMPORTED)
     set_target_properties(T8Code::T8Code PROPERTIES
+      IMPORTED_LOCATION "${T8Code_LIBRARY}"
       INTERFACE_INCLUDE_DIRECTORIES "${T8Code_INCLUDE_DIRS}"
-      INTERFACE_LINK_LIBRARIES "${T8Code_LIBRARIES}"
     )
   endif()
 endif()

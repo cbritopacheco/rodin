@@ -24,6 +24,22 @@
 namespace Rodin::T8Code
 {
   // --------------------------------------------------------------------------
+  // Helper: hash 3D coordinates for vertex deduplication
+  // --------------------------------------------------------------------------
+  static
+  size_t hashCoordinates(const double coords[3])
+  {
+    size_t hash = 0;
+    for (size_t d = 0; d < 3; ++d)
+    {
+      auto bits = static_cast<int64_t>(coords[d] * 1e10);
+      hash ^= std::hash<int64_t>{}(bits) + 0x9e3779b9
+               + (hash << 6) + (hash >> 2);
+    }
+    return hash;
+  }
+
+  // --------------------------------------------------------------------------
   // Helper: map Rodin polytope type -> t8code element class
   // --------------------------------------------------------------------------
   static
@@ -264,7 +280,9 @@ namespace Rodin::T8Code
       t8_cmesh_set_tree_vertices(m_cmesh, i, coords.data(), nv);
     }
 
-    // Commit the coarse mesh (serial, no MPI)
+    // Commit the coarse mesh
+    // Note: sc_MPI_COMM_WORLD resolves to a serial communicator when
+    // t8code is built without MPI support.
     t8_cmesh_commit(m_cmesh, sc_MPI_COMM_WORLD);
 
     // Create the forest from the coarse mesh
@@ -328,15 +346,7 @@ namespace Rodin::T8Code
           t8_forest_element_coordinate(
             m_forest, itree, element, ic, coords);
 
-          // Hash the coordinates to identify unique vertices
-          size_t hash = 0;
-          for (size_t d = 0; d < 3; ++d)
-          {
-            // Quantize to avoid floating-point hash issues
-            auto bits = static_cast<int64_t>(coords[d] * 1e10);
-            hash ^= std::hash<int64_t>{}(bits) + 0x9e3779b9
-                     + (hash << 6) + (hash >> 2);
-          }
+          const size_t hash = hashCoordinates(coords);
 
           auto ins = vertexMap.insert({hash, static_cast<Index>(vertices.size())});
           if (ins.second)
@@ -388,15 +398,11 @@ namespace Rodin::T8Code
     std::unordered_map<size_t, Index> coordToVertex;
     for (Index vi = 0; vi < static_cast<Index>(getVertexCount()); ++vi)
     {
-      auto coords = getVertexCoordinates(vi);
-      size_t hash = 0;
+      auto vcoords = getVertexCoordinates(vi);
+      double c[3] = {0.0, 0.0, 0.0};
       for (size_t d = 0; d < sdim && d < 3; ++d)
-      {
-        auto bits = static_cast<int64_t>(coords[d] * 1e10);
-        hash ^= std::hash<int64_t>{}(bits) + 0x9e3779b9
-                 + (hash << 6) + (hash >> 2);
-      }
-      coordToVertex[hash] = vi;
+        c[d] = vcoords[d];
+      coordToVertex[hashCoordinates(c)] = vi;
     }
 
     // For each tree and each element, check face neighbors for level
@@ -462,13 +468,7 @@ namespace Rodin::T8Code
                   mid[d] = 0.5 * (c0[d] + c1[d]);
 
                 // Find the midpoint vertex in the Rodin mesh
-                size_t midHash = 0;
-                for (size_t d = 0; d < 3; ++d)
-                {
-                  auto bits = static_cast<int64_t>(mid[d] * 1e10);
-                  midHash ^= std::hash<int64_t>{}(bits) + 0x9e3779b9
-                             + (midHash << 6) + (midHash >> 2);
-                }
+                const size_t midHash = hashCoordinates(mid);
 
                 auto midIt = coordToVertex.find(midHash);
                 if (midIt != coordToVertex.end())
@@ -491,16 +491,8 @@ namespace Rodin::T8Code
                     t8_forest_element_coordinate(
                       m_forest, neighTree, neighbors[0], nfc1, nc1);
 
-                    size_t h0 = 0, h1 = 0;
-                    for (size_t d = 0; d < 3; ++d)
-                    {
-                      auto b0 = static_cast<int64_t>(nc0[d] * 1e10);
-                      h0 ^= std::hash<int64_t>{}(b0) + 0x9e3779b9
-                            + (h0 << 6) + (h0 >> 2);
-                      auto b1 = static_cast<int64_t>(nc1[d] * 1e10);
-                      h1 ^= std::hash<int64_t>{}(b1) + 0x9e3779b9
-                            + (h1 << 6) + (h1 >> 2);
-                    }
+                    const size_t h0 = hashCoordinates(nc0);
+                    const size_t h1 = hashCoordinates(nc1);
 
                     auto it0 = coordToVertex.find(h0);
                     auto it1 = coordToVertex.find(h1);
@@ -604,7 +596,6 @@ namespace Rodin::T8Code
       Alert::Exception()
         << "Cannot refine: no forest initialized."
         << Alert::Raise;
-      return *this;
     }
 
     AdaptContext ctx;
@@ -631,7 +622,6 @@ namespace Rodin::T8Code
       Alert::Exception()
         << "Cannot refine: no forest initialized."
         << Alert::Raise;
-      return *this;
     }
 
     AdaptContext ctx;
@@ -661,7 +651,6 @@ namespace Rodin::T8Code
       Alert::Exception()
         << "Cannot coarsen: no forest initialized."
         << Alert::Raise;
-      return *this;
     }
 
     AdaptContext ctx;
@@ -692,7 +681,6 @@ namespace Rodin::T8Code
       Alert::Exception()
         << "Cannot balance: no forest initialized."
         << Alert::Raise;
-      return *this;
     }
 
     t8_forest_t newForest;
