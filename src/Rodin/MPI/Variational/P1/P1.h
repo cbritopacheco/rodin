@@ -255,73 +255,86 @@ namespace Rodin::Variational
         const auto& comm  = ctx.getCommunicator();
         const auto& shard = mesh.getShard();
 
-        // halo: owned local vertex -> peers that need it
-        const auto& halo  = shard.getHalo(0);
-        // owner: ghost local vertex -> owning rank
-        const auto& owner = shard.getOwner(0);
+        const auto& halo  = shard.getHalo(0);   // owned local vertex -> remote ranks that also contain it
+        const auto& owner = shard.getOwner(0);  // shared/ghost local vertex -> owner rank
 
         const int P    = comm.size();
         const int rank = comm.rank();
 
-        // Owned vertices are exactly the keys in halo(0) (by construction).
-        m_owned = halo.size();
+        // Count all owned local vertices, not just those present in halo(0).
+        m_owned = 0;
+        for (size_t lv = 0; lv < shard.getVertexCount(); ++lv)
+        {
+          if (shard.isOwned(0, lv))
+            ++m_owned;
+        }
 
         const size_t inclusive = boost::mpi::scan(comm, m_owned, std::plus<size_t>());
         m_offset = inclusive - m_owned;
 
-        // 1) Use rank-indexed buffers (dense ranks), no FlatMap in the hot path.
         std::vector<std::vector<std::pair<Index, Index>>> send(P); // to peer: (globalVertexId, globalDof)
         std::vector<std::vector<std::pair<Index, Index>>> recv(P); // from owner: (globalVertexId, globalDof)
         std::vector<char> need_recv(P, 0);
 
-        // 2) Collect (globalDof -> localDof) as a flat vector, then bulk-build FlatMap once.
-        //    Estimate: owned + ghosts (owner map size is a good proxy for ghosts in this shard).
+        // owned + non-owned is a good upper bound
         std::vector<std::pair<Index, Index>> gl_pairs;
-        gl_pairs.reserve(m_owned + owner.size());
+        gl_pairs.reserve(shard.getVertexCount());
 
-        // ----- Owned part: iterate halo entries (do NOT scan all vertices) -----
+        // Number every owned local vertex.
         Index dofIdx = 0;
-        for (const auto& [lv, peers] : halo)
+        for (size_t lv = 0; lv < shard.getVertexCount(); ++lv)
         {
-          // lv is local vertex index (owned)
-          const Index gid   = mesh.getGlobalIndex(0, lv);   // global vertex id
-          const Index local = m_fes.getDOFs(0, lv)[0];      // scalar P1 => 1 dof (often == lv)
+          if (!shard.isOwned(0, lv))
+            continue;
+
+          const Index gid    = mesh.getGlobalIndex(0, lv);
+          const Index local  = m_fes.getDOFs(0, lv)[0];
           const Index global = m_offset + dofIdx++;
 
-          gl_pairs.push_back({global, local});
+          gl_pairs.push_back({ global, local });
 
-          for (const Index& peer : peers)
+          // Only shared owned vertices appear in halo(0).
+          auto hit = halo.find(lv);
+          if (hit != halo.end())
           {
-            const int rpeer = static_cast<int>(peer);
-            if (rpeer == rank) continue;
-            send[rpeer].push_back({gid, global});
+            for (const Index& peer : hit->second)
+            {
+              const int rpeer = static_cast<int>(peer);
+              if (rpeer == rank)
+                continue;
+              send[rpeer].push_back({ gid, global });
+            }
           }
         }
         assert(dofIdx == static_cast<Index>(m_owned));
 
-        // ----- Ghost part: we only need to post receives to owners that exist in this shard -----
+        // Non-owned local vertices (Shared or Ghost) need owner numbering.
         for (const auto& [lv, own] : owner)
         {
+          (void) lv;
           const int ro = static_cast<int>(own);
           if (ro != rank)
             need_recv[ro] = 1;
         }
 
-        // 3) Post receives and sends.
         std::vector<boost::mpi::request> reqs;
-        reqs.reserve(static_cast<size_t>(P) * 2);
+        reqs.reserve(static_cast<size_t>(2 * P));
 
         for (int r = 0; r < P; ++r)
+        {
           if (need_recv[r])
             reqs.push_back(comm.irecv(r, 0, recv[r]));
+        }
 
         for (int r = 0; r < P; ++r)
+        {
           if (!send[r].empty())
             reqs.push_back(comm.isend(r, 0, send[r]));
+        }
 
         boost::mpi::wait_all(reqs.begin(), reqs.end());
 
-        // 4) Consume received (gid, globalDof) pairs and map them to local DOFs.
+        // Install remote numbering for non-owned local vertices.
         for (int r = 0; r < P; ++r)
         {
           for (const auto& [gid, global] : recv[r])
@@ -330,23 +343,28 @@ namespace Rodin::Variational
             assert(lvOpt);
             const Index lv = *lvOpt;
 
+            // This should only populate non-owned vertices.
+            assert(!shard.isOwned(0, lv));
+
             const Index local = m_fes.getDOFs(0, lv)[0];
-            gl_pairs.push_back({global, local});
+            gl_pairs.push_back({ global, local });
           }
         }
 
-        // 5) Bulk-build the FlatMap ONCE (avoid O(n^2) incremental inserts).
         std::sort(gl_pairs.begin(), gl_pairs.end(),
                   [](const auto& a, const auto& b) { return a.first < b.first; });
-        gl_pairs.erase(std::unique(gl_pairs.begin(), gl_pairs.end(),
-                                   [](const auto& a, const auto& b) { return a.first == b.first; }),
-                       gl_pairs.end());
+
+        gl_pairs.erase(
+            std::unique(gl_pairs.begin(), gl_pairs.end(),
+                        [](const auto& a, const auto& b)
+                        {
+                          return a.first == b.first;
+                        }),
+            gl_pairs.end());
 
         m_local_to_global.right = FlatMap<Index, Index>(gl_pairs.begin(), gl_pairs.end());
 
-        // 6) Build left in one linear pass.
-        // For scalar P1 on the local shard, local DOF count should be shard vertex count.
-        const size_t localDofCount = shard.getVertexCount();
+        const size_t localDofCount = m_fes.getSize();
         m_local_to_global.left.assign(localDofCount, std::numeric_limits<Index>::max());
 
         for (const auto& [global, local] : m_local_to_global.right)
@@ -354,6 +372,11 @@ namespace Rodin::Variational
           assert(local < localDofCount);
           m_local_to_global.left[local] = global;
         }
+
+#ifndef NDEBUG
+        for (size_t local = 0; local < localDofCount; ++local)
+          assert(m_local_to_global.left[local] != std::numeric_limits<Index>::max());
+#endif
       }
 
       /**
@@ -371,73 +394,98 @@ namespace Rodin::Variational
       {
         static thread_local std::vector<Index> s_send;
 
-        const auto& ctx = mesh.getContext();
+        const auto& ctx   = mesh.getContext();
         const auto& comm  = ctx.getCommunicator();
         const auto& shard = mesh.getShard();
-        const auto& halo = shard.getHalo(0);
-        const auto& owner = shard.getOwner(0);
+        const auto& halo  = shard.getHalo(0);   // owned local vertex -> remote ranks that also contain it
+        const auto& owner = shard.getOwner(0);  // shared/ghost local vertex -> owner rank
 
-        const size_t nv = halo.size();
-        m_owned = nv * vdim;
+        const int rank = comm.rank();
+
+        // Count all owned local vertices, not just those present in halo.
+        size_t ownedVertices = 0;
+        for (size_t i = 0; i < shard.getVertexCount(); ++i)
+        {
+          if (shard.isOwned(0, i))
+            ++ownedVertices;
+        }
+
+        m_owned = ownedVertices * vdim;
+
         const size_t inclusive = boost::mpi::scan(comm, m_owned, std::plus<size_t>());
         m_offset = inclusive - m_owned;
 
         FlatMap<Index, std::vector<std::pair<Index, std::vector<Index>>>> push, pull;
+
         Index dofIdx = 0;
         for (size_t i = 0; i < shard.getVertexCount(); ++i)
         {
           if (shard.isOwned(0, i))
           {
-            const Index id = mesh.getGlobalIndex(0, i);
+            const Index gid = mesh.getGlobalIndex(0, i);
             const auto& dofs = m_fes.getDOFs(0, i);
 
             s_send.clear();
+            s_send.reserve(dofs.size());
+
             for (const Index& local : dofs)
             {
-              const Index global = dofIdx + m_offset;
+              const Index global = m_offset + dofIdx;
               s_send.push_back(global);
 
               const auto [it, inserted] = m_local_to_global.right.emplace(global, local);
               assert(inserted);
 
-              dofIdx++;
+              ++dofIdx;
             }
 
-            for (const Index& peer : halo.at(i))
+            // Only vertices that are also present remotely appear in halo.
+            auto hit = halo.find(i);
+            if (hit != halo.end())
             {
-              assert(comm.rank() >= 0);
-              assert(peer != static_cast<Index>(comm.rank()));
-              push[peer].push_back({ id, s_send });
+              for (const Index& peer : hit->second)
+              {
+                assert(peer != static_cast<Index>(rank));
+                push[peer].push_back({ gid, s_send });
+              }
             }
           }
           else
           {
-            pull.try_emplace(owner.at(i));
+            // Non-owned vertices are either Shared or Ghost and must have an owner.
+            auto oit = owner.find(i);
+            assert(oit != owner.end());
+            pull.try_emplace(oit->second);
           }
         }
 
+        assert(dofIdx == static_cast<Index>(m_owned));
+
         std::vector<boost::mpi::request> irecv;
-        for (auto& [owner, requested] : pull)
-          irecv.push_back(comm.irecv(owner, 0, pull[owner]));
+        irecv.reserve(pull.size());
+        for (auto& [own, requested] : pull)
+          irecv.push_back(comm.irecv(own, 0, pull[own]));
 
         std::vector<boost::mpi::request> isend;
+        isend.reserve(push.size());
         for (const auto& [peer, requested] : push)
           isend.push_back(comm.isend(peer, 0, push[peer]));
 
         boost::mpi::wait_all(isend.begin(), isend.end());
-
         boost::mpi::wait_all(irecv.begin(), irecv.end());
 
-        for (const auto& [owner, requested] : pull)
+        for (const auto& [own, requested] : pull)
         {
-          for (const auto& [id, global] : requested)
+          (void) own;
+          for (const auto& [gid, global] : requested)
           {
-            const auto i = mesh.getLocalIndex(0, id);
+            const auto i = mesh.getLocalIndex(0, gid);
             assert(i);
+
             const auto& dofs = m_fes.getDOFs(0, *i);
-            assert(dofs.size() >= 0);
             assert(dofs.size() == global.size());
-            for (size_t k = 0; k < global.size(); k++)
+
+            for (size_t k = 0; k < global.size(); ++k)
             {
               const auto [it, inserted] = m_local_to_global.right.emplace(global[k], dofs[k]);
               assert(inserted);
@@ -446,13 +494,18 @@ namespace Rodin::Variational
         }
 
         const size_t localDofCount = m_fes.getSize();
-        m_local_to_global.left.assign(localDofCount, 0);
+        m_local_to_global.left.assign(localDofCount, std::numeric_limits<Index>::max());
 
         for (const auto& [global, local] : m_local_to_global.right)
         {
           assert(local < localDofCount);
           m_local_to_global.left[local] = global;
         }
+
+#ifndef NDEBUG
+        for (size_t local = 0; local < localDofCount; ++local)
+          assert(m_local_to_global.left[local] != std::numeric_limits<Index>::max());
+#endif
       }
 
       /**

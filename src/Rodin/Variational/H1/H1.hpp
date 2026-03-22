@@ -1398,12 +1398,6 @@ namespace Rodin::Variational
           cellVertsIA(5)
         };
 
-        auto sort3 = [](std::array<Index,3> a)
-        {
-          std::sort(a.begin(), a.end());
-          return a;
-        };
-
         auto sort4 = [](std::array<Index,4> a)
         {
           std::sort(a.begin(), a.end());

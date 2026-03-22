@@ -494,6 +494,15 @@ namespace Rodin::Variational
         this->release();
       }
 
+      GridFunction& operator=(const ScalarType& value)
+      {
+        this->flush();
+        PetscErrorCode ierr = VecSet(m_data, value);
+        assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
+        return *this;
+      }
+
       /**
        * @brief Finds the minimum DOF value in the grid function.
        *
@@ -1182,102 +1191,6 @@ namespace Rodin::Variational
       Optional<size_t> getOrder(const Geometry::Polytope&) const
       {
         return std::nullopt;
-      }
-
-      /**
-       * @brief Evaluates the grid function at a geometric point.
-       *
-       * Convenience operator that delegates to `getValue(p)`.
-       *
-       * @param[in] p The evaluation point @f$ x @f$, carrying the
-       *              polytope it belongs to.
-       * @returns The interpolated value @f$ u_h(x) @f$.
-       */
-      decltype(auto) operator()(const Geometry::Point& p) const
-      {
-        return this->getValue(p);
-      }
-
-      /**
-       * @brief Evaluates the grid function @f$ u_h @f$ at a geometric point.
-       *
-       * The evaluation strategy depends on the mesh context:
-       *
-       * ### Local mode (`Context::Local`)
-       * Delegates directly to the parent `GridFunctionBase::getValue()`, which
-       * performs the standard finite element interpolation
-       * @f$ u_h(x) = \sum_i u_i \phi_i(x) @f$.
-       *
-       * ### MPI mode (`Context::MPI`)
-       * The point may lie on the local shard, on its parent mesh, or on a
-       * submesh.  The method checks, in order:
-       * 1. Whether the point's polytope belongs to the shard (direct match).
-       * 2. Whether the shard geometrically includes the point
-       *    (`shard.inclusion(p)`).
-       * 3. If the shard is a submesh, whether the point can be restricted to
-       *    it (`submesh.restriction(p)`).
-       *
-       * If none of these succeed, an exception is raised.
-       *
-       * @param[in] p The evaluation point @f$ x @f$.
-       * @returns The interpolated value @f$ u_h(x) @f$.
-       *
-       * @throws Alert::MemberFunctionException if the point does not belong
-       *         to the local shard in MPI mode, or if the mesh context type
-       *         is unsupported.
-       */
-      decltype(auto) getValue(const Geometry::Point& p) const
-      {
-        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
-        {
-          return Parent::getValue(p);
-        }
-        else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
-        {
-          static thread_local RangeType s_out;
-
-          const auto& fes = this->getFiniteElementSpace();
-          const auto& mesh = fes.getMesh();
-          const auto& shard = mesh.getShard();
-          const auto& polytope = p.getPolytope();
-          const auto& polytopeMesh = polytope.getMesh();
-
-          if (polytopeMesh == shard)
-          {
-            this->interpolate(s_out, p);
-            return s_out;
-          }
-
-          if (const auto inclusion = shard.inclusion(p))
-          {
-            this->interpolate(s_out, *inclusion);
-            return s_out;
-          }
-
-          if (shard.isSubMesh())
-          {
-            const auto& submesh = shard.asSubMesh();
-            if (const auto restriction = submesh.restriction(p))
-            {
-              this->interpolate(s_out, *restriction);
-              return s_out;
-            }
-          }
-
-          Alert::MemberFunctionException(*this, __func__)
-            << "Point does not belong to the PETSc GridFunction shard."
-            << Alert::Raise;
-
-          assert(false);
-          return s_out;
-        }
-        else
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "Unsupported mesh context type for PETSc GridFunction."
-            << Alert::Raise;
-          return Parent::getValue(p);
-        }
       }
 
       /**
