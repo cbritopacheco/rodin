@@ -1444,6 +1444,11 @@ namespace Rodin::IO
       HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaSize, static_cast<HDF5::U64>(nv));
       HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaDimension, static_cast<HDF5::U64>(vdim));
 
+      // Use the grid function's own FES mesh for polytope lookup so the
+      // Point's mesh reference matches the identity check in getValue().
+      // This is essential for distributed (MPI) meshes where visMesh is
+      // the shard but the GF is defined on the parent MPI mesh.
+      const auto& gfMesh = gf.getFiniteElementSpace().getMesh();
       const Geometry::Polytope::Traits ts(Geometry::Polytope::Type::Point);
 
       if constexpr (std::is_same_v<RangeType, ScalarType>)
@@ -1452,7 +1457,8 @@ namespace Rodin::IO
         for (auto it = visMesh.getVertex(); !it.end(); ++it)
         {
           const Index i = it->getIndex();
-          const Geometry::Point p(*it, ts.getVertex(0), it->getCoordinates());
+          const auto gfVtx = gfMesh.getVertex(i);
+          const Geometry::Point p(*gfVtx, ts.getVertex(0), gfVtx->getCoordinates());
           values[static_cast<size_t>(i)] = static_cast<HDF5::F64>(gf(p));
         }
 
@@ -1464,7 +1470,8 @@ namespace Rodin::IO
         for (auto it = visMesh.getVertex(); !it.end(); ++it)
         {
           const Index i = it->getIndex();
-          const Geometry::Point p(*it, ts.getVertex(0), it->getCoordinates());
+          const auto gfVtx = gfMesh.getVertex(i);
+          const Geometry::Point p(*gfVtx, ts.getVertex(0), gfVtx->getCoordinates());
           const auto value = gf(p);
 
           for (size_t c = 0; c < vdim; ++c)
@@ -1548,6 +1555,9 @@ namespace Rodin::IO
       HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaSize, static_cast<HDF5::U64>(nc));
       HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaDimension, static_cast<HDF5::U64>(vdim));
 
+      // Use the grid function's own FES mesh for polytope lookup so the
+      // Point's mesh reference matches the identity check in getValue().
+      const auto& gfMesh = gf.getFiniteElementSpace().getMesh();
       const Geometry::Polytope::Traits ts(Geometry::Polytope::Type::Point);
 
       if constexpr (std::is_same_v<RangeType, ScalarType>)
@@ -1567,7 +1577,7 @@ namespace Rodin::IO
           ScalarType accum = ScalarType(0);
           for (size_t k = 0; k < vertices.size(); ++k)
           {
-            const auto vit = visMesh.getVertex(vertices[k]);
+            const auto vit = gfMesh.getVertex(vertices[k]);
             const Geometry::Point p(*vit, ts.getVertex(0), vit->getCoordinates());
             accum += gf(p);
           }
@@ -1595,7 +1605,7 @@ namespace Rodin::IO
           std::vector<ScalarType> accum(vdim, ScalarType(0));
           for (size_t k = 0; k < vertices.size(); ++k)
           {
-            const auto vit = visMesh.getVertex(vertices[k]);
+            const auto vit = gfMesh.getVertex(vertices[k]);
             const Geometry::Point p(*vit, ts.getVertex(0), vit->getCoordinates());
             const auto value = gf(p);
 
