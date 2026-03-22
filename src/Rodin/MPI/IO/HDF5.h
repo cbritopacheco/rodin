@@ -247,11 +247,11 @@ namespace Rodin::IO
         }
         {
           const auto g = HDF5::Group(
-              H5Gcreate2(file, HDF5::Path::ShardFlags, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+              H5Gcreate2(file, HDF5::Path::ShardState, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g)
           {
             Alert::Exception()
-              << "Failed to create " << HDF5::Path::ShardFlags << " group."
+              << "Failed to create " << HDF5::Path::ShardState << " group."
               << Alert::Raise;
           }
         }
@@ -302,18 +302,18 @@ namespace Rodin::IO
        */
       static void writeFlags(hid_t file, const Geometry::Shard& shard, size_t d)
       {
-        const auto& flags = shard.getFlags(d);
-        std::vector<HDF5::U8> buf(flags.size());
-        for (size_t i = 0; i < flags.size(); ++i)
+        const auto& state = shard.getState(d);
+        std::vector<HDF5::U8> buf(state.size());
+        for (size_t i = 0; i < state.size(); ++i)
         {
-          if (flags[i].has(Geometry::Shard::Flags::Owned))
+          if (state[i] == Geometry::Shard::State::Owned)
             buf[i] = 1;
-          else if (flags[i].has(Geometry::Shard::Flags::Ghost))
+          else if (state[i] == Geometry::Shard::State::Ghost)
             buf[i] = 2;
           else
             buf[i] = 0;
         }
-        HDF5::writeVectorDataset(file, HDF5::shardFlagsPath(d), buf);
+        HDF5::writeVectorDataset(file, HDF5::shardStatePath(d), buf);
       }
 
       /**

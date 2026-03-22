@@ -494,6 +494,15 @@ namespace Rodin::Variational
         this->release();
       }
 
+      GridFunction& operator=(const ScalarType& value)
+      {
+        this->flush();
+        PetscErrorCode ierr = VecSet(m_data, value);
+        assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
+        return *this;
+      }
+
       /**
        * @brief Finds the minimum DOF value in the grid function.
        *
@@ -1193,10 +1202,10 @@ namespace Rodin::Variational
        *              polytope it belongs to.
        * @returns The interpolated value @f$ u_h(x) @f$.
        */
-      decltype(auto) operator()(const Geometry::Point& p) const
-      {
-        return this->getValue(p);
-      }
+      // decltype(auto) operator()(const Geometry::Point& p) const
+      // {
+      //   return this->getValue(p);
+      // }
 
       /**
        * @brief Evaluates the grid function @f$ u_h @f$ at a geometric point.
@@ -1226,59 +1235,59 @@ namespace Rodin::Variational
        *         to the local shard in MPI mode, or if the mesh context type
        *         is unsupported.
        */
-      decltype(auto) getValue(const Geometry::Point& p) const
-      {
-        if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
-        {
-          return Parent::getValue(p);
-        }
-        else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
-        {
-          static thread_local RangeType s_out;
+      // decltype(auto) getValue(const Geometry::Point& p) const
+      // {
+      //   if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
+      //   {
+      //     return Parent::getValue(p);
+      //   }
+      //   else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+      //   {
+      //     static thread_local RangeType s_out;
 
-          const auto& fes = this->getFiniteElementSpace();
-          const auto& mesh = fes.getMesh();
-          const auto& shard = mesh.getShard();
-          const auto& polytope = p.getPolytope();
-          const auto& polytopeMesh = polytope.getMesh();
+      //     const auto& fes = this->getFiniteElementSpace();
+      //     const auto& mesh = fes.getMesh();
+      //     const auto& shard = mesh.getShard();
+      //     const auto& polytope = p.getPolytope();
+      //     const auto& polytopeMesh = polytope.getMesh();
 
-          if (polytopeMesh == shard)
-          {
-            this->interpolate(s_out, p);
-            return s_out;
-          }
+      //     if (polytopeMesh == shard)
+      //     {
+      //       this->interpolate(s_out, p);
+      //       return s_out;
+      //     }
 
-          if (const auto inclusion = shard.inclusion(p))
-          {
-            this->interpolate(s_out, *inclusion);
-            return s_out;
-          }
+      //     if (const auto inclusion = shard.inclusion(p))
+      //     {
+      //       this->interpolate(s_out, *inclusion);
+      //       return s_out;
+      //     }
 
-          if (shard.isSubMesh())
-          {
-            const auto& submesh = shard.asSubMesh();
-            if (const auto restriction = submesh.restriction(p))
-            {
-              this->interpolate(s_out, *restriction);
-              return s_out;
-            }
-          }
+      //     if (shard.isSubMesh())
+      //     {
+      //       const auto& submesh = shard.asSubMesh();
+      //       if (const auto restriction = submesh.restriction(p))
+      //       {
+      //         this->interpolate(s_out, *restriction);
+      //         return s_out;
+      //       }
+      //     }
 
-          Alert::MemberFunctionException(*this, __func__)
-            << "Point does not belong to the PETSc GridFunction shard."
-            << Alert::Raise;
+      //     Alert::MemberFunctionException(*this, __func__)
+      //       << "Point does not belong to the PETSc GridFunction shard."
+      //       << Alert::Raise;
 
-          assert(false);
-          return s_out;
-        }
-        else
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "Unsupported mesh context type for PETSc GridFunction."
-            << Alert::Raise;
-          return Parent::getValue(p);
-        }
-      }
+      //     assert(false);
+      //     return s_out;
+      //   }
+      //   else
+      //   {
+      //     Alert::MemberFunctionException(*this, __func__)
+      //       << "Unsupported mesh context type for PETSc GridFunction."
+      //       << Alert::Raise;
+      //     return Parent::getValue(p);
+      //   }
+      // }
 
       /**
        * @brief Releases all PETSc array handles and destroys the vector.

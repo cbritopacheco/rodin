@@ -546,64 +546,12 @@ namespace Rodin::Assembly
         ierr = VecAssemblyEnd(b);
         assert(ierr == PETSC_SUCCESS);
 
-        // ------------------------
-        // Dirichlet BCs (only for this single trial u)
-        // - Use global indices; safe to provide all ranks' bcIdx (PETSc will route).
-        // - If dbc.getDOFs() is already global, drop the getGlobalIndex conversion.
-        // ------------------------
-        std::vector<PetscInt>    bcIdx;
-        std::vector<PetscScalar> bcVals;
-
         for (auto& dbc : pb.getDBCs())
         {
           if (dbc.getOperand().getUUID() != u.getUUID())
             continue;
-
           dbc.assemble();
-          const auto& dofs = dbc.getDOFs();
-          for (const auto& [local, value] : dofs)
-          {
-            // local is assumed in the trial FES numbering (global in the FES sense).
-            // In your sequential code local already matched the global row index.
-            // Here, keep the same interpretation:
-            bcIdx.push_back(static_cast<PetscInt>(local));
-            bcVals.push_back(static_cast<PetscScalar>(value));
-          }
-        }
-
-        if (!bcIdx.empty())
-        {
-          Vec bcVec;
-          ierr = VecDuplicate(b, &bcVec);
-          assert(ierr == PETSC_SUCCESS);
-
-          ierr = VecZeroEntries(bcVec);
-          assert(ierr == PETSC_SUCCESS);
-
-          ierr = VecSetValues(
-              bcVec,
-              static_cast<PetscInt>(bcIdx.size()),
-              bcIdx.data(),
-              bcVals.data(),
-              INSERT_VALUES);
-          assert(ierr == PETSC_SUCCESS);
-
-          ierr = VecAssemblyBegin(bcVec);
-          assert(ierr == PETSC_SUCCESS);
-          ierr = VecAssemblyEnd(bcVec);
-          assert(ierr == PETSC_SUCCESS);
-
-          ierr = MatZeroRowsColumns(
-              A,
-              static_cast<PetscInt>(bcIdx.size()),
-              bcIdx.data(),
-              1.0,
-              bcVec,
-              b);
-          assert(ierr == PETSC_SUCCESS);
-
-          ierr = VecDestroy(&bcVec);
-          assert(ierr == PETSC_SUCCESS);
+          axb.eliminate(dbc.getDOFs());
         }
 
         (void) ierr;
@@ -1001,12 +949,6 @@ namespace Rodin::Assembly
         ierr = VecAssemblyEnd(b);
         assert(ierr == PETSC_SUCCESS);
 
-        // ------------------------
-        // Dirichlet BCs via MatZeroRowsColumns (serial on each rank, PETSc routes)
-        // ------------------------
-        std::vector<PetscInt>    bcIdx;
-        std::vector<PetscScalar> bcVals;
-
         for (auto& dbc : pb.getDBCs())
         {
           const auto uUUID = dbc.getOperand().getUUID();
@@ -1015,46 +957,7 @@ namespace Rodin::Assembly
 
           dbc.assemble();
           const auto& dofs = dbc.getDOFs();
-          for (const auto& [local, value] : dofs)
-          {
-            bcIdx.push_back(uOff + local);
-            bcVals.push_back(value);
-          }
-        }
-
-        if (!bcIdx.empty())
-        {
-          Vec bcVec;
-          ierr = VecDuplicate(b, &bcVec);
-          assert(ierr == PETSC_SUCCESS);
-
-          ierr = VecZeroEntries(bcVec);
-          assert(ierr == PETSC_SUCCESS);
-
-          ierr = VecSetValues(
-              bcVec,
-              static_cast<PetscInt>(bcIdx.size()),
-              bcIdx.data(),
-              bcVals.data(),
-              INSERT_VALUES);
-          assert(ierr == PETSC_SUCCESS);
-
-          ierr = VecAssemblyBegin(bcVec);
-          assert(ierr == PETSC_SUCCESS);
-          ierr = VecAssemblyEnd(bcVec);
-          assert(ierr == PETSC_SUCCESS);
-
-          ierr = MatZeroRowsColumns(
-              A,
-              static_cast<PetscInt>(bcIdx.size()),
-              bcIdx.data(),
-              1.0,
-              bcVec,
-              b);
-          assert(ierr == PETSC_SUCCESS);
-
-          ierr = VecDestroy(&bcVec);
-          assert(ierr == PETSC_SUCCESS);
+          axb.eliminate(dofs, uOff);
         }
 
         (void) ierr;

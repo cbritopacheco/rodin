@@ -243,7 +243,7 @@ namespace
         ASSERT_TRUE(g);
       }
       {
-        const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::ShardFlags,
+        const auto g = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::ShardState,
                                                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         ASSERT_TRUE(g);
       }
@@ -266,7 +266,7 @@ namespace
       // /Shard/Flags/0 — ownership flags (U8)
       {
         std::vector<HDF5::U8> flags = { 1, 1, 2, 0 };
-        HDF5::writeVectorDataset(file.get(), HDF5::shardFlagsPath(0), flags);
+        HDF5::writeVectorDataset(file.get(), HDF5::shardStatePath(0), flags);
       }
 
       // /Shard/PolytopeMap/0
@@ -330,8 +330,8 @@ namespace
       ASSERT_GE(h5, 0);
 
       EXPECT_TRUE(HDF5::exists(h5, HDF5::Path::Shard));
-      EXPECT_TRUE(HDF5::exists(h5, HDF5::Path::ShardFlags));
-      EXPECT_TRUE(HDF5::exists(h5, HDF5::shardFlagsPath(0)));
+      EXPECT_TRUE(HDF5::exists(h5, HDF5::Path::ShardState));
+      EXPECT_TRUE(HDF5::exists(h5, HDF5::shardStatePath(0)));
       EXPECT_TRUE(HDF5::exists(h5, HDF5::shardPolytopeMapLeftPath(0)));
       EXPECT_TRUE(HDF5::exists(h5, HDF5::shardPolytopeMapRightGroupPath(0) + "/Keys"));
       EXPECT_TRUE(HDF5::exists(h5, HDF5::shardPolytopeMapRightGroupPath(0) + "/Values"));
@@ -343,7 +343,7 @@ namespace
 
       // Verify data round-trip for flags
       {
-        auto flags = HDF5::readVectorDataset<HDF5::U8>(h5, HDF5::shardFlagsPath(0));
+        auto flags = HDF5::readVectorDataset<HDF5::U8>(h5, HDF5::shardStatePath(0));
         ASSERT_EQ(flags.size(), 4u);
         EXPECT_EQ(flags[0], 1);
         EXPECT_EQ(flags[1], 1);
@@ -381,8 +381,8 @@ namespace
 
   TEST(ShardMetadata, PathHelpers)
   {
-    EXPECT_EQ(HDF5::shardFlagsPath(0), "/Shard/Flags/0");
-    EXPECT_EQ(HDF5::shardFlagsPath(2), "/Shard/Flags/2");
+    EXPECT_EQ(HDF5::shardStatePath(0), "/Shard/Flags/0");
+    EXPECT_EQ(HDF5::shardStatePath(2), "/Shard/Flags/2");
     EXPECT_EQ(HDF5::shardPolytopeMapGroupPath(1), "/Shard/PolytopeMap/1");
     EXPECT_EQ(HDF5::shardPolytopeMapLeftPath(3), "/Shard/PolytopeMap/3/Left");
     EXPECT_EQ(HDF5::shardPolytopeMapRightGroupPath(0), "/Shard/PolytopeMap/0/Right");

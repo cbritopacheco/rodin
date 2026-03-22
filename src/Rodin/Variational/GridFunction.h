@@ -25,7 +25,7 @@
  * ## Features
  * - **Storage**: Manages coefficient vector for FEM solutions
  * - **Evaluation**: Point-wise evaluation using basis function interpolation
- * - **I/O**: Export to visualization formats (VTK, MEDIT, etc.)
+ * - **I/O**: Export to visualization formats (XDMF, HDF5, MEDIT, etc.)
  * - **Operations**: Arithmetic operations, norms, projections
  * - **Assignment**: Can be set from functions or expressions
  *
@@ -124,22 +124,22 @@ namespace Rodin::Variational
    * - **Space Association**: Strong association with underlying finite element space
    */
 
-  template <class StrictType>
+  template <class Derived>
   class GridFunctionBaseReference
-    : public FunctionBase<GridFunctionBaseReference<StrictType>>
+    : public FunctionBase<GridFunctionBaseReference<Derived>>
   {
     public:
-      using Parent = FunctionBase<GridFunctionBaseReference<StrictType>>;
+      using Parent = FunctionBase<GridFunctionBaseReference<Derived>>;
 
       /**
        * @brief R-Values are not allowed.
        */
-      GridFunctionBaseReference(StrictType&&) = delete;
+      GridFunctionBaseReference(Derived&&) = delete;
 
       /**
        * @brief Prevent implicit copies.
        */
-      GridFunctionBaseReference(const StrictType& ref) = delete;
+      GridFunctionBaseReference(const Derived& ref) = delete;
 
       /**
        * @brief Constructs the LazyEvaluator object from a constant reference
@@ -147,7 +147,7 @@ namespace Rodin::Variational
        */
       explicit
       constexpr
-      GridFunctionBaseReference(std::reference_wrapper<const StrictType> ref)
+      GridFunctionBaseReference(std::reference_wrapper<const Derived> ref)
         : m_ref(ref)
       {}
 
@@ -242,7 +242,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<const StrictType> m_ref;
+      std::reference_wrapper<const Derived> m_ref;
   };
 
   /**
@@ -258,7 +258,7 @@ namespace Rodin::Variational
     class FES = typename FormLanguage::Traits<Derived>::FESType,
     class Data = typename FormLanguage::Traits<Derived>::DataType>
   class GridFunctionBase
-    : public GridFunctionBaseReference<GridFunctionBase<Derived, FES, Data>>
+    : public GridFunctionBaseReference<Derived>
   {
     public:
       using FESType = FES;
@@ -280,8 +280,7 @@ namespace Rodin::Variational
       using ElementType = typename FormLanguage::Traits<FESType>::ElementType;
 
       /// Parent class
-      using Parent =
-        GridFunctionBaseReference<GridFunctionBase<Derived, FESType, Data>>;
+      using Parent = GridFunctionBaseReference<Derived>;
 
       static_assert(
           std::is_same_v<RangeType, ScalarType> ||
@@ -295,7 +294,7 @@ namespace Rodin::Variational
        * vector is sized according to the space dimension.
        */
       GridFunctionBase(const FES& fes)
-        : Parent(std::cref(*this)),
+        : Parent(std::cref(static_cast<const Derived&>(*this))),
           m_fes(std::cref(fes))
       {}
 
@@ -304,7 +303,7 @@ namespace Rodin::Variational
        * @param[in] other Grid function to copy
        */
       GridFunctionBase(const GridFunctionBase& other)
-        : Parent(std::cref(*this)),
+        : Parent(std::cref(static_cast<const Derived&>(*this))),
           m_name(other.m_name),
           m_fes(other.m_fes)
       {}
@@ -314,7 +313,7 @@ namespace Rodin::Variational
        * @param[in] other Grid function to move from
        */
       GridFunctionBase(GridFunctionBase&& other)
-        : Parent(std::cref(*this)),
+        : Parent(std::cref(static_cast<const Derived&>(*this))),
           m_name(std::move(other.m_name)),
           m_fes(std::move(other.m_fes))
       {}
@@ -606,12 +605,16 @@ namespace Rodin::Variational
           }
           else
           {
-            assert(false);
+            Alert::MemberFunctionException(*this, __func__)
+              << "Point is not contained in the finite element space mesh."
+              << Alert::Raise;
           }
         }
         else
         {
-          assert(false);
+          Alert::MemberFunctionException(*this, __func__)
+            << "Point is not contained in the finite element space mesh."
+            << Alert::Raise;
         }
         return s_out;
       }

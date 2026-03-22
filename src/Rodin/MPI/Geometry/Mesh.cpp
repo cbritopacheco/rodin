@@ -142,26 +142,26 @@ namespace Rodin::Geometry
   CellIterator MPIMesh::getCell(Index localIdx) const
   {
     const auto& shard = this->getShard();
-    return CellIterator(shard, BoundedIndexGenerator(localIdx, shard.getCellCount()));
+    return CellIterator(*this, BoundedIndexGenerator(localIdx, shard.getCellCount()));
   }
 
   FaceIterator MPIMesh::getFace(Index localIdx) const
   {
     const auto& shard = this->getShard();
-    return FaceIterator(shard, BoundedIndexGenerator(localIdx, shard.getFaceCount()));
+    return FaceIterator(*this, BoundedIndexGenerator(localIdx, shard.getFaceCount()));
   }
 
   VertexIterator MPIMesh::getVertex(Index localIdx) const
   {
     const auto& shard = this->getShard();
-    return VertexIterator(shard, BoundedIndexGenerator(localIdx, shard.getVertexCount()));
+    return VertexIterator(*this, BoundedIndexGenerator(localIdx, shard.getVertexCount()));
   }
 
   PolytopeIterator MPIMesh::getPolytope(size_t dimension, Index localIdx) const
   {
     const auto& shard = this->getShard();
     return PolytopeIterator(
-        dimension, shard, BoundedIndexGenerator(localIdx, shard.getPolytopeCount(dimension)));
+        dimension, *this, BoundedIndexGenerator(localIdx, shard.getPolytopeCount(dimension)));
   }
 
   FaceIterator MPIMesh::getBoundary() const
@@ -175,7 +175,7 @@ namespace Rodin::Geometry
       if (shard.isOwned(d, i) && shard.isBoundary(i))
         indices.push_back(i);
     }
-    return FaceIterator(shard, VectorIndexGenerator(std::move(indices)));
+    return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
   }
 
   FaceIterator MPIMesh::getInterface() const
@@ -189,7 +189,7 @@ namespace Rodin::Geometry
       if (shard.isOwned(d, i) && shard.isInterface(i))
         indices.push_back(i);
     }
-    return FaceIterator(shard, VectorIndexGenerator(std::move(indices)));
+    return FaceIterator(*this, VectorIndexGenerator(std::move(indices)));
   }
 
   bool MPIMesh::isBoundary(Index faceIdx) const
@@ -711,8 +711,8 @@ namespace Rodin::Geometry
         assert(inserted);
       }
 
-      auto& flags = shard.getFlags(d);
-      flags.assign(nd, Shard::Flags::None);
+      auto& state = shard.getState(d);
+      state.assign(nd, Shard::State::Shared);
 
       auto& owner = shard.getOwner(d);
       auto& halo  = shard.getHalo(d);
@@ -723,7 +723,7 @@ namespace Rodin::Geometry
       {
         if (ownerRank[i] == rank)
         {
-          flags[i] = Shard::Flags::Owned;
+          state[i] = Shard::State::Owned;
 
           IndexSet rs;
           for (const int r : participants[i])
@@ -737,7 +737,7 @@ namespace Rodin::Geometry
         }
         else
         {
-          flags[i] = Shard::Flags::Ghost;
+          state[i] = Shard::State::Ghost;
           owner.emplace(i, static_cast<Index>(ownerRank[i]));
         }
       }
@@ -838,11 +838,7 @@ namespace Rodin::Geometry
 
         for (size_t d = 0; d < dim; ++d)
         {
-          // Prefer dimensions with the largest current local extent.
           const double score = static_cast<double>(cells[d]) / static_cast<double>(ps[d]);
-
-          // Mildly penalize choices that would create clearly excessive splitting
-          // when another dimension can still absorb the factor.
           const bool feasible = (static_cast<size_t>(ps[d] * f) <= std::max<size_t>(cells[d], 1));
           const double adjusted = feasible ? score : 0.5 * score;
 
@@ -957,10 +953,10 @@ namespace Rodin::Geometry
         Shard::Builder sb;
         sb.initialize(/*dimension=*/0, /*sdim=*/0);
 
-        const Shard::Flags flags =
-          (rank == 0 ? Shard::Flags::Owned : Shard::Flags::Ghost);
+        const Shard::State state =
+          (rank == 0 ? Shard::State::Owned : Shard::State::Ghost);
 
-        const Index lv = sb.vertex(/*globalIdx=*/0, sp0(), flags);
+        const Index lv = sb.vertex(/*globalIdx=*/0, sp0(), state);
 
         if (rank == 0)
         {
@@ -1008,6 +1004,12 @@ namespace Rodin::Geometry
 
         const Interval ownedCells = cellSplits[0][procCoord[0]];
         const Interval ghostCells = expandByOne(ownedCells, nCells[0]);
+
+        const Interval localVerts = Interval{
+          ownedCells.begin,
+          ownedCells.empty() ? ownedCells.end : std::min(nx, ownedCells.end + 1)
+        };
+
         const Interval ghostVerts = Interval{
           ghostCells.begin,
           ghostCells.empty() ? ghostCells.end : std::min(nx, ghostCells.end + 1)
@@ -1024,26 +1026,45 @@ namespace Rodin::Geometry
           return 0;
         };
 
-        const auto sharersOfVertex = [&](size_t i)
+        const auto ownerOfVertex = [&](size_t i) -> int
+        {
+          std::vector<int> rs;
+          if (i > 0 && i - 1 < nCells[0])
+            rs.push_back(ownerOfCell(i - 1));
+          if (i < nCells[0])
+            rs.push_back(ownerOfCell(i));
+          if (rs.empty())
+            rs.push_back(0);
+          uniqueSort(rs);
+          return rs.front();
+        };
+
+        const auto holdersOfVertex = [&](size_t i)
         {
           std::vector<int> res;
-          if (i > 0 && i - 1 < nCells[0])
-            res.push_back(ownerOfCell(i - 1));
-          if (i < nCells[0])
-            res.push_back(ownerOfCell(i));
-          if (res.empty())
-            res.push_back(0);
+          for (int p = 0; p < procShape[0]; ++p)
+          {
+            const Interval Gc = expandByOne(cellSplits[0][p], nCells[0]);
+            const Interval Gv{
+              Gc.begin,
+              Gc.empty() ? Gc.end : std::min(nx, Gc.end + 1)
+            };
+            if (Gv.contains(i))
+              res.push_back(p);
+          }
           uniqueSort(res);
           return res;
         };
 
-        const auto ownerOfVertex = [&](size_t i)
+        const auto stateOfVertex = [&](size_t i) -> Shard::State
         {
-          auto rs = sharersOfVertex(i);
-          return rs.front();
+          const int owner = ownerOfVertex(i);
+          if (localVerts.contains(i))
+            return owner == rank ? Shard::State::Owned : Shard::State::Shared;
+          return Shard::State::Ghost;
         };
 
-        const auto sharersOfCell = [&](size_t i)
+        const auto holdersOfCell = [&](size_t i)
         {
           std::vector<int> res;
           const int owner = ownerOfCell(i);
@@ -1054,9 +1075,6 @@ namespace Rodin::Geometry
             std::vector<int> pc = oc;
             pc[0] += dx;
             if (pc[0] < 0 || pc[0] >= procShape[0])
-              continue;
-
-            if (dx == 0)
               continue;
 
             const Interval G = expandByOne(cellSplits[0][pc[0]], nCells[0]);
@@ -1078,15 +1096,14 @@ namespace Rodin::Geometry
         {
           const Index gvid = vid1(i);
           const int owner = ownerOfVertex(i);
-          const Shard::Flags flags =
-            (owner == rank ? Shard::Flags::Owned : Shard::Flags::Ghost);
+          const Shard::State state = stateOfVertex(i);
 
-          const Index lv = sb.vertex(gvid, sp1(static_cast<Real>(i)), flags);
+          const Index lv = sb.vertex(gvid, sp1(static_cast<Real>(i)), state);
           gv2lv.emplace(gvid, lv);
 
-          if (owner == rank)
+          if (state == Shard::State::Owned)
           {
-            for (const int r : sharersOfVertex(i))
+            for (const int r : holdersOfVertex(i))
             {
               if (r != rank)
                 sb.halo(0, lv, static_cast<Index>(r));
@@ -1101,8 +1118,8 @@ namespace Rodin::Geometry
         for (size_t i = ghostCells.begin; i < ghostCells.end; ++i)
         {
           const int owner = ownerOfCell(i);
-          const Shard::Flags flags =
-            (owner == rank ? Shard::Flags::Owned : Shard::Flags::Ghost);
+          const Shard::State state =
+            (owner == rank ? Shard::State::Owned : Shard::State::Ghost);
 
           const Index gcid = static_cast<Index>(i);
           const IndexArray vs = makeIndexArray(
@@ -1110,12 +1127,15 @@ namespace Rodin::Geometry
             gv2lv.at(vid1(i + 1))
           );
 
-          const Index lc = sb.polytope(1, gcid, Polytope::Type::Segment, vs, flags);
+          const Index lc = sb.polytope(1, gcid, Polytope::Type::Segment, vs, state);
 
-          if (owner == rank)
+          if (state == Shard::State::Owned)
           {
-            for (const int r : sharersOfCell(i))
-              sb.halo(1, lc, static_cast<Index>(r));
+            for (const int r : holdersOfCell(i))
+            {
+              if (r != rank)
+                sb.halo(1, lc, static_cast<Index>(r));
+            }
           }
           else
           {
@@ -1167,8 +1187,23 @@ namespace Rodin::Geometry
         const Interval ghostX = expandByOne(ownedX, cx);
         const Interval ghostY = expandByOne(ownedY, cy);
 
-        const Interval vertX = Interval{ ghostX.begin, ghostX.empty() ? ghostX.end : std::min(nx, ghostX.end + 1) };
-        const Interval vertY = Interval{ ghostY.begin, ghostY.empty() ? ghostY.end : std::min(ny, ghostY.end + 1) };
+        const Interval localVertX{
+          ownedX.begin,
+          ownedX.empty() ? ownedX.end : std::min(nx, ownedX.end + 1)
+        };
+        const Interval localVertY{
+          ownedY.begin,
+          ownedY.empty() ? ownedY.end : std::min(ny, ownedY.end + 1)
+        };
+
+        const Interval vertX{
+          ghostX.begin,
+          ghostX.empty() ? ghostX.end : std::min(nx, ghostX.end + 1)
+        };
+        const Interval vertY{
+          ghostY.begin,
+          ghostY.empty() ? ghostY.end : std::min(ny, ghostY.end + 1)
+        };
 
         const auto ownerOfCell = [&](size_t i, size_t j) -> int
         {
@@ -1181,9 +1216,9 @@ namespace Rodin::Geometry
           return procCoordToRank({ px, py }, procShape);
         };
 
-        const auto sharersOfVertex = [&](size_t i, size_t j)
+        const auto ownerOfVertex = [&](size_t i, size_t j) -> int
         {
-          std::vector<int> res;
+          std::vector<int> rs;
           const size_t ix0 = (i > 0 ? i - 1 : i);
           const size_t ix1 = std::min(i, cx ? cx - 1 : 0);
           const size_t jy0 = (j > 0 ? j - 1 : j);
@@ -1195,23 +1230,53 @@ namespace Rodin::Geometry
             for (size_t jj : { jy0, jy1 })
             {
               if (jj >= cy) continue;
-              res.push_back(ownerOfCell(ii, jj));
+              rs.push_back(ownerOfCell(ii, jj));
             }
           }
 
-          if (res.empty())
-            res.push_back(0);
+          if (rs.empty())
+            rs.push_back(0);
+          uniqueSort(rs);
+          return rs.front();
+        };
+
+        const auto holdersOfVertex = [&](size_t i, size_t j)
+        {
+          std::vector<int> res;
+          for (int px = 0; px < procShape[0]; ++px)
+          {
+            const Interval Gx = expandByOne(cellSplits[0][px], cx);
+            const Interval Vx{
+              Gx.begin,
+              Gx.empty() ? Gx.end : std::min(nx, Gx.end + 1)
+            };
+            if (!Vx.contains(i))
+              continue;
+
+            for (int py = 0; py < procShape[1]; ++py)
+            {
+              const Interval Gy = expandByOne(cellSplits[1][py], cy);
+              const Interval Vy{
+                Gy.begin,
+                Gy.empty() ? Gy.end : std::min(ny, Gy.end + 1)
+              };
+              if (Vy.contains(j))
+                res.push_back(procCoordToRank({ px, py }, procShape));
+            }
+          }
           uniqueSort(res);
           return res;
         };
 
-        const auto ownerOfVertex = [&](size_t i, size_t j)
+        const auto stateOfVertex = [&](size_t i, size_t j) -> Shard::State
         {
-          auto rs = sharersOfVertex(i, j);
-          return rs.front();
+          const int owner = ownerOfVertex(i, j);
+          if (localVertX.contains(i) && localVertY.contains(j))
+            return owner == rank ? Shard::State::Owned : Shard::State::Shared;
+          return Shard::State::Ghost;
         };
 
-        const auto sharersOfCell = [&](size_t i, size_t j)
+        const auto holdersOfCell = [&](size_t i, size_t j)
         {
           std::vector<int> res;
           const int owner = ownerOfCell(i, j);
@@ -1221,9 +1286,6 @@ namespace Rodin::Geometry
           {
             for (int dy = -1; dy <= 1; ++dy)
             {
-              if (dx == 0 && dy == 0)
-                continue;
-
               std::vector<int> pc = oc;
               pc[0] += dx;
               pc[1] += dy;
@@ -1253,18 +1315,17 @@ namespace Rodin::Geometry
           {
             const Index gvid = vid2(i, j, nx);
             const int owner = ownerOfVertex(i, j);
-            const Shard::Flags flags =
-              (owner == rank ? Shard::Flags::Owned : Shard::Flags::Ghost);
+            const Shard::State state = stateOfVertex(i, j);
 
             const Index lv = sb.vertex(
               gvid,
               sp2(static_cast<Real>(i), static_cast<Real>(j)),
-              flags);
+              state);
             gv2lv.emplace(gvid, lv);
 
-            if (owner == rank)
+            if (state == Shard::State::Owned)
             {
-              for (const int r : sharersOfVertex(i, j))
+              for (const int r : holdersOfVertex(i, j))
               {
                 if (r != rank)
                   sb.halo(0, lv, static_cast<Index>(r));
@@ -1283,8 +1344,8 @@ namespace Rodin::Geometry
           {
             const Index mid = macroId2(i, j, cx);
             const int owner = ownerOfCell(i, j);
-            const Shard::Flags flags =
-              (owner == rank ? Shard::Flags::Owned : Shard::Flags::Ghost);
+            const Shard::State state =
+              (owner == rank ? Shard::State::Owned : Shard::State::Ghost);
 
             if (g == Polytope::Type::Triangle)
             {
@@ -1295,19 +1356,21 @@ namespace Rodin::Geometry
 
               const Index lc0 = sb.polytope(
                 2, static_cast<Index>(2 * mid + 0), Polytope::Type::Triangle,
-                makeIndexArray(v00, v10, v01), flags);
+                makeIndexArray(v00, v10, v01), state);
 
               const Index lc1 = sb.polytope(
                 2, static_cast<Index>(2 * mid + 1), Polytope::Type::Triangle,
-                makeIndexArray(v10, v11, v01), flags);
+                makeIndexArray(v10, v11, v01), state);
 
-              if (owner == rank)
+              if (state == Shard::State::Owned)
               {
-                const auto rs = sharersOfCell(i, j);
-                for (const int r : rs)
+                for (const int r : holdersOfCell(i, j))
                 {
-                  sb.halo(2, lc0, static_cast<Index>(r));
-                  sb.halo(2, lc1, static_cast<Index>(r));
+                  if (r != rank)
+                  {
+                    sb.halo(2, lc0, static_cast<Index>(r));
+                    sb.halo(2, lc1, static_cast<Index>(r));
+                  }
                 }
               }
               else
@@ -1326,12 +1389,15 @@ namespace Rodin::Geometry
                 gv2lv.at(vid2(i,     j + 1, nx))
               );
 
-              const Index lc = sb.polytope(2, mid, Polytope::Type::Quadrilateral, vs, flags);
+              const Index lc = sb.polytope(2, mid, Polytope::Type::Quadrilateral, vs, state);
 
-              if (owner == rank)
+              if (state == Shard::State::Owned)
               {
-                for (const int r : sharersOfCell(i, j))
-                  sb.halo(2, lc, static_cast<Index>(r));
+                for (const int r : holdersOfCell(i, j))
+                {
+                  if (r != rank)
+                    sb.halo(2, lc, static_cast<Index>(r));
+                }
               }
               else
               {
@@ -1391,9 +1457,31 @@ namespace Rodin::Geometry
         const Interval ghostY = expandByOne(ownedY, cy);
         const Interval ghostZ = expandByOne(ownedZ, cz);
 
-        const Interval vertX = Interval{ ghostX.begin, ghostX.empty() ? ghostX.end : std::min(nx, ghostX.end + 1) };
-        const Interval vertY = Interval{ ghostY.begin, ghostY.empty() ? ghostY.end : std::min(ny, ghostY.end + 1) };
-        const Interval vertZ = Interval{ ghostZ.begin, ghostZ.empty() ? ghostZ.end : std::min(nz, ghostZ.end + 1) };
+        const Interval localVertX{
+          ownedX.begin,
+          ownedX.empty() ? ownedX.end : std::min(nx, ownedX.end + 1)
+        };
+        const Interval localVertY{
+          ownedY.begin,
+          ownedY.empty() ? ownedY.end : std::min(ny, ownedY.end + 1)
+        };
+        const Interval localVertZ{
+          ownedZ.begin,
+          ownedZ.empty() ? ownedZ.end : std::min(nz, ownedZ.end + 1)
+        };
+
+        const Interval vertX{
+          ghostX.begin,
+          ghostX.empty() ? ghostX.end : std::min(nx, ghostX.end + 1)
+        };
+        const Interval vertY{
+          ghostY.begin,
+          ghostY.empty() ? ghostY.end : std::min(ny, ghostY.end + 1)
+        };
+        const Interval vertZ{
+          ghostZ.begin,
+          ghostZ.empty() ? ghostZ.end : std::min(nz, ghostZ.end + 1)
+        };
 
         const auto ownerOfCell = [&](size_t i, size_t j, size_t k) -> int
         {
@@ -1408,9 +1496,9 @@ namespace Rodin::Geometry
           return procCoordToRank({ px, py, pz }, procShape);
         };
 
-        const auto sharersOfVertex = [&](size_t i, size_t j, size_t k)
+        const auto ownerOfVertex = [&](size_t i, size_t j, size_t k) -> int
         {
-          std::vector<int> res;
+          std::vector<int> rs;
 
           std::array<size_t, 2> ii = { i > 0 ? i - 1 : i, std::min(i, cx ? cx - 1 : 0) };
           std::array<size_t, 2> jj = { j > 0 ? j - 1 : j, std::min(j, cy ? cy - 1 : 0) };
@@ -1425,24 +1513,65 @@ namespace Rodin::Geometry
               for (size_t c : kk)
               {
                 if (c >= cz) continue;
-                res.push_back(ownerOfCell(a, b, c));
+                rs.push_back(ownerOfCell(a, b, c));
               }
             }
           }
 
-          if (res.empty())
-            res.push_back(0);
+          if (rs.empty())
+            rs.push_back(0);
+          uniqueSort(rs);
+          return rs.front();
+        };
+
+        const auto holdersOfVertex = [&](size_t i, size_t j, size_t k)
+        {
+          std::vector<int> res;
+          for (int px = 0; px < procShape[0]; ++px)
+          {
+            const Interval Gx = expandByOne(cellSplits[0][px], cx);
+            const Interval Vx{
+              Gx.begin,
+              Gx.empty() ? Gx.end : std::min(nx, Gx.end + 1)
+            };
+            if (!Vx.contains(i))
+              continue;
+
+            for (int py = 0; py < procShape[1]; ++py)
+            {
+              const Interval Gy = expandByOne(cellSplits[1][py], cy);
+              const Interval Vy{
+                Gy.begin,
+                Gy.empty() ? Gy.end : std::min(ny, Gy.end + 1)
+              };
+              if (!Vy.contains(j))
+                continue;
+
+              for (int pz = 0; pz < procShape[2]; ++pz)
+              {
+                const Interval Gz = expandByOne(cellSplits[2][pz], cz);
+                const Interval Vz{
+                  Gz.begin,
+                  Gz.empty() ? Gz.end : std::min(nz, Gz.end + 1)
+                };
+                if (Vz.contains(k))
+                  res.push_back(procCoordToRank({ px, py, pz }, procShape));
+              }
+            }
+          }
           uniqueSort(res);
           return res;
         };
 
-        const auto ownerOfVertex = [&](size_t i, size_t j, size_t k)
+        const auto stateOfVertex = [&](size_t i, size_t j, size_t k) -> Shard::State
         {
-          auto rs = sharersOfVertex(i, j, k);
-          return rs.front();
+          const int owner = ownerOfVertex(i, j, k);
+          if (localVertX.contains(i) && localVertY.contains(j) && localVertZ.contains(k))
+            return owner == rank ? Shard::State::Owned : Shard::State::Shared;
+          return Shard::State::Ghost;
         };
 
-        const auto sharersOfCell = [&](size_t i, size_t j, size_t k)
+        const auto holdersOfCell = [&](size_t i, size_t j, size_t k)
         {
           std::vector<int> res;
           const int owner = ownerOfCell(i, j, k);
@@ -1454,9 +1583,6 @@ namespace Rodin::Geometry
             {
               for (int dz = -1; dz <= 1; ++dz)
               {
-                if (dx == 0 && dy == 0 && dz == 0)
-                  continue;
-
                 std::vector<int> pc = oc;
                 pc[0] += dx;
                 pc[1] += dy;
@@ -1493,18 +1619,17 @@ namespace Rodin::Geometry
             {
               const Index gvid = vid3(i, j, k, nx, ny);
               const int owner = ownerOfVertex(i, j, k);
-              const Shard::Flags flags =
-                (owner == rank ? Shard::Flags::Owned : Shard::Flags::Ghost);
+              const Shard::State state = stateOfVertex(i, j, k);
 
               const Index lv = sb.vertex(
                 gvid,
                 sp3(static_cast<Real>(i), static_cast<Real>(j), static_cast<Real>(k)),
-                flags);
+                state);
               gv2lv.emplace(gvid, lv);
 
-              if (owner == rank)
+              if (state == Shard::State::Owned)
               {
-                for (const int r : sharersOfVertex(i, j, k))
+                for (const int r : holdersOfVertex(i, j, k))
                 {
                   if (r != rank)
                     sb.halo(0, lv, static_cast<Index>(r));
@@ -1526,8 +1651,8 @@ namespace Rodin::Geometry
             {
               const Index mid = macroId3(i, j, k, cx, cy);
               const int owner = ownerOfCell(i, j, k);
-              const Shard::Flags flags =
-                (owner == rank ? Shard::Flags::Owned : Shard::Flags::Ghost);
+              const Shard::State state =
+                (owner == rank ? Shard::State::Owned : Shard::State::Ghost);
 
               if (g == Polytope::Type::Hexahedron)
               {
@@ -1541,12 +1666,15 @@ namespace Rodin::Geometry
                 const Index v7 = gv2lv.at(vid3(i,     j + 1, k + 1, nx, ny));
 
                 const IndexArray vs = makeIndexArray(v0, v1, v2, v3, v4, v5, v6, v7);
-                const Index lc = sb.polytope(3, mid, Polytope::Type::Hexahedron, vs, flags);
+                const Index lc = sb.polytope(3, mid, Polytope::Type::Hexahedron, vs, state);
 
-                if (owner == rank)
+                if (state == Shard::State::Owned)
                 {
-                  for (const int r : sharersOfCell(i, j, k))
-                    sb.halo(3, lc, static_cast<Index>(r));
+                  for (const int r : holdersOfCell(i, j, k))
+                  {
+                    if (r != rank)
+                      sb.halo(3, lc, static_cast<Index>(r));
+                  }
                 }
                 else
                 {
@@ -1566,19 +1694,21 @@ namespace Rodin::Geometry
 
                 const Index lc0 = sb.polytope(
                   3, static_cast<Index>(2 * mid + 0), Polytope::Type::Wedge,
-                  makeIndexArray(v0, v1, v2, v0p, v1p, v2p), flags);
+                  makeIndexArray(v0, v1, v2, v0p, v1p, v2p), state);
 
                 const Index lc1 = sb.polytope(
                   3, static_cast<Index>(2 * mid + 1), Polytope::Type::Wedge,
-                  makeIndexArray(v1, v3, v2, v1p, v3p, v2p), flags);
+                  makeIndexArray(v1, v3, v2, v1p, v3p, v2p), state);
 
-                if (owner == rank)
+                if (state == Shard::State::Owned)
                 {
-                  const auto rs = sharersOfCell(i, j, k);
-                  for (const int r : rs)
+                  for (const int r : holdersOfCell(i, j, k))
                   {
-                    sb.halo(3, lc0, static_cast<Index>(r));
-                    sb.halo(3, lc1, static_cast<Index>(r));
+                    if (r != rank)
+                    {
+                      sb.halo(3, lc0, static_cast<Index>(r));
+                      sb.halo(3, lc1, static_cast<Index>(r));
+                    }
                   }
                 }
                 else
@@ -1602,34 +1732,36 @@ namespace Rodin::Geometry
 
                 const Index lc0 = sb.polytope(
                   3, static_cast<Index>(6 * mid + 0), Polytope::Type::Tetrahedron,
-                  makeIndexArray(v000, v100, v110, v111), flags);
+                  makeIndexArray(v000, v100, v110, v111), state);
                 const Index lc1 = sb.polytope(
                   3, static_cast<Index>(6 * mid + 1), Polytope::Type::Tetrahedron,
-                  makeIndexArray(v000, v110, v010, v111), flags);
+                  makeIndexArray(v000, v110, v010, v111), state);
                 const Index lc2 = sb.polytope(
                   3, static_cast<Index>(6 * mid + 2), Polytope::Type::Tetrahedron,
-                  makeIndexArray(v000, v010, v011, v111), flags);
+                  makeIndexArray(v000, v010, v011, v111), state);
                 const Index lc3 = sb.polytope(
                   3, static_cast<Index>(6 * mid + 3), Polytope::Type::Tetrahedron,
-                  makeIndexArray(v000, v011, v001, v111), flags);
+                  makeIndexArray(v000, v011, v001, v111), state);
                 const Index lc4 = sb.polytope(
                   3, static_cast<Index>(6 * mid + 4), Polytope::Type::Tetrahedron,
-                  makeIndexArray(v000, v001, v101, v111), flags);
+                  makeIndexArray(v000, v001, v101, v111), state);
                 const Index lc5 = sb.polytope(
                   3, static_cast<Index>(6 * mid + 5), Polytope::Type::Tetrahedron,
-                  makeIndexArray(v000, v101, v100, v111), flags);
+                  makeIndexArray(v000, v101, v100, v111), state);
 
-                if (owner == rank)
+                if (state == Shard::State::Owned)
                 {
-                  const auto rs = sharersOfCell(i, j, k);
-                  for (const int r : rs)
+                  for (const int r : holdersOfCell(i, j, k))
                   {
-                    sb.halo(3, lc0, static_cast<Index>(r));
-                    sb.halo(3, lc1, static_cast<Index>(r));
-                    sb.halo(3, lc2, static_cast<Index>(r));
-                    sb.halo(3, lc3, static_cast<Index>(r));
-                    sb.halo(3, lc4, static_cast<Index>(r));
-                    sb.halo(3, lc5, static_cast<Index>(r));
+                    if (r != rank)
+                    {
+                      sb.halo(3, lc0, static_cast<Index>(r));
+                      sb.halo(3, lc1, static_cast<Index>(r));
+                      sb.halo(3, lc2, static_cast<Index>(r));
+                      sb.halo(3, lc3, static_cast<Index>(r));
+                      sb.halo(3, lc4, static_cast<Index>(r));
+                      sb.halo(3, lc5, static_cast<Index>(r));
+                    }
                   }
                 }
                 else
