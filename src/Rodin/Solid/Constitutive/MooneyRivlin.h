@@ -65,21 +65,21 @@ namespace Rodin::Solid
        * @param c2 Second material constant
        * @param kappa Bulk modulus @f$ \kappa @f$
        */
-      MooneyRivlin(Real c1, Real c2, Real kappa)
-        : m_c1(c1), m_c2(c2), m_kappa(kappa)
+      MooneyRivlin(Real c1, Real c2, Real bulkModulus)
+        : m_c1(c1), m_c2(c2), m_kappa(bulkModulus)
       {}
 
       MooneyRivlin(const MooneyRivlin&) = default;
       MooneyRivlin(MooneyRivlin&&) = default;
 
       /// @brief Gets @f$ c_1 @f$.
-      Real getC1() const { return m_c1; }
+      Real getMaterialConstantC1() const { return m_c1; }
 
       /// @brief Gets @f$ c_2 @f$.
-      Real getC2() const { return m_c2; }
+      Real getMaterialConstantC2() const { return m_c2; }
 
       /// @brief Gets the bulk modulus @f$ \kappa @f$.
-      Real getKappa() const { return m_kappa; }
+      Real getBulkModulus() const { return m_kappa; }
 
       void setCache(Cache& cache, const KinematicState& state) const
       {

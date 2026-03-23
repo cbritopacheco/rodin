@@ -417,7 +417,7 @@ namespace Rodin::Tests::Unit
     epsilon(0,0)=0.1; epsilon(0,1)=0.05; epsilon(1,0)=0.05; epsilon(1,1)=0.2;
 
     Math::SpatialMatrix<Real> sigma;
-    hooke.stress(sigma, epsilon);
+    hooke.getStress(sigma, epsilon);
 
     // sigma = lambda tr(epsilon) I + 2 mu epsilon
     // tr(epsilon) = 0.3
@@ -431,13 +431,13 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Solid_Hooke, YoungPoissonConversion)
   {
     const Real E = 200.0, nu = 0.3;
-    auto hooke = Solid::Hooke::fromYoungPoisson(E, nu);
+    auto hooke = Solid::Hooke::YoungPoisson(E, nu);
 
     const Real expected_lambda = E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu));
     const Real expected_mu = E / (2.0 * (1.0 + nu));
 
-    EXPECT_NEAR(hooke.getLambda(), expected_lambda, 1e-10);
-    EXPECT_NEAR(hooke.getMu(), expected_mu, 1e-10);
+    EXPECT_NEAR(hooke.getLameFirstParameter(), expected_lambda, 1e-10);
+    EXPECT_NEAR(hooke.getShearModulus(), expected_mu, 1e-10);
   }
 
   // ========================================================================

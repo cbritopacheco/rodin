@@ -5,17 +5,19 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 /**
- * @file FirstPiolaKirchhoffStress.h
- * @brief First Piola-Kirchhoff stress tensor computation.
+ * @file Fields/CauchyStress.h
+ * @brief Cauchy (true) stress tensor computation from the first Piola-Kirchhoff stress.
  *
- * Computes the first Piola-Kirchhoff stress @f$ \mathbf{P} @f$ from a
- * hyperelastic constitutive law:
+ * Computes the Cauchy stress tensor via the Piola transform:
  * @f[
- *   \mathbf{P} = \frac{\partial W}{\partial \mathbf{F}}
+ *   \boldsymbol{\sigma} = \frac{1}{J} \mathbf{P} \mathbf{F}^T
  * @f]
+ * where @f$ \mathbf{P} @f$ is the first Piola-Kirchhoff stress,
+ * @f$ \mathbf{F} @f$ is the deformation gradient, and
+ * @f$ J = \det(\mathbf{F}) @f$.
  */
-#ifndef RODIN_SOLID_POSTPROCESSING_FIRSTPIOLAKIRCHHOFFSTRESS_H
-#define RODIN_SOLID_POSTPROCESSING_FIRSTPIOLAKIRCHHOFFSTRESS_H
+#ifndef RODIN_SOLID_FIELDS_CAUCHYSTRESS_H
+#define RODIN_SOLID_FIELDS_CAUCHYSTRESS_H
 
 #include "Rodin/Types.h"
 #include "Rodin/Math/Matrix.h"
@@ -27,7 +29,7 @@
 namespace Rodin::Solid
 {
   /**
-   * @brief Computes the first Piola-Kirchhoff stress from a constitutive law.
+   * @brief Computes the Cauchy stress from a constitutive law.
    *
    * ## Usage
    * @code
@@ -37,43 +39,47 @@ namespace Rodin::Solid
    * state.setDisplacementGradient(gradU);
    * law.setCache(cache, state);
    *
-   * FirstPiolaKirchhoffStress<NeoHookean> pk1(law);
-    * Math::SpatialMatrix<Real> P;
-   * pk1.getFirstPiolaKirchhoffStress(P, cache, state);
+   * CauchyStress<NeoHookean> cauchy(law);
+    * Math::SpatialMatrix<Real> sigma;
+   * cauchy.getCauchyStress(sigma, cache, state);
    * @endcode
    *
    * @tparam LawDerived The hyperelastic law type
    */
   template <class LawDerived>
-  class FirstPiolaKirchhoffStress
+  class CauchyStress
   {
     public:
       using LawType = LawDerived;
       using CacheType = typename LawType::Cache;
 
       /**
-       * @brief Constructs the stress evaluator.
+       * @brief Constructs the Cauchy stress evaluator.
        * @param law Reference to the constitutive law
        */
-      FirstPiolaKirchhoffStress(const LawType& law)
+      CauchyStress(const LawType& law)
         : m_law(law)
       {}
 
-      FirstPiolaKirchhoffStress(const FirstPiolaKirchhoffStress&) = default;
-      FirstPiolaKirchhoffStress(FirstPiolaKirchhoffStress&&) = default;
+      CauchyStress(const CauchyStress&) = default;
+      CauchyStress(CauchyStress&&) = default;
 
       /**
-       * @brief Computes @f$ \mathbf{P} = \partial W / \partial \mathbf{F} @f$.
-       * @param[out] P Output stress tensor
+       * @brief Computes @f$ \boldsymbol{\sigma} = \tfrac{1}{J} \mathbf{P} \mathbf{F}^T @f$.
+       * @param[out] sigma Output Cauchy stress tensor
        * @param[in] cache Precomputed law cache
        * @param[in] state Current kinematic state
        */
-      void getFirstPiolaKirchhoffStress(
-          Math::SpatialMatrix<Real>& P,
+      void getCauchyStress(
+          Math::SpatialMatrix<Real>& sigma,
           const CacheType& cache,
           const KinematicState& state) const
       {
+        Math::SpatialMatrix<Real> P;
         m_law.getFirstPiolaKirchhoffStress(P, cache, state);
+        const auto& F = state.getDeformationGradient();
+        const Real J = state.getJacobian();
+        sigma = (1.0 / J) * P * F.transpose();
       }
 
       /// @brief Gets the constitutive law.

@@ -22,8 +22,6 @@ namespace Rodin::Solid
 
   class Hooke;
 
-  class LinearElasticity;
-
   template <class LawDerived, class FES>
   class InternalForce;
 

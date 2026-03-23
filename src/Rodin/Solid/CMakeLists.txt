@@ -17,11 +17,10 @@ set(RodinSolid_HEADERS
   Integrators/MaterialTangent.h
   Integrators/BodyForce.h
   Integrators/TractionForce.h
-  Linear/Hooke.h
-  Linear/LinearElasticity.h
-  PostProcessing/GreenLagrangeStrain.h
-  PostProcessing/FirstPiolaKirchhoffStress.h
-  PostProcessing/CauchyStress.h
+  Constitutive/Hooke.h
+  Fields/GreenLagrangeStrain.h
+  Fields/FirstPiolaKirchhoffStress.h
+  Fields/CauchyStress.h
 )
 
 # Header-only / interface library
