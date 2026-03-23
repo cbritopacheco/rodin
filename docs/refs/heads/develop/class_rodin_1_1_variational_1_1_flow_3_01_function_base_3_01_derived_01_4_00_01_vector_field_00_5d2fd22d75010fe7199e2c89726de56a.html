@@ -86,19 +86,19 @@
           <tbody>
             <tr>
               <td style="width: 1%">Derived</td>
-              <td>Type of the function being advected</td>
+              <td>Type of the advected function.</td>
             </tr>
             <tr>
               <td>VectorField</td>
-              <td>Type of the velocity field</td>
+              <td>Type of the velocity field.</td>
             </tr>
             <tr>
               <td>Step</td>
-              <td>Time step for flow integration</td>
+              <td>Time integrator used to advance characteristics.</td>
             </tr>
             <tr>
               <td>BoundaryPolicy</td>
-              <td>Policy for handling domain boundaries</td>
+              <td>Policy used when a trajectory reaches the boundary.</td>
             </tr>
           </tbody>
         </table>
@@ -110,6 +110,7 @@
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -125,7 +126,7 @@ $ u $
 <g id='eq1-page1'>
 <use x='0' y='0' xlink:href='#eq1-g0-117'/>
 </g>
-</svg> and velocity field <svg class="m-math" style="width: 0.759em; height: 0.553em; vertical-align: -0.000em;" viewBox="0 -5.313399 7.285181 5.313399">
+</svg> and a velocity field <svg class="m-math" style="width: 0.759em; height: 0.553em; vertical-align: -0.000em;" viewBox="0 -5.313399 7.285181 5.313399">
 <title>
 $ \mathbf{v} $
 </title>
@@ -135,7 +136,7 @@ $ \mathbf{v} $
 <g id='eq2-page1'>
 <use x='0' y='0' xlink:href='#eq2-g0-118'/>
 </g>
-</svg>, this computes <svg class="m-math" style="width: 2.751em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 26.407693 8.169366">
+</svg>, this class computes <svg class="m-math" style="width: 2.751em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 26.407693 8.169366">
 <title>
 $ u \circ \Phi $
 </title>
@@ -149,7 +150,7 @@ $ u \circ \Phi $
 <use x='9.319103' y='0' xlink:href='#eq3-g0-14'/>
 <use x='17.953373' y='0' xlink:href='#eq3-g2-8'/>
 </g>
-</svg> where <svg class="m-math" style="width: 0.881em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.454319 8.169366">
+</svg>, where <svg class="m-math" style="width: 0.881em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.454319 8.169366">
 <title>
 $ \Phi $
 </title>
@@ -159,7 +160,17 @@ $ \Phi $
 <g id='eq4-page1'>
 <use x='0' y='0' xlink:href='#eq4-g0-8'/>
 </g>
-</svg> is the flow map.</p>
+</svg> is the flow map associated with <svg class="m-math" style="width: 0.759em; height: 0.553em; vertical-align: -0.000em;" viewBox="0 -5.313399 7.285181 5.313399">
+<title>
+$ \mathbf{v} $
+</title>
+<defs>
+<path id='eq5-g0-118' d='M5.917808-4.519054C6.001494-4.698381 6.049315-4.794022 6.802491-4.794022V-5.308095C6.372105-5.284184 6.348194-5.284184 5.858032-5.284184C5.535243-5.284184 5.511333-5.284184 4.829888-5.308095V-4.794022C5.152677-4.794022 5.415691-4.734247 5.415691-4.65056C5.415691-4.638605 5.415691-4.62665 5.355915-4.507098L3.957161-1.43462L2.414944-4.794022H3.072478V-5.308095C2.797509-5.284184 1.960648-5.284184 1.637858-5.284184C1.291158-5.284184 .597758-5.284184 .286924-5.308095V-4.794022H1.0401L3.144209-.227148C3.251806 0 3.275716 .059776 3.550685 .059776C3.741968 .059776 3.837609 .035866 3.945205-.203238L5.917808-4.519054Z'/>
+</defs>
+<g id='eq5-page1'>
+<use x='0' y='0' xlink:href='#eq5-g0-118'/>
+</g>
+</svg>.</p><p>The implementation performs robust cell-by-cell tracing with explicit face crossing detection, adaptive substepping, and optional boundary handling.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -173,15 +184,130 @@ $ \Phi $
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
+            <dt>
+              class <a href="class_rodin_1_1_variational_1_1_flow_3_01_function_base_3_01_derived_01_4_00_01_vector_field_00_783a973c979ff18bfae34562f8910583.html" class="m-doc">Trace</a>
+            </dt>
+            <dd>Result of a characteristic trace.</dd>
             <dt id="a15baa24730f5b2ae01fbf619b23d7795">
               using <a href="#a15baa24730f5b2ae01fbf619b23d7795" class="m-doc-self">Operand</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;Derived&gt;
             </dt>
-            <dd>Type of the operand function.</dd>
+            <dd>Operand function type.</dd>
+            <dt id="a944fcfd398d1e05c4ccb478c8d2b8813">
+              using <a href="#a944fcfd398d1e05c4ccb478c8d2b8813" class="m-doc-self">VectorFieldType</a> = VectorField
+            </dt>
+            <dd>Velocity field type.</dd>
+            <dt id="af64c5a2aace3ee109b0b08713933ec73">
+              using <a href="#af64c5a2aace3ee109b0b08713933ec73" class="m-doc-self">StepType</a> = Step
+            </dt>
+            <dd>Time integration scheme type.</dd>
+            <dt id="aa88ade43a69ae7643eb80a965cf0b50f">
+              using <a href="#aa88ade43a69ae7643eb80a965cf0b50f" class="m-doc-self">BoundaryPolicyType</a> = BoundaryPolicy
+            </dt>
+            <dd>Boundary policy type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class VVel, class S = <a href="#af64c5a2aace3ee109b0b08713933ec73" class="m-doc">StepType</a>, class B = BoundaryPolicy&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a8a84a082fa91180519961a19058a441c" class="m-doc">Flow</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; t,
+              const <a href="#a15baa24730f5b2ae01fbf619b23d7795" class="m-doc">Operand</a>&amp; u,
+              VVel&amp;&amp; vel,
+              S&amp;&amp; st = S{},
+              B&amp;&amp; bp = B{})</span>
+            </dt>
+            <dd>Constructs a flow operator.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a68881cd41fa694ef3eb98dca7ad90958" class="m-doc">trace</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="class_rodin_1_1_variational_1_1_trace.html" class="m-doc">Trace</a></span>
+            </dt>
+            <dd>Traces the characteristic starting at <code>p</code>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af5f065ebe0b3b1c58b0c2402a50fc9e3" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Evaluates the flowed function at a point.</dd>
+            <dt id="a37f33013a5aa5afec8659481f014d52f">
+              <span class="m-doc-wrap-bumper">auto <a href="#a37f33013a5aa5afec8659481f014d52f" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
+            </dt>
+            <dd>Returns the operand function.</dd>
+            <dt id="aea556e87bdc544abd509156483a63dbd">
+              <span class="m-doc-wrap-bumper">auto <a href="#aea556e87bdc544abd509156483a63dbd" class="m-doc-self">getVelocity</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
+            </dt>
+            <dd>Returns the velocity field.</dd>
+            <dt id="ae4b73381b6809da140a9b3a2f6ac7b4e">
+              <span class="m-doc-wrap-bumper">auto <a href="#ae4b73381b6809da140a9b3a2f6ac7b4e" class="m-doc-self">getStep</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
+            </dt>
+            <dd>Returns the time integrator.</dd>
+            <dt id="a4fa0d4a28df8f83681df0ee341596c9d">
+              <span class="m-doc-wrap-bumper">auto <a href="#a4fa0d4a28df8f83681df0ee341596c9d" class="m-doc-self">getBoundaryPolicy</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
+            </dt>
+            <dd>Returns the boundary policy.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#abc8a9c6e29b90341b2c9a49f3dd74369" class="m-doc">setMaxZeroHops</a>(</span><span class="m-doc-wrap">size_t value) -&gt; <a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp;</span>
+            </dt>
+            <dd>Sets the maximum number of zero-time face hops.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a23e8c2aca0c26a6107731b5558687ebd" class="m-doc">setMaxBisections</a>(</span><span class="m-doc-wrap">size_t value) -&gt; <a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp;</span>
+            </dt>
+            <dd>Sets the maximum number of bisection iterations used to refine a face hit time.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a319cfbccaf994415468eaa66441d24fa" class="m-doc">setMaxSubdivisions</a>(</span><span class="m-doc-wrap">size_t value) -&gt; <a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp;</span>
+            </dt>
+            <dd>Sets the maximum number of adaptive subdivisions used when bracketing fails.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5b3e628efb6191b784336befd260f46a" class="m-doc">setMaxOuterIterations</a>(</span><span class="m-doc-wrap">size_t value) -&gt; <a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp;</span>
+            </dt>
+            <dd>Sets the maximum number of outer trace loop iterations.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6b4b65f61aba7564a964617d46e27d21" class="m-doc">setMaxStagnations</a>(</span><span class="m-doc-wrap">size_t value) -&gt; <a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp;</span>
+            </dt>
+            <dd>Sets the maximum number of consecutive stagnating iterations tolerated before aborting.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8d2c5bf8ce426ca027e2a94055dd5b51" class="m-doc">setFaceTrials</a>(</span><span class="m-doc-wrap">size_t value) -&gt; <a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp;</span>
+            </dt>
+            <dd>Sets how many candidate faces are tried first after sorting by predicted hit time.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#acf7967b94a896efec9f7076811f57d50" class="m-doc">setBracketGrowth</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> value) -&gt; <a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp;</span>
+            </dt>
+            <dd>Sets the multiplicative growth factor used when expanding a face hit bracket.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a878f391f049fb1b3d12aa0caba8bb672" class="m-doc">setMaxBracketExpansions</a>(</span><span class="m-doc-wrap">size_t value) -&gt; <a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp;</span>
+            </dt>
+            <dd>Sets the maximum number of bracket expansion attempts per face.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a61da3ac9801270f1edb8bb523ae4ce86" class="m-doc">setStepSafety</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> value) -&gt; <a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp;</span>
+            </dt>
+            <dd>Sets the safety factor used in the local per-cell time-step cap.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1c15dd95b88283f692a56b041aa749c4" class="m-doc">setMinStepFactor</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> value) -&gt; <a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp;</span>
+            </dt>
+            <dd>Sets the factor used to define the minimum admissible substep.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2d94906f1996d3cae00f297b0d2ca088" class="m-doc">setTolFactor</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> value) -&gt; <a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp;</span>
+            </dt>
+            <dd>Sets the factor multiplying <svg class="m-math" style="width: 1.608em; height: 1.245em; vertical-align: -0.300em;" viewBox="0 -9.089229 15.440694 11.955168">
+<title>
+$ \sqrt{\varepsilon} $
+</title>
+<defs>
+<path id='eq7-g1-34' d='M1.661768-2.725778C2.044334-2.570361 2.450809-2.570361 2.677958-2.570361C2.988792-2.570361 3.610461-2.570361 3.610461-2.917061C3.610461-3.132254 3.383313-3.21594 2.773599-3.21594C2.47472-3.21594 2.116065-3.180075 1.697634-3.000747C1.327024-3.180075 1.183562-3.455044 1.183562-3.718057C1.183562-4.459278 2.355168-4.889664 3.419178-4.889664C3.622416-4.889664 4.052802-4.889664 4.554919-4.519054C4.62665-4.471233 4.662516-4.435367 4.746202-4.435367C4.889664-4.435367 5.045081-4.590785 5.045081-4.734247C5.045081-4.94944 4.351681-5.403736 3.526775-5.403736C2.187796-5.403736 .920548-4.60274 .920548-3.718057C.920548-3.275716 1.207472-3.000747 1.41071-2.857285C.71731-2.462765 .310834-1.817186 .310834-1.231382C.310834-.406476 1.052055 .251059 2.199751 .251059C3.777833 .251059 4.411457-.800996 4.411457-.968369C4.411457-1.028144 4.363636-1.075965 4.303861-1.075965S4.220174-1.0401 4.172354-.968369C4.040847-.74122 3.730012-.263014 2.307347-.263014C1.566127-.263014 .585803-.454296 .585803-1.303113C.585803-1.709589 .884682-2.319303 1.661768-2.725778ZM2.032379-2.86924C2.355168-2.976837 2.666002-2.976837 2.749689-2.976837C3.084433-2.976837 3.144209-2.952927 3.335492-2.905106C3.132254-2.809465 3.108344-2.809465 2.677958-2.809465C2.462765-2.809465 2.271482-2.809465 2.032379-2.86924Z'/>
+<path id='eq7-g0-112' d='M4.65056 10.221669L2.546451 5.571108C2.462765 5.379826 2.402989 5.379826 2.367123 5.379826C2.355168 5.379826 2.295392 5.379826 2.163885 5.475467L1.028144 6.336239C.872727 6.455791 .872727 6.491656 .872727 6.527522C.872727 6.587298 .908593 6.659029 .992279 6.659029C1.06401 6.659029 1.267248 6.491656 1.398755 6.396015C1.470486 6.336239 1.649813 6.204732 1.78132 6.109091L4.136488 11.285679C4.220174 11.476961 4.27995 11.476961 4.387547 11.476961C4.566874 11.476961 4.60274 11.40523 4.686426 11.237858L10.114072 0C10.197758-.167372 10.197758-.215193 10.197758-.239103C10.197758-.358655 10.102117-.478207 9.958655-.478207C9.863014-.478207 9.779328-.418431 9.683686-.227148L4.65056 10.221669Z'/>
+</defs>
+<g id='eq7-page1'>
+<use x='0' y='-8.611034' xlink:href='#eq7-g0-112'/>
+<rect x='9.962671' y='-9.089222' height='.478187' width='5.478023'/>
+<use x='9.962671' y='0' xlink:href='#eq7-g1-34'/>
+</g>
+</svg> in the geometric and directional tolerances.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a24fc2532b36945ecba08716527db22ae" class="m-doc">setClampFactor</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> value) -&gt; <a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp;</span>
+            </dt>
+            <dd>Sets the factor controlling when a point is considered far enough outside a cell to be clamped back inside.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a9cbedfa50f978f7c4362783ce540f542" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -190,6 +316,241 @@ $ \Phi $
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a8a84a082fa91180519961a19058a441c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;
+                template&lt;class VVel, class S = <a href="#af64c5a2aace3ee109b0b08713933ec73" class="m-doc">StepType</a>, class B = BoundaryPolicy&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8a84a082fa91180519961a19058a441c" class="m-doc-self">Flow</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; t,
+              const <a href="#a15baa24730f5b2ae01fbf619b23d7795" class="m-doc">Operand</a>&amp; u,
+              VVel&amp;&amp; vel,
+              S&amp;&amp; st = S{},
+              B&amp;&amp; bp = B{})</span></span>
+            </h3>
+            <p>Constructs a flow operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">t</td>
+                  <td>Signed tracing time.</td>
+                </tr>
+                <tr>
+                  <td>u</td>
+                  <td>Operand function.</td>
+                </tr>
+                <tr>
+                  <td>vel</td>
+                  <td>Velocity field.</td>
+                </tr>
+                <tr>
+                  <td>st</td>
+                  <td>Time integrator.</td>
+                </tr>
+                <tr>
+                  <td>bp</td>
+                  <td>Boundary policy.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Default tracing parameters:</p><ul><li>max zero hops: 128</li><li>max bisections: 16</li><li>max subdivisions: 8</li><li>max outer iterations: 100000</li><li>max stagnations: 512</li><li>face trials: 6</li><li>bracket growth: 2.0</li><li>max bracket expansions: 3</li><li>step safety: 0.5</li><li>min step factor: 10</li><li>tolerance factor: 50</li><li>clamp factor: 10</li></ul>
+          </div></section>
+          <section class="m-doc-details" id="a68881cd41fa694ef3eb98dca7ad90958"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_trace.html" class="m-doc">Trace</a> Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68881cd41fa694ef3eb98dca7ad90958" class="m-doc-self">trace</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
+            </h3>
+            <p>Traces the characteristic starting at <code>p</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Starting point.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_variational_1_1_flow_3_01_function_base_3_01_derived_01_4_00_01_vector_field_00_783a973c979ff18bfae34562f8910583.html" class="m-doc">Trace</a> result.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The tracing algorithm:</p><ul><li>consumes the remaining time by repeated cell-local advances,</li><li>detects the earliest face crossing when needed,</li><li>hops across interior faces,</li><li>delegates boundary handling to the boundary policy,</li><li>aborts safely if it detects non-progress.</li></ul><p>&lt; Linearized face hit time.</p><p>&lt; Local face index.</p><p>&lt; <svg class="m-math" style="width: 4.152em; height: 0.749em; vertical-align: -0.196em;" viewBox="0 -5.313422 39.859986 7.190058">
+<title>
+$ n_{\text{ref}}\cdot v_{\text{ref}} $
+</title>
+<defs>
+<path id='eq6-g3-1' d='M2.295392-2.988792C2.295392-3.335492 2.008468-3.622416 1.661768-3.622416S1.028144-3.335492 1.028144-2.988792S1.315068-2.355168 1.661768-2.355168S2.295392-2.642092 2.295392-2.988792Z'/>
+<path id='eq6-g2-101' d='M3.366702-1.246633L3.239657-1.302215C2.858521-.69875 2.517086-.46848 2.008905-.46848C1.572186-.46848 1.238692-.674929 1.008423-1.103707C.849616-1.41338 .786093-1.691292 .770213-2.199473H3.215836C3.152313-2.715595 3.07291-2.945865 2.874402-3.199955C2.636191-3.485807 2.270936-3.652554 1.858039-3.652554C.873437-3.652554 .198508-2.858521 .198508-1.699232C.198508-.603466 .770213 .079403 1.683351 .079403C2.445623 .079403 3.033208-.389076 3.366702-1.246633ZM2.405922-2.453564H.786093C.873437-3.08085 1.143408-3.366702 1.627769-3.366702S2.302697-3.144373 2.405922-2.453564Z'/>
+<path id='eq6-g2-102' d='M3.041149-4.930949C3.041149-5.216801 2.691774-5.423249 2.215354-5.423249C1.715113-5.423249 1.302215-5.20886 1.095766-4.851545S.825795-4.208378 .817855-3.573151H.166747V-3.31906H.817855V-.825795C.817855-.24615 .730511-.150866 .158807-.119105V0H2.223294V-.119105C1.572186-.142926 1.484843-.23027 1.484843-.825795V-3.31906H2.453564V-3.573151H1.476902V-4.49423C1.476902-4.96271 1.627769-5.20092 1.929502-5.20092C2.104189-5.20092 2.207413-5.121517 2.350339-4.891247C2.477385-4.676858 2.572669-4.605395 2.707655-4.605395C2.898223-4.605395 3.041149-4.748321 3.041149-4.930949Z'/>
+<path id='eq6-g2-114' d='M2.660012-3.231717C2.660012-3.493748 2.493265-3.652554 2.223294-3.652554C1.8898-3.652554 1.65953-3.469927 1.270454-2.906163V-3.636674L1.230752-3.652554C.809914-3.477867 .524062-3.374643 .055582-3.223776V-3.096731C.166747-3.120552 .23821-3.128492 .333494-3.128492C.532002-3.128492 .603466-3.001447 .603466-2.652072V-.666988C.603466-.269971 .547883-.214389 .039702-.119105V0H1.945382V-.119105C1.405439-.142926 1.270454-.262031 1.270454-.71463V-2.501206C1.270454-2.755297 1.611888-3.152313 1.826277-3.152313C1.873919-3.152313 1.945382-3.112612 2.032726-3.033208C2.159771-2.922044 2.247115-2.874402 2.350339-2.874402C2.540907-2.874402 2.660012-3.009387 2.660012-3.231717Z'/>
+<path id='eq6-g4-110' d='M2.462765-3.502864C2.486675-3.574595 2.785554-4.172354 3.227895-4.554919C3.53873-4.841843 3.945205-5.033126 4.411457-5.033126C4.889664-5.033126 5.057036-4.674471 5.057036-4.196264C5.057036-3.514819 4.566874-2.15193 4.327771-1.506351C4.220174-1.219427 4.160399-1.06401 4.160399-.848817C4.160399-.310834 4.531009 .119552 5.104857 .119552C6.216687 .119552 6.635118-1.637858 6.635118-1.709589C6.635118-1.769365 6.587298-1.817186 6.515567-1.817186C6.40797-1.817186 6.396015-1.78132 6.336239-1.578082C6.06127-.597758 5.606974-.119552 5.140722-.119552C5.021171-.119552 4.829888-.131507 4.829888-.514072C4.829888-.812951 4.961395-1.171606 5.033126-1.338979C5.272229-1.996513 5.774346-3.335492 5.774346-4.016936C5.774346-4.734247 5.355915-5.272229 4.447323-5.272229C3.383313-5.272229 2.82142-4.519054 2.606227-4.220174C2.570361-4.901619 2.080199-5.272229 1.554172-5.272229C1.171606-5.272229 .908593-5.045081 .705355-4.638605C.490162-4.208219 .32279-3.490909 .32279-3.443088S.37061-3.335492 .454296-3.335492C.549938-3.335492 .561893-3.347447 .633624-3.622416C.824907-4.351681 1.0401-5.033126 1.518306-5.033126C1.793275-5.033126 1.888917-4.841843 1.888917-4.483188C1.888917-4.220174 1.769365-3.753923 1.685679-3.383313L1.350934-2.092154C1.303113-1.865006 1.171606-1.327024 1.111831-1.111831C1.028144-.800996 .896638-.239103 .896638-.179328C.896638-.011955 1.028144 .119552 1.207472 .119552C1.350934 .119552 1.518306 .047821 1.613948-.131507C1.637858-.191283 1.745455-.609714 1.80523-.848817L2.068244-1.924782L2.462765-3.502864Z'/>
+<path id='eq6-g4-118' d='M5.463512-4.471233C5.463512-5.224408 5.080946-5.272229 4.985305-5.272229C4.698381-5.272229 4.435367-4.985305 4.435367-4.746202C4.435367-4.60274 4.519054-4.519054 4.566874-4.471233C4.686426-4.363636 4.99726-4.040847 4.99726-3.419178C4.99726-2.917061 4.27995-.119552 2.84533-.119552C2.116065-.119552 1.972603-.729265 1.972603-1.171606C1.972603-1.769365 2.247572-2.606227 2.570361-3.466999C2.761644-3.957161 2.809465-4.076712 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.033126 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.255293-1.996513 1.255293-1.625903 1.255293-1.338979C1.255293-1.075965 1.291158-.585803 1.661768-.251059C2.092154 .119552 2.689913 .119552 2.797509 .119552C4.782067 .119552 5.463512-3.789788 5.463512-4.471233Z'/>
+</defs>
+<g id='eq6-page1'>
+<use x='0' y='0' xlink:href='#eq6-g4-110'/>
+<use x='6.987606' y='1.793263' xlink:href='#eq6-g2-114'/>
+<use x='9.641654' y='1.793263' xlink:href='#eq6-g2-101'/>
+<use x='13.180386' y='1.793263' xlink:href='#eq6-g2-102'/>
+<use x='18.98923' y='0' xlink:href='#eq6-g3-1'/>
+<use x='24.966784' y='0' xlink:href='#eq6-g4-118'/>
+<use x='30.626054' y='1.793263' xlink:href='#eq6-g2-114'/>
+<use x='33.280103' y='1.793263' xlink:href='#eq6-g2-101'/>
+<use x='36.818835' y='1.793263' xlink:href='#eq6-g2-102'/>
+</g>
+</svg> at the start.</p><p>&lt; Initial face function value.</p><p>&lt; Global face index.</p>
+          </div></section>
+          <section class="m-doc-details" id="af5f065ebe0b3b1c58b0c2402a50fc9e3"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af5f065ebe0b3b1c58b0c2402a50fc9e3" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Evaluates the flowed function at a point.</p>
+<p>If tracing exits or aborts before completion, this default implementation returns zero.</p>
+          </div></section>
+          <section class="m-doc-details" id="abc8a9c6e29b90341b2c9a49f3dd74369"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abc8a9c6e29b90341b2c9a49f3dd74369" class="m-doc-self">setMaxZeroHops</a>(</span><span class="m-doc-wrap">size_t value)</span></span>
+            </h3>
+            <p>Sets the maximum number of zero-time face hops.</p>
+<p>Default value: 128.</p>
+          </div></section>
+          <section class="m-doc-details" id="a23e8c2aca0c26a6107731b5558687ebd"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23e8c2aca0c26a6107731b5558687ebd" class="m-doc-self">setMaxBisections</a>(</span><span class="m-doc-wrap">size_t value)</span></span>
+            </h3>
+            <p>Sets the maximum number of bisection iterations used to refine a face hit time.</p>
+<p>Default value: 16.</p>
+          </div></section>
+          <section class="m-doc-details" id="a319cfbccaf994415468eaa66441d24fa"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a319cfbccaf994415468eaa66441d24fa" class="m-doc-self">setMaxSubdivisions</a>(</span><span class="m-doc-wrap">size_t value)</span></span>
+            </h3>
+            <p>Sets the maximum number of adaptive subdivisions used when bracketing fails.</p>
+<p>Default value: 8.</p>
+          </div></section>
+          <section class="m-doc-details" id="a5b3e628efb6191b784336befd260f46a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5b3e628efb6191b784336befd260f46a" class="m-doc-self">setMaxOuterIterations</a>(</span><span class="m-doc-wrap">size_t value)</span></span>
+            </h3>
+            <p>Sets the maximum number of outer trace loop iterations.</p>
+<p>Default value: 100000.</p>
+          </div></section>
+          <section class="m-doc-details" id="a6b4b65f61aba7564a964617d46e27d21"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6b4b65f61aba7564a964617d46e27d21" class="m-doc-self">setMaxStagnations</a>(</span><span class="m-doc-wrap">size_t value)</span></span>
+            </h3>
+            <p>Sets the maximum number of consecutive stagnating iterations tolerated before aborting.</p>
+<p>Default value: 512.</p>
+          </div></section>
+          <section class="m-doc-details" id="a8d2c5bf8ce426ca027e2a94055dd5b51"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8d2c5bf8ce426ca027e2a94055dd5b51" class="m-doc-self">setFaceTrials</a>(</span><span class="m-doc-wrap">size_t value)</span></span>
+            </h3>
+            <p>Sets how many candidate faces are tried first after sorting by predicted hit time.</p>
+<p>Default value: 6.</p>
+          </div></section>
+          <section class="m-doc-details" id="acf7967b94a896efec9f7076811f57d50"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acf7967b94a896efec9f7076811f57d50" class="m-doc-self">setBracketGrowth</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> value)</span></span>
+            </h3>
+            <p>Sets the multiplicative growth factor used when expanding a face hit bracket.</p>
+<p>Default value: 2.0.</p>
+          </div></section>
+          <section class="m-doc-details" id="a878f391f049fb1b3d12aa0caba8bb672"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a878f391f049fb1b3d12aa0caba8bb672" class="m-doc-self">setMaxBracketExpansions</a>(</span><span class="m-doc-wrap">size_t value)</span></span>
+            </h3>
+            <p>Sets the maximum number of bracket expansion attempts per face.</p>
+<p>Default value: 3.</p>
+          </div></section>
+          <section class="m-doc-details" id="a61da3ac9801270f1edb8bb523ae4ce86"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a61da3ac9801270f1edb8bb523ae4ce86" class="m-doc-self">setStepSafety</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> value)</span></span>
+            </h3>
+            <p>Sets the safety factor used in the local per-cell time-step cap.</p>
+<p>Smaller values are more conservative.</p><p>Default value: 0.5.</p>
+          </div></section>
+          <section class="m-doc-details" id="a1c15dd95b88283f692a56b041aa749c4"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c15dd95b88283f692a56b041aa749c4" class="m-doc-self">setMinStepFactor</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> value)</span></span>
+            </h3>
+            <p>Sets the factor used to define the minimum admissible substep.</p>
+<p>Default value: 10.</p>
+          </div></section>
+          <section class="m-doc-details" id="a2d94906f1996d3cae00f297b0d2ca088"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2d94906f1996d3cae00f297b0d2ca088" class="m-doc-self">setTolFactor</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> value)</span></span>
+            </h3>
+            <p>Sets the factor multiplying <svg class="m-math" style="width: 1.608em; height: 1.245em; vertical-align: -0.300em;" viewBox="0 -9.089229 15.440694 11.955168">
+<title>
+$ \sqrt{\varepsilon} $
+</title>
+<defs>
+<path id='eq7-g1-34' d='M1.661768-2.725778C2.044334-2.570361 2.450809-2.570361 2.677958-2.570361C2.988792-2.570361 3.610461-2.570361 3.610461-2.917061C3.610461-3.132254 3.383313-3.21594 2.773599-3.21594C2.47472-3.21594 2.116065-3.180075 1.697634-3.000747C1.327024-3.180075 1.183562-3.455044 1.183562-3.718057C1.183562-4.459278 2.355168-4.889664 3.419178-4.889664C3.622416-4.889664 4.052802-4.889664 4.554919-4.519054C4.62665-4.471233 4.662516-4.435367 4.746202-4.435367C4.889664-4.435367 5.045081-4.590785 5.045081-4.734247C5.045081-4.94944 4.351681-5.403736 3.526775-5.403736C2.187796-5.403736 .920548-4.60274 .920548-3.718057C.920548-3.275716 1.207472-3.000747 1.41071-2.857285C.71731-2.462765 .310834-1.817186 .310834-1.231382C.310834-.406476 1.052055 .251059 2.199751 .251059C3.777833 .251059 4.411457-.800996 4.411457-.968369C4.411457-1.028144 4.363636-1.075965 4.303861-1.075965S4.220174-1.0401 4.172354-.968369C4.040847-.74122 3.730012-.263014 2.307347-.263014C1.566127-.263014 .585803-.454296 .585803-1.303113C.585803-1.709589 .884682-2.319303 1.661768-2.725778ZM2.032379-2.86924C2.355168-2.976837 2.666002-2.976837 2.749689-2.976837C3.084433-2.976837 3.144209-2.952927 3.335492-2.905106C3.132254-2.809465 3.108344-2.809465 2.677958-2.809465C2.462765-2.809465 2.271482-2.809465 2.032379-2.86924Z'/>
+<path id='eq7-g0-112' d='M4.65056 10.221669L2.546451 5.571108C2.462765 5.379826 2.402989 5.379826 2.367123 5.379826C2.355168 5.379826 2.295392 5.379826 2.163885 5.475467L1.028144 6.336239C.872727 6.455791 .872727 6.491656 .872727 6.527522C.872727 6.587298 .908593 6.659029 .992279 6.659029C1.06401 6.659029 1.267248 6.491656 1.398755 6.396015C1.470486 6.336239 1.649813 6.204732 1.78132 6.109091L4.136488 11.285679C4.220174 11.476961 4.27995 11.476961 4.387547 11.476961C4.566874 11.476961 4.60274 11.40523 4.686426 11.237858L10.114072 0C10.197758-.167372 10.197758-.215193 10.197758-.239103C10.197758-.358655 10.102117-.478207 9.958655-.478207C9.863014-.478207 9.779328-.418431 9.683686-.227148L4.65056 10.221669Z'/>
+</defs>
+<g id='eq7-page1'>
+<use x='0' y='-8.611034' xlink:href='#eq7-g0-112'/>
+<rect x='9.962671' y='-9.089222' height='.478187' width='5.478023'/>
+<use x='9.962671' y='0' xlink:href='#eq7-g1-34'/>
+</g>
+</svg> in the geometric and directional tolerances.</p>
+<p>Default value: 50.</p>
+          </div></section>
+          <section class="m-doc-details" id="a24fc2532b36945ecba08716527db22ae"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a24fc2532b36945ecba08716527db22ae" class="m-doc-self">setClampFactor</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> value)</span></span>
+            </h3>
+            <p>Sets the factor controlling when a point is considered far enough outside a cell to be clamped back inside.</p>
+<p>Default value: 10.</p>
+          </div></section>
           <section class="m-doc-details" id="a9cbedfa50f978f7c4362783ce540f542"><div>
             <h3>
               <div class="m-doc-template">
