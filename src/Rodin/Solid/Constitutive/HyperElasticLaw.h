@@ -22,6 +22,7 @@
 
 #include "Rodin/Types.h"
 #include "Rodin/Math/Matrix.h"
+#include "Rodin/Math/SpatialMatrix.h"
 
 #include "Rodin/Solid/Kinematics/KinematicState.h"
 
@@ -69,7 +70,7 @@ namespace Rodin::Solid
        */
       template <class Cache>
       void getFirstPiolaKirchhoffStress(
-          Math::Matrix<Real>& P,
+          Math::SpatialMatrix<Real>& P,
           const Cache& cache,
           const KinematicState& state) const
       {
@@ -93,10 +94,10 @@ namespace Rodin::Solid
        */
       template <class Cache>
       void getMaterialTangent(
-          Math::Matrix<Real>& dP,
+          Math::SpatialMatrix<Real>& dP,
           const Cache& cache,
           const KinematicState& state,
-          const Math::Matrix<Real>& dF) const
+          const Math::SpatialMatrix<Real>& dF) const
       {
         static_cast<const Derived&>(*this).getMaterialTangent(dP, cache, state, dF);
       }

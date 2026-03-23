@@ -19,6 +19,7 @@
 
 #include "Rodin/Types.h"
 #include "Rodin/Math/Matrix.h"
+#include "Rodin/Math/SpatialMatrix.h"
 
 #include "Rodin/Solid/Kinematics/KinematicState.h"
 #include "Rodin/Solid/Constitutive/HyperElasticLaw.h"
@@ -37,7 +38,7 @@ namespace Rodin::Solid
    * law.setCache(cache, state);
    *
    * FirstPiolaKirchhoffStress<NeoHookean> pk1(law);
-   * Math::Matrix<Real> P;
+    * Math::SpatialMatrix<Real> P;
    * pk1.getFirstPiolaKirchhoffStress(P, cache, state);
    * @endcode
    *
@@ -68,7 +69,7 @@ namespace Rodin::Solid
        * @param[in] state Current kinematic state
        */
       void getFirstPiolaKirchhoffStress(
-          Math::Matrix<Real>& P,
+          Math::SpatialMatrix<Real>& P,
           const CacheType& cache,
           const KinematicState& state) const
       {

@@ -23,6 +23,7 @@
 
 #include "Rodin/Types.h"
 #include "Rodin/Math/Matrix.h"
+#include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/LinearFormIntegrator.h"
 #include "Rodin/Variational/TestFunction.h"
@@ -123,7 +124,8 @@ namespace Rodin::Solid
         }
 
         // Evaluate displacement gradient H from DOF values
-        Math::Matrix<ScalarType> H(vdim, d);
+        Math::SpatialMatrix<ScalarType> H;
+        H.resize(static_cast<std::uint8_t>(vdim), static_cast<std::uint8_t>(d));
         H.setZero();
         for (size_t v = 0; v < nv; ++v)
           for (size_t c = 0; c < vdim; ++c)
@@ -141,7 +143,7 @@ namespace Rodin::Solid
         typename LawType::Cache cache;
         m_law.setCache(cache, state);
 
-        Math::Matrix<ScalarType> P;
+        Math::SpatialMatrix<ScalarType> P;
         m_law.getFirstPiolaKirchhoffStress(P, cache, state);
 
         // Precompute element vector

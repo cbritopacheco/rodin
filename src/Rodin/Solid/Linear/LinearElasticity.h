@@ -16,6 +16,7 @@
 
 #include "Rodin/Types.h"
 #include "Rodin/Math/Matrix.h"
+#include "Rodin/Math/SpatialMatrix.h"
 
 #include "Hooke.h"
 
@@ -33,7 +34,7 @@ namespace Rodin::Solid
    * ## Usage
    * @code
    * auto le = LinearElasticity::fromYoungPoisson(200.0, 0.3);
-   * Math::Matrix<Real> sigma;
+    * Math::SpatialMatrix<Real> sigma;
    * le.getStress(sigma, epsilon);
    * @endcode
    */
@@ -74,7 +75,7 @@ namespace Rodin::Solid
        * @param[out] sigma Output stress tensor
        * @param[in] epsilon Infinitesimal strain tensor
        */
-      void getStress(Math::Matrix<Real>& sigma, const Math::Matrix<Real>& epsilon) const
+      void getStress(Math::SpatialMatrix<Real>& sigma, const Math::SpatialMatrix<Real>& epsilon) const
       {
         m_hooke.stress(sigma, epsilon);
       }

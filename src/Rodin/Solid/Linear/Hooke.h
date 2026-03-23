@@ -22,6 +22,7 @@
 
 #include "Rodin/Types.h"
 #include "Rodin/Math/Matrix.h"
+#include "Rodin/Math/SpatialMatrix.h"
 
 namespace Rodin::Solid
 {
@@ -67,11 +68,14 @@ namespace Rodin::Solid
        * @param[out] sigma Output stress tensor
        * @param[in] epsilon Infinitesimal strain tensor @f$ \boldsymbol{\varepsilon} @f$
        */
-      void stress(Math::Matrix<Real>& sigma, const Math::Matrix<Real>& epsilon) const
+      void stress(Math::SpatialMatrix<Real>& sigma, const Math::SpatialMatrix<Real>& epsilon) const
       {
         const size_t d = epsilon.rows();
+        Math::SpatialMatrix<Real> I;
+        I.resize(static_cast<std::uint8_t>(d), static_cast<std::uint8_t>(d));
+        I.setIdentity();
         sigma = m_lambda * epsilon.trace()
-              * Math::Matrix<Real>::Identity(d, d)
+              * I
               + 2.0 * m_mu * epsilon;
       }
 

@@ -22,6 +22,7 @@
 #define RODIN_SOLID_INTEGRATORS_BODYFORCE_H
 
 #include "Rodin/Types.h"
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Math/Vector.h"
 
 namespace Rodin::Solid
@@ -51,7 +52,7 @@ namespace Rodin::Solid
        * @brief Constructs a body force from a constant vector.
        * @param force Body force vector @f$ \mathbf{f} @f$
        */
-      BodyForce(const Math::Vector<Real>& force)
+      BodyForce(const Math::SpatialVector<Real>& force)
         : m_force(force)
       {}
 
@@ -59,17 +60,17 @@ namespace Rodin::Solid
       BodyForce(BodyForce&&) = default;
 
       /// @brief Gets the body force vector.
-      const Math::Vector<Real>& getValue() const { return m_force; }
+      const Math::SpatialVector<Real>& getValue() const { return m_force; }
 
       /// @brief Sets the body force vector.
-      BodyForce& setValue(const Math::Vector<Real>& force)
+      BodyForce& setValue(const Math::SpatialVector<Real>& force)
       {
         m_force = force;
         return *this;
       }
 
     private:
-      Math::Vector<Real> m_force;
+      Math::SpatialVector<Real> m_force;
   };
 }
 

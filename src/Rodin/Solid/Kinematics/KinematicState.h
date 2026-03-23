@@ -23,7 +23,6 @@
 #include <cmath>
 
 #include "Rodin/Types.h"
-#include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/SpatialMatrix.h"
 
 namespace Rodin::Solid
@@ -62,28 +61,16 @@ namespace Rodin::Solid
         assert(d == 2 || d == 3);
         m_H.resize(static_cast<std::uint8_t>(d), static_cast<std::uint8_t>(d));
         m_H.setZero();
-        m_HDense.resize(d, d);
-        m_HDense.setZero();
         m_F.resize(static_cast<std::uint8_t>(d), static_cast<std::uint8_t>(d));
         m_F.setIdentity();
-        m_FDense.resize(d, d);
-        m_FDense.setIdentity();
         m_Finv.resize(static_cast<std::uint8_t>(d), static_cast<std::uint8_t>(d));
         m_Finv.setIdentity();
-        m_FinvDense.resize(d, d);
-        m_FinvDense.setIdentity();
         m_FinvT.resize(static_cast<std::uint8_t>(d), static_cast<std::uint8_t>(d));
         m_FinvT.setIdentity();
-        m_FinvTDense.resize(d, d);
-        m_FinvTDense.setIdentity();
         m_C.resize(static_cast<std::uint8_t>(d), static_cast<std::uint8_t>(d));
         m_C.setIdentity();
-        m_CDense.resize(d, d);
-        m_CDense.setIdentity();
         m_b.resize(static_cast<std::uint8_t>(d), static_cast<std::uint8_t>(d));
         m_b.setIdentity();
-        m_bDense.resize(d, d);
-        m_bDense.setIdentity();
         m_J = 1.0;
         m_logJ = 0.0;
       }
@@ -98,98 +85,7 @@ namespace Rodin::Solid
        * @param H Displacement gradient matrix
        * @returns Reference to this for chaining
        */
-      KinematicState& setDisplacementGradient(const Math::Matrix<Real>& H)
-      {
-        assert(static_cast<size_t>(H.rows()) == m_d);
-        assert(static_cast<size_t>(H.cols()) == m_d);
-        Math::SpatialMatrix<Real> HSpatial;
-        HSpatial = H;
-        return setDisplacementGradient(HSpatial);
-      }
-
-      /**
-       * @brief Sets the displacement gradient @f$ \nabla \mathbf{u} @f$.
-       * @param H Displacement gradient matrix
-       * @returns Reference to this for chaining
-       */
       KinematicState& setDisplacementGradient(const Math::SpatialMatrix<Real>& H)
-      {
-        updateKinematics(H);
-        return *this;
-      }
-
-      /// @brief Gets the spatial dimension.
-      size_t getDimension() const { return m_d; }
-
-      /// @brief Gets the displacement gradient @f$ \nabla \mathbf{u} @f$.
-      const Math::Matrix<Real>& getDisplacementGradient() const { return m_HDense; }
-
-      /// @brief Gets the deformation gradient @f$ \mathbf{F} = \mathbf{I} + \nabla \mathbf{u} @f$.
-      const Math::Matrix<Real>& getDeformationGradient() const { return m_FDense; }
-
-      /// @brief Gets @f$ \mathbf{F}^{-1} @f$.
-      const Math::Matrix<Real>& getDeformationGradientInverse() const { return m_FinvDense; }
-
-      /// @brief Gets @f$ \mathbf{F}^{-T} @f$.
-      const Math::Matrix<Real>& getDeformationGradientInverseTranspose() const { return m_FinvTDense; }
-
-      /// @brief Gets the right Cauchy-Green tensor @f$ \mathbf{C} = \mathbf{F}^T \mathbf{F} @f$.
-      const Math::Matrix<Real>& getRightCauchyGreenTensor() const { return m_CDense; }
-
-      /// @brief Gets the left Cauchy-Green tensor @f$ \mathbf{b} = \mathbf{F} \mathbf{F}^T @f$.
-      const Math::Matrix<Real>& getLeftCauchyGreenTensor() const { return m_bDense; }
-
-      /// @brief Gets the Jacobian @f$ J = \det(\mathbf{F}) @f$.
-      Real getJacobian() const { return m_J; }
-
-      /// @brief Gets @f$ \ln(J) @f$.
-      Real getLogJacobian() const { return m_logJ; }
-
-    private:
-      size_t m_d;                  ///< Spatial dimension
-
-      Math::SpatialMatrix<Real> m_H;     ///< Displacement gradient
-      Math::SpatialMatrix<Real> m_F;     ///< Deformation gradient
-      Math::SpatialMatrix<Real> m_Finv;  ///< Inverse of deformation gradient
-      Math::SpatialMatrix<Real> m_FinvT; ///< Inverse transpose of deformation gradient
-      Math::SpatialMatrix<Real> m_C;     ///< Right Cauchy-Green tensor
-      Math::SpatialMatrix<Real> m_b;     ///< Left Cauchy-Green tensor
-
-      Math::Matrix<Real> m_HDense;     ///< Dense displacement gradient (API compatibility)
-      Math::Matrix<Real> m_FDense;     ///< Dense deformation gradient (API compatibility)
-      Math::Matrix<Real> m_FinvDense;  ///< Dense inverse deformation gradient (API compatibility)
-      Math::Matrix<Real> m_FinvTDense; ///< Dense inverse transpose deformation gradient (API compatibility)
-      Math::Matrix<Real> m_CDense;     ///< Dense right Cauchy-Green tensor (API compatibility)
-      Math::Matrix<Real> m_bDense;     ///< Dense left Cauchy-Green tensor (API compatibility)
-      Real m_J;                    ///< Jacobian (det F)
-      Real m_logJ;                 ///< log(J)
-
-      static
-      void spatialToDense(Math::Matrix<Real>& dst, const Math::SpatialMatrix<Real>& src)
-      {
-        // Extract the active rows/cols from bounded SpatialMatrix storage into
-        // a dynamic dense matrix for API compatibility.
-        const size_t rows = static_cast<size_t>(src.rows());
-        const size_t cols = static_cast<size_t>(src.cols());
-        dst.resize(rows, cols);
-        dst = src.getData().topLeftCorner(
-          static_cast<Eigen::Index>(rows),
-          static_cast<Eigen::Index>(cols));
-      }
-
-      void syncDenseViews()
-      {
-        // Keep dense views synchronized with internal spatial storage so
-        // existing callers using Math::Matrix<Real> getters remain unchanged.
-        spatialToDense(m_HDense, m_H);
-        spatialToDense(m_FDense, m_F);
-        spatialToDense(m_FinvDense, m_Finv);
-        spatialToDense(m_FinvTDense, m_FinvT);
-        spatialToDense(m_CDense, m_C);
-        spatialToDense(m_bDense, m_b);
-      }
-
-      void updateKinematics(const Math::SpatialMatrix<Real>& H)
       {
         assert(static_cast<size_t>(H.rows()) == m_d);
         assert(static_cast<size_t>(H.cols()) == m_d);
@@ -213,11 +109,49 @@ namespace Rodin::Solid
         // b = F F^T
         m_b = m_F * m_F.transpose();
 
-        syncDenseViews();
-
         // log(J)
         m_logJ = std::log(m_J);
+        return *this;
       }
+
+      /// @brief Gets the spatial dimension.
+      size_t getDimension() const { return m_d; }
+
+      /// @brief Gets the displacement gradient @f$ \nabla \mathbf{u} @f$.
+      const Math::SpatialMatrix<Real>& getDisplacementGradient() const { return m_H; }
+
+      /// @brief Gets the deformation gradient @f$ \mathbf{F} = \mathbf{I} + \nabla \mathbf{u} @f$.
+      const Math::SpatialMatrix<Real>& getDeformationGradient() const { return m_F; }
+
+      /// @brief Gets @f$ \mathbf{F}^{-1} @f$.
+      const Math::SpatialMatrix<Real>& getDeformationGradientInverse() const { return m_Finv; }
+
+      /// @brief Gets @f$ \mathbf{F}^{-T} @f$.
+      const Math::SpatialMatrix<Real>& getDeformationGradientInverseTranspose() const { return m_FinvT; }
+
+      /// @brief Gets the right Cauchy-Green tensor @f$ \mathbf{C} = \mathbf{F}^T \mathbf{F} @f$.
+      const Math::SpatialMatrix<Real>& getRightCauchyGreenTensor() const { return m_C; }
+
+      /// @brief Gets the left Cauchy-Green tensor @f$ \mathbf{b} = \mathbf{F} \mathbf{F}^T @f$.
+      const Math::SpatialMatrix<Real>& getLeftCauchyGreenTensor() const { return m_b; }
+
+      /// @brief Gets the Jacobian @f$ J = \det(\mathbf{F}) @f$.
+      Real getJacobian() const { return m_J; }
+
+      /// @brief Gets @f$ \ln(J) @f$.
+      Real getLogJacobian() const { return m_logJ; }
+
+    private:
+      size_t m_d;                  ///< Spatial dimension
+
+      Math::SpatialMatrix<Real> m_H;     ///< Displacement gradient
+      Math::SpatialMatrix<Real> m_F;     ///< Deformation gradient
+      Math::SpatialMatrix<Real> m_Finv;  ///< Inverse of deformation gradient
+      Math::SpatialMatrix<Real> m_FinvT; ///< Inverse transpose of deformation gradient
+      Math::SpatialMatrix<Real> m_C;     ///< Right Cauchy-Green tensor
+      Math::SpatialMatrix<Real> m_b;     ///< Left Cauchy-Green tensor
+      Real m_J;                    ///< Jacobian (det F)
+      Real m_logJ;                 ///< log(J)
   };
 }
 

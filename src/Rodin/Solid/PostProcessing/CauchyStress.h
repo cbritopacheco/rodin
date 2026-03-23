@@ -21,6 +21,7 @@
 
 #include "Rodin/Types.h"
 #include "Rodin/Math/Matrix.h"
+#include "Rodin/Math/SpatialMatrix.h"
 
 #include "Rodin/Solid/Kinematics/KinematicState.h"
 #include "Rodin/Solid/Constitutive/HyperElasticLaw.h"
@@ -39,7 +40,7 @@ namespace Rodin::Solid
    * law.setCache(cache, state);
    *
    * CauchyStress<NeoHookean> cauchy(law);
-   * Math::Matrix<Real> sigma;
+    * Math::SpatialMatrix<Real> sigma;
    * cauchy.getCauchyStress(sigma, cache, state);
    * @endcode
    *
@@ -70,11 +71,11 @@ namespace Rodin::Solid
        * @param[in] state Current kinematic state
        */
       void getCauchyStress(
-          Math::Matrix<Real>& sigma,
+          Math::SpatialMatrix<Real>& sigma,
           const CacheType& cache,
           const KinematicState& state) const
       {
-        Math::Matrix<Real> P;
+        Math::SpatialMatrix<Real> P;
         m_law.getFirstPiolaKirchhoffStress(P, cache, state);
         const auto& F = state.getDeformationGradient();
         const Real J = state.getJacobian();

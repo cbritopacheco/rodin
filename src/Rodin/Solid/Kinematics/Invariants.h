@@ -27,6 +27,7 @@
 
 #include "Rodin/Types.h"
 #include "Rodin/Math/Matrix.h"
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Math/Vector.h"
 
 #include "KinematicState.h"
@@ -95,7 +96,7 @@ namespace Rodin::Solid
    *
    * ## Usage
    * @code
-   * Math::Vector<Real> fiberDir(2);
+   * Math::SpatialVector<Real> fiberDir(2);
    * fiberDir << 1.0, 0.0;
    * FiberInvariants inv(fiberDir);
    * inv.setState(state);
@@ -109,7 +110,7 @@ namespace Rodin::Solid
        * @brief Constructs fiber invariants for a given fiber direction.
        * @param a0 Unit fiber direction vector @f$ \mathbf{a}_0 @f$
        */
-      FiberInvariants(const Math::Vector<Real>& a0)
+      FiberInvariants(const Math::SpatialVector<Real>& a0)
         : m_a0(a0)
       {}
 
@@ -136,7 +137,7 @@ namespace Rodin::Solid
       Real getFifthInvariant() const { return m_I5; }
 
     private:
-      Math::Vector<Real> m_a0;
+      Math::SpatialVector<Real> m_a0;
       Real m_I4 = 0.0;
       Real m_I5 = 0.0;
   };

@@ -31,6 +31,7 @@
 
 #include "Rodin/Types.h"
 #include "Rodin/Math/Matrix.h"
+#include "Rodin/Math/SpatialMatrix.h"
 
 #include "Rodin/Solid/Kinematics/KinematicState.h"
 
@@ -52,8 +53,8 @@ namespace Rodin::Solid
       /// Precomputed cache for the Saint-Venant-Kirchhoff law.
       struct Cache
       {
-        Math::Matrix<Real> E;  ///< Green-Lagrange strain @f$ \mathbf{E} @f$
-        Math::Matrix<Real> S;  ///< Second Piola-Kirchhoff stress @f$ \mathbf{S} @f$
+        Math::SpatialMatrix<Real> E;  ///< Green-Lagrange strain @f$ \mathbf{E} @f$
+        Math::SpatialMatrix<Real> S;  ///< Second Piola-Kirchhoff stress @f$ \mathbf{S} @f$
         Real trE;              ///< @f$ \operatorname{tr}(\mathbf{E}) @f$
       };
 
@@ -79,10 +80,13 @@ namespace Rodin::Solid
       {
         const auto& C = state.getRightCauchyGreenTensor();
         const size_t d = state.getDimension();
-        const auto I = Math::Matrix<Real>::Identity(d, d);
+        Math::SpatialMatrix<Real> I;
+        I.resize(static_cast<std::uint8_t>(d), static_cast<std::uint8_t>(d));
+        I.setIdentity();
 
         // E = 0.5 (C - I)
-        cache.E = 0.5 * (C - I);
+        // SpatialMatrix does not provide direct matrix subtraction operators.
+        cache.E = 0.5 * C + (-0.5) * I;
         cache.trE = cache.E.trace();
 
         // S = lambda tr(E) I + 2 mu E
@@ -91,12 +95,13 @@ namespace Rodin::Solid
 
       Real getStrainEnergyDensity(const Cache& cache, const KinematicState&) const
       {
+        // SpatialMatrix::dot computes the Frobenius inner product A:B.
         return 0.5 * m_lambda * cache.trE * cache.trE
-             + m_mu * (cache.E.array() * cache.E.array()).sum();
+             + m_mu * cache.E.dot(cache.E);
       }
 
       void getFirstPiolaKirchhoffStress(
-          Math::Matrix<Real>& P,
+          Math::SpatialMatrix<Real>& P,
           const Cache& cache,
           const KinematicState& state) const
       {
@@ -105,20 +110,22 @@ namespace Rodin::Solid
       }
 
       void getMaterialTangent(
-          Math::Matrix<Real>& dP,
+          Math::SpatialMatrix<Real>& dP,
           const Cache& cache,
           const KinematicState& state,
-          const Math::Matrix<Real>& dF) const
+          const Math::SpatialMatrix<Real>& dF) const
       {
         const auto& F = state.getDeformationGradient();
         const size_t d = state.getDimension();
-        const auto I = Math::Matrix<Real>::Identity(d, d);
+        Math::SpatialMatrix<Real> I;
+        I.resize(static_cast<std::uint8_t>(d), static_cast<std::uint8_t>(d));
+        I.setIdentity();
 
         // dE = 0.5 (dF^T F + F^T dF)
-        const Math::Matrix<Real> dE = 0.5 * (dF.transpose() * F + F.transpose() * dF);
+        const Math::SpatialMatrix<Real> dE = 0.5 * (dF.transpose() * F + F.transpose() * dF);
 
         // dS = lambda tr(dE) I + 2 mu dE
-        const Math::Matrix<Real> dS = m_lambda * dE.trace() * I + 2.0 * m_mu * dE;
+        const Math::SpatialMatrix<Real> dS = m_lambda * dE.trace() * I + 2.0 * m_mu * dE;
 
         // dP = dF S + F dS
         dP = dF * cache.S + F * dS;

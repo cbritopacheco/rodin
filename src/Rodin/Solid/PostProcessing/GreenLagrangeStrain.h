@@ -19,6 +19,7 @@
 
 #include "Rodin/Types.h"
 #include "Rodin/Math/Matrix.h"
+#include "Rodin/Math/SpatialMatrix.h"
 
 #include "Rodin/Solid/Kinematics/KinematicState.h"
 
@@ -36,7 +37,7 @@ namespace Rodin::Solid
    * KinematicState state(d);
    * state.setDisplacementGradient(gradU);
    * GreenLagrangeStrain glStrain;
-   * Math::Matrix<Real> E;
+   * Math::SpatialMatrix<Real> E;
    * glStrain.getGreenLagrangeStrain(E, state);
    * @endcode
    */
@@ -50,11 +51,17 @@ namespace Rodin::Solid
        * @param[out] E Output strain tensor
        * @param[in] state Kinematic state
        */
-      void getGreenLagrangeStrain(Math::Matrix<Real>& E, const KinematicState& state) const
+      void getGreenLagrangeStrain(Math::SpatialMatrix<Real>& E, const KinematicState& state) const
       {
         const auto& C = state.getRightCauchyGreenTensor();
         const size_t d = state.getDimension();
-        E = 0.5 * (C - Math::Matrix<Real>::Identity(d, d));
+        E.resize(static_cast<std::uint8_t>(d), static_cast<std::uint8_t>(d));
+        E = C;
+        // SpatialMatrix does not provide direct matrix subtraction operators,
+        // so subtract the identity's diagonal entries before scaling.
+        for (size_t i = 0; i < d; i++)
+          E(static_cast<std::uint8_t>(i), static_cast<std::uint8_t>(i)) -= 1.0;
+        E = 0.5 * E;
       }
   };
 }

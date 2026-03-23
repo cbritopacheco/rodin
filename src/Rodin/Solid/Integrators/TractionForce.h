@@ -24,6 +24,7 @@
 #define RODIN_SOLID_INTEGRATORS_TRACTIONFORCE_H
 
 #include "Rodin/Types.h"
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Math/Vector.h"
 
 namespace Rodin::Solid
@@ -51,7 +52,7 @@ namespace Rodin::Solid
        * @brief Constructs a traction force from a constant vector.
        * @param traction Traction vector @f$ \mathbf{t} @f$
        */
-      TractionForce(const Math::Vector<Real>& traction)
+      TractionForce(const Math::SpatialVector<Real>& traction)
         : m_traction(traction)
       {}
 
@@ -59,17 +60,17 @@ namespace Rodin::Solid
       TractionForce(TractionForce&&) = default;
 
       /// @brief Gets the traction vector.
-      const Math::Vector<Real>& getValue() const { return m_traction; }
+      const Math::SpatialVector<Real>& getValue() const { return m_traction; }
 
       /// @brief Sets the traction vector.
-      TractionForce& setValue(const Math::Vector<Real>& traction)
+      TractionForce& setValue(const Math::SpatialVector<Real>& traction)
       {
         m_traction = traction;
         return *this;
       }
 
     private:
-      Math::Vector<Real> m_traction;
+      Math::SpatialVector<Real> m_traction;
   };
 }
 

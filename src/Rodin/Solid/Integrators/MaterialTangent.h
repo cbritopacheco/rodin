@@ -26,6 +26,7 @@
 
 #include "Rodin/Types.h"
 #include "Rodin/Math/Matrix.h"
+#include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/BilinearFormIntegrator.h"
 #include "Rodin/Variational/TrialFunction.h"
@@ -135,7 +136,8 @@ namespace Rodin::Solid
         }
 
         // Evaluate displacement gradient H from DOF values
-        Math::Matrix<ScalarType> H(vdim, d);
+        Math::SpatialMatrix<ScalarType> H;
+        H.resize(static_cast<std::uint8_t>(vdim), static_cast<std::uint8_t>(d));
         H.setZero();
         for (size_t v = 0; v < nv; ++v)
           for (size_t c = 0; c < vdim; ++c)
@@ -163,13 +165,14 @@ namespace Rodin::Solid
           const size_t comp_tr = tr % vdim;
 
           // Construct dF = e_{comp_tr} ⊗ phys_grad[node_tr]
-          Math::Matrix<ScalarType> dF(vdim, d);
+          Math::SpatialMatrix<ScalarType> dF;
+          dF.resize(static_cast<std::uint8_t>(vdim), static_cast<std::uint8_t>(d));
           dF.setZero();
           for (size_t k = 0; k < d; ++k)
             dF(comp_tr, k) = m_physGrads[node_tr](k);
 
           // Compute material tangent action dP = DP[dF]
-          Math::Matrix<ScalarType> dP;
+          Math::SpatialMatrix<ScalarType> dP;
           m_law.getMaterialTangent(dP, cache, state, dF);
 
           for (size_t te = 0; te < ndof; ++te)

@@ -37,6 +37,7 @@
 
 #include "Rodin/Types.h"
 #include "Rodin/Math/Matrix.h"
+#include "Rodin/Math/SpatialMatrix.h"
 
 #include "Rodin/Solid/Kinematics/KinematicState.h"
 
@@ -95,27 +96,30 @@ namespace Rodin::Solid
       }
 
       void getFirstPiolaKirchhoffStress(
-          Math::Matrix<Real>& P,
+          Math::SpatialMatrix<Real>& P,
           const Cache& cache,
           const KinematicState& state) const
       {
         const auto& F = state.getDeformationGradient();
         const auto& FinvT = state.getDeformationGradientInverseTranspose();
 
-        // P = mu (F - F^{-T}) + lambda ln(J) F^{-T}
-        P = m_mu * (F - FinvT) + m_lambda * cache.logJ * FinvT;
+        // SpatialMatrix does not provide direct matrix subtraction operators.
+        // This algebraic rewrite is exactly equivalent:
+        // Equivalent form:
+        // P = mu * F + (lambda ln(J) - mu) * F^{-T}
+        P = m_mu * F + (m_lambda * cache.logJ - m_mu) * FinvT;
       }
 
       void getMaterialTangent(
-          Math::Matrix<Real>& dP,
+          Math::SpatialMatrix<Real>& dP,
           const Cache& cache,
           const KinematicState& state,
-          const Math::Matrix<Real>& dF) const
+          const Math::SpatialMatrix<Real>& dF) const
       {
         const auto& FinvT = state.getDeformationGradientInverseTranspose();
 
         // Frobenius inner product F^{-T} : dF
-        const Real FinvT_dF = (FinvT.array() * dF.array()).sum();
+        const Real FinvT_dF = FinvT.dot(dF);
 
         // dP = mu dF + lambda (F^{-T} : dF) F^{-T}
         //    + (mu - lambda ln J) F^{-T} dF^T F^{-T}
