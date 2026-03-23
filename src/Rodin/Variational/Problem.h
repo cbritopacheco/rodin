@@ -41,6 +41,24 @@
 #include "ForwardDecls.h"
 #include "ProblemBody.h"
 
+namespace Rodin::FormLanguage
+{
+  template <class LinearSystem>
+  struct Traits<Variational::ProblemBase<LinearSystem>>
+  {
+    using LinearSystemType = LinearSystem;
+  };
+
+  template <class LinearSystem, class TrialFunction, class TestFunction>
+  struct Traits<Variational::Problem<TrialFunction, TestFunction, LinearSystem>>
+  {
+    using LinearSystemType = LinearSystem;
+    using TrialFunctionType = TrialFunction;
+    using TestFunctionType = TestFunction;
+  };
+
+}
+
 namespace Rodin::Variational
 {
   /**
