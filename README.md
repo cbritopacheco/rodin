@@ -35,6 +35,7 @@ New to Rodin? Check out our comprehensive [Getting Started Guide](https://cbrito
 7. [Requirements](#requirements)
 8. [CMake options](#cmake-options)
 9. [Development](#development)
+10. [Gallery](#gallery)
 
 ## Installation
 
@@ -462,3 +463,37 @@ To use the Rodin agent in GitHub Copilot Chat:
 ```
 
 For more information, see [.github/agents/README.md](.github/agents/README.md).
+
+## Gallery
+
+<p align="center">
+  <em>Click on any preview to open the full video or image.</em>
+</p>
+
+### Density Optimization
+
+<table>
+  <tr>
+    <td align="center" width="33%">
+      <a href="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/TemperatureMinimization/TemperatureMinimization.webm">
+        <img src="https://pub-e1956c6ec5174975b6d98b71421e8abb.r2.dev/gallery/TemperatureMinimization/Preview.png" alt="Density Poisson" width="100%">
+      </a>
+      <br />
+      Density optimization for Poisson
+    </td>
+        <td align="center" width="33%">
+      <a href="">
+        <img src="" alt="Placeholder" width="100%">
+      </a>
+      <br />
+      Placeholder
+    </td>
+        <td align="center" width="33%">
+      <a href="">
+        <img src="" alt="Placeholder" width="100%">
+      </a>
+      <br />
+      Placeholder
+    </td>
+  </tr>
+</table>
