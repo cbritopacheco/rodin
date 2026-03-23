@@ -381,8 +381,8 @@ namespace
 
   TEST(ShardMetadata, PathHelpers)
   {
-    EXPECT_EQ(HDF5::shardStatePath(0), "/Shard/Flags/0");
-    EXPECT_EQ(HDF5::shardStatePath(2), "/Shard/Flags/2");
+    EXPECT_EQ(HDF5::shardStatePath(0), "/Shard/State/0");
+    EXPECT_EQ(HDF5::shardStatePath(2), "/Shard/State/2");
     EXPECT_EQ(HDF5::shardPolytopeMapGroupPath(1), "/Shard/PolytopeMap/1");
     EXPECT_EQ(HDF5::shardPolytopeMapLeftPath(3), "/Shard/PolytopeMap/3/Left");
     EXPECT_EQ(HDF5::shardPolytopeMapRightGroupPath(0), "/Shard/PolytopeMap/0/Right");
