@@ -225,6 +225,13 @@ namespace Rodin::Solid
       std::vector<Math::SpatialVector<ScalarType>> m_physGrads;
       Math::Matrix<ScalarType> m_matrix;
   };
+
+  /// CTAD deduction guide for MaterialTangent
+  template <class LawDerived, class S, class TrialFES, class TestFES>
+  MaterialTangent(const LawDerived&,
+                  const Variational::TrialFunction<S, TrialFES>&,
+                  const Variational::TestFunction<TestFES>&)
+    -> MaterialTangent<LawDerived, S, TrialFES>;
 }
 
 #endif

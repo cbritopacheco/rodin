@@ -198,6 +198,11 @@ namespace Rodin::Solid
       std::vector<Math::SpatialVector<ScalarType>> m_physGrads;
       Math::Vector<ScalarType> m_elemVec;
   };
+
+  /// CTAD deduction guide for InternalForce
+  template <class LawDerived, class TestFES>
+  InternalForce(const LawDerived&, const Variational::TestFunction<TestFES>&)
+    -> InternalForce<LawDerived, TestFES>;
 }
 
 #endif
