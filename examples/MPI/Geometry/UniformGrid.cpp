@@ -22,26 +22,30 @@ int main(int argc, char** argv)
   mpi::environment env(argc, argv);
   mpi::communicator world;
 
-  constexpr size_t n = 256;
-  constexpr Geometry::Polytope::Type g = Geometry::Polytope::Type::Triangle;
+  constexpr size_t n = 128;
+  constexpr Geometry::Polytope::Type g = Geometry::Polytope::Type::Tetrahedron;
 
   Context::MPI mpi(env, world);
   auto t0 = std::chrono::high_resolution_clock::now();
-  auto mesh = Mesh<Context::MPI>::UniformGrid(mpi, g, { n, n });
+  auto mesh = Mesh<Context::MPI>::UniformGrid(mpi, g, { n, n, n });
   auto t1 = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed = t1 - t0;
 
-  // if (world.rank() == 0)
-  // {
-  //   Alert::Info()
-  //     << "Generated uniform grid with " << mesh.getVertexCount() << " vertices and "
-  //     << mesh.getCellCount() << " cells in " << elapsed.count() << " seconds."
-  //     << Alert::Raise;
-  // }
+  size_t nv = mesh.getVertexCount();
+  size_t nc = mesh.getCellCount();
 
-  IO::XDMF xdmf("UniformGrid", world.rank(), world.size());
+  if (world.rank() == 0)
+  {
+    Alert::Info()
+      << "Generated uniform grid with " << nv << " vertices and "
+      << nc << " cells in " << elapsed.count() << " seconds."
+      << Alert::Raise;
+  }
+
+  IO::XDMF xdmf(world, "UniformGrid");
   xdmf.grid().setMesh(mesh);
   xdmf.write();
+  xdmf.close();
 
   return 0;
 }

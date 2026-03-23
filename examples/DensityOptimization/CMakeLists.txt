@@ -3,6 +3,4 @@ target_link_libraries(TemperatureMinimization
   PUBLIC
   Rodin::Geometry
   Rodin::Solver
-  Rodin::Variational
-  Rodin::MMG
-  )
+  Rodin::Variational)

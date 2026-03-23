@@ -5,12 +5,6 @@
 
 namespace Rodin::Geometry
 {
-  Shard::Flags const Shard::Flags::None(0b00);
-
-  Shard::Flags const Shard::Flags::Owned(0b01);
-
-  Shard::Flags const Shard::Flags::Ghost(0b10);
-
   const Shard::PolytopeMap& Shard::Builder::getPolytopeMap(size_t d) const
   {
     return m_s2ds[d];
@@ -26,8 +20,7 @@ namespace Rodin::Geometry
     : m_dimension(0),
       m_sdim(0),
       m_mode(Mode::None)
-  {
-  }
+  {}
 
   Shard::Builder& Shard::Builder::initialize(const Mesh<Context>& parent)
   {
@@ -41,14 +34,14 @@ namespace Rodin::Geometry
     m_build.initialize(sdim);
 
     m_s2ds.clear();
-    m_flags.clear();
+    m_state.clear();
     m_owner.clear();
     m_halo.clear();
     m_sidx.clear();
     m_vertices.clear();
 
     m_s2ds.resize(dim + 1);
-    m_flags.resize(dim + 1);
+    m_state.resize(dim + 1);
     m_owner.resize(dim + 1);
     m_halo.resize(dim + 1);
     m_sidx.resize(dim + 1, 0);
@@ -71,13 +64,13 @@ namespace Rodin::Geometry
     m_build.initialize(sdim);
 
     m_s2ds.clear();
-    m_flags.clear();
+    m_state.clear();
     m_owner.clear();
     m_halo.clear();
     m_sidx.clear();
 
     m_s2ds.resize(dimension + 1);
-    m_flags.resize(dimension + 1);
+    m_state.resize(dimension + 1);
     m_owner.resize(dimension + 1);
     m_halo.resize(dimension + 1);
     m_sidx.resize(dimension + 1, 0);
@@ -92,7 +85,7 @@ namespace Rodin::Geometry
   Index Shard::Builder::vertex(
       Index globalIdx,
       const Math::SpatialPoint& x,
-      const Flags& flags)
+      const State& state)
   {
     if (m_mode != Mode::Direct)
     {
@@ -107,11 +100,11 @@ namespace Rodin::Geometry
 
     const Index localIdx = m_sidx[0]++;
     const auto [it, inserted] = vmap.right.emplace(globalIdx, localIdx);
-    (void)it;
+    (void) it;
     assert(inserted);
 
     vmap.left.push_back(globalIdx);
-    m_flags[0].push_back(flags);
+    m_state[0].push_back(state);
 
     m_vertices.push_back(x);
     m_attributes.resize(0, m_sidx[0]);
@@ -125,7 +118,7 @@ namespace Rodin::Geometry
       Index globalIdx,
       Polytope::Type g,
       const IndexArray& vs,
-      const Flags& flags)
+      const State& state)
   {
     if (m_mode != Mode::Direct)
     {
@@ -163,7 +156,7 @@ namespace Rodin::Geometry
     assert(inserted);
 
     map.left.push_back(globalIdx);
-    m_flags[d].push_back(flags);
+    m_state[d].push_back(state);
 
     m_connectivity.polytope(g, vs);
     m_attributes.resize(d, m_sidx[d]);
@@ -233,7 +226,7 @@ namespace Rodin::Geometry
   }
 
   std::pair<Index, Boolean> Shard::Builder::include(
-      const std::pair<size_t, Index>& p, const Flags& flags)
+      const std::pair<size_t, Index>& p, const State& state)
   {
     if (m_mode != Mode::Parent || !m_parent.has_value())
     {
@@ -260,7 +253,7 @@ namespace Rodin::Geometry
         auto attr = parent.getAttribute(0, parentIdx);
         if (attr)
           build.attribute({ 0, childIdx }, *attr);
-        m_flags[0].push_back(flags);
+        m_state[0].push_back(state);
         m_sidx[0] += 1;
       }
       res.first = it->second;
@@ -280,7 +273,7 @@ namespace Rodin::Geometry
         auto attr = parent.getAttribute(d, parentIdx);
         if (attr)
           build.attribute({ d, childIdx }, *attr);
-        m_flags[d].push_back(flags);
+        m_state[d].push_back(state);
         m_sidx[d] += 1;
         for (size_t i = 0; i < static_cast<size_t>(childPolytope.size()); i++)
         {
@@ -384,7 +377,7 @@ namespace Rodin::Geometry
     Shard res;
     res.Parent::operator=(m_build.finalize());
     res.m_s2ds  = std::move(m_s2ds);
-    res.m_flags = std::move(m_flags);
+    res.m_state = std::move(m_state);
     res.m_owner = std::move(m_owner);
     res.m_halo  = std::move(m_halo);
 
@@ -394,7 +387,7 @@ namespace Rodin::Geometry
   Shard::Shard(const Shard& other)
     : Parent(other),
       m_s2ds(other.m_s2ds),
-      m_flags(other.m_flags),
+      m_state(other.m_state),
       m_owner(other.m_owner),
       m_halo(other.m_halo)
   {}
@@ -402,7 +395,7 @@ namespace Rodin::Geometry
   Shard::Shard(Shard&& other)
     : Parent(std::move(other)),
       m_s2ds(std::move(other.m_s2ds)),
-      m_flags(std::move(other.m_flags)),
+      m_state(std::move(other.m_state)),
       m_owner(std::move(other.m_owner)),
       m_halo(std::move(other.m_halo))
   {}
@@ -411,20 +404,31 @@ namespace Rodin::Geometry
   {
     Parent::operator=(std::move(other));
     m_s2ds = std::move(other.m_s2ds);
-    m_flags = std::move(other.m_flags);
+    m_state = std::move(other.m_state);
     m_owner = std::move(other.m_owner);
     m_halo = std::move(other.m_halo);
     return *this;
   }
 
-  bool Shard::isGhost(size_t d, Index idx) const
-  {
-    return m_flags[d][idx] & Shard::Flags::Ghost;
-  }
-
   bool Shard::isOwned(size_t d, Index idx) const
   {
-    return m_flags[d][idx] & Shard::Flags::Owned;
+    return m_state[d][idx] == State::Owned;
+  }
+
+  bool Shard::isShared(size_t d, Index idx) const
+  {
+    return m_state[d][idx] == State::Shared;
+  }
+
+  bool Shard::isGhost(size_t d, Index idx) const
+  {
+    return m_state[d][idx] == State::Ghost;
+  }
+
+  bool Shard::isLocal(size_t d, Index idx) const
+  {
+    const auto s = m_state[d][idx];
+    return s == State::Owned || s == State::Shared;
   }
 
   const UnorderedMap<Index, Index>& Shard::getOwner(size_t d) const
@@ -461,14 +465,14 @@ namespace Rodin::Geometry
     return m_s2ds[d];
   }
 
-  const std::vector<Shard::Flags>& Shard::getFlags(size_t d) const
+  const std::vector<Shard::State>& Shard::getState(size_t d) const
   {
-    return m_flags[d];
+    return m_state[d];
   }
 
-  std::vector<Shard::Flags>& Shard::getFlags(size_t d)
+  std::vector<Shard::State>& Shard::getState(size_t d)
   {
-    return m_flags[d];
+    return m_state[d];
   }
 }
 
