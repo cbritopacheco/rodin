@@ -80,7 +80,7 @@ namespace Rodin::Solid
       /// @brief Gets the bulk modulus @f$ \kappa @f$.
       Real getKappa() const { return m_kappa; }
 
-      void initializeCache(Cache& cache, const KinematicState& state) const
+      void setCache(Cache& cache, const KinematicState& state) const
       {
         const auto& C = state.getRightCauchyGreenTensor();
         const size_t d = state.getDimension();
@@ -97,7 +97,7 @@ namespace Rodin::Solid
         cache.I2bar = cache.Jm4d * cache.I2;
       }
 
-      Real strainEnergyDensity(const Cache& cache, const KinematicState& state) const
+      Real getStrainEnergyDensity(const Cache& cache, const KinematicState& state) const
       {
         const Real dd = static_cast<Real>(state.getDimension());
         return m_c1 * (cache.I1bar - dd)
@@ -105,7 +105,7 @@ namespace Rodin::Solid
              + 0.5 * m_kappa * (cache.J - 1.0) * (cache.J - 1.0);
       }
 
-      void firstPiolaKirchhoffStress(
+      void getFirstPiolaKirchhoffStress(
           Math::Matrix<Real>& P,
           const Cache& cache,
           const KinematicState& state) const
@@ -131,7 +131,7 @@ namespace Rodin::Solid
         P = m_c1 * dI1bar_dF + m_c2 * dI2bar_dF + dJvol_dF;
       }
 
-      void materialTangentAction(
+      void getMaterialTangent(
           Math::Matrix<Real>& dP,
           const Cache& cache,
           const KinematicState& state,

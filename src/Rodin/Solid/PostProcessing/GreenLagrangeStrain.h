@@ -37,7 +37,7 @@ namespace Rodin::Solid
    * state.setDisplacementGradient(gradU).update();
    * GreenLagrangeStrain glStrain;
    * Math::Matrix<Real> E;
-   * glStrain.compute(E, state);
+   * glStrain.getGreenLagrangeStrain(E, state);
    * @endcode
    */
   class GreenLagrangeStrain
@@ -50,7 +50,7 @@ namespace Rodin::Solid
        * @param[out] E Output strain tensor
        * @param[in] state Kinematic state
        */
-      void compute(Math::Matrix<Real>& E, const KinematicState& state) const
+      void getGreenLagrangeStrain(Math::Matrix<Real>& E, const KinematicState& state) const
       {
         const auto& C = state.getRightCauchyGreenTensor();
         const size_t d = state.getDimension();

@@ -36,11 +36,11 @@ namespace Rodin::Solid
    * NeoHookean::Cache cache;
    * KinematicState state(d);
    * state.setDisplacementGradient(gradU).update();
-   * law.initializeCache(cache, state);
+   * law.setCache(cache, state);
    *
    * CauchyStress<NeoHookean> cauchy(law);
    * Math::Matrix<Real> sigma;
-   * cauchy.compute(sigma, cache, state);
+   * cauchy.getCauchyStress(sigma, cache, state);
    * @endcode
    *
    * @tparam LawDerived The hyperelastic law type
@@ -69,13 +69,13 @@ namespace Rodin::Solid
        * @param[in] cache Precomputed law cache
        * @param[in] state Current kinematic state
        */
-      void compute(
+      void getCauchyStress(
           Math::Matrix<Real>& sigma,
           const CacheType& cache,
           const KinematicState& state) const
       {
         Math::Matrix<Real> P;
-        m_law.firstPiolaKirchhoffStress(P, cache, state);
+        m_law.getFirstPiolaKirchhoffStress(P, cache, state);
         const auto& F = state.getDeformationGradient();
         const Real J = state.getJacobian();
         sigma = (1.0 / J) * P * F.transpose();

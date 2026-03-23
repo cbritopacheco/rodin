@@ -11,10 +11,10 @@
  * Provides the CRTP base class for all hyperelastic constitutive laws.
  * Each derived law must provide:
  * - A `Cache` struct for precomputed data
- * - `initializeCache(Cache&, const KinematicState&)` to populate the cache
- * - `firstPiolaKirchhoffStress(SpatialMatrix&, const Cache&, const KinematicState&)`
+ * - `setCache(Cache&, const KinematicState&)` to populate the cache
+ * - `getFirstPiolaKirchhoffStress(SpatialMatrix&, const Cache&, const KinematicState&)`
  *   to compute @f$ \mathbf{P} = \partial W / \partial \mathbf{F} @f$
- * - `materialTangentAction(SpatialMatrix&, const Cache&, const KinematicState&, const SpatialMatrix&)`
+ * - `getMaterialTangent(SpatialMatrix&, const Cache&, const KinematicState&, const SpatialMatrix&)`
  *   to compute @f$ D\mathbf{P}[\delta\mathbf{F}] @f$
  */
 #ifndef RODIN_SOLID_CONSTITUTIVE_HYPERELASTICLAW_H
@@ -34,9 +34,9 @@ namespace Rodin::Solid
    * function @f$ W(\mathbf{F}) @f$ from which all stress measures derive.
    *
    * Each derived class implements:
-   * - **Cache initialization**: Precomputes law-specific data from the kinematic state.
+   * - **Cache setup**: Precomputes law-specific data from the kinematic state.
    * - **First Piola-Kirchhoff stress**: @f$ \mathbf{P} = \frac{\partial W}{\partial \mathbf{F}} @f$
-   * - **Material tangent action**: Directional derivative
+   * - **Material tangent**: Directional derivative
    *   @f$ D\mathbf{P}[\delta\mathbf{F}] = \frac{\partial^2 W}{\partial \mathbf{F}^2} : \delta\mathbf{F} @f$
    *
    * @tparam Derived The derived constitutive law type (CRTP)
@@ -46,14 +46,14 @@ namespace Rodin::Solid
   {
     public:
       /**
-       * @brief Initializes the cache from the kinematic state.
+       * @brief Sets the cache from the kinematic state.
        * @param[out] cache Cache to populate
        * @param[in] state Current kinematic state
        */
       template <class Cache>
-      void initializeCache(Cache& cache, const KinematicState& state) const
+      void setCache(Cache& cache, const KinematicState& state) const
       {
-        static_cast<const Derived&>(*this).initializeCache(cache, state);
+        static_cast<const Derived&>(*this).setCache(cache, state);
       }
 
       /**
@@ -68,16 +68,16 @@ namespace Rodin::Solid
        * @param[in] state Current kinematic state
        */
       template <class Cache>
-      void firstPiolaKirchhoffStress(
+      void getFirstPiolaKirchhoffStress(
           Math::Matrix<Real>& P,
           const Cache& cache,
           const KinematicState& state) const
       {
-        static_cast<const Derived&>(*this).firstPiolaKirchhoffStress(P, cache, state);
+        static_cast<const Derived&>(*this).getFirstPiolaKirchhoffStress(P, cache, state);
       }
 
       /**
-       * @brief Computes the material tangent action on a perturbation.
+       * @brief Computes the material tangent on a perturbation.
        *
        * Evaluates the directional derivative of the first Piola-Kirchhoff
        * stress:
@@ -92,13 +92,13 @@ namespace Rodin::Solid
        * @param[in] dF Perturbation of the deformation gradient
        */
       template <class Cache>
-      void materialTangentAction(
+      void getMaterialTangent(
           Math::Matrix<Real>& dP,
           const Cache& cache,
           const KinematicState& state,
           const Math::Matrix<Real>& dF) const
       {
-        static_cast<const Derived&>(*this).materialTangentAction(dP, cache, state, dF);
+        static_cast<const Derived&>(*this).getMaterialTangent(dP, cache, state, dF);
       }
 
       /**
@@ -113,11 +113,11 @@ namespace Rodin::Solid
        * @returns Strain energy density value
        */
       template <class Cache>
-      Real strainEnergyDensity(
+      Real getStrainEnergyDensity(
           const Cache& cache,
           const KinematicState& state) const
       {
-        return static_cast<const Derived&>(*this).strainEnergyDensity(cache, state);
+        return static_cast<const Derived&>(*this).getStrainEnergyDensity(cache, state);
       }
 
     protected:

@@ -8,6 +8,8 @@
 #include <cmath>
 
 #include <Rodin/Solid.h>
+#include <Rodin/Geometry.h>
+#include <Rodin/Variational.h>
 
 namespace Rodin::Tests::Unit
 {
@@ -163,17 +165,17 @@ namespace Rodin::Tests::Unit
     Math::Matrix<Real> H(2, 2);
     H.setZero();
     state.setDisplacementGradient(H).update();
-    law.initializeCache(cache, state);
+    law.setCache(cache, state);
 
     // At zero deformation, P should be zero
     Math::Matrix<Real> P;
-    law.firstPiolaKirchhoffStress(P, cache, state);
+    law.getFirstPiolaKirchhoffStress(P, cache, state);
     for (int i = 0; i < 2; ++i)
       for (int j = 0; j < 2; ++j)
         EXPECT_NEAR(P(i, j), 0.0, 1e-14);
 
     // Energy should also be zero
-    EXPECT_NEAR(law.strainEnergyDensity(cache, state), 0.0, 1e-14);
+    EXPECT_NEAR(law.getStrainEnergyDensity(cache, state), 0.0, 1e-14);
   }
 
   TEST(Rodin_Solid_NeoHookean, StressSymmetryUnderPureStretch)
@@ -187,10 +189,10 @@ namespace Rodin::Tests::Unit
     H << 0.1, 0.0,
          0.0, 0.1;
     state.setDisplacementGradient(H).update();
-    law.initializeCache(cache, state);
+    law.setCache(cache, state);
 
     Math::Matrix<Real> P;
-    law.firstPiolaKirchhoffStress(P, cache, state);
+    law.getFirstPiolaKirchhoffStress(P, cache, state);
 
     // Under uniform stretch, P should be diagonal
     EXPECT_NEAR(P(0, 1), 0.0, 1e-13);
@@ -211,7 +213,7 @@ namespace Rodin::Tests::Unit
     state.setDisplacementGradient(H).update();
 
     Solid::NeoHookean::Cache cache;
-    law.initializeCache(cache, state);
+    law.setCache(cache, state);
 
     // Test tangent via finite differences
     Math::Matrix<Real> dF(2, 2);
@@ -219,7 +221,7 @@ namespace Rodin::Tests::Unit
           0.1,  0.4;
 
     Math::Matrix<Real> dP_analytical;
-    law.materialTangentAction(dP_analytical, cache, state, dF);
+    law.getMaterialTangent(dP_analytical, cache, state, dF);
 
     // Finite difference approximation
     const Real eps = 1e-7;
@@ -227,12 +229,12 @@ namespace Rodin::Tests::Unit
     Solid::KinematicState state_plus(2);
     state_plus.setDisplacementGradient(H_plus).update();
     Solid::NeoHookean::Cache cache_plus;
-    law.initializeCache(cache_plus, state_plus);
+    law.setCache(cache_plus, state_plus);
     Math::Matrix<Real> P_plus;
-    law.firstPiolaKirchhoffStress(P_plus, cache_plus, state_plus);
+    law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, state_plus);
 
     Math::Matrix<Real> P;
-    law.firstPiolaKirchhoffStress(P, cache, state);
+    law.getFirstPiolaKirchhoffStress(P, cache, state);
 
     Math::Matrix<Real> dP_fd = (P_plus - P) / eps;
 
@@ -255,16 +257,16 @@ namespace Rodin::Tests::Unit
     Math::Matrix<Real> H(2, 2);
     H.setZero();
     state.setDisplacementGradient(H).update();
-    law.initializeCache(cache, state);
+    law.setCache(cache, state);
 
     // At zero deformation, P should be zero (E = 0, S = 0)
     Math::Matrix<Real> P;
-    law.firstPiolaKirchhoffStress(P, cache, state);
+    law.getFirstPiolaKirchhoffStress(P, cache, state);
     for (int i = 0; i < 2; ++i)
       for (int j = 0; j < 2; ++j)
         EXPECT_NEAR(P(i, j), 0.0, 1e-14);
 
-    EXPECT_NEAR(law.strainEnergyDensity(cache, state), 0.0, 1e-14);
+    EXPECT_NEAR(law.getStrainEnergyDensity(cache, state), 0.0, 1e-14);
   }
 
   TEST(Rodin_Solid_SaintVenantKirchhoff, TangentFiniteDifference)
@@ -279,14 +281,14 @@ namespace Rodin::Tests::Unit
     state.setDisplacementGradient(H).update();
 
     Solid::SaintVenantKirchhoff::Cache cache;
-    law.initializeCache(cache, state);
+    law.setCache(cache, state);
 
     Math::Matrix<Real> dF(2, 2);
     dF << 0.3, -0.2,
           0.1,  0.4;
 
     Math::Matrix<Real> dP_analytical;
-    law.materialTangentAction(dP_analytical, cache, state, dF);
+    law.getMaterialTangent(dP_analytical, cache, state, dF);
 
     // Finite difference
     const Real eps = 1e-7;
@@ -294,12 +296,12 @@ namespace Rodin::Tests::Unit
     Solid::KinematicState state_plus(2);
     state_plus.setDisplacementGradient(H_plus).update();
     Solid::SaintVenantKirchhoff::Cache cache_plus;
-    law.initializeCache(cache_plus, state_plus);
+    law.setCache(cache_plus, state_plus);
     Math::Matrix<Real> P_plus;
-    law.firstPiolaKirchhoffStress(P_plus, cache_plus, state_plus);
+    law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, state_plus);
 
     Math::Matrix<Real> P;
-    law.firstPiolaKirchhoffStress(P, cache, state);
+    law.getFirstPiolaKirchhoffStress(P, cache, state);
 
     Math::Matrix<Real> dP_fd = (P_plus - P) / eps;
 
@@ -322,10 +324,10 @@ namespace Rodin::Tests::Unit
     state.setDisplacementGradient(H).update();
 
     Solid::SaintVenantKirchhoff::Cache cache;
-    law.initializeCache(cache, state);
+    law.setCache(cache, state);
 
     Math::Matrix<Real> P;
-    law.firstPiolaKirchhoffStress(P, cache, state);
+    law.getFirstPiolaKirchhoffStress(P, cache, state);
 
     // For infinitesimal strain, P ~ sigma = lambda tr(epsilon) I + 2 mu epsilon
     // where epsilon = 0.5 (H + H^T)
@@ -352,11 +354,11 @@ namespace Rodin::Tests::Unit
     Math::Matrix<Real> H(2, 2);
     H.setZero();
     state.setDisplacementGradient(H).update();
-    law.initializeCache(cache, state);
+    law.setCache(cache, state);
 
     // At zero deformation, P should be zero
     Math::Matrix<Real> P;
-    law.firstPiolaKirchhoffStress(P, cache, state);
+    law.getFirstPiolaKirchhoffStress(P, cache, state);
     for (int i = 0; i < 2; ++i)
       for (int j = 0; j < 2; ++j)
         EXPECT_NEAR(P(i, j), 0.0, 1e-12);
@@ -374,14 +376,14 @@ namespace Rodin::Tests::Unit
     state.setDisplacementGradient(H).update();
 
     Solid::MooneyRivlin::Cache cache;
-    law.initializeCache(cache, state);
+    law.setCache(cache, state);
 
     Math::Matrix<Real> dF(2, 2);
     dF << 0.3, -0.2,
           0.1,  0.4;
 
     Math::Matrix<Real> dP_analytical;
-    law.materialTangentAction(dP_analytical, cache, state, dF);
+    law.getMaterialTangent(dP_analytical, cache, state, dF);
 
     // Finite difference
     const Real eps = 1e-7;
@@ -389,12 +391,12 @@ namespace Rodin::Tests::Unit
     Solid::KinematicState state_plus(2);
     state_plus.setDisplacementGradient(H_plus).update();
     Solid::MooneyRivlin::Cache cache_plus;
-    law.initializeCache(cache_plus, state_plus);
+    law.setCache(cache_plus, state_plus);
     Math::Matrix<Real> P_plus;
-    law.firstPiolaKirchhoffStress(P_plus, cache_plus, state_plus);
+    law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, state_plus);
 
     Math::Matrix<Real> P;
-    law.firstPiolaKirchhoffStress(P, cache, state);
+    law.getFirstPiolaKirchhoffStress(P, cache, state);
 
     Math::Matrix<Real> dP_fd = (P_plus - P) / eps;
 
@@ -451,7 +453,7 @@ namespace Rodin::Tests::Unit
 
     Solid::GreenLagrangeStrain gl;
     Math::Matrix<Real> E;
-    gl.compute(E, state);
+    gl.getGreenLagrangeStrain(E, state);
 
     for (int i = 0; i < 2; ++i)
       for (int j = 0; j < 2; ++j)
@@ -468,7 +470,7 @@ namespace Rodin::Tests::Unit
 
     Solid::GreenLagrangeStrain gl;
     Math::Matrix<Real> E;
-    gl.compute(E, state);
+    gl.getGreenLagrangeStrain(E, state);
 
     // F = [[1.1, 0],[0, 1]], C = [[1.21, 0],[0, 1]]
     // E = 0.5(C - I) = [[0.105, 0],[0, 0]]
@@ -489,11 +491,11 @@ namespace Rodin::Tests::Unit
     H << 0.1, 0.05,
         -0.02, 0.15;
     state.setDisplacementGradient(H).update();
-    law.initializeCache(cache, state);
+    law.setCache(cache, state);
 
     Solid::CauchyStress<Solid::NeoHookean> cauchy(law);
     Math::Matrix<Real> sigma;
-    cauchy.compute(sigma, cache, state);
+    cauchy.getCauchyStress(sigma, cache, state);
 
     // Cauchy stress must be symmetric
     EXPECT_NEAR(sigma(0, 1), sigma(1, 0), 1e-12);
@@ -503,62 +505,62 @@ namespace Rodin::Tests::Unit
   // InternalForce and MaterialTangent tests
   // ========================================================================
 
-  TEST(Rodin_Solid_InternalForce, ConsistencyWithDirectCall)
+  TEST(Rodin_Solid_InternalForce, ZeroDisplacementZeroForce)
   {
+    using namespace Rodin::Geometry;
+    using namespace Rodin::Variational;
+
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {2, 2});
+
+    const size_t vdim = 2;
+    P1 Vh(mesh, vdim);
+    TestFunction v(Vh);
+
     const Real lambda = 2.0, mu = 1.0;
     Solid::NeoHookean law(lambda, mu);
-    Solid::NeoHookean::Cache cache;
 
-    Solid::KinematicState state(2);
-    Math::Matrix<Real> H(2, 2);
-    H << 0.1, 0.05,
-         0.02, 0.15;
-    state.setDisplacementGradient(H).update();
-    law.initializeCache(cache, state);
+    Solid::InternalForce force(law, v);
 
-    // Direct call
-    Math::Matrix<Real> P_direct;
-    law.firstPiolaKirchhoffStress(P_direct, cache, state);
+    Math::Vector<Real> data = Math::Vector<Real>::Zero(Vh.getSize());
+    force.setLinearizationPoint(data);
 
-    // Through InternalForce
-    Solid::InternalForce<Solid::NeoHookean> force(law);
-    Math::Matrix<Real> P_force;
-    force.evaluate(P_force, cache, state);
+    auto cellIt = mesh.getCell(0);
+    force.setPolytope(*cellIt);
 
-    for (int i = 0; i < 2; ++i)
-      for (int j = 0; j < 2; ++j)
-        EXPECT_NEAR(P_direct(i, j), P_force(i, j), 1e-14);
+    const size_t ndof = 3 * vdim;
+    for (size_t i = 0; i < ndof; ++i)
+      EXPECT_NEAR(force.integrate(i), 0.0, 1e-14);
   }
 
-  TEST(Rodin_Solid_MaterialTangent, ConsistencyWithDirectCall)
+  TEST(Rodin_Solid_MaterialTangent, ZeroDisplacementSymmetry)
   {
+    using namespace Rodin::Geometry;
+    using namespace Rodin::Variational;
+
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {2, 2});
+
+    const size_t vdim = 2;
+    P1 Vh(mesh, vdim);
+    TrialFunction u(Vh);
+    TestFunction v(Vh);
+
     const Real lambda = 2.0, mu = 1.0;
     Solid::NeoHookean law(lambda, mu);
-    Solid::NeoHookean::Cache cache;
 
-    Solid::KinematicState state(2);
-    Math::Matrix<Real> H(2, 2);
-    H << 0.1, 0.05,
-         0.02, 0.15;
-    state.setDisplacementGradient(H).update();
-    law.initializeCache(cache, state);
+    Solid::MaterialTangent tangent(law, u, v);
 
-    Math::Matrix<Real> dF(2, 2);
-    dF << 0.3, -0.2,
-          0.1,  0.4;
+    Math::Vector<Real> data = Math::Vector<Real>::Zero(Vh.getSize());
+    tangent.setLinearizationPoint(data);
 
-    // Direct call
-    Math::Matrix<Real> dP_direct;
-    law.materialTangentAction(dP_direct, cache, state, dF);
+    auto cellIt = mesh.getCell(0);
+    tangent.setPolytope(*cellIt);
 
-    // Through MaterialTangent
-    Solid::MaterialTangent<Solid::NeoHookean> tangent(law);
-    Math::Matrix<Real> dP_tangent;
-    tangent.evaluate(dP_tangent, cache, state, dF);
-
-    for (int i = 0; i < 2; ++i)
-      for (int j = 0; j < 2; ++j)
-        EXPECT_NEAR(dP_direct(i, j), dP_tangent(i, j), 1e-14);
+    const size_t ndof = 3 * vdim;
+    for (size_t i = 0; i < ndof; ++i)
+      for (size_t j = 0; j < ndof; ++j)
+        EXPECT_NEAR(tangent.integrate(i, j), tangent.integrate(j, i), 1e-12);
   }
 
   // ========================================================================
@@ -578,7 +580,7 @@ namespace Rodin::Tests::Unit
     state.setDisplacementGradient(H).update();
 
     Solid::NeoHookean::Cache cache;
-    law.initializeCache(cache, state);
+    law.setCache(cache, state);
 
     Math::Matrix<Real> dF(3, 3);
     dF << 0.3, -0.2, 0.1,
@@ -586,7 +588,7 @@ namespace Rodin::Tests::Unit
          -0.05, 0.2, 0.25;
 
     Math::Matrix<Real> dP_analytical;
-    law.materialTangentAction(dP_analytical, cache, state, dF);
+    law.getMaterialTangent(dP_analytical, cache, state, dF);
 
     // Finite difference
     const Real eps = 1e-7;
@@ -594,12 +596,12 @@ namespace Rodin::Tests::Unit
     Solid::KinematicState state_plus(3);
     state_plus.setDisplacementGradient(H_plus).update();
     Solid::NeoHookean::Cache cache_plus;
-    law.initializeCache(cache_plus, state_plus);
+    law.setCache(cache_plus, state_plus);
     Math::Matrix<Real> P_plus;
-    law.firstPiolaKirchhoffStress(P_plus, cache_plus, state_plus);
+    law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, state_plus);
 
     Math::Matrix<Real> P;
-    law.firstPiolaKirchhoffStress(P, cache, state);
+    law.getFirstPiolaKirchhoffStress(P, cache, state);
 
     Math::Matrix<Real> dP_fd = (P_plus - P) / eps;
 
@@ -621,7 +623,7 @@ namespace Rodin::Tests::Unit
     state.setDisplacementGradient(H).update();
 
     Solid::SaintVenantKirchhoff::Cache cache;
-    law.initializeCache(cache, state);
+    law.setCache(cache, state);
 
     Math::Matrix<Real> dF(3, 3);
     dF << 0.3, -0.2, 0.1,
@@ -629,19 +631,19 @@ namespace Rodin::Tests::Unit
          -0.05, 0.2, 0.25;
 
     Math::Matrix<Real> dP_analytical;
-    law.materialTangentAction(dP_analytical, cache, state, dF);
+    law.getMaterialTangent(dP_analytical, cache, state, dF);
 
     const Real eps = 1e-7;
     Math::Matrix<Real> H_plus = H + eps * dF;
     Solid::KinematicState state_plus(3);
     state_plus.setDisplacementGradient(H_plus).update();
     Solid::SaintVenantKirchhoff::Cache cache_plus;
-    law.initializeCache(cache_plus, state_plus);
+    law.setCache(cache_plus, state_plus);
     Math::Matrix<Real> P_plus;
-    law.firstPiolaKirchhoffStress(P_plus, cache_plus, state_plus);
+    law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, state_plus);
 
     Math::Matrix<Real> P;
-    law.firstPiolaKirchhoffStress(P, cache, state);
+    law.getFirstPiolaKirchhoffStress(P, cache, state);
 
     Math::Matrix<Real> dP_fd = (P_plus - P) / eps;
 

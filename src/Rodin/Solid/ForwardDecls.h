@@ -21,6 +21,14 @@ namespace Rodin::Solid
   class HyperElasticLaw;
 
   class Hooke;
+
+  class LinearElasticity;
+
+  template <class LawDerived, class FES>
+  class InternalForce;
+
+  template <class LawDerived, class Solution, class FES>
+  class MaterialTangent;
 }
 
 #endif

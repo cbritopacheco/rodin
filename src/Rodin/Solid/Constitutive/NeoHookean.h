@@ -78,7 +78,7 @@ namespace Rodin::Solid
       /// @brief Gets the shear modulus.
       Real getMu() const { return m_mu; }
 
-      void initializeCache(Cache& cache, const KinematicState& state) const
+      void setCache(Cache& cache, const KinematicState& state) const
       {
         const auto& C = state.getRightCauchyGreenTensor();
         cache.I1 = C.trace();
@@ -86,7 +86,7 @@ namespace Rodin::Solid
         cache.logJ = state.getLogJacobian();
       }
 
-      Real strainEnergyDensity(const Cache& cache, const KinematicState& state) const
+      Real getStrainEnergyDensity(const Cache& cache, const KinematicState& state) const
       {
         const size_t d = state.getDimension();
         return 0.5 * m_mu * (cache.I1 - static_cast<Real>(d))
@@ -94,7 +94,7 @@ namespace Rodin::Solid
              + 0.5 * m_lambda * cache.logJ * cache.logJ;
       }
 
-      void firstPiolaKirchhoffStress(
+      void getFirstPiolaKirchhoffStress(
           Math::Matrix<Real>& P,
           const Cache& cache,
           const KinematicState& state) const
@@ -106,7 +106,7 @@ namespace Rodin::Solid
         P = m_mu * (F - FinvT) + m_lambda * cache.logJ * FinvT;
       }
 
-      void materialTangentAction(
+      void getMaterialTangent(
           Math::Matrix<Real>& dP,
           const Cache& cache,
           const KinematicState& state,
