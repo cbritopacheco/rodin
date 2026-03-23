@@ -171,3 +171,18 @@ gtest_discover_tests(RodinManufacturedLinearElasticity3D
   PROPERTIES
     LABELS slow manufactured
 )
+
+add_executable(RodinManufacturedP1HyperElasticity HyperElasticity.cpp)
+target_link_libraries(RodinManufacturedP1HyperElasticity
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solver
+  Rodin::Solid
+)
+gtest_discover_tests(RodinManufacturedP1HyperElasticity
+  PROPERTIES
+    LABELS manufactured
+)
