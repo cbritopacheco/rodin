@@ -148,7 +148,7 @@ namespace Rodin::Solid
 
         // Compute kinematic state and cache
         KinematicState state(d);
-        state.setDisplacementGradient(H).update();
+        state.setDisplacementGradient(H);
 
         typename LawType::Cache cache;
         m_law.setCache(cache, state);

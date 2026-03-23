@@ -45,7 +45,6 @@ namespace Rodin::Solid
    * @code
    * KinematicState state(d);
    * state.setDisplacementGradient(gradU);
-   * state.update();
    * auto F = state.getDeformationGradient();
    * Real J = state.getJacobian();
    * @endcode
@@ -92,20 +91,7 @@ namespace Rodin::Solid
         assert(static_cast<size_t>(H.rows()) == m_d);
         assert(static_cast<size_t>(H.cols()) == m_d);
         m_H = H;
-        return *this;
-      }
 
-      /**
-       * @brief Updates all derived kinematic quantities from the current
-       * displacement gradient.
-       *
-       * Computes @f$ \mathbf{F}, \mathbf{C}, \mathbf{b}, J @f$ and
-       * the inverse/transpose quantities.
-       *
-       * @returns Reference to this for chaining
-       */
-      KinematicState& update()
-      {
         // F = I + H
         m_F = Math::Matrix<Real>::Identity(m_d, m_d) + m_H;
 

@@ -22,7 +22,7 @@ namespace Rodin::Tests::Unit
     Solid::KinematicState state(2);
     Math::Matrix<Real> H(2, 2);
     H.setZero();
-    state.setDisplacementGradient(H).update();
+    state.setDisplacementGradient(H);
 
     EXPECT_NEAR(state.getJacobian(), 1.0, 1e-14);
     EXPECT_NEAR(state.getLogJacobian(), 0.0, 1e-14);
@@ -44,7 +44,7 @@ namespace Rodin::Tests::Unit
     Math::Matrix<Real> H(2, 2);
     H << 0.0, 0.1,
          0.0, 0.0;
-    state.setDisplacementGradient(H).update();
+    state.setDisplacementGradient(H);
 
     // F = [[1, 0.1], [0, 1]], det(F) = 1
     EXPECT_NEAR(state.getJacobian(), 1.0, 1e-14);
@@ -68,7 +68,7 @@ namespace Rodin::Tests::Unit
     Solid::KinematicState state(3);
     const Real alpha = 0.5;
     Math::Matrix<Real> H = alpha * Math::Matrix<Real>::Identity(3, 3);
-    state.setDisplacementGradient(H).update();
+    state.setDisplacementGradient(H);
 
     // F = (1 + alpha) I, J = (1 + alpha)^3
     const Real expected_J = std::pow(1.0 + alpha, 3);
@@ -82,7 +82,7 @@ namespace Rodin::Tests::Unit
     Math::Matrix<Real> H(2, 2);
     H << 0.1, 0.05,
          -0.02, 0.2;
-    state.setDisplacementGradient(H).update();
+    state.setDisplacementGradient(H);
 
     const auto& F = state.getDeformationGradient();
     const auto& Finv = state.getDeformationGradientInverse();
@@ -103,7 +103,7 @@ namespace Rodin::Tests::Unit
     Solid::KinematicState state(2);
     Math::Matrix<Real> H(2, 2);
     H.setZero();
-    state.setDisplacementGradient(H).update();
+    state.setDisplacementGradient(H);
 
     Solid::IsotropicInvariants inv;
     inv.setState(state);
@@ -119,7 +119,7 @@ namespace Rodin::Tests::Unit
     Solid::KinematicState state(3);
     Math::Matrix<Real> H(3, 3);
     H.setZero();
-    state.setDisplacementGradient(H).update();
+    state.setDisplacementGradient(H);
 
     Solid::IsotropicInvariants inv;
     inv.setState(state);
@@ -136,7 +136,7 @@ namespace Rodin::Tests::Unit
     Math::Matrix<Real> H(2, 2);
     H << 0.2, 0.0,
          0.0, 0.0;
-    state.setDisplacementGradient(H).update();
+    state.setDisplacementGradient(H);
 
     Math::Vector<Real> a0(2);
     a0 << 1.0, 0.0;
@@ -164,7 +164,7 @@ namespace Rodin::Tests::Unit
     Solid::KinematicState state(2);
     Math::Matrix<Real> H(2, 2);
     H.setZero();
-    state.setDisplacementGradient(H).update();
+    state.setDisplacementGradient(H);
     law.setCache(cache, state);
 
     // At zero deformation, P should be zero
@@ -188,7 +188,7 @@ namespace Rodin::Tests::Unit
     Math::Matrix<Real> H(2, 2);
     H << 0.1, 0.0,
          0.0, 0.1;
-    state.setDisplacementGradient(H).update();
+    state.setDisplacementGradient(H);
     law.setCache(cache, state);
 
     Math::Matrix<Real> P;
@@ -210,7 +210,7 @@ namespace Rodin::Tests::Unit
     Math::Matrix<Real> H(2, 2);
     H << 0.1, 0.05,
         -0.02, 0.15;
-    state.setDisplacementGradient(H).update();
+    state.setDisplacementGradient(H);
 
     Solid::NeoHookean::Cache cache;
     law.setCache(cache, state);
@@ -227,7 +227,7 @@ namespace Rodin::Tests::Unit
     const Real eps = 1e-7;
     Math::Matrix<Real> H_plus = H + eps * dF;
     Solid::KinematicState state_plus(2);
-    state_plus.setDisplacementGradient(H_plus).update();
+    state_plus.setDisplacementGradient(H_plus);
     Solid::NeoHookean::Cache cache_plus;
     law.setCache(cache_plus, state_plus);
     Math::Matrix<Real> P_plus;
@@ -256,7 +256,7 @@ namespace Rodin::Tests::Unit
     Solid::KinematicState state(2);
     Math::Matrix<Real> H(2, 2);
     H.setZero();
-    state.setDisplacementGradient(H).update();
+    state.setDisplacementGradient(H);
     law.setCache(cache, state);
 
     // At zero deformation, P should be zero (E = 0, S = 0)
@@ -278,7 +278,7 @@ namespace Rodin::Tests::Unit
     Math::Matrix<Real> H(2, 2);
     H << 0.1, 0.05,
         -0.02, 0.15;
-    state.setDisplacementGradient(H).update();
+    state.setDisplacementGradient(H);
 
     Solid::SaintVenantKirchhoff::Cache cache;
     law.setCache(cache, state);
@@ -294,7 +294,7 @@ namespace Rodin::Tests::Unit
     const Real eps = 1e-7;
     Math::Matrix<Real> H_plus = H + eps * dF;
     Solid::KinematicState state_plus(2);
-    state_plus.setDisplacementGradient(H_plus).update();
+    state_plus.setDisplacementGradient(H_plus);
     Solid::SaintVenantKirchhoff::Cache cache_plus;
     law.setCache(cache_plus, state_plus);
     Math::Matrix<Real> P_plus;
@@ -321,7 +321,7 @@ namespace Rodin::Tests::Unit
     const Real eps = 1e-6;
     H << eps, 0.5 * eps,
          0.5 * eps, 2.0 * eps;
-    state.setDisplacementGradient(H).update();
+    state.setDisplacementGradient(H);
 
     Solid::SaintVenantKirchhoff::Cache cache;
     law.setCache(cache, state);
@@ -353,7 +353,7 @@ namespace Rodin::Tests::Unit
     Solid::KinematicState state(2);
     Math::Matrix<Real> H(2, 2);
     H.setZero();
-    state.setDisplacementGradient(H).update();
+    state.setDisplacementGradient(H);
     law.setCache(cache, state);
 
     // At zero deformation, P should be zero
@@ -373,7 +373,7 @@ namespace Rodin::Tests::Unit
     Math::Matrix<Real> H(2, 2);
     H << 0.1, 0.05,
         -0.02, 0.15;
-    state.setDisplacementGradient(H).update();
+    state.setDisplacementGradient(H);
 
     Solid::MooneyRivlin::Cache cache;
     law.setCache(cache, state);
@@ -389,7 +389,7 @@ namespace Rodin::Tests::Unit
     const Real eps = 1e-7;
     Math::Matrix<Real> H_plus = H + eps * dF;
     Solid::KinematicState state_plus(2);
-    state_plus.setDisplacementGradient(H_plus).update();
+    state_plus.setDisplacementGradient(H_plus);
     Solid::MooneyRivlin::Cache cache_plus;
     law.setCache(cache_plus, state_plus);
     Math::Matrix<Real> P_plus;
@@ -449,7 +449,7 @@ namespace Rodin::Tests::Unit
     Solid::KinematicState state(2);
     Math::Matrix<Real> H(2, 2);
     H.setZero();
-    state.setDisplacementGradient(H).update();
+    state.setDisplacementGradient(H);
 
     Solid::GreenLagrangeStrain gl;
     Math::Matrix<Real> E;
@@ -466,7 +466,7 @@ namespace Rodin::Tests::Unit
     Math::Matrix<Real> H(2, 2);
     H << 0.1, 0.0,
          0.0, 0.0;
-    state.setDisplacementGradient(H).update();
+    state.setDisplacementGradient(H);
 
     Solid::GreenLagrangeStrain gl;
     Math::Matrix<Real> E;
@@ -490,7 +490,7 @@ namespace Rodin::Tests::Unit
     Math::Matrix<Real> H(2, 2);
     H << 0.1, 0.05,
         -0.02, 0.15;
-    state.setDisplacementGradient(H).update();
+    state.setDisplacementGradient(H);
     law.setCache(cache, state);
 
     Solid::CauchyStress<Solid::NeoHookean> cauchy(law);
@@ -577,7 +577,7 @@ namespace Rodin::Tests::Unit
     H << 0.1, 0.05, -0.02,
         -0.02, 0.15, 0.03,
          0.01, -0.01, 0.08;
-    state.setDisplacementGradient(H).update();
+    state.setDisplacementGradient(H);
 
     Solid::NeoHookean::Cache cache;
     law.setCache(cache, state);
@@ -594,7 +594,7 @@ namespace Rodin::Tests::Unit
     const Real eps = 1e-7;
     Math::Matrix<Real> H_plus = H + eps * dF;
     Solid::KinematicState state_plus(3);
-    state_plus.setDisplacementGradient(H_plus).update();
+    state_plus.setDisplacementGradient(H_plus);
     Solid::NeoHookean::Cache cache_plus;
     law.setCache(cache_plus, state_plus);
     Math::Matrix<Real> P_plus;
@@ -620,7 +620,7 @@ namespace Rodin::Tests::Unit
     H << 0.1, 0.05, -0.02,
         -0.02, 0.15, 0.03,
          0.01, -0.01, 0.08;
-    state.setDisplacementGradient(H).update();
+    state.setDisplacementGradient(H);
 
     Solid::SaintVenantKirchhoff::Cache cache;
     law.setCache(cache, state);
@@ -636,7 +636,7 @@ namespace Rodin::Tests::Unit
     const Real eps = 1e-7;
     Math::Matrix<Real> H_plus = H + eps * dF;
     Solid::KinematicState state_plus(3);
-    state_plus.setDisplacementGradient(H_plus).update();
+    state_plus.setDisplacementGradient(H_plus);
     Solid::SaintVenantKirchhoff::Cache cache_plus;
     law.setCache(cache_plus, state_plus);
     Math::Matrix<Real> P_plus;

@@ -34,7 +34,7 @@ namespace Rodin::Solid
    * ## Usage
    * @code
    * KinematicState state(d);
-   * state.setDisplacementGradient(gradU).update();
+   * state.setDisplacementGradient(gradU);
    * GreenLagrangeStrain glStrain;
    * Math::Matrix<Real> E;
    * glStrain.getGreenLagrangeStrain(E, state);
