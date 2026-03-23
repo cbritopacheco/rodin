@@ -148,11 +148,11 @@ using namespace Rodin::Variational;
 static constexpr int Gamma0 = 1, GammaD = 2;
 
 // Optimization parameters
-static constexpr Real ell = 4;
+static constexpr Real ell = 3;
 static constexpr Real mu = 0.01;
-static constexpr Real gmin = 0.0001;
-static constexpr Real gmax = 1;
-static constexpr Real alpha = 0.05;
+static constexpr Real gmin = 1e-3;
+static constexpr Real gmax = 10;
+static constexpr Real alpha = 1e-4;
 static constexpr size_t maxIterations = 1e4;
 static constexpr Real radius = 0.1;
 
