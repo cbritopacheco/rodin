@@ -102,8 +102,9 @@ namespace Rodin::Solid
       {
         assert(static_cast<size_t>(H.rows()) == m_d);
         assert(static_cast<size_t>(H.cols()) == m_d);
-        m_H = H;
-        return setDisplacementGradient(m_H);
+        Math::SpatialMatrix<Real> HSpatial;
+        HSpatial = H;
+        return setDisplacementGradient(HSpatial);
       }
 
       /**
@@ -113,33 +114,7 @@ namespace Rodin::Solid
        */
       KinematicState& setDisplacementGradient(const Math::SpatialMatrix<Real>& H)
       {
-        assert(static_cast<size_t>(H.rows()) == m_d);
-        assert(static_cast<size_t>(H.cols()) == m_d);
-        m_H = H;
-
-        // F = I + H
-        m_F = m_H;
-        for (size_t i = 0; i < m_d; i++)
-          m_F(static_cast<std::uint8_t>(i), static_cast<std::uint8_t>(i)) += 1.0;
-
-        // J = det(F)
-        m_J = m_F.determinant();
-
-        // F^{-1} and F^{-T}
-        m_Finv = m_F.inverse();
-        m_FinvT = m_Finv.transpose();
-
-        // C = F^T F
-        m_C = m_F.transpose() * m_F;
-
-        // b = F F^T
-        m_b = m_F * m_F.transpose();
-
-        syncDenseViews();
-
-        // log(J)
-        m_logJ = std::log(m_J);
-
+        updateKinematics(H);
         return *this;
       }
 
@@ -192,24 +167,56 @@ namespace Rodin::Solid
       static
       void spatialToDense(Math::Matrix<Real>& dst, const Math::SpatialMatrix<Real>& src)
       {
+        // Extract the active rows/cols from bounded SpatialMatrix storage into
+        // a dynamic dense matrix for API compatibility.
         const size_t rows = static_cast<size_t>(src.rows());
         const size_t cols = static_cast<size_t>(src.cols());
         dst.resize(rows, cols);
-        for (size_t i = 0; i < rows; i++)
-        {
-          for (size_t j = 0; j < cols; j++)
-            dst(i, j) = src(static_cast<std::uint8_t>(i), static_cast<std::uint8_t>(j));
-        }
+        dst = src.getData().topLeftCorner(
+          static_cast<Eigen::Index>(rows),
+          static_cast<Eigen::Index>(cols));
       }
 
       void syncDenseViews()
       {
+        // Keep dense views synchronized with internal spatial storage so
+        // existing callers using Math::Matrix<Real> getters remain unchanged.
         spatialToDense(m_HDense, m_H);
         spatialToDense(m_FDense, m_F);
         spatialToDense(m_FinvDense, m_Finv);
         spatialToDense(m_FinvTDense, m_FinvT);
         spatialToDense(m_CDense, m_C);
         spatialToDense(m_bDense, m_b);
+      }
+
+      void updateKinematics(const Math::SpatialMatrix<Real>& H)
+      {
+        assert(static_cast<size_t>(H.rows()) == m_d);
+        assert(static_cast<size_t>(H.cols()) == m_d);
+        m_H = H;
+
+        // F = I + H
+        m_F = m_H;
+        for (size_t i = 0; i < m_d; i++)
+          m_F(static_cast<std::uint8_t>(i), static_cast<std::uint8_t>(i)) += 1.0;
+
+        // J = det(F)
+        m_J = m_F.determinant();
+
+        // F^{-1} and F^{-T}
+        m_Finv = m_F.inverse();
+        m_FinvT = m_Finv.transpose();
+
+        // C = F^T F
+        m_C = m_F.transpose() * m_F;
+
+        // b = F F^T
+        m_b = m_F * m_F.transpose();
+
+        syncDenseViews();
+
+        // log(J)
+        m_logJ = std::log(m_J);
       }
   };
 }
