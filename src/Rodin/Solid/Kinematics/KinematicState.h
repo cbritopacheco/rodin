@@ -60,18 +60,30 @@ namespace Rodin::Solid
         : m_d(d)
       {
         assert(d == 2 || d == 3);
-        m_H.resize(d, d);
+        m_H.resize(static_cast<std::uint8_t>(d), static_cast<std::uint8_t>(d));
         m_H.setZero();
-        m_F.resize(d, d);
+        m_HDense.resize(d, d);
+        m_HDense.setZero();
+        m_F.resize(static_cast<std::uint8_t>(d), static_cast<std::uint8_t>(d));
         m_F.setIdentity();
-        m_Finv.resize(d, d);
+        m_FDense.resize(d, d);
+        m_FDense.setIdentity();
+        m_Finv.resize(static_cast<std::uint8_t>(d), static_cast<std::uint8_t>(d));
         m_Finv.setIdentity();
-        m_FinvT.resize(d, d);
+        m_FinvDense.resize(d, d);
+        m_FinvDense.setIdentity();
+        m_FinvT.resize(static_cast<std::uint8_t>(d), static_cast<std::uint8_t>(d));
         m_FinvT.setIdentity();
-        m_C.resize(d, d);
+        m_FinvTDense.resize(d, d);
+        m_FinvTDense.setIdentity();
+        m_C.resize(static_cast<std::uint8_t>(d), static_cast<std::uint8_t>(d));
         m_C.setIdentity();
-        m_b.resize(d, d);
+        m_CDense.resize(d, d);
+        m_CDense.setIdentity();
+        m_b.resize(static_cast<std::uint8_t>(d), static_cast<std::uint8_t>(d));
         m_b.setIdentity();
+        m_bDense.resize(d, d);
+        m_bDense.setIdentity();
         m_J = 1.0;
         m_logJ = 0.0;
       }
@@ -91,9 +103,24 @@ namespace Rodin::Solid
         assert(static_cast<size_t>(H.rows()) == m_d);
         assert(static_cast<size_t>(H.cols()) == m_d);
         m_H = H;
+        return setDisplacementGradient(m_H);
+      }
+
+      /**
+       * @brief Sets the displacement gradient @f$ \nabla \mathbf{u} @f$.
+       * @param H Displacement gradient matrix
+       * @returns Reference to this for chaining
+       */
+      KinematicState& setDisplacementGradient(const Math::SpatialMatrix<Real>& H)
+      {
+        assert(static_cast<size_t>(H.rows()) == m_d);
+        assert(static_cast<size_t>(H.cols()) == m_d);
+        m_H = H;
 
         // F = I + H
-        m_F = Math::Matrix<Real>::Identity(m_d, m_d) + m_H;
+        m_F = m_H;
+        for (size_t i = 0; i < m_d; i++)
+          m_F(static_cast<std::uint8_t>(i), static_cast<std::uint8_t>(i)) += 1.0;
 
         // J = det(F)
         m_J = m_F.determinant();
@@ -108,6 +135,8 @@ namespace Rodin::Solid
         // b = F F^T
         m_b = m_F * m_F.transpose();
 
+        syncDenseViews();
+
         // log(J)
         m_logJ = std::log(m_J);
 
@@ -118,22 +147,22 @@ namespace Rodin::Solid
       size_t getDimension() const { return m_d; }
 
       /// @brief Gets the displacement gradient @f$ \nabla \mathbf{u} @f$.
-      const Math::Matrix<Real>& getDisplacementGradient() const { return m_H; }
+      const Math::Matrix<Real>& getDisplacementGradient() const { return m_HDense; }
 
       /// @brief Gets the deformation gradient @f$ \mathbf{F} = \mathbf{I} + \nabla \mathbf{u} @f$.
-      const Math::Matrix<Real>& getDeformationGradient() const { return m_F; }
+      const Math::Matrix<Real>& getDeformationGradient() const { return m_FDense; }
 
       /// @brief Gets @f$ \mathbf{F}^{-1} @f$.
-      const Math::Matrix<Real>& getDeformationGradientInverse() const { return m_Finv; }
+      const Math::Matrix<Real>& getDeformationGradientInverse() const { return m_FinvDense; }
 
       /// @brief Gets @f$ \mathbf{F}^{-T} @f$.
-      const Math::Matrix<Real>& getDeformationGradientInverseTranspose() const { return m_FinvT; }
+      const Math::Matrix<Real>& getDeformationGradientInverseTranspose() const { return m_FinvTDense; }
 
       /// @brief Gets the right Cauchy-Green tensor @f$ \mathbf{C} = \mathbf{F}^T \mathbf{F} @f$.
-      const Math::Matrix<Real>& getRightCauchyGreenTensor() const { return m_C; }
+      const Math::Matrix<Real>& getRightCauchyGreenTensor() const { return m_CDense; }
 
       /// @brief Gets the left Cauchy-Green tensor @f$ \mathbf{b} = \mathbf{F} \mathbf{F}^T @f$.
-      const Math::Matrix<Real>& getLeftCauchyGreenTensor() const { return m_b; }
+      const Math::Matrix<Real>& getLeftCauchyGreenTensor() const { return m_bDense; }
 
       /// @brief Gets the Jacobian @f$ J = \det(\mathbf{F}) @f$.
       Real getJacobian() const { return m_J; }
@@ -144,14 +173,44 @@ namespace Rodin::Solid
     private:
       size_t m_d;                  ///< Spatial dimension
 
-      Math::Matrix<Real> m_H;     ///< Displacement gradient
-      Math::Matrix<Real> m_F;     ///< Deformation gradient
-      Math::Matrix<Real> m_Finv;  ///< Inverse of deformation gradient
-      Math::Matrix<Real> m_FinvT; ///< Inverse transpose of deformation gradient
-      Math::Matrix<Real> m_C;     ///< Right Cauchy-Green tensor
-      Math::Matrix<Real> m_b;     ///< Left Cauchy-Green tensor
+      Math::SpatialMatrix<Real> m_H;     ///< Displacement gradient
+      Math::SpatialMatrix<Real> m_F;     ///< Deformation gradient
+      Math::SpatialMatrix<Real> m_Finv;  ///< Inverse of deformation gradient
+      Math::SpatialMatrix<Real> m_FinvT; ///< Inverse transpose of deformation gradient
+      Math::SpatialMatrix<Real> m_C;     ///< Right Cauchy-Green tensor
+      Math::SpatialMatrix<Real> m_b;     ///< Left Cauchy-Green tensor
+
+      Math::Matrix<Real> m_HDense;     ///< Dense displacement gradient (API compatibility)
+      Math::Matrix<Real> m_FDense;     ///< Dense deformation gradient (API compatibility)
+      Math::Matrix<Real> m_FinvDense;  ///< Dense inverse deformation gradient (API compatibility)
+      Math::Matrix<Real> m_FinvTDense; ///< Dense inverse transpose deformation gradient (API compatibility)
+      Math::Matrix<Real> m_CDense;     ///< Dense right Cauchy-Green tensor (API compatibility)
+      Math::Matrix<Real> m_bDense;     ///< Dense left Cauchy-Green tensor (API compatibility)
       Real m_J;                    ///< Jacobian (det F)
       Real m_logJ;                 ///< log(J)
+
+      static
+      void spatialToDense(Math::Matrix<Real>& dst, const Math::SpatialMatrix<Real>& src)
+      {
+        const size_t rows = static_cast<size_t>(src.rows());
+        const size_t cols = static_cast<size_t>(src.cols());
+        dst.resize(rows, cols);
+        for (size_t i = 0; i < rows; i++)
+        {
+          for (size_t j = 0; j < cols; j++)
+            dst(i, j) = src(static_cast<std::uint8_t>(i), static_cast<std::uint8_t>(j));
+        }
+      }
+
+      void syncDenseViews()
+      {
+        spatialToDense(m_HDense, m_H);
+        spatialToDense(m_FDense, m_F);
+        spatialToDense(m_FinvDense, m_Finv);
+        spatialToDense(m_FinvTDense, m_FinvT);
+        spatialToDense(m_CDense, m_C);
+        spatialToDense(m_bDense, m_b);
+      }
   };
 }
 
