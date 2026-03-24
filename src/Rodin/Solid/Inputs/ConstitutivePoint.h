@@ -9,11 +9,11 @@
  * @brief Central constitutive input abstraction for hyperelastic formulations.
  *
  * The ConstitutivePoint bundles all data available at a quadrature point for
- * constitutive evaluation:
+ * constitutive evaluation.  It is built by composition over Geometry::Point,
+ * which provides the geometric evaluation context (reference/physical
+ * coordinates, polytope, Jacobian), while ConstitutivePoint extends it with:
+ *
  * - KinematicState (deformation gradient and derived quantities)
- * - Reference coordinates @f$ \boldsymbol{\xi} @f$ (in the reference element)
- * - Physical coordinates @f$ \mathbf{x} @f$ (in the reference configuration)
- * - Geometry attribute / region id (for heterogeneous materials)
  * - Extensible typed auxiliary data (fiber directions, activation, etc.)
  *
  * This abstraction decouples constitutive laws from the integration scheme
@@ -31,9 +31,11 @@
 #include <typeindex>
 #include <unordered_map>
 #include <cassert>
+#include <functional>
 
 #include "Rodin/Types.h"
 #include "Rodin/Geometry/Types.h"
+#include "Rodin/Geometry/Point.h"
 #include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Math/SpatialMatrix.h"
 
@@ -44,34 +46,63 @@ namespace Rodin::Solid
   /**
    * @brief Central data bundle for constitutive evaluation at a quadrature point.
    *
-   * A ConstitutivePoint gathers all information available at a single
-   * integration point and passes it to constitutive laws.  Laws may inspect
-   * any subset of the data they need (kinematics, coordinates, region id,
-   * or user-attached auxiliary data).
+   * A ConstitutivePoint composes a Geometry::Point (geometric context) with a
+   * KinematicState (deformation measures) and extensible typed auxiliary data.
+   * Constitutive laws receive a ConstitutivePoint and may inspect any subset
+   * of the data they need.
    *
-   * ## Usage
+   * ## Usage (with geometric context, typical in integrators)
    *
    * @code
-   * ConstitutivePoint cp(state);
-   * cp.setReferenceCoordinates(xi);
-   * cp.setPhysicalCoordinates(x);
-   * cp.setRegionId(3);
+   * Geometry::Point pt(polytope, rc);
+   * KinematicState state(d);
+   * state.setDisplacementGradient(H);
+   *
+   * ConstitutivePoint cp(pt, state);
    * cp.setAuxiliaryData<FiberDirection>(fiberDir);
    *
    * law.setCache(cache, cp);
    * law.getFirstPiolaKirchhoffStress(P, cache, cp);
+   * @endcode
+   *
+   * ## Usage (without geometry, for unit testing)
+   *
+   * @code
+   * KinematicState state(2);
+   * state.setDisplacementGradient(H);
+   * ConstitutivePoint cp(state);
    * @endcode
    */
   class ConstitutivePoint
   {
     public:
       /**
-       * @brief Constructs a constitutive point from a kinematic state.
+       * @brief Constructs a constitutive point from a geometric point and kinematic state.
+       *
+       * This is the primary constructor used by integrators.  The Geometry::Point
+       * provides reference/physical coordinates and the polytope (from which
+       * the region id can be queried).
+       *
+       * @param point The geometric evaluation point (reference to a local variable is valid
+       *              as long as the ConstitutivePoint does not outlive it)
        * @param state The kinematic state at this quadrature point
        */
+      explicit ConstitutivePoint(const Geometry::Point& point, const KinematicState& state)
+        : m_point(std::cref(point)),
+          m_state(state)
+      {}
+
+      /**
+       * @brief Constructs a constitutive point from a kinematic state only.
+       *
+       * Use this constructor for unit tests or contexts where geometric
+       * context is not needed.  Coordinate and region queries will assert
+       * if called without a Geometry::Point.
+       *
+       * @param state The kinematic state
+       */
       explicit ConstitutivePoint(const KinematicState& state)
-        : m_state(state),
-          m_regionId(0)
+        : m_state(state)
       {}
 
       ConstitutivePoint(const ConstitutivePoint&) = default;
@@ -82,47 +113,52 @@ namespace Rodin::Solid
       /// @brief Gets the kinematic state.
       const KinematicState& getKinematicState() const { return m_state; }
 
-      /**
-       * @brief Sets the reference (parent element) coordinates @f$ \boldsymbol{\xi} @f$.
-       * @param xi Reference coordinates
-       * @returns Reference to this for chaining
-       */
-      ConstitutivePoint& setReferenceCoordinates(const Math::SpatialVector<Real>& xi)
-      {
-        m_xi = xi;
-        return *this;
-      }
-
-      /// @brief Gets the reference coordinates @f$ \boldsymbol{\xi} @f$.
-      const Math::SpatialVector<Real>& getReferenceCoordinates() const { return m_xi; }
+      /// @brief Checks whether a Geometry::Point is available.
+      bool hasPoint() const { return m_point.has_value(); }
 
       /**
-       * @brief Sets the physical (material) coordinates @f$ \mathbf{x} @f$.
-       * @param x Physical coordinates in the reference configuration
-       * @returns Reference to this for chaining
+       * @brief Gets the underlying Geometry::Point.
+       * @pre hasPoint() must be true.
        */
-      ConstitutivePoint& setPhysicalCoordinates(const Math::SpatialVector<Real>& x)
+      const Geometry::Point& getPoint() const
       {
-        m_x = x;
-        return *this;
+        assert(m_point);
+        return m_point->get();
       }
-
-      /// @brief Gets the physical coordinates @f$ \mathbf{x} @f$.
-      const Math::SpatialVector<Real>& getPhysicalCoordinates() const { return m_x; }
 
       /**
-       * @brief Sets the geometry attribute / region id.
-       * @param id Region identifier (e.g., material region)
-       * @returns Reference to this for chaining
+       * @brief Gets the reference (parent element) coordinates @f$ \boldsymbol{\xi} @f$.
+       *
+       * Delegates to the underlying Geometry::Point.
+       * @pre hasPoint() must be true.
        */
-      ConstitutivePoint& setRegionId(Geometry::Attribute id)
+      const auto& getReferenceCoordinates() const
       {
-        m_regionId = id;
-        return *this;
+        return getPoint().getReferenceCoordinates();
       }
 
-      /// @brief Gets the geometry attribute / region id.
-      Geometry::Attribute getRegionId() const { return m_regionId; }
+      /**
+       * @brief Gets the physical (material) coordinates @f$ \mathbf{x} @f$.
+       *
+       * Delegates to the underlying Geometry::Point.
+       * @pre hasPoint() must be true.
+       */
+      const auto& getPhysicalCoordinates() const
+      {
+        return getPoint().getPhysicalCoordinates();
+      }
+
+      /**
+       * @brief Gets the geometry attribute / region id from the polytope.
+       *
+       * Delegates to the underlying Geometry::Point's polytope.
+       * @pre hasPoint() must be true.
+       * @returns The polytope attribute, or empty if no attribute is set.
+       */
+      Optional<Geometry::Attribute> getRegionId() const
+      {
+        return getPoint().getPolytope().getAttribute();
+      }
 
       /**
        * @brief Stores typed auxiliary data (e.g., fiber direction, activation).
@@ -174,10 +210,8 @@ namespace Rodin::Solid
       }
 
     private:
+      Optional<std::reference_wrapper<const Geometry::Point>> m_point;
       const KinematicState& m_state;
-      Math::SpatialVector<Real> m_xi;
-      Math::SpatialVector<Real> m_x;
-      Geometry::Attribute m_regionId;
       std::unordered_map<std::type_index, std::any> m_aux;
   };
 }

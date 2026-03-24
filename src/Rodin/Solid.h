@@ -31,6 +31,7 @@
 
 // Inputs
 #include "Solid/Inputs/ConstitutivePoint.h"
+#include "Solid/Inputs/InputProvider.h"
 
 // Kinematics
 #include "Solid/Kinematics/KinematicState.h"

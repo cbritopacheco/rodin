@@ -18,9 +18,10 @@
  * where @f$ D\mathbf{P}[\cdot] @f$ denotes the directional derivative
  * of the first Piola-Kirchhoff stress.
  *
- * The integrator is generic: it supports arbitrary finite element spaces
- * and quadrature rules (not limited to P1/centroid).  The constitutive law
- * receives a ConstitutivePoint at each quadrature point.
+ * The integrator is generic: it obtains the finite element basis from the
+ * FE space (not hardcoded to P1), supports arbitrary quadrature rules, and
+ * builds a ConstitutivePoint (composed over Geometry::Point) at each
+ * quadrature point for constitutive evaluation.
  */
 #ifndef RODIN_SOLID_INTEGRATORS_MATERIALTANGENT_H
 #define RODIN_SOLID_INTEGRATORS_MATERIALTANGENT_H
@@ -36,12 +37,12 @@
 #include "Rodin/Variational/BilinearFormIntegrator.h"
 #include "Rodin/Variational/TrialFunction.h"
 #include "Rodin/Variational/TestFunction.h"
-#include "Rodin/Variational/P1/P1Element.h"
 #include "Rodin/QF/GenericPolytopeQuadrature.h"
 #include "Rodin/Geometry/Point.h"
 
 #include "Rodin/Solid/Kinematics/KinematicState.h"
 #include "Rodin/Solid/Inputs/ConstitutivePoint.h"
+#include "Rodin/Solid/Inputs/InputProvider.h"
 #include "Rodin/Solid/Constitutive/HyperElasticLaw.h"
 
 namespace Rodin::Solid
@@ -55,8 +56,12 @@ namespace Rodin::Solid
    *   K^e_{ij} = \int_{K} D\mathbf{P}[\nabla \phi_j] : \nabla \phi_i \, dX
    * @f]
    *
-   * Uses generic quadrature (order 2 by default) and builds a
-   * ConstitutivePoint at each quadrature point for constitutive evaluation.
+   * Obtains the finite element basis from the FE space via
+   * @c getFiniteElement(), supports configurable quadrature order, and
+   * builds a ConstitutivePoint (composed over Geometry::Point) at each
+   * quadrature point for constitutive evaluation.  An optional
+   * InputProvider can inject auxiliary data (fiber directions, activation,
+   * etc.) into the ConstitutivePoint at each quadrature point.
    *
    * @tparam LawDerived The hyperelastic constitutive law type
    * @tparam Solution The solution type of the trial function
@@ -88,7 +93,7 @@ namespace Rodin::Solid
           m_trialfes(u.getFiniteElementSpace()),
           m_testfes(v.getFiniteElementSpace()),
           m_linData(nullptr),
-          m_quadOrder(2)
+          m_quadOrder(0)
       {
         static_assert(std::is_same_v<TrialFES, FES>);
         static_assert(std::is_same_v<TestFES, FES>);
@@ -100,7 +105,8 @@ namespace Rodin::Solid
           m_trialfes(other.m_trialfes),
           m_testfes(other.m_testfes),
           m_linData(other.m_linData),
-          m_quadOrder(other.m_quadOrder)
+          m_quadOrder(other.m_quadOrder),
+          m_inputProvider(other.m_inputProvider)
       {}
 
       /**
@@ -116,12 +122,34 @@ namespace Rodin::Solid
 
       /**
        * @brief Sets the quadrature order.
-       * @param order Polynomial order for exact integration
+       *
+       * When set to 0 (the default), the quadrature order is determined
+       * automatically from the finite element approximation order as
+       * @c 2 * fe.getOrder().
+       *
+       * @param order Polynomial order for exact integration (0 = auto)
        * @returns Reference to this object for chaining
        */
       MaterialTangent& setQuadratureOrder(size_t order)
       {
         m_quadOrder = order;
+        return *this;
+      }
+
+      /**
+       * @brief Sets an input provider for auxiliary constitutive data.
+       *
+       * The provider is called at each quadrature point after the
+       * ConstitutivePoint has been constructed with geometric context and
+       * kinematics, allowing injection of fiber directions, activation
+       * parameters, region-wise material properties, etc.
+       *
+       * @param provider A callable with signature void(ConstitutivePoint&)
+       * @returns Reference to this object for chaining
+       */
+      MaterialTangent& setInputProvider(InputProviderFunction provider)
+      {
+        m_inputProvider = std::move(provider);
         return *this;
       }
 
@@ -136,13 +164,16 @@ namespace Rodin::Solid
         const auto& fes = m_trialfes.get();
         const size_t vdim = fes.getVectorDimension();
 
-        const auto& qf = QF::GenericPolytopeQuadrature::get(m_quadOrder, polytope.getGeometry());
-        const size_t nqp = qf.getSize();
+        // Get element from the FE space (not hardcoded to any element type)
+        const auto& fe = fes.getFiniteElement(d, idx);
+        const size_t ndof = fe.getCount();
 
-        // Get scalar FE for basis gradients (P1 for now, extensible)
-        const Variational::P1Element<ScalarType> fe_scalar(polytope.getGeometry());
-        const size_t nv = fe_scalar.getCount();
-        const size_t ndof = nv * vdim;
+        // Determine effective quadrature order
+        const size_t effectiveOrder = (m_quadOrder > 0)
+          ? m_quadOrder
+          : 2 * fe.getOrder();
+        const auto& qf = QF::GenericPolytopeQuadrature::get(effectiveOrder, polytope.getGeometry());
+        const size_t nqp = qf.getSize();
 
         // Zero element stiffness matrix
         m_matrix.resize(ndof, ndof);
@@ -158,73 +189,59 @@ namespace Rodin::Solid
           const ScalarType distortion = pt.getDistortion();
           const auto& JacInv = pt.getJacobianInverse();
 
-          // Physical gradients at this quadrature point
-          std::vector<Math::SpatialVector<ScalarType>> physGrads(nv);
-          for (size_t v = 0; v < nv; ++v)
+          // Precompute physical Jacobians for each DOF via the FE element.
+          // physJacs[dof] = refJac(dof) * JacInv, where refJac is the
+          // vdim × d reference Jacobian of the basis function.
+          std::vector<Math::SpatialMatrix<ScalarType>> physJacs(ndof);
+          for (size_t dof = 0; dof < ndof; ++dof)
           {
-            Math::SpatialVector<ScalarType> ghat(d_u8);
-            for (size_t k = 0; k < d; ++k)
-              ghat(k) = fe_scalar.getBasis(v).template getDerivative<1>(k)(rc);
-            physGrads[v] = JacInv.transpose() * ghat;
+            Math::SpatialMatrix<ScalarType> refJac = fe.getBasis(dof).getJacobian()(rc);
+            physJacs[dof] = refJac * JacInv;
           }
 
           // Evaluate displacement gradient H from DOF values
           Math::SpatialMatrix<ScalarType> H;
           H.resize(static_cast<std::uint8_t>(vdim), d_u8);
           H.setZero();
-          for (size_t v = 0; v < nv; ++v)
+          for (size_t dof = 0; dof < ndof; ++dof)
+          {
+            const ScalarType u_dof = (*m_linData)(fes.getGlobalIndex({d, idx}, dof));
             for (size_t c = 0; c < vdim; ++c)
-            {
-              const size_t local = v * vdim + c;
-              const ScalarType uc = (*m_linData)(fes.getGlobalIndex({d, idx}, local));
-              for (size_t col = 0; col < d; ++col)
-                H(c, col) += uc * physGrads[v](col);
-            }
+              for (size_t k = 0; k < d; ++k)
+                H(c, k) += u_dof * physJacs[dof](c, k);
+          }
 
-          // Build ConstitutivePoint
+          // Build ConstitutivePoint composed over Geometry::Point
           KinematicState state(d);
           state.setDisplacementGradient(H);
 
-          ConstitutivePoint cp(state);
-          Math::SpatialVector<ScalarType> xiVec(d_u8);
-          Math::SpatialVector<ScalarType> xVec(d_u8);
-          for (size_t k = 0; k < d; ++k)
-          {
-            xiVec(static_cast<std::uint8_t>(k)) = rc(static_cast<std::uint8_t>(k));
-            xVec(static_cast<std::uint8_t>(k)) = pt.getPhysicalCoordinates()(static_cast<std::uint8_t>(k));
-          }
-          cp.setReferenceCoordinates(xiVec);
-          cp.setPhysicalCoordinates(xVec);
-          if (polytope.getAttribute())
-            cp.setRegionId(*polytope.getAttribute());
+          ConstitutivePoint cp(pt, state);
+
+          // Invoke input provider for auxiliary data injection
+          if (m_inputProvider)
+            m_inputProvider(cp);
 
           typename LawType::Cache cache;
           m_law.setCache(cache, cp);
 
-          // Build element stiffness at this quadrature point
+          // Build element stiffness at this quadrature point.
+          // For trial DOF tr, the deformation gradient perturbation dF equals
+          // physJacs[tr] (the physical Jacobian of the basis function).
           for (size_t tr = 0; tr < ndof; ++tr)
           {
-            const size_t node_tr = tr / vdim;
-            const size_t comp_tr = tr % vdim;
-
-            // Construct dF = e_{comp_tr} ⊗ phys_grad[node_tr]
-            Math::SpatialMatrix<ScalarType> dF;
-            dF.resize(static_cast<std::uint8_t>(vdim), d_u8);
-            dF.setZero();
-            for (size_t k = 0; k < d; ++k)
-              dF(comp_tr, k) = physGrads[node_tr](k);
+            const auto& dF = physJacs[tr];
 
             // Compute material tangent action dP = DP[dF]
             Math::SpatialMatrix<ScalarType> dP;
             m_law.getMaterialTangent(dP, cache, cp, dF);
 
+            // K_{te,tr} += wq * distortion * (dP : physJac_te)
             for (size_t te = 0; te < ndof; ++te)
             {
-              const size_t node_te = te / vdim;
-              const size_t comp_te = te % vdim;
               ScalarType val = 0;
-              for (size_t k = 0; k < d; ++k)
-                val += dP(comp_te, k) * physGrads[node_te](k);
+              for (size_t c = 0; c < vdim; ++c)
+                for (size_t k = 0; k < d; ++k)
+                  val += dP(c, k) * physJacs[te](c, k);
               m_matrix(te, tr) += wq * distortion * val;
             }
           }
@@ -263,6 +280,7 @@ namespace Rodin::Solid
       std::reference_wrapper<const FESType> m_testfes;
       const Math::Vector<ScalarType>* m_linData;
       size_t m_quadOrder;
+      InputProviderFunction m_inputProvider;
 
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
       Math::Matrix<ScalarType> m_matrix;
