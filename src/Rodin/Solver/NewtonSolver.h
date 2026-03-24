@@ -104,6 +104,11 @@ namespace Rodin::Solver
             SolutionType>>>
       void solve(GridFunctionType& gf)
       {
+        static_assert(
+          std::is_same_v<
+            typename FormLanguage::Traits<std::decay_t<GridFunctionType>>::DataType,
+            SolutionType>,
+          "GridFunction DataType must match the solver's SolutionType.");
         solve(gf.getData());
       }
 
