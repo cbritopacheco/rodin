@@ -22,7 +22,6 @@
  *
  * Output is written to XDMF for visualization in ParaView.
  */
-#include "Rodin/Math/Vector.h"
 #include <cstddef>
 
 #include <Rodin/Geometry.h>
@@ -198,11 +197,7 @@ int main(int, char**)
     solver.setMaxIterations(50)
           .setAbsoluteTolerance(1e-10)
           .setRelativeTolerance(1e-8);
-    Math::Vector<Real> x;
-    x.resize(u.getSize());
-    x.setZero();
-    solver.solve(x);
-    u.setData(x);
+    solver.solve(u);
     std::cout << "Step " << step << ", time " << t << std::endl;
 
     // ---- Newmark correctors -----------------------------------------------

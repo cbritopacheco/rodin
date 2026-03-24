@@ -82,6 +82,23 @@ namespace Rodin::Solver
        */
       virtual void solve(SolutionType& x) = 0;
 
+      /**
+       * @brief Solve a nonlinear system using a GridFunction as the solution container.
+       *
+       * The GridFunction's internal data vector is used both as the initial
+       * guess and as the storage for the converged solution.  This is
+       * equivalent to calling `solve(gf.getData())`.
+       *
+       * @tparam FES      Finite-element-space type.
+       * @tparam DataType Backend data vector type (must match SolutionType).
+       * @param[in,out] gf  GridFunction holding the initial guess / final solution.
+       */
+      template <class FES, class DataType>
+      void solve(Variational::GridFunction<FES, DataType>& gf)
+      {
+        solve(gf.getData());
+      }
+
     protected:
       ProblemBaseType& getProblem() noexcept
       {
@@ -133,6 +150,8 @@ namespace Rodin::Solver
       using ProblemBaseType = typename Parent::ProblemBaseType;
       using SolutionType = typename Parent::SolutionType;
       using LinearSolverType = LinearSolver;
+
+      using Parent::solve;
 
       /**
        * @brief Constructs a NewtonSolver from a linear solver reference.

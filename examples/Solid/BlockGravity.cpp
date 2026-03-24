@@ -123,7 +123,7 @@ int main(int, char**)
           .setAbsoluteTolerance(1e-10)
           .setRelativeTolerance(1e-8);
 
-    solver.solve(u.getData());
+    solver.solve(u);
 
     xdmf.write(static_cast<Real>(step));
   }

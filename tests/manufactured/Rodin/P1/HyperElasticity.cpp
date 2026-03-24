@@ -76,7 +76,7 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
     newton.setMaxIterations(20)
       .setAbsoluteTolerance(1e-12)
       .setRelativeTolerance(1e-10);
-    newton.solve(uCurrent.getData());
+    newton.solve(uCurrent);
 
     P1 scalar(mesh);
     GridFunction err2(scalar);
