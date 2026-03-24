@@ -9,11 +9,13 @@
 
 #include <cstddef>
 #include <functional>
+#include <type_traits>
 #include <utility>
 
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Alert/Raise.h"
 #include "Rodin/Copyable.h"
+#include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/Math/ForwardDecls.h"
 #include "Rodin/Math/LinearSystem.h"
 #include "Rodin/Types.h"
@@ -86,15 +88,21 @@ namespace Rodin::Solver
        * @brief Solve a nonlinear system using a GridFunction as the solution container.
        *
        * The GridFunction's internal data vector is used both as the initial
-       * guess and as the storage for the converged solution.  This is
-       * equivalent to calling `solve(gf.getData())`.
+       * guess and as the storage for the converged solution.  The backend
+       * data type is inferred from @c FormLanguage::Traits<GridFunctionType>::DataType
+       * and must match the solver's @c SolutionType.
        *
-       * @tparam FES      Finite-element-space type.
-       * @tparam DataType Backend data vector type (must match SolutionType).
+       * This is equivalent to calling @c solve(gf.getData()).
+       *
+       * @tparam GridFunctionType GridFunction type whose Traits must expose DataType.
        * @param[in,out] gf  GridFunction holding the initial guess / final solution.
        */
-      template <class FES, class DataType>
-      void solve(Variational::GridFunction<FES, DataType>& gf)
+      template <class GridFunctionType,
+        class = std::enable_if_t<
+          std::is_same_v<
+            typename FormLanguage::Traits<std::decay_t<GridFunctionType>>::DataType,
+            SolutionType>>>
+      void solve(GridFunctionType& gf)
       {
         solve(gf.getData());
       }
