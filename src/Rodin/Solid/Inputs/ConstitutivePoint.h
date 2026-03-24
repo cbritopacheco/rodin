@@ -83,8 +83,11 @@ namespace Rodin::Solid
        * provides reference/physical coordinates and the polytope (from which
        * the region id can be queried).
        *
-       * @param point The geometric evaluation point (reference to a local variable is valid
-       *              as long as the ConstitutivePoint does not outlive it)
+       * @warning The caller must ensure the Geometry::Point outlives this
+       *          ConstitutivePoint.  Typically both are local variables in
+       *          the same quadrature-point loop.
+       *
+       * @param point The geometric evaluation point
        * @param state The kinematic state at this quadrature point
        */
       explicit ConstitutivePoint(const Geometry::Point& point, const KinematicState& state)
