@@ -51,7 +51,7 @@
 namespace Rodin::Solid
 {
   /**
-   * @brief CRTP base class for input providers.
+   * @brief CRTP base class for inputs.
    *
    * Derived classes implement a `populate(ConstitutivePoint&)` method that
    * injects auxiliary data into the ConstitutivePoint at each quadrature
