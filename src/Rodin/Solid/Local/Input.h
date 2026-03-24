@@ -39,8 +39,8 @@
  * });
  * @endcode
  */
-#ifndef RODIN_SOLID_INPUTS_INPUT_H
-#define RODIN_SOLID_INPUTS_INPUT_H
+#ifndef RODIN_SOLID_LOCAL_INPUT_H
+#define RODIN_SOLID_LOCAL_INPUT_H
 
 #include <functional>
 

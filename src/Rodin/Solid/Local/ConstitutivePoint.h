@@ -28,8 +28,8 @@
  * - Anisotropic materials (fiber direction fields)
  * - Active materials (activation parameters)
  */
-#ifndef RODIN_SOLID_INPUTS_CONSTITUTIVEPOINT_H
-#define RODIN_SOLID_INPUTS_CONSTITUTIVEPOINT_H
+#ifndef RODIN_SOLID_LOCAL_CONSTITUTIVEPOINT_H
+#define RODIN_SOLID_LOCAL_CONSTITUTIVEPOINT_H
 
 #include <any>
 #include <typeindex>

@@ -25,7 +25,7 @@
 #include "Rodin/Math/SpatialMatrix.h"
 
 #include "Rodin/Solid/Kinematics/KinematicState.h"
-#include "Rodin/Solid/Inputs/ConstitutivePoint.h"
+#include "Rodin/Solid/Local/ConstitutivePoint.h"
 
 namespace Rodin::Solid
 {
