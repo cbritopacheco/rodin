@@ -131,6 +131,7 @@ namespace Rodin::Solid
         m_polytope = polytope;
 
         const size_t d = polytope.getDimension();
+        const auto d_u8 = static_cast<std::uint8_t>(d);
         const Index idx = polytope.getIndex();
         const auto& fes = m_trialfes.get();
         const size_t vdim = fes.getVectorDimension();
@@ -161,7 +162,7 @@ namespace Rodin::Solid
           std::vector<Math::SpatialVector<ScalarType>> physGrads(nv);
           for (size_t v = 0; v < nv; ++v)
           {
-            Math::SpatialVector<ScalarType> ghat(static_cast<std::uint8_t>(d));
+            Math::SpatialVector<ScalarType> ghat(d_u8);
             for (size_t k = 0; k < d; ++k)
               ghat(k) = fe_scalar.getBasis(v).template getDerivative<1>(k)(rc);
             physGrads[v] = JacInv.transpose() * ghat;
@@ -169,7 +170,7 @@ namespace Rodin::Solid
 
           // Evaluate displacement gradient H from DOF values
           Math::SpatialMatrix<ScalarType> H;
-          H.resize(static_cast<std::uint8_t>(vdim), static_cast<std::uint8_t>(d));
+          H.resize(static_cast<std::uint8_t>(vdim), d_u8);
           H.setZero();
           for (size_t v = 0; v < nv; ++v)
             for (size_t c = 0; c < vdim; ++c)
@@ -185,8 +186,8 @@ namespace Rodin::Solid
           state.setDisplacementGradient(H);
 
           ConstitutivePoint cp(state);
-          Math::SpatialVector<ScalarType> xiVec(static_cast<std::uint8_t>(d));
-          Math::SpatialVector<ScalarType> xVec(static_cast<std::uint8_t>(d));
+          Math::SpatialVector<ScalarType> xiVec(d_u8);
+          Math::SpatialVector<ScalarType> xVec(d_u8);
           for (size_t k = 0; k < d; ++k)
           {
             xiVec(static_cast<std::uint8_t>(k)) = rc(static_cast<std::uint8_t>(k));
@@ -208,7 +209,7 @@ namespace Rodin::Solid
 
             // Construct dF = e_{comp_tr} ⊗ phys_grad[node_tr]
             Math::SpatialMatrix<ScalarType> dF;
-            dF.resize(static_cast<std::uint8_t>(vdim), static_cast<std::uint8_t>(d));
+            dF.resize(static_cast<std::uint8_t>(vdim), d_u8);
             dF.setZero();
             for (size_t k = 0; k < d; ++k)
               dF(comp_tr, k) = physGrads[node_tr](k);
