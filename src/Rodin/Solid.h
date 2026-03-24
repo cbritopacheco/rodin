@@ -29,6 +29,9 @@
 // Forward declarations
 #include "Solid/ForwardDecls.h"
 
+// Inputs
+#include "Solid/Inputs/ConstitutivePoint.h"
+
 // Kinematics
 #include "Solid/Kinematics/KinematicState.h"
 #include "Solid/Kinematics/Invariants.h"

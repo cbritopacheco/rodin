@@ -17,6 +17,10 @@
  * @f]
  * where @f$ D\mathbf{P}[\cdot] @f$ denotes the directional derivative
  * of the first Piola-Kirchhoff stress.
+ *
+ * The integrator is generic: it supports arbitrary finite element spaces
+ * and quadrature rules (not limited to P1/centroid).  The constitutive law
+ * receives a ConstitutivePoint at each quadrature point.
  */
 #ifndef RODIN_SOLID_INTEGRATORS_MATERIALTANGENT_H
 #define RODIN_SOLID_INTEGRATORS_MATERIALTANGENT_H
@@ -27,15 +31,17 @@
 #include "Rodin/Types.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/SpatialMatrix.h"
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/BilinearFormIntegrator.h"
 #include "Rodin/Variational/TrialFunction.h"
 #include "Rodin/Variational/TestFunction.h"
 #include "Rodin/Variational/P1/P1Element.h"
-#include "Rodin/QF/Centroid.h"
+#include "Rodin/QF/GenericPolytopeQuadrature.h"
 #include "Rodin/Geometry/Point.h"
 
 #include "Rodin/Solid/Kinematics/KinematicState.h"
+#include "Rodin/Solid/Inputs/ConstitutivePoint.h"
 #include "Rodin/Solid/Constitutive/HyperElasticLaw.h"
 
 namespace Rodin::Solid
@@ -48,6 +54,9 @@ namespace Rodin::Solid
    * @f[
    *   K^e_{ij} = \int_{K} D\mathbf{P}[\nabla \phi_j] : \nabla \phi_i \, dX
    * @f]
+   *
+   * Uses generic quadrature (order 2 by default) and builds a
+   * ConstitutivePoint at each quadrature point for constitutive evaluation.
    *
    * @tparam LawDerived The hyperelastic constitutive law type
    * @tparam Solution The solution type of the trial function
@@ -78,7 +87,8 @@ namespace Rodin::Solid
           m_law(law),
           m_trialfes(u.getFiniteElementSpace()),
           m_testfes(v.getFiniteElementSpace()),
-          m_linData(nullptr)
+          m_linData(nullptr),
+          m_quadOrder(2)
       {
         static_assert(std::is_same_v<TrialFES, FES>);
         static_assert(std::is_same_v<TestFES, FES>);
@@ -89,7 +99,8 @@ namespace Rodin::Solid
           m_law(other.m_law),
           m_trialfes(other.m_trialfes),
           m_testfes(other.m_testfes),
-          m_linData(other.m_linData)
+          m_linData(other.m_linData),
+          m_quadOrder(other.m_quadOrder)
       {}
 
       /**
@@ -103,6 +114,17 @@ namespace Rodin::Solid
         return *this;
       }
 
+      /**
+       * @brief Sets the quadrature order.
+       * @param order Polynomial order for exact integration
+       * @returns Reference to this object for chaining
+       */
+      MaterialTangent& setQuadratureOrder(size_t order)
+      {
+        m_quadOrder = order;
+        return *this;
+      }
+
       MaterialTangent& setPolytope(const Geometry::Polytope& polytope) final override
       {
         assert(m_linData);
@@ -113,76 +135,97 @@ namespace Rodin::Solid
         const auto& fes = m_trialfes.get();
         const size_t vdim = fes.getVectorDimension();
 
-        m_qf.emplace(polytope.getGeometry());
-        assert(m_qf->getSize() == 1);
-        m_p.emplace(polytope, m_qf->getPoint(0));
-        m_weight = m_qf->getWeight(0);
-        m_distortion = m_p->getDistortion();
+        const auto& qf = QF::GenericPolytopeQuadrature::get(m_quadOrder, polytope.getGeometry());
+        const size_t nqp = qf.getSize();
 
-        const auto& rc = m_qf->getPoint(0);
-        const auto& JacInv = m_p->getJacobianInverse();
-
-        // Compute physical gradients of scalar P1 basis functions
+        // Get scalar FE for basis gradients (P1 for now, extensible)
         const Variational::P1Element<ScalarType> fe_scalar(polytope.getGeometry());
         const size_t nv = fe_scalar.getCount();
+        const size_t ndof = nv * vdim;
 
-        m_physGrads.resize(nv);
-        for (size_t v = 0; v < nv; ++v)
+        // Zero element stiffness matrix
+        m_matrix.resize(ndof, ndof);
+        m_matrix.setZero();
+
+        // Loop over quadrature points
+        for (size_t q = 0; q < nqp; ++q)
         {
-          Math::SpatialVector<ScalarType> ghat(d);
-          for (size_t k = 0; k < d; ++k)
-            ghat(k) = fe_scalar.getBasis(v).template getDerivative<1>(k)(rc);
-          m_physGrads[v] = JacInv.transpose() * ghat;
-        }
+          const auto& rc = qf.getPoint(q);
+          const ScalarType wq = qf.getWeight(q);
 
-        // Evaluate displacement gradient H from DOF values
-        Math::SpatialMatrix<ScalarType> H;
-        H.resize(static_cast<std::uint8_t>(vdim), static_cast<std::uint8_t>(d));
-        H.setZero();
-        for (size_t v = 0; v < nv; ++v)
-          for (size_t c = 0; c < vdim; ++c)
+          Geometry::Point pt(polytope, rc);
+          const ScalarType distortion = pt.getDistortion();
+          const auto& JacInv = pt.getJacobianInverse();
+
+          // Physical gradients at this quadrature point
+          std::vector<Math::SpatialVector<ScalarType>> physGrads(nv);
+          for (size_t v = 0; v < nv; ++v)
           {
-            const size_t local = v * vdim + c;
-            const ScalarType uc = (*m_linData)(fes.getGlobalIndex({d, idx}, local));
-            for (size_t col = 0; col < d; ++col)
-              H(c, col) += uc * m_physGrads[v](col);
+            Math::SpatialVector<ScalarType> ghat(static_cast<std::uint8_t>(d));
+            for (size_t k = 0; k < d; ++k)
+              ghat(k) = fe_scalar.getBasis(v).template getDerivative<1>(k)(rc);
+            physGrads[v] = JacInv.transpose() * ghat;
           }
 
-        // Compute kinematic state and cache
-        KinematicState state(d);
-        state.setDisplacementGradient(H);
+          // Evaluate displacement gradient H from DOF values
+          Math::SpatialMatrix<ScalarType> H;
+          H.resize(static_cast<std::uint8_t>(vdim), static_cast<std::uint8_t>(d));
+          H.setZero();
+          for (size_t v = 0; v < nv; ++v)
+            for (size_t c = 0; c < vdim; ++c)
+            {
+              const size_t local = v * vdim + c;
+              const ScalarType uc = (*m_linData)(fes.getGlobalIndex({d, idx}, local));
+              for (size_t col = 0; col < d; ++col)
+                H(c, col) += uc * physGrads[v](col);
+            }
 
-        typename LawType::Cache cache;
-        m_law.setCache(cache, state);
+          // Build ConstitutivePoint
+          KinematicState state(d);
+          state.setDisplacementGradient(H);
 
-        // Precompute element stiffness matrix
-        const size_t ndof = nv * vdim;
-        m_matrix.resize(ndof, ndof);
-
-        for (size_t tr = 0; tr < ndof; ++tr)
-        {
-          const size_t node_tr = tr / vdim;
-          const size_t comp_tr = tr % vdim;
-
-          // Construct dF = e_{comp_tr} ⊗ phys_grad[node_tr]
-          Math::SpatialMatrix<ScalarType> dF;
-          dF.resize(static_cast<std::uint8_t>(vdim), static_cast<std::uint8_t>(d));
-          dF.setZero();
+          ConstitutivePoint cp(state);
+          Math::SpatialVector<ScalarType> xiVec(static_cast<std::uint8_t>(d));
+          Math::SpatialVector<ScalarType> xVec(static_cast<std::uint8_t>(d));
           for (size_t k = 0; k < d; ++k)
-            dF(comp_tr, k) = m_physGrads[node_tr](k);
-
-          // Compute material tangent action dP = DP[dF]
-          Math::SpatialMatrix<ScalarType> dP;
-          m_law.getMaterialTangent(dP, cache, state, dF);
-
-          for (size_t te = 0; te < ndof; ++te)
           {
-            const size_t node_te = te / vdim;
-            const size_t comp_te = te % vdim;
-            ScalarType val = 0;
+            xiVec(static_cast<std::uint8_t>(k)) = rc(static_cast<std::uint8_t>(k));
+            xVec(static_cast<std::uint8_t>(k)) = pt.getPhysicalCoordinates()(static_cast<std::uint8_t>(k));
+          }
+          cp.setReferenceCoordinates(xiVec);
+          cp.setPhysicalCoordinates(xVec);
+          if (polytope.getAttribute())
+            cp.setRegionId(*polytope.getAttribute());
+
+          typename LawType::Cache cache;
+          m_law.setCache(cache, cp);
+
+          // Build element stiffness at this quadrature point
+          for (size_t tr = 0; tr < ndof; ++tr)
+          {
+            const size_t node_tr = tr / vdim;
+            const size_t comp_tr = tr % vdim;
+
+            // Construct dF = e_{comp_tr} ⊗ phys_grad[node_tr]
+            Math::SpatialMatrix<ScalarType> dF;
+            dF.resize(static_cast<std::uint8_t>(vdim), static_cast<std::uint8_t>(d));
+            dF.setZero();
             for (size_t k = 0; k < d; ++k)
-              val += dP(comp_te, k) * m_physGrads[node_te](k);
-            m_matrix(te, tr) = val;
+              dF(comp_tr, k) = physGrads[node_tr](k);
+
+            // Compute material tangent action dP = DP[dF]
+            Math::SpatialMatrix<ScalarType> dP;
+            m_law.getMaterialTangent(dP, cache, cp, dF);
+
+            for (size_t te = 0; te < ndof; ++te)
+            {
+              const size_t node_te = te / vdim;
+              const size_t comp_te = te % vdim;
+              ScalarType val = 0;
+              for (size_t k = 0; k < d; ++k)
+                val += dP(comp_te, k) * physGrads[node_te](k);
+              m_matrix(te, tr) += wq * distortion * val;
+            }
           }
         }
 
@@ -191,7 +234,7 @@ namespace Rodin::Solid
 
       ScalarType integrate(size_t tr, size_t te) final override
       {
-        return m_weight * m_distortion * m_matrix(te, tr);
+        return m_matrix(te, tr);
       }
 
       const Geometry::Polytope& getPolytope() const final override
@@ -218,14 +261,9 @@ namespace Rodin::Solid
       std::reference_wrapper<const FESType> m_trialfes;
       std::reference_wrapper<const FESType> m_testfes;
       const Math::Vector<ScalarType>* m_linData;
+      size_t m_quadOrder;
 
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
-      Optional<QF::Centroid> m_qf;
-      Optional<Geometry::Point> m_p;
-
-      ScalarType m_weight;
-      ScalarType m_distortion;
-      std::vector<Math::SpatialVector<ScalarType>> m_physGrads;
       Math::Matrix<ScalarType> m_matrix;
   };
 

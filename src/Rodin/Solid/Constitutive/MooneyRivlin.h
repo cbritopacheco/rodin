@@ -81,8 +81,9 @@ namespace Rodin::Solid
       /// @brief Gets the bulk modulus @f$ \kappa @f$.
       Real getBulkModulus() const { return m_kappa; }
 
-      void setCache(Cache& cache, const KinematicState& state) const
+      void setCache(Cache& cache, const ConstitutivePoint& cp) const
       {
+        const auto& state = cp.getKinematicState();
         const auto& C = state.getRightCauchyGreenTensor();
         const size_t d = state.getDimension();
         const Real dd = static_cast<Real>(d);
@@ -98,9 +99,9 @@ namespace Rodin::Solid
         cache.I2bar = cache.Jm4d * cache.I2;
       }
 
-      Real getStrainEnergyDensity(const Cache& cache, const KinematicState& state) const
+      Real getStrainEnergyDensity(const Cache& cache, const ConstitutivePoint& cp) const
       {
-        const Real dd = static_cast<Real>(state.getDimension());
+        const Real dd = static_cast<Real>(cp.getKinematicState().getDimension());
         return m_c1 * (cache.I1bar - dd)
              + m_c2 * (cache.I2bar - dd)
              + 0.5 * m_kappa * (cache.J - 1.0) * (cache.J - 1.0);
@@ -109,8 +110,9 @@ namespace Rodin::Solid
       void getFirstPiolaKirchhoffStress(
           Math::SpatialMatrix<Real>& P,
           const Cache& cache,
-          const KinematicState& state) const
+          const ConstitutivePoint& cp) const
       {
+        const auto& state = cp.getKinematicState();
         const auto& F = state.getDeformationGradient();
         const auto& FinvT = state.getDeformationGradientInverseTranspose();
         const auto& C = state.getRightCauchyGreenTensor();
@@ -141,9 +143,10 @@ namespace Rodin::Solid
       void getMaterialTangent(
           Math::SpatialMatrix<Real>& dP,
           const Cache& cache,
-          const KinematicState& state,
+          const ConstitutivePoint& cp,
           const Math::SpatialMatrix<Real>& dF) const
       {
+        const auto& state = cp.getKinematicState();
         const auto& F = state.getDeformationGradient();
         const auto& FinvT = state.getDeformationGradientInverseTranspose();
         const auto& C = state.getRightCauchyGreenTensor();

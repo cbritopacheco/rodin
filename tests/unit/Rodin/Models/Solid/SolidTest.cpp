@@ -171,17 +171,18 @@ namespace Rodin::Tests::Unit
     Math::SpatialMatrix<Real> H(2, 2);
     H.setZero();
     state.setDisplacementGradient(H);
-    law.setCache(cache, state);
+    Solid::ConstitutivePoint cp(state);
+    law.setCache(cache, cp);
 
     // At zero deformation, P should be zero
     Math::SpatialMatrix<Real> P;
-    law.getFirstPiolaKirchhoffStress(P, cache, state);
+    law.getFirstPiolaKirchhoffStress(P, cache, cp);
     for (int i = 0; i < 2; ++i)
       for (int j = 0; j < 2; ++j)
         EXPECT_NEAR(P(i, j), 0.0, 1e-14);
 
     // Energy should also be zero
-    EXPECT_NEAR(law.getStrainEnergyDensity(cache, state), 0.0, 1e-14);
+    EXPECT_NEAR(law.getStrainEnergyDensity(cache, cp), 0.0, 1e-14);
   }
 
   TEST(Rodin_Solid_NeoHookean, StressSymmetryUnderPureStretch)
@@ -194,10 +195,11 @@ namespace Rodin::Tests::Unit
     Math::SpatialMatrix<Real> H(2, 2);
     H(0,0)=0.1; H(0,1)=0.0; H(1,0)=0.0; H(1,1)=0.1;
     state.setDisplacementGradient(H);
-    law.setCache(cache, state);
+    Solid::ConstitutivePoint cp(state);
+    law.setCache(cache, cp);
 
     Math::SpatialMatrix<Real> P;
-    law.getFirstPiolaKirchhoffStress(P, cache, state);
+    law.getFirstPiolaKirchhoffStress(P, cache, cp);
 
     // Under uniform stretch, P should be diagonal
     EXPECT_NEAR(P(0, 1), 0.0, 1e-13);
@@ -217,14 +219,15 @@ namespace Rodin::Tests::Unit
     state.setDisplacementGradient(H);
 
     Solid::NeoHookean::Cache cache;
-    law.setCache(cache, state);
+    Solid::ConstitutivePoint cp(state);
+    law.setCache(cache, cp);
 
     // Test tangent via finite differences
     Math::SpatialMatrix<Real> dF(2, 2);
     dF(0,0)=0.3; dF(0,1)=-0.2; dF(1,0)=0.1; dF(1,1)=0.4;
 
     Math::SpatialMatrix<Real> dP_analytical;
-    law.getMaterialTangent(dP_analytical, cache, state, dF);
+    law.getMaterialTangent(dP_analytical, cache, cp, dF);
 
     // Finite difference approximation
     const Real eps = 1e-7;
@@ -232,14 +235,14 @@ namespace Rodin::Tests::Unit
     Solid::KinematicState state_plus(2);
     state_plus.setDisplacementGradient(H_plus);
     Solid::NeoHookean::Cache cache_plus;
-    law.setCache(cache_plus, state_plus);
+    Solid::ConstitutivePoint cp_plus(state_plus);
+    law.setCache(cache_plus, cp_plus);
     Math::SpatialMatrix<Real> P_plus;
-    law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, state_plus);
+    law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, cp_plus);
 
     Math::SpatialMatrix<Real> P;
-    law.getFirstPiolaKirchhoffStress(P, cache, state);
+    law.getFirstPiolaKirchhoffStress(P, cache, cp);
 
-    // SpatialMatrix does not implement direct matrix subtraction.
     Math::SpatialMatrix<Real> dP_fd = (1.0 / eps) * P_plus + (-1.0 / eps) * P;
 
     for (int i = 0; i < 2; ++i)
@@ -261,16 +264,17 @@ namespace Rodin::Tests::Unit
     Math::SpatialMatrix<Real> H(2, 2);
     H.setZero();
     state.setDisplacementGradient(H);
-    law.setCache(cache, state);
+    Solid::ConstitutivePoint cp(state);
+    law.setCache(cache, cp);
 
     // At zero deformation, P should be zero (E = 0, S = 0)
     Math::SpatialMatrix<Real> P;
-    law.getFirstPiolaKirchhoffStress(P, cache, state);
+    law.getFirstPiolaKirchhoffStress(P, cache, cp);
     for (int i = 0; i < 2; ++i)
       for (int j = 0; j < 2; ++j)
         EXPECT_NEAR(P(i, j), 0.0, 1e-14);
 
-    EXPECT_NEAR(law.getStrainEnergyDensity(cache, state), 0.0, 1e-14);
+    EXPECT_NEAR(law.getStrainEnergyDensity(cache, cp), 0.0, 1e-14);
   }
 
   TEST(Rodin_Solid_SaintVenantKirchhoff, TangentFiniteDifference)
@@ -284,13 +288,14 @@ namespace Rodin::Tests::Unit
     state.setDisplacementGradient(H);
 
     Solid::SaintVenantKirchhoff::Cache cache;
-    law.setCache(cache, state);
+    Solid::ConstitutivePoint cp(state);
+    law.setCache(cache, cp);
 
     Math::SpatialMatrix<Real> dF(2, 2);
     dF(0,0)=0.3; dF(0,1)=-0.2; dF(1,0)=0.1; dF(1,1)=0.4;
 
     Math::SpatialMatrix<Real> dP_analytical;
-    law.getMaterialTangent(dP_analytical, cache, state, dF);
+    law.getMaterialTangent(dP_analytical, cache, cp, dF);
 
     // Finite difference
     const Real eps = 1e-7;
@@ -298,14 +303,14 @@ namespace Rodin::Tests::Unit
     Solid::KinematicState state_plus(2);
     state_plus.setDisplacementGradient(H_plus);
     Solid::SaintVenantKirchhoff::Cache cache_plus;
-    law.setCache(cache_plus, state_plus);
+    Solid::ConstitutivePoint cp_plus(state_plus);
+    law.setCache(cache_plus, cp_plus);
     Math::SpatialMatrix<Real> P_plus;
-    law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, state_plus);
+    law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, cp_plus);
 
     Math::SpatialMatrix<Real> P;
-    law.getFirstPiolaKirchhoffStress(P, cache, state);
+    law.getFirstPiolaKirchhoffStress(P, cache, cp);
 
-    // SpatialMatrix does not implement direct matrix subtraction.
     Math::SpatialMatrix<Real> dP_fd = (1.0 / eps) * P_plus + (-1.0 / eps) * P;
 
     for (int i = 0; i < 2; ++i)
@@ -326,10 +331,11 @@ namespace Rodin::Tests::Unit
     state.setDisplacementGradient(H);
 
     Solid::SaintVenantKirchhoff::Cache cache;
-    law.setCache(cache, state);
+    Solid::ConstitutivePoint cp(state);
+    law.setCache(cache, cp);
 
     Math::SpatialMatrix<Real> P;
-    law.getFirstPiolaKirchhoffStress(P, cache, state);
+    law.getFirstPiolaKirchhoffStress(P, cache, cp);
 
     // For infinitesimal strain, P ~ sigma = lambda tr(epsilon) I + 2 mu epsilon
     // where epsilon = 0.5 (H + H^T)
@@ -356,11 +362,12 @@ namespace Rodin::Tests::Unit
     Math::SpatialMatrix<Real> H(2, 2);
     H.setZero();
     state.setDisplacementGradient(H);
-    law.setCache(cache, state);
+    Solid::ConstitutivePoint cp(state);
+    law.setCache(cache, cp);
 
     // At zero deformation, P should be zero
     Math::SpatialMatrix<Real> P;
-    law.getFirstPiolaKirchhoffStress(P, cache, state);
+    law.getFirstPiolaKirchhoffStress(P, cache, cp);
     for (int i = 0; i < 2; ++i)
       for (int j = 0; j < 2; ++j)
         EXPECT_NEAR(P(i, j), 0.0, 1e-12);
@@ -377,13 +384,14 @@ namespace Rodin::Tests::Unit
     state.setDisplacementGradient(H);
 
     Solid::MooneyRivlin::Cache cache;
-    law.setCache(cache, state);
+    Solid::ConstitutivePoint cp(state);
+    law.setCache(cache, cp);
 
     Math::SpatialMatrix<Real> dF(2, 2);
     dF(0,0)=0.3; dF(0,1)=-0.2; dF(1,0)=0.1; dF(1,1)=0.4;
 
     Math::SpatialMatrix<Real> dP_analytical;
-    law.getMaterialTangent(dP_analytical, cache, state, dF);
+    law.getMaterialTangent(dP_analytical, cache, cp, dF);
 
     // Finite difference
     const Real eps = 1e-7;
@@ -391,14 +399,14 @@ namespace Rodin::Tests::Unit
     Solid::KinematicState state_plus(2);
     state_plus.setDisplacementGradient(H_plus);
     Solid::MooneyRivlin::Cache cache_plus;
-    law.setCache(cache_plus, state_plus);
+    Solid::ConstitutivePoint cp_plus(state_plus);
+    law.setCache(cache_plus, cp_plus);
     Math::SpatialMatrix<Real> P_plus;
-    law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, state_plus);
+    law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, cp_plus);
 
     Math::SpatialMatrix<Real> P;
-    law.getFirstPiolaKirchhoffStress(P, cache, state);
+    law.getFirstPiolaKirchhoffStress(P, cache, cp);
 
-    // SpatialMatrix does not implement direct matrix subtraction.
     Math::SpatialMatrix<Real> dP_fd = (1.0 / eps) * P_plus + (-1.0 / eps) * P;
 
     for (int i = 0; i < 2; ++i)
@@ -489,11 +497,12 @@ namespace Rodin::Tests::Unit
     Math::SpatialMatrix<Real> H(2, 2);
     H(0,0)=0.1; H(0,1)=0.05; H(1,0)=-0.02; H(1,1)=0.15;
     state.setDisplacementGradient(H);
-    law.setCache(cache, state);
+    Solid::ConstitutivePoint cp(state);
+    law.setCache(cache, cp);
 
     Solid::CauchyStress<Solid::NeoHookean> cauchy(law);
     Math::SpatialMatrix<Real> sigma;
-    cauchy.getCauchyStress(sigma, cache, state);
+    cauchy.getCauchyStress(sigma, cache, cp);
 
     // Cauchy stress must be symmetric
     EXPECT_NEAR(sigma(0, 1), sigma(1, 0), 1e-12);
@@ -578,7 +587,8 @@ namespace Rodin::Tests::Unit
     state.setDisplacementGradient(H);
 
     Solid::NeoHookean::Cache cache;
-    law.setCache(cache, state);
+    Solid::ConstitutivePoint cp(state);
+    law.setCache(cache, cp);
 
     Math::SpatialMatrix<Real> dF(3, 3);
     dF(0,0)=0.3; dF(0,1)=-0.2; dF(0,2)=0.1;
@@ -586,7 +596,7 @@ namespace Rodin::Tests::Unit
     dF(2,0)=-0.05; dF(2,1)=0.2; dF(2,2)=0.25;
 
     Math::SpatialMatrix<Real> dP_analytical;
-    law.getMaterialTangent(dP_analytical, cache, state, dF);
+    law.getMaterialTangent(dP_analytical, cache, cp, dF);
 
     // Finite difference
     const Real eps = 1e-7;
@@ -594,14 +604,14 @@ namespace Rodin::Tests::Unit
     Solid::KinematicState state_plus(3);
     state_plus.setDisplacementGradient(H_plus);
     Solid::NeoHookean::Cache cache_plus;
-    law.setCache(cache_plus, state_plus);
+    Solid::ConstitutivePoint cp_plus(state_plus);
+    law.setCache(cache_plus, cp_plus);
     Math::SpatialMatrix<Real> P_plus;
-    law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, state_plus);
+    law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, cp_plus);
 
     Math::SpatialMatrix<Real> P;
-    law.getFirstPiolaKirchhoffStress(P, cache, state);
+    law.getFirstPiolaKirchhoffStress(P, cache, cp);
 
-    // SpatialMatrix does not implement direct matrix subtraction.
     Math::SpatialMatrix<Real> dP_fd = (1.0 / eps) * P_plus + (-1.0 / eps) * P;
 
     for (int i = 0; i < 3; ++i)
@@ -622,7 +632,8 @@ namespace Rodin::Tests::Unit
     state.setDisplacementGradient(H);
 
     Solid::SaintVenantKirchhoff::Cache cache;
-    law.setCache(cache, state);
+    Solid::ConstitutivePoint cp(state);
+    law.setCache(cache, cp);
 
     Math::SpatialMatrix<Real> dF(3, 3);
     dF(0,0)=0.3; dF(0,1)=-0.2; dF(0,2)=0.1;
@@ -630,21 +641,21 @@ namespace Rodin::Tests::Unit
     dF(2,0)=-0.05; dF(2,1)=0.2; dF(2,2)=0.25;
 
     Math::SpatialMatrix<Real> dP_analytical;
-    law.getMaterialTangent(dP_analytical, cache, state, dF);
+    law.getMaterialTangent(dP_analytical, cache, cp, dF);
 
     const Real eps = 1e-7;
     Math::SpatialMatrix<Real> H_plus = H + eps * dF;
     Solid::KinematicState state_plus(3);
     state_plus.setDisplacementGradient(H_plus);
     Solid::SaintVenantKirchhoff::Cache cache_plus;
-    law.setCache(cache_plus, state_plus);
+    Solid::ConstitutivePoint cp_plus(state_plus);
+    law.setCache(cache_plus, cp_plus);
     Math::SpatialMatrix<Real> P_plus;
-    law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, state_plus);
+    law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, cp_plus);
 
     Math::SpatialMatrix<Real> P;
-    law.getFirstPiolaKirchhoffStress(P, cache, state);
+    law.getFirstPiolaKirchhoffStress(P, cache, cp);
 
-    // SpatialMatrix does not implement direct matrix subtraction.
     Math::SpatialMatrix<Real> dP_fd = (1.0 / eps) * P_plus + (-1.0 / eps) * P;
 
     for (int i = 0; i < 3; ++i)

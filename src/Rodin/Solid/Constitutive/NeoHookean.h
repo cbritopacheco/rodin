@@ -79,17 +79,18 @@ namespace Rodin::Solid
       /// @brief Gets the shear modulus.
       Real getShearModulus() const { return m_mu; }
 
-      void setCache(Cache& cache, const KinematicState& state) const
+      void setCache(Cache& cache, const ConstitutivePoint& cp) const
       {
+        const auto& state = cp.getKinematicState();
         const auto& C = state.getRightCauchyGreenTensor();
         cache.I1 = C.trace();
         cache.J = state.getJacobian();
         cache.logJ = state.getLogJacobian();
       }
 
-      Real getStrainEnergyDensity(const Cache& cache, const KinematicState& state) const
+      Real getStrainEnergyDensity(const Cache& cache, const ConstitutivePoint& cp) const
       {
-        const size_t d = state.getDimension();
+        const size_t d = cp.getKinematicState().getDimension();
         return 0.5 * m_mu * (cache.I1 - static_cast<Real>(d))
              - m_mu * cache.logJ
              + 0.5 * m_lambda * cache.logJ * cache.logJ;
@@ -98,14 +99,12 @@ namespace Rodin::Solid
       void getFirstPiolaKirchhoffStress(
           Math::SpatialMatrix<Real>& P,
           const Cache& cache,
-          const KinematicState& state) const
+          const ConstitutivePoint& cp) const
       {
+        const auto& state = cp.getKinematicState();
         const auto& F = state.getDeformationGradient();
         const auto& FinvT = state.getDeformationGradientInverseTranspose();
 
-        // SpatialMatrix does not provide direct matrix subtraction operators.
-        // This algebraic rewrite is exactly equivalent:
-        // Equivalent form:
         // P = mu * F + (lambda ln(J) - mu) * F^{-T}
         P = m_mu * F + (m_lambda * cache.logJ - m_mu) * FinvT;
       }
@@ -113,9 +112,10 @@ namespace Rodin::Solid
       void getMaterialTangent(
           Math::SpatialMatrix<Real>& dP,
           const Cache& cache,
-          const KinematicState& state,
+          const ConstitutivePoint& cp,
           const Math::SpatialMatrix<Real>& dF) const
       {
+        const auto& state = cp.getKinematicState();
         const auto& FinvT = state.getDeformationGradientInverseTranspose();
 
         // Frobenius inner product F^{-T} : dF

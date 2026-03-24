@@ -15,6 +15,8 @@ namespace Rodin::Solid
 {
   class KinematicState;
 
+  class ConstitutivePoint;
+
   class IsotropicInvariants;
 
   template <class Derived>

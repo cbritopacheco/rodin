@@ -11,10 +11,10 @@
  * Provides the CRTP base class for all hyperelastic constitutive laws.
  * Each derived law must provide:
  * - A `Cache` struct for precomputed data
- * - `setCache(Cache&, const KinematicState&)` to populate the cache
- * - `getFirstPiolaKirchhoffStress(SpatialMatrix&, const Cache&, const KinematicState&)`
+ * - `setCache(Cache&, const ConstitutivePoint&)` to populate the cache
+ * - `getFirstPiolaKirchhoffStress(SpatialMatrix&, const Cache&, const ConstitutivePoint&)`
  *   to compute @f$ \mathbf{P} = \partial W / \partial \mathbf{F} @f$
- * - `getMaterialTangent(SpatialMatrix&, const Cache&, const KinematicState&, const SpatialMatrix&)`
+ * - `getMaterialTangent(SpatialMatrix&, const Cache&, const ConstitutivePoint&, const SpatialMatrix&)`
  *   to compute @f$ D\mathbf{P}[\delta\mathbf{F}] @f$
  */
 #ifndef RODIN_SOLID_CONSTITUTIVE_HYPERELASTICLAW_H
@@ -25,6 +25,7 @@
 #include "Rodin/Math/SpatialMatrix.h"
 
 #include "Rodin/Solid/Kinematics/KinematicState.h"
+#include "Rodin/Solid/Inputs/ConstitutivePoint.h"
 
 namespace Rodin::Solid
 {
@@ -35,7 +36,7 @@ namespace Rodin::Solid
    * function @f$ W(\mathbf{F}) @f$ from which all stress measures derive.
    *
    * Each derived class implements:
-   * - **Cache setup**: Precomputes law-specific data from the kinematic state.
+   * - **Cache setup**: Precomputes law-specific data from the constitutive point.
    * - **First Piola-Kirchhoff stress**: @f$ \mathbf{P} = \frac{\partial W}{\partial \mathbf{F}} @f$
    * - **Material tangent**: Directional derivative
    *   @f$ D\mathbf{P}[\delta\mathbf{F}] = \frac{\partial^2 W}{\partial \mathbf{F}^2} : \delta\mathbf{F} @f$
@@ -47,14 +48,14 @@ namespace Rodin::Solid
   {
     public:
       /**
-       * @brief Sets the cache from the kinematic state.
+       * @brief Sets the cache from the constitutive point.
        * @param[out] cache Cache to populate
-       * @param[in] state Current kinematic state
+       * @param[in] cp Constitutive point (kinematic state, coordinates, region, etc.)
        */
       template <class Cache>
-      void setCache(Cache& cache, const KinematicState& state) const
+      void setCache(Cache& cache, const ConstitutivePoint& cp) const
       {
-        static_cast<const Derived&>(*this).setCache(cache, state);
+        static_cast<const Derived&>(*this).setCache(cache, cp);
       }
 
       /**
@@ -66,15 +67,15 @@ namespace Rodin::Solid
        *
        * @param[out] P Output stress tensor
        * @param[in] cache Precomputed cache
-       * @param[in] state Current kinematic state
+       * @param[in] cp Constitutive point
        */
       template <class Cache>
       void getFirstPiolaKirchhoffStress(
           Math::SpatialMatrix<Real>& P,
           const Cache& cache,
-          const KinematicState& state) const
+          const ConstitutivePoint& cp) const
       {
-        static_cast<const Derived&>(*this).getFirstPiolaKirchhoffStress(P, cache, state);
+        static_cast<const Derived&>(*this).getFirstPiolaKirchhoffStress(P, cache, cp);
       }
 
       /**
@@ -89,17 +90,17 @@ namespace Rodin::Solid
        *
        * @param[out] dP Output tangent stress increment
        * @param[in] cache Precomputed cache
-       * @param[in] state Current kinematic state
+       * @param[in] cp Constitutive point
        * @param[in] dF Perturbation of the deformation gradient
        */
       template <class Cache>
       void getMaterialTangent(
           Math::SpatialMatrix<Real>& dP,
           const Cache& cache,
-          const KinematicState& state,
+          const ConstitutivePoint& cp,
           const Math::SpatialMatrix<Real>& dF) const
       {
-        static_cast<const Derived&>(*this).getMaterialTangent(dP, cache, state, dF);
+        static_cast<const Derived&>(*this).getMaterialTangent(dP, cache, cp, dF);
       }
 
       /**
@@ -110,15 +111,15 @@ namespace Rodin::Solid
        * @f]
        *
        * @param[in] cache Precomputed cache
-       * @param[in] state Current kinematic state
+       * @param[in] cp Constitutive point
        * @returns Strain energy density value
        */
       template <class Cache>
       Real getStrainEnergyDensity(
           const Cache& cache,
-          const KinematicState& state) const
+          const ConstitutivePoint& cp) const
       {
-        return static_cast<const Derived&>(*this).getStrainEnergyDensity(cache, state);
+        return static_cast<const Derived&>(*this).getStrainEnergyDensity(cache, cp);
       }
 
     protected:
