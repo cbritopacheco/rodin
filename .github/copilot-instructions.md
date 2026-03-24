@@ -108,7 +108,7 @@ Prefer names like:
 - `getShearModulus`
 - `getLameFirstParameter`
 
-Avoid cryptic public names like `P`, `getMu`, `getLambda`, or ambiguous abbreviations unless Rodin already standardizes them internally.
+Avoid cryptic public names like `P`, `getMu`, `getLambda`, or ambiguous abbreviations in new public APIs.
 
 ## How to extend Rodin correctly
 
@@ -154,7 +154,7 @@ Prefer targeted tests during development; broaden scope only after local confide
    ```bash
    cmake --build build -j2
    ```
-4. Run smallest relevant test subset first:
+4. Run the smallest relevant test subset first, using the same `unit` / `manufactured` / `slow` CTest labels used in CI:
    ```bash
    ctest --test-dir build/tests -L unit -LE slow --output-on-failure
    ctest --test-dir build/tests -L manufactured -LE slow --output-on-failure
@@ -195,7 +195,7 @@ Core packages installed in Build/Tests/Benchmarks/Copilot setup workflows:
 - `mpich`
 - `lcov`
 
-Additional test/coverage tooling in some jobs includes `gcc-14 g++-14`.
+The Tests and Coverage workflow jobs additionally install `gcc-14 g++-14`.
 
 ### macOS CI packages
 
