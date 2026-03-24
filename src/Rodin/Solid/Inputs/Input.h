@@ -5,10 +5,10 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 /**
- * @file InputProvider.h
+ * @file Input.h
  * @brief Extensible input injection mechanism for constitutive evaluation.
  *
- * An InputProvider populates a ConstitutivePoint with auxiliary data at each
+ * An Input populates a ConstitutivePoint with auxiliary data at each
  * quadrature point during integration.  This is the injection site for
  * material-specific fields (fiber directions, activation parameters,
  * region-wise material properties, etc.) without hard-coding them into the
@@ -17,32 +17,32 @@
  * ## Usage with CRTP
  *
  * @code
- * struct MyProvider : Solid::InputProvider<MyProvider>
+ * struct MyInput : Solid::Input<MyInput>
  * {
  *   void populate(Solid::ConstitutivePoint& cp) const
  *   {
  *     // e.g., interpolate fiber direction from a GridFunction
  *     struct FiberTag {};
  *     Math::SpatialVector<Real> fiber = ...;
- *     cp.setAuxiliaryData<FiberTag>(fiber);
+ *     cp.set<FiberTag>(fiber);
  *   }
  * };
  *
  * Solid::InternalForce force(law, v);
- * force.setInputProvider(MyProvider{});
+ * force.setInput(MyInput{});
  * @endcode
  *
  * ## Usage with lambda / std::function
  *
  * @code
- * force.setInputProvider([&](Solid::ConstitutivePoint& cp) {
+ * force.setInput([&](Solid::ConstitutivePoint& cp) {
  *   struct ActivationTag {};
- *   cp.setAuxiliaryData<ActivationTag>(activationValue);
+ *   cp.set<ActivationTag>(activationValue);
  * });
  * @endcode
  */
-#ifndef RODIN_SOLID_INPUTS_INPUTPROVIDER_H
-#define RODIN_SOLID_INPUTS_INPUTPROVIDER_H
+#ifndef RODIN_SOLID_INPUTS_INPUT_H
+#define RODIN_SOLID_INPUTS_INPUT_H
 
 #include <functional>
 
@@ -57,10 +57,10 @@ namespace Rodin::Solid
    * injects auxiliary data into the ConstitutivePoint at each quadrature
    * point during assembly.
    *
-   * @tparam Derived The concrete input provider type (CRTP)
+   * @tparam Derived The concrete input type (CRTP)
    */
   template <class Derived>
-  class InputProvider
+  class Input
   {
     public:
       /**
@@ -77,15 +77,15 @@ namespace Rodin::Solid
       }
 
     protected:
-      InputProvider() = default;
-      InputProvider(const InputProvider&) = default;
-      InputProvider(InputProvider&&) = default;
-      InputProvider& operator=(const InputProvider&) = default;
-      InputProvider& operator=(InputProvider&&) = default;
+      Input() = default;
+      Input(const Input&) = default;
+      Input(Input&&) = default;
+      Input& operator=(const Input&) = default;
+      Input& operator=(Input&&) = default;
   };
 
   /// @brief Type-erased callable for input injection into ConstitutivePoint.
-  using InputProviderFunction = std::function<void(ConstitutivePoint&)>;
+  using InputFunction = std::function<void(ConstitutivePoint&)>;
 }
 
 #endif

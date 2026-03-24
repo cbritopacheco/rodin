@@ -59,7 +59,7 @@ namespace Rodin::Solid
    * state.setDisplacementGradient(H);
    *
    * ConstitutivePoint cp(pt, state);
-   * cp.setAuxiliaryData<FiberDirection>(fiberDir);
+   * cp.set<FiberDirection>(fiberDir);
    *
    * law.setCache(cache, cp);
    * law.getFirstPiolaKirchhoffStress(P, cache, cp);
@@ -172,11 +172,11 @@ namespace Rodin::Solid
        *
        * @code
        * struct FiberDirection {};
-       * cp.setAuxiliaryData<FiberDirection>(fiberVec);
+       * cp.set<FiberDirection>(fiberVec);
        * @endcode
        */
       template <class Tag, class T>
-      ConstitutivePoint& setAuxiliaryData(T&& value)
+      ConstitutivePoint& set(T&& value)
       {
         m_aux[std::type_index(typeid(Tag))] = std::forward<T>(value);
         return *this;
@@ -190,11 +190,11 @@ namespace Rodin::Solid
        * @returns Const reference to the stored value
        *
        * @code
-       * const auto& fiber = cp.getAuxiliaryData<FiberDirection, Math::SpatialVector<Real>>();
+       * const auto& fiber = cp.get<FiberDirection, Math::SpatialVector<Real>>();
        * @endcode
        */
       template <class Tag, class T>
-      const T& getAuxiliaryData() const
+      const T& get() const
       {
         auto it = m_aux.find(std::type_index(typeid(Tag)));
         assert(it != m_aux.end());
@@ -207,7 +207,7 @@ namespace Rodin::Solid
        * @returns True if auxiliary data with this tag has been set
        */
       template <class Tag>
-      bool hasAuxiliaryData() const
+      bool has() const
       {
         return m_aux.find(std::type_index(typeid(Tag))) != m_aux.end();
       }

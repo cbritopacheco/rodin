@@ -18,7 +18,7 @@ namespace Rodin::Solid
   class ConstitutivePoint;
 
   template <class Derived>
-  class InputProvider;
+  class Input;
 
   class IsotropicInvariants;
 

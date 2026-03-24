@@ -38,7 +38,7 @@
 
 #include "Rodin/Solid/Kinematics/KinematicState.h"
 #include "Rodin/Solid/Inputs/ConstitutivePoint.h"
-#include "Rodin/Solid/Inputs/InputProvider.h"
+#include "Rodin/Solid/Inputs/Input.h"
 #include "Rodin/Solid/Constitutive/HyperElasticLaw.h"
 
 namespace Rodin::Solid
@@ -56,7 +56,7 @@ namespace Rodin::Solid
    * @c getFiniteElement(), supports configurable quadrature order, and
    * builds a ConstitutivePoint (composed over Geometry::Point) at each
    * quadrature point for constitutive evaluation.  An optional
-   * InputProvider can inject auxiliary data (fiber directions, activation,
+   * Input can inject auxiliary data (fiber directions, activation,
    * etc.) into the ConstitutivePoint at each quadrature point.
    *
    * @tparam LawDerived The hyperelastic constitutive law type
@@ -94,8 +94,7 @@ namespace Rodin::Solid
           m_fes(other.m_fes),
           m_linData(other.m_linData),
           m_quadOrder(other.m_quadOrder),
-          m_inputProvider(other.m_inputProvider)
-      {}
+          m_input(other.m_input)      {}
 
       /**
        * @brief Sets the linearization point (current displacement DOF vector).
@@ -125,19 +124,19 @@ namespace Rodin::Solid
       }
 
       /**
-       * @brief Sets an input provider for auxiliary constitutive data.
+       * @brief Sets an input for auxiliary constitutive data.
        *
-       * The provider is called at each quadrature point after the
+       * The input is called at each quadrature point after the
        * ConstitutivePoint has been constructed with geometric context and
        * kinematics, allowing injection of fiber directions, activation
        * parameters, region-wise material properties, etc.
        *
-       * @param provider A callable with signature void(ConstitutivePoint&)
+       * @param input A callable with signature void(ConstitutivePoint&)
        * @returns Reference to this object for chaining
        */
-      InternalForce& setInputProvider(InputProviderFunction provider)
+      InternalForce& setInput(InputFunction input)
       {
-        m_inputProvider = std::move(provider);
+        m_input = std::move(input);
         return *this;
       }
 
@@ -205,9 +204,9 @@ namespace Rodin::Solid
 
           ConstitutivePoint cp(pt, state);
 
-          // Invoke input provider for auxiliary data injection
-          if (m_inputProvider)
-            m_inputProvider(cp);
+          // Invoke input for auxiliary data injection
+          if (m_input)
+            m_input(cp);
 
           typename LawType::Cache cache;
           m_law.setCache(cache, cp);
@@ -258,7 +257,7 @@ namespace Rodin::Solid
       std::reference_wrapper<const FESType> m_fes;
       const Math::Vector<ScalarType>* m_linData;
       size_t m_quadOrder;
-      InputProviderFunction m_inputProvider;
+      InputFunction m_input;
 
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
       Math::Vector<ScalarType> m_elemVec;
