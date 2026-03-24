@@ -17,6 +17,14 @@ namespace Rodin::Solid
 
   class ConstitutivePoint;
 
+  namespace Tags
+  {
+    struct FiberDirection;
+    struct SheetDirection;
+    struct SheetNormalDirection;
+    struct Activation;
+  }
+
   template <class Derived>
   class Input;
 

@@ -22,9 +22,8 @@
  *   void populate(Solid::ConstitutivePoint& cp) const
  *   {
  *     // e.g., interpolate fiber direction from a GridFunction
- *     struct FiberTag {};
  *     Math::SpatialVector<Real> fiber = ...;
- *     cp.set<FiberTag>(fiber);
+ *     cp.set<Solid::Tags::FiberDirection>(fiber);
  *   }
  * };
  *
@@ -36,8 +35,7 @@
  *
  * @code
  * force.setInput([&](Solid::ConstitutivePoint& cp) {
- *   struct ActivationTag {};
- *   cp.set<ActivationTag>(activationValue);
+ *   cp.set<Solid::Tags::Activation>(activationValue);
  * });
  * @endcode
  */

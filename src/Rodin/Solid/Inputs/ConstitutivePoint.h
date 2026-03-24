@@ -16,6 +16,10 @@
  * - KinematicState (deformation gradient and derived quantities)
  * - Extensible typed auxiliary data (fiber directions, activation, etc.)
  *
+ * Auxiliary data tags define their associated value type via a nested
+ * @c Type alias, so @c set<Tag>(value) and @c get<Tag>() do not require
+ * the caller to repeat the value type.
+ *
  * This abstraction decouples constitutive laws from the integration scheme
  * and finite element space, enabling:
  * - Arbitrary quadrature rules (not just centroid)
@@ -44,12 +48,54 @@
 namespace Rodin::Solid
 {
   /**
+   * @brief Standard tag types for auxiliary constitutive data.
+   *
+   * Each tag defines a nested @c Type alias indicating the value type
+   * stored and retrieved via @c ConstitutivePoint::set / @c get.
+   *
+   * @code
+   * cp.set<Tags::FiberDirection>(fiberVec);
+   * const auto& fiber = cp.get<Tags::FiberDirection>();
+   * @endcode
+   */
+  namespace Tags
+  {
+    /// @brief Tag for the fiber direction vector.
+    struct FiberDirection
+    {
+      using Type = Math::SpatialVector<Real>;
+    };
+
+    /// @brief Tag for the sheet direction vector.
+    struct SheetDirection
+    {
+      using Type = Math::SpatialVector<Real>;
+    };
+
+    /// @brief Tag for the sheet-normal direction vector.
+    struct SheetNormalDirection
+    {
+      using Type = Math::SpatialVector<Real>;
+    };
+
+    /// @brief Tag for the activation parameter.
+    struct Activation
+    {
+      using Type = Real;
+    };
+  }
+
+  /**
    * @brief Central data bundle for constitutive evaluation at a quadrature point.
    *
    * A ConstitutivePoint composes a Geometry::Point (geometric context) with a
    * KinematicState (deformation measures) and extensible typed auxiliary data.
    * Constitutive laws receive a ConstitutivePoint and may inspect any subset
    * of the data they need.
+   *
+   * Geometric context (reference/physical coordinates, region id) is accessed
+   * through @c getPoint(), which returns an optional reference to the
+   * underlying Geometry::Point.
    *
    * ## Usage (with geometric context, typical in integrators)
    *
@@ -59,7 +105,7 @@ namespace Rodin::Solid
    * state.setDisplacementGradient(H);
    *
    * ConstitutivePoint cp(pt, state);
-   * cp.set<FiberDirection>(fiberDir);
+   * cp.set<Tags::FiberDirection>(fiberDir);
    *
    * law.setCache(cache, cp);
    * law.getFirstPiolaKirchhoffStress(P, cache, cp);
@@ -83,29 +129,28 @@ namespace Rodin::Solid
        * provides reference/physical coordinates and the polytope (from which
        * the region id can be queried).
        *
-       * @warning The caller must ensure the Geometry::Point outlives this
-       *          ConstitutivePoint.  Typically both are local variables in
-       *          the same quadrature-point loop.
+       * @warning The caller must ensure the Geometry::Point and KinematicState
+       *          outlive this ConstitutivePoint.  Typically all are local
+       *          variables in the same quadrature-point loop.
        *
        * @param point The geometric evaluation point
        * @param state The kinematic state at this quadrature point
        */
       explicit ConstitutivePoint(const Geometry::Point& point, const KinematicState& state)
         : m_point(std::cref(point)),
-          m_state(state)
+          m_state(std::cref(state))
       {}
 
       /**
        * @brief Constructs a constitutive point from a kinematic state only.
        *
        * Use this constructor for unit tests or contexts where geometric
-       * context is not needed.  Coordinate and region queries will assert
-       * if called without a Geometry::Point.
+       * context is not needed.  getPoint() will return an empty optional.
        *
        * @param state The kinematic state
        */
       explicit ConstitutivePoint(const KinematicState& state)
-        : m_state(state)
+        : m_state(std::cref(state))
       {}
 
       ConstitutivePoint(const ConstitutivePoint&) = default;
@@ -114,91 +159,58 @@ namespace Rodin::Solid
       ConstitutivePoint& operator=(ConstitutivePoint&&) = default;
 
       /// @brief Gets the kinematic state.
-      const KinematicState& getKinematicState() const { return m_state; }
-
-      /// @brief Checks whether a Geometry::Point is available.
-      bool hasPoint() const { return m_point.has_value(); }
+      const KinematicState& getKinematicState() const { return m_state.get(); }
 
       /**
-       * @brief Gets the underlying Geometry::Point.
-       * @pre hasPoint() must be true.
+       * @brief Gets the underlying Geometry::Point, if available.
+       * @returns An optional reference to the Geometry::Point, or empty if
+       *          constructed without geometric context.
        */
-      const Geometry::Point& getPoint() const
+      const Optional<std::reference_wrapper<const Geometry::Point>>& getPoint() const
       {
-        assert(m_point);
-        return m_point->get();
-      }
-
-      /**
-       * @brief Gets the reference (parent element) coordinates @f$ \boldsymbol{\xi} @f$.
-       *
-       * Delegates to the underlying Geometry::Point.
-       * @pre hasPoint() must be true.
-       */
-      const auto& getReferenceCoordinates() const
-      {
-        return getPoint().getReferenceCoordinates();
-      }
-
-      /**
-       * @brief Gets the physical (material) coordinates @f$ \mathbf{x} @f$.
-       *
-       * Delegates to the underlying Geometry::Point.
-       * @pre hasPoint() must be true.
-       */
-      const auto& getPhysicalCoordinates() const
-      {
-        return getPoint().getPhysicalCoordinates();
-      }
-
-      /**
-       * @brief Gets the geometry attribute / region id from the polytope.
-       *
-       * Delegates to the underlying Geometry::Point's polytope.
-       * @pre hasPoint() must be true.
-       * @returns The polytope attribute, or empty if no attribute is set.
-       */
-      Optional<Geometry::Attribute> getRegionId() const
-      {
-        return getPoint().getPolytope().getAttribute();
+        return m_point;
       }
 
       /**
        * @brief Stores typed auxiliary data (e.g., fiber direction, activation).
        *
-       * @tparam Tag A type tag used as a key (e.g., a struct FiberDirection{};)
+       * The value type is deduced from the tag's @c Type alias.
+       *
+       * @tparam Tag A type tag with a nested @c Type alias
        * @param value The auxiliary data value
        * @returns Reference to this for chaining
        *
        * @code
-       * struct FiberDirection {};
-       * cp.set<FiberDirection>(fiberVec);
+       * cp.set<Tags::FiberDirection>(fiberVec);
+       * cp.set<Tags::Activation>(0.5);
        * @endcode
        */
-      template <class Tag, class T>
-      ConstitutivePoint& set(T&& value)
+      template <class Tag>
+      ConstitutivePoint& set(const typename Tag::Type& value)
       {
-        m_aux[std::type_index(typeid(Tag))] = std::forward<T>(value);
+        m_aux[std::type_index(typeid(Tag))] = value;
         return *this;
       }
 
       /**
        * @brief Retrieves typed auxiliary data by tag.
        *
+       * The return type is deduced from the tag's @c Type alias.
+       *
        * @tparam Tag The type tag used when storing the data
-       * @tparam T The expected type of the stored data
        * @returns Const reference to the stored value
        *
        * @code
-       * const auto& fiber = cp.get<FiberDirection, Math::SpatialVector<Real>>();
+       * const auto& fiber = cp.get<Tags::FiberDirection>();
+       * Real activation = cp.get<Tags::Activation>();
        * @endcode
        */
-      template <class Tag, class T>
-      const T& get() const
+      template <class Tag>
+      const typename Tag::Type& get() const
       {
         auto it = m_aux.find(std::type_index(typeid(Tag)));
         assert(it != m_aux.end());
-        return std::any_cast<const T&>(it->second);
+        return std::any_cast<const typename Tag::Type&>(it->second);
       }
 
       /**
@@ -214,7 +226,7 @@ namespace Rodin::Solid
 
     private:
       Optional<std::reference_wrapper<const Geometry::Point>> m_point;
-      const KinematicState& m_state;
+      std::reference_wrapper<const KinematicState> m_state;
       std::unordered_map<std::type_index, std::any> m_aux;
   };
 }
