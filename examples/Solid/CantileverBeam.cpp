@@ -5,17 +5,24 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 /**
- * @file CantileverBeam.cpp
- * @brief Quasi-static hyperelastic cantilever beam under time-varying traction.
+ * @file DampedTransientCantileverBeam.cpp
+ * @brief Transient hyperelastic cantilever beam with inertia, damping, and release.
  *
  * A rectangular 2D beam (4 × 1) is clamped on the left edge and subject to
- * a downward traction on the right edge.  The traction ramps up linearly
- * over the first half of the time steps and is then suddenly removed, so the
- * NeoHookean material springs back to its undeformed configuration.
+ * a downward traction on the right edge. The traction ramps up linearly over
+ * the first half of the simulation and is then suddenly removed.
  *
- * Output is written to XDMF for visualization in ParaView (apply "Warp by
- * Vector" to see the deformed shape).
+ * The beam is modeled as a compressible NeoHookean solid with inertia and
+ * simple mass-proportional viscous damping:
+ *
+ *   rho * u_tt + c * u_t - div(P(F(u))) = 0
+ *
+ * Time integration is performed with the Newmark-beta method using the
+ * average-acceleration choice beta = 1/4, gamma = 1/2.
+ *
+ * Output is written to XDMF for visualization in ParaView.
  */
+#include "Rodin/Math/Vector.h"
 #include <cstddef>
 
 #include <Rodin/Geometry.h>
@@ -25,6 +32,7 @@
 #include <Rodin/IO/XDMF.h>
 #include <Rodin/Solver/NewtonSolver.h>
 #include <Rodin/Solver/SparseLU.h>
+#include <Rodin/Solver/CG.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -34,8 +42,6 @@ using namespace Rodin::Solver;
 int main(int, char**)
 {
   // ---- geometry -----------------------------------------------------------
-  // UniformGrid({nx, ny}) produces nx × ny vertices on [0, nx-1] × [0, ny-1].
-  // After scaling by 1/(ny-1) the domain becomes [0, Lx] × [0, 1].
   constexpr size_t nx = 33;
   constexpr size_t ny = 9;
   constexpr Real Lx = static_cast<Real>(nx - 1) / static_cast<Real>(ny - 1);
@@ -77,57 +83,136 @@ int main(int, char**)
   const Real mu     = E / (2.0 * (1.0 + nu));
   Solid::NeoHookean law(lambda, mu);
 
-  // ---- solution -----------------------------------------------------------
-  GridFunction u(Vh);
-  u.setName("Displacement");
-  u = VectorFunction{ Zero(), Zero() };
+  // ---- dynamics parameters ------------------------------------------------
+  const Real rho = 1.0;
+  const Real c   = 0.5;   // mass-proportional viscous damping coefficient
+  const Real dt  = 1e-5;
+  const size_t nSteps = 200;
 
-  // ---- XDMF output --------------------------------------------------------
+  // Newmark average acceleration
+  const Real beta  = 0.25;
+  const Real gamma = 0.5;
+
+  // Effective coefficients
+  const Real aMass = rho / (beta * dt * dt);
+  const Real aDamp = c * gamma / (beta * dt);
+
+  // ---- fields -------------------------------------------------------------
+  GridFunction u(Vh);      // displacement
+  GridFunction vel(Vh);    // velocity
+  GridFunction acc(Vh);    // acceleration
+
+  u.setName("Displacement");
+  vel.setName("Velocity");
+  acc.setName("Acceleration");
+
+  auto zero = VectorFunction{ Zero(), Zero() };
+  u   = zero;
+  vel = zero;
+  acc = zero;
+
+  GridFunction uPred(Vh);
+  GridFunction vPred(Vh);
+  GridFunction aNew(Vh);
+  GridFunction rhsDamp(Vh);
+
+  uPred.setName("PredictedDisplacement");
+  vPred.setName("PredictedVelocity");
+  aNew.setName("AccelerationNew");
+  rhsDamp.setName("DampingRHS");
+
+  // ---- output -------------------------------------------------------------
   IO::XDMF xdmf("CantileverBeam");
   auto grid = xdmf.grid();
   grid.setMesh(mesh);
   grid.add(u);
+  grid.add(vel);
+  grid.add(acc);
 
-  // ---- quasi-static time stepping -----------------------------------------
-  // The traction ramps up linearly then drops to zero (sudden release).
-  constexpr size_t nSteps = 20;
-  constexpr Real maxTraction = -5.0;  // downward
+  xdmf.write(0.0);
+
+  // ---- time loop ----------------------------------------------------------
+  constexpr Real maxTraction = -0.1; // downward
 
   TrialFunction du(Vh);
-  TestFunction  v(Vh);
-  auto zero = VectorFunction{ Zero(), Zero() };
+  TestFunction  w(Vh);
 
-  for (size_t step = 0; step <= nSteps; ++step)
+  for (size_t step = 1; step <= nSteps; ++step)
   {
-    Real ty = 0;
+    const Real t = step * dt;
+
+    Real ty = 0.0;
     if (step <= nSteps / 2)
       ty = maxTraction * static_cast<Real>(step) / static_cast<Real>(nSteps / 2);
 
     auto traction = VectorFunction{ Zero(), RealFunction(ty) };
 
-    Solid::MaterialTangent tangent(law, du, v);
+    // ---- Newmark predictors -----------------------------------------------
+    uPred = u + dt * vel + (dt * dt * (0.5 - beta)) * acc;
+    vPred = vel + (dt * (1.0 - gamma)) * acc;
+
+    // Damping RHS term:
+    // c * M * (vPred - gamma/(beta dt) * uPred)
+    rhsDamp = vPred - (gamma / (beta * dt)) * uPred;
+
+    // Use predictor as initial guess for u^{n+1}
+    u = uPred;
+
+    // ---- nonlinear solid operators ----------------------------------------
+    Solid::MaterialTangent tangent(law, du, w);
     tangent.setLinearizationPoint(u.getData());
 
-    Solid::InternalForce residual(law, v);
-    residual.setLinearizationPoint(u.getData());
+    Solid::InternalForce internal(law, w);
+    internal.setLinearizationPoint(u.getData());
 
-    // Newton linearization:  K δu = -F_int(u) + F_ext
-    Problem newton(du, v);
+    // Effective nonlinear problem:
+    //
+    //   F_int(u_{n+1})
+    // + aMass * M u_{n+1}
+    // + aDamp * M u_{n+1}
+    // = F_ext(t_{n+1})
+    // + aMass * M uPred
+    // - c * M rhsDamp
+    //
+    // where rhsDamp = gamma/(beta dt) * uPred - vPred with the chosen sign
+    // convention below:
+    //
+    //   rhsDamp = vPred - gamma/(beta dt) * uPred
+    //
+    // so the right-hand side contribution is:
+    //
+    //   + c * M rhsDamp
+    //
+    Problem newton(du, w);
     newton = tangent
-           + residual
-           - BoundaryIntegral(traction, v).over(rightBC)
+           + aMass * Integral(du, w)
+           + aDamp * Integral(du, w)
+           + internal
+           - BoundaryIntegral(traction, w).over(rightBC)
+           - aMass * Integral(uPred, w)
+           - c * Integral(rhsDamp, w)
            + DirichletBC(du, zero).on(leftBC);
 
-    SparseLU linearSolver(newton);
+    CG linearSolver(newton);
     NewtonSolver solver(linearSolver);
     solver.setMaxIterations(50)
           .setAbsoluteTolerance(1e-10)
           .setRelativeTolerance(1e-8);
+    Math::Vector<Real> x;
+    x.resize(u.getSize());
+    x.setZero();
+    solver.solve(x);
+    u.setData(x);
+    std::cout << "Step " << step << ", time " << t << std::endl;
 
-    solver.solve(u.getData());
+    // ---- Newmark correctors -----------------------------------------------
+    aNew = (1.0 / (beta * dt * dt)) * (u - uPred);
+    vel  = vPred + (gamma * dt) * aNew;
+    acc  = aNew;
 
-    xdmf.write(static_cast<Real>(step));
+    xdmf.write(t).flush();
   }
 
+  xdmf.close();
   return 0;
 }
