@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::DefaultBoundaryPolicy class | Rodin</title>
+  <title>Rodin::Variational::BoundaryHit struct | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -74,47 +74,45 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>DefaultBoundaryPolicy <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>BoundaryHit <span class="m-thin">struct</span>
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_flow_8h.html">&lt;Rodin/Variational/Flow.h&gt;</a></div>
         </h1>
-        <p>Default boundary policy for flow maps.</p>
+        <p>Information passed to a boundary policy when a trajectory reaches the domain boundary.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#pub-attribs">Public variables</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>This policy does not enforce any special treatment at domain boundaries. <a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a> integration stops when the traced trajectory reaches the boundary.</p>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
+        <section id="pub-attribs">
+          <h2><a href="#pub-attribs">Public variables</a></h2>
           <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9b5c682c4f8a0bc6c588aefa9fb81fd7" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_variational_1_1_boundary_hit.html" class="m-doc">BoundaryHit</a>&amp;) const -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt id="a9da7e0180b1ae243caeacdeef745a2ce">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; <a href="#a9da7e0180b1ae243caeacdeef745a2ce" class="m-doc-self">tau</a>
             </dt>
-            <dd>Called when a traced trajectory reaches a boundary.</dd>
+            <dd>Remaining time after the hit.</dd>
+            <dt id="aa2cb389ecff89468caf855fb03710870">
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; <a href="#aa2cb389ecff89468caf855fb03710870" class="m-doc-self">cell</a>
+            </dt>
+            <dd>Current cell index.</dd>
+            <dt id="af30264ce2a0e5cfe6963bc25d813a3c5">
+              <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; <a href="#af30264ce2a0e5cfe6963bc25d813a3c5" class="m-doc-self">rref</a>
+            </dt>
+            <dd>Reference coordinates of the hit point.</dd>
+            <dt id="a0b79d23e23163cdeb85537edb8c38315">
+              size_t <a href="#a0b79d23e23163cdeb85537edb8c38315" class="m-doc-self">face</a>
+            </dt>
+            <dd>Local face index in the current cell.</dd>
+            <dt id="a667dff872cc4fcebc367660da5b9a27d">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; <a href="#a667dff872cc4fcebc367660da5b9a27d" class="m-doc-self">correction</a>
+            </dt>
+            <dd>Additive correction to the traced value.</dd>
           </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a9b5c682c4f8a0bc6c588aefa9fb81fd7"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Variational::<wbr />DefaultBoundaryPolicy::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9b5c682c4f8a0bc6c588aefa9fb81fd7" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_variational_1_1_boundary_hit.html" class="m-doc">BoundaryHit</a>&amp;) const <span class="m-label m-primary">constexpr</span></span></span>
-            </h3>
-            <p>Called when a traced trajectory reaches a boundary.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>false, indicating that the trace should stop.</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
         </section>
       </div>
     </div>
