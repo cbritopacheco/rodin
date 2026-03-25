@@ -1,0 +1,169 @@
+    public:
+      using LHSFESType = P1<LHSRange, LHSMesh>;
+      using RHSFESType = P1<RHSRange, RHSMesh>;
+
+      using CoefficientType = FunctionBase<CoefficientDerived>;
+
+      using LHSType =
+        ShapeFunctionBase<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>;
+
+      using RHSType =
+        ShapeFunctionBase<ShapeFunction<RHSDerived, RHSFESType, TestSpace>>;
+
+      using InnerIntegrandType = Dot<LHSType, RHSType>;
+      using IntegrandType = Mult<CoefficientType, InnerIntegrandType>;
+
+      using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
+      using ScalarType   = typename FormLanguage::Traits<InnerIntegrandType>::ScalarType;
+
+      using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
+
+      static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
+
+      QuadratureRule(const IntegrandType& integrand)
+        : Parent(integrand.getRHS().getLHS().getLeaf(), integrand.getRHS().getRHS().getLeaf()),
+          m_integrand(integrand.copy()),
+          m_qf(nullptr), m_polytope(nullptr),
+          m_set(false), m_order(0),
+          m_geometry(Geometry::Polytope::Type::Point)
+      {}
+
+      QuadratureRule(const QuadratureRule& other)
+        : Parent(other),
+          m_integrand(other.m_integrand->copy()),
+          m_qf(nullptr), m_polytope(nullptr),
+          m_set(false), m_order(0),
+          m_geometry(Geometry::Polytope::Type::Point)
+      {}
+
+      QuadratureRule(QuadratureRule&& other)
+        : Parent(std::move(other)),
+          m_integrand(std::move(other.m_integrand)),
+          m_qf(std::exchange(other.m_qf, nullptr)),
+          m_ps(std::move(other.m_ps)),
+          m_polytope(std::exchange(other.m_polytope, nullptr)),
+          m_set(std::exchange(other.m_set, false)),
+          m_order(std::exchange(other.m_order, 0)),
+          m_geometry(std::exchange(other.m_geometry, Geometry::Polytope::Type::Point)),
+          m_matrix(std::move(other.m_matrix))
+      {}
+
+      constexpr
+      const IntegrandType& getIntegrand() const
+      {
+        assert(m_integrand);
+        return *m_integrand;
+      }
+
+      const Geometry::Polytope& getPolytope() const final override
+      {
+        assert(m_polytope);
+        return *m_polytope;
+      }
+
+      QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
+      {
+        m_polytope = &polytope;
+
+        const size_t d   = polytope.getDimension();
+        const Index  idx = polytope.getIndex();
+
+        const auto& integrand = getIntegrand();
+        const auto& coeff = integrand.getLHS();
+        const auto& inner = integrand.getRHS();
+        const auto& lhs = inner.getLHS();
+        const auto& rhs = inner.getRHS();
+        const auto& trialfes = lhs.getFiniteElementSpace();
+        const auto& testfes = rhs.getFiniteElementSpace();
+
+        const auto& trialfe = trialfes.getFiniteElement(d, idx);
+        const auto& testfe  = testfes.getFiniteElement(d, idx);
+
+        const size_t order = trialfe.getOrder() + testfe.getOrder();
+
+        const auto geometry = polytope.getGeometry();
+        const bool recompute = !m_set || m_order != order || m_geometry != geometry;
+
+        if (recompute)
+        {
+          m_set      = true;
+          m_order    = order;
+          m_geometry = geometry;
+
+          m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
+
+          m_ps.clear();
+          m_ps.reserve(m_qf->getSize());
+          for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
+            m_ps.emplace_back(polytope, m_qf->getPoint(qp));
+        }
+        else
+        {
+          assert(m_qf);
+          for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
+            m_ps[qp].setPolytope(polytope);
+        }
+
+        const size_t ntr = lhs.getDOFs(polytope);
+        const size_t nte = rhs.getDOFs(polytope);
+
+        const P1Element<ScalarType> trialScalarFE(geometry);
+        const P1Element<ScalarType> testScalarFE(geometry);
+        const size_t scalarCountTr = trialScalarFE.getCount();
+        const size_t scalarCountTe = testScalarFE.getCount();
+
+        assert(scalarCountTr > 0 && ntr % scalarCountTr == 0);
+        assert(scalarCountTe > 0 && nte % scalarCountTe == 0);
+        const size_t vdim = ntr / scalarCountTr;
+        assert(vdim == nte / scalarCountTe);
+
+        m_matrix.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
+        m_matrix.setZero();
+
+        for (size_t qp = 0; qp < m_ps.size(); ++qp)
+        {
+          const auto& p = m_ps[qp];
+          const ScalarType wdet =
+            static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
+
+          const auto& rc = m_qf->getPoint(qp);
+
+          const ScalarType csv = coeff(p);
+
+          for (size_t ib = 0; ib < scalarCountTe; ++ib)
+          {
+            const ScalarType phi_te = testScalarFE.getBasis(ib)(rc);
+            for (size_t ia = 0; ia < scalarCountTr; ++ia)
+            {
+              const ScalarType kij =
+                wdet * csv * phi_te * trialScalarFE.getBasis(ia)(rc);
+              for (size_t c = 0; c < vdim; ++c)
+                m_matrix(ib * vdim + c, ia * vdim + c) += kij;
+            }
+          }
+        }
+
+        return *this;
+      }
+
+      ScalarType integrate(size_t tr, size_t te) final override
+      {
+        return m_matrix(te, tr);
+      }
+
+      virtual Geometry::Region getRegion() const override = 0;
+      virtual QuadratureRule* copy() const noexcept override = 0;
+
+    private:
+      std::unique_ptr<IntegrandType> m_integrand;
+
+      const QF::QuadratureFormulaBase* m_qf;
+      std::vector<Geometry::Point> m_ps;
+
+      const Geometry::Polytope* m_polytope;
+      bool m_set;
+      size_t m_order;
+      Geometry::Polytope::Type m_geometry;
+
+      Math::Matrix<ScalarType> m_matrix;
