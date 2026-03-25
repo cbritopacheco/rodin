@@ -90,6 +90,8 @@ namespace Rodin::Variational
        */
       LinearElasticityIntegrator(const LinearElasticityIntegrator& other)
         : Parent(other),
+          m_lambda(other.m_lambda ? other.m_lambda->copy() : nullptr),
+          m_mu(other.m_mu ? other.m_mu->copy() : nullptr),
           m_trialfes(other.m_trialfes),
           m_testfes(other.m_testfes)
       {}
