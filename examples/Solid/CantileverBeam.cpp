@@ -21,8 +21,22 @@
  * average-acceleration choice beta = 1/4, gamma = 1/2.
  *
  * Output is written to XDMF for visualization in ParaView.
+ *
+ * This version also instruments a discrete derivative check for the assembled
+ * nonlinear residual R(u) and tangent J(u):
+ *
+ *   FD(eps) = (R(u + eps * eta) - R(u)) / eps
+ *
+ * and compares FD(eps) against J(u) * eta.
+ *
+ * If the tangent is consistent, ||FD(eps) - J(u) eta|| should scale like O(eps)
+ * for sufficiently small eps, until roundoff dominates.
  */
+#include "Rodin/IO/ForwardDecls.h"
+#include <array>
+#include <cmath>
 #include <cstddef>
+#include <iostream>
 
 #include <Rodin/Geometry.h>
 #include <Rodin/Assembly.h>
@@ -38,11 +52,172 @@ using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 using namespace Rodin::Solver;
 
+namespace
+{
+  template <class VectorType>
+  VectorType copyVector(const VectorType& x)
+  {
+    VectorType y;
+    y.resize(x.size());
+    for (Index i = 0; i < x.size(); ++i)
+      y(i) = x(i);
+    return y;
+  }
+
+  template <class VectorType>
+  VectorType makeZeroLike(const VectorType& x)
+  {
+    VectorType y;
+    y.resize(x.size());
+    y.setZero();
+    return y;
+  }
+
+  template <class VectorType>
+  VectorType addScaled(const VectorType& x, Real alpha, const VectorType& y)
+  {
+    VectorType z;
+    z.resize(x.size());
+    for (Index i = 0; i < x.size(); ++i)
+      z(i) = x(i) + alpha * y(i);
+    return z;
+  }
+
+  template <class VectorType>
+  VectorType scaledDifference(const VectorType& x, const VectorType& y, Real alpha)
+  {
+    VectorType z;
+    z.resize(x.size());
+    for (Index i = 0; i < x.size(); ++i)
+      z(i) = alpha * (x(i) - y(i));
+    return z;
+  }
+
+  template <class VectorType>
+  Real infNorm(const VectorType& x)
+  {
+    Real n = 0.0;
+    for (Index i = 0; i < x.size(); ++i)
+      n = std::max(n, std::abs(x(i)));
+    return n;
+  }
+
+  template <class VectorType>
+  VectorType makeDeterministicPerturbation(const VectorType& x)
+  {
+    VectorType eta;
+    eta.resize(x.size());
+    for (Index i = 0; i < x.size(); ++i)
+    {
+      const Real ii = static_cast<Real>(i + 1);
+      eta(i) = std::sin(0.173 * ii) + 0.5 * std::cos(0.071 * ii);
+    }
+    return eta;
+  }
+
+  template <class VectorType>
+  void applyHomogeneousDirichletToVector(VectorType& x, const IndexMap<Real>& dbc)
+  {
+    for (const auto& [local, value] : dbc)
+    {
+      (void) value;
+      x(local) = 0.0;
+    }
+  }
+
+  template <class GridFunctionType>
+  void applyHomogeneousDirichletToGridFunction(GridFunctionType& gf, const IndexMap<Real>& dbc)
+  {
+    auto& data = gf.getData();
+    applyHomogeneousDirichletToVector(data, dbc);
+  }
+
+  template <class ProblemType, class GridFunctionType>
+  void assembleResidualAndJacobian(ProblemType& pb, GridFunctionType& u)
+  {
+    (void) u;
+    pb.assemble();
+  }
+
+  template <class ProblemType, class GridFunctionType>
+  void checkDiscreteDerivative(
+      ProblemType& pb,
+      GridFunctionType& u,
+      const IndexMap<Real>& dbc)
+  {
+    using VectorType = std::decay_t<decltype(u.getData())>;
+
+    auto& x = u.getData();
+
+    // Base assembly at current state
+    assembleResidualAndJacobian(pb, u);
+    const auto& A = pb.getLinearSystem().getOperator();
+    const auto& RbaseRef = pb.getLinearSystem().getVector();
+
+    VectorType Rbase = copyVector(RbaseRef);
+
+    VectorType eta = makeDeterministicPerturbation(x);
+    applyHomogeneousDirichletToVector(eta, dbc);
+
+    const VectorType Jeta = A * eta;
+
+    std::cout << "\n============================================================\n";
+    std::cout << "Discrete derivative check\n";
+    std::cout << "  |R(u)|_2      = " << Rbase.norm() << '\n';
+    std::cout << "  |R(u)|_inf    = " << infNorm(Rbase) << '\n';
+    std::cout << "  |eta|_2       = " << eta.norm() << '\n';
+    std::cout << "  |J(u) eta|_2  = " << Jeta.norm() << '\n';
+    std::cout << "  |J(u) eta|_inf= " << infNorm(Jeta) << '\n';
+
+    const std::array<Real, 8> epsilons = {
+      1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8
+    };
+
+    const VectorType xBase = copyVector(x);
+
+    for (const Real eps : epsilons)
+    {
+      x = addScaled(xBase, eps, eta);
+      applyHomogeneousDirichletToVector(x, dbc);
+
+      assembleResidualAndJacobian(pb, u);
+      const auto& RepsRef = pb.getLinearSystem().getVector();
+      VectorType Reps = copyVector(RepsRef);
+
+      VectorType FD = scaledDifference(Reps, Rbase, 1.0 / eps);
+      VectorType err = scaledDifference(FD, Jeta, 1.0);
+      for (Index i = 0; i < err.size(); ++i)
+        err(i) = FD(i) + Jeta(i);
+
+      const Real nFD2   = FD.norm();
+      const Real nErr2  = err.norm();
+      const Real nFDInf = infNorm(FD);
+      const Real nErrInf= infNorm(err);
+      const Real rel2   = (nFD2   > 0.0) ? (nErr2   / nFD2)   : nErr2;
+      const Real relInf = (nFDInf > 0.0) ? (nErrInf / nFDInf) : nErrInf;
+
+      std::cout
+        << "  eps = " << eps
+        << "  |FD|_2 = " << nFD2
+        << "  |FD + Jeta|_2 = " << nErr2
+        << "  rel2 = " << rel2
+        << "  |FD|_inf = " << nFDInf
+        << "  |FD + Jeta|_inf = " << nErrInf
+        << "  relInf = " << relInf
+        << '\n';
+    }
+
+    x = xBase;
+    assembleResidualAndJacobian(pb, u);
+    std::cout << "============================================================\n\n";
+  }
+}
+
 int main(int, char**)
 {
   // ---- geometry -----------------------------------------------------------
-  constexpr size_t nx = 33;
-  constexpr size_t ny = 9;
+  constexpr size_t nx = 66;
+  constexpr size_t ny = 18;
   constexpr Real Lx = static_cast<Real>(nx - 1) / static_cast<Real>(ny - 1);
 
   Mesh mesh;
@@ -71,7 +246,9 @@ int main(int, char**)
       mesh.setAttribute({ 1, it->getIndex() }, rightBC);
   }
 
-  // ---- finite-element space -----------------------------------------------
+  mesh.save("CantileverBeam.mesh", IO::FileFormat::MEDIT);
+
+  // ---- Finite-element space -----------------------------------------------
   const size_t dim = mesh.getSpaceDimension();
   P1 Vh(mesh, dim);
 
@@ -85,8 +262,8 @@ int main(int, char**)
   // ---- dynamics parameters ------------------------------------------------
   const Real rho = 1.0;
   const Real c   = 0.5;   // mass-proportional viscous damping coefficient
-  const Real dt  = 1e-5;
-  const size_t nSteps = 200;
+  const Real dt  = 1e-2;
+  const size_t nSteps = 2000;
 
   // Newmark average acceleration
   const Real beta  = 0.25;
@@ -120,6 +297,13 @@ int main(int, char**)
   aNew.setName("AccelerationNew");
   rhsDamp.setName("DampingRHS");
 
+  // Build homogeneous Dirichlet map once, for perturbation filtering
+  TrialFunction uBC(Vh);
+  DirichletBC dbc(uBC, zero);
+  dbc.on(leftBC);
+  dbc.assemble();
+  const IndexMap<Real> dbcMap = dbc.getDOFs();
+
   // ---- output -------------------------------------------------------------
   IO::XDMF xdmf("CantileverBeam");
   auto grid = xdmf.grid();
@@ -131,7 +315,7 @@ int main(int, char**)
   xdmf.write(0.0);
 
   // ---- time loop ----------------------------------------------------------
-  constexpr Real maxTraction = -0.1; // downward
+  constexpr Real maxTraction = -1.0; // downward
 
   TrialFunction du(Vh);
   TestFunction  w(Vh);
@@ -141,8 +325,8 @@ int main(int, char**)
     const Real t = step * dt;
 
     Real ty = 0.0;
-    if (step <= nSteps / 2)
-      ty = maxTraction * static_cast<Real>(step) / static_cast<Real>(nSteps / 2);
+    if (t > 0.5 && t < 1)
+      ty = maxTraction;
 
     auto traction = VectorFunction{ Zero(), RealFunction(ty) };
 
@@ -151,7 +335,7 @@ int main(int, char**)
     vPred = vel + (dt * (1.0 - gamma)) * acc;
 
     // Damping RHS term:
-    // c * M * (vPred - gamma/(beta dt) * uPred)
+    // rhsDamp = vPred - gamma/(beta dt) * uPred
     rhsDamp = vPred - (gamma / (beta * dt)) * uPred;
 
     // Use predictor as initial guess for u^{n+1}
@@ -166,38 +350,43 @@ int main(int, char**)
 
     // Effective nonlinear problem:
     //
-    //   F_int(u_{n+1})
-    // + aMass * M u_{n+1}
-    // + aDamp * M u_{n+1}
-    // = F_ext(t_{n+1})
-    // + aMass * M uPred
-    // - c * M rhsDamp
+    //   R(u; w)
+    //   = F_int(u; w)
+    //   + aMass * (u, w)
+    //   + aDamp * (u, w)
+    //   - F_ext(w)
+    //   - aMass * (uPred, w)
+    //   + c * (rhsDamp, w)
     //
-    // where rhsDamp = gamma/(beta dt) * uPred - vPred with the chosen sign
-    // convention below:
+    // Newton increment equation:
     //
-    //   rhsDamp = vPred - gamma/(beta dt) * uPred
-    //
-    // so the right-hand side contribution is:
-    //
-    //   + c * M rhsDamp
+    //   J(u^k)[du] + R(u^k) = 0
     //
     Problem newton(du, w);
-    newton = tangent
+    newton =
+          tangent
            + aMass * Integral(du, w)
            + aDamp * Integral(du, w)
            + internal
+           + aMass * Integral(u, w)
+           + aDamp * Integral(u, w)
            - BoundaryIntegral(traction, w).over(rightBC)
            - aMass * Integral(uPred, w)
-           - c * Integral(rhsDamp, w)
+           + c * Integral(rhsDamp, w)
            + DirichletBC(du, zero).on(leftBC);
 
-    CG linearSolver(newton);
+    // Discrete derivative check once, at the first time step and first Newton base point
+    if (step == 1)
+      checkDiscreteDerivative(newton, u, dbcMap);
+
+    SparseLU linearSolver(newton);
     NewtonSolver solver(linearSolver);
     solver.setMaxIterations(50)
+          .setDampingFactor(1.0)
           .setAbsoluteTolerance(1e-10)
           .setRelativeTolerance(1e-8);
     solver.solve(u);
+
     std::cout << "Step " << step << ", time " << t << std::endl;
 
     // ---- Newmark correctors -----------------------------------------------
