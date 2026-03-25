@@ -7,7 +7,6 @@
  * integration with minimal quadrature points.
  *
  * ## Quadrature Strategies
- * - **Centroid quadrature**: Uses single point at element barycenter
  * - **Exact for P1 bilinear forms**: @f$ \int \nabla \phi_i \cdot \nabla \phi_j @f$
  * - **Reduced integration**: Enables efficient assembly
  *
@@ -19,11 +18,6 @@
  * - Anisotropic stiffness: @f$ \int (A\nabla u) \cdot \nabla v \, dx @f$
  * - Jacobian forms: @f$ \int \mathbf{J}u : \mathbf{J}v \, dx @f$
  * - Potential operators for boundary elements
- *
- * These specializations mirror the generic quadrature rules in
- * `Rodin/Variational/QuadratureRule.h` but collapse to a single centroid
- * evaluation when possible. Mixed trial/test P1 spaces are supported for the
- * mass, stiffness, and Jacobian forms.
  *
  * @see P1, QuadratureFormula, Integral
  */
@@ -475,9 +469,6 @@ namespace Rodin::Variational
    * \int u \cdot v \ dx \: ,
    * @f]
    * where @f$ u \in \mathbb{P}_1 @f$ and @f$ v \in \mathbb{P}_1 @f$.
-   *
-   * The specialization evaluates the integrand at the element centroid and
-   * supports distinct P1 trial and test spaces.
    */
   template <
     class LHSDerived, class RHSDerived,
@@ -732,10 +723,6 @@ namespace Rodin::Variational
    * {\vdash u, v : \mathbb{P}_1}
    * @f]
    *
-   * The specialization evaluates the integrand at the element centroid and
-   * supports distinct P1 trial and test spaces while keeping the coefficient
-   * evaluation to a single point. This specialization only applies to P1
-   * finite element spaces by construction.
    */
   template <
     class CoefficientDerived, class LHSDerived, class RHSDerived,
@@ -1031,8 +1018,6 @@ namespace Rodin::Variational
    * {\vdash u, v : \mathbb{P}_1}
    * @f]
    *
-   * A single centroid evaluation is used and mixed P1 trial/test spaces are
-   * accommodated.
    */
   template <class LHSDerived, class RHSDerived, class LHSRange, class RHSRange, class LHSMesh, class RHSMesh>
   class QuadratureRule<
@@ -1260,8 +1245,6 @@ namespace Rodin::Variational
    * {\vdash u, v : \mathbb{P}_1}
    * @f]
    *
-   * The rule evaluates the coefficient and gradients at the centroid and
-   * permits distinct P1 trial and test spaces.
    */
   template <
     class CoefficientDerived, class LHSDerived, class RHSDerived,
@@ -2588,8 +2571,6 @@ namespace Rodin::Variational
    * {\vdash u, v : \mathbb{P}_1}
    * @f]
    *
-   * Uses a single centroid quadrature point and supports different P1 trial
-   * and test spaces.
    */
   template <
     class CoefficientDerived, class LHSDerived, class RHSDerived,
@@ -2950,8 +2931,6 @@ namespace Rodin::Variational
    * {\vdash u, v : \mathbb{P}_1}
    * @f]
    *
-   * Evaluates at the element centroid. Supports distinct P1 trial and test
-   * spaces. Implements the linearized convection term for Navier-Stokes.
    */
   template <
     class CoefficientDerived, class LHSDerived, class RHSDerived,
@@ -3222,9 +3201,6 @@ namespace Rodin::Variational
    * {\vdash u, v : \mathbb{P}_1}
    * @f]
    *
-   * When the trial and test polytopes coincide, triangles use the optimized
-   * six-point construction; all other geometries fall back to a single centroid
-   * pairing consistent with the generic QuadratureRule.
    */
   template <class Kernel, class Range, class Mesh, class LHSDerived, class RHSDerived>
   class QuadratureRule<
