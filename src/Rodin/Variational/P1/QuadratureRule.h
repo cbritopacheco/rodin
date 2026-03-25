@@ -774,6 +774,7 @@ namespace Rodin::Variational
             ShapeFunctionBase<
               ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>>>
         ::ScalarType>
+  {
     public:
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
@@ -1050,6 +1051,7 @@ namespace Rodin::Variational
             ShapeFunctionBase<
               Grad<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>, P1<RHSRange, RHSMesh>, TestSpace>>>
         ::ScalarType>
+  {
     public:
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
@@ -1301,6 +1303,7 @@ namespace Rodin::Variational
               Grad<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>,
               P1<RHSRange, RHSMesh>, TestSpace>>>
         ::ScalarType>
+  {
     public:
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
@@ -1640,6 +1643,7 @@ namespace Rodin::Variational
               ShapeFunction<LHSDerived, P1<LHSRange, LHSMesh>, TrialSpace>>,
             ShapeFunctionBase<
               ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>>>::ScalarType>
+  {
     public:
       using LHSFESType = P1<LHSRange, LHSMesh>;
       using RHSFESType = P1<RHSRange, RHSMesh>;
@@ -2328,6 +2332,7 @@ namespace Rodin::Variational
               Jacobian<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>,
                 P1<RHSRange, RHSMesh>, TestSpace>>>
         ::ScalarType>
+  {
     public:
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
@@ -2635,6 +2640,7 @@ namespace Rodin::Variational
               Jacobian<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>,
               P1<RHSRange, RHSMesh>, TestSpace>>>
         ::ScalarType>
+  {
     public:
       using LHSFESType = P1<LHSRange, LHSMesh>;
 
@@ -3002,6 +3008,7 @@ namespace Rodin::Variational
             ShapeFunctionBase<
               ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>,
               P1<RHSRange, RHSMesh>, TestSpace>>>::ScalarType>
+  {
     public:
       using TrialFESType = P1<LHSRange, LHSMesh>;
       using TestFESType  = P1<RHSRange, RHSMesh>;
