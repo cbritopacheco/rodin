@@ -15,14 +15,25 @@ namespace Rodin::Solid
 {
   class KinematicState;
 
+  class ConstitutivePoint;
+
+  namespace Tags
+  {
+    struct FiberDirection;
+    struct SheetDirection;
+    struct SheetNormalDirection;
+    struct Activation;
+  }
+
+  template <class Derived>
+  class Input;
+
   class IsotropicInvariants;
 
   template <class Derived>
   class HyperElasticLaw;
 
   class Hooke;
-
-  class LinearElasticity;
 
   template <class LawDerived, class FES>
   class InternalForce;

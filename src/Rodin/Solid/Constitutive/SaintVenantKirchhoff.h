@@ -63,21 +63,22 @@ namespace Rodin::Solid
        * @param lambda First Lamé parameter @f$ \lambda @f$
        * @param mu Second Lamé parameter (shear modulus) @f$ \mu @f$
        */
-      SaintVenantKirchhoff(Real lambda, Real mu)
-        : m_lambda(lambda), m_mu(mu)
+      SaintVenantKirchhoff(Real lameFirstParameter, Real shearModulus)
+        : m_lambda(lameFirstParameter), m_mu(shearModulus)
       {}
 
       SaintVenantKirchhoff(const SaintVenantKirchhoff&) = default;
       SaintVenantKirchhoff(SaintVenantKirchhoff&&) = default;
 
       /// @brief Gets the first Lamé parameter.
-      Real getLambda() const { return m_lambda; }
+      Real getLameFirstParameter() const { return m_lambda; }
 
       /// @brief Gets the shear modulus.
-      Real getMu() const { return m_mu; }
+      Real getShearModulus() const { return m_mu; }
 
-      void setCache(Cache& cache, const KinematicState& state) const
+      void setCache(Cache& cache, const ConstitutivePoint& cp) const
       {
+        const auto& state = cp.getKinematicState();
         const auto& C = state.getRightCauchyGreenTensor();
         const size_t d = state.getDimension();
         Math::SpatialMatrix<Real> I;
@@ -85,7 +86,6 @@ namespace Rodin::Solid
         I.setIdentity();
 
         // E = 0.5 (C - I)
-        // SpatialMatrix does not provide direct matrix subtraction operators.
         cache.E = 0.5 * C + (-0.5) * I;
         cache.trE = cache.E.trace();
 
@@ -93,9 +93,8 @@ namespace Rodin::Solid
         cache.S = m_lambda * cache.trE * I + 2.0 * m_mu * cache.E;
       }
 
-      Real getStrainEnergyDensity(const Cache& cache, const KinematicState&) const
+      Real getStrainEnergyDensity(const Cache& cache, const ConstitutivePoint&) const
       {
-        // SpatialMatrix::dot computes the Frobenius inner product A:B.
         return 0.5 * m_lambda * cache.trE * cache.trE
              + m_mu * cache.E.dot(cache.E);
       }
@@ -103,18 +102,19 @@ namespace Rodin::Solid
       void getFirstPiolaKirchhoffStress(
           Math::SpatialMatrix<Real>& P,
           const Cache& cache,
-          const KinematicState& state) const
+          const ConstitutivePoint& cp) const
       {
         // P = F S
-        P = state.getDeformationGradient() * cache.S;
+        P = cp.getKinematicState().getDeformationGradient() * cache.S;
       }
 
       void getMaterialTangent(
           Math::SpatialMatrix<Real>& dP,
           const Cache& cache,
-          const KinematicState& state,
+          const ConstitutivePoint& cp,
           const Math::SpatialMatrix<Real>& dF) const
       {
+        const auto& state = cp.getKinematicState();
         const auto& F = state.getDeformationGradient();
         const size_t d = state.getDimension();
         Math::SpatialMatrix<Real> I;

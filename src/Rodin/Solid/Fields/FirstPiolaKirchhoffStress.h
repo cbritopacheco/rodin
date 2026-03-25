@@ -5,7 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 /**
- * @file FirstPiolaKirchhoffStress.h
+ * @file Fields/FirstPiolaKirchhoffStress.h
  * @brief First Piola-Kirchhoff stress tensor computation.
  *
  * Computes the first Piola-Kirchhoff stress @f$ \mathbf{P} @f$ from a
@@ -14,14 +14,15 @@
  *   \mathbf{P} = \frac{\partial W}{\partial \mathbf{F}}
  * @f]
  */
-#ifndef RODIN_SOLID_POSTPROCESSING_FIRSTPIOLAKIRCHHOFFSTRESS_H
-#define RODIN_SOLID_POSTPROCESSING_FIRSTPIOLAKIRCHHOFFSTRESS_H
+#ifndef RODIN_SOLID_FIELDS_FIRSTPIOLAKIRCHHOFFSTRESS_H
+#define RODIN_SOLID_FIELDS_FIRSTPIOLAKIRCHHOFFSTRESS_H
 
 #include "Rodin/Types.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/SpatialMatrix.h"
 
 #include "Rodin/Solid/Kinematics/KinematicState.h"
+#include "Rodin/Solid/Local/ConstitutivePoint.h"
 #include "Rodin/Solid/Constitutive/HyperElasticLaw.h"
 
 namespace Rodin::Solid
@@ -66,14 +67,14 @@ namespace Rodin::Solid
        * @brief Computes @f$ \mathbf{P} = \partial W / \partial \mathbf{F} @f$.
        * @param[out] P Output stress tensor
        * @param[in] cache Precomputed law cache
-       * @param[in] state Current kinematic state
+       * @param[in] cp Constitutive point
        */
       void getFirstPiolaKirchhoffStress(
           Math::SpatialMatrix<Real>& P,
           const CacheType& cache,
-          const KinematicState& state) const
+          const ConstitutivePoint& cp) const
       {
-        m_law.getFirstPiolaKirchhoffStress(P, cache, state);
+        m_law.getFirstPiolaKirchhoffStress(P, cache, cp);
       }
 
       /// @brief Gets the constitutive law.

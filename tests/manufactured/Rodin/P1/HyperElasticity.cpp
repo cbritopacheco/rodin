@@ -61,10 +61,10 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
 
     // Both tangent and residual are linearized at the same iterate.
     Solid::MaterialTangent tangent(law, du, v);
-    tangent.setLinearizationPoint(uCurrent.getData());
+    tangent.setLinearizationPoint(uCurrent);
 
     Solid::InternalForce residual(law, v);
-    residual.setLinearizationPoint(uCurrent.getData());
+    residual.setLinearizationPoint(uCurrent);
 
     Problem newtonProblem(du, v);
     newtonProblem = tangent
@@ -76,7 +76,7 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
     newton.setMaxIterations(20)
       .setAbsoluteTolerance(1e-12)
       .setRelativeTolerance(1e-10);
-    newton.solve(uCurrent.getData());
+    newton.solve(uCurrent);
 
     P1 scalar(mesh);
     GridFunction err2(scalar);

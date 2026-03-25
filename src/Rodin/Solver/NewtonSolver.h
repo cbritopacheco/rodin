@@ -9,11 +9,14 @@
 
 #include <cstddef>
 #include <functional>
+#include <type_traits>
 #include <utility>
 
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Alert/Raise.h"
 #include "Rodin/Copyable.h"
+#include "Rodin/FormLanguage/Traits.h"
+#include "Rodin/Math/Common.h"
 #include "Rodin/Math/ForwardDecls.h"
 #include "Rodin/Math/LinearSystem.h"
 #include "Rodin/Types.h"
@@ -82,6 +85,34 @@ namespace Rodin::Solver
        */
       virtual void solve(SolutionType& x) = 0;
 
+      /**
+       * @brief Solve a nonlinear system using a GridFunction as the solution container.
+       *
+       * The GridFunction's internal data vector is used both as the initial
+       * guess and as the storage for the converged solution.  The backend
+       * data type is inferred from @c FormLanguage::Traits<GridFunctionType>::DataType
+       * and must match the solver's @c SolutionType.
+       *
+       * This is equivalent to calling @c solve(gf.getData()).
+       *
+       * @tparam GridFunctionType GridFunction type whose Traits must expose DataType.
+       * @param[in,out] gf  GridFunction holding the initial guess / final solution.
+       */
+      template <class GridFunctionType,
+        class = std::enable_if_t<
+          std::is_same_v<
+            typename FormLanguage::Traits<std::decay_t<GridFunctionType>>::DataType,
+            SolutionType>>>
+      void solve(GridFunctionType& gf)
+      {
+        static_assert(
+          std::is_same_v<
+            typename FormLanguage::Traits<std::decay_t<GridFunctionType>>::DataType,
+            SolutionType>,
+          "GridFunction DataType must match the solver's SolutionType.");
+        solve(gf.getData());
+      }
+
     protected:
       ProblemBaseType& getProblem() noexcept
       {
@@ -133,6 +164,8 @@ namespace Rodin::Solver
       using ProblemBaseType = typename Parent::ProblemBaseType;
       using SolutionType = typename Parent::SolutionType;
       using LinearSolverType = LinearSolver;
+
+      using Parent::solve;
 
       /**
        * @brief Constructs a NewtonSolver from a linear solver reference.
@@ -220,8 +253,17 @@ namespace Rodin::Solver
         {
           auto& pb = this->getProblem();
           pb.assemble();
+
           auto& linearSystem = pb.getLinearSystem();
           const Real r = linearSystem.getVector().norm();
+
+          if (!std::isfinite(r))
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Newton residual is not finite."
+              << Alert::Raise;
+          }
+
           if (it == 0)
             r0 = r;
 
@@ -233,6 +275,8 @@ namespace Rodin::Solver
           this->getLinearSolver().solve();
           x += m_alpha * linearSystem.getSolution();
         }
+
+        std::cout << "Reached max iterations\n";
       }
 
     private:

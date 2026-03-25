@@ -422,6 +422,7 @@ namespace Rodin::Assembly
       void execute(OperatorType& res, const InputType& input) const override
       {
         const auto& mesh = input.getTrialFES().getMesh();
+        res.clear();
         res.reserve(input.getTestFES().getSize() * std::log(input.getTrialFES().getSize()));
         for (auto& bfi : input.getLocalBFIs())
         {
@@ -555,6 +556,7 @@ namespace Rodin::Assembly
         size_t capacity = 0;
         for (const auto& v : ts)
           capacity += v.size();
+        res.clear();
         res.reserve(capacity);
 
         const Offsets& offsets = input.getOffsets();

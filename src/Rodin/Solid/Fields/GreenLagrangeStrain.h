@@ -5,7 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 /**
- * @file GreenLagrangeStrain.h
+ * @file Fields/GreenLagrangeStrain.h
  * @brief Green-Lagrange strain tensor computation.
  *
  * Computes the Green-Lagrange strain tensor:
@@ -14,8 +14,8 @@
  *              = \frac{1}{2}(\mathbf{C} - \mathbf{I})
  * @f]
  */
-#ifndef RODIN_SOLID_POSTPROCESSING_GREENLAGRANGESTRAIN_H
-#define RODIN_SOLID_POSTPROCESSING_GREENLAGRANGESTRAIN_H
+#ifndef RODIN_SOLID_FIELDS_GREENLAGRANGESTRAIN_H
+#define RODIN_SOLID_FIELDS_GREENLAGRANGESTRAIN_H
 
 #include "Rodin/Types.h"
 #include "Rodin/Math/Matrix.h"

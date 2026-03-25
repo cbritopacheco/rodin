@@ -5,7 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 /**
- * @file CauchyStress.h
+ * @file Fields/CauchyStress.h
  * @brief Cauchy (true) stress tensor computation from the first Piola-Kirchhoff stress.
  *
  * Computes the Cauchy stress tensor via the Piola transform:
@@ -16,14 +16,15 @@
  * @f$ \mathbf{F} @f$ is the deformation gradient, and
  * @f$ J = \det(\mathbf{F}) @f$.
  */
-#ifndef RODIN_SOLID_POSTPROCESSING_CAUCHYSTRESS_H
-#define RODIN_SOLID_POSTPROCESSING_CAUCHYSTRESS_H
+#ifndef RODIN_SOLID_FIELDS_CAUCHYSTRESS_H
+#define RODIN_SOLID_FIELDS_CAUCHYSTRESS_H
 
 #include "Rodin/Types.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/SpatialMatrix.h"
 
 #include "Rodin/Solid/Kinematics/KinematicState.h"
+#include "Rodin/Solid/Local/ConstitutivePoint.h"
 #include "Rodin/Solid/Constitutive/HyperElasticLaw.h"
 
 namespace Rodin::Solid
@@ -68,15 +69,16 @@ namespace Rodin::Solid
        * @brief Computes @f$ \boldsymbol{\sigma} = \tfrac{1}{J} \mathbf{P} \mathbf{F}^T @f$.
        * @param[out] sigma Output Cauchy stress tensor
        * @param[in] cache Precomputed law cache
-       * @param[in] state Current kinematic state
+       * @param[in] cp Constitutive point
        */
       void getCauchyStress(
           Math::SpatialMatrix<Real>& sigma,
           const CacheType& cache,
-          const KinematicState& state) const
+          const ConstitutivePoint& cp) const
       {
+        const auto& state = cp.getKinematicState();
         Math::SpatialMatrix<Real> P;
-        m_law.getFirstPiolaKirchhoffStress(P, cache, state);
+        m_law.getFirstPiolaKirchhoffStress(P, cache, cp);
         const auto& F = state.getDeformationGradient();
         const Real J = state.getJacobian();
         sigma = (1.0 / J) * P * F.transpose();

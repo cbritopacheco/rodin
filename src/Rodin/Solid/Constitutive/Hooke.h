@@ -5,7 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 /**
- * @file Hooke.h
+ * @file Constitutive/Hooke.h
  * @brief Hooke's law for linear elasticity.
  *
  * Provides the isotropic elasticity tensor @f$ \mathbb{C} @f$ such that:
@@ -17,8 +17,8 @@
  * where @f$ \boldsymbol{\varepsilon} = \tfrac{1}{2}(\nabla\mathbf{u}
  * + (\nabla\mathbf{u})^T) @f$ is the infinitesimal strain tensor.
  */
-#ifndef RODIN_SOLID_LINEAR_HOOKE_H
-#define RODIN_SOLID_LINEAR_HOOKE_H
+#ifndef RODIN_SOLID_CONSTITUTIVE_HOOKE_H
+#define RODIN_SOLID_CONSTITUTIVE_HOOKE_H
 
 #include "Rodin/Types.h"
 #include "Rodin/Math/Matrix.h"
@@ -46,29 +46,29 @@ namespace Rodin::Solid
   {
     public:
       /**
-       * @brief Constructs Hooke's law with the given Lamé parameters.
+       * @brief Constructs Hooke's law with the given elastic parameters.
        * @param lambda First Lamé parameter @f$ \lambda @f$
        * @param mu Second Lamé parameter (shear modulus) @f$ \mu @f$
        */
-      Hooke(Real lambda, Real mu)
-        : m_lambda(lambda), m_mu(mu)
+      Hooke(Real lameFirstParameter, Real shearModulus)
+        : m_lambda(lameFirstParameter), m_mu(shearModulus)
       {}
 
       Hooke(const Hooke&) = default;
       Hooke(Hooke&&) = default;
 
       /// @brief Gets the first Lamé parameter.
-      Real getLambda() const { return m_lambda; }
+      Real getLameFirstParameter() const { return m_lambda; }
 
       /// @brief Gets the shear modulus.
-      Real getMu() const { return m_mu; }
+      Real getShearModulus() const { return m_mu; }
 
       /**
        * @brief Computes the Cauchy stress from the infinitesimal strain.
        * @param[out] sigma Output stress tensor
        * @param[in] epsilon Infinitesimal strain tensor @f$ \boldsymbol{\varepsilon} @f$
        */
-      void stress(Math::SpatialMatrix<Real>& sigma, const Math::SpatialMatrix<Real>& epsilon) const
+      void getStress(Math::SpatialMatrix<Real>& sigma, const Math::SpatialMatrix<Real>& epsilon) const
       {
         const size_t d = epsilon.rows();
         Math::SpatialMatrix<Real> I;
@@ -85,7 +85,7 @@ namespace Rodin::Solid
        * @param nu Poisson's ratio
        * @returns Hooke object with computed Lamé parameters
        */
-      static Hooke fromYoungPoisson(Real E, Real nu)
+      static Hooke YoungPoisson(Real E, Real nu)
       {
         const Real lambda = E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu));
         const Real mu = E / (2.0 * (1.0 + nu));
