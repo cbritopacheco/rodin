@@ -596,8 +596,9 @@ namespace Rodin::Tests::Unit
 
     Solid::InternalForce force(law, v);
 
-    Math::Vector<Real> data = Math::Vector<Real>::Zero(Vh.getSize());
-    force.setLinearizationPoint(data);
+    GridFunction gf(Vh);
+    gf.getData().setZero();
+    force.setLinearizationPoint(gf);
 
     auto cellIt = mesh.getCell(0);
     force.setPolytope(*cellIt);
@@ -622,8 +623,9 @@ namespace Rodin::Tests::Unit
     Solid::SaintVenantKirchhoff law(2.0, 1.0);
     Solid::InternalForce force(law, v);
 
-    Math::Vector<Real> data = Math::Vector<Real>::Zero(Vh.getSize());
-    force.setLinearizationPoint(data);
+    GridFunction gf(Vh);
+    gf.getData().setZero();
+    force.setLinearizationPoint(gf);
 
     auto cellIt = mesh.getCell(0);
     force.setPolytope(*cellIt);
@@ -648,8 +650,9 @@ namespace Rodin::Tests::Unit
     Solid::MooneyRivlin law(0.5, 0.2, 5.0);
     Solid::InternalForce force(law, v);
 
-    Math::Vector<Real> data = Math::Vector<Real>::Zero(Vh.getSize());
-    force.setLinearizationPoint(data);
+    GridFunction gf(Vh);
+    gf.getData().setZero();
+    force.setLinearizationPoint(gf);
 
     auto cellIt = mesh.getCell(0);
     force.setPolytope(*cellIt);
@@ -675,11 +678,11 @@ namespace Rodin::Tests::Unit
     Solid::InternalForce force(law, v);
 
     // Set a non-trivial displacement (uniform extension)
-    Math::Vector<Real> data(Vh.getSize());
-    data.setZero();
+    GridFunction gf(Vh);
+    gf.getData().setZero();
     for (Index i = 0; i < static_cast<Index>(Vh.getSize()); ++i)
-      data(i) = 0.01 * static_cast<Real>(i % 3);
-    force.setLinearizationPoint(data);
+      gf.getData()(i) = 0.01 * static_cast<Real>(i % 3);
+    force.setLinearizationPoint(gf);
 
     auto cellIt = mesh.getCell(0);
     force.setPolytope(*cellIt);
@@ -715,8 +718,9 @@ namespace Rodin::Tests::Unit
       cp.set<Solid::Tags::FiberDirection>(fiber);
     });
 
-    Math::Vector<Real> data = Math::Vector<Real>::Zero(Vh.getSize());
-    force.setLinearizationPoint(data);
+    GridFunction gf(Vh);
+    gf.getData().setZero();
+    force.setLinearizationPoint(gf);
 
     auto cellIt = mesh.getCell(0);
     force.setPolytope(*cellIt);
@@ -747,8 +751,9 @@ namespace Rodin::Tests::Unit
 
     Solid::MaterialTangent tangent(law, u, v);
 
-    Math::Vector<Real> data = Math::Vector<Real>::Zero(Vh.getSize());
-    tangent.setLinearizationPoint(data);
+    GridFunction gf(Vh);
+    gf.getData().setZero();
+    tangent.setLinearizationPoint(gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);
@@ -775,8 +780,9 @@ namespace Rodin::Tests::Unit
     Solid::SaintVenantKirchhoff law(2.0, 1.0);
     Solid::MaterialTangent tangent(law, u, v);
 
-    Math::Vector<Real> data = Math::Vector<Real>::Zero(Vh.getSize());
-    tangent.setLinearizationPoint(data);
+    GridFunction gf(Vh);
+    gf.getData().setZero();
+    tangent.setLinearizationPoint(gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);
@@ -803,8 +809,9 @@ namespace Rodin::Tests::Unit
     Solid::MooneyRivlin law(0.5, 0.2, 5.0);
     Solid::MaterialTangent tangent(law, u, v);
 
-    Math::Vector<Real> data = Math::Vector<Real>::Zero(Vh.getSize());
-    tangent.setLinearizationPoint(data);
+    GridFunction gf(Vh);
+    gf.getData().setZero();
+    tangent.setLinearizationPoint(gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);
@@ -832,11 +839,11 @@ namespace Rodin::Tests::Unit
     Solid::MaterialTangent tangent(law, u, v);
 
     // Non-trivial linearization point
-    Math::Vector<Real> data(Vh.getSize());
-    data.setZero();
+    GridFunction gf(Vh);
+    gf.getData().setZero();
     for (Index i = 0; i < static_cast<Index>(Vh.getSize()); ++i)
-      data(i) = 0.01 * static_cast<Real>(i % 3);
-    tangent.setLinearizationPoint(data);
+      gf.getData()(i) = 0.01 * static_cast<Real>(i % 3);
+    tangent.setLinearizationPoint(gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);
@@ -863,11 +870,11 @@ namespace Rodin::Tests::Unit
     Solid::NeoHookean law(2.0, 1.0);
     Solid::MaterialTangent tangent(law, u, v);
 
-    Math::Vector<Real> data(Vh.getSize());
-    data.setZero();
+    GridFunction gf(Vh);
+    gf.getData().setZero();
     for (Index i = 0; i < static_cast<Index>(Vh.getSize()); ++i)
-      data(i) = 0.01 * static_cast<Real>(i % 3);
-    tangent.setLinearizationPoint(data);
+      gf.getData()(i) = 0.01 * static_cast<Real>(i % 3);
+    tangent.setLinearizationPoint(gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);
@@ -903,8 +910,9 @@ namespace Rodin::Tests::Unit
       cp.set<Solid::Tags::Activation>(1.0);
     });
 
-    Math::Vector<Real> data = Math::Vector<Real>::Zero(Vh.getSize());
-    tangent.setLinearizationPoint(data);
+    GridFunction gf(Vh);
+    gf.getData().setZero();
+    tangent.setLinearizationPoint(gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);

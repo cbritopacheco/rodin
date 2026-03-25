@@ -34,6 +34,7 @@
 #include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Math/Vector.h"
+#include "Rodin/Variational/GridFunction.h"
 #include "Rodin/Variational/BilinearFormIntegrator.h"
 #include "Rodin/Variational/TrialFunction.h"
 #include "Rodin/Variational/TestFunction.h"
@@ -76,6 +77,7 @@ namespace Rodin::Solid
       using Parent = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
       using LawType = LawDerived;
       using FESType = FES;
+      using GridFunctionType = Variational::GridFunction<FESType, Math::Vector<ScalarType>>;
 
       /**
        * @brief Constructs the material tangent integrator.
@@ -92,7 +94,7 @@ namespace Rodin::Solid
           m_law(law),
           m_trialfes(u.getFiniteElementSpace()),
           m_testfes(v.getFiniteElementSpace()),
-          m_linData(nullptr),
+          m_linGf(nullptr),
           m_quadOrder(0)
       {
         static_assert(std::is_same_v<TrialFES, FES>);
@@ -104,19 +106,19 @@ namespace Rodin::Solid
           m_law(other.m_law),
           m_trialfes(other.m_trialfes),
           m_testfes(other.m_testfes),
-          m_linData(other.m_linData),
+          m_linGf(other.m_linGf),
           m_quadOrder(other.m_quadOrder),
           m_input(other.m_input)
       {}
 
       /**
-       * @brief Sets the linearization point (current displacement DOF vector).
-       * @param data Reference to the coefficient vector of the displacement GridFunction
+       * @brief Sets the linearization point (current displacement GridFunction).
+       * @param gf Reference to the displacement GridFunction
        * @returns Reference to this object for chaining
        */
-      MaterialTangent& setLinearizationPoint(const Math::Vector<ScalarType>& data)
+      MaterialTangent& setLinearizationPoint(const GridFunctionType& gf)
       {
-        m_linData = &data;
+        m_linGf = &gf;
         return *this;
       }
 
@@ -155,8 +157,10 @@ namespace Rodin::Solid
 
       MaterialTangent& setPolytope(const Geometry::Polytope& polytope) final override
       {
-        assert(m_linData);
+        assert(m_linGf);
         m_polytope = polytope;
+
+        const auto& linData = m_linGf->getData();
 
         const size_t d = polytope.getDimension();
         const auto d_u8 = static_cast<std::uint8_t>(d);
@@ -205,7 +209,7 @@ namespace Rodin::Solid
           H.setZero();
           for (size_t dof = 0; dof < ndof; ++dof)
           {
-            const ScalarType u_dof = (*m_linData)(fes.getGlobalIndex({d, idx}, dof));
+            const ScalarType u_dof = linData(fes.getGlobalIndex({d, idx}, dof));
             for (size_t c = 0; c < vdim; ++c)
               for (size_t k = 0; k < d; ++k)
                 H(c, k) += u_dof * physJacs[dof](c, k);
@@ -278,7 +282,7 @@ namespace Rodin::Solid
       LawType m_law;
       std::reference_wrapper<const FESType> m_trialfes;
       std::reference_wrapper<const FESType> m_testfes;
-      const Math::Vector<ScalarType>* m_linData;
+      const GridFunctionType* m_linGf;
       size_t m_quadOrder;
       InputFunction m_input;
 

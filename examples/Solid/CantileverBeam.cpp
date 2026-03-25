@@ -159,10 +159,10 @@ int main(int, char**)
 
     // ---- nonlinear solid operators ----------------------------------------
     Solid::MaterialTangent tangent(law, du, w);
-    tangent.setLinearizationPoint(u.getData());
+    tangent.setLinearizationPoint(u);
 
     Solid::InternalForce internal(law, w);
-    internal.setLinearizationPoint(u.getData());
+    internal.setLinearizationPoint(u);
 
     // Effective nonlinear problem:
     //
