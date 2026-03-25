@@ -63,7 +63,6 @@ add_subdirectory(Serialization)
 
 add_subdirectory(Advection)
 add_subdirectory(Eikonal)
-add_subdirectory(LinearElasticity)
 add_subdirectory(Solid)
 
 add_subdirectory(MMG)
