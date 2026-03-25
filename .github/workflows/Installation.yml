@@ -9,6 +9,9 @@ on:
       - master
       - develop
 
+permissions:
+  contents: read
+
 concurrency:
   group: Installation-${{ github.ref }}
   cancel-in-progress: true
