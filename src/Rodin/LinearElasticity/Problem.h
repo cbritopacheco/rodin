@@ -15,7 +15,7 @@
 #define RODIN_MODELS_ELASTICITY_LINEARELASTICITY_H
 
 #include "Rodin/Solver/CG.h"
-#include "Rodin/Variational/LinearElasticity.h"
+#include "Rodin/Solid/Linear/LinearElasticityIntegral.h"
 
 namespace Rodin::Elasticity
 {

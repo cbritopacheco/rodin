@@ -21,6 +21,8 @@ set(RodinSolid_HEADERS
   Fields/GreenLagrangeStrain.h
   Fields/FirstPiolaKirchhoffStress.h
   Fields/CauchyStress.h
+  Linear/ForwardDecls.h
+  Linear/LinearElasticityIntegral.h
 )
 
 # Header-only / interface library

@@ -55,4 +55,7 @@
 #include "Solid/Fields/FirstPiolaKirchhoffStress.h"
 #include "Solid/Fields/CauchyStress.h"
 
+// Linear elasticity
+#include "Solid/Linear/LinearElasticityIntegral.h"
+
 #endif
