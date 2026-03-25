@@ -1638,18 +1638,20 @@ namespace Rodin::Variational
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getRHS().getLHS().getLeaf(), integrand.getRHS().getRHS().getLeaf()),
           m_integrand(integrand.copy()),
-          m_distortion(Math::nan<Real>()),
-          m_weight(Math::nan<Real>()),
-          m_set(false)
+          m_qf(nullptr),
+          m_set(false),
+          m_order(0),
+          m_geometry(Geometry::Polytope::Type::Point)
       {}
 
       constexpr
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
-          m_distortion(Math::nan<Real>()),
-          m_weight(Math::nan<Real>()),
-          m_set(false)
+          m_qf(nullptr),
+          m_set(false),
+          m_order(0),
+          m_geometry(Geometry::Polytope::Type::Point)
       {}
 
       constexpr
@@ -1657,15 +1659,12 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
           m_polytope(std::move(other.m_polytope)),
-          m_qf(std::move(other.m_qf)),
-          m_p(std::move(other.m_p)),
-          m_distortion(std::move(other.m_distortion)),
-          m_weight(std::move(other.m_weight)),
-          m_trialBasis(std::move(other.m_trialBasis)),
-          m_testBasis(std::move(other.m_testBasis)),
+          m_qf(std::exchange(other.m_qf, nullptr)),
+          m_ps(std::move(other.m_ps)),
           m_matrix(std::move(other.m_matrix)),
-          m_set(std::move(other.m_set)),
-          m_geometry(std::move(other.m_geometry))
+          m_set(std::exchange(other.m_set, false)),
+          m_order(std::exchange(other.m_order, 0)),
+          m_geometry(std::exchange(other.m_geometry, Geometry::Polytope::Type::Point))
       {}
 
       constexpr
@@ -1684,7 +1683,6 @@ namespace Rodin::Variational
       {
         m_polytope = polytope;
         const auto& geometry = polytope.getGeometry();
-        const bool recompute = !m_set || m_geometry != geometry;
 
         const auto& integrand = getIntegrand();
         const auto& coeff = integrand.getLHS();
@@ -1693,93 +1691,82 @@ namespace Rodin::Variational
         const auto& rhs = inner.getRHS();
         const auto& trialfes = lhs.getFiniteElementSpace();
         const auto& testfes = rhs.getFiniteElementSpace();
+        const size_t d = polytope.getDimension();
+        const Index idx = polytope.getIndex();
+        const auto& trialfeData = trialfes.getFiniteElement(d, idx);
+        const auto& testfeData = testfes.getFiniteElement(d, idx);
+        const size_t order = integrand.getOrder(polytope).value_or(
+          trialfeData.getOrder() + testfeData.getOrder());
+        const bool recompute = !m_set || m_order != order || m_geometry != geometry;
 
         if (recompute)
         {
           m_set = true;
+          m_order = order;
           m_geometry = geometry;
 
-          m_qf.emplace(geometry);
-          assert(m_qf->getSize() == 1);
-
-          m_p.emplace(polytope, m_qf->getPoint(0));
-          m_weight = m_qf->getWeight(0);
-
-          const auto& rc = m_qf->getPoint(0);
-
-          if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
-          {
-            const P1Element<LHSRangeType> trialfe(geometry);
-            m_trialBasis.resize(trialfe.getCount());
-            for (size_t i = 0; i < trialfe.getCount(); ++i)
-              m_trialBasis[i] = trialfe.getBasis(i)(rc);
-          }
-          else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>)
-          {
-            const P1Element<LHSRangeType> trialfe(geometry, trialfes.getVectorDimension());
-            m_trialBasis.resize(trialfe.getCount());
-            for (size_t i = 0; i < trialfe.getCount(); ++i)
-              m_trialBasis[i] = trialfe.getBasis(i)(rc);
-          }
-          else
-          {
-            assert(false);
-          }
-
-          if (trialfes == testfes)
-          {
-            m_testBasis = m_trialBasis;
-          }
-          else
-          {
-            if constexpr (std::is_same_v<RHSRangeType, ScalarType>)
-            {
-              const P1Element<RHSRangeType> testfe(geometry);
-              m_testBasis.resize(testfe.getCount());
-              for (size_t i = 0; i < testfe.getCount(); ++i)
-                m_testBasis[i] = testfe.getBasis(i)(rc);
-            }
-            else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>)
-            {
-              const P1Element<RHSRangeType> testfe(geometry, testfes.getVectorDimension());
-              m_testBasis.resize(testfe.getCount());
-              for (size_t i = 0; i < testfe.getCount(); ++i)
-                m_testBasis[i] = testfe.getBasis(i)(rc);
-            }
-            else
-            {
-              assert(false);
-            }
-          }
-
-          m_matrix.resize(m_testBasis.size(), m_trialBasis.size());
+          m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
+          m_ps.clear();
+          m_ps.reserve(m_qf->getSize());
+          for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
+            m_ps.emplace_back(polytope, m_qf->getPoint(qp));
+        }
+        else
+        {
+          assert(m_qf);
+          for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
+            m_ps[qp].setPolytope(polytope);
         }
 
-        assert(m_p);
-        auto& p = *m_p;
-        p.setPolytope(polytope);
-        m_distortion = p.getDistortion();
-
-        const ScalarType csv = coeff(p);
-
-        const size_t ntr = m_trialBasis.size();
-        const size_t nte = m_testBasis.size();
-
-        for (size_t te = 0; te < nte; ++te)
-          for (size_t tr = 0; tr < ntr; ++tr)
+        if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
+        {
+          const P1Element<LHSRangeType> trialfe(geometry);
+          const P1Element<RHSRangeType> testfe(geometry);
+          m_matrix.resize(testfe.getCount(), trialfe.getCount());
+          m_matrix.setZero();
+          for (size_t qp = 0; qp < m_ps.size(); ++qp)
           {
-            if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
-              m_matrix(te, tr) = csv * m_testBasis[te] * m_trialBasis[tr];
-            else
-              m_matrix(te, tr) = csv * Math::dot(m_testBasis[te], m_trialBasis[tr]);
+            const auto& p = m_ps[qp];
+            const auto& rc = m_qf->getPoint(qp);
+            const ScalarType wdet =
+              static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
+            const ScalarType csv = coeff(p);
+            for (size_t te = 0; te < testfe.getCount(); ++te)
+              for (size_t tr = 0; tr < trialfe.getCount(); ++tr)
+                m_matrix(te, tr) +=
+                  wdet * csv * testfe.getBasis(te)(rc) * trialfe.getBasis(tr)(rc);
           }
+        }
+        else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>)
+        {
+          const P1Element<LHSRangeType> trialfe(geometry, trialfes.getVectorDimension());
+          const P1Element<RHSRangeType> testfe(geometry, testfes.getVectorDimension());
+          m_matrix.resize(testfe.getCount(), trialfe.getCount());
+          m_matrix.setZero();
+          for (size_t qp = 0; qp < m_ps.size(); ++qp)
+          {
+            const auto& p = m_ps[qp];
+            const auto& rc = m_qf->getPoint(qp);
+            const ScalarType wdet =
+              static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
+            const ScalarType csv = coeff(p);
+            for (size_t te = 0; te < testfe.getCount(); ++te)
+              for (size_t tr = 0; tr < trialfe.getCount(); ++tr)
+                m_matrix(te, tr) +=
+                  wdet * csv * Math::dot(testfe.getBasis(te)(rc), trialfe.getBasis(tr)(rc));
+          }
+        }
+        else
+        {
+          assert(false);
+        }
 
         return *this;
       }
 
       ScalarType integrate(size_t tr, size_t te) final override
       {
-        return m_weight * m_distortion * m_matrix(te, tr);
+        return m_matrix(te, tr);
       }
 
       virtual Geometry::Region getRegion() const override = 0;
@@ -1789,18 +1776,13 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_integrand;
 
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
-      Optional<QF::Centroid> m_qf;
-      Optional<Geometry::Point> m_p;
-
-      Real m_distortion;
-      Real m_weight;
-
-      std::vector<LHSRangeType> m_trialBasis;
-      std::vector<RHSRangeType> m_testBasis;
+      const QF::QuadratureFormulaBase* m_qf;
+      std::vector<Geometry::Point> m_ps;
       Math::Matrix<ScalarType> m_matrix;
 
       bool m_set;
-      Optional<Geometry::Polytope::Type> m_geometry;
+      size_t m_order;
+      Geometry::Polytope::Type m_geometry;
   };
 
   template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Range, class Mesh>
