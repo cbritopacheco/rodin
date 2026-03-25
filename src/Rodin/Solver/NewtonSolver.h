@@ -16,6 +16,7 @@
 #include "Rodin/Alert/Raise.h"
 #include "Rodin/Copyable.h"
 #include "Rodin/FormLanguage/Traits.h"
+#include "Rodin/Math/Common.h"
 #include "Rodin/Math/ForwardDecls.h"
 #include "Rodin/Math/LinearSystem.h"
 #include "Rodin/Types.h"
@@ -252,8 +253,17 @@ namespace Rodin::Solver
         {
           auto& pb = this->getProblem();
           pb.assemble();
+
           auto& linearSystem = pb.getLinearSystem();
           const Real r = linearSystem.getVector().norm();
+
+          if (!std::isfinite(r))
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Newton residual is not finite."
+              << Alert::Raise;
+          }
+
           if (it == 0)
             r0 = r;
 
@@ -265,6 +275,8 @@ namespace Rodin::Solver
           this->getLinearSolver().solve();
           x += m_alpha * linearSystem.getSolution();
         }
+
+        std::cout << "Reached max iterations\n";
       }
 
     private:

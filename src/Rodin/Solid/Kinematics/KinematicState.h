@@ -98,6 +98,7 @@ namespace Rodin::Solid
 
         // J = det(F)
         m_J = m_F.determinant();
+        assert(m_J > 0); // Ensure no interpenetration
 
         // F^{-1} and F^{-T}
         m_Finv = m_F.inverse();
@@ -111,6 +112,8 @@ namespace Rodin::Solid
 
         // log(J)
         m_logJ = std::log(m_J);
+        assert(std::isfinite(m_logJ)); // Ensure no singularity
+
         return *this;
       }
 
