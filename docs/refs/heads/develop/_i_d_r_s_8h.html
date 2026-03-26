@@ -80,8 +80,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md230">Notes</a></li>
-            <li><a href="#autotoc_md231">Usage Example</a></li>
+            <li><a href="#autotoc_md238">Notes</a></li>
+            <li><a href="#autotoc_md239">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -109,7 +109,7 @@
 <use x='194.944339' y='0' xlink:href='#eq1-g1-61'/>
 <use x='207.36982' y='0' xlink:href='#eq1-g0-98'/>
 </g>
-</svg></div><p>for general (possibly non-symmetric) matrices.</p><p>IDR(s) is typically competitive with BiCGSTAB/GMRES for certain nonsymmetric problems, with short recurrences and modest memory footprint.</p><section id="autotoc_md230"><h3><a href="#autotoc_md230">Notes</a></h3><ul><li>This implementation uses Eigen&#x27;s unsupported IDRS.</li></ul></section><section id="autotoc_md231"><h3><a href="#autotoc_md231">Usage Example</a></h3><pre class="m-code"><span class="n">Solver</span><span class="o">::</span><span class="n">IDRS</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
+</svg></div><p>for general (possibly non-symmetric) matrices.</p><p>IDR(s) is typically competitive with BiCGSTAB/GMRES for certain nonsymmetric problems, with short recurrences and modest memory footprint.</p><section id="autotoc_md238"><h3><a href="#autotoc_md238">Notes</a></h3><ul><li>This implementation uses Eigen&#x27;s unsupported IDRS.</li></ul></section><section id="autotoc_md239"><h3><a href="#autotoc_md239">Usage Example</a></h3><pre class="m-code"><span class="n">Solver</span><span class="o">::</span><span class="n">IDRS</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
 <span class="n">solver</span><span class="p">.</span><span class="n">setTolerance</span><span class="p">(</span><span class="mf">1e-10</span><span class="p">).</span><span class="n">setMaxIterations</span><span class="p">(</span><span class="mi">1000</span><span class="p">).</span><span class="n">setS</span><span class="p">(</span><span class="mi">8</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>

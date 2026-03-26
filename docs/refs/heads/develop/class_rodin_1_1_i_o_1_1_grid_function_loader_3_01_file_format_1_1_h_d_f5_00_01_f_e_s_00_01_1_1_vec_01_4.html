@@ -82,7 +82,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md177">HDF5 Layout</a></li>
+            <li><a href="#autotoc_md170">HDF5 Layout</a></li>
             <li>
               Reference
               <ul>
@@ -93,7 +93,7 @@
             </li>
           </ul>
         </nav>
-<p>Reads per-rank DOF values from an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file into the local portion of a distributed <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector.</p><section id="autotoc_md177"><h3><a href="#autotoc_md177">HDF5 Layout</a></h3><p>The expected file structure is:</p><ul><li><code>/GridFunction/Values/Data</code> — 1-D array of DOF values</li><li><code>/GridFunction/Meta/Size</code> — number of DOFs</li><li><code>/GridFunction/Meta/Dimension</code> — vector dimension</li></ul><aside class="m-note m-info"><h4>Note</h4><p>Stream-based loading is not supported; use the path-based overload.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html" class="m-doc">GridFunctionPrinter</a></p></aside></section>
+<p>Reads per-rank DOF values from an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file into the local portion of a distributed <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector.</p><section id="autotoc_md170"><h3><a href="#autotoc_md170">HDF5 Layout</a></h3><p>The expected file structure is:</p><ul><li><code>/GridFunction/Values/Data</code> — 1-D array of DOF values</li><li><code>/GridFunction/Meta/Size</code> — number of DOFs</li><li><code>/GridFunction/Meta/Dimension</code> — vector dimension</li></ul><aside class="m-note m-info"><h4>Note</h4><p>Stream-based loading is not supported; use the path-based overload.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html" class="m-doc">GridFunctionPrinter</a></p></aside></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">

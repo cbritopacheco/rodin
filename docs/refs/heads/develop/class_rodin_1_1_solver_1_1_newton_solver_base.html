@@ -200,6 +200,11 @@ u^{k + 1} = u^k + \delta u^k.
               <span class="m-doc-wrap-bumper">void <a href="#a3e02db55cedf48a5ba1545bc84dfceea" class="m-doc">solve</a>(</span><span class="m-doc-wrap">SolutionType&amp; x) <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Solve a nonlinear system starting from the initial guess stored in <code>x</code>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class GridFunctionType, class = std::enable_if_t&lt;         std::is_same_v&lt;           typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;std::decay_t&lt;GridFunctionType&gt;&gt;::DataType,            SolutionType&gt;&gt;&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#af5a89e139d4f7ceddba01f8ed8a7e837" class="m-doc">solve</a>(</span><span class="m-doc-wrap">GridFunctionType&amp; gf)</span>
+            </dt>
+            <dd>Solve a nonlinear system using a GridFunction as the solution container.</dd>
           </dl>
         </section>
         <section>
@@ -243,6 +248,37 @@ u^{k + 1} = u^k + \delta u^k.
                 </tr>
               </tbody>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="af5a89e139d4f7ceddba01f8ed8a7e837"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LinearSolver&gt;
+                template&lt;class GridFunctionType, class = std::enable_if_t&lt;         std::is_same_v&lt;           typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;std::decay_t&lt;GridFunctionType&gt;&gt;::DataType,            SolutionType&gt;&gt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />NewtonSolverBase&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af5a89e139d4f7ceddba01f8ed8a7e837" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">GridFunctionType&amp; gf)</span></span>
+            </h3>
+            <p>Solve a nonlinear system using a GridFunction as the solution container.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">GridFunctionType</td>
+                  <td>GridFunction type whose <a href="namespace_rodin_1_1_traits.html" class="m-doc">Traits</a> must expose DataType.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>gf&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>GridFunction holding the initial guess / final solution.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>The GridFunction&#x27;s internal data vector is used both as the initial guess and as the storage for the converged solution. The backend data type is inferred from <code>FormLanguage::Traits&lt;GridFunctionType&gt;::DataType</code> and must match the solver&#x27;s <code>SolutionType</code>.</p><p>This is equivalent to calling <code>solve</code>(gf.getData()).</p>
           </div></section>
         </section>
       </div>

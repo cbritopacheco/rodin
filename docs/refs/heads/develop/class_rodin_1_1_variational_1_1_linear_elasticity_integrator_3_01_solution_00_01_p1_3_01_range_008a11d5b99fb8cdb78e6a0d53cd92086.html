@@ -74,7 +74,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_variational_2_p1_2_linear_elasticity_2_linear_elasticity_integral_8h.html">&lt;Rodin/Variational/P1/LinearElasticity/LinearElasticityIntegral.h&gt;</a></div>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_linear_elasticity_integral_8h.html">&lt;Rodin/Solid/Linear/P1/LinearElasticityIntegral.h&gt;</a></div>
           <div class="m-doc-template">template&lt;class Solution, class MuDerived, class LambdaDerived, class Range, class Mesh&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, MuDerived, LambdaDerived&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
@@ -82,7 +82,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md420">Local Stiffness Matrix</a></li>
+            <li><a href="#autotoc_md214">Local Stiffness Matrix</a></li>
             <li>
               Reference
               <ul>
@@ -91,7 +91,7 @@
             </li>
           </ul>
         </nav>
-<p>Specialized integrator for the linear elasticity problem with <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> vector elements. Uses centroid quadrature which is exact for the constant Jacobians of <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> basis functions.</p><section id="autotoc_md420"><h3><a href="#autotoc_md420">Local Stiffness Matrix</a></h3><p>For element <svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
+<p>Specialized integrator for the linear elasticity problem with <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> vector elements. Uses centroid quadrature which is exact for the constant Jacobians of <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> basis functions.</p><section id="autotoc_md214"><h3><a href="#autotoc_md214">Local Stiffness Matrix</a></h3><p>For element <svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
 <title>
 $ K $
 </title>
@@ -173,6 +173,14 @@ $ K $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a665c15fd4d38c14f3ba77239ca6f0a2a" class="m-doc">getShearModulus</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">MuType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Gets the shear modulus function.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0cc290aaad04960af30e95647fc4df91" class="m-doc">getLameFirstParameter</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">LambdaType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Gets the first Lamé parameter function.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aaf7cd784909d44f892c1a99fab183140" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_linear_elasticity_integrator.html" class="m-doc">LinearElasticityIntegrator</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a copy of this integrator.</dd>
@@ -180,6 +188,40 @@ $ K $
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a665c15fd4d38c14f3ba77239ca6f0a2a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Solution, class MuDerived, class LambdaDerived, class Range, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">MuType</a>&amp; Rodin::<wbr />Variational::<wbr />LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, MuDerived, LambdaDerived&gt;&lt;Solution, MuDerived, LambdaDerived, Range, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a665c15fd4d38c14f3ba77239ca6f0a2a" class="m-doc-self">getShearModulus</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the shear modulus function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to shear modulus (second Lamé parameter) function</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0cc290aaad04960af30e95647fc4df91"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Solution, class MuDerived, class LambdaDerived, class Range, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">LambdaType</a>&amp; Rodin::<wbr />Variational::<wbr />LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, MuDerived, LambdaDerived&gt;&lt;Solution, MuDerived, LambdaDerived, Range, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0cc290aaad04960af30e95647fc4df91" class="m-doc-self">getLameFirstParameter</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the first Lamé parameter function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to first Lamé parameter function</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="aaf7cd784909d44f892c1a99fab183140"><div>
             <h3>
               <div class="m-doc-template">
