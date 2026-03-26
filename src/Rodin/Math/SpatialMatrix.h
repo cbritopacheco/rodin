@@ -1026,6 +1026,288 @@ namespace Rodin::Math
       }
 
       constexpr
+      SpatialMatrix& operator*=(const Scalar& s) noexcept
+      {
+        if (m_rows == 0 || m_cols == 0)
+          return *this;
+
+        switch (static_cast<unsigned>(m_rows) * 4u + static_cast<unsigned>(m_cols))
+        {
+          case 5u:
+            m_data(0,0) *= s; return *this;
+          case 6u:
+            m_data(0,0) *= s; m_data(0,1) *= s; return *this;
+          case 7u:
+            m_data(0,0) *= s; m_data(0,1) *= s; m_data(0,2) *= s; return *this;
+          case 9u:
+            m_data(0,0) *= s; m_data(1,0) *= s; return *this;
+          case 10u:
+            m_data(0,0) *= s; m_data(0,1) *= s;
+            m_data(1,0) *= s; m_data(1,1) *= s;
+            return *this;
+          case 11u:
+            m_data(0,0) *= s; m_data(0,1) *= s; m_data(0,2) *= s;
+            m_data(1,0) *= s; m_data(1,1) *= s; m_data(1,2) *= s;
+            return *this;
+          case 13u:
+            m_data(0,0) *= s; m_data(1,0) *= s; m_data(2,0) *= s; return *this;
+          case 14u:
+            m_data(0,0) *= s; m_data(0,1) *= s;
+            m_data(1,0) *= s; m_data(1,1) *= s;
+            m_data(2,0) *= s; m_data(2,1) *= s;
+            return *this;
+          case 15u:
+            m_data(0,0) *= s; m_data(0,1) *= s; m_data(0,2) *= s;
+            m_data(1,0) *= s; m_data(1,1) *= s; m_data(1,2) *= s;
+            m_data(2,0) *= s; m_data(2,1) *= s; m_data(2,2) *= s;
+            return *this;
+          default:
+            assert(false);
+            return *this;
+        }
+      }
+
+      constexpr
+      SpatialMatrix& operator*=(const SpatialMatrix& rhs) noexcept
+      {
+        assert(m_cols == rhs.m_rows);
+
+        const std::uint8_t r = m_rows;
+        const std::uint8_t k = m_cols;
+        const std::uint8_t c = rhs.m_cols;
+
+        // Empty product: preserve row count, update column count.
+        if (r == 0 || k == 0 || c == 0)
+        {
+          m_cols = c;
+          return *this;
+        }
+
+        // Cache active lhs entries to handle aliasing (*this *= *this) safely
+        // and to keep the hot path register-friendly.
+        const Scalar a00 = (r >= 1 && k >= 1) ? m_data(0,0) : Scalar(0);
+        const Scalar a01 = (r >= 1 && k >= 2) ? m_data(0,1) : Scalar(0);
+        const Scalar a02 = (r >= 1 && k >= 3) ? m_data(0,2) : Scalar(0);
+
+        const Scalar a10 = (r >= 2 && k >= 1) ? m_data(1,0) : Scalar(0);
+        const Scalar a11 = (r >= 2 && k >= 2) ? m_data(1,1) : Scalar(0);
+        const Scalar a12 = (r >= 2 && k >= 3) ? m_data(1,2) : Scalar(0);
+
+        const Scalar a20 = (r >= 3 && k >= 1) ? m_data(2,0) : Scalar(0);
+        const Scalar a21 = (r >= 3 && k >= 2) ? m_data(2,1) : Scalar(0);
+        const Scalar a22 = (r >= 3 && k >= 3) ? m_data(2,2) : Scalar(0);
+
+        const auto& B = rhs.m_data;
+
+        const Scalar b00 = (k >= 1 && c >= 1) ? B(0,0) : Scalar(0);
+        const Scalar b01 = (k >= 1 && c >= 2) ? B(0,1) : Scalar(0);
+        const Scalar b02 = (k >= 1 && c >= 3) ? B(0,2) : Scalar(0);
+
+        const Scalar b10 = (k >= 2 && c >= 1) ? B(1,0) : Scalar(0);
+        const Scalar b11 = (k >= 2 && c >= 2) ? B(1,1) : Scalar(0);
+        const Scalar b12 = (k >= 2 && c >= 3) ? B(1,2) : Scalar(0);
+
+        const Scalar b20 = (k >= 3 && c >= 1) ? B(2,0) : Scalar(0);
+        const Scalar b21 = (k >= 3 && c >= 2) ? B(2,1) : Scalar(0);
+        const Scalar b22 = (k >= 3 && c >= 3) ? B(2,2) : Scalar(0);
+
+        // key in [0..63] for (r,k,c) in [0..3]^3
+        const unsigned key = static_cast<unsigned>(r) * 16u
+                           + static_cast<unsigned>(k) *  4u
+                           + static_cast<unsigned>(c);
+
+        switch (key)
+        {
+          // -------------------- k = 1 --------------------
+
+          case 1u * 16u + 1u * 4u + 1u: // 1x1 * 1x1 => 1x1
+            m_data(0,0) = a00 * b00;
+            break;
+
+          case 1u * 16u + 1u * 4u + 2u: // 1x1 * 1x2 => 1x2
+            m_data(0,0) = a00 * b00;
+            m_data(0,1) = a00 * b01;
+            break;
+
+          case 1u * 16u + 1u * 4u + 3u: // 1x1 * 1x3 => 1x3
+            m_data(0,0) = a00 * b00;
+            m_data(0,1) = a00 * b01;
+            m_data(0,2) = a00 * b02;
+            break;
+
+          case 2u * 16u + 1u * 4u + 1u: // 2x1 * 1x1 => 2x1
+            m_data(0,0) = a00 * b00;
+            m_data(1,0) = a10 * b00;
+            break;
+
+          case 2u * 16u + 1u * 4u + 2u: // 2x1 * 1x2 => 2x2
+            m_data(0,0) = a00 * b00; m_data(0,1) = a00 * b01;
+            m_data(1,0) = a10 * b00; m_data(1,1) = a10 * b01;
+            break;
+
+          case 2u * 16u + 1u * 4u + 3u: // 2x1 * 1x3 => 2x3
+            m_data(0,0) = a00 * b00; m_data(0,1) = a00 * b01; m_data(0,2) = a00 * b02;
+            m_data(1,0) = a10 * b00; m_data(1,1) = a10 * b01; m_data(1,2) = a10 * b02;
+            break;
+
+          case 3u * 16u + 1u * 4u + 1u: // 3x1 * 1x1 => 3x1
+            m_data(0,0) = a00 * b00;
+            m_data(1,0) = a10 * b00;
+            m_data(2,0) = a20 * b00;
+            break;
+
+          case 3u * 16u + 1u * 4u + 2u: // 3x1 * 1x2 => 3x2
+            m_data(0,0) = a00 * b00; m_data(0,1) = a00 * b01;
+            m_data(1,0) = a10 * b00; m_data(1,1) = a10 * b01;
+            m_data(2,0) = a20 * b00; m_data(2,1) = a20 * b01;
+            break;
+
+          case 3u * 16u + 1u * 4u + 3u: // 3x1 * 1x3 => 3x3
+            m_data(0,0) = a00 * b00; m_data(0,1) = a00 * b01; m_data(0,2) = a00 * b02;
+            m_data(1,0) = a10 * b00; m_data(1,1) = a10 * b01; m_data(1,2) = a10 * b02;
+            m_data(2,0) = a20 * b00; m_data(2,1) = a20 * b01; m_data(2,2) = a20 * b02;
+            break;
+
+          // -------------------- k = 2 --------------------
+
+          case 1u * 16u + 2u * 4u + 1u:
+            m_data(0,0) = a00*b00 + a01*b10;
+            break;
+
+          case 1u * 16u + 2u * 4u + 2u:
+            m_data(0,0) = a00*b00 + a01*b10;
+            m_data(0,1) = a00*b01 + a01*b11;
+            break;
+
+          case 1u * 16u + 2u * 4u + 3u:
+            m_data(0,0) = a00*b00 + a01*b10;
+            m_data(0,1) = a00*b01 + a01*b11;
+            m_data(0,2) = a00*b02 + a01*b12;
+            break;
+
+          case 2u * 16u + 2u * 4u + 1u:
+            m_data(0,0) = a00*b00 + a01*b10;
+            m_data(1,0) = a10*b00 + a11*b10;
+            break;
+
+          case 2u * 16u + 2u * 4u + 2u:
+            m_data(0,0) = a00*b00 + a01*b10;
+            m_data(0,1) = a00*b01 + a01*b11;
+            m_data(1,0) = a10*b00 + a11*b10;
+            m_data(1,1) = a10*b01 + a11*b11;
+            break;
+
+          case 2u * 16u + 2u * 4u + 3u:
+            m_data(0,0) = a00*b00 + a01*b10;
+            m_data(0,1) = a00*b01 + a01*b11;
+            m_data(0,2) = a00*b02 + a01*b12;
+            m_data(1,0) = a10*b00 + a11*b10;
+            m_data(1,1) = a10*b01 + a11*b11;
+            m_data(1,2) = a10*b02 + a11*b12;
+            break;
+
+          case 3u * 16u + 2u * 4u + 1u:
+            m_data(0,0) = a00*b00 + a01*b10;
+            m_data(1,0) = a10*b00 + a11*b10;
+            m_data(2,0) = a20*b00 + a21*b10;
+            break;
+
+          case 3u * 16u + 2u * 4u + 2u:
+            m_data(0,0) = a00*b00 + a01*b10;
+            m_data(0,1) = a00*b01 + a01*b11;
+            m_data(1,0) = a10*b00 + a11*b10;
+            m_data(1,1) = a10*b01 + a11*b11;
+            m_data(2,0) = a20*b00 + a21*b10;
+            m_data(2,1) = a20*b01 + a21*b11;
+            break;
+
+          case 3u * 16u + 2u * 4u + 3u:
+            m_data(0,0) = a00*b00 + a01*b10;
+            m_data(0,1) = a00*b01 + a01*b11;
+            m_data(0,2) = a00*b02 + a01*b12;
+            m_data(1,0) = a10*b00 + a11*b10;
+            m_data(1,1) = a10*b01 + a11*b11;
+            m_data(1,2) = a10*b02 + a11*b12;
+            m_data(2,0) = a20*b00 + a21*b10;
+            m_data(2,1) = a20*b01 + a21*b11;
+            m_data(2,2) = a20*b02 + a21*b12;
+            break;
+
+          // -------------------- k = 3 --------------------
+
+          case 1u * 16u + 3u * 4u + 1u:
+            m_data(0,0) = a00*b00 + a01*b10 + a02*b20;
+            break;
+
+          case 1u * 16u + 3u * 4u + 2u:
+            m_data(0,0) = a00*b00 + a01*b10 + a02*b20;
+            m_data(0,1) = a00*b01 + a01*b11 + a02*b21;
+            break;
+
+          case 1u * 16u + 3u * 4u + 3u:
+            m_data(0,0) = a00*b00 + a01*b10 + a02*b20;
+            m_data(0,1) = a00*b01 + a01*b11 + a02*b21;
+            m_data(0,2) = a00*b02 + a01*b12 + a02*b22;
+            break;
+
+          case 2u * 16u + 3u * 4u + 1u:
+            m_data(0,0) = a00*b00 + a01*b10 + a02*b20;
+            m_data(1,0) = a10*b00 + a11*b10 + a12*b20;
+            break;
+
+          case 2u * 16u + 3u * 4u + 2u:
+            m_data(0,0) = a00*b00 + a01*b10 + a02*b20;
+            m_data(0,1) = a00*b01 + a01*b11 + a02*b21;
+            m_data(1,0) = a10*b00 + a11*b10 + a12*b20;
+            m_data(1,1) = a10*b01 + a11*b11 + a12*b21;
+            break;
+
+          case 2u * 16u + 3u * 4u + 3u:
+            m_data(0,0) = a00*b00 + a01*b10 + a02*b20;
+            m_data(0,1) = a00*b01 + a01*b11 + a02*b21;
+            m_data(0,2) = a00*b02 + a01*b12 + a02*b22;
+            m_data(1,0) = a10*b00 + a11*b10 + a12*b20;
+            m_data(1,1) = a10*b01 + a11*b11 + a12*b21;
+            m_data(1,2) = a10*b02 + a11*b12 + a12*b22;
+            break;
+
+          case 3u * 16u + 3u * 4u + 1u:
+            m_data(0,0) = a00*b00 + a01*b10 + a02*b20;
+            m_data(1,0) = a10*b00 + a11*b10 + a12*b20;
+            m_data(2,0) = a20*b00 + a21*b10 + a22*b20;
+            break;
+
+          case 3u * 16u + 3u * 4u + 2u:
+            m_data(0,0) = a00*b00 + a01*b10 + a02*b20;
+            m_data(0,1) = a00*b01 + a01*b11 + a02*b21;
+            m_data(1,0) = a10*b00 + a11*b10 + a12*b20;
+            m_data(1,1) = a10*b01 + a11*b11 + a12*b21;
+            m_data(2,0) = a20*b00 + a21*b10 + a22*b20;
+            m_data(2,1) = a20*b01 + a21*b11 + a22*b21;
+            break;
+
+          case 3u * 16u + 3u * 4u + 3u:
+            m_data(0,0) = a00*b00 + a01*b10 + a02*b20;
+            m_data(0,1) = a00*b01 + a01*b11 + a02*b21;
+            m_data(0,2) = a00*b02 + a01*b12 + a02*b22;
+            m_data(1,0) = a10*b00 + a11*b10 + a12*b20;
+            m_data(1,1) = a10*b01 + a11*b11 + a12*b21;
+            m_data(1,2) = a10*b02 + a11*b12 + a12*b22;
+            m_data(2,0) = a20*b00 + a21*b10 + a22*b20;
+            m_data(2,1) = a20*b01 + a21*b11 + a22*b21;
+            m_data(2,2) = a20*b02 + a21*b12 + a22*b22;
+            break;
+
+          default:
+            assert(false);
+            return *this;
+        }
+
+        m_cols = c;
+        return *this;
+      }
+
+      constexpr
       auto& getData() noexcept
       {
         return m_data;
@@ -1294,7 +1576,7 @@ namespace Rodin::Math
   template <class Scalar>
   [[nodiscard]] inline
   SpatialMatrix<Scalar>
-  operator*(const SpatialMatrix<Scalar>& A, const SpatialMatrix<Scalar>& B)
+  operator*(const SpatialMatrix<Scalar>& A, const SpatialMatrix<Scalar>& B) noexcept
   {
     assert(A.cols() == B.rows());
 

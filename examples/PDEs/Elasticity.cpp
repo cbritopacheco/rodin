@@ -10,7 +10,7 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
-#include <Rodin/LinearElasticity.h>
+#include <Rodin/Solid.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;

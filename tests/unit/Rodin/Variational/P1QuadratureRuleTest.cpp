@@ -10,6 +10,70 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
+  TEST(Rodin_Variational_P1QuadratureRule, LinearForm_ScalarLinearCoefficient_UsesMultiPointQuadrature)
+  {
+    Mesh mesh =
+      Mesh<Rodin::Context::Local>::Builder()
+      .initialize(2)
+      .nodes(3)
+      .vertex({0, 0})
+      .vertex({1, 0})
+      .vertex({0, 1})
+      .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
+      .finalize();
+
+    P1 fes(mesh);
+    TestFunction v(fes);
+    LinearForm lf(v);
+
+    RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); });
+    lf = Integral(c, v);
+    lf.assemble();
+
+    const auto& b = lf.getVector();
+    ASSERT_EQ(b.size(), 3);
+
+    // Exact values on the reference triangle:
+    // ∫(x+y)φ0 = 1/12, ∫(x+y)φ1 = 1/8, ∫(x+y)φ2 = 1/8.
+    EXPECT_NEAR(b(0), 1.0 / 12.0, 1e-12);
+    EXPECT_NEAR(b(1), 1.0 / 8.0, 1e-12);
+    EXPECT_NEAR(b(2), 1.0 / 8.0, 1e-12);
+    EXPECT_NEAR(b.sum(), 1.0 / 3.0, 1e-12);
+  }
+
+  TEST(Rodin_Variational_P1QuadratureRule, BilinearForm_LinearCoefficientMass_UsesMultiPointQuadrature)
+  {
+    Mesh mesh =
+      Mesh<Rodin::Context::Local>::Builder()
+      .initialize(2)
+      .nodes(3)
+      .vertex({0, 0})
+      .vertex({1, 0})
+      .vertex({0, 1})
+      .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
+      .finalize();
+
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TestFunction v(fes);
+    BilinearForm bf(u, v);
+
+    RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); });
+    bf = Integral(Dot(Mult(c, u), v));
+    bf.assemble();
+
+    const auto& A = bf.getOperator();
+    ASSERT_EQ(A.rows(), 3);
+    ASSERT_EQ(A.cols(), 3);
+
+    // Exact entries on the reference triangle.
+    EXPECT_NEAR(A.coeff(0, 0), 1.0 / 30.0, 1e-12);
+    EXPECT_NEAR(A.coeff(0, 1), 1.0 / 40.0, 1e-12);
+    EXPECT_NEAR(A.coeff(0, 2), 1.0 / 40.0, 1e-12);
+    EXPECT_NEAR(A.coeff(1, 1), 1.0 / 15.0, 1e-12);
+    EXPECT_NEAR(A.coeff(2, 2), 1.0 / 15.0, 1e-12);
+  }
+
   TEST(Rodin_Variational_P1QuadratureRule, MixedSpaces_GradGrad_Assembles)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
