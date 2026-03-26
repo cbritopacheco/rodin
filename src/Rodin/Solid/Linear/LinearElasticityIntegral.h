@@ -129,7 +129,7 @@ namespace Rodin::Variational
        * @returns Reference to shear modulus (second Lamé parameter) function
        */
       constexpr
-      const Mu& getMu() const
+      const Mu& getShearModulus() const
       {
         assert(m_mu);
         return *m_mu;
@@ -140,7 +140,7 @@ namespace Rodin::Variational
        * @returns Reference to first Lamé parameter function
        */
       constexpr
-      const Lambda& getLambda() const
+      const Lambda& getLameFirstParameter() const
       {
         assert(m_lambda);
         return *m_lambda;

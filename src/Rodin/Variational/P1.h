@@ -56,7 +56,7 @@
 #include "P1/P1Element.h"
 #include "P1/Derivative.h"
 #include "P1/QuadratureRule.h"
-#include "P1/LinearElasticity.h"
+#include "Rodin/Solid/Linear/P1/LinearElasticityIntegral.h"
 #include "P1/ShapeFunction.h"
 
 #endif

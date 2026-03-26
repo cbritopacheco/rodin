@@ -1,5 +1,5 @@
-#ifndef RODIN_VARIATIONAL_P1_LINEARELASTICITY_LINEARELASTICITYINTEGRAL_H
-#define RODIN_VARIATIONAL_P1_LINEARELASTICITY_LINEARELASTICITYINTEGRAL_H
+#ifndef RODIN_SOLID_LINEAR_P1_LINEARELASTICITYINTEGRAL_H
+#define RODIN_SOLID_LINEAR_P1_LINEARELASTICITYINTEGRAL_H
 
 /**
  * @file LinearElasticityIntegral.h
@@ -22,10 +22,10 @@
  * P1 Vh(mesh, spaceDim);  // Vector P1 space
  * TrialFunction u(Vh);
  * TestFunction v(Vh);
- * 
+ *
  * Real mu = 1.0, lambda = 1.0;
  * Problem problem(u, v);
- * problem = LinearElasticityIntegral(u, v, lambda, mu);
+ * problem = Solid::Linear::LinearElasticityIntegral(u, v)(lambda, mu);
  * @endcode
  *
  * @see LinearElasticityIntegral, P1
@@ -153,10 +153,10 @@ namespace Rodin::Variational
         const size_t nte = testfe.getCount();
 
         const size_t lambdaOrder =
-          getLambda().getOrder(polytope).value_or(size_t(0));
+          getLameFirstParameter().getOrder(polytope).value_or(size_t(0));
 
         const size_t muOrder =
-          getMu().getOrder(polytope).value_or(size_t(0));
+          getShearModulus().getOrder(polytope).value_or(size_t(0));
 
         // Upper bound based on the actual finite elements on the current
         // polytope. This intentionally queries the FE order directly instead
@@ -204,8 +204,8 @@ namespace Rodin::Variational
             const ScalarType wdet =
               static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
-            const auto lambda = getLambda().getValue(p);
-            const auto mu     = getMu().getValue(p);
+            const auto lambda = getLameFirstParameter().getValue(p);
+            const auto mu     = getShearModulus().getValue(p);
 
             for (size_t i = 0; i < nte; ++i)
             {
@@ -269,8 +269,8 @@ namespace Rodin::Variational
             const ScalarType wdet =
               static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
-            const auto lambda = getLambda().getValue(p);
-            const auto mu     = getMu().getValue(p);
+            const auto lambda = getLameFirstParameter().getValue(p);
+            const auto mu     = getShearModulus().getValue(p);
 
             for (size_t i = 0; i < nte; ++i)
             {
@@ -323,15 +323,23 @@ namespace Rodin::Variational
         return m_matrix(te, tr);
       }
 
+      /**
+       * @brief Gets the shear modulus function.
+       * @returns Reference to shear modulus (second Lamé parameter) function
+       */
       constexpr
-      const MuType& getMu() const
+      const MuType& getShearModulus() const
       {
         assert(m_mu);
         return *m_mu;
       }
 
+      /**
+       * @brief Gets the first Lamé parameter function.
+       * @returns Reference to first Lamé parameter function
+       */
       constexpr
-      const LambdaType& getLambda() const
+      const LambdaType& getLameFirstParameter() const
       {
         assert(m_lambda);
         return *m_lambda;
@@ -367,4 +375,3 @@ namespace Rodin::Variational
   };
 }
 #endif
-

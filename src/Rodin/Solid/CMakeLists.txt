@@ -23,6 +23,7 @@ set(RodinSolid_HEADERS
   Fields/CauchyStress.h
   Linear/ForwardDecls.h
   Linear/LinearElasticityIntegral.h
+  Linear/P1/LinearElasticityIntegral.h
 )
 
 # Header-only / interface library

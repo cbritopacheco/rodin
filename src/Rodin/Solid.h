@@ -57,5 +57,6 @@
 
 // Linear elasticity
 #include "Solid/Linear/LinearElasticityIntegral.h"
+#include "Solid/Linear/P1/LinearElasticityIntegral.h"
 
 #endif
