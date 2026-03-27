@@ -48,6 +48,7 @@
 #include "PolytopeIterator.h"
 #include "PolytopeTransformation.h"
 #include "PolytopeTransformationIndex.h"
+#include "QuadraturePointIndex.h"
 
 /**
  * @ingroup RodinDirectives
@@ -1121,6 +1122,7 @@ namespace Rodin::Geometry
       virtual void flush() override
       {
         m_transformations.clear();
+        m_quadraturePoints.clear();
       }
 
       /**
@@ -1371,6 +1373,20 @@ namespace Rodin::Geometry
         return m_transformations;
       }
 
+      const QuadraturePointIndex& getQuadraturePointIndex() const
+      {
+        if (m_quadraturePoints.dimensions() < getDimension() + 1)
+          m_quadraturePoints.initialize(getDimension());
+        return m_quadraturePoints;
+      }
+
+      QuadraturePointIndex& getQuadraturePointIndex()
+      {
+        if (m_quadraturePoints.dimensions() < getDimension() + 1)
+          m_quadraturePoints.initialize(getDimension());
+        return m_quadraturePoints;
+      }
+
       const PointCloud& getVertices() const
       {
         return m_vertices;
@@ -1468,6 +1484,7 @@ namespace Rodin::Geometry
 
       AttributeIndex m_attributes;
       PolytopeTransformationIndex m_transformations;
+      mutable QuadraturePointIndex m_quadraturePoints;
 
       Context m_context;
   };

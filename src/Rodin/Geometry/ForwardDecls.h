@@ -90,6 +90,12 @@ namespace Rodin::Geometry
   class Point;
 
   /**
+   * @brief Thread-safe lazy index for caching quadrature points per polytope.
+   * @see QuadraturePointIndex.h
+   */
+  class QuadraturePointIndex;
+
+  /**
    * @brief Iterator over polytopes.
    * @see PolytopeIterator.h
    */

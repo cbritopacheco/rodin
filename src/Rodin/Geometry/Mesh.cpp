@@ -48,7 +48,8 @@ namespace Rodin::Geometry
       m_vertices(std::move(other.m_vertices)),
       m_connectivity(std::move(other.m_connectivity)),
       m_attributes(std::move(other.m_attributes)),
-      m_transformations(std::move(other.m_transformations))
+      m_transformations(std::move(other.m_transformations)),
+      m_quadraturePoints(std::move(other.m_quadraturePoints))
   {}
 
   Mesh<Context::Local>& Mesh<Context::Local>::operator=(Mesh&& other)
@@ -59,6 +60,7 @@ namespace Rodin::Geometry
     m_connectivity = std::move(other.m_connectivity);
     m_transformations = std::move(other.m_transformations);
     m_attributes = std::move(other.m_attributes);
+    m_quadraturePoints = std::move(other.m_quadraturePoints);
     return *this;
   }
 
