@@ -50,13 +50,10 @@
 #ifndef RODIN_VARIATIONAL_QUADRATURERULE_H
 #define RODIN_VARIATIONAL_QUADRATURERULE_H
 
-#include <concepts>
-#include <type_traits>
-
 #include "ForwardDecls.h"
 
 #include "Rodin/QF/GenericPolytopeQuadrature.h"
-#include "Rodin/Geometry/QuadraturePointIndex.h"
+#include "Rodin/Geometry/PolytopeQuadratureData.h"
 
 #include "IntegrationPoint.h"
 #include "ShapeFunction.h"
@@ -65,49 +62,6 @@
 
 namespace Rodin::Variational
 {
-  namespace Internal
-  {
-    /**
-     * @brief Concept to check if a mesh type provides a QuadraturePointIndex.
-     */
-    template <class T>
-    concept HasQuadraturePointIndex = requires(const T& t)
-    {
-      { t.getQuadraturePointIndex() } -> std::same_as<const Geometry::QuadraturePointIndex&>;
-    };
-
-    /**
-     * @brief Factory function that creates quadrature points for a polytope
-     * with pre-populated geometric caches.
-     *
-     * @param[in] mesh Reference to the mesh
-     * @param[in] order Quadrature order
-     * @param[in] geometry Polytope geometry type
-     * @returns A callable that creates a vector of pre-cached Point objects
-     */
-    template <class MeshType>
-    auto makeQuadraturePointFactory(
-        const MeshType& mesh, size_t order, Geometry::Polytope::Type geometry)
-    {
-      return [&mesh, order, geometry](size_t d, Index idx)
-        -> std::vector<Geometry::Point>
-      {
-        const auto& qf = QF::GenericPolytopeQuadrature::get(order, geometry);
-        const Geometry::Polytope poly(d, idx, mesh);
-        std::vector<Geometry::Point> ps;
-        ps.reserve(qf.getSize());
-        for (size_t i = 0; i < qf.getSize(); ++i)
-        {
-          ps.emplace_back(poly, qf.getPoint(i));
-          // Pre-populate all mutable caches so that subsequent
-          // const access does not mutate state (thread-safe reads).
-          ps.back().getDistortion();
-        }
-        return ps;
-      };
-    }
-  }
-
   /**
    * @defgroup QuadratureRuleSpecializations QuadratureRule Template Specializations
    * @brief Template specializations of the QuadratureRule class.
@@ -411,28 +365,21 @@ namespace Rodin::Variational
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
-          m_polytope(nullptr),
-          m_set(false)
+          m_polytope(nullptr)
       {}
 
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
           m_qf(nullptr),
-          m_polytope(nullptr),
-          m_set(false),
-          m_order(0)
+          m_polytope(nullptr)
       {}
 
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
           m_qf(std::move(other.m_qf)),
-          m_ps(std::move(other.m_ps)),
-          m_polytope(std::exchange(other.m_polytope, nullptr)),
-          m_set(std::move(other.m_set)),
-          m_order(std::move(other.m_order)),
-          m_geometry(std::move(other.m_geometry))
+          m_polytope(std::exchange(other.m_polytope, nullptr))
       {}
 
       constexpr
@@ -474,39 +421,8 @@ namespace Rodin::Variational
 
         m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
 
-        const std::vector<Geometry::Point>* points = nullptr;
-
-        if constexpr (Internal::HasQuadraturePointIndex<
-            std::remove_cvref_t<decltype(trialfes.getMesh())>>)
-        {
-          const auto& mesh = trialfes.getMesh();
-          const auto count = mesh.getPolytopeCount(d);
-          auto& qpi = mesh.getQuadraturePointIndex();
-          points = &qpi.get(
-            d, idx, order, geometry, count,
-            Internal::makeQuadraturePointFactory(mesh, order, geometry));
-        }
-        else
-        {
-          const bool recompute = !m_set || (m_order != order) || (m_geometry != geometry);
-          if (recompute)
-          {
-            m_ps.clear();
-            m_ps.reserve(m_qf->getSize());
-            for (size_t i = 0; i < m_qf->getSize(); ++i)
-              m_ps.emplace_back(polytope, m_qf->getPoint(i));
-          }
-          else
-          {
-            for (size_t i = 0; i < m_qf->getSize(); ++i)
-              m_ps[i].setPolytope(polytope);
-          }
-          points = &m_ps;
-        }
-
-        m_set      = true;
-        m_order    = order;
-        m_geometry = geometry;
+        const auto& qdata = polytope.getQuadratureData(*m_qf);
+        const auto& points = qdata.points;
 
         const size_t ntr = trial.getDOFs(*m_polytope);
         const size_t nte = test .getDOFs(*m_polytope);
@@ -519,9 +435,9 @@ namespace Rodin::Variational
         ScalarType* __restrict M = m_mat.data();
         const Eigen::Index ld = m_mat.outerStride(); // leading dimension for ColMajor is rows
 
-        for (size_t qp = 0; qp < points->size(); ++qp)
+        for (size_t qp = 0; qp < points.size(); ++qp)
         {
-          const auto& p = (*points)[qp];
+          const auto& p = points[qp];
           assert(m_qf);
 
           const ScalarType wdet =
@@ -561,12 +477,8 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_integrand;
 
       const QF::QuadratureFormulaBase* m_qf;
-      std::vector<Geometry::Point> m_ps;
 
       const Geometry::Polytope* m_polytope;
-      bool m_set;
-      size_t m_order;
-      Geometry::Polytope::Type m_geometry;
 
       Math::Matrix<ScalarType> m_mat; // rows=test, cols=trial
   };
@@ -599,16 +511,14 @@ namespace Rodin::Variational
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLeaf()),
           m_integrand(integrand.copy()),
-          m_polytope(nullptr),
-          m_set(false)
+          m_polytope(nullptr)
       {}
 
       constexpr
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
-          m_polytope(other.m_polytope),
-          m_set(false)
+          m_polytope(other.m_polytope)
       {}
 
       constexpr
@@ -616,11 +526,7 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
           m_qf(std::move(other.m_qf)),
-          m_ps(std::move(other.m_ps)),
-          m_polytope(std::exchange(other.m_polytope, nullptr)),
-          m_set(std::move(other.m_set)),
-          m_order(std::move(other.m_order)),
-          m_geometry(std::move(other.m_geometry))
+          m_polytope(std::exchange(other.m_polytope, nullptr))
       {}
 
       constexpr
@@ -656,39 +562,8 @@ namespace Rodin::Variational
 
         m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
 
-        const std::vector<Geometry::Point>* points = nullptr;
-
-        if constexpr (Internal::HasQuadraturePointIndex<
-            std::remove_cvref_t<decltype(fes.getMesh())>>)
-        {
-          const auto& mesh = fes.getMesh();
-          const auto count = mesh.getPolytopeCount(d);
-          auto& qpi = mesh.getQuadraturePointIndex();
-          points = &qpi.get(
-            d, idx, order, geometry, count,
-            Internal::makeQuadraturePointFactory(mesh, order, geometry));
-        }
-        else
-        {
-          const bool recompute = !m_set || (m_order != order) || (m_geometry != geometry);
-          if (recompute)
-          {
-            m_ps.clear();
-            m_ps.reserve(m_qf->getSize());
-            for (size_t i = 0; i < m_qf->getSize(); ++i)
-              m_ps.emplace_back(polytope, m_qf->getPoint(i));
-          }
-          else
-          {
-            for (size_t i = 0; i < m_qf->getSize(); ++i)
-              m_ps[i].setPolytope(polytope);
-          }
-          points = &m_ps;
-        }
-
-        m_set      = true;
-        m_order    = order;
-        m_geometry = geometry;
+        const auto& qdata = polytope.getQuadratureData(*m_qf);
+        const auto& points = qdata.points;
 
         const size_t nte = integrand.getDOFs(polytope);
 
@@ -697,9 +572,9 @@ namespace Rodin::Variational
 
         ScalarType* __restrict v = m_vec.data();
 
-        for (size_t qp = 0; qp < points->size(); ++qp)
+        for (size_t qp = 0; qp < points.size(); ++qp)
         {
-          const auto& p = (*points)[qp];
+          const auto& p = points[qp];
           assert(m_qf);
 
           const ScalarType wdet =
@@ -729,12 +604,8 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_integrand;
 
       const QF::QuadratureFormulaBase* m_qf;
-      std::vector<Geometry::Point> m_ps;
 
       const Geometry::Polytope* m_polytope;
-      bool m_set;
-      size_t m_order;
-      Geometry::Polytope::Type m_geometry;
 
       Math::Vector<ScalarType> m_vec;
   };

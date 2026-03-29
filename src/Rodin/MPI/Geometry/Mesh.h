@@ -624,6 +624,19 @@ namespace Rodin::Geometry
       virtual const PolytopeTransformation& getPolytopeTransformation(size_t dimension, Index localIdx) const override;
 
       /**
+       * @brief Gets cached quadrature data for a local polytope.
+       *
+       * Delegates to the local shard.
+       *
+       * @param[in] d Topological dimension of the polytope.
+       * @param[in] idx Local index of the polytope in the shard.
+       * @param[in] qf Quadrature formula.
+       * @return Reference to the cached PolytopeQuadratureData.
+       */
+      virtual const PolytopeQuadratureData& getQuadratureData(
+          size_t d, Index idx, const QF::QuadratureFormulaBase& qf) const override;
+
+      /**
        * @brief Sets the transformation associated with a local polytope.
        *
        * The key @f$ ( d, i ) @f$ is interpreted using the local indexing of the mesh

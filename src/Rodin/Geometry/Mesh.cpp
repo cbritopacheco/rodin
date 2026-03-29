@@ -12,6 +12,8 @@
 #include "Rodin/Variational/GridFunction.h"
 #include "Rodin/Variational/FiniteElementSpace.h"
 
+#include "Rodin/QF/QuadratureFormula.h"
+
 #include "ForwardDecls.h"
 
 #include "Rodin/IO/MFEM.h"
@@ -49,7 +51,7 @@ namespace Rodin::Geometry
       m_connectivity(std::move(other.m_connectivity)),
       m_attributes(std::move(other.m_attributes)),
       m_transformations(std::move(other.m_transformations)),
-      m_quadraturePoints(std::move(other.m_quadraturePoints))
+      m_quadratureData(std::move(other.m_quadratureData))
   {}
 
   Mesh<Context::Local>& Mesh<Context::Local>::operator=(Mesh&& other)
@@ -60,7 +62,7 @@ namespace Rodin::Geometry
     m_connectivity = std::move(other.m_connectivity);
     m_transformations = std::move(other.m_transformations);
     m_attributes = std::move(other.m_attributes);
-    m_quadraturePoints = std::move(other.m_quadraturePoints);
+    m_quadratureData = std::move(other.m_quadratureData);
     return *this;
   }
 
@@ -435,6 +437,56 @@ namespace Rodin::Geometry
         {
           return std::unique_ptr<PolytopeTransformation>(this->getDefaultPolytopeTransformation(dim, idx));
         });
+  }
+
+  const PolytopeQuadratureData&
+  Mesh<Context::Local>::getQuadratureData(
+      size_t d, Index idx, const QF::QuadratureFormulaBase& qf) const
+  {
+    // Ensure per-dimension storage is allocated.
+    if (m_quadratureData.size() < getDimension() + 1)
+      m_quadratureData.resize(getDimension() + 1);
+
+    assert(d < m_quadratureData.size());
+    auto& dim = m_quadratureData[d];
+    const QF::QuadratureFormulaBase* qfp = &qf;
+
+    // Fast path: shared lock read.
+    {
+      std::shared_lock<std::shared_mutex> rd(dim.mutex);
+      auto polyIt = dim.entries.find(idx);
+      if (polyIt != dim.entries.end())
+      {
+        auto qfIt = polyIt->second.find(qfp);
+        if (qfIt != polyIt->second.end())
+          return qfIt->second;
+      }
+    }
+
+    // Slow path: exclusive lock, create entry.
+    {
+      std::unique_lock<std::shared_mutex> wr(dim.mutex);
+
+      // Double-check after acquiring exclusive lock.
+      auto& polyMap = dim.entries[idx];
+      auto qfIt = polyMap.find(qfp);
+      if (qfIt != polyMap.end())
+        return qfIt->second;
+
+      const Polytope poly(d, idx, *this);
+      PolytopeQuadratureData data;
+      data.qf = qfp;
+      data.points.reserve(qf.getSize());
+      for (size_t i = 0; i < qf.getSize(); ++i)
+      {
+        data.points.emplace_back(poly, qf.getPoint(i));
+        // Pre-populate mutable caches for thread-safe const reads.
+        data.points.back().getDistortion();
+      }
+
+      auto [it, inserted] = polyMap.emplace(qfp, std::move(data));
+      return it->second;
+    }
   }
 
   Real Mesh<Context::Local>::getVolume() const

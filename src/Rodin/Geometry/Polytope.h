@@ -23,6 +23,8 @@
 #include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/Math/SpatialVector.h"
 
+#include "Rodin/QF/ForwardDecls.h"
+
 #include "ForwardDecls.h"
 
 #include "Types.h"
@@ -417,6 +419,16 @@ namespace Rodin::Geometry
        * @see PolytopeTransformation
        */
       const PolytopeTransformation& getTransformation() const;
+
+      /**
+       * @brief Gets cached quadrature data for this polytope.
+       * @param[in] qf Quadrature formula
+       * @returns Const reference to the cached PolytopeQuadratureData
+       *
+       * Forwards to the owning mesh's getQuadratureData method.
+       */
+      const PolytopeQuadratureData& getQuadratureData(
+          const QF::QuadratureFormulaBase& qf) const;
 
       /**
        * @brief Gets an iterator over the vertices of this polytope.
