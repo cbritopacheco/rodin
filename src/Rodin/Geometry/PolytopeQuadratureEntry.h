@@ -4,12 +4,12 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_GEOMETRY_POLYTOPEQUADRATUREDATA_H
-#define RODIN_GEOMETRY_POLYTOPEQUADRATUREDATA_H
+#ifndef RODIN_GEOMETRY_POLYTOPEQUADRATUREENTRY_H
+#define RODIN_GEOMETRY_POLYTOPEQUADRATUREENTRY_H
 
 /**
  * @file
- * @brief Cached quadrature data for a single polytope and quadrature formula.
+ * @brief Cached quadrature entry for a single polytope and quadrature formula.
  */
 
 #include <vector>
@@ -21,18 +21,18 @@
 namespace Rodin::Geometry
 {
   /**
-   * @brief Cached quadrature data for a single polytope and quadrature formula.
+   * @brief Cached quadrature entry for a single polytope and quadrature formula.
    *
    * Stores the quadrature formula pointer together with the pre-mapped
    * quadrature points.  Each Point carries pre-populated geometric caches
    * (Jacobian, distortion, etc.) so that concurrent const reads are safe
    * without further mutation.
    */
-  struct PolytopeQuadratureData
+  struct PolytopeQuadratureEntry
   {
     const QF::QuadratureFormulaBase* qf; ///< Quadrature formula used
     std::vector<Point> points;           ///< Mapped quadrature points
   };
 }
 
-#endif // RODIN_GEOMETRY_POLYTOPEQUADRATUREDATA_H
+#endif // RODIN_GEOMETRY_POLYTOPEQUADRATUREENTRY_H

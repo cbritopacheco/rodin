@@ -421,13 +421,13 @@ namespace Rodin::Geometry
       const PolytopeTransformation& getTransformation() const;
 
       /**
-       * @brief Gets cached quadrature data for this polytope.
+       * @brief Gets cached quadrature entry for this polytope.
        * @param[in] qf Quadrature formula
-       * @returns Const reference to the cached PolytopeQuadratureData
+       * @returns Const reference to the cached PolytopeQuadratureEntry
        *
-       * Forwards to the owning mesh's getQuadratureData method.
+       * Forwards to the owning mesh's getQuadrature method.
        */
-      const PolytopeQuadratureData& getQuadratureData(
+      const PolytopeQuadratureEntry& getQuadrature(
           const QF::QuadratureFormulaBase& qf) const;
 
       /**

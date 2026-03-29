@@ -53,7 +53,7 @@
 #include "ForwardDecls.h"
 
 #include "Rodin/QF/GenericPolytopeQuadrature.h"
-#include "Rodin/Geometry/PolytopeQuadratureData.h"
+#include "Rodin/Geometry/PolytopeQuadratureEntry.h"
 
 #include "IntegrationPoint.h"
 #include "ShapeFunction.h"
@@ -421,7 +421,7 @@ namespace Rodin::Variational
 
         m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
 
-        const auto& qdata = polytope.getQuadratureData(*m_qf);
+        const auto& qdata = polytope.getQuadrature(*m_qf);
         const auto& points = qdata.points;
 
         const size_t ntr = trial.getDOFs(*m_polytope);
@@ -562,7 +562,7 @@ namespace Rodin::Variational
 
         m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
 
-        const auto& qdata = polytope.getQuadratureData(*m_qf);
+        const auto& qdata = polytope.getQuadrature(*m_qf);
         const auto& points = qdata.points;
 
         const size_t nte = integrand.getDOFs(polytope);

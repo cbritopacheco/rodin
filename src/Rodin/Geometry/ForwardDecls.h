@@ -90,10 +90,10 @@ namespace Rodin::Geometry
   class Point;
 
   /**
-   * @brief Cached quadrature data for a single polytope and quadrature formula.
-   * @see PolytopeQuadratureData.h
+   * @brief Cached quadrature entry for a single polytope and quadrature formula.
+   * @see PolytopeQuadratureEntry.h
    */
-  struct PolytopeQuadratureData;
+  struct PolytopeQuadratureEntry;
 
   /**
    * @brief Iterator over polytopes.

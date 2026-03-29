@@ -51,7 +51,7 @@ namespace Rodin::Geometry
       m_connectivity(std::move(other.m_connectivity)),
       m_attributes(std::move(other.m_attributes)),
       m_transformations(std::move(other.m_transformations)),
-      m_quadratureData(std::move(other.m_quadratureData))
+      m_quadrature(std::move(other.m_quadrature))
   {}
 
   Mesh<Context::Local>& Mesh<Context::Local>::operator=(Mesh&& other)
@@ -62,7 +62,7 @@ namespace Rodin::Geometry
     m_connectivity = std::move(other.m_connectivity);
     m_transformations = std::move(other.m_transformations);
     m_attributes = std::move(other.m_attributes);
-    m_quadratureData = std::move(other.m_quadratureData);
+    m_quadrature = std::move(other.m_quadrature);
     return *this;
   }
 
@@ -439,16 +439,16 @@ namespace Rodin::Geometry
         });
   }
 
-  const PolytopeQuadratureData&
-  Mesh<Context::Local>::getQuadratureData(
+  const PolytopeQuadratureEntry&
+  Mesh<Context::Local>::getQuadrature(
       size_t d, Index idx, const QF::QuadratureFormulaBase& qf) const
   {
     // Ensure per-dimension storage is allocated.
-    if (m_quadratureData.size() < getDimension() + 1)
-      m_quadratureData.resize(getDimension() + 1);
+    if (m_quadrature.size() < getDimension() + 1)
+      m_quadrature.resize(getDimension() + 1);
 
-    assert(d < m_quadratureData.size());
-    auto& dim = m_quadratureData[d];
+    assert(d < m_quadrature.size());
+    auto& dim = m_quadrature[d];
     const QF::QuadratureFormulaBase* qfp = &qf;
 
     // Fast path: shared lock read.
@@ -474,7 +474,7 @@ namespace Rodin::Geometry
         return qfIt->second;
 
       const Polytope poly(d, idx, *this);
-      PolytopeQuadratureData data;
+      PolytopeQuadratureEntry data;
       data.qf = qfp;
       data.points.reserve(qf.getSize());
       for (size_t i = 0; i < qf.getSize(); ++i)

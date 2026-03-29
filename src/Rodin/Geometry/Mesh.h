@@ -49,7 +49,7 @@
 #include "PointCloud.h"
 #include "Polytope.h"
 #include "PolytopeIterator.h"
-#include "PolytopeQuadratureData.h"
+#include "PolytopeQuadratureEntry.h"
 #include "PolytopeTransformation.h"
 #include "PolytopeTransformationIndex.h"
 
@@ -684,20 +684,20 @@ namespace Rodin::Geometry
       virtual const PolytopeTransformation& getPolytopeTransformation(size_t dimension, Index idx) const = 0;
 
       /**
-       * @brief Gets cached quadrature data for a polytope and quadrature formula.
+       * @brief Gets cached quadrature entry for a polytope and quadrature formula.
        * @param[in] d Polytope dimension
        * @param[in] idx Polytope index
        * @param[in] qf Quadrature formula
-       * @returns Const reference to the cached PolytopeQuadratureData
+       * @returns Const reference to the cached PolytopeQuadratureEntry
        *
-       * Returns a reference to the cached quadrature data for the polytope
+       * Returns a reference to the cached quadrature entry for the polytope
        * identified by @p (d, idx) and the given quadrature formula @p qf.
        * The cache supports multiple quadrature formulas per polytope, keyed
        * by the quadrature formula pointer.  Entries are lazily created on
        * first access with pre-populated geometric caches (Jacobian,
        * distortion) so that subsequent const reads are thread-safe.
        */
-      virtual const PolytopeQuadratureData& getQuadratureData(
+      virtual const PolytopeQuadratureEntry& getQuadrature(
           size_t d, Index idx, const QF::QuadratureFormulaBase& qf) const = 0;
 
       /**
@@ -1142,7 +1142,7 @@ namespace Rodin::Geometry
       virtual void flush() override
       {
         m_transformations.clear();
-        for (auto& dim : m_quadratureData)
+        for (auto& dim : m_quadrature)
         {
           std::unique_lock<std::shared_mutex> wr(dim.mutex);
           dim.entries.clear();
@@ -1472,7 +1472,7 @@ namespace Rodin::Geometry
       virtual const PolytopeTransformation& getPolytopeTransformation(
           size_t dimension, Index idx) const override;
 
-      virtual const PolytopeQuadratureData& getQuadratureData(
+      virtual const PolytopeQuadratureEntry& getQuadrature(
           size_t d, Index idx, const QF::QuadratureFormulaBase& qf) const override;
 
       virtual PolytopeTransformation* getDefaultPolytopeTransformation(size_t d, Index i) const;
@@ -1491,29 +1491,29 @@ namespace Rodin::Geometry
 
     private:
       /**
-       * @brief Per-dimension cache for quadrature data.
+       * @brief Per-dimension cache for quadrature entries.
        *
        * For each polytope in a dimension, multiple quadrature formulas
        * may be cached.  The inner map is keyed by the quadrature formula
        * pointer.
        */
-      struct QuadratureDataDimension
+      struct PolytopeQuadratureDimension
       {
         std::unordered_map<Index,
           std::unordered_map<const QF::QuadratureFormulaBase*,
-                             PolytopeQuadratureData>> entries;
+                             PolytopeQuadratureEntry>> entries;
         mutable std::shared_mutex mutex;
 
-        QuadratureDataDimension() = default;
+        PolytopeQuadratureDimension() = default;
 
-        QuadratureDataDimension(const QuadratureDataDimension&) = delete;
-        QuadratureDataDimension& operator=(const QuadratureDataDimension&) = delete;
+        PolytopeQuadratureDimension(const PolytopeQuadratureDimension&) = delete;
+        PolytopeQuadratureDimension& operator=(const PolytopeQuadratureDimension&) = delete;
 
-        QuadratureDataDimension(QuadratureDataDimension&& other) noexcept
+        PolytopeQuadratureDimension(PolytopeQuadratureDimension&& other) noexcept
           : entries(std::move(other.entries))
         {}
 
-        QuadratureDataDimension& operator=(QuadratureDataDimension&& other) noexcept
+        PolytopeQuadratureDimension& operator=(PolytopeQuadratureDimension&& other) noexcept
         {
           entries = std::move(other.entries);
           return *this;
@@ -1528,7 +1528,7 @@ namespace Rodin::Geometry
       AttributeIndex m_attributes;
       PolytopeTransformationIndex m_transformations;
 
-      mutable std::vector<QuadratureDataDimension> m_quadratureData;
+      mutable std::vector<PolytopeQuadratureDimension> m_quadrature;
 
       Context m_context;
   };

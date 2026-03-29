@@ -1074,10 +1074,10 @@ namespace Rodin::Geometry
     return m_mesh.get().getPolytopeTransformation(m_dimension, m_index);
   }
 
-  const PolytopeQuadratureData& Polytope::getQuadratureData(
+  const PolytopeQuadratureEntry& Polytope::getQuadrature(
       const QF::QuadratureFormulaBase& qf) const
   {
-    return m_mesh.get().getQuadratureData(m_dimension, m_index, qf);
+    return m_mesh.get().getQuadrature(m_dimension, m_index, qf);
   }
 
   Real Polytope::getMeasure() const
