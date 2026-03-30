@@ -80,10 +80,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md487">Finite Element Spaces</a></li>
-            <li><a href="#autotoc_md488">Functions</a></li>
-            <li><a href="#autotoc_md489">Variational Forms</a></li>
-            <li><a href="#autotoc_md490">Problem</a></li>
+            <li><a href="#autotoc_md489">Finite Element Spaces</a></li>
+            <li><a href="#autotoc_md490">Functions</a></li>
+            <li><a href="#autotoc_md491">Variational Forms</a></li>
+            <li><a href="#autotoc_md492">Problem</a></li>
             <li>
               Reference
               <ul>
@@ -95,7 +95,7 @@
             </li>
           </ul>
         </nav>
-<p>The <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> module is the core of the <a href="namespace_rodin.html" class="m-doc">Rodin</a> finite element framework. It provides classes for defining finite element spaces, trial and test functions, variational forms, boundary conditions, and problems.</p><section id="autotoc_md487"><h3><a href="#autotoc_md487">Finite Element Spaces</a></h3><ul><li><a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> — Piecewise constant (discontinuous) finite element space</li><li><a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> — Piecewise linear (continuous) finite element space</li><li><a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> — Higher-order <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
+<p>The <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> module is the core of the <a href="namespace_rodin.html" class="m-doc">Rodin</a> finite element framework. It provides classes for defining finite element spaces, trial and test functions, variational forms, boundary conditions, and problems.</p><section id="autotoc_md489"><h3><a href="#autotoc_md489">Finite Element Spaces</a></h3><ul><li><a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> — Piecewise constant (discontinuous) finite element space</li><li><a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> — Piecewise linear (continuous) finite element space</li><li><a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> — Higher-order <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
 <title>
 $ H^1 $
 </title>
@@ -107,7 +107,7 @@ $ H^1 $
 <use x='0' y='0' xlink:href='#eq1-g0-72'/>
 <use x='10.62261' y='-4.338437' xlink:href='#eq1-g1-49'/>
 </g>
-</svg>-conforming finite element space (arbitrary polynomial order)</li></ul></section><section id="autotoc_md488"><h3><a href="#autotoc_md488">Functions</a></h3><ul><li><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a> — Represents the unknown solution <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
+</svg>-conforming finite element space (arbitrary polynomial order)</li></ul></section><section id="autotoc_md490"><h3><a href="#autotoc_md490">Functions</a></h3><ul><li><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a> — Represents the unknown solution <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
 $ u $
 </title>
@@ -127,7 +127,7 @@ $ v $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-118'/>
 </g>
-</svg></li><li><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> — A concrete function storing DOF values in a finite element space</li></ul></section><section id="autotoc_md489"><h3><a href="#autotoc_md489">Variational Forms</a></h3><p>The module supports building variational problems of the form:</p><div class="m-math"><svg style="width: 24.319em; height: 1.245em;" viewBox="77.53888 -11.955168 233.465314 11.955168">
+</svg></li><li><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> — A concrete function storing DOF values in a finite element space</li></ul></section><section id="autotoc_md491"><h3><a href="#autotoc_md491">Variational Forms</a></h3><p>The module supports building variational problems of the form:</p><div class="m-math"><svg style="width: 24.319em; height: 1.245em;" viewBox="77.53888 -11.955168 233.465314 11.955168">
 <title>
 \[
   \text{Find} \quad u \in U \quad \text{ s.t. } \quad \forall v \in V \quad
@@ -201,7 +201,7 @@ $ \mathbf{A}\mathbf{x}
 <use x='20.575578' y='0' xlink:href='#eq5-g1-61'/>
 <use x='33.001059' y='0' xlink:href='#eq5-g0-98'/>
 </g>
-</svg>.</p><p>Key expression classes:</p><ul><li><code>Integral(A, B)</code> — Domain integrals (bilinear or linear forms)</li><li><code>BoundaryIntegral(A, B)</code> — Boundary integrals</li><li><code>Grad(u)</code> — Gradient operator</li><li><code>Div(u)</code> — Divergence operator</li><li><code>Jacobian(u)</code> — <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> operator</li><li><code>DirichletBC(u, g)</code> — Dirichlet boundary conditions</li></ul></section><section id="autotoc_md490"><h3><a href="#autotoc_md490">Problem</a></h3><p>The <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> class assembles all forms and boundary conditions into a solvable linear system.</p><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg>.</p><p>Key expression classes:</p><ul><li><code>Integral(A, B)</code> — Domain integrals (bilinear or linear forms)</li><li><code>BoundaryIntegral(A, B)</code> — Boundary integrals</li><li><code>Grad(u)</code> — Gradient operator</li><li><code>Div(u)</code> — Divergence operator</li><li><code>Jacobian(u)</code> — <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> operator</li><li><code>DirichletBC(u, g)</code> — Dirichlet boundary conditions</li></ul></section><section id="autotoc_md492"><h3><a href="#autotoc_md492">Problem</a></h3><p>The <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> class assembles all forms and boundary conditions into a solvable linear system.</p><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="n">TestFunction</span><span class="w">  </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 
@@ -536,7 +536,7 @@ $ \mathbf{A}\mathbf{x}
             <dt>
               class <a href="class_rodin_1_1_variational_1_1_face_normal.html" class="m-doc">FaceNormal</a>
             </dt>
-            <dd>Unit normal vector on mesh faces.</dd>
+            <dd>Unit normal vector on codimension-one mesh entities.</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t K&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_fekete_tetrahedron.html" class="m-doc">FeketeTetrahedron</a>
