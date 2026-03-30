@@ -65,6 +65,8 @@ namespace Rodin::Geometry
    */
   class Polytope;
 
+  class PolytopeQuadrature;
+
   /**
    * @brief Represents a mesh cell (polytope of maximal dimension).
    * @see Polytope.h
