@@ -5364,7 +5364,7 @@
 <g id="node180" class="node">
 <title>Rodin/PETSc/Solver/SNES.h</title>
 <ellipse fill="#abdda4" stroke="black" cx="18269.74" cy="-6336" rx="72" ry="72"/>
-<text text-anchor="middle" x="18269.74" y="-6333.2" font-family="Times,serif" font-size="11.00">Rodin/PETSc/Solver/SNES.h</text>
+<text text-anchor="middle" x="18269.74" y="-6333.5" font-family="Times,serif" font-size="10.00">Rodin/PETSc/Solver/SNES.h</text>
 </g>
 <!-- Rodin/PETSc/Solver.h&#45;&gt;Rodin/PETSc/Solver/SNES.h -->
 <g id="edge204" class="edge">
@@ -5376,7 +5376,7 @@
 <g id="node181" class="node">
 <title>Rodin/PETSc/Solver/CG.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="17907.74" cy="-6336" rx="72" ry="72"/>
-<text text-anchor="middle" x="17907.74" y="-6333.8" font-family="Times,serif" font-size="9.00">Rodin/PETSc/Solver/CG.h</text>
+<text text-anchor="middle" x="17907.74" y="-6334.1" font-family="Times,serif" font-size="8.00">Rodin/PETSc/Solver/CG.h</text>
 </g>
 <!-- Rodin/PETSc/Solver.h&#45;&gt;Rodin/PETSc/Solver/CG.h -->
 <g id="edge205" class="edge">
@@ -5388,7 +5388,7 @@
 <g id="node182" class="node">
 <title>Rodin/PETSc/Solver/GMRES.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="18069.74" cy="-6336" rx="72" ry="72"/>
-<text text-anchor="middle" x="18069.74" y="-6333.8" font-family="Times,serif" font-size="9.00">Rodin/PETSc/Solver/GMRES.h</text>
+<text text-anchor="middle" x="18069.74" y="-6334.1" font-family="Times,serif" font-size="8.00">Rodin/PETSc/Solver/GMRES.h</text>
 </g>
 <!-- Rodin/PETSc/Solver.h&#45;&gt;Rodin/PETSc/Solver/GMRES.h -->
 <g id="edge206" class="edge">
@@ -9294,7 +9294,7 @@
 <g id="node332" class="node">
 <title>Rodin/Variational/H1/Dubiner.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="9047.74" cy="-1800" rx="72" ry="72"/>
-<text text-anchor="middle" x="9047.74" y="-1798.1" font-family="Times,serif" font-size="8.00">Rodin/Variational/H1/Dubiner.h</text>
+<text text-anchor="middle" x="9047.74" y="-1798.4" font-family="Times,serif" font-size="7.00">Rodin/Variational/H1/Dubiner.h</text>
 </g>
 <!-- Rodin/Variational/H1/H1Element.hpp&#45;&gt;Rodin/Variational/H1/Dubiner.h -->
 <g id="edge1064" class="edge">
