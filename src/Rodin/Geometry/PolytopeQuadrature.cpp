@@ -5,6 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include "PolytopeQuadrature.h"
+#include "Rodin/QF/QuadratureFormula.h"
 
 namespace Rodin::Geometry
 {

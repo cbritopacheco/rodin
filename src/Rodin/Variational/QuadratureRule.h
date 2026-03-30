@@ -52,6 +52,7 @@
 
 #include "ForwardDecls.h"
 
+#include "Rodin/Geometry/PolytopeQuadrature.h"
 #include "Rodin/QF/GenericPolytopeQuadrature.h"
 
 #include "IntegrationPoint.h"
@@ -91,21 +92,24 @@ namespace Rodin::Variational
 
       QuadratureRule(const IntegrandType& f)
         : m_integrand(f.copy()),
-          m_polytope(nullptr)
+          m_polytope(nullptr),
+          m_quadrature(nullptr)
       {}
 
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_polytope(nullptr),
           m_integrand(other.m_integrand->copy()),
-          m_qf(other.m_qf)
+          m_qf(other.m_qf),
+          m_quadrature(nullptr)
       {}
 
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_polytope(std::exchange(other.m_polytope, nullptr)),
           m_integrand(std::move(other.m_integrand)),
-          m_qf(std::move(other.m_qf))
+          m_qf(std::move(other.m_qf)),
+          m_quadrature(std::exchange(other.m_quadrature, nullptr))
       {}
 
       const Geometry::Polytope& getPolytope() const
@@ -122,11 +126,7 @@ namespace Rodin::Variational
           m_qf = &QF::GenericPolytopeQuadrature::get(1, polytope.getGeometry());
         }
         assert(m_qf);
-        const auto& qf = *m_qf;
-        m_ps.clear();
-        m_ps.reserve(qf.getSize());
-        for (size_t i = 0; i < qf.getSize(); i++)
-          m_ps.emplace_back(polytope, qf.getPoint(i));
+        m_quadrature = &polytope.getQuadrature(*m_qf);
         return *this;
       }
 
@@ -135,9 +135,13 @@ namespace Rodin::Variational
         auto& res = m_value.emplace(0);
         const auto& qf = getQuadratureFormula();
         const auto& f = getIntegrand();
-        assert(m_ps.size() == qf.getSize());
-        for (size_t i = 0; i < m_ps.size(); i++)
-          res += qf.getWeight(i) * m_ps[i].getDistortion() * f(m_ps[i]);
+        assert(m_quadrature);
+        const auto& q = *m_quadrature;
+        for (size_t i = 0; i < q.getSize(); i++)
+        {
+          const auto& p = q.getPoint(i);
+          res += qf.getWeight(i) * p.getDistortion() * f(p);
+        }
         return res;
       }
 
@@ -163,10 +167,9 @@ namespace Rodin::Variational
 
       const Geometry::Polytope* m_polytope;
       const QF::QuadratureFormulaBase* m_qf;
+      const Geometry::PolytopeQuadrature* m_quadrature;
 
       Optional<ScalarType> m_value;
-
-      std::vector<Geometry::Point> m_ps;
   };
 
   /**

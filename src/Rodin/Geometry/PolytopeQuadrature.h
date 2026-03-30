@@ -13,10 +13,12 @@
  */
 
 #include <shared_mutex>
+#include <mutex>
+#include <memory>
 #include <vector>
 
 #include "Rodin/Types.h"
-#include "Rodin/QF/QuadratureFormula.h"
+#include "Rodin/QF/ForwardDecls.h"
 #include "Point.h"
 
 namespace Rodin::Geometry
@@ -91,6 +93,10 @@ namespace Rodin::Geometry
       }
 
       template <class Factory>
+      /**
+       * @brief Gets or creates a cached quadrature for a given polytope and formula.
+       * @throws std::out_of_range if @p d is outside initialized dimensions.
+       */
       const PolytopeQuadrature& get(
           const std::pair<size_t, Index>& p,
           size_t count,
@@ -142,17 +148,43 @@ namespace Rodin::Geometry
     private:
       struct Slot
       {
+        // The mutex is intentionally default-constructed in moved instances.
+        Slot() = default;
+        Slot(const Slot&) = delete;
+        Slot& operator=(const Slot&) = delete;
+        Slot(Slot&& other) noexcept
+          : quadratures(std::move(other.quadratures))
+        {}
+        Slot& operator=(Slot&& other) noexcept
+        {
+          quadratures = std::move(other.quadratures);
+          return *this;
+        }
+
         FlatMap<const QF::QuadratureFormulaBase*, std::unique_ptr<PolytopeQuadrature>> quadratures;
         mutable std::shared_mutex mutex;
       };
 
       struct Dimension
       {
+        // The mutex is intentionally default-constructed in moved instances.
+        Dimension() = default;
+        Dimension(const Dimension&) = delete;
+        Dimension& operator=(const Dimension&) = delete;
+        Dimension(Dimension&& other) noexcept
+          : slots(std::move(other.slots))
+        {}
+        Dimension& operator=(Dimension&& other) noexcept
+        {
+          slots = std::move(other.slots);
+          return *this;
+        }
+
         std::vector<Slot> slots;
         mutable std::shared_mutex mutex;
       };
 
-      std::vector<Dimension> m_dimensions;
+      mutable std::vector<Dimension> m_dimensions;
   };
 }
 

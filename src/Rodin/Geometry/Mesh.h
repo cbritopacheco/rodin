@@ -34,6 +34,7 @@
 #include "Rodin/IO/ForwardDecls.h"
 #include "Rodin/Geometry/AttributeIndex.h"
 #include "Rodin/Variational/ForwardDecls.h"
+#include "Rodin/QF/ForwardDecls.h"
 
 #include "Rodin/Serialization/Array.h"
 #include "Rodin/Serialization/EigenMatrix.h"

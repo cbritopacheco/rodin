@@ -39,9 +39,7 @@ namespace Rodin::Geometry
       m_sdim(other.m_sdim),
       m_vertices(other.m_vertices),
       m_connectivity(other.m_connectivity),
-      m_attributes(other.m_attributes),
-      m_transformations(other.m_transformations),
-      m_quadratures(other.m_quadratures)
+      m_attributes(other.m_attributes)
   {}
 
   Mesh<Context::Local>::Mesh(Mesh&& other)

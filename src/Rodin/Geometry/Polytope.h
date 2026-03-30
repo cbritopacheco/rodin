@@ -23,7 +23,7 @@
 #include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/Math/SpatialVector.h"
 
-#include "PolytopeQuadrature.h"
+#include "Rodin/QF/ForwardDecls.h"
 #include "ForwardDecls.h"
 
 #include "Types.h"
