@@ -103,7 +103,7 @@ namespace Rodin::Solid
        * @param gf Reference to the displacement GridFunction
        * @returns Reference to this object for chaining
        */
-      InternalForce& setLinearizationPoint(const GridFunctionType& gf)
+      InternalForce& setDisplacement(const GridFunctionType& gf)
       {
         m_linGf = &gf;
         return *this;

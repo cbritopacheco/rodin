@@ -116,7 +116,7 @@ namespace Rodin::Solid
        * @param gf Reference to the displacement GridFunction
        * @returns Reference to this object for chaining
        */
-      MaterialTangent& setLinearizationPoint(const GridFunctionType& gf)
+      MaterialTangent& setDisplacement(const GridFunctionType& gf)
       {
         m_linGf = &gf;
         return *this;
