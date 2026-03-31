@@ -121,6 +121,8 @@ namespace Rodin::Solver
        */
       KSP& setPreconditioner(OperatorType P) noexcept;
 
+      KSP& setPrefix(const Optional<std::string>& prefix) noexcept;
+
       /// @brief Returns a mutable reference to the underlying PETSc KSP handle.
       /// @returns Mutable reference to the KSP handle.
       HandleType& getHandle() noexcept override;
@@ -144,6 +146,7 @@ namespace Rodin::Solver
                    m_dtol; ///< Divergence tolerance.
       PetscInt     m_maxIt; ///< Maximum iteration count.
       std::optional<OperatorType> m_preconditioner; ///< Optional preconditioner matrix.
+      Optional<std::string> m_prefix; ///< Optional prefix for PETSc options.
   };
 } // namespace Rodin::Solver
 

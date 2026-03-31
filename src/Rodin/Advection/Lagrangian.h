@@ -107,7 +107,8 @@ namespace Rodin::Advection
           Real dt,
           const Geometry::Mesh<Context::Local>& mesh,
           Real eps_in_phys = Real(1e-12))
-        : m_mesh(mesh),
+        : m_dt(dt),
+          m_mesh(mesh),
           m_eps_in_phys(eps_in_phys)
       {}
 
@@ -190,8 +191,9 @@ namespace Rodin::Advection
 
         // -------- (4) nudge inside in physical space (inside = -nhat) --------
         const Real eps_machine = std::numeric_limits<Real>::epsilon();
-        const Real eps_floor   = Real(50) * std::sqrt(eps_machine);
-        const Real eps_in      = std::max<Real>(m_eps_in_phys, eps_floor);
+        const Real eps_floor   = Real(10) * eps_machine;
+        const Real eps_dt      = Real(0.1) * std::abs(m_dt);
+        const Real eps_in      = std::max(eps_floor, std::min(m_eps_in_phys, eps_dt));
 
         x -= eps_in * nhat;
 
@@ -205,6 +207,7 @@ namespace Rodin::Advection
       }
 
     private:
+      Real m_dt;
       std::reference_wrapper<const Geometry::Mesh<Context::Local>> m_mesh;
       const Real m_eps_in_phys;
   };
@@ -346,8 +349,9 @@ namespace Rodin::Advection
 
         // ---- (4) inward nudge: x_new = x_hit - eps_in * nD
         const Real eps_machine = std::numeric_limits<Real>::epsilon();
-        const Real eps_floor   = Real(50) * std::sqrt(eps_machine);
-        const Real eps_in      = std::max<Real>(m_eps_in_phys, eps_floor);
+        const Real eps_floor   = Real(10) * eps_machine;
+        const Real eps_dt      = Real(0.1) * std::abs(m_dt);
+        const Real eps_in      = std::max(eps_floor, std::min(m_eps_in_phys, eps_dt));
 
         Math::SpatialPoint x_new = x_hit;
         x_new -= eps_in * nD;
@@ -508,23 +512,19 @@ namespace Rodin::Advection
         const auto& fes = u.getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
 
-        const Math::RungeKutta::RK4 step;
-
         Problem pb(u, v);
         if (m_t > 0)
         {
           const TaylorBoundaryShiftPolicy bp(-dt, mesh, u.getSolution());
           pb = Integral(u, v)
-             - Integral(Flow(-dt, u.getSolution(), m_velocity, step, bp), v);
+             - Integral(Flow(-dt, u.getSolution(), m_velocity, m_step, bp), v);
           Solver::CG(pb).solve();
         }
         else
         {
-          GridFunction u0(fes);
-          u0 = m_initial;
-          const TaylorBoundaryShiftPolicy bp(-dt, mesh, u0);
+          const StopInsideBoundaryPolicy bp0(-dt, mesh);
           pb = Integral(u, v)
-             - Integral(Flow(-dt, m_initial, m_velocity, step, bp), v);
+             - Integral(Flow(-dt, m_initial, m_velocity, m_step, bp0), v);
           Solver::CG(pb).solve();
         }
 
