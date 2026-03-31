@@ -72,13 +72,14 @@
  * same logical formula has a stable object identity.
  */
 
-#include <array>
 #include <cassert>
+#include <utility>
+#include <array>
 #include <deque>
 #include <memory>
-#include <shared_mutex>
-#include <utility>
+#include <mutex>
 #include <vector>
+#include <shared_mutex>
 
 #include "Rodin/Alert/Exception.h"
 #include "Rodin/Alert/MemberFunctionException.h"
