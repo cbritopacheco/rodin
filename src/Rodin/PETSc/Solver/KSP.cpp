@@ -5,6 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <cassert>
+#include <cstring>
 #include <petsc.h>
 #include <petscksp.h>
 
@@ -55,11 +56,7 @@ namespace Rodin::Solver
   void KSP::solve(PETSc::Math::LinearSystem& axb)
   {
     auto& [a, x, b] = axb;
-
     PetscErrorCode ierr;
-
-    ierr = KSPSetInitialGuessNonzero(m_ksp, PETSC_TRUE);
-    assert(ierr == PETSC_SUCCESS);
 
     ierr = KSPSetTolerances(m_ksp, m_rtol, m_abstol, m_dtol, m_maxIt);
     assert(ierr == PETSC_SUCCESS);
@@ -75,16 +72,34 @@ namespace Rodin::Solver
       assert(ierr == PETSC_SUCCESS);
     }
 
-    const auto& splits = axb.getFieldSplits();
-    if (!splits.empty())
+    if (m_prefix)
     {
-      ::PC pc = PETSC_NULLPTR;
-      ierr = KSPGetPC(m_ksp, &pc);
+      ierr = KSPSetOptionsPrefix(m_ksp, m_prefix->c_str());
       assert(ierr == PETSC_SUCCESS);
+    }
 
-      ierr = PCSetType(pc, PCFIELDSPLIT);
+    // Programmatic default, still overridable from options.
+    if (m_type)
+    {
+      ierr = KSPSetType(m_ksp, m_type);
       assert(ierr == PETSC_SUCCESS);
+    }
 
+    ierr = KSPSetFromOptions(m_ksp);
+    assert(ierr == PETSC_SUCCESS);
+
+    ::PC pc = PETSC_NULLPTR;
+    ierr = KSPGetPC(m_ksp, &pc);
+    assert(ierr == PETSC_SUCCESS);
+
+    const char* pctype = nullptr;
+    ierr = PCGetType(pc, &pctype);
+    assert(ierr == PETSC_SUCCESS);
+
+    // Only activate stored field splits when the runtime PC is actually fieldsplit.
+    if (pctype && std::strcmp(pctype, PCFIELDSPLIT) == 0)
+    {
+      const auto& splits = axb.getFieldSplits();
       for (size_t k = 0; k < splits.size(); ++k)
       {
         const auto& s = splits[k];
@@ -98,19 +113,14 @@ namespace Rodin::Solver
       }
     }
 
-    if (m_prefix)
-    {
-      PetscErrorCode ierr =
-        KSPSetOptionsPrefix(m_ksp, m_prefix->c_str());
-      assert(ierr == PETSC_SUCCESS);
-    }
-
-    ierr = KSPSetFromOptions(m_ksp);
+    const char* ksptype = nullptr;
+    ierr = KSPGetType(m_ksp, &ksptype);
     assert(ierr == PETSC_SUCCESS);
 
-    if (m_type)
+    // PREONLY must not be used with a nonzero initial guess.
+    if (!ksptype || std::strcmp(ksptype, KSPPREONLY) != 0)
     {
-      ierr = KSPSetType(m_ksp, m_type);
+      ierr = KSPSetInitialGuessNonzero(m_ksp, PETSC_TRUE);
       assert(ierr == PETSC_SUCCESS);
     }
 
