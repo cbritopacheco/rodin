@@ -98,6 +98,13 @@ namespace Rodin::Solver
       }
     }
 
+    if (m_prefix)
+    {
+      PetscErrorCode ierr =
+        KSPSetOptionsPrefix(m_ksp, m_prefix->c_str());
+      assert(ierr == PETSC_SUCCESS);
+    }
+
     ierr = KSPSetFromOptions(m_ksp);
     assert(ierr == PETSC_SUCCESS);
 
@@ -126,6 +133,12 @@ namespace Rodin::Solver
     m_abstol = abstol;
     m_dtol = dtol;
     m_maxIt = maxIt;
+    return *this;
+  }
+
+  KSP& KSP::setPrefix(const Optional<std::string>& prefix) noexcept
+  {
+    m_prefix = prefix;
     return *this;
   }
 
