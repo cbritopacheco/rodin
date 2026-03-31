@@ -12,29 +12,68 @@
 
 #include "GenericPolytopeQuadrature.h"
 
+#include <array>
+#include <mutex>
+
 #include "Centroid.h"
 #include "GaussLegendre.h"
 #include "GrundmannMoller.h"
 
 namespace Rodin::QF
 {
-  struct Key
+  namespace
   {
-    size_t order;
-
-    Geometry::Polytope::Type g;
-
-    friend bool operator<(const Key& a, const Key& b)
+    struct Key
     {
-      if (a.g != b.g) return a.g < b.g;
-      return a.order < b.order;
-    }
+      size_t order;
+      Geometry::Polytope::Type g;
 
-    friend bool operator==(const Key& a, const Key& b)
+      friend bool operator<(const Key& a, const Key& b)
+      {
+        if (a.g != b.g)
+          return a.g < b.g;
+        return a.order < b.order;
+      }
+
+      friend bool operator==(const Key& a, const Key& b)
+      {
+        return a.order == b.order && a.g == b.g;
+      }
+    };
+
+    /**
+     * @brief Tiny per-thread hot cache for canonical quadrature pointers.
+     *
+     * This cache does not own anything. It only mirrors pointers owned by the
+     * global canonical pool below. Entries are replaced in round-robin order.
+     */
+    struct HotCache
     {
-      return a.order == b.order && a.g == b.g;
-    }
-  };
+      static constexpr size_t Capacity = 8;
+
+      struct Entry
+      {
+        Key key{0, Geometry::Polytope::Type::Point};
+        const QuadratureFormulaBase* ptr = nullptr;
+        bool valid = false;
+      };
+
+      std::array<Entry, Capacity> entries;
+      size_t next = 0;
+    };
+
+    /**
+     * @brief Process-wide canonical pool of generic quadrature formulas.
+     *
+     * This pool owns one unique quadrature formula object per `(order, geometry)`
+     * pair. Returned references remain valid until program termination.
+     */
+    struct CanonicalPool
+    {
+      FlatMap<Key, std::unique_ptr<const QuadratureFormulaBase>> formulas;
+      std::mutex mutex;
+    };
+  }
 
   std::unique_ptr<const QuadratureFormulaBase>
   GenericPolytopeQuadrature::build(size_t order, Geometry::Polytope::Type g)
@@ -88,21 +127,61 @@ namespace Rodin::QF
     }
   }
 
-  const QuadratureFormulaBase& GenericPolytopeQuadrature::get(size_t order, Geometry::Polytope::Type g)
+  const QuadratureFormulaBase&
+  GenericPolytopeQuadrature::get(size_t order, Geometry::Polytope::Type g)
   {
-    static thread_local FlatMap<Key, std::unique_ptr<const QuadratureFormulaBase>> pool;
+    static CanonicalPool pool;
+    static thread_local HotCache hot;
 
     const Key key{order, g};
 
-    auto it = pool.find(key);
-    if (it == pool.end())
-      it = pool.emplace(key, build(order, g)).first;
+    // ------------------------------------------------------------------------
+    // Tier 1: tiny thread-local hot cache
+    // ------------------------------------------------------------------------
+    for (auto& e : hot.entries)
+    {
+      if (e.valid && e.key == key)
+      {
+        assert(e.ptr);
+        return *e.ptr;
+      }
+    }
 
-    return *it->second;
+    // ------------------------------------------------------------------------
+    // Tier 2: process-wide canonical pool
+    // ------------------------------------------------------------------------
+    const QuadratureFormulaBase* ptr = nullptr;
+
+    {
+      std::lock_guard<std::mutex> lock(pool.mutex);
+
+      auto it = pool.formulas.find(key);
+      if (it == pool.formulas.end())
+        it = pool.formulas.emplace(key, build(order, g)).first;
+
+      assert(it->second);
+      ptr = it->second.get();
+    }
+
+    assert(ptr);
+
+    // ------------------------------------------------------------------------
+    // Update thread-local hot cache (round-robin replacement)
+    // ------------------------------------------------------------------------
+    auto& e = hot.entries[hot.next];
+    e.key = key;
+    e.ptr = ptr;
+    e.valid = true;
+    hot.next = (hot.next + 1) % HotCache::Capacity;
+
+    return *ptr;
   }
 
-  // Optional: keep the old behavior, but delegate to build()
-  GenericPolytopeQuadrature::GenericPolytopeQuadrature(size_t order, Geometry::Polytope::Type g)
-    : m_qf(build(order, g)), m_order(order), m_geometry(g)
+  GenericPolytopeQuadrature::GenericPolytopeQuadrature(
+      size_t order,
+      Geometry::Polytope::Type g)
+    : m_qf(build(order, g)),
+      m_order(order),
+      m_geometry(g)
   {}
 }
