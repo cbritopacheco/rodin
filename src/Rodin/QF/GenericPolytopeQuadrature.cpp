@@ -14,6 +14,7 @@
 
 #include <array>
 #include <mutex>
+#include <shared_mutex>
 
 #include "Centroid.h"
 #include "GaussLegendre.h"
