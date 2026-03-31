@@ -98,7 +98,8 @@ namespace Rodin::QF
       GenericPolytopeQuadrature(const GenericPolytopeQuadrature& other)
         : Parent(other),
           m_qf(other.m_qf->copy()),
-          m_order(other.m_order)
+          m_order(other.m_order),
+          m_geometry(other.m_geometry)
       {}
 
       /**
@@ -108,8 +109,14 @@ namespace Rodin::QF
       GenericPolytopeQuadrature(GenericPolytopeQuadrature&& other)
         : Parent(std::move(other)),
           m_qf(std::move(other.m_qf)),
-          m_order(std::move(other.m_order))
+          m_order(std::move(other.m_order)),
+          m_geometry(other.m_geometry)
       {}
+
+      Geometry::Polytope::Type getGeometry() const
+      {
+        return m_geometry;
+      }
 
       /**
        * @brief Gets the number of quadrature points.
@@ -156,6 +163,7 @@ namespace Rodin::QF
     private:
       std::unique_ptr<const QuadratureFormulaBase> m_qf; ///< Underlying quadrature formula
       const size_t m_order; ///< Polynomial degree of exactness
+      const Geometry::Polytope::Type m_geometry; ///< Polytope geometry type
   };
 }
 

@@ -103,6 +103,6 @@ namespace Rodin::QF
 
   // Optional: keep the old behavior, but delegate to build()
   GenericPolytopeQuadrature::GenericPolytopeQuadrature(size_t order, Geometry::Polytope::Type g)
-    : Parent(g), m_qf(build(order, g)), m_order(order)
+    : m_qf(build(order, g)), m_order(order), m_geometry(g)
   {}
 }

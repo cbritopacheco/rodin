@@ -105,6 +105,7 @@ namespace Rodin::QF
       constexpr
       GrundmannMoller(const GrundmannMoller& other)
         : Parent(other),
+          m_geometry(other.m_geometry),
           m_s(other.m_s),
           m_n(other.m_n),
           m_order(other.m_order)
@@ -117,6 +118,7 @@ namespace Rodin::QF
       constexpr
       GrundmannMoller(GrundmannMoller&& other)
         : Parent(std::move(other)),
+          m_geometry(other.m_geometry),
           m_s(std::move(other.m_s)),
           m_n(std::move(other.m_n)),
           m_order(std::move(other.m_order))
@@ -130,6 +132,11 @@ namespace Rodin::QF
       size_t getOrder() const
       {
         return m_order;
+      }
+
+      Geometry::Polytope::Type getGeometry() const
+      {
+        return m_geometry;
       }
 
       /**
@@ -190,6 +197,7 @@ namespace Rodin::QF
       /// Static table: quadrature points for each [s][n] combination
       static boost::multi_array<std::vector<Math::SpatialVector<Real>>, 2> s_points;
 
+      const Geometry::Polytope::Type m_geometry; ///< Simplex geometry type
       const size_t m_s;     ///< Parameter @f$ s @f$ determining degree @f$ 2s+1 @f$
       const size_t m_n;     ///< Simplex dimension
       const size_t m_order; ///< Degree of exactness @f$ d = 2s + 1 @f$

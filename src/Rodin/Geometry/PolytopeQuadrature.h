@@ -15,8 +15,11 @@
 #include <shared_mutex>
 #include <mutex>
 #include <memory>
+#include <array>
+#include <utility>
 #include <vector>
 
+#include "Rodin/Alert/Exception.h"
 #include "Rodin/Types.h"
 #include "Rodin/QF/ForwardDecls.h"
 #include "Point.h"
@@ -108,7 +111,9 @@ namespace Rodin::Geometry
 
         if (m_dimensions.size() <= d)
         {
-          throw std::out_of_range("PolytopeQuadratureIndex: dimension out of range.");
+          Alert::Exception()
+            << "PolytopeQuadratureIndex: dimension out of range."
+            << Alert::Raise;
         }
 
         auto& dim = m_dimensions[d];
@@ -119,8 +124,11 @@ namespace Rodin::Geometry
           {
             const auto& slot = dim.slots[idx];
             std::shared_lock<std::shared_mutex> rdslot(slot.mutex);
-            if (auto it = slot.quadratures.find(&qf); it != slot.quadratures.end())
-              return *it->second;
+            for (size_t i = 0; i < slot.size; ++i)
+            {
+              if (slot.quadratures[i].first == &qf)
+                return *slot.quadratures[i].second;
+            }
           }
         }
 
@@ -135,33 +143,50 @@ namespace Rodin::Geometry
 
         {
           std::unique_lock<std::shared_mutex> wrslot(slot.mutex);
-          auto it = slot.quadratures.find(&qf);
-          if (it == slot.quadratures.end())
+          for (size_t i = 0; i < slot.size; ++i)
           {
-            auto up = factory();
-            it = slot.quadratures.emplace(&qf, std::move(up)).first;
+            if (slot.quadratures[i].first == &qf)
+              return *slot.quadratures[i].second;
           }
-          return *it->second;
+
+          if (slot.size >= Slot::s_maxQuadratures)
+          {
+            Alert::Exception()
+              << "PolytopeQuadratureIndex: exceeded per-polytope cache capacity."
+              << Alert::Raise;
+          }
+
+          const size_t entry = slot.size++;
+          slot.quadratures[entry] = std::make_pair(&qf, factory());
+          return *slot.quadratures[entry].second;
         }
       }
 
     private:
       struct Slot
       {
+        /// Maximum number of distinct quadrature formulas cached per polytope slot.
+        /// A linear scan is intentionally used because this cache is capped to 8 entries.
+        static constexpr size_t s_maxQuadratures = 8;
+        using CacheEntry = std::pair<const QF::QuadratureFormulaBase*, std::unique_ptr<PolytopeQuadrature>>;
+
         // The mutex is intentionally default-constructed in moved instances.
         Slot() = default;
         Slot(const Slot&) = delete;
         Slot& operator=(const Slot&) = delete;
         Slot(Slot&& other) noexcept
-          : quadratures(std::move(other.quadratures))
+          : quadratures(std::move(other.quadratures)),
+            size(std::exchange(other.size, 0))
         {}
         Slot& operator=(Slot&& other) noexcept
         {
           quadratures = std::move(other.quadratures);
+          size = std::exchange(other.size, 0);
           return *this;
         }
 
-        FlatMap<const QF::QuadratureFormulaBase*, std::unique_ptr<PolytopeQuadrature>> quadratures;
+        std::array<CacheEntry, s_maxQuadratures> quadratures;
+        size_t size = 0;
         mutable std::shared_mutex mutex;
       };
 

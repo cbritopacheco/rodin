@@ -6,6 +6,9 @@
  */
 #include <gtest/gtest.h>
 
+#include <vector>
+
+#include <Rodin/Alert/Exception.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Geometry/PolytopeQuadrature.h>
 #include <Rodin/QF/Centroid.h>
@@ -18,6 +21,8 @@ namespace Rodin::Tests::Unit
 {
   namespace
   {
+    constexpr size_t kMaxQuadraturesPerPolytope = 8;
+
     Mesh<Context::Local> makeTriangleMesh()
     {
       return Mesh<Context::Local>::Builder()
@@ -119,6 +124,47 @@ namespace Rodin::Tests::Unit
         1,
         qf,
         [&]() { return std::make_unique<PolytopeQuadrature>(polytope, qf); }),
-      std::out_of_range);
+      Alert::Exception);
+  }
+
+  TEST(Geometry_PolytopeQuadratureIndex, ThrowsWhenPerPolytopeCapacityExceeded)
+  {
+    auto mesh = makeTriangleMesh();
+    const auto polytope = *mesh.getPolytope(2, 0);
+
+    PolytopeQuadratureIndex index;
+    index.initialize(mesh.getDimension());
+    index.resize(2, mesh.getPolytopeCount(2));
+
+    std::vector<std::unique_ptr<QF::Centroid>> quadratureFormulas;
+    // Reserve one extra slot for the expected-to-fail insertion attempt.
+    quadratureFormulas.reserve(kMaxQuadraturesPerPolytope + 1);
+
+    // Cache keying uses quadrature formula object identity (address), so this test
+    // deliberately creates distinct formula objects to fill each slot.
+    for (size_t i = 0; i < kMaxQuadraturesPerPolytope; ++i)
+    {
+      quadratureFormulas.emplace_back(std::make_unique<QF::Centroid>(Polytope::Type::Triangle));
+      EXPECT_NO_THROW(index.get(
+        {2, 0},
+        mesh.getPolytopeCount(2),
+        *quadratureFormulas.back(),
+        [&]()
+        {
+          return std::make_unique<PolytopeQuadrature>(polytope, *quadratureFormulas.back());
+        }));
+    }
+
+    quadratureFormulas.emplace_back(std::make_unique<QF::Centroid>(Polytope::Type::Triangle));
+    EXPECT_THROW(
+      index.get(
+        {2, 0},
+        mesh.getPolytopeCount(2),
+        *quadratureFormulas.back(),
+        [&]()
+        {
+          return std::make_unique<PolytopeQuadrature>(polytope, *quadratureFormulas.back());
+        }),
+      Alert::Exception);
   }
 }
