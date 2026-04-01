@@ -82,7 +82,7 @@ namespace Rodin::Variational
       using IntegrandType =
         ShapeFunctionBase<ShapeFunction<NestedDerived, FESType, TestSpace>>;
 
-      using IntegrandRangeType = typename FormLanguage::Traits<FESType>::RangeType;
+      using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
 
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
 
@@ -131,6 +131,8 @@ namespace Rodin::Variational
 
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
+        static_assert(std::is_same_v<IntegrandRangeType, ScalarType>);
+
         m_polytope = &polytope;
 
         const size_t d   = polytope.getDimension();
@@ -171,33 +173,9 @@ namespace Rodin::Variational
           const auto& p = q.getPoint(qp);
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
-
           const auto& rc = m_qf->getPoint(qp);
-
-          if constexpr (std::is_same_v<IntegrandRangeType, ScalarType>)
-          {
-            for (size_t local = 0; local < nte; ++local)
-              m_vec(local) += wdet * fe.getBasis(local)(rc);
-          }
-          else if constexpr (std::is_same_v<IntegrandRangeType, Math::Vector<ScalarType>>)
-          {
-            const P1Element<ScalarType> scalarFE(geometry);
-            const size_t vdim = fes.getVectorDimension();
-            assert(nte == scalarFE.getCount() * vdim);
-
-            for (size_t local = 0; local < nte; ++local)
-            {
-              const size_t scalarLocal = local / vdim;
-              m_vec(local) += wdet * scalarFE.getBasis(scalarLocal)(rc);
-            }
-          }
-          else
-          {
-            static_assert(
-              std::is_same_v<IntegrandRangeType, ScalarType>
-              || std::is_same_v<IntegrandRangeType, Math::Vector<ScalarType>>,
-              "Unsupported P1 Integral(v) range type.");
-          }
+          for (size_t local = 0; local < fe.getCount(); ++local)
+            m_vec(local) += wdet * fe.getBasis(local)(rc);
         }
 
         return *this;
@@ -398,9 +376,7 @@ namespace Rodin::Variational
         }
         else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>)
         {
-          const P1Element<ScalarType> scalarFE(geometry);
           const size_t vdim = fes.getVectorDimension();
-          assert(nte == scalarFE.getCount() * vdim);
 
           assert(m_quadrature);
           const auto& q = *m_quadrature;
@@ -414,12 +390,7 @@ namespace Rodin::Variational
             s_v = f(p);
 
             for (size_t local = 0; local < nte; ++local)
-            {
-              const size_t scalarLocal = local / vdim;
-              const size_t comp = local % vdim;
-              m_vec(local) +=
-                wdet * s_v.coeff(comp) * scalarFE.getBasis(scalarLocal)(rc);
-            }
+              m_vec(local) += wdet * Math::dot(s_v, fe.getBasis(local)(rc));
           }
         }
         else
