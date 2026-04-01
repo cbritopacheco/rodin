@@ -154,10 +154,13 @@ namespace Rodin::Variational
 
           m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
 
+          const auto& cachedQuadrature = polytope.getQuadrature(*m_qf);
+
+          const size_t cachedSize = cachedQuadrature.getSize();
           m_ps.clear();
-          m_ps.reserve(m_qf->getSize());
-          for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
-            m_ps.emplace_back(polytope, m_qf->getPoint(qp));
+          m_ps.reserve(cachedSize);
+          for (size_t qp = 0; qp < cachedSize; ++qp)
+            m_ps.emplace_back(cachedQuadrature.getPoint(qp));
         }
         else
         {
@@ -373,10 +376,13 @@ namespace Rodin::Variational
 
           m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
 
+          const auto& cachedQuadrature = polytope.getQuadrature(*m_qf);
+
+          const size_t cachedSize = cachedQuadrature.getSize();
           m_ps.clear();
-          m_ps.reserve(m_qf->getSize());
-          for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
-            m_ps.emplace_back(polytope, m_qf->getPoint(qp));
+          m_ps.reserve(cachedSize);
+          for (size_t qp = 0; qp < cachedSize; ++qp)
+            m_ps.emplace_back(cachedQuadrature.getPoint(qp));
         }
         else
         {
@@ -601,10 +607,13 @@ namespace Rodin::Variational
 
           m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
 
+          const auto& cachedQuadrature = polytope.getQuadrature(*m_qf);
+
+          const size_t cachedSize = cachedQuadrature.getSize();
           m_ps.clear();
-          m_ps.reserve(m_qf->getSize());
-          for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
-            m_ps.emplace_back(polytope, m_qf->getPoint(qp));
+          m_ps.reserve(cachedSize);
+          for (size_t qp = 0; qp < cachedSize; ++qp)
+            m_ps.emplace_back(cachedQuadrature.getPoint(qp));
         }
         else
         {
@@ -884,10 +893,13 @@ namespace Rodin::Variational
 
           m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
 
+          const auto& cachedQuadrature = polytope.getQuadrature(*m_qf);
+
+          const size_t cachedSize = cachedQuadrature.getSize();
           m_ps.clear();
-          m_ps.reserve(m_qf->getSize());
-          for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
-            m_ps.emplace_back(polytope, m_qf->getPoint(qp));
+          m_ps.reserve(cachedSize);
+          for (size_t qp = 0; qp < cachedSize; ++qp)
+            m_ps.emplace_back(cachedQuadrature.getPoint(qp));
         }
         else
         {
@@ -1157,10 +1169,13 @@ namespace Rodin::Variational
 
           m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
 
+          const auto& cachedQuadrature = polytope.getQuadrature(*m_qf);
+
+          const size_t cachedSize = cachedQuadrature.getSize();
           m_ps.clear();
-          m_ps.reserve(m_qf->getSize());
-          for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
-            m_ps.emplace_back(polytope, m_qf->getPoint(qp));
+          m_ps.reserve(cachedSize);
+          for (size_t qp = 0; qp < cachedSize; ++qp)
+            m_ps.emplace_back(cachedQuadrature.getPoint(qp));
 
           const P1Element<ScalarType> fe(geometry);
           const size_t n = fe.getCount();
@@ -1423,10 +1438,13 @@ namespace Rodin::Variational
 
           m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
 
+          const auto& cachedQuadrature = polytope.getQuadrature(*m_qf);
+
+          const size_t cachedSize = cachedQuadrature.getSize();
           m_ps.clear();
-          m_ps.reserve(m_qf->getSize());
-          for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
-            m_ps.emplace_back(polytope, m_qf->getPoint(qp));
+          m_ps.reserve(cachedSize);
+          for (size_t qp = 0; qp < cachedSize; ++qp)
+            m_ps.emplace_back(cachedQuadrature.getPoint(qp));
 
           const P1Element<ScalarType> trialScalarFE(geometry);
           const P1Element<ScalarType> testScalarFE(geometry);
@@ -1739,10 +1757,13 @@ namespace Rodin::Variational
 
           m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
 
+          const auto& cachedQuadrature = polytope.getQuadrature(*m_qf);
+
+          const size_t cachedSize = cachedQuadrature.getSize();
           m_ps.clear();
-          m_ps.reserve(m_qf->getSize());
-          for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
-            m_ps.emplace_back(polytope, m_qf->getPoint(qp));
+          m_ps.reserve(cachedSize);
+          for (size_t qp = 0; qp < cachedSize; ++qp)
+            m_ps.emplace_back(cachedQuadrature.getPoint(qp));
         }
         else
         {
@@ -1953,10 +1974,13 @@ namespace Rodin::Variational
 
           m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
 
+          const auto& cachedQuadrature = polytope.getQuadrature(*m_qf);
+
+          const size_t cachedSize = cachedQuadrature.getSize();
           m_ps.clear();
-          m_ps.reserve(m_qf->getSize());
-          for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
-            m_ps.emplace_back(polytope, m_qf->getPoint(qp));
+          m_ps.reserve(cachedSize);
+          for (size_t qp = 0; qp < cachedSize; ++qp)
+            m_ps.emplace_back(cachedQuadrature.getPoint(qp));
 
           const auto& rc = m_qf->getPoint(0);
 
@@ -2183,10 +2207,13 @@ namespace Rodin::Variational
 
           m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
 
+          const auto& cachedQuadrature = polytope.getQuadrature(*m_qf);
+
+          const size_t cachedSize = cachedQuadrature.getSize();
           m_ps.clear();
-          m_ps.reserve(m_qf->getSize());
-          for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
-            m_ps.emplace_back(polytope, m_qf->getPoint(qp));
+          m_ps.reserve(cachedSize);
+          for (size_t qp = 0; qp < cachedSize; ++qp)
+            m_ps.emplace_back(cachedQuadrature.getPoint(qp));
 
           const auto& rc = m_qf->getPoint(0);
 
@@ -2446,10 +2473,13 @@ namespace Rodin::Variational
 
           m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
 
+          const auto& cachedQuadrature = polytope.getQuadrature(*m_qf);
+
+          const size_t cachedSize = cachedQuadrature.getSize();
           m_ps.clear();
-          m_ps.reserve(m_qf->getSize());
-          for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
-            m_ps.emplace_back(polytope, m_qf->getPoint(qp));
+          m_ps.reserve(cachedSize);
+          for (size_t qp = 0; qp < cachedSize; ++qp)
+            m_ps.emplace_back(cachedQuadrature.getPoint(qp));
 
           const P1Element<Math::Vector<ScalarType>> trialVecFE(
             geometry, trialfes.getVectorDimension());
@@ -2763,10 +2793,13 @@ namespace Rodin::Variational
 
           m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
 
+          const auto& cachedQuadrature = polytope.getQuadrature(*m_qf);
+
+          const size_t cachedSize = cachedQuadrature.getSize();
           m_ps.clear();
-          m_ps.reserve(m_qf->getSize());
-          for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
-            m_ps.emplace_back(polytope, m_qf->getPoint(qp));
+          m_ps.reserve(cachedSize);
+          for (size_t qp = 0; qp < cachedSize; ++qp)
+            m_ps.emplace_back(cachedQuadrature.getPoint(qp));
 
           const P1Element<Math::Vector<ScalarType>> trialVecFE(
             geometry, trialfes.getVectorDimension());
@@ -3111,10 +3144,13 @@ namespace Rodin::Variational
 
           m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
 
+          const auto& cachedQuadrature = polytope.getQuadrature(*m_qf);
+
+          const size_t cachedSize = cachedQuadrature.getSize();
           m_ps.clear();
-          m_ps.reserve(m_qf->getSize());
-          for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
-            m_ps.emplace_back(polytope, m_qf->getPoint(qp));
+          m_ps.reserve(cachedSize);
+          for (size_t qp = 0; qp < cachedSize; ++qp)
+            m_ps.emplace_back(cachedQuadrature.getPoint(qp));
 
           const P1Element<ScalarType> scalarFE(geometry);
           const size_t n = scalarFE.getCount();
