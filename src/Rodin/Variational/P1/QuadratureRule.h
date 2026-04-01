@@ -38,7 +38,7 @@
 #include "Rodin/QF/GenericPolytopeQuadrature.h"
 
 #include "P1.h"
-#include "P1Element.h"
+
 
 namespace Rodin::Variational
 {
@@ -626,45 +626,36 @@ namespace Rodin::Variational
           }
           else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>)
           {
-            const P1Element<ScalarType> trialScalarFE(geometry);
-            const P1Element<ScalarType> testScalarFE(geometry);
-            const size_t vdim = trialfes.getVectorDimension();
-            const size_t scalarCountTr = trialScalarFE.getCount();
-            const size_t scalarCountTe = testScalarFE.getCount();
-
             if (symmetric)
             {
-              for (size_t ib = 0; ib < scalarCountTe; ++ib)
+              for (size_t ib = 0; ib < nte; ++ib)
               {
-                const ScalarType phi_te = testScalarFE.getBasis(ib)(rc);
+                const auto& phi_te = testfe.getBasis(ib)(rc);
 
                 {
                   const ScalarType kii =
-                    wdet * phi_te * trialScalarFE.getBasis(ib)(rc);
-                  for (size_t c = 0; c < vdim; ++c)
-                    m_matrix(ib * vdim + c, ib * vdim + c) += kii;
+                    wdet * Math::dot(phi_te, trialfe.getBasis(ib)(rc));
+                  m_matrix(ib, ib) += kii;
                 }
 
                 for (size_t ia = 0; ia < ib; ++ia)
                 {
                   const ScalarType kij =
-                    wdet * phi_te * trialScalarFE.getBasis(ia)(rc);
-                  for (size_t c = 0; c < vdim; ++c)
-                    m_matrix(ib * vdim + c, ia * vdim + c) += kij;
+                    wdet * Math::dot(phi_te, trialfe.getBasis(ia)(rc));
+                  m_matrix(ib, ia) += kij;
                 }
               }
             }
             else
             {
-              for (size_t ib = 0; ib < scalarCountTe; ++ib)
+              for (size_t ib = 0; ib < nte; ++ib)
               {
-                const ScalarType phi_te = testScalarFE.getBasis(ib)(rc);
-                for (size_t ia = 0; ia < scalarCountTr; ++ia)
+                const auto& phi_te = testfe.getBasis(ib)(rc);
+                for (size_t ia = 0; ia < ntr; ++ia)
                 {
                   const ScalarType kij =
-                    wdet * phi_te * trialScalarFE.getBasis(ia)(rc);
-                  for (size_t c = 0; c < vdim; ++c)
-                    m_matrix(ib * vdim + c, ia * vdim + c) += kij;
+                    wdet * Math::dot(phi_te, trialfe.getBasis(ia)(rc));
+                  m_matrix(ib, ia) += kij;
                 }
               }
             }
@@ -922,21 +913,14 @@ namespace Rodin::Variational
             }
             else
             {
-              const P1Element<ScalarType> trialScalarFE(geometry);
-              const P1Element<ScalarType> testScalarFE(geometry);
-              const size_t vdim = trialfes.getVectorDimension();
-              const size_t scalarCountTr = trialScalarFE.getCount();
-              const size_t scalarCountTe = testScalarFE.getCount();
-
-              for (size_t ib = 0; ib < scalarCountTe; ++ib)
+              for (size_t ib = 0; ib < nte; ++ib)
               {
-                const ScalarType phi_te = testScalarFE.getBasis(ib)(rc);
-                for (size_t ia = 0; ia < scalarCountTr; ++ia)
+                const auto& phi_te = testfe.getBasis(ib)(rc);
+                for (size_t ia = 0; ia < ntr; ++ia)
                 {
                   const ScalarType kij =
-                    wdet * csv * phi_te * trialScalarFE.getBasis(ia)(rc);
-                  for (size_t c = 0; c < vdim; ++c)
-                    m_matrix(ib * vdim + c, ia * vdim + c) += kij;
+                    wdet * csv * Math::dot(phi_te, trialfe.getBasis(ia)(rc));
+                  m_matrix(ib, ia) += kij;
                 }
               }
             }
@@ -949,22 +933,13 @@ namespace Rodin::Variational
             static thread_local Math::Matrix<ScalarType> s_cmv;
             coeff.getValue(s_cmv, p);
 
-            const P1Element<ScalarType> trialScalarFE(geometry);
-            const P1Element<ScalarType> testScalarFE(geometry);
-            const size_t vdim = trialfes.getVectorDimension();
-            const size_t scalarCountTr = trialScalarFE.getCount();
-            const size_t scalarCountTe = testScalarFE.getCount();
-
-            for (size_t ib = 0; ib < scalarCountTe; ++ib)
+            for (size_t ib = 0; ib < nte; ++ib)
             {
-              const ScalarType phi_te = testScalarFE.getBasis(ib)(rc);
-              for (size_t ia = 0; ia < scalarCountTr; ++ia)
+              const auto& phi_te = testfe.getBasis(ib)(rc);
+              for (size_t ia = 0; ia < ntr; ++ia)
               {
-                const ScalarType phi_tr = trialScalarFE.getBasis(ia)(rc);
-                const ScalarType w = wdet * phi_te * phi_tr;
-                for (size_t ci = 0; ci < vdim; ++ci)
-                  for (size_t cj = 0; cj < vdim; ++cj)
-                    m_matrix(ib * vdim + ci, ia * vdim + cj) += w * s_cmv(ci, cj);
+                const auto& phi_tr = trialfe.getBasis(ia)(rc);
+                m_matrix(ib, ia) += wdet * Math::dot(phi_te, s_cmv * phi_tr);
               }
             }
           }
@@ -1774,21 +1749,14 @@ namespace Rodin::Variational
           }
           else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>)
           {
-            const P1Element<ScalarType> trialScalarFE(geometry);
-            const P1Element<ScalarType> testScalarFE(geometry);
-            const size_t vdim = trialfes.getVectorDimension();
-            const size_t scalarCountTr = trialScalarFE.getCount();
-            const size_t scalarCountTe = testScalarFE.getCount();
-
-            for (size_t ib = 0; ib < scalarCountTe; ++ib)
+            for (size_t ib = 0; ib < nte; ++ib)
             {
-              const ScalarType phi_te = testScalarFE.getBasis(ib)(rc);
-              for (size_t ia = 0; ia < scalarCountTr; ++ia)
+              const auto& phi_te = testfe.getBasis(ib)(rc);
+              for (size_t ia = 0; ia < ntr; ++ia)
               {
                 const ScalarType kij =
-                  wdet * csv * phi_te * trialScalarFE.getBasis(ia)(rc);
-                for (size_t c = 0; c < vdim; ++c)
-                  m_matrix(ib * vdim + c, ia * vdim + c) += kij;
+                  wdet * csv * Math::dot(phi_te, trialfe.getBasis(ia)(rc));
+                m_matrix(ib, ia) += kij;
               }
             }
           }
@@ -3095,21 +3063,24 @@ namespace Rodin::Variational
           }
           else
           {
-            const P1Element<ScalarType> scalarFE(geometry);
             const size_t vdim = trialfes.getVectorDimension();
-            const size_t n = scalarFE.getCount();
-            m_refGrad.resize(n);
-            for (size_t a = 0; a < n; ++a)
+            const size_t nVertices = trialfe.getCount() / vdim;
+
+            m_refGrad.resize(nVertices);
+            for (size_t v = 0; v < nVertices; ++v)
             {
-              m_refGrad[a].resize(d);
-              const auto& basisFn = scalarFE.getBasis(a);
+              m_refGrad[v].resize(d);
+              const auto& basisFn = trialfe.getBasis(v * vdim);
               for (size_t j = 0; j < d; ++j)
-                m_refGrad[a](j) = basisFn.template getDerivative<1>(j)(rc);
+                m_refGrad[v](j) = basisFn.template getDerivative<1>(0, j)(rc);
             }
 
-            m_basis.resize(n);
-            for (size_t b = 0; b < n; ++b)
-              m_basis[b] = scalarFE.getBasis(b)(rc);
+            m_basis.resize(nVertices);
+            for (size_t v = 0; v < nVertices; ++v)
+            {
+              const auto& bv = testfe.getBasis(v * vdim)(rc);
+              m_basis[v] = bv.coeff(0);
+            }
           }
         }
 
