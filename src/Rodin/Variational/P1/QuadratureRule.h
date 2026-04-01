@@ -31,7 +31,6 @@
 #define RODIN_VARIATIONAL_P1_QUADRATURERULE_H
 
 #include "Rodin/FormLanguage/Traits.h"
-#include "Rodin/Geometry/PolytopeQuadrature.h"
 #include "Rodin/Geometry/Region.h"
 #include "Rodin/Math/Common.h"
 #include "Rodin/Variational/ShapeFunction.h"
@@ -382,8 +381,8 @@ namespace Rodin::Variational
         if constexpr (std::is_same_v<RHSRangeType, ScalarType>)
         {
           assert(m_quadrature);
-          const auto& q = *m_quadrature;
-          for (size_t qp = 0; qp < q.getSize(); ++qp)
+        const auto& q = *m_quadrature;
+        for (size_t qp = 0; qp < q.getSize(); ++qp)
           {
             const auto& p = q.getPoint(qp);
             const ScalarType wdet =
@@ -402,8 +401,8 @@ namespace Rodin::Variational
           assert(nte == scalarCount * vdim);
 
           assert(m_quadrature);
-          const auto& q = *m_quadrature;
-          for (size_t qp = 0; qp < q.getSize(); ++qp)
+        const auto& q = *m_quadrature;
+        for (size_t qp = 0; qp < q.getSize(); ++qp)
           {
             const auto& p = q.getPoint(qp);
             const ScalarType wdet =
@@ -1136,9 +1135,6 @@ namespace Rodin::Variational
 
           m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
 
-          assert(m_qf);
-          m_quadrature = &polytope.getQuadrature(*m_qf);
-
           const P1Element<ScalarType> fe(geometry);
           const size_t n = fe.getCount();
 
@@ -1156,7 +1152,9 @@ namespace Rodin::Variational
 
           m_matrix.resize(n, n);
         }
-        
+
+        assert(m_qf);
+        m_quadrature = &polytope.getQuadrature(*m_qf);
 
         const size_t n = m_refGrad.size();
 
@@ -1397,9 +1395,6 @@ namespace Rodin::Variational
 
           m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
 
-          assert(m_qf);
-          m_quadrature = &polytope.getQuadrature(*m_qf);
-
           const P1Element<ScalarType> trialScalarFE(geometry);
           const P1Element<ScalarType> testScalarFE(geometry);
 
@@ -1434,7 +1429,9 @@ namespace Rodin::Variational
 
           m_matrix.resize(m_testRefGrad.size(), m_trialRefGrad.size());
         }
-        
+
+        assert(m_qf);
+        m_quadrature = &polytope.getQuadrature(*m_qf);
 
         m_matrix.setZero();
 
@@ -1916,9 +1913,6 @@ namespace Rodin::Variational
 
           m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
 
-          assert(m_qf);
-          m_quadrature = &polytope.getQuadrature(*m_qf);
-
           const auto& rc = m_qf->getPoint(0);
 
           const P1Element<Math::Vector<Real>> trialVecFE(geometry, trialfes.getVectorDimension());
@@ -1944,7 +1938,9 @@ namespace Rodin::Variational
 
           m_matrix.resize(m_testBasis.size(), m_refGrad.size());
         }
-        
+
+        assert(m_qf);
+        m_quadrature = &polytope.getQuadrature(*m_qf);
 
         m_matrix.setZero();
 
@@ -2141,9 +2137,6 @@ namespace Rodin::Variational
 
           m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
 
-          assert(m_qf);
-          m_quadrature = &polytope.getQuadrature(*m_qf);
-
           const auto& rc = m_qf->getPoint(0);
 
           const P1Element<Real> trialScalarFE(geometry);
@@ -2169,7 +2162,9 @@ namespace Rodin::Variational
 
           m_matrix.resize(m_refGrad.size(), m_trialBasis.size());
         }
-        
+
+        assert(m_qf);
+        m_quadrature = &polytope.getQuadrature(*m_qf);
 
         m_matrix.setZero();
 
@@ -2399,9 +2394,6 @@ namespace Rodin::Variational
 
           m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
 
-          assert(m_qf);
-          m_quadrature = &polytope.getQuadrature(*m_qf);
-
           const P1Element<Math::Vector<ScalarType>> trialVecFE(
             geometry, trialfes.getVectorDimension());
           const P1Element<Math::Vector<ScalarType>> testVecFE(
@@ -2440,7 +2432,9 @@ namespace Rodin::Variational
 
           m_matrix.resize(m_testRefJac.size(), m_trialRefJac.size());
         }
-        
+
+        assert(m_qf);
+        m_quadrature = &polytope.getQuadrature(*m_qf);
 
         m_matrix.setZero();
 
@@ -2711,9 +2705,6 @@ namespace Rodin::Variational
 
           m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
 
-          assert(m_qf);
-          m_quadrature = &polytope.getQuadrature(*m_qf);
-
           const P1Element<Math::Vector<ScalarType>> trialVecFE(
             geometry, trialfes.getVectorDimension());
           const P1Element<Math::Vector<ScalarType>> testVecFE(
@@ -2752,7 +2743,9 @@ namespace Rodin::Variational
 
           m_matrix.resize(m_testRefJac.size(), m_trialRefJac.size());
         }
-        
+
+        assert(m_qf);
+        m_quadrature = &polytope.getQuadrature(*m_qf);
 
         m_matrix.setZero();
 
@@ -3054,9 +3047,6 @@ namespace Rodin::Variational
 
           m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
 
-          assert(m_qf);
-          m_quadrature = &polytope.getQuadrature(*m_qf);
-
           const P1Element<ScalarType> scalarFE(geometry);
           const size_t n = scalarFE.getCount();
 
@@ -3075,7 +3065,9 @@ namespace Rodin::Variational
           for (size_t b = 0; b < n; ++b)
             m_basis[b] = scalarFE.getBasis(b)(rc);
         }
-        
+
+        assert(m_qf);
+        m_quadrature = &polytope.getQuadrature(*m_qf);
 
         const size_t n = m_refGrad.size();
         const size_t vdim = trialfes.getVectorDimension();
