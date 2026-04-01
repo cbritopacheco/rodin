@@ -6,7 +6,11 @@
 # https://github.com/actions/labeler
 
 name: Labeler
-on: [pull_request]
+on:
+  push:
+    branches: [master, develop]
+  pull_request:
+    branches: [master, develop]
 
 jobs:
   label:
