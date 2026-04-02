@@ -9,7 +9,8 @@
 #ifndef RODIN_SOLID_LINEAR_LINEARELASTICITYINTEGRAL_H
 #define RODIN_SOLID_LINEAR_LINEARELASTICITYINTEGRAL_H
 
-#include "Rodin/QF/GenericPolytopeQuadrature.h"
+#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/Geometry/PolytopeQuadrature.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Variational/Function.h"
 #include "Rodin/Variational/BilinearFormIntegrator.h"
@@ -87,9 +88,7 @@ namespace Rodin::Variational
           m_trialfes(u.getFiniteElementSpace()),
           m_testfes(v.getFiniteElementSpace()),
           m_qf(nullptr),
-          m_set(false),
-          m_order(0),
-          m_geometry(Geometry::Polytope::Type::Point)
+          m_quadrature(nullptr)
       {
         assert(u.getFiniteElementSpace() == v.getFiniteElementSpace());
       }
@@ -106,11 +105,8 @@ namespace Rodin::Variational
           m_testfes(other.m_testfes),
           m_polytope(other.m_polytope),
           m_qf(nullptr),
-          m_ps(),
-          m_matrix(),
-          m_set(false),
-          m_order(0),
-          m_geometry(Geometry::Polytope::Type::Point)
+          m_quadrature(nullptr),
+          m_matrix()
       {}
 
       /**
@@ -125,11 +121,8 @@ namespace Rodin::Variational
           m_testfes(other.m_testfes),
           m_polytope(std::move(other.m_polytope)),
           m_qf(std::exchange(other.m_qf, nullptr)),
-          m_ps(std::move(other.m_ps)),
-          m_matrix(std::move(other.m_matrix)),
-          m_set(std::exchange(other.m_set, false)),
-          m_order(std::exchange(other.m_order, 0)),
-          m_geometry(std::exchange(other.m_geometry, Geometry::Polytope::Type::Point))
+          m_quadrature(std::exchange(other.m_quadrature, nullptr)),
+          m_matrix(std::move(other.m_matrix))
       {}
 
       const Geometry::Polytope& getPolytope() const override
@@ -181,28 +174,8 @@ namespace Rodin::Variational
         const size_t order =
           std::max(lambdaOrder, muOrder) + trialfe.getOrder() + testfe.getOrder();
 
-        const bool recompute =
-          !m_set || m_order != order || m_geometry != geometry;
-
-        if (recompute)
-        {
-          m_set      = true;
-          m_order    = order;
-          m_geometry = geometry;
-
-          m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
-
-          m_ps.clear();
-          m_ps.reserve(m_qf->getSize());
-          for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
-            m_ps.emplace_back(polytope, m_qf->getPoint(qp));
-        }
-        else
-        {
-          assert(m_qf);
-          for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
-            m_ps[qp].setPolytope(polytope);
-        }
+        m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+        m_quadrature = &polytope.getQuadrature(*m_qf);
 
         m_matrix.resize(
           static_cast<Eigen::Index>(nte),
@@ -213,9 +186,9 @@ namespace Rodin::Variational
 
         if (symmetric)
         {
-          for (size_t qp = 0; qp < m_ps.size(); ++qp)
+          for (size_t qp = 0; qp < m_quadrature->getSize(); ++qp)
           {
-            const auto& p  = m_ps[qp];
+            const auto& p  = m_quadrature->getPoint(qp);
             const auto& rc = m_qf->getPoint(qp);
 
             const ScalarType wdet =
@@ -278,9 +251,9 @@ namespace Rodin::Variational
         }
         else
         {
-          for (size_t qp = 0; qp < m_ps.size(); ++qp)
+          for (size_t qp = 0; qp < m_quadrature->getSize(); ++qp)
           {
-            const auto& p  = m_ps[qp];
+            const auto& p  = m_quadrature->getPoint(qp);
             const auto& rc = m_qf->getPoint(qp);
 
             const ScalarType wdet =
@@ -389,14 +362,10 @@ namespace Rodin::Variational
 
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
 
-      const QF::QuadratureFormulaBase* m_qf;  ///< Quadrature formula
-      std::vector<Geometry::Point> m_ps;       ///< Quadrature points
+      const QF::QuadratureFormulaBase* m_qf;                     ///< Quadrature formula
+      const Geometry::PolytopeQuadrature* m_quadrature;          ///< Cached quadrature points
 
       Math::Matrix<ScalarType> m_matrix;  ///< Local stiffness matrix
-
-      bool m_set;                         ///< Whether QF is initialized
-      size_t m_order;                     ///< Cached quadrature order
-      Geometry::Polytope::Type m_geometry;  ///< Cached geometry type
   };
 
   /**

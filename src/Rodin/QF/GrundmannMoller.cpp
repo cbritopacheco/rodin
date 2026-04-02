@@ -175,7 +175,7 @@ namespace Rodin::QF
   boost::multi_array<std::vector<Math::SpatialVector<Real>>, 2> GrundmannMoller::s_points = GrundmannMoller::initPoints();
 
   GrundmannMoller::GrundmannMoller(size_t s, Geometry::Polytope::Type geom)
-    : Parent(geom),
+    : m_geometry(geom),
       m_s(s),
       m_n(Geometry::Polytope::Traits(geom).getDimension()),
       m_order(2 * m_s + 1)
@@ -205,4 +205,3 @@ namespace Rodin::QF
     return s_points[m_n][m_s][i];
   }
 }
-

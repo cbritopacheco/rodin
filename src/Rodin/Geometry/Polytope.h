@@ -23,6 +23,7 @@
 #include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/Math/SpatialVector.h"
 
+#include "Rodin/QF/ForwardDecls.h"
 #include "ForwardDecls.h"
 
 #include "Types.h"
@@ -469,6 +470,12 @@ namespace Rodin::Geometry
        * @note Implementation details in derived classes.
        */
       Polytope& setAttribute();
+
+      /**
+       * @brief Gets cached quadrature for this polytope.
+       * @param[in] qf Quadrature formula
+       */
+      const PolytopeQuadrature& getQuadrature(const QF::QuadratureFormulaBase& qf) const;
 
     private:
       size_t m_dimension;

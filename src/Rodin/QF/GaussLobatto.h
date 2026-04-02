@@ -79,7 +79,7 @@ namespace Rodin::QF
        * directions. Requires @f$ \text{order} \geq 2 @f$.
        */
       GaussLobatto(Geometry::Polytope::Type g, size_t order)
-        : Parent(g), m_nx(order), m_ny(order), m_nz(order)
+        : m_geometry(g), m_nx(order), m_ny(order), m_nz(order)
       { assert(order >= 2); build(); }
 
       /**
@@ -92,7 +92,7 @@ namespace Rodin::QF
        * Requires @f$ nx, ny \geq 2 @f$.
        */
       GaussLobatto(Geometry::Polytope::Type g, size_t nx, size_t ny)
-        : Parent(g), m_nx(nx), m_ny(ny), m_nz(ny)
+        : m_geometry(g), m_nx(nx), m_ny(ny), m_nz(ny)
       { assert(nx>=2 && ny>=2); build(); }
 
       /**
@@ -106,7 +106,7 @@ namespace Rodin::QF
        * Requires @f$ nu, nv, nw \geq 2 @f$.
        */
       GaussLobatto(Geometry::Polytope::Type g, size_t nu, size_t nv, size_t nw)
-        : Parent(g), m_nx(nu), m_ny(nv), m_nz(nw)
+        : m_geometry(g), m_nx(nu), m_ny(nv), m_nz(nw)
       { assert(nu>=2 && nv>=2 && nw>=2); build(); }
 
       /**
@@ -116,8 +116,13 @@ namespace Rodin::QF
        * Uses 2 points per direction, which is the minimum for Lobatto quadrature.
        */
       GaussLobatto(Geometry::Polytope::Type g)
-        : Parent(g), m_nx(2), m_ny(2), m_nz(2)
+        : m_geometry(g), m_nx(2), m_ny(2), m_nz(2)
       { build(); }
+
+      Geometry::Polytope::Type getGeometry() const
+      {
+        return m_geometry;
+      }
 
       /**
        * @brief Gets the number of quadrature points.
@@ -473,6 +478,7 @@ namespace Rodin::QF
         }
       }
 
+      Geometry::Polytope::Type m_geometry; ///< Polytope geometry type
       size_t m_nx{2}, m_ny{2}, m_nz{2}; ///< Number of points per direction
       std::vector<Math::SpatialVector<Real>> m_points; ///< Quadrature point coordinates
       Math::Vector<Real> m_weights; ///< Quadrature weights

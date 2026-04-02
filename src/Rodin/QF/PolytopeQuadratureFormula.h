@@ -4,22 +4,22 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_QF_GENERIC_POLYTOPE_QUADRATURE_H
-#define RODIN_VARIATIONAL_QF_GENERIC_POLYTOPE_QUADRATURE_H
+#ifndef RODIN_VARIATIONAL_QF_POLYTOPE_QUADRATURE_FORMULA_H
+#define RODIN_VARIATIONAL_QF_POLYTOPE_QUADRATURE_FORMULA_H
 
 /**
  * @file
- * @brief Defines the GenericPolytopeQuadrature dispatcher class.
+ * @brief Defines the PolytopeQuadratureFormula dispatcher class.
  */
 
 /**
  * @ingroup RodinDirectives
- * @brief Default order for GenericPolytopeQuadrature.
+ * @brief Default order for PolytopeQuadratureFormula.
  *
  * This macro defines the default polynomial degree of exactness when
- * constructing a GenericPolytopeQuadrature without specifying an order.
+ * constructing a PolytopeQuadratureFormula without specifying an order.
  */
-#define RODIN_VARIATIONAL_QF_GENERIC_POLYTOPE_QUADRATURE_DEFAULT_ORDER 1
+#define RODIN_VARIATIONAL_QF_POLYTOPE_QUADRATURE_FORMULA_DEFAULT_ORDER 1
 
 
 #include "QuadratureFormula.h"
@@ -30,7 +30,7 @@ namespace Rodin::QF
    * @ingroup RodinQuadrature
    * @brief Generic quadrature formula dispatcher for all polytope types.
    *
-   * GenericPolytopeQuadrature provides a convenient interface for creating
+   * PolytopeQuadratureFormula provides a convenient interface for creating
    * quadrature formulas without needing to know which specific quadrature
    * rule to use for each geometry type. It automatically selects an
    * appropriate quadrature formula based on:
@@ -49,17 +49,17 @@ namespace Rodin::QF
    *
    * @code{.cpp}
    * // Create a quadrature rule exact for degree 3 polynomials on a triangle
-   * GenericPolytopeQuadrature qf(3, Geometry::Polytope::Type::Triangle);
+   * PolytopeQuadratureFormula qf(3, Geometry::Polytope::Type::Triangle);
    *
    * // Use default order (degree 1)
-   * GenericPolytopeQuadrature qf_default(Geometry::Polytope::Type::Tetrahedron);
+   * PolytopeQuadratureFormula qf_default(Geometry::Polytope::Type::Tetrahedron);
    * @endcode
    *
    * @see QuadratureFormulaBase
    * @see GaussLegendre
    * @see GrundmannMoller
    */
-  class GenericPolytopeQuadrature : public QuadratureFormulaBase
+  class PolytopeQuadratureFormula : public QuadratureFormulaBase
   {
     public:
       /// Parent class type
@@ -75,10 +75,10 @@ namespace Rodin::QF
        *
        * Creates a quadrature formula with the default polynomial degree
        * of exactness (defined by 
-       * RODIN_VARIATIONAL_QF_GENERIC_POLYTOPE_QUADRATURE_DEFAULT_ORDER).
+       * RODIN_VARIATIONAL_QF_POLYTOPE_QUADRATURE_FORMULA_DEFAULT_ORDER).
        */
-      GenericPolytopeQuadrature(Geometry::Polytope::Type g)
-        : GenericPolytopeQuadrature(RODIN_VARIATIONAL_QF_GENERIC_POLYTOPE_QUADRATURE_DEFAULT_ORDER, g)
+      PolytopeQuadratureFormula(Geometry::Polytope::Type g)
+        : PolytopeQuadratureFormula(RODIN_VARIATIONAL_QF_POLYTOPE_QUADRATURE_FORMULA_DEFAULT_ORDER, g)
       {}
 
       /**
@@ -89,27 +89,34 @@ namespace Rodin::QF
        * Automatically selects and constructs an appropriate quadrature
        * formula that is exact for all polynomials of degree up to @p order.
        */
-      GenericPolytopeQuadrature(size_t order, Geometry::Polytope::Type g);
+      PolytopeQuadratureFormula(size_t order, Geometry::Polytope::Type g);
 
       /**
        * @brief Copy constructor.
-       * @param other GenericPolytopeQuadrature to copy from
+       * @param other PolytopeQuadratureFormula to copy from
        */
-      GenericPolytopeQuadrature(const GenericPolytopeQuadrature& other)
+      PolytopeQuadratureFormula(const PolytopeQuadratureFormula& other)
         : Parent(other),
           m_qf(other.m_qf->copy()),
-          m_order(other.m_order)
+          m_order(other.m_order),
+          m_geometry(other.m_geometry)
       {}
 
       /**
        * @brief Move constructor.
-       * @param other GenericPolytopeQuadrature to move from
+       * @param other PolytopeQuadratureFormula to move from
        */
-      GenericPolytopeQuadrature(GenericPolytopeQuadrature&& other)
+      PolytopeQuadratureFormula(PolytopeQuadratureFormula&& other)
         : Parent(std::move(other)),
           m_qf(std::move(other.m_qf)),
-          m_order(std::move(other.m_order))
+          m_order(std::move(other.m_order)),
+          m_geometry(other.m_geometry)
       {}
+
+      Geometry::Polytope::Type getGeometry() const
+      {
+        return m_geometry;
+      }
 
       /**
        * @brief Gets the number of quadrature points.
@@ -145,17 +152,18 @@ namespace Rodin::QF
 
       /**
        * @brief Creates a copy of this quadrature formula.
-       * @return Pointer to a new GenericPolytopeQuadrature instance
+       * @return Pointer to a new PolytopeQuadratureFormula instance
        */
       inline
-      GenericPolytopeQuadrature* copy() const noexcept override
+      PolytopeQuadratureFormula* copy() const noexcept override
       {
-        return new GenericPolytopeQuadrature(*this);
+        return new PolytopeQuadratureFormula(*this);
       }
 
     private:
       std::unique_ptr<const QuadratureFormulaBase> m_qf; ///< Underlying quadrature formula
       const size_t m_order; ///< Polynomial degree of exactness
+      const Geometry::Polytope::Type m_geometry; ///< Polytope geometry type
   };
 }
 
