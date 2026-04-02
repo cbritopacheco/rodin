@@ -18,7 +18,7 @@
 
 #include "Rodin/Alert/MemberFunctionException.h"
 
-#include "MarchingBase.h"
+#include "LevelSetDiscretizerBase.h"
 #include "Mesh.h"
 #include "Rodin/Geometry/Polytope.h"
 
@@ -352,9 +352,9 @@ namespace Rodin::Geometry
           FaceSplit& fs = faceSplit[(size_t)fid];
 
           const auto& fv = conn.getPolytope(2, fid); // 3 vertices (a,b,c)
-          const Index a = fv.coeff(0);
-          const Index b = fv.coeff(1);
-          const Index c = fv.coeff(2);
+          const Index a = fv(0);
+          const Index b = fv(1);
+          const Index c = fv(2);
 
           const Real fa = ls[a], fb = ls[b], fc = ls[c];
           if (!finite(fa) || !finite(fb) || !finite(fc))
@@ -589,9 +589,9 @@ namespace Rodin::Geometry
               if (!isNoSplit(2, fa)) continue;
 
               const auto& fv = conn.getPolytope(2, fid);
-              const int s0 = sstrict(ls[fv.coeff(0)]);
-              const int s1 = sstrict(ls[fv.coeff(1)]);
-              const int s2 = sstrict(ls[fv.coeff(2)]);
+              const int s0 = sstrict(ls[fv(0)]);
+              const int s1 = sstrict(ls[fv(1)]);
+              const int s2 = sstrict(ls[fv(2)]);
               const bool uniform = (s0 == s1 && s1 == s2);
               if (!uniform) { blocked = true; break; }
             }
