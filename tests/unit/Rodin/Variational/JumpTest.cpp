@@ -7,6 +7,7 @@
 #include <gtest/gtest.h>
 
 #include "Rodin/Variational.h"
+#include "InterfaceTestUtils.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -14,30 +15,6 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
-  /**
-   * @brief Helper to find an interior face and create a point on it.
-   *
-   * Iterates over mesh faces and returns a point at the midpoint of the
-   * first non-boundary face found. The mesh must have (d-1, d) connectivity
-   * computed.
-   */
-  static std::pair<bool, Point> findInteriorFacePoint(Mesh<Context::Local>& mesh)
-  {
-    const size_t d = mesh.getDimension();
-    mesh.getConnectivity().compute(d - 1, d);
-    for (auto it = mesh.getFace(); it; ++it)
-    {
-      if (!it->isBoundary())
-      {
-        // Face midpoint in reference coordinates (1D edge: midpoint = 0.5)
-        Math::SpatialPoint rc(1);
-        rc(0) = 0.5;
-        return { true, Point(*it, std::move(rc)) };
-      }
-    }
-    return { false, Point(*(mesh.getFace()), Math::SpatialPoint(1)) };
-  }
-
   TEST(Rodin_Variational_Jump, ConstantFunction_JumpIsZero)
   {
     // Jump of a constant across any interior face should be zero

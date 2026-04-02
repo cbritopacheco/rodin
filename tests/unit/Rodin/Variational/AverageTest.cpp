@@ -7,6 +7,7 @@
 #include <gtest/gtest.h>
 
 #include "Rodin/Variational.h"
+#include "InterfaceTestUtils.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -14,25 +15,6 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
-  /**
-   * @brief Helper to find an interior face and create a point on it.
-   */
-  static std::pair<bool, Point> findInteriorFacePointAvg(Mesh<Context::Local>& mesh)
-  {
-    const size_t d = mesh.getDimension();
-    mesh.getConnectivity().compute(d - 1, d);
-    for (auto it = mesh.getFace(); it; ++it)
-    {
-      if (!it->isBoundary())
-      {
-        Math::SpatialPoint rc(1);
-        rc(0) = 0.5;
-        return { true, Point(*it, std::move(rc)) };
-      }
-    }
-    return { false, Point(*(mesh.getFace()), Math::SpatialPoint(1)) };
-  }
-
   TEST(Rodin_Variational_Average, ConstantFunction_AverageEqualsConstant)
   {
     // Average of a constant function across any face should equal the constant
@@ -40,7 +22,7 @@ namespace Rodin::Tests::Unit
     RealFunction f(42.0);
     auto avg_f = Average(f);
 
-    auto [found, p] = findInteriorFacePointAvg(mesh);
+    auto [found, p] = findInteriorFacePoint(mesh);
     ASSERT_TRUE(found) << "No interior face found in mesh";
 
     EXPECT_NEAR(avg_f.getValue(p), 42.0, 1e-10);
@@ -53,7 +35,7 @@ namespace Rodin::Tests::Unit
     VectorFunction f{3.0, 7.0};
     auto avg_f = Average(f);
 
-    auto [found, p] = findInteriorFacePointAvg(mesh);
+    auto [found, p] = findInteriorFacePoint(mesh);
     ASSERT_TRUE(found) << "No interior face found in mesh";
 
     auto result = avg_f.getValue(p);
@@ -71,7 +53,7 @@ namespace Rodin::Tests::Unit
     gf.project(f);
     auto avg_gf = Average(gf);
 
-    auto [found, p] = findInteriorFacePointAvg(mesh);
+    auto [found, p] = findInteriorFacePoint(mesh);
     ASSERT_TRUE(found) << "No interior face found in mesh";
 
     EXPECT_NEAR(avg_gf.getValue(p), 5.0, 1e-10);
@@ -84,7 +66,7 @@ namespace Rodin::Tests::Unit
     auto avg_copy = avg_f;
 
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    auto [found, p] = findInteriorFacePointAvg(mesh);
+    auto [found, p] = findInteriorFacePoint(mesh);
     ASSERT_TRUE(found) << "No interior face found in mesh";
 
     EXPECT_NEAR(avg_copy.getValue(p), 9.0, 1e-10);
@@ -97,7 +79,7 @@ namespace Rodin::Tests::Unit
     auto avg_moved = std::move(avg_f);
 
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    auto [found, p] = findInteriorFacePointAvg(mesh);
+    auto [found, p] = findInteriorFacePoint(mesh);
     ASSERT_TRUE(found) << "No interior face found in mesh";
 
     EXPECT_NEAR(avg_moved.getValue(p), 9.0, 1e-10);
@@ -110,7 +92,7 @@ namespace Rodin::Tests::Unit
     std::unique_ptr<decltype(avg_f)> copy(avg_f.copy());
 
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    auto [found, p] = findInteriorFacePointAvg(mesh);
+    auto [found, p] = findInteriorFacePoint(mesh);
     ASSERT_TRUE(found) << "No interior face found in mesh";
 
     EXPECT_NEAR(copy->getValue(p), 11.0, 1e-10);
@@ -124,7 +106,7 @@ namespace Rodin::Tests::Unit
     auto avg_f = Average(f);
     auto jump_f = Jump(f);
 
-    auto [found, p] = findInteriorFacePointAvg(mesh);
+    auto [found, p] = findInteriorFacePoint(mesh);
     ASSERT_TRUE(found) << "No interior face found in mesh";
 
     EXPECT_NEAR(jump_f.getValue(p), 0.0, 1e-10);

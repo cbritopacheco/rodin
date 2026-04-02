@@ -128,8 +128,8 @@ namespace Rodin::Variational
        */
       auto getValue(const Geometry::Point& p) const
       {
-        static thread_local Math::SpatialPoint rc1;
-        static thread_local Math::SpatialPoint rc2;
+        static thread_local Math::SpatialPoint s_rc1;
+        static thread_local Math::SpatialPoint s_rc2;
 
         assert(p.getPolytope().isFace());
         const auto& face = p.getPolytope();
@@ -142,10 +142,10 @@ namespace Rodin::Variational
         const auto it1 = mesh.getPolytope(d + 1, idx1);
         const auto it2 = mesh.getPolytope(d + 1, idx2);
         const auto& pc = p.getPhysicalCoordinates();
-        it1->getTransformation().inverse(rc1, pc);
-        it2->getTransformation().inverse(rc2, pc);
-        const Geometry::Point p1(std::cref(*it1), std::cref(rc1), pc);
-        const Geometry::Point p2(std::cref(*it2), std::cref(rc2), pc);
+        it1->getTransformation().inverse(s_rc1, pc);
+        it2->getTransformation().inverse(s_rc2, pc);
+        const Geometry::Point p1(std::cref(*it1), std::cref(s_rc1), pc);
+        const Geometry::Point p2(std::cref(*it2), std::cref(s_rc2), pc);
         return 0.5 * (this->object(getOperand().getValue(p1)) + this->object(getOperand().getValue(p2)));
       }
 
