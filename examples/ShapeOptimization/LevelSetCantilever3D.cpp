@@ -97,6 +97,7 @@
  * - The XDMF output is intended for temporal visualization of the optimization.
  */
 
+#include "Rodin/Geometry/LevelSetDiscretizerTetrahedra.h"
 #include <Rodin/Alert/Exception.h>
 #include <Rodin/Alert/Success.h>
 #include <Rodin/Alert/Warning.h>
@@ -130,14 +131,14 @@ static constexpr Real eps = 1e-12;
 static constexpr Real hgrad = 1.6;
 static constexpr Real ell = 0.1;
 static Real elementStep = 0.5;
-static Real hmax0 = 0.1;
+static Real hmax0 = 0.5;
 static Real hmax = hmax0;
 static Real hmin = 0.1 * hmax;
 static Real hausd = 0.1 * hmin;
 static size_t hmaxIt = maxIt / 2;
-const Real k = 0.5;
+const Real k = 0.2;
 const Real dt = k * (hmax - hmin) / 2;
-static Real alpha = dt;
+static Real alpha = 8 * hmax * hmax;
 
 using FES = VectorP1<Mesh<Context::Local>>;
 
@@ -190,7 +191,7 @@ int main(int, char**)
       MMG::Optimizer().setHMax(hmax)
                       .setHMin(hmin)
                       // .setGradation(1.1)
-                      // .setHausdorff(hausd)
+                      .setHausdorff(hausd)
                       .setAngleDetection(false)
                       .optimize(th);
 
@@ -217,6 +218,7 @@ int main(int, char**)
 
     conn.restrict(1, 0);
     conn.restrict(2, 0);
+    conn.restrict(2, 1);
 
     conn.restrict(2, 3);
 
@@ -255,7 +257,7 @@ int main(int, char**)
     elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
                - BoundaryIntegral(f, v).over(GammaN)
                + DirichletBC(u, VectorFunction{0, 0, 0}).on(GammaD);
-    auto cg = Solver::CG(elasticity);
+    auto cg = Solver::SparseLU(elasticity);
     cg.solve();
 
     u.getSolution().save("State.gf", IO::FileFormat::MFEM);
@@ -277,7 +279,7 @@ int main(int, char**)
             + Integral(g, w)
             - FaceIntegral(Dot(Ae, e) - ell, Dot(n, w)).over(Gamma)
             + DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaN);
-    Solver::CG(hilbert).solve();
+    Solver::SparseLU(hilbert).solve();
 
     auto& dJ = g.getSolution();
 
@@ -323,30 +325,43 @@ int main(int, char**)
     xdmf.write(i).flush();
 
     // Recover the implicit domain
-    Alert::Info() << "   | Meshing the domain." << Alert::Raise;
-    try
-    {
-      th = MMG::LevelSetDiscretizer().setHMax(hmax)
-                                     .setHMin(hmin)
-                                     // .setHausdorff(hausd)
-                                     .setAngleDetection(false)
-                                     .setRMC(1e-5)
-                                     .setBaseReferences(GammaD)
-                                     .setBoundaryReference(Gamma)
-                                     .discretize(advect.getSolution());
+Alert::Info() << "   | Meshing the domain." << Alert::Raise;
+try
+{
+  LevelSetDiscretizerTetrahedra lsd(advect.getSolution());
+  lsd
+    .setSignTolerance(1e-12)
+    .setSnapTolerance(1e-12)
+    .split(3, Interior, {Interior, Exterior})
+    .split(3, Exterior, {Interior, Exterior})
+    .preserve(2, GammaD)
+    .preserve(2, GammaN)
+    .setInterface(2, Gamma)
+    .setInterface(1, Gamma);
 
-      hmax = hmax0;
-      hmin = 0.1 * hmax;
-    }
-    catch (const Alert::Exception& e)
+  th = lsd.discretize();
+  th.getConnectivity().compute(2, 3);
+  for (auto it = th.getBoundary(); it; ++it)
+  {
+    const auto attr = it->getAttribute();
+    if (!attr)
     {
-      hmax /= 2;
-      hmin = 0.1 * hmax;
-      Alert::Warning() << "Meshing failed at iteration " << i
-                       << ". Reducing hmax to " << hmax
-                       << " and retrying." << Alert::Raise;
-      continue;
+      th.setAttribute(it.key(), Gamma0);
     }
+  }
+
+  hmax = hmax0;
+  hmin = 0.1 * hmax;
+}
+catch (const Alert::Exception& e)
+{
+  hmax /= 2;
+  hmin = 0.1 * hmax;
+  Alert::Warning() << "Level-set discretization failed at iteration " << i
+                   << ". Reducing hmax to " << hmax
+                   << " and retrying." << Alert::Raise;
+  continue;
+}
 
     i++;
     th.save("Omega.mesh", IO::FileFormat::MEDIT);
