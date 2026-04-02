@@ -95,9 +95,7 @@ namespace Rodin::Variational
           m_trialfes(u.getFiniteElementSpace()),
           m_testfes(v.getFiniteElementSpace()),
           m_qf(nullptr),
-          m_set(false),
-          m_order(0),
-          m_geometry(Geometry::Polytope::Type::Point)
+          m_quadrature(nullptr)
       {}
 
       LinearElasticityIntegrator(const LinearElasticityIntegrator& other)
@@ -108,11 +106,8 @@ namespace Rodin::Variational
           m_testfes(other.m_testfes),
           m_polytope(other.m_polytope),
           m_qf(nullptr),
-          m_ps(),
-          m_matrix(),
-          m_set(false),
-          m_order(0),
-          m_geometry(Geometry::Polytope::Type::Point)
+          m_quadrature(nullptr),
+          m_matrix()
       {}
 
       LinearElasticityIntegrator(LinearElasticityIntegrator&& other)
@@ -123,11 +118,8 @@ namespace Rodin::Variational
           m_testfes(other.m_testfes),
           m_polytope(std::move(other.m_polytope)),
           m_qf(std::exchange(other.m_qf, nullptr)),
-          m_ps(std::move(other.m_ps)),
-          m_matrix(std::move(other.m_matrix)),
-          m_set(std::exchange(other.m_set, false)),
-          m_order(std::exchange(other.m_order, 0)),
-          m_geometry(std::exchange(other.m_geometry, Geometry::Polytope::Type::Point))
+          m_quadrature(std::exchange(other.m_quadrature, nullptr)),
+          m_matrix(std::move(other.m_matrix))
       {}
 
       const Geometry::Polytope& getPolytope() const final override
@@ -158,34 +150,11 @@ namespace Rodin::Variational
         const size_t muOrder =
           getShearModulus().getOrder(polytope).value_or(size_t(0));
 
-        // Upper bound based on the actual finite elements on the current
-        // polytope. This intentionally queries the FE order directly instead
-        // of assuming anything from the abstract "P1" name.
         const size_t order =
           std::max(lambdaOrder, muOrder) + trialfe.getOrder() + testfe.getOrder();
 
-        const bool recompute =
-          !m_set || m_order != order || m_geometry != geometry;
-
-        if (recompute)
-        {
-          m_set      = true;
-          m_order    = order;
-          m_geometry = geometry;
-
-          m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
-
-          m_ps.clear();
-          m_ps.reserve(m_qf->getSize());
-          for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
-            m_ps.emplace_back(polytope, m_qf->getPoint(qp));
-        }
-        else
-        {
-          assert(m_qf);
-          for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
-            m_ps[qp].setPolytope(polytope);
-        }
+        m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+        m_quadrature = &polytope.getQuadrature(*m_qf);
 
         m_matrix.resize(
           static_cast<Eigen::Index>(nte),
@@ -196,9 +165,9 @@ namespace Rodin::Variational
 
         if (symmetric)
         {
-          for (size_t qp = 0; qp < m_ps.size(); ++qp)
+          for (size_t qp = 0; qp < m_quadrature->getSize(); ++qp)
           {
-            const auto& p  = m_ps[qp];
+            const auto& p  = m_quadrature->getPoint(qp);
             const auto& rc = m_qf->getPoint(qp);
 
             const ScalarType wdet =
@@ -261,9 +230,9 @@ namespace Rodin::Variational
         }
         else
         {
-          for (size_t qp = 0; qp < m_ps.size(); ++qp)
+          for (size_t qp = 0; qp < m_quadrature->getSize(); ++qp)
           {
-            const auto& p  = m_ps[qp];
+            const auto& p  = m_quadrature->getPoint(qp);
             const auto& rc = m_qf->getPoint(qp);
 
             const ScalarType wdet =
@@ -365,13 +334,9 @@ namespace Rodin::Variational
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
 
       const QF::QuadratureFormulaBase* m_qf;
-      std::vector<Geometry::Point> m_ps;
+      const Geometry::PolytopeQuadrature* m_quadrature;
 
       Math::Matrix<ScalarType> m_matrix;
-
-      bool m_set;
-      size_t m_order;
-      Geometry::Polytope::Type m_geometry;
   };
 }
 #endif

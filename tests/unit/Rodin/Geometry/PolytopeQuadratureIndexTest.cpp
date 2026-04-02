@@ -13,7 +13,7 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Geometry/PolytopeQuadrature.h>
 #include <Rodin/QF/Centroid.h>
-#include <Rodin/QF/GenericPolytopeQuadrature.h>
+#include <Rodin/QF/PolytopeQuadratureFormula.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -69,7 +69,7 @@ namespace Rodin::Tests::Unit
     const auto polytope = *mesh.getPolytope(2, 0);
 
     QF::Centroid qf1(Polytope::Type::Triangle);
-    const auto& qf2 = QF::GenericPolytopeQuadrature::get(2, Polytope::Type::Triangle);
+    const auto& qf2 = QF::PolytopeQuadratureFormula::get(2, Polytope::Type::Triangle);
 
     PolytopeQuadratureIndex index;
     index.initialize(mesh.getDimension());

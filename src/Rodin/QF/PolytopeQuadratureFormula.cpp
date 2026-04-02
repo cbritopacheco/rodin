@@ -7,10 +7,10 @@
 
 /**
  * @file
- * @brief Implementation of the GenericPolytopeQuadrature dispatcher class.
+ * @brief Implementation of the PolytopeQuadratureFormula dispatcher class.
  */
 
-#include "GenericPolytopeQuadrature.h"
+#include "PolytopeQuadratureFormula.h"
 
 #include <array>
 #include <mutex>
@@ -77,7 +77,7 @@ namespace Rodin::QF
   }
 
   std::unique_ptr<const QuadratureFormulaBase>
-  GenericPolytopeQuadrature::build(size_t order, Geometry::Polytope::Type g)
+  PolytopeQuadratureFormula::build(size_t order, Geometry::Polytope::Type g)
   {
     switch (g)
     {
@@ -129,7 +129,7 @@ namespace Rodin::QF
   }
 
   const QuadratureFormulaBase&
-  GenericPolytopeQuadrature::get(size_t order, Geometry::Polytope::Type g)
+  PolytopeQuadratureFormula::get(size_t order, Geometry::Polytope::Type g)
   {
     static CanonicalPool pool;
     static thread_local HotCache hot;
@@ -178,7 +178,7 @@ namespace Rodin::QF
     return *ptr;
   }
 
-  GenericPolytopeQuadrature::GenericPolytopeQuadrature(
+  PolytopeQuadratureFormula::PolytopeQuadratureFormula(
       size_t order,
       Geometry::Polytope::Type g)
     : m_qf(build(order, g)),
