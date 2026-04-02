@@ -105,7 +105,7 @@
 #include <Rodin/Assembly.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
-#include <Rodin/LinearElasticity.h>
+#include <Rodin/Solid.h>
 
 #include <Rodin/MMG.h>
 

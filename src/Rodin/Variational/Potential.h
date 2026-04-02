@@ -231,9 +231,10 @@ namespace Rodin::Variational
           {
             const auto& polytope = *it;
             const auto& qf = *m_qf;
-            for (size_t i = 0; i < qf.getSize(); i++)
+            const auto& quadrature = polytope.getQuadrature(qf);
+            for (size_t i = 0; i < quadrature.getSize(); i++)
             {
-              const Geometry::Point y(polytope, std::ref(qf.getPoint(i)));
+              const auto& y = quadrature.getPoint(i);
               res += qf.getWeight(i) * y.getDistortion() * kernel(p, y) * operand(y);
             }
           }
@@ -280,7 +281,7 @@ namespace Rodin::Variational
       //     for (auto it = mesh.getCell(); it; ++it)
       //     {
       //       const auto& polytope = *it;
-      //       const QF::GenericPolytopeQuadrature qf(polytope.getGeometry());
+      //       const QF::PolytopeQuadratureFormula qf(polytope.getGeometry());
       //       for (size_t i = 0; i < qf.getSize(); i++)
       //       {
       //         const Geometry::Point y(polytope, qf.getPoint(i));

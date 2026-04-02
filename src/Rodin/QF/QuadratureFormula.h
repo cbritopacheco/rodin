@@ -49,39 +49,19 @@ namespace Rodin::QF
   class QuadratureFormulaBase : public Copyable
   {
     public:
-      /**
-       * @brief Constructs a quadrature formula for the given geometry type.
-       * @param g The polytope geometry (e.g., triangle, tetrahedron, etc.)
-       */
-      constexpr
-      QuadratureFormulaBase(Geometry::Polytope::Type g)
-        : m_geometry(g)
-      {}
+      constexpr QuadratureFormulaBase() = default;
 
       /**
        * @brief Copy constructor.
        * @param other Another quadrature formula to copy from
        */
       constexpr
-      QuadratureFormulaBase(const QuadratureFormulaBase& other)
-        : m_geometry(other.m_geometry)
-      {}
+      QuadratureFormulaBase(const QuadratureFormulaBase& other) = default;
 
       /**
        * @brief Virtual destructor.
        */
       virtual ~QuadratureFormulaBase() = default;
-
-      /**
-       * @brief Gets the polytope geometry for this quadrature formula.
-       * @return The geometry type (e.g., Point, Segment, Triangle, etc.)
-       */
-      inline
-      constexpr
-      Geometry::Polytope::Type getGeometry() const
-      {
-        return m_geometry;
-      }
 
       /**
        * @brief Gets the number of quadrature points.
@@ -114,11 +94,7 @@ namespace Rodin::QF
        * returned pointer.
        */
       virtual QuadratureFormulaBase* copy() const noexcept override = 0;
-
-    private:
-      Geometry::Polytope::Type m_geometry; ///< Polytope geometry type
   };
 }
 
 #endif
-

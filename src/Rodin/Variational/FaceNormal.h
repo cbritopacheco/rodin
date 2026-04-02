@@ -6,44 +6,102 @@
  */
 /**
  * @file FaceNormal.h
- * @brief Normal vector on mesh faces for DG methods.
+ * @brief Unit normal vector on mesh faces for DG and face-based formulations.
  *
- * This file defines the FaceNormal class, which represents the unit normal
- * vector on mesh faces (both interior and boundary). Face normals are crucial
- * for Discontinuous Galerkin (DG) methods where numerical fluxes depend on
- * the normal direction at element interfaces.
+ * This file defines the FaceNormal class, which represents a unit normal
+ * vector on codimension-one mesh entities (faces in 3D, edges in 2D). Face
+ * normals are fundamental in face-based finite element formulations, notably
+ * in Discontinuous Galerkin (DG) methods where numerical fluxes, jumps, and
+ * averages depend on a consistent face orientation.
  *
  * ## Mathematical Foundation
- * For a face @f$ F @f$ shared by elements @f$ K^+ @f$ and @f$ K^- @f$, the
- * face normal @f$ \mathbf{n} @f$ satisfies:
+ *
+ * Let @f$ F @f$ be a codimension-one polytope of the mesh. A face normal is a
+ * vector field @f$ \mathbf{n}_F @f$ such that
  * @f[
- *   \|\mathbf{n}\| = 1
+ *   \|\mathbf{n}_F\| = 1.
  * @f]
+ * Geometrically, the normal is orthogonal to the tangent space of the face.
+ *
+ * For an interior face shared by two adjacent cells @f$ K_1 @f$ and
+ * @f$ K_2 @f$, the normal is defined only up to sign unless one chooses which
+ * adjacent cell defines the outward direction. In trace-based formulations,
+ * this side is determined by the chosen trace domain.
+ *
+ * For a boundary face, there is a unique adjacent cell @f$ K @f$, and the
+ * normal is oriented automatically outward from that cell.
  *
  * ## Orientation Convention
- * The normal direction is chosen according to a consistent orientation:
- * - For interior faces: points from @f$ K^+ @f$ to @f$ K^- @f$
- * - For boundary faces: points outward from the domain
+ *
+ * The orientation is chosen as follows:
+ *
+ * - **Boundary face (one adjacent cell)**:
+ *   the normal is oriented automatically outward from the unique incident cell.
+ *
+ * - **Interior face (two adjacent cells)**:
+ *   the normal is oriented outward from the unique adjacent cell whose
+ *   attribute belongs to the trace domain.
+ *
+ * Consequently, on interior faces the normal is trace-dependent, while on
+ * boundary faces it is determined geometrically from the unique incident cell.
+ *
+ * ## Trace Semantics
+ *
+ * The FaceNormal object supports both boundary and interior codimension-one
+ * entities, but the meaning differs slightly:
+ *
+ * - On a **boundary face**, no trace domain is required, since there is only
+ *   one adjacent cell and the outward direction is unambiguous.
+ *
+ * - On an **interior face**, a trace domain is required to select which side
+ *   of the interface defines the outward direction. If no trace domain is
+ *   provided, or if none of the adjacent cells matches it, the normal is
+ *   considered undefined and an exception is raised.
+ *
+ * This behavior makes FaceNormal suitable for DG interface terms where one
+ * needs a normal consistent with a chosen side of the interface.
  *
  * ## Applications in DG Methods
- * - **Numerical fluxes**: @f$ \hat{f}(\mathbf{u}^+, \mathbf{u}^-, \mathbf{n}) @f$
- * - **Jump terms**: @f$ [\![u]\!] = u^+ \mathbf{n}^+ + u^- \mathbf{n}^- @f$
- * - **Average terms**: @f$ \{\!\{\nabla u\}\!\} \cdot \mathbf{n} @f$
- * - **Penalty terms**: @f$ \frac{\sigma}{h} [\![u]\!] \cdot [\![v]\!] @f$
+ *
+ * Typical uses include:
+ *
+ * - **Numerical fluxes**:
+ *   @f$ \hat{f}(u^+, u^-, \mathbf{n}) @f$
+ * - **Jump terms**:
+ *   @f$ [\![u]\!] = u^+ \mathbf{n}^+ + u^- \mathbf{n}^- @f$
+ * - **Average-normal couplings**:
+ *   @f$ \{\!\{\nabla u\}\!\} \cdot \mathbf{n} @f$
+ * - **Penalty terms**:
+ *   @f$ \frac{\sigma}{h} [\![u]\!] \cdot [\![v]\!] @f$
  *
  * ## Difference from BoundaryNormal
- * - **FaceNormal**: Defined on all faces (interior + boundary)
- * - **BoundaryNormal**: Only defined on domain boundary
+ *
+ * - **FaceNormal**:
+ *   defined on all codimension-one mesh entities; on interior faces its
+ *   orientation may depend on the trace domain.
+ *
+ * - **BoundaryNormal**:
+ *   defined only on the boundary of the domain and always oriented outward.
+ *
+ * ## Manifold Assumption
+ *
+ * This implementation assumes that a codimension-one mesh entity is incident
+ * to either:
+ *
+ * - exactly one cell (boundary face), or
+ * - exactly two cells (interior face).
+ *
+ * Non-manifold situations with more than two incident cells are not supported.
  *
  * ## Usage Example
  * ```cpp
  * FaceNormal n(mesh);
- * 
- * // DG numerical flux on interior faces
- * auto flux = InterfaceIntegral(Average(u) * Dot(n, Jump(v)));
- * 
- * // Normal component of vector field
- * auto normal_component = Dot(velocity, n);
+ *
+ * // DG numerical flux on interfaces
+ * auto flux = InterfaceIntegral(Average(u) * Dot(n.traceOf(omega), Jump(v)));
+ *
+ * // Normal component of a vector field on a boundary region
+ * auto un = Dot(velocity, n);
  * ```
  *
  * @see BoundaryNormal, InterfaceIntegral, Jump, Average
@@ -65,27 +123,27 @@ namespace Rodin::Variational
 {
   /**
    * @ingroup RodinVariational
-   * @brief Unit normal vector on mesh faces.
+   * @brief Unit normal vector on codimension-one mesh entities.
    *
-   * FaceNormal represents the unit normal vector on mesh faces, essential for
-   * DG methods and face integral computations. The normal orientation follows
-   * a consistent convention across the mesh.
+   * FaceNormal represents a unit normal vector on mesh faces and is intended
+   * for face integral formulations such as DG methods. On boundary faces, the
+   * normal is oriented automatically outward from the unique adjacent cell. On
+   * interior faces, the orientation is determined by the selected trace domain.
    */
   class FaceNormal : public VectorFunctionBase<Real, FaceNormal>
   {
     public:
       using ScalarType = Real;
-
       using RangeType = Math::Vector<ScalarType>;
-
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
-
       using Parent = VectorFunctionBase<ScalarType, FaceNormal>;
 
       using Parent::traceOf;
 
       /**
-       * @brief Constructs the outward unit on a face.
+       * @brief Constructs a face normal field on the given mesh.
+       *
+       * @param mesh Underlying mesh supporting codimension-one entities.
        */
       FaceNormal(const Geometry::MeshBase& mesh)
         : m_sdim(mesh.getSpaceDimension())
@@ -115,15 +173,16 @@ namespace Rodin::Variational
 
         const auto& polytope = p.getPolytope();
         const auto& vs = polytope.getVertices();
-        const auto  d  = polytope.getDimension();
-        const auto  i  = polytope.getIndex();
+        const auto  d = polytope.getDimension();
+        const auto  i = polytope.getIndex();
         const auto& mesh = polytope.getMesh();
-        assert(d == mesh.getDimension() - 1);
         const auto& jacobian = p.getJacobian();
 
-        SpatialVectorType res;
+        assert(d == mesh.getDimension() - 1);
 
+        SpatialVectorType res;
         res.resize(m_sdim);
+
         if (jacobian.rows() == 2)
         {
           res[0] = jacobian(1, 0);
@@ -135,14 +194,17 @@ namespace Rodin::Variational
           {
             const Index v1 = vs[0];
             const Index v2 = vs[1];
-            Math::SpatialVector<ScalarType> a =
-                mesh.getVertexCoordinates(v1) - mesh.getVertexCoordinates(v2);
+
+            const Math::SpatialVector<ScalarType> a =
+              mesh.getVertexCoordinates(v1) - mesh.getVertexCoordinates(v2);
+
             Math::SpatialVector<ScalarType> n(3);
             n[0] = jacobian(1, 0);
             n[1] = -jacobian(0, 0);
             n[2] = jacobian(2, 0);
             n = n.cross(a);
             n.normalize();
+
             res = n.cross(a) + n * (n.dot(a));
           }
           else if (jacobian.cols() == 2)
@@ -154,6 +216,11 @@ namespace Rodin::Variational
             res[2] =
               jacobian(0, 0) * jacobian(1, 1) - jacobian(1, 0) * jacobian(0, 1);
           }
+          else
+          {
+            assert(false);
+            res.setConstant(Math::nan<ScalarType>());
+          }
         }
         else
         {
@@ -161,42 +228,56 @@ namespace Rodin::Variational
           res.setConstant(Math::nan<ScalarType>());
         }
 
-        const auto& incidence = mesh.getConnectivity().getIncidence({d, d+1}, i);
+        const auto& incidence = mesh.getConnectivity().getIncidence({ d, d + 1 }, i);
         assert(incidence.size() == 1 || incidence.size() == 2);
 
-        const auto& traceDomain = getTraceDomain();
-        if (traceDomain.size() == 0)
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "No trace domain provided: "
-            << Alert::Notation::Predicate(true, "getTraceDomain().size() == 0")
-            << ". FaceNormal at an interface with no trace domain is undefined."
-            << Alert::Raise;
-        }
-        else
-        {
-          bool matched = false;
-          for (const Index cell : incidence)
+        const auto orientFromCell =
+          [&](const Geometry::Polytope& cellPoly)
           {
-            auto pit = mesh.getPolytope(d + 1, cell);
-
-            const Optional<Geometry::Attribute> ca = pit->getAttribute();
-            if (!ca || !traceDomain.contains(*ca))
-              continue;
-
-            // `pit` is the chosen adjacent cell that defines "outward"
-            const auto& cellPoly = *pit;
-
             const auto xf = p.getCoordinates();
 
-            const auto rc_cell = Geometry::Polytope::Traits(cellPoly.getGeometry()).getCentroid();
-            Geometry::Point pc(cellPoly, rc_cell);
+            const auto rc =
+              Geometry::Polytope::Traits(cellPoly.getGeometry()).getCentroid();
+            Geometry::Point pc(cellPoly, rc);
             const auto xc = pc.getCoordinates();
 
             if (res.dot(xc - xf) > 0)
               res *= ScalarType(-1);
 
             res.normalize();
+          };
+
+        if (incidence.size() == 1)
+        {
+          const Index cell = incidence[0];
+          const auto pit = mesh.getPolytope(d + 1, cell);
+          assert(pit);
+          orientFromCell(*pit);
+        }
+        else
+        {
+          const auto& traceDomain = getTraceDomain();
+          if (traceDomain.size() == 0)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "No trace domain provided: "
+              << Alert::Notation::Predicate(true, "getTraceDomain().size() == 0")
+              << ". FaceNormal on an interior face with two adjacent cells is "
+                 "undefined without a trace domain."
+              << Alert::Raise;
+          }
+
+          bool matched = false;
+          for (const Index cell : incidence)
+          {
+            const auto pit = mesh.getPolytope(d + 1, cell);
+            assert(pit);
+
+            const Optional<Geometry::Attribute> ca = pit->getAttribute();
+            if (!ca || !traceDomain.contains(*ca))
+              continue;
+
+            orientFromCell(*pit);
             matched = true;
             break;
           }
@@ -204,9 +285,10 @@ namespace Rodin::Variational
           if (!matched)
           {
             UndeterminedTraceDomainException(
-              *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()).raise();
+              *this, __func__, { d, i }, traceDomain.begin(), traceDomain.end()).raise();
           }
         }
+
         s_res = res.getData().head(static_cast<Eigen::Index>(m_sdim));
         return s_res;
       }
@@ -228,4 +310,3 @@ namespace Rodin::Variational
 }
 
 #endif
-

@@ -56,7 +56,7 @@
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/RungeKutta/RK4.h"
 
-#include "Rodin/QF/GenericPolytopeQuadrature.h"
+#include "Rodin/QF/PolytopeQuadratureFormula.h"
 #include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/Variational/ShapeFunction.h"
 
@@ -923,20 +923,22 @@ namespace Rodin::Variational
 
           if (!foundEvent)
           {
-            if (!(tauCell > dtMin) || !isFinite(tauCell))
+            if (!isFinite(tauCell) || !(tauCell > Real(0)))
             {
               return Trace{ true, tau, Geometry::Point(cell, s_rc), correction };
             }
 
+            const Real tauStep = tauCell;
+
             const Real tauBefore = tau;
             const Math::SpatialPoint rcBefore = s_rc;
 
-            advance(s_rc1, tauCell, s_rc);
+            advance(s_rc1, tauStep, s_rc);
             s_rc = s_rc1;
 
             clampIfOutside(hs, g, s_rc, epsPhi);
 
-            tau -= tauCell;
+            tau -= tauStep;
 
             const Real rcMove2 = (s_rc - rcBefore).squaredNorm();
             const bool timeProgress = (tau < tauBefore);
@@ -944,7 +946,8 @@ namespace Rodin::Variational
 
             if (!timeProgress && !spaceProgress)
             {
-              return Trace{ true, tau, Geometry::Point(cell, s_rc), correction };
+              // Remaining step is numerically negligible: finish successfully at current point.
+              tau = Real(0);
             }
 
             continue;

@@ -34,6 +34,7 @@
 #include "Rodin/IO/ForwardDecls.h"
 #include "Rodin/Geometry/AttributeIndex.h"
 #include "Rodin/Variational/ForwardDecls.h"
+#include "Rodin/QF/ForwardDecls.h"
 
 #include "Rodin/Serialization/Array.h"
 #include "Rodin/Serialization/EigenMatrix.h"
@@ -45,6 +46,7 @@
 #include "Point.h"
 #include "PointCloud.h"
 #include "Polytope.h"
+#include "PolytopeQuadrature.h"
 #include "PolytopeIterator.h"
 #include "PolytopeTransformation.h"
 #include "PolytopeTransformationIndex.h"
@@ -680,6 +682,12 @@ namespace Rodin::Geometry
       virtual const PolytopeTransformation& getPolytopeTransformation(size_t dimension, Index idx) const = 0;
 
       /**
+       * @brief Gets cached quadrature for a polytope.
+       */
+      virtual const PolytopeQuadrature& getQuadrature(
+          size_t dimension, Index idx, const QF::QuadratureFormulaBase& qf) const = 0;
+
+      /**
        * @brief Gets geometry type of a polytope.
        * @param[in] dimension Polytope dimension
        * @param[in] idx Polytope index
@@ -996,6 +1004,13 @@ namespace Rodin::Geometry
            */
           Builder& setTransformationIndex(PolytopeTransformationIndex&& transIndex);
 
+          /**
+           * @brief Sets the quadrature index.
+           * @param[in] quadIndex Quadrature index object to move into the mesh
+           * @returns Reference to this builder
+           */
+          Builder& setQuadratureIndex(PolytopeQuadratureIndex&& quadIndex);
+
           Connectivity<Context>& getConnectivity()
           {
             return m_connectivity;
@@ -1017,6 +1032,7 @@ namespace Rodin::Geometry
 
           AttributeIndex m_attributes;
           PolytopeTransformationIndex m_transformations;
+          PolytopeQuadratureIndex m_quadratures;
       };
 
       /**
@@ -1121,6 +1137,7 @@ namespace Rodin::Geometry
       virtual void flush() override
       {
         m_transformations.clear();
+        m_quadratures.clear();
       }
 
       /**
@@ -1448,6 +1465,9 @@ namespace Rodin::Geometry
 
       virtual PolytopeTransformation* getDefaultPolytopeTransformation(size_t d, Index i) const;
 
+      virtual const PolytopeQuadrature&
+      getQuadrature(size_t dimension, Index idx, const QF::QuadratureFormulaBase& qf) const override;
+
       template<class Archive>
       void serialize(Archive& ar, const unsigned int)
       {
@@ -1468,6 +1488,7 @@ namespace Rodin::Geometry
 
       AttributeIndex m_attributes;
       PolytopeTransformationIndex m_transformations;
+      PolytopeQuadratureIndex m_quadratures;
 
       Context m_context;
   };

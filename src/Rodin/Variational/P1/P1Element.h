@@ -1009,12 +1009,18 @@ namespace Rodin::Variational
 
       constexpr
       P1Element(const P1Element& other)
-        : Parent(other)
+        : Parent(other),
+          m_vdim(other.m_vdim),
+          m_lfs(other.m_lfs),
+          m_bs(other.m_bs)
       {}
 
       constexpr
       P1Element(P1Element&& other)
-        : Parent(std::move(other))
+        : Parent(std::move(other)),
+          m_vdim(std::exchange(other.m_vdim, 0)),
+          m_lfs(std::move(other.m_lfs)),
+          m_bs(std::move(other.m_bs))
       {}
 
       constexpr

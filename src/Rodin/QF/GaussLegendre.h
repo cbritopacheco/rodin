@@ -74,7 +74,7 @@ namespace Rodin::QF
        * directions. Requires @f$ \text{order} \geq 1 @f$.
        */
       GaussLegendre(Geometry::Polytope::Type g, size_t order)
-        : Parent(g), m_nx(order), m_ny(order), m_nz(order)
+        : m_geometry(g), m_nx(order), m_ny(order), m_nz(order)
       {
         assert(order >= 1);
         build();
@@ -90,7 +90,7 @@ namespace Rodin::QF
        * Requires @f$ nx, ny \geq 1 @f$.
        */
       GaussLegendre(Geometry::Polytope::Type g, size_t nx, size_t ny)
-        : Parent(g), m_nx(nx), m_ny(ny), m_nz(1)
+        : m_geometry(g), m_nx(nx), m_ny(ny), m_nz(1)
       {
         assert(nx >= 1 && ny >= 1);
         build();
@@ -107,7 +107,7 @@ namespace Rodin::QF
        * Requires @f$ nu, nv, nw \geq 1 @f$.
        */
       GaussLegendre(Geometry::Polytope::Type g, size_t nu, size_t nv, size_t nw)
-        : Parent(g), m_nx(nu), m_ny(nv), m_nz(nw)
+        : m_geometry(g), m_nx(nu), m_ny(nv), m_nz(nw)
       {
         assert(nu >= 1 && nv >= 1 && nw >= 1);
         build();
@@ -121,9 +121,14 @@ namespace Rodin::QF
        * polynomials of degree up to 3 in 1D.
        */
       GaussLegendre(Geometry::Polytope::Type g)
-        : Parent(g), m_nx(2), m_ny(2), m_nz(2)
+        : m_geometry(g), m_nx(2), m_ny(2), m_nz(2)
       {
         build();
+      }
+
+      Geometry::Polytope::Type getGeometry() const
+      {
+        return m_geometry;
       }
 
       /**
@@ -234,6 +239,7 @@ namespace Rodin::QF
        */
       void build_hex(size_t nx, size_t ny, size_t nz);
 
+      Geometry::Polytope::Type m_geometry; ///< Polytope geometry type
       size_t m_nx { 2 }, m_ny { 2 }, m_nz { 2 }; ///< Number of points per direction
       std::vector<Math::SpatialVector<Real>> m_points; ///< Quadrature point coordinates
       Math::Vector<Real> m_weights; ///< Quadrature weights

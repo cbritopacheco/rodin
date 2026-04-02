@@ -74,8 +74,14 @@ namespace Rodin::QF
        */
       constexpr
       Centroid(Geometry::Polytope::Type g)
-        : Parent(g)
+        : m_geometry(g)
       {}
+
+      constexpr
+      Geometry::Polytope::Type getGeometry() const
+      {
+        return m_geometry;
+      }
 
       /**
        * @brief Gets the number of quadrature points (always 1).
@@ -108,6 +114,9 @@ namespace Rodin::QF
       {
         return new Centroid(*this);
       }
+
+    private:
+      Geometry::Polytope::Type m_geometry;
   };
 }
 

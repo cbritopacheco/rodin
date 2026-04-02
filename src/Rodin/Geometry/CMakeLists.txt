@@ -9,6 +9,7 @@ set(RodinGeometry_HEADERS
   Mesh.h
   SubMesh.h
   Polytope.h
+  PolytopeQuadrature.h
   Connectivity.h
   PolytopeIterator.h
   PolytopeTransformation.h
@@ -18,6 +19,7 @@ set(RodinGeometry_SRCS
   Mesh.cpp
   Point.cpp
   Polytope.cpp
+  PolytopeQuadrature.cpp
   Shard.cpp
   PolytopeIterator.cpp
   PolytopeTransformation.cpp

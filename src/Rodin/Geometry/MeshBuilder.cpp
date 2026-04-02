@@ -19,6 +19,7 @@ namespace Rodin::Geometry
     m_connectivity.initialize(m_sdim);
     m_attributes.initialize(m_sdim);
     m_transformations.initialize(m_sdim);
+    m_quadratures.initialize(m_sdim);
     m_initialized = true;
     return *this;
   }
@@ -36,6 +37,7 @@ namespace Rodin::Geometry
     m_vertices.resize(m_sdim, n);
     m_attributes.resize(0, n);
     m_transformations.resize(0, n);
+    m_quadratures.resize(0, n);
     return *this;
   }
 
@@ -101,6 +103,7 @@ namespace Rodin::Geometry
       m_connectivity.reserve(d, count);
       m_attributes.resize(d, count);
       m_transformations.resize(d, count);
+      m_quadratures.resize(d, count);
     }
     return *this;
   }
@@ -113,6 +116,7 @@ namespace Rodin::Geometry
     res.m_connectivity = std::move(m_connectivity);
     res.m_attributes = std::move(m_attributes);
     res.m_transformations = std::move(m_transformations);
+    res.m_quadratures = std::move(m_quadratures);
 
     return res;
   }
@@ -133,6 +137,7 @@ namespace Rodin::Geometry
     m_connectivity.nodes(m_nodes);
     m_attributes.resize(0, m_nodes);
     m_transformations.resize(0, m_nodes);
+    m_quadratures.resize(0, m_nodes);
     return *this;
   }
 
@@ -145,6 +150,7 @@ namespace Rodin::Geometry
     m_connectivity.nodes(m_nodes);
     m_attributes.resize(0, m_nodes);
     m_transformations.resize(0, m_nodes);
+    m_quadratures.resize(0, m_nodes);
     return *this;
   }
 
@@ -160,6 +166,14 @@ namespace Rodin::Geometry
       PolytopeTransformationIndex&& transformations)
   {
     m_transformations = std::move(transformations);
+    return *this;
+  }
+
+  Mesh<Context::Local>::Builder&
+  Mesh<Context::Local>::Builder::setQuadratureIndex(
+      PolytopeQuadratureIndex&& quadratures)
+  {
+    m_quadratures = std::move(quadratures);
     return *this;
   }
 }

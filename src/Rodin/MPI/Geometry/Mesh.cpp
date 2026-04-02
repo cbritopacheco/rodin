@@ -397,6 +397,15 @@ namespace Rodin::Geometry
     return shard.getPolytopeTransformation(dimension, localIdx);
   }
 
+  const PolytopeQuadrature&
+  MPIMesh::getQuadrature(
+      size_t dimension, Index localIdx, const QF::QuadratureFormulaBase& qf) const
+  {
+    const auto& shard = this->getShard();
+    assert(localIdx < shard.getPolytopeCount(dimension));
+    return shard.getQuadrature(dimension, localIdx, qf);
+  }
+
   Polytope::Type MPIMesh::getGeometry(size_t dimension, Index localIdx) const
   {
     const auto& shard = this->getShard();
@@ -1793,4 +1802,3 @@ namespace Rodin::Geometry
   }
 
 }
-

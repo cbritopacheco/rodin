@@ -48,7 +48,8 @@ namespace Rodin::Geometry
       m_vertices(std::move(other.m_vertices)),
       m_connectivity(std::move(other.m_connectivity)),
       m_attributes(std::move(other.m_attributes)),
-      m_transformations(std::move(other.m_transformations))
+      m_transformations(std::move(other.m_transformations)),
+      m_quadratures(std::move(other.m_quadratures))
   {}
 
   Mesh<Context::Local>& Mesh<Context::Local>::operator=(Mesh&& other)
@@ -58,6 +59,7 @@ namespace Rodin::Geometry
     m_vertices = std::move(other.m_vertices);
     m_connectivity = std::move(other.m_connectivity);
     m_transformations = std::move(other.m_transformations);
+    m_quadratures = std::move(other.m_quadratures);
     m_attributes = std::move(other.m_attributes);
     return *this;
   }
@@ -391,6 +393,20 @@ namespace Rodin::Geometry
     m_transformations.set(
         p, this->getPolytopeCount(d), std::unique_ptr<PolytopeTransformation>(trans));
     return *this;
+  }
+
+  const PolytopeQuadrature&
+  Mesh<Context::Local>::getQuadrature(
+      size_t dimension, Index idx, const QF::QuadratureFormulaBase& qf) const
+  {
+    const size_t count = this->getPolytopeCount(dimension);
+    return m_quadratures.get(
+        { dimension, idx }, count, qf,
+        [this, dimension, idx, &qf]()
+        {
+          return std::make_unique<PolytopeQuadrature>(
+              Polytope(dimension, idx, *this), qf);
+        });
   }
 
   PolytopeTransformation*

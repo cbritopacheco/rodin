@@ -4,7 +4,7 @@
 
 #include "Rodin/Geometry/Connectivity.h"
 #include "Rodin/Math/SpatialVector.h"
-#include "Rodin/QF/GenericPolytopeQuadrature.h"
+#include "Rodin/QF/PolytopeQuadratureFormula.h"
 
 #include "Mesh.h"
 #include "PolytopeTransformation.h"
@@ -1045,6 +1045,12 @@ namespace Rodin::Geometry
     return this->getMesh().getGeometry(getDimension(), getIndex());
   }
 
+  const PolytopeQuadrature&
+  Polytope::getQuadrature(const QF::QuadratureFormulaBase& qf) const
+  {
+    return m_mesh.get().getQuadrature(getDimension(), getIndex(), qf);
+  }
+
   VertexIterator Polytope::getVertex() const
   {
     const auto& vertices = getVertices();
@@ -1077,11 +1083,12 @@ namespace Rodin::Geometry
   Real Polytope::getMeasure() const
   {
     Real res = 0;
-    QF::GenericPolytopeQuadrature qf(getTransformation().getOrder(), getGeometry());
-    for (size_t i = 0; i < qf.getSize(); i++)
+    const auto& qf =
+      QF::PolytopeQuadratureFormula::get(getTransformation().getOrder(), getGeometry());
+    const auto& quadrature = getQuadrature(qf);
+    for (size_t i = 0; i < quadrature.getSize(); i++)
     {
-      const Geometry::Point p(*this, qf.getPoint(i));
-      res += qf.getWeight(i) * p.getDistortion();
+      res += qf.getWeight(i) * quadrature.getPoint(i).getDistortion();
     }
     return res;
   }
