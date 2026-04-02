@@ -118,24 +118,20 @@
             </dt>
             <dd>Gauss-Lobatto quadrature formula on reference polytopes.</dd>
             <dt>
-              class <a href="class_rodin_1_1_q_f_1_1_generic_polytope_quadrature.html" class="m-doc">GenericPolytopeQuadrature</a>
-            </dt>
-            <dd>Generic quadrature formula dispatcher for all polytope types.</dd>
-            <dt>
               class <a href="class_rodin_1_1_q_f_1_1_grundmann_moller.html" class="m-doc">GrundmannMoller</a>
             </dt>
             <dd>Grundmann-Möller simplex quadrature formula.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_q_f_1_1_polytope_quadrature_formula.html" class="m-doc">PolytopeQuadratureFormula</a>
+            </dt>
+            <dd>Generic quadrature formula dispatcher for all polytope types.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#af7e6ba709ececcceb8249c669a0f736e" class="m-doc">QuadratureFormulaBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Constructs a quadrature formula for the given geometry type.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a6212a81a033348734b63046f4be0f452" class="m-doc">QuadratureFormulaBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a8ddaa85ea5318c750b955eeb2f705892" class="m-doc">QuadratureFormulaBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="a48eea02491d8564d45bda3e0adf832a9">
@@ -147,10 +143,6 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a31877fd761e82217b0cafe1757d2dab0" class="m-doc">getGeometry</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Gets the polytope geometry for this quadrature formula.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a319cde5b2ea76e92e922845ecfa5c615" class="m-doc">getSize</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
@@ -171,26 +163,9 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="af7e6ba709ececcceb8249c669a0f736e"><div>
+          <section class="m-doc-details" id="a8ddaa85ea5318c750b955eeb2f705892"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />QF::<wbr />QuadratureFormulaBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7e6ba709ececcceb8249c669a0f736e" class="m-doc-self">QuadratureFormulaBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) <span class="m-label m-primary">constexpr</span></span></span>
-            </h3>
-            <p>Constructs a quadrature formula for the given geometry type.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">g</td>
-                  <td>The polytope geometry (e.g., triangle, tetrahedron, etc.)</td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="a6212a81a033348734b63046f4be0f452"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />QF::<wbr />QuadratureFormulaBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6212a81a033348734b63046f4be0f452" class="m-doc-self">QuadratureFormulaBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />QF::<wbr />QuadratureFormulaBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ddaa85ea5318c750b955eeb2f705892" class="m-doc-self">QuadratureFormulaBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -203,20 +178,6 @@
                   <td>Another quadrature formula to copy from</td>
                 </tr>
               </tbody>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="a31877fd761e82217b0cafe1757d2dab0"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> Rodin::<wbr />QF::<wbr />QuadratureFormulaBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a31877fd761e82217b0cafe1757d2dab0" class="m-doc-self">getGeometry</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
-            </h3>
-            <p>Gets the polytope geometry for this quadrature formula.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>The geometry type (e.g., Point, Segment, Triangle, etc.)</td>
-                </tr>
-              </tfoot>
             </table>
           </div></section>
           <section class="m-doc-details" id="a319cde5b2ea76e92e922845ecfa5c615"><div>

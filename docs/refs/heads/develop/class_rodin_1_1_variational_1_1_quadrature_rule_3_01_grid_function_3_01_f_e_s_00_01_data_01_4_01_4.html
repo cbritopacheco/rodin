@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>QuadratureRule&lt;GridFunction&lt;FES, Data&gt;&gt; <span class="m-thin">class</span>
         </h1>
-        <p>Integration of a <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> object.</p>
+        <p>Integration of a scalar grid function over a mesh region.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -93,6 +93,7 @@
             </li>
           </ul>
         </nav>
+<p>This specialization delegates the computation to linear forms over the requested region. It is not a per-polytope quadrature rule and therefore does not use <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">Geometry::<wbr />PolytopeQuadrature</a> directly.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -115,10 +116,10 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a57eb792cb9b652efaf88bc7053713433">
-              <span class="m-doc-wrap-bumper"><a href="#a57eb792cb9b652efaf88bc7053713433" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">IntegrandType</a>&amp; u)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a57eb792cb9b652efaf88bc7053713433" class="m-doc">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">IntegrandType</a>&amp; u)</span>
             </dt>
-            <dd>Constructs the integral object from the given integrand.</dd>
+            <dd>Constructs the integral object from the given grid function.</dd>
             <dt id="a52e4d5082ffb29cb85f65b361289fd32">
               <span class="m-doc-wrap-bumper"><a href="#a52e4d5082ffb29cb85f65b361289fd32" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; other)</span>
             </dt>
@@ -130,7 +131,7 @@
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#a0465eaeb9c2a683fddf89431faaa88a3" class="m-doc">operator ScalarType</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
-            <dd>Returns the value of the integral, computing it if necessary.</dd>
+            <dd>Returns the integral value, computing it if necessary.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -139,19 +140,55 @@
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a353d9754ac67af541c2d4a35118aa535" class="m-doc">compute</a>(</span><span class="m-doc-wrap">) -&gt; ScalarType</span>
             </dt>
-            <dd>Integrates the expression and returns the value.</dd>
+            <dd>Computes the integral value over the selected region.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#acc740acfd1678ec28c128059c738570a" class="m-doc">over</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> attr) -&gt; <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp;</span>
+            </dt>
+            <dd>Restricts integration to one attribute.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a796e1eed78940ee1cf99599bb03d83af" class="m-doc">over</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attrs) -&gt; <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp;</span>
+            </dt>
+            <dd>Restricts integration to a set of attributes.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa4caca1c2903b8b70648c487999306e6" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;ScalarType&gt;&amp;</span>
+            </dt>
+            <dd>Gets the cached value, if available.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a3c84cc1ee6a9e16cfa5e372851ea04ad" class="m-doc">getType</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_integrator.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Type</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Gets the type of this integrator.</dd>
+            <dd>Gets the integrator type.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac16226cca266745ac414468db3235c17" class="m-doc">getRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </dt>
+            <dd>Gets the region over which the integral is defined.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a97e8bbec3df10545ba877130c3be5b93" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Creates a copy of this integrator.</dd>
+            <dd>Polymorphic copy.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a57eb792cb9b652efaf88bc7053713433"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;GridFunction&lt;FES, Data&gt;&gt;&lt;FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a57eb792cb9b652efaf88bc7053713433" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">IntegrandType</a>&amp; u)</span></span>
+            </h3>
+            <p>Constructs the integral object from the given grid function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">u&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Grid function to integrate</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a0465eaeb9c2a683fddf89431faaa88a3"><div>
             <h3>
               <div class="m-doc-template">
@@ -159,16 +196,15 @@
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;GridFunction&lt;FES, Data&gt;&gt;&lt;FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0465eaeb9c2a683fddf89431faaa88a3" class="m-doc-self">operator ScalarType</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
-            <p>Returns the value of the integral, computing it if necessary.</p>
+            <p>Returns the integral value, computing it if necessary.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Value of integral</td>
+                  <td><a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a> value</td>
                 </tr>
               </tfoot>
             </table>
-<p>If <a href="#a353d9754ac67af541c2d4a35118aa535" class="m-doc">compute()</a> has been called before, returns the value of the cached value. Otherwise, it will call <a href="#a353d9754ac67af541c2d4a35118aa535" class="m-doc">compute()</a> and return the newly computed value.</p>
           </div></section>
           <section class="m-doc-details" id="a353d9754ac67af541c2d4a35118aa535"><div>
             <h3>
@@ -177,16 +213,84 @@
               </div>
               <span class="m-doc-wrap-bumper">ScalarType Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;GridFunction&lt;FES, Data&gt;&gt;&lt;FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a353d9754ac67af541c2d4a35118aa535" class="m-doc-self">compute</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
-            <p>Integrates the expression and returns the value.</p>
+            <p>Computes the integral value over the selected region.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Value of integral</td>
+                  <td><a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a> value</td>
                 </tr>
               </tfoot>
             </table>
-<p>Compute the value of the integral, caches it and returns it.</p>
+          </div></section>
+          <section class="m-doc-details" id="acc740acfd1678ec28c128059c738570a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;GridFunction&lt;FES, Data&gt;&gt;&lt;FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acc740acfd1678ec28c128059c738570a" class="m-doc-self">over</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a> attr)</span></span>
+            </h3>
+            <p>Restricts integration to one attribute.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Attribute</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a796e1eed78940ee1cf99599bb03d83af"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;GridFunction&lt;FES, Data&gt;&gt;&lt;FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a796e1eed78940ee1cf99599bb03d83af" class="m-doc-self">over</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attrs)</span></span>
+            </h3>
+            <p>Restricts integration to a set of attributes.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attrs&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Attributes</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa4caca1c2903b8b70648c487999306e6"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;ScalarType&gt;&amp; Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;GridFunction&lt;FES, Data&gt;&gt;&lt;FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa4caca1c2903b8b70648c487999306e6" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the cached value, if available.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Cached value</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
           <section class="m-doc-details" id="a3c84cc1ee6a9e16cfa5e372851ea04ad"><div>
             <h3>
@@ -195,12 +299,29 @@
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_integrator.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Type</a> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;GridFunction&lt;FES, Data&gt;&gt;&lt;FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3c84cc1ee6a9e16cfa5e372851ea04ad" class="m-doc-self">getType</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Gets the type of this integrator.</p>
+            <p>Gets the integrator type.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Type indicating whether this is a linear or bilinear integrator</td>
+                  <td>Linear integrator type</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac16226cca266745ac414468db3235c17"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;GridFunction&lt;FES, Data&gt;&gt;&lt;FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac16226cca266745ac414468db3235c17" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <p>Gets the region over which the integral is defined.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Integration region</td>
                 </tr>
               </tfoot>
             </table>
@@ -212,12 +333,12 @@
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>* Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;GridFunction&lt;FES, Data&gt;&gt;&lt;FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a97e8bbec3df10545ba877130c3be5b93" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Creates a copy of this integrator.</p>
+            <p>Polymorphic copy.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Pointer to newly allocated copy</td>
+                  <td>Heap-allocated copy</td>
                 </tr>
               </tfoot>
             </table>

@@ -80,10 +80,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md476">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md477">Properties</a></li>
-            <li><a href="#autotoc_md478">Applications</a></li>
-            <li><a href="#autotoc_md479">Usage Example</a></li>
+            <li><a href="#autotoc_md480">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md481">Properties</a></li>
+            <li><a href="#autotoc_md482">Applications</a></li>
+            <li><a href="#autotoc_md483">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -93,7 +93,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the Trace class, which computes the trace (sum of diagonal elements) of matrix-valued functions in variational formulations.</p><section id="autotoc_md476"><h3><a href="#autotoc_md476">Mathematical Foundation</a></h3><p>For a square matrix <svg class="m-math" style="width: 5.092em; height: 1.002em; vertical-align: -0.049em;" viewBox="0 -9.153753 48.884368 9.621174">
+<p>This file defines the Trace class, which computes the trace (sum of diagonal elements) of matrix-valued functions in variational formulations.</p><section id="autotoc_md480"><h3><a href="#autotoc_md480">Mathematical Foundation</a></h3><p>For a square matrix <svg class="m-math" style="width: 5.092em; height: 1.002em; vertical-align: -0.049em;" viewBox="0 -9.153753 48.884368 9.621174">
 <title>
 $ A \in \mathbb{R}^{n \times n} $
 </title>
@@ -147,7 +147,7 @@ $ A \in \mathbb{R}^{n \times n} $
 <use x='225.622977' y='-13.239141' xlink:href='#eq2-g1-105'/>
 <use x='228.506116' y='-13.239141' xlink:href='#eq2-g1-105'/>
 </g>
-</svg></div></section><section id="autotoc_md477"><h3><a href="#autotoc_md477">Properties</a></h3><p>The trace operator satisfies:</p><ul><li><strong>Linearity</strong>: <svg class="m-math" style="width: 13.578em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 130.353262 11.955168">
+</svg></div></section><section id="autotoc_md481"><h3><a href="#autotoc_md481">Properties</a></h3><p>The trace operator satisfies:</p><ul><li><strong>Linearity</strong>: <svg class="m-math" style="width: 13.578em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 130.353262 11.955168">
 <title>
 $ \text{tr}(A + B) = \text{tr}(A) + \text{tr}(B) $
 </title>
@@ -276,7 +276,7 @@ $ \text{tr}(A^T) = \text{tr}(A) $
 <use x='59.392341' y='0' xlink:href='#eq6-g1-65'/>
 <use x='68.167688' y='0' xlink:href='#eq6-g5-41'/>
 </g>
-</svg></li></ul></section><section id="autotoc_md478"><h3><a href="#autotoc_md478">Applications</a></h3><ul><li>Linear elasticity: <svg class="m-math" style="width: 2.368em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 22.731362 11.955168">
+</svg></li></ul></section><section id="autotoc_md482"><h3><a href="#autotoc_md482">Applications</a></h3><ul><li>Linear elasticity: <svg class="m-math" style="width: 2.368em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 22.731362 11.955168">
 <title>
 $ \text{tr}(\boldsymbol{\varepsilon}) $
 </title>
@@ -294,7 +294,7 @@ $ \text{tr}(\boldsymbol{\varepsilon}) $
 <use x='11.856934' y='0' xlink:href='#eq7-g0-34'/>
 <use x='18.179036' y='0' xlink:href='#eq7-g4-41'/>
 </g>
-</svg> (volumetric strain)</li><li>Continuum mechanics: invariants of stress/strain tensors</li><li>Fluid dynamics: divergence from velocity gradient</li><li>General tensor operations</li></ul></section><section id="autotoc_md479"><h3><a href="#autotoc_md479">Usage Example</a></h3><pre class="m-code"><span class="c1">// Volumetric strain in linear elasticity</span>
+</svg> (volumetric strain)</li><li>Continuum mechanics: invariants of stress/strain tensors</li><li>Fluid dynamics: divergence from velocity gradient</li><li>General tensor operations</li></ul></section><section id="autotoc_md483"><h3><a href="#autotoc_md483">Usage Example</a></h3><pre class="m-code"><span class="c1">// Volumetric strain in linear elasticity</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">strain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">Jacobian</span><span class="p">(</span><span class="n">u</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">Transpose</span><span class="p">(</span><span class="n">Jacobian</span><span class="p">(</span><span class="n">u</span><span class="p">)));</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">volumetric_strain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Trace</span><span class="p">(</span><span class="n">strain</span><span class="p">);</span><span class="w">  </span><span class="c1">// tr(ε)</span></pre></section>
         <section id="namespaces">

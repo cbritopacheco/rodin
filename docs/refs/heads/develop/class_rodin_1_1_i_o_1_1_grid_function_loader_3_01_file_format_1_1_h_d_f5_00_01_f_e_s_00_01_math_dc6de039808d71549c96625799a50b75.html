@@ -97,7 +97,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md129">Usage Example</a></li>
+            <li><a href="#autotoc_md136">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -108,7 +108,7 @@
             </li>
           </ul>
         </nav>
-<p>Reads a standalone grid function field file (one <code>.h5</code> per grid function) and populates the DOF vector. The file is expected to contain <code>/GridFunction/Meta/{Size,Dimension}</code> and <code>/GridFunction/Values/Data</code>.</p><p>The grid function must already be attached to a finite element space of matching size and dimension before loading.</p><p>Stream-based loading is not supported; only file-path loading is available.</p><section id="autotoc_md129"><h3><a href="#autotoc_md129">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<p>Reads a standalone grid function field file (one <code>.h5</code> per grid function) and populates the DOF vector. The file is expected to contain <code>/GridFunction/Meta/{Size,Dimension}</code> and <code>/GridFunction/Values/Data</code>.</p><p>The grid function must already be attached to a finite element space of matching size and dimension before loading.</p><p>Stream-based loading is not supported; only file-path loading is available.</p><section id="autotoc_md136"><h3><a href="#autotoc_md136">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">GridFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="n">IO</span><span class="o">::</span><span class="n">GridFunctionLoader</span><span class="o">&lt;</span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">HDF5</span><span class="p">,</span><span class="w"> </span><span class="n">P1</span><span class="p">,</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">loader</span><span class="p">(</span><span class="n">u</span><span class="p">);</span>
 <span class="n">loader</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;field.h5&quot;</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_grid_function_printer_3_01_file_format_1_1_h_d_f5_00_01_f_e_s_00_01_math68cb348ce8bf27093bff6c8086fbdd6f.html" class="m-doc">GridFunctionPrinter&lt;FileFormat::<wbr />HDF5, FES, Math::<wbr />Vector&lt;Scalar&gt;&gt;</a></p></aside></section>

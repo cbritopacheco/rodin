@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::IO::MeshPrinterBase class | Rodin</title>
+  <title>Rodin::Geometry::PolytopeQuadrature class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -74,110 +74,124 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class Context&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_i_o.html">IO</a>::<wbr/></span>MeshPrinterBase <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>PolytopeQuadrature <span class="m-thin">class</span>
+          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_polytope_quadrature_8h.html">&lt;Rodin/Geometry/PolytopeQuadrature.h&gt;</a></div>
         </h1>
-        <p>Base class for printing meshes to streams or files.</p>
+        <p>Cached quadrature attached to one specific polytope.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md141">Usage Example</a></li>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
-                <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p><a href="class_rodin_1_1_i_o_1_1_mesh_printer_base.html" class="m-doc">MeshPrinterBase</a> provides the foundation for writing mesh data in different file formats. It extends the generic <a href="class_rodin_1_1_i_o_1_1_printer.html" class="m-doc">Printer</a> class to handle mesh-specific operations and manages the mesh object being output.</p><p>Specialized printers for specific file formats should derive from this class and implement the <a href="class_rodin_1_1_i_o_1_1_printer.html#abee96dede91f700b63bad73f415bbe29" class="m-doc">print(std::<wbr />ostream&amp;)</a> method to generate their respective formats.</p><section id="autotoc_md141"><h3><a href="#autotoc_md141">Usage Example</a></h3><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="n">Mesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getMesh</span><span class="p">();</span>
-<span class="n">MeshPrinter</span><span class="o">&lt;</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MEDIT</span><span class="p">,</span><span class="w"> </span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">printer</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
-<span class="n">std</span><span class="o">::</span><span class="n">ofstream</span><span class="w"> </span><span class="n">file</span><span class="p">(</span><span class="s">&quot;output.mesh&quot;</span><span class="p">);</span>
-<span class="n">printer</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="n">file</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_printer.html" class="m-doc">Printer</a>, <a href="class_rodin_1_1_i_o_1_1_mesh_loader.html" class="m-doc">MeshLoader</a></p></aside></section>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class T&gt;</div>
-              class <a href="class_rodin_1_1_i_o_1_1_printer.html" class="m-doc">Printer&lt;Geometry::Mesh&lt;Context&gt;&gt;</a>
-            </dt>
-            <dd>Base template for printing objects to streams.</dd>
-          </dl>
-        </section>
-        <section id="pub-types">
-          <h2><a href="#pub-types">Public types</a></h2>
-          <dl class="m-doc">
-            <dt id="a6d47fa221a0d6476543bdda57927aeed">
-              using <a href="#a6d47fa221a0d6476543bdda57927aeed" class="m-doc-self">ContextType</a> = Context
-            </dt>
-            <dd><a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a> type for the mesh (e.g., sequential or parallel).</dd>
-            <dt id="a0aa213e4c6f5333c6f41f8e57fd9ac5c">
-              using <a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc-self">ObjectType</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="#a6d47fa221a0d6476543bdda57927aeed" class="m-doc">ContextType</a>&gt;
-            </dt>
-            <dd>Type of mesh object being printed.</dd>
-          </dl>
-        </section>
+<p>A <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a> stores the mapped quadrature points corresponding to a single quadrature formula on a single concrete polytope. It is:</p><ul><li>not a reference quadrature formula,</li><li>not a variational quadrature rule,</li><li>not a container of weights.</li></ul><p>Its purpose is to cache the geometric realization of a quadrature formula on a polytope so that repeated integration passes can reuse mapped <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />Point</a> objects.</p>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#aa72cea6881a6fd6f5f4addb676c2e87f" class="m-doc">MeshPrinterBase</a>(</span><span class="m-doc-wrap">const <a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&amp; mesh)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a45f418ca2628a150b12dce6d258ede6a" class="m-doc">PolytopeQuadrature</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; polytope,
+              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>&amp; qf)</span>
             </dt>
-            <dd>Constructs a mesh printer for the given mesh object.</dd>
+            <dd>Constructs the realized quadrature on a polytope.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a11c4ca84d818b4c96f829e779509de85" class="m-doc">getObject</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3faca872d1040b7e23345a1da1375073" class="m-doc">getQuadratureFormula</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>&amp;</span>
             </dt>
-            <dd>Gets a const reference to the mesh being printed.</dd>
+            <dd>Gets the reference quadrature formula used to build this object.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9be1e4285daa77fe397767c097fbdc66" class="m-doc">getSize</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd>Gets the number of mapped quadrature points.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aba6e7e622bcec7b242dff714b64a5008" class="m-doc">getPoint</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp;</span>
+            </dt>
+            <dd>Gets a mapped quadrature point by index.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="aa72cea6881a6fd6f5f4addb676c2e87f"><div>
+          <section class="m-doc-details" id="a45f418ca2628a150b12dce6d258ede6a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Context&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />MeshPrinterBase&lt;Context&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa72cea6881a6fd6f5f4addb676c2e87f" class="m-doc-self">MeshPrinterBase</a>(</span><span class="m-doc-wrap">const <a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&amp; mesh)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />PolytopeQuadrature::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a45f418ca2628a150b12dce6d258ede6a" class="m-doc-self">PolytopeQuadrature</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>&amp; polytope,
+              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>&amp; qf)</span></span>
             </h3>
-            <p>Constructs a mesh printer for the given mesh object.</p>
+            <p>Constructs the realized quadrature on a polytope.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Mesh object to be written to output</td>
+                  <td style="width: 1%">polytope&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Concrete mesh polytope</td>
+                </tr>
+                <tr>
+                  <td>qf&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Reference quadrature formula</td>
                 </tr>
               </tbody>
             </table>
-<p>The mesh is stored by const reference and remains unchanged during printing.</p>
           </div></section>
-          <section class="m-doc-details" id="a11c4ca84d818b4c96f829e779509de85"><div>
+          <section class="m-doc-details" id="a3faca872d1040b7e23345a1da1375073"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;class Context&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&amp; Rodin::<wbr />IO::<wbr />MeshPrinterBase&lt;Context&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a11c4ca84d818b4c96f829e779509de85" class="m-doc-self">getObject</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>&amp; Rodin::<wbr />Geometry::<wbr />PolytopeQuadrature::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3faca872d1040b7e23345a1da1375073" class="m-doc-self">getQuadratureFormula</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
-            <p>Gets a const reference to the mesh being printed.</p>
+            <p>Gets the reference quadrature formula used to build this object.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Const reference to the mesh object</td>
+                  <td>Reference to the quadrature formula</td>
                 </tr>
               </tfoot>
             </table>
-<p>Provides read-only access to the mesh for derived classes during output.</p>
+          </div></section>
+          <section class="m-doc-details" id="a9be1e4285daa77fe397767c097fbdc66"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />PolytopeQuadrature::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9be1e4285daa77fe397767c097fbdc66" class="m-doc-self">getSize</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the number of mapped quadrature points.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Number of quadrature points</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aba6e7e622bcec7b242dff714b64a5008"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; Rodin::<wbr />Geometry::<wbr />PolytopeQuadrature::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba6e7e622bcec7b242dff714b64a5008" class="m-doc-self">getPoint</a>(</span><span class="m-doc-wrap">size_t i) const</span></span>
+            </h3>
+            <p>Gets a mapped quadrature point by index.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Quadrature point index</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to the mapped point</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
         </section>
       </div>

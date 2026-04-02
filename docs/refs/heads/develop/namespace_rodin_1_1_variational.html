@@ -80,10 +80,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md489">Finite Element Spaces</a></li>
-            <li><a href="#autotoc_md490">Functions</a></li>
-            <li><a href="#autotoc_md491">Variational Forms</a></li>
-            <li><a href="#autotoc_md492">Problem</a></li>
+            <li><a href="#autotoc_md493">Finite Element Spaces</a></li>
+            <li><a href="#autotoc_md494">Functions</a></li>
+            <li><a href="#autotoc_md495">Variational Forms</a></li>
+            <li><a href="#autotoc_md496">Problem</a></li>
             <li>
               Reference
               <ul>
@@ -95,7 +95,7 @@
             </li>
           </ul>
         </nav>
-<p>The <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> module is the core of the <a href="namespace_rodin.html" class="m-doc">Rodin</a> finite element framework. It provides classes for defining finite element spaces, trial and test functions, variational forms, boundary conditions, and problems.</p><section id="autotoc_md489"><h3><a href="#autotoc_md489">Finite Element Spaces</a></h3><ul><li><a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> — Piecewise constant (discontinuous) finite element space</li><li><a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> — Piecewise linear (continuous) finite element space</li><li><a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> — Higher-order <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
+<p>The <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> module is the core of the <a href="namespace_rodin.html" class="m-doc">Rodin</a> finite element framework. It provides classes for defining finite element spaces, trial and test functions, variational forms, boundary conditions, and problems.</p><section id="autotoc_md493"><h3><a href="#autotoc_md493">Finite Element Spaces</a></h3><ul><li><a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> — Piecewise constant (discontinuous) finite element space</li><li><a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> — Piecewise linear (continuous) finite element space</li><li><a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> — Higher-order <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
 <title>
 $ H^1 $
 </title>
@@ -107,7 +107,7 @@ $ H^1 $
 <use x='0' y='0' xlink:href='#eq1-g0-72'/>
 <use x='10.62261' y='-4.338437' xlink:href='#eq1-g1-49'/>
 </g>
-</svg>-conforming finite element space (arbitrary polynomial order)</li></ul></section><section id="autotoc_md490"><h3><a href="#autotoc_md490">Functions</a></h3><ul><li><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a> — Represents the unknown solution <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
+</svg>-conforming finite element space (arbitrary polynomial order)</li></ul></section><section id="autotoc_md494"><h3><a href="#autotoc_md494">Functions</a></h3><ul><li><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a> — Represents the unknown solution <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
 $ u $
 </title>
@@ -127,7 +127,7 @@ $ v $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-118'/>
 </g>
-</svg></li><li><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> — A concrete function storing DOF values in a finite element space</li></ul></section><section id="autotoc_md491"><h3><a href="#autotoc_md491">Variational Forms</a></h3><p>The module supports building variational problems of the form:</p><div class="m-math"><svg style="width: 24.319em; height: 1.245em;" viewBox="77.53888 -11.955168 233.465314 11.955168">
+</svg></li><li><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> — A concrete function storing DOF values in a finite element space</li></ul></section><section id="autotoc_md495"><h3><a href="#autotoc_md495">Variational Forms</a></h3><p>The module supports building variational problems of the form:</p><div class="m-math"><svg style="width: 24.319em; height: 1.245em;" viewBox="77.53888 -11.955168 233.465314 11.955168">
 <title>
 \[
   \text{Find} \quad u \in U \quad \text{ s.t. } \quad \forall v \in V \quad
@@ -201,7 +201,7 @@ $ \mathbf{A}\mathbf{x}
 <use x='20.575578' y='0' xlink:href='#eq5-g1-61'/>
 <use x='33.001059' y='0' xlink:href='#eq5-g0-98'/>
 </g>
-</svg>.</p><p>Key expression classes:</p><ul><li><code>Integral(A, B)</code> — Domain integrals (bilinear or linear forms)</li><li><code>BoundaryIntegral(A, B)</code> — Boundary integrals</li><li><code>Grad(u)</code> — Gradient operator</li><li><code>Div(u)</code> — Divergence operator</li><li><code>Jacobian(u)</code> — <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> operator</li><li><code>DirichletBC(u, g)</code> — Dirichlet boundary conditions</li></ul></section><section id="autotoc_md492"><h3><a href="#autotoc_md492">Problem</a></h3><p>The <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> class assembles all forms and boundary conditions into a solvable linear system.</p><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg>.</p><p>Key expression classes:</p><ul><li><code>Integral(A, B)</code> — Domain integrals (bilinear or linear forms)</li><li><code>BoundaryIntegral(A, B)</code> — Boundary integrals</li><li><code>Grad(u)</code> — Gradient operator</li><li><code>Div(u)</code> — Divergence operator</li><li><code>Jacobian(u)</code> — <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> operator</li><li><code>DirichletBC(u, g)</code> — Dirichlet boundary conditions</li></ul></section><section id="autotoc_md496"><h3><a href="#autotoc_md496">Problem</a></h3><p>The <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> class assembles all forms and boundary conditions into a solvable linear system.</p><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="n">TestFunction</span><span class="w">  </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 
@@ -1335,7 +1335,7 @@ $\int J u : J v \ dx$
               <div class="m-doc-template">template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_l_h_s_der8743a0969982d5f08c8d9ce16c0376b5.html" class="m-doc">QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;</a>
             </dt>
-            <dd>Approximation of the integral of the the dot product between a trial shape function and a test shape function.</dd>
+            <dd>Local bilinear-form quadrature for the dot product of a trial and a test shape function.</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived, class RHSDerived, class Scalar, class Mesh&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_mult_3_0184d09cbfa4e0d29a2d833c9e09f7038c.html" class="m-doc">QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Mult&lt;FunctionBase&lt;CoefficientDerived&gt;, ShapeFunctionBase&lt;Grad&lt;ShapeFunction&lt;LHSDerived, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;&gt;, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;&gt;, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;Grad&lt;ShapeFunction&lt;RHSDerived, H1&lt;KTest, Scalar, Mesh&gt;, TestSpace&gt;&gt;, H1&lt;KTest, Scalar, Mesh&gt;, TestSpace&gt;&gt;&gt;</a>
@@ -1581,12 +1581,12 @@ $\int p \, (\nabla \cdot v)\, dx$
               <div class="m-doc-template">template&lt;class FunctionDerived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_function_base_3_01_function_derived_01_4_01_4.html" class="m-doc">QuadratureRule&lt;FunctionBase&lt;FunctionDerived&gt;&gt;</a>
             </dt>
-            <dd>Quadrature rule for integrating functions on mesh polytopes.</dd>
+            <dd>Quadrature rule for integrating general functions on mesh polytopes.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_grid_function_3_01_f_e_s_00_01_data_01_4_01_4.html" class="m-doc">QuadratureRule&lt;GridFunction&lt;FES, Data&gt;&gt;</a>
             </dt>
-            <dd>Integration of a <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> object.</dd>
+            <dd>Integration of a scalar grid function over a mesh region.</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived, class RHSDerived, class Scalar, class Mesh&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_mult_3_01_function_base_3_01_coefficient_deae7b9f05954f08133e602bd78fca5936.html" class="m-doc">QuadratureRule&lt;Mult&lt;FunctionBase&lt;CoefficientDerived&gt;, Dot&lt;ShapeFunctionBase&lt;ShapeFunction&lt;LHSDerived, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;ShapeFunction&lt;RHSDerived, H1&lt;KTest, Scalar, Mesh&gt;, TestSpace&gt;, H1&lt;KTest, Scalar, Mesh&gt;, TestSpace&gt;&gt;&gt;&gt;</a>
@@ -1683,7 +1683,7 @@ $\int f \cdot v \ dx$
               <div class="m-doc-template">template&lt;class NestedDerived, class FES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_shape_function_base_3_01_nested_derived_00_098b200335f11a538dc0d8b3a17a60f0.html" class="m-doc">QuadratureRule&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;</a>
             </dt>
-            <dd>Approximation of the integral of a test shape function.</dd>
+            <dd>Local linear-form quadrature for a test shape function expression.</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t K, class NestedDerived, class Scalar, class Mesh&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_shape_function_base_3_01_shape_function_3_0304f32a70a0f92810d500f65ed92b0b6.html" class="m-doc">QuadratureRule&lt;ShapeFunctionBase&lt;ShapeFunction&lt;NestedDerived, H1&lt;K, Scalar, Mesh&gt;, TestSpace&gt;, H1&lt;K, Scalar, Mesh&gt;, TestSpace&gt;&gt;</a>
