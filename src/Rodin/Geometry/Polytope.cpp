@@ -1083,11 +1083,12 @@ namespace Rodin::Geometry
   Real Polytope::getMeasure() const
   {
     Real res = 0;
-    QF::GenericPolytopeQuadrature qf(getTransformation().getOrder(), getGeometry());
-    for (size_t i = 0; i < qf.getSize(); i++)
+    const auto& qf =
+      QF::GenericPolytopeQuadrature::get(getTransformation().getOrder(), getGeometry());
+    const auto& quadrature = getQuadrature(qf);
+    for (size_t i = 0; i < quadrature.getSize(); i++)
     {
-      const Geometry::Point p(*this, qf.getPoint(i));
-      res += qf.getWeight(i) * p.getDistortion();
+      res += qf.getWeight(i) * quadrature.getPoint(i).getDistortion();
     }
     return res;
   }

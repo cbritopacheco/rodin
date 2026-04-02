@@ -164,7 +164,8 @@ namespace Rodin::Solid
           ? m_quadOrder
           : 2 * fe.getOrder();
         const auto& qf = QF::GenericPolytopeQuadrature::get(effectiveOrder, polytope.getGeometry());
-        const size_t nqp = qf.getSize();
+        const auto& quadrature = polytope.getQuadrature(qf);
+        const size_t nqp = quadrature.getSize();
 
         // Zero element vector
         m_elemVec.resize(ndof);
@@ -173,10 +174,10 @@ namespace Rodin::Solid
         // Loop over quadrature points
         for (size_t q = 0; q < nqp; ++q)
         {
+          const auto& pt = quadrature.getPoint(q);
           const auto& rc = qf.getPoint(q);
           const ScalarType wq = qf.getWeight(q);
 
-          Geometry::Point pt(polytope, rc);
           const ScalarType distortion = pt.getDistortion();
           const auto& JacInv = pt.getJacobianInverse();
 
