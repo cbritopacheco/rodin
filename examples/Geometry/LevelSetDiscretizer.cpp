@@ -29,6 +29,7 @@ int main(int, char**)
   mesh.scale(1.0 / (24 - 1)); // unit cube
 
   mesh.getConnectivity().compute(3, 2);
+  mesh.getConnectivity().compute(2, 3);
   mesh.getConnectivity().compute(3, 1);
   mesh.getConnectivity().compute(2, 1);
   mesh.getConnectivity().compute(1, 0);
@@ -74,7 +75,7 @@ int main(int, char**)
   static constexpr Attribute outside = 20;
   static constexpr Attribute gamma   = 30;
 
-  MarchingTetrahedra mt(phi);
+  LevelSetDiscretizerTetrahedra mt(phi);
   mt
     .setSignTolerance(1e-14)
     .setSnapTolerance(1e-14)

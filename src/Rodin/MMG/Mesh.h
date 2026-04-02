@@ -181,6 +181,10 @@ namespace Rodin::MMG
 
       Mesh& operator=(Parent&& other)
       {
+        m_cornerIndex.clear();
+        m_requiredVertexIndex.clear();
+        m_ridgeIndex.clear();
+        m_requiredEdgeIndex.clear();
         Parent::operator=(std::move(other));
         return *this;
       }

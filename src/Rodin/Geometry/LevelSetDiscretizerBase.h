@@ -4,10 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_GEOMETRY_MARCHINGBASE_H
-#define RODIN_GEOMETRY_MARCHINGBASE_H
+#ifndef RODIN_GEOMETRY_LEVELSETDISCRETIZERBASE_H
+#define RODIN_GEOMETRY_LEVELSETDISCRETIZERBASE_H
 
+#include <array>
+#include <cassert>
 #include <functional>
+#include <variant>
+#include <vector>
 
 #include "Rodin/Geometry/Types.h"
 #include "Rodin/Variational/ForwardDecls.h"
@@ -16,43 +20,36 @@
 namespace Rodin::Geometry
 {
   /**
-   * @brief Base class for marching-based discretizers driven by a level-set.
+   * @brief Base class for discretizers driven by a level-set.
    *
-   * This class provides common configuration/state for algorithms that
+   * This class stores the common configuration/state for algorithms that
    * discretize a domain or interface described implicitly by a scalar field
    * (typically a level-set function) defined on a mesh.
    *
-   * The input is a P1 grid function @f$\phi@f$ on a mesh @f$\mathcal{T}@f$.
-   * A derived class implements a specific marching strategy (e.g. marching
-   * tetrahedra) to produce an output mesh where:
-   * - cells may be split according to the sign of @f$\phi@f$,
-   * - regions may be relabeled depending on which side of the interface they
-   *   belong to,
-   * - interface entities (faces/edges) may be marked with a dedicated attribute.
-   *
-   * Splitting/relabeling is controlled by a per-dimension map (SplitMap) that
+   * Attribute transfer is controlled by a per-dimension map (SplitMap) that
    * associates an input attribute to either:
-   * - a Split policy (negative/positive relabel), or
-   * - a NoSplit policy (prevent splitting where that attribute appears).
+   * - a Split policy, meaning "split geometrically and relabel by side", or
+   * - a PreserveAttribute policy, meaning "split geometrically and keep the
+   *   original input attribute".
+   *
+   * Geometry is handled entirely by derived classes. The policies stored here
+   * affect only how attributes are transferred to the output entities/cells.
    *
    * @tparam Params Specialization parameters; this header provides a
    * specialization for:
    *   Variational::GridFunction<Variational::P1<Real, Mesh>, Data>.
    */
-  template <class ... Params>
-  class MarchingBase;
+  template <class... Params>
+  class LevelSetDiscretizerBase;
 
   /**
-   * @brief Specialization for marching algorithms operating on a P1 grid function.
-   *
-   * The marching is driven by a scalar P1 grid function on a mesh. The derived
-   * class is responsible for implementing discretize().
+   * @brief Specialization for level-set discretization algorithms operating on a P1 grid function.
    *
    * @tparam Mesh Mesh type hosting the P1 space.
    * @tparam Data Underlying storage/backend of the GridFunction.
    */
   template <class Mesh, class Data>
-  class MarchingBase<Variational::GridFunction<Variational::P1<Real, Mesh>, Data>>
+  class LevelSetDiscretizerBase<Variational::GridFunction<Variational::P1<Real, Mesh>, Data>>
   {
     public:
       /// Mesh type associated with the underlying P1 finite element space.
@@ -61,56 +58,56 @@ namespace Rodin::Geometry
       /// Finite element space type (P1 scalar field).
       using FESType = Variational::P1<Real, Mesh>;
 
-      /// Grid function type driving the marching procedure.
+      /// Grid function type used as the input level-set.
       using GridFunctionType = Variational::GridFunction<FESType, Data>;
 
       /**
-       * @brief Tag type representing a "do not split" policy.
+       * @brief Tag type representing the policy "preserve the original attribute".
        *
-       * When an entity/cell is associated with an attribute configured as NoSplit
-       * for a given topological dimension, the derived algorithm should avoid
-       * performing a cut/split across that entity/cell in that dimension.
+       * This policy means that if the derived discretizer geometrically splits an
+       * entity/cell carrying a given input attribute, the descendants should keep
+       * that original attribute instead of being relabeled by side.
        */
-      struct NoSplitT {};
+      struct PreserveAttributeT {};
 
-      /// Singleton value used to specify the NoSplit policy.
-      static constexpr NoSplitT NoSplit{};
+      /// Singleton value used to specify the PreserveAttribute policy.
+      static constexpr PreserveAttributeT PreserveAttribute{};
 
       /**
-       * @brief Split policy for an input attribute.
+       * @brief Side-based relabeling policy.
        *
-       * When splitting is performed, the output entities/cells may be relabeled
-       * based on the side of the level set:
+       * When splitting is performed, descendants may be relabeled according to
+       * the sign of the level-set:
        * - @ref negative: attribute assigned to the negative side (phi < 0)
        * - @ref positive: attribute assigned to the positive side (phi > 0)
        *
-       * The exact semantics of "side" and how labels are applied are defined
-       * by the derived class, but the intended use is region relabeling.
+       * The exact geometric meaning of "side" is defined by the derived class,
+       * but the intended use is region/interface-aware relabeling.
        */
       struct Split
       {
-        /// Attribute to assign to elements/entities classified on the negative side.
+        /// Attribute to assign to descendants classified on the negative side.
         Attribute negative;
 
-        /// Attribute to assign to elements/entities classified on the positive side.
+        /// Attribute to assign to descendants classified on the positive side.
         Attribute positive;
       };
 
       /**
-       * @brief Per-attribute splitting configuration map.
+       * @brief Per-attribute attribute-transfer configuration map.
        *
        * For a fixed topological dimension @f$d@f$, this map associates an input
        * attribute to either:
-       * - Split: allow splitting and relabel output with the configured pair, or
-       * - NoSplit: prevent splitting for that attribute in that dimension.
+       * - Split: split geometrically and relabel by side, or
+       * - PreserveAttribute: split geometrically and keep the original attribute.
        *
        * Notes:
-       * - The map is stored per dimension (see m_split).
-       * - The default behavior when an attribute is absent from the map is left
-       *   to the derived class (common choices: "split and keep label", or
-       *   "do not split unless specified").
+       * - The map is stored per dimension (see @ref m_split).
+       * - If an attribute is absent from the map, the derived class may choose
+       *   its own default behavior. A common choice is to preserve the original
+       *   attribute.
        */
-      using SplitMap = FlatMap<Attribute, std::variant<Split, NoSplitT>>;
+      using SplitMap = FlatMap<Attribute, std::variant<Split, PreserveAttributeT>>;
 
       /**
        * @brief Construct from a P1 grid function.
@@ -120,21 +117,24 @@ namespace Rodin::Geometry
        *
        * @param gf Input grid function (typically a level-set).
        */
-      MarchingBase(const GridFunctionType& gf)
+      LevelSetDiscretizerBase(const GridFunctionType& gf)
         : m_gf(gf)
       {
-        m_split.resize(gf.getFiniteElementSpace().getMesh().getDimension() + 1);
+        const size_t dim = gf.getFiniteElementSpace().getMesh().getDimension();
+        m_split.resize(dim + 1);
+        m_interface.fill({});
       }
 
       /**
-       * @brief Set the splitting policy for an attribute at a given dimension.
+       * @brief Set the attribute-transfer policy for an input attribute at a given dimension.
        *
        * @param d Topological dimension (0..mesh_dim).
        * @param attr Input attribute to configure.
-       * @param value Either Split{neg,pos} or NoSplit.
+       * @param value Either Split{neg,pos} or PreserveAttribute.
        * @return *this
        */
-      MarchingBase& setSplit(size_t d, const Attribute& attr, const std::variant<Split, NoSplitT>& value)
+      LevelSetDiscretizerBase&
+      setSplit(size_t d, const Attribute& attr, const std::variant<Split, PreserveAttributeT>& value)
       {
         assert(d < m_split.size());
         m_split[d][attr] = value;
@@ -142,28 +142,33 @@ namespace Rodin::Geometry
       }
 
       /**
-       * @brief Convenience wrapper to configure a Split policy.
+       * @brief Convenience wrapper to configure side-based relabeling.
        *
        * @param d Topological dimension (0..mesh_dim).
        * @param attr Input attribute to configure.
        * @param split Split policy (negative/positive relabel).
        * @return *this
        */
-      MarchingBase& split(size_t d, Attribute attr, const Split& split)
+      LevelSetDiscretizerBase& split(size_t d, Attribute attr, const Split& split)
       {
         return this->setSplit(d, attr, split);
       }
 
       /**
-       * @brief Convenience wrapper to configure a NoSplit policy.
+       * @brief Convenience wrapper to configure attribute preservation.
+       *
+       * This means that descendants of entities/cells carrying @p attr are still
+       * allowed to be split geometrically by the derived algorithm, but their
+       * output attribute should remain equal to @p attr instead of being relabeled
+       * by side.
        *
        * @param d Topological dimension (0..mesh_dim).
-       * @param attr Input attribute to configure as "do not split".
+       * @param attr Input attribute to configure for preservation.
        * @return *this
        */
-      MarchingBase& noSplit(size_t d, Attribute attr)
+      LevelSetDiscretizerBase& preserve(size_t d, Attribute attr)
       {
-        return this->setSplit(d, attr, NoSplit);
+        return this->setSplit(d, attr, PreserveAttribute);
       }
 
       /**
@@ -188,27 +193,31 @@ namespace Rodin::Geometry
        * If unset (nullopt), the derived algorithm should not assign a dedicated
        * interface attribute.
        *
+       * @param d Topological dimension of the interface entities to mark.
        * @param attr Optional interface attribute.
        * @return *this
        */
-      MarchingBase& setInterface(size_t d, const Optional<Attribute>& attr)
+      LevelSetDiscretizerBase& setInterface(size_t d, const Optional<Attribute>& attr)
       {
+        assert(d < m_interface.size());
         m_interface[d] = attr;
         return *this;
       }
 
       /**
-       * @brief Get the configured interface attribute.
+       * @brief Get the configured interface attribute for a given dimension.
        *
+       * @param d Topological dimension.
        * @return Optional interface attribute (may be nullopt).
        */
       const Optional<Attribute>& getInterface(size_t d) const
       {
+        assert(d < m_interface.size());
         return m_interface[d];
       }
 
       /**
-       * @brief Get the input grid function driving the marching.
+       * @brief Get the input grid function driving the discretization.
        *
        * @return Reference to the input GridFunction.
        */
@@ -220,11 +229,9 @@ namespace Rodin::Geometry
       /**
        * @brief Perform the discretization.
        *
-       * The derived class implements a specific marching strategy and returns
-       * a new mesh representing the discretized geometry (and possibly relabeled
-       * regions/interface) induced by the input grid function.
+       * Must be implemented by the derived class.
        *
-       * @return Output mesh generated by the marching algorithm.
+       * @return Output mesh.
        */
       virtual MeshType discretize() const = 0;
 
@@ -232,7 +239,7 @@ namespace Rodin::Geometry
       /// Reference to the input grid function (level-set).
       std::reference_wrapper<const GridFunctionType> m_gf;
 
-      /// Per-dimension split configuration maps (indexed by topological dimension).
+      /// Per-dimension attribute-transfer configuration maps.
       std::vector<SplitMap> m_split;
 
       /// Optional attribute used to mark interface entities in the output.
