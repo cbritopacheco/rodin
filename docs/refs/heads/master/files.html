@@ -94,7 +94,7 @@
                 <a href="#" onclick="return toggle(this)">dir</a> <a href="dir_609b8253b7bf42d1aa344d32447168a8.html" class="m-doc">Assembly</a> <span class="m-doc">Namespace <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Rodin::<wbr />Assembly</a>.</span>
                 <ul class="m-doc">
                   <li>file <a href="_assembly_2_default_8h.html" class="m-doc">Default.h</a> <span class="m-doc">Default assembly strategy selection based on compilation configuration.</span></li>
-                  <li>file <a href="_input_8h.html" class="m-doc">Input.h</a> <span class="m-doc">Input data structures for assembly operations.</span></li>
+                  <li>file <a href="_assembly_2_input_8h.html" class="m-doc">Input.h</a> <span class="m-doc">Input data structures for assembly operations.</span></li>
                   <li>file <a href="_assembly_2_forward_decls_8h.html" class="m-doc">ForwardDecls.h</a> <span class="m-doc">Forward declarations for the Assembly module.</span></li>
                 </ul>
               </li>
@@ -155,6 +155,7 @@
                   <li>file <a href="_point_8h.html" class="m-doc">Point.h</a> <span class="m-doc">Spatial points on mesh polytopes with reference and physical coordinates.</span></li>
                   <li>file <a href="_polytope_8h.html" class="m-doc">Polytope.h</a> <span class="m-doc">Polytope classes representing geometric elements in finite element meshes.</span></li>
                   <li>file <a href="_polytope_iterator_8h.html" class="m-doc">PolytopeIterator.h</a> <span class="m-doc">Iterator classes for traversing mesh polytopes.</span></li>
+                  <li>file <a href="_polytope_quadrature_8h.html" class="m-doc">PolytopeQuadrature.h</a> <span class="m-doc">Cached quadrature data attached to mesh polytopes.</span></li>
                   <li>file <a href="_polytope_transformation_8h.html" class="m-doc">PolytopeTransformation.h</a> <span class="m-doc">Base class for polytope geometric transformations.</span></li>
                   <li>file <a href="_polytope_transformation_index_8h.html" class="m-doc">PolytopeTransformationIndex.h</a> <span class="m-doc">Index for storing polytope transformations.</span></li>
                   <li>file <a href="_region_8h.html" class="m-doc">Region.h</a> <span class="m-doc">Region enumeration for identifying mesh subregions.</span></li>
@@ -198,10 +199,10 @@
                   <li>file <a href="_gauss_legendre_8cpp.html" class="m-doc">GaussLegendre.cpp</a> <span class="m-doc">Implementation of the GaussLegendre quadrature formula.</span></li>
                   <li>file <a href="_gauss_legendre_8h.html" class="m-doc">GaussLegendre.h</a> <span class="m-doc">Defines the GaussLegendre quadrature formula.</span></li>
                   <li>file <a href="_gauss_lobatto_8h.html" class="m-doc">GaussLobatto.h</a> <span class="m-doc">Defines the GaussLobatto quadrature formula.</span></li>
-                  <li>file <a href="_generic_polytope_quadrature_8cpp.html" class="m-doc">GenericPolytopeQuadrature.cpp</a> <span class="m-doc">Implementation of the GenericPolytopeQuadrature dispatcher class.</span></li>
-                  <li>file <a href="_generic_polytope_quadrature_8h.html" class="m-doc">GenericPolytopeQuadrature.h</a> <span class="m-doc">Defines the GenericPolytopeQuadrature dispatcher class.</span></li>
                   <li>file <a href="_grundmann_moller_8cpp.html" class="m-doc">GrundmannMoller.cpp</a> <span class="m-doc">Implementation of the GrundmannMoller simplex quadrature formula.</span></li>
                   <li>file <a href="_grundmann_moller_8h.html" class="m-doc">GrundmannMoller.h</a> <span class="m-doc">Defines the GrundmannMoller simplex quadrature formula.</span></li>
+                  <li>file <a href="_polytope_quadrature_formula_8cpp.html" class="m-doc">PolytopeQuadratureFormula.cpp</a> <span class="m-doc">Implementation of the PolytopeQuadratureFormula dispatcher class.</span></li>
+                  <li>file <a href="_polytope_quadrature_formula_8h.html" class="m-doc">PolytopeQuadratureFormula.h</a> <span class="m-doc">Defines the PolytopeQuadratureFormula dispatcher class.</span></li>
                   <li>file <a href="_quadrature_formula_8h.html" class="m-doc">QuadratureFormula.h</a> <span class="m-doc">Defines the QuadratureFormulaBase abstract base class.</span></li>
                 </ul>
               </li>
@@ -282,7 +283,7 @@
                   <li>file <a href="_exp_8h.html" class="m-doc">Exp.h</a> <span class="m-doc">Exponential function operations.</span></li>
                   <li>file <a href="_f_8h.html" class="m-doc">F.h</a> <span class="m-doc">Coordinate projection functions for variational formulations.</span></li>
                   <li>file <a href="_face_integral_8h.html" class="m-doc">FaceIntegral.h</a> <span class="m-doc">Face integral classes for discontinuous Galerkin methods.</span></li>
-                  <li>file <a href="_face_normal_8h.html" class="m-doc">FaceNormal.h</a> <span class="m-doc">Normal vector on mesh faces for DG methods.</span></li>
+                  <li>file <a href="_face_normal_8h.html" class="m-doc">FaceNormal.h</a> <span class="m-doc">Unit normal vector on mesh faces for DG and face-based formulations.</span></li>
                   <li>file <a href="_finite_element_8h.html" class="m-doc">FiniteElement.h</a> <span class="m-doc">Base classes for finite element definitions.</span></li>
                   <li>file <a href="_variational_2_finite_element_space_8h.html" class="m-doc">FiniteElementSpace.h</a> <span class="m-doc">Finite element space classes and infrastructure.</span></li>
                   <li>file <a href="_flow_8h.html" class="m-doc">Flow.h</a> <span class="m-doc">Flow map operators for shape functions and grid functions.</span></li>
@@ -364,6 +365,7 @@
               <li>file <a href="_math_8h.html" class="m-doc">Math.h</a> <span class="m-doc">Top level include for the <a href="namespace_rodin_1_1_math.html" class="m-doc">Rodin::<wbr />Math</a> module.</span></li>
               <li>file <a href="_types_8h.html" class="m-doc">Types.h</a> <span class="m-doc">Fundamental type definitions for the <a href="namespace_rodin.html" class="m-doc">Rodin</a> library.</span></li>
               <li>file <a href="_q_f_8h.html" class="m-doc">QF.h</a> <span class="m-doc">Top level include for the <a href="namespace_rodin_1_1_q_f.html" class="m-doc">Rodin::<wbr />QF</a> module.</span></li>
+              <li>file <a href="_solid_8h.html" class="m-doc">Solid.h</a> <span class="m-doc">Aggregator header for the Rodin::Solid module.</span></li>
               <li>file <a href="_solver_8h.html" class="m-doc">Solver.h</a> <span class="m-doc">Main header for the Solver module.</span></li>
               <li>file <a href="_forward_decls_8h.html" class="m-doc">ForwardDecls.h</a> <span class="m-doc">Forward declarations for core <a href="namespace_rodin.html" class="m-doc">Rodin</a> types.</span></li>
               <li>file <a href="_test_8h.html" class="m-doc">Test.h</a> <span class="m-doc">Top level include for the <a href="namespace_rodin_1_1_test.html" class="m-doc">Rodin::<wbr />Test</a> module.</span></li>
@@ -371,7 +373,6 @@
               <li>file <a href="_threads_8h.html" class="m-doc">Threads.h</a> <span class="m-doc">Top level include for the <a href="namespace_rodin_1_1_threads.html" class="m-doc">Rodin::<wbr />Threads</a> module.</span></li>
               <li>file <a href="_tuple_8h.html" class="m-doc">Tuple.h</a> <span class="m-doc">Defines the Tuple class, an extended tuple implementation.</span></li>
               <li>file <a href="_cast_8h.html" class="m-doc">Cast.h</a> <span class="m-doc">Defines the Cast template for type conversion operations.</span></li>
-              <li>file <a href="_linear_elasticity_8h.html" class="m-doc">LinearElasticity.h</a> <span class="m-doc">Linear elasticity formulations and integrators.</span></li>
             </ul>
           </li>
           <li>file <a href="_rodin_8h.html" class="m-doc">Rodin.h</a> <span class="m-doc">Top level include for <a href="namespace_rodin.html" class="m-doc">Rodin</a> library.</span></li>

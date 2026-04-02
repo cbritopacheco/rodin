@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Solid::ConstitutivePoint class | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid.html">Solid</a>::<wbr/></span>ConstitutivePoint <span class="m-thin">class</span>
+          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_constitutive_point_8h.html">&lt;Rodin/Solid/Local/ConstitutivePoint.h&gt;</a></div>
+        </h1>
+        <p>Central data bundle for constitutive evaluation at a quadrature point.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li><a href="#autotoc_md222">Usage (with geometric context, typical in integrators)</a></li>
+            <li><a href="#autotoc_md223">Usage (without geometry, for unit testing)</a></li>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>A <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a> composes a <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a> (geometric context) with a <a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a> (deformation measures) and extensible typed auxiliary data. Constitutive laws receive a <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a> and may inspect any subset of the data they need.</p><p>Geometric context (reference/physical coordinates, region id) is accessed through <code><a href="#af659bd6f4e4a6e4d0ca9848febae4f27" class="m-doc">getPoint()</a></code>, which returns an optional reference to the underlying <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>.</p><section id="autotoc_md222"><h3><a href="#autotoc_md222">Usage (with geometric context, typical in integrators)</a></h3><pre class="m-code"><span class="n">Geometry</span><span class="o">::</span><span class="n">Point</span><span class="w"> </span><span class="nf">pt</span><span class="p">(</span><span class="n">polytope</span><span class="p">,</span><span class="w"> </span><span class="n">rc</span><span class="p">);</span>
+<span class="n">KinematicState</span><span class="w"> </span><span class="nf">state</span><span class="p">(</span><span class="n">d</span><span class="p">);</span>
+<span class="n">state</span><span class="p">.</span><span class="n">setDisplacementGradient</span><span class="p">(</span><span class="n">H</span><span class="p">);</span>
+
+<span class="n">ConstitutivePoint</span><span class="w"> </span><span class="nf">cp</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">);</span>
+<span class="n">cp</span><span class="p">.</span><span class="n">set</span><span class="o">&lt;</span><span class="n">Tags</span><span class="o">::</span><span class="n">FiberDirection</span><span class="o">&gt;</span><span class="p">(</span><span class="n">fiberDir</span><span class="p">);</span>
+
+<span class="n">law</span><span class="p">.</span><span class="n">setCache</span><span class="p">(</span><span class="n">cache</span><span class="p">,</span><span class="w"> </span><span class="n">cp</span><span class="p">);</span>
+<span class="n">law</span><span class="p">.</span><span class="n">getFirstPiolaKirchhoffStress</span><span class="p">(</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">cache</span><span class="p">,</span><span class="w"> </span><span class="n">cp</span><span class="p">);</span></pre></section><section id="autotoc_md223"><h3><a href="#autotoc_md223">Usage (without geometry, for unit testing)</a></h3><pre class="m-code"><span class="n">KinematicState</span><span class="w"> </span><span class="nf">state</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">state</span><span class="p">.</span><span class="n">setDisplacementGradient</span><span class="p">(</span><span class="n">H</span><span class="p">);</span>
+<span class="n">ConstitutivePoint</span><span class="w"> </span><span class="nf">cp</span><span class="p">(</span><span class="n">state</span><span class="p">);</span></pre></section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a1ddf41b8cffe51440194dd18df2a66af" class="m-doc">ConstitutivePoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; point,
+              const <a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a>&amp; state) <span class="m-label m-flat m-info">explicit</span> </span>
+            </dt>
+            <dd>Constructs a constitutive point from a geometric point and kinematic state.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a94f6aeb45491f99e94e60d9cf9dbc9cd" class="m-doc">ConstitutivePoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a>&amp; state) <span class="m-label m-flat m-info">explicit</span> </span>
+            </dt>
+            <dd>Constructs a constitutive point from a kinematic state only.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a859283bf64f988f608c32fcf0af4280d">
+              <span class="m-doc-wrap-bumper">auto <a href="#a859283bf64f988f608c32fcf0af4280d" class="m-doc-self">getKinematicState</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a>&amp;</span>
+            </dt>
+            <dd>Gets the kinematic state.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af659bd6f4e4a6e4d0ca9848febae4f27" class="m-doc">getPoint</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;std::reference_wrapper&lt;const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&gt;&gt;&amp;</span>
+            </dt>
+            <dd>Gets the underlying <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>, if available.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Tag&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#acb811f83cffe57473d03915b120d8520" class="m-doc">set</a>(</span><span class="m-doc-wrap">const typename Tag::Type&amp; value) -&gt; <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp;</span>
+            </dt>
+            <dd>Stores typed auxiliary data (e.g., fiber direction, activation).</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Tag&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2e61d308c9c8e1a23b35d429216f5f65" class="m-doc">get</a>(</span><span class="m-doc-wrap">) const -&gt; const Tag::Type&amp;</span>
+            </dt>
+            <dd>Retrieves typed auxiliary data by tag.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Tag&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#af2403acf5250d85d474308c1b84253f8" class="m-doc">has</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
+            </dt>
+            <dd>Checks whether auxiliary data with the given tag exists.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a1ddf41b8cffe51440194dd18df2a66af"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />ConstitutivePoint::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ddf41b8cffe51440194dd18df2a66af" class="m-doc-self">ConstitutivePoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; point,
+              const <a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a>&amp; state) <span class="m-label m-info">explicit</span> </span></span>
+            </h3>
+            <p>Constructs a constitutive point from a geometric point and kinematic state.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">point</td>
+                  <td>The geometric evaluation point</td>
+                </tr>
+                <tr>
+                  <td>state</td>
+                  <td>The kinematic state at this quadrature point</td>
+                </tr>
+              </tbody>
+            </table>
+<p>This is the primary constructor used by integrators. The <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a> provides reference/physical coordinates and the polytope (from which the region id can be queried).</p><aside class="m-note m-danger"><h4>Warning</h4><p>The caller must ensure the <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a> and <a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a> outlive this <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>. Typically all are local variables in the same quadrature-point loop.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a94f6aeb45491f99e94e60d9cf9dbc9cd"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />ConstitutivePoint::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a94f6aeb45491f99e94e60d9cf9dbc9cd" class="m-doc-self">ConstitutivePoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a>&amp; state) <span class="m-label m-info">explicit</span> </span></span>
+            </h3>
+            <p>Constructs a constitutive point from a kinematic state only.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">state</td>
+                  <td>The kinematic state</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Use this constructor for unit tests or contexts where geometric context is not needed. <a href="#af659bd6f4e4a6e4d0ca9848febae4f27" class="m-doc">getPoint()</a> will return an empty optional.</p>
+          </div></section>
+          <section class="m-doc-details" id="af659bd6f4e4a6e4d0ca9848febae4f27"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;std::reference_wrapper&lt;const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&gt;&gt;&amp; Rodin::<wbr />Solid::<wbr />ConstitutivePoint::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af659bd6f4e4a6e4d0ca9848febae4f27" class="m-doc-self">getPoint</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the underlying <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>, if available.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>An optional reference to the <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>, or empty if constructed without geometric context.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="acb811f83cffe57473d03915b120d8520"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Tag&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; Rodin::<wbr />Solid::<wbr />ConstitutivePoint::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acb811f83cffe57473d03915b120d8520" class="m-doc-self">set</a>(</span><span class="m-doc-wrap">const typename Tag::Type&amp; value)</span></span>
+            </h3>
+            <p>Stores typed auxiliary data (e.g., fiber direction, activation).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Tag</td>
+                  <td>A type tag with a nested <code>Type</code> alias</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>value</td>
+                  <td>The auxiliary data value</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this for chaining</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The value type is deduced from the tag&#x27;s <code>Type</code> alias.</p><pre class="m-code"><span class="n">cp</span><span class="p">.</span><span class="n">set</span><span class="o">&lt;</span><span class="n">Tags</span><span class="o">::</span><span class="n">FiberDirection</span><span class="o">&gt;</span><span class="p">(</span><span class="n">fiberVec</span><span class="p">);</span>
+<span class="n">cp</span><span class="p">.</span><span class="n">set</span><span class="o">&lt;</span><span class="n">Tags</span><span class="o">::</span><span class="n">Activation</span><span class="o">&gt;</span><span class="p">(</span><span class="mf">0.5</span><span class="p">);</span></pre>
+          </div></section>
+          <section class="m-doc-details" id="a2e61d308c9c8e1a23b35d429216f5f65"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Tag&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const Tag::Type&amp; Rodin::<wbr />Solid::<wbr />ConstitutivePoint::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2e61d308c9c8e1a23b35d429216f5f65" class="m-doc-self">get</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Retrieves typed auxiliary data by tag.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Tag</td>
+                  <td>The type tag used when storing the data</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Const reference to the stored value</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The return type is deduced from the tag&#x27;s <code>Type</code> alias.</p><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">fiber</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cp</span><span class="p">.</span><span class="n">get</span><span class="o">&lt;</span><span class="n">Tags</span><span class="o">::</span><span class="n">FiberDirection</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="n">Real</span><span class="w"> </span><span class="n">activation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cp</span><span class="p">.</span><span class="n">get</span><span class="o">&lt;</span><span class="n">Tags</span><span class="o">::</span><span class="n">Activation</span><span class="o">&gt;</span><span class="p">();</span></pre>
+          </div></section>
+          <section class="m-doc-details" id="af2403acf5250d85d474308c1b84253f8"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Tag&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Solid::<wbr />ConstitutivePoint::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af2403acf5250d85d474308c1b84253f8" class="m-doc-self">has</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Checks whether auxiliary data with the given tag exists.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Tag</td>
+                  <td>The type tag to check</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True if auxiliary data with this tag has been set</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

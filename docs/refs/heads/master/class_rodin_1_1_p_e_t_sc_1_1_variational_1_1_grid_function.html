@@ -75,7 +75,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p_e_t_sc_2_variational_2_grid_function_8h.html">&lt;Rodin/PETSc/Variational/GridFunction.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a7c7c15dc43a710a140062694b75a9980" class="m-doc">class</a> FES&gt;</div>
+          <div class="m-doc-template">template&lt;class FES&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_p_e_t_sc.html">PETSc</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_p_e_t_sc_1_1_variational.html">Variational</a>::<wbr/></span>GridFunction <span class="m-thin">class</span>
         </h1>
         <p>Convenience wrapper that inherits all functionality from <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;</a>.</p>
@@ -108,17 +108,17 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a7c7c15dc43a710a140062694b75a9980" class="m-doc">class</a> FES&gt;</div>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html" class="m-doc">GridFunction&lt;FES, ::Vec&gt;</a>
             </dt>
-            <dd>Grid function specialization storing DOF coefficients in a <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector (<code><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a7c7c15dc43a710a140062694b75a9980" class="m-doc">Vec</a></code>).</dd>
+            <dd>Grid function specialization storing DOF coefficients in a <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector (<code>::Vec</code>).</dd>
           </dl>
         </section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a03479c10042334a732f24badd3acd6d1">
-              using <a href="#a03479c10042334a732f24badd3acd6d1" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Rodin::<wbr />Variational::<wbr />GridFunction</a>&lt;FES, <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a7c7c15dc43a710a140062694b75a9980" class="m-doc">::<wbr />Vec</a>&gt;
+              using <a href="#a03479c10042334a732f24badd3acd6d1" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Rodin::<wbr />Variational::<wbr />GridFunction</a>&lt;FES, ::Vec&gt;
             </dt>
             <dd>Parent specialization type.</dd>
             <dt id="a3a7c9c7b52446b53d800779922de198e">
@@ -131,7 +131,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="aa10c0a45af82cdaab1c78ef9af315cbe">
-              <span class="m-doc-wrap-bumper">auto <a href="#aa10c0a45af82cdaab1c78ef9af315cbe" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a7c7c15dc43a710a140062694b75a9980" class="m-doc">const</a> <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; other) -&gt; <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa10c0a45af82cdaab1c78ef9af315cbe" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; other) -&gt; <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>&lt; Inherit getValue.</dd>
             <dt id="ac7108dc6c770e0642feadb5250a6c0cb">
@@ -139,7 +139,7 @@
             </dt>
             <dd>&lt; Inherit getValue.</dd>
             <dt id="ab49e69b89ecff523a846f2f53f80ffd1">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab49e69b89ecff523a846f2f53f80ffd1" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a7c7c15dc43a710a140062694b75a9980" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; value) -&gt; <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab49e69b89ecff523a846f2f53f80ffd1" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; value) -&gt; <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>&lt; Inherit getValue.</dd>
             <dt id="a52b2a6e2f898ab31632b6ccfe5fea5ee">
@@ -147,44 +147,44 @@
             </dt>
             <dd>&lt; Inherit getValue.</dd>
             <dt id="a4107a9064ab310b5d2fa87a878625ae0">
-              <span class="m-doc-wrap-bumper">auto <a href="#a4107a9064ab310b5d2fa87a878625ae0" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a7c7c15dc43a710a140062694b75a9980" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a64a561bef7097744a37d7cc40c37c66c" class="m-doc">GridFunctionBase</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a64a561bef7097744a37d7cc40c37c66c" class="m-doc">GridFunctionBase</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4107a9064ab310b5d2fa87a878625ae0" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a64a561bef7097744a37d7cc40c37c66c" class="m-doc">GridFunctionBase</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a64a561bef7097744a37d7cc40c37c66c" class="m-doc">GridFunctionBase</a>&amp;</span>
             </dt>
             <dd>&lt; Inherit getValue.</dd>
             <dt id="acfc7fd27b959cb868fdf1ad16ebf1e1e">
-              <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a7c7c15dc43a710a140062694b75a9980" class="m-doc">class</a> <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#acfc7fd27b959cb868fdf1ad16ebf1e1e" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a7c7c15dc43a710a140062694b75a9980" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; v) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a7c7c15dc43a710a140062694b75a9980" class="m-doc">Derived</a>&amp;</span>
+              <div class="m-doc-template">template&lt;class <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#acfc7fd27b959cb868fdf1ad16ebf1e1e" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; v) -&gt; Derived&amp;</span>
             </dt>
             <dd>&lt; Inherit getValue.</dd>
             <dt id="a5a15c7fdd2c776656746e8ea2df8664d">
-              <span class="m-doc-wrap-bumper">auto <a href="#a5a15c7fdd2c776656746e8ea2df8664d" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a7c7c15dc43a710a140062694b75a9980" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5a15c7fdd2c776656746e8ea2df8664d" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>&lt; Inherit assignment operators.</dd>
             <dt id="ab8cd8d1f3bb94590f68bbf067c78c528">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab8cd8d1f3bb94590f68bbf067c78c528" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a7c7c15dc43a710a140062694b75a9980" class="m-doc">const</a> <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab8cd8d1f3bb94590f68bbf067c78c528" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>&lt; Inherit assignment operators.</dd>
             <dt id="ad971d24f5a29ea157727c537fa23120d">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad971d24f5a29ea157727c537fa23120d" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a7c7c15dc43a710a140062694b75a9980" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad971d24f5a29ea157727c537fa23120d" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>&lt; Inherit addition operators.</dd>
             <dt id="af27d7820fb9dce5a22a90df5df2403ee">
-              <span class="m-doc-wrap-bumper">auto <a href="#af27d7820fb9dce5a22a90df5df2403ee" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a7c7c15dc43a710a140062694b75a9980" class="m-doc">const</a> <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af27d7820fb9dce5a22a90df5df2403ee" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>&lt; Inherit addition operators.</dd>
             <dt id="aa147a85f2c2df5480870d5b31277c0bb">
-              <span class="m-doc-wrap-bumper">auto <a href="#aa147a85f2c2df5480870d5b31277c0bb" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a7c7c15dc43a710a140062694b75a9980" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa147a85f2c2df5480870d5b31277c0bb" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>&lt; Inherit subtraction operators.</dd>
             <dt id="a44862edfff1ba702cd3efcaf0cb69479">
-              <span class="m-doc-wrap-bumper">auto <a href="#a44862edfff1ba702cd3efcaf0cb69479" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a7c7c15dc43a710a140062694b75a9980" class="m-doc">const</a> <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a44862edfff1ba702cd3efcaf0cb69479" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>&lt; Inherit subtraction operators.</dd>
             <dt id="adf43b34e239e137af95f838dbfe5feea">
-              <span class="m-doc-wrap-bumper">auto <a href="#adf43b34e239e137af95f838dbfe5feea" class="m-doc-self">operator/=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a7c7c15dc43a710a140062694b75a9980" class="m-doc">const</a> <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#adf43b34e239e137af95f838dbfe5feea" class="m-doc-self">operator/=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>&lt; Inherit multiplication operators.</dd>
             <dt id="ae5d094b71239723ce0345f67721f4b28">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae5d094b71239723ce0345f67721f4b28" class="m-doc-self">operator/=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html#a7c7c15dc43a710a140062694b75a9980" class="m-doc">const</a> <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae5d094b71239723ce0345f67721f4b28" class="m-doc-self">operator/=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>&lt; Inherit multiplication operators.</dd>
           </dl>

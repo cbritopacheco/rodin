@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin/Solid/Fields/FirstPiolaKirchhoffStress.h file | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_add7d0d1e3fa2c5fc6de951654f0f623.html">Solid</a>/</span><span class="m-breadcrumb"><a href="dir_08b1eb1022a76c2736ffeef1d3fd1384.html">Fields</a>/</span>FirstPiolaKirchhoffStress.h <span class="m-thin">file</span>
+        </h1>
+        <p>First Piola-Kirchhoff stress tensor computation.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>Computes the first Piola-Kirchhoff stress <svg class="m-math" style="width: 0.957em; height: 0.854em; vertical-align: -0.000em;" viewBox="0 -8.202578 9.187779 8.202578">
+<title>
+$ \mathbf{P} $
+</title>
+<defs>
+<path id='eq1-g0-80' d='M3.299626-3.646326H5.332005C7.328518-3.646326 8.440349-4.662516 8.440349-5.893898C8.440349-7.185056 7.304608-8.201245 5.332005-8.201245H.454296V-7.687173H1.721544V-.514072H.454296V0C.800996-.02391 2.080199-.02391 2.510585-.02391S4.220174-.02391 4.566874 0V-.514072H3.299626V-3.646326ZM4.901619-7.687173C6.75467-7.687173 6.75467-6.706849 6.75467-5.893898C6.75467-5.104857 6.75467-4.100623 4.901619-4.100623H3.239851V-7.687173H4.901619Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g0-80'/>
+</g>
+</svg> from a hyperelastic constitutive law:</p><div class="m-math"><svg style="width: 4.754em; height: 2.562em;" viewBox="170.85534 -24.590612 45.636811 24.590612">
+<title>
+\[
+  \mathbf{P} = \frac{\partial W}{\partial \mathbf{F}}
+\]
+</title>
+<defs>
+<path id='eq2-g1-64' d='M5.427646-3.993026C5.355915-4.662516 4.937484-5.463512 3.861519-5.463512C2.175841-5.463512 .454296-3.753923 .454296-1.853051C.454296-1.123786 .956413 .251059 2.582316 .251059C5.403736 .251059 6.611208-3.861519 6.611208-5.499377C6.611208-7.220922 5.642839-8.547945 4.112578-8.547945C2.379078-8.547945 1.865006-7.029639 1.865006-6.706849C1.865006-6.599253 1.936737-6.336239 2.271482-6.336239C2.689913-6.336239 2.86924-6.718804 2.86924-6.922042C2.86924-7.292653 2.49863-7.292653 2.343213-7.292653C2.833375-8.177335 3.741968-8.261021 4.064757-8.261021C5.116812-8.261021 5.786301-7.424159 5.786301-6.085181C5.786301-5.32005 5.559153-4.435367 5.439601-3.993026H5.427646ZM2.618182-.071731C1.494396-.071731 1.303113-.956413 1.303113-1.458531C1.303113-1.984558 1.637858-3.21594 1.817186-3.658281C1.972603-4.016936 2.654047-5.224408 3.897385-5.224408C4.985305-5.224408 5.236364-4.27995 5.236364-3.634371C5.236364-2.749689 4.459278-.071731 2.618182-.071731Z'/>
+<path id='eq2-g1-87' d='M10.795517-6.838356C11.070486-7.304608 11.333499-7.746949 12.050809-7.81868C12.158406-7.830635 12.266002-7.84259 12.266002-8.033873C12.266002-8.16538 12.158406-8.16538 12.12254-8.16538C12.09863-8.16538 12.014944-8.141469 11.225903-8.141469C10.867248-8.141469 10.496638-8.16538 10.149938-8.16538C10.078207-8.16538 9.934745-8.16538 9.934745-7.938232C9.934745-7.830635 10.030386-7.81868 10.102117-7.81868C10.34122-7.806725 10.723786-7.734994 10.723786-7.364384C10.723786-7.208966 10.675965-7.12528 10.556413-6.922042L7.292653-1.207472L6.862267-7.436115C6.862267-7.579577 6.993773-7.806725 7.663263-7.81868C7.81868-7.81868 7.938232-7.81868 7.938232-8.045828C7.938232-8.16538 7.81868-8.16538 7.758904-8.16538C7.340473-8.16538 6.898132-8.141469 6.467746-8.141469H5.846077C5.66675-8.141469 5.451557-8.16538 5.272229-8.16538C5.200498-8.16538 5.057036-8.16538 5.057036-7.938232C5.057036-7.81868 5.140722-7.81868 5.34396-7.81868C5.893898-7.81868 5.893898-7.806725 5.941719-7.07746L5.977584-6.647073L2.881196-1.207472L2.438854-7.376339C2.438854-7.507846 2.438854-7.806725 3.251806-7.81868C3.383313-7.81868 3.514819-7.81868 3.514819-8.033873C3.514819-8.16538 3.407223-8.16538 3.335492-8.16538C2.917061-8.16538 2.47472-8.141469 2.044334-8.141469H1.422665C1.243337-8.141469 1.028144-8.16538 .848817-8.16538C.777086-8.16538 .633624-8.16538 .633624-7.938232C.633624-7.81868 .729265-7.81868 .896638-7.81868C1.458531-7.81868 1.470486-7.746949 1.494396-7.364384L2.020423-.02391C2.032379 .179328 2.044334 .251059 2.187796 .251059C2.307347 .251059 2.331258 .203238 2.438854 .02391L6.001494-6.204732L6.443836-.02391C6.455791 .179328 6.467746 .251059 6.611208 .251059C6.73076 .251059 6.766625 .191283 6.862267 .02391L10.795517-6.838356Z'/>
+<path id='eq2-g2-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq2-g0-70' d='M7.531756-8.141469H.454296V-7.627397H1.721544V-.514072H.454296V0C.800996-.02391 2.163885-.02391 2.606227-.02391C3.239851-.02391 4.303861-.02391 4.889664 0V-.514072H3.299626V-3.813699H3.957161C5.104857-3.813699 5.200498-3.287671 5.200498-2.414944H5.702615V-5.726526H5.200498C5.200498-4.853798 5.104857-4.327771 3.957161-4.327771H3.299626V-7.627397H5.009215C6.910087-7.627397 7.208966-6.75467 7.376339-5.308095H7.878456L7.531756-8.141469Z'/>
+<path id='eq2-g0-80' d='M3.299626-3.646326H5.332005C7.328518-3.646326 8.440349-4.662516 8.440349-5.893898C8.440349-7.185056 7.304608-8.201245 5.332005-8.201245H.454296V-7.687173H1.721544V-.514072H.454296V0C.800996-.02391 2.080199-.02391 2.510585-.02391S4.220174-.02391 4.566874 0V-.514072H3.299626V-3.646326ZM4.901619-7.687173C6.75467-7.687173 6.75467-6.706849 6.75467-5.893898C6.75467-5.104857 6.75467-4.100623 4.901619-4.100623H3.239851V-7.687173H4.901619Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='170.85534' y='-8.200662' xlink:href='#eq2-g0-80'/>
+<use x='183.363948' y='-8.200662' xlink:href='#eq2-g2-61'/>
+<use x='196.984943' y='-16.288421' xlink:href='#eq2-g1-64'/>
+<use x='203.814811' y='-16.288421' xlink:href='#eq2-g1-87'/>
+<rect x='196.984943' y='-11.428548' height='.478187' width='19.507186'/>
+<use x='199.09641' y='0' xlink:href='#eq2-g1-64'/>
+<use x='205.926278' y='0' xlink:href='#eq2-g0-70'/>
+</g>
+</svg></div>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
+            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
+          </dl>
+        </section>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class LawDerived&gt;</div>
+              class <a href="class_rodin_1_1_solid_1_1_first_piola_kirchhoff_stress.html" class="m-doc">Rodin::Solid::FirstPiolaKirchhoffStress</a>
+            </dt>
+            <dd>Computes the first Piola-Kirchhoff stress from a constitutive law.</dd>
+          </dl>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

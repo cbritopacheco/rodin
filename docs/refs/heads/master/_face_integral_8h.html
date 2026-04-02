@@ -80,9 +80,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md294">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md295">Discontinuous Galerkin Context</a></li>
-            <li><a href="#autotoc_md296">Usage Example</a></li>
+            <li><a href="#autotoc_md309">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md310">Discontinuous Galerkin Context</a></li>
+            <li><a href="#autotoc_md311">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -92,7 +92,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the FaceIntegral classes which represent integrals over mesh faces (element interfaces) in discontinuous Galerkin (DG) formulations. Face integrals are crucial for coupling elements in DG methods where solutions are discontinuous across element boundaries.</p><section id="autotoc_md294"><h3><a href="#autotoc_md294">Mathematical Foundation</a></h3><p>Face integrals compute:</p><div class="m-math"><svg style="width: 5.876em; height: 2.966em;" viewBox="166.069059 -28.471297 56.404849 28.471297">
+<p>This file defines the FaceIntegral classes which represent integrals over mesh faces (element interfaces) in discontinuous Galerkin (DG) formulations. Face integrals are crucial for coupling elements in DG methods where solutions are discontinuous across element boundaries.</p><section id="autotoc_md309"><h3><a href="#autotoc_md309">Mathematical Foundation</a></h3><p>Face integrals compute:</p><div class="m-math"><svg style="width: 5.876em; height: 2.966em;" viewBox="166.069059 -28.471297 56.404849 28.471297">
 <title>
 \[
   \int_{\mathcal{F}_h} f(x) \, ds
@@ -132,7 +132,7 @@ $ \mathcal{F}_h $
 <use x='0' y='0' xlink:href='#eq2-g0-70'/>
 <use x='8.592754' y='1.793263' xlink:href='#eq2-g1-104'/>
 </g>
-</svg> is the set of all mesh faces (both interior and boundary faces).</p></section><section id="autotoc_md295"><h3><a href="#autotoc_md295">Discontinuous Galerkin Context</a></h3><p>In DG methods, face integrals handle:</p><ul><li><strong>Numerical fluxes</strong>: Coupling between elements</li><li><strong>Jump terms</strong>: <svg class="m-math" style="width: 7.296em; height: 1.582em; vertical-align: -0.581em;" viewBox="0 -9.630618 70.041072 15.18763">
+</svg> is the set of all mesh faces (both interior and boundary faces).</p></section><section id="autotoc_md310"><h3><a href="#autotoc_md310">Discontinuous Galerkin Context</a></h3><p>In DG methods, face integrals handle:</p><ul><li><strong>Numerical fluxes</strong>: Coupling between elements</li><li><strong>Jump terms</strong>: <svg class="m-math" style="width: 7.296em; height: 1.582em; vertical-align: -0.581em;" viewBox="0 -9.630618 70.041072 15.18763">
 <title>
 $ \int_{\mathcal{F}_h} [\![u]\!] \cdot [\![v]\!] \, ds $
 </title>
@@ -202,7 +202,7 @@ $ \int_{\mathcal{F}_h} \{\!\{u\}\!\} \cdot [\![v]\!] \, ds $
 <use x='69.348156' y='0' xlink:href='#eq4-g4-100'/>
 <use x='75.430849' y='0' xlink:href='#eq4-g4-115'/>
 </g>
-</svg></li><li><strong>Penalty terms</strong>: Interior penalty for stability</li></ul></section><section id="autotoc_md296"><h3><a href="#autotoc_md296">Usage Example</a></h3><pre class="m-code"><span class="c1">// Interior penalty DG method</span>
+</svg></li><li><strong>Penalty terms</strong>: Interior penalty for stability</li></ul></section><section id="autotoc_md311"><h3><a href="#autotoc_md311">Usage Example</a></h3><pre class="m-code"><span class="c1">// Interior penalty DG method</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">penalty</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FaceIntegral</span><span class="p">(</span><span class="n">Jump</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Jump</span><span class="p">(</span><span class="n">v</span><span class="p">));</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">consistency</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FaceIntegral</span><span class="p">(</span><span class="n">Average</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">)),</span><span class="w"> </span><span class="n">Jump</span><span class="p">(</span><span class="n">v</span><span class="p">));</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">symmetry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FaceIntegral</span><span class="p">(</span><span class="n">Jump</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Average</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">)));</span></pre><aside class="m-note m-default"><h4>See also</h4><p>InterfaceIntegral, BoundaryIntegral, Jump, Average</p></aside></section>

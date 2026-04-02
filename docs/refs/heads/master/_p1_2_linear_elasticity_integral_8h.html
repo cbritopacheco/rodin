@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin/Variational/P1/LinearElasticity/LinearElasticityIntegral.h file | Rodin</title>
+  <title>Rodin/Solid/Linear/P1/LinearElasticityIntegral.h file | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -74,14 +74,14 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_8abf735db4842a0d37da7c8b4f1d6568.html">Variational</a>/</span><span class="m-breadcrumb"><a href="dir_80838750593a9f1caedce9bf7d761a53.html">P1</a>/</span><span class="m-breadcrumb"><a href="dir_892b04a3315503e437baf33ccb797c50.html">LinearElasticity</a>/</span>LinearElasticityIntegral.h <span class="m-thin">file</span>
+          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_add7d0d1e3fa2c5fc6de951654f0f623.html">Solid</a>/</span><span class="m-breadcrumb"><a href="dir_74b98d5d5abcc704d0f5b0fa0cd92518.html">Linear</a>/</span><span class="m-breadcrumb"><a href="dir_fbb9b878a24a9bc88663bc5b6a6f016b.html">P1</a>/</span>LinearElasticityIntegral.h <span class="m-thin">file</span>
         </h1>
         <p>P1 specialization of the linear elasticity bilinear form integrator.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md418">Bilinear Form</a></li>
-            <li><a href="#autotoc_md419">Usage</a></li>
+            <li><a href="#autotoc_md219">Bilinear Form</a></li>
+            <li><a href="#autotoc_md220">Usage</a></li>
             <li>
               Reference
               <ul>
@@ -91,7 +91,7 @@
             </li>
           </ul>
         </nav>
-<p>This file provides an optimized implementation of the linear elasticity integrator for P1 vector finite element spaces.</p><section id="autotoc_md418"><h3><a href="#autotoc_md418">Bilinear Form</a></h3><p>The integrator assembles the elasticity bilinear form:</p><div class="m-math"><svg style="width: 25.289em; height: 2.819em;" viewBox="72.885432 -27.065451 242.772107 27.065451">
+<p>This file provides an optimized implementation of the linear elasticity integrator for P1 vector finite element spaces.</p><section id="autotoc_md219"><h3><a href="#autotoc_md219">Bilinear Form</a></h3><p>The integrator assembles the elasticity bilinear form:</p><div class="m-math"><svg style="width: 25.289em; height: 2.819em;" viewBox="72.885432 -27.065451 242.772107 27.065451">
 <title>
 \[
   a(\mathbf{u}, \mathbf{v}) = \int_\Omega 2\mu \, \boldsymbol{\varepsilon}(\mathbf{u}) : \boldsymbol{\varepsilon}(\mathbf{v}) + \lambda (\nabla \cdot \mathbf{u})(\nabla \cdot \mathbf{v}) \, dx
@@ -154,13 +154,13 @@
 <use x='302.922759' y='-10.793007' xlink:href='#eq1-g4-100'/>
 <use x='309.005452' y='-10.793007' xlink:href='#eq1-g4-120'/>
 </g>
-</svg></div><p>For P1 elements, this uses centroid quadrature (exact for the bilinear form) and exploits the constant gradient property of P1 basis functions.</p></section><section id="autotoc_md419"><h3><a href="#autotoc_md419">Usage</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="w"> </span><span class="n">spaceDim</span><span class="p">);</span><span class="w">  </span><span class="c1">// Vector P1 space</span>
+</svg></div><p>For P1 elements, this uses centroid quadrature (exact for the bilinear form) and exploits the constant gradient property of P1 basis functions.</p></section><section id="autotoc_md220"><h3><a href="#autotoc_md220">Usage</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="w"> </span><span class="n">spaceDim</span><span class="p">);</span><span class="w">  </span><span class="c1">// Vector P1 space</span>
 <span class="n">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="n">TestFunction</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 
 <span class="n">Real</span><span class="w"> </span><span class="n">mu</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="n">lambda</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
 <span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
-<span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LinearElasticityIntegral</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="n">lambda</span><span class="p">,</span><span class="w"> </span><span class="n">mu</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p>LinearElasticityIntegral, P1</p></aside></section>
+<span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Solid</span><span class="o">::</span><span class="n">Linear</span><span class="o">::</span><span class="n">LinearElasticityIntegral</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)(</span><span class="n">lambda</span><span class="p">,</span><span class="w"> </span><span class="n">mu</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p>LinearElasticityIntegral, P1</p></aside></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Solid::SaintVenantKirchhoff::Cache struct | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid.html">Solid</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_solid_1_1_saint_venant_kirchhoff.html">SaintVenantKirchhoff</a>::<wbr/></span>Cache <span class="m-thin">struct</span>
+          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_saint_venant_kirchhoff_8h.html">&lt;Rodin/Solid/Constitutive/SaintVenantKirchhoff.h&gt;</a></div>
+        </h1>
+        <p>Precomputed cache for the Saint-Venant-Kirchhoff law.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-attribs">Public variables</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="pub-attribs">
+          <h2><a href="#pub-attribs">Public variables</a></h2>
+          <dl class="m-doc">
+            <dt id="a81c0b7d384f357dcd47a3854864b5c5c">
+              <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; <a href="#a81c0b7d384f357dcd47a3854864b5c5c" class="m-doc-self">E</a>
+            </dt>
+            <dd>Green-Lagrange strain <svg class="m-math" style="width: 0.920em; height: 0.854em; vertical-align: -0.000em;" viewBox="0 -8.202578 8.828009 8.202578">
+<title>
+$ \mathbf{E} $
+</title>
+<defs>
+<path id='eq1-g0-69' d='M8.440349-3.227895H7.938232C7.687173-1.446575 7.244832-.514072 5.164633-.514072H3.299626V-3.969116H4.004981C5.152677-3.969116 5.272229-3.478954 5.272229-2.570361H5.774346V-5.881943H5.272229C5.272229-4.985305 5.152677-4.483188 4.004981-4.483188H3.299626V-7.627397H5.164633C6.993773-7.627397 7.388294-6.850311 7.567621-5.308095H8.069738L7.723039-8.141469H.454296V-7.627397H1.721544V-.514072H.454296V0H7.926276L8.440349-3.227895Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g0-69'/>
+</g>
+</svg>.</dd>
+            <dt id="a8c908ee9264b0fbc1b03412dcc2e05f1">
+              <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; <a href="#a8c908ee9264b0fbc1b03412dcc2e05f1" class="m-doc-self">S</a>
+            </dt>
+            <dd>Second Piola-Kirchhoff stress <svg class="m-math" style="width: 0.778em; height: 0.854em; vertical-align: -0.000em;" viewBox="0 -8.202578 7.47198 8.202578">
+<title>
+$ \mathbf{S} $
+</title>
+<defs>
+<path id='eq2-g0-83' d='M3.036613-5.260274C1.853051-5.523288 1.817186-6.38406 1.817186-6.551432C1.817186-7.161146 2.211706-7.866501 3.371357-7.866501S5.571108-7.304608 5.822167-5.738481C5.858032-5.487422 5.858032-5.475467 6.085181-5.475467C6.336239-5.475467 6.336239-5.511333 6.336239-5.786301V-8.033873C6.336239-8.261021 6.336239-8.344707 6.156912-8.344707C6.073225-8.344707 6.03736-8.332752 5.929763-8.2132L5.415691-7.627397C5.116812-7.878456 4.519054-8.344707 3.359402-8.344707C1.649813-8.344707 .74122-7.268742 .74122-5.965629C.74122-5.164633 1.171606-4.60274 1.338979-4.435367C1.960648-3.813699 2.295392-3.741968 3.53873-3.466999C4.734247-3.203985 4.877709-3.180075 5.140722-2.929016C5.296139-2.773599 5.642839-2.438854 5.642839-1.829141C5.642839-1.315068 5.391781-.37061 4.052802-.37061C3.000747-.37061 1.338979-.729265 1.243337-2.47472C1.231382-2.689913 1.231382-2.725778 .992279-2.725778C.74122-2.725778 .74122-2.689913 .74122-2.414944V-.167372C.74122 .059776 .74122 .143462 .920548 .143462C1.004234 .143462 1.016189 .131507 1.135741 .02391C1.267248-.107597 1.374844-.263014 1.673724-.561893C2.367123-.011955 3.347447 .143462 4.064757 .143462C5.929763 .143462 6.718804-1.123786 6.718804-2.391034C6.718804-3.514819 5.977584-4.590785 4.674471-4.889664L3.036613-5.260274Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g0-83'/>
+</g>
+</svg>.</dd>
+            <dt id="a9696a9102a0b839f040ae020da96ed16">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a9696a9102a0b839f040ae020da96ed16" class="m-doc-self">trE</a>
+            </dt>
+            <dd><svg class="m-math" style="width: 2.816em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 27.037312 11.955168">
+<title>
+$ \operatorname{tr}(\mathbf{E}) $
+</title>
+<defs>
+<path id='eq3-g0-69' d='M8.440349-3.227895H7.938232C7.687173-1.446575 7.244832-.514072 5.164633-.514072H3.299626V-3.969116H4.004981C5.152677-3.969116 5.272229-3.478954 5.272229-2.570361H5.774346V-5.881943H5.272229C5.272229-4.985305 5.152677-4.483188 4.004981-4.483188H3.299626V-7.627397H5.164633C6.993773-7.627397 7.388294-6.850311 7.567621-5.308095H8.069738L7.723039-8.141469H.454296V-7.627397H1.721544V-.514072H.454296V0H7.926276L8.440349-3.227895Z'/>
+<path id='eq3-g1-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq3-g1-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq3-g1-114' d='M1.996513-2.785554C1.996513-3.945205 2.47472-5.033126 3.395268-5.033126C3.490909-5.033126 3.514819-5.033126 3.56264-5.021171C3.466999-4.97335 3.275716-4.901619 3.275716-4.578829C3.275716-4.23213 3.550685-4.100623 3.741968-4.100623C3.981071-4.100623 4.220174-4.25604 4.220174-4.578829C4.220174-4.937484 3.897385-5.272229 3.383313-5.272229C2.367123-5.272229 2.020423-4.172354 1.948692-3.945205H1.936737V-5.272229L.334745-5.140722V-4.794022C1.147696-4.794022 1.243337-4.710336 1.243337-4.124533V-.884682C1.243337-.3467 1.111831-.3467 .334745-.3467V0C.669489-.02391 1.327024-.02391 1.685679-.02391C2.008468-.02391 2.857285-.02391 3.132254 0V-.3467H2.893151C2.020423-.3467 1.996513-.478207 1.996513-.908593V-2.785554Z'/>
+<path id='eq3-g1-116' d='M2.008468-4.805978H3.694147V-5.152677H2.008468V-7.352428H1.745455C1.733499-6.228643 1.303113-5.080946 .215193-5.045081V-4.805978H1.231382V-1.482441C1.231382-.155417 2.116065 .119552 2.749689 .119552C3.502864 .119552 3.897385-.621669 3.897385-1.482441V-2.163885H3.634371V-1.506351C3.634371-.645579 3.287671-.143462 2.82142-.143462C2.008468-.143462 2.008468-1.255293 2.008468-1.458531V-4.805978Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='0' y='0' xlink:href='#eq3-g1-116'/>
+<use x='4.552326' y='0' xlink:href='#eq3-g1-114'/>
+<use x='9.104652' y='0' xlink:href='#eq3-g1-40'/>
+<use x='13.656977' y='0' xlink:href='#eq3-g0-69'/>
+<use x='22.484987' y='0' xlink:href='#eq3-g1-41'/>
+</g>
+</svg></dd>
+          </dl>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

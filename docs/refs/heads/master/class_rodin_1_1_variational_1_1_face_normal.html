@@ -77,7 +77,7 @@
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>FaceNormal <span class="m-thin">class</span>
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_face_normal_8h.html">&lt;Rodin/Variational/FaceNormal.h&gt;</a></div>
         </h1>
-        <p>Unit normal vector on mesh faces.</p>
+        <p>Unit normal vector on codimension-one mesh entities.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -91,7 +91,7 @@
             </li>
           </ul>
         </nav>
-<p><a href="class_rodin_1_1_variational_1_1_face_normal.html" class="m-doc">FaceNormal</a> represents the unit normal vector on mesh faces, essential for DG methods and face integral computations. The normal orientation follows a consistent convention across the mesh.</p>
+<p><a href="class_rodin_1_1_variational_1_1_face_normal.html" class="m-doc">FaceNormal</a> represents a unit normal vector on mesh faces and is intended for face integral formulations such as DG methods. On boundary faces, the normal is oriented automatically outward from the unique adjacent cell. On interior faces, the orientation is determined by the selected trace domain.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -105,10 +105,10 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="af86adaf4b84a67a4da54af6b21fe302c">
-              <span class="m-doc-wrap-bumper"><a href="#af86adaf4b84a67a4da54af6b21fe302c" class="m-doc-self">FaceNormal</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#af86adaf4b84a67a4da54af6b21fe302c" class="m-doc">FaceNormal</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span>
             </dt>
-            <dd>Constructs the outward unit on a face.</dd>
+            <dd>Constructs a face normal field on the given mesh.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -122,6 +122,23 @@
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="af86adaf4b84a67a4da54af6b21fe302c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />FaceNormal::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af86adaf4b84a67a4da54af6b21fe302c" class="m-doc-self">FaceNormal</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span></span>
+            </h3>
+            <p>Constructs a face normal field on the given mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">mesh</td>
+                  <td>Underlying mesh supporting codimension-one entities.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="ae5f5b443e9f62be955639af23c8c2a0d"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_face_normal.html" class="m-doc">FaceNormal</a>* Rodin::<wbr />Variational::<wbr />FaceNormal::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae5f5b443e9f62be955639af23c8c2a0d" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>

@@ -169,20 +169,41 @@ $ V_h $
               <div class="m-doc-template">template&lt;class NestedDerived, class FES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_shape_function_base_3_01_nested_derived_00_098b200335f11a538dc0d8b3a17a60f0.html" class="m-doc">QuadratureRule&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;</a>
             </dt>
-            <dd>Approximation of the integral of a test shape function.</dd>
+            <dd>Local linear-form quadrature for a test shape function expression.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa5d79cb88973b769fdd1665729c03952" class="m-doc">getRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets the geometric region supported by this integrator.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a8c36f23046b7f55c776a113ec228a94a" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_face_integral.html" class="m-doc">FaceIntegral</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Creates a copy of this integrator.</dd>
+            <dd>Polymorphic copy.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="aa5d79cb88973b769fdd1665729c03952"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived, class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> Rodin::<wbr />Variational::<wbr />FaceIntegral&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;NestedDerived, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa5d79cb88973b769fdd1665729c03952" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets the geometric region supported by this integrator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Region type</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a8c36f23046b7f55c776a113ec228a94a"><div>
             <h3>
               <div class="m-doc-template">
@@ -190,12 +211,12 @@ $ V_h $
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_face_integral.html" class="m-doc">FaceIntegral</a>* Rodin::<wbr />Variational::<wbr />FaceIntegral&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;NestedDerived, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8c36f23046b7f55c776a113ec228a94a" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Creates a copy of this integrator.</p>
+            <p>Polymorphic copy.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Pointer to newly allocated copy</td>
+                  <td>Heap-allocated copy</td>
                 </tr>
               </tfoot>
             </table>

@@ -170,7 +170,7 @@ $ V_h $
               <div class="m-doc-template">template&lt;class NestedDerived, class FES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_shape_function_base_3_01_nested_derived_00_098b200335f11a538dc0d8b3a17a60f0.html" class="m-doc">QuadratureRule&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;</a>
             </dt>
-            <dd>Approximation of the integral of a test shape function.</dd>
+            <dd>Local linear-form quadrature for a test shape function expression.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -206,7 +206,7 @@ $ V_h $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#af1f3519d4152a4d6cae4ad0aa8840243" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_interface_integral.html" class="m-doc">InterfaceIntegral</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Creates a copy of this integrator.</dd>
+            <dd>Polymorphic copy.</dd>
           </dl>
         </section>
         <section>
@@ -369,12 +369,12 @@ $ \int_{\Gamma_h} f(x) \cdot A(v) d\sigma $
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_interface_integral.html" class="m-doc">InterfaceIntegral</a>* Rodin::<wbr />Variational::<wbr />InterfaceIntegral&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;&lt;NestedDerived, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af1f3519d4152a4d6cae4ad0aa8840243" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Creates a copy of this integrator.</p>
+            <p>Polymorphic copy.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Pointer to newly allocated copy</td>
+                  <td>Heap-allocated copy</td>
                 </tr>
               </tfoot>
             </table>
