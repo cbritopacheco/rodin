@@ -153,7 +153,7 @@ namespace Rodin::Variational
         const size_t order =
           std::max(lambdaOrder, muOrder) + trialfe.getOrder() + testfe.getOrder();
 
-        m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
+        m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
         m_quadrature = &polytope.getQuadrature(*m_qf);
 
         m_matrix.resize(

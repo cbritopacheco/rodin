@@ -1,7 +1,7 @@
 #ifndef RODIN_VARIATIONAL_H1_QUADRATURERULE_H
 #define RODIN_VARIATIONAL_H1_QUADRATURERULE_H
 
-#include "Rodin/QF/GenericPolytopeQuadrature.h"
+#include "Rodin/QF/PolytopeQuadratureFormula.h"
 
 #include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/Math/Common.h"
@@ -116,7 +116,7 @@ namespace Rodin::Variational
           m_order    = order;
           m_geometry = geometry;
 
-          m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
+          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -323,7 +323,7 @@ namespace Rodin::Variational
           m_order    = order;
           m_geometry = geometry;
 
-          m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
+          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -544,7 +544,7 @@ namespace Rodin::Variational
           m_order    = order;
           m_geometry = geometry;
 
-          m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
+          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -810,7 +810,7 @@ namespace Rodin::Variational
           m_order    = order;
           m_geometry = geometry;
 
-          m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
+          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -1083,7 +1083,7 @@ namespace Rodin::Variational
           m_order    = order;
           m_geometry = geometry;
 
-          m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
+          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -1403,7 +1403,7 @@ namespace Rodin::Variational
           m_order    = order;
           m_geometry = geometry;
 
-          m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
+          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -1631,7 +1631,7 @@ namespace Rodin::Variational
           m_order    = order;
           m_geometry = geometry;
 
-          m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
+          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -1903,7 +1903,7 @@ namespace Rodin::Variational
           m_order    = order;
           m_geometry = geometry;
 
-          m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
+          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -2193,7 +2193,7 @@ namespace Rodin::Variational
           m_order    = order;
           m_geometry = geometry;
 
-          m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
+          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -2588,7 +2588,7 @@ namespace Rodin::Variational
           m_order = order;
           m_geometry = geometry;
 
-          m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
+          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -2915,7 +2915,7 @@ namespace Rodin::Variational
           m_order    = order;
           m_geometry = geometry;
 
-          m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
+          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);
@@ -3278,7 +3278,7 @@ namespace Rodin::Variational
           m_order    = order;
           m_geometry = geometry;
 
-          m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
+          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
         }
 
         assert(m_qf);

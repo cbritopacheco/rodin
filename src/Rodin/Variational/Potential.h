@@ -281,7 +281,7 @@ namespace Rodin::Variational
       //     for (auto it = mesh.getCell(); it; ++it)
       //     {
       //       const auto& polytope = *it;
-      //       const QF::GenericPolytopeQuadrature qf(polytope.getGeometry());
+      //       const QF::PolytopeQuadratureFormula qf(polytope.getGeometry());
       //       for (size_t i = 0; i < qf.getSize(); i++)
       //       {
       //         const Geometry::Point y(polytope, qf.getPoint(i));

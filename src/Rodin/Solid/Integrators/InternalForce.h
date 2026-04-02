@@ -34,7 +34,7 @@
 #include "Rodin/Variational/GridFunction.h"
 #include "Rodin/Variational/LinearFormIntegrator.h"
 #include "Rodin/Variational/TestFunction.h"
-#include "Rodin/QF/GenericPolytopeQuadrature.h"
+#include "Rodin/QF/PolytopeQuadratureFormula.h"
 #include "Rodin/Geometry/Point.h"
 
 #include "Rodin/Solid/Kinematics/KinematicState.h"
@@ -163,7 +163,7 @@ namespace Rodin::Solid
         const size_t effectiveOrder = (m_quadOrder > 0)
           ? m_quadOrder
           : 2 * fe.getOrder();
-        const auto& qf = QF::GenericPolytopeQuadrature::get(effectiveOrder, polytope.getGeometry());
+        const auto& qf = QF::PolytopeQuadratureFormula::get(effectiveOrder, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
         const size_t nqp = quadrature.getSize();
 

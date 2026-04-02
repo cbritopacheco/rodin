@@ -9,7 +9,7 @@
 #ifndef RODIN_SOLID_LINEAR_LINEARELASTICITYINTEGRAL_H
 #define RODIN_SOLID_LINEAR_LINEARELASTICITYINTEGRAL_H
 
-#include "Rodin/QF/GenericPolytopeQuadrature.h"
+#include "Rodin/QF/PolytopeQuadratureFormula.h"
 #include "Rodin/Geometry/PolytopeQuadrature.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Variational/Function.h"
@@ -174,7 +174,7 @@ namespace Rodin::Variational
         const size_t order =
           std::max(lambdaOrder, muOrder) + trialfe.getOrder() + testfe.getOrder();
 
-        m_qf = &QF::GenericPolytopeQuadrature::get(order, geometry);
+        m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
         m_quadrature = &polytope.getQuadrature(*m_qf);
 
         m_matrix.resize(

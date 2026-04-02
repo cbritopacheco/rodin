@@ -9,14 +9,14 @@ set(RodinQF_HEADERS
   Centroid.h
   GaussLegendre.h
   GrundmannMoller.h
-  GenericPolytopeQuadrature.h
+  PolytopeQuadratureFormula.h
 )
 
 set(RodinQF_SRCS
   Centroid.cpp
   GaussLegendre.cpp
   GrundmannMoller.cpp
-  GenericPolytopeQuadrature.cpp
+  PolytopeQuadratureFormula.cpp
 )
 
 add_library(RodinQF
