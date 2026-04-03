@@ -52,14 +52,14 @@ namespace Rodin::Variational
    */
   template <class LHSDerived, class RHSDerived>
   class EQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>> final
-    : public FunctionBase<EQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
+    : public BooleanFunctionBase<EQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:
       using LHSType = FunctionBase<LHSDerived>;
 
       using RHSType = FunctionBase<RHSDerived>;
 
-      using Parent = FunctionBase<EQ<LHSType, RHSType>>;
+      using Parent = BooleanFunctionBase<EQ<LHSType, RHSType>>;
 
       EQ(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())

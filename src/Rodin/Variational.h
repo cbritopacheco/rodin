@@ -42,6 +42,7 @@
 #include "Variational/Conjugate.h"
 
 #include "Variational/EQ.h"
+#include "Variational/NEQ.h"
 #include "Variational/GT.h"
 #include "Variational/LT.h"
 #include "Variational/GEQ.h"
