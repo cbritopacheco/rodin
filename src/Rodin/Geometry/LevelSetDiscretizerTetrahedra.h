@@ -135,7 +135,6 @@ namespace Rodin::Geometry
         RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 3, 2);
         RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 3, 1);
         RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 2, 1);
-        RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 1, 2);
         RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 1, 0);
 
         static constexpr Index INVALID = std::numeric_limits<Index>::max();
@@ -836,100 +835,6 @@ namespace Rodin::Geometry
         }
 
         // --------------------------------------------------------------------
-        // Global face-state smoothing heuristic:
-        // exact split -> simplified/whole where local split is fragile and
-        // surrounded by non-split neighbors, to avoid isolated pointy remnants.
-        // --------------------------------------------------------------------
-        auto faceArea = [&](Index a, Index b, Index c) -> long double
-        {
-          const auto A = outVerts[a];
-          const auto B = outVerts[b];
-          const auto C = outVerts[c];
-          return (long double) ((B - A).cross(C - A)).norm() / 2.0L;
-        };
-
-        auto minEdgeInTris = [&](const std::vector<Tri>& tris) -> long double
-        {
-          long double m = std::numeric_limits<long double>::infinity();
-          for (const auto& t : tris)
-          {
-            m = std::min(m, edgeLen(t[0], t[1]));
-            m = std::min(m, edgeLen(t[1], t[2]));
-            m = std::min(m, edgeLen(t[2], t[0]));
-          }
-          if (m == std::numeric_limits<long double>::infinity())
-            return 0.0L;
-          return m;
-        };
-
-        auto splitArea = [&](const std::vector<Tri>& tris) -> long double
-        {
-          long double a = 0.0L;
-          for (const auto& t : tris)
-            a += triangleArea(t[0], t[1], t[2]);
-          return a;
-        };
-
-        for (int pass = 0; pass < 3; ++pass)
-        {
-          bool changed = false;
-          for (Index fid = 0; fid < nf; ++fid)
-          {
-            auto& fr = faceRestr[(size_t)fid];
-            if (fr.kind != FaceRestriction::Kind::Split)
-              continue;
-
-            const auto& fv = conn.getPolytope(2, fid);
-            const long double A = faceArea(fv(0), fv(1), fv(2));
-            if (!(A > 0.0L))
-              continue;
-
-            const long double negA = splitArea(fr.neg);
-            const long double posA = splitArea(fr.pos);
-            const long double frac = negA / std::max<long double>(1e-30L, negA + posA);
-            const long double minE = std::min(minEdgeInTris(fr.neg), minEdgeInTris(fr.pos));
-            const long double scaledEdge = minE / std::sqrt(A);
-
-            int splitNbr = 0;
-            const auto& eids = conn.getIncidence({2, 1}, fid);
-            for (const auto eid : eids)
-            {
-              const auto& nfaces = conn.getIncidence({1, 2}, eid);
-              for (const auto nfid : nfaces)
-              {
-                if (nfid == fid) continue;
-                if (faceRestr[(size_t)nfid].kind == FaceRestriction::Kind::Split)
-                  splitNbr++;
-              }
-            }
-
-            const bool fragile =
-              (scaledEdge < 2e-3L) ||
-              (frac < 2e-3L) || (frac > 1.0L - 2e-3L);
-            const bool isolated = (splitNbr <= 1);
-
-            if (fragile && isolated)
-            {
-              fr.neg.clear();
-              fr.pos.clear();
-              if (frac >= 0.5L)
-              {
-                fr.kind = FaceRestriction::Kind::WholeNegative;
-                triPush(fr.neg, fv(0), fv(1), fv(2));
-              }
-              else
-              {
-                fr.kind = FaceRestriction::Kind::WholePositive;
-                triPush(fr.pos, fv(0), fv(1), fv(2));
-              }
-              changed = true;
-            }
-          }
-          if (!changed)
-            break;
-        }
-
-        // --------------------------------------------------------------------
         // Cell patterns
         // --------------------------------------------------------------------
         struct CellPattern
@@ -1164,7 +1069,8 @@ namespace Rodin::Geometry
               std::vector<Tet>& bestTets,
               CandidateScore& bestScore,
               const std::vector<Tri>& exactIface,
-              long double neighborPenalty) -> bool
+              long double neighborPenalty,
+              long double minQuality) -> bool
         {
           bestTets.clear();
           bestScore = CandidateScore{};
@@ -1232,7 +1138,7 @@ namespace Rodin::Geometry
               return;
 
             const auto q = candidateQuality(cand);
-            if (q.first < this->getMinimumQuality())
+            if (q.first < minQuality)
               return;
 
             const auto exactStats = interfaceStats(exactIface);
@@ -1372,8 +1278,18 @@ namespace Rodin::Geometry
                 CandidateScore score;
                 std::vector<Tri> exactIface;
                 triPush(exactIface, iface[0], iface[1], iface[2]);
-                if (tryBestPrismFillExhaustive(
-                      u0, u1, u2, p0, p1, p2, posBoundary, best, score, exactIface, 0.0L))
+                bool ok = tryBestPrismFillExhaustive(
+                  u0, u1, u2, p0, p1, p2, posBoundary, best, score, exactIface,
+                  0.0L, this->getMinimumQuality());
+                if (!ok)
+                {
+                  // Tier-2 fallback before coning: keep exact topology but relax
+                  // the strict quality gate to avoid hanging entities.
+                  ok = tryBestPrismFillExhaustive(
+                    u0, u1, u2, p0, p1, p2, posBoundary, best, score, exactIface,
+                    1e-6L, 0.0L);
+                }
+                if (ok)
                 {
                   emitTet(v[(size_t)lone], p0, p1, p2, cp.negAttr, SideNegative);
                   emitTetList(best, cp.posAttr, SidePositive);
@@ -1394,8 +1310,16 @@ namespace Rodin::Geometry
                 CandidateScore score;
                 std::vector<Tri> exactIface;
                 triPush(exactIface, iface[0], iface[1], iface[2]);
-                if (tryBestPrismFillExhaustive(
-                      u0, u1, u2, p0, p1, p2, negBoundary, best, score, exactIface, 0.0L))
+                bool ok = tryBestPrismFillExhaustive(
+                  u0, u1, u2, p0, p1, p2, negBoundary, best, score, exactIface,
+                  0.0L, this->getMinimumQuality());
+                if (!ok)
+                {
+                  ok = tryBestPrismFillExhaustive(
+                    u0, u1, u2, p0, p1, p2, negBoundary, best, score, exactIface,
+                    1e-6L, 0.0L);
+                }
+                if (ok)
                 {
                   emitTet(v[(size_t)lone], p0, p1, p2, cp.posAttr, SidePositive);
                   emitTetList(best, cp.negAttr, SideNegative);
@@ -1486,7 +1410,8 @@ namespace Rodin::Geometry
                   negCand,
                   negScore,
                   ifaceOptions[opt],
-                  coherencePenalty);
+                  coherencePenalty,
+                  this->getMinimumQuality());
 
                 std::vector<Tet> posCand;
                 CandidateScore posScore;
@@ -1497,7 +1422,8 @@ namespace Rodin::Geometry
                   posCand,
                   posScore,
                   ifaceOptions[opt],
-                  coherencePenalty);
+                  coherencePenalty,
+                  this->getMinimumQuality());
 
                 if (negOK && posOK)
                 {
@@ -1516,6 +1442,52 @@ namespace Rodin::Geometry
                     bestNeg = std::move(negCand);
                     bestPos = std::move(posCand);
                     bestScore = cellScore;
+                  }
+                }
+              }
+
+              if (!anyValid)
+              {
+                for (int opt = 0; opt < 3; ++opt)
+                {
+                  std::vector<Tri> negBoundary = negFaceBdry;
+                  std::vector<Tri> posBoundary = posFaceBdry;
+                  negBoundary.insert(negBoundary.end(),
+                                     ifaceOptions[opt].begin(), ifaceOptions[opt].end());
+                  posBoundary.insert(posBoundary.end(),
+                                     ifaceOptions[opt].begin(), ifaceOptions[opt].end());
+
+                  std::vector<Tet> negCand, posCand;
+                  CandidateScore negScore, posScore;
+                  const long double coherencePenalty =
+                    (opt == 0 ? 1e-6L : (opt == 1 ? 1e-5L : 1e-4L));
+
+                  const bool negOK = tryBestPrismFillExhaustive(
+                    n0, a, b, n1, c, d,
+                    negBoundary, negCand, negScore, ifaceOptions[opt],
+                    coherencePenalty, 0.0L);
+                  const bool posOK = tryBestPrismFillExhaustive(
+                    p0, a, c, p1, b, d,
+                    posBoundary, posCand, posScore, ifaceOptions[opt],
+                    coherencePenalty, 0.0L);
+
+                  if (negOK && posOK)
+                  {
+                    CandidateScore cellScore;
+                    cellScore.qmin = std::min(negScore.qmin, posScore.qmin);
+                    cellScore.qavg = 0.5L * (negScore.qavg + posScore.qavg);
+                    cellScore.fidelityPenalty = negScore.fidelityPenalty + posScore.fidelityPenalty;
+                    cellScore.shortEdgePenalty = negScore.shortEdgePenalty + posScore.shortEdgePenalty;
+                    cellScore.smallTriPenalty = negScore.smallTriPenalty + posScore.smallTriPenalty;
+                    cellScore.jaggedPenalty = negScore.jaggedPenalty + posScore.jaggedPenalty;
+                    cellScore.neighborPenalty = negScore.neighborPenalty + posScore.neighborPenalty;
+                    if (!anyValid || betterScore(cellScore, bestScore))
+                    {
+                      anyValid = true;
+                      bestNeg = std::move(negCand);
+                      bestPos = std::move(posCand);
+                      bestScore = cellScore;
+                    }
                   }
                 }
               }
