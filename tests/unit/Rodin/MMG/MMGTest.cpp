@@ -954,10 +954,12 @@ namespace Rodin::Tests::Unit
     parentMesh = parentMesh.UniformGrid(Polytope::Type::Triangle, { 3, 3 });
     mesh = std::move(parentMesh);
 
-    // After parent assignment, mesh topology changes but corners/ridges
-    // are not cleared by the Parent move op — they persist from before.
-    // This is the actual behavior we document.
+    // After parent assignment, topology changes and MMG metadata is cleared.
     EXPECT_EQ(mesh.getVertexCount(), 9);
+    EXPECT_EQ(mesh.getCorners().size(), 0);
+    EXPECT_EQ(mesh.getRidges().size(), 0);
+    EXPECT_EQ(mesh.getRequiredVertices().size(), 0);
+    EXPECT_EQ(mesh.getRequiredEdges().size(), 0);
   }
 
   TEST(Rodin_MMG_Mesh, IsSurface)

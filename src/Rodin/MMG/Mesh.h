@@ -270,9 +270,23 @@ namespace Rodin::MMG
         return *this;
       }
 
+      /**
+       * @brief Copy assignment is deleted.
+       *
+       * Parent @ref Geometry::Mesh<Context::Local> deletes copy assignment.
+       */
+      Mesh& operator=(const Mesh& other) = delete;
+
+      /**
+       * @brief Move-assigns from a parent mesh, clearing MMG metadata.
+       */
       Mesh& operator=(Parent&& other)
       {
         Parent::operator=(std::move(other));
+        m_cornerIndex.clear();
+        m_requiredVertexIndex.clear();
+        m_ridgeIndex.clear();
+        m_requiredEdgeIndex.clear();
         return *this;
       }
 

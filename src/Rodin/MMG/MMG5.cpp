@@ -269,11 +269,11 @@ namespace Rodin::MMG
       dst->info.invmat.lookup = nullptr;
 
     // char* : mesh->namein
-    MMG5_SAFE_CALLOC(dst->namein, std::strlen(src->namein), char, /* No op */);
+    MMG5_SAFE_CALLOC(dst->namein, std::strlen(src->namein) + 1, char, /* No op */);
     std::strcpy(dst->namein, src->namein);
 
     // char* : mesh->nameout
-    MMG5_SAFE_CALLOC(dst->nameout, std::strlen(src->nameout), char, /* No op */);
+    MMG5_SAFE_CALLOC(dst->nameout, std::strlen(src->nameout) + 1, char, /* No op */);
     std::strcpy(dst->nameout, src->nameout);
   }
 
