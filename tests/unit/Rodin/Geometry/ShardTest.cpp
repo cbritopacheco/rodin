@@ -4,6 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <set>
+
 #include <gtest/gtest.h>
 
 #include <Rodin/Geometry.h>
@@ -980,5 +982,187 @@ namespace Rodin::Tests::Unit
     const auto& cmap = shard.getPolytopeMap(2);
     EXPECT_EQ(cmap.left[t0], 0u);
     EXPECT_EQ(cmap.left[q0], 1u);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Shard::Builder — Parent mode: attribute preservation
+  // ---------------------------------------------------------------------------
+
+  /**
+   * @brief Tests that Builder::include() preserves entity attributes from the
+   * parent mesh after shard finalization.
+   */
+  TEST(Rodin_Geometry_Shard, Builder_ParentMode_AttributePreservation)
+  {
+    constexpr size_t sdim = 2;
+
+    Mesh<Context::Local> mesh =
+      Mesh<Context::Local>::Builder()
+        .initialize(sdim)
+        .nodes(4)
+        .vertex({0, 0})
+        .vertex({1, 0})
+        .vertex({0, 1})
+        .vertex({1, 1})
+        .polytope(Polytope::Type::Triangle, {0, 1, 2})
+        .polytope(Polytope::Type::Triangle, {1, 3, 2})
+        .finalize();
+
+    const size_t D = mesh.getDimension();
+
+    // Set distinct attributes on each cell in the parent mesh
+    mesh.setAttribute({D, 0}, 10);
+    mesh.setAttribute({D, 1}, 20);
+
+    mesh.getConnectivity().compute(D, 0);
+
+    // Build a shard including all entities as Owned
+    Shard::Builder sb;
+    sb.initialize(mesh);
+    for (Index v = 0; v < mesh.getVertexCount(); v++)
+      sb.include({0, v}, Shard::State::Owned);
+    for (Index c = 0; c < mesh.getCellCount(); c++)
+      sb.include({D, c}, Shard::State::Owned);
+
+    Shard shard = sb.finalize();
+
+    EXPECT_EQ(shard.getCellCount(), 2u);
+
+    // Use the polytope map to find which local cell corresponds to each parent cell
+    const auto& cmap = shard.getPolytopeMap(D);
+    for (Index parentCell = 0; parentCell < mesh.getCellCount(); parentCell++)
+    {
+      auto it = cmap.right.find(parentCell);
+      ASSERT_NE(it, cmap.right.end());
+      Index localCell = it->second;
+
+      auto parentAttr = mesh.getAttribute(D, parentCell);
+      auto shardAttr  = shard.getAttribute(D, localCell);
+
+      ASSERT_TRUE(parentAttr.has_value());
+      ASSERT_TRUE(shardAttr.has_value());
+      EXPECT_EQ(shardAttr.value(), parentAttr.value());
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Shard::Builder — Parent mode: connectivity preservation
+  // ---------------------------------------------------------------------------
+
+  /**
+   * @brief Tests that shard-local cell-to-vertex connectivity matches the
+   * parent mesh connectivity when mapped through the PolytopeMap.
+   */
+  TEST(Rodin_Geometry_Shard, Builder_ParentMode_ConnectivityPreservation)
+  {
+    constexpr size_t sdim = 2;
+
+    Mesh<Context::Local> mesh =
+      Mesh<Context::Local>::Builder()
+        .initialize(sdim)
+        .nodes(4)
+        .vertex({0, 0})
+        .vertex({1, 0})
+        .vertex({0, 1})
+        .vertex({1, 1})
+        .polytope(Polytope::Type::Triangle, {0, 1, 2})
+        .polytope(Polytope::Type::Triangle, {1, 3, 2})
+        .finalize();
+
+    const size_t D = mesh.getDimension();
+    mesh.getConnectivity().compute(D, 0);
+
+    // Build shard including all entities as Owned
+    Shard::Builder sb;
+    sb.initialize(mesh);
+    for (Index v = 0; v < mesh.getVertexCount(); v++)
+      sb.include({0, v}, Shard::State::Owned);
+    for (Index c = 0; c < mesh.getCellCount(); c++)
+      sb.include({D, c}, Shard::State::Owned);
+
+    Shard shard = sb.finalize();
+    shard.getConnectivity().compute(D, 0);
+
+    EXPECT_EQ(shard.getCellCount(), 2u);
+
+    const auto& parentCellToVertex = mesh.getConnectivity().getIncidence(D, 0);
+    const auto& shardCellToVertex  = shard.getConnectivity().getIncidence(D, 0);
+    const auto& cmap = shard.getPolytopeMap(D);
+    const auto& vmap = shard.getPolytopeMap(0);
+
+    for (Index localCell = 0; localCell < shard.getCellCount(); localCell++)
+    {
+      Index parentCell = cmap.left[localCell];
+
+      // Collect parent vertex set for this cell
+      const auto& parentVerts = parentCellToVertex.at(parentCell);
+
+      // Collect shard vertex set, mapped back to parent indices
+      const auto& shardVerts = shardCellToVertex.at(localCell);
+
+      ASSERT_EQ(shardVerts.size(), parentVerts.size());
+
+      // Convert shard-local vertex indices to parent indices and compare as sets
+      std::set<Index> parentSet(parentVerts.begin(), parentVerts.end());
+      std::set<Index> mappedSet;
+      for (const Index sv : shardVerts)
+        mappedSet.insert(vmap.left[sv]);
+
+      EXPECT_EQ(mappedSet, parentSet);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Shard::Builder — Direct mode with mixed 3D (tetrahedron + wedge)
+  // ---------------------------------------------------------------------------
+
+  /**
+   * @brief Tests direct-mode construction of a mixed 3D shard containing one
+   * tetrahedron and one wedge that share a triangular face.
+   */
+  TEST(Rodin_Geometry_Shard, Builder_DirectMode_Mixed3D)
+  {
+    Shard::Builder sb;
+    sb.initialize(3, 3);
+
+    // Shared face vertices: v0, v1, v2
+    Index v0 = sb.vertex(0, Math::SpatialPoint{{0.0, 0.0, 0.0}}, Shard::State::Owned);
+    Index v1 = sb.vertex(1, Math::SpatialPoint{{1.0, 0.0, 0.0}}, Shard::State::Owned);
+    Index v2 = sb.vertex(2, Math::SpatialPoint{{0.0, 1.0, 0.0}}, Shard::State::Owned);
+
+    // Tetrahedron apex
+    Index v3 = sb.vertex(3, Math::SpatialPoint{{0.3, 0.3, -1.0}}, Shard::State::Owned);
+
+    // Wedge top-triangle vertices
+    Index v4 = sb.vertex(4, Math::SpatialPoint{{0.0, 0.0, 1.0}}, Shard::State::Owned);
+    Index v5 = sb.vertex(5, Math::SpatialPoint{{1.0, 0.0, 1.0}}, Shard::State::Owned);
+    Index v6 = sb.vertex(6, Math::SpatialPoint{{0.0, 1.0, 1.0}}, Shard::State::Owned);
+
+    // Tetrahedron: (v0, v1, v2, v3)
+    IndexArray tetVerts(4);
+    tetVerts << v0, v1, v2, v3;
+    Index t0 = sb.polytope(3, 0, Polytope::Type::Tetrahedron, tetVerts, Shard::State::Owned);
+
+    // Wedge vertex ordering: bottom triangle (v0, v1, v2), then top triangle (v4, v5, v6)
+    IndexArray wedgeVerts(6);
+    wedgeVerts << v0, v1, v2, v4, v5, v6;
+    Index w0 = sb.polytope(3, 1, Polytope::Type::Wedge, wedgeVerts, Shard::State::Owned);
+
+    Shard shard = sb.finalize();
+
+    EXPECT_EQ(shard.getVertexCount(), 7u);
+    EXPECT_EQ(shard.getCellCount(), 2u);
+    EXPECT_EQ(shard.getDimension(), 3u);
+    EXPECT_TRUE(shard.isOwned(3, t0));
+    EXPECT_TRUE(shard.isOwned(3, w0));
+
+    // Verify all vertices are owned
+    for (Index vi = 0; vi < shard.getVertexCount(); vi++)
+      EXPECT_TRUE(shard.isOwned(0, vi));
+
+    // Polytope map: global indices should match
+    const auto& cmap = shard.getPolytopeMap(3);
+    EXPECT_EQ(cmap.left[t0], 0u);
+    EXPECT_EQ(cmap.left[w0], 1u);
   }
 }
