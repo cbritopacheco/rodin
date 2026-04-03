@@ -81,6 +81,97 @@ namespace Rodin::MMG
            */
           Builder& operator=(Builder&& other);
 
+          // ----------------------------------------------------------------
+          // Forwarding overrides of Parent::Builder methods.
+          // These return MMG::Mesh::Builder& so that method chaining can
+          // reach MMG-specific setters (corner, ridge, etc.) after calling
+          // any inherited builder method.
+          // ----------------------------------------------------------------
+
+          /** @copydoc Parent::Builder::reserve */
+          Builder& reserve(size_t d, size_t count)
+          {
+            Parent::Builder::reserve(d, count);
+            return *this;
+          }
+
+          /** @copydoc Parent::Builder::initialize */
+          Builder& initialize(size_t sdim)
+          {
+            Parent::Builder::initialize(sdim);
+            return *this;
+          }
+
+          /** @copydoc Parent::Builder::nodes */
+          Builder& nodes(size_t n)
+          {
+            Parent::Builder::nodes(n);
+            return *this;
+          }
+
+          /** @copydoc Parent::Builder::vertex(std::initializer_list<Real>) */
+          Builder& vertex(std::initializer_list<Real> l)
+          {
+            Parent::Builder::vertex(l);
+            return *this;
+          }
+
+          /** @copydoc Parent::Builder::vertex(const Real*) */
+          Builder& vertex(const Real* data)
+          {
+            Parent::Builder::vertex(data);
+            return *this;
+          }
+
+          /** @copydoc Parent::Builder::vertex(const Math::SpatialPoint&) */
+          Builder& vertex(const Math::SpatialPoint& x)
+          {
+            Parent::Builder::vertex(x);
+            return *this;
+          }
+
+          /** @copydoc Parent::Builder::vertex(const Real (&)[Size]) */
+          template <size_t Size>
+          Builder& vertex(const Real (&data)[Size])
+          {
+            Parent::Builder::vertex(data);
+            return *this;
+          }
+
+          /** @copydoc Parent::Builder::attribute */
+          Builder& attribute(
+              const std::pair<size_t, Index>& p,
+              const Optional<Geometry::Attribute>& attr)
+          {
+            Parent::Builder::attribute(p, attr);
+            return *this;
+          }
+
+          /** @copydoc Parent::Builder::polytope(Polytope::Type, std::initializer_list<Index>) */
+          Builder& polytope(Geometry::Polytope::Type t, std::initializer_list<Index> vs)
+          {
+            Parent::Builder::polytope(t, vs);
+            return *this;
+          }
+
+          /** @copydoc Parent::Builder::polytope(Polytope::Type, const IndexArray&) */
+          Builder& polytope(Geometry::Polytope::Type t, const IndexArray& vs)
+          {
+            Parent::Builder::polytope(t, vs);
+            return *this;
+          }
+
+          /** @copydoc Parent::Builder::polytope(Polytope::Type, IndexArray&&) */
+          Builder& polytope(Geometry::Polytope::Type t, IndexArray&& vs)
+          {
+            Parent::Builder::polytope(t, std::move(vs));
+            return *this;
+          }
+
+          // ----------------------------------------------------------------
+          // MMG-specific builder methods
+          // ----------------------------------------------------------------
+
           /**
            * @brief Marks a vertex as a corner.
            * @param[in] vertexIdx Vertex index in the mesh.
@@ -179,9 +270,23 @@ namespace Rodin::MMG
         return *this;
       }
 
+      /**
+       * @brief Copy assignment is deleted.
+       *
+       * Parent @ref Geometry::Mesh<Context::Local> deletes copy assignment.
+       */
+      Mesh& operator=(const Mesh& other) = delete;
+
+      /**
+       * @brief Move-assigns from a parent mesh, clearing MMG metadata.
+       */
       Mesh& operator=(Parent&& other)
       {
         Parent::operator=(std::move(other));
+        m_cornerIndex.clear();
+        m_requiredVertexIndex.clear();
+        m_ridgeIndex.clear();
+        m_requiredEdgeIndex.clear();
         return *this;
       }
 
