@@ -160,7 +160,7 @@ namespace Rodin::MMG
       dst->tetra = nullptr;
 
     // MMG5_pxTetra : mesh->xtetra
-    if (src->tetra)
+    if (src->xtetra)
     {
       MMG5_SAFE_CALLOC(dst->xtetra, src->xt + 1, MMG5_xTetra, /* No op */);
       std::copy(src->xtetra, src->xtetra + src->xt + 1, dst->xtetra);
@@ -269,11 +269,11 @@ namespace Rodin::MMG
       dst->info.invmat.lookup = nullptr;
 
     // char* : mesh->namein
-    MMG5_SAFE_CALLOC(dst->namein, std::strlen(src->namein), char, /* No op */);
+    MMG5_SAFE_CALLOC(dst->namein, std::strlen(src->namein) + 1, char, /* No op */);
     std::strcpy(dst->namein, src->namein);
 
     // char* : mesh->nameout
-    MMG5_SAFE_CALLOC(dst->nameout, std::strlen(src->nameout), char, /* No op */);
+    MMG5_SAFE_CALLOC(dst->nameout, std::strlen(src->nameout) + 1, char, /* No op */);
     std::strcpy(dst->nameout, src->nameout);
   }
 
@@ -814,7 +814,7 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
     if (src->namein)
     {
       auto nameInLength = std::strlen(src->namein);
-      MMG5_SAFE_CALLOC(dst->namein, nameInLength, char,
+      MMG5_SAFE_CALLOC(dst->namein, nameInLength + 1, char,
           MMG5Exception(__func__) << "Failed to allocate memory for the MMG5_pSol->namein." << Alert::Raise);
       std::memcpy(dst->namein, src->namein, nameInLength + 1);
     }
@@ -826,7 +826,7 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
     if (src->nameout)
     {
       auto nameOutLength = std::strlen(src->nameout);
-      MMG5_SAFE_CALLOC(dst->nameout, nameOutLength, char,
+      MMG5_SAFE_CALLOC(dst->nameout, nameOutLength + 1, char,
           MMG5Exception(__func__) << "Failed to allocate memory for the MMG5_pSol->nameout." << Alert::Raise);
       std::memcpy(dst->nameout, src->nameout, nameOutLength + 1);
     }
