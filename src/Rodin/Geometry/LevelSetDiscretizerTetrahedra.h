@@ -1345,24 +1345,17 @@ namespace Rodin::Geometry
               const Index p2 = cutLocal(localEdgeId, lone, others[2]);
 
               Tri iface{{ p0, p1, p2 }};
-              const Tet fullCell{{v[0], v[1], v[2], v[3]}};
-              const long double fullVol = tetAbsVolume(fullCell);
-              const long double loneVol = tetAbsVolume(Tet{{v[(size_t)lone], p0, p1, p2}});
-              const long double negVol = loneIsNeg ? loneVol : std::max<long double>(0.0L, fullVol - loneVol);
-              const bool keepNegative = (negVol * 2.0L >= fullVol);
-              const auto fallbackWhole = [&]()
-              {
-                if (keepNegative)
-                  emitTet(v[0], v[1], v[2], v[3], cp.negAttr, SideNegative);
-                else
-                  emitTet(v[0], v[1], v[2], v[3], cp.posAttr, SidePositive);
-              };
 
               const long double loneQ =
                 m_quality_metric(outVerts, Tet{{v[(size_t)lone], p0, p1, p2}});
               if (!(loneQ >= this->getMinimumQuality()))
               {
-                fallbackWhole();
+                std::vector<Tri> negBoundary = negFaceBdry;
+                std::vector<Tri> posBoundary = posFaceBdry;
+                triPush(negBoundary, iface[0], iface[1], iface[2]);
+                triPush(posBoundary, iface[0], iface[1], iface[2]);
+                conePolyhedron(negBoundary, cp.negAttr, SideNegative);
+                conePolyhedron(posBoundary, cp.posAttr, SidePositive);
                 break;
               }
 
@@ -1386,7 +1379,7 @@ namespace Rodin::Geometry
                   emitTetList(best, cp.posAttr, SidePositive);
                 }
                 else
-                  fallbackWhole();
+                  conePolyhedron(posBoundary, cp.posAttr, SidePositive);
               }
               else
               {
@@ -1408,7 +1401,7 @@ namespace Rodin::Geometry
                   emitTetList(best, cp.negAttr, SideNegative);
                 }
                 else
-                  fallbackWhole();
+                  conePolyhedron(negBoundary, cp.negAttr, SideNegative);
               }
               break;
             }
@@ -1534,13 +1527,15 @@ namespace Rodin::Geometry
               }
               else
               {
-                const Tet fullCell{{v[0], v[1], v[2], v[3]}};
-                const long double fullVol = tetAbsVolume(fullCell);
-                const long double negVol = prismVolumeFromReferenceFill(n0, a, b, n1, c, d);
-                if (negVol * 2.0L >= fullVol)
-                  emitTet(v[0], v[1], v[2], v[3], cp.negAttr, SideNegative);
-                else
-                  emitTet(v[0], v[1], v[2], v[3], cp.posAttr, SidePositive);
+                std::vector<Tri> negBoundary = negFaceBdry;
+                std::vector<Tri> posBoundary = posFaceBdry;
+                negBoundary.insert(negBoundary.end(),
+                                   ifaceOptions[0].begin(), ifaceOptions[0].end());
+                posBoundary.insert(posBoundary.end(),
+                                   ifaceOptions[0].begin(), ifaceOptions[0].end());
+
+                conePolyhedron(negBoundary, cp.negAttr, SideNegative);
+                conePolyhedron(posBoundary, cp.posAttr, SidePositive);
               }
               break;
             }
