@@ -60,6 +60,7 @@ namespace Rodin::Geometry
         : Parent(ls),
           m_sign_tolerance(1e-12),
           m_snap_tolerance(1e-12),
+          m_min_quality(1e-10L),
           m_quality_metric(q ? std::move(q) : defaultQualityMetric())
       {}
 
@@ -81,6 +82,12 @@ namespace Rodin::Geometry
         return *this;
       }
 
+      LevelSetDiscretizerTetrahedra& setMinimumQuality(long double qmin)
+      {
+        m_min_quality = std::max(0.0L, qmin);
+        return *this;
+      }
+
       Real getSignTolerance() const
       {
         return m_sign_tolerance;
@@ -94,6 +101,11 @@ namespace Rodin::Geometry
       const QualityMetric& getQualityMetric() const
       {
         return m_quality_metric;
+      }
+
+      long double getMinimumQuality() const
+      {
+        return m_min_quality;
       }
 
       LevelSetDiscretizerTetrahedra& setOld(size_t d, const Optional<Attribute>& a)
@@ -123,6 +135,7 @@ namespace Rodin::Geometry
         RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 3, 2);
         RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 3, 1);
         RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 2, 1);
+        RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 1, 2);
         RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 1, 0);
 
         static constexpr Index INVALID = std::numeric_limits<Index>::max();
@@ -373,13 +386,104 @@ namespace Rodin::Geometry
           return { qmin, qavg };
         };
 
-        auto betterScore = [&](const std::pair<long double, long double>& a,
-                               const std::pair<long double, long double>& b)
+        struct InterfaceStats
+        {
+          long double area = 0.0L;
+          long double minEdge = 0.0L;
+          long double minTriArea = 0.0L;
+          Point centroid{3};
+          Point normal{3};
+          int triCount = 0;
+        };
+
+        auto edgeLen = [&](Index a, Index b) -> long double
+        {
+          return (long double) (outVerts[b] - outVerts[a]).norm();
+        };
+
+        auto triangleArea = [&](Index a, Index b, Index c) -> long double
+        {
+          const auto A = outVerts[a];
+          const auto B = outVerts[b];
+          const auto C = outVerts[c];
+          return (long double) ((B - A).cross(C - A)).norm() / 2.0L;
+        };
+
+        auto interfaceStats = [&](const std::vector<Tri>& tris) -> InterfaceStats
+        {
+          InterfaceStats s;
+          s.centroid.setZero();
+          s.normal.setZero();
+          s.minEdge = std::numeric_limits<long double>::infinity();
+          s.minTriArea = std::numeric_limits<long double>::infinity();
+          s.triCount = static_cast<int>(tris.size());
+          if (tris.empty())
+          {
+            s.minEdge = 0.0L;
+            s.minTriArea = 0.0L;
+            return s;
+          }
+
+          for (const auto& t : tris)
+          {
+            const auto A = outVerts[t[0]];
+            const auto B = outVerts[t[1]];
+            const auto C = outVerts[t[2]];
+            const auto n = (B - A).cross(C - A);
+            const long double area2 = (long double) n.norm();
+            const long double area = area2 / 2.0L;
+            s.area += area;
+            s.normal += n;
+            s.centroid += (A + B + C) * (area / 3.0L);
+            s.minTriArea = std::min(s.minTriArea, area);
+            s.minEdge = std::min(s.minEdge, edgeLen(t[0], t[1]));
+            s.minEdge = std::min(s.minEdge, edgeLen(t[1], t[2]));
+            s.minEdge = std::min(s.minEdge, edgeLen(t[2], t[0]));
+          }
+
+          if (s.area > 0.0L)
+            s.centroid /= s.area;
+          else
+            s.centroid.setZero();
+
+          if (s.minEdge == std::numeric_limits<long double>::infinity())
+            s.minEdge = 0.0L;
+          if (s.minTriArea == std::numeric_limits<long double>::infinity())
+            s.minTriArea = 0.0L;
+          return s;
+        };
+
+        struct CandidateScore
+        {
+          long double qmin = -1.0L;
+          long double qavg = -1.0L;
+          long double fidelityPenalty = std::numeric_limits<long double>::infinity();
+          long double shortEdgePenalty = std::numeric_limits<long double>::infinity();
+          long double smallTriPenalty = std::numeric_limits<long double>::infinity();
+          long double jaggedPenalty = std::numeric_limits<long double>::infinity();
+          long double neighborPenalty = std::numeric_limits<long double>::infinity();
+        };
+
+        auto betterScore = [&](const CandidateScore& a, const CandidateScore& b)
         {
           static constexpr long double tol = 1e-18L;
-          if (a.first > b.first + tol) return true;
-          if (b.first > a.first + tol) return false;
-          return a.second > b.second + tol;
+          // Lexicographic policy:
+          //   1) enforce minimum quality strongly (higher qmin, then qavg),
+          //   2) preserve interface fidelity/smoothness among admissible candidates.
+          if (a.qmin > b.qmin + tol) return true;
+          if (b.qmin > a.qmin + tol) return false;
+          if (a.qavg > b.qavg + tol) return true;
+          if (b.qavg > a.qavg + tol) return false;
+          if (a.fidelityPenalty + tol < b.fidelityPenalty) return true;
+          if (b.fidelityPenalty + tol < a.fidelityPenalty) return false;
+          if (a.shortEdgePenalty + tol < b.shortEdgePenalty) return true;
+          if (b.shortEdgePenalty + tol < a.shortEdgePenalty) return false;
+          if (a.smallTriPenalty + tol < b.smallTriPenalty) return true;
+          if (b.smallTriPenalty + tol < a.smallTriPenalty) return false;
+          if (a.jaggedPenalty + tol < b.jaggedPenalty) return true;
+          if (b.jaggedPenalty + tol < a.jaggedPenalty) return false;
+          if (a.neighborPenalty + tol < b.neighborPenalty) return true;
+          return false;
         };
 
         auto triArea2 = [&](Index a, Index b, Index c) -> long double
@@ -732,6 +836,100 @@ namespace Rodin::Geometry
         }
 
         // --------------------------------------------------------------------
+        // Global face-state smoothing heuristic:
+        // exact split -> simplified/whole where local split is fragile and
+        // surrounded by non-split neighbors, to avoid isolated pointy remnants.
+        // --------------------------------------------------------------------
+        auto faceArea = [&](Index a, Index b, Index c) -> long double
+        {
+          const auto A = outVerts[a];
+          const auto B = outVerts[b];
+          const auto C = outVerts[c];
+          return (long double) ((B - A).cross(C - A)).norm() / 2.0L;
+        };
+
+        auto minEdgeInTris = [&](const std::vector<Tri>& tris) -> long double
+        {
+          long double m = std::numeric_limits<long double>::infinity();
+          for (const auto& t : tris)
+          {
+            m = std::min(m, edgeLen(t[0], t[1]));
+            m = std::min(m, edgeLen(t[1], t[2]));
+            m = std::min(m, edgeLen(t[2], t[0]));
+          }
+          if (m == std::numeric_limits<long double>::infinity())
+            return 0.0L;
+          return m;
+        };
+
+        auto splitArea = [&](const std::vector<Tri>& tris) -> long double
+        {
+          long double a = 0.0L;
+          for (const auto& t : tris)
+            a += triangleArea(t[0], t[1], t[2]);
+          return a;
+        };
+
+        for (int pass = 0; pass < 3; ++pass)
+        {
+          bool changed = false;
+          for (Index fid = 0; fid < nf; ++fid)
+          {
+            auto& fr = faceRestr[(size_t)fid];
+            if (fr.kind != FaceRestriction::Kind::Split)
+              continue;
+
+            const auto& fv = conn.getPolytope(2, fid);
+            const long double A = faceArea(fv(0), fv(1), fv(2));
+            if (!(A > 0.0L))
+              continue;
+
+            const long double negA = splitArea(fr.neg);
+            const long double posA = splitArea(fr.pos);
+            const long double frac = negA / std::max<long double>(1e-30L, negA + posA);
+            const long double minE = std::min(minEdgeInTris(fr.neg), minEdgeInTris(fr.pos));
+            const long double scaledEdge = minE / std::sqrt(A);
+
+            int splitNbr = 0;
+            const auto& eids = conn.getIncidence({2, 1}, fid);
+            for (const auto eid : eids)
+            {
+              const auto& nfaces = conn.getIncidence({1, 2}, eid);
+              for (const auto nfid : nfaces)
+              {
+                if (nfid == fid) continue;
+                if (faceRestr[(size_t)nfid].kind == FaceRestriction::Kind::Split)
+                  splitNbr++;
+              }
+            }
+
+            const bool fragile =
+              (scaledEdge < 2e-3L) ||
+              (frac < 2e-3L) || (frac > 1.0L - 2e-3L);
+            const bool isolated = (splitNbr <= 1);
+
+            if (fragile && isolated)
+            {
+              fr.neg.clear();
+              fr.pos.clear();
+              if (frac >= 0.5L)
+              {
+                fr.kind = FaceRestriction::Kind::WholeNegative;
+                triPush(fr.neg, fv(0), fv(1), fv(2));
+              }
+              else
+              {
+                fr.kind = FaceRestriction::Kind::WholePositive;
+                triPush(fr.pos, fv(0), fv(1), fv(2));
+              }
+              changed = true;
+            }
+          }
+          if (!changed)
+            break;
+        }
+
+        // --------------------------------------------------------------------
         // Cell patterns
         // --------------------------------------------------------------------
         struct CellPattern
@@ -964,10 +1162,14 @@ namespace Rodin::Geometry
               Index v0, Index v1, Index v2,
               const std::vector<Tri>& boundary,
               std::vector<Tet>& bestTets,
-              std::pair<long double, long double>& bestScore) -> bool
+              CandidateScore& bestScore,
+              const std::vector<Tri>& exactIface,
+              long double neighborPenalty) -> bool
         {
           bestTets.clear();
-          bestScore = { -1.0L, -1.0L };
+          bestScore = CandidateScore{};
+          bestScore.qmin = -1.0L;
+          bestScore.qavg = -1.0L;
 
           const auto required = normalizeTriList(boundary);
           const std::array<Index, 6> P{{u0, u1, u2, v0, v1, v2}};
@@ -1029,11 +1231,28 @@ namespace Rodin::Geometry
             if (!std::all_of(used.begin(), used.end(), [](bool x) { return x; }))
               return;
 
-            const auto score = candidateQuality(cand);
-            if (score.first <= 0.0L)
+            const auto q = candidateQuality(cand);
+            if (q.first < this->getMinimumQuality())
               return;
 
-            if (bestScore.first < 0.0L || betterScore(score, bestScore))
+            const auto exactStats = interfaceStats(exactIface);
+            const auto candStats = interfaceStats(boundary);
+
+            CandidateScore score;
+            score.qmin = q.first;
+            score.qavg = q.second;
+            score.fidelityPenalty =
+              std::abs(candStats.area - exactStats.area) +
+              (long double) (candStats.centroid - exactStats.centroid).norm() +
+              std::abs((long double) candStats.normal.norm() - (long double) exactStats.normal.norm());
+            score.shortEdgePenalty = (candStats.minEdge > 0.0L) ? (1.0L / candStats.minEdge) : 1e30L;
+            score.smallTriPenalty = (candStats.minTriArea > 0.0L) ? (1.0L / candStats.minTriArea) : 1e30L;
+            score.jaggedPenalty = (candStats.triCount > 0 && candStats.area > 0.0L)
+              ? std::abs((long double) candStats.normal.norm() / (2.0L * candStats.area) - 1.0L)
+              : 1e30L;
+            score.neighborPenalty = neighborPenalty;
+
+            if (bestScore.qmin < 0.0L || betterScore(score, bestScore))
             {
               bestScore = score;
               bestTets  = cand;
@@ -1126,11 +1345,29 @@ namespace Rodin::Geometry
               const Index p2 = cutLocal(localEdgeId, lone, others[2]);
 
               Tri iface{{ p0, p1, p2 }};
+              const Tet fullCell{{v[0], v[1], v[2], v[3]}};
+              const long double fullVol = tetAbsVolume(fullCell);
+              const long double loneVol = tetAbsVolume(Tet{{v[(size_t)lone], p0, p1, p2}});
+              const long double negVol = loneIsNeg ? loneVol : std::max<long double>(0.0L, fullVol - loneVol);
+              const bool keepNegative = (negVol * 2.0L >= fullVol);
+              const auto fallbackWhole = [&]()
+              {
+                if (keepNegative)
+                  emitTet(v[0], v[1], v[2], v[3], cp.negAttr, SideNegative);
+                else
+                  emitTet(v[0], v[1], v[2], v[3], cp.posAttr, SidePositive);
+              };
+
+              const long double loneQ =
+                m_quality_metric(outVerts, Tet{{v[(size_t)lone], p0, p1, p2}});
+              if (!(loneQ >= this->getMinimumQuality()))
+              {
+                fallbackWhole();
+                break;
+              }
 
               if (loneIsNeg)
               {
-                emitTet(v[(size_t)lone], p0, p1, p2, cp.negAttr, SideNegative);
-
                 std::vector<Tri> posBoundary = posFaceBdry;
                 triPush(posBoundary, iface[0], iface[1], iface[2]);
 
@@ -1139,16 +1376,20 @@ namespace Rodin::Geometry
                 const Index u2 = v[(size_t)others[2]];
 
                 std::vector<Tet> best;
-                std::pair<long double, long double> score;
-                if (tryBestPrismFillExhaustive(u0, u1, u2, p0, p1, p2, posBoundary, best, score))
+                CandidateScore score;
+                std::vector<Tri> exactIface;
+                triPush(exactIface, iface[0], iface[1], iface[2]);
+                if (tryBestPrismFillExhaustive(
+                      u0, u1, u2, p0, p1, p2, posBoundary, best, score, exactIface, 0.0L))
+                {
+                  emitTet(v[(size_t)lone], p0, p1, p2, cp.negAttr, SideNegative);
                   emitTetList(best, cp.posAttr, SidePositive);
+                }
                 else
-                  conePolyhedron(posBoundary, cp.posAttr, SidePositive);
+                  fallbackWhole();
               }
               else
               {
-                emitTet(v[(size_t)lone], p0, p1, p2, cp.posAttr, SidePositive);
-
                 std::vector<Tri> negBoundary = negFaceBdry;
                 triPush(negBoundary, iface[0], iface[1], iface[2]);
 
@@ -1157,11 +1398,17 @@ namespace Rodin::Geometry
                 const Index u2 = v[(size_t)others[2]];
 
                 std::vector<Tet> best;
-                std::pair<long double, long double> score;
-                if (tryBestPrismFillExhaustive(u0, u1, u2, p0, p1, p2, negBoundary, best, score))
+                CandidateScore score;
+                std::vector<Tri> exactIface;
+                triPush(exactIface, iface[0], iface[1], iface[2]);
+                if (tryBestPrismFillExhaustive(
+                      u0, u1, u2, p0, p1, p2, negBoundary, best, score, exactIface, 0.0L))
+                {
+                  emitTet(v[(size_t)lone], p0, p1, p2, cp.posAttr, SidePositive);
                   emitTetList(best, cp.negAttr, SideNegative);
+                }
                 else
-                  conePolyhedron(negBoundary, cp.negAttr, SideNegative);
+                  fallbackWhole();
               }
               break;
             }
@@ -1204,18 +1451,29 @@ namespace Rodin::Geometry
               const Index c = cutLocal(localEdgeId, ineg[1], ipos[0]);
               const Index d = cutLocal(localEdgeId, ineg[1], ipos[1]);
 
-              std::array<std::vector<Tri>, 2> ifaceOptions;
+              std::array<std::vector<Tri>, 3> ifaceOptions;
               triPush(ifaceOptions[0], a, b, d);
               triPush(ifaceOptions[0], a, d, c);
 
               triPush(ifaceOptions[1], a, b, c);
               triPush(ifaceOptions[1], b, d, c);
 
+              // Simplified tier: collapse fragile quads to a single triangle.
+              // This sacrifices local fidelity but removes sliver-producing facets.
+              const long double dAC = edgeLen(a, c);
+              const long double dBD = edgeLen(b, d);
+              if (dAC <= dBD)
+                triPush(ifaceOptions[2], a, b, d);
+              else
+                triPush(ifaceOptions[2], a, c, d);
+
               bool anyValid = false;
               std::vector<Tet> bestNeg, bestPos;
-              std::pair<long double, long double> bestScore{ -1.0L, -1.0L };
+              CandidateScore bestScore{};
+              bestScore.qmin = -1.0L;
+              bestScore.qavg = -1.0L;
 
-              for (int opt = 0; opt < 2; ++opt)
+              for (int opt = 0; opt < 3; ++opt)
               {
                 std::vector<Tri> negBoundary = negFaceBdry;
                 std::vector<Tri> posBoundary = posFaceBdry;
@@ -1225,29 +1483,39 @@ namespace Rodin::Geometry
                                    ifaceOptions[opt].begin(), ifaceOptions[opt].end());
 
                 std::vector<Tet> negCand;
-                std::pair<long double, long double> negScore;
+                CandidateScore negScore;
+                const long double coherencePenalty =
+                  (opt == 0 ? 0.0L : (opt == 1 ? 1e-8L : 1e-5L));
                 const bool negOK = tryBestPrismFillExhaustive(
                   n0, a, b,
                   n1, c, d,
                   negBoundary,
                   negCand,
-                  negScore);
+                  negScore,
+                  ifaceOptions[opt],
+                  coherencePenalty);
 
                 std::vector<Tet> posCand;
-                std::pair<long double, long double> posScore;
+                CandidateScore posScore;
                 const bool posOK = tryBestPrismFillExhaustive(
                   p0, a, c,
                   p1, b, d,
                   posBoundary,
                   posCand,
-                  posScore);
+                  posScore,
+                  ifaceOptions[opt],
+                  coherencePenalty);
 
                 if (negOK && posOK)
                 {
-                  const std::pair<long double, long double> cellScore{
-                    std::min(negScore.first, posScore.first),
-                    0.5L * (negScore.second + posScore.second)
-                  };
+                  CandidateScore cellScore;
+                  cellScore.qmin = std::min(negScore.qmin, posScore.qmin);
+                  cellScore.qavg = 0.5L * (negScore.qavg + posScore.qavg);
+                  cellScore.fidelityPenalty = negScore.fidelityPenalty + posScore.fidelityPenalty;
+                  cellScore.shortEdgePenalty = negScore.shortEdgePenalty + posScore.shortEdgePenalty;
+                  cellScore.smallTriPenalty = negScore.smallTriPenalty + posScore.smallTriPenalty;
+                  cellScore.jaggedPenalty = negScore.jaggedPenalty + posScore.jaggedPenalty;
+                  cellScore.neighborPenalty = negScore.neighborPenalty + posScore.neighborPenalty;
 
                   if (!anyValid || betterScore(cellScore, bestScore))
                   {
@@ -1266,15 +1534,13 @@ namespace Rodin::Geometry
               }
               else
               {
-                std::vector<Tri> negBoundary = negFaceBdry;
-                std::vector<Tri> posBoundary = posFaceBdry;
-                negBoundary.insert(negBoundary.end(),
-                                   ifaceOptions[0].begin(), ifaceOptions[0].end());
-                posBoundary.insert(posBoundary.end(),
-                                   ifaceOptions[0].begin(), ifaceOptions[0].end());
-
-                conePolyhedron(negBoundary, cp.negAttr, SideNegative);
-                conePolyhedron(posBoundary, cp.posAttr, SidePositive);
+                const Tet fullCell{{v[0], v[1], v[2], v[3]}};
+                const long double fullVol = tetAbsVolume(fullCell);
+                const long double negVol = prismVolumeFromReferenceFill(n0, a, b, n1, c, d);
+                if (negVol * 2.0L >= fullVol)
+                  emitTet(v[0], v[1], v[2], v[3], cp.negAttr, SideNegative);
+                else
+                  emitTet(v[0], v[1], v[2], v[3], cp.posAttr, SidePositive);
               }
               break;
             }
@@ -1463,6 +1729,7 @@ namespace Rodin::Geometry
 
       Real m_sign_tolerance;
       Real m_snap_tolerance;
+      long double m_min_quality;
       QualityMetric m_quality_metric;
 
       std::array<Optional<Attribute>, 4> m_old;
