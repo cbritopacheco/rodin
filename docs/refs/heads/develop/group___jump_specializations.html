@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Context namespace | Rodin</title>
+  <title>Jump Template Specializations module | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -74,13 +74,11 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Context <span class="m-thin">namespace</span>
-        </h1>
-        <p>Module for serial, multi-threaded, distributed, and/or parallel computation.</p>
+          Jump Template Specializations <span class="m-thin">module</span></h1>
+        <p>Template specializations of the <a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a> class.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md492">Supported Contexts</a></li>
             <li>
               Reference
               <ul>
@@ -89,22 +87,20 @@
             </li>
           </ul>
         </nav>
-<p>The <a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a> module provides abstractions for different execution environments and computing contexts. It enables <a href="namespace_rodin.html" class="m-doc">Rodin</a> to operate efficiently across various platforms, from single-machine local execution to distributed computing environments.</p><section id="autotoc_md492"><h3><a href="#autotoc_md492">Supported Contexts</a></h3><ul><li><strong><a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Local</a> <a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a></strong>: Single-machine execution with shared memory</li><li><strong>Distributed <a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a></strong>: Multi-node execution with message passing (<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">MPI</a>)</li></ul></section>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a></p></aside>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_context_1_1_base.html" class="m-doc">Base</a>
+              <div class="m-doc-template">template&lt;class FunctionDerived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_jump_3_01_function_base_3_01_function_derived_01_4_01_4.html" class="m-doc">Rodin::Variational::Jump&lt;FunctionBase&lt;FunctionDerived&gt;&gt;</a>
             </dt>
-            <dd>Abstract base class for all execution contexts.</dd>
+            <dd><a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a> of a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> instance across an interface.</dd>
             <dt>
-              class <a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Local</a>
+              <div class="m-doc-template">template&lt;class NestedDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_jump_3_01_shape_function_base_3_01_nested_derived_00_01_f_e_s_00_01_space_01_4_01_4.html" class="m-doc">Rodin::Variational::Jump&lt;ShapeFunctionBase&lt;NestedDerived, FES, Space&gt;&gt;</a>
             </dt>
-            <dd>Represents a single machine context.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">MPI</a>
-            </dt>
-            <dd><a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">MPI</a> context for parallel computing with Message Passing Interface.</dd>
+            <dd><a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a> of a <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a> instance across an interface.</dd>
           </dl>
         </section>
       </div>

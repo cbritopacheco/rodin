@@ -80,10 +80,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md493">Finite Element Spaces</a></li>
-            <li><a href="#autotoc_md494">Functions</a></li>
-            <li><a href="#autotoc_md495">Variational Forms</a></li>
-            <li><a href="#autotoc_md496">Problem</a></li>
+            <li><a href="#autotoc_md494">Finite Element Spaces</a></li>
+            <li><a href="#autotoc_md495">Functions</a></li>
+            <li><a href="#autotoc_md496">Variational Forms</a></li>
+            <li><a href="#autotoc_md497">Problem</a></li>
             <li>
               Reference
               <ul>
@@ -95,7 +95,7 @@
             </li>
           </ul>
         </nav>
-<p>The <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> module is the core of the <a href="namespace_rodin.html" class="m-doc">Rodin</a> finite element framework. It provides classes for defining finite element spaces, trial and test functions, variational forms, boundary conditions, and problems.</p><section id="autotoc_md493"><h3><a href="#autotoc_md493">Finite Element Spaces</a></h3><ul><li><a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> — Piecewise constant (discontinuous) finite element space</li><li><a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> — Piecewise linear (continuous) finite element space</li><li><a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> — Higher-order <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
+<p>The <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> module is the core of the <a href="namespace_rodin.html" class="m-doc">Rodin</a> finite element framework. It provides classes for defining finite element spaces, trial and test functions, variational forms, boundary conditions, and problems.</p><section id="autotoc_md494"><h3><a href="#autotoc_md494">Finite Element Spaces</a></h3><ul><li><a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> — Piecewise constant (discontinuous) finite element space</li><li><a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> — Piecewise linear (continuous) finite element space</li><li><a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> — Higher-order <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
 <title>
 $ H^1 $
 </title>
@@ -107,7 +107,7 @@ $ H^1 $
 <use x='0' y='0' xlink:href='#eq1-g0-72'/>
 <use x='10.62261' y='-4.338437' xlink:href='#eq1-g1-49'/>
 </g>
-</svg>-conforming finite element space (arbitrary polynomial order)</li></ul></section><section id="autotoc_md494"><h3><a href="#autotoc_md494">Functions</a></h3><ul><li><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a> — Represents the unknown solution <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
+</svg>-conforming finite element space (arbitrary polynomial order)</li></ul></section><section id="autotoc_md495"><h3><a href="#autotoc_md495">Functions</a></h3><ul><li><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a> — Represents the unknown solution <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
 $ u $
 </title>
@@ -127,7 +127,7 @@ $ v $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-118'/>
 </g>
-</svg></li><li><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> — A concrete function storing DOF values in a finite element space</li></ul></section><section id="autotoc_md495"><h3><a href="#autotoc_md495">Variational Forms</a></h3><p>The module supports building variational problems of the form:</p><div class="m-math"><svg style="width: 24.319em; height: 1.245em;" viewBox="77.53888 -11.955168 233.465314 11.955168">
+</svg></li><li><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> — A concrete function storing DOF values in a finite element space</li></ul></section><section id="autotoc_md496"><h3><a href="#autotoc_md496">Variational Forms</a></h3><p>The module supports building variational problems of the form:</p><div class="m-math"><svg style="width: 24.319em; height: 1.245em;" viewBox="77.53888 -11.955168 233.465314 11.955168">
 <title>
 \[
   \text{Find} \quad u \in U \quad \text{ s.t. } \quad \forall v \in V \quad
@@ -201,7 +201,7 @@ $ \mathbf{A}\mathbf{x}
 <use x='20.575578' y='0' xlink:href='#eq5-g1-61'/>
 <use x='33.001059' y='0' xlink:href='#eq5-g0-98'/>
 </g>
-</svg>.</p><p>Key expression classes:</p><ul><li><code>Integral(A, B)</code> — Domain integrals (bilinear or linear forms)</li><li><code>BoundaryIntegral(A, B)</code> — Boundary integrals</li><li><code>Grad(u)</code> — Gradient operator</li><li><code>Div(u)</code> — Divergence operator</li><li><code>Jacobian(u)</code> — <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> operator</li><li><code>DirichletBC(u, g)</code> — Dirichlet boundary conditions</li></ul></section><section id="autotoc_md496"><h3><a href="#autotoc_md496">Problem</a></h3><p>The <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> class assembles all forms and boundary conditions into a solvable linear system.</p><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg>.</p><p>Key expression classes:</p><ul><li><code>Integral(A, B)</code> — Domain integrals (bilinear or linear forms)</li><li><code>BoundaryIntegral(A, B)</code> — Boundary integrals</li><li><code>Grad(u)</code> — Gradient operator</li><li><code>Div(u)</code> — Divergence operator</li><li><code>Jacobian(u)</code> — <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> operator</li><li><code>DirichletBC(u, g)</code> — Dirichlet boundary conditions</li></ul></section><section id="autotoc_md497"><h3><a href="#autotoc_md497">Problem</a></h3><p>The <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> class assembles all forms and boundary conditions into a solvable linear system.</p><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="n">TestFunction</span><span class="w">  </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 
@@ -245,7 +245,12 @@ $ \mathbf{A}\mathbf{x}
               <div class="m-doc-template">template&lt;class FunctionDerived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_average_3_01_function_base_3_01_function_derived_01_4_01_4.html" class="m-doc">Average&lt;FunctionBase&lt;FunctionDerived&gt;&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_average.html" class="m-doc">Average</a> operator for computing interface averages.</dd>
+            <dd><a href="class_rodin_1_1_variational_1_1_average.html" class="m-doc">Average</a> of a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> instance across an interface.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class NestedDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_average_3_01_shape_function_base_3_01_nested_derived_00_01_f_e_s_00_01_space_01_4_01_4.html" class="m-doc">Average&lt;ShapeFunctionBase&lt;NestedDerived, FES, Space&gt;&gt;</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_variational_1_1_average.html" class="m-doc">Average</a> of a <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a> instance across an interface.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Solution, class TrialFES, class TestFES, class OperatorType&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>
@@ -883,6 +888,16 @@ $ I_n $
               class <a href="class_rodin_1_1_variational_1_1_jacobi_polynomial.html" class="m-doc">JacobiPolynomial</a>
             </dt>
             <dd>Jacobi polynomial evaluator.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FunctionDerived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_jump_3_01_function_base_3_01_function_derived_01_4_01_4.html" class="m-doc">Jump&lt;FunctionBase&lt;FunctionDerived&gt;&gt;</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a> of a <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> instance across an interface.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class NestedDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_jump_3_01_shape_function_base_3_01_nested_derived_00_01_f_e_s_00_01_space_01_4_01_4.html" class="m-doc">Jump&lt;ShapeFunctionBase&lt;NestedDerived, FES, Space&gt;&gt;</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a> of a <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a> instance across an interface.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Range, class Context&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_l2.html" class="m-doc">L2</a>
