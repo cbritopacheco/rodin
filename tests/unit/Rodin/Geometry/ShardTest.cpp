@@ -453,4 +453,532 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(hit->second.count(1) > 0);
     EXPECT_TRUE(hit->second.count(2) > 0);
   }
+
+  // ---------------------------------------------------------------------------
+  // Shard::Builder — Parent-based mode with Quadrilateral mesh
+  // ---------------------------------------------------------------------------
+
+  TEST(Rodin_Geometry_Shard, Builder_ParentMode_Quadrilateral)
+  {
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Quadrilateral, {3, 3});
+    const size_t D = mesh.getDimension();
+    mesh.getConnectivity().compute(D, 0);
+
+    Shard::Builder sb;
+    sb.initialize(mesh);
+    for (Index v = 0; v < mesh.getVertexCount(); v++)
+      sb.include({0, v}, Shard::State::Owned);
+    for (Index c = 0; c < mesh.getCellCount(); c++)
+      sb.include({D, c}, Shard::State::Owned);
+
+    Shard shard = sb.finalize();
+
+    EXPECT_EQ(shard.getVertexCount(), mesh.getVertexCount());
+    EXPECT_EQ(shard.getCellCount(), mesh.getCellCount());
+
+    for (Index c = 0; c < shard.getCellCount(); c++)
+    {
+      EXPECT_TRUE(shard.isOwned(D, c));
+      EXPECT_TRUE(shard.isLocal(D, c));
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Shard::Builder — Parent-based mode with Segment (1D) mesh
+  // ---------------------------------------------------------------------------
+
+  TEST(Rodin_Geometry_Shard, Builder_ParentMode_Segment)
+  {
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Segment, {5});
+    const size_t D = mesh.getDimension();
+    EXPECT_EQ(D, 1u);
+    mesh.getConnectivity().compute(D, 0);
+
+    Shard::Builder sb;
+    sb.initialize(mesh);
+
+    // Include all vertices and cells as owned
+    for (Index v = 0; v < mesh.getVertexCount(); v++)
+      sb.include({0, v}, Shard::State::Owned);
+    for (Index c = 0; c < mesh.getCellCount(); c++)
+      sb.include({D, c}, Shard::State::Owned);
+
+    Shard shard = sb.finalize();
+
+    EXPECT_EQ(shard.getVertexCount(), mesh.getVertexCount());
+    EXPECT_EQ(shard.getCellCount(), mesh.getCellCount());
+    EXPECT_EQ(shard.getDimension(), 1u);
+
+    for (Index c = 0; c < shard.getCellCount(); c++)
+      EXPECT_TRUE(shard.isOwned(D, c));
+  }
+
+  // ---------------------------------------------------------------------------
+  // Shard::Builder — Parent-based mode with Tetrahedron (3D) mesh
+  // ---------------------------------------------------------------------------
+
+  TEST(Rodin_Geometry_Shard, Builder_ParentMode_Tetrahedron)
+  {
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Tetrahedron, {3, 3, 3});
+    const size_t D = mesh.getDimension();
+    EXPECT_EQ(D, 3u);
+    mesh.getConnectivity().compute(D, 0);
+
+    Shard::Builder sb;
+    sb.initialize(mesh);
+
+    for (Index v = 0; v < mesh.getVertexCount(); v++)
+      sb.include({0, v}, Shard::State::Owned);
+    for (Index c = 0; c < mesh.getCellCount(); c++)
+      sb.include({D, c}, Shard::State::Owned);
+
+    Shard shard = sb.finalize();
+
+    EXPECT_EQ(shard.getVertexCount(), mesh.getVertexCount());
+    EXPECT_EQ(shard.getCellCount(), mesh.getCellCount());
+    EXPECT_EQ(shard.getDimension(), 3u);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Shard::Builder — Parent-based mode with Hexahedron (3D) mesh
+  // ---------------------------------------------------------------------------
+
+  TEST(Rodin_Geometry_Shard, Builder_ParentMode_Hexahedron)
+  {
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Hexahedron, {3, 3, 3});
+    const size_t D = mesh.getDimension();
+    EXPECT_EQ(D, 3u);
+    mesh.getConnectivity().compute(D, 0);
+
+    Shard::Builder sb;
+    sb.initialize(mesh);
+
+    for (Index v = 0; v < mesh.getVertexCount(); v++)
+      sb.include({0, v}, Shard::State::Owned);
+    for (Index c = 0; c < mesh.getCellCount(); c++)
+      sb.include({D, c}, Shard::State::Owned);
+
+    Shard shard = sb.finalize();
+
+    EXPECT_EQ(shard.getVertexCount(), mesh.getVertexCount());
+    EXPECT_EQ(shard.getCellCount(), mesh.getCellCount());
+  }
+
+  // ---------------------------------------------------------------------------
+  // Shard::Builder — Parent-based mode with Wedge (3D) mesh
+  // ---------------------------------------------------------------------------
+
+  TEST(Rodin_Geometry_Shard, Builder_ParentMode_Wedge)
+  {
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Wedge, {3, 3, 3});
+    const size_t D = mesh.getDimension();
+    EXPECT_EQ(D, 3u);
+    mesh.getConnectivity().compute(D, 0);
+
+    Shard::Builder sb;
+    sb.initialize(mesh);
+
+    for (Index v = 0; v < mesh.getVertexCount(); v++)
+      sb.include({0, v}, Shard::State::Owned);
+    for (Index c = 0; c < mesh.getCellCount(); c++)
+      sb.include({D, c}, Shard::State::Owned);
+
+    Shard shard = sb.finalize();
+
+    EXPECT_EQ(shard.getVertexCount(), mesh.getVertexCount());
+    EXPECT_EQ(shard.getCellCount(), mesh.getCellCount());
+  }
+
+  // ---------------------------------------------------------------------------
+  // Shard::Builder — Direct mode with Quadrilateral
+  // ---------------------------------------------------------------------------
+
+  TEST(Rodin_Geometry_Shard, Builder_DirectMode_Quadrilateral)
+  {
+    Shard::Builder sb;
+    sb.initialize(2, 2);
+
+    Index v0 = sb.vertex(0, Math::SpatialPoint{{0.0, 0.0}}, Shard::State::Owned);
+    Index v1 = sb.vertex(1, Math::SpatialPoint{{1.0, 0.0}}, Shard::State::Owned);
+    Index v2 = sb.vertex(2, Math::SpatialPoint{{1.0, 1.0}}, Shard::State::Owned);
+    Index v3 = sb.vertex(3, Math::SpatialPoint{{0.0, 1.0}}, Shard::State::Shared);
+
+    IndexArray vs(4);
+    vs << v0, v1, v2, v3;
+    Index q0 = sb.polytope(2, 50, Polytope::Type::Quadrilateral, vs, Shard::State::Owned);
+    EXPECT_EQ(q0, 0u);
+
+    sb.setOwner(0, v3, 2);
+
+    Shard shard = sb.finalize();
+
+    EXPECT_EQ(shard.getVertexCount(), 4u);
+    EXPECT_EQ(shard.getCellCount(), 1u);
+    EXPECT_TRUE(shard.isOwned(0, v0));
+    EXPECT_TRUE(shard.isShared(0, v3));
+    EXPECT_TRUE(shard.isOwned(2, q0));
+    EXPECT_EQ(shard.getOwner(0).at(v3), 2u);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Shard::Builder — Direct mode with Segment (1D)
+  // ---------------------------------------------------------------------------
+
+  TEST(Rodin_Geometry_Shard, Builder_DirectMode_Segment)
+  {
+    Shard::Builder sb;
+    sb.initialize(1, 1);
+
+    Index v0 = sb.vertex(0, Math::SpatialPoint{{0.0}}, Shard::State::Owned);
+    Index v1 = sb.vertex(1, Math::SpatialPoint{{1.0}}, Shard::State::Owned);
+    Index v2 = sb.vertex(2, Math::SpatialPoint{{2.0}}, Shard::State::Ghost);
+
+    IndexArray seg1_vs(2);
+    seg1_vs << v0, v1;
+    Index s0 = sb.polytope(1, 10, Polytope::Type::Segment, seg1_vs, Shard::State::Owned);
+
+    IndexArray seg2_vs(2);
+    seg2_vs << v1, v2;
+    Index s1 = sb.polytope(1, 11, Polytope::Type::Segment, seg2_vs, Shard::State::Ghost);
+
+    sb.setOwner(0, v2, 1);
+    sb.setOwner(1, s1, 1);
+
+    Shard shard = sb.finalize();
+
+    EXPECT_EQ(shard.getVertexCount(), 3u);
+    EXPECT_EQ(shard.getCellCount(), 2u);
+    EXPECT_EQ(shard.getDimension(), 1u);
+
+    EXPECT_TRUE(shard.isOwned(1, s0));
+    EXPECT_TRUE(shard.isGhost(1, s1));
+    EXPECT_TRUE(shard.isGhost(0, v2));
+    EXPECT_EQ(shard.getOwner(0).at(v2), 1u);
+    EXPECT_EQ(shard.getOwner(1).at(s1), 1u);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Shard::Builder — Direct mode with Tetrahedron (3D)
+  // ---------------------------------------------------------------------------
+
+  TEST(Rodin_Geometry_Shard, Builder_DirectMode_Tetrahedron)
+  {
+    Shard::Builder sb;
+    sb.initialize(3, 3);
+
+    Index v0 = sb.vertex(0, Math::SpatialPoint{{0.0, 0.0, 0.0}}, Shard::State::Owned);
+    Index v1 = sb.vertex(1, Math::SpatialPoint{{1.0, 0.0, 0.0}}, Shard::State::Owned);
+    Index v2 = sb.vertex(2, Math::SpatialPoint{{0.0, 1.0, 0.0}}, Shard::State::Owned);
+    Index v3 = sb.vertex(3, Math::SpatialPoint{{0.0, 0.0, 1.0}}, Shard::State::Shared);
+
+    IndexArray vs(4);
+    vs << v0, v1, v2, v3;
+    Index t0 = sb.polytope(3, 100, Polytope::Type::Tetrahedron, vs, Shard::State::Owned);
+    EXPECT_EQ(t0, 0u);
+
+    sb.setOwner(0, v3, 1);
+    sb.halo(0, v0, 1);
+
+    Shard shard = sb.finalize();
+
+    EXPECT_EQ(shard.getVertexCount(), 4u);
+    EXPECT_EQ(shard.getCellCount(), 1u);
+    EXPECT_EQ(shard.getDimension(), 3u);
+
+    EXPECT_TRUE(shard.isOwned(3, t0));
+    EXPECT_TRUE(shard.isShared(0, v3));
+    EXPECT_EQ(shard.getOwner(0).at(v3), 1u);
+
+    const auto& haloMap = shard.getHalo(0);
+    ASSERT_NE(haloMap.find(v0), haloMap.end());
+    EXPECT_TRUE(haloMap.at(v0).count(1) > 0);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Shard::Builder — Direct mode with Hexahedron (3D)
+  // ---------------------------------------------------------------------------
+
+  TEST(Rodin_Geometry_Shard, Builder_DirectMode_Hexahedron)
+  {
+    Shard::Builder sb;
+    sb.initialize(3, 3);
+
+    // 8 vertices of a unit cube
+    Index v0 = sb.vertex(0, Math::SpatialPoint{{0.0, 0.0, 0.0}}, Shard::State::Owned);
+    Index v1 = sb.vertex(1, Math::SpatialPoint{{1.0, 0.0, 0.0}}, Shard::State::Owned);
+    Index v2 = sb.vertex(2, Math::SpatialPoint{{1.0, 1.0, 0.0}}, Shard::State::Owned);
+    Index v3 = sb.vertex(3, Math::SpatialPoint{{0.0, 1.0, 0.0}}, Shard::State::Owned);
+    Index v4 = sb.vertex(4, Math::SpatialPoint{{0.0, 0.0, 1.0}}, Shard::State::Ghost);
+    Index v5 = sb.vertex(5, Math::SpatialPoint{{1.0, 0.0, 1.0}}, Shard::State::Ghost);
+    Index v6 = sb.vertex(6, Math::SpatialPoint{{1.0, 1.0, 1.0}}, Shard::State::Ghost);
+    Index v7 = sb.vertex(7, Math::SpatialPoint{{0.0, 1.0, 1.0}}, Shard::State::Ghost);
+
+    IndexArray vs(8);
+    vs << v0, v1, v2, v3, v4, v5, v6, v7;
+    Index h0 = sb.polytope(3, 200, Polytope::Type::Hexahedron, vs, Shard::State::Owned);
+    EXPECT_EQ(h0, 0u);
+
+    for (Index vi = v4; vi <= v7; vi++)
+      sb.setOwner(0, vi, 1);
+
+    Shard shard = sb.finalize();
+
+    EXPECT_EQ(shard.getVertexCount(), 8u);
+    EXPECT_EQ(shard.getCellCount(), 1u);
+    EXPECT_EQ(shard.getDimension(), 3u);
+    EXPECT_TRUE(shard.isOwned(3, h0));
+
+    for (Index vi = v0; vi <= v3; vi++)
+      EXPECT_TRUE(shard.isOwned(0, vi));
+    for (Index vi = v4; vi <= v7; vi++)
+      EXPECT_TRUE(shard.isGhost(0, vi));
+  }
+
+  // ---------------------------------------------------------------------------
+  // Shard::Builder — Parent-based mode with mixed 2D mesh (tri+quad)
+  // ---------------------------------------------------------------------------
+
+  TEST(Rodin_Geometry_Shard, Builder_ParentMode_Mixed2D_TriQuad)
+  {
+    // Build a mixed mesh: 2 triangles + 1 quadrilateral sharing vertices
+    //
+    //   2---3---4
+    //   |\ | Q |
+    //   | \|   |
+    //   0--1---5
+    //
+    // T0: (0,1,2), T1: (1,3,2), Q0: (1,3,4,5)
+    Mesh<Context::Local> mesh =
+      Mesh<Context::Local>::Builder()
+        .initialize(2)
+        .nodes(6)
+        .vertex({0.0, 0.0})
+        .vertex({1.0, 0.0})
+        .vertex({0.0, 1.0})
+        .vertex({1.0, 1.0})
+        .vertex({2.0, 1.0})
+        .vertex({2.0, 0.0})
+        .polytope(Polytope::Type::Triangle, {0, 1, 2})
+        .polytope(Polytope::Type::Triangle, {1, 3, 2})
+        .polytope(Polytope::Type::Quadrilateral, {1, 5, 4, 3})
+        .finalize();
+
+    const size_t D = mesh.getDimension();
+    EXPECT_EQ(D, 2u);
+    mesh.getConnectivity().compute(D, 0);
+
+    // Shard all entities as owned
+    Shard::Builder sb;
+    sb.initialize(mesh);
+    for (Index v = 0; v < mesh.getVertexCount(); v++)
+      sb.include({0, v}, Shard::State::Owned);
+    for (Index c = 0; c < mesh.getCellCount(); c++)
+      sb.include({D, c}, Shard::State::Owned);
+
+    Shard shard = sb.finalize();
+
+    EXPECT_EQ(shard.getVertexCount(), 6u);
+    EXPECT_EQ(shard.getCellCount(), 3u);
+
+    // Verify polytope map round-trips
+    const auto& cmap = shard.getPolytopeMap(D);
+    for (Index ci = 0; ci < cmap.left.size(); ci++)
+    {
+      Index parentIdx = cmap.left[ci];
+      EXPECT_EQ(cmap.right.at(parentIdx), ci);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Shard::Builder — Parent-based mode with mixed 2D: partial inclusion
+  // ---------------------------------------------------------------------------
+
+  TEST(Rodin_Geometry_Shard, Builder_ParentMode_Mixed2D_Partial)
+  {
+    // Same mixed mesh but only include one triangle and one quad, with
+    // shared vertices at the interface
+    Mesh<Context::Local> mesh =
+      Mesh<Context::Local>::Builder()
+        .initialize(2)
+        .nodes(6)
+        .vertex({0.0, 0.0})
+        .vertex({1.0, 0.0})
+        .vertex({0.0, 1.0})
+        .vertex({1.0, 1.0})
+        .vertex({2.0, 1.0})
+        .vertex({2.0, 0.0})
+        .polytope(Polytope::Type::Triangle, {0, 1, 2})
+        .polytope(Polytope::Type::Triangle, {1, 3, 2})
+        .polytope(Polytope::Type::Quadrilateral, {1, 5, 4, 3})
+        .finalize();
+
+    const size_t D = mesh.getDimension();
+    mesh.getConnectivity().compute(D, 0);
+
+    const auto& c2v = mesh.getConnectivity().getIncidence(D, 0);
+
+    // Shard 0: owns cell 0 (triangle), cell 2 (quad) is ghost
+    Shard::Builder sb;
+    sb.initialize(mesh);
+
+    // Vertices of cell 0 as owned
+    for (const Index v : c2v.at(0))
+      sb.include({0, v}, Shard::State::Owned);
+    sb.include({D, 0}, Shard::State::Owned);
+
+    // Vertices of cell 2 (quad) — shared or ghost for new ones
+    for (const Index v : c2v.at(2))
+      sb.include({0, v}, Shard::State::Ghost);
+    sb.include({D, 2}, Shard::State::Ghost);
+
+    Shard shard = sb.finalize();
+
+    EXPECT_EQ(shard.getCellCount(), 2u);
+
+    // Cell 0 is owned, cell 2 is ghost
+    EXPECT_TRUE(shard.isOwned(D, 0));
+    EXPECT_TRUE(shard.isGhost(D, 1)); // cell 2 maps to local 1
+    EXPECT_TRUE(shard.isLocal(D, 0));
+    EXPECT_FALSE(shard.isLocal(D, 1));
+
+    // Vertices 0, 1, 2 are owned (from cell 0), others are ghost
+    for (Index vi = 0; vi < shard.getVertexCount(); vi++)
+    {
+      EXPECT_TRUE(shard.isOwned(0, vi) || shard.isGhost(0, vi));
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Shard::Builder — Parent-based mode with mixed 3D (tet+wedge)
+  // ---------------------------------------------------------------------------
+
+  TEST(Rodin_Geometry_Shard, Builder_ParentMode_Mixed3D_TetWedge)
+  {
+    // 3D mixed mesh: 1 tetrahedron + 1 wedge sharing a triangular face
+    //
+    // Vertices:
+    //   0=(0,0,0), 1=(1,0,0), 2=(0,1,0), 3=(0,0,1)
+    //   4=(1,0,1), 5=(0,1,1)
+    //
+    // Tet: (0,1,2,3)
+    // Wedge: (1,2,3, 4,5,3)  -> reuse face (1,2,3)
+    //
+    // Use proper wedge vertex ordering: bottom tri (1,2,4), top tri (3,5,6)
+    // Actually let's use a simpler arrangement with 7 vertices
+    Mesh<Context::Local> mesh =
+      Mesh<Context::Local>::Builder()
+        .initialize(3)
+        .nodes(7)
+        .vertex({0.0, 0.0, 0.0})  // 0
+        .vertex({1.0, 0.0, 0.0})  // 1
+        .vertex({0.0, 1.0, 0.0})  // 2
+        .vertex({0.0, 0.0, 1.0})  // 3
+        .vertex({1.0, 0.0, 1.0})  // 4
+        .vertex({0.0, 1.0, 1.0})  // 5
+        .vertex({0.5, 0.5, 0.5})  // 6 — interior
+        .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 6})
+        .polytope(Polytope::Type::Wedge, {0, 1, 2, 3, 4, 5})
+        .finalize();
+
+    const size_t D = mesh.getDimension();
+    EXPECT_EQ(D, 3u);
+    mesh.getConnectivity().compute(D, 0);
+
+    Shard::Builder sb;
+    sb.initialize(mesh);
+
+    for (Index v = 0; v < mesh.getVertexCount(); v++)
+      sb.include({0, v}, Shard::State::Owned);
+    for (Index c = 0; c < mesh.getCellCount(); c++)
+      sb.include({D, c}, Shard::State::Owned);
+
+    Shard shard = sb.finalize();
+
+    EXPECT_EQ(shard.getVertexCount(), 7u);
+    EXPECT_EQ(shard.getCellCount(), 2u);
+    EXPECT_EQ(shard.getDimension(), 3u);
+
+    for (Index c = 0; c < shard.getCellCount(); c++)
+      EXPECT_TRUE(shard.isOwned(D, c));
+  }
+
+  // ---------------------------------------------------------------------------
+  // Shard::Builder — Direct mode with Wedge (3D)
+  // ---------------------------------------------------------------------------
+
+  TEST(Rodin_Geometry_Shard, Builder_DirectMode_Wedge)
+  {
+    Shard::Builder sb;
+    sb.initialize(3, 3);
+
+    // Wedge: bottom triangle (v0,v1,v2), top triangle (v3,v4,v5)
+    Index v0 = sb.vertex(0, Math::SpatialPoint{{0.0, 0.0, 0.0}}, Shard::State::Owned);
+    Index v1 = sb.vertex(1, Math::SpatialPoint{{1.0, 0.0, 0.0}}, Shard::State::Owned);
+    Index v2 = sb.vertex(2, Math::SpatialPoint{{0.0, 1.0, 0.0}}, Shard::State::Owned);
+    Index v3 = sb.vertex(3, Math::SpatialPoint{{0.0, 0.0, 1.0}}, Shard::State::Shared);
+    Index v4 = sb.vertex(4, Math::SpatialPoint{{1.0, 0.0, 1.0}}, Shard::State::Shared);
+    Index v5 = sb.vertex(5, Math::SpatialPoint{{0.0, 1.0, 1.0}}, Shard::State::Shared);
+
+    IndexArray vs(6);
+    vs << v0, v1, v2, v3, v4, v5;
+    Index w0 = sb.polytope(3, 300, Polytope::Type::Wedge, vs, Shard::State::Owned);
+    EXPECT_EQ(w0, 0u);
+
+    for (Index vi = v3; vi <= v5; vi++)
+      sb.setOwner(0, vi, 2);
+
+    Shard shard = sb.finalize();
+
+    EXPECT_EQ(shard.getVertexCount(), 6u);
+    EXPECT_EQ(shard.getCellCount(), 1u);
+    EXPECT_EQ(shard.getDimension(), 3u);
+    EXPECT_TRUE(shard.isOwned(3, w0));
+
+    for (Index vi = v0; vi <= v2; vi++)
+      EXPECT_TRUE(shard.isOwned(0, vi));
+    for (Index vi = v3; vi <= v5; vi++)
+    {
+      EXPECT_TRUE(shard.isShared(0, vi));
+      EXPECT_EQ(shard.getOwner(0).at(vi), 2u);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Shard::Builder — Direct mode with mixed 2D (tri + quad)
+  // ---------------------------------------------------------------------------
+
+  TEST(Rodin_Geometry_Shard, Builder_DirectMode_Mixed2D)
+  {
+    Shard::Builder sb;
+    sb.initialize(2, 2);
+
+    // 5 vertices forming a triangle + adjacent quadrilateral
+    Index v0 = sb.vertex(0, Math::SpatialPoint{{0.0, 0.0}}, Shard::State::Owned);
+    Index v1 = sb.vertex(1, Math::SpatialPoint{{1.0, 0.0}}, Shard::State::Owned);
+    Index v2 = sb.vertex(2, Math::SpatialPoint{{0.5, 1.0}}, Shard::State::Owned);
+    Index v3 = sb.vertex(3, Math::SpatialPoint{{2.0, 0.0}}, Shard::State::Owned);
+    Index v4 = sb.vertex(4, Math::SpatialPoint{{2.0, 1.0}}, Shard::State::Owned);
+
+    // Triangle: (v0, v1, v2)
+    IndexArray tri(3);
+    tri << v0, v1, v2;
+    Index t0 = sb.polytope(2, 0, Polytope::Type::Triangle, tri, Shard::State::Owned);
+
+    // Quad: (v1, v3, v4, v2)
+    IndexArray quad(4);
+    quad << v1, v3, v4, v2;
+    Index q0 = sb.polytope(2, 1, Polytope::Type::Quadrilateral, quad, Shard::State::Owned);
+
+    Shard shard = sb.finalize();
+
+    EXPECT_EQ(shard.getVertexCount(), 5u);
+    EXPECT_EQ(shard.getCellCount(), 2u);
+    EXPECT_TRUE(shard.isOwned(2, t0));
+    EXPECT_TRUE(shard.isOwned(2, q0));
+
+    // Polytope map
+    const auto& cmap = shard.getPolytopeMap(2);
+    EXPECT_EQ(cmap.left[t0], 0u);
+    EXPECT_EQ(cmap.left[q0], 1u);
+  }
 }
