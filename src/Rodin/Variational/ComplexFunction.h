@@ -360,12 +360,12 @@ namespace Rodin::Variational
 
       ComplexFunction(const ComplexFunction& other)
         : Parent(other),
-          m_re(m_re->copy()), m_imag(m_imag->copy())
+          m_re(other.m_re->copy()), m_imag(other.m_imag->copy())
       {}
 
       ComplexFunction(ComplexFunction&& other)
         : Parent(std::move(other)),
-          m_re(std::move(m_re)), m_imag(std::move(m_imag))
+          m_re(std::move(other.m_re)), m_imag(std::move(other.m_imag))
       {}
 
       constexpr
