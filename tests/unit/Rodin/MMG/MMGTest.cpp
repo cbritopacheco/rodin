@@ -492,7 +492,7 @@ namespace Rodin::Tests::Unit
     // Create a variable size map: smaller near center, larger near boundary
     P1 fes(mesh);
     MMG::RealGridFunction sizeMap(fes);
-    sizeMap = [&n](const Geometry::Point& p)
+    sizeMap = [&](const Geometry::Point& p)
     {
       Real cx = static_cast<Real>(n - 1) / 2.0;
       Real cy = cx;
