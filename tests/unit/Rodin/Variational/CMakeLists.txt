@@ -421,3 +421,80 @@ gtest_discover_tests(RodinVariationalTraceTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinVariationalComparisonTest ComparisonTest.cpp)
+target_link_libraries(RodinVariationalComparisonTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalComparisonTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinVariationalLogicalTest LogicalTest.cpp)
+target_link_libraries(RodinVariationalLogicalTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalLogicalTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinVariationalHyperbolicTest HyperbolicTest.cpp)
+target_link_libraries(RodinVariationalHyperbolicTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalHyperbolicTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinVariationalTransposeTest TransposeTest.cpp)
+target_link_libraries(RodinVariationalTransposeTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalTransposeTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinVariationalZeroTest ZeroTest.cpp)
+target_link_libraries(RodinVariationalZeroTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalZeroTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinVariationalIdentityMatrixTest IdentityMatrixTest.cpp)
+target_link_libraries(RodinVariationalIdentityMatrixTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalIdentityMatrixTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinVariationalFrobeniusTest FrobeniusTest.cpp)
+target_link_libraries(RodinVariationalFrobeniusTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalFrobeniusTest
+  PROPERTIES
+    LABELS unit
+)
