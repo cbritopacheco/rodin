@@ -388,3 +388,36 @@ gtest_discover_tests(RodinVariationalFlowTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinVariationalJumpTest JumpTest.cpp)
+target_link_libraries(RodinVariationalJumpTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalJumpTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinVariationalAverageTest AverageTest.cpp)
+target_link_libraries(RodinVariationalAverageTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalAverageTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinVariationalTraceTest TraceTest.cpp)
+target_link_libraries(RodinVariationalTraceTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalTraceTest
+  PROPERTIES
+    LABELS unit
+)

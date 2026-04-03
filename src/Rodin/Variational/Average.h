@@ -22,12 +22,20 @@
 #include "Rodin/Geometry/Point.h"
 
 #include "ForwardDecls.h"
+#include "IntegrationPoint.h"
+#include "ShapeFunction.h"
 
 namespace Rodin::Variational
 {
   /**
-   * @ingroup RodinVariational
-   * @brief Average operator for computing interface averages.
+   * @defgroup AverageSpecializations Average Template Specializations
+   * @brief Template specializations of the Average class.
+   * @see Average
+   */
+
+  /**
+   * @ingroup AverageSpecializations
+   * @brief Average of a FunctionBase instance across an interface.
    *
    * The Average operator computes the average value of a function across an
    * interface (face) between two adjacent elements:
@@ -120,8 +128,8 @@ namespace Rodin::Variational
        */
       auto getValue(const Geometry::Point& p) const
       {
-        static thread_local Math::SpatialPoint rc1;
-        static thread_local Math::SpatialPoint rc2;
+        static thread_local Math::SpatialPoint s_rc1;
+        static thread_local Math::SpatialPoint s_rc2;
 
         assert(p.getPolytope().isFace());
         const auto& face = p.getPolytope();
@@ -134,11 +142,17 @@ namespace Rodin::Variational
         const auto it1 = mesh.getPolytope(d + 1, idx1);
         const auto it2 = mesh.getPolytope(d + 1, idx2);
         const auto& pc = p.getPhysicalCoordinates();
-        it1->getTransformation().inverse(rc1, pc);
-        it2->getTransformation().inverse(rc2, pc);
-        const Geometry::Point p1(std::cref(*it1), std::cref(rc1), pc);
-        const Geometry::Point p2(std::cref(*it2), std::cref(rc2), pc);
+        it1->getTransformation().inverse(s_rc1, pc);
+        it2->getTransformation().inverse(s_rc2, pc);
+        const Geometry::Point p1(std::cref(*it1), std::cref(s_rc1), pc);
+        const Geometry::Point p2(std::cref(*it2), std::cref(s_rc2), pc);
         return 0.5 * (this->object(getOperand().getValue(p1)) + this->object(getOperand().getValue(p2)));
+      }
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
+      {
+        return this->getOperand().getOrder(p);
       }
 
       /**
@@ -155,120 +169,189 @@ namespace Rodin::Variational
   };
 
   /**
-   * @brief Deduction guide for Average.
+   * @brief Deduction guide for Average with FunctionBase.
    */
   template <class Derived>
   Average(const FunctionBase<Derived>&) -> Average<FunctionBase<Derived>>;
 
-  // template <class Derived, class FES, ShapeFunctionSpaceType Space>
-  // class Average<ShapeFunctionBase<Derived, FES, Space>> final
-  //   : public ShapeFunctionBase<Average<ShapeFunctionBase<Derived, FES, Space>>>
-  // {
-  //   public:
-  //     using FESType = FES;
-  //     static constexpr ShapeFunctionSpaceType SpaceType = Space;
+  /**
+   * @ingroup AverageSpecializations
+   * @brief Average of a ShapeFunctionBase instance across an interface.
+   *
+   * Computes the average of shape (trial or test) functions across element
+   * interfaces in finite element formulations. This is used in DG bilinear
+   * and linear form assembly.
+   *
+   * ## Usage Example
+   * ```cpp
+   * // DG consistency term
+   * auto consistency = InterfaceIntegral(Average(Grad(u)), Jump(v));
+   * ```
+   *
+   * @tparam NestedDerived Type of the shape function
+   * @tparam FES Finite element space type
+   * @tparam Space Trial or test function space
+   */
+  template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
+  class Average<ShapeFunctionBase<NestedDerived, FES, Space>> final
+    : public ShapeFunctionBase<Average<ShapeFunctionBase<NestedDerived, FES, Space>>, FES, Space>
+  {
+    public:
+      using FESType = FES;
 
-  //     using OperandType = ShapeFunctionBase<Derived, FESType, SpaceType>;
+      using OperandType = ShapeFunctionBase<NestedDerived, FES, Space>;
 
-  //     using RangeType = typename FormLanguage::Traits<OperandType>::RangeType;
+      using Parent = ShapeFunctionBase<Average<OperandType>, FES, Space>;
 
-  //     using Parent = ShapeFunctionBase<Average<ShapeFunctionBase<Derived, FESType, SpaceType>>>;
+      /**
+       * @brief Constructs the average of a shape function.
+       * @param[in] op Shape function to average
+       */
+      constexpr
+      Average(const OperandType& op)
+        : Parent(op.getFiniteElementSpace()),
+          m_operand(op.copy()),
+          m_ip(nullptr)
+      {}
 
-  //     constexpr
-  //     Average(const OperandType& op)
-  //       : Parent(op.getFiniteElementSpace()),
-  //         m_operand(op.copy())
-  //     {}
+      constexpr
+      Average(const Average& other)
+        : Parent(other),
+          m_operand(other.m_operand->copy()),
+          m_ip(nullptr)
+      {}
 
-  //     constexpr
-  //     Average(const Average& other)
-  //       : Parent(other),
-  //         m_operand(other.m_operand->copy())
-  //     {}
+      constexpr
+      Average(Average&& other)
+        : Parent(std::move(other)),
+          m_operand(std::move(other.m_operand)),
+          m_ip(std::exchange(other.m_ip, nullptr))
+      {}
 
-  //     constexpr
-  //     Average(Average&& other)
-  //       : Parent(std::move(other)),
-  //         m_operand(std::move(other.m_operand))
-  //     {}
+      /**
+       * @brief Gets the underlying shape function.
+       * @returns Reference to the operand
+       */
+      constexpr
+      const OperandType& getOperand() const
+      {
+        assert(m_operand);
+        return *m_operand;
+      }
 
-  //     inline
-  //     constexpr
-  //     const OperandType& getOperand() const
-  //     {
-  //       assert(m_operand);
-  //       return *m_operand;
-  //     }
+      /**
+       * @brief Gets the leaf (underlying trial/test function).
+       * @returns Reference to the leaf function
+       */
+      constexpr
+      const auto& getLeaf() const
+      {
+        return getOperand().getLeaf();
+      }
 
-  //     inline
-  //     constexpr
-  //     const auto& getLeaf() const
-  //     {
-  //       return getOperand().getLeaf();
-  //     }
+      /**
+       * @brief Gets number of degrees of freedom on a polytope.
+       * @param[in] element Mesh polytope
+       * @returns Number of DOFs
+       */
+      constexpr
+      size_t getDOFs(const Geometry::Polytope& element) const
+      {
+        return getOperand().getDOFs(element);
+      }
 
-  //     inline
-  //     constexpr
-  //     size_t getDOFs(const Geometry::Polytope& element) const
-  //     {
-  //       return getOperand().getDOFs(element);
-  //     }
+      /**
+       * @brief Gets the current integration point.
+       * @returns Reference to the integration point
+       */
+      const IntegrationPoint& getIntegrationPoint() const
+      {
+        assert(m_ip);
+        return *m_ip;
+      }
 
-  //     inline
-  //     const Geometry::Point& getPoint() const
-  //     {
-  //       return m_operand->getPoint();
-  //     }
+      /**
+       * @brief Sets the integration point for evaluation.
+       * @param[in] ip Integration point on an interface face
+       * @returns Reference to this average operator
+       */
+      Average& setIntegrationPoint(const IntegrationPoint& ip)
+      {
+        m_ip = &ip;
+        return *this;
+      }
 
-  //     inline
-  //     Average& setPoint(const Geometry::Point& p)
-  //     {
-  //       m_operand->setPoint(p);
-  //       return *this;
-  //     }
+      /**
+       * @brief Gets the averaged basis function for local DOF.
+       * @param[in] local Local DOF index
+       * @returns Average of the basis function @f$ \frac{1}{2}(\phi^+(p) + \phi^-(p)) @f$
+       *
+       * Evaluates the operand's basis function at the same physical point
+       * mapped to both adjacent elements, and returns the average.
+       */
+      auto getBasis(size_t local) const
+      {
+        static thread_local Math::SpatialPoint s_rc1;
+        static thread_local Math::SpatialPoint s_rc2;
 
-  //     inline
-  //     auto getBasis(size_t local, const Geometry::Point& p) const
-  //     {
-  //       assert(p.getPolytope().isFace());
-  //       const auto& face = p.getPolytope();
-  //       const size_t d = face.getDimension();
-  //       const auto& mesh = face.getMesh();
-  //       const auto& inc = mesh.getConnectivity().getIncidence({ d, d + 1 }, face.getIndex() );
-  //       assert(inc.size() == 2);
-  //       const Index idx1 = *inc.begin();
-  //       const Index idx2 = *std::next(inc.begin());
-  //       const auto it1 = mesh.getPolytope(d + 1, idx1);
-  //       const auto it2 = mesh.getPolytope(d + 1, idx2);
-  //       const auto& pc = p.getPhysicalCoordinates();
-  //       const Math::SpatialVector<Real> rc1 = it1->getTransformation().inverse(pc);
-  //       const Math::SpatialVector<Real> rc2 = it2->getTransformation().inverse(pc);
-  //       const Geometry::Point p1(std::cref(*it1), std::cref(rc1), pc);
-  //       const Geometry::Point p2(std::cref(*it2), std::cref(rc2), pc);
-  //       const auto& lhs = this->object(getOperand().getBasis(local, p1));
-  //       const auto& rhs = this->object(getOperand().getBasis(local, p2));
-  //       return 0.5 * (lhs + rhs);
-  //     }
+        assert(m_ip);
+        const auto& p = m_ip->getPoint();
+        assert(p.getPolytope().isFace());
+        const auto& face = p.getPolytope();
+        const size_t d = face.getDimension();
+        const auto& mesh = face.getMesh();
+        const auto& inc = mesh.getConnectivity().getIncidence({ d, d + 1 }, face.getIndex());
+        assert(inc.size() == 2);
+        const Index idx1 = *inc.begin();
+        const Index idx2 = *std::next(inc.begin());
+        const auto it1 = mesh.getPolytope(d + 1, idx1);
+        const auto it2 = mesh.getPolytope(d + 1, idx2);
+        const auto& pc = p.getPhysicalCoordinates();
+        it1->getTransformation().inverse(s_rc1, pc);
+        it2->getTransformation().inverse(s_rc2, pc);
+        const Geometry::Point p1(std::cref(*it1), std::cref(s_rc1), pc);
+        const Geometry::Point p2(std::cref(*it2), std::cref(s_rc2), pc);
+        const IntegrationPoint ip1(p1, m_ip->getQuadratureFormula(), m_ip->getIndex());
+        const IntegrationPoint ip2(p2, m_ip->getQuadratureFormula(), m_ip->getIndex());
+        m_operand->setIntegrationPoint(ip1);
+        const auto& val1 = this->object(m_operand->getBasis(local));
+        m_operand->setIntegrationPoint(ip2);
+        const auto& val2 = this->object(m_operand->getBasis(local));
+        return 0.5 * (val1 + val2);
+      }
 
-  //     inline
-  //     constexpr
-  //     const auto& getFiniteElementSpace() const
-  //     {
-  //       return getOperand().getFiniteElementSpace();
-  //     }
+      /**
+       * @brief Gets the finite element space.
+       * @returns Reference to the FE space
+       */
+      constexpr
+      const FES& getFiniteElementSpace() const
+      {
+        return getOperand().getFiniteElementSpace();
+      }
 
-  //     inline Average* copy() const noexcept override
-  //     {
-  //       return new Average(*this);
-  //     }
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
+      {
+        return this->getOperand().getOrder(p);
+      }
 
-  //   private:
-  //     std::unique_ptr<OperandType> m_operand;
-  // };
+      Average* copy() const noexcept override
+      {
+        return new Average(*this);
+      }
 
-  // template <class Derived, class FESType, ShapeFunctionSpaceType SpaceType>
-  // Average(const ShapeFunctionBase<Derived, FESType, SpaceType>&)
-  //   -> Average<ShapeFunctionBase<Derived, FESType, SpaceType>>;
+    private:
+      std::unique_ptr<OperandType> m_operand;
+      const IntegrationPoint* m_ip;
+  };
+
+  /**
+   * @brief Deduction guide for Average with ShapeFunctionBase.
+   */
+  template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
+  Average(const ShapeFunctionBase<NestedDerived, FES, Space>&)
+    -> Average<ShapeFunctionBase<NestedDerived, FES, Space>>;
 }
 
 #endif
