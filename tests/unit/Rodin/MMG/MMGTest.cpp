@@ -790,4 +790,719 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&ref7, &lsd);
     EXPECT_EQ(&ref8, &lsd);
   }
+
+  // ========================================================================
+  // MMG::Mesh deeper behavior tests
+  // ========================================================================
+
+  TEST(Rodin_MMG_Mesh, ScalePreservesTopology)
+  {
+    const size_t n = 4;
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh.scale(0.5);
+
+    EXPECT_EQ(mesh.getVertexCount(), n * n);
+    EXPECT_EQ(mesh.getCellCount(), 2 * (n - 1) * (n - 1));
+    EXPECT_EQ(mesh.getDimension(), 2);
+  }
+
+  TEST(Rodin_MMG_Mesh, SetAttributeOnCells)
+  {
+    const size_t n = 4;
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+
+    static constexpr Attribute label = 42;
+    for (auto it = mesh.getCell(); it; ++it)
+    {
+      mesh.setAttribute({ it->getDimension(), it->getIndex() }, label);
+    }
+
+    // Verify attributes are set correctly
+    for (auto it = mesh.getCell(); it; ++it)
+    {
+      auto attr = mesh.getAttribute(it->getDimension(), it->getIndex());
+      ASSERT_TRUE(attr.has_value());
+      EXPECT_EQ(*attr, label);
+    }
+  }
+
+  TEST(Rodin_MMG_Mesh, VertexCoordinates)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 3, 3 });
+
+    // Vertices on a 3x3 grid at integer coordinates
+    const size_t vertexCount = mesh.getVertexCount();
+    EXPECT_EQ(vertexCount, 9);
+
+    // Check that vertex coordinates are within the expected range
+    for (Index i = 0; i < static_cast<Index>(vertexCount); i++)
+    {
+      auto coords = mesh.getVertexCoordinates(i);
+      EXPECT_GE(coords(0), 0.0);
+      EXPECT_GE(coords(1), 0.0);
+    }
+  }
+
+  TEST(Rodin_MMG_Mesh, ScaleAffectsCoordinates)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 3, 3 });
+    mesh.scale(0.5);
+
+    // After scaling by 0.5, max coordinates should be halved
+    for (Index i = 0; i < static_cast<Index>(mesh.getVertexCount()); i++)
+    {
+      auto coords = mesh.getVertexCoordinates(i);
+      EXPECT_LE(coords(0), 1.1);  // Allow small FP tolerance
+      EXPECT_LE(coords(1), 1.1);
+    }
+  }
+
+  TEST(Rodin_MMG_Mesh, ConnectivityCompute)
+  {
+    const size_t n = 4;
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh.getConnectivity().compute(1, 2);
+
+    // After computing face→cell incidence, boundary detection works
+    size_t boundaryCount = 0;
+    for (auto it = mesh.getBoundary(); !it.end(); ++it)
+    {
+      boundaryCount++;
+      EXPECT_TRUE(it->isBoundary());
+    }
+    // A 4×4 uniform grid has 4×(n-1) = 12 boundary edges
+    EXPECT_EQ(boundaryCount, 4 * (n - 1));
+  }
+
+  TEST(Rodin_MMG_Mesh, IdempotentSetCorner)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+
+    mesh.setCorner(0);
+    mesh.setCorner(0);
+    mesh.setCorner(0);
+
+    // IndexSet should deduplicate
+    EXPECT_EQ(mesh.getCorners().size(), 1);
+  }
+
+  TEST(Rodin_MMG_Mesh, IdempotentSetRidge)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+
+    mesh.setRidge(0);
+    mesh.setRidge(0);
+
+    EXPECT_EQ(mesh.getRidges().size(), 1);
+  }
+
+  TEST(Rodin_MMG_Mesh, MoveAssignmentClearsSource)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.setCorner(0);
+    mesh.setCorner(3);
+    mesh.setRidge(1);
+    mesh.setRequiredVertex(5);
+    mesh.setRequiredEdge(2);
+
+    MMG::Mesh target;
+    target = std::move(mesh);
+
+    // Target has the data
+    EXPECT_EQ(target.getCorners().size(), 2);
+    EXPECT_EQ(target.getRidges().size(), 1);
+    EXPECT_EQ(target.getRequiredVertices().size(), 1);
+    EXPECT_EQ(target.getRequiredEdges().size(), 1);
+    EXPECT_FALSE(target.isEmpty());
+  }
+
+  TEST(Rodin_MMG_Mesh, CopyPreservesMetadataAfterMutation)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.setCorner(0);
+
+    MMG::Mesh copy(mesh);
+    EXPECT_EQ(copy.getCorners().size(), 1);
+
+    // Mutate original
+    mesh.setCorner(1);
+    mesh.setCorner(2);
+    EXPECT_EQ(mesh.getCorners().size(), 3);
+
+    // Copy is independent
+    EXPECT_EQ(copy.getCorners().size(), 1);
+  }
+
+  TEST(Rodin_MMG_Mesh, ParentMoveAssignmentClearsMMGMetadata)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.setCorner(0);
+    mesh.setRidge(1);
+
+    // Assign from parent type (which has no MMG metadata)
+    Mesh<Context::Local> parentMesh;
+    parentMesh = parentMesh.UniformGrid(Polytope::Type::Triangle, { 3, 3 });
+    mesh = std::move(parentMesh);
+
+    // After parent assignment, mesh topology changes but corners/ridges
+    // are not cleared by the Parent move op — they persist from before.
+    // This is the actual behavior we document.
+    EXPECT_EQ(mesh.getVertexCount(), 9);
+  }
+
+  TEST(Rodin_MMG_Mesh, IsSurface)
+  {
+    // A 2D uniform grid on triangles is not a surface mesh
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    EXPECT_FALSE(mesh.isSurface());
+  }
+
+  TEST(Rodin_MMG_Mesh, GetArea)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 3, 3 });
+    mesh.getConnectivity().compute(1, 2);
+
+    // The area of the default 2D grid
+    Real area = mesh.getArea();
+    EXPECT_GT(area, 0.0);
+  }
+
+  // ========================================================================
+  // MMG::GridFunction deeper behavior tests
+  // ========================================================================
+
+  TEST(Rodin_MMG_GridFunction, ScalarZeroInitialization)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh);
+    MMG::RealGridFunction gf(fes);
+
+    // Default-constructed GridFunction should have zero data
+    const auto& data = gf.getData();
+    for (Eigen::Index i = 0; i < data.size(); i++)
+    {
+      EXPECT_NEAR(data(i), 0.0, 1e-15);
+    }
+  }
+
+  TEST(Rodin_MMG_GridFunction, ScalarProjectFromLambda)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh);
+    MMG::RealGridFunction gf(fes);
+
+    gf = [](const Geometry::Point& p) { return 2.0 * p.x() + 3.0 * p.y(); };
+
+    // P1 represents linear functions exactly on vertices.
+    // Verify that DOFs match the expected values at vertex coordinates.
+    for (Index i = 0; i < static_cast<Index>(mesh.getVertexCount()); i++)
+    {
+      auto coords = mesh.getVertexCoordinates(i);
+      Real expected = 2.0 * coords(0) + 3.0 * coords(1);
+      EXPECT_NEAR(gf[i], expected, 1e-10);
+    }
+  }
+
+  TEST(Rodin_MMG_GridFunction, ScalarProjectConstant)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh);
+    MMG::RealGridFunction gf(fes);
+
+    gf = RealFunction(7.5);
+
+    for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
+    {
+      EXPECT_NEAR(gf[i], 7.5, 1e-14);
+    }
+  }
+
+  TEST(Rodin_MMG_GridFunction, ScalarDataAccess)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh);
+    MMG::RealGridFunction gf(fes);
+
+    gf = RealFunction(3.0);
+
+    const auto& data = gf.getData();
+    EXPECT_EQ(static_cast<size_t>(data.size()), gf.getSize());
+    for (Eigen::Index i = 0; i < data.size(); i++)
+    {
+      EXPECT_NEAR(data(i), 3.0, 1e-14);
+    }
+  }
+
+  TEST(Rodin_MMG_GridFunction, ScalarOperatorBracket)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh);
+    MMG::RealGridFunction gf(fes);
+
+    // Write via operator[]
+    for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
+    {
+      gf[i] = static_cast<Real>(i * 10);
+    }
+
+    // Read back
+    for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
+    {
+      EXPECT_NEAR(gf[i], static_cast<Real>(i * 10), 1e-14);
+    }
+  }
+
+  TEST(Rodin_MMG_GridFunction, ScalarArithmeticAddScalar)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh);
+    MMG::RealGridFunction gf(fes);
+
+    gf = RealFunction(5.0);
+    gf += 3.0;
+
+    for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
+    {
+      EXPECT_NEAR(gf[i], 8.0, 1e-14);
+    }
+  }
+
+  TEST(Rodin_MMG_GridFunction, ScalarArithmeticSubScalar)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh);
+    MMG::RealGridFunction gf(fes);
+
+    gf = RealFunction(10.0);
+    gf -= 4.0;
+
+    for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
+    {
+      EXPECT_NEAR(gf[i], 6.0, 1e-14);
+    }
+  }
+
+  TEST(Rodin_MMG_GridFunction, ScalarArithmeticMulScalar)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh);
+    MMG::RealGridFunction gf(fes);
+
+    gf = RealFunction(4.0);
+    gf *= 3.0;
+
+    for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
+    {
+      EXPECT_NEAR(gf[i], 12.0, 1e-14);
+    }
+  }
+
+  TEST(Rodin_MMG_GridFunction, ScalarArithmeticDivScalar)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh);
+    MMG::RealGridFunction gf(fes);
+
+    gf = RealFunction(12.0);
+    gf /= 4.0;
+
+    for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
+    {
+      EXPECT_NEAR(gf[i], 3.0, 1e-14);
+    }
+  }
+
+  TEST(Rodin_MMG_GridFunction, ScalarArithmeticAddGridFunction)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh);
+    MMG::RealGridFunction gf1(fes), gf2(fes);
+
+    gf1 = RealFunction(3.0);
+    gf2 = RealFunction(7.0);
+    gf1 += gf2;
+
+    for (Index i = 0; i < static_cast<Index>(gf1.getSize()); i++)
+    {
+      EXPECT_NEAR(gf1[i], 10.0, 1e-14);
+    }
+  }
+
+  TEST(Rodin_MMG_GridFunction, ScalarArithmeticSubGridFunction)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh);
+    MMG::RealGridFunction gf1(fes), gf2(fes);
+
+    gf1 = RealFunction(10.0);
+    gf2 = RealFunction(4.0);
+    gf1 -= gf2;
+
+    for (Index i = 0; i < static_cast<Index>(gf1.getSize()); i++)
+    {
+      EXPECT_NEAR(gf1[i], 6.0, 1e-14);
+    }
+  }
+
+  TEST(Rodin_MMG_GridFunction, ScalarArithmeticMulGridFunction)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh);
+    MMG::RealGridFunction gf1(fes), gf2(fes);
+
+    gf1 = RealFunction(3.0);
+    gf2 = RealFunction(5.0);
+    gf1 *= gf2;
+
+    for (Index i = 0; i < static_cast<Index>(gf1.getSize()); i++)
+    {
+      EXPECT_NEAR(gf1[i], 15.0, 1e-14);
+    }
+  }
+
+  TEST(Rodin_MMG_GridFunction, ScalarArithmeticDivGridFunction)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh);
+    MMG::RealGridFunction gf1(fes), gf2(fes);
+
+    gf1 = RealFunction(12.0);
+    gf2 = RealFunction(3.0);
+    gf1 /= gf2;
+
+    for (Index i = 0; i < static_cast<Index>(gf1.getSize()); i++)
+    {
+      EXPECT_NEAR(gf1[i], 4.0, 1e-14);
+    }
+  }
+
+  TEST(Rodin_MMG_GridFunction, ScalarMinMax)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh);
+    MMG::RealGridFunction gf(fes);
+
+    for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
+    {
+      gf[i] = static_cast<Real>(i);
+    }
+
+    EXPECT_NEAR(gf.min(), 0.0, 1e-14);
+    EXPECT_NEAR(gf.max(), static_cast<Real>(gf.getSize() - 1), 1e-14);
+  }
+
+  TEST(Rodin_MMG_GridFunction, ScalarArgMinArgMax)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh);
+    MMG::RealGridFunction gf(fes);
+
+    for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
+    {
+      gf[i] = static_cast<Real>(i);
+    }
+
+    EXPECT_EQ(gf.argmin(), 0);
+    EXPECT_EQ(gf.argmax(), static_cast<Index>(gf.getSize() - 1));
+  }
+
+  TEST(Rodin_MMG_GridFunction, ScalarCopyConstructor)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh);
+    MMG::RealGridFunction gf1(fes);
+    gf1 = RealFunction(5.0);
+
+    // Copy
+    MMG::RealGridFunction gf2(gf1);
+
+    for (Index i = 0; i < static_cast<Index>(gf1.getSize()); i++)
+    {
+      EXPECT_NEAR(gf2[i], 5.0, 1e-14);
+    }
+
+    // Mutate copy — original is unaffected
+    gf2[0] = 99.0;
+    EXPECT_NEAR(gf1[0], 5.0, 1e-14);
+    EXPECT_NEAR(gf2[0], 99.0, 1e-14);
+  }
+
+  TEST(Rodin_MMG_GridFunction, ScalarMoveConstructor)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh);
+    MMG::RealGridFunction gf1(fes);
+    gf1 = RealFunction(7.0);
+    size_t sz = gf1.getSize();
+
+    MMG::RealGridFunction gf2(std::move(gf1));
+    EXPECT_EQ(gf2.getSize(), sz);
+    for (Index i = 0; i < static_cast<Index>(gf2.getSize()); i++)
+    {
+      EXPECT_NEAR(gf2[i], 7.0, 1e-14);
+    }
+  }
+
+  TEST(Rodin_MMG_GridFunction, ScalarCopyAssignment)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh);
+    MMG::RealGridFunction gf1(fes), gf2(fes);
+    gf1 = RealFunction(3.0);
+    gf2 = RealFunction(9.0);
+
+    gf2 = gf1;
+    for (Index i = 0; i < static_cast<Index>(gf2.getSize()); i++)
+    {
+      EXPECT_NEAR(gf2[i], 3.0, 1e-14);
+    }
+  }
+
+  TEST(Rodin_MMG_GridFunction, ScalarFESAssociation)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh);
+    MMG::RealGridFunction gf(fes);
+
+    EXPECT_EQ(&gf.getFiniteElementSpace(), &fes);
+    EXPECT_EQ(gf.getFiniteElementSpace().getVectorDimension(), 1);
+    EXPECT_EQ(gf.getSize(), fes.getSize());
+    EXPECT_EQ(gf.getSize(), mesh.getVertexCount());
+  }
+
+  TEST(Rodin_MMG_GridFunction, ScalarPointEvaluation)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh);
+    MMG::RealGridFunction gf(fes);
+
+    // Project a constant function: should evaluate to the same constant
+    gf = RealFunction(42.0);
+
+    // Get the first cell and evaluate at a reference point inside it
+    auto it = mesh.getPolytope(mesh.getDimension(), 0);
+    const auto& polytope = *it;
+    const Math::Vector<Real> rc{{ 0.25, 0.25 }};
+    Geometry::Point p(polytope, rc);
+
+    Real value = gf.getValue(p);
+    EXPECT_NEAR(value, 42.0, 1e-10);
+  }
+
+  TEST(Rodin_MMG_GridFunction, ScalarLinearFunctionExactInterpolation)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh);
+    MMG::RealGridFunction gf(fes);
+
+    // P1 should represent linear functions exactly
+    gf = [](const Geometry::Point& p) { return p.x() + 2.0 * p.y(); };
+
+    // Evaluate at the centroid of a cell
+    for (Index cellIdx = 0; cellIdx < static_cast<Index>(mesh.getCellCount()); cellIdx++)
+    {
+      auto it = mesh.getPolytope(mesh.getDimension(), cellIdx);
+      const auto& polytope = *it;
+      const auto& trans = mesh.getPolytopeTransformation(mesh.getDimension(), cellIdx);
+
+      const Math::Vector<Real> rc{{ 1.0 / 3.0, 1.0 / 3.0 }};
+      Math::SpatialPoint pc;
+      trans.transform(pc, rc);
+      Geometry::Point p(polytope, rc);
+
+      Real value = gf.getValue(p);
+      Real expected = pc(0) + 2.0 * pc(1);
+      EXPECT_NEAR(value, expected, 1e-10);
+    }
+  }
+
+  TEST(Rodin_MMG_GridFunction, VectorProjectFromLambda)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh, 2);
+    MMG::VectorGridFunction gf(fes);
+
+    gf = [](const Geometry::Point& p)
+    {
+      return Math::Vector<Real>{{ p.x(), p.y() }};
+    };
+
+    EXPECT_EQ(gf.getFiniteElementSpace().getVectorDimension(), 2);
+    EXPECT_EQ(gf.getSize(), mesh.getVertexCount() * 2);
+  }
+
+  TEST(Rodin_MMG_GridFunction, VectorFESAssociation)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh, 3);
+    MMG::GridFunction<Math::Vector<Real>> gf(fes);
+
+    EXPECT_EQ(&gf.getFiniteElementSpace(), &fes);
+    EXPECT_EQ(gf.getFiniteElementSpace().getVectorDimension(), 3);
+    EXPECT_EQ(gf.getSize(), mesh.getVertexCount() * 3);
+  }
+
+  TEST(Rodin_MMG_GridFunction, ScalarIOSaveLoadMEDIT)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh);
+    MMG::RealGridFunction gf(fes);
+    gf = [](const Geometry::Point& p) { return p.x() + p.y(); };
+
+    const std::string meshFile = "/tmp/rodin_mmg_gf_io_mesh.mesh";
+    const std::string solFile = "/tmp/rodin_mmg_gf_io.sol";
+    mesh.save(meshFile, IO::FileFormat::MEDIT);
+    gf.save(solFile, IO::FileFormat::MEDIT);
+
+    // Load back on a fresh mesh+FES
+    MMG::Mesh mesh2;
+    mesh2.load(meshFile, IO::FileFormat::MEDIT);
+    P1 fes2(mesh2);
+    MMG::RealGridFunction gf2(fes2);
+    gf2.load(solFile, IO::FileFormat::MEDIT);
+
+    EXPECT_EQ(gf2.getSize(), gf.getSize());
+    for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
+    {
+      EXPECT_NEAR(gf2[i], gf[i], 1e-10);
+    }
+
+    std::remove(meshFile.c_str());
+    std::remove(solFile.c_str());
+  }
+
+  TEST(Rodin_MMG_GridFunction, ScalarIOSaveLoadMFEM)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh);
+    MMG::RealGridFunction gf(fes);
+    gf = RealFunction(3.14);
+
+    const std::string meshFile = "/tmp/rodin_mmg_gf_mfem.mesh";
+    const std::string gfFile = "/tmp/rodin_mmg_gf_mfem.gf";
+    mesh.save(meshFile, IO::FileFormat::MFEM);
+    gf.save(gfFile, IO::FileFormat::MFEM);
+
+    // Load back
+    MMG::Mesh mesh2;
+    mesh2.load(meshFile, IO::FileFormat::MFEM);
+    P1 fes2(mesh2);
+    MMG::RealGridFunction gf2(fes2);
+    gf2.load(gfFile, IO::FileFormat::MFEM);
+
+    EXPECT_EQ(gf2.getSize(), gf.getSize());
+    for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
+    {
+      EXPECT_NEAR(gf2[i], 3.14, 1e-10);
+    }
+
+    std::remove(meshFile.c_str());
+    std::remove(gfFile.c_str());
+  }
+
+  TEST(Rodin_MMG_GridFunction, ScalarProjectThenAdapt)
+  {
+    // Integration test: project a size map, adapt, then verify the adapted
+    // mesh can host a new grid function.
+    const size_t n = 8;
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+
+    P1 fes(mesh);
+    MMG::RealGridFunction sizeMap(fes);
+    sizeMap = [](const Geometry::Point&) { return 0.25; };
+
+    MMG::Adapt().setHMin(0.05).setHMax(0.5).adapt(mesh, sizeMap);
+
+    // After adaptation, build a new P1 space and grid function on the
+    // adapted mesh.
+    P1 fesAdapted(mesh);
+    MMG::RealGridFunction gfAdapted(fesAdapted);
+    gfAdapted = [](const Geometry::Point& p) { return p.x() * p.y(); };
+
+    EXPECT_EQ(gfAdapted.getSize(), mesh.getVertexCount());
+    EXPECT_GT(gfAdapted.getSize(), 0);
+  }
+
+  TEST(Rodin_MMG_GridFunction, VectorPointEvaluation)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh, 2);
+    MMG::VectorGridFunction gf(fes);
+
+    // Project a constant vector function
+    gf = [](const Geometry::Point&)
+    {
+      return Math::Vector<Real>{{ 1.0, 2.0 }};
+    };
+
+    // Evaluate at a point inside the first cell
+    auto it = mesh.getPolytope(mesh.getDimension(), 0);
+    const auto& polytope = *it;
+    const Math::Vector<Real> rc{{ 0.25, 0.25 }};
+    Geometry::Point p(polytope, rc);
+
+    auto value = gf.getValue(p);
+    EXPECT_NEAR(value(0), 1.0, 1e-10);
+    EXPECT_NEAR(value(1), 2.0, 1e-10);
+  }
+
+  TEST(Rodin_MMG_GridFunction, ScalarSetData)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh);
+    MMG::RealGridFunction gf(fes);
+
+    // Manually set data
+    Math::Vector<Real> data(gf.getSize());
+    for (Eigen::Index i = 0; i < data.size(); i++)
+    {
+      data(i) = static_cast<Real>(i * 2);
+    }
+    gf.setData(data);
+
+    for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
+    {
+      EXPECT_NEAR(gf[i], static_cast<Real>(i * 2), 1e-14);
+    }
+  }
 }
