@@ -499,7 +499,7 @@ namespace Rodin::Variational
       constexpr
       Complex getValue(const Geometry::Point& p) const
       {
-        return { m_re->getValue(p), m_imag->getValue(p) };
+        return { m_re(p), m_imag(p) };
       }
 
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
