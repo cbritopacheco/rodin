@@ -48,9 +48,9 @@ TEST(Rodin_Variational_BoundaryNormal, UnitNormalOnBoundary)
   BoundaryNormal n(mesh);
 
   // Find a boundary edge (codimension-1 entity)
-  const size_t meshDim = mesh.getDimension();
+  const size_t dimension = mesh.getDimension();
   bool foundBoundary = false;
-  for (auto it = mesh.getPolytope(meshDim - 1); !it.end(); ++it)
+  for (auto it = mesh.getPolytope(dimension - 1); !it.end(); ++it)
   {
     const auto& polytope = *it;
     if (mesh.isBoundary(polytope.getIndex()))
