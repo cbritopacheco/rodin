@@ -81,6 +81,8 @@
 #include <vector>
 #include <shared_mutex>
 
+#include <boost/serialization/split_member.hpp>
+
 #include "Rodin/Alert/Exception.h"
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Types.h"
@@ -192,6 +194,8 @@ namespace Rodin::Geometry
   class PolytopeQuadratureIndex
   {
     public:
+      friend class boost::serialization::access;
+
       /**
        * @brief Default constructor.
        */
@@ -555,6 +559,25 @@ namespace Rodin::Geometry
         size_t size = 0;                             ///< Number of valid entries
         size_t next = 0;                             ///< Round-robin eviction pointer
         mutable std::shared_mutex mutex;             ///< Slot-level synchronization
+
+
+        template <class Archive>
+        void save(Archive& ar, const unsigned int) const
+        {
+          // Intentionally serialize no cache content.
+        }
+
+        template <class Archive>
+        void load(Archive& ar, const unsigned int)
+        {
+          hot.qf = nullptr;
+          hot.ptr = nullptr;
+          entries = {};
+          size = 0;
+          next = 0;
+        }
+
+        BOOST_SERIALIZATION_SPLIT_MEMBER()
       };
 
       /**
@@ -588,9 +611,21 @@ namespace Rodin::Geometry
           return *this;
         }
 
+        template <class Archive>
+        void serialize(Archive& ar, const unsigned int)
+        {
+          ar & slots; // mutex is not serialized
+        }
+
         std::deque<Slot> slots;              ///< Polytope slots for this dimension
         mutable std::shared_mutex mutex;     ///< Dimension-level synchronization
       };
+
+        template <class Archive>
+        void serialize(Archive& ar, const unsigned int)
+        {
+          ar & m_dimensions; // mutex is not serialized
+        }
 
       mutable std::vector<Dimension> m_dimensions; ///< Dimension-partitioned storage
   };
