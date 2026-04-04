@@ -542,3 +542,36 @@ gtest_discover_tests(RodinVariationalReImTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinVariationalCoordinateFunctionTest CoordinateFunctionTest.cpp)
+target_link_libraries(RodinVariationalCoordinateFunctionTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalCoordinateFunctionTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinVariationalBoundaryNormalTest BoundaryNormalTest.cpp)
+target_link_libraries(RodinVariationalBoundaryNormalTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalBoundaryNormalTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinVariationalRelativeErrorTest RelativeErrorTest.cpp)
+target_link_libraries(RodinVariationalRelativeErrorTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalRelativeErrorTest
+  PROPERTIES
+    LABELS unit
+)
