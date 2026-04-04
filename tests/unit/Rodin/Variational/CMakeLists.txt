@@ -498,3 +498,47 @@ gtest_discover_tests(RodinVariationalFrobeniusTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinVariationalUnaryMinusTest UnaryMinusTest.cpp)
+target_link_libraries(RodinVariationalUnaryMinusTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalUnaryMinusTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinVariationalConjugateTest ConjugateTest.cpp)
+target_link_libraries(RodinVariationalConjugateTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalConjugateTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinVariationalComplexFunctionTest ComplexFunctionTest.cpp)
+target_link_libraries(RodinVariationalComplexFunctionTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalComplexFunctionTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinVariationalReImTest ReImTest.cpp)
+target_link_libraries(RodinVariationalReImTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalReImTest
+  PROPERTIES
+    LABELS unit
+)
