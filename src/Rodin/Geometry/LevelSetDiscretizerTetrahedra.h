@@ -220,11 +220,17 @@ namespace Rodin::Geometry
 
         FlatMap<EdgeKey, Attribute> inEdgeAttrByVerts;
         FlatMap<FaceKey, Attribute> inFaceAttrByVerts;
+        auto toOptionalAttr = [](const auto& attr) -> Optional<Attribute>
+        {
+          if (attr)
+            return Optional<Attribute>(*attr);
+          return {};
+        };
 
         for (auto eit = mesh.getPolytope(1); !eit.end(); ++eit)
         {
           const auto& ev = eit->getVertices();
-          const auto a = eit->getAttribute();
+          const Optional<Attribute> a = toOptionalAttr(eit->getAttribute());
           if (a)
             inEdgeAttrByVerts[makeEdgeKey(ev(0), ev(1))] = *a;
         }
@@ -234,7 +240,7 @@ namespace Rodin::Geometry
           if (fit->getGeometry() != Polytope::Type::Triangle)
             continue;
           const auto& fv = fit->getVertices();
-          const auto a = fit->getAttribute();
+          const Optional<Attribute> a = toOptionalAttr(fit->getAttribute());
           if (a)
             inFaceAttrByVerts[makeFaceKey(fv(0), fv(1), fv(2))] = *a;
         }
@@ -865,7 +871,7 @@ namespace Rodin::Geometry
               << "Only tetrahedral meshes are supported."
               << Alert::Raise;
 
-          const auto cellAttr = cit->getAttribute();
+          const Optional<Attribute> cellAttr = toOptionalAttr(cit->getAttribute());
           const auto& cv = cit->getVertices();
 
           std::array<Sign, 4> ss{
