@@ -13,6 +13,7 @@ set(RodinVariational_HEADERS
   Derivative.h
   Dot.h
   Jump.h
+  Average.h
   FiniteElementSpace.h
   ForwardDecls.h
   Grad.h

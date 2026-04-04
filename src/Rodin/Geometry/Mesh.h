@@ -1475,8 +1475,9 @@ namespace Rodin::Geometry
         ar & m_sdim;
         ar & m_vertices;
         ar & m_connectivity;
-        ar & m_transformations;
         ar & m_attributes;
+        ar & m_transformations;
+        ar & m_quadratures;
         ar & m_context;
       }
 

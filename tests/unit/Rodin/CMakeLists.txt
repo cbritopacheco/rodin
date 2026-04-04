@@ -111,6 +111,7 @@ add_subdirectory(FormLanguage)
 add_subdirectory(Models)
 add_subdirectory(Solver)
 add_subdirectory(Assembly)
+add_subdirectory(MMG)
 
 if (RODIN_USE_MPI)
   add_subdirectory(MPI)
