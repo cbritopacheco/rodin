@@ -575,3 +575,25 @@ gtest_discover_tests(RodinVariationalRelativeErrorTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinVariationalProblemTest ProblemTest.cpp)
+target_link_libraries(RodinVariationalProblemTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalProblemTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinVariationalMatrixFunctionTest MatrixFunctionTest.cpp)
+target_link_libraries(RodinVariationalMatrixFunctionTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalMatrixFunctionTest
+  PROPERTIES
+    LABELS unit
+)
