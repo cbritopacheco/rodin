@@ -57,8 +57,7 @@ TEST(Rodin_Variational_EQ, NumberLHS)
   auto p = makePoint(mesh);
 
   RealFunction a(5.0);
-  RealFunction b(5.0);
-  auto eq = (a == b);
+  auto eq = (5.0 == a);
 
   EXPECT_TRUE(eq.getValue(p));
 }
@@ -69,8 +68,7 @@ TEST(Rodin_Variational_EQ, NumberRHS)
   auto p = makePoint(mesh);
 
   RealFunction a(5.0);
-  RealFunction b(6.0);
-  auto eq = (a == b);
+  auto eq = (a == 6.0);
 
   EXPECT_FALSE(eq.getValue(p));
 }
@@ -121,9 +119,8 @@ TEST(Rodin_Variational_NEQ, NumberLHS)
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
   auto p = makePoint(mesh);
 
-  RealFunction a(4.0);
   RealFunction b(5.0);
-  auto neq = (a != b);
+  auto neq = (4.0 != b);
 
   EXPECT_TRUE(neq.getValue(p));
 }
@@ -134,8 +131,7 @@ TEST(Rodin_Variational_NEQ, NumberRHS)
   auto p = makePoint(mesh);
 
   RealFunction a(5.0);
-  RealFunction b(5.0);
-  auto neq = (a != b);
+  auto neq = (a != 5.0);
 
   EXPECT_FALSE(neq.getValue(p));
 }

@@ -42,8 +42,8 @@
  * problem.solve(solver);
  * ```
  */
-#ifndef RODIN_VARIATIONAL_DENSEPROBLEM_H
-#define RODIN_VARIATIONAL_DENSEPROBLEM_H
+#ifndef RODIN_VARIATIONAL_SPARSEPROBLEM_H
+#define RODIN_VARIATIONAL_SPARSEPROBLEM_H
 
 #include "Problem.h"
 

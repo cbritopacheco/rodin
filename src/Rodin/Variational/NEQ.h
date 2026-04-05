@@ -131,6 +131,24 @@ namespace Rodin::Variational
   {
     return NEQ(lhs, BooleanFunction(rhs));
   }
+
+  template <class Number, class RHSDerived,
+           typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
+  constexpr
+  auto
+  operator!=(Number lhs, const FunctionBase<RHSDerived>& rhs)
+  {
+    return NEQ(RealFunction(lhs), rhs);
+  }
+
+  template <class LHSDerived, class Number,
+           typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
+  constexpr
+  auto
+  operator!=(const FunctionBase<LHSDerived>& lhs, Number rhs)
+  {
+    return NEQ(lhs, RealFunction(rhs));
+  }
 }
 
 #endif
