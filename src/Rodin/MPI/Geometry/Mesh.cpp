@@ -666,12 +666,13 @@ namespace Rodin::Geometry
         if (ownerRank[i] != rank)
           continue;
 
+        // Send the distributed id to every neighbor.  A neighbor may hold
+        // the entity as a ghost because it discovered it from one of its
+        // own ghost cells.  The participant set built from local cell
+        // ownership is a lower bound; sending to all neighbors and letting
+        // the recipient filter by key is always correct.
         for (size_t k = 0; k < neighbors.size(); ++k)
-        {
-          const int nbr = neighbors[k];
-          if (participants[i].find(nbr) != participants[i].end())
-            sendbuf[k].push_back({ keys[i], distId[i] });
-        }
+          sendbuf[k].push_back({ keys[i], distId[i] });
       }
 
       std::vector<boost::mpi::request> reqs;
@@ -698,6 +699,54 @@ namespace Rodin::Geometry
       }
 
       boost::mpi::wait_all(reqs.begin(), reqs.end());
+    }
+
+    // --------------------------------------------------------------------------
+    // Forwarding round: relay received ids to neighbors.
+    //
+    // When three or more partitions meet at an entity, the owner may be two
+    // hops away from a ghost holder.  One additional forwarding round covers
+    // the 2-hop case arising from a 1-cell-deep ghost layer.
+    // --------------------------------------------------------------------------
+    {
+      const int tagFwd = 3000 + static_cast<int>(d);
+      std::vector<std::vector<std::pair<Polytope::Key, Index>>> fwdbuf(neighbors.size());
+
+      for (Index i = 0; i < static_cast<Index>(nd); ++i)
+      {
+        if (ownerRank[i] == rank)
+          continue;                 // already sent by owner in round 1
+        if (distId[i] == std::numeric_limits<Index>::max())
+          continue;                 // not yet resolved — nothing to forward
+
+        for (size_t k = 0; k < neighbors.size(); ++k)
+          fwdbuf[k].push_back({ keys[i], distId[i] });
+      }
+
+      std::vector<boost::mpi::request> fwdReqs;
+      fwdReqs.reserve(neighbors.size());
+
+      for (size_t k = 0; k < neighbors.size(); ++k)
+        fwdReqs.push_back(comm.isend(neighbors[k], tagFwd, fwdbuf[k]));
+
+      for (size_t k = 0; k < neighbors.size(); ++k)
+      {
+        std::vector<std::pair<Polytope::Key, Index>> recvbuf;
+        comm.recv(neighbors[k], tagFwd, recvbuf);
+
+        for (const auto& [key, gid] : recvbuf)
+        {
+          const auto it = key2local.find(key);
+          if (it == key2local.end())
+            continue;
+
+          const Index i = it->second;
+          if (distId[i] == std::numeric_limits<Index>::max())
+            distId[i] = gid;
+        }
+      }
+
+      boost::mpi::wait_all(fwdReqs.begin(), fwdReqs.end());
     }
 
     for (Index i = 0; i < static_cast<Index>(nd); ++i)

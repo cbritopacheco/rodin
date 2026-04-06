@@ -1549,6 +1549,341 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(globalInterfaceCount, 0u)
       << "With multiple ranks, there should be interface faces.";
   }
+
+  // =========================================================================
+  // MPI Mesh — reconcile()
+  //
+  // These tests use Mesh<Context::MPI>::UniformGrid() which constructs
+  // shards with matching ghost layers suitable for reconciliation, following
+  // the pattern from examples/PETSc/DensityOptimization and MPI_Poisson.
+  // =========================================================================
+
+  /**
+   * @brief Verifies that after reconcile(1) on a 2D triangle mesh, the global
+   * sum of owned edges equals the total edge count in the parent mesh.
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, Reconcile_Edges2D_GlobalOwnershipCount)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+
+    size_t totalEdges = 0;
+    {
+      auto localMesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {4, 4});
+      localMesh.getConnectivity().compute(1, 2);
+      totalEdges = localMesh.getPolytopeCount(1);
+    }
+
+    auto mpiMesh = Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Triangle, {4, 4});
+    mpiMesh.getConnectivity().compute(1, 2);
+    mpiMesh.reconcile(1);
+
+    const auto& shard = mpiMesh.getShard();
+    size_t ownedLocal = 0;
+    for (Index i = 0; i < shard.getPolytopeCount(1); ++i)
+    {
+      if (shard.isOwned(1, i))
+        ++ownedLocal;
+    }
+
+    size_t ownedGlobal = 0;
+    boost::mpi::all_reduce(world, ownedLocal, ownedGlobal, std::plus<size_t>());
+
+    EXPECT_EQ(ownedGlobal, totalEdges)
+      << "Rank " << world.rank()
+      << ": sum of owned edges should equal total edges in parent mesh.";
+  }
+
+  /**
+   * @brief Verifies that after reconcile(1), the edge polytope map is
+   * bidirectional (left and right are inverses).
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, Reconcile_Edges2D_PolytopeMapBidirectional)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh = Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Triangle, {4, 4});
+    mpiMesh.getConnectivity().compute(1, 2);
+    mpiMesh.reconcile(1);
+
+    const auto& shard = mpiMesh.getShard();
+    const auto& pmap = shard.getPolytopeMap(1);
+
+    EXPECT_EQ(pmap.left.size(), pmap.right.size())
+      << "Rank " << world.rank()
+      << ": polytope map left/right size mismatch for edges.";
+
+    for (Index li = 0; li < pmap.left.size(); ++li)
+    {
+      Index distId = pmap.left[li];
+      auto it = pmap.right.find(distId);
+      ASSERT_NE(it, pmap.right.end())
+        << "Rank " << world.rank()
+        << ": distId " << distId << " not in right map.";
+      EXPECT_EQ(it->second, li)
+        << "Rank " << world.rank()
+        << ": round-trip mismatch for local edge " << li;
+    }
+  }
+
+  /**
+   * @brief Verifies that after reconcile(1), each edge has exactly one state
+   * (Owned, Shared, or Ghost) — states are mutually exclusive.
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, Reconcile_Edges2D_StateExclusivity)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh = Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Triangle, {4, 4});
+    mpiMesh.getConnectivity().compute(1, 2);
+    mpiMesh.reconcile(1);
+
+    const auto& shard = mpiMesh.getShard();
+    for (Index i = 0; i < shard.getPolytopeCount(1); ++i)
+    {
+      int count = static_cast<int>(shard.isOwned(1, i))
+                + static_cast<int>(shard.isShared(1, i))
+                + static_cast<int>(shard.isGhost(1, i));
+      EXPECT_EQ(count, 1)
+        << "Rank " << world.rank() << " edge " << i
+        << " has " << count << " states (expected 1).";
+    }
+  }
+
+  /**
+   * @brief Verifies that after reconcile(1), the owner map for edges is
+   * consistent: ghost edges point to valid non-self ranks.
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, Reconcile_Edges2D_OwnerMapConsistency)
+  {
+    const auto& world = *g_world;
+    if (world.size() < 2 || world.size() > 3)
+      GTEST_SKIP() << "Test requires 2 or 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh = Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Triangle, {4, 4});
+    mpiMesh.getConnectivity().compute(1, 2);
+    mpiMesh.reconcile(1);
+
+    const auto& shard = mpiMesh.getShard();
+    const size_t myRank = static_cast<size_t>(world.rank());
+    const size_t numRanks = static_cast<size_t>(world.size());
+
+    const auto& ownerMap = shard.getOwner(1);
+    for (const auto& [localIdx, ownerRank] : ownerMap)
+    {
+      EXPECT_TRUE(shard.isGhost(1, localIdx))
+        << "Rank " << myRank << " edge " << localIdx
+        << ": entity in owner map should be ghost.";
+      EXPECT_LT(ownerRank, numRanks)
+        << "Rank " << myRank << " edge " << localIdx
+        << ": owner rank out of range.";
+      EXPECT_NE(ownerRank, myRank)
+        << "Rank " << myRank << " edge " << localIdx
+        << ": owner should not be self.";
+    }
+  }
+
+  /**
+   * @brief Verifies that after reconcile(1), no distributed edge ID is owned
+   * by multiple ranks — each edge has a unique global owner.
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, Reconcile_Edges2D_NoDuplicateOwnership)
+  {
+    const auto& world = *g_world;
+    if (world.size() < 2 || world.size() > 3)
+      GTEST_SKIP() << "Test requires 2 or 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh = Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Triangle, {4, 4});
+    mpiMesh.getConnectivity().compute(1, 2);
+    mpiMesh.reconcile(1);
+
+    const auto& shard = mpiMesh.getShard();
+
+    std::vector<Index> ownedDistIds;
+    for (Index i = 0; i < shard.getPolytopeCount(1); ++i)
+    {
+      if (shard.isOwned(1, i))
+        ownedDistIds.push_back(shard.getPolytopeMap(1).left[i]);
+    }
+
+    std::vector<std::vector<Index>> allOwned;
+    boost::mpi::gather(world, ownedDistIds, allOwned, 0);
+
+    if (world.rank() == 0)
+    {
+      std::set<Index> allIds;
+      for (const auto& rankIds : allOwned)
+      {
+        for (Index id : rankIds)
+        {
+          auto [it, inserted] = allIds.insert(id);
+          EXPECT_TRUE(inserted)
+            << "Distributed edge ID " << id
+            << " is owned by multiple ranks.";
+        }
+      }
+    }
+  }
+
+  /**
+   * @brief Verifies that after reconcile(1), the halo map for edges is
+   * consistent: halo entries reference owned entities and valid remote ranks.
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, Reconcile_Edges2D_HaloMapConsistency)
+  {
+    const auto& world = *g_world;
+    if (world.size() < 2 || world.size() > 3)
+      GTEST_SKIP() << "Test requires 2 or 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh = Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Triangle, {4, 4});
+    mpiMesh.getConnectivity().compute(1, 2);
+    mpiMesh.reconcile(1);
+
+    const auto& shard = mpiMesh.getShard();
+    const size_t myRank = static_cast<size_t>(world.rank());
+    const size_t numRanks = static_cast<size_t>(world.size());
+
+    const auto& haloMap = shard.getHalo(1);
+    for (const auto& [localIdx, ranks] : haloMap)
+    {
+      EXPECT_TRUE(shard.isOwned(1, localIdx))
+        << "Rank " << myRank << " edge " << localIdx
+        << ": entity in halo map should be owned.";
+      for (Index r : ranks)
+      {
+        EXPECT_LT(r, numRanks)
+          << "Rank " << myRank << " edge " << localIdx
+          << ": halo rank out of range.";
+        EXPECT_NE(r, myRank)
+          << "Rank " << myRank << " edge " << localIdx
+          << ": halo should not reference self.";
+      }
+    }
+  }
+
+  /**
+   * @brief Verifies that with a single MPI rank, reconcile(1) marks all edges
+   * as Owned (no ghosts since there are no neighbors).
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, Reconcile_Edges2D_SingleRank_AllOwned)
+  {
+    const auto& world = *g_world;
+    if (world.size() != 1)
+      GTEST_SKIP() << "Test designed for single MPI rank.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh = Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Triangle, {4, 4});
+    mpiMesh.getConnectivity().compute(1, 2);
+    mpiMesh.reconcile(1);
+
+    const auto& shard = mpiMesh.getShard();
+    for (Index i = 0; i < shard.getPolytopeCount(1); ++i)
+    {
+      EXPECT_TRUE(shard.isOwned(1, i))
+        << "With single rank, all edges should be owned, but edge "
+        << i << " is not.";
+    }
+
+    EXPECT_TRUE(shard.getOwner(1).empty())
+      << "With single rank, owner map for edges should be empty.";
+    EXPECT_TRUE(shard.getHalo(1).empty())
+      << "With single rank, halo map for edges should be empty.";
+  }
+
+  /**
+   * @brief Verifies that reconcile(2) on a 3D tetrahedron mesh produces
+   * correct global face ownership count.
+   *
+   * Uses distributeFromRoot because the MPI UniformGrid for 3D types may
+   * produce degenerate partitions with small grids.
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, Reconcile_Faces3D_GlobalOwnershipCount)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+
+    size_t totalFaces = 0;
+    if (world.rank() == 0)
+    {
+      auto localMesh = makeShardableMesh(Polytope::Type::Tetrahedron, {3, 3, 3});
+      localMesh.getConnectivity().compute(2, 3);
+      totalFaces = localMesh.getPolytopeCount(2);
+    }
+    boost::mpi::broadcast(world, totalFaces, 0);
+
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Tetrahedron, {3, 3, 3});
+    mpiMesh.getConnectivity().compute(2, 3);
+    mpiMesh.reconcile(2);
+
+    const auto& shard = mpiMesh.getShard();
+    size_t ownedLocal = 0;
+    for (Index i = 0; i < shard.getPolytopeCount(2); ++i)
+    {
+      if (shard.isOwned(2, i))
+        ++ownedLocal;
+    }
+
+    size_t ownedGlobal = 0;
+    boost::mpi::all_reduce(world, ownedLocal, ownedGlobal, std::plus<size_t>());
+
+    EXPECT_EQ(ownedGlobal, totalFaces)
+      << "Rank " << world.rank()
+      << ": sum of owned faces should equal total faces in parent mesh.";
+  }
+
+  /**
+   * @brief Verifies that reconcile(1) works for a 2D quadrilateral mesh,
+   * producing the correct global edge ownership count.
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, Reconcile_Quad2D_GlobalEdgeCount)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+
+    size_t totalEdges = 0;
+    {
+      auto localMesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Quadrilateral, {4, 4});
+      localMesh.getConnectivity().compute(1, 2);
+      totalEdges = localMesh.getPolytopeCount(1);
+    }
+
+    auto mpiMesh = Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Quadrilateral, {4, 4});
+    mpiMesh.getConnectivity().compute(1, 2);
+    mpiMesh.reconcile(1);
+
+    const auto& shard = mpiMesh.getShard();
+    size_t ownedLocal = 0;
+    for (Index i = 0; i < shard.getPolytopeCount(1); ++i)
+    {
+      if (shard.isOwned(1, i))
+        ++ownedLocal;
+    }
+
+    size_t ownedGlobal = 0;
+    boost::mpi::all_reduce(world, ownedLocal, ownedGlobal, std::plus<size_t>());
+
+    EXPECT_EQ(ownedGlobal, totalEdges)
+      << "Rank " << world.rank()
+      << ": sum of owned edges should equal total edges in parent quad mesh.";
+  }
 }
 
 int main(int argc, char** argv)
