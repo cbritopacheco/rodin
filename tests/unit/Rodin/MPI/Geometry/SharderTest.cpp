@@ -1971,14 +1971,21 @@ namespace Rodin::Tests::Unit
     const auto& shard = mpiMesh.getShard();
     const size_t ne = shard.getPolytopeCount(1);
     std::vector<Index> firstGlobal(ne);
-    std::vector<int> firstState(ne);  // 0=owned, 1=shared, 2=ghost
+
+    enum LocalState : int { kOwned = 0, kShared = 1, kGhost = 2 };
+    std::vector<int> firstState(ne);
+
+    auto classifyState = [&](size_t d, Index i) -> int
+    {
+      if (shard.isOwned(d, i))  return kOwned;
+      if (shard.isShared(d, i)) return kShared;
+      return kGhost;
+    };
 
     for (Index i = 0; i < ne; ++i)
     {
       firstGlobal[i] = shard.getPolytopeMap(1).left.at(i);
-      if (shard.isOwned(1, i))       firstState[i] = 0;
-      else if (shard.isShared(1, i)) firstState[i] = 1;
-      else                           firstState[i] = 2;
+      firstState[i] = classifyState(1, i);
     }
 
     // Reconcile again.
@@ -1991,11 +1998,7 @@ namespace Rodin::Tests::Unit
         << "Rank " << world.rank()
         << ": edge " << i << " global ID changed on second reconcile.";
 
-      int state2 = -1;
-      if (shard.isOwned(1, i))       state2 = 0;
-      else if (shard.isShared(1, i)) state2 = 1;
-      else                           state2 = 2;
-      EXPECT_EQ(state2, firstState[i])
+      EXPECT_EQ(classifyState(1, i), firstState[i])
         << "Rank " << world.rank()
         << ": edge " << i << " state changed on second reconcile.";
     }
