@@ -129,3 +129,14 @@ gtest_discover_tests(RodinVariationalH1DivTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinVariationalH1DerivativeTest DerivativeTest.cpp)
+target_link_libraries(RodinVariationalH1DerivativeTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalH1DerivativeTest
+  PROPERTIES
+    LABELS unit
+)

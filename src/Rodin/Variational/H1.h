@@ -62,6 +62,7 @@
 
 #include "H1/H1.h"
 #include "H1/H1Element.h"
+#include "H1/Derivative.h"
 #include "H1/Grad.h"
 #include "H1/Jacobian.h"
 #include "H1/Div.h"
