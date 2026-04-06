@@ -13,6 +13,7 @@
 #include <boost/mpi/environment.hpp>
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/collectives.hpp>
+#include <boost/filesystem.hpp>
 
 #include <Rodin/Geometry.h>
 #include <Rodin/Geometry/Shard.h>
@@ -1508,7 +1509,9 @@ namespace Rodin::Tests::Unit
     const size_t cellCountBefore = shard.getPolytopeCount(D);
     const size_t vertCountBefore = shard.getVertexCount();
 
-    std::string tmpPath = "/tmp/rodin_mpi_test_rank_" + std::to_string(world.rank()) + ".mesh";
+    auto tmpDir = boost::filesystem::temp_directory_path();
+    auto tmpPath = tmpDir / ("rodin_mpi_test_rank_"
+                             + std::to_string(world.rank()) + ".mesh");
     mpiMesh.save(tmpPath, IO::FileFormat::MEDIT);
 
     Mesh<Context::MPI> loaded(ctx);
@@ -1522,7 +1525,7 @@ namespace Rodin::Tests::Unit
       << "Rank " << world.rank()
       << ": loaded mesh should have same vertex count.";
 
-    std::remove(tmpPath.c_str());
+    boost::filesystem::remove(tmpPath);
   }
 
   TEST(Rodin_MPI_Geometry_Mesh, GetInterface_WithFaces)
