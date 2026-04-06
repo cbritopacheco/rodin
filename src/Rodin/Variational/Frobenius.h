@@ -118,6 +118,11 @@ namespace Rodin::Variational
         return *m_v;
       }
 
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
+      {
+        return GetOrderIfConstant(getOperand(), polytope);
+      }
+
       /**
        * @brief Creates a copy of the Frobenius norm operation.
        * @returns Pointer to copied object

@@ -42,6 +42,7 @@
 #include "Variational/Conjugate.h"
 
 #include "Variational/EQ.h"
+#include "Variational/NEQ.h"
 #include "Variational/GT.h"
 #include "Variational/LT.h"
 #include "Variational/GEQ.h"
@@ -82,6 +83,7 @@
 #include "Variational/InterfaceIntegral.h"
 #include "Variational/Problem.h"
 #include "Variational/DenseProblem.h"
+#include "Variational/SparseProblem.h"
 
 #include "Variational/RealFunction.h"
 #include "Variational/VectorFunction.h"

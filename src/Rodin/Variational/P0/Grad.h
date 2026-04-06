@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_P0_GRADIENT_H
-#define RODIN_VARIATIONAL_P0_GRADIENT_H
+#ifndef RODIN_VARIATIONAL_P0_GRAD_H
+#define RODIN_VARIATIONAL_P0_GRAD_H
 
 /**
  * @file
@@ -54,7 +54,7 @@ namespace Rodin::Variational
    */
   template <class Range, class Data, class Mesh>
   class Grad<GridFunction<P0<Range, Mesh>, Data>> final
-    : public GradBase<Grad<GridFunction<P0<Range, Mesh>, Data>>, GridFunction<P0<Range, Mesh>, Data>>
+    : public GradBase<GridFunction<P0<Range, Mesh>, Data>, Grad<GridFunction<P0<Range, Mesh>, Data>>>
   {
     public:
       using RangeType = Range;
@@ -65,7 +65,7 @@ namespace Rodin::Variational
 
       using OperandType = GridFunction<FESType, Data>;
 
-      using Parent = GradBase<Grad<OperandType>, OperandType>;
+      using Parent = GradBase<OperandType, Grad<OperandType>>;
 
       /**
        * @brief Constructs the gradient of a P0 function @f$ u @f$.
