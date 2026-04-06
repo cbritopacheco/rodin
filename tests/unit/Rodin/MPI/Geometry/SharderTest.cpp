@@ -6,6 +6,7 @@
  */
 #include <set>
 #include <numeric>
+#include <cstdio>
 #include <stdexcept>
 
 #include <gtest/gtest.h>
@@ -17,6 +18,7 @@
 #include <Rodin/Geometry/Shard.h>
 #include <Rodin/Geometry/BalancedCompactPartitioner.h>
 #include <Rodin/QF/PolytopeQuadratureFormula.h>
+#include <Rodin/IO/ForwardDecls.h>
 #include <Rodin/MPI/Context/MPI.h>
 #include <Rodin/MPI/Geometry/Sharder.h>
 #include <Rodin/MPI/Geometry/Mesh.h>
@@ -1452,6 +1454,97 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(distribPerimeter, parentPerimeter, 1e-10)
       << "Rank " << world.rank()
       << ": distributed perimeter does not match parent.";
+  }
+
+  TEST(Rodin_MPI_Geometry_Mesh, UniformGrid_Triangle)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh = Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Triangle, {4, 4});
+
+    EXPECT_EQ(mpiMesh.getDimension(), 2u)
+      << "Rank " << world.rank()
+      << ": UniformGrid dimension should be 2.";
+    EXPECT_EQ(mpiMesh.getSpaceDimension(), 2u)
+      << "Rank " << world.rank()
+      << ": UniformGrid space dimension should be 2.";
+
+    size_t localOwnedCells = 0;
+    const auto& shard = mpiMesh.getShard();
+    const size_t D = mpiMesh.getDimension();
+    for (Index i = 0; i < static_cast<Index>(shard.getPolytopeCount(D)); ++i)
+    {
+      if (shard.isOwned(D, i))
+        ++localOwnedCells;
+    }
+
+    size_t globalCells = 0;
+    boost::mpi::all_reduce(world, localOwnedCells, globalCells, std::plus<size_t>());
+
+    EXPECT_GT(globalCells, 0u)
+      << "Rank " << world.rank()
+      << ": UniformGrid should produce cells globally.";
+
+    size_t globalCellsViaAPI = mpiMesh.getPolytopeCount(D);
+    EXPECT_EQ(globalCells, globalCellsViaAPI)
+      << "Rank " << world.rank()
+      << ": Manual owned cell sum should match getPolytopeCount(D).";
+  }
+
+  TEST(Rodin_MPI_Geometry_Mesh, SaveLoad_RoundTrip)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+
+    const size_t D = mpiMesh.getDimension();
+    const auto& shard = mpiMesh.getShard();
+    const size_t cellCountBefore = shard.getPolytopeCount(D);
+    const size_t vertCountBefore = shard.getVertexCount();
+
+    std::string tmpPath = "/tmp/rodin_mpi_test_rank_" + std::to_string(world.rank()) + ".mesh";
+    mpiMesh.save(tmpPath, IO::FileFormat::MEDIT);
+
+    Mesh<Context::MPI> loaded(ctx);
+    loaded.load(tmpPath, IO::FileFormat::MEDIT);
+
+    const auto& loadedShard = loaded.getShard();
+    EXPECT_EQ(loadedShard.getPolytopeCount(D), cellCountBefore)
+      << "Rank " << world.rank()
+      << ": loaded mesh should have same cell count.";
+    EXPECT_EQ(loadedShard.getVertexCount(), vertCountBefore)
+      << "Rank " << world.rank()
+      << ": loaded mesh should have same vertex count.";
+
+    std::remove(tmpPath.c_str());
+  }
+
+  TEST(Rodin_MPI_Geometry_Mesh, GetInterface_WithFaces)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+    if (world.size() < 2)
+      GTEST_SKIP() << "Interface test requires at least 2 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh = distributeFromRootWithFaces(ctx, Polytope::Type::Triangle, {4, 4});
+
+    size_t localInterfaceCount = 0;
+    for (auto it = mpiMesh.getInterface(); it; ++it)
+      ++localInterfaceCount;
+
+    size_t globalInterfaceCount = 0;
+    boost::mpi::all_reduce(world, localInterfaceCount, globalInterfaceCount,
+                           std::plus<size_t>());
+    EXPECT_GT(globalInterfaceCount, 0u)
+      << "With multiple ranks, there should be interface faces.";
   }
 }
 
