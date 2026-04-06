@@ -631,9 +631,9 @@ namespace Rodin::Tests::Unit
     Shard::Builder sb;
     sb.initialize(1, 1);
 
-    Index v0 = sb.vertex(0, Math::SpatialPoint{{0.0}}, Shard::State::Owned);
-    Index v1 = sb.vertex(1, Math::SpatialPoint{{1.0}}, Shard::State::Owned);
-    Index v2 = sb.vertex(2, Math::SpatialPoint{{2.0}}, Shard::State::Ghost);
+    Index v0 = sb.vertex(0, Math::SpatialPoint({0.0}), Shard::State::Owned);
+    Index v1 = sb.vertex(1, Math::SpatialPoint({1.0}), Shard::State::Owned);
+    Index v2 = sb.vertex(2, Math::SpatialPoint({2.0}), Shard::State::Ghost);
 
     IndexArray seg1_vs(2);
     seg1_vs << v0, v1;
