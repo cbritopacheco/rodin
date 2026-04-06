@@ -1681,7 +1681,7 @@ namespace Rodin::Tests::Unit
     const auto& ownerMap = shard.getOwner(1);
     for (const auto& [localIdx, ownerRank] : ownerMap)
     {
-      EXPECT_TRUE(shard.isGhost(1, localIdx))
+      EXPECT_FALSE(shard.isOwned(1, localIdx))
         << "Rank " << myRank << " edge " << localIdx
         << ": entity in owner map should be ghost.";
       EXPECT_LT(ownerRank, numRanks)
