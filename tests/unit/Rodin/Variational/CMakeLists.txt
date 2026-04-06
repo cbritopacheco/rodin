@@ -619,3 +619,14 @@ gtest_discover_tests(RodinVariationalDenseProblemTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinVariationalSparseProblemTest SparseProblemTest.cpp)
+target_link_libraries(RodinVariationalSparseProblemTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalSparseProblemTest
+  PROPERTIES
+    LABELS unit
+)

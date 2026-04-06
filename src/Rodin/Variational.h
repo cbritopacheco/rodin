@@ -83,6 +83,7 @@
 #include "Variational/InterfaceIntegral.h"
 #include "Variational/Problem.h"
 #include "Variational/DenseProblem.h"
+#include "Variational/SparseProblem.h"
 
 #include "Variational/RealFunction.h"
 #include "Variational/VectorFunction.h"
