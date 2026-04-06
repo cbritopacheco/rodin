@@ -1884,6 +1884,122 @@ namespace Rodin::Tests::Unit
       << "Rank " << world.rank()
       << ": sum of owned edges should equal total edges in parent quad mesh.";
   }
+
+  // Note: Mixed 2D mesh reconcile is not tested here because the
+  // makeMixed2DMesh() helper only produces 4 cells, which is too small
+  // for reliable distributed reconcile (degenerate partitioning causes
+  // communication deadlocks).  Mixed mesh sharding/distribution is
+  // thoroughly covered by the non-MPI ShardTest and SharderTest suites.
+
+  /**
+   * @brief Verifies that reconcile(2) on a 3D tetrahedron mesh produces
+   * mutually exclusive states for every face entity (exactly one of
+   * Owned, Shared, or Ghost).
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, Reconcile_Faces3D_StateExclusivity)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Tetrahedron, {3, 3, 3});
+    mpiMesh.getConnectivity().compute(2, 3);
+    mpiMesh.reconcile(2);
+
+    const auto& shard = mpiMesh.getShard();
+    for (Index i = 0; i < shard.getPolytopeCount(2); ++i)
+    {
+      int count = 0;
+      if (shard.isOwned(2, i))  ++count;
+      if (shard.isShared(2, i)) ++count;
+      if (shard.isGhost(2, i))  ++count;
+      EXPECT_EQ(count, 1)
+        << "Rank " << world.rank()
+        << ": face " << i << " has " << count << " states (expected 1).";
+    }
+  }
+
+  /**
+   * @brief Verifies that reconcile(2) on a 3D mesh produces a bidirectional
+   * polytope map for faces.
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, Reconcile_Faces3D_PolytopeMapBidirectional)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Tetrahedron, {3, 3, 3});
+    mpiMesh.getConnectivity().compute(2, 3);
+    mpiMesh.reconcile(2);
+
+    const auto& shard = mpiMesh.getShard();
+    const auto& pm = shard.getPolytopeMap(2);
+
+    for (Index localIdx = 0; localIdx < pm.left.size(); ++localIdx)
+    {
+      const Index globalIdx = pm.left[localIdx];
+      auto it = pm.right.find(globalIdx);
+      ASSERT_NE(it, pm.right.end())
+        << "Rank " << world.rank()
+        << ": global face " << globalIdx << " missing in right map.";
+      EXPECT_EQ(it->second, localIdx);
+    }
+  }
+
+  /**
+   * @brief Verifies that calling reconcile(1) twice is idempotent: the
+   * distributed IDs and ownership state do not change on a second call.
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, Reconcile_Edges2D_Idempotent)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+
+    auto mpiMesh = Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Triangle, {4, 4});
+    mpiMesh.getConnectivity().compute(1, 2);
+    mpiMesh.reconcile(1);
+
+    // Snapshot state after first reconcile.
+    const auto& shard = mpiMesh.getShard();
+    const size_t ne = shard.getPolytopeCount(1);
+    std::vector<Index> firstGlobal(ne);
+    std::vector<int> firstState(ne);  // 0=owned, 1=shared, 2=ghost
+
+    for (Index i = 0; i < ne; ++i)
+    {
+      firstGlobal[i] = shard.getPolytopeMap(1).left.at(i);
+      if (shard.isOwned(1, i))       firstState[i] = 0;
+      else if (shard.isShared(1, i)) firstState[i] = 1;
+      else                           firstState[i] = 2;
+    }
+
+    // Reconcile again.
+    mpiMesh.reconcile(1);
+
+    // Verify nothing changed.
+    for (Index i = 0; i < ne; ++i)
+    {
+      EXPECT_EQ(shard.getPolytopeMap(1).left.at(i), firstGlobal[i])
+        << "Rank " << world.rank()
+        << ": edge " << i << " global ID changed on second reconcile.";
+
+      int state2 = -1;
+      if (shard.isOwned(1, i))       state2 = 0;
+      else if (shard.isShared(1, i)) state2 = 1;
+      else                           state2 = 2;
+      EXPECT_EQ(state2, firstState[i])
+        << "Rank " << world.rank()
+        << ": edge " << i << " state changed on second reconcile.";
+    }
+  }
 }
 
 int main(int argc, char** argv)
