@@ -1,5 +1,5 @@
-#ifndef RODDIN_VARIATIONAL_IM_H
-#define RODDIN_VARIATIONAL_IM_H
+#ifndef RODIN_VARIATIONAL_IM_H
+#define RODIN_VARIATIONAL_IM_H
 
 /**
  * @file Im.h
@@ -84,6 +84,11 @@ namespace Rodin::Variational
       Real getValue(const Geometry::Point& p) const
       {
         return getOperand().getValue(p).imag();
+      }
+
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
+      {
+        return GetOrderIfConstant(getOperand(), polytope);
       }
 
       /**

@@ -39,8 +39,8 @@
  * auto bc = BoundaryIntegral(u_boundary, v).on(boundary_attr);
  * ```
  */
-#ifndef RODIN_VARIATIONAL_COMPOSITION_H
-#define RODIN_VARIATIONAL_COMPOSITION_H
+#ifndef RODIN_VARIATIONAL_TRACEOPERATOR_H
+#define RODIN_VARIATIONAL_TRACEOPERATOR_H
 
 #include <functional>
 
