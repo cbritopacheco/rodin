@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include <boost/dynamic_bitset.hpp>
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_free.hpp>
@@ -589,16 +591,18 @@ namespace Rodin::Geometry
     }
 
     // --------------------------------------------------------------------------
-    // Per-entity local metadata.
+    // Per-entity local classification and per-neighbor send lists.
     //
     // inLocalPartition[i]:
     //   true iff entity i is incident to at least one locally owned top cell.
     //
-    // candidateNeighbors[i]:
-    //   neighbors to which key i should be exported for matching.
+    // entitiesToSend[k]:
+    //   deduplicated list of local entity indices to export to neighbors[k].
+    //   Built from the cell-entity-neighbor stencil so that each entity-
+    //   neighbor pair appears exactly once.
     // --------------------------------------------------------------------------
     std::vector<uint8_t> inLocalPartition(nd, 0);
-    std::vector<UnorderedSet<int>> candidateNeighbors(nd);
+    std::vector<std::vector<Index>> entitiesToSend(neighbors.size());
 
     {
       const auto& cellHalo  = shard.getHalo(D);
@@ -609,70 +613,79 @@ namespace Rodin::Geometry
         const bool owned = shard.isOwned(D, cell);
         const bool ghost = shard.isGhost(D, cell);
 
-        int ghostOwner = kInfOwner;
-        if (ghost)
-        {
-          const auto it = cellOwner.find(cell);
-          assert(it != cellOwner.end());
-          ghostOwner = static_cast<int>(it->second);
-        }
-
-        const IndexSet* haloRanks = nullptr;
         if (owned)
         {
-          auto it = cellHalo.find(cell);
-          if (it != cellHalo.end())
-            haloRanks = &it->second;
-        }
-
-        for (const Index e : D2d[cell])
-        {
-          if (owned)
-          {
+          for (const Index e : D2d[cell])
             inLocalPartition[e] = 1;
 
-            if (haloRanks)
+          auto hit = cellHalo.find(cell);
+          if (hit != cellHalo.end())
+          {
+            for (const Index r : hit->second)
             {
-              for (const Index r : *haloRanks)
-              {
-                const int rr = static_cast<int>(r);
-                if (rr != rank)
-                  candidateNeighbors[e].insert(rr);
-              }
+              const int rr = static_cast<int>(r);
+              if (rr == rank)
+                continue;
+              const auto nit = neighborPos.find(rr);
+              assert(nit != neighborPos.end());
+              for (const Index e : D2d[cell])
+                entitiesToSend[nit->second].push_back(e);
             }
           }
+        }
 
-          if (ghost)
+        if (ghost)
+        {
+          auto oit = cellOwner.find(cell);
+          assert(oit != cellOwner.end());
+          const int rr = static_cast<int>(oit->second);
+          if (rr != rank)
           {
-            if (ghostOwner != rank)
-              candidateNeighbors[e].insert(ghostOwner);
+            const auto nit = neighborPos.find(rr);
+            assert(nit != neighborPos.end());
+            for (const Index e : D2d[cell])
+              entitiesToSend[nit->second].push_back(e);
           }
         }
+      }
+
+      for (auto& v : entitiesToSend)
+      {
+        std::sort(v.begin(), v.end());
+        v.erase(std::unique(v.begin(), v.end()), v.end());
       }
     }
 
     // --------------------------------------------------------------------------
-    // Direct neighbor matching.
+    // Key exchange with candidate neighbors.
     //
-    // We send (key, inLocalPartitionFlag) to candidate neighbors.
-    // If neighbor also has the same key, we learn that it is a true holder.
+    // Each rank sends (key, inLocalPartition flag) for entities in its send
+    // list.  Recipients match received keys against their local key map.
+    //
+    // matchedHolders[i]:
+    //   set of direct neighbor ranks that also hold entity i (confirmed by
+    //   key matching).
+    //
+    // ownerRank[i]:
+    //   seeded from local inLocalPartition and remote flags received here.
+    //   For most entities this already yields the correct owner; iterative
+    //   convergence below refines the remaining multi-hop cases.
     // --------------------------------------------------------------------------
     using KeyMsg = std::pair<Key, uint8_t>;
 
     std::vector<UnorderedSet<int>> matchedHolders(nd);
-    std::vector<UnorderedSet<int>> allHolders(nd);
+
+    std::vector<int> ownerRank(nd, kInfOwner);
+    for (Index i = 0; i < static_cast<Index>(nd); ++i)
+      ownerRank[i] = inLocalPartition[i] ? rank : kInfOwner;
 
     {
       std::vector<std::vector<KeyMsg>> sendbuf(neighbors.size());
-
-      for (Index i = 0; i < static_cast<Index>(nd); ++i)
+      for (size_t k = 0; k < neighbors.size(); ++k)
       {
-        for (const int nbr : candidateNeighbors[i])
-        {
-          const auto it = neighborPos.find(nbr);
-          assert(it != neighborPos.end());
-          sendbuf[it->second].push_back({ keys[i], inLocalPartition[i] });
-        }
+        sendbuf[k].reserve(entitiesToSend[k].size());
+        for (const Index i : entitiesToSend[k])
+          sendbuf[k].push_back({ keys[i], inLocalPartition[i] });
       }
 
       const int tagKeys = 1000 + static_cast<int>(d);
@@ -689,44 +702,37 @@ namespace Rodin::Geometry
         comm.recv(neighbors[k], tagKeys, recvbuf);
 
         const int nbr = neighbors[k];
-        for (const auto& [key, remoteLocalFlag] : recvbuf)
+        for (const auto& [key, remoteFlag] : recvbuf)
         {
-          (void) remoteLocalFlag;
           const auto it = key2local.find(key);
           if (it == key2local.end())
             continue;
 
           const Index i = it->second;
           matchedHolders[i].insert(nbr);
+
+          if (remoteFlag && nbr < ownerRank[i])
+            ownerRank[i] = nbr;
         }
       }
 
       boost::mpi::wait_all(reqs.begin(), reqs.end());
     }
 
-    for (Index i = 0; i < static_cast<Index>(nd); ++i)
-    {
-      allHolders[i].insert(rank);
-      for (const int r : matchedHolders[i])
-        allHolders[i].insert(r);
-    }
-
     // --------------------------------------------------------------------------
     // Iterative owner convergence.
     //
-    // ownerRank[i]:
-    //   rank if this entity belongs to the local partition here,
-    //   INF otherwise.
+    // Repeatedly exchange the current best owner candidate with matched holders
+    // and take the global minimum.  This propagates the smallest partition-
+    // holder rank across the full holder graph, even when it spans multiple
+    // neighbor hops (e.g. edges in 3D shared by a ring of tetrahedra whose
+    // partitions are not face-adjacent).
     //
-    // Repeatedly exchange owner candidates with matched holders and take min.
-    // This propagates the smallest partition-holder rank across the full holder
-    // graph, even when it spans multiple neighbor hops.
+    // Because ownerRank was already seeded from both local and received flags
+    // above, most entities already carry the correct owner.  The loop typically
+    // converges in one to two additional rounds.
     // --------------------------------------------------------------------------
     using OwnerMsg = std::pair<Key, int>;
-
-    std::vector<int> ownerRank(nd, kInfOwner);
-    for (Index i = 0; i < static_cast<Index>(nd); ++i)
-      ownerRank[i] = inLocalPartition[i] ? rank : kInfOwner;
 
     while (true)
     {
@@ -802,11 +808,7 @@ namespace Rodin::Geometry
     size_t inclusive = 0;
     boost::mpi::scan(comm, localOwnedCount, inclusive, std::plus<size_t>());
 
-    size_t offset = 0;
-    if (rank == 0)
-      offset = 0;
-    else
-      offset = inclusive - localOwnedCount;
+    const size_t offset = inclusive - localOwnedCount;
 
     for (size_t k = 0; k < locallyOwned.size(); ++k)
       distId[locallyOwned[k]] = static_cast<Index>(offset + k);
@@ -915,7 +917,7 @@ namespace Rodin::Geometry
           state[i] = Shard::State::Owned;
 
           IndexSet rs;
-          for (const int r : allHolders[i])
+          for (const int r : matchedHolders[i])
           {
             if (r != rank)
               rs.insert(static_cast<Index>(r));
