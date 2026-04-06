@@ -6,6 +6,7 @@
  */
 #include <set>
 #include <numeric>
+#include <stdexcept>
 
 #include <gtest/gtest.h>
 #include <boost/mpi/environment.hpp>
@@ -15,6 +16,7 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Geometry/Shard.h>
 #include <Rodin/Geometry/BalancedCompactPartitioner.h>
+#include <Rodin/QF/PolytopeQuadratureFormula.h>
 #include <Rodin/MPI/Context/MPI.h>
 #include <Rodin/MPI/Geometry/Sharder.h>
 #include <Rodin/MPI/Geometry/Mesh.h>
@@ -94,6 +96,49 @@ namespace
     if (comm.rank() == 0)
     {
       auto localMesh = makeShardableMesh(type, shape);
+      BalancedCompactPartitioner partitioner(localMesh);
+      partitioner.partition(static_cast<size_t>(comm.size()));
+      sharder.shard(partitioner);
+      sharder.scatter(0);
+    }
+
+    return sharder.gather(0);
+  }
+
+  /**
+   * @brief Creates a local mesh with face incidences needed for
+   * boundary/interface/perimeter queries.
+   */
+  Mesh<Context::Local> makeShardableMeshWithFaces(
+      Polytope::Type type,
+      std::initializer_list<size_t> shape)
+  {
+    auto mesh = Mesh<Context::Local>::UniformGrid(type, shape);
+    const size_t D = mesh.getDimension();
+    mesh.getConnectivity().compute(D, D);
+    mesh.getConnectivity().compute(D, 0);
+    mesh.getConnectivity().compute(D, D - 1);
+    mesh.getConnectivity().compute(D - 1, D);
+    mesh.getConnectivity().compute(D - 1, 0);
+    return mesh;
+  }
+
+  /**
+   * @brief Distributes a mesh with face incidences from root, enabling
+   * boundary/interface/perimeter queries on the distributed mesh.
+   */
+  Mesh<Context::MPI> distributeFromRootWithFaces(
+      const Context::MPI& ctx,
+      Polytope::Type type,
+      std::initializer_list<size_t> shape)
+  {
+    const auto& comm = ctx.getCommunicator();
+
+    Sharder<Context::MPI> sharder(ctx);
+
+    if (comm.rank() == 0)
+    {
+      auto localMesh = makeShardableMeshWithFaces(type, shape);
       BalancedCompactPartitioner partitioner(localMesh);
       partitioner.partition(static_cast<size_t>(comm.size()));
       sharder.shard(partitioner);
@@ -1288,6 +1333,125 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(measure, area, 1e-10)
       << "Rank " << world.rank()
       << ": getMeasure(D) does not match getArea() for 2D mesh.";
+  }
+
+  // =========================================================================
+  // MPIMesh API — asSubMesh, getQuadrature, boundary, perimeter
+  // =========================================================================
+
+  TEST(Rodin_MPI_Geometry_Mesh, AsSubMesh_Throws)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+
+    EXPECT_THROW(mpiMesh.asSubMesh(), std::runtime_error)
+      << "Rank " << world.rank()
+      << ": asSubMesh() should throw std::runtime_error.";
+
+    const auto& constMesh = mpiMesh;
+    EXPECT_THROW(constMesh.asSubMesh(), std::runtime_error)
+      << "Rank " << world.rank()
+      << ": const asSubMesh() should throw std::runtime_error.";
+  }
+
+  TEST(Rodin_MPI_Geometry_Mesh, GetQuadrature)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+
+    const size_t D = mpiMesh.getDimension();
+    QF::PolytopeQuadratureFormula qf(Polytope::Type::Triangle);
+
+    const auto& pq = mpiMesh.getQuadrature(D, 0, qf);
+
+    EXPECT_GT(pq.getSize(), 0u)
+      << "Rank " << world.rank()
+      << ": quadrature should have at least one point.";
+  }
+
+  TEST(Rodin_MPI_Geometry_Mesh, GetBoundary_FaceCount)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh = distributeFromRootWithFaces(ctx, Polytope::Type::Triangle, {4, 4});
+
+    size_t localBoundaryCount = 0;
+    for (auto it = mpiMesh.getBoundary(); it; ++it)
+      ++localBoundaryCount;
+
+    size_t globalBoundaryCount = 0;
+    boost::mpi::all_reduce(world, localBoundaryCount, globalBoundaryCount,
+                           std::plus<size_t>());
+
+    auto parentMesh = makeShardableMeshWithFaces(Polytope::Type::Triangle, {4, 4});
+    size_t parentBoundaryCount = 0;
+    for (auto it = parentMesh.getBoundary(); it; ++it)
+      ++parentBoundaryCount;
+
+    EXPECT_EQ(globalBoundaryCount, parentBoundaryCount)
+      << "Rank " << world.rank()
+      << ": global owned boundary face count should match parent.";
+  }
+
+  TEST(Rodin_MPI_Geometry_Mesh, IsBoundary_IsInterface)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh = distributeFromRootWithFaces(ctx, Polytope::Type::Triangle, {4, 4});
+
+    const auto& shard = mpiMesh.getShard();
+    const size_t d = mpiMesh.getDimension() - 1;
+    const size_t faceCount = shard.getPolytopeCount(d);
+
+    for (Index i = 0; i < static_cast<Index>(faceCount); ++i)
+    {
+      bool isBound = mpiMesh.isBoundary(i);
+      bool isIface = mpiMesh.isInterface(i);
+      bool isOwned = shard.isOwned(d, i);
+
+      if (!isOwned)
+      {
+        EXPECT_FALSE(isBound)
+          << "Rank " << world.rank()
+          << ": non-owned face " << i << " should not be classified as boundary.";
+        EXPECT_FALSE(isIface)
+          << "Rank " << world.rank()
+          << ": non-owned face " << i << " should not be classified as interface.";
+      }
+    }
+  }
+
+  TEST(Rodin_MPI_Geometry_Mesh, GetPerimeter_Triangle2D)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh = distributeFromRootWithFaces(ctx, Polytope::Type::Triangle, {4, 4});
+
+    Real distribPerimeter = mpiMesh.getPerimeter();
+
+    auto parentMesh = makeShardableMeshWithFaces(Polytope::Type::Triangle, {4, 4});
+    Real parentPerimeter = parentMesh.getPerimeter();
+
+    EXPECT_NEAR(distribPerimeter, parentPerimeter, 1e-10)
+      << "Rank " << world.rank()
+      << ": distributed perimeter does not match parent.";
   }
 }
 
