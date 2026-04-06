@@ -717,7 +717,7 @@ namespace Rodin::Geometry
         if (ownerRank[i] == rank)
           continue;                 // already sent by owner in round 1
         if (distId[i] == std::numeric_limits<Index>::max())
-          continue;                 // not yet resolved — nothing to forward
+          continue;                 // not yet resolved -- nothing to forward
 
         for (size_t k = 0; k < neighbors.size(); ++k)
           fwdbuf[k].push_back({ keys[i], distId[i] });
