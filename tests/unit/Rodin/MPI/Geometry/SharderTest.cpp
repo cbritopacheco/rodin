@@ -929,6 +929,366 @@ namespace Rodin::Tests::Unit
       << "Rank " << world.rank()
       << ": 3D distributed cell count mismatch.";
   }
+
+  // =========================================================================
+  // MPI Mesh — scale()
+  // =========================================================================
+
+  /**
+   * @brief Verifies that MPIMesh::scale() modifies vertex coordinates
+   * by the given factor on each rank.
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, Scale)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+
+    // Record original coordinates for vertex 0
+    auto origCoords = mpiMesh.getVertexCoordinates(0);
+
+    const Real factor = 2.5;
+    mpiMesh.scale(factor);
+
+    auto newCoords = mpiMesh.getVertexCoordinates(0);
+    for (int j = 0; j < origCoords.size(); j++)
+    {
+      EXPECT_NEAR(newCoords(j), factor * origCoords(j), 1e-12)
+        << "Rank " << world.rank() << " coord " << j
+        << ": scale factor not applied correctly.";
+    }
+  }
+
+  // =========================================================================
+  // MPI Mesh — flush()
+  // =========================================================================
+
+  /**
+   * @brief Verifies that MPIMesh::flush() does not crash and the mesh
+   * remains valid afterward.
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, Flush)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+
+    // flush should not crash
+    mpiMesh.flush();
+
+    // Mesh should still be valid
+    EXPECT_EQ(mpiMesh.getDimension(), 2u);
+    EXPECT_GT(mpiMesh.getShard().getCellCount(), 0u);
+  }
+
+  // =========================================================================
+  // MPI Mesh — isSubMesh()
+  // =========================================================================
+
+  /**
+   * @brief Verifies that MPIMesh::isSubMesh() returns false.
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, IsSubMesh)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+
+    EXPECT_FALSE(mpiMesh.isSubMesh());
+  }
+
+  // =========================================================================
+  // MPI Mesh — getConnectivity()
+  // =========================================================================
+
+  /**
+   * @brief Verifies that MPIMesh::getConnectivity() returns the shard's
+   * connectivity and that cell-to-vertex incidence is valid.
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, GetConnectivity)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+
+    const auto& conn = mpiMesh.getConnectivity();
+    const size_t D = mpiMesh.getDimension();
+
+    // Cell-to-vertex incidence should exist (was computed before sharding)
+    const auto& d2v = conn.getIncidence(D, 0);
+    EXPECT_GT(d2v.size(), 0u)
+      << "Rank " << world.rank()
+      << ": cell-to-vertex incidence is empty.";
+
+    // Each triangle cell should have 3 vertices
+    const auto& shard = mpiMesh.getShard();
+    for (Index ci = 0; ci < shard.getCellCount(); ci++)
+    {
+      const auto& verts = conn.getIncidence({D, 0}, ci);
+      EXPECT_EQ(verts.size(), 3u)
+        << "Rank " << world.rank() << " cell " << ci
+        << ": expected 3 vertices for triangle.";
+    }
+  }
+
+  // =========================================================================
+  // MPI Mesh — getAttribute() / setAttribute()
+  // =========================================================================
+
+  /**
+   * @brief Verifies that getAttribute returns valid attributes and
+   * setAttribute modifies them.
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, GetSetAttribute)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+
+    const size_t D = mpiMesh.getDimension();
+    const auto& shard = mpiMesh.getShard();
+
+    if (shard.getCellCount() > 0)
+    {
+      // Set attribute on first local cell
+      mpiMesh.setAttribute({D, 0}, 42);
+      auto attr = mpiMesh.getAttribute(D, 0);
+      ASSERT_TRUE(attr.has_value())
+        << "Rank " << world.rank()
+        << ": getAttribute returned nullopt after setAttribute.";
+      EXPECT_EQ(*attr, 42u)
+        << "Rank " << world.rank()
+        << ": attribute value mismatch after setAttribute.";
+    }
+  }
+
+  // =========================================================================
+  // MPI Mesh — setVertexCoordinates()
+  // =========================================================================
+
+  /**
+   * @brief Verifies that setVertexCoordinates modifies vertex coordinates
+   * and the change is reflected in getVertexCoordinates.
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, SetVertexCoordinates)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+
+    const auto& shard = mpiMesh.getShard();
+    if (shard.getVertexCount() > 0)
+    {
+      const size_t sdim = mpiMesh.getSpaceDimension();
+      Math::SpatialPoint newCoords(static_cast<Eigen::Index>(sdim));
+      newCoords(0) = 99.0;
+      newCoords(1) = 88.0;
+      mpiMesh.setVertexCoordinates(0, newCoords);
+
+      auto readBack = mpiMesh.getVertexCoordinates(0);
+      EXPECT_NEAR(readBack(0), 99.0, 1e-14);
+      EXPECT_NEAR(readBack(1), 88.0, 1e-14);
+    }
+  }
+
+  // =========================================================================
+  // MPI Mesh — getArea() for 2D triangle mesh
+  // =========================================================================
+
+  /**
+   * @brief Verifies that MPIMesh::getArea() returns the correct total area
+   * for a distributed 2D triangle mesh, matching the parent mesh area.
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, GetArea_Triangle2D)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+
+    Real expectedArea = 0;
+    if (world.rank() == 0)
+    {
+      auto localMesh = makeShardableMesh(Polytope::Type::Triangle, {4, 4});
+      expectedArea = localMesh.getArea();
+    }
+    boost::mpi::broadcast(world, expectedArea, 0);
+
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+    Real distributedArea = mpiMesh.getArea();
+
+    EXPECT_NEAR(distributedArea, expectedArea, 1e-10)
+      << "Rank " << world.rank()
+      << ": distributed area does not match parent area.";
+  }
+
+  // =========================================================================
+  // MPI Mesh — getVolume() for 3D tetrahedron mesh
+  // =========================================================================
+
+  /**
+   * @brief Verifies that MPIMesh::getVolume() returns the correct total
+   * volume for a distributed 3D tetrahedron mesh.
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, GetVolume_Tetrahedron3D)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+
+    Real expectedVolume = 0;
+    if (world.rank() == 0)
+    {
+      auto localMesh = makeShardableMesh(Polytope::Type::Tetrahedron, {2, 2, 2});
+      expectedVolume = localMesh.getVolume();
+    }
+    boost::mpi::broadcast(world, expectedVolume, 0);
+
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Tetrahedron, {2, 2, 2});
+    Real distributedVolume = mpiMesh.getVolume();
+
+    EXPECT_NEAR(distributedVolume, expectedVolume, 1e-10)
+      << "Rank " << world.rank()
+      << ": distributed volume does not match parent volume.";
+  }
+
+  // =========================================================================
+  // MPI Mesh — getPolytopeTransformation()
+  // =========================================================================
+
+  /**
+   * @brief Verifies that MPIMesh::getPolytopeTransformation() returns valid
+   * transformations for all local cells.
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, GetPolytopeTransformation)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+
+    const size_t D = mpiMesh.getDimension();
+    const auto& shard = mpiMesh.getShard();
+
+    for (Index ci = 0; ci < shard.getCellCount(); ci++)
+    {
+      const auto& trans = mpiMesh.getPolytopeTransformation(D, ci);
+      // Transformation order should be non-negative
+      EXPECT_GE(trans.getOrder(), 0u)
+        << "Rank " << world.rank() << " cell " << ci
+        << ": invalid transformation order.";
+    }
+  }
+
+  // =========================================================================
+  // MPI Mesh — getCell(localIdx)
+  // =========================================================================
+
+  /**
+   * @brief Verifies that MPIMesh::getCell(localIdx) returns a valid polytope
+   * for each local cell index.
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, GetCellByIndex)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+
+    const auto& shard = mpiMesh.getShard();
+    const size_t D = mpiMesh.getDimension();
+
+    for (Index ci = 0; ci < shard.getCellCount(); ci++)
+    {
+      auto it = mpiMesh.getCell(ci);
+      ASSERT_TRUE(static_cast<bool>(it))
+        << "Rank " << world.rank() << " cell " << ci
+        << ": getCell(idx) returned invalid iterator.";
+      EXPECT_EQ(it->getDimension(), D);
+      EXPECT_EQ(it->getIndex(), ci);
+    }
+  }
+
+  // =========================================================================
+  // MPI Mesh — getVertex(localIdx)
+  // =========================================================================
+
+  /**
+   * @brief Verifies that MPIMesh::getVertex(localIdx) returns a valid polytope
+   * for each local vertex index.
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, GetVertexByIndex)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+
+    const auto& shard = mpiMesh.getShard();
+
+    for (Index vi = 0; vi < shard.getVertexCount(); vi++)
+    {
+      auto it = mpiMesh.getVertex(vi);
+      ASSERT_TRUE(static_cast<bool>(it))
+        << "Rank " << world.rank() << " vertex " << vi
+        << ": getVertex(idx) returned invalid iterator.";
+      EXPECT_EQ(it->getDimension(), 0u);
+      EXPECT_EQ(it->getIndex(), vi);
+    }
+  }
+
+  // =========================================================================
+  // MPI Mesh — getMeasure(d)
+  // =========================================================================
+
+  /**
+   * @brief Verifies that MPIMesh::getMeasure(D) returns the same value as
+   * getArea() for a 2D mesh.
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, GetMeasure_MatchesGetArea)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+
+    const size_t D = mpiMesh.getDimension();
+    Real area = mpiMesh.getArea();
+    Real measure = mpiMesh.getMeasure(D);
+
+    EXPECT_NEAR(measure, area, 1e-10)
+      << "Rank " << world.rank()
+      << ": getMeasure(D) does not match getArea() for 2D mesh.";
+  }
 }
 
 int main(int argc, char** argv)
