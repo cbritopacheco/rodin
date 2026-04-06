@@ -103,7 +103,7 @@ namespace Rodin::Variational
        */
       Derivative(Derivative&& other)
         : Parent(std::move(other)),
-          m_i(std::move(other.m_i))
+          m_i(other.m_i)
       {}
 
       /**
