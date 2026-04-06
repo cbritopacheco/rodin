@@ -597,3 +597,25 @@ gtest_discover_tests(RodinVariationalMatrixFunctionTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinVariationalP0gTest P0gTest.cpp)
+target_link_libraries(RodinVariationalP0gTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalP0gTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinVariationalDenseProblemTest DenseProblemTest.cpp)
+target_link_libraries(RodinVariationalDenseProblemTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalDenseProblemTest
+  PROPERTIES
+    LABELS unit
+)
