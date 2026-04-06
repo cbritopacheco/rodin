@@ -1,25 +1,73 @@
 /**
  * @file RelativeErrorTest.cpp
  * @brief Tests for the RelativeError utility class.
- *
- * @note RelativeError has a template deduction bug: its methods take
- * `const GridFunction<FES>&` but GridFunction's usable form is a partial
- * specialization `GridFunction<FES, Data>`, so the compiler cannot deduce
- * FES from a GridFunction object. This needs to be fixed in RelativeError.h.
- *
- * Additionally, RelativeError.h has a `nan` identifier ambiguity when
- * combined with Variational.h includes. These issues are noted in the
- * audit PR description.
  */
 #include <gtest/gtest.h>
 
-TEST(Rodin_Variational_RelativeError, AuditNote_TemplateDeductionBug)
+#include "Rodin/Geometry.h"
+#include "Rodin/Variational.h"
+#include "Rodin/Variational/RelativeError.h"
+
+using namespace Rodin;
+using namespace Rodin::Geometry;
+using namespace Rodin::Variational;
+
+TEST(Rodin_Variational_RelativeError, L2_ExactMatch)
 {
-  // RelativeError::l1/l2/lInf/compute take `const GridFunction<FES>&` but
-  // the usable GridFunction is a partial specialization
-  // `GridFunction<FES, Data>`. The compiler cannot deduce FES, making the
-  // API effectively unusable without explicit template specification.
-  //
-  // This is a known bug identified during the variational module audit.
-  SUCCEED();
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+  P1 Vh(mesh);
+  GridFunction uh(Vh);
+  uh = RealFunction([](const Geometry::Point& p) { return p.x() + p.y(); });
+
+  auto exact = RealFunction([](const Geometry::Point& p) { return p.x() + p.y(); });
+  Real err = RelativeError::l2(uh, exact);
+  EXPECT_NEAR(err, 0.0, 1e-10);
+}
+
+TEST(Rodin_Variational_RelativeError, L1_ExactMatch)
+{
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+  P1 Vh(mesh);
+  GridFunction uh(Vh);
+  uh = RealFunction(1.0);
+
+  auto exact = RealFunction(1.0);
+  Real err = RelativeError::l1(uh, exact);
+  EXPECT_NEAR(err, 0.0, 1e-10);
+}
+
+TEST(Rodin_Variational_RelativeError, LInf_ExactMatch)
+{
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+  P1 Vh(mesh);
+  GridFunction uh(Vh);
+  uh = RealFunction(2.0);
+
+  auto exact = RealFunction(2.0);
+  Real err = RelativeError::lInf(uh, exact);
+  EXPECT_NEAR(err, 0.0, 1e-10);
+}
+
+TEST(Rodin_Variational_RelativeError, Compute_WithNorm)
+{
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+  P1 Vh(mesh);
+  GridFunction uh(Vh);
+  uh = RealFunction(1.0);
+
+  auto exact = RealFunction(1.0);
+  Real err = RelativeError::compute(uh, exact, RelativeError::Norm::L2);
+  EXPECT_NEAR(err, 0.0, 1e-10);
+}
+
+TEST(Rodin_Variational_RelativeError, L2_NonZeroError)
+{
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 8, 8 });
+  P1 Vh(mesh);
+  GridFunction uh(Vh);
+  uh = RealFunction(1.0);
+
+  auto exact = RealFunction(2.0);
+  Real err = RelativeError::l2(uh, exact);
+  EXPECT_NEAR(err, 0.5, 1e-10);
 }
