@@ -1475,9 +1475,16 @@ namespace Rodin::Geometry
         ar & m_sdim;
         ar & m_vertices;
         ar & m_connectivity;
-        ar & m_transformations;
         ar & m_attributes;
+        ar & m_transformations;
+        ar & m_quadratures;
         ar & m_context;
+        // Re-initialize the quadrature cache after deserialization.
+        // PolytopeQuadratureIndex is intentionally not serialized (it is a
+        // lazy cache), so on load the dimension buckets must be allocated from
+        // the now-known space dimension.  On save the call is a harmless
+        // no-op because the buckets already exist.
+        m_quadratures.initialize(m_sdim);
       }
 
     private:

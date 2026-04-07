@@ -598,7 +598,7 @@ namespace Rodin::Tests::Unit
 
     GridFunction gf(Vh);
     gf.getData().setZero();
-    force.setLinearizationPoint(gf);
+    force.setDisplacement(gf);
 
     auto cellIt = mesh.getCell(0);
     force.setPolytope(*cellIt);
@@ -625,7 +625,7 @@ namespace Rodin::Tests::Unit
 
     GridFunction gf(Vh);
     gf.getData().setZero();
-    force.setLinearizationPoint(gf);
+    force.setDisplacement(gf);
 
     auto cellIt = mesh.getCell(0);
     force.setPolytope(*cellIt);
@@ -652,7 +652,7 @@ namespace Rodin::Tests::Unit
 
     GridFunction gf(Vh);
     gf.getData().setZero();
-    force.setLinearizationPoint(gf);
+    force.setDisplacement(gf);
 
     auto cellIt = mesh.getCell(0);
     force.setPolytope(*cellIt);
@@ -682,7 +682,7 @@ namespace Rodin::Tests::Unit
     gf.getData().setZero();
     for (Index i = 0; i < static_cast<Index>(Vh.getSize()); ++i)
       gf.getData()(i) = 0.01 * static_cast<Real>(i % 3);
-    force.setLinearizationPoint(gf);
+    force.setDisplacement(gf);
 
     auto cellIt = mesh.getCell(0);
     force.setPolytope(*cellIt);
@@ -720,7 +720,7 @@ namespace Rodin::Tests::Unit
 
     GridFunction gf(Vh);
     gf.getData().setZero();
-    force.setLinearizationPoint(gf);
+    force.setDisplacement(gf);
 
     auto cellIt = mesh.getCell(0);
     force.setPolytope(*cellIt);
@@ -753,7 +753,7 @@ namespace Rodin::Tests::Unit
 
     GridFunction gf(Vh);
     gf.getData().setZero();
-    tangent.setLinearizationPoint(gf);
+    tangent.setDisplacement(gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);
@@ -782,7 +782,7 @@ namespace Rodin::Tests::Unit
 
     GridFunction gf(Vh);
     gf.getData().setZero();
-    tangent.setLinearizationPoint(gf);
+    tangent.setDisplacement(gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);
@@ -811,7 +811,7 @@ namespace Rodin::Tests::Unit
 
     GridFunction gf(Vh);
     gf.getData().setZero();
-    tangent.setLinearizationPoint(gf);
+    tangent.setDisplacement(gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);
@@ -843,7 +843,7 @@ namespace Rodin::Tests::Unit
     gf.getData().setZero();
     for (Index i = 0; i < static_cast<Index>(Vh.getSize()); ++i)
       gf.getData()(i) = 0.01 * static_cast<Real>(i % 3);
-    tangent.setLinearizationPoint(gf);
+    tangent.setDisplacement(gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);
@@ -874,7 +874,7 @@ namespace Rodin::Tests::Unit
     gf.getData().setZero();
     for (Index i = 0; i < static_cast<Index>(Vh.getSize()); ++i)
       gf.getData()(i) = 0.01 * static_cast<Real>(i % 3);
-    tangent.setLinearizationPoint(gf);
+    tangent.setDisplacement(gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);
@@ -912,7 +912,7 @@ namespace Rodin::Tests::Unit
 
     GridFunction gf(Vh);
     gf.getData().setZero();
-    tangent.setLinearizationPoint(gf);
+    tangent.setDisplacement(gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);

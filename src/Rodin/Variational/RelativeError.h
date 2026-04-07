@@ -16,7 +16,13 @@
 #ifndef RODIN_VARIATIONAL_RELATIVEERROR_H
 #define RODIN_VARIATIONAL_RELATIVEERROR_H
 
+#include "Rodin/Math/Common.h"
+
+#include "Abs.h"
 #include "GridFunction.h"
+#include "Integral.h"
+#include "RealFunction.h"
+#include "Rodin/Assembly.h"
 
 namespace Rodin::Variational
 {
@@ -73,8 +79,8 @@ namespace Rodin::Variational
          * @param[in] exact Exact solution (function or grid function)
          * @returns Relative error @f$ \|u_h - u\|_{L^1} / \|u\|_{L^1} @f$
          */
-        template <class FES, class FunctionType>
-        static Real l1(const GridFunction<FES>& model, const FunctionType& exact)
+        template <class FES, class Data, class FunctionType>
+        static Real l1(const GridFunction<FES, Data>& model, const FunctionType& exact)
         {
           return compute(model, exact, Norm::L1);
         }
@@ -85,8 +91,8 @@ namespace Rodin::Variational
          * @param[in] exact Exact solution (function or grid function)
          * @returns Relative error @f$ \|u_h - u\|_{L^2} / \|u\|_{L^2} @f$
          */
-        template <class FES, class FunctionType>
-        static Real l2(const GridFunction<FES>& model, const FunctionType& exact)
+        template <class FES, class Data, class FunctionType>
+        static Real l2(const GridFunction<FES, Data>& model, const FunctionType& exact)
         {
           return compute(model, exact, Norm::L2);
         }
@@ -97,8 +103,8 @@ namespace Rodin::Variational
          * @param[in] exact Exact solution (function or grid function)
          * @returns Relative error @f$ \|u_h - u\|_{L^\infty} / \|u\|_{L^\infty} @f$
          */
-        template <class FES, class FunctionType>
-        static Real lInf(const GridFunction<FES>& model, const FunctionType& exact)
+        template <class FES, class Data, class FunctionType>
+        static Real lInf(const GridFunction<FES, Data>& model, const FunctionType& exact)
         {
           return compute(model, exact, Norm::LInf);
         }
@@ -110,44 +116,38 @@ namespace Rodin::Variational
          * @param[in] norm Norm type to use
          * @returns Relative error in the specified norm
          */
-        template <class FES, class FunctionType>
-        static Real compute(const GridFunction<FES>& model, const FunctionType& exact, const Norm& norm)
+        template <class FES, class Data, class FunctionType>
+        static Real compute(const GridFunction<FES, Data>& model, const FunctionType& exact, const Norm& norm)
         {
+            const auto& fes = model.getFiniteElementSpace();
             switch (norm)
             {
                 case Norm::L1:
                 {
-                  const auto& fes = model.getFiniteElementSpace();
-                  GridFunction<FES> exactNorm(fes);
+                  GridFunction exactNorm(fes);
                   exactNorm = Abs(exact);
-                  exactNorm.setWeights();
-                  GridFunction<FES> diff(fes);
+                  GridFunction diff(fes);
                   diff = Abs(model - exact);
-                  diff.setWeights();
                   return Integral(diff).compute() / Integral(exactNorm).compute();
                 }
                 case Norm::L2:
                 {
-                  const auto& fes = model.getFiniteElementSpace();
-                  GridFunction<FES> exactNorm(fes);
+                  GridFunction exactNorm(fes);
                   exactNorm = [&](const Geometry::Point& p) { auto v = exact(p); return Math::dot(v, v); };
-                  exactNorm.setWeights();
-                  GridFunction<FES> diff(fes);
+                  GridFunction diff(fes);
                   diff = [&](const Geometry::Point& p) { auto v = exact(p) - model(p); return Math::dot(v, v); };
-                  diff.setWeights();
-                  return sqrt(Integral(diff).compute()) / sqrt(Integral(exactNorm).compute());
+                  return Math::sqrt(Integral(diff).compute()) / Math::sqrt(Integral(exactNorm).compute());
                 }
                 case Norm::LInf:
                 {
-                  const auto& fes = model.getFiniteElementSpace();
-                  GridFunction<FES> exactNorm(fes);
+                  GridFunction exactNorm(fes);
                   exactNorm = Abs(exact);
-                  GridFunction<FES> diff(fes);
+                  GridFunction diff(fes);
                   diff = Abs(model - exact);
                   return diff.max() / exactNorm.max();
                 }
             }
-            return Math::Constants::nan();
+            return Math::nan<Real>();
         }
     };
 }
