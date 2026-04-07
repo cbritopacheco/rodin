@@ -98,3 +98,25 @@ gtest_discover_tests(RodinMathLinearSystemTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinMathNewtonRaphsonTest NewtonRaphsonTest.cpp)
+target_link_libraries(RodinMathNewtonRaphsonTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Rodin)
+gtest_discover_tests(RodinMathNewtonRaphsonTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinMathRungeKuttaTest RungeKuttaTest.cpp)
+target_link_libraries(RodinMathRungeKuttaTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Rodin)
+gtest_discover_tests(RodinMathRungeKuttaTest
+  PROPERTIES
+    LABELS unit
+)

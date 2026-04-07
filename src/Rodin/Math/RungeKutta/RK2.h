@@ -72,7 +72,7 @@ namespace Rodin::Math::RungeKutta
       static thread_local T s_k1, s_k2;
       s_k1 = f(p);
       s_k2 = f(p + Real(0.5) * dt * s_k1);
-      q += dt * s_k2;
+      q = p + dt * s_k2;
     }
   };
 }

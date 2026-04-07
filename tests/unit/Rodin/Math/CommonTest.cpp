@@ -7,6 +7,8 @@
 #include <gtest/gtest.h>
 
 #include "Rodin/Math/Common.h"
+#include "Rodin/Math/SpatialVector.h"
+#include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/Types.h"
 
 using namespace Rodin;
@@ -214,4 +216,228 @@ TEST_F(CommonTest, FunctionComposition)
 
   // Test abs(conj(z)) = abs(z)
   EXPECT_DOUBLE_EQ(abs(conj(z)), abs(z));
+}
+
+TEST_F(CommonTest, Pow2Function)
+{
+  EXPECT_DOUBLE_EQ(pow2(3.0), 9.0);
+  EXPECT_DOUBLE_EQ(pow2(-4.0), 16.0);
+  EXPECT_DOUBLE_EQ(pow2(0.0), 0.0);
+}
+
+TEST_F(CommonTest, PowNFunction)
+{
+  EXPECT_DOUBLE_EQ((pow<0>(5.0)), 1.0);
+  EXPECT_DOUBLE_EQ((pow<1>(3.0)), 3.0);
+  EXPECT_DOUBLE_EQ((pow<2>(3.0)), 9.0);
+  EXPECT_DOUBLE_EQ((pow<3>(2.0)), 8.0);
+  EXPECT_DOUBLE_EQ((pow<4>(2.0)), 16.0);
+  EXPECT_DOUBLE_EQ((pow<10>(2.0)), 1024.0);
+}
+
+TEST_F(CommonTest, PowRuntimeFunction)
+{
+  EXPECT_DOUBLE_EQ(pow(2.0, 3.0), 8.0);
+  EXPECT_DOUBLE_EQ(pow(4.0, 0.5), 2.0);
+  EXPECT_DOUBLE_EQ(pow(2.0, 0.0), 1.0);
+}
+
+TEST_F(CommonTest, SqrtFunction)
+{
+  EXPECT_DOUBLE_EQ(sqrt(4.0), 2.0);
+  EXPECT_DOUBLE_EQ(sqrt(9.0), 3.0);
+  EXPECT_DOUBLE_EQ(sqrt(0.0), 0.0);
+  EXPECT_DOUBLE_EQ(sqrt(1.0), 1.0);
+  EXPECT_NEAR(sqrt(2.0), 1.41421356, 1e-6);
+}
+
+TEST_F(CommonTest, IsNaNFunction)
+{
+  EXPECT_TRUE(isNaN(nan<Real>()));
+  EXPECT_FALSE(isNaN(1.0));
+  EXPECT_FALSE(isNaN(0.0));
+
+  EXPECT_TRUE(isNaN(nan<Complex>()));
+  EXPECT_TRUE(isNaN(Complex(1.0, nan<Real>())));
+  EXPECT_FALSE(isNaN(Complex(1.0, 2.0)));
+}
+
+TEST_F(CommonTest, IsInfFunction)
+{
+  EXPECT_TRUE(isInf(std::numeric_limits<Real>::infinity()));
+  EXPECT_TRUE(isInf(-std::numeric_limits<Real>::infinity()));
+  EXPECT_FALSE(isInf(1.0));
+  EXPECT_FALSE(isInf(0.0));
+}
+
+TEST_F(CommonTest, TrigFunctions)
+{
+  EXPECT_DOUBLE_EQ(cos(0.0), 1.0);
+  EXPECT_DOUBLE_EQ(sin(0.0), 0.0);
+  EXPECT_DOUBLE_EQ(tan(0.0), 0.0);
+  EXPECT_NEAR(cos(M_PI), -1.0, 1e-10);
+  EXPECT_NEAR(sin(M_PI / 2.0), 1.0, 1e-10);
+  EXPECT_NEAR(tan(M_PI / 4.0), 1.0, 1e-10);
+}
+
+TEST_F(CommonTest, HyperbolicFunctions)
+{
+  EXPECT_DOUBLE_EQ(cosh(0.0), 1.0);
+  EXPECT_DOUBLE_EQ(sinh(0.0), 0.0);
+  EXPECT_DOUBLE_EQ(tanh(0.0), 0.0);
+  EXPECT_NEAR(cosh(1.0), 1.5430806, 1e-6);
+  EXPECT_NEAR(sinh(1.0), 1.1752012, 1e-6);
+  EXPECT_NEAR(tanh(1.0), 0.7615942, 1e-6);
+}
+
+TEST_F(CommonTest, InverseTrigFunctions)
+{
+  EXPECT_DOUBLE_EQ(acos(1.0), 0.0);
+  EXPECT_DOUBLE_EQ(asin(0.0), 0.0);
+  EXPECT_DOUBLE_EQ(atan(0.0), 0.0);
+  EXPECT_NEAR(acos(0.0), M_PI / 2.0, 1e-10);
+  EXPECT_NEAR(asin(1.0), M_PI / 2.0, 1e-10);
+  EXPECT_NEAR(atan(1.0), M_PI / 4.0, 1e-10);
+  EXPECT_NEAR(atan2(1.0, 1.0), M_PI / 4.0, 1e-10);
+  EXPECT_DOUBLE_EQ(atan2(0.0, 1.0), 0.0);
+}
+
+TEST_F(CommonTest, LogFunctions)
+{
+  EXPECT_DOUBLE_EQ(log(1.0), 0.0);
+  EXPECT_NEAR(log(M_E), 1.0, 1e-10);
+  EXPECT_DOUBLE_EQ(log2(1.0), 0.0);
+  EXPECT_DOUBLE_EQ(log2(8.0), 3.0);
+  EXPECT_DOUBLE_EQ(log10(1.0), 0.0);
+  EXPECT_DOUBLE_EQ(log10(100.0), 2.0);
+}
+
+TEST_F(CommonTest, SgnFunction)
+{
+  EXPECT_DOUBLE_EQ(sgn(-5.0), -1.0);
+  EXPECT_DOUBLE_EQ(sgn(5.0), 1.0);
+  EXPECT_DOUBLE_EQ(sgn(0.0), 0.0);
+  EXPECT_EQ(sgn(-3), -1);
+  EXPECT_EQ(sgn(3), 1);
+  EXPECT_EQ(sgn(0), 0);
+}
+
+TEST_F(CommonTest, BinomFunction)
+{
+  EXPECT_EQ(binom(Integer(5), Integer(2)), 10);
+  EXPECT_EQ(binom(Integer(10), Integer(3)), 120);
+  EXPECT_EQ(binom(Integer(0), Integer(0)), 1);
+  EXPECT_EQ(binom(Integer(5), Integer(0)), 1);
+  EXPECT_EQ(binom(Integer(5), Integer(5)), 1);
+}
+
+TEST_F(CommonTest, FactorialFunction)
+{
+  EXPECT_EQ(factorial(Integer(0)), 1);
+  EXPECT_EQ(factorial(Integer(1)), 1);
+  EXPECT_EQ(factorial(Integer(5)), 120);
+  EXPECT_EQ(factorial(Integer(10)), 3628800);
+}
+
+TEST_F(CommonTest, PermutationFunction)
+{
+  EXPECT_EQ(permutation(Integer(5), Integer(2)), 20);
+  EXPECT_EQ(permutation(Integer(5), Integer(0)), 1);
+  EXPECT_EQ(permutation(Integer(5), Integer(5)), 120);
+}
+
+TEST_F(CommonTest, NanFactory)
+{
+  EXPECT_TRUE(isNaN(nan<Real>()));
+
+  auto cn = nan<Complex>();
+  EXPECT_TRUE(isNaN(cn));
+  EXPECT_TRUE(std::isnan(cn.real()));
+  EXPECT_TRUE(std::isnan(cn.imag()));
+}
+
+TEST_F(CommonTest, FormLanguageHelpers)
+{
+  EXPECT_DOUBLE_EQ(sum(2.0, 3.0), 5.0);
+  EXPECT_DOUBLE_EQ(minus(5.0), -5.0);
+  EXPECT_DOUBLE_EQ(minus(5.0, 3.0), 2.0);
+  EXPECT_DOUBLE_EQ(mult(3.0, 4.0), 12.0);
+  EXPECT_DOUBLE_EQ(division(10.0, 2.0), 5.0);
+}
+
+TEST_F(CommonTest, DotProductScalar)
+{
+  EXPECT_DOUBLE_EQ(dot(Real(2.0), Real(3.0)), 6.0);
+
+  // dot(z1, z2) = z1 * conj(z2)
+  // (1+2i) * conj(3+4i) = (1+2i) * (3-4i) = 3 - 4i + 6i - 8i^2 = 3 + 2i + 8 = 11 + 2i
+  Complex result = dot(Complex(1, 2), Complex(3, 4));
+  EXPECT_DOUBLE_EQ(result.real(), 11.0);
+  EXPECT_DOUBLE_EQ(result.imag(), 2.0);
+}
+
+TEST_F(CommonTest, DotProductEigen)
+{
+  Eigen::Vector3d v1(1, 2, 3);
+  Eigen::Vector3d v2(4, 5, 6);
+  EXPECT_DOUBLE_EQ(dot(v1, v2), 32.0);
+}
+
+TEST_F(CommonTest, MinFunction)
+{
+  EXPECT_DOUBLE_EQ(min(3.0, 5.0), 3.0);
+  EXPECT_DOUBLE_EQ(min(5.0, 3.0), 3.0);
+  EXPECT_DOUBLE_EQ(min(-1.0, 1.0), -1.0);
+  EXPECT_DOUBLE_EQ(min(0.0, 0.0), 0.0);
+  EXPECT_EQ(min(2, 7), 2);
+}
+
+TEST_F(CommonTest, MaxFunction)
+{
+  EXPECT_DOUBLE_EQ(max(3.0, 5.0), 5.0);
+  EXPECT_DOUBLE_EQ(max(5.0, 3.0), 5.0);
+  EXPECT_DOUBLE_EQ(max(-1.0, 1.0), 1.0);
+  EXPECT_DOUBLE_EQ(max(0.0, 0.0), 0.0);
+  EXPECT_EQ(max(2, 7), 7);
+}
+
+TEST_F(CommonTest, ClampFunction)
+{
+  EXPECT_DOUBLE_EQ(clamp(5.0, 0.0, 10.0), 5.0);
+  EXPECT_DOUBLE_EQ(clamp(-1.0, 0.0, 10.0), 0.0);
+  EXPECT_DOUBLE_EQ(clamp(15.0, 0.0, 10.0), 10.0);
+  EXPECT_DOUBLE_EQ(clamp(0.0, 0.0, 10.0), 0.0);
+  EXPECT_DOUBLE_EQ(clamp(10.0, 0.0, 10.0), 10.0);
+  EXPECT_EQ(clamp(3, 1, 5), 3);
+  EXPECT_EQ(clamp(0, 1, 5), 1);
+  EXPECT_EQ(clamp(7, 1, 5), 5);
+}
+
+TEST_F(CommonTest, DotProductSpatialVector)
+{
+  SpatialVector<Real> a({1.0, 2.0, 3.0});
+  SpatialVector<Real> b({4.0, 5.0, 6.0});
+  EXPECT_DOUBLE_EQ(dot(a, b), 32.0);
+}
+
+TEST_F(CommonTest, DotProductSpatialMatrix)
+{
+  SpatialMatrix<Real> a(2, 2);
+  a(0, 0) = 1; a(0, 1) = 2;
+  a(1, 0) = 3; a(1, 1) = 4;
+
+  SpatialMatrix<Real> b(2, 2);
+  b(0, 0) = 5; b(0, 1) = 6;
+  b(1, 0) = 7; b(1, 1) = 8;
+
+  EXPECT_DOUBLE_EQ(dot(a, b), 70.0);
+}
+
+TEST_F(CommonTest, DotProductMixedEigenSpatialVector)
+{
+  Eigen::Vector3d ev(1, 2, 3);
+  SpatialVector<Real> sv({4.0, 5.0, 6.0});
+
+  EXPECT_DOUBLE_EQ(dot(ev, sv), 32.0);
+  EXPECT_DOUBLE_EQ(dot(sv, ev), 32.0);
 }

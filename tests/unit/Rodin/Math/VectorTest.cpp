@@ -6,6 +6,7 @@
  */
 #include <gtest/gtest.h>
 
+#include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Types.h"
@@ -321,4 +322,247 @@ TEST_F(VectorTest, SegmentOperations)
   EXPECT_EQ(segment2.size(), 2);
   EXPECT_DOUBLE_EQ(segment2[0], 3.0);
   EXPECT_DOUBLE_EQ(segment2[1], 4.0);
+}
+
+// --- Comprehensive SpatialVector Tests ---
+
+TEST_F(VectorTest, SpatialVectorInitializerList)
+{
+  SpatialVector<Real> v3({1.0, 2.0, 3.0});
+  EXPECT_EQ(v3.size(), 3);
+  EXPECT_DOUBLE_EQ(v3[0], 1.0);
+  EXPECT_DOUBLE_EQ(v3[1], 2.0);
+  EXPECT_DOUBLE_EQ(v3[2], 3.0);
+
+  SpatialVector<Real> v2({4.0, 5.0});
+  EXPECT_EQ(v2.size(), 2);
+  EXPECT_DOUBLE_EQ(v2[0], 4.0);
+  EXPECT_DOUBLE_EQ(v2[1], 5.0);
+
+  SpatialVector<Real> v1({7.0});
+  EXPECT_EQ(v1.size(), 1);
+  EXPECT_DOUBLE_EQ(v1[0], 7.0);
+}
+
+TEST_F(VectorTest, SpatialVectorEigenConstructor)
+{
+  Eigen::Vector3d ev;
+  ev << 1, 2, 3;
+  SpatialVector<Real> sv(ev);
+  EXPECT_EQ(sv.size(), 3);
+  EXPECT_DOUBLE_EQ(sv[0], 1.0);
+  EXPECT_DOUBLE_EQ(sv[1], 2.0);
+  EXPECT_DOUBLE_EQ(sv[2], 3.0);
+}
+
+TEST_F(VectorTest, SpatialVectorCompoundOperators)
+{
+  SpatialVector<Real> b({4.0, 5.0, 6.0});
+
+  // operator+=
+  SpatialVector<Real> a({1.0, 2.0, 3.0});
+  a += b;
+  EXPECT_DOUBLE_EQ(a[0], 5.0);
+  EXPECT_DOUBLE_EQ(a[1], 7.0);
+  EXPECT_DOUBLE_EQ(a[2], 9.0);
+
+  // operator-=
+  a = SpatialVector<Real>({1.0, 2.0, 3.0});
+  a -= b;
+  EXPECT_DOUBLE_EQ(a[0], -3.0);
+  EXPECT_DOUBLE_EQ(a[1], -3.0);
+  EXPECT_DOUBLE_EQ(a[2], -3.0);
+
+  // operator*=
+  a = SpatialVector<Real>({1.0, 2.0, 3.0});
+  a *= Real(2.0);
+  EXPECT_DOUBLE_EQ(a[0], 2.0);
+  EXPECT_DOUBLE_EQ(a[1], 4.0);
+  EXPECT_DOUBLE_EQ(a[2], 6.0);
+
+  // operator/=
+  a = SpatialVector<Real>({1.0, 2.0, 3.0});
+  a /= Real(2.0);
+  EXPECT_DOUBLE_EQ(a[0], 0.5);
+  EXPECT_DOUBLE_EQ(a[1], 1.0);
+  EXPECT_DOUBLE_EQ(a[2], 1.5);
+}
+
+TEST_F(VectorTest, SpatialVectorUnaryNegation)
+{
+  SpatialVector<Real> v({1.0, 2.0, 3.0});
+  SpatialVector<Real> neg = -v;
+  EXPECT_EQ(neg.size(), 3);
+  EXPECT_DOUBLE_EQ(neg[0], -1.0);
+  EXPECT_DOUBLE_EQ(neg[1], -2.0);
+  EXPECT_DOUBLE_EQ(neg[2], -3.0);
+}
+
+TEST_F(VectorTest, SpatialVectorResize)
+{
+  SpatialVector<Real> v(3);
+  v[0] = 10.0;
+  v[1] = 20.0;
+  v[2] = 30.0;
+
+  v.resize(2);
+  EXPECT_EQ(v.size(), 2);
+  EXPECT_DOUBLE_EQ(v[0], 10.0);
+  EXPECT_DOUBLE_EQ(v[1], 20.0);
+}
+
+TEST_F(VectorTest, SpatialVectorNamedAccessors)
+{
+  SpatialVector<Real> v({1.0, 2.0, 3.0});
+  EXPECT_DOUBLE_EQ(v.x(), 1.0);
+  EXPECT_DOUBLE_EQ(v.y(), 2.0);
+  EXPECT_DOUBLE_EQ(v.z(), 3.0);
+
+  v.x() = 10.0;
+  EXPECT_DOUBLE_EQ(v(0), 10.0);
+}
+
+TEST_F(VectorTest, SpatialVectorSetZeroSetConstant)
+{
+  SpatialVector<Real> v({1.0, 2.0, 3.0});
+
+  v.setZero();
+  EXPECT_DOUBLE_EQ(v[0], 0.0);
+  EXPECT_DOUBLE_EQ(v[1], 0.0);
+  EXPECT_DOUBLE_EQ(v[2], 0.0);
+
+  v.setConstant(5.0);
+  EXPECT_DOUBLE_EQ(v[0], 5.0);
+  EXPECT_DOUBLE_EQ(v[1], 5.0);
+  EXPECT_DOUBLE_EQ(v[2], 5.0);
+}
+
+TEST_F(VectorTest, SpatialVectorCrossProduct)
+{
+  SpatialVector<Real> a({1.0, 0.0, 0.0});
+  SpatialVector<Real> b({0.0, 1.0, 0.0});
+
+  SpatialVector<Real> c = a.cross(b);
+  EXPECT_DOUBLE_EQ(c[0], 0.0);
+  EXPECT_DOUBLE_EQ(c[1], 0.0);
+  EXPECT_DOUBLE_EQ(c[2], 1.0);
+
+  SpatialVector<Real> d = b.cross(a);
+  EXPECT_DOUBLE_EQ(d[0], 0.0);
+  EXPECT_DOUBLE_EQ(d[1], 0.0);
+  EXPECT_DOUBLE_EQ(d[2], -1.0);
+}
+
+TEST_F(VectorTest, SpatialVectorDotProduct)
+{
+  SpatialVector<Real> a({1.0, 2.0, 3.0});
+  SpatialVector<Real> b({4.0, 5.0, 6.0});
+  EXPECT_DOUBLE_EQ(a.dot(b), 32.0);
+}
+
+TEST_F(VectorTest, SpatialVectorTranspose)
+{
+  SpatialVector<Real> v({1.0, 2.0, 3.0});
+  SpatialMatrix<Real> m = v.transpose();
+  EXPECT_EQ(m.rows(), 1);
+  EXPECT_EQ(m.cols(), 3);
+  EXPECT_DOUBLE_EQ(m(0, 0), 1.0);
+  EXPECT_DOUBLE_EQ(m(0, 1), 2.0);
+  EXPECT_DOUBLE_EQ(m(0, 2), 3.0);
+}
+
+TEST_F(VectorTest, SpatialVectorValue)
+{
+  SpatialVector<Real> v({7.5, 2.0});
+  EXPECT_DOUBLE_EQ(v.value(), 7.5);
+}
+
+TEST_F(VectorTest, SpatialVectorNormalize)
+{
+  SpatialVector<Real> v({3.0, 4.0, 0.0});
+  v.normalize();
+  EXPECT_NEAR(v.norm(), 1.0, 1e-10);
+
+  SpatialVector<Real> w({3.0, 4.0, 0.0});
+  SpatialVector<Real> n = w.normalized();
+  EXPECT_NEAR(n.norm(), 1.0, 1e-10);
+  EXPECT_DOUBLE_EQ(w[0], 3.0);
+  EXPECT_DOUBLE_EQ(w[1], 4.0);
+  EXPECT_DOUBLE_EQ(w[2], 0.0);
+}
+
+TEST_F(VectorTest, SpatialVectorNorms)
+{
+  SpatialVector<Real> v({3.0, 4.0, 0.0});
+  EXPECT_DOUBLE_EQ(v.squaredNorm(), 25.0);
+  EXPECT_DOUBLE_EQ(v.norm(), 5.0);
+  EXPECT_NEAR(v.stableNorm(), 5.0, 1e-10);
+  EXPECT_NEAR(v.blueNorm(), 5.0, 1e-10);
+}
+
+TEST_F(VectorTest, SpatialVectorLpNorm)
+{
+  SpatialVector<Real> v({3.0, 4.0, 0.0});
+  EXPECT_DOUBLE_EQ(v.lpNorm<1>(), 7.0);
+  EXPECT_NEAR(v.lpNorm<2>(), 5.0, 1e-10);
+}
+
+TEST_F(VectorTest, SpatialVectorConjugate)
+{
+  SpatialVector<Real> v({1.0, 2.0, 3.0});
+  SpatialVector<Real> c = v.conjugate();
+  EXPECT_DOUBLE_EQ(c[0], 1.0);
+  EXPECT_DOUBLE_EQ(c[1], 2.0);
+  EXPECT_DOUBLE_EQ(c[2], 3.0);
+}
+
+TEST_F(VectorTest, SpatialVectorGetData)
+{
+  SpatialVector<Real> v({1.0, 2.0, 3.0});
+  const auto& d = v.getData();
+  EXPECT_DOUBLE_EQ(d(0), 1.0);
+  EXPECT_DOUBLE_EQ(d(1), 2.0);
+  EXPECT_DOUBLE_EQ(d(2), 3.0);
+}
+
+TEST_F(VectorTest, SpatialVector2D)
+{
+  SpatialVector<Real> v(2);
+  v[0] = 1.0;
+  v[1] = 2.0;
+
+  SpatialVector<Real> w(2);
+  w[0] = 3.0;
+  w[1] = 4.0;
+
+  EXPECT_DOUBLE_EQ(v.dot(w), 11.0);
+  EXPECT_DOUBLE_EQ(v.norm(), std::sqrt(5.0));
+
+  v.setZero();
+  EXPECT_DOUBLE_EQ(v[0], 0.0);
+  EXPECT_DOUBLE_EQ(v[1], 0.0);
+
+  v[0] = 1.0;
+  v[1] = 2.0;
+  v += w;
+  EXPECT_DOUBLE_EQ(v[0], 4.0);
+  EXPECT_DOUBLE_EQ(v[1], 6.0);
+}
+
+TEST_F(VectorTest, SpatialVector1D)
+{
+  SpatialVector<Real> v(1);
+  v[0] = 5.0;
+
+  EXPECT_DOUBLE_EQ(v.value(), 5.0);
+  EXPECT_DOUBLE_EQ(v.norm(), 5.0);
+  EXPECT_DOUBLE_EQ(v.squaredNorm(), 25.0);
+}
+
+TEST_F(VectorTest, SpatialVector0D)
+{
+  SpatialVector<Real> v(0);
+  EXPECT_EQ(v.size(), 0);
+  EXPECT_DOUBLE_EQ(v.norm(), 0.0);
+  EXPECT_DOUBLE_EQ(v.squaredNorm(), 0.0);
 }

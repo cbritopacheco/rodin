@@ -8,6 +8,7 @@
 
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/SpatialMatrix.h"
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Types.h"
 
 using namespace Rodin;
@@ -236,4 +237,379 @@ TEST_F(MatrixTest, MatrixProperties)
             3, 4;
   Real det = square.determinant();
   EXPECT_DOUBLE_EQ(det, -2.0);  // 1*4 - 2*3 = -2
+}
+
+// --- Comprehensive SpatialMatrix Tests ---
+
+TEST_F(MatrixTest, SpatialMatrixConstruction)
+{
+  SpatialMatrix<Real> sm;
+  EXPECT_EQ(sm.rows(), 0);
+  EXPECT_EQ(sm.cols(), 0);
+
+  SpatialMatrix<Real> sm2(2, 3);
+  EXPECT_EQ(sm2.rows(), 2);
+  EXPECT_EQ(sm2.cols(), 3);
+
+  auto sm3 = sm2;
+  EXPECT_EQ(sm3.rows(), 2);
+  EXPECT_EQ(sm3.cols(), 3);
+}
+
+TEST_F(MatrixTest, SpatialMatrixElementAccess)
+{
+  SpatialMatrix<Real> sm(2, 2);
+  sm(0, 0) = 1;
+  sm(0, 1) = 2;
+  sm(1, 0) = 3;
+  sm(1, 1) = 4;
+
+  EXPECT_DOUBLE_EQ(sm(0, 0), 1.0);
+  EXPECT_DOUBLE_EQ(sm(0, 1), 2.0);
+  EXPECT_DOUBLE_EQ(sm(1, 0), 3.0);
+  EXPECT_DOUBLE_EQ(sm(1, 1), 4.0);
+}
+
+TEST_F(MatrixTest, SpatialMatrixSetZeroConstantIdentity)
+{
+  SpatialMatrix<Real> sm(3, 3);
+
+  sm.setZero();
+  for (int i = 0; i < 3; ++i)
+    for (int j = 0; j < 3; ++j)
+      EXPECT_DOUBLE_EQ(sm(i, j), 0.0);
+
+  sm.setConstant(5.0);
+  for (int i = 0; i < 3; ++i)
+    for (int j = 0; j < 3; ++j)
+      EXPECT_DOUBLE_EQ(sm(i, j), 5.0);
+
+  sm.setIdentity();
+  for (int i = 0; i < 3; ++i)
+    for (int j = 0; j < 3; ++j)
+    {
+      if (i == j)
+        EXPECT_DOUBLE_EQ(sm(i, j), 1.0);
+      else
+        EXPECT_DOUBLE_EQ(sm(i, j), 0.0);
+    }
+}
+
+TEST_F(MatrixTest, SpatialMatrixResize)
+{
+  SpatialMatrix<Real> sm(2, 2);
+  sm(0, 0) = 1;
+  sm(0, 1) = 2;
+  sm(1, 0) = 3;
+  sm(1, 1) = 4;
+
+  sm.resize(3, 3);
+  EXPECT_EQ(sm.rows(), 3);
+  EXPECT_EQ(sm.cols(), 3);
+}
+
+TEST_F(MatrixTest, SpatialMatrixNorms)
+{
+  SpatialMatrix<Real> sm(2, 2);
+  sm(0, 0) = 3;
+  sm(0, 1) = 0;
+  sm(1, 0) = 0;
+  sm(1, 1) = 4;
+
+  EXPECT_DOUBLE_EQ(sm.squaredNorm(), 25.0);
+  EXPECT_DOUBLE_EQ(sm.norm(), 5.0);
+}
+
+TEST_F(MatrixTest, SpatialMatrixDot)
+{
+  SpatialMatrix<Real> a(2, 2);
+  a(0, 0) = 1; a(0, 1) = 2;
+  a(1, 0) = 3; a(1, 1) = 4;
+
+  SpatialMatrix<Real> b(2, 2);
+  b(0, 0) = 5; b(0, 1) = 6;
+  b(1, 0) = 7; b(1, 1) = 8;
+
+  EXPECT_DOUBLE_EQ(a.dot(b), 70.0);
+}
+
+TEST_F(MatrixTest, SpatialMatrixTranspose)
+{
+  SpatialMatrix<Real> sm(2, 3);
+  sm(0, 0) = 1; sm(0, 1) = 2; sm(0, 2) = 3;
+  sm(1, 0) = 4; sm(1, 1) = 5; sm(1, 2) = 6;
+
+  auto t = sm.transpose();
+  EXPECT_EQ(t.rows(), 3);
+  EXPECT_EQ(t.cols(), 2);
+  EXPECT_DOUBLE_EQ(t(0, 0), 1.0);
+  EXPECT_DOUBLE_EQ(t(1, 0), 2.0);
+  EXPECT_DOUBLE_EQ(t(2, 0), 3.0);
+  EXPECT_DOUBLE_EQ(t(0, 1), 4.0);
+  EXPECT_DOUBLE_EQ(t(1, 1), 5.0);
+  EXPECT_DOUBLE_EQ(t(2, 1), 6.0);
+}
+
+TEST_F(MatrixTest, SpatialMatrixTrace)
+{
+  SpatialMatrix<Real> sm1(1, 1);
+  sm1(0, 0) = 5;
+  EXPECT_DOUBLE_EQ(sm1.trace(), 5.0);
+
+  SpatialMatrix<Real> sm2(2, 2);
+  sm2(0, 0) = 1; sm2(0, 1) = 2;
+  sm2(1, 0) = 3; sm2(1, 1) = 4;
+  EXPECT_DOUBLE_EQ(sm2.trace(), 5.0);
+
+  SpatialMatrix<Real> sm3(3, 3);
+  sm3.setIdentity();
+  EXPECT_DOUBLE_EQ(sm3.trace(), 3.0);
+}
+
+TEST_F(MatrixTest, SpatialMatrixValue)
+{
+  SpatialMatrix<Real> sm(1, 1);
+  sm(0, 0) = 7.5;
+  EXPECT_DOUBLE_EQ(sm.value(), 7.5);
+}
+
+TEST_F(MatrixTest, SpatialMatrixDeterminant1x1)
+{
+  SpatialMatrix<Real> sm(1, 1);
+  sm(0, 0) = 5;
+  EXPECT_DOUBLE_EQ(sm.determinant(), 5.0);
+}
+
+TEST_F(MatrixTest, SpatialMatrixDeterminant2x2)
+{
+  SpatialMatrix<Real> sm(2, 2);
+  sm(0, 0) = 1; sm(0, 1) = 2;
+  sm(1, 0) = 3; sm(1, 1) = 4;
+  EXPECT_DOUBLE_EQ(sm.determinant(), -2.0);
+}
+
+TEST_F(MatrixTest, SpatialMatrixDeterminant3x3)
+{
+  SpatialMatrix<Real> sm(3, 3);
+  sm(0, 0) = 1; sm(0, 1) = 2; sm(0, 2) = 3;
+  sm(1, 0) = 0; sm(1, 1) = 1; sm(1, 2) = 4;
+  sm(2, 0) = 5; sm(2, 1) = 6; sm(2, 2) = 0;
+  EXPECT_NEAR(sm.determinant(), 1.0, 1e-10);
+}
+
+TEST_F(MatrixTest, SpatialMatrixInverse1x1)
+{
+  SpatialMatrix<Real> sm(1, 1);
+  sm(0, 0) = 4;
+  auto inv = sm.inverse();
+  EXPECT_DOUBLE_EQ(inv(0, 0), 0.25);
+}
+
+TEST_F(MatrixTest, SpatialMatrixInverse2x2)
+{
+  SpatialMatrix<Real> sm(2, 2);
+  sm(0, 0) = 4; sm(0, 1) = 7;
+  sm(1, 0) = 2; sm(1, 1) = 6;
+  auto inv = sm.inverse();
+
+  EXPECT_NEAR(inv(0, 0), 0.6, 1e-10);
+  EXPECT_NEAR(inv(0, 1), -0.7, 1e-10);
+  EXPECT_NEAR(inv(1, 0), -0.2, 1e-10);
+  EXPECT_NEAR(inv(1, 1), 0.4, 1e-10);
+}
+
+TEST_F(MatrixTest, SpatialMatrixInverse3x3)
+{
+  SpatialMatrix<Real> sm(3, 3);
+  sm(0, 0) = 1; sm(0, 1) = 0; sm(0, 2) = 0;
+  sm(1, 0) = 0; sm(1, 1) = 2; sm(1, 2) = 0;
+  sm(2, 0) = 0; sm(2, 1) = 0; sm(2, 2) = 3;
+
+  auto inv = sm.inverse();
+  EXPECT_NEAR(inv(0, 0), 1.0, 1e-10);
+  EXPECT_NEAR(inv(0, 1), 0.0, 1e-10);
+  EXPECT_NEAR(inv(0, 2), 0.0, 1e-10);
+  EXPECT_NEAR(inv(1, 0), 0.0, 1e-10);
+  EXPECT_NEAR(inv(1, 1), 0.5, 1e-10);
+  EXPECT_NEAR(inv(1, 2), 0.0, 1e-10);
+  EXPECT_NEAR(inv(2, 0), 0.0, 1e-10);
+  EXPECT_NEAR(inv(2, 1), 0.0, 1e-10);
+  EXPECT_NEAR(inv(2, 2), 1.0 / 3.0, 1e-10);
+}
+
+TEST_F(MatrixTest, SpatialMatrixSolve)
+{
+  SpatialMatrix<Real> A(2, 2);
+  A(0, 0) = 2; A(0, 1) = 1;
+  A(1, 0) = 1; A(1, 1) = 3;
+
+  SpatialVector<Real> b(2);
+  b(0) = 5;
+  b(1) = 7;
+
+  auto x = A.solve(b);
+  EXPECT_NEAR(x(0), 1.6, 1e-10);
+  EXPECT_NEAR(x(1), 1.8, 1e-10);
+}
+
+TEST_F(MatrixTest, SpatialMatrixRowCol)
+{
+  SpatialMatrix<Real> sm(2, 3);
+  sm(0, 0) = 1; sm(0, 1) = 2; sm(0, 2) = 3;
+  sm(1, 0) = 4; sm(1, 1) = 5; sm(1, 2) = 6;
+
+  auto r = sm.row(0);
+  EXPECT_EQ(r.size(), 3);
+  EXPECT_DOUBLE_EQ(r(0), 1.0);
+  EXPECT_DOUBLE_EQ(r(1), 2.0);
+  EXPECT_DOUBLE_EQ(r(2), 3.0);
+
+  auto c = sm.col(1);
+  EXPECT_EQ(c.size(), 2);
+  EXPECT_DOUBLE_EQ(c(0), 2.0);
+  EXPECT_DOUBLE_EQ(c(1), 5.0);
+}
+
+TEST_F(MatrixTest, SpatialMatrixScalarMultiply)
+{
+  SpatialMatrix<Real> sm(2, 2);
+  sm(0, 0) = 1; sm(0, 1) = 2;
+  sm(1, 0) = 3; sm(1, 1) = 4;
+
+  sm *= 2.0;
+  EXPECT_DOUBLE_EQ(sm(0, 0), 2.0);
+  EXPECT_DOUBLE_EQ(sm(0, 1), 4.0);
+  EXPECT_DOUBLE_EQ(sm(1, 0), 6.0);
+  EXPECT_DOUBLE_EQ(sm(1, 1), 8.0);
+}
+
+TEST_F(MatrixTest, SpatialMatrixMatrixMultiply)
+{
+  SpatialMatrix<Real> a(2, 2);
+  a(0, 0) = 1; a(0, 1) = 2;
+  a(1, 0) = 3; a(1, 1) = 4;
+
+  SpatialMatrix<Real> b(2, 2);
+  b(0, 0) = 5; b(0, 1) = 6;
+  b(1, 0) = 7; b(1, 1) = 8;
+
+  a *= b;
+  EXPECT_DOUBLE_EQ(a(0, 0), 19.0);
+  EXPECT_DOUBLE_EQ(a(0, 1), 22.0);
+  EXPECT_DOUBLE_EQ(a(1, 0), 43.0);
+  EXPECT_DOUBLE_EQ(a(1, 1), 50.0);
+}
+
+TEST_F(MatrixTest, SpatialMatrixPseudoInverse)
+{
+  SpatialMatrix<Real> sm(2, 2);
+  sm.setIdentity();
+
+  auto pi = sm.pseudoInverse();
+  for (int i = 0; i < 2; ++i)
+    for (int j = 0; j < 2; ++j)
+    {
+      if (i == j)
+        EXPECT_NEAR(pi(i, j), 1.0, 1e-10);
+      else
+        EXPECT_NEAR(pi(i, j), 0.0, 1e-10);
+    }
+}
+
+TEST_F(MatrixTest, SpatialMatrixNonSquare)
+{
+  SpatialMatrix<Real> sm(2, 3);
+  sm(0, 0) = 1; sm(0, 1) = 2; sm(0, 2) = 3;
+  sm(1, 0) = 4; sm(1, 1) = 5; sm(1, 2) = 6;
+
+  EXPECT_EQ(sm.rows(), 2);
+  EXPECT_EQ(sm.cols(), 3);
+
+  auto t = sm.transpose();
+  EXPECT_EQ(t.rows(), 3);
+  EXPECT_EQ(t.cols(), 2);
+}
+
+TEST_F(MatrixTest, SpatialMatrixBinaryAdd)
+{
+  SpatialMatrix<Real> a(2, 2);
+  a(0, 0) = 1; a(0, 1) = 2;
+  a(1, 0) = 3; a(1, 1) = 4;
+
+  SpatialMatrix<Real> b(2, 2);
+  b(0, 0) = 5; b(0, 1) = 6;
+  b(1, 0) = 7; b(1, 1) = 8;
+
+  auto c = a + b;
+  EXPECT_DOUBLE_EQ(c(0, 0), 6.0);
+  EXPECT_DOUBLE_EQ(c(0, 1), 8.0);
+  EXPECT_DOUBLE_EQ(c(1, 0), 10.0);
+  EXPECT_DOUBLE_EQ(c(1, 1), 12.0);
+}
+
+TEST_F(MatrixTest, SpatialMatrixBinarySubtract)
+{
+  SpatialMatrix<Real> a(2, 2);
+  a(0, 0) = 5; a(0, 1) = 6;
+  a(1, 0) = 7; a(1, 1) = 8;
+
+  SpatialMatrix<Real> b(2, 2);
+  b(0, 0) = 1; b(0, 1) = 2;
+  b(1, 0) = 3; b(1, 1) = 4;
+
+  auto c = a - b;
+  EXPECT_DOUBLE_EQ(c(0, 0), 4.0);
+  EXPECT_DOUBLE_EQ(c(0, 1), 4.0);
+  EXPECT_DOUBLE_EQ(c(1, 0), 4.0);
+  EXPECT_DOUBLE_EQ(c(1, 1), 4.0);
+}
+
+TEST_F(MatrixTest, SpatialMatrixBinaryMultiply)
+{
+  SpatialMatrix<Real> a(2, 2);
+  a(0, 0) = 1; a(0, 1) = 2;
+  a(1, 0) = 3; a(1, 1) = 4;
+
+  SpatialMatrix<Real> b(2, 2);
+  b(0, 0) = 5; b(0, 1) = 6;
+  b(1, 0) = 7; b(1, 1) = 8;
+
+  auto c = a * b;
+  EXPECT_DOUBLE_EQ(c(0, 0), 19.0);
+  EXPECT_DOUBLE_EQ(c(0, 1), 22.0);
+  EXPECT_DOUBLE_EQ(c(1, 0), 43.0);
+  EXPECT_DOUBLE_EQ(c(1, 1), 50.0);
+}
+
+TEST_F(MatrixTest, SpatialMatrixBinarySubtract3x3)
+{
+  SpatialMatrix<Real> a(3, 3);
+  a.setIdentity();
+
+  SpatialMatrix<Real> b(3, 3);
+  b.setIdentity();
+
+  auto c = a - b;
+  for (int i = 0; i < 3; ++i)
+    for (int j = 0; j < 3; ++j)
+      EXPECT_DOUBLE_EQ(c(i, j), 0.0);
+}
+
+TEST_F(MatrixTest, SpatialMatrixBinarySubtractNonSquare)
+{
+  SpatialMatrix<Real> a(2, 3);
+  a(0, 0) = 1; a(0, 1) = 2; a(0, 2) = 3;
+  a(1, 0) = 4; a(1, 1) = 5; a(1, 2) = 6;
+
+  SpatialMatrix<Real> b(2, 3);
+  b(0, 0) = 6; b(0, 1) = 5; b(0, 2) = 4;
+  b(1, 0) = 3; b(1, 1) = 2; b(1, 2) = 1;
+
+  auto c = a - b;
+  EXPECT_DOUBLE_EQ(c(0, 0), -5.0);
+  EXPECT_DOUBLE_EQ(c(0, 1), -3.0);
+  EXPECT_DOUBLE_EQ(c(0, 2), -1.0);
+  EXPECT_DOUBLE_EQ(c(1, 0), 1.0);
+  EXPECT_DOUBLE_EQ(c(1, 1), 3.0);
+  EXPECT_DOUBLE_EQ(c(1, 2), 5.0);
 }
