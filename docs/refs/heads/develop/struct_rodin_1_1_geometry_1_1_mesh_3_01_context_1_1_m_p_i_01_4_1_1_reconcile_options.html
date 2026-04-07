@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin/Math/ directory | Rodin</title>
+  <title>Rodin::Geometry::Mesh&lt;Context::MPI&gt;::ReconcileOptions struct | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -74,50 +74,81 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span>Math<span class="m-breadcrumb">/</span> <span class="m-thin">directory</span>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_p_i_2_geometry_2_mesh_8h.html">&lt;Rodin/MPI/Geometry/Mesh.h&gt;</a></div>
+          <div class="m-doc-template">template&lt;&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html">Mesh&lt;Context::MPI&gt;</a>::<wbr/></span>ReconcileOptions <span class="m-thin">struct</span>
         </h1>
-        <p>Namespace <a href="namespace_rodin_1_1_math.html" class="m-doc">Rodin::<wbr />Math</a>.</p>
+        <p>Options controlling iterative reconciliation rounds.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#files">Files</a></li>
+                <li><a href="#pub-attribs">Public variables</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-        <section id="files">
-          <h2><a href="#files">Files</a></h2>
+        <section id="pub-attribs">
+          <h2><a href="#pub-attribs">Public variables</a></h2>
           <dl class="m-doc">
-            <dt>file <a href="_math_2_common_8h.html" class="m-doc">Common.h</a></dt>
-            <dd>Common mathematical functions and operations.</dd>
-            <dt>file <a href="_constants_8h.html" class="m-doc">Constants.h</a></dt>
-            <dd>Mathematical constants and related utility functions.</dd>
-            <dt>file <a href="_deg_8h.html" class="m-doc">Deg.h</a></dt>
-            <dd>Degree angle unit type with radian conversion.</dd>
-            <dt>file <a href="_math_2_forward_decls_8h.html" class="m-doc">ForwardDecls.h</a></dt>
-            <dd>Forward declarations for the Math module.</dd>
-            <dt>file <a href="_math_2_matrix_8h.html" class="m-doc">Matrix.h</a></dt>
-            <dd>Dense matrix type aliases and definitions.</dd>
-            <dt>file <a href="_rad_8h.html" class="m-doc">Rad.h</a></dt>
-            <dd>Radian angle unit type.</dd>
-            <dt>file <a href="_sparse_matrix_8h.html" class="m-doc">SparseMatrix.h</a></dt>
-            <dd>Sparse matrix type and operations.</dd>
-            <dt>file <a href="_spatial_matrix_8h.html" class="m-doc">SpatialMatrix.h</a></dt>
-            <dd>Fixed-capacity spatial matrix with bounded maximum dimensions.</dd>
-            <dt>file <a href="_spatial_vector_8h.html" class="m-doc">SpatialVector.h</a></dt>
-            <dd>Fixed-capacity spatial vector with bounded maximum dimension.</dd>
-            <dt>file <a href="_math_2_traits_8h.html" class="m-doc">Traits.h</a></dt>
-            <dd>Type traits for the Math module and form language.</dd>
-            <dt>file <a href="_math_2_types_8h.html" class="m-doc">Types.h</a></dt>
-            <dd>Type definitions for the Math module.</dd>
-            <dt>file <a href="_unit_8h.html" class="m-doc">Unit.h</a></dt>
-            <dd>Base class for type-safe unit representations.</dd>
-            <dt>file <a href="_math_2_vector_8h.html" class="m-doc">Vector.h</a></dt>
-            <dd>Dense vector type aliases and definitions.</dd>
+            <dt>
+              size_t <a href="#a16ffc68bcf5a41c35867c4026061336c" class="m-doc">maxOwnerRounds</a>
+            </dt>
+            <dd></dd>
+            <dt>
+              size_t <a href="#a4e483067490cdc05ed03dcb48a0538bf" class="m-doc">maxGidRounds</a>
+            </dt>
+            <dd></dd>
+            <dt>
+              size_t <a href="#a139bb8efef6466ac7bbcd7ea76ddd960" class="m-doc">globalCheckPeriod</a>
+            </dt>
+            <dd></dd>
+            <dt>
+              bool <a href="#a5ad819f23e8dc80cd416e41d535171e9" class="m-doc">strictRoundCap</a>
+            </dt>
+            <dd></dd>
           </dl>
+        </section>
+        <section>
+          <h2>Variable documentation</h2>
+          <section class="m-doc-details" id="a16ffc68bcf5a41c35867c4026061336c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              size_t Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;::<wbr />ReconcileOptions::<wbr /><a href="#a16ffc68bcf5a41c35867c4026061336c" class="m-doc-self">maxOwnerRounds</a>
+            </h3>
+<p>Maximum number of owner-convergence rounds.</p><p>Defaults to unlimited.</p>
+          </div></section>
+          <section class="m-doc-details" id="a4e483067490cdc05ed03dcb48a0538bf"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              size_t Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;::<wbr />ReconcileOptions::<wbr /><a href="#a4e483067490cdc05ed03dcb48a0538bf" class="m-doc-self">maxGidRounds</a>
+            </h3>
+<p>Maximum number of gid-convergence rounds.</p><p>Defaults to unlimited.</p>
+          </div></section>
+          <section class="m-doc-details" id="a139bb8efef6466ac7bbcd7ea76ddd960"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              size_t Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;::<wbr />ReconcileOptions::<wbr /><a href="#a139bb8efef6466ac7bbcd7ea76ddd960" class="m-doc-self">globalCheckPeriod</a>
+            </h3>
+<p>Controls how often global convergence is checked.</p><p>A value of 1 checks every round (legacy behavior). Larger values reduce the frequency of global all-reduce operations during active convergence.</p>
+          </div></section>
+          <section class="m-doc-details" id="a5ad819f23e8dc80cd416e41d535171e9"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              bool Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;::<wbr />ReconcileOptions::<wbr /><a href="#a5ad819f23e8dc80cd416e41d535171e9" class="m-doc-self">strictRoundCap</a>
+            </h3>
+<p>If true, exceeding a round cap throws; otherwise reconciliation keeps converging with existing state.</p>
+          </div></section>
         </section>
       </div>
     </div>

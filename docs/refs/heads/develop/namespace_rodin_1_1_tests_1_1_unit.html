@@ -109,6 +109,68 @@
         <section id="func-members">
           <h2><a href="#func-members">Functions</a></h2>
           <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a876a122c23dbcba1d5f263a672584e63" class="m-doc">makeMixed2DMesh</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;</span>
+            </dt>
+            <dd>Helper to build a mixed 2D mesh with triangles and quadrilaterals.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a5c41eb41a2ee289e0a9c3c23bb416aea" class="m-doc">makeMixed3DMesh</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;</span>
+            </dt>
+            <dd>Helper to build a mixed 3D mesh with tetrahedra and wedges.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a984318045f939c8a5a786970d0dedd64" class="m-doc">makeLargerMixed2DMesh</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;</span>
+            </dt>
+            <dd>Builds a larger mixed 2D mesh: 4 triangles + 2 quadrilaterals.</dd>
+            <dt id="a9abbd80c73902732b8bd867469d16648">
+              <span class="m-doc-wrap-bumper"><a href="#a9abbd80c73902732b8bd867469d16648" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Geometry_Shard,
+              Builder_ParentMode_AllOwned)</span>
+            </dt>
+            <dd>Builds a shard from a parent mesh containing two triangles forming a unit square and includes all entities as owned.</dd>
+            <dt id="a6d0e1c60cd09e7f4d8503a708deda39f">
+              <span class="m-doc-wrap-bumper"><a href="#a6d0e1c60cd09e7f4d8503a708deda39f" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Geometry_Shard,
+              Builder_ParentMode_MixedStates)</span>
+            </dt>
+            <dd>Builds two shards from a 4-triangle mesh and verifies ownership, shared, and ghost state for vertices and cells.</dd>
+            <dt id="a0b3b33f32373472a5133ef3c064c985f">
+              <span class="m-doc-wrap-bumper"><a href="#a0b3b33f32373472a5133ef3c064c985f" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Geometry_Shard,
+              Builder_DirectMode_SingleTriangle)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> direct construction of a shard with explicit vertex and polytope insertion.</dd>
+            <dt id="a84d44994ad4756159997e3099bfdccb3">
+              <span class="m-doc-wrap-bumper"><a href="#a84d44994ad4756159997e3099bfdccb3" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Geometry_Shard,
+              Builder_DirectMode_VertexIdempotent)</span>
+            </dt>
+            <dd>Verifies that inserting the same global vertex twice in direct mode is idempotent and returns the same local index.</dd>
+            <dt id="ad1885fbf196a804bda705635c98aac11">
+              <span class="m-doc-wrap-bumper"><a href="#ad1885fbf196a804bda705635c98aac11" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Geometry_Shard,
+              PolytopeMap_ParentMode)</span>
+            </dt>
+            <dd>Verifies the bidirectional polytope map after building a shard from a parent mesh.</dd>
+            <dt id="a112355d65fba2f99ec74e119e1453d68">
+              <span class="m-doc-wrap-bumper"><a href="#a112355d65fba2f99ec74e119e1453d68" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Geometry_Shard,
+              PolytopeMap_DirectMode)</span>
+            </dt>
+            <dd>Verifies the bidirectional polytope map after building a shard in direct mode.</dd>
+            <dt id="abe6890f560f44beec7234571c38f3f20">
+              <span class="m-doc-wrap-bumper"><a href="#abe6890f560f44beec7234571c38f3f20" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Geometry_Shard,
+              GetState)</span>
+            </dt>
+            <dd>Verifies getState() returns the correct per-entity state vectors.</dd>
+            <dt id="aa58c6192de997baa9fbe34b5a165fd86">
+              <span class="m-doc-wrap-bumper"><a href="#aa58c6192de997baa9fbe34b5a165fd86" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Geometry_Shard,
+              Builder_ParentMode_AttributePreservation)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> that Builder::include() preserves entity attributes from the parent mesh after shard finalization.</dd>
+            <dt id="a357a27823a0a1d0fef05696a4e0f8f4f">
+              <span class="m-doc-wrap-bumper"><a href="#a357a27823a0a1d0fef05696a4e0f8f4f" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Geometry_Shard,
+              Builder_ParentMode_ConnectivityPreservation)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> that shard-local cell-to-vertex connectivity matches the parent mesh connectivity when mapped through the PolytopeMap.</dd>
+            <dt id="a94fc2258ce226fdb3bace783014de050">
+              <span class="m-doc-wrap-bumper"><a href="#a94fc2258ce226fdb3bace783014de050" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Geometry_Shard,
+              Builder_DirectMode_Mixed3D)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> direct-mode construction of a mixed 3D shard containing one tetrahedron and one wedge that share a triangular face.</dd>
             <dt id="afb9cecf901552579b8a209ff95e1961c">
               <span class="m-doc-wrap-bumper"><a href="#afb9cecf901552579b8a209ff95e1961c" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_IO_MFEM_H1_GridFunction,
               SaveLoadRoundTrip_H1_Degree1_Scalar)</span>
@@ -299,6 +361,186 @@
               DifferentInitialConditions)</span>
             </dt>
             <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> with different initial conditions.</dd>
+            <dt id="ab890ec53040a969469ec1d4188be497e">
+              <span class="m-doc-wrap-bumper"><a href="#ab890ec53040a969469ec1d4188be497e" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              GetPolytopeCount_Cells)</span>
+            </dt>
+            <dd>Verifies that MPIMesh::getPolytopeCount(D) for cells equals the parent mesh cell count (using the MPIMesh API directly, not manual shard iteration).</dd>
+            <dt id="a339f51052565d44d0c276119ef88250b">
+              <span class="m-doc-wrap-bumper"><a href="#a339f51052565d44d0c276119ef88250b" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              GetPolytopeCount_Vertices)</span>
+            </dt>
+            <dd>Verifies that MPIMesh::getPolytopeCount(0) for vertices equals the parent mesh vertex count.</dd>
+            <dt id="a560b65a928ac4cae087f1bcbc026baff">
+              <span class="m-doc-wrap-bumper"><a href="#a560b65a928ac4cae087f1bcbc026baff" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              GetPolytopeCount_ByType)</span>
+            </dt>
+            <dd>Verifies that MPIMesh::getPolytopeCount(Polytope::Type) correctly counts cells by geometry type.</dd>
+            <dt id="a7749d9bbe4f5148a9378b6bae4352171">
+              <span class="m-doc-wrap-bumper"><a href="#a7749d9bbe4f5148a9378b6bae4352171" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              IndexMapping_RoundTrip)</span>
+            </dt>
+            <dd>Verifies that getLocalIndex and getGlobalIndex are inverses of each other for all local polytopes.</dd>
+            <dt id="a92a528f3089495fa913541a093d3510e">
+              <span class="m-doc-wrap-bumper"><a href="#a92a528f3089495fa913541a093d3510e" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              IndexMapping_MissingReturnsNullopt)</span>
+            </dt>
+            <dd>Verifies that getLocalIndex returns nullopt for a global index that is not present in the local shard.</dd>
+            <dt id="a64f6cfa8b62421ee3282814ecf999aa2">
+              <span class="m-doc-wrap-bumper"><a href="#a64f6cfa8b62421ee3282814ecf999aa2" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              GetContext)</span>
+            </dt>
+            <dd>Verifies that <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#ad2346a6e26e8a39fb63ebdf9c0eca50f" class="m-doc">MPIMesh::<wbr />getContext()</a> returns the construction context.</dd>
+            <dt id="a9c3d78e2b0c3209409bb9e06994d0c8e">
+              <span class="m-doc-wrap-bumper"><a href="#a9c3d78e2b0c3209409bb9e06994d0c8e" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              LocalIterators)</span>
+            </dt>
+            <dd>Verifies that local cell and vertex iterators on MPIMesh work correctly and iterate over the expected number of entities.</dd>
+            <dt id="a63ff46893f6880fa8c69daa08d9f2a4b">
+              <span class="m-doc-wrap-bumper"><a href="#a63ff46893f6880fa8c69daa08d9f2a4b" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              GetGeometry_Cells)</span>
+            </dt>
+            <dd>Verifies that <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#ad6cca31cbc1228bd17c19eb14b768182" class="m-doc">MPIMesh::<wbr />getGeometry()</a> returns correct geometry types for local cells.</dd>
+            <dt id="a7c5020f10e54810f198ecabb7dafcb2d">
+              <span class="m-doc-wrap-bumper"><a href="#a7c5020f10e54810f198ecabb7dafcb2d" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              GetVertexCoordinates)</span>
+            </dt>
+            <dd>Verifies that <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a3244640e687c2724ba4044c22a8c3001" class="m-doc">MPIMesh::<wbr />getVertexCoordinates()</a> returns valid coordinates for all local vertices.</dd>
+            <dt id="a775eff35c22c2542501a8d5e825258a4">
+              <span class="m-doc-wrap-bumper"><a href="#a775eff35c22c2542501a8d5e825258a4" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              Tetrahedron3D_GlobalCellCount)</span>
+            </dt>
+            <dd>Verifies that a 3D Tetrahedron mesh distributes correctly via MPIMesh and getPolytopeCount returns the correct global count.</dd>
+            <dt id="ac8ca4ca8280099c31dd56502696293e6">
+              <span class="m-doc-wrap-bumper"><a href="#ac8ca4ca8280099c31dd56502696293e6" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              Scale)</span>
+            </dt>
+            <dd>Verifies that <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#adca2cc21c7465cd5134715dc825ece42" class="m-doc">MPIMesh::<wbr />scale()</a> modifies vertex coordinates by the given factor on each rank.</dd>
+            <dt id="a69a54be1a0582ac7e9437e118aedf80a">
+              <span class="m-doc-wrap-bumper"><a href="#a69a54be1a0582ac7e9437e118aedf80a" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              Flush)</span>
+            </dt>
+            <dd>Verifies that <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a04f2540d940cc37b5c2538ed8e5b54be" class="m-doc">MPIMesh::<wbr />flush()</a> does not crash and the mesh remains valid afterward.</dd>
+            <dt id="afb1c89879449dadad08acc7dcf979407">
+              <span class="m-doc-wrap-bumper"><a href="#afb1c89879449dadad08acc7dcf979407" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              IsSubMesh)</span>
+            </dt>
+            <dd>Verifies that <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a07118dd6dc984cb9260ae21fc61a4130" class="m-doc">MPIMesh::<wbr />isSubMesh()</a> returns false.</dd>
+            <dt id="a9f78b0f5359f798e8f527aab0628e458">
+              <span class="m-doc-wrap-bumper"><a href="#a9f78b0f5359f798e8f527aab0628e458" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              GetConnectivity)</span>
+            </dt>
+            <dd>Verifies that <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a01277d7ad215e3fe65b940508dff0b85" class="m-doc">MPIMesh::<wbr />getConnectivity()</a> returns the shard&#x27;s connectivity and that cell-to-vertex incidence is valid.</dd>
+            <dt id="ac0079d06dca1dad390e7696225243561">
+              <span class="m-doc-wrap-bumper"><a href="#ac0079d06dca1dad390e7696225243561" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              GetSetAttribute)</span>
+            </dt>
+            <dd>Verifies that getAttribute returns valid attributes and setAttribute modifies them.</dd>
+            <dt id="aa3e1fd7a58f3b94295fb1bf707f3ada5">
+              <span class="m-doc-wrap-bumper"><a href="#aa3e1fd7a58f3b94295fb1bf707f3ada5" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              SetVertexCoordinates)</span>
+            </dt>
+            <dd>Verifies that setVertexCoordinates modifies vertex coordinates and the change is reflected in getVertexCoordinates.</dd>
+            <dt id="a90338bd3e46c0bac49ee3cc45e81a75e">
+              <span class="m-doc-wrap-bumper"><a href="#a90338bd3e46c0bac49ee3cc45e81a75e" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              GetArea_Triangle2D)</span>
+            </dt>
+            <dd>Verifies that <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a7f5708e7b511ba4460df9947caf767af" class="m-doc">MPIMesh::<wbr />getArea()</a> returns the correct total area for a distributed 2D triangle mesh, matching the parent mesh area.</dd>
+            <dt id="aa93580a424329761838ab2df93f06cb9">
+              <span class="m-doc-wrap-bumper"><a href="#aa93580a424329761838ab2df93f06cb9" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              GetVolume_Tetrahedron3D)</span>
+            </dt>
+            <dd>Verifies that <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#aedb17bb61a414bba468c922efb42e0d1" class="m-doc">MPIMesh::<wbr />getVolume()</a> returns the correct total volume for a distributed 3D tetrahedron mesh.</dd>
+            <dt id="a479ba7a1ef653c0ce1316887e5d42671">
+              <span class="m-doc-wrap-bumper"><a href="#a479ba7a1ef653c0ce1316887e5d42671" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              GetPolytopeTransformation)</span>
+            </dt>
+            <dd>Verifies that <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html#a6244ad1d2bd992ac497746558353179c" class="m-doc">MPIMesh::<wbr />getPolytopeTransformation()</a> returns valid transformations for all local cells.</dd>
+            <dt id="a84d40f1e111b461d4d6e2dd754c3171a">
+              <span class="m-doc-wrap-bumper"><a href="#a84d40f1e111b461d4d6e2dd754c3171a" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              GetCellByIndex)</span>
+            </dt>
+            <dd>Verifies that MPIMesh::getCell(localIdx) returns a valid polytope for each local cell index.</dd>
+            <dt id="a96eab72548e574c0e4742d03089e00f8">
+              <span class="m-doc-wrap-bumper"><a href="#a96eab72548e574c0e4742d03089e00f8" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              GetVertexByIndex)</span>
+            </dt>
+            <dd>Verifies that MPIMesh::getVertex(localIdx) returns a valid polytope for each local vertex index.</dd>
+            <dt id="a622ad4b6f1167a9e789e2384165d156f">
+              <span class="m-doc-wrap-bumper"><a href="#a622ad4b6f1167a9e789e2384165d156f" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              GetMeasure_MatchesGetArea)</span>
+            </dt>
+            <dd>Verifies that MPIMesh::getMeasure(D) returns the same value as getArea() for a 2D mesh.</dd>
+            <dt id="ad4c4b63eeba49a3490e01870561d6dbe">
+              <span class="m-doc-wrap-bumper"><a href="#ad4c4b63eeba49a3490e01870561d6dbe" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              Reconcile_Edges2D_GlobalOwnershipCount)</span>
+            </dt>
+            <dd>Verifies that after reconcile(1) on a 2D triangle mesh, the global sum of owned edges equals the total edge count in the parent mesh.</dd>
+            <dt id="a8e363c16bbfc58eb0a436aba6887c18a">
+              <span class="m-doc-wrap-bumper"><a href="#a8e363c16bbfc58eb0a436aba6887c18a" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              Reconcile_Edges2D_PolytopeMapBidirectional)</span>
+            </dt>
+            <dd>Verifies that after reconcile(1), the edge polytope map is bidirectional (left and right are inverses).</dd>
+            <dt id="a3459b20474a72ccb526c4a41c4b806d1">
+              <span class="m-doc-wrap-bumper"><a href="#a3459b20474a72ccb526c4a41c4b806d1" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              Reconcile_Edges2D_StateExclusivity)</span>
+            </dt>
+            <dd>Verifies that after reconcile(1), each edge has exactly one state (Owned, Shared, or Ghost) — states are mutually exclusive.</dd>
+            <dt id="a2d1cef6af9bdf2ed68b166ca9bc40b49">
+              <span class="m-doc-wrap-bumper"><a href="#a2d1cef6af9bdf2ed68b166ca9bc40b49" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              Reconcile_Edges2D_OwnerMapConsistency)</span>
+            </dt>
+            <dd>Verifies that after reconcile(1), the owner map for edges is consistent: ghost edges point to valid non-self ranks.</dd>
+            <dt id="a3f42e8733aeed71c51478cc82bba8845">
+              <span class="m-doc-wrap-bumper"><a href="#a3f42e8733aeed71c51478cc82bba8845" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              Reconcile_Edges2D_NoDuplicateOwnership)</span>
+            </dt>
+            <dd>Verifies that after reconcile(1), no distributed edge ID is owned by multiple ranks — each edge has a unique global owner.</dd>
+            <dt id="a622bfa7f4f99ace939b3fc8b7a794774">
+              <span class="m-doc-wrap-bumper"><a href="#a622bfa7f4f99ace939b3fc8b7a794774" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              Reconcile_Edges2D_HaloMapConsistency)</span>
+            </dt>
+            <dd>Verifies that after reconcile(1), the halo map for edges is consistent: halo entries reference owned entities and valid remote ranks.</dd>
+            <dt id="a5e9273636953df2c121cc921c219e3a3">
+              <span class="m-doc-wrap-bumper"><a href="#a5e9273636953df2c121cc921c219e3a3" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              Reconcile_Edges2D_SingleRank_AllOwned)</span>
+            </dt>
+            <dd>Verifies that with a single MPI rank, reconcile(1) marks all edges as Owned (no ghosts since there are no neighbors).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a3c73331f6db7bd9101a37e68e9e03316" class="m-doc">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              Reconcile_Faces3D_GlobalOwnershipCount)</span>
+            </dt>
+            <dd>Verifies that reconcile(2) on a 3D tetrahedron mesh produces correct global face ownership count.</dd>
+            <dt id="a49c74078665531989df6affabbe6f76e">
+              <span class="m-doc-wrap-bumper"><a href="#a49c74078665531989df6affabbe6f76e" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              Reconcile_Quad2D_GlobalEdgeCount)</span>
+            </dt>
+            <dd>Verifies that reconcile(1) works for a 2D quadrilateral mesh, producing the correct global edge ownership count.</dd>
+            <dt id="a982307f2881dec18025626e691f189f1">
+              <span class="m-doc-wrap-bumper"><a href="#a982307f2881dec18025626e691f189f1" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              Reconcile_Faces3D_StateExclusivity)</span>
+            </dt>
+            <dd>Verifies that reconcile(2) on a 3D tetrahedron mesh produces mutually exclusive states for every face entity (exactly one of Owned, Shared, or Ghost).</dd>
+            <dt id="a66b38d5d8a9afba9ccab55b9c893612b">
+              <span class="m-doc-wrap-bumper"><a href="#a66b38d5d8a9afba9ccab55b9c893612b" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              Reconcile_Faces3D_PolytopeMapBidirectional)</span>
+            </dt>
+            <dd>Verifies that reconcile(2) on a 3D mesh produces a bidirectional polytope map for faces.</dd>
+            <dt id="a06e0b47c32e8b53ef3fb4d712e16b3ae">
+              <span class="m-doc-wrap-bumper"><a href="#a06e0b47c32e8b53ef3fb4d712e16b3ae" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              Reconcile_Edges2D_Idempotent)</span>
+            </dt>
+            <dd>Verifies that calling reconcile(1) twice is idempotent: the distributed IDs and ownership state do not change on a second call.</dd>
+            <dt id="a017ae024e5785020a9801cb4436c28c9">
+              <span class="m-doc-wrap-bumper"><a href="#a017ae024e5785020a9801cb4436c28c9" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              Reconcile_Edges2D_StrictRoundCapThrows)</span>
+            </dt>
+            <dd>Verifies that strict round caps are enforced for reconcile().</dd>
+            <dt id="a4cff9bdadee6e20e5f3994d5ffd3a0f6">
+              <span class="m-doc-wrap-bumper"><a href="#a4cff9bdadee6e20e5f3994d5ffd3a0f6" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              Reconcile_Edges2D_GlobalCheckPeriodPreservesState)</span>
+            </dt>
+            <dd>Verifies that throttled global checks preserve reconcile correctness.</dd>
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#aa16108b846c6a27e592cb2bc3ee40f02" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_unit_1_1_flow_test.html" class="m-doc">FlowTest</a>,
               BasicConstruction)</span>
@@ -355,6 +597,27 @@
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a876a122c23dbcba1d5f263a672584e63"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt; Rodin::<wbr />Tests::<wbr />Unit::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a876a122c23dbcba1d5f263a672584e63" class="m-doc-self">makeMixed2DMesh</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Helper to build a mixed 2D mesh with triangles and quadrilaterals.</p>
+<p>Layout (6 vertices, 3 cells): 2&mdash;3&mdash;4 |\ | Q | | \ | | 0&ndash;1-&mdash;5</p><p>T0: (0,1,2), T1: (1,3,2), Q0: (1,5,4,3)</p>
+          </div></section>
+          <section class="m-doc-details" id="a5c41eb41a2ee289e0a9c3c23bb416aea"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt; Rodin::<wbr />Tests::<wbr />Unit::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5c41eb41a2ee289e0a9c3c23bb416aea" class="m-doc-self">makeMixed3DMesh</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Helper to build a mixed 3D mesh with tetrahedra and wedges.</p>
+<p>Tet: (0,1,2,6) Wedge: (0,1,2,3,4,5) — prism extruding the base triangle upward</p>
+          </div></section>
+          <section class="m-doc-details" id="a984318045f939c8a5a786970d0dedd64"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt; Rodin::<wbr />Tests::<wbr />Unit::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a984318045f939c8a5a786970d0dedd64" class="m-doc-self">makeLargerMixed2DMesh</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Builds a larger mixed 2D mesh: 4 triangles + 2 quadrilaterals.</p>
+<p>Layout (8 vertices): 5&mdash;6&mdash;7 | Q1| Q0| 2&mdash;3&mdash;4 |\ T1 /| |T0\ /T3| 0&mdash;1 |\ T2 (uses vertex 4 from above)</p><p>Actually, simpler to just build a strip: 4&mdash;5&mdash;6&mdash;7 |T1/| Q1 | | / | Q0| | 0&mdash;1&mdash;2&mdash;3</p>
+          </div></section>
           <section class="m-doc-details" id="a198ed75949276f5b978fa8da3509b63a"><div>
             <h3>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Unit::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a198ed75949276f5b978fa8da3509b63a" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_unit_1_1_lagrangian_test.html" class="m-doc">LagrangianTest</a>,
@@ -386,6 +649,14 @@
             </h3>
             <p><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> with different initial conditions.</p>
 <p>This test verifies that Lagrangian works with various initial conditions.</p>
+          </div></section>
+          <section class="m-doc-details" id="a3c73331f6db7bd9101a37e68e9e03316"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Unit::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3c73331f6db7bd9101a37e68e9e03316" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              Reconcile_Faces3D_GlobalOwnershipCount)</span></span>
+            </h3>
+            <p>Verifies that reconcile(2) on a 3D tetrahedron mesh produces correct global face ownership count.</p>
+<p>Uses distributeFromRoot because the MPI UniformGrid for 3D types may produce degenerate partitions with small grids.</p>
           </div></section>
           <section class="m-doc-details" id="aa16108b846c6a27e592cb2bc3ee40f02"><div>
             <h3>
