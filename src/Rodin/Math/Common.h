@@ -117,6 +117,17 @@ namespace Rodin::Math
     return base * base;
   }
 
+  /**
+   * @brief Computes the compile-time integer power.
+   *
+   * Returns @f$ x^N @f$ where @f$ N @f$ is known at compile time, using
+   * exponentiation by squaring for efficiency.
+   *
+   * @tparam N Exponent (non-negative integer)
+   * @tparam Base Type of the base value
+   * @param[in] x Base value
+   * @return @f$ x^N @f$
+   */
   template <size_t N, class Base>
   constexpr Base pow(const Base& x)
   {
@@ -140,7 +151,17 @@ namespace Rodin::Math
     }
   }
 
-  // Integral-constant overload (same behavior)
+  /**
+   * @brief Computes the compile-time integer power via integral_constant.
+   *
+   * Convenience overload accepting the exponent as a
+   * `std::integral_constant<size_t, N>` parameter.
+   *
+   * @tparam Base Type of the base value
+   * @tparam N Exponent
+   * @param[in] x Base value
+   * @return @f$ x^N @f$
+   */
   template <class Base, size_t N>
   constexpr Base pow(const Base& x, std::integral_constant<size_t, N>)
   {
@@ -806,18 +827,6 @@ namespace Rodin::Math
   {
     return std::tanh(x);
   }
-
-  /**
-   * @brief Computes the compile-time integer power.
-   *
-   * Returns @f$ x^N @f$ where @f$ N @f$ is known at compile time, using
-   * exponentiation by squaring for efficiency.
-   *
-   * @tparam N Exponent (non-negative integer)
-   * @tparam Base Type of the base value
-   * @param[in] x Base value
-   * @return @f$ x^N @f$
-   */
 
   /**
    * @brief Returns the minimum of two values.
