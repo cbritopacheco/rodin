@@ -756,6 +756,15 @@ namespace Rodin::Geometry
        */
       virtual MeshBase& setVertexCoordinates(Index idx, const Math::SpatialPoint& coords) = 0;
 
+      /**
+       * @brief Sets the geometric transformation for a polytope.
+       * @param[in] p Pair of (dimension, index) identifying the polytope
+       * @param[in] trans Pointer to the transformation (ownership is taken by the mesh)
+       * @returns Reference to this mesh for method chaining
+       *
+       * The mesh takes ownership of the @p trans pointer. The caller must
+       * not delete it after this call.
+       */
       virtual MeshBase& setPolytopeTransformation(
           const std::pair<size_t, Index> p, PolytopeTransformation* trans) = 0;
 

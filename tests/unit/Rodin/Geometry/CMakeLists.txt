@@ -262,3 +262,15 @@ gtest_discover_tests(RodinGeometryAttributeIndexTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinGeometryPolytopeExtTest PolytopeExtTest.cpp)
+target_link_libraries(RodinGeometryPolytopeExtTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometryPolytopeExtTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)
