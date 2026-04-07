@@ -12,8 +12,8 @@
  * elementary functions, trigonometric functions, combinatorics, and linear algebra
  * operations. Functions are templated to work with various numeric types.
  */
-#ifndef RODIN_CORE_COMMON_H
-#define RODIN_CORE_COMMON_H
+#ifndef RODIN_MATH_COMMON_H
+#define RODIN_MATH_COMMON_H
 
 #include <cmath>
 #include <Eigen/Core>
@@ -117,6 +117,17 @@ namespace Rodin::Math
     return base * base;
   }
 
+  /**
+   * @brief Computes the compile-time integer power.
+   *
+   * Returns @f$ x^N @f$ where @f$ N @f$ is known at compile time, using
+   * exponentiation by squaring for efficiency.
+   *
+   * @tparam N Exponent (non-negative integer)
+   * @tparam Base Type of the base value
+   * @param[in] x Base value
+   * @return @f$ x^N @f$
+   */
   template <size_t N, class Base>
   constexpr Base pow(const Base& x)
   {
@@ -140,7 +151,17 @@ namespace Rodin::Math
     }
   }
 
-  // Integral-constant overload (same behavior)
+  /**
+   * @brief Computes the compile-time integer power via integral_constant.
+   *
+   * Convenience overload accepting the exponent as a
+   * `std::integral_constant<size_t, N>` parameter.
+   *
+   * @tparam Base Type of the base value
+   * @tparam N Exponent
+   * @param[in] x Base value
+   * @return @f$ x^N @f$
+   */
   template <class Base, size_t N>
   constexpr Base pow(const Base& x, std::integral_constant<size_t, N>)
   {
@@ -576,11 +597,20 @@ namespace Rodin::Math
   constexpr
   auto dot(const Eigen::MatrixBase<LHSDerived>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
   {
-    assert(lhs.rows() == lhs.rows());
-    assert(rhs.cols() == rhs.cols());
+    assert(lhs.rows() == rhs.rows());
+    assert(lhs.cols() == rhs.cols());
     return (lhs.array() * rhs.conjugate().array()).sum();
   }
 
+  /**
+   * @brief Computes the dot product of two SpatialVector objects.
+   *
+   * @tparam LHSScalar Scalar type of left-hand side
+   * @tparam RHSScalar Scalar type of right-hand side
+   * @param[in] lhs Left-hand side SpatialVector
+   * @param[in] rhs Right-hand side SpatialVector
+   * @return Dot product (scalar)
+   */
   template <class LHSScalar, class RHSScalar>
   constexpr
   auto dot(const SpatialVector<LHSScalar>& lhs, const SpatialVector<RHSScalar>& rhs)
@@ -588,6 +618,15 @@ namespace Rodin::Math
     return lhs.dot(rhs);
   }
 
+  /**
+   * @brief Computes the dot product of two SpatialMatrix objects.
+   *
+   * @tparam LHSScalar Scalar type of left-hand side
+   * @tparam RHSScalar Scalar type of right-hand side
+   * @param[in] lhs Left-hand side SpatialMatrix
+   * @param[in] rhs Right-hand side SpatialMatrix
+   * @return Dot product (scalar)
+   */
   template <class LHSScalar, class RHSScalar>
   constexpr
   auto dot(const SpatialMatrix<LHSScalar>& lhs, const SpatialMatrix<RHSScalar>& rhs)
@@ -595,6 +634,15 @@ namespace Rodin::Math
     return lhs.dot(rhs);
   }
 
+  /**
+   * @brief Computes the dot product of an Eigen vector and a SpatialVector.
+   *
+   * @tparam LHSDerived Eigen type of left-hand side
+   * @tparam RHSScalar Scalar type of SpatialVector
+   * @param[in] lhs Left-hand side Eigen vector
+   * @param[in] rhs Right-hand side SpatialVector
+   * @return Dot product (scalar)
+   */
   template <class LHSDerived, class RHSScalar>
   constexpr
   auto dot(const Eigen::MatrixBase<LHSDerived>& lhs, const Math::SpatialVector<RHSScalar>& rhs)
@@ -602,6 +650,15 @@ namespace Rodin::Math
     return lhs.dot(rhs.getData().head(static_cast<Eigen::Index>(rhs.size())));
   }
 
+  /**
+   * @brief Computes the dot product of a SpatialVector and an Eigen vector.
+   *
+   * @tparam LHSScalar Scalar type of SpatialVector
+   * @tparam RHSDerived Eigen type of right-hand side
+   * @param[in] lhs Left-hand side SpatialVector
+   * @param[in] rhs Right-hand side Eigen vector
+   * @return Dot product (scalar)
+   */
   template <class LHSScalar, class RHSDerived>
   constexpr
   auto dot(const Math::SpatialVector<LHSScalar>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
@@ -609,6 +666,15 @@ namespace Rodin::Math
     return lhs.getData().head(static_cast<Eigen::Index>(lhs.size())).dot(rhs);
   }
 
+  /**
+   * @brief Computes the dot product of an Eigen matrix and a SpatialMatrix.
+   *
+   * @tparam LHSDerived Eigen type of left-hand side
+   * @tparam RHSScalar Scalar type of SpatialMatrix
+   * @param[in] lhs Left-hand side Eigen matrix
+   * @param[in] rhs Right-hand side SpatialMatrix
+   * @return Dot product (scalar)
+   */
   template <class LHSDerived, class RHSScalar>
   constexpr
   auto dot(const Eigen::MatrixBase<LHSDerived>& lhs, const Math::SpatialMatrix<RHSScalar>& rhs)
@@ -616,11 +682,200 @@ namespace Rodin::Math
     return lhs.dot(rhs.getData().head(static_cast<Eigen::Index>(rhs.size())));
   }
 
+  /**
+   * @brief Computes the dot product of a SpatialMatrix and an Eigen matrix.
+   *
+   * @tparam LHSScalar Scalar type of SpatialMatrix
+   * @tparam RHSDerived Eigen type of right-hand side
+   * @param[in] lhs Left-hand side SpatialMatrix
+   * @param[in] rhs Right-hand side Eigen matrix
+   * @return Dot product (scalar)
+   */
   template <class LHSScalar, class RHSDerived>
   constexpr
   auto dot(const Math::SpatialMatrix<LHSScalar>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
   {
     return lhs.getData().head(static_cast<Eigen::Index>(lhs.size())).dot(rhs);
+  }
+
+  /**
+   * @brief Computes the natural logarithm.
+   *
+   * Returns @f$ \ln(x) @f$, the natural (base-@f$ e @f$) logarithm of @f$ x @f$.
+   *
+   * @tparam T Type of value
+   * @param[in] x Value (must be positive for real types)
+   * @return @f$ \ln(x) @f$
+   */
+  template <class T>
+  constexpr
+  auto log(const T& x)
+  {
+    return std::log(x);
+  }
+
+  /**
+   * @brief Computes the base-2 logarithm.
+   *
+   * Returns @f$ \log_2(x) @f$.
+   *
+   * @tparam T Type of value
+   * @param[in] x Value (must be positive for real types)
+   * @return @f$ \log_2(x) @f$
+   */
+  template <class T>
+  constexpr
+  auto log2(const T& x)
+  {
+    return std::log2(x);
+  }
+
+  /**
+   * @brief Computes the base-10 logarithm.
+   *
+   * Returns @f$ \log_{10}(x) @f$.
+   *
+   * @tparam T Type of value
+   * @param[in] x Value (must be positive for real types)
+   * @return @f$ \log_{10}(x) @f$
+   */
+  template <class T>
+  constexpr
+  auto log10(const T& x)
+  {
+    return std::log10(x);
+  }
+
+  /**
+   * @brief Computes the arc cosine (inverse cosine).
+   *
+   * Returns @f$ \arccos(x) @f$ in radians, in the range @f$ [0, \pi] @f$.
+   *
+   * @tparam T Type of value
+   * @param[in] x Value in @f$ [-1, 1] @f$
+   * @return @f$ \arccos(x) @f$ in radians
+   */
+  template <class T>
+  constexpr
+  auto acos(const T& x)
+  {
+    return std::acos(x);
+  }
+
+  /**
+   * @brief Computes the arc sine (inverse sine).
+   *
+   * Returns @f$ \arcsin(x) @f$ in radians, in the range @f$ [-\pi/2, \pi/2] @f$.
+   *
+   * @tparam T Type of value
+   * @param[in] x Value in @f$ [-1, 1] @f$
+   * @return @f$ \arcsin(x) @f$ in radians
+   */
+  template <class T>
+  constexpr
+  auto asin(const T& x)
+  {
+    return std::asin(x);
+  }
+
+  /**
+   * @brief Computes the arc tangent (inverse tangent).
+   *
+   * Returns @f$ \arctan(x) @f$ in radians, in the range @f$ (-\pi/2, \pi/2) @f$.
+   *
+   * @tparam T Type of value
+   * @param[in] x Value
+   * @return @f$ \arctan(x) @f$ in radians
+   */
+  template <class T>
+  constexpr
+  auto atan(const T& x)
+  {
+    return std::atan(x);
+  }
+
+  /**
+   * @brief Computes the two-argument arc tangent.
+   *
+   * Returns @f$ \text{atan2}(y, x) @f$ in radians, in the range @f$ (-\pi, \pi] @f$.
+   * This is the angle of the vector @f$ (x, y) @f$ from the positive @f$ x @f$-axis.
+   *
+   * @tparam T Type of value
+   * @param[in] y The y-coordinate
+   * @param[in] x The x-coordinate
+   * @return @f$ \text{atan2}(y, x) @f$ in radians
+   */
+  template <class T>
+  constexpr
+  auto atan2(const T& y, const T& x)
+  {
+    return std::atan2(y, x);
+  }
+
+  /**
+   * @brief Computes the hyperbolic tangent function.
+   *
+   * Returns @f$ \tanh(x) = \frac{\sinh(x)}{\cosh(x)} @f$.
+   *
+   * @tparam T Type of value
+   * @param[in] x Value
+   * @return @f$ \tanh(x) @f$
+   */
+  template <class T>
+  constexpr
+  auto tanh(const T& x)
+  {
+    return std::tanh(x);
+  }
+
+  /**
+   * @brief Returns the minimum of two values.
+   *
+   * @tparam T Type of value
+   * @param[in] a First value
+   * @param[in] b Second value
+   * @return The smaller of @f$ a @f$ and @f$ b @f$
+   */
+  template <class T>
+  constexpr
+  auto min(const T& a, const T& b)
+  {
+    return (a < b) ? a : b;
+  }
+
+  /**
+   * @brief Returns the maximum of two values.
+   *
+   * @tparam T Type of value
+   * @param[in] a First value
+   * @param[in] b Second value
+   * @return The larger of @f$ a @f$ and @f$ b @f$
+   */
+  template <class T>
+  constexpr
+  auto max(const T& a, const T& b)
+  {
+    return (a > b) ? a : b;
+  }
+
+  /**
+   * @brief Clamps a value to the range @f$ [\text{lo}, \text{hi}] @f$.
+   *
+   * If @f$ x < \text{lo} @f$, returns @f$ \text{lo} @f$.
+   * If @f$ x > \text{hi} @f$, returns @f$ \text{hi} @f$.
+   * Otherwise returns @f$ x @f$.
+   *
+   * @tparam T Type of value
+   * @param[in] x Value to clamp
+   * @param[in] lo Lower bound
+   * @param[in] hi Upper bound
+   * @return Clamped value in @f$ [\text{lo}, \text{hi}] @f$
+   */
+  template <class T>
+  constexpr
+  auto clamp(const T& x, const T& lo, const T& hi)
+  {
+    return min(max(x, lo), hi);
   }
 }
 
