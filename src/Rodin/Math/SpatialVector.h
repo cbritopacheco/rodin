@@ -32,6 +32,11 @@ namespace Rodin::Math
    * A dynamic-size vector with maximum size bounded by RODIN_MAXIMAL_SPACE_DIMENSION.
    * Used for geometric quantities in 2D or 3D space to optimize memory allocation.
    *
+   * @note Internally stores a fixed Eigen::Vector3 regardless of the logical size.
+   * For size=1 or size=2 vectors, only the first 1 or 2 elements are active; the
+   * remaining elements in the underlying storage are unused. This design avoids
+   * dynamic allocation for small spatial vectors at the cost of a few extra bytes.
+   *
    * @tparam ScalarType The element type
    */
   template <class ScalarType>

@@ -30,6 +30,7 @@
 #include "Math/SpatialMatrix.h"
 #include "Math/Unit.h"
 #include "Math/Rad.h"
+#include "Math/Deg.h"
 #include "Math/LinearSystem.h"
 #include "Math/RootFinding/NewtonRaphson.h"
 #include "Math/RungeKutta/RK2.h"

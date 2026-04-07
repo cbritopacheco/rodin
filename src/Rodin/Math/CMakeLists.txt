@@ -18,6 +18,7 @@ set(RodinMath_HEADERS
   SpatialMatrix.h
   Unit.h
   Rad.h
+  Deg.h
   LinearSystem.h
   RootFinding/NewtonRaphson.h
   RungeKutta/RK2.h
