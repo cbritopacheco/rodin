@@ -7,6 +7,7 @@
 #include <set>
 #include <numeric>
 #include <cstdio>
+#include <limits>
 #include <stdexcept>
 
 #include <gtest/gtest.h>
@@ -2005,47 +2006,79 @@ namespace Rodin::Tests::Unit
   }
 
   /**
-   * @brief Verifies that passing a maxRounds bound to reconcile() produces
-   * the same global ownership count as unbounded reconcile for codimension-1
-   * entities (edges in 2D), where convergence is expected in 1 round.
+   * @brief Verifies that strict round caps are enforced for reconcile().
    */
-  TEST(Rodin_MPI_Geometry_Mesh, Reconcile_Edges2D_BoundedMaxRounds)
+  TEST(Rodin_MPI_Geometry_Mesh, Reconcile_Edges2D_StrictRoundCapThrows)
+  {
+    const auto& world = *g_world;
+    if (world.size() < 2 || world.size() > 3)
+      GTEST_SKIP() << "Test requires 2 or 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh = Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Triangle, {4, 4});
+    mpiMesh.getConnectivity().compute(1, 2);
+
+    Mesh<Context::MPI>::ReconcileOptions opts;
+    opts.maxOwnerRounds = 0;
+    opts.strictRoundCap = true;
+
+    EXPECT_THROW(mpiMesh.reconcile(1, opts), std::runtime_error);
+  }
+
+  /**
+   * @brief Verifies that throttled global checks preserve reconcile correctness.
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, Reconcile_Edges2D_GlobalCheckPeriodPreservesState)
   {
     const auto& world = *g_world;
     if (world.size() > 3)
       GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
+    auto baseline = Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Triangle, {4, 4});
+    auto throttled = Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Triangle, {4, 4});
 
-    // Compute reference total edges from local mesh.
-    size_t totalEdges = 0;
+    baseline.getConnectivity().compute(1, 2);
+    throttled.getConnectivity().compute(1, 2);
+
+    baseline.reconcile(1);
+
+    Mesh<Context::MPI>::ReconcileOptions opts;
+    opts.globalCheckPeriod = 3;
+    throttled.reconcile(1, opts);
+
+    const auto& bShard = baseline.getShard();
+    const auto& tShard = throttled.getShard();
+
+    ASSERT_EQ(bShard.getPolytopeCount(1), tShard.getPolytopeCount(1));
+
+    for (Index i = 0; i < bShard.getPolytopeCount(1); ++i)
     {
-      auto localMesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {4, 4});
-      localMesh.getConnectivity().compute(1, 2);
-      totalEdges = localMesh.getPolytopeCount(1);
+      EXPECT_EQ(bShard.getPolytopeMap(1).left.at(i), tShard.getPolytopeMap(1).left.at(i))
+        << "Rank " << world.rank() << ": edge gid mismatch at local index " << i;
+
+      EXPECT_EQ(bShard.isOwned(1, i), tShard.isOwned(1, i))
+        << "Rank " << world.rank() << ": owned flag mismatch at local index " << i;
+      EXPECT_EQ(bShard.isShared(1, i), tShard.isShared(1, i))
+        << "Rank " << world.rank() << ": shared flag mismatch at local index " << i;
+      EXPECT_EQ(bShard.isGhost(1, i), tShard.isGhost(1, i))
+        << "Rank " << world.rank() << ": ghost flag mismatch at local index " << i;
     }
+  }
 
-    // Reconcile with explicit maxRounds = 1 (sufficient for codimension-1
-    // entities, since each edge is shared by at most 2 cells).
-    auto mpiMesh = Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Triangle, {4, 4});
-    mpiMesh.getConnectivity().compute(1, 2);
-    const Optional<size_t> bound = 1;
-    mpiMesh.reconcile(1, bound);
+  TEST(Rodin_MPI_Geometry_Mesh, ReconcileOptions_Presets)
+  {
+    const auto legacy = Mesh<Context::MPI>::ReconcileOptions::Legacy();
+    EXPECT_EQ(legacy.globalCheckPeriod, 1u);
+    EXPECT_EQ(legacy.maxOwnerRounds, std::numeric_limits<size_t>::max());
+    EXPECT_EQ(legacy.maxGidRounds, std::numeric_limits<size_t>::max());
+    EXPECT_FALSE(legacy.strictRoundCap);
 
-    const auto& shard = mpiMesh.getShard();
-    size_t ownedLocal = 0;
-    for (Index i = 0; i < shard.getPolytopeCount(1); ++i)
-    {
-      if (shard.isOwned(1, i))
-        ++ownedLocal;
-    }
-
-    size_t ownedGlobal = 0;
-    boost::mpi::all_reduce(world, ownedLocal, ownedGlobal, std::plus<size_t>());
-
-    EXPECT_EQ(ownedGlobal, totalEdges)
-      << "Rank " << world.rank()
-      << ": bounded reconcile(1, 1) should produce same ownership count as unbounded.";
+    const auto tuned = Mesh<Context::MPI>::ReconcileOptions::SmallToMidModeratePartitions();
+    EXPECT_EQ(tuned.globalCheckPeriod, 2u);
+    EXPECT_EQ(tuned.maxOwnerRounds, 12u);
+    EXPECT_EQ(tuned.maxGidRounds, 12u);
+    EXPECT_FALSE(tuned.strictRoundCap);
   }
 }
 
