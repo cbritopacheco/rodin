@@ -664,7 +664,7 @@ namespace Rodin::Geometry
     // map and build compact per-neighbor structures for subsequent rounds.
     //
     // convergeSend[k]:
-    //   sorted list of local entity indices confirmed shared with neighbors[k].
+    //   list of local entity indices confirmed shared with neighbors[k].
     //   Replaces per-entity matchedHolders sets with K per-neighbor vectors.
     //
     // remoteToLocal[k]:
@@ -677,6 +677,7 @@ namespace Rodin::Geometry
     //   For most entities this already yields the correct owner; iterative
     //   convergence below refines the remaining multi-hop cases.
     // --------------------------------------------------------------------------
+    // KeyMsg: (canonical key, (inLocalPartition flag, sender's local index))
     using KeyMsg = std::pair<Key, std::pair<uint8_t, Index>>;
 
     std::vector<std::vector<Index>> convergeSend(neighbors.size());
@@ -725,12 +726,6 @@ namespace Rodin::Geometry
       }
 
       boost::mpi::wait_all(reqs.begin(), reqs.end());
-
-      for (auto& v : convergeSend)
-      {
-        std::sort(v.begin(), v.end());
-        v.erase(std::unique(v.begin(), v.end()), v.end());
-      }
     }
 
     // --------------------------------------------------------------------------
@@ -922,25 +917,12 @@ namespace Rodin::Geometry
       owner.clear();
       halo.clear();
 
-      // Build halo from convergeSend: entity i has a remote holder at
-      // neighbors[k] iff i appears in convergeSend[k].
-      for (size_t k = 0; k < neighbors.size(); ++k)
-      {
-        const int nbr = neighbors[k];
-        for (const Index i : convergeSend[k])
-          halo[i].insert(static_cast<Index>(nbr));
-      }
-
       for (Index i = 0; i < static_cast<Index>(nd); ++i)
       {
         if (ownerRank[i] == rank)
         {
           assert(inLocalPartition[i]);
           state[i] = Shard::State::Owned;
-
-          auto hit = halo.find(i);
-          if (hit != halo.end() && hit->second.empty())
-            halo.erase(hit);
         }
         else
         {
@@ -949,9 +931,17 @@ namespace Rodin::Geometry
             : Shard::State::Ghost;
 
           owner.emplace(i, static_cast<Index>(ownerRank[i]));
+        }
+      }
 
-          // Non-owned entities should not appear in halo.
-          halo.erase(i);
+      // Build halo only for owned entities from convergeSend.
+      for (size_t k = 0; k < neighbors.size(); ++k)
+      {
+        const Index nbr = static_cast<Index>(neighbors[k]);
+        for (const Index i : convergeSend[k])
+        {
+          if (ownerRank[i] == rank)
+            halo[i].insert(nbr);
         }
       }
     }
