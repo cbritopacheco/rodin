@@ -669,21 +669,26 @@ namespace Rodin::Math
       SpatialVector conjugate() const noexcept
       {
         SpatialVector r(*this);
-        switch (m_size)
+        if constexpr (std::is_same_v<Scalar, std::complex<float>>
+                   || std::is_same_v<Scalar, std::complex<double>>
+                   || std::is_same_v<Scalar, std::complex<long double>>)
         {
-          case 3:
-            r.m_data[2] = std::conj(r.m_data[2]);
-            [[fallthrough]];
-          case 2:
-            r.m_data[1] = std::conj(r.m_data[1]);
-            [[fallthrough]];
-          case 1:
-            r.m_data[0] = std::conj(r.m_data[0]);
-            break;
-          case 0:
-            break;
-          default:
-            assert(false);
+          switch (m_size)
+          {
+            case 3:
+              r.m_data[2] = std::conj(r.m_data[2]);
+              [[fallthrough]];
+            case 2:
+              r.m_data[1] = std::conj(r.m_data[1]);
+              [[fallthrough]];
+            case 1:
+              r.m_data[0] = std::conj(r.m_data[0]);
+              break;
+            case 0:
+              break;
+            default:
+              assert(false);
+          }
         }
         return r;
       }
