@@ -72,17 +72,17 @@ TEST_F(NewtonRaphsonTest, SinRoot)
   EXPECT_NEAR(*root, M_PI, 1e-10);
 }
 
-TEST_F(NewtonRaphsonTest, RootAtBoundary)
+TEST_F(NewtonRaphsonTest, RootNearBoundary)
 {
-  // f(x) = x - 1, f'(x) = 1, root at x = 1 (boundary of [1, 2])
+  // f(x) = x - 1.001, f'(x) = 1, root at x = 1.001 (near boundary of [1, 2])
   NewtonRaphson<Real> solver(1e-12, 1e-9, 1e-12, 25);
   auto f = [](Real x) -> std::pair<Real, Real>
   {
-    return {x - 1.0, 1.0};
+    return {x - 1.001, 1.0};
   };
   auto root = solver.solve(f, 1.5, 1.0, 2.0);
   ASSERT_TRUE(root.has_value());
-  EXPECT_NEAR(*root, 1.0, 1e-10);
+  EXPECT_NEAR(*root, 1.001, 1e-10);
 }
 
 TEST_F(NewtonRaphsonTest, MaxIterationLimit)

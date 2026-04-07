@@ -8,6 +8,7 @@
 
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/SpatialMatrix.h"
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Types.h"
 
 using namespace Rodin;
