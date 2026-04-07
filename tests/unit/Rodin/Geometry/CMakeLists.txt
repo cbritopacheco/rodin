@@ -142,3 +142,51 @@ gtest_discover_tests(RodinGeometrySharderTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinGeometryPolytopeKeyTest PolytopeKeyTest.cpp)
+target_link_libraries(RodinGeometryPolytopeKeyTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometryPolytopeKeyTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinGeometrySubMeshTest SubMeshTest.cpp)
+target_link_libraries(RodinGeometrySubMeshTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometrySubMeshTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinGeometryMeshExtendedTest MeshExtendedTest.cpp)
+target_link_libraries(RodinGeometryMeshExtendedTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometryMeshExtendedTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinGeometryPolytopeTraitsExtTest PolytopeTraitsExtTest.cpp)
+target_link_libraries(RodinGeometryPolytopeTraitsExtTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometryPolytopeTraitsExtTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)

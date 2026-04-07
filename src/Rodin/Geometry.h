@@ -13,11 +13,22 @@
  */
 
 #include "Geometry/Types.h"
+#include "Geometry/ForwardDecls.h"
 #include "Geometry/Mesh.h"
 #include "Geometry/SubMesh.h"
 #include "Geometry/Polytope.h"
+#include "Geometry/Point.h"
+#include "Geometry/PointCloud.h"
+#include "Geometry/Connectivity.h"
 #include "Geometry/PolytopeTransformation.h"
+#include "Geometry/PolytopeIterator.h"
 #include "Geometry/IsoparametricTransformation.h"
+#include "Geometry/Region.h"
+#include "Geometry/AttributeIndex.h"
+#include "Geometry/IndexGenerator.h"
+#include "Geometry/MeshPartitioner.h"
 #include "Geometry/BalancedCompactPartitioner.h"
+#include "Geometry/GreedyPartitioner.h"
+#include "Geometry/Euclidean.h"
 
 #endif
