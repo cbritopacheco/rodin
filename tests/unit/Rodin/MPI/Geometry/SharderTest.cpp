@@ -2007,7 +2007,7 @@ namespace Rodin::Tests::Unit
   /**
    * @brief Verifies that passing a maxRounds bound to reconcile() produces
    * the same global ownership count as unbounded reconcile for codimension-1
-   * entities (edges in 2D), where convergence is expected in <= 1 round.
+   * entities (edges in 2D), where convergence is expected in 1 round.
    */
   TEST(Rodin_MPI_Geometry_Mesh, Reconcile_Edges2D_BoundedMaxRounds)
   {
@@ -2025,10 +2025,12 @@ namespace Rodin::Tests::Unit
       totalEdges = localMesh.getPolytopeCount(1);
     }
 
-    // Reconcile with maxRounds = 2 (sufficient for codimension-1).
+    // Reconcile with explicit maxRounds = 1 (sufficient for codimension-1
+    // entities, since each edge is shared by at most 2 cells).
     auto mpiMesh = Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Triangle, {4, 4});
     mpiMesh.getConnectivity().compute(1, 2);
-    mpiMesh.reconcile(1, 2);
+    const Optional<size_t> bound = 1;
+    mpiMesh.reconcile(1, bound);
 
     const auto& shard = mpiMesh.getShard();
     size_t ownedLocal = 0;
@@ -2043,7 +2045,7 @@ namespace Rodin::Tests::Unit
 
     EXPECT_EQ(ownedGlobal, totalEdges)
       << "Rank " << world.rank()
-      << ": bounded reconcile(1, 2) should produce same ownership count as unbounded.";
+      << ": bounded reconcile(1, 1) should produce same ownership count as unbounded.";
   }
 }
 
