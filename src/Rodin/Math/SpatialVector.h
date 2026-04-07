@@ -5,11 +5,12 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 /**
- * @file Vector.h
- * @brief Dense vector type aliases and definitions.
+ * @file SpatialVector.h
+ * @brief Fixed-capacity spatial vector with bounded maximum dimension.
  *
- * This file provides type aliases for various vector types built on Eigen.
- * Vectors are column-oriented by default and support both dynamic and fixed sizes.
+ * This file provides a spatial vector class with maximum dimensions bounded by
+ * RODIN_MAXIMAL_SPACE_DIMENSION. Used for geometric points, normals, and other
+ * spatial vectors to optimize memory allocation.
  */
 #ifndef RODIN_MATH_SPATIALVECTOR_H
 #define RODIN_MATH_SPATIALVECTOR_H
@@ -17,8 +18,6 @@
 #include <iostream>
 
 #include "Rodin/FormLanguage/Traits.h"
-
-#include "ForwardDecls.h"
 
 #include "ForwardDecls.h"
 #include "Common.h"

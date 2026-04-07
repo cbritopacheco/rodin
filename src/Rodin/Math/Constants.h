@@ -11,14 +11,14 @@
  * This file provides commonly used mathematical constants with machine precision,
  * as well as utility functions for checking special values.
  */
-#ifndef RODIN_CORE_CONSTANTS_H
-#define RODIN_CORE_CONSTANTS_H
+#ifndef RODIN_MATH_CONSTANTS_H
+#define RODIN_MATH_CONSTANTS_H
 
 #include <cmath>
 #include <limits>
 #include <type_traits>
 
-#include "Types.h"
+#include "Rodin/Types.h"
 
 namespace Rodin::Math::Constants
 {

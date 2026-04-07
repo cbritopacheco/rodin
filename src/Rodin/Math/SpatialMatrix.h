@@ -1,3 +1,11 @@
+/**
+ * @file SpatialMatrix.h
+ * @brief Fixed-capacity spatial matrix with bounded maximum dimensions.
+ *
+ * This file provides a spatial matrix class with maximum dimensions bounded by
+ * RODIN_MAXIMAL_SPACE_DIMENSION. Used for geometric transformations, Jacobians,
+ * and other spatial operators to optimize memory allocation.
+ */
 #ifndef RODIN_MATH_SPATIALMATRIX_H
 #define RODIN_MATH_SPATIALMATRIX_H
 
