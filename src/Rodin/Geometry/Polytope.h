@@ -70,6 +70,20 @@ namespace Rodin::Geometry
   class Polytope
   {
     public:
+      /**
+       * @brief Vertex index array identifying a polytope in the mesh.
+       *
+       * A Key stores the vertex indices that define a polytope. Two
+       * polytopes with the same vertex set (in any order) are
+       * topologically identical. The SymmetricHash and SymmetricEquality
+       * functors compare keys ignoring vertex ordering, which allows
+       * efficient lookup of polytopes regardless of how their vertices
+       * are listed.
+       *
+       * The underlying storage is a fixed-size array of
+       * RODIN_MAXIMUM_POLYTOPE_VERTICES entries with a size counter,
+       * so that keys do not allocate heap memory.
+       */
       class Key
       {
         public:
@@ -83,11 +97,25 @@ namespace Rodin::Geometry
           using const_reference = const Index&;
           using size_type = std::uint8_t;
 
+          /**
+           * @brief Compares two keys for equality ignoring vertex ordering.
+           *
+           * Two keys are symmetrically equal if they contain the same
+           * multiset of vertex indices (i.e., the same vertices in any
+           * permutation).
+           */
           struct SymmetricEquality
           {
             bool operator()(const Key& a, const Key& b) const;
           };
 
+          /**
+           * @brief Hash functor that produces the same hash for any
+           *        permutation of the vertex indices.
+           *
+           * Uses the SplitMix64 hash function per vertex index,
+           * combined with XOR to ensure order-independence.
+           */
           struct SymmetricHash
           {
             std::size_t operator()(const Key& poly) const;
@@ -249,6 +277,10 @@ namespace Rodin::Geometry
            */
           bool isSimplex() const;
 
+          /**
+           * @brief Checks if the geometry is a tensor product element.
+           * @returns True for segments, quadrilaterals, and hexahedra
+           */
           bool isTensorProduct() const;
 
           /**
@@ -276,6 +308,12 @@ namespace Rodin::Geometry
            */
           const HalfSpace& getHalfSpace() const;
 
+          /**
+           * @brief Gets the centroid of the reference element.
+           * @returns Centroid coordinates in the reference domain
+           *
+           * The centroid is the arithmetic mean of all reference vertices.
+           */
           const Math::SpatialPoint& getCentroid() const;
 
         private:
@@ -648,30 +686,27 @@ namespace Rodin::Geometry
       /**
        * @brief Gets the y-coordinate (second coordinate).
        * @returns y-coordinate value
+       *
+       * @warning The mesh must have a space dimension of at least 2.
+       * Calling this on a 1D mesh vertex triggers an assertion failure.
        */
-      Real y() const
-      {
-        return operator()(1);
-      }
+      Real y() const;
 
       /**
        * @brief Gets the z-coordinate (third coordinate).
        * @returns z-coordinate value
+       *
+       * @warning The mesh must have a space dimension of at least 3.
+       * Calling this on a 1D or 2D mesh vertex triggers an assertion failure.
        */
-      Real z() const
-      {
-        return operator()(2);
-      }
+      Real z() const;
 
       /**
        * @brief Gets the i-th coordinate.
-       * @param[in] i Coordinate index
+       * @param[in] i Coordinate index (must be less than space dimension)
        * @returns i-th coordinate value
        */
-      Real operator()(size_t i) const
-      {
-        return getCoordinates()(i);
-      }
+      Real operator()(size_t i) const;
 
       /**
        * @brief Gets the vertex coordinates as a vector.
