@@ -78,7 +78,7 @@
 <g id="node7" class="node">
 <title>Rodin/Solver.h</title>
 <ellipse fill="#abdda4" stroke="black" cx="15647.62" cy="-1548" rx="72" ry="72"/>
-<text text-anchor="middle" x="15647.62" y="-1544.9" font-family="Times,serif" font-size="12.00">Rodin/Solver.h</text>
+<text text-anchor="middle" x="15647.62" y="-1545.2" font-family="Times,serif" font-size="11.00">Rodin/Solver.h</text>
 </g>
 <!-- Rodin.h&#45;&gt;Rodin/Solver.h -->
 <g id="edge6" class="edge">
@@ -1326,7 +1326,7 @@
 <g id="node111" class="node">
 <title>Rodin/Solver/SparseLU.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="15685.62" cy="-1332" rx="72" ry="72"/>
-<text text-anchor="middle" x="15685.62" y="-1330.1" font-family="Times,serif" font-size="8.00">Rodin/Solver/SparseLU.h</text>
+<text text-anchor="middle" x="15685.62" y="-1330.4" font-family="Times,serif" font-size="7.00">Rodin/Solver/SparseLU.h</text>
 </g>
 <!-- Rodin/Solver.h&#45;&gt;Rodin/Solver/SparseLU.h -->
 <g id="edge110" class="edge">
@@ -1338,7 +1338,7 @@
 <g id="node112" class="node">
 <title>Rodin/Solver/SparseQR.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="15361.62" cy="-1332" rx="72" ry="72"/>
-<text text-anchor="middle" x="15361.62" y="-1330.1" font-family="Times,serif" font-size="8.00">Rodin/Solver/SparseQR.h</text>
+<text text-anchor="middle" x="15361.62" y="-1330.4" font-family="Times,serif" font-size="7.00">Rodin/Solver/SparseQR.h</text>
 </g>
 <!-- Rodin/Solver.h&#45;&gt;Rodin/Solver/SparseQR.h -->
 <g id="edge111" class="edge">
@@ -1350,7 +1350,7 @@
 <g id="node113" class="node">
 <title>Rodin/Solver/SimplicialLLT.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="15523.62" cy="-1332" rx="72" ry="72"/>
-<text text-anchor="middle" x="15523.62" y="-1330.1" font-family="Times,serif" font-size="8.00">Rodin/Solver/SimplicialLLT.h</text>
+<text text-anchor="middle" x="15523.62" y="-1330.4" font-family="Times,serif" font-size="7.00">Rodin/Solver/SimplicialLLT.h</text>
 </g>
 <!-- Rodin/Solver.h&#45;&gt;Rodin/Solver/SimplicialLLT.h -->
 <g id="edge112" class="edge">
@@ -1362,7 +1362,7 @@
 <g id="node114" class="node">
 <title>Rodin/Solver/SimplicialLDLT.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="15847.62" cy="-1332" rx="72" ry="72"/>
-<text text-anchor="middle" x="15847.62" y="-1330.1" font-family="Times,serif" font-size="8.00">Rodin/Solver/SimplicialLDLT.h</text>
+<text text-anchor="middle" x="15847.62" y="-1330.4" font-family="Times,serif" font-size="7.00">Rodin/Solver/SimplicialLDLT.h</text>
 </g>
 <!-- Rodin/Solver.h&#45;&gt;Rodin/Solver/SimplicialLDLT.h -->
 <g id="edge113" class="edge">
@@ -1374,7 +1374,7 @@
 <g id="node115" class="node">
 <title>Rodin/Solver/CG.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="12642.62" cy="-1332" rx="72" ry="72"/>
-<text text-anchor="middle" x="12642.62" y="-1330.1" font-family="Times,serif" font-size="8.00">Rodin/Solver/CG.h</text>
+<text text-anchor="middle" x="12642.62" y="-1330.4" font-family="Times,serif" font-size="7.00">Rodin/Solver/CG.h</text>
 </g>
 <!-- Rodin/Solver.h&#45;&gt;Rodin/Solver/CG.h -->
 <g id="edge114" class="edge">
@@ -1386,7 +1386,7 @@
 <g id="node116" class="node">
 <title>Rodin/Solver/BiCGSTAB.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="16047.62" cy="-1332" rx="72" ry="72"/>
-<text text-anchor="middle" x="16047.62" y="-1330.1" font-family="Times,serif" font-size="8.00">Rodin/Solver/BiCGSTAB.h</text>
+<text text-anchor="middle" x="16047.62" y="-1330.4" font-family="Times,serif" font-size="7.00">Rodin/Solver/BiCGSTAB.h</text>
 </g>
 <!-- Rodin/Solver.h&#45;&gt;Rodin/Solver/BiCGSTAB.h -->
 <g id="edge115" class="edge">
@@ -1398,7 +1398,7 @@
 <g id="node117" class="node">
 <title>Rodin/Solver/LeastSquaresCG.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="16209.62" cy="-1332" rx="72" ry="72"/>
-<text text-anchor="middle" x="16209.62" y="-1330.1" font-family="Times,serif" font-size="8.00">Rodin/Solver/LeastSquaresCG.h</text>
+<text text-anchor="middle" x="16209.62" y="-1330.4" font-family="Times,serif" font-size="7.00">Rodin/Solver/LeastSquaresCG.h</text>
 </g>
 <!-- Rodin/Solver.h&#45;&gt;Rodin/Solver/LeastSquaresCG.h -->
 <g id="edge116" class="edge">
@@ -1434,7 +1434,7 @@
 <g id="node120" class="node">
 <title>Rodin/Solver/SPQR.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="16409.62" cy="-1332" rx="72" ry="72"/>
-<text text-anchor="middle" x="16409.62" y="-1330.1" font-family="Times,serif" font-size="8.00">Rodin/Solver/SPQR.h</text>
+<text text-anchor="middle" x="16409.62" y="-1330.4" font-family="Times,serif" font-size="7.00">Rodin/Solver/SPQR.h</text>
 </g>
 <!-- Rodin/Solver.h&#45;&gt;Rodin/Solver/SPQR.h -->
 <g id="edge119" class="edge">
@@ -1446,7 +1446,7 @@
 <g id="node121" class="node">
 <title>Rodin/Solver/CHOLMOD.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="16571.62" cy="-1332" rx="72" ry="72"/>
-<text text-anchor="middle" x="16571.62" y="-1330.1" font-family="Times,serif" font-size="8.00">Rodin/Solver/CHOLMOD.h</text>
+<text text-anchor="middle" x="16571.62" y="-1330.4" font-family="Times,serif" font-size="7.00">Rodin/Solver/CHOLMOD.h</text>
 </g>
 <!-- Rodin/Solver.h&#45;&gt;Rodin/Solver/CHOLMOD.h -->
 <g id="edge120" class="edge">
@@ -5502,7 +5502,7 @@
 <g id="node181" class="node">
 <title>Rodin/PETSc/Solver/KSP.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="18477.62" cy="-5832" rx="72" ry="72"/>
-<text text-anchor="middle" x="18477.62" y="-5829.8" font-family="Times,serif" font-size="9.00">Rodin/PETSc/Solver/KSP.h</text>
+<text text-anchor="middle" x="18477.62" y="-5830.1" font-family="Times,serif" font-size="8.00">Rodin/PETSc/Solver/KSP.h</text>
 </g>
 <!-- Rodin/PETSc/Solver.h&#45;&gt;Rodin/PETSc/Solver/KSP.h -->
 <g id="edge205" class="edge">
@@ -5514,7 +5514,7 @@
 <g id="node182" class="node">
 <title>Rodin/PETSc/Solver/SNES.h</title>
 <ellipse fill="#abdda4" stroke="black" cx="18687.62" cy="-6264" rx="72" ry="72"/>
-<text text-anchor="middle" x="18687.62" y="-6261.2" font-family="Times,serif" font-size="11.00">Rodin/PETSc/Solver/SNES.h</text>
+<text text-anchor="middle" x="18687.62" y="-6261.5" font-family="Times,serif" font-size="10.00">Rodin/PETSc/Solver/SNES.h</text>
 </g>
 <!-- Rodin/PETSc/Solver.h&#45;&gt;Rodin/PETSc/Solver/SNES.h -->
 <g id="edge206" class="edge">
@@ -5526,7 +5526,7 @@
 <g id="node183" class="node">
 <title>Rodin/PETSc/Solver/CG.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="18325.62" cy="-6264" rx="72" ry="72"/>
-<text text-anchor="middle" x="18325.62" y="-6261.8" font-family="Times,serif" font-size="9.00">Rodin/PETSc/Solver/CG.h</text>
+<text text-anchor="middle" x="18325.62" y="-6262.1" font-family="Times,serif" font-size="8.00">Rodin/PETSc/Solver/CG.h</text>
 </g>
 <!-- Rodin/PETSc/Solver.h&#45;&gt;Rodin/PETSc/Solver/CG.h -->
 <g id="edge207" class="edge">
@@ -5538,7 +5538,7 @@
 <g id="node184" class="node">
 <title>Rodin/PETSc/Solver/GMRES.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="18525.62" cy="-6264" rx="72" ry="72"/>
-<text text-anchor="middle" x="18525.62" y="-6261.8" font-family="Times,serif" font-size="9.00">Rodin/PETSc/Solver/GMRES.h</text>
+<text text-anchor="middle" x="18525.62" y="-6262.1" font-family="Times,serif" font-size="8.00">Rodin/PETSc/Solver/GMRES.h</text>
 </g>
 <!-- Rodin/PETSc/Solver.h&#45;&gt;Rodin/PETSc/Solver/GMRES.h -->
 <g id="edge208" class="edge">
@@ -9186,7 +9186,7 @@
 <g id="node315" class="node">
 <title>Rodin/Solver/HouseholderQR.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="12480.62" cy="-1332" rx="72" ry="72"/>
-<text text-anchor="middle" x="12480.62" y="-1330.1" font-family="Times,serif" font-size="8.00">Rodin/Solver/HouseholderQR.h</text>
+<text text-anchor="middle" x="12480.62" y="-1330.4" font-family="Times,serif" font-size="7.00">Rodin/Solver/HouseholderQR.h</text>
 </g>
 <!-- Rodin/Solver/HouseholderQR.h&#45;&gt;Rodin/Solver/LinearSolver.h -->
 <g id="edge809" class="edge">
