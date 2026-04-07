@@ -659,21 +659,28 @@ namespace Rodin::Geometry
     // --------------------------------------------------------------------------
     // Key exchange with candidate neighbors.
     //
-    // Each rank sends (key, inLocalPartition flag) for entities in its send
-    // list.  Recipients match received keys against their local key map.
+    // Each rank sends (key, inLocalPartition flag, senderLocalIdx) for entities
+    // in its send list.  Recipients match received keys against their local key
+    // map and build compact per-neighbor structures for subsequent rounds.
     //
-    // matchedHolders[i]:
-    //   set of direct neighbor ranks that also hold entity i (confirmed by
-    //   key matching).
+    // convergeSend[k]:
+    //   sorted list of local entity indices confirmed shared with neighbors[k].
+    //   Replaces per-entity matchedHolders sets with K per-neighbor vectors.
+    //
+    // remoteToLocal[k]:
+    //   map from neighbor k's sender local index to our local entity index.
+    //   Enables index-based (not key-based) addressing in convergence rounds,
+    //   reducing per-entry message size from ~69 bytes to ~12 bytes.
     //
     // ownerRank[i]:
     //   seeded from local inLocalPartition and remote flags received here.
     //   For most entities this already yields the correct owner; iterative
     //   convergence below refines the remaining multi-hop cases.
     // --------------------------------------------------------------------------
-    using KeyMsg = std::pair<Key, uint8_t>;
+    using KeyMsg = std::pair<Key, std::pair<uint8_t, Index>>;
 
-    std::vector<UnorderedSet<int>> matchedHolders(nd);
+    std::vector<std::vector<Index>> convergeSend(neighbors.size());
+    std::vector<UnorderedMap<Index, Index>> remoteToLocal(neighbors.size());
 
     std::vector<int> ownerRank(nd, kInfOwner);
     for (Index i = 0; i < static_cast<Index>(nd); ++i)
@@ -685,7 +692,7 @@ namespace Rodin::Geometry
       {
         sendbuf[k].reserve(entitiesToSend[k].size());
         for (const Index i : entitiesToSend[k])
-          sendbuf[k].push_back({ keys[i], inLocalPartition[i] });
+          sendbuf[k].push_back({ keys[i], { inLocalPartition[i], i } });
       }
 
       const int tagKeys = 1000 + static_cast<int>(d);
@@ -702,21 +709,28 @@ namespace Rodin::Geometry
         comm.recv(neighbors[k], tagKeys, recvbuf);
 
         const int nbr = neighbors[k];
-        for (const auto& [key, remoteFlag] : recvbuf)
+        for (const auto& [key, flagAndIdx] : recvbuf)
         {
           const auto it = key2local.find(key);
           if (it == key2local.end())
             continue;
 
           const Index i = it->second;
-          matchedHolders[i].insert(nbr);
+          convergeSend[k].push_back(i);
+          remoteToLocal[k].emplace(flagAndIdx.second, i);
 
-          if (remoteFlag && nbr < ownerRank[i])
+          if (flagAndIdx.first && nbr < ownerRank[i])
             ownerRank[i] = nbr;
         }
       }
 
       boost::mpi::wait_all(reqs.begin(), reqs.end());
+
+      for (auto& v : convergeSend)
+      {
+        std::sort(v.begin(), v.end());
+        v.erase(std::unique(v.begin(), v.end()), v.end());
+      }
     }
 
     // --------------------------------------------------------------------------
@@ -728,24 +742,26 @@ namespace Rodin::Geometry
     // neighbor hops (e.g. edges in 3D shared by a ring of tetrahedra whose
     // partitions are not face-adjacent).
     //
+    // Messages use (senderLocalIdx, owner) pairs instead of (Key, owner),
+    // reducing per-entry size from ~69 bytes to ~12 bytes.  The receiver
+    // resolves senderLocalIdx via the remoteToLocal map built during key
+    // exchange.
+    //
     // Because ownerRank was already seeded from both local and received flags
     // above, most entities already carry the correct owner.  The loop typically
     // converges in one to two additional rounds.
     // --------------------------------------------------------------------------
-    using OwnerMsg = std::pair<Key, int>;
+    using OwnerMsg = std::pair<Index, int>;
 
     while (true)
     {
       std::vector<std::vector<OwnerMsg>> sendbuf(neighbors.size());
 
-      for (Index i = 0; i < static_cast<Index>(nd); ++i)
+      for (size_t k = 0; k < neighbors.size(); ++k)
       {
-        for (const int nbr : matchedHolders[i])
-        {
-          const auto it = neighborPos.find(nbr);
-          assert(it != neighborPos.end());
-          sendbuf[it->second].push_back({ keys[i], ownerRank[i] });
-        }
+        sendbuf[k].reserve(convergeSend[k].size());
+        for (const Index i : convergeSend[k])
+          sendbuf[k].push_back({ i, ownerRank[i] });
       }
 
       const int tagOwner = 1500 + static_cast<int>(d);
@@ -763,10 +779,10 @@ namespace Rodin::Geometry
         std::vector<OwnerMsg> recvbuf;
         comm.recv(neighbors[k], tagOwner, recvbuf);
 
-        for (const auto& [key, remoteOwner] : recvbuf)
+        for (const auto& [remoteIdx, remoteOwner] : recvbuf)
         {
-          const auto it = key2local.find(key);
-          if (it == key2local.end())
+          const auto it = remoteToLocal[k].find(remoteIdx);
+          if (it == remoteToLocal[k].end())
             continue;
 
           const Index i = it->second;
@@ -817,24 +833,21 @@ namespace Rodin::Geometry
     // Iterative gid convergence.
     //
     // Owners start with a valid gid. Repeatedly exchange gids with matched
-    // holders until every local copy has received the gid.
+    // holders until every local copy has received the gid.  Uses index-based
+    // messages (senderLocalIdx, gid) for the same bandwidth savings as above.
     // --------------------------------------------------------------------------
-    using GidMsg = std::pair<Key, Index>;
+    using GidMsg = std::pair<Index, Index>;
 
     while (true)
     {
       std::vector<std::vector<GidMsg>> sendbuf(neighbors.size());
 
-      for (Index i = 0; i < static_cast<Index>(nd); ++i)
+      for (size_t k = 0; k < neighbors.size(); ++k)
       {
-        if (distId[i] == kInvalidId)
-          continue;
-
-        for (const int nbr : matchedHolders[i])
+        for (const Index i : convergeSend[k])
         {
-          const auto it = neighborPos.find(nbr);
-          assert(it != neighborPos.end());
-          sendbuf[it->second].push_back({ keys[i], distId[i] });
+          if (distId[i] != kInvalidId)
+            sendbuf[k].push_back({ i, distId[i] });
         }
       }
 
@@ -853,10 +866,10 @@ namespace Rodin::Geometry
         std::vector<GidMsg> recvbuf;
         comm.recv(neighbors[k], tagIds, recvbuf);
 
-        for (const auto& [key, gid] : recvbuf)
+        for (const auto& [remoteIdx, gid] : recvbuf)
         {
-          const auto it = key2local.find(key);
-          if (it == key2local.end())
+          const auto it = remoteToLocal[k].find(remoteIdx);
+          if (it == remoteToLocal[k].end())
             continue;
 
           const Index i = it->second;
@@ -909,6 +922,15 @@ namespace Rodin::Geometry
       owner.clear();
       halo.clear();
 
+      // Build halo from convergeSend: entity i has a remote holder at
+      // neighbors[k] iff i appears in convergeSend[k].
+      for (size_t k = 0; k < neighbors.size(); ++k)
+      {
+        const int nbr = neighbors[k];
+        for (const Index i : convergeSend[k])
+          halo[i].insert(static_cast<Index>(nbr));
+      }
+
       for (Index i = 0; i < static_cast<Index>(nd); ++i)
       {
         if (ownerRank[i] == rank)
@@ -916,15 +938,9 @@ namespace Rodin::Geometry
           assert(inLocalPartition[i]);
           state[i] = Shard::State::Owned;
 
-          IndexSet rs;
-          for (const int r : matchedHolders[i])
-          {
-            if (r != rank)
-              rs.insert(static_cast<Index>(r));
-          }
-
-          if (!rs.empty())
-            halo.emplace(i, std::move(rs));
+          auto hit = halo.find(i);
+          if (hit != halo.end() && hit->second.empty())
+            halo.erase(hit);
         }
         else
         {
@@ -933,6 +949,9 @@ namespace Rodin::Geometry
             : Shard::State::Ghost;
 
           owner.emplace(i, static_cast<Index>(ownerRank[i]));
+
+          // Non-owned entities should not appear in halo.
+          halo.erase(i);
         }
       }
     }
