@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include <boost/dynamic_bitset.hpp>
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_free.hpp>
@@ -487,7 +489,7 @@ namespace Rodin::Geometry
     return m_shard.getConnectivity();
   }
 
-  Mesh<Context::MPI>& MPIMesh::reconcile(size_t d)
+  Mesh<Context::MPI>& MPIMesh::reconcile(size_t d, const ReconcileOptions& options)
   {
     auto& shard = this->getShard();
     auto& conn  = shard.getConnectivity();
@@ -498,12 +500,13 @@ namespace Rodin::Geometry
     const size_t D = shard.getDimension();
     assert(d <= D);
 
-    // Vertices and cells are assumed to already carry distributed ids/ownership.
+    // Vertices and top cells are assumed already reconciled.
     if (d == 0 || d == D)
       return *this;
 
-    // Make sure the two relations needed by reconciliation exist.
-    // Restrict mode avoids discovering anything new here.
+    // Need:
+    // - D -> d to visit subentities through incident top cells
+    // - d -> 0 to build canonical keys from distributed vertex ids
     RODIN_GEOMETRY_REQUIRE_INCIDENCE(shard, D, d);
     RODIN_GEOMETRY_REQUIRE_INCIDENCE(shard, d, 0);
 
@@ -516,15 +519,25 @@ namespace Rodin::Geometry
     if (nd == 0)
       return *this;
 
+    using Key = Polytope::Key;
+    using KeyMap = UnorderedMap<
+        Key, Index,
+        Polytope::Key::SymmetricHash,
+        Polytope::Key::SymmetricEquality>;
+
+    static constexpr int kInfOwner = std::numeric_limits<int>::max();
+    static constexpr Index kInvalidId = std::numeric_limits<Index>::max();
+
     // --------------------------------------------------------------------------
-    // Neighbor stencil from cell ownership metadata.
+    // Neighbor stencil from top-cell ownership metadata.
     // --------------------------------------------------------------------------
     std::vector<int> neighbors;
+    UnorderedMap<int, size_t> neighborPos;
     {
       UnorderedSet<int> nbrs;
 
-      const auto& cellHalo  = shard.getHalo(D);   // owned cell -> remote ranks
-      const auto& cellOwner = shard.getOwner(D);  // ghost cell -> owner rank
+      const auto& cellHalo  = shard.getHalo(D);   // owned top cell -> remote ranks that also store it
+      const auto& cellOwner = shard.getOwner(D);  // ghost top cell -> owner rank
 
       for (const auto& [cell, rs] : cellHalo)
       {
@@ -547,22 +560,23 @@ namespace Rodin::Geometry
 
       neighbors.assign(nbrs.begin(), nbrs.end());
       std::sort(neighbors.begin(), neighbors.end());
+
+      neighborPos.reserve(neighbors.size());
+      for (size_t k = 0; k < neighbors.size(); ++k)
+        neighborPos.emplace(neighbors[k], k);
     }
 
     // --------------------------------------------------------------------------
-    // Build a canonical key for each local d-entity from distributed vertex ids.
-    //
-    // Since reconcile(d) is done for a fixed d, the distributed vertex key is
-    // enough for the currently supported polytope families.
+    // Canonical key of each local d-entity from distributed vertex ids.
     // --------------------------------------------------------------------------
-    std::vector<Polytope::Key> keys(nd);
-    UnorderedMap<Polytope::Key, Index, Polytope::Key::SymmetricHash, Polytope::Key::SymmetricEquality> key2local;
+    std::vector<Key> keys(nd);
+    KeyMap key2local;
     key2local.reserve(nd);
 
     for (Index i = 0; i < static_cast<Index>(nd); ++i)
     {
       const auto& lv = d20[i];
-      Polytope::Key key(static_cast<std::uint8_t>(lv.size()));
+      Key key(static_cast<std::uint8_t>(lv.size()));
 
       for (std::uint8_t j = 0; j < static_cast<std::uint8_t>(lv.size()); ++j)
       {
@@ -571,65 +585,247 @@ namespace Rodin::Geometry
       }
 
       keys[i] = key;
-      key2local.emplace(keys[i], i);
+      const auto [it, inserted] = key2local.emplace(keys[i], i);
+      (void) it;
+      assert(inserted);
     }
 
     // --------------------------------------------------------------------------
-    // Local classification from incident cells.
+    // Per-entity local classification and per-neighbor send lists.
     //
-    // ownerCandidates[i] is the set of ranks that may own entity i:
-    //   - self, if i touches at least one owned cell;
-    //   - owner(ghost-cell), for each incident ghost cell.
+    // inLocalPartition[i]:
+    //   true iff entity i is incident to at least one locally owned top cell.
     //
-    // This is enough to decide ownership without first exchanging the keys.
+    // entitiesToSend[k]:
+    //   deduplicated list of local entity indices to export to neighbors[k].
+    //   Built from the cell-entity-neighbor stencil so that each entity-
+    //   neighbor pair appears exactly once.
     // --------------------------------------------------------------------------
-    std::vector<uint8_t> hasOwnedIncident(nd, 0);
-    std::vector<int> ownerRank(nd, std::numeric_limits<int>::max());
-    std::vector<UnorderedSet<int>> participants(nd);
+    std::vector<uint8_t> inLocalPartition(nd, 0);
+    std::vector<std::vector<Index>> entitiesToSend(neighbors.size());
 
-    for (Index cell = 0; cell < static_cast<Index>(nc); ++cell)
     {
-      const bool owned = shard.isOwned(D, cell);
-      const bool ghost = shard.isGhost(D, cell);
+      const auto& cellHalo  = shard.getHalo(D);
+      const auto& cellOwner = shard.getOwner(D);
 
-      int ghostOwner = std::numeric_limits<int>::max();
-      if (ghost)
+      for (Index cell = 0; cell < static_cast<Index>(nc); ++cell)
       {
-        const auto it = shard.getOwner(D).find(cell);
-        assert(it != shard.getOwner(D).end());
-        ghostOwner = static_cast<int>(it->second);
-      }
+        const bool owned = shard.isOwned(D, cell);
+        const bool ghost = shard.isGhost(D, cell);
 
-      for (const Index e : D2d[cell])
-      {
         if (owned)
         {
-          hasOwnedIncident[e] = 1;
-          participants[e].insert(rank);
+          for (const Index e : D2d[cell])
+            inLocalPartition[e] = 1;
+
+          auto hit = cellHalo.find(cell);
+          if (hit != cellHalo.end())
+          {
+            for (const Index r : hit->second)
+            {
+              const int rr = static_cast<int>(r);
+              if (rr == rank)
+                continue;
+              const auto nit = neighborPos.find(rr);
+              assert(nit != neighborPos.end());
+              for (const Index e : D2d[cell])
+                entitiesToSend[nit->second].push_back(e);
+            }
+          }
         }
 
         if (ghost)
         {
-          participants[e].insert(ghostOwner);
+          auto oit = cellOwner.find(cell);
+          assert(oit != cellOwner.end());
+          const int rr = static_cast<int>(oit->second);
+          if (rr != rank)
+          {
+            const auto nit = neighborPos.find(rr);
+            assert(nit != neighborPos.end());
+            for (const Index e : D2d[cell])
+              entitiesToSend[nit->second].push_back(e);
+          }
         }
+      }
+
+      for (auto& v : entitiesToSend)
+      {
+        std::sort(v.begin(), v.end());
+        v.erase(std::unique(v.begin(), v.end()), v.end());
+      }
+    }
+
+    // --------------------------------------------------------------------------
+    // Key exchange with candidate neighbors.
+    //
+    // Each rank sends (key, inLocalPartition flag, senderLocalIdx) for entities
+    // in its send list.  Recipients match received keys against their local key
+    // map and build compact per-neighbor structures for subsequent rounds.
+    //
+    // convergeSend[k]:
+    //   list of local entity indices confirmed shared with neighbors[k].
+    //   Replaces per-entity matchedHolders sets with K per-neighbor vectors.
+    //
+    // remoteToLocal[k]:
+    //   map from neighbor k's sender local index to our local entity index.
+    //   Enables index-based (not key-based) addressing in convergence rounds,
+    //   reducing per-entry message size from ~69 bytes to ~12 bytes.
+    //
+    // ownerRank[i]:
+    //   seeded from local inLocalPartition and remote flags received here.
+    //   For most entities this already yields the correct owner; iterative
+    //   convergence below refines the remaining multi-hop cases.
+    // --------------------------------------------------------------------------
+    // KeyMsg: (canonical key, (inLocalPartition flag, sender's local index))
+    using KeyMsg = std::pair<Key, std::pair<uint8_t, Index>>;
+
+    std::vector<std::vector<Index>> convergeSend(neighbors.size());
+    std::vector<UnorderedMap<Index, Index>> remoteToLocal(neighbors.size());
+
+    std::vector<int> ownerRank(nd, kInfOwner);
+    for (Index i = 0; i < static_cast<Index>(nd); ++i)
+      ownerRank[i] = inLocalPartition[i] ? rank : kInfOwner;
+
+    {
+      std::vector<std::vector<KeyMsg>> sendbuf(neighbors.size());
+      for (size_t k = 0; k < neighbors.size(); ++k)
+      {
+        sendbuf[k].reserve(entitiesToSend[k].size());
+        for (const Index i : entitiesToSend[k])
+          sendbuf[k].push_back({ keys[i], { inLocalPartition[i], i } });
+      }
+
+      const int tagKeys = 1000 + static_cast<int>(d);
+
+      std::vector<boost::mpi::request> reqs;
+      reqs.reserve(neighbors.size());
+
+      for (size_t k = 0; k < neighbors.size(); ++k)
+        reqs.push_back(comm.isend(neighbors[k], tagKeys, sendbuf[k]));
+
+      for (size_t k = 0; k < neighbors.size(); ++k)
+      {
+        std::vector<KeyMsg> recvbuf;
+        comm.recv(neighbors[k], tagKeys, recvbuf);
+
+        const int nbr = neighbors[k];
+        for (const auto& [key, flagAndIdx] : recvbuf)
+        {
+          const auto it = key2local.find(key);
+          if (it == key2local.end())
+            continue;
+
+          const Index i = it->second;
+          convergeSend[k].push_back(i);
+          remoteToLocal[k].emplace(flagAndIdx.second, i);
+
+          if (flagAndIdx.first && nbr < ownerRank[i])
+            ownerRank[i] = nbr;
+        }
+      }
+
+      boost::mpi::wait_all(reqs.begin(), reqs.end());
+    }
+
+    // --------------------------------------------------------------------------
+    // Iterative owner convergence.
+    //
+    // Repeatedly exchange the current best owner candidate with matched holders
+    // and take the global minimum.  This propagates the smallest partition-
+    // holder rank across the full holder graph, even when it spans multiple
+    // neighbor hops (e.g. edges in 3D shared by a ring of tetrahedra whose
+    // partitions are not face-adjacent).
+    //
+    // Messages use (senderLocalIdx, owner) pairs instead of (Key, owner),
+    // reducing per-entry size from ~69 bytes to ~12 bytes.  The receiver
+    // resolves senderLocalIdx via the remoteToLocal map built during key
+    // exchange.
+    //
+    // Because ownerRank was already seeded from both local and received flags
+    // above, most entities already carry the correct owner.  The loop typically
+    // converges in one to two additional rounds.
+    // --------------------------------------------------------------------------
+    using OwnerMsg = std::pair<Index, int>;
+
+    const size_t checkPeriod = std::max<size_t>(1, options.globalCheckPeriod);
+    size_t ownerRounds = 0;
+    bool ownerDirtySinceCheck = false;
+    while (true)
+    {
+      if (ownerRounds >= options.maxOwnerRounds)
+      {
+        if (options.strictRoundCap)
+        {
+          throw std::runtime_error(
+              "MPIMesh::reconcile owner convergence exceeded maxOwnerRounds");
+        }
+      }
+      ++ownerRounds;
+
+      std::vector<std::vector<OwnerMsg>> sendbuf(neighbors.size());
+
+      for (size_t k = 0; k < neighbors.size(); ++k)
+      {
+        sendbuf[k].reserve(convergeSend[k].size());
+        for (const Index i : convergeSend[k])
+          sendbuf[k].push_back({ i, ownerRank[i] });
+      }
+
+      const int tagOwner = 1500 + static_cast<int>(d);
+
+      std::vector<boost::mpi::request> reqs;
+      reqs.reserve(neighbors.size());
+
+      for (size_t k = 0; k < neighbors.size(); ++k)
+        reqs.push_back(comm.isend(neighbors[k], tagOwner, sendbuf[k]));
+
+      bool changed = false;
+
+      for (size_t k = 0; k < neighbors.size(); ++k)
+      {
+        std::vector<OwnerMsg> recvbuf;
+        comm.recv(neighbors[k], tagOwner, recvbuf);
+
+        for (const auto& [remoteIdx, remoteOwner] : recvbuf)
+        {
+          const auto it = remoteToLocal[k].find(remoteIdx);
+          if (it == remoteToLocal[k].end())
+            continue;
+
+          const Index i = it->second;
+          if (remoteOwner < ownerRank[i])
+          {
+            ownerRank[i] = remoteOwner;
+            changed = true;
+          }
+        }
+      }
+
+      boost::mpi::wait_all(reqs.begin(), reqs.end());
+
+      ownerDirtySinceCheck = ownerDirtySinceCheck || changed;
+
+      const bool forceCheck = !changed;
+      const bool periodicCheck = (ownerRounds % checkPeriod) == 0;
+      if (forceCheck || periodicCheck)
+      {
+        bool globallyChanged = false;
+        boost::mpi::all_reduce(comm, ownerDirtySinceCheck, globallyChanged, std::logical_or<bool>());
+        ownerDirtySinceCheck = false;
+
+        if (!globallyChanged)
+          break;
       }
     }
 
     for (Index i = 0; i < static_cast<Index>(nd); ++i)
-    {
-      assert(!participants[i].empty());
-
-      int o = std::numeric_limits<int>::max();
-      for (const int r : participants[i])
-        o = std::min(o, r);
-
-      ownerRank[i] = o;
-    }
+      assert(ownerRank[i] != kInfOwner);
 
     // --------------------------------------------------------------------------
-    // Assign distributed ids to locally owned entities.
+    // Assign distributed ids on owners only.
     // --------------------------------------------------------------------------
-    std::vector<Index> distId(nd, std::numeric_limits<Index>::max());
+    std::vector<Index> distId(nd, kInvalidId);
     std::vector<Index> locallyOwned;
     locallyOwned.reserve(nd);
 
@@ -640,39 +836,50 @@ namespace Rodin::Geometry
     }
 
     const size_t localOwnedCount = locallyOwned.size();
-    std::vector<size_t> ownedCounts;
-    boost::mpi::all_gather(comm, localOwnedCount, ownedCounts);
 
-    size_t offset = 0;
-    for (int r = 0; r < rank; ++r)
-      offset += ownedCounts[r];
+    size_t inclusive = 0;
+    boost::mpi::scan(comm, localOwnedCount, inclusive, std::plus<size_t>());
+
+    const size_t offset = inclusive - localOwnedCount;
 
     for (size_t k = 0; k < locallyOwned.size(); ++k)
       distId[locallyOwned[k]] = static_cast<Index>(offset + k);
 
     // --------------------------------------------------------------------------
-    // Owner -> ghost holders: send back distributed ids.
+    // Iterative gid convergence.
     //
-    // Deadlock-free because every rank sends exactly one message (possibly empty)
-    // to every neighbor and receives exactly one from every neighbor.
+    // Owners start with a valid gid. Repeatedly exchange gids with matched
+    // holders until every local copy has received the gid.  Uses index-based
+    // messages (senderLocalIdx, gid) for the same bandwidth savings as above.
     // --------------------------------------------------------------------------
-    const int tagIds = 2000 + static_cast<int>(d);
+    using GidMsg = std::pair<Index, Index>;
 
+    size_t gidRounds = 0;
+    bool gidDirtySinceCheck = false;
+    while (true)
     {
-      std::vector<std::vector<std::pair<Polytope::Key, Index>>> sendbuf(neighbors.size());
-
-      for (Index i = 0; i < static_cast<Index>(nd); ++i)
+      if (gidRounds >= options.maxGidRounds)
       {
-        if (ownerRank[i] != rank)
-          continue;
-
-        for (size_t k = 0; k < neighbors.size(); ++k)
+        if (options.strictRoundCap)
         {
-          const int nbr = neighbors[k];
-          if (participants[i].find(nbr) != participants[i].end())
-            sendbuf[k].push_back({ keys[i], distId[i] });
+          throw std::runtime_error(
+              "MPIMesh::reconcile gid convergence exceeded maxGidRounds");
         }
       }
+      ++gidRounds;
+
+      std::vector<std::vector<GidMsg>> sendbuf(neighbors.size());
+
+      for (size_t k = 0; k < neighbors.size(); ++k)
+      {
+        for (const Index i : convergeSend[k])
+        {
+          if (distId[i] != kInvalidId)
+            sendbuf[k].push_back({ i, distId[i] });
+        }
+      }
+
+      const int tagIds = 2000 + static_cast<int>(d);
 
       std::vector<boost::mpi::request> reqs;
       reqs.reserve(neighbors.size());
@@ -680,28 +887,51 @@ namespace Rodin::Geometry
       for (size_t k = 0; k < neighbors.size(); ++k)
         reqs.push_back(comm.isend(neighbors[k], tagIds, sendbuf[k]));
 
+      bool changed = false;
+
       for (size_t k = 0; k < neighbors.size(); ++k)
       {
-        std::vector<std::pair<Polytope::Key, Index>> recvbuf;
+        std::vector<GidMsg> recvbuf;
         comm.recv(neighbors[k], tagIds, recvbuf);
 
-        for (const auto& [key, gid] : recvbuf)
+        for (const auto& [remoteIdx, gid] : recvbuf)
         {
-          const auto it = key2local.find(key);
-          if (it == key2local.end())
+          const auto it = remoteToLocal[k].find(remoteIdx);
+          if (it == remoteToLocal[k].end())
             continue;
 
           const Index i = it->second;
-          if (ownerRank[i] != rank)
+          if (distId[i] == kInvalidId)
+          {
             distId[i] = gid;
+            changed = true;
+          }
+          else
+          {
+            assert(distId[i] == gid);
+          }
         }
       }
 
       boost::mpi::wait_all(reqs.begin(), reqs.end());
+
+      gidDirtySinceCheck = gidDirtySinceCheck || changed;
+
+      const bool forceCheck = !changed;
+      const bool periodicCheck = (gidRounds % checkPeriod) == 0;
+      if (forceCheck || periodicCheck)
+      {
+        bool globallyChanged = false;
+        boost::mpi::all_reduce(comm, gidDirtySinceCheck, globallyChanged, std::logical_or<bool>());
+        gidDirtySinceCheck = false;
+
+        if (!globallyChanged)
+          break;
+      }
     }
 
     for (Index i = 0; i < static_cast<Index>(nd); ++i)
-      assert(distId[i] != std::numeric_limits<Index>::max());
+      assert(distId[i] != kInvalidId);
 
     // --------------------------------------------------------------------------
     // Rewrite shard metadata for dimension d.
@@ -721,7 +951,7 @@ namespace Rodin::Geometry
       }
 
       auto& state = shard.getState(d);
-      state.assign(nd, Shard::State::Shared);
+      state.assign(nd, Shard::State::Ghost);
 
       auto& owner = shard.getOwner(d);
       auto& halo  = shard.getHalo(d);
@@ -732,22 +962,27 @@ namespace Rodin::Geometry
       {
         if (ownerRank[i] == rank)
         {
+          assert(inLocalPartition[i]);
           state[i] = Shard::State::Owned;
-
-          IndexSet rs;
-          for (const int r : participants[i])
-          {
-            if (r != rank)
-              rs.insert(static_cast<Index>(r));
-          }
-
-          if (!rs.empty())
-            halo.emplace(i, std::move(rs));
         }
         else
         {
-          state[i] = Shard::State::Ghost;
+          state[i] = inLocalPartition[i]
+            ? Shard::State::Shared
+            : Shard::State::Ghost;
+
           owner.emplace(i, static_cast<Index>(ownerRank[i]));
+        }
+      }
+
+      // Build halo only for owned entities from convergeSend.
+      for (size_t k = 0; k < neighbors.size(); ++k)
+      {
+        const Index nbr = static_cast<Index>(neighbors[k]);
+        for (const Index i : convergeSend[k])
+        {
+          if (ownerRank[i] == rank)
+            halo[i].insert(nbr);
         }
       }
     }

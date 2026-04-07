@@ -118,3 +118,27 @@ gtest_discover_tests(RodinGeometryPolytopeQuadratureIndexTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinGeometryShardTest ShardTest.cpp)
+target_link_libraries(RodinGeometryShardTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometryShardTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinGeometrySharderTest SharderTest.cpp)
+target_link_libraries(RodinGeometrySharderTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometrySharderTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)

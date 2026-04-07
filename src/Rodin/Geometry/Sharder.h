@@ -152,7 +152,9 @@ namespace Rodin::Geometry
 
         m_shards.resize(numShards);
 
+#ifdef _OPENMP
 #pragma omp parallel for schedule(dynamic, 1)
+#endif
         for (size_t i = 0; i < numShards; i++)
           m_shards[i] = sbs[i].finalize();
 
