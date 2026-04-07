@@ -2068,17 +2068,11 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_MPI_Geometry_Mesh, ReconcileOptions_Presets)
   {
-    const auto legacy = Mesh<Context::MPI>::ReconcileOptions::Legacy();
+    const auto legacy = Mesh<Context::MPI>::ReconcileOptions();
     EXPECT_EQ(legacy.globalCheckPeriod, 1u);
     EXPECT_EQ(legacy.maxOwnerRounds, std::numeric_limits<size_t>::max());
     EXPECT_EQ(legacy.maxGidRounds, std::numeric_limits<size_t>::max());
     EXPECT_FALSE(legacy.strictRoundCap);
-
-    const auto tuned = Mesh<Context::MPI>::ReconcileOptions::SmallToMidModeratePartitions();
-    EXPECT_EQ(tuned.globalCheckPeriod, 2u);
-    EXPECT_EQ(tuned.maxOwnerRounds, 12u);
-    EXPECT_EQ(tuned.maxGidRounds, 12u);
-    EXPECT_FALSE(tuned.strictRoundCap);
   }
 }
 

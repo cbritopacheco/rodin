@@ -489,7 +489,7 @@ namespace Rodin::Geometry
     return m_shard.getConnectivity();
   }
 
-  Mesh<Context::MPI>& MPIMesh::reconcile(size_t d, const ReconcileOptions& options = ReconcileOptions::Unbounded())
+  Mesh<Context::MPI>& MPIMesh::reconcile(size_t d, const ReconcileOptions& options)
   {
     auto& shard = this->getShard();
     auto& conn  = shard.getConnectivity();

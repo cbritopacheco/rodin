@@ -743,6 +743,46 @@ namespace Rodin::Geometry
       const Connectivity<Context::Local>& getConnectivity() const override;
 
       /**
+       * @brief Options controlling iterative reconciliation rounds.
+       */
+      struct ReconcileOptions
+      {
+
+        /**
+         * Maximum number of owner-convergence rounds.
+         *
+         * Defaults to unlimited.
+         */
+        size_t maxOwnerRounds = std::numeric_limits<size_t>::max();
+
+        /**
+         * Maximum number of gid-convergence rounds.
+         *
+         * Defaults to unlimited.
+         */
+        size_t maxGidRounds = std::numeric_limits<size_t>::max();
+
+        /**
+         * Controls how often global convergence is checked.
+         *
+         * A value of 1 checks every round (legacy behavior). Larger values reduce
+         * the frequency of global all-reduce operations during active convergence.
+         */
+        size_t globalCheckPeriod = 1;
+
+        /**
+         * If true, exceeding a round cap throws; otherwise reconciliation keeps
+         * converging with existing state.
+         */
+        bool strictRoundCap = false;
+      };
+
+      Mesh& reconcile(size_t d)
+      {
+        return this->reconcile(d, ReconcileOptions());
+      }
+
+      /**
        * @brief Reconciles entities of dimension @p d across MPI ranks.
        *
        * After a local connectivity computation, entities of dimension @p d
@@ -785,83 +825,6 @@ namespace Rodin::Geometry
        *   in 3D), the holder graph diameter depends on the mesh topology and
        *   can exceed 2, so the unbounded default is the safe choice.
        *
-       * @return Reference to the mesh.
-       */
-      Mesh& reconcile(size_t d, Optional<size_t> maxRounds = {});
-
-      /**
-       * @brief Options controlling iterative reconciliation rounds.
-       */
-      struct ReconcileOptions
-      {
-        /**
-         * @brief Legacy behavior preset.
-         *
-         * Checks global convergence every round and uses unlimited rounds.
-         */
-        static ReconcileOptions Legacy()
-        {
-          ReconcileOptions opts;
-          opts.maxOwnerRounds = std::numeric_limits<size_t>::max();
-          opts.maxGidRounds = std::numeric_limits<size_t>::max();
-          opts.globalCheckPeriod = 1;
-          opts.strictRoundCap = false;
-          return opts;
-        }
-
-        /**
-         * @brief Preset for small-to-mid entity counts and moderate partitions.
-         *
-         * This preset keeps robust convergence while reducing global checks.
-         */
-        static ReconcileOptions SmallToMidModeratePartitions()
-        {
-          ReconcileOptions opts;
-          opts.maxOwnerRounds = 12;
-          opts.maxGidRounds = 12;
-          opts.globalCheckPeriod = 2;
-          opts.strictRoundCap = false;
-          return opts;
-        }
-
-        /**
-         * Maximum number of owner-convergence rounds.
-         *
-         * Defaults to unlimited.
-         */
-        size_t maxOwnerRounds = std::numeric_limits<size_t>::max();
-
-        /**
-         * Maximum number of gid-convergence rounds.
-         *
-         * Defaults to unlimited.
-         */
-        size_t maxGidRounds = std::numeric_limits<size_t>::max();
-
-        /**
-         * Controls how often global convergence is checked.
-         *
-         * A value of 1 checks every round (legacy behavior). Larger values reduce
-         * the frequency of global all-reduce operations during active convergence.
-         */
-        size_t globalCheckPeriod = 1;
-
-        /**
-         * If true, exceeding a round cap throws; otherwise reconciliation keeps
-         * converging with existing state.
-         */
-        bool strictRoundCap = false;
-      };
-
-      /**
-       * @brief Reconciles entities of dimension @p d with configurable options.
-       *
-       * For a convenience baseline tuned for small-to-mid entity counts and
-       * moderate partition counts, use
-       * ReconcileOptions::SmallToMidModeratePartitions().
-       *
-       * @param[in] d Topological dimension of the entities to reconcile.
-       * @param[in] options Reconciliation options.
        * @return Reference to the mesh.
        */
       Mesh& reconcile(size_t d, const ReconcileOptions& options);
