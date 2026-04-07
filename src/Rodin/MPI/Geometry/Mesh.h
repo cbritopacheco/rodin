@@ -773,9 +773,21 @@ namespace Rodin::Geometry
        * Only shard metadata is modified; the local mesh topology is unchanged.
        *
        * @param[in] d Topological dimension of the entities to reconcile.
+       * @param[in] maxRounds Optional upper bound on the number of
+       *   convergence rounds for iterative owner resolution and distributed
+       *   ID propagation.  When absent (the default), the loops iterate
+       *   until global convergence.  When present, each convergence loop
+       *   executes at most @p maxRounds iterations.
+       *
+       *   For codimension-1 entities (e.g. faces in 3D, edges in 2D), each
+       *   entity is shared by at most 2 cells, so 1 round after the initial
+       *   key exchange suffices.  For lower-dimensional entities (e.g. edges
+       *   in 3D), the holder graph diameter depends on the mesh topology and
+       *   can exceed 2, so the unbounded default is the safe choice.
+       *
        * @return Reference to the mesh.
        */
-      Mesh& reconcile(size_t d);
+      Mesh& reconcile(size_t d, Optional<size_t> maxRounds = {});
 
       /**
        * @brief Options controlling iterative reconciliation rounds.
