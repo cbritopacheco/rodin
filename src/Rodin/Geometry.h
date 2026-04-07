@@ -21,6 +21,7 @@
 #include "Geometry/PointCloud.h"
 #include "Geometry/Connectivity.h"
 #include "Geometry/PolytopeTransformation.h"
+#include "Geometry/IdentityTransformation.h"
 #include "Geometry/PolytopeIterator.h"
 #include "Geometry/IsoparametricTransformation.h"
 #include "Geometry/Region.h"

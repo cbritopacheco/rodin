@@ -686,30 +686,27 @@ namespace Rodin::Geometry
       /**
        * @brief Gets the y-coordinate (second coordinate).
        * @returns y-coordinate value
+       *
+       * @warning The mesh must have a space dimension of at least 2.
+       * Calling this on a 1D mesh vertex triggers an assertion failure.
        */
-      Real y() const
-      {
-        return operator()(1);
-      }
+      Real y() const;
 
       /**
        * @brief Gets the z-coordinate (third coordinate).
        * @returns z-coordinate value
+       *
+       * @warning The mesh must have a space dimension of at least 3.
+       * Calling this on a 1D or 2D mesh vertex triggers an assertion failure.
        */
-      Real z() const
-      {
-        return operator()(2);
-      }
+      Real z() const;
 
       /**
        * @brief Gets the i-th coordinate.
-       * @param[in] i Coordinate index
+       * @param[in] i Coordinate index (must be less than space dimension)
        * @returns i-th coordinate value
        */
-      Real operator()(size_t i) const
-      {
-        return getCoordinates()(i);
-      }
+      Real operator()(size_t i) const;
 
       /**
        * @brief Gets the vertex coordinates as a vector.

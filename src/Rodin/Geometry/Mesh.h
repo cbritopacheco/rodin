@@ -1060,15 +1060,19 @@ namespace Rodin::Geometry
       }
 
       /**
-       * @brief Generates a box-shaped mesh for a given geometry.
+       * @brief Generates a box-shaped surface mesh from a face geometry type.
        *
-       * Similar to UniformGrid, but produces a mesh on the unit box
-       * domain @f$ [0, 1]^d @f$ with the specified number of nodes in
-       * each coordinate direction.
+       * Given a face geometry type @p g of dimension @f$ d @f$, produces
+       * a surface mesh of dimension @f$ d @f$ embedded in @f$ (d+1) @f$
+       * space dimensions. The mesh represents the boundary of the unit
+       * box @f$ [0, N_1] \times [0, N_2] \times \cdots @f$ tessellated
+       * with faces of type @p g.
        *
-       * @param[in] g Geometry type of the cells (e.g., Triangle,
-       * Quadrilateral, Tetrahedron, Hexahedron)
+       * @param[in] g Face geometry type (e.g., Point for 1D box,
+       * Segment for 2D box boundary, Triangle or Quadrilateral for 3D
+       * box boundary)
        * @param[in] l Number of nodes in each coordinate direction
+       * (must have @f$ d+1 @f$ entries)
        */
       static Mesh Box(Polytope::Type g, std::initializer_list<size_t> l)
       {
@@ -1087,9 +1091,11 @@ namespace Rodin::Geometry
       static Mesh UniformGrid(Polytope::Type g, const Array<size_t>& shape);
 
       /**
-       * @brief Generates a box-shaped mesh for a given geometry.
+       * @brief Generates a box-shaped surface mesh from a face geometry type.
        *
-       * @param[in] g Geometry type of the cells
+       * @copydetails Box(Polytope::Type, std::initializer_list<size_t>)
+       *
+       * @param[in] g Face geometry type
        * @param[in] shape Number of nodes in each coordinate direction
        */
       static Mesh Box(Polytope::Type g, const Array<size_t>& shape);
