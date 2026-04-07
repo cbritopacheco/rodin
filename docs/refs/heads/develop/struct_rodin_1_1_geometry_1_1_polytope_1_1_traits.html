@@ -118,6 +118,10 @@
             </dt>
             <dd>Checks if the geometry is a simplex.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a57c7bd283ac4adfcf2f6b43a8e57a697" class="m-doc">isTensorProduct</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
+            </dt>
+            <dd>Checks if the geometry is a tensor product element.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#acfab02634131e313692a9c39c73b8976" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
             </dt>
             <dd>Gets the topological dimension.</dd>
@@ -133,6 +137,10 @@
               <span class="m-doc-wrap-bumper">auto <a href="#ab38a262224d3069d54d6d0971d85d3fc" class="m-doc">getHalfSpace</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="struct_rodin_1_1_geometry_1_1_polytope_1_1_traits_1_1_half_space.html" class="m-doc">HalfSpace</a>&amp;</span>
             </dt>
             <dd>Gets the half-space representation.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aee18eb1f9163162591f0d2194fb47c4e" class="m-doc">getCentroid</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp;</span>
+            </dt>
+            <dd>Gets the centroid of the reference element.</dd>
           </dl>
         </section>
         <section>
@@ -164,6 +172,20 @@
                 <tr>
                   <th style="width: 1%">Returns</th>
                   <td>True for triangles and tetrahedra, false otherwise</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a57c7bd283ac4adfcf2f6b43a8e57a697"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />Polytope::<wbr />Traits::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a57c7bd283ac4adfcf2f6b43a8e57a697" class="m-doc-self">isTensorProduct</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Checks if the geometry is a tensor product element.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>True for segments, quadrilaterals, and hexahedra</td>
                 </tr>
               </tfoot>
             </table>
@@ -232,6 +254,21 @@
                 </tr>
               </tfoot>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="aee18eb1f9163162591f0d2194fb47c4e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; Rodin::<wbr />Geometry::<wbr />Polytope::<wbr />Traits::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aee18eb1f9163162591f0d2194fb47c4e" class="m-doc-self">getCentroid</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the centroid of the reference element.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Centroid coordinates in the reference domain</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The centroid is the arithmetic mean of all reference vertices.</p>
           </div></section>
         </section>
       </div>
