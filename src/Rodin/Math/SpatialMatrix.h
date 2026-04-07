@@ -1080,6 +1080,7 @@ namespace Rodin::Math
         if (r == 0 || k == 0 || c == 0)
         {
           m_cols = c;
+          m_data.setZero();
           return *this;
         }
 

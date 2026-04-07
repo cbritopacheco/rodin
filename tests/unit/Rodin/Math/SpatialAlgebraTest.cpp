@@ -82,9 +82,9 @@ TEST_F(SpatialAlgebraTest, SpatialVectorDotWithEigen)
   EXPECT_DOUBLE_EQ(Math::dot(e, v), 20.0);
 }
 
-namespace
+TEST_F(SpatialAlgebraTest, SpatialMatrixMultiplyAllShapeCombos)
 {
-  SpatialMatrix<Real> makeSpatial(std::uint8_t rows, std::uint8_t cols)
+  const auto makeSpatial = [](std::uint8_t rows, std::uint8_t cols)
   {
     SpatialMatrix<Real> m(rows, cols);
     Real v = 1.0;
@@ -97,11 +97,8 @@ namespace
       }
     }
     return m;
-  }
-}
+  };
 
-TEST_F(SpatialAlgebraTest, SpatialMatrixMultiplyAllShapeCombos)
-{
   for (std::uint8_t r = 0; r <= 3; ++r)
   {
     for (std::uint8_t k = 0; k <= 3; ++k)
@@ -145,7 +142,7 @@ TEST_F(SpatialAlgebraTest, SpatialMatrixSolveDeterminantAndInverse)
   A(2, 0) = 2.0; A(2, 1) = 0.0; A(2, 2) = 5.0;
 
   const auto det = A.determinant();
-  EXPECT_NEAR(det, 50.0, 1e-12);
+  EXPECT_NEAR(det, 46.0, 1e-12);
 
   const auto inv = A.inverse();
   SpatialMatrix<Real> I = A;
@@ -161,9 +158,9 @@ TEST_F(SpatialAlgebraTest, SpatialMatrixSolveDeterminantAndInverse)
   SpatialVector<Real> b{1.0, 2.0, 3.0};
   const auto x = A.solve(b);
   const auto check = A * x;
-  EXPECT_NEAR(check(0, 0), b(0), 1e-10);
-  EXPECT_NEAR(check(1, 0), b(1), 1e-10);
-  EXPECT_NEAR(check(2, 0), b(2), 1e-10);
+  EXPECT_NEAR(check(0), b(0), 1e-10);
+  EXPECT_NEAR(check(1), b(1), 1e-10);
+  EXPECT_NEAR(check(2), b(2), 1e-10);
 }
 
 TEST_F(SpatialAlgebraTest, SpatialMatrixPseudoInverseRectangular)

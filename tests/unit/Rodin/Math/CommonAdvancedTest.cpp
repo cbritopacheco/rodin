@@ -85,8 +85,10 @@ TEST_F(CommonAdvancedTest, DotOverloadFamilies)
   EXPECT_DOUBLE_EQ(dot(a, b), 32.0);
 
   SpatialVector<Real> sv{1.0, 2.0, 3.0};
+  EXPECT_DOUBLE_EQ(dot(sv, a), 14.0);
   EXPECT_DOUBLE_EQ(dot(sv, b), 32.0);
-  EXPECT_DOUBLE_EQ(dot(a, sv), 32.0);
+  EXPECT_DOUBLE_EQ(dot(a, sv), 14.0);
+  EXPECT_DOUBLE_EQ(dot(b, sv), 32.0);
 
   SpatialMatrix<Real> sm(2, 2);
   sm(0, 0) = 1.0;

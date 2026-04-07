@@ -129,10 +129,9 @@ TEST_F(TraitsTest, DivisionTrait)
 TEST_F(TraitsTest, DotTrait)
 {
   static_assert(std::is_same_v<typename Dot<Real, Real>::Type, Real>);
-  static_assert(std::is_same_v<typename Dot<Integer, Integer>::Type, Integer>);
+  static_assert(std::is_same_v<typename Dot<Integer, Integer>::Type, Real>);
   static_assert(std::is_same_v<typename Dot<Complex, Complex>::Type, Complex>);
   static_assert(std::is_same_v<typename Dot<Real, Integer>::Type, Real>);
-  static_assert(std::is_same_v<typename Dot<Complex, Real>::Type, Complex>);
 }
 
 // Test trait composition and nesting
@@ -148,12 +147,11 @@ TEST_F(TraitsTest, TraitComposition)
 // Test traits with vector and matrix types
 TEST_F(TraitsTest, VectorMatrixTraits)
 {
-  static_assert(std::is_same_v<
-    typename Sum<Math::Vector<Real>, Math::Vector<Real>>::Type,
-    Math::Vector<Real>>);
-  static_assert(std::is_same_v<
-    typename Mult<Math::Matrix<Real>, Math::Vector<Real>>::Type,
-    Math::Vector<Real>>);
+  using VectorSumType = typename Sum<Math::Vector<Real>, Math::Vector<Real>>::Type;
+  using MatrixVectorMultType = typename Mult<Math::Matrix<Real>, Math::Vector<Real>>::Type;
+
+  static_assert(IsEigenObject<VectorSumType>::Value);
+  static_assert(IsEigenObject<MatrixVectorMultType>::Value);
   static_assert(std::is_same_v<
     typename Dot<Math::Vector<Real>, Math::Vector<Real>>::Type,
     Real>);

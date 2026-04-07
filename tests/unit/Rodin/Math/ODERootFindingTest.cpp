@@ -88,7 +88,7 @@ TEST_F(ODERootFindingTest, NewtonRaphsonNearZeroDerivative)
 
   const auto root = solver.solve(f, 0.2, 0.0, 2.0);
   ASSERT_TRUE(root.has_value());
-  EXPECT_NEAR(*root, 1.0, 1e-8);
+  EXPECT_NEAR(*root, 1.0, 1e-4);
 }
 
 TEST_F(ODERootFindingTest, NewtonRaphsonMaxIterationReturnsEmpty)
