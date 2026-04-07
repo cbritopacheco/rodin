@@ -529,3 +529,87 @@ TEST_F(MatrixTest, SpatialMatrixNonSquare)
   EXPECT_EQ(t.rows(), 3);
   EXPECT_EQ(t.cols(), 2);
 }
+
+TEST_F(MatrixTest, SpatialMatrixBinaryAdd)
+{
+  SpatialMatrix<Real> a(2, 2);
+  a(0, 0) = 1; a(0, 1) = 2;
+  a(1, 0) = 3; a(1, 1) = 4;
+
+  SpatialMatrix<Real> b(2, 2);
+  b(0, 0) = 5; b(0, 1) = 6;
+  b(1, 0) = 7; b(1, 1) = 8;
+
+  auto c = a + b;
+  EXPECT_DOUBLE_EQ(c(0, 0), 6.0);
+  EXPECT_DOUBLE_EQ(c(0, 1), 8.0);
+  EXPECT_DOUBLE_EQ(c(1, 0), 10.0);
+  EXPECT_DOUBLE_EQ(c(1, 1), 12.0);
+}
+
+TEST_F(MatrixTest, SpatialMatrixBinarySubtract)
+{
+  SpatialMatrix<Real> a(2, 2);
+  a(0, 0) = 5; a(0, 1) = 6;
+  a(1, 0) = 7; a(1, 1) = 8;
+
+  SpatialMatrix<Real> b(2, 2);
+  b(0, 0) = 1; b(0, 1) = 2;
+  b(1, 0) = 3; b(1, 1) = 4;
+
+  auto c = a - b;
+  EXPECT_DOUBLE_EQ(c(0, 0), 4.0);
+  EXPECT_DOUBLE_EQ(c(0, 1), 4.0);
+  EXPECT_DOUBLE_EQ(c(1, 0), 4.0);
+  EXPECT_DOUBLE_EQ(c(1, 1), 4.0);
+}
+
+TEST_F(MatrixTest, SpatialMatrixBinaryMultiply)
+{
+  SpatialMatrix<Real> a(2, 2);
+  a(0, 0) = 1; a(0, 1) = 2;
+  a(1, 0) = 3; a(1, 1) = 4;
+
+  SpatialMatrix<Real> b(2, 2);
+  b(0, 0) = 5; b(0, 1) = 6;
+  b(1, 0) = 7; b(1, 1) = 8;
+
+  auto c = a * b;
+  EXPECT_DOUBLE_EQ(c(0, 0), 19.0);
+  EXPECT_DOUBLE_EQ(c(0, 1), 22.0);
+  EXPECT_DOUBLE_EQ(c(1, 0), 43.0);
+  EXPECT_DOUBLE_EQ(c(1, 1), 50.0);
+}
+
+TEST_F(MatrixTest, SpatialMatrixBinarySubtract3x3)
+{
+  SpatialMatrix<Real> a(3, 3);
+  a.setIdentity();
+
+  SpatialMatrix<Real> b(3, 3);
+  b.setIdentity();
+
+  auto c = a - b;
+  for (int i = 0; i < 3; ++i)
+    for (int j = 0; j < 3; ++j)
+      EXPECT_DOUBLE_EQ(c(i, j), 0.0);
+}
+
+TEST_F(MatrixTest, SpatialMatrixBinarySubtractNonSquare)
+{
+  SpatialMatrix<Real> a(2, 3);
+  a(0, 0) = 1; a(0, 1) = 2; a(0, 2) = 3;
+  a(1, 0) = 4; a(1, 1) = 5; a(1, 2) = 6;
+
+  SpatialMatrix<Real> b(2, 3);
+  b(0, 0) = 6; b(0, 1) = 5; b(0, 2) = 4;
+  b(1, 0) = 3; b(1, 1) = 2; b(1, 2) = 1;
+
+  auto c = a - b;
+  EXPECT_DOUBLE_EQ(c(0, 0), -5.0);
+  EXPECT_DOUBLE_EQ(c(0, 1), -3.0);
+  EXPECT_DOUBLE_EQ(c(0, 2), -1.0);
+  EXPECT_DOUBLE_EQ(c(1, 0), 1.0);
+  EXPECT_DOUBLE_EQ(c(1, 1), 3.0);
+  EXPECT_DOUBLE_EQ(c(1, 2), 5.0);
+}

@@ -382,3 +382,62 @@ TEST_F(CommonTest, DotProductEigen)
   Eigen::Vector3d v2(4, 5, 6);
   EXPECT_DOUBLE_EQ(dot(v1, v2), 32.0);
 }
+
+TEST_F(CommonTest, MinFunction)
+{
+  EXPECT_DOUBLE_EQ(min(3.0, 5.0), 3.0);
+  EXPECT_DOUBLE_EQ(min(5.0, 3.0), 3.0);
+  EXPECT_DOUBLE_EQ(min(-1.0, 1.0), -1.0);
+  EXPECT_DOUBLE_EQ(min(0.0, 0.0), 0.0);
+  EXPECT_EQ(min(2, 7), 2);
+}
+
+TEST_F(CommonTest, MaxFunction)
+{
+  EXPECT_DOUBLE_EQ(max(3.0, 5.0), 5.0);
+  EXPECT_DOUBLE_EQ(max(5.0, 3.0), 5.0);
+  EXPECT_DOUBLE_EQ(max(-1.0, 1.0), 1.0);
+  EXPECT_DOUBLE_EQ(max(0.0, 0.0), 0.0);
+  EXPECT_EQ(max(2, 7), 7);
+}
+
+TEST_F(CommonTest, ClampFunction)
+{
+  EXPECT_DOUBLE_EQ(clamp(5.0, 0.0, 10.0), 5.0);
+  EXPECT_DOUBLE_EQ(clamp(-1.0, 0.0, 10.0), 0.0);
+  EXPECT_DOUBLE_EQ(clamp(15.0, 0.0, 10.0), 10.0);
+  EXPECT_DOUBLE_EQ(clamp(0.0, 0.0, 10.0), 0.0);
+  EXPECT_DOUBLE_EQ(clamp(10.0, 0.0, 10.0), 10.0);
+  EXPECT_EQ(clamp(3, 1, 5), 3);
+  EXPECT_EQ(clamp(0, 1, 5), 1);
+  EXPECT_EQ(clamp(7, 1, 5), 5);
+}
+
+TEST_F(CommonTest, DotProductSpatialVector)
+{
+  SpatialVector<Real> a({1.0, 2.0, 3.0});
+  SpatialVector<Real> b({4.0, 5.0, 6.0});
+  EXPECT_DOUBLE_EQ(dot(a, b), 32.0);
+}
+
+TEST_F(CommonTest, DotProductSpatialMatrix)
+{
+  SpatialMatrix<Real> a(2, 2);
+  a(0, 0) = 1; a(0, 1) = 2;
+  a(1, 0) = 3; a(1, 1) = 4;
+
+  SpatialMatrix<Real> b(2, 2);
+  b(0, 0) = 5; b(0, 1) = 6;
+  b(1, 0) = 7; b(1, 1) = 8;
+
+  EXPECT_DOUBLE_EQ(dot(a, b), 70.0);
+}
+
+TEST_F(CommonTest, DotProductMixedEigenSpatialVector)
+{
+  Eigen::Vector3d ev(1, 2, 3);
+  SpatialVector<Real> sv({4.0, 5.0, 6.0});
+
+  EXPECT_DOUBLE_EQ(dot(ev, sv), 32.0);
+  EXPECT_DOUBLE_EQ(dot(sv, ev), 32.0);
+}

@@ -307,6 +307,17 @@ namespace Rodin::Math
         return *this;
       }
 
+      /**
+       * @brief Merges dependent degrees of freedom in the sparse linear system.
+       *
+       * Eliminates dependent DOFs by expressing them as linear combinations
+       * of independent DOFs, modifying both the operator and RHS vector.
+       *
+       * @tparam DOFScalar Scalar type for DOF values
+       * @param[in] dofs Map from DOF index to (dependent indices, coefficients) pairs
+       * @param[in] offset Index offset applied to DOF indices (default: 0)
+       * @return Reference to @f$ *this @f$
+       */
       template <class DOFScalar>
       LinearSystem& merge(const IndexMap<std::pair<IndexArray, Math::Vector<DOFScalar>>>& dofs, size_t offset = 0)
       {
@@ -560,6 +571,18 @@ namespace Rodin::Math
         return *this;
       }
 
+      /**
+       * @brief Eliminates degrees of freedom from the dense linear system.
+       *
+       * For each DOF in @p dofs, moves its contribution from LHS to RHS,
+       * then zeros the corresponding row and column in the operator and
+       * sets the diagonal to 1, effectively imposing the constraint.
+       *
+       * @tparam DOFScalar Scalar type for DOF values
+       * @param[in] dofs Map from DOF index to prescribed value
+       * @param[in] offset Index offset applied to DOF indices (default: 0)
+       * @return Reference to @f$ *this @f$
+       */
       template <class DOFScalar>
       LinearSystem& eliminate(const IndexMap<DOFScalar>& dofs, size_t offset = 0)
       {

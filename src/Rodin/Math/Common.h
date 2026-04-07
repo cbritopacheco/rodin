@@ -818,6 +818,56 @@ namespace Rodin::Math
    * @param[in] x Base value
    * @return @f$ x^N @f$
    */
+
+  /**
+   * @brief Returns the minimum of two values.
+   *
+   * @tparam T Type of value
+   * @param[in] a First value
+   * @param[in] b Second value
+   * @return The smaller of @f$ a @f$ and @f$ b @f$
+   */
+  template <class T>
+  constexpr
+  auto min(const T& a, const T& b)
+  {
+    return (a < b) ? a : b;
+  }
+
+  /**
+   * @brief Returns the maximum of two values.
+   *
+   * @tparam T Type of value
+   * @param[in] a First value
+   * @param[in] b Second value
+   * @return The larger of @f$ a @f$ and @f$ b @f$
+   */
+  template <class T>
+  constexpr
+  auto max(const T& a, const T& b)
+  {
+    return (a > b) ? a : b;
+  }
+
+  /**
+   * @brief Clamps a value to the range @f$ [\text{lo}, \text{hi}] @f$.
+   *
+   * If @f$ x < \text{lo} @f$, returns @f$ \text{lo} @f$.
+   * If @f$ x > \text{hi} @f$, returns @f$ \text{hi} @f$.
+   * Otherwise returns @f$ x @f$.
+   *
+   * @tparam T Type of value
+   * @param[in] x Value to clamp
+   * @param[in] lo Lower bound
+   * @param[in] hi Upper bound
+   * @return Clamped value in @f$ [\text{lo}, \text{hi}] @f$
+   */
+  template <class T>
+  constexpr
+  auto clamp(const T& x, const T& lo, const T& hi)
+  {
+    return min(max(x, lo), hi);
+  }
 }
 
 #endif
