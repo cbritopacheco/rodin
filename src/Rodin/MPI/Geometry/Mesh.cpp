@@ -489,7 +489,7 @@ namespace Rodin::Geometry
     return m_shard.getConnectivity();
   }
 
-  Mesh<Context::MPI>& MPIMesh::reconcile(size_t d)
+  Mesh<Context::MPI>& MPIMesh::reconcile(size_t d, Optional<size_t> maxRounds)
   {
     auto& shard = this->getShard();
     auto& conn  = shard.getConnectivity();
@@ -748,7 +748,7 @@ namespace Rodin::Geometry
     // --------------------------------------------------------------------------
     using OwnerMsg = std::pair<Index, int>;
 
-    while (true)
+    for (size_t round = 0; !maxRounds.has_value() || round < *maxRounds; ++round)
     {
       std::vector<std::vector<OwnerMsg>> sendbuf(neighbors.size());
 
@@ -833,7 +833,7 @@ namespace Rodin::Geometry
     // --------------------------------------------------------------------------
     using GidMsg = std::pair<Index, Index>;
 
-    while (true)
+    for (size_t round = 0; !maxRounds.has_value() || round < *maxRounds; ++round)
     {
       std::vector<std::vector<GidMsg>> sendbuf(neighbors.size());
 

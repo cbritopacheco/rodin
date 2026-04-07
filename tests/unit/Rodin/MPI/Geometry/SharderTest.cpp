@@ -2003,6 +2003,48 @@ namespace Rodin::Tests::Unit
         << ": edge " << i << " state changed on second reconcile.";
     }
   }
+
+  /**
+   * @brief Verifies that passing a maxRounds bound to reconcile() produces
+   * the same global ownership count as unbounded reconcile for codimension-1
+   * entities (edges in 2D), where convergence is expected in <= 1 round.
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, Reconcile_Edges2D_BoundedMaxRounds)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+
+    // Compute reference total edges from local mesh.
+    size_t totalEdges = 0;
+    {
+      auto localMesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {4, 4});
+      localMesh.getConnectivity().compute(1, 2);
+      totalEdges = localMesh.getPolytopeCount(1);
+    }
+
+    // Reconcile with maxRounds = 2 (sufficient for codimension-1).
+    auto mpiMesh = Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Triangle, {4, 4});
+    mpiMesh.getConnectivity().compute(1, 2);
+    mpiMesh.reconcile(1, 2);
+
+    const auto& shard = mpiMesh.getShard();
+    size_t ownedLocal = 0;
+    for (Index i = 0; i < shard.getPolytopeCount(1); ++i)
+    {
+      if (shard.isOwned(1, i))
+        ++ownedLocal;
+    }
+
+    size_t ownedGlobal = 0;
+    boost::mpi::all_reduce(world, ownedLocal, ownedGlobal, std::plus<size_t>());
+
+    EXPECT_EQ(ownedGlobal, totalEdges)
+      << "Rank " << world.rank()
+      << ": bounded reconcile(1, 2) should produce same ownership count as unbounded.";
+  }
 }
 
 int main(int argc, char** argv)
