@@ -491,6 +491,11 @@ namespace Rodin::Geometry
 
   Mesh<Context::MPI>& MPIMesh::reconcile(size_t d)
   {
+    return reconcile(d, ReconcileOptions::SmallToMidModeratePartitions());
+  }
+
+  Mesh<Context::MPI>& MPIMesh::reconcile(size_t d, const ReconcileOptions& options)
+  {
     auto& shard = this->getShard();
     auto& conn  = shard.getConnectivity();
 
@@ -748,8 +753,21 @@ namespace Rodin::Geometry
     // --------------------------------------------------------------------------
     using OwnerMsg = std::pair<Index, int>;
 
+    const size_t checkPeriod = std::max<size_t>(1, options.globalCheckPeriod);
+    size_t ownerRounds = 0;
+    bool ownerDirtySinceCheck = false;
     while (true)
     {
+      if (ownerRounds >= options.maxOwnerRounds)
+      {
+        if (options.strictRoundCap)
+        {
+          throw std::runtime_error(
+              "MPIMesh::reconcile owner convergence exceeded maxOwnerRounds");
+        }
+      }
+      ++ownerRounds;
+
       std::vector<std::vector<OwnerMsg>> sendbuf(neighbors.size());
 
       for (size_t k = 0; k < neighbors.size(); ++k)
@@ -791,11 +809,19 @@ namespace Rodin::Geometry
 
       boost::mpi::wait_all(reqs.begin(), reqs.end());
 
-      bool globallyChanged = false;
-      boost::mpi::all_reduce(comm, changed, globallyChanged, std::logical_or<bool>());
+      ownerDirtySinceCheck = ownerDirtySinceCheck || changed;
 
-      if (!globallyChanged)
-        break;
+      const bool forceCheck = !changed;
+      const bool periodicCheck = (ownerRounds % checkPeriod) == 0;
+      if (forceCheck || periodicCheck)
+      {
+        bool globallyChanged = false;
+        boost::mpi::all_reduce(comm, ownerDirtySinceCheck, globallyChanged, std::logical_or<bool>());
+        ownerDirtySinceCheck = false;
+
+        if (!globallyChanged)
+          break;
+      }
     }
 
     for (Index i = 0; i < static_cast<Index>(nd); ++i)
@@ -833,8 +859,20 @@ namespace Rodin::Geometry
     // --------------------------------------------------------------------------
     using GidMsg = std::pair<Index, Index>;
 
+    size_t gidRounds = 0;
+    bool gidDirtySinceCheck = false;
     while (true)
     {
+      if (gidRounds >= options.maxGidRounds)
+      {
+        if (options.strictRoundCap)
+        {
+          throw std::runtime_error(
+              "MPIMesh::reconcile gid convergence exceeded maxGidRounds");
+        }
+      }
+      ++gidRounds;
+
       std::vector<std::vector<GidMsg>> sendbuf(neighbors.size());
 
       for (size_t k = 0; k < neighbors.size(); ++k)
@@ -882,11 +920,19 @@ namespace Rodin::Geometry
 
       boost::mpi::wait_all(reqs.begin(), reqs.end());
 
-      bool globallyChanged = false;
-      boost::mpi::all_reduce(comm, changed, globallyChanged, std::logical_or<bool>());
+      gidDirtySinceCheck = gidDirtySinceCheck || changed;
 
-      if (!globallyChanged)
-        break;
+      const bool forceCheck = !changed;
+      const bool periodicCheck = (gidRounds % checkPeriod) == 0;
+      if (forceCheck || periodicCheck)
+      {
+        bool globallyChanged = false;
+        boost::mpi::all_reduce(comm, gidDirtySinceCheck, globallyChanged, std::logical_or<bool>());
+        gidDirtySinceCheck = false;
+
+        if (!globallyChanged)
+          break;
+      }
     }
 
     for (Index i = 0; i < static_cast<Index>(nd); ++i)
