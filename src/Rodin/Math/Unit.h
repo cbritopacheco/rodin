@@ -187,7 +187,7 @@ namespace Rodin::Math
       constexpr
       auto operator+(const Unit& other) const
       {
-        return Unit(m_v + other.m_v);
+        return Derived(m_v + other.m_v);
       }
 
       /**
@@ -198,7 +198,7 @@ namespace Rodin::Math
       constexpr
       auto operator-(const Unit& other) const
       {
-        return Unit(m_v - other.m_v);
+        return Derived(m_v - other.m_v);
       }
 
       /**
@@ -209,7 +209,7 @@ namespace Rodin::Math
       constexpr
       auto operator*(const Unit& other) const
       {
-        return Unit(m_v * other.m_v);
+        return Derived(m_v * other.m_v);
       }
 
 
@@ -221,7 +221,7 @@ namespace Rodin::Math
       constexpr
       auto operator/(const Unit& other) const
       {
-        return Unit(m_v / other.m_v);
+        return Derived(m_v / other.m_v);
       }
 
       /**
@@ -229,9 +229,9 @@ namespace Rodin::Math
        * @return Copy of this unit
        */
       constexpr
-      Unit operator+() const
+      Derived operator+() const
       {
-        return *this;
+        return Derived(m_v);
       }
 
       /**
@@ -239,9 +239,9 @@ namespace Rodin::Math
        * @return Negated unit
        */
       constexpr
-      Unit operator-() const
+      Derived operator-() const
       {
-        return Unit(-m_v);
+        return Derived(-m_v);
       }
 
       /**
@@ -250,10 +250,10 @@ namespace Rodin::Math
        * @return Reference to this unit
        */
       constexpr
-      Unit& operator+=(const Unit& other)
+      Derived& operator+=(const Unit& other)
       {
         m_v += other.m_v;
-        return *this;
+        return static_cast<Derived&>(*this);
       }
 
       /**
@@ -262,10 +262,10 @@ namespace Rodin::Math
        * @return Reference to this unit
        */
       constexpr
-      Unit& operator-=(const Unit& other)
+      Derived& operator-=(const Unit& other)
       {
         m_v -= other.m_v;
-        return *this;
+        return static_cast<Derived&>(*this);
       }
 
       /**
@@ -274,10 +274,10 @@ namespace Rodin::Math
        * @return Reference to this unit
        */
       constexpr
-      Unit& operator*=(const Unit& other)
+      Derived& operator*=(const Unit& other)
       {
         m_v *= other.m_v;
-        return *this;
+        return static_cast<Derived&>(*this);
       }
 
       /**
@@ -286,10 +286,10 @@ namespace Rodin::Math
        * @return Reference to this unit
        */
       constexpr
-      Unit& operator/=(const Unit& other)
+      Derived& operator/=(const Unit& other)
       {
         m_v /= other.m_v;
-        return *this;
+        return static_cast<Derived&>(*this);
       }
 
     private:
@@ -298,4 +298,3 @@ namespace Rodin::Math
 }
 
 #endif
-

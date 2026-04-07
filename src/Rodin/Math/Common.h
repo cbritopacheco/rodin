@@ -12,8 +12,8 @@
  * elementary functions, trigonometric functions, combinatorics, and linear algebra
  * operations. Functions are templated to work with various numeric types.
  */
-#ifndef RODIN_CORE_COMMON_H
-#define RODIN_CORE_COMMON_H
+#ifndef RODIN_MATH_COMMON_H
+#define RODIN_MATH_COMMON_H
 
 #include <cmath>
 #include <Eigen/Core>
@@ -576,8 +576,8 @@ namespace Rodin::Math
   constexpr
   auto dot(const Eigen::MatrixBase<LHSDerived>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
   {
-    assert(lhs.rows() == lhs.rows());
-    assert(rhs.cols() == rhs.cols());
+    assert(lhs.rows() == rhs.rows());
+    assert(lhs.cols() == rhs.cols());
     return (lhs.array() * rhs.conjugate().array()).sum();
   }
 
@@ -613,14 +613,29 @@ namespace Rodin::Math
   constexpr
   auto dot(const Eigen::MatrixBase<LHSDerived>& lhs, const Math::SpatialMatrix<RHSScalar>& rhs)
   {
-    return lhs.dot(rhs.getData().head(static_cast<Eigen::Index>(rhs.size())));
+    assert(lhs.rows() == rhs.rows());
+    assert(lhs.cols() == rhs.cols());
+    return (lhs.array()
+            * rhs.getData()
+                .topLeftCorner(static_cast<Eigen::Index>(rhs.rows()),
+                               static_cast<Eigen::Index>(rhs.cols()))
+                .conjugate()
+                .array())
+        .sum();
   }
 
   template <class LHSScalar, class RHSDerived>
   constexpr
   auto dot(const Math::SpatialMatrix<LHSScalar>& lhs, const Eigen::MatrixBase<RHSDerived>& rhs)
   {
-    return lhs.getData().head(static_cast<Eigen::Index>(lhs.size())).dot(rhs);
+    assert(lhs.rows() == rhs.rows());
+    assert(lhs.cols() == rhs.cols());
+    return (lhs.getData()
+                .topLeftCorner(static_cast<Eigen::Index>(lhs.rows()),
+                               static_cast<Eigen::Index>(lhs.cols()))
+                .array()
+            * rhs.conjugate().array())
+        .sum();
   }
 }
 

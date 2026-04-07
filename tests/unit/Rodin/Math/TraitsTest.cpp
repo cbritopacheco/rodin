@@ -86,133 +86,77 @@ TEST_F(TraitsTest, BasicTypeTraits)
 // Test Sum trait
 TEST_F(TraitsTest, SumTrait)
 {
-  // Note: These tests check that the trait compiles and has the expected behavior
-  // The actual Math::sum function would need to be implemented for full testing
-
-  // Test that Sum trait exists and can be instantiated for basic types
-  using RealSum = Sum<Real, Real>;
-  using IntSum = Sum<Integer, Integer>;
-  using ComplexSum = Sum<Complex, Complex>;
-
-  // Test mixed type sums
-  using MixedSum = Sum<Real, Integer>;
-
-  // These tests verify the trait exists and compiles
-  static_assert(std::is_class_v<RealSum>);
-  static_assert(std::is_class_v<IntSum>);
-  static_assert(std::is_class_v<ComplexSum>);
-  static_assert(std::is_class_v<MixedSum>);
+  static_assert(std::is_same_v<typename Sum<Real, Real>::Type, Real>);
+  static_assert(std::is_same_v<typename Sum<Integer, Integer>::Type, Integer>);
+  static_assert(std::is_same_v<typename Sum<Complex, Complex>::Type, Complex>);
+  static_assert(std::is_same_v<typename Sum<Real, Integer>::Type, Real>);
 }
 
 // Test Minus trait
 TEST_F(TraitsTest, MinusTrait)
 {
-  // Test binary minus trait
-  using RealMinus = Minus<Real, Real>;
-  using IntMinus = Minus<Integer, Integer>;
-  using ComplexMinus = Minus<Complex, Complex>;
+  static_assert(std::is_same_v<typename Minus<Real, Real>::Type, Real>);
+  static_assert(std::is_same_v<typename Minus<Integer, Integer>::Type, Integer>);
+  static_assert(std::is_same_v<typename Minus<Complex, Complex>::Type, Complex>);
+  static_assert(std::is_same_v<typename Minus<Real, Integer>::Type, Real>);
 
-  // Test mixed type minus
-  using MixedMinus = Minus<Real, Integer>;
-
-  static_assert(std::is_class_v<RealMinus>);
-  static_assert(std::is_class_v<IntMinus>);
-  static_assert(std::is_class_v<ComplexMinus>);
-  static_assert(std::is_class_v<MixedMinus>);
-
-  // Test unary minus trait
-  using RealUnaryMinus = UnaryMinus<Real>;
-  using IntUnaryMinus = UnaryMinus<Integer>;
-  using ComplexUnaryMinus = UnaryMinus<Complex>;
-
-  static_assert(std::is_class_v<RealUnaryMinus>);
-  static_assert(std::is_class_v<IntUnaryMinus>);
-  static_assert(std::is_class_v<ComplexUnaryMinus>);
+  static_assert(std::is_same_v<typename UnaryMinus<Real>::Type, Real>);
+  static_assert(std::is_same_v<typename UnaryMinus<Integer>::Type, Integer>);
+  static_assert(std::is_same_v<typename UnaryMinus<Complex>::Type, Complex>);
 }
 
 // Test Mult trait
 TEST_F(TraitsTest, MultTrait)
 {
-  using RealMult = Mult<Real, Real>;
-  using IntMult = Mult<Integer, Integer>;
-  using ComplexMult = Mult<Complex, Complex>;
-
-  // Test mixed type multiplication
-  using MixedMult = Mult<Real, Integer>;
-  using ComplexRealMult = Mult<Complex, Real>;
-
-  static_assert(std::is_class_v<RealMult>);
-  static_assert(std::is_class_v<IntMult>);
-  static_assert(std::is_class_v<ComplexMult>);
-  static_assert(std::is_class_v<MixedMult>);
-  static_assert(std::is_class_v<ComplexRealMult>);
+  static_assert(std::is_same_v<typename Mult<Real, Real>::Type, Real>);
+  static_assert(std::is_same_v<typename Mult<Integer, Integer>::Type, Integer>);
+  static_assert(std::is_same_v<typename Mult<Complex, Complex>::Type, Complex>);
+  static_assert(std::is_same_v<typename Mult<Real, Integer>::Type, Real>);
+  static_assert(std::is_same_v<typename Mult<Complex, Real>::Type, Complex>);
 }
 
 // Test Division trait
 TEST_F(TraitsTest, DivisionTrait)
 {
-  using RealDiv = Division<Real, Real>;
-  using IntDiv = Division<Integer, Integer>;
-  using ComplexDiv = Division<Complex, Complex>;
-
-  // Test mixed type division
-  using MixedDiv = Division<Real, Integer>;
-  using ComplexRealDiv = Division<Complex, Real>;
-
-  static_assert(std::is_class_v<RealDiv>);
-  static_assert(std::is_class_v<IntDiv>);
-  static_assert(std::is_class_v<ComplexDiv>);
-  static_assert(std::is_class_v<MixedDiv>);
-  static_assert(std::is_class_v<ComplexRealDiv>);
+  static_assert(std::is_same_v<typename Division<Real, Real>::Type, Real>);
+  static_assert(std::is_same_v<typename Division<Integer, Integer>::Type, Integer>);
+  static_assert(std::is_same_v<typename Division<Complex, Complex>::Type, Complex>);
+  static_assert(std::is_same_v<typename Division<Real, Integer>::Type, Real>);
+  static_assert(std::is_same_v<typename Division<Complex, Real>::Type, Complex>);
 }
 
 // Test Dot trait
 TEST_F(TraitsTest, DotTrait)
 {
-  using RealDot = Dot<Real, Real>;
-  using IntDot = Dot<Integer, Integer>;
-  using ComplexDot = Dot<Complex, Complex>;
-
-  // Test mixed type dot product
-  using MixedDot = Dot<Real, Integer>;
-  using ComplexRealDot = Dot<Complex, Real>;
-
-  static_assert(std::is_class_v<RealDot>);
-  static_assert(std::is_class_v<IntDot>);
-  static_assert(std::is_class_v<ComplexDot>);
-  static_assert(std::is_class_v<MixedDot>);
-  static_assert(std::is_class_v<ComplexRealDot>);
+  static_assert(std::is_same_v<typename Dot<Real, Real>::Type, Real>);
+  static_assert(std::is_same_v<typename Dot<Integer, Integer>::Type, Integer>);
+  static_assert(std::is_same_v<typename Dot<Complex, Complex>::Type, Complex>);
+  static_assert(std::is_same_v<typename Dot<Real, Integer>::Type, Real>);
+  static_assert(std::is_same_v<typename Dot<Complex, Real>::Type, Complex>);
 }
 
 // Test trait composition and nesting
 TEST_F(TraitsTest, TraitComposition)
 {
-  // Test that traits can be composed
-  using NestedSum = Sum<Sum<Real, Real>, Real>;
-  using NestedMult = Mult<Mult<Real, Real>, Real>;
-
-  static_assert(std::is_class_v<NestedSum>);
-  static_assert(std::is_class_v<NestedMult>);
-
-  // Test complex expressions
-  using ComplexExpr = Sum<Mult<Real, Real>, Division<Real, Real>>;
-  static_assert(std::is_class_v<ComplexExpr>);
+  static_assert(std::is_same_v<typename Sum<typename Sum<Real, Real>::Type, Real>::Type, Real>);
+  static_assert(std::is_same_v<typename Mult<typename Mult<Real, Real>::Type, Real>::Type, Real>);
+  static_assert(std::is_same_v<
+    typename Sum<typename Mult<Real, Real>::Type, typename Division<Real, Real>::Type>::Type,
+    Real>);
 }
 
 // Test traits with vector and matrix types
 TEST_F(TraitsTest, VectorMatrixTraits)
 {
-  // Test Sum with vector types
-  using VectorSum = Sum<Math::Vector<Real>, Math::Vector<Real>>;
-  static_assert(std::is_class_v<VectorSum>);
-
-  // Test Mult with matrix and vector
-  using MatrixVectorMult = Mult<Math::Matrix<Real>, Math::Vector<Real>>;
-  static_assert(std::is_class_v<MatrixVectorMult>);
-
-  // Test Dot with vectors
-  using VectorDot = Dot<Math::Vector<Real>, Math::Vector<Real>>;
-  static_assert(std::is_class_v<VectorDot>);
+  static_assert(std::is_same_v<
+    typename Sum<Math::Vector<Real>, Math::Vector<Real>>::Type,
+    Math::Vector<Real>>);
+  static_assert(std::is_same_v<
+    typename Mult<Math::Matrix<Real>, Math::Vector<Real>>::Type,
+    Math::Vector<Real>>);
+  static_assert(std::is_same_v<
+    typename Dot<Math::Vector<Real>, Math::Vector<Real>>::Type,
+    Real>);
 }
 
 // Test trait edge cases

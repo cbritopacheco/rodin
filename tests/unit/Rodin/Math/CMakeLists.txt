@@ -98,3 +98,58 @@ gtest_discover_tests(RodinMathLinearSystemTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinMathCommonAdvancedTest CommonAdvancedTest.cpp)
+target_link_libraries(RodinMathCommonAdvancedTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Rodin)
+gtest_discover_tests(RodinMathCommonAdvancedTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinMathSpatialAlgebraTest SpatialAlgebraTest.cpp)
+target_link_libraries(RodinMathSpatialAlgebraTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Rodin)
+gtest_discover_tests(RodinMathSpatialAlgebraTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinMathODERootFindingTest ODERootFindingTest.cpp)
+target_link_libraries(RodinMathODERootFindingTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Rodin)
+gtest_discover_tests(RodinMathODERootFindingTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinMathLinearSystemAdvancedTest LinearSystemAdvancedTest.cpp)
+target_link_libraries(RodinMathLinearSystemAdvancedTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Rodin)
+gtest_discover_tests(RodinMathLinearSystemAdvancedTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinMathUmbrellaIncludeTest UmbrellaIncludeTest.cpp)
+target_link_libraries(RodinMathUmbrellaIncludeTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Rodin)
+gtest_discover_tests(RodinMathUmbrellaIncludeTest
+  PROPERTIES
+    LABELS unit
+)

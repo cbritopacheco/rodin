@@ -115,6 +115,11 @@ TEST_F(UnitTest, ArithmeticOperators)
   TestUnit u1(5.0);
   TestUnit u2(3.0);
 
+  static_assert(std::is_same_v<decltype(u1 + u2), TestUnit>);
+  static_assert(std::is_same_v<decltype(u1 - u2), TestUnit>);
+  static_assert(std::is_same_v<decltype(u1 * u2), TestUnit>);
+  static_assert(std::is_same_v<decltype(u1 / u2), TestUnit>);
+
   // Test addition
   auto sum = u1 + u2;
   EXPECT_DOUBLE_EQ(static_cast<Real>(sum), 8.0);
@@ -137,6 +142,9 @@ TEST_F(UnitTest, UnaryOperators)
 {
   TestUnit u1(5.0);
   TestUnit u2(-3.0);
+
+  static_assert(std::is_same_v<decltype(+u1), TestUnit>);
+  static_assert(std::is_same_v<decltype(-u1), TestUnit>);
 
   // Test unary plus
   auto plus_u1 = +u1;

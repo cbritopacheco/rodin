@@ -186,7 +186,10 @@ namespace Rodin::Math
    */
   template <class MatrixScalar, class VectorScalar>
   class LinearSystem<Math::SparseMatrix<MatrixScalar>, Math::Vector<VectorScalar>>
-    : public LinearSystemBase<Math::SparseMatrix<MatrixScalar>, Math::Vector<VectorScalar>, LinearSystem<MatrixScalar, VectorScalar>>
+    : public LinearSystemBase<
+        Math::SparseMatrix<MatrixScalar>,
+        Math::Vector<VectorScalar>,
+        LinearSystem<Math::SparseMatrix<MatrixScalar>, Math::Vector<VectorScalar>>>
   {
     public:
       /// Sparse matrix type for the linear operator
@@ -199,7 +202,10 @@ namespace Rodin::Math
 
       /// Parent class type
       using Parent =
-        LinearSystemBase<Math::SparseMatrix<MatrixScalar>, Math::Vector<VectorScalar>, LinearSystem<MatrixScalar, VectorScalar>>;
+        LinearSystemBase<
+          Math::SparseMatrix<MatrixScalar>,
+          Math::Vector<VectorScalar>,
+          LinearSystem<Math::SparseMatrix<MatrixScalar>, Math::Vector<VectorScalar>>>;
 
       /// Default constructor
       constexpr
@@ -494,7 +500,10 @@ namespace Rodin::Math
    */
   template <class MatrixScalar, class VectorScalar>
   class LinearSystem<Math::Matrix<MatrixScalar>, Math::Vector<VectorScalar>>
-    : public LinearSystemBase<Math::Matrix<MatrixScalar>, Math::Vector<VectorScalar>, LinearSystem<MatrixScalar, VectorScalar>>
+    : public LinearSystemBase<
+        Math::Matrix<MatrixScalar>,
+        Math::Vector<VectorScalar>,
+        LinearSystem<Math::Matrix<MatrixScalar>, Math::Vector<VectorScalar>>>
   {
     public:
       /// Dense matrix type for the linear operator  
@@ -507,7 +516,10 @@ namespace Rodin::Math
 
       /// Parent class type
       using Parent =
-        LinearSystemBase<MatrixType, VectorType, LinearSystem<MatrixScalar, VectorScalar>>;
+        LinearSystemBase<
+          MatrixType,
+          VectorType,
+          LinearSystem<Math::Matrix<MatrixScalar>, Math::Vector<VectorScalar>>>;
 
       /// Default constructor
       constexpr
@@ -826,4 +838,3 @@ namespace Rodin::Math
 }
 
 #endif
-
