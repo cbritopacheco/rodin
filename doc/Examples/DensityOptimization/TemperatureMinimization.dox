@@ -66,7 +66,16 @@
 
   // Label Dirichlet boundary (left edge near center)
   for (auto it = mesh.getBoundary(); it; ++it)
-    mesh.setAttribute(it.key(), /* condition */ ? GammaD : Gamma0);
+  {
+    bool onGammaD = false;
+    for (auto vit = it->getVertex(); vit; ++vit)
+    {
+      const Real x = vit->x(), y = vit->y();
+      if (std::abs(x) < 1e-12 && y > 0.5 - radius && y < 0.5 + radius)
+      { onGammaD = true; break; }
+    }
+    mesh.setAttribute(it.key(), onGammaD ? GammaD : Gamma0);
+  }
 
   P1 vh(mesh);
   P1 ph(mesh);
