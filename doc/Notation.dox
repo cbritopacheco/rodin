@@ -62,10 +62,18 @@
 | @f$ \nabla \cdot \mathbf{u} @f$ | `Div(u)` | Divergence of a vector field. Returns a scalar. |
 | @f$ \Delta u @f$  | —          | Laplacian. Not used directly; appears via integration by parts as `Integral(Grad(u), Grad(v))`. |
 | @f$ \nabla \mathbf{u} @f$ | `Jacobian(u)` | Jacobian (gradient) of a vector field. Returns a @f$ d \times d @f$ matrix. |
-| @f$ \nabla \mathbf{u}^T @f$ | `Jacobian(u).T()` | Transpose of the Jacobian. |
-| @f$ e(\mathbf{u}) @f$ | `0.5 * (Jacobian(u) + Jacobian(u).T())` | Symmetric gradient (linearized strain tensor). |
-| @f$ \mathrm{tr}(A) @f$ | `Trace(A)` | Trace of a matrix. |
+| @f$ \nabla \mathbf{u}^T @f$ | `Transpose(Jacobian(u))` | Transpose of the Jacobian. |
+| @f$ \varepsilon(\mathbf{u}) @f$ | See below | Symmetric gradient (linearized strain tensor): @f$ \frac{1}{2}(\nabla \mathbf{u} + \nabla \mathbf{u}^T) @f$. |
+| @f$ \mathrm{tr}(A) @f$ | `Trace(A)` | Trace of a matrix: @f$ \mathrm{tr}(A) = \sum_i A_{ii} @f$. |
 | @f$ A : B @f$    | `Dot(A, B)` | Frobenius (double-contraction) inner product of two matrices: @f$ A : B = \sum_{ij} A_{ij} B_{ij} @f$. |
+| @f$ \|A\|_F @f$  | `Frobenius(A)` | Frobenius norm: @f$ \|A\|_F = \sqrt{A : A} @f$. |
+| @f$ u_i @f$      | `Component(u, i)` | The @f$ i @f$-th component of a vector function (0-indexed). Shorthand: `u.x()`, `u.y()`, `u.z()`. |
+
+  @note The symmetric gradient @f$ \varepsilon(\mathbf{u}) @f$ can be built
+  from Rodin operators as:
+  @code{.cpp}
+  auto eps_u = 0.5 * (Jacobian(u) + Transpose(Jacobian(u)));
+  @endcode
 
   @section notation-integrals Notation regarding integrals
 
@@ -75,7 +83,15 @@
 | @f$ \int_\Omega \nabla u \cdot \nabla v \, dx @f$  | `Integral(Grad(u), Grad(v))` | Stiffness integral. The dot product of the two gradient vectors is taken automatically. |
 | @f$ \int_\Omega u \, v \, dx @f$                   | `Integral(u, v)` | Mass integral. |
 | @f$ \int_{\Gamma_N} g \, v \, ds @f$               | `BoundaryIntegral(g, v).over(GammaN)` | Boundary integral on @f$ \Gamma_N @f$. The `.over()` method restricts the integration to boundary faces with the given attribute. |
-| @f$ \int_\Gamma h \, v \, ds @f$                   | `FaceIntegral(h, v).over(Gamma)` | Face integral on an internal interface @f$ \Gamma @f$. |
+| @f$ \int_{\mathcal{F}_h} h \, v \, ds @f$          | `FaceIntegral(h, v)` | Integral over all faces (interior and boundary). |
+| @f$ \int_{\mathcal{F}_h^i} h \, v \, ds @f$        | `InterfaceIntegral(h, v)` | Integral over interior faces only (excluding boundary). |
+
+  @section notation-dg Notation regarding DG operators
+
+| Notation                                         | Rodin code        | Description |
+| ------------------------------------------------ | ----------------- | ----------- |
+| @f$ [u] = u^+ - u^- @f$                         | `Jump(u)`         | Jump of @f$ u @f$ across an internal face. |
+| @f$ \{u\} = \frac{1}{2}(u^+ + u^-) @f$          | `Average(u)`      | Average of @f$ u @f$ across an internal face. |
 
   */
 

@@ -33,6 +33,7 @@
   | Space | Polynomial Degree | Continuity | Typical Use |
   |-------|------------------|------------|-------------|
   | @ref Rodin::Variational::P0 "P0" | 0 (constant) | Discontinuous | Piecewise constant quantities, indicators |
+  | @ref Rodin::Variational::P0g "P0g" | 0 + gradient | Discontinuous | P0 with gradient enrichment (DG methods) |
   | @ref Rodin::Variational::P1 "P1" | 1 (linear) | @f$ C^0 @f$ (continuous) | Most PDEs: Poisson, elasticity, heat |
   | @ref Rodin::Variational::H1 "H1" | Arbitrary (order @f$ k @f$) | @f$ C^0 @f$ (continuous) | Higher-order methods, mixed problems (e.g. Taylor-Hood for Navier-Stokes) |
 

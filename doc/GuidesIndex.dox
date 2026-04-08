@@ -54,7 +54,7 @@
   - @subpage fem-ciarlet — Ciarlet's formal definition of a finite element:
     the triple @f$ (K, P, \Sigma) @f$
 
-  - @subpage fem-spaces — Available finite element spaces (P0, P1, H1),
+  - @subpage fem-spaces — Available finite element spaces (P0, P0g, P1, H1),
     vector-valued and complex-valued variants, and the
     @ref Rodin::Variational::GridFunction "GridFunction" class
 
