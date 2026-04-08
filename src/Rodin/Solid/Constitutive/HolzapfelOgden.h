@@ -124,8 +124,8 @@ namespace Rodin::Solid
       {
         return m_mu1 * (cache.I1 * cache.I3m1d3 - 3.0)
              + m_mu2 * (cache.I2 * cache.I3m2d3 - 3.0)
-             + m_C0 * cache.E1
-             + m_C2 * cache.E4
+             + m_C0 * (cache.E1 - 1.0)
+             + m_C2 * (cache.E4 - 1.0)
              + m_kappa * (cache.J - 1.0 - cache.logJ);
       }
 
@@ -150,7 +150,10 @@ namespace Rodin::Solid
         const auto dI3_dF = 2.0 * cache.I3 * FinvT;
 
         const Math::SpatialVector<Real> Fa0 = F * a0;
-        const auto dI4_dF = 2.0 * Fa0 * a0.transpose();
+        Math::SpatialMatrix<Real> dI4_dF(F.rows(), F.cols());
+        for (size_t i = 0; i < F.rows(); ++i)
+          for (size_t j = 0; j < F.cols(); ++j)
+            dI4_dF(i, j) = 2.0 * Fa0[i] * a0[j];
 
         P = w1 * dI1_dF + w2 * dI2_dF + w3 * dI3_dF + w4 * dI4_dF;
       }
@@ -174,7 +177,10 @@ namespace Rodin::Solid
         const auto A2 = 2.0 * (cache.I1 * F + (-1.0) * (F * C));
         const auto A3 = 2.0 * cache.I3 * FinvT;
         const Math::SpatialVector<Real> Fa0 = F * a0;
-        const auto A4 = 2.0 * Fa0 * a0.transpose();
+        Math::SpatialMatrix<Real> A4(F.rows(), F.cols());
+        for (size_t i = 0; i < F.rows(); ++i)
+          for (size_t j = 0; j < F.cols(); ++j)
+            A4(i, j) = 2.0 * Fa0[i] * a0[j];
 
         const Real dI1 = A1.dot(dF);
         const Real dI2 = A2.dot(dF);
@@ -185,7 +191,10 @@ namespace Rodin::Solid
         const auto dA2 = 2.0 * (dI1 * F + cache.I1 * dF + (-1.0) * (dF * C) + (-1.0) * (F * dC));
         const auto dA3 = 2.0 * (dI3 * FinvT + cache.I3 * dFinvT);
         const Math::SpatialVector<Real> dFa0 = dF * a0;
-        const auto dA4 = 2.0 * dFa0 * a0.transpose();
+        Math::SpatialMatrix<Real> dA4(F.rows(), F.cols());
+        for (size_t i = 0; i < F.rows(); ++i)
+          for (size_t j = 0; j < F.cols(); ++j)
+            dA4(i, j) = 2.0 * dFa0[i] * a0[j];
 
         const auto w1 = dWdI1(cache);
         const auto w2 = dWdI2(cache);
