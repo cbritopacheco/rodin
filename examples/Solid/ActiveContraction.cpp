@@ -6,17 +6,20 @@
  */
 /**
  * @file ActiveContraction.cpp
- * @brief Minimal monolithic active-contraction demo without local variable elimination.
+ * @brief Quasi-static active-contraction demo using FiberActiveI4Contraction.
  *
- * Unknowns at each time step are solved in one coupled system:
- *   - displacement u      (H1 vector)
- *   - active extension ec (P0g scalar, one dof over the mesh)
- *   - gamma               (P0g scalar)
- *   - beta                (P0g scalar)
+ * A 2D rectangular slab (aspect ratio 4:1) is clamped on the left edge.
+ * The material is modeled as a NeoHookean solid wrapped with a
+ * FiberActiveI4Contraction decorator that adds a fiber-aligned active stress
+ * contribution.  Fiber direction is constant and aligned with the x-axis.
  *
- * This keeps a monolithic block structure and avoids Schur/local elimination.
- * The model below is intentionally minimal and pedagogical (Hill–Maxwell-inspired),
- * designed to show the architecture direction requested by the user.
+ * The scalar activation level is ramped smoothly from 0 to 1 and back to 0
+ * over nSteps quasi-static time steps.  At each step a Newton–Raphson solve
+ * is performed to find the equilibrium displacement, driving an end-to-end
+ * demonstration of the constitutive law, integrators, and solver chain.
+ *
+ * Output is written to XDMF for visualization (apply "Warp by Vector" in
+ * ParaView to see the deformed shape).
  */
 #include <cstddef>
 #include <cmath>
@@ -24,7 +27,9 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Assembly.h>
 #include <Rodin/Variational.h>
+#include <Rodin/Solid.h>
 #include <Rodin/IO/XDMF.h>
+#include <Rodin/Solver/NewtonSolver.h>
 #include <Rodin/Solver/SparseLU.h>
 
 using namespace Rodin;
@@ -37,14 +42,13 @@ int main(int, char**)
   // ---- geometry -----------------------------------------------------------
   constexpr size_t nx = 65;
   constexpr size_t ny = 17;
-  constexpr Real Lx = static_cast<Real>(nx - 1) / static_cast<Real>(ny - 1);
 
   Mesh mesh;
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, { nx, ny });
   mesh.scale(1.0 / static_cast<Real>(ny - 1));
   mesh.getConnectivity().compute(1, 2);
 
-  // Clamp left boundary to remove rigid modes.
+  // Clamp left boundary.
   constexpr Attribute leftBC = 1;
   constexpr Real eps = 1e-10;
   for (auto it = mesh.getBoundary(); !it.end(); ++it)
@@ -55,131 +59,95 @@ int main(int, char**)
     Real xSum = 0;
     for (size_t i = 0; i < nv; ++i)
       xSum += mesh.getVertexCoordinates(verts[i])(0);
-    const Real xMid = xSum / static_cast<Real>(nv);
 
-    if (xMid < eps)
+    if (xSum / static_cast<Real>(nv) < eps)
       mesh.setAttribute({ 1, it->getIndex() }, leftBC);
   }
 
   const size_t dim = mesh.getSpaceDimension();
 
-  // ---- FE spaces ----------------------------------------------------------
-  // u  : vector H1
-  // ec, gamma, beta : P0g (single scalar dof over whole mesh)
+  // ---- FE space -----------------------------------------------------------
   P1 Vh(mesh, dim);
-  P0g Qh(mesh);
 
-  // ---- state at time n ----------------------------------------------------
-  GridFunction u_n(Vh);
-  u_n.setName("Displacement");
-  u_n = VectorFunction{ Zero(), Zero() };
+  // ---- constitutive law ---------------------------------------------------
+  const Real E      = 120.0;
+  const Real nu     = 0.35;
+  const Real lambda = E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu));
+  const Real mu     = E / (2.0 * (1.0 + nu));
 
-  GridFunction ec_n(Qh);
-  ec_n.setName("ec");
-  ec_n = RealFunction(0.0);
+  Solid::NeoHookean passive(lambda, mu);
 
-  GridFunction gamma_n(Qh);
-  gamma_n.setName("gamma");
-  gamma_n = RealFunction(1.0);
+  // Active tension scale and reference fiber stretch
+  const Real activeTensionScale    = 10.0;
+  const Real referenceFiberStretch = 1.0;
+  Solid::FiberActiveI4Contraction<Solid::NeoHookean> law(
+      passive, activeTensionScale, referenceFiberStretch);
 
-  GridFunction beta_n(Qh);
-  beta_n.setName("beta");
-  beta_n = RealFunction(0.0);
+  // Fiber direction: constant, aligned with the x-axis
+  Math::SpatialVector<Real> fiberDir(static_cast<std::uint8_t>(dim));
+  fiberDir.setZero();
+  fiberDir(0) = 1.0;
+
+  // ---- solution -----------------------------------------------------------
+  GridFunction u(Vh);
+  u.setName("Displacement");
+  u = VectorFunction{ Zero(), Zero() };
 
   // ---- output -------------------------------------------------------------
   IO::XDMF xdmf("ActiveContraction");
   auto grid = xdmf.grid();
   grid.setMesh(mesh);
-  grid.add(u_n);
-  grid.add(ec_n);
-  grid.add(gamma_n);
-  grid.add(beta_n);
+  grid.add(u);
+  xdmf.write(0.0);
 
-  // ---- model parameters (minimal Hill–Maxwell-inspired) -------------------
-  const Real E  = 120.0;
-  const Real nu = 0.35;
-  const Real lambda = E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu));
-  const Real mu     = E / (2.0 * (1.0 + nu));
+  // ---- Newton trial / test functions (reused across time steps) -----------
+  TrialFunction du(Vh);
+  TestFunction  v(Vh);
+  auto zero = VectorFunction{ Zero(), Zero() };
 
-  const Real Es        = 40.0;
-  const Real muParallel = 0.5;
-  const Real n0         = 0.8;
-  const Real k0         = 1.0;
-  const Real sigma0     = 1.0;
-  const Real alphaD     = 0.2;
-
+  // ---- quasi-static time stepping -----------------------------------------
   constexpr size_t nSteps = 20;
-  const Real T = 1.0;
-  const Real dt = T / static_cast<Real>(nSteps);
-  const Real pi = Math::Constants::pi();
+  const Real pi = std::acos(static_cast<Real>(-1));
 
-  // ---- time stepping ------------------------------------------------------
   for (size_t step = 1; step <= nSteps; ++step)
   {
-    const Real time = dt * static_cast<Real>(step);
-    const Real ecPrev = ec_n.getData()(0);
-    const Real gammaPrev = gamma_n.getData()(0);
-    const Real betaPrev = beta_n.getData()(0);
+    const Real t = static_cast<Real>(step) / static_cast<Real>(nSteps);
 
-    // Unknowns at t^{n+1}
-    TrialFunction u(Vh);
-    TrialFunction ec(Qh);
-    TrialFunction gamma(Qh);
-    TrialFunction beta(Qh);
+    // Activation: smooth ramp up then down over [0, 1]
+    const Real activation = 0.5 * (1.0 - std::cos(pi * t));
 
-    // Tests
-    TestFunction v(Vh);
-    TestFunction w(Qh);
-    TestFunction z(Qh);
-    TestFunction r(Qh);
+    // Input: inject fiber direction and activation at every quadrature point
+    auto input = [&](Solid::ConstitutivePoint& cp)
+    {
+      cp.set<Solid::Tags::FiberDirection>(fiberDir);
+      cp.set<Solid::Tags::Activation>(activation);
+    };
 
-    // Smooth prescribed activation in [0, 1] with mild x-modulation.
-    const Real activationTime = 0.5 * (1.0 + std::sin(2.0 * pi * time));
-    const auto activation = activationTime * (0.6 + 0.4 * F::x / Lx);
+    // Nonlinear integrators at current linearization point u
+    Solid::MaterialTangent tangent(law, du, v);
+    tangent.setDisplacement(u);
+    tangent.setInput(input);
 
-    // kinematic proxy for fiber strain (minimal demo): div(u)
-    const auto e1D = Div(u);
+    Solid::InternalForce internal(law, v);
+    internal.setDisplacement(u);
+    internal.setInput(input);
 
-    // Active strain rate (backward Euler)
-    const auto edot = (ec - ecPrev) / dt;
+    // Newton problem:  K(u) du = -R(u)
+    Problem newton(du, v);
+    newton = tangent
+           + internal
+           + DirichletBC(du, zero).on(leftBC);
 
-    // Positive regularized damping factor (minimal smooth variant)
-    const auto damp = activation + alphaD * edot * edot;
+    SparseLU linearSolver(newton);
+    NewtonSolver solver(linearSolver);
+    solver.setMaxIterations(50)
+          .setAbsoluteTolerance(1e-10)
+          .setRelativeTolerance(1e-8);
+    solver.solve(u);
 
-    // Residual block 1: mechanics (linear elastic + active contribution)
-    const auto Ru =
-        Integral(mu * Jacobian(u), Jacobian(v))
-      + Integral(lambda * Div(u), Div(v))
-      + Integral(Es * (e1D - ec) * Div(v));
-
-    // Residual block 2: active branch constraint (minimal HM-inspired form)
-    const auto Rec =
-      Integral((gamma * beta + muParallel * edot) - Es * (e1D - ec), w);
-
-    // Residual block 3: gamma evolution (no elimination)
-    const auto Rg =
-      Integral((gamma - gammaPrev) / dt - (n0 * k0 * activation - damp * gamma), z);
-
-    // Residual block 4: beta evolution (no elimination)
-    const auto Rb =
-      Integral((beta - betaPrev) / dt - (n0 * sigma0 * activation - damp * beta + edot * gamma), r);
-
-    Problem monolithic(u, ec, gamma, beta, v, w, z, r);
-    monolithic =
-        Ru + Rec + Rg + Rb
-      + DirichletBC(u, VectorFunction{ Zero(), Zero() }).on(leftBC);
-
-    monolithic.assemble();
-    SparseLU(monolithic).solve();
-
-    // Commit n+1 -> n
-    u_n = u.getSolution();
-    ec_n = ec.getSolution();
-    gamma_n = gamma.getSolution();
-    beta_n = beta.getSolution();
-
-    xdmf.write(time);
+    xdmf.write(t);
   }
 
+  xdmf.close();
   return 0;
 }

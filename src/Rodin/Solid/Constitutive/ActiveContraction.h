@@ -120,7 +120,7 @@ namespace Rodin::Solid
         const Real coef = m_activeTensionScale * cache.activation
                         * (1.0 - m_referenceFiberStretch / cache.lambdaF);
 
-        P += coef * (cache.f * cache.a0.transpose());
+        P = P + coef * (cache.f * cache.a0.transpose());
       }
 
       void getMaterialTangent(
@@ -141,7 +141,7 @@ namespace Rodin::Solid
                          * m_referenceFiberStretch * fdotdf
                          / (cache.lambdaF * cache.lambdaF * cache.lambdaF);
 
-        dP += dCoef * (cache.f * cache.a0.transpose())
+        dP = dP + dCoef * (cache.f * cache.a0.transpose())
             + coef * (df * cache.a0.transpose());
       }
 
