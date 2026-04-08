@@ -106,69 +106,102 @@
 
   @subsection guides-getting-started-core-concepts-fe-spaces Finite Element Spaces
 
-  A finite element space defines the type of approximation used. Rodin provides
-  several standard spaces:
+  A **finite element space** @f$ V_h @f$ is a finite-dimensional subspace of a
+  function space (such as @f$ H^1(\Omega) @f$ or @f$ L^2(\Omega) @f$), built by
+  assembling local polynomial spaces on each cell of the mesh. In Rodin, finite
+  element spaces are the bridge between the mesh geometry and the variational
+  formulation of a PDE.
 
-  | Space | Description | Typical Use |
-  |-------|-------------|-------------|
-  | `P1` | Continuous piecewise linear | Most PDEs |
-  | `P2` | Continuous piecewise quadratic | Higher accuracy |
-  | `P0` | Piecewise constant | Discontinuous quantities |
-  | `H1` | General H¹ conforming space | Scalar problems |
+  Rodin provides the following standard spaces:
+
+  | Space | Polynomial degree | Continuity | DOF location | Typical use |
+  |-------|-------------------|------------|--------------|-------------|
+  | @ref Rodin::Variational::P0 "P0" | 0 (constant) | Discontinuous | One per cell | Material indicators, piecewise constant data |
+  | @ref Rodin::Variational::P1 "P1" | 1 (linear) | @f$ C^0 @f$ continuous | One per vertex | Most scalar and vector PDEs |
+  | @ref Rodin::Variational::H1 "H1<k>" | @f$ k @f$ (arbitrary) | @f$ C^0 @f$ continuous | Vertices + edges + interior | Higher-order accuracy, mixed formulations |
+
+  @note There is no separate `P2` class. Quadratic elements are obtained via
+  `H1` with order 2: `H1 Vh(std::integral_constant<size_t, 2>{}, mesh)`.
 
   @code{.cpp}
   Mesh mesh;
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
 
-  // Linear elements
-  P1 Vh1(mesh);
-  std::cout << "P1 space DOFs: " << Vh1.getSize() << std::endl;
+  // Piecewise constant space: 1 DOF per cell
+  P0 Wh(mesh);
+  std::cout << "P0 DOFs: " << Wh.getSize() << std::endl;  // = number of cells
 
-  // Quadratic elements (if available)
-  // P2 Vh2(mesh);
-  // std::cout << "P2 space DOFs: " << Vh2.getSize() << std::endl;
+  // Piecewise linear space: 1 DOF per vertex
+  P1 Vh(mesh);
+  std::cout << "P1 DOFs: " << Vh.getSize() << std::endl;  // = number of vertices
+
+  // Quadratic H1 space (order 2)
+  H1 Qh(std::integral_constant<size_t, 2>{}, mesh);
+  std::cout << "H1<2> DOFs: " << Qh.getSize() << std::endl;
   @endcode
 
   @subsection guides-getting-started-core-concepts-trial-test Trial and Test Functions
 
-  In the finite element method, we express problems in weak form using trial
-  and test functions.
+  In the finite element method, we express problems in **weak form** using
+  trial and test functions. These are abstract symbolic objects that represent
+  functions in the finite element space — they do not store numerical values
+  themselves.
 
   @code{.cpp}
   P1 Vh(mesh);
 
-  // Trial function: the unknown we're solving for
+  // Trial function: represents the unknown solution u ∈ Vh
   TrialFunction u(Vh);
 
-  // Test function: used in weak formulation
+  // Test function: represents the weighting function v ∈ Vh
   TestFunction v(Vh);
   @endcode
 
   **Mathematical background:**
-  - We seek @f$ u \in V_h @f$ (the trial space)
-  - We test against all @f$ v \in V_h @f$ (the test space)
-  - The discrete problem is: Find @f$ u_h @f$ such that @f$ a(u_h, v_h) = b(v_h) @f$ for all @f$ v_h @f$
+
+  The finite element method seeks an approximate solution @f$ u_h @f$ in the
+  finite-dimensional space @f$ V_h @f$ by requiring the **residual** to be
+  orthogonal to all test functions:
+
+  @f[
+    \text{Find } u_h \in V_h \text{ such that } a(u_h, v_h) = \ell(v_h)
+    \quad \forall\, v_h \in V_h
+  @f]
+
+  - The **trial function** @f$ u_h @f$ (represented by `TrialFunction`) is the
+    unknown being solved for. After solving, its coefficients are stored in the
+    associated @ref Rodin::Variational::GridFunction "GridFunction", accessible
+    via `u.getSolution()`.
+  - The **test function** @f$ v_h @f$ (represented by `TestFunction`) is used
+    to generate the equations of the discrete system. Each basis function
+    @f$ \phi_i @f$ of @f$ V_h @f$ produces one equation @f$ a(u_h, \phi_i)
+    = \ell(\phi_i) @f$, yielding the linear system @f$ A\mathbf{x}
+    = \mathbf{b} @f$.
 
   @subsection guides-getting-started-core-concepts-operators Differential Operators
 
-  Rodin provides operators that work on trial and test functions:
+  Rodin provides differential operators that work on trial and test functions.
+  These operators are **expression templates**: they are not evaluated
+  immediately but are stored as symbolic expressions and evaluated during
+  assembly.
 
-  | Operator | Mathematical Meaning | Usage |
-  |----------|---------------------|--------|
-  | `Grad(u)` | @f$ \nabla u @f$ | Gradient |
-  | `Div(u)` | @f$ \nabla \cdot u @f$ | Divergence |
-  | `Curl(u)` | @f$ \nabla \times u @f$ | Curl |
+  | Operator | Mathematical meaning | Result type |
+  |----------|---------------------|-------------|
+  | `Grad(u)` | @f$ \nabla u @f$ | Vector (for scalar @f$ u @f$) |
+  | `Div(u)` | @f$ \nabla \cdot \mathbf{u} @f$ | Scalar (for vector @f$ \mathbf{u} @f$) |
+  | `Jacobian(u)` | @f$ \nabla \mathbf{u} @f$ | Matrix (for vector @f$ \mathbf{u} @f$) |
+  | `Jacobian(u).T()` | @f$ (\nabla \mathbf{u})^T @f$ | Transpose of the Jacobian |
 
   @code{.cpp}
   TrialFunction u(Vh);
   TestFunction v(Vh);
 
-  // Gradient operator
+  // The gradient of a scalar function is a vector
   auto grad_u = Grad(u);
   auto grad_v = Grad(v);
 
-  // Used in integrals
-  auto bilinear_form = Integral(Grad(u), Grad(v));
+  // Used in integrals: the dot product is taken implicitly
+  auto stiffness = Integral(Grad(u), Grad(v));  // ∫ ∇u · ∇v dx
   @endcode
 
   @subsection guides-getting-started-core-concepts-integrals Integrals
@@ -233,59 +266,69 @@
 
   @subsection guides-getting-started-core-concepts-solving Solving
 
-  After defining a problem, solve it with an appropriate solver:
+  After defining a problem, solve it with an appropriate solver from the
+  @ref Rodin::Solver "Solver" module:
 
   @code{.cpp}
   // Direct solver (good for small to medium problems)
-  SparseLU().solve(problem);
+  Solver::SparseLU solver;
+  problem.solve(solver);
 
-  // Iterative solver (good for large problems)
-  CG solver;
-  solver.setMaxIterations(1000);
-  solver.setRelativeTolerance(1e-10);
-  solver.solve(problem);
+  // Iterative solver (good for large SPD systems)
+  Solver::CG cg;
+  cg.setMaxIterations(1000);
+  cg.setRelativeTolerance(1e-10);
+  problem.solve(cg);
 
-  // Access solution
+  // Access solution as a GridFunction
   auto& solution = u.getSolution();
   @endcode
 
+  The solution is stored in the @ref Rodin::Variational::GridFunction
+  "GridFunction" associated with the trial function. You can evaluate it at
+  any point, compute norms, or export it for visualization.
+
   @section guides-getting-started-core-concepts-workflow Typical Workflow
 
-  Here's a summary of the typical workflow for solving a PDE with Rodin:
+  Here's a summary of the typical workflow for solving a PDE with Rodin.
+  Each step corresponds to one of the core abstractions:
 
-  1. **Create/Load Mesh**
+  1. **Create or load a Mesh** — discretize the domain @f$ \Omega @f$
      @code{.cpp}
      Mesh mesh;
      mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
-     mesh.getConnectivity().compute(1, 2);
+     mesh.getConnectivity().compute(1, 2);  // Needed for boundary detection
      @endcode
 
-  2. **Define Finite Element Space**
+  2. **Choose a Finite Element Space** — define @f$ V_h @f$
      @code{.cpp}
-     P1 Vh(mesh);
+     P1 Vh(mesh);                  // Piecewise linear
+     // or: P0 Wh(mesh);           // Piecewise constant
+     // or: H1 Vh(std::integral_constant<size_t, 2>{}, mesh);  // Quadratic
      @endcode
 
-  3. **Create Trial and Test Functions**
+  3. **Create Trial and Test Functions** — the symbolic unknowns
      @code{.cpp}
      TrialFunction u(Vh);
      TestFunction v(Vh);
      @endcode
 
-  4. **Define Problem**
+  4. **Define the Variational Problem** — translate the weak form
      @code{.cpp}
      Problem problem(u, v);
      problem = [bilinear forms] - [linear forms] + [boundary conditions];
      @endcode
 
-  5. **Solve**
+  5. **Solve** — choose a solver and compute the solution
      @code{.cpp}
-     Solver().solve(problem);
+     Solver::SparseLU solver;
+     problem.solve(solver);
      @endcode
 
-  6. **Post-Process**
+  6. **Post-Process** — export for visualization
      @code{.cpp}
      IO::XDMF xdmf("Results");
-     xdmf.grid().setMesh(mesh).add("u", u.getSolution());
+     xdmf.setMesh(mesh).add("u", u.getSolution());
      xdmf.write();
      @endcode
 
