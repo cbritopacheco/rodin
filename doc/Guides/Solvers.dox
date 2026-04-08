@@ -187,8 +187,10 @@
   | Method | Default | Description |
   |--------|---------|-------------|
   | `setMaxIterations(n)` | 100 | Maximum Newton iterations |
-  | `setAbsoluteTolerance(tol)` | @f$ 10^{-12} @f$ | Convergence if @f$ \|r\| \le \mathrm{atol} @f$ |
-  | `setRelativeTolerance(tol)` | @f$ 10^{-8} @f$ | Convergence if @f$ \|r\|/\|r_0\| \le \mathrm{rtol} @f$ |
+  | `setAbsoluteTolerance(tol)` | @f$ 10^{-12} @f$ | Converged when @f$ \|r\| \le \mathrm{atol} @f$ |
+  | `setRelativeTolerance(tol)` | @f$ 10^{-8} @f$ | Converged when @f$ \|r\|/\|r_0\| \le \mathrm{rtol} @f$ |
+
+  Convergence is declared when **either** criterion is satisfied (not both).
 
   @subsection guides-solvers-nonlinear-hyperelastic Hyperelastic Example
 

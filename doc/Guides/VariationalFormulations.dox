@@ -332,9 +332,9 @@
   actual `examples/DG/Poisson.cpp` uses this pattern:
 
   @code{.cpp}
-  P0 vh(mesh);           // Discontinuous piecewise-constant space
-  TrialFunction u(vh);
-  TestFunction  v(vh);
+  P0 Vh(mesh);           // Discontinuous piecewise-constant space
+  TrialFunction u(Vh);
+  TestFunction  v(Vh);
 
   RealFunction f = 1.0;
 

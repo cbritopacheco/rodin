@@ -532,7 +532,7 @@
 
   | Method | Class | Equation | Properties |
   |--------|-------|----------|------------|
-  | **Eikonal** | `Distance::Eikonal<FES, Data>` | @f$ \|\nabla d\| = 1 @f$ | Exact distances via FMM; supports signed distance with interior/interface regions |
+  | **Eikonal** | `Distance::Eikonal` | @f$ \|\nabla d\| = 1 @f$ | Exact distances via FMM; supports signed distance with interior/interface regions |
   | **Poisson** | `Distance::Poisson` | @f$ -\Delta u = 1, \; u\|_{\partial\Omega} = 0 @f$ | Smooth approximation; fast (one linear solve); does not give exact distances |
   | **SignedPoisson** | `Distance::SignedPoisson` | @f$ -\Delta u = 2\chi_\Omega - 1, \; u\|_\Gamma = 0 @f$ | Region-dependent forcing yields a signed smooth distance |
   | **Rvachev** | `Distance::Rvachev` | @f$ d = \frac{u}{\sqrt{u^2 + \|\nabla u\|^2}} @f$ | Normalizes a level-set field to approximate distance; preserves zero set and sign |

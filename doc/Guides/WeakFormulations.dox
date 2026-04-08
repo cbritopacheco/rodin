@@ -204,7 +204,7 @@
     TrialFunction u(Vh);
     TestFunction  v(Vh);
 
-    VectorFunction traction{0, -1};  // Downward traction on Neumann boundary
+    VectorFunction traction{0, -1};  // Traction force (stress vector) on Neumann boundary
 
     Problem elasticity(u, v);
     elasticity = LinearElasticityIntegral(u, v)(lambda, mu)

@@ -666,8 +666,10 @@
      - Integral(v);
   @endcode
 
-  See the `examples/IntegralEquations/` directory for Newtonian potential and
-  elastic distribution examples.
+  @note The kernel @f$ K(\mathbf{x}, \mathbf{y}) @f$ is singular when
+  @f$ \mathbf{x} = \mathbf{y} @f$. The small regularization term
+  @f$ \varepsilon \int \nabla u \cdot \nabla v @f$ stabilizes the formulation.
+  See the `examples/IntegralEquations/` directory for complete implementations.
 
   @subsection guides-getting-started-core-concepts-trace TraceOperator
 
