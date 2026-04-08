@@ -95,46 +95,59 @@
   @subsection guides-variational-forms-assembly Problem Assembly
 
   The @ref Rodin::Variational::Problem "Problem" class assembles bilinear
-  and linear forms into a linear system @f$ Ax = b @f$:
+  and linear forms into a linear system @f$ A\mathbf{x} = \mathbf{b} @f$:
 
   @code{.cpp}
   TrialFunction u(Vh);
   TestFunction  v(Vh);
 
   Problem problem(u, v);
-  problem = Integral(Grad(u), Grad(v))   // bilinear form (goes into A)
-          - Integral(f, v)                // linear form (goes into b)
-          + DirichletBC(u, Zero());       // modifies A and b
+  problem = Integral(Grad(u), Grad(v))   // bilinear form → goes into A
+          - Integral(f, v)                // linear form   → goes into b
+          + DirichletBC(u, Zero());       // modifies both A and b
   @endcode
 
-  Note the sign convention: bilinear forms are added with `+`, while linear
-  forms are subtracted with `-`. This corresponds to moving everything to the
-  left-hand side:
+  **Sign convention explained:**
 
+  The mathematical variational problem is:
+  @f[
+    a(u, v) = \ell(v)
+  @f]
+
+  Rodin moves everything to the left-hand side, giving:
   @f[
     a(u, v) - \ell(v) = 0
   @f]
 
+  This is why bilinear forms (involving both @f$ u @f$ and @f$ v @f$) are
+  added with `+`, while linear forms (involving only @f$ v @f$) are
+  **subtracted** with `-`. The `Problem` object recognizes which terms are
+  bilinear (containing both trial and test) and which are linear (containing
+  only the test function), and routes them to the matrix @f$ A @f$ or vector
+  @f$ \mathbf{b} @f$ accordingly.
+
   @section guides-variational-operators Differential Operators
 
   Rodin provides standard differential operators that work on trial and
-  test functions:
+  test functions. These are **expression templates**: they are not evaluated
+  immediately, but recorded as symbolic expressions and evaluated later during
+  assembly.
 
-  | Operator | Mathematical Meaning | Code |
-  |----------|---------------------|------|
-  | Gradient | @f$ \nabla u @f$ | `Grad(u)` |
-  | Divergence | @f$ \nabla \cdot u @f$ | `Div(u)` |
-  | Jacobian | @f$ \nabla u @f$ (matrix) | `Jacobian(u)` |
-  | Transpose | @f$ (\nabla u)^T @f$ | `Jacobian(u).T()` |
+  | Operator | Mathematical meaning | Result | Code |
+  |----------|---------------------|--------|------|
+  | Gradient | @f$ \nabla u @f$ | Vector (for scalar @f$ u @f$) | `Grad(u)` |
+  | Divergence | @f$ \nabla \cdot \mathbf{u} @f$ | Scalar (for vector @f$ \mathbf{u} @f$) | `Div(u)` |
+  | Jacobian | @f$ \nabla \mathbf{u} @f$ (matrix) | @f$ d \times d @f$ matrix | `Jacobian(u)` |
+  | Transpose | @f$ (\nabla \mathbf{u})^T @f$ | @f$ d \times d @f$ matrix | `Jacobian(u).T()` |
 
   @code{.cpp}
-  // Laplacian-like term
+  // Laplacian-like term: ∫ ∇u · ∇v dx
   Integral(Grad(u), Grad(v))
 
-  // Divergence term (for vector fields)
+  // Divergence term (for vector fields): ∫ (∇·u)(∇·v) dx
   Integral(Div(u), Div(v))
 
-  // Elasticity strain energy
+  // Elasticity: symmetric gradient ε(u) : ε(v)
   Integral(Jacobian(u) + Jacobian(u).T(), Jacobian(v) + Jacobian(v).T())
   @endcode
 

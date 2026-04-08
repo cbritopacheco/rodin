@@ -21,11 +21,36 @@
 
   @section guides-solvers-available Available Solvers
 
-  | Solver | Type | Best For | Symmetric Required |
-  |--------|------|----------|-------------------|
-  | @ref Rodin::Solver::SparseLU "SparseLU" | Direct | Small to medium problems | No |
-  | @ref Rodin::Solver::CG "CG" | Iterative | Large SPD systems | Yes |
-  | @ref Rodin::Solver::UMFPack "UMFPack" | Direct | General sparse systems | No |
+  Rodin provides a wide range of solvers. They are organized into direct
+  solvers (exact up to floating-point precision), iterative solvers
+  (approximate via successive refinement), and nonlinear solvers.
+
+  @subsection guides-solvers-available-direct Direct Solvers
+
+  | Solver | Class | Matrix requirement | Notes |
+  |--------|-------|-------------------|-------|
+  | @ref Rodin::Solver::SparseLU "SparseLU" | `Solver::SparseLU` | Any non-singular | General-purpose, good default for small/medium problems |
+  | @ref Rodin::Solver::UMFPack "UMFPack" | `Solver::UMFPack` | Any non-singular | SuiteSparse-based, often faster than SparseLU |
+  | @ref Rodin::Solver::CHOLMOD "CHOLMOD" | `Solver::CHOLMOD` | Symmetric positive definite | SuiteSparse Cholesky factorization |
+  | @ref Rodin::Solver::SimplicialLLT "SimplicialLLT" | `Solver::SimplicialLLT` | Symmetric positive definite | Eigen's simplicial Cholesky @f$ LL^T @f$ |
+  | @ref Rodin::Solver::SimplicialLDLT "SimplicialLDLT" | `Solver::SimplicialLDLT` | Symmetric | Eigen's simplicial @f$ LDL^T @f$ factorization |
+  | @ref Rodin::Solver::LDLT "LDLT" | `Solver::LDLT` | Symmetric | Dense @f$ LDL^T @f$ factorization |
+  | @ref Rodin::Solver::HouseholderQR "HouseholderQR" | `Solver::HouseholderQR` | Any | Dense QR factorization |
+  | @ref Rodin::Solver::SparseQR "SparseQR" | `Solver::SparseQR` | Any | Sparse QR factorization |
+  | @ref Rodin::Solver::SPQR "SPQR" | `Solver::SPQR` | Any | SuiteSparse sparse QR |
+
+  @subsection guides-solvers-available-iterative Iterative Solvers
+
+  | Solver | Class | Matrix requirement | Notes |
+  |--------|-------|-------------------|-------|
+  | @ref Rodin::Solver::CG "CG" | `Solver::CG` | Symmetric positive definite | Conjugate Gradient — optimal for SPD systems |
+  | @ref Rodin::Solver::BiCGSTAB "BiCGSTAB" | `Solver::BiCGSTAB` | Any | Bi-conjugate gradient stabilized |
+  | @ref Rodin::Solver::GMRES "GMRES" | `Solver::GMRES` | Any | Generalized Minimum Residual |
+  | @ref Rodin::Solver::DGMRES "DGMRES" | `Solver::DGMRES` | Any | Deflated GMRES variant |
+  | @ref Rodin::Solver::MINRES "MINRES" | `Solver::MINRES` | Symmetric | Minimum Residual method |
+  | @ref Rodin::Solver::IDRS "IDRS" | `Solver::IDRS` | Any | Induced Dimension Reduction |
+  | @ref Rodin::Solver::IDRSTABL "IDRSTABL" | `Solver::IDRSTABL` | Any | IDR(s) with higher-order stabilization |
+  | @ref Rodin::Solver::LeastSquaresCG "LeastSquaresCG" | `Solver::LeastSquaresCG` | Any | Least-squares CG for rectangular systems |
 
   @section guides-solvers-direct Direct Solvers
 
@@ -199,15 +224,17 @@
 
   @section guides-solvers-choosing Choosing a Solver
 
-  | Criterion | Recommended Solver |
-  |-----------|-------------------|
-  | Small system, any matrix | SparseLU |
-  | Large symmetric positive definite system | CG |
-  | Non-symmetric or indefinite system | SparseLU or UMFPack |
-  | Saddle-point system (Stokes, mixed FEM) | UMFPack |
-  | Need guaranteed convergence | Direct solver |
-  | Memory-constrained large system | CG |
-  | Nonlinear PDE | Newton + any linear solver |
+  | Criterion | Recommended solver | Why |
+  |-----------|-------------------|-----|
+  | Small system (< 100k DOFs), any matrix | SparseLU or UMFPack | Robust direct factorization |
+  | Large SPD system (Poisson, elasticity) | CG | Memory-efficient, optimal for SPD |
+  | Large non-symmetric system | BiCGSTAB or GMRES | General iterative methods |
+  | Symmetric indefinite (saddle-point) | UMFPack or MINRES | UMFPack is most robust |
+  | Saddle-point (Stokes, mixed FEM) | UMFPack | Handles indefinite structure |
+  | SPD with SuiteSparse available | CHOLMOD or SimplicialLLT | Exploit symmetric structure |
+  | Need guaranteed convergence | Any direct solver | No iteration needed |
+  | Memory-constrained large system | CG (if SPD), GMRES (otherwise) | Matrix-free possible |
+  | Nonlinear PDE | Newton + any linear solver | Successive linearization |
 
   @section guides-solvers-example Complete Example
 

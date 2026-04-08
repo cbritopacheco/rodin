@@ -424,16 +424,24 @@
 
 /**
   * @namespace Rodin::QF
-  * @brief Module for defining quadrature formulae.
+  * @brief Module for defining quadrature formulae over reference polytopes.
 
   * The QF (Quadrature Formula) module provides numerical integration rules
   * for computing integrals over reference polytopes. These quadrature rules
-  * approximate integrals by weighted sums:
+  * approximate integrals by weighted sums of function evaluations:
   * @f[
-  *   \int_K f(x) \, dx \approx \sum_{i=1}^n w_i f(x_i)
+  *   \int_{\hat{K}} f(\hat{x}) \, d\hat{x} \approx \sum_{i=1}^n w_i \, f(\hat{x}_i)
   * @f]
-  * where @f$ K @f$ is a reference polytope, @f$ x_i @f$ are quadrature points,
-  * and @f$ w_i @f$ are associated weights.
+  * where @f$ \hat{K} @f$ is a reference polytope, @f$ \hat{x}_i @f$ are the
+  * quadrature points, and @f$ w_i @f$ are the associated weights.
+  *
+  * Higher-order quadrature rules integrate higher-degree polynomials exactly.
+  * The rule order is automatically chosen based on the polynomial degree of
+  * the finite element space during assembly, but can also be specified
+  * explicitly.
+  *
+  * Rodin provides quadrature rules for all supported polytope types
+  * (segments, triangles, quadrilaterals, tetrahedra, hexahedra, wedges).
  */
 
 /**
@@ -482,26 +490,47 @@
 
 /**
   @namespace Rodin::Solver
-  @brief Module for solving linear and nonlinear systems.
+  @brief Module for solving linear and nonlinear systems arising from
+  finite element discretizations.
 
-  The Solver module provides linear solvers for the systems arising from
-  finite element discretizations. Available solvers include:
+  The Solver module provides a comprehensive set of direct and iterative
+  linear solvers:
 
-  - @ref Rodin::Solver::CG "CG" — Conjugate Gradient (for SPD systems)
+  **Direct solvers** (exact up to floating-point precision):
+  - @ref Rodin::Solver::SparseLU "SparseLU" — General-purpose sparse LU factorization
+  - @ref Rodin::Solver::UMFPack "UMFPack" — SuiteSparse UMFPACK solver
+  - @ref Rodin::Solver::CHOLMOD "CHOLMOD" — SuiteSparse Cholesky for SPD systems
+  - @ref Rodin::Solver::SimplicialLLT "SimplicialLLT" — Simplicial @f$ LL^T @f$
+  - @ref Rodin::Solver::SimplicialLDLT "SimplicialLDLT" — Simplicial @f$ LDL^T @f$
+  - @ref Rodin::Solver::SparseQR "SparseQR" — Sparse QR factorization
+  - @ref Rodin::Solver::SPQR "SPQR" — SuiteSparse sparse QR
+  - @ref Rodin::Solver::HouseholderQR "HouseholderQR" — Dense Householder QR
+  - @ref Rodin::Solver::LDLT "LDLT" — Dense @f$ LDL^T @f$
+
+  **Iterative solvers** (for large systems):
+  - @ref Rodin::Solver::CG "CG" — Conjugate Gradient (SPD systems)
+  - @ref Rodin::Solver::BiCGSTAB "BiCGSTAB" — Bi-conjugate gradient stabilized
   - @ref Rodin::Solver::GMRES "GMRES" — Generalized Minimum Residual
-  - @ref Rodin::Solver::SparseLU "SparseLU" — Direct sparse LU factorization
-  - @ref Rodin::Solver::UMFPack "UMFPack" — UMFPACK direct solver
+  - @ref Rodin::Solver::DGMRES "DGMRES" — Deflated GMRES
+  - @ref Rodin::Solver::MINRES "MINRES" — Minimum Residual (symmetric systems)
+  - @ref Rodin::Solver::IDRS "IDRS" — Induced Dimension Reduction
+  - @ref Rodin::Solver::IDRSTABL "IDRSTABL" — IDR(s) with stabilization
+  - @ref Rodin::Solver::LeastSquaresCG "LeastSquaresCG" — Least-squares CG
 
   Usage:
   @code{.cpp}
   // Iterative solver
-  Solver::CG(problem).solve();
+  Solver::CG cg;
+  cg.setMaxIterations(1000);
+  cg.setRelativeTolerance(1e-10);
+  problem.solve(cg);
 
   // Direct solver
-  Solver::SparseLU(problem).solve();
+  Solver::SparseLU solver;
+  problem.solve(solver);
   @endcode
 
-  @see @ref guides-variational "Variational Formulations Guide"
+  @see @ref guides-solvers "Solvers Guide"
  */
 
 /**

@@ -8,12 +8,32 @@
 
   @section guides-meshes-intro Introduction
 
-  A mesh is the fundamental data structure in finite element analysis,
-  representing the discretization of a computational domain into simple
-  geometric elements called polytopes.
+  A **mesh** is the fundamental data structure in finite element analysis. It
+  represents the discretization of a computational domain @f$ \Omega @f$ into
+  simple geometric shapes called **polytopes** (triangles, tetrahedra, etc.).
 
-  In Rodin, the @ref Rodin::Geometry::Mesh "Mesh" class provides a complete
-  framework for representing, manipulating, and querying finite element meshes.
+  In Rodin, the @ref Rodin::Geometry::Mesh "Mesh" class is the central object
+  of the @ref Rodin::Geometry "Geometry" module. It stores:
+
+  - **Vertex coordinates**: the physical positions of mesh nodes
+  - **Cell connectivity**: which vertices form each cell (triangle, tet, etc.)
+  - **Topological incidence**: computed on demand via
+    @ref Rodin::Geometry::Connectivity "Connectivity" (e.g., which cells share
+    an edge, which edges lie on the boundary)
+  - **Attributes**: integer labels on cells and boundary faces, used to
+    distinguish subdomains and boundary segments
+
+  The mesh supports both **structured** generation (via `UniformGrid` and
+  `Box` factory methods) and **unstructured** meshes loaded from files in
+  MFEM, MEDIT, or HDF5 format.
+
+  @subsection guides-meshes-intro-factory Factory Methods
+
+  | Method | Description |
+  |--------|-------------|
+  | `Mesh::UniformGrid(type, shape)` | Generate a uniform grid filling the unit hypercube @f$ [0, N_1{-}1] \times \cdots @f$. The `type` specifies the cell shape (Triangle, Tetrahedron, etc.) and `shape` gives the number of subdivisions per axis. |
+  | `Mesh::Box(type, shape)` | Generate a **surface mesh** (boundary of the unit box). The `type` specifies the **face** shape (Segment for 2D boundary, Triangle for 3D boundary), and the resulting mesh has topological dimension one less than the ambient space. |
+  | `Mesh::Build()` | Programmatic construction via the Builder pattern. |
 
   @section guides-meshes-concepts Key Concepts
 

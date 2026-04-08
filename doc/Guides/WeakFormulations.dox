@@ -208,24 +208,32 @@
 
   @section guides-weak-bilinear Bilinear Forms
 
-  Bilinear forms involve both the trial and test functions. Common examples:
+  A **bilinear form** @f$ a(u, v) @f$ is a mapping that is linear in both
+  arguments. It involves both the trial function @f$ u @f$ and the test
+  function @f$ v @f$, and is assembled into the **system matrix** @f$ A @f$.
 
-  | Mathematical Expression | Rodin Code |
-  |-------------------------|------------|
-  | @f$ \int_\Omega \nabla u \cdot \nabla v \, dx @f$ | `Integral(Grad(u), Grad(v))` |
-  | @f$ \int_\Omega u \, v \, dx @f$ | `Integral(u, v)` |
-  | @f$ \int_\Omega \lambda \nabla u \cdot \nabla v \, dx @f$ | `Integral(lambda * Grad(u), Grad(v))` |
-  | @f$ \int_\Omega \lambda (\nabla \cdot u)(\nabla \cdot v) \, dx @f$ | `Integral(lambda * Div(u), Div(v))` |
+  Common examples:
+
+  | Mathematical expression | Rodin code | Name |
+  |-------------------------|------------|------|
+  | @f$ \int_\Omega \nabla u \cdot \nabla v \, dx @f$ | `Integral(Grad(u), Grad(v))` | Stiffness |
+  | @f$ \int_\Omega u \, v \, dx @f$ | `Integral(u, v)` | Mass |
+  | @f$ \int_\Omega \lambda \nabla u \cdot \nabla v \, dx @f$ | `Integral(lambda * Grad(u), Grad(v))` | Weighted stiffness |
+  | @f$ \int_\Omega \lambda (\nabla \cdot \mathbf{u})(\nabla \cdot \mathbf{v}) \, dx @f$ | `Integral(lambda * Div(u), Div(v))` | Divergence penalization |
 
   @section guides-weak-linear Linear Forms
 
-  Linear forms involve only the test function. Common examples:
+  A **linear form** @f$ \ell(v) @f$ is a mapping that is linear in @f$ v @f$
+  only (it does not depend on the unknown @f$ u @f$). It is assembled into the
+  **right-hand side vector** @f$ \mathbf{b} @f$.
 
-  | Mathematical Expression | Rodin Code |
-  |-------------------------|------------|
-  | @f$ \int_\Omega f \, v \, dx @f$ | `Integral(f, v)` |
-  | @f$ \int_{\Gamma_N} g \, v \, ds @f$ | `BoundaryIntegral(g, v).over(GammaN)` |
-  | @f$ \int_\Omega \mathbf{f} \cdot \mathbf{v} \, dx @f$ | `Integral(f, v)` |
+  Common examples:
+
+  | Mathematical expression | Rodin code | Name |
+  |-------------------------|------------|------|
+  | @f$ \int_\Omega f \, v \, dx @f$ | `Integral(f, v)` | Volume source |
+  | @f$ \int_{\Gamma_N} g \, v \, ds @f$ | `BoundaryIntegral(g, v).over(GammaN)` | Neumann load |
+  | @f$ \int_\Omega \mathbf{f} \cdot \mathbf{v} \, dx @f$ | `Integral(f, v)` | Vector body force |
 
   @section guides-weak-bc Boundary Conditions in Weak Form
 
