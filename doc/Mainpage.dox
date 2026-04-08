@@ -24,8 +24,7 @@
           - Integral(f, v)
           + DirichletBC(u, Zero());
 
-  Solver::SparseLU solver;
-  problem.solve(solver);
+  Solver::CG(problem).solve();
   @endcode
 
   @image html Images/Logo_Inverse.png width=210px

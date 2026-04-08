@@ -304,6 +304,64 @@
          + DirichletBC(u, g);
   @endcode
 
+  @section guides-variational-dg Discontinuous Galerkin Formulations
+
+  For problems with **discontinuous** finite element spaces (or when penalty
+  methods are needed across element interfaces), Rodin provides specialized
+  integral types and operators:
+
+  @subsection guides-variational-dg-operators DG Operators
+
+  | Operator | Description | Code |
+  |----------|------------|------|
+  | @ref Rodin::Variational::Jump "Jump" | Jump across a face: @f$ [u] = u^+ - u^- @f$ | `Jump(u)` |
+  | @ref Rodin::Variational::Average "Average" | Average across a face: @f$ \{u\} = \frac{1}{2}(u^+ + u^-) @f$ | `Average(u)` |
+
+  @subsection guides-variational-dg-integrals DG Integral Types
+
+  | Integral type | Region | Description |
+  |---------------|--------|-------------|
+  | `Integral(...)` | Cell interiors @f$ K @f$ | Standard domain integral |
+  | `BoundaryIntegral(...)` | Boundary faces @f$ \partial\Omega @f$ | Boundary-only integration |
+  | `FaceIntegral(...)` | All faces @f$ \mathcal{F}_h @f$ | Interior + boundary faces |
+  | `InterfaceIntegral(...)` | Interior faces @f$ \mathcal{F}_h^i @f$ | Interior faces only |
+
+  @subsection guides-variational-dg-example DG Interior Penalty Poisson
+
+  The symmetric interior penalty (SIP) DG formulation for the Poisson
+  equation reads:
+
+  @f[
+    \sum_K \int_K \nabla u \cdot \nabla v \, dx
+    - \int_{\mathcal{F}_h^i} \{\nabla u\} \cdot [v] \, ds
+    - \int_{\mathcal{F}_h^i} [u] \cdot \{\nabla v\} \, ds
+    + \frac{\sigma}{h} \int_{\mathcal{F}_h^i} [u] \cdot [v] \, ds
+    = \int_\Omega f v \, dx
+  @f]
+
+  In Rodin this translates directly:
+
+  @code{.cpp}
+  P1 Vh(mesh);
+  TrialFunction u(Vh);
+  TestFunction  v(Vh);
+
+  Real sigma = 10.0;  // penalty parameter
+
+  Problem dg(u, v);
+  dg = Integral(Grad(u), Grad(v))
+     - InterfaceIntegral(Average(Grad(u)), Jump(v))
+     - InterfaceIntegral(Jump(u), Average(Grad(v)))
+     + InterfaceIntegral(sigma * Jump(u), Jump(v))
+     - Integral(f, v)
+     + DirichletBC(u, Zero());
+
+  Solver::SparseLU(dg).solve();
+  @endcode
+
+  See the @ref examples-dg-poisson "DG Poisson example" for a complete
+  working implementation.
+
   @section guides-variational-see-also See Also
 
   - @ref fem-spaces "Finite element spaces" — Available spaces (P0, P1, H1)
