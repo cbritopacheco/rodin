@@ -19,7 +19,9 @@
   @f]
 
   See the @ref guides-variational "variational formulations guide" for the
-  mathematical background.
+  mathematical background, the @ref notation-index "notation reference" for
+  the symbols used, and the @ref guides-solvers "solvers guide" for choosing
+  a solver.
 
   @section examples-index-pdes Solving PDEs
 
