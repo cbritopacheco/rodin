@@ -244,6 +244,7 @@
 
   @code{.cpp}
   // FE spaces: H1(2) for velocity, H1(1) for pressure, P0g for LM
+  // The first argument to H1 is a compile-time order using std::integral_constant
   H1  uh(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
   H1  ph(std::integral_constant<size_t, 1>{}, mesh);
   P0g lh(mesh);
