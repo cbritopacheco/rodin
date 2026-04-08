@@ -196,6 +196,9 @@
   | `Frobenius(A)` | @f$ \|A\|_F @f$ | Scalar (Frobenius norm) |
   | `Dot(a, b)` | @f$ \mathbf{a} \cdot \mathbf{b} @f$ | Scalar (inner product) |
   | `Component(u, i)` | @f$ u_i @f$ | Scalar (i-th component of vector @f$ \mathbf{u} @f$) |
+  | `BoundaryNormal(mesh)` | @f$ \mathbf{n} @f$ | Outward unit normal on @f$ \partial\Omega @f$ |
+  | `FaceNormal(mesh)` | @f$ \mathbf{n}_F @f$ | Unit normal on mesh faces (DG formulations) |
+  | `IdentityMatrix(n)` | @f$ I_n @f$ | @f$ n \times n @f$ identity matrix |
 
   @code{.cpp}
   TrialFunction u(Vh);
@@ -513,6 +516,51 @@
   });
   // Or equivalently, composing Rodin operators:
   // auto u_exact = Sin(RealFunction([](const Geometry::Point& p) { ... }));
+  @endcode
+
+  @subsection guides-getting-started-core-concepts-functions-coords Coordinate Functions
+
+  The `F` namespace provides built-in coordinate projection functions that
+  extract spatial coordinates at evaluation points. These are particularly
+  convenient for defining spatially varying source terms and exact solutions:
+
+  | Function | Description | Mathematical meaning |
+  |----------|------------|---------------------|
+  | `F::x` | @f$ x @f$-coordinate | @f$ x \mapsto x_1 @f$ |
+  | `F::y` | @f$ y @f$-coordinate | @f$ x \mapsto x_2 @f$ |
+  | `F::z` | @f$ z @f$-coordinate | @f$ x \mapsto x_3 @f$ |
+
+  @code{.cpp}
+  #include <Rodin/Variational/F.h>
+
+  // Define a source term using coordinate functions
+  auto f = cos(2 * pi() * F::x + pi() / 2) * sin(2 * pi() * F::y);
+
+  // Boolean operations using coordinate functions
+  GridFunction gf(Vh);
+  gf = F::x > 0.5;  // 1 where x > 0.5, 0 elsewhere
+  @endcode
+
+  @subsection guides-getting-started-core-concepts-functions-complex Complex Functions
+
+  For complex-valued problems (e.g.\ Helmholtz, electromagnetics):
+
+  | Function | Description |
+  |----------|-------------|
+  | `Re(u)` | Real part of complex-valued function |
+  | `Im(u)` | Imaginary part of complex-valued function |
+  | `Conjugate(u)` | Complex conjugate |
+
+  @code{.cpp}
+  P1<Complex> Vh(mesh);
+  GridFunction gf(Vh);
+  gf = [](const Geometry::Point& p) { return Complex(p.x(), p.y()); };
+
+  // Extract real and imaginary parts
+  P1<Real> realVh(mesh);
+  GridFunction re(realVh), im(realVh);
+  re = Re(gf);
+  im = Im(gf);
   @endcode
 
   @section guides-getting-started-core-concepts-dg Discontinuous Galerkin Operators

@@ -93,5 +93,18 @@
 | @f$ [u] = u^+ - u^- @f$                         | `Jump(u)`         | Jump of @f$ u @f$ across an internal face. |
 | @f$ \{u\} = \frac{1}{2}(u^+ + u^-) @f$          | `Average(u)`      | Average of @f$ u @f$ across an internal face. |
 
+  @section notation-special Special Functions and Operators
+
+| Notation                     | Rodin code           | Description |
+| ---------------------------- | -------------------- | ----------- |
+| @f$ \mathbf{n} @f$          | `BoundaryNormal(mesh)` | Outward unit normal on @f$ \partial\Omega @f$. Used in boundary integrals. |
+| @f$ \mathbf{n}_F @f$        | `FaceNormal(mesh)` | Unit normal on mesh faces. Used in DG formulations for numerical fluxes. |
+| @f$ x, y, z @f$             | `F::x`, `F::y`, `F::z` | Coordinate projection functions. E.g., `F::x` returns the @f$ x @f$-coordinate at a point. |
+| @f$ I_n @f$                 | `IdentityMatrix(n)` | @f$ n \times n @f$ identity matrix function. |
+| @f$ \operatorname{Re}(u) @f$ | `Re(u)` | Real part of a complex-valued function. |
+| @f$ \operatorname{Im}(u) @f$ | `Im(u)` | Imaginary part of a complex-valued function. |
+| @f$ \bar{u} @f$             | `Conjugate(u)` | Complex conjugate of a complex-valued function. |
+| @f$ 0 @f$                   | `Zero()` | Zero function (scalar or vector, deduced from context). |
+
   */
 
