@@ -180,7 +180,8 @@
                - BoundaryIntegral(load, v).over(GammaN)
                + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
 
-    Solver::CG(elasticity).solve();
+    Solver::CG cg;
+    elasticity.solve(cg);
 
     return 0;
   }

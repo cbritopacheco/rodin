@@ -82,11 +82,12 @@
             + DirichletBC(u, Zero());
 
     // 7. Solve the problem
-    CG(poisson).solve();
+    CG cg;
+    poisson.solve(cg);
 
     // 8. Export results using XDMF (open in ParaView)
     IO::XDMF xdmf("Poisson");
-    xdmf.grid().setMesh(mesh).add("u", u.getSolution());
+    xdmf.setMesh(mesh).add("u", u.getSolution());
     xdmf.write();
 
     return 0;
@@ -150,22 +151,29 @@
   @subsection guides-getting-started-first-problem-solve Step 7: Solve the System
 
   @code{.cpp}
-  CG(poisson).solve();
+  Solver::CG cg;
+  poisson.solve(cg);
   @endcode
 
-  - Uses the Conjugate Gradient (CG) iterative solver
-  - For symmetric positive definite systems (like the Poisson equation)
-  - Alternative solvers: `SparseLU`, `BiCGSTAB`, etc.
+  - Creates a Conjugate Gradient (CG) iterative solver
+  - Passes it to `problem.solve()`, which assembles the linear system
+    @f$ A\mathbf{x} = \mathbf{b} @f$ and solves it
+  - CG is appropriate for symmetric positive definite systems, which the
+    Poisson equation produces
+  - Alternative solvers: `Solver::SparseLU` (direct), `Solver::BiCGSTAB`
+    (non-symmetric iterative), `Solver::UMFPack` (SuiteSparse direct)
 
   @subsection guides-getting-started-first-problem-output Step 8: Export Results
 
   @code{.cpp}
   IO::XDMF xdmf("Poisson");
-  xdmf.grid().setMesh(mesh).add("u", u.getSolution());
+  xdmf.setMesh(mesh).add("u", u.getSolution());
   xdmf.write();
   @endcode
 
-  - Exports the mesh and solution in XDMF format (XML + HDF5)
+  - Creates an XDMF writer with base filename "Poisson"
+  - Sets the mesh and adds the solution grid function with name "u"
+  - Writes the XDMF metadata file and HDF5 data files
   - Produces `Poisson.xdmf` and associated `.h5` data files
   - Can be visualized with [ParaView](https://www.paraview.org/)
 
@@ -259,14 +267,15 @@
 
   @code{.cpp}
   // Sparse LU direct solver (for small to medium problems)
-  SparseLU().solve(poisson);
+  Solver::SparseLU sparseLU;
+  poisson.solve(sparseLU);
 
   // Conjugate Gradient with options
-  CG solver;
-  solver.setMaxIterations(1000);
-  solver.setRelativeTolerance(1e-10);
-  solver.printIterations(true);
-  solver.solve(poisson);
+  Solver::CG cg;
+  cg.setMaxIterations(1000);
+  cg.setRelativeTolerance(1e-10);
+  cg.printIterations(true);
+  poisson.solve(cg);
   @endcode
 
   @section guides-getting-started-first-problem-next What's Next?

@@ -88,8 +88,9 @@
             - Integral(RealFunction(1.0), v)
             + DirichletBC(u, Zero());
 
-    // Inline usage — creates solver, solves, and discards
-    Solver::SparseLU(poisson).solve();
+    // Create solver and solve
+    Solver::SparseLU solver;
+    poisson.solve(solver);
 
     return 0;
   }
@@ -110,8 +111,8 @@
   @code{.cpp}
   #include <Rodin/Solver/UMFPack.h>
 
-  // Inline usage
-  Solver::UMFPack(problem).solve();
+  Solver::UMFPack solver;
+  problem.solve(solver);
   @endcode
 
   UMFPack requires the SuiteSparse library to be installed. It is the
@@ -132,18 +133,19 @@
   elasticity, heat equation):
 
   @code{.cpp}
-  // Basic inline usage
-  Solver::CG(poisson).solve();
+  // Basic usage
+  Solver::CG cg;
+  poisson.solve(cg);
   @endcode
 
   The CG solver supports several configuration options:
 
   @code{.cpp}
-  Solver::CG solver(poisson);
-  solver.setMaxIterations(1000);       // Maximum number of iterations
-  solver.setRelativeTolerance(1e-10);  // Relative convergence threshold
-  solver.printIterations(true);        // Print iteration residuals
-  solver.solve();
+  Solver::CG cg;
+  cg.setMaxIterations(1000);       // Maximum number of iterations
+  cg.setRelativeTolerance(1e-10);  // Relative convergence threshold
+  cg.printIterations(true);        // Print iteration residuals
+  poisson.solve(cg);
   @endcode
 
   CG is the recommended solver when:
@@ -182,40 +184,25 @@
 
   @section guides-solvers-usage Usage Patterns
 
-  Rodin solvers support two main usage patterns.
+  Rodin solvers follow a simple pattern: create a solver, optionally
+  configure it, and pass it to `problem.solve()`.
 
-  @subsection guides-solvers-usage-inline Inline Solving
-
-  For quick one-shot use, create and invoke the solver in a single
-  expression:
+  @subsection guides-solvers-usage-basic Basic Usage
 
   @code{.cpp}
-  Solver::CG(poisson).solve();
-  Solver::SparseLU(elasticity).solve();
+  Solver::SparseLU solver;
+  problem.solve(solver);
   @endcode
 
   @subsection guides-solvers-usage-configured Configured Solving
 
-  When you need to tune parameters, create the solver object first:
-
-  @code{.cpp}
-  Solver::CG solver(poisson);
-  solver.setMaxIterations(500);
-  solver.setRelativeTolerance(1e-12);
-  solver.printIterations(true);
-  solver.solve();
-  @endcode
-
-  @subsection guides-solvers-usage-reuse Solver Reuse via solve()
-
-  You can also pass a pre-configured solver to the problem:
+  When you need to tune parameters, configure the solver object first:
 
   @code{.cpp}
   Solver::CG cg;
-  cg.setMaxIterations(200);
+  cg.setMaxIterations(500);
   cg.setRelativeTolerance(1e-12);
   cg.printIterations(true);
-
   problem.solve(cg);
   @endcode
 
@@ -264,15 +251,15 @@
             + DirichletBC(u, Zero());
 
     // Solve with CG and print iteration info
-    Solver::CG cg(poisson);
+    Solver::CG cg;
     cg.setMaxIterations(1000);
     cg.setRelativeTolerance(1e-10);
     cg.printIterations(true);
-    cg.solve();
+    poisson.solve(cg);
 
     // Export result
     IO::XDMF xdmf("SolverExample");
-    xdmf.grid().setMesh(mesh).add("u", u.getSolution());
+    xdmf.setMesh(mesh).add("u", u.getSolution());
     xdmf.write();
 
     return 0;
