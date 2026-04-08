@@ -415,6 +415,88 @@ namespace Rodin::Tests::Unit
   }
 
   // ========================================================================
+  // HolzapfelOgden tests
+  // ========================================================================
+
+  TEST(Rodin_Solid_HolzapfelOgden, ZeroDeformationWithFiber)
+  {
+    Solid::HolzapfelOgden law(10.0, 0.5, 0.1, 0.2, 1.5, 0.3, 2.0);
+    Solid::HolzapfelOgden::Cache cache;
+
+    Solid::KinematicState state(2);
+    Math::SpatialMatrix<Real> H(2, 2);
+    H.setZero();
+    state.setDisplacementGradient(H);
+
+    Solid::ConstitutivePoint cp(state);
+    Math::SpatialVector<Real> fiber(2);
+    fiber[0] = 1.0;
+    fiber[1] = 0.0;
+    cp.set<Solid::Tags::FiberDirection>(fiber);
+
+    law.setCache(cache, cp);
+
+    Math::SpatialMatrix<Real> P;
+    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+    for (int i = 0; i < 2; ++i)
+      for (int j = 0; j < 2; ++j)
+        EXPECT_NEAR(P(i, j), 0.0, 1e-11);
+  }
+
+  TEST(Rodin_Solid_HolzapfelOgden, TangentFiniteDifference)
+  {
+    Solid::HolzapfelOgden law(10.0, 0.5, 0.2, 0.1, 1.2, 0.15, 0.8);
+
+    Solid::KinematicState state(2);
+    Math::SpatialMatrix<Real> H(2, 2);
+    H(0, 0) = 0.08;
+    H(0, 1) = 0.03;
+    H(1, 0) = -0.01;
+    H(1, 1) = 0.05;
+    state.setDisplacementGradient(H);
+
+    Solid::ConstitutivePoint cp(state);
+    Math::SpatialVector<Real> fiber(2);
+    fiber[0] = 1.0;
+    fiber[1] = 0.0;
+    cp.set<Solid::Tags::FiberDirection>(fiber);
+
+    Solid::HolzapfelOgden::Cache cache;
+    law.setCache(cache, cp);
+
+    Math::SpatialMatrix<Real> dF(2, 2);
+    dF(0, 0) = 0.2;
+    dF(0, 1) = -0.1;
+    dF(1, 0) = 0.05;
+    dF(1, 1) = 0.1;
+
+    Math::SpatialMatrix<Real> dP_analytical;
+    law.getMaterialTangent(dP_analytical, cache, cp, dF);
+
+    const Real eps = 1e-7;
+    const Math::SpatialMatrix<Real> H_plus = H + eps * dF;
+    Solid::KinematicState state_plus(2);
+    state_plus.setDisplacementGradient(H_plus);
+    Solid::ConstitutivePoint cp_plus(state_plus);
+    cp_plus.set<Solid::Tags::FiberDirection>(fiber);
+
+    Solid::HolzapfelOgden::Cache cache_plus;
+    law.setCache(cache_plus, cp_plus);
+
+    Math::SpatialMatrix<Real> P_plus;
+    law.getFirstPiolaKirchhoffStress(P_plus, cache_plus, cp_plus);
+
+    Math::SpatialMatrix<Real> P;
+    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+
+    const Math::SpatialMatrix<Real> dP_fd = (1.0 / eps) * P_plus + (-1.0 / eps) * P;
+
+    for (int i = 0; i < 2; ++i)
+      for (int j = 0; j < 2; ++j)
+        EXPECT_NEAR(dP_analytical(i, j), dP_fd(i, j), 5e-4);
+  }
+
+  // ========================================================================
   // Hooke tests
   // ========================================================================
 

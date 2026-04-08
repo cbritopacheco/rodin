@@ -13,6 +13,7 @@
  *
  * - **Kinematics**: Deformation gradient, Cauchy-Green tensors, invariants
  * - **Constitutive laws**: Neo-Hookean, Saint-Venant-Kirchhoff, Mooney-Rivlin
+ *   and Holzapfel-Ogden
  * - **Integrators**: Internal force, material tangent, body/traction forces
  * - **Constitutive**: Hyperelastic laws and linear Hooke's law
  * - **Fields**: Green-Lagrange strain, Piola-Kirchhoff stress, Cauchy stress
@@ -43,6 +44,7 @@
 #include "Solid/Constitutive/NeoHookean.h"
 #include "Solid/Constitutive/SaintVenantKirchhoff.h"
 #include "Solid/Constitutive/MooneyRivlin.h"
+#include "Solid/Constitutive/HolzapfelOgden.h"
 
 // Integrators
 #include "Solid/Integrators/InternalForce.h"

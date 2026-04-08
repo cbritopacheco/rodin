@@ -34,6 +34,7 @@ namespace Rodin::Solid
   class HyperElasticLaw;
 
   class Hooke;
+  class HolzapfelOgden;
 
   template <class LawDerived, class FES>
   class InternalForce;
