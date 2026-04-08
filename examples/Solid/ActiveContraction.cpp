@@ -19,6 +19,7 @@
  * designed to show the architecture direction requested by the user.
  */
 #include <cstddef>
+#include <cmath>
 
 #include <Rodin/Geometry.h>
 #include <Rodin/Assembly.h>
@@ -116,6 +117,9 @@ int main(int, char**)
   for (size_t step = 1; step <= nSteps; ++step)
   {
     const Real time = dt * static_cast<Real>(step);
+    const Real ecPrev = ec_n.getData()(0);
+    const Real gammaPrev = gamma_n.getData()(0);
+    const Real betaPrev = beta_n.getData()(0);
 
     // Unknowns at t^{n+1}
     TrialFunction u(Vh);
@@ -130,14 +134,14 @@ int main(int, char**)
     TestFunction r(Qh);
 
     // Smooth prescribed activation in [0, 1] with mild x-modulation.
-    const auto activation =
-      0.5 * (1.0 + Sin(2.0 * pi * time)) * (0.6 + 0.4 * F::x / Lx);
+    const Real activationTime = 0.5 * (1.0 + std::sin(2.0 * pi * time));
+    const auto activation = activationTime * (0.6 + 0.4 * F::x / Lx);
 
     // kinematic proxy for fiber strain (minimal demo): div(u)
     const auto e1D = Div(u);
 
     // Active strain rate (backward Euler)
-    const auto edot = (ec - ec_n) / dt;
+    const auto edot = (ec - ecPrev) / dt;
 
     // Positive regularized damping factor (minimal smooth variant)
     const auto damp = activation + alphaD * edot * edot;
@@ -154,11 +158,11 @@ int main(int, char**)
 
     // Residual block 3: gamma evolution (no elimination)
     const auto Rg =
-      Integral((gamma - gamma_n) / dt - (n0 * k0 * activation - damp * gamma), z);
+      Integral((gamma - gammaPrev) / dt - (n0 * k0 * activation - damp * gamma), z);
 
     // Residual block 4: beta evolution (no elimination)
     const auto Rb =
-      Integral((beta - beta_n) / dt - (n0 * sigma0 * activation - damp * beta + edot * gamma), r);
+      Integral((beta - betaPrev) / dt - (n0 * sigma0 * activation - damp * beta + edot * gamma), r);
 
     Problem monolithic(u, ec, gamma, beta, v, w, z, r);
     monolithic =

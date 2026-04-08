@@ -56,7 +56,7 @@ namespace Rodin::Solid
    * @tparam PassiveLaw The passive law type (must satisfy HyperElasticLaw API)
    */
   template <class PassiveLaw>
-  class ActiveContraction final : public HyperElasticLaw<ActiveContraction<PassiveLaw>>
+  class FiberActiveI4Contraction final : public HyperElasticLaw<FiberActiveI4Contraction<PassiveLaw>>
   {
     public:
       struct Cache
@@ -73,7 +73,7 @@ namespace Rodin::Solid
        * @param activeTensionScale Active tension scale @f$T_a@f$.
        * @param referenceFiberStretch Active reference fiber stretch @f$\lambda_0@f$.
        */
-      ActiveContraction(
+      FiberActiveI4Contraction(
           const PassiveLaw& passive,
           Real activeTensionScale,
           Real referenceFiberStretch = 1.0)
@@ -154,6 +154,10 @@ namespace Rodin::Solid
       Real m_activeTensionScale;
       Real m_referenceFiberStretch;
   };
+
+  // Backward-compatible alias.
+  template <class PassiveLaw>
+  using ActiveContraction = FiberActiveI4Contraction<PassiveLaw>;
 }
 
 #endif
