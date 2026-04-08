@@ -35,6 +35,7 @@ namespace Rodin::Solid
 
   class Hooke;
   class HolzapfelOgden;
+  class HolzapfelOgden;
 
   template <class LawDerived, class FES>
   class InternalForce;

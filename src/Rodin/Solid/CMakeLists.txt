@@ -14,6 +14,7 @@ set(RodinSolid_HEADERS
   Constitutive/SaintVenantKirchhoff.h
   Constitutive/MooneyRivlin.h
   Constitutive/HolzapfelOgden.h
+  Constitutive/HolzapfelOgden.h
   Integrators/InternalForce.h
   Integrators/MaterialTangent.h
   Integrators/BodyForce.h
