@@ -11,3 +11,10 @@ target_link_libraries(RodinSolidBlockGravity
   Rodin::Solid
   Rodin::Variational
   Rodin::IO)
+
+add_executable(RodinSolidActiveContraction ActiveContraction.cpp)
+target_link_libraries(RodinSolidActiveContraction
+  PUBLIC
+  Rodin::Solid
+  Rodin::Variational
+  Rodin::IO)

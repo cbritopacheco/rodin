@@ -10,6 +10,7 @@ set(RodinSolid_HEADERS
   Kinematics/KinematicState.h
   Kinematics/Invariants.h
   Constitutive/HyperElasticLaw.h
+  Constitutive/ActiveContraction.h
   Constitutive/NeoHookean.h
   Constitutive/SaintVenantKirchhoff.h
   Constitutive/MooneyRivlin.h
