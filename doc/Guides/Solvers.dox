@@ -179,16 +179,48 @@
   newton.setMaxIterations(20);
   newton.setAbsoluteTolerance(1e-10);
   newton.setRelativeTolerance(1e-8);
-  newton.solve();
+  newton.solve(u);  // updates u in place
   @endcode
 
   Configuration methods:
 
-  | Method | Description |
-  |--------|-------------|
-  | `setMaxIterations(n)` | Maximum Newton iterations (default: 100) |
-  | `setAbsoluteTolerance(tol)` | Absolute residual norm threshold |
-  | `setRelativeTolerance(tol)` | Relative residual norm threshold |
+  | Method | Default | Description |
+  |--------|---------|-------------|
+  | `setMaxIterations(n)` | 100 | Maximum Newton iterations |
+  | `setAbsoluteTolerance(tol)` | @f$ 10^{-12} @f$ | Convergence if @f$ \|r\| \le \mathrm{atol} @f$ |
+  | `setRelativeTolerance(tol)` | @f$ 10^{-8} @f$ | Convergence if @f$ \|r\|/\|r_0\| \le \mathrm{rtol} @f$ |
+
+  @subsection guides-solvers-nonlinear-hyperelastic Hyperelastic Example
+
+  For hyperelastic problems, the Newton system is built from
+  `Solid::MaterialTangent` (tangent stiffness) and `Solid::InternalForce`
+  (nonlinear residual), both linearized about the current displacement:
+
+  @code{.cpp}
+  #include <Rodin/Solid.h>
+  #include <Rodin/Solver/NewtonSolver.h>
+  #include <Rodin/Solver/SparseLU.h>
+
+  Solid::NeoHookean law(lambda, mu);
+  GridFunction u(Vh);   // accumulated displacement
+
+  Solid::MaterialTangent tangent(law, du, v);
+  tangent.setDisplacement(u);
+
+  Solid::InternalForce residual(law, v);
+  residual.setDisplacement(u);
+
+  Problem newton(du, v);
+  newton = tangent + residual
+         - Integral(bodyForce, v)
+         + DirichletBC(du, VectorFunction{Zero(), Zero()}).on(fixedBC);
+
+  SparseLU linearSolver(newton);
+  NewtonSolver solver(linearSolver);
+  solver.setMaxIterations(50)
+        .setAbsoluteTolerance(1e-10);
+  solver.solve(u);
+  @endcode
 
   The Newton solver is used for:
   - Hyperelastic solid mechanics (with `Solid::InternalForce` / `MaterialTangent`)

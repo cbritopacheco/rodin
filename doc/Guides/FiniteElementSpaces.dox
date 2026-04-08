@@ -33,7 +33,7 @@
   | Space | Polynomial Degree | Continuity | Typical Use |
   |-------|------------------|------------|-------------|
   | @ref Rodin::Variational::P0 "P0" | 0 (constant) | Discontinuous | Piecewise constant quantities, indicators |
-  | @ref Rodin::Variational::P0g "P0g" | 0 + gradient | Discontinuous | P0 with gradient enrichment (DG methods) |
+  | @ref Rodin::Variational::P0g "P0g" | 0 (global constant) | Continuous | Globally constant functions (1 DOF for scalar, vdim for vector) |
   | @ref Rodin::Variational::P1 "P1" | 1 (linear) | @f$ C^0 @f$ (continuous) | Most PDEs: Poisson, elasticity, heat |
   | @ref Rodin::Variational::H1 "H1" | Arbitrary (order @f$ k @f$) | @f$ C^0 @f$ (continuous) | Higher-order methods, mixed problems (e.g. Taylor-Hood for Navier-Stokes) |
 
@@ -72,6 +72,31 @@
     return (p.x() < 0.5) ? 1.0 : 0.0;
   };
   @endcode
+
+  @subsection fem-spaces-p0-dg Discontinuous Galerkin with P0
+
+  Because P0 functions are discontinuous, they are natural for DG methods.
+  In a DG formulation, jump and average operators are used across cell
+  interfaces. See @ref guides-variational-dg "DG formulations" for details.
+
+  @section fem-spaces-p0g P0g: Global Constant Space
+
+  The @ref Rodin::Variational::P0g "P0g" space is a **global constant**
+  finite element space — it consists of functions that are constant over the
+  **entire** mesh (not per-cell like P0).
+
+  **Properties:**
+  - Scalar P0g: **1 DOF** total (the single global constant)
+  - Vector P0g: **vdim DOFs** total (one per component)
+  - Continuous everywhere (trivially, since the function is constant)
+
+  @code{.cpp}
+  P0g Wh(mesh);           // scalar: 1 DOF
+  P0g Vh(mesh, d);        // vector: d DOFs
+  @endcode
+
+  P0g is useful for representing globally constant fields (e.g., a uniform
+  property or a Lagrange multiplier for a global constraint).
 
   @section fem-spaces-p1 P1: Piecewise Linear Space
 
