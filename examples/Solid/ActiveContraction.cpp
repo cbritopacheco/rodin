@@ -54,7 +54,6 @@ int main(int, char**)
   // ---- geometry -----------------------------------------------------------
   constexpr size_t nx = 65;
   constexpr size_t ny = 17;
-  constexpr Real Lx = static_cast<Real>(nx - 1) / static_cast<Real>(ny - 1);
 
   Mesh mesh;
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, { nx, ny });
@@ -223,10 +222,13 @@ int main(int, char**)
       divU /= vol;
 
       // ---- Blocks 2–4: Update scalar internal variables -------------------
+      // edot and damp are recomputed each iteration as part of the
+      // nonlinear fixed-point coupling (they depend on the evolving ecCur).
+
       // Active strain rate (backward Euler)
       const Real edot = (ecCur - ecPrev) / dt;
 
-      // Regularized damping
+      // Regularized damping (depends on current iterate through edot)
       const Real damp = activation + alphaD * edot * edot;
 
       // Block 2: active branch constraint
