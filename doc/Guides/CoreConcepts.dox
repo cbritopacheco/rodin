@@ -512,6 +512,10 @@
   | Square root | `Sqrt(f)` | @f$ \sqrt{f} @f$ |
   | Sine | `Sin(f)` | @f$ \sin(f) @f$ |
   | Cosine | `Cos(f)` | @f$ \cos(f) @f$ |
+  | Tangent | `Tan(f)` | @f$ \tan(f) @f$ |
+  | Absolute value | `Abs(f)` | @f$ |f| @f$ |
+  | Maximum | `Max(f, g)` | @f$ \max(f, g) @f$ |
+  | Minimum | `Min(f, g)` | @f$ \min(f, g) @f$ |
 
   @code{.cpp}
   RealFunction u_exact([](const Geometry::Point& p) {

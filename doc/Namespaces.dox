@@ -479,7 +479,7 @@
   - `RealFunction` — Scalar function from constant or lambda
   - `VectorFunction` — Vector function from initializer list
   - `Zero` — Zero scalar/vector function
-  - `Pow`, `Exp`, `Sqrt`, `Sin`, `Cos` — Pointwise math operations
+  - `Pow`, `Exp`, `Sqrt`, `Sin`, `Cos`, `Tan`, `Abs`, `Min`, `Max` — Pointwise math operations
 
   Special operators:
   - `BoundaryNormal(mesh)` — Outward unit normal on @f$ \partial\Omega @f$
@@ -1252,13 +1252,13 @@
   |-------|---------|
   | `MMG::Mesh` | MMG-specific mesh type (extends `Geometry::Mesh<Local>`) with ridge, corner, and required-entity metadata. Loaded and saved via MEDIT format. |
   | `MMG::Adapt` | Metric-based adaptation: remeshes a mesh according to a nodal size map. |
-  | `MMG::Optimizer` | Mesh-quality optimization: improves element shapes without a metric field. |
+  | `MMG::MeshOptimizer` | Mesh-quality optimization: improves element shapes without a metric field. |
   | `MMG::LevelSetDiscretizer` | Implicit-domain meshing: cuts a background mesh along a level-set isovalue. |
   | `MMG::MMG5` | Base class providing shared remeshing controls. |
 
   ## Auto-Dispatch
 
-  `Adapt`, `Optimizer`, and `LevelSetDiscretizer` all auto-dispatch to the
+  `Adapt`, `MeshOptimizer`, and `LevelSetDiscretizer` all auto-dispatch to the
   appropriate MMG backend based on the mesh type:
 
   | Mesh type | Backend |
@@ -1318,7 +1318,7 @@
   MMG::Adapt().setHMax(0.5).setGradation(1.2).adapt(mesh, sizeMap);
 
   // Optimize: improve element quality
-  MMG::Optimizer().setHMax(0.5).optimize(mesh);
+  MMG::MeshOptimizer().setHMax(0.5).optimize(mesh);
 
   // Level-set discretization: cut mesh along phi = 0
   MMG::LevelSetDiscretizer lsd;

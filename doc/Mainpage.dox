@@ -56,6 +56,10 @@
   | @ref Rodin::External::MMG "MMG" | Mesh adaptation and optimization via the Mmg Platform |
   | @ref Rodin::PETSc "PETSc" | Distributed solvers (KSP, SNES) and PETSc-backed variational forms for large-scale problems |
   | @ref Rodin::MPI "MPI" | Distributed mesh partitioning, sharding, and parallel assembly via Boost.MPI |
+  | @ref Rodin::Solid "Solid" | Hyperelastic solid mechanics: NeoHookean, SaintVenantKirchhoff, MooneyRivlin constitutive laws |
+  | @ref Rodin::Advection "Advection" | Semi-Lagrangian transport via characteristic tracing |
+  | @ref Rodin::Eikonal "Eikonal" | Fast Marching Method for the Eikonal equation @f$ |\nabla u| = F @f$ |
+  | @ref Rodin::Distance "Distance" | Distance function computation (Eikonal, Poisson, level-set normalization) |
 
   @section download-and-build Download and build
 
