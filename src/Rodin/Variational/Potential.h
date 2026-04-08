@@ -404,7 +404,7 @@ namespace Rodin::Variational
       }
 
     private:
-      std::reference_wrapper<KernelType> m_kernel;
+      std::reference_wrapper<const KernelType> m_kernel;
       std::reference_wrapper<const OperandType> m_u;
   };
 

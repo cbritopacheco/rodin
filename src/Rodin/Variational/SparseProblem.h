@@ -36,14 +36,14 @@
  * TrialFunction u(Vh);
  * TestFunction v(Vh);
  * 
- * // Automatically uses sparse storage
+ * // Explicitly uses sparse storage
  * SparseProblem problem(u, v);
  * problem = Integral(Grad(u), Grad(v)) - Integral(f, v);
  * problem.solve(solver);
  * ```
  */
-#ifndef RODIN_VARIATIONAL_DENSEPROBLEM_H
-#define RODIN_VARIATIONAL_DENSEPROBLEM_H
+#ifndef RODIN_VARIATIONAL_SPARSEPROBLEM_H
+#define RODIN_VARIATIONAL_SPARSEPROBLEM_H
 
 #include "Problem.h"
 
@@ -51,15 +51,6 @@ namespace Rodin::Variational
 {
   template <class ... Parameters>
   class SparseProblem;
-
-  template <class TrialFES, class TestFES>
-  SparseProblem(TrialFunction<TrialFES>&, TestFunction<TestFES>&)
-    -> SparseProblem<TrialFES, TestFES,
-          Math::Matrix<
-            typename FormLanguage::Mult<
-              typename FormLanguage::Traits<TrialFES>::ScalarType,
-              typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
-          Math::Vector<typename FormLanguage::Traits<TestFES>::ScalarType>>;
 
   /**
    * @defgroup SparseProblemSpecializations SparseProblem Template Specializations
@@ -72,36 +63,29 @@ namespace Rodin::Variational
    * @brief General class to assemble linear systems with `Math::SparseMatrix`
    * and `Math::Vector` types in a serial context.
    */
-  template <class TrialFES, class TestFES>
-  class SparseProblem<
-    TrialFES, TestFES,
-    Math::Matrix<
-      typename FormLanguage::Mult<
-        typename FormLanguage::Traits<TrialFES>::ScalarType,
-        typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
-    Math::Vector<typename FormLanguage::Traits<TestFES>::ScalarType>>
-    : public Problem<
-        TrialFES, TestFES,
-        Math::SparseMatrix<
-          typename FormLanguage::Mult<
-            typename FormLanguage::Traits<TrialFES>::ScalarType,
-            typename FormLanguage::Traits<TrialFES>::ScalarType>
-          ::Type>,
-        Math::Vector<typename FormLanguage::Traits<TestFES>::ScalarType>>
-    {
-      public:
-        using Parent = Problem<
-          TrialFES, TestFES,
+  template <class LinearSystem, class U, class V>
+  class SparseProblem<LinearSystem, U, V> : public Problem<LinearSystem, U, V>
+  {
+    public:
+      using Parent = Problem<LinearSystem, U, V>;
+      using Parent::Parent;
+      using Parent::operator=;
+  };
+
+  /**
+   * @ingroup RodinCTAD
+   */
+  template <class U, class V>
+  SparseProblem(U& u, V& v)
+    -> SparseProblem<
+        Math::LinearSystem<
           Math::SparseMatrix<
             typename FormLanguage::Mult<
-              typename FormLanguage::Traits<TrialFES>::ScalarType,
-              typename FormLanguage::Traits<TrialFES>::ScalarType>
-            ::Type>,
-          Math::Vector<typename FormLanguage::Traits<TestFES>::ScalarType>>;
-
-        using Parent::Parent;
-        using Parent::operator=;
-    };
+              typename FormLanguage::Traits<typename FormLanguage::Traits<U>::FESType>::ScalarType,
+              typename FormLanguage::Traits<typename FormLanguage::Traits<V>::FESType>::ScalarType>::Type>,
+          Math::Vector<
+            typename FormLanguage::Traits<typename FormLanguage::Traits<V>::FESType>::ScalarType>>,
+          U, V>;
 }
 
 #endif

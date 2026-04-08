@@ -1138,6 +1138,24 @@ namespace Rodin::Geometry
     return getMesh().getVertexCoordinates(getIndex());
   }
 
+  Real Vertex::y() const
+  {
+    assert(getMesh().getSpaceDimension() >= 2);
+    return getCoordinates()(1);
+  }
+
+  Real Vertex::z() const
+  {
+    assert(getMesh().getSpaceDimension() >= 3);
+    return getCoordinates()(2);
+  }
+
+  Real Vertex::operator()(size_t i) const
+  {
+    assert(i < getMesh().getSpaceDimension());
+    return getCoordinates()(i);
+  }
+
   Polytope::Project::Project(Type g)
     : m_g(g)
   {}
@@ -1774,5 +1792,12 @@ namespace Rodin::Geometry
       }
     }
     assert(false);
+  }
+
+  void Polytope::Project::vertex(size_t local, Math::SpatialPoint& out, const Math::SpatialPoint&) const
+  {
+    const Traits ts(m_g);
+    assert(local < ts.getVertexCount());
+    out = ts.getVertex(local);
   }
 }

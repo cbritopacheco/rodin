@@ -118,3 +118,159 @@ gtest_discover_tests(RodinGeometryPolytopeQuadratureIndexTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinGeometryShardTest ShardTest.cpp)
+target_link_libraries(RodinGeometryShardTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometryShardTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinGeometrySharderTest SharderTest.cpp)
+target_link_libraries(RodinGeometrySharderTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometrySharderTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinGeometryPolytopeKeyTest PolytopeKeyTest.cpp)
+target_link_libraries(RodinGeometryPolytopeKeyTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometryPolytopeKeyTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinGeometrySubMeshTest SubMeshTest.cpp)
+target_link_libraries(RodinGeometrySubMeshTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometrySubMeshTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinGeometryMeshExtendedTest MeshExtendedTest.cpp)
+target_link_libraries(RodinGeometryMeshExtendedTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometryMeshExtendedTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinGeometryPolytopeTraitsExtTest PolytopeTraitsExtTest.cpp)
+target_link_libraries(RodinGeometryPolytopeTraitsExtTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometryPolytopeTraitsExtTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinGeometryPolytopeProjectTest PolytopeProjectTest.cpp)
+target_link_libraries(RodinGeometryPolytopeProjectTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometryPolytopeProjectTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinGeometryPointCloudTest PointCloudTest.cpp)
+target_link_libraries(RodinGeometryPointCloudTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometryPointCloudTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinGeometryIdentityTransformationTest IdentityTransformationTest.cpp)
+target_link_libraries(RodinGeometryIdentityTransformationTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometryIdentityTransformationTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinGeometryMeshOpsTest MeshOpsTest.cpp)
+target_link_libraries(RodinGeometryMeshOpsTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometryMeshOpsTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinGeometryConnectivityExtTest ConnectivityExtTest.cpp)
+target_link_libraries(RodinGeometryConnectivityExtTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometryConnectivityExtTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinGeometryAttributeIndexTest AttributeIndexTest.cpp)
+target_link_libraries(RodinGeometryAttributeIndexTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometryAttributeIndexTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinGeometryPolytopeExtTest PolytopeExtTest.cpp)
+target_link_libraries(RodinGeometryPolytopeExtTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometryPolytopeExtTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)

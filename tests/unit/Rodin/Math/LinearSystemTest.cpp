@@ -307,3 +307,153 @@ TEST_F(LinearSystemTest, TypeProperties)
   static_assert(std::is_copy_assignable_v<SparseLSType>);
   static_assert(std::is_move_assignable_v<SparseLSType>);
 }
+
+// Test sparse matrix eliminate
+TEST_F(LinearSystemTest, SparseMatrixEliminate)
+{
+  using LSType = LinearSystem<SparseMatrix<Real>, Vector<Real>>;
+
+  LSType ls;
+
+  // Build a simple 3x3 sparse system
+  SparseMatrix<Real> A(3, 3);
+  std::vector<Eigen::Triplet<Real>> trips;
+  trips.emplace_back(0, 0, 2.0);
+  trips.emplace_back(0, 1, 1.0);
+  trips.emplace_back(1, 0, 1.0);
+  trips.emplace_back(1, 1, 3.0);
+  trips.emplace_back(1, 2, 1.0);
+  trips.emplace_back(2, 1, 1.0);
+  trips.emplace_back(2, 2, 2.0);
+  A.setFromTriplets(trips.begin(), trips.end());
+
+  ls.getOperator() = A;
+  ls.getVector().resize(3);
+  ls.getVector() << 1, 2, 3;
+  ls.getSolution().resize(3);
+
+  // Eliminate DOF 1 with value 5.0
+  IndexMap<Real> dofs;
+  dofs[1] = 5.0;
+  ls.eliminate(dofs);
+
+  // Check diagonal is 1
+  EXPECT_DOUBLE_EQ(ls.getOperator().coeff(1, 1), 1.0);
+
+  // Check off-diagonals in row/col 1 are zeroed
+  EXPECT_DOUBLE_EQ(ls.getOperator().coeff(1, 0), 0.0);
+  EXPECT_DOUBLE_EQ(ls.getOperator().coeff(1, 2), 0.0);
+  EXPECT_DOUBLE_EQ(ls.getOperator().coeff(0, 1), 0.0);
+  EXPECT_DOUBLE_EQ(ls.getOperator().coeff(2, 1), 0.0);
+
+  // Check RHS at eliminated DOF
+  EXPECT_DOUBLE_EQ(ls.getVector()(1), 5.0);
+}
+
+// Test multiple DOF elimination
+TEST_F(LinearSystemTest, MultipleDOFElimination)
+{
+  using LSType = LinearSystem<Matrix<Real>, Vector<Real>>;
+
+  LSType ls;
+  ls.getOperator().resize(4, 4);
+  ls.getVector().resize(4);
+  ls.getSolution().resize(4);
+
+  ls.getOperator() << 4, 1, 0, 0,
+                       1, 4, 1, 0,
+                       0, 1, 4, 1,
+                       0, 0, 1, 4;
+  ls.getVector() << 1, 2, 3, 4;
+
+  // Eliminate DOFs 0 and 3 simultaneously
+  IndexMap<Real> dofs;
+  dofs[0] = 1.0;
+  dofs[3] = 2.0;
+  ls.eliminate(dofs);
+
+  // Check diagonals of eliminated DOFs
+  EXPECT_DOUBLE_EQ(ls.getOperator()(0, 0), 1.0);
+  EXPECT_DOUBLE_EQ(ls.getOperator()(3, 3), 1.0);
+
+  // Check RHS at eliminated DOFs
+  EXPECT_DOUBLE_EQ(ls.getVector()(0), 1.0);
+  EXPECT_DOUBLE_EQ(ls.getVector()(3), 2.0);
+
+  // Check rows/cols of eliminated DOFs are zeroed (except diagonal)
+  EXPECT_DOUBLE_EQ(ls.getOperator()(0, 1), 0.0);
+  EXPECT_DOUBLE_EQ(ls.getOperator()(1, 0), 0.0);
+  EXPECT_DOUBLE_EQ(ls.getOperator()(3, 2), 0.0);
+  EXPECT_DOUBLE_EQ(ls.getOperator()(2, 3), 0.0);
+
+  // Interior DOFs should still have their original stiffness entries
+  EXPECT_DOUBLE_EQ(ls.getOperator()(1, 1), 4.0);
+  EXPECT_DOUBLE_EQ(ls.getOperator()(2, 2), 4.0);
+  EXPECT_DOUBLE_EQ(ls.getOperator()(1, 2), 1.0);
+  EXPECT_DOUBLE_EQ(ls.getOperator()(2, 1), 1.0);
+}
+
+// Test sparse eliminate with offset
+TEST_F(LinearSystemTest, SparseEliminateWithOffset)
+{
+  using LSType = LinearSystem<SparseMatrix<Real>, Vector<Real>>;
+
+  LSType ls;
+
+  // Build a 4x4 sparse identity
+  SparseMatrix<Real> A(4, 4);
+  std::vector<Eigen::Triplet<Real>> trips;
+  for (int i = 0; i < 4; ++i)
+    trips.emplace_back(i, i, 2.0);
+  trips.emplace_back(0, 1, 1.0);
+  trips.emplace_back(1, 0, 1.0);
+  trips.emplace_back(2, 3, 1.0);
+  trips.emplace_back(3, 2, 1.0);
+  A.setFromTriplets(trips.begin(), trips.end());
+
+  ls.getOperator() = A;
+  ls.getVector().resize(4);
+  ls.getVector() << 1, 2, 3, 4;
+  ls.getSolution().resize(4);
+
+  // Eliminate DOF 0 with offset 2 → affects global DOF 2
+  IndexMap<Real> dofs;
+  dofs[0] = 10.0;
+  ls.eliminate(dofs, 2);
+
+  // DOF at index 2 (0+offset) should be eliminated
+  EXPECT_DOUBLE_EQ(ls.getOperator().coeff(2, 2), 1.0);
+  EXPECT_DOUBLE_EQ(ls.getVector()(2), 10.0);
+}
+
+// Test dense end-to-end: eliminate then solve
+TEST_F(LinearSystemTest, DenseEliminateThenSolve)
+{
+  using LSType = LinearSystem<Matrix<Real>, Vector<Real>>;
+
+  // Set up system: simple Laplacian-like [2,-1,0; -1,2,-1; 0,-1,2] x = [1,0,1]
+  // With BCs x(0) = 0, x(2) = 0
+  LSType ls;
+  ls.getOperator().resize(3, 3);
+  ls.getVector().resize(3);
+  ls.getSolution().resize(3);
+
+  ls.getOperator() << 2, -1, 0,
+                       -1, 2, -1,
+                        0, -1, 2;
+  ls.getVector() << 0, 1, 0;
+
+  // Eliminate DOFs 0 and 2 with value 0
+  IndexMap<Real> dofs;
+  dofs[0] = 0.0;
+  dofs[2] = 0.0;
+  ls.eliminate(dofs);
+
+  // After elimination:
+  // Row 0: [1, 0, 0] x = [0]
+  // Row 1: [0, 2, 0] x = [1]  (contributions from eliminated DOFs are 0)
+  // Row 2: [0, 0, 1] x = [0]
+  // So x = [0, 0.5, 0]
+  EXPECT_DOUBLE_EQ(ls.getOperator()(1, 1), 2.0);
+  EXPECT_NEAR(ls.getVector()(1), 1.0, 1e-10);
+}

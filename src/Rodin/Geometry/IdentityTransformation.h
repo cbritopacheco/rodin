@@ -72,36 +72,27 @@ namespace Rodin::Geometry
       }
 
       /**
-       * @brief Gets the polynomial order of the Jacobian.
-       * @returns 0 (constant Jacobian)
-       */
-      size_t getJacobianOrder() const override
-      {
-        return 0;
-      }
-
-      /**
        * @brief Applies the identity transformation.
+       * @param[out] pc Physical coordinates (set equal to reference coordinates)
        * @param[in] rc Reference coordinates
-       * @param[out] pc Physical coordinates (equal to reference coordinates)
        *
        * Sets @f$ pc = rc @f$.
        */
-      void transform(const Math::SpatialVector<Real>& rc, Math::SpatialVector<Real>& pc) const override
+      void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc) const override
       {
         pc = rc;
       }
 
       /**
        * @brief Computes the Jacobian of the identity transformation.
+       * @param[out] jacobian Jacobian matrix (set to identity)
        * @param[in] rc Reference coordinates (unused)
-       * @param[out] res Jacobian matrix (identity matrix)
        *
-       * Sets @p res to the identity matrix.
+       * Sets @p jacobian to the identity matrix.
        */
-      void jacobian(const Math::SpatialVector<Real>& rc, Math::SpatialMatrix<Real>& res) const override
+      void jacobian(Math::SpatialMatrix<Real>& jacobian, const Math::SpatialPoint& rc) const override
       {
-        res.setIdentity();
+        jacobian.setIdentity();
       }
 
       /**
@@ -114,3 +105,5 @@ namespace Rodin::Geometry
       }
   };
 }
+
+#endif

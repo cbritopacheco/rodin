@@ -5,11 +5,12 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 /**
- * @file Vector.h
- * @brief Dense vector type aliases and definitions.
+ * @file SpatialVector.h
+ * @brief Fixed-capacity spatial vector with bounded maximum dimension.
  *
- * This file provides type aliases for various vector types built on Eigen.
- * Vectors are column-oriented by default and support both dynamic and fixed sizes.
+ * This file provides a spatial vector class with maximum dimensions bounded by
+ * RODIN_MAXIMAL_SPACE_DIMENSION. Used for geometric points, normals, and other
+ * spatial vectors to optimize memory allocation.
  */
 #ifndef RODIN_MATH_SPATIALVECTOR_H
 #define RODIN_MATH_SPATIALVECTOR_H
@@ -17,8 +18,6 @@
 #include <iostream>
 
 #include "Rodin/FormLanguage/Traits.h"
-
-#include "ForwardDecls.h"
 
 #include "ForwardDecls.h"
 #include "Common.h"
@@ -32,6 +31,11 @@ namespace Rodin::Math
    *
    * A dynamic-size vector with maximum size bounded by RODIN_MAXIMAL_SPACE_DIMENSION.
    * Used for geometric quantities in 2D or 3D space to optimize memory allocation.
+   *
+   * @note Internally stores a fixed Eigen::Vector3 regardless of the logical size.
+   * For size=1 or size=2 vectors, only the first 1 or 2 elements are active; the
+   * remaining elements in the underlying storage are unused. This design avoids
+   * dynamic allocation for small spatial vectors at the cost of a few extra bytes.
    *
    * @tparam ScalarType The element type
    */
@@ -670,21 +674,26 @@ namespace Rodin::Math
       SpatialVector conjugate() const noexcept
       {
         SpatialVector r(*this);
-        switch (m_size)
+        if constexpr (std::is_same_v<Scalar, std::complex<float>>
+                   || std::is_same_v<Scalar, std::complex<double>>
+                   || std::is_same_v<Scalar, std::complex<long double>>)
         {
-          case 3:
-            r.m_data[2] = std::conj(r.m_data[2]);
-            [[fallthrough]];
-          case 2:
-            r.m_data[1] = std::conj(r.m_data[1]);
-            [[fallthrough]];
-          case 1:
-            r.m_data[0] = std::conj(r.m_data[0]);
-            break;
-          case 0:
-            break;
-          default:
-            assert(false);
+          switch (m_size)
+          {
+            case 3:
+              r.m_data[2] = std::conj(r.m_data[2]);
+              [[fallthrough]];
+            case 2:
+              r.m_data[1] = std::conj(r.m_data[1]);
+              [[fallthrough]];
+            case 1:
+              r.m_data[0] = std::conj(r.m_data[0]);
+              break;
+            case 0:
+              break;
+            default:
+              assert(false);
+          }
         }
         return r;
       }

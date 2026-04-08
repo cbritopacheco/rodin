@@ -7,10 +7,22 @@ Distributed under the Boost Software License, Version 1.0.
 
 # Header interface for Math; sources (if any) are built elsewhere or unused here
 set(RodinMath_HEADERS
-  Constants.h
+  ForwardDecls.h
+  Traits.h
   Common.h
+  Constants.h
   Vector.h
   Matrix.h
+  SparseMatrix.h
+  SpatialVector.h
+  SpatialMatrix.h
+  Unit.h
+  Rad.h
+  Deg.h
+  LinearSystem.h
+  RootFinding/NewtonRaphson.h
+  RungeKutta/RK2.h
+  RungeKutta/RK4.h
 )
 
 add_library(RodinMath INTERFACE)

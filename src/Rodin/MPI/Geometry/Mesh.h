@@ -17,6 +17,7 @@
  */
 
 #include <mpi.h>
+#include <limits>
 #include <type_traits>
 
 #include "Rodin/Configure.h"
@@ -742,6 +743,46 @@ namespace Rodin::Geometry
       const Connectivity<Context::Local>& getConnectivity() const override;
 
       /**
+       * @brief Options controlling iterative reconciliation rounds.
+       */
+      struct ReconcileOptions
+      {
+
+        /**
+         * Maximum number of owner-convergence rounds.
+         *
+         * Defaults to unlimited.
+         */
+        size_t maxOwnerRounds = std::numeric_limits<size_t>::max();
+
+        /**
+         * Maximum number of gid-convergence rounds.
+         *
+         * Defaults to unlimited.
+         */
+        size_t maxGidRounds = std::numeric_limits<size_t>::max();
+
+        /**
+         * Controls how often global convergence is checked.
+         *
+         * A value of 1 checks every round (legacy behavior). Larger values reduce
+         * the frequency of global all-reduce operations during active convergence.
+         */
+        size_t globalCheckPeriod = 1;
+
+        /**
+         * If true, exceeding a round cap throws; otherwise reconciliation keeps
+         * converging with existing state.
+         */
+        bool strictRoundCap = false;
+      };
+
+      Mesh& reconcile(size_t d)
+      {
+        return this->reconcile(d, ReconcileOptions());
+      }
+
+      /**
        * @brief Reconciles entities of dimension @p d across MPI ranks.
        *
        * After a local connectivity computation, entities of dimension @p d
@@ -772,9 +813,21 @@ namespace Rodin::Geometry
        * Only shard metadata is modified; the local mesh topology is unchanged.
        *
        * @param[in] d Topological dimension of the entities to reconcile.
+       * @param[in] maxRounds Optional upper bound on the number of
+       *   convergence rounds for iterative owner resolution and distributed
+       *   ID propagation.  When absent (the default), the loops iterate
+       *   until global convergence.  When present, each convergence loop
+       *   executes at most @p maxRounds iterations.
+       *
+       *   For codimension-1 entities (e.g. faces in 3D, edges in 2D), each
+       *   entity is shared by at most 2 cells, so 1 round after the initial
+       *   key exchange suffices.  For lower-dimensional entities (e.g. edges
+       *   in 3D), the holder graph diameter depends on the mesh topology and
+       *   can exceed 2, so the unbounded default is the safe choice.
+       *
        * @return Reference to the mesh.
        */
-      Mesh& reconcile(size_t d);
+      Mesh& reconcile(size_t d, const ReconcileOptions& options);
 
     private:
       /// MPI execution context associated with this distributed mesh.

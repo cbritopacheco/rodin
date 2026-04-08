@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_Min_H
-#define RODIN_VARIATIONAL_Min_H
+#ifndef RODIN_VARIATIONAL_MIN_H
+#define RODIN_VARIATIONAL_MIN_H
 
 /**
  * @file
@@ -94,8 +94,8 @@ namespace Rodin::Variational
       constexpr
       Min& traceOf(Geometry::Attribute attrs)
       {
-        m_lhs.traceOf(attrs);
-        m_rhs.traceOf(attrs);
+        m_lhs->traceOf(attrs);
+        m_rhs->traceOf(attrs);
         return *this;
       }
 
@@ -213,7 +213,7 @@ namespace Rodin::Variational
       constexpr
       Min& traceOf(Geometry::Attribute attrs)
       {
-        m_lhs.traceOf(attrs);
+        m_lhs->traceOf(attrs);
         return *this;
       }
 
@@ -255,8 +255,7 @@ namespace Rodin::Variational
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         const auto lo = getLHS().getOrder(polytope);
-        const auto ro = getRHS().getOrder(polytope);
-        if (lo && ro && *lo == 0 && *ro == 0)
+        if (lo && *lo == 0)
           return size_t{0};
         return std::nullopt;
       }

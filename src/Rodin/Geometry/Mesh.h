@@ -756,6 +756,15 @@ namespace Rodin::Geometry
        */
       virtual MeshBase& setVertexCoordinates(Index idx, const Math::SpatialPoint& coords) = 0;
 
+      /**
+       * @brief Sets the geometric transformation for a polytope.
+       * @param[in] p Pair of (dimension, index) identifying the polytope
+       * @param[in] trans Pointer to the transformation (ownership is taken by the mesh)
+       * @returns Reference to this mesh for method chaining
+       *
+       * The mesh takes ownership of the @p trans pointer. The caller must
+       * not delete it after this call.
+       */
       virtual MeshBase& setPolytopeTransformation(
           const std::pair<size_t, Index> p, PolytopeTransformation* trans) = 0;
 
@@ -768,6 +777,10 @@ namespace Rodin::Geometry
        */
       virtual const Context::Base& getContext() const = 0;
 
+      /**
+       * @brief Gets the optional name assigned to this mesh.
+       * @returns The name if set, or std::nullopt
+       */
       Optional<StringView> getName() const
       {
         if (m_name)
@@ -776,6 +789,11 @@ namespace Rodin::Geometry
           return std::nullopt;
       }
 
+      /**
+       * @brief Sets a human-readable name for the mesh.
+       * @param[in] name Name to assign
+       * @returns Reference to this mesh for method chaining
+       */
       MeshBase& setName(const std::string& name)
       {
         m_name = name;
@@ -1050,6 +1068,21 @@ namespace Rodin::Geometry
         return UniformGrid(g, shape);
       }
 
+      /**
+       * @brief Generates a box-shaped surface mesh from a face geometry type.
+       *
+       * Given a face geometry type @p g of dimension @f$ d @f$, produces
+       * a surface mesh of dimension @f$ d @f$ embedded in @f$ (d+1) @f$
+       * space dimensions. The mesh represents the boundary of the unit
+       * box @f$ [0, N_1] \times [0, N_2] \times \cdots @f$ tessellated
+       * with faces of type @p g.
+       *
+       * @param[in] g Face geometry type (e.g., Point for 1D box,
+       * Segment for 2D box boundary, Triangle or Quadrilateral for 3D
+       * box boundary)
+       * @param[in] l Number of nodes in each coordinate direction
+       * (must have @f$ d+1 @f$ entries)
+       */
       static Mesh Box(Polytope::Type g, std::initializer_list<size_t> l)
       {
         Array<size_t> shape(l.size());
@@ -1066,6 +1099,14 @@ namespace Rodin::Geometry
        */
       static Mesh UniformGrid(Polytope::Type g, const Array<size_t>& shape);
 
+      /**
+       * @brief Generates a box-shaped surface mesh from a face geometry type.
+       *
+       * @copydetails Box(Polytope::Type, std::initializer_list<size_t>)
+       *
+       * @param[in] g Face geometry type
+       * @param[in] shape Number of nodes in each coordinate direction
+       */
       static Mesh Box(Polytope::Type g, const Array<size_t>& shape);
 
       /**
@@ -1110,6 +1151,9 @@ namespace Rodin::Geometry
        * @f]
        * at each node @f$ x @f$ of the mesh.
        *
+       * @tparam FunctionDerived Derived class of FunctionBase providing the
+       *         displacement field
+       *
        * @note The vector dimension of @f$ \vec{u} @f$ must be equal to the
        * space dimension.
        *
@@ -1130,10 +1174,20 @@ namespace Rodin::Geometry
           for (size_t i = 0; i < m_sdim; ++i)
             m_vertices(i, it->getIndex()) += u(p)[i];
         }
+        flush();
         return *this;
       }
 
 
+      /**
+       * @brief Flushes cached transformation and quadrature data.
+       *
+       * Clears internally cached polytope transformations and quadrature
+       * objects.  Call this method after any operation that modifies the
+       * mesh geometry (e.g., vertex coordinate changes) so that subsequent
+       * calls to getPolytopeTransformation() or getQuadrature() recompute
+       * from the updated coordinates.
+       */
       virtual void flush() override
       {
         m_transformations.clear();
@@ -1188,18 +1242,41 @@ namespace Rodin::Geometry
 
       Real getMeasure(size_t d, const FlatSet<Attribute>& attr) const override;
 
+      /**
+       * @brief Connected component labeling on cells.
+       * @tparam BinaryPredicate Predicate(polytope_a, polytope_b) returning
+       *         true if adjacent polytopes belong to the same component.
+       * @param[in] p Adjacency predicate
+       * @returns Deque of FlatSet<Index>, each set being one connected component.
+       */
       template <class BinaryPredicate>
       CCL ccl(const BinaryPredicate& p) const
       {
         return this->ccl(getDimension(), p, [](const Polytope&) { return true; });
       }
 
+      /**
+       * @brief Connected component labeling on polytopes of dimension @p d.
+       * @tparam BinaryPredicate Predicate(polytope_a, polytope_b) returning
+       *         true if adjacent polytopes belong to the same component.
+       * @param[in] d Dimension of polytopes to label
+       * @param[in] p Adjacency predicate
+       * @returns Deque of FlatSet<Index>, each set being one connected component.
+       */
       template <class BinaryPredicate>
       CCL ccl(size_t d, const BinaryPredicate& p) const
       {
         return this->ccl(d, p, [](const Polytope&) { return true; });
       }
 
+      /**
+       * @brief Connected component labeling restricted to a single attribute.
+       * @tparam BinaryPredicate Adjacency predicate type
+       * @param[in] d Dimension of polytopes to label
+       * @param[in] p Adjacency predicate
+       * @param[in] attr Only polytopes with this attribute are included
+       * @returns Deque of FlatSet<Index>, each set being one connected component.
+       */
       template <class BinaryPredicate>
       CCL ccl(size_t d, const BinaryPredicate& p, Attribute attr) const
       {
@@ -1207,6 +1284,14 @@ namespace Rodin::Geometry
           [attr](const Polytope& polytope) { return attr == polytope.getAttribute(); });
       }
 
+      /**
+       * @brief Connected component labeling restricted to a set of attributes.
+       * @tparam BinaryPredicate Adjacency predicate type
+       * @param[in] d Dimension of polytopes to label
+       * @param[in] p Adjacency predicate
+       * @param[in] attrs Set of attributes to restrict labeling to
+       * @returns Deque of FlatSet<Index>, each set being one connected component.
+       */
       template <class BinaryPredicate>
       CCL ccl(size_t d, const BinaryPredicate& p, const FlatSet<Attribute>& attrs) const
       {
@@ -1222,6 +1307,21 @@ namespace Rodin::Geometry
           });
       }
 
+      /**
+       * @brief Connected component labeling with custom adjacency and inclusion predicates.
+       * @tparam BinaryPredicate Predicate(polytope_a, polytope_b) returning
+       *         true if adjacent polytopes belong to the same component.
+       * @tparam UnitaryPredicate Predicate(polytope) returning true if the
+       *         polytope should be included in the labeling.
+       * @param[in] d Dimension of polytopes to label
+       * @param[in] p Adjacency predicate
+       * @param[in] f Inclusion predicate
+       * @returns Deque of FlatSet<Index>, each set being one connected component.
+       *
+       * Uses a breadth-first search algorithm to discover connected components
+       * among polytopes of the specified dimension. Requires that the adjacency
+       * connectivity @f$ d \rightarrow d @f$ has been computed beforehand.
+       */
       template <class BinaryPredicate, class UnitaryPredicate>
       CCL ccl(size_t d, const BinaryPredicate& p, const UnitaryPredicate& f) const
       {
@@ -1334,23 +1434,58 @@ namespace Rodin::Geometry
       */
       virtual SubMesh<Context> keep(const FlatSet<Attribute>& attrs) const;
 
+      /**
+       * @brief Traces interface faces between adjacent cells.
+       *
+       * Marks interface faces between cell pairs with the attribute given
+       * by @p tmap. The mapping key is a pair of cell attributes
+       * (ordered), and the value is the attribute to assign to the
+       * interface face between them.
+       *
+       * @param[in] tmap Mapping from cell-attribute pairs to face attributes
+       * @returns Reference to this mesh
+       */
       Mesh& trace(const Map<Pair<Attribute, Attribute>, Attribute>& tmap)
       {
         return this->trace(tmap, FlatSet<Attribute>{});
       }
 
+      /**
+       * @brief Traces interface faces restricted to a single cell attribute.
+       * @param[in] tmap Mapping from cell-attribute pairs to face attributes
+       * @param[in] attr Only consider cells with this attribute
+       * @returns Reference to this mesh
+       */
       Mesh& trace(const Map<Pair<Attribute, Attribute>, Attribute>& tmap, Attribute attr)
       {
         return this->trace(tmap, FlatSet<Attribute>{ attr });
       }
 
+      /**
+       * @brief Traces interface faces restricted to a set of cell attributes.
+       * @param[in] tmap Mapping from cell-attribute pairs to face attributes
+       * @param[in] attrs Only consider cells with attributes in this set
+       * @returns Reference to this mesh
+       */
       virtual Mesh& trace(const Map<Pair<Attribute, Attribute>, Attribute>& tmap, const FlatSet<Attribute>& attrs);
 
+      /**
+       * @brief Traces faces using a simple attribute mapping.
+       * @param[in] tmap Mapping from cell attribute to face attribute
+       * @returns Reference to this mesh
+       */
       Mesh& trace(const Map<Attribute, Attribute>& tmap)
       {
         return trace(tmap, FlatSet<Attribute>{});
       }
 
+      /**
+       * @brief Traces faces using a simple attribute mapping restricted
+       *        to a set of cell attributes.
+       * @param[in] tmap Mapping from cell attribute to face attribute
+       * @param[in] attrs Only consider cells with attributes in this set
+       * @returns Reference to this mesh
+       */
       virtual Mesh& trace(const Map<Attribute, Attribute>& tmap, const FlatSet<Attribute>& attrs);
 
       SubMeshBase& asSubMesh() override;
@@ -1378,16 +1513,28 @@ namespace Rodin::Geometry
 
       virtual Mesh& scale(Real c) override;
 
+      /**
+       * @brief Gets the attribute index mapping for all polytopes.
+       * @returns Const reference to the AttributeIndex
+       */
       const AttributeIndex& getAttributeIndex() const
       {
         return m_attributes;
       }
 
+      /**
+       * @brief Gets the polytope transformation cache.
+       * @returns Const reference to the PolytopeTransformationIndex
+       */
       const PolytopeTransformationIndex& getPolytopeTransformationIndex() const
       {
         return m_transformations;
       }
 
+      /**
+       * @brief Gets the raw vertex coordinate storage.
+       * @returns Const reference to the PointCloud containing all vertices
+       */
       const PointCloud& getVertices() const
       {
         return m_vertices;
@@ -1463,6 +1610,16 @@ namespace Rodin::Geometry
       virtual const PolytopeTransformation& getPolytopeTransformation(
           size_t dimension, Index idx) const override;
 
+      /**
+       * @brief Creates the default polytope transformation for a given polytope.
+       * @param[in] d Dimension of the polytope
+       * @param[in] i Index of the polytope
+       * @returns Heap-allocated transformation (caller takes ownership)
+       *
+       * Constructs the isoparametric transformation based on the current vertex
+       * coordinates and polytope geometry type. This is used internally by
+       * getPolytopeTransformation() when no cached transformation exists.
+       */
       virtual PolytopeTransformation* getDefaultPolytopeTransformation(size_t d, Index i) const;
 
       virtual const PolytopeQuadrature&
@@ -1475,9 +1632,16 @@ namespace Rodin::Geometry
         ar & m_sdim;
         ar & m_vertices;
         ar & m_connectivity;
-        ar & m_transformations;
         ar & m_attributes;
+        ar & m_transformations;
+        ar & m_quadratures;
         ar & m_context;
+        // Re-initialize the quadrature cache after deserialization.
+        // PolytopeQuadratureIndex is intentionally not serialized (it is a
+        // lazy cache), so on load the dimension buckets must be allocated from
+        // the now-known space dimension.  On save the call is a harmless
+        // no-op because the buckets already exist.
+        m_quadratures.initialize(m_sdim);
       }
 
     private:

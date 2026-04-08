@@ -498,7 +498,7 @@ namespace Rodin::Variational
   };
 
   template <class LHSNumber, class RHSNumber>
-  Sum(const LinearFormIntegratorBase<LHSNumber>&, const FormLanguage::List<LinearFormIntegratorBase<RHSNumber>&>)
+  Sum(const LinearFormIntegratorBase<LHSNumber>&, const FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>&)
     -> Sum<LinearFormIntegratorBase<LHSNumber>, FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>>;
 
   template <class LHSNumber, class RHSNumber>
@@ -546,16 +546,16 @@ namespace Rodin::Variational
   };
 
   template <class LHSNumber, class RHSNumber>
-  Sum(const FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>& lhs,
-      const LinearFormIntegratorBase<LHSNumber>& rhs)
+  Sum(const FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>&,
+      const LinearFormIntegratorBase<RHSNumber>&)
     -> Sum<FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>, LinearFormIntegratorBase<RHSNumber>>;
 
   template <class LHSNumber, class RHSNumber>
   constexpr
   auto
   operator+(
-      const FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>& lhs,
-      const LinearFormIntegratorBase<LHSNumber>& rhs)
+      const FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>& lhs,
+      const LinearFormIntegratorBase<RHSNumber>& rhs)
   {
     return Sum(lhs, rhs);
   }
@@ -572,7 +572,7 @@ namespace Rodin::Variational
 
       using RHSScalarType = RHSNumber;
 
-      using LHSType = FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>;
+      using LHSType = FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>;
 
       using RHSType = FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>;
 
