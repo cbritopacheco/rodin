@@ -107,13 +107,49 @@
   sequential and parallel assembly strategies, with specializations for
   different operator types and finite element spaces.
 
-  ## Key Features
-  - **Bilinear Form Assembly**: Assembly of stiffness matrices from expressions
-    like `Integral(Grad(u), Grad(v))`
-  - **Linear Form Assembly**: Assembly of load vectors from expressions
-    like `Integral(f, v)`
-  - **Parallel Assembly**: OpenMP-based parallel assembly
-  - **Mixed Formulations**: Support for saddle-point problems (e.g. Stokes)
+  ## Assembly Strategies
+
+  | Strategy | Class | Description |
+  |----------|-------|-------------|
+  | **Sequential** | `Assembly::Sequential` | Single-threaded assembly. Iterates over mesh cells, evaluates local element matrices/vectors, and accumulates into the global system. Deterministic and reproducible. |
+  | **OpenMP** | `Assembly::OpenMP` | Shared-memory parallel assembly using OpenMP. Each thread processes a subset of cells and accumulates contributions using thread-safe operations. Requires compilation with `RODIN_USE_OPENMP=ON`. |
+  | **Default** | `Assembly::Default` | Compile-time policy selector. Maps to `OpenMP` when OpenMP is available, otherwise falls back to `Sequential`. Users rarely need to specify this directly. |
+
+  ## What Gets Assembled
+
+  - **Bilinear Form** @f$ a(u,v) @f$: Assembles into a sparse matrix
+    @f$ A_{ij} = a(\phi_j, \psi_i) @f$ where @f$ \phi_j @f$ are trial basis
+    functions and @f$ \psi_i @f$ are test basis functions.
+  - **Linear Form** @f$ \ell(v) @f$: Assembles into a vector
+    @f$ b_i = \ell(\psi_i) @f$.
+  - **Dirichlet BC**: Assembles into an `IndexMap` mapping constrained DOFs
+    to their prescribed values.
+  - **Problem**: Orchestrates the full assembly pipeline — bilinear form,
+    linear form(s), Dirichlet elimination — into a complete
+    @ref Rodin::Math::LinearSystem "LinearSystem".
+
+  ## Assembly Pipeline
+
+  Assembly is normally triggered automatically when `Problem::solve()` is
+  called. The pipeline is:
+
+  1. Assemble the bilinear form into a sparse matrix @f$ A @f$
+  2. Assemble the linear form into a vector @f$ b @f$
+  3. Apply Dirichlet boundary conditions (row/column elimination)
+  4. Package into a `LinearSystem` and pass to the solver
+
+  Users can also trigger assembly manually by calling `BilinearForm::assemble()`
+  or `LinearForm::assemble()`.
+
+  ## Multi-Field Assembly
+
+  For saddle-point problems (e.g.\ Stokes), the Assembly module supports
+  block-structured systems via `Tuple<BilinearForm...>` and
+  `Tuple<LinearForm...>`, which assemble into block matrices and vectors.
+  This is used by multi-field `Problem` objects with multiple trial/test
+  function pairs.
+
+  @see @ref guides-variational "Variational Formulations Guide"
  */
 
 /**
@@ -356,6 +392,44 @@
 /**
   @namespace Rodin::Distance
   @brief Module which provides models for computation of the distance function.
+
+  The Distance module offers several methods for computing distance functions
+  on finite element meshes, each with different trade-offs between accuracy,
+  speed, and smoothness.
+
+  ## Available Methods
+
+  | Method | Class | Equation | Properties |
+  |--------|-------|----------|------------|
+  | **Eikonal** | `Distance::Eikonal` | @f$ \|\nabla d\| = 1 @f$ | Exact distances via FMM; supports signed distance with interior/interface regions |
+  | **Poisson** | `Distance::Poisson` | @f$ -\Delta u = 1, \; u\|_{\partial\Omega} = 0 @f$ | Smooth approximation; fast (one linear solve); does not give exact distances |
+  | **SignedPoisson** | `Distance::SignedPoisson` | Signed version of Poisson | Combines Poisson solves for interior/exterior, yielding a signed smooth distance |
+  | **Rvachev** | `Distance::Rvachev` | R-function composition | Constructs distance-like fields from Boolean operations on primitives |
+  | **SpaldingTucker** | `Distance::SpaldingTucker` | Spalding-Tucker approximation | Boundary-layer approximation for wall-distance computations |
+
+  All methods inherit from a common CRTP `Base<Derived>` that provides
+  `setInterior()` and `setInterface()` methods for specifying the signed-distance
+  regions.
+
+  ## Typical Usage
+
+  @code{.cpp}
+  P1 Vh(mesh);
+  GridFunction d(Vh);
+
+  // Eikonal (exact, uses FMM)
+  Distance::Eikonal eikonal(d);
+  eikonal.setInterface(interfaceAttr)
+         .setInterior(interiorAttr)
+         .solve()
+         .sign();
+
+  // Poisson (smooth approximation, one linear solve)
+  Distance::Poisson poissonDist;
+  auto u = poissonDist(Vh);
+  @endcode
+
+  @see @ref Rodin::Eikonal "Eikonal module" for the underlying FMM solver.
  */
 
 /**
@@ -367,6 +441,19 @@
   @namespace Rodin::Hilbert
   @brief Module which provides models and tools for the Hilbertian
   extension-regularization procedure.
+
+  The Hilbert module implements @f$ H^1 @f$-based extension-regularization
+  operators used in shape and topology optimization. The primary class
+  `H1a` solves the regularized extension problem:
+  @f[
+    \alpha^2 \int_\Omega \nabla u : \nabla v \, dx + \int_\Omega u \cdot v \, dx = \ell(v)
+  @f]
+  where @f$ \alpha @f$ is a regularization length-scale parameter that controls
+  the smoothness of the extended field.
+
+  This is used, for example, to extend and regularize a shape derivative
+  (defined only on the boundary) to a smooth descent direction in the full
+  computational domain.
  */
 
 /**
@@ -378,6 +465,51 @@
   @namespace Rodin::Advection
   @brief Module which provides models for the resolution of unsteady advection
   equations.
+
+  The Advection module implements semi-Lagrangian (characteristic-based)
+  transport of scalar fields on unstructured meshes. The primary class is
+  @ref Rodin::Advection::Lagrangian "Lagrangian", which solves the
+  advection equation:
+  @f[
+    \frac{\partial \phi}{\partial t} + \mathbf{v} \cdot \nabla \phi = 0
+  @f]
+
+  ## Algorithm
+
+  At each time step, the Lagrangian method:
+  1. **Traces characteristics** backward from each mesh vertex along the
+     velocity field @f$ \mathbf{v} @f$ for a duration @f$ \Delta t @f$
+  2. **Interpolates** the solution at the departure points
+  3. **Projects** the interpolated values back onto the finite element space
+     via an @f$ L^2 @f$ projection (mass-matrix solve)
+
+  The characteristic tracing uses configurable time-stepping schemes. The
+  default is Runge-Kutta 4 (`Math::RungeKutta::RK4`). A boundary policy
+  (`TaylorBoundaryShiftPolicy`) handles characteristics that hit the domain
+  boundary by clamping the footpoint inside with an inward nudge.
+
+  ## Typical Usage
+
+  @code{.cpp}
+  P1 Vh(mesh);
+  TrialFunction u(Vh);
+  TestFunction  v(Vh);
+
+  GridFunction phi(Vh);
+  // ... initialize phi ...
+
+  VectorFunction velocity{1.0, 0.0};  // uniform horizontal advection
+
+  Advection::Lagrangian advection(u, v, phi, velocity);
+
+  Real dt = 0.01;
+  for (int step = 0; step < 100; ++step)
+    advection.step(dt);
+  @endcode
+
+  @note The module is header-only (`Rodin::Advection` INTERFACE library).
+
+  @see @ref Rodin::Variational::Flow "Flow" for the characteristic tracer.
  */
 
 /**
@@ -394,9 +526,43 @@
     |\nabla u| = F(x)
   @f]
   where @f$ F(x) @f$ is a speed function. When @f$ F = 1 @f$, the solution
-  represents the distance function. This module provides efficient Fast Marching
-  Method (FMM) implementations for solving the Eikonal equation on unstructured
-  meshes.
+  represents the distance function.
+
+  ## Fast Marching Method (FMM)
+
+  The primary solver is @ref Rodin::Eikonal::FMM "FMM", which implements the
+  Fast Marching Method on unstructured simplicial meshes. The algorithm
+  propagates a wavefront from seed vertices, updating arrival times in
+  causal order using a priority queue. Vertex states during propagation:
+
+  | State | Description |
+  |-------|-------------|
+  | **Far** | Not yet visited |
+  | **Considered** | In the priority queue, tentative value computed |
+  | **Accepted** | Finalized — arrival time is correct |
+
+  The FMM specialization for P1 finite elements on local meshes supports:
+  - Arbitrary spatial dimension (2D triangular, 3D tetrahedral, surface meshes)
+  - User-defined speed functions @f$ F(x) @f$
+  - Seed interface specification (initial zero-distance vertices)
+
+  ## Typical Usage
+
+  @code{.cpp}
+  P1 Vh(mesh);
+  GridFunction u(Vh);
+
+  // Speed function F(x) = 1 (distance computation)
+  auto speed = [](const Geometry::Point&) -> Real { return 1.0; };
+
+  Eikonal::FMM fmm(u, speed);
+  fmm.seed(interfaceVertices).solve();
+  @endcode
+
+  @note The module is header-only.
+
+  @see @ref Rodin::Distance "Distance module" for higher-level distance
+  function computation that wraps FMM.
  */
 
 /**
@@ -408,13 +574,106 @@
   @namespace Rodin::Elasticity
   @brief Module which provides models for solid mechanics and elasticity.
 
-  This module implements various elasticity models including linear elasticity
-  for small deformations. Key functionality:
+  This module implements the linearized elasticity bilinear form for small
+  deformations. The primary class is
+  @ref Rodin::Variational::LinearElasticityIntegrator "LinearElasticityIntegral",
+  which assembles:
+  @f[
+    a(\mathbf{u}, \mathbf{v}) = \int_\Omega \bigl[\lambda (\nabla \cdot \mathbf{u})(\nabla \cdot \mathbf{v})
+    + 2\mu \, \boldsymbol{\varepsilon}(\mathbf{u}) : \boldsymbol{\varepsilon}(\mathbf{v})\bigr] \, dx
+  @f]
+  where @f$ \boldsymbol{\varepsilon}(\mathbf{u}) = \tfrac{1}{2}(\nabla \mathbf{u} + (\nabla \mathbf{u})^T) @f$
+  is the symmetric strain tensor, and @f$ \lambda, \mu @f$ are the Lamé
+  parameters.
 
-  - `LinearElasticityIntegral(u, v)(lambda, mu)` — Assembles the bilinear form
-    for linearized elasticity with Lamé parameters @f$ \lambda @f$ and @f$ \mu @f$
+  ## Typical Usage
+
+  @code{.cpp}
+  P1 Vh(mesh, mesh.getSpaceDimension()); // vector P1 space
+  TrialFunction u(Vh);
+  TestFunction  v(Vh);
+
+  Real lambda = 0.5769, mu = 0.3846;
+  VectorFunction f{0, -1};
+
+  Problem elasticity(u, v);
+  elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
+             - BoundaryIntegral(f, v).over(GammaN)
+             + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
+
+  Solver::CG(elasticity).solve();
+  @endcode
 
   @see @ref examples-pdes-elasticity "Elasticity example"
+  @see @ref Rodin::Solid "Solid module" for hyperelastic (large deformation) models
+ */
+
+/**
+  @namespace Rodin::Solid
+  @brief Hyperelastic solid mechanics module for large-deformation problems.
+
+  The Solid module provides a layered framework for finite-strain
+  hyperelasticity. It is organized into four sub-layers:
+
+  ## Kinematics
+
+  - `KinematicState` — Stores the deformation gradient @f$ \mathbf{F} @f$,
+    Jacobian @f$ J = \det\mathbf{F} @f$, and right Cauchy-Green tensor
+    @f$ \mathbf{C} = \mathbf{F}^T\mathbf{F} @f$ at a quadrature point.
+  - `IsotropicInvariants` — Computes principal invariants @f$ I_1, I_2, I_3 @f$
+    from @f$ \mathbf{C} @f$.
+
+  ## Constitutive Laws
+
+  Each law derives from `HyperElasticLaw<Derived>` (CRTP base) and provides:
+  - A `Cache` struct for precomputed data
+  - `setCache(cache, cp)` — populate the cache from a `ConstitutivePoint`
+  - `getFirstPiolaKirchhoffStress(P, cache, cp)` — @f$ \mathbf{P} = \partial W / \partial \mathbf{F} @f$
+  - `getMaterialTangent(dP, cache, cp, dF)` — @f$ D\mathbf{P}[\delta\mathbf{F}] @f$
+
+  | Law | Energy density @f$ W @f$ |
+  |-----|--------------------------|
+  | `Hooke` | @f$ \lambda(\operatorname{tr}\boldsymbol{\varepsilon})\mathbf{I} + 2\mu\boldsymbol{\varepsilon} @f$ (linear, small strain) |
+  | `NeoHookean` | @f$ \frac{\mu}{2}(I_1 - d) - \mu\ln J + \frac{\lambda}{2}(\ln J)^2 @f$ |
+  | `SaintVenantKirchhoff` | @f$ \frac{\lambda}{2}(\operatorname{tr}\mathbf{E})^2 + \mu\,\mathbf{E}:\mathbf{E} @f$ |
+  | `MooneyRivlin` | @f$ c_1(\bar{I}_1 - d) + c_2(\bar{I}_2 - d) + \frac{\kappa}{2}(J-1)^2 @f$ |
+
+  ## Integrators
+
+  - `InternalForce<Law, FES>` — Nonlinear residual (internal force vector):
+    @f$ R_i = \int_\Omega \mathbf{P} : \nabla\phi_i \, dX @f$
+  - `MaterialTangent<Law, Solution, FES>` — Tangent matrix:
+    @f$ K_{ij} = \int_\Omega D\mathbf{P}[\nabla\phi_j] : \nabla\phi_i \, dX @f$
+  - `BodyForce<FES>` — External body-force vector
+  - `TractionForce<FES>` — Boundary traction vector
+
+  ## Derived Fields
+
+  - `FirstPiolaKirchhoffStress` — Post-process @f$ \mathbf{P} @f$ field
+  - `CauchyStress` — Post-process @f$ \boldsymbol{\sigma} = J^{-1}\mathbf{P}\mathbf{F}^T @f$
+  - `GreenLagrangeStrain` — Post-process @f$ \mathbf{E} = \frac{1}{2}(\mathbf{C} - \mathbf{I}) @f$
+
+  ## Typical Usage
+
+  A transient hyperelastic cantilever beam using `NeoHookean`:
+
+  @code{.cpp}
+  #include <Rodin/Solid.h>
+
+  P1 Vh(mesh, mesh.getSpaceDimension()); // vector P1 space
+  TrialFunction u(Vh);
+  TestFunction  v(Vh);
+
+  Solid::NeoHookean law(lambda, mu);
+
+  // Nonlinear residual and tangent
+  auto R = Solid::InternalForce(law, v, u.getSolution());
+  auto K = Solid::MaterialTangent(law, u, v, u.getSolution());
+  @endcode
+
+  @note The module is header-only (`Rodin::Solid` INTERFACE library).
+
+  @see @ref Rodin::Elasticity "Linear elasticity" for small-deformation problems.
  */
 
 /**
@@ -435,10 +694,32 @@
   * where @f$ \hat{K} @f$ is a reference polytope, @f$ \hat{x}_i @f$ are the
   * quadrature points, and @f$ w_i @f$ are the associated weights.
   *
-  * Higher-order quadrature rules integrate higher-degree polynomials exactly.
-  * The rule order is automatically chosen based on the polynomial degree of
-  * the finite element space during assembly, but can also be specified
-  * explicitly.
+  * ## Available Quadrature Rules
+  *
+  * | Rule | Class | Polytopes | Exactness |
+  * |------|-------|-----------|-----------|
+  * | **Centroid** | `QF::Centroid` | All types | Degree 1 (linear). Single point at barycenter. |
+  * | **Gauss-Legendre** | `QF::GaussLegendre` | All types | Degree @f$ 2n-1 @f$ for @f$ n @f$ points (1D). Tensor-product or Duffy transform for higher dimensions. |
+  * | **Gauss-Lobatto** | `QF::GaussLobatto` | Segments | Degree @f$ 2n-3 @f$ for @f$ n @f$ points. Includes endpoints (useful for spectral methods). |
+  * | **Grundmann-Möller** | `QF::GrundmannMoller` | Simplices only | Degree @f$ 2s+1 @f$ for parameter @f$ s \geq 0 @f$. Designed specifically for simplicial elements. |
+  *
+  * ## Automatic Selection
+  *
+  * During assembly, the quadrature order is automatically chosen based on the
+  * polynomial degree of the finite element space and the integrands. Users can
+  * also specify a quadrature rule explicitly:
+  *
+  * @code{.cpp}
+  * QF::GaussLegendre qf(Polytope::Type::Triangle, 5); // order 5 on triangles
+  * @endcode
+  *
+  * ## Higher-Dimensional Construction
+  *
+  * - **Tensor-product geometries** (quadrilaterals, hexahedra): constructed via
+  *   tensor products of 1D Gauss-Legendre rules.
+  * - **Simplicial geometries** (triangles, tetrahedra): the Duffy transformation
+  *   maps tensor-product rules to the simplex, or Grundmann-Möller rules are
+  *   used natively.
   *
   * Rodin provides quadrature rules for all supported polytope types
   * (segments, triangles, quadrilaterals, tetrahedra, hexahedra, wedges).
@@ -455,7 +736,25 @@
 
   The FormLanguage module provides the expression template infrastructure
   underlying Rodin's variational form language. It enables composing
-  mathematical expressions that are lazily evaluated during assembly:
+  mathematical expressions that are lazily evaluated during assembly.
+
+  ## Key Classes
+
+  - `FormLanguage::Base` — Root base class for all form language objects.
+    Provides unique identification (UUID), object lifetime management via
+    shared ownership, and polymorphic `copy()`. **Not thread-safe**: use
+    `thread_local` caching for per-thread output in evaluation methods.
+
+  - `FormLanguage::Traits<T>` — Type trait template. Each form language type
+    provides a specialization defining associated types (`ScalarType`,
+    `RangeType`, `FESType`, etc.). Always specialize `Traits` for new types.
+
+  - `FormLanguage::List` — Container for variational form components (integrals,
+    boundary conditions) that makes up the body of a `Problem`.
+
+  ## Expression Template Pattern
+
+  Operators like `Grad`, `Div`, `Dot` are CRTP-based expression templates:
 
   @code{.cpp}
   auto stiffness = Integral(Grad(u), Grad(v)); // expression, not yet evaluated
@@ -463,6 +762,20 @@
   Problem p(u, v);
   p = stiffness - load + DirichletBC(u, Zero()); // combined expression
   @endcode
+
+  Expressions store operands via `std::reference_wrapper` (non-owning) or
+  `std::unique_ptr` (owning, for temporaries). No computation occurs until
+  assembly iterates over mesh cells and evaluates the expression at quadrature
+  points.
+
+  ## Object Lifetime
+
+  The `Base::object()` helpers manage temporary object lifetimes. When an
+  expression captures a temporary (e.g.\ a lambda-constructed `RealFunction`),
+  the temporary is stored in a `shared_ptr` table within the expression,
+  ensuring it lives as long as the expression does.
+
+  @see @ref Rodin::Variational "Variational module" for the user-facing form language.
  */
 
 /**
@@ -474,12 +787,64 @@
   @namespace Rodin::Math
   @brief Module for general mathematical operations.
 
-  Provides mathematical constants, vector/matrix types, and utility functions.
-  Key items include:
+  Provides mathematical types, constants, and utility functions used
+  throughout the Rodin framework.
 
-  - `Math::Constants::pi()` — The constant @f$ \pi @f$
-  - `Math::Vector<Real>` — Dense vector type
-  - `Math::Matrix<Real>` — Dense matrix type
+  ## Types
+
+  | Type | Description |
+  |------|-------------|
+  | `Math::Vector<T>` | Dense column vector (Eigen-based) |
+  | `Math::Matrix<T>` | Dense matrix (Eigen-based) |
+  | `Math::SparseMatrix<T>` | Compressed sparse column matrix |
+  | `Math::SpatialVector<T>` | Small fixed-size vector for physical coordinates |
+  | `Math::SpatialMatrix<T>` | Small fixed-size matrix (e.g.\ Jacobians, stress tensors) |
+  | `Math::LinearSystem` | Couples operator matrix @f$ A @f$, RHS vector @f$ b @f$, and solution @f$ x @f$ |
+
+  ## Constants
+
+  `Math::Constants::pi()` — @f$ \pi @f$
+
+  ## Mathematical Functions
+
+  | Function | Signature | Domain |
+  |----------|-----------|--------|
+  | `abs` | `abs(x)` | Scalar or matrix |
+  | `exp` | `exp(x)` | Scalar or matrix |
+  | `sqrt` | `sqrt(x)` | Scalar or matrix |
+  | `pow` | `pow(base, exp)` | Scalar or matrix |
+  | `pow2` | `pow2(x)` | Scalar or matrix |
+  | `log` | `log(x)` | Scalar |
+  | `log2` | `log2(x)` | Scalar |
+  | `log10` | `log10(x)` | Scalar |
+  | `sin`, `cos`, `tan` | Trigonometric | Scalar or matrix |
+  | `asin`, `acos`, `atan` | Inverse trig | Scalar |
+  | `atan2` | `atan2(y, x)` | Two-argument arctangent |
+  | `sinh`, `cosh`, `tanh` | Hyperbolic | Scalar or matrix |
+  | `min`, `max` | Element-wise | Scalar |
+  | `clamp` | `clamp(x, lo, hi)` | Scalar |
+
+  ## Unit Types
+
+  - `Math::Rad` — Radian wrapper with implicit `Real` conversion
+  - `Math::Deg` — Degree wrapper with conversion to `Rad`
+
+  ## Runge-Kutta Schemes
+
+  - `Math::RungeKutta::RK2` — Second-order Runge-Kutta (midpoint)
+  - `Math::RungeKutta::RK4` — Classical fourth-order Runge-Kutta
+
+  ## Root Finding
+
+  - `Math::RootFinding::Bisection` — Bisection method for scalar root finding
+
+  ## Linear Algebra Utilities
+
+  - `dot(a, b)` — Inner product
+  - `cross(a, b)` — Cross product (3D)
+  - `sum`, `minus`, `mult`, `division` — Element-wise operations
+  - `conj` — Complex conjugate
+  - `nan<T>()` — NaN sentinel
  */
 
 
@@ -531,6 +896,13 @@
   // Direct solver
   Solver::SparseLU(problem).solve();
   @endcode
+
+  **Nonlinear solvers** (for hyperelastic or other nonlinear problems):
+  - `Solver::NewtonSolver<LinearSolver>` — Newton-Raphson iteration for nonlinear
+    variational problems. At each iterate @f$ u^k @f$, assembles the tangent
+    system @f$ J(u^k)\,\delta u^k = -F(u^k) @f$ and updates
+    @f$ u^{k+1} = u^k + \delta u^k @f$. Configurable via `setMaxIterations()`,
+    `setAbsoluteTolerance()`, and `setRelativeTolerance()`.
 
   @see @ref guides-solvers "Solvers Guide"
  */
@@ -585,10 +957,43 @@
   @namespace Rodin::External::MMG
   @brief MMG integration with Rodin
 
-  The Rodin::External::MMG module has a wide variety of uses which ranges from
-  optimization of the mesh, to implicit domain meshing. It provides many C++
-  wrappers to execute the functionality of the [Mmg
-  Platform](https://www.mmgtools.org/).
+  The `Rodin::External::MMG` module provides C++ wrappers for the
+  [Mmg Platform](https://www.mmgtools.org/), enabling metric-based mesh
+  adaptation, mesh-quality optimization, and implicit-domain discretization
+  directly from Rodin objects.
+
+  ## Key Classes
+
+  | Class | Purpose |
+  |-------|---------|
+  | `MMG::Mesh` | MMG-specific mesh type convertible to/from `Rodin::Geometry::Mesh`. Loaded and saved via MEDIT format. |
+  | `MMG::Adapt` | Metric-based adaptation: remeshes a mesh according to a nodal size map. Dispatches to MMG2D/MMG3D/MMGS automatically. |
+  | `MMG::Optimizer` | Mesh-quality optimization without a metric field. Improves element shapes while preserving local edge sizes. |
+  | `MMG::LevelSetDiscretizer` | Implicit-domain meshing: cuts a background mesh along a level-set isovalue @f$ \phi = c @f$, producing boundary-fitted meshes or explicit isosurfaces. Supports material-split maps. |
+  | `MMG::MMG5` | Base class providing shared remeshing controls: `setHMin()`, `setHMax()`, `setHausdorff()`, `setGradation()`, `setAngleDetection()`. |
+
+  ## Typical Usage
+
+  @code{.cpp}
+  #include <Rodin/MMG.h>
+
+  // Adapt: remesh from a size map
+  MMG::Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+  P1 Vh(mesh);
+  GridFunction sizeMap(Vh);
+  // ... define sizeMap ...
+  MMG::Adapt().setHMax(0.5).adapt(mesh, sizeMap);
+
+  // Optimize: improve element quality
+  MMG::Optimizer().setHMax(0.5).optimize(mesh);
+
+  // Level-set discretization
+  MMG::LevelSetDiscretizer lsd;
+  lsd.setLevelSet(0.0).discretize(mesh, phi);
+  @endcode
+
+  @note Requires the MMG library and Rodin configured with `RODIN_USE_MMG=ON`.
 
   @see @ref examples-mmg-index "MMG examples"
  */

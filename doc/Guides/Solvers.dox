@@ -158,33 +158,42 @@
 
   @section guides-solvers-nonlinear Newton Solver
 
-  For nonlinear problems (e.g.\ Navier–Stokes with Picard iteration),
-  Rodin provides a Newton solver that wraps a linear solver. At each
-  Newton step, the Jacobian system is assembled and solved using the
-  chosen linear solver:
+  For nonlinear variational problems (e.g.\ hyperelasticity, Navier–Stokes),
+  Rodin provides a `NewtonSolver<LinearSolver>` that wraps a linear solver
+  and performs Newton-Raphson iteration. At each iterate @f$ u^k @f$, the
+  tangent system is assembled and solved:
+
+  @f[
+    J(u^k)\,\delta u^k = -F(u^k), \qquad u^{k+1} = u^k + \delta u^k
+  @f]
+
+  where @f$ J @f$ is the Jacobian (tangent matrix) and @f$ F @f$ is the
+  nonlinear residual.
 
   @code{.cpp}
-  #include <Rodin/Solver.h>
+  #include <Rodin/Solver/NewtonSolver.h>
+  #include <Rodin/Solver/SparseLU.h>
 
-  // Create and configure a linear solver
-  Solver::CG solver(problem);
-  solver.setMaxIterations(500);
-  solver.setTolerance(1e-10);
-
-  // Solve within an outer iteration loop (e.g.\ Picard)
-  for (size_t k = 0; k < maxIterations; ++k)
-  {
-    // Reassemble with updated coefficients
-    problem.assemble();
-    solver.solve();
-    // ... check convergence ...
-  }
+  Solver::SparseLU linearSolver(problem);
+  Solver::NewtonSolver newton(linearSolver);
+  newton.setMaxIterations(20);
+  newton.setAbsoluteTolerance(1e-10);
+  newton.setRelativeTolerance(1e-8);
+  newton.solve();
   @endcode
 
-  The Newton solver is useful for:
-  - Nonlinear PDEs solved via successive linearization
-  - Coupled systems with iterative decoupling
-  - Problems where the bilinear form depends on the solution itself
+  Configuration methods:
+
+  | Method | Description |
+  |--------|-------------|
+  | `setMaxIterations(n)` | Maximum Newton iterations (default: 100) |
+  | `setAbsoluteTolerance(tol)` | Absolute residual norm threshold |
+  | `setRelativeTolerance(tol)` | Relative residual norm threshold |
+
+  The Newton solver is used for:
+  - Hyperelastic solid mechanics (with `Solid::InternalForce` / `MaterialTangent`)
+  - Nonlinear PDEs (Navier–Stokes, nonlinear diffusion)
+  - Any problem where the bilinear form depends on the current solution
 
   @section guides-solvers-usage Usage Patterns
 
