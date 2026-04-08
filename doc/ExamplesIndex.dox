@@ -123,4 +123,37 @@
 
   @see @ref guides-variational "Variational Formulations Guide" for the DG section.
 
+  @section examples-index-integral Integral Equations
+
+  The @ref Rodin::Variational::Potential "Potential" operator enables integral
+  equation formulations (boundary element methods). The kernel
+  @f$ K(\mathbf{x}, \mathbf{y}) @f$ is convolved with the solution on the mesh:
+
+  | Problem | Kernel | Example |
+  |---------|--------|---------|
+  | Newtonian potential | @f$ \frac{1}{4\pi\|\mathbf{x}-\mathbf{y}\|} @f$ | `examples/IntegralEquations/NewtonianPotential.cpp` |
+  | Elastic distribution | Navier 3×3 kernel | `examples/IntegralEquations/ElasticDistribution.cpp` |
+
+  @section examples-index-surfevol Surface Evolution
+
+  The surface evolution examples demonstrate conormal advection — moving
+  domain boundaries along their outward normal direction using level-set
+  methods with MMG implicit-domain meshing:
+
+  | Problem | Description | Example |
+  |---------|-------------|---------|
+  | Conormal advection | Move boundary along conormal | `examples/SurfaceEvolution/ConormalAdvection/Main.cpp` |
+  | Convergence study | Parametric sweep over resolution and CFL | `examples/SurfaceEvolution/ConormalAdvection/Test.cpp` |
+  | Plane evolution | Planar surface motion | `examples/SurfaceEvolution/ConormalAdvection/Plane.cpp` |
+
+  @section examples-index-boundaryopt Boundary Optimization
+
+  Advanced shape and topology optimization examples that combine complex-valued
+  PDE solvers, adjoint methods, Hilbert space regularization, and MMG
+  remeshing:
+
+  | Problem | Description | Example |
+  |---------|-------------|---------|
+  | Acoustic cloaking | Complex Helmholtz + adjoint-based shape gradient + conormal advection | `examples/BoundaryOptimization/AcousticCloaking.cpp` |
+
   */

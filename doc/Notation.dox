@@ -106,5 +106,26 @@
 | @f$ \bar{u} @f$             | `Conjugate(u)` | Complex conjugate of a complex-valued function. |
 | @f$ 0 @f$                   | `Zero()` | Zero function (scalar or vector, deduced from context). |
 
+  @section notation-solid Notation regarding solid mechanics
+
+| Notation                       | Rodin code | Description |
+| ------------------------------ | ---------- | ----------- |
+| @f$ \boldsymbol{\varepsilon}(\mathbf{u}) @f$ | `0.5 * (Jacobian(u) + Transpose(Jacobian(u)))` | Infinitesimal (linearized) strain tensor. |
+| @f$ \boldsymbol{\sigma} @f$    | — | Cauchy stress tensor (Hooke's law). |
+| @f$ \lambda, \mu @f$          | `lambda`, `mu` | Lamé parameters: @f$ \lambda = \frac{E\nu}{(1+\nu)(1-2\nu)} @f$, @f$ \mu = \frac{E}{2(1+\nu)} @f$. |
+| @f$ \mathbf{F} @f$            | `KinematicState::getDeformationGradient()` | Deformation gradient @f$ \mathbf{F} = \mathbf{I} + \nabla\mathbf{u} @f$. |
+| @f$ J @f$                     | `KinematicState::getJacobian()` | @f$ J = \det\mathbf{F} @f$. |
+| @f$ \mathbf{C} @f$            | `KinematicState::getRightCauchyGreenTensor()` | Right Cauchy-Green tensor @f$ \mathbf{C} = \mathbf{F}^T\mathbf{F} @f$. |
+| @f$ \mathbf{E} @f$            | — | Green-Lagrange strain @f$ \mathbf{E} = \frac{1}{2}(\mathbf{C} - \mathbf{I}) @f$. |
+| @f$ \mathbf{P} @f$            | `Solid::FirstPiolaKirchhoffStress` | First Piola-Kirchhoff stress @f$ \mathbf{P} = \partial W / \partial \mathbf{F} @f$. |
+| @f$ I_1, I_2, I_3 @f$        | `IsotropicInvariants` | Principal invariants of @f$ \mathbf{C} @f$. |
+| @f$ W(\mathbf{F}) @f$         | — | Strain energy density function (hyperelastic stored energy). |
+
+  @section notation-integral-eq Notation regarding integral equations
+
+| Notation                                                  | Rodin code | Description |
+| --------------------------------------------------------- | ---------- | ----------- |
+| @f$ \int_\Omega K(\mathbf{x}, \mathbf{y}) f(\mathbf{y}) \, d\mathbf{y} @f$ | `Potential(K, f)` | Integral convolution with kernel @f$ K @f$. |
+
   */
 
