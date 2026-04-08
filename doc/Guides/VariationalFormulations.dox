@@ -326,10 +326,28 @@
   | `FaceIntegral(...)` | All faces @f$ \mathcal{F}_h @f$ | Interior + boundary faces |
   | `InterfaceIntegral(...)` | Interior faces @f$ \mathcal{F}_h^i @f$ | Interior faces only |
 
-  @subsection guides-variational-dg-example DG Interior Penalty Poisson
+  @subsection guides-variational-dg-example DG Poisson Example
 
-  The symmetric interior penalty (SIP) DG formulation for the Poisson
-  equation reads:
+  The simplest DG approach uses `P0` (piecewise constant) functions. The
+  actual `examples/DG/Poisson.cpp` uses this pattern:
+
+  @code{.cpp}
+  P0 vh(mesh);           // Discontinuous piecewise-constant space
+  TrialFunction u(vh);
+  TestFunction  v(vh);
+
+  RealFunction f = 1.0;
+
+  Problem poisson(u, v);
+  poisson = Integral(Grad(u), Grad(v))
+          - Integral(f, v)
+          + DirichletBC(u, Zero());
+
+  Solver::SparseLU(poisson).solve();
+  @endcode
+
+  For higher-order DG methods, the symmetric interior penalty (SIP) formulation
+  uses explicit jump and average operators:
 
   @f[
     \sum_K \int_K \nabla u \cdot \nabla v \, dx
@@ -339,13 +357,7 @@
     = \int_\Omega f v \, dx
   @f]
 
-  In Rodin this translates directly:
-
   @code{.cpp}
-  P1 Vh(mesh);
-  TrialFunction u(Vh);
-  TestFunction  v(Vh);
-
   Real sigma = 10.0;  // penalty parameter
 
   Problem dg(u, v);
@@ -355,8 +367,6 @@
      + InterfaceIntegral(sigma * Jump(u), Jump(v))
      - Integral(f, v)
      + DirichletBC(u, Zero());
-
-  Solver::SparseLU(dg).solve();
   @endcode
 
   See the @ref examples-dg-poisson "DG Poisson example" for a complete
@@ -364,11 +374,14 @@
 
   @section guides-variational-see-also See Also
 
-  - @ref fem-spaces "Finite element spaces" — Available spaces (P0, P1, H1)
+  - @ref fem-spaces "Finite element spaces" — Available spaces (P0, P0g, P1, H1)
   - @ref fem-ciarlet "Ciarlet's definition" — Mathematical foundations
   - @ref guides-io "I/O in Rodin" — Saving and visualizing results
   - @ref examples-pdes-poisson "Poisson example"
   - @ref examples-pdes-elasticity "Elasticity example"
   - @ref examples-pdes-navierstokes "Navier-Stokes example" — Mixed formulation
+  - @ref Rodin::Solid "Solid module" — Hyperelastic constitutive laws and Newton solvers
+  - @ref Rodin::Advection "Advection module" — Semi-Lagrangian transport
+  - @ref guides-solvers "Solvers guide" — Direct, iterative, and nonlinear solvers
 
   */

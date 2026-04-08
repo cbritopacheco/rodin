@@ -126,12 +126,18 @@
   | Method | Description |
   |--------|-------------|
   | `getConnectivity().compute(d1, d2)` | Compute incidence relation @f$ d_1 \to d_2 @f$ |
-  | `scale(factor)` | Scale vertex coordinates |
-  | `displace(vectorFunction)` | Apply displacement field |
+  | `scale(factor)` | Scale all vertex coordinates by a scalar factor |
+  | `displace(vectorFunction)` | Apply a displacement field to all vertices |
   | `skin()` | Extract the boundary surface mesh |
-  | `getDimension()` | Topological dimension |
-  | `getSpaceDimension()` | Ambient space dimension |
+  | `getDimension()` | Topological dimension (2 for triangles, 3 for tetrahedra) |
+  | `getSpaceDimension()` | Ambient space dimension (≥ topological dimension) |
+  | `getVertexCount()` | Number of vertices |
+  | `getCellCount()` | Number of cells |
+  | `getVolume()` | Total volume (or area) of the domain |
+  | `getPerimeter()` | Total perimeter (or surface area) of the domain boundary |
   | `getVertex()` / `getCell()` / `getBoundary()` | Polytope iterators |
+  | `getVertexCoordinates(idx)` | Get coordinates of a vertex |
+  | `setAttribute({dim, idx}, attr)` | Set attribute of a polytope (for BC labeling) |
 
   ## Polytope Types
 
@@ -474,6 +480,19 @@
   - `VectorFunction` — Vector function from initializer list
   - `Zero` — Zero scalar/vector function
   - `Pow`, `Exp`, `Sqrt`, `Sin`, `Cos` — Pointwise math operations
+
+  Special operators:
+  - `BoundaryNormal(mesh)` — Outward unit normal on @f$ \partial\Omega @f$
+  - `FaceNormal(mesh)` — Unit normal on mesh faces
+  - `IdentityMatrix(n)` — @f$ n \times n @f$ identity matrix function
+  - `F::x`, `F::y`, `F::z` — Coordinate projection functions
+  - `Re(u)`, `Im(u)`, `Conjugate(u)` — Complex-valued function operators
+
+  Advanced operators:
+  - `Potential(K, u)` — Integral convolution: @f$ \int K(\mathbf{x},\mathbf{y}) u(\mathbf{y}) \, d\mathbf{y} @f$
+  - `Flow(t, u, vel)` — Flow composition @f$ u \circ \Phi_t @f$ (characteristic tracing for advection)
+  - `TraceOperator(u, attr)` — Boundary trace @f$ u|_{\partial\Omega} @f$
+  - `LinearElasticityIntegral(u, v)(lambda, mu)` — Hooke elasticity bilinear form
 
   ## Problem
 
