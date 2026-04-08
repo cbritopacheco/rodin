@@ -74,6 +74,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_vector_8h.html">&lt;Rodin/Math/SpatialVector.h&gt;</a></div>
           <div class="m-doc-template">template&lt;class ScalarType&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_math.html">Math</a>::<wbr/></span>SpatialVector <span class="m-thin">class</span>
         </h1>
@@ -89,7 +90,7 @@
             </tr>
           </tbody>
         </table>
-<p>A dynamic-size vector with maximum size bounded by RODIN_MAXIMAL_SPACE_DIMENSION. Used for geometric quantities in 2D or 3D space to optimize memory allocation.</p>
+<p>A dynamic-size vector with maximum size bounded by RODIN_MAXIMAL_SPACE_DIMENSION. Used for geometric quantities in 2D or 3D space to optimize memory allocation.</p><aside class="m-note m-info"><h4>Note</h4><p>Internally stores a fixed Eigen::Vector3 regardless of the logical size. For size=1 or size=2 vectors, only the first 1 or 2 elements are active; the remaining elements in the underlying storage are unused. This design avoids dynamic allocation for small spatial vectors at the cost of a few extra bytes.</p></aside>
       </div>
     </div>
   </div>

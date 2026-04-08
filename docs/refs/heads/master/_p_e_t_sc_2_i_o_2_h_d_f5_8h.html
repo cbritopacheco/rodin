@@ -80,7 +80,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md176">HDF5 File Layout</a></li>
+            <li><a href="#autotoc_md177">HDF5 File Layout</a></li>
             <li>
               Reference
               <ul>
@@ -90,7 +90,7 @@
             </li>
           </ul>
         </nav>
-<p>Provides <code>GridFunctionPrinter</code> and <code>GridFunctionLoader</code> specializations that serialise the locally-owned portion of a PETSc <code>Vec</code> to/from HDF5 files. This enables checkpoint/restart workflows and post-processing with external HDF5-compatible tools.</p><section id="autotoc_md176"><h3><a href="#autotoc_md176">HDF5 File Layout</a></h3><pre class="m-code"><span class="o">/</span><span class="n">GridFunction</span><span class="o">/</span>
+<p>Provides <code>GridFunctionPrinter</code> and <code>GridFunctionLoader</code> specializations that serialise the locally-owned portion of a PETSc <code>Vec</code> to/from HDF5 files. This enables checkpoint/restart workflows and post-processing with external HDF5-compatible tools.</p><section id="autotoc_md177"><h3><a href="#autotoc_md177">HDF5 File Layout</a></h3><pre class="m-code"><span class="o">/</span><span class="n">GridFunction</span><span class="o">/</span>
 <span class="err">├──</span><span class="w"> </span><span class="n">Meta</span><span class="o">/</span>
 <span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">Size</span><span class="w">       </span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="err">—</span><span class="w"> </span><span class="n">number</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">local</span><span class="w"> </span><span class="n">DOFs</span><span class="p">)</span>
 <span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">Dimension</span><span class="w">  </span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="err">—</span><span class="w"> </span><span class="n">vector</span><span class="w"> </span><span class="n">dimension</span><span class="p">)</span>

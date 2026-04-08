@@ -155,17 +155,13 @@ $ x(r) = r $
             </dt>
             <dd>Gets the polynomial order of the transformation.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a4c4ece9c603c9bd76cbbcef31c990589" class="m-doc">getJacobianOrder</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd>Gets the polynomial order of the Jacobian.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#ab4ff66aa824864e27401ad28269c0e43" class="m-doc">transform</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; rc,
-              <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; pc) const <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#ae0895b6c6700d26833f04690f179e0aa" class="m-doc">transform</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; pc,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Applies the identity transformation.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#af78dc7f8043722bd0720bb92d5384a4b" class="m-doc">jacobian</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; rc,
-              <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; res) const <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a6b377b0ca9855fdfc540a57f39fd93e3" class="m-doc">jacobian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; jacobian,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Computes the Jacobian of the identity transformation.</dd>
             <dt>
@@ -226,24 +222,10 @@ $ \mathbb{R}^{\text{sdim}} $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a4c4ece9c603c9bd76cbbcef31c990589"><div>
+          <section class="m-doc-details" id="ae0895b6c6700d26833f04690f179e0aa"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />IdentityTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4c4ece9c603c9bd76cbbcef31c990589" class="m-doc-self">getJacobianOrder</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
-            </h3>
-            <p>Gets the polynomial order of the Jacobian.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>0 (constant Jacobian)</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="ab4ff66aa824864e27401ad28269c0e43"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />IdentityTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab4ff66aa824864e27401ad28269c0e43" class="m-doc-self">transform</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; rc,
-              <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; pc) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />IdentityTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae0895b6c6700d26833f04690f179e0aa" class="m-doc-self">transform</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; pc,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Applies the identity transformation.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -252,12 +234,12 @@ $ \mathbb{R}^{\text{sdim}} $
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">rc&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Reference coordinates</td>
+                  <td style="width: 1%">pc&nbsp;<span class="m-label m-flat m-warning">out</span></td>
+                  <td>Physical coordinates (set equal to reference coordinates)</td>
                 </tr>
                 <tr>
-                  <td>pc&nbsp;<span class="m-label m-flat m-warning">out</span></td>
-                  <td>Physical coordinates (equal to reference coordinates)</td>
+                  <td>rc&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Reference coordinates</td>
                 </tr>
               </tbody>
             </table>
@@ -280,10 +262,10 @@ $ pc = rc $
 </g>
 </svg>.</p>
           </div></section>
-          <section class="m-doc-details" id="af78dc7f8043722bd0720bb92d5384a4b"><div>
+          <section class="m-doc-details" id="a6b377b0ca9855fdfc540a57f39fd93e3"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />IdentityTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af78dc7f8043722bd0720bb92d5384a4b" class="m-doc-self">jacobian</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; rc,
-              <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; res) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />IdentityTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6b377b0ca9855fdfc540a57f39fd93e3" class="m-doc-self">jacobian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; jacobian,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Computes the Jacobian of the identity transformation.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -292,16 +274,16 @@ $ pc = rc $
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">rc&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Reference coordinates (unused)</td>
+                  <td style="width: 1%">jacobian&nbsp;<span class="m-label m-flat m-warning">out</span></td>
+                  <td>Jacobian matrix (set to identity)</td>
                 </tr>
                 <tr>
-                  <td>res&nbsp;<span class="m-label m-flat m-warning">out</span></td>
-                  <td>Jacobian matrix (identity matrix)</td>
+                  <td>rc&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Reference coordinates (unused)</td>
                 </tr>
               </tbody>
             </table>
-<p>Sets <code>res</code> to the identity matrix.</p>
+<p>Sets <code>jacobian</code> to the identity matrix.</p>
           </div></section>
           <section class="m-doc-details" id="a3a7f490e7ba5e7ca5804c2b725125103"><div>
             <h3>

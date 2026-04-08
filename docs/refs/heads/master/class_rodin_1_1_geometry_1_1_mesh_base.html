@@ -351,9 +351,22 @@
             </dt>
             <dd>Sets the space coordinate of the vertex at the given index for the given coordinate index.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a11834e52a91313eb6d2d3b44810e0ea1" class="m-doc">setPolytopeTransformation</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; p,
+              <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>* trans) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </dt>
+            <dd>Sets the geometric transformation for a polytope.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#acef2ca1a1d09aa328c13f39950d65749" class="m-doc">getContext</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_context_1_1_base.html" class="m-doc">Context::<wbr />Base</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the execution context of the mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aafa1fbb6fcf1168fe50762a590fe5f89" class="m-doc">getName</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;StringView&gt;</span>
+            </dt>
+            <dd>Gets the optional name assigned to this mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad5193c20d0320dd32fd0c8df5460b883" class="m-doc">setName</a>(</span><span class="m-doc-wrap">const std::string&amp; name) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp;</span>
+            </dt>
+            <dd>Sets a human-readable name for the mesh.</dd>
           </dl>
         </section>
         <section>
@@ -1522,6 +1535,35 @@ $ (0, 5, 10) $
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a11834e52a91313eb6d2d3b44810e0ea1"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a11834e52a91313eb6d2d3b44810e0ea1" class="m-doc-self">setPolytopeTransformation</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; p,
+              <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>* trans) <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <p>Sets the geometric transformation for a polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> of (dimension, index) identifying the polytope</td>
+                </tr>
+                <tr>
+                  <td>trans&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Pointer to the transformation (ownership is taken by the mesh)</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this mesh for method chaining</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The mesh takes ownership of the <code>trans</code> pointer. The caller must not delete it after this call.</p>
+          </div></section>
           <section class="m-doc-details" id="acef2ca1a1d09aa328c13f39950d65749"><div>
             <h3>
               <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_context_1_1_base.html" class="m-doc">Context::<wbr />Base</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acef2ca1a1d09aa328c13f39950d65749" class="m-doc-self">getContext</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
@@ -1536,6 +1578,43 @@ $ (0, 5, 10) $
               </tfoot>
             </table>
 <p>The context determines whether the mesh is local, distributed, or uses another execution model.</p>
+          </div></section>
+          <section class="m-doc-details" id="aafa1fbb6fcf1168fe50762a590fe5f89"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;StringView&gt; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aafa1fbb6fcf1168fe50762a590fe5f89" class="m-doc-self">getName</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the optional name assigned to this mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The name if set, or std::nullopt</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad5193c20d0320dd32fd0c8df5460b883"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad5193c20d0320dd32fd0c8df5460b883" class="m-doc-self">setName</a>(</span><span class="m-doc-wrap">const std::string&amp; name)</span></span>
+            </h3>
+            <p>Sets a human-readable name for the mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">name&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Name to assign</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this mesh for method chaining</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
         </section>
       </div>
