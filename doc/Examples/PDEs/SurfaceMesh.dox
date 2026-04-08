@@ -95,8 +95,7 @@
   @code{.cpp}
   Solver::CG cg;
   cg.setMaxIterations(200);
-  cg.setRelativeTolerance(1e-12);
-  cg.printIterations(true);
+  cg.setTolerance(1e-12);
 
   Problem rd(u, v);
   rd = Integral(Grad(u), Grad(v))    // Surface stiffness: ∫_Γ ∇_Γ u · ∇_Γ v ds
@@ -104,6 +103,11 @@
      - Integral(f, v);               // Load: ∫_Γ f v ds
   rd.solve(cg);
   @endcode
+
+  The CG solver is configured with `setTolerance()` for convergence and
+  `setMaxIterations()` for an iteration cap. The `rd.solve(cg)` pattern
+  passes the solver to the problem, which is useful when the same solver
+  configuration is reused across multiple solves.
 
   @note No boundary conditions are needed here because the surface
   @f$ \Gamma @f$ has no boundary (it is a closed manifold). The mass term

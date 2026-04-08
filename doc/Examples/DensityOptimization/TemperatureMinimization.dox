@@ -44,8 +44,8 @@
   @code{.cpp}
   static constexpr int Gamma0 = 1, GammaD = 2;
 
-  static constexpr double ell   = 4;       // Lagrange multiplier
-  static constexpr double mu    = 0.2;     // Step size
+  static constexpr double ell   = 4;       // Volume penalty
+  static constexpr double mu    = 0.01;    // Step size
   static constexpr double gmin  = 0.0001;  // Minimum conductivity
   static constexpr double gmax  = 1;       // Maximum conductivity
   static constexpr double alpha = 0.05;    // Regularization parameter
@@ -54,16 +54,22 @@
 
   @subsection examples-densopt-temp-setup-mesh Mesh and Initial Density
 
-  The mesh is loaded and optimized with @ref Rodin::External::MMG
-  "MMG::Optimizer":
+  We build a structured triangular mesh on the unit square and label the
+  Dirichlet boundary. Two P1 finite element spaces are created: one for the
+  state/adjoint and one for the density:
 
   @code{.cpp}
-  MMG::Mesh Omega;
-  Omega.load(meshFile, IO::FileFormat::MFEM);
-  MMG::Optimizer().setHMax(0.005).setHMin(0.001).optimize(Omega);
+  constexpr size_t n = 32;
+  Mesh mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { n, n });
+  mesh.getConnectivity().compute(1, 2);
+  mesh.scale(1.0 / (n - 1));
 
-  P1 vh(Omega);
-  P1 ph(Omega);
+  // Label Dirichlet boundary (left edge near center)
+  for (auto it = mesh.getBoundary(); it; ++it)
+    mesh.setAttribute(it.key(), /* condition */ ? GammaD : Gamma0);
+
+  P1 vh(mesh);
+  P1 ph(mesh);
 
   GridFunction gamma(ph);
   gamma = 0.9;  // Initial density: nearly full material
@@ -124,6 +130,21 @@
   step = mu * g.getSolution();
   gamma -= step;
   gamma = Min(1.0, Max(0.0, gamma));
+  @endcode
+
+  @subsection examples-densopt-temp-loop-xdmf XDMF Output
+
+  Results are exported in XDMF format at each iteration for visualization in
+  ParaView. The convenience API delegates to the default grid:
+
+  @code{.cpp}
+  IO::XDMF xdmf("TemperatureMinimization");
+  xdmf.grid().setMesh(mesh);
+  xdmf.add("u", u.getSolution());
+  xdmf.add("gamma", gamma);
+  // ...
+  xdmf.write().flush();   // inside loop
+  xdmf.close();           // after loop
   @endcode
 
   @section examples-densopt-temp-full Full Source Code
