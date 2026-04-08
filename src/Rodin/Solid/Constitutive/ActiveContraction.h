@@ -155,9 +155,6 @@ namespace Rodin::Solid
       Real m_referenceFiberStretch;
   };
 
-  // Backward-compatible alias.
-  template <class PassiveLaw>
-  using ActiveContraction = FiberActiveI4Contraction<PassiveLaw>;
 }
 
 #endif
