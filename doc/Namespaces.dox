@@ -519,15 +519,17 @@
 
   Usage:
   @code{.cpp}
-  // Iterative solver
-  Solver::CG cg;
-  cg.setMaxIterations(1000);
-  cg.setRelativeTolerance(1e-10);
-  problem.solve(cg);
+  // Inline iterative solver — most common pattern
+  Solver::CG(problem).solve();
+
+  // Configured iterative solver
+  Solver::CG solver(problem);
+  solver.setMaxIterations(1000);
+  solver.setTolerance(1e-10);
+  solver.solve();
 
   // Direct solver
-  Solver::SparseLU solver;
-  problem.solve(solver);
+  Solver::SparseLU(problem).solve();
   @endcode
 
   @see @ref guides-solvers "Solvers Guide"

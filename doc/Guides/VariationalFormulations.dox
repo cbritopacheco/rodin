@@ -138,7 +138,10 @@
   | Gradient | @f$ \nabla u @f$ | Vector (for scalar @f$ u @f$) | `Grad(u)` |
   | Divergence | @f$ \nabla \cdot \mathbf{u} @f$ | Scalar (for vector @f$ \mathbf{u} @f$) | `Div(u)` |
   | Jacobian | @f$ \nabla \mathbf{u} @f$ (matrix) | @f$ d \times d @f$ matrix | `Jacobian(u)` |
-  | Transpose | @f$ (\nabla \mathbf{u})^T @f$ | @f$ d \times d @f$ matrix | `Jacobian(u).T()` |
+  | Transpose | @f$ (\nabla \mathbf{u})^T @f$ | @f$ d \times d @f$ matrix | `Transpose(Jacobian(u))` |
+  | Trace | @f$ \text{tr}(\nabla \mathbf{u}) @f$ | Scalar | `Trace(Jacobian(u))` |
+  | Frobenius norm | @f$ \| \nabla \mathbf{u} \|_F @f$ | Scalar | `Frobenius(Jacobian(u))` |
+  | Component | @f$ u_i @f$ | Scalar (from vector @f$ \mathbf{u} @f$) | `Component(u, i)` or `u.x()` |
 
   @code{.cpp}
   // Laplacian-like term: ∫ ∇u · ∇v dx
@@ -148,7 +151,8 @@
   Integral(Div(u), Div(v))
 
   // Elasticity: symmetric gradient ε(u) : ε(v)
-  Integral(Jacobian(u) + Jacobian(u).T(), Jacobian(v) + Jacobian(v).T())
+  Integral(Jacobian(u) + Transpose(Jacobian(u)),
+           Jacobian(v) + Transpose(Jacobian(v)))
   @endcode
 
   @section guides-variational-bc Boundary Conditions
@@ -197,6 +201,11 @@
 
   // Direct sparse LU factorization
   Solver::SparseLU(problem).solve();
+
+  // Or pass a standalone solver to the problem
+  Solver::CG solver(problem);
+  solver.setTolerance(1e-10);
+  solver.solve();
   @endcode
 
   The solution is then accessible via the trial function:
@@ -257,12 +266,11 @@
             + DirichletBC(u, Zero());
 
     // 5. Solve
-    CG cg;
-    poisson.solve(cg);
+    CG(poisson).solve();
 
     // 6. Output
     IO::XDMF xdmf("Poisson");
-    xdmf.setMesh(mesh).add("u", u.getSolution());
+    xdmf.grid().setMesh(mesh).add("u", u.getSolution());
     xdmf.write();
 
     return 0;

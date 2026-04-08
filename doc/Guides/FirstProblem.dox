@@ -82,12 +82,11 @@
             + DirichletBC(u, Zero());
 
     // 7. Solve the problem
-    CG cg;
-    poisson.solve(cg);
+    CG(poisson).solve();
 
     // 8. Export results using XDMF (open in ParaView)
     IO::XDMF xdmf("Poisson");
-    xdmf.setMesh(mesh).add("u", u.getSolution());
+    xdmf.grid().setMesh(mesh).add("u", u.getSolution());
     xdmf.write();
 
     return 0;
@@ -151,30 +150,30 @@
   @subsection guides-getting-started-first-problem-solve Step 7: Solve the System
 
   @code{.cpp}
-  Solver::CG cg;
-  poisson.solve(cg);
+  CG(poisson).solve();
   @endcode
 
-  - Creates a Conjugate Gradient (CG) iterative solver
-  - Passes it to `problem.solve()`, which assembles the linear system
-    @f$ A\mathbf{x} = \mathbf{b} @f$ and solves it
-  - CG is appropriate for symmetric positive definite systems, which the
-    Poisson equation produces
-  - Alternative solvers: `Solver::SparseLU` (direct), `Solver::BiCGSTAB`
-    (non-symmetric iterative), `Solver::UMFPack` (SuiteSparse direct)
+  - Constructs a Conjugate Gradient (CG) iterative solver bound to the
+    problem, then solves the resulting linear system
+    @f$ A\mathbf{x} = \mathbf{b} @f$
+  - CG is appropriate for **symmetric positive definite** (SPD) systems, which
+    the Poisson equation produces
+  - Alternative: `Solver::SparseLU(poisson).solve()` for a direct solver
+  - You can also pass a standalone solver to the problem:
+    `poisson.solve(solver)` (see @ref guides-solvers "Solvers Guide")
 
   @subsection guides-getting-started-first-problem-output Step 8: Export Results
 
   @code{.cpp}
   IO::XDMF xdmf("Poisson");
-  xdmf.setMesh(mesh).add("u", u.getSolution());
+  xdmf.grid().setMesh(mesh).add("u", u.getSolution());
   xdmf.write();
   @endcode
 
   - Creates an XDMF writer with base filename "Poisson"
-  - Sets the mesh and adds the solution grid function with name "u"
-  - Writes the XDMF metadata file and HDF5 data files
-  - Produces `Poisson.xdmf` and associated `.h5` data files
+  - Calls `grid()` to obtain the default grid handle, then sets the mesh
+    and adds the solution grid function via method chaining
+  - `write()` produces `Poisson.xdmf` (XML metadata) and `.h5` data files
   - Can be visualized with [ParaView](https://www.paraview.org/)
 
   @section guides-getting-started-first-problem-build Building and Running
@@ -267,15 +266,17 @@
 
   @code{.cpp}
   // Sparse LU direct solver (for small to medium problems)
-  Solver::SparseLU sparseLU;
-  poisson.solve(sparseLU);
+  Solver::SparseLU(poisson).solve();
 
-  // Conjugate Gradient with options
-  Solver::CG cg;
-  cg.setMaxIterations(1000);
-  cg.setRelativeTolerance(1e-10);
-  cg.printIterations(true);
-  poisson.solve(cg);
+  // Conjugate Gradient with tuned parameters
+  Solver::CG solver(poisson);
+  solver.setMaxIterations(1000);
+  solver.setTolerance(1e-10);
+  solver.solve();
+
+  // Or, pass a standalone solver to the problem
+  Solver::SparseLU lu;
+  poisson.solve(lu);
   @endcode
 
   @section guides-getting-started-first-problem-next What's Next?

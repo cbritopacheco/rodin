@@ -88,9 +88,8 @@
             - Integral(RealFunction(1.0), v)
             + DirichletBC(u, Zero());
 
-    // Create solver and solve
-    Solver::SparseLU solver;
-    poisson.solve(solver);
+    // Inline usage — construct solver with the problem, then solve
+    Solver::SparseLU(poisson).solve();
 
     return 0;
   }
@@ -111,8 +110,7 @@
   @code{.cpp}
   #include <Rodin/Solver/UMFPack.h>
 
-  Solver::UMFPack solver;
-  problem.solve(solver);
+  Solver::UMFPack(problem).solve();
   @endcode
 
   UMFPack requires the SuiteSparse library to be installed. It is the
@@ -133,19 +131,20 @@
   elasticity, heat equation):
 
   @code{.cpp}
-  // Basic usage
-  Solver::CG cg;
-  poisson.solve(cg);
+  // Inline usage — construct with the problem and solve immediately
+  Solver::CG(poisson).solve();
   @endcode
 
   The CG solver supports several configuration options:
 
   @code{.cpp}
-  Solver::CG cg;
-  cg.setMaxIterations(1000);       // Maximum number of iterations
-  cg.setRelativeTolerance(1e-10);  // Relative convergence threshold
-  cg.printIterations(true);        // Print iteration residuals
-  poisson.solve(cg);
+  Solver::CG solver(poisson);
+  solver.setTolerance(1e-10);           // Relative convergence threshold
+  solver.setMaxIterations(1000);        // Maximum number of iterations
+  solver.solve();
+
+  if (solver.success())
+    std::cout << "CG converged." << std::endl;
   @endcode
 
   CG is the recommended solver when:
@@ -167,14 +166,19 @@
   @code{.cpp}
   #include <Rodin/Solver.h>
 
-  // Create a linear solver
-  Solver::CG linear(problem);
-  linear.setMaxIterations(500);
-  linear.setRelativeTolerance(1e-10);
+  // Create and configure a linear solver
+  Solver::CG solver(problem);
+  solver.setMaxIterations(500);
+  solver.setTolerance(1e-10);
 
-  // Wrap it in a Newton solver
-  Solver::NewtonSolver newton(linear);
-  newton.solve();
+  // Solve within an outer iteration loop (e.g.\ Picard)
+  for (size_t k = 0; k < maxIterations; ++k)
+  {
+    // Reassemble with updated coefficients
+    problem.assemble();
+    solver.solve();
+    // ... check convergence ...
+  }
   @endcode
 
   The Newton solver is useful for:
@@ -184,30 +188,45 @@
 
   @section guides-solvers-usage Usage Patterns
 
-  Rodin solvers follow a simple pattern: create a solver, optionally
-  configure it, and pass it to `problem.solve()`.
+  Rodin solvers support two main usage patterns.
 
-  @subsection guides-solvers-usage-basic Basic Usage
+  @subsection guides-solvers-usage-inline Inline Solving
+
+  For quick one-shot use, construct the solver with the problem and call
+  `solve()` in a single expression. This is the most common pattern in
+  Rodin:
 
   @code{.cpp}
-  Solver::SparseLU solver;
-  problem.solve(solver);
+  Solver::CG(poisson).solve();
+  Solver::SparseLU(elasticity).solve();
   @endcode
 
   @subsection guides-solvers-usage-configured Configured Solving
 
-  When you need to tune parameters, configure the solver object first:
+  When you need to tune parameters, construct the solver object first,
+  configure it, then call `solve()`:
 
   @code{.cpp}
-  Solver::CG cg;
-  cg.setMaxIterations(500);
-  cg.setRelativeTolerance(1e-12);
-  cg.printIterations(true);
-  problem.solve(cg);
+  Solver::CG solver(poisson);
+  solver.setMaxIterations(500);
+  solver.setTolerance(1e-12);
+  solver.solve();
   @endcode
 
-  This pattern is useful when the same solver configuration is applied
-  to multiple problems (e.g.\ in an optimization loop).
+  @subsection guides-solvers-usage-reuse Solver Reuse via problem.solve()
+
+  You can also pass a pre-configured solver to `problem.solve()`. This
+  is useful when the same solver is applied to multiple problems (e.g.\
+  in an optimization loop):
+
+  @code{.cpp}
+  Solver::SparseLU solver;
+  for (size_t i = 0; i < nIterations; ++i)
+  {
+    // ... update problem ...
+    problem.solve(solver);
+  }
+  @endcode
 
   @section guides-solvers-choosing Choosing a Solver
 
@@ -250,16 +269,15 @@
             - Integral(RealFunction(1.0), v)
             + DirichletBC(u, Zero());
 
-    // Solve with CG and print iteration info
-    Solver::CG cg;
-    cg.setMaxIterations(1000);
-    cg.setRelativeTolerance(1e-10);
-    cg.printIterations(true);
-    poisson.solve(cg);
+    // Solve with CG
+    Solver::CG solver(poisson);
+    solver.setMaxIterations(1000);
+    solver.setTolerance(1e-10);
+    solver.solve();
 
     // Export result
     IO::XDMF xdmf("SolverExample");
-    xdmf.setMesh(mesh).add("u", u.getSolution());
+    xdmf.grid().setMesh(mesh).add("u", u.getSolution());
     xdmf.write();
 
     return 0;

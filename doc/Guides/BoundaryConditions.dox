@@ -247,12 +247,11 @@
             - Integral(f, v)
             + DirichletBC(u, Zero());
 
-    Solver::CG cg;
-    problem.solve(cg);
+    Solver::CG(problem).solve();
 
     // Export to XDMF
     IO::XDMF xdmf("BoundaryConditions");
-    xdmf.setMesh(mesh).add("u", u.getSolution());
+    xdmf.grid().setMesh(mesh).add("u", u.getSolution());
     xdmf.write();
 
     return 0;

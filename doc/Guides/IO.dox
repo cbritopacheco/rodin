@@ -165,7 +165,7 @@
 
     // Export to XDMF for visualization in ParaView
     IO::XDMF xdmf("MySimulation");
-    xdmf.setMesh(mesh).add("u", u.getSolution());
+    xdmf.grid().setMesh(mesh).add("u", u.getSolution());
     xdmf.write();
 
     return 0;
@@ -336,12 +336,11 @@
             + DirichletBC(u, Zero());
 
     // 3. Solve
-    Solver::CG cg;
-    poisson.solve(cg);
+    CG(poisson).solve();
 
     // 4. Export results via XDMF
     IO::XDMF xdmf("Results");
-    xdmf.setMesh(mesh).add("u", u.getSolution());
+    xdmf.grid().setMesh(mesh).add("u", u.getSolution());
     xdmf.write();
 
     return 0;
