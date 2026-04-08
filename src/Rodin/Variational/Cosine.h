@@ -13,7 +13,6 @@
  */
 
 #include "Rodin/Math/Common.h"
-#include <type_traits>
 
 #include "ForwardDecls.h"
 #include "Function.h"
@@ -144,9 +143,6 @@ namespace Rodin::Variational
   template <class NestedDerived>
   Cos(const FunctionBase<NestedDerived>&) -> Cos<FunctionBase<NestedDerived>>;
 
-  template <class Number, typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
-  Cos(Number) -> Cos<FunctionBase<RealFunction>>;
-
   /**
    * @brief Helper function to construct objects of type Cos.
    */
@@ -154,12 +150,6 @@ namespace Rodin::Variational
   auto cos(const FunctionBase<NestedDerived>& f)
   {
     return Cos(f);
-  }
-
-  template <class Number, typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
-  auto Cos(Number value)
-  {
-    return Cos(RealFunction(value));
   }
 }
 
