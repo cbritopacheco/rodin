@@ -284,6 +284,117 @@
   }
   @endcode
 
+  @section guides-solvers-petsc PETSc Solvers
+
+  When Rodin is built with PETSc support (`RODIN_USE_PETSC=ON`), additional
+  solvers become available that support both sequential and MPI-distributed
+  linear systems.  PETSc solvers work with
+  @ref Rodin::PETSc::Math::LinearSystem "PETSc::Math::LinearSystem" and are
+  activated by using `PETSc::Variational::TrialFunction` /
+  `PETSc::Variational::TestFunction` instead of the standard trial/test
+  functions.
+
+  @subsection guides-solvers-petsc-ksp KSP (Krylov Subspace)
+
+  @ref Rodin::Solver::KSP "KSP" is the base PETSc linear solver wrapper.
+  It provides access to the full PETSc Krylov solver library and can be
+  configured both programmatically and via PETSc command-line options.
+
+  | Method | Description |
+  |--------|-------------|
+  | `setType(KSPType)` | Select algorithm (e.g.\ `KSPCG`, `KSPGMRES`, `KSPBCGS`) |
+  | `setTolerances(rtol, abstol, dtol, maxIt)` | Set convergence tolerances and iteration limit |
+  | `setPreconditioner(Mat)` | Supply an explicit preconditioner matrix |
+  | `setPrefix(string)` | Set option prefix for multi-solver configurations |
+
+  @code{.cpp}
+  #include <Rodin/PETSc.h>
+
+  // Use the KSP base solver directly
+  Solver::KSP(problem).solve();
+
+  // Configure via PETSc command-line options:
+  //   ./myprogram -ksp_type gmres -pc_type ilu -ksp_rtol 1e-8 -ksp_monitor
+  @endcode
+
+  @subsection guides-solvers-petsc-cg PETSc CG
+
+  @ref Rodin::Solver::CG<PETSc::Math::LinearSystem> "CG\<PETSc::Math::LinearSystem\>"
+  is a convenience specialization that sets the KSP type to `KSPCG`.
+  It is the recommended iterative solver for SPD systems when using PETSc:
+
+  @code{.cpp}
+  PETSc::Variational::TrialFunction u(Vh);
+  PETSc::Variational::TestFunction  v(Vh);
+
+  Problem poisson(u, v);
+  poisson = Integral(Grad(u), Grad(v))
+          - Integral(f, v)
+          + DirichletBC(u, Zero());
+
+  Solver::CG(poisson).solve();
+  @endcode
+
+  @subsection guides-solvers-petsc-gmres PETSc GMRES
+
+  @ref Rodin::Solver::GMRES<PETSc::Math::LinearSystem> "GMRES\<PETSc::Math::LinearSystem\>"
+  sets the KSP type to `KSPGMRES`.  Suitable for non-symmetric and indefinite
+  systems:
+
+  @code{.cpp}
+  Solver::GMRES(stokes).solve();
+  @endcode
+
+  @subsection guides-solvers-petsc-snes SNES (Nonlinear)
+
+  @ref Rodin::Solver::SNES "SNES" wraps the PETSc Scalable Nonlinear Equations
+  Solver for Newton-type methods.  It uses an associated KSP for the inner
+  linear solve at each Newton step:
+
+  @code{.cpp}
+  // Create the KSP linear solver
+  Solver::KSP ksp(problem);
+  ksp.setTolerances(1e-10, 1e-14, 1e5, 200);
+
+  // Wrap it in SNES for Newton iteration
+  Solver::SNES snes(ksp);
+  snes.setTolerances(1e-8, 1e-10, 1e-6, 50, 10000);
+  snes.solve(x);
+  @endcode
+
+  @subsection guides-solvers-petsc-multifield Multi-Field Problems
+
+  PETSc solvers support block systems with multiple trial/test function pairs.
+  The resulting linear system can be solved with field-split preconditioning
+  configured via PETSc command-line options:
+
+  @code{.cpp}
+  PETSc::Variational::TrialFunction u(Vh_velocity);
+  PETSc::Variational::TrialFunction p(Vh_pressure);
+
+  PETSc::Variational::TestFunction v(Vh_velocity);
+  PETSc::Variational::TestFunction q(Vh_pressure);
+
+  Problem stokes(u, p, v, q);
+  stokes = Integral(Jacobian(u), Jacobian(v))
+         - Integral(p, Div(v))
+         + Integral(Div(u), q)
+         - Integral(f, v)
+         + DirichletBC(u, g);
+
+  Solver::KSP(stokes).solve();
+  // Run with: -ksp_type gmres -pc_type fieldsplit -ksp_monitor
+  @endcode
+
+  @subsection guides-solvers-petsc-table PETSc Solver Summary
+
+  | Solver | Class | System type | Notes |
+  |--------|-------|-------------|-------|
+  | KSP | `Solver::KSP` | Any (via PETSc type selection) | Base wrapper, full PETSc configuration |
+  | CG | `Solver::CG<PETSc::Math::LinearSystem>` | SPD | Sets `KSPCG` |
+  | GMRES | `Solver::GMRES<PETSc::Math::LinearSystem>` | Non-symmetric, indefinite | Sets `KSPGMRES` |
+  | SNES | `Solver::SNES` | Nonlinear @f$ F(x)=0 @f$ | Newton-type, uses KSP internally |
+
   @section guides-solvers-troubleshooting Troubleshooting
 
   - **CG does not converge**: The matrix may not be SPD. Switch to
@@ -292,10 +403,14 @@
     direct solver. Use CG instead (if SPD) or consider PETSc solvers.
   - **Solution is incorrect**: Check that boundary conditions are applied
     correctly and that the mesh connectivity is computed before assembling.
+  - **PETSc solver does not converge**: Use `-ksp_monitor` to inspect
+    residual history.  Try `-pc_type gamg` for AMG preconditioning or
+    `-ksp_type gmres -pc_type ilu` for non-SPD systems.
 
   @section guides-solvers-see-also See Also
 
   - @ref Rodin::Solver "Solver namespace reference"
+  - @ref Rodin::PETSc "PETSc module"
   - @ref guides-weak-formulations "Weak formulations"
   - @ref guides-boundary-conditions "Boundary conditions"
   - @ref examples-pdes-poisson "Poisson example"

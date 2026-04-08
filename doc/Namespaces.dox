@@ -599,6 +599,225 @@
  */
 
 /**
+  @namespace Rodin::MPI
+  @brief Distributed-memory parallel extensions using MPI.
+
+  The MPI module enables distributed finite element computations across
+  multiple processes using the Message Passing Interface (MPI) via Boost.MPI.
+
+  ## Key Components
+
+  - @ref Rodin::Context::MPI "Context::MPI" — Wraps a `boost::mpi::environment`
+    and `boost::mpi::communicator` to provide a uniform execution context.
+  - @ref Rodin::Geometry::Mesh<Context::MPI> "Mesh\<Context::MPI\>" — Distributed
+    mesh storing a rank-local @ref Rodin::Geometry::Shard "Shard" with ownership,
+    ghost, and distributed index metadata.  Geometric queries
+    (`getPolytopeCount`, `getVolume`, `getPerimeter`, etc.) perform
+    MPI reductions automatically.
+  - @ref Rodin::Geometry::Sharder<Context::MPI> "Sharder" — Distributes a global
+    mesh across MPI ranks in three steps: `shard()`, `scatter()`, `gather()`.
+    Also available as one-step `distribute()`.
+  - @ref Rodin::Geometry::Shard "Shard" — Rank-local view of a partitioned mesh.
+    Classifies every polytope as **Owned**, **Shared**, or **Ghost** and maintains
+    bidirectional local↔distributed index maps.
+  - `reconcile(d)` — After local connectivity discovery, reconciles entities of
+    dimension @p d across ranks so that shared entities have consistent
+    distributed IDs and ownership.
+
+  ## Typical Workflow
+
+  @code{.cpp}
+  #include <Rodin/MPI.h>
+
+  boost::mpi::environment env(argc, argv);
+  boost::mpi::communicator world;
+  Context::MPI mpi(env, world);
+
+  // Option A: UniformGrid (partition + distribute in one call)
+  auto mesh = Mesh<Context::MPI>::UniformGrid(mpi, Polytope::Type::Tetrahedron, {16,16,16});
+
+  // Option B: explicit partition → shard → scatter → gather
+  MPI::Sharder sharder(mpi);
+  if (world.rank() == 0)
+  {
+    LocalMesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, {16,16,16});
+    mesh.getConnectivity().compute(cellDim, cellDim);
+    BalancedCompactPartitioner partitioner(mesh);
+    partitioner.partition(world.size());
+    sharder.shard(partitioner);
+    sharder.scatter(0);
+  }
+  auto mesh = sharder.gather(0);
+
+  // Compute distributed connectivity and reconcile shared entities
+  mesh.getConnectivity().compute(2, 3);
+  mesh.reconcile(2);
+  @endcode
+
+  ## Submodules
+
+  - **Assembly** — MPI-parallel assembly strategies for PETSc-backed forms
+  - **Context** — `Context::MPI` execution context
+  - **Geometry** — Distributed mesh and sharder
+  - **IO** — HDF5 and MFEM IO specializations for distributed meshes
+  - **Variational** — Distributed FE spaces (P1 on MPI mesh)
+
+  @note Requires MPI to be available and Rodin configured with
+  `RODIN_USE_MPI=ON`.
+
+  @see @ref Rodin::Context::MPI, @ref Rodin::Geometry::Shard
+ */
+
+/**
+  @namespace Rodin::PETSc
+  @brief PETSc integration module for Rodin.
+
+  The PETSc module provides integration with the
+  [Portable, Extensible Toolkit for Scientific Computation](https://petsc.org/)
+  (PETSc), enabling the use of distributed and parallel linear algebra objects,
+  Krylov solvers, and nonlinear solver frameworks within Rodin's finite element
+  pipeline.
+
+  ## Key Components
+
+  **Math types** (@ref Rodin::PETSc::Math):
+  - @ref Rodin::PETSc::Math::LinearSystem "LinearSystem" — Couples a PETSc
+    `Mat` (operator @f$ A @f$), right-hand side `Vec` (@f$ \mathbf{b} @f$), and
+    solution `Vec` (@f$ \mathbf{x} @f$).  Supports Dirichlet elimination via
+    `eliminate()` and block-preconditioner field splits via `setFieldSplits()`.
+  - `Vector` (`::Vec`) and `Matrix` (`::Mat`) — PETSc handle aliases.
+
+  **Solvers** (@ref Rodin::PETSc::Solver):
+  - @ref Rodin::Solver::KSP "KSP" — Wraps the PETSc KSP (Krylov subspace)
+    context.  Configurable via `setType()`, `setTolerances()`,
+    `setPreconditioner()`, and PETSc command-line options (`-ksp_type`,
+    `-ksp_rtol`, `-ksp_monitor`, etc.).
+  - @ref Rodin::Solver::CG<PETSc::Math::LinearSystem> "CG" — CG specialization
+    setting `KSPCG`.  For symmetric positive-definite systems.
+  - @ref Rodin::Solver::GMRES<PETSc::Math::LinearSystem> "GMRES" — GMRES
+    specialization setting `KSPGMRES`.  For non-symmetric/indefinite systems.
+  - @ref Rodin::Solver::SNES "SNES" — Wraps the PETSc SNES (Scalable Nonlinear
+    Equations Solvers) for Newton-type methods.  The inner linear solve uses
+    `KSP`.
+
+  **Variational** (@ref Rodin::PETSc::Variational):
+  - `PETSc::Variational::TrialFunction` / `TestFunction` — Thin wrappers
+    that trigger PETSc-specific CTAD so that `Problem`, `BilinearForm`, and
+    `LinearForm` automatically use PETSc storage.
+  - `PETSc::Variational::GridFunction` — Stores DOF coefficients in a PETSc
+    `Vec`.  In MPI mode, the vector is created with `VecMPISetGhost` for
+    transparent ghost-layer synchronization.
+  - `Problem` — Assembles into a PETSc `LinearSystem`.  Supports both
+    single-field (`Problem(u, v)`) and multi-field block systems
+    (`Problem(u, p, l, v, q, m)`) with field-split preconditioning.
+  - `BilinearForm` / `LinearForm` — Assemble into PETSc `Mat` / `Vec`.
+
+  **Assembly** (@ref Rodin::PETSc::Assembly):
+  - `Sequential` — Single-rank assembly into PETSc objects.
+  - `MPI` — Distributed assembly where each rank contributes owned elements.
+  - `OpenMP` — Shared-memory parallel assembly on a single rank.
+
+  ## Typical Usage (Sequential)
+
+  @code{.cpp}
+  #include <Rodin/PETSc.h>
+
+  PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
+
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+  mesh.getConnectivity().compute(1, 2);
+
+  P1 Vh(mesh);
+  PETSc::Variational::TrialFunction u(Vh);
+  PETSc::Variational::TestFunction  v(Vh);
+
+  Problem poisson(u, v);
+  poisson = Integral(Grad(u), Grad(v))
+          - Integral(f, v)
+          + DirichletBC(u, Zero());
+
+  Solver::CG(poisson).solve();
+
+  PetscFinalize();
+  @endcode
+
+  ## Typical Usage (MPI + PETSc)
+
+  @code{.cpp}
+  #include <Rodin/MPI.h>
+  #include <Rodin/PETSc.h>
+
+  boost::mpi::environment env(argc, argv);
+  boost::mpi::communicator world;
+  Context::MPI mpi(env, world);
+  PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
+
+  // Partition and distribute mesh
+  MPI::Sharder sharder(mpi);
+  // ... (see MPI module documentation)
+  auto mesh = sharder.gather(0);
+  mesh.getConnectivity().compute(2, 3);
+  mesh.reconcile(2);
+
+  P1 Vh(mesh);
+  PETSc::Variational::TrialFunction u(Vh);
+  PETSc::Variational::TestFunction  v(Vh);
+
+  Problem poisson(u, v);
+  poisson = Integral(Grad(u), Grad(v))
+          - Integral(f, v)
+          + DirichletBC(u, Zero());
+
+  Solver::CG(poisson).solve();
+
+  PetscFinalize();
+  @endcode
+
+  ## Multi-Field Problems (Stokes)
+
+  PETSc problems support an arbitrary number of coupled trial/test function
+  pairs for saddle-point systems:
+
+  @code{.cpp}
+  H1  uh(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+  H1  ph(std::integral_constant<size_t, 1>{}, mesh);
+  P0g lh(mesh);
+
+  PETSc::Variational::TrialFunction u(uh);
+  PETSc::Variational::TrialFunction p(ph);
+  PETSc::Variational::TrialFunction l(lh);
+
+  PETSc::Variational::TestFunction v(uh);
+  PETSc::Variational::TestFunction q(ph);
+  PETSc::Variational::TestFunction m(lh);
+
+  Problem stokes(u, p, l, v, q, m);
+  stokes = Integral(Jacobian(u), Jacobian(v))
+         - Integral(p, Div(v))
+         + Integral(Div(u), q)
+         + Integral(l, q)
+         + Integral(p, m)
+         - Integral(f, v)
+         + DirichletBC(u, u_exact);
+
+  Solver::KSP(stokes).solve();
+  @endcode
+
+  PETSc command-line options can be used to configure field-split
+  preconditioning:
+  @code
+  ./Stokes -ksp_type gmres -pc_type fieldsplit -ksp_rtol 1e-8
+  @endcode
+
+  @note Requires PETSc to be available and Rodin configured with
+  `RODIN_USE_PETSC=ON`.
+
+  @see Rodin::Solver::KSP, Rodin::Solver::SNES
+ */
+
+/**
   @namespace Rodin::Tests
   @brief %Tests of the Rodin library
  */

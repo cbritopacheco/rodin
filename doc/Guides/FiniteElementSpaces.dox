@@ -347,6 +347,10 @@
   - @ref fem-ciarlet "Ciarlet's definition" — Mathematical foundations
   - @ref guides-getting-started-core-concepts "Core Concepts" — Practical
     guide
+  - @ref guides-mpi "MPI distributed computing" — Distributed P1 on
+    `Mesh<Context::MPI>` with local↔global DOF index maps
+  - @ref guides-petsc "PETSc integration" — PETSc-backed grid functions
+    with ghost-layer synchronization
   - @ref examples-pdes-poisson "Poisson example" — Using P1 in practice
   - @ref examples-pdes-elasticity "Elasticity example" — Vector-valued spaces
 

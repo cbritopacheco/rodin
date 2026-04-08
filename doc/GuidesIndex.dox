@@ -81,6 +81,18 @@
   - @subpage guides-io — Supported formats (MFEM, MEDIT, HDF5, XDMF),
     ParaView visualization, and time-series output
 
+  @section guides-parallel-index Parallel and Distributed Computing
+
+  Using MPI and PETSc for large-scale problems:
+
+  - @subpage guides-mpi — Distributed mesh partitioning, sharding, and
+    reconciliation with @ref Rodin::Context::MPI "Context::MPI",
+    @ref Rodin::Geometry::Mesh<Context::MPI> "Mesh\<Context::MPI\>",
+    and @ref Rodin::Geometry::Sharder<Context::MPI> "Sharder"
+
+  - @subpage guides-petsc — PETSc-backed variational forms, distributed
+    linear algebra, KSP/SNES solvers, and multi-field problems
+
   @section guides-getting-started-help Getting Help
 
   - Check the [GitHub repository](https://github.com/cbritopacheco/rodin)

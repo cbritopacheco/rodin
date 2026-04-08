@@ -54,8 +54,8 @@
   | Extension | Purpose |
   |-----------|---------|
   | @ref Rodin::External::MMG "MMG" | Mesh adaptation and optimization via the Mmg Platform |
-  | PETSc | Distributed solvers (KSP, SNES) for large-scale parallel problems |
-  | MPI | Distributed mesh and parallel assembly |
+  | @ref Rodin::PETSc "PETSc" | Distributed solvers (KSP, SNES) and PETSc-backed variational forms for large-scale problems |
+  | @ref Rodin::MPI "MPI" | Distributed mesh partitioning, sharding, and parallel assembly via Boost.MPI |
 
   @section download-and-build Download and build
 
@@ -85,6 +85,8 @@
     descriptions of simulations built with Rodin
   - **I/O and visualization**: Learn how to export results using
     @ref guides-io "XDMF for ParaView visualization"
+  - **Parallel computing**: See @ref guides-mpi "MPI distributed computing"
+    and @ref guides-petsc "PETSc solvers" for large-scale problems
   - **Notation reference**: Consult the @ref notation-index "Notation" page
     for the mathematical symbols used throughout the documentation
 

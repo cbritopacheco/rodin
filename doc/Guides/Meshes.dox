@@ -111,6 +111,8 @@
   - @ref Rodin::Geometry::Mesh "Mesh class reference"
   - @ref guides-polytopes "Polytopes guide"
   - @ref guides-connectivity "Connectivity guide"
+  - @ref guides-mpi "MPI distributed computing" — distributed meshes using
+    `Mesh<Context::MPI>`, partitioning, and reconciliation
   - @ref examples-index "Examples"
 
   */
