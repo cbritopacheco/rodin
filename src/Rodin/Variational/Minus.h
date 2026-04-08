@@ -89,6 +89,33 @@ namespace Rodin::Variational
   }
 
   /**
+   * @brief Subtracts a known solution from a trial function using the trial's
+   * current solution field representation.
+   *
+   * This is useful in semi-implicit time-discrete expressions such as
+   * @f$ (u - u_n)/\Delta t @f$ where @f$ u @f$ is represented by a TrialFunction
+   * and @f$ u_n @f$ is stored in a GridFunction.
+   */
+  template <class Solution, class FES>
+  constexpr
+  auto
+  operator-(const TrialFunction<Solution, FES>& lhs, const Solution& rhs)
+  {
+    return lhs.getSolution() - rhs;
+  }
+
+  /**
+   * @brief Subtracts a known solution from a trial-function reference.
+   */
+  template <class Solution, class FES>
+  constexpr
+  auto
+  operator-(const TrialFunctionReference<Solution, FES>& lhs, const Solution& rhs)
+  {
+    return lhs.getSolution() - rhs;
+  }
+
+  /**
    * @brief Subtracts two bilinear form integrators.
    * @param lhs First integrator
    * @param rhs Second integrator

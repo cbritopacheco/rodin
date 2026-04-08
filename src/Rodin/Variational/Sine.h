@@ -13,6 +13,7 @@
  */
 
 #include "Rodin/Math.h"
+#include <type_traits>
 #include "ForwardDecls.h"
 #include "Function.h"
 #include "RealFunction.h"
@@ -145,6 +146,9 @@ namespace Rodin::Variational
   template <class NestedDerived>
   Sin(const FunctionBase<NestedDerived>&) -> Sin<FunctionBase<NestedDerived>>;
 
+  template <class Number, typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
+  Sin(Number) -> Sin<FunctionBase<RealFunction>>;
+
   /**
    * @brief Helper function to construct objects of type Sin.
    */
@@ -153,7 +157,12 @@ namespace Rodin::Variational
   {
     return Sin(f);
   }
+
+  template <class Number, typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
+  auto Sin(Number value)
+  {
+    return Sin(RealFunction(value));
+  }
 }
 
 #endif
-
