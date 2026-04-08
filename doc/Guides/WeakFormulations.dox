@@ -284,8 +284,8 @@
   velocity and pressure:
 
   @code{.cpp}
-  H1 Vh(mesh, d, 2);  // Velocity: vector H1, order 2
-  H1 Qh(mesh, 1, 1);  // Pressure: scalar H1, order 1
+  H1 Vh(std::integral_constant<size_t, 2>{}, mesh, d);  // Velocity: vector H1, order 2
+  H1 Qh(std::integral_constant<size_t, 1>{}, mesh);     // Pressure: scalar H1, order 1
 
   TrialFunction u(Vh);  TestFunction v(Vh);   // Velocity pair
   TrialFunction p(Qh);  TestFunction q(Qh);   // Pressure pair

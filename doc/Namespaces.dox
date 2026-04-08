@@ -53,15 +53,41 @@
   @namespace Rodin::Alert
   @brief Module to handle alerts, exceptions, and diagnostic messages.
 
-  The Alert module provides a comprehensive system for handling exceptions,
+  The Alert module provides a stream-based system for handling exceptions,
   warnings, informational messages, and success notifications with colored
-  terminal output and formatted messaging capabilities.
+  terminal output. Rodin uses this system **instead of raw `throw` statements**.
 
-  Example usage:
+  ## Alert Types
+
+  | Type | Color | Behavior |
+  |------|-------|----------|
+  | `Alert::Info` | Blue | Informational message (non-fatal) |
+  | `Alert::Warning` | Yellow | Warning message (non-fatal) |
+  | `Alert::Success` | Green | Success notification (non-fatal) |
+  | `Alert::Exception` | Red | Throws an exception (fatal) |
+  | `Alert::MemberFunctionException` | Red | Exception with class/method context |
+  | `Alert::MemberFunctionWarning` | Yellow | Warning with class/method context |
+
+  ## Usage Pattern
+
+  All alerts use the stream insertion operator `<<` and terminate with
+  `Alert::Raise`:
+
   @code{.cpp}
+  // Informational message
   Alert::Info() << "Assembling the system..." << Alert::Raise;
-  Alert::Success() << "Solution computed successfully." << Alert::Raise;
+
+  // Warning
+  Alert::Warning() << "Convergence is slow." << Alert::Raise;
+
+  // Fatal exception (replaces throw)
+  Alert::MemberFunctionException(*this, __func__)
+    << "Incidence " << d << " -> " << dp << " has not been computed."
+    << Alert::Raise;
   @endcode
+
+  @warning Never use raw `throw` in Rodin code. Always use the Alert stream
+  pattern with `<< Alert::Raise`.
  */
 
 /**
@@ -82,14 +108,52 @@
     edges, faces, cells) with type enumeration
   - @ref Rodin::Geometry::Connectivity "Connectivity" — Incidence relations
     between polytopes of different dimensions
-  - @ref Rodin::Geometry::Point "Point" — Evaluation point for grid functions
+  - @ref Rodin::Geometry::Point "Point" — Evaluation point for grid functions,
+    bundling reference coordinates, physical coordinates, Jacobian data, and
+    the owning polytope
 
-  Meshes can be generated or loaded from files:
+  ## Mesh Creation
+
+  | Method | Description |
+  |--------|-------------|
+  | `Mesh::UniformGrid(type, shape)` | Structured grid on the unit hypercube |
+  | `Mesh::Box(faceType, shape)` | Surface mesh (boundary of unit box) |
+  | `Mesh::Build()` | Programmatic construction via Builder pattern |
+  | `mesh.load(file, format)` | Load from MFEM, MEDIT, or HDF5 |
+
+  ## Mesh Operations
+
+  | Method | Description |
+  |--------|-------------|
+  | `getConnectivity().compute(d1, d2)` | Compute incidence relation @f$ d_1 \to d_2 @f$ |
+  | `scale(factor)` | Scale vertex coordinates |
+  | `displace(vectorFunction)` | Apply displacement field |
+  | `skin()` | Extract the boundary surface mesh |
+  | `getDimension()` | Topological dimension |
+  | `getSpaceDimension()` | Ambient space dimension |
+  | `getVertex()` / `getCell()` / `getBoundary()` | Polytope iterators |
+
+  ## Polytope Types
+
+  | Type | Dimension | Description |
+  |------|-----------|-------------|
+  | `Point` | 0 | Vertex |
+  | `Segment` | 1 | Edge |
+  | `Triangle` | 2 | 3-vertex face/cell |
+  | `Quadrilateral` | 2 | 4-vertex face/cell |
+  | `Tetrahedron` | 3 | 4-vertex cell |
+  | `Hexahedron` | 3 | 8-vertex cell |
+  | `Wedge` | 3 | Triangular prism (6 vertices) |
+
   @code{.cpp}
   Mesh mesh;
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
   mesh.getConnectivity().compute(1, 2); // Compute face-to-cell connectivity
   @endcode
+
+  @see @ref guides-meshes "Meshes Guide"
+  @see @ref guides-polytopes "Polytopes Guide"
+  @see @ref guides-connectivity "Connectivity Guide"
  */
 
 /**
@@ -192,12 +256,35 @@
   output for scientific visualization in [ParaView](https://www.paraview.org/),
   supporting time series and multiple fields.
 
-  File format is specified explicitly via the @ref Rodin::IO::FileFormat
-  "FileFormat" enumeration:
+  ## XDMF Architecture
+
+  The XDMF writer uses a two-level design:
+
+  - **XDMF** — Top-level writer that manages the `.xdmf` XML file and `.h5`
+    HDF5 data. Provides `write()`, `flush()`, `close()`, `setPadding()`.
+  - **XDMF::Grid** — A lightweight handle returned by `xdmf.grid()` (default)
+    or `xdmf.grid("name")` (named). Provides `setMesh()`, `add()`, `hasMesh()`,
+    `reset()` — all returning `Grid&` for method chaining.
+
   @code{.cpp}
-  mesh.save("output.mesh", IO::FileFormat::MFEM);
-  mesh.load("domain.mesh", IO::FileFormat::MEDIT);
+  IO::XDMF xdmf("output");
+  xdmf.grid().setMesh(mesh).add("u", u.getSolution());
+  xdmf.write();
   @endcode
+
+  For MPI-distributed I/O, pass the communicator:
+  @code{.cpp}
+  IO::XDMF xdmf("distributed_output", MPI_COMM_WORLD);
+  @endcode
+
+  ## File Format Summary
+
+  | Format | Extensions | Key Classes | Notes |
+  |--------|-----------|-------------|-------|
+  | MFEM | `.mesh`, `.gf` | `IO::FileFormat::MFEM` | Text-based, compatible with MFEM ecosystem |
+  | MEDIT | `.mesh` | `IO::FileFormat::MEDIT` | Used by MMG, supports attributes |
+  | HDF5 | `.h5` | `IO::FileFormat::HDF5` | Binary, parallel-capable |
+  | XDMF | `.xdmf` + `.h5` | `IO::XDMF`, `IO::XDMF::Grid` | ParaView visualization, time series |
 
   @see @ref guides-io "I/O in Rodin" for a comprehensive guide.
  */
@@ -331,6 +418,7 @@
 
   - @ref Rodin::Variational::P0 "P0" — Piecewise constant (discontinuous)
     finite element space
+  - @ref Rodin::Variational::P0g "P0g" — P0 with gradient enrichment for DG methods
   - @ref Rodin::Variational::P1 "P1" — Piecewise linear (continuous)
     finite element space
   - @ref Rodin::Variational::H1 "H1" — Higher-order @f$ H^1 @f$-conforming
@@ -358,10 +446,34 @@
   Key expression classes:
   - `Integral(A, B)` — Domain integrals (bilinear or linear forms)
   - `BoundaryIntegral(A, B)` — Boundary integrals
+  - `FaceIntegral(A, B)` — Integrals over all faces (interior + boundary)
+  - `InterfaceIntegral(A, B)` — Integrals over interior faces only
+
+  Differential operators:
   - `Grad(u)` — Gradient operator
   - `Div(u)` — Divergence operator
-  - `Jacobian(u)` — Jacobian operator
-  - `DirichletBC(u, g)` — Dirichlet boundary conditions
+  - `Jacobian(u)` — Jacobian (gradient of vector field)
+  - `Transpose(A)` — Matrix transpose
+
+  Algebraic operators:
+  - `Dot(A, B)` — Inner product / Frobenius contraction
+  - `Trace(A)` — Matrix trace
+  - `Frobenius(A)` — Frobenius norm
+  - `Component(u, i)` — Extract @f$ i @f$-th component of vector function
+
+  DG operators:
+  - `Jump(u)` — Jump across internal faces: @f$ [u] = u^+ - u^- @f$
+  - `Average(u)` — Average across internal faces: @f$ \{u\} = (u^+ + u^-)/2 @f$
+
+  Boundary conditions:
+  - `DirichletBC(u, g)` — Essential boundary conditions
+  - `PeriodicBC(u, dofMap)` — Periodic boundary conditions
+
+  Convenience functions:
+  - `RealFunction` — Scalar function from constant or lambda
+  - `VectorFunction` — Vector function from initializer list
+  - `Zero` — Zero scalar/vector function
+  - `Pow`, `Exp`, `Sqrt`, `Sin`, `Cos` — Pointwise math operations
 
   ## Problem
 
@@ -1001,6 +1113,31 @@
 /**
   @namespace Rodin::External::MFEM
   @brief MFEM integration with Rodin
+ */
+
+/**
+  @namespace Rodin::Scotch
+  @brief PT-Scotch mesh partitioning integration.
+
+  The Scotch module provides a graph-based mesh partitioner using the
+  [PT-Scotch](https://www.labri.fr/perso/pelegrin/scotch/) library.
+  It implements the `Geometry::Partitioner` interface and supports
+  configurable partitioning strategies via `SCOTCH_Strat`.
+
+  The primary class is `Scotch::Partitioner`, which partitions cells of
+  a local mesh into a given number of parts. The resulting partition can be
+  used with the `Sharder` to distribute the mesh for MPI computations.
+
+  @code{.cpp}
+  #include <Rodin/Scotch/MeshPartitioner.h>
+
+  Scotch::Partitioner partitioner(mesh);
+  partitioner.partition(numRanks);  // partition into numRanks parts
+
+  size_t part = partitioner.getPartition(cellIndex);
+  @endcode
+
+  @note Requires the Scotch library and is conditionally compiled.
  */
 
 /**
