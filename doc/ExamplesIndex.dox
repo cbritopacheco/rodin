@@ -4,1140 +4,156 @@
 
   @tableofcontents
 
-  This page provides a comprehensive guide to the example programs shipped with
-  Rodin. Each section explains the mathematical problem, walks through the code,
-  and highlights the Rodin features used. Examples are the best way to learn how
-  to use the library — we recommend reading them alongside the
-  @ref guides-index "guides".
-
   @section examples-index-gallery Gallery
 
   For a visual overview of what Rodin can do, visit the @ref gallery "Gallery".
 
+  @section examples-index-variational Variational methods and weak formulations
+
+  The @ref Rodin::Variational "Variational" module is used when dealing with
+  variational problems of the form:
+
+  @f[
+    \text{Find} \quad u \in U \quad \text{ s.t. } \quad \forall v \in V \quad
+    a(u, v) = b(v) \ .
+  @f]
+
+  See the @ref guides-variational "variational formulations guide" for the
+  mathematical background, the @ref notation-index "notation reference" for
+  the symbols used, and the @ref guides-solvers "solvers guide" for choosing
+  a solver.
 
   @section examples-index-pdes Solving PDEs
 
-  These examples demonstrate the core workflow: create a mesh, build a finite
-  element space, define trial/test functions, compose a @ref Rodin::Variational::Problem
-  "Problem" from integrals and boundary conditions, solve, and save results.
+  %Rodin can be used to solve partial differential equations of many types. To
+  start solving PDEs with Rodin, we recommend taking a look at the simplest
+  example which is how to solve the Poisson equation.
 
-  @subsection examples-index-pdes-poisson Poisson Equation
-
-  **File:** `examples/PDEs/Poisson.cpp`
-
-  **Problem:**
-  @f[
-    -\Delta u = 1 \quad \text{in } \Omega = [0,1]^2, \qquad u = 0 \quad \text{on } \partial\Omega.
-  @f]
-
-  **Full code:**
-  @code{.cpp}
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
-  mesh.getConnectivity().compute(1, 2); // Compute boundary
-
-  P1 vh(mesh);
-
-  TrialFunction u(vh);
-  TestFunction  v(vh);
-
-  RealFunction f = 1;
-
-  Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, Zero());
-  CG(poisson).solve();
-
-  IO::XDMF xdmf("Poisson");
-  xdmf.grid().setMesh(mesh).add("u", u.getSolution());
-  xdmf.write();
-  @endcode
-
-  **Features demonstrated:**
-  - @ref Rodin::Geometry::Mesh::UniformGrid "Mesh::UniformGrid" — structured
-    triangular grid factory
-  - @ref Rodin::Variational::P1 "P1" — piecewise-linear finite element space
-  - @ref Rodin::Variational::Integral "Integral(Grad(u), Grad(v))" — the
-    bilinear form @f$ \int_\Omega \nabla u \cdot \nabla v @f$
-  - @ref Rodin::Variational::DirichletBC "DirichletBC(u, Zero())" — homogeneous
-    Dirichlet on the full boundary (no `.on()` call needed)
-  - `CG(poisson).solve()` — inline solver pattern: constructs, solves, and
-    discards the conjugate-gradient solver in one expression
-  - @ref Rodin::IO::XDMF "IO::XDMF" with `grid().setMesh(mesh).add(...)` —
-    chained XDMF output for ParaView visualization
-  - `mesh.getConnectivity().compute(1, 2)` — computes edge-to-face incidence,
-    required for boundary detection
-
-  @subsection examples-index-pdes-elasticity Linear Elasticity
-
-  **File:** `examples/PDEs/Elasticity.cpp`
-
-  **Problem:** Find the displacement @f$ \mathbf{u} @f$ of an elastic body
-  with Lamé parameters @f$ \lambda, \mu @f$:
-  @f[
-    -\nabla \cdot \sigma(\mathbf{u}) = 0, \qquad
-    \sigma = \lambda (\operatorname{tr}\varepsilon) I + 2\mu\varepsilon, \qquad
-    \varepsilon = \tfrac{1}{2}(\nabla\mathbf{u} + \nabla\mathbf{u}^T).
-  @f]
-  Dirichlet (fixed) boundary on @f$ \Gamma_D @f$, Neumann (traction) on
-  @f$ \Gamma_N @f$.
-
-  **Key code:**
-  @code{.cpp}
-  Mesh mesh;
-  mesh.load(meshFile, IO::FileFormat::MFEM);
-  mesh.getConnectivity().compute(1, 2);
-
-  size_t d = mesh.getSpaceDimension();
-  P1 fes(mesh, d);  // vector-valued P1 space
-
-  const Real lambda = 0.5769, mu = 0.3846;
-  VectorFunction f{0, -1};  // downward pull
-
-  TrialFunction u(fes);
-  TestFunction  v(fes);
-
-  Problem elasticity(u, v);
-  elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
-             - BoundaryIntegral(f, v).over(GammaN)
-             + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
-  Solver::CG(elasticity).solve();
-  @endcode
-
-  **Features demonstrated:**
-  - `P1(mesh, d)` — vector-valued FE space with `d` components
-  - @ref Rodin::Variational::LinearElasticityIntegral
-    "LinearElasticityIntegral(u, v)(lambda, mu)" — built-in integrator that
-    assembles @f$ \int_\Omega 2\mu\,\varepsilon(u):\varepsilon(v) +
-    \lambda\,(\operatorname{div}u)(\operatorname{div}v) @f$
-  - `BoundaryIntegral(f, v).over(GammaN)` — Neumann traction restricted to
-    a boundary attribute
-  - `DirichletBC(u, ...).on(GammaD)` — Dirichlet BC on a specific boundary
-    attribute
-  - `VectorFunction{0, -1}` — vector constant from initializer list
-  - `mesh.load(file, IO::FileFormat::MFEM)` — loading external mesh files
-  - @ref Rodin::Alert::Info "Alert::Info()" stream pattern for logging
-
-  @subsection examples-index-pdes-helmholtz Helmholtz Equation (Complex-valued)
-
-  **File:** `examples/PDEs/Helmholtz.cpp`
-
-  **Problem:** Complex-valued Helmholtz equation:
-  @f[
-    -\Delta u - k^2 u = f \quad \text{in } \Omega, \qquad u = u_{\mathrm{ex}} \quad \text{on } \partial\Omega.
-  @f]
-
-  **Key code:**
-  @code{.cpp}
-  P1<Complex> vh(mesh);     // complex-valued P1 space
-
-  TrialFunction u(vh);
-  TestFunction  v(vh);
-
-  ComplexFunction f = [&](const Point& p) { return Complex(p.x(), 1) * ...; };
-  ComplexFunction u_ex = [&](const Point& p) { ... };
-
-  Problem helmholtz(u, v);
-  helmholtz = Integral(Grad(u), Grad(v))
-            - waveNumber * waveNumber * Integral(u, v)
-            - Integral(f, v)
-            + DirichletBC(u, u_ex);
-  CG(helmholtz).solve();
-
-  // Extract real and imaginary parts
-  P1<Real> rh(mesh);
-  GridFunction uRe(rh);
-  GridFunction uIm(rh);
-  uRe = Re(u.getSolution());
-  uIm = Im(u.getSolution());
-  @endcode
-
-  **Features demonstrated:**
-  - `P1<Complex>` — complex scalar finite element space
-  - @ref Rodin::Variational::ComplexFunction "ComplexFunction" from lambda
-  - `Re(u)` and `Im(u)` — real/imaginary part extraction operators
-  - The `- k^2 * Integral(u, v)` mass term for the reaction operator
-  - Complex Dirichlet boundary conditions
-
-  @subsection examples-index-pdes-periodic Periodic Boundary Conditions
-
-  **File:** `examples/PDEs/Periodic.cpp`
-
-  **Problem:** Poisson equation on @f$ [0, 2\pi]^2 @f$ with periodic
-  boundary conditions linking left↔right and bottom↔top DOFs.
-
-  **Key code:**
-  @code{.cpp}
-  IndexMap<IndexSet> dofs;
-  for (Index i = 0; i < vh.getSize(); i += n)
-    dofs[i].insert(i + n - 1);     // left ↔ right
-  for (Index i = 0; i < n; i++)
-    dofs[i].insert(i + n * (n - 1)); // bottom ↔ top
-
-  Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + PeriodicBC(u, dofs);
-  Solver::SparseLU(poisson).solve();
-  @endcode
-
-  **Features demonstrated:**
-  - @ref Rodin::Variational::PeriodicBC "PeriodicBC(u, dofs)" — periodic
-    boundary conditions via DOF identification maps
-  - `IndexMap<IndexSet>` — maps each primary DOF to a set of secondary DOFs
-    that must have the same value
-  - `Solver::SparseLU` — direct sparse solver (Eigen's SparseLU)
-
-  @subsection examples-index-pdes-surfacemesh Surface PDE
-
-  **File:** `examples/PDEs/SurfaceMesh.cpp`
-
-  **Problem:** Reaction-diffusion on a curved surface
-  @f$ \Gamma \subset \mathbb{R}^3 @f$:
-  @f[
-    -\Delta_\Gamma u + u = f \quad \text{on } \Gamma.
-  @f]
-
-  **Key code:**
-  @code{.cpp}
-  Mesh Omega;
-  Omega.load(meshFile, IO::FileFormat::MFEM); // surface mesh in R^3
-
-  H1 Vh(Omega); // H1 order 1 on a surface mesh
-
-  TrialFunction u(Vh);
-  TestFunction  v(Vh);
-
-  Problem rd(u, v);
-  rd = Integral(Grad(u), Grad(v))
-     + Integral(u, v)
-     - Integral(f, v);
-  @endcode
-
-  **Features demonstrated:**
-  - Surface meshes (mesh dimension < space dimension) work transparently
-  - @ref Rodin::Variational::H1 "H1" space on a surface mesh — Rodin
-    handles the surface Jacobian internally
-  - Reaction-diffusion: combination of stiffness `Integral(Grad(u), Grad(v))`
-    and mass `Integral(u, v)` terms
-
-  @section examples-index-dg Discontinuous Galerkin
-
-  **File:** `examples/DG/Poisson.cpp`
-
-  **Problem:** Poisson equation solved with the Symmetric Interior Penalty (SIP)
-  DG method using piecewise-constant (@ref Rodin::Variational::P0 "P0") elements.
-
-  **Full code:**
-  @code{.cpp}
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, 16, 16);
-  mesh.getConnectivity().compute(1, 2);
-
-  P0 vh(mesh);   // piecewise-constant DG space
-
-  TrialFunction u(vh);
-  TestFunction  v(vh);
-
-  RealFunction f = 1.0;
-  RealFunction g = 0.0;
-
-  Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, g);
-
-  Solver::SparseLU solver;
-  poisson.solve(solver);
-  @endcode
-
-  **Features demonstrated:**
-  - @ref Rodin::Variational::P0 "P0" — discontinuous piecewise-constant FE
-    space (1 DOF per cell)
-  - `Integral(Grad(u), Grad(v))` with P0 functions — Rodin's DG assembly
-    automatically handles the interior penalty terms
-  - `poisson.solve(solver)` — the second solver pattern: create a reusable
-    solver, then pass it to `Problem::solve()`
-  - `SparseLU` is preferred for DG problems because the resulting system is
-    often non-symmetric
-
-  @see @ref guides-variational "Variational Formulations Guide" for the
-  mathematical DG formulation and additional operators (`Jump`, `Average`,
-  `FaceIntegral`, `InterfaceIntegral`).
+  | Equation                                        | Link to example |
+  | ----------------------------------------------- | --------------- |
+  | @f$ - \Delta u = f @f$                          | @ref examples-pdes-poisson |
+  | @f$ - \nabla \cdot \sigma (u ) = 0  @f$         | @ref examples-pdes-elasticity |
+  | @f$ - \Delta u - k^2 u = f @f$                  | @ref examples-pdes-helmholtz |
+  | @f$ -\nu \Delta \mathbf{u} + (\mathbf{u} \cdot \nabla)\mathbf{u} + \nabla p = \mathbf{f} @f$ | @ref examples-pdes-navierstokes |
+  | @f$ - \Delta u = f @f$ (periodic)               | @ref examples-pdes-periodic |
+  | @f$ - \Delta_\Gamma u + u = f @f$ (surface)     | @ref examples-pdes-surfacemesh |
 
   @section examples-index-io Input/Output
 
-  @subsection examples-index-io-xdmf XDMF Time Series
-
-  **File:** `examples/IO/XDMF.cpp`
-
-  **Problem:** Export a time-evolving vector field to XDMF for visualization in
-  ParaView.
-
-  **Key code:**
-  @code{.cpp}
-  IO::XDMF xdmf("TimeEvolution");
-
-  auto grid = xdmf.grid();
-  grid.setMesh(mesh);
-  grid.add(u);  // register the vector field
-
-  for (size_t k = 0; k < Nt; ++k)
-  {
-    const Real t = k * dt;
-    u = [t](const Geometry::Point& p) { ... };  // update field
-    xdmf.write(t);                               // export snapshot
-  }
-  @endcode
-
-  **Features demonstrated:**
-  - `xdmf.grid()` returns a Grid handle for the default grid
-  - `grid.setMesh(mesh)` binds a mesh to the grid; `grid.add(u)` registers
-    fields — both return `Grid&` for method chaining
-  - `xdmf.write(t)` writes a timestamped snapshot of all registered fields
-  - The field data is read from the @ref Rodin::Variational::GridFunction
-    "GridFunction" at each `write()` call, so updating the grid function and
-    calling `write()` again captures the new state
-  - `xdmf.write(t).flush()` ensures data is flushed to disk immediately
-
-  @subsection examples-index-io-formats Mesh Format Conversion
-
-  **File:** `examples/IO/MEDIT.cpp`
-
-  Converts a MEDIT mesh to MFEM format:
-  @code{.cpp}
-  Mesh mesh;
-  mesh.load(argv[1], IO::FileFormat::MEDIT);
-  mesh.save("mfem.mesh", IO::FileFormat::MFEM);
-  @endcode
-
-  Supported formats: @ref Rodin::IO::FileFormat "MFEM", MEDIT, HDF5, and
-  @ref Rodin::IO::XDMF "XDMF".
+  Rodin supports several I/O formats for meshes, grid functions, and simulation
+  data. The supported formats are @ref Rodin::IO::FileFormat "MFEM", MEDIT,
+  and HDF5. The @ref Rodin::IO::XDMF "XDMF" format is recommended for
+  exporting results for visualization in ParaView:
 
   - @subpage examples-io-index
 
   @section examples-index-geometry Mesh Geometry
 
-  @subsection examples-index-geometry-box Box Surface Meshes
-
-  **File:** `examples/Geometry/Box.cpp`
-
-  `Mesh::Box` creates a **surface mesh** (boundary of a box) where the face
-  type determines the embedding dimension:
-
-  @code{.cpp}
-  mesh = mesh.Box(Polytope::Type::Point, { n });            // 0D points on 1D line
-  mesh = mesh.Box(Polytope::Type::Segment, { n, n });       // 1D edges on 2D square boundary
-  mesh = mesh.Box(Polytope::Type::Triangle, { n, n, n });   // 2D triangles on 3D cube boundary
-  mesh = mesh.Box(Polytope::Type::Quadrilateral, { n, n, n }); // 2D quads on 3D cube boundary
-  @endcode
-
-  @note `Box` takes a **face type** (not a cell type) and produces a surface
-  mesh where the spatial dimension is one higher than the mesh dimension.
-
-  @subsection examples-index-geometry-normal Boundary Normals
-
-  **File:** `examples/Variational/Normal.cpp`
-
-  Projects the outward unit normal onto a displaced mesh:
-  @code{.cpp}
-  mesh.displace(VectorFunction{ 0, 0.2 * sin(2 * M_PI * F::x) });
-
-  P1 fes(mesh, vdim);
-  GridFunction gf(fes);
-  gf.project(Region::Boundary, BoundaryNormal(mesh));
-  @endcode
-
-  **Features demonstrated:**
-  - `mesh.displace(...)` — deform the mesh by a vector field
-  - `F::x` — coordinate projection function (see @ref guides-core-concepts)
-  - @ref Rodin::Variational::BoundaryNormal "BoundaryNormal(mesh)" — outward
-    unit normal vector on the boundary
-  - `gf.project(Region::Boundary, ...)` — project a field only on the boundary
-
-  @subsection examples-index-geometry-partition Mesh Partitioning (Scotch)
-
-  **File:** `examples/Scotch/MeshPartitioner.cpp`
-
-  Partitions a mesh into 16 parts using the Scotch graph partitioner:
-  @code{.cpp}
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {32, 32});
-  mesh.getConnectivity().compute(2, 2);
-
-  Scotch::Partitioner partitioner(mesh);
-  partitioner.partition(16);
-
-  for (auto it = mesh.getCell(); it; ++it)
-    mesh.setAttribute({2, it->getIndex()}, partitioner.getPartition(it->getIndex()) + 1);
-  @endcode
-
-  **Features demonstrated:**
-  - `mesh.getConnectivity().compute(2, 2)` — cell-to-cell adjacency required
-    by the partitioner
-  - `Scotch::Partitioner` — wrapper around the SCOTCH graph partitioner
-  - `mesh.setAttribute(...)` — label cells by partition for visualization
+  The @ref Rodin::Geometry "Geometry" module provides mesh creation,
+  topological connectivity, and geometric operations:
 
   - @subpage examples-geometry-index
 
   @section examples-index-mmg Working with MMG
 
-  @subsection examples-index-mmg-optimize Mesh Optimization
-
-  **File:** `examples/MMG/MeshOptimization.cpp`
-
-  Optimizes a coarse uniform mesh using the MMG remesher:
-  @code{.cpp}
-  MMG::Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
-
-  mesh.setCorner(0);   // pin corner vertices
-  mesh.setCorner(15);
-
-  for (auto it = mesh.getBoundary(); !it.end(); ++it)
-    mesh.setRidge(it->getIndex()); // mark boundary edges as ridges
-
-  MMG::Optimizer().setHMax(0.5).optimize(mesh);
-  @endcode
-
-  **Features demonstrated:**
-  - @ref Rodin::External::MMG::Mesh "MMG::Mesh" — extended mesh type
-    compatible with the MMG library
-  - `setCorner()` / `setRidge()` — geometric feature preservation
-  - @ref Rodin::External::MMG::Optimizer "MMG::Optimizer" with fluent API
-    (`setHMax`, `setHMin`, `setHausdorff`, `setAngleDetection`)
-
-  @subsection examples-index-mmg-levelset Implicit Domain Meshing
-
-  **File:** `examples/MMG/DomainDiscretization.cpp`
-
-  Creates a mesh of a circle from a level-set function:
-  @code{.cpp}
-  MMG::Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
-  mesh.scale(1. / (n - 1));
-
-  P1 fes(mesh);
-  MMG::RealGridFunction gf(fes);
-  gf = [](const Geometry::Point& p)
-       {
-         return (p.x() - 0.5) * (p.x() - 0.5)
-              + (p.y() - 0.5) * (p.y() - 0.5) - radius;
-       };
-
-  MMG::LevelSetDiscretizer().split(interior, { interior, exterior })
-                             .setBoundaryReference(boundary)
-                             .setHMax(hmax)
-                             .discretize(gf);
-  @endcode
-
-  **Features demonstrated:**
-  - `MMG::RealGridFunction` — grid function type required by MMG operations
-  - @ref Rodin::External::MMG::LevelSetDiscretizer "LevelSetDiscretizer" —
-    splits regions along the zero level set of a function
-  - `.split(from, {interior, exterior})` — defines how regions are divided
-  - `.setBoundaryReference(attr)` — the attribute assigned to the new interface
-  - The discretized mesh conforms exactly to the zero-isosurface
+  The @ref Rodin::External::MMG "MMG" module has a wide variety of uses which
+  ranges from optimization of the mesh, to implicit domain meshing. It provides
+  many C++ wrappers to execute the functionality of the [Mmg
+  Platform](https://www.mmgtools.org/):
 
   - @subpage examples-mmg-index
 
-  @section examples-index-solid Solid Mechanics
-
-  The @ref Rodin::Solid "Solid" module provides hyperelastic constitutive laws
-  and nonlinear integrators for large-deformation solid mechanics, while the
-  @ref Rodin::Variational::LinearElasticityIntegral "LinearElasticityIntegral"
-  covers the small-strain (linearized) case.
-
-  @subsection examples-index-solid-blockgravity Block Under Gravity (NeoHookean)
-
-  **File:** `examples/Solid/BlockGravity.cpp`
-
-  **Problem:** A unit square block, fixed on its bottom edge, is loaded by a
-  time-varying gravitational body force. A compressible NeoHookean material
-  model is used with Newton linearization for the nonlinear problem.
-
-  **Key code:**
-  @code{.cpp}
-  // Material
-  const Real lambda = E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu));
-  const Real mu     = E / (2.0 * (1.0 + nu));
-  Solid::NeoHookean law(lambda, mu);
-
-  // Solution field
-  GridFunction u(Vh);
-  u = VectorFunction{ Zero(), Zero() };
-
-  // At each quasi-static load step:
-  Solid::MaterialTangent tangent(law, du, v);
-  tangent.setDisplacement(u);
-
-  Solid::InternalForce residual(law, v);
-  residual.setDisplacement(u);
-
-  Problem newton(du, v);
-  newton = tangent
-         + residual
-         - Integral(bodyForce, v)
-         + DirichletBC(du, zero).on(bottomBC);
-
-  SparseLU linearSolver(newton);
-  NewtonSolver solver(linearSolver);
-  solver.setMaxIterations(50)
-        .setAbsoluteTolerance(1e-10)
-        .setRelativeTolerance(1e-8);
-  solver.solve(u);
-  @endcode
-
-  **Features demonstrated:**
-  - @ref Rodin::Solid::NeoHookean "Solid::NeoHookean" — compressible
-    NeoHookean constitutive law parameterized by @f$ (\lambda, \mu) @f$
-  - @ref Rodin::Solid::MaterialTangent "Solid::MaterialTangent" — linearized
-    tangent operator @f$ K[\delta u] = \partial F_{\text{int}} / \partial u @f$;
-    use `.setDisplacement(u)` to set the current deformation state
-  - @ref Rodin::Solid::InternalForce "Solid::InternalForce" — internal force
-    residual @f$ F_{\text{int}}(u; v) @f$; also uses `.setDisplacement(u)`
-  - @ref Rodin::Solver::NewtonSolver "NewtonSolver" — wraps a linear solver
-    for Newton-Raphson iteration (defaults: max 100 iterations, atol 1e-12,
-    rtol 1e-8)
-  - `solver.solve(u)` — Newton iteration updates `u` in place
-  - XDMF time-series output: `xdmf.write(static_cast<Real>(step))`
-  - Boundary labeling by iterating over boundary edges and checking coordinates
-
-  @subsection examples-index-solid-cantilever Transient Cantilever Beam (Newmark)
-
-  **File:** `examples/Solid/CantileverBeam.cpp`
-
-  **Problem:** A rectangular beam (4×1) clamped on the left, subject to
-  time-varying traction on the right. Models inertia, viscous damping, and
-  NeoHookean hyperelasticity with Newmark-beta time integration
-  (@f$ \beta = 1/4 @f$, @f$ \gamma = 1/2 @f$ — average acceleration).
-
-  **Features demonstrated:**
-  - Newmark-beta time integration with predictor-corrector scheme
-  - Combined inertia (`aMass * Integral(du, w)`), damping
-    (`aDamp * Integral(du, w)`), and hyperelastic internal force
-  - `DirichletBC(du, zero).on(leftBC)` — BC on the Newton increment
-  - Discrete derivative check for verifying tangent consistency
-  - `solver.setDampingFactor(1.0)` — full Newton step (no line search damping)
-  - `xdmf.write(t).flush()` — time-stamped output with flush
-  - `xdmf.close()` — finalize the XDMF file
-
-  @section examples-index-shapeoptimization Shape Optimization
-
-  @subsection examples-index-shapeopt-cantilever Level-Set Cantilever 2D
-
-  **File:** `examples/ShapeOptimization/LevelSetCantilever2D.cpp`
-
-  **Problem:** Compliance minimization with volume penalty for a 2D cantilever.
-  The domain is represented as a level set, and the optimization loop combines:
-  1. MMG mesh optimization,
-  2. domain trimming (remove exterior),
-  3. elasticity state solve,
-  4. Hilbert-regularized shape gradient computation,
-  5. signed-distance reconstruction (Eikonal),
-  6. semi-Lagrangian level-set advection,
-  7. implicit-domain reconstruction (MMG::LevelSetDiscretizer),
-  8. XDMF visualization.
-
-  **Optimization loop (simplified):**
-  @code{.cpp}
-  while (i < maxIt)
-  {
-    // 1. Optimize mesh
-    MMG::Optimizer().setHMax(hmax).setHMin(hmin).setHausdorff(hausd).optimize(th);
-
-    // 2. Trim exterior
-    SubMesh trimmed = th.trim(exterior);
-
-    // 3. Solve elasticity
-    Problem elasticity(u, v);
-    elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
-               - BoundaryIntegral(f, v).over(GammaN)
-               + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
-    Solver::CG(elasticity).solve();
-
-    // 4. Hilbert shape gradient
-    auto jac = Jacobian(u.getSolution());
-    jac.traceOf(interior);
-    auto e = 0.5 * (jac + jac.T());
-    auto Ae = 2.0 * mu * e + lambda * Trace(e) * IdentityMatrix(d);
-    auto n = FaceNormal(th);
-    n.traceOf(interior);
-
-    Problem hilbert(g, w);
-    hilbert = Integral(alpha * alpha * Jacobian(g), Jacobian(w))
-            + Integral(g, w)
-            - FaceIntegral(Dot(Ae, e) - ell, Dot(n, w)).over(Gamma);
-    Solver::CG(hilbert).solve();
-
-    // 5. Distance
-    Distance::Eikonal(dist).setInterior(interior).setInterface(Gamma).solve().sign();
-
-    // 6. Advect level set
-    Advection::Lagrangian(advect, test, dist, dJ).step(dt);
-
-    // 7. Reconstruct domain
-    th = MMG::LevelSetDiscretizer().split(interior, {interior, exterior})
-                                   .setBoundaryReference(Gamma)
-                                   .discretize(advect.getSolution());
-
-    // 8. XDMF
-    xdmf.write(i).flush();
-  }
-  @endcode
-
-  **Features demonstrated:**
-  - @ref Rodin::External::MMG::Optimizer "MMG::Optimizer" and
-    @ref Rodin::External::MMG::LevelSetDiscretizer "MMG::LevelSetDiscretizer"
-    for adaptive remeshing and implicit-domain reconstruction
-  - `th.trim(exterior)` — extract a subdomain as a @ref Rodin::Geometry::SubMesh
-    "SubMesh"
-  - `Jacobian(u).traceOf(interior)` — evaluate the Jacobian from the interior
-    side of an interface
-  - `FaceNormal(th).traceOf(interior)` — face normal evaluated from the
-    interior side
-  - `FaceIntegral(integrand, test).over(Gamma)` — integration over interior
-    faces
-  - `Trace(e)`, `IdentityMatrix(d)`, `Dot(Ae, e)` — tensor operators
-  - @ref Rodin::Distance::Eikonal "Distance::Eikonal" — signed-distance
-    function via Fast Marching Method
-  - @ref Rodin::Advection::Lagrangian "Advection::Lagrangian" —
-    semi-Lagrangian advection with `step(dt)`
-  - `Frobenius(dJ)` for computing the norm of the gradient field
-  - Named XDMF grids: `xdmf.grid("domain")` and `xdmf.grid("state")` with
-    `IO::XDMF::MeshPolicy::Transient` for evolving meshes
-  - Error recovery: `catch (const Alert::Exception& e)` with `hmax /= 2`
-    retry strategy
-
-  @subsection examples-index-shapeopt-simple Simple Cantilever 2D
-
-  **File:** `examples/ShapeOptimization/SimpleCantilever2D.cpp`
-
-  A simplified shape optimization workflow without level sets. Uses:
-  - `BilinearForm bf(u, v)` with `LinearElasticityIntegral(u, v)(lambda, mu)`
-    for computing compliance `bf(w, w)`
-  - Similar Hilbert-regularized gradient approach
-
-  @subsection examples-index-shapeopt-more More Shape Optimization
-
-  | Problem | Dimension | File |
-  |---------|-----------|------|
-  | Level-set arch | 2D | `examples/ShapeOptimization/LevelSetArch2D.cpp` |
-  | Level-set cantilever | 3D | `examples/ShapeOptimization/LevelSetCantilever3D.cpp` |
-  | Level-set eigenvalue | 2D | `examples/ShapeOptimization/LevelSetEigenvalue2D.cpp` |
-  | Level-set mast | 2D | `examples/ShapeOptimization/LevelSetMast2D.cpp` |
-
-  - @subpage examples-shapeoptimization-index
-
-  @section examples-index-density_optimization Density Optimization
-
-  **File:** `examples/DensityOptimization/TemperatureMinimization.cpp`
-
-  **Problem:** Density-based topology optimization that minimizes average
-  temperature subject to a SIMP-interpolated Poisson state equation:
-  @f[
-    J(\gamma, u) = \frac{1}{|\Omega|}\int_\Omega u\,dx + \ell \int_\Omega \gamma\,dx,
-    \qquad -\nabla\cdot\bigl(a(\gamma)\nabla u\bigr) = 1.
-  @f]
-
-  **Key code (optimization loop):**
-  @code{.cpp}
-  const auto a = gmin + (gmax - gmin) * Pow(gamma, 3);
-
-  // State equation
-  Problem poisson(u, v);
-  poisson = Integral(a * Grad(u), Grad(v))
-          - Integral(f * v)
-          + DirichletBC(u, RealFunction(0.0)).on(GammaD);
-  Solver::SparseLU(poisson).solve();
-
-  // Adjoint equation
-  Problem adjoint(p, q);
-  adjoint = Integral(a * Grad(p), Grad(q))
-          + Integral(RealFunction(1.0 / vol), q)
-          + DirichletBC(p, RealFunction(0.0)).on(GammaD);
-  Solver::SparseLU(adjoint).solve();
-
-  // Hilbert-regularized gradient
-  Problem hilbert(gfun, w);
-  hilbert = Integral(alpha * Grad(gfun), Grad(w))
-          + Integral(gfun, w)
-          - Integral(ell + 3 * (gmax - gmin) * Pow(gamma, 2)
-                       * Dot(Grad(u.getSolution()), Grad(p.getSolution())), w);
-  Solver::SparseLU(hilbert).solve();
-
-  // Projected gradient descent
-  gamma -= mu * gfun.getSolution();
-  gamma = Min(1.0, Max(0.0, gamma));
-  @endcode
-
-  **Features demonstrated:**
-  - @ref Rodin::Variational::Pow "Pow(gamma, 3)" — SIMP material
-    interpolation (expression template, evaluated lazily during assembly)
-  - Adjoint-based gradient computation with separate state and adjoint problems
-  - @ref Rodin::Variational::Dot "Dot(Grad(u), Grad(p))" — inner product
-    of gradient fields
-  - `Hilbert-regularization` — filtering the raw gradient through an H1 solve
-  - @ref Rodin::Variational::Min "Min" / @ref Rodin::Variational::Max "Max"
-    — pointwise bounds enforcement for the density field
-  - `Integral(u.getSolution()).compute()` — evaluate a global integral
-    of a grid function (returns a scalar)
-  - XDMF convenience API: `xdmf.grid().setMesh(mesh)`, `xdmf.add("name", gf)`,
-    `xdmf.write().flush()`
+  @section examples-index-density_optimization Density optimization examples
 
   - @subpage examples-density_optimization-index
 
+  @section examples-index-shapeoptimization Shape optimization examples
+
+  - @subpage examples-shapeoptimization-index
+
+  @section examples-index-solid Solid Mechanics
+
+  The @ref Rodin::Solid "Solid" module provides hyperelastic constitutive
+  laws and nonlinear integrators for large-deformation solid mechanics. The
+  @ref Rodin::Elasticity "LinearElasticityIntegral" covers the small-deformation
+  (linearized) case, while the Solid module handles finite-strain problems with
+  constitutive laws such as NeoHookean, Saint-Venant-Kirchhoff, and
+  Mooney-Rivlin:
+
+  | Problem | Constitutive Law | Example |
+  |---------|-----------------|---------|
+  | Linear cantilever beam | @f$ \sigma = \lambda(\operatorname{tr}\varepsilon)I + 2\mu\varepsilon @f$ | @ref examples-pdes-elasticity |
+  | Hyperelastic cantilever (NeoHookean, transient) | @f$ W = \frac{\mu}{2}(I_1-d) - \mu\ln J + \frac{\lambda}{2}(\ln J)^2 @f$ | `examples/Solid/CantileverBeam.cpp` |
+
   @section examples-index-eikonal Distance and Eikonal
 
-  @subsection examples-index-eikonal-fmm Fast Marching Method
+  The @ref Rodin::Eikonal "Eikonal" module solves @f$ |\nabla u| = F(x) @f$
+  via the Fast Marching Method, and the @ref Rodin::Distance "Distance" module
+  wraps several distance-function computation strategies:
 
-  **File:** `examples/Models/Eikonal/FMM.cpp`
-
-  **Problem:** Solve the Eikonal equation @f$ |\nabla u| = 1/F(x) @f$ on
-  unstructured triangular and surface meshes using the Fast Marching Method.
-
-  **Key code:**
-  @code{.cpp}
-  P1 vh(mesh);
-  GridFunction u(vh);
-
-  auto f = [](const Geometry::Point& p) -> Real { return 1.0; };
-
-  Eikonal::FMM fmm(u, f);
-
-  // Seed interface: vertices near center
-  std::vector<Index> interface;
-  for (auto it = mesh.getVertex(); !it.end(); ++it)
-  {
-    const auto& coord = mesh.getVertexCoordinates(it->getIndex());
-    if ((coord - Math::SpatialVector<Real>{{0.5, 0.5}}).norm() < 0.05)
-      interface.push_back(it->getIndex());
-  }
-
-  fmm.seed(interface).solve();
-  @endcode
-
-  **Features demonstrated:**
-  - @ref Rodin::Eikonal::FMM "Eikonal::FMM" — Fast Marching Method solver
-  - `fmm.seed(vertices)` — specify interface vertices where @f$ u = 0 @f$
-  - `.solve()` — marches outward from seeds, computing exact geodesic distance
-  - Works on both planar and surface meshes (the example includes a 3D
-    surface extracted with `volume.skin()`)
-  - Varying speed function: pass any `(Point) -> Real` callable
-
-  @subsection examples-index-eikonal-distance Distance Functions
-
-  **File:** `examples/Models/Distance/SpaldingTucker.cpp`
-
-  Demonstrates the composition of multiple distance-computation methods:
-  @code{.cpp}
-  // Discretize implicit domains with MMG
-  mesh = MMG::LevelSetDiscretizer().setBoundaryReference(5)
-    .setAngleDetection().setHMax(0.02).discretize(dist);
-
-  // Signed distance via variational method
-  auto ls = Distance::SignedPoisson()(5, 3, vh);
-
-  // Wall distance via Spalding-Tucker normalization
-  auto dist = Distance::SpaldingTucker()(ls);
-  @endcode
-
-  **Features demonstrated:**
-  - @ref Rodin::Distance::SignedPoisson "Distance::SignedPoisson" — variational
-    signed distance (takes boundary attribute, sign attribute, and FE space)
-  - @ref Rodin::Distance::SpaldingTucker "Distance::SpaldingTucker" — Reynolds
-    number-aware boundary-layer wall distance normalization
-  - Composing distance methods: output of one method feeds into the next
+  | Method | Description | Example |
+  |--------|-------------|---------|
+  | FMM | Exact distance on unstructured meshes | `examples/Models/Eikonal/FMM.cpp` |
+  | Spalding-Tucker | Boundary-layer wall distance | `examples/Models/Distance/SpaldingTucker.cpp` |
 
   @section examples-index-petsc PETSc Examples
 
-  The @ref Rodin::PETSc "PETSc" module enables PETSc-based linear algebra,
-  distributed solvers, and multi-field block systems.
+  The @ref Rodin::PETSc "PETSc" module enables distributed solvers and
+  multi-field block systems. Examples include:
 
-  @subsection examples-index-petsc-seqpoisson Sequential Poisson (PETSc)
+  | Problem | Description | Example |
+  |---------|-------------|---------|
+  | Sequential Poisson | PETSc CG solver on local mesh | `examples/PETSc/PDEs/Seq_Poisson.cpp` |
+  | MPI Poisson | Distributed mesh + PETSc KSP | `examples/PETSc/PDEs/MPI_Poisson.cpp` |
+  | Sequential Stokes | Multi-field (velocity-pressure-Lagrange) | `examples/PETSc/PDEs/Seq_Stokes.cpp` |
+  | Lid-driven cavity | Navier-Stokes with Picard iteration | `examples/PETSc/PDEs/Seq_LidDrivenCavity.cpp` |
+  | Navier-Stokes | Nonlinear convection-diffusion | `examples/PETSc/PDEs/Seq_NavierStokes.cpp` |
 
-  **File:** `examples/PETSc/PDEs/Seq_Poisson.cpp`
+  @see @ref guides-petsc "PETSc Guide", @ref guides-mpi "MPI Guide"
 
-  **Problem:** Same Poisson problem as above, but using PETSc sparse matrices
-  and the PETSc CG solver on a 3D hexahedral mesh.
+  @section examples-index-dg Discontinuous Galerkin
 
-  **Key code:**
-  @code{.cpp}
-  PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
+  The DG example solves the Poisson equation using the Symmetric Interior
+  Penalty (SIP) method with DG-specific operators (`Jump`, `Average`,
+  `FaceIntegral`, `InterfaceIntegral`):
 
-  Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Hexahedron, { n, n, n });
+  | Equation | Method | Example |
+  |----------|--------|---------|
+  | @f$ -\Delta u = f @f$ | SIP-DG | `examples/DG/Poisson.cpp` |
 
-  P1 vh(mesh);
-
-  PETSc::Variational::TrialFunction u(vh);
-  PETSc::Variational::TestFunction  v(vh);
-
-  Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, Zero());
-
-  CG(poisson).solve();
-
-  PetscFinalize();
-  @endcode
-
-  **Features demonstrated:**
-  - `PETSc::Variational::TrialFunction` / `TestFunction` — CTAD wrappers
-    that route assembly to PETSc sparse matrices
-  - `Polytope::Type::Hexahedron` — 3D hexahedral elements (Rodin handles
-    tensor-product elements natively)
-  - The problem composition (`Integral`, `DirichletBC`) is
-    **identical** to the non-PETSc version — only the trial/test function
-    types change
-  - `PetscInitialize`/`PetscFinalize` — standard PETSc lifecycle
-
-  @subsection examples-index-petsc-mpi MPI-Distributed Poisson
-
-  **File:** `examples/PETSc/PDEs/MPI_Poisson.cpp`
-
-  **Problem:** Poisson equation solved in parallel using distributed mesh
-  partitioning and PETSc KSP.
-
-  **Key code:**
-  @code{.cpp}
-  mpi::environment env(argc, argv);
-  mpi::communicator world;
-  Context::MPI mpi(env, world);
-
-  Rodin::MPI::Sharder sharder(mpi);
-  if (world.rank() == ROOT_RANK)
-  {
-    Geometry::LocalMesh mesh;
-    mesh = mesh.UniformGrid(Geometry::Polytope::Type::Tetrahedron, { n, n, n });
-    mesh.getConnectivity().compute(cellDim, cellDim);
-
-    Geometry::BalancedCompactPartitioner partitioner(mesh);
-    partitioner.partition(world.size());
-
-    sharder.shard(partitioner);
-    sharder.scatter(ROOT_RANK);
-  }
-
-  auto mesh = sharder.gather(ROOT_RANK);
-  mesh.getConnectivity().compute(2, 3);
-  mesh.reconcile(2);
-
-  P1 vh(mesh);
-  PETSc::Variational::TrialFunction u(vh);
-  PETSc::Variational::TestFunction  v(vh);
-
-  Problem poisson(u, v);
-  poisson = Integral(Grad(u), Grad(v))
-          - Integral(f, v)
-          + DirichletBC(u, Zero());
-  CG(poisson).solve();
-
-  IO::XDMF xdmf(MPI_COMM_WORLD, "mpi/Poisson");
-  xdmf.setMesh(mesh);
-  xdmf.add("u", u.getSolution());
-  xdmf.write();
-  @endcode
-
-  **Features demonstrated:**
-  - `Context::MPI` — MPI execution context from Boost.MPI
-  - @ref Rodin::MPI::Sharder "Sharder" — shard/scatter/gather workflow for
-    distributing a mesh
-  - @ref Rodin::Geometry::BalancedCompactPartitioner
-    "BalancedCompactPartitioner" — balanced graph partitioning
-  - `mesh.reconcile(2)` — reconcile shared face ownership across ranks
-  - `IO::XDMF(MPI_COMM_WORLD, name)` — parallel XDMF output
-  - The problem definition is **identical** to the sequential version
-
-  @see @ref guides-mpi "MPI Guide", @ref guides-petsc "PETSc Guide"
-
-  @subsection examples-index-petsc-stokes Multi-Field Stokes (Taylor-Hood)
-
-  **File:** `examples/PETSc/PDEs/Seq_Stokes.cpp`
-
-  **Problem:** 3D Stokes flow with Taylor-Hood elements (P2 velocity, P1
-  pressure) and a P0g Lagrange multiplier for the zero-mean pressure
-  constraint:
-
-  @code{.cpp}
-  H1  uh(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
-  H1  ph(std::integral_constant<size_t, 1>{}, mesh);
-  P0g lh(mesh); // global constant space (1 DOF)
-
-  PETSc::Variational::TrialFunction u(uh); u.setName("u");
-  PETSc::Variational::TrialFunction p(ph); p.setName("p");
-  PETSc::Variational::TrialFunction l(lh); l.setName("lambda");
-
-  PETSc::Variational::TestFunction v(uh);
-  PETSc::Variational::TestFunction q(ph);
-  PETSc::Variational::TestFunction m(lh);
-
-  Problem stokes(u, p, l, v, q, m);
-  stokes =
-      Integral(Jacobian(u), Jacobian(v))
-    - Integral(p, Div(v))
-    + Integral(Div(u), q)
-    + Integral(l, q)
-    + Integral(p, m)
-    + 1e-12 * Integral(p, q)
-    + 1e-12 * Integral(l, m)
-    - Integral(f, v)
-    + DirichletBC(u, u_exact);
-
-  Solver::KSP(stokes).solve();
-  @endcode
-
-  **Features demonstrated:**
-  - `H1(std::integral_constant<size_t, 2>{}, mesh, dim)` — quadratic
-    (order-2) H1 vector space for velocity
-  - `H1(std::integral_constant<size_t, 1>{}, mesh)` — linear H1 scalar
-    space for pressure
-  - @ref Rodin::Variational::P0g "P0g" — global constant space (1 DOF total)
-    for the Lagrange multiplier
-  - `Problem(u, p, l, v, q, m)` — **multi-field problem** with three
-    trial/test function pairs
-  - `Integral(Jacobian(u), Jacobian(v))` — viscous term using the velocity
-    Jacobian
-  - `Integral(p, Div(v))` and `Integral(Div(u), q)` — pressure-velocity
-    coupling
-  - `Solver::KSP(stokes).solve()` — PETSc KSP solver (default GMRES+ILU)
-  - Manufactured solution with trigonometric functions using `Sin`, `Cos`,
-    `F::x`, `F::y`, `F::z` coordinate projections
-
-  @subsection examples-index-petsc-navierstokes Transient Navier-Stokes
-
-  **File:** `examples/PETSc/PDEs/Seq_NavierStokes.cpp`
-
-  **Problem:** Transient incompressible Navier-Stokes in 2D with:
-  - Taylor-Hood elements (P2 velocity, P1 pressure)
-  - Semi-implicit Oseen/Picard linearization
-  - Backward Euler time stepping
-  - Windkessel-like outlet resistance model
-
-  **Key code (per time step):**
-  @code{.cpp}
-  const auto conv_u = Mult(Jacobian(u), u_old);    // (u_old · ∇)u
-  const auto div_u_old = Div(u_old);
-  const auto beta = Max(-Dot(u_old, n), 0.0);       // backflow damping
-
-  Problem flow(u, p, v, q);
-  flow =
-      (rho / dt) * Integral(u, v)
-    - (rho / dt) * Integral(u_old, v)
-    + rho * Integral(Dot(conv_u, v))
-    + 0.5 * rho * Integral(div_u_old * Dot(u, v))
-    + mu * Integral(Jacobian(u), Jacobian(v))
-    - Integral(p, Div(v))
-    + Integral(Div(u), q)
-    - BoundaryIntegral(pout * Dot(v, n)).over(outlet)
-    + BoundaryIntegral(0.5 * rho * beta * Dot(u, v)).over(outlet)
-    + DirichletBC(u, Zero(dim)).on(wall)
-    + DirichletBC(u, inletProfile).on(inlet);
-
-  flow.assemble().setFieldSplits();
-  Solver::KSP(flow).solve();
-  @endcode
-
-  **Features demonstrated:**
-  - `Mult(Jacobian(u), u_old)` — convective term @f$ (\mathbf{u}^n \cdot \nabla)\mathbf{u} @f$
-  - `Max(-Dot(u_old, n), 0.0)` — backflow stabilization coefficient
-  - `BoundaryNormal(mesh)` — outward boundary normal
-  - `.assemble().setFieldSplits()` — assemble then configure PETSc field splits
-    for block preconditioning
-  - Time-dependent Dirichlet BC from a lambda-projected grid function
-  - `xdmf.write(t).flush()` — time-series XDMF output
-
-  @subsection examples-index-petsc-cavity Lid-Driven Cavity
-
-  **File:** `examples/PETSc/PDEs/Seq_LidDrivenCavity.cpp`
-
-  Standard benchmark: unit square with moving top wall (u = (1,0)), no-slip
-  elsewhere. Same Oseen linearization as above with backward Euler time
-  stepping. Demonstrates PETSc command-line configuration:
-  @code
-  ./PETSc_Seq_LidDrivenCavity -ksp_type preonly -pc_type lu -ksp_monitor
-  @endcode
-
-  @subsection examples-index-petsc-shapeopt PETSc Shape Optimization
-
-  | Problem | Dimension | File |
-  |---------|-----------|------|
-  | Level-set cantilever | 2D | `examples/PETSc/ShapeOptimization/LevelSetCantilever2D.cpp` |
-  | Level-set cantilever | 3D | `examples/PETSc/ShapeOptimization/LevelSetCantilever3D.cpp` |
-
-  These examples parallel the Rodin-native shape optimization examples but use
-  PETSc solvers for the linear algebra, enabling larger 3D problems.
+  @see @ref guides-variational "Variational Formulations Guide" for the DG section.
 
   @section examples-index-integral Integral Equations
 
-  @subsection examples-index-integral-potential Potential Operator
+  The @ref Rodin::Variational::Potential "Potential" operator enables integral
+  equation formulations (boundary element methods). The kernel
+  @f$ K(\mathbf{x}, \mathbf{y}) @f$ is convolved with the solution on the mesh:
 
-  **File:** `examples/Variational/P1/P1Potential.cpp`
-
-  The @ref Rodin::Variational::Potential "Potential" operator computes
-  convolutions with a kernel @f$ K(\mathbf{x}, \mathbf{y}) @f$:
-
-  @code{.cpp}
-  // Define the 3D Newtonian kernel
-  Real K(const Point& x, const Point& y)
-  {
-    return 1. / (4 * M_PI * ((x.vector() - y.vector()).stableNorm()));
-  }
-
-  // Evaluate potential
-  Potential sl(K, f);
-  GridFunction u(fes);
-  u = sl;  // projects the potential onto the FE space
-
-  // Compute global integral
-  Alert::Info() << Integral(u).compute() << Alert::Raise;
-  @endcode
-
-  **Features demonstrated:**
-  - @ref Rodin::Variational::Potential "Potential(K, f)" — integral operator
-    with user-defined kernel; K takes two `Point` arguments
-  - `u = sl` — project the potential onto a grid function
-  - `Integral(u).compute()` — evaluate a scalar integral of a grid function
-
-  @subsection examples-index-integral-equations Integral Equation System
-
-  **File:** `examples/IntegralEquations/NewtonianPotential.cpp`
-
-  Solves a boundary integral equation by using the Potential operator in a
-  variational formulation:
-  @code{.cpp}
-  Problem eq(u, v);
-  eq = Integral(0.0001 * Grad(u), Grad(v))
-     + Integral(Potential(K, u), v)
-     - Integral(v);
-  Solver::CG(eq).solve();
-  @endcode
-
-  This combines a small regularization term with the integral operator to
-  produce a well-conditioned system.
+  | Problem | Kernel | Example |
+  |---------|--------|---------|
+  | Newtonian potential | @f$ \frac{1}{4\pi\|\mathbf{x}-\mathbf{y}\|} @f$ | `examples/IntegralEquations/NewtonianPotential.cpp` |
+  | Elastic distribution | Navier 3×3 kernel | `examples/IntegralEquations/ElasticDistribution.cpp` |
 
   @section examples-index-surfevol Surface Evolution
 
-  @subsection examples-index-surfevol-fire Fire Propagation
+  The surface evolution examples demonstrate conormal advection — moving
+  domain boundaries along their outward normal direction using level-set
+  methods with MMG implicit-domain meshing:
 
-  **File:** `examples/SurfaceEvolution/FirePropagation/Simulation.cpp`
-
-  A wildfire spread simulation on realistic topography using level-set
-  evolution. Combines MMG remeshing with the Rothermel fire spread model.
-
-  @subsection examples-index-surfevol-conormal Conormal Advection
-
-  **File:** `examples/SurfaceEvolution/ConormalAdvection/Main.cpp`
-
-  Moves domain boundaries along their outward normal direction:
-  - Signed distance computation: `MMG::Distancer`
-  - Gradient normalization: `conormal = Grad(dist) / Frobenius(Grad(dist))`
-  - Level-set advection: `MMG::Advect(dist, conormal).step(dt)`
-  - Domain reconstruction: `MMG::ImplicitDomainMesher`
-
-  | Variant | Description | File |
-  |---------|-------------|------|
-  | Main | Sphere cap evolution | `ConormalAdvection/Main.cpp` |
-  | Test | Convergence study | `ConormalAdvection/Test.cpp` |
-  | Plane | Planar motion | `ConormalAdvection/Plane.cpp` |
+  | Problem | Description | Example |
+  |---------|-------------|---------|
+  | Conormal advection | Move boundary along conormal | `examples/SurfaceEvolution/ConormalAdvection/Main.cpp` |
+  | Convergence study | Parametric sweep over resolution and CFL | `examples/SurfaceEvolution/ConormalAdvection/Test.cpp` |
+  | Plane evolution | Planar surface motion | `examples/SurfaceEvolution/ConormalAdvection/Plane.cpp` |
 
   @section examples-index-boundaryopt Boundary Optimization
 
-  | Problem | Description | File |
-  |---------|-------------|------|
-  | Acoustic cloaking | Complex Helmholtz + adjoint shape gradient | `BoundaryOptimization/AcousticCloaking.cpp` |
-  | Clamp locator | Clamp placement optimization | `BoundaryOptimization/ClampLocator.cpp` |
-  | EMM | Electromagnetic optimization | `BoundaryOptimization/EMM.cpp` |
-  | Surface cooling | Heat transfer optimization | `BoundaryOptimization/SurfaceCooling.cpp` |
-  | Water tank | Fluid container optimization | `BoundaryOptimization/WaterTank.cpp` |
+  Advanced shape and topology optimization examples that combine complex-valued
+  PDE solvers, adjoint methods, Hilbert space regularization, and MMG
+  remeshing:
 
-  These examples combine complex-valued PDE solvers, adjoint methods, Hilbert
-  space regularization, and MMG remeshing.
-
-  @section examples-index-variational Variational Utilities
-
-  @subsection examples-index-variational-gradient Gradient Computation
-
-  **File:** `examples/Variational/P1/P1GridFunctionGradient.cpp`
-
-  Computes and visualizes the gradient of a scalar field, including trace
-  evaluation on internal faces:
-
-  @code{.cpp}
-  P1 fes(mesh);
-  GridFunction gf(fes);
-  gf = [](const Point& p){ return 1 - (p.x()-0.5)*(p.x()-0.5) - (p.y()-0.5)*(p.y()-0.5); };
-
-  P1 vfes(mesh, vdim);
-  GridFunction grad(vfes);
-  grad = Grad(gf);
-
-  GridFunction trace(vfes);
-  trace.project(Region::Faces, Grad(gf).traceOf(1));
-  @endcode
-
-  **Features demonstrated:**
-  - `grad = Grad(gf)` — project the gradient of a scalar field onto a vector
-    FE space
-  - `Grad(gf).traceOf(1)` — evaluate the gradient trace from region attribute 1
-  - `project(Region::Faces, ...)` — project only on internal faces
-
-  @section examples-index-misc Miscellaneous
-
-  @subsection examples-index-misc-alert Alert Colors
-
-  **File:** `examples/Alert/Colors.cpp` — demonstrates the
-  @ref Rodin::Alert "Alert" stream types (Info, Warning, Success, Exception).
-
-  @subsection examples-index-misc-qf Quadrature Formulas
-
-  **File:** `examples/QF/GrundmannMoller.cpp` — prints weights and points
-  of the Grundmann-Möller quadrature rule.
-
-  @subsection examples-index-misc-mpi MPI Utilities
-
-  | Example | Description |
-  |---------|-------------|
-  | `MPI/Context/MPI.cpp` | Basic MPI context setup |
-  | `MPI/Geometry/Mesh.cpp` | Distributed mesh creation |
-  | `MPI/Geometry/Sharder.cpp` | Sharder workflow |
-  | `MPI/Geometry/UniformGrid.cpp` | One-step distributed grid |
-  | `MPI/Variational/P1.cpp` | Distributed P1 FE space |
-
-  @section examples-index-summary Quick Reference
-
-  | Category | Example | Key Features |
-  |----------|---------|-------------|
-  | Poisson | `PDEs/Poisson.cpp` | P1, CG solver, XDMF output |
-  | Elasticity | `PDEs/Elasticity.cpp` | Vector P1, LinearElasticityIntegral, Neumann BC |
-  | Helmholtz | `PDEs/Helmholtz.cpp` | Complex P1, Re/Im extraction |
-  | Periodic | `PDEs/Periodic.cpp` | PeriodicBC, IndexMap |
-  | Surface PDE | `PDEs/SurfaceMesh.cpp` | H1 on surface, reaction-diffusion |
-  | DG Poisson | `DG/Poisson.cpp` | P0, SparseLU, DG assembly |
-  | NeoHookean block | `Solid/BlockGravity.cpp` | NewtonSolver, NeoHookean, quasi-static |
-  | Dynamic cantilever | `Solid/CantileverBeam.cpp` | Newmark-beta, inertia+damping |
-  | Shape optimization | `ShapeOptimization/LevelSetCantilever2D.cpp` | MMG, Distance, Advection, Hilbert |
-  | Density optimization | `DensityOptimization/TemperatureMinimization.cpp` | SIMP, adjoint, Pow/Min/Max |
-  | Eikonal FMM | `Models/Eikonal/FMM.cpp` | Fast Marching, surface meshes |
-  | PETSc Poisson | `PETSc/PDEs/Seq_Poisson.cpp` | PETSc TrialFunction, hexahedral mesh |
-  | MPI Poisson | `PETSc/PDEs/MPI_Poisson.cpp` | Sharder, reconcile, parallel XDMF |
-  | Stokes | `PETSc/PDEs/Seq_Stokes.cpp` | Multi-field, Taylor-Hood, P0g, KSP |
-  | Navier-Stokes | `PETSc/PDEs/Seq_NavierStokes.cpp` | Oseen, backflow, field splits |
-  | XDMF time series | `IO/XDMF.cpp` | Grid handle, write(t) |
-  | Level-set meshing | `MMG/DomainDiscretization.cpp` | LevelSetDiscretizer, split |
-  | Mesh optimization | `MMG/MeshOptimization.cpp` | Optimizer, corners, ridges |
-  | Boundary normal | `Variational/Normal.cpp` | BoundaryNormal, displace, F::x |
-  | Mesh partitioning | `Scotch/MeshPartitioner.cpp` | Scotch::Partitioner |
-  | Potential | `Variational/P1/P1Potential.cpp` | Potential operator, kernels |
-
-  @see
-  - @ref guides-index "Guides" for the mathematical background
-  - @ref guides-core-concepts "Core Concepts" for the function and operator
-    reference
-  - @ref guides-solvers "Solvers" for the complete solver catalog
-  - @ref guides-petsc "PETSc Guide" and @ref guides-mpi "MPI Guide" for
-    parallel computing
+  | Problem | Description | Example |
+  |---------|-------------|---------|
+  | Acoustic cloaking | Complex Helmholtz + adjoint-based shape gradient + conormal advection | `examples/BoundaryOptimization/AcousticCloaking.cpp` |
 
   */
