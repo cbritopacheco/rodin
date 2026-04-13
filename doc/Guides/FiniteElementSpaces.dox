@@ -33,13 +33,15 @@
   | Space | Polynomial Degree | Continuity | Typical Use |
   |-------|------------------|------------|-------------|
   | @ref Rodin::Variational::P0 "P0" | 0 (constant) | Discontinuous | Piecewise constant quantities, indicators |
+  | @ref Rodin::Variational::P0g "P0g" | 0 (global constant) | Continuous | Globally constant functions (1 DOF for scalar, vdim for vector) |
   | @ref Rodin::Variational::P1 "P1" | 1 (linear) | @f$ C^0 @f$ (continuous) | Most PDEs: Poisson, elasticity, heat |
   | @ref Rodin::Variational::H1 "H1" | Arbitrary (order @f$ k @f$) | @f$ C^0 @f$ (continuous) | Higher-order methods, mixed problems (e.g. Taylor-Hood for Navier-Stokes) |
 
   @section fem-spaces-p0 P0: Piecewise Constant Space
 
-  The **P0** space consists of functions that are constant on each cell of the
-  mesh. Functions in P0 are generally discontinuous across cell boundaries.
+  The @ref Rodin::Variational::P0 "P0" space consists of functions that are
+  constant on each cell of the mesh. Functions in P0 are generally
+  **discontinuous** across cell boundaries.
 
   @f[
     V_h^0 = \{ v \in L^2(\Omega) : v|_K \in \mathbb{P}_0(K), \
@@ -47,11 +49,14 @@
   @f]
 
   **Properties:**
-  - One DOF per cell (the cell-average value)
-  - Number of DOFs = number of cells
-  - Discontinuous across cell boundaries
-  - Used for piecewise constant approximations (e.g. material properties,
-    indicator functions)
+  - One DOF per cell (the constant value on that cell)
+  - Number of DOFs = number of cells (retrieved by `Wh.getSize()`)
+  - Discontinuous across cell boundaries — this is an @f$ L^2 @f$ space,
+    **not** @f$ H^1 @f$-conforming
+  - Used for piecewise constant approximations such as material properties,
+    indicator functions, and cell-based data
+  - The `Grad` operator applied to a P0 function is identically zero
+    within each cell
 
   @code{.cpp}
   Mesh mesh;
@@ -59,18 +64,45 @@
 
   P0 Wh(mesh);
   std::cout << "P0 DOFs: " << Wh.getSize() << std::endl;
-  // For an 8x8 grid of triangles: 128 DOFs (= 128 cells)
+  // For an 8×8 grid of triangles: 128 DOFs (= 128 cells)
 
+  // Project a function: each cell stores the function value at its centroid
   GridFunction indicator(Wh);
   indicator = [](const Geometry::Point& p) {
     return (p.x() < 0.5) ? 1.0 : 0.0;
   };
   @endcode
 
+  @subsection fem-spaces-p0-dg Discontinuous Galerkin with P0
+
+  Because P0 functions are discontinuous, they are natural for DG methods.
+  In a DG formulation, jump and average operators are used across cell
+  interfaces. See @ref guides-variational-dg "DG formulations" for details.
+
+  @section fem-spaces-p0g P0g: Global Constant Space
+
+  The @ref Rodin::Variational::P0g "P0g" space is a **global constant**
+  finite element space — it consists of functions that are constant over the
+  **entire** mesh (not per-cell like P0).
+
+  **Properties:**
+  - Scalar P0g: **1 DOF** total (the single global constant)
+  - Vector P0g: **vdim DOFs** total (one per component)
+  - Continuous everywhere (trivially, since the function is constant)
+
+  @code{.cpp}
+  P0g Wh(mesh);           // scalar: 1 DOF
+  P0g Vh(mesh, d);        // vector: d DOFs
+  @endcode
+
+  P0g is useful for representing globally constant fields (e.g., a uniform
+  property or a Lagrange multiplier for a global constraint).
+
   @section fem-spaces-p1 P1: Piecewise Linear Space
 
-  The **P1** space is the most commonly used finite element space. It consists
-  of continuous functions that are linear on each cell.
+  The @ref Rodin::Variational::P1 "P1" space is the most commonly used finite
+  element space. It consists of **continuous** functions that are **linear** on
+  each cell.
 
   @f[
     V_h^1 = \{ v \in H^1(\Omega) : v|_K \in \mathbb{P}_1(K), \
@@ -78,11 +110,15 @@
   @f]
 
   **Properties:**
-  - One DOF per vertex (the function value at the vertex)
-  - Number of DOFs = number of vertices
-  - Continuous across cell boundaries (@f$ H^1 @f$-conforming)
-  - Approximation error: @f$ \|u - u_h\|_{H^1} = O(h) @f$ where @f$ h @f$
-    is the mesh size
+  - One DOF per vertex (the function value at that vertex)
+  - Number of DOFs = number of vertices (retrieved by `Vh.getSize()`)
+  - Continuous across cell boundaries (@f$ H^1 @f$-conforming): values at
+    shared vertices are identified, ensuring global continuity
+  - The gradient `Grad(u)` is **constant** within each cell (since a linear
+    function has constant derivatives)
+  - Approximation error for smooth solutions:
+    - @f$ L^2 @f$ norm: @f$ \|u - u_h\|_{L^2} = O(h^2) @f$
+    - @f$ H^1 @f$ seminorm: @f$ |u - u_h|_{H^1} = O(h) @f$
 
   @code{.cpp}
   Mesh mesh;
@@ -90,9 +126,9 @@
 
   P1 Vh(mesh);
   std::cout << "P1 DOFs: " << Vh.getSize() << std::endl;
-  // For an 8x8 grid: 81 DOFs (= 9x9 = 81 vertices)
+  // For an 8×8 grid: 81 DOFs (= 9×9 = 81 vertices)
 
-  // P1 is the default choice for most scalar PDEs
+  // P1 is the standard choice for most scalar PDEs
   TrialFunction u(Vh);
   TestFunction  v(Vh);
   @endcode
@@ -100,11 +136,9 @@
   @section fem-spaces-h1 H1: Higher-Order Space
 
   The @ref Rodin::Variational::H1 "H1" space provides @f$ H^1 @f$-conforming
-  finite elements of **arbitrary polynomial order**. This is useful for
-  problems requiring higher accuracy or mixed formulations (e.g. Taylor-Hood
-  elements for the @ref examples-pdes-navierstokes "Navier-Stokes equations").
-
-  The polynomial order is specified as a compile-time constant:
+  finite elements of **arbitrary polynomial order** @f$ k @f$. The polynomial
+  order is specified as a **compile-time constant** via
+  `std::integral_constant`:
 
   @code{.cpp}
   #include <Rodin/Variational/H1.h>
@@ -116,9 +150,28 @@
   H1 Uh(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
   @endcode
 
-  A common application is the **Taylor-Hood** pair for incompressible flow:
+  The number of DOFs per element depends on the polynomial degree @f$ k @f$
+  and the element type:
+
+  | Element | DOFs per element | Formula |
+  |---------|-----------------|---------|
+  | Segment | @f$ k + 1 @f$ | — |
+  | Triangle | @f$ \frac{(k+1)(k+2)}{2} @f$ | e.g., 6 for @f$ k = 2 @f$ |
+  | Quadrilateral | @f$ (k+1)^2 @f$ | e.g., 9 for @f$ k = 2 @f$ |
+  | Tetrahedron | @f$ \frac{(k+1)(k+2)(k+3)}{6} @f$ | e.g., 10 for @f$ k = 2 @f$ |
+
+  **Convergence rates** for smooth solutions:
+  - @f$ L^2 @f$ norm: @f$ \|u - u_h\|_{L^2} = O(h^{k+1}) @f$
+  - @f$ H^1 @f$ seminorm: @f$ |u - u_h|_{H^1} = O(h^k) @f$
+
+  A common application is the **Taylor-Hood** pair for incompressible flow,
+  which uses different polynomial orders for velocity and pressure to satisfy
+  the inf-sup stability condition:
   - P2 velocity (order 2): `H1 uh(std::integral_constant<size_t, 2>{}, mesh, d)`
   - P1 pressure (order 1): `H1 ph(std::integral_constant<size_t, 1>{}, mesh)`
+
+  @note P1 and H1<1> are equivalent mathematically, but `P1` is a specialized
+  class optimized for the linear case. Use `P1` when you only need order 1.
 
   @section fem-spaces-vector Vector-Valued Spaces
 
@@ -300,19 +353,29 @@
 
   @section fem-spaces-choosing Choosing the Right Space
 
-  | Problem Type | Recommended Space | Reason |
+  | Problem type | Recommended space | Reason |
   |-------------|-------------------|--------|
-  | Scalar PDE (Poisson, heat) | `P1` | Standard @f$ H^1 @f$ conforming |
-  | Vector PDE (elasticity) | `P1(mesh, d)` | Vector-valued @f$ H^1 @f$ |
-  | Wave problems | `P1<Complex>` | Complex-valued fields |
-  | Material indicators | `P0` | Piecewise constant |
-  | Incompressible flow (Navier-Stokes) | `H1` order 2 (velocity) + `H1` order 1 (pressure) | Taylor-Hood pair satisfying the inf-sup condition |
+  | Scalar PDE (Poisson, heat) | `P1` | Standard @f$ H^1 @f$-conforming, 1 DOF/vertex |
+  | Vector PDE (elasticity) | `P1(mesh, d)` | Vector-valued @f$ H^1 @f$, d components |
+  | Wave problems (Helmholtz) | `P1<Complex>` | Complex-valued fields |
+  | Material indicators, cell data | `P0` | Piecewise constant, 1 DOF/cell |
+  | Higher accuracy for smooth solutions | `H1` with order @f$ k \geq 2 @f$ | @f$ O(h^{k+1}) @f$ @f$ L^2 @f$ convergence |
+  | Incompressible flow (Stokes) | `H1` order 2 (velocity) + `H1` order 1 (pressure) | Taylor-Hood pair, satisfies inf-sup |
+
+  **Rule of thumb**: Start with P1 for scalar problems. Use vector-valued P1
+  for elasticity and fluid dynamics. Move to higher-order H1 when you need
+  better accuracy per DOF or when the PDE's solution is smooth enough to
+  benefit from higher polynomial approximation.
 
   @section fem-spaces-see-also See Also
 
   - @ref fem-ciarlet "Ciarlet's definition" — Mathematical foundations
   - @ref guides-getting-started-core-concepts "Core Concepts" — Practical
     guide
+  - @ref guides-mpi "MPI distributed computing" — Distributed P1 on
+    `Mesh<Context::MPI>` with local↔global DOF index maps
+  - @ref guides-petsc "PETSc integration" — PETSc-backed grid functions
+    with ghost-layer synchronization
   - @ref examples-pdes-poisson "Poisson example" — Using P1 in practice
   - @ref examples-pdes-elasticity "Elasticity example" — Vector-valued spaces
 

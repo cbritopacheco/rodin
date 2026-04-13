@@ -1,0 +1,334 @@
+/**
+  @page guides-mpi MPI: Distributed Computing
+  @brief Guide to distributed-memory parallel computing with Rodin's MPI module
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section guides-mpi-intro Introduction
+
+  Rodin's MPI module enables distributed finite element computations across
+  multiple processes using the Message Passing Interface.  It builds on
+  [Boost.MPI](https://www.boost.org/doc/libs/release/doc/html/mpi.html) and
+  provides:
+
+  - A @ref Rodin::Context::MPI "Context::MPI" execution context wrapping a
+    Boost.MPI environment and communicator.
+  - A @ref Rodin::Geometry::Mesh<Context::MPI> "Mesh\<Context::MPI\>"
+    distributed mesh that stores a rank-local shard with ownership and ghost
+    metadata.
+  - A @ref Rodin::Geometry::Sharder<Context::MPI> "Sharder" that partitions a
+    global mesh and distributes shards to MPI ranks.
+  - A `reconcile()` method that resolves shared entity ownership and
+    distributed indices after local connectivity discovery.
+
+  Include the module via:
+  @code{.cpp}
+  #include <Rodin/MPI.h>
+  @endcode
+
+  @section guides-mpi-context Execution Context
+
+  The @ref Rodin::Context::MPI "Context::MPI" class wraps a
+  `boost::mpi::environment` and `boost::mpi::communicator`:
+
+  @code{.cpp}
+  #include <boost/mpi/environment.hpp>
+  #include <boost/mpi/communicator.hpp>
+  #include <Rodin/MPI.h>
+
+  namespace mpi = boost::mpi;
+
+  int main(int argc, char** argv)
+  {
+    mpi::environment env(argc, argv);
+    mpi::communicator world;
+    Rodin::Context::MPI mpi(env, world);
+
+    // mpi.getCommunicator() -> const boost::mpi::communicator&
+    // mpi.getEnvironment()  -> const boost::mpi::environment&
+  }
+  @endcode
+
+  The context is passed to distributed mesh constructors and sharders.  It
+  does not own the Boost.MPI objects — they must outlive the context.
+
+  @section guides-mpi-mesh Distributed Mesh
+
+  @ref Rodin::Geometry::Mesh<Context::MPI> "Mesh\<Context::MPI\>" (aliased as
+  `Geometry::MPIMesh`) stores a rank-local
+  @ref Rodin::Geometry::Shard "Shard" together with an MPI context.  Geometric
+  queries that require global information (polytope counts, volume, perimeter)
+  perform MPI reductions automatically.
+
+  @subsection guides-mpi-mesh-uniformgrid UniformGrid
+
+  The simplest way to create a distributed mesh is `UniformGrid`, which
+  partitions and distributes internally:
+
+  @code{.cpp}
+  auto mesh = Mesh<Context::MPI>::UniformGrid(
+      mpi, Polytope::Type::Tetrahedron, {16, 16, 16});
+  @endcode
+
+  @subsection guides-mpi-mesh-sharder Explicit Partitioning with Sharder
+
+  For more control, use the
+  @ref Rodin::Geometry::Sharder<Context::MPI> "Sharder" with an explicit
+  partitioning step.  The workflow is:
+
+  1. **Root rank**: generate a local mesh, compute cell-cell connectivity,
+     partition with a @ref Rodin::Geometry::Partitioner "Partitioner", then
+     `shard()` and `scatter()`.
+  2. **All ranks**: `gather()` to receive the local shard as an MPI mesh.
+
+  @code{.cpp}
+  MPI::Sharder sharder(mpi);
+
+  if (world.rank() == 0)
+  {
+    Geometry::LocalMesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, {32, 32, 32});
+    const size_t cellDim = mesh.getDimension();
+    mesh.getConnectivity().compute(cellDim, cellDim);
+
+    Geometry::BalancedCompactPartitioner partitioner(mesh);
+    partitioner.partition(world.size());
+
+    sharder.shard(partitioner);
+    sharder.scatter(0);
+  }
+
+  auto mesh = sharder.gather(0);
+  @endcode
+
+  The `distribute()` convenience method combines `shard()`, `scatter()`, and
+  `gather()` in one call:
+
+  @code{.cpp}
+  auto mesh = sharder.distribute(partitioner, 0);
+  @endcode
+
+  @section guides-mpi-shard Shard: Rank-Local View
+
+  A @ref Rodin::Geometry::Shard "Shard" is a local mesh enriched with
+  distributed metadata.  It classifies every polytope into one of three
+  mutually exclusive states:
+
+  | State | Meaning |
+  |-------|---------|
+  | **Owned** | Belongs to this partition and this rank is the designated owner |
+  | **Shared** | Belongs to this partition but owned by another rank |
+  | **Ghost** | Does not belong to this partition; imported as overlap |
+
+  Key invariants:
+  - **Owned ∪ Shared** = entities defining the local partition
+  - Every distributed entity has exactly one owner across all ranks
+  - Ghost entities provide stencil support and adjacency completeness
+
+  The shard provides bidirectional index maps between local shard indices and
+  distributed (global) indices:
+
+  @code{.cpp}
+  const auto& shard = mesh.getShard();
+
+  // Local → distributed
+  Index globalIdx = shard.getPolytopeMap(d).left[localIdx];
+
+  // Distributed → local
+  Index localIdx = shard.getPolytopeMap(d).right.at(globalIdx);
+
+  // Ownership queries
+  bool owned  = shard.isOwned(d, localIdx);
+  bool shared = shard.isShared(d, localIdx);
+  bool ghost  = shard.isGhost(d, localIdx);
+  bool local  = shard.isLocal(d, localIdx);  // Owned || Shared
+  @endcode
+
+  @section guides-mpi-connectivity Connectivity and Reconciliation
+
+  After receiving a shard, you must compute local connectivity for the
+  incidence relations you need.  However, entities discovered independently
+  on neighboring shards may not yet have consistent distributed indices or
+  ownership.  The `reconcile()` method resolves this:
+
+  @code{.cpp}
+  // Compute face-to-cell incidence locally
+  mesh.getConnectivity().compute(2, 3);
+
+  // Reconcile faces across MPI ranks:
+  // - identifies shared entities via their vertex keys
+  // - assigns unique distributed indices
+  // - determines a unique owner rank per entity
+  // - updates shard metadata (ownership, owner/halo maps, index maps)
+  mesh.reconcile(2);
+  @endcode
+
+  @subsection guides-mpi-reconcile-details How Reconciliation Works
+
+  Reconciliation is an iterative peer-to-peer convergence algorithm:
+
+  1. Each rank identifies candidate shared entities from the ghost layer and
+     exchanges their vertex keys with face-adjacent neighbor ranks.
+  2. Matching entities are identified; distributed IDs and ownership are
+     propagated iteratively until global convergence (checked via MPI
+     all-reduce).
+  3. Communication is restricted to K face-adjacent neighbors (K is O(1)),
+     making the algorithm weak-scalable.
+
+  @subsection guides-mpi-reconcile-options ReconcileOptions
+
+  The `reconcile()` method accepts an optional
+  `ReconcileOptions` struct to control convergence:
+
+  | Field | Default | Description |
+  |-------|---------|-------------|
+  | `maxOwnerRounds` | unlimited | Cap on owner-convergence rounds |
+  | `maxGidRounds` | unlimited | Cap on distributed-ID-convergence rounds |
+  | `globalCheckPeriod` | 1 | How often global convergence is checked |
+  | `strictRoundCap` | false | If true, exceeding a cap throws |
+
+  For codimension-1 entities (faces in 3D, edges in 2D), `maxOwnerRounds=1`
+  typically suffices because each face is shared by at most 2 cells.  For
+  lower-dimensional entities (edges in 3D), unbounded rounds are the safe
+  default since the holder graph diameter depends on mesh topology.
+
+  @section guides-mpi-queries Global Queries
+
+  Global geometric queries on the distributed mesh automatically perform MPI
+  reductions.  Each rank accumulates contributions from its **owned** entities,
+  then the results are summed across ranks:
+
+  @code{.cpp}
+  // Total number of cells across all ranks
+  size_t totalCells = mesh.getCellCount();
+
+  // Total volume (each rank contributes owned cells)
+  Real vol = mesh.getVolume();
+
+  // Volume restricted to an attribute
+  Real vol_attr = mesh.getVolume(2);   // attribute 2
+
+  // Total perimeter (owned boundary faces only)
+  Real perim = mesh.getPerimeter();
+  @endcode
+
+  @section guides-mpi-io I/O
+
+  The MPI module provides HDF5-based I/O for distributed meshes.  Each rank
+  saves or loads its own shard independently:
+
+  @code{.cpp}
+  // Rank-dependent filename
+  mesh.save(
+    [](int rank) { return "mesh." + std::to_string(rank) + ".h5"; },
+    IO::FileFormat::HDF5);
+
+  // Or save the shard directly (MEDIT format)
+  mesh.getShard().save("Shard." + std::to_string(world.rank()) + ".mesh",
+                       IO::FileFormat::MEDIT);
+  @endcode
+
+  For XDMF output (ParaView visualization), pass the MPI communicator:
+
+  @code{.cpp}
+  IO::XDMF xdmf(MPI_COMM_WORLD, "output/simulation");
+  xdmf.setMesh(mesh);
+  xdmf.add("u", u.getSolution());
+  xdmf.write();
+  xdmf.close();
+  @endcode
+
+  @section guides-mpi-fes Distributed Finite Element Spaces
+
+  The P1 finite element space is specialized for MPI meshes.  It wraps a
+  local shard P1 space and augments it with distributed global indexing:
+
+  @code{.cpp}
+  P1 Vh(mesh);  // mesh is Mesh<Context::MPI>
+  @endcode
+
+  Owned DOFs receive contiguous global ranges per rank, while ghost DOFs are
+  synchronized from their owner ranks.  The space provides bidirectional
+  local↔global DOF index maps.
+
+  @section guides-mpi-example Complete Example
+
+  This example solves the Poisson equation on a distributed mesh using MPI
+  and PETSc:
+
+  @code{.cpp}
+  #include <Rodin/MPI.h>
+  #include <Rodin/PETSc.h>
+  #include <Rodin/Geometry.h>
+  #include <Rodin/Variational.h>
+  #include <Rodin/IO/XDMF.h>
+
+  namespace mpi = boost::mpi;
+  using namespace Rodin;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
+
+  int main(int argc, char** argv)
+  {
+    mpi::environment env(argc, argv);
+    mpi::communicator world;
+    Context::MPI mpi(env, world);
+    PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
+
+    // Partition and distribute mesh from root
+    MPI::Sharder sharder(mpi);
+    if (world.rank() == 0)
+    {
+      LocalMesh mesh;
+      mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, {16, 16, 16});
+      mesh.scale(1.0 / 15);
+      const size_t cellDim = mesh.getDimension();
+      mesh.getConnectivity().compute(cellDim, cellDim);
+
+      BalancedCompactPartitioner partitioner(mesh);
+      partitioner.partition(world.size());
+      sharder.shard(partitioner);
+      sharder.scatter(0);
+    }
+    auto mesh = sharder.gather(0);
+
+    // Compute distributed connectivity
+    mesh.getConnectivity().compute(2, 3);
+    mesh.reconcile(2);
+
+    // Build FE space and define problem
+    P1 Vh(mesh);
+    RealFunction f = 1;
+
+    PETSc::Variational::TrialFunction u(Vh);
+    PETSc::Variational::TestFunction  v(Vh);
+
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, Zero());
+
+    Solver::CG(poisson).solve();
+
+    // Write XDMF output for ParaView
+    IO::XDMF xdmf(MPI_COMM_WORLD, "Poisson");
+    xdmf.setMesh(mesh);
+    xdmf.add("u", u.getSolution());
+    xdmf.write();
+    xdmf.close();
+
+    PetscFinalize();
+  }
+  @endcode
+
+  @section guides-mpi-see-also See Also
+
+  - @ref Rodin::MPI "MPI namespace reference"
+  - @ref Rodin::Context::MPI "Context::MPI"
+  - @ref Rodin::Geometry::Shard "Shard"
+  - @ref guides-petsc "PETSc module"
+  - @ref guides-solvers "Solvers"
+
+  */

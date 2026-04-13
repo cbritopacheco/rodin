@@ -18,13 +18,15 @@
 | @f$ \partial \Omega @f$ | Denotes the Lipschitz boundary of the domain @f$ \Omega @f$. |
 | @f$ \Gamma_D @f$  | The Dirichlet part of the boundary where essential conditions are imposed. |
 | @f$ \Gamma_N @f$  | The Neumann part of the boundary where natural conditions are imposed. |
-| @f$ \mathcal{T}_h @f$ | Denotes a polyhedral complex (mesh) which discretizes the domain @f$ \Omega @f$. The subscript @f$ h @f$ refers to the mesh size parameter. |
+| @f$ \mathcal{T}_h @f$ | Denotes a polyhedral complex (mesh) which discretizes the domain @f$ \Omega @f$. The subscript @f$ h @f$ refers to the mesh size parameter. In Rodin, this is represented by the @ref Rodin::Geometry::Mesh "Mesh" class. |
 | @f$ \mathcal{F}_h @f$ | Represents the set of all faces in the mesh @f$ \mathcal{T}_h @f$. |
-| @f$ \mathcal{B}_h @f$ | Represents the boundary faces of the mesh @f$ \mathcal{T}_h @f$. |
-| @f$ \mathcal{I}_h @f$ | Represents the interior faces (interfaces) of the mesh @f$ \mathcal{T}_h @f$. |
-| @f$ K @f$         | A single cell (element) of the mesh @f$ \mathcal{T}_h @f$. |
+| @f$ \mathcal{B}_h @f$ | Represents the boundary faces of the mesh @f$ \mathcal{T}_h @f$. A face is on the boundary if it belongs to exactly one cell. |
+| @f$ \mathcal{I}_h @f$ | Represents the interior faces (interfaces) of the mesh @f$ \mathcal{T}_h @f$. An interior face belongs to exactly two cells. |
+| @f$ K @f$         | A single cell (element) of the mesh @f$ \mathcal{T}_h @f$. Each cell is a @ref Rodin::Geometry::Polytope "Polytope" (triangle, tetrahedron, etc.). |
+| @f$ \hat{K} @f$   | The reference element. All local computations (basis function evaluation, quadrature) are performed on @f$ \hat{K} @f$ and mapped to each physical cell @f$ K @f$. |
+| @f$ F_K @f$       | The geometric transformation @f$ F_K : \hat{K} \to K @f$ mapping the reference element to the physical cell. Its Jacobian is accessible via @ref Rodin::Geometry::Point::getJacobian "Point::getJacobian()". |
 | @f$ h @f$         | Mesh size parameter: the maximum diameter over all cells @f$ K \in \mathcal{T}_h @f$. |
-| @f$ d @f$         | The spatial dimension (typically 2 or 3). |
+| @f$ d @f$         | The topological dimension of the mesh (2 for surface meshes, 3 for volumetric). Retrieved by @ref Rodin::Geometry::Mesh "Mesh::getDimension()". |
 | @f$ \mathbf{n} @f$ | The outward unit normal vector on @f$ \partial \Omega @f$ or on a face. |
 
   @section notation-spaces Notation regarding function spaces
@@ -34,10 +36,11 @@
 | @f$ L^2(\Omega) @f$       | The space of square-integrable functions on @f$ \Omega @f$. |
 | @f$ H^1(\Omega) @f$       | The Sobolev space of functions in @f$ L^2(\Omega) @f$ whose gradient is also in @f$ L^2(\Omega) @f$. |
 | @f$ H^1_0(\Omega) @f$     | The subspace of @f$ H^1(\Omega) @f$ with zero trace on @f$ \partial \Omega @f$ (homogeneous Dirichlet). |
-| @f$ V_h @f$               | A finite element space built on the mesh @f$ \mathcal{T}_h @f$. Subscript @f$ h @f$ indicates discrete. |
+| @f$ V_h @f$               | A finite element space built on the mesh @f$ \mathcal{T}_h @f$. Subscript @f$ h @f$ indicates discrete. In Rodin, created by instantiating @ref Rodin::Variational::P0 "P0", @ref Rodin::Variational::P1 "P1", or @ref Rodin::Variational::H1 "H1". |
 | @f$ \mathbb{P}_k @f$      | The space of polynomials of total degree at most @f$ k @f$. |
-| @f$ P_0 @f$               | Piecewise constant functions on each cell (@ref Rodin::Variational::P0 "P0" in Rodin). |
-| @f$ P_1 @f$               | Piecewise linear, globally continuous functions (@ref Rodin::Variational::P1 "P1" in Rodin). |
+| @f$ P_0 @f$               | Piecewise constant functions on each cell. In Rodin: @ref Rodin::Variational::P0 "P0". One DOF per cell, discontinuous across cell boundaries. |
+| @f$ P_1 @f$               | Piecewise linear, globally continuous functions. In Rodin: @ref Rodin::Variational::P1 "P1". One DOF per vertex, @f$ H^1 @f$-conforming. |
+| @f$ H^1_k @f$             | Continuous piecewise polynomials of degree @f$ k @f$. In Rodin: @ref Rodin::Variational::H1 "H1<k>". DOFs on vertices, edges, and cell interiors. |
 
   @section notation-variational Notation regarding variational methods
 
@@ -45,33 +48,84 @@
 | ----------------- | ------------------------------------------------------ |
 | @f$ u @f$         | The trial function (unknown, sought solution). Corresponds to @ref Rodin::Variational::TrialFunction "TrialFunction" in Rodin. |
 | @f$ v @f$         | The test function (weighting function). Corresponds to @ref Rodin::Variational::TestFunction "TestFunction" in Rodin. |
-| @f$ a(u, v) @f$   | A bilinear form: linear in both @f$ u @f$ and @f$ v @f$. Assembled by the @ref Rodin::Variational::BilinearForm "BilinearForm" class. |
-| @f$ \ell(v) @f$   | A linear form: linear in @f$ v @f$ only. Assembled by the @ref Rodin::Variational::LinearForm "LinearForm" class. |
-| @f$ f @f$         | A source term or right-hand-side function. |
+| @f$ u_h @f$       | The discrete (finite element) approximation of @f$ u @f$. After solving, its coefficients are stored in the @ref Rodin::Variational::GridFunction "GridFunction" associated with the trial function. |
+| @f$ a(u, v) @f$   | A bilinear form: linear in both @f$ u @f$ and @f$ v @f$. Built from `Integral` expressions involving both trial and test functions. Assembled into the system matrix @f$ A @f$. |
+| @f$ \ell(v) @f$   | A linear form: linear in @f$ v @f$ only. Built from `Integral` expressions involving only the test function. Assembled into the right-hand side vector @f$ \mathbf{b} @f$. |
+| @f$ f @f$         | A source term or right-hand-side function. In Rodin, represented as a @ref Rodin::Variational::RealFunction "RealFunction" or a lambda. |
 | @f$ g @f$         | A boundary data function (Dirichlet or Neumann data). |
 
   @section notation-operators Notation regarding differential operators
 
 | Notation          | Rodin code | Description                                  |
 | ----------------- | ---------- | -------------------------------------------- |
-| @f$ \nabla u @f$  | `Grad(u)`  | Gradient of a scalar field. Returns a vector. |
+| @f$ \nabla u @f$  | `Grad(u)`  | Gradient of a scalar field. Returns a vector of dimension @f$ d @f$. |
 | @f$ \nabla \cdot \mathbf{u} @f$ | `Div(u)` | Divergence of a vector field. Returns a scalar. |
 | @f$ \Delta u @f$  | —          | Laplacian. Not used directly; appears via integration by parts as `Integral(Grad(u), Grad(v))`. |
-| @f$ \nabla \mathbf{u} @f$ | `Jacobian(u)` | Jacobian (gradient) of a vector field. Returns a matrix. |
-| @f$ \nabla \mathbf{u}^T @f$ | `Jacobian(u).T()` | Transpose of the Jacobian. |
-| @f$ e(\mathbf{u}) @f$ | `0.5 * (Jacobian(u) + Jacobian(u).T())` | Symmetric gradient (linearized strain tensor). |
-| @f$ \mathrm{tr}(A) @f$ | `Trace(A)` | Trace of a matrix. |
-| @f$ A : B @f$    | `Dot(A, B)` | Frobenius (double-contraction) inner product of two matrices. |
+| @f$ \nabla \mathbf{u} @f$ | `Jacobian(u)` | Jacobian (gradient) of a vector field. Returns a @f$ d \times d @f$ matrix. |
+| @f$ \nabla \mathbf{u}^T @f$ | `Transpose(Jacobian(u))` | Transpose of the Jacobian. |
+| @f$ \varepsilon(\mathbf{u}) @f$ | See below | Symmetric gradient (linearized strain tensor): @f$ \frac{1}{2}(\nabla \mathbf{u} + \nabla \mathbf{u}^T) @f$. |
+| @f$ \mathrm{tr}(A) @f$ | `Trace(A)` | Trace of a matrix: @f$ \mathrm{tr}(A) = \sum_i A_{ii} @f$. |
+| @f$ A : B @f$    | `Dot(A, B)` | Frobenius (double-contraction) inner product of two matrices: @f$ A : B = \sum_{ij} A_{ij} B_{ij} @f$. |
+| @f$ \|A\|_F @f$  | `Frobenius(A)` | Frobenius norm: @f$ \|A\|_F = \sqrt{A : A} @f$. |
+| @f$ u_i @f$      | `Component(u, i)` | The @f$ i @f$-th component of a vector function (0-indexed). Shorthand: `u.x()`, `u.y()`, `u.z()`. |
+
+  @note The symmetric gradient @f$ \varepsilon(\mathbf{u}) @f$ can be built
+  from Rodin operators as:
+  @code{.cpp}
+  auto eps_u = 0.5 * (Jacobian(u) + Transpose(Jacobian(u)));
+  @endcode
 
   @section notation-integrals Notation regarding integrals
 
 | Notation                                           | Rodin code | Description |
 | -------------------------------------------------- | ---------- | ----------- |
-| @f$ \int_\Omega f \, v \, dx @f$                   | `Integral(f, v)` | Domain integral of @f$ f \cdot v @f$. |
-| @f$ \int_\Omega \nabla u \cdot \nabla v \, dx @f$  | `Integral(Grad(u), Grad(v))` | Stiffness integral. |
+| @f$ \int_\Omega f \, v \, dx @f$                   | `Integral(f, v)` | Domain integral of @f$ f \cdot v @f$. When both arguments are scalar, this is ordinary multiplication. When both are vectors, it is the dot product. |
+| @f$ \int_\Omega \nabla u \cdot \nabla v \, dx @f$  | `Integral(Grad(u), Grad(v))` | Stiffness integral. The dot product of the two gradient vectors is taken automatically. |
 | @f$ \int_\Omega u \, v \, dx @f$                   | `Integral(u, v)` | Mass integral. |
-| @f$ \int_{\Gamma_N} g \, v \, ds @f$               | `BoundaryIntegral(g, v).over(GammaN)` | Boundary integral on @f$ \Gamma_N @f$. |
-| @f$ \int_\Gamma h \, v \, ds @f$                   | `FaceIntegral(h, v).over(Gamma)` | Face integral on an internal interface @f$ \Gamma @f$. |
+| @f$ \int_{\Gamma_N} g \, v \, ds @f$               | `BoundaryIntegral(g, v).over(GammaN)` | Boundary integral on @f$ \Gamma_N @f$. The `.over()` method restricts the integration to boundary faces with the given attribute. |
+| @f$ \int_{\mathcal{F}_h} h \, v \, ds @f$          | `FaceIntegral(h, v)` | Integral over all faces (interior and boundary). |
+| @f$ \int_{\mathcal{F}_h^i} h \, v \, ds @f$        | `InterfaceIntegral(h, v)` | Integral over interior faces only (excluding boundary). |
+
+  @section notation-dg Notation regarding DG operators
+
+| Notation                                         | Rodin code        | Description |
+| ------------------------------------------------ | ----------------- | ----------- |
+| @f$ [u] = u^+ - u^- @f$                         | `Jump(u)`         | Jump of @f$ u @f$ across an internal face. |
+| @f$ \{u\} = \frac{1}{2}(u^+ + u^-) @f$          | `Average(u)`      | Average of @f$ u @f$ across an internal face. |
+
+  @section notation-special Special Functions and Operators
+
+| Notation                     | Rodin code           | Description |
+| ---------------------------- | -------------------- | ----------- |
+| @f$ \mathbf{n} @f$          | `BoundaryNormal(mesh)` | Outward unit normal on @f$ \partial\Omega @f$. Used in boundary integrals. |
+| @f$ \mathbf{n}_F @f$        | `FaceNormal(mesh)` | Unit normal on mesh faces. Used in DG formulations for numerical fluxes. |
+| @f$ x, y, z @f$             | `F::x`, `F::y`, `F::z` | Coordinate projection functions. E.g., `F::x` returns the @f$ x @f$-coordinate at a point. |
+| @f$ I_n @f$                 | `IdentityMatrix(n)` | @f$ n \times n @f$ identity matrix function. |
+| @f$ \operatorname{Re}(u) @f$ | `Re(u)` | Real part of a complex-valued function. |
+| @f$ \operatorname{Im}(u) @f$ | `Im(u)` | Imaginary part of a complex-valued function. |
+| @f$ \bar{u} @f$             | `Conjugate(u)` | Complex conjugate of a complex-valued function. |
+| @f$ 0 @f$                   | `Zero()` | Zero function (scalar or vector, deduced from context). |
+
+  @section notation-solid Notation regarding solid mechanics
+
+| Notation                       | Rodin code | Description |
+| ------------------------------ | ---------- | ----------- |
+| @f$ \boldsymbol{\varepsilon}(\mathbf{u}) @f$ | `0.5 * (Jacobian(u) + Transpose(Jacobian(u)))` | Infinitesimal (linearized) strain tensor. |
+| @f$ \boldsymbol{\sigma} @f$    | — | Cauchy stress tensor (Hooke's law). |
+| @f$ \lambda, \mu @f$          | `lambda`, `mu` | Lamé parameters: @f$ \lambda = \frac{E\nu}{(1+\nu)(1-2\nu)} @f$, @f$ \mu = \frac{E}{2(1+\nu)} @f$. |
+| @f$ \mathbf{F} @f$            | `KinematicState::getDeformationGradient()` | Deformation gradient @f$ \mathbf{F} = \mathbf{I} + \nabla\mathbf{u} @f$. |
+| @f$ J @f$                     | `KinematicState::getJacobian()` | @f$ J = \det\mathbf{F} @f$. |
+| @f$ \mathbf{C} @f$            | `KinematicState::getRightCauchyGreenTensor()` | Right Cauchy-Green tensor @f$ \mathbf{C} = \mathbf{F}^T\mathbf{F} @f$. |
+| @f$ \mathbf{E} @f$            | — | Green-Lagrange strain @f$ \mathbf{E} = \frac{1}{2}(\mathbf{C} - \mathbf{I}) @f$. |
+| @f$ \mathbf{P} @f$            | `Solid::FirstPiolaKirchhoffStress` | First Piola-Kirchhoff stress @f$ \mathbf{P} = \partial W / \partial \mathbf{F} @f$. |
+| @f$ I_1, I_2, I_3 @f$        | `IsotropicInvariants` | Principal invariants of @f$ \mathbf{C} @f$. |
+| @f$ W(\mathbf{F}) @f$         | — | Strain energy density function (hyperelastic stored energy). |
+
+  @section notation-integral-eq Notation regarding integral equations
+
+| Notation                                                  | Rodin code | Description |
+| --------------------------------------------------------- | ---------- | ----------- |
+| @f$ \int_\Omega K(\mathbf{x}, \mathbf{y}) f(\mathbf{y}) \, d\mathbf{y} @f$ | `Potential(K, f)` | Integral convolution with kernel @f$ K @f$. |
 
   */
 

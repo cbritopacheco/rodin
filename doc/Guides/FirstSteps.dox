@@ -45,16 +45,16 @@
 
   @section guides-getting-started-first-steps-modules Rodin Modules
 
-  Rodin is organized into several modules, each providing specific
-  functionality:
+  Rodin is organized into several modules. Each module has a well-defined
+  responsibility, and you link only the modules you need:
 
-  | Module | Purpose | Common Classes |
-  |--------|---------|----------------|
-  | Rodin::Geometry | Mesh operations and geometry | Mesh, Polytope |
-  | Rodin::Variational | Finite element spaces and forms | P1, TrialFunction, TestFunction, Problem |
-  | Rodin::Solver | Linear system solvers | CG, SparseLU |
-  | Rodin::IO | Input/output operations | File reading/writing |
-  | Rodin::Assembly | Matrix assembly | Assemblers |
+  | Module | Header | Purpose | Key classes |
+  |--------|--------|---------|-------------|
+  | @ref Rodin::Geometry "Geometry" | `<Rodin/Geometry.h>` | Meshes, polytopes, connectivity | @ref Rodin::Geometry::Mesh "Mesh", @ref Rodin::Geometry::Polytope "Polytope", @ref Rodin::Geometry::Connectivity "Connectivity" |
+  | @ref Rodin::Variational "Variational" | `<Rodin/Variational.h>` | Finite element spaces, forms, problems | @ref Rodin::Variational::P1 "P1", @ref Rodin::Variational::P0 "P0", @ref Rodin::Variational::H1 "H1", @ref Rodin::Variational::TrialFunction "TrialFunction", @ref Rodin::Variational::TestFunction "TestFunction", @ref Rodin::Variational::GridFunction "GridFunction" |
+  | @ref Rodin::Solver "Solver" | `<Rodin/Solver.h>` | Linear system solvers | @ref Rodin::Solver::CG "CG", @ref Rodin::Solver::SparseLU "SparseLU", @ref Rodin::Solver::UMFPack "UMFPack" |
+  | @ref Rodin::IO "IO" | `<Rodin/IO/XDMF.h>` | Input/output and visualization | @ref Rodin::IO::XDMF "XDMF" |
+  | @ref Rodin::Assembly "Assembly" | (used internally) | Matrix and vector assembly | Assemblers (not used directly) |
 
   @section guides-getting-started-first-steps-hello Hello Rodin
 
@@ -104,22 +104,45 @@
   @subsection guides-getting-started-first-steps-mesh Working with Meshes
 
   A @ref Rodin::Geometry::Mesh "Mesh" represents the discretization of your
-  domain. You can create meshes in several ways:
+  domain @f$ \Omega @f$ into a collection of polytopes. You can create meshes
+  in several ways:
 
-  **Generate a uniform grid:**
+  **Generate a uniform grid on the unit hypercube:**
   @code{.cpp}
   Mesh mesh;
-  // 2D triangular mesh with 16x16 grid
+  // 2D triangular mesh: 16×16 subdivisions on [0, 15] × [0, 15]
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
 
-  // 3D tetrahedral mesh with 8x8x8 grid
+  // 3D tetrahedral mesh: 8×8×8 subdivisions
   mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, {8, 8, 8});
   @endcode
+
+  **Generate a boundary (surface) mesh:**
+  @code{.cpp}
+  // 2D box boundary (segments): a rectangle boundary in 2D
+  mesh = mesh.Box(Polytope::Type::Segment, {4, 4});
+
+  // 3D box boundary (triangles): a surface mesh in 3D
+  mesh = mesh.Box(Polytope::Type::Triangle, {2, 2, 2});
+  @endcode
+
+  @note `Mesh::Box` produces a **surface** mesh whose topological dimension
+  is one less than the ambient space (e.g. a 1D curve in 2D, or a 2D surface
+  in 3D). The `type` parameter specifies the **face** type, not the cell type.
 
   **Load from file:**
   @code{.cpp}
   Mesh mesh;
-  mesh.load("domain.mesh");  // MEDIT format
+  mesh.load("domain.mesh", IO::FileFormat::MEDIT);   // MEDIT format
+  mesh.load("domain.mesh", IO::FileFormat::MFEM);     // MFEM format
+  @endcode
+
+  **Key properties:**
+  @code{.cpp}
+  mesh.getDimension();          // Topological dimension (2 or 3)
+  mesh.getSpaceDimension();     // Ambient space dimension
+  mesh.getVertexCount();        // Total number of vertices
+  mesh.getCellCount();          // Total number of cells
   @endcode
 
   @subsection guides-getting-started-first-steps-connectivity Computing Connectivity
@@ -143,8 +166,9 @@
 
   @subsection guides-getting-started-first-steps-fe Finite Element Spaces
 
-  Finite element spaces define the type of basis functions used for
-  approximation:
+  A **finite element space** @f$ V_h @f$ defines the type of basis functions
+  used for approximation. It is built on a mesh and determines how many
+  degrees of freedom (DOFs) the discrete problem will have.
 
   @code{.cpp}
   #include <Rodin/Variational.h>
@@ -154,27 +178,49 @@
   Mesh mesh;
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
 
-  // P1 (linear) finite element space
+  // P1 (piecewise linear) finite element space
+  // One DOF per vertex → continuous across cells
   P1 Vh(mesh);
+  std::cout << "P1 DOFs: " << Vh.getSize() << std::endl;
 
-  std::cout << "FE space has " << Vh.getSize() << " degrees of freedom" << std::endl;
+  // P0 (piecewise constant) finite element space
+  // One DOF per cell → discontinuous across cells
+  P0 Wh(mesh);
+  std::cout << "P0 DOFs: " << Wh.getSize() << std::endl;
+
+  // Vector-valued P1 space (d components)
+  P1 Uh(mesh, mesh.getSpaceDimension());
+  std::cout << "Vector P1 DOFs: " << Uh.getSize() << std::endl;
   @endcode
+
+  For more details, see @ref fem-spaces "Finite Element Spaces".
 
   @subsection guides-getting-started-first-steps-functions Trial and Test Functions
 
-  To formulate problems, we use trial and test functions:
+  To formulate variational problems, we create **trial** and **test**
+  functions from a finite element space:
 
   @code{.cpp}
   P1 Vh(mesh);
 
-  // The unknown function we're solving for
+  // Trial function: represents the unknown solution u
   TrialFunction u(Vh);
 
-  // The test function for weak formulation
+  // Test function: represents the weighting function v
   TestFunction v(Vh);
   @endcode
 
-  These are used to express variational formulations in a natural way.
+  - The **trial function** `u` is the unknown we solve for. Its solution is
+    a @ref Rodin::Variational::GridFunction "GridFunction" accessible via
+    `u.getSolution()`.
+  - The **test function** `v` is used to construct the equations: for each
+    basis function of @f$ V_h @f$, one equation of the linear system is
+    generated.
+
+  These symbolic objects are combined with differential operators (`Grad`,
+  `Div`, `Jacobian`) and integrals (`Integral`, `BoundaryIntegral`) to
+  express the variational formulation of a PDE. See
+  @ref guides-variational "Variational Formulations" for details.
 
   @section guides-getting-started-first-steps-namespaces Using Namespaces
 

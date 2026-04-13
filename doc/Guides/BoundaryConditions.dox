@@ -10,20 +10,31 @@
 
   Boundary conditions specify the behavior of the solution on the boundary
   @f$ \partial \Omega @f$ of the computational domain. They are essential for
-  obtaining a well-posed problem.
+  obtaining a **well-posed** problem — without appropriate boundary conditions,
+  the PDE may have no solution, or infinitely many solutions.
 
-  In the finite element method, boundary conditions are classified into two
-  main types:
+  In the finite element method, boundary conditions are classified by how they
+  enter the discrete system:
 
   - **Essential (Dirichlet) conditions**: Directly prescribe the value of
-    the solution on the boundary. These are imposed by modifying the finite
-    element space or the assembled linear system.
-  - **Natural (Neumann) conditions**: Prescribe the flux or derivative of
-    the solution on the boundary. These appear naturally in the weak
-    formulation as boundary integrals.
+    the solution on the boundary: @f$ u = g @f$ on @f$ \Gamma_D @f$. These
+    are imposed by modifying the assembled linear system — the corresponding
+    rows and columns of the system matrix are adjusted to enforce the
+    prescribed values. In Rodin, this is handled by
+    @ref Rodin::Variational::DirichletBC "DirichletBC".
+  - **Natural (Neumann) conditions**: Prescribe the flux or normal derivative
+    of the solution: @f$ \partial u / \partial n = h @f$ on @f$ \Gamma_N @f$.
+    These appear **naturally** in the weak formulation as boundary integrals
+    after integration by parts. In Rodin, they are expressed as
+    `BoundaryIntegral(h, v).over(GammaN)`.
+  - **Periodic conditions**: Tie degrees of freedom on opposite boundaries.
+    In Rodin, handled by @ref Rodin::Variational::PeriodicBC "PeriodicBC"
+    with an explicit DOF correspondence map.
 
-  A third type, **periodic conditions**, ties degrees of freedom on opposite
-  sides of the domain.
+  @note **Homogeneous Neumann** conditions (@f$ \partial u / \partial n = 0 @f$)
+  are the "default" boundary condition. If no Dirichlet or Neumann condition
+  is imposed on a boundary segment, homogeneous Neumann is automatically
+  satisfied by the weak formulation.
 
   @section guides-bc-dirichlet Dirichlet Boundary Conditions
 
