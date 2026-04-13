@@ -33,12 +33,20 @@ namespace Rodin::Solver
       };
 
       /**
+       * @brief Returns the default Options instance.
+       */
+      static Options defaultOptions()
+      {
+        return Options{};
+      }
+
+      /**
        * @brief Builds FD Jacobian of a residual function R(x).
        *
        * @tparam ResidualEval Callable of signature `void(const DenseVector&, DenseVector&)`.
        */
       template <class ResidualEval>
-      static DenseMatrix jacobian(const DenseVector& x, ResidualEval&& residual, const Options& options = {})
+      static DenseMatrix jacobian(const DenseVector& x, ResidualEval&& residual, const Options& options = defaultOptions())
       {
         DenseVector R0(x.size());
         residual(x, R0);
@@ -83,7 +91,7 @@ namespace Rodin::Solver
           Problem& pb,
           const DenseVector& x,
           SetStateFn&& setState,
-          const Options& options = {})
+          const Options& options = defaultOptions())
       {
         auto residual = [&](const DenseVector& state, DenseVector& out)
         {

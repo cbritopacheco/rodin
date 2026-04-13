@@ -26,6 +26,7 @@ target_compile_definitions(RodinHeart
 
 target_link_libraries(RodinHeart
   INTERFACE
+    Rodin::Variational
     Rodin::Solver
 )
 
