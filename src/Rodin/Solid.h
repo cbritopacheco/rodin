@@ -40,6 +40,7 @@
 // Constitutive laws
 #include "Solid/Constitutive/Hooke.h"
 #include "Solid/Constitutive/HyperElasticLaw.h"
+#include "Solid/Constitutive/ActiveContraction.h"
 #include "Solid/Constitutive/NeoHookean.h"
 #include "Solid/Constitutive/SaintVenantKirchhoff.h"
 #include "Solid/Constitutive/MooneyRivlin.h"
