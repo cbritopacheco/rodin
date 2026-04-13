@@ -24,3 +24,17 @@ gtest_discover_tests(RodinSolverConceptTest
    PROPERTIES
      LABELS unit
  )
+
+add_executable(RodinFiniteDifferenceProbeTest FiniteDifferenceProbeTest.cpp)
+target_link_libraries(RodinFiniteDifferenceProbeTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Alert
+  Rodin::Rodin
+  Rodin::Solver
+)
+gtest_discover_tests(RodinFiniteDifferenceProbeTest
+  PROPERTIES
+    LABELS unit
+)

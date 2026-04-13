@@ -26,6 +26,7 @@
 
 #include "Solver/LinearSolver.h"
 #include "Solver/NewtonSolver.h"
+#include "Solver/FiniteDifferenceProbe.h"
 
 #include "Solver/LDLT.h"
 

@@ -43,6 +43,11 @@ namespace Rodin::Solver
   class NewtonSolverBase;
 
   /**
+   * @brief Finite-difference utilities for probing nonlinear residuals/tangents.
+   */
+  class FiniteDifferenceProbe;
+
+  /**
    * @brief Wrapper class for any Eigen sparse solver.
    * @tparam EigenSolverType Type of the underlying Eigen solver
    * @tparam OperatorType Type of operator (matrix)
