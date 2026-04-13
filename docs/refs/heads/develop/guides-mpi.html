@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>General concepts &raquo; MPI: Distributed Computing | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <link rel="prev" href="guides-io.html" />
+  <link rel="next" href="guides-petsc.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="guides-index.html">General concepts</a> &raquo;</span>
+          MPI: Distributed Computing
+        </h1>
+        <p>Guide to distributed-memory parallel computing with <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s MPI module.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li><a href="#guides-mpi-intro">Introduction</a></li>
+            <li><a href="#guides-mpi-context">Execution Context</a></li>
+            <li>
+              <a href="#guides-mpi-mesh">Distributed Mesh</a>
+              <ul>
+                <li><a href="#guides-mpi-mesh-uniformgrid">UniformGrid</a></li>
+                <li><a href="#guides-mpi-mesh-sharder">Explicit Partitioning with Sharder</a></li>
+              </ul>
+            </li>
+            <li><a href="#guides-mpi-shard">Shard: Rank-Local View</a></li>
+            <li>
+              <a href="#guides-mpi-connectivity">Connectivity and Reconciliation</a>
+              <ul>
+                <li><a href="#guides-mpi-reconcile-details">How Reconciliation Works</a></li>
+                <li><a href="#guides-mpi-reconcile-options">ReconcileOptions</a></li>
+              </ul>
+            </li>
+            <li><a href="#guides-mpi-queries">Global Queries</a></li>
+            <li><a href="#guides-mpi-io">I/O</a></li>
+            <li><a href="#guides-mpi-fes">Distributed Finite Element Spaces</a></li>
+            <li><a href="#guides-mpi-example">Complete Example</a></li>
+            <li><a href="#guides-mpi-see-also">See Also</a></li>
+          </ul>
+        </nav>
+<section id="guides-mpi-intro"><h2><a href="#guides-mpi-intro">Introduction</a></h2><p><a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s MPI module enables distributed finite element computations across multiple processes using the Message Passing Interface. It builds on <a href="https://www.boost.org/doc/libs/release/doc/html/mpi.html">Boost.MPI</a> and provides:</p><ul><li>A <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a> execution context wrapping a Boost.MPI environment and communicator.</li><li>A <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh&lt;Context::<wbr />MPI&gt;</a> distributed mesh that stores a rank-local shard with ownership and ghost metadata.</li><li>A <a href="class_rodin_1_1_geometry_1_1_sharder.html" class="m-doc">Sharder</a> that partitions a global mesh and distributes shards to MPI ranks.</li><li>A <code>reconcile()</code> method that resolves shared entity ownership and distributed indices after local connectivity discovery.</li></ul><p>Include the module via: <code class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/MPI.h&gt;</span></code></p></section><section id="guides-mpi-context"><h2><a href="#guides-mpi-context">Execution Context</a></h2><p>The <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a> class wraps a <code>boost::mpi::environment</code> and <code>boost::mpi::communicator</code>:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;boost/mpi/environment.hpp&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;boost/mpi/communicator.hpp&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/MPI.h&gt;</span>
+
+<span class="k">namespace</span><span class="w"> </span><span class="nn">mpi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">boost</span><span class="o">::</span><span class="nn">mpi</span><span class="p">;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">**</span><span class="w"> </span><span class="n">argv</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">mpi</span><span class="o">::</span><span class="n">environment</span><span class="w"> </span><span class="n">env</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="n">argv</span><span class="p">);</span>
+<span class="w">  </span><span class="n">mpi</span><span class="o">::</span><span class="n">communicator</span><span class="w"> </span><span class="n">world</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Rodin</span><span class="o">::</span><span class="n">Context</span><span class="o">::</span><span class="n">MPI</span><span class="w"> </span><span class="n">mpi</span><span class="p">(</span><span class="n">env</span><span class="p">,</span><span class="w"> </span><span class="n">world</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// mpi.getCommunicator() -&gt; const boost::mpi::communicator&amp;</span>
+<span class="w">  </span><span class="c1">// mpi.getEnvironment()  -&gt; const boost::mpi::environment&amp;</span>
+<span class="p">}</span></pre><p>The context is passed to distributed mesh constructors and sharders. It does not own the Boost.MPI objects — they must outlive the context.</p></section><section id="guides-mpi-mesh"><h2><a href="#guides-mpi-mesh">Distributed Mesh</a></h2><p><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh&lt;Context::<wbr />MPI&gt;</a> (aliased as <code>Geometry::MPIMesh</code>) stores a rank-local <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a> together with an MPI context. Geometric queries that require global information (polytope counts, volume, perimeter) perform MPI reductions automatically.</p><section id="guides-mpi-mesh-uniformgrid"><h3><a href="#guides-mpi-mesh-uniformgrid">UniformGrid</a></h3><p>The simplest way to create a distributed mesh is <code>UniformGrid</code>, which partitions and distributes internally:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Mesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">MPI</span><span class="o">&gt;::</span><span class="n">UniformGrid</span><span class="p">(</span>
+<span class="w">    </span><span class="n">mpi</span><span class="p">,</span><span class="w"> </span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Tetrahedron</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">});</span></pre></section><section id="guides-mpi-mesh-sharder"><h3><a href="#guides-mpi-mesh-sharder">Explicit Partitioning with Sharder</a></h3><p>For more control, use the <a href="class_rodin_1_1_geometry_1_1_sharder.html" class="m-doc">Sharder</a> with an explicit partitioning step. The workflow is:</p><ol><li><strong>Root rank</strong>: generate a local mesh, compute cell-cell connectivity, partition with a <a href="class_rodin_1_1_geometry_1_1_partitioner.html" class="m-doc">Partitioner</a>, then <code>shard()</code> and <code>scatter()</code>.</li><li><strong>All ranks</strong>: <code>gather()</code> to receive the local shard as an MPI mesh.</li></ol><pre class="m-code"><span class="n">MPI</span><span class="o">::</span><span class="n">Sharder</span><span class="w"> </span><span class="nf">sharder</span><span class="p">(</span><span class="n">mpi</span><span class="p">);</span>
+
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">world</span><span class="p">.</span><span class="n">rank</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">Geometry</span><span class="o">::</span><span class="n">LocalMesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+<span class="w">  </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Tetrahedron</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">32</span><span class="p">,</span><span class="w"> </span><span class="mi">32</span><span class="p">,</span><span class="w"> </span><span class="mi">32</span><span class="p">});</span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">cellDim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getDimension</span><span class="p">();</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="n">cellDim</span><span class="p">,</span><span class="w"> </span><span class="n">cellDim</span><span class="p">);</span>
+
+<span class="w">  </span><span class="n">Geometry</span><span class="o">::</span><span class="n">BalancedCompactPartitioner</span><span class="w"> </span><span class="nf">partitioner</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<span class="w">  </span><span class="n">partitioner</span><span class="p">.</span><span class="n">partition</span><span class="p">(</span><span class="n">world</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+
+<span class="w">  </span><span class="n">sharder</span><span class="p">.</span><span class="n">shard</span><span class="p">(</span><span class="n">partitioner</span><span class="p">);</span>
+<span class="w">  </span><span class="n">sharder</span><span class="p">.</span><span class="n">scatter</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">auto</span><span class="w"> </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sharder</span><span class="p">.</span><span class="n">gather</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span></pre><p>The <code>distribute()</code> convenience method combines <code>shard()</code>, <code>scatter()</code>, and <code>gather()</code> in one call:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sharder</span><span class="p">.</span><span class="n">distribute</span><span class="p">(</span><span class="n">partitioner</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span></pre></section></section><section id="guides-mpi-shard"><h2><a href="#guides-mpi-shard">Shard: Rank-Local View</a></h2><p>A <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a> is a local mesh enriched with distributed metadata. It classifies every polytope into one of three mutually exclusive states:</p><table class="m-table"><thead><tr><th>State</th><th>Meaning</th></tr></thead><tbody><tr><td><strong>Owned</strong></td><td>Belongs to this partition and this rank is the designated owner</td></tr><tr><td><strong>Shared</strong></td><td>Belongs to this partition but owned by another rank</td></tr><tr><td><strong>Ghost</strong></td><td>Does not belong to this partition; imported as overlap</td></tr></tbody></table><p>Key invariants:</p><ul><li><strong>Owned ∪ Shared</strong> = entities defining the local partition</li><li>Every distributed entity has exactly one owner across all ranks</li><li>Ghost entities provide stencil support and adjacency completeness</li></ul><p>The shard provides bidirectional index maps between local shard indices and distributed (global) indices:</p><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">shard</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getShard</span><span class="p">();</span>
+
+<span class="c1">// Local → distributed</span>
+<span class="n">Index</span><span class="w"> </span><span class="n">globalIdx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">shard</span><span class="p">.</span><span class="n">getPolytopeMap</span><span class="p">(</span><span class="n">d</span><span class="p">).</span><span class="n">left</span><span class="p">[</span><span class="n">localIdx</span><span class="p">];</span>
+
+<span class="c1">// Distributed → local</span>
+<span class="n">Index</span><span class="w"> </span><span class="n">localIdx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">shard</span><span class="p">.</span><span class="n">getPolytopeMap</span><span class="p">(</span><span class="n">d</span><span class="p">).</span><span class="n">right</span><span class="p">.</span><span class="n">at</span><span class="p">(</span><span class="n">globalIdx</span><span class="p">);</span>
+
+<span class="c1">// Ownership queries</span>
+<span class="kt">bool</span><span class="w"> </span><span class="n">owned</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">shard</span><span class="p">.</span><span class="n">isOwned</span><span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="w"> </span><span class="n">localIdx</span><span class="p">);</span>
+<span class="kt">bool</span><span class="w"> </span><span class="n">shared</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">shard</span><span class="p">.</span><span class="n">isShared</span><span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="w"> </span><span class="n">localIdx</span><span class="p">);</span>
+<span class="kt">bool</span><span class="w"> </span><span class="n">ghost</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">shard</span><span class="p">.</span><span class="n">isGhost</span><span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="w"> </span><span class="n">localIdx</span><span class="p">);</span>
+<span class="kt">bool</span><span class="w"> </span><span class="n">local</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">shard</span><span class="p">.</span><span class="n">isLocal</span><span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="w"> </span><span class="n">localIdx</span><span class="p">);</span><span class="w">  </span><span class="c1">// Owned || Shared</span></pre></section><section id="guides-mpi-connectivity"><h2><a href="#guides-mpi-connectivity">Connectivity and Reconciliation</a></h2><p>After receiving a shard, you must compute local connectivity for the incidence relations you need. However, entities discovered independently on neighboring shards may not yet have consistent distributed indices or ownership. The <code>reconcile()</code> method resolves this:</p><pre class="m-code"><span class="c1">// Compute face-to-cell incidence locally</span>
+<span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
+
+<span class="c1">// Reconcile faces across MPI ranks:</span>
+<span class="c1">// - identifies shared entities via their vertex keys</span>
+<span class="c1">// - assigns unique distributed indices</span>
+<span class="c1">// - determines a unique owner rank per entity</span>
+<span class="c1">// - updates shard metadata (ownership, owner/halo maps, index maps)</span>
+<span class="n">mesh</span><span class="p">.</span><span class="n">reconcile</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span></pre><section id="guides-mpi-reconcile-details"><h3><a href="#guides-mpi-reconcile-details">How Reconciliation Works</a></h3><p>Reconciliation is an iterative peer-to-peer convergence algorithm:</p><ol><li>Each rank identifies candidate shared entities from the ghost layer and exchanges their vertex keys with face-adjacent neighbor ranks.</li><li>Matching entities are identified; distributed IDs and ownership are propagated iteratively until global convergence (checked via MPI all-reduce).</li><li>Communication is restricted to K face-adjacent neighbors (K is O(1)), making the algorithm weak-scalable.</li></ol></section><section id="guides-mpi-reconcile-options"><h3><a href="#guides-mpi-reconcile-options">ReconcileOptions</a></h3><p>The <code>reconcile()</code> method accepts an optional <code>ReconcileOptions</code> struct to control convergence:</p><table class="m-table"><thead><tr><th>Field</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code>maxOwnerRounds</code></td><td>unlimited</td><td>Cap on owner-convergence rounds</td></tr><tr><td><code>maxGidRounds</code></td><td>unlimited</td><td>Cap on distributed-ID-convergence rounds</td></tr><tr><td><code>globalCheckPeriod</code></td><td>1</td><td>How often global convergence is checked</td></tr><tr><td><code>strictRoundCap</code></td><td>false</td><td>If true, exceeding a cap throws</td></tr></tbody></table><p>For codimension-1 entities (faces in 3D, edges in 2D), <code>maxOwnerRounds=1</code> typically suffices because each face is shared by at most 2 cells. For lower-dimensional entities (edges in 3D), unbounded rounds are the safe default since the holder graph diameter depends on mesh topology.</p></section></section><section id="guides-mpi-queries"><h2><a href="#guides-mpi-queries">Global Queries</a></h2><p>Global geometric queries on the distributed mesh automatically perform MPI reductions. Each rank accumulates contributions from its <strong>owned</strong> entities, then the results are summed across ranks:</p><pre class="m-code"><span class="c1">// Total number of cells across all ranks</span>
+<span class="kt">size_t</span><span class="w"> </span><span class="n">totalCells</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getCellCount</span><span class="p">();</span>
+
+<span class="c1">// Total volume (each rank contributes owned cells)</span>
+<span class="n">Real</span><span class="w"> </span><span class="n">vol</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getVolume</span><span class="p">();</span>
+
+<span class="c1">// Volume restricted to an attribute</span>
+<span class="n">Real</span><span class="w"> </span><span class="n">vol_attr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getVolume</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span><span class="w">   </span><span class="c1">// attribute 2</span>
+
+<span class="c1">// Total perimeter (owned boundary faces only)</span>
+<span class="n">Real</span><span class="w"> </span><span class="n">perim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getPerimeter</span><span class="p">();</span></pre></section><section id="guides-mpi-io"><h2><a href="#guides-mpi-io">I/O</a></h2><p>The MPI module provides HDF5-based I/O for distributed meshes. Each rank saves or loads its own shard independently:</p><pre class="m-code"><span class="c1">// Rank-dependent filename</span>
+<span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span>
+<span class="w">  </span><span class="p">[](</span><span class="kt">int</span><span class="w"> </span><span class="n">rank</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="s">&quot;mesh.&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">to_string</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;.h5&quot;</span><span class="p">;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">HDF5</span><span class="p">);</span>
+
+<span class="c1">// Or save the shard directly (MEDIT format)</span>
+<span class="n">mesh</span><span class="p">.</span><span class="n">getShard</span><span class="p">().</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;Shard.&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">to_string</span><span class="p">(</span><span class="n">world</span><span class="p">.</span><span class="n">rank</span><span class="p">())</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;.mesh&quot;</span><span class="p">,</span>
+<span class="w">                     </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MEDIT</span><span class="p">);</span></pre><p>For XDMF output (ParaView visualization), pass the MPI communicator:</p><pre class="m-code"><span class="n">IO</span><span class="o">::</span><span class="n">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="n">MPI_COMM_WORLD</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;output/simulation&quot;</span><span class="p">);</span>
+<span class="n">xdmf</span><span class="p">.</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<span class="n">xdmf</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;u&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">());</span>
+<span class="n">xdmf</span><span class="p">.</span><span class="n">write</span><span class="p">();</span>
+<span class="n">xdmf</span><span class="p">.</span><span class="n">close</span><span class="p">();</span></pre></section><section id="guides-mpi-fes"><h2><a href="#guides-mpi-fes">Distributed Finite Element Spaces</a></h2><p>The P1 finite element space is specialized for MPI meshes. It wraps a local shard P1 space and augments it with distributed global indexing:</p><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w">  </span><span class="c1">// mesh is Mesh&lt;Context::MPI&gt;</span></pre><p>Owned DOFs receive contiguous global ranges per rank, while ghost DOFs are synchronized from their owner ranks. The space provides bidirectional local↔global DOF index maps.</p></section><section id="guides-mpi-example"><h2><a href="#guides-mpi-example">Complete Example</a></h2><p>This example solves the Poisson equation on a distributed mesh using MPI and PETSc:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/MPI.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/PETSc.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Variational.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/IO/XDMF.h&gt;</span>
+
+<span class="k">namespace</span><span class="w"> </span><span class="nn">mpi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">boost</span><span class="o">::</span><span class="nn">mpi</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Geometry</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Variational</span><span class="p">;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">**</span><span class="w"> </span><span class="n">argv</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">mpi</span><span class="o">::</span><span class="n">environment</span><span class="w"> </span><span class="n">env</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="n">argv</span><span class="p">);</span>
+<span class="w">  </span><span class="n">mpi</span><span class="o">::</span><span class="n">communicator</span><span class="w"> </span><span class="n">world</span><span class="p">;</span>
+<span class="w">  </span><span class="n">Context</span><span class="o">::</span><span class="n">MPI</span><span class="w"> </span><span class="n">mpi</span><span class="p">(</span><span class="n">env</span><span class="p">,</span><span class="w"> </span><span class="n">world</span><span class="p">);</span>
+<span class="w">  </span><span class="n">PetscInitialize</span><span class="p">(</span><span class="o">&amp;</span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">argv</span><span class="p">,</span><span class="w"> </span><span class="n">PETSC_NULLPTR</span><span class="p">,</span><span class="w"> </span><span class="n">PETSC_NULLPTR</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Partition and distribute mesh from root</span>
+<span class="w">  </span><span class="n">MPI</span><span class="o">::</span><span class="n">Sharder</span><span class="w"> </span><span class="n">sharder</span><span class="p">(</span><span class="n">mpi</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">world</span><span class="p">.</span><span class="n">rank</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="n">LocalMesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+<span class="w">    </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Tetrahedron</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">});</span>
+<span class="w">    </span><span class="n">mesh</span><span class="p">.</span><span class="n">scale</span><span class="p">(</span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">15</span><span class="p">);</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">cellDim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getDimension</span><span class="p">();</span>
+<span class="w">    </span><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="n">cellDim</span><span class="p">,</span><span class="w"> </span><span class="n">cellDim</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">BalancedCompactPartitioner</span><span class="w"> </span><span class="n">partitioner</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<span class="w">    </span><span class="n">partitioner</span><span class="p">.</span><span class="n">partition</span><span class="p">(</span><span class="n">world</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+<span class="w">    </span><span class="n">sharder</span><span class="p">.</span><span class="n">shard</span><span class="p">(</span><span class="n">partitioner</span><span class="p">);</span>
+<span class="w">    </span><span class="n">sharder</span><span class="p">.</span><span class="n">scatter</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sharder</span><span class="p">.</span><span class="n">gather</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Compute distributed connectivity</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">reconcile</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Build FE space and define problem</span>
+<span class="w">  </span><span class="n">P1</span><span class="w"> </span><span class="n">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<span class="w">  </span><span class="n">RealFunction</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+
+<span class="w">  </span><span class="n">PETSc</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><span class="n">TrialFunction</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
+<span class="w">  </span><span class="n">PETSc</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><span class="n">TestFunction</span><span class="w">  </span><span class="n">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
+
+<span class="w">  </span><span class="n">Problem</span><span class="w"> </span><span class="n">poisson</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+<span class="w">  </span><span class="n">poisson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+<span class="w">          </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
+<span class="w">          </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">Zero</span><span class="p">());</span>
+
+<span class="w">  </span><span class="n">Solver</span><span class="o">::</span><span class="n">CG</span><span class="p">(</span><span class="n">poisson</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span>
+
+<span class="w">  </span><span class="c1">// Write XDMF output for ParaView</span>
+<span class="w">  </span><span class="n">IO</span><span class="o">::</span><span class="n">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="n">MPI_COMM_WORLD</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Poisson&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="n">xdmf</span><span class="p">.</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<span class="w">  </span><span class="n">xdmf</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;u&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">());</span>
+<span class="w">  </span><span class="n">xdmf</span><span class="p">.</span><span class="n">write</span><span class="p">();</span>
+<span class="w">  </span><span class="n">xdmf</span><span class="p">.</span><span class="n">close</span><span class="p">();</span>
+
+<span class="w">  </span><span class="n">PetscFinalize</span><span class="p">();</span>
+<span class="p">}</span></pre></section><section id="guides-mpi-see-also"><h2><a href="#guides-mpi-see-also">See Also</a></h2><ul><li><a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI namespace reference</a></li><li><a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a></li><li><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a></li><li><a href="guides-petsc.html" class="m-doc">PETSc module</a></li><li><a href="guides-solvers.html" class="m-doc">Solvers</a></li></ul></section>
+        <div class="m-note m-dim m-thin m-text-center"><a href="guides-io.html" class="m-doc">&laquo; I/O in Rodin</a> | <a href="guides-index.html" class="m-doc">General concepts</a> | <a href="guides-petsc.html" class="m-doc">PETSc: Parallel Solvers and Distributed Linear Algebra &raquo;</a></div>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

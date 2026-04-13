@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin/Solid/Local/Input.h file | Rodin</title>
+  <title>Rodin::Scotch namespace | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -74,56 +74,15 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_add7d0d1e3fa2c5fc6de951654f0f623.html">Solid</a>/</span><span class="m-breadcrumb"><a href="dir_cc914b0b7e3f237609749fafe17f6ede.html">Local</a>/</span>Input.h <span class="m-thin">file</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Scotch <span class="m-thin">namespace</span>
         </h1>
-        <p>Extensible input injection mechanism for constitutive evaluation.</p>
-        <nav class="m-block m-default">
-          <h3>Contents</h3>
-          <ul>
-            <li><a href="#autotoc_md225">Usage with CRTP</a></li>
-            <li><a href="#autotoc_md226">Usage with lambda / std::function</a></li>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#namespaces">Namespaces</a></li>
-                <li><a href="#nested-classes">Classes</a></li>
-              </ul>
-            </li>
-          </ul>
-        </nav>
-<p>An Input populates a ConstitutivePoint with auxiliary data at each quadrature point during integration. This is the injection site for material-specific fields (fiber directions, activation parameters, region-wise material properties, etc.) without hard-coding them into the integrator or the constitutive law.</p><section id="autotoc_md225"><h3><a href="#autotoc_md225">Usage with CRTP</a></h3><pre class="m-code"><span class="k">struct</span><span class="w"> </span><span class="nc">MyInput</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Solid</span><span class="o">::</span><span class="n">Input</span><span class="o">&lt;</span><span class="n">MyInput</span><span class="o">&gt;</span>
-<span class="p">{</span>
-<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">populate</span><span class="p">(</span><span class="n">Solid</span><span class="o">::</span><span class="n">ConstitutivePoint</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cp</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
-<span class="w">  </span><span class="p">{</span>
-<span class="w">    </span><span class="c1">// e.g., interpolate fiber direction from a GridFunction</span>
-<span class="w">    </span><span class="n">Math</span><span class="o">::</span><span class="n">SpatialVector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">fiber</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
-<span class="w">    </span><span class="n">cp</span><span class="p">.</span><span class="n">set</span><span class="o">&lt;</span><span class="n">Solid</span><span class="o">::</span><span class="n">Tags</span><span class="o">::</span><span class="n">FiberDirection</span><span class="o">&gt;</span><span class="p">(</span><span class="n">fiber</span><span class="p">);</span>
-<span class="w">  </span><span class="p">}</span>
-<span class="p">};</span>
+        <p>PT-Scotch mesh partitioning integration.</p>
+<p>The <a href="namespace_rodin_1_1_scotch.html" class="m-doc">Scotch</a> module provides a graph-based mesh partitioner using the <a href="https://www.labri.fr/perso/pelegrin/scotch/">PT-Scotch</a> library. It implements the <code><a href="class_rodin_1_1_geometry_1_1_partitioner.html" class="m-doc">Geometry::<wbr />Partitioner</a></code> interface and supports configurable partitioning strategies via <code>SCOTCH_Strat</code>.</p><p>The primary class is <code><a href="class_rodin_1_1_scotch_1_1_partitioner.html" class="m-doc">Scotch::<wbr />Partitioner</a></code>, which partitions cells of a local mesh into a given number of parts. The resulting partition can be used with the <code>Sharder</code> to distribute the mesh for <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> computations.</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Scotch/MeshPartitioner.h&gt;</span>
 
-<span class="n">Solid</span><span class="o">::</span><span class="n">InternalForce</span><span class="w"> </span><span class="nf">force</span><span class="p">(</span><span class="n">law</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
-<span class="n">force</span><span class="p">.</span><span class="n">setInput</span><span class="p">(</span><span class="n">MyInput</span><span class="p">{});</span></pre></section><section id="autotoc_md226"><h3><a href="#autotoc_md226">Usage with lambda / std::function</a></h3><pre class="m-code"><span class="n">force</span><span class="p">.</span><span class="n">setInput</span><span class="p">([</span><span class="o">&amp;</span><span class="p">](</span><span class="n">Solid</span><span class="o">::</span><span class="n">ConstitutivePoint</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cp</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="n">cp</span><span class="p">.</span><span class="n">set</span><span class="o">&lt;</span><span class="n">Solid</span><span class="o">::</span><span class="n">Tags</span><span class="o">::</span><span class="n">Activation</span><span class="o">&gt;</span><span class="p">(</span><span class="n">activationValue</span><span class="p">);</span>
-<span class="p">});</span></pre></section>
-        <section id="namespaces">
-          <h2><a href="#namespaces">Namespaces</a></h2>
-          <dl class="m-doc">
-            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_solid.html" class="m-doc">Rodin::Solid</a></dt>
-            <dd>Hyperelastic solid mechanics module for large-deformation problems.</dd>
-          </dl>
-        </section>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_solid_1_1_input.html" class="m-doc">Rodin::Solid::Input</a>
-            </dt>
-            <dd>CRTP base class for inputs.</dd>
-          </dl>
-        </section>
+<span class="n">Scotch</span><span class="o">::</span><span class="n">Partitioner</span><span class="w"> </span><span class="nf">partitioner</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<span class="n">partitioner</span><span class="p">.</span><span class="n">partition</span><span class="p">(</span><span class="n">numRanks</span><span class="p">);</span><span class="w">  </span><span class="c1">// partition into numRanks parts</span>
+
+<span class="kt">size_t</span><span class="w"> </span><span class="n">part</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">partitioner</span><span class="p">.</span><span class="n">getPartition</span><span class="p">(</span><span class="n">cellIndex</span><span class="p">);</span></pre><aside class="m-note m-info"><h4>Note</h4><p>Requires the <a href="namespace_rodin_1_1_scotch.html" class="m-doc">Scotch</a> library and is conditionally compiled.</p></aside>
       </div>
     </div>
   </div>

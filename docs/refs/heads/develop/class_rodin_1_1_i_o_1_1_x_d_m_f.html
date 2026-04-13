@@ -171,7 +171,7 @@
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#ae31dd3c02ea7d8deb2a1b5b3bd62ba0a" class="m-doc">XDMF</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp;) <span class="m-label m-flat m-danger">deleted</span></span>
             </dt>
-            <dd>Constructs an <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> writer in distributed (MPI) mode.</dd>
+            <dd>Constructs an <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> writer in distributed (<a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a>) mode.</dd>
             <dt id="a334007009b7b2b2d5e8fd72d1a94f443">
               <span class="m-doc-wrap-bumper"><a href="#a334007009b7b2b2d5e8fd72d1a94f443" class="m-doc-self">XDMF</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
@@ -267,7 +267,7 @@
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a96692d2ad8bbf35f4513f238194436f3" class="m-doc">isDistributed</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd><a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> whether the writer is in distributed (MPI) mode.</dd>
+            <dd><a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> whether the writer is in distributed (<a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a>) mode.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a8a1f56914b35cd103f63bb1e12e61ecc" class="m-doc">getRank</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -542,7 +542,7 @@
             <h3>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae31dd3c02ea7d8deb2a1b5b3bd62ba0a" class="m-doc-self">XDMF</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp;) <span class="m-label m-danger">deleted</span></span></span>
             </h3>
-            <p>Constructs an <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> writer in distributed (MPI) mode.</p>
+            <p>Constructs an <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> writer in distributed (<a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a>) mode.</p>
 <p>In distributed mode:</p><ul><li>Each rank writes its own rank-specific <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> visualization files (using <code>{rank}</code> in the file patterns).</li><li>Only the root rank writes the master <code>.xdmf</code> XML file that references all per-rank piece files as a Spatial collection.</li><li>For transient output, the master <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> contains a Temporal collection of Spatial collections.</li><li><a href="#a4241c0d0f7c3a62b3f49e6f8edce1a1f" class="m-doc">write()</a>, flush(), and <a href="#a5ae591df94fc66ccb85cbb6565368bca" class="m-doc">close()</a> are collective operations that must be called by all ranks.</li></ul><h5 id="autotoc_md155">Example</h5><pre class="m-code"><span class="n">IO</span><span class="o">::</span><span class="n">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="n">MPI_COMM_WORLD</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;output/Poisson&quot;</span><span class="p">);</span>
 <span class="n">xdmf</span><span class="p">.</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mpiMesh</span><span class="p">);</span>
 <span class="n">xdmf</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;u&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">XDMF</span><span class="o">::</span><span class="n">Center</span><span class="o">::</span><span class="n">Node</span><span class="p">);</span>
@@ -916,7 +916,7 @@
             <h3>
               <span class="m-doc-wrap-bumper">bool Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a96692d2ad8bbf35f4513f238194436f3" class="m-doc-self">isDistributed</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p><a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> whether the writer is in distributed (MPI) mode.</p>
+            <p><a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> whether the writer is in distributed (<a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a>) mode.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
