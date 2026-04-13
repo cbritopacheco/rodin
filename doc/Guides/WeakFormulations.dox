@@ -121,17 +121,36 @@
   @f[
     \left\{
     \begin{aligned}
-      -\nabla \cdot \sigma(\mathbf{u}) &= \mathbf{0} && \text{in } \Omega \\
+      -\nabla \cdot \boldsymbol{\sigma}(\mathbf{u}) &= \mathbf{f} && \text{in } \Omega \\
       \mathbf{u} &= \mathbf{0} && \text{on } \Gamma_D \\
-      \sigma(\mathbf{u}) \, \mathbf{n} &= \mathbf{f} && \text{on } \Gamma_N
+      \boldsymbol{\sigma}(\mathbf{u}) \, \mathbf{n} &= \mathbf{g} && \text{on } \Gamma_N
     \end{aligned}
     \right.
   @f]
 
-  where @f$ \sigma(\mathbf{u}) = 2\mu \, e(\mathbf{u}) + \lambda \,
-  \mathrm{tr}(e(\mathbf{u})) \, I @f$ is the Cauchy stress tensor
-  (Hooke's law) and @f$ e(\mathbf{u}) = \frac{1}{2}(\nabla \mathbf{u}
-  + \nabla \mathbf{u}^T) @f$ is the linearized strain tensor.
+  where @f$ \boldsymbol{\sigma}(\mathbf{u}) = 2\mu \, \boldsymbol{\varepsilon}(\mathbf{u})
+  + \lambda \, \mathrm{tr}(\boldsymbol{\varepsilon}(\mathbf{u})) \, \mathbf{I} @f$
+  is the Cauchy stress tensor (Hooke's law) and
+  @f$ \boldsymbol{\varepsilon}(\mathbf{u}) = \frac{1}{2}(\nabla \mathbf{u}
+  + \nabla \mathbf{u}^T) @f$ is the linearized (infinitesimal) strain tensor.
+
+  @subsection guides-weak-elasticity-lame Lamé Parameters
+
+  The Lamé parameters @f$ \lambda @f$ and @f$ \mu @f$ characterize the material.
+  They are related to the more common Young's modulus @f$ E @f$ and Poisson's
+  ratio @f$ \nu @f$ by:
+  @f[
+    \lambda = \frac{E\nu}{(1+\nu)(1-2\nu)}, \quad
+    \mu = \frac{E}{2(1+\nu)}
+  @f]
+
+  For example, with @f$ E = 1 @f$ and @f$ \nu = 0.3 @f$:
+
+  @code{.cpp}
+  const Real E = 1.0, nu = 0.3;
+  const Real lambda = E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu));  // ≈ 0.5769
+  const Real mu     = E / (2.0 * (1.0 + nu));                     // ≈ 0.3846
+  @endcode
 
   @subsection guides-weak-elasticity-deriv Derivation
 
@@ -140,15 +159,25 @@
   produces the traction term:
 
   @f[
-    \int_\Omega \sigma(\mathbf{u}) : e(\mathbf{v}) \, dx
-    = \int_{\Gamma_N} \mathbf{f} \cdot \mathbf{v} \, ds
+    \int_\Omega \boldsymbol{\sigma}(\mathbf{u}) : \boldsymbol{\varepsilon}(\mathbf{v}) \, dx
+    = \int_\Omega \mathbf{f} \cdot \mathbf{v} \, dx
+    + \int_{\Gamma_N} \mathbf{g} \cdot \mathbf{v} \, ds
+  @f]
+
+  Expanding Hooke's law, the bilinear form becomes:
+  @f[
+    a(\mathbf{u}, \mathbf{v}) = \int_\Omega \bigl[
+    \lambda (\nabla \cdot \mathbf{u})(\nabla \cdot \mathbf{v})
+    + 2\mu \, \boldsymbol{\varepsilon}(\mathbf{u}) : \boldsymbol{\varepsilon}(\mathbf{v})
+    \bigr] \, dx
   @f]
 
   @subsection guides-weak-elasticity-rodin Implementation
 
-  Rodin provides a convenient `LinearElasticityIntegral` that assembles the
-  bilinear form for the Hooke tensor. The Lamé parameters @f$ \lambda @f$
-  and @f$ \mu @f$ are passed as arguments:
+  Rodin provides `LinearElasticityIntegral` (in `<Rodin/Solid.h>`) which
+  assembles the bilinear form for the Hooke tensor. The helper class
+  `LinearElasticityIntegral(u, v)` returns a callable that accepts the Lamé
+  parameters — either as constants or spatially-varying functions:
 
   @code{.cpp}
   #include <Rodin/Solver.h>
@@ -167,17 +196,19 @@
     mesh.getConnectivity().compute(1, 2);
 
     const size_t d = mesh.getSpaceDimension();
-    const Real lambda = 0.5769, mu = 0.3846;
+    const Real E = 1.0, nu = 0.3;
+    const Real lambda = E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu));
+    const Real mu     = E / (2.0 * (1.0 + nu));
 
     P1 Vh(mesh, d);  // Vector-valued P1 space
     TrialFunction u(Vh);
     TestFunction  v(Vh);
 
-    VectorFunction load{0, -1};  // Downward force
+    VectorFunction traction{0, -1};  // Traction force (stress vector) on Neumann boundary
 
     Problem elasticity(u, v);
     elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
-               - BoundaryIntegral(load, v).over(GammaN)
+               - BoundaryIntegral(traction, v).over(GammaN)
                + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
 
     Solver::CG(elasticity).solve();
@@ -185,6 +216,52 @@
     return 0;
   }
   @endcode
+
+  @note `LinearElasticityIntegral` includes a P1-optimized specialization
+  that uses centroid quadrature (exact for piecewise-constant Lamé parameters
+  with linear basis functions). For higher-order elements, the quadrature order
+  is auto-computed as `max(lambdaOrder, muOrder) + trialOrder + testOrder`.
+
+  @subsection guides-weak-elasticity-hyperelastic Beyond Small Deformations
+
+  For large deformations (finite strain), use the `Solid` module's
+  hyperelastic framework with `MaterialTangent` and `InternalForce` integrators
+  coupled with a `NewtonSolver`. Available constitutive laws include
+  `NeoHookean`, `SaintVenantKirchhoff`, and `MooneyRivlin`.
+
+  The Newton linearization at each iterate @f$ \mathbf{u}^k @f$ solves:
+  @f[
+    K(\mathbf{u}^k) \, \delta\mathbf{u}^k = -F_{\mathrm{int}}(\mathbf{u}^k) + F_{\mathrm{ext}}
+  @f]
+  where @f$ K @f$ is the material tangent and @f$ F_{\mathrm{int}} @f$ is the
+  internal force vector.
+
+  @code{.cpp}
+  #include <Rodin/Solid.h>
+  #include <Rodin/Solver/NewtonSolver.h>
+  #include <Rodin/Solver/SparseLU.h>
+
+  Solid::NeoHookean law(lambda, mu);
+
+  GridFunction u(Vh);  // accumulated displacement
+
+  Solid::MaterialTangent tangent(law, du, v);
+  tangent.setDisplacement(u);
+
+  Solid::InternalForce residual(law, v);
+  residual.setDisplacement(u);
+
+  Problem newton(du, v);
+  newton = tangent + residual
+         - Integral(bodyForce, v)
+         + DirichletBC(du, VectorFunction{Zero(), Zero()}).on(fixedBC);
+
+  SparseLU linearSolver(newton);
+  NewtonSolver solver(linearSolver);
+  solver.solve(u);  // updates u in place
+  @endcode
+
+  See @ref Rodin::Solid "Solid module" for the full API.
 
   @section guides-weak-general General Structure
 
@@ -208,24 +285,32 @@
 
   @section guides-weak-bilinear Bilinear Forms
 
-  Bilinear forms involve both the trial and test functions. Common examples:
+  A **bilinear form** @f$ a(u, v) @f$ is a mapping that is linear in both
+  arguments. It involves both the trial function @f$ u @f$ and the test
+  function @f$ v @f$, and is assembled into the **system matrix** @f$ A @f$.
 
-  | Mathematical Expression | Rodin Code |
-  |-------------------------|------------|
-  | @f$ \int_\Omega \nabla u \cdot \nabla v \, dx @f$ | `Integral(Grad(u), Grad(v))` |
-  | @f$ \int_\Omega u \, v \, dx @f$ | `Integral(u, v)` |
-  | @f$ \int_\Omega \lambda \nabla u \cdot \nabla v \, dx @f$ | `Integral(lambda * Grad(u), Grad(v))` |
-  | @f$ \int_\Omega \lambda (\nabla \cdot u)(\nabla \cdot v) \, dx @f$ | `Integral(lambda * Div(u), Div(v))` |
+  Common examples:
+
+  | Mathematical expression | Rodin code | Name |
+  |-------------------------|------------|------|
+  | @f$ \int_\Omega \nabla u \cdot \nabla v \, dx @f$ | `Integral(Grad(u), Grad(v))` | Stiffness |
+  | @f$ \int_\Omega u \, v \, dx @f$ | `Integral(u, v)` | Mass |
+  | @f$ \int_\Omega \lambda \nabla u \cdot \nabla v \, dx @f$ | `Integral(lambda * Grad(u), Grad(v))` | Weighted stiffness |
+  | @f$ \int_\Omega \lambda (\nabla \cdot \mathbf{u})(\nabla \cdot \mathbf{v}) \, dx @f$ | `Integral(lambda * Div(u), Div(v))` | Divergence penalization |
 
   @section guides-weak-linear Linear Forms
 
-  Linear forms involve only the test function. Common examples:
+  A **linear form** @f$ \ell(v) @f$ is a mapping that is linear in @f$ v @f$
+  only (it does not depend on the unknown @f$ u @f$). It is assembled into the
+  **right-hand side vector** @f$ \mathbf{b} @f$.
 
-  | Mathematical Expression | Rodin Code |
-  |-------------------------|------------|
-  | @f$ \int_\Omega f \, v \, dx @f$ | `Integral(f, v)` |
-  | @f$ \int_{\Gamma_N} g \, v \, ds @f$ | `BoundaryIntegral(g, v).over(GammaN)` |
-  | @f$ \int_\Omega \mathbf{f} \cdot \mathbf{v} \, dx @f$ | `Integral(f, v)` |
+  Common examples:
+
+  | Mathematical expression | Rodin code | Name |
+  |-------------------------|------------|------|
+  | @f$ \int_\Omega f \, v \, dx @f$ | `Integral(f, v)` | Volume source |
+  | @f$ \int_{\Gamma_N} g \, v \, ds @f$ | `BoundaryIntegral(g, v).over(GammaN)` | Neumann load |
+  | @f$ \int_\Omega \mathbf{f} \cdot \mathbf{v} \, dx @f$ | `Integral(f, v)` | Vector body force |
 
   @section guides-weak-bc Boundary Conditions in Weak Form
 
@@ -276,8 +361,8 @@
   velocity and pressure:
 
   @code{.cpp}
-  H1 Vh(mesh, d, 2);  // Velocity: vector H1, order 2
-  H1 Qh(mesh, 1, 1);  // Pressure: scalar H1, order 1
+  H1 Vh(std::integral_constant<size_t, 2>{}, mesh, d);  // Velocity: vector H1, order 2
+  H1 Qh(std::integral_constant<size_t, 1>{}, mesh);     // Pressure: scalar H1, order 1
 
   TrialFunction u(Vh);  TestFunction v(Vh);   // Velocity pair
   TrialFunction p(Qh);  TestFunction q(Qh);   // Pressure pair
