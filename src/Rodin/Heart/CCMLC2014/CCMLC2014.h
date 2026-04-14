@@ -14,12 +14,13 @@
 #include <functional>
 #include <numbers>
 
+#include "Rodin/Solver/ForwardDecls.h"
 #include "Rodin/Types.h"
 #include "Rodin/Math/LinearSystem.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/Problem.h"
-#include "Rodin/Solver/LDLT.h"
+#include "Rodin/Solver/PartialPivLU.h"
 #include "Rodin/Solver/NewtonSolver.h"
 #include "Rodin/Heart/CCMLC2014/HolzapfelReducedLaw.h"
 #include "Rodin/Heart/CCMLC2014/PassiveLaw.h"
@@ -116,8 +117,8 @@ namespace Rodin::Heart
         size_t iterations = 0;
         Scalar finalResidual = 0.0;
         Scalar finalStepNorm = 0.0;
-        Solver::NewtonSolver<Solver::LDLT<DenseLinearSystem>>::ConvergenceReason reason =
-          Solver::NewtonSolver<Solver::LDLT<DenseLinearSystem>>::ConvergenceReason::MaxIterations;
+        Solver::NewtonSolver<Solver::PartialPivLU<DenseLinearSystem>>::ConvergenceReason reason =
+          Solver::NewtonSolver<Solver::PartialPivLU<DenseLinearSystem>>::ConvergenceReason::MaxIterations;
       };
 
     private:
@@ -644,8 +645,8 @@ namespace Rodin::Heart
 
       DenseVector m_x;
       Problem m_problem;
-      Solver::LDLT<DenseLinearSystem> m_solver;
-      Solver::NewtonSolver<Solver::LDLT<DenseLinearSystem>> m_newton;
+      Solver::PartialPivLU<DenseLinearSystem> m_solver;
+      Solver::NewtonSolver<Solver::PartialPivLU<DenseLinearSystem>> m_newton;
   };
 
   using CCMLC2014 = CCMLC2014T<>;
