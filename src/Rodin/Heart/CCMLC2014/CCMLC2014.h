@@ -21,11 +21,14 @@
 #include "Rodin/Variational/Problem.h"
 #include "Rodin/Solver/LDLT.h"
 #include "Rodin/Solver/NewtonSolver.h"
+#include "Rodin/Heart/CCMLC2014/HolzapfelReducedLaw.h"
 #include "Rodin/Heart/CCMLC2014/PassiveLaw.h"
 
 namespace Rodin::Heart
 {
-  template <class PassiveLaw = CCMLC2014PassiveLaw<Real>>
+  template <
+    class PassiveEnergyLaw = HolzapfelReducedLaw<Real>,
+    class PassiveLaw = CCMLC2014PassiveLaw<Real>>
   class CCMLC2014T
   {
     public:
@@ -104,22 +107,7 @@ namespace Rodin::Heart
         std::function<Scalar(Scalar)> m0Prime =
           [](Scalar) { return Scalar(0); };
 
-        std::function<Scalar(Scalar, Scalar, Scalar)> dWe_dJ1 =
-          [](Scalar, Scalar, Scalar) { return Scalar(0); };
-
-        std::function<Scalar(Scalar, Scalar, Scalar)> dWe_dJ2 =
-          [](Scalar, Scalar, Scalar) { return Scalar(0); };
-
-        std::function<Scalar(Scalar, Scalar, Scalar)> dWe_dJ4 =
-          [](Scalar, Scalar, Scalar) { return Scalar(0); };
-
-        std::function<Scalar(Scalar, Scalar, Scalar, Scalar, Scalar, Scalar, Scalar)>
-          dSigmaPassive_dC =
-            [](Scalar C, Scalar, Scalar, Scalar, Scalar dW1, Scalar dW2, Scalar)
-            {
-              return Scalar(12) * std::pow(C, -4) * (dW1 + C * dW2)
-                   + Scalar(4) * (Scalar(1) - std::pow(C, -3)) * dW2;
-            };
+        PassiveEnergyLaw passiveEnergy;
       };
 
       struct Report
@@ -313,7 +301,7 @@ namespace Rodin::Heart
         d.dCdot_dv = d.sqrtC / input.R0;
 
         PassiveLaw passiveLaw;
-        passiveLaw(input, d.C, d.dC_dy, d.sigmaPassive, d.dsigmaPassive_dy);
+        passiveLaw(input.passiveEnergy, d.C, d.dC_dy, d.sigmaPassive, d.dsigmaPassive_dy);
 
         d.ecdot = (d.ec - d.ecPrev) / dt;
         d.absEcdot = std::abs(d.ecdot);

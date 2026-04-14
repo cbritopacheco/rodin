@@ -9,6 +9,8 @@ set(RodinHeart_HEADERS
   ForwardDecls.h
   CCMLC2014.h
   CCMLC2014/CCMLC2014.h
+  CCMLC2014/PassiveEnergy.h
+  CCMLC2014/HolzapfelReducedLaw.h
   CCMLC2014/PassiveLaw.h
 )
 

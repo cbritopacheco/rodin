@@ -6,6 +6,7 @@
  */
 #include <gtest/gtest.h>
 #include <cmath>
+#include <type_traits>
 
 #include "Rodin/Heart/CCMLC2014.h"
 
@@ -70,9 +71,17 @@ TEST(CCMLC2014Test, DerivedJacobianMatchesFiniteDifference)
   input.n0 = [](Real) { return 0.9; };
   input.m0 = [](Real ec) { return 1.0 + 0.2 * ec; };
   input.m0Prime = [](Real) { return 0.2; };
-  input.dWe_dJ1 = [](Real j1, Real, Real) { return 0.02 * j1; };
-  input.dWe_dJ2 = [](Real, Real j2, Real) { return 0.01 * j2; };
-  input.dWe_dJ4 = [](Real, Real, Real j4) { return 0.015 * j4; };
+  {
+    using PassiveEnergy = std::decay_t<decltype(input.passiveEnergy)>;
+    typename PassiveEnergy::Parameters hp;
+    hp.mu1 = 0.0;
+    hp.mu2 = 0.01;
+    hp.C0 = 0.05;
+    hp.C1 = 0.5;
+    hp.C2 = 0.03;
+    hp.C3 = 0.6;
+    input.passiveEnergy = PassiveEnergy(hp);
+  }
 
   Math::Vector<Real> x(Model::NVAR), xPrev(Model::NVAR);
   x << 0.08, -0.03, 0.12, 0.07, 0.03, 0.015, 0.02, 0.04, 1.1;

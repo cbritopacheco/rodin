@@ -9,14 +9,16 @@
 
 #include <cmath>
 
+#include "Rodin/Heart/CCMLC2014/PassiveEnergy.h"
+
 namespace Rodin::Heart
 {
   template <class Scalar>
   struct CCMLC2014PassiveLaw
   {
-    template <class Input>
+    template <class PassiveEnergyLaw>
     void operator()(
-        const Input& input,
+        const PassiveEnergyLaw& law,
         const Scalar C,
         const Scalar dC_dy,
         Scalar& sigmaPassive,
@@ -26,16 +28,42 @@ namespace Rodin::Heart
       const Scalar J2 = C * C + Scalar(2) * std::pow(C, -1);
       const Scalar J4 = C;
 
-      const Scalar dW1 = input.dWe_dJ1(J1, J2, J4);
-      const Scalar dW2 = input.dWe_dJ2(J1, J2, J4);
-      const Scalar dW4 = input.dWe_dJ4(J1, J2, J4);
+      const Scalar dJ1_dC = Scalar(2) - Scalar(2) * std::pow(C, -3);
+      const Scalar dJ2_dC = Scalar(2) * C - Scalar(2) * std::pow(C, -2);
+      const Scalar dJ4_dC = Scalar(1);
+
+      const ReducedInvariants<Scalar> I{J1, J2, J4};
+      const auto D = law.evaluate(I);
+
+      const Scalar dW1 = D.grad.dW_dJ1;
+      const Scalar dW2 = D.grad.dW_dJ2;
+      const Scalar dW4 = D.grad.dW_dJ4;
 
       sigmaPassive =
           Scalar(4) * (Scalar(1) - std::pow(C, -3)) * (dW1 + C * dW2)
         + Scalar(2) * dW4;
 
-      dsigmaPassive_dy =
-        input.dSigmaPassive_dC(C, J1, J2, J4, dW1, dW2, dW4) * dC_dy;
+      const Scalar ddW1_dC =
+          D.hess.d2W_dJ1dJ1 * dJ1_dC
+        + D.hess.d2W_dJ1dJ2 * dJ2_dC
+        + D.hess.d2W_dJ1dJ4 * dJ4_dC;
+
+      const Scalar ddW2_dC =
+          D.hess.d2W_dJ1dJ2 * dJ1_dC
+        + D.hess.d2W_dJ2dJ2 * dJ2_dC
+        + D.hess.d2W_dJ2dJ4 * dJ4_dC;
+
+      const Scalar ddW4_dC =
+          D.hess.d2W_dJ1dJ4 * dJ1_dC
+        + D.hess.d2W_dJ2dJ4 * dJ2_dC
+        + D.hess.d2W_dJ4dJ4 * dJ4_dC;
+
+      const Scalar dsigmaPassive_dC =
+          Scalar(12) * std::pow(C, -4) * (dW1 + C * dW2)
+        + Scalar(4) * (Scalar(1) - std::pow(C, -3)) * (ddW1_dC + dW2 + C * ddW2_dC)
+        + Scalar(2) * ddW4_dC;
+
+      dsigmaPassive_dy = dsigmaPassive_dC * dC_dy;
     }
   };
 }

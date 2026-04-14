@@ -8,14 +8,15 @@
 #define RODIN_HEART_FORWARDDECLS_H
 
 #include "Rodin/Types.h"
+#include "Rodin/Heart/CCMLC2014/HolzapfelReducedLaw.h"
 #include "Rodin/Heart/CCMLC2014/PassiveLaw.h"
 
 namespace Rodin::Heart
 {
-  template <class PassiveLaw>
+  template <class PassiveEnergyLaw, class PassiveLaw>
   class CCMLC2014T;
 
-  using CCMLC2014 = CCMLC2014T<CCMLC2014PassiveLaw<Real>>;
+  using CCMLC2014 = CCMLC2014T<HolzapfelReducedLaw<Real>, CCMLC2014PassiveLaw<Real>>;
 }
 
 #endif
