@@ -7,7 +7,9 @@ Distributed under the Boost Software License, Version 1.0.
 
 set(RodinHeart_HEADERS
   ForwardDecls.h
-  CCMLC2024.h
+  CCMLC2014.h
+  CCMLC2014/PassiveLaw.h
+  CCMLC2014/CCMLC2014.h
 )
 
 add_library(RodinHeart INTERFACE)

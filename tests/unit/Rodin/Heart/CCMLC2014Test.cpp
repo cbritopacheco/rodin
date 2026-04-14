@@ -7,21 +7,23 @@
 #include <gtest/gtest.h>
 #include <cmath>
 
-#include "Rodin/Heart/CCMLC2024.h"
+#include "Rodin/Heart/CCMLC2014.h"
 
 using namespace Rodin;
 
 namespace
 {
+  using Model = Heart::CCMLC2014<>;
+
   Math::Matrix<Real> finiteDifferenceJacobian(
-      const Heart::CCMLC2024::Input& input,
+      const Model::Input& input,
       const Math::Vector<Real>& x,
       const Math::Vector<Real>& xPrev,
       Real t,
       Real dt)
   {
     Math::Vector<Real> R0;
-    Heart::CCMLC2024::evaluateResidual(input, x, xPrev, t, dt, R0);
+    Model::evaluateResidual(input, x, xPrev, t, dt, R0);
 
     Math::Matrix<Real> J(R0.size(), x.size());
     const Real eps = 1e-7;
@@ -34,8 +36,8 @@ namespace
       xm[j] -= h;
 
       Math::Vector<Real> Rp, Rm;
-      Heart::CCMLC2024::evaluateResidual(input, xp, xPrev, t, dt, Rp);
-      Heart::CCMLC2024::evaluateResidual(input, xm, xPrev, t, dt, Rm);
+      Model::evaluateResidual(input, xp, xPrev, t, dt, Rp);
+      Model::evaluateResidual(input, xm, xPrev, t, dt, Rm);
 
       J.col(j) = (Rp - Rm) / (2.0 * h);
     }
@@ -43,9 +45,9 @@ namespace
   }
 }
 
-TEST(CCMLC2024Test, DerivedJacobianMatchesFiniteDifference)
+TEST(CCMLC2014Test, DerivedJacobianMatchesFiniteDifference)
 {
-  Heart::CCMLC2024::Input input;
+  Model::Input input;
   input.rho = 1.2;
   input.d0 = 0.8;
   input.R0 = 1.1;
@@ -62,24 +64,16 @@ TEST(CCMLC2024Test, DerivedJacobianMatchesFiniteDifference)
   input.Rp = 1.1;
   input.Rd = 1.6;
   input.Psv = 0.3;
-  input.e1D = [](Real C) { return 0.5 * (C * C - 1.0); };
-  input.e1DPrime = [](Real C) { return C; };
   input.ubar = [](Real t) { return 0.2 * std::sin(t); };
   input.pAt = [](Real t) { return 0.1 + 0.05 * std::cos(t); };
   input.valveFlow = [](Real pv, Real par, Real pat) { return 0.8 * (pv - par) + 0.1 * pat; };
   input.dValveFlow_dPv = [](Real, Real, Real) { return 0.8; };
   input.dValveFlow_dPar = [](Real, Real, Real) { return -0.8; };
-  input.dWe_dJ1 = [](Real j1, Real, Real) { return 0.02 * j1; };
-  input.dWe_dJ2 = [](Real, Real j2, Real) { return 0.01 * j2; };
-  input.dWe_dJ4 = [](Real, Real, Real j4) { return 0.015 * j4; };
-  input.dSigmaPassive_dC = [](Real C, Real d1, Real d2, Real d4)
-  {
-    (void)d4;
-    return 12.0 * std::pow(C, -4) * (d1 + C * d2)
-         + 4.0 * (1.0 - std::pow(C, -3)) * d2;
-  };
+  Heart::CCMLC2014Laws::HolzapfelOgdenLaw law;
+  law.input = {0.2, 0.05, 0.01, 0.1, 0.01, 0.1};
+  input.passive = law;
 
-  Math::Vector<Real> x(Heart::CCMLC2024::NVAR), xPrev(Heart::CCMLC2024::NVAR);
+  Math::Vector<Real> x(Model::NVAR), xPrev(Model::NVAR);
   x << 0.08, -0.03, 0.12, 0.07, 0.03, 0.015, 0.02, 0.04;
   xPrev << 0.05, -0.01, 0.10, 0.08, 0.04, 0.012, 0.018, 0.035;
 
@@ -87,7 +81,7 @@ TEST(CCMLC2024Test, DerivedJacobianMatchesFiniteDifference)
   const Real dt = 1e-2;
 
   Math::Matrix<Real> Janalytic;
-  Heart::CCMLC2024::evaluateJacobian(input, x, xPrev, t, dt, Janalytic);
+  Model::evaluateJacobian(input, x, xPrev, t, dt, Janalytic);
 
   const auto Jfd = finiteDifferenceJacobian(input, x, xPrev, t, dt);
 
@@ -95,9 +89,9 @@ TEST(CCMLC2024Test, DerivedJacobianMatchesFiniteDifference)
   EXPECT_LT(rel, 5e-4);
 }
 
-TEST(CCMLC2024Test, StepConvergesForQuasiStaticCase)
+TEST(CCMLC2014Test, StepConvergesForQuasiStaticCase)
 {
-  Heart::CCMLC2024::Input input;
+  Model::Input input;
   input.rho = 0.0;
   input.d0 = 1.0;
   input.R0 = 1.0;
@@ -122,13 +116,13 @@ TEST(CCMLC2024Test, StepConvergesForQuasiStaticCase)
   input.dValveFlow_dPv = [](Real, Real, Real) { return 1.0; };
   input.dValveFlow_dPar = [](Real, Real, Real) { return -1.0; };
 
-  Heart::CCMLC2024 model(input);
+  Model model(input);
   model.setMaxIterations(50)
     .setAbsoluteTolerance(1e-10)
     .setRelativeTolerance(1e-10)
     .setStepTolerance(1e-12);
 
-  Heart::CCMLC2024::State initial;
+  Model::State initial;
   model.initialize(initial);
 
   const auto report = model.step(1e-2);

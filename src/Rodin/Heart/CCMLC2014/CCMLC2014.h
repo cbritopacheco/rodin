@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_HEART_CCMLC2024_H
-#define RODIN_HEART_CCMLC2024_H
+#ifndef RODIN_HEART_CCMLC2014_CCMLC2014_H
+#define RODIN_HEART_CCMLC2014_CCMLC2014_H
 
 #include <cassert>
 #include <cmath>
@@ -20,9 +20,12 @@
 #include "Rodin/Solver/LDLT.h"
 #include "Rodin/Solver/NewtonSolver.h"
 
+#include "PassiveLaw.h"
+
 namespace Rodin::Heart
 {
-  class CCMLC2024
+  template <class PassiveLaw = CCMLC2014Laws::HolzapfelOgdenLaw>
+  class CCMLC2014
   {
     public:
       using Scalar = Real;
@@ -30,87 +33,31 @@ namespace Rodin::Heart
       using DenseVector = Math::Vector<Scalar>;
       using DenseLinearSystem = Math::LinearSystem<DenseMatrix, DenseVector>;
 
-      enum Variable : size_t
-      {
-        Y = 0,
-        V,
-        PV,
-        PAR,
-        PD,
-        EC,
-        KC,
-        TAUC,
-        NVAR
-      };
+      enum Variable : size_t { Y = 0, V, PV, PAR, PD, EC, KC, TAUC, NVAR };
 
       struct State
       {
-        Scalar y = 0.0;
-        Scalar v = 0.0;
-        Scalar pv = 0.0;
-        Scalar par = 0.0;
-        Scalar pd = 0.0;
-        Scalar ec = 0.0;
-        Scalar kc = 0.0;
-        Scalar tauc = 0.0;
-        Scalar t = 0.0;
+        Scalar y = 0.0, v = 0.0, pv = 0.0, par = 0.0, pd = 0.0, ec = 0.0, kc = 0.0, tauc = 0.0, t = 0.0;
       };
 
       struct Input
       {
-        Scalar rho = 1.0;
-        Scalar d0 = 1.0;
-        Scalar R0 = 1.0;
-        Scalar eta = 0.0;
+        Scalar rho = 1.0, d0 = 1.0, R0 = 1.0, eta = 0.0;
+        Scalar Es = 1.0, mu = 1.0, alpha = 0.0, n0 = 0.0, k0 = 0.0, sigma0 = 0.0, w = 1.0;
+        Scalar Cp = 1.0, Cd = 1.0, Rp = 1.0, Rd = 1.0, Psv = 0.0;
 
-        Scalar Es = 1.0;
-        Scalar mu = 1.0;
-        Scalar alpha = 0.0;
-        Scalar n0 = 0.0;
-        Scalar k0 = 0.0;
-        Scalar sigma0 = 0.0;
-        Scalar w = 1.0;
+        PassiveLaw passive;
 
-        Scalar Cp = 1.0;
-        Scalar Cd = 1.0;
-        Scalar Rp = 1.0;
-        Scalar Rd = 1.0;
-        Scalar Psv = 0.0;
+        std::function<Scalar(Scalar)> e1D = [](Scalar C) { return Scalar(0.5) * (C * C - Scalar(1)); };
+        std::function<Scalar(Scalar)> e1DPrime = [](Scalar C) { return C; };
 
-        std::function<Scalar(Scalar)> e1D =
-          [](Scalar C) { return Scalar(0.5) * (C * C - Scalar(1)); };
-
-        std::function<Scalar(Scalar)> e1DPrime =
-          [](Scalar C) { return C; };
-
-        std::function<Scalar(Scalar, Scalar, Scalar)> dWe_dJ1 =
-          [](Scalar, Scalar, Scalar) { return Scalar(0); };
-        std::function<Scalar(Scalar, Scalar, Scalar)> dWe_dJ2 =
-          [](Scalar, Scalar, Scalar) { return Scalar(0); };
-        std::function<Scalar(Scalar, Scalar, Scalar)> dWe_dJ4 =
-          [](Scalar, Scalar, Scalar) { return Scalar(0); };
-
-        /**
-         * @brief Derivative of passive spherical stress contribution wrt C.
-         */
-        std::function<Scalar(Scalar, Scalar, Scalar, Scalar)> dSigmaPassive_dC =
-          [](Scalar C, Scalar d1, Scalar d2, Scalar) {
-            return 12.0 * std::pow(C, -4) * (d1 + C * d2)
-                 + 4.0 * (1.0 - std::pow(C, -3)) * d2;
-          };
-
-        std::function<Scalar(Scalar)> ubar =
-          [](Scalar) { return Scalar(0); };
-
-        std::function<Scalar(Scalar)> pAt =
-          [](Scalar) { return Scalar(0); };
+        std::function<Scalar(Scalar)> ubar = [](Scalar) { return Scalar(0); };
+        std::function<Scalar(Scalar)> pAt = [](Scalar) { return Scalar(0); };
 
         std::function<Scalar(Scalar, Scalar, Scalar)> valveFlow =
           [](Scalar pv, Scalar par, Scalar) { return pv > par ? pv - par : Scalar(0); };
-
         std::function<Scalar(Scalar, Scalar, Scalar)> dValveFlow_dPv =
           [](Scalar pv, Scalar par, Scalar) { return pv > par ? Scalar(1) : Scalar(0); };
-
         std::function<Scalar(Scalar, Scalar, Scalar)> dValveFlow_dPar =
           [](Scalar pv, Scalar par, Scalar) { return pv > par ? Scalar(-1) : Scalar(0); };
       };
@@ -125,30 +72,10 @@ namespace Rodin::Heart
           Solver::NewtonSolver<Solver::LDLT<DenseLinearSystem>>::ConvergenceReason::MaxIterations;
       };
 
-      static void evaluateResidual(
-          const Input& input,
-          const DenseVector& x,
-          const DenseVector& xPrev,
-          const Scalar t,
-          const Scalar dt,
-          DenseVector& R)
+      static void evaluateResidual(const Input& input, const DenseVector& x, const DenseVector& xPrev, Scalar t, Scalar dt, DenseVector& R)
       {
-        const Scalar y = x[Y];
-        const Scalar v = x[V];
-        const Scalar pv = x[PV];
-        const Scalar par = x[PAR];
-        const Scalar pd = x[PD];
-        const Scalar ec = x[EC];
-        const Scalar kc = x[KC];
-        const Scalar tauc = x[TAUC];
-
-        const Scalar yPrev = xPrev[Y];
-        const Scalar vPrev = xPrev[V];
-        const Scalar parPrev = xPrev[PAR];
-        const Scalar pdPrev = xPrev[PD];
-        const Scalar ecPrev = xPrev[EC];
-        const Scalar kcPrev = xPrev[KC];
-        const Scalar taucPrev = xPrev[TAUC];
+        const Scalar y = x[Y], v = x[V], pv = x[PV], par = x[PAR], pd = x[PD], ec = x[EC], kc = x[KC], tauc = x[TAUC];
+        const Scalar yPrev = xPrev[Y], vPrev = xPrev[V], parPrev = xPrev[PAR], pdPrev = xPrev[PD], ecPrev = xPrev[EC], kcPrev = xPrev[KC], taucPrev = xPrev[TAUC];
 
         const Scalar C = 1.0 + y / input.R0;
         const Scalar invC = 1.0 / C;
@@ -160,101 +87,52 @@ namespace Rodin::Heart
         const Scalar j2 = 2.0 * C + invC * invC;
         const Scalar j4 = C2;
 
-        const Scalar dwe1 = input.dWe_dJ1(j1, j2, j4);
-        const Scalar dwe2 = input.dWe_dJ2(j1, j2, j4);
-        const Scalar dwe4 = input.dWe_dJ4(j1, j2, j4);
-
+        const auto passive = input.passive(C, j1, j2, j4);
         const Scalar e1d = input.e1D(C);
         const Scalar ecDot = (ec - ecPrev) / dt;
 
         const Scalar denom1 = 1.0 + 2.0 * ec;
         const Scalar sigma1D = input.Es * (e1d - ec) / (denom1 * denom1);
-
         const Scalar sigmaSph =
           sigma1D
-          + 4.0 * (1.0 - invC * invC * invC) * (dwe1 + C * dwe2)
-          + 2.0 * dwe4
+          + 4.0 * (1.0 - invC * invC * invC) * (passive.dW1 + C * passive.dW2)
+          + 2.0 * passive.dW4
           + 2.0 * input.eta * cdot * (1.0 - 2.0 * C6inv);
 
         const Scalar pat = input.pAt(t + dt);
         const Scalar Q = input.valveFlow(pv, par, pat);
-
         const Scalar ubar = input.ubar(t + dt);
-        const Scalar A =
-          posPart(ubar)
-          + input.w * negPart(ubar)
-          + input.alpha * std::abs(ecDot);
+        const Scalar A = posPart(ubar) + input.w * negPart(ubar) + input.alpha * std::abs(ecDot);
 
-        const Scalar volumeRate =
-          4.0 * std::numbers::pi_v<Scalar> * input.R0 * input.R0 * C2 * v;
+        const Scalar volumeRate = 4.0 * std::numbers::pi_v<Scalar> * input.R0 * input.R0 * C2 * v;
 
         R.resize(NVAR);
         R[Y] = y - yPrev - dt * v;
-
-        R[V] =
-          input.rho * input.d0 * (v - vPrev) / dt
-          + (input.d0 / input.R0) * C * sigmaSph
-          - pv * C2;
-
-        R[PV] =
-          tauc + input.mu * ecDot
-          - input.Es * ((e1d - ec) * (1.0 + 2.0 * e1d))
-            / (denom1 * denom1 * denom1);
-
+        R[V] = input.rho * input.d0 * (v - vPrev) / dt + (input.d0 / input.R0) * C * sigmaSph - pv * C2;
+        R[PV] = tauc + input.mu * ecDot - input.Es * ((e1d - ec) * (1.0 + 2.0 * e1d)) / (denom1 * denom1 * denom1);
         R[PAR] = (kc - kcPrev) / dt + A * kc - input.n0 * input.k0 * posPart(ubar);
-
-        R[PD] =
-          (tauc - taucPrev) / dt
-          + A * tauc
-          - input.n0 * input.sigma0 * posPart(ubar)
-          - kc * ecDot;
-
+        R[PD] = (tauc - taucPrev) / dt + A * tauc - input.n0 * input.sigma0 * posPart(ubar) - kc * ecDot;
         R[EC] = volumeRate + Q;
-
-        R[KC] =
-          input.Cp * (par - parPrev) / dt
-          + (par - pd) / input.Rp
-          - Q;
-
-        R[TAUC] =
-          input.Cd * (pd - pdPrev) / dt
-          + (pd - par) / input.Rp
-          - (input.Psv - pd) / input.Rd;
+        R[KC] = input.Cp * (par - parPrev) / dt + (par - pd) / input.Rp - Q;
+        R[TAUC] = input.Cd * (pd - pdPrev) / dt + (pd - par) / input.Rp - (input.Psv - pd) / input.Rd;
       }
 
-      static void evaluateJacobian(
-          const Input& input,
-          const DenseVector& x,
-          const DenseVector& xPrev,
-          const Scalar t,
-          const Scalar dt,
-          DenseMatrix& J)
+      static void evaluateJacobian(const Input& input, const DenseVector& x, const DenseVector& xPrev, Scalar t, Scalar dt, DenseMatrix& J)
       {
-        const Scalar y = x[Y];
-        const Scalar v = x[V];
-        const Scalar pv = x[PV];
-        const Scalar par = x[PAR];
-        const Scalar ec = x[EC];
-        const Scalar kc = x[KC];
-        const Scalar tauc = x[TAUC];
-
+        const Scalar y = x[Y], v = x[V], pv = x[PV], par = x[PAR], ec = x[EC], kc = x[KC], tauc = x[TAUC];
         const Scalar ecPrev = xPrev[EC];
 
         const Scalar C = 1.0 + y / input.R0;
-        const Scalar invC = 1.0 / C;
         const Scalar C2 = C * C;
         const Scalar C6inv = std::pow(C, -6);
         const Scalar C7inv = std::pow(C, -7);
         const Scalar cdot = v / input.R0;
         const Scalar dCdy = 1.0 / input.R0;
 
-        const Scalar j1 = C2 + 2.0 * invC;
-        const Scalar j2 = 2.0 * C + invC * invC;
+        const Scalar j1 = C2 + 2.0 / C;
+        const Scalar j2 = 2.0 * C + 1.0 / (C * C);
         const Scalar j4 = C2;
-
-        const Scalar dwe1 = input.dWe_dJ1(j1, j2, j4);
-        const Scalar dwe2 = input.dWe_dJ2(j1, j2, j4);
-        const Scalar dwe4 = input.dWe_dJ4(j1, j2, j4);
+        const auto passive = input.passive(C, j1, j2, j4);
 
         const Scalar e1d = input.e1D(C);
         const Scalar de1d_dy = input.e1DPrime(C) * dCdy;
@@ -270,10 +148,8 @@ namespace Rodin::Heart
         const Scalar dsigma1D_dy = input.Es * de1d_dy / denom2;
         const Scalar dsigma1D_dec = input.Es * (-1.0 / denom2 - 4.0 * (e1d - ec) / denom3);
 
-        const Scalar sigmaPassive =
-          4.0 * (1.0 - invC * invC * invC) * (dwe1 + C * dwe2)
-          + 2.0 * dwe4;
-        const Scalar dsigmaPassive_dy = input.dSigmaPassive_dC(C, dwe1, dwe2, dwe4) * dCdy;
+        const Scalar sigmaPassive = 4.0 * (1.0 - std::pow(C, -3)) * (passive.dW1 + C * passive.dW2) + 2.0 * passive.dW4;
+        const Scalar dsigmaPassive_dy = passive.dSigmaPassive_dC * dCdy;
 
         const Scalar sigmaViscous = 2.0 * input.eta * cdot * (1.0 - 2.0 * C6inv);
         const Scalar dsigmaViscous_dv = 2.0 * input.eta / input.R0 * (1.0 - 2.0 * C6inv);
@@ -333,81 +209,59 @@ namespace Rodin::Heart
       }
 
     private:
-      static Scalar posPart(const Scalar x)
-      {
-        return (x > 0) ? x : 0;
-      }
+      static Scalar posPart(Scalar x) { return (x > 0) ? x : 0; }
+      static Scalar negPart(Scalar x) { return (x < 0) ? -x : 0; }
 
-      static Scalar negPart(const Scalar x)
-      {
-        return (x < 0) ? -x : 0;
-      }
-
-    private:
       class Problem final : public Variational::ProblemBase<DenseLinearSystem>
       {
         public:
           using Parent = Variational::ProblemBase<DenseLinearSystem>;
           using ProblemBodyType = typename Parent::ProblemBodyType;
 
-          explicit Problem(const Input& in)
-            : m_input(in), m_dt(0.0), m_time(0.0)
+          explicit Problem(const Input& in) : m_input(in)
           {
             m_system.getOperator().resize(NVAR, NVAR);
             m_system.getVector().resize(NVAR);
             m_system.getSolution().resize(NVAR);
-            m_xPrev.resize(NVAR);
-            m_xCurrent = nullptr;
-            m_xPrev.setZero();
           }
 
-          Parent& operator=(const ProblemBodyType&) override
-          {
-            return *this;
-          }
+          Parent& operator=(const ProblemBodyType&) override { return *this; }
 
           Problem& assemble() override
           {
             assert(m_xCurrent);
             auto& A = m_system.getOperator();
             auto& b = m_system.getVector();
-            auto& s = m_system.getSolution();
-            s.setZero();
+            m_system.getSolution().setZero();
 
             DenseVector R;
-            CCMLC2024::evaluateResidual(m_input, *m_xCurrent, m_xPrev, m_time, m_dt, R);
+            CCMLC2014::evaluateResidual(m_input, *m_xCurrent, m_xPrev, m_time, m_dt, R);
+            CCMLC2014::evaluateJacobian(m_input, *m_xCurrent, m_xPrev, m_time, m_dt, A);
             b = -R;
-
-            CCMLC2024::evaluateJacobian(m_input, *m_xCurrent, m_xPrev, m_time, m_dt, A);
             return *this;
           }
 
-          void solve(Solver::LinearSolverBase<DenseLinearSystem>& solver) override
-          {
-            solver.solve(m_system);
-          }
-
+          void solve(Solver::LinearSolverBase<DenseLinearSystem>& solver) override { solver.solve(m_system); }
           DenseLinearSystem& getLinearSystem() override { return m_system; }
           const DenseLinearSystem& getLinearSystem() const override { return m_system; }
-
           Problem* copy() const noexcept override { return new Problem(*this); }
 
           void setPrevious(const DenseVector& xPrev) { m_xPrev = xPrev; }
           void setCurrent(DenseVector& xCurrent) { m_xCurrent = &xCurrent; }
-          void setTime(const Scalar t) { m_time = t; }
-          void setTimeStep(const Scalar dt) { m_dt = dt; }
+          void setTime(Scalar t) { m_time = t; }
+          void setTimeStep(Scalar dt) { m_dt = dt; }
 
         private:
-          DenseLinearSystem m_system;
           Input m_input;
           DenseVector m_xPrev;
-          DenseVector* m_xCurrent;
-          Scalar m_dt;
-          Scalar m_time;
+          DenseVector* m_xCurrent = nullptr;
+          DenseLinearSystem m_system;
+          Scalar m_time = 0.0;
+          Scalar m_dt = 0.0;
       };
 
     public:
-      explicit CCMLC2024(const Input& input)
+      explicit CCMLC2014(const Input& input)
         : m_input(input), m_problem(input), m_solver(m_problem), m_newton(m_solver)
       {
         m_x.resize(NVAR);
@@ -416,35 +270,29 @@ namespace Rodin::Heart
         m_xPrev.setZero();
       }
 
-      CCMLC2024& setAbsoluteTolerance(const Scalar atol) { m_newton.setAbsoluteTolerance(atol); return *this; }
-      CCMLC2024& setRelativeTolerance(const Scalar rtol) { m_newton.setRelativeTolerance(rtol); return *this; }
-      CCMLC2024& setStepTolerance(const Scalar stol) { m_newton.setStepTolerance(stol); return *this; }
-      CCMLC2024& setMaxIterations(const size_t maxIt) { m_newton.setMaxIterations(maxIt); return *this; }
-      CCMLC2024& setDampingFactor(const Scalar alpha) { m_newton.setDampingFactor(alpha); return *this; }
+      CCMLC2014& setAbsoluteTolerance(Scalar v){ m_newton.setAbsoluteTolerance(v); return *this; }
+      CCMLC2014& setRelativeTolerance(Scalar v){ m_newton.setRelativeTolerance(v); return *this; }
+      CCMLC2014& setStepTolerance(Scalar v){ m_newton.setStepTolerance(v); return *this; }
+      CCMLC2014& setMaxIterations(size_t v){ m_newton.setMaxIterations(v); return *this; }
+      CCMLC2014& setDampingFactor(Scalar v){ m_newton.setDampingFactor(v); return *this; }
 
       void initialize(const State& initial)
       {
         m_state = initial;
-        m_x[Y] = initial.y;
-        m_x[V] = initial.v;
-        m_x[PV] = initial.pv;
-        m_x[PAR] = initial.par;
-        m_x[PD] = initial.pd;
-        m_x[EC] = initial.ec;
-        m_x[KC] = initial.kc;
-        m_x[TAUC] = initial.tauc;
+        m_x[Y]=initial.y; m_x[V]=initial.v; m_x[PV]=initial.pv; m_x[PAR]=initial.par;
+        m_x[PD]=initial.pd; m_x[EC]=initial.ec; m_x[KC]=initial.kc; m_x[TAUC]=initial.tauc;
         m_xPrev = m_x;
       }
 
-      Report step(const Scalar dt)
+      Report step(Scalar dt)
       {
         m_xPrev = m_x;
         m_problem.setPrevious(m_xPrev);
         m_problem.setCurrent(m_x);
         m_problem.setTime(m_state.t);
         m_problem.setTimeStep(dt);
-        m_newton.solve(m_x);
 
+        m_newton.solve(m_x);
         const auto& nr = m_newton.getReport();
         m_report.converged = nr.converged;
         m_report.iterations = nr.iterations;
@@ -454,17 +302,10 @@ namespace Rodin::Heart
 
         if (nr.converged)
         {
-          m_state.y = m_x[Y];
-          m_state.v = m_x[V];
-          m_state.pv = m_x[PV];
-          m_state.par = m_x[PAR];
-          m_state.pd = m_x[PD];
-          m_state.ec = m_x[EC];
-          m_state.kc = m_x[KC];
-          m_state.tauc = m_x[TAUC];
+          m_state.y=m_x[Y]; m_state.v=m_x[V]; m_state.pv=m_x[PV]; m_state.par=m_x[PAR];
+          m_state.pd=m_x[PD]; m_state.ec=m_x[EC]; m_state.kc=m_x[KC]; m_state.tauc=m_x[TAUC];
           m_state.t += dt;
         }
-
         return m_report;
       }
 

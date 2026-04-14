@@ -1,5 +1,5 @@
-add_executable(RodinHeartCCMLC2024Test CCMLC2024Test.cpp)
-target_link_libraries(RodinHeartCCMLC2024Test
+add_executable(RodinHeartCCMLC2014Test CCMLC2014Test.cpp)
+target_link_libraries(RodinHeartCCMLC2014Test
   PUBLIC
   GTest::gtest
   GTest::gtest_main
@@ -7,7 +7,7 @@ target_link_libraries(RodinHeartCCMLC2024Test
   Rodin::Heart
   Rodin::Solver
 )
-gtest_discover_tests(RodinHeartCCMLC2024Test
+gtest_discover_tests(RodinHeartCCMLC2014Test
   PROPERTIES
     LABELS unit
 )
