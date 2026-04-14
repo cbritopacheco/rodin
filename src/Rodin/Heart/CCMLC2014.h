@@ -7,6 +7,6 @@
 #ifndef RODIN_HEART_CCMLC2014_H
 #define RODIN_HEART_CCMLC2014_H
 
-#include "Heart/CCMLC2014/CCMLC2014.h"
+#include "CCMLC2014/CCMLC2014.h"
 
 #endif

@@ -174,13 +174,6 @@ namespace Rodin::Heart
         Scalar dCdot_dy = 0.0;
         Scalar dCdot_dv = 0.0;
 
-        Scalar J1 = 0.0;
-        Scalar J2 = 0.0;
-        Scalar J4 = 0.0;
-
-        Scalar dW1 = 0.0;
-        Scalar dW2 = 0.0;
-        Scalar dW4 = 0.0;
         Scalar sigmaPassive = 0.0;
         Scalar dsigmaPassive_dy = 0.0;
 

@@ -6,6 +6,7 @@ target_link_libraries(RodinHeartCCMLC2014Test
   Rodin::Rodin
   Rodin::Heart
   Rodin::Solver
+  Rodin::Alert
 )
 gtest_discover_tests(RodinHeartCCMLC2014Test
   PROPERTIES
