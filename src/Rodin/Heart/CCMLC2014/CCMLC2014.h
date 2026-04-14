@@ -52,6 +52,20 @@ namespace Rodin::Heart
         NVAR
       };
 
+      enum class ValveBranch : int
+      {
+        Filling = 0,
+        Isovol = 1,
+        Ejection = 2
+      };
+
+      struct FrozenRegime
+      {
+        bool useFrozen = false;
+        ValveBranch valve = ValveBranch::Isovol;
+        int ecdotSign = 1; // must be ±1 when frozen
+      };
+
       struct State
       {
         Scalar y = 0.0;
@@ -121,7 +135,6 @@ namespace Rodin::Heart
           Solver::NewtonSolver<Solver::PartialPivLU<DenseLinearSystem>>::ConvergenceReason::MaxIterations;
       };
 
-    private:
       struct EvalData
       {
         Scalar t = 0.0;
@@ -198,6 +211,8 @@ namespace Rodin::Heart
         Scalar Q = 0.0;
         Scalar dQ_dpv = 0.0;
         Scalar dQ_dpar = 0.0;
+
+        ValveBranch valveBranch = ValveBranch::Isovol;
       };
 
       static Scalar posPart(Scalar x)
@@ -244,6 +259,7 @@ namespace Rodin::Heart
           const State& prev,
           const Scalar t,
           const Scalar dt,
+          const FrozenRegime& regime,
           EvalData& d)
       {
         assert(dt > Scalar(0));
@@ -298,10 +314,18 @@ namespace Rodin::Heart
         passiveLaw(input.passiveEnergy, d.C, d.dC_dy, d.sigmaPassive, d.dsigmaPassive_dy);
 
         d.ecdot = (d.ec - d.ecPrev) / dt;
-        d.absEcdot = std::abs(d.ecdot);
-        d.signEcdot =
-          d.ecdot > Scalar(0) ? Scalar(1)
-          : (d.ecdot < Scalar(0) ? Scalar(-1) : Scalar(0));
+        if (regime.useFrozen)
+        {
+          d.signEcdot = Scalar(regime.ecdotSign);
+          d.absEcdot = d.signEcdot * d.ecdot;
+        }
+        else
+        {
+          d.absEcdot = std::abs(d.ecdot);
+          d.signEcdot =
+            d.ecdot > Scalar(0) ? Scalar(1)
+            : (d.ecdot < Scalar(0) ? Scalar(-1) : Scalar(0));
+        }
 
         {
           const Scalar den = Scalar(1) + Scalar(2) * d.ecMid;
@@ -312,19 +336,18 @@ namespace Rodin::Heart
           d.dsigma1D_dy = input.Es * d.de1D_dy / den2;
           d.dsigma1D_dec =
             Scalar(0.5) * input.Es *
-            ( -Scalar(1) / den2 - Scalar(4) * (d.e1D - d.ecMid) / den3 );
+            (-Scalar(1) / den2 - Scalar(4) * (d.e1D - d.ecMid) / den3);
         }
 
-        const Scalar viscFactor = Scalar(1) - Scalar(2) * std::pow(d.C, -6);
+        const Scalar viscFactor = Scalar(1) + Scalar(2) * std::pow(d.C, -6);
         const Scalar dViscFactor_dy =
-          Scalar(12) * std::pow(d.C, -7) * d.dC_dy;
+          Scalar(-12) * std::pow(d.C, -7) * d.dC_dy;
 
-        const Scalar sigmaViscous = Scalar(2) * input.eta * d.Cdot * viscFactor;
+        const Scalar sigmaViscous = input.eta * d.Cdot * viscFactor;
         const Scalar dsigmaViscous_dy =
-          Scalar(2) * input.eta *
-            (d.dCdot_dy * viscFactor + d.Cdot * dViscFactor_dy);
+          input.eta * (d.dCdot_dy * viscFactor + d.Cdot * dViscFactor_dy);
         const Scalar dsigmaViscous_dv =
-          Scalar(2) * input.eta * d.dCdot_dv * viscFactor;
+          input.eta * d.dCdot_dv * viscFactor;
 
         d.sigmaSph = d.sigma1D + d.sigmaPassive + sigmaViscous;
         d.dsigmaSph_dy = d.dsigma1D_dy + d.dsigmaPassive_dy + dsigmaViscous_dy;
@@ -335,38 +358,54 @@ namespace Rodin::Heart
         d.dA_dec = input.alpha * d.signEcdot / dt;
         d.dA_dw = Scalar(0.5) * d.uMinus;
 
-        if (d.pvMid <= d.pAtMid)
+        if (regime.useFrozen)
         {
-          d.Q = input.Kat * (d.pvMid - d.pAtMid);
-          d.dQ_dpv = Scalar(0.5) * input.Kat;
-          d.dQ_dpar = Scalar(0);
-        }
-        else if (d.pvMid <= d.parMid)
-        {
-          d.Q = input.Kp * (d.pvMid - d.pAtMid);
-          d.dQ_dpv = Scalar(0.5) * input.Kp;
-          d.dQ_dpar = Scalar(0);
+          d.valveBranch = regime.valve;
         }
         else
         {
-          d.Q = input.Kar * (d.pvMid - d.parMid)
-              + input.Kp * (d.parMid - d.pAtMid);
-          d.dQ_dpv = Scalar(0.5) * input.Kar;
-          d.dQ_dpar = Scalar(0.5) * (-input.Kar + input.Kp);
+          if (d.pvMid <= d.pAtMid)
+            d.valveBranch = ValveBranch::Filling;
+          else if (d.pvMid <= d.parMid)
+            d.valveBranch = ValveBranch::Isovol;
+          else
+            d.valveBranch = ValveBranch::Ejection;
+        }
+
+        switch (d.valveBranch)
+        {
+          case ValveBranch::Filling:
+            d.Q = input.Kat * (d.pvMid - d.pAtMid);
+            d.dQ_dpv = Scalar(0.5) * input.Kat;
+            d.dQ_dpar = Scalar(0);
+            break;
+
+          case ValveBranch::Isovol:
+            d.Q = input.Kp * (d.pvMid - d.pAtMid);
+            d.dQ_dpv = Scalar(0.5) * input.Kp;
+            d.dQ_dpar = Scalar(0);
+            break;
+
+          case ValveBranch::Ejection:
+            d.Q = input.Kar * (d.pvMid - d.parMid)
+                + input.Kp * (d.parMid - d.pAtMid);
+            d.dQ_dpv = Scalar(0.5) * input.Kar;
+            d.dQ_dpar = Scalar(0.5) * (-input.Kar + input.Kp);
+            break;
         }
       }
 
-    public:
       static void evaluateResidual(
           const Input& input,
           const DenseVector& x,
           const State& prev,
           const Scalar t,
           const Scalar dt,
+          const FrozenRegime& regime,
           DenseVector& R)
       {
         EvalData d;
-        prepareEvalData(input, x, prev, t, dt, d);
+        prepareEvalData(input, x, prev, t, dt, regime, d);
 
         R.resize(NVAR);
         R.setZero();
@@ -426,10 +465,11 @@ namespace Rodin::Heart
           const State& prev,
           const Scalar t,
           const Scalar dt,
+          const FrozenRegime& regime,
           DenseMatrix& J)
       {
         EvalData d;
-        prepareEvalData(input, x, prev, t, dt, d);
+        prepareEvalData(input, x, prev, t, dt, regime, d);
 
         J.resize(NVAR, NVAR);
         J.setZero();
@@ -475,8 +515,7 @@ namespace Rodin::Heart
             + (d.e1D - d.ecMid) * (Scalar(2) * d.de1D_dy);
           const Scalar dg_dec = -Scalar(0.5) * (Scalar(1) + Scalar(2) * d.e1D);
 
-          J(EC, Y) =
-            -input.Es * (dg_dy / den3);
+          J(EC, Y) = -input.Es * (dg_dy / den3);
 
           J(EC, EC) =
             input.mu / dt
@@ -526,8 +565,10 @@ namespace Rodin::Heart
             s.setZero();
 
             DenseVector R;
-            CCMLC2014T::evaluateResidual(m_input, *m_xCurrent, m_prev, m_time, m_dt, R);
-            CCMLC2014T::evaluateJacobian(m_input, *m_xCurrent, m_prev, m_time, m_dt, A);
+            CCMLC2014T::evaluateResidual(
+                m_input, *m_xCurrent, m_prev, m_time, m_dt, m_regime, R);
+            CCMLC2014T::evaluateJacobian(
+                m_input, *m_xCurrent, m_prev, m_time, m_dt, m_regime, A);
             b = -R;
             return *this;
           }
@@ -546,6 +587,7 @@ namespace Rodin::Heart
           void setCurrent(DenseVector& xCurrent) { m_xCurrent = &xCurrent; }
           void setTime(const Scalar t) { m_time = t; }
           void setTimeStep(const Scalar dt) { m_dt = dt; }
+          void setFrozenRegime(const FrozenRegime& regime) { m_regime = regime; }
 
         private:
           Input m_input;
@@ -554,6 +596,7 @@ namespace Rodin::Heart
           DenseLinearSystem m_system;
           Scalar m_time = 0.0;
           Scalar m_dt = 0.0;
+          FrozenRegime m_regime;
       };
 
     public:
@@ -603,10 +646,52 @@ namespace Rodin::Heart
       {
         m_x = pack(m_state);
 
+        // predictor
+        {
+          const Scalar tMid = m_state.t + Scalar(0.5) * dt;
+          const Scalar uMid = m_input.u(tMid);
+
+          const Scalar uPlus = uMid > Scalar(0) ? uMid : Scalar(0);
+          const Scalar uMinus = uMid < Scalar(0) ? -uMid : Scalar(0);
+
+          const Scalar n0 = m_input.n0(m_state.ec);
+          const Scalar A0 = uPlus + m_state.w * uMinus;
+
+          m_x[KC]   = m_state.kc   + dt * (-A0 * m_state.kc   + n0 * m_input.k0     * uPlus);
+          m_x[TAUC] = m_state.tauc + dt * (-A0 * m_state.tauc + n0 * m_input.sigma0 * uPlus);
+          m_x[W]    = m_state.w    + dt * (m_input.m0(m_state.ec) - m_state.w) / m_input.alphaR;
+
+          const Scalar den = Scalar(1) + Scalar(2) * m_state.ec;
+          const Scalar den3 = den * den * den;
+
+          const Scalar e1D =
+            Scalar(0.5) * (std::pow(Scalar(1) + m_state.y / m_input.R0, 2) - Scalar(1));
+
+          const Scalar rhs =
+            m_input.Es * (e1D - m_state.ec) * (Scalar(1) + Scalar(2) * e1D) / den3;
+
+          const Scalar ecdot0 = (rhs - m_state.tauc) / m_input.mu;
+          m_x[EC] = m_state.ec + dt * ecdot0;
+        }
+
+        // choose frozen regime from predictor
+        FrozenRegime regime;
+        {
+          EvalData d0;
+          FrozenRegime unfrozen;
+          unfrozen.useFrozen = false;
+          prepareEvalData(m_input, m_x, m_state, m_state.t, dt, unfrozen, d0);
+
+          regime.useFrozen = true;
+          regime.valve = d0.valveBranch;
+          regime.ecdotSign = (d0.ecdot >= Scalar(0)) ? 1 : -1;
+        }
+
         m_problem.setPrevious(m_state);
         m_problem.setCurrent(m_x);
         m_problem.setTime(m_state.t);
         m_problem.setTimeStep(dt);
+        m_problem.setFrozenRegime(regime);
 
         m_newton.solve(m_x);
 

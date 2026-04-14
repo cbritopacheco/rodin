@@ -99,7 +99,7 @@ int main()
 
   {
     using PassiveEnergy = std::decay_t<decltype(in.passiveEnergy)>;
-    typename PassiveEnergy::Parameters hp;
+    PassiveEnergy::Parameters hp;
     hp.mu1 = 0.0;
     hp.mu2 = 0.0;
     hp.C0 = 1.9e3;
@@ -119,7 +119,7 @@ int main()
   Model::State s0;
   s0.y = 5.0e-3;
   s0.v = 0.0;
-  s0.pv = in.pAt(0.0);
+  s0.pv = in.pAt(0.0) + 1;
   s0.par = 1.0e4;
   s0.pd  = 8.0e3;
   const Real e1D0 = 0.5 * (std::pow(1.0 + s0.y / in.R0, 2) - 1.0);

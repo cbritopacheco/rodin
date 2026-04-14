@@ -16,15 +16,39 @@ namespace
 {
   using Model = Heart::CCMLC2014;
 
-  Math::Matrix<Real> finiteDifferenceJacobian(
+  Model::FrozenRegime inferFrozenRegime(
       const Model::Input& input,
       const Math::Vector<Real>& x,
       const Model::State& prev,
       Real t,
       Real dt)
   {
+    typename Model::FrozenRegime unfrozen;
+    unfrozen.useFrozen = false;
+
+    Math::Vector<Real> R;
+    (void) R; // silence unused if needed
+
+    typename Model::EvalData d;
+    Model::prepareEvalData(input, x, prev, t, dt, unfrozen, d);
+
+    Model::FrozenRegime regime;
+    regime.useFrozen = true;
+    regime.valve = d.valveBranch;
+    regime.ecdotSign = (d.ecdot >= 0.0) ? 1 : -1;
+    return regime;
+  }
+
+  Math::Matrix<Real> finiteDifferenceJacobian(
+      const Model::Input& input,
+      const Math::Vector<Real>& x,
+      const Model::State& prev,
+      Real t,
+      Real dt,
+      const Model::FrozenRegime& regime)
+  {
     Math::Vector<Real> R0;
-    Model::evaluateResidual(input, x, prev, t, dt, R0);
+    Model::evaluateResidual(input, x, prev, t, dt, regime, R0);
 
     Math::Matrix<Real> J(R0.size(), x.size());
     const Real eps = 1e-7;
@@ -38,8 +62,8 @@ namespace
       xm[j] -= h;
 
       Math::Vector<Real> Rp, Rm;
-      Model::evaluateResidual(input, xp, prev, t, dt, Rp);
-      Model::evaluateResidual(input, xm, prev, t, dt, Rm);
+      Model::evaluateResidual(input, xp, prev, t, dt, regime, Rp);
+      Model::evaluateResidual(input, xm, prev, t, dt, regime, Rm);
 
       J.col(j) = (Rp - Rm) / (2.0 * h);
     }
@@ -48,7 +72,7 @@ namespace
   }
 }
 
-TEST(CCMLC2014Test, DerivedJacobianMatchesFiniteDifference)
+TEST(CCMLC2014Test, DerivedJacobianMatchesFiniteDifferenceOnFrozenBranch)
 {
   Model::Input input;
   input.rho = 1.2;
@@ -77,7 +101,7 @@ TEST(CCMLC2014Test, DerivedJacobianMatchesFiniteDifference)
 
   {
     using PassiveEnergy = std::decay_t<decltype(input.passiveEnergy)>;
-    typename PassiveEnergy::Parameters hp;
+    PassiveEnergy::Parameters hp;
     hp.mu1 = 0.0;
     hp.mu2 = 0.01;
     hp.C0 = 0.05;
@@ -105,10 +129,12 @@ TEST(CCMLC2014Test, DerivedJacobianMatchesFiniteDifference)
   const Real t = 0.2;
   const Real dt = 1e-2;
 
-  Math::Matrix<Real> Janalytic;
-  Model::evaluateJacobian(input, x, prev, t, dt, Janalytic);
+  const auto regime = inferFrozenRegime(input, x, prev, t, dt);
 
-  const auto Jfd = finiteDifferenceJacobian(input, x, prev, t, dt);
+  Math::Matrix<Real> Janalytic;
+  Model::evaluateJacobian(input, x, prev, t, dt, regime, Janalytic);
+
+  const auto Jfd = finiteDifferenceJacobian(input, x, prev, t, dt, regime);
 
   const Real rel =
     (Janalytic - Jfd).norm() / std::max<Real>(Jfd.norm(), 1e-14);
