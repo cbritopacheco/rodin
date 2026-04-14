@@ -24,6 +24,7 @@
 #include "Rodin/Variational.h"
 #include "Rodin/Assembly.h"
 #include "Rodin/Solver.h"
+#include "Rodin/Heart.h"
 #include "Rodin/IO.h"
 #include "Rodin/Math.h"
 #include "Rodin/Utility.h"
