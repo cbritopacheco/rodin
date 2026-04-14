@@ -9,6 +9,7 @@ set(RodinHeart_HEADERS
   ForwardDecls.h
   CCMLC2014.h
   CCMLC2014/CCMLC2014.h
+  CCMLC2014/PassiveLaw.h
 )
 
 add_library(RodinHeart INTERFACE)

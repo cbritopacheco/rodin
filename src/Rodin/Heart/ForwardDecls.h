@@ -7,9 +7,15 @@
 #ifndef RODIN_HEART_FORWARDDECLS_H
 #define RODIN_HEART_FORWARDDECLS_H
 
+#include "Rodin/Types.h"
+#include "Rodin/Heart/CCMLC2014/PassiveLaw.h"
+
 namespace Rodin::Heart
 {
-  class CCMLC2014;
+  template <class PassiveLaw>
+  class CCMLC2014T;
+
+  using CCMLC2014 = CCMLC2014T<CCMLC2014PassiveLaw<Real>>;
 }
 
 #endif

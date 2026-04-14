@@ -21,10 +21,12 @@
 #include "Rodin/Variational/Problem.h"
 #include "Rodin/Solver/LDLT.h"
 #include "Rodin/Solver/NewtonSolver.h"
+#include "Rodin/Heart/CCMLC2014/PassiveLaw.h"
 
 namespace Rodin::Heart
 {
-  class CCMLC2014
+  template <class PassiveLaw = CCMLC2014PassiveLaw<Real>>
+  class CCMLC2014T
   {
     public:
       using Scalar = Real;
@@ -310,20 +312,8 @@ namespace Rodin::Heart
         d.dCdot_dy = d.vMid / (input.R0 * input.R0);
         d.dCdot_dv = d.sqrtC / input.R0;
 
-        d.J1 = Scalar(2) * d.C + std::pow(d.C, -2);
-        d.J2 = d.C * d.C + Scalar(2) * std::pow(d.C, -1);
-        d.J4 = d.C;
-
-        d.dW1 = input.dWe_dJ1(d.J1, d.J2, d.J4);
-        d.dW2 = input.dWe_dJ2(d.J1, d.J2, d.J4);
-        d.dW4 = input.dWe_dJ4(d.J1, d.J2, d.J4);
-
-        d.sigmaPassive =
-            Scalar(4) * (Scalar(1) - std::pow(d.C, -3)) * (d.dW1 + d.C * d.dW2)
-          + Scalar(2) * d.dW4;
-
-        d.dsigmaPassive_dy =
-          input.dSigmaPassive_dC(d.C, d.J1, d.J2, d.J4, d.dW1, d.dW2, d.dW4) * d.dC_dy;
+        PassiveLaw passiveLaw;
+        passiveLaw(input, d.C, d.dC_dy, d.sigmaPassive, d.dsigmaPassive_dy);
 
         d.ecdot = (d.ec - d.ecPrev) / dt;
         d.absEcdot = std::abs(d.ecdot);
@@ -554,8 +544,8 @@ namespace Rodin::Heart
             s.setZero();
 
             DenseVector R;
-            CCMLC2014::evaluateResidual(m_input, *m_xCurrent, m_prev, m_time, m_dt, R);
-            CCMLC2014::evaluateJacobian(m_input, *m_xCurrent, m_prev, m_time, m_dt, A);
+            CCMLC2014T::evaluateResidual(m_input, *m_xCurrent, m_prev, m_time, m_dt, R);
+            CCMLC2014T::evaluateJacobian(m_input, *m_xCurrent, m_prev, m_time, m_dt, A);
             b = -R;
             return *this;
           }
@@ -585,37 +575,37 @@ namespace Rodin::Heart
       };
 
     public:
-      explicit CCMLC2014(const Input& input)
+      explicit CCMLC2014T(const Input& input)
         : m_input(input), m_problem(input), m_solver(m_problem), m_newton(m_solver)
       {
         m_x = pack(m_state);
       }
 
-      CCMLC2014& setAbsoluteTolerance(const Scalar atol)
+      CCMLC2014T& setAbsoluteTolerance(const Scalar atol)
       {
         m_newton.setAbsoluteTolerance(atol);
         return *this;
       }
 
-      CCMLC2014& setRelativeTolerance(const Scalar rtol)
+      CCMLC2014T& setRelativeTolerance(const Scalar rtol)
       {
         m_newton.setRelativeTolerance(rtol);
         return *this;
       }
 
-      CCMLC2014& setStepTolerance(const Scalar stol)
+      CCMLC2014T& setStepTolerance(const Scalar stol)
       {
         m_newton.setStepTolerance(stol);
         return *this;
       }
 
-      CCMLC2014& setMaxIterations(const size_t maxIt)
+      CCMLC2014T& setMaxIterations(const size_t maxIt)
       {
         m_newton.setMaxIterations(maxIt);
         return *this;
       }
 
-      CCMLC2014& setDampingFactor(const Scalar alpha)
+      CCMLC2014T& setDampingFactor(const Scalar alpha)
       {
         m_newton.setDampingFactor(alpha);
         return *this;
@@ -676,6 +666,8 @@ namespace Rodin::Heart
       Solver::LDLT<DenseLinearSystem> m_solver;
       Solver::NewtonSolver<Solver::LDLT<DenseLinearSystem>> m_newton;
   };
+
+  using CCMLC2014 = CCMLC2014T<>;
 }
 
 #endif
