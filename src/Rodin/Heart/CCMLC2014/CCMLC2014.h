@@ -8,10 +8,10 @@
 #define RODIN_HEART_CCMLC2014_CCMLC2014_H
 
 #include <algorithm>
-#include <array>
 #include <cassert>
 #include <cmath>
 #include <functional>
+#include <limits>
 #include <numbers>
 
 #include "Rodin/Solver/ForwardDecls.h"
@@ -40,30 +40,11 @@ namespace Rodin::Heart
 
       enum Variable : size_t
       {
-        Y = 0,
-        V,
+        DISP = 0,
         PV,
         PAR,
         PD,
-        EC,
-        KC,
-        TAUC,
-        W,
         NVAR
-      };
-
-      enum class ValveBranch : int
-      {
-        Filling = 0,
-        Isovol = 1,
-        Ejection = 2
-      };
-
-      struct FrozenRegime
-      {
-        bool useFrozen = false;
-        ValveBranch valve = ValveBranch::Isovol;
-        int ecdotSign = 1; // must be ±1 when frozen
       };
 
       struct State
@@ -73,36 +54,56 @@ namespace Rodin::Heart
         Scalar pv = 0.0;
         Scalar par = 0.0;
         Scalar pd = 0.0;
+
+        // Local active state
         Scalar ec = 0.0;
         Scalar kc = 0.0;
         Scalar tauc = 0.0;
-        Scalar w = 1.0;
+        Scalar gamma = 0.0;
+        Scalar beta = 0.0;
+
         Scalar t = 0.0;
       };
 
       struct Input
       {
+        // Geometry / inertia
         Scalar rho = 1.0;
         Scalar d0 = 1.0;
         Scalar R0 = 1.0;
 
+        // Passive / active material
         Scalar Es = 1.0;
-        Scalar mu = 0.0;
-        Scalar alpha = 0.0;
-        Scalar alphaR = 1.0;
-        Scalar k0 = 0.0;
-        Scalar sigma0 = 0.0;
+        Scalar eta = 0.0;                // spherical viscous stress coefficient
+        Scalar mu = 0.0;                 // DampingParallel
+        Scalar alpha = 0.0;              // DestructionRate
+        Scalar k0 = 0.0;                 // CrossBridgeStiffness
+        Scalar sigma0 = 0.0;             // Contractility
 
-        Scalar eta = 0.0;
-
+        // Windkessel
         Scalar Cp = 1.0;
         Scalar Cd = 1.0;
         Scalar Rp = 1.0;
         Scalar Rd = 1.0;
 
-        Scalar Kat = 0.0;
-        Scalar Kp = 0.0;
-        Scalar Kar = 0.0;
+        // Valve law
+        Scalar Kat = 0.0;                // K_cavities
+        Scalar Kp = 0.0;                 // K_closed
+        Scalar Kar = 0.0;                // K_artery
+
+        // Tiny p_cav capacity regularization used in valve block
+        Scalar cavityCapacity = Scalar(5e-12);
+
+        // Local active solve options
+        Scalar localTolerance = Scalar(1e-12);
+        size_t localMaxIterations = 50;
+        Scalar localDamping = Scalar(1.0);
+        Scalar absRegularization = Scalar(1e-14);
+
+        // Initial local active state
+        Scalar initFibDef = 0.0;
+        Scalar initActiveStiffness = 0.0; // kc(0)
+        Scalar initActiveStress = 0.0;    // tauc(0)
 
         std::function<Scalar(Scalar)> u =
           [](Scalar) { return Scalar(0); };
@@ -111,15 +112,6 @@ namespace Rodin::Heart
           [](Scalar) { return Scalar(0); };
 
         std::function<Scalar(Scalar)> pSv =
-          [](Scalar) { return Scalar(0); };
-
-        std::function<Scalar(Scalar)> n0 =
-          [](Scalar) { return Scalar(1); };
-
-        std::function<Scalar(Scalar)> m0 =
-          [](Scalar) { return Scalar(1); };
-
-        std::function<Scalar(Scalar)> m0Prime =
           [](Scalar) { return Scalar(0); };
 
         PassiveEnergyLaw passiveEnergy;
@@ -135,407 +127,94 @@ namespace Rodin::Heart
           Solver::NewtonSolver<Solver::PartialPivLU<DenseLinearSystem>>::ConvergenceReason::MaxIterations;
       };
 
+      struct LocalActiveData
+      {
+        Scalar fib0 = 0.0;
+        Scalar fib1 = 0.0;
+        Scalar fib12 = 0.0;
+
+        Scalar gammaOld = 0.0;
+        Scalar betaOld = 0.0;
+        Scalar gammaNew = 0.0;
+        Scalar betaNew = 0.0;
+
+        Scalar u1 = 0.0;
+        Scalar u1Plus = 0.0;
+        Scalar n0 = 0.0;
+
+        Scalar k21 = 0.0;
+        Scalar k22 = 0.0;
+        Scalar krc_k22 = 0.0;
+
+        Scalar sigma1d = 0.0;
+        Scalar partialSigma1dWrtDisp = 0.0;
+        Scalar partialSigma1dWrtEc = 0.0;
+
+        Scalar stressActive = 0.0;
+        Scalar diffStressActive = 0.0;
+
+        bool converged = false;
+        size_t iterations = 0;
+      };
+
       struct EvalData
       {
-        Scalar t = 0.0;
+        State sn;
+        State snm1;
+
+        Scalar tnp1 = 0.0;
         Scalar dt = 0.0;
 
+        // Current Newton iterate (global unknowns)
         Scalar y = 0.0;
-        Scalar v = 0.0;
         Scalar pv = 0.0;
         Scalar par = 0.0;
         Scalar pd = 0.0;
-        Scalar ec = 0.0;
-        Scalar kc = 0.0;
-        Scalar tauc = 0.0;
-        Scalar w = 0.0;
 
+        // Previous step
         Scalar yPrev = 0.0;
-        Scalar vPrev = 0.0;
         Scalar pvPrev = 0.0;
         Scalar parPrev = 0.0;
         Scalar pdPrev = 0.0;
-        Scalar ecPrev = 0.0;
-        Scalar kcPrev = 0.0;
-        Scalar taucPrev = 0.0;
-        Scalar wPrev = 0.0;
 
+        // Previous-previous step (for inertia only)
+        Scalar yPrevPrev = 0.0;
+
+        // Midpoint quantities
         Scalar yMid = 0.0;
-        Scalar vMid = 0.0;
         Scalar pvMid = 0.0;
         Scalar parMid = 0.0;
         Scalar pdMid = 0.0;
-        Scalar ecMid = 0.0;
-        Scalar kcMid = 0.0;
-        Scalar taucMid = 0.0;
-        Scalar wMid = 0.0;
+        Scalar vel = 0.0;
 
-        Scalar uMidInput = 0.0;
-        Scalar pAtMid = 0.0;
-        Scalar pSvMid = 0.0;
-        Scalar n0Frozen = 0.0;
-        Scalar m0Mid = 0.0;
-
-        Scalar uPlus = 0.0;
-        Scalar uMinus = 0.0;
-
+        // Geometry at midpoint
         Scalar sqrtC = 0.0;
         Scalar C = 0.0;
-        Scalar dC_dy = 0.0;
-        Scalar e1D = 0.0;
-        Scalar de1D_dy = 0.0;
-        Scalar Cdot = 0.0;
-        Scalar dCdot_dy = 0.0;
-        Scalar dCdot_dv = 0.0;
+        Scalar strain1D = 0.0;
+        Scalar diffGreen = 0.0; // d strain1D / d(mid disp)
 
-        Scalar sigmaPassive = 0.0;
-        Scalar dsigmaPassive_dy = 0.0;
+        // Passive / viscous
+        Scalar stressPassive = 0.0;
+        Scalar diffStressPassive = 0.0;
+        Scalar stressViscous = 0.0;
+        Scalar diffStressViscous = 0.0;
 
-        Scalar sigma1D = 0.0;
-        Scalar dsigma1D_dy = 0.0;
-        Scalar dsigma1D_dec = 0.0;
+        // Flow branches
+        Scalar pAtCur = 0.0;
+        Scalar pAtPrev = 0.0;
+        Scalar pSvMid = 0.0;
 
-        Scalar sigmaSph = 0.0;
-        Scalar dsigmaSph_dy = 0.0;
-        Scalar dsigmaSph_dv = 0.0;
-        Scalar dsigmaSph_dec = 0.0;
+        Scalar cavityFluxCur = 0.0;
+        Scalar cavityFluxPrev = 0.0;
+        Scalar dCavityFluxCur_dPv = 0.0;
+        Scalar dCavityFluxCur_dPar = 0.0;
 
-        Scalar ecdot = 0.0;
-        Scalar absEcdot = 0.0;
-        Scalar signEcdot = 0.0;
+        Scalar windkesselOutflow = 0.0;
+        Scalar dWindkesselOutflow_dPv = 0.0;
+        Scalar dWindkesselOutflow_dPar = 0.0;
 
-        Scalar A = 0.0;
-        Scalar dA_dec = 0.0;
-        Scalar dA_dw = 0.0;
-
-        Scalar Q = 0.0;
-        Scalar dQ_dpv = 0.0;
-        Scalar dQ_dpar = 0.0;
-
-        ValveBranch valveBranch = ValveBranch::Isovol;
+        LocalActiveData active;
       };
-
-      static Scalar posPart(Scalar x)
-      {
-        return x > Scalar(0) ? x : Scalar(0);
-      }
-
-      static Scalar negPart(Scalar x)
-      {
-        return x < Scalar(0) ? -x : Scalar(0);
-      }
-
-      static void unpack(const DenseVector& x, EvalData& d)
-      {
-        d.y = x[Y];
-        d.v = x[V];
-        d.pv = x[PV];
-        d.par = x[PAR];
-        d.pd = x[PD];
-        d.ec = x[EC];
-        d.kc = x[KC];
-        d.tauc = x[TAUC];
-        d.w = x[W];
-      }
-
-      static DenseVector pack(const State& s)
-      {
-        DenseVector x(NVAR);
-        x[Y] = s.y;
-        x[V] = s.v;
-        x[PV] = s.pv;
-        x[PAR] = s.par;
-        x[PD] = s.pd;
-        x[EC] = s.ec;
-        x[KC] = s.kc;
-        x[TAUC] = s.tauc;
-        x[W] = s.w;
-        return x;
-      }
-
-      static void prepareEvalData(
-          const Input& input,
-          const DenseVector& x,
-          const State& prev,
-          const Scalar t,
-          const Scalar dt,
-          const FrozenRegime& regime,
-          EvalData& d)
-      {
-        assert(dt > Scalar(0));
-        unpack(x, d);
-
-        d.t = t;
-        d.dt = dt;
-
-        d.yPrev = prev.y;
-        d.vPrev = prev.v;
-        d.pvPrev = prev.pv;
-        d.parPrev = prev.par;
-        d.pdPrev = prev.pd;
-        d.ecPrev = prev.ec;
-        d.kcPrev = prev.kc;
-        d.taucPrev = prev.tauc;
-        d.wPrev = prev.w;
-
-        d.yMid = Scalar(0.5) * (d.y + d.yPrev);
-        d.vMid = Scalar(0.5) * (d.v + d.vPrev);
-        d.pvMid = Scalar(0.5) * (d.pv + d.pvPrev);
-        d.parMid = Scalar(0.5) * (d.par + d.parPrev);
-        d.pdMid = Scalar(0.5) * (d.pd + d.pdPrev);
-        d.ecMid = Scalar(0.5) * (d.ec + d.ecPrev);
-        d.kcMid = Scalar(0.5) * (d.kc + d.kcPrev);
-        d.taucMid = Scalar(0.5) * (d.tauc + d.taucPrev);
-        d.wMid = Scalar(0.5) * (d.w + d.wPrev);
-
-        const Scalar tMid = t + Scalar(0.5) * dt;
-        d.uMidInput = input.u(tMid);
-        d.pAtMid = input.pAt(tMid);
-        d.pSvMid = input.pSv(tMid);
-        d.n0Frozen = input.n0(d.ecPrev);
-        d.m0Mid = input.m0(d.ecMid);
-
-        d.uPlus = posPart(d.uMidInput);
-        d.uMinus = negPart(d.uMidInput);
-
-        d.sqrtC = Scalar(1) + d.yMid / input.R0;
-        assert(d.sqrtC > Scalar(0));
-        d.C = d.sqrtC * d.sqrtC;
-
-        d.dC_dy = d.sqrtC / input.R0;
-        d.e1D = Scalar(0.5) * (d.C - Scalar(1));
-        d.de1D_dy = Scalar(0.5) * d.dC_dy;
-
-        d.Cdot = Scalar(2) * d.sqrtC / input.R0 * d.vMid;
-        d.dCdot_dy = d.vMid / (input.R0 * input.R0);
-        d.dCdot_dv = d.sqrtC / input.R0;
-
-        PassiveLaw passiveLaw;
-        passiveLaw(input.passiveEnergy, d.C, d.dC_dy, d.sigmaPassive, d.dsigmaPassive_dy);
-
-        d.ecdot = (d.ec - d.ecPrev) / dt;
-        if (regime.useFrozen)
-        {
-          d.signEcdot = Scalar(regime.ecdotSign);
-          d.absEcdot = d.signEcdot * d.ecdot;
-        }
-        else
-        {
-          d.absEcdot = std::abs(d.ecdot);
-          d.signEcdot =
-            d.ecdot > Scalar(0) ? Scalar(1)
-            : (d.ecdot < Scalar(0) ? Scalar(-1) : Scalar(0));
-        }
-
-        {
-          const Scalar den = Scalar(1) + Scalar(2) * d.ecMid;
-          const Scalar den2 = den * den;
-          const Scalar den3 = den2 * den;
-
-          d.sigma1D = input.Es * (d.e1D - d.ecMid) / den2;
-          d.dsigma1D_dy = input.Es * d.de1D_dy / den2;
-          d.dsigma1D_dec =
-            Scalar(0.5) * input.Es *
-            (-Scalar(1) / den2 - Scalar(4) * (d.e1D - d.ecMid) / den3);
-        }
-
-        const Scalar viscFactor = Scalar(1) + Scalar(2) * std::pow(d.C, -6);
-        const Scalar dViscFactor_dy =
-          Scalar(-12) * std::pow(d.C, -7) * d.dC_dy;
-
-        const Scalar sigmaViscous = input.eta * d.Cdot * viscFactor;
-        const Scalar dsigmaViscous_dy =
-          input.eta * (d.dCdot_dy * viscFactor + d.Cdot * dViscFactor_dy);
-        const Scalar dsigmaViscous_dv =
-          input.eta * d.dCdot_dv * viscFactor;
-
-        d.sigmaSph = d.sigma1D + d.sigmaPassive + sigmaViscous;
-        d.dsigmaSph_dy = d.dsigma1D_dy + d.dsigmaPassive_dy + dsigmaViscous_dy;
-        d.dsigmaSph_dv = dsigmaViscous_dv;
-        d.dsigmaSph_dec = d.dsigma1D_dec;
-
-        d.A = d.uPlus + d.wMid * d.uMinus + input.alpha * d.absEcdot;
-        d.dA_dec = input.alpha * d.signEcdot / dt;
-        d.dA_dw = Scalar(0.5) * d.uMinus;
-
-        if (regime.useFrozen)
-        {
-          d.valveBranch = regime.valve;
-        }
-        else
-        {
-          if (d.pvMid <= d.pAtMid)
-            d.valveBranch = ValveBranch::Filling;
-          else if (d.pvMid <= d.parMid)
-            d.valveBranch = ValveBranch::Isovol;
-          else
-            d.valveBranch = ValveBranch::Ejection;
-        }
-
-        switch (d.valveBranch)
-        {
-          case ValveBranch::Filling:
-            d.Q = input.Kat * (d.pvMid - d.pAtMid);
-            d.dQ_dpv = Scalar(0.5) * input.Kat;
-            d.dQ_dpar = Scalar(0);
-            break;
-
-          case ValveBranch::Isovol:
-            d.Q = input.Kp * (d.pvMid - d.pAtMid);
-            d.dQ_dpv = Scalar(0.5) * input.Kp;
-            d.dQ_dpar = Scalar(0);
-            break;
-
-          case ValveBranch::Ejection:
-            d.Q = input.Kar * (d.pvMid - d.parMid)
-                + input.Kp * (d.parMid - d.pAtMid);
-            d.dQ_dpv = Scalar(0.5) * input.Kar;
-            d.dQ_dpar = Scalar(0.5) * (-input.Kar + input.Kp);
-            break;
-        }
-      }
-
-      static void evaluateResidual(
-          const Input& input,
-          const DenseVector& x,
-          const State& prev,
-          const Scalar t,
-          const Scalar dt,
-          const FrozenRegime& regime,
-          DenseVector& R)
-      {
-        EvalData d;
-        prepareEvalData(input, x, prev, t, dt, regime, d);
-
-        R.resize(NVAR);
-        R.setZero();
-
-        const Scalar geom1 = Scalar(1) + d.yMid / input.R0;
-        const Scalar geom2 = geom1 * geom1;
-
-        R[Y] = d.y - d.yPrev - dt * d.vMid;
-
-        R[V] =
-          input.rho * input.d0 * (d.v - d.vPrev) / dt
-          + (input.d0 / input.R0) * geom1 * d.sigmaSph
-          - d.pvMid * geom2;
-
-        R[PV] =
-          Scalar(4) * std::numbers::pi_v<Scalar> * input.R0 * input.R0 * geom2 * d.vMid
-          - d.Q;
-
-        R[PAR] =
-          input.Cp * (d.par - d.parPrev) / dt
-          + (d.parMid - d.pdMid) / input.Rp
-          - d.Q;
-
-        R[PD] =
-          input.Cd * (d.pd - d.pdPrev) / dt
-          + (d.pdMid - d.parMid) / input.Rp
-          - (d.pSvMid - d.pdMid) / input.Rd;
-
-        {
-          const Scalar den = Scalar(1) + Scalar(2) * d.ecMid;
-          const Scalar den3 = den * den * den;
-          const Scalar rhs =
-            input.Es * (d.e1D - d.ecMid) * (Scalar(1) + Scalar(2) * d.e1D) / den3;
-
-          R[EC] = d.taucMid + input.mu * d.ecdot - rhs;
-        }
-
-        R[KC] =
-          (d.kc - d.kcPrev) / dt
-          + d.A * d.kcMid
-          - d.n0Frozen * input.k0 * d.uPlus;
-
-        R[TAUC] =
-          (d.tauc - d.taucPrev) / dt
-          + d.A * d.taucMid
-          - d.n0Frozen * input.sigma0 * d.uPlus
-          - d.kcMid * d.ecdot;
-
-        R[W] =
-          input.alphaR * (d.w - d.wPrev) / dt
-          - (d.m0Mid - d.wMid);
-      }
-
-      static void evaluateJacobian(
-          const Input& input,
-          const DenseVector& x,
-          const State& prev,
-          const Scalar t,
-          const Scalar dt,
-          const FrozenRegime& regime,
-          DenseMatrix& J)
-      {
-        EvalData d;
-        prepareEvalData(input, x, prev, t, dt, regime, d);
-
-        J.resize(NVAR, NVAR);
-        J.setZero();
-
-        const Scalar geom1 = Scalar(1) + d.yMid / input.R0;
-        const Scalar geom2 = geom1 * geom1;
-        const Scalar dGeom1_dy = Scalar(1) / (Scalar(2) * input.R0);
-        const Scalar dGeom2_dy = geom1 / input.R0;
-
-        J(Y, Y) = Scalar(1);
-        J(Y, V) = -Scalar(0.5) * dt;
-
-        J(V, Y) =
-          (input.d0 / input.R0) * (dGeom1_dy * d.sigmaSph + geom1 * d.dsigmaSph_dy)
-          - d.pvMid * dGeom2_dy;
-        J(V, V) =
-          input.rho * input.d0 / dt
-          + (input.d0 / input.R0) * geom1 * d.dsigmaSph_dv;
-        J(V, PV) = -Scalar(0.5) * geom2;
-        J(V, EC) = (input.d0 / input.R0) * geom1 * d.dsigmaSph_dec;
-
-        J(PV, Y) =
-          Scalar(4) * std::numbers::pi_v<Scalar> * input.R0 * input.R0 * dGeom2_dy * d.vMid;
-        J(PV, V) =
-          Scalar(2) * std::numbers::pi_v<Scalar> * input.R0 * input.R0 * geom2;
-        J(PV, PV) = -d.dQ_dpv;
-        J(PV, PAR) = -d.dQ_dpar;
-
-        J(PAR, PV) = -d.dQ_dpv;
-        J(PAR, PAR) = input.Cp / dt + Scalar(0.5) / input.Rp - d.dQ_dpar;
-        J(PAR, PD) = -Scalar(0.5) / input.Rp;
-
-        J(PD, PAR) = -Scalar(0.5) / input.Rp;
-        J(PD, PD) = input.Cd / dt + Scalar(0.5) / input.Rp + Scalar(0.5) / input.Rd;
-
-        {
-          const Scalar den = Scalar(1) + Scalar(2) * d.ecMid;
-          const Scalar den3 = den * den * den;
-          const Scalar den4 = den3 * den;
-          const Scalar g = (d.e1D - d.ecMid) * (Scalar(1) + Scalar(2) * d.e1D);
-          const Scalar dg_dy =
-            d.de1D_dy * (Scalar(1) + Scalar(2) * d.e1D)
-            + (d.e1D - d.ecMid) * (Scalar(2) * d.de1D_dy);
-          const Scalar dg_dec = -Scalar(0.5) * (Scalar(1) + Scalar(2) * d.e1D);
-
-          J(EC, Y) = -input.Es * (dg_dy / den3);
-
-          J(EC, EC) =
-            input.mu / dt
-            - input.Es * (dg_dec / den3 - Scalar(3) * g / den4);
-
-          J(EC, TAUC) = Scalar(0.5);
-        }
-
-        J(KC, EC) = d.dA_dec * d.kcMid;
-        J(KC, KC) = Scalar(1) / dt + Scalar(0.5) * d.A;
-        J(KC, W) = d.dA_dw * d.kcMid;
-
-        J(TAUC, EC) = d.dA_dec * d.taucMid - d.kcMid / dt;
-        J(TAUC, KC) = -Scalar(0.5) * d.ecdot;
-        J(TAUC, TAUC) = Scalar(1) / dt + Scalar(0.5) * d.A;
-        J(TAUC, W) = d.dA_dw * d.taucMid;
-
-        J(W, EC) = -Scalar(0.5) * input.m0Prime(d.ecMid);
-        J(W, W) = input.alphaR / dt + Scalar(0.5);
-      }
 
       class Problem final : public Variational::ProblemBase<DenseLinearSystem>
       {
@@ -559,16 +238,15 @@ namespace Rodin::Heart
           Problem& assemble() override
           {
             assert(m_xCurrent);
+
             auto& A = m_system.getOperator();
             auto& b = m_system.getVector();
             auto& s = m_system.getSolution();
             s.setZero();
 
             DenseVector R;
-            CCMLC2014T::evaluateResidual(
-                m_input, *m_xCurrent, m_prev, m_time, m_dt, m_regime, R);
-            CCMLC2014T::evaluateJacobian(
-                m_input, *m_xCurrent, m_prev, m_time, m_dt, m_regime, A);
+            CCMLC2014T::evaluateDynamicResidual(m_input, *m_xCurrent, m_sn, m_snm1, m_time, m_dt, R);
+            CCMLC2014T::evaluateDynamicJacobian(m_input, *m_xCurrent, m_sn, m_snm1, m_time, m_dt, A);
             b = -R;
             return *this;
           }
@@ -580,58 +258,560 @@ namespace Rodin::Heart
 
           DenseLinearSystem& getLinearSystem() override { return m_system; }
           const DenseLinearSystem& getLinearSystem() const override { return m_system; }
-
           Problem* copy() const noexcept override { return new Problem(*this); }
 
-          void setPrevious(const State& prev) { m_prev = prev; }
           void setCurrent(DenseVector& xCurrent) { m_xCurrent = &xCurrent; }
-          void setTime(const Scalar t) { m_time = t; }
-          void setTimeStep(const Scalar dt) { m_dt = dt; }
-          void setFrozenRegime(const FrozenRegime& regime) { m_regime = regime; }
+
+          void setStepData(const State& sn, const State& snm1, Scalar time, Scalar dt)
+          {
+            m_sn = sn;
+            m_snm1 = snm1;
+            m_time = time;
+            m_dt = dt;
+          }
 
         private:
           Input m_input;
-          State m_prev;
           DenseVector* m_xCurrent = nullptr;
           DenseLinearSystem m_system;
+
+          State m_sn;
+          State m_snm1;
           Scalar m_time = 0.0;
           Scalar m_dt = 0.0;
-          FrozenRegime m_regime;
       };
 
+    private:
+      static DenseVector packUnknowns(const State& s)
+      {
+        DenseVector x(NVAR);
+        x[DISP] = s.y;
+        x[PV]   = s.pv;
+        x[PAR]  = s.par;
+        x[PD]   = s.pd;
+        return x;
+      }
+
+      static State unpackUnknownsIntoState(const DenseVector& x, const State& base, Scalar t)
+      {
+        State s = base;
+        s.y = x[DISP];
+        s.pv = x[PV];
+        s.par = x[PAR];
+        s.pd = x[PD];
+        s.t = t;
+        return s;
+      }
+
+      static Scalar n0_piecewise(Scalar fib0)
+      {
+        const Scalar x1 = Scalar(-0.4);
+        const Scalar y1 = Scalar(0.0);
+        const Scalar x2 = Scalar(0.3);
+        const Scalar y2 = Scalar(0.38);
+        const Scalar x3 = Scalar(0.73);
+        const Scalar y3 = Scalar(0.74);
+        const Scalar x4 = Scalar(1.0);
+        const Scalar y4 = Scalar(1.0);
+        const Scalar x5 = Scalar(1.3);
+        const Scalar y5 = Scalar(1.0);
+        const Scalar x6 = Scalar(2.4);
+        const Scalar y6 = Scalar(0.0);
+
+        Scalar n0 = Scalar(0.0);
+
+        if (fib0 < x2)
+          n0 = ((y2 - y1) / (x2 - x1)) * (fib0 - x2) + y2;
+        else if (fib0 < x3)
+          n0 = ((y3 - y2) / (x3 - x2)) * (fib0 - x3) + y3;
+        else if (fib0 < x4)
+          n0 = ((y4 - y3) / (x4 - x3)) * (fib0 - x4) + y4;
+        else if (fib0 < x5)
+          n0 = y4;
+        else if (fib0 < x6)
+          n0 = ((y6 - y5) / (x6 - x5)) * (fib0 - x6) + y6;
+
+        return std::max<Scalar>(n0, Scalar(0));
+      }
+
+      static void computeMidpointKinematics(const Input& in, EvalData& d)
+      {
+        d.yMid = Scalar(0.5) * (d.y + d.yPrev);
+        d.pvMid = Scalar(0.5) * (d.pv + d.pvPrev);
+        d.parMid = Scalar(0.5) * (d.par + d.parPrev);
+        d.pdMid = Scalar(0.5) * (d.pd + d.pdPrev);
+        d.vel = (d.y - d.yPrev) / d.dt;
+
+        d.sqrtC = Scalar(1) + d.yMid / in.R0;
+        assert(d.sqrtC > Scalar(0));
+        d.C = d.sqrtC * d.sqrtC;
+
+        d.strain1D = Scalar(0.5) * (d.C - Scalar(1));
+        d.diffGreen = d.sqrtC / in.R0;
+      }
+
+      static void computePassiveContribution(const Input& in, EvalData& d)
+      {
+        Scalar dC_dyMid = Scalar(2) * d.sqrtC / in.R0;
+
+        Scalar sigmaPassive = 0.0;
+        Scalar dsigmaPassive_dyMid = 0.0;
+        PassiveLaw passiveLaw;
+        passiveLaw(in.passiveEnergy, d.C, dC_dyMid, sigmaPassive, dsigmaPassive_dyMid);
+
+        d.stressPassive = sigmaPassive;
+        d.diffStressPassive = Scalar(0.5) * dsigmaPassive_dyMid;
+      }
+
+      static void computeViscousContribution(const Input& in, EvalData& d)
+      {
+        const Scalar R0 = in.R0;
+        const Scalar nu = in.eta;
+        const Scalar vel = d.vel;
+        const Scalar sqrtC = d.sqrtC;
+        const Scalar C = d.C;
+
+        const Scalar diffGreen_rr = Scalar(-2) / R0 * std::pow(sqrtC, -5);
+        const Scalar diffGreen_pp = d.diffGreen;
+
+        const Scalar stress_rr = nu * diffGreen_rr * vel;
+        const Scalar stress_pp = nu * diffGreen_pp * vel;
+        const Scalar stress_tt = stress_pp;
+
+        d.stressViscous =
+          stress_pp + stress_tt - Scalar(2) * std::pow(C, -3) * stress_rr;
+
+        const Scalar d_dotC_rr_dy =
+          Scalar(10) / (R0 * R0) * nu * std::pow(sqrtC, -6) * vel
+          + Scalar(2) * nu * diffGreen_rr / d.dt;
+
+        const Scalar d_dotC_pp_dy =
+          nu / (R0 * R0) * vel
+          + Scalar(2) * nu * diffGreen_pp / d.dt;
+
+        const Scalar diffStress =
+          d_dotC_pp_dy + d_dotC_pp_dy
+          - Scalar(2) * (std::pow(C, -3) * d_dotC_rr_dy
+              - Scalar(6) / R0 * std::pow(sqrtC, -7) * stress_rr);
+
+        d.diffStressViscous = diffStress;
+      }
+
+      static void updateInternalVariables0D(
+          const Input& in,
+          Scalar dt,
+          Scalar fib0,
+          Scalar fib1,
+          Scalar gammaOld,
+          Scalar betaOld,
+          Scalar u1,
+          Scalar& gammaNew,
+          Scalar& betaNew,
+          Scalar& n0)
+      {
+        const Scalar alpha = in.alpha;
+        const Scalar k0 = in.k0;
+        const Scalar sigma0 = in.sigma0;
+
+        const Scalar u1Plus = std::max<Scalar>(u1, Scalar(0));
+
+        n0 = n0_piecewise(fib0);
+
+        const Scalar denominatorGamma =
+          Scalar(1) + dt * (std::abs(u1) + alpha * std::abs(fib1 - fib0) / dt);
+
+        Scalar gammaSquare =
+          (gammaOld * gammaOld + dt * n0 * k0 * u1Plus) / denominatorGamma;
+        gammaSquare = std::max<Scalar>(Scalar(1e-16), gammaSquare);
+        gammaNew = std::sqrt(gammaSquare);
+
+        const Scalar denominatorBeta =
+          Scalar(1)
+          + Scalar(0.5) * dt * n0 * k0 * u1Plus / gammaSquare
+          + Scalar(0.5) * dt * (std::abs(u1) + alpha * std::abs(fib1 - fib0) / dt);
+
+        betaNew =
+          (betaOld + gammaNew * (fib1 - fib0) + dt * n0 * sigma0 * u1Plus / gammaNew)
+          / denominatorBeta;
+      }
+
+      static void getPartialDerivativesInternalVariablesWrtFibDeformation(
+          const Input& in,
+          Scalar dt,
+          Scalar gammaOld,
+          Scalar betaOld,
+          Scalar u1,
+          Scalar fib0,
+          Scalar fib1,
+          Scalar& derBetaGammaWrtFib)
+      {
+        const Scalar alpha = in.alpha;
+        const Scalar k0 = in.k0;
+        const Scalar sigma0 = in.sigma0;
+
+        const Scalar deltaFib = fib1 - fib0;
+        const Scalar absDelta = std::abs(deltaFib);
+        const Scalar sign =
+          (deltaFib > Scalar(0)) ? Scalar(1) :
+          (deltaFib < Scalar(0)) ? Scalar(-1) : Scalar(0);
+
+        const Scalar u1Plus = std::max<Scalar>(u1, Scalar(0));
+        const Scalar n0 = n0_piecewise(fib0);
+
+        const Scalar Dg =
+          Scalar(1) + dt * std::abs(u1) + alpha * absDelta;
+
+        const Scalar Ng =
+          gammaOld * gammaOld + dt * n0 * k0 * u1Plus;
+
+        const Scalar gammaNewSq = std::max<Scalar>(Scalar(1e-16), Ng / Dg);
+        const Scalar gammaNew = std::sqrt(gammaNewSq);
+
+        const Scalar dGammaSq =
+          -Ng * alpha * sign / (Dg * Dg);
+
+        const Scalar dGamma =
+          Scalar(0.5) * dGammaSq / gammaNew;
+
+        const Scalar Nb =
+          betaOld + gammaNew * deltaFib + dt * n0 * sigma0 * u1Plus / gammaNew;
+
+        const Scalar Db =
+          Scalar(1)
+          + Scalar(0.5) * dt * n0 * k0 * u1Plus / gammaNewSq
+          + Scalar(0.5) * dt * std::abs(u1)
+          + Scalar(0.5) * alpha * absDelta;
+
+        const Scalar dNb =
+          dGamma * deltaFib
+          + gammaNew
+          - dt * n0 * sigma0 * u1Plus * dGamma / (gammaNew * gammaNew);
+
+        const Scalar dDb =
+          -Scalar(0.5) * dt * n0 * k0 * u1Plus * dGammaSq / (gammaNewSq * gammaNewSq)
+          + Scalar(0.5) * alpha * sign;
+
+        const Scalar dBeta =
+          (dNb * Db - Nb * dDb) / (Db * Db);
+
+        derBetaGammaWrtFib =
+          dGamma * (Nb / Db) + gammaNew * dBeta;
+      }
+
+      static bool solveLocalDynamicActive(
+          const Input& in,
+          const EvalData& d,
+          LocalActiveData& a)
+      {
+        a.fib0 = d.sn.ec;
+        a.gammaOld = d.sn.gamma;
+        a.betaOld = d.sn.beta;
+        a.u1 = in.u(d.tnp1);
+        a.u1Plus = std::max<Scalar>(a.u1, Scalar(0));
+        a.n0 = n0_piecewise(a.fib0);
+
+        a.fib1 = a.fib0;
+
+        bool ok = false;
+        for (size_t it = 0; it < in.localMaxIterations; ++it)
+        {
+          a.iterations = it + 1;
+          a.fib12 = Scalar(0.5) * (a.fib1 + a.fib0);
+
+          updateInternalVariables0D(
+              in, d.dt, a.fib0, a.fib1, a.gammaOld, a.betaOld, a.u1,
+              a.gammaNew, a.betaNew, a.n0);
+
+          a.k21 = -in.Es * (Scalar(1) + Scalar(4) * d.strain1D - Scalar(2) * a.fib12);
+
+          {
+            Scalar derBetaGammaWrtFib = 0.0;
+            getPartialDerivativesInternalVariablesWrtFibDeformation(
+                in, d.dt, a.gammaOld, a.betaOld, a.u1, a.fib0, a.fib1, derBetaGammaWrtFib);
+
+            a.k22 =
+                Scalar(3) * std::pow(Scalar(1) + Scalar(2) * a.fib12, 2) *
+                    (a.gammaNew * a.betaNew + in.mu * (a.fib1 - a.fib0) / d.dt)
+              + std::pow(Scalar(1) + Scalar(2) * a.fib12, 3) *
+                    (derBetaGammaWrtFib + in.mu / d.dt)
+              + Scalar(0.5) * in.Es * (Scalar(1) + Scalar(2) * d.strain1D);
+          }
+
+          const Scalar Rraw =
+            (a.gammaNew * a.betaNew + in.mu * (a.fib1 - a.fib0) / d.dt)
+              * std::pow(Scalar(1) + Scalar(2) * a.fib12, 3)
+            - in.Es * (d.strain1D - a.fib12) * (Scalar(1) + Scalar(2) * d.strain1D);
+
+          a.krc_k22 = Rraw / a.k22;
+
+          if (std::abs(Rraw) < in.localTolerance)
+          {
+            ok = true;
+            break;
+          }
+
+          if (std::abs(a.k22) < std::numeric_limits<Scalar>::epsilon())
+            break;
+
+          a.fib1 += -in.localDamping * a.krc_k22;
+        }
+
+        a.fib12 = Scalar(0.5) * (a.fib1 + a.fib0);
+        updateInternalVariables0D(
+            in, d.dt, a.fib0, a.fib1, a.gammaOld, a.betaOld, a.u1,
+            a.gammaNew, a.betaNew, a.n0);
+
+        a.sigma1d =
+          in.Es / std::pow(Scalar(1) + Scalar(2) * a.fib12, 2)
+          * (d.strain1D - a.fib12);
+
+        a.partialSigma1dWrtDisp =
+          in.Es / std::pow(Scalar(1) + Scalar(2) * a.fib12, 2);
+
+        a.partialSigma1dWrtEc =
+          in.Es / std::pow(Scalar(1) + Scalar(2) * a.fib12, 3)
+          * (Scalar(2) * a.fib12 - Scalar(4) * d.strain1D - Scalar(1));
+
+        const Scalar coefSchurD2W =
+          Scalar(0.5) * a.partialSigma1dWrtEc / a.k22 * a.k21;
+
+        const Scalar tangentCorrection =
+          a.partialSigma1dWrtDisp - coefSchurD2W;
+
+        const Scalar rhsCorrection =
+          Scalar(0.5) * a.partialSigma1dWrtEc * a.krc_k22;
+
+        a.stressActive = a.sigma1d - rhsCorrection;
+        a.diffStressActive = tangentCorrection * d.diffGreen;
+        a.converged = ok;
+        return ok;
+      }
+
+      static void buildEvalData(
+          const Input& in,
+          const DenseVector& x,
+          const State& sn,
+          const State& snm1,
+          Scalar tnp1,
+          Scalar dt,
+          EvalData& d)
+      {
+        d.sn = sn;
+        d.snm1 = snm1;
+
+        d.tnp1 = tnp1;
+        d.dt = dt;
+
+        d.y = x[DISP];
+        d.pv = x[PV];
+        d.par = x[PAR];
+        d.pd = x[PD];
+
+        d.yPrev = sn.y;
+        d.pvPrev = sn.pv;
+        d.parPrev = sn.par;
+        d.pdPrev = sn.pd;
+        d.yPrevPrev = snm1.y;
+
+        d.pAtCur = in.pAt(tnp1);
+        d.pAtPrev = in.pAt(sn.t);
+        d.pSvMid = in.pSv(sn.t + Scalar(0.5) * dt);
+
+        computeMidpointKinematics(in, d);
+        computePassiveContribution(in, d);
+        computeViscousContribution(in, d);
+        solveLocalDynamicActive(in, d, d.active);
+
+        {
+          const bool mitralOpenCur = d.pv <= d.pAtCur;
+          const bool bothClosedCur = d.pAtCur <= d.pv && d.pv <= d.par;
+
+          if (mitralOpenCur)
+          {
+            d.cavityFluxCur = in.Kat * (d.pv - d.pAtCur);
+            d.dCavityFluxCur_dPv = in.Kat;
+            d.dCavityFluxCur_dPar = Scalar(0);
+          }
+          else if (bothClosedCur)
+          {
+            d.cavityFluxCur = in.Kp * (d.pv - d.pAtCur);
+            d.dCavityFluxCur_dPv = in.Kp;
+            d.dCavityFluxCur_dPar = Scalar(0);
+          }
+          else
+          {
+            d.cavityFluxCur = in.Kar * (d.pv - d.par) + in.Kp * (d.par - d.pAtCur);
+            d.dCavityFluxCur_dPv = in.Kar;
+            d.dCavityFluxCur_dPar = -in.Kar + in.Kp;
+          }
+        }
+
+        {
+          const bool mitralOpenPrev = d.pvPrev <= d.pAtPrev;
+          const bool bothClosedPrev = d.pAtPrev <= d.pvPrev && d.pvPrev <= d.parPrev;
+
+          if (mitralOpenPrev)
+          {
+            d.cavityFluxPrev = in.Kat * (d.pvPrev - d.pAtPrev);
+          }
+          else if (bothClosedPrev)
+          {
+            d.cavityFluxPrev = in.Kp * (d.pvPrev - d.pAtPrev);
+          }
+          else
+          {
+            d.cavityFluxPrev = in.Kar * (d.pvPrev - d.parPrev) + in.Kp * (d.parPrev - d.pAtPrev);
+          }
+        }
+
+        {
+          const Scalar flowAr = in.Kar * (d.pvMid - d.parMid);
+          d.windkesselOutflow = (flowAr > Scalar(0)) ? flowAr : Scalar(0);
+
+          const Scalar difFlow = (flowAr > Scalar(0)) ? (Scalar(0.5) * in.Kar) : Scalar(0);
+          d.dWindkesselOutflow_dPv = difFlow;
+          d.dWindkesselOutflow_dPar = -difFlow;
+        }
+      }
+
     public:
+      static void evaluateDynamicResidual(
+          const Input& in,
+          const DenseVector& x,
+          const State& sn,
+          const State& snm1,
+          Scalar tnp1,
+          Scalar dt,
+          DenseVector& R)
+      {
+        EvalData d;
+        buildEvalData(in, x, sn, snm1, tnp1, dt, d);
+
+        R.resize(NVAR);
+        R.setZero();
+
+        const Scalar coeff = in.d0 * in.rho;
+        const Scalar geom = Scalar(1) + d.yMid / in.R0;
+        const Scalar geom2 = geom * geom;
+
+        const Scalar totalStress =
+          d.stressPassive + d.stressViscous + d.active.stressActive;
+
+        R[DISP] =
+          coeff / (dt * dt) * (d.y - Scalar(2) * d.yPrev + d.yPrevPrev)
+          + in.d0 / in.R0 * geom * totalStress
+          - d.pvMid * geom2;
+
+        {
+          const Scalar capacityCur = in.cavityCapacity / dt * d.pv;
+          const Scalar capacityPrev = in.cavityCapacity / dt * d.pvPrev;
+          const Scalar volumeTerm =
+            Scalar(4) * std::numbers::pi_v<Scalar> * in.R0 * in.R0 * geom2 * d.vel;
+
+          R[PV] =
+            (capacityCur - capacityPrev)
+            + Scalar(0.5) * (d.cavityFluxCur + d.cavityFluxPrev)
+            + volumeTerm;
+        }
+
+        {
+          R[PAR] =
+            in.Cp / dt * (d.par - d.parPrev)
+            + (d.parMid - d.pdMid) / in.Rp
+            - d.windkesselOutflow;
+        }
+
+        {
+          R[PD] =
+            in.Cd / dt * (d.pd - d.pdPrev)
+            + (d.pdMid - d.parMid) / in.Rp
+            - (d.pSvMid - d.pdMid) / in.Rd;
+        }
+      }
+
+      static void evaluateDynamicJacobian(
+          const Input& in,
+          const DenseVector& x,
+          const State& sn,
+          const State& snm1,
+          Scalar tnp1,
+          Scalar dt,
+          DenseMatrix& J)
+      {
+        EvalData d;
+        buildEvalData(in, x, sn, snm1, tnp1, dt, d);
+
+        J.resize(NVAR, NVAR);
+        J.setZero();
+
+        const Scalar coeff = in.d0 * in.rho;
+        const Scalar geom = Scalar(1) + d.yMid / in.R0;
+        const Scalar geom2 = geom * geom;
+
+        const Scalar totalStress =
+          d.stressPassive + d.stressViscous + d.active.stressActive;
+        const Scalar totalDiffStress =
+          d.diffStressPassive + d.diffStressViscous + d.active.diffStressActive;
+
+        J(DISP, DISP) +=
+          coeff / (dt * dt)
+          + Scalar(0.5) * in.d0 / (in.R0 * in.R0) * totalStress
+          + Scalar(0.5) * in.d0 / in.R0 * geom * totalDiffStress
+          - Scalar(1) / in.R0 * d.pvMid * geom;
+        J(DISP, PV) += -Scalar(0.5) * geom2;
+
+        J(PV, DISP) +=
+          Scalar(4) * std::numbers::pi_v<Scalar> * in.R0 * geom * d.vel
+          + Scalar(4) * std::numbers::pi_v<Scalar> * in.R0 * in.R0 * geom2 * (Scalar(1) / dt);
+
+        J(PV, PV) += in.cavityCapacity / dt + Scalar(0.5) * d.dCavityFluxCur_dPv;
+        J(PV, PAR) += Scalar(0.5) * d.dCavityFluxCur_dPar;
+
+        J(PAR, PV) += -d.dWindkesselOutflow_dPv;
+        J(PAR, PAR) += in.Cp / dt + Scalar(1) / (Scalar(2) * in.Rp) - d.dWindkesselOutflow_dPar;
+        J(PAR, PD) += -Scalar(1) / (Scalar(2) * in.Rp);
+
+        J(PD, PAR) += -Scalar(1) / (Scalar(2) * in.Rp);
+        J(PD, PD) += in.Cd / dt + Scalar(1) / (Scalar(2) * in.Rp) + Scalar(1) / (Scalar(2) * in.Rd);
+      }
+
       explicit CCMLC2014T(const Input& input)
         : m_input(input), m_problem(input), m_solver(m_problem), m_newton(m_solver)
       {
-        m_x = pack(m_state);
+        m_x = packUnknowns(m_state);
       }
 
       CCMLC2014T& setAbsoluteTolerance(const Scalar atol)
       {
+        m_atol = atol;
         m_newton.setAbsoluteTolerance(atol);
         return *this;
       }
 
       CCMLC2014T& setRelativeTolerance(const Scalar rtol)
       {
+        m_rtol = rtol;
         m_newton.setRelativeTolerance(rtol);
         return *this;
       }
 
       CCMLC2014T& setStepTolerance(const Scalar stol)
       {
+        m_stol = stol;
         m_newton.setStepTolerance(stol);
         return *this;
       }
 
       CCMLC2014T& setMaxIterations(const size_t maxIt)
       {
+        m_maxIt = maxIt;
         m_newton.setMaxIterations(maxIt);
         return *this;
       }
 
       CCMLC2014T& setDampingFactor(const Scalar alpha)
       {
+        m_damping = alpha;
         m_newton.setDampingFactor(alpha);
         return *this;
       }
@@ -639,59 +819,57 @@ namespace Rodin::Heart
       void initialize(const State& initial)
       {
         m_state = initial;
-        m_x = pack(m_state);
+        m_x = packUnknowns(m_state);
+        m_report = {};
+
+        if (initial.gamma > Scalar(0))
+        {
+          m_state.gamma = initial.gamma;
+          m_state.beta = initial.beta;
+          m_state.kc = initial.gamma * initial.gamma;
+          m_state.tauc = initial.gamma * initial.beta;
+        }
+        else
+        {
+          if (initial.kc > Scalar(0))
+          {
+            m_state.gamma = std::sqrt(initial.kc);
+            m_state.beta = (m_state.gamma > Scalar(0))
+                         ? (initial.tauc / m_state.gamma)
+                         : Scalar(0);
+          }
+          else
+          {
+            m_state.gamma = std::sqrt(std::max<Scalar>(m_input.initActiveStiffness, Scalar(0)));
+            m_state.beta =
+              (m_state.gamma > Scalar(0))
+              ? (m_input.initActiveStress / m_state.gamma)
+              : Scalar(0);
+            m_state.kc = m_state.gamma * m_state.gamma;
+            m_state.tauc = m_state.gamma * m_state.beta;
+          }
+        }
+
+        if (std::abs(initial.ec) > Scalar(0))
+          m_state.ec = initial.ec;
+        else
+          m_state.ec = m_input.initFibDef;
+
+        m_prevState = m_state;
+        m_x = packUnknowns(m_state);
       }
 
       Report step(const Scalar dt)
       {
-        m_x = pack(m_state);
+        assert(dt > Scalar(0));
 
-        // predictor
-        {
-          const Scalar tMid = m_state.t + Scalar(0.5) * dt;
-          const Scalar uMid = m_input.u(tMid);
+        const State sn = m_state;
+        const State snm1 = m_prevState;
 
-          const Scalar uPlus = uMid > Scalar(0) ? uMid : Scalar(0);
-          const Scalar uMinus = uMid < Scalar(0) ? -uMid : Scalar(0);
+        m_x = packUnknowns(sn);
 
-          const Scalar n0 = m_input.n0(m_state.ec);
-          const Scalar A0 = uPlus + m_state.w * uMinus;
-
-          m_x[KC]   = m_state.kc   + dt * (-A0 * m_state.kc   + n0 * m_input.k0     * uPlus);
-          m_x[TAUC] = m_state.tauc + dt * (-A0 * m_state.tauc + n0 * m_input.sigma0 * uPlus);
-          m_x[W]    = m_state.w    + dt * (m_input.m0(m_state.ec) - m_state.w) / m_input.alphaR;
-
-          const Scalar den = Scalar(1) + Scalar(2) * m_state.ec;
-          const Scalar den3 = den * den * den;
-
-          const Scalar e1D =
-            Scalar(0.5) * (std::pow(Scalar(1) + m_state.y / m_input.R0, 2) - Scalar(1));
-
-          const Scalar rhs =
-            m_input.Es * (e1D - m_state.ec) * (Scalar(1) + Scalar(2) * e1D) / den3;
-
-          const Scalar ecdot0 = (rhs - m_state.tauc) / m_input.mu;
-          m_x[EC] = m_state.ec + dt * ecdot0;
-        }
-
-        // choose frozen regime from predictor
-        FrozenRegime regime;
-        {
-          EvalData d0;
-          FrozenRegime unfrozen;
-          unfrozen.useFrozen = false;
-          prepareEvalData(m_input, m_x, m_state, m_state.t, dt, unfrozen, d0);
-
-          regime.useFrozen = true;
-          regime.valve = d0.valveBranch;
-          regime.ecdotSign = (d0.ecdot >= Scalar(0)) ? 1 : -1;
-        }
-
-        m_problem.setPrevious(m_state);
         m_problem.setCurrent(m_x);
-        m_problem.setTime(m_state.t);
-        m_problem.setTimeStep(dt);
-        m_problem.setFrozenRegime(regime);
+        m_problem.setStepData(sn, snm1, sn.t + dt, dt);
 
         m_newton.solve(m_x);
 
@@ -704,16 +882,17 @@ namespace Rodin::Heart
 
         if (nr.converged)
         {
-          m_state.y = m_x[Y];
-          m_state.v = m_x[V];
-          m_state.pv = m_x[PV];
-          m_state.par = m_x[PAR];
-          m_state.pd = m_x[PD];
-          m_state.ec = m_x[EC];
-          m_state.kc = m_x[KC];
-          m_state.tauc = m_x[TAUC];
-          m_state.w = m_x[W];
-          m_state.t += dt;
+          EvalData d;
+          buildEvalData(m_input, m_x, sn, snm1, sn.t + dt, dt, d);
+
+          m_prevState = m_state;
+          m_state = unpackUnknownsIntoState(m_x, m_state, sn.t + dt);
+          m_state.v = (m_state.y - sn.y) / dt;
+          m_state.ec = d.active.fib1;
+          m_state.gamma = d.active.gammaNew;
+          m_state.beta = d.active.betaNew;
+          m_state.kc = m_state.gamma * m_state.gamma;
+          m_state.tauc = m_state.gamma * m_state.beta;
         }
 
         return m_report;
@@ -726,9 +905,17 @@ namespace Rodin::Heart
     private:
       Input m_input;
       State m_state;
-      Report m_report;
+      State m_prevState;
 
+      Scalar m_atol = Scalar(1e-10);
+      Scalar m_rtol = Scalar(1e-10);
+      Scalar m_stol = Scalar(1e-12);
+      size_t m_maxIt = 50;
+      Scalar m_damping = Scalar(1.0);
+
+      Report m_report;
       DenseVector m_x;
+
       Problem m_problem;
       Solver::PartialPivLU<DenseLinearSystem> m_solver;
       Solver::NewtonSolver<Solver::PartialPivLU<DenseLinearSystem>> m_newton;
