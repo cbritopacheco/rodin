@@ -13,10 +13,16 @@
 
 namespace Rodin::Heart
 {
-  template <class PassiveEnergyLaw, class PassiveLaw>
-  class CCMLC2014T;
+  namespace CCMLC2014::Solver
+  {
+    template <class PassiveEnergyLaw, class PassiveLaw>
+    class StepperT;
+  }
 
-  using CCMLC2014 = CCMLC2014T<HolzapfelReducedLaw<Real>, CCMLC2014PassiveLaw<Real>>;
+  template <
+    class PassiveEnergyLaw = HolzapfelReducedLaw<Real>,
+    class PassiveLaw = CCMLC2014PassiveLaw<Real>>
+  using CCMLC2014T = CCMLC2014::Solver::StepperT<PassiveEnergyLaw, PassiveLaw>;
 }
 
 #endif

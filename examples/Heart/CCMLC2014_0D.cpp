@@ -8,7 +8,7 @@
 #include "Rodin/Heart/CCMLC2014.h"
 
 using Real = Rodin::Real;
-using Model = Rodin::Heart::CCMLC2014;
+using Model = Rodin::Heart::CCMLC2014T<>;
 
 static Real periodic_activation(Real t)
 {

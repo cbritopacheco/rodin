@@ -17,8 +17,6 @@ namespace Rodin::Heart
     class PassiveEnergyLaw = HolzapfelReducedLaw<Real>,
     class PassiveLaw = CCMLC2014PassiveLaw<Real>>
   using CCMLC2014T = CCMLC2014::Solver::StepperT<PassiveEnergyLaw, PassiveLaw>;
-
-  using CCMLC2014 = CCMLC2014T<>;
 }
 
 #endif
