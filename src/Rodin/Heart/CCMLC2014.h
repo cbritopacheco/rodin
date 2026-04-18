@@ -4,6 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file CCMLC2014.h
+ * @brief Convenience include for the CCMLC2014 reduced model API.
+ */
 #ifndef RODIN_HEART_CCMLC2014_H
 #define RODIN_HEART_CCMLC2014_H
 

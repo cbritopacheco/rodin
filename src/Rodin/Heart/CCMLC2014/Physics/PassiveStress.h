@@ -4,6 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file PassiveStress.h
+ * @brief Passive and viscous stress contributions for CCMLC2014 reduced dynamics.
+ */
 #ifndef RODIN_HEART_CCMLC2014_PHYSICS_PASSIVESTRESS_H
 #define RODIN_HEART_CCMLC2014_PHYSICS_PASSIVESTRESS_H
 
@@ -11,55 +15,67 @@
 
 namespace Rodin::Heart::CCMLC2014::Physics
 {
+  /**
+   * @brief Evaluate passive stress and tangent contribution from the selected passive law.
+   */
   template <class PassiveLaw, class Input, class EvalData>
-  inline void computePassiveContribution(const Input& in, EvalData& d)
+  inline void computePassiveContribution(const Input& in, EvalData& evalData)
   {
-    using Scalar = decltype(d.y);
-    const Scalar dC_dyMid = Scalar(2) * d.sqrtC / in.R0;
+    using Scalar = decltype(evalData.y);
+    const Scalar dC_dyMid = Scalar(2) * evalData.sqrtC / in.R0;
 
-    Scalar sigmaPassive = 0.0;
-    Scalar dsigmaPassive_dyMid = 0.0;
+    Scalar passiveStress = 0.0;
+    Scalar passiveStressDerivativeWrtMidpointDisplacement = 0.0;
     PassiveLaw passiveLaw;
-    passiveLaw(in.passiveEnergy, d.C, dC_dyMid, sigmaPassive, dsigmaPassive_dyMid);
+    passiveLaw(
+        in.passiveEnergy,
+        evalData.C,
+        dC_dyMid,
+        passiveStress,
+        passiveStressDerivativeWrtMidpointDisplacement);
 
-    d.stressPassive = sigmaPassive;
-    d.diffStressPassive = Scalar(0.5) * dsigmaPassive_dyMid;
+    evalData.stressPassive = passiveStress;
+    evalData.diffStressPassive = Scalar(0.5) * passiveStressDerivativeWrtMidpointDisplacement;
   }
 
+  /**
+   * @brief Evaluate viscous stress and tangent contribution.
+   */
   template <class Input, class EvalData>
-  inline void computeViscousContribution(const Input& in, EvalData& d)
+  inline void computeViscousContribution(const Input& in, EvalData& evalData)
   {
-    using Scalar = decltype(d.y);
-    const Scalar R0 = in.R0;
-    const Scalar nu = in.eta;
-    const Scalar vel = d.vel;
-    const Scalar sqrtC = d.sqrtC;
-    const Scalar C = d.C;
+    using Scalar = decltype(evalData.y);
+    const Scalar referenceRadius = in.R0;
+    const Scalar viscosity = in.eta;
+    const Scalar radialVelocity = evalData.vel;
+    const Scalar reducedStretch = evalData.sqrtC;
+    const Scalar reducedCauchyGreen = evalData.C;
 
-    const Scalar diffGreen_rr = Scalar(-2) / R0 * std::pow(sqrtC, -5);
-    const Scalar diffGreen_pp = d.diffGreen;
+    const Scalar dGreenRRWrtDisplacement = Scalar(-2) / referenceRadius * std::pow(reducedStretch, -5);
+    const Scalar dGreenThetaThetaWrtDisplacement = evalData.diffGreen;
 
-    const Scalar stress_rr = nu * diffGreen_rr * vel;
-    const Scalar stress_pp = nu * diffGreen_pp * vel;
-    const Scalar stress_tt = stress_pp;
+    const Scalar viscousStressRR = viscosity * dGreenRRWrtDisplacement * radialVelocity;
+    const Scalar viscousStressThetaTheta = viscosity * dGreenThetaThetaWrtDisplacement * radialVelocity;
+    const Scalar viscousStressPhiPhi = viscousStressThetaTheta;
 
-    d.stressViscous =
-      stress_pp + stress_tt - Scalar(2) * std::pow(C, -3) * stress_rr;
+    evalData.stressViscous =
+      viscousStressThetaTheta + viscousStressPhiPhi
+      - Scalar(2) * std::pow(reducedCauchyGreen, -3) * viscousStressRR;
 
-    const Scalar d_dotC_rr_dy =
-      Scalar(10) / (R0 * R0) * nu * std::pow(sqrtC, -6) * vel
-      + Scalar(2) * nu * diffGreen_rr / d.dt;
+    const Scalar dDotCRRWrtDisplacement =
+      Scalar(10) / (referenceRadius * referenceRadius) * viscosity * std::pow(reducedStretch, -6) * radialVelocity
+      + Scalar(2) * viscosity * dGreenRRWrtDisplacement / evalData.dt;
 
-    const Scalar d_dotC_pp_dy =
-      nu / (R0 * R0) * vel
-      + Scalar(2) * nu * diffGreen_pp / d.dt;
+    const Scalar dDotCThetaThetaWrtDisplacement =
+      viscosity / (referenceRadius * referenceRadius) * radialVelocity
+      + Scalar(2) * viscosity * dGreenThetaThetaWrtDisplacement / evalData.dt;
 
-    const Scalar diffStress =
-      d_dotC_pp_dy + d_dotC_pp_dy
-      - Scalar(2) * (std::pow(C, -3) * d_dotC_rr_dy
-          - Scalar(6) / R0 * std::pow(sqrtC, -7) * stress_rr);
+    const Scalar viscousStressDerivativeWrtDisplacement =
+      dDotCThetaThetaWrtDisplacement + dDotCThetaThetaWrtDisplacement
+      - Scalar(2) * (std::pow(reducedCauchyGreen, -3) * dDotCRRWrtDisplacement
+          - Scalar(6) / referenceRadius * std::pow(reducedStretch, -7) * viscousStressRR);
 
-    d.diffStressViscous = diffStress;
+    evalData.diffStressViscous = viscousStressDerivativeWrtDisplacement;
   }
 }
 

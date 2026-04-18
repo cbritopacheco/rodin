@@ -4,6 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file ActiveDynamics.h
+ * @brief Local active dynamics and linearization terms for the CCMLC2014 model.
+ */
 #ifndef RODIN_HEART_CCMLC2014_PHYSICS_ACTIVEDYNAMICS_H
 #define RODIN_HEART_CCMLC2014_PHYSICS_ACTIVEDYNAMICS_H
 
@@ -14,8 +18,15 @@
 
 namespace Rodin::Heart::CCMLC2014::Physics
 {
+  /**
+   * @brief Piecewise-linear recruitment factor @f$ n_0(e_c) @f$ from CCMLC2014.
+   *
+   * @tparam Scalar Scalar numeric type.
+   * @param[in] fiberDeformation Previous contractile deformation @f$ e_c @f$.
+   * @returns Recruitment fraction in @f$ [0, 1] @f$.
+   */
   template <class Scalar>
-  inline Scalar n0_piecewise(Scalar fib0)
+  inline Scalar computeRecruitmentFractionPiecewise(Scalar fiberDeformation)
   {
     const Scalar x1 = Scalar(-0.4);
     const Scalar y1 = Scalar(0.0);
@@ -30,90 +41,100 @@ namespace Rodin::Heart::CCMLC2014::Physics
     const Scalar x6 = Scalar(2.4);
     const Scalar y6 = Scalar(0.0);
 
-    Scalar n0 = Scalar(0.0);
+    Scalar recruitmentFraction = Scalar(0.0);
 
-    if (fib0 < x2)
-      n0 = ((y2 - y1) / (x2 - x1)) * (fib0 - x2) + y2;
-    else if (fib0 < x3)
-      n0 = ((y3 - y2) / (x3 - x2)) * (fib0 - x3) + y3;
-    else if (fib0 < x4)
-      n0 = ((y4 - y3) / (x4 - x3)) * (fib0 - x4) + y4;
-    else if (fib0 < x5)
-      n0 = y4;
-    else if (fib0 < x6)
-      n0 = ((y6 - y5) / (x6 - x5)) * (fib0 - x6) + y6;
+    if (fiberDeformation < x2)
+      recruitmentFraction = ((y2 - y1) / (x2 - x1)) * (fiberDeformation - x2) + y2;
+    else if (fiberDeformation < x3)
+      recruitmentFraction = ((y3 - y2) / (x3 - x2)) * (fiberDeformation - x3) + y3;
+    else if (fiberDeformation < x4)
+      recruitmentFraction = ((y4 - y3) / (x4 - x3)) * (fiberDeformation - x4) + y4;
+    else if (fiberDeformation < x5)
+      recruitmentFraction = y4;
+    else if (fiberDeformation < x6)
+      recruitmentFraction = ((y6 - y5) / (x6 - x5)) * (fiberDeformation - x6) + y6;
 
-    return std::max<Scalar>(n0, Scalar(0));
+    return std::max<Scalar>(recruitmentFraction, Scalar(0));
   }
 
+  /**
+   * @brief Update active internal variables @f$ \gamma @f$ and @f$ \beta @f$.
+   */
   template <class Input, class Scalar>
   inline void updateInternalVariables0D(
       const Input& in,
       Scalar dt,
-      Scalar fib0,
-      Scalar fib1,
-      Scalar gammaOld,
-      Scalar betaOld,
-      Scalar u1,
-      Scalar& gammaNew,
-      Scalar& betaNew,
-      Scalar& n0)
+      Scalar fiberDeformationPrevious,
+      Scalar fiberDeformationCurrent,
+      Scalar gammaPrevious,
+      Scalar betaPrevious,
+      Scalar activationDrive,
+      Scalar& gammaCurrent,
+      Scalar& betaCurrent,
+      Scalar& recruitmentFraction)
   {
     const Scalar alpha = in.alpha;
     const Scalar k0 = in.k0;
     const Scalar sigma0 = in.sigma0;
 
-    const Scalar u1Plus = std::max<Scalar>(u1, Scalar(0));
+    const Scalar activationDrivePositivePart = std::max<Scalar>(activationDrive, Scalar(0));
 
-    n0 = n0_piecewise(fib0);
+    recruitmentFraction = computeRecruitmentFractionPiecewise(fiberDeformationPrevious);
 
     const Scalar denominatorGamma =
-      Scalar(1) + dt * (std::abs(u1) + alpha * std::abs(fib1 - fib0) / dt);
+      Scalar(1)
+      + dt * (std::abs(activationDrive)
+      + alpha * std::abs(fiberDeformationCurrent - fiberDeformationPrevious) / dt);
 
     Scalar gammaSquare =
-      (gammaOld * gammaOld + dt * n0 * k0 * u1Plus) / denominatorGamma;
+      (gammaPrevious * gammaPrevious + dt * recruitmentFraction * k0 * activationDrivePositivePart) / denominatorGamma;
     gammaSquare = std::max<Scalar>(Scalar(1e-16), gammaSquare);
-    gammaNew = std::sqrt(gammaSquare);
+    gammaCurrent = std::sqrt(gammaSquare);
 
     const Scalar denominatorBeta =
       Scalar(1)
-      + Scalar(0.5) * dt * n0 * k0 * u1Plus / gammaSquare
-      + Scalar(0.5) * dt * (std::abs(u1) + alpha * std::abs(fib1 - fib0) / dt);
+      + Scalar(0.5) * dt * recruitmentFraction * k0 * activationDrivePositivePart / gammaSquare
+      + Scalar(0.5) * dt * (std::abs(activationDrive)
+      + alpha * std::abs(fiberDeformationCurrent - fiberDeformationPrevious) / dt);
 
-    betaNew =
-      (betaOld + gammaNew * (fib1 - fib0) + dt * n0 * sigma0 * u1Plus / gammaNew)
+    betaCurrent =
+      (betaPrevious + gammaCurrent * (fiberDeformationCurrent - fiberDeformationPrevious)
+      + dt * recruitmentFraction * sigma0 * activationDrivePositivePart / gammaCurrent)
       / denominatorBeta;
   }
 
+  /**
+   * @brief Compute @f$\partial(\beta\gamma)/\partial e_c@f$ for local active tangent terms.
+   */
   template <class Input, class Scalar>
-  inline void getPartialDerivativesInternalVariablesWrtFibDeformation(
+  inline void computePartialDerivativeBetaGammaWrtFiberDeformation(
       const Input& in,
       Scalar dt,
-      Scalar gammaOld,
-      Scalar betaOld,
-      Scalar u1,
-      Scalar fib0,
-      Scalar fib1,
-      Scalar& derBetaGammaWrtFib)
+      Scalar gammaPrevious,
+      Scalar betaPrevious,
+      Scalar activationDrive,
+      Scalar fiberDeformationPrevious,
+      Scalar fiberDeformationCurrent,
+      Scalar& derivativeBetaGammaWrtFiberDeformation)
   {
     const Scalar alpha = in.alpha;
     const Scalar k0 = in.k0;
     const Scalar sigma0 = in.sigma0;
 
-    const Scalar deltaFib = fib1 - fib0;
-    const Scalar absDelta = std::abs(deltaFib);
+    const Scalar fiberDeformationIncrement = fiberDeformationCurrent - fiberDeformationPrevious;
+    const Scalar absoluteFiberDeformationIncrement = std::abs(fiberDeformationIncrement);
     const Scalar sign =
-      (deltaFib > Scalar(0)) ? Scalar(1) :
-      (deltaFib < Scalar(0)) ? Scalar(-1) : Scalar(0);
+      (fiberDeformationIncrement > Scalar(0)) ? Scalar(1) :
+      (fiberDeformationIncrement < Scalar(0)) ? Scalar(-1) : Scalar(0);
 
-    const Scalar u1Plus = std::max<Scalar>(u1, Scalar(0));
-    const Scalar n0 = n0_piecewise(fib0);
+    const Scalar activationDrivePositivePart = std::max<Scalar>(activationDrive, Scalar(0));
+    const Scalar recruitmentFraction = computeRecruitmentFractionPiecewise(fiberDeformationPrevious);
 
     const Scalar Dg =
-      Scalar(1) + dt * std::abs(u1) + alpha * absDelta;
+      Scalar(1) + dt * std::abs(activationDrive) + alpha * absoluteFiberDeformationIncrement;
 
     const Scalar Ng =
-      gammaOld * gammaOld + dt * n0 * k0 * u1Plus;
+      gammaPrevious * gammaPrevious + dt * recruitmentFraction * k0 * activationDrivePositivePart;
 
     const Scalar gammaNewSq = std::max<Scalar>(Scalar(1e-16), Ng / Dg);
     const Scalar gammaNew = std::sqrt(gammaNewSq);
@@ -125,30 +146,35 @@ namespace Rodin::Heart::CCMLC2014::Physics
       Scalar(0.5) * dGammaSq / gammaNew;
 
     const Scalar Nb =
-      betaOld + gammaNew * deltaFib + dt * n0 * sigma0 * u1Plus / gammaNew;
+      betaPrevious + gammaNew * fiberDeformationIncrement
+      + dt * recruitmentFraction * sigma0 * activationDrivePositivePart / gammaNew;
 
     const Scalar Db =
       Scalar(1)
-      + Scalar(0.5) * dt * n0 * k0 * u1Plus / gammaNewSq
-      + Scalar(0.5) * dt * std::abs(u1)
-      + Scalar(0.5) * alpha * absDelta;
+      + Scalar(0.5) * dt * recruitmentFraction * k0 * activationDrivePositivePart / gammaNewSq
+      + Scalar(0.5) * dt * std::abs(activationDrive)
+      + Scalar(0.5) * alpha * absoluteFiberDeformationIncrement;
 
     const Scalar dNb =
-      dGamma * deltaFib
+      dGamma * fiberDeformationIncrement
       + gammaNew
-      - dt * n0 * sigma0 * u1Plus * dGamma / (gammaNew * gammaNew);
+      - dt * recruitmentFraction * sigma0 * activationDrivePositivePart * dGamma / (gammaNew * gammaNew);
 
     const Scalar dDb =
-      -Scalar(0.5) * dt * n0 * k0 * u1Plus * dGammaSq / (gammaNewSq * gammaNewSq)
+      -Scalar(0.5) * dt * recruitmentFraction * k0 * activationDrivePositivePart
+      * dGammaSq / (gammaNewSq * gammaNewSq)
       + Scalar(0.5) * alpha * sign;
 
     const Scalar dBeta =
       (dNb * Db - Nb * dDb) / (Db * Db);
 
-    derBetaGammaWrtFib =
+    derivativeBetaGammaWrtFiberDeformation =
       dGamma * (Nb / Db) + gammaNew * dBeta;
   }
 
+  /**
+   * @brief Solve local active dynamics and return effective active stress/tangent.
+   */
   template <class Input, class EvalData, class LocalActiveData>
   inline bool solveLocalDynamicActive(
       const Input& in,
@@ -156,86 +182,93 @@ namespace Rodin::Heart::CCMLC2014::Physics
       LocalActiveData& a)
   {
     using Scalar = decltype(d.y);
-    a.fib0 = d.sn.ec;
-    a.gammaOld = d.sn.gamma;
-    a.betaOld = d.sn.beta;
-    a.u1 = in.u(d.tnp1);
-    a.u1Plus = std::max<Scalar>(a.u1, Scalar(0));
-    a.n0 = n0_piecewise(a.fib0);
+    a.fiberDeformationPrevious = d.sn.ec;
+    a.gammaPrevious = d.sn.gamma;
+    a.betaPrevious = d.sn.beta;
+    a.activationDrive = in.u(d.tnp1);
+    a.activationDrivePositivePart = std::max<Scalar>(a.activationDrive, Scalar(0));
+    a.recruitmentFraction = computeRecruitmentFractionPiecewise(a.fiberDeformationPrevious);
 
-    a.fib1 = a.fib0;
+    a.fiberDeformationCurrent = a.fiberDeformationPrevious;
 
     bool ok = false;
     for (size_t it = 0; it < in.localMaxIterations; ++it)
     {
       a.iterations = it + 1;
-      a.fib12 = Scalar(0.5) * (a.fib1 + a.fib0);
+      a.fiberDeformationMidpoint = Scalar(0.5) * (a.fiberDeformationCurrent + a.fiberDeformationPrevious);
 
       updateInternalVariables0D(
-          in, d.dt, a.fib0, a.fib1, a.gammaOld, a.betaOld, a.u1,
-          a.gammaNew, a.betaNew, a.n0);
+          in, d.dt, a.fiberDeformationPrevious, a.fiberDeformationCurrent,
+          a.gammaPrevious, a.betaPrevious, a.activationDrive,
+          a.gammaCurrent, a.betaCurrent, a.recruitmentFraction);
 
-      a.k21 = -in.Es * (Scalar(1) + Scalar(4) * d.strain1D - Scalar(2) * a.fib12);
+      a.partialResidualWrtDisplacement =
+        -in.Es * (Scalar(1) + Scalar(4) * d.strain1D - Scalar(2) * a.fiberDeformationMidpoint);
 
       {
-        Scalar derBetaGammaWrtFib = 0.0;
-        getPartialDerivativesInternalVariablesWrtFibDeformation(
-            in, d.dt, a.gammaOld, a.betaOld, a.u1, a.fib0, a.fib1, derBetaGammaWrtFib);
+        Scalar derivativeBetaGammaWrtFiberDeformation = 0.0;
+        computePartialDerivativeBetaGammaWrtFiberDeformation(
+            in, d.dt, a.gammaPrevious, a.betaPrevious, a.activationDrive,
+            a.fiberDeformationPrevious, a.fiberDeformationCurrent,
+            derivativeBetaGammaWrtFiberDeformation);
 
-        a.k22 =
-            Scalar(3) * std::pow(Scalar(1) + Scalar(2) * a.fib12, 2) *
-                (a.gammaNew * a.betaNew + in.mu * (a.fib1 - a.fib0) / d.dt)
-          + std::pow(Scalar(1) + Scalar(2) * a.fib12, 3) *
-                (derBetaGammaWrtFib + in.mu / d.dt)
+        a.partialResidualWrtFiberDeformation =
+            Scalar(3) * std::pow(Scalar(1) + Scalar(2) * a.fiberDeformationMidpoint, 2) *
+                (a.gammaCurrent * a.betaCurrent
+                + in.mu * (a.fiberDeformationCurrent - a.fiberDeformationPrevious) / d.dt)
+          + std::pow(Scalar(1) + Scalar(2) * a.fiberDeformationMidpoint, 3) *
+                (derivativeBetaGammaWrtFiberDeformation + in.mu / d.dt)
           + Scalar(0.5) * in.Es * (Scalar(1) + Scalar(2) * d.strain1D);
       }
 
-      const Scalar Rraw =
-        (a.gammaNew * a.betaNew + in.mu * (a.fib1 - a.fib0) / d.dt)
-          * std::pow(Scalar(1) + Scalar(2) * a.fib12, 3)
-        - in.Es * (d.strain1D - a.fib12) * (Scalar(1) + Scalar(2) * d.strain1D);
+      const Scalar localResidual =
+        (a.gammaCurrent * a.betaCurrent + in.mu * (a.fiberDeformationCurrent - a.fiberDeformationPrevious) / d.dt)
+          * std::pow(Scalar(1) + Scalar(2) * a.fiberDeformationMidpoint, 3)
+        - in.Es * (d.strain1D - a.fiberDeformationMidpoint) * (Scalar(1) + Scalar(2) * d.strain1D);
 
-      a.krc_k22 = Rraw / a.k22;
+      a.fiberDeformationNewtonStep = localResidual / a.partialResidualWrtFiberDeformation;
 
-      if (std::abs(Rraw) < in.localTolerance)
+      if (std::abs(localResidual) < in.localTolerance)
       {
         ok = true;
         break;
       }
 
-      if (std::abs(a.k22) < std::numeric_limits<Scalar>::epsilon())
+      if (std::abs(a.partialResidualWrtFiberDeformation) < std::numeric_limits<Scalar>::epsilon())
         break;
 
-      a.fib1 += -in.localDamping * a.krc_k22;
+      a.fiberDeformationCurrent += -in.localDamping * a.fiberDeformationNewtonStep;
     }
 
-    a.fib12 = Scalar(0.5) * (a.fib1 + a.fib0);
+    a.fiberDeformationMidpoint = Scalar(0.5) * (a.fiberDeformationCurrent + a.fiberDeformationPrevious);
     updateInternalVariables0D(
-        in, d.dt, a.fib0, a.fib1, a.gammaOld, a.betaOld, a.u1,
-        a.gammaNew, a.betaNew, a.n0);
+        in, d.dt, a.fiberDeformationPrevious, a.fiberDeformationCurrent,
+        a.gammaPrevious, a.betaPrevious, a.activationDrive,
+        a.gammaCurrent, a.betaCurrent, a.recruitmentFraction);
 
-    a.sigma1d =
-      in.Es / std::pow(Scalar(1) + Scalar(2) * a.fib12, 2)
-      * (d.strain1D - a.fib12);
+    a.activeStressOneDimensional =
+      in.Es / std::pow(Scalar(1) + Scalar(2) * a.fiberDeformationMidpoint, 2)
+      * (d.strain1D - a.fiberDeformationMidpoint);
 
-    a.partialSigma1dWrtDisp =
-      in.Es / std::pow(Scalar(1) + Scalar(2) * a.fib12, 2);
+    a.partialActiveStressWrtDisplacement =
+      in.Es / std::pow(Scalar(1) + Scalar(2) * a.fiberDeformationMidpoint, 2);
 
-    a.partialSigma1dWrtEc =
-      in.Es / std::pow(Scalar(1) + Scalar(2) * a.fib12, 3)
-      * (Scalar(2) * a.fib12 - Scalar(4) * d.strain1D - Scalar(1));
+    a.partialActiveStressWrtFiberDeformation =
+      in.Es / std::pow(Scalar(1) + Scalar(2) * a.fiberDeformationMidpoint, 3)
+      * (Scalar(2) * a.fiberDeformationMidpoint - Scalar(4) * d.strain1D - Scalar(1));
 
-    const Scalar coefSchurD2W =
-      Scalar(0.5) * a.partialSigma1dWrtEc / a.k22 * a.k21;
+    const Scalar schurComplementCorrection =
+      Scalar(0.5) * a.partialActiveStressWrtFiberDeformation
+      / a.partialResidualWrtFiberDeformation * a.partialResidualWrtDisplacement;
 
     const Scalar tangentCorrection =
-      a.partialSigma1dWrtDisp - coefSchurD2W;
+      a.partialActiveStressWrtDisplacement - schurComplementCorrection;
 
     const Scalar rhsCorrection =
-      Scalar(0.5) * a.partialSigma1dWrtEc * a.krc_k22;
+      Scalar(0.5) * a.partialActiveStressWrtFiberDeformation * a.fiberDeformationNewtonStep;
 
-    a.stressActive = a.sigma1d - rhsCorrection;
-    a.diffStressActive = tangentCorrection * d.diffGreen;
+    a.activeStress = a.activeStressOneDimensional - rhsCorrection;
+    a.dActiveStressWrtDisplacement = tangentCorrection * d.diffGreen;
     a.converged = ok;
     return ok;
   }

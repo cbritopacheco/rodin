@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file State.h
+ * @brief State, input and intermediate data structures for the CCMLC2014 0D model.
+ *
+ * The variable names documented in this file follow the reduced 0D notation from:
+ * M. Caruel et al., Biomechanics and Modeling in Mechanobiology (2014),
+ * doi:10.1007/s10237-013-0544-6, HAL: hal-00872746.
+ */
 #ifndef RODIN_HEART_CCMLC2014_MODEL_STATE_H
 #define RODIN_HEART_CCMLC2014_MODEL_STATE_H
 
@@ -15,172 +23,214 @@
 
 namespace Rodin::Heart::CCMLC2014::Model
 {
+  /**
+   * @brief Indices of the nonlinear unknown vector for one time step.
+   */
   enum Variable : size_t
   {
-    DISP = 0,
-    PV,
-    PAR,
-    PD,
-    NVAR
+    RadialDisplacement = 0, ///< @f$ y_{n+1} @f$.
+    VentricularPressure,    ///< @f$ p_v^{n+1} @f$.
+    ArterialPressure,       ///< @f$ p_{ar}^{n+1} @f$.
+    DistalPressure,         ///< @f$ p_d^{n+1} @f$.
+    NumberOfVariables,      ///< Total number of unknowns.
+
+    /** @name Backward-compatible aliases */
+    ///@{
+    DISP = RadialDisplacement,
+    PV = VentricularPressure,
+    PAR = ArterialPressure,
+    PD = DistalPressure,
+    NVAR = NumberOfVariables
+    ///@}
   };
 
+  /**
+   * @brief CCMLC2014 dynamic state variables at a given time.
+   *
+   * The short symbols are intentionally retained to match the publication notation.
+   *
+   * @tparam Scalar Scalar numeric type.
+   */
   template <class Scalar>
   struct StateT
   {
-    Scalar y = 0.0;
-    Scalar v = 0.0;
-    Scalar pv = 0.0;
-    Scalar par = 0.0;
-    Scalar pd = 0.0;
+    Scalar y = 0.0;     ///< Radial displacement-like kinematic unknown @f$ y @f$.
+    Scalar v = 0.0;     ///< Radial velocity-like quantity @f$ \dot{y} @f$.
+    Scalar pv = 0.0;    ///< Left-ventricular pressure @f$ p_v @f$.
+    Scalar par = 0.0;   ///< Arterial/Windkessel proximal pressure @f$ p_{ar} @f$.
+    Scalar pd = 0.0;    ///< Distal pressure @f$ p_d @f$.
 
-    Scalar ec = 0.0;
-    Scalar kc = 0.0;
-    Scalar tauc = 0.0;
-    Scalar gamma = 0.0;
-    Scalar beta = 0.0;
+    Scalar ec = 0.0;    ///< Contractile internal variable @f$ e_c @f$ (fiber deformation).
+    Scalar kc = 0.0;    ///< Active stiffness-like scalar @f$ k_c = \gamma^2 @f$.
+    Scalar tauc = 0.0;  ///< Active stress-like scalar @f$ \tau_c = \gamma\beta @f$.
+    Scalar gamma = 0.0; ///< Active state variable @f$ \gamma @f$.
+    Scalar beta = 0.0;  ///< Active state variable @f$ \beta @f$.
 
-    Scalar t = 0.0;
+    Scalar t = 0.0;     ///< Time associated with this state.
   };
 
+  /**
+   * @brief Model parameters and external forcings for one CCMLC2014 simulation.
+   *
+   * @tparam Scalar Scalar numeric type.
+   * @tparam PassiveEnergyLaw Passive constitutive energy law type.
+   */
   template <class Scalar, class PassiveEnergyLaw>
   struct InputT
   {
-    Scalar rho = 1.0;
-    Scalar d0 = 1.0;
-    Scalar R0 = 1.0;
+    Scalar rho = 1.0;     ///< Wall density/inertia coefficient.
+    Scalar d0 = 1.0;      ///< Reference wall thickness.
+    Scalar R0 = 1.0;      ///< Reference cavity radius.
 
-    Scalar Es = 1.0;
-    Scalar eta = 0.0;
-    Scalar mu = 0.0;
-    Scalar alpha = 0.0;
-    Scalar k0 = 0.0;
-    Scalar sigma0 = 0.0;
+    Scalar Es = 1.0;      ///< Elastic stiffness parameter.
+    Scalar eta = 0.0;     ///< Viscous coefficient.
+    Scalar mu = 0.0;      ///< Active-viscous coupling coefficient.
+    Scalar alpha = 0.0;   ///< Active length-rate coupling coefficient.
+    Scalar k0 = 0.0;      ///< Active stiffness rate coefficient.
+    Scalar sigma0 = 0.0;  ///< Active stress rate coefficient.
 
-    Scalar Cp = 1.0;
-    Scalar Cd = 1.0;
-    Scalar Rp = 1.0;
-    Scalar Rd = 1.0;
+    Scalar Cp = 1.0;      ///< Proximal (arterial) compliance.
+    Scalar Cd = 1.0;      ///< Distal compliance.
+    Scalar Rp = 1.0;      ///< Peripheral/proximal resistance.
+    Scalar Rd = 1.0;      ///< Distal resistance.
 
-    Scalar Kat = 0.0;
-    Scalar Kp = 0.0;
-    Scalar Kar = 0.0;
+    Scalar Kat = 0.0;     ///< Atrioventricular (mitral) conductance.
+    Scalar Kp = 0.0;      ///< Valve leakage conductance.
+    Scalar Kar = 0.0;     ///< Aortic conductance.
 
-    Scalar cavityCapacity = Scalar(5e-12);
+    Scalar cavityCapacity = Scalar(5e-12); ///< Cavity compliance-like capacity term.
 
-    Scalar localTolerance = Scalar(1e-12);
-    size_t localMaxIterations = 50;
-    Scalar localDamping = Scalar(1.0);
-    Scalar absRegularization = Scalar(1e-14);
+    Scalar localTolerance = Scalar(1e-12); ///< Absolute tolerance for local active solve.
+    size_t localMaxIterations = 50;         ///< Maximum iterations for local active solve.
+    Scalar localDamping = Scalar(1.0);      ///< Damping factor for local active Newton updates.
+    Scalar absRegularization = Scalar(1e-14); ///< Regularization scalar for absolute values.
 
-    Scalar initFibDef = 0.0;
-    Scalar initActiveStiffness = 0.0;
-    Scalar initActiveStress = 0.0;
+    Scalar initFibDef = 0.0;          ///< Initial fiber deformation @f$ e_c @f$.
+    Scalar initActiveStiffness = 0.0; ///< Initial active stiffness-like value @f$ k_c @f$.
+    Scalar initActiveStress = 0.0;    ///< Initial active stress-like value @f$ \tau_c @f$.
 
     std::function<Scalar(Scalar)> u =
-      [](Scalar) { return Scalar(0); };
+      [](Scalar) { return Scalar(0); }; ///< Active input drive @f$ u(t) @f$.
 
     std::function<Scalar(Scalar)> pAt =
-      [](Scalar) { return Scalar(0); };
+      [](Scalar) { return Scalar(0); }; ///< Atrial pressure boundary condition.
 
     std::function<Scalar(Scalar)> pSv =
-      [](Scalar) { return Scalar(0); };
+      [](Scalar) { return Scalar(0); }; ///< Venous pressure boundary condition.
 
-    PassiveEnergyLaw passiveEnergy;
+    PassiveEnergyLaw passiveEnergy; ///< Passive reduced constitutive law.
   };
 
+  /**
+   * @brief Newton report for one global dynamic step.
+   *
+   * @tparam Scalar Scalar numeric type.
+   * @tparam DenseLinearSystem Dense linear system type.
+   */
   template <class Scalar, class DenseLinearSystem>
   struct ReportT
   {
-    bool converged = false;
-    size_t iterations = 0;
-    Scalar finalResidual = 0.0;
-    Scalar finalStepNorm = 0.0;
-    typename Solver::NewtonSolver<::Rodin::Solver::PartialPivLU<DenseLinearSystem>>::ConvergenceReason reason =
-      Solver::NewtonSolver<::Rodin::Solver::PartialPivLU<DenseLinearSystem>>::ConvergenceReason::MaxIterations;
+    bool converged = false;     ///< Whether the nonlinear solve converged.
+    size_t iterations = 0;      ///< Number of nonlinear iterations used.
+    Scalar finalResidual = 0.0; ///< Final residual norm.
+    Scalar finalStepNorm = 0.0; ///< Final step norm.
+    using ConvergenceReason =
+      typename Solver::NewtonSolver<::Rodin::Solver::PartialPivLU<DenseLinearSystem>>::ConvergenceReason;
+    ConvergenceReason reason = ConvergenceReason::MaxIterations; ///< Nonlinear convergence reason.
   };
 
+  /**
+   * @brief Internal data for the local active-dynamics solve at one global step.
+   *
+   * @tparam Scalar Scalar numeric type.
+   */
   template <class Scalar>
   struct LocalActiveDataT
   {
-    Scalar fib0 = 0.0;
-    Scalar fib1 = 0.0;
-    Scalar fib12 = 0.0;
+    Scalar fiberDeformationPrevious = 0.0; ///< Previous local fiber deformation.
+    Scalar fiberDeformationCurrent = 0.0;  ///< Current local fiber deformation iterate.
+    Scalar fiberDeformationMidpoint = 0.0; ///< Midpoint local fiber deformation.
 
-    Scalar gammaOld = 0.0;
-    Scalar betaOld = 0.0;
-    Scalar gammaNew = 0.0;
-    Scalar betaNew = 0.0;
+    Scalar gammaPrevious = 0.0; ///< Previous global gamma state.
+    Scalar betaPrevious = 0.0;  ///< Previous global beta state.
+    Scalar gammaCurrent = 0.0;  ///< Updated gamma state.
+    Scalar betaCurrent = 0.0;   ///< Updated beta state.
 
-    Scalar u1 = 0.0;
-    Scalar u1Plus = 0.0;
-    Scalar n0 = 0.0;
+    Scalar activationDrive = 0.0;             ///< Value of @f$ u(t_{n+1}) @f$.
+    Scalar activationDrivePositivePart = 0.0; ///< Positive part of activation drive.
+    Scalar recruitmentFraction = 0.0;         ///< Recruitment fraction @f$ n_0 @f$.
 
-    Scalar k21 = 0.0;
-    Scalar k22 = 0.0;
-    Scalar krc_k22 = 0.0;
+    Scalar partialResidualWrtDisplacement = 0.0;     ///< Coupling residual derivative wrt displacement.
+    Scalar partialResidualWrtFiberDeformation = 0.0; ///< Local residual derivative wrt fiber deformation.
+    Scalar fiberDeformationNewtonStep = 0.0;         ///< Newton correction term for fiber deformation.
 
-    Scalar sigma1d = 0.0;
-    Scalar partialSigma1dWrtDisp = 0.0;
-    Scalar partialSigma1dWrtEc = 0.0;
+    Scalar activeStressOneDimensional = 0.0;             ///< Local one-dimensional active stress.
+    Scalar partialActiveStressWrtDisplacement = 0.0;     ///< Derivative wrt displacement.
+    Scalar partialActiveStressWrtFiberDeformation = 0.0; ///< Derivative wrt fiber deformation.
 
-    Scalar stressActive = 0.0;
-    Scalar diffStressActive = 0.0;
+    Scalar activeStress = 0.0;                   ///< Effective active stress in global balance.
+    Scalar dActiveStressWrtDisplacement = 0.0;   ///< Effective active-stress derivative wrt displacement.
 
-    bool converged = false;
-    size_t iterations = 0;
+    bool converged = false; ///< Whether local active solve converged.
+    size_t iterations = 0;  ///< Number of local active iterations.
   };
 
+  /**
+   * @brief Intermediate data cached during residual/Jacobian evaluation.
+   *
+   * @tparam Scalar Scalar numeric type.
+   */
   template <class Scalar>
   struct EvalDataT
   {
-    StateT<Scalar> sn;
-    StateT<Scalar> snm1;
+    StateT<Scalar> sn;   ///< State at time level @f$ n @f$.
+    StateT<Scalar> snm1; ///< State at time level @f$ n-1 @f$.
 
-    Scalar tnp1 = 0.0;
-    Scalar dt = 0.0;
+    Scalar tnp1 = 0.0; ///< Target time @f$ t_{n+1} @f$.
+    Scalar dt = 0.0;   ///< Time-step size.
 
-    Scalar y = 0.0;
-    Scalar pv = 0.0;
-    Scalar par = 0.0;
-    Scalar pd = 0.0;
+    Scalar y = 0.0;   ///< Candidate @f$ y_{n+1} @f$.
+    Scalar pv = 0.0;  ///< Candidate @f$ p_v^{n+1} @f$.
+    Scalar par = 0.0; ///< Candidate @f$ p_{ar}^{n+1} @f$.
+    Scalar pd = 0.0;  ///< Candidate @f$ p_d^{n+1} @f$.
 
-    Scalar yPrev = 0.0;
-    Scalar pvPrev = 0.0;
-    Scalar parPrev = 0.0;
-    Scalar pdPrev = 0.0;
+    Scalar yPrev = 0.0;   ///< @f$ y_n @f$.
+    Scalar pvPrev = 0.0;  ///< @f$ p_v^n @f$.
+    Scalar parPrev = 0.0; ///< @f$ p_{ar}^n @f$.
+    Scalar pdPrev = 0.0;  ///< @f$ p_d^n @f$.
 
-    Scalar yPrevPrev = 0.0;
+    Scalar yPrevPrev = 0.0; ///< @f$ y_{n-1} @f$.
 
-    Scalar yMid = 0.0;
-    Scalar pvMid = 0.0;
-    Scalar parMid = 0.0;
-    Scalar pdMid = 0.0;
-    Scalar vel = 0.0;
+    Scalar yMid = 0.0;   ///< Midpoint displacement.
+    Scalar pvMid = 0.0;  ///< Midpoint ventricular pressure.
+    Scalar parMid = 0.0; ///< Midpoint arterial pressure.
+    Scalar pdMid = 0.0;  ///< Midpoint distal pressure.
+    Scalar vel = 0.0;    ///< Midpoint radial velocity approximation.
 
-    Scalar sqrtC = 0.0;
-    Scalar C = 0.0;
-    Scalar strain1D = 0.0;
-    Scalar diffGreen = 0.0;
+    Scalar sqrtC = 0.0;    ///< @f$ \sqrt{C} @f$.
+    Scalar C = 0.0;        ///< Reduced right Cauchy-Green scalar @f$ C @f$.
+    Scalar strain1D = 0.0; ///< Reduced Green-Lagrange strain.
+    Scalar diffGreen = 0.0; ///< Derivative of reduced strain mapping wrt displacement.
 
-    Scalar stressPassive = 0.0;
-    Scalar diffStressPassive = 0.0;
-    Scalar stressViscous = 0.0;
-    Scalar diffStressViscous = 0.0;
+    Scalar stressPassive = 0.0;      ///< Passive stress contribution.
+    Scalar diffStressPassive = 0.0;  ///< Derivative of passive stress wrt displacement.
+    Scalar stressViscous = 0.0;      ///< Viscous stress contribution.
+    Scalar diffStressViscous = 0.0;  ///< Derivative of viscous stress wrt displacement.
 
-    Scalar pAtCur = 0.0;
-    Scalar pAtPrev = 0.0;
-    Scalar pSvMid = 0.0;
+    Scalar pAtCur = 0.0;  ///< Atrial pressure at @f$ t_{n+1} @f$.
+    Scalar pAtPrev = 0.0; ///< Atrial pressure at @f$ t_n @f$.
+    Scalar pSvMid = 0.0;  ///< Venous pressure at midpoint time.
 
-    Scalar cavityFluxCur = 0.0;
-    Scalar cavityFluxPrev = 0.0;
-    Scalar dCavityFluxCur_dPv = 0.0;
-    Scalar dCavityFluxCur_dPar = 0.0;
+    Scalar cavityFluxCur = 0.0;      ///< Current cavity valve flux.
+    Scalar cavityFluxPrev = 0.0;     ///< Previous cavity valve flux.
+    Scalar dCavityFluxCur_dPv = 0.0; ///< Derivative of current cavity flux wrt ventricular pressure.
+    Scalar dCavityFluxCur_dPar = 0.0; ///< Derivative of current cavity flux wrt arterial pressure.
 
-    Scalar windkesselOutflow = 0.0;
-    Scalar dWindkesselOutflow_dPv = 0.0;
-    Scalar dWindkesselOutflow_dPar = 0.0;
+    Scalar windkesselOutflow = 0.0;      ///< Outflow term toward Windkessel branch.
+    Scalar dWindkesselOutflow_dPv = 0.0; ///< Derivative of outflow wrt ventricular pressure.
+    Scalar dWindkesselOutflow_dPar = 0.0; ///< Derivative of outflow wrt arterial pressure.
 
-    LocalActiveDataT<Scalar> active;
+    LocalActiveDataT<Scalar> active; ///< Local active-dynamics data.
   };
 }
 

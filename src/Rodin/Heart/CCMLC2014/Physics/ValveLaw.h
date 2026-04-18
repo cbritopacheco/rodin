@@ -4,51 +4,61 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file ValveLaw.h
+ * @brief Valve branch laws used in the 0D cavity mass balance.
+ */
 #ifndef RODIN_HEART_CCMLC2014_PHYSICS_VALVELAW_H
 #define RODIN_HEART_CCMLC2014_PHYSICS_VALVELAW_H
 
 namespace Rodin::Heart::CCMLC2014::Physics
 {
+  /**
+   * @brief Compute cavity inflow/outflow terms and their pressure derivatives.
+   */
   template <class Input, class EvalData>
-  inline void computeCavityFluxes(const Input& in, EvalData& d)
+  inline void computeCavityFluxes(const Input& in, EvalData& evalData)
   {
-    using Scalar = decltype(d.y);
-    const bool mitralOpenCur = d.pv <= d.pAtCur;
-    const bool bothClosedCur = d.pAtCur <= d.pv && d.pv <= d.par;
+    using Scalar = decltype(evalData.y);
+    const bool mitralValveOpenAtCurrentStep = evalData.pv <= evalData.pAtCur;
+    const bool bothValvesClosedAtCurrentStep =
+      evalData.pAtCur <= evalData.pv && evalData.pv <= evalData.par;
 
-    if (mitralOpenCur)
+    if (mitralValveOpenAtCurrentStep)
     {
-      d.cavityFluxCur = in.Kat * (d.pv - d.pAtCur);
-      d.dCavityFluxCur_dPv = in.Kat;
-      d.dCavityFluxCur_dPar = Scalar(0);
+      evalData.cavityFluxCur = in.Kat * (evalData.pv - evalData.pAtCur);
+      evalData.dCavityFluxCur_dPv = in.Kat;
+      evalData.dCavityFluxCur_dPar = Scalar(0);
     }
-    else if (bothClosedCur)
+    else if (bothValvesClosedAtCurrentStep)
     {
-      d.cavityFluxCur = in.Kp * (d.pv - d.pAtCur);
-      d.dCavityFluxCur_dPv = in.Kp;
-      d.dCavityFluxCur_dPar = Scalar(0);
+      evalData.cavityFluxCur = in.Kp * (evalData.pv - evalData.pAtCur);
+      evalData.dCavityFluxCur_dPv = in.Kp;
+      evalData.dCavityFluxCur_dPar = Scalar(0);
     }
     else
     {
-      d.cavityFluxCur = in.Kar * (d.pv - d.par) + in.Kp * (d.par - d.pAtCur);
-      d.dCavityFluxCur_dPv = in.Kar;
-      d.dCavityFluxCur_dPar = -in.Kar + in.Kp;
+      evalData.cavityFluxCur = in.Kar * (evalData.pv - evalData.par) + in.Kp * (evalData.par - evalData.pAtCur);
+      evalData.dCavityFluxCur_dPv = in.Kar;
+      evalData.dCavityFluxCur_dPar = -in.Kar + in.Kp;
     }
 
-    const bool mitralOpenPrev = d.pvPrev <= d.pAtPrev;
-    const bool bothClosedPrev = d.pAtPrev <= d.pvPrev && d.pvPrev <= d.parPrev;
+    const bool mitralValveOpenAtPreviousStep = evalData.pvPrev <= evalData.pAtPrev;
+    const bool bothValvesClosedAtPreviousStep =
+      evalData.pAtPrev <= evalData.pvPrev && evalData.pvPrev <= evalData.parPrev;
 
-    if (mitralOpenPrev)
+    if (mitralValveOpenAtPreviousStep)
     {
-      d.cavityFluxPrev = in.Kat * (d.pvPrev - d.pAtPrev);
+      evalData.cavityFluxPrev = in.Kat * (evalData.pvPrev - evalData.pAtPrev);
     }
-    else if (bothClosedPrev)
+    else if (bothValvesClosedAtPreviousStep)
     {
-      d.cavityFluxPrev = in.Kp * (d.pvPrev - d.pAtPrev);
+      evalData.cavityFluxPrev = in.Kp * (evalData.pvPrev - evalData.pAtPrev);
     }
     else
     {
-      d.cavityFluxPrev = in.Kar * (d.pvPrev - d.parPrev) + in.Kp * (d.parPrev - d.pAtPrev);
+      evalData.cavityFluxPrev =
+        in.Kar * (evalData.pvPrev - evalData.parPrev) + in.Kp * (evalData.parPrev - evalData.pAtPrev);
     }
   }
 }

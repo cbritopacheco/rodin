@@ -4,6 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file PassiveLaw.h
+ * @brief Conversion from reduced passive energy derivatives to 0D passive stress terms.
+ */
 #ifndef RODIN_HEART_CCMLC2014_PASSIVELAW_H
 #define RODIN_HEART_CCMLC2014_PASSIVELAW_H
 
@@ -13,9 +17,24 @@
 
 namespace Rodin::Heart
 {
+  /**
+   * @brief Default passive stress law for the CCMLC2014 reduced model.
+   *
+   * @tparam Scalar Scalar numeric type.
+   */
   template <class Scalar>
   struct CCMLC2014PassiveLaw
   {
+    /**
+     * @brief Evaluate passive stress and tangent with respect to radial displacement.
+     *
+     * @tparam PassiveEnergyLaw Passive-energy evaluator type.
+     * @param[in] law Passive-energy law.
+     * @param[in] C Reduced right Cauchy-Green scalar.
+     * @param[in] dC_dy Derivative of @f$ C @f$ wrt displacement.
+     * @param[out] sigmaPassive Passive stress.
+     * @param[out] dsigmaPassive_dy Derivative of passive stress wrt displacement.
+     */
     template <class PassiveEnergyLaw>
     void operator()(
         const PassiveEnergyLaw& law,

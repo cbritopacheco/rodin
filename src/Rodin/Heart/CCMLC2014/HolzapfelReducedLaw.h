@@ -4,6 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file HolzapfelReducedLaw.h
+ * @brief Reduced Holzapfel-like passive-energy law used in CCMLC2014.
+ */
 #ifndef RODIN_HEART_CCMLC2014_HOLZAPFELREDUCEDLAW_H
 #define RODIN_HEART_CCMLC2014_HOLZAPFELREDUCEDLAW_H
 
@@ -13,24 +17,38 @@
 
 namespace Rodin::Heart
 {
+  /**
+   * @brief Passive-energy evaluator based on reduced invariants.
+   *
+   * @tparam Scalar Scalar numeric type.
+   */
   template <class Scalar>
   class HolzapfelReducedLaw
   {
     public:
+      /**
+       * @brief Parameters of the reduced passive-energy law.
+       */
       struct Parameters
       {
-        Scalar mu1 = Scalar(0);
-        Scalar mu2 = Scalar(0);
-        Scalar C0 = Scalar(0);
-        Scalar C1 = Scalar(0);
-        Scalar C2 = Scalar(0);
-        Scalar C3 = Scalar(0);
+        Scalar mu1 = Scalar(0); ///< Linear coefficient for @f$ J_1 @f$.
+        Scalar mu2 = Scalar(0); ///< Linear coefficient for @f$ J_2 @f$.
+        Scalar C0 = Scalar(0);  ///< Exponential scale for @f$ J_1 @f$.
+        Scalar C1 = Scalar(0);  ///< Exponential exponent factor for @f$ J_1 @f$.
+        Scalar C2 = Scalar(0);  ///< Exponential scale for @f$ J_4 @f$.
+        Scalar C3 = Scalar(0);  ///< Exponential exponent factor for @f$ J_4 @f$.
       };
 
       explicit HolzapfelReducedLaw(const Parameters& params = Parameters())
         : m_params(params)
       {}
 
+      /**
+       * @brief Evaluate first- and second-order derivatives at reduced invariants.
+       *
+       * @param[in] I Reduced invariants.
+       * @returns Gradient and Hessian of passive energy.
+       */
       PassiveEnergyDerivatives<Scalar> evaluate(const ReducedInvariants<Scalar>& I) const
       {
         PassiveEnergyDerivatives<Scalar> out;

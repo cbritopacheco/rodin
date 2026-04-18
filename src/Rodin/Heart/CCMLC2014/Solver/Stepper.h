@@ -4,6 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file Stepper.h
+ * @brief Nonlinear time-stepper for the CCMLC2014 reduced 0D ventricular model.
+ */
 #ifndef RODIN_HEART_CCMLC2014_SOLVER_STEPPER_H
 #define RODIN_HEART_CCMLC2014_SOLVER_STEPPER_H
 
@@ -26,6 +30,12 @@
 
 namespace Rodin::Heart::CCMLC2014::Solver
 {
+  /**
+   * @brief Time-stepper for the coupled 0D CCMLC2014 ventricular model.
+   *
+   * @tparam PassiveEnergyLaw Passive-energy law used by the constitutive response.
+   * @tparam PassiveLaw Passive stress operator using passive-energy derivatives.
+   */
   template <class PassiveEnergyLaw, class PassiveLaw>
   class StepperT
   {
@@ -64,18 +74,19 @@ namespace Rodin::Heart::CCMLC2014::Solver
           {
             assert(m_xCurrent);
 
-            auto& A = m_system.getOperator();
-            auto& b = m_system.getVector();
-            auto& s = m_system.getSolution();
-            s.setZero();
+          auto& operatorMatrix = m_system.getOperator();
+          auto& rightHandSide = m_system.getVector();
+          auto& solutionIncrement = m_system.getSolution();
+          solutionIncrement.setZero();
 
-            EvalData d;
-            Numerics::buildEvalData<PassiveLaw>(m_input, *m_xCurrent, m_history.n, m_history.nm1, m_time, m_dt, d);
-            Numerics::evaluateDynamicResidual(m_input, d, b);
-            b = -b;
-            Numerics::evaluateDynamicJacobian(m_input, A, d, m_dt);
-            return *this;
-          }
+          EvalData evalData;
+          Numerics::buildEvalData<PassiveLaw>(
+              m_input, *m_xCurrent, m_history.n, m_history.nm1, m_time, m_dt, evalData);
+          Numerics::evaluateDynamicResidual(m_input, evalData, rightHandSide);
+          rightHandSide = -rightHandSide;
+          Numerics::evaluateDynamicJacobian(m_input, operatorMatrix, evalData, m_dt);
+          return *this;
+        }
 
           void solve(::Rodin::Solver::LinearSolverBase<DenseLinearSystem>& solver) override
           {
@@ -211,16 +222,23 @@ namespace Rodin::Heart::CCMLC2014::Solver
 
         if (nr.converged)
         {
-          EvalData d;
-          Numerics::buildEvalData<PassiveLaw>(m_input, m_x, m_history.n, m_history.nm1, m_history.n.t + dt, dt, d);
+          EvalData evalData;
+          Numerics::buildEvalData<PassiveLaw>(
+              m_input,
+              m_x,
+              m_history.n,
+              m_history.nm1,
+              m_history.n.t + dt,
+              dt,
+              evalData);
 
           m_history.nm2 = m_history.nm1;
           m_history.nm1 = m_history.n;
           m_state = unpackUnknownsIntoState(m_x, m_state, m_history.n.t + dt);
           m_state.v = (m_state.y - m_history.n.y) / dt;
-          m_state.ec = d.active.fib1;
-          m_state.gamma = d.active.gammaNew;
-          m_state.beta = d.active.betaNew;
+          m_state.ec = evalData.active.fiberDeformationCurrent;
+          m_state.gamma = evalData.active.gammaCurrent;
+          m_state.beta = evalData.active.betaCurrent;
           m_state.kc = m_state.gamma * m_state.gamma;
           m_state.tauc = m_state.gamma * m_state.beta;
         }

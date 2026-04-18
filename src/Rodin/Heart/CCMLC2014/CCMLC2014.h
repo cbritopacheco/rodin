@@ -4,6 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file CCMLC2014.h
+ * @brief User-facing alias for the CCMLC2014 0D ventricular model stepper.
+ */
 #ifndef RODIN_HEART_CCMLC2014_CCMLC2014_H
 #define RODIN_HEART_CCMLC2014_CCMLC2014_H
 
@@ -13,6 +17,12 @@
 
 namespace Rodin::Heart
 {
+  /**
+   * @brief Default CCMLC2014 0D model type.
+   *
+   * @tparam PassiveEnergyLaw Reduced passive energy law.
+   * @tparam PassiveLaw Passive stress operator from the reduced invariants.
+   */
   template <
     class PassiveEnergyLaw = HolzapfelReducedLaw<Real>,
     class PassiveLaw = CCMLC2014PassiveLaw<Real>>
