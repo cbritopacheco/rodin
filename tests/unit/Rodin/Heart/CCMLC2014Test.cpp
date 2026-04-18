@@ -23,78 +23,78 @@ namespace
 
   Model::Input makeGenericCardiacInput()
   {
-    Model::Input in;
+    Model::Input cardiacInput;
 
-    in.rho = 1.0e3;
-    in.R0 = 2.36e-2;
-    in.d0 = 1.42e-2;
+    cardiacInput.rho = 1.0e3;
+    cardiacInput.R0 = 2.36e-2;
+    cardiacInput.d0 = 1.42e-2;
 
-    in.Es = 3.0e5;
-    in.mu = 70.0;
-    in.eta = 70.0;
-    in.alpha = 3.0;
-    in.k0 = 1.0e5;
-    in.sigma0 = 5.0e5;
+    cardiacInput.Es = 3.0e5;
+    cardiacInput.mu = 70.0;
+    cardiacInput.eta = 70.0;
+    cardiacInput.alpha = 3.0;
+    cardiacInput.k0 = 1.0e5;
+    cardiacInput.sigma0 = 5.0e5;
 
-    in.Rp = 8.0e6;
-    in.Cp = 5.0e-9;
-    in.Rd = 1.0e8;
-    in.Cd = 1.0e-8;
+    cardiacInput.Rp = 8.0e6;
+    cardiacInput.Cp = 5.0e-9;
+    cardiacInput.Rd = 1.0e8;
+    cardiacInput.Cd = 1.0e-8;
 
-    in.Kat = 8.0e-7;
-    in.Kp  = 5.0e-10;
-    in.Kar = 1.3e-5;
+    cardiacInput.Kat = 8.0e-7;
+    cardiacInput.Kp  = 5.0e-10;
+    cardiacInput.Kar = 1.3e-5;
 
-    in.cavityCapacity = 5.0e-12;
-    in.localTolerance = 1e-12;
-    in.localMaxIterations = 50;
-    in.localDamping = 1.0;
-    in.absRegularization = 1e-14;
+    cardiacInput.cavityCapacity = 5.0e-12;
+    cardiacInput.localTolerance = 1e-12;
+    cardiacInput.localMaxIterations = 50;
+    cardiacInput.localDamping = 1.0;
+    cardiacInput.absRegularization = 1e-14;
 
-    in.u = [](Real) { return 25.0; };
-    in.pAt = [](Real) { return 900.0; };
-    in.pSv = [](Real) { return 1000.0; };
+    cardiacInput.u = [](Real) { return 25.0; };
+    cardiacInput.pAt = [](Real) { return 900.0; };
+    cardiacInput.pSv = [](Real) { return 1000.0; };
 
-    using PassiveEnergyType = std::decay_t<decltype(in.passiveEnergy)>;
-    typename PassiveEnergyType::Parameters hp;
-    hp.mu1 = 0.0;
-    hp.mu2 = 0.0;
-    hp.C0 = 1.9e3;
-    hp.C1 = 1.1e-1;
-    hp.C2 = 1.9e3;
-    hp.C3 = 1.1e-1;
-    in.passiveEnergy = PassiveEnergyType(hp);
+    using PassiveEnergyType = std::decay_t<decltype(cardiacInput.passiveEnergy)>;
+    typename PassiveEnergyType::Parameters passiveParameters;
+    passiveParameters.mu1 = 0.0;
+    passiveParameters.mu2 = 0.0;
+    passiveParameters.C0 = 1.9e3;
+    passiveParameters.C1 = 1.1e-1;
+    passiveParameters.C2 = 1.9e3;
+    passiveParameters.C3 = 1.1e-1;
+    cardiacInput.passiveEnergy = PassiveEnergyType(passiveParameters);
 
-    return in;
+    return cardiacInput;
   }
 }
 
 TEST(CCMLC2014Test, InitializeUsesInputActiveDefaultsWhenInitialActiveStateIsZero)
 {
-  auto in = makeGenericCardiacInput();
-  in.initFibDef = 0.12;
-  in.initActiveStiffness = 0.25;
-  in.initActiveStress = 0.5;
+  auto cardiacInput = makeGenericCardiacInput();
+  cardiacInput.initFibDef = 0.12;
+  cardiacInput.initActiveStiffness = 0.25;
+  cardiacInput.initActiveStress = 0.5;
 
-  Model model(in);
+  Model model(cardiacInput);
 
   Model::State initial;
   initial.t = 0.0;
   model.initialize(initial);
 
-  const auto& s = model.getState();
-  EXPECT_NEAR(s.ec, 0.12, 1e-14);
-  EXPECT_NEAR(s.gamma, 0.5, 1e-14);
-  EXPECT_NEAR(s.beta, 1.0, 1e-14);
-  EXPECT_NEAR(s.kc, 0.25, 1e-14);
-  EXPECT_NEAR(s.tauc, 0.5, 1e-14);
+  const auto& state = model.getState();
+  EXPECT_NEAR(state.ec, 0.12, 1e-14);
+  EXPECT_NEAR(state.gamma, 0.5, 1e-14);
+  EXPECT_NEAR(state.beta, 1.0, 1e-14);
+  EXPECT_NEAR(state.kc, 0.25, 1e-14);
+  EXPECT_NEAR(state.tauc, 0.5, 1e-14);
 }
 
 TEST(CCMLC2014Test, InitializeUsesProvidedGammaAndBeta)
 {
-  auto in = makeGenericCardiacInput();
+  auto cardiacInput = makeGenericCardiacInput();
 
-  Model model(in);
+  Model model(cardiacInput);
 
   Model::State initial;
   initial.t = 0.0;
@@ -105,22 +105,22 @@ TEST(CCMLC2014Test, InitializeUsesProvidedGammaAndBeta)
   initial.tauc = 1.0;
   model.initialize(initial);
 
-  const auto& s = model.getState();
-  EXPECT_NEAR(s.ec, 0.03, 1e-14);
-  EXPECT_NEAR(s.gamma, 0.4, 1e-14);
-  EXPECT_NEAR(s.beta, 0.2, 1e-14);
-  EXPECT_NEAR(s.kc, 0.16, 1e-14);
-  EXPECT_NEAR(s.tauc, 0.08, 1e-14);
+  const auto& state = model.getState();
+  EXPECT_NEAR(state.ec, 0.03, 1e-14);
+  EXPECT_NEAR(state.gamma, 0.4, 1e-14);
+  EXPECT_NEAR(state.beta, 0.2, 1e-14);
+  EXPECT_NEAR(state.kc, 0.16, 1e-14);
+  EXPECT_NEAR(state.tauc, 0.08, 1e-14);
 }
 
 TEST(CCMLC2014Test, StepConvergesAndAdvancesTime)
 {
-  auto in = makeGenericCardiacInput();
-  in.initFibDef = 0.0;
-  in.initActiveStiffness = 0.0;
-  in.initActiveStress = 0.0;
+  auto cardiacInput = makeGenericCardiacInput();
+  cardiacInput.initFibDef = 0.0;
+  cardiacInput.initActiveStiffness = 0.0;
+  cardiacInput.initActiveStress = 0.0;
 
-  Model model(in);
+  Model model(cardiacInput);
   model.setMaxIterations(200)
        .setAbsoluteTolerance(1e-8)
        .setRelativeTolerance(1e-8)
@@ -131,76 +131,81 @@ TEST(CCMLC2014Test, StepConvergesAndAdvancesTime)
   initial.t = 0.0;
   initial.y = 0.0;
   initial.v = 0.0;
-  initial.pv = in.pAt(0.0) - 100.0;
+  initial.pv = cardiacInput.pAt(0.0) - 100.0;
   initial.par = 11000.0;
   initial.pd = 10000.0;
   model.initialize(initial);
 
   const Real dt = 1e-3;
-  const auto rep = model.step(dt);
-  EXPECT_TRUE(rep.converged);
+  const auto report = model.step(dt);
+  EXPECT_TRUE(report.converged);
   EXPECT_NEAR(model.getState().t, dt, 1e-14);
 }
 
 TEST(CCMLC2014Test, DynamicJacobianMatchesFiniteDifference)
 {
-  auto in = makeGenericCardiacInput();
+  auto cardiacInput = makeGenericCardiacInput();
 
-  Model::DenseVector x(CCMLC2014Vars::NVAR);
-  x[CCMLC2014Vars::DISP] = 8e-5;
-  x[CCMLC2014Vars::PV] = 1.0e4;
-  x[CCMLC2014Vars::PAR] = 9.0e3;
-  x[CCMLC2014Vars::PD] = 8.0e3;
+  Model::DenseVector candidateState(CCMLC2014Vars::NVAR);
+  candidateState[CCMLC2014Vars::DISP] = 8e-5;
+  candidateState[CCMLC2014Vars::PV] = 1.0e4;
+  candidateState[CCMLC2014Vars::PAR] = 9.0e3;
+  candidateState[CCMLC2014Vars::PD] = 8.0e3;
 
-  Model::State sn;
-  sn.t = 0.1;
-  sn.y = 7e-5;
-  sn.pv = 9.8e3;
-  sn.par = 8.8e3;
-  sn.pd = 7.9e3;
-  sn.ec = 0.01;
-  sn.gamma = 0.2;
-  sn.beta = 0.3;
-  sn.kc = sn.gamma * sn.gamma;
-  sn.tauc = sn.gamma * sn.beta;
+  Model::State currentState;
+  currentState.t = 0.1;
+  currentState.y = 7e-5;
+  currentState.pv = 9.8e3;
+  currentState.par = 8.8e3;
+  currentState.pd = 7.9e3;
+  currentState.ec = 0.01;
+  currentState.gamma = 0.2;
+  currentState.beta = 0.3;
+  currentState.kc = currentState.gamma * currentState.gamma;
+  currentState.tauc = currentState.gamma * currentState.beta;
 
-  Model::State snm1 = sn;
-  snm1.t = 0.099;
-  snm1.y = 6e-5;
+  Model::State previousState = currentState;
+  previousState.t = 0.099;
+  previousState.y = 6e-5;
 
   const Real dt = 1e-3;
-  const Real tnp1 = sn.t + dt;
+  const Real nextTime = currentState.t + dt;
 
-  Model::EvalData d;
-  Heart::CCMLC2014::Numerics::buildEvalData<PassiveLaw>(in, x, sn, snm1, tnp1, dt, d);
+  Model::EvalData evaluationData;
+  Heart::CCMLC2014::Numerics::buildEvalData<PassiveLaw>(
+      cardiacInput, candidateState, currentState, previousState, nextTime, dt, evaluationData);
 
-  Model::DenseMatrix J;
-  Heart::CCMLC2014::Numerics::evaluateDynamicJacobian(in, J, d, dt);
+  Model::DenseMatrix analyticalJacobian;
+  Heart::CCMLC2014::Numerics::evaluateDynamicJacobian(cardiacInput, analyticalJacobian, evaluationData, dt);
 
-  Model::DenseMatrix Jfd(CCMLC2014Vars::NVAR, CCMLC2014Vars::NVAR);
-  Jfd.setZero();
+  Model::DenseMatrix finiteDifferenceJacobian(CCMLC2014Vars::NVAR, CCMLC2014Vars::NVAR);
+  finiteDifferenceJacobian.setZero();
 
-  const Real eps = 1e-7;
+  const Real relativePerturbation = 1e-7;
   for (Index j = 0; j < CCMLC2014Vars::NVAR; ++j)
   {
-    const Real h = eps * std::max<Real>(1.0, std::abs(x[j]));
-    auto xp = x;
-    auto xm = x;
-    xp[j] += h;
-    xm[j] -= h;
+    const Real perturbation = relativePerturbation * std::max<Real>(1.0, std::abs(candidateState[j]));
+    auto statePlus = candidateState;
+    auto stateMinus = candidateState;
+    statePlus[j] += perturbation;
+    stateMinus[j] -= perturbation;
 
-    Model::EvalData dp;
-    Model::EvalData dm;
-    Heart::CCMLC2014::Numerics::buildEvalData<PassiveLaw>(in, xp, sn, snm1, tnp1, dt, dp);
-    Heart::CCMLC2014::Numerics::buildEvalData<PassiveLaw>(in, xm, sn, snm1, tnp1, dt, dm);
+    Model::EvalData evaluationDataPlus;
+    Model::EvalData evaluationDataMinus;
+    Heart::CCMLC2014::Numerics::buildEvalData<PassiveLaw>(
+        cardiacInput, statePlus, currentState, previousState, nextTime, dt, evaluationDataPlus);
+    Heart::CCMLC2014::Numerics::buildEvalData<PassiveLaw>(
+        cardiacInput, stateMinus, currentState, previousState, nextTime, dt, evaluationDataMinus);
 
-    Model::DenseVector Rp;
-    Model::DenseVector Rm;
-    Heart::CCMLC2014::Numerics::evaluateDynamicResidual(in, dp, Rp);
-    Heart::CCMLC2014::Numerics::evaluateDynamicResidual(in, dm, Rm);
-    Jfd.col(j) = (Rp - Rm) / (2.0 * h);
+    Model::DenseVector residualPlus;
+    Model::DenseVector residualMinus;
+    Heart::CCMLC2014::Numerics::evaluateDynamicResidual(cardiacInput, evaluationDataPlus, residualPlus);
+    Heart::CCMLC2014::Numerics::evaluateDynamicResidual(cardiacInput, evaluationDataMinus, residualMinus);
+    finiteDifferenceJacobian.col(j) = (residualPlus - residualMinus) / (2.0 * perturbation);
   }
 
-  const Real rel = (J - Jfd).norm() / std::max<Real>(Jfd.norm(), 1e-14);
-  EXPECT_LT(rel, 1e-3);
+  const Real relativeError =
+    (analyticalJacobian - finiteDifferenceJacobian).norm()
+    / std::max<Real>(finiteDifferenceJacobian.norm(), 1e-14);
+  EXPECT_LT(relativeError, 1e-3);
 }
