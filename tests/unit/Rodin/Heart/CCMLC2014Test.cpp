@@ -19,9 +19,9 @@ namespace
 {
   using Model = Heart::CCMLC2014T<>;
   using PassiveLaw = Heart::CCMLC2014PassiveLaw<Real>;
-  namespace ModelVars = Heart::CCMLC2014::Model;
+  namespace CCMLC2014Vars = Heart::CCMLC2014::Model;
 
-  Model::Input makeInput()
+  Model::Input makeGenericCardiacInput()
   {
     Model::Input in;
 
@@ -55,14 +55,15 @@ namespace
     in.pAt = [](Real) { return 900.0; };
     in.pSv = [](Real) { return 1000.0; };
 
-    typename std::decay_t<decltype(in.passiveEnergy)>::Parameters hp;
+    using PassiveEnergyType = std::decay_t<decltype(in.passiveEnergy)>;
+    typename PassiveEnergyType::Parameters hp;
     hp.mu1 = 0.0;
     hp.mu2 = 0.0;
     hp.C0 = 1.9e3;
     hp.C1 = 1.1e-1;
     hp.C2 = 1.9e3;
     hp.C3 = 1.1e-1;
-    in.passiveEnergy = std::decay_t<decltype(in.passiveEnergy)>(hp);
+    in.passiveEnergy = PassiveEnergyType(hp);
 
     return in;
   }
@@ -70,7 +71,7 @@ namespace
 
 TEST(CCMLC2014Test, InitializeUsesInputActiveDefaultsWhenInitialActiveStateIsZero)
 {
-  auto in = makeInput();
+  auto in = makeGenericCardiacInput();
   in.initFibDef = 0.12;
   in.initActiveStiffness = 0.25;
   in.initActiveStress = 0.5;
@@ -91,7 +92,7 @@ TEST(CCMLC2014Test, InitializeUsesInputActiveDefaultsWhenInitialActiveStateIsZer
 
 TEST(CCMLC2014Test, InitializeUsesProvidedGammaAndBeta)
 {
-  auto in = makeInput();
+  auto in = makeGenericCardiacInput();
 
   Model model(in);
 
@@ -114,7 +115,7 @@ TEST(CCMLC2014Test, InitializeUsesProvidedGammaAndBeta)
 
 TEST(CCMLC2014Test, StepConvergesAndAdvancesTime)
 {
-  auto in = makeInput();
+  auto in = makeGenericCardiacInput();
   in.initFibDef = 0.0;
   in.initActiveStiffness = 0.0;
   in.initActiveStress = 0.0;
@@ -143,13 +144,13 @@ TEST(CCMLC2014Test, StepConvergesAndAdvancesTime)
 
 TEST(CCMLC2014Test, DynamicJacobianMatchesFiniteDifference)
 {
-  auto in = makeInput();
+  auto in = makeGenericCardiacInput();
 
-  Model::DenseVector x(ModelVars::NVAR);
-  x[ModelVars::DISP] = 8e-5;
-  x[ModelVars::PV] = 1.0e4;
-  x[ModelVars::PAR] = 9.0e3;
-  x[ModelVars::PD] = 8.0e3;
+  Model::DenseVector x(CCMLC2014Vars::NVAR);
+  x[CCMLC2014Vars::DISP] = 8e-5;
+  x[CCMLC2014Vars::PV] = 1.0e4;
+  x[CCMLC2014Vars::PAR] = 9.0e3;
+  x[CCMLC2014Vars::PD] = 8.0e3;
 
   Model::State sn;
   sn.t = 0.1;
@@ -176,11 +177,11 @@ TEST(CCMLC2014Test, DynamicJacobianMatchesFiniteDifference)
   Model::DenseMatrix J;
   Heart::CCMLC2014::Numerics::evaluateDynamicJacobian(in, J, d, dt);
 
-  Model::DenseMatrix Jfd(ModelVars::NVAR, ModelVars::NVAR);
+  Model::DenseMatrix Jfd(CCMLC2014Vars::NVAR, CCMLC2014Vars::NVAR);
   Jfd.setZero();
 
   const Real eps = 1e-7;
-  for (Index j = 0; j < ModelVars::NVAR; ++j)
+  for (Index j = 0; j < CCMLC2014Vars::NVAR; ++j)
   {
     const Real h = eps * std::max<Real>(1.0, std::abs(x[j]));
     auto xp = x;
