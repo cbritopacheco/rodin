@@ -95,8 +95,8 @@ namespace Rodin::Heart::CCMLC2014::Model
     size_t iterations = 0;
     Scalar finalResidual = 0.0;
     Scalar finalStepNorm = 0.0;
-    ::Rodin::Solver::NewtonSolver<::Rodin::Solver::PartialPivLU<DenseLinearSystem>>::ConvergenceReason reason =
-      ::Rodin::Solver::NewtonSolver<::Rodin::Solver::PartialPivLU<DenseLinearSystem>>::ConvergenceReason::MaxIterations;
+    typename Solver::NewtonSolver<::Rodin::Solver::PartialPivLU<DenseLinearSystem>>::ConvergenceReason reason =
+      Solver::NewtonSolver<::Rodin::Solver::PartialPivLU<DenseLinearSystem>>::ConvergenceReason::MaxIterations;
   };
 
   template <class Scalar>
