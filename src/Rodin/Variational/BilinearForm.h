@@ -411,6 +411,7 @@ namespace Rodin::Variational
       BilinearForm(const BilinearForm& other)
         : Parent(other),
           m_u(other.m_u), m_v(other.m_v),
+          m_operator(other.m_operator),
           m_assembly(other.m_assembly)
       {}
 
@@ -418,6 +419,7 @@ namespace Rodin::Variational
       BilinearForm(BilinearForm&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)), m_v(std::move(other.m_v)),
+          m_operator(std::move(other.m_operator)),
           m_assembly(std::move(other.m_assembly))
       {}
 
