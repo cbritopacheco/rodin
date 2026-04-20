@@ -80,9 +80,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md345">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md346">Features</a></li>
-            <li><a href="#autotoc_md347">Usage Examples</a></li>
+            <li><a href="#autotoc_md348">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md349">Features</a></li>
+            <li><a href="#autotoc_md350">Usage Examples</a></li>
             <li>
               Reference
               <ul>
@@ -92,7 +92,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the GridFunction class, which represents functions defined on a finite element mesh by their degrees of freedom. Grid functions are the discrete representation of solutions in finite element analysis.</p><section id="autotoc_md345"><h3><a href="#autotoc_md345">Mathematical Foundation</a></h3><p>A grid function represents a function <svg class="m-math" style="width: 3.995em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 38.356537 9.962629">
+<p>This file defines the GridFunction class, which represents functions defined on a finite element mesh by their degrees of freedom. Grid functions are the discrete representation of solutions in finite element analysis.</p><section id="autotoc_md348"><h3><a href="#autotoc_md348">Mathematical Foundation</a></h3><p>A grid function represents a function <svg class="m-math" style="width: 3.995em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 38.356537 9.962629">
 <title>
 $ u_h \in V_h $
 </title>
@@ -183,7 +183,7 @@ $ N $
 <g id='eq5-page1'>
 <use x='0' y='0' xlink:href='#eq5-g0-78'/>
 </g>
-</svg> is the number of DOFs</li></ul></section><section id="autotoc_md346"><h3><a href="#autotoc_md346">Features</a></h3><ul><li><strong>Storage</strong>: Manages coefficient vector for FEM solutions</li><li><strong>Evaluation</strong>: Point-wise evaluation using basis function interpolation</li><li><strong>I/O</strong>: Export to visualization formats (XDMF, HDF5, MEDIT, etc.)</li><li><strong>Operations</strong>: Arithmetic operations, norms, projections</li><li><strong>Assignment</strong>: Can be set from functions or expressions</li></ul></section><section id="autotoc_md347"><h3><a href="#autotoc_md347">Usage Examples</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg> is the number of DOFs</li></ul></section><section id="autotoc_md349"><h3><a href="#autotoc_md349">Features</a></h3><ul><li><strong>Storage</strong>: Manages coefficient vector for FEM solutions</li><li><strong>Evaluation</strong>: Point-wise evaluation using basis function interpolation</li><li><strong>I/O</strong>: Export to visualization formats (XDMF, HDF5, MEDIT, etc.)</li><li><strong>Operations</strong>: Arithmetic operations, norms, projections</li><li><strong>Assignment</strong>: Can be set from functions or expressions</li></ul></section><section id="autotoc_md350"><h3><a href="#autotoc_md350">Usage Examples</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">GridFunction</span><span class="o">&lt;</span><span class="n">P1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span><span class="w">  </span><span class="c1">// Create grid function</span>
 
 <span class="c1">// Set from analytical function</span>

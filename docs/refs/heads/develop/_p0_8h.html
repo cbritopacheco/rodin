@@ -80,12 +80,12 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md425">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md426">Features</a></li>
-            <li><a href="#autotoc_md427">Usage Example</a></li>
+            <li><a href="#autotoc_md428">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md429">Features</a></li>
+            <li><a href="#autotoc_md430">Usage Example</a></li>
           </ul>
         </nav>
-<p>This header aggregates all functionality related to the P0 finite element space, which consists of piecewise constant functions over mesh elements.</p><section id="autotoc_md425"><h3><a href="#autotoc_md425">Mathematical Foundation</a></h3><p>The P0 space is defined as:</p><div class="m-math"><svg style="width: 24.282em; height: 1.361em;" viewBox="77.717547 -13.06128 233.107969 13.06128">
+<p>This header aggregates all functionality related to the P0 finite element space, which consists of piecewise constant functions over mesh elements.</p><section id="autotoc_md428"><h3><a href="#autotoc_md428">Mathematical Foundation</a></h3><p>The P0 space is defined as:</p><div class="m-math"><svg style="width: 24.282em; height: 1.361em;" viewBox="77.717547 -13.06128 233.107969 13.06128">
 <title>
 \[
   P_0(\mathcal{T}_h) = \{u \in L^2(\Omega) : u|_K \in \mathbb{P}_0(K) \, \forall K \in \mathcal{T}_h\}
@@ -174,7 +174,7 @@ $ K $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-75'/>
 </g>
-</svg>.</p></section><section id="autotoc_md426"><h3><a href="#autotoc_md426">Features</a></h3><ul><li>One degree of freedom per element (at element center)</li><li>Discontinuous across element boundaries</li><li>Suitable for DG methods and element-wise constant approximations</li><li>Gradient of P0 functions is zero within each element</li></ul></section><section id="autotoc_md427"><h3><a href="#autotoc_md427">Usage Example</a></h3><pre class="m-code"><span class="n">P0</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w">           </span><span class="c1">// Define P0 space</span>
+</svg>.</p></section><section id="autotoc_md429"><h3><a href="#autotoc_md429">Features</a></h3><ul><li>One degree of freedom per element (at element center)</li><li>Discontinuous across element boundaries</li><li>Suitable for DG methods and element-wise constant approximations</li><li>Gradient of P0 functions is zero within each element</li></ul></section><section id="autotoc_md430"><h3><a href="#autotoc_md430">Usage Example</a></h3><pre class="m-code"><span class="n">P0</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w">           </span><span class="c1">// Define P0 space</span>
 <span class="n">GridFunction</span><span class="o">&lt;</span><span class="n">P0</span><span class="o">&gt;</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span><span class="w"> </span><span class="c1">// P0 grid function</span></pre></section>
       </div>
     </div>
