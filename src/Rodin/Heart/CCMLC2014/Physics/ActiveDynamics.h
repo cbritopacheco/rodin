@@ -211,7 +211,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
        * @returns Recruitment fraction in @f$ [0, 1] @f$.
        */
       template <class Scalar>
-      static Scalar computeRecruitmentFraction(Scalar fiberDeformation)
+      static Scalar computeRecruitmentFraction(Scalar fiberDeformationPrevious)
       {
         const Scalar x1 = Scalar(-0.4);
         const Scalar y1 = Scalar(0.0);
@@ -228,16 +228,16 @@ namespace Rodin::Heart::CCMLC2014::Physics
 
         Scalar result = Scalar(0.0);
 
-        if (fiberDeformation < x2)
-          result = ((y2 - y1) / (x2 - x1)) * (fiberDeformation - x2) + y2;
-        else if (fiberDeformation < x3)
-          result = ((y3 - y2) / (x3 - x2)) * (fiberDeformation - x3) + y3;
-        else if (fiberDeformation < x4)
-          result = ((y4 - y3) / (x4 - x3)) * (fiberDeformation - x4) + y4;
-        else if (fiberDeformation < x5)
+        if (fiberDeformationPrevious < x2)
+          result = ((y2 - y1) / (x2 - x1)) * (fiberDeformationPrevious - x2) + y2;
+        else if (fiberDeformationPrevious < x3)
+          result = ((y3 - y2) / (x3 - x2)) * (fiberDeformationPrevious - x3) + y3;
+        else if (fiberDeformationPrevious < x4)
+          result = ((y4 - y3) / (x4 - x3)) * (fiberDeformationPrevious - x4) + y4;
+        else if (fiberDeformationPrevious < x5)
           result = y4;
-        else if (fiberDeformation < x6)
-          result = ((y6 - y5) / (x6 - x5)) * (fiberDeformation - x6) + y6;
+        else if (fiberDeformationPrevious < x6)
+          result = ((y6 - y5) / (x6 - x5)) * (fiberDeformationPrevious - x6) + y6;
 
         return std::max<Scalar>(result, Scalar(0));
       }

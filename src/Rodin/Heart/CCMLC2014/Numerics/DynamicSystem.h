@@ -81,11 +81,11 @@ namespace Rodin::Heart::CCMLC2014::Numerics
        * @param[in] dt Time-step size @f$ \Delta t @f$.
        * @param[out] evalData Populated evaluation data.
        */
-      template <class DenseVector, class State, class EvalData>
+      template <class DenseVector, class StateType, class EvalData>
       void buildEvalData(
           const DenseVector& candidateUnknowns,
-          const State& currentState,
-          const State& previousState,
+          const StateType& currentState,
+          const StateType& previousState,
           typename DenseVector::Scalar tnp1,
           typename DenseVector::Scalar dt,
           EvalData& evalData) const
