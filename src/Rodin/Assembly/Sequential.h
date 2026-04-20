@@ -1006,6 +1006,58 @@ namespace Rodin::Assembly
         }
 
         // ------------------------------------------------------------
+        // Preassembled bilinear forms (with block offsets)
+        // ------------------------------------------------------------
+        for (auto& bf : pb.getBFs())
+        {
+          const auto uUUID = bf.getTrialFunction().getUUID();
+          const auto vUUID = bf.getTestFunction().getUUID();
+
+          const size_t uBlock = findTrialBlock(uUUID);
+          const size_t vBlock = findTestBlock(vUUID);
+
+          const size_t uOff = trialOffsets[uBlock];
+          const size_t vOff = testOffsets[vBlock];
+
+          const auto& op = bf.getOperator();
+          if constexpr (IsSparse)
+          {
+            for (int k = 0; k < op.outerSize(); ++k)
+              for (typename OperatorType::InnerIterator it(op, k); it; ++it)
+                sparse_entry(
+                  static_cast<Index>(vOff) + it.row(),
+                  static_cast<Index>(uOff) + it.col(),
+                  it.value());
+          }
+          else
+          {
+            const auto opRows = op.rows();
+            const auto opCols = op.cols();
+            for (Eigen::Index i = 0; i < opRows; ++i)
+              for (Eigen::Index j = 0; j < opCols; ++j)
+              {
+                const auto val = op(i, j);
+                if (val != ScalarType(0))
+                  A(static_cast<Index>(vOff) + i, static_cast<Index>(uOff) + j) += val;
+              }
+          }
+        }
+
+        // ------------------------------------------------------------
+        // Preassembled linear forms (with block offsets)
+        // ------------------------------------------------------------
+        for (auto& lf : pb.getLFs())
+        {
+          const auto vUUID = lf.getTestFunction().getUUID();
+          const size_t vBlock = findTestBlock(vUUID);
+          const size_t vOff   = testOffsets[vBlock];
+
+          const auto& vec = lf.getVector();
+          for (Eigen::Index i = 0; i < vec.size(); ++i)
+            b.coeffRef(static_cast<Index>(vOff) + i) -= vec.coeff(i);
+        }
+
+        // ------------------------------------------------------------
         // Finalize
         // ------------------------------------------------------------
         if constexpr (IsSparse)
