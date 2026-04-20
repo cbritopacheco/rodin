@@ -11,6 +11,8 @@ if (RODIN_BUILD_EXAMPLES)
   add_subdirectory(PDEs)
   add_subdirectory(Models)
   add_subdirectory(Solid)
+  add_subdirectory(Heart)
+
   # add_subdirectory(SurfaceEvolution)
   add_subdirectory(IntegralEquations)
   add_subdirectory(ShapeOptimization)

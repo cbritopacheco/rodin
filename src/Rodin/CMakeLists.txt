@@ -5,6 +5,7 @@ set(Rodin_HEADERS
   Alert.h
   Geometry.h
   Solver.h
+  Heart.h
   Variational.h
 )
 
@@ -53,6 +54,7 @@ add_subdirectory(IO)
 add_subdirectory(Test)
 add_subdirectory(Alert)
 add_subdirectory(Solver)
+add_subdirectory(Heart)
 add_subdirectory(Utility)
 add_subdirectory(Context)
 add_subdirectory(Geometry)
