@@ -7,6 +7,10 @@
 /**
  * @file Stepper.h
  * @brief Nonlinear time-stepper for the CCMLC2014 reduced 0D ventricular model.
+ *
+ * Wraps the DynamicSystem assembler inside a Variational::ProblemBase
+ * and drives the Newton solver, advancing the coupled system state
+ * from one time step to the next (Caruel et al. 2014, §4).
  */
 #ifndef RODIN_HEART_CCMLC2014_SOLVER_STEPPER_H
 #define RODIN_HEART_CCMLC2014_SOLVER_STEPPER_H
@@ -25,13 +29,16 @@
 #include "Rodin/Variational/Problem.h"
 #include "Rodin/Heart/CCMLC2014/Model/History.h"
 #include "Rodin/Heart/CCMLC2014/Model/State.h"
-#include "Rodin/Heart/CCMLC2014/Numerics/Jacobian.h"
-#include "Rodin/Heart/CCMLC2014/Numerics/Residual.h"
+#include "Rodin/Heart/CCMLC2014/Numerics/DynamicSystem.h"
 
 namespace Rodin::Heart::CCMLC2014::Solver
 {
   /**
    * @brief Time-stepper for the coupled 0D CCMLC2014 ventricular model.
+   *
+   * Manages the Newton iteration for one time step, delegating residual and
+   * Jacobian assembly to the Numerics::DynamicSystem class, and updating
+   * the model state on convergence.
    *
    * @tparam PassiveEnergyLaw Passive-energy law used by the constitutive response.
    * @tparam PassiveLaw Passive stress operator using passive-energy derivatives.
@@ -51,6 +58,13 @@ namespace Rodin::Heart::CCMLC2014::Solver
       using EvalData = Model::EvalDataT<Scalar>;
       using History = Model::HistoryT<State>;
 
+      /**
+       * @brief Variational problem adapter for Newton iteration.
+       *
+       * Bridges the Numerics::DynamicSystem assembler into the
+       * Rodin::Variational::ProblemBase interface expected by the
+       * Newton solver.
+       */
       class Problem final : public Variational::ProblemBase<DenseLinearSystem>
       {
         public:
@@ -58,11 +72,12 @@ namespace Rodin::Heart::CCMLC2014::Solver
           using ProblemBodyType = typename Parent::ProblemBodyType;
 
           explicit Problem(const Input& in)
-            : m_input(in)
+            : m_dynamicSystem(in)
           {
-            m_system.getOperator().resize(Model::NVAR, Model::NVAR);
-            m_system.getVector().resize(Model::NVAR);
-            m_system.getSolution().resize(Model::NVAR);
+            m_system.getOperator().resize(
+                Model::NumberOfVariables, Model::NumberOfVariables);
+            m_system.getVector().resize(Model::NumberOfVariables);
+            m_system.getSolution().resize(Model::NumberOfVariables);
           }
 
           Parent& operator=(const ProblemBodyType&) override
@@ -74,27 +89,32 @@ namespace Rodin::Heart::CCMLC2014::Solver
           {
             assert(m_xCurrent);
 
-          auto& operatorMatrix = m_system.getOperator();
-          auto& rightHandSide = m_system.getVector();
-          auto& solutionIncrement = m_system.getSolution();
-          solutionIncrement.setZero();
+            auto& operatorMatrix = m_system.getOperator();
+            auto& rightHandSide = m_system.getVector();
+            auto& solutionIncrement = m_system.getSolution();
+            solutionIncrement.setZero();
 
-          EvalData evalData;
-          Numerics::buildEvalData<PassiveLaw>(
-              m_input, *m_xCurrent, m_history.n, m_history.nm1, m_time, m_dt, evalData);
-          Numerics::evaluateDynamicResidual(m_input, evalData, rightHandSide);
-          rightHandSide = -rightHandSide;
-          Numerics::evaluateDynamicJacobian(m_input, operatorMatrix, evalData, m_dt);
-          return *this;
-        }
+            EvalData evalData;
+            m_dynamicSystem.buildEvalData(
+                *m_xCurrent, m_history.n, m_history.nm1, m_time, m_dt,
+                evalData);
+            m_dynamicSystem.evaluateResidual(evalData, rightHandSide);
+            rightHandSide = -rightHandSide;
+            m_dynamicSystem.evaluateJacobian(evalData, operatorMatrix, m_dt);
+            return *this;
+          }
 
-          void solve(::Rodin::Solver::LinearSolverBase<DenseLinearSystem>& solver) override
+          void solve(
+              ::Rodin::Solver::LinearSolverBase<DenseLinearSystem>& solver) override
           {
             solver.solve(m_system);
           }
 
           DenseLinearSystem& getLinearSystem() override { return m_system; }
-          const DenseLinearSystem& getLinearSystem() const override { return m_system; }
+          const DenseLinearSystem& getLinearSystem() const override
+          {
+            return m_system;
+          }
           Problem* copy() const noexcept override { return new Problem(*this); }
 
           void setCurrent(DenseVector& xCurrent) { m_xCurrent = &xCurrent; }
@@ -107,7 +127,7 @@ namespace Rodin::Heart::CCMLC2014::Solver
           }
 
         private:
-          Input m_input;
+          Numerics::DynamicSystem<PassiveLaw, Input> m_dynamicSystem;
           DenseVector* m_xCurrent = nullptr;
           DenseLinearSystem m_system;
 
@@ -222,9 +242,9 @@ namespace Rodin::Heart::CCMLC2014::Solver
 
         if (nr.converged)
         {
+          Numerics::DynamicSystem<PassiveLaw, Input> dynamicSystem(m_input);
           EvalData evalData;
-          Numerics::buildEvalData<PassiveLaw>(
-              m_input,
+          dynamicSystem.buildEvalData(
               m_x,
               m_history.n,
               m_history.nm1,
@@ -254,21 +274,22 @@ namespace Rodin::Heart::CCMLC2014::Solver
     private:
       static DenseVector packUnknowns(const State& s)
       {
-        DenseVector x(Model::NVAR);
-        x[Model::DISP] = s.y;
-        x[Model::PV]   = s.pv;
-        x[Model::PAR]  = s.par;
-        x[Model::PD]   = s.pd;
+        DenseVector x(Model::NumberOfVariables);
+        x[Model::RadialDisplacement] = s.y;
+        x[Model::VentricularPressure] = s.pv;
+        x[Model::ArterialPressure] = s.par;
+        x[Model::DistalPressure] = s.pd;
         return x;
       }
 
-      static State unpackUnknownsIntoState(const DenseVector& x, const State& base, Scalar t)
+      static State unpackUnknownsIntoState(
+          const DenseVector& x, const State& base, Scalar t)
       {
         State s = base;
-        s.y = x[Model::DISP];
-        s.pv = x[Model::PV];
-        s.par = x[Model::PAR];
-        s.pd = x[Model::PD];
+        s.y = x[Model::RadialDisplacement];
+        s.pv = x[Model::VentricularPressure];
+        s.par = x[Model::ArterialPressure];
+        s.pd = x[Model::DistalPressure];
         s.t = t;
         return s;
       }

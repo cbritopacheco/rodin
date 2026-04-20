@@ -25,23 +25,18 @@ namespace Rodin::Heart::CCMLC2014::Model
 {
   /**
    * @brief Indices of the nonlinear unknown vector for one time step.
+   *
+   * Matches the ordering of the coupled system unknowns
+   * @f$ (y, p_v, p_{ar}, p_d) @f$ from Caruel et al. (2014),
+   * Biomechanics and Modeling in Mechanobiology, §4 (0D model).
    */
   enum Variable : size_t
   {
-    RadialDisplacement = 0, ///< @f$ y_{n+1} @f$.
-    VentricularPressure,    ///< @f$ p_v^{n+1} @f$.
-    ArterialPressure,       ///< @f$ p_{ar}^{n+1} @f$.
-    DistalPressure,         ///< @f$ p_d^{n+1} @f$.
-    NumberOfVariables,      ///< Total number of unknowns.
-
-    /** @name Backward-compatible aliases */
-    ///@{
-    DISP = RadialDisplacement,
-    PV = VentricularPressure,
-    PAR = ArterialPressure,
-    PD = DistalPressure,
-    NVAR = NumberOfVariables
-    ///@}
+    RadialDisplacement = 0, ///< @f$ y_{n+1} @f$ — radial displacement.
+    VentricularPressure,    ///< @f$ p_v^{n+1} @f$ — left-ventricular pressure.
+    ArterialPressure,       ///< @f$ p_{ar}^{n+1} @f$ — proximal arterial pressure.
+    DistalPressure,         ///< @f$ p_d^{n+1} @f$ — distal pressure.
+    NumberOfVariables       ///< Total number of unknowns in the coupled system.
   };
 
   /**

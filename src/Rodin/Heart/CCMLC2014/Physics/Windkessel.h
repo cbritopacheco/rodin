@@ -6,7 +6,11 @@
  */
 /**
  * @file Windkessel.h
- * @brief Outflow law toward the arterial Windkessel branch.
+ * @brief Windkessel outflow evaluator for the arterial branch.
+ *
+ * Implements the three-element Windkessel outflow term
+ * @f$ Q_{ar} = K_{ar} (p_v - p_{ar}) @f$ when the aortic valve is open
+ * (Caruel et al. 2014, §4, arterial outflow model).
  */
 #ifndef RODIN_HEART_CCMLC2014_PHYSICS_WINDKESSEL_H
 #define RODIN_HEART_CCMLC2014_PHYSICS_WINDKESSEL_H
@@ -14,20 +18,56 @@
 namespace Rodin::Heart::CCMLC2014::Physics
 {
   /**
-   * @brief Compute Windkessel outflow and midpoint-pressure derivatives.
+   * @brief Evaluates the Windkessel outflow and its pressure derivatives.
+   *
+   * The outflow is the positive part of the aortic flow rate
+   * @f$ Q_{ar}^+ = \max(0, K_{ar}(p_{v,\text{mid}} - p_{ar,\text{mid}})) @f$.
+   *
+   * @tparam Input Model input parameter type.
    */
-  template <class Input, class EvalData>
-  inline void computeWindkesselOutflow(const Input& in, EvalData& evalData)
+  template <class Input>
+  class WindkesselOutflowEvaluator
   {
-    using Scalar = decltype(evalData.y);
-    const Scalar aorticFlowRate = in.Kar * (evalData.pvMid - evalData.parMid);
-    evalData.windkesselOutflow = (aorticFlowRate > Scalar(0)) ? aorticFlowRate : Scalar(0);
+    public:
+      /**
+       * @brief Construct with model input parameters.
+       * @param[in] input Model parameters (aortic valve conductance).
+       */
+      explicit WindkesselOutflowEvaluator(const Input& input)
+        : m_input(input)
+      {}
 
-    const Scalar midpointOutflowDerivative =
-      (aorticFlowRate > Scalar(0)) ? (Scalar(0.5) * in.Kar) : Scalar(0);
-    evalData.dWindkesselOutflow_dPv = midpointOutflowDerivative;
-    evalData.dWindkesselOutflow_dPar = -midpointOutflowDerivative;
-  }
+      /**
+       * @brief Evaluate outflow and pressure derivatives.
+       *
+       * Reads midpoint pressures from @p data and writes
+       * @p data.windkesselOutflow and its pressure derivatives.
+       *
+       * @tparam EvalData Evaluation data structure type.
+       * @param[in,out] data Evaluation data with midpoint pressures set.
+       */
+      template <class EvalData>
+      void evaluate(EvalData& data) const
+      {
+        using Scalar = decltype(data.y);
+        const Scalar aorticFlowRate =
+          m_input.Kar * (data.pvMid - data.parMid);
+
+        data.windkesselOutflow =
+          (aorticFlowRate > Scalar(0)) ? aorticFlowRate : Scalar(0);
+
+        const Scalar midpointDerivative =
+          (aorticFlowRate > Scalar(0))
+            ? (Scalar(0.5) * m_input.Kar)
+            : Scalar(0);
+
+        data.dWindkesselOutflow_dPv = midpointDerivative;
+        data.dWindkesselOutflow_dPar = -midpointDerivative;
+      }
+
+    private:
+      const Input& m_input;
+  };
 }
 
 #endif

@@ -6,7 +6,11 @@
  */
 /**
  * @file ValveLaw.h
- * @brief Valve branch laws used in the 0D cavity mass balance.
+ * @brief Cavity flux evaluator implementing the valve branch laws.
+ *
+ * Models the mitral valve, aortic valve, and leakage pathways
+ * in the 0D lumped-parameter representation of the left ventricle
+ * (Caruel et al. 2014, §4, valve model).
  */
 #ifndef RODIN_HEART_CCMLC2014_PHYSICS_VALVELAW_H
 #define RODIN_HEART_CCMLC2014_PHYSICS_VALVELAW_H
@@ -14,53 +18,97 @@
 namespace Rodin::Heart::CCMLC2014::Physics
 {
   /**
-   * @brief Compute cavity inflow/outflow terms and their pressure derivatives.
+   * @brief Evaluates cavity inflow/outflow fluxes through the valve branches.
+   *
+   * Determines the valve state (mitral open, both closed, aortic open) based
+   * on the relative pressures and computes the corresponding volume flux and
+   * its derivatives with respect to ventricular and arterial pressures.
+   *
+   * The three valve regimes are:
+   * - **Mitral open**: @f$ p_v \le p_{at} @f$ — filling phase.
+   * - **Both closed**: @f$ p_{at} \le p_v \le p_{ar} @f$ — isovolumetric phase.
+   * - **Aortic open**: @f$ p_v > p_{ar} @f$ — ejection phase.
+   *
+   * @tparam Input Model input parameter type.
    */
-  template <class Input, class EvalData>
-  inline void computeCavityFluxes(const Input& in, EvalData& evalData)
+  template <class Input>
+  class CavityFluxEvaluator
   {
-    using Scalar = decltype(evalData.y);
-    const bool mitralValveOpenAtCurrentStep = evalData.pv <= evalData.pAtCur;
-    const bool bothValvesClosedAtCurrentStep =
-      evalData.pAtCur <= evalData.pv && evalData.pv <= evalData.par;
+    public:
+      /**
+       * @brief Construct with model input parameters.
+       * @param[in] input Model parameters (valve conductances).
+       */
+      explicit CavityFluxEvaluator(const Input& input)
+        : m_input(input)
+      {}
 
-    if (mitralValveOpenAtCurrentStep)
-    {
-      evalData.cavityFluxCur = in.Kat * (evalData.pv - evalData.pAtCur);
-      evalData.dCavityFluxCur_dPv = in.Kat;
-      evalData.dCavityFluxCur_dPar = Scalar(0);
-    }
-    else if (bothValvesClosedAtCurrentStep)
-    {
-      evalData.cavityFluxCur = in.Kp * (evalData.pv - evalData.pAtCur);
-      evalData.dCavityFluxCur_dPv = in.Kp;
-      evalData.dCavityFluxCur_dPar = Scalar(0);
-    }
-    else
-    {
-      evalData.cavityFluxCur = in.Kar * (evalData.pv - evalData.par) + in.Kp * (evalData.par - evalData.pAtCur);
-      evalData.dCavityFluxCur_dPv = in.Kar;
-      evalData.dCavityFluxCur_dPar = -in.Kar + in.Kp;
-    }
+      /**
+       * @brief Evaluate cavity fluxes at the current and previous time levels.
+       *
+       * Populates @p data.cavityFluxCur, @p data.cavityFluxPrev, and their
+       * pressure derivatives.
+       *
+       * @tparam EvalData Evaluation data structure type.
+       * @param[in,out] data Evaluation data with pressures already set.
+       */
+      template <class EvalData>
+      void evaluate(EvalData& data) const
+      {
+        using Scalar = decltype(data.y);
 
-    const bool mitralValveOpenAtPreviousStep = evalData.pvPrev <= evalData.pAtPrev;
-    const bool bothValvesClosedAtPreviousStep =
-      evalData.pAtPrev <= evalData.pvPrev && evalData.pvPrev <= evalData.parPrev;
+        // --- Current step valve state ---
+        const bool mitralOpenCurrent = data.pv <= data.pAtCur;
+        const bool bothClosedCurrent =
+          data.pAtCur <= data.pv && data.pv <= data.par;
 
-    if (mitralValveOpenAtPreviousStep)
-    {
-      evalData.cavityFluxPrev = in.Kat * (evalData.pvPrev - evalData.pAtPrev);
-    }
-    else if (bothValvesClosedAtPreviousStep)
-    {
-      evalData.cavityFluxPrev = in.Kp * (evalData.pvPrev - evalData.pAtPrev);
-    }
-    else
-    {
-      evalData.cavityFluxPrev =
-        in.Kar * (evalData.pvPrev - evalData.parPrev) + in.Kp * (evalData.parPrev - evalData.pAtPrev);
-    }
-  }
+        if (mitralOpenCurrent)
+        {
+          data.cavityFluxCur = m_input.Kat * (data.pv - data.pAtCur);
+          data.dCavityFluxCur_dPv = m_input.Kat;
+          data.dCavityFluxCur_dPar = Scalar(0);
+        }
+        else if (bothClosedCurrent)
+        {
+          data.cavityFluxCur = m_input.Kp * (data.pv - data.pAtCur);
+          data.dCavityFluxCur_dPv = m_input.Kp;
+          data.dCavityFluxCur_dPar = Scalar(0);
+        }
+        else
+        {
+          data.cavityFluxCur =
+            m_input.Kar * (data.pv - data.par)
+            + m_input.Kp * (data.par - data.pAtCur);
+          data.dCavityFluxCur_dPv = m_input.Kar;
+          data.dCavityFluxCur_dPar = -m_input.Kar + m_input.Kp;
+        }
+
+        // --- Previous step valve state ---
+        const bool mitralOpenPrevious = data.pvPrev <= data.pAtPrev;
+        const bool bothClosedPrevious =
+          data.pAtPrev <= data.pvPrev && data.pvPrev <= data.parPrev;
+
+        if (mitralOpenPrevious)
+        {
+          data.cavityFluxPrev =
+            m_input.Kat * (data.pvPrev - data.pAtPrev);
+        }
+        else if (bothClosedPrevious)
+        {
+          data.cavityFluxPrev =
+            m_input.Kp * (data.pvPrev - data.pAtPrev);
+        }
+        else
+        {
+          data.cavityFluxPrev =
+            m_input.Kar * (data.pvPrev - data.parPrev)
+            + m_input.Kp * (data.parPrev - data.pAtPrev);
+        }
+      }
+
+    private:
+      const Input& m_input;
+  };
 }
 
 #endif

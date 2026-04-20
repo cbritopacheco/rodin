@@ -1,17 +1,10 @@
-/*
- *          Copyright Carlos BRITO PACHECO 2021 - 2026.
- * Distributed under the Boost Software License, Version 1.0.
- *       (See accompanying file LICENSE or copy at
- *          https://www.boost.org/LICENSE_1_0.txt)
- */
 #include <gtest/gtest.h>
 
 #include <algorithm>
 #include <cmath>
 
 #include "Rodin/Heart/CCMLC2014.h"
-#include "Rodin/Heart/CCMLC2014/Numerics/Jacobian.h"
-#include "Rodin/Heart/CCMLC2014/Numerics/Residual.h"
+#include "Rodin/Heart/CCMLC2014/Numerics/DynamicSystem.h"
 
 using namespace Rodin;
 
@@ -146,11 +139,15 @@ TEST(CCMLC2014Test, DynamicJacobianMatchesFiniteDifference)
 {
   auto cardiacInput = makeGenericCardiacInput();
 
-  Model::DenseVector candidateState(CCMLC2014Vars::NVAR);
-  candidateState[CCMLC2014Vars::DISP] = 8e-5;
-  candidateState[CCMLC2014Vars::PV] = 1.0e4;
-  candidateState[CCMLC2014Vars::PAR] = 9.0e3;
-  candidateState[CCMLC2014Vars::PD] = 8.0e3;
+  using InputType = Model::Input;
+  Heart::CCMLC2014::Numerics::DynamicSystem<PassiveLaw, InputType>
+      dynamicSystem(cardiacInput);
+
+  Model::DenseVector candidateState(CCMLC2014Vars::NumberOfVariables);
+  candidateState[CCMLC2014Vars::RadialDisplacement] = 8e-5;
+  candidateState[CCMLC2014Vars::VentricularPressure] = 1.0e4;
+  candidateState[CCMLC2014Vars::ArterialPressure] = 9.0e3;
+  candidateState[CCMLC2014Vars::DistalPressure] = 8.0e3;
 
   Model::State currentState;
   currentState.t = 0.1;
@@ -172,19 +169,21 @@ TEST(CCMLC2014Test, DynamicJacobianMatchesFiniteDifference)
   const Real nextTime = currentState.t + dt;
 
   Model::EvalData evaluationData;
-  Heart::CCMLC2014::Numerics::buildEvalData<PassiveLaw>(
-      cardiacInput, candidateState, currentState, previousState, nextTime, dt, evaluationData);
+  dynamicSystem.buildEvalData(
+      candidateState, currentState, previousState, nextTime, dt, evaluationData);
 
   Model::DenseMatrix analyticalJacobian;
-  Heart::CCMLC2014::Numerics::evaluateDynamicJacobian(cardiacInput, analyticalJacobian, evaluationData, dt);
+  dynamicSystem.evaluateJacobian(evaluationData, analyticalJacobian, dt);
 
-  Model::DenseMatrix finiteDifferenceJacobian(CCMLC2014Vars::NVAR, CCMLC2014Vars::NVAR);
+  Model::DenseMatrix finiteDifferenceJacobian(
+      CCMLC2014Vars::NumberOfVariables, CCMLC2014Vars::NumberOfVariables);
   finiteDifferenceJacobian.setZero();
 
   const Real relativePerturbation = 1e-7;
-  for (Index j = 0; j < CCMLC2014Vars::NVAR; ++j)
+  for (Index j = 0; j < CCMLC2014Vars::NumberOfVariables; ++j)
   {
-    const Real perturbation = relativePerturbation * std::max<Real>(1.0, std::abs(candidateState[j]));
+    const Real perturbation =
+      relativePerturbation * std::max<Real>(1.0, std::abs(candidateState[j]));
     auto statePlus = candidateState;
     auto stateMinus = candidateState;
     statePlus[j] += perturbation;
@@ -192,16 +191,17 @@ TEST(CCMLC2014Test, DynamicJacobianMatchesFiniteDifference)
 
     Model::EvalData evaluationDataPlus;
     Model::EvalData evaluationDataMinus;
-    Heart::CCMLC2014::Numerics::buildEvalData<PassiveLaw>(
-        cardiacInput, statePlus, currentState, previousState, nextTime, dt, evaluationDataPlus);
-    Heart::CCMLC2014::Numerics::buildEvalData<PassiveLaw>(
-        cardiacInput, stateMinus, currentState, previousState, nextTime, dt, evaluationDataMinus);
+    dynamicSystem.buildEvalData(
+        statePlus, currentState, previousState, nextTime, dt, evaluationDataPlus);
+    dynamicSystem.buildEvalData(
+        stateMinus, currentState, previousState, nextTime, dt, evaluationDataMinus);
 
     Model::DenseVector residualPlus;
     Model::DenseVector residualMinus;
-    Heart::CCMLC2014::Numerics::evaluateDynamicResidual(cardiacInput, evaluationDataPlus, residualPlus);
-    Heart::CCMLC2014::Numerics::evaluateDynamicResidual(cardiacInput, evaluationDataMinus, residualMinus);
-    finiteDifferenceJacobian.col(j) = (residualPlus - residualMinus) / (2.0 * perturbation);
+    dynamicSystem.evaluateResidual(evaluationDataPlus, residualPlus);
+    dynamicSystem.evaluateResidual(evaluationDataMinus, residualMinus);
+    finiteDifferenceJacobian.col(j) =
+      (residualPlus - residualMinus) / (2.0 * perturbation);
   }
 
   const Real relativeError =
