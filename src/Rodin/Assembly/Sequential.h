@@ -1054,7 +1054,7 @@ namespace Rodin::Assembly
 
           const auto& vec = lf.getVector();
           for (Eigen::Index i = 0; i < vec.size(); ++i)
-            b.coeffRef(static_cast<Index>(vOff) + i) -= vec.coeff(i);
+            b.coeffRef(static_cast<Index>(vOff) + i) += vec.coeff(i);
         }
 
         // ------------------------------------------------------------
@@ -1356,7 +1356,7 @@ namespace Rodin::Assembly
         }
 
         for (auto& lf : pb.getLFs())
-          b -= lf.getVector();
+          b += lf.getVector();
 
         // ------------------------------------------------------------
         // Finalize: Sparse build; Dense eliminate afterwards

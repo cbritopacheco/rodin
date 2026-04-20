@@ -533,10 +533,10 @@ namespace Rodin::Assembly
           }
         }
 
-        // Preassembled linear forms: b += -LF
+        // Preassembled linear forms: b += LF
         for (auto& lf : pb.getLFs())
         {
-          ierr = VecAXPY(b, -1.0, lf.getVector());
+          ierr = VecAXPY(b, 1.0, lf.getVector());
           assert(ierr == PETSC_SUCCESS);
         }
 
@@ -1000,7 +1000,7 @@ namespace Rodin::Assembly
             const PetscScalar val = arr[i - lo];
             if (val != PetscScalar(0))
             {
-              ierr = VecSetValue(b, static_cast<PetscInt>(vOff) + i, -val, ADD_VALUES);
+              ierr = VecSetValue(b, static_cast<PetscInt>(vOff) + i, val, ADD_VALUES);
               assert(ierr == PETSC_SUCCESS);
             }
           }

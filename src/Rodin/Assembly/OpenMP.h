@@ -1070,7 +1070,7 @@ namespace Rodin::Assembly
 
           // Preassembled linear forms (serial)
           for (auto& lf : pb.getLFs())
-            b -= lf.getVector();
+            b += lf.getVector();
 
           // ---------------- Reduce RHS chunks into b ----------------
           for (int tid = 0; tid < tc; ++tid)
@@ -1291,7 +1291,7 @@ namespace Rodin::Assembly
 
           // Preassembled linear forms (serial)
           for (auto& lf : pb.getLFs())
-            b -= lf.getVector();
+            b += lf.getVector();
 
           // Dense elimination afterwards
           for (Index idx = 0; idx < static_cast<Index>(rows); ++idx)
@@ -1743,7 +1743,7 @@ namespace Rodin::Assembly
 
           const auto& vec = lf.getVector();
           for (Eigen::Index i = 0; i < vec.size(); ++i)
-            b.coeffRef(static_cast<Index>(vOff) + i) -= vec.coeff(i);
+            b.coeffRef(static_cast<Index>(vOff) + i) += vec.coeff(i);
         }
 
         // ------------------------------------------------------------------

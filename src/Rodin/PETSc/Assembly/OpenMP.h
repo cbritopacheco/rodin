@@ -686,10 +686,10 @@ namespace Rodin::Assembly
           } // omp parallel
         }
 
-        // Preassembled linear forms (serial) : b += -LF
+        // Preassembled linear forms (serial) : b += LF
         for (auto& lf : pb.getLFs())
         {
-          ierr = VecAXPY(b, -1.0, lf.getVector());
+          ierr = VecAXPY(b, 1.0, lf.getVector());
           assert(ierr == PETSC_SUCCESS);
         }
 
@@ -1274,7 +1274,7 @@ namespace Rodin::Assembly
           {
             if (arr[i] != PetscScalar(0))
             {
-              ierr = VecSetValue(b, static_cast<PetscInt>(vOff) + i, -arr[i], ADD_VALUES);
+              ierr = VecSetValue(b, static_cast<PetscInt>(vOff) + i, arr[i], ADD_VALUES);
               assert(ierr == PETSC_SUCCESS);
             }
           }
