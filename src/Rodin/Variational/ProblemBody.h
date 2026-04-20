@@ -918,6 +918,83 @@ namespace Rodin::Variational
     res.getBFs().add(bfs);
     return res;
   }
+
+  /**
+   * @brief Combines a list of local bilinear form integrators with a
+   * preassembled BilinearForm into a ProblemBody.
+   *
+   * Enables expression chains such as:
+   * @code
+   *   problem = Integral(u, v) - Integral(p, v) + preassembledBF - ...;
+   * @endcode
+   * where the first two Integral terms produce a List<LocalBFI> (via Sum)
+   * and the preassembled BilinearForm is added afterwards.
+   */
+  template <class LHSScalar, class OperatorType>
+  auto
+  operator+(
+      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSScalar>>& lbfis,
+      const BilinearFormBase<OperatorType>& bf)
+  {
+    using RHSScalar = typename FormLanguage::Traits<
+      std::remove_reference_t<OperatorType>>::ScalarType;
+    using ScalarType = typename FormLanguage::Sum<LHSScalar, RHSScalar>::Type;
+    ProblemBody<OperatorType, void, ScalarType> res;
+    res.getLocalBFIs().add(lbfis);
+    res.getBFs().add(bf);
+    return res;
+  }
+
+  /**
+   * @brief Subtracts a preassembled LinearForm from a list of local bilinear
+   * form integrators to create a ProblemBody.
+   *
+   * Enables expression chains such as:
+   * @code
+   *   problem = Integral(u, v) - Integral(p, v) + Integral(p, q) - loadP0;
+   * @endcode
+   * where the Integral terms produce a List<LocalBFI> and the preassembled
+   * LinearForm is subtracted afterwards.
+   */
+  template <class LHSScalar, class VectorType>
+  auto
+  operator-(
+      const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSScalar>>& lbfis,
+      const LinearFormBase<VectorType>& lf)
+  {
+    using RHSScalar = typename FormLanguage::Traits<
+      std::remove_reference_t<VectorType>>::ScalarType;
+    using ScalarType = typename FormLanguage::Minus<LHSScalar, RHSScalar>::Type;
+    ProblemBody<void, VectorType, ScalarType> res;
+    res.getLocalBFIs().add(lbfis);
+    res.getLFs().add(lf);
+    return res;
+  }
+
+  /**
+   * @brief Subtracts a preassembled LinearForm from a ProblemBody that has
+   * an OperatorType but no VectorType yet.
+   *
+   * Enables expression chains such as:
+   * @code
+   *   problem = Integral(u, v) - Integral(p, v) + preassembledBF - loadP0;
+   * @endcode
+   * where the chain first produces ProblemBody<Op, void, S> (after adding
+   * the preassembled BF) and then the LinearForm introduces the VectorType.
+   */
+  template <class OperatorType, class LHSScalar, class VectorType>
+  auto
+  operator-(
+      const ProblemBody<OperatorType, void, LHSScalar>& pb,
+      const LinearFormBase<VectorType>& lf)
+  {
+    using RHSScalar = typename FormLanguage::Traits<
+      std::remove_reference_t<VectorType>>::ScalarType;
+    using ScalarType = typename FormLanguage::Minus<LHSScalar, RHSScalar>::Type;
+    ProblemBody<OperatorType, VectorType, ScalarType> res(pb);
+    res.getLFs().add(lf);
+    return res;
+  }
 }
 
 #endif
