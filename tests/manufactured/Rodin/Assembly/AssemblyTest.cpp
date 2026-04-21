@@ -477,8 +477,11 @@ namespace Rodin::Tests::Manufactured::Assembly
   }
 
   /**
-   * @brief 1-D P1 mass matrix row-sum equals the mesh length (= 1 after
-   * scaling), since ∑_j M_ij summed over all i,j equals ∫_Ω 1 dΩ = length.
+   * @brief 1-D P1 mass matrix: (M * ones).sum() equals the domain length.
+   *
+   * By partition of unity, ∑_i φ_i(x) = 1 for all x, so
+   * (M * ones)_i = ∑_j M_ij = ∫_Ω φ_i dΩ, and summing over i gives
+   * ∑_i ∫_Ω φ_i dΩ = ∫_Ω 1 dΩ = |Ω| = 1 (after scaling to [0,1]).
    */
   TEST_F(Assembly_Segment_Test, P1MassMatrix_SumEqualsLength)
   {
