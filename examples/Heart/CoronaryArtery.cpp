@@ -1,3 +1,13 @@
+/**
+ * @file CoronaryArtery.cpp
+ * @brief Driver for the coupled LV-0D / coronary 3D Newtonian flow example.
+ *
+ * This executable configures and runs `CoupledLV0DCoronary3D` with default
+ * paths for the example mesh and output files:
+ * - Mesh: `../resources/examples/Heart/CoronaryArtery_Fluid.medit.mesh`
+ * - XDMF basename: `CoronaryArtery`
+ * - CSV output: `CoronaryArtery.csv`
+ */
 #include <exception>
 #include <iostream>
 
