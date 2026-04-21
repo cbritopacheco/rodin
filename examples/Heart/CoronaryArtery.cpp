@@ -296,8 +296,8 @@ int main(int argc, char** argv)
     const Real eps = 1e-12;
 
     // Newtonian fluid parameters for the 3D coronary solve
-    const Real rho = 1.0;
-    const Real mu  = 0.01;
+    const Real rho = 1060.0;
+    const Real mu  = 3.5e-3;
 
     // Shared time step with the 0D model
     const Real dt = 1e-3;
@@ -305,6 +305,7 @@ int main(int argc, char** argv)
 
     Mesh mesh;
     mesh.load("CoronaryArtery.mesh", IO::FileFormat::MEDIT);
+    mesh.scale(1.0e-3);
 
     Alert::Info() << "Computing connectivity for CoronaryArtery.mesh ..."
                   << Alert::Raise;
@@ -356,11 +357,11 @@ int main(int argc, char** argv)
     for (const Attribute tag : outlets)
     {
       RCR bc;
-      bc.Rp   = 100.0;
-      bc.C    = 1.0;
-      bc.Rd   = 300.0;
-      bc.pd   = 0.0;
-      bc.pc   = bc.pd;
+      bc.Rp = 1e9;
+      bc.Rd = 5e9;
+      bc.C  = 1e-10;
+      bc.pd = 8000.0;
+      bc.pc = bc.pd;
       bc.pout = bc.pd;
       wk.emplace(tag, bc);
     }
@@ -457,12 +458,12 @@ int main(int argc, char** argv)
         + BoundaryIntegral(pin * Dot(v, n)).over(inlet)
 
         // One RCR pressure traction per outlet
-        - BoundaryIntegral(wk[4].pout * Dot(v, n)).over(4)
-        - BoundaryIntegral(wk[5].pout * Dot(v, n)).over(5)
-        - BoundaryIntegral(wk[6].pout * Dot(v, n)).over(6)
-        - BoundaryIntegral(wk[7].pout * Dot(v, n)).over(7)
-        - BoundaryIntegral(wk[8].pout * Dot(v, n)).over(8)
-        - BoundaryIntegral(wk[9].pout * Dot(v, n)).over(9)
+        + BoundaryIntegral(wk[4].pout * Dot(v, n)).over(4)
+        + BoundaryIntegral(wk[5].pout * Dot(v, n)).over(5)
+        + BoundaryIntegral(wk[6].pout * Dot(v, n)).over(6)
+        + BoundaryIntegral(wk[7].pout * Dot(v, n)).over(7)
+        + BoundaryIntegral(wk[8].pout * Dot(v, n)).over(8)
+        + BoundaryIntegral(wk[9].pout * Dot(v, n)).over(9)
 
         // Outlet backflow stabilization
         + BoundaryIntegral(0.5 * rho * beta * Dot(u, v)).over(4)
@@ -488,9 +489,29 @@ int main(int argc, char** argv)
       // 3) Diagnostics: inlet flux
       //----------------------------------------------------------------------
 
+      std::cout << "  pin = " << pin << '\n';
+
       flux = BoundaryIntegral(Dot(u.getSolution(), n), qFlux).over(inlet);
       flux.assemble();
       const Real Qin = flux(one);
+      std::cout << "  Qin = " << Qin << '\n';
+
+      Real sumQout = 0.0;
+      for (const Attribute tag : outlets)
+      {
+        flux = BoundaryIntegral(Dot(u.getSolution(), n), qFlux).over(tag);
+        flux.assemble();
+        const Real Qout = flux(one);
+        sumQout += Qout;
+
+        std::cout << "  outlet " << tag
+                  << ": Qout = " << Qout
+                  << ", pout = " << wk[tag].pout << '\n';
+      }
+      std::cout << "  Qin + sumQout = " << Qin + sumQout << '\n';
+
+      flux = BoundaryIntegral(Dot(u.getSolution(), n), qFlux).over(inlet);
+      flux.assemble();
 
       inletPressureFile << s.t << " " << pin << "\n";
       inletFluxFile << s.t << " " << Qin << "\n";
