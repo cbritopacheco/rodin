@@ -17,9 +17,14 @@ namespace Rodin::Examples::Heart
   using namespace Rodin::Geometry;
   using namespace Rodin::Variational;
 
+  CoupledLV0DCoronary3D::CoupledLV0DCoronary3D()
+    : CoupledLV0DCoronary3D(Config{})
+  {
+  }
+
   CoupledLV0DCoronary3D::CoupledLV0DCoronary3D(const Config& cfg)
     : m_cfg(cfg),
-      m_model(m_input)
+      m_model(std::in_place, m_input)
   {
   }
 
@@ -159,7 +164,8 @@ namespace Rodin::Examples::Heart
       m_input.passiveEnergy = PassiveEnergy(hp);
     }
 
-    m_model.setMaxIterations(200)
+    m_model.emplace(m_input);
+    m_model->setMaxIterations(200)
            .setAbsoluteTolerance(1e-8)
            .setRelativeTolerance(1e-8)
            .setStepTolerance(1e-10)
@@ -178,7 +184,7 @@ namespace Rodin::Examples::Heart
     s0.kc = s0.gamma * s0.gamma;
     s0.tauc = s0.gamma * s0.beta;
 
-    m_model.initialize(s0);
+    m_model->initialize(s0);
   }
 
   void CoupledLV0DCoronary3D::setupMeshAndSpaces()
@@ -242,7 +248,7 @@ namespace Rodin::Examples::Heart
 
   void CoupledLV0DCoronary3D::printInitialState() const
   {
-    const auto& s = m_model.getState();
+    const auto& s = m_model->getState();
     std::cout << "Initial 0D state:\n"
               << "  y     = " << s.y << '\n'
               << "  v     = " << s.v << '\n'
@@ -258,7 +264,7 @@ namespace Rodin::Examples::Heart
 
   bool CoupledLV0DCoronary3D::advance0D()
   {
-    const auto rep = m_model.step(m_cfg.dt);
+    const auto rep = m_model->step(m_cfg.dt);
     std::cout << "  0D Newton step: "
               << (rep.converged ? "converged" : "not converged")
               << ", iterations = " << rep.iterations
@@ -270,7 +276,7 @@ namespace Rodin::Examples::Heart
 
   void CoupledLV0DCoronary3D::solve3D()
   {
-    const auto& s = m_model.getState();
+    const auto& s = m_model->getState();
     const Real pin = s.par;
 
     const auto n = BoundaryNormal(m_mesh);
@@ -313,7 +319,7 @@ namespace Rodin::Examples::Heart
   void CoupledLV0DCoronary3D::computeFluxesAndUpdateRCR()
   {
     const auto n = BoundaryNormal(m_mesh);
-    const auto& s = m_model.getState();
+    const auto& s = m_model->getState();
 
     (*m_flux) = BoundaryIntegral(Dot(m_u->getSolution(), n), *m_qFlux).over(m_cfg.inlet);
     m_flux->assemble();
@@ -343,13 +349,13 @@ namespace Rodin::Examples::Heart
 
   void CoupledLV0DCoronary3D::writeOutputs() const
   {
-    m_xdmf->write(m_model.getState().t).flush();
+    m_xdmf->write(m_model->getState().t).flush();
   }
 
   CoupledLV0DCoronary3D::StepData CoupledLV0DCoronary3D::collectStepData() const
   {
     StepData d;
-    const auto& s = m_model.getState();
+    const auto& s = m_model->getState();
     d.t = s.t;
     d.pat = m_input.pAt(s.t);
     d.psv = m_input.pSv(s.t);
@@ -476,11 +482,11 @@ namespace Rodin::Examples::Heart
 
     for (int i = 0; i < m_cfg.nsteps; ++i)
     {
-      std::cout << "Step " << i << ": t = " << m_model.getState().t << "\n";
+      std::cout << "Step " << i << ": t = " << m_model->getState().t << "\n";
       if (!advance0D())
       {
         std::cerr << "0D solver failed to converge at step "
-                  << i << ", t = " << m_model.getState().t << "\n";
+                  << i << ", t = " << m_model->getState().t << "\n";
         return 1;
       }
 

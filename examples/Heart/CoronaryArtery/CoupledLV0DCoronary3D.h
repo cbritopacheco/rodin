@@ -66,6 +66,8 @@ namespace Rodin::Examples::Heart
         RCR defaultRCR{1.0e9, 1.0e-10, 5.0e9, 8000.0, 8000.0, 8000.0};
       };
 
+      CoupledLV0DCoronary3D();
+
       explicit CoupledLV0DCoronary3D(const Config& cfg);
 
       ~CoupledLV0DCoronary3D();
@@ -90,12 +92,12 @@ namespace Rodin::Examples::Heart
 
       Model& getModel() noexcept
       {
-        return m_model;
+        return *m_model;
       }
 
       const Model& getModel() const noexcept
       {
-        return m_model;
+        return *m_model;
       }
 
     private:
@@ -149,7 +151,7 @@ namespace Rodin::Examples::Heart
 
       Config m_cfg;
       Model::Input m_input;
-      Model m_model;
+      Optional<Model> m_model;
 
       MeshType m_mesh;
       std::unique_ptr<Rodin::IO::XDMF> m_xdmf;
