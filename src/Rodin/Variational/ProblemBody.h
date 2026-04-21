@@ -427,6 +427,11 @@ namespace Rodin::Variational
         m_bfs.add(pbo.getBFs());
       }
 
+      ProblemBody(const BilinearFormBaseType& bf)
+      {
+        m_bfs.add(bf);
+      }
+
       ProblemBody(const ProblemBody<void, VectorType, Scalar>& pbv)
         : Parent(pbv)
       {
@@ -846,7 +851,7 @@ namespace Rodin::Variational
       const ProblemBody<OperatorType, VectorType, LHSScalar>& pb,
       const BilinearFormBase<OperatorType>& bf)
   {
-    using RHSScalar = typename FormLanguage::Traits<BilinearFormBase<OperatorType>>::ScalarType;
+    using RHSScalar = typename FormLanguage::Traits<std::remove_reference_t<OperatorType>>::ScalarType;
     using ScalarType = typename FormLanguage::Sum<LHSScalar, RHSScalar>::Type;
     ProblemBody<OperatorType, VectorType, ScalarType> res(pb);
     res.getBFs().add(bf);
@@ -870,7 +875,7 @@ namespace Rodin::Variational
   operator+(
       const LocalBilinearFormIntegratorBase<LHSScalar>& bfi, const BilinearFormBase<OperatorType>& bf)
   {
-    using RHSScalar = typename FormLanguage::Traits<BilinearFormBase<OperatorType>>::ScalarType;
+    using RHSScalar = typename FormLanguage::Traits<std::remove_reference_t<OperatorType>>::ScalarType;
     using ScalarType = typename FormLanguage::Sum<LHSScalar, RHSScalar>::Type;
     ProblemBody<OperatorType, void, ScalarType> res;
     res.getLocalBFIs().add(bfi);
@@ -883,7 +888,7 @@ namespace Rodin::Variational
   operator-(
       const BilinearFormBase<OperatorType>& bf, const LinearFormIntegratorBase<RHSScalar>& lfi)
   {
-    using LHSScalar = typename FormLanguage::Traits<BilinearFormBase<OperatorType>>::ScalarType;
+    using LHSScalar = typename FormLanguage::Traits<std::remove_reference_t<OperatorType>>::ScalarType;
     using ScalarType = typename FormLanguage::Minus<LHSScalar, RHSScalar>::Type;
     ProblemBody<OperatorType, void, ScalarType> res;
     res.getBFs().add(bf);
@@ -897,7 +902,7 @@ namespace Rodin::Variational
       const FormLanguage::List<BilinearFormBase<OperatorType>>& bfs,
       const LinearFormIntegratorBase<RHSScalar>& lfi)
   {
-    using LHSScalar = typename FormLanguage::Traits<BilinearFormBase<OperatorType>>::ScalarType;
+    using LHSScalar = typename FormLanguage::Traits<std::remove_reference_t<OperatorType>>::ScalarType;
     using ScalarType = typename FormLanguage::Minus<LHSScalar, RHSScalar>::Type;
     ProblemBody<OperatorType, void, ScalarType> res;
     res.getBFs().add(bfs);
@@ -911,7 +916,7 @@ namespace Rodin::Variational
       const LocalBilinearFormIntegratorBase<LHSScalar>& bfi,
       const FormLanguage::List<BilinearFormBase<OperatorType>>& bfs)
   {
-    using RHSScalar = typename FormLanguage::Traits<BilinearFormBase<OperatorType>>::ScalarType;
+    using RHSScalar = typename FormLanguage::Traits<std::remove_reference_t<OperatorType>>::ScalarType;
     using ScalarType = typename FormLanguage::Sum<LHSScalar, RHSScalar>::Type;
     ProblemBody<OperatorType, void, ScalarType> res;
     res.getLocalBFIs().add(bfi);
@@ -942,6 +947,32 @@ namespace Rodin::Variational
     ProblemBody<OperatorType, void, ScalarType> res;
     res.getLocalBFIs().add(lbfis);
     res.getBFs().add(bf);
+    return res;
+  }
+
+  /**
+   * @brief Subtracts a preassembled LinearForm from a single local bilinear
+   * form integrator to create a ProblemBody.
+   *
+   * Enables expression chains such as:
+   * @code
+   *   problem = Integral(Grad(u), Grad(v)) - assembledLoadForm;
+   * @endcode
+   * where a single Integral term (LocalBFI) is combined with a preassembled
+   * LinearForm.
+   */
+  template <class LHSScalar, class VectorType>
+  auto
+  operator-(
+      const LocalBilinearFormIntegratorBase<LHSScalar>& bfi,
+      const LinearFormBase<VectorType>& lf)
+  {
+    using RHSScalar = typename FormLanguage::Traits<
+      std::remove_reference_t<VectorType>>::ScalarType;
+    using ScalarType = typename FormLanguage::Minus<LHSScalar, RHSScalar>::Type;
+    ProblemBody<void, VectorType, ScalarType> res;
+    res.getLocalBFIs().add(bfi);
+    res.getLFs().add(lf);
     return res;
   }
 
