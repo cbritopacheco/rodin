@@ -1148,7 +1148,7 @@ namespace Rodin::Assembly
 
         // ------------------------
         // Assemble linear terms into b (parallel)
-        // Note: matches your sequential multi-variable sign convention (no minus)
+        // Convention: negate each LFI value, consistent with all other assembly paths.
         // ------------------------
         for (auto& lfi : pb.getLFIs())
         {

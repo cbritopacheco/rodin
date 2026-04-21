@@ -898,8 +898,7 @@ namespace Rodin::Assembly
 
         // ------------------------
         // Assemble linear terms into b
-        // Convention: matches your sequential multi-variable version (no minus).
-        // If you want the single-variable convention (-LF), swap sign here.
+        // Convention: negate each LFI value, consistent with all other assembly paths.
         // ------------------------
         for (auto& lfi : pb.getLFIs())
         {
