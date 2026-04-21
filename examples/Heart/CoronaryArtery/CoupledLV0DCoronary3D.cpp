@@ -9,7 +9,7 @@
 #include <Rodin/Alert.h>
 #include <Rodin/Solver.h>
 
-namespace Examples::Heart
+namespace Rodin::Examples::Heart
 {
   using namespace Rodin;
   using namespace Rodin::Math;
@@ -159,7 +159,6 @@ namespace Examples::Heart
       m_input.passiveEnergy = PassiveEnergy(hp);
     }
 
-    m_model = Model(m_input);
     m_model.setMaxIterations(200)
            .setAbsoluteTolerance(1e-8)
            .setRelativeTolerance(1e-8)
@@ -205,25 +204,25 @@ namespace Examples::Heart
     if (dim != 3)
       throw std::runtime_error("Expected a 3D coronary mesh.");
 
-    m_uh = std::make_unique<H1>(std::integral_constant<size_t, 2>{}, m_mesh, dim);
-    m_ph = std::make_unique<H1>(std::integral_constant<size_t, 1>{}, m_mesh);
+    m_uh = std::make_unique<VelocityFESType>(std::integral_constant<size_t, 2>{}, m_mesh, dim);
+    m_ph = std::make_unique<PressureFESType>(std::integral_constant<size_t, 1>{}, m_mesh);
 
-    m_u = std::make_unique<PETSc::Variational::TrialFunction>(*m_uh);
-    m_p = std::make_unique<PETSc::Variational::TrialFunction>(*m_ph);
-    m_v = std::make_unique<PETSc::Variational::TestFunction>(*m_uh);
-    m_q = std::make_unique<PETSc::Variational::TestFunction>(*m_ph);
+    m_u = std::make_unique<VelocityTrialFunctionType>(*m_uh);
+    m_p = std::make_unique<PressureTrialFunctionType>(*m_ph);
+    m_v = std::make_unique<VelocityTestFunctionType>(*m_uh);
+    m_q = std::make_unique<PressureTestFunctionType>(*m_ph);
     m_u->setName("u");
     m_p->setName("p");
 
-    m_uOld = std::make_unique<PETSc::Variational::GridFunction>(*m_uh);
-    m_pOld = std::make_unique<PETSc::Variational::GridFunction>(*m_ph);
+    m_uOld = std::make_unique<VelocityGridFunctionType>(*m_uh);
+    m_pOld = std::make_unique<PressureGridFunctionType>(*m_ph);
     *m_uOld = Math::Vector<Real>{{0.0, 0.0, 0.0}};
     *m_pOld = 0.0;
 
-    m_one = std::make_unique<PETSc::Variational::GridFunction>(*m_ph);
+    m_one = std::make_unique<PressureGridFunctionType>(*m_ph);
     *m_one = 1.0;
-    m_qFlux = std::make_unique<PETSc::Variational::TestFunction>(*m_ph);
-    m_flux = std::make_unique<LinearForm>(*m_qFlux);
+    m_qFlux = std::make_unique<PressureTestFunctionType>(*m_ph);
+    m_flux = std::make_unique<FluxLinearFormType>(*m_qFlux);
 
     m_xdmf->add("velocity", m_u->getSolution());
     m_xdmf->add("pressure", m_p->getSolution());
@@ -421,7 +420,7 @@ namespace Examples::Heart
       << "tauc\n";
   }
 
-  void CoupledLV0DCoronary3D::writeCSVRow() const
+  void CoupledLV0DCoronary3D::writeCSVRow()
   {
     const StepData d = collectStepData();
     auto get = [](const std::map<Attribute, Real>& m, Attribute a) -> Real

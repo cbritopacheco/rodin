@@ -22,6 +22,18 @@ namespace Rodin::Examples::Heart
       using Real = Rodin::Real;
       using Model = Rodin::Heart::CCMLC2014T<>;
       using Attribute = Rodin::Geometry::Attribute;
+      using MeshType = Rodin::Geometry::Mesh<Rodin::Context::Local>;
+      using VelocityFESType = Rodin::Variational::H1<2, Rodin::Math::Vector<Real>, MeshType>;
+      using PressureFESType = Rodin::Variational::H1<1, Real, MeshType>;
+      using VelocityGridFunctionType = Rodin::PETSc::Variational::GridFunction<VelocityFESType>;
+      using PressureGridFunctionType = Rodin::PETSc::Variational::GridFunction<PressureFESType>;
+      using VelocityTrialFunctionType =
+        Rodin::PETSc::Variational::TrialFunction<VelocityGridFunctionType, VelocityFESType>;
+      using PressureTrialFunctionType =
+        Rodin::PETSc::Variational::TrialFunction<PressureGridFunctionType, PressureFESType>;
+      using VelocityTestFunctionType = Rodin::PETSc::Variational::TestFunction<VelocityFESType>;
+      using PressureTestFunctionType = Rodin::PETSc::Variational::TestFunction<PressureFESType>;
+      using FluxLinearFormType = Rodin::Variational::LinearForm<PressureFESType, ::Vec>;
 
       struct RCR
       {
@@ -54,7 +66,7 @@ namespace Rodin::Examples::Heart
         RCR defaultRCR{1.0e9, 1.0e-10, 5.0e9, 8000.0, 8000.0, 8000.0};
       };
 
-      explicit CoupledLV0DCoronary3D(const Config& cfg = Config());
+      explicit CoupledLV0DCoronary3D(const Config& cfg);
 
       ~CoupledLV0DCoronary3D();
 
@@ -132,29 +144,29 @@ namespace Rodin::Examples::Heart
       void updateHistory();
       void writeOutputs() const;
       void writeCSVHeader();
-      void writeCSVRow() const;
+      void writeCSVRow();
       StepData collectStepData() const;
 
       Config m_cfg;
       Model::Input m_input;
       Model m_model;
 
-      Geometry::Mesh m_mesh;
+      MeshType m_mesh;
       std::unique_ptr<Rodin::IO::XDMF> m_xdmf;
 
-      std::unique_ptr<Variational::H1> m_uh;
-      std::unique_ptr<Variational::H1> m_ph;
+      std::unique_ptr<VelocityFESType> m_uh;
+      std::unique_ptr<PressureFESType> m_ph;
 
-      std::unique_ptr<PETSc::Variational::TrialFunction> m_u;
-      std::unique_ptr<PETSc::Variational::TrialFunction> m_p;
-      std::unique_ptr<PETSc::Variational::TestFunction> m_v;
-      std::unique_ptr<PETSc::Variational::TestFunction> m_q;
+      std::unique_ptr<VelocityTrialFunctionType> m_u;
+      std::unique_ptr<PressureTrialFunctionType> m_p;
+      std::unique_ptr<VelocityTestFunctionType> m_v;
+      std::unique_ptr<PressureTestFunctionType> m_q;
 
-      std::unique_ptr<PETSc::Variational::GridFunction> m_uOld;
-      std::unique_ptr<PETSc::Variational::GridFunction> m_pOld;
-      std::unique_ptr<PETSc::Variational::GridFunction> m_one;
-      std::unique_ptr<PETSc::Variational::TestFunction> m_qFlux;
-      std::unique_ptr<Variational::LinearForm> m_flux;
+      std::unique_ptr<VelocityGridFunctionType> m_uOld;
+      std::unique_ptr<PressureGridFunctionType> m_pOld;
+      std::unique_ptr<PressureGridFunctionType> m_one;
+      std::unique_ptr<PressureTestFunctionType> m_qFlux;
+      std::unique_ptr<FluxLinearFormType> m_flux;
 
       std::map<Attribute, RCR> m_wk;
 
