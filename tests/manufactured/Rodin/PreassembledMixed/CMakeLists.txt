@@ -9,5 +9,5 @@ target_link_libraries(RodinManufacturedPreassembledMixed
 )
 gtest_discover_tests(RodinManufacturedPreassembledMixed
   PROPERTIES
-    LABELS manufactured
+    LABELS unit
 )
