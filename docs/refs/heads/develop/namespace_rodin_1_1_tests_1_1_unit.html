@@ -93,6 +93,10 @@
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
+              class <a href="class_rodin_1_1_tests_1_1_unit_1_1_assembly___open_m_p___problem.html" class="m-doc">Assembly_OpenMP_Problem</a>
+            </dt>
+            <dd>Single-variable Problem: Default assembler (OpenMP when available) produces same operator as Sequential for all 2D geometries.</dd>
+            <dt>
               class <a href="class_rodin_1_1_tests_1_1_unit_1_1_flow_test.html" class="m-doc">FlowTest</a>
             </dt>
             <dd><a href="namespace_rodin_1_1_tests_1_1_unit.html" class="m-doc">Unit</a> tests for Flow class basic functionality.</dd>
@@ -109,6 +113,171 @@
         <section id="func-members">
           <h2><a href="#func-members">Functions</a></h2>
           <dl class="m-doc">
+            <dt id="a8191eaf8134cce58c13efba72e30f2d2">
+              <span class="m-doc-wrap-bumper"><a href="#a8191eaf8134cce58c13efba72e30f2d2" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_unit_1_1_assembly___open_m_p___linear_form.html" class="m-doc">Assembly_<wbr />OpenMP_<wbr />LinearForm</a>,
+              ConstantLoad_MatchesSequential_P1)</span>
+            </dt>
+            <dd>Constant load f = 1: OpenMP result equals Sequential result.</dd>
+            <dt id="aaebcbbed336d5897095d60779a9ba0f4">
+              <span class="m-doc-wrap-bumper"><a href="#aaebcbbed336d5897095d60779a9ba0f4" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_unit_1_1_assembly___open_m_p___linear_form.html" class="m-doc">Assembly_<wbr />OpenMP_<wbr />LinearForm</a>,
+              ConstantLoad_MatchesSequential_P0)</span>
+            </dt>
+            <dd>P0 constant load: OpenMP result equals Sequential result.</dd>
+            <dt id="ab40cdc06fa19167b930604e81c4dcbe4">
+              <span class="m-doc-wrap-bumper"><a href="#ab40cdc06fa19167b930604e81c4dcbe4" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_unit_1_1_assembly___open_m_p___bilinear_form.html" class="m-doc">Assembly_<wbr />OpenMP_<wbr />BilinearForm</a>,
+              P1StiffnessMatrix_MatchesSequential)</span>
+            </dt>
+            <dd>P1 stiffness matrix: OpenMP result equals Sequential result.</dd>
+            <dt id="ad032c52da75ba808c704ebd3f5144544">
+              <span class="m-doc-wrap-bumper"><a href="#ad032c52da75ba808c704ebd3f5144544" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_unit_1_1_assembly___open_m_p___bilinear_form.html" class="m-doc">Assembly_<wbr />OpenMP_<wbr />BilinearForm</a>,
+              P1MassMatrix_MatchesSequential)</span>
+            </dt>
+            <dd>P1 mass matrix: OpenMP result equals Sequential result.</dd>
+            <dt id="a702b942d66eb56efe7383ca05ffa152d">
+              <span class="m-doc-wrap-bumper"><a href="#a702b942d66eb56efe7383ca05ffa152d" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_unit_1_1_assembly___open_m_p___bilinear_form.html" class="m-doc">Assembly_<wbr />OpenMP_<wbr />BilinearForm</a>,
+              P0MassMatrix_MatchesSequential)</span>
+            </dt>
+            <dd>P0 mass matrix: OpenMP result equals Sequential result.</dd>
+            <dt id="a2f272ae3da0186dbf7b7ea869f8071c6">
+              <span class="m-doc-wrap-bumper"><a href="#a2f272ae3da0186dbf7b7ea869f8071c6" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_unit_1_1_assembly___open_m_p___bilinear_form.html" class="m-doc">Assembly_<wbr />OpenMP_<wbr />BilinearForm</a>,
+              NonSquare_P0test_P1trial_MatchesSequential)</span>
+            </dt>
+            <dd>Non-square mixed BF (P0 test × P1 trial): OpenMP equals Sequential.</dd>
+            <dt id="a48cedfdb1273d164776380bbe27f0a89">
+              <span class="m-doc-wrap-bumper"><a href="#a48cedfdb1273d164776380bbe27f0a89" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_unit_1_1_assembly___open_m_p___bilinear_form.html" class="m-doc">Assembly_<wbr />OpenMP_<wbr />BilinearForm</a>,
+              SingleThread_EqualsSequential_P1Stiffness)</span>
+            </dt>
+            <dd>OpenMP with explicit thread count 1 gives same result as Sequential.</dd>
+            <dt id="a310a6e44e45216ed049af6c75d8fa6e1">
+              <span class="m-doc-wrap-bumper"><a href="#a310a6e44e45216ed049af6c75d8fa6e1" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_Sequential_LinearForm,
+              VectorSize_P1_4x4)</span>
+            </dt>
+            <dd>Assembled vector has the expected size (one entry per DOF).</dd>
+            <dt id="a8833be2f7d019d0dae33a92942143b78">
+              <span class="m-doc-wrap-bumper"><a href="#a8833be2f7d019d0dae33a92942143b78" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_Sequential_LinearForm,
+              VectorSize_P1_Quad_4x4)</span>
+            </dt>
+            <dd>Assembled vector has the expected size for Quadrilateral meshes.</dd>
+            <dt id="a3c7b6c38fcb3e30439cdd82ec957e372">
+              <span class="m-doc-wrap-bumper"><a href="#a3c7b6c38fcb3e30439cdd82ec957e372" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_Sequential_LinearForm,
+              ConstantRHS_EntriesPositive_P1)</span>
+            </dt>
+            <dd>All entries of ∫ 1·v dΩ are positive for a positive basis.</dd>
+            <dt id="a18a683a1e59cc35159739b70e225fa9d">
+              <span class="m-doc-wrap-bumper"><a href="#a18a683a1e59cc35159739b70e225fa9d" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_Sequential_LinearForm,
+              ConstantRHS_SumEqualsArea_P0)</span>
+            </dt>
+            <dd>∫ 1·v dΩ with P0 sums to area (each element has exactly one DOF and the mass is |K|).</dd>
+            <dt id="adc5142d1035562fb5e27d560d60daa53">
+              <span class="m-doc-wrap-bumper"><a href="#adc5142d1035562fb5e27d560d60daa53" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_Sequential_LinearForm,
+              LinearScaling_P1)</span>
+            </dt>
+            <dd>Scaling: ∫ 2·v dΩ = 2 · ∫ 1·v dΩ.</dd>
+            <dt id="a748ab4b375db67a0065ce72c42d33814">
+              <span class="m-doc-wrap-bumper"><a href="#a748ab4b375db67a0065ce72c42d33814" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_Sequential_BilinearForm_Sparse,
+              MatrixDimensions_P1_4x4)</span>
+            </dt>
+            <dd>Stiffness matrix has correct dimensions.</dd>
+            <dt id="a5ecf0c2670302f86151386e6683e132e">
+              <span class="m-doc-wrap-bumper"><a href="#a5ecf0c2670302f86151386e6683e132e" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_Sequential_BilinearForm_Sparse,
+              P0MassMatrix_IsDiagonal)</span>
+            </dt>
+            <dd>P0 mass matrix is diagonal (each element has one DOF).</dd>
+            <dt id="ad3de110fcdf3fd5f1f858cc39af4cf24">
+              <span class="m-doc-wrap-bumper"><a href="#ad3de110fcdf3fd5f1f858cc39af4cf24" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_Sequential_BilinearForm_Sparse,
+              P1MassMatrix_IsSymmetric)</span>
+            </dt>
+            <dd>P1 mass matrix is symmetric.</dd>
+            <dt id="a48a317c6e103948f113e3f34a68637b9">
+              <span class="m-doc-wrap-bumper"><a href="#a48a317c6e103948f113e3f34a68637b9" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_Sequential_BilinearForm_Sparse,
+              P1StiffnessMatrix_IsSymmetric)</span>
+            </dt>
+            <dd>P1 stiffness matrix is symmetric.</dd>
+            <dt id="a738aa2badcc9a90aa127f3dd768fcdb7">
+              <span class="m-doc-wrap-bumper"><a href="#a738aa2badcc9a90aa127f3dd768fcdb7" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_Sequential_BilinearForm_Sparse,
+              P1MassMatrix_SumEqualsArea)</span>
+            </dt>
+            <dd>P1 mass matrix row-sum equals domain area (∑_j M_ij summed over all i,j equals ∫_Ω 1 dΩ = area(Ω)). For UniformGrid({4,4}) the domain is [0,3]x[0,3] so area = 9.</dd>
+            <dt id="a942bb9b6f2c63e3eeea4d6feb7770743">
+              <span class="m-doc-wrap-bumper"><a href="#a942bb9b6f2c63e3eeea4d6feb7770743" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_Sequential_BilinearForm_Sparse,
+              NonSquare_P0test_P1trial_Dimensions)</span>
+            </dt>
+            <dd>Non-square BF: P1 trial, P0 test. Dimensions must match (testSize × trialSize).</dd>
+            <dt id="a9e6e8a16ef848bd8b8b5805d3f81b9a4">
+              <span class="m-doc-wrap-bumper"><a href="#a9e6e8a16ef848bd8b8b5805d3f81b9a4" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_Sequential_Problem_SingleVar,
+              Dimensions_P1_4x4)</span>
+            </dt>
+            <dd>Single-variable Problem: assembled system has correct dimensions.</dd>
+            <dt id="addc8c10374c691b351243fa4a76b3e29">
+              <span class="m-doc-wrap-bumper"><a href="#addc8c10374c691b351243fa4a76b3e29" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_Sequential_Problem_SingleVar,
+              DirichletBC_RowIsIdentity_P1)</span>
+            </dt>
+            <dd>DirichletBC is enforced: fixed DOF row is an identity row and RHS entry equals the prescribed value.</dd>
+            <dt id="aa720788b195d7266ee5c9fe6aad54e3b">
+              <span class="m-doc-wrap-bumper"><a href="#aa720788b195d7266ee5c9fe6aad54e3b" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_Sequential_Problem_SingleVar,
+              PreassembledBF_MatchesIntegral_P1)</span>
+            </dt>
+            <dd>Preassembled BF added to a single-variable Problem produces the same matrix as assembling the integral directly.</dd>
+            <dt id="a942f75c15ac8c7361250ced47374e8bb">
+              <span class="m-doc-wrap-bumper"><a href="#a942f75c15ac8c7361250ced47374e8bb" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_Sequential_Problem_SingleVar,
+              PreassembledLF_MatchesIntegral_P1)</span>
+            </dt>
+            <dd>Preassembled LF added to a single-variable Problem produces the same RHS vector as assembling the integral directly.</dd>
+            <dt id="a6502fe2cb42f9881aac6aaaa7a9223f3">
+              <span class="m-doc-wrap-bumper"><a href="#a6502fe2cb42f9881aac6aaaa7a9223f3" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_Sequential_Problem_MultiVar,
+              Dimensions_P0P1_4x4)</span>
+            </dt>
+            <dd>Multi-variable Problem: global system has combined DOF count.</dd>
+            <dt id="a6431dbcc34d098c7872151b5403bcce7">
+              <span class="m-doc-wrap-bumper"><a href="#a6431dbcc34d098c7872151b5403bcce7" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_Sequential_Problem_MultiVar,
+              PreassembledBF_BlockOffset_P0P1)</span>
+            </dt>
+            <dd>Multi-variable preassembled BF: block [p,q] placed at correct offset in the global matrix.</dd>
+            <dt id="a961a694f3782d9b42066ba146b269067">
+              <span class="m-doc-wrap-bumper"><a href="#a961a694f3782d9b42066ba146b269067" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_Sequential_Problem_MultiVar,
+              PreassembledLF_BlockOffset_P0P1)</span>
+            </dt>
+            <dd>Multi-variable preassembled LF: block [q] placed at correct offset in the global RHS vector.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#ade45a2c5035fbabdc80c83e3ec5ee3cd" class="m-doc">makeAllGeomMesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> geom,
+              size_t n = 4) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;</span>
+            </dt>
+            <dd>Creates a mesh with minimal connectivity for cell integration.</dd>
+            <dt id="a8102e5a0eb12162816aa727b21f38645">
+              <span class="m-doc-wrap-bumper"><a href="#a8102e5a0eb12162816aa727b21f38645" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_unit_1_1_assembly___sequential___all_geometries.html" class="m-doc">Assembly_<wbr />Sequential_<wbr />AllGeometries</a>,
+              LF_VectorSize_P1)</span>
+            </dt>
+            <dd>P1 LinearForm vector size equals the FES DOF count for every supported geometry type.</dd>
+            <dt id="ad948610ec6a5ed4fb64af94e14314a70">
+              <span class="m-doc-wrap-bumper"><a href="#ad948610ec6a5ed4fb64af94e14314a70" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_unit_1_1_assembly___sequential___all_geometries.html" class="m-doc">Assembly_<wbr />Sequential_<wbr />AllGeometries</a>,
+              LF_VectorSize_P0)</span>
+            </dt>
+            <dd>P0 LinearForm vector size equals the FES DOF count (= cell count) for every supported geometry type.</dd>
+            <dt id="a7dc87dc5298ae6318dff86619fbddd18">
+              <span class="m-doc-wrap-bumper"><a href="#a7dc87dc5298ae6318dff86619fbddd18" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_unit_1_1_assembly___sequential___all_geometries.html" class="m-doc">Assembly_<wbr />Sequential_<wbr />AllGeometries</a>,
+              BF_StiffnessMatrix_Dimensions_P1)</span>
+            </dt>
+            <dd>P1 stiffness matrix has correct square dimensions for every supported geometry type.</dd>
+            <dt id="acd3bf5df7e9aaeee1776a81897893476">
+              <span class="m-doc-wrap-bumper"><a href="#acd3bf5df7e9aaeee1776a81897893476" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_unit_1_1_assembly___sequential___all_geometries.html" class="m-doc">Assembly_<wbr />Sequential_<wbr />AllGeometries</a>,
+              BF_MassMatrix_IsSymmetric_P1)</span>
+            </dt>
+            <dd>P1 mass matrix is symmetric for every supported geometry type.</dd>
+            <dt id="a29a176b3cfbdceea26311b883179a775">
+              <span class="m-doc-wrap-bumper"><a href="#a29a176b3cfbdceea26311b883179a775" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_unit_1_1_assembly___sequential___all_geometries.html" class="m-doc">Assembly_<wbr />Sequential_<wbr />AllGeometries</a>,
+              BF_StiffnessMatrix_IsSymmetric_P1)</span>
+            </dt>
+            <dd>P1 stiffness matrix is symmetric for every supported geometry type.</dd>
+            <dt id="a711756df926a13875317f9c318e6bb22">
+              <span class="m-doc-wrap-bumper"><a href="#a711756df926a13875317f9c318e6bb22" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_unit_1_1_assembly___sequential___all_geometries.html" class="m-doc">Assembly_<wbr />Sequential_<wbr />AllGeometries</a>,
+              BF_P0MassMatrix_IsDiagonal)</span>
+            </dt>
+            <dd>P0 mass matrix is diagonal for every supported geometry type (each cell has exactly one P0 DOF, so there is no inter-cell coupling).</dd>
+            <dt id="a2896750c40adf2e57e1ac590a088224a">
+              <span class="m-doc-wrap-bumper"><a href="#a2896750c40adf2e57e1ac590a088224a" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_unit_1_1_assembly___sequential___all_geometries.html" class="m-doc">Assembly_<wbr />Sequential_<wbr />AllGeometries</a>,
+              LF_LoadVector_P0_EntriesPositive)</span>
+            </dt>
+            <dd>P0 load vector: all entries are positive (element measure &gt; 0) for every supported geometry type.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">static auto <a href="#a876a122c23dbcba1d5f263a672584e63" class="m-doc">makeMixed2DMesh</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;</span>
             </dt>
@@ -361,6 +530,71 @@
               DifferentInitialConditions)</span>
             </dt>
             <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> with different initial conditions.</dd>
+            <dt id="a1b1d23e2d1e6a5d9946a8e4b60a34b60">
+              <span class="m-doc-wrap-bumper"><a href="#a1b1d23e2d1e6a5d9946a8e4b60a34b60" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_MPI_Iteration,
+              TriangleMesh_HasCells)</span>
+            </dt>
+            <dd>MPIIteration over a Triangle mesh yields at least one cell.</dd>
+            <dt id="a24233625411c4d87c47c8d433da45b79">
+              <span class="m-doc-wrap-bumper"><a href="#a24233625411c4d87c47c8d433da45b79" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_MPI_Iteration,
+              QuadrilateralMesh_HasCells)</span>
+            </dt>
+            <dd>MPIIteration over a Quadrilateral mesh yields at least one cell.</dd>
+            <dt id="ac0f3b9b4095209afdba6175e70d3484b">
+              <span class="m-doc-wrap-bumper"><a href="#ac0f3b9b4095209afdba6175e70d3484b" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_MPI_Iteration,
+              GlobalCellCount_MatchesLocal_Triangle)</span>
+            </dt>
+            <dd>Global cell count equals the sum of local counts across all ranks.</dd>
+            <dt id="aae75fa41e0a44a3570ef2083c27a02af">
+              <span class="m-doc-wrap-bumper"><a href="#aae75fa41e0a44a3570ef2083c27a02af" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_MPI_DirichletBC,
+              ConstantBC_NonEmpty_Triangle)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> DirichletBC assembly yields at least one boundary DOF entry on a Triangle mesh with a constant boundary condition.</dd>
+            <dt id="aff1c40166686af8dcdc99c0166dd3b55">
+              <span class="m-doc-wrap-bumper"><a href="#aff1c40166686af8dcdc99c0166dd3b55" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_MPI_DirichletBC,
+              SingleRank_MatchesSequentialCount_Triangle)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> DirichletBC assembly: boundary DOF count is consistent with the sequential assembly on the same mesh for a 1-rank run.</dd>
+            <dt id="a1952950a06a804f64a216a7749920ef4">
+              <span class="m-doc-wrap-bumper"><a href="#a1952950a06a804f64a216a7749920ef4" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_MPI_DirichletBC,
+              ConstantBC_Values_AllEqualPrescribed_Triangle)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> DirichletBC assembly: boundary DOF values are correct for a constant boundary condition.</dd>
+            <dt id="aae32ec1d5cf0b7c442447343f739542c">
+              <span class="m-doc-wrap-bumper"><a href="#aae32ec1d5cf0b7c442447343f739542c" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_MPI_Iteration,
+              SegmentMesh_HasCells)</span>
+            </dt>
+            <dd>MPIIteration over a 1D Segment mesh yields at least one cell.</dd>
+            <dt id="a7afbed21ee38431dd04353f579f40eb7">
+              <span class="m-doc-wrap-bumper"><a href="#a7afbed21ee38431dd04353f579f40eb7" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_MPI_Iteration,
+              GlobalCellCount_MatchesLocal_Segment)</span>
+            </dt>
+            <dd>Global cell count for a 1D Segment mesh equals the expected value.</dd>
+            <dt id="a88a21589a95a34c105776bf0e27dae98">
+              <span class="m-doc-wrap-bumper"><a href="#a88a21589a95a34c105776bf0e27dae98" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_MPI_Iteration,
+              TetrahedronMesh_HasCells)</span>
+            </dt>
+            <dd>MPIIteration over a Tetrahedron mesh yields at least one cell.</dd>
+            <dt id="aa37fd487c9191208b0d46a5381172280">
+              <span class="m-doc-wrap-bumper"><a href="#aa37fd487c9191208b0d46a5381172280" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_MPI_Iteration,
+              HexahedronMesh_HasCells)</span>
+            </dt>
+            <dd>MPIIteration over a Hexahedron mesh yields at least one cell.</dd>
+            <dt id="a14e81f1706bf0f021ea1d5c5493c9f41">
+              <span class="m-doc-wrap-bumper"><a href="#a14e81f1706bf0f021ea1d5c5493c9f41" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_MPI_DirichletBC,
+              ConstantBC_Segment)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> DirichletBC assembly on Segment (1D) mesh: at least one boundary DOF is found and its value matches the prescribed constant.</dd>
+            <dt id="ab546b6e465707b15658c3dd4ccd2c472">
+              <span class="m-doc-wrap-bumper"><a href="#ab546b6e465707b15658c3dd4ccd2c472" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_MPI_DirichletBC,
+              ConstantBC_NonEmpty_Tetrahedron)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> DirichletBC assembly on Tetrahedron (3D) mesh: at least one boundary DOF found globally.</dd>
+            <dt id="aa06d94e010bcd25ed78a2413b62916a8">
+              <span class="m-doc-wrap-bumper"><a href="#aa06d94e010bcd25ed78a2413b62916a8" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_MPI_DirichletBC,
+              ConstantBC_NonEmpty_Hexahedron)</span>
+            </dt>
+            <dd><a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> DirichletBC assembly on Hexahedron (3D) mesh: at least one boundary DOF found globally.</dd>
             <dt id="ab890ec53040a969469ec1d4188be497e">
               <span class="m-doc-wrap-bumper"><a href="#ab890ec53040a969469ec1d4188be497e" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
               GetPolytopeCount_Cells)</span>
@@ -593,10 +827,38 @@
               <span class="m-doc-wrap-bumper">auto <a href="#ab3b7bb1cfc8709f2b327bf1b03624c4a" class="m-doc">findInteriorFacePoint</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&amp; mesh) -&gt; std::pair&lt;bool, <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&gt;</span>
             </dt>
             <dd>Finds an interior face in the mesh and returns a point at its midpoint.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ae1e2b8a7d8aae341ad50f5e1462f94d3" class="m-doc">TEST</a>(</span><span class="m-doc-wrap">MixedProblem_PreassembledBF,
+              SparseP0P1_MatrixMatchesIntegralOnly)</span>
+            </dt>
+            <dd>Mixed P0/P1 problem: compare integral-only vs preassembled BF.</dd>
+            <dt id="a91a25a0a4bf8ba15c6a327660dd9a878">
+              <span class="m-doc-wrap-bumper"><a href="#a91a25a0a4bf8ba15c6a327660dd9a878" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MixedProblem_PreassembledLF,
+              SparseP0P1_VectorMatchesIntegralOnly)</span>
+            </dt>
+            <dd>Same test for the RHS vector: compare integral-only vs preassembled LinearForm.</dd>
+            <dt id="a22dfa32deb01095a960fc2510ab80cb0">
+              <span class="m-doc-wrap-bumper"><a href="#a22dfa32deb01095a960fc2510ab80cb0" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MixedProblem_PreassembledBF,
+              SolveP0P1_SolutionMatches)</span>
+            </dt>
+            <dd>Verify that a solve using preassembled BF in a mixed Problem produces the same numerical solution as the integral-only version.</dd>
+            <dt id="af771e4caf28dfe5438f1c3798fc52e54">
+              <span class="m-doc-wrap-bumper"><a href="#af771e4caf28dfe5438f1c3798fc52e54" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MixedProblem_PreassembledLF,
+              SolveP0P1_SolutionMatches)</span>
+            </dt>
+            <dd>Verify that a solve using preassembled LF in a mixed Problem produces the same numerical solution as the integral-only version.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ade45a2c5035fbabdc80c83e3ec5ee3cd"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt; Rodin::<wbr />Tests::<wbr />Unit::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ade45a2c5035fbabdc80c83e3ec5ee3cd" class="m-doc-self">makeAllGeomMesh</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> geom,
+              size_t n = 4)</span></span>
+            </h3>
+            <p>Creates a mesh with minimal connectivity for cell integration.</p>
+<p>For each geometry, computes cell→face incidence (needed for boundary detection by BC assemblers) and cell→vertex incidence (for DOF mapping).</p>
+          </div></section>
           <section class="m-doc-details" id="a876a122c23dbcba1d5f263a672584e63"><div>
             <h3>
               <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt; Rodin::<wbr />Tests::<wbr />Unit::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a876a122c23dbcba1d5f263a672584e63" class="m-doc-self">makeMixed2DMesh</a>(</span><span class="m-doc-wrap">)</span></span>
@@ -877,6 +1139,14 @@
                 </tr>
               </tfoot>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="ae1e2b8a7d8aae341ad50f5e1462f94d3"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Unit::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae1e2b8a7d8aae341ad50f5e1462f94d3" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MixedProblem_PreassembledBF,
+              SparseP0P1_MatrixMatchesIntegralOnly)</span></span>
+            </h3>
+            <p>Mixed P0/P1 problem: compare integral-only vs preassembled BF.</p>
+<p>System: Integral(u, v) – Integral(p, v) = 0 (test v in P1) Integral(p, q) = (f, q) (test q in P0)</p><p>We replace the Integral(p, q) block with a preassembled BilinearForm and verify the global matrix matches.</p>
           </div></section>
         </section>
       </div>
