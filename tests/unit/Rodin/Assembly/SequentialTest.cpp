@@ -685,7 +685,9 @@ namespace Rodin::Tests::Unit
       for (typename Math::SparseMatrix<Real>::InnerIterator it(A, k); it; ++it)
       {
         if (it.row() != it.col())
+        {
           EXPECT_NEAR(it.value(), 0.0, 1e-14);
+        }
       }
     }
   }

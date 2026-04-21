@@ -399,4 +399,242 @@ namespace Rodin::Tests::Manufactured::Assembly
     Assembly_P0_2D_Test_8x8,
     ::testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral)
   );
+
+  // =========================================================================
+  // 1-D manufactured tests — Segment
+  // =========================================================================
+
+  /**
+   * @brief 1-D fixture on a Segment mesh (16 cells on [0,1]).
+   */
+  class Assembly_Segment_Test : public ::testing::Test
+  {
+    protected:
+      void SetUp() override
+      {
+        m_mesh = Mesh<Context::Local>::UniformGrid(
+          Polytope::Type::Segment, { 16 });
+        m_mesh.scale(1.0 / 15.0);
+        m_mesh.getConnectivity().compute(1, 0);
+        m_mesh.getConnectivity().compute(0, 1);
+      }
+
+      const Mesh<Context::Local>& getMesh() const { return m_mesh; }
+
+    private:
+      Mesh<Context::Local> m_mesh;
+  };
+
+  /**
+   * @brief 1-D P1 LinearForm vector size equals the FES DOF count.
+   */
+  TEST_F(Assembly_Segment_Test, LF_VectorSize_P1)
+  {
+    const auto& mesh = getMesh();
+    P1 vh(mesh);
+    TestFunction v(vh);
+
+    LinearForm load(v);
+    load = Integral(RealFunction(1.0), v);
+    load.assemble();
+
+    EXPECT_EQ(load.getVector().size(), static_cast<Eigen::Index>(vh.getSize()));
+  }
+
+  /**
+   * @brief 1-D P1 load vector sums to domain length = 1.
+   */
+  TEST_F(Assembly_Segment_Test, LF_LoadVector_SumsToLength)
+  {
+    const auto& mesh = getMesh();
+    P1 vh(mesh);
+    TestFunction v(vh);
+
+    LinearForm load(v);
+    load = Integral(RealFunction(1.0), v);
+    load.assemble();
+
+    EXPECT_NEAR(load.getVector().sum(), 1.0, 1e-12);
+  }
+
+  /**
+   * @brief 1-D P1 stiffness matrix has correct square dimensions.
+   */
+  TEST_F(Assembly_Segment_Test, BF_StiffnessMatrix_CorrectDimensions)
+  {
+    const auto& mesh = getMesh();
+    P1 vh(mesh);
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+
+    BilinearForm stiff(u, v);
+    stiff = Integral(Grad(u), Grad(v));
+    stiff.assemble();
+
+    const auto& A = stiff.getOperator();
+    EXPECT_EQ(A.rows(), static_cast<Eigen::Index>(vh.getSize()));
+    EXPECT_EQ(A.cols(), static_cast<Eigen::Index>(vh.getSize()));
+  }
+
+  /**
+   * @brief 1-D P1 mass matrix row-sum equals the mesh length (= 1 after
+   * scaling), since ∑_j M_ij summed over all i,j equals ∫_Ω 1 dΩ = length.
+   */
+  TEST_F(Assembly_Segment_Test, P1MassMatrix_SumEqualsLength)
+  {
+    const auto& mesh = getMesh();
+    P1 vh(mesh);
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+
+    BilinearForm mass(u, v);
+    mass = Integral(u, v);
+    mass.assemble();
+
+    const auto& M = mass.getOperator();
+    Math::Vector<Real> ones(M.cols());
+    ones.setOnes();
+    EXPECT_NEAR((M * ones).sum(), 1.0, 1e-12);
+  }
+
+  /**
+   * @brief 1-D preassembled BilinearForm matches inline integral.
+   */
+  TEST_F(Assembly_Segment_Test, PreassembledBF_MatchesIntegral_P1)
+  {
+    const auto& mesh = getMesh();
+    P1 vh(mesh);
+
+    // Inline
+    TrialFunction u1(vh);
+    TestFunction  v1(vh);
+    BilinearForm bfInline(u1, v1);
+    bfInline = Integral(Grad(u1), Grad(v1));
+    bfInline.assemble();
+
+    // Preassembled
+    TrialFunction u2(vh);
+    TestFunction  v2(vh);
+    BilinearForm bfPre(u2, v2);
+    bfPre = Integral(Grad(u2), Grad(v2));
+    bfPre.assemble();
+
+    Problem prob(u2, v2);
+    prob = bfPre;
+    prob.assemble();
+
+    const auto& A1 = bfInline.getOperator();
+    const auto& A2 = prob.getLinearSystem().getOperator();
+
+    ASSERT_EQ(A1.rows(), A2.rows());
+    const Math::SparseMatrix<Real> diff = A1 - A2;
+    EXPECT_NEAR(diff.norm(), 0.0, 1e-12);
+  }
+
+  // =========================================================================
+  // 3-D manufactured tests — Hexahedron
+  // =========================================================================
+
+  /**
+   * @brief 3-D fixture on a small Hexahedron mesh (4×4×4 grid on [0,1]³).
+   */
+  class Assembly_Hex_Test : public ::testing::Test
+  {
+    protected:
+      void SetUp() override
+      {
+        m_mesh = Mesh<Context::Local>::UniformGrid(
+          Polytope::Type::Hexahedron, { 4, 4, 4 });
+        m_mesh.scale(1.0 / 3.0);
+        m_mesh.getConnectivity().compute(2, 3);
+        m_mesh.getConnectivity().compute(3, 0);
+      }
+
+      const Mesh<Context::Local>& getMesh() const { return m_mesh; }
+
+    private:
+      Mesh<Context::Local> m_mesh;
+  };
+
+  /**
+   * @brief 3-D Hexahedron: P1 stiffness matrix has correct square dimensions.
+   */
+  TEST_F(Assembly_Hex_Test, StiffnessMatrix_CorrectDimensions)
+  {
+    const auto& mesh = getMesh();
+    P1 vh(mesh);
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+
+    BilinearForm stiff(u, v);
+    stiff = Integral(Grad(u), Grad(v));
+    stiff.assemble();
+
+    const auto& A = stiff.getOperator();
+    EXPECT_EQ(A.rows(), static_cast<Eigen::Index>(vh.getSize()));
+    EXPECT_EQ(A.cols(), static_cast<Eigen::Index>(vh.getSize()));
+  }
+
+  /**
+   * @brief 3-D Hexahedron: P1 stiffness matrix is symmetric.
+   */
+  TEST_F(Assembly_Hex_Test, StiffnessMatrix_IsSymmetric)
+  {
+    const auto& mesh = getMesh();
+    P1 vh(mesh);
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+
+    BilinearForm stiff(u, v);
+    stiff = Integral(Grad(u), Grad(v));
+    stiff.assemble();
+
+    const auto& A = stiff.getOperator();
+    const Math::SparseMatrix<Real> diff = A - Math::SparseMatrix<Real>(A.transpose());
+    EXPECT_NEAR(diff.norm(), 0.0, 1e-12);
+  }
+
+  /**
+   * @brief 3-D Hexahedron: P1 load vector size equals DOF count.
+   */
+  TEST_F(Assembly_Hex_Test, LoadVector_CorrectSize)
+  {
+    const auto& mesh = getMesh();
+    P1 vh(mesh);
+    TestFunction v(vh);
+
+    LinearForm load(v);
+    load = Integral(RealFunction(1.0), v);
+    load.assemble();
+
+    EXPECT_EQ(load.getVector().size(), static_cast<Eigen::Index>(vh.getSize()));
+  }
+
+  /**
+   * @brief 3-D Hexahedron Poisson with affine P1-exact solution (f = 0).
+   */
+  TEST_F(Assembly_Hex_Test, Poisson3D_P1ExactSolution_ZeroError)
+  {
+    const auto& mesh = getMesh();
+    P1 vh(mesh);
+
+    const auto solution = F::x + RealFunction(2.0) * F::y
+                        + RealFunction(3.0) * F::z + RealFunction(1.0);
+    const auto f = RealFunction(0.0);
+
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, solution);
+
+    CG(poisson).solve();
+
+    P1 sh(mesh);
+    GridFunction diff(sh);
+    diff = Pow(u.getSolution() - solution, 2);
+    EXPECT_NEAR(Integral(diff).compute(), 0.0, 1e-12);
+  }
 }
