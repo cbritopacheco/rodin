@@ -630,3 +630,16 @@ gtest_discover_tests(RodinVariationalSparseProblemTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinVariationalMixedProblemPreassembledBFTest MixedProblemPreassembledBFTest.cpp)
+
+target_link_libraries(RodinVariationalMixedProblemPreassembledBFTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational
+  Rodin::Solver)
+gtest_discover_tests(RodinVariationalMixedProblemPreassembledBFTest
+  PROPERTIES
+    LABELS unit
+)
