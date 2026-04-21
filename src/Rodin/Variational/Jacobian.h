@@ -153,7 +153,7 @@ namespace Rodin::Variational
        * @f$ J_{ij}(p) = \frac{\partial u_i}{\partial x_j}(p) @f$
        * Handles mesh inclusion and submesh restrictions automatically.
        */
-      decltype(auto) getValue(const Geometry::Point& p) const
+      const RangeType& getValue(const Geometry::Point& p) const
       {
         static thread_local RangeType s_res;
 

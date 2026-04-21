@@ -170,7 +170,7 @@ namespace Rodin::Variational
        * weighted by the degrees of freedom. Handles mesh inclusion and
        * submesh restrictions automatically.
        */
-      decltype(auto) getValue(const Geometry::Point& p) const
+      const RangeType& getValue(const Geometry::Point& p) const
       {
         static thread_local RangeType s_res;
 

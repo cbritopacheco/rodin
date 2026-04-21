@@ -118,7 +118,7 @@ namespace Rodin::Variational
         return m_u.get().getFiniteElementSpace().getMesh().getSpaceDimension();
       }
 
-      decltype(auto) getValue(const Geometry::Point& p) const
+      const ScalarType& getValue(const Geometry::Point& p) const
       {
         static thread_local ScalarType s_out;
         const auto& polytope = p.getPolytope();

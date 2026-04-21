@@ -580,7 +580,7 @@ namespace Rodin::Variational
       /**
        * @brief Gets the interpolated value at the point.
        */
-      decltype(auto) getValue(const Geometry::Point& p) const
+      const RangeType& getValue(const Geometry::Point& p) const
       {
         static thread_local RangeType s_out;
         const auto& polytope = p.getPolytope();
@@ -705,7 +705,7 @@ namespace Rodin::Variational
       {
         return static_cast<Derived&>(*this).project(
             region,
-            [&](const Geometry::Point&) -> decltype(auto)
+            [&](const Geometry::Point&) -> const RangeType&
             { static thread_local RangeType s_out; s_out = fn; return s_out; }, pred);
       }
 

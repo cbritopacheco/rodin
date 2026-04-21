@@ -223,7 +223,7 @@ namespace Rodin::Variational
         }
       }
 
-      decltype(auto) getValue(const Geometry::Point& p) const
+      const RangeType& getValue(const Geometry::Point& p) const
       {
         static thread_local RangeType s_res;
 
