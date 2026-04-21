@@ -283,6 +283,8 @@ namespace Rodin::Examples::Heart
     const auto conv_u = Mult(Jacobian(*m_u), *m_uOld);
     const auto div_u_old = Div(*m_uOld);
     const auto beta = Max(-Dot(*m_uOld, n), 0.0);
+    auto symU = 0.5 * (Jacobian(*m_u) + Transpose(Jacobian(*m_u)));
+    auto symV = 0.5 * (Jacobian(*m_v) + Transpose(Jacobian(*m_v)));
 
     Problem flow(*m_u, *m_p, *m_v, *m_q);
     flow =
@@ -290,7 +292,7 @@ namespace Rodin::Examples::Heart
         - (m_cfg.rho / m_cfg.dt) * Integral(*m_uOld, *m_v)
         + m_cfg.rho * Integral(Dot(conv_u, *m_v))
         + 0.5 * m_cfg.rho * Integral(div_u_old * Dot(*m_u, *m_v))
-        + m_cfg.mu * Integral(Jacobian(*m_u), Jacobian(*m_v))
+        + 2 * m_cfg.mu * Integral(symU, symV)
         - Integral(*m_p, Div(*m_v))
         + Integral(Div(*m_u), *m_q)
         + m_cfg.eps * Integral(*m_p, *m_q)
@@ -424,6 +426,7 @@ namespace Rodin::Examples::Heart
       << "beta,"
       << "kc,"
       << "tauc\n";
+    m_csv.flush();
   }
 
   void CoupledLV0DCoronary3D::writeCSVRow()
