@@ -9,8 +9,9 @@
  * These tests verify that the Default assembler (Sequential or OpenMP
  * depending on the build configuration) produces numerically correct
  * solutions across all supported mesh geometry types:
+ *   - 1D: Segment
  *   - 2D: Triangle, Quadrilateral
- *   - 3D: Tetrahedron
+ *   - 3D: Tetrahedron, Hexahedron
  *
  * Each test uses a manufactured (P1-exact or polynomial) solution so that
  * the error in the assembled discrete system is roundoff, regardless of mesh

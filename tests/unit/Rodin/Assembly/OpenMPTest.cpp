@@ -32,11 +32,32 @@ namespace Rodin::Tests::Unit
   // Helper
   // =========================================================================
 
-  static Mesh<Context::Local> makeMesh2D(Polytope::Type geom, size_t n = 4)
+  static Mesh<Context::Local> makeMesh(Polytope::Type geom, size_t n = 4)
   {
-    auto mesh = LocalMesh::UniformGrid(geom, { n, n });
-    mesh.getConnectivity().compute(1, 2);
-    return mesh;
+    switch (geom)
+    {
+      case Polytope::Type::Segment:
+      {
+        auto mesh = LocalMesh::UniformGrid(geom, { n });
+        mesh.getConnectivity().compute(1, 0);
+        mesh.getConnectivity().compute(0, 1);
+        return mesh;
+      }
+      case Polytope::Type::Tetrahedron:
+      case Polytope::Type::Hexahedron:
+      {
+        auto mesh = LocalMesh::UniformGrid(geom, { n, n, n });
+        mesh.getConnectivity().compute(2, 3);
+        mesh.getConnectivity().compute(3, 0);
+        return mesh;
+      }
+      default:
+      {
+        auto mesh = LocalMesh::UniformGrid(geom, { n, n });
+        mesh.getConnectivity().compute(1, 2);
+        return mesh;
+      }
+    }
   }
 
   // =========================================================================
@@ -50,7 +71,7 @@ namespace Rodin::Tests::Unit
    */
   TEST_P(Assembly_OpenMP_LinearForm, ConstantLoad_MatchesSequential_P1)
   {
-    auto mesh = makeMesh2D(GetParam());
+    auto mesh = makeMesh(GetParam());
     P1 fes(mesh);
     TestFunction v(fes);
 
@@ -77,7 +98,7 @@ namespace Rodin::Tests::Unit
    */
   TEST_P(Assembly_OpenMP_LinearForm, ConstantLoad_MatchesSequential_P0)
   {
-    auto mesh = makeMesh2D(GetParam());
+    auto mesh = makeMesh(GetParam());
     P0 fes(mesh);
     TestFunction v(fes);
 
@@ -100,9 +121,15 @@ namespace Rodin::Tests::Unit
   }
 
   INSTANTIATE_TEST_SUITE_P(
-    Geometries2D,
+    AllGeometries,
     Assembly_OpenMP_LinearForm,
-    ::testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral)
+    ::testing::Values(
+      Polytope::Type::Segment,
+      Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral,
+      Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron
+    )
   );
 
   // =========================================================================
@@ -116,7 +143,7 @@ namespace Rodin::Tests::Unit
    */
   TEST_P(Assembly_OpenMP_BilinearForm, P1StiffnessMatrix_MatchesSequential)
   {
-    auto mesh = makeMesh2D(GetParam());
+    auto mesh = makeMesh(GetParam());
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction  v(fes);
@@ -148,7 +175,7 @@ namespace Rodin::Tests::Unit
    */
   TEST_P(Assembly_OpenMP_BilinearForm, P1MassMatrix_MatchesSequential)
   {
-    auto mesh = makeMesh2D(GetParam());
+    auto mesh = makeMesh(GetParam());
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction  v(fes);
@@ -180,7 +207,7 @@ namespace Rodin::Tests::Unit
    */
   TEST_P(Assembly_OpenMP_BilinearForm, P0MassMatrix_MatchesSequential)
   {
-    auto mesh = makeMesh2D(GetParam());
+    auto mesh = makeMesh(GetParam());
     P0 fes(mesh);
     TrialFunction u(fes);
     TestFunction  v(fes);
@@ -212,7 +239,7 @@ namespace Rodin::Tests::Unit
    */
   TEST_P(Assembly_OpenMP_BilinearForm, NonSquare_P0test_P1trial_MatchesSequential)
   {
-    auto mesh = makeMesh2D(GetParam());
+    auto mesh = makeMesh(GetParam());
     P1 p1h(mesh);
     P0 p0h(mesh);
     TrialFunction u(p1h);
@@ -245,7 +272,7 @@ namespace Rodin::Tests::Unit
    */
   TEST_P(Assembly_OpenMP_BilinearForm, SingleThread_EqualsSequential_P1Stiffness)
   {
-    auto mesh = makeMesh2D(GetParam());
+    auto mesh = makeMesh(GetParam());
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction  v(fes);
@@ -272,9 +299,15 @@ namespace Rodin::Tests::Unit
   }
 
   INSTANTIATE_TEST_SUITE_P(
-    Geometries2D,
+    AllGeometries,
     Assembly_OpenMP_BilinearForm,
-    ::testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral)
+    ::testing::Values(
+      Polytope::Type::Segment,
+      Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral,
+      Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron
+    )
   );
 
   // =========================================================================
@@ -289,7 +322,7 @@ namespace Rodin::Tests::Unit
 
   TEST_P(Assembly_OpenMP_Problem, SingleVar_P1_DimensionsCorrect)
   {
-    auto mesh = makeMesh2D(GetParam());
+    auto mesh = makeMesh(GetParam());
     P1 fes(mesh);
     TrialFunction u(fes);
     TestFunction  v(fes);
@@ -309,8 +342,7 @@ namespace Rodin::Tests::Unit
 
   TEST_P(Assembly_OpenMP_Problem, MultiVar_P0P1_DimensionsCorrect)
   {
-    auto mesh = makeMesh2D(GetParam());
-    mesh.getConnectivity().compute(2, 1);
+    auto mesh = makeMesh(GetParam());
 
     P0 p0h(mesh);
     P1 p1h(mesh);
@@ -333,8 +365,14 @@ namespace Rodin::Tests::Unit
   }
 
   INSTANTIATE_TEST_SUITE_P(
-    Geometries2D,
+    AllGeometries,
     Assembly_OpenMP_Problem,
-    ::testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral)
+    ::testing::Values(
+      Polytope::Type::Segment,
+      Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral,
+      Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron
+    )
   );
 }

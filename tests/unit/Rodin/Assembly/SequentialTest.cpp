@@ -486,7 +486,7 @@ namespace Rodin::Tests::Unit
   TEST(Assembly_Sequential_Problem_MultiVar, PreassembledLF_BlockOffset_P0P1)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(1, 2);  // needed for the P1h boundary iteration
 
     P0 p0h(mesh);
     P1 p1h(mesh);
@@ -523,4 +523,201 @@ namespace Rodin::Tests::Unit
     ASSERT_EQ(b1.size(), b2.size());
     EXPECT_NEAR((b1 - b2).norm(), 0.0, 1e-12);
   }
+
+  // =========================================================================
+  // All-geometry parameterised tests — Sequential assembler
+  //
+  // These tests verify correctness across all supported mesh geometry types:
+  //   1D: Segment
+  //   2D: Triangle, Quadrilateral
+  //   3D: Tetrahedron, Hexahedron
+  // =========================================================================
+
+  /**
+   * @brief Creates a mesh with minimal connectivity for cell integration.
+   *
+   * For each geometry, computes cell→face incidence (needed for boundary
+   * detection by BC assemblers) and cell→vertex incidence (for DOF mapping).
+   */
+  static Mesh<Context::Local> makeAllGeomMesh(Polytope::Type geom, size_t n = 4)
+  {
+    switch (geom)
+    {
+      case Polytope::Type::Segment:
+      {
+        auto mesh = LocalMesh::UniformGrid(geom, { n });
+        mesh.getConnectivity().compute(1, 0);
+        mesh.getConnectivity().compute(0, 1);
+        return mesh;
+      }
+      case Polytope::Type::Tetrahedron:
+      case Polytope::Type::Hexahedron:
+      {
+        auto mesh = LocalMesh::UniformGrid(geom, { n, n, n });
+        mesh.getConnectivity().compute(2, 3);
+        mesh.getConnectivity().compute(3, 0);
+        return mesh;
+      }
+      default:
+      {
+        auto mesh = LocalMesh::UniformGrid(geom, { n, n });
+        mesh.getConnectivity().compute(1, 2);
+        return mesh;
+      }
+    }
+  }
+
+  class Assembly_Sequential_AllGeometries
+    : public ::testing::TestWithParam<Polytope::Type> {};
+
+  /**
+   * @brief P1 LinearForm vector size equals the FES DOF count for every
+   * supported geometry type.
+   */
+  TEST_P(Assembly_Sequential_AllGeometries, LF_VectorSize_P1)
+  {
+    auto mesh = makeAllGeomMesh(GetParam());
+    P1 fes(mesh);
+    TestFunction v(fes);
+
+    LinearForm lf(v);
+    lf = Integral(RealFunction(1.0), v);
+    lf.assemble();
+
+    EXPECT_EQ(lf.getVector().size(), static_cast<Eigen::Index>(fes.getSize()));
+  }
+
+  /**
+   * @brief P0 LinearForm vector size equals the FES DOF count (= cell count)
+   * for every supported geometry type.
+   */
+  TEST_P(Assembly_Sequential_AllGeometries, LF_VectorSize_P0)
+  {
+    auto mesh = makeAllGeomMesh(GetParam());
+    P0 fes(mesh);
+    TestFunction v(fes);
+
+    LinearForm lf(v);
+    lf = Integral(RealFunction(1.0), v);
+    lf.assemble();
+
+    EXPECT_EQ(lf.getVector().size(), static_cast<Eigen::Index>(fes.getSize()));
+  }
+
+  /**
+   * @brief P1 stiffness matrix has correct square dimensions for every
+   * supported geometry type.
+   */
+  TEST_P(Assembly_Sequential_AllGeometries, BF_StiffnessMatrix_Dimensions_P1)
+  {
+    auto mesh = makeAllGeomMesh(GetParam());
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TestFunction  v(fes);
+
+    BilinearForm bf(u, v);
+    bf = Integral(Grad(u), Grad(v));
+    bf.assemble();
+
+    const auto& A = bf.getOperator();
+    EXPECT_EQ(A.rows(), static_cast<Eigen::Index>(fes.getSize()));
+    EXPECT_EQ(A.cols(), static_cast<Eigen::Index>(fes.getSize()));
+  }
+
+  /**
+   * @brief P1 mass matrix is symmetric for every supported geometry type.
+   */
+  TEST_P(Assembly_Sequential_AllGeometries, BF_MassMatrix_IsSymmetric_P1)
+  {
+    auto mesh = makeAllGeomMesh(GetParam());
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TestFunction  v(fes);
+
+    BilinearForm bf(u, v);
+    bf = Integral(u, v);
+    bf.assemble();
+
+    const auto& A = bf.getOperator();
+    const Math::SparseMatrix<Real> diff = A - Math::SparseMatrix<Real>(A.transpose());
+    EXPECT_NEAR(diff.norm(), 0.0, 1e-12);
+  }
+
+  /**
+   * @brief P1 stiffness matrix is symmetric for every supported geometry type.
+   */
+  TEST_P(Assembly_Sequential_AllGeometries, BF_StiffnessMatrix_IsSymmetric_P1)
+  {
+    auto mesh = makeAllGeomMesh(GetParam());
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TestFunction  v(fes);
+
+    BilinearForm bf(u, v);
+    bf = Integral(Grad(u), Grad(v));
+    bf.assemble();
+
+    const auto& A = bf.getOperator();
+    const Math::SparseMatrix<Real> diff = A - Math::SparseMatrix<Real>(A.transpose());
+    EXPECT_NEAR(diff.norm(), 0.0, 1e-12);
+  }
+
+  /**
+   * @brief P0 mass matrix is diagonal for every supported geometry type
+   * (each cell has exactly one P0 DOF, so there is no inter-cell coupling).
+   */
+  TEST_P(Assembly_Sequential_AllGeometries, BF_P0MassMatrix_IsDiagonal)
+  {
+    auto mesh = makeAllGeomMesh(GetParam());
+    P0 fes(mesh);
+    TrialFunction u(fes);
+    TestFunction  v(fes);
+
+    BilinearForm bf(u, v);
+    bf = Integral(u, v);
+    bf.assemble();
+
+    const auto& A = bf.getOperator();
+    ASSERT_GT(A.rows(), 0);
+
+    for (int k = 0; k < A.outerSize(); ++k)
+    {
+      for (typename Math::SparseMatrix<Real>::InnerIterator it(A, k); it; ++it)
+      {
+        if (it.row() != it.col())
+          EXPECT_NEAR(it.value(), 0.0, 1e-14);
+      }
+    }
+  }
+
+  /**
+   * @brief P0 load vector: all entries are positive (element measure > 0)
+   * for every supported geometry type.
+   */
+  TEST_P(Assembly_Sequential_AllGeometries, LF_LoadVector_P0_EntriesPositive)
+  {
+    auto mesh = makeAllGeomMesh(GetParam());
+    P0 fes(mesh);
+    TestFunction v(fes);
+
+    LinearForm lf(v);
+    lf = Integral(RealFunction(1.0), v);
+    lf.assemble();
+
+    const auto& b = lf.getVector();
+    ASSERT_GT(b.size(), 0);
+    EXPECT_GT(b.minCoeff(), 0.0);
+  }
+
+  INSTANTIATE_TEST_SUITE_P(
+    AllGeometries,
+    Assembly_Sequential_AllGeometries,
+    ::testing::Values(
+      Polytope::Type::Segment,
+      Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral,
+      Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron
+    )
+  );
 }
