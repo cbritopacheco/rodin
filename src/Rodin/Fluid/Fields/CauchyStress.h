@@ -36,7 +36,7 @@ namespace Rodin::Fluid
       using CacheType = typename LawType::Cache;
 
       explicit CauchyStress(const LawType& law)
-        : m_law(law)
+        : m_lawRef(law)
       {}
 
       void getCauchyStress(
@@ -45,7 +45,7 @@ namespace Rodin::Fluid
           const FlowPoint& fp) const
       {
         Math::SpatialMatrix<Real> tau;
-        m_law.getDeviatoricStress(tau, cache, fp);
+        m_lawRef.getDeviatoricStress(tau, cache, fp);
 
         const size_t d = fp.getDimension();
         Math::SpatialMatrix<Real> I;
@@ -58,11 +58,11 @@ namespace Rodin::Fluid
 
       const LawType& getLaw() const
       {
-        return m_law;
+        return m_lawRef;
       }
 
     private:
-      const LawType& m_law;
+      const LawType& m_lawRef;
   };
 }
 

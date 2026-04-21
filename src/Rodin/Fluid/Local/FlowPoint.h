@@ -46,7 +46,7 @@ namespace Rodin::Fluid
       using PressureType = Real;
       using PressureGradientType = Math::SpatialVector<Real>;
 
-      explicit FlowPoint(
+      FlowPoint(
           const Geometry::Point& point,
           const VelocityType& velocity,
           const VelocityGradientType& velocityGradient)
@@ -58,7 +58,7 @@ namespace Rodin::Fluid
         assert(m_velocityGradient.cols() == m_velocity.size());
       }
 
-      explicit FlowPoint(
+      FlowPoint(
           const VelocityType& velocity,
           const VelocityGradientType& velocityGradient)
         : m_velocity(velocity),
