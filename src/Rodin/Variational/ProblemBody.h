@@ -883,6 +883,29 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Combines a preassembled BilinearForm with a DirichletBC into a
+   * ProblemBody.
+   *
+   * Enables expression chains such as:
+   * @code
+   *   problem = preassembledBF + DirichletBC(u, g);
+   * @endcode
+   * where the BilinearForm has already been assembled and the Dirichlet
+   * boundary condition is added to constrain the problem.
+   */
+  template <class OperatorType, class RHSScalar>
+  auto
+  operator+(
+      const BilinearFormBase<OperatorType>& bf, const DirichletBCBase<RHSScalar>& dbc)
+  {
+    using ScalarType = RHSScalar;
+    ProblemBody<OperatorType, void, ScalarType> res;
+    res.getBFs().add(bf);
+    res.getDBCs().add(dbc);
+    return res;
+  }
+
   template <class OperatorType, class RHSScalar>
   auto
   operator-(

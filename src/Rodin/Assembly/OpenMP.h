@@ -161,6 +161,12 @@ namespace Rodin::Assembly
 
       OpenMP() = default;
 
+      explicit OpenMP(size_t threadCount)
+        : m_threadCount(threadCount)
+      {
+        assert(threadCount > 0);
+      }
+
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
