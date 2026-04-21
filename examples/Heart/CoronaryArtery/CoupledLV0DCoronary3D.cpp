@@ -279,23 +279,69 @@ namespace Rodin::Examples::Heart
     const auto& s = m_model->getState();
     const Real pin = s.par;
 
+    const size_t dim = m_mesh.getSpaceDimension();
+
+    const Real c1 = 4.0;
+    const Real c2 = 2.0;
+
     const auto n = BoundaryNormal(m_mesh);
+
+    // Frozen transport field u^n.
     const auto conv_u = Mult(Jacobian(*m_u), *m_uOld);
+    const auto conv_v = Mult(Jacobian(*m_v), *m_uOld);
     const auto div_u_old = Div(*m_uOld);
+
+    // Backflow penalty coefficient.
     const auto beta = Max(-Dot(*m_uOld, n), 0.0);
+
     auto symU = 0.5 * (Jacobian(*m_u) + Transpose(Jacobian(*m_u)));
     auto symV = 0.5 * (Jacobian(*m_v) + Transpose(Jacobian(*m_v)));
 
+    // --------------------------------------------------------------------------
+    // Local auxiliary fields for the VMS / OSS stabilization.
+    // --------------------------------------------------------------------------
+
+    // Piecewise-constant element size field.
+    P0 p0(m_mesh);
+    PETSc::Variational::GridFunction hElement(p0);
+    hElement = [](const Point& p)
+    {
+      // return 1;
+      const Real measure = p.getPolytope().getMeasure();
+      const int  d       = p.getPolytope().getDimension();
+      return std::pow(measure, 1.0 / d);
+    };
+
+    // Magnitude of the frozen convecting velocity.
+    const auto velNorm  = Frobenius(*m_uOld);
+    const auto viscTerm = c1 * m_cfg.mu / (hElement * hElement);
+    const auto convTerm = c2 * m_cfg.rho * velNorm / hElement;
+    const auto timeTerm = m_cfg.rho / m_cfg.dt;
+    const auto tau1     = 1.0 / (timeTerm + viscTerm + convTerm);
+
+    // --------------------------------------------------------------------------
+    // Main mixed Oseen step with added VMS / OSS term.
+    // --------------------------------------------------------------------------
     Problem flow(*m_u, *m_p, *m_v, *m_q);
     flow =
           (m_cfg.rho / m_cfg.dt) * Integral(*m_u, *m_v)
         - (m_cfg.rho / m_cfg.dt) * Integral(*m_uOld, *m_v)
+
         + m_cfg.rho * Integral(Dot(conv_u, *m_v))
         + 0.5 * m_cfg.rho * Integral(div_u_old * Dot(*m_u, *m_v))
-        + 2 * m_cfg.mu * Integral(symU, symV)
+
+        + 2.0 * m_cfg.mu * Integral(symU, symV)
+
         - Integral(*m_p, Div(*m_v))
         + Integral(Div(*m_u), *m_q)
+
         + m_cfg.eps * Integral(*m_p, *m_q)
+
+        // VMS / OSS convective stabilization:
+        //   (tau1 (u_old · grad u), (u_old · grad v))
+        // - (tau1 Pi_h[(u_old · grad u_old)], (u_old · grad v))
+        + m_cfg.rho * Integral(tau1 * conv_u, conv_v)
+
         + BoundaryIntegral(pin * Dot(*m_v, n)).over(m_cfg.inlet)
         + BoundaryIntegral(m_wk.at(4).pout * Dot(*m_v, n)).over(4)
         + BoundaryIntegral(m_wk.at(5).pout * Dot(*m_v, n)).over(5)
@@ -303,12 +349,14 @@ namespace Rodin::Examples::Heart
         + BoundaryIntegral(m_wk.at(7).pout * Dot(*m_v, n)).over(7)
         + BoundaryIntegral(m_wk.at(8).pout * Dot(*m_v, n)).over(8)
         + BoundaryIntegral(m_wk.at(9).pout * Dot(*m_v, n)).over(9)
+
         + BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(*m_u, *m_v)).over(4)
         + BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(*m_u, *m_v)).over(5)
         + BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(*m_u, *m_v)).over(6)
         + BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(*m_u, *m_v)).over(7)
         + BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(*m_u, *m_v)).over(8)
         + BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(*m_u, *m_v)).over(9)
+
         + DirichletBC(*m_u, Zero(m_mesh.getSpaceDimension())).on(m_cfg.wall);
 
     Alert::Info() << "Assembling 3D time step ..." << Alert::Raise;
