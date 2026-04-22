@@ -169,8 +169,6 @@ namespace Rodin::Variational
 
       const RangeType& getValue(const Geometry::Point& p) const
       {
-        static thread_local RangeType s_res;
-
         const auto& polytope = p.getPolytope();
         const auto& vs = polytope.getVertices();
         const auto  d = polytope.getDimension();
@@ -289,8 +287,8 @@ namespace Rodin::Variational
           }
         }
 
-        s_res = res.getData().head(static_cast<Eigen::Index>(m_sdim));
-        return s_res;
+        m_res = res.getData().head(static_cast<Eigen::Index>(m_sdim));
+        return m_res;
       }
 
       constexpr
@@ -306,6 +304,7 @@ namespace Rodin::Variational
 
     private:
       const size_t m_sdim;
+      mutable RangeType m_res;
   };
 }
 

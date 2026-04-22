@@ -172,8 +172,6 @@ namespace Rodin::Variational
        */
       const RangeType& getValue(const Geometry::Point& p) const
       {
-        static thread_local RangeType s_res;
-
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& gf = getOperand();
@@ -201,9 +199,9 @@ namespace Rodin::Variational
           assert(false);
         }
 
-        s_res = out.getData().head(out.size());
+        m_res = out.getData().head(out.size());
 
-        return s_res;
+        return m_res;
       }
 
       constexpr
@@ -256,6 +254,7 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const OperandType> m_u;
+      mutable RangeType m_res;
   };
 
   /**
