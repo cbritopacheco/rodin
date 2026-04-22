@@ -22,6 +22,7 @@
 #include "ForwardDecls.h"
 
 #include "Rodin/Alert.h"
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Utility/ForConstexpr.h"
 
 #include "Function.h"
@@ -190,6 +191,7 @@ namespace Rodin::Variational
       using ScalarType = Scalar;
 
       using VectorType = Math::Vector<ScalarType>;
+      using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
       using Parent = VectorFunctionBase<ScalarType, VectorFunction<VectorType>>;
 
@@ -214,9 +216,9 @@ namespace Rodin::Variational
           m_vector(std::move(other.m_vector))
       {}
 
-      const VectorType& getValue(const Geometry::Point&) const
+      SpatialVectorType getValue(const Geometry::Point&) const
       {
-        return m_vector.get();
+        return SpatialVectorType(m_vector.get());
       }
 
       constexpr
@@ -277,6 +279,7 @@ namespace Rodin::Variational
       using ScalarType = Real;
 
       using VectorType = Math::Vector<ScalarType>;
+      using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
       using FixedSizeVectorType = Math::FixedSizeVector<ScalarType, 1 + sizeof...(Values)>;
 
@@ -302,15 +305,17 @@ namespace Rodin::Variational
           m_fs(std::move(other.m_fs))
       {}
 
-      decltype(auto) getValue(const Geometry::Point& p) const
+      SpatialVectorType getValue(const Geometry::Point& p) const
       {
-        static thread_local Math::FixedSizeVector<ScalarType, 1 + sizeof...(Values)> s_res;
+        static_assert(1 + sizeof...(Values) <= Math::SpatialVector<ScalarType>::MaxSize,
+          "Variadic VectorFunction exceeds spatial vector capacity.");
+        SpatialVectorType res(1 + sizeof...(Values));
         Utility::ForIndex<1 + sizeof...(Values)>(
           [&](auto i)
           {
-            s_res.coeffRef(static_cast<Eigen::Index>(i)) = std::get<i>(m_fs).getValue(p);
+            res[static_cast<std::uint8_t>(i)] = std::get<i>(m_fs).getValue(p);
           });
-        return s_res;
+        return res;
       }
 
       constexpr
