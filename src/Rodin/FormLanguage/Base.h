@@ -9,7 +9,6 @@
 
 #include <atomic>
 #include <vector>
-#include <memory>
 #include <cassert>
 #include <variant>
 #include <typeinfo>
@@ -41,14 +40,12 @@ namespace Rodin::FormLanguage
    *
    * ## Key Features
    * - **Unique Identification**: Each instance receives a unique UUID for tracking
-   * - **Object Management**: Automatic lifetime management for temporary objects
+ * - **Object Management**: Value materialization for expression objects
    * - **Polymorphic Operations**: Support for copying and cloning operations
    * - **Type Safety**: Template-based object storage with type validation
    */
   class Base : public Copyable, public Identifiable
   {
-    using ObjectTable = std::vector<std::shared_ptr<const void>>;
-
     public:
       /**
        * @brief Constructor.
@@ -60,8 +57,7 @@ namespace Rodin::FormLanguage
        */
       Base(const Base& other)
         : Copyable(other),
-          Identifiable(other),
-          m_objs(other.m_objs)
+          Identifiable(other)
       {}
 
       /**
@@ -69,8 +65,7 @@ namespace Rodin::FormLanguage
        */
       Base(Base&& other)
         : Copyable(std::move(other)),
-          Identifiable(std::move(other)),
-          m_objs(std::move(other.m_objs))
+          Identifiable(std::move(other))
       {}
 
       /**
@@ -103,18 +98,10 @@ namespace Rodin::FormLanguage
       }
 
       /**
-       * @brief Stores an object for automatic lifetime management.
-       * 
-       * @tparam T Type of object to store (must be a plain object type)
-       * @param obj Object to store (rvalue) or reference (lvalue) 
-       * @return const T& Reference to the stored object
-       * 
-       * This method provides automatic lifetime management for temporary objects
-       * used in form language expressions. For rvalue references, the object is
-       * moved into internal storage and its lifetime is tied to this Base instance.
-       * For lvalue references, the original object is returned unchanged.
-       * 
-       * @note Only plain object types (as defined by IsPlainObject) are accepted
+       * @brief Materializes expression objects into concrete value objects.
+       *
+       * @tparam T Type of object to materialize
+       * @param obj Object to materialize
        */
       template <class T>
       using DecayT = std::remove_cv_t<std::remove_reference_t<T>>;
@@ -164,19 +151,9 @@ namespace Rodin::FormLanguage
           !IsStackBackedObject<T> && FormLanguage::IsPlainObject<std::remove_reference_t<T>>::Value,
         int> = 0>
       constexpr
-      const T& object(T&& obj) const noexcept
+      DecayT<T> object(T&& obj) const noexcept
       {
-        if constexpr (std::is_lvalue_reference_v<T>)
-        {
-          return obj;
-        }
-        else
-        {
-          using R = typename std::remove_reference_t<T>;
-          const R* res = new R(std::forward<T>(obj));
-          m_objs.emplace_back(res);
-          return *res;
-        }
+        return static_cast<DecayT<T>>(std::forward<T>(obj));
       }
 
       /**
@@ -200,18 +177,11 @@ namespace Rodin::FormLanguage
       }
 
       /**
-       * @brief Clears all stored objects, releasing their memory.
-       *
-       * Destroys all objects that were stored via the object() method,
-       * freeing the associated memory. This is useful for managing
-       * temporary object lifetimes explicitly.
-       *
-       * @note After calling clear(), any references obtained from previous
-       * object() calls become invalid.
+       * @brief Clears internal temporary state.
        */
       void clear()
       {
-        m_objs.clear();
+        // No-op: object() now materializes values without heap storage.
       }
 
       /**
@@ -226,8 +196,6 @@ namespace Rodin::FormLanguage
        */
       virtual Base* copy() const noexcept override = 0;
 
-    private:
-      mutable std::vector<std::shared_ptr<const void>> m_objs;
   };
 }
 
