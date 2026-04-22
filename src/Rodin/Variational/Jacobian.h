@@ -198,12 +198,6 @@ namespace Rodin::Variational
         return m_u.get();
       }
 
-      constexpr
-      void interpolate(RangeType& out, const Geometry::Point& p) const
-      {
-        this->interpolate(static_cast<SpatialMatrixType&>(out), p);
-      }
-
       /**
        * @brief Interpolates the Jacobian at a point (to be overridden in derived class).
        * @param[out] out Output matrix for Jacobian result

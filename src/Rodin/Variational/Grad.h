@@ -208,12 +208,6 @@ namespace Rodin::Variational
         return s_res;
       }
 
-      constexpr
-      void interpolate(RangeType& out, const Geometry::Point& p) const
-      {
-        this->interpolate(static_cast<SpatialVectorType&>(out), p);
-      }
-
       /**
        * @brief Interpolates the gradient at a point (to be overridden in derived class).
        * @param[out] out Output vector for gradient result
