@@ -18,6 +18,9 @@
 #include "Rodin/Copyable.h"
 #include "Rodin/Identifiable.h"
 #include "Rodin/Math/ForwardDecls.h"
+#include "Rodin/Math/Traits.h"
+#include "Rodin/Math/SpatialVector.h"
+#include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/Variational/ForwardDecls.h"
 
 #include "Traits.h"
@@ -113,8 +116,53 @@ namespace Rodin::FormLanguage
        * 
        * @note Only plain object types (as defined by IsPlainObject) are accepted
        */
-      template <class T, typename =
-        std::enable_if_t<FormLanguage::IsPlainObject<std::remove_reference_t<T>>::Value>>
+      template <class T>
+      using DecayT = std::remove_cv_t<std::remove_reference_t<T>>;
+
+      template <class T>
+      static constexpr bool IsStackBackedObject =
+        FormLanguage::RangeKindOf<DecayT<T>>::Value != FormLanguage::RangeKind::Unknown;
+
+      /**
+       * @brief Materializes stack-backed math objects.
+       *
+       * Supported categories are Boolean, Integer, Real, Complex,
+       * SpatialVector and SpatialMatrix. Vector/matrix-like Eigen expressions
+       * are explicitly materialized into spatial objects.
+       */
+      template <class T, std::enable_if_t<IsStackBackedObject<T>, int> = 0>
+      constexpr
+      auto object(T&& obj) const noexcept
+      {
+        using D = DecayT<T>;
+        constexpr auto kind = FormLanguage::RangeKindOf<D>::Value;
+        if constexpr (kind == FormLanguage::RangeKind::Boolean
+                   || kind == FormLanguage::RangeKind::Integer
+                   || kind == FormLanguage::RangeKind::Real
+                   || kind == FormLanguage::RangeKind::Complex)
+        {
+          return static_cast<D>(std::forward<T>(obj));
+        }
+        else if constexpr (kind == FormLanguage::RangeKind::Vector)
+        {
+          using Scalar = typename D::Scalar;
+          return Math::SpatialVector<Scalar>(std::forward<T>(obj));
+        }
+        else if constexpr (kind == FormLanguage::RangeKind::Matrix)
+        {
+          using Scalar = typename D::Scalar;
+          return Math::SpatialMatrix<Scalar>(std::forward<T>(obj));
+        }
+        else
+        {
+          return static_cast<D>(std::forward<T>(obj));
+        }
+      }
+
+      template <class T,
+        std::enable_if_t<
+          !IsStackBackedObject<T> && FormLanguage::IsPlainObject<std::remove_reference_t<T>>::Value,
+        int> = 0>
       constexpr
       const T& object(T&& obj) const noexcept
       {
@@ -141,8 +189,10 @@ namespace Rodin::FormLanguage
        * or expression templates) by forwarding them directly without storage.
        * It is selected via SFINAE when T is not a plain object.
        */
-      template <class T, typename =
-        std::enable_if_t<!FormLanguage::IsPlainObject<std::remove_reference_t<T>>::Value>>
+      template <class T,
+        std::enable_if_t<
+          !IsStackBackedObject<T> && !FormLanguage::IsPlainObject<std::remove_reference_t<T>>::Value,
+        int> = 0>
       constexpr
       T object(T&& obj) const noexcept
       {

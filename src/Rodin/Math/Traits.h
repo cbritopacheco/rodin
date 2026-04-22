@@ -97,6 +97,7 @@ namespace Rodin::FormLanguage
     Boolean,
     Integer,
     Real,
+    Complex,
     Vector,
     Matrix,
     Unknown
@@ -155,6 +156,7 @@ namespace Rodin::FormLanguage
       std::is_same_v<std::decay_t<T>, Boolean> ? RangeKind::Boolean
       : std::is_same_v<std::decay_t<T>, Integer> ? RangeKind::Integer
       : std::is_same_v<std::decay_t<T>, Real> ? RangeKind::Real
+      : std::is_same_v<std::decay_t<T>, Complex> ? RangeKind::Complex
       : IsVectorRange<std::decay_t<T>>::Value ? RangeKind::Vector
       : IsMatrixRange<std::decay_t<T>>::Value ? RangeKind::Matrix
       : RangeKind::Unknown;
@@ -257,4 +259,3 @@ namespace Rodin::FormLanguage
 }
 
 #endif
-
