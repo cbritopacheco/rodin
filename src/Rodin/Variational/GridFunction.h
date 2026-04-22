@@ -580,19 +580,20 @@ namespace Rodin::Variational
       /**
        * @brief Gets the interpolated value at the point.
        */
-      const RangeType& getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
+        static thread_local RangeType s_out;
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& fes = m_fes.get();
         const auto& fesMesh = fes.getMesh();
         if (polytopeMesh == fesMesh)
         {
-          static_cast<const Derived&>(*this).interpolate(m_out, p);
+          static_cast<const Derived&>(*this).interpolate(s_out, p);
         }
         else if (const auto inclusion = fesMesh.inclusion(p))
         {
-          static_cast<const Derived&>(*this).interpolate(m_out, *inclusion);
+          static_cast<const Derived&>(*this).interpolate(s_out, *inclusion);
         }
         else if (fesMesh.isSubMesh())
         {
@@ -600,7 +601,7 @@ namespace Rodin::Variational
           const auto restriction = submesh.restriction(p);
           if (restriction)
           {
-            static_cast<const Derived&>(*this).interpolate(m_out, *restriction);
+            static_cast<const Derived&>(*this).interpolate(s_out, *restriction);
           }
           else
           {
@@ -615,7 +616,7 @@ namespace Rodin::Variational
             << "Point is not contained in the finite element space mesh."
             << Alert::Raise;
         }
-        return m_out;
+        return s_out;
       }
 
       constexpr
@@ -704,7 +705,8 @@ namespace Rodin::Variational
       {
         return static_cast<Derived&>(*this).project(
             region,
-            [&](const Geometry::Point&) -> const RangeType& { return fn; }, pred);
+            [&](const Geometry::Point&) -> decltype(auto)
+            { static thread_local RangeType s_out; s_out = fn; return s_out; }, pred);
       }
 
       /**
@@ -888,7 +890,6 @@ namespace Rodin::Variational
     private:
       Optional<std::string> m_name;
       std::reference_wrapper<const FESType> m_fes;
-      mutable RangeType m_out;
 
   };
 

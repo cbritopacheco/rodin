@@ -153,8 +153,10 @@ namespace Rodin::Variational
        * @f$ J_{ij}(p) = \frac{\partial u_i}{\partial x_j}(p) @f$
        * Handles mesh inclusion and submesh restrictions automatically.
        */
-      const RangeType& getValue(const Geometry::Point& p) const
+      decltype(auto) getValue(const Geometry::Point& p) const
       {
+        static thread_local RangeType s_res;
+
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& gf = getOperand();
@@ -181,8 +183,8 @@ namespace Rodin::Variational
           assert(false);
         }
 
-        m_res = res.getData().topLeftCorner(res.rows(), res.cols());
-        return m_res;
+        s_res = res.getData().topLeftCorner(res.rows(), res.cols());
+        return s_res;
       }
 
       /**
@@ -234,7 +236,6 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const OperandType> m_u;
-      mutable RangeType m_res;
   };
 }
 
