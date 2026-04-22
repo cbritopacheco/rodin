@@ -118,9 +118,8 @@ namespace Rodin::Variational
         return m_u.get().getFiniteElementSpace().getMesh().getSpaceDimension();
       }
 
-      decltype(auto) getValue(const Geometry::Point& p) const
+      const ScalarType& getValue(const Geometry::Point& p) const
       {
-        static thread_local ScalarType s_out;
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& gf = getOperand();
@@ -128,23 +127,23 @@ namespace Rodin::Variational
         const auto& fesMesh = fes.getMesh();
         if (polytopeMesh == fesMesh)
         {
-          this->interpolate(s_out, p);
+          this->interpolate(m_out, p);
         }
         else if (const auto inclusion = fesMesh.inclusion(p))
         {
-          this->interpolate(s_out, *inclusion);
+          this->interpolate(m_out, *inclusion);
         }
         else if (fesMesh.isSubMesh())
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
-          interpolate(s_out, *restriction);
+          interpolate(m_out, *restriction);
         }
         else
         {
           assert(false);
         }
-        return s_out;
+        return m_out;
       }
 
       /**
@@ -172,6 +171,7 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const OperandType> m_u;
+      mutable ScalarType m_out{};
   };
 
   template <class NestedDerived, class FES, ShapeFunctionSpaceType SpaceType>

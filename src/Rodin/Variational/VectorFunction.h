@@ -302,15 +302,14 @@ namespace Rodin::Variational
           m_fs(std::move(other.m_fs))
       {}
 
-      decltype(auto) getValue(const Geometry::Point& p) const
+      const FixedSizeVectorType& getValue(const Geometry::Point& p) const
       {
-        static thread_local Math::FixedSizeVector<ScalarType, 1 + sizeof...(Values)> s_res;
         Utility::ForIndex<1 + sizeof...(Values)>(
           [&](auto i)
           {
-            s_res.coeffRef(static_cast<Eigen::Index>(i)) = std::get<i>(m_fs).getValue(p);
+            m_res.coeffRef(static_cast<Eigen::Index>(i)) = std::get<i>(m_fs).getValue(p);
           });
-        return s_res;
+        return m_res;
       }
 
       constexpr
@@ -352,6 +351,7 @@ namespace Rodin::Variational
 
     private:
       std::tuple<RealFunction<V>, RealFunction<Values>...> m_fs;
+      mutable FixedSizeVectorType m_res;
   };
 
   template <class V, class ... Values>
