@@ -23,19 +23,46 @@ namespace Rodin::Examples::Heart
       using Model = Rodin::Heart::CCMLC2014T<>;
       using Attribute = Rodin::Geometry::Attribute;
       using MeshType = Rodin::Geometry::Mesh<Rodin::Context::Local>;
-      using VelocityFESType = Rodin::Variational::H1<2, Rodin::Math::Vector<Real>, MeshType>;
-      using PressureFESType = Rodin::Variational::H1<1, Real, MeshType>;
-      using ViscosityFESType = Rodin::Variational::P1<Real, MeshType>;
-      using VelocityGridFunctionType = Rodin::PETSc::Variational::GridFunction<VelocityFESType>;
-      using PressureGridFunctionType = Rodin::PETSc::Variational::GridFunction<PressureFESType>;
+
+      using VelocityFESType =
+        Rodin::Variational::H1<2, Rodin::Math::Vector<Real>, MeshType>;
+
+      using PressureFESType =
+        Rodin::Variational::H1<1, Real, MeshType>;
+
+      // P0 because we want a cell-centered projected viscosity
+      using ViscosityFESType =
+        Rodin::Variational::P1<Real, MeshType>;
+
+      using VelocityGridFunctionType =
+        Rodin::PETSc::Variational::GridFunction<VelocityFESType>;
+
+      using PressureGridFunctionType =
+        Rodin::PETSc::Variational::GridFunction<PressureFESType>;
+
+      using ViscosityGridFunctionType =
+        Rodin::PETSc::Variational::GridFunction<ViscosityFESType>;
+
       using VelocityTrialFunctionType =
         Rodin::PETSc::Variational::TrialFunction<VelocityGridFunctionType, VelocityFESType>;
+
+      using VelocityTestFunctionType =
+        Rodin::PETSc::Variational::TestFunction<VelocityFESType>;
+
       using PressureTrialFunctionType =
         Rodin::PETSc::Variational::TrialFunction<PressureGridFunctionType, PressureFESType>;
-      using VelocityTestFunctionType = Rodin::PETSc::Variational::TestFunction<VelocityFESType>;
-      using PressureTestFunctionType = Rodin::PETSc::Variational::TestFunction<PressureFESType>;
-      using FluxLinearFormType = Rodin::Variational::LinearForm<PressureFESType, ::Vec>;
-      using ViscosityGridFunctionType = Rodin::PETSc::Variational::GridFunction<ViscosityFESType>;
+
+      using PressureTestFunctionType =
+        Rodin::PETSc::Variational::TestFunction<PressureFESType>;
+
+      using ViscosityTrialFunctionType =
+        Rodin::PETSc::Variational::TrialFunction<ViscosityGridFunctionType, ViscosityFESType>;
+
+      using ViscosityTestFunctionType =
+        Rodin::PETSc::Variational::TestFunction<ViscosityFESType>;
+
+      using FluxLinearFormType =
+        Rodin::Variational::LinearForm<PressureFESType, ::Vec>;
 
       struct RCR
       {
@@ -69,17 +96,13 @@ namespace Rodin::Examples::Heart
       };
 
       CoupledLV0DCoronary3D();
-
       explicit CoupledLV0DCoronary3D(const Config& cfg);
-
       ~CoupledLV0DCoronary3D();
 
       CoupledLV0DCoronary3D(const CoupledLV0DCoronary3D&) = delete;
-
       CoupledLV0DCoronary3D& operator=(const CoupledLV0DCoronary3D&) = delete;
 
       int run();
-
       CoupledLV0DCoronary3D& initialize();
 
       Config& getConfig() noexcept
@@ -168,20 +191,19 @@ namespace Rodin::Examples::Heart
       std::unique_ptr<VelocityTestFunctionType> m_v;
       std::unique_ptr<PressureTestFunctionType> m_q;
 
+      std::unique_ptr<ViscosityTrialFunctionType> m_mu;
+      std::unique_ptr<ViscosityTestFunctionType> m_w;
+
       std::unique_ptr<VelocityGridFunctionType> m_uOld;
       std::unique_ptr<PressureGridFunctionType> m_pOld;
       std::unique_ptr<PressureGridFunctionType> m_one;
       std::unique_ptr<PressureTestFunctionType> m_qFlux;
       std::unique_ptr<FluxLinearFormType> m_flux;
 
-      std::unique_ptr<ViscosityGridFunctionType> m_muNonNew;
-
       std::map<Attribute, RCR> m_wk;
 
       mutable StepData m_stepData;
-
       std::ofstream m_csv;
-
       bool m_initialized = false;
   };
 }

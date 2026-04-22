@@ -241,32 +241,37 @@ namespace Rodin::Examples::Heart
     if (dim != 3)
       throw std::runtime_error("Expected a 3D coronary mesh.");
 
-    m_uh = std::make_unique<VelocityFESType>(std::integral_constant<size_t, 2>{}, m_mesh, dim);
-    m_ph = std::make_unique<PressureFESType>(std::integral_constant<size_t, 1>{}, m_mesh);
+    m_uh  = std::make_unique<VelocityFESType>(std::integral_constant<size_t, 2>{}, m_mesh, dim);
+    m_ph  = std::make_unique<PressureFESType>(std::integral_constant<size_t, 1>{}, m_mesh);
     m_muh = std::make_unique<ViscosityFESType>(m_mesh);
 
     m_u = std::make_unique<VelocityTrialFunctionType>(*m_uh);
-    m_p = std::make_unique<PressureTrialFunctionType>(*m_ph);
     m_v = std::make_unique<VelocityTestFunctionType>(*m_uh);
-    m_q = std::make_unique<PressureTestFunctionType>(*m_ph);
     m_u->setName("u");
+
+    m_p = std::make_unique<PressureTrialFunctionType>(*m_ph);
+    m_q = std::make_unique<PressureTestFunctionType>(*m_ph);
     m_p->setName("p");
+
+    m_mu = std::make_unique<ViscosityTrialFunctionType>(*m_muh);
+    m_w  = std::make_unique<ViscosityTestFunctionType>(*m_muh);
+    m_mu->setName("mu_nonNew");
 
     m_uOld = std::make_unique<VelocityGridFunctionType>(*m_uh);
     m_pOld = std::make_unique<PressureGridFunctionType>(*m_ph);
+
     *m_uOld = Math::Vector<Real>{{0.0, 0.0, 0.0}};
     *m_pOld = 0.0;
 
     m_one = std::make_unique<PressureGridFunctionType>(*m_ph);
     *m_one = 1.0;
-    m_qFlux = std::make_unique<PressureTestFunctionType>(*m_ph);
-    m_flux = std::make_unique<FluxLinearFormType>(*m_qFlux);
 
-    m_muNonNew = std::make_unique<ViscosityGridFunctionType>(*m_muh);
+    m_qFlux = std::make_unique<PressureTestFunctionType>(*m_ph);
+    m_flux  = std::make_unique<FluxLinearFormType>(*m_qFlux);
 
     m_xdmf->add("velocity", m_u->getSolution());
     m_xdmf->add("pressure", m_p->getSolution());
-    m_xdmf->add("mu_nonNew", *m_muNonNew);
+    m_xdmf->add("viscosity", m_mu->getSolution());
 
     m_wk.clear();
     for (const Attribute tag : m_cfg.outlets)
@@ -318,29 +323,36 @@ namespace Rodin::Examples::Heart
     const auto conv_u = Mult(Jacobian(*m_u), *m_uOld);
     const auto div_u_old = Div(*m_uOld);
     const auto beta = Max(-Dot(*m_uOld, n), 0.0);
+
     auto symU = 0.5 * (Jacobian(*m_u) + Transpose(Jacobian(*m_u)));
     auto symV = 0.5 * (Jacobian(*m_v) + Transpose(Jacobian(*m_v)));
-
-    // Compute variable viscosity using P-L model
-    const Real n_pl = 0.7; //standard values for blood
-    const Real m_pl = 0.035; // standard values for blood
-
-    // Compute the symmetric tensor at the previous time step
     auto symU_old = 0.5 * (Jacobian(*m_uOld) + Transpose(Jacobian(*m_uOld)));
 
+    const Real n_pl = 0.7;
+    const Real m_pl = 0.035;
+
+    const Real mu_min = m_cfg.mu;
+    const Real gamma_min = 1e-3;
+    const Real mu_max = 5e-2;
+
     // Define a function that will be evaluated in the assembly which contains the P-L model
-const Real mu0  = m_cfg.mu;
-const Real eps_reg = 1e-8;
+    RealFunction mu_nonNew = [=, this](const Point& p) -> Real
+    {
+      auto S = symU_old.getValue(p);
+      const Real gamma = std::sqrt(2.0 * dot(S, S));
+      if (std::abs(gamma) > 0.0) return m_pl * std::pow(gamma, n_pl - 1.0);
+      else return m_cfg.mu;
+    };
 
-RealFunction mu_nonNew = [m_pl, n_pl, mu0, eps_reg, symU_old](const Point& p) -> Real
-{
-  const auto S = symU_old.getValue(p);
-  const Real gamma = std::sqrt(2.0 * std::abs(dot(S, S)) + eps_reg * eps_reg);
-  const Real mu_eff = m_pl * std::pow(gamma, n_pl - 1.0);
-  return std::max(mu_eff, mu0);
-};
+    Alert::Info() << "Projecting non-Newtonian viscosity ..." << Alert::Raise;
 
-    (*m_muNonNew) = mu_nonNew;
+    Problem muProjection(*m_mu, *m_w);
+    muProjection =
+        Integral(*m_mu, *m_w)
+      - Integral(mu_nonNew, *m_w);
+
+    muProjection.assemble();
+    Solver::KSP(muProjection).solve();
 
     Problem flow(*m_u, *m_p, *m_v, *m_q);
     flow =
@@ -348,7 +360,7 @@ RealFunction mu_nonNew = [m_pl, n_pl, mu0, eps_reg, symU_old](const Point& p) ->
         - (m_cfg.rho / m_cfg.dt) * Integral(*m_uOld, *m_v)
         + m_cfg.rho * Integral(Dot(conv_u, *m_v))
         + 0.5 * m_cfg.rho * Integral(div_u_old * Dot(*m_u, *m_v))
-        + 2 * Integral(mu_nonNew * symU, symV)
+        + 2 * Integral(m_mu->getSolution() * symU, symV)
         - Integral(*m_p, Div(*m_v))
         + Integral(Div(*m_u), *m_q)
         + m_cfg.eps * Integral(*m_p, *m_q)
@@ -407,7 +419,7 @@ RealFunction mu_nonNew = [m_pl, n_pl, mu0, eps_reg, symU_old](const Point& p) ->
 
   void CoupledLV0DCoronary3D::writeOutputs() const
   {
-    m_xdmf->write(m_model->getState().t).flush();
+    m_xdmf->write(m_model->getState().t - m_cfg.dt).flush();
   }
 
   CoupledLV0DCoronary3D::StepData CoupledLV0DCoronary3D::collectStepData() const
