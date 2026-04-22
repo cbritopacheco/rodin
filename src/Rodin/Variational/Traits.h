@@ -140,7 +140,14 @@ namespace Rodin::FormLanguage
   struct RangeOf<Math::SpatialVector<Scalar>>
   {
     using Type =
-      Math::Vector<Scalar>;
+      Math::SpatialVector<Scalar>;
+  };
+
+  template <class Scalar>
+  struct RangeOf<Math::SpatialMatrix<Scalar>>
+  {
+    using Type =
+      Math::SpatialMatrix<Scalar>;
   };
 
   /**
@@ -165,8 +172,16 @@ namespace Rodin::FormLanguage
    *
    * Deduces whether the expression is a vector or matrix based on compile-time properties.
    */
+  template <class MatrixXpr, class = void>
+  struct EigenRangeOf;
+
   template <class MatrixXpr>
-  struct RangeOf
+  struct EigenRangeOf<
+    MatrixXpr,
+    std::void_t<
+      decltype(MatrixXpr::IsVectorAtCompileTime),
+      decltype(MatrixXpr::ColsAtCompileTime),
+      typename MatrixXpr::Scalar>>
   {
     using Type =
       std::conditional_t<
@@ -176,6 +191,12 @@ namespace Rodin::FormLanguage
           Math::Matrix<typename MatrixXpr::Scalar>
         >
       >;
+  };
+
+  template <class MatrixXpr>
+  struct RangeOf
+  {
+    using Type = typename EigenRangeOf<MatrixXpr>::Type;
   };
 
   /**
