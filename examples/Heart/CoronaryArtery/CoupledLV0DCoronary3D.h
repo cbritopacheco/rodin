@@ -26,9 +26,7 @@ namespace Rodin::Examples::Heart
       using VelocityFESType = Rodin::Variational::H1<2, Rodin::Math::Vector<Real>, MeshType>;
       using PressureFESType = Rodin::Variational::H1<1, Real, MeshType>;
       using VelocityGridFunctionType = Rodin::PETSc::Variational::GridFunction<VelocityFESType>;
-      using PressureGridFunctionType =
-        Rodin::PETSc::Variational::GridFunction<PressureFESType>;
-
+      using PressureGridFunctionType = Rodin::PETSc::Variational::GridFunction<PressureFESType>;
       using VelocityTrialFunctionType =
         Rodin::PETSc::Variational::TrialFunction<VelocityGridFunctionType, VelocityFESType>;
       using PressureTrialFunctionType =
@@ -58,7 +56,7 @@ namespace Rodin::Examples::Heart
         std::array<Attribute, 6> outlets{{4, 5, 6, 7, 8, 9}};
 
         Real meshScale = 1.0e-3;
-        Real eps = 1.0e-6;
+        Real eps = 1.0e-12;
         Real rho = 1060.0;
         Real mu = 3.5e-3;
 
@@ -134,6 +132,7 @@ namespace Rodin::Examples::Heart
       };
 
       static void updateRCR(RCR& bc, Real Q, Real dt);
+      static void updateRCRNonNew(const Model& model, RCR& bc, Real Q, Real dt);
       static Real periodic_activation(Real t);
       static Real atrial_pressure(Real t);
 
@@ -171,6 +170,8 @@ namespace Rodin::Examples::Heart
       std::unique_ptr<PressureGridFunctionType> m_one;
       std::unique_ptr<PressureTestFunctionType> m_qFlux;
       std::unique_ptr<FluxLinearFormType> m_flux;
+
+      std::unique_ptr<PressureGridFunctionType> m_muNonNew;
 
       std::map<Attribute, RCR> m_wk;
 
