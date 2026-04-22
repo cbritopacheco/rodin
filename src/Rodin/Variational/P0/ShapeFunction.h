@@ -87,7 +87,7 @@ namespace Rodin::Variational
         }
         else
         {
-          static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
+          static_assert(FormLanguage::IsVectorRange<RangeType>::value);
           return P0Element<RangeType>(polytope.getGeometry(), this->getFiniteElementSpace().getVectorDimension()).getCount();
         }
       }
@@ -131,7 +131,7 @@ namespace Rodin::Variational
           }
           else
           {
-            static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
+            static_assert(FormLanguage::IsVectorRange<RangeType>::value);
 
             m_cache.basis.resize(vdim);
             for (size_t c = 0; c < vdim; ++c)

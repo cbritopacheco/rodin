@@ -17,6 +17,8 @@
 
 #include "ForwardDecls.h"
 
+#include "Rodin/Math/SpatialVector.h"
+
 #include "VectorFunction.h"
 
 namespace Rodin::FormLanguage
@@ -28,7 +30,7 @@ namespace Rodin::FormLanguage
 
     using OperandType = Variational::GridFunction<FESType, Data>;
 
-    using RangeType = Math::Vector<typename FormLanguage::Traits<FESType>::ScalarType>;
+    using RangeType = Math::SpatialVector<typename FormLanguage::Traits<FESType>::ScalarType>;
   };
 
   template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>
@@ -40,7 +42,7 @@ namespace Rodin::FormLanguage
 
     using OperandType = Variational::ShapeFunction<NestedDerived, FESType, SpaceType>;
 
-    using RangeType = Math::Vector<typename FormLanguage::Traits<FESType>::ScalarType>;
+    using RangeType = Math::SpatialVector<typename FormLanguage::Traits<FESType>::ScalarType>;
   };
 }
 
@@ -106,7 +108,7 @@ namespace Rodin::Variational
       using FESType = FES;
 
       /// @brief Type of the output range
-      using RangeType = Math::Vector<typename FormLanguage::Traits<FESType>::ScalarType>;
+      using RangeType = Math::SpatialVector<typename FormLanguage::Traits<FESType>::ScalarType>;
 
       /// @brief Scalar type for computations
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
@@ -209,11 +211,7 @@ namespace Rodin::Variational
       constexpr
       void interpolate(RangeType& out, const Geometry::Point& p) const
       {
-        SpatialVectorType res;
-        this->interpolate(res, p);
-
-        out.resize(res.size());
-        std::copy(res.begin(), res.end(), out.begin());
+        this->interpolate(static_cast<SpatialVectorType&>(out), p);
       }
 
       /**

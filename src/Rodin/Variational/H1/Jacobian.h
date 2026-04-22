@@ -92,7 +92,7 @@ namespace Rodin::Variational
 
       using Parent = JacobianBase<OperandType, Jacobian<OperandType>>;
 
-      using RangeType = Math::Matrix<Scalar>;
+      using RangeType = Math::SpatialMatrix<Scalar>;
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 

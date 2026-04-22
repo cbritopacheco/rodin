@@ -374,7 +374,7 @@ namespace Rodin::Variational
               m_vec(local) += wdet * fval * fe.getBasis(local)(rc);
           }
         }
-        else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>)
+        else if constexpr (FormLanguage::IsVectorRange<RHSRangeType>::value)
         {
           const size_t vdim = fes.getVectorDimension();
 
@@ -397,7 +397,7 @@ namespace Rodin::Variational
         {
           static_assert(
             std::is_same_v<RHSRangeType, ScalarType>
-            || std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>,
+            || FormLanguage::IsVectorRange<RHSRangeType>::value,
             "Unsupported P1 Integral(f.v) range type.");
         }
 
@@ -624,7 +624,7 @@ namespace Rodin::Variational
               }
             }
           }
-          else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>)
+          else if constexpr (FormLanguage::IsVectorRange<LHSRangeType>::value)
           {
             if (symmetric)
             {
@@ -925,10 +925,10 @@ namespace Rodin::Variational
               }
             }
           }
-          else if constexpr (std::is_same_v<CoefficientRangeType, Math::Matrix<ScalarType>>)
+          else if constexpr (FormLanguage::IsMatrixRange<CoefficientRangeType>::value)
           {
-            static_assert(std::is_same_v<MultiplicandRangeType, Math::Vector<ScalarType>>);
-            static_assert(std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>);
+            static_assert(FormLanguage::IsVectorRange<MultiplicandRangeType>::value);
+            static_assert(FormLanguage::IsVectorRange<RHSRangeType>::value);
 
             static thread_local Math::Matrix<ScalarType> s_cmv;
             coeff.getValue(s_cmv, p);
@@ -1478,7 +1478,7 @@ namespace Rodin::Variational
               }
             }
           }
-          else if constexpr (std::is_same_v<CoefficientRangeType, Math::Matrix<ScalarType>>)
+          else if constexpr (FormLanguage::IsMatrixRange<CoefficientRangeType>::value)
           {
             static thread_local Math::Matrix<ScalarType> s_cmv;
             coeff.getValue(s_cmv, p);
@@ -1747,7 +1747,7 @@ namespace Rodin::Variational
               }
             }
           }
-          else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>)
+          else if constexpr (FormLanguage::IsVectorRange<LHSRangeType>::value)
           {
             for (size_t ib = 0; ib < nte; ++ib)
             {
@@ -2323,8 +2323,8 @@ namespace Rodin::Variational
       using Parent =
         LocalBilinearFormIntegratorBase<ScalarType>;
 
-      static_assert(std::is_same_v<LHSOperandRangeType, Math::Vector<ScalarType>>);
-      static_assert(std::is_same_v<RHSOperandRangeType, Math::Vector<ScalarType>>);
+      static_assert(FormLanguage::IsVectorRange<LHSOperandRangeType>::value);
+      static_assert(FormLanguage::IsVectorRange<RHSOperandRangeType>::value);
 
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
@@ -2628,8 +2628,8 @@ namespace Rodin::Variational
       using Parent =
         LocalBilinearFormIntegratorBase<ScalarType>;
 
-      static_assert(std::is_same_v<LHSOperandRangeType, Math::Vector<ScalarType>>);
-      static_assert(std::is_same_v<RHSOperandRangeType, Math::Vector<ScalarType>>);
+      static_assert(FormLanguage::IsVectorRange<LHSOperandRangeType>::value);
+      static_assert(FormLanguage::IsVectorRange<RHSOperandRangeType>::value);
 
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
@@ -2784,7 +2784,7 @@ namespace Rodin::Variational
               }
             }
           }
-          else if constexpr (std::is_same_v<CoefficientRangeType, Math::Matrix<ScalarType>>)
+          else if constexpr (FormLanguage::IsMatrixRange<CoefficientRangeType>::value)
           {
             static thread_local Math::Matrix<ScalarType> s_cmv;
             coeff.getValue(s_cmv, p);
@@ -3483,7 +3483,7 @@ namespace Rodin::Variational
             }
           }
         }
-        else if constexpr (std::is_same_v<Range, Math::Vector<ScalarType>>)
+        else if constexpr (FormLanguage::IsVectorRange<Range>::value)
         {
 
           if (trp == tep)

@@ -78,25 +78,25 @@ namespace Rodin::FormLanguage
         // Else
         std::conditional_t<
           // If
-          std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>,
+          FormLanguage::IsVectorRange<LHSRangeType>::value,
           // Then <--------------------------------------------- LHS is Vector
           std::conditional_t<
             // If
             std::is_same_v<RHSRangeType, ScalarType>,
             // Then
-            Math::Vector<ScalarType>,
+            Math::SpatialVector<ScalarType>,
             // Else
             std::conditional_t<
               // If
-              std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>,
+              FormLanguage::IsVectorRange<RHSRangeType>::value,
               // Then
               void,
               // Else
               std::conditional_t<
                 // If
-                std::is_same_v<RHSRangeType, Math::Matrix<ScalarType>>,
+                FormLanguage::IsMatrixRange<RHSRangeType>::value,
                 // Then
-                Math::Matrix<ScalarType>,
+                Math::SpatialMatrix<ScalarType>,
                 // Else
                 void
               >
@@ -106,17 +106,17 @@ namespace Rodin::FormLanguage
           // Else
           std::conditional_t<
             // If
-            std::is_same_v<LHSRangeType, Math::Matrix<ScalarType>>,
+            FormLanguage::IsMatrixRange<LHSRangeType>::value,
             // Then <------------------------------------------- LHS is Matrix
             std::conditional_t<
               std::is_same_v<RHSRangeType, ScalarType>,
-              Math::Matrix<ScalarType>,
+              Math::SpatialMatrix<ScalarType>,
               std::conditional_t<
-                std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>,
-                Math::Vector<ScalarType>,
+                FormLanguage::IsVectorRange<RHSRangeType>::value,
+                Math::SpatialVector<ScalarType>,
                 std::conditional_t<
-                  std::is_same_v<RHSRangeType, Math::Matrix<ScalarType>>,
-                    Math::Matrix<ScalarType>,
+                  FormLanguage::IsMatrixRange<RHSRangeType>::value,
+                    Math::SpatialMatrix<ScalarType>,
                     void
                   >
                 >

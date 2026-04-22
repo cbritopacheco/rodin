@@ -24,6 +24,7 @@
 #include "Rodin/Types.h"
 
 #include "Common.h"
+#include "ForwardDecls.h"
 
 namespace Rodin::FormLanguage
 {
@@ -89,6 +90,64 @@ namespace Rodin::FormLanguage
    * @tparam LHS Type of left-hand side operand
    * @tparam RHS Type of right-hand side operand
    */
+
+
+  enum class RangeKind
+  {
+    Boolean,
+    Integer,
+    Real,
+    Vector,
+    Matrix,
+    Unknown
+  };
+
+  template <class T>
+  struct IsSpatialVector : std::false_type {};
+
+  template <class Scalar>
+  struct IsSpatialVector<Math::SpatialVector<Scalar>> : std::true_type {};
+
+  template <class T>
+  struct IsSpatialMatrix : std::false_type {};
+
+  template <class Scalar>
+  struct IsSpatialMatrix<Math::SpatialMatrix<Scalar>> : std::true_type {};
+
+  template <class T>
+  struct IsVectorRange
+    : std::bool_constant<
+        IsSpatialVector<std::decay_t<T>>::value
+        || (
+          IsEigenObject<std::decay_t<T>>::Value
+          && (std::decay_t<T>::ColsAtCompileTime == 1)
+        )>
+  {};
+
+  template <class T>
+  struct IsMatrixRange
+    : std::bool_constant<
+        IsSpatialMatrix<std::decay_t<T>>::value
+        || (
+          IsEigenObject<std::decay_t<T>>::Value
+          && (std::decay_t<T>::ColsAtCompileTime != 1)
+        )>
+  {};
+
+  template <class T>
+  struct RangeKindOf
+  {
+    static constexpr RangeKind Value =
+      std::is_same_v<std::decay_t<T>, Boolean> ? RangeKind::Boolean
+      : std::is_same_v<std::decay_t<T>, Integer> ? RangeKind::Integer
+      : std::is_same_v<std::decay_t<T>, Real> ? RangeKind::Real
+      : IsVectorRange<std::decay_t<T>>::value ? RangeKind::Vector
+      : IsMatrixRange<std::decay_t<T>>::value ? RangeKind::Matrix
+      : RangeKind::Unknown;
+  };
+
+  template <class T>
+  inline constexpr auto RangeKindOfV = RangeKindOf<T>::Value;
   template <class LHS, class RHS>
   struct Sum
   {

@@ -81,7 +81,7 @@ namespace Rodin::Variational
       using LambdaRangeType =
         typename FormLanguage::Traits<LambdaType>::RangeType;
 
-      static_assert(std::is_same_v<Range, Math::Vector<ScalarType>>);
+      static_assert(FormLanguage::IsVectorRange<Range>::value);
 
     public:
       LinearElasticityIntegrator(

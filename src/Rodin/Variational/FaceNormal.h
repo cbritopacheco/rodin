@@ -134,7 +134,7 @@ namespace Rodin::Variational
   {
     public:
       using ScalarType = Real;
-      using RangeType = Math::Vector<ScalarType>;
+      using RangeType = Math::SpatialVector<ScalarType>;
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
       using Parent = VectorFunctionBase<ScalarType, FaceNormal>;
 

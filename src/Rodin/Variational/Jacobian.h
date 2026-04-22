@@ -43,6 +43,7 @@
 #define RODIN_VARIATIONAL_JACOBIAN_H
 
 #include "ForwardDecls.h"
+#include "Rodin/Math/SpatialMatrix.h"
 #include "MatrixFunction.h"
 
 namespace Rodin::Variational
@@ -80,7 +81,7 @@ namespace Rodin::Variational
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
-      using RangeType = Math::Matrix<ScalarType>;
+      using RangeType = Math::SpatialMatrix<ScalarType>;
 
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
@@ -200,9 +201,7 @@ namespace Rodin::Variational
       constexpr
       void interpolate(RangeType& out, const Geometry::Point& p) const
       {
-        SpatialMatrixType res;
-        this->interpolate(res, p);
-        out = res.getData().topLeftCorner(res.rows(), res.cols());
+        this->interpolate(static_cast<SpatialMatrixType&>(out), p);
       }
 
       /**

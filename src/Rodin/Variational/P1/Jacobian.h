@@ -87,7 +87,7 @@ namespace Rodin::Variational
         Jacobian<GridFunction<P1<Math::Vector<Scalar>, Mesh>, Data>>>
   {
     public:
-      using RangeType = Math::Matrix<Scalar>;
+      using RangeType = Math::SpatialMatrix<Scalar>;
 
       using FESType = P1<Math::Vector<Scalar>, Mesh>;
 
@@ -247,7 +247,7 @@ namespace Rodin::Variational
   class Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Range, Mesh>, Space>> final
     : public ShapeFunctionBase<Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Range, Mesh>, Space>>>
   {
-    static_assert(std::is_same_v<Range, Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>,
+    static_assert(FormLanguage::IsVectorRange<Range>::value,
                   "Jacobian<P1> specialization is intended for vector-valued P1.");
 
     public:
@@ -256,7 +256,7 @@ namespace Rodin::Variational
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
-      using RangeType = Math::Matrix<ScalarType>;
+      using RangeType = Math::SpatialMatrix<ScalarType>;
 
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 

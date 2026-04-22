@@ -183,7 +183,7 @@ namespace Rodin::Variational
           FESType,
           SpaceType>;
 
-      static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
+      static_assert(FormLanguage::IsVectorRange<RangeType>::value);
 
       struct Cache
       {

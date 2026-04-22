@@ -369,7 +369,7 @@ namespace Rodin::Variational
 
       using Parent = ShapeFunctionBase<Component<OperandType>, FES, Space>;
 
-      static_assert(std::is_same_v<OperandRangeType, Math::Vector<ScalarType>>);
+      static_assert(FormLanguage::IsVectorRange<OperandRangeType>::value);
 
       /**
        * @brief Constructs component extractor for ShapeFunction.

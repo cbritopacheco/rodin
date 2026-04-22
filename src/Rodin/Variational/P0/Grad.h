@@ -93,14 +93,6 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      void interpolate(Math::Vector<Real>& out, const Geometry::Point& p) const
-      {
-        Math::SpatialVector<Real> tmp;
-        interpolate(tmp, p);
-
-        out = tmp.getData().head(tmp.size());
-      }
-
       void interpolate(Math::SpatialVector<Real>& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
