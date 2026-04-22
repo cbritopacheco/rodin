@@ -362,7 +362,7 @@ namespace Rodin::Variational
             {
               const size_t scalarLocal = local / vdim;
               const size_t comp = local % vdim;
-              m_vec(local) += wdet * fval.coeff(comp) * tab.getBasis(qp, scalarLocal);
+              m_vec(local) += wdet * fval(comp) * tab.getBasis(qp, scalarLocal);
             }
           }
           else

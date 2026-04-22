@@ -3080,7 +3080,7 @@ namespace Rodin::Variational
             for (size_t v = 0; v < nVertices; ++v)
             {
               const auto& bv = testfe.getBasis(v * vdim)(rc);
-              m_basis[v] = bv.coeff(0);
+              m_basis[v] = bv(0);
             }
           }
         }
