@@ -122,7 +122,7 @@ namespace Rodin::Variational
         }
         else
         {
-          static_assert(FormLanguage::IsVectorRange<RangeType>::value);
+          static_assert(FormLanguage::IsVectorRange<RangeType>::Value);
           return P1Element<RangeType>(polytope.getGeometry(), this->getFiniteElementSpace().getVectorDimension()).getCount();
         }
       }
@@ -179,7 +179,7 @@ namespace Rodin::Variational
           }
           else
           {
-            static_assert(FormLanguage::IsVectorRange<RangeType>::value);
+            static_assert(FormLanguage::IsVectorRange<RangeType>::Value);
             const size_t ndof = nv * vdim;
             m_cache.basis.resize(ndof);
 
@@ -219,7 +219,7 @@ namespace Rodin::Variational
           }
           else
           {
-            static_assert(FormLanguage::IsVectorRange<RangeType>::value);
+            static_assert(FormLanguage::IsVectorRange<RangeType>::Value);
 
             // Update only the one active component; others remain zero.
             for (size_t a = 0; a < nv; ++a)

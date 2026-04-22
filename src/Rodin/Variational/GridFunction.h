@@ -285,7 +285,7 @@ namespace Rodin::Variational
 
       static_assert(
           std::is_same_v<RangeType, ScalarType> ||
-          FormLanguage::IsVectorRange<RangeType>::value);
+          FormLanguage::IsVectorRange<RangeType>::Value);
 
       /**
        * @brief Constructs a grid function on the given finite element space.
@@ -358,7 +358,7 @@ namespace Rodin::Variational
       constexpr
       auto x() const
       {
-        static_assert(FormLanguage::IsVectorRange<RangeType>::value);
+        static_assert(FormLanguage::IsVectorRange<RangeType>::Value);
         assert(m_fes.get().getVectorDimension() >= 1);
         return Component(static_cast<const Derived&>(*this), 0);
       }
@@ -373,7 +373,7 @@ namespace Rodin::Variational
       constexpr
       auto y() const
       {
-        static_assert(FormLanguage::IsVectorRange<RangeType>::value);
+        static_assert(FormLanguage::IsVectorRange<RangeType>::Value);
         assert(m_fes.get().getVectorDimension() >= 2);
         return Component(static_cast<const Derived&>(*this), 1);
       }
@@ -388,7 +388,7 @@ namespace Rodin::Variational
       constexpr
       auto z() const
       {
-        static_assert(FormLanguage::IsVectorRange<RangeType>::value);
+        static_assert(FormLanguage::IsVectorRange<RangeType>::Value);
         assert(m_fes.get().getVectorDimension() >= 3);
         return Component(static_cast<const Derived&>(*this), 2);
       }

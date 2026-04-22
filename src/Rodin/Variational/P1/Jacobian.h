@@ -248,7 +248,7 @@ namespace Rodin::Variational
   class Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Range, Mesh>, Space>> final
     : public ShapeFunctionBase<Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Range, Mesh>, Space>>>
   {
-    static_assert(FormLanguage::IsVectorRange<Range>::value,
+    static_assert(FormLanguage::IsVectorRange<Range>::Value,
                   "Jacobian<P1> specialization is intended for vector-valued P1.");
 
     public:

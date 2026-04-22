@@ -375,7 +375,7 @@ namespace Rodin::Variational
               m_vec(local) += wdet * fval * fe.getBasis(local)(rc);
           }
         }
-        else if constexpr (FormLanguage::IsVectorRange<RHSRangeType>::value)
+        else if constexpr (FormLanguage::IsVectorRange<RHSRangeType>::Value)
         {
           const size_t vdim = fes.getVectorDimension();
 
@@ -398,7 +398,7 @@ namespace Rodin::Variational
         {
           static_assert(
             std::is_same_v<RHSRangeType, ScalarType>
-            || FormLanguage::IsVectorRange<RHSRangeType>::value,
+            || FormLanguage::IsVectorRange<RHSRangeType>::Value,
             "Unsupported P1 Integral(f.v) range type.");
         }
 
@@ -625,7 +625,7 @@ namespace Rodin::Variational
               }
             }
           }
-          else if constexpr (FormLanguage::IsVectorRange<LHSRangeType>::value)
+          else if constexpr (FormLanguage::IsVectorRange<LHSRangeType>::Value)
           {
             if (symmetric)
             {
@@ -926,10 +926,10 @@ namespace Rodin::Variational
               }
             }
           }
-          else if constexpr (FormLanguage::IsMatrixRange<CoefficientRangeType>::value)
+          else if constexpr (FormLanguage::IsMatrixRange<CoefficientRangeType>::Value)
           {
-            static_assert(FormLanguage::IsVectorRange<MultiplicandRangeType>::value);
-            static_assert(FormLanguage::IsVectorRange<RHSRangeType>::value);
+            static_assert(FormLanguage::IsVectorRange<MultiplicandRangeType>::Value);
+            static_assert(FormLanguage::IsVectorRange<RHSRangeType>::Value);
 
             static thread_local Math::Matrix<ScalarType> s_cmv;
             coeff.getValue(s_cmv, p);
@@ -1479,7 +1479,7 @@ namespace Rodin::Variational
               }
             }
           }
-          else if constexpr (FormLanguage::IsMatrixRange<CoefficientRangeType>::value)
+          else if constexpr (FormLanguage::IsMatrixRange<CoefficientRangeType>::Value)
           {
             static thread_local Math::Matrix<ScalarType> s_cmv;
             coeff.getValue(s_cmv, p);
@@ -1748,7 +1748,7 @@ namespace Rodin::Variational
               }
             }
           }
-          else if constexpr (FormLanguage::IsVectorRange<LHSRangeType>::value)
+          else if constexpr (FormLanguage::IsVectorRange<LHSRangeType>::Value)
           {
             for (size_t ib = 0; ib < nte; ++ib)
             {
@@ -2324,8 +2324,8 @@ namespace Rodin::Variational
       using Parent =
         LocalBilinearFormIntegratorBase<ScalarType>;
 
-      static_assert(FormLanguage::IsVectorRange<LHSOperandRangeType>::value);
-      static_assert(FormLanguage::IsVectorRange<RHSOperandRangeType>::value);
+      static_assert(FormLanguage::IsVectorRange<LHSOperandRangeType>::Value);
+      static_assert(FormLanguage::IsVectorRange<RHSOperandRangeType>::Value);
 
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
@@ -2629,8 +2629,8 @@ namespace Rodin::Variational
       using Parent =
         LocalBilinearFormIntegratorBase<ScalarType>;
 
-      static_assert(FormLanguage::IsVectorRange<LHSOperandRangeType>::value);
-      static_assert(FormLanguage::IsVectorRange<RHSOperandRangeType>::value);
+      static_assert(FormLanguage::IsVectorRange<LHSOperandRangeType>::Value);
+      static_assert(FormLanguage::IsVectorRange<RHSOperandRangeType>::Value);
 
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
@@ -2785,7 +2785,7 @@ namespace Rodin::Variational
               }
             }
           }
-          else if constexpr (FormLanguage::IsMatrixRange<CoefficientRangeType>::value)
+          else if constexpr (FormLanguage::IsMatrixRange<CoefficientRangeType>::Value)
           {
             static thread_local Math::Matrix<ScalarType> s_cmv;
             coeff.getValue(s_cmv, p);
@@ -3484,7 +3484,7 @@ namespace Rodin::Variational
             }
           }
         }
-        else if constexpr (FormLanguage::IsVectorRange<Range>::value)
+        else if constexpr (FormLanguage::IsVectorRange<Range>::Value)
         {
 
           if (trp == tep)

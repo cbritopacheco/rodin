@@ -88,7 +88,7 @@ namespace Rodin::Variational
         }
         else
         {
-          static_assert(FormLanguage::IsVectorRange<RangeType>::value);
+          static_assert(FormLanguage::IsVectorRange<RangeType>::Value);
           return P0Element<RangeType>(polytope.getGeometry(), this->getFiniteElementSpace().getVectorDimension()).getCount();
         }
       }
@@ -132,7 +132,7 @@ namespace Rodin::Variational
           }
           else
           {
-            static_assert(FormLanguage::IsVectorRange<RangeType>::value);
+            static_assert(FormLanguage::IsVectorRange<RangeType>::Value);
 
             m_cache.basis.resize(vdim);
             for (size_t c = 0; c < vdim; ++c)

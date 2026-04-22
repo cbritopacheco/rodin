@@ -78,7 +78,7 @@ namespace Rodin::FormLanguage
         // Else
         std::conditional_t<
           // If
-          FormLanguage::IsVectorRange<LHSRangeType>::value,
+          FormLanguage::IsVectorRange<LHSRangeType>::Value,
           // Then <--------------------------------------------- LHS is Vector
           std::conditional_t<
             // If
@@ -88,13 +88,13 @@ namespace Rodin::FormLanguage
             // Else
             std::conditional_t<
               // If
-              FormLanguage::IsVectorRange<RHSRangeType>::value,
+              FormLanguage::IsVectorRange<RHSRangeType>::Value,
               // Then
               void,
               // Else
               std::conditional_t<
                 // If
-                FormLanguage::IsMatrixRange<RHSRangeType>::value,
+                FormLanguage::IsMatrixRange<RHSRangeType>::Value,
                 // Then
                 Math::SpatialMatrix<ScalarType>,
                 // Else
@@ -106,16 +106,16 @@ namespace Rodin::FormLanguage
           // Else
           std::conditional_t<
             // If
-            FormLanguage::IsMatrixRange<LHSRangeType>::value,
+            FormLanguage::IsMatrixRange<LHSRangeType>::Value,
             // Then <------------------------------------------- LHS is Matrix
             std::conditional_t<
               std::is_same_v<RHSRangeType, ScalarType>,
               Math::SpatialMatrix<ScalarType>,
               std::conditional_t<
-                FormLanguage::IsVectorRange<RHSRangeType>::value,
+                FormLanguage::IsVectorRange<RHSRangeType>::Value,
                 Math::SpatialVector<ScalarType>,
                 std::conditional_t<
-                  FormLanguage::IsMatrixRange<RHSRangeType>::value,
+                  FormLanguage::IsMatrixRange<RHSRangeType>::Value,
                     Math::SpatialMatrix<ScalarType>,
                     void
                   >

@@ -93,7 +93,7 @@ namespace Rodin::FormLanguage
       // Else
       std::conditional_t<
         // If
-        FormLanguage::IsVectorRange<RHSRangeType>::value,
+        FormLanguage::IsVectorRange<RHSRangeType>::Value,
         // Then
         Math::Matrix<ScalarType>,
         // Else
@@ -137,7 +137,7 @@ namespace Rodin::FormLanguage
       // Else
       std::conditional_t<
         // If
-        FormLanguage::IsVectorRange<RHSRangeType>::value,
+        FormLanguage::IsVectorRange<RHSRangeType>::Value,
         // Then
         Math::Matrix<ScalarType>,
         // Else
@@ -184,7 +184,7 @@ namespace Rodin::Variational
         // Else
         std::conditional_t<
           // If
-          FormLanguage::IsVectorRange<RHSRangeType>::value,
+          FormLanguage::IsVectorRange<RHSRangeType>::Value,
           // Then
           Math::Matrix<ScalarType>,
           // Else
@@ -241,7 +241,7 @@ namespace Rodin::Variational
           }
           return res;
         }
-        else if constexpr (FormLanguage::IsVectorRange<RHSRangeType>::value)
+        else if constexpr (FormLanguage::IsVectorRange<RHSRangeType>::Value)
         {
           Math::Vector<ScalarType> res;
           assert(false);
@@ -364,7 +364,7 @@ namespace Rodin::Variational
         // Else
         std::conditional_t<
           // If
-          FormLanguage::IsVectorRange<RHSRangeType>::value,
+          FormLanguage::IsVectorRange<RHSRangeType>::Value,
           // Then
           Math::Matrix<ScalarType>,
           // Else

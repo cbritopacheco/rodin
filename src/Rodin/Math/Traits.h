@@ -103,36 +103,50 @@ namespace Rodin::FormLanguage
   };
 
   template <class T>
-  struct IsSpatialVector : std::false_type {};
+  struct IsSpatialVector : std::false_type { static constexpr bool Value = false; };
 
   template <class Scalar>
-  struct IsSpatialVector<Math::SpatialVector<Scalar>> : std::true_type {};
+  struct IsSpatialVector<Math::SpatialVector<Scalar>> : std::true_type { static constexpr bool Value = true; };
 
   template <class T>
-  struct IsSpatialMatrix : std::false_type {};
+  struct IsSpatialMatrix : std::false_type { static constexpr bool Value = false; };
 
   template <class Scalar>
-  struct IsSpatialMatrix<Math::SpatialMatrix<Scalar>> : std::true_type {};
+  struct IsSpatialMatrix<Math::SpatialMatrix<Scalar>> : std::true_type { static constexpr bool Value = true; };
 
   template <class T>
   struct IsVectorRange
     : std::bool_constant<
-        IsSpatialVector<std::decay_t<T>>::value
+        IsSpatialVector<std::decay_t<T>>::Value
         || (
           IsEigenObject<std::decay_t<T>>::Value
           && (std::decay_t<T>::ColsAtCompileTime == 1)
         )>
-  {};
+  {
+    static constexpr bool Value =
+      IsSpatialVector<std::decay_t<T>>::Value
+      || (
+        IsEigenObject<std::decay_t<T>>::Value
+        && (std::decay_t<T>::ColsAtCompileTime == 1)
+      );
+  };
 
   template <class T>
   struct IsMatrixRange
     : std::bool_constant<
-        IsSpatialMatrix<std::decay_t<T>>::value
+        IsSpatialMatrix<std::decay_t<T>>::Value
         || (
           IsEigenObject<std::decay_t<T>>::Value
           && (std::decay_t<T>::ColsAtCompileTime != 1)
         )>
-  {};
+  {
+    static constexpr bool Value =
+      IsSpatialMatrix<std::decay_t<T>>::Value
+      || (
+        IsEigenObject<std::decay_t<T>>::Value
+        && (std::decay_t<T>::ColsAtCompileTime != 1)
+      );
+  };
 
   template <class T>
   struct RangeKindOf
@@ -141,8 +155,8 @@ namespace Rodin::FormLanguage
       std::is_same_v<std::decay_t<T>, Boolean> ? RangeKind::Boolean
       : std::is_same_v<std::decay_t<T>, Integer> ? RangeKind::Integer
       : std::is_same_v<std::decay_t<T>, Real> ? RangeKind::Real
-      : IsVectorRange<std::decay_t<T>>::value ? RangeKind::Vector
-      : IsMatrixRange<std::decay_t<T>>::value ? RangeKind::Matrix
+      : IsVectorRange<std::decay_t<T>>::Value ? RangeKind::Vector
+      : IsMatrixRange<std::decay_t<T>>::Value ? RangeKind::Matrix
       : RangeKind::Unknown;
   };
 

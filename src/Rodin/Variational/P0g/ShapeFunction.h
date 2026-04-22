@@ -33,7 +33,7 @@ namespace Rodin::Variational
           SpaceType>;
 
       static constexpr bool IsScalarRange = std::is_same_v<RangeType, ScalarType>;
-      static constexpr bool IsVectorRange = FormLanguage::IsVectorRange<RangeType>::value;
+      static constexpr bool IsVectorRange = FormLanguage::IsVectorRange<RangeType>::Value;
 
       static_assert(IsScalarRange || IsVectorRange);
 

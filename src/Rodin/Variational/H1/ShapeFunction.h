@@ -184,7 +184,7 @@ namespace Rodin::Variational
           FESType,
           SpaceType>;
 
-      static_assert(FormLanguage::IsVectorRange<RangeType>::value);
+      static_assert(FormLanguage::IsVectorRange<RangeType>::Value);
 
       struct Cache
       {
