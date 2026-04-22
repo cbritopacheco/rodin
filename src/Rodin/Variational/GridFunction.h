@@ -71,6 +71,7 @@
 #include "ForwardDecls.h"
 
 #include "Function.h"
+#include "Rodin/Math/Traits.h"
 
 
 namespace Rodin::FormLanguage

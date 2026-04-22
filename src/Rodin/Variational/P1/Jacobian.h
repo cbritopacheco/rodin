@@ -33,6 +33,7 @@
 #include "Rodin/Variational/Jacobian.h"
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 #include "Rodin/Variational/Mult.h"
+#include "Rodin/Math/Traits.h"
 
 namespace Rodin::FormLanguage
 {

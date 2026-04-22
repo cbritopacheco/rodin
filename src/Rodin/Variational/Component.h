@@ -12,6 +12,7 @@
 
 #include "ForwardDecls.h"
 #include "Rodin/Variational/IntegrationPoint.h"
+#include "Rodin/Math/Traits.h"
 
 namespace Rodin::FormLanguage
 {

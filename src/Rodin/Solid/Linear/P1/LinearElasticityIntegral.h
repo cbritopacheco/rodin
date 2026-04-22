@@ -35,6 +35,7 @@
 #include "Rodin/Variational/P1/ForwardDecls.h"
 #include "Rodin/Variational/P1/P1.h"
 #include "Rodin/QF/Centroid.h"
+#include "Rodin/Math/Traits.h"
 
 namespace Rodin::Variational
 {

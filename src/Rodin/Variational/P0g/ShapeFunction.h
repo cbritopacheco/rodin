@@ -8,6 +8,7 @@
 #include "Rodin/Variational/P0g/ForwardDecls.h"
 #include "Rodin/Variational/ShapeFunction.h"
 #include "Rodin/Variational/IntegrationPoint.h"
+#include "Rodin/Math/Traits.h"
 
 namespace Rodin::Variational
 {

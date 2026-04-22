@@ -57,6 +57,7 @@
 #include "ShapeFunction.h"
 #include "QuadratureRule.h"
 #include "LinearFormIntegrator.h"
+#include "Rodin/Math/Traits.h"
 
 namespace Rodin::FormLanguage
 {

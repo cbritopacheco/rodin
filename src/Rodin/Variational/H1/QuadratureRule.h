@@ -9,6 +9,7 @@
 
 #include "H1.h"
 #include "H1Element.h"
+#include "Rodin/Math/Traits.h"
 
 namespace Rodin::Variational
 {

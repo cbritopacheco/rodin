@@ -38,6 +38,7 @@
 #include "Rodin/QF/PolytopeQuadratureFormula.h"
 
 #include "P1.h"
+#include "Rodin/Math/Traits.h"
 
 
 namespace Rodin::Variational
