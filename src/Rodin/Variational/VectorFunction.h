@@ -278,10 +278,16 @@ namespace Rodin::Variational
     public:
       using ScalarType = Real;
 
+      static constexpr size_t Dimension = 1 + sizeof...(Values);
       using VectorType = Math::Vector<ScalarType>;
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
+      using RangeType =
+        std::conditional_t<
+          Dimension <= Math::SpatialVector<ScalarType>::MaxSize,
+          SpatialVectorType,
+          VectorType>;
 
-      using FixedSizeVectorType = Math::FixedSizeVector<ScalarType, 1 + sizeof...(Values)>;
+      using FixedSizeVectorType = Math::FixedSizeVector<ScalarType, Dimension>;
 
       using Parent = VectorFunctionBase<ScalarType, VectorFunction<V, Values...>>;
       /**
@@ -305,23 +311,34 @@ namespace Rodin::Variational
           m_fs(std::move(other.m_fs))
       {}
 
-      SpatialVectorType getValue(const Geometry::Point& p) const
+      RangeType getValue(const Geometry::Point& p) const
       {
-        static_assert(1 + sizeof...(Values) <= Math::SpatialVector<ScalarType>::MaxSize,
-          "Variadic VectorFunction exceeds spatial vector capacity.");
-        SpatialVectorType res(1 + sizeof...(Values));
-        Utility::ForIndex<1 + sizeof...(Values)>(
-          [&](auto i)
-          {
-            res[static_cast<std::uint8_t>(i)] = std::get<i>(m_fs).getValue(p);
-          });
+        RangeType res;
+        if constexpr (Dimension <= Math::SpatialVector<ScalarType>::MaxSize)
+        {
+          res.resize(Dimension);
+          Utility::ForIndex<Dimension>(
+            [&](auto i)
+            {
+              res[static_cast<std::uint8_t>(i)] = std::get<i>(m_fs).getValue(p);
+            });
+        }
+        else
+        {
+          res.resize(Dimension);
+          Utility::ForIndex<Dimension>(
+            [&](auto i)
+            {
+              res.coeffRef(i) = std::get<i>(m_fs).getValue(p);
+            });
+        }
         return res;
       }
 
       constexpr
       size_t getDimension() const
       {
-        return 1 + sizeof...(Values);
+        return Dimension;
       }
 
       template <class ... Args>

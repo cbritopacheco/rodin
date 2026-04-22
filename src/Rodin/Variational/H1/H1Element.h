@@ -773,7 +773,13 @@ namespace Rodin::Variational
           ScalarType operator()(const T& v) const
           {
             static thread_local RangeType s_out;
-            s_out = v(H1Element<K, ScalarType>::getNodes(m_g)[m_local / m_vdim]);
+            const auto value = v(H1Element<K, ScalarType>::getNodes(m_g)[m_local / m_vdim]);
+            const Eigen::Index n = static_cast<Eigen::Index>(value.size());
+            s_out.resize(n);
+            for (Eigen::Index i = 0; i < n; i++)
+            {
+              s_out.coeffRef(i) = value(i);
+            }
             return s_out.coeff(m_local % m_vdim);
           }
 
@@ -1061,4 +1067,3 @@ namespace Rodin::Variational
 #include "H1Element.hpp"
 
 #endif
-

@@ -117,7 +117,7 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        return this->getOperand().getValue(p).coeff(m_idx);
+        return this->getOperand().getValue(p)(m_idx);
       }
 
       constexpr
@@ -214,7 +214,7 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        return this->getOperand().getValue(p).coeff(m_i, m_j);
+        return this->getOperand().getValue(p)(m_i, m_j);
       }
 
       constexpr
@@ -317,7 +317,7 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        return m_u.get().getValue(p).coeff(m_idx);
+        return m_u.get().getValue(p)(m_idx);
       }
 
       constexpr
@@ -463,7 +463,7 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         const auto basis = this->getOperand().getBasis(local);
-        return basis.coeff(m_idx);
+        return basis(m_idx);
       }
 
       constexpr
@@ -491,4 +491,3 @@ namespace Rodin::Variational
 }
 
 #endif
-
