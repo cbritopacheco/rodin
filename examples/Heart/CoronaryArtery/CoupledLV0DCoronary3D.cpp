@@ -243,6 +243,7 @@ namespace Rodin::Examples::Heart
 
     m_uh = std::make_unique<VelocityFESType>(std::integral_constant<size_t, 2>{}, m_mesh, dim);
     m_ph = std::make_unique<PressureFESType>(std::integral_constant<size_t, 1>{}, m_mesh);
+    m_muh = std::make_unique<ViscosityFESType>(m_mesh);
 
     m_u = std::make_unique<VelocityTrialFunctionType>(*m_uh);
     m_p = std::make_unique<PressureTrialFunctionType>(*m_ph);
@@ -261,7 +262,7 @@ namespace Rodin::Examples::Heart
     m_qFlux = std::make_unique<PressureTestFunctionType>(*m_ph);
     m_flux = std::make_unique<FluxLinearFormType>(*m_qFlux);
 
-    m_muNonNew = std::make_unique<PressureGridFunctionType>(*m_ph);
+    m_muNonNew = std::make_unique<ViscosityGridFunctionType>(*m_muh);
 
     m_xdmf->add("velocity", m_u->getSolution());
     m_xdmf->add("pressure", m_p->getSolution());
@@ -323,20 +324,21 @@ namespace Rodin::Examples::Heart
     // Compute variable viscosity using P-L model
     const Real n_pl = 0.7; //standard values for blood
     const Real m_pl = 0.035; // standard values for blood
-    const Real mu = 0.035;
 
     // Compute the symmetric tensor at the previous time step
     auto symU_old = 0.5 * (Jacobian(*m_uOld) + Transpose(Jacobian(*m_uOld)));
 
     // Define a function that will be evaluated in the assembly which contains the P-L model
-    RealFunction mu_nonNew = [m_pl, n_pl, symU_old, mu](const Point& p) -> Real
-    {
-      return Frobenius(symU_old)(p);
-      auto S = symU_old.getValue(p);
-      const Real gamma = std::sqrt(2.0 * dot(S, S));
-      if (std::abs(gamma) > 0.0) return m_pl * std::pow(gamma, n_pl - 1.0);
-      else return mu;
-    };
+const Real mu0  = m_cfg.mu;
+const Real eps_reg = 1e-8;
+
+RealFunction mu_nonNew = [m_pl, n_pl, mu0, eps_reg, symU_old](const Point& p) -> Real
+{
+  const auto S = symU_old.getValue(p);
+  const Real gamma = std::sqrt(2.0 * std::abs(dot(S, S)) + eps_reg * eps_reg);
+  const Real mu_eff = m_pl * std::pow(gamma, n_pl - 1.0);
+  return std::max(mu_eff, mu0);
+};
 
     (*m_muNonNew) = mu_nonNew;
 

@@ -25,6 +25,7 @@ namespace Rodin::Examples::Heart
       using MeshType = Rodin::Geometry::Mesh<Rodin::Context::Local>;
       using VelocityFESType = Rodin::Variational::H1<2, Rodin::Math::Vector<Real>, MeshType>;
       using PressureFESType = Rodin::Variational::H1<1, Real, MeshType>;
+      using ViscosityFESType = Rodin::Variational::P1<Real, MeshType>;
       using VelocityGridFunctionType = Rodin::PETSc::Variational::GridFunction<VelocityFESType>;
       using PressureGridFunctionType = Rodin::PETSc::Variational::GridFunction<PressureFESType>;
       using VelocityTrialFunctionType =
@@ -34,6 +35,7 @@ namespace Rodin::Examples::Heart
       using VelocityTestFunctionType = Rodin::PETSc::Variational::TestFunction<VelocityFESType>;
       using PressureTestFunctionType = Rodin::PETSc::Variational::TestFunction<PressureFESType>;
       using FluxLinearFormType = Rodin::Variational::LinearForm<PressureFESType, ::Vec>;
+      using ViscosityGridFunctionType = Rodin::PETSc::Variational::GridFunction<ViscosityFESType>;
 
       struct RCR
       {
@@ -159,6 +161,7 @@ namespace Rodin::Examples::Heart
 
       std::unique_ptr<VelocityFESType> m_uh;
       std::unique_ptr<PressureFESType> m_ph;
+      std::unique_ptr<ViscosityFESType> m_muh;
 
       std::unique_ptr<VelocityTrialFunctionType> m_u;
       std::unique_ptr<PressureTrialFunctionType> m_p;
@@ -171,7 +174,7 @@ namespace Rodin::Examples::Heart
       std::unique_ptr<PressureTestFunctionType> m_qFlux;
       std::unique_ptr<FluxLinearFormType> m_flux;
 
-      std::unique_ptr<PressureGridFunctionType> m_muNonNew;
+      std::unique_ptr<ViscosityGridFunctionType> m_muNonNew;
 
       std::map<Attribute, RCR> m_wk;
 
