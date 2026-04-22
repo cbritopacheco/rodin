@@ -227,7 +227,13 @@ namespace Rodin::Variational
       {
         static thread_local RangeType s_out;
         const auto& xi = P0gElement<ScalarType>(m_g).getNode(m_local / m_vdim);
-        s_out = v(xi);
+        const auto value = v(xi);
+        const Eigen::Index n = static_cast<Eigen::Index>(value.size());
+        s_out.resize(n);
+        for (Eigen::Index i = 0; i < n; i++)
+        {
+          s_out.coeffRef(i) = value(i);
+        }
         return s_out.coeff(m_local % m_vdim);
       }
 

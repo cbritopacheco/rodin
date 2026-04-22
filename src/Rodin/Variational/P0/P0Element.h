@@ -327,7 +327,13 @@ namespace Rodin::Variational
           {
             static thread_local RangeType s_out;
             const Geometry::Polytope::Traits ts(m_g);
-            s_out = v(ts.getCentroid());
+            const auto value = v(ts.getCentroid());
+            const Eigen::Index n = static_cast<Eigen::Index>(value.size());
+            s_out.resize(n);
+            for (Eigen::Index i = 0; i < n; i++)
+            {
+              s_out.coeffRef(i) = value(i);
+            }
             return s_out.coeff(m_local % m_vdim);
           }
 
