@@ -17,13 +17,9 @@
 #include "Rodin/Copyable.h"
 #include "Rodin/Identifiable.h"
 #include "Rodin/Math/ForwardDecls.h"
-#include "Rodin/Math/Traits.h"
-#include "Rodin/Math/SpatialVector.h"
-#include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/Variational/ForwardDecls.h"
 
 #include "Traits.h"
-#include "IsPlaneObject.h"
 
 namespace Rodin::FormLanguage
 {
@@ -40,9 +36,7 @@ namespace Rodin::FormLanguage
    *
    * ## Key Features
    * - **Unique Identification**: Each instance receives a unique UUID for tracking
- * - **Object Management**: Value materialization for expression objects
-   * - **Polymorphic Operations**: Support for copying and cloning operations
-   * - **Type Safety**: Template-based object storage with type validation
+ * - **Polymorphic Operations**: Support for copying and cloning operations
    */
   class Base : public Copyable, public Identifiable
   {
@@ -95,93 +89,6 @@ namespace Rodin::FormLanguage
       virtual Optional<StringView> getName() const
       {
         return {};
-      }
-
-      /**
-       * @brief Materializes expression objects into concrete value objects.
-       *
-       * @tparam T Type of object to materialize
-       * @param obj Object to materialize
-       */
-      template <class T>
-      using DecayT = std::remove_cv_t<std::remove_reference_t<T>>;
-
-      template <class T>
-      static constexpr bool IsStackBackedObject =
-        FormLanguage::RangeKindOf<DecayT<T>>::Value != FormLanguage::RangeKind::Unknown;
-
-      /**
-       * @brief Materializes stack-backed math objects.
-       *
-       * Supported categories are Boolean, Integer, Real, Complex,
-       * SpatialVector and SpatialMatrix. Vector/matrix-like Eigen expressions
-       * are explicitly materialized into spatial objects.
-       */
-      template <class T, std::enable_if_t<IsStackBackedObject<T>, int> = 0>
-      constexpr
-      auto object(T&& obj) const noexcept
-      {
-        using D = DecayT<T>;
-        constexpr auto kind = FormLanguage::RangeKindOf<D>::Value;
-        if constexpr (kind == FormLanguage::RangeKind::Boolean
-                   || kind == FormLanguage::RangeKind::Integer
-                   || kind == FormLanguage::RangeKind::Real
-                   || kind == FormLanguage::RangeKind::Complex)
-        {
-          return static_cast<D>(std::forward<T>(obj));
-        }
-        else if constexpr (kind == FormLanguage::RangeKind::Vector)
-        {
-          using Scalar = typename D::Scalar;
-          return Math::SpatialVector<Scalar>(std::forward<T>(obj));
-        }
-        else if constexpr (kind == FormLanguage::RangeKind::Matrix)
-        {
-          using Scalar = typename D::Scalar;
-          return Math::SpatialMatrix<Scalar>(std::forward<T>(obj));
-        }
-        else
-        {
-          return static_cast<D>(std::forward<T>(obj));
-        }
-      }
-
-      template <class T,
-        std::enable_if_t<
-          !IsStackBackedObject<T> && FormLanguage::IsPlainObject<std::remove_reference_t<T>>::Value,
-        int> = 0>
-      constexpr
-      DecayT<T> object(T&& obj) const noexcept
-      {
-        return static_cast<DecayT<T>>(std::forward<T>(obj));
-      }
-
-      /**
-       * @brief Forwards non-plain objects unchanged.
-       * @tparam T Type of object (must not be a plain object type)
-       * @param[in] obj Object to forward
-       * @return Forwarded object
-       *
-       * This overload handles non-plain object types (such as scalars, references,
-       * or expression templates) by forwarding them directly without storage.
-       * It is selected via SFINAE when T is not a plain object.
-       */
-      template <class T,
-        std::enable_if_t<
-          !IsStackBackedObject<T> && !FormLanguage::IsPlainObject<std::remove_reference_t<T>>::Value,
-        int> = 0>
-      constexpr
-      T object(T&& obj) const noexcept
-      {
-        return std::forward<T>(obj);
-      }
-
-      /**
-       * @brief Clears internal temporary state.
-       */
-      void clear()
-      {
-        // No-op: object() now materializes values without heap storage.
       }
 
       /**

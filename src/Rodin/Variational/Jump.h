@@ -147,7 +147,9 @@ namespace Rodin::Variational
         it2->getTransformation().inverse(rc2, pc);
         const Geometry::Point p1(std::cref(*it1), std::cref(rc1), pc);
         const Geometry::Point p2(std::cref(*it2), std::cref(rc2), pc);
-        return this->object(getOperand().getValue(p1)) - this->object(getOperand().getValue(p2));
+        const auto v1 = getOperand().getValue(p1);
+        const auto v2 = getOperand().getValue(p2);
+        return v1 - v2;
       }
 
       constexpr
@@ -314,9 +316,9 @@ namespace Rodin::Variational
         const IntegrationPoint ip1(p1, m_ip->getQuadratureFormula(), m_ip->getIndex());
         const IntegrationPoint ip2(p2, m_ip->getQuadratureFormula(), m_ip->getIndex());
         m_operand->setIntegrationPoint(ip1);
-        const auto& val1 = this->object(m_operand->getBasis(local));
+        const auto val1 = m_operand->getBasis(local);
         m_operand->setIntegrationPoint(ip2);
-        const auto& val2 = this->object(m_operand->getBasis(local));
+        const auto val2 = m_operand->getBasis(local);
         return val1 - val2;
       }
 

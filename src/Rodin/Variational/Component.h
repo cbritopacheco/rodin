@@ -462,7 +462,8 @@ namespace Rodin::Variational
       constexpr
       auto getBasis(size_t local) const
       {
-        return this->object(this->getOperand().getBasis(local)).coeff(m_idx);
+        const auto basis = this->getOperand().getBasis(local);
+        return basis.coeff(m_idx);
       }
 
       constexpr

@@ -231,7 +231,9 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        return Math::dot(this->object(getLHS().getValue(p)), this->object(getRHS().getValue(p)));
+        const auto lhs = getLHS().getValue(p);
+        const auto rhs = getRHS().getValue(p);
+        return Math::dot(lhs, rhs);
       }
 
       constexpr
@@ -387,7 +389,9 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         const auto& ip = this->getRHS().getIntegrationPoint();
-        return Math::dot(this->object(getLHS().getValue(ip.getPoint())), this->object(getRHS().getBasis(local)));
+        const auto lhs = getLHS().getValue(ip.getPoint());
+        const auto rhs = getRHS().getBasis(local);
+        return Math::dot(lhs, rhs);
       }
 
       constexpr
@@ -523,7 +527,9 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         const auto& p = getLHS().getIntegrationPoint();
-        return Math::dot(this->object(getLHS().getBasis(local)), this->object(getRHS().getValue(p.getPoint())));
+        const auto lhs = getLHS().getBasis(local);
+        const auto rhs = getRHS().getValue(p.getPoint());
+        return Math::dot(lhs, rhs);
       }
 
       constexpr
@@ -641,7 +647,9 @@ namespace Rodin::Variational
       constexpr
       auto operator()(size_t tr, size_t te)
       {
-        return Math::dot(this->object(getLHS().getBasis(tr)), this->object(getRHS().getBasis(te)));
+        const auto lhs = getLHS().getBasis(tr);
+        const auto rhs = getRHS().getBasis(te);
+        return Math::dot(lhs, rhs);
       }
 
       constexpr
