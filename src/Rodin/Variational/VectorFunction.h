@@ -302,9 +302,9 @@ namespace Rodin::Variational
           m_fs(std::move(other.m_fs))
       {}
 
-      decltype(auto) getValue(const Geometry::Point& p) const
+      const FixedSizeVectorType& getValue(const Geometry::Point& p) const
       {
-        static thread_local Math::FixedSizeVector<ScalarType, 1 + sizeof...(Values)> s_res;
+        static thread_local FixedSizeVectorType s_res;
         Utility::ForIndex<1 + sizeof...(Values)>(
           [&](auto i)
           {

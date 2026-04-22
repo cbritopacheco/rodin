@@ -122,10 +122,11 @@ namespace Rodin::Variational
        * @param p Point at which to evaluate
        * @returns Value @f$ \frac{f(x)}{g(x)} @f$ at point @f$ x @f$
        */
-      constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        return this->object(getLHS().getValue(p)) / this->object(getRHS().getValue(p));
+        static thread_local LHSRangeType s_lhs;
+        s_lhs = getLHS().getValue(p);
+        return s_lhs / this->object(getRHS().getValue(p));
       }
 
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept

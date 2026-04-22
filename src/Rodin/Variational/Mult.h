@@ -214,10 +214,11 @@ namespace Rodin::Variational
        * @param p Point at which to evaluate
        * @returns Product value @f$ f(p) \cdot g(p) @f$
        */
-      constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        return this->object(this->getLHS().getValue(p)) * this->object(this->getRHS().getValue(p));
+        static thread_local LHSRangeType s_lhs;
+        s_lhs = getLHS().getValue(p);
+        return s_lhs * this->object(getRHS().getValue(p));
       }
 
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const

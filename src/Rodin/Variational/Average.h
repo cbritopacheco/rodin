@@ -72,6 +72,9 @@ namespace Rodin::Variational
       /// @brief Type of the operand function
       using OperandType = FunctionBase<FunctionDerived>;
 
+      /// @brief Range type of the operand
+      using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
+
       /// @brief Parent class type
       using Parent = FunctionBase<Average<FunctionBase<FunctionDerived>>>;
 
@@ -146,7 +149,9 @@ namespace Rodin::Variational
         it2->getTransformation().inverse(s_rc2, pc);
         const Geometry::Point p1(std::cref(*it1), std::cref(s_rc1), pc);
         const Geometry::Point p2(std::cref(*it2), std::cref(s_rc2), pc);
-        return 0.5 * (this->object(getOperand().getValue(p1)) + this->object(getOperand().getValue(p2)));
+        static thread_local OperandRangeType s_val1;
+        s_val1 = getOperand().getValue(p1);
+        return 0.5 * (s_val1 + this->object(getOperand().getValue(p2)));
       }
 
       constexpr

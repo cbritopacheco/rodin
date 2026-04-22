@@ -167,10 +167,11 @@ namespace Rodin::Variational
        * @param p Point at which to evaluate
        * @returns Sum @f$ f(p) + g(p) @f$
        */
-      constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        return this->object(this->getLHS().getValue(p)) + this->object(this->getRHS().getValue(p));
+        static thread_local LHSRangeType s_lhs;
+        s_lhs = getLHS().getValue(p);
+        return s_lhs + this->object(getRHS().getValue(p));
       }
 
       constexpr
