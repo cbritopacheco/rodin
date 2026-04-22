@@ -46,6 +46,18 @@ namespace Rodin::FormLanguage
       std::is_base_of_v<Eigen::EigenBase<typename std::decay<T>::type>, typename std::decay<T>::type>;
   };
 
+  template <class T, class = void>
+  struct ColsAtCompileTime
+  {
+    static constexpr int Value = -1;
+  };
+
+  template <class T>
+  struct ColsAtCompileTime<T, std::void_t<decltype(std::decay_t<T>::ColsAtCompileTime)>>
+  {
+    static constexpr int Value = std::decay_t<T>::ColsAtCompileTime;
+  };
+
   /**
    * @brief Traits specialization for Boolean type.
    */
@@ -121,14 +133,14 @@ namespace Rodin::FormLanguage
         IsSpatialVector<std::decay_t<T>>::Value
         || (
           IsEigenObject<std::decay_t<T>>::Value
-          && (std::decay_t<T>::ColsAtCompileTime == 1)
+          && (ColsAtCompileTime<std::decay_t<T>>::Value == 1)
         )>
   {
     static constexpr bool Value =
       IsSpatialVector<std::decay_t<T>>::Value
       || (
         IsEigenObject<std::decay_t<T>>::Value
-        && (std::decay_t<T>::ColsAtCompileTime == 1)
+        && (ColsAtCompileTime<std::decay_t<T>>::Value == 1)
       );
   };
 
@@ -138,14 +150,14 @@ namespace Rodin::FormLanguage
         IsSpatialMatrix<std::decay_t<T>>::Value
         || (
           IsEigenObject<std::decay_t<T>>::Value
-          && (std::decay_t<T>::ColsAtCompileTime != 1)
+          && (ColsAtCompileTime<std::decay_t<T>>::Value != 1)
         )>
   {
     static constexpr bool Value =
       IsSpatialMatrix<std::decay_t<T>>::Value
       || (
         IsEigenObject<std::decay_t<T>>::Value
-        && (std::decay_t<T>::ColsAtCompileTime != 1)
+        && (ColsAtCompileTime<std::decay_t<T>>::Value != 1)
       );
   };
 
