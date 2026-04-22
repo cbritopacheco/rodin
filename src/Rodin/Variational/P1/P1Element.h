@@ -208,17 +208,17 @@ namespace Rodin::Variational
                */
               const ReturnType& operator()(const Math::SpatialPoint& r) const
               {
-                static thread_local ReturnType s_out;
                 const size_t dim = Geometry::Polytope::Traits(m_g).getDimension();
-                s_out.resize(dim);
+                m_out.resize(dim);
                 for (size_t i = 0; i < dim; ++i)
-                  s_out(i) = DerivativeFunction<1>(i, m_local, m_g)(r);
-                return s_out;
+                  m_out(i) = DerivativeFunction<1>(i, m_local, m_g)(r);
+                return m_out;
               }
 
             private:
               const size_t m_local;
               const Geometry::Polytope::Type m_g;
+              mutable ReturnType m_out;
           };
 
           constexpr
@@ -933,21 +933,21 @@ namespace Rodin::Variational
 
               const ReturnType& operator()(const Math::SpatialPoint& r) const
               {
-                static thread_local ReturnType s_out;
                 const size_t dim = Geometry::Polytope::Traits(m_g).getDimension();
-                s_out.resize(m_vdim, dim);
+                m_out.resize(m_vdim, dim);
                 for (size_t i = 0; i < m_vdim; ++i)
                 {
                   for (size_t j = 0; j < dim; ++j)
-                    s_out(i, j) = DerivativeFunction<1>(i, j, m_vdim, m_local, m_g)(r);
+                    m_out(i, j) = DerivativeFunction<1>(i, j, m_vdim, m_local, m_g)(r);
                 }
-                return s_out;
+                return m_out;
               }
 
             private:
               const size_t m_vdim;
               const size_t m_local;
               const Geometry::Polytope::Type m_g;
+              mutable ReturnType m_out;
           };
 
           constexpr
@@ -963,11 +963,10 @@ namespace Rodin::Variational
 
           const ReturnType& operator()(const Math::SpatialPoint& rc) const
           {
-            static thread_local ReturnType s_out;
-            s_out.resize(m_vdim);
-            s_out.setZero();
-            s_out.coeffRef(m_local % m_vdim) = P1Element<ScalarType>(m_g).getBasis(m_local / m_vdim)(rc);
-            return s_out;
+            m_out.resize(m_vdim);
+            m_out.setZero();
+            m_out.coeffRef(m_local % m_vdim) = P1Element<ScalarType>(m_g).getBasis(m_local / m_vdim)(rc);
+            return m_out;
           }
 
           template <size_t Order>
@@ -987,6 +986,7 @@ namespace Rodin::Variational
           const size_t m_vdim;
           const size_t m_local;
           const Geometry::Polytope::Type m_g;
+          mutable ReturnType m_out;
       };
 
       P1Element()

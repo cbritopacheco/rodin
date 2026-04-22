@@ -424,17 +424,16 @@ namespace Rodin::Variational
 
         assert(alpha < m_cache.grad_phys.size());
 
-        static thread_local RangeType s_J;
-        if (static_cast<size_t>(s_J.rows()) != vdim || static_cast<size_t>(s_J.cols()) != d)
-          s_J.resize(vdim, d);
+        if (static_cast<size_t>(m_J.rows()) != vdim || static_cast<size_t>(m_J.cols()) != d)
+          m_J.resize(vdim, d);
 
-        s_J.setZero();
+        m_J.setZero();
 
         // Only row comp is non-zero
         for (size_t j = 0; j < d; ++j)
-          s_J(comp, j) = m_cache.grad_phys[alpha](j);
+          m_J(comp, j) = m_cache.grad_phys[alpha](j);
 
-        return s_J;
+        return m_J;
       }
 
       constexpr
@@ -456,6 +455,7 @@ namespace Rodin::Variational
       const IntegrationPoint* m_ip;
 
       Cache m_cache;
+      mutable RangeType m_J;
   };
 
   template <size_t K, class ShapeFunctionDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>

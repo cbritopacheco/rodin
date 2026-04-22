@@ -267,11 +267,10 @@ namespace Rodin::Variational
 
       const ReturnType& operator()(const Math::SpatialVector<Real>&) const
       {
-        static thread_local ReturnType s_out;
-        s_out.resize(m_vdim);
-        s_out.setZero();
-        s_out.coeffRef(m_local % m_vdim) = ScalarType(1);
-        return s_out;
+        m_out.resize(m_vdim);
+        m_out.setZero();
+        m_out.coeffRef(m_local % m_vdim) = ScalarType(1);
+        return m_out;
       }
 
       template <size_t Order>
@@ -284,6 +283,7 @@ namespace Rodin::Variational
       const size_t m_vdim;
       const size_t m_local;
       const G m_g;
+      mutable ReturnType m_out;
     };
 
     P0gElement()
