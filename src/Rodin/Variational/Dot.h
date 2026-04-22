@@ -228,11 +228,10 @@ namespace Rodin::Variational
        * @param p Point at which to evaluate
        * @returns @f$ f(p) \cdot g(p) @f$ (scalar result)
        */
+      constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        static thread_local LHSRangeType s_lhs;
-        s_lhs = getLHS().getValue(p);
-        return Math::dot(s_lhs, this->object(getRHS().getValue(p)));
+        return Math::dot(this->object(getLHS().getValue(p)), this->object(getRHS().getValue(p)));
       }
 
       constexpr
