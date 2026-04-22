@@ -75,7 +75,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_active_dynamics_8h.html">&lt;Rodin/Heart/CCMLC2014/Physics/ActiveDynamics.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> Input&gt;</div>
+          <div class="m-doc-template">template&lt;class Input&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_heart.html">Heart</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_heart_1_1_c_c_m_l_c2014.html">CCMLC2014</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_physics.html">Physics</a>::<wbr/></span>ActiveDynamicsSolver <span class="m-thin">class</span>
         </h1>
         <p>Solves the local active dynamics and computes condensed active stress/tangent for the global balance.</p>
@@ -133,7 +133,7 @@ $ \gamma, \beta $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a71a145e116fce87b2a52cca72bd33a68" class="m-doc">ActiveDynamicsSolver</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">const</a> Input&amp; input) <span class="m-label m-flat m-info">explicit</span> </span>
+              <span class="m-doc-wrap-bumper"><a href="#a71a145e116fce87b2a52cca72bd33a68" class="m-doc">ActiveDynamicsSolver</a>(</span><span class="m-doc-wrap">const Input&amp; input) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Construct with model input parameters.</dd>
           </dl>
@@ -142,9 +142,9 @@ $ \gamma, \beta $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> EvalData, <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">LocalActiveData</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac3340ddf23956b620647291f4c5c0ba3" class="m-doc">evaluate</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">const</a> EvalData&amp; data,
-              <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">LocalActiveData</a>&amp; active) const -&gt; <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">bool</a></span>
+              <div class="m-doc-template">template&lt;class EvalData, class LocalActiveData&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac3340ddf23956b620647291f4c5c0ba3" class="m-doc">evaluate</a>(</span><span class="m-doc-wrap">const EvalData&amp; data,
+              LocalActiveData&amp; active) const -&gt; bool</span>
             </dt>
             <dd>Solve the local active dynamics at the current global iterate.</dd>
           </dl>
@@ -154,9 +154,9 @@ $ \gamma, \beta $
           <section class="m-doc-details" id="a71a145e116fce87b2a52cca72bd33a68"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> Input&gt;
+                template&lt;class Input&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Physics::<wbr />ActiveDynamicsSolver&lt;Input&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a71a145e116fce87b2a52cca72bd33a68" class="m-doc-self">ActiveDynamicsSolver</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">const</a> Input&amp; input) <span class="m-label m-info">explicit</span> </span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Physics::<wbr />ActiveDynamicsSolver&lt;Input&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a71a145e116fce87b2a52cca72bd33a68" class="m-doc-self">ActiveDynamicsSolver</a>(</span><span class="m-doc-wrap">const Input&amp; input) <span class="m-label m-info">explicit</span> </span></span>
             </h3>
             <p>Construct with model input parameters.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -174,11 +174,11 @@ $ \gamma, \beta $
           <section class="m-doc-details" id="ac3340ddf23956b620647291f4c5c0ba3"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> Input&gt;
-                template&lt;<a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> EvalData, <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">LocalActiveData</a>&gt;
+                template&lt;class Input&gt;
+                template&lt;class EvalData, class LocalActiveData&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">bool</a> Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Physics::<wbr />ActiveDynamicsSolver&lt;Input&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac3340ddf23956b620647291f4c5c0ba3" class="m-doc-self">evaluate</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">const</a> EvalData&amp; data,
-              <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">LocalActiveData</a>&amp; active) const</span></span>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Physics::<wbr />ActiveDynamicsSolver&lt;Input&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac3340ddf23956b620647291f4c5c0ba3" class="m-doc-self">evaluate</a>(</span><span class="m-doc-wrap">const EvalData&amp; data,
+              LocalActiveData&amp; active) const</span></span>
             </h3>
             <p>Solve the local active dynamics at the current global iterate.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -189,6 +189,10 @@ $ \gamma, \beta $
                 <tr>
                   <td style="width: 1%">EvalData</td>
                   <td>Evaluation data structure type.</td>
+                </tr>
+                <tr>
+                  <td>LocalActiveData</td>
+                  <td>Local active data structure type.</td>
                 </tr>
               </tbody>
               <thead>
