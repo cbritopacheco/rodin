@@ -19,7 +19,7 @@ if (MPIEXEC_EXECUTABLE)
   endif()
 endif()
 
-foreach(np 1 2 3)
+foreach(np 1 2 3 4 8)
   add_test(
     NAME RodinMPIAssemblyTest_np${np}
     COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
