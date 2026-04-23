@@ -192,7 +192,9 @@ namespace Rodin::Tests::Unit
     boost::mpi::reduce(world, localFixed, globalFixed, std::plus<size_t>(), 0);
 
     if (world.rank() == 0)
+    {
       EXPECT_GT(globalFixed, 0u);
+    }
   }
 
   /**
@@ -374,7 +376,9 @@ namespace Rodin::Tests::Unit
     boost::mpi::reduce(world, localFixed, globalFixed, std::plus<size_t>(), 0);
 
     if (world.rank() == 0)
+    {
       EXPECT_GT(globalFixed, 0u);
+    }
 
     for (const auto& [local, value] : dbc.getDOFs())
       EXPECT_NEAR(value, gValue, 1e-12);
@@ -404,7 +408,9 @@ namespace Rodin::Tests::Unit
     boost::mpi::reduce(world, localFixed, globalFixed, std::plus<size_t>(), 0);
 
     if (world.rank() == 0)
+    {
       EXPECT_GT(globalFixed, 0u);
+    }
   }
 
   /**
@@ -431,7 +437,9 @@ namespace Rodin::Tests::Unit
     boost::mpi::reduce(world, localFixed, globalFixed, std::plus<size_t>(), 0);
 
     if (world.rank() == 0)
+    {
       EXPECT_GT(globalFixed, 0u);
+    }
   }
 }
 
