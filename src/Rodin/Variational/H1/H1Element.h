@@ -132,7 +132,7 @@ namespace Rodin::Variational
    *           for smooth functions but increase computational cost.
    * @tparam Scalar Type of scalar range (e.g., Real, Complex<Real>)
    *
-   * @see H1Element<K, Math::Vector<Scalar>> for vector-valued version
+   * @see H1Element<K, Math::SpatialVector<Scalar>> for vector-valued version
    * @see P0Element for piecewise constant elements
    * @see P1Element for piecewise linear elements
    */
