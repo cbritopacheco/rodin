@@ -24,7 +24,7 @@
  * - Single DOF at element barycenter
  * - Constant value throughout element
  *
- * **Vector P0Element<Math::Vector<Scalar>>:**
+ * **Vector P0Element<Math::SpatialVector<Scalar>>:**
  * - Component-wise constant vector fields
  * - @f$ d @f$ DOFs per element (one per vector component)
  * - Basis functions: @f$ \boldsymbol{\phi}_i = \mathbf{e}_j @f$ where @f$ j = i \mod d @f$
@@ -48,6 +48,7 @@
 
 #include "Rodin/Types.h"
 
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Math/Traits.h"
 
 #include "Rodin/Geometry/Mesh.h"
@@ -278,19 +279,19 @@ namespace Rodin::Variational
    * @tparam Scalar Type of scalar components
    */
   template <class Scalar>
-  class P0Element<Math::Vector<Scalar>> final
-    : public FiniteElementBase<P0Element<Math::Vector<Scalar>>>
+  class P0Element<Math::SpatialVector<Scalar>> final
+    : public FiniteElementBase<P0Element<Math::SpatialVector<Scalar>>>
   {
     using G = Geometry::Polytope::Type;
 
     public:
       /// Parent class
-      using Parent = FiniteElementBase<P0Element<Math::Vector<Scalar>>>;
+      using Parent = FiniteElementBase<P0Element<Math::SpatialVector<Scalar>>>;
 
       using ScalarType = Scalar;
 
       /// Type of range
-      using RangeType = Math::Vector<Scalar>;
+      using RangeType = Math::SpatialVector<Scalar>;
 
       /**
        * @brief Represents a linear form (evaluation functional) for vector P0 elements.
@@ -325,16 +326,9 @@ namespace Rodin::Variational
           template <class T>
           ScalarType operator()(const T& v) const
           {
-            static thread_local RangeType s_out;
             const Geometry::Polytope::Traits ts(m_g);
             const auto value = v(ts.getCentroid());
-            const Eigen::Index n = static_cast<Eigen::Index>(value.size());
-            s_out.resize(n);
-            for (Eigen::Index i = 0; i < n; i++)
-            {
-              s_out.coeffRef(i) = value(i);
-            }
-            return s_out.coeff(m_local % m_vdim);
+            return value(static_cast<std::uint8_t>(m_local % m_vdim));
           }
 
         private:
@@ -352,7 +346,7 @@ namespace Rodin::Variational
       class BasisFunction
       {
         public:
-          using ReturnType = Math::Vector<ScalarType>;  ///< Vector return type
+          using ReturnType = Math::SpatialVector<ScalarType>;  ///< Vector return type
 
           /**
            * @brief Represents a derivative of the vector P0 basis function (always zero).
@@ -418,13 +412,12 @@ namespace Rodin::Variational
            * @brief Evaluates the vector basis function at a spatial point.
            * @return Constant unit vector: e_j where j = local % vdim
            */
-          const ReturnType& operator()(const Math::SpatialVector<ScalarType>&) const
+          ReturnType operator()(const Math::SpatialVector<ScalarType>&) const
           {
-            static thread_local ReturnType s_out;
-            s_out.resize(m_vdim);
-            s_out.setZero();
-            s_out.coeffRef(m_local % m_vdim) = ScalarType(1);
-            return s_out;
+            ReturnType out(static_cast<std::uint8_t>(m_vdim));
+            out.setZero();
+            out[static_cast<std::uint8_t>(m_local % m_vdim)] = ScalarType(1);
+            return out;
           }
 
           /**
