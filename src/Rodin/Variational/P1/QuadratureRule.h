@@ -33,6 +33,7 @@
 #include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/Geometry/Region.h"
 #include "Rodin/Math/Common.h"
+#include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/Variational/ShapeFunction.h"
 #include "Rodin/QF/Centroid.h"
 #include "Rodin/QF/PolytopeQuadratureFormula.h"
@@ -3697,10 +3698,10 @@ namespace Rodin::Variational
       Real m_distortion;
 
       ScalarType m_sk;
-      Math::Matrix<ScalarType> m_mk;
+      Math::SpatialMatrix<ScalarType> m_mk;
 
-      Math::Vector<ScalarType> m_trv, m_tev;
-      Math::Matrix<ScalarType> m_k0, m_k1, m_k2, m_k3, m_k4, m_k5;
+      Math::SpatialVector<ScalarType> m_trv, m_tev;
+      Math::SpatialMatrix<ScalarType> m_k0, m_k1, m_k2, m_k3, m_k4, m_k5;
 
       Math::Matrix<ScalarType> m_matrix;
   };

@@ -334,14 +334,13 @@ namespace Rodin::Variational
                * @param r Reference point in the element
                * @return Gradient vector at point r
                */
-              const ReturnType& operator()(const Math::SpatialPoint& r) const
+              ReturnType operator()(const Math::SpatialPoint& r) const
               {
-                static thread_local ReturnType s_out;
                 const size_t dim = Geometry::Polytope::Traits(m_g).getDimension();
-                s_out.resize(dim);
+                ReturnType out(static_cast<std::uint8_t>(dim));
                 for (size_t i = 0; i < dim; ++i)
-                  s_out(i) = DerivativeFunction<1>(i, m_local, m_g)(r);
-                return s_out;
+                  out(i) = DerivativeFunction<1>(i, m_local, m_g)(r);
+                return out;
               }
 
             private:
@@ -865,17 +864,16 @@ namespace Rodin::Variational
               constexpr
               JacobianFunction(JacobianFunction&&) = default;
 
-              const ReturnType& operator()(const Math::SpatialPoint& r) const
+              ReturnType operator()(const Math::SpatialPoint& r) const
               {
-                static thread_local ReturnType s_out;
                 const size_t dim = Geometry::Polytope::Traits(m_g).getDimension();
-                s_out.resize(m_vdim, dim);
+                ReturnType out(static_cast<std::uint8_t>(m_vdim), static_cast<std::uint8_t>(dim));
                 for (size_t i = 0; i < m_vdim; ++i)
                 {
                   for (size_t j = 0; j < dim; ++j)
-                    s_out(i, j) = DerivativeFunction<1>(i, j, m_vdim, m_local, m_g)(r);
+                    out(i, j) = DerivativeFunction<1>(i, j, m_vdim, m_local, m_g)(r);
                 }
-                return s_out;
+                return out;
               }
 
             private:
@@ -895,14 +893,13 @@ namespace Rodin::Variational
           constexpr
           BasisFunction(BasisFunction&&) = default;
 
-          const ReturnType& operator()(const Math::SpatialPoint& rc) const
+          ReturnType operator()(const Math::SpatialPoint& rc) const
           {
-            static thread_local ReturnType s_out;
-            s_out = ReturnType(static_cast<std::uint8_t>(m_vdim));
-            s_out.setZero();
-            s_out[static_cast<std::uint8_t>(m_local % m_vdim)] =
+            ReturnType out(static_cast<std::uint8_t>(m_vdim));
+            out.setZero();
+            out[static_cast<std::uint8_t>(m_local % m_vdim)] =
               H1Element<K, ScalarType>(m_g).getBasis(m_local / m_vdim)(rc);
-            return s_out;
+            return out;
           }
 
           template <size_t Order>

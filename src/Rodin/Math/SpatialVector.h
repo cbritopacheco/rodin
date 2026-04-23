@@ -16,6 +16,7 @@
 #define RODIN_MATH_SPATIALVECTOR_H
 
 #include <iostream>
+#include <type_traits>
 
 #include "Rodin/FormLanguage/Traits.h"
 
@@ -779,7 +780,8 @@ namespace Rodin::Math
     return r;
   }
 
-  template <class LHS, class Scalar>
+  template <class LHS, class Scalar,
+    std::enable_if_t<std::is_arithmetic_v<std::decay_t<LHS>>, int> = 0>
   [[nodiscard]] inline
   SpatialVector<Scalar>
   operator*(const LHS& s, const SpatialVector<Scalar>& v) noexcept
