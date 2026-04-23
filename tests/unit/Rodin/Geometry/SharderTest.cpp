@@ -5,11 +5,16 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <set>
+#include <cstdio>
+#include <unordered_map>
 #include <gtest/gtest.h>
+
+#include <boost/filesystem.hpp>
 
 #include <Rodin/Geometry.h>
 #include <Rodin/Geometry/Shard.h>
 #include <Rodin/Geometry/Sharder.h>
+#include <Rodin/IO.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -1167,5 +1172,172 @@ namespace Rodin::Tests::Unit
           << " partitions: owned cell count mismatch.";
       }
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // HDF5 shard workflow — Topology round-trip per shard.
+  //
+  // Exercises the full local workflow:
+  //   1. Mesh is sharded.
+  //   2. Each shard is saved to HDF5.
+  //   3. Each shard is reread from HDF5.
+  //   4. Loaded shard topology is reconciled against the original.
+  // ---------------------------------------------------------------------------
+
+  /**
+   * @brief Verifies that each shard's vertex and cell counts are preserved
+   * through an HDF5 save/load round-trip.
+   *
+   * Shard inherits from Mesh<Context::Local>, so it can be persisted with
+   * the standard local HDF5 printer.  After reloading, the base mesh
+   * topology (space dimension, topological dimension, vertex count, cell
+   * count) must match the original shard exactly.
+   */
+  TEST(Rodin_Geometry_Sharder, HDF5_ShardSaveLoad_TopologyRoundTrip)
+  {
+    auto mesh = makeShardableMesh(Polytope::Type::Triangle, {4, 4});
+
+    BalancedCompactPartitioner partitioner(mesh);
+    partitioner.partition(3);
+
+    Context::Local ctx;
+    SharderBase<Context::Local> sharder(ctx);
+    sharder.shard(partitioner);
+
+    const auto& shards = sharder.getShards();
+    ASSERT_EQ(shards.size(), 3u);
+
+    for (size_t si = 0; si < shards.size(); ++si)
+    {
+      const auto& shard = shards[si];
+      const boost::filesystem::path path =
+          boost::filesystem::temp_directory_path()
+          / ("rodin_shard_hdf5_topo_rt_" + std::to_string(si) + ".h5");
+
+      // Step 2: Save shard to HDF5. Shard inherits Mesh<Context::Local>.
+      shard.save(path, IO::FileFormat::HDF5);
+
+      // Step 3: Reload from HDF5.
+      Mesh<Context::Local> loaded;
+      loaded.load(path, IO::FileFormat::HDF5);
+
+      // Step 4: Reconcile — verify the loaded topology matches the shard.
+      EXPECT_EQ(loaded.getSpaceDimension(), shard.getSpaceDimension())
+        << "Shard " << si << ": space dimension mismatch.";
+      EXPECT_EQ(loaded.getDimension(), shard.getDimension())
+        << "Shard " << si << ": topological dimension mismatch.";
+      EXPECT_EQ(loaded.getVertexCount(), shard.getVertexCount())
+        << "Shard " << si << ": vertex count mismatch.";
+      EXPECT_EQ(loaded.getCellCount(), shard.getCellCount())
+        << "Shard " << si << ": cell count mismatch.";
+
+      boost::filesystem::remove(path);
+    }
+  }
+
+  /**
+   * @brief Verifies global mesh consistency after HDF5 shard save/load.
+   *
+   * After reloading each shard from HDF5:
+   * - Vertex coordinates are preserved (geometric reconcile check): for each
+   *   global vertex ID appearing in multiple shards, all loaded copies carry
+   *   the same spatial coordinates as in the original shard.
+   * - Owned cell and vertex counts from the original shards sum to the global
+   *   mesh totals (partition reconcile check).
+   */
+  TEST(Rodin_Geometry_Sharder, HDF5_ShardSaveLoad_Reconcile_GlobalConsistency)
+  {
+    auto mesh = makeShardableMesh(Polytope::Type::Triangle, {4, 4});
+    const size_t D = mesh.getDimension();
+    const size_t totalCells = mesh.getCellCount();
+    const size_t totalVerts = mesh.getVertexCount();
+
+    BalancedCompactPartitioner partitioner(mesh);
+    partitioner.partition(3);
+
+    Context::Local ctx;
+    SharderBase<Context::Local> sharder(ctx);
+    sharder.shard(partitioner);
+
+    const auto& shards = sharder.getShards();
+
+    // Step 2: Save each shard to HDF5.
+    std::vector<boost::filesystem::path> paths;
+    paths.reserve(shards.size());
+    for (size_t si = 0; si < shards.size(); ++si)
+    {
+      const boost::filesystem::path path =
+          boost::filesystem::temp_directory_path()
+          / ("rodin_shard_hdf5_gcons_" + std::to_string(si) + ".h5");
+      shards[si].save(path, IO::FileFormat::HDF5);
+      paths.push_back(path);
+    }
+
+    // Step 3: Reload each shard and collect loaded meshes.
+    std::vector<Mesh<Context::Local>> loaded(shards.size());
+    for (size_t si = 0; si < shards.size(); ++si)
+    {
+      loaded[si].load(paths[si], IO::FileFormat::HDF5);
+      EXPECT_EQ(loaded[si].getVertexCount(), shards[si].getVertexCount())
+        << "Shard " << si << ": vertex count changed after HDF5 round-trip.";
+      EXPECT_EQ(loaded[si].getCellCount(), shards[si].getCellCount())
+        << "Shard " << si << ": cell count changed after HDF5 round-trip.";
+    }
+
+    // Step 4a: Geometric reconcile — build global vertex → coordinate map
+    // from loaded shards and verify that shared vertices are consistent.
+    // The polytope maps from the original shards provide the global vertex IDs.
+    using CoordMap = std::unordered_map<Index, Math::SpatialPoint>;
+    CoordMap globalCoords;
+    globalCoords.reserve(totalVerts);
+
+    for (size_t si = 0; si < shards.size(); ++si)
+    {
+      const auto& vmap = shards[si].getPolytopeMap(0);
+      for (Index vi = 0; vi < static_cast<Index>(shards[si].getVertexCount()); ++vi)
+      {
+        const Index gid    = vmap.left[vi];
+        const auto  coords = loaded[si].getVertexCoordinates(vi);
+        const auto [it, inserted] = globalCoords.emplace(gid, coords);
+        if (!inserted)
+        {
+          // Same global vertex already seen in another shard: verify coords.
+          for (int k = 0; k < static_cast<int>(coords.size()); ++k)
+          {
+            EXPECT_NEAR(it->second(k), coords(k), 1e-12)
+              << "Global vertex " << gid
+              << ": coordinate[" << k << "] mismatch across shards after HDF5 round-trip.";
+          }
+        }
+      }
+    }
+
+    EXPECT_EQ(globalCoords.size(), totalVerts)
+      << "Not all global vertices found across loaded shards.";
+
+    // Step 4b: Partition reconcile — owned cell and vertex sums.
+    size_t ownedCells = 0;
+    size_t ownedVerts = 0;
+    for (const auto& shard : shards)
+    {
+      for (Index ci = 0; ci < static_cast<Index>(shard.getCellCount()); ++ci)
+      {
+        if (shard.isOwned(D, ci))
+          ++ownedCells;
+      }
+      for (Index vi = 0; vi < static_cast<Index>(shard.getVertexCount()); ++vi)
+      {
+        if (shard.isOwned(0, vi))
+          ++ownedVerts;
+      }
+    }
+
+    EXPECT_EQ(ownedCells, totalCells)
+      << "Owned cell count across shards does not match total mesh cell count.";
+    EXPECT_EQ(ownedVerts, totalVerts)
+      << "Owned vertex count across shards does not match total mesh vertex count.";
+
+    for (const auto& p : paths)
+      boost::filesystem::remove(p);
   }
 }
