@@ -1829,8 +1829,8 @@ namespace Rodin::Variational
   class QuadratureRule<
     Dot<
       ShapeFunctionBase<
-        Div<ShapeFunction<LHSDerived, P1<Math::Vector<Real>, LHSMesh>, TrialSpace>>,
-        P1<Math::Vector<Real>, LHSMesh>, TrialSpace>,
+        Div<ShapeFunction<LHSDerived, P1<Math::SpatialVector<Real>, LHSMesh>, TrialSpace>>,
+        P1<Math::SpatialVector<Real>, LHSMesh>, TrialSpace>,
       ShapeFunctionBase<
         ShapeFunction<RHSDerived, P1<Real, RHSMesh>, TestSpace>,
         P1<Real, RHSMesh>, TestSpace>>>
@@ -1838,7 +1838,7 @@ namespace Rodin::Variational
   {
     public:
       using ScalarType = typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType;
-      using TrialFESType = P1<Math::Vector<Real>, LHSMesh>;
+      using TrialFESType = P1<Math::SpatialVector<Real>, LHSMesh>;
       using TestFESType  = P1<Real, RHSMesh>;
 
       using LHSType = ShapeFunctionBase<
@@ -2013,8 +2013,8 @@ namespace Rodin::Variational
   using P1DivTrialIntegrand =
     Dot<
       ShapeFunctionBase<
-        Div<ShapeFunction<LHSDerived, P1<Math::Vector<Real>, LHSMesh>, TrialSpace>>,
-        P1<Math::Vector<Real>, LHSMesh>, TrialSpace>,
+        Div<ShapeFunction<LHSDerived, P1<Math::SpatialVector<Real>, LHSMesh>, TrialSpace>>,
+        P1<Math::SpatialVector<Real>, LHSMesh>, TrialSpace>,
       ShapeFunctionBase<
         ShapeFunction<RHSDerived, P1<Real, RHSMesh>, TestSpace>,
         P1<Real, RHSMesh>, TestSpace>>;
@@ -2053,14 +2053,14 @@ namespace Rodin::Variational
         ShapeFunction<LHSDerived, P1<Real, LHSMesh>, TrialSpace>,
         P1<Real, LHSMesh>, TrialSpace>,
       ShapeFunctionBase<
-        Div<ShapeFunction<RHSDerived, P1<Math::Vector<Real>, RHSMesh>, TestSpace>>,
-        P1<Math::Vector<Real>, RHSMesh>, TestSpace>>>
+        Div<ShapeFunction<RHSDerived, P1<Math::SpatialVector<Real>, RHSMesh>, TestSpace>>,
+        P1<Math::SpatialVector<Real>, RHSMesh>, TestSpace>>>
     : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType>
   {
     public:
       using ScalarType = typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType;
       using TrialFESType = P1<Real, LHSMesh>;
-      using TestFESType  = P1<Math::Vector<Real>, RHSMesh>;
+      using TestFESType  = P1<Math::SpatialVector<Real>, RHSMesh>;
 
       using LHSType = ShapeFunctionBase<
         ShapeFunction<LHSDerived, TrialFESType, TrialSpace>,
@@ -2237,8 +2237,8 @@ namespace Rodin::Variational
         ShapeFunction<LHSDerived, P1<Real, LHSMesh>, TrialSpace>,
         P1<Real, LHSMesh>, TrialSpace>,
       ShapeFunctionBase<
-        Div<ShapeFunction<RHSDerived, P1<Math::Vector<Real>, RHSMesh>, TestSpace>>,
-        P1<Math::Vector<Real>, RHSMesh>, TestSpace>>;
+        Div<ShapeFunction<RHSDerived, P1<Math::SpatialVector<Real>, RHSMesh>, TestSpace>>,
+        P1<Math::SpatialVector<Real>, RHSMesh>, TestSpace>>;
 
   template <class LHSDerived, class RHSDerived, class LHSMesh, class RHSMesh>
   QuadratureRule(const P1DivTestIntegrand<LHSDerived, RHSDerived, LHSMesh, RHSMesh>&)
@@ -2873,9 +2873,9 @@ namespace Rodin::Variational
       ShapeFunctionBase<
         Mult<
           FunctionBase<LHSFunctionDerived>,
-          ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived, P1<Math::Vector<Real>, Mesh>, TrialSpace>>>>>,
+          ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived, P1<Math::SpatialVector<Real>, Mesh>, TrialSpace>>>>>,
       ShapeFunctionBase<
-        Jacobian<ShapeFunction<RHSDerived, P1<Math::Vector<Real>, Mesh>, TestSpace>>>>&)
+        Jacobian<ShapeFunction<RHSDerived, P1<Math::SpatialVector<Real>, Mesh>, TestSpace>>>>&)
   ->
   QuadratureRule<
     Dot<
@@ -2883,9 +2883,9 @@ namespace Rodin::Variational
         Mult<
           FunctionBase<LHSFunctionDerived>,
           ShapeFunctionBase<
-            Jacobian<ShapeFunction<LHSDerived, P1<Math::Vector<Real>, Mesh>, TrialSpace>>>>>,
+            Jacobian<ShapeFunction<LHSDerived, P1<Math::SpatialVector<Real>, Mesh>, TrialSpace>>>>>,
       ShapeFunctionBase<
-        Jacobian<ShapeFunction<RHSDerived, P1<Math::Vector<Real>, Mesh>, TestSpace>>>>>;
+        Jacobian<ShapeFunction<RHSDerived, P1<Math::SpatialVector<Real>, Mesh>, TestSpace>>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations

@@ -77,20 +77,20 @@ namespace Rodin::Variational
    * - Velocity gradient in fluid mechanics
    * - Deformation gradient in nonlinear mechanics
    *
-   * @tparam Range Value range type (typically Math::Vector<Scalar>)
+   * @tparam Range Value range type (typically Math::SpatialVector<Scalar>)
    * @tparam Data Data storage type
    * @tparam Mesh Mesh type
    */
   template <class Data, class Mesh, class Scalar>
-  class Jacobian<GridFunction<P1<Math::Vector<Scalar>, Mesh>, Data>> final
+  class Jacobian<GridFunction<P1<Math::SpatialVector<Scalar>, Mesh>, Data>> final
     : public JacobianBase<
-        GridFunction<P1<Math::Vector<Scalar>, Mesh>, Data>,
-        Jacobian<GridFunction<P1<Math::Vector<Scalar>, Mesh>, Data>>>
+        GridFunction<P1<Math::SpatialVector<Scalar>, Mesh>, Data>,
+        Jacobian<GridFunction<P1<Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
     public:
       using RangeType = Math::SpatialMatrix<Scalar>;
 
-      using FESType = P1<Math::Vector<Scalar>, Mesh>;
+      using FESType = P1<Math::SpatialVector<Scalar>, Mesh>;
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
@@ -534,8 +534,8 @@ namespace Rodin::Variational
   };
 
   template <class ShapeFunctionDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
-  Jacobian(const ShapeFunction<ShapeFunctionDerived, P1<Math::Vector<Number>, Mesh>, Space>&)
-    -> Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Math::Vector<Number>, Mesh>, Space>>;
+  Jacobian(const ShapeFunction<ShapeFunctionDerived, P1<Math::SpatialVector<Number>, Mesh>, Space>&)
+    -> Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Math::SpatialVector<Number>, Mesh>, Space>>;
 }
 
 #endif

@@ -165,14 +165,14 @@ namespace Rodin::Variational
   };
 
   template <class Derived, size_t K, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
-  class ShapeFunction<Derived, H1<K, Math::Vector<Scalar>, Mesh>, Space>
+  class ShapeFunction<Derived, H1<K, Math::SpatialVector<Scalar>, Mesh>, Space>
     : public ShapeFunctionBase<
-        ShapeFunction<Derived, H1<K, Math::Vector<Scalar>, Mesh>, Space>,
-        H1<K, Math::Vector<Scalar>, Mesh>,
+        ShapeFunction<Derived, H1<K, Math::SpatialVector<Scalar>, Mesh>, Space>,
+        H1<K, Math::SpatialVector<Scalar>, Mesh>,
         Space>
   {
     public:
-      using FESType = H1<K, Math::Vector<Scalar>, Mesh>;
+      using FESType = H1<K, Math::SpatialVector<Scalar>, Mesh>;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType; // == Scalar

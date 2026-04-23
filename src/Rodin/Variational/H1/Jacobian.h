@@ -75,18 +75,18 @@ namespace Rodin::Variational
    * - Deformation gradient in nonlinear mechanics
    *
    * @tparam K Polynomial degree
-   * @tparam Range Value range type (typically Math::Vector<Scalar>)
+   * @tparam Range Value range type (typically Math::SpatialVector<Scalar>)
    * @tparam Data Data storage type
    * @tparam Mesh Mesh type
    */
   template <size_t K, class Scalar, class Data, class Mesh>
-  class Jacobian<GridFunction<H1<K, Math::Vector<Scalar>, Mesh>, Data>> final
+  class Jacobian<GridFunction<H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>> final
     : public JacobianBase<
-        GridFunction<H1<K, Math::Vector<Scalar>, Mesh>, Data>,
-        Jacobian<GridFunction<H1<K, Math::Vector<Scalar>, Mesh>, Data>>>
+        GridFunction<H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>,
+        Jacobian<GridFunction<H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
     public:
-      using FESType = H1<K, Math::Vector<Scalar>, Mesh>;
+      using FESType = H1<K, Math::SpatialVector<Scalar>, Mesh>;
 
       using OperandType = GridFunction<FESType, Data>;
 
@@ -236,14 +236,14 @@ namespace Rodin::Variational
    * @brief Jacobian of an H1 ShapeFunction object.
    */
   template <size_t K, class NestedDerived, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
-  class Jacobian<ShapeFunction<NestedDerived, H1<K, Math::Vector<Scalar>, Mesh>, Space>> final
+  class Jacobian<ShapeFunction<NestedDerived, H1<K, Math::SpatialVector<Scalar>, Mesh>, Space>> final
     : public ShapeFunctionBase<
-        Jacobian<ShapeFunction<NestedDerived, H1<K, Math::Vector<Scalar>, Mesh>, Space>>,
-        H1<K, Math::Vector<Scalar>, Mesh>,
+        Jacobian<ShapeFunction<NestedDerived, H1<K, Math::SpatialVector<Scalar>, Mesh>, Space>>,
+        H1<K, Math::SpatialVector<Scalar>, Mesh>,
         Space>
   {
     public:
-      using FESType = H1<K, Math::Vector<Scalar>, Mesh>;
+      using FESType = H1<K, Math::SpatialVector<Scalar>, Mesh>;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       using OperandType = ShapeFunction<NestedDerived, FESType, SpaceType>;
@@ -459,8 +459,8 @@ namespace Rodin::Variational
   };
 
   template <size_t K, class ShapeFunctionDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
-  Jacobian(const ShapeFunction<ShapeFunctionDerived, H1<K, Math::Vector<Number>, Mesh>, Space>&)
-    -> Jacobian<ShapeFunction<ShapeFunctionDerived, H1<K, Math::Vector<Number>, Mesh>, Space>>;
+  Jacobian(const ShapeFunction<ShapeFunctionDerived, H1<K, Math::SpatialVector<Number>, Mesh>, Space>&)
+    -> Jacobian<ShapeFunction<ShapeFunctionDerived, H1<K, Math::SpatialVector<Number>, Mesh>, Space>>;
 }
 
 #endif
