@@ -16,6 +16,7 @@
 
 #include "Rodin/Types.h"
 
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/Geometry/Polytope.h"
@@ -39,13 +40,13 @@ namespace Rodin::FormLanguage
   };
 
   template <class Number, class Mesh>
-  struct Traits<Variational::P0g<Math::Vector<Number>, Mesh>>
+  struct Traits<Variational::P0g<Math::SpatialVector<Number>, Mesh>>
   {
     using MeshType    = Mesh;
     using ScalarType  = Number;
-    using RangeType   = Math::Vector<ScalarType>;
+    using RangeType   = Math::SpatialVector<ScalarType>;
     using ContextType = typename MeshType::Context;
-    using ElementType = Variational::P0gElement<RangeType>;
+    using ElementType = Variational::P0gElement<Math::SpatialVector<ScalarType>>;
   };
 }
 
@@ -206,21 +207,21 @@ namespace Rodin::Variational
   };
 
   // --------------------------------------------------------------------------
-  // Vector P0g<Math::Vector<Real>, Mesh<Local>>
+  // Vector P0g<Math::SpatialVector<Real>, Mesh<Local>>
   // --------------------------------------------------------------------------
   template <>
-  class P0g<Math::Vector<Real>, Geometry::Mesh<Context::Local>> final
+  class P0g<Math::SpatialVector<Real>, Geometry::Mesh<Context::Local>> final
     : public FiniteElementSpace<
         Geometry::Mesh<Context::Local>,
-        P0g<Math::Vector<Real>, Geometry::Mesh<Context::Local>>>
+        P0g<Math::SpatialVector<Real>, Geometry::Mesh<Context::Local>>>
   {
     public:
       using ScalarType  = Real;
-      using RangeType   = Math::Vector<Real>;
+      using RangeType   = Math::SpatialVector<Real>;
       using ContextType = Context::Local;
       using MeshType    = Geometry::Mesh<ContextType>;
-      using ElementType = P0gElement<RangeType>;
-      using Parent      = FiniteElementSpace<MeshType, P0g<RangeType, MeshType>>;
+      using ElementType = P0gElement<Math::SpatialVector<ScalarType>>;
+      using Parent      = FiniteElementSpace<MeshType, P0g<Math::SpatialVector<Real>, MeshType>>;
 
       template <class Callable>
       class Pullback :
@@ -361,7 +362,7 @@ namespace Rodin::Variational
 
   // Aliases (vector spaces)
   template <class Mesh>
-  using VectorP0g = P0g<Math::Vector<Real>, Mesh>;
+  using VectorP0g = P0g<Math::SpatialVector<Real>, Mesh>;
 }
 
 #endif
