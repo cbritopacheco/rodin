@@ -583,7 +583,7 @@ namespace Rodin::Variational
        */
       RangeType getValue(const Geometry::Point& p) const
       {
-        RangeType out;
+        RangeType out{};
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& fes = m_fes.get();

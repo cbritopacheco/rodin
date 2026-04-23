@@ -2197,6 +2197,35 @@ namespace Rodin::Math
     return result;
   }
 
+  template <class Scalar, class EigenDerived>
+  [[nodiscard]] inline
+  SpatialMatrix<Scalar>
+  operator+(
+    const SpatialMatrix<Scalar>& A,
+    const Eigen::MatrixBase<EigenDerived>& B)
+  {
+    assert(A.rows() == static_cast<std::uint8_t>(B.rows()));
+    assert(A.cols() == static_cast<std::uint8_t>(B.cols()));
+
+    SpatialMatrix<Scalar> C(A.rows(), A.cols());
+
+    for (std::uint8_t i = 0; i < A.rows(); ++i)
+      for (std::uint8_t j = 0; j < A.cols(); ++j)
+        C(i, j) = A(i, j) + B(i, j);
+
+    return C;
+  }
+
+  template <class EigenDerived, class Scalar>
+  [[nodiscard]] inline
+  SpatialMatrix<Scalar>
+  operator+(
+    const Eigen::MatrixBase<EigenDerived>& A,
+    const SpatialMatrix<Scalar>& B)
+  {
+    return B + A;
+  }
+
   template <class Scalar>
   std::ostream& operator<<(std::ostream& os, const SpatialMatrix<Scalar>& m)
   {
