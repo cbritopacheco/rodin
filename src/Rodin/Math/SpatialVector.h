@@ -353,6 +353,34 @@ namespace Rodin::Math
       }
 
       constexpr
+      ScalarType& operator()(std::size_t i)
+      {
+        assert(i < m_size);
+        return m_data[static_cast<std::uint8_t>(i)];
+      }
+
+      constexpr
+      const ScalarType& operator()(std::size_t i) const
+      {
+        assert(i < m_size);
+        return m_data[static_cast<std::uint8_t>(i)];
+      }
+
+      constexpr
+      ScalarType& operator[](std::size_t i)
+      {
+        assert(i < m_size);
+        return m_data[static_cast<std::uint8_t>(i)];
+      }
+
+      constexpr
+      const ScalarType& operator[](std::size_t i) const
+      {
+        assert(i < m_size);
+        return m_data[static_cast<std::uint8_t>(i)];
+      }
+
+      constexpr
       ScalarType& operator()(std::uint8_t i)
       {
         assert(i < m_size);
@@ -378,6 +406,22 @@ namespace Rodin::Math
       {
         assert(i < m_size);
         return m_data[i];
+      }
+
+      /// @brief Eigen-compatible element access (for drop-in compatibility with Math::Vector)
+      constexpr
+      ScalarType& coeffRef(std::size_t i)
+      {
+        assert(i < m_size);
+        return m_data[static_cast<std::uint8_t>(i)];
+      }
+
+      /// @brief Eigen-compatible element access (const, for drop-in compatibility with Math::Vector)
+      constexpr
+      const ScalarType& coeffRef(std::size_t i) const
+      {
+        assert(i < m_size);
+        return m_data[static_cast<std::uint8_t>(i)];
       }
 
       constexpr
