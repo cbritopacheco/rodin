@@ -34,6 +34,7 @@
 #include "Rodin/Types.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/Vector.h"
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Geometry/Polytope.h"
 #include "Rodin/QF/ForwardDecls.h"
 
@@ -737,8 +738,8 @@ namespace Rodin::Variational
    * @see H1Element<K, Scalar> for scalar-valued version
    */
   template <size_t K, class Scalar>
-  class H1Element<K, Math::Vector<Scalar>> final
-    : public FiniteElementBase<H1Element<K, Math::Vector<Scalar>>>
+  class H1Element<K, Math::SpatialVector<Scalar>> final
+    : public FiniteElementBase<H1Element<K, Math::SpatialVector<Scalar>>>
   {
     using G = Geometry::Polytope::Type;
 
@@ -748,12 +749,12 @@ namespace Rodin::Variational
       friend class boost::serialization::access;
 
       /// Parent class
-      using Parent = FiniteElementBase<H1Element<K, Math::Vector<Scalar>>>;
+      using Parent = FiniteElementBase<H1Element<K, Math::SpatialVector<Scalar>>>;
 
       using ScalarType = Scalar;
 
       /// Type of range
-      using RangeType = Math::Vector<Scalar>;
+      using RangeType = Math::SpatialVector<Scalar>;
 
       class LinearForm
       {
@@ -772,15 +773,8 @@ namespace Rodin::Variational
           template <class T>
           ScalarType operator()(const T& v) const
           {
-            static thread_local RangeType s_out;
             const auto value = v(H1Element<K, ScalarType>::getNodes(m_g)[m_local / m_vdim]);
-            const Eigen::Index n = static_cast<Eigen::Index>(value.size());
-            s_out.resize(n);
-            for (Eigen::Index i = 0; i < n; i++)
-            {
-              s_out.coeffRef(i) = value(i);
-            }
-            return s_out.coeff(m_local % m_vdim);
+            return value(static_cast<std::uint8_t>(m_local % m_vdim));
           }
 
         private:
@@ -792,7 +786,7 @@ namespace Rodin::Variational
       class BasisFunction
       {
         public:
-          using ReturnType = Math::Vector<ScalarType>;
+          using ReturnType = Math::SpatialVector<ScalarType>;
 
           /**
            * @brief Represents a derivative function of a Pk vector element.
@@ -904,9 +898,10 @@ namespace Rodin::Variational
           const ReturnType& operator()(const Math::SpatialPoint& rc) const
           {
             static thread_local ReturnType s_out;
-            s_out.resize(m_vdim);
+            s_out = ReturnType(static_cast<std::uint8_t>(m_vdim));
             s_out.setZero();
-            s_out.coeffRef(m_local % m_vdim) = H1Element<K, ScalarType>(m_g).getBasis(m_local / m_vdim)(rc);
+            s_out[static_cast<std::uint8_t>(m_local % m_vdim)] =
+              H1Element<K, ScalarType>(m_g).getBasis(m_local / m_vdim)(rc);
             return s_out;
           }
 
