@@ -1649,8 +1649,7 @@ namespace Rodin::Tests::Unit
       expected(0) = a0 + b0 * x;
       expected(1) = a1 + b1 * x;
 
-      Math::Vector<Real> interpolated(vdim);
-      interpolated.setZero();
+      Math::SpatialVector<Real> interpolated(static_cast<std::uint8_t>(vdim)); interpolated.setZero();
 
       for (size_t node_idx = 0; node_idx < scalar_k.getCount(); node_idx++)
       {
@@ -2973,7 +2972,7 @@ namespace Rodin::Tests::Unit
               dofs[i] = elem.getLinearForm(i)(f);
 
             Math::Vector<Real> p{{0.5}};
-            Math::Vector<Real> interp = Math::Vector<Real>::Zero(vdim);
+            Math::SpatialVector<Real> interp(static_cast<std::uint8_t>(vdim)); interp.setZero();
             for (size_t i = 0; i < elem.getCount(); i++)
               interp += dofs[i] * elem.getBasis(i)(p);
 
@@ -2990,7 +2989,7 @@ namespace Rodin::Tests::Unit
               dofs[i] = elem.getLinearForm(i)(f);
 
             Math::Vector<Real> p{{0.5}};
-            Math::Vector<Real> interp = Math::Vector<Real>::Zero(vdim);
+            Math::SpatialVector<Real> interp(static_cast<std::uint8_t>(vdim)); interp.setZero();
             for (size_t i = 0; i < elem.getCount(); i++)
               interp += dofs[i] * elem.getBasis(i)(p);
 
@@ -3007,7 +3006,7 @@ namespace Rodin::Tests::Unit
               dofs[i] = elem.getLinearForm(i)(f);
 
             Math::Vector<Real> p{{0.5}};
-            Math::Vector<Real> interp = Math::Vector<Real>::Zero(vdim);
+            Math::SpatialVector<Real> interp(static_cast<std::uint8_t>(vdim)); interp.setZero();
             for (size_t i = 0; i < elem.getCount(); i++)
               interp += dofs[i] * elem.getBasis(i)(p);
 
