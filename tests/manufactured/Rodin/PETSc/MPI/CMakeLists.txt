@@ -1,9 +1,10 @@
-add_executable(RodinPETScMPIPoissonTest PoissonTest.cpp)
-target_link_libraries(RodinPETScMPIPoissonTest
+add_executable(RodinManufacturedPETScMPIPoissonTest PoissonTest.cpp)
+target_link_libraries(RodinManufacturedPETScMPIPoissonTest
   PUBLIC
   GTest::gtest
   Rodin::Geometry
   Rodin::Variational
+  Rodin::IO
   Rodin::MPI
   Rodin::PETSc)
 
@@ -22,11 +23,12 @@ endif()
 
 foreach(np 1 2 4)
   add_test(
-    NAME RodinPETScMPIPoissonTest_np${np}
+    NAME RodinManufacturedPETScMPIPoissonTest_np${np}
     COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
             ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
-            $<TARGET_FILE:RodinPETScMPIPoissonTest>)
-  set_tests_properties(RodinPETScMPIPoissonTest_np${np} PROPERTIES
-    LABELS unit
+            $<TARGET_FILE:RodinManufacturedPETScMPIPoissonTest>)
+  set_tests_properties(RodinManufacturedPETScMPIPoissonTest_np${np} PROPERTIES
+    LABELS "manufactured;petsc;distributed"
+    ENVIRONMENT "HDF5_USE_FILE_LOCKING=FALSE"
   )
 endforeach()

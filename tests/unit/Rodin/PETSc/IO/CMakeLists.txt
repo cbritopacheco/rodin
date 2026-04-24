@@ -9,5 +9,5 @@ target_link_libraries(RodinPETScIOHDF5IOTest
   Rodin::PETSc)
 gtest_discover_tests(RodinPETScIOHDF5IOTest
   PROPERTIES
-    LABELS unit
+    LABELS "unit;petsc"
 )
