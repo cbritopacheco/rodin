@@ -120,8 +120,11 @@ namespace Rodin::Examples::Heart
           const TestFunction& v,
           const OldVelocity& uOld,
           const Viscosity& mu,
+          ScalarType rho,
+          ScalarType dt,
           ScalarType c1 = 4.0,
-          ScalarType c2 = 2.0)
+          ScalarType c2 = 2.0,
+          ScalarType vmsScale = 0.05)
         : Parent(u.getLeaf(), v.getLeaf()),
           m_u(u),
           m_v(v),
@@ -129,6 +132,9 @@ namespace Rodin::Examples::Heart
           m_mu(mu),
           m_c1(c1),
           m_c2(c2),
+          m_rho(rho),
+          m_dt(dt),
+          m_vmsScale(vmsScale),
           m_polytope(nullptr)
       {}
 
@@ -229,9 +235,13 @@ namespace Rodin::Examples::Heart
 
           const ScalarType speed = std::sqrt(Math::dot(uOld, uOld));
 
-          const ScalarType tau =
-            ScalarType(1)
-            / (m_c1 * mu / (hK * hK) + m_c2 * speed / hK);
+          const ScalarType invTau =
+            std::sqrt(
+                Math::pow2(ScalarType(2) * m_rho / m_dt)
+              + Math::pow2(m_c2 * m_rho * speed / hK)
+              + Math::pow2(m_c1 * mu / (hK * hK)));
+
+          const ScalarType tau = m_vmsScale / invTau;
 
           for (size_t a = 0; a < ntrS; ++a)
             trDir[a] = Math::dot(Gtr[a], uOld);
@@ -316,6 +326,10 @@ namespace Rodin::Examples::Heart
         Eigen::Dynamic,
         Eigen::Dynamic,
         Eigen::RowMajor> m_mat;
+
+      ScalarType m_rho;
+      ScalarType m_dt;
+      ScalarType m_vmsScale;
   };
 
   /**
@@ -405,8 +419,11 @@ namespace Rodin::Examples::Heart
           const OldVelocity& uOld,
           const ProjectedVelocity& uProj,
           const Viscosity& mu,
+          ScalarType rho,
+          ScalarType dt,
           ScalarType c1 = 4.0,
-          ScalarType c2 = 2.0)
+          ScalarType c2 = 2.0,
+          ScalarType vmsScale = 0.05)
         : Parent(v.getLeaf()),
           m_v(v),
           m_uOld(uOld),
@@ -414,6 +431,9 @@ namespace Rodin::Examples::Heart
           m_mu(mu),
           m_c1(c1),
           m_c2(c2),
+          m_rho(rho),
+          m_dt(dt),
+          m_vmsScale(vmsScale),
           m_polytope(nullptr)
       {}
 
@@ -494,9 +514,13 @@ namespace Rodin::Examples::Heart
 
           const ScalarType speed = std::sqrt(Math::dot(uOld, uOld));
 
-          const ScalarType tau =
-            ScalarType(1)
-            / (m_c1 * mu / (hK * hK) + m_c2 * speed / hK);
+          const ScalarType invTau =
+            std::sqrt(
+                Math::pow2(ScalarType(2) * m_rho / m_dt)
+              + Math::pow2(m_c2 * m_rho * speed / hK)
+              + Math::pow2(m_c1 * mu / (hK * hK)));
+
+          const ScalarType tau = m_vmsScale / invTau;
 
           for (size_t b = 0; b < nteS; ++b)
             teDir[b] = Math::dot(Gte[b], uOld);
@@ -567,6 +591,10 @@ namespace Rodin::Examples::Heart
       const Geometry::Polytope* m_polytope;
 
       Math::Vector<ScalarType> m_vec;
+
+      ScalarType m_rho;
+      ScalarType m_dt;
+      ScalarType m_vmsScale;
   };
 }
 

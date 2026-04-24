@@ -426,6 +426,8 @@ namespace Rodin::Examples::Heart
 
     const auto projConvU = m_up.getSolution();
 
+    const Real vmsScale = 0.05;
+
     Problem flow(m_u, m_p, m_v, m_q);
     flow =
           (m_cfg.rho / m_cfg.dt) * Integral(m_u, m_v)
@@ -441,8 +443,13 @@ namespace Rodin::Examples::Heart
         // + Integral(tau1 * Dot(conv_u, conv_v))
         // - Integral(tau1 * Dot(projConvU, conv_v))
 
-        // + VMSConvectionBilinearIntegrator(m_u, m_v, m_uOld, m_mu.getSolution(), c1, c2);
-        // - VMSConvectionLinearIntegrator(m_v, m_uOld, m_up.getSolution(), m_mu.getSolution(), c1, c2)
+        + VMSConvectionBilinearIntegrator(
+            m_u, m_v, m_uOld, m_mu.getSolution(),
+            m_cfg.rho, m_cfg.dt, c1, c2, vmsScale)
+
+        - VMSConvectionLinearIntegrator(
+            m_v, m_uOld, m_up.getSolution(), m_mu.getSolution(),
+            m_cfg.rho, m_cfg.dt, c1, c2, vmsScale)
 
         + BoundaryIntegral(pin * Dot(m_v, n)).over(m_cfg.inlet)
 
