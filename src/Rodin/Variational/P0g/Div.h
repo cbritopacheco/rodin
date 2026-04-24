@@ -29,9 +29,9 @@
 namespace Rodin::FormLanguage
 {
   template <class Scalar, class Data, class Mesh>
-  struct Traits<Variational::Div<Variational::GridFunction<Variational::P0g<Math::Vector<Scalar>, Mesh>, Data>>>
+  struct Traits<Variational::Div<Variational::GridFunction<Variational::P0g<Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
-    using FESType = Variational::P0g<Math::Vector<Scalar>, Mesh>;
+    using FESType = Variational::P0g<Math::SpatialVector<Scalar>, Mesh>;
     using ScalarType = Scalar;
     using OperandType = Variational::GridFunction<FESType, Data>;
   };
@@ -39,9 +39,9 @@ namespace Rodin::FormLanguage
   template <class NestedDerived, class Scalar, class Mesh, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Div<
-      Variational::ShapeFunction<NestedDerived, Variational::P0g<Math::Vector<Scalar>, Mesh>, Space>>>
+      Variational::ShapeFunction<NestedDerived, Variational::P0g<Math::SpatialVector<Scalar>, Mesh>, Space>>>
   {
-    using FESType = Variational::P0g<Math::Vector<Scalar>, Mesh>;
+    using FESType = Variational::P0g<Math::SpatialVector<Scalar>, Mesh>;
     static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
     using ScalarType = Scalar;
     using OperandType =
@@ -59,13 +59,13 @@ namespace Rodin::Variational
    * @brief Divergence of a P0g vector GridFunction (identically zero).
    */
   template <class Scalar, class Data, class Mesh>
-  class Div<GridFunction<P0g<Math::Vector<Scalar>, Mesh>, Data>> final
+  class Div<GridFunction<P0g<Math::SpatialVector<Scalar>, Mesh>, Data>> final
     : public DivBase<
-        GridFunction<P0g<Math::Vector<Scalar>, Mesh>, Data>,
-        Div<GridFunction<P0g<Math::Vector<Scalar>, Mesh>, Data>>>
+        GridFunction<P0g<Math::SpatialVector<Scalar>, Mesh>, Data>,
+        Div<GridFunction<P0g<Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
     public:
-      using FESType = P0g<Math::Vector<Scalar>, Mesh>;
+      using FESType = P0g<Math::SpatialVector<Scalar>, Mesh>;
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       using OperandType = GridFunction<FESType, Data>;
@@ -108,14 +108,14 @@ namespace Rodin::Variational
    * @brief Divergence of a P0g vector ShapeFunction (identically zero).
    */
   template <class NestedDerived, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
-  class Div<ShapeFunction<NestedDerived, P0g<Math::Vector<Scalar>, Mesh>, Space>> final
+  class Div<ShapeFunction<NestedDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>> final
     : public ShapeFunctionBase<
-        Div<ShapeFunction<NestedDerived, P0g<Math::Vector<Scalar>, Mesh>, Space>>,
-        P0g<Math::Vector<Scalar>, Mesh>,
+        Div<ShapeFunction<NestedDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>>,
+        P0g<Math::SpatialVector<Scalar>, Mesh>,
         Space>
   {
     public:
-      using FESType = P0g<Math::Vector<Scalar>, Mesh>;
+      using FESType = P0g<Math::SpatialVector<Scalar>, Mesh>;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
@@ -206,12 +206,12 @@ namespace Rodin::Variational
    * @brief CTAD for Div of a P0g GridFunction
    */
   template <class Scalar, class Data, class Mesh>
-  Div(const GridFunction<P0g<Math::Vector<Scalar>, Mesh>, Data>&)
-    -> Div<GridFunction<P0g<Math::Vector<Scalar>, Mesh>, Data>>;
+  Div(const GridFunction<P0g<Math::SpatialVector<Scalar>, Mesh>, Data>&)
+    -> Div<GridFunction<P0g<Math::SpatialVector<Scalar>, Mesh>, Data>>;
 
   template <class NestedDerived, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
-  Div(const ShapeFunction<NestedDerived, P0g<Math::Vector<Scalar>, Mesh>, Space>&)
-    -> Div<ShapeFunction<NestedDerived, P0g<Math::Vector<Scalar>, Mesh>, Space>>;
+  Div(const ShapeFunction<NestedDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>&)
+    -> Div<ShapeFunction<NestedDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>>;
 }
 
 #endif

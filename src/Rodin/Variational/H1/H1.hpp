@@ -2207,7 +2207,7 @@ namespace Rodin::Variational
   }
 
   template <size_t K, class Scalar>
-  H1<K, Math::Vector<Scalar>, Geometry::Mesh<Context::Local>>::
+  H1<K, Math::SpatialVector<Scalar>, Geometry::Mesh<Context::Local>>::
   H1(std::integral_constant<size_t, K>, const Geometry::Mesh<ContextType>& mesh,
      size_t vdim)
     : m_mesh(mesh),

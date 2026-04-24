@@ -4,7 +4,6 @@
 #include <array>
 #include <fstream>
 #include <map>
-#include <memory>
 #include <string>
 
 #include "Rodin/Heart/CCMLC2014.h"
@@ -25,20 +24,16 @@ namespace Rodin::Examples::Heart
       using MeshType = Rodin::Geometry::Mesh<Rodin::Context::Local>;
 
       using VelocityFESType =
-        Rodin::Variational::H1<2, Rodin::Math::Vector<Real>, MeshType>;
+        Rodin::Variational::H1<2, Rodin::Math::SpatialVector<Real>, MeshType>;
 
       using PressureFESType =
         Rodin::Variational::H1<1, Real, MeshType>;
 
-      using ScalarFESType =
-        Rodin::Variational::P0<Real, MeshType>;
-
-      using VMSFESType =
-        Rodin::Variational::H1<2, Rodin::Math::Vector<Real>, MeshType>;
-
-      // P0 because we want a cell-centered projected viscosity
       using ViscosityFESType =
         Rodin::Variational::P1<Real, MeshType>;
+
+      using VMSFESType =
+        Rodin::Variational::H1<2, Rodin::Math::SpatialVector<Real>, MeshType>;
 
       using VelocityGridFunctionType =
         Rodin::PETSc::Variational::GridFunction<VelocityFESType>;
@@ -48,9 +43,6 @@ namespace Rodin::Examples::Heart
 
       using ViscosityGridFunctionType =
         Rodin::PETSc::Variational::GridFunction<ViscosityFESType>;
-
-      using ScalarGridFunctionType =
-        Rodin::PETSc::Variational::GridFunction<ScalarFESType>;
 
       using VMSGridFunctionType =
         Rodin::PETSc::Variational::GridFunction<VMSFESType>;
@@ -123,25 +115,11 @@ namespace Rodin::Examples::Heart
       int run();
       CoupledLV0DCoronary3D& initialize();
 
-      Config& getConfig() noexcept
-      {
-        return m_cfg;
-      }
+      Config& getConfig() noexcept { return m_cfg; }
+      const Config& getConfig() const noexcept { return m_cfg; }
 
-      const Config& getConfig() const noexcept
-      {
-        return m_cfg;
-      }
-
-      Model& getModel() noexcept
-      {
-        return *m_model;
-      }
-
-      const Model& getModel() const noexcept
-      {
-        return *m_model;
-      }
+      Model& getModel() noexcept { return m_model; }
+      const Model& getModel() const noexcept { return m_model; }
 
     private:
       struct StepData
@@ -174,6 +152,9 @@ namespace Rodin::Examples::Heart
         std::map<Attribute, Real> pOut;
       };
 
+      static Model::Input makeInput();
+      static MeshType makeMesh(const Config& cfg);
+
       static void updateRCR(RCR& bc, Real Q, Real dt);
       static void updateRCRNonNew(const Model& model, RCR& bc, Real Q, Real dt);
       static Real periodic_activation(Real t);
@@ -188,39 +169,38 @@ namespace Rodin::Examples::Heart
       void solve3D();
       void computeFluxesAndUpdateRCR();
       void updateHistory();
-      void writeOutputs() const;
+      void writeOutputs();
       void writeCSVHeader();
       void writeCSVRow();
       StepData collectStepData() const;
 
       Config m_cfg;
       Model::Input m_input;
-      Optional<Model> m_model;
+      Model m_model;
 
       MeshType m_mesh;
-      std::unique_ptr<Rodin::IO::XDMF> m_xdmf;
+      Rodin::IO::XDMF m_xdmf;
 
-      std::unique_ptr<VelocityFESType> m_uh;
-      std::unique_ptr<PressureFESType> m_ph;
-      std::unique_ptr<ViscosityFESType> m_muh;
-      std::unique_ptr<VMSFESType> m_uph;
+      VelocityFESType m_uh;
+      PressureFESType m_ph;
+      ViscosityFESType m_muh;
+      VMSFESType m_uph;
 
-      std::unique_ptr<VelocityTrialFunctionType> m_u;
-      std::unique_ptr<PressureTrialFunctionType> m_p;
-      std::unique_ptr<VMSTrialFunctionType> m_up;
-      std::unique_ptr<VelocityTestFunctionType> m_v;
-      std::unique_ptr<PressureTestFunctionType> m_q;
-      std::unique_ptr<VMSTestFunctionType> m_vp;
+      VelocityTrialFunctionType m_u;
+      PressureTrialFunctionType m_p;
+      ViscosityTrialFunctionType m_mu;
+      VMSTrialFunctionType m_up;
 
-      std::unique_ptr<ViscosityTrialFunctionType> m_mu;
-      std::unique_ptr<ViscosityTestFunctionType> m_w;
+      VelocityTestFunctionType m_v;
+      PressureTestFunctionType m_q;
+      ViscosityTestFunctionType m_w;
+      VMSTestFunctionType m_vp;
 
-      std::unique_ptr<VelocityGridFunctionType> m_uOld;
-      std::unique_ptr<PressureGridFunctionType> m_pOld;
-      std::unique_ptr<PressureGridFunctionType> m_one;
-      std::unique_ptr<PressureTestFunctionType> m_qFlux;
-      std::unique_ptr<FluxLinearFormType> m_flux;
-      std::unique_ptr<ScalarGridFunctionType> m_h;
+      VelocityGridFunctionType m_uOld;
+      PressureGridFunctionType m_pOld;
+      PressureGridFunctionType m_one;
+      PressureTestFunctionType m_qFlux;
+      FluxLinearFormType m_flux;
 
       std::map<Attribute, RCR> m_wk;
 

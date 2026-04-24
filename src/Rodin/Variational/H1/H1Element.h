@@ -34,6 +34,7 @@
 #include "Rodin/Types.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/Vector.h"
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Geometry/Polytope.h"
 #include "Rodin/QF/ForwardDecls.h"
 
@@ -120,7 +121,7 @@ namespace Rodin::Variational
    * std::cout << h1_tri.getCount() << std::endl;  // Output: 10
    *
    * // Evaluate basis function at a point
-   * Math::Vector<Real> pt{{0.25, 0.25}};
+   * Math::SpatialVector<Real> pt{{0.25, 0.25}};
    * Real value = h1_tri.getBasis(0)(pt);
    *
    * // Get gradient of basis function
@@ -131,7 +132,7 @@ namespace Rodin::Variational
    *           for smooth functions but increase computational cost.
    * @tparam Scalar Type of scalar range (e.g., Real, Complex<Real>)
    *
-   * @see H1Element<K, Math::Vector<Scalar>> for vector-valued version
+   * @see H1Element<K, Math::SpatialVector<Scalar>> for vector-valued version
    * @see P0Element for piecewise constant elements
    * @see P1Element for piecewise linear elements
    */
@@ -333,14 +334,13 @@ namespace Rodin::Variational
                * @param r Reference point in the element
                * @return Gradient vector at point r
                */
-              const ReturnType& operator()(const Math::SpatialPoint& r) const
+              ReturnType operator()(const Math::SpatialPoint& r) const
               {
-                static thread_local ReturnType s_out;
                 const size_t dim = Geometry::Polytope::Traits(m_g).getDimension();
-                s_out.resize(dim);
+                ReturnType out(static_cast<std::uint8_t>(dim));
                 for (size_t i = 0; i < dim; ++i)
-                  s_out(i) = DerivativeFunction<1>(i, m_local, m_g)(r);
-                return s_out;
+                  out(i) = DerivativeFunction<1>(i, m_local, m_g)(r);
+                return out;
               }
 
             private:
@@ -724,7 +724,7 @@ namespace Rodin::Variational
    * std::cout << vec_h1.getCount() << std::endl;  // Output: 12
    *
    * // Evaluate vector basis function
-   * Math::Vector<Real> pt{{0.25, 0.25}};
+   * Math::SpatialVector<Real> pt{{0.25, 0.25}};
    * auto vec_value = vec_h1.getBasis(0)(pt);  // Returns a 2D vector
    *
    * // Get Jacobian matrix
@@ -737,8 +737,8 @@ namespace Rodin::Variational
    * @see H1Element<K, Scalar> for scalar-valued version
    */
   template <size_t K, class Scalar>
-  class H1Element<K, Math::Vector<Scalar>> final
-    : public FiniteElementBase<H1Element<K, Math::Vector<Scalar>>>
+  class H1Element<K, Math::SpatialVector<Scalar>> final
+    : public FiniteElementBase<H1Element<K, Math::SpatialVector<Scalar>>>
   {
     using G = Geometry::Polytope::Type;
 
@@ -748,12 +748,12 @@ namespace Rodin::Variational
       friend class boost::serialization::access;
 
       /// Parent class
-      using Parent = FiniteElementBase<H1Element<K, Math::Vector<Scalar>>>;
+      using Parent = FiniteElementBase<H1Element<K, Math::SpatialVector<Scalar>>>;
 
       using ScalarType = Scalar;
 
       /// Type of range
-      using RangeType = Math::Vector<Scalar>;
+      using RangeType = Math::SpatialVector<Scalar>;
 
       class LinearForm
       {
@@ -772,9 +772,8 @@ namespace Rodin::Variational
           template <class T>
           ScalarType operator()(const T& v) const
           {
-            static thread_local RangeType s_out;
-            s_out = v(H1Element<K, ScalarType>::getNodes(m_g)[m_local / m_vdim]);
-            return s_out.coeff(m_local % m_vdim);
+            const auto value = v(H1Element<K, ScalarType>::getNodes(m_g)[m_local / m_vdim]);
+            return value(static_cast<std::uint8_t>(m_local % m_vdim));
           }
 
         private:
@@ -786,7 +785,7 @@ namespace Rodin::Variational
       class BasisFunction
       {
         public:
-          using ReturnType = Math::Vector<ScalarType>;
+          using ReturnType = Math::SpatialVector<ScalarType>;
 
           /**
            * @brief Represents a derivative function of a Pk vector element.
@@ -865,17 +864,16 @@ namespace Rodin::Variational
               constexpr
               JacobianFunction(JacobianFunction&&) = default;
 
-              const ReturnType& operator()(const Math::SpatialPoint& r) const
+              ReturnType operator()(const Math::SpatialPoint& r) const
               {
-                static thread_local ReturnType s_out;
                 const size_t dim = Geometry::Polytope::Traits(m_g).getDimension();
-                s_out.resize(m_vdim, dim);
+                ReturnType out(static_cast<std::uint8_t>(m_vdim), static_cast<std::uint8_t>(dim));
                 for (size_t i = 0; i < m_vdim; ++i)
                 {
                   for (size_t j = 0; j < dim; ++j)
-                    s_out(i, j) = DerivativeFunction<1>(i, j, m_vdim, m_local, m_g)(r);
+                    out(i, j) = DerivativeFunction<1>(i, j, m_vdim, m_local, m_g)(r);
                 }
-                return s_out;
+                return out;
               }
 
             private:
@@ -895,13 +893,13 @@ namespace Rodin::Variational
           constexpr
           BasisFunction(BasisFunction&&) = default;
 
-          const ReturnType& operator()(const Math::SpatialPoint& rc) const
+          ReturnType operator()(const Math::SpatialPoint& rc) const
           {
-            static thread_local ReturnType s_out;
-            s_out.resize(m_vdim);
-            s_out.setZero();
-            s_out.coeffRef(m_local % m_vdim) = H1Element<K, ScalarType>(m_g).getBasis(m_local / m_vdim)(rc);
-            return s_out;
+            ReturnType out(static_cast<std::uint8_t>(m_vdim));
+            out.setZero();
+            out[static_cast<std::uint8_t>(m_local % m_vdim)] =
+              H1Element<K, ScalarType>(m_g).getBasis(m_local / m_vdim)(rc);
+            return out;
           }
 
           template <size_t Order>
@@ -1061,4 +1059,3 @@ namespace Rodin::Variational
 #include "H1Element.hpp"
 
 #endif
-

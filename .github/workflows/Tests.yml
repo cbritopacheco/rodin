@@ -59,6 +59,8 @@ jobs:
         run: >
           cmake -B ${{ github.workspace }}/build
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DRODIN_USE_MPI=ON
+          -DRODIN_USE_PETSC=ON
           -DRODIN_USE_ASAN=${{ matrix.asan }}
           -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
           -DRODIN_BUILD_DOC=OFF
@@ -133,6 +135,8 @@ jobs:
         run: >
           cmake -B ${{ github.workspace }}/build
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DRODIN_USE_MPI=ON
+          -DRODIN_USE_PETSC=ON
           -DRODIN_USE_ASAN=${{ matrix.asan }}
           -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
           -DRODIN_BUILD_DOC=OFF
@@ -207,6 +211,8 @@ jobs:
         run: >
           cmake -B ${{ github.workspace }}/build
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DRODIN_USE_MPI=ON
+          -DRODIN_USE_PETSC=ON
           -DRODIN_USE_ASAN=${{ matrix.asan }}
           -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
           -DRODIN_BUILD_DOC=OFF
@@ -284,6 +290,8 @@ jobs:
         run: >
           cmake -B ${{ github.workspace }}/build
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DRODIN_USE_MPI=ON
+          -DRODIN_USE_PETSC=ON
           -DRODIN_USE_ASAN=${{ matrix.asan }}
           -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
           -DRODIN_BUILD_DOC=OFF

@@ -9,6 +9,7 @@
 
 #include "H1.h"
 #include "H1Element.h"
+#include "Rodin/Math/Traits.h"
 
 namespace Rodin::Variational
 {
@@ -143,7 +144,7 @@ namespace Rodin::Variational
             for (size_t local = 0; local < nte; ++local)
               m_vec(local) += wdet * tab.getBasis(qp, local);
           }
-          else if constexpr (std::is_same_v<IntegrandRangeType, Math::Vector<ScalarType>>)
+          else if constexpr (FormLanguage::IsVectorRange<IntegrandRangeType>::Value)
           {
             const size_t vdim = fes.getVectorDimension();
             assert(nte == scalarFE.getCount() * vdim);
@@ -158,7 +159,7 @@ namespace Rodin::Variational
           {
             static_assert(
               std::is_same_v<IntegrandRangeType, ScalarType>
-              || std::is_same_v<IntegrandRangeType, Math::Vector<ScalarType>>,
+              || FormLanguage::IsVectorRange<IntegrandRangeType>::Value,
               "Unsupported H1 Integral(v) range type. Expected scalar or vector-valued shape function.");
           }
         }
@@ -352,7 +353,7 @@ namespace Rodin::Variational
             for (size_t local = 0; local < nte; ++local)
               m_vec(local) += wdet * fval * tab.getBasis(qp, local);
           }
-          else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>)
+          else if constexpr (FormLanguage::IsVectorRange<RHSRangeType>::Value)
           {
             const size_t vdim = fes.getVectorDimension();
             assert(nte == scalarFE.getCount() * vdim);
@@ -361,14 +362,14 @@ namespace Rodin::Variational
             {
               const size_t scalarLocal = local / vdim;
               const size_t comp = local % vdim;
-              m_vec(local) += wdet * fval.coeff(comp) * tab.getBasis(qp, scalarLocal);
+              m_vec(local) += wdet * fval(comp) * tab.getBasis(qp, scalarLocal);
             }
           }
           else
           {
             static_assert(
               std::is_same_v<RHSRangeType, ScalarType>
-              || std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>,
+              || FormLanguage::IsVectorRange<RHSRangeType>::Value,
               "Unsupported H1 Integral(f,v) RHS range type. Expected scalar or vector-valued shape function.");
           }
         }
@@ -858,7 +859,7 @@ namespace Rodin::Variational
               }
             }
           }
-          else if constexpr (std::is_same_v<CoefficientRangeType, Math::Matrix<ScalarType>>)
+          else if constexpr (FormLanguage::IsMatrixRange<CoefficientRangeType>::Value)
           {
             coeff.getValue(m_cmv, p);
             for (size_t ib = 0; ib < scalarCountTe; ++ib)
@@ -1191,7 +1192,7 @@ namespace Rodin::Variational
                 row[a] += wdet * csv * Math::dot(gb, Gtr[a]);
             }
           }
-          else if constexpr (std::is_same_v<CoefficientRangeType, Math::Matrix<ScalarType>>)
+          else if constexpr (FormLanguage::IsMatrixRange<CoefficientRangeType>::Value)
           {
             coeff.getValue(m_cmv, p);
             for (size_t b = 0; b < nte; ++b)
@@ -2349,7 +2350,7 @@ namespace Rodin::Variational
               }
             }
           }
-          else if constexpr (std::is_same_v<CoefficientRangeType, Math::Matrix<ScalarType>>)
+          else if constexpr (FormLanguage::IsMatrixRange<CoefficientRangeType>::Value)
           {
             coeff.getValue(m_cmv, p);
 

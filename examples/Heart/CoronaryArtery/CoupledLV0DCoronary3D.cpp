@@ -1,5 +1,6 @@
 #include "CoupledLV0DCoronary3D.h"
 
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <numbers>
@@ -24,11 +25,107 @@ namespace Rodin::Examples::Heart
 
   CoupledLV0DCoronary3D::CoupledLV0DCoronary3D(const Config& cfg)
     : m_cfg(cfg),
-      m_model(std::in_place, m_input)
+      m_input(makeInput()),
+      m_model(m_input),
+      m_mesh(makeMesh(m_cfg)),
+      m_xdmf(m_cfg.xdmfBasename),
+      m_uh(std::integral_constant<size_t, 2>{}, m_mesh, m_mesh.getSpaceDimension()),
+      m_ph(std::integral_constant<size_t, 1>{}, m_mesh),
+      m_muh(m_mesh),
+      m_uph(std::integral_constant<size_t, 2>{}, m_mesh, m_mesh.getSpaceDimension()),
+      m_u(m_uh),
+      m_p(m_ph),
+      m_mu(m_muh),
+      m_up(m_uph),
+      m_v(m_uh),
+      m_q(m_ph),
+      m_w(m_muh),
+      m_vp(m_uph),
+      m_uOld(m_uh),
+      m_pOld(m_ph),
+      m_one(m_ph),
+      m_qFlux(m_ph),
+      m_flux(m_qFlux)
   {
   }
 
   CoupledLV0DCoronary3D::~CoupledLV0DCoronary3D() = default;
+
+  CoupledLV0DCoronary3D::MeshType
+  CoupledLV0DCoronary3D::makeMesh(const Config& cfg)
+  {
+    MeshType mesh;
+    mesh.load(cfg.meshPath, IO::FileFormat::MEDIT);
+    mesh.scale(cfg.meshScale);
+
+    if (mesh.getSpaceDimension() != 3)
+      throw std::runtime_error("Expected a 3D coronary mesh.");
+
+    Alert::Info() << "Computing connectivity for " << cfg.meshPath << " ..."
+                  << Alert::Raise;
+
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    mesh.getConnectivity().compute(2, 3);
+
+    return mesh;
+  }
+
+  CoupledLV0DCoronary3D::Model::Input
+  CoupledLV0DCoronary3D::makeInput()
+  {
+    Model::Input input;
+
+    input.rho = 1.0e3;
+    input.R0 = 2.36e-2;
+    input.d0 = 1.42e-2;
+
+    input.Es = 3.0e5;
+    input.mu = 70.0;
+    input.eta = 70.0;
+    input.alpha = 3.0;
+    input.k0 = 1.0e5;
+    input.sigma0 = 5.0e5;
+
+    input.Rp = 8.0e6;
+    input.Cp = 5.0e-9;
+    input.Rd = 1.0e8;
+    input.Cd = 1.0e-8;
+
+    input.Kat = 8.0e-7;
+    input.Kp  = 5.0e-10;
+    input.Kar = 1.3e-5;
+
+    input.cavityCapacity = 5.0e-12;
+
+    input.localTolerance = 1e-12;
+    input.localMaxIterations = 50;
+    input.localDamping = 1.0;
+    input.absRegularization = 1e-14;
+
+    input.initFibDef = 0.0;
+    input.initActiveStiffness = 0.0;
+    input.initActiveStress = 0.0;
+
+    input.pSv = [](Real) { return 1.0e3; };
+    input.pAt = atrial_pressure;
+    input.u = periodic_activation;
+
+    {
+      using PassiveEnergy = std::decay_t<decltype(input.passiveEnergy)>;
+      typename PassiveEnergy::Parameters hp;
+      hp.mu1 = 0.0;
+      hp.mu2 = 0.0;
+      hp.C0 = 1.9e3;
+      hp.C1 = 1.1e-1;
+      hp.C2 = 1.9e3;
+      hp.C3 = 1.1e-1;
+      input.passiveEnergy = PassiveEnergy(hp);
+    }
+
+    return input;
+  }
 
   void CoupledLV0DCoronary3D::updateRCR(RCR& bc, Real Q, Real dt)
   {
@@ -37,43 +134,50 @@ namespace Rodin::Examples::Heart
     bc.pout = bc.pc + bc.Rp * Q;
   }
 
-  void CoupledLV0DCoronary3D::updateRCRNonNew(const Model& model, RCR& bc, Real Q, Real dt)
+  void CoupledLV0DCoronary3D::updateRCRNonNew(
+      const Model& model, RCR& bc, Real Q, Real dt)
   {
     const Real a = bc.C / dt;
-    // We compute the resistance, please add the values of the radius, Large, m and n somewhere as input
-    const Real RadiusP = 0.004;
-    const Real Lp = 0.015;
 
-    const Real RadiusD = 0.0005;
-    const Real Ld = 0.002;
+    const Real radiusP = 0.004;
+    const Real lengthP = 0.015;
 
-    auto R = [](Real pp, Real pd, Real L, Real R)
+    const Real radiusD = 0.0005;
+    const Real lengthD = 0.002;
+
+    auto resistance = [](Real pp, Real pd, Real L, Real radius) -> Real
     {
-        const Real m = 0.035;
-        const Real n = 0.7;
-        const Real tau_w = R * (pp - pd) / (2. * L);
-        const Real Ip = std::pow(1. / m, 1. / n) * n / (3 * n + 1.) * std::pow(std::abs(tau_w), (3 * n + 1.0) / n);
+      const Real m = 0.035;
+      const Real n = 0.7;
 
-        const Real minR = std::pow(1, -8);
+      const Real dp = pp - pd;
+      const Real tauW = radius * dp / (2.0 * L);
 
-        const Real res = std::pow(pp - pd, 4.0) /
-               (8.0 * M_PI * std::pow(L, 3.0) * Ip);
-        if (std::abs(res) > 0.0) return res;
-        else return minR;
-    }; // This lambda function could change depending on the model. For this specific case we have PL, but if we had Carreau Yasuda it would be different (see article)
+      const Real Ip =
+        std::pow(1.0 / m, 1.0 / n)
+        * n / (3.0 * n + 1.0)
+        * std::pow(std::abs(tauW), (3.0 * n + 1.0) / n);
 
-    auto Rp = R(bc.pc, bc.pd, Lp, RadiusP);
+      if (Ip <= 0.0 || std::abs(dp) <= 0.0)
+        return 1.0e-8;
+
+      return std::pow(dp, 4.0)
+        / (8.0 * std::numbers::pi_v<Real> * std::pow(L, 3.0) * Ip);
+    };
+
+    const Real Rp = resistance(bc.pc, bc.pd, lengthP, radiusP);
 
     const auto& s = model.getState();
-    const Real pv = s.pv; // We need to retrieve the oressure in the left ventricle, since the gradient pressure will be the veins minus the ventricle (the coronary arteries are irrigating)
+    const Real pv = s.pv;
 
-    auto Rd = R(bc.pd, pv, Ld, RadiusD);
+    const Real Rd = resistance(bc.pd, pv, lengthD, radiusD);
 
     bc.pc = (a * bc.pc + Q + bc.pd / Rd) / (a + 1.0 / Rd);
     bc.pout = bc.pc + Rp * Q;
   }
 
-  CoupledLV0DCoronary3D::Real CoupledLV0DCoronary3D::periodic_activation(Real t)
+  CoupledLV0DCoronary3D::Real
+  CoupledLV0DCoronary3D::periodic_activation(Real t)
   {
     const Real T = 0.85;
     const Real tau = t - T * std::floor(t / T);
@@ -86,14 +190,15 @@ namespace Rodin::Examples::Heart
     return 0.0;
   }
 
-  CoupledLV0DCoronary3D::Real CoupledLV0DCoronary3D::atrial_pressure(Real t)
+  CoupledLV0DCoronary3D::Real
+  CoupledLV0DCoronary3D::atrial_pressure(Real t)
   {
     const Real T = 0.85;
     const Real tau = t - T * std::floor(t / T);
 
-    const Real min_value = 500.0;
-    const Real max_value = 1000.0;
-    const Real second_threshold = 1250.0;
+    const Real minValue = 500.0;
+    const Real maxValue = 1000.0;
+    const Real secondThreshold = 1250.0;
 
     const Real t1 = 0.02;
     const Real t2 = 0.15;
@@ -103,39 +208,35 @@ namespace Rodin::Examples::Heart
     const Real t6 = 0.85;
 
     Real alpha = 0.0;
-    Real value = min_value;
+    Real value = minValue;
 
     if (tau < t1)
     {
       alpha = -(tau - t1) / t1;
-      value = alpha * min_value + (1.0 - alpha) * max_value;
+      value = alpha * minValue + (1.0 - alpha) * maxValue;
     }
     else if (tau < t2)
     {
-      value = max_value;
+      value = maxValue;
     }
     else if (tau < t3)
     {
       alpha = -(tau - t3) / (t3 - t2);
-      value = alpha * max_value + (1.0 - alpha) * min_value;
+      value = alpha * maxValue + (1.0 - alpha) * minValue;
     }
     else if (tau < t4)
     {
       alpha = -(tau - t4) / (t4 - t3);
-      value = alpha * min_value + (1.0 - alpha) * second_threshold;
+      value = alpha * minValue + (1.0 - alpha) * secondThreshold;
     }
     else if (tau < t5)
     {
-      value = second_threshold;
+      value = secondThreshold;
     }
     else if (tau < t6)
     {
       alpha = -(tau - t6) / (t6 - t5);
-      value = alpha * second_threshold + (1.0 - alpha) * min_value;
-    }
-    else
-    {
-      value = min_value;
+      value = alpha * secondThreshold + (1.0 - alpha) * minValue;
     }
 
     return value;
@@ -153,55 +254,7 @@ namespace Rodin::Examples::Heart
 
   void CoupledLV0DCoronary3D::setupModel()
   {
-    m_input.rho = 1.0e3;
-    m_input.R0 = 2.36e-2;
-    m_input.d0 = 1.42e-2;
-
-    m_input.Es = 3.0e5;
-    m_input.mu = 70.0;
-    m_input.eta = 70.0;
-    m_input.alpha = 3.0;
-    m_input.k0 = 1.0e5;
-    m_input.sigma0 = 5.0e5;
-
-    m_input.Rp = 8.0e6;
-    m_input.Cp = 5.0e-9;
-    m_input.Rd = 1.0e8;
-    m_input.Cd = 1.0e-8;
-
-    m_input.Kat = 8.0e-7;
-    m_input.Kp  = 5.0e-10;
-    m_input.Kar = 1.3e-5;
-
-    m_input.cavityCapacity = 5.0e-12;
-
-    m_input.localTolerance = 1e-12;
-    m_input.localMaxIterations = 50;
-    m_input.localDamping = 1.0;
-    m_input.absRegularization = 1e-14;
-
-    m_input.initFibDef = 0.0;
-    m_input.initActiveStiffness = 0.0;
-    m_input.initActiveStress = 0.0;
-
-    m_input.pSv = [](Real) { return 1.0e3; };
-    m_input.pAt = atrial_pressure;
-    m_input.u = periodic_activation;
-
-    {
-      using PassiveEnergy = std::decay_t<decltype(m_input.passiveEnergy)>;
-      typename PassiveEnergy::Parameters hp;
-      hp.mu1 = 0.0;
-      hp.mu2 = 0.0;
-      hp.C0 = 1.9e3;
-      hp.C1 = 1.1e-1;
-      hp.C2 = 1.9e3;
-      hp.C3 = 1.1e-1;
-      m_input.passiveEnergy = PassiveEnergy(hp);
-    }
-
-    m_model.emplace(m_input);
-    m_model->setMaxIterations(200)
+    m_model.setMaxIterations(200)
            .setAbsoluteTolerance(1e-8)
            .setRelativeTolerance(1e-8)
            .setStepTolerance(1e-10)
@@ -220,68 +273,28 @@ namespace Rodin::Examples::Heart
     s0.kc = s0.gamma * s0.gamma;
     s0.tauc = s0.gamma * s0.beta;
 
-    m_model->initialize(s0);
+    m_model.initialize(s0);
   }
 
   void CoupledLV0DCoronary3D::setupMeshAndSpaces()
   {
-    m_mesh.load(m_cfg.meshPath, IO::FileFormat::MEDIT);
-    m_mesh.scale(m_cfg.meshScale);
-
-    Alert::Info() << "Computing connectivity for " << m_cfg.meshPath << " ..."
-                  << Alert::Raise;
-
-    m_mesh.getConnectivity().compute(3, 2);
-    m_mesh.getConnectivity().compute(2, 1);
-    m_mesh.getConnectivity().compute(1, 0);
-    m_mesh.getConnectivity().compute(2, 3);
-
     Alert::Info() << "Setting up " << m_cfg.xdmfBasename << ".xdmf ..."
                   << Alert::Raise;
 
-    m_xdmf = std::make_unique<IO::XDMF>(m_cfg.xdmfBasename);
-    m_xdmf->setMesh(m_mesh);
+    m_xdmf.setMesh(m_mesh);
 
-    const size_t dim = m_mesh.getSpaceDimension();
-    if (dim != 3)
-      throw std::runtime_error("Expected a 3D coronary mesh.");
+    m_u.setName("u");
+    m_p.setName("p");
+    m_mu.setName("mu_nonNew");
+    m_up.setName("projected_convection");
 
-    m_uh  = std::make_unique<VelocityFESType>(std::integral_constant<size_t, 2>{}, m_mesh, dim);
-    m_ph  = std::make_unique<PressureFESType>(std::integral_constant<size_t, 1>{}, m_mesh);
-    m_muh = std::make_unique<ViscosityFESType>(m_mesh);
-    m_h = std::make_unique<ScalarFESType>(m_mesh);
-    m_uph = std::make_unique<VMSFESType>(std::integral_constant<size_t, 2>{}, m_mesh, dim);
+    m_uOld = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
+    m_pOld = 0.0;
+    m_one = 1.0;
 
-    m_up = std::make_unique<VMSTrialFunctionType>(*m_uph);
-    m_vp = std::make_unique<VMSTestFunctionType>(*m_uph);
-
-    m_u = std::make_unique<VelocityTrialFunctionType>(*m_uh);
-    m_v = std::make_unique<VelocityTestFunctionType>(*m_uh);
-    m_u->setName("u");
-
-    m_p = std::make_unique<PressureTrialFunctionType>(*m_ph);
-    m_q = std::make_unique<PressureTestFunctionType>(*m_ph);
-    m_p->setName("p");
-
-    m_mu = std::make_unique<ViscosityTrialFunctionType>(*m_muh);
-    m_w  = std::make_unique<ViscosityTestFunctionType>(*m_muh);
-    m_mu->setName("mu_nonNew");
-
-    m_uOld = std::make_unique<VelocityGridFunctionType>(*m_uh);
-    m_pOld = std::make_unique<PressureGridFunctionType>(*m_ph);
-
-    *m_uOld = Math::Vector<Real>{{0.0, 0.0, 0.0}};
-    *m_pOld = 0.0;
-
-    m_one = std::make_unique<PressureGridFunctionType>(*m_ph);
-    *m_one = 1.0;
-
-    m_qFlux = std::make_unique<PressureTestFunctionType>(*m_ph);
-    m_flux  = std::make_unique<FluxLinearFormType>(*m_qFlux);
-
-    m_xdmf->add("velocity", m_u->getSolution());
-    m_xdmf->add("pressure", m_p->getSolution());
-    m_xdmf->add("viscosity", m_mu->getSolution());
+    m_xdmf.add("velocity", m_u.getSolution());
+    m_xdmf.add("pressure", m_p.getSolution());
+    m_xdmf.add("viscosity", m_mu.getSolution());
 
     m_wk.clear();
     for (const Attribute tag : m_cfg.outlets)
@@ -293,12 +306,14 @@ namespace Rodin::Examples::Heart
     m_csv.open(m_cfg.csvPath);
     if (!m_csv)
       throw std::runtime_error("Failed to open coupled CSV file: " + m_cfg.csvPath);
+
     writeCSVHeader();
   }
 
   void CoupledLV0DCoronary3D::printInitialState() const
   {
-    const auto& s = m_model->getState();
+    const auto& s = m_model.getState();
+
     std::cout << "Initial 0D state:\n"
               << "  y     = " << s.y << '\n'
               << "  v     = " << s.v << '\n'
@@ -314,109 +329,125 @@ namespace Rodin::Examples::Heart
 
   bool CoupledLV0DCoronary3D::advance0D()
   {
-    const auto rep = m_model->step(m_cfg.dt);
+    const auto rep = m_model.step(m_cfg.dt);
+
     std::cout << "  0D Newton step: "
               << (rep.converged ? "converged" : "not converged")
               << ", iterations = " << rep.iterations
               << ", final residual = " << rep.finalResidual
               << ", final step norm = " << rep.finalStepNorm
               << '\n';
+
     return rep.converged;
   }
 
   void CoupledLV0DCoronary3D::solve3D()
   {
-    const auto& s = m_model->getState();
+    const auto& s = m_model.getState();
     const Real pin = s.par;
 
     const auto n = BoundaryNormal(m_mesh);
-    const auto conv_u = Mult(Jacobian(*m_u), *m_uOld);
-    const auto div_u_old = Div(*m_uOld);
-    const auto beta = Max(-Dot(*m_uOld, n), 0.0);
 
-    auto symU = 0.5 * (Jacobian(*m_u) + Transpose(Jacobian(*m_u)));
-    auto symV = 0.5 * (Jacobian(*m_v) + Transpose(Jacobian(*m_v)));
-    auto symU_old = 0.5 * (Jacobian(*m_uOld) + Transpose(Jacobian(*m_uOld)));
+    const auto conv_u = Mult(Jacobian(m_u), m_uOld);
+    const auto div_u_old = Div(m_uOld);
+    const auto beta = Max(-Dot(m_uOld, n), 0.0);
+
+    auto symU = 0.5 * (Jacobian(m_u) + Transpose(Jacobian(m_u)));
+    auto symV = 0.5 * (Jacobian(m_v) + Transpose(Jacobian(m_v)));
+    auto symUOld = 0.5 * (Jacobian(m_uOld) + Transpose(Jacobian(m_uOld)));
 
     const Real n_pl = 0.7;
     const Real m_pl = 0.035;
 
     const Real mu_min = m_cfg.mu;
-    const Real gamma_min = 1e-3;
-    const Real mu_max = 5e-2;
+    const Real gamma_min = 1.0e-3;
+    const Real mu_max = 5.0e-2;
 
-    // Define a function that will be evaluated in the assembly which contains the P-L model
-    RealFunction mu_nonNew = [=, this](const Point& p) -> Real
+    RealFunction muNonNew = [=, this](const Point& p) -> Real
     {
-      auto S = symU_old.getValue(p);
-      const Real gamma = std::sqrt(2.0 * dot(S, S));
-      if (std::abs(gamma) > 0.0) return m_pl * std::pow(gamma, n_pl - 1.0);
-      else return m_cfg.mu;
-    };
+      auto S = symUOld.getValue(p);
 
+      const Real gamma =
+        std::max(gamma_min, std::sqrt(2.0 * dot(S, S)));
+
+      const Real mu =
+        m_pl * std::pow(gamma, n_pl - 1.0);
+
+      return std::clamp(mu, mu_min, mu_max);
+    };
 
     Alert::Info() << "Projecting non-Newtonian viscosity ..." << Alert::Raise;
 
-    Problem muProjection(*m_mu, *m_w);
+    Problem muProjection(m_mu, m_w);
     muProjection =
-        Integral(*m_mu, *m_w)
-      - Integral(mu_nonNew, *m_w);
+        Integral(m_mu, m_w)
+      - Integral(muNonNew, m_w);
 
     muProjection.assemble();
     Solver::KSP(muProjection).solve();
 
-    // STAB
-    const auto conv_v = Mult(u_old, Jacobian(v));
-    const Real c_1 = 4.0;
-    const Real c_2 = 2.0;
+    const Real c1 = 4.0;
+    const Real c2 = 2.0;
 
-    m_h = [](const Point& p) { const auto measure = p.getPolytope().getMeasure();
-                                     const int dim = p.getPolytope().getDimension();
-                                     return std::pow(measure, 1.0 / dim);};
+    RealFunction h = [](const Point& p) -> Real
+    {
+      const auto& K = p.getPolytope();
+      return std::pow(K.getMeasure(), 1.0 / K.getDimension());
+    };
 
-    // mu_element = [](const Point& p) {return u_old(p)}; // it is possible to apply any transformation
-    const auto vel_norm = Frobenius(u_old);
-    const auto visc_term = c_1 * mu_nonNew / (m_h * m_h);  // diffusion contribution
-    const auto conv_term = c_2 * vel_norm / m_h; // TO DO: change to h_stream
+    const auto conv_v = Mult(Jacobian(m_v), m_uOld);
+    const auto vel_norm = Sqrt(Dot(m_uOld, m_uOld));
 
-
-    const auto tau_1 = 1. / (visc_term + conv_term);
+    const auto visc_term = c1 * m_mu.getSolution() / (h * h);
+    const auto conv_term = c2 * vel_norm / h;
+    const auto tau1 = 1.0 / (visc_term + conv_term);
 
     {
-      const auto convection_target = Mult(Jacobian(u_old), u_old);
-      Problem l2_convU(up, vp);
-      l2_convU = Integral(*m_up, *m_vp) - Integral(convection_target, *m_vp);
-      l2_convU.assemble();
-      CG(l2_convU).solve();
+      const auto convectionTarget = Mult(Jacobian(m_uOld), m_uOld);
+
+      Problem l2ConvU(m_up, m_vp);
+      l2ConvU =
+          Integral(m_up, m_vp)
+        - Integral(convectionTarget, m_vp);
+
+      l2ConvU.assemble();
+      Solver::KSP(l2ConvU).solve();
     }
 
+    const auto projConvU = m_up.getSolution();
 
-    Problem flow(*m_u, *m_p, *m_v, *m_q);
+    Problem flow(m_u, m_p, m_v, m_q);
     flow =
-          (m_cfg.rho / m_cfg.dt) * Integral(*m_u, *m_v)
-        - (m_cfg.rho / m_cfg.dt) * Integral(*m_uOld, *m_v)
-        + m_cfg.rho * Integral(Dot(conv_u, *m_v))
-        + 0.5 * m_cfg.rho * Integral(div_u_old * Dot(*m_u, *m_v))
-        + 2 * Integral(m_mu->getSolution() * symU, symV)
-        - Integral(*m_p, Div(*m_v))
-        + Integral(Div(*m_u), *m_q)
-        + m_cfg.eps * Integral(*m_p, *m_q)
-        +  Integral(tau_1 * conv_u, conv_v)
-        -  Integral(tau_1 * proj_convU, conv_v)
-        + BoundaryIntegral(pin * Dot(*m_v, n)).over(m_cfg.inlet)
-        + BoundaryIntegral(m_wk.at(4).pout * Dot(*m_v, n)).over(4)
-        + BoundaryIntegral(m_wk.at(5).pout * Dot(*m_v, n)).over(5)
-        + BoundaryIntegral(m_wk.at(6).pout * Dot(*m_v, n)).over(6)
-        + BoundaryIntegral(m_wk.at(7).pout * Dot(*m_v, n)).over(7)
-        + BoundaryIntegral(m_wk.at(8).pout * Dot(*m_v, n)).over(8)
-        + BoundaryIntegral(m_wk.at(9).pout * Dot(*m_v, n)).over(9)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(*m_u, *m_v)).over(4)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(*m_u, *m_v)).over(5)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(*m_u, *m_v)).over(6)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(*m_u, *m_v)).over(7)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(*m_u, *m_v)).over(8)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(*m_u, *m_v)).over(9)
-        + DirichletBC(*m_u, Zero(m_mesh.getSpaceDimension())).on(m_cfg.wall);
+          (m_cfg.rho / m_cfg.dt) * Integral(m_u, m_v)
+        - (m_cfg.rho / m_cfg.dt) * Integral(m_uOld, m_v)
+        + m_cfg.rho * Integral(Dot(conv_u, m_v))
+        + 0.5 * m_cfg.rho * Integral(div_u_old * Dot(m_u, m_v))
+        + 2.0 * Integral(m_mu.getSolution() * symU, symV)
+        - Integral(m_p, Div(m_v))
+        + Integral(Div(m_u), m_q)
+        + m_cfg.eps * Integral(m_p, m_q)
+
+        // VMS
+        // + Integral(tau1 * Dot(conv_u, conv_v))
+        // - Integral(tau1 * Dot(projConvU, conv_v))
+
+        + BoundaryIntegral(pin * Dot(m_v, n)).over(m_cfg.inlet)
+
+        + BoundaryIntegral(m_wk.at(4).pout * Dot(m_v, n)).over(4)
+        + BoundaryIntegral(m_wk.at(5).pout * Dot(m_v, n)).over(5)
+        + BoundaryIntegral(m_wk.at(6).pout * Dot(m_v, n)).over(6)
+        + BoundaryIntegral(m_wk.at(7).pout * Dot(m_v, n)).over(7)
+        + BoundaryIntegral(m_wk.at(8).pout * Dot(m_v, n)).over(8)
+        + BoundaryIntegral(m_wk.at(9).pout * Dot(m_v, n)).over(9)
+
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(4)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(5)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(6)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(7)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(8)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(9)
+
+        + DirichletBC(m_u, Zero(m_mesh.getSpaceDimension())).on(m_cfg.wall);
 
     Alert::Info() << "Assembling 3D time step ..." << Alert::Raise;
     flow.assemble().setFieldSplits();
@@ -428,23 +459,26 @@ namespace Rodin::Examples::Heart
   void CoupledLV0DCoronary3D::computeFluxesAndUpdateRCR()
   {
     const auto n = BoundaryNormal(m_mesh);
-    const auto& s = m_model->getState();
+    const auto& s = m_model.getState();
 
-    (*m_flux) = BoundaryIntegral(Dot(m_u->getSolution(), n), *m_qFlux).over(m_cfg.inlet);
-    m_flux->assemble();
-    m_stepData.qIn = (*m_flux)(*m_one);
+    m_flux = BoundaryIntegral(Dot(m_u.getSolution(), n), m_qFlux).over(m_cfg.inlet);
+    m_flux.assemble();
+    m_stepData.qIn = m_flux(m_one);
 
     m_stepData.qOut.clear();
     m_stepData.qOutSum = 0.0;
+
     for (const Attribute tag : m_cfg.outlets)
     {
-      (*m_flux) = BoundaryIntegral(Dot(m_u->getSolution(), n), *m_qFlux).over(tag);
-      m_flux->assemble();
-      const Real qOut = (*m_flux)(*m_one);
+      m_flux = BoundaryIntegral(Dot(m_u.getSolution(), n), m_qFlux).over(tag);
+      m_flux.assemble();
+
+      const Real qOut = m_flux(m_one);
       m_stepData.qOut[tag] = qOut;
       m_stepData.qOutSum += qOut;
+
       updateRCR(m_wk[tag], qOut, m_cfg.dt);
-      //updateRCRNonNew(*m_model, m_wk[tag], qOut, m_cfg.dt);
+      // updateRCRNonNew(m_model, m_wk[tag], qOut, m_cfg.dt);
     }
 
     m_stepData.flowBalance = m_stepData.qIn + m_stepData.qOutSum;
@@ -453,44 +487,57 @@ namespace Rodin::Examples::Heart
 
   void CoupledLV0DCoronary3D::updateHistory()
   {
-    m_uOld->setData(m_u->getSolution().getData());
-    m_pOld->setData(m_p->getSolution().getData());
+    m_uOld.setData(m_u.getSolution().getData());
+    m_pOld.setData(m_p.getSolution().getData());
   }
 
-  void CoupledLV0DCoronary3D::writeOutputs() const
+  void CoupledLV0DCoronary3D::writeOutputs()
   {
-    m_xdmf->write(m_model->getState().t - m_cfg.dt).flush();
+    m_xdmf.write(m_model.getState().t - m_cfg.dt).flush();
   }
 
-  CoupledLV0DCoronary3D::StepData CoupledLV0DCoronary3D::collectStepData() const
+  CoupledLV0DCoronary3D::StepData
+  CoupledLV0DCoronary3D::collectStepData() const
   {
     StepData d;
-    const auto& s = m_model->getState();
+
+    const auto& s = m_model.getState();
+
     d.t = s.t;
     d.pat = m_input.pAt(s.t);
     d.psv = m_input.pSv(s.t);
+
     d.y = s.y;
     d.v = s.v;
     d.radius = m_input.R0 + s.y;
-    d.lvVolume = (4.0 / 3.0) * std::numbers::pi_v<Real> * d.radius * d.radius * d.radius;
-    d.lvFlow = 4.0 * std::numbers::pi_v<Real> * d.radius * d.radius * s.v;
+    d.lvVolume =
+      (4.0 / 3.0) * std::numbers::pi_v<Real>
+      * d.radius * d.radius * d.radius;
+    d.lvFlow =
+      4.0 * std::numbers::pi_v<Real>
+      * d.radius * d.radius * s.v;
+
     d.pv = s.pv;
     d.par = s.par;
     d.pd = s.pd;
+
     d.ec = s.ec;
     d.gamma = s.gamma;
     d.beta = s.beta;
     d.kc = s.kc;
     d.tauc = s.tauc;
+
     d.qIn = m_stepData.qIn;
     d.qOutSum = m_stepData.qOutSum;
     d.flowBalance = m_stepData.flowBalance;
     d.qOut = m_stepData.qOut;
+
     for (const auto& [tag, bc] : m_wk)
     {
       d.pc[tag] = bc.pc;
       d.pOut[tag] = bc.pout;
     }
+
     return d;
   }
 
@@ -534,12 +581,14 @@ namespace Rodin::Examples::Heart
       << "beta,"
       << "kc,"
       << "tauc\n";
+
     m_csv.flush();
   }
 
   void CoupledLV0DCoronary3D::writeCSVRow()
   {
     const StepData d = collectStepData();
+
     auto get = [](const std::map<Attribute, Real>& m, Attribute a) -> Real
     {
       const auto it = m.find(a);
@@ -591,13 +640,14 @@ namespace Rodin::Examples::Heart
     if (!m_initialized)
       initialize();
 
-    for (int i = 0; i < m_cfg.nsteps; ++i)
+    for (int i = 0; i < static_cast<int>(m_cfg.nsteps); ++i)
     {
-      std::cout << "Step " << i << ": t = " << m_model->getState().t << "\n";
+      std::cout << "Step " << i << ": t = " << m_model.getState().t << "\n";
+
       if (!advance0D())
       {
         std::cerr << "0D solver failed to converge at step "
-                  << i << ", t = " << m_model->getState().t << "\n";
+                  << i << ", t = " << m_model.getState().t << "\n";
         return 1;
       }
 
@@ -608,8 +658,7 @@ namespace Rodin::Examples::Heart
       writeOutputs();
     }
 
-    if (m_xdmf)
-      m_xdmf->close();
+    m_xdmf.close();
     return 0;
   }
 }

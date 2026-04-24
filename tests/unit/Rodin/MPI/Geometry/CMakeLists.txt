@@ -3,7 +3,8 @@ target_link_libraries(RodinMPIGeometrySharderTest
   PUBLIC
   GTest::gtest
   Rodin::Geometry
-  Rodin::MPI)
+  Rodin::MPI
+  Rodin::IO)
 
 # Detect Open MPI for --oversubscribe flag (not supported by MPICH).
 set(_RODIN_MPI_OVERSUBSCRIBE_FLAG "")
@@ -18,7 +19,7 @@ if (MPIEXEC_EXECUTABLE)
   endif()
 endif()
 
-foreach(np 1 2 3)
+foreach(np 1 2 3 4 8)
   add_test(
     NAME RodinMPIGeometrySharderTest_np${np}
     COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
@@ -26,5 +27,6 @@ foreach(np 1 2 3)
             $<TARGET_FILE:RodinMPIGeometrySharderTest>)
   set_tests_properties(RodinMPIGeometrySharderTest_np${np} PROPERTIES
     LABELS unit
+    ENVIRONMENT "HDF5_USE_FILE_LOCKING=FALSE"
   )
 endforeach()
