@@ -154,124 +154,6 @@ namespace
     return sharder.gather(0);
   }
 
-  /**
-   * @brief Rebuilds a Shard from a loaded base mesh and HDF5 shard metadata.
-   *
-   * This utility is used in the HDF5 shard workflow integration tests.  The
-   * HDF5 file must have been written by
-   * `MeshPrinter<FileFormat::HDF5, Context::MPI>`, which writes both the base
-   * mesh topology (under @c /Mesh/...) and the shard-specific metadata (under
-   * @c /Shard/...).  The helper reads the polytope maps, ownership state
-   * vectors, ghost-to-owner maps, and halo CSR, then reconstructs a `Shard`
-   * via `Shard::Builder::initialize(baseMesh)` and post-processes the polytope
-   * maps to restore the distributed global indices.
-   *
-   * @param baseMesh  Local mesh loaded from the HDF5 file (base topology).
-   * @param filepath  Path to the HDF5 file containing @c /Shard/... datasets.
-   * @param D         Topological dimension of the mesh.
-   * @returns A `Shard` with polytope maps, state, owner, and halo restored.
-   */
-  Shard rebuildShardFromHDF5(
-      const Mesh<Context::Local>& baseMesh,
-      const boost::filesystem::path& filepath,
-      size_t D)
-  {
-    using namespace Rodin::IO;
-
-    const hid_t h5 = H5Fopen(filepath.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
-    if (h5 < 0)
-    {
-      ADD_FAILURE() << "rebuildShardFromHDF5: cannot open " << filepath;
-      return Shard{};
-    }
-
-    // Read vertex metadata (dimension 0).
-    auto vtxState = HDF5::readVectorDataset<HDF5::U8>(h5, HDF5::shardStatePath(0));
-    auto vtxLeft  = HDF5::readVectorDataset<HDF5::U64>(h5, HDF5::shardPolytopeMapLeftPath(0));
-
-    // Read cell metadata (dimension D).
-    auto cellState = HDF5::readVectorDataset<HDF5::U8>(h5, HDF5::shardStatePath(D));
-    auto cellLeft  = HDF5::readVectorDataset<HDF5::U64>(h5, HDF5::shardPolytopeMapLeftPath(D));
-
-    // Read cell owner map (ghost local index → owner rank).
-    const std::string ownerPath = HDF5::shardOwnerGroupPath(D);
-    auto ownerKeys = HDF5::readVectorDataset<HDF5::U64>(h5, ownerPath + "/Keys");
-    auto ownerVals = HDF5::readVectorDataset<HDF5::U64>(h5, ownerPath + "/Values");
-
-    // Read cell halo map (owned local index → CSR of neighbor ranks).
-    const std::string haloPath = HDF5::shardHaloGroupPath(D);
-    auto haloKeys    = HDF5::readVectorDataset<HDF5::U64>(h5, haloPath + "/Keys");
-    auto haloOffsets = HDF5::readVectorDataset<HDF5::U64>(h5, haloPath + "/Offsets");
-    auto haloIndices = HDF5::readVectorDataset<HDF5::U64>(h5, haloPath + "/Indices");
-
-    H5Fclose(h5);
-
-    // Map HDF5 U8 flag values to Shard::State.
-    // 0 = Shared (or unused), 1 = Owned, 2 = Ghost.
-    const auto stateOf = [](HDF5::U8 flag) -> Shard::State
-    {
-      if (flag == 1) return Shard::State::Owned;
-      if (flag == 2) return Shard::State::Ghost;
-      return Shard::State::Shared;
-    };
-
-    // Build Shard in Parent mode from the loaded base mesh.
-    // Vertices must be included before cells (include() for d>0 requires
-    // the vertex indices to be present in the polytope map already).
-    Shard::Builder builder;
-    builder.initialize(baseMesh);
-
-    for (Index vi = 0; vi < static_cast<Index>(baseMesh.getVertexCount()); ++vi)
-      builder.include({0, vi}, stateOf(vtxState[vi]));
-
-    for (Index ci = 0; ci < static_cast<Index>(baseMesh.getCellCount()); ++ci)
-      builder.include({D, ci}, stateOf(cellState[ci]));
-
-    // Set owner maps for ghost cells.
-    for (size_t i = 0; i < ownerKeys.size(); ++i)
-      builder.setOwner(D, static_cast<Index>(ownerKeys[i]),
-                           static_cast<Index>(ownerVals[i]));
-
-    // Set halo maps (CSR format): each key is an owned local cell index that
-    // is visible on at least one neighboring rank.
-    for (size_t i = 0; i < haloKeys.size(); ++i)
-    {
-      const Index key   = static_cast<Index>(haloKeys[i]);
-      const size_t from = static_cast<size_t>(haloOffsets[i]);
-      const size_t to   = static_cast<size_t>(haloOffsets[i + 1]);
-      for (size_t j = from; j < to; ++j)
-        builder.halo(D, key, static_cast<Index>(haloIndices[j]));
-    }
-
-    Shard shard = builder.finalize();
-
-    // Fix vertex polytope map: replace the parent-local indices (0..V-1)
-    // produced by finalize() with the distributed global indices stored in
-    // the HDF5 file.  Both the forward (left) and reverse (right) directions
-    // must be updated together.
-    {
-      auto& vmap = shard.getPolytopeMap(0);
-      vmap.right.clear();
-      for (Index vi = 0; vi < static_cast<Index>(vmap.left.size()); ++vi)
-      {
-        vmap.left[vi]           = static_cast<Index>(vtxLeft[vi]);
-        vmap.right[vtxLeft[vi]] = vi;
-      }
-    }
-
-    // Fix cell polytope map likewise.
-    {
-      auto& cmap = shard.getPolytopeMap(D);
-      cmap.right.clear();
-      for (Index ci = 0; ci < static_cast<Index>(cmap.left.size()); ++ci)
-      {
-        cmap.left[ci]            = static_cast<Index>(cellLeft[ci]);
-        cmap.right[cellLeft[ci]] = ci;
-      }
-    }
-
-    return shard;
-  }
 }
 
 namespace Rodin::Tests::Unit
@@ -2209,7 +2091,7 @@ namespace Rodin::Tests::Unit
    *   2. Each rank saves its shard using MeshPrinter<FileFormat::HDF5,
    *      Context::MPI>, which writes both the base mesh topology and the
    *      /Shard/... metadata datasets.
-   *   3. Each rank rereads its shard (base mesh topology) from HDF5.
+   *   3. Each rank rereads its shard from HDF5 through the MPI mesh loader.
    *
    * After reloading, the vertex and cell counts must match the original shard.
    */
@@ -2240,13 +2122,13 @@ namespace Rodin::Tests::Unit
       printer.print(rankFile);
     }
 
-    // Step 3: Reread – load the base mesh topology from HDF5.
-    Mesh<Context::Local> loaded;
+    // Step 3: Reread through the MPI loader so /Shard metadata is restored.
+    Mesh<Context::MPI> loaded(ctx);
     loaded.load(rankFile, IO::FileFormat::HDF5);
 
-    EXPECT_EQ(loaded.getCellCount(), cellsBefore)
+    EXPECT_EQ(loaded.getShard().getCellCount(), cellsBefore)
       << "Rank " << world.rank() << ": cell count mismatch after HDF5 reload.";
-    EXPECT_EQ(loaded.getVertexCount(), vertsBefore)
+    EXPECT_EQ(loaded.getShard().getVertexCount(), vertsBefore)
       << "Rank " << world.rank() << ": vertex count mismatch after HDF5 reload.";
 
     boost::filesystem::remove(rankFile);
@@ -2259,10 +2141,8 @@ namespace Rodin::Tests::Unit
    *   1. Mesh is sharded (distributed via @c distributeFromRoot).
    *   2. Each rank saves its shard to a per-rank HDF5 file using the MPI
    *      printer (writes base mesh + /Shard/... metadata).
-   *   3. Each rank rereads its shard base mesh from HDF5.
-   *   4. The shard metadata stored in HDF5 is read back and used to rebuild
-   *      a @c Shard with correct polytope maps, ownership state, owner maps,
-   *      and halo maps.  Edge connectivity is then computed and reconciled.
+   *   3. Each rank rereads its shard from HDF5 through the MPI mesh loader.
+   *   4. Edge connectivity is then computed and reconciled.
    *
    * After reconciliation, the global sum of locally-owned edges must equal
    * the total edge count of the reference mesh.
@@ -2274,7 +2154,6 @@ namespace Rodin::Tests::Unit
       GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
-    const size_t D = 2;
 
     // Compute the expected total edge count from the reference mesh on rank 0
     // and broadcast to all ranks.
@@ -2304,27 +2183,16 @@ namespace Rodin::Tests::Unit
     }
     world.barrier();
 
-    // Step 3: Reread base mesh topology.
-    Mesh<Context::Local> baseMesh;
-    baseMesh.load(rankPath(world.rank()), IO::FileFormat::HDF5);
+    // Step 3: Reread through the MPI loader.
+    Mesh<Context::MPI> reloaded(ctx);
+    reloaded.load(rankPath(world.rank()), IO::FileFormat::HDF5);
 
-    EXPECT_EQ(baseMesh.getCellCount(), mpiMesh.getShard().getCellCount())
+    EXPECT_EQ(reloaded.getShard().getCellCount(), mpiMesh.getShard().getCellCount())
       << "Rank " << world.rank() << ": cell count mismatch after HDF5 reload.";
-    EXPECT_EQ(baseMesh.getVertexCount(), mpiMesh.getShard().getVertexCount())
+    EXPECT_EQ(reloaded.getShard().getVertexCount(), mpiMesh.getShard().getVertexCount())
       << "Rank " << world.rank() << ": vertex count mismatch after HDF5 reload.";
 
-    // Step 4: Reconcile – rebuild the Shard from the loaded base mesh and the
-    // /Shard/... metadata stored in the HDF5 file, then create an MPIMesh,
-    // compute edge connectivity, and call reconcile(1).
-    Shard shard = rebuildShardFromHDF5(baseMesh, rankPath(world.rank()), D);
-    if (Test::HasFailure())
-      GTEST_SKIP() << "Shard reconstruction from HDF5 failed; skipping reconcile.";
-
-    Mesh<Context::MPI> reloaded =
-        Mesh<Context::MPI>::Builder(ctx)
-          .initialize(std::move(shard))
-          .finalize();
-
+    // Step 4: Reconcile.
     reloaded.getConnectivity().compute(1, 2);
     reloaded.reconcile(1);
 

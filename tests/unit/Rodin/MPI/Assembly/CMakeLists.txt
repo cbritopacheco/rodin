@@ -26,6 +26,6 @@ foreach(np 1 2 3 4 8)
             ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
             $<TARGET_FILE:RodinMPIAssemblyTest>)
   set_tests_properties(RodinMPIAssemblyTest_np${np} PROPERTIES
-    LABELS unit
+    LABELS "unit;distributed"
   )
 endforeach()

@@ -7,5 +7,9 @@ target_link_libraries(RodinManufacturedPETScPoisson
   Rodin::PETSc)
 gtest_discover_tests(RodinManufacturedPETScPoisson
   PROPERTIES
-    LABELS manufactured
+    LABELS "manufactured;petsc"
 )
+
+if (RODIN_USE_MPI)
+  add_subdirectory(MPI)
+endif()

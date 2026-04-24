@@ -26,7 +26,7 @@ foreach(np 1 2 3 4 8)
             ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
             $<TARGET_FILE:RodinMPIGeometrySharderTest>)
   set_tests_properties(RodinMPIGeometrySharderTest_np${np} PROPERTIES
-    LABELS unit
+    LABELS "unit;distributed"
     ENVIRONMENT "HDF5_USE_FILE_LOCKING=FALSE"
   )
 endforeach()

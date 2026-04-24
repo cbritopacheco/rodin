@@ -79,7 +79,7 @@ jobs:
       - name: Run unit tests
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
-          -L unit -LE slow
+          -L unit -LE "slow|distributed"
           --output-on-failure
           -j ${{ env.CTEST_PARALLEL_LEVEL }}
 
@@ -87,7 +87,21 @@ jobs:
         if: failure()
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
-          -L unit -LE slow
+          -L unit -LE "slow|distributed"
+          --rerun-failed -V --output-on-failure
+
+      - name: Run distributed tests
+        run: >
+          ctest --test-dir ${{ github.workspace }}/build/tests
+          -L unit -L distributed -LE slow
+          --output-on-failure
+          -j 1
+
+      - name: Rerun failed distributed tests (verbose)
+        if: failure()
+        run: >
+          ctest --test-dir ${{ github.workspace }}/build/tests
+          -L unit -L distributed -LE slow
           --rerun-failed -V --output-on-failure
 
   Manufactured:
@@ -155,7 +169,7 @@ jobs:
       - name: Run manufactured tests
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
-          -L manufactured -LE slow
+          -L manufactured -LE "slow|distributed"
           --output-on-failure
           -j ${{ env.CTEST_PARALLEL_LEVEL }}
 
@@ -163,7 +177,21 @@ jobs:
         if: failure()
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
-          -L manufactured -LE slow
+          -L manufactured -LE "slow|distributed"
+          --rerun-failed -V --output-on-failure
+
+      - name: Run manufactured distributed tests
+        run: >
+          ctest --test-dir ${{ github.workspace }}/build/tests
+          -L manufactured -L distributed -LE slow
+          --output-on-failure
+          -j 1
+
+      - name: Rerun failed manufactured distributed tests (verbose)
+        if: failure()
+        run: >
+          ctest --test-dir ${{ github.workspace }}/build/tests
+          -L manufactured -L distributed -LE slow
           --rerun-failed -V --output-on-failure
 
   Slow:
@@ -311,14 +339,21 @@ jobs:
       - name: Run unit tests (coverage build)
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
-          -L unit
+          -L unit -LE distributed
           --output-on-failure
           -j ${{ env.CTEST_PARALLEL_LEVEL }}
+
+      - name: Run distributed tests (coverage build)
+        run: >
+          ctest --test-dir ${{ github.workspace }}/build/tests
+          -L distributed
+          --output-on-failure
+          -j 1
 
       - name: Run manufactured tests (coverage build)
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
-          -L manufactured -LE slow
+          -L manufactured -LE "slow|distributed"
           --output-on-failure
           -j 1
 
