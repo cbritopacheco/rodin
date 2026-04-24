@@ -376,12 +376,14 @@ namespace Rodin::Examples::Heart
     RealFunction muNonNew = [=, this](const Point& p) -> Real
     {
       auto S = symUOld.getValue(p);
-      const Real gamma = std::sqrt(2.0 * dot(S, S));
 
-      if (std::abs(gamma) > 0.0)
-        return m_pl * std::pow(gamma, n_pl - 1.0);
+      const Real gamma =
+        std::max(gamma_min, std::sqrt(2.0 * dot(S, S)));
 
-      return m_cfg.mu;
+      const Real mu =
+        m_pl * std::pow(gamma, n_pl - 1.0);
+
+      return std::clamp(mu, mu_min, mu_max);
     };
 
     Alert::Info() << "Projecting non-Newtonian viscosity ..." << Alert::Raise;
