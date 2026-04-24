@@ -82,6 +82,12 @@ namespace Rodin::Solver
 
       using NewtonSolverParent::solve;
 
+      static constexpr PetscReal DEFAULT_RTOL   = 1e-8;
+      static constexpr PetscReal DEFAULT_ABSTOL = 1e-50;
+      static constexpr PetscReal DEFAULT_STOL   = 1e-8;
+      static constexpr PetscInt  DEFAULT_MAXIT  = 50;
+      static constexpr PetscInt  DEFAULT_MAXF   = 10000;
+
       /**
        * @brief Construct SNES from a Rodin KSP linear solver.
        * @param ksp Rodin KSP wrapper; the associated ProblemBase is

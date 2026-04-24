@@ -159,4 +159,3 @@ namespace Rodin::Solver
     return *this;
   }
 }
-
