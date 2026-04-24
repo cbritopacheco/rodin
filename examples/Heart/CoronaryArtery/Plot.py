@@ -22,48 +22,46 @@ This script reads the CSV produced by CoupledLV0DCoronary3D and provides:
 3. Live dashboard:
    - repeatedly reloads the CSV,
    - tolerates partially written rows,
-   - refreshes the dashboard windows in-place,
-   - keeps the correlation-matrix window in its moved position.
+   - refreshes dashboard windows in-place,
+   - keeps the correlation-matrix window in its moved position,
+   - creates the colorbar once to avoid matplotlib recursion bugs.
 
 Examples
 --------
 Save all diagnostics:
 
-    python coronary_diagnostics.py CoronaryArtery.csv
+    python Plot.py CoronaryArtery.csv
 
 Show static dashboard:
 
-    python coronary_diagnostics.py CoronaryArtery.csv --show
+    python Plot.py CoronaryArtery.csv --show
 
 Live dashboard:
 
-    python coronary_diagnostics.py CoronaryArtery.csv --watch --interval 1
+    python Plot.py CoronaryArtery.csv --watch --interval 1
 
 Live dashboard without saving:
 
-    python coronary_diagnostics.py CoronaryArtery.csv --watch --no-save
+    python Plot.py CoronaryArtery.csv --watch --no-save
 
 Periodically save tables while live-monitoring:
 
-    python coronary_diagnostics.py CoronaryArtery.csv --watch --save-every 20
+    python Plot.py CoronaryArtery.csv --watch --save-every 20
 """
 
 import argparse
 import time
 from pathlib import Path
 
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
 
 OUTLET_IDS = [4, 5, 6, 7, 8, 9]
 PERIOD = 0.85
 
-
-# ---------------------------------------------------------------------------
-# Data handling
-# ---------------------------------------------------------------------------
 
 def cols_present(df, cols):
     """Return only columns present in the dataframe."""
@@ -94,12 +92,9 @@ def read_csv_robust(path):
     """
     try:
         df = pd.read_csv(path, dtype=str, on_bad_lines="skip")
-
         if df.empty:
             return None
-
         return add_derived_columns(df)
-
     except Exception as e:
         print(f"[live] Could not read CSV yet: {e}")
         return None
@@ -185,10 +180,6 @@ def add_derived_columns(df):
 
     return df
 
-
-# ---------------------------------------------------------------------------
-# Plot primitives
-# ---------------------------------------------------------------------------
 
 def savefig(path):
     """Save current figure and close it."""
@@ -311,10 +302,6 @@ def corr_matrix(ax, df, cols, title="Correlation matrix"):
 
     return im
 
-
-# ---------------------------------------------------------------------------
-# Dashboard definitions
-# ---------------------------------------------------------------------------
 
 def dashboard_specs():
     """Return the original grouped dashboard windows."""
@@ -529,10 +516,6 @@ def diagnostic_columns(df):
     )
 
 
-# ---------------------------------------------------------------------------
-# Dashboard creation / update
-# ---------------------------------------------------------------------------
-
 def create_dashboard_windows():
     """Create all dashboard windows."""
     windows = []
@@ -546,6 +529,7 @@ def create_dashboard_windows():
             pass
 
         fig.suptitle(title, fontsize=14)
+        fig.tight_layout(rect=(0, 0, 1, 0.96))
         windows.append((title, fig, axs.ravel(), funcs))
 
     return windows
@@ -564,7 +548,6 @@ def update_dashboard_windows(windows, df):
         for ax, func in zip(axs, funcs):
             func(ax, df)
 
-        fig.tight_layout(rect=(0, 0, 1, 0.96))
         fig.canvas.draw_idle()
         fig.canvas.flush_events()
 
@@ -649,8 +632,8 @@ def live_dashboard(csv_path, interval=1.0, save_every=None, outdir=None):
     """
     Monitor a growing CSV and update the full dashboard set live.
 
-    The correlation figure is kept alive and only its axes are cleared. This
-    prevents the window from snapping back to its default location.
+    The colorbar is created once using a ScalarMappable and is never recreated
+    inside the refresh loop. This avoids matplotlib colorbar recursion on macOS.
     """
     plt.ion()
 
@@ -659,6 +642,11 @@ def live_dashboard(csv_path, interval=1.0, save_every=None, outdir=None):
     corr_fig, corr_ax = plt.subplots(figsize=(12.5, 9))
     corr_fig.subplots_adjust(left=0.22, right=0.78, bottom=0.30, top=0.90)
     corr_cax = corr_fig.add_axes([0.84, 0.30, 0.025, 0.55])
+
+    corr_norm = mpl.colors.Normalize(vmin=-1.0, vmax=1.0)
+    corr_sm = mpl.cm.ScalarMappable(norm=corr_norm, cmap=plt.get_cmap())
+    corr_sm.set_array([])
+    corr_fig.colorbar(corr_sm, cax=corr_cax, label="correlation")
 
     try:
         corr_fig.canvas.manager.set_window_title("Live: correlation matrix")
@@ -678,17 +666,13 @@ def live_dashboard(csv_path, interval=1.0, save_every=None, outdir=None):
 
         if plt.fignum_exists(corr_fig.number):
             corr_ax.clear()
-            corr_cax.clear()
 
-            im = corr_matrix(
+            corr_matrix(
                 corr_ax,
                 df,
                 diagnostic_columns(df),
                 "Live diagnostic correlation matrix",
             )
-
-            if im is not None:
-                corr_fig.colorbar(im, cax=corr_cax, label="correlation")
 
             corr_fig.canvas.draw_idle()
             corr_fig.canvas.flush_events()
@@ -705,10 +689,6 @@ def live_dashboard(csv_path, interval=1.0, save_every=None, outdir=None):
 
     plt.ioff()
 
-
-# ---------------------------------------------------------------------------
-# Saved diagnostics
-# ---------------------------------------------------------------------------
 
 def save_live_snapshot(df, outdir):
     """Save lightweight live snapshot tables."""
@@ -908,10 +888,6 @@ def write_tables(df, outdir):
 
     pd.DataFrame(flags).to_csv(outdir / "validation_flags.csv", index=False)
 
-
-# ---------------------------------------------------------------------------
-# Entry point
-# ---------------------------------------------------------------------------
 
 def main():
     parser = argparse.ArgumentParser()
