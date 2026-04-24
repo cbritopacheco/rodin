@@ -405,7 +405,7 @@ namespace Rodin::Examples::Heart
    * @tparam ProjectedVelocity Projected convective acceleration field type.
    * @tparam Viscosity Effective viscosity field type.
    */
-  template <class TestFunction, class OldVelocity, class ProjectedVelocity, class Viscosity>
+  template <class TestFunction, class OldSubScale, class OldVelocity, class ProjectedVelocity, class Viscosity>
   class VMSConvectionLinearIntegrator final
     : public Variational::LinearFormIntegratorBase<
         typename TestFunction::ScalarType>
@@ -416,6 +416,7 @@ namespace Rodin::Examples::Heart
 
       VMSConvectionLinearIntegrator(
           const TestFunction& v,
+          const OldSubScale& subOld,
           const OldVelocity& uOld,
           const ProjectedVelocity& uProj,
           const Viscosity& mu,
@@ -426,6 +427,7 @@ namespace Rodin::Examples::Heart
           ScalarType vmsScale = 0.05)
         : Parent(v.getLeaf()),
           m_v(v),
+          m_sub(subOld),
           m_uOld(uOld),
           m_uProj(uProj),
           m_mu(mu),
@@ -511,6 +513,7 @@ namespace Rodin::Examples::Heart
           const auto uOld  = m_uOld.getValue(p);
           const auto uProj = m_uProj.getValue(p);
           const ScalarType mu = m_mu.getValue(p);
+          auto& subScale = m_sub.getValue(p);
 
           const ScalarType speed = std::sqrt(Math::dot(uOld, uOld));
 
@@ -525,6 +528,8 @@ namespace Rodin::Examples::Heart
           for (size_t b = 0; b < nteS; ++b)
             teDir[b] = Math::dot(Gte[b], uOld);
 
+          subScale = tau * (ScalarType(1) / m_dt * subScale - (teDir - uProj));
+
           for (size_t b = 0; b < nteS; ++b)
           {
             for (size_t c = 0; c < vdim; ++c)
@@ -532,7 +537,7 @@ namespace Rodin::Examples::Heart
               const size_t row = b * vdim + c;
 
               m_vec(static_cast<Eigen::Index>(row)) +=
-                wdet * tau * uProj[c] * teDir[b];
+                wdet * tau * (uProj[c] + subScale[c]) * teDir[b];
             }
           }
         }
@@ -581,6 +586,7 @@ namespace Rodin::Examples::Heart
       }
 
       const TestFunction& m_v;
+      const OldSubScale& m_sub;
       const OldVelocity& m_uOld;
       const ProjectedVelocity& m_uProj;
       const Viscosity& m_mu;
