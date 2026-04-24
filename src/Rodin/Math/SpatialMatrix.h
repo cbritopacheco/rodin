@@ -101,8 +101,12 @@ namespace Rodin::Math
       static constexpr SpatialMatrix Identity(std::uint8_t rows, std::uint8_t cols)
       {
         assert(rows <= MaxSize && cols <= MaxSize);
+
         SpatialMatrix I(rows, cols);
+        I.setZero();
+
         const std::uint8_t n = std::min(rows, cols);
+
         switch (n)
         {
           case 3:
@@ -119,6 +123,7 @@ namespace Rodin::Math
           default:
             assert(false);
         }
+
         return I;
       }
 

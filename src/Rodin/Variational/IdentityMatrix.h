@@ -85,7 +85,7 @@ namespace Rodin::Variational
        * @brief Evaluates the identity matrix at a point.
        * @returns Identity matrix @f$ I_n @f$
        */
-      auto getValue(const Geometry::Point&) const
+      Math::SpatialMatrix<Real> getValue(const Geometry::Point&) const
       {
         return Math::SpatialMatrix<Real>::Identity(m_n, m_n);
       }

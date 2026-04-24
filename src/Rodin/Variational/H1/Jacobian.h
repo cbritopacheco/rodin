@@ -256,7 +256,7 @@ namespace Rodin::Variational
 
       using ScalarType        = typename FormLanguage::Traits<FESType>::ScalarType;
 
-      using RangeType         = Math::Matrix<ScalarType>;
+      using RangeType         = Math::SpatialMatrix<ScalarType>;
 
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
@@ -409,32 +409,30 @@ namespace Rodin::Variational
         return *this;
       }
 
-      const RangeType& getBasis(size_t local) const
+      RangeType getBasis(size_t local) const
       {
         assert(m_cache.key);
 
-        const auto& fes  = this->getFiniteElementSpace();
-        const size_t vdim = fes.getVectorDimension();
+        const auto& fes = this->getFiniteElementSpace();
+        const std::uint8_t vdim = fes.getVectorDimension();
 
         const auto& p = this->getIntegrationPoint().getPoint();
-        const size_t d = p.getPolytope().getDimension();
+        const std::uint8_t d = p.getPolytope().getDimension();
 
         const size_t alpha = local / vdim;
         const size_t comp  = local % vdim;
 
         assert(alpha < m_cache.grad_phys.size());
+        assert(vdim <= RangeType::MaxSize);
+        assert(d <= RangeType::MaxSize);
 
-        static thread_local RangeType s_J;
-        if (static_cast<size_t>(s_J.rows()) != vdim || static_cast<size_t>(s_J.cols()) != d)
-          s_J.resize(vdim, d);
+        RangeType J(vdim, d);
+        J.setZero();
 
-        s_J.setZero();
+        for (std::uint8_t j = 0; j < d; ++j)
+          J(comp, j) = m_cache.grad_phys[alpha](j);
 
-        // Only row comp is non-zero
-        for (size_t j = 0; j < d; ++j)
-          s_J(comp, j) = m_cache.grad_phys[alpha](j);
-
-        return s_J;
+        return J;
       }
 
       constexpr

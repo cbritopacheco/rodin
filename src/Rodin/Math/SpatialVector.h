@@ -122,6 +122,29 @@ namespace Rodin::Math
           m_data(std::move(other.m_data))
       {}
 
+      static constexpr SpatialVector Zero(std::uint8_t size)
+      {
+        assert(size <= MaxSize);
+        SpatialVector result(size);
+        switch (size)
+        {
+          case 3:
+            result.m_data[2] = ScalarType(0);
+            [[fallthrough]];
+          case 2:
+            result.m_data[1] = ScalarType(0);
+            [[fallthrough]];
+          case 1:
+            result.m_data[0] = ScalarType(0);
+            break;
+          case 0:
+            break;
+          default:
+            assert(false);
+        }
+        return result;
+      }
+
       constexpr
       SpatialVector& operator=(const SpatialVector& other) noexcept
       {

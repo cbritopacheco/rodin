@@ -251,7 +251,7 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         const size_t sdim = getIntegrationPoint().getPoint().getPolytope().getMesh().getSpaceDimension();
-        return Math::Vector<ScalarType>::Zero(sdim);
+        return Math::SpatialVector<ScalarType>::Zero(sdim);
       }
 
       Grad* copy() const noexcept override
