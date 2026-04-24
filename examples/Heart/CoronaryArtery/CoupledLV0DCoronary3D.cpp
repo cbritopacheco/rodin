@@ -49,6 +49,14 @@ namespace Rodin::Examples::Heart
       m_qFlux(m_ph),
       m_flux(m_qFlux)
   {
+    Alert::Info() << "Number of elements in mesh: " << m_mesh.getCellCount() << '\n'
+                  << "Number of vertices in mesh: " << m_mesh.getVertexCount() << '\n'
+                  << "Mesh space dimension: " << m_mesh.getSpaceDimension() << '\n'
+                  << Alert::Raise;
+
+    Alert::Info() << "Velocity space has " << m_uh.getSize() << " DOFs.\n"
+                  << "Pressure space has " << m_ph.getSize() << " DOFs.\n"
+                  << Alert::Raise;
   }
 
   CoupledLV0DCoronary3D::~CoupledLV0DCoronary3D() = default;
@@ -431,8 +439,8 @@ namespace Rodin::Examples::Heart
         // + Integral(tau1 * Dot(conv_u, conv_v))
         // - Integral(tau1 * Dot(projConvU, conv_v))
 
-        + VMSConvectionBilinearIntegrator(m_u, m_v, m_uOld, m_mu.getSolution(), c1, c2);
-        - VMSConvectionLinearIntegrator(m_v, m_uOld, m_up.getSolution(), m_mu.getSolution(), c1, c2)
+        // + VMSConvectionBilinearIntegrator(m_u, m_v, m_uOld, m_mu.getSolution(), c1, c2);
+        // - VMSConvectionLinearIntegrator(m_v, m_uOld, m_up.getSolution(), m_mu.getSolution(), c1, c2)
 
         + BoundaryIntegral(pin * Dot(m_v, n)).over(m_cfg.inlet)
 
