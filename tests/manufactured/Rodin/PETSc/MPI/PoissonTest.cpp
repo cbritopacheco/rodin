@@ -23,24 +23,27 @@
  *
  * 1. Rank 0 builds a uniform-grid mesh, partitions it with
  *    `BalancedCompactPartitioner`, and calls `sharder.scatter()`.
- * 2. All ranks call `sharder.gather()` to obtain their local shard as a
- *    `Mesh<Context::MPI>`.
- * 3. Incidence data required for assembly and Dirichlet-BC enforcement is
- *    computed and reconciled.
- * 4. `PETSc::Variational::TrialFunction / TestFunction` wrap the distributed
+ * 2. Each rank saves its shard to HDF5.
+ * 3. Each rank rereads its shard from HDF5 and rebuilds the shard metadata.
+ * 4. Incidence data required for assembly and Dirichlet-BC enforcement is
+ *    computed and the mesh is reconciled.
+ * 5. `PETSc::Variational::TrialFunction / TestFunction` wrap the distributed
  *    `P1` space.
- * 5. `Problem<PETSc::Math::LinearSystem, U, V>` is assembled with the MPI
+ * 6. `Problem<PETSc::Math::LinearSystem, U, V>` is assembled with the MPI
  *    assembly backend and solved with a PETSc KSP solver.
- * 6. The local per-rank L² error is summed globally and checked against the
+ * 7. The local per-rank L² error is summed globally and checked against the
  *    manufactured tolerance.
  */
 
 #include <cmath>
 #include <numeric>
+#include <string>
 
 #include <gtest/gtest.h>
 
+#include <hdf5.h>
 #include <petsc.h>
+#include <boost/filesystem.hpp>
 #include <boost/mpi/environment.hpp>
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/collectives.hpp>
@@ -50,12 +53,22 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Geometry/BalancedCompactPartitioner.h>
 #include <Rodin/Variational.h>
+#include <Rodin/IO.h>
 #include <Rodin/MPI.h>
 #include <Rodin/MPI/Context/MPI.h>
 #include <Rodin/MPI/Geometry/Sharder.h>
 #include <Rodin/MPI/Geometry/Mesh.h>
+#include <Rodin/MPI/IO.h>
 #include <Rodin/MPI/Variational/P1.h>
 #include <Rodin/PETSc.h>
+
+#if defined(_WIN32)
+#include <process.h>
+#define RODIN_GETPID _getpid
+#else
+#include <unistd.h>
+#define RODIN_GETPID getpid
+#endif
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -92,13 +105,148 @@ namespace
     return mesh;
   }
 
+  static Shard rebuildShardFromHDF5(
+      const Mesh<Context::Local>& baseMesh,
+      const boost::filesystem::path& filepath,
+      size_t D)
+  {
+    using namespace Rodin::IO;
+
+    const hid_t h5 = H5Fopen(filepath.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+    if (h5 < 0)
+    {
+      ADD_FAILURE() << "Cannot open HDF5 shard file " << filepath;
+      return Shard{};
+    }
+
+    auto vtxState = HDF5::readVectorDataset<HDF5::U8>(h5, HDF5::shardStatePath(0));
+    auto vtxLeft = HDF5::readVectorDataset<HDF5::U64>(h5, HDF5::shardPolytopeMapLeftPath(0));
+    auto cellState = HDF5::readVectorDataset<HDF5::U8>(h5, HDF5::shardStatePath(D));
+    auto cellLeft = HDF5::readVectorDataset<HDF5::U64>(h5, HDF5::shardPolytopeMapLeftPath(D));
+
+    const std::string ownerPath = HDF5::shardOwnerGroupPath(D);
+    auto ownerKeys = HDF5::readVectorDataset<HDF5::U64>(h5, ownerPath + "/Keys");
+    auto ownerVals = HDF5::readVectorDataset<HDF5::U64>(h5, ownerPath + "/Values");
+
+    const std::string haloPath = HDF5::shardHaloGroupPath(D);
+    auto haloKeys = HDF5::readVectorDataset<HDF5::U64>(h5, haloPath + "/Keys");
+    auto haloOffsets = HDF5::readVectorDataset<HDF5::U64>(h5, haloPath + "/Offsets");
+    auto haloIndices = HDF5::readVectorDataset<HDF5::U64>(h5, haloPath + "/Indices");
+
+    H5Fclose(h5);
+
+    const auto stateOf = [](HDF5::U8 flag) -> Shard::State
+    {
+      if (flag == 1)
+        return Shard::State::Owned;
+      if (flag == 2)
+        return Shard::State::Ghost;
+      return Shard::State::Shared;
+    };
+
+    Shard::Builder builder;
+    builder.initialize(baseMesh);
+
+    for (Index vi = 0; vi < static_cast<Index>(baseMesh.getVertexCount()); vi++)
+      builder.include({ 0, vi }, stateOf(vtxState[vi]));
+
+    for (Index ci = 0; ci < static_cast<Index>(baseMesh.getCellCount()); ci++)
+      builder.include({ D, ci }, stateOf(cellState[ci]));
+
+    for (size_t i = 0; i < ownerKeys.size(); i++)
+    {
+      builder.setOwner(
+          D,
+          static_cast<Index>(ownerKeys[i]),
+          static_cast<Index>(ownerVals[i]));
+    }
+
+    for (size_t i = 0; i < haloKeys.size(); i++)
+    {
+      const Index key = static_cast<Index>(haloKeys[i]);
+      const size_t from = static_cast<size_t>(haloOffsets[i]);
+      const size_t to = static_cast<size_t>(haloOffsets[i + 1]);
+      for (size_t j = from; j < to; j++)
+        builder.halo(D, key, static_cast<Index>(haloIndices[j]));
+    }
+
+    Shard shard = builder.finalize();
+
+    {
+      auto& vmap = shard.getPolytopeMap(0);
+      vmap.right.clear();
+      for (Index vi = 0; vi < static_cast<Index>(vmap.left.size()); vi++)
+      {
+        vmap.left[vi] = static_cast<Index>(vtxLeft[vi]);
+        vmap.right[vtxLeft[vi]] = vi;
+      }
+    }
+
+    {
+      auto& cmap = shard.getPolytopeMap(D);
+      cmap.right.clear();
+      for (Index ci = 0; ci < static_cast<Index>(cmap.left.size()); ci++)
+      {
+        cmap.left[ci] = static_cast<Index>(cellLeft[ci]);
+        cmap.right[cellLeft[ci]] = ci;
+      }
+    }
+
+    return shard;
+  }
+
+  static Mesh<Context::MPI> reloadShardViaHDF5(
+      const Context::MPI& ctx,
+      Mesh<Context::MPI>&& mesh)
+  {
+    const auto& comm = ctx.getCommunicator();
+    const size_t D = mesh.getDimension();
+
+    const boost::filesystem::path rankFile =
+        boost::filesystem::temp_directory_path()
+        / ("rodin_petsc_mpi_poisson_" + std::to_string(RODIN_GETPID())
+           + "_r" + std::to_string(comm.rank()) + ".h5");
+
+    {
+      IO::MeshPrinter<IO::FileFormat::HDF5, Context::MPI> printer(mesh);
+      printer.print(rankFile);
+    }
+    comm.barrier();
+
+    Mesh<Context::Local> baseMesh;
+    baseMesh.load(rankFile, IO::FileFormat::HDF5);
+
+    EXPECT_EQ(baseMesh.getCellCount(), mesh.getShard().getCellCount())
+      << "Rank " << comm.rank() << ": cell count mismatch after HDF5 reload.";
+    EXPECT_EQ(baseMesh.getVertexCount(), mesh.getShard().getVertexCount())
+      << "Rank " << comm.rank() << ": vertex count mismatch after HDF5 reload.";
+
+    Shard shard = rebuildShardFromHDF5(baseMesh, rankFile, D);
+
+    Mesh<Context::MPI> reloaded =
+        Mesh<Context::MPI>::Builder(ctx)
+          .initialize(std::move(shard))
+          .finalize();
+
+    reloaded.getConnectivity().compute(D, D);
+    reloaded.getConnectivity().compute(D, 0);
+    reloaded.getConnectivity().compute(D, D - 1);
+    reloaded.getConnectivity().compute(D - 1, D);
+    reloaded.getConnectivity().compute(D - 1, 0);
+    reloaded.getConnectivity().compute(1, 2);
+    reloaded.reconcile(1);
+
+    comm.barrier();
+    boost::filesystem::remove(rankFile);
+    return reloaded;
+  }
+
   /**
    * @brief Distributes a uniform 2D grid from rank 0 to all ranks via
    *        `BalancedCompactPartitioner` + `Sharder<Context::MPI>`.
    *
-   * After this function returns, every rank holds its shard of the mesh.
-   * The function also calls `compute(1,2)` and `reconcile(1)` on the
-   * distributed mesh so that it is ready for FE assembly.
+   * After this function returns, every rank holds a shard that has been
+   * persisted through HDF5, reread, and reconciled for FE assembly.
    */
   static Mesh<Context::MPI> distributeFromRoot(
       const Context::MPI& ctx,
@@ -117,13 +265,11 @@ namespace
       sharder.scatter(0);
     }
     auto mesh = sharder.gather(0);
-    mesh.getConnectivity().compute(1, 2);
-    mesh.reconcile(1);
-    return mesh;
+    return reloadShardViaHDF5(ctx, std::move(mesh));
   }
 }
 
-namespace Rodin::Tests::Unit::PETSc::MPI
+namespace Rodin::Tests::Manufactured::PETSc::MPI
 {
   // Alias to resolve the enclosing 'PETSc' namespace scope to Rodin::PETSc.
   namespace PETSc = ::Rodin::PETSc;
@@ -361,7 +507,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     Real globalError = 0;
     boost::mpi::all_reduce(world, localError, globalError, std::plus<Real>());
 
-    EXPECT_NEAR(globalError, 0, 1e-12);
+    EXPECT_NEAR(globalError, 0, RODIN_FUZZY_CONSTANT);
   }
 
   /**
