@@ -1,6 +1,33 @@
 #ifndef RODIN_EXAMPLES_HEART_VMSCONVECTIONINTEGRATOR_H
 #define RODIN_EXAMPLES_HEART_VMSCONVECTIONINTEGRATOR_H
 
+/**
+ * @file VMSConvectionIntegrator.h
+ * @brief Custom VMS convective stabilization integrators for the coronary example.
+ *
+ * This file defines local bilinear and linear form integrators used by the
+ * coupled 0D--3D coronary artery example. They implement the VMS terms
+ * associated with the projected convective residual:
+ * @f[
+ *   \tau_K
+ *   \left(
+ *     (\nabla u_h)u_h^{old}
+ *     -
+ *     u_h^{proj}
+ *   \right)
+ *   \cdot
+ *   ((\nabla v_h)u_h^{old}) .
+ * @f]
+ *
+ * The implementation is intentionally example-specific:
+ *
+ * - three-dimensional cells only,
+ * - quadratic @f$H^1@f$ velocity basis functions,
+ * - diagonal component-wise vector assembly,
+ * - cell-wise stabilization length
+ *   @f$h_K = |K|^{1/\dim K}@f$.
+ */
+
 #include <cassert>
 #include <cmath>
 #include <memory>
@@ -14,6 +41,71 @@
 
 namespace Rodin::Examples::Heart
 {
+  /**
+   * @brief Cell integrator for the bilinear VMS convective stabilization term.
+   *
+   * This class represents the cell-wise contribution
+   * @f[
+   *   \int_K \tau_K
+   *     \bigl((\nabla u_h) u_h^{old}\bigr)
+   *     \cdot
+   *     \bigl((\nabla v_h) u_h^{old}\bigr)
+   *   \, dx .
+   * @f]
+   *
+   * Here @f$u_h@f$ is the trial velocity, @f$v_h@f$ is the test velocity,
+   * @f$u_h^{old}@f$ is the frozen convective velocity, and @f$\tau_K@f$ is
+   * computed locally as
+   * @f[
+   *   \tau_K =
+   *   \left(
+   *     c_1 \frac{\mu_h}{h_K^2}
+   *     +
+   *     c_2 \frac{\lVert u_h^{old} \rVert}{h_K}
+   *   \right)^{-1}.
+   * @f]
+   *
+   * The local matrix entry is assembled as
+   * @f[
+   *   A_{bi}
+   *   =
+   *   \int_K
+   *     \tau_K
+   *     \bigl(\nabla \phi_i \cdot u_h^{old}\bigr)
+   *     \bigl(\nabla \psi_b \cdot u_h^{old}\bigr)
+   *   \, dx ,
+   * @f]
+   * copied component-wise on the diagonal velocity blocks.
+   *
+   * Judgement
+   * ---------
+   *
+   * The following judgement specifies that the expression is a local bilinear
+   * form integrator:
+   * @f[
+   * \dfrac
+   * {
+   *   \vdash
+   *   \int_K \tau_K
+   *   ((\nabla u_h)u_h^{old})
+   *   \cdot
+   *   ((\nabla v_h)u_h^{old})
+   *   \, dx
+   *   :
+   *   \texttt{LocalBilinearFormIntegrator}
+   * }
+   * {
+   *   \vdash u_h : H^1_2(\Omega)^3,
+   *   \quad
+   *   \vdash v_h : H^1_2(\Omega)^3
+   * }
+   * @f]
+   *
+   * @tparam TrialFunction Trial velocity shape-function type.
+   * @tparam TestFunction Test velocity shape-function type.
+   * @tparam OldVelocity Frozen convective velocity field type.
+   * @tparam Viscosity Effective viscosity field type.
+   */
   template <class TrialFunction, class TestFunction, class OldVelocity, class Viscosity>
   class VMSConvectionBilinearIntegrator final
     : public Variational::LocalBilinearFormIntegratorBase<
@@ -226,6 +318,79 @@ namespace Rodin::Examples::Heart
         Eigen::RowMajor> m_mat;
   };
 
+  /**
+   * @brief Cell integrator for the linear projected VMS convective term.
+   *
+   * This class represents the cell-wise contribution
+   * @f[
+   *   \int_K \tau_K
+   *     u_h^{proj}
+   *     \cdot
+   *     \bigl((\nabla v_h)u_h^{old}\bigr)
+   *   \, dx .
+   * @f]
+   *
+   * In the residual used by the coronary example, this term is subtracted:
+   * @f[
+   *   -
+   *   \int_K \tau_K
+   *     u_h^{proj}
+   *     \cdot
+   *     \bigl((\nabla v_h)u_h^{old}\bigr)
+   *   \, dx .
+   * @f]
+   * The sign is therefore expected to be supplied by the variational expression,
+   * for example with @code -vmsLinear @endcode.
+   *
+   * The stabilization parameter is computed locally as
+   * @f[
+   *   \tau_K =
+   *   \left(
+   *     c_1 \frac{\mu_h}{h_K^2}
+   *     +
+   *     c_2 \frac{\lVert u_h^{old} \rVert}{h_K}
+   *   \right)^{-1}.
+   * @f]
+   *
+   * The local vector entry is assembled as
+   * @f[
+   *   F_b
+   *   =
+   *   \int_K
+   *     \tau_K
+   *     u_{h,c}^{proj}
+   *     \bigl(\nabla \psi_b \cdot u_h^{old}\bigr)
+   *   \, dx ,
+   * @f]
+   * for each velocity component @f$c@f$.
+   *
+   * Judgement
+   * ---------
+   *
+   * The following judgement specifies that the expression is a local linear
+   * form integrator:
+   * @f[
+   * \dfrac
+   * {
+   *   \vdash
+   *   \int_K \tau_K
+   *   u_h^{proj}
+   *   \cdot
+   *   ((\nabla v_h)u_h^{old})
+   *   \, dx
+   *   :
+   *   \texttt{LinearFormIntegrator}
+   * }
+   * {
+   *   \vdash v_h : H^1_2(\Omega)^3
+   * }
+   * @f]
+   *
+   * @tparam TestFunction Test velocity shape-function type.
+   * @tparam OldVelocity Frozen convective velocity field type.
+   * @tparam ProjectedVelocity Projected convective acceleration field type.
+   * @tparam Viscosity Effective viscosity field type.
+   */
   template <class TestFunction, class OldVelocity, class ProjectedVelocity, class Viscosity>
   class VMSConvectionLinearIntegrator final
     : public Variational::LinearFormIntegratorBase<
