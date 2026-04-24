@@ -28,6 +28,7 @@
  *   @f$h_K = |K|^{1/\dim K}@f$.
  */
 
+#include "Rodin/Math/SpatialVector.h"
 #include <cassert>
 #include <cmath>
 #include <memory>
@@ -205,8 +206,8 @@ namespace Rodin::Examples::Heart
 
         std::vector<Math::SpatialVector<ScalarType>> Gtr(ntrS);
         std::vector<Math::SpatialVector<ScalarType>> Gte(nteS);
-        std::vector<ScalarType> trDir(ntrS);
-        std::vector<ScalarType> teDir(nteS);
+        Math::SpatialVector<ScalarType> trDir(ntrS);
+        Math::SpatialVector<ScalarType> teDir(nteS);
 
         for (auto& g : Gtr)
           g.resize(static_cast<std::uint8_t>(d));
@@ -489,7 +490,7 @@ namespace Rodin::Examples::Heart
         m_vec.setZero();
 
         std::vector<Math::SpatialVector<ScalarType>> Gte(nteS);
-        std::vector<ScalarType> teDir(nteS);
+        Math::SpatialVector<ScalarType> teDir(nteS);
 
         for (auto& g : Gte)
           g.resize(static_cast<std::uint8_t>(d));
@@ -513,7 +514,7 @@ namespace Rodin::Examples::Heart
           const auto uOld  = m_uOld.getValue(p);
           const auto uProj = m_uProj.getValue(p);
           const ScalarType mu = m_mu.getValue(p);
-          auto& subScale = m_sub.getValue(p);
+          auto subScale = m_sub.getValue(p);
 
           const ScalarType speed = std::sqrt(Math::dot(uOld, uOld));
 
