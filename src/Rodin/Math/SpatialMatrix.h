@@ -98,6 +98,30 @@ namespace Rodin::Math
         assert(m_rows <= MaxSize && m_cols <= MaxSize);
       }
 
+      static constexpr SpatialMatrix Identity(std::uint8_t rows, std::uint8_t cols)
+      {
+        assert(rows <= MaxSize && cols <= MaxSize);
+        SpatialMatrix I(rows, cols);
+        const std::uint8_t n = std::min(rows, cols);
+        switch (n)
+        {
+          case 3:
+            I.m_data(2, 2) = ScalarType(1);
+            [[fallthrough]];
+          case 2:
+            I.m_data(1, 1) = ScalarType(1);
+            [[fallthrough]];
+          case 1:
+            I.m_data(0, 0) = ScalarType(1);
+            break;
+          case 0:
+            break;
+          default:
+            assert(false);
+        }
+        return I;
+      }
+
       template <class EigenDerived>
       constexpr
       SpatialMatrix& operator=(const Eigen::ArrayBase<EigenDerived>& other)

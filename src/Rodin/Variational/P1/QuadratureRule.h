@@ -378,8 +378,6 @@ namespace Rodin::Variational
         }
         else if constexpr (FormLanguage::IsVectorRange<RHSRangeType>::Value)
         {
-          const size_t vdim = fes.getVectorDimension();
-
           assert(m_quadrature);
           const auto& q = *m_quadrature;
           for (size_t qp = 0; qp < q.getSize(); ++qp)

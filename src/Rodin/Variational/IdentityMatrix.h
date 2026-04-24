@@ -87,7 +87,7 @@ namespace Rodin::Variational
        */
       auto getValue(const Geometry::Point&) const
       {
-        return Math::Matrix<Real>::Identity(m_n, m_n);
+        return Math::SpatialMatrix<Real>::Identity(m_n, m_n);
       }
 
       constexpr

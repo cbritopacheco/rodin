@@ -121,7 +121,7 @@ namespace Rodin::Variational
    * std::cout << h1_tri.getCount() << std::endl;  // Output: 10
    *
    * // Evaluate basis function at a point
-   * Math::Vector<Real> pt{{0.25, 0.25}};
+   * Math::SpatialVector<Real> pt{{0.25, 0.25}};
    * Real value = h1_tri.getBasis(0)(pt);
    *
    * // Get gradient of basis function
@@ -724,7 +724,7 @@ namespace Rodin::Variational
    * std::cout << vec_h1.getCount() << std::endl;  // Output: 12
    *
    * // Evaluate vector basis function
-   * Math::Vector<Real> pt{{0.25, 0.25}};
+   * Math::SpatialVector<Real> pt{{0.25, 0.25}};
    * auto vec_value = vec_h1.getBasis(0)(pt);  // Returns a 2D vector
    *
    * // Get Jacobian matrix
