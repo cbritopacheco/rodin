@@ -583,23 +583,7 @@ namespace Rodin::Variational
        */
       RangeType getValue(const Geometry::Point& p) const
       {
-        struct ValueCache
-        {
-          const void* self = nullptr;
-          const Geometry::Point* point = nullptr;
-          RangeType value{};
-          bool valid = false;
-        };
-
-        static thread_local ValueCache cache;
-
-        const void* self = static_cast<const void*>(&static_cast<const Derived&>(*this));
-
-        if (cache.valid && cache.self == self && cache.point == &p)
-          return cache.value;
-
         RangeType out{};
-
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& fes = m_fes.get();
@@ -635,12 +619,6 @@ namespace Rodin::Variational
             << "Point is not contained in the finite element space mesh."
             << Alert::Raise;
         }
-
-        cache.self = self;
-        cache.point = &p;
-        cache.value = out;
-        cache.valid = true;
-
         return out;
       }
 
