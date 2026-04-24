@@ -21,10 +21,10 @@ namespace Rodin::Solver
     : Parent(pb),
       m_ksp(PETSC_NULLPTR),
       m_type(PETSC_NULLPTR),
-      m_rtol(PETSC_DECIDE),
-      m_abstol(PETSC_DECIDE),
-      m_dtol(PETSC_DECIDE),
-      m_maxIt(PETSC_DECIDE)
+      m_rtol(PETSC_CURRENT),
+      m_abstol(PETSC_CURRENT),
+      m_dtol(PETSC_CURRENT),
+      m_maxIt(PETSC_CURRENT)
   {
     PetscErrorCode ierr;
     ierr = KSPCreate(pb.getLinearSystem().getCommunicator(), &m_ksp);
@@ -158,4 +158,3 @@ namespace Rodin::Solver
     return *this;
   }
 }
-

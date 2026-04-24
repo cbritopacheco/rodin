@@ -13,11 +13,11 @@ namespace Rodin::Solver
     : NewtonSolverParent(ksp),
       m_snes(PETSC_NULLPTR),
       m_type(SNESNEWTONLS),
-      m_abstol(PETSC_DECIDE),
-      m_rtol(PETSC_DECIDE),
-      m_stol(PETSC_DECIDE),
-      m_maxIt(PETSC_DECIDE),
-      m_maxF(PETSC_DECIDE)
+      m_abstol(PETSC_CURRENT),
+      m_rtol(PETSC_CURRENT),
+      m_stol(PETSC_CURRENT),
+      m_maxIt(PETSC_CURRENT),
+      m_maxF(PETSC_CURRENT)
   {
     auto& problem = ksp.getProblem();
     auto& system = problem.getLinearSystem();

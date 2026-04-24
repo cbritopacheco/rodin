@@ -126,6 +126,7 @@ namespace Rodin::Tests::Manufactured::PETScPoisson
             + DirichletBC(u, solution);
 
     PETSc::Solver::CG solver(poisson);
+    solver.setTolerances(1e-12, PETSC_CURRENT, PETSC_CURRENT, PETSC_CURRENT);
     solver.solve();
 
     // Check solver residual.
