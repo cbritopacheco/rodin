@@ -39,7 +39,7 @@ MacOS:
     - name: Install dependencies
       run: |
         brew update
-        brew install boost eigen libomp
+        brew install boost eigen hdf5 libomp petsc
     
     - name: Link libomp
       run: |
@@ -72,7 +72,9 @@ MacOS:
 All required dependencies are installed via Homebrew:
 - ✓ boost
 - ✓ eigen
+- ✓ hdf5
 - ✓ libomp
+- ✓ petsc
 
 ### ✓ Test 6: Build System
 - CMake configuration is platform-agnostic

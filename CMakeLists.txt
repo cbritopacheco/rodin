@@ -353,6 +353,7 @@ configure_package_config_file(
 install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/RodinConfig.cmake"
   "${CMAKE_CURRENT_BINARY_DIR}/RodinConfigVersion.cmake"
+  "${PROJECT_SOURCE_DIR}/cmake/FindPETSc.cmake"
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Rodin
 )
 
