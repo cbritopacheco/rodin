@@ -53,8 +53,13 @@ namespace Rodin::Examples::Heart
         const Real n = 0.7;
         const Real tau_w = R * (pp - pd) / (2. * L);
         const Real Ip = std::pow(1. / m, 1. / n) * n / (3 * n + 1.) * std::pow(std::abs(tau_w), (3 * n + 1.0) / n);
-        return std::pow(pp - pd, 4.0) /
+
+        const Real minR = std::pow(1, -8);
+
+        const Real res = std::pow(pp - pd, 4.0) /
                (8.0 * M_PI * std::pow(L, 3.0) * Ip);
+        if (std::abs(res) > 0.0) return res;
+        else return minR;
     }; // This lambda function could change depending on the model. For this specific case we have PL, but if we had Carreau Yasuda it would be different (see article)
 
     auto Rp = R(bc.pc, bc.pd, Lp, RadiusP);
@@ -244,6 +249,11 @@ namespace Rodin::Examples::Heart
     m_uh  = std::make_unique<VelocityFESType>(std::integral_constant<size_t, 2>{}, m_mesh, dim);
     m_ph  = std::make_unique<PressureFESType>(std::integral_constant<size_t, 1>{}, m_mesh);
     m_muh = std::make_unique<ViscosityFESType>(m_mesh);
+    m_h = std::make_unique<ScalarFESType>(m_mesh);
+    m_uph = std::make_unique<VMSFESType>(std::integral_constant<size_t, 2>{}, m_mesh, dim);
+
+    m_up = std::make_unique<VMSTrialFunctionType>(*m_uph);
+    m_vp = std::make_unique<VMSTestFunctionType>(*m_uph);
 
     m_u = std::make_unique<VelocityTrialFunctionType>(*m_uh);
     m_v = std::make_unique<VelocityTestFunctionType>(*m_uh);
@@ -344,6 +354,7 @@ namespace Rodin::Examples::Heart
       else return m_cfg.mu;
     };
 
+
     Alert::Info() << "Projecting non-Newtonian viscosity ..." << Alert::Raise;
 
     Problem muProjection(*m_mu, *m_w);
@@ -353,6 +364,32 @@ namespace Rodin::Examples::Heart
 
     muProjection.assemble();
     Solver::KSP(muProjection).solve();
+
+    // STAB
+    const auto conv_v = Mult(u_old, Jacobian(v));
+    const Real c_1 = 4.0;
+    const Real c_2 = 2.0;
+
+    m_h = [](const Point& p) { const auto measure = p.getPolytope().getMeasure();
+                                     const int dim = p.getPolytope().getDimension();
+                                     return std::pow(measure, 1.0 / dim);};
+
+    // mu_element = [](const Point& p) {return u_old(p)}; // it is possible to apply any transformation
+    const auto vel_norm = Frobenius(u_old);
+    const auto visc_term = c_1 * mu_nonNew / (m_h * m_h);  // diffusion contribution
+    const auto conv_term = c_2 * vel_norm / m_h; // TO DO: change to h_stream
+
+
+    const auto tau_1 = 1. / (visc_term + conv_term);
+
+    {
+      const auto convection_target = Mult(Jacobian(u_old), u_old);
+      Problem l2_convU(up, vp);
+      l2_convU = Integral(*m_up, *m_vp) - Integral(convection_target, *m_vp);
+      l2_convU.assemble();
+      CG(l2_convU).solve();
+    }
+
 
     Problem flow(*m_u, *m_p, *m_v, *m_q);
     flow =
@@ -364,6 +401,8 @@ namespace Rodin::Examples::Heart
         - Integral(*m_p, Div(*m_v))
         + Integral(Div(*m_u), *m_q)
         + m_cfg.eps * Integral(*m_p, *m_q)
+        +  Integral(tau_1 * conv_u, conv_v)
+        -  Integral(tau_1 * proj_convU, conv_v)
         + BoundaryIntegral(pin * Dot(*m_v, n)).over(m_cfg.inlet)
         + BoundaryIntegral(m_wk.at(4).pout * Dot(*m_v, n)).over(4)
         + BoundaryIntegral(m_wk.at(5).pout * Dot(*m_v, n)).over(5)
@@ -405,6 +444,7 @@ namespace Rodin::Examples::Heart
       m_stepData.qOut[tag] = qOut;
       m_stepData.qOutSum += qOut;
       updateRCR(m_wk[tag], qOut, m_cfg.dt);
+      //updateRCRNonNew(*m_model, m_wk[tag], qOut, m_cfg.dt);
     }
 
     m_stepData.flowBalance = m_stepData.qIn + m_stepData.qOutSum;
