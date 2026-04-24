@@ -39,6 +39,7 @@ namespace Rodin::Examples::Heart
       m_p(m_ph),
       m_mu(m_muh),
       m_up(m_uph),
+      m_sub(m_uph),
       m_v(m_uh),
       m_q(m_ph),
       m_w(m_muh),
@@ -297,6 +298,7 @@ namespace Rodin::Examples::Heart
     m_p.setName("p");
     m_mu.setName("mu_nonNew");
     m_up.setName("projected_convection");
+    m_sub.setName("subscale");
 
     m_uOld = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
     m_pOld = 0.0;
@@ -305,6 +307,7 @@ namespace Rodin::Examples::Heart
     m_xdmf.add("velocity", m_u.getSolution());
     m_xdmf.add("pressure", m_p.getSolution());
     m_xdmf.add("viscosity", m_mu.getSolution());
+    m_xdmf.add("subscale", m_sub);
 
     m_wk.clear();
     for (const Attribute tag : m_cfg.outlets)
@@ -373,6 +376,9 @@ namespace Rodin::Examples::Heart
     const Real gamma_min = 1.0e-3;
     const Real mu_max = 5.0e-2;
 
+    const Real c1 = 4.0;
+    const Real c2 = 2.0;
+
     RealFunction muNonNew = [=, this](const Point& p) -> Real
     {
       auto S = symUOld.getValue(p);
@@ -396,21 +402,6 @@ namespace Rodin::Examples::Heart
     muProjection.assemble();
     Solver::KSP(muProjection).solve();
 
-    const Real c1 = 4.0;
-    const Real c2 = 2.0;
-
-    RealFunction h = [](const Point& p) -> Real
-    {
-      const auto& K = p.getPolytope();
-      return std::pow(K.getMeasure(), 1.0 / K.getDimension());
-    };
-
-    const auto conv_v = Mult(Jacobian(m_v), m_uOld);
-    const auto vel_norm = Sqrt(Dot(m_uOld, m_uOld));
-
-    const auto visc_term = c1 * muNonNew / (h * h);
-    const auto conv_term = c2 * vel_norm / h;
-    const auto tau1 = 1.0 / (visc_term + conv_term);
 
     {
       const auto convectionTarget = Mult(Jacobian(m_uOld), m_uOld);
@@ -448,7 +439,7 @@ namespace Rodin::Examples::Heart
             m_cfg.rho, m_cfg.dt, c1, c2, vmsScale)
 
         - VMSConvectionLinearIntegrator(
-            m_v, m_uOld, m_up.getSolution(), m_mu.getSolution(),
+            m_v, m_sub, m_uOld, m_up.getSolution(), m_mu.getSolution(),
             m_cfg.rho, m_cfg.dt, c1, c2, vmsScale)
 
         + BoundaryIntegral(pin * Dot(m_v, n)).over(m_cfg.inlet)
