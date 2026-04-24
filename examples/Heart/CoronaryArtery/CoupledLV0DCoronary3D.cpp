@@ -1,4 +1,3 @@
-#include "CoupledLV0DCoronary3D.h"
 
 #include <algorithm>
 #include <cmath>
@@ -9,6 +8,9 @@
 
 #include <Rodin/Alert.h>
 #include <Rodin/Solver.h>
+
+#include "CoupledLV0DCoronary3D.h"
+#include "VMSConvectionIntegrator.h"
 
 namespace Rodin::Examples::Heart
 {
@@ -396,7 +398,7 @@ namespace Rodin::Examples::Heart
     const auto conv_v = Mult(Jacobian(m_v), m_uOld);
     const auto vel_norm = Sqrt(Dot(m_uOld, m_uOld));
 
-    const auto visc_term = c1 * m_mu.getSolution() / (h * h);
+    const auto visc_term = c1 * muNonNew / (h * h);
     const auto conv_term = c2 * vel_norm / h;
     const auto tau1 = 1.0 / (visc_term + conv_term);
 
@@ -428,6 +430,9 @@ namespace Rodin::Examples::Heart
         // VMS
         // + Integral(tau1 * Dot(conv_u, conv_v))
         // - Integral(tau1 * Dot(projConvU, conv_v))
+
+        + VMSConvectionBilinearIntegrator(m_u, m_v, m_uOld, m_mu.getSolution(), c1, c2);
+        - VMSConvectionLinearIntegrator(m_v, m_uOld, m_up.getSolution(), m_mu.getSolution(), c1, c2)
 
         + BoundaryIntegral(pin * Dot(m_v, n)).over(m_cfg.inlet)
 
