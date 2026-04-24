@@ -24,7 +24,7 @@
  * 1. Rank 0 builds a uniform-grid mesh, partitions it with
  *    `BalancedCompactPartitioner`, and calls `sharder.scatter()`.
  * 2. Each rank saves its shard to HDF5.
- * 3. Each rank rereads its shard from HDF5 and rebuilds the shard metadata.
+ * 3. Each rank rereads its shard from HDF5 through the MPI mesh loader.
  * 4. Incidence data required for assembly and Dirichlet-BC enforcement is
  *    computed and the mesh is reconciled.
  * 5. `PETSc::Variational::TrialFunction / TestFunction` wrap the distributed
@@ -41,7 +41,6 @@
 
 #include <gtest/gtest.h>
 
-#include <hdf5.h>
 #include <petsc.h>
 #include <boost/filesystem.hpp>
 #include <boost/mpi/environment.hpp>
@@ -105,96 +104,6 @@ namespace
     return mesh;
   }
 
-  static Shard rebuildShardFromHDF5(
-      const Mesh<Context::Local>& baseMesh,
-      const boost::filesystem::path& filepath,
-      size_t D)
-  {
-    using namespace Rodin::IO;
-
-    const hid_t h5 = H5Fopen(filepath.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
-    if (h5 < 0)
-    {
-      ADD_FAILURE() << "Cannot open HDF5 shard file " << filepath;
-      return Shard{};
-    }
-
-    auto vtxState = HDF5::readVectorDataset<HDF5::U8>(h5, HDF5::shardStatePath(0));
-    auto vtxLeft = HDF5::readVectorDataset<HDF5::U64>(h5, HDF5::shardPolytopeMapLeftPath(0));
-    auto cellState = HDF5::readVectorDataset<HDF5::U8>(h5, HDF5::shardStatePath(D));
-    auto cellLeft = HDF5::readVectorDataset<HDF5::U64>(h5, HDF5::shardPolytopeMapLeftPath(D));
-
-    const std::string ownerPath = HDF5::shardOwnerGroupPath(D);
-    auto ownerKeys = HDF5::readVectorDataset<HDF5::U64>(h5, ownerPath + "/Keys");
-    auto ownerVals = HDF5::readVectorDataset<HDF5::U64>(h5, ownerPath + "/Values");
-
-    const std::string haloPath = HDF5::shardHaloGroupPath(D);
-    auto haloKeys = HDF5::readVectorDataset<HDF5::U64>(h5, haloPath + "/Keys");
-    auto haloOffsets = HDF5::readVectorDataset<HDF5::U64>(h5, haloPath + "/Offsets");
-    auto haloIndices = HDF5::readVectorDataset<HDF5::U64>(h5, haloPath + "/Indices");
-
-    H5Fclose(h5);
-
-    const auto stateOf = [](HDF5::U8 flag) -> Shard::State
-    {
-      if (flag == 1)
-        return Shard::State::Owned;
-      if (flag == 2)
-        return Shard::State::Ghost;
-      return Shard::State::Shared;
-    };
-
-    Shard::Builder builder;
-    builder.initialize(baseMesh);
-
-    for (Index vi = 0; vi < static_cast<Index>(baseMesh.getVertexCount()); vi++)
-      builder.include({ 0, vi }, stateOf(vtxState[vi]));
-
-    for (Index ci = 0; ci < static_cast<Index>(baseMesh.getCellCount()); ci++)
-      builder.include({ D, ci }, stateOf(cellState[ci]));
-
-    for (size_t i = 0; i < ownerKeys.size(); i++)
-    {
-      builder.setOwner(
-          D,
-          static_cast<Index>(ownerKeys[i]),
-          static_cast<Index>(ownerVals[i]));
-    }
-
-    for (size_t i = 0; i < haloKeys.size(); i++)
-    {
-      const Index key = static_cast<Index>(haloKeys[i]);
-      const size_t from = static_cast<size_t>(haloOffsets[i]);
-      const size_t to = static_cast<size_t>(haloOffsets[i + 1]);
-      for (size_t j = from; j < to; j++)
-        builder.halo(D, key, static_cast<Index>(haloIndices[j]));
-    }
-
-    Shard shard = builder.finalize();
-
-    {
-      auto& vmap = shard.getPolytopeMap(0);
-      vmap.right.clear();
-      for (Index vi = 0; vi < static_cast<Index>(vmap.left.size()); vi++)
-      {
-        vmap.left[vi] = static_cast<Index>(vtxLeft[vi]);
-        vmap.right[vtxLeft[vi]] = vi;
-      }
-    }
-
-    {
-      auto& cmap = shard.getPolytopeMap(D);
-      cmap.right.clear();
-      for (Index ci = 0; ci < static_cast<Index>(cmap.left.size()); ci++)
-      {
-        cmap.left[ci] = static_cast<Index>(cellLeft[ci]);
-        cmap.right[cellLeft[ci]] = ci;
-      }
-    }
-
-    return shard;
-  }
-
   static Mesh<Context::MPI> reloadShardViaHDF5(
       const Context::MPI& ctx,
       Mesh<Context::MPI>&& mesh)
@@ -213,20 +122,13 @@ namespace
     }
     comm.barrier();
 
-    Mesh<Context::Local> baseMesh;
-    baseMesh.load(rankFile, IO::FileFormat::HDF5);
+    Mesh<Context::MPI> reloaded(ctx);
+    reloaded.load(rankFile, IO::FileFormat::HDF5);
 
-    EXPECT_EQ(baseMesh.getCellCount(), mesh.getShard().getCellCount())
+    EXPECT_EQ(reloaded.getShard().getCellCount(), mesh.getShard().getCellCount())
       << "Rank " << comm.rank() << ": cell count mismatch after HDF5 reload.";
-    EXPECT_EQ(baseMesh.getVertexCount(), mesh.getShard().getVertexCount())
+    EXPECT_EQ(reloaded.getShard().getVertexCount(), mesh.getShard().getVertexCount())
       << "Rank " << comm.rank() << ": vertex count mismatch after HDF5 reload.";
-
-    Shard shard = rebuildShardFromHDF5(baseMesh, rankFile, D);
-
-    Mesh<Context::MPI> reloaded =
-        Mesh<Context::MPI>::Builder(ctx)
-          .initialize(std::move(shard))
-          .finalize();
 
     reloaded.getConnectivity().compute(D, D);
     reloaded.getConnectivity().compute(D, 0);
