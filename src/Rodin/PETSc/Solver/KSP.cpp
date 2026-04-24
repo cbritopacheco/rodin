@@ -7,6 +7,7 @@
 #include <cassert>
 #include <cstring>
 #include <petsc.h>
+#include <petscsys.h>
 #include <petscksp.h>
 
 #include "Rodin/Variational/Problem.h"
