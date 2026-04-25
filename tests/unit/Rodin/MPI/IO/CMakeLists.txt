@@ -28,6 +28,8 @@ foreach(np 1 2 3 4 8)
             $<TARGET_FILE:RodinMPIIOHDF5IOTest>)
   set_tests_properties(RodinMPIIOHDF5IOTest_np${np} PROPERTIES
     LABELS "unit;distributed"
-    ENVIRONMENT "HDF5_USE_FILE_LOCKING=FALSE"
   )
+  rodin_disable_lsan_for_test(
+    RodinMPIIOHDF5IOTest_np${np}
+    "HDF5_USE_FILE_LOCKING=FALSE")
 endforeach()
