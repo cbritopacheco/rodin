@@ -6,6 +6,8 @@ target_link_libraries(RodinManufacturedPETScPoisson
   Rodin::Variational
   Rodin::PETSc)
 gtest_discover_tests(RodinManufacturedPETScPoisson
+  DISCOVERY_MODE PRE_TEST
+  DISCOVERY_TIMEOUT 120
   PROPERTIES
     LABELS "manufactured;petsc"
 )
