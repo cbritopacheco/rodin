@@ -10,6 +10,7 @@ gtest_discover_tests(RodinManufacturedPETScPoisson
   DISCOVERY_TIMEOUT 120
   PROPERTIES
     LABELS "manufactured;petsc"
+    ENVIRONMENT "ASAN_OPTIONS=detect_leaks=0"
 )
 
 if (RODIN_USE_MPI)

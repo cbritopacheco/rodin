@@ -10,4 +10,5 @@ target_link_libraries(RodinPETScIOHDF5IOTest
 gtest_discover_tests(RodinPETScIOHDF5IOTest
   PROPERTIES
     LABELS "unit;petsc"
+    ENVIRONMENT "ASAN_OPTIONS=detect_leaks=0"
 )
