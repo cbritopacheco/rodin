@@ -449,8 +449,8 @@ namespace Rodin::Examples::Heart
           const Real tau = vmsScale / invTau;
 
           // TODO: VERIFY SIGN CONVENTION FOR PROJECTION
-          Math::SpatialVector<Real> out(3);
-          for (size_t c = 0; c < 3; ++c)
+          Math::SpatialVector<Real> out(m_mesh.getSpaceDimension());
+          for (size_t c = 0; c < out.size(); ++c)
             out[c] = tau * ((conv[c] - proj[c]) + old[c] / m_cfg.dt);
 
           return out;
