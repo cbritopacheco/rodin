@@ -12,6 +12,7 @@
 #include <Rodin/IO/XDMF.h>
 #include <Rodin/Variational.h>
 #include <Rodin/PETSc.h>
+#include <Rodin/Solver.h>
 
 namespace Rodin::Examples::Heart
 {
@@ -73,6 +74,25 @@ namespace Rodin::Examples::Heart
 
       using FluxLinearFormType =
         Rodin::Variational::LinearForm<PressureFESType, ::Vec>;
+
+      using LinearSystemType =
+        Rodin::PETSc::Math::LinearSystem;
+
+      using ViscosityProblemType =
+        Rodin::Variational::Problem<
+          LinearSystemType, ViscosityTrialFunctionType, ViscosityTestFunctionType>;
+
+      using VMSProblemType =
+        Rodin::Variational::Problem<
+          LinearSystemType, VMSTrialFunctionType, VMSTestFunctionType>;
+
+      using FlowProblemType =
+        Rodin::Variational::Problem<
+          LinearSystemType,
+          VelocityTrialFunctionType,
+          PressureTrialFunctionType,
+          VelocityTestFunctionType,
+          PressureTestFunctionType>;
 
       struct RCR
       {
@@ -206,10 +226,21 @@ namespace Rodin::Examples::Heart
       VMSTrialFunctionType m_sub;
       VMSGridFunctionType m_subOld;
 
+      ViscosityProblemType m_muProjection;
+      VMSProblemType m_l2ConvU;
+      VMSProblemType m_subProjection;
+      FlowProblemType m_flow;
+
+      Rodin::Solver::KSP m_muProjectionSolver;
+      Rodin::Solver::KSP m_l2ConvUSolver;
+      Rodin::Solver::KSP m_subProjectionSolver;
+      Rodin::Solver::KSP m_flowSolver;
+
       std::map<Attribute, RCR> m_wk;
 
       mutable StepData m_stepData;
       std::ofstream m_csv;
+      bool m_flowFieldSplitsSet = false;
       bool m_initialized = false;
   };
 }

@@ -48,7 +48,15 @@ namespace Rodin::Examples::Heart
       m_pOld(m_ph),
       m_one(m_ph),
       m_qFlux(m_ph),
-      m_flux(m_qFlux)
+      m_flux(m_qFlux),
+      m_muProjection(m_mu, m_w),
+      m_l2ConvU(m_up, m_vp),
+      m_subProjection(m_sub, m_vp),
+      m_flow(m_u, m_p, m_v, m_q),
+      m_muProjectionSolver(m_muProjection),
+      m_l2ConvUSolver(m_l2ConvU),
+      m_subProjectionSolver(m_subProjection),
+      m_flowSolver(m_flow)
   {
     Alert::Info() << "Number of elements in mesh: " << m_mesh.getCellCount() << '\n'
                   << "Number of vertices in mesh: " << m_mesh.getVertexCount() << '\n'
@@ -398,34 +406,28 @@ namespace Rodin::Examples::Heart
 
     Alert::Info() << "Projecting non-Newtonian viscosity ..." << Alert::Raise;
 
-    Problem muProjection(m_mu, m_w);
-    muProjection =
+    m_muProjection =
         Integral(m_mu, m_w)
       - Integral(muNonNew, m_w);
 
-    muProjection.assemble();
-    Solver::KSP(muProjection).solve();
+    m_muProjection.assemble();
+    m_muProjectionSolver.solve();
 
     const auto convectionTarget = Mult(Jacobian(m_uOld), m_uOld);
 
-    {
-      Problem l2ConvU(m_up, m_vp);
-      l2ConvU =
-          Integral(m_up, m_vp)
-        - Integral(convectionTarget, m_vp);
+    m_l2ConvU =
+        Integral(m_up, m_vp)
+      - Integral(convectionTarget, m_vp);
 
-      l2ConvU.assemble();
-      Solver::KSP(l2ConvU).solve();
-    }
-
-    const auto projConvU = m_up.getSolution();
+    m_l2ConvU.assemble();
+    m_l2ConvUSolver.solve();
 
     auto subUpdate = VectorFunction(
         m_mesh.getSpaceDimension(),
         [=, this](const Point& p) -> Math::SpatialVector<Real>
         {
           const auto conv = convectionTarget.getValue(p);
-          const auto proj = projConvU.getValue(p);
+          const auto proj = m_up.getSolution().getValue(p);
           const auto old  = m_subOld.getValue(p);
           const auto uOld = m_uOld.getValue(p);
 
@@ -454,18 +456,14 @@ namespace Rodin::Examples::Heart
           return out;
         });
 
-    {
-      Problem subProjection(m_sub, m_vp);
-      subProjection =
-          Integral(m_sub, m_vp)
-        - Integral(subUpdate, m_vp);
+    m_subProjection =
+        Integral(m_sub, m_vp)
+      - Integral(subUpdate, m_vp);
 
-      subProjection.assemble();
-      Solver::KSP(subProjection).solve();
-    }
+    m_subProjection.assemble();
+    m_subProjectionSolver.solve();
 
-    Problem flow(m_u, m_p, m_v, m_q);
-    flow =
+    m_flow =
           (m_cfg.rho / m_cfg.dt) * Integral(m_u, m_v)
         - (m_cfg.rho / m_cfg.dt) * Integral(m_uOld, m_v)
         + m_cfg.rho * Integral(Dot(conv_u, m_v))
@@ -502,10 +500,15 @@ namespace Rodin::Examples::Heart
         + DirichletBC(m_u, Zero(m_mesh.getSpaceDimension())).on(m_cfg.wall);
 
     Alert::Info() << "Assembling 3D time step ..." << Alert::Raise;
-    flow.assemble().setFieldSplits();
+    m_flow.assemble();
+    if (!m_flowFieldSplitsSet)
+    {
+      m_flow.setFieldSplits();
+      m_flowFieldSplitsSet = true;
+    }
 
     Alert::Info() << "Solving 3D time step ..." << Alert::Raise;
-    Solver::KSP(flow).solve();
+    m_flowSolver.solve();
   }
 
   void CoupledLV0DCoronary3D::computeFluxesAndUpdateRCR()
