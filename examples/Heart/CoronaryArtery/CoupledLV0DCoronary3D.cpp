@@ -1,4 +1,3 @@
-
 #include <algorithm>
 #include <cmath>
 #include <iostream>
@@ -40,6 +39,7 @@ namespace Rodin::Examples::Heart
       m_mu(m_muh),
       m_up(m_uph),
       m_sub(m_uph),
+      m_subOld(m_uph),
       m_v(m_uh),
       m_q(m_ph),
       m_w(m_muh),
@@ -302,12 +302,15 @@ namespace Rodin::Examples::Heart
 
     m_uOld = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
     m_pOld = 0.0;
+
+    m_subOld = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
+
     m_one = 1.0;
 
     m_xdmf.add("velocity", m_u.getSolution());
     m_xdmf.add("pressure", m_p.getSolution());
     m_xdmf.add("viscosity", m_mu.getSolution());
-    m_xdmf.add("subscale", m_sub);
+    m_xdmf.add("subscale", m_sub.getSolution());
 
     m_wk.clear();
     for (const Attribute tag : m_cfg.outlets)
@@ -378,10 +381,11 @@ namespace Rodin::Examples::Heart
 
     const Real c1 = 4.0;
     const Real c2 = 2.0;
+    const Real vmsScale = 0.05;
 
     RealFunction muNonNew = [=, this](const Point& p) -> Real
     {
-      auto S = symUOld.getValue(p);
+      const auto S = symUOld.getValue(p);
 
       const Real gamma =
         std::max(gamma_min, std::sqrt(2.0 * dot(S, S)));
@@ -402,10 +406,9 @@ namespace Rodin::Examples::Heart
     muProjection.assemble();
     Solver::KSP(muProjection).solve();
 
+    const auto convectionTarget = Mult(Jacobian(m_uOld), m_uOld);
 
     {
-      const auto convectionTarget = Mult(Jacobian(m_uOld), m_uOld);
-
       Problem l2ConvU(m_up, m_vp);
       l2ConvU =
           Integral(m_up, m_vp)
@@ -417,7 +420,49 @@ namespace Rodin::Examples::Heart
 
     const auto projConvU = m_up.getSolution();
 
-    const Real vmsScale = 0.05;
+    auto subUpdate = VectorFunction(
+        m_mesh.getSpaceDimension(),
+        [=, this](const Point& p) -> Math::SpatialVector<Real>
+        {
+          const auto conv = convectionTarget.getValue(p);
+          const auto proj = projConvU.getValue(p);
+          const auto old  = m_subOld.getValue(p);
+          const auto uOld = m_uOld.getValue(p);
+
+          const Real mu = m_mu.getSolution().getValue(p);
+
+          const Real hK =
+            std::pow(
+              p.getPolytope().getMeasure(),
+              1.0 / p.getPolytope().getDimension());
+
+          const Real speed = std::sqrt(dot(uOld, uOld));
+
+          const Real invTau =
+            std::sqrt(
+                Math::pow2(2.0 * m_cfg.rho / m_cfg.dt)
+              + Math::pow2(c2 * m_cfg.rho * speed / hK)
+              + Math::pow2(c1 * mu / (hK * hK)));
+
+          const Real tau = vmsScale / invTau;
+
+          // TODO: VERIFY SIGN CONVENTION FOR PROJECTION
+          Math::SpatialVector<Real> out(3);
+          for (size_t c = 0; c < 3; ++c)
+            out[c] = tau * ((conv[c] - proj[c]) + old[c] / m_cfg.dt);
+
+          return out;
+        });
+
+    {
+      Problem subProjection(m_sub, m_vp);
+      subProjection =
+          Integral(m_sub, m_vp)
+        - Integral(subUpdate, m_vp);
+
+      subProjection.assemble();
+      Solver::KSP(subProjection).solve();
+    }
 
     Problem flow(m_u, m_p, m_v, m_q);
     flow =
@@ -430,16 +475,12 @@ namespace Rodin::Examples::Heart
         + Integral(Div(m_u), m_q)
         + m_cfg.eps * Integral(m_p, m_q)
 
-        // VMS
-        // + Integral(tau1 * Dot(conv_u, conv_v))
-        // - Integral(tau1 * Dot(projConvU, conv_v))
-
         + VMSConvectionBilinearIntegrator(
             m_u, m_v, m_uOld, m_mu.getSolution(),
             m_cfg.rho, m_cfg.dt, c1, c2, vmsScale)
 
         - VMSConvectionLinearIntegrator(
-            m_v, m_sub, m_uOld, m_up.getSolution(), m_mu.getSolution(),
+            m_v, m_sub.getSolution(), m_uOld, m_up.getSolution(), m_mu.getSolution(),
             m_cfg.rho, m_cfg.dt, c1, c2, vmsScale)
 
         + BoundaryIntegral(pin * Dot(m_v, n)).over(m_cfg.inlet)
@@ -500,6 +541,7 @@ namespace Rodin::Examples::Heart
   {
     m_uOld.setData(m_u.getSolution().getData());
     m_pOld.setData(m_p.getSolution().getData());
+    m_subOld.setData(m_sub.getSolution().getData());
   }
 
   void CoupledLV0DCoronary3D::writeOutputs()

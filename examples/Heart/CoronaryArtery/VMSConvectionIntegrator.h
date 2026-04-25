@@ -513,8 +513,8 @@ namespace Rodin::Examples::Heart
 
           const auto uOld  = m_uOld.getValue(p);
           const auto uProj = m_uProj.getValue(p);
+          const auto subScale = m_sub.getValue(p);
           const ScalarType mu = m_mu.getValue(p);
-          auto subScale = m_sub.getValue(p);
 
           const ScalarType speed = std::sqrt(Math::dot(uOld, uOld));
 
@@ -529,8 +529,6 @@ namespace Rodin::Examples::Heart
           for (size_t b = 0; b < nteS; ++b)
             teDir[b] = Math::dot(Gte[b], uOld);
 
-          subScale = tau * (ScalarType(1) / m_dt * subScale - (teDir - uProj));
-
           for (size_t b = 0; b < nteS; ++b)
           {
             for (size_t c = 0; c < vdim; ++c)
@@ -538,7 +536,7 @@ namespace Rodin::Examples::Heart
               const size_t row = b * vdim + c;
 
               m_vec(static_cast<Eigen::Index>(row)) +=
-                wdet * tau * (uProj[c] + subScale[c]) * teDir[b];
+                wdet * (tau * uProj[c] + subScale[c]) * teDir[b];
             }
           }
         }

@@ -196,13 +196,15 @@ namespace Rodin::Examples::Heart
       ViscosityTestFunctionType m_w;
       VMSTestFunctionType m_vp;
 
-
       VelocityGridFunctionType m_uOld;
       PressureGridFunctionType m_pOld;
       PressureGridFunctionType m_one;
       PressureTestFunctionType m_qFlux;
+
       FluxLinearFormType m_flux;
-      VMSGridFunctionType m_sub;
+
+      VMSTrialFunctionType m_sub;
+      VMSGridFunctionType m_subOld;
 
       std::map<Attribute, RCR> m_wk;
 
