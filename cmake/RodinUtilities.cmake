@@ -185,4 +185,10 @@ function(rodin_add_link_options)
   endforeach()
 endfunction()
 
+function(rodin_disable_lsan_for_test test_name)
+  set(_rodin_test_environment "ASAN_OPTIONS=detect_leaks=0" ${ARGN})
+  set_tests_properties(${test_name} PROPERTIES
+    ENVIRONMENT "${_rodin_test_environment}"
+  )
+endfunction()
 

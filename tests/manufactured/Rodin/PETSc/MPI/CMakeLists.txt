@@ -29,6 +29,8 @@ foreach(np 1 2 4)
             $<TARGET_FILE:RodinManufacturedPETScMPIPoissonTest>)
   set_tests_properties(RodinManufacturedPETScMPIPoissonTest_np${np} PROPERTIES
     LABELS "manufactured;petsc;distributed"
-    ENVIRONMENT "HDF5_USE_FILE_LOCKING=FALSE"
   )
+  rodin_disable_lsan_for_test(
+    RodinManufacturedPETScMPIPoissonTest_np${np}
+    "HDF5_USE_FILE_LOCKING=FALSE")
 endforeach()

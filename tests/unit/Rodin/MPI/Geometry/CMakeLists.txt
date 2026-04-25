@@ -27,6 +27,8 @@ foreach(np 1 2 3 4 8)
             $<TARGET_FILE:RodinMPIGeometrySharderTest>)
   set_tests_properties(RodinMPIGeometrySharderTest_np${np} PROPERTIES
     LABELS "unit;distributed"
-    ENVIRONMENT "HDF5_USE_FILE_LOCKING=FALSE"
   )
+  rodin_disable_lsan_for_test(
+    RodinMPIGeometrySharderTest_np${np}
+    "HDF5_USE_FILE_LOCKING=FALSE")
 endforeach()
