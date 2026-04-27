@@ -9,6 +9,7 @@
 #include <Rodin/Solver.h>
 
 #include "CoupledLV0DCoronary3D.h"
+#include "Rodin/Math/RungeKutta/RK4.h"
 #include "VMSConvectionIntegrator.h"
 
 namespace Rodin::Examples::Heart
@@ -166,22 +167,61 @@ namespace Rodin::Examples::Heart
 
     auto resistance = [](Real pp, Real pd, Real L, Real radius) -> Real
     {
-      const Real m = 0.035;
-      const Real n = 0.7;
+        const Real mu_0 = 0.04868;
+        const Real mu_inf = 0.003605;
+        const Real lambda = 3.39;
+        const Real n = 0.198;
+        const Real a = 1.235;
+        const Real delta = mu_0 - mu_inf;
 
-      const Real dp = pp - pd;
-      const Real tauW = radius * dp / (2.0 * L);
+        const Real dp = pp - pd;
+        if (std::abs(dp) < 1e-10) return 1e10;
 
-      const Real Ip =
-        std::pow(1.0 / m, 1.0 / n)
-        * n / (3.0 * n + 1.0)
-        * std::pow(std::abs(tauW), (3.0 * n + 1.0) / n);
+        const Real tauW = radius * std::abs(dp) / (2.0 * L);
 
-      if (Ip <= 0.0 || std::abs(dp) <= 0.0)
-        return 1.0e-8;
+        auto gamma_dot_wall = [&](const Real tw) {
+            Real g = tw / ((mu_0 + mu_inf) * 0.5);
+            for (int i = 0; i < 50; ++i) {
+                Real lga = std::pow(lambda * g, a);
+                Real common_pow = std::pow(1.0 + lga, (n - 1.0) / a);
 
-      return std::pow(dp, 4.0)
-        / (8.0 * std::numbers::pi_v<Real> * std::pow(L, 3.0) * Ip);
+                Real eta = mu_inf + delta * common_pow;
+                Real deta_dg = delta * (n - 1.0) * std::pow(1.0 + lga, (n - 1.0 - a) / a) * std::pow(lambda, a) * std::pow(g, a - 1.0);
+
+                Real f = g * eta - tw;
+                Real df = eta + g * deta_dg;
+
+                Real step = f / df;
+                g = std::max(1e-10, g - step);
+                if (std::abs(step) < 1e-8 * g) break;
+            }
+            return g;
+        };
+
+        const Real gamma_dot_w = gamma_dot_wall(tauW);
+
+        auto f = [&](const Real g) {
+            if (g < 1e-15) return 0.0;
+            Real lga = std::pow(lambda * g, a);
+            Real base = 1.0 + lga;
+            Real mu = mu_inf + delta * std::pow(base, (n - 1.0) / a);
+            Real dtau_dg = mu + delta * (n - 1.0) * std::pow(base, (n - 1.0 - a) / a) * lga;
+
+            return std::pow(g, 3.0) * (mu * mu) * dtau_dg;
+        };
+
+        Math::RungeKutta::RK4 Integrator;
+        int steps = 100;
+        const Real h = gamma_dot_w / steps;
+        Real Ip = 0.0;
+
+        for (int i = 0; i < steps; ++i) {
+          Integrator.step(Ip, i * h, Ip, f);
+        }
+
+        if (Ip <= 0.0) return 1e10;
+
+        return std::pow(dp, 4.0) / (8.0 * std::numbers::pi_v<Real> * std::pow(L, 3.0) * Ip);
     };
 
     const Real Rp = resistance(bc.pc, bc.pd, lengthP, radiusP);
@@ -380,28 +420,46 @@ namespace Rodin::Examples::Heart
     auto symV = 0.5 * (Jacobian(m_v) + Transpose(Jacobian(m_v)));
     auto symUOld = 0.5 * (Jacobian(m_uOld) + Transpose(Jacobian(m_uOld)));
 
-    const Real n_pl = 0.7;
-    const Real m_pl = 0.035;
+    //const Real n_pl = 0.7;
+    //const Real m_pl = 0.035;
 
-    const Real mu_min = m_cfg.mu;
+    //const Real mu_min = m_cfg.mu;
     const Real gamma_min = 1.0e-3;
-    const Real mu_max = 5.0e-2;
+    //const Real mu_max = 5.0e-2;
+    const Real mu_0 = 0.04868;
+    const Real mu_inf = 0.003605;
+    const Real lambda = 3.39;
+    const Real n_cy = 0.198;
+    const Real a = 1.235;
 
     const Real c1 = 4.0;
     const Real c2 = 2.0;
     const Real vmsScale = 0.05;
 
-    RealFunction muNonNew = [=, this](const Point& p) -> Real
-    {
+    //RealFunction muNonNew = [=, this](const Point& p) -> Real
+    //{
+     // const auto S = symUOld.getValue(p);
+
+      //const Real gamma =
+        //std::max(gamma_min, std::sqrt(2.0 * dot(S, S)));
+
+      //const Real mu =
+       // m_pl * std::pow(gamma, n_pl - 1.0);
+
+     // return std::clamp(mu, mu_min, mu_max);
+     //};
+
+     RealFunction muNonNew = [=, this](const Point& p) -> Real
+     {
       const auto S = symUOld.getValue(p);
 
-      const Real gamma =
-        std::max(gamma_min, std::sqrt(2.0 * dot(S, S)));
+       const Real gamma =
+         std::max(gamma_min, std::sqrt(2.0 * dot(S, S)));
 
-      const Real mu =
-        m_pl * std::pow(gamma, n_pl - 1.0);
+       const Real mu =
+         mu_inf + (mu_0 - mu_inf) * Math::pow(1.0 + Math::pow(lambda * gamma, a), (n_cy - 1.) / a);
 
-      return std::clamp(mu, mu_min, mu_max);
+       return mu;
     };
 
     Alert::Info() << "Projecting non-Newtonian viscosity ..." << Alert::Raise;
