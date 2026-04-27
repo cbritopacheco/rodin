@@ -55,13 +55,13 @@ namespace Rodin::Variational
    * @brief Jacobian of a P0g vector GridFunction (identically zero).
    */
   template <class Data, class Mesh, class Scalar>
-  class Jacobian<GridFunction<P0g<Math::Vector<Scalar>, Mesh>, Data>> final
+  class Jacobian<GridFunction<P0g<Math::SpatialVector<Scalar>, Mesh>, Data>> final
     : public JacobianBase<
-        GridFunction<P0g<Math::Vector<Scalar>, Mesh>, Data>,
-        Jacobian<GridFunction<P0g<Math::Vector<Scalar>, Mesh>, Data>>>
+        GridFunction<P0g<Math::SpatialVector<Scalar>, Mesh>, Data>,
+        Jacobian<GridFunction<P0g<Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
     public:
-      using FESType = P0g<Math::Vector<Scalar>, Mesh>;
+      using FESType = P0g<Math::SpatialVector<Scalar>, Mesh>;
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
@@ -122,14 +122,14 @@ namespace Rodin::Variational
    * their Jacobians are zero.
    */
   template <class ShapeFunctionDerived, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
-  class Jacobian<ShapeFunction<ShapeFunctionDerived, P0g<Math::Vector<Scalar>, Mesh>, Space>> final
+  class Jacobian<ShapeFunction<ShapeFunctionDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>> final
     : public ShapeFunctionBase<
-        Jacobian<ShapeFunction<ShapeFunctionDerived, P0g<Math::Vector<Scalar>, Mesh>, Space>>,
-        P0g<Math::Vector<Scalar>, Mesh>,
+        Jacobian<ShapeFunction<ShapeFunctionDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>>,
+        P0g<Math::SpatialVector<Scalar>, Mesh>,
         Space>
   {
     public:
-      using FESType = P0g<Math::Vector<Scalar>, Mesh>;
+      using FESType = P0g<Math::SpatialVector<Scalar>, Mesh>;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
@@ -237,8 +237,8 @@ namespace Rodin::Variational
     -> Jacobian<GridFunction<P0g<Range, Mesh>, Data>>;
 
   template <class ShapeFunctionDerived, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
-  Jacobian(const ShapeFunction<ShapeFunctionDerived, P0g<Math::Vector<Scalar>, Mesh>, Space>&)
-    -> Jacobian<ShapeFunction<ShapeFunctionDerived, P0g<Math::Vector<Scalar>, Mesh>, Space>>;
+  Jacobian(const ShapeFunction<ShapeFunctionDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>&)
+    -> Jacobian<ShapeFunction<ShapeFunctionDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>>;
 }
 
 #endif

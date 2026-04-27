@@ -57,6 +57,7 @@
 #include "ShapeFunction.h"
 #include "QuadratureRule.h"
 #include "LinearFormIntegrator.h"
+#include "Rodin/Math/Traits.h"
 
 namespace Rodin::FormLanguage
 {
@@ -92,7 +93,7 @@ namespace Rodin::FormLanguage
       // Else
       std::conditional_t<
         // If
-        std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>,
+        FormLanguage::IsVectorRange<RHSRangeType>::Value,
         // Then
         Math::Matrix<ScalarType>,
         // Else
@@ -136,7 +137,7 @@ namespace Rodin::FormLanguage
       // Else
       std::conditional_t<
         // If
-        std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>,
+        FormLanguage::IsVectorRange<RHSRangeType>::Value,
         // Then
         Math::Matrix<ScalarType>,
         // Else
@@ -183,7 +184,7 @@ namespace Rodin::Variational
         // Else
         std::conditional_t<
           // If
-          std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>,
+          FormLanguage::IsVectorRange<RHSRangeType>::Value,
           // Then
           Math::Matrix<ScalarType>,
           // Else
@@ -240,7 +241,7 @@ namespace Rodin::Variational
           }
           return res;
         }
-        else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>)
+        else if constexpr (FormLanguage::IsVectorRange<RHSRangeType>::Value)
         {
           Math::Vector<ScalarType> res;
           assert(false);
@@ -363,7 +364,7 @@ namespace Rodin::Variational
         // Else
         std::conditional_t<
           // If
-          std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>,
+          FormLanguage::IsVectorRange<RHSRangeType>::Value,
           // Then
           Math::Matrix<ScalarType>,
           // Else

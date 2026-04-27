@@ -10,6 +10,7 @@
 #include "Rodin/Variational/P1/P1.h"
 #include "Rodin/Variational/ShapeFunction.h"
 #include "Rodin/Variational/IntegrationPoint.h"
+#include "Rodin/Math/Traits.h"
 
 namespace Rodin::Variational
 {
@@ -121,7 +122,7 @@ namespace Rodin::Variational
         }
         else
         {
-          static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
+          static_assert(FormLanguage::IsVectorRange<RangeType>::Value);
           return P1Element<RangeType>(polytope.getGeometry(), this->getFiniteElementSpace().getVectorDimension()).getCount();
         }
       }
@@ -178,7 +179,7 @@ namespace Rodin::Variational
           }
           else
           {
-            static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
+            static_assert(FormLanguage::IsVectorRange<RangeType>::Value);
             const size_t ndof = nv * vdim;
             m_cache.basis.resize(ndof);
 
@@ -218,7 +219,7 @@ namespace Rodin::Variational
           }
           else
           {
-            static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
+            static_assert(FormLanguage::IsVectorRange<RangeType>::Value);
 
             // Update only the one active component; others remain zero.
             for (size_t a = 0; a < nv; ++a)

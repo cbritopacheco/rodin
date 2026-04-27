@@ -16,6 +16,7 @@
 #define RODIN_MATH_SPATIALVECTOR_H
 
 #include <iostream>
+#include <type_traits>
 
 #include "Rodin/FormLanguage/Traits.h"
 
@@ -120,6 +121,29 @@ namespace Rodin::Math
         : m_size(std::move(other.m_size)),
           m_data(std::move(other.m_data))
       {}
+
+      static constexpr SpatialVector Zero(std::uint8_t size)
+      {
+        assert(size <= MaxSize);
+        SpatialVector result(size);
+        switch (size)
+        {
+          case 3:
+            result.m_data[2] = ScalarType(0);
+            [[fallthrough]];
+          case 2:
+            result.m_data[1] = ScalarType(0);
+            [[fallthrough]];
+          case 1:
+            result.m_data[0] = ScalarType(0);
+            break;
+          case 0:
+            break;
+          default:
+            assert(false);
+        }
+        return result;
+      }
 
       constexpr
       SpatialVector& operator=(const SpatialVector& other) noexcept
@@ -378,6 +402,22 @@ namespace Rodin::Math
       {
         assert(i < m_size);
         return m_data[i];
+      }
+
+      /// @brief Eigen-compatible element access (for drop-in compatibility with Math::Vector)
+      constexpr
+      ScalarType& coeffRef(std::size_t i)
+      {
+        assert(i < m_size);
+        return m_data[static_cast<std::uint8_t>(i)];
+      }
+
+      /// @brief Eigen-compatible element access (const, for drop-in compatibility with Math::Vector)
+      constexpr
+      const ScalarType& coeffRef(std::size_t i) const
+      {
+        assert(i < m_size);
+        return m_data[static_cast<std::uint8_t>(i)];
       }
 
       constexpr
@@ -763,7 +803,8 @@ namespace Rodin::Math
     return r;
   }
 
-  template <class LHS, class Scalar>
+  template <class LHS, class Scalar,
+    std::enable_if_t<std::is_arithmetic_v<std::decay_t<LHS>>, int> = 0>
   [[nodiscard]] inline
   SpatialVector<Scalar>
   operator*(const LHS& s, const SpatialVector<Scalar>& v) noexcept
@@ -926,6 +967,44 @@ namespace Rodin::Math
     return m * v.getData().head(static_cast<Eigen::Index>(v.size()));
   }
 
+  template <class Scalar, class EigenDerived>
+  [[nodiscard]] inline
+  SpatialMatrix<Scalar>
+  operator-(
+    const SpatialMatrix<Scalar>& A,
+    const Eigen::MatrixBase<EigenDerived>& B)
+  {
+    assert(A.rows() == static_cast<std::uint8_t>(B.rows()));
+    assert(A.cols() == static_cast<std::uint8_t>(B.cols()));
+
+    SpatialMatrix<Scalar> C(A.rows(), A.cols());
+
+    for (std::uint8_t i = 0; i < A.rows(); ++i)
+      for (std::uint8_t j = 0; j < A.cols(); ++j)
+        C(i, j) = A(i, j) - B(i, j);
+
+    return C;
+  }
+
+  template <class EigenDerived, class Scalar>
+  [[nodiscard]] inline
+  SpatialMatrix<Scalar>
+  operator-(
+    const Eigen::MatrixBase<EigenDerived>& A,
+    const SpatialMatrix<Scalar>& B)
+  {
+    assert(static_cast<std::uint8_t>(A.rows()) == B.rows());
+    assert(static_cast<std::uint8_t>(A.cols()) == B.cols());
+
+    SpatialMatrix<Scalar> C(B.rows(), B.cols());
+
+    for (std::uint8_t i = 0; i < B.rows(); ++i)
+      for (std::uint8_t j = 0; j < B.cols(); ++j)
+        C(i, j) = A(i, j) - B(i, j);
+
+    return C;
+  }
+
   /**
    * @brief Real-valued spatial vector for point coordinates.
    *
@@ -941,8 +1020,6 @@ namespace Rodin::Math
     return os;
   }
 }
-
-
 
 namespace Rodin::FormLanguage
 {

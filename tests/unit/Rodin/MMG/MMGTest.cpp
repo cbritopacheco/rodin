@@ -725,7 +725,7 @@ namespace Rodin::Tests::Unit
     MMG::VectorGridFunction gf(fes);
     gf = [](const Geometry::Point& p)
     {
-      return Math::Vector<Real>{{ p.x(), p.y() }};
+      return Math::SpatialVector<Real>{{ p.x(), p.y() }};
     };
 
     EXPECT_EQ(gf.getFiniteElementSpace().getVectorDimension(), 2);
@@ -1360,7 +1360,7 @@ namespace Rodin::Tests::Unit
 
     gf = [](const Geometry::Point& p)
     {
-      return Math::Vector<Real>{{ p.x(), p.y() }};
+      return Math::SpatialVector<Real>{{ p.x(), p.y() }};
     };
 
     EXPECT_EQ(gf.getFiniteElementSpace().getVectorDimension(), 2);
@@ -1372,7 +1372,7 @@ namespace Rodin::Tests::Unit
     MMG::Mesh mesh;
     mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
     P1 fes(mesh, 3);
-    MMG::GridFunction<Math::Vector<Real>> gf(fes);
+    MMG::GridFunction<Math::SpatialVector<Real>> gf(fes);
 
     EXPECT_EQ(&gf.getFiniteElementSpace(), &fes);
     EXPECT_EQ(gf.getFiniteElementSpace().getVectorDimension(), 3);
@@ -1473,7 +1473,7 @@ namespace Rodin::Tests::Unit
     // Project a constant vector function
     gf = [](const Geometry::Point&)
     {
-      return Math::Vector<Real>{{ 1.0, 2.0 }};
+      return Math::SpatialVector<Real>{{ 1.0, 2.0 }};
     };
 
     // Evaluate at a point inside the first cell
