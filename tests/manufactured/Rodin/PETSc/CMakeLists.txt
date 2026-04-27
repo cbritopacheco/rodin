@@ -11,8 +11,8 @@ add_test(
 )
 set_tests_properties(RodinManufacturedPETScPoisson PROPERTIES
   LABELS "manufactured;petsc"
-  ENVIRONMENT "ASAN_OPTIONS=detect_leaks=0"
 )
+rodin_suppress_external_mpi_lsan_for_test(RodinManufacturedPETScPoisson)
 
 if (RODIN_USE_MPI)
   add_subdirectory(MPI)

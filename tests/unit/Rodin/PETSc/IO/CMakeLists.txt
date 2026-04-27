@@ -13,5 +13,5 @@ add_test(
 )
 set_tests_properties(RodinPETScIOHDF5IOTest PROPERTIES
   LABELS "unit;petsc"
-  ENVIRONMENT "ASAN_OPTIONS=detect_leaks=0"
 )
+rodin_suppress_external_mpi_lsan_for_test(RodinPETScIOHDF5IOTest)
