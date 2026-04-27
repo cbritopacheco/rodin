@@ -75,7 +75,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_passive_law_8h.html">&lt;Rodin/Heart/CCMLC2014/PassiveLaw.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+          <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> Scalar&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_heart.html">Heart</a>::<wbr/></span>CCMLC2014PassiveLaw <span class="m-thin">struct</span>
         </h1>
         <p>Default passive stress law for the CCMLC2014 reduced model.</p>
@@ -105,12 +105,12 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class PassiveEnergyLaw&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#aea81ae984d7084d0f01a16caa926b651" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const PassiveEnergyLaw&amp; law,
-              const Scalar C,
-              const Scalar dC_dy,
+              <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">PassiveEnergyLaw</a>&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#aea81ae984d7084d0f01a16caa926b651" class="m-doc">operator()</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">const</a> <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">PassiveEnergyLaw</a>&amp; law,
+              <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">const</a> Scalar C,
+              <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">const</a> Scalar dC_dy,
               Scalar&amp; sigmaPassive,
-              Scalar&amp; dsigmaPassive_dy) const</span>
+              Scalar&amp; dsigmaPassive_dy) const -&gt; <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">void</a></span>
             </dt>
             <dd>Evaluate passive stress and tangent with respect to radial displacement.</dd>
           </dl>
@@ -120,32 +120,23 @@
           <section class="m-doc-details" id="aea81ae984d7084d0f01a16caa926b651"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Scalar&gt;
-                template&lt;class PassiveEnergyLaw&gt;
+                template&lt;<a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> Scalar&gt;
+                template&lt;<a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">PassiveEnergyLaw</a>&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Heart::<wbr />CCMLC2014PassiveLaw&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aea81ae984d7084d0f01a16caa926b651" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const PassiveEnergyLaw&amp; law,
-              const Scalar C,
-              const Scalar dC_dy,
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">void</a> Rodin::<wbr />Heart::<wbr />CCMLC2014PassiveLaw&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aea81ae984d7084d0f01a16caa926b651" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">const</a> <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">PassiveEnergyLaw</a>&amp; law,
+              <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">const</a> Scalar C,
+              <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">const</a> Scalar dC_dy,
               Scalar&amp; sigmaPassive,
               Scalar&amp; dsigmaPassive_dy) const</span></span>
             </h3>
             <p>Evaluate passive stress and tangent with respect to radial displacement.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">PassiveEnergyLaw</td>
-                  <td>Passive-energy evaluator type.</td>
-                </tr>
-              </tbody>
-              <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>law&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td style="width: 1%">law&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Passive-energy law.</td>
                 </tr>
                 <tr>
