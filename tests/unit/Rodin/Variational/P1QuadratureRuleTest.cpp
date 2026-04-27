@@ -97,8 +97,8 @@ namespace Rodin::Tests::Unit
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     const size_t vdim = 2;
-    P1<Math::Vector<Real>> fesTr(mesh, vdim);
-    P1<Math::Vector<Real>> fesTe(mesh, vdim);
+    P1<Math::SpatialVector<Real>> fesTr(mesh, vdim);
+    P1<Math::SpatialVector<Real>> fesTe(mesh, vdim);
 
     TrialFunction u(fesTr);
     TestFunction v(fesTe);
@@ -119,8 +119,8 @@ namespace Rodin::Tests::Unit
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     const size_t vdim = 2;
-    P1<Math::Vector<Real>> fesTr(mesh, vdim);
-    P1<Math::Vector<Real>> fesTe(mesh, vdim);
+    P1<Math::SpatialVector<Real>> fesTr(mesh, vdim);
+    P1<Math::SpatialVector<Real>> fesTe(mesh, vdim);
 
     TrialFunction u(fesTr);
     TestFunction v(fesTe);
@@ -139,7 +139,7 @@ namespace Rodin::Tests::Unit
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     const size_t vdim = 2;
-    P1<Math::Vector<Real>> vel(mesh, vdim);
+    P1<Math::SpatialVector<Real>> vel(mesh, vdim);
     P1<Real> pres(mesh);
 
     TrialFunction u(vel);
@@ -160,7 +160,7 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     const size_t vdim = 2;
     P1<Real> pres(mesh);
-    P1<Math::Vector<Real>> vel(mesh, vdim);
+    P1<Math::SpatialVector<Real>> vel(mesh, vdim);
 
     TrialFunction p(pres);
     TestFunction v(vel);

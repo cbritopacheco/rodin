@@ -19,7 +19,7 @@ namespace Rodin::MMG
 {
   /**
    * @brief Grid function type used by the MMG module.
-   * @tparam Range Value type (`Real` for scalar fields, `Math::Vector<Real>`
+   * @tparam Range Value type (`Real` for scalar fields, `Math::SpatialVector<Real>`
    * for vector fields).
    *
    * MMG workflows in Rodin operate on first-order nodal fields defined on
@@ -44,7 +44,7 @@ namespace Rodin::MMG
    *
    * Useful for vector metrics or vector fields in MMG-related pre/post-processing.
    */
-  using VectorGridFunction = GridFunction<Math::Vector<Real>>;
+  using VectorGridFunction = GridFunction<Math::SpatialVector<Real>>;
 }
 
 #endif

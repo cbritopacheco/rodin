@@ -12,6 +12,7 @@
 
 #include "Rodin/Types.h"
 
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Geometry/Mesh.h"
 
 #include "Rodin/Variational/FiniteElementSpace.h"
@@ -31,12 +32,12 @@ namespace Rodin::FormLanguage
   };
 
   template <class Scalar, class Mesh>
-  struct Traits<Variational::P1<Math::Vector<Scalar>, Mesh>>
+  struct Traits<Variational::P1<Math::SpatialVector<Scalar>, Mesh>>
   {
     using MeshType = Mesh;
     using ScalarType = Scalar;
-    using RangeType = Math::Vector<ScalarType>;
-    using ElementType = Variational::P1Element<RangeType>;
+    using RangeType = Math::SpatialVector<ScalarType>;
+    using ElementType = Variational::P1Element<Math::SpatialVector<ScalarType>>;
   };
 }
 
@@ -419,10 +420,10 @@ namespace Rodin::Variational
    * @see P1Element, TrialFunction, TestFunction
    */
   template <class Scalar>
-  class P1<Math::Vector<Scalar>, Geometry::Mesh<Context::Local>> final
+  class P1<Math::SpatialVector<Scalar>, Geometry::Mesh<Context::Local>> final
     : public FiniteElementSpace<
         Geometry::Mesh<Context::Local>,
-        P1<Math::Vector<Scalar>, Geometry::Mesh<Context::Local>>>
+        P1<Math::SpatialVector<Scalar>, Geometry::Mesh<Context::Local>>>
   {
     using KeyLeft = std::tuple<size_t, Index, Index>;
     using KeyRight = Index;
@@ -432,7 +433,7 @@ namespace Rodin::Variational
       using ScalarType = Scalar;
 
       /// Range type of value
-      using RangeType = Math::Vector<ScalarType>;
+      using RangeType = Math::SpatialVector<ScalarType>;
 
       /// Type of mesh on which the finite element space is built
       using MeshType = Geometry::Mesh<Context::Local>;
@@ -441,10 +442,10 @@ namespace Rodin::Variational
       using ContextType = Context::Local;
 
       /// Type of finite element
-      using ElementType = P1Element<RangeType>;
+      using ElementType = P1Element<Math::SpatialVector<ScalarType>>;
 
       /// Parent class
-      using Parent = FiniteElementSpace<MeshType, P1<RangeType, MeshType>>;
+      using Parent = FiniteElementSpace<MeshType, P1<Math::SpatialVector<Scalar>, MeshType>>;
 
       template <class Callable>
       class Pullback :
@@ -708,11 +709,11 @@ namespace Rodin::Variational
    */
   template <class Context>
   P1(const Geometry::Mesh<Context>&, size_t)
-    -> P1<Math::Vector<Real>, Geometry::Mesh<Context>>;
+    -> P1<Math::SpatialVector<Real>, Geometry::Mesh<Context>>;
 
   /// Alias for a vector-valued real P1 finite element space
   template <class Mesh>
-  using VectorP1 = P1<Math::Vector<Real>, Mesh>;
+  using VectorP1 = P1<Math::SpatialVector<Real>, Mesh>;
 }
 
 #endif

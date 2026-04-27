@@ -43,6 +43,7 @@
 #define RODIN_VARIATIONAL_JACOBIAN_H
 
 #include "ForwardDecls.h"
+#include "Rodin/Math/SpatialMatrix.h"
 #include "MatrixFunction.h"
 
 namespace Rodin::Variational
@@ -80,7 +81,7 @@ namespace Rodin::Variational
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
-      using RangeType = Math::Matrix<ScalarType>;
+      using RangeType = Math::SpatialMatrix<ScalarType>;
 
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
@@ -153,10 +154,8 @@ namespace Rodin::Variational
        * @f$ J_{ij}(p) = \frac{\partial u_i}{\partial x_j}(p) @f$
        * Handles mesh inclusion and submesh restrictions automatically.
        */
-      decltype(auto) getValue(const Geometry::Point& p) const
+      RangeType getValue(const Geometry::Point& p) const
       {
-        static thread_local RangeType s_res;
-
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& gf = getOperand();
@@ -182,9 +181,7 @@ namespace Rodin::Variational
         {
           assert(false);
         }
-
-        s_res = res.getData().topLeftCorner(res.rows(), res.cols());
-        return s_res;
+        return res;
       }
 
       /**
@@ -195,14 +192,6 @@ namespace Rodin::Variational
       const OperandType& getOperand() const
       {
         return m_u.get();
-      }
-
-      constexpr
-      void interpolate(RangeType& out, const Geometry::Point& p) const
-      {
-        SpatialMatrixType res;
-        this->interpolate(res, p);
-        out = res.getData().topLeftCorner(res.rows(), res.cols());
       }
 
       /**

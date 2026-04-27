@@ -160,7 +160,7 @@ namespace Rodin::Variational
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
-      using RangeType  = Math::Vector<ScalarType>;
+      using RangeType  = Math::SpatialVector<ScalarType>;
       using OperandType = ShapeFunction<NestedDerived, FESType, Space>;
       using Parent = ShapeFunctionBase<Grad<OperandType>, FESType, Space>;
 
@@ -313,12 +313,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      constexpr
-      auto getBasis(size_t local) const
+      RangeType getBasis(size_t local) const
       {
         assert(m_cache.key);
         assert(local < m_cache.grad_phys.size());
-        return m_cache.grad_phys[local].getData().head(m_cache.key.dim);
+        return m_cache.grad_phys[local];
       }
 
       constexpr
