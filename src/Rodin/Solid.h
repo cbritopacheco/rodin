@@ -43,6 +43,9 @@
 #include "Solid/Constitutive/NeoHookean.h"
 #include "Solid/Constitutive/SaintVenantKirchhoff.h"
 #include "Solid/Constitutive/MooneyRivlin.h"
+#include "Solid/Constitutive/HolzapfelOgden.h"
+#include "Solid/Constitutive/ChapelleMoireauActiveLaw.h"
+#include "Solid/Constitutive/ActiveContraction.h"
 
 // Integrators
 #include "Solid/Integrators/InternalForce.h"

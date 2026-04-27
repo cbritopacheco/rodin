@@ -415,6 +415,115 @@ namespace Rodin::Tests::Unit
   }
 
   // ========================================================================
+  // Holzapfel-Ogden and active contraction tests
+  // ========================================================================
+
+  TEST(Rodin_Solid_HolzapfelOgden, ZeroDeformationStressFree)
+  {
+    Solid::HolzapfelOgden law(0.5, 0.2, 0.1, 1.5, 0.3, 2.0, 10.0);
+
+    Solid::KinematicState state(3);
+    Math::SpatialMatrix<Real> H(3, 3);
+    H.setZero();
+    state.setDisplacementGradient(H);
+
+    Solid::ConstitutivePoint cp(state);
+    Math::SpatialVector<Real> fiber(3);
+    fiber[0] = 1.0; fiber[1] = 0.0; fiber[2] = 0.0;
+    cp.set<Solid::Tags::FiberDirection>(fiber);
+
+    Solid::HolzapfelOgden::Cache cache;
+    law.setCache(cache, cp);
+
+    Math::SpatialMatrix<Real> P;
+    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+
+    for (int i = 0; i < 3; ++i)
+      for (int j = 0; j < 3; ++j)
+        EXPECT_NEAR(P(i, j), 0.0, 1e-12);
+  }
+
+  TEST(Rodin_Solid_HolzapfelOgden, TangentFiniteDifference3D)
+  {
+    Solid::HolzapfelOgden law(0.5, 0.2, 0.1, 1.5, 0.3, 2.0, 10.0);
+
+    Solid::KinematicState state(3);
+    Math::SpatialMatrix<Real> H(3, 3);
+    H(0,0)=0.08; H(0,1)=0.03; H(0,2)=0.01;
+    H(1,0)=-0.02; H(1,1)=0.06; H(1,2)=0.04;
+    H(2,0)=0.01; H(2,1)=-0.03; H(2,2)=0.05;
+    state.setDisplacementGradient(H);
+
+    Solid::ConstitutivePoint cp(state);
+    Math::SpatialVector<Real> fiber(3);
+    fiber[0] = 0.8; fiber[1] = 0.4; fiber[2] = 0.2;
+    cp.set<Solid::Tags::FiberDirection>(fiber);
+
+    Solid::HolzapfelOgden::Cache cache;
+    law.setCache(cache, cp);
+
+    Math::SpatialMatrix<Real> dF(3, 3);
+    dF(0,0)=0.2; dF(0,1)=-0.1; dF(0,2)=0.05;
+    dF(1,0)=0.03; dF(1,1)=0.15; dF(1,2)=-0.07;
+    dF(2,0)=-0.04; dF(2,1)=0.08; dF(2,2)=0.12;
+
+    Math::SpatialMatrix<Real> dP;
+    law.getMaterialTangent(dP, cache, cp, dF);
+
+    const Real eps = 1e-7;
+    Solid::KinematicState statePlus(3);
+    statePlus.setDisplacementGradient(H + eps * dF);
+    Solid::ConstitutivePoint cpPlus(statePlus);
+    cpPlus.set<Solid::Tags::FiberDirection>(fiber);
+    Solid::HolzapfelOgden::Cache cachePlus;
+    law.setCache(cachePlus, cpPlus);
+
+    Math::SpatialMatrix<Real> P, PPlus;
+    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+    law.getFirstPiolaKirchhoffStress(PPlus, cachePlus, cpPlus);
+    Math::SpatialMatrix<Real> dPfd = (1.0 / eps) * PPlus + (-1.0 / eps) * P;
+
+    for (int i = 0; i < 3; ++i)
+      for (int j = 0; j < 3; ++j)
+        EXPECT_NEAR(dP(i, j), dPfd(i, j), 1e-8);
+  }
+
+  TEST(Rodin_Solid_ActiveContraction, AddsFiberStress)
+  {
+    Solid::NeoHookean passive(0.0, 0.0);
+    Solid::ChapelleMoireauActiveLaw::Input activeInput;
+    activeInput.Es = 10.0;
+    activeInput.initFibDef = 0.0;
+    Solid::ChapelleMoireauActiveLaw active(activeInput);
+    Solid::ActiveContraction law(passive, active);
+
+    Solid::KinematicState state(2);
+    Math::SpatialMatrix<Real> H(2, 2);
+    H.setZero();
+    H(0, 0) = 0.1;
+    state.setDisplacementGradient(H);
+
+    Solid::ConstitutivePoint cp(state);
+    Math::SpatialVector<Real> fiber(2);
+    fiber[0] = 1.0; fiber[1] = 0.0;
+    cp.set<Solid::Tags::FiberDirection>(fiber);
+    cp.set<Solid::Tags::ActiveExtension>(0.0);
+
+    typename decltype(law)::Cache cache;
+    law.setCache(cache, cp);
+
+    Math::SpatialMatrix<Real> P;
+    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+
+    const Real strain1D = 0.5 * (1.1 * 1.1 - 1.0);
+    const Real stress = activeInput.Es * strain1D;
+    EXPECT_NEAR(P(0, 0), 1.1 * stress, 1e-12);
+    EXPECT_NEAR(P(0, 1), 0.0, 1e-12);
+    EXPECT_NEAR(P(1, 0), 0.0, 1e-12);
+    EXPECT_NEAR(P(1, 1), 0.0, 1e-12);
+  }
+
+  // ========================================================================
   // Hooke tests
   // ========================================================================
 

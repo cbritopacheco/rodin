@@ -83,6 +83,54 @@ namespace Rodin::Solid
     {
       using Type = Real;
     };
+
+    /// @brief Tag for the active fiber extension @f$e_c^{n+1}@f$.
+    struct ActiveExtension
+    {
+      using Type = Real;
+    };
+
+    /// @brief Tag for the previous active fiber extension @f$e_c^n@f$.
+    struct PreviousActiveExtension
+    {
+      using Type = Real;
+    };
+
+    /// @brief Tag for the active-law time step.
+    struct TimeStep
+    {
+      using Type = Real;
+    };
+
+    /// @brief Tag for the scalar electrical/chemical activation input.
+    struct ElectricalActivation
+    {
+      using Type = Real;
+    };
+
+    /// @brief Tag for current active variable @f$\gamma=\sqrt{k_c}@f$.
+    struct ActiveGamma
+    {
+      using Type = Real;
+    };
+
+    /// @brief Tag for current active variable @f$\beta=\tau_c/\gamma@f$.
+    struct ActiveBeta
+    {
+      using Type = Real;
+    };
+
+    /// @brief Tag for previous active variable @f$\gamma^n@f$.
+    struct PreviousActiveGamma
+    {
+      using Type = Real;
+    };
+
+    /// @brief Tag for previous active variable @f$\beta^n@f$.
+    struct PreviousActiveBeta
+    {
+      using Type = Real;
+    };
   }
 
   /**
