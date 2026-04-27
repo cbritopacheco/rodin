@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin/MPI/IO/HDF5.h file | Rodin</title>
+  <title>Rodin::Variational::P0Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;::LinearForm class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -74,45 +74,69 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_e290bfab8759f47931d844dd05a08f1b.html">MPI</a>/</span><span class="m-breadcrumb"><a href="dir_3d2cbac321e646db37d2d0ce714b4b14.html">IO</a>/</span>HDF5.h <span class="m-thin">file</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html">P0Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;</a>::<wbr/></span>LinearForm <span class="m-thin">class</span>
+          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p0_element_8h.html">&lt;Rodin/Variational/P0/P0Element.h&gt;</a></div>
         </h1>
-        <p>HDF5 mesh persistence specializations for distributed MPI meshes.</p>
+        <p>Represents a linear form (evaluation functional) for vector <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> elements.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#namespaces">Namespaces</a></li>
-                <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>Provides MeshPrinter and MeshLoader specializations for <code>Mesh&lt;Context::MPI&gt;</code> using the HDF5 file format.</p><p>Each MPI rank persists its own local shard independently: the printer delegates to <code>MeshPrinter&lt;FileFormat::HDF5, Context::Local&gt;</code> to write the base mesh topology and then appends shard-specific metadata (ownership flags, polytope index maps, ghost-to-owner maps, and halo CSR) under the <code>/Shard/...</code> HDF5 group.</p><p>The loader delegates to <code>MeshLoader&lt;FileFormat::HDF5, Context::Local&gt;</code> to restore the base mesh and then reconstructs the MPI shard metadata needed for distributed assembly from the <code>/Shard/...</code> HDF5 datasets written by the MPI printer.</p><aside class="m-note m-default"><h4>See also</h4><p>MeshPrinter</p><p>MeshLoader</p><p>Geometry::Mesh&lt;Context::MPI&gt;</p><p>Geometry::Shard</p></aside>
-        <section id="namespaces">
-          <h2><a href="#namespaces">Namespaces</a></h2>
+<p>Evaluates a vector field at the barycenter and extracts a specific component.</p>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_i_o.html" class="m-doc">Rodin::IO</a></dt>
-            <dd>Module for mesh and grid function input/output.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#aacfb55719082f5b972bdbc96be74980a" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const T&amp; v) const -&gt; ScalarType</span>
+            </dt>
+            <dd>Evaluates the linear form on a vector field.</dd>
           </dl>
         </section>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_i_o_1_1_mesh_loader_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_m_p_i_01_4.html" class="m-doc">Rodin::IO::MeshLoader&lt;FileFormat::HDF5, Context::MPI&gt;</a>
-            </dt>
-            <dd>Loads a distributed <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mesh from an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_m_p_i_01_4.html" class="m-doc">Rodin::IO::MeshPrinter&lt;FileFormat::HDF5, Context::MPI&gt;</a>
-            </dt>
-            <dd>Prints a distributed <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mesh to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file.</dd>
-          </dl>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="aacfb55719082f5b972bdbc96be74980a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">ScalarType Rodin::<wbr />Variational::<wbr />P0Element&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;::<wbr />LinearForm::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aacfb55719082f5b972bdbc96be74980a" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const T&amp; v) const</span></span>
+            </h3>
+            <p>Evaluates the linear form on a vector field.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">T</td>
+                  <td>Type of the input vector field</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>v</td>
+                  <td>Vector field to evaluate</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a> value at the barycenter</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::H1Element&lt;K, Math::Vector&lt;Scalar&gt;&gt;::BasisFunction::DerivativeFunction class | Rodin</title>
+  <title>Rodin::Variational::Div&lt;GridFunction&lt;P0g&lt;Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -74,22 +74,43 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_h1_element_8h.html">&lt;Rodin/Variational/H1/H1Element.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;size_t Order&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_h1_element_3_01_k_00_01_math_1_1_vector_3_01_scalar_01_4_01_4.html">H1Element&lt;K, Math::Vector&lt;Scalar&gt;&gt;</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_h1_element_3_01_k_00_01_math_1_1_vector_3_01_scalar_01_4_01_4_1_1_basis_function.html">BasisFunction</a>::<wbr/></span>DerivativeFunction <span class="m-thin">class</span>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p0g_2_div_8h.html">&lt;Rodin/Variational/P0g/Div.h&gt;</a></div>
+          <div class="m-doc-template">template&lt;class Scalar, class Data, class Mesh&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Div&lt;GridFunction&lt;P0g&lt;Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p>Represents a derivative function of a Pk vector element.</p>
-        <table class="m-table m-fullwidth m-flat">
-          <thead>
-            <tr><th colspan="2">Template parameters</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="width: 1%">Order</td>
-              <td>Order of the derivative (0 for function, 1 for first derivative, etc.)</td>
-            </tr>
-          </tbody>
-        </table>
+        <p>Divergence of a <a href="class_rodin_1_1_variational_1_1_p0g.html" class="m-doc">P0g</a> vector <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> (identically zero).</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Operand, class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_div_base.html" class="m-doc">DivBase&lt;GridFunction&lt;P0g&lt;Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;, Div&lt;GridFunction&lt;P0g&lt;Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Base class for divergence operator implementations.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a6a0e03e3045fccc67be3e1b4cd6b7e16">
+              <span class="m-doc-wrap-bumper">void <a href="#a6a0e03e3045fccc67be3e1b4cd6b7e16" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap">ScalarType&amp; out,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;) const</span>
+            </dt>
+            <dd>Interpolates div(u) at point p (always zero for <a href="class_rodin_1_1_variational_1_1_p0g.html" class="m-doc">P0g</a>).</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

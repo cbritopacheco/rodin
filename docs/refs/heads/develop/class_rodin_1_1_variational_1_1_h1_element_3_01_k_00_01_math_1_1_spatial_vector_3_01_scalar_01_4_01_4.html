@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::H1Element&lt;K, Math::Vector&lt;Scalar&gt;&gt; class | Rodin</title>
+  <title>Rodin::Variational::H1Element&lt;K, Math::SpatialVector&lt;Scalar&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -76,7 +76,7 @@
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_h1_element_8h.html">&lt;Rodin/Variational/H1/H1Element.h&gt;</a></div>
           <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>H1Element&lt;K, Math::Vector&lt;Scalar&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>H1Element&lt;K, Math::SpatialVector&lt;Scalar&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Continuous H1-conforming piecewise polynomial (degree k) vector Lagrange element.</p>
         <nav class="m-block m-default">
@@ -305,7 +305,7 @@ $ \mathbf{E}(x) $
 <span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">vec_h1</span><span class="p">.</span><span class="n">getCount</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w">  </span><span class="c1">// Output: 12</span>
 
 <span class="c1">// Evaluate vector basis function</span>
-<span class="n">Math</span><span class="o">::</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">pt</span><span class="p">{{</span><span class="mf">0.25</span><span class="p">,</span><span class="w"> </span><span class="mf">0.25</span><span class="p">}};</span>
+<span class="n">Math</span><span class="o">::</span><span class="n">SpatialVector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">pt</span><span class="p">{{</span><span class="mf">0.25</span><span class="p">,</span><span class="w"> </span><span class="mf">0.25</span><span class="p">}};</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">vec_value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vec_h1</span><span class="p">.</span><span class="n">getBasis</span><span class="p">(</span><span class="mi">0</span><span class="p">)(</span><span class="n">pt</span><span class="p">);</span><span class="w">  </span><span class="c1">// Returns a 2D vector</span>
 
 <span class="c1">// Get Jacobian matrix</span>
@@ -315,7 +315,7 @@ $ \mathbf{E}(x) $
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase&lt;H1Element&lt;K, Math::Vector&lt;Scalar&gt;&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase&lt;H1Element&lt;K, Math::SpatialVector&lt;Scalar&gt;&gt;&gt;</a>
             </dt>
             <dd>Base class for finite elements.</dd>
           </dl>
@@ -323,12 +323,12 @@ $ \mathbf{E}(x) $
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt id="ad51cb44d68f0a511f9b1f8bda8990d76">
-              using <a href="#ad51cb44d68f0a511f9b1f8bda8990d76" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&lt;K, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;&gt;&gt;
+            <dt id="af45ac2166f5838ffd97201ac799798df">
+              using <a href="#af45ac2166f5838ffd97201ac799798df" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;&gt;&gt;
             </dt>
             <dd>Parent class.</dd>
-            <dt id="a1f9f2413f0b7c0761221b0df7e358bba">
-              using <a href="#a1f9f2413f0b7c0761221b0df7e358bba" class="m-doc-self">RangeType</a> = <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;
+            <dt id="a59e0b84f076a4b011aebb57a90a85a57">
+              using <a href="#a59e0b84f076a4b011aebb57a90a85a57" class="m-doc-self">RangeType</a> = <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;
             </dt>
             <dd>Type of range.</dd>
           </dl>

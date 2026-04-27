@@ -75,7 +75,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_dynamic_system_8h.html">&lt;Rodin/Heart/CCMLC2014/Numerics/DynamicSystem.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">PassiveLaw</a>, <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> Input&gt;</div>
+          <div class="m-doc-template">template&lt;class PassiveLaw, class Input&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_heart.html">Heart</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_heart_1_1_c_c_m_l_c2014.html">CCMLC2014</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_numerics.html">Numerics</a>::<wbr/></span>DynamicSystem <span class="m-thin">class</span>
         </h1>
         <p>Assembles the coupled residual and Jacobian for the 0D CCMLC2014 model.</p>
@@ -85,7 +85,11 @@
           </thead>
           <tbody>
             <tr>
-              <td style="width: 1%">Input</td>
+              <td style="width: 1%">PassiveLaw</td>
+              <td>Passive stress operator type (functor).</td>
+            </tr>
+            <tr>
+              <td>Input</td>
               <td>Model input parameter type.</td>
             </tr>
           </tbody>
@@ -107,7 +111,7 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a49161cf03c4ad101e9f0d326674911ca" class="m-doc">DynamicSystem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">const</a> Input&amp; input) <span class="m-label m-flat m-info">explicit</span> </span>
+              <span class="m-doc-wrap-bumper"><a href="#a49161cf03c4ad101e9f0d326674911ca" class="m-doc">DynamicSystem</a>(</span><span class="m-doc-wrap">const Input&amp; input) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Construct the dynamic system assembler.</dd>
           </dl>
@@ -116,26 +120,26 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> DenseVector, <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">StateType</a>, <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> EvalData&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a55f22d0caa406331e230e8884009910a" class="m-doc">buildEvalData</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">const</a> DenseVector&amp; candidateUnknowns,
-              <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">const</a> <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">StateType</a>&amp; currentState,
-              <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">const</a> <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">StateType</a>&amp; previousState,
-              <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">typename</a> DenseVector::Scalar tnp1,
-              <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">typename</a> DenseVector::Scalar dt,
-              EvalData&amp; evalData) const -&gt; <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">void</a></span>
+              <div class="m-doc-template">template&lt;class DenseVector, class StateType, class EvalData&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a55f22d0caa406331e230e8884009910a" class="m-doc">buildEvalData</a>(</span><span class="m-doc-wrap">const DenseVector&amp; candidateUnknowns,
+              const StateType&amp; currentState,
+              const StateType&amp; previousState,
+              typename DenseVector::Scalar tnp1,
+              typename DenseVector::Scalar dt,
+              EvalData&amp; evalData) const</span>
             </dt>
             <dd>Build intermediate evaluation data from candidate unknowns.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> DenseVector, <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> EvalData&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7d76a8c30c936c0584130c810a81258b" class="m-doc">evaluateResidual</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">const</a> EvalData&amp; evalData,
-              DenseVector&amp; residualVector) const -&gt; <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">void</a></span>
+              <div class="m-doc-template">template&lt;class DenseVector, class EvalData&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a7d76a8c30c936c0584130c810a81258b" class="m-doc">evaluateResidual</a>(</span><span class="m-doc-wrap">const EvalData&amp; evalData,
+              DenseVector&amp; residualVector) const</span>
             </dt>
             <dd>Evaluate the coupled 0D residual vector.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> DenseMatrix, <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> EvalData&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac4c253bbc994655c8d167d14870d71b8" class="m-doc">evaluateJacobian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">const</a> EvalData&amp; evalData,
+              <div class="m-doc-template">template&lt;class DenseMatrix, class EvalData&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#ac4c253bbc994655c8d167d14870d71b8" class="m-doc">evaluateJacobian</a>(</span><span class="m-doc-wrap">const EvalData&amp; evalData,
               DenseMatrix&amp; jacobianMatrix,
-              <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">typename</a> DenseMatrix::Scalar dt) const -&gt; <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">void</a></span>
+              typename DenseMatrix::Scalar dt) const</span>
             </dt>
             <dd>Assemble the Jacobian of the coupled 0D nonlinear residual.</dd>
           </dl>
@@ -145,9 +149,9 @@
           <section class="m-doc-details" id="a49161cf03c4ad101e9f0d326674911ca"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">PassiveLaw</a> _1, <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> Input&gt;
+                template&lt;class PassiveLaw, class Input&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Numerics::<wbr />DynamicSystem&lt;_1, Input&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a49161cf03c4ad101e9f0d326674911ca" class="m-doc-self">DynamicSystem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">const</a> Input&amp; input) <span class="m-label m-info">explicit</span> </span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Numerics::<wbr />DynamicSystem&lt;PassiveLaw, Input&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a49161cf03c4ad101e9f0d326674911ca" class="m-doc-self">DynamicSystem</a>(</span><span class="m-doc-wrap">const Input&amp; input) <span class="m-label m-info">explicit</span> </span></span>
             </h3>
             <p>Construct the dynamic system assembler.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -165,14 +169,14 @@
           <section class="m-doc-details" id="a55f22d0caa406331e230e8884009910a"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">PassiveLaw</a> _1, <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> Input&gt;
-                template&lt;<a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> DenseVector, <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">StateType</a>, <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> EvalData&gt;
+                template&lt;class PassiveLaw, class Input&gt;
+                template&lt;class DenseVector, class StateType, class EvalData&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">void</a> Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Numerics::<wbr />DynamicSystem&lt;_1, Input&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a55f22d0caa406331e230e8884009910a" class="m-doc-self">buildEvalData</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">const</a> DenseVector&amp; candidateUnknowns,
-              <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">const</a> <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">StateType</a>&amp; currentState,
-              <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">const</a> <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">StateType</a>&amp; previousState,
-              <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">typename</a> DenseVector::Scalar tnp1,
-              <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">typename</a> DenseVector::Scalar dt,
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Numerics::<wbr />DynamicSystem&lt;PassiveLaw, Input&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a55f22d0caa406331e230e8884009910a" class="m-doc-self">buildEvalData</a>(</span><span class="m-doc-wrap">const DenseVector&amp; candidateUnknowns,
+              const StateType&amp; currentState,
+              const StateType&amp; previousState,
+              typename DenseVector::Scalar tnp1,
+              typename DenseVector::Scalar dt,
               EvalData&amp; evalData) const</span></span>
             </h3>
             <p>Build intermediate evaluation data from candidate unknowns.</p>
@@ -317,10 +321,10 @@ $ \Delta t $
           <section class="m-doc-details" id="a7d76a8c30c936c0584130c810a81258b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">PassiveLaw</a> _1, <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> Input&gt;
-                template&lt;<a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> DenseVector, <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> EvalData&gt;
+                template&lt;class PassiveLaw, class Input&gt;
+                template&lt;class DenseVector, class EvalData&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">void</a> Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Numerics::<wbr />DynamicSystem&lt;_1, Input&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7d76a8c30c936c0584130c810a81258b" class="m-doc-self">evaluateResidual</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">const</a> EvalData&amp; evalData,
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Numerics::<wbr />DynamicSystem&lt;PassiveLaw, Input&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7d76a8c30c936c0584130c810a81258b" class="m-doc-self">evaluateResidual</a>(</span><span class="m-doc-wrap">const EvalData&amp; evalData,
               DenseVector&amp; residualVector) const</span></span>
             </h3>
             <p>Evaluate the coupled 0D residual vector.</p>
@@ -357,12 +361,12 @@ $ \Delta t $
           <section class="m-doc-details" id="ac4c253bbc994655c8d167d14870d71b8"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;<a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">PassiveLaw</a> _1, <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> Input&gt;
-                template&lt;<a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> DenseMatrix, <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">class</a> EvalData&gt;
+                template&lt;class PassiveLaw, class Input&gt;
+                template&lt;class DenseMatrix, class EvalData&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">void</a> Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Numerics::<wbr />DynamicSystem&lt;_1, Input&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac4c253bbc994655c8d167d14870d71b8" class="m-doc-self">evaluateJacobian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">const</a> EvalData&amp; evalData,
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Numerics::<wbr />DynamicSystem&lt;PassiveLaw, Input&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac4c253bbc994655c8d167d14870d71b8" class="m-doc-self">evaluateJacobian</a>(</span><span class="m-doc-wrap">const EvalData&amp; evalData,
               DenseMatrix&amp; jacobianMatrix,
-              <a href="class_rodin_1_1_heart_1_1_holzapfel_reduced_law.html" class="m-doc">typename</a> DenseMatrix::Scalar dt) const</span></span>
+              typename DenseMatrix::Scalar dt) const</span></span>
             </h3>
             <p>Assemble the Jacobian of the coupled 0D nonlinear residual.</p>
             <table class="m-table m-fullwidth m-flat">

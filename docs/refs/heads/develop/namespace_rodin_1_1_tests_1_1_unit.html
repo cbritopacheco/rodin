@@ -290,6 +290,16 @@
               <span class="m-doc-wrap-bumper">static auto <a href="#a984318045f939c8a5a786970d0dedd64" class="m-doc">makeLargerMixed2DMesh</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;</span>
             </dt>
             <dd>Builds a larger mixed 2D mesh: 4 triangles + 2 quadrilaterals.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a14d473b31b744d3143d7b82b1ce5472c" class="m-doc">TEST</a>(</span><span class="m-doc-wrap">Rodin_Geometry_Sharder,
+              HDF5_ShardSaveLoad_TopologyRoundTrip)</span>
+            </dt>
+            <dd>Verifies that each shard&#x27;s vertex and cell counts are preserved through an HDF5 save/load round-trip.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a8ffb1c16f009dffa6a70beba6fe124af" class="m-doc">TEST</a>(</span><span class="m-doc-wrap">Rodin_Geometry_Sharder,
+              HDF5_ShardSaveLoad_Reconcile_GlobalConsistency)</span>
+            </dt>
+            <dd>Verifies global mesh consistency after HDF5 shard save/load.</dd>
             <dt id="a9abbd80c73902732b8bd867469d16648">
               <span class="m-doc-wrap-bumper"><a href="#a9abbd80c73902732b8bd867469d16648" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Geometry_Shard,
               Builder_ParentMode_AllOwned)</span>
@@ -776,6 +786,16 @@
             </dt>
             <dd>Verifies that throttled global checks preserve reconcile correctness.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper"><a href="#abafa87dfc6bcec7f130a99fa571cec76" class="m-doc">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              Shard_HDF5_SaveLoad_BaseTopologyRoundTrip)</span>
+            </dt>
+            <dd>Verifies that each rank&#x27;s shard can be saved to HDF5 and reloaded with base mesh topology preserved.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a64366d8e68b9c8e61368b1834a53ad49" class="m-doc">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              Shard_HDF5_FullWorkflow_Reconcile)</span>
+            </dt>
+            <dd>Full HDF5 shard workflow: distribute → save → reload → reconcile.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper"><a href="#aa16108b846c6a27e592cb2bc3ee40f02" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_unit_1_1_flow_test.html" class="m-doc">FlowTest</a>,
               BasicConstruction)</span>
             </dt>
@@ -880,6 +900,22 @@
             <p>Builds a larger mixed 2D mesh: 4 triangles + 2 quadrilaterals.</p>
 <p>Layout (8 vertices): 5&mdash;6&mdash;7 | Q1| Q0| 2&mdash;3&mdash;4 |\ T1 /| |T0\ /T3| 0&mdash;1 |\ T2 (uses vertex 4 from above)</p><p>Actually, simpler to just build a strip: 4&mdash;5&mdash;6&mdash;7 |T1/| Q1 | | / | Q0| | 0&mdash;1&mdash;2&mdash;3</p>
           </div></section>
+          <section class="m-doc-details" id="a14d473b31b744d3143d7b82b1ce5472c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Unit::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a14d473b31b744d3143d7b82b1ce5472c" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Geometry_Sharder,
+              HDF5_ShardSaveLoad_TopologyRoundTrip)</span></span>
+            </h3>
+            <p>Verifies that each shard&#x27;s vertex and cell counts are preserved through an HDF5 save/load round-trip.</p>
+<p>Shard inherits from Mesh&lt;Context::Local&gt;, so it can be persisted with the standard local HDF5 printer. After reloading, the base mesh topology (space dimension, topological dimension, vertex count, cell count) must match the original shard exactly.</p>
+          </div></section>
+          <section class="m-doc-details" id="a8ffb1c16f009dffa6a70beba6fe124af"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Unit::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ffb1c16f009dffa6a70beba6fe124af" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Geometry_Sharder,
+              HDF5_ShardSaveLoad_Reconcile_GlobalConsistency)</span></span>
+            </h3>
+            <p>Verifies global mesh consistency after HDF5 shard save/load.</p>
+<p>After reloading each shard from HDF5:</p><ul><li>Vertex coordinates are preserved (geometric reconcile check): for each global vertex ID appearing in multiple shards, all loaded copies carry the same spatial coordinates as in the original shard.</li><li>Owned cell and vertex counts from the original shards sum to the global mesh totals (partition reconcile check).</li></ul>
+          </div></section>
           <section class="m-doc-details" id="a198ed75949276f5b978fa8da3509b63a"><div>
             <h3>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Unit::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a198ed75949276f5b978fa8da3509b63a" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_unit_1_1_lagrangian_test.html" class="m-doc">LagrangianTest</a>,
@@ -919,6 +955,22 @@
             </h3>
             <p>Verifies that reconcile(2) on a 3D tetrahedron mesh produces correct global face ownership count.</p>
 <p>Uses distributeFromRoot because the <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> UniformGrid for 3D types may produce degenerate partitions with small grids.</p>
+          </div></section>
+          <section class="m-doc-details" id="abafa87dfc6bcec7f130a99fa571cec76"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Unit::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abafa87dfc6bcec7f130a99fa571cec76" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              Shard_HDF5_SaveLoad_BaseTopologyRoundTrip)</span></span>
+            </h3>
+            <p>Verifies that each rank&#x27;s shard can be saved to HDF5 and reloaded with base mesh topology preserved.</p>
+<p>Exercises steps 1–3 of the shard HDF5 workflow:</p><ol><li>Mesh is sharded (distributed via <code>distributeFromRoot</code>).</li><li>Each rank saves its shard using MeshPrinter&lt;FileFormat::HDF5, <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;, which writes both the base mesh topology and the /Shard/... metadata datasets.</li><li>Each rank rereads its shard from HDF5 through the <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mesh loader.</li></ol><p>After reloading, the vertex and cell counts must match the original shard.</p>
+          </div></section>
+          <section class="m-doc-details" id="a64366d8e68b9c8e61368b1834a53ad49"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Unit::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a64366d8e68b9c8e61368b1834a53ad49" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
+              Shard_HDF5_FullWorkflow_Reconcile)</span></span>
+            </h3>
+            <p>Full HDF5 shard workflow: distribute → save → reload → reconcile.</p>
+<p>Exercises all four steps of the workflow:</p><ol><li>Mesh is sharded (distributed via <code>distributeFromRoot</code>).</li><li>Each rank saves its shard to a per-rank HDF5 file using the <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> printer (writes base mesh + /Shard/... metadata).</li><li>Each rank rereads its shard from HDF5 through the <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mesh loader.</li><li>Edge connectivity is then computed and reconciled.</li></ol><p>After reconciliation, the global sum of locally-owned edges must equal the total edge count of the reference mesh.</p>
           </div></section>
           <section class="m-doc-details" id="aa16108b846c6a27e592cb2bc3ee40f02"><div>
             <h3>

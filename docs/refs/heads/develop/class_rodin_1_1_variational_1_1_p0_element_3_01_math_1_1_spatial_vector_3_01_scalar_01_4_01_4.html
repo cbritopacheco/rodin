@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::P0Element&lt;Math::Vector&lt;Scalar&gt;&gt; class | Rodin</title>
+  <title>Rodin::Variational::P0Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -76,7 +76,7 @@
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p0_element_8h.html">&lt;Rodin/Variational/P0/P0Element.h&gt;</a></div>
           <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>P0Element&lt;Math::Vector&lt;Scalar&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>P0Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Piecewise constant (degree 0) vector Lagrange element.</p>
         <nav class="m-block m-default">
@@ -233,7 +233,7 @@ $ \boldsymbol{\phi}_1(x) = (0, 1)^T $
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase&lt;P0Element&lt;Math::Vector&lt;Scalar&gt;&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase&lt;P0Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;&gt;</a>
             </dt>
             <dd>Base class for finite elements.</dd>
           </dl>
@@ -242,19 +242,19 @@ $ \boldsymbol{\phi}_1(x) = (0, 1)^T $
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_vector_3_01_scalar_01_4_01_4_1_1_basis_function.html" class="m-doc">BasisFunction</a>
+              class <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4_1_1_basis_function.html" class="m-doc">BasisFunction</a>
             </dt>
             <dd>Represents a piecewise constant vector basis function.</dd>
             <dt>
-              class <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_vector_3_01_scalar_01_4_01_4_1_1_linear_form.html" class="m-doc">LinearForm</a>
+              class <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4_1_1_linear_form.html" class="m-doc">LinearForm</a>
             </dt>
             <dd>Represents a linear form (evaluation functional) for vector <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> elements.</dd>
-            <dt id="a797a5e0e771d775342cebd4947b7b15e">
-              using <a href="#a797a5e0e771d775342cebd4947b7b15e" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>&lt;<a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;&gt;&gt;
+            <dt id="aa0d31ee85c25ded550ecf059ac17e068">
+              using <a href="#aa0d31ee85c25ded550ecf059ac17e068" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;&gt;&gt;
             </dt>
             <dd>Parent class.</dd>
-            <dt id="a1f9f2413f0b7c0761221b0df7e358bba">
-              using <a href="#a1f9f2413f0b7c0761221b0df7e358bba" class="m-doc-self">RangeType</a> = <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;
+            <dt id="a59e0b84f076a4b011aebb57a90a85a57">
+              using <a href="#a59e0b84f076a4b011aebb57a90a85a57" class="m-doc-self">RangeType</a> = <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;
             </dt>
             <dd>Type of range.</dd>
           </dl>
@@ -280,7 +280,7 @@ $ \boldsymbol{\phi}_1(x) = (0, 1)^T $
               <div class="m-doc-template">
                 template&lt;class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P0Element&lt;Math::<wbr />Vector&lt;Scalar&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9aa5eea6a188b88105b871232fdea8f5" class="m-doc-self">P0Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P0Element&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9aa5eea6a188b88105b871232fdea8f5" class="m-doc-self">P0Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructor with geometry, defaulting vdim to spatial dimension.</p>
 <p>Keeps backward compatibility with previous behaviour.</p>
@@ -290,7 +290,7 @@ $ \boldsymbol{\phi}_1(x) = (0, 1)^T $
               <div class="m-doc-template">
                 template&lt;class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P0Element&lt;Math::<wbr />Vector&lt;Scalar&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a945b24e0fc1300b7160b6613631636a0" class="m-doc-self">P0Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P0Element&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a945b24e0fc1300b7160b6613631636a0" class="m-doc-self">P0Element</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry,
               size_t vdim) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructor with explicit vector dimension.</p>

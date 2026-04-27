@@ -80,21 +80,22 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md536">Key Classes</a></li>
-            <li><a href="#autotoc_md537">Expression Template Pattern</a></li>
-            <li><a href="#autotoc_md538">Object Lifetime</a></li>
+            <li><a href="#autotoc_md537">Key Classes</a></li>
+            <li><a href="#autotoc_md538">Expression Template Pattern</a></li>
+            <li><a href="#autotoc_md539">Object Lifetime</a></li>
             <li>
               Reference
               <ul>
                 <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#enum-members">Enums</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>The <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a> module provides the expression template infrastructure underlying <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s variational form language. It enables composing mathematical expressions that are lazily evaluated during assembly.</p><section id="autotoc_md536"><h3><a href="#autotoc_md536">Key Classes</a></h3><ul><li><code><a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a></code> — Root base class for all form language objects. Provides unique identification (UUID), object lifetime management via shared ownership, and polymorphic <code>copy()</code>. <strong>Not thread-safe</strong>: use <code>thread_local</code> caching for per-thread output in evaluation methods.</li><li><code><a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;T&gt;</code> — Type trait template. Each form language type provides a specialization defining associated types (<code>ScalarType</code>, <code>RangeType</code>, <code>FESType</code>, etc.). Always specialize <code><a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a></code> for new types.</li><li><code><a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a></code> — Container for variational form components (integrals, boundary conditions) that makes up the body of a <code>Problem</code>.</li></ul></section><section id="autotoc_md537"><h3><a href="#autotoc_md537">Expression Template Pattern</a></h3><p>Operators like <code>Grad</code>, <code>Div</code>, <code><a href="struct_rodin_1_1_form_language_1_1_dot.html" class="m-doc">Dot</a></code> are CRTP-based expression templates:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">stiffness</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">));</span><span class="w"> </span><span class="c1">// expression, not yet evaluated</span>
+<p>The <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a> module provides the expression template infrastructure underlying <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s variational form language. It enables composing mathematical expressions that are lazily evaluated during assembly.</p><section id="autotoc_md537"><h3><a href="#autotoc_md537">Key Classes</a></h3><ul><li><code><a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a></code> — Root base class for all form language objects. Provides unique identification (UUID), object lifetime management via shared ownership, and polymorphic <code>copy()</code>. <strong>Not thread-safe</strong>: use <code>thread_local</code> caching for per-thread output in evaluation methods.</li><li><code><a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;T&gt;</code> — Type trait template. Each form language type provides a specialization defining associated types (<code>ScalarType</code>, <code>RangeType</code>, <code>FESType</code>, etc.). Always specialize <code><a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a></code> for new types.</li><li><code><a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a></code> — Container for variational form components (integrals, boundary conditions) that makes up the body of a <code>Problem</code>.</li></ul></section><section id="autotoc_md538"><h3><a href="#autotoc_md538">Expression Template Pattern</a></h3><p>Operators like <code>Grad</code>, <code>Div</code>, <code><a href="struct_rodin_1_1_form_language_1_1_dot.html" class="m-doc">Dot</a></code> are CRTP-based expression templates:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">stiffness</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">));</span><span class="w"> </span><span class="c1">// expression, not yet evaluated</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">load</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span><span class="w">                   </span><span class="c1">// another expression</span>
 <span class="n">Problem</span><span class="w"> </span><span class="nf">p</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
-<span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stiffness</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">load</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">Zero</span><span class="p">());</span><span class="w"> </span><span class="c1">// combined expression</span></pre><p>Expressions store operands via <code>std::reference_wrapper</code> (non-owning) or <code>std::unique_ptr</code> (owning, for temporaries). No computation occurs until assembly iterates over mesh cells and evaluates the expression at quadrature points.</p></section><section id="autotoc_md538"><h3><a href="#autotoc_md538">Object Lifetime</a></h3><p>The <code><a href="class_rodin_1_1_form_language_1_1_base.html#a4417fb78d73a66bd16866d807ace5c91" class="m-doc">Base::<wbr />object()</a></code> helpers manage temporary object lifetimes. When an expression captures a temporary (e.g. a lambda-constructed <code>RealFunction</code>), the temporary is stored in a <code>shared_ptr</code> table within the expression, ensuring it lives as long as the expression does.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational module</a> for the user-facing form language.</p></aside></section>
+<span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stiffness</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">load</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">Zero</span><span class="p">());</span><span class="w"> </span><span class="c1">// combined expression</span></pre><p>Expressions store operands via <code>std::reference_wrapper</code> (non-owning) or <code>std::unique_ptr</code> (owning, for temporaries). No computation occurs until assembly iterates over mesh cells and evaluates the expression at quadrature points.</p></section><section id="autotoc_md539"><h3><a href="#autotoc_md539">Object Lifetime</a></h3><p>The <code>Base::object()</code> helpers manage temporary object lifetimes. When an expression captures a temporary (e.g. a lambda-constructed <code>RealFunction</code>), the temporary is stored in a <code>shared_ptr</code> table within the expression, ensuring it lives as long as the expression does.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational module</a> for the user-facing form language.</p></aside></section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
@@ -208,11 +209,6 @@
             </dt>
             <dd>Specialization of <a href="struct_rodin_1_1_form_language_1_1_result_of.html" class="m-doc">ResultOf</a> for ShapeFunctionBase.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class LHS, class RHS&gt;</div>
-              struct <a href="struct_rodin_1_1_form_language_1_1_sum.html" class="m-doc">Sum</a>
-            </dt>
-            <dd>Type trait for deducing the result type of addition.</dd>
-            <dt>
               <div class="m-doc-template">template&lt;class ... Args&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a>
             </dt>
@@ -288,6 +284,52 @@
             </dt>
             <dd>Type trait for deducing the result type of unary negation.</dd>
           </dl>
+        </section>
+        <section id="enum-members">
+          <h2><a href="#enum-members">Enums</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">enum class <a href="#ac6e4fa171f57a9659c9e8d1988e6b78a" class="m-doc">RangeKind</a> { </span><span class="m-doc-wrap"><a href="#ac6e4fa171f57a9659c9e8d1988e6b78aa27226c864bac7454a8504f8edb15d95b" class="m-doc">Boolean</a>,
+              <a href="#ac6e4fa171f57a9659c9e8d1988e6b78aaa0faef0851b4294c06f2b94bb1cb2044" class="m-doc">Integer</a>,
+              <a href="#ac6e4fa171f57a9659c9e8d1988e6b78aa7f80fcc452c2f1ed2bb51b39d0864df1" class="m-doc">Real</a>,
+              <a href="#ac6e4fa171f57a9659c9e8d1988e6b78aa10b4eb76294b70d7fd6df997ff06edb1" class="m-doc">Complex</a>,
+              <a href="#ac6e4fa171f57a9659c9e8d1988e6b78aa57dea6f5039281b7fee517fc43bf3110" class="m-doc">Vector</a>,
+              <a href="#ac6e4fa171f57a9659c9e8d1988e6b78aaf53df0293e169f562bc1d9a20e1d2589" class="m-doc">Matrix</a>,
+              <a href="#ac6e4fa171f57a9659c9e8d1988e6b78aa88183b946cc5f0e8c96b2e66e1c74a7e" class="m-doc">Unknown</a> }</span>
+            </dt>
+            <dd>Type trait for deducing the result type of addition.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Enum documentation</h2>
+          <section class="m-doc-details" id="ac6e4fa171f57a9659c9e8d1988e6b78a"><div>
+            <h3>
+              enum class Rodin::<wbr />FormLanguage::<wbr /><a href="#ac6e4fa171f57a9659c9e8d1988e6b78a" class="m-doc-self">RangeKind</a>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_math_2_traits_8h.html">&lt;Rodin/Math/Traits.h&gt;</a></div>
+            </h3>
+            <p>Type trait for deducing the result type of addition.</p>
+<p>Determines the type of <svg class="m-math" style="width: 6.274em; height: 0.933em; vertical-align: -0.095em;" viewBox="0 -8.045544 60.229255 8.958746">
+<title>
+$ \text{LHS} + \text{RHS} $
+</title>
+<defs>
+<path id='eq1-g3-43' d='M4.770112-2.761644H8.069738C8.237111-2.761644 8.452304-2.761644 8.452304-2.976837C8.452304-3.203985 8.249066-3.203985 8.069738-3.203985H4.770112V-6.503611C4.770112-6.670984 4.770112-6.886177 4.554919-6.886177C4.327771-6.886177 4.327771-6.682939 4.327771-6.503611V-3.203985H1.028144C.860772-3.203985 .645579-3.203985 .645579-2.988792C.645579-2.761644 .848817-2.761644 1.028144-2.761644H4.327771V.537983C4.327771 .705355 4.327771 .920548 4.542964 .920548C4.770112 .920548 4.770112 .71731 4.770112 .537983V-2.761644Z'/>
+<path id='eq1-g2-72' d='M8.361174 0V-.2263C7.467886-.297763 7.313049-.452599 7.313049-1.298245V-6.586509C7.313049-7.444065 7.444065-7.57508 8.361174-7.658454V-7.884753H5.050054V-7.658454C5.967162-7.57508 6.098178-7.444065 6.098178-6.586509V-4.275871H2.489295V-6.586509C2.489295-7.444065 2.620311-7.57508 3.53742-7.658454V-7.884753H.2263V-7.658454C1.143408-7.57508 1.274424-7.444065 1.274424-6.586509V-1.42926C1.274424-.428778 1.155319-.285852 .2263-.2263V0H3.53742V-.2263C2.644132-.297763 2.489295-.452599 2.489295-1.298245V-3.751809H6.098178V-1.42926C6.098178-.428778 5.979073-.285852 5.050054-.2263V0H8.361174Z'/>
+<path id='eq1-g2-76' d='M7.122481-2.072428H6.824719C6.634151-1.65556 6.479314-1.381618 6.312567-1.19105C5.895699-.690809 5.240622-.46451 4.216318-.46451H3.418315C2.548848-.46451 2.394011-.535973 2.394011-.95284V-6.586509C2.394011-7.432154 2.560758-7.598901 3.501688-7.658454V-7.884753H.142926V-7.658454C1.024303-7.586991 1.17914-7.432154 1.17914-6.586509V-1.298245C1.17914-.452599 1.012393-.285852 .142926-.2263V0H6.550777L7.122481-2.072428Z'/>
+<path id='eq1-g2-82' d='M7.849022 0V-.2263C7.396423-.262031 7.158213-.381136 6.812808-.786093L4.359244-3.799451C5.157248-3.954287 5.514563-4.097213 5.90761-4.418797C6.288746-4.72847 6.515046-5.228711 6.515046-5.788505C6.515046-6.300656 6.360209-6.741345 6.050536-7.08675C5.597937-7.57508 4.609365-7.884753 3.489778-7.884753H.202479V-7.658454C1.095766-7.56317 1.214871-7.432154 1.214871-6.586509V-1.42926C1.214871-.440689 1.095766-.297763 .202479-.2263V0H3.501688V-.2263C2.584579-.285852 2.429743-.440689 2.429743-1.298245V-3.644614L3.096731-3.668435L5.931431 0H7.849022ZM5.216801-5.812326C5.216801-5.216801 4.96668-4.716559 4.537902-4.49026C3.990019-4.180587 3.573151-4.109124 2.429743-4.085303V-7.015287C2.429743-7.348781 2.560758-7.444065 3.037178-7.444065C4.525991-7.444065 5.216801-6.931913 5.216801-5.812326Z'/>
+<path id='eq1-g2-83' d='M5.848057-2.000965C5.848057-2.989536 5.19298-3.751809 3.620793-4.609365C2.37019-5.288264 1.869949-5.812326 1.869949-6.467404S2.37019-7.56317 3.108641-7.56317C3.644614-7.56317 4.144855-7.33687 4.561723-6.908092C4.930949-6.526956 5.097696-6.217283 5.288264-5.514563H5.586026L5.323995-8.051501H5.073875C5.026233-7.789469 4.895217-7.646543 4.692738-7.646543C4.573633-7.646543 4.383065-7.694185 4.168676-7.789469C3.727988-7.956216 3.29921-8.051501 2.882342-8.051501C2.417832-8.051501 1.917591-7.860932 1.536455-7.551259C1.071945-7.170123 .845646-6.657972 .845646-6.002894C.845646-5.061964 1.369708-4.394976 2.703684-3.692256C3.561241-3.227747 4.180587-2.751326 4.478349-2.298727C4.585544-2.13198 4.645096-1.89377 4.645096-1.596007C4.645096-.809914 4.049571-.262031 3.180104-.262031C2.108159-.262031 1.369708-.917109 .774183-2.37019H.500241L.857556 .154837H1.119587C1.131498-.071463 1.274424-.23821 1.453081-.23821C1.584097-.23821 1.786576-.190568 2.012875-.107195C2.465474 .071463 2.941894 .166747 3.418315 .166747C4.799933 .166747 5.848057-.774183 5.848057-2.000965Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g2-76'/>
+<use x='7.304608' y='0' xlink:href='#eq1-g2-72'/>
+<use x='15.936241' y='0' xlink:href='#eq1-g2-83'/>
+<use x='25.239975' y='0' xlink:href='#eq1-g3-43'/>
+<use x='37.00129' y='0' xlink:href='#eq1-g2-82'/>
+<use x='44.975385' y='0' xlink:href='#eq1-g2-72'/>
+<use x='53.607018' y='0' xlink:href='#eq1-g2-83'/>
+</g>
+</svg> at compile time.</p>
+          </div></section>
         </section>
       </div>
     </div>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::Div&lt;GridFunction&lt;P0g&lt;Math::Vector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt; class | Rodin</title>
+  <title>Rodin::Variational::Div&lt;ShapeFunction&lt;NestedDerived, P0g&lt;Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -75,10 +75,10 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p0g_2_div_8h.html">&lt;Rodin/Variational/P0g/Div.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class Scalar, class Data, class Mesh&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Div&lt;GridFunction&lt;P0g&lt;Math::Vector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+          <div class="m-doc-template">template&lt;class NestedDerived, class Scalar, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Div&lt;ShapeFunction&lt;NestedDerived, P0g&lt;Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p>Divergence of a <a href="class_rodin_1_1_variational_1_1_p0g.html" class="m-doc">P0g</a> vector <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> (identically zero).</p>
+        <p>Divergence of a <a href="class_rodin_1_1_variational_1_1_p0g.html" class="m-doc">P0g</a> vector <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a> (identically zero).</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -95,21 +95,44 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class Operand, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_div_base.html" class="m-doc">DivBase&lt;GridFunction&lt;P0g&lt;Math::Vector&lt;Scalar&gt;, Mesh&gt;, Data&gt;, Div&lt;GridFunction&lt;P0g&lt;Math::Vector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class Derived, class FES = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;<a href="class_rodin_1_1_variational_1_1_shape_function_base.html#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">::<wbr />FESType</a>, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType = <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::SpaceType&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase&lt;Div&lt;ShapeFunction&lt;NestedDerived, P0g&lt;Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;, P0g&lt;Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;</a>
             </dt>
-            <dd>Base class for divergence operator implementations.</dd>
+            <dd>Base class for shape function objects.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a6a0e03e3045fccc67be3e1b4cd6b7e16">
-              <span class="m-doc-wrap-bumper">void <a href="#a6a0e03e3045fccc67be3e1b4cd6b7e16" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap">ScalarType&amp; out,
-              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;) const</span>
+            <dt id="a33e1a16d7033a2b95e4f54fc7f1d2142">
+              <span class="m-doc-wrap-bumper">auto <a href="#a33e1a16d7033a2b95e4f54fc7f1d2142" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">size_t local) const -&gt; ScalarType <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd>Interpolates div(u) at point p (always zero for <a href="class_rodin_1_1_variational_1_1_p0g.html" class="m-doc">P0g</a>).</dd>
+            <dd>Returns div(phi_local) (always zero).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0e071453b9d576fa6557bdc5600ae87c" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Creates a polymorphic copy of the shape function.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a0e071453b9d576fa6557bdc5600ae87c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived, class Scalar, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>* Rodin::<wbr />Variational::<wbr />Div&lt;ShapeFunction&lt;NestedDerived, P0g&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;&lt;NestedDerived, Scalar, Mesh, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0e071453b9d576fa6557bdc5600ae87c" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Creates a polymorphic copy of the shape function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to newly allocated copy</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
