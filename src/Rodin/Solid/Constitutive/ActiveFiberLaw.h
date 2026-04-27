@@ -30,14 +30,19 @@ namespace Rodin::Solid
     public:
       struct Parameters
       {
+        struct Initial
+        {
+          Real extension = 0.0;
+          Real stiffness = 0.0;
+          Real stress = 0.0;
+        };
+
         Real stiffness = 1.0;
-        Real initialExtension = 0.0;
-        Real initialActiveStiffness = 0.0;
-        Real initialActiveStress = 0.0;
         Real damping = 0.0;
         Real destructionRate = 0.0;
         Real crossBridgeStiffness = 0.0;
         Real contractility = 0.0;
+        Initial initial;
       };
 
       struct State
@@ -54,12 +59,12 @@ namespace Rodin::Solid
       struct Response
       {
         Real stress = 0.0;
-        Real dStressWrtStrain = 0.0;
-        Real dStressWrtActiveExtension = 0.0;
-        Real contractionResidualOverK22 = 0.0;
-        Real k21 = 0.0;
-        Real k22 = 1.0;
-        Real condensedStressTangent = 0.0;
+        Real dStressDe = 0.0;
+        Real dStressDc = 0.0;
+        Real residual = 0.0;
+        Real kce = 0.0;
+        Real kcc = 1.0;
+        Real tangent = 0.0;
       };
 
       ActiveFiberLaw()
@@ -79,54 +84,49 @@ namespace Rodin::Solid
       {
         State state;
         state.gamma =
-          std::sqrt(std::max<Real>(m_parameters.initialActiveStiffness, 0.0));
+          std::sqrt(std::max<Real>(m_parameters.initial.stiffness, 0.0));
         state.beta = state.gamma > 0.0
-          ? m_parameters.initialActiveStress / state.gamma
+          ? m_parameters.initial.stress / state.gamma
           : 0.0;
         return state;
       }
 
-      Real getStress(Real strain1D, Real activeExtension) const
+      Real stress(Real e, Real c) const
       {
-        const Real denom = 1.0 + 2.0 * activeExtension;
+        const Real denom = 1.0 + 2.0 * c;
         return m_parameters.stiffness
-             * (strain1D - activeExtension) / (denom * denom);
+             * (e - c) / (denom * denom);
       }
 
-      Real getPartialDerivativeStressWrtStrain1D(Real activeExtension) const
+      Real dStressDe(Real c) const
       {
-        const Real denom = 1.0 + 2.0 * activeExtension;
+        const Real denom = 1.0 + 2.0 * c;
         return m_parameters.stiffness / (denom * denom);
       }
 
-      Real getPartialDerivativeStressWrtActiveExtension(
-          Real strain1D,
-          Real activeExtension) const
+      Real dStressDc(Real e, Real c) const
       {
-        const Real denom = 1.0 + 2.0 * activeExtension;
+        const Real denom = 1.0 + 2.0 * c;
         return m_parameters.stiffness
-             * (2.0 * activeExtension - 4.0 * strain1D - 1.0)
+             * (2.0 * c - 4.0 * e - 1.0)
              / (denom * denom * denom);
       }
 
-      Response evaluateStatic(Real strain1D, Real activeExtension) const
+      Response evaluateStatic(Real e, Real c) const
       {
         Response response;
-        response.stress = getStress(strain1D, activeExtension);
-        response.dStressWrtStrain =
-          getPartialDerivativeStressWrtStrain1D(activeExtension);
-        response.dStressWrtActiveExtension =
-          getPartialDerivativeStressWrtActiveExtension(strain1D, activeExtension);
-        response.k22 = m_parameters.stiffness * (1.0 + 2.0 * strain1D);
-        response.k21 =
-          -m_parameters.stiffness * (1.0 + 4.0 * strain1D - 2.0 * activeExtension);
-        response.contractionResidualOverK22 =
+        response.stress = stress(e, c);
+        response.dStressDe = dStressDe(c);
+        response.dStressDc = dStressDc(e, c);
+        response.kcc = m_parameters.stiffness * (1.0 + 2.0 * e);
+        response.kce =
+          -m_parameters.stiffness * (1.0 + 4.0 * e - 2.0 * c);
+        response.residual =
           (-m_parameters.stiffness
-           * (strain1D - activeExtension) * (1.0 + 2.0 * strain1D))
-          / response.k22;
-        response.condensedStressTangent =
-          response.dStressWrtStrain
-          - response.dStressWrtActiveExtension * response.k21 / response.k22;
+           * (e - c) * (1.0 + 2.0 * e))
+          / response.kcc;
+        response.tangent =
+          response.dStressDe - response.dStressDc * response.kce / response.kcc;
         return response;
       }
 
@@ -172,7 +172,7 @@ namespace Rodin::Solid
           Real dt,
           const State& oldState,
           const State& newState,
-          Real strain1D,
+          Real e,
           Real previousActiveExtension,
           Real activeExtension,
           Real activation) const
@@ -186,37 +186,35 @@ namespace Rodin::Solid
           * (activeExtension - previousActiveExtension) / dt;
 
         Response response;
-        response.stress = getStress(strain1D, midpointExtension);
-        response.dStressWrtStrain =
-          getPartialDerivativeStressWrtStrain1D(midpointExtension);
-        response.dStressWrtActiveExtension =
-          getPartialDerivativeStressWrtActiveExtension(strain1D, midpointExtension);
-        response.k21 =
+        response.stress = stress(e, midpointExtension);
+        response.dStressDe = dStressDe(midpointExtension);
+        response.dStressDc = dStressDc(e, midpointExtension);
+        response.kce =
           -m_parameters.stiffness
-          * (1.0 + 4.0 * strain1D - 2.0 * midpointExtension);
-        response.k22 =
+          * (1.0 + 4.0 * e - 2.0 * midpointExtension);
+        response.kcc =
           3.0 * onePlus2MidpointExtension * onePlus2MidpointExtension
             * activeBranchStress
           + onePlus2MidpointExtension * onePlus2MidpointExtension
             * onePlus2MidpointExtension
-            * (getPartialDerivativeActiveStressWrtActiveExtension(
+            * (dActiveStressDc(
                 dt, oldState, activation, previousActiveExtension, activeExtension)
               + m_parameters.damping / dt)
-          + 0.5 * m_parameters.stiffness * (1.0 + 2.0 * strain1D);
-        response.contractionResidualOverK22 =
+          + 0.5 * m_parameters.stiffness * (1.0 + 2.0 * e);
+        response.residual =
           (activeBranchStress
              * onePlus2MidpointExtension * onePlus2MidpointExtension
              * onePlus2MidpointExtension
            - m_parameters.stiffness
-             * (strain1D - midpointExtension) * (1.0 + 2.0 * strain1D))
-          / response.k22;
-        response.condensedStressTangent =
-          response.dStressWrtStrain
-          - 0.5 * response.dStressWrtActiveExtension * response.k21 / response.k22;
+             * (e - midpointExtension) * (1.0 + 2.0 * e))
+          / response.kcc;
+        response.tangent =
+          response.dStressDe
+          - 0.5 * response.dStressDc * response.kce / response.kcc;
         return response;
       }
 
-      Real getPartialDerivativeActiveStressWrtActiveExtension(
+      Real dActiveStressDc(
           Real dt,
           const State& oldState,
           Real activation,

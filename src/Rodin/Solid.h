@@ -32,6 +32,7 @@
 // Local (constitutive point, input injection)
 #include "Solid/Local/ConstitutivePoint.h"
 #include "Solid/Local/Input.h"
+#include "Solid/Local/FiberKinematics.h"
 
 // Kinematics
 #include "Solid/Kinematics/KinematicState.h"

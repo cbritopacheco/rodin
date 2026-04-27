@@ -18,6 +18,7 @@
 #include "Rodin/Math/SpatialVector.h"
 
 #include "Rodin/Solid/Kinematics/KinematicState.h"
+#include "Rodin/Solid/Local/FiberKinematics.h"
 #include "Rodin/Solid/Local/ConstitutivePoint.h"
 
 #include "HyperElasticLaw.h"
@@ -64,7 +65,7 @@ namespace Rodin::Solid
         Real I1bar = 0.0;
         Real I2bar = 0.0;
         Real I4bar = 1.0;
-        Math::SpatialVector<Real> fiber;
+        Math::SpatialVector<Real> direction;
       };
 
       explicit HolzapfelOgden(const Parameters& params)
@@ -89,21 +90,7 @@ namespace Rodin::Solid
 
       void setCache(Cache& cache, const ConstitutivePoint& cp) const
       {
-        const auto& state = cp.getKinematicState();
-        const auto& C = state.getRightCauchyGreenTensor();
-
-        cache.J = state.getJacobian();
-        cache.I1 = C.trace();
-        cache.I2 = 0.5 * (cache.I1 * cache.I1 - (C * C).trace());
-        cache.I3 = cache.J * cache.J;
-        cache.I3m13 = std::pow(cache.I3, -1.0 / 3.0);
-        cache.I3m23 = cache.I3m13 * cache.I3m13;
-        cache.I1bar = cache.I1 * cache.I3m13;
-        cache.I2bar = cache.I2 * cache.I3m23;
-
-        cache.fiber = getFiberDirection(cp, state.getDimension());
-        cache.I4 = cache.fiber.dot(C * cache.fiber);
-        cache.I4bar = cache.I4 * cache.I3m13;
+        setCache(cache, cp.getKinematicState(), FiberKinematics::direction(cp));
       }
 
       Real getStrainEnergyDensity(const Cache& cache, const ConstitutivePoint&) const
@@ -136,7 +123,7 @@ namespace Rodin::Solid
         KinematicState plus(state.getDimension());
         plus.setDisplacementGradient(H + eps * dF);
         Cache plusCache = cache;
-        setCacheFromState(plusCache, plus, cache.fiber);
+        setCache(plusCache, plus, cache.direction);
         Math::SpatialMatrix<Real> Pplus;
         computeFirstPiolaKirchhoffStress(Pplus, plusCache, plus);
 
@@ -152,29 +139,10 @@ namespace Rodin::Solid
         return x * x;
       }
 
-      static Math::SpatialVector<Real> getFiberDirection(
-          const ConstitutivePoint& cp,
-          size_t d)
-      {
-        Math::SpatialVector<Real> fiber(static_cast<std::uint8_t>(d));
-        if (cp.has<Tags::FiberDirection>())
-          fiber = cp.get<Tags::FiberDirection>();
-        else
-        {
-          fiber.setZero();
-          fiber[0] = 1.0;
-        }
-
-        const Real norm = std::sqrt(fiber.dot(fiber));
-        if (norm > 0.0)
-          fiber = (1.0 / norm) * fiber;
-        return fiber;
-      }
-
-      void setCacheFromState(
+      void setCache(
           Cache& cache,
           const KinematicState& state,
-          const Math::SpatialVector<Real>& fiber) const
+          const Math::SpatialVector<Real>& direction) const
       {
         const auto& C = state.getRightCauchyGreenTensor();
         cache.J = state.getJacobian();
@@ -185,8 +153,8 @@ namespace Rodin::Solid
         cache.I3m23 = cache.I3m13 * cache.I3m13;
         cache.I1bar = cache.I1 * cache.I3m13;
         cache.I2bar = cache.I2 * cache.I3m23;
-        cache.fiber = fiber;
-        cache.I4 = fiber.dot(C * fiber);
+        cache.direction = direction;
+        cache.I4 = direction.dot(C * direction);
         cache.I4bar = cache.I4 * cache.I3m13;
       }
 
@@ -202,12 +170,8 @@ namespace Rodin::Solid
 
         Math::SpatialMatrix<Real> I(static_cast<std::uint8_t>(d), static_cast<std::uint8_t>(d));
         I.setIdentity();
-        Math::SpatialMatrix<Real> A(static_cast<std::uint8_t>(d), static_cast<std::uint8_t>(d));
-        A.setZero();
-        for (size_t i = 0; i < d; ++i)
-          for (size_t j = 0; j < d; ++j)
-            A(static_cast<std::uint8_t>(i), static_cast<std::uint8_t>(j)) =
-              cache.fiber[i] * cache.fiber[j];
+        const Math::SpatialMatrix<Real> A =
+          FiberKinematics::dyad(cache.direction);
 
         const Real W1 =
           2.0 * m_params.C0 * m_params.C1 * cache.I3m13

@@ -157,6 +157,27 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(fib.getFifthInvariant(), 1.44 * 1.44, 1e-12);
   }
 
+  TEST(Rodin_Solid_FiberKinematics, NormalizedDirectionAndStrain)
+  {
+    Solid::KinematicState state(2);
+    Math::SpatialMatrix<Real> H(2, 2);
+    H(0,0)=0.2; H(0,1)=0.0; H(1,0)=0.0; H(1,1)=0.0;
+    state.setDisplacementGradient(H);
+
+    Solid::ConstitutivePoint cp(state);
+    Math::SpatialVector<Real> direction(2);
+    direction[0] = 2.0;
+    direction[1] = 0.0;
+    cp.set<Solid::Tags::FiberDirection>(direction);
+
+    Solid::FiberKinematics fiber(cp);
+
+    EXPECT_NEAR(fiber.direction()[0], 1.0, 1e-14);
+    EXPECT_NEAR(fiber.direction()[1], 0.0, 1e-14);
+    EXPECT_NEAR(fiber.I4(), 1.44, 1e-12);
+    EXPECT_NEAR(fiber.strain(), 0.22, 1e-12);
+  }
+
   // ========================================================================
   // NeoHookean tests
   // ========================================================================
@@ -493,7 +514,7 @@ namespace Rodin::Tests::Unit
     Solid::NeoHookean passive(0.0, 0.0);
     Solid::ActiveFiberLaw::Parameters activeInput;
     activeInput.stiffness = 10.0;
-    activeInput.initialExtension = 0.0;
+    activeInput.initial.extension = 0.0;
     Solid::ActiveFiberLaw active(activeInput);
     Solid::ActiveContraction law(passive, active);
 
@@ -515,12 +536,25 @@ namespace Rodin::Tests::Unit
     Math::SpatialMatrix<Real> P;
     law.getFirstPiolaKirchhoffStress(P, cache, cp);
 
-    const Real strain1D = 0.5 * (1.1 * 1.1 - 1.0);
-    const Real stress = activeInput.stiffness * strain1D;
+    const Real strain = 0.5 * (1.1 * 1.1 - 1.0);
+    const Real stress = activeInput.stiffness * strain;
     EXPECT_NEAR(P(0, 0), 1.1 * stress, 1e-12);
     EXPECT_NEAR(P(0, 1), 0.0, 1e-12);
     EXPECT_NEAR(P(1, 0), 0.0, 1e-12);
     EXPECT_NEAR(P(1, 1), 0.0, 1e-12);
+  }
+
+  TEST(Rodin_Solid_ActiveFiberLaw, InitialValues)
+  {
+    Solid::ActiveFiberLaw::Parameters parameters;
+    parameters.initial.stiffness = 4.0;
+    parameters.initial.stress = 6.0;
+
+    Solid::ActiveFiberLaw law(parameters);
+    const auto state = law.initialState();
+
+    EXPECT_NEAR(state.gamma, 2.0, 1e-14);
+    EXPECT_NEAR(state.beta, 3.0, 1e-14);
   }
 
   // ========================================================================

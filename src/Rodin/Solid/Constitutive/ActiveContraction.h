@@ -16,6 +16,7 @@
 #include "Rodin/Types.h"
 #include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/Math/SpatialVector.h"
+#include "Rodin/Solid/Local/FiberKinematics.h"
 #include "Rodin/Solid/Local/ConstitutivePoint.h"
 
 #include "HyperElasticLaw.h"
@@ -39,14 +40,10 @@ namespace Rodin::Solid
       struct Cache
       {
         typename PassiveLaw::Cache passive;
-        Math::SpatialVector<Real> fiber;
-        Math::SpatialMatrix<Real> fiberTensor;
-        Math::SpatialVector<Real> deformedFiber;
-        Real strain1D = 0.0;
+        FiberKinematics fiber;
+        Real strain = 0.0;
         Real activeExtension = 0.0;
-        Real activeStress = 0.0;
-        Real condensedStressTangent = 0.0;
-        typename ActiveLaw::Response activeResponse;
+        typename ActiveLaw::Response active;
       };
 
       ActiveContraction(
@@ -70,24 +67,11 @@ namespace Rodin::Solid
       {
         m_passiveLaw.setCache(cache.passive, cp);
 
-        const auto& state = cp.getKinematicState();
-        const size_t d = state.getDimension();
-        const auto d8 = static_cast<std::uint8_t>(d);
-
-        cache.fiber = getFiberDirection(cp, d);
-        cache.fiberTensor.resize(d8, d8);
-        cache.fiberTensor.setZero();
-        for (size_t i = 0; i < d; ++i)
-          for (size_t j = 0; j < d; ++j)
-            cache.fiberTensor(static_cast<std::uint8_t>(i), static_cast<std::uint8_t>(j)) =
-              cache.fiber[i] * cache.fiber[j];
-
-        cache.deformedFiber = state.getDeformationGradient() * cache.fiber;
-        cache.strain1D =
-          0.5 * (cache.fiber.dot(state.getRightCauchyGreenTensor() * cache.fiber) - 1.0);
+        cache.fiber = FiberKinematics(cp);
+        cache.strain = cache.fiber.strain();
         cache.activeExtension = cp.has<Tags::ActiveExtension>()
           ? cp.get<Tags::ActiveExtension>()
-          : m_activeLaw.getParameters().initialExtension;
+          : m_activeLaw.getParameters().initial.extension;
 
         if (hasDynamicData(cp))
         {
@@ -100,23 +84,20 @@ namespace Rodin::Solid
               cp.get<Tags::PreviousActiveExtension>(),
               cache.activeExtension,
               cp.get<Tags::ElectricalActivation>());
-          cache.activeResponse = m_activeLaw.evaluateDynamic(
+          cache.active = m_activeLaw.evaluateDynamic(
               cp.get<Tags::TimeStep>(),
               oldState,
               newState,
-              cache.strain1D,
+              cache.strain,
               cp.get<Tags::PreviousActiveExtension>(),
               cache.activeExtension,
               cp.get<Tags::ElectricalActivation>());
         }
         else
         {
-          cache.activeResponse =
-            m_activeLaw.evaluateStatic(cache.strain1D, cache.activeExtension);
+          cache.active =
+            m_activeLaw.evaluateStatic(cache.strain, cache.activeExtension);
         }
-
-        cache.activeStress = cache.activeResponse.stress;
-        cache.condensedStressTangent = cache.activeResponse.condensedStressTangent;
       }
 
       Real getStrainEnergyDensity(const Cache& cache, const ConstitutivePoint& cp) const
@@ -126,8 +107,8 @@ namespace Rodin::Solid
         const Real denom = 1.0 + 2.0 * cache.activeExtension;
         const Real activeEnergy =
           0.5 * m_activeLaw.getParameters().stiffness
-          * (cache.strain1D - cache.activeExtension)
-          * (cache.strain1D - cache.activeExtension)
+          * (cache.strain - cache.activeExtension)
+          * (cache.strain - cache.activeExtension)
           / (denom * denom);
         return passiveEnergy + activeEnergy;
       }
@@ -138,9 +119,9 @@ namespace Rodin::Solid
           const ConstitutivePoint& cp) const
       {
         m_passiveLaw.getFirstPiolaKirchhoffStress(P, cache.passive, cp);
-        P = P + cache.activeStress
+        P = P + cache.active.stress
               * cp.getKinematicState().getDeformationGradient()
-              * cache.fiberTensor;
+              * cache.fiber.tensor();
       }
 
       void getMaterialTangent(
@@ -151,13 +132,12 @@ namespace Rodin::Solid
       {
         m_passiveLaw.getMaterialTangent(dP, cache.passive, cp, dF);
 
-        const auto dFa = dF * cache.fiber;
-        const Real dStrain1D = cache.deformedFiber.dot(dFa);
+        const Real dStrain = cache.fiber.dStrain(dF);
         dP = dP
-           + cache.activeStress * dF * cache.fiberTensor
-           + cache.condensedStressTangent * dStrain1D
+           + cache.active.stress * dF * cache.fiber.tensor()
+           + cache.active.tangent * dStrain
              * cp.getKinematicState().getDeformationGradient()
-             * cache.fiberTensor;
+             * cache.fiber.tensor();
       }
 
     private:
@@ -168,25 +148,6 @@ namespace Rodin::Solid
             && cp.has<Tags::PreviousActiveGamma>()
             && cp.has<Tags::PreviousActiveBeta>()
             && cp.has<Tags::ElectricalActivation>();
-      }
-
-      static Math::SpatialVector<Real> getFiberDirection(
-          const ConstitutivePoint& cp,
-          size_t d)
-      {
-        Math::SpatialVector<Real> fiber(static_cast<std::uint8_t>(d));
-        if (cp.has<Tags::FiberDirection>())
-          fiber = cp.get<Tags::FiberDirection>();
-        else
-        {
-          fiber.setZero();
-          fiber[0] = 1.0;
-        }
-
-        const Real norm = std::sqrt(fiber.dot(fiber));
-        if (norm > 0.0)
-          fiber = (1.0 / norm) * fiber;
-        return fiber;
       }
 
       PassiveLaw m_passiveLaw;

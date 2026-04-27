@@ -36,6 +36,8 @@ namespace Rodin::Solid
 
   class IsotropicInvariants;
 
+  class FiberKinematics;
+
   template <class Derived>
   class HyperElasticLaw;
 
