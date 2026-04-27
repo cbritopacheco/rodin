@@ -75,7 +75,7 @@ option(RODIN_USE_CHOLMOD              "Use Rodin with CHOLMOD support"          
 option(RODIN_USE_PARDISO              "Use Rodin with Pardiso support"            OFF)
 option(RODIN_USE_APPLE_ACCELERATE     "Use Rodin with Apple Accelerate support"   OFF)
 option(RODIN_USE_SCOTCH               "Use Rodin with Scotch support"             OFF)
-option(RODIN_USE_PETSC                "Use Rodin with PETSc support"              OFF)
+option(RODIN_USE_PETSC                "Use Rodin with PETSc support"              ON)
 option(RODIN_SILENCE_WARNINGS         "Silence warnings outputted by Rodin"       OFF)
 option(RODIN_SILENCE_EXCEPTIONS       "Silence exceptions thrown by Rodin"        ON)
 option(RODIN_CODE_COVERAGE            "Compile with code coverage flags"          OFF)
@@ -353,6 +353,7 @@ configure_package_config_file(
 install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/RodinConfig.cmake"
   "${CMAKE_CURRENT_BINARY_DIR}/RodinConfigVersion.cmake"
+  "${PROJECT_SOURCE_DIR}/cmake/FindPETSc.cmake"
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Rodin
 )
 

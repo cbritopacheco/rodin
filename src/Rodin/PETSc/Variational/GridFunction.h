@@ -108,6 +108,7 @@
 
 #include "Rodin/Types.h"
 #include "Rodin/Context/Local.h"
+#include "Rodin/Context/ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/GridFunction.h"
 
