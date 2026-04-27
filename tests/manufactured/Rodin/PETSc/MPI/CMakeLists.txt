@@ -30,7 +30,7 @@ foreach(np 1 2 4)
   set_tests_properties(RodinManufacturedPETScMPIPoissonTest_np${np} PROPERTIES
     LABELS "manufactured;petsc;distributed"
   )
-  rodin_disable_lsan_for_test(
+  rodin_suppress_external_mpi_lsan_for_test(
     RodinManufacturedPETScMPIPoissonTest_np${np}
     "HDF5_USE_FILE_LOCKING=FALSE")
 endforeach()

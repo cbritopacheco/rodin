@@ -7,7 +7,11 @@ target_link_libraries(RodinPETScIOHDF5IOTest
   Rodin::Variational
   Rodin::IO
   Rodin::PETSc)
-gtest_discover_tests(RodinPETScIOHDF5IOTest
-  PROPERTIES
-    LABELS "unit;petsc"
+add_test(
+  NAME RodinPETScIOHDF5IOTest
+  COMMAND $<TARGET_FILE:RodinPETScIOHDF5IOTest>
 )
+set_tests_properties(RodinPETScIOHDF5IOTest PROPERTIES
+  LABELS "unit;petsc"
+)
+rodin_suppress_external_mpi_lsan_for_test(RodinPETScIOHDF5IOTest)

@@ -5,12 +5,14 @@ target_link_libraries(RodinManufacturedPETScPoisson
   Rodin::Geometry
   Rodin::Variational
   Rodin::PETSc)
-gtest_discover_tests(RodinManufacturedPETScPoisson
-  DISCOVERY_MODE PRE_TEST
-  DISCOVERY_TIMEOUT 120
-  PROPERTIES
-    LABELS "manufactured;petsc"
+add_test(
+  NAME RodinManufacturedPETScPoisson
+  COMMAND $<TARGET_FILE:RodinManufacturedPETScPoisson>
 )
+set_tests_properties(RodinManufacturedPETScPoisson PROPERTIES
+  LABELS "manufactured;petsc"
+)
+rodin_suppress_external_mpi_lsan_for_test(RodinManufacturedPETScPoisson)
 
 if (RODIN_USE_MPI)
   add_subdirectory(MPI)

@@ -26,4 +26,4 @@ add_test(
 set_tests_properties(Rodin_MPI_Context_Test_np1 PROPERTIES
   LABELS "unit;distributed"
 )
-rodin_disable_lsan_for_test(Rodin_MPI_Context_Test_np1)
+rodin_suppress_external_mpi_lsan_for_test(Rodin_MPI_Context_Test_np1)
