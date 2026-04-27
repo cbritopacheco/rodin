@@ -9,8 +9,11 @@
 
 namespace Rodin::Context
 {
-  struct Sequential;
-  struct MPI;
+  class Base;
+
+  class Local;
+
+  class MPI;
 }
 
 #endif
