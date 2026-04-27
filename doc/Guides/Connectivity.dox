@@ -54,9 +54,29 @@
   mesh.getConnectivity().compute(1, 2);
   @endcode
 
-  @note The @f$ (1, 2) @f$ connectivity (edges → cells in 2D, or faces →
-  cells in 3D) is required before imposing `DirichletBC`, since boundary
-  detection relies on finding entities that belong to only one cell.
+  @note The @f$ (d{-}1, d) @f$ connectivity (edges → cells in 2D, or
+  faces → cells in 3D) is required before imposing `DirichletBC`, since
+  boundary detection relies on finding entities that belong to only one cell.
+
+  @subsection guides-connectivity-compute-modes Computation Modes
+
+  The `compute()` method accepts an optional **mode** parameter that controls
+  how sub-entities are handled:
+
+  | Mode | Behavior |
+  |------|----------|
+  | `Connectivity::Mode::Discover` (default) | Creates any missing sub-polytopes that are needed for the relation. For example, computing @f$ (1, 2) @f$ on a triangle mesh will create edge entities if they do not yet exist. |
+  | `Connectivity::Mode::Restrict` | Only uses polytopes that already exist in the mesh. Does not create new entities. Use this when you only want to relate entities that have been explicitly added. |
+
+  @code{.cpp}
+  // Default mode: discovers (creates) edges if needed
+  mesh.getConnectivity().compute(1, 2);
+
+  // Restrict mode: only uses existing entities
+  mesh.getConnectivity().compute(1, 2, Connectivity::Mode::Restrict);
+  @endcode
+
+  In most workflows, the default `Discover` mode is what you want.
 
   @section guides-connectivity-boundary Boundary Detection
 

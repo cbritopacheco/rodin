@@ -18,6 +18,7 @@
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Math/Vector.h"
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Types.h"
 
 #include "Rodin/Geometry/Mesh.h"
@@ -44,12 +45,12 @@ namespace Rodin::FormLanguage
   };
 
   template <size_t K, class Scalar, class Mesh>
-  struct Traits<Variational::H1<K, Math::Vector<Scalar>, Mesh>>
+  struct Traits<Variational::H1<K, Math::SpatialVector<Scalar>, Mesh>>
   {
     using MeshType = Mesh;
     using ScalarType = Scalar;
-    using RangeType = Math::Vector<ScalarType>;
-    using ElementType = Variational::H1Element<K, RangeType>;
+    using RangeType = Math::SpatialVector<ScalarType>;
+    using ElementType = Variational::H1Element<K, Math::SpatialVector<ScalarType>>;
   };
 }
 
@@ -538,10 +539,10 @@ namespace Rodin::Variational
    * @tparam Scalar Scalar type for vector components (Real or Complex)
    */
   template <size_t K, class Scalar>
-  class H1<K, Math::Vector<Scalar>, Geometry::Mesh<Context::Local>> final
+  class H1<K, Math::SpatialVector<Scalar>, Geometry::Mesh<Context::Local>> final
     : public FiniteElementSpace<
         Geometry::Mesh<Context::Local>,
-        H1<K, Math::Vector<Scalar>, Geometry::Mesh<Context::Local>>>
+        H1<K, Math::SpatialVector<Scalar>, Geometry::Mesh<Context::Local>>>
   {
     public:
       static_assert(K > 0, "Polynomial degree K must be greater than 0.");
@@ -549,7 +550,7 @@ namespace Rodin::Variational
       using ScalarType = Scalar;
 
       /// Range type of value
-      using RangeType = Math::Vector<ScalarType>;
+      using RangeType = Math::SpatialVector<ScalarType>;
 
       /// Type of mesh on which the finite element space is built
       using MeshType = Geometry::Mesh<Context::Local>;
@@ -558,10 +559,10 @@ namespace Rodin::Variational
       using ContextType = Context::Local;
 
       /// Type of finite element
-      using ElementType = H1Element<K, RangeType>;
+      using ElementType = H1Element<K, Math::SpatialVector<ScalarType>>;
 
       /// Parent class
-      using Parent = FiniteElementSpace<MeshType, H1<K, RangeType, MeshType>>;
+      using Parent = FiniteElementSpace<MeshType, H1<K, Math::SpatialVector<Scalar>, MeshType>>;
 
       template <class Callable>
       class Pullback :
@@ -806,11 +807,11 @@ namespace Rodin::Variational
    */
   template <size_t K, class Context>
   H1(std::integral_constant<size_t, K>, const Geometry::Mesh<Context>&, size_t)
-    -> H1<K, Math::Vector<Real>, Geometry::Mesh<Context>>;
+    -> H1<K, Math::SpatialVector<Real>, Geometry::Mesh<Context>>;
 
   /// Alias for a vector-valued real H1 finite element space
   template <size_t K, class Mesh>
-  using VectorH1 = H1<K, Math::Vector<Real>, Mesh>;
+  using VectorH1 = H1<K, Math::SpatialVector<Real>, Mesh>;
 }
 
 #include "H1.hpp"

@@ -35,8 +35,8 @@ namespace Rodin::Tests::Unit
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     mesh.getConnectivity().compute(1, 0);
     const size_t vdim = 2;
-    H1<2, Math::Vector<Real>> fesTr(std::integral_constant<size_t, 2>{}, mesh, vdim);
-    H1<1, Math::Vector<Real>> fesTe(std::integral_constant<size_t, 1>{}, mesh, vdim);
+    H1<2, Math::SpatialVector<Real>> fesTr(std::integral_constant<size_t, 2>{}, mesh, vdim);
+    H1<1, Math::SpatialVector<Real>> fesTe(std::integral_constant<size_t, 1>{}, mesh, vdim);
 
     TrialFunction u(fesTr);
     TestFunction v(fesTe);

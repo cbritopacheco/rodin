@@ -136,7 +136,8 @@ target_link_libraries(RodinGeometrySharderTest
   PUBLIC
   GTest::gtest
   GTest::gtest_main
-  Rodin::Geometry)
+  Rodin::Geometry
+  Rodin::IO)
 gtest_discover_tests(RodinGeometrySharderTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES

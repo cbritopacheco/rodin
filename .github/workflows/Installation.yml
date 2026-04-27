@@ -88,7 +88,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install boost eigen hdf5 libomp
+          brew install boost eigen libomp petsc
 
       - name: Link libomp
         run: |
@@ -102,6 +102,8 @@ jobs:
           brew --prefix eigen
           echo "OpenMP location:"
           brew --prefix libomp
+          echo "PETSc location:"
+          brew --prefix petsc
 
       - name: Run installation test
         run: bash tests/installation/test_installation.sh

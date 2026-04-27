@@ -82,6 +82,11 @@ namespace Rodin::Solver
 
       virtual ~KSP() override;
 
+      static constexpr PetscReal DEFAULT_RTOL = 1e-10;
+      static constexpr PetscReal DEFAULT_ABSTOL = 1e-50;
+      static constexpr PetscReal DEFAULT_DTOL = 1e5;
+      static constexpr PetscInt  DEFAULT_MAXIT = 100000;
+
       /**
        * @brief Solve @f$ Ax = b @f$, allocating @f$ x @f$ if null.
        *

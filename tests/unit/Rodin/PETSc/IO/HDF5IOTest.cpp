@@ -65,20 +65,9 @@ namespace
     }
   }
 
-  // Parameterized test fixture with PETSc initialization
+  // Parameterized test fixture (PETSc is initialized once in main())
   class PETScHDF5 : public ::testing::TestWithParam<Polytope::Type>
-  {
-    protected:
-      static void SetUpTestSuite()
-      {
-        PetscInitialize(nullptr, nullptr, nullptr, nullptr);
-      }
-
-      static void TearDownTestSuite()
-      {
-        PetscFinalize();
-      }
-  };
+  {};
 
   // --- PETSc GridFunction HDF5 standalone field file -------------------------
 
@@ -230,4 +219,13 @@ namespace
           Polytope::Type::Wedge
       ),
       PETScPolytopeNameGenerator());
+}
+
+int main(int argc, char** argv)
+{
+  PetscInitialize(&argc, &argv, nullptr, nullptr);
+  ::testing::InitGoogleTest(&argc, argv);
+  int result = RUN_ALL_TESTS();
+  PetscFinalize();
+  return result;
 }

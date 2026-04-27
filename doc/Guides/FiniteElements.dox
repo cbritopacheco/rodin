@@ -17,8 +17,16 @@
 
   The most widely used formal definition of a finite element was introduced by
   Philippe G. Ciarlet. This definition provides a clean mathematical
-  framework that separates the geometric, functional, and algebraic aspects
-  of finite element construction.
+  framework that separates three concerns:
+
+  1. **Geometry**: on which shape is the element defined?
+  2. **Approximation**: which polynomial space is used?
+  3. **Degrees of freedom**: how are functions in the space uniquely determined?
+
+  This separation is precisely mirrored in Rodin's architecture: the
+  @ref Rodin::Geometry "Geometry" module handles shapes, the
+  @ref Rodin::Variational "Variational" module defines polynomial spaces and
+  DOFs, and the @ref Rodin::Assembly "Assembly" module puts them together.
 
   @section fem-ciarlet-definition The Ciarlet Triple
 
@@ -28,11 +36,21 @@
   - @f$ K @f$ is a **geometric domain** — a compact, connected subset of
     @f$ \mathbb{R}^d @f$ with nonempty interior (e.g. a triangle,
     tetrahedron, quadrilateral). This is also called the **reference element**.
+    In Rodin, reference element geometry is defined by the
+    @ref Rodin::Geometry::Polytope::Type "Polytope::Type" enumeration
+    (Triangle, Tetrahedron, Quadrilateral, etc.).
 
   - @f$ P @f$ is a finite-dimensional **function space** defined on @f$ K @f$
     — typically a space of polynomials of a certain degree. For instance,
     @f$ P = \mathbb{P}_k(K) @f$, the space of polynomials of degree at most
-    @f$ k @f$.
+    @f$ k @f$, whose dimension is:
+    @f[
+      \dim \mathbb{P}_k(\mathbb{R}^d) = \binom{k + d}{d}
+    @f]
+    For @f$ d = 2 @f$: @f$ \dim \mathbb{P}_1 = 3 @f$,
+    @f$ \dim \mathbb{P}_2 = 6 @f$.
+    For @f$ d = 3 @f$: @f$ \dim \mathbb{P}_1 = 4 @f$,
+    @f$ \dim \mathbb{P}_2 = 10 @f$.
 
   - @f$ \Sigma = \{ \sigma_1, \sigma_2, \ldots, \sigma_n \} @f$ is a set of
     **degrees of freedom** (DOFs) — linear functionals
@@ -45,7 +63,9 @@
   @f[
     p \mapsto (\sigma_1(p), \ldots, \sigma_n(p))
   @f]
-  is an isomorphism from @f$ P @f$ to @f$ \mathbb{R}^n @f$.
+  is an isomorphism from @f$ P @f$ to @f$ \mathbb{R}^n @f$. Equivalently,
+  if @f$ \sigma_i(p) = 0 @f$ for all @f$ i @f$, then @f$ p = 0 @f$.
+  This property is called **unisolvence**.
 
   @section fem-ciarlet-basis Basis Functions
 
@@ -67,6 +87,10 @@
     p = \sum_{i=1}^{n} \sigma_i(p) \, \phi_i
   @f]
 
+  The values @f$ \sigma_i(p) @f$ are the **degrees of freedom** (DOF values)
+  of @f$ p @f$. In Rodin, these DOF values are stored as the coefficient
+  vector of a @ref Rodin::Variational::GridFunction "GridFunction".
+
   @section fem-ciarlet-examples Common Finite Elements
 
   @subsection fem-ciarlet-p1 P1 (Piecewise Linear) Elements
@@ -76,19 +100,26 @@
 
   - @f$ K @f$ = a triangle with vertices @f$ a_1, a_2, a_3 @f$
   - @f$ P = \mathbb{P}_1(K) @f$ = polynomials of degree @f$ \leq 1 @f$
-    (i.e. @f$ p(x, y) = \alpha + \beta x + \gamma y @f$)
+    (i.e. @f$ p(x, y) = \alpha + \beta x + \gamma y @f$), dimension 3
   - @f$ \Sigma = \{ \sigma_1, \sigma_2, \sigma_3 \} @f$ where
     @f$ \sigma_i(p) = p(a_i) @f$ (point evaluations at vertices)
 
   The basis functions are the **barycentric coordinates**
   @f$ \lambda_1, \lambda_2, \lambda_3 @f$, satisfying
-  @f$ \lambda_i(a_j) = \delta_{ij} @f$.
+  @f$ \lambda_i(a_j) = \delta_{ij} @f$. Each basis function is 1 at one
+  vertex and 0 at the other two, varying linearly between them.
 
   In Rodin, a P1 finite element space is created with:
 
   @code{.cpp}
   P1 Vh(mesh);
+  // Number of DOFs = number of vertices
+  std::cout << Vh.getSize() << std::endl;
   @endcode
+
+  The @ref Rodin::Variational::P1 "P1" class constructs one DOF per mesh
+  vertex, producing a space of continuous piecewise linear functions that
+  is @f$ H^1 @f$-conforming.
 
   @subsection fem-ciarlet-p0 P0 (Piecewise Constant) Elements
 
@@ -96,7 +127,7 @@
   quantities:
 
   - @f$ K @f$ = a polytope (triangle, tetrahedron, etc.)
-  - @f$ P = \mathbb{P}_0(K) @f$ = constant functions
+  - @f$ P = \mathbb{P}_0(K) @f$ = constant functions, dimension 1
   - @f$ \Sigma = \{ \sigma_1 \} @f$ where @f$ \sigma_1(p) @f$ is the value
     of the constant, often defined as the average over @f$ K @f$
 
@@ -104,58 +135,95 @@
 
   @code{.cpp}
   P0 Wh(mesh);
+  // Number of DOFs = number of cells
+  std::cout << Wh.getSize() << std::endl;
   @endcode
+
+  The @ref Rodin::Variational::P0 "P0" class constructs one DOF per mesh
+  cell. Functions in P0 are discontinuous across cell boundaries, making this
+  space a subspace of @f$ L^2(\Omega) @f$ (not @f$ H^1 @f$).
+
+  @subsection fem-ciarlet-hk Higher-Order Elements (H1<k>)
+
+  For polynomial degree @f$ k \geq 2 @f$, additional DOFs are placed on edges
+  and (for @f$ k \geq 3 @f$) on cell interiors. For example, the P2 element
+  on a triangle has:
+
+  - @f$ K @f$ = a triangle
+  - @f$ P = \mathbb{P}_2(K) @f$ = quadratic polynomials, dimension 6
+  - @f$ \Sigma @f$ = point evaluations at the 3 vertices and 3 edge midpoints
+
+  In Rodin, higher-order elements are provided by the
+  @ref Rodin::Variational::H1 "H1<k>" class:
+
+  @code{.cpp}
+  // Quadratic (P2) finite element space
+  H1 Vh(std::integral_constant<size_t, 2>{}, mesh);
+  @endcode
+
+  The polynomial order @f$ k @f$ is a compile-time template parameter.
 
   @section fem-ciarlet-global From Local to Global
 
   The Ciarlet definition describes a **local** finite element on a single
-  reference cell. To construct a **global** finite element space on an entire
-  mesh @f$ \mathcal{T}_h @f$, we:
+  reference cell @f$ \hat{K} @f$. To construct a **global** finite element
+  space on an entire mesh @f$ \mathcal{T}_h @f$, we:
 
-  1. Define a reference element @f$ (\hat{K}, \hat{P}, \hat{\Sigma}) @f$
-  2. Map it to each cell @f$ K \in \mathcal{T}_h @f$ using a geometric
-     transformation @f$ F_K : \hat{K} \to K @f$
-  3. Assemble local DOFs into global DOFs, enforcing continuity conditions
-     at shared entities (vertices, edges, faces)
+  1. **Define** a reference element @f$ (\hat{K}, \hat{P}, \hat{\Sigma}) @f$
+  2. **Map** it to each physical cell @f$ K \in \mathcal{T}_h @f$ using a
+     geometric transformation @f$ F_K : \hat{K} \to K @f$. In Rodin, the
+     Jacobian of this transformation is accessible through
+     @ref Rodin::Geometry::Point "Point::getJacobian()".
+  3. **Assemble** local DOFs into global DOFs, enforcing inter-element
+     continuity conditions at shared entities (vertices, edges, faces)
 
   The result is a finite-dimensional subspace @f$ V_h @f$ of the function
   space in which we seek our approximate solution.
+
+  The assembly of local DOFs into global DOFs is handled automatically when
+  you create a finite element space. For example, `P1 Vh(mesh)` constructs
+  the global DOF numbering by identifying vertex-based DOFs on shared mesh
+  vertices.
 
   @section fem-ciarlet-conformity Conformity
 
   Different types of inter-element continuity give rise to different types
   of conforming finite element spaces:
 
-  | Conformity | Continuity Requirement | Typical Use |
-  |------------|----------------------|-------------|
-  | @f$ H^1 @f$-conforming | Continuous across element boundaries | Scalar PDEs (Poisson, heat) |
-  | @f$ H(\mathrm{div}) @f$-conforming | Normal component continuous | Mixed methods, fluid flow |
-  | @f$ H(\mathrm{curl}) @f$-conforming | Tangential component continuous | Electromagnetics |
-  | @f$ L^2 @f$ (no conformity) | No continuity required | Discontinuous Galerkin |
+  | Conformity | Continuity requirement | Typical use | Rodin class |
+  |------------|----------------------|-------------|-------------|
+  | @f$ H^1 @f$-conforming | Continuous across element boundaries | Scalar PDEs (Poisson, heat) | @ref Rodin::Variational::P1 "P1", @ref Rodin::Variational::H1 "H1" |
+  | @f$ H(\mathrm{div}) @f$-conforming | Normal component continuous | Mixed methods, fluid flow | — |
+  | @f$ H(\mathrm{curl}) @f$-conforming | Tangential component continuous | Electromagnetics | — |
+  | @f$ L^2 @f$ (no conformity) | No continuity required | Discontinuous Galerkin, indicators | @ref Rodin::Variational::P0 "P0" |
 
-  Rodin's P1 element is @f$ H^1 @f$-conforming — the assembled global
-  functions are continuous across element boundaries.
+  Rodin currently provides @f$ H^1 @f$-conforming elements (P1, H1) and
+  @f$ L^2 @f$ elements (P0). The P1 and H1 spaces produce global functions
+  that are continuous across element boundaries: values at shared vertices
+  (and shared edge/face DOFs for higher order) are identified.
 
   @section fem-ciarlet-rodin Connection to Rodin
 
   In Rodin, the Ciarlet definition is realized through the interaction of
   several classes:
 
-  - The @ref Rodin::Geometry::Mesh "Mesh" provides the geometric cells
-    @f$ K @f$
-  - Finite element spaces like @ref Rodin::Variational::P1 "P1" define
-    the polynomial space @f$ P @f$ and degrees of freedom @f$ \Sigma @f$
-  - @ref Rodin::Variational::TrialFunction "TrialFunction" and
-    @ref Rodin::Variational::TestFunction "TestFunction" represent functions
-    in the global finite element space @f$ V_h @f$
+  | Ciarlet component | Mathematical object | Rodin class |
+  |-------------------|---------------------|-------------|
+  | @f$ K @f$ | Reference element geometry | @ref Rodin::Geometry::Polytope "Polytope" + @ref Rodin::Geometry::Polytope::Type "Polytope::Type" |
+  | @f$ P @f$ | Local polynomial space | Defined internally by @ref Rodin::Variational::P0 "P0", @ref Rodin::Variational::P1 "P1", @ref Rodin::Variational::H1 "H1" |
+  | @f$ \Sigma @f$ | Degrees of freedom | DOF numbering managed by the finite element space class |
+  | @f$ V_h @f$ | Global finite element space | The space object itself (e.g. `P1 Vh(mesh)`) |
+  | @f$ u_h \in V_h @f$ | Discrete function | @ref Rodin::Variational::GridFunction "GridFunction" |
+  | @f$ u @f$ (unknown) | Trial function | @ref Rodin::Variational::TrialFunction "TrialFunction" |
+  | @f$ v @f$ (weight) | Test function | @ref Rodin::Variational::TestFunction "TestFunction" |
 
   @code{.cpp}
-  // The mesh provides the cells K
+  // The mesh provides the cells K and the geometric transformations F_K
   Mesh mesh;
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
 
   // P1 defines the local element (K, P1, point evaluations at vertices)
-  // and assembles them into a global space
+  // and assembles them into a global space Vh
   P1 Vh(mesh);
 
   // Trial and test functions live in this global space
@@ -170,5 +238,6 @@
     guide to using finite elements in Rodin
   - @ref guides-polytopes "Polytopes" — Geometric shapes used as reference
     elements
+  - @ref notation-index "Notation" — Mathematical notation reference
 
   */

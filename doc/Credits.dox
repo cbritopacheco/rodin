@@ -21,7 +21,7 @@
 
   @subsection credits-index-eigen Eigen
 
-  Eigens is C++ template library for linear algebra. Eigen provides a wide
+  Eigen is a C++ template library for linear algebra. Eigen provides a wide
   range of mathematical operations, data structures, and algorithms for
   performing linear algebra operations efficiently and with a syntax that
   resembles mathematical notation. It is especially useful for tasks such as

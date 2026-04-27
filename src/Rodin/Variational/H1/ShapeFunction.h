@@ -7,6 +7,7 @@
 #include "Rodin/Variational/H1/ForwardDecls.h"
 #include "Rodin/Variational/ShapeFunction.h"
 #include "Rodin/Variational/IntegrationPoint.h"
+#include "Rodin/Math/Traits.h"
 
 namespace Rodin::Variational
 {
@@ -164,14 +165,14 @@ namespace Rodin::Variational
   };
 
   template <class Derived, size_t K, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
-  class ShapeFunction<Derived, H1<K, Math::Vector<Scalar>, Mesh>, Space>
+  class ShapeFunction<Derived, H1<K, Math::SpatialVector<Scalar>, Mesh>, Space>
     : public ShapeFunctionBase<
-        ShapeFunction<Derived, H1<K, Math::Vector<Scalar>, Mesh>, Space>,
-        H1<K, Math::Vector<Scalar>, Mesh>,
+        ShapeFunction<Derived, H1<K, Math::SpatialVector<Scalar>, Mesh>, Space>,
+        H1<K, Math::SpatialVector<Scalar>, Mesh>,
         Space>
   {
     public:
-      using FESType = H1<K, Math::Vector<Scalar>, Mesh>;
+      using FESType = H1<K, Math::SpatialVector<Scalar>, Mesh>;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType; // == Scalar
@@ -183,7 +184,7 @@ namespace Rodin::Variational
           FESType,
           SpaceType>;
 
-      static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
+      static_assert(FormLanguage::IsVectorRange<RangeType>::Value);
 
       struct Cache
       {

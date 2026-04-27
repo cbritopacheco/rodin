@@ -53,15 +53,41 @@
   @namespace Rodin::Alert
   @brief Module to handle alerts, exceptions, and diagnostic messages.
 
-  The Alert module provides a comprehensive system for handling exceptions,
+  The Alert module provides a stream-based system for handling exceptions,
   warnings, informational messages, and success notifications with colored
-  terminal output and formatted messaging capabilities.
+  terminal output. Rodin uses this system **instead of raw `throw` statements**.
 
-  Example usage:
+  ## Alert Types
+
+  | Type | Color | Behavior |
+  |------|-------|----------|
+  | `Alert::Info` | Blue | Informational message (non-fatal) |
+  | `Alert::Warning` | Yellow | Warning message (non-fatal) |
+  | `Alert::Success` | Green | Success notification (non-fatal) |
+  | `Alert::Exception` | Red | Throws an exception (fatal) |
+  | `Alert::MemberFunctionException` | Red | Exception with class/method context |
+  | `Alert::MemberFunctionWarning` | Yellow | Warning with class/method context |
+
+  ## Usage Pattern
+
+  All alerts use the stream insertion operator `<<` and terminate with
+  `Alert::Raise`:
+
   @code{.cpp}
+  // Informational message
   Alert::Info() << "Assembling the system..." << Alert::Raise;
-  Alert::Success() << "Solution computed successfully." << Alert::Raise;
+
+  // Warning
+  Alert::Warning() << "Convergence is slow." << Alert::Raise;
+
+  // Fatal exception (replaces throw)
+  Alert::MemberFunctionException(*this, __func__)
+    << "Incidence " << d << " -> " << dp << " has not been computed."
+    << Alert::Raise;
   @endcode
+
+  @warning Never use raw `throw` in Rodin code. Always use the Alert stream
+  pattern with `<< Alert::Raise`.
  */
 
 /**
@@ -82,14 +108,58 @@
     edges, faces, cells) with type enumeration
   - @ref Rodin::Geometry::Connectivity "Connectivity" — Incidence relations
     between polytopes of different dimensions
-  - @ref Rodin::Geometry::Point "Point" — Evaluation point for grid functions
+  - @ref Rodin::Geometry::Point "Point" — Evaluation point for grid functions,
+    bundling reference coordinates, physical coordinates, Jacobian data, and
+    the owning polytope
 
-  Meshes can be generated or loaded from files:
+  ## Mesh Creation
+
+  | Method | Description |
+  |--------|-------------|
+  | `Mesh::UniformGrid(type, shape)` | Structured grid on the unit hypercube |
+  | `Mesh::Box(faceType, shape)` | Surface mesh (boundary of unit box) |
+  | `Mesh::Build()` | Programmatic construction via Builder pattern |
+  | `mesh.load(file, format)` | Load from MFEM, MEDIT, or HDF5 |
+
+  ## Mesh Operations
+
+  | Method | Description |
+  |--------|-------------|
+  | `getConnectivity().compute(d1, d2)` | Compute incidence relation @f$ d_1 \to d_2 @f$ |
+  | `scale(factor)` | Scale all vertex coordinates by a scalar factor |
+  | `displace(vectorFunction)` | Apply a displacement field to all vertices |
+  | `skin()` | Extract the boundary surface mesh |
+  | `getDimension()` | Topological dimension (2 for triangles, 3 for tetrahedra) |
+  | `getSpaceDimension()` | Ambient space dimension (≥ topological dimension) |
+  | `getVertexCount()` | Number of vertices |
+  | `getCellCount()` | Number of cells |
+  | `getVolume()` | Total volume (or area) of the domain |
+  | `getPerimeter()` | Total perimeter (or surface area) of the domain boundary |
+  | `getVertex()` / `getCell()` / `getBoundary()` | Polytope iterators |
+  | `getVertexCoordinates(idx)` | Get coordinates of a vertex |
+  | `setAttribute({dim, idx}, attr)` | Set attribute of a polytope (for BC labeling) |
+
+  ## Polytope Types
+
+  | Type | Dimension | Description |
+  |------|-----------|-------------|
+  | `Point` | 0 | Vertex |
+  | `Segment` | 1 | Edge |
+  | `Triangle` | 2 | 3-vertex face/cell |
+  | `Quadrilateral` | 2 | 4-vertex face/cell |
+  | `Tetrahedron` | 3 | 4-vertex cell |
+  | `Hexahedron` | 3 | 8-vertex cell |
+  | `Wedge` | 3 | Triangular prism (6 vertices) |
+
   @code{.cpp}
   Mesh mesh;
   mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
   mesh.getConnectivity().compute(1, 2); // Compute face-to-cell connectivity
   @endcode
+
+  @see @ref guides-meshes "Meshes Guide"
+  @see @ref guides-polytopes "Polytopes Guide"
+  @see @ref guides-connectivity "Connectivity Guide"
  */
 
 /**
@@ -107,13 +177,49 @@
   sequential and parallel assembly strategies, with specializations for
   different operator types and finite element spaces.
 
-  ## Key Features
-  - **Bilinear Form Assembly**: Assembly of stiffness matrices from expressions
-    like `Integral(Grad(u), Grad(v))`
-  - **Linear Form Assembly**: Assembly of load vectors from expressions
-    like `Integral(f, v)`
-  - **Parallel Assembly**: OpenMP-based parallel assembly
-  - **Mixed Formulations**: Support for saddle-point problems (e.g. Stokes)
+  ## Assembly Strategies
+
+  | Strategy | Class | Description |
+  |----------|-------|-------------|
+  | **Sequential** | `Assembly::Sequential` | Single-threaded assembly. Iterates over mesh cells, evaluates local element matrices/vectors, and accumulates into the global system. Deterministic and reproducible. |
+  | **OpenMP** | `Assembly::OpenMP` | Shared-memory parallel assembly using OpenMP. Each thread processes a subset of cells and accumulates contributions using thread-safe operations. Requires compilation with `RODIN_USE_OPENMP=ON`. |
+  | **Default** | `Assembly::Default` | Compile-time policy selector. Maps to `OpenMP` when OpenMP is available, otherwise falls back to `Sequential`. Users rarely need to specify this directly. |
+
+  ## What Gets Assembled
+
+  - **Bilinear Form** @f$ a(u,v) @f$: Assembles into a sparse matrix
+    @f$ A_{ij} = a(\phi_j, \psi_i) @f$ where @f$ \phi_j @f$ are trial basis
+    functions and @f$ \psi_i @f$ are test basis functions.
+  - **Linear Form** @f$ \ell(v) @f$: Assembles into a vector
+    @f$ b_i = \ell(\psi_i) @f$.
+  - **Dirichlet BC**: Assembles into an `IndexMap` mapping constrained DOFs
+    to their prescribed values.
+  - **Problem**: Orchestrates the full assembly pipeline — bilinear form,
+    linear form(s), Dirichlet elimination — into a complete
+    @ref Rodin::Math::LinearSystem "LinearSystem".
+
+  ## Assembly Pipeline
+
+  Assembly is normally triggered automatically when `Problem::solve()` is
+  called. The pipeline is:
+
+  1. Assemble the bilinear form into a sparse matrix @f$ A @f$
+  2. Assemble the linear form into a vector @f$ b @f$
+  3. Apply Dirichlet boundary conditions (row/column elimination)
+  4. Package into a `LinearSystem` and pass to the solver
+
+  Users can also trigger assembly manually by calling `BilinearForm::assemble()`
+  or `LinearForm::assemble()`.
+
+  ## Multi-Field Assembly
+
+  For saddle-point problems (e.g.\ Stokes), the Assembly module supports
+  block-structured systems via `Tuple<BilinearForm...>` and
+  `Tuple<LinearForm...>`, which assemble into block matrices and vectors.
+  This is used by multi-field `Problem` objects with multiple trial/test
+  function pairs.
+
+  @see @ref guides-variational "Variational Formulations Guide"
  */
 
 /**
@@ -156,12 +262,35 @@
   output for scientific visualization in [ParaView](https://www.paraview.org/),
   supporting time series and multiple fields.
 
-  File format is specified explicitly via the @ref Rodin::IO::FileFormat
-  "FileFormat" enumeration:
+  ## XDMF Architecture
+
+  The XDMF writer uses a two-level design:
+
+  - **XDMF** — Top-level writer that manages the `.xdmf` XML file and `.h5`
+    HDF5 data. Provides `write()`, `flush()`, `close()`, `setPadding()`.
+  - **XDMF::Grid** — A lightweight handle returned by `xdmf.grid()` (default)
+    or `xdmf.grid("name")` (named). Provides `setMesh()`, `add()`, `hasMesh()`,
+    `reset()` — all returning `Grid&` for method chaining.
+
   @code{.cpp}
-  mesh.save("output.mesh", IO::FileFormat::MFEM);
-  mesh.load("domain.mesh", IO::FileFormat::MEDIT);
+  IO::XDMF xdmf("output");
+  xdmf.grid().setMesh(mesh).add("u", u.getSolution());
+  xdmf.write();
   @endcode
+
+  For MPI-distributed I/O, pass the communicator:
+  @code{.cpp}
+  IO::XDMF xdmf("distributed_output", MPI_COMM_WORLD);
+  @endcode
+
+  ## File Format Summary
+
+  | Format | Extensions | Key Classes | Notes |
+  |--------|-----------|-------------|-------|
+  | MFEM | `.mesh`, `.gf` | `IO::FileFormat::MFEM` | Text-based, compatible with MFEM ecosystem |
+  | MEDIT | `.mesh` | `IO::FileFormat::MEDIT` | Used by MMG, supports attributes |
+  | HDF5 | `.h5` | `IO::FileFormat::HDF5` | Binary, parallel-capable |
+  | XDMF | `.xdmf` + `.h5` | `IO::XDMF`, `IO::XDMF::Grid` | ParaView visualization, time series |
 
   @see @ref guides-io "I/O in Rodin" for a comprehensive guide.
  */
@@ -295,6 +424,7 @@
 
   - @ref Rodin::Variational::P0 "P0" — Piecewise constant (discontinuous)
     finite element space
+  - @ref Rodin::Variational::P0g "P0g" — Global constant space (1 DOF for scalar, vdim for vector)
   - @ref Rodin::Variational::P1 "P1" — Piecewise linear (continuous)
     finite element space
   - @ref Rodin::Variational::H1 "H1" — Higher-order @f$ H^1 @f$-conforming
@@ -322,10 +452,47 @@
   Key expression classes:
   - `Integral(A, B)` — Domain integrals (bilinear or linear forms)
   - `BoundaryIntegral(A, B)` — Boundary integrals
+  - `FaceIntegral(A, B)` — Integrals over all faces (interior + boundary)
+  - `InterfaceIntegral(A, B)` — Integrals over interior faces only
+
+  Differential operators:
   - `Grad(u)` — Gradient operator
   - `Div(u)` — Divergence operator
-  - `Jacobian(u)` — Jacobian operator
-  - `DirichletBC(u, g)` — Dirichlet boundary conditions
+  - `Jacobian(u)` — Jacobian (gradient of vector field)
+  - `Transpose(A)` — Matrix transpose
+
+  Algebraic operators:
+  - `Dot(A, B)` — Inner product / Frobenius contraction
+  - `Trace(A)` — Matrix trace
+  - `Frobenius(A)` — Frobenius norm
+  - `Component(u, i)` — Extract @f$ i @f$-th component of vector function
+
+  DG operators:
+  - `Jump(u)` — Jump across internal faces: @f$ [u] = u^+ - u^- @f$
+  - `Average(u)` — Average across internal faces: @f$ \{u\} = (u^+ + u^-)/2 @f$
+
+  Boundary conditions:
+  - `DirichletBC(u, g)` — Essential boundary conditions
+  - `PeriodicBC(u, dofMap)` — Periodic boundary conditions
+
+  Convenience functions:
+  - `RealFunction` — Scalar function from constant or lambda
+  - `VectorFunction` — Vector function from initializer list
+  - `Zero` — Zero scalar/vector function
+  - `Pow`, `Exp`, `Sqrt`, `Sin`, `Cos`, `Tan`, `Abs`, `Min`, `Max` — Pointwise math operations
+
+  Special operators:
+  - `BoundaryNormal(mesh)` — Outward unit normal on @f$ \partial\Omega @f$
+  - `FaceNormal(mesh)` — Unit normal on mesh faces
+  - `IdentityMatrix(n)` — @f$ n \times n @f$ identity matrix function
+  - `F::x`, `F::y`, `F::z` — Coordinate projection functions
+  - `Re(u)`, `Im(u)`, `Conjugate(u)` — Complex-valued function operators
+
+  Advanced operators:
+  - `Potential(K, u)` — Integral convolution: @f$ \int K(\mathbf{x},\mathbf{y}) u(\mathbf{y}) \, d\mathbf{y} @f$
+  - `Flow(t, u, vel)` — Flow composition @f$ u \circ \Phi_t @f$ (characteristic tracing for advection)
+  - `TraceOperator(u, attr)` — Boundary trace @f$ u|_{\partial\Omega} @f$
+  - `LinearElasticityIntegral(u, v)(lambda, mu)` — Hooke elasticity bilinear form
 
   ## Problem
 
@@ -356,6 +523,79 @@
 /**
   @namespace Rodin::Distance
   @brief Module which provides models for computation of the distance function.
+
+  The Distance module offers several methods for computing distance functions
+  on finite element meshes, each with different trade-offs between accuracy,
+  speed, and smoothness.
+
+  ## Available Methods
+
+  | Method | Class | Equation | Properties |
+  |--------|-------|----------|------------|
+  | **Eikonal** | `Distance::Eikonal` | @f$ \|\nabla d\| = 1 @f$ | Exact distances via FMM; supports signed distance with interior/interface regions |
+  | **Poisson** | `Distance::Poisson` | @f$ -\Delta u = 1, \; u\|_{\partial\Omega} = 0 @f$ | Smooth approximation; fast (one linear solve); does not give exact distances |
+  | **SignedPoisson** | `Distance::SignedPoisson` | @f$ -\Delta u = 2\chi_\Omega - 1, \; u\|_\Gamma = 0 @f$ | Region-dependent forcing yields a signed smooth distance |
+  | **Rvachev** | `Distance::Rvachev` | @f$ d = \frac{u}{\sqrt{u^2 + \|\nabla u\|^2}} @f$ | Normalizes a level-set field to approximate distance; preserves zero set and sign |
+  | **SpaldingTucker** | `Distance::SpaldingTucker` | @f$ d = \frac{2u}{\|\nabla u\| + \sqrt{\|\nabla u\|^2 + 2|u|}} @f$ | Better gradient normalization than Rvachev; more accurate near the interface |
+
+  All methods except `Rvachev` and `SpaldingTucker` inherit from a common CRTP
+  `Base<Derived>` that provides `setInterior()` and `setInterface()` methods for
+  specifying the signed-distance regions (mesh boundary attributes).
+
+  ## Eikonal Distance (FMM)
+
+  The `Eikonal` class wraps the FMM solver and provides the most accurate
+  distance computation. Seeds are automatically identified from the interface
+  attributes. Calling `sign()` after `solve()` negates interior values to produce
+  a signed distance field.
+
+  @code{.cpp}
+  P1 Vh(mesh);
+  GridFunction d(Vh);
+
+  Distance::Eikonal eikonal(d);
+  eikonal.setInterface(interfaceAttr)
+         .setInterior(interiorAttr)
+         .solve()
+         .sign();
+  @endcode
+
+  ## Poisson Distance Approximation
+
+  `Poisson` solves @f$ -\Delta u = 1 @f$ with @f$ u = 0 @f$ on
+  @f$ \partial\Omega @f$ in a single linear solve. The result is smooth but
+  only approximates the true distance.
+
+  `SignedPoisson` extends this with region-dependent forcing: @f$ -\Delta u = 2 @f$
+  inside a specified region and @f$ -\Delta u = -1 @f$ elsewhere, with
+  @f$ u = 0 @f$ on the interface. It supports both single-attribute and
+  attribute-set overloads:
+
+  @code{.cpp}
+  // Unsigned Poisson distance
+  Distance::Poisson poisson;
+  auto d1 = poisson(Vh);
+
+  // Signed Poisson distance with interface/region attributes
+  Distance::SignedPoisson signedPoisson;
+  auto d2 = signedPoisson(interfaceAttr, regionAttr, Vh);
+  @endcode
+
+  ## Level-Set Normalization
+
+  `Rvachev` and `SpaldingTucker` are post-processing operators that normalize
+  an existing level-set field into an approximate distance function without
+  solving any PDE:
+
+  @code{.cpp}
+  Distance::Rvachev rvachev;
+  auto dR = rvachev(phi);
+
+  Distance::SpaldingTucker st;
+  auto dST = st(phi);
+  @endcode
+
+  @see @ref Rodin::Eikonal "Eikonal module" for the underlying FMM solver.
  */
 
 /**
@@ -367,6 +607,33 @@
   @namespace Rodin::Hilbert
   @brief Module which provides models and tools for the Hilbertian
   extension-regularization procedure.
+
+  The Hilbert module implements @f$ H^1 @f$-based extension-regularization
+  operators used in shape and topology optimization. The primary class
+  `H1a` solves the regularized extension problem:
+  @f[
+    \alpha^2 \int_\Omega \nabla u : \nabla v \, dx + \int_\Omega u \cdot v \, dx = \ell(v)
+  @f]
+  where @f$ \alpha @f$ is a regularization length-scale parameter that controls
+  the smoothness of the extended field (larger @f$ \alpha @f$ = smoother).
+
+  This is used, for example, to extend and regularize a shape derivative
+  (defined only on the boundary) to a smooth descent direction in the full
+  computational domain.
+
+  ## API
+
+  | Method | Description |
+  |--------|-------------|
+  | `H1a(fes)` | Constructor: creates the extension operator on a finite element space |
+  | `setAlpha(alpha)` | Sets @f$ \alpha @f$ (typically proportional to mesh size @f$ h @f$) |
+  | `operator()(lf)` | Applies extension to a linear form (differential) |
+  | `operator+=(DirichletBC)` | Adds boundary conditions to the extension problem |
+  | `getProblem()` | Access the underlying `Problem` object |
+  | `getTrialFunction()` / `getTestFunction()` | Access trial/test functions |
+
+  For vector-valued problems, `H1a` uses `Jacobian()` instead of `Grad()`.
+  The internal solver is `Solver::CG`.
  */
 
 /**
@@ -378,6 +645,71 @@
   @namespace Rodin::Advection
   @brief Module which provides models for the resolution of unsteady advection
   equations.
+
+  The Advection module implements semi-Lagrangian (characteristic-based)
+  transport of scalar fields on unstructured meshes. The primary class is
+  @ref Rodin::Advection::Lagrangian "Lagrangian", which solves the
+  advection equation:
+  @f[
+    \frac{\partial \phi}{\partial t} + \mathbf{v} \cdot \nabla \phi = 0
+  @f]
+
+  ## Algorithm
+
+  At each time step, the Lagrangian method:
+  1. **Traces characteristics** backward from each mesh vertex along the
+     velocity field @f$ \mathbf{v} @f$ for a duration @f$ \Delta t @f$
+     using the `Flow` operator
+  2. **Interpolates** the solution at the departure points
+  3. **Projects** the interpolated values back onto the finite element space
+     via an @f$ L^2 @f$ projection (mass-matrix solve using CG)
+
+  The variational formulation at each step is:
+  @f[
+    \int_\Omega u^{n+1} v \, dx = \int_\Omega u^n(\mathbf{X}) \, v \, dx
+  @f]
+  where @f$ \mathbf{X} @f$ is the departure point traced backward along
+  @f$ \mathbf{v} @f$.
+
+  ## Time Stepping and Boundary Policies
+
+  The characteristic tracing uses configurable time-stepping schemes. The
+  default is Runge-Kutta 4 (`Math::RungeKutta::RK4`); custom steppers can
+  be passed as the fifth constructor argument.
+
+  Two boundary policies handle characteristics that hit the domain boundary:
+
+  | Policy | Behavior |
+  |--------|----------|
+  | `StopInsideBoundaryPolicy` | Clamps the departure point to an interior point with a small inward offset (`eps_in_phys`, default @f$ 10^{-12} @f$). Used automatically for the **first time step** (from initial condition). |
+  | `TaylorBoundaryShiftPolicy<Field>` | Applies a first-order Taylor correction at the boundary hit: shifts the point inward and accumulates the gradient correction @f$ \nabla\phi \cdot \delta\mathbf{x} @f$. Used automatically for **subsequent steps** (from the current solution). |
+
+  The `Lagrangian` class tracks time internally (`m_t`) and switches between
+  the initial condition (first step) and the current solution (later steps).
+
+  ## Typical Usage
+
+  @code{.cpp}
+  P1 Vh(mesh);
+  TrialFunction u(Vh);
+  TestFunction  v(Vh);
+
+  GridFunction phi(Vh);
+  // ... initialize phi ...
+
+  VectorFunction velocity{1.0, 0.0};  // uniform horizontal advection
+
+  // Default stepper: RK4
+  Advection::Lagrangian advection(u, v, phi, velocity);
+
+  Real dt = 0.01;
+  for (int step = 0; step < 100; ++step)
+    advection.step(dt);
+  @endcode
+
+  @note The module is header-only (`Rodin::Advection` INTERFACE library).
+
+  @see @ref Rodin::Variational::Flow "Flow" for the characteristic tracer.
  */
 
 /**
@@ -394,9 +726,43 @@
     |\nabla u| = F(x)
   @f]
   where @f$ F(x) @f$ is a speed function. When @f$ F = 1 @f$, the solution
-  represents the distance function. This module provides efficient Fast Marching
-  Method (FMM) implementations for solving the Eikonal equation on unstructured
-  meshes.
+  represents the distance function.
+
+  ## Fast Marching Method (FMM)
+
+  The primary solver is @ref Rodin::Eikonal::FMM "FMM", which implements the
+  Fast Marching Method on unstructured simplicial meshes. The algorithm
+  propagates a wavefront from seed vertices, updating arrival times in
+  causal order using a priority queue. Vertex states during propagation:
+
+  | State | Description |
+  |-------|-------------|
+  | **Far** | Not yet visited |
+  | **Considered** | In the priority queue, tentative value computed |
+  | **Accepted** | Finalized — arrival time is correct |
+
+  The FMM specialization for P1 finite elements on local meshes supports:
+  - Arbitrary spatial dimension (2D triangular, 3D tetrahedral, surface meshes)
+  - User-defined speed functions @f$ F(x) @f$
+  - Seed interface specification (initial zero-distance vertices)
+
+  ## Typical Usage
+
+  @code{.cpp}
+  P1 Vh(mesh);
+  GridFunction u(Vh);
+
+  // Speed function F(x) = 1 (distance computation)
+  auto speed = [](const Geometry::Point&) -> Real { return 1.0; };
+
+  Eikonal::FMM fmm(u, speed);
+  fmm.seed(interfaceVertices).solve();
+  @endcode
+
+  @note The module is header-only.
+
+  @see @ref Rodin::Distance "Distance module" for higher-level distance
+  function computation that wraps FMM.
  */
 
 /**
@@ -408,13 +774,190 @@
   @namespace Rodin::Elasticity
   @brief Module which provides models for solid mechanics and elasticity.
 
-  This module implements various elasticity models including linear elasticity
-  for small deformations. Key functionality:
+  This module implements the linearized elasticity bilinear form for small
+  deformations. The primary class is
+  @ref Rodin::Variational::LinearElasticityIntegrator "LinearElasticityIntegral",
+  which assembles:
+  @f[
+    a(\mathbf{u}, \mathbf{v}) = \int_\Omega \bigl[\lambda (\nabla \cdot \mathbf{u})(\nabla \cdot \mathbf{v})
+    + 2\mu \, \boldsymbol{\varepsilon}(\mathbf{u}) : \boldsymbol{\varepsilon}(\mathbf{v})\bigr] \, dx
+  @f]
+  where @f$ \boldsymbol{\varepsilon}(\mathbf{u}) = \tfrac{1}{2}(\nabla \mathbf{u} + (\nabla \mathbf{u})^T) @f$
+  is the symmetric strain tensor, and @f$ \lambda, \mu @f$ are the Lamé
+  parameters.
 
-  - `LinearElasticityIntegral(u, v)(lambda, mu)` — Assembles the bilinear form
-    for linearized elasticity with Lamé parameters @f$ \lambda @f$ and @f$ \mu @f$
+  ## Typical Usage
+
+  @code{.cpp}
+  P1 Vh(mesh, mesh.getSpaceDimension()); // vector P1 space
+  TrialFunction u(Vh);
+  TestFunction  v(Vh);
+
+  Real lambda = 0.5769, mu = 0.3846;
+  VectorFunction f{0, -1};
+
+  Problem elasticity(u, v);
+  elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
+             - BoundaryIntegral(f, v).over(GammaN)
+             + DirichletBC(u, VectorFunction{0, 0}).on(GammaD);
+
+  Solver::CG(elasticity).solve();
+  @endcode
 
   @see @ref examples-pdes-elasticity "Elasticity example"
+  @see @ref Rodin::Solid "Solid module" for hyperelastic (large deformation) models
+ */
+
+/**
+  @namespace Rodin::Solid
+  @brief Hyperelastic solid mechanics module for large-deformation problems.
+
+  The Solid module provides a layered framework for finite-strain
+  hyperelasticity. It is organized into four sub-layers:
+
+  ## Kinematics
+
+  `KinematicState` encapsulates all finite-strain kinematic quantities at a
+  quadrature point. Set the displacement gradient with
+  `setDisplacementGradient(H)` and query derived tensors:
+
+  | Getter | Returns | Definition |
+  |--------|---------|------------|
+  | `getDisplacementGradient()` | @f$ \nabla\mathbf{u} @f$ | Input gradient |
+  | `getDeformationGradient()` | @f$ \mathbf{F} @f$ | @f$ \mathbf{I} + \nabla\mathbf{u} @f$ |
+  | `getDeformationGradientInverse()` | @f$ \mathbf{F}^{-1} @f$ | Inverse |
+  | `getDeformationGradientInverseTranspose()` | @f$ \mathbf{F}^{-T} @f$ | Inverse transpose |
+  | `getRightCauchyGreenTensor()` | @f$ \mathbf{C} @f$ | @f$ \mathbf{F}^T\mathbf{F} @f$ |
+  | `getLeftCauchyGreenTensor()` | @f$ \mathbf{b} @f$ | @f$ \mathbf{F}\mathbf{F}^T @f$ |
+  | `getJacobian()` | @f$ J @f$ | @f$ \det\mathbf{F} @f$ |
+  | `getLogJacobian()` | @f$ \ln J @f$ | Natural log of Jacobian |
+
+  Invariant classes compute derived quantities from the kinematic state:
+  - `IsotropicInvariants` — @f$ I_1 = \operatorname{tr}\mathbf{C} @f$,
+    @f$ I_2 = \tfrac{1}{2}[\operatorname{tr}(\mathbf{C})^2 - \operatorname{tr}(\mathbf{C}^2)] @f$,
+    @f$ I_3 = \det\mathbf{C} = J^2 @f$
+  - `FiberInvariants` — @f$ I_4 = \mathbf{a}_0 \cdot \mathbf{C}\mathbf{a}_0 @f$,
+    @f$ I_5 = \mathbf{a}_0 \cdot \mathbf{C}^2\mathbf{a}_0 @f$
+    (for anisotropic materials; constructed with a fiber direction vector)
+
+  ## Constitutive Point and Input Injection
+
+  `ConstitutivePoint` bundles a `KinematicState` with an optional
+  `Geometry::Point` (for spatial location) and a tag-based auxiliary data store.
+  Auxiliary data (fiber directions, activation values, etc.) is injected via
+  typed tags:
+
+  @code{.cpp}
+  cp.set<Solid::Tags::FiberDirection>(fiberVec);
+  auto& f = cp.get<Solid::Tags::FiberDirection>();
+  bool has = cp.has<Solid::Tags::Activation>();
+  @endcode
+
+  The `Input<Derived>` CRTP base and `InputFunction` callable allow the user to
+  inject auxiliary data at each quadrature point during assembly. Integrators
+  accept input via `setInput()`.
+
+  ## Constitutive Laws
+
+  Each law derives from `HyperElasticLaw<Derived>` (CRTP base) and provides:
+  - A `Cache` struct for precomputed invariant data
+  - `setCache(cache, cp)` — populate the cache from a `ConstitutivePoint`
+  - `getFirstPiolaKirchhoffStress(P, cache, cp)` — @f$ \mathbf{P} = \partial W / \partial \mathbf{F} @f$
+  - `getMaterialTangent(dP, cache, cp, dF)` — directional derivative @f$ D\mathbf{P}[\delta\mathbf{F}] @f$
+  - `getStrainEnergyDensity(cache, cp)` — returns @f$ W(\mathbf{F}) @f$
+
+  | Law | Constructor | Energy density @f$ W @f$ |
+  |-----|-------------|--------------------------|
+  | `Hooke` | `Hooke(lambda, mu)` | @f$ \boldsymbol{\sigma} = \lambda(\operatorname{tr}\boldsymbol{\varepsilon})\mathbf{I} + 2\mu\boldsymbol{\varepsilon} @f$ (linear stress-strain; not hyperelastic) |
+  | `NeoHookean` | `NeoHookean(lambda, mu)` | @f$ \frac{\mu}{2}(I_1 - d) - \mu\ln J + \frac{\lambda}{2}(\ln J)^2 @f$ |
+  | `SaintVenantKirchhoff` | `SaintVenantKirchhoff(lambda, mu)` | @f$ \frac{\lambda}{2}(\operatorname{tr}\mathbf{E})^2 + \mu\,\mathbf{E}:\mathbf{E} @f$ |
+  | `MooneyRivlin` | `MooneyRivlin(c1, c2, kappa)` | @f$ c_1(\bar{I}_1 - d) + c_2(\bar{I}_2 - d) + \frac{\kappa}{2}(J-1)^2 @f$ |
+
+  where @f$ \mathbf{E} = \tfrac{1}{2}(\mathbf{C} - \mathbf{I}) @f$ is the
+  Green-Lagrange strain, @f$ \bar{I}_k = J^{-2k/d} I_k @f$ are modified
+  invariants, and @f$ \kappa @f$ is the bulk modulus.
+
+  All Lamé-parameter constructors accept @f$ \lambda @f$ and @f$ \mu @f$ computed
+  from Young's modulus @f$ E @f$ and Poisson's ratio @f$ \nu @f$:
+  @f[
+    \lambda = \frac{E\nu}{(1+\nu)(1-2\nu)}, \quad
+    \mu = \frac{E}{2(1+\nu)}
+  @f]
+
+  ## Integrators
+
+  Both integrators use `setDisplacement()` to set the linearization point and
+  `setInput()` for auxiliary data injection. Quadrature order is auto-selected
+  (2× FE order) unless overridden with `setQuadratureOrder()`.
+
+  | Integrator | Form type | Assembles | Mathematical expression |
+  |------------|-----------|-----------|-------------------------|
+  | `InternalForce<Law, FES>` | Linear (residual) | Internal force vector | @f$ R_i = \int_\Omega \mathbf{P} : \nabla\phi_i \, dX @f$ |
+  | `MaterialTangent<Law, Solution, FES>` | Bilinear (tangent) | Tangent stiffness matrix | @f$ K_{ij} = \int_\Omega D\mathbf{P}[\nabla\phi_j] : \nabla\phi_i \, dX @f$ |
+
+  Constructor signatures (CTAD-deduced):
+
+  @code{.cpp}
+  Solid::InternalForce residual(law, v);       // (law, TestFunction)
+  residual.setDisplacement(u);                  // set linearization point
+
+  Solid::MaterialTangent tangent(law, du, v);  // (law, TrialFunction, TestFunction)
+  tangent.setDisplacement(u);                   // set linearization point
+  @endcode
+
+  ## Derived Fields
+
+  - `FirstPiolaKirchhoffStress<Law>` — Post-process @f$ \mathbf{P} @f$ field
+  - `CauchyStress<Law>` — Post-process @f$ \boldsymbol{\sigma} = J^{-1}\mathbf{P}\mathbf{F}^T @f$
+  - `GreenLagrangeStrain` — Post-process @f$ \mathbf{E} = \frac{1}{2}(\mathbf{C} - \mathbf{I}) @f$
+
+  ## Typical Usage
+
+  A quasi-static hyperelastic block under gravity using `NeoHookean`
+  (from `examples/Solid/BlockGravity.cpp`):
+
+  @code{.cpp}
+  #include <Rodin/Solid.h>
+  #include <Rodin/Solver/NewtonSolver.h>
+  #include <Rodin/Solver/SparseLU.h>
+
+  // Material from Young's modulus and Poisson's ratio
+  const Real E = 200.0, nu = 0.3;
+  const Real lambda = E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu));
+  const Real mu     = E / (2.0 * (1.0 + nu));
+  Solid::NeoHookean law(lambda, mu);
+
+  P1 Vh(mesh, mesh.getSpaceDimension());  // vector P1 space
+  TrialFunction du(Vh);
+  TestFunction  v(Vh);
+  GridFunction  u(Vh);  // accumulated displacement
+
+  // Build Newton system: K δu = -F_int(u) + F_body
+  Solid::MaterialTangent tangent(law, du, v);
+  tangent.setDisplacement(u);
+
+  Solid::InternalForce residual(law, v);
+  residual.setDisplacement(u);
+
+  auto bodyForce = VectorFunction{ Zero(), RealFunction(-10.0) };
+
+  Problem newton(du, v);
+  newton = tangent
+         + residual
+         - Integral(bodyForce, v)
+         + DirichletBC(du, VectorFunction{ Zero(), Zero() }).on(bottomBC);
+
+  SparseLU linearSolver(newton);
+  NewtonSolver solver(linearSolver);
+  solver.setMaxIterations(50)
+        .setAbsoluteTolerance(1e-10)
+        .setRelativeTolerance(1e-8);
+  solver.solve(u);
+  @endcode
+
+  @note The module is header-only (`Rodin::Solid` INTERFACE library).
+
+  @see @ref Rodin::Elasticity "Linear elasticity" for small-deformation problems.
  */
 
 /**
@@ -424,16 +967,46 @@
 
 /**
   * @namespace Rodin::QF
-  * @brief Module for defining quadrature formulae.
+  * @brief Module for defining quadrature formulae over reference polytopes.
 
   * The QF (Quadrature Formula) module provides numerical integration rules
   * for computing integrals over reference polytopes. These quadrature rules
-  * approximate integrals by weighted sums:
+  * approximate integrals by weighted sums of function evaluations:
   * @f[
-  *   \int_K f(x) \, dx \approx \sum_{i=1}^n w_i f(x_i)
+  *   \int_{\hat{K}} f(\hat{x}) \, d\hat{x} \approx \sum_{i=1}^n w_i \, f(\hat{x}_i)
   * @f]
-  * where @f$ K @f$ is a reference polytope, @f$ x_i @f$ are quadrature points,
-  * and @f$ w_i @f$ are associated weights.
+  * where @f$ \hat{K} @f$ is a reference polytope, @f$ \hat{x}_i @f$ are the
+  * quadrature points, and @f$ w_i @f$ are the associated weights.
+  *
+  * ## Available Quadrature Rules
+  *
+  * | Rule | Class | Polytopes | Exactness |
+  * |------|-------|-----------|-----------|
+  * | **Centroid** | `QF::Centroid` | All types | Degree 1 (linear). Single point at barycenter. |
+  * | **Gauss-Legendre** | `QF::GaussLegendre` | All types | Degree @f$ 2n-1 @f$ for @f$ n @f$ points (1D). Tensor-product or Duffy transform for higher dimensions. |
+  * | **Gauss-Lobatto** | `QF::GaussLobatto` | Segments | Degree @f$ 2n-3 @f$ for @f$ n @f$ points. Includes endpoints (useful for spectral methods). |
+  * | **Grundmann-Möller** | `QF::GrundmannMoller` | Simplices only | Degree @f$ 2s+1 @f$ for parameter @f$ s \geq 0 @f$. Designed specifically for simplicial elements. |
+  *
+  * ## Automatic Selection
+  *
+  * During assembly, the quadrature order is automatically chosen based on the
+  * polynomial degree of the finite element space and the integrands. Users can
+  * also specify a quadrature rule explicitly:
+  *
+  * @code{.cpp}
+  * QF::GaussLegendre qf(Polytope::Type::Triangle, 5); // order 5 on triangles
+  * @endcode
+  *
+  * ## Higher-Dimensional Construction
+  *
+  * - **Tensor-product geometries** (quadrilaterals, hexahedra): constructed via
+  *   tensor products of 1D Gauss-Legendre rules.
+  * - **Simplicial geometries** (triangles, tetrahedra): the Duffy transformation
+  *   maps tensor-product rules to the simplex, or Grundmann-Möller rules are
+  *   used natively.
+  *
+  * Rodin provides quadrature rules for all supported polytope types
+  * (segments, triangles, quadrilaterals, tetrahedra, hexahedra, wedges).
  */
 
 /**
@@ -447,7 +1020,25 @@
 
   The FormLanguage module provides the expression template infrastructure
   underlying Rodin's variational form language. It enables composing
-  mathematical expressions that are lazily evaluated during assembly:
+  mathematical expressions that are lazily evaluated during assembly.
+
+  ## Key Classes
+
+  - `FormLanguage::Base` — Root base class for all form language objects.
+    Provides unique identification (UUID), object lifetime management via
+    shared ownership, and polymorphic `copy()`. **Not thread-safe**: use
+    `thread_local` caching for per-thread output in evaluation methods.
+
+  - `FormLanguage::Traits<T>` — Type trait template. Each form language type
+    provides a specialization defining associated types (`ScalarType`,
+    `RangeType`, `FESType`, etc.). Always specialize `Traits` for new types.
+
+  - `FormLanguage::List` — Container for variational form components (integrals,
+    boundary conditions) that makes up the body of a `Problem`.
+
+  ## Expression Template Pattern
+
+  Operators like `Grad`, `Div`, `Dot` are CRTP-based expression templates:
 
   @code{.cpp}
   auto stiffness = Integral(Grad(u), Grad(v)); // expression, not yet evaluated
@@ -455,6 +1046,20 @@
   Problem p(u, v);
   p = stiffness - load + DirichletBC(u, Zero()); // combined expression
   @endcode
+
+  Expressions store operands via `std::reference_wrapper` (non-owning) or
+  `std::unique_ptr` (owning, for temporaries). No computation occurs until
+  assembly iterates over mesh cells and evaluates the expression at quadrature
+  points.
+
+  ## Object Lifetime
+
+  The `Base::object()` helpers manage temporary object lifetimes. When an
+  expression captures a temporary (e.g.\ a lambda-constructed `RealFunction`),
+  the temporary is stored in a `shared_ptr` table within the expression,
+  ensuring it lives as long as the expression does.
+
+  @see @ref Rodin::Variational "Variational module" for the user-facing form language.
  */
 
 /**
@@ -466,12 +1071,64 @@
   @namespace Rodin::Math
   @brief Module for general mathematical operations.
 
-  Provides mathematical constants, vector/matrix types, and utility functions.
-  Key items include:
+  Provides mathematical types, constants, and utility functions used
+  throughout the Rodin framework.
 
-  - `Math::Constants::pi()` — The constant @f$ \pi @f$
-  - `Math::Vector<Real>` — Dense vector type
-  - `Math::Matrix<Real>` — Dense matrix type
+  ## Types
+
+  | Type | Description |
+  |------|-------------|
+  | `Math::Vector<T>` | Dense column vector (Eigen-based) |
+  | `Math::Matrix<T>` | Dense matrix (Eigen-based) |
+  | `Math::SparseMatrix<T>` | Compressed sparse column matrix |
+  | `Math::SpatialVector<T>` | Small fixed-size vector for physical coordinates |
+  | `Math::SpatialMatrix<T>` | Small fixed-size matrix (e.g.\ Jacobians, stress tensors) |
+  | `Math::LinearSystem` | Couples operator matrix @f$ A @f$, RHS vector @f$ b @f$, and solution @f$ x @f$ |
+
+  ## Constants
+
+  `Math::Constants::pi()` — @f$ \pi @f$
+
+  ## Mathematical Functions
+
+  | Function | Signature | Domain |
+  |----------|-----------|--------|
+  | `abs` | `abs(x)` | Scalar or matrix |
+  | `exp` | `exp(x)` | Scalar or matrix |
+  | `sqrt` | `sqrt(x)` | Scalar or matrix |
+  | `pow` | `pow(base, exp)` | Scalar or matrix |
+  | `pow2` | `pow2(x)` | Scalar or matrix |
+  | `log` | `log(x)` | Scalar |
+  | `log2` | `log2(x)` | Scalar |
+  | `log10` | `log10(x)` | Scalar |
+  | `sin`, `cos`, `tan` | Trigonometric | Scalar or matrix |
+  | `asin`, `acos`, `atan` | Inverse trig | Scalar |
+  | `atan2` | `atan2(y, x)` | Two-argument arctangent |
+  | `sinh`, `cosh`, `tanh` | Hyperbolic | Scalar or matrix |
+  | `min`, `max` | Element-wise | Scalar |
+  | `clamp` | `clamp(x, lo, hi)` | Scalar |
+
+  ## Unit Types
+
+  - `Math::Rad` — Radian wrapper with implicit `Real` conversion
+  - `Math::Deg` — Degree wrapper with conversion to `Rad`
+
+  ## Runge-Kutta Schemes
+
+  - `Math::RungeKutta::RK2` — Second-order Runge-Kutta (midpoint)
+  - `Math::RungeKutta::RK4` — Classical fourth-order Runge-Kutta
+
+  ## Root Finding
+
+  - `Math::RootFinding::Bisection` — Bisection method for scalar root finding
+
+  ## Linear Algebra Utilities
+
+  - `dot(a, b)` — Inner product
+  - `cross(a, b)` — Cross product (3D)
+  - `sum`, `minus`, `mult`, `division` — Element-wise operations
+  - `conj` — Complex conjugate
+  - `nan<T>()` — NaN sentinel
  */
 
 
@@ -482,26 +1139,56 @@
 
 /**
   @namespace Rodin::Solver
-  @brief Module for solving linear and nonlinear systems.
+  @brief Module for solving linear and nonlinear systems arising from
+  finite element discretizations.
 
-  The Solver module provides linear solvers for the systems arising from
-  finite element discretizations. Available solvers include:
+  The Solver module provides a comprehensive set of direct and iterative
+  linear solvers:
 
-  - @ref Rodin::Solver::CG "CG" — Conjugate Gradient (for SPD systems)
+  **Direct solvers** (exact up to floating-point precision):
+  - @ref Rodin::Solver::SparseLU "SparseLU" — General-purpose sparse LU factorization
+  - @ref Rodin::Solver::UMFPack "UMFPack" — SuiteSparse UMFPACK solver
+  - @ref Rodin::Solver::CHOLMOD "CHOLMOD" — SuiteSparse Cholesky for SPD systems
+  - @ref Rodin::Solver::SimplicialLLT "SimplicialLLT" — Simplicial @f$ LL^T @f$
+  - @ref Rodin::Solver::SimplicialLDLT "SimplicialLDLT" — Simplicial @f$ LDL^T @f$
+  - @ref Rodin::Solver::SparseQR "SparseQR" — Sparse QR factorization
+  - @ref Rodin::Solver::SPQR "SPQR" — SuiteSparse sparse QR
+  - @ref Rodin::Solver::HouseholderQR "HouseholderQR" — Dense Householder QR
+  - @ref Rodin::Solver::LDLT "LDLT" — Dense @f$ LDL^T @f$
+
+  **Iterative solvers** (for large systems):
+  - @ref Rodin::Solver::CG "CG" — Conjugate Gradient (SPD systems)
+  - @ref Rodin::Solver::BiCGSTAB "BiCGSTAB" — Bi-conjugate gradient stabilized
   - @ref Rodin::Solver::GMRES "GMRES" — Generalized Minimum Residual
-  - @ref Rodin::Solver::SparseLU "SparseLU" — Direct sparse LU factorization
-  - @ref Rodin::Solver::UMFPack "UMFPack" — UMFPACK direct solver
+  - @ref Rodin::Solver::DGMRES "DGMRES" — Deflated GMRES
+  - @ref Rodin::Solver::MINRES "MINRES" — Minimum Residual (symmetric systems)
+  - @ref Rodin::Solver::IDRS "IDRS" — Induced Dimension Reduction
+  - @ref Rodin::Solver::IDRSTABL "IDRSTABL" — IDR(s) with stabilization
+  - @ref Rodin::Solver::LeastSquaresCG "LeastSquaresCG" — Least-squares CG
 
   Usage:
   @code{.cpp}
-  // Iterative solver
+  // Inline iterative solver — most common pattern
   Solver::CG(problem).solve();
+
+  // Configured iterative solver
+  Solver::CG solver(problem);
+  solver.setMaxIterations(1000);
+  solver.setTolerance(1e-10);
+  solver.solve();
 
   // Direct solver
   Solver::SparseLU(problem).solve();
   @endcode
 
-  @see @ref guides-variational "Variational Formulations Guide"
+  **Nonlinear solvers** (for hyperelastic or other nonlinear problems):
+  - `Solver::NewtonSolver<LinearSolver>` — Newton-Raphson iteration for nonlinear
+    variational problems. At each iterate @f$ u^k @f$, assembles the tangent
+    system @f$ J(u^k)\,\delta u^k = -F(u^k) @f$ and updates
+    @f$ u^{k+1} = u^k + \delta u^k @f$. Configurable via `setMaxIterations()`,
+    `setAbsoluteTolerance()`, and `setRelativeTolerance()`.
+
+  @see @ref guides-solvers "Solvers Guide"
  */
 
 /**
@@ -554,10 +1241,106 @@
   @namespace Rodin::External::MMG
   @brief MMG integration with Rodin
 
-  The Rodin::External::MMG module has a wide variety of uses which ranges from
-  optimization of the mesh, to implicit domain meshing. It provides many C++
-  wrappers to execute the functionality of the [Mmg
-  Platform](https://www.mmgtools.org/).
+  The `Rodin::External::MMG` module provides C++ wrappers for the
+  [Mmg Platform](https://www.mmgtools.org/), enabling metric-based mesh
+  adaptation, mesh-quality optimization, and implicit-domain discretization
+  directly from Rodin objects.
+
+  ## Key Classes
+
+  | Class | Purpose |
+  |-------|---------|
+  | `MMG::Mesh` | MMG-specific mesh type (extends `Geometry::Mesh<Local>`) with ridge, corner, and required-entity metadata. Loaded and saved via MEDIT format. |
+  | `MMG::Adapt` | Metric-based adaptation: remeshes a mesh according to a nodal size map. |
+  | `MMG::MeshOptimizer` | Mesh-quality optimization: improves element shapes without a metric field. |
+  | `MMG::LevelSetDiscretizer` | Implicit-domain meshing: cuts a background mesh along a level-set isovalue. |
+  | `MMG::MMG5` | Base class providing shared remeshing controls. |
+
+  ## Auto-Dispatch
+
+  `Adapt`, `MeshOptimizer`, and `LevelSetDiscretizer` all auto-dispatch to the
+  appropriate MMG backend based on the mesh type:
+
+  | Mesh type | Backend |
+  |-----------|---------|
+  | 2D planar | MMG2D |
+  | 3D volumetric | MMG3D |
+  | Surface in 3D | MMGS |
+
+  ## Shared Configuration (MMG5 base)
+
+  All three classes inherit from `MMG5` and share these configuration methods
+  (each returns `*this` for chaining):
+
+  | Method | Default | Description |
+  |--------|---------|-------------|
+  | `setHMin(hmin)` | ~0.01× bounding box | Minimal allowed edge size |
+  | `setHMax(hmax)` | ~2× bounding box | Maximal allowed edge size |
+  | `setHausdorff(hausd)` | 0.01 | Hausdorff distance tolerance for boundary approximation |
+  | `setGradation(hgrad)` | 1.3 | Edge-size gradation ratio between adjacent elements |
+  | `setAngleDetection(bool)` | true | Enable ridge angle detection for feature preservation |
+
+  ## LevelSetDiscretizer API
+
+  In addition to `MMG5` parameters, `LevelSetDiscretizer` provides:
+
+  | Method | Description |
+  |--------|-------------|
+  | `setLevelSet(ls)` | Isovalue to extract (default: 0.0) |
+  | `surface(bool)` | When true, discretize the isosurface; when false, discretize the subdomain volume |
+  | `setRMC(rmc)` | Removal threshold for small parasitic components (default: @f$ 10^{-5} @f$) |
+  | `setBoundaryReference(ref)` | Material reference for the discretized boundary (default: 10) |
+  | `setBaseReferences(refs)` | Restrict level-set splitting to specified base materials |
+  | `split(ref, split)` / `noSplit(ref)` | Per-material splitting policy |
+
+  The `discretize()` method takes an `MMG::RealGridFunction` and returns a
+  new `MMG::Mesh`:
+
+  @code{.cpp}
+  MMG::LevelSetDiscretizer lsd;
+  lsd.setLevelSet(0.0)
+     .setBoundaryReference(10)
+     .setHausdorff(0.005);
+  MMG::Mesh cut = lsd.discretize(phi);
+  @endcode
+
+  ## Typical Usage
+
+  @code{.cpp}
+  #include <Rodin/MMG.h>
+
+  // Adapt: remesh from a size map
+  MMG::Mesh mesh;
+  mesh.load("domain.mesh", IO::FileFormat::MEDIT);
+  P1 Vh(mesh);
+  GridFunction sizeMap(Vh);
+  // ... define sizeMap ...
+  MMG::Adapt().setHMax(0.5).setGradation(1.2).adapt(mesh, sizeMap);
+
+  // Optimize: improve element quality
+  MMG::MeshOptimizer().setHMax(0.5).optimize(mesh);
+
+  // Level-set discretization: cut mesh along phi = 0
+  MMG::LevelSetDiscretizer lsd;
+  MMG::Mesh cut = lsd.setLevelSet(0.0).discretize(phi);
+  @endcode
+
+  ## MMG::Mesh Extras
+
+  `MMG::Mesh` extends the base `Geometry::Mesh<Local>` with MMG-specific
+  boundary metadata:
+
+  | Method | Description |
+  |--------|-------------|
+  | `setCorner(vertexIdx)` | Mark a vertex as a geometric corner |
+  | `setRidge(edgeIdx)` | Mark an edge as a geometric ridge |
+  | `setRequiredVertex(idx)` | Mark a vertex as required (fixed during remeshing) |
+  | `setRequiredEdge(idx)` | Mark an edge as required |
+
+  Use `MMG::Mesh::Build()` to construct meshes programmatically via the
+  builder pattern.
+
+  @note Requires the MMG library and Rodin configured with `RODIN_USE_MMG=ON`.
 
   @see @ref examples-mmg-index "MMG examples"
  */
@@ -565,6 +1348,250 @@
 /**
   @namespace Rodin::External::MFEM
   @brief MFEM integration with Rodin
+ */
+
+/**
+  @namespace Rodin::Scotch
+  @brief PT-Scotch mesh partitioning integration.
+
+  The Scotch module provides a graph-based mesh partitioner using the
+  [PT-Scotch](https://www.labri.fr/perso/pelegrin/scotch/) library.
+  It implements the `Geometry::Partitioner` interface and supports
+  configurable partitioning strategies via `SCOTCH_Strat`.
+
+  The primary class is `Scotch::Partitioner`, which partitions cells of
+  a local mesh into a given number of parts. The resulting partition can be
+  used with the `Sharder` to distribute the mesh for MPI computations.
+
+  @code{.cpp}
+  #include <Rodin/Scotch/MeshPartitioner.h>
+
+  Scotch::Partitioner partitioner(mesh);
+  partitioner.partition(numRanks);  // partition into numRanks parts
+
+  size_t part = partitioner.getPartition(cellIndex);
+  @endcode
+
+  @note Requires the Scotch library and is conditionally compiled.
+ */
+
+/**
+  @namespace Rodin::MPI
+  @brief Distributed-memory parallel extensions using MPI.
+
+  The MPI module enables distributed finite element computations across
+  multiple processes using the Message Passing Interface (MPI) via Boost.MPI.
+
+  ## Key Components
+
+  - @ref Rodin::Context::MPI "Context::MPI" — Wraps a `boost::mpi::environment`
+    and `boost::mpi::communicator` to provide a uniform execution context.
+  - @ref Rodin::Geometry::Mesh<Context::MPI> "Mesh\<Context::MPI\>" — Distributed
+    mesh storing a rank-local @ref Rodin::Geometry::Shard "Shard" with ownership,
+    ghost, and distributed index metadata.  Geometric queries
+    (`getPolytopeCount`, `getVolume`, `getPerimeter`, etc.) perform
+    MPI reductions automatically.
+  - @ref Rodin::Geometry::Sharder<Context::MPI> "Sharder" — Distributes a global
+    mesh across MPI ranks in three steps: `shard()`, `scatter()`, `gather()`.
+    Also available as one-step `distribute()`.
+  - @ref Rodin::Geometry::Shard "Shard" — Rank-local view of a partitioned mesh.
+    Classifies every polytope as **Owned**, **Shared**, or **Ghost** and maintains
+    bidirectional local↔distributed index maps.
+  - `reconcile(d)` — After local connectivity discovery, reconciles entities of
+    dimension @p d across ranks so that shared entities have consistent
+    distributed IDs and ownership.
+
+  ## Typical Workflow
+
+  @code{.cpp}
+  #include <Rodin/MPI.h>
+
+  boost::mpi::environment env(argc, argv);
+  boost::mpi::communicator world;
+  Context::MPI mpi(env, world);
+
+  // Option A: UniformGrid (partition + distribute in one call)
+  auto mesh = Mesh<Context::MPI>::UniformGrid(mpi, Polytope::Type::Tetrahedron, {16,16,16});
+
+  // Option B: explicit partition → shard → scatter → gather
+  MPI::Sharder sharder(mpi);
+  if (world.rank() == 0)
+  {
+    LocalMesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, {16,16,16});
+    mesh.getConnectivity().compute(cellDim, cellDim);
+    BalancedCompactPartitioner partitioner(mesh);
+    partitioner.partition(world.size());
+    sharder.shard(partitioner);
+    sharder.scatter(0);
+  }
+  auto mesh = sharder.gather(0);
+
+  // Compute distributed connectivity and reconcile shared entities
+  mesh.getConnectivity().compute(2, 3);
+  mesh.reconcile(2);
+  @endcode
+
+  ## Submodules
+
+  - **Assembly** — MPI-parallel assembly strategies for PETSc-backed forms
+  - **Context** — `Context::MPI` execution context
+  - **Geometry** — Distributed mesh and sharder
+  - **IO** — HDF5 and MFEM IO specializations for distributed meshes
+  - **Variational** — Distributed FE spaces (P1 on MPI mesh)
+
+  @note Requires MPI to be available and Rodin configured with
+  `RODIN_USE_MPI=ON`.
+
+  @see @ref Rodin::Context::MPI, @ref Rodin::Geometry::Shard
+ */
+
+/**
+  @namespace Rodin::PETSc
+  @brief PETSc integration module for Rodin.
+
+  The PETSc module provides integration with the
+  [Portable, Extensible Toolkit for Scientific Computation](https://petsc.org/)
+  (PETSc), enabling the use of distributed and parallel linear algebra objects,
+  Krylov solvers, and nonlinear solver frameworks within Rodin's finite element
+  pipeline.
+
+  ## Key Components
+
+  **Math types** (@ref Rodin::PETSc::Math):
+  - @ref Rodin::PETSc::Math::LinearSystem "LinearSystem" — Couples a PETSc
+    `Mat` (operator @f$ A @f$), right-hand side `Vec` (@f$ \mathbf{b} @f$), and
+    solution `Vec` (@f$ \mathbf{x} @f$).  Supports Dirichlet elimination via
+    `eliminate()` and block-preconditioner field splits via `setFieldSplits()`.
+  - `Vector` (`::Vec`) and `Matrix` (`::Mat`) — PETSc handle aliases.
+
+  **Solvers** (@ref Rodin::PETSc::Solver):
+  - @ref Rodin::Solver::KSP "KSP" — Wraps the PETSc KSP (Krylov subspace)
+    context.  Configurable via `setType()`, `setTolerances()`,
+    `setPreconditioner()`, and PETSc command-line options (`-ksp_type`,
+    `-ksp_rtol`, `-ksp_monitor`, etc.).
+  - @ref Rodin::Solver::CG<PETSc::Math::LinearSystem> "CG" — CG specialization
+    setting `KSPCG`.  For symmetric positive-definite systems.
+  - @ref Rodin::Solver::GMRES<PETSc::Math::LinearSystem> "GMRES" — GMRES
+    specialization setting `KSPGMRES`.  For non-symmetric/indefinite systems.
+  - @ref Rodin::Solver::SNES "SNES" — Wraps the PETSc SNES (Scalable Nonlinear
+    Equations Solvers) for Newton-type methods.  The inner linear solve uses
+    `KSP`.
+
+  **Variational** (@ref Rodin::PETSc::Variational):
+  - `PETSc::Variational::TrialFunction` / `TestFunction` — Thin wrappers
+    that trigger PETSc-specific CTAD so that `Problem`, `BilinearForm`, and
+    `LinearForm` automatically use PETSc storage.
+  - `PETSc::Variational::GridFunction` — Stores DOF coefficients in a PETSc
+    `Vec`.  In MPI mode, the vector is created with `VecMPISetGhost` for
+    transparent ghost-layer synchronization.
+  - `Problem` — Assembles into a PETSc `LinearSystem`.  Supports both
+    single-field (`Problem(u, v)`) and multi-field block systems
+    (`Problem(u, p, l, v, q, m)`) with field-split preconditioning.
+  - `BilinearForm` / `LinearForm` — Assemble into PETSc `Mat` / `Vec`.
+
+  **Assembly** (@ref Rodin::PETSc::Assembly):
+  - `Sequential` — Single-rank assembly into PETSc objects.
+  - `MPI` — Distributed assembly where each rank contributes owned elements.
+  - `OpenMP` — Shared-memory parallel assembly on a single rank.
+
+  ## Typical Usage (Sequential)
+
+  @code{.cpp}
+  #include <Rodin/PETSc.h>
+
+  PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
+
+  Mesh mesh;
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+  mesh.getConnectivity().compute(1, 2);
+
+  P1 Vh(mesh);
+  PETSc::Variational::TrialFunction u(Vh);
+  PETSc::Variational::TestFunction  v(Vh);
+
+  Problem poisson(u, v);
+  poisson = Integral(Grad(u), Grad(v))
+          - Integral(f, v)
+          + DirichletBC(u, Zero());
+
+  Solver::CG(poisson).solve();
+
+  PetscFinalize();
+  @endcode
+
+  ## Typical Usage (MPI + PETSc)
+
+  @code{.cpp}
+  #include <Rodin/MPI.h>
+  #include <Rodin/PETSc.h>
+
+  boost::mpi::environment env(argc, argv);
+  boost::mpi::communicator world;
+  Context::MPI mpi(env, world);
+  PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
+
+  // Partition and distribute mesh
+  MPI::Sharder sharder(mpi);
+  // ... (see MPI module documentation)
+  auto mesh = sharder.gather(0);
+  mesh.getConnectivity().compute(2, 3);
+  mesh.reconcile(2);
+
+  P1 Vh(mesh);
+  PETSc::Variational::TrialFunction u(Vh);
+  PETSc::Variational::TestFunction  v(Vh);
+
+  Problem poisson(u, v);
+  poisson = Integral(Grad(u), Grad(v))
+          - Integral(f, v)
+          + DirichletBC(u, Zero());
+
+  Solver::CG(poisson).solve();
+
+  PetscFinalize();
+  @endcode
+
+  ## Multi-Field Problems (Stokes)
+
+  PETSc problems support an arbitrary number of coupled trial/test function
+  pairs for saddle-point systems:
+
+  @code{.cpp}
+  H1  uh(std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+  H1  ph(std::integral_constant<size_t, 1>{}, mesh);
+  P0g lh(mesh);
+
+  PETSc::Variational::TrialFunction u(uh);
+  PETSc::Variational::TrialFunction p(ph);
+  PETSc::Variational::TrialFunction l(lh);
+
+  PETSc::Variational::TestFunction v(uh);
+  PETSc::Variational::TestFunction q(ph);
+  PETSc::Variational::TestFunction m(lh);
+
+  Problem stokes(u, p, l, v, q, m);
+  stokes = Integral(Jacobian(u), Jacobian(v))
+         - Integral(p, Div(v))
+         + Integral(Div(u), q)
+         + Integral(l, q)
+         + Integral(p, m)
+         - Integral(f, v)
+         + DirichletBC(u, u_exact);
+
+  Solver::KSP(stokes).solve();
+  @endcode
+
+  PETSc command-line options can be used to configure field-split
+  preconditioning:
+  @code
+  ./Stokes -ksp_type gmres -pc_type fieldsplit -ksp_rtol 1e-8
+  @endcode
+
+  @note Requires PETSc to be available and Rodin configured with
+  `RODIN_USE_PETSC=ON`.
+
+  @see Rodin::Solver::KSP, Rodin::Solver::SNES
  */
 
 /**

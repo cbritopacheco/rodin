@@ -29,6 +29,7 @@
 #include <vector>
 
 #include "Rodin/Types.h"
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Variational/FiniteElement.h"
 
@@ -199,15 +200,15 @@ namespace Rodin::Variational
   // Vector P0gElement
   // ----------------------------------------------------------------------------
   template <class Scalar>
-  class P0gElement<Math::Vector<Scalar>> final
-    : public FiniteElementBase<P0gElement<Math::Vector<Scalar>>>
+  class P0gElement<Math::SpatialVector<Scalar>> final
+    : public FiniteElementBase<P0gElement<Math::SpatialVector<Scalar>>>
   {
     using G = Geometry::Polytope::Type;
 
   public:
-    using Parent = FiniteElementBase<P0gElement<Math::Vector<Scalar>>>;
+    using Parent = FiniteElementBase<P0gElement<Math::SpatialVector<Scalar>>>;
     using ScalarType = Scalar;
-    using RangeType = Math::Vector<Scalar>;
+    using RangeType = Math::SpatialVector<Scalar>;
 
     class LinearForm
     {
@@ -225,10 +226,9 @@ namespace Rodin::Variational
       template <class T>
       ScalarType operator()(const T& v) const
       {
-        static thread_local RangeType s_out;
         const auto& xi = P0gElement<ScalarType>(m_g).getNode(m_local / m_vdim);
-        s_out = v(xi);
-        return s_out.coeff(m_local % m_vdim);
+        const auto value = v(xi);
+        return value(static_cast<std::uint8_t>(m_local % m_vdim));
       }
 
     private:
@@ -268,9 +268,9 @@ namespace Rodin::Variational
       const ReturnType& operator()(const Math::SpatialVector<Real>&) const
       {
         static thread_local ReturnType s_out;
-        s_out.resize(m_vdim);
+        s_out = ReturnType(static_cast<std::uint8_t>(m_vdim));
         s_out.setZero();
-        s_out.coeffRef(m_local % m_vdim) = ScalarType(1);
+        s_out[static_cast<std::uint8_t>(m_local % m_vdim)] = ScalarType(1);
         return s_out;
       }
 

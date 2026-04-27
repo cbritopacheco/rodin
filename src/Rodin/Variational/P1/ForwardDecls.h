@@ -9,6 +9,7 @@
 
 #include "Rodin/Types.h"
 #include "Rodin/Math/Vector.h"
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Variational/ForwardDecls.h"
 
 namespace Rodin::Variational
@@ -57,16 +58,16 @@ namespace Rodin::Variational
   using ComplexP1Element = P1Element<Complex>;
 
   /**
-   * @brief Alias for P1Element<Math::Vector<Scalar>>
+   * @brief Alias for P1Element<Math::SpatialVector<Scalar>>
    * @tparam Scalar Scalar type for vector components
    */
   template <class Scalar>
-  using VectorP1Element = P1Element<Math::Vector<Scalar>>;
+  using VectorP1Element = P1Element<Math::SpatialVector<Scalar>>;
 
   /**
    * @brief Alias for real vector P1Element
    */
-  using RealVectorP1Element = P1Element<Math::Vector<Real>>;
+  using RealVectorP1Element = P1Element<Math::SpatialVector<Real>>;
 }
 
 #endif

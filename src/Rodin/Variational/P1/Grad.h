@@ -47,7 +47,7 @@ namespace Rodin::Variational
     public:
       using FESType = P1<Scalar, Mesh>;
 
-      using RangeType = Math::Vector<Scalar>;
+      using RangeType = Math::SpatialVector<Scalar>;
 
       using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
 
@@ -195,7 +195,7 @@ namespace Rodin::Variational
 
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
-      using RangeType = Math::Vector<ScalarType>;
+      using RangeType = Math::SpatialVector<ScalarType>;
 
       using OperandType = ShapeFunction<NestedDerived, FESType, Space>;
 

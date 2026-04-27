@@ -125,7 +125,9 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        return this->object(getLHS().getValue(p)) / this->object(getRHS().getValue(p));
+        const auto lhs = getLHS().getValue(p);
+        const auto rhs = getRHS().getValue(p);
+        return lhs / rhs;
       }
 
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept

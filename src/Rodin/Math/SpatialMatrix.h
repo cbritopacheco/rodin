@@ -98,6 +98,35 @@ namespace Rodin::Math
         assert(m_rows <= MaxSize && m_cols <= MaxSize);
       }
 
+      static constexpr SpatialMatrix Identity(std::uint8_t rows, std::uint8_t cols)
+      {
+        assert(rows <= MaxSize && cols <= MaxSize);
+
+        SpatialMatrix I(rows, cols);
+        I.setZero();
+
+        const std::uint8_t n = std::min(rows, cols);
+
+        switch (n)
+        {
+          case 3:
+            I.m_data(2, 2) = ScalarType(1);
+            [[fallthrough]];
+          case 2:
+            I.m_data(1, 1) = ScalarType(1);
+            [[fallthrough]];
+          case 1:
+            I.m_data(0, 0) = ScalarType(1);
+            break;
+          case 0:
+            break;
+          default:
+            assert(false);
+        }
+
+        return I;
+      }
+
       template <class EigenDerived>
       constexpr
       SpatialMatrix& operator=(const Eigen::ArrayBase<EigenDerived>& other)
@@ -2195,6 +2224,35 @@ namespace Rodin::Math
       result[i] = sum;
     }
     return result;
+  }
+
+  template <class Scalar, class EigenDerived>
+  [[nodiscard]] inline
+  SpatialMatrix<Scalar>
+  operator+(
+    const SpatialMatrix<Scalar>& A,
+    const Eigen::MatrixBase<EigenDerived>& B)
+  {
+    assert(A.rows() == static_cast<std::uint8_t>(B.rows()));
+    assert(A.cols() == static_cast<std::uint8_t>(B.cols()));
+
+    SpatialMatrix<Scalar> C(A.rows(), A.cols());
+
+    for (std::uint8_t i = 0; i < A.rows(); ++i)
+      for (std::uint8_t j = 0; j < A.cols(); ++j)
+        C(i, j) = A(i, j) + B(i, j);
+
+    return C;
+  }
+
+  template <class EigenDerived, class Scalar>
+  [[nodiscard]] inline
+  SpatialMatrix<Scalar>
+  operator+(
+    const Eigen::MatrixBase<EigenDerived>& A,
+    const SpatialMatrix<Scalar>& B)
+  {
+    return B + A;
   }
 
   template <class Scalar>

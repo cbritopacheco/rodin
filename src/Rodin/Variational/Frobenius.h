@@ -102,9 +102,8 @@ namespace Rodin::Variational
         }
         else
         {
-          static thread_local OperandRangeType s_v;
-          s_v = this->getOperand().getValue(p);
-          return s_v.norm();
+          const auto v = this->getOperand().getValue(p);
+          return v.norm();
         }
       }
 

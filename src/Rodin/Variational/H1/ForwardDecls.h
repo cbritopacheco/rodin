@@ -14,6 +14,7 @@
 
 #include "Rodin/Types.h"
 #include "Rodin/Math/Vector.h"
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Variational/ForwardDecls.h"
 
 namespace Rodin::Variational
@@ -77,21 +78,21 @@ namespace Rodin::Variational
    * @brief Convenience alias for real vector-valued H1 element.
    * @tparam K Polynomial degree
    *
-   * Equivalent to `H1Element<K, Math::Vector<Real>>`. Used for vector-valued
+   * Equivalent to `H1Element<K, Math::SpatialVector<Real>>`. Used for vector-valued
    * problems such as linear elasticity or fluid mechanics.
    */
   template <size_t K>
-  using VectorH1Element = H1Element<K, Math::Vector<Real>>;
+  using VectorH1Element = H1Element<K, Math::SpatialVector<Real>>;
 
   /**
    * @brief Convenience alias for complex vector-valued H1 element.
    * @tparam K Polynomial degree
    *
-   * Equivalent to `H1Element<K, Math::Vector<Complex>>`. Used for complex
+   * Equivalent to `H1Element<K, Math::SpatialVector<Complex>>`. Used for complex
    * vector-valued problems such as electromagnetic wave propagation.
    */
   template <size_t K>
-  using ComplexVectorH1Element = H1Element<K, Math::Vector<Complex>>;
+  using ComplexVectorH1Element = H1Element<K, Math::SpatialVector<Complex>>;
 
   template <size_t K>
   class GLL;

@@ -40,7 +40,7 @@ const Real R = 50;
 
 using RealFES = P1<Real>;
 using ComplexFES = P1<Complex>;
-using VectorFES = P1<Math::Vector<Real>>;
+using VectorFES = P1<Math::SpatialVector<Real>>;
 using VectorGridFunction = GridFunction<VectorFES, Math::Vector<Real>>;
 using ShapeGradient = VectorGridFunction;
 
