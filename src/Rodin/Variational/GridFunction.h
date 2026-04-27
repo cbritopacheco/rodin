@@ -175,13 +175,13 @@ namespace Rodin::Variational
       GridFunctionBaseReference& operator=(GridFunctionBaseReference&&) = delete;
 
       constexpr
-      decltype(auto) operator()(const Geometry::Point& p) const
+      auto operator()(const Geometry::Point& p) const
       {
         return m_ref.get().getValue(p);
       }
 
       constexpr
-      decltype(auto) getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
         return m_ref.get().getValue(p);
       }
@@ -588,6 +588,7 @@ namespace Rodin::Variational
         const auto& polytopeMesh = polytope.getMesh();
         const auto& fes = m_fes.get();
         const auto& fesMesh = fes.getMesh();
+
         if (polytopeMesh == fesMesh)
         {
           static_cast<const Derived&>(*this).interpolate(out, p);
@@ -600,6 +601,7 @@ namespace Rodin::Variational
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
+
           if (restriction)
           {
             static_cast<const Derived&>(*this).interpolate(out, *restriction);
