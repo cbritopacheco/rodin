@@ -5,7 +5,10 @@ target_link_libraries(CCMLC2014_0D
   Rodin::Alert
   )
 
-add_executable(CoronaryArtery CoronaryArtery.cpp)
+add_executable(CoronaryArtery
+  CoronaryArtery.cpp
+  CoronaryArtery/CoupledLV0DCoronary3D.cpp
+  )
 target_link_libraries(CoronaryArtery
   PUBLIC
   Rodin::Heart
@@ -13,4 +16,3 @@ target_link_libraries(CoronaryArtery
   Rodin::PETSc
   Rodin::Alert
   )
-

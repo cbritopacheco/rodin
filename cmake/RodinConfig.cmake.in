@@ -7,6 +7,9 @@ endif()
 
 include(CMakeFindDependencyMacro)
 
+set(_RODIN_CONFIG_MODULE_PATH_SAVED "${CMAKE_MODULE_PATH}")
+list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
+
 # Eigen3 - We originally developed with 3.4, but newer versions (e.g., 5.x) are compatible
 # Note: Not specifying version to allow flexibility with system installations
 find_dependency(Boost 1.74 REQUIRED COMPONENTS filesystem serialization)
@@ -30,5 +33,8 @@ endif()
 if(@RODIN_USE_PETSC@)
   find_dependency(PETSc REQUIRED)
 endif()
+
+set(CMAKE_MODULE_PATH "${_RODIN_CONFIG_MODULE_PATH_SAVED}")
+unset(_RODIN_CONFIG_MODULE_PATH_SAVED)
 
 include("${CMAKE_CURRENT_LIST_DIR}/RodinTargets.cmake")

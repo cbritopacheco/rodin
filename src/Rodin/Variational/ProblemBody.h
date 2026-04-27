@@ -1049,6 +1049,56 @@ namespace Rodin::Variational
     res.getLFs().add(lf);
     return res;
   }
+
+  template <class LHSScalar, class RHSScalar>
+  auto operator+(
+      const FormLanguage::List<LinearFormIntegratorBase<LHSScalar>>& lfis,
+      const LocalBilinearFormIntegratorBase<RHSScalar>& bfi)
+  {
+    using ScalarType = typename FormLanguage::Sum<LHSScalar, RHSScalar>::Type;
+
+    ProblemBody<void, void, ScalarType> res;
+    res.getLFIs().add(lfis);
+    res.getLocalBFIs().add(bfi);
+    return res;
+  }
+
+  template <class LHSScalar, class RHSScalar>
+  auto operator-(
+      const FormLanguage::List<LinearFormIntegratorBase<LHSScalar>>& lfis,
+      const LocalBilinearFormIntegratorBase<RHSScalar>& bfi)
+  {
+    using ScalarType = typename FormLanguage::Minus<LHSScalar, RHSScalar>::Type;
+
+    ProblemBody<void, void, ScalarType> res;
+    res.getLFIs().add(lfis);
+    res.getLocalBFIs().add(UnaryMinus(bfi));
+    return res;
+  }
+
+  template <class Operator, class Vector, class LHSScalar, class RHSScalar>
+  auto operator+(
+      const ProblemBody<Operator, Vector, LHSScalar>& pb,
+      const FormLanguage::List<LocalBilinearFormIntegratorBase<RHSScalar>>& bfis)
+  {
+    using ScalarType = typename FormLanguage::Sum<LHSScalar, RHSScalar>::Type;
+
+    ProblemBody<Operator, Vector, ScalarType> res(pb);
+    res.getLocalBFIs().add(bfis);
+    return res;
+  }
+
+  template <class Operator, class Vector, class LHSScalar, class RHSScalar>
+  auto operator-(
+      const ProblemBody<Operator, Vector, LHSScalar>& pb,
+      const FormLanguage::List<LocalBilinearFormIntegratorBase<RHSScalar>>& bfis)
+  {
+    using ScalarType = typename FormLanguage::Minus<LHSScalar, RHSScalar>::Type;
+
+    ProblemBody<Operator, Vector, ScalarType> res(pb);
+    res.getLocalBFIs().add(UnaryMinus(bfis));
+    return res;
+  }
 }
 
 #endif
