@@ -144,12 +144,18 @@ namespace Rodin::Tests::Unit
     Context::MPI ctx(*g_env, world);
     auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, { 4, 4 });
 
-    // Count cells on this rank
+    // Count only owned cells on this rank (ghost cells must be excluded to
+    // avoid double-counting when reducing across ranks).
+    const size_t D = mpiMesh.getDimension();
+    const auto& shard = mpiMesh.getShard();
     size_t localCount = 0;
     {
       Assembly::MPIIteration iter(mpiMesh, Geometry::Region::Cells);
       for (auto it = iter.getIterator(); it; ++it)
-        ++localCount;
+      {
+        if (shard.isOwned(D, it->getIndex()))
+          ++localCount;
+      }
     }
 
     // Reduce to root
@@ -192,7 +198,9 @@ namespace Rodin::Tests::Unit
     boost::mpi::reduce(world, localFixed, globalFixed, std::plus<size_t>(), 0);
 
     if (world.rank() == 0)
+    {
       EXPECT_GT(globalFixed, 0u);
+    }
   }
 
   /**
@@ -287,11 +295,18 @@ namespace Rodin::Tests::Unit
     Context::MPI ctx(*g_env, world);
     auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Segment, { 10 });
 
+    // Count only owned cells on this rank (ghost cells must be excluded to
+    // avoid double-counting when reducing across ranks).
+    const size_t D = mpiMesh.getDimension();
+    const auto& shard = mpiMesh.getShard();
     size_t localCount = 0;
     {
       Assembly::MPIIteration iter(mpiMesh, Geometry::Region::Cells);
       for (auto it = iter.getIterator(); it; ++it)
-        ++localCount;
+      {
+        if (shard.isOwned(D, it->getIndex()))
+          ++localCount;
+      }
     }
 
     size_t totalCount = 0;
@@ -374,7 +389,9 @@ namespace Rodin::Tests::Unit
     boost::mpi::reduce(world, localFixed, globalFixed, std::plus<size_t>(), 0);
 
     if (world.rank() == 0)
+    {
       EXPECT_GT(globalFixed, 0u);
+    }
 
     for (const auto& [local, value] : dbc.getDOFs())
       EXPECT_NEAR(value, gValue, 1e-12);
@@ -404,7 +421,9 @@ namespace Rodin::Tests::Unit
     boost::mpi::reduce(world, localFixed, globalFixed, std::plus<size_t>(), 0);
 
     if (world.rank() == 0)
+    {
       EXPECT_GT(globalFixed, 0u);
+    }
   }
 
   /**
@@ -431,7 +450,9 @@ namespace Rodin::Tests::Unit
     boost::mpi::reduce(world, localFixed, globalFixed, std::plus<size_t>(), 0);
 
     if (world.rank() == 0)
+    {
       EXPECT_GT(globalFixed, 0u);
+    }
   }
 }
 

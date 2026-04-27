@@ -502,7 +502,7 @@ namespace Rodin::Tests::Unit
     Math::Vector<Real> p{{0.3, 0.4}};
 
     // Interpolate: sum of coefficients * basis functions
-    Math::Vector<Real> interpolated = Math::Vector<Real>::Zero(2);
+    Math::SpatialVector<Real> interpolated(static_cast<std::uint8_t>(2)); interpolated.setZero();
     for (size_t i = 0; i < 2; i++)
     {
       const auto& basis_val = elem.getBasis(i)(p);
@@ -754,7 +754,7 @@ namespace Rodin::Tests::Unit
 
       // Interpolate
       Math::Vector<Real> p{{0.3, 0.4}};
-      Math::Vector<Real> interpolated = Math::Vector<Real>::Zero(vdim);
+      Math::SpatialVector<Real> interpolated(static_cast<std::uint8_t>(vdim)); interpolated.setZero();
       for (size_t i = 0; i < vdim; i++)
         interpolated += dof_values[i] * elem.getBasis(i)(p);
       ASSERT_EQ(interpolated.size(), vdim);

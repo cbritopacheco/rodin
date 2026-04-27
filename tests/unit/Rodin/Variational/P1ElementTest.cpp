@@ -591,7 +591,7 @@ namespace Rodin::Tests::Unit
     Math::Vector<Real> exact{{1.8, 4.6}};  // [1+2*0.4, 3+4*0.4]
 
     // Interpolate
-    Math::Vector<Real> interpolated = Math::Vector<Real>::Zero(2);
+    Math::SpatialVector<Real> interpolated(static_cast<std::uint8_t>(2)); interpolated.setZero();
     interpolated += v0(0) * elem.getBasis(0)(p);  // x-component, node 0
     interpolated += v0(1) * elem.getBasis(1)(p);  // y-component, node 0
     interpolated += v1(0) * elem.getBasis(2)(p);  // x-component, node 1
@@ -1134,7 +1134,7 @@ namespace Rodin::Tests::Unit
 
       // Test interpolation at a point
       Math::Vector<Real> p{{0.3, 0.4}};
-      Math::Vector<Real> interpolated = Math::Vector<Real>::Zero(vdim);
+      Math::SpatialVector<Real> interpolated(static_cast<std::uint8_t>(vdim)); interpolated.setZero();
 
       for (size_t i = 0; i < elem.getCount(); i++)
         interpolated += dof_values[i] * elem.getBasis(i)(p);

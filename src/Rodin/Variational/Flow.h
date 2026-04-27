@@ -381,9 +381,15 @@ namespace Rodin::Variational
         // Normalize the velocity return type in one place.
         auto vphysOf = [&](const Geometry::Point& qp) -> Math::SpatialVector<Real>
         {
-          // If m_velocity(qp) is already vector-like, replace the next line by:
-          // return m_velocity(qp);
-          return m_velocity(qp).col(0);
+          const auto v = m_velocity(qp);
+          if constexpr (requires { v.col(0); })
+          {
+            return v.col(0);
+          }
+          else
+          {
+            return v;
+          }
         };
 
         // Thread-local scratch buffers to reduce temporary allocations.

@@ -30,23 +30,23 @@
 namespace Rodin::FormLanguage
 {
   template <class Scalar, class Data, class Mesh>
-  struct Traits<Variational::Div<Variational::GridFunction<Variational::P1<Math::Vector<Scalar>, Mesh>, Data>>>
+  struct Traits<Variational::Div<Variational::GridFunction<Variational::P1<Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
-    using FESType = Variational::P1<Math::Vector<Scalar>, Mesh>;
+    using FESType = Variational::P1<Math::SpatialVector<Scalar>, Mesh>;
     using ScalarType = Scalar;
-    using OperandType = Variational::GridFunction<Variational::P1<Math::Vector<Scalar>, Mesh>, Data>;
+    using OperandType = Variational::GridFunction<Variational::P1<Math::SpatialVector<Scalar>, Mesh>, Data>;
   };
 
   template <class NestedDerived, class Scalar, class Mesh, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Div<
-      Variational::ShapeFunction<NestedDerived, Variational::P1<Math::Vector<Scalar>, Mesh>, Space>>>
+      Variational::ShapeFunction<NestedDerived, Variational::P1<Math::SpatialVector<Scalar>, Mesh>, Space>>>
   {
-    using FESType = Variational::P1<Math::Vector<Scalar>, Mesh>;
+    using FESType = Variational::P1<Math::SpatialVector<Scalar>, Mesh>;
     static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
     using ScalarType = Scalar;
     using OperandType =
-      Variational::ShapeFunction<NestedDerived, Variational::P1<Math::Vector<Scalar>, Mesh>, Space>;
+      Variational::ShapeFunction<NestedDerived, Variational::P1<Math::SpatialVector<Scalar>, Mesh>, Space>;
   };
 }
 
@@ -68,13 +68,13 @@ namespace Rodin::Variational
    * - Continuity equation
    */
   template <class Scalar, class Data, class Mesh>
-  class Div<GridFunction<P1<Math::Vector<Scalar>, Mesh>, Data>> final
+  class Div<GridFunction<P1<Math::SpatialVector<Scalar>, Mesh>, Data>> final
     : public DivBase<
-        GridFunction<P1<Math::Vector<Scalar>, Mesh>, Data>,
-        Div<GridFunction<P1<Math::Vector<Scalar>, Mesh>, Data>>>
+        GridFunction<P1<Math::SpatialVector<Scalar>, Mesh>, Data>,
+        Div<GridFunction<P1<Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
     public:
-      using FESType = P1<Math::Vector<Scalar>, Mesh>;
+      using FESType = P1<Math::SpatialVector<Scalar>, Mesh>;
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
       using OperandType = GridFunction<FESType, Data>;
       using Parent = DivBase<OperandType, Div<OperandType>>;
@@ -206,8 +206,8 @@ namespace Rodin::Variational
    * @brief CTAD for Div of a P1 GridFunction
    */
   template <class Scalar, class Data, class Mesh>
-  Div(const GridFunction<P1<Math::Vector<Scalar>, Mesh>, Data>&)
-    -> Div<GridFunction<P1<Math::Vector<Scalar>, Mesh>, Data>>;
+  Div(const GridFunction<P1<Math::SpatialVector<Scalar>, Mesh>, Data>&)
+    -> Div<GridFunction<P1<Math::SpatialVector<Scalar>, Mesh>, Data>>;
 
   /**
    * @ingroup DivSpecializations
@@ -221,11 +221,11 @@ namespace Rodin::Variational
    * for pressure-velocity coupling in Stokes/Navier-Stokes equations.
    */
   template <class NestedDerived, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
-  class Div<ShapeFunction<NestedDerived, P1<Math::Vector<Scalar>, Mesh>, Space>> final
-    : public ShapeFunctionBase<Div<ShapeFunction<NestedDerived, P1<Math::Vector<Scalar>, Mesh>, Space>>>
+  class Div<ShapeFunction<NestedDerived, P1<Math::SpatialVector<Scalar>, Mesh>, Space>> final
+    : public ShapeFunctionBase<Div<ShapeFunction<NestedDerived, P1<Math::SpatialVector<Scalar>, Mesh>, Space>>>
   {
     public:
-      using FESType = P1<Math::Vector<Scalar>, Mesh>;
+      using FESType = P1<Math::SpatialVector<Scalar>, Mesh>;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       using ScalarType = Scalar;
@@ -467,8 +467,8 @@ namespace Rodin::Variational
   };
 
   template <class NestedDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
-  Div(const ShapeFunction<NestedDerived, P1<Math::Vector<Number>, Mesh>, Space>&)
-    -> Div<ShapeFunction<NestedDerived, P1<Math::Vector<Number>, Mesh>, Space>>;
+  Div(const ShapeFunction<NestedDerived, P1<Math::SpatialVector<Number>, Mesh>, Space>&)
+    -> Div<ShapeFunction<NestedDerived, P1<Math::SpatialVector<Number>, Mesh>, Space>>;
 }
 
 #endif

@@ -118,9 +118,9 @@ namespace Rodin::Variational
         return m_u.get().getFiniteElementSpace().getMesh().getSpaceDimension();
       }
 
-      decltype(auto) getValue(const Geometry::Point& p) const
+      ScalarType getValue(const Geometry::Point& p) const
       {
-        static thread_local ScalarType s_out;
+        ScalarType out{};
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
         const auto& gf = getOperand();
@@ -128,23 +128,23 @@ namespace Rodin::Variational
         const auto& fesMesh = fes.getMesh();
         if (polytopeMesh == fesMesh)
         {
-          this->interpolate(s_out, p);
+          this->interpolate(out, p);
         }
         else if (const auto inclusion = fesMesh.inclusion(p))
         {
-          this->interpolate(s_out, *inclusion);
+          this->interpolate(out, *inclusion);
         }
         else if (fesMesh.isSubMesh())
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
-          interpolate(s_out, *restriction);
+          interpolate(out, *restriction);
         }
         else
         {
           assert(false);
         }
-        return s_out;
+        return out;
       }
 
       /**

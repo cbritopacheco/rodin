@@ -24,6 +24,7 @@
 #include "Rodin/Types.h"
 
 #include "Common.h"
+#include "ForwardDecls.h"
 
 namespace Rodin::FormLanguage
 {
@@ -43,6 +44,18 @@ namespace Rodin::FormLanguage
      */
     static constexpr bool Value =
       std::is_base_of_v<Eigen::EigenBase<typename std::decay<T>::type>, typename std::decay<T>::type>;
+  };
+
+  template <class T, class = void>
+  struct ColsAtCompileTime
+  {
+    static constexpr int Value = -1;
+  };
+
+  template <class T>
+  struct ColsAtCompileTime<T, std::void_t<decltype(std::decay_t<T>::ColsAtCompileTime)>>
+  {
+    static constexpr int Value = std::decay_t<T>::ColsAtCompileTime;
   };
 
   /**
@@ -89,6 +102,80 @@ namespace Rodin::FormLanguage
    * @tparam LHS Type of left-hand side operand
    * @tparam RHS Type of right-hand side operand
    */
+
+
+  enum class RangeKind
+  {
+    Boolean,
+    Integer,
+    Real,
+    Complex,
+    Vector,
+    Matrix,
+    Unknown
+  };
+
+  template <class T>
+  struct IsSpatialVector : std::false_type { static constexpr bool Value = false; };
+
+  template <class Scalar>
+  struct IsSpatialVector<Math::SpatialVector<Scalar>> : std::true_type { static constexpr bool Value = true; };
+
+  template <class T>
+  struct IsSpatialMatrix : std::false_type { static constexpr bool Value = false; };
+
+  template <class Scalar>
+  struct IsSpatialMatrix<Math::SpatialMatrix<Scalar>> : std::true_type { static constexpr bool Value = true; };
+
+  template <class T>
+  struct IsVectorRange
+    : std::bool_constant<
+        IsSpatialVector<std::decay_t<T>>::Value
+        || (
+          IsEigenObject<std::decay_t<T>>::Value
+          && (ColsAtCompileTime<std::decay_t<T>>::Value == 1)
+        )>
+  {
+    static constexpr bool Value =
+      IsSpatialVector<std::decay_t<T>>::Value
+      || (
+        IsEigenObject<std::decay_t<T>>::Value
+        && (ColsAtCompileTime<std::decay_t<T>>::Value == 1)
+      );
+  };
+
+  template <class T>
+  struct IsMatrixRange
+    : std::bool_constant<
+        IsSpatialMatrix<std::decay_t<T>>::Value
+        || (
+          IsEigenObject<std::decay_t<T>>::Value
+          && (ColsAtCompileTime<std::decay_t<T>>::Value != 1)
+        )>
+  {
+    static constexpr bool Value =
+      IsSpatialMatrix<std::decay_t<T>>::Value
+      || (
+        IsEigenObject<std::decay_t<T>>::Value
+        && (ColsAtCompileTime<std::decay_t<T>>::Value != 1)
+      );
+  };
+
+  template <class T>
+  struct RangeKindOf
+  {
+    static constexpr RangeKind Value =
+      std::is_same_v<std::decay_t<T>, Boolean> ? RangeKind::Boolean
+      : std::is_same_v<std::decay_t<T>, Integer> ? RangeKind::Integer
+      : std::is_same_v<std::decay_t<T>, Real> ? RangeKind::Real
+      : std::is_same_v<std::decay_t<T>, Complex> ? RangeKind::Complex
+      : IsVectorRange<std::decay_t<T>>::Value ? RangeKind::Vector
+      : IsMatrixRange<std::decay_t<T>>::Value ? RangeKind::Matrix
+      : RangeKind::Unknown;
+  };
+
+  template <class T>
+  inline constexpr auto RangeKindOfV = RangeKindOf<T>::Value;
   template <class LHS, class RHS>
   struct Sum
   {
@@ -184,4 +271,3 @@ namespace Rodin::FormLanguage
 }
 
 #endif
-

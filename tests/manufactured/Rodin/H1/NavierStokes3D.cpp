@@ -64,7 +64,7 @@ namespace Rodin::Tests::Manufactured::NavierStokes3D
     TestFunction  mu(p0g);
 
     GridFunction u_picard(uh);
-    u_picard = Math::Vector<Real>{{ 0.0, 0.0, 0.0 }};
+    u_picard = Math::SpatialVector<Real>{ 0.0, 0.0, 0.0 };
 
     bool converged = false;
     for (size_t k = 0; k < maxPicardIters; ++k)

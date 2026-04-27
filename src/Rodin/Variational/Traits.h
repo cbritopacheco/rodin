@@ -133,14 +133,22 @@ namespace Rodin::FormLanguage
   struct RangeOf<Eigen::Matrix<Scalar, Rows, 1, Options, MaxRows, MaxCols>>
   {
     using Type =
-      Math::Vector<Scalar>;
+      Math::SpatialVector<Scalar>;
   };
 
   template <class Scalar>
   struct RangeOf<Math::SpatialVector<Scalar>>
   {
     using Type =
-      Math::Vector<Scalar>;
+      Math::SpatialVector<Scalar>;
+  };
+
+
+  template <class Scalar>
+  struct RangeOf<Math::SpatialMatrix<Scalar>>
+  {
+    using Type =
+      Math::SpatialMatrix<Scalar>;
   };
 
   /**
@@ -156,7 +164,7 @@ namespace Rodin::FormLanguage
   struct RangeOf<Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>>
   {
     using Type =
-      Math::Matrix<Scalar>;
+      Math::SpatialMatrix<Scalar>;
   };
 
   /**
@@ -170,10 +178,10 @@ namespace Rodin::FormLanguage
   {
     using Type =
       std::conditional_t<
-        MatrixXpr::IsVectorAtCompileTime, Math::Vector<typename MatrixXpr::Scalar>,
+        MatrixXpr::IsVectorAtCompileTime, Math::SpatialVector<typename MatrixXpr::Scalar>,
         std::conditional_t<
-          MatrixXpr::ColsAtCompileTime == 1, Math::Vector<typename MatrixXpr::Scalar>,
-          Math::Matrix<typename MatrixXpr::Scalar>
+          MatrixXpr::ColsAtCompileTime == 1, Math::SpatialVector<typename MatrixXpr::Scalar>,
+          Math::SpatialMatrix<typename MatrixXpr::Scalar>
         >
       >;
   };

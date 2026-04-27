@@ -27,7 +27,7 @@ class Environment
     using Context = Context::Local;
     using DataType = Math::Vector<Real>;
     using RealFES = P1<Real>;
-    using VectorFES = P1<Math::Vector<Real>>;
+    using VectorFES = P1<Math::SpatialVector<Real>>;
 
     struct Plane
     {

@@ -78,25 +78,25 @@ namespace Rodin::FormLanguage
         // Else
         std::conditional_t<
           // If
-          std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>,
+          FormLanguage::IsVectorRange<LHSRangeType>::Value,
           // Then <--------------------------------------------- LHS is Vector
           std::conditional_t<
             // If
             std::is_same_v<RHSRangeType, ScalarType>,
             // Then
-            Math::Vector<ScalarType>,
+            Math::SpatialVector<ScalarType>,
             // Else
             std::conditional_t<
               // If
-              std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>,
+              FormLanguage::IsVectorRange<RHSRangeType>::Value,
               // Then
               void,
               // Else
               std::conditional_t<
                 // If
-                std::is_same_v<RHSRangeType, Math::Matrix<ScalarType>>,
+                FormLanguage::IsMatrixRange<RHSRangeType>::Value,
                 // Then
-                Math::Matrix<ScalarType>,
+                Math::SpatialMatrix<ScalarType>,
                 // Else
                 void
               >
@@ -106,17 +106,17 @@ namespace Rodin::FormLanguage
           // Else
           std::conditional_t<
             // If
-            std::is_same_v<LHSRangeType, Math::Matrix<ScalarType>>,
+            FormLanguage::IsMatrixRange<LHSRangeType>::Value,
             // Then <------------------------------------------- LHS is Matrix
             std::conditional_t<
               std::is_same_v<RHSRangeType, ScalarType>,
-              Math::Matrix<ScalarType>,
+              Math::SpatialMatrix<ScalarType>,
               std::conditional_t<
-                std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>,
-                Math::Vector<ScalarType>,
+                FormLanguage::IsVectorRange<RHSRangeType>::Value,
+                Math::SpatialVector<ScalarType>,
                 std::conditional_t<
-                  std::is_same_v<RHSRangeType, Math::Matrix<ScalarType>>,
-                    Math::Matrix<ScalarType>,
+                  FormLanguage::IsMatrixRange<RHSRangeType>::Value,
+                    Math::SpatialMatrix<ScalarType>,
                     void
                   >
                 >
@@ -217,7 +217,9 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        return this->object(this->getLHS().getValue(p)) * this->object(this->getRHS().getValue(p));
+        const auto lhs = this->getLHS().getValue(p);
+        const auto rhs = this->getRHS().getValue(p);
+        return lhs * rhs;
       }
 
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
@@ -423,7 +425,9 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         const auto& p = this->getIntegrationPoint();
-        return this->object(getLHS().getValue(p.getPoint())) * this->object(getRHS().getBasis(local));
+        const auto lhs = getLHS().getValue(p.getPoint());
+        const auto rhs = getRHS().getBasis(local);
+        return lhs * rhs;
       }
 
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
@@ -573,7 +577,9 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         const auto& p = this->getIntegrationPoint();
-        return this->object(this->getLHS().getBasis(local)) * this->object(this->getRHS().getValue(p.getPoint()));
+        const auto lhs = this->getLHS().getBasis(local);
+        const auto rhs = this->getRHS().getValue(p.getPoint());
+        return lhs * rhs;
       }
 
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const

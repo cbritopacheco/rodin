@@ -93,14 +93,6 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      void interpolate(Math::Vector<Real>& out, const Geometry::Point& p) const
-      {
-        Math::SpatialVector<Real> tmp;
-        interpolate(tmp, p);
-
-        out = tmp.getData().head(tmp.size());
-      }
-
       void interpolate(Math::SpatialVector<Real>& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
@@ -259,7 +251,7 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         const size_t sdim = getIntegrationPoint().getPoint().getPolytope().getMesh().getSpaceDimension();
-        return Math::Vector<ScalarType>::Zero(sdim);
+        return Math::SpatialVector<ScalarType>::Zero(sdim);
       }
 
       Grad* copy() const noexcept override

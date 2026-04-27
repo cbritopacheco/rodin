@@ -10,6 +10,7 @@
 #include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Geometry/PolytopeTransformation.h"
 #include "Rodin/Types.h"
+#include "Rodin/MPI/IO.h"
 
 #include "Mesh.h"
 
@@ -461,15 +462,41 @@ namespace Rodin::Geometry
 
   MPIMesh& MPIMesh::load(const boost::filesystem::path& filename, IO::FileFormat fmt)
   {
-    auto& shard = this->getShard();
-    shard.load(filename, fmt);
+    switch (fmt)
+    {
+      case IO::FileFormat::HDF5:
+      {
+        IO::MeshLoader<IO::FileFormat::HDF5, Context::MPI> loader(*this);
+        loader.load(filename);
+        break;
+      }
+      default:
+      {
+        auto& shard = this->getShard();
+        shard.load(filename, fmt);
+        break;
+      }
+    }
     return *this;
   }
 
   void MPIMesh::save(const boost::filesystem::path& filename, IO::FileFormat fmt) const
   {
-    const auto& shard = getShard();
-    shard.save(filename, fmt);
+    switch (fmt)
+    {
+      case IO::FileFormat::HDF5:
+      {
+        IO::MeshPrinter<IO::FileFormat::HDF5, Context::MPI> printer(*this);
+        printer.print(filename);
+        break;
+      }
+      default:
+      {
+        const auto& shard = getShard();
+        shard.save(filename, fmt);
+        break;
+      }
+    }
   }
 
   Math::SpatialPoint MPIMesh::getVertexCoordinates(Index localIdx) const

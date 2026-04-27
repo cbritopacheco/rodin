@@ -103,7 +103,7 @@ namespace Rodin::IO
           else
           {
             static_assert(
-              std::is_same_v<RangeType, Math::Vector<PetscScalar>>,
+              std::is_same_v<RangeType, Math::SpatialVector<PetscScalar>>,
               "MEDIT PETSc printer expects Range to be PetscScalar or Math::Vector<PetscScalar>."
             );
 

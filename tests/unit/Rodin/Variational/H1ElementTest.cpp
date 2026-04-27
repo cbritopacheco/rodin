@@ -1649,8 +1649,7 @@ namespace Rodin::Tests::Unit
       expected(0) = a0 + b0 * x;
       expected(1) = a1 + b1 * x;
 
-      Math::Vector<Real> interpolated(vdim);
-      interpolated.setZero();
+      Math::SpatialVector<Real> interpolated(static_cast<std::uint8_t>(vdim)); interpolated.setZero();
 
       for (size_t node_idx = 0; node_idx < scalar_k.getCount(); node_idx++)
       {
@@ -1926,7 +1925,7 @@ namespace Rodin::Tests::Unit
   TEST(FinalTest_H1Element_Vector, ComponentStructure_P2_2D_Segment)
   {
     constexpr size_t vdim = 2;
-    H1Element<2, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
+    H1Element<2, Math::SpatialVector<Real>> elem(Polytope::Type::Segment, vdim);
     H1Element<2, Real> scalar_elem(Polytope::Type::Segment);
 
     EXPECT_EQ(elem.getCount(), scalar_elem.getCount() * vdim);
@@ -1966,7 +1965,7 @@ namespace Rodin::Tests::Unit
 
   TEST(FinalTest_H1Element_Vector, QuadraticVectorFieldReproduction_P2_Segment)
   {
-    H1Element<2, Math::Vector<Real>> elem(Polytope::Type::Segment, 2);
+    H1Element<2, Math::SpatialVector<Real>> elem(Polytope::Type::Segment, 2);
 
     auto v = [](Real x)
     {
@@ -1986,7 +1985,7 @@ namespace Rodin::Tests::Unit
     Math::Vector<Real> p{{0.3}};
     Math::Vector<Real> exact = v(p(0));
 
-    Math::Vector<Real> interpolated = Math::Vector<Real>::Zero(2);
+    Math::SpatialVector<Real> interpolated(static_cast<std::uint8_t>(2)); interpolated.setZero();
     for (size_t node = 0; node < 3; node++)
     {
       for (size_t comp = 0; comp < 2; comp++)
@@ -2004,7 +2003,7 @@ namespace Rodin::Tests::Unit
   {
     // P3 on Triangle with 3D vectors
     {
-      H1Element<3, Math::Vector<Real>> elem(Polytope::Type::Triangle, 3);
+      H1Element<3, Math::SpatialVector<Real>> elem(Polytope::Type::Triangle, 3);
       EXPECT_EQ(elem.getCount(), 30);  // 10 nodes × 3 components
 
       Math::Vector<Real> p{{0.3, 0.4}};
@@ -2064,10 +2063,10 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(RealH1Element<3>(Polytope::Type::Tetrahedron).getCount(), 20);
 
     // Vector Pk Elements
-    int count = H1Element<2, Math::Vector<Real>>(Polytope::Type::Segment, 2).getCount();
+    int count = H1Element<2, Math::SpatialVector<Real>>(Polytope::Type::Segment, 2).getCount();
     EXPECT_EQ(count, 6);
 
-    count = H1Element<3, Math::Vector<Real>>(Polytope::Type::Segment, 3).getCount();
+    count = H1Element<3, Math::SpatialVector<Real>>(Polytope::Type::Segment, 3).getCount();
     EXPECT_EQ(count, 12);
   }
 
@@ -2344,7 +2343,7 @@ namespace Rodin::Tests::Unit
     {
       for (size_t vdim : {1, 2, 3})
       {
-        H1Element<1, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
+        H1Element<1, Math::SpatialVector<Real>> elem(Polytope::Type::Segment, vdim);
         EXPECT_EQ(elem.getCount(), vdim * 2);
       }
     }
@@ -2353,7 +2352,7 @@ namespace Rodin::Tests::Unit
     {
       for (size_t vdim : {1, 2, 3})
       {
-        H1Element<2, Math::Vector<Real>> elem(Polytope::Type::Triangle, vdim);
+        H1Element<2, Math::SpatialVector<Real>> elem(Polytope::Type::Triangle, vdim);
         EXPECT_EQ(elem.getCount(), vdim * 6);
       }
     }
@@ -2362,7 +2361,7 @@ namespace Rodin::Tests::Unit
     {
       for (size_t vdim : {1, 2, 3})
       {
-        H1Element<3, Math::Vector<Real>> elem(Polytope::Type::Tetrahedron, vdim);
+        H1Element<3, Math::SpatialVector<Real>> elem(Polytope::Type::Tetrahedron, vdim);
         EXPECT_EQ(elem.getCount(), vdim * 20);
       }
     }
@@ -2582,7 +2581,7 @@ namespace Rodin::Tests::Unit
         {
           case 1:
           {
-            H1Element<1, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
+            H1Element<1, Math::SpatialVector<Real>> elem(Polytope::Type::Segment, vdim);
             for (size_t i = 0; i < elem.getCount(); i++)
             {
               const auto& lf = elem.getLinearForm(i);
@@ -2595,7 +2594,7 @@ namespace Rodin::Tests::Unit
           }
           case 2:
           {
-            H1Element<2, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
+            H1Element<2, Math::SpatialVector<Real>> elem(Polytope::Type::Segment, vdim);
             for (size_t i = 0; i < elem.getCount(); i++)
             {
               const auto& lf = elem.getLinearForm(i);
@@ -2608,7 +2607,7 @@ namespace Rodin::Tests::Unit
           }
           case 3:
           {
-            H1Element<3, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
+            H1Element<3, Math::SpatialVector<Real>> elem(Polytope::Type::Segment, vdim);
             for (size_t i = 0; i < elem.getCount(); i++)
             {
               const auto& lf = elem.getLinearForm(i);
@@ -2752,7 +2751,7 @@ namespace Rodin::Tests::Unit
         {
           case 1:
           {
-            H1Element<1, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
+            H1Element<1, Math::SpatialVector<Real>> elem(Polytope::Type::Segment, vdim);
             for (size_t i = 0; i < elem.getCount(); i++)
             {
               auto jac_func = elem.getBasis(i).getJacobian();
@@ -2764,7 +2763,7 @@ namespace Rodin::Tests::Unit
           }
           case 2:
           {
-            H1Element<2, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
+            H1Element<2, Math::SpatialVector<Real>> elem(Polytope::Type::Segment, vdim);
             for (size_t i = 0; i < elem.getCount(); i++)
             {
               auto jac_func = elem.getBasis(i).getJacobian();
@@ -2776,7 +2775,7 @@ namespace Rodin::Tests::Unit
           }
           case 3:
           {
-            H1Element<3, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
+            H1Element<3, Math::SpatialVector<Real>> elem(Polytope::Type::Segment, vdim);
             for (size_t i = 0; i < elem.getCount(); i++)
             {
               auto jac_func = elem.getBasis(i).getJacobian();
@@ -2794,7 +2793,7 @@ namespace Rodin::Tests::Unit
   TEST(FinalTest_H1Element_JacobianFunction, Jacobian2D_K2_Triangle)
   {
     // Test 2D Jacobian for K=2 on triangle
-    H1Element<2, Math::Vector<Real>> elem(Polytope::Type::Triangle, 2);
+    H1Element<2, Math::SpatialVector<Real>> elem(Polytope::Type::Triangle, 2);
 
     Math::Vector<Real> p{{0.3, 0.4}};
 
@@ -2967,13 +2966,13 @@ namespace Rodin::Tests::Unit
         {
           case 1:
           {
-            H1Element<1, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
+            H1Element<1, Math::SpatialVector<Real>> elem(Polytope::Type::Segment, vdim);
             std::vector<Real> dofs(elem.getCount());
             for (size_t i = 0; i < elem.getCount(); i++)
               dofs[i] = elem.getLinearForm(i)(f);
 
             Math::Vector<Real> p{{0.5}};
-            Math::Vector<Real> interp = Math::Vector<Real>::Zero(vdim);
+            Math::SpatialVector<Real> interp(static_cast<std::uint8_t>(vdim)); interp.setZero();
             for (size_t i = 0; i < elem.getCount(); i++)
               interp += dofs[i] * elem.getBasis(i)(p);
 
@@ -2984,13 +2983,13 @@ namespace Rodin::Tests::Unit
           }
           case 2:
           {
-            H1Element<2, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
+            H1Element<2, Math::SpatialVector<Real>> elem(Polytope::Type::Segment, vdim);
             std::vector<Real> dofs(elem.getCount());
             for (size_t i = 0; i < elem.getCount(); i++)
               dofs[i] = elem.getLinearForm(i)(f);
 
             Math::Vector<Real> p{{0.5}};
-            Math::Vector<Real> interp = Math::Vector<Real>::Zero(vdim);
+            Math::SpatialVector<Real> interp(static_cast<std::uint8_t>(vdim)); interp.setZero();
             for (size_t i = 0; i < elem.getCount(); i++)
               interp += dofs[i] * elem.getBasis(i)(p);
 
@@ -3001,13 +3000,13 @@ namespace Rodin::Tests::Unit
           }
           case 3:
           {
-            H1Element<3, Math::Vector<Real>> elem(Polytope::Type::Segment, vdim);
+            H1Element<3, Math::SpatialVector<Real>> elem(Polytope::Type::Segment, vdim);
             std::vector<Real> dofs(elem.getCount());
             for (size_t i = 0; i < elem.getCount(); i++)
               dofs[i] = elem.getLinearForm(i)(f);
 
             Math::Vector<Real> p{{0.5}};
-            Math::Vector<Real> interp = Math::Vector<Real>::Zero(vdim);
+            Math::SpatialVector<Real> interp(static_cast<std::uint8_t>(vdim)); interp.setZero();
             for (size_t i = 0; i < elem.getCount(); i++)
               interp += dofs[i] * elem.getBasis(i)(p);
 

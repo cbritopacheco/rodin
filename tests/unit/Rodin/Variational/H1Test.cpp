@@ -1821,7 +1821,7 @@ namespace Rodin::Tests::Unit
             pointTraits.getVertex(0),
             vit->getCoordinates());
         Math::Vector<Real> expected = exact(p);
-        Math::Vector<Real> value = gf(p);
+        Math::SpatialVector<Real> value = gf(p);
         EXPECT_EQ(value.size(), 2);
         EXPECT_NEAR(value(0), expected(0), 1e-10)
           << "Vector H1 interpolation component 0 at vertex " << vtx << " should match exact function.";

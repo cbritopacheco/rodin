@@ -1,0 +1,12 @@
+# OpenMPI/PETSc initialization can retain process-lifetime allocations in
+# external runtime libraries. Keep LSan enabled for Rodin code while suppressing
+# those known non-Rodin roots.
+leak:ompi_op_base_op_select
+leak:ompi_op_init
+leak:ompi_mpi_init
+leak:MPI_Init_thread
+leak:orte_init
+leak:hwloc_topology_load
+leak:libhwloc.so
+leak:libopen-rte.so
+leak:libevent_core

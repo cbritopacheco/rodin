@@ -338,7 +338,7 @@ int main(int argc, char** argv)
     xdmf.add("velocity", u.getSolution());
     xdmf.add("pressure", p.getSolution());
 
-    u_old = Math::Vector<Real>{{0.0, 0.0, 0.0}};
+    u_old = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
     p_old = 0.0;
 
     const auto n = BoundaryNormal(mesh);

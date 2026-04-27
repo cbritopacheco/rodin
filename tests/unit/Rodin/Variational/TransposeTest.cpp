@@ -14,7 +14,7 @@ TEST(Rodin_Variational_Transpose, IdentityIsSymmetric)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
   auto it = mesh.getPolytope(mesh.getDimension(), 0);
-  const Math::Vector<Real> rc{{ 0.25, 0.25 }};
+  const Math::SpatialVector<Real> rc{{ 0.25, 0.25 }};
   Point p(*it, rc);
 
   IdentityMatrix I(2);
@@ -30,7 +30,7 @@ TEST(Rodin_Variational_Transpose, Copy)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
   auto it = mesh.getPolytope(mesh.getDimension(), 0);
-  const Math::Vector<Real> rc{{ 0.25, 0.25 }};
+  const Math::SpatialVector<Real> rc{{ 0.25, 0.25 }};
   Point p(*it, rc);
 
   IdentityMatrix I(3);

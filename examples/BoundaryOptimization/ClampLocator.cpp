@@ -40,7 +40,7 @@ static constexpr Real tgv = std::numeric_limits<float>::max();
 static const Real alpha = 4;
 
 using RealFES = P1<Real>;
-using VectorFES = P1<Math::Vector<Real>>;
+using VectorFES = P1<Math::SpatialVector<Real>>;
 using RealGridFunction = GridFunction<RealFES, Math::Vector<Real>>;
 using VectorGridFunction = GridFunction<VectorFES, Math::Vector<Real>>;
 using ShapeGradient = VectorGridFunction;

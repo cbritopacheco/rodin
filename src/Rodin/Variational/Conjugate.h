@@ -98,7 +98,8 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        return Math::conj(this->object(getOperand().getValue(p)));
+        const auto v = getOperand().getValue(p);
+        return Math::conj(v);
       }
 
       /**
@@ -238,7 +239,8 @@ namespace Rodin::Variational
       constexpr
       decltype(auto) getBasis(size_t local) const
       {
-        return Math::conj(this->object(this->getOperand().getBasis(local)));
+        const auto v = this->getOperand().getBasis(local);
+        return Math::conj(v);
       }
 
       /**
