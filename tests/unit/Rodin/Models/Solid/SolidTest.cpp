@@ -491,10 +491,10 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Solid_ActiveContraction, AddsFiberStress)
   {
     Solid::NeoHookean passive(0.0, 0.0);
-    Solid::ChapelleMoireauActiveLaw::Input activeInput;
-    activeInput.Es = 10.0;
-    activeInput.initFibDef = 0.0;
-    Solid::ChapelleMoireauActiveLaw active(activeInput);
+    Solid::ActiveFiberLaw::Parameters activeInput;
+    activeInput.stiffness = 10.0;
+    activeInput.initialExtension = 0.0;
+    Solid::ActiveFiberLaw active(activeInput);
     Solid::ActiveContraction law(passive, active);
 
     Solid::KinematicState state(2);
@@ -516,7 +516,7 @@ namespace Rodin::Tests::Unit
     law.getFirstPiolaKirchhoffStress(P, cache, cp);
 
     const Real strain1D = 0.5 * (1.1 * 1.1 - 1.0);
-    const Real stress = activeInput.Es * strain1D;
+    const Real stress = activeInput.stiffness * strain1D;
     EXPECT_NEAR(P(0, 0), 1.1 * stress, 1e-12);
     EXPECT_NEAR(P(0, 1), 0.0, 1e-12);
     EXPECT_NEAR(P(1, 0), 0.0, 1e-12);

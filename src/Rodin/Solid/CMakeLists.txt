@@ -15,7 +15,7 @@ set(RodinSolid_HEADERS
   Constitutive/SaintVenantKirchhoff.h
   Constitutive/MooneyRivlin.h
   Constitutive/HolzapfelOgden.h
-  Constitutive/ChapelleMoireauActiveLaw.h
+  Constitutive/ActiveFiberLaw.h
   Constitutive/ActiveContraction.h
   Integrators/InternalForce.h
   Integrators/MaterialTangent.h

@@ -108,18 +108,6 @@ namespace Rodin::Solid
       using Type = Real;
     };
 
-    /// @brief Tag for current active variable @f$\gamma=\sqrt{k_c}@f$.
-    struct ActiveGamma
-    {
-      using Type = Real;
-    };
-
-    /// @brief Tag for current active variable @f$\beta=\tau_c/\gamma@f$.
-    struct ActiveBeta
-    {
-      using Type = Real;
-    };
-
     /// @brief Tag for previous active variable @f$\gamma^n@f$.
     struct PreviousActiveGamma
     {

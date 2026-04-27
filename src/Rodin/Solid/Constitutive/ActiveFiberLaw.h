@@ -5,11 +5,11 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 /**
- * @file ChapelleMoireauActiveLaw.h
- * @brief Chapelle-Moireau active contraction rheology.
+ * @file ActiveFiberLaw.h
+ * @brief Local active fiber contraction law.
  */
-#ifndef RODIN_SOLID_CONSTITUTIVE_CHAPELLEMOIREAUACTIVELAW_H
-#define RODIN_SOLID_CONSTITUTIVE_CHAPELLEMOIREAUACTIVELAW_H
+#ifndef RODIN_SOLID_CONSTITUTIVE_ACTIVEFIBERLAW_H
+#define RODIN_SOLID_CONSTITUTIVE_ACTIVEFIBERLAW_H
 
 #include <algorithm>
 #include <cmath>
@@ -19,26 +19,25 @@
 namespace Rodin::Solid
 {
   /**
-   * @brief Local Chapelle-Moireau/Hill-Maxwell active contraction law.
+   * @brief Local active fiber contraction law.
    *
-   * This is the Rodin-side counterpart of Felisce's
-   * `ChapelleMoireauActiveLaw`: it evaluates the one-dimensional active fiber
-   * stress, the local contraction residual, and the Schur-complement
-   * derivative used when the active extension @f$e_c@f$ is eliminated locally.
+   * Evaluates a one-dimensional fiber stress, the local contraction residual,
+   * and the condensed tangent obtained after eliminating the local extension
+   * variable @f$e_c@f$.
    */
-  class ChapelleMoireauActiveLaw
+  class ActiveFiberLaw
   {
     public:
-      struct Input
+      struct Parameters
       {
-        Real Es = 1.0;
-        Real initFibDef = 0.0;
-        Real initActiveStiffness = 0.0;
-        Real initActiveStress = 0.0;
-        Real DampingParallel = 0.0;
-        Real DestructionRate = 0.0;
-        Real CrossBridgeStiffness = 0.0;
-        Real Contractility = 0.0;
+        Real stiffness = 1.0;
+        Real initialExtension = 0.0;
+        Real initialActiveStiffness = 0.0;
+        Real initialActiveStress = 0.0;
+        Real damping = 0.0;
+        Real destructionRate = 0.0;
+        Real crossBridgeStiffness = 0.0;
+        Real contractility = 0.0;
       };
 
       struct State
@@ -63,37 +62,41 @@ namespace Rodin::Solid
         Real condensedStressTangent = 0.0;
       };
 
-      ChapelleMoireauActiveLaw()
-        : m_input()
+      ActiveFiberLaw()
+        : m_parameters()
       {}
 
-      explicit ChapelleMoireauActiveLaw(const Input& input)
-        : m_input(input)
+      explicit ActiveFiberLaw(const Parameters& parameters)
+        : m_parameters(parameters)
       {}
 
-      const Input& getInput() const
+      const Parameters& getParameters() const
       {
-        return m_input;
+        return m_parameters;
       }
 
       State initialState() const
       {
         State state;
-        state.gamma = std::sqrt(std::max<Real>(m_input.initActiveStiffness, 0.0));
-        state.beta = state.gamma > 0.0 ? m_input.initActiveStress / state.gamma : 0.0;
+        state.gamma =
+          std::sqrt(std::max<Real>(m_parameters.initialActiveStiffness, 0.0));
+        state.beta = state.gamma > 0.0
+          ? m_parameters.initialActiveStress / state.gamma
+          : 0.0;
         return state;
       }
 
       Real getStress(Real strain1D, Real activeExtension) const
       {
         const Real denom = 1.0 + 2.0 * activeExtension;
-        return m_input.Es * (strain1D - activeExtension) / (denom * denom);
+        return m_parameters.stiffness
+             * (strain1D - activeExtension) / (denom * denom);
       }
 
       Real getPartialDerivativeStressWrtStrain1D(Real activeExtension) const
       {
         const Real denom = 1.0 + 2.0 * activeExtension;
-        return m_input.Es / (denom * denom);
+        return m_parameters.stiffness / (denom * denom);
       }
 
       Real getPartialDerivativeStressWrtActiveExtension(
@@ -101,7 +104,8 @@ namespace Rodin::Solid
           Real activeExtension) const
       {
         const Real denom = 1.0 + 2.0 * activeExtension;
-        return m_input.Es * (2.0 * activeExtension - 4.0 * strain1D - 1.0)
+        return m_parameters.stiffness
+             * (2.0 * activeExtension - 4.0 * strain1D - 1.0)
              / (denom * denom * denom);
       }
 
@@ -113,10 +117,12 @@ namespace Rodin::Solid
           getPartialDerivativeStressWrtStrain1D(activeExtension);
         response.dStressWrtActiveExtension =
           getPartialDerivativeStressWrtActiveExtension(strain1D, activeExtension);
-        response.k22 = m_input.Es * (1.0 + 2.0 * strain1D);
-        response.k21 = -m_input.Es * (1.0 + 4.0 * strain1D - 2.0 * activeExtension);
+        response.k22 = m_parameters.stiffness * (1.0 + 2.0 * strain1D);
+        response.k21 =
+          -m_parameters.stiffness * (1.0 + 4.0 * strain1D - 2.0 * activeExtension);
         response.contractionResidualOverK22 =
-          (-m_input.Es * (strain1D - activeExtension) * (1.0 + 2.0 * strain1D))
+          (-m_parameters.stiffness
+           * (strain1D - activeExtension) * (1.0 + 2.0 * strain1D))
           / response.k22;
         response.condensedStressTangent =
           response.dStressWrtStrain
@@ -131,9 +137,9 @@ namespace Rodin::Solid
           Real activeExtension,
           Real activation) const
       {
-        const Real alpha = m_input.DestructionRate;
-        const Real k0 = m_input.CrossBridgeStiffness;
-        const Real sigma0 = m_input.Contractility;
+        const Real alpha = m_parameters.destructionRate;
+        const Real k0 = m_parameters.crossBridgeStiffness;
+        const Real sigma0 = m_parameters.contractility;
         const Real delta = activeExtension - previousActiveExtension;
         const Real activationPlus = std::max<Real>(activation, 0.0);
         const Real n0 = starling(previousActiveExtension);
@@ -171,30 +177,38 @@ namespace Rodin::Solid
           Real activeExtension,
           Real activation) const
       {
-        const Real fib12 = 0.5 * (activeExtension + previousActiveExtension);
-        const Real onePlus2Fib12 = 1.0 + 2.0 * fib12;
+        const Real midpointExtension =
+          0.5 * (activeExtension + previousActiveExtension);
+        const Real onePlus2MidpointExtension = 1.0 + 2.0 * midpointExtension;
         const Real activeBranchStress =
           newState.activeStress()
-          + m_input.DampingParallel
+          + m_parameters.damping
           * (activeExtension - previousActiveExtension) / dt;
 
         Response response;
-        response.stress = getStress(strain1D, fib12);
+        response.stress = getStress(strain1D, midpointExtension);
         response.dStressWrtStrain =
-          getPartialDerivativeStressWrtStrain1D(fib12);
+          getPartialDerivativeStressWrtStrain1D(midpointExtension);
         response.dStressWrtActiveExtension =
-          getPartialDerivativeStressWrtActiveExtension(strain1D, fib12);
-        response.k21 = -m_input.Es * (1.0 + 4.0 * strain1D - 2.0 * fib12);
+          getPartialDerivativeStressWrtActiveExtension(strain1D, midpointExtension);
+        response.k21 =
+          -m_parameters.stiffness
+          * (1.0 + 4.0 * strain1D - 2.0 * midpointExtension);
         response.k22 =
-          3.0 * onePlus2Fib12 * onePlus2Fib12 * activeBranchStress
-          + onePlus2Fib12 * onePlus2Fib12 * onePlus2Fib12
+          3.0 * onePlus2MidpointExtension * onePlus2MidpointExtension
+            * activeBranchStress
+          + onePlus2MidpointExtension * onePlus2MidpointExtension
+            * onePlus2MidpointExtension
             * (getPartialDerivativeActiveStressWrtActiveExtension(
                 dt, oldState, activation, previousActiveExtension, activeExtension)
-              + m_input.DampingParallel / dt)
-          + 0.5 * m_input.Es * (1.0 + 2.0 * strain1D);
+              + m_parameters.damping / dt)
+          + 0.5 * m_parameters.stiffness * (1.0 + 2.0 * strain1D);
         response.contractionResidualOverK22 =
-          (activeBranchStress * onePlus2Fib12 * onePlus2Fib12 * onePlus2Fib12
-           - m_input.Es * (strain1D - fib12) * (1.0 + 2.0 * strain1D))
+          (activeBranchStress
+             * onePlus2MidpointExtension * onePlus2MidpointExtension
+             * onePlus2MidpointExtension
+           - m_parameters.stiffness
+             * (strain1D - midpointExtension) * (1.0 + 2.0 * strain1D))
           / response.k22;
         response.condensedStressTangent =
           response.dStressWrtStrain
@@ -209,9 +223,9 @@ namespace Rodin::Solid
           Real previousActiveExtension,
           Real activeExtension) const
       {
-        const Real alpha = m_input.DestructionRate;
-        const Real k0 = m_input.CrossBridgeStiffness;
-        const Real sigma0 = m_input.Contractility;
+        const Real alpha = m_parameters.destructionRate;
+        const Real k0 = m_parameters.crossBridgeStiffness;
+        const Real sigma0 = m_parameters.contractility;
         const Real delta = activeExtension - previousActiveExtension;
         const Real absDelta = std::abs(delta);
         const Real sign = delta > 0.0 ? 1.0 : (delta < 0.0 ? -1.0 : 0.0);
@@ -278,7 +292,7 @@ namespace Rodin::Solid
       }
 
     private:
-      Input m_input;
+      Parameters m_parameters;
   };
 }
 

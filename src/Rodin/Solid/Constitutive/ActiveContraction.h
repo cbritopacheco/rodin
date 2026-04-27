@@ -19,12 +19,12 @@
 #include "Rodin/Solid/Local/ConstitutivePoint.h"
 
 #include "HyperElasticLaw.h"
-#include "ChapelleMoireauActiveLaw.h"
+#include "ActiveFiberLaw.h"
 
 namespace Rodin::Solid
 {
   /**
-   * @brief Adds Chapelle-Moireau active fiber stress to a passive law.
+   * @brief Adds active fiber stress to a passive law.
    *
    * The passive law can be any Rodin hyperelastic law. The active contribution is
    * aligned with `Tags::FiberDirection` and uses `Tags::ActiveExtension`; if
@@ -32,7 +32,7 @@ namespace Rodin::Solid
    * `PreviousActiveGamma`, `PreviousActiveBeta`, `ElectricalActivation`), the
    * condensed dynamic tangent is used.
    */
-  template <class PassiveLaw, class ActiveLaw = ChapelleMoireauActiveLaw>
+  template <class PassiveLaw, class ActiveLaw = ActiveFiberLaw>
   class ActiveContraction final : public HyperElasticLaw<ActiveContraction<PassiveLaw, ActiveLaw>>
   {
     public:
@@ -87,7 +87,7 @@ namespace Rodin::Solid
           0.5 * (cache.fiber.dot(state.getRightCauchyGreenTensor() * cache.fiber) - 1.0);
         cache.activeExtension = cp.has<Tags::ActiveExtension>()
           ? cp.get<Tags::ActiveExtension>()
-          : m_activeLaw.getInput().initFibDef;
+          : m_activeLaw.getParameters().initialExtension;
 
         if (hasDynamicData(cp))
         {
@@ -125,7 +125,7 @@ namespace Rodin::Solid
           m_passiveLaw.getStrainEnergyDensity(cache.passive, cp);
         const Real denom = 1.0 + 2.0 * cache.activeExtension;
         const Real activeEnergy =
-          0.5 * m_activeLaw.getInput().Es
+          0.5 * m_activeLaw.getParameters().stiffness
           * (cache.strain1D - cache.activeExtension)
           * (cache.strain1D - cache.activeExtension)
           / (denom * denom);

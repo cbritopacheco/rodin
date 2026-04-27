@@ -27,8 +27,6 @@ namespace Rodin::Solid
     struct PreviousActiveExtension;
     struct TimeStep;
     struct ElectricalActivation;
-    struct ActiveGamma;
-    struct ActiveBeta;
     struct PreviousActiveGamma;
     struct PreviousActiveBeta;
   }
@@ -45,7 +43,7 @@ namespace Rodin::Solid
 
   class HolzapfelOgden;
 
-  class ChapelleMoireauActiveLaw;
+  class ActiveFiberLaw;
 
   template <class PassiveLaw, class ActiveLaw>
   class ActiveContraction;

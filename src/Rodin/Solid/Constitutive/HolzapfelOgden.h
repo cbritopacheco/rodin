@@ -25,7 +25,7 @@
 namespace Rodin::Solid
 {
   /**
-   * @brief Compressible Holzapfel-Ogden law matching Felisce's invariant form.
+   * @brief Compressible Holzapfel-Ogden law with one preferred direction.
    *
    * The stored energy density is
    * @f[
