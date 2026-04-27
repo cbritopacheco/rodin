@@ -127,6 +127,14 @@ namespace Rodin::Math
         return I;
       }
 
+      static SpatialMatrix Zero(std::uint8_t rows, std::uint8_t cols)
+      {
+        assert(rows <= MaxSize && cols <= MaxSize);
+        SpatialMatrix Z(rows, cols);
+        Z.setZero();
+        return Z;
+      }
+
       template <class EigenDerived>
       constexpr
       SpatialMatrix& operator=(const Eigen::ArrayBase<EigenDerived>& other)
@@ -1654,6 +1662,18 @@ namespace Rodin::Math
         assert(false);
         return C;
     }
+  }
+
+  /**
+   * @brief Element-wise division of a SpatialMatrix by a scalar.
+   */
+  template <class Scalar>
+  [[nodiscard]] inline
+  SpatialMatrix<Scalar>
+  operator/(const SpatialMatrix<Scalar>& A, const Scalar& s) noexcept
+  {
+    assert(s != Scalar(0));
+    return A * (Scalar(1) / s);
   }
 
   template <class Scalar>
