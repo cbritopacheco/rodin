@@ -41,15 +41,50 @@
   The @ref Rodin::Geometry::Polytope::Type "Polytope::Type" enumeration
   defines the available element types:
 
-  | Type | Dimension | Vertices | Description |
-  |------|-----------|----------|-------------|
-  | `Polytope::Type::Point` | 0 | 1 | A single vertex |
-  | `Polytope::Type::Segment` | 1 | 2 | A line segment (edge) |
-  | `Polytope::Type::Triangle` | 2 | 3 | A triangular element |
-  | `Polytope::Type::Quadrilateral` | 2 | 4 | A quadrilateral element |
-  | `Polytope::Type::Tetrahedron` | 3 | 4 | A tetrahedral element |
-  | `Polytope::Type::Hexahedron` | 3 | 8 | A hexahedral (brick) element |
-  | `Polytope::Type::Wedge` | 3 | 6 | A prismatic (wedge) element |
+  | Type | Dimension | Vertices | Simplicial? | Description |
+  |------|-----------|----------|-------------|-------------|
+  | `Polytope::Type::Point` | 0 | 1 | — | A single vertex |
+  | `Polytope::Type::Segment` | 1 | 2 | Yes | A line segment (edge) |
+  | `Polytope::Type::Triangle` | 2 | 3 | Yes | A triangular element |
+  | `Polytope::Type::Quadrilateral` | 2 | 4 | No | A quadrilateral (tensor-product) element |
+  | `Polytope::Type::Tetrahedron` | 3 | 4 | Yes | A tetrahedral element |
+  | `Polytope::Type::Hexahedron` | 3 | 8 | No | A hexahedral (brick, tensor-product) element |
+  | `Polytope::Type::Wedge` | 3 | 6 | No | A prismatic (wedge) element |
+
+  **Simplicial vs. tensor-product elements:**
+  - **Simplicial** elements (triangle, tetrahedron) are the simplest shapes
+    in their dimension. They are flexible for meshing complex geometries
+    because any domain can be triangulated.
+  - **Tensor-product** elements (quadrilateral, hexahedron) are formed as
+    Cartesian products of lower-dimensional elements. They often provide
+    higher accuracy per DOF on structured domains but are harder to fit to
+    complex geometries.
+  - The **wedge** (triangular prism) is a hybrid: a tensor product of a
+    triangle and a segment.
+
+  @section guides-polytopes-reference Reference Elements
+
+  All local computations in the finite element method (basis function
+  evaluation, quadrature, gradient computation) are performed on a
+  **reference element** @f$ \hat{K} @f$, then mapped to each physical cell
+  via a geometric transformation @f$ F_K : \hat{K} \to K @f$. The reference
+  element vertices for the standard types are:
+
+  | Type | Reference vertices |
+  |------|-------------------|
+  | Segment | @f$ (0), (1) @f$ |
+  | Triangle | @f$ (0,0), (1,0), (0,1) @f$ |
+  | Quadrilateral | @f$ (0,0), (1,0), (1,1), (0,1) @f$ |
+  | Tetrahedron | @f$ (0,0,0), (1,0,0), (0,1,0), (0,0,1) @f$ |
+
+  The Jacobian of @f$ F_K @f$ and its determinant are available at any
+  quadrature point through the @ref Rodin::Geometry::Point "Point" class:
+
+  @code{.cpp}
+  // At a quadrature point p on element K:
+  auto J = p.getJacobian();              // d×d Jacobian matrix
+  auto detJ = p.getJacobianDeterminant();  // |J|
+  @endcode
 
   @section guides-polytopes-meshgen Using Polytopes for Mesh Generation
 

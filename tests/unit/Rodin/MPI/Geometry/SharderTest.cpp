@@ -21,6 +21,8 @@
 #include <Rodin/Geometry/BalancedCompactPartitioner.h>
 #include <Rodin/QF/PolytopeQuadratureFormula.h>
 #include <Rodin/IO/ForwardDecls.h>
+#include <Rodin/IO.h>
+#include <Rodin/MPI/IO.h>
 #include <Rodin/MPI/Context/MPI.h>
 #include <Rodin/MPI/Geometry/Sharder.h>
 #include <Rodin/MPI/Geometry/Mesh.h>
@@ -151,6 +153,7 @@ namespace
 
     return sharder.gather(0);
   }
+
 }
 
 namespace Rodin::Tests::Unit
@@ -2073,6 +2076,150 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(legacy.maxOwnerRounds, std::numeric_limits<size_t>::max());
     EXPECT_EQ(legacy.maxGidRounds, std::numeric_limits<size_t>::max());
     EXPECT_FALSE(legacy.strictRoundCap);
+  }
+
+  // =========================================================================
+  // HDF5 shard workflow — full distributed workflow with MPI printer
+  // =========================================================================
+
+  /**
+   * @brief Verifies that each rank's shard can be saved to HDF5 and reloaded
+   * with base mesh topology preserved.
+   *
+   * Exercises steps 1–3 of the shard HDF5 workflow:
+   *   1. Mesh is sharded (distributed via @c distributeFromRoot).
+   *   2. Each rank saves its shard using MeshPrinter<FileFormat::HDF5,
+   *      Context::MPI>, which writes both the base mesh topology and the
+   *      /Shard/... metadata datasets.
+   *   3. Each rank rereads its shard from HDF5 through the MPI mesh loader.
+   *
+   * After reloading, the vertex and cell counts must match the original shard.
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, Shard_HDF5_SaveLoad_BaseTopologyRoundTrip)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+
+    // Step 1: Shard.
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+    const auto& shard = mpiMesh.getShard();
+
+    const size_t cellsBefore = shard.getCellCount();
+    const size_t vertsBefore = shard.getVertexCount();
+
+    const boost::filesystem::path tmpDir =
+        boost::filesystem::temp_directory_path();
+    const boost::filesystem::path rankFile =
+        tmpDir / ("rodin_mpi_hdf5_rt_r" + std::to_string(world.rank()) + ".h5");
+
+    // Step 2: Save – use the MPI HDF5 printer so both base-mesh topology
+    // and /Shard/... metadata datasets are written to the file.
+    {
+      IO::MeshPrinter<IO::FileFormat::HDF5, Context::MPI> printer(mpiMesh);
+      printer.print(rankFile);
+    }
+
+    // Step 3: Reread through the MPI loader so /Shard metadata is restored.
+    Mesh<Context::MPI> loaded(ctx);
+    loaded.load(rankFile, IO::FileFormat::HDF5);
+
+    EXPECT_EQ(loaded.getShard().getCellCount(), cellsBefore)
+      << "Rank " << world.rank() << ": cell count mismatch after HDF5 reload.";
+    EXPECT_EQ(loaded.getShard().getVertexCount(), vertsBefore)
+      << "Rank " << world.rank() << ": vertex count mismatch after HDF5 reload.";
+
+    boost::filesystem::remove(rankFile);
+  }
+
+  /**
+   * @brief Full HDF5 shard workflow: distribute → save → reload → reconcile.
+   *
+   * Exercises all four steps of the workflow:
+   *   1. Mesh is sharded (distributed via @c distributeFromRoot).
+   *   2. Each rank saves its shard to a per-rank HDF5 file using the MPI
+   *      printer (writes base mesh + /Shard/... metadata).
+   *   3. Each rank rereads its shard from HDF5 through the MPI mesh loader.
+   *   4. Edge connectivity is then computed and reconciled.
+   *
+   * After reconciliation, the global sum of locally-owned edges must equal
+   * the total edge count of the reference mesh.
+   */
+  TEST(Rodin_MPI_Geometry_Mesh, Shard_HDF5_FullWorkflow_Reconcile)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+
+    // Compute the expected total edge count from the reference mesh on rank 0
+    // and broadcast to all ranks.
+    size_t totalEdges = 0;
+    if (world.rank() == 0)
+    {
+      auto ref = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {4, 4});
+      ref.getConnectivity().compute(1, 2);
+      totalEdges = ref.getPolytopeCount(1);
+    }
+    boost::mpi::broadcast(world, totalEdges, 0);
+
+    // Step 1: Shard.
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+
+    const boost::filesystem::path tmpDir =
+        boost::filesystem::temp_directory_path();
+    const auto rankPath = [&](int r) -> boost::filesystem::path
+    {
+      return tmpDir / ("rodin_mpi_hdf5_wf_r" + std::to_string(r) + ".h5");
+    };
+
+    // Step 2: Save using MPI printer (writes /Shard/... metadata).
+    {
+      IO::MeshPrinter<IO::FileFormat::HDF5, Context::MPI> printer(mpiMesh);
+      printer.print(rankPath(world.rank()));
+    }
+    world.barrier();
+
+    // Step 3: Reread through the MPI loader.
+    Mesh<Context::MPI> reloaded(ctx);
+    reloaded.load(rankPath(world.rank()), IO::FileFormat::HDF5);
+
+    EXPECT_EQ(reloaded.getShard().getCellCount(), mpiMesh.getShard().getCellCount())
+      << "Rank " << world.rank() << ": cell count mismatch after HDF5 reload.";
+    EXPECT_EQ(reloaded.getShard().getVertexCount(), mpiMesh.getShard().getVertexCount())
+      << "Rank " << world.rank() << ": vertex count mismatch after HDF5 reload.";
+
+    // Step 4: Reconcile.
+    reloaded.getConnectivity().compute(1, 2);
+    reloaded.reconcile(1);
+
+    // Verify that the global owned-edge count after reconciliation equals the
+    // reference total.
+    const auto& reloadedShard = reloaded.getShard();
+    size_t ownedEdgesLocal = 0;
+    for (Index i = 0; i < static_cast<Index>(reloadedShard.getPolytopeCount(1)); ++i)
+    {
+      if (reloadedShard.isOwned(1, i))
+        ++ownedEdgesLocal;
+    }
+
+    size_t ownedEdgesGlobal = 0;
+    boost::mpi::all_reduce(world, ownedEdgesLocal, ownedEdgesGlobal,
+                           std::plus<size_t>());
+
+    EXPECT_EQ(ownedEdgesGlobal, totalEdges)
+      << "After HDF5 reload and reconcile, global owned-edge count mismatch.";
+
+    // Cleanup: rank 0 removes all per-rank files after all ranks finish.
+    world.barrier();
+    if (world.rank() == 0)
+    {
+      for (int r = 0; r < world.size(); ++r)
+        boost::filesystem::remove(rankPath(r));
+    }
   }
 }
 

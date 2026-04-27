@@ -533,10 +533,10 @@ namespace Rodin::Assembly
           }
         }
 
-        // Preassembled linear forms: b += -LF
+        // Preassembled linear forms: b += LF
         for (auto& lf : pb.getLFs())
         {
-          ierr = VecAXPY(b, -1.0, lf.getVector());
+          ierr = VecAXPY(b, 1.0, lf.getVector());
           assert(ierr == PETSC_SUCCESS);
         }
 
@@ -890,6 +890,43 @@ namespace Rodin::Assembly
           }
         }
 
+        // Preassembled bilinear forms (with block offsets)
+        for (auto& bf : pb.getBFs())
+        {
+          const auto uUUID = bf.getTrialFunction().getUUID();
+          const auto vUUID = bf.getTestFunction().getUUID();
+
+          const size_t uBlock = findTrialBlock(uUUID);
+          const size_t vBlock = findTestBlock(vUUID);
+
+          const size_t uOff = trialOffsets[uBlock];
+          const size_t vOff = testOffsets[vBlock];
+
+          const auto& op = bf.getOperator();
+          PetscInt rStart, rEnd;
+          ierr = MatGetOwnershipRange(op, &rStart, &rEnd);
+          assert(ierr == PETSC_SUCCESS);
+
+          for (PetscInt i = rStart; i < rEnd; ++i)
+          {
+            PetscInt nc;
+            const PetscInt* cols;
+            const PetscScalar* vals;
+            ierr = MatGetRow(op, i, &nc, &cols, &vals);
+            assert(ierr == PETSC_SUCCESS);
+            for (PetscInt j = 0; j < nc; ++j)
+            {
+              ierr = MatSetValue(A,
+                static_cast<PetscInt>(vOff) + i,
+                static_cast<PetscInt>(uOff) + cols[j],
+                vals[j], ADD_VALUES);
+              assert(ierr == PETSC_SUCCESS);
+            }
+            ierr = MatRestoreRow(op, i, &nc, &cols, &vals);
+            assert(ierr == PETSC_SUCCESS);
+          }
+        }
+
         // Assemble A
         ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
         assert(ierr == PETSC_SUCCESS);
@@ -898,8 +935,7 @@ namespace Rodin::Assembly
 
         // ------------------------
         // Assemble linear terms into b
-        // Convention: matches your sequential multi-variable version (no minus).
-        // If you want the single-variable convention (-LF), swap sign here.
+        // Convention: negate each LFI value, consistent with all other assembly paths.
         // ------------------------
         for (auto& lfi : pb.getLFIs())
         {
@@ -941,6 +977,34 @@ namespace Rodin::Assembly
               }
             }
           }
+        }
+
+        // Preassembled linear forms (with block offsets)
+        for (auto& lf : pb.getLFs())
+        {
+          const auto vUUID = lf.getTestFunction().getUUID();
+          const size_t vBlock = findTestBlock(vUUID);
+          const size_t vOff   = testOffsets[vBlock];
+
+          const auto& vec = lf.getVector();
+          PetscInt lo, hi;
+          ierr = VecGetOwnershipRange(vec, &lo, &hi);
+          assert(ierr == PETSC_SUCCESS);
+
+          const PetscScalar* arr;
+          ierr = VecGetArrayRead(vec, &arr);
+          assert(ierr == PETSC_SUCCESS);
+          for (PetscInt i = lo; i < hi; ++i)
+          {
+            const PetscScalar val = arr[i - lo];
+            if (val != PetscScalar(0))
+            {
+              ierr = VecSetValue(b, static_cast<PetscInt>(vOff) + i, val, ADD_VALUES);
+              assert(ierr == PETSC_SUCCESS);
+            }
+          }
+          ierr = VecRestoreArrayRead(vec, &arr);
+          assert(ierr == PETSC_SUCCESS);
         }
 
         // Assemble b

@@ -138,6 +138,43 @@
   - **Multiple fields**: Export several grid functions (velocity, pressure,
     temperature, etc.) in a single output
 
+  @subsection guides-io-xdmf-overview-arch Architecture of IO::XDMF
+
+  The XDMF writer has a two-level design:
+
+  - The **XDMF** object manages the output file and temporal collection.
+  - One or more **Grid** handles describe independent meshes, each with
+    their own field attributes.
+
+  The `grid()` method returns a lightweight handle to the default (unnamed)
+  grid; `grid("name")` returns a handle to a named grid (creating it on
+  first call). All convenience methods on XDMF (`setMesh`, `add`) delegate
+  to the default grid.
+
+  **Grid handle API** (returns `Grid&` for chaining):
+
+  | Method | Description |
+  |--------|-------------|
+  | `setMesh(mesh)` | Observe a mesh for export |
+  | `setMesh(mesh, MeshPolicy::Transient)` | Re-export mesh every snapshot (for deforming meshes) |
+  | `add(gf)` | Register a named grid function (uses `gf.getName()`) |
+  | `add("name", gf)` | Register a grid function with explicit name |
+  | `add("name", gf, Center::Cell)` | Register with cell-centered data |
+  | `hasMesh()` | Check if a mesh has been set |
+  | `reset()` | Reset grid state for next snapshot |
+
+  **XDMF writer API**:
+
+  | Method | Description |
+  |--------|-------------|
+  | `grid()` | Get default grid handle |
+  | `grid("name")` | Get or create named grid handle |
+  | `write()` | Write snapshot (auto time = snapshot count) |
+  | `write(time)` | Write snapshot at given physical time |
+  | `flush()` | Force buffered data to disk |
+  | `close()` | Finalize XML; also called by destructor |
+  | `setPadding(digits)` | Set zero-padding for file indices |
+
   @subsection guides-io-xdmf-overview-basic Basic XDMF Usage
 
   The simplest use case is to export a mesh and solution at a single time step:
@@ -175,6 +212,18 @@
   This produces:
   - `MySimulation.xdmf` — XML metadata file (open this in ParaView)
   - `MySimulation.*.h5` — HDF5 data files with mesh and field data
+
+  You can also use the convenience shorthand that delegates to the default
+  grid:
+
+  @code{.cpp}
+  IO::XDMF xdmf("MySimulation");
+  xdmf.setMesh(mesh).add("u", u.getSolution());
+  xdmf.write();
+  @endcode
+
+  Both produce identical output; `xdmf.setMesh(mesh)` internally calls
+  `xdmf.grid().setMesh(mesh)`.
 
   @subsection guides-io-xdmf-overview-time Time-Dependent Output
 

@@ -161,6 +161,12 @@ namespace Rodin::Assembly
 
       OpenMP() = default;
 
+      explicit OpenMP(size_t threadCount)
+        : m_threadCount(threadCount)
+      {
+        assert(threadCount > 0);
+      }
+
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
@@ -1070,7 +1076,7 @@ namespace Rodin::Assembly
 
           // Preassembled linear forms (serial)
           for (auto& lf : pb.getLFs())
-            b -= lf.getVector();
+            b += lf.getVector();
 
           // ---------------- Reduce RHS chunks into b ----------------
           for (int tid = 0; tid < tc; ++tid)
@@ -1291,7 +1297,7 @@ namespace Rodin::Assembly
 
           // Preassembled linear forms (serial)
           for (auto& lf : pb.getLFs())
-            b -= lf.getVector();
+            b += lf.getVector();
 
           // Dense elimination afterwards
           for (Index idx = 0; idx < static_cast<Index>(rows); ++idx)
@@ -1734,22 +1740,42 @@ namespace Rodin::Assembly
             b.coeffRef(i) += localRhs[i];
         }
 
-        // Preassembled LFs (serial)
+        // Preassembled LFs (serial, with block offsets)
         for (auto& lf : pb.getLFs())
-          b -= lf.getVector();
+        {
+          const auto vUUID = lf.getTestFunction().getUUID();
+          const size_t vBlock = findTestBlock(vUUID);
+          const size_t vOff   = testOffsets[vBlock];
+
+          const auto& vec = lf.getVector();
+          for (Eigen::Index i = 0; i < vec.size(); ++i)
+            b.coeffRef(static_cast<Index>(vOff) + i) += vec.coeff(i);
+        }
 
         // ------------------------------------------------------------------
         // Finalize operator
         // ------------------------------------------------------------------
         if constexpr (IsSparse)
         {
-          // Preassembled BFs -> apply elimination through sparse_entry (tid=0)
+          // Preassembled BFs -> apply elimination through sparse_entry (tid=0, with block offsets)
           for (auto& bf : pb.getBFs())
           {
+            const auto uUUID = bf.getTrialFunction().getUUID();
+            const auto vUUID = bf.getTestFunction().getUUID();
+
+            const size_t uBlock = findTrialBlock(uUUID);
+            const size_t vBlock = findTestBlock(vUUID);
+
+            const size_t uOff = trialOffsets[uBlock];
+            const size_t vOff = testOffsets[vBlock];
+
             const auto& op = bf.getOperator();
             for (int k = 0; k < op.outerSize(); ++k)
               for (typename OperatorType::InnerIterator it(op, k); it; ++it)
-                sparse_entry(0, it.row(), it.col(), it.value());
+                sparse_entry(0,
+                  static_cast<Index>(vOff) + it.row(),
+                  static_cast<Index>(uOff) + it.col(),
+                  it.value());
           }
 
           // Merge triplets
@@ -1788,9 +1814,29 @@ namespace Rodin::Assembly
           for (int tid = 0; tid < tc; ++tid)
             A += Achunks[static_cast<size_t>(tid)];
 
-          // Add preassembled dense BFs (serial)
+          // Add preassembled dense BFs (serial, with block offsets)
           for (auto& bf : pb.getBFs())
-            A += bf.getOperator();
+          {
+            const auto uUUID = bf.getTrialFunction().getUUID();
+            const auto vUUID = bf.getTestFunction().getUUID();
+
+            const size_t uBlock = findTrialBlock(uUUID);
+            const size_t vBlock = findTestBlock(vUUID);
+
+            const size_t uOff = trialOffsets[uBlock];
+            const size_t vOff = testOffsets[vBlock];
+
+            const auto& op = bf.getOperator();
+            const auto opRows = op.rows();
+            const auto opCols = op.cols();
+            for (Eigen::Index i = 0; i < opRows; ++i)
+              for (Eigen::Index j = 0; j < opCols; ++j)
+              {
+                const auto val = op(i, j);
+                if (val != ScalarType(0))
+                  A(static_cast<Index>(vOff) + i, static_cast<Index>(uOff) + j) += val;
+              }
+          }
 
           // Dense elimination after assembly
           for (Index idx = 0; idx < static_cast<Index>(nrows); ++idx)

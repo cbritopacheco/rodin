@@ -100,6 +100,18 @@ namespace Rodin::Solver
   template <class LinearSystem>
   class LDLT;
 
+
+  /**
+   * @brief Dense LU factorization with partial pivoting for general matrices.
+   * @tparam LinearSystem Type of linear system to solve
+   *
+   * Performs LU decomposition with partial pivoting for dense matrices.
+   *
+   * @see PartialPivLUSpecializations for available template specializations.
+   */
+  template <class LinearSystem>
+  class PartialPivLU;
+
   /**
    * @brief Householder QR decomposition for dense matrices.
    * @tparam LinearSystem Type of linear system to solve

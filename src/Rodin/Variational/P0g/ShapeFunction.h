@@ -8,6 +8,7 @@
 #include "Rodin/Variational/P0g/ForwardDecls.h"
 #include "Rodin/Variational/ShapeFunction.h"
 #include "Rodin/Variational/IntegrationPoint.h"
+#include "Rodin/Math/Traits.h"
 
 namespace Rodin::Variational
 {
@@ -32,7 +33,7 @@ namespace Rodin::Variational
           SpaceType>;
 
       static constexpr bool IsScalarRange = std::is_same_v<RangeType, ScalarType>;
-      static constexpr bool IsVectorRange = std::is_same_v<RangeType, Math::Vector<ScalarType>>;
+      static constexpr bool IsVectorRange = FormLanguage::IsVectorRange<RangeType>::Value;
 
       static_assert(IsScalarRange || IsVectorRange);
 

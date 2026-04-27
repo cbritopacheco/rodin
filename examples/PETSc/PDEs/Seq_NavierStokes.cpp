@@ -179,9 +179,9 @@ int main(int argc, char** argv)
     PETSc::Variational::GridFunction inletProfile(uh);
 
     // Initial conditions: fluid initially at rest and zero pressure.
-    u_old = Math::Vector<Real>{{0.0, 0.0}};
+    u_old = Math::SpatialVector<Real>{{0.0, 0.0}};
     p_old = 0.0;
-    inletProfile = Math::Vector<Real>{{0.0, 0.0}};
+    inletProfile = Math::SpatialVector<Real>{{0.0, 0.0}};
 
     // Diagnostic output files.
     std::ofstream fluxFile("flux.txt");
