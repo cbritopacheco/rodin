@@ -20,6 +20,8 @@ set(RodinFluid_HEADERS
   Constitutive/CarreauYasuda.h
   Constitutive/Bingham.h
   Constitutive/HerschelBulkley.h
+  Integrators/ViscousForce.h
+  Integrators/ViscousTangent.h
 )
 
 # Header-only / interface library

@@ -43,4 +43,8 @@
 #include "Fluid/Constitutive/Bingham.h"
 #include "Fluid/Constitutive/HerschelBulkley.h"
 
+// Integrators
+#include "Fluid/Integrators/ViscousForce.h"
+#include "Fluid/Integrators/ViscousTangent.h"
+
 #endif
