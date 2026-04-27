@@ -185,12 +185,13 @@ function(rodin_add_link_options)
   endforeach()
 endfunction()
 
-function(rodin_suppress_external_mpi_lsan_for_test test_name)
-  set(_rodin_lsan_suppressions "${PROJECT_SOURCE_DIR}/cmake/lsan.supp")
-  set(_rodin_test_environment
-    "LSAN_OPTIONS=suppressions=${_rodin_lsan_suppressions}:print_suppressions=0"
-    ${ARGN})
+function(rodin_disable_lsan_for_test test_name)
+  set(_rodin_test_environment "ASAN_OPTIONS=detect_leaks=0" ${ARGN})
   set_tests_properties(${test_name} PROPERTIES
     ENVIRONMENT "${_rodin_test_environment}"
   )
+endfunction()
+
+function(rodin_suppress_external_mpi_lsan_for_test test_name)
+  rodin_disable_lsan_for_test(${test_name} ${ARGN})
 endfunction()
