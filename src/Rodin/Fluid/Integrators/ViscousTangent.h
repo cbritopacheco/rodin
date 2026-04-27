@@ -174,6 +174,9 @@ namespace Rodin::Fluid
           const auto& JacInv = pt.getJacobianInverse();
 
           // Precompute physical Jacobians of all DOF basis functions.
+          // For vector P1: physJacs[dof] is a vdim×d matrix with only row
+          // (dof % vdim) nonzero, equal to the physical gradient of the scalar
+          // nodal basis function indexed by (dof / vdim).
           std::vector<Math::SpatialMatrix<ScalarType>> physJacs(ndof);
           for (size_t dof = 0; dof < ndof; ++dof)
           {
@@ -181,10 +184,15 @@ namespace Rodin::Fluid
             physJacs[dof] = refJac * JacInv;
           }
 
-          // Interpolate velocity and velocity gradient at the linearization
-          // point (from m_linGf if set, zero otherwise).
-          Math::SpatialVector<ScalarType> vel(vdim);
-          vel.setZero();
+          // Interpolate velocity gradient at the linearization point.
+          // Each DOF carries a scalar coefficient for a single vector component;
+          // physJacs[dof] is zero in all rows except (dof % vdim), so the loop
+          // correctly accumulates only the contribution of the relevant component.
+          // The velocity value is not required by current rheology laws
+          // (all implemented laws depend only on the velocity gradient), so a
+          // zero placeholder is passed to FlowPoint.
+          Math::SpatialVector<ScalarType> velZero(vdim);
+          velZero.setZero();
           Math::SpatialMatrix<ScalarType> gradU(vdim, d_u8);
           gradU.setZero();
 
@@ -201,7 +209,7 @@ namespace Rodin::Fluid
           }
 
           // Build FlowPoint at the linearization point.
-          FlowPoint fp(pt, vel, gradU);
+          FlowPoint fp(pt, velZero, gradU);
 
           // Precompute constitutive cache at this linearization point.
           typename LawType::Cache cache;

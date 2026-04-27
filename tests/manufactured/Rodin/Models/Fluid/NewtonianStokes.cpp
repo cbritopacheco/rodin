@@ -211,6 +211,8 @@ namespace Rodin::Tests::Manufactured::FluidNewtonianStokes
 
     auto computeL2Error = [&](size_t n) -> Real
     {
+      // UniformGrid({n, n}) creates n nodes per direction at integer positions
+      // {0, 1, ..., n-1}. Scaling by 1/(n-1) maps them to [0,1]^2.
       Mesh mesh = makeUnitSquareMesh(gt, n);
       const size_t dim = mesh.getSpaceDimension();
       P1 Vh(mesh, dim);
@@ -242,9 +244,10 @@ namespace Rodin::Tests::Manufactured::FluidNewtonianStokes
     const Real e8  = computeL2Error(9);
     const Real e16 = computeL2Error(17);
 
-    // P1 should give at least ~first-order convergence in L2.
-    // A factor of ~2 in L2 error is expected for mesh refinement by 2.
-    // We verify the error is decreasing by a meaningful amount (factor > 1.2).
+    // P1 gives O(h^2) convergence in L2, so mesh refinement by 2 (from n=9 to
+    // n=17, i.e. h ~1/8 to ~1/16) should reduce the error by ~4x in the
+    // asymptotic regime. We use a conservative threshold of 1.2x to allow for
+    // pre-asymptotic effects on coarse meshes.
     EXPECT_GT(e8, e16);
     EXPECT_GT(e8 / e16, 1.2)
         << "Error did not decrease sufficiently on mesh refinement: "
