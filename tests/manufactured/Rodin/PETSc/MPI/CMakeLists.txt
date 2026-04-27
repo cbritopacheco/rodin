@@ -1,10 +1,12 @@
-add_executable(RodinMPIAssemblyTest MPIAssemblyTest.cpp)
-target_link_libraries(RodinMPIAssemblyTest
+add_executable(RodinManufacturedPETScMPIPoissonTest PoissonTest.cpp)
+target_link_libraries(RodinManufacturedPETScMPIPoissonTest
   PUBLIC
   GTest::gtest
   Rodin::Geometry
   Rodin::Variational
-  Rodin::MPI)
+  Rodin::IO
+  Rodin::MPI
+  Rodin::PETSc)
 
 # Detect Open MPI for --oversubscribe flag (not supported by MPICH).
 set(_RODIN_MPI_OVERSUBSCRIBE_FLAG "")
@@ -19,14 +21,16 @@ if (MPIEXEC_EXECUTABLE)
   endif()
 endif()
 
-foreach(np 1 2 3 4 8)
+foreach(np 1 2 4)
   add_test(
-    NAME RodinMPIAssemblyTest_np${np}
+    NAME RodinManufacturedPETScMPIPoissonTest_np${np}
     COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
             ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
-            $<TARGET_FILE:RodinMPIAssemblyTest>)
-  set_tests_properties(RodinMPIAssemblyTest_np${np} PROPERTIES
-    LABELS "unit;distributed"
+            $<TARGET_FILE:RodinManufacturedPETScMPIPoissonTest>)
+  set_tests_properties(RodinManufacturedPETScMPIPoissonTest_np${np} PROPERTIES
+    LABELS "manufactured;petsc;distributed"
   )
-  rodin_suppress_external_mpi_lsan_for_test(RodinMPIAssemblyTest_np${np})
+  rodin_suppress_external_mpi_lsan_for_test(
+    RodinManufacturedPETScMPIPoissonTest_np${np}
+    "HDF5_USE_FILE_LOCKING=FALSE")
 endforeach()

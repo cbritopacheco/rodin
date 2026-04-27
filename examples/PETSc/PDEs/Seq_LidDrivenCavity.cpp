@@ -263,7 +263,7 @@ int main(int argc, char** argv)
     xdmf.add("pressure", p.getSolution());
 
     // Initial condition: fluid initially at rest, zero pressure.
-    u_old = Math::Vector<Real>{{0.0, 0.0}};
+    u_old = Math::SpatialVector<Real>{{0.0, 0.0}};
     p_old = 0.0;
 
     // Prescribed lid velocity.

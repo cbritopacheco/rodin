@@ -21,11 +21,9 @@
  * `/Shard/...` HDF5 group.
  *
  * The loader delegates to `MeshLoader<FileFormat::HDF5, Context::Local>` to
- * restore the base mesh.  Shard metadata restoration from HDF5 is not yet
- * implemented because the `Shard` class does not expose a public API for
- * resizing its internal metadata vectors after construction.  Full shard
- * round-trips should use Boost.Serialization; the HDF5 shard datasets are
- * available for custom tooling and post-processing.
+ * restore the base mesh and then reconstructs the MPI shard metadata needed
+ * for distributed assembly from the `/Shard/...` HDF5 datasets written by the
+ * MPI printer.
  *
  * @see MeshPrinter
  * @see MeshLoader
@@ -46,17 +44,10 @@ namespace Rodin::IO
   /**
    * @brief Loads a distributed MPI mesh from an HDF5 file.
    *
-   * Each MPI rank independently loads its local shard from the given HDF5
-   * file path using the canonical local mesh HDF5 layout.  The file is
-   * expected to contain the standard datasets produced by
-   * `MeshPrinter<FileFormat::HDF5, Context::Local>`.
-   *
-   * @note Shard metadata (`/Shard/...`) written by the MPI printer is
-   *       currently **not** restored by this loader because the `Shard`
-   *       class does not expose a public API for resizing its internal
-   *       metadata vectors after construction.  The base mesh topology is
-   *       fully round-tripped; shard ownership can be re-established via
-   *       `Sharder::reconcile()` or through Boost.Serialization.
+   * Each MPI rank independently loads its local shard from the given HDF5 file
+   * path using the canonical local mesh HDF5 layout and the vertex/cell shard
+   * metadata stored under `/Shard/...`.  The file is expected to have been
+   * produced by `MeshPrinter<FileFormat::HDF5, Context::MPI>`.
    *
    * @note Each rank must be given a rank-specific file path (e.g. via
    *       the callable filename overload on Mesh<Context::MPI>::load).
@@ -106,19 +97,185 @@ namespace Rodin::IO
       /**
        * @brief Loads the local mesh shard from the given HDF5 file.
        *
-       * Delegates to `MeshLoader<FileFormat::HDF5, Context::Local>`
-       * operating on the shard of the distributed mesh.  The base mesh
-       * topology is fully restored; shard metadata is not yet restored
-       * (see class documentation).
-       *
        * @param[in] filename  Path to the HDF5 file for this rank's shard.
        */
       void load(const boost::filesystem::path& filename) override
       {
         auto& mesh = this->getObject();
-        auto& shard = mesh.getShard();
-        MeshLoader<FileFormat::HDF5, Context::Local> localLoader(shard);
-        localLoader.load(filename);
+        mesh.getShard() = loadShard(filename);
+      }
+
+    private:
+      struct ShardDimensionMetadata
+      {
+        std::vector<HDF5::U8> state;
+        std::vector<HDF5::U64> left;
+        std::vector<HDF5::U64> ownerKeys;
+        std::vector<HDF5::U64> ownerValues;
+        std::vector<HDF5::U64> haloKeys;
+        std::vector<HDF5::U64> haloOffsets;
+        std::vector<HDF5::U64> haloIndices;
+      };
+
+      static Geometry::Shard loadShard(const boost::filesystem::path& filename)
+      {
+        Geometry::Mesh<Context::Local> baseMesh;
+        baseMesh.load(filename, FileFormat::HDF5);
+
+        const auto file = HDF5::File(
+            H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+        if (!file)
+        {
+          Alert::Exception()
+            << "Failed to open HDF5 file for shard metadata: " << filename
+            << Alert::Raise;
+        }
+
+        const size_t Dmax = baseMesh.getDimension();
+        const auto vertexMetadata =
+          readShardDimensionMetadata(file.get(), baseMesh, 0);
+        const auto cellMetadata =
+          readShardDimensionMetadata(file.get(), baseMesh, Dmax);
+
+        Geometry::Shard::Builder builder;
+        builder.initialize(baseMesh);
+
+        includeDimension(builder, 0, vertexMetadata);
+        if (Dmax > 0)
+          includeDimension(builder, Dmax, cellMetadata);
+
+        applyOwnership(builder, 0, vertexMetadata);
+        if (Dmax > 0)
+          applyOwnership(builder, Dmax, cellMetadata);
+
+        Geometry::Shard shard = builder.finalize();
+        restorePolytopeMap(shard, 0, vertexMetadata.left);
+        if (Dmax > 0)
+          restorePolytopeMap(shard, Dmax, cellMetadata.left);
+
+        return shard;
+      }
+
+      static ShardDimensionMetadata readShardDimensionMetadata(
+          hid_t file,
+          const Geometry::Mesh<Context::Local>& baseMesh,
+          size_t d)
+      {
+        ShardDimensionMetadata metadata;
+        metadata.state =
+          HDF5::readVectorDataset<HDF5::U8>(file, HDF5::shardStatePath(d));
+        metadata.left =
+          HDF5::readVectorDataset<HDF5::U64>(file, HDF5::shardPolytopeMapLeftPath(d));
+
+        const size_t count = baseMesh.getPolytopeCount(d);
+        if (metadata.state.size() != count || metadata.left.size() != count)
+        {
+          Alert::Exception()
+            << "Invalid shard metadata size for dimension " << d
+            << ": expected " << count << " entries, got "
+            << metadata.state.size() << " state entries and "
+            << metadata.left.size() << " map entries."
+            << Alert::Raise;
+        }
+
+        const std::string ownerPath = HDF5::shardOwnerGroupPath(d);
+        metadata.ownerKeys =
+          HDF5::readVectorDataset<HDF5::U64>(file, ownerPath + "/Keys");
+        metadata.ownerValues =
+          HDF5::readVectorDataset<HDF5::U64>(file, ownerPath + "/Values");
+        if (metadata.ownerKeys.size() != metadata.ownerValues.size())
+        {
+          Alert::Exception()
+            << "Invalid shard owner metadata for dimension " << d
+            << ": key/value sizes differ."
+            << Alert::Raise;
+        }
+
+        const std::string haloPath = HDF5::shardHaloGroupPath(d);
+        metadata.haloKeys =
+          HDF5::readVectorDataset<HDF5::U64>(file, haloPath + "/Keys");
+        metadata.haloOffsets =
+          HDF5::readVectorDataset<HDF5::U64>(file, haloPath + "/Offsets");
+        metadata.haloIndices =
+          HDF5::readVectorDataset<HDF5::U64>(file, haloPath + "/Indices");
+        if (metadata.haloOffsets.size() != metadata.haloKeys.size() + 1)
+        {
+          Alert::Exception()
+            << "Invalid shard halo metadata for dimension " << d
+            << ": offsets size must equal keys size plus one."
+            << Alert::Raise;
+        }
+
+        return metadata;
+      }
+
+      static Geometry::Shard::State stateOf(HDF5::U8 flag)
+      {
+        if (flag == 1)
+          return Geometry::Shard::State::Owned;
+        if (flag == 2)
+          return Geometry::Shard::State::Ghost;
+        return Geometry::Shard::State::Shared;
+      }
+
+      static void includeDimension(
+          Geometry::Shard::Builder& builder,
+          size_t d,
+          const ShardDimensionMetadata& metadata)
+      {
+        for (Index i = 0; i < static_cast<Index>(metadata.state.size()); ++i)
+          builder.include({ d, i }, stateOf(metadata.state[i]));
+      }
+
+      static void applyOwnership(
+          Geometry::Shard::Builder& builder,
+          size_t d,
+          const ShardDimensionMetadata& metadata)
+      {
+        for (size_t i = 0; i < metadata.ownerKeys.size(); ++i)
+        {
+          builder.setOwner(
+              d,
+              static_cast<Index>(metadata.ownerKeys[i]),
+              static_cast<Index>(metadata.ownerValues[i]));
+        }
+
+        for (size_t i = 0; i < metadata.haloKeys.size(); ++i)
+        {
+          const Index key = static_cast<Index>(metadata.haloKeys[i]);
+          const size_t from = static_cast<size_t>(metadata.haloOffsets[i]);
+          const size_t to = static_cast<size_t>(metadata.haloOffsets[i + 1]);
+          if (from > to || to > metadata.haloIndices.size())
+          {
+            Alert::Exception()
+              << "Invalid shard halo offsets for dimension " << d << "."
+              << Alert::Raise;
+          }
+          for (size_t j = from; j < to; ++j)
+            builder.halo(d, key, static_cast<Index>(metadata.haloIndices[j]));
+        }
+      }
+
+      static void restorePolytopeMap(
+          Geometry::Shard& shard,
+          size_t d,
+          const std::vector<HDF5::U64>& left)
+      {
+        auto& pmap = shard.getPolytopeMap(d);
+        if (pmap.left.size() != left.size())
+        {
+          Alert::Exception()
+            << "Invalid reconstructed shard map size for dimension " << d
+            << ": expected " << pmap.left.size() << " entries, got "
+            << left.size() << "."
+            << Alert::Raise;
+        }
+        pmap.right.clear();
+        for (Index i = 0; i < static_cast<Index>(left.size()); ++i)
+        {
+          pmap.left[i] = static_cast<Index>(left[i]);
+          pmap.right[static_cast<Index>(left[i])] = i;
+        }
       }
   };
 

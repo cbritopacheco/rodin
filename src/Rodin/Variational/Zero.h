@@ -121,12 +121,12 @@ namespace Rodin::Variational
    * @see Zero
    */
   template <class Scalar>
-  class Zero<Math::Vector<Scalar>> final
-    : public VectorFunctionBase<Scalar, Zero<Math::Vector<Scalar>>>
+  class Zero<Math::SpatialVector<Scalar>> final
+    : public VectorFunctionBase<Scalar, Zero<Math::SpatialVector<Scalar>>>
   {
     public:
-      /// @brief Vector value type
-      using VectorType = Math::Vector<Scalar>;
+      /// @brief Spatial vector value type
+      using VectorType = Math::SpatialVector<Scalar>;
 
       /// @brief Parent class type
       using Parent = VectorFunctionBase<Scalar, Zero<VectorType>>;
@@ -159,11 +159,13 @@ namespace Rodin::Variational
 
       /**
        * @brief Evaluates the zero vector function at a point
-       * @returns Zero vector of dimension m_d
+       * @returns Zero SpatialVector of dimension m_d
        */
-      auto getValue(const Geometry::Point&) const
+      VectorType getValue(const Geometry::Point&) const
       {
-        return VectorType::Zero(m_d);
+        VectorType v(static_cast<std::uint8_t>(m_d));
+        v.setZero();
+        return v;
       }
 
       constexpr
@@ -188,16 +190,16 @@ namespace Rodin::Variational
   /**
    * @brief CTAD for vector Zero
    *
-   * Deduces Zero<Math::Vector<Real>> from Zero(size_t)
+   * Deduces Zero<Math::SpatialVector<Real>> from Zero(size_t)
    */
-  Zero(size_t) -> Zero<Math::Vector<Real>>;
+  Zero(size_t) -> Zero<Math::SpatialVector<Real>>;
 
   /**
    * @brief Convenience typedef for vector zero function
    * @tparam Scalar Scalar type for vector components
    */
   template <class Scalar>
-  using VectorZero = Zero<Math::Vector<Scalar>>;
+  using VectorZero = Zero<Math::SpatialVector<Scalar>>;
 }
 
 #endif
