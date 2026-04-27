@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;class Range&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>P1&lt;Range, Geometry::Mesh&lt;Context::MPI&gt;&gt; <span class="m-thin">class</span>
         </h1>
-        <p>Distributed <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> finite element space for MPI meshes.</p>
+        <p>Distributed <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> finite element space for <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> meshes.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -423,7 +423,7 @@ $ [\text{begin}, \text{end}) $
 <use x='46.345887' y='0' xlink:href='#eq1-g3-100'/>
 <use x='52.323471' y='0' xlink:href='#eq1-g4-41'/>
 </g>
-</svg> identifies the global degrees of freedom owned by the current MPI rank.</p>
+</svg> identifies the global degrees of freedom owned by the current <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> rank.</p>
           </div></section>
           <section class="m-doc-details" id="a5dca55880f71baf8ba967bef5e1c992d"><div>
             <h3>
@@ -538,7 +538,7 @@ $(d,i)$
 <use x='15.879178' y='0' xlink:href='#eq3-g0-105'/>
 <use x='19.87261' y='0' xlink:href='#eq3-g1-41'/>
 </g>
-</svg> refers to a polytope in the local mesh shard of this MPI rank. Finite elements are therefore retrieved directly from the underlying shard finite element space.</p><aside class="m-note m-success"><h4>Precondition</h4><p><svg class="m-math" style="width: 7.833em; height: 1.606em; vertical-align: -0.348em;" viewBox="0 -12.087986 75.192185 15.417663">
+</svg> refers to a polytope in the local mesh shard of this <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> rank. Finite elements are therefore retrieved directly from the underlying shard finite element space.</p><aside class="m-note m-success"><h4>Precondition</h4><p><svg class="m-math" style="width: 7.833em; height: 1.606em; vertical-align: -0.348em;" viewBox="0 -12.087986 75.192185 15.417663">
 <title>
 $0 \le i &lt; |\mathcal{T}_d^{(loc)}|$
 </title>

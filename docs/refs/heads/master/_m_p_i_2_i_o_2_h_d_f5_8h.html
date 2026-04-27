@@ -89,7 +89,7 @@
             </li>
           </ul>
         </nav>
-<p>Provides MeshPrinter and MeshLoader specializations for <code>Mesh&lt;Context::MPI&gt;</code> using the HDF5 file format.</p><p>Each MPI rank persists its own local shard independently: the printer delegates to <code>MeshPrinter&lt;FileFormat::HDF5, Context::Local&gt;</code> to write the base mesh topology and then appends shard-specific metadata (ownership flags, polytope index maps, ghost-to-owner maps, and halo CSR) under the <code>/Shard/...</code> HDF5 group.</p><p>The loader delegates to <code>MeshLoader&lt;FileFormat::HDF5, Context::Local&gt;</code> to restore the base mesh. Shard metadata restoration from HDF5 is not yet implemented because the <code>Shard</code> class does not expose a public API for resizing its internal metadata vectors after construction. Full shard round-trips should use Boost.Serialization; the HDF5 shard datasets are available for custom tooling and post-processing.</p><aside class="m-note m-default"><h4>See also</h4><p>MeshPrinter</p><p>MeshLoader</p><p>Geometry::Mesh&lt;Context::MPI&gt;</p><p>Geometry::Shard</p></aside>
+<p>Provides MeshPrinter and MeshLoader specializations for <code>Mesh&lt;Context::MPI&gt;</code> using the HDF5 file format.</p><p>Each MPI rank persists its own local shard independently: the printer delegates to <code>MeshPrinter&lt;FileFormat::HDF5, Context::Local&gt;</code> to write the base mesh topology and then appends shard-specific metadata (ownership flags, polytope index maps, ghost-to-owner maps, and halo CSR) under the <code>/Shard/...</code> HDF5 group.</p><p>The loader delegates to <code>MeshLoader&lt;FileFormat::HDF5, Context::Local&gt;</code> to restore the base mesh and then reconstructs the MPI shard metadata needed for distributed assembly from the <code>/Shard/...</code> HDF5 datasets written by the MPI printer.</p><aside class="m-note m-default"><h4>See also</h4><p>MeshPrinter</p><p>MeshLoader</p><p>Geometry::Mesh&lt;Context::MPI&gt;</p><p>Geometry::Shard</p></aside>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
@@ -106,12 +106,12 @@
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_mesh_loader_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_m_p_i_01_4.html" class="m-doc">Rodin::IO::MeshLoader&lt;FileFormat::HDF5, Context::MPI&gt;</a>
             </dt>
-            <dd>Loads a distributed MPI mesh from an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file.</dd>
+            <dd>Loads a distributed <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mesh from an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_m_p_i_01_4.html" class="m-doc">Rodin::IO::MeshPrinter&lt;FileFormat::HDF5, Context::MPI&gt;</a>
             </dt>
-            <dd>Prints a distributed MPI mesh to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file.</dd>
+            <dd>Prints a distributed <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mesh to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file.</dd>
           </dl>
         </section>
       </div>

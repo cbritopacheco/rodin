@@ -82,8 +82,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md343">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md344">Usage Example</a></li>
+            <li><a href="#autotoc_md346">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md347">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -168,7 +168,7 @@ $ d $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-100'/>
 </g>
-</svg> is the spatial dimension.</p><section id="autotoc_md343"><h3><a href="#autotoc_md343">Mathematical Foundation</a></h3><p>For a scalar function <svg class="m-math" style="width: 8.507em; height: 1.077em; vertical-align: -0.049em;" viewBox="0 -9.873238 81.671169 10.340659">
+</svg> is the spatial dimension.</p><section id="autotoc_md346"><h3><a href="#autotoc_md346">Mathematical Foundation</a></h3><p>For a scalar function <svg class="m-math" style="width: 8.507em; height: 1.077em; vertical-align: -0.049em;" viewBox="0 -9.873238 81.671169 10.340659">
 <title>
 $ u : \Omega \subset \mathbb{R}^d \to \mathbb{R} $
 </title>
@@ -266,7 +266,7 @@ $ u_h = \sum_i u_i \phi_i $
 <use x='227.625287' y='-15.032404' xlink:href='#eq7-g3-30'/>
 <use x='234.553389' y='-13.239141' xlink:href='#eq7-g2-105'/>
 </g>
-</svg></div></section><section id="autotoc_md344"><h3><a href="#autotoc_md344">Usage Example</a></h3><pre class="m-code"><span class="c1">// In a variational formulation</span>
+</svg></div></section><section id="autotoc_md347"><h3><a href="#autotoc_md347">Usage Example</a></h3><pre class="m-code"><span class="c1">// In a variational formulation</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">stiffness</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">));</span><span class="w">  </span><span class="c1">// Laplacian term</span></pre></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
@@ -285,8 +285,8 @@ $ u_h = \sum_i u_i \phi_i $
               using <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc-self">FESType</a> = FES
             </dt>
             <dd>Finite element space type.</dd>
-            <dt id="a152a748bc7c7298d9b2bbba4b517b108">
-              using <a href="#a152a748bc7c7298d9b2bbba4b517b108" class="m-doc-self">RangeType</a> = <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">::<wbr />ScalarType</a>&gt;
+            <dt id="ac404d01cfb7dd958afde5f42c1dcd72d">
+              using <a href="#ac404d01cfb7dd958afde5f42c1dcd72d" class="m-doc-self">RangeType</a> = <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">::<wbr />ScalarType</a>&gt;
             </dt>
             <dd>Type of the output range.</dd>
             <dt id="acdf431ab4381f783f82b9086cc8b6752">
@@ -332,7 +332,7 @@ $ u_h = \sum_i u_i \phi_i $
             </dt>
             <dd>Gets the spatial dimension of the gradient.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a475059e0c5d98a64868dd42f48abb39d" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; decltype(auto)</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af0e2923caa24f35613d3cc8427bdc6bb" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="#ac404d01cfb7dd958afde5f42c1dcd72d" class="m-doc">RangeType</a></span>
             </dt>
             <dd>Evaluates the gradient at a point.</dd>
             <dt>
@@ -419,12 +419,12 @@ $ \nabla u \in \mathbb{R}^d $
 </g>
 </svg>.</p>
           </div></section>
-          <section class="m-doc-details" id="a475059e0c5d98a64868dd42f48abb39d"><div>
+          <section class="m-doc-details" id="af0e2923caa24f35613d3cc8427bdc6bb"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES, class Data, class Derived&gt;
               </div>
-              <span class="m-doc-wrap-bumper">decltype(auto) Rodin::<wbr />Variational::<wbr />GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a475059e0c5d98a64868dd42f48abb39d" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ac404d01cfb7dd958afde5f42c1dcd72d" class="m-doc">RangeType</a> Rodin::<wbr />Variational::<wbr />GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af0e2923caa24f35613d3cc8427bdc6bb" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
             </h3>
             <p>Evaluates the gradient at a point.</p>
             <table class="m-table m-fullwidth m-flat">

@@ -186,6 +186,11 @@
             </dt>
             <dd>CTAD (Class Template Argument Deduction) guide for <a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a>.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#ga6de92f81a44e88729691fe9e88fa7010" class="m-doc">PartialPivLU</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystem&gt;&amp;) -&gt; PartialPivLU&lt; LinearSystem &gt;</span>
+            </dt>
+            <dd>CTAD guide for <a href="class_rodin_1_1_solver_1_1_partial_piv_l_u.html" class="m-doc">PartialPivLU</a>.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class LinearSystemType&gt;</div>
               <span class="m-doc-wrap-bumper"><a href="#gacc677f2e577625039f0ec3b2cbd8e875" class="m-doc">SimplicialLDLT</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystemType&gt;&amp;) -&gt; SimplicialLDLT&lt; LinearSystemType &gt;</span>
             </dt>
@@ -229,7 +234,7 @@
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_derivative.html" class="m-doc">Derivative</a> of an <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t K, class Scalar, class Data, class Mesh&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#gaf1996f416536c7c1cb88834919508648" class="m-doc">Div</a>(</span><span class="m-doc-wrap">const GridFunction&lt;H1&lt;K, Math::Vector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&amp;) -&gt; Div&lt; GridFunction&lt; H1&lt; K, Math::Vector&lt; Scalar &gt;, Mesh &gt;, Data &gt; &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#ga6d941f7edf5f3f63910b5f26a5dc15f3" class="m-doc">Div</a>(</span><span class="m-doc-wrap">const GridFunction&lt;H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&amp;) -&gt; Div&lt; GridFunction&lt; H1&lt; K, Math::SpatialVector&lt; Scalar &gt;, Mesh &gt;, Data &gt; &gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a> of an <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
             <dt>
@@ -254,7 +259,7 @@
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> from mesh - deduces to RealP0.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar, class Data, class Mesh&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#ga2bcb332a235837e42344fd91eec65940" class="m-doc">Div</a>(</span><span class="m-doc-wrap">const GridFunction&lt;P0g&lt;Math::Vector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&amp;) -&gt; Div&lt; GridFunction&lt; P0g&lt; Math::Vector&lt; Scalar &gt;, Mesh &gt;, Data &gt; &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#gac34ae941b9ae7d3f8e5a09003adc2f86" class="m-doc">Div</a>(</span><span class="m-doc-wrap">const GridFunction&lt;P0g&lt;Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&amp;) -&gt; Div&lt; GridFunction&lt; P0g&lt; Math::SpatialVector&lt; Scalar &gt;, Mesh &gt;, Data &gt; &gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a> of a <a href="class_rodin_1_1_variational_1_1_p0g.html" class="m-doc">P0g</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
             <dt>
@@ -270,7 +275,7 @@
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_derivative.html" class="m-doc">Derivative</a> of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar, class Data, class Mesh&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#ga58e9d391d18423707a5d53fdf29d55d8" class="m-doc">Div</a>(</span><span class="m-doc-wrap">const GridFunction&lt;P1&lt;Math::Vector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&amp;) -&gt; Div&lt; GridFunction&lt; P1&lt; Math::Vector&lt; Scalar &gt;, Mesh &gt;, Data &gt; &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#gae4e77e0ab843a1e5b7b0d0cf1dfabd77" class="m-doc">Div</a>(</span><span class="m-doc-wrap">const GridFunction&lt;P1&lt;Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&amp;) -&gt; Div&lt; GridFunction&lt; P1&lt; Math::SpatialVector&lt; Scalar &gt;, Mesh &gt;, Data &gt; &gt;</span>
             </dt>
             <dd>CTAD for <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a> of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</dd>
             <dt>
@@ -479,6 +484,16 @@
 <p>Allows writing:</p><pre class="m-code"><span class="n">SparseLU</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">tangent</span><span class="p">);</span>
 <span class="n">NewtonSolver</span><span class="w"> </span><span class="nf">newton</span><span class="p">(</span><span class="n">solver</span><span class="p">);</span></pre>
           </div></section>
+          <section class="m-doc-details" id="ga6de92f81a44e88729691fe9e88fa7010"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_partial_piv_l_u_8h.html">&lt;Rodin/Solver/PartialPivLU.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class LinearSystem&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga6de92f81a44e88729691fe9e88fa7010" class="m-doc-self">PartialPivLU</a>(</span><span class="m-doc-wrap">Variational::ProblemBase&lt;LinearSystem&gt;&amp;) -&gt; PartialPivLU&lt; LinearSystem &gt;</span></span>
+            </h3>
+            <p>CTAD guide for <a href="class_rodin_1_1_solver_1_1_partial_piv_l_u.html" class="m-doc">PartialPivLU</a>.</p>
+          </div></section>
           <section class="m-doc-details" id="gacc677f2e577625039f0ec3b2cbd8e875"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_simplicial_l_d_l_t_8h.html">&lt;Rodin/Solver/SimplicialLDLT.h&gt;</a></div>
@@ -572,13 +587,13 @@
             </h3>
             <p>CTAD for <a href="class_rodin_1_1_variational_1_1_derivative.html" class="m-doc">Derivative</a> of an <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</p>
           </div></section>
-          <section class="m-doc-details" id="gaf1996f416536c7c1cb88834919508648"><div>
+          <section class="m-doc-details" id="ga6d941f7edf5f3f63910b5f26a5dc15f3"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_h1_2_div_8h.html">&lt;Rodin/Variational/H1/Div.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;size_t K, class Scalar, class Data, class Mesh&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gaf1996f416536c7c1cb88834919508648" class="m-doc-self">Div</a>(</span><span class="m-doc-wrap">const GridFunction&lt;H1&lt;K, Math::Vector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&amp;) -&gt; Div&lt; GridFunction&lt; H1&lt; K, Math::Vector&lt; Scalar &gt;, Mesh &gt;, Data &gt; &gt;</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga6d941f7edf5f3f63910b5f26a5dc15f3" class="m-doc-self">Div</a>(</span><span class="m-doc-wrap">const GridFunction&lt;H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&amp;) -&gt; Div&lt; GridFunction&lt; H1&lt; K, Math::SpatialVector&lt; Scalar &gt;, Mesh &gt;, Data &gt; &gt;</span></span>
             </h3>
             <p>CTAD for <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a> of an <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</p>
           </div></section>
@@ -624,13 +639,13 @@
             </h3>
             <p>CTAD for <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a> of a <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</p>
           </div></section>
-          <section class="m-doc-details" id="ga2bcb332a235837e42344fd91eec65940"><div>
+          <section class="m-doc-details" id="gac34ae941b9ae7d3f8e5a09003adc2f86"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p0g_2_div_8h.html">&lt;Rodin/Variational/P0g/Div.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class Scalar, class Data, class Mesh&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga2bcb332a235837e42344fd91eec65940" class="m-doc-self">Div</a>(</span><span class="m-doc-wrap">const GridFunction&lt;P0g&lt;Math::Vector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&amp;) -&gt; Div&lt; GridFunction&lt; P0g&lt; Math::Vector&lt; Scalar &gt;, Mesh &gt;, Data &gt; &gt;</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gac34ae941b9ae7d3f8e5a09003adc2f86" class="m-doc-self">Div</a>(</span><span class="m-doc-wrap">const GridFunction&lt;P0g&lt;Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&amp;) -&gt; Div&lt; GridFunction&lt; P0g&lt; Math::SpatialVector&lt; Scalar &gt;, Mesh &gt;, Data &gt; &gt;</span></span>
             </h3>
             <p>CTAD for <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a> of a <a href="class_rodin_1_1_variational_1_1_p0g.html" class="m-doc">P0g</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</p>
           </div></section>
@@ -655,13 +670,13 @@
             </h3>
             <p>CTAD for <a href="class_rodin_1_1_variational_1_1_derivative.html" class="m-doc">Derivative</a> of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</p>
           </div></section>
-          <section class="m-doc-details" id="ga58e9d391d18423707a5d53fdf29d55d8"><div>
+          <section class="m-doc-details" id="gae4e77e0ab843a1e5b7b0d0cf1dfabd77"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_div_8h.html">&lt;Rodin/Variational/P1/Div.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class Scalar, class Data, class Mesh&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga58e9d391d18423707a5d53fdf29d55d8" class="m-doc-self">Div</a>(</span><span class="m-doc-wrap">const GridFunction&lt;P1&lt;Math::Vector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&amp;) -&gt; Div&lt; GridFunction&lt; P1&lt; Math::Vector&lt; Scalar &gt;, Mesh &gt;, Data &gt; &gt;</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gae4e77e0ab843a1e5b7b0d0cf1dfabd77" class="m-doc-self">Div</a>(</span><span class="m-doc-wrap">const GridFunction&lt;P1&lt;Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&amp;) -&gt; Div&lt; GridFunction&lt; P1&lt; Math::SpatialVector&lt; Scalar &gt;, Mesh &gt;, Data &gt; &gt;</span></span>
             </h3>
             <p>CTAD for <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a> of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</p>
           </div></section>

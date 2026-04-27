@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>Sharder&lt;Context::MPI&gt; <span class="m-thin">class</span>
         </h1>
-        <p><a href="namespace_rodin_1_1_utility.html" class="m-doc">Utility</a> for distributing a global mesh across MPI ranks by splitting into per-rank shards, scattering them from a root, and gathering the local mesh on each rank.</p>
+        <p><a href="namespace_rodin_1_1_utility.html" class="m-doc">Utility</a> for distributing a global mesh across <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> ranks by splitting into per-rank shards, scattering them from a root, and gathering the local mesh on each rank.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -98,7 +98,7 @@
             <dt id="a6ed016c8f29cab690cc600a8c803f5ed">
               using <a href="#a6ed016c8f29cab690cc600a8c803f5ed" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_geometry_1_1_sharder_base.html" class="m-doc">SharderBase</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;
             </dt>
-            <dd>Base sharder interface specialized on MPI context.</dd>
+            <dd>Base sharder interface specialized on <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> context.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -107,7 +107,7 @@
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#abf3964edbaf86bd6879176fd2f55b2ba" class="m-doc">Sharder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&amp; context)</span>
             </dt>
-            <dd>Construct a <a href="class_rodin_1_1_geometry_1_1_sharder.html" class="m-doc">Sharder</a> with the given MPI context.</dd>
+            <dd>Construct a <a href="class_rodin_1_1_geometry_1_1_sharder.html" class="m-doc">Sharder</a> with the given <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> context.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -137,7 +137,7 @@
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />Sharder&lt;Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abf3964edbaf86bd6879176fd2f55b2ba" class="m-doc-self">Sharder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&amp; context)</span></span>
             </h3>
-            <p>Construct a <a href="class_rodin_1_1_geometry_1_1_sharder.html" class="m-doc">Sharder</a> with the given MPI context.</p>
+            <p>Construct a <a href="class_rodin_1_1_geometry_1_1_sharder.html" class="m-doc">Sharder</a> with the given <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> context.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -145,7 +145,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">context</td>
-                  <td>The MPI context (communicator and environment).</td>
+                  <td>The <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> context (communicator and environment).</td>
                 </tr>
               </tbody>
             </table>
@@ -176,7 +176,7 @@
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>The local MPI mesh built from the received shard.</td>
+                  <td>The local <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mesh built from the received shard.</td>
                 </tr>
               </tfoot>
             </table>
@@ -230,11 +230,11 @@
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>The local MPI mesh built from the received shard.</td>
+                  <td>The local <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mesh built from the received shard.</td>
                 </tr>
               </tfoot>
             </table>
-<p>On the root rank, returns its own shard without MPI. On other ranks, blocks in a matching MPI_Recv from the root.</p>
+<p>On the root rank, returns its own shard without <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a>. On other ranks, blocks in a matching MPI_Recv from the root.</p>
           </div></section>
         </section>
       </div>

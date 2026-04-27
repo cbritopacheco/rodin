@@ -80,10 +80,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md490">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md491">Trace Theorem</a></li>
-            <li><a href="#autotoc_md492">Applications</a></li>
-            <li><a href="#autotoc_md493">Usage Example</a></li>
+            <li><a href="#autotoc_md493">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md494">Trace Theorem</a></li>
+            <li><a href="#autotoc_md495">Applications</a></li>
+            <li><a href="#autotoc_md496">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -93,7 +93,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the TraceOperator class, which computes the trace (boundary restriction) of functions to specified mesh boundaries. This is different from the matrix trace in <a href="_trace_8h.html" class="m-doc">Trace.h</a> - this operator restricts function domains.</p><section id="autotoc_md490"><h3><a href="#autotoc_md490">Mathematical Foundation</a></h3><p>For a function <svg class="m-math" style="width: 5.442em; height: 0.858em; vertical-align: -0.000em;" viewBox="0 -8.235778 52.241252 8.235778">
+<p>This file defines the TraceOperator class, which computes the trace (boundary restriction) of functions to specified mesh boundaries. This is different from the matrix trace in <a href="_trace_8h.html" class="m-doc">Trace.h</a> - this operator restricts function domains.</p><section id="autotoc_md493"><h3><a href="#autotoc_md493">Mathematical Foundation</a></h3><p>For a function <svg class="m-math" style="width: 5.442em; height: 0.858em; vertical-align: -0.000em;" viewBox="0 -8.235778 52.241252 8.235778">
 <title>
 $ u : \Omega \to \mathbb{R} $
 </title>
@@ -173,7 +173,7 @@ $ \Gamma $
 <g id='eq5-page1'>
 <use x='0' y='0' xlink:href='#eq5-g0-0'/>
 </g>
-</svg>.</p></section><section id="autotoc_md491"><h3><a href="#autotoc_md491">Trace Theorem</a></h3><p>For <svg class="m-math" style="width: 5.645em; height: 1.298em; vertical-align: -0.312em;" viewBox="0 -9.474739 54.188133 12.463531">
+</svg>.</p></section><section id="autotoc_md494"><h3><a href="#autotoc_md494">Trace Theorem</a></h3><p>For <svg class="m-math" style="width: 5.645em; height: 1.298em; vertical-align: -0.312em;" viewBox="0 -9.474739 54.188133 12.463531">
 <title>
 $ u \in H^1(\Omega) $
 </title>
@@ -235,7 +235,7 @@ $ H^{1/2}(\partial\Omega) $
 <use x='35.205485' y='0' xlink:href='#eq8-g3-10'/>
 <use x='43.659804' y='0' xlink:href='#eq8-g3-41'/>
 </g>
-</svg>.</p></section><section id="autotoc_md492"><h3><a href="#autotoc_md492">Applications</a></h3><ul><li>Boundary condition evaluation</li><li>Surface integrals</li><li>Coupling interface conditions</li><li>Weak boundary term evaluation</li></ul></section><section id="autotoc_md493"><h3><a href="#autotoc_md493">Usage Example</a></h3><pre class="m-code"><span class="c1">// Evaluate function on specific boundary</span>
+</svg>.</p></section><section id="autotoc_md495"><h3><a href="#autotoc_md495">Applications</a></h3><ul><li>Boundary condition evaluation</li><li>Surface integrals</li><li>Coupling interface conditions</li><li>Weak boundary term evaluation</li></ul></section><section id="autotoc_md496"><h3><a href="#autotoc_md496">Usage Example</a></h3><pre class="m-code"><span class="c1">// Evaluate function on specific boundary</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">u_boundary</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">TraceOperator</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">boundary_attr</span><span class="p">);</span>
 
 <span class="c1">// Use in boundary integral</span>

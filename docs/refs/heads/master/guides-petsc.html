@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>General concepts &raquo; PETSc: Parallel Solvers and Distributed Linear Algebra | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <link rel="prev" href="guides-mpi.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="guides-index.html">General concepts</a> &raquo;</span>
+          PETSc: Parallel Solvers and Distributed Linear Algebra
+        </h1>
+        <p>Guide to using PETSc-backed variational forms, solvers, and distributed assembly.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li><a href="#guides-petsc-intro">Introduction</a></li>
+            <li>
+              <a href="#guides-petsc-variational">PETSc Variational Components</a>
+              <ul>
+                <li><a href="#guides-petsc-trialtest">Trial and Test Functions</a></li>
+                <li><a href="#guides-petsc-gridfunction">Grid Functions</a></li>
+                <li><a href="#guides-petsc-forms">Bilinear and Linear Forms</a></li>
+                <li><a href="#guides-petsc-problem">Problem</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#guides-petsc-solvers">PETSc Solvers</a>
+              <ul>
+                <li><a href="#guides-petsc-solvers-ksp">KSP: Krylov Subspace Solvers</a></li>
+                <li><a href="#guides-petsc-solvers-cg">CG (Conjugate Gradient)</a></li>
+                <li><a href="#guides-petsc-solvers-gmres">GMRES</a></li>
+                <li><a href="#guides-petsc-solvers-snes">SNES: Nonlinear Solvers</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#guides-petsc-linearsystem">Linear System</a>
+              <ul>
+                <li><a href="#guides-petsc-dirichlet">Dirichlet Elimination</a></li>
+                <li><a href="#guides-petsc-fieldsplit">Field-Split Preconditioning</a></li>
+              </ul>
+            </li>
+            <li><a href="#guides-petsc-assembly">Assembly Strategies</a></li>
+            <li><a href="#guides-petsc-multifield">Multi-Field Problems</a></li>
+            <li><a href="#guides-petsc-sequential-example">Sequential PETSc Example</a></li>
+            <li><a href="#guides-petsc-mpi-example">MPI + PETSc Example</a></li>
+            <li><a href="#guides-petsc-cmdline">Command-Line Configuration</a></li>
+            <li><a href="#guides-petsc-see-also">See Also</a></li>
+          </ul>
+        </nav>
+<section id="guides-petsc-intro"><h2><a href="#guides-petsc-intro">Introduction</a></h2><p><a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s PETSc module integrates the <a href="https://petsc.org/">Portable, Extensible Toolkit for Scientific Computation</a> (PETSc) into the finite element pipeline. It provides:</p><ul><li>PETSc-backed trial/test functions, grid functions, bilinear forms, and linear forms that store data in PETSc <code>Vec</code> and <code>Mat</code> objects.</li><li>KSP (Krylov subspace) and SNES (nonlinear) solver wrappers.</li><li>Sequential, OpenMP, and MPI assembly strategies targeting PETSc objects.</li><li>Seamless support for both <code>Context::Local</code> (single-process) and <code>Context::MPI</code> (distributed) mesh contexts.</li></ul><p>Include the module via: <code class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/PETSc.h&gt;</span></code></p><aside class="m-note m-info"><h4>Note</h4><p>PETSc must be initialized before use and finalized after:</p><pre class="m-code"><span class="n">PetscInitialize</span><span class="p">(</span><span class="o">&amp;</span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">argv</span><span class="p">,</span><span class="w"> </span><span class="n">PETSC_NULLPTR</span><span class="p">,</span><span class="w"> </span><span class="n">PETSC_NULLPTR</span><span class="p">);</span>
+<span class="c1">// ... Rodin + PETSc code ...</span>
+<span class="n">PetscFinalize</span><span class="p">();</span></pre></aside></section><section id="guides-petsc-variational"><h2><a href="#guides-petsc-variational">PETSc Variational Components</a></h2><p>The PETSc variational wrappers live in the <code>Rodin::PETSc::Variational</code> namespace. They are thin CTAD wrappers around the core <a href="namespace_rodin.html" class="m-doc">Rodin</a> classes that trigger PETSc-specific template deduction.</p><section id="guides-petsc-trialtest"><h3><a href="#guides-petsc-trialtest">Trial and Test Functions</a></h3><p>Use <code>PETSc::Variational::TrialFunction</code> and <code>PETSc::Variational::TestFunction</code> instead of the standard versions to activate PETSc storage:</p><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+
+<span class="n">PETSc</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><span class="n">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
+<span class="n">PETSc</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><span class="n">TestFunction</span><span class="w">  </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span></pre><p>The CTAD deduction guide automatically associates the trial function with a <code>PETSc::Variational::GridFunction</code> as its solution type, ensuring that the discrete solution is stored in a PETSc <code>Vec</code>.</p></section><section id="guides-petsc-gridfunction"><h3><a href="#guides-petsc-gridfunction">Grid Functions</a></h3><p><a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">PETSc::<wbr />Variational::<wbr />GridFunction</a> stores DOF coefficients in a PETSc <code>Vec</code>. It supports:</p><table class="m-table"><thead><tr><th>Feature</th><th>Description</th></tr></thead><tbody><tr><td>Projection</td><td><code>gf = expr</code> assigns DOF values from a function expression</td></tr><tr><td>Arithmetic</td><td><code>+=</code>, <code>-=</code>, <code>*=</code>, <code>/=</code> for scalars and grid functions</td></tr><tr><td>Point evaluation</td><td><code>gf(point)</code> evaluates <svg class="m-math" style="width: 1.202em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 11.542349 6.940636">
+<title>
+$ u_h $
+</title>
+<defs>
+<path id='eq1-g0-104' d='M2.327273-5.292154C2.335243-5.308095 2.359153-5.411706 2.359153-5.419676C2.359153-5.459527 2.327273-5.531258 2.231631-5.531258C2.199751-5.531258 1.952677-5.507347 1.769365-5.491407L1.323039-5.459527C1.147696-5.443587 1.067995-5.435616 1.067995-5.292154C1.067995-5.180573 1.179577-5.180573 1.275218-5.180573C1.657783-5.180573 1.657783-5.132752 1.657783-5.061021C1.657783-5.037111 1.657783-5.021171 1.617933-4.877709L.486177-.342715C.454296-.223163 .454296-.175342 .454296-.167372C.454296-.03188 .565878 .079701 .71731 .079701C.844832 .079701 .956413 0 1.020174-.103611C1.044085-.151432 1.107846-.406476 1.147696-.565878L1.331009-1.275218C1.354919-1.39477 1.43462-1.697634 1.458531-1.817186C1.578082-2.279452 1.578082-2.295392 1.753425-2.550436C2.024408-2.940971 2.399004-3.291656 2.933001-3.291656C3.219925-3.291656 3.387298-3.124284 3.387298-2.749689C3.387298-2.311333 3.052553-1.40274 2.901121-1.012204C2.797509-.749191 2.797509-.70137 2.797509-.597758C2.797509-.143462 3.172105 .079701 3.514819 .079701C4.29589 .079701 4.622665-1.036115 4.622665-1.139726C4.622665-1.219427 4.558904-1.243337 4.503113-1.243337C4.407472-1.243337 4.391532-1.187547 4.367621-1.107846C4.176339-.454296 3.841594-.143462 3.53873-.143462C3.411208-.143462 3.347447-.223163 3.347447-.406476S3.411208-.765131 3.490909-.964384C3.610461-1.267248 3.961146-2.183811 3.961146-2.630137C3.961146-3.227895 3.5467-3.514819 2.972852-3.514819C2.526526-3.514819 2.10411-3.323537 1.737484-2.901121L2.327273-5.292154Z'/>
+<path id='eq1-g1-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g1-117'/>
+<use x='6.66244' y='1.793263' xlink:href='#eq1-g0-104'/>
+</g>
+</svg> at a geometric point</td></tr><tr><td>DOF access</td><td><code>gf[i]</code> accesses individual DOF coefficients</td></tr><tr><td>Data import</td><td><code>setData(Vec)</code> copies from another PETSc vector</td></tr><tr><td>I/O</td><td><code>save()</code> / <code>load()</code> for persistence</td></tr></tbody></table><p>In MPI mode, the vector is created with <code>VecMPISetGhost</code> for transparent ghost-layer synchronization. The <code>acquire()</code> / <code>flush()</code> / <code>release()</code> methods encapsulate ghost update patterns:</p><table class="m-table"><thead><tr><th>Direction</th><th>PETSc call</th><th>Purpose</th></tr></thead><tbody><tr><td>owner → ghost</td><td><code>VecGhostUpdateBegin/End(INSERT, FORWARD)</code></td><td>Read remote DOFs before evaluation</td></tr><tr><td>ghost → owner</td><td><code>VecGhostUpdateBegin/End(INSERT, REVERSE)</code></td><td>Scatter modified ghosts back to owners</td></tr></tbody></table></section><section id="guides-petsc-forms"><h3><a href="#guides-petsc-forms">Bilinear and Linear Forms</a></h3><p>When PETSc trial/test functions are used, <code>BilinearForm</code> assembles into a PETSc <code>Mat</code> and <code>LinearForm</code> assembles into a PETSc <code>Vec</code>:</p><pre class="m-code"><span class="c1">// Automatically selected via CTAD</span>
+<span class="n">BilinearForm</span><span class="w"> </span><span class="nf">a</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span><span class="w">  </span><span class="c1">// assembles into ::Mat</span>
+<span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">));</span>
+
+<span class="n">LinearForm</span><span class="w"> </span><span class="nf">L</span><span class="p">(</span><span class="n">v</span><span class="p">);</span><span class="w">       </span><span class="c1">// assembles into ::Vec</span>
+<span class="n">L</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span></pre><p>The assembly strategy is automatically selected based on the mesh context:</p><ul><li><code>Context::Local</code> → Sequential or OpenMP assembly</li><li><code>Context::MPI</code> → MPI-parallel assembly (each rank assembles owned elements)</li></ul></section><section id="guides-petsc-problem"><h3><a href="#guides-petsc-problem">Problem</a></h3><p>The PETSc <code>Problem</code> assembles into a <a href="_p_e_t_sc_2_math_2_linear_system_8h.html#afa0435f07e69ca0a0806164a5b7e897f" class="m-doc">PETSc::<wbr />Math::<wbr />LinearSystem</a> containing the system matrix <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
+<title>
+$ A $
+</title>
+<defs>
+<path id='eq2-g0-65' d='M2.032379-1.327024C1.613948-.621669 1.207472-.382565 .633624-.3467C.502117-.334745 .406476-.334745 .406476-.119552C.406476-.047821 .466252 0 .549938 0C.765131 0 1.303113-.02391 1.518306-.02391C1.865006-.02391 2.247572 0 2.582316 0C2.654047 0 2.797509 0 2.797509-.227148C2.797509-.334745 2.701868-.3467 2.630137-.3467C2.355168-.37061 2.12802-.466252 2.12802-.753176C2.12802-.920548 2.199751-1.052055 2.355168-1.315068L3.263761-2.82142H6.312329C6.324284-2.713823 6.324284-2.618182 6.336239-2.510585C6.372105-2.199751 6.515567-.956413 6.515567-.729265C6.515567-.37061 5.905853-.3467 5.71457-.3467C5.583064-.3467 5.451557-.3467 5.451557-.131507C5.451557 0 5.559153 0 5.630884 0C5.834122 0 6.073225-.02391 6.276463-.02391H6.957908C7.687173-.02391 8.2132 0 8.225156 0C8.308842 0 8.440349 0 8.440349-.227148C8.440349-.3467 8.332752-.3467 8.153425-.3467C7.49589-.3467 7.483935-.454296 7.44807-.812951L6.718804-8.272976C6.694894-8.51208 6.647073-8.53599 6.515567-8.53599C6.396015-8.53599 6.324284-8.51208 6.216687-8.332752L2.032379-1.327024ZM3.466999-3.16812L5.869988-7.185056L6.276463-3.16812H3.466999Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g0-65'/>
+</g>
+</svg>, right-hand side <svg class="m-math" style="width: 0.778em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 7.47198 8.302191">
+<title>
+$ \mathbf{b} $
+</title>
+<defs>
+<path id='eq3-g0-98' d='M2.486675-8.296887L.418431-8.201245V-7.687173C1.159651-7.687173 1.243337-7.687173 1.243337-7.220922V0H1.745455C1.948692-.227148 2.15193-.454296 2.343213-.6934C2.952927-.059776 3.610461 .071731 4.088667 .071731C5.738481 .071731 7.005729-.932503 7.005729-2.666002C7.005729-4.303861 5.881943-5.379826 4.244085-5.379826C3.53873-5.379826 2.976837-5.152677 2.486675-4.770112V-8.296887ZM2.546451-4.196264C2.964882-4.770112 3.58655-4.985305 4.088667-4.985305C5.571108-4.985305 5.571108-3.466999 5.571108-2.677958C5.571108-2.139975 5.571108-1.458531 5.284184-1.016189C4.913574-.442341 4.351681-.32279 3.969116-.32279C3.156164-.32279 2.713823-.896638 2.546451-1.159651V-4.196264Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='0' y='0' xlink:href='#eq3-g0-98'/>
+</g>
+</svg>, and solution <svg class="m-math" style="width: 0.739em; height: 0.553em; vertical-align: -0.000em;" viewBox="0 -5.313399 7.098381 5.313399">
+<title>
+$ \mathbf{x} $
+</title>
+<defs>
+<path id='eq4-g0-120' d='M4.028892-2.952927L5.415691-4.542964C5.547198-4.698381 5.654795-4.794022 6.647073-4.794022V-5.308095C5.977584-5.284184 5.953674-5.284184 5.547198-5.284184C5.200498-5.284184 4.686426-5.284184 4.351681-5.308095V-4.794022C4.578829-4.794022 4.829888-4.734247 4.829888-4.65056C4.829888-4.62665 4.770112-4.542964 4.746202-4.519054L3.706102-3.347447L2.52254-4.794022H3.024658V-5.308095C2.749689-5.284184 1.936737-5.284184 1.613948-5.284184C1.255293-5.284184 .609714-5.284184 .274969-5.308095V-4.794022H1.123786L2.988792-2.52254L1.43462-.765131C1.291158-.597758 1.207472-.514072 .215193-.514072V0C.932503-.02391 .956413-.02391 1.327024-.02391C1.673724-.02391 2.175841-.02391 2.510585 0V-.514072C2.283437-.514072 2.032379-.573848 2.032379-.657534C2.032379-.669489 2.032379-.681445 2.116065-.777086L3.311582-2.12802L4.638605-.514072H4.136488V0C4.423412-.02391 5.224408-.02391 5.559153-.02391C5.917808-.02391 6.551432-.02391 6.886177 0V-.514072H6.049315L4.028892-2.952927Z'/>
+</defs>
+<g id='eq4-page1'>
+<use x='0' y='0' xlink:href='#eq4-g0-120'/>
+</g>
+</svg>:</p><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">poisson</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+<span class="n">poisson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+<span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
+<span class="w">        </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">Zero</span><span class="p">());</span>
+
+<span class="c1">// Assembly + solve</span>
+<span class="n">Solver</span><span class="o">::</span><span class="n">CG</span><span class="p">(</span><span class="n">poisson</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span>
+
+<span class="c1">// The solution is automatically scattered to u.getSolution()</span></pre></section></section><section id="guides-petsc-solvers"><h2><a href="#guides-petsc-solvers">PETSc Solvers</a></h2><section id="guides-petsc-solvers-ksp"><h3><a href="#guides-petsc-solvers-ksp">KSP: Krylov Subspace Solvers</a></h3><p><a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a> is the base PETSc linear solver. It wraps the PETSc <code>KSP</code> context and supports programmatic configuration as well as command-line overrides.</p><pre class="m-code"><span class="c1">// Direct usage</span>
+<span class="n">Solver</span><span class="o">::</span><span class="n">KSP</span><span class="p">(</span><span class="n">problem</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span>
+
+<span class="c1">// Configured usage</span>
+<span class="n">Solver</span><span class="o">::</span><span class="n">KSP</span><span class="w"> </span><span class="nf">ksp</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
+<span class="n">ksp</span><span class="p">.</span><span class="n">setType</span><span class="p">(</span><span class="n">KSPGMRES</span><span class="p">);</span>
+<span class="n">ksp</span><span class="p">.</span><span class="n">setTolerances</span><span class="p">(</span>
+<span class="w">  </span><span class="mf">1e-10</span><span class="p">,</span><span class="w">    </span><span class="c1">// rtol:   relative decrease in residual norm</span>
+<span class="w">  </span><span class="mf">1e-14</span><span class="p">,</span><span class="w">    </span><span class="c1">// abstol: absolute residual norm threshold</span>
+<span class="w">  </span><span class="mf">1e5</span><span class="p">,</span><span class="w">      </span><span class="c1">// dtol:   divergence tolerance</span>
+<span class="w">  </span><span class="mi">1000</span><span class="w">      </span><span class="c1">// maxIt:  maximum iterations</span>
+<span class="p">);</span>
+<span class="n">ksp</span><span class="p">.</span><span class="n">setPreconditioner</span><span class="p">(</span><span class="n">precondMat</span><span class="p">);</span>
+<span class="n">ksp</span><span class="p">.</span><span class="n">solve</span><span class="p">();</span></pre><p>PETSc command-line options override programmatic settings: <code class="m-code"><span class="p">.</span><span class="o">/</span><span class="n">myprogram</span><span class="w"> </span><span class="o">-</span><span class="n">ksp_type</span><span class="w"> </span><span class="n">cg</span><span class="w"> </span><span class="o">-</span><span class="n">pc_type</span><span class="w"> </span><span class="n">jacobi</span><span class="w"> </span><span class="o">-</span><span class="n">ksp_rtol</span><span class="w"> </span><span class="mf">1e-8</span><span class="w"> </span><span class="o">-</span><span class="n">ksp_monitor</span></code></p></section><section id="guides-petsc-solvers-cg"><h3><a href="#guides-petsc-solvers-cg">CG (Conjugate Gradient)</a></h3><p><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a> is a convenience specialization that sets the KSP type to <code>KSPCG</code>. Use for symmetric positive-definite (SPD) systems:</p><pre class="m-code"><span class="n">Solver</span><span class="o">::</span><span class="n">CG</span><span class="p">(</span><span class="n">poisson</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre></section><section id="guides-petsc-solvers-gmres"><h3><a href="#guides-petsc-solvers-gmres">GMRES</a></h3><p><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a> sets the KSP type to <code>KSPGMRES</code>. Use for non-symmetric or indefinite systems:</p><pre class="m-code"><span class="n">Solver</span><span class="o">::</span><span class="n">GMRES</span><span class="p">(</span><span class="n">stokes</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre></section><section id="guides-petsc-solvers-snes"><h3><a href="#guides-petsc-solvers-snes">SNES: Nonlinear Solvers</a></h3><p><a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a> wraps PETSc&#x27;s nonlinear solver framework. It uses a KSP solver for the inner linear system at each Newton step:</p><pre class="m-code"><span class="n">Solver</span><span class="o">::</span><span class="n">KSP</span><span class="w"> </span><span class="nf">ksp</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
+<span class="n">Solver</span><span class="o">::</span><span class="n">SNES</span><span class="w"> </span><span class="nf">snes</span><span class="p">(</span><span class="n">ksp</span><span class="p">);</span>
+<span class="n">snes</span><span class="p">.</span><span class="n">setType</span><span class="p">(</span><span class="n">SNESNEWTONLS</span><span class="p">);</span>
+<span class="n">snes</span><span class="p">.</span><span class="n">setTolerances</span><span class="p">(</span>
+<span class="w">  </span><span class="mf">1e-8</span><span class="p">,</span><span class="w">     </span><span class="c1">// abstol</span>
+<span class="w">  </span><span class="mf">1e-10</span><span class="p">,</span><span class="w">    </span><span class="c1">// rtol</span>
+<span class="w">  </span><span class="mf">1e-6</span><span class="p">,</span><span class="w">     </span><span class="c1">// stol (step norm)</span>
+<span class="w">  </span><span class="mi">50</span><span class="p">,</span><span class="w">       </span><span class="c1">// maxIt (nonlinear iterations)</span>
+<span class="w">  </span><span class="mi">10000</span><span class="w">     </span><span class="c1">// maxF (function evaluations)</span>
+<span class="p">);</span>
+<span class="n">snes</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">x</span><span class="p">);</span></pre></section></section><section id="guides-petsc-linearsystem"><h2><a href="#guides-petsc-linearsystem">Linear System</a></h2><p><a href="_p_e_t_sc_2_math_2_linear_system_8h.html#afa0435f07e69ca0a0806164a5b7e897f" class="m-doc">PETSc::<wbr />Math::<wbr />LinearSystem</a> couples the PETSc matrix, RHS vector, and solution vector:</p><pre class="m-code"><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">axb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">problem</span><span class="p">.</span><span class="n">getLinearSystem</span><span class="p">();</span>
+<span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">axb</span><span class="p">.</span><span class="n">getOperator</span><span class="p">();</span><span class="w">   </span><span class="c1">// ::Mat</span>
+<span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">axb</span><span class="p">.</span><span class="n">getVector</span><span class="p">();</span><span class="w">     </span><span class="c1">// ::Vec (RHS)</span>
+<span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">axb</span><span class="p">.</span><span class="n">getSolution</span><span class="p">();</span><span class="w">   </span><span class="c1">// ::Vec (solution)</span></pre><section id="guides-petsc-dirichlet"><h3><a href="#guides-petsc-dirichlet">Dirichlet Elimination</a></h3><p>Dirichlet boundary conditions are enforced by the <code>eliminate()</code> template method, which zeros constrained rows in <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
+<title>
+$ A $
+</title>
+<defs>
+<path id='eq5-g0-65' d='M2.032379-1.327024C1.613948-.621669 1.207472-.382565 .633624-.3467C.502117-.334745 .406476-.334745 .406476-.119552C.406476-.047821 .466252 0 .549938 0C.765131 0 1.303113-.02391 1.518306-.02391C1.865006-.02391 2.247572 0 2.582316 0C2.654047 0 2.797509 0 2.797509-.227148C2.797509-.334745 2.701868-.3467 2.630137-.3467C2.355168-.37061 2.12802-.466252 2.12802-.753176C2.12802-.920548 2.199751-1.052055 2.355168-1.315068L3.263761-2.82142H6.312329C6.324284-2.713823 6.324284-2.618182 6.336239-2.510585C6.372105-2.199751 6.515567-.956413 6.515567-.729265C6.515567-.37061 5.905853-.3467 5.71457-.3467C5.583064-.3467 5.451557-.3467 5.451557-.131507C5.451557 0 5.559153 0 5.630884 0C5.834122 0 6.073225-.02391 6.276463-.02391H6.957908C7.687173-.02391 8.2132 0 8.225156 0C8.308842 0 8.440349 0 8.440349-.227148C8.440349-.3467 8.332752-.3467 8.153425-.3467C7.49589-.3467 7.483935-.454296 7.44807-.812951L6.718804-8.272976C6.694894-8.51208 6.647073-8.53599 6.515567-8.53599C6.396015-8.53599 6.324284-8.51208 6.216687-8.332752L2.032379-1.327024ZM3.466999-3.16812L5.869988-7.185056L6.276463-3.16812H3.466999Z'/>
+</defs>
+<g id='eq5-page1'>
+<use x='0' y='0' xlink:href='#eq5-g0-65'/>
+</g>
+</svg> and adjusts <svg class="m-math" style="width: 0.778em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 7.47198 8.302191">
+<title>
+$ \mathbf{b} $
+</title>
+<defs>
+<path id='eq6-g0-98' d='M2.486675-8.296887L.418431-8.201245V-7.687173C1.159651-7.687173 1.243337-7.687173 1.243337-7.220922V0H1.745455C1.948692-.227148 2.15193-.454296 2.343213-.6934C2.952927-.059776 3.610461 .071731 4.088667 .071731C5.738481 .071731 7.005729-.932503 7.005729-2.666002C7.005729-4.303861 5.881943-5.379826 4.244085-5.379826C3.53873-5.379826 2.976837-5.152677 2.486675-4.770112V-8.296887ZM2.546451-4.196264C2.964882-4.770112 3.58655-4.985305 4.088667-4.985305C5.571108-4.985305 5.571108-3.466999 5.571108-2.677958C5.571108-2.139975 5.571108-1.458531 5.284184-1.016189C4.913574-.442341 4.351681-.32279 3.969116-.32279C3.156164-.32279 2.713823-.896638 2.546451-1.159651V-4.196264Z'/>
+</defs>
+<g id='eq6-page1'>
+<use x='0' y='0' xlink:href='#eq6-g0-98'/>
+</g>
+</svg> and <svg class="m-math" style="width: 0.739em; height: 0.553em; vertical-align: -0.000em;" viewBox="0 -5.313399 7.098381 5.313399">
+<title>
+$ \mathbf{x} $
+</title>
+<defs>
+<path id='eq7-g0-120' d='M4.028892-2.952927L5.415691-4.542964C5.547198-4.698381 5.654795-4.794022 6.647073-4.794022V-5.308095C5.977584-5.284184 5.953674-5.284184 5.547198-5.284184C5.200498-5.284184 4.686426-5.284184 4.351681-5.308095V-4.794022C4.578829-4.794022 4.829888-4.734247 4.829888-4.65056C4.829888-4.62665 4.770112-4.542964 4.746202-4.519054L3.706102-3.347447L2.52254-4.794022H3.024658V-5.308095C2.749689-5.284184 1.936737-5.284184 1.613948-5.284184C1.255293-5.284184 .609714-5.284184 .274969-5.308095V-4.794022H1.123786L2.988792-2.52254L1.43462-.765131C1.291158-.597758 1.207472-.514072 .215193-.514072V0C.932503-.02391 .956413-.02391 1.327024-.02391C1.673724-.02391 2.175841-.02391 2.510585 0V-.514072C2.283437-.514072 2.032379-.573848 2.032379-.657534C2.032379-.669489 2.032379-.681445 2.116065-.777086L3.311582-2.12802L4.638605-.514072H4.136488V0C4.423412-.02391 5.224408-.02391 5.559153-.02391C5.917808-.02391 6.551432-.02391 6.886177 0V-.514072H6.049315L4.028892-2.952927Z'/>
+</defs>
+<g id='eq7-page1'>
+<use x='0' y='0' xlink:href='#eq7-g0-120'/>
+</g>
+</svg>:</p><div class="m-math"><svg style="width: 25.462em; height: 1.282em;" viewBox="71.805665 -12.309385 244.433552 12.309385">
+<title>
+\[
+  A_{ii} \leftarrow 1, \quad A_{ij} \leftarrow 0 \; (j \ne i), \quad
+  b_i \leftarrow u_i, \quad x_i \leftarrow u_i
+\]
+</title>
+<defs>
+<path id='eq8-g0-32' d='M10.855293-2.749689C11.070486-2.749689 11.285679-2.749689 11.285679-2.988792S11.070486-3.227895 10.855293-3.227895H1.972603C2.630137-3.730012 2.952927-4.220174 3.048568-4.375592C3.58655-5.200498 3.682192-5.953674 3.682192-5.965629C3.682192-6.109091 3.53873-6.109091 3.443088-6.109091C3.239851-6.109091 3.227895-6.085181 3.180075-5.869988C2.905106-4.698381 2.199751-3.706102 .848817-3.144209C.71731-3.096389 .669489-3.072478 .669489-2.988792S.729265-2.881196 .848817-2.833375C2.092154-2.319303 2.893151-1.3868 3.19203-.047821C3.227895 .095641 3.239851 .131507 3.443088 .131507C3.53873 .131507 3.682192 .131507 3.682192-.011955C3.682192-.035866 3.574595-.789041 3.072478-1.590037C2.833375-1.948692 2.486675-2.367123 1.972603-2.749689H10.855293Z'/>
+<path id='eq8-g0-54' d='M7.531756-8.093649C7.627397-8.261021 7.627397-8.284932 7.627397-8.320797C7.627397-8.404483 7.555666-8.5599 7.388294-8.5599C7.244832-8.5599 7.208966-8.488169 7.12528-8.320797L1.75741 2.116065C1.661768 2.283437 1.661768 2.307347 1.661768 2.343213C1.661768 2.438854 1.745455 2.582316 1.900872 2.582316C2.044334 2.582316 2.080199 2.510585 2.163885 2.343213L7.531756-8.093649Z'/>
+<path id='eq8-g3-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq8-g3-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq8-g3-48' d='M5.355915-3.825654C5.355915-4.817933 5.296139-5.786301 4.865753-6.694894C4.375592-7.687173 3.514819-7.950187 2.929016-7.950187C2.235616-7.950187 1.3868-7.603487 .944458-6.611208C.609714-5.858032 .490162-5.116812 .490162-3.825654C.490162-2.666002 .573848-1.793275 1.004234-.944458C1.470486-.035866 2.295392 .251059 2.917061 .251059C3.957161 .251059 4.554919-.37061 4.901619-1.06401C5.332005-1.960648 5.355915-3.132254 5.355915-3.825654ZM2.917061 .011955C2.534496 .011955 1.75741-.203238 1.530262-1.506351C1.398755-2.223661 1.398755-3.132254 1.398755-3.969116C1.398755-4.94944 1.398755-5.834122 1.590037-6.539477C1.793275-7.340473 2.402989-7.711083 2.917061-7.711083C3.371357-7.711083 4.064757-7.436115 4.291905-6.40797C4.447323-5.726526 4.447323-4.782067 4.447323-3.969116C4.447323-3.16812 4.447323-2.259527 4.315816-1.530262C4.088667-.215193 3.335492 .011955 2.917061 .011955Z'/>
+<path id='eq8-g3-49' d='M3.443088-7.663263C3.443088-7.938232 3.443088-7.950187 3.203985-7.950187C2.917061-7.627397 2.319303-7.185056 1.08792-7.185056V-6.838356C1.362889-6.838356 1.960648-6.838356 2.618182-7.149191V-.920548C2.618182-.490162 2.582316-.3467 1.530262-.3467H1.159651V0C1.482441-.02391 2.642092-.02391 3.036613-.02391S4.578829-.02391 4.901619 0V-.3467H4.531009C3.478954-.3467 3.443088-.490162 3.443088-.920548V-7.663263Z'/>
+<path id='eq8-g3-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq8-g1-105' d='M2.375093-4.97335C2.375093-5.148692 2.247572-5.276214 2.064259-5.276214C1.857036-5.276214 1.625903-5.084932 1.625903-4.845828C1.625903-4.670486 1.753425-4.542964 1.936737-4.542964C2.14396-4.542964 2.375093-4.734247 2.375093-4.97335ZM1.211457-2.048319L.781071-.948443C.74122-.828892 .70137-.73325 .70137-.597758C.70137-.207223 1.004234 .079701 1.42665 .079701C2.199751 .079701 2.526526-1.036115 2.526526-1.139726C2.526526-1.219427 2.462765-1.243337 2.406974-1.243337C2.311333-1.243337 2.295392-1.187547 2.271482-1.107846C2.088169-.470237 1.761395-.143462 1.44259-.143462C1.346949-.143462 1.251308-.183313 1.251308-.398506C1.251308-.589788 1.307098-.73325 1.41071-.980324C1.490411-1.195517 1.570112-1.41071 1.657783-1.625903L1.904857-2.271482C1.976588-2.454795 2.072229-2.701868 2.072229-2.83736C2.072229-3.235866 1.753425-3.514819 1.346949-3.514819C.573848-3.514819 .239103-2.399004 .239103-2.295392C.239103-2.223661 .294894-2.191781 .358655-2.191781C.462267-2.191781 .470237-2.239601 .494147-2.319303C.71731-3.076463 1.083935-3.291656 1.323039-3.291656C1.43462-3.291656 1.514321-3.251806 1.514321-3.028643C1.514321-2.948941 1.506351-2.83736 1.42665-2.598257L1.211457-2.048319Z'/>
+<path id='eq8-g1-106' d='M3.291656-4.97335C3.291656-5.124782 3.172105-5.276214 2.980822-5.276214C2.741719-5.276214 2.534496-5.053051 2.534496-4.845828C2.534496-4.694396 2.654047-4.542964 2.84533-4.542964C3.084433-4.542964 3.291656-4.766127 3.291656-4.97335ZM1.625903 .398506C1.506351 .884682 1.115816 1.40274 .629639 1.40274C.502117 1.40274 .382565 1.370859 .366625 1.362889C.613699 1.243337 .645579 1.028144 .645579 .956413C.645579 .765131 .502117 .661519 .334745 .661519C.103611 .661519-.111582 .860772-.111582 1.123786C-.111582 1.42665 .183313 1.625903 .637609 1.625903C1.123786 1.625903 2.000498 1.323039 2.239601 .366625L2.956912-2.486675C2.980822-2.582316 2.996762-2.646077 2.996762-2.765629C2.996762-3.203985 2.646077-3.514819 2.183811-3.514819C1.338979-3.514819 .844832-2.399004 .844832-2.295392C.844832-2.223661 .900623-2.191781 .964384-2.191781C1.052055-2.191781 1.060025-2.215691 1.115816-2.335243C1.354919-2.885181 1.761395-3.291656 2.1599-3.291656C2.327273-3.291656 2.422914-3.180075 2.422914-2.917061C2.422914-2.805479 2.399004-2.693898 2.375093-2.582316L1.625903 .398506Z'/>
+<path id='eq8-g2-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='eq8-g2-65' d='M2.032379-1.327024C1.613948-.621669 1.207472-.382565 .633624-.3467C.502117-.334745 .406476-.334745 .406476-.119552C.406476-.047821 .466252 0 .549938 0C.765131 0 1.303113-.02391 1.518306-.02391C1.865006-.02391 2.247572 0 2.582316 0C2.654047 0 2.797509 0 2.797509-.227148C2.797509-.334745 2.701868-.3467 2.630137-.3467C2.355168-.37061 2.12802-.466252 2.12802-.753176C2.12802-.920548 2.199751-1.052055 2.355168-1.315068L3.263761-2.82142H6.312329C6.324284-2.713823 6.324284-2.618182 6.336239-2.510585C6.372105-2.199751 6.515567-.956413 6.515567-.729265C6.515567-.37061 5.905853-.3467 5.71457-.3467C5.583064-.3467 5.451557-.3467 5.451557-.131507C5.451557 0 5.559153 0 5.630884 0C5.834122 0 6.073225-.02391 6.276463-.02391H6.957908C7.687173-.02391 8.2132 0 8.225156 0C8.308842 0 8.440349 0 8.440349-.227148C8.440349-.3467 8.332752-.3467 8.153425-.3467C7.49589-.3467 7.483935-.454296 7.44807-.812951L6.718804-8.272976C6.694894-8.51208 6.647073-8.53599 6.515567-8.53599C6.396015-8.53599 6.324284-8.51208 6.216687-8.332752L2.032379-1.327024ZM3.466999-3.16812L5.869988-7.185056L6.276463-3.16812H3.466999Z'/>
+<path id='eq8-g2-98' d='M2.761644-7.998007C2.773599-8.045828 2.797509-8.117559 2.797509-8.177335C2.797509-8.296887 2.677958-8.296887 2.654047-8.296887C2.642092-8.296887 2.211706-8.261021 1.996513-8.237111C1.793275-8.225156 1.613948-8.201245 1.398755-8.18929C1.111831-8.16538 1.028144-8.153425 1.028144-7.938232C1.028144-7.81868 1.147696-7.81868 1.267248-7.81868C1.876961-7.81868 1.876961-7.711083 1.876961-7.591532C1.876961-7.507846 1.78132-7.161146 1.733499-6.945953L1.446575-5.798257C1.327024-5.32005 .645579-2.606227 .597758-2.391034C.537983-2.092154 .537983-1.888917 .537983-1.733499C.537983-.514072 1.219427 .119552 1.996513 .119552C3.383313 .119552 4.817933-1.661768 4.817933-3.395268C4.817933-4.495143 4.196264-5.272229 3.299626-5.272229C2.677958-5.272229 2.116065-4.758157 1.888917-4.519054L2.761644-7.998007ZM2.008468-.119552C1.625903-.119552 1.207472-.406476 1.207472-1.338979C1.207472-1.733499 1.243337-1.960648 1.458531-2.797509C1.494396-2.952927 1.685679-3.718057 1.733499-3.873474C1.75741-3.969116 2.462765-5.033126 3.275716-5.033126C3.801743-5.033126 4.040847-4.507098 4.040847-3.88543C4.040847-3.311582 3.706102-1.960648 3.407223-1.338979C3.108344-.6934 2.558406-.119552 2.008468-.119552Z'/>
+<path id='eq8-g2-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
+<path id='eq8-g2-106' d='M4.184309-3.789788C4.23213-3.981071 4.23213-4.148443 4.23213-4.196264C4.23213-4.889664 3.718057-5.272229 3.180075-5.272229C1.972603-5.272229 1.327024-3.526775 1.327024-3.443088C1.327024-3.383313 1.374844-3.335492 1.446575-3.335492C1.542217-3.335492 1.554172-3.383313 1.613948-3.502864C2.092154-4.662516 2.689913-5.033126 3.144209-5.033126C3.395268-5.033126 3.526775-4.901619 3.526775-4.483188C3.526775-4.196264 3.490909-4.076712 3.443088-3.861519L2.307347 .645579C2.080199 1.530262 1.518306 2.199751 .860772 2.199751C.812951 2.199751 .561893 2.199751 .334745 2.080199C.621669 2.020423 .848817 1.793275 .848817 1.506351C.848817 1.315068 .705355 1.123786 .442341 1.123786C.131507 1.123786-.155417 1.3868-.155417 1.745455C-.155417 2.235616 .37061 2.438854 .860772 2.438854C1.685679 2.438854 2.773599 1.829141 3.072478 .633624L4.184309-3.789788ZM4.674471-7.460025C4.674471-7.758904 4.423412-7.854545 4.27995-7.854545C3.957161-7.854545 3.682192-7.543711 3.682192-7.280697C3.682192-7.10137 3.825654-6.886177 4.088667-6.886177C4.363636-6.886177 4.674471-7.149191 4.674471-7.460025Z'/>
+<path id='eq8-g2-117' d='M4.076712-.6934C4.23213-.02391 4.805978 .119552 5.092902 .119552C5.475467 .119552 5.762391-.131507 5.953674-.537983C6.156912-.968369 6.312329-1.673724 6.312329-1.709589C6.312329-1.769365 6.264508-1.817186 6.192777-1.817186C6.085181-1.817186 6.073225-1.75741 6.025405-1.578082C5.810212-.753176 5.595019-.119552 5.116812-.119552C4.758157-.119552 4.758157-.514072 4.758157-.669489C4.758157-.944458 4.794022-1.06401 4.913574-1.566127C4.99726-1.888917 5.080946-2.211706 5.152677-2.546451L5.642839-4.495143C5.726526-4.794022 5.726526-4.817933 5.726526-4.853798C5.726526-5.033126 5.583064-5.152677 5.403736-5.152677C5.057036-5.152677 4.97335-4.853798 4.901619-4.554919C4.782067-4.088667 4.136488-1.518306 4.052802-1.099875C4.040847-1.099875 3.574595-.119552 2.701868-.119552C2.080199-.119552 1.960648-.657534 1.960648-1.099875C1.960648-1.78132 2.295392-2.737733 2.606227-3.53873C2.749689-3.921295 2.809465-4.076712 2.809465-4.315816C2.809465-4.829888 2.438854-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.948692-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.303113-2.10411 1.243337-1.649813 1.243337-1.291158C1.243337-.071731 2.163885 .119552 2.654047 .119552C3.419178 .119552 3.837609-.406476 4.076712-.6934Z'/>
+<path id='eq8-g2-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+</defs>
+<g id='eq8-page1'>
+<use x='71.805665' y='-3.343009' xlink:href='#eq8-g2-65'/>
+<use x='80.581011' y='-1.549746' xlink:href='#eq8-g1-105'/>
+<use x='83.464151' y='-1.549746' xlink:href='#eq8-g1-105'/>
+<use x='90.166252' y='-3.343009' xlink:href='#eq8-g0-32'/>
+<use x='105.442284' y='-3.343009' xlink:href='#eq8-g3-49'/>
+<use x='111.295274' y='-3.343009' xlink:href='#eq8-g2-59'/>
+<use x='128.494601' y='-3.343009' xlink:href='#eq8-g2-65'/>
+<use x='137.269948' y='-1.549746' xlink:href='#eq8-g1-105'/>
+<use x='140.153087' y='-1.549746' xlink:href='#eq8-g1-106'/>
+<use x='147.856074' y='-3.343009' xlink:href='#eq8-g0-32'/>
+<use x='163.132105' y='-3.343009' xlink:href='#eq8-g3-48'/>
+<use x='172.305925' y='-3.343009' xlink:href='#eq8-g3-40'/>
+<use x='176.858251' y='-3.343009' xlink:href='#eq8-g2-106'/>
+<use x='185.694576' y='-3.343009' xlink:href='#eq8-g0-54'/>
+<use x='185.694576' y='-3.343009' xlink:href='#eq8-g3-61'/>
+<use x='198.120056' y='-3.343009' xlink:href='#eq8-g2-105'/>
+<use x='202.113489' y='-3.343009' xlink:href='#eq8-g3-41'/>
+<use x='206.665814' y='-3.343009' xlink:href='#eq8-g2-59'/>
+<use x='223.865141' y='-3.343009' xlink:href='#eq8-g2-98'/>
+<use x='228.842247' y='-1.549746' xlink:href='#eq8-g1-105'/>
+<use x='235.544348' y='-3.343009' xlink:href='#eq8-g0-32'/>
+<use x='250.820379' y='-3.343009' xlink:href='#eq8-g2-117'/>
+<use x='257.482819' y='-1.549746' xlink:href='#eq8-g1-105'/>
+<use x='260.864091' y='-3.343009' xlink:href='#eq8-g2-59'/>
+<use x='278.063418' y='-3.343009' xlink:href='#eq8-g2-120'/>
+<use x='284.715505' y='-1.549746' xlink:href='#eq8-g1-105'/>
+<use x='291.417606' y='-3.343009' xlink:href='#eq8-g0-32'/>
+<use x='306.693637' y='-3.343009' xlink:href='#eq8-g2-117'/>
+<use x='313.356077' y='-1.549746' xlink:href='#eq8-g1-105'/>
+</g>
+</svg></div><p>This is handled automatically by <code>DirichletBC(u, g)</code> during assembly.</p></section><section id="guides-petsc-fieldsplit"><h3><a href="#guides-petsc-fieldsplit">Field-Split Preconditioning</a></h3><p>For multi-field problems (e.g. Stokes), the linear system supports named field splits that can be passed to PETSc&#x27;s <code>PCFIELDSPLIT</code> preconditioner:</p><pre class="m-code"><span class="c1">// The Problem class automatically sets up field splits for multi-field</span>
+<span class="c1">// problems. Configure via command line:</span>
+<span class="c1">//   -pc_type fieldsplit</span>
+<span class="c1">//   -pc_fieldsplit_type schur</span>
+<span class="c1">//   -fieldsplit_velocity_ksp_type cg</span>
+<span class="c1">//   -fieldsplit_pressure_ksp_type preonly</span></pre></section></section><section id="guides-petsc-assembly"><h2><a href="#guides-petsc-assembly">Assembly Strategies</a></h2><p>The PETSc module provides three assembly strategies:</p><table class="m-table"><thead><tr><th>Strategy</th><th>Header</th><th>Context</th><th>Description</th></tr></thead><tbody><tr><td><code>Sequential</code></td><td><code><a href="_p_e_t_sc_2_assembly_2_sequential_8h.html" class="m-doc">PETSc/<wbr />Assembly/<wbr />Sequential.h</a></code></td><td><code>Context::Local</code></td><td>Single-thread assembly into PETSc objects</td></tr><tr><td><code>OpenMP</code></td><td><code><a href="_p_e_t_sc_2_assembly_2_open_m_p_8h.html" class="m-doc">PETSc/<wbr />Assembly/<wbr />OpenMP.h</a></code></td><td><code>Context::Local</code></td><td>Shared-memory parallel assembly</td></tr><tr><td><code>MPI</code></td><td><code><a href="_p_e_t_sc_2_assembly_2_m_p_i_8h.html" class="m-doc">PETSc/<wbr />Assembly/<wbr />MPI.h</a></code></td><td><code>Context::MPI</code></td><td>Distributed assembly (each rank contributes owned elements)</td></tr></tbody></table><p>The assembly strategy is selected automatically via the <code>Assembly::Default&lt;TrialContext, TestContext&gt;</code> trait based on the mesh context. Users do not normally need to select it explicitly.</p></section><section id="guides-petsc-multifield"><h2><a href="#guides-petsc-multifield">Multi-Field Problems</a></h2><p>PETSc problems support an arbitrary number of coupled trial/test function pairs. This is essential for saddle-point systems like Stokes, which involve velocity, pressure, and (optionally) a Lagrange multiplier for the mean-pressure constraint.</p><pre class="m-code"><span class="c1">// FE spaces: H1(2) for velocity, H1(1) for pressure, P0g for LM</span>
+<span class="c1">// The first argument to H1 is a compile-time order using std::integral_constant</span>
+<span class="n">H1</span><span class="w">  </span><span class="nf">uh</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">integral_constant</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="o">&gt;</span><span class="p">{},</span><span class="w"> </span><span class="n">mesh</span><span class="p">,</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getSpaceDimension</span><span class="p">());</span>
+<span class="n">H1</span><span class="w">  </span><span class="nf">ph</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">integral_constant</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="o">&gt;</span><span class="p">{},</span><span class="w"> </span><span class="n">mesh</span><span class="p">);</span>
+<span class="n">P0g</span><span class="w"> </span><span class="nf">lh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+
+<span class="n">PETSc</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><span class="n">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">uh</span><span class="p">);</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">setName</span><span class="p">(</span><span class="s">&quot;u&quot;</span><span class="p">);</span>
+<span class="n">PETSc</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><span class="n">TrialFunction</span><span class="w"> </span><span class="nf">p</span><span class="p">(</span><span class="n">ph</span><span class="p">);</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">setName</span><span class="p">(</span><span class="s">&quot;p&quot;</span><span class="p">);</span>
+<span class="n">PETSc</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><span class="n">TrialFunction</span><span class="w"> </span><span class="nf">l</span><span class="p">(</span><span class="n">lh</span><span class="p">);</span><span class="w"> </span><span class="n">l</span><span class="p">.</span><span class="n">setName</span><span class="p">(</span><span class="s">&quot;lambda&quot;</span><span class="p">);</span>
+
+<span class="n">PETSc</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><span class="n">TestFunction</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="n">uh</span><span class="p">);</span>
+<span class="n">PETSc</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><span class="n">TestFunction</span><span class="w"> </span><span class="nf">q</span><span class="p">(</span><span class="n">ph</span><span class="p">);</span>
+<span class="n">PETSc</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><span class="n">TestFunction</span><span class="w"> </span><span class="nf">m</span><span class="p">(</span><span class="n">lh</span><span class="p">);</span>
+
+<span class="n">Problem</span><span class="w"> </span><span class="nf">stokes</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="n">l</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="n">q</span><span class="p">,</span><span class="w"> </span><span class="n">m</span><span class="p">);</span>
+<span class="n">stokes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Jacobian</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Jacobian</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+<span class="w">       </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="n">Div</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+<span class="w">       </span><span class="o">+</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Div</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">q</span><span class="p">)</span>
+<span class="w">       </span><span class="o">+</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="w"> </span><span class="n">q</span><span class="p">)</span>
+<span class="w">       </span><span class="o">+</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="n">m</span><span class="p">)</span>
+<span class="w">       </span><span class="o">+</span><span class="w"> </span><span class="mf">1e-12</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="n">q</span><span class="p">)</span>
+<span class="w">       </span><span class="o">+</span><span class="w"> </span><span class="mf">1e-12</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="w"> </span><span class="n">m</span><span class="p">)</span>
+<span class="w">       </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
+<span class="w">       </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">u_exact</span><span class="p">);</span>
+
+<span class="n">stokes</span><span class="p">.</span><span class="n">assemble</span><span class="p">();</span>
+<span class="n">Solver</span><span class="o">::</span><span class="n">KSP</span><span class="p">(</span><span class="n">stokes</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre></section><section id="guides-petsc-sequential-example"><h2><a href="#guides-petsc-sequential-example">Sequential PETSc Example</a></h2><p>This example solves a 3D Poisson equation on hexahedra using PETSc CG:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/PETSc.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Variational.h&gt;</span>
+
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Geometry</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Variational</span><span class="p">;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">**</span><span class="w"> </span><span class="n">argv</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">PetscInitialize</span><span class="p">(</span><span class="o">&amp;</span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">argv</span><span class="p">,</span><span class="w"> </span><span class="n">PETSC_NULLPTR</span><span class="p">,</span><span class="w"> </span><span class="n">PETSC_NULLPTR</span><span class="p">);</span>
+
+<span class="w">  </span><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+<span class="w">  </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Hexahedron</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">});</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">scale</span><span class="p">(</span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">15</span><span class="p">);</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+
+<span class="w">  </span><span class="n">RealFunction</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">  </span><span class="n">P1</span><span class="w"> </span><span class="n">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+
+<span class="w">  </span><span class="n">PETSc</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><span class="n">TrialFunction</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
+<span class="w">  </span><span class="n">PETSc</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><span class="n">TestFunction</span><span class="w">  </span><span class="n">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
+
+<span class="w">  </span><span class="n">Problem</span><span class="w"> </span><span class="n">poisson</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+<span class="w">  </span><span class="n">poisson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+<span class="w">          </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
+<span class="w">          </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">Zero</span><span class="p">());</span>
+
+<span class="w">  </span><span class="n">Solver</span><span class="o">::</span><span class="n">CG</span><span class="p">(</span><span class="n">poisson</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span>
+
+<span class="w">  </span><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">().</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;Poisson.gf&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">);</span>
+<span class="w">  </span><span class="n">mesh</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;Poisson.mesh&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">);</span>
+
+<span class="w">  </span><span class="n">PetscFinalize</span><span class="p">();</span>
+<span class="p">}</span></pre></section><section id="guides-petsc-mpi-example"><h2><a href="#guides-petsc-mpi-example">MPI + PETSc Example</a></h2><p>See the <a href="guides-mpi.html" class="m-doc">MPI guide</a> for the full distributed workflow. The key difference from sequential usage is:</p><ol><li>Create a <code>Context::MPI</code> and initialize PETSc.</li><li>Partition and distribute the mesh using <code>Sharder</code>.</li><li>Reconcile shared entities.</li><li>Use <code>PETSc::Variational::TrialFunction</code> / <code>TestFunction</code> as usual.</li><li>The assembly and solve are automatically distributed.</li></ol></section><section id="guides-petsc-cmdline"><h2><a href="#guides-petsc-cmdline">Command-Line Configuration</a></h2><p>All PETSc solvers support command-line configuration via PETSc&#x27;s options database. This is especially powerful for experimenting with preconditioners and solver parameters without recompiling:</p><table class="m-table"><thead><tr><th>Option</th><th>Description</th><th>Example</th></tr></thead><tbody><tr><td><code>-ksp_type</code></td><td>Krylov method</td><td><code>-ksp_type gmres</code></td></tr><tr><td><code>-pc_type</code></td><td>Preconditioner</td><td><code>-pc_type gamg</code></td></tr><tr><td><code>-ksp_rtol</code></td><td>Relative tolerance</td><td><code>-ksp_rtol 1e-10</code></td></tr><tr><td><code>-ksp_monitor</code></td><td>Print residual each iteration</td><td></td></tr><tr><td><code>-ksp_view</code></td><td>Print solver configuration</td><td></td></tr><tr><td><code>-snes_type</code></td><td>Nonlinear method</td><td><code>-snes_type newtonls</code></td></tr><tr><td><code>-snes_monitor</code></td><td>Print nonlinear residual</td><td></td></tr><tr><td><code>-pc_type fieldsplit</code></td><td>Block preconditioner</td><td></td></tr></tbody></table></section><section id="guides-petsc-see-also"><h2><a href="#guides-petsc-see-also">See Also</a></h2><ul><li><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc namespace reference</a></li><li><a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP solver</a></li><li><a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES nonlinear solver</a></li><li><a href="guides-mpi.html" class="m-doc">MPI module</a></li><li><a href="guides-solvers.html" class="m-doc">Solvers guide</a></li></ul></section>
+        <div class="m-note m-dim m-thin m-text-center"><a href="guides-mpi.html" class="m-doc">&laquo; MPI: Distributed Computing</a> | <a href="guides-index.html" class="m-doc">General concepts</a></div>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

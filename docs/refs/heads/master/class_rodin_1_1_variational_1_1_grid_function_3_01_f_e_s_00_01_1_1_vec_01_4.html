@@ -96,7 +96,7 @@
             </li>
           </ul>
         </nav>
-<p>This partial specialization replaces the default Eigen-based coefficient storage with a <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> <code>Vec</code>, making it possible to assemble and solve variational problems entirely within the <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> ecosystem. The class supports both sequential (<code><a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a></code>) and distributed (<code><a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a></code>) finite element spaces.</p><section id="autotoc_md187"><h3><a href="#autotoc_md187">Ownership and Ghost Model (MPI)</a></h3><p>When the mesh context is <code><a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a></code>, the constructor partitions the global DOF vector across MPI ranks. Each rank <em>owns</em> a contiguous range <svg class="m-math" style="width: 8.794em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 84.420393 11.955168">
+<p>This partial specialization replaces the default Eigen-based coefficient storage with a <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> <code>Vec</code>, making it possible to assemble and solve variational problems entirely within the <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> ecosystem. The class supports both sequential (<code><a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a></code>) and distributed (<code><a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a></code>) finite element spaces.</p><section id="autotoc_md187"><h3><a href="#autotoc_md187">Ownership and Ghost Model (MPI)</a></h3><p>When the mesh context is <code><a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a></code>, the constructor partitions the global DOF vector across <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> ranks. Each rank <em>owns</em> a contiguous range <svg class="m-math" style="width: 8.794em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 84.420393 11.955168">
 <title>
 $[\texttt{m\_begin}, \texttt{m\_end})$
 </title>
@@ -549,7 +549,7 @@ $ u_i \leftarrow u_i / v_i $
               <tbody>
                 <tr>
                   <td style="width: 1%">fes&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The finite element space that defines the DOF layout, mesh association, and (in MPI mode) the parallel partitioning.</td>
+                  <td>The finite element space that defines the DOF layout, mesh association, and (in <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mode) the parallel partitioning.</td>
                 </tr>
               </tbody>
             </table>
@@ -729,7 +729,7 @@ $ \min_i u_i $
                 </tr>
               </tfoot>
             </table>
-<p>Flushes any pending write access, then delegates to <code>VecMin</code>. In MPI mode the result is the global minimum across all ranks.</p>
+<p>Flushes any pending write access, then delegates to <code>VecMin</code>. In <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mode the result is the global minimum across all ranks.</p>
           </div></section>
           <section class="m-doc-details" id="a7c7c15dc43a710a140062694b75a9980"><div>
             <h3>
@@ -775,7 +775,7 @@ $ \max_i u_i $
                 </tr>
               </tfoot>
             </table>
-<p>Flushes any pending write access, then delegates to <code>VecMax</code>. In MPI mode the result is the global maximum across all ranks.</p>
+<p>Flushes any pending write access, then delegates to <code>VecMax</code>. In <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mode the result is the global maximum across all ranks.</p>
           </div></section>
           <section class="m-doc-details" id="aa40b9fd92d45801380c5354c8822b016"><div>
             <h3>
@@ -1408,7 +1408,7 @@ $[\text{offset}, \text{offset}+N)$
 <use x='75.779547' y='0' xlink:href='#eq25-g0-78'/>
 <use x='86.402158' y='0' xlink:href='#eq25-g4-41'/>
 </g>
-</svg> is extracted with <code>VecGetSubVector</code> / <code>VecCopy</code>. In MPI mode only the locally-owned portion is copied, and ghost values are refreshed by a <code>VecGhostUpdate(INSERT, FORWARD)</code>.</p>
+</svg> is extracted with <code>VecGetSubVector</code> / <code>VecCopy</code>. In <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mode only the locally-owned portion is copied, and ghost values are refreshed by a <code>VecGhostUpdate(INSERT, FORWARD)</code>.</p>
           </div></section>
           <section class="m-doc-details" id="a7bf67f07be076e2023ed7da153504931"><div>
             <h3>
@@ -1491,7 +1491,7 @@ $[\text{offset}, \text{offset}+N)$
                 </tr>
               </tfoot>
             </table>
-<p>Behaves like the mutable <code><a href="#ac2d041132b1540469de13585c1c12a7f" class="m-doc">acquire()</a></code> but uses <code>VecGetArrayRead</code> instead, permitting concurrent read access from multiple threads or call sites. In MPI mode the forward ghost update is still performed to ensure ghost values are up-to-date.</p>
+<p>Behaves like the mutable <code><a href="#ac2d041132b1540469de13585c1c12a7f" class="m-doc">acquire()</a></code> but uses <code>VecGetArrayRead</code> instead, permitting concurrent read access from multiple threads or call sites. In <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mode the forward ghost update is still performed to ensure ghost values are up-to-date.</p>
           </div></section>
           <section class="m-doc-details" id="a7134d5d6b568f5867a8efcc25d8bc761"><div>
             <h3>
@@ -1527,7 +1527,7 @@ $[\text{offset}, \text{offset}+N)$
                 </tr>
               </tfoot>
             </table>
-<p>Calls <code>VecRestoreArrayRead</code> (and, in MPI mode, <code>VecGhostRestoreLocalForm</code>) to unlock the array. No ghost scatter is performed because the array was accessed read-only.</p>
+<p>Calls <code>VecRestoreArrayRead</code> (and, in <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mode, <code>VecGhostRestoreLocalForm</code>) to unlock the array. No ghost scatter is performed because the array was accessed read-only.</p>
           </div></section>
           <section class="m-doc-details" id="a31b508e8852fbaef5f85507e9143458b"><div>
             <h3>
@@ -1547,7 +1547,7 @@ $[\text{offset}, \text{offset}+N)$
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23b477d0e2d399f75d585d154c346591" class="m-doc-self">release</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Releases all <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> array handles and destroys the vector.</p>
-<p>Performs a full teardown of the <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> resources owned by this grid function:</p><ol><li>If a read array is acquired, calls <code>VecRestoreArrayRead</code> (and <code>VecGhostRestoreLocalForm</code> in MPI mode).</li><li>If a write array is acquired, calls <code>VecRestoreArrayWrite</code>, <code>VecGhostRestoreLocalForm</code>, and a reverse ghost scatter.</li><li>Destroys the <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector with <code>VecDestroy</code>.</li></ol><p>After this call the grid function is in an empty (null-vector) state. Called automatically by the destructor. Can also be called explicitly to free resources before the object goes out of scope.</p>
+<p>Performs a full teardown of the <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> resources owned by this grid function:</p><ol><li>If a read array is acquired, calls <code>VecRestoreArrayRead</code> (and <code>VecGhostRestoreLocalForm</code> in <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mode).</li><li>If a write array is acquired, calls <code>VecRestoreArrayWrite</code>, <code>VecGhostRestoreLocalForm</code>, and a reverse ghost scatter.</li><li>Destroys the <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector with <code>VecDestroy</code>.</li></ol><p>After this call the grid function is in an empty (null-vector) state. Called automatically by the destructor. Can also be called explicitly to free resources before the object goes out of scope.</p>
           </div></section>
           <section class="m-doc-details" id="a52b2a6e2f898ab31632b6ccfe5fea5ee"><div>
             <h3>
