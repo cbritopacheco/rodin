@@ -334,6 +334,17 @@ Prefer targeted tests during development; broaden scope only after local confide
 - **Manufactured tests** must be built and run in **`Release`** (or **`RelWithDebInfo`**) by default. Manufactured tests solve PDEs and verify convergence rates; running them in `Debug` is prohibitively slow due to the lack of optimizations, making execution times impractical. Only use `Debug` for manufactured tests when you need debugger support for a specific numerical failure. `RelWithDebInfo` is a good middle ground when you need both reasonable performance and debug symbols (e.g., to get meaningful stack traces).
 - If you are adding or modifying new functionality and want to run only the directly related manufactured tests while iterating, you may use `RelWithDebInfo` for those targeted runs. Switch to `Release` for final validation.
 
+### Scope tests to what changed
+
+Before running tests, determine which tests are actually affected by the change:
+
+- Identify the modified module(s) (e.g., `Geometry`, `Variational`, `Assembly`).
+- Run only the unit and manufactured tests that exercise that module or directly depend on it.
+- Use `ctest -R <pattern>` to select tests by name, or `-L <label>` to select by label.
+- Only escalate to the full test suite once the targeted tests pass, or when the change cuts across many modules.
+
+This avoids spending time rebuilding and running tests that cannot possibly be affected, which is especially important for manufactured tests given their execution time.
+
 ### Fast local workflow
 
 1. Update submodules if needed:
