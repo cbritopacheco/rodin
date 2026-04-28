@@ -773,7 +773,14 @@ namespace Rodin::Variational
           ScalarType operator()(const T& v) const
           {
             const auto value = v(H1Element<K, ScalarType>::getNodes(m_g)[m_local / m_vdim]);
-            return value(static_cast<std::uint8_t>(m_local % m_vdim));
+            // When `v` is a scalar function (e.g. Zero()), `value` is a
+            // scalar that applies uniformly to every component.  When `v`
+            // is a vector function its result is indexable and we extract
+            // the relevant component.
+            if constexpr (std::is_convertible_v<std::decay_t<decltype(value)>, ScalarType>)
+              return static_cast<ScalarType>(value);
+            else
+              return value(static_cast<std::uint8_t>(m_local % m_vdim));
           }
 
         private:

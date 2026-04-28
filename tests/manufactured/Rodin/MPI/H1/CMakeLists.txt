@@ -1,3 +1,27 @@
+add_executable(RodinManufacturedMPIH1LinearElasticityTest LinearElasticityTest.cpp)
+target_link_libraries(RodinManufacturedMPIH1LinearElasticityTest
+  PUBLIC
+  GTest::gtest
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::IO
+  Rodin::MPI
+  Rodin::PETSc)
+
+foreach(np 1 2 3 4 6)
+  add_test(
+    NAME RodinManufacturedMPIH1LinearElasticityTest_np${np}
+    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+            $<TARGET_FILE:RodinManufacturedMPIH1LinearElasticityTest>)
+  set_tests_properties(RodinManufacturedMPIH1LinearElasticityTest_np${np} PROPERTIES
+    LABELS "manufactured;petsc;distributed"
+  )
+  rodin_suppress_external_mpi_lsan_for_test(
+    RodinManufacturedMPIH1LinearElasticityTest_np${np}
+    "HDF5_USE_FILE_LOCKING=FALSE")
+endforeach()
+
 add_executable(RodinManufacturedMPIH1PoissonTest PoissonTest.cpp)
 target_link_libraries(RodinManufacturedMPIH1PoissonTest
   PUBLIC
