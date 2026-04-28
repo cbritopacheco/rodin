@@ -210,18 +210,30 @@ namespace Rodin::Examples::Heart
             return std::pow(g, 3.0) * (mu * mu) * dtau_dg;
         };
 
-        Math::RungeKutta::RK4 Integrator;
-        int steps = 100;
-        const Real h = gamma_dot_w / steps;
+        Math::RungeKutta::RK4 integrator;
+
+        constexpr int steps = 100;
+        const Real h = gamma_dot_w / static_cast<Real>(steps);
+
         Real Ip = 0.0;
 
-        for (int i = 0; i < steps; ++i) {
-          Integrator.step(Ip, i * h, Ip, f);
+        auto rhs = [&](Real g, Real I) -> Real
+        {
+          (void) I;
+          return f(g);
+        };
+
+        for (int i = 0; i < steps; ++i)
+        {
+          const Real g = static_cast<Real>(i) * h;
+          integrator.step(Ip, g, h, Ip, rhs);
         }
 
-        if (Ip <= 0.0) return 1e10;
+        if (Ip <= 0.0)
+          return 1e10;
 
-        return std::pow(dp, 4.0) / (8.0 * std::numbers::pi_v<Real> * std::pow(L, 3.0) * Ip);
+        return std::pow(dp, 4.0) / (
+            8.0 * std::numbers::pi_v<Real> * std::pow(L, 3.0) * Ip);
     };
 
     const Real Rp = resistance(bc.pc, bc.pd, lengthP, radiusP);
@@ -508,7 +520,7 @@ namespace Rodin::Examples::Heart
 
           Math::SpatialVector<Real> out(m_mesh.getSpaceDimension());
           for (size_t c = 0; c < out.size(); ++c)
-            out[c] = tau * m_cfg.rho * ((conv[c] - proj[c]) + old[c] / m_cfg.dt);
+            out[c] = tau * ((conv[c] - proj[c]) + old[c] / m_cfg.dt);
 
           return out;
         });
@@ -589,8 +601,8 @@ namespace Rodin::Examples::Heart
       m_stepData.qOut[tag] = qOut;
       m_stepData.qOutSum += qOut;
 
-      updateRCR(m_wk[tag], qOut, m_cfg.dt);
-      // updateRCRNonNew(m_model, m_wk[tag], qOut, m_cfg.dt);
+      // updateRCR(m_wk[tag], qOut, m_cfg.dt);
+      updateRCRNonNew(m_model, m_wk[tag], qOut, m_cfg.dt);
     }
 
     m_stepData.flowBalance = m_stepData.qIn + m_stepData.qOutSum;
