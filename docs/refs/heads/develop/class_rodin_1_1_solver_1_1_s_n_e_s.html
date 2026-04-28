@@ -173,6 +173,10 @@ $ \mathbf{x} $
               using <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc-self">VectorType</a> = ::Vec
             </dt>
             <dd><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector type (<code>::Vec</code>) for the nonlinear residual and solution.</dd>
+            <dt id="a40f1ef579b52dfaa7bc6e13f9e82ddb8">
+              using <a href="#a40f1ef579b52dfaa7bc6e13f9e82ddb8" class="m-doc-self">StateUpdate</a> = std::function&lt;void(<a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>)&gt;
+            </dt>
+            <dd>Callback used to synchronize state-dependent <a href="namespace_rodin.html" class="m-doc">Rodin</a> fields from a <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector.</dd>
             <dt id="ab6098d508adace773204c1e42ece893a">
               using <a href="#ab6098d508adace773204c1e42ece893a" class="m-doc-self">ProblemBaseType</a> = <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Variational::<wbr />ProblemBase</a>&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&gt;
             </dt>
@@ -211,6 +215,10 @@ $ \mathbf{x} $
               PetscInt maxF) -&gt; <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Sets nonlinear convergence tolerances and limits.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a117f09c747f17b1b3d838ef04e63f827" class="m-doc">setStateUpdate</a>(</span><span class="m-doc-wrap"><a href="#a40f1ef579b52dfaa7bc6e13f9e82ddb8" class="m-doc">StateUpdate</a> update) -&gt; <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a>&amp;</span>
+            </dt>
+            <dd>Sets an optional callback invoked before residual/Jacobian assembly.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#ab7d0e5809cd6fa1903a32f917e38c96e" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>&amp; x) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
@@ -333,6 +341,13 @@ $ F(x) = 0 $
                 </tr>
               </tfoot>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="a117f09c747f17b1b3d838ef04e63f827"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a>&amp; Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a117f09c747f17b1b3d838ef04e63f827" class="m-doc-self">setStateUpdate</a>(</span><span class="m-doc-wrap"><a href="#a40f1ef579b52dfaa7bc6e13f9e82ddb8" class="m-doc">StateUpdate</a> update)</span></span>
+            </h3>
+            <p>Sets an optional callback invoked before residual/Jacobian assembly.</p>
+<p>This is useful for nonlinear variational forms whose coefficients are stored in GridFunctions separate from the <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a> solution vector.</p>
           </div></section>
           <section class="m-doc-details" id="ab7d0e5809cd6fa1903a32f917e38c96e"><div>
             <h3>
