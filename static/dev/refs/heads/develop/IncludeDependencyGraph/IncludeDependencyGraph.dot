@@ -3207,7 +3207,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=16,
+		weight=17,
 		width=2];
 	"Rodin/Solid.h" -> "Rodin/Solid/Local/Input.h";
 	"Rodin/Solid/Kinematics/KinematicState.h"	[colorscheme=spectral9,
@@ -3247,37 +3247,37 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=16,
+		weight=17,
 		width=2];
 	"Rodin/Solid.h" -> "Rodin/Solid/Constitutive/HyperElasticLaw.h";
 	"Rodin/Solid/Constitutive/NeoHookean.h"	[colorscheme=spectral9,
 		fillcolor=8,
 		fixedsize=true,
-		fontsize=7,
+		fontsize=8,
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=15,
+		weight=18,
 		width=2];
 	"Rodin/Solid.h" -> "Rodin/Solid/Constitutive/NeoHookean.h";
 	"Rodin/Solid/Constitutive/SaintVenantKirchhoff.h"	[colorscheme=spectral9,
 		fillcolor=8,
 		fixedsize=true,
-		fontsize=7,
+		fontsize=8,
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=15,
+		weight=18,
 		width=2];
 	"Rodin/Solid.h" -> "Rodin/Solid/Constitutive/SaintVenantKirchhoff.h";
 	"Rodin/Solid/Constitutive/MooneyRivlin.h"	[colorscheme=spectral9,
 		fillcolor=8,
 		fixedsize=true,
-		fontsize=7,
+		fontsize=8,
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=15,
+		weight=18,
 		width=2];
 	"Rodin/Solid.h" -> "Rodin/Solid/Constitutive/MooneyRivlin.h";
 	"Rodin/Solid/Integrators/InternalForce.h"	[colorscheme=spectral9,
@@ -3337,7 +3337,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=17,
+		weight=18,
 		width=2];
 	"Rodin/Solid.h" -> "Rodin/Solid/Fields/FirstPiolaKirchhoffStress.h";
 	"Rodin/Solid/Fields/CauchyStress.h"	[colorscheme=spectral9,
@@ -3347,7 +3347,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=17,
+		weight=18,
 		width=2];
 	"Rodin/Solid.h" -> "Rodin/Solid/Fields/CauchyStress.h";
 	"Rodin/Solid/Linear/LinearElasticityIntegral.h"	[colorscheme=spectral9,
@@ -4077,11 +4077,11 @@ strict digraph "" {
 	"Rodin/Variational/P1/P1Element.hpp"	[colorscheme=spectral9,
 		fillcolor=8,
 		fixedsize=true,
-		fontsize=7,
+		fontsize=8,
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=14,
+		weight=17,
 		width=2];
 	"Rodin/Variational/P1/P1Element.h" -> "Rodin/Variational/P1/P1Element.hpp";
 	"Rodin/Variational/P1/Derivative.h" -> "Rodin/Variational/Derivative.h";
@@ -4347,7 +4347,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=15,
+		weight=12,
 		width=2];
 	"Rodin/Variational/H1/H1Element.hpp" -> "Rodin/Variational/H1/Dubiner.h";
 	"Rodin/Variational/H1/H1Element.hpp" -> "Rodin/Variational/H1/WarpBlend.h";
