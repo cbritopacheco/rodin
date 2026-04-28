@@ -157,58 +157,20 @@ namespace Rodin::Solver
       SNES& setStateUpdate(StateUpdate update);
 
       /**
-       * @brief Copies @p src into the internally managed initial-guess vector
-       *        at DOF offset @p offset.
-       *
-       * The internal combined vector @f$ x @f$ is allocated lazily from the
-       * linear system's solution on the first call.  Subsequent calls reuse the
-       * same allocation.  Typical usage before @ref solve():
-       *
-       * @code
-       * snes.setSubVector(0, uOld)
-       *     .setSubVector(uh.getSize(), pOld);
-       * snes.solve();
-       * @endcode
-       *
-       * @param offset  Starting DOF index within the combined vector.
-       * @param src     Source vector whose entries are copied in.
-       * @returns Reference to `*this`.
-       */
-      SNES& setSubVector(size_t offset, const PETSc::Math::Vector& src);
-
-      /**
-       * @brief Copies the data of a GridFunction into the combined initial-guess
-       *        vector at DOF offset @p offset.
-       *
-       * Convenience overload that extracts the underlying PETSc vector from @p gf
-       * and delegates to @ref setSubVector(size_t, const PETSc::Math::Vector&).
-       *
-       * @tparam GridFunctionType Any grid-function type that exposes `getData()`
-       *   returning a `const PETSc::Math::Vector&`.
-       * @param offset DOF index within the combined vector at which to write.
-       * @param gf     GridFunction whose DOF data will be packed into the initial guess.
-       * @returns Reference to `*this`.
-       */
-      template <class GridFunctionType>
-      SNES& setSubVector(size_t offset, const GridFunctionType& gf)
-      {
-        return setSubVector(offset, gf.getData());
-      }
-
-      /**
        * @brief Solves the nonlinear system @f$ F(x) = 0 @f$.
        * @param[in,out] x Initial guess on input; solution on output.
        */
       void solve(VectorType& x) override;
 
       /**
-       * @brief Solves the nonlinear system using the internally managed
-       *        initial-guess vector populated via @ref setSubVector().
+       * @brief Solves the nonlinear system using the linear system's solution
+       *        vector as both the initial guess and the solution storage.
        *
-       * Allocates the combined vector on the first call if @ref setSubVector()
-       * has not been called yet.
-       *
-       * @see setSubVector()
+       * The solution vector is obtained directly from
+       * @c ksp.getProblem().getLinearSystem().getSolution(), so no manual
+       * initial-guess packing is needed.  After the first solve the solution
+       * vector retains its value, providing a natural warm-start for subsequent
+       * time steps.
        */
       void solve();
 
@@ -249,7 +211,6 @@ namespace Rodin::Solver
 
     private:
       HandleType m_snes;   ///< Underlying PETSc SNES context.
-      VectorType m_x;      ///< Internally managed combined state vector.
       ::SNESType m_type;   ///< Requested SNES algorithm type.
       PetscReal m_abstol,  ///< Absolute convergence tolerance.
                 m_rtol,    ///< Relative convergence tolerance.

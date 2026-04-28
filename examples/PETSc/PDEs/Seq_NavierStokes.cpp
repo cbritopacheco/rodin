@@ -208,9 +208,6 @@ int main(int argc, char** argv)
       const Real ramp = std::min<Real>(1.0, t / std::max<Real>(dt, 0.1 * T));
       lidVelocity = VectorFunction{lidSpeed * ramp, 0.0};
 
-      snes.setSubVector(0, uOld)
-          .setSubVector(uh.getSize(), pOld);
-
       Alert::Info()
         << "SNES solve for nonlinear Navier-Stokes step "
         << step << " / " << nt << " at t = " << t
