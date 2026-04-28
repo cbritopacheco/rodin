@@ -117,7 +117,7 @@ jobs:
     strategy:
       matrix:
         compiler: [gcc-14]
-        build_type: [RelWithDebInfo, Release]
+        build_type: [Debug, Release]
         multithreaded: [ON, OFF]
         asan: [ON, OFF]
         ubsan: [ON, OFF]
