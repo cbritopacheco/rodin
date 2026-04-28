@@ -446,19 +446,25 @@ namespace Rodin::Variational
        * @brief Core DOF-numbering algorithm: builds m_local_to_global.
        *
        * For each entity dimension d = 0..D, owned entities receive contiguous
-       * global DOF indices and non-owned entities receive them from the owning
-       * rank via point-to-point MPI messages.
+       * global DOF indices.  Non-owned entities obtain their global DOF
+       * indices via a two-phase request-response exchange:
        *
-       * Interior DOFs for each mesh entity are assigned contiguously within
-       * each rank's DOF range.  The exchange uses the message format
-       * @f$ (\text{globalEntityId},\, \text{firstGlobalDOF}) @f$: a single
-       * pair of indices per owned entity with interior DOFs.  Because
-       * interior DOFs are numbered consecutively the receiver reconstructs
-       * all DOF indices as @f$ \text{firstGlobalDOF} + k @f$.
+       * - Phase 1 (request): every non-owner rank with interior-DOF entities
+       *   of dimension d sends the global entity IDs it needs to the owning
+       *   rank.  An all_to_all count exchange is performed first so that
+       *   every owner can post irecv calls before the isend loop,
+       *   guaranteeing deadlock-free operation regardless of whether the mesh
+       *   halo covers all ranks that hold a given entity.
        *
-       * The implementation follows the same booking pattern as the MPI P1
-       * specialization: rank-indexed vectors with all irecvs posted before
-       * any isend to avoid deadlock.
+       * - Phase 2 (response): each owner sends back (gid, firstGlobalDOF)
+       *   to every requester.  The requester reconstructs all DOF global
+       *   indices as firstGlobalDOF + k.
+       *
+       * This two-phase protocol correctly handles entities that cross
+       * non-adjacent partition boundaries (e.g. a K=2 edge owned by rank A
+       * but visible in rank C's ghost layer via an intermediate rank B, where
+       * A and C do not share a cell boundary and C is therefore absent from
+       * A's halo).
        *
        * @param[in] mesh The distributed mesh.
        */
@@ -509,36 +515,29 @@ namespace Rodin::Variational
 
         // ------------------------------------------------------------------
         // Step 4: for each dimension, assign owned global indices and
-        //         exchange with non-owned counterparts.
+        //         exchange with non-owned counterparts via two-phase
+        //         request-response (see method documentation above).
         //
-        // Message format: (globalEntityId, firstGlobalDOF).
-        // Interior DOFs are assigned contiguously so the receiver computes
-        //   globalDOF[k] = firstGlobalDOF + k
-        // for k = 0 .. interiorPositions(g).size() - 1.
-        //
-        // Following the P1 pattern: rank-indexed vectors of trivially-
-        // serializable pairs with all irecvs posted before isends.
+        // Interior DOFs are numbered contiguously so the receiver computes:
+        //   globalDOF[k] = firstGlobalDOF + k,  k = 0..pos.size()-1.
         // ------------------------------------------------------------------
         Index dimOffset = m_offset;
 
-        // Message type: (globalEntityID, firstGlobalDOF)
+        // Phase-1 message: global entity ID (request from non-owner).
+        using GidMsg    = Index;
+        // Phase-2 message: (globalEntityID, firstGlobalDOF) (owner response).
         using EntityMsg = std::pair<Index, Index>;
 
         for (size_t d = 0; d <= D; ++d)
         {
           const size_t count = shard.getPolytopeCount(d);
-
-          // Per-rank send/receive buffers indexed by rank index (0..P-1).
-          std::vector<std::vector<EntityMsg>> send(static_cast<size_t>(P));
-          std::vector<std::vector<EntityMsg>> recv(static_cast<size_t>(P));
-          std::vector<char> need_recv(static_cast<size_t>(P), 0);
-
-          const auto& halo  = shard.getHalo(d);
-          const auto& owner = shard.getOwner(d);
+          const auto& owner  = shard.getOwner(d);
 
           Index dofIdx = dimOffset;
 
-          // Assign global DOF indices to owned entities with interior DOFs.
+          // ----------------------------------------------------------------
+          // 4a. Assign global DOF indices to every owned entity.
+          // ----------------------------------------------------------------
           for (Index i = 0; i < static_cast<Index>(count); ++i)
           {
             if (!shard.isOwned(d, i))
@@ -550,31 +549,17 @@ namespace Rodin::Variational
               continue;
 
             const auto& entityDOFs = m_fes.getDOFs(d, i);
-            const Index  gid       = mesh.getGlobalIndex(d, i);
-            const Index  firstGDOF = dofIdx;
-
             for (const size_t p : pos)
-            {
-              const Index localDOF = entityDOFs(p);
-              m_local_to_global.left[localDOF] = dofIdx++;
-            }
-
-            // Schedule sends to all peer ranks that share this entity.
-            auto hit = halo.find(i);
-            if (hit == halo.end())
-              continue;
-
-            for (const Index peer : hit->second)
-            {
-              const int rpeer = static_cast<int>(peer);
-              if (rpeer == rank)
-                continue;
-              send[static_cast<size_t>(rpeer)].push_back({ gid, firstGDOF });
-            }
+              m_local_to_global.left[entityDOFs(p)] = dofIdx++;
           }
 
-          // Mark which ranks we need to receive from.
-          // Only consider entities that actually have interior DOFs for this K.
+          // ----------------------------------------------------------------
+          // 4b. Phase 1 request: non-owners send needed gids to owners.
+          //     all_to_all count exchange first to enable deadlock-free
+          //     irecv posting.
+          // ----------------------------------------------------------------
+          std::vector<std::vector<GidMsg>> p1_send(static_cast<size_t>(P));
+
           for (Index i = 0; i < static_cast<Index>(count); ++i)
           {
             if (shard.isOwned(d, i))
@@ -586,49 +571,109 @@ namespace Rodin::Variational
             if (oit == owner.end())
               continue;
             const int ro = static_cast<int>(oit->second);
-            if (ro != rank)
-              need_recv[static_cast<size_t>(ro)] = 1;
+            if (ro == rank)
+              continue;
+            p1_send[static_cast<size_t>(ro)].push_back(mesh.getGlobalIndex(d, i));
           }
 
-          // Post all irecvs before any isend (P1 pattern, avoids deadlock).
-          std::vector<boost::mpi::request> reqs;
-          reqs.reserve(static_cast<size_t>(2 * P));
+          std::vector<int> p1_out_cnt(static_cast<size_t>(P), 0);
+          for (int r = 0; r < P; ++r)
+            p1_out_cnt[static_cast<size_t>(r)] =
+                static_cast<int>(p1_send[static_cast<size_t>(r)].size());
 
-          const int tag = static_cast<int>(d);
+          std::vector<int> p1_in_cnt;
+          boost::mpi::all_to_all(comm, p1_out_cnt, p1_in_cnt);
+
+          std::vector<std::vector<GidMsg>> p1_recv(static_cast<size_t>(P));
+
+          {
+            std::vector<boost::mpi::request> reqs;
+            reqs.reserve(static_cast<size_t>(2 * P));
+
+            const int tag_p1 = static_cast<int>(d);
+
+            for (int r = 0; r < P; ++r)
+            {
+              if (p1_in_cnt[static_cast<size_t>(r)] > 0)
+                reqs.push_back(comm.irecv(r, tag_p1,
+                    p1_recv[static_cast<size_t>(r)]));
+            }
+            for (int r = 0; r < P; ++r)
+            {
+              if (!p1_send[static_cast<size_t>(r)].empty())
+                reqs.push_back(comm.isend(r, tag_p1,
+                    p1_send[static_cast<size_t>(r)]));
+            }
+            boost::mpi::wait_all(reqs.begin(), reqs.end());
+          }
+
+          // ----------------------------------------------------------------
+          // 4c. Phase 2 response: owners reply with (gid, firstGlobalDOF).
+          //     Non-owners know their expected response count from p1_send,
+          //     so irecvs can be posted before isends without a second
+          //     count exchange.
+          // ----------------------------------------------------------------
+          std::vector<std::vector<EntityMsg>> p2_send(static_cast<size_t>(P));
 
           for (int r = 0; r < P; ++r)
           {
-            if (need_recv[static_cast<size_t>(r)])
-              reqs.push_back(comm.irecv(r, tag, recv[static_cast<size_t>(r)]));
-          }
-
-          for (int r = 0; r < P; ++r)
-          {
-            if (!send[static_cast<size_t>(r)].empty())
-              reqs.push_back(comm.isend(r, tag, send[static_cast<size_t>(r)]));
-          }
-
-          boost::mpi::wait_all(reqs.begin(), reqs.end());
-
-          // Install received global DOF numbering for non-owned entities.
-          for (int r = 0; r < P; ++r)
-          {
-            for (const auto& [gid, firstGDOF] : recv[static_cast<size_t>(r)])
+            for (const GidMsg gid : p1_recv[static_cast<size_t>(r)])
             {
               const auto liOpt = mesh.getLocalIndex(d, gid);
               assert(liOpt);
               const Index li = *liOpt;
+              assert(shard.isOwned(d, li));
 
+              const auto  pos        = interiorPositions(shard.getGeometry(d, li));
+              const auto& entityDOFs = m_fes.getDOFs(d, li);
+              const Index  firstGDOF =
+                  m_local_to_global.left[entityDOFs(pos[0])];
+
+              p2_send[static_cast<size_t>(r)].push_back({ gid, firstGDOF });
+            }
+          }
+
+          std::vector<std::vector<EntityMsg>> p2_recv(static_cast<size_t>(P));
+
+          {
+            std::vector<boost::mpi::request> reqs;
+            reqs.reserve(static_cast<size_t>(2 * P));
+
+            const int tag_p2 = static_cast<int>(D + 1 + d);
+
+            for (int r = 0; r < P; ++r)
+            {
+              if (!p1_send[static_cast<size_t>(r)].empty())
+                reqs.push_back(comm.irecv(r, tag_p2,
+                    p2_recv[static_cast<size_t>(r)]));
+            }
+            for (int r = 0; r < P; ++r)
+            {
+              if (!p2_send[static_cast<size_t>(r)].empty())
+                reqs.push_back(comm.isend(r, tag_p2,
+                    p2_send[static_cast<size_t>(r)]));
+            }
+            boost::mpi::wait_all(reqs.begin(), reqs.end());
+          }
+
+          // ----------------------------------------------------------------
+          // 4d. Install received global DOF numbering for non-owned entities.
+          // ----------------------------------------------------------------
+          for (int r = 0; r < P; ++r)
+          {
+            for (const auto& [gid, firstGDOF] : p2_recv[static_cast<size_t>(r)])
+            {
+              const auto liOpt = mesh.getLocalIndex(d, gid);
+              assert(liOpt);
+              const Index li = *liOpt;
               assert(!shard.isOwned(d, li));
 
               const auto& entityDOFs = m_fes.getDOFs(d, li);
               const auto  pos        = interiorPositions(shard.getGeometry(d, li));
 
               for (size_t k = 0; k < pos.size(); ++k)
-              {
-                const Index localDOF = entityDOFs(pos[k]);
-                m_local_to_global.left[localDOF] = firstGDOF + static_cast<Index>(k);
-              }
+                m_local_to_global.left[entityDOFs(pos[k])] =
+                    firstGDOF + static_cast<Index>(k);
             }
           }
 
