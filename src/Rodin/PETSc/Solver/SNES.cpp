@@ -97,6 +97,15 @@ namespace Rodin::Solver
     return its;
   }
 
+  ::SNESConvergedReason SNES::getConvergedReason() const
+  {
+    ::SNESConvergedReason reason;
+    PetscErrorCode ierr = SNESGetConvergedReason(m_snes, &reason);
+    assert(ierr == PETSC_SUCCESS);
+    (void) ierr;
+    return reason;
+  }
+
   bool SNES::converged() const
   {
     ::SNESConvergedReason reason;

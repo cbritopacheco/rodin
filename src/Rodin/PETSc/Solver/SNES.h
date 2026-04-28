@@ -190,6 +190,8 @@ namespace Rodin::Solver
        */
       bool converged() const;
 
+      ::SNESConvergedReason getConvergedReason() const;
+
       /// @brief Returns a mutable reference to the underlying PETSc SNES handle.
       /// @returns Mutable reference to the SNES handle.
       HandleType& getHandle() noexcept override;
