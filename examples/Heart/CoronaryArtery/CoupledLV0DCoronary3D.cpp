@@ -205,7 +205,13 @@ namespace Rodin::Examples::Heart
             Real lga = std::pow(lambda * g, a);
             Real base = 1.0 + lga;
             Real mu = mu_inf + delta * std::pow(base, (n - 1.0) / a);
-            Real dtau_dg = mu + delta * (n - 1.0) * std::pow(base, (n - 1.0 - a) / a) * lga;
+            const Real dmu_dg =
+              delta * (n - 1.0)
+              * std::pow(base, (n - 1.0 - a) / a)
+              * std::pow(lambda, a)
+              * std::pow(g, a - 1.0);
+
+            const Real dtau_dg = mu + g * dmu_dg;
 
             return std::pow(g, 3.0) * (mu * mu) * dtau_dg;
         };
