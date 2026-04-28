@@ -215,7 +215,7 @@ int main(int argc, char** argv)
 
       snes.solve();
 
-      if (!snes.hasConverged())
+      if (!snes.converged())
       {
         Alert::Warning()
           << "SNES failed at step " << step

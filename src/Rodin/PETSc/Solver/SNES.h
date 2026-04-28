@@ -188,7 +188,7 @@ namespace Rodin::Solver
        *
        * @returns `true` when converged, `false` when diverged or not yet solved.
        */
-      bool hasConverged() const;
+      bool converged() const;
 
       /// @brief Returns a mutable reference to the underlying PETSc SNES handle.
       /// @returns Mutable reference to the SNES handle.
