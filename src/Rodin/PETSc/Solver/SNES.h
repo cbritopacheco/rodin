@@ -17,6 +17,8 @@
 
 #include <petscsnes.h>
 
+#include <functional>
+
 #include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/PETSc/Object.h"
 #include "Rodin/PETSc/Math/LinearSystem.h"
@@ -71,6 +73,9 @@ namespace Rodin::Solver
       /// @brief PETSc vector type (`::Vec`) for the nonlinear residual and solution.
       using VectorType = ::Vec;
 
+      /// @brief Callback used to synchronize state-dependent Rodin fields from a PETSc vector.
+      using StateUpdate = std::function<void(VectorType)>;
+
       /// @brief Base problem type that provides the linear system.
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
 
@@ -120,6 +125,14 @@ namespace Rodin::Solver
                           PetscInt maxF) noexcept;
 
       /**
+       * @brief Sets an optional callback invoked before residual/Jacobian assembly.
+       *
+       * This is useful for nonlinear variational forms whose coefficients are
+       * stored in GridFunctions separate from the SNES solution vector.
+       */
+      SNES& setStateUpdate(StateUpdate update);
+
+      /**
        * @brief Solves the nonlinear system @f$ F(x) = 0 @f$.
        * @param[in,out] x Initial guess on input; solution on output.
        */
@@ -152,6 +165,7 @@ namespace Rodin::Solver
                 m_stol;   ///< Step norm convergence tolerance.
       PetscInt m_maxIt,   ///< Maximum nonlinear iterations.
                m_maxF;    ///< Maximum function evaluations.
+      StateUpdate m_stateUpdate; ///< Optional state synchronization callback.
   };
 }
 
