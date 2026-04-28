@@ -331,8 +331,8 @@ Prefer targeted tests during development; broaden scope only after local confide
 ### Build type policy
 
 - **Unit tests** can be built and run in `Debug` to catch assertion failures and enable sanitizers.
-- **Manufactured tests** must be built and run in **`Release`** by default. Manufactured tests solve PDEs and verify convergence rates; running them in `Debug` is prohibitively slow and unnecessary for routine validation. Only switch to `Debug` for manufactured tests when actively debugging a specific numerical failure or when a change is known to affect the manufactured suite and you need debugger support.
-- If you are adding or modifying new functionality and want to run only the directly related manufactured tests while iterating, you may use `Debug` for those targeted runs. Switch back to `Release` for final validation.
+- **Manufactured tests** must be built and run in **`Release`** (or **`RelWithDebInfo`**) by default. Manufactured tests solve PDEs and verify convergence rates; running them in `Debug` is prohibitively slow due to the lack of optimizations, making execution times impractical. Only use `Debug` for manufactured tests when you need debugger support for a specific numerical failure. `RelWithDebInfo` is a good middle ground when you need both reasonable performance and debug symbols (e.g., to get meaningful stack traces).
+- If you are adding or modifying new functionality and want to run only the directly related manufactured tests while iterating, you may use `RelWithDebInfo` for those targeted runs. Switch to `Release` for final validation.
 
 ### Fast local workflow
 
