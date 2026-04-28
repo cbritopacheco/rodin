@@ -328,22 +328,29 @@ Prefer targeted tests during development; broaden scope only after local confide
 
 ## Build and validation workflow (optimized)
 
+### Build type policy
+
+- **Unit tests** can be built and run in `Debug` to catch assertion failures and enable sanitizers.
+- **Manufactured tests** must be built and run in **`Release`** by default. Manufactured tests solve PDEs and verify convergence rates; running them in `Debug` is prohibitively slow and unnecessary for routine validation. Only switch to `Debug` for manufactured tests when actively debugging a specific numerical failure or when a change is known to affect the manufactured suite and you need debugger support.
+- If you are adding or modifying new functionality and want to run only the directly related manufactured tests while iterating, you may use `Debug` for those targeted runs. Switch back to `Release` for final validation.
+
 ### Fast local workflow
 
 1. Update submodules if needed:
    ```bash
    git submodule update --init --recursive
    ```
-2. Configure an out-of-source build:
+2. Configure an out-of-source **Release** build (default for manufactured tests):
    ```bash
    cmake -S . -B build \
-     -DCMAKE_BUILD_TYPE=Debug \
+     -DCMAKE_BUILD_TYPE=Release \
      -DRODIN_BUILD_SRC=ON \
      -DRODIN_BUILD_UNIT_TESTS=ON \
      -DRODIN_BUILD_MANUFACTURED_TESTS=ON \
      -DRODIN_BUILD_EXAMPLES=OFF \
      -DRODIN_BUILD_DOC=OFF
    ```
+   If you only need unit tests (e.g., for rapid iteration on a single class), you may use `Debug` and omit `-DRODIN_BUILD_MANUFACTURED_TESTS=ON`.
 3. Build incrementally:
    ```bash
    cmake --build build -j2
