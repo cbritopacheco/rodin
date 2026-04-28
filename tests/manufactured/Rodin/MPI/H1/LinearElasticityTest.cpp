@@ -435,12 +435,13 @@ namespace Rodin::Tests::Manufactured::MPI::H1LinearElasticity
    * @brief Distributed 3D linear elasticity with H1 of degree K.
    *
    * Mesh: 5×5×5 uniform grid (h = 1/4, 4³ cells).
-   * Solution: (x(1−x), y(1−y), z(1−z)) — degree-2 polynomial, zero on ∂Ω.
+   * Solution: (x(1−x), y(1−y), z(1−z)) — per-component degree-2 polynomial,
+   * zero on ∂Ω.  Exactly representable for K ≥ 2.
    * Tolerance: 10 × @ref RODIN_FUZZY_CONSTANT.
    *
    * A polynomial solution is used to avoid the @f$ \pi^{K+1} @f$ norm
    * blow-up that makes coarse-mesh trigonometric solutions inaccurate
-   * for low degrees.  The polynomial is exactly representable for K ≥ 2.
+   * for low degrees.
    */
   TEST_P(H1LinearElasticity3D, PolynomialSolution)
   {
