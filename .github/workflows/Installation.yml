@@ -23,6 +23,8 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         compiler: [gcc-12, gcc-13, gcc-14]
+        mpi: ['ON', 'OFF']
+        petsc: ['ON', 'OFF']
       fail-fast: false
     env:
       MAKEFLAGS: "-j2"
@@ -54,12 +56,15 @@ jobs:
 
       - name: Run installation test
         run: bash tests/installation/test_installation.sh
+        env:
+          RODIN_USE_MPI: ${{ matrix.mpi }}
+          RODIN_USE_PETSC: ${{ matrix.petsc }}
 
       - name: Archive installation artifacts on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: installation-test-failure-${{ matrix.compiler }}
+          name: installation-test-failure-${{ matrix.compiler }}-mpi${{ matrix.mpi }}-petsc${{ matrix.petsc }}
           path: |
             build/install-test/
             build/test-installation-project/
@@ -70,6 +75,8 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest]
+        mpi: ['ON', 'OFF']
+        petsc: ['ON', 'OFF']
       fail-fast: false
     env:
       MAKEFLAGS: "-j2"
@@ -88,7 +95,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install boost eigen libomp petsc
+          BREW_PACKAGES="boost boost-mpi eigen libomp"
+          if [ "${{ matrix.petsc }}" = "ON" ]; then
+            BREW_PACKAGES="$BREW_PACKAGES petsc"
+          elif [ "${{ matrix.mpi }}" = "ON" ]; then
+            BREW_PACKAGES="$BREW_PACKAGES open-mpi"
+          fi
+          brew install $BREW_PACKAGES
 
       - name: Link libomp
         run: |
@@ -102,17 +115,26 @@ jobs:
           brew --prefix eigen
           echo "OpenMP location:"
           brew --prefix libomp
-          echo "PETSc location:"
-          brew --prefix petsc
+          if [ "${{ matrix.petsc }}" = "ON" ]; then
+            echo "PETSc location:"
+            brew --prefix petsc
+          fi
+          if [ "${{ matrix.mpi }}" = "ON" ]; then
+            echo "MPI location:"
+            brew --prefix open-mpi 2>/dev/null || brew --prefix petsc
+          fi
 
       - name: Run installation test
         run: bash tests/installation/test_installation.sh
+        env:
+          RODIN_USE_MPI: ${{ matrix.mpi }}
+          RODIN_USE_PETSC: ${{ matrix.petsc }}
 
       - name: Archive installation artifacts on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: installation-test-failure-macos
+          name: installation-test-failure-macos-mpi${{ matrix.mpi }}-petsc${{ matrix.petsc }}
           path: |
             build/install-test/
             build/test-installation-project/
