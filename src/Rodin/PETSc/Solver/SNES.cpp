@@ -13,6 +13,7 @@ namespace Rodin::Solver
   SNES::SNES(KSP& ksp)
     : NewtonSolverParent(ksp),
       m_snes(PETSC_NULLPTR),
+      m_x(PETSC_NULLPTR),
       m_type(SNESNEWTONLS),
       m_abstol(DEFAULT_ABSTOL),
       m_rtol(DEFAULT_RTOL),
@@ -50,6 +51,13 @@ namespace Rodin::Solver
 
   SNES::~SNES()
   {
+    if (m_x)
+    {
+      PetscErrorCode ierr = VecDestroy(&m_x);
+      assert(ierr == PETSC_SUCCESS);
+      m_x = PETSC_NULLPTR;
+      (void) ierr;
+    }
     if (m_snes)
     {
       PetscErrorCode ierr = SNESDestroy(&m_snes);
@@ -80,6 +88,77 @@ namespace Rodin::Solver
   {
     m_stateUpdate = std::move(update);
     return *this;
+  }
+
+  SNES& SNES::setSubVector(size_t offset, const PETSc::Math::Vector& src)
+  {
+    if (!m_x)
+    {
+      auto& system = this->getProblem().getLinearSystem();
+      PetscErrorCode ierr = VecDuplicate(system.getSolution(), &m_x);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = VecZeroEntries(m_x);
+      assert(ierr == PETSC_SUCCESS);
+      (void) ierr;
+    }
+
+    PetscErrorCode ierr;
+
+    PetscInt n = 0;
+    ierr = VecGetSize(src, &n);
+    assert(ierr == PETSC_SUCCESS);
+
+    ::IS is = PETSC_NULLPTR;
+    ierr = ISCreateStride(PETSC_COMM_SELF, n, static_cast<PetscInt>(offset), 1, &is);
+    assert(ierr == PETSC_SUCCESS);
+
+    ::Vec sub = PETSC_NULLPTR;
+    ierr = VecGetSubVector(m_x, is, &sub);
+    assert(ierr == PETSC_SUCCESS);
+
+    ierr = VecCopy(src, sub);
+    assert(ierr == PETSC_SUCCESS);
+
+    ierr = VecRestoreSubVector(m_x, is, &sub);
+    assert(ierr == PETSC_SUCCESS);
+
+    ierr = ISDestroy(&is);
+    assert(ierr == PETSC_SUCCESS);
+
+    (void) ierr;
+    return *this;
+  }
+
+  void SNES::solve()
+  {
+    if (!m_x)
+    {
+      auto& system = this->getProblem().getLinearSystem();
+      PetscErrorCode ierr = VecDuplicate(system.getSolution(), &m_x);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = VecZeroEntries(m_x);
+      assert(ierr == PETSC_SUCCESS);
+      (void) ierr;
+    }
+    solve(m_x);
+  }
+
+  PetscInt SNES::getIterationNumber() const
+  {
+    PetscInt its = 0;
+    PetscErrorCode ierr = SNESGetIterationNumber(m_snes, &its);
+    assert(ierr == PETSC_SUCCESS);
+    (void) ierr;
+    return its;
+  }
+
+  bool SNES::hasConverged() const
+  {
+    ::SNESConvergedReason reason;
+    PetscErrorCode ierr = SNESGetConvergedReason(m_snes, &reason);
+    assert(ierr == PETSC_SUCCESS);
+    (void) ierr;
+    return reason > 0;
   }
 
   PetscErrorCode SNES::Residual(::SNES, ::Vec x, ::Vec f, void* ctx)

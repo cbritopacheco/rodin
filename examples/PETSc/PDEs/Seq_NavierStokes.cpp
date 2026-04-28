@@ -32,16 +32,9 @@
  *   ./examples/PETSc/PDEs/PETSc_Seq_NavierStokes \
  *     -ns_n 12 -ns_nt 3 -ns_T 0.03 \
  *     -snes_monitor -snes_converged_reason \
- *     -ksp_type preonly -pc_type lu
+ *     -ksp_type preonly -pc_type lu \
+ *     -pc_factor_shift_type nonzero -pc_factor_shift_amount 1e-10
  */
-
-#include <algorithm>
-#include <cassert>
-#include <cmath>
-#include <iostream>
-
-#include <petscksp.h>
-#include <petscsnes.h>
 
 #include <Rodin/PETSc.h>
 
@@ -94,32 +87,6 @@ namespace
 
       mesh.setAttribute(it.key(), attr);
     }
-  }
-
-  void copyIntoStateVector(::Vec state, ::Vec values, PetscInt offset)
-  {
-    PetscErrorCode ierr;
-
-    PetscInt n = 0;
-    ierr = VecGetSize(values, &n);
-    assert(ierr == PETSC_SUCCESS);
-
-    ::IS is = PETSC_NULLPTR;
-    ierr = ISCreateStride(PETSC_COMM_SELF, n, offset, 1, &is);
-    assert(ierr == PETSC_SUCCESS);
-
-    ::Vec sub = PETSC_NULLPTR;
-    ierr = VecGetSubVector(state, is, &sub);
-    assert(ierr == PETSC_SUCCESS);
-
-    ierr = VecCopy(values, sub);
-    assert(ierr == PETSC_SUCCESS);
-
-    ierr = VecRestoreSubVector(state, is, &sub);
-    assert(ierr == PETSC_SUCCESS);
-
-    ierr = ISDestroy(&is);
-    assert(ierr == PETSC_SUCCESS);
   }
 }
 
@@ -225,33 +192,15 @@ int main(int argc, char** argv)
 
     navierStokes.assemble().setFieldSplits();
 
-    ::Vec x = PETSC_NULLPTR;
-    PetscErrorCode ierr = VecDuplicate(navierStokes.getLinearSystem().getSolution(), &x);
-    assert(ierr == PETSC_SUCCESS);
-
-    auto syncState = [&](::Vec state)
-    {
-      uState.setData(state, 0);
-      pState.setData(state, uh.getSize());
-    };
-
     Solver::KSP ksp(navierStokes);
-    ksp.setType(KSPPREONLY);
-
-    ::PC pc = PETSC_NULLPTR;
-    ierr = KSPGetPC(ksp.getHandle(), &pc);
-    assert(ierr == PETSC_SUCCESS);
-    ierr = PCSetType(pc, PCLU);
-    assert(ierr == PETSC_SUCCESS);
-    ierr = PCFactorSetShiftType(pc, MAT_SHIFT_NONZERO);
-    assert(ierr == PETSC_SUCCESS);
-    ierr = PCFactorSetShiftAmount(pc, 1e-10);
-    assert(ierr == PETSC_SUCCESS);
 
     Solver::SNES snes(ksp);
-    snes.setType(SNESNEWTONLS)
-        .setTolerances(1e-10, 1e-8, 1e-10, 25, 1000)
-        .setStateUpdate(syncState);
+    snes.setTolerances(1e-10, 1e-8, 1e-10, 25, 1000)
+        .setStateUpdate([&](const PETSc::Math::Vector& state)
+        {
+          uState.setData(state, 0);
+          pState.setData(state, uh.getSize());
+        });
 
     for (Index step = 1; step <= nt; ++step)
     {
@@ -259,39 +208,33 @@ int main(int argc, char** argv)
       const Real ramp = std::min<Real>(1.0, t / std::max<Real>(dt, 0.1 * T));
       lidVelocity = VectorFunction{lidSpeed * ramp, 0.0};
 
-      copyIntoStateVector(x, uOld.getData(), 0);
-      copyIntoStateVector(x, pOld.getData(), static_cast<PetscInt>(uh.getSize()));
-      syncState(x);
+      snes.setSubVector(0, uOld)
+          .setSubVector(uh.getSize(), pOld);
 
       Alert::Info()
         << "SNES solve for nonlinear Navier-Stokes step "
         << step << " / " << nt << " at t = " << t
         << Alert::Raise;
 
-      snes.solve(x);
+      snes.solve();
 
-      PetscInt its = 0;
-      ::SNESConvergedReason reason;
-      ierr = SNESGetIterationNumber(snes.getHandle(), &its);
-      assert(ierr == PETSC_SUCCESS);
-      ierr = SNESGetConvergedReason(snes.getHandle(), &reason);
-      assert(ierr == PETSC_SUCCESS);
-
-      if (reason < 0)
+      if (!snes.hasConverged())
       {
-        std::cerr << "SNES failed at step " << step
-                  << " with reason " << reason << "\n";
+        Alert::Warning()
+          << "SNES failed at step " << step
+          << " after " << snes.getIterationNumber() << " iterations."
+          << Alert::Raise;
         exitCode = 1;
         break;
       }
 
       Alert::Success()
-        << "Step " << step << " converged in " << its
+        << "Step " << step << " converged in " << snes.getIterationNumber()
         << " SNES iterations."
         << Alert::Raise;
 
-      uOld.setData(uState.getData());
-      pOld.setData(pState.getData());
+      uOld = uState;
+      pOld = pState;
 
       xdmf.write(t).flush();
     }
@@ -302,9 +245,6 @@ int main(int argc, char** argv)
       uState.save("NavierStokes_velocity.gf", IO::FileFormat::MFEM);
       pState.save("NavierStokes_pressure.gf", IO::FileFormat::MFEM);
     }
-
-    ierr = VecDestroy(&x);
-    assert(ierr == PETSC_SUCCESS);
   }
 
   xdmf.close();

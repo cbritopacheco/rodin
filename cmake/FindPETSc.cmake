@@ -56,8 +56,10 @@ if (PETSc_FOUND)
   set(PETSc_INCLUDE_DIRS "${PETSc_INCLUDE_DIR}")
   set(PETSc_LIBRARIES "${PETSc_LIBRARY}")
 
-  # PETSc headers include mpi.h, so MPI must be on the include path
-  find_package(MPI COMPONENTS C QUIET)
+  # PETSc headers include mpi.h, so MPI must be on the include path.
+  # Also link the C++ MPI wrappers (libmpi_cxx) because PETSc installations
+  # built with C++ support pull in MPI::Win and other C++-binding symbols.
+  find_package(MPI COMPONENTS C CXX QUIET)
 
   if (NOT TARGET PETSc::PETSc)
     add_library(PETSc::PETSc IMPORTED INTERFACE)
@@ -70,6 +72,10 @@ if (PETSc_FOUND)
         INTERFACE_INCLUDE_DIRECTORIES "${MPI_C_INCLUDE_DIRS}")
       set_property(TARGET PETSc::PETSc APPEND PROPERTY
         INTERFACE_LINK_LIBRARIES "MPI::MPI_C")
+    endif()
+    if (MPI_CXX_FOUND)
+      set_property(TARGET PETSc::PETSc APPEND PROPERTY
+        INTERFACE_LINK_LIBRARIES "MPI::MPI_CXX")
     endif()
   endif()
 endif()

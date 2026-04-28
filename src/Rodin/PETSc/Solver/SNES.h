@@ -73,8 +73,20 @@ namespace Rodin::Solver
       /// @brief PETSc vector type (`::Vec`) for the nonlinear residual and solution.
       using VectorType = ::Vec;
 
-      /// @brief Callback used to synchronize state-dependent Rodin fields from a PETSc vector.
-      using StateUpdate = std::function<void(VectorType)>;
+      /**
+       * @brief Callback invoked before residual/Jacobian assembly to synchronize
+       *        state-dependent Rodin fields from the current SNES iterate.
+       *
+       * The argument is the current iterate expressed as a Rodin
+       * @ref Rodin::PETSc::Math::Vector (a PETSc `Vec`).  Typical usage:
+       * @code
+       * snes.setStateUpdate([&](const PETSc::Math::Vector& x) {
+       *   uState.setData(x, 0);
+       *   pState.setData(x, uh.getSize());
+       * });
+       * @endcode
+       */
+      using StateUpdate = std::function<void(const PETSc::Math::Vector&)>;
 
       /// @brief Base problem type that provides the linear system.
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
@@ -127,16 +139,94 @@ namespace Rodin::Solver
       /**
        * @brief Sets an optional callback invoked before residual/Jacobian assembly.
        *
-       * This is useful for nonlinear variational forms whose coefficients are
-       * stored in GridFunctions separate from the SNES solution vector.
+       * The callback receives the current SNES iterate as a Rodin
+       * @ref PETSc::Math::Vector.  It is responsible for copying the relevant
+       * sub-vectors back into the GridFunctions that appear in the nonlinear
+       * variational form.
+       *
+       * @code
+       * snes.setStateUpdate([&](const PETSc::Math::Vector& x) {
+       *   uState.setData(x, 0);
+       *   pState.setData(x, uh.getSize());
+       * });
+       * @endcode
+       *
+       * @param update Callback to invoke on each residual/Jacobian assembly.
+       * @returns Reference to `*this`.
        */
       SNES& setStateUpdate(StateUpdate update);
+
+      /**
+       * @brief Copies @p src into the internally managed initial-guess vector
+       *        at DOF offset @p offset.
+       *
+       * The internal combined vector @f$ x @f$ is allocated lazily from the
+       * linear system's solution on the first call.  Subsequent calls reuse the
+       * same allocation.  Typical usage before @ref solve():
+       *
+       * @code
+       * snes.setSubVector(0, uOld)
+       *     .setSubVector(uh.getSize(), pOld);
+       * snes.solve();
+       * @endcode
+       *
+       * @param offset  Starting DOF index within the combined vector.
+       * @param src     Source vector whose entries are copied in.
+       * @returns Reference to `*this`.
+       */
+      SNES& setSubVector(size_t offset, const PETSc::Math::Vector& src);
+
+      /**
+       * @brief Copies the data of a GridFunction into the combined initial-guess
+       *        vector at DOF offset @p offset.
+       *
+       * Convenience overload that extracts the underlying PETSc vector from @p gf
+       * and delegates to @ref setSubVector(size_t, const PETSc::Math::Vector&).
+       *
+       * @tparam GridFunctionType Any grid-function type that exposes `getData()`
+       *   returning a `const PETSc::Math::Vector&`.
+       * @param offset DOF index within the combined vector at which to write.
+       * @param gf     GridFunction whose DOF data will be packed into the initial guess.
+       * @returns Reference to `*this`.
+       */
+      template <class GridFunctionType>
+      SNES& setSubVector(size_t offset, const GridFunctionType& gf)
+      {
+        return setSubVector(offset, gf.getData());
+      }
 
       /**
        * @brief Solves the nonlinear system @f$ F(x) = 0 @f$.
        * @param[in,out] x Initial guess on input; solution on output.
        */
       void solve(VectorType& x) override;
+
+      /**
+       * @brief Solves the nonlinear system using the internally managed
+       *        initial-guess vector populated via @ref setSubVector().
+       *
+       * Allocates the combined vector on the first call if @ref setSubVector()
+       * has not been called yet.
+       *
+       * @see setSubVector()
+       */
+      void solve();
+
+      /**
+       * @brief Returns the number of SNES iterations from the most recent solve.
+       * @returns PETSc iteration count.
+       */
+      PetscInt getIterationNumber() const;
+
+      /**
+       * @brief Returns `true` if the most recent @ref solve() converged.
+       *
+       * Wraps @c SNESGetConvergedReason: a positive reason indicates
+       * convergence, a negative reason indicates divergence.
+       *
+       * @returns `true` when converged, `false` when diverged or not yet solved.
+       */
+      bool hasConverged() const;
 
       /// @brief Returns a mutable reference to the underlying PETSc SNES handle.
       /// @returns Mutable reference to the SNES handle.
@@ -158,13 +248,14 @@ namespace Rodin::Solver
       static PetscErrorCode Jacobian(::SNES snes, ::Vec x, ::Mat J, ::Mat P, void* ctx);
 
     private:
-      HandleType m_snes;  ///< Underlying PETSc SNES context.
-      ::SNESType m_type;  ///< Requested SNES algorithm type.
-      PetscReal m_abstol, ///< Absolute convergence tolerance.
-                m_rtol,   ///< Relative convergence tolerance.
-                m_stol;   ///< Step norm convergence tolerance.
-      PetscInt m_maxIt,   ///< Maximum nonlinear iterations.
-               m_maxF;    ///< Maximum function evaluations.
+      HandleType m_snes;   ///< Underlying PETSc SNES context.
+      VectorType m_x;      ///< Internally managed combined state vector.
+      ::SNESType m_type;   ///< Requested SNES algorithm type.
+      PetscReal m_abstol,  ///< Absolute convergence tolerance.
+                m_rtol,    ///< Relative convergence tolerance.
+                m_stol;    ///< Step norm convergence tolerance.
+      PetscInt m_maxIt,    ///< Maximum nonlinear iterations.
+               m_maxF;     ///< Maximum function evaluations.
       StateUpdate m_stateUpdate; ///< Optional state synchronization callback.
   };
 }
