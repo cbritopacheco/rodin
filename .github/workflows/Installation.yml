@@ -95,7 +95,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          BREW_PACKAGES="boost eigen libomp"
+          BREW_PACKAGES="boost boost-mpi eigen libomp"
           if [ "${{ matrix.petsc }}" = "ON" ]; then
             BREW_PACKAGES="$BREW_PACKAGES petsc"
           elif [ "${{ matrix.mpi }}" = "ON" ]; then
