@@ -25,9 +25,6 @@ jobs:
         compiler: [gcc-12, gcc-13, gcc-14]
         mpi: ['ON', 'OFF']
         petsc: ['ON', 'OFF']
-      exclude:
-        - mpi: 'OFF'
-          petsc: 'ON'
       fail-fast: false
     env:
       MAKEFLAGS: "-j2"
