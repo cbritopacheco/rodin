@@ -7,7 +7,8 @@
 
 /**
  * @file PoissonTest.cpp
- * @brief Distributed MPI H1 Poisson manufactured tests.
+ * @brief Distributed MPI H1 Poisson manufactured tests — all three mesh
+ *        construction workflows.
  *
  * Parametrized over (geometry, K) with K ∈ {1, 2, 3, 4, 6}.
  *
@@ -18,21 +19,37 @@
  * Each GTest parametrization is invoked by CTest with
  * MPIEXEC_NUMPROC_FLAG set to 1, 2, 3, 4, and 6 ranks.
  *
- * ### 2D tests
- * Manufactured solution @f$ u = \sin(\pi x)\sin(\pi y) @f$ on a 16×16
- * uniform grid (h = 1/15).  The global @f$ L^2 @f$ error
- * @f$ \int_\Omega (u - u_h)^2 @f$ must stay below
- * @ref RODIN_FUZZY_CONSTANT.
+ * ### Mesh construction workflows under test
  *
- * ### 3D tests
- * Manufactured solution @f$ u = x(1-x)\,y(1-y)\,z(1-z) @f$ on a 5×5×5
- * uniform grid (h = 1/4, 4³ = 64 cells).  This degree-6 polynomial has
- * @f$ u = 0 @f$ on all six faces of @f$ [0,1]^3 @f$, so the Dirichlet
- * data is identically zero.  Using a polynomial avoids the large
- * @f$ \pi^{K+1} @f$ norm factors that make trigonometric solutions
- * inaccurate on coarse 3D meshes for K=1,2.  For K ≥ 6 the solution is
- * exactly representable; for smaller K the interpolation error is still
- * well within @f$ 10 \times @f$ @ref RODIN_FUZZY_CONSTANT.
+ * **Workflow 1 — Shard → Save → Load → Reconcile → Assemble → Solve**
+ * Rank 0 builds a local uniform-grid mesh, partitions it with
+ * `BalancedCompactPartitioner`, and calls `Sharder::scatter()`.  Each rank
+ * saves its shard to an HDF5 file, reloads it, recomputes all connectivity,
+ * and reconciles intermediate entities before assembly.
+ *
+ * **Workflow 2 — Construct → Shard → Distribute → Reconcile → Assemble → Solve**
+ * Rank 0 builds a local uniform-grid mesh and calls `Sharder::distribute()`,
+ * which performs shard + scatter + gather in one step without any I/O
+ * round-trip.  Connectivity and reconciliation are applied to the resulting
+ * distributed mesh.
+ *
+ * **Workflow 3 — UniformGrid → Reconcile → Assemble → Solve**
+ * Every rank constructs its portion of the mesh independently via
+ * `Mesh<Context::MPI>::UniformGrid()`, which builds ghost layers and
+ * ownership information without any inter-rank communication beyond what the
+ * constructor already performs.  Connectivity and reconciliation are then
+ * applied before assembly.
+ *
+ * ### Manufactured solutions
+ *
+ * **2D:** @f$ u = \sin(\pi x)\sin(\pi y) @f$ on a 16×16 grid (h = 1/15).
+ * RHS: @f$ f = 2\pi^2 \sin(\pi x)\sin(\pi y) @f$.
+ * Tolerance: @ref RODIN_FUZZY_CONSTANT.
+ *
+ * **3D:** @f$ u = x(1-x)\,y(1-y)\,z(1-z) @f$ on a 5×5×5 grid (h = 1/4).
+ * Zero Dirichlet data on all six faces.  A polynomial solution is used to
+ * avoid the @f$ \pi^{K+1} @f$ norm blow-up on coarse meshes.
+ * Tolerance: @f$ 10 \times @f$ @ref RODIN_FUZZY_CONSTANT.
  */
 
 #include <cmath>
@@ -105,11 +122,53 @@ namespace
   }
 
   /**
-   * @brief Persists a distributed shard to HDF5, reloads it, and recomputes
-   *        all connectivity needed for H1 assembly at any polynomial degree.
+   * @brief Computes all connectivity needed for H1 assembly at any polynomial
+   *        degree and reconciles all intermediate entity dimensions.
    *
-   * For 3D meshes the edge chain (D→1, D−1→1, 1→0) is computed in addition
-   * to the facet chain, and both reconcile(1) and reconcile(2) are called.
+   * This helper is shared by all three mesh construction workflows.  It
+   * assumes that cell-vertex connectivity (@f$ D \to 0 @f$) is already
+   * present (which is true after shard-gather, HDF5 reload, and
+   * `Mesh<Context::MPI>::UniformGrid`).
+   *
+   * For 3D meshes the edge chain (@f$ D \to 1 @f$, @f$ D-1 \to 1 @f$,
+   * @f$ 1 \to 0 @f$) is computed in addition to the facet chain, and both
+   * `reconcile(1)` and `reconcile(2)` are called.
+   */
+  static void setupConnectivityAndReconcile(Mesh<Context::MPI>& mesh)
+  {
+    const size_t D = mesh.getDimension();
+
+    // Core chain — valid for D = 2 and D = 3.
+    mesh.getConnectivity().compute(D, D);
+    mesh.getConnectivity().compute(D, 0);
+    mesh.getConnectivity().compute(D, D - 1);
+    mesh.getConnectivity().compute(D - 1, D);
+    mesh.getConnectivity().compute(D - 1, 0);
+
+    // Edge chain — needed for K ≥ 2 interior edge DOFs in 3D.
+    if (D >= 3)
+    {
+      mesh.getConnectivity().compute(D, 1);
+      mesh.getConnectivity().compute(D - 1, 1);
+      mesh.getConnectivity().compute(1, 0);
+    }
+
+    // Reconcile all intermediate entity dimensions (1 in 2D; 1 and 2 in 3D).
+    for (size_t d = 1; d < D; ++d)
+      mesh.reconcile(d);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Workflow 1: Shard → Save MPI mesh → Load MPI mesh → Reconcile
+  // ---------------------------------------------------------------------------
+
+  /**
+   * @brief Persists a distributed shard to HDF5, reloads it, and applies
+   *        full connectivity and reconciliation.
+   *
+   * This is the core of **Workflow 1**: after sharding the mesh is persisted
+   * to disk and reloaded to exercise the complete I/O round-trip before FE
+   * assembly.
    */
   static Mesh<Context::MPI> reloadShard(
       const Context::MPI& ctx,
@@ -138,34 +197,23 @@ namespace
     EXPECT_EQ(r.getShard().getVertexCount(), mesh.getShard().getVertexCount())
       << "Rank " << comm.rank() << ": vertex count mismatch after HDF5 reload.";
 
-    // Core connectivity — valid for D = 2 and D = 3.
-    r.getConnectivity().compute(D, D);
-    r.getConnectivity().compute(D, 0);
-    r.getConnectivity().compute(D, D - 1);
-    r.getConnectivity().compute(D - 1, D);
-    r.getConnectivity().compute(D - 1, 0);
-
-    // Edge chain — needed for K ≥ 2 interior edge DOFs in 3D.
-    if (D >= 3)
-    {
-      r.getConnectivity().compute(D, 1);
-      r.getConnectivity().compute(D - 1, 1);
-      r.getConnectivity().compute(1, 0);
-    }
-
-    // Reconcile all intermediate entity dimensions (1 in 2D; 1 and 2 in 3D).
-    for (size_t d = 1; d < D; ++d)
-      r.reconcile(d);
-
     comm.barrier();
     boost::filesystem::remove(rankFile);
+
+    setupConnectivityAndReconcile(r);
+    comm.barrier();
     return r;
   }
 
   /**
-   * @brief Partitions and distributes a uniform-grid mesh from rank 0.
+   * @brief **Workflow 1** — Shard → Save MPI mesh → Load MPI mesh →
+   *        Reconcile.
+   *
+   * Rank 0 builds a uniform-grid mesh, partitions it with
+   * `BalancedCompactPartitioner`, scatters shards, each rank saves to HDF5
+   * and reloads before assembly.
    */
-  static Mesh<Context::MPI> distributeFromRoot(
+  static Mesh<Context::MPI> meshViaShardSaveLoad(
       const Context::MPI& ctx,
       Polytope::Type type,
       std::initializer_list<size_t> shape)
@@ -182,6 +230,66 @@ namespace
     }
     auto mesh = sharder.gather(0);
     return reloadShard(ctx, std::move(mesh));
+  }
+
+  // ---------------------------------------------------------------------------
+  // Workflow 2: Construct → Shard → Distribute → Reconcile
+  // ---------------------------------------------------------------------------
+
+  /**
+   * @brief **Workflow 2** — Construct → Shard → Distribute → Reconcile.
+   *
+   * Rank 0 builds a local uniform-grid mesh, partitions it, shards and
+   * scatters the shards to all ranks.  All ranks gather their local shard
+   * directly — no HDF5 I/O round-trip occurs.  Connectivity and
+   * reconciliation are then applied to the distributed mesh.
+   *
+   * This workflow differs from Workflow 1 only in the absence of the
+   * HDF5 save/load step.
+   */
+  static Mesh<Context::MPI> meshViaSharderDistribute(
+      const Context::MPI& ctx,
+      Polytope::Type type,
+      std::initializer_list<size_t> shape)
+  {
+    const auto& comm = ctx.getCommunicator();
+    Sharder<Context::MPI> sharder(ctx);
+    if (comm.rank() == 0)
+    {
+      auto localMesh = makeShardableMesh(type, shape);
+      BalancedCompactPartitioner partitioner(localMesh);
+      partitioner.partition(static_cast<size_t>(comm.size()));
+      sharder.shard(partitioner);
+      sharder.scatter(0);
+    }
+    auto mesh = sharder.gather(0);
+    setupConnectivityAndReconcile(mesh);
+    comm.barrier();
+    return mesh;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Workflow 3: UniformGrid → Reconcile
+  // ---------------------------------------------------------------------------
+
+  /**
+   * @brief **Workflow 3** — UniformGrid → Reconcile → Assemble → Solve.
+   *
+   * All ranks construct their portion of the mesh independently via
+   * `Mesh<Context::MPI>::UniformGrid()`, which builds ghost layers and
+   * ownership information without a rank-0-centric sharding step.
+   * Connectivity and reconciliation are applied before assembly.
+   */
+  static Mesh<Context::MPI> meshViaUniformGrid(
+      const Context::MPI& ctx,
+      Polytope::Type type,
+      std::initializer_list<size_t> shape)
+  {
+    auto mesh = Mesh<Context::MPI>::UniformGrid(ctx, type, shape);
+    mesh.scale(1.0 / static_cast<Real>(*shape.begin() - 1));
+    setupConnectivityAndReconcile(mesh);
+    ctx.getCommunicator().barrier();
+    return mesh;
   }
 
   // -------------------------------------------------------------------------
@@ -353,25 +461,25 @@ namespace Rodin::Tests::Manufactured::MPI::H1Poisson
   using Param = std::tuple<Polytope::Type, size_t>;
 
   // =========================================================================
-  // 2D: Triangle and Quadrilateral × K ∈ {1,2,3,4,6}
+  // Workflow 1 — Shard → Save → Load → Reconcile → Assemble → Solve
   // =========================================================================
 
-  class H1Poisson2D : public ::testing::TestWithParam<Param> {};
+  class H1Poisson2D_Workflow1 : public ::testing::TestWithParam<Param> {};
 
   /**
-   * @brief Distributed 2D Poisson with H1 of degree K.
+   * @brief Workflow 1 — 2D Poisson with HDF5 mesh I/O round-trip.
    *
-   * Mesh: 16×16 uniform grid (h = 1/15).
+   * Mesh: 16×16 uniform grid, shard → save HDF5 → load HDF5 → reconcile.
    * Solution: sin(πx)sin(πy).
    * Tolerance: @ref RODIN_FUZZY_CONSTANT.
    */
-  TEST_P(H1Poisson2D, SimpleSine)
+  TEST_P(H1Poisson2D_Workflow1, SimpleSine)
   {
     const auto& [geom, K] = GetParam();
     auto& world = *g_world;
 
     Context::MPI ctx(*g_env, world);
-    auto mesh = distributeFromRoot(ctx, geom, { 16, 16 });
+    auto mesh = meshViaShardSaveLoad(ctx, geom, { 16, 16 });
 
     const Real globalError = run2D(K, world, mesh);
     EXPECT_NEAR(globalError, 0, RODIN_FUZZY_CONSTANT)
@@ -382,7 +490,7 @@ namespace Rodin::Tests::Manufactured::MPI::H1Poisson
 
   INSTANTIATE_TEST_SUITE_P(
     AllGeometriesAndDegrees,
-    H1Poisson2D,
+    H1Poisson2D_Workflow1,
     testing::Combine(
       testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral),
       testing::Values<size_t>(1, 2, 3, 4, 6)
@@ -390,31 +498,22 @@ namespace Rodin::Tests::Manufactured::MPI::H1Poisson
     ParamName{}
   );
 
-  // =========================================================================
-  // 3D: Tetrahedron, Hexahedron, and Wedge × K ∈ {1,2,3,4,6}
-  // =========================================================================
-
-  class H1Poisson3D : public ::testing::TestWithParam<Param> {};
+  class H1Poisson3D_Workflow1 : public ::testing::TestWithParam<Param> {};
 
   /**
-   * @brief Distributed 3D Poisson with H1 of degree K.
+   * @brief Workflow 1 — 3D Poisson with HDF5 mesh I/O round-trip.
    *
-   * Mesh: 5×5×5 uniform grid (h = 1/4, 4³ cells).
-   * Solution: x(1−x)y(1−y)z(1−z) — degree-6 polynomial, zero on ∂Ω.
+   * Mesh: 5×5×5 uniform grid, shard → save HDF5 → load HDF5 → reconcile.
+   * Solution: x(1−x)y(1−y)z(1−z).
    * Tolerance: 10 × @ref RODIN_FUZZY_CONSTANT.
-   *
-   * A polynomial solution is used instead of sin to avoid the
-   * @f$ \pi^{K+1} @f$ norm blow-up that makes coarse-mesh trigonometric
-   * solutions inaccurate for K = 1, 2.  For K ≥ 6 the solution is
-   * representable exactly in the FE space.
    */
-  TEST_P(H1Poisson3D, PolynomialBC)
+  TEST_P(H1Poisson3D_Workflow1, PolynomialBC)
   {
     const auto& [geom, K] = GetParam();
     auto& world = *g_world;
 
     Context::MPI ctx(*g_env, world);
-    auto mesh = distributeFromRoot(ctx, geom, { 5, 5, 5 });
+    auto mesh = meshViaShardSaveLoad(ctx, geom, { 5, 5, 5 });
 
     const Real globalError = run3D(K, world, mesh);
     EXPECT_NEAR(globalError, 0, 10 * RODIN_FUZZY_CONSTANT)
@@ -425,7 +524,159 @@ namespace Rodin::Tests::Manufactured::MPI::H1Poisson
 
   INSTANTIATE_TEST_SUITE_P(
     AllGeometriesAndDegrees,
-    H1Poisson3D,
+    H1Poisson3D_Workflow1,
+    testing::Combine(
+      testing::Values(
+        Polytope::Type::Tetrahedron,
+        Polytope::Type::Hexahedron,
+        Polytope::Type::Wedge),
+      testing::Values<size_t>(1, 2, 3, 4, 6)
+    ),
+    ParamName{}
+  );
+
+  // =========================================================================
+  // Workflow 2 — Construct → Shard → Distribute → Reconcile → Assemble → Solve
+  // =========================================================================
+
+  class H1Poisson2D_Workflow2 : public ::testing::TestWithParam<Param> {};
+
+  /**
+   * @brief Workflow 2 — 2D Poisson with direct shard-gather (no I/O).
+   *
+   * Mesh: 16×16 uniform grid, shard → scatter → gather → reconcile (no HDF5).
+   * Solution: sin(πx)sin(πy).
+   * Tolerance: @ref RODIN_FUZZY_CONSTANT.
+   */
+  TEST_P(H1Poisson2D_Workflow2, SimpleSine)
+  {
+    const auto& [geom, K] = GetParam();
+    auto& world = *g_world;
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = meshViaSharderDistribute(ctx, geom, { 16, 16 });
+
+    const Real globalError = run2D(K, world, mesh);
+    EXPECT_NEAR(globalError, 0, RODIN_FUZZY_CONSTANT)
+        << "np=" << world.size()
+        << " geometry=" << static_cast<int>(geom)
+        << " K=" << K;
+  }
+
+  INSTANTIATE_TEST_SUITE_P(
+    AllGeometriesAndDegrees,
+    H1Poisson2D_Workflow2,
+    testing::Combine(
+      testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral),
+      testing::Values<size_t>(1, 2, 3, 4, 6)
+    ),
+    ParamName{}
+  );
+
+  class H1Poisson3D_Workflow2 : public ::testing::TestWithParam<Param> {};
+
+  /**
+   * @brief Workflow 2 — 3D Poisson with direct shard-gather (no I/O).
+   *
+   * Mesh: 5×5×5 uniform grid, shard → scatter → gather → reconcile (no HDF5).
+   * Solution: x(1−x)y(1−y)z(1−z).
+   * Tolerance: 10 × @ref RODIN_FUZZY_CONSTANT.
+   */
+  TEST_P(H1Poisson3D_Workflow2, PolynomialBC)
+  {
+    const auto& [geom, K] = GetParam();
+    auto& world = *g_world;
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = meshViaSharderDistribute(ctx, geom, { 5, 5, 5 });
+
+    const Real globalError = run3D(K, world, mesh);
+    EXPECT_NEAR(globalError, 0, 10 * RODIN_FUZZY_CONSTANT)
+        << "np=" << world.size()
+        << " geometry=" << static_cast<int>(geom)
+        << " K=" << K;
+  }
+
+  INSTANTIATE_TEST_SUITE_P(
+    AllGeometriesAndDegrees,
+    H1Poisson3D_Workflow2,
+    testing::Combine(
+      testing::Values(
+        Polytope::Type::Tetrahedron,
+        Polytope::Type::Hexahedron,
+        Polytope::Type::Wedge),
+      testing::Values<size_t>(1, 2, 3, 4, 6)
+    ),
+    ParamName{}
+  );
+
+  // =========================================================================
+  // Workflow 3 — UniformGrid → Reconcile → Assemble → Solve
+  // =========================================================================
+
+  class H1Poisson2D_Workflow3 : public ::testing::TestWithParam<Param> {};
+
+  /**
+   * @brief Workflow 3 — 2D Poisson built via distributed `UniformGrid`.
+   *
+   * Mesh: 16×16 grid constructed directly on all ranks via
+   * `Mesh<Context::MPI>::UniformGrid()`, then reconciled.
+   * Solution: sin(πx)sin(πy).
+   * Tolerance: @ref RODIN_FUZZY_CONSTANT.
+   */
+  TEST_P(H1Poisson2D_Workflow3, SimpleSine)
+  {
+    const auto& [geom, K] = GetParam();
+    auto& world = *g_world;
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = meshViaUniformGrid(ctx, geom, { 16, 16 });
+
+    const Real globalError = run2D(K, world, mesh);
+    EXPECT_NEAR(globalError, 0, RODIN_FUZZY_CONSTANT)
+        << "np=" << world.size()
+        << " geometry=" << static_cast<int>(geom)
+        << " K=" << K;
+  }
+
+  INSTANTIATE_TEST_SUITE_P(
+    AllGeometriesAndDegrees,
+    H1Poisson2D_Workflow3,
+    testing::Combine(
+      testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral),
+      testing::Values<size_t>(1, 2, 3, 4, 6)
+    ),
+    ParamName{}
+  );
+
+  class H1Poisson3D_Workflow3 : public ::testing::TestWithParam<Param> {};
+
+  /**
+   * @brief Workflow 3 — 3D Poisson built via distributed `UniformGrid`.
+   *
+   * Mesh: 5×5×5 grid constructed directly on all ranks via
+   * `Mesh<Context::MPI>::UniformGrid()`, then reconciled.
+   * Solution: x(1−x)y(1−y)z(1−z).
+   * Tolerance: 10 × @ref RODIN_FUZZY_CONSTANT.
+   */
+  TEST_P(H1Poisson3D_Workflow3, PolynomialBC)
+  {
+    const auto& [geom, K] = GetParam();
+    auto& world = *g_world;
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = meshViaUniformGrid(ctx, geom, { 5, 5, 5 });
+
+    const Real globalError = run3D(K, world, mesh);
+    EXPECT_NEAR(globalError, 0, 10 * RODIN_FUZZY_CONSTANT)
+        << "np=" << world.size()
+        << " geometry=" << static_cast<int>(geom)
+        << " K=" << K;
+  }
+
+  INSTANTIATE_TEST_SUITE_P(
+    AllGeometriesAndDegrees,
+    H1Poisson3D_Workflow3,
     testing::Combine(
       testing::Values(
         Polytope::Type::Tetrahedron,
