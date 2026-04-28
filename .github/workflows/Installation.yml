@@ -77,9 +77,6 @@ jobs:
         os: [macos-latest]
         mpi: ['ON', 'OFF']
         petsc: ['ON', 'OFF']
-      exclude:
-        - mpi: 'OFF'
-          petsc: 'ON'
       fail-fast: false
     env:
       MAKEFLAGS: "-j2"
