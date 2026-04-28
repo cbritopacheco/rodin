@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <limits>
 #include <numbers>
 #include <stdexcept>
 #include <type_traits>
@@ -10,7 +11,41 @@
 
 #include "CoupledLV0DCoronary3D.h"
 #include "Rodin/Math/RungeKutta/RK4.h"
+#include "Rodin/Math/RootFinding/NewtonRaphson.h"
 #include "VMSConvectionIntegrator.h"
+
+/**
+ * @file CoupledLV0DCoronary3D.cpp
+ * @brief Partitioned 0D--3D coronary haemodynamics example.
+ *
+ * This file implements a one-way coupled model:
+ *
+ *   LV 0D model
+ *      -> inlet pressure for the 3D coronary domain
+ *      -> semi-implicit generalized-Newtonian Navier--Stokes solve
+ *      -> outlet fluxes
+ *      -> nonlinear rheological RCR outlet updates.
+ *
+ * The 3D fluid model is a backward-Euler, Oseen-linearized,
+ * incompressible Navier--Stokes problem with:
+ *
+ *   - Carreau--Yasuda viscosity evaluated explicitly from u^n,
+ *   - dynamic projected VMS convective stabilization,
+ *   - pressure regularization,
+ *   - inlet/outlet pressure tractions,
+ *   - outlet backflow stabilization.
+ *
+ * The outlet model replaces the constant RCR resistances by nonlinear
+ * rheological pipe-flow laws derived from the WRMS/Rabinowitsch correction
+ * for generalized Newtonian fluids.
+ *
+ * The coupling is partitioned and one-way at the cardiac/aortic level:
+ *
+ *   p_ar(t) from the 0D model drives the coronary inlet.
+ *
+ * The coronary outlet states are updated from the 3D outlet fluxes, but they
+ * are not fed back into the LV/aortic 0D model in this driver.
+ */
 
 namespace Rodin::Examples::Heart
 {
@@ -134,6 +169,7 @@ namespace Rodin::Examples::Heart
 
     {
       using PassiveEnergy = std::decay_t<decltype(input.passiveEnergy)>;
+
       typename PassiveEnergy::Parameters hp;
       hp.mu1 = 0.0;
       hp.mu2 = 0.0;
@@ -141,116 +177,453 @@ namespace Rodin::Examples::Heart
       hp.C1 = 1.1e-1;
       hp.C2 = 1.9e3;
       hp.C3 = 1.1e-1;
+
       input.passiveEnergy = PassiveEnergy(hp);
     }
 
     return input;
   }
 
+  /**
+   * Constant-resistance RCR update:
+   *
+   *   C (pc^{n+1} - pc^n) / dt + (pc^{n+1} - pd) / Rd = Q,
+   *
+   * hence
+   *
+   *   pc^{n+1}
+   *     =
+   *   ((C/dt) pc^n + Q + pd/Rd) / (C/dt + 1/Rd),
+   *
+   * and
+   *
+   *   pout^{n+1} = pc^{n+1} + Rp Q.
+   *
+   * Sign convention:
+   *
+   *   Q = int_Gamma u · n
+   *
+   * so Q > 0 means flow leaving the 3D coronary domain.
+   */
   void CoupledLV0DCoronary3D::updateRCR(RCR& bc, Real Q, Real dt)
   {
     const Real a = bc.C / dt;
-    bc.pc = (a * bc.pc + Q + bc.pd / bc.Rd) / (a + 1.0 / bc.Rd);
+
+    bc.pc =
+      (a * bc.pc + Q + bc.pd / bc.Rd)
+      / (a + 1.0 / bc.Rd);
+
     bc.pout = bc.pc + bc.Rp * Q;
   }
 
+  /**
+   * Nonlinear rheological RCR update.
+   *
+   * This replaces the constant distal/proximal resistance laws by nonlinear
+   * pipe-flow laws:
+   *
+   *   Q = Q_pipe(dp; L, R).
+   *
+   * The distal capacitor equation is solved implicitly:
+   *
+   *   C (pc^{n+1} - pc^n) / dt
+   *   + Q_d(pc^{n+1} - pd)
+   *   = Q_out.
+   *
+   * The proximal pressure is then recovered from:
+   *
+   *   Q_out = Q_p(pout - pc).
+   *
+   * This is still an outlet model. It is not a monolithic 0D--3D nonlinear
+   * coupling because the 3D solve uses the previous outlet pressures and the
+   * RCR states are updated after the 3D solve.
+   */
   void CoupledLV0DCoronary3D::updateRCRNonNew(
       const Model& model, RCR& bc, Real Q, Real dt)
   {
-    const Real a = bc.C / dt;
+    (void) model;
 
+    const Real cap = bc.C / dt;
+    const Real pcOld = bc.pc;
+
+    /*
+     * Equivalent unresolved segment dimensions.
+     *
+     * These are modelling parameters for the lumped proximal and distal
+     * rheological closures, not geometric data extracted from the mesh.
+     */
     const Real radiusP = 0.004;
     const Real lengthP = 0.015;
 
     const Real radiusD = 0.0005;
     const Real lengthD = 0.002;
 
-    auto resistance = [](Real pp, Real pd, Real L, Real radius) -> Real
+    /*
+     * Fully developed generalized-Newtonian pipe-flow law.
+     *
+     * Input:
+     *   dp     = pressure drop across the unresolved segment
+     *   L      = segment length
+     *   radius = segment radius
+     *
+     * Output:
+     *   Q(dp)  = volumetric flow rate
+     *   dQ/ddp = differential conductance
+     *
+     * Constitutive law:
+     *
+     *   mu(gamma)
+     *     =
+     *   mu_inf
+     *   + (mu_0 - mu_inf)
+     *     [1 + (lambda gamma)^a]^((n - 1) / a).
+     *
+     * Wall shear stress:
+     *
+     *   tau_w = R |dp| / (2 L).
+     *
+     * Wall shear rate:
+     *
+     *   tau_w = mu(gamma_w) gamma_w.
+     *
+     * WRMS/Rabinowitsch integral:
+     *
+     *   I =
+     *   int_0^{gamma_w}
+     *     gamma^3 mu(gamma)^2 d tau/d gamma d gamma,
+     *
+     * where
+     *
+     *   tau(gamma) = mu(gamma) gamma.
+     *
+     * Flow rate:
+     *
+     *   |Q| = pi R^3 I / tau_w^3,
+     *
+     * with sign(Q) = sign(dp).
+     */
+    auto flowLaw = [](Real dp, Real L, Real radius) -> std::pair<Real, Real>
     {
-        const Real mu_0 = 0.04868;
-        const Real mu_inf = 0.003605;
-        const Real lambda = 3.39;
-        const Real n = 0.198;
-        const Real a = 1.235;
-        const Real delta = mu_0 - mu_inf;
+      const Real mu0    = 0.04868;
+      const Real muInf  = 0.003605;
+      const Real lambda = 3.39;
+      const Real n      = 0.198;
+      const Real yasuda = 1.235;
+      const Real delta  = mu0 - muInf;
 
-        const Real dp = pp - pd;
-        if (std::abs(dp) < 1e-10) return 1e10;
+      const Real sgn = (dp >= 0.0) ? 1.0 : -1.0;
+      const Real adp = std::abs(dp);
 
-        const Real tauW = radius * std::abs(dp) / (2.0 * L);
+      /*
+       * Low-pressure-drop fallback.
+       *
+       * At vanishing shear, Carreau--Yasuda gives mu -> mu0, so the
+       * pipe law reduces to Poiseuille with viscosity mu0:
+       *
+       *   R0 = 8 mu0 L / (pi R^4).
+       */
+      const Real R0 =
+        8.0 * mu0 * L /
+        (std::numbers::pi_v<Real> * std::pow(radius, 4.0));
 
-        auto gamma_dot_wall = [&](const Real tw) {
-            Real g = tw / ((mu_0 + mu_inf) * 0.5);
-            for (int i = 0; i < 50; ++i) {
-                Real lga = std::pow(lambda * g, a);
-                Real common_pow = std::pow(1.0 + lga, (n - 1.0) / a);
+      if (adp < 1e-12)
+        return {dp / R0, 1.0 / R0};
 
-                Real eta = mu_inf + delta * common_pow;
-                Real deta_dg = delta * (n - 1.0) * std::pow(1.0 + lga, (n - 1.0 - a) / a) * std::pow(lambda, a) * std::pow(g, a - 1.0);
+      const Real tauW = radius * adp / (2.0 * L);
 
-                Real f = g * eta - tw;
-                Real df = eta + g * deta_dg;
+      auto mu = [&](Real g) -> Real
+      {
+        return muInf
+          + delta * std::pow(
+              1.0 + std::pow(lambda * g, yasuda),
+              (n - 1.0) / yasuda);
+      };
 
-                Real step = f / df;
-                g = std::max(1e-10, g - step);
-                if (std::abs(step) < 1e-8 * g) break;
-            }
-            return g;
-        };
+      auto dmu = [&](Real g) -> Real
+      {
+        const Real base = 1.0 + std::pow(lambda * g, yasuda);
 
-        const Real gamma_dot_w = gamma_dot_wall(tauW);
+        return delta * (n - 1.0)
+          * std::pow(base, (n - 1.0 - yasuda) / yasuda)
+          * std::pow(lambda, yasuda)
+          * std::pow(g, yasuda - 1.0);
+      };
 
-        auto f = [&](const Real g) {
-            if (g < 1e-15) return 0.0;
-            Real lga = std::pow(lambda * g, a);
-            Real base = 1.0 + lga;
-            Real mu = mu_inf + delta * std::pow(base, (n - 1.0) / a);
-            const Real dmu_dg =
-              delta * (n - 1.0)
-              * std::pow(base, (n - 1.0 - a) / a)
-              * std::pow(lambda, a)
-              * std::pow(g, a - 1.0);
+      /*
+       * Solve:
+       *
+       *   F(gamma) = gamma mu(gamma) - tau_w = 0.
+       *
+       * Exact derivative:
+       *
+       *   F'(gamma) = mu(gamma) + gamma mu'(gamma).
+       */
+      auto tauMinusTauW = [&](Real g) -> std::pair<Real, Real>
+      {
+        const Real m  = mu(g);
+        const Real dm = dmu(g);
 
-            const Real dtau_dg = mu + g * dmu_dg;
+        return {g * m - tauW, m + g * dm};
+      };
 
-            return std::pow(g, 3.0) * (mu * mu) * dtau_dg;
-        };
+      Math::RootFinding::NewtonRaphson<Real> rootFinder(
+        1e-12, 1e-10, 1e-12, 50);
 
-        Math::RungeKutta::RK4 integrator;
+      /*
+       * Safeguarded Newton needs a bracket.
+       *
+       * At gamma ~= 0:
+       *
+       *   gamma mu(gamma) - tau_w < 0.
+       *
+       * For large gamma, the left-hand side becomes positive. We expand the
+       * upper bound until the sign changes.
+       */
+      Real gHi = std::max<Real>(tauW / muInf, 1e-8);
 
-        constexpr int steps = 100;
-        const Real h = gamma_dot_w / static_cast<Real>(steps);
+      for (int k = 0; k < 100 && tauMinusTauW(gHi).first < 0.0; ++k)
+        gHi *= 2.0;
 
-        Real Ip = 0.0;
+      if (tauMinusTauW(gHi).first < 0.0)
+      {
+        std::cerr << "Warning: failed to bracket wall shear rate. "
+                  << "Using Poiseuille fallback.\n";
+        return {dp / R0, 1.0 / R0};
+      }
 
-        auto rhs = [&](Real g, Real I) -> Real
-        {
-          (void) I;
-          return f(g);
-        };
+      const auto gammaRoot =
+        rootFinder.solve(tauMinusTauW, 0.5 * gHi, 1e-12, gHi);
 
-        for (int i = 0; i < steps; ++i)
-        {
-          const Real g = static_cast<Real>(i) * h;
-          integrator.step(Ip, g, h, Ip, rhs);
-        }
+      if (!gammaRoot)
+      {
+        std::cerr << "Warning: failed to solve wall shear rate. "
+                  << "Using Poiseuille fallback.\n";
+        return {dp / R0, 1.0 / R0};
+      }
 
-        if (Ip <= 0.0)
-          return 1e10;
+      const Real gammaW = *gammaRoot;
 
-        return std::pow(dp, 4.0) / (
-            8.0 * std::numbers::pi_v<Real> * std::pow(L, 3.0) * Ip);
+      /*
+       * Rheological integral:
+       *
+       *   I =
+       *   int_0^{gamma_w}
+       *     gamma^3 mu(gamma)^2
+       *     [mu(gamma) + gamma mu'(gamma)]
+       *   d gamma.
+       */
+      auto integrand = [&](Real g) -> Real
+      {
+        if (g <= 0.0)
+          return 0.0;
+
+        const Real m     = mu(g);
+        const Real dm    = dmu(g);
+        const Real dtau  = m + g * dm;
+
+        return std::pow(g, 3.0) * m * m * dtau;
+      };
+
+      Math::RungeKutta::RK4 integrator;
+
+      constexpr int steps = 100;
+      const Real h = gammaW / static_cast<Real>(steps);
+
+      Real I = 0.0;
+
+      auto rhs = [&](Real g, Real y) -> Real
+      {
+        (void) y;
+        return integrand(g);
+      };
+
+      /*
+       * Integrate dI/dgamma = integrand(gamma), I(0) = 0.
+       */
+      for (int i = 0; i < steps; ++i)
+      {
+        const Real g = static_cast<Real>(i) * h;
+        integrator.step(I, g, h, I, rhs);
+      }
+
+      if (I <= 0.0 || !std::isfinite(I))
+      {
+        std::cerr << "Warning: invalid WRMS integral. "
+                  << "Using Poiseuille fallback.\n";
+        return {dp / R0, 1.0 / R0};
+      }
+
+      const Real qAbs =
+        std::numbers::pi_v<Real> * std::pow(radius, 3.0) * I /
+        std::pow(tauW, 3.0);
+
+      /*
+       * Differential conductance.
+       *
+       * From the Rabinowitsch relation:
+       *
+       *   d|Q| / d|dp|
+       *     =
+       *   (pi R^3 gamma_w - 3 |Q|) / |dp|.
+       *
+       * Since Q(dp) is odd, dQ/ddp is positive for both signs of dp.
+       */
+      const Real dqAbs =
+        (std::numbers::pi_v<Real> * std::pow(radius, 3.0) * gammaW
+         - 3.0 * qAbs) / adp;
+
+      if (!std::isfinite(qAbs) || !std::isfinite(dqAbs) || dqAbs <= 0.0)
+      {
+        std::cerr << "Warning: invalid WRMS flow derivative. "
+                  << "Using Poiseuille fallback.\n";
+        return {dp / R0, 1.0 / R0};
+      }
+
+      return {sgn * qAbs, dqAbs};
     };
 
-    const Real Rp = resistance(bc.pc, bc.pd, lengthP, radiusP);
+    /*
+     * Invert the nonlinear pipe law.
+     *
+     * Given targetQ, find dp such that:
+     *
+     *   Q_pipe(dp) = targetQ.
+     */
+    auto solvePressureDropForFlow =
+      [&](Real targetQ, Real L, Real radius, Real guess) -> Real
+      {
+        if (std::abs(targetQ) < 1e-16)
+          return 0.0;
 
-    const auto& s = model.getState();
-    const Real pv = s.pv;
+        const Real sgn  = (targetQ >= 0.0) ? 1.0 : -1.0;
+        const Real qAbs = std::abs(targetQ);
 
-    const Real Rd = resistance(bc.pd, pv, lengthD, radiusD);
+        /*
+         * Solve in x = |dp| >= 0:
+         *
+         *   F(x) = sign(Q) Q_pipe(sign(Q) x) - |Q| = 0.
+         *
+         * Its derivative is dQ/ddp because Q_pipe is odd.
+         */
+        auto F = [&](Real x) -> std::pair<Real, Real>
+        {
+          const auto [q, dq] = flowLaw(sgn * x, L, radius);
+          return {sgn * q - qAbs, dq};
+        };
 
-    bc.pc = (a * bc.pc + Q + bc.pd / Rd) / (a + 1.0 / Rd);
-    bc.pout = bc.pc + Rp * Q;
+        Real hi = std::max<Real>(std::abs(guess), 1.0);
+
+        for (int k = 0; k < 100 && F(hi).first < 0.0; ++k)
+          hi *= 2.0;
+
+        if (F(hi).first < 0.0)
+        {
+          std::cerr << "Warning: failed to bracket pressure drop for targetQ = "
+                    << targetQ << ". Returning last upper bound.\n";
+          return sgn * hi;
+        }
+
+        Math::RootFinding::NewtonRaphson<Real> solver(
+          1e-10, 1e-9, 1e-12, 50);
+
+        const auto root =
+          solver.solve(F, std::min(std::abs(guess), hi), 0.0, hi);
+
+        if (!root)
+        {
+          std::cerr << "Warning: failed to invert flow law for targetQ = "
+                    << targetQ << ". Returning bracket upper bound.\n";
+          return sgn * hi;
+        }
+
+        return sgn * (*root);
+      };
+
+    /*
+     * Distal nonlinear capacitor equation:
+     *
+     *   F(pc)
+     *     =
+     *   C/dt (pc - pcOld)
+     *   + Q_d(pc - pd)
+     *   - Q_out
+     *   = 0.
+     *
+     * Exact derivative:
+     *
+     *   F'(pc) = C/dt + dQ_d/d(pc - pd).
+     */
+    auto distalResidual = [&](Real pc) -> std::pair<Real, Real>
+    {
+      const Real x = pc - bc.pd;
+      const auto [qd, dqd] = flowLaw(x, lengthD, radiusD);
+
+      const Real f  = cap * (pc - pcOld) + qd - Q;
+      const Real df = cap + dqd;
+
+      return {f, df};
+    };
+
+    Math::RootFinding::NewtonRaphson<Real> solver(
+      1e-10, 1e-9, 1e-12, 50);
+
+    /*
+     * Bracket pc^{n+1}.
+     *
+     * The pressure can move above or below pd depending on the sign of Q.
+     * Therefore the bracket is expanded symmetrically around pcOld and pd.
+     */
+    Real span = std::max<Real>(std::abs(Q) / cap + 1000.0, 1000.0);
+
+    Real lo = std::min(pcOld, bc.pd) - span;
+    Real hi = std::max(pcOld, bc.pd) + span;
+
+    for (int k = 0;
+         k < 100 && distalResidual(lo).first * distalResidual(hi).first > 0.0;
+         ++k)
+    {
+      span *= 2.0;
+      lo = std::min(pcOld, bc.pd) - span;
+      hi = std::max(pcOld, bc.pd) + span;
+    }
+
+    if (distalResidual(lo).first * distalResidual(hi).first > 0.0)
+    {
+      std::cerr << "Warning: failed to bracket distal capacitor pressure. "
+                << "Keeping previous pc.\n";
+      bc.pc = pcOld;
+    }
+    else
+    {
+      const auto pcNew =
+        solver.solve(distalResidual, pcOld, lo, hi);
+
+      if (!pcNew)
+      {
+        std::cerr << "Warning: failed to solve distal capacitor equation. "
+                  << "Keeping previous pc.\n";
+        bc.pc = pcOld;
+      }
+      else
+      {
+        bc.pc = *pcNew;
+      }
+    }
+
+    /*
+     * Proximal nonlinear pressure recovery:
+     *
+     *   Q_out = Q_p(pout - pc).
+     *
+     * Recover dpP = pout - pc from the nonlinear pipe law, then set:
+     *
+     *   pout = pc + dpP.
+     */
+    const Real oldGuess = bc.pout - bc.pc;
+    const Real dpP =
+      solvePressureDropForFlow(Q, lengthP, radiusP, oldGuess);
+
+    bc.pout = bc.pc + dpP;
   }
 
   CoupledLV0DCoronary3D::Real
@@ -264,6 +637,7 @@ namespace Rodin::Examples::Heart
     if (tau < 0.281) return 35.0;
     if (tau < 0.361) return 35.0 - 47.0 * ((tau - 0.281) / 0.08);
     if (tau < 0.45)  return -12.0;
+
     return 0.0;
   }
 
@@ -325,6 +699,7 @@ namespace Rodin::Examples::Heart
     setupMeshAndSpaces();
     setupDiagnostics();
     printInitialState();
+
     m_initialized = true;
     return *this;
   }
@@ -368,7 +743,6 @@ namespace Rodin::Examples::Heart
 
     m_uOld = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
     m_pOld = 0.0;
-
     m_subOld = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
 
     m_one = 1.0;
@@ -386,6 +760,7 @@ namespace Rodin::Examples::Heart
   void CoupledLV0DCoronary3D::setupDiagnostics()
   {
     m_csv.open(m_cfg.csvPath);
+
     if (!m_csv)
       throw std::runtime_error("Failed to open coupled CSV file: " + m_cfg.csvPath);
 
@@ -426,62 +801,118 @@ namespace Rodin::Examples::Heart
   void CoupledLV0DCoronary3D::solve3D()
   {
     const auto& s = m_model.getState();
+
+    /*
+     * One-way coupling:
+     *
+     *   p_in = p_ar(t)
+     *
+     * from the 0D model. This pressure is imposed as a Neumann traction at
+     * the coronary inlet.
+     */
     const Real pin = s.par;
 
     const auto n = BoundaryNormal(m_mesh);
 
+    /*
+     * Oseen-linearized convection:
+     *
+     *   (u · grad) u
+     *   approximated by
+     *   (u^n · grad) u^{n+1}
+     *
+     * in Rodin notation:
+     *
+     *   Mult(Jacobian(m_u), m_uOld)
+     *
+     * i.e. (grad u^{n+1}) u^n.
+     */
     const auto conv_u = Mult(Jacobian(m_u), m_uOld);
+
+    /*
+     * Skew-symmetric / Temam-style correction:
+     *
+     *   0.5 rho (div u^n) u^{n+1}.
+     */
     const auto div_u_old = Div(m_uOld);
+
+    /*
+     * Backflow coefficient on outlets:
+     *
+     *   beta = max(-u^n · n, 0).
+     */
     const auto beta = Max(-Dot(m_uOld, n), 0.0);
 
-    auto symU = 0.5 * (Jacobian(m_u) + Transpose(Jacobian(m_u)));
-    auto symV = 0.5 * (Jacobian(m_v) + Transpose(Jacobian(m_v)));
-    auto symUOld = 0.5 * (Jacobian(m_uOld) + Transpose(Jacobian(m_uOld)));
+    auto symU =
+      0.5 * (Jacobian(m_u) + Transpose(Jacobian(m_u)));
 
-    //const Real n_pl = 0.7;
-    //const Real m_pl = 0.035;
+    auto symV =
+      0.5 * (Jacobian(m_v) + Transpose(Jacobian(m_v)));
 
-    //const Real mu_min = m_cfg.mu;
+    auto symUOld =
+      0.5 * (Jacobian(m_uOld) + Transpose(Jacobian(m_uOld)));
+
+    /*
+     * Carreau--Yasuda viscosity:
+     *
+     *   mu(gamma)
+     *     =
+     *   mu_inf
+     *   + (mu_0 - mu_inf)
+     *     [1 + (lambda gamma)^a]^((n - 1) / a),
+     *
+     * with:
+     *
+     *   gamma = sqrt(2 D(u^n) : D(u^n)).
+     *
+     * The viscosity is evaluated explicitly from u^n, making the 3D solve
+     * linear in (u^{n+1}, p^{n+1}).
+     */
     const Real gamma_min = 1.0e-3;
-    //const Real mu_max = 5.0e-2;
     const Real mu_0 = 0.04868;
     const Real mu_inf = 0.003605;
     const Real lambda = 3.39;
     const Real n_cy = 0.198;
     const Real a = 1.235;
 
+    /*
+     * VMS stabilization constants.
+     *
+     * tau_K is computed as:
+     *
+     *   tau_K =
+     *   vmsScale /
+     *   sqrt(
+     *     (2 rho / dt)^2
+     *     + (c2 rho |u^n| / h_K)^2
+     *     + (c1 mu / h_K^2)^2
+     *   ).
+     */
     const Real c1 = 4.0;
     const Real c2 = 2.0;
     const Real vmsScale = 0.05;
 
-    //RealFunction muNonNew = [=, this](const Point& p) -> Real
-    //{
-     // const auto S = symUOld.getValue(p);
-
-      //const Real gamma =
-        //std::max(gamma_min, std::sqrt(2.0 * dot(S, S)));
-
-      //const Real mu =
-       // m_pl * std::pow(gamma, n_pl - 1.0);
-
-     // return std::clamp(mu, mu_min, mu_max);
-     //};
-
-     RealFunction muNonNew = [=, this](const Point& p) -> Real
-     {
+    RealFunction muNonNew = [=, this](const Point& p) -> Real
+    {
       const auto S = symUOld.getValue(p);
 
-       const Real gamma =
-         std::max(gamma_min, std::sqrt(2.0 * dot(S, S)));
+      const Real gamma =
+        std::max(gamma_min, std::sqrt(2.0 * dot(S, S)));
 
-       const Real mu =
-         mu_inf + (mu_0 - mu_inf) * Math::pow(1.0 + Math::pow(lambda * gamma, a), (n_cy - 1.) / a);
-
-       return mu;
+      return mu_inf
+        + (mu_0 - mu_inf)
+        * Math::pow(
+            1.0 + Math::pow(lambda * gamma, a),
+            (n_cy - 1.0) / a);
     };
 
     Alert::Info() << "Projecting non-Newtonian viscosity ..." << Alert::Raise;
 
+    /*
+     * L2 projection of the explicit viscosity into the P0/Pcell space m_muh:
+     *
+     *   int mu_h w = int mu(u^n) w.
+     */
     m_muProjection =
         Integral(m_mu, m_w)
       - Integral(muNonNew, m_w);
@@ -489,8 +920,22 @@ namespace Rodin::Examples::Heart
     m_muProjection.assemble();
     m_muProjectionSolver.solve();
 
+    /*
+     * Convective residual target:
+     *
+     *   a^n = (grad u^n) u^n.
+     */
     const auto convectionTarget = Mult(Jacobian(m_uOld), m_uOld);
 
+    /*
+     * L2 projection:
+     *
+     *   int u_proj · v = int a^n · v.
+     *
+     * Thus:
+     *
+     *   u_proj = Pi_h[(grad u^n) u^n].
+     */
     m_l2ConvU =
         Integral(m_up, m_vp)
       - Integral(convectionTarget, m_vp);
@@ -498,6 +943,17 @@ namespace Rodin::Examples::Heart
     m_l2ConvU.assemble();
     m_l2ConvUSolver.solve();
 
+    /*
+     * Dynamic unresolved convective subscale:
+     *
+     *   u'^{n+1}
+     *     =
+     *   tau_K rho (a^n - Pi_h a^n)
+     *   + tau_K (rho / dt) u'^n.
+     *
+     * This is explicit in the resolved velocity because a^n and Pi_h a^n
+     * are both computed from u^n.
+     */
     auto subUpdate = VectorFunction(
         m_mesh.getSpaceDimension(),
         [=, this](const Point& p) -> Math::SpatialVector<Real>
@@ -525,12 +981,22 @@ namespace Rodin::Examples::Heart
           const Real tau = vmsScale / invTau;
 
           Math::SpatialVector<Real> out(m_mesh.getSpaceDimension());
+
           for (size_t c = 0; c < out.size(); ++c)
-            out[c] = tau * ((conv[c] - proj[c]) + old[c] / m_cfg.dt);
+          {
+            out[c] =
+                tau * m_cfg.rho * (conv[c] - proj[c])
+              + tau * (m_cfg.rho / m_cfg.dt) * old[c];
+          }
 
           return out;
         });
 
+    /*
+     * L2 projection of the dynamic subscale into m_sub:
+     *
+     *   int sub_h · v = int subUpdate · v.
+     */
     m_subProjection =
         Integral(m_sub, m_vp)
       - Integral(subUpdate, m_vp);
@@ -538,26 +1004,68 @@ namespace Rodin::Examples::Heart
     m_subProjection.assemble();
     m_subProjectionSolver.solve();
 
+    /*
+     * Semi-implicit weak form:
+     *
+     * Find (u^{n+1}, p^{n+1}) such that, for all (v, q),
+     *
+     *   rho/dt (u^{n+1}, v)
+     * - rho/dt (u^n, v)
+     * + rho ((grad u^{n+1}) u^n, v)
+     * + 0.5 rho ((div u^n) u^{n+1}, v)
+     * + 2 (mu^n D(u^{n+1}), D(v))
+     * - (p^{n+1}, div v)
+     * + (div u^{n+1}, q)
+     * + eps (p^{n+1}, q)
+     *
+     * plus VMS stabilization, pressure tractions, backflow stabilization,
+     * and wall no-slip conditions.
+     */
     m_flow =
           (m_cfg.rho / m_cfg.dt) * Integral(m_u, m_v)
         - (m_cfg.rho / m_cfg.dt) * Integral(m_uOld, m_v)
+
         + m_cfg.rho * Integral(Dot(conv_u, m_v))
         + 0.5 * m_cfg.rho * Integral(div_u_old * Dot(m_u, m_v))
+
         + 2.0 * Integral(m_mu.getSolution() * symU, symV)
+
         - Integral(m_p, Div(m_v))
         + Integral(Div(m_u), m_q)
         + m_cfg.eps * Integral(m_p, m_q)
 
+        /*
+         * VMS bilinear contribution:
+         *
+         *   int_K tau_K rho^2
+         *     ((grad u^{n+1}) u^n)
+         *     ·
+         *     ((grad v) u^n).
+         */
         + VMSConvectionBilinearIntegrator(
             m_u, m_v, m_uOld, m_mu.getSolution(),
             m_cfg.rho, m_cfg.dt, c1, c2, vmsScale)
 
+        /*
+         * VMS linear contribution subtracted from the residual:
+         *
+         *   - int_K rho
+         *       (tau_K rho u_proj + u'^{n+1})
+         *       ·
+         *       ((grad v) u^n).
+         */
         - VMSConvectionLinearIntegrator(
             m_v, m_sub.getSolution(), m_uOld, m_up.getSolution(), m_mu.getSolution(),
             m_cfg.rho, m_cfg.dt, c1, c2, vmsScale)
 
+        /*
+         * Inlet pressure traction.
+         */
         + BoundaryIntegral(pin * Dot(m_v, n)).over(m_cfg.inlet)
 
+        /*
+         * Outlet pressure tractions.
+         */
         + BoundaryIntegral(m_wk.at(4).pout * Dot(m_v, n)).over(4)
         + BoundaryIntegral(m_wk.at(5).pout * Dot(m_v, n)).over(5)
         + BoundaryIntegral(m_wk.at(6).pout * Dot(m_v, n)).over(6)
@@ -565,6 +1073,11 @@ namespace Rodin::Examples::Heart
         + BoundaryIntegral(m_wk.at(8).pout * Dot(m_v, n)).over(8)
         + BoundaryIntegral(m_wk.at(9).pout * Dot(m_v, n)).over(9)
 
+        /*
+         * Outlet backflow stabilization:
+         *
+         *   - 0.5 rho int_Gamma max(-u^n · n, 0) u^{n+1} · v.
+         */
         - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(4)
         - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(5)
         - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(6)
@@ -572,10 +1085,15 @@ namespace Rodin::Examples::Heart
         - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(8)
         - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(9)
 
+        /*
+         * No-slip wall.
+         */
         + DirichletBC(m_u, Zero(m_mesh.getSpaceDimension())).on(m_cfg.wall);
 
     Alert::Info() << "Assembling 3D time step ..." << Alert::Raise;
+
     m_flow.assemble();
+
     if (!m_flowFieldSplitsSet)
     {
       m_flow.setFieldSplits();
@@ -591,26 +1109,49 @@ namespace Rodin::Examples::Heart
     const auto n = BoundaryNormal(m_mesh);
     const auto& s = m_model.getState();
 
-    m_flux = BoundaryIntegral(Dot(m_u.getSolution(), n), m_qFlux).over(m_cfg.inlet);
+    /*
+     * Inlet flux:
+     *
+     *   Q_in = int_Gamma_in u · n.
+     *
+     * With outward normals, an entering inflow usually gives Q_in < 0.
+     */
+    m_flux =
+      BoundaryIntegral(Dot(m_u.getSolution(), n), m_qFlux).over(m_cfg.inlet);
+
     m_flux.assemble();
     m_stepData.qIn = m_flux(m_one);
 
     m_stepData.qOut.clear();
     m_stepData.qOutSum = 0.0;
 
+    /*
+     * Outlet fluxes:
+     *
+     *   Q_out,k = int_Gamma_k u · n.
+     *
+     * With outward normals, Q_out,k > 0 means blood leaves the 3D domain.
+     */
     for (const Attribute tag : m_cfg.outlets)
     {
-      m_flux = BoundaryIntegral(Dot(m_u.getSolution(), n), m_qFlux).over(tag);
+      m_flux =
+        BoundaryIntegral(Dot(m_u.getSolution(), n), m_qFlux).over(tag);
+
       m_flux.assemble();
 
       const Real qOut = m_flux(m_one);
+
       m_stepData.qOut[tag] = qOut;
       m_stepData.qOutSum += qOut;
 
-      // updateRCR(m_wk[tag], qOut, m_cfg.dt);
       updateRCRNonNew(m_model, m_wk[tag], qOut, m_cfg.dt);
     }
 
+    /*
+     * For an exactly conservative incompressible solve:
+     *
+     *   Q_in + sum_k Q_out,k ~= 0.
+     */
     m_stepData.flowBalance = m_stepData.qIn + m_stepData.qOutSum;
     m_stepData.t = s.t;
   }
@@ -624,6 +1165,11 @@ namespace Rodin::Examples::Heart
 
   void CoupledLV0DCoronary3D::writeOutputs()
   {
+    /*
+     * The 0D model has already advanced to t^{n+1}, while the current 3D
+     * solution corresponds to the just-computed time slab. The existing driver
+     * writes at t - dt to preserve the original output convention.
+     */
     m_xdmf.write(m_model.getState().t - m_cfg.dt).flush();
   }
 
@@ -641,9 +1187,11 @@ namespace Rodin::Examples::Heart
     d.y = s.y;
     d.v = s.v;
     d.radius = m_input.R0 + s.y;
+
     d.lvVolume =
       (4.0 / 3.0) * std::numbers::pi_v<Real>
       * d.radius * d.radius * d.radius;
+
     d.lvFlow =
       4.0 * std::numbers::pi_v<Real>
       * d.radius * d.radius * s.v;
@@ -764,6 +1312,8 @@ namespace Rodin::Examples::Heart
       << d.beta << ','
       << d.kc << ','
       << d.tauc << '\n';
+
+    m_csv.flush();
   }
 
   int CoupledLV0DCoronary3D::run()
