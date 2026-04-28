@@ -106,8 +106,9 @@
   | Sequential Poisson | PETSc CG solver on local mesh | `examples/PETSc/PDEs/Seq_Poisson.cpp` |
   | MPI Poisson | Distributed mesh + PETSc KSP | `examples/PETSc/PDEs/MPI_Poisson.cpp` |
   | Sequential Stokes | Multi-field (velocity-pressure-Lagrange) | `examples/PETSc/PDEs/Seq_Stokes.cpp` |
-  | Lid-driven cavity | Navier-Stokes with Picard iteration | `examples/PETSc/PDEs/Seq_LidDrivenCavity.cpp` |
-  | Navier-Stokes | Nonlinear convection-diffusion | `examples/PETSc/PDEs/Seq_NavierStokes.cpp` |
+  | Oseen flow | Transient Picard/Oseen linearization | `examples/PETSc/PDEs/Seq_OseenFlow.cpp` |
+  | Oseen lid-driven cavity | Transient cavity with Picard/Oseen linearization | `examples/PETSc/PDEs/Seq_OseenLidDrivenCavity.cpp` |
+  | Navier-Stokes | Transient nonlinear lid-driven cavity with PETSc SNES | `examples/PETSc/PDEs/Seq_NavierStokes.cpp` |
 
   @see @ref guides-petsc "PETSc Guide", @ref guides-mpi "MPI Guide"
 

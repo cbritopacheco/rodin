@@ -1,4 +1,5 @@
 #include <cassert>
+#include <utility>
 #include <petsc.h>
 #include <petscsnes.h>
 
@@ -75,13 +76,20 @@ namespace Rodin::Solver
     return *this;
   }
 
+  SNES& SNES::setStateUpdate(StateUpdate update)
+  {
+    m_stateUpdate = std::move(update);
+    return *this;
+  }
+
   PetscErrorCode SNES::Residual(::SNES, ::Vec x, ::Vec f, void* ctx)
   {
     auto* self = static_cast<SNES*>(ctx);
     assert(self);
 
     auto& system = self->getProblem().getLinearSystem();
-    system.getSolution() = x;
+    if (self->m_stateUpdate)
+      self->m_stateUpdate(x);
     self->getProblem().assemble();
 
     PetscErrorCode ierr = VecCopy(system.getVector(), f);
@@ -99,7 +107,8 @@ namespace Rodin::Solver
     assert(self);
 
     auto& system = self->getProblem().getLinearSystem();
-    system.getSolution() = x;
+    if (self->m_stateUpdate)
+      self->m_stateUpdate(x);
     self->getProblem().assemble();
 
     const auto& assembledJ = system.getOperator();
@@ -124,11 +133,6 @@ namespace Rodin::Solver
 
   void SNES::solve(VectorType& x)
   {
-    auto& pb = this->getProblem();
-    auto& system = pb.getLinearSystem();
-    auto& b = system.getVector();
-    auto& x0 = system.getSolution();
-
     PetscErrorCode ierr;
 
     ierr = SNESSetType(m_snes, m_type);
@@ -137,13 +141,14 @@ namespace Rodin::Solver
     ierr = SNESSetTolerances(m_snes, m_abstol, m_rtol, m_stol, m_maxIt, m_maxF);
     assert(ierr == PETSC_SUCCESS);
 
-    ierr = SNESSetInitialFunction(m_snes, x0);
-
     ierr = SNESSetFromOptions(m_snes);
     assert(ierr == PETSC_SUCCESS);
 
-    ierr = SNESSolve(m_snes, b, x);
+    ierr = SNESSolve(m_snes, PETSC_NULLPTR, x);
     assert(ierr == PETSC_SUCCESS);
+
+    if (m_stateUpdate)
+      m_stateUpdate(x);
     (void) ierr;
   }
 
