@@ -7,9 +7,7 @@
 
 name: Labeler
 on:
-  push:
-    branches: [master, develop]
-  pull_request:
+  pull_request_target:
     branches: [master, develop]
 
 jobs:
