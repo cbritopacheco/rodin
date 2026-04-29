@@ -19,6 +19,7 @@
  * dimension (vertices, edges, faces, cells).
  */
 
+#include <array>
 #include <limits>
 #include <numeric>
 #include <vector>
@@ -27,6 +28,7 @@
 
 #include "Rodin/Array.h"
 #include "Rodin/Serialization/Optional.h"
+#include "Rodin/Serialization/Vector.h"
 #include "Rodin/MPI/Geometry/Mesh.h"
 #include "Rodin/MPI/Variational/FiniteElementSpace.h"
 #include "Rodin/Variational/H1/H1.h"
@@ -442,6 +444,172 @@ namespace Rodin::Variational
         return res;
       }
 
+      static size_t triangleIndex(size_t i, size_t j)
+      {
+        return j * (K + 1) - j * (j - 1) / 2 + i;
+      }
+
+      static Optional<size_t> findOrdinal(
+          const std::vector<size_t>& positions,
+          size_t position)
+      {
+        for (size_t i = 0; i < positions.size(); ++i)
+        {
+          if (positions[i] == position)
+            return i;
+        }
+        return std::nullopt;
+      }
+
+      static Optional<std::vector<size_t>> vertexPermutation(
+          const std::vector<Index>& localVertexIDs,
+          const std::vector<Index>& ownerVertexIDs)
+      {
+        if (localVertexIDs.size() != ownerVertexIDs.size())
+          return std::nullopt;
+
+        std::vector<size_t> localToOwner(localVertexIDs.size());
+        for (size_t li = 0; li < localVertexIDs.size(); ++li)
+        {
+          bool found = false;
+          for (size_t oi = 0; oi < ownerVertexIDs.size(); ++oi)
+          {
+            if (localVertexIDs[li] == ownerVertexIDs[oi])
+            {
+              localToOwner[li] = oi;
+              found = true;
+              break;
+            }
+          }
+          if (!found)
+            return std::nullopt;
+        }
+        return localToOwner;
+      }
+
+      static Optional<size_t> orientedOwnerOrdinal(
+          Geometry::Polytope::Type g,
+          const std::vector<size_t>& positions,
+          size_t localOrdinal,
+          const std::vector<Index>& localVertexIDs,
+          const std::vector<Index>& ownerVertexIDs)
+      {
+        if (localOrdinal >= positions.size())
+          return std::nullopt;
+
+        const auto permOpt = vertexPermutation(localVertexIDs, ownerVertexIDs);
+        if (!permOpt)
+          return std::nullopt;
+        const auto& localToOwner = *permOpt;
+
+        switch (g)
+        {
+          case Geometry::Polytope::Type::Segment:
+          {
+            if (localToOwner.size() != 2)
+              return std::nullopt;
+            if (localToOwner[0] == 1 && localToOwner[1] == 0)
+              return positions.size() - 1 - localOrdinal;
+            return localOrdinal;
+          }
+
+          case Geometry::Polytope::Type::Triangle:
+          {
+            if (localToOwner.size() != 3)
+              return std::nullopt;
+
+            const size_t raw = positions[localOrdinal];
+            Optional<size_t> li;
+            Optional<size_t> lj;
+            for (size_t j = 1; j < K; ++j)
+            {
+              for (size_t i = 1; i < K - j; ++i)
+              {
+                if (triangleIndex(i, j) == raw)
+                {
+                  li = i;
+                  lj = j;
+                  break;
+                }
+              }
+              if (li)
+                break;
+            }
+            if (!li || !lj)
+              return std::nullopt;
+
+            std::array<size_t, 3> localBary = {
+              K - *li - *lj,
+              *li,
+              *lj
+            };
+            std::array<size_t, 3> ownerBary = { 0, 0, 0 };
+            for (size_t lv = 0; lv < 3; ++lv)
+              ownerBary[localToOwner[lv]] = localBary[lv];
+
+            const size_t ownerRaw = triangleIndex(ownerBary[1], ownerBary[2]);
+            return findOrdinal(positions, ownerRaw);
+          }
+
+          case Geometry::Polytope::Type::Quadrilateral:
+          {
+            if (localToOwner.size() != 4)
+              return std::nullopt;
+
+            const size_t N1 = K + 1;
+            const size_t raw = positions[localOrdinal];
+            const size_t i = raw % N1;
+            const size_t j = raw / N1;
+
+            using Coord = std::array<size_t, 2>;
+            const std::array<Coord, 4> corners = {{
+              Coord{ 0, 0 },
+              Coord{ K, 0 },
+              Coord{ K, K },
+              Coord{ 0, K }
+            }};
+
+            using Transform = Coord (*)(size_t, size_t);
+            const std::array<Transform, 8> transforms = {{
+              +[](size_t x, size_t y) -> Coord { return { x, y }; },
+              +[](size_t x, size_t y) -> Coord { return { K - x, y }; },
+              +[](size_t x, size_t y) -> Coord { return { x, K - y }; },
+              +[](size_t x, size_t y) -> Coord { return { K - x, K - y }; },
+              +[](size_t x, size_t y) -> Coord { return { y, x }; },
+              +[](size_t x, size_t y) -> Coord { return { K - y, x }; },
+              +[](size_t x, size_t y) -> Coord { return { y, K - x }; },
+              +[](size_t x, size_t y) -> Coord { return { K - y, K - x }; }
+            }};
+
+            for (const auto& transform : transforms)
+            {
+              bool matches = true;
+              for (size_t lv = 0; lv < 4; ++lv)
+              {
+                const Coord mapped =
+                    transform(corners[lv][0], corners[lv][1]);
+                if (mapped != corners[localToOwner[lv]])
+                {
+                  matches = false;
+                  break;
+                }
+              }
+
+              if (matches)
+              {
+                const Coord ownerCoord = transform(i, j);
+                const size_t ownerRaw = ownerCoord[1] * N1 + ownerCoord[0];
+                return findOrdinal(positions, ownerRaw);
+              }
+            }
+            return std::nullopt;
+          }
+
+          default:
+            return localOrdinal;
+        }
+      }
+
       /**
        * @brief Core DOF-numbering algorithm: builds m_local_to_global.
        *
@@ -450,15 +618,15 @@ namespace Rodin::Variational
        * indices via a direct owner-push exchange:
        *
        * - The owner iterates @c shard.getHalo(d) and sends
-       *   @c (gid, firstGlobalDOF) to every rank listed as a holder.
+       *   @c (gid, firstGlobalDOF, vertexIDs) to every rank listed as a holder.
        *   The halo is guaranteed to be complete because @c reconcile()
        *   runs an iterative holder-set propagation phase that reaches
        *   non-adjacent ranks sharing the same entity (e.g. a K=2 edge at
        *   the junction of four partitions arranged in a ring).
        *
        * - Each non-owner posts a matching irecv from its owner rank
-       *   (recorded in @c shard.getOwner(d)).  It then reconstructs all
-       *   DOF global indices as @c firstGlobalDOF + k.
+       *   (recorded in @c shard.getOwner(d)).  It then uses the ordered vertex
+       *   IDs to map local edge/face interior DOFs to the owner's orientation.
        *
        * @param[in] mesh The distributed mesh.
        */
@@ -512,18 +680,39 @@ namespace Rodin::Variational
         //         exchange with non-owned counterparts via two-phase
         //         owner-push (see method documentation above).
         //
-        // Interior DOFs are numbered contiguously so the receiver computes:
-        //   globalDOF[k] = firstGlobalDOF + k,  k = 0..pos.size()-1.
+        // Interior DOFs are numbered contiguously in the owner's orientation.
+        // Receivers map their local edge/face orientation to the owner's
+        // ordinal before adding firstGlobalDOF.
         // ------------------------------------------------------------------
         Index dimOffset = m_offset;
 
-        // Owner-push message: (globalEntityID, firstGlobalDOF).
-        using EntityMsg = std::pair<Index, Index>;
+        // Owner-push message:
+        //   (globalEntityID, (firstGlobalDOF, ordered global vertex IDs)).
+        //
+        // The ordered vertex IDs allow non-owner ranks to install shared
+        // high-order edge/face DOFs with the same physical orientation as the
+        // owner.
+        using EntityMsg = std::pair<Index, std::pair<Index, std::vector<Index>>>;
 
         for (size_t d = 0; d <= D; ++d)
         {
           const size_t count = shard.getPolytopeCount(d);
           const auto& owner  = shard.getOwner(d);
+          const auto* d20 =
+              d > 0 ? &shard.getConnectivity().getIncidence(d, 0) : nullptr;
+
+          const auto getOrderedVertexIDs =
+            [&](Index entity) -> std::vector<Index>
+            {
+              std::vector<Index> res;
+              if (d20 == nullptr)
+                return res;
+              const auto& vertices = (*d20)[entity];
+              res.reserve(vertices.size());
+              for (const Index v : vertices)
+                res.push_back(shard.getPolytopeMap(0).left.at(v));
+              return res;
+            };
 
           Index dofIdx = dimOffset;
 
@@ -546,7 +735,7 @@ namespace Rodin::Variational
           }
 
           // ----------------------------------------------------------------
-          // 4b. Owner-push: owners send (gid, firstGlobalDOF) to every
+          // 4b. Owner-push: owners send (gid, firstGlobalDOF, vertexIDs) to every
           //     rank listed in halo[d].  Non-owners post irecv from their
           //     owner rank.  The halo is complete after reconcile() runs
           //     the holder-set propagation, so no all_to_all is required.
@@ -572,13 +761,15 @@ namespace Rodin::Variational
             const auto& entityDOFs = m_fes.getDOFs(d, i);
             const Index  firstGDOF = m_local_to_global.left[entityDOFs(pos[0])];
             const Index  gid       = mesh.getGlobalIndex(d, i);
+            const auto   orderedVertexIDs = getOrderedVertexIDs(i);
 
             for (const Index h : hit->second)
             {
               const int rh = static_cast<int>(h);
               if (rh == rank)
                 continue;
-              push_send[static_cast<size_t>(rh)].push_back({ gid, firstGDOF });
+              push_send[static_cast<size_t>(rh)].push_back(
+                  { gid, { firstGDOF, orderedVertexIDs } });
             }
           }
 
@@ -626,19 +817,26 @@ namespace Rodin::Variational
           // ----------------------------------------------------------------
           for (int r = 0; r < P; ++r)
           {
-            for (const auto& [gid, firstGDOF] : push_recv[static_cast<size_t>(r)])
+            for (const auto& [gid, payload] : push_recv[static_cast<size_t>(r)])
             {
+              const auto& [firstGDOF, ownerVertexIDs] = payload;
               const auto liOpt = mesh.getLocalIndex(d, gid);
               assert(liOpt);
               const Index li = *liOpt;
               assert(!shard.isOwned(d, li));
 
               const auto& entityDOFs = m_fes.getDOFs(d, li);
-              const auto  pos        = interiorPositions(shard.getGeometry(d, li));
+              const auto  g          = shard.getGeometry(d, li);
+              const auto  pos        = interiorPositions(g);
+              const auto  localVertexIDs = getOrderedVertexIDs(li);
 
               for (size_t k = 0; k < pos.size(); ++k)
+              {
+                const auto ownerK = orientedOwnerOrdinal(
+                    g, pos, k, localVertexIDs, ownerVertexIDs);
                 m_local_to_global.left[entityDOFs(pos[k])] =
-                    firstGDOF + static_cast<Index>(k);
+                    firstGDOF + static_cast<Index>(ownerK.value_or(k));
+              }
             }
           }
 
@@ -683,7 +881,7 @@ namespace Rodin::Variational
    *
    * @f[
    *   \text{globalVecDOF}(q, c) =
-   *       \text{globalScalarDOF}(q) + c \cdot \text{globalScalarSize}
+   *       \text{vdim} \cdot \text{globalScalarDOF}(q) + c
    * @f]
    *
    * @tparam K    Polynomial degree (≥ 1).
@@ -831,7 +1029,7 @@ namespace Rodin::Variational
         {
           Index begin, end;
           scalarSpace.getOwnershipRange(begin, end);
-          m_offset = begin;
+          m_offset = begin * static_cast<Index>(vdim);
           m_owned  = (end - begin) * vdim;
         }
 
@@ -841,8 +1039,11 @@ namespace Rodin::Variational
         // Local vector H1 layout (from H1<K, SpatialVector, Local>):
         //   vecLocal[q*vdim + c] = scalarLocal[q] + c * scalarLocalSize
         //
-        // Global vector layout mirrors the scalar distribution:
-        //   vecGlobal = scalarGlobal + c * scalarGlobalSize
+        // Global vector layout interleaves components per scalar DOF:
+        //   vecGlobal = scalarGlobal * vdim + c
+        //
+        // This keeps each rank's PETSc ownership range contiguous:
+        //   [scalarBegin * vdim, scalarEnd * vdim)
         // ------------------------------------------------------------------
         const size_t localVecSize = m_fes.getSize();
         m_local_to_global.left.assign(
@@ -858,7 +1059,7 @@ namespace Rodin::Variational
             const Index localVec  =
                 static_cast<Index>(localScalar + c * scalarLocalSize);
             const Index globalVec =
-                globalScalar + static_cast<Index>(c * scalarGlobalSize);
+                static_cast<Index>(globalScalar * vdim + c);
 
             m_local_to_global.left[localVec] = globalVec;
           }
