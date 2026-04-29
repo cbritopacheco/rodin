@@ -70,6 +70,15 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
+      constexpr
+      decltype(auto) getValue(const IntegrationPoint& ip) const
+      {
+        if constexpr (requires (const Derived& f, const IntegrationPoint& q) { f.getValue(q); })
+          return static_cast<const Derived&>(*this).getValue(ip);
+        else
+          return static_cast<const Derived&>(*this).getValue(ip.getPoint());
+      }
+
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         return static_cast<const Derived&>(*this).getOrder(poly);
@@ -527,4 +536,3 @@ namespace Rodin::Variational
 }
 
 #endif
-

@@ -627,6 +627,12 @@ namespace Rodin::Geometry
       /**
        * @brief Returns cached quadrature associated with a local polytope.
        *
+       * The index @p localIdx is interpreted in the rank-local shard, matching
+       * MPI assembly and finite element space conventions. Returned quadrature
+       * points are nevertheless attached to this distributed mesh object, so
+       * point evaluation observes `point.getPolytope().getMesh() == *this`
+       * while retaining shard-local `(dimension, localIdx)` addressing.
+       *
        * @param[in] dimension Topological dimension of the polytope.
        * @param[in] localIdx Local index of the polytope in the shard.
        * @param[in] qf Quadrature formula.
@@ -834,6 +840,8 @@ namespace Rodin::Geometry
       Context::MPI m_context;
       /// Rank-local shard containing geometry, topology, and ownership metadata.
       Shard m_shard;
+      /// Quadrature cache whose points are attached to this distributed mesh.
+      mutable PolytopeQuadratureIndex m_quadratures;
   };
 
   Mesh(const Context::MPI& context) -> Mesh<Context::MPI>;

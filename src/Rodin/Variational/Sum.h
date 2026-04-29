@@ -163,12 +163,13 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Evaluates the sum at a point.
-       * @param p Point at which to evaluate
+       * @brief Evaluates the sum at a point or integration point.
+       * @param p Point or IntegrationPoint at which to evaluate
        * @returns Sum @f$ f(p) + g(p) @f$
        */
+      template <class Point>
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      auto getValue(const Point& p) const
       {
         const auto lhs = this->getLHS().getValue(p);
         const auto rhs = this->getRHS().getValue(p);

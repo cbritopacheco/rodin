@@ -25,6 +25,7 @@
 #include "Rodin/FormLanguage/Traits.h"
 
 #include "ForwardDecls.h"
+#include "IntegrationPoint.h"
 
 namespace Rodin::FormLanguage
 {
@@ -113,6 +114,12 @@ namespace Rodin::Variational
       decltype(auto) operator()(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
+      }
+
+      constexpr
+      decltype(auto) operator()(const IntegrationPoint& ip) const
+      {
+        return getValue(ip);
       }
 
       /**
@@ -260,6 +267,15 @@ namespace Rodin::Variational
       decltype(auto) getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
+      }
+
+      constexpr
+      decltype(auto) getValue(const IntegrationPoint& ip) const
+      {
+        if constexpr (requires (const Derived& f, const IntegrationPoint& q) { f.getValue(q); })
+          return static_cast<const Derived&>(*this).getValue(ip);
+        else
+          return static_cast<const Derived&>(*this).getValue(ip.getPoint());
       }
 
       /**

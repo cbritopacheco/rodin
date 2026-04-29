@@ -138,6 +138,12 @@ namespace Rodin::Variational
         return s_out;
       }
 
+      template <class Point>
+      ScalarType getValue(const Point& ip) const
+      {
+        return static_cast<const Derived&>(*this).getValue(ip);
+      }
+
       /**
        * @brief Gets the operand grid function.
        * @return Reference to the vector-valued grid function

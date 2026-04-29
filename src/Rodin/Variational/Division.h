@@ -144,8 +144,9 @@ namespace Rodin::Variational
        * @param p Point at which to evaluate
        * @returns Value @f$ \frac{f(x)}{g(x)} @f$ at point @f$ x @f$
        */
+      template <class Point>
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      auto getValue(const Point& p) const
       {
         const auto lhs = getLHS().getValue(p);
         const auto rhs = getRHS().getValue(p);
@@ -302,7 +303,7 @@ namespace Rodin::Variational
       {
         const auto& ip = getIntegrationPoint();
         const auto lhs = getLHS().getBasis(local);
-        const auto rhs = getRHS().getValue(ip.getPoint());
+        const auto rhs = getRHS().getValue(ip);
         return lhs / rhs;
       }
 

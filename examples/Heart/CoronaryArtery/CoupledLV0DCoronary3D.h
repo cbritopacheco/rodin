@@ -11,6 +11,7 @@
 #include <Rodin/Types.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/IO/XDMF.h>
+#include <Rodin/MPI.h>
 #include <Rodin/Variational.h>
 #include <Rodin/PETSc.h>
 #include <Rodin/Solver.h>
@@ -23,7 +24,7 @@ namespace Rodin::Examples::Heart
       using Real = Rodin::Real;
       using Model = Rodin::Heart::CCMLC2014T<>;
       using Attribute = Rodin::Geometry::Attribute;
-      using MeshType = Rodin::Geometry::Mesh<Rodin::Context::Local>;
+      using MeshType = Rodin::Geometry::Mesh<Rodin::Context::MPI>;
 
       using VelocityFESType =
         Rodin::Variational::H1<2, Rodin::Math::SpatialVector<Real>, MeshType>;
@@ -94,8 +95,8 @@ namespace Rodin::Examples::Heart
         RCR defaultRCR{5.0e8, 5.0e-9, 1.0e9, 400.0, 10500.0, 11000.0};
       };
 
-      CoupledLV0DCoronary3D();
-      explicit CoupledLV0DCoronary3D(const Config& cfg);
+      explicit CoupledLV0DCoronary3D(const Rodin::Context::MPI& context);
+      CoupledLV0DCoronary3D(const Rodin::Context::MPI& context, const Config& cfg);
       ~CoupledLV0DCoronary3D();
 
       CoupledLV0DCoronary3D(const CoupledLV0DCoronary3D&) = delete;
@@ -142,7 +143,7 @@ namespace Rodin::Examples::Heart
       };
 
       static Model::Input makeInput();
-      static MeshType makeMesh(const Config& cfg);
+      static MeshType makeMesh(const Rodin::Context::MPI& context, const Config& cfg);
 
       static void updateRCR(RCR& bc, Real Q, Real dt);
       static void updateRCRNonNew(const Model& model, RCR& bc, Real Q, Real dt);
@@ -153,6 +154,7 @@ namespace Rodin::Examples::Heart
       void setupMeshAndSpaces();
       void setupDiagnostics();
       void printInitialState() const;
+      bool isRoot() const;
 
       bool advance0D();
       void solve3D();

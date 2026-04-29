@@ -22,6 +22,7 @@
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/Grad.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Variational/ShapeFunction.h"
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
@@ -53,9 +54,97 @@ namespace Rodin::Variational
       using OperandType = GridFunction<FESType, Data>;
       using Parent = GradBase<OperandType, Grad<OperandType>>;
 
+      struct Cache
+      {
+        struct Key
+        {
+          const void* mesh = nullptr;
+          Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
+          size_t dim = 0;
+          Index cell = 0;
+          const QF::QuadratureFormulaBase* qf = nullptr;
+          size_t qp = 0;
+          bool valid = false;
+
+          bool operator==(const Key& o) const noexcept
+          {
+            if (!valid || !o.valid)
+              return false;
+            return mesh == o.mesh
+                && geom == o.geom
+                && dim == o.dim
+                && cell == o.cell
+                && qf == o.qf
+                && qp == o.qp;
+          }
+        };
+
+        Key key;
+        SpatialVectorType value;
+      };
+
+      using Parent::getValue;
+
       Grad(const OperandType& u) : Parent(u) {}
       Grad(const Grad& other) : Parent(other) {}
       Grad(Grad&& other) : Parent(std::move(other)) {}
+
+      const SpatialVectorType& getValue(const IntegrationPoint& ip) const
+      {
+        const auto& p = ip.getPoint();
+        const auto& polytope = p.getPolytope();
+        const auto& gf = this->getOperand();
+        const auto& fes = gf.getFiniteElementSpace();
+
+        if (!(polytope.getMesh() == fes.getMesh()))
+        {
+          m_cache.key.valid = false;
+          m_cache.value = Parent::getValue(p);
+          return m_cache.value;
+        }
+
+        const size_t d = polytope.getDimension();
+        const auto& mesh = polytope.getMesh();
+        if (d != mesh.getDimension())
+        {
+          m_cache.key.valid = false;
+          m_cache.value = Parent::getValue(p);
+          return m_cache.value;
+        }
+
+        typename Cache::Key key;
+        key.mesh = static_cast<const void*>(&mesh);
+        key.geom = polytope.getGeometry();
+        key.dim = d;
+        key.cell = polytope.getIndex();
+        key.qf = &ip.getQuadratureFormula();
+        key.qp = ip.getIndex();
+        key.valid = true;
+
+        if (m_cache.key == key)
+          return m_cache.value;
+
+        m_cache.key = key;
+
+        const auto& fe = fes.getFiniteElement(d, polytope.getIndex());
+        const auto& tab = fe.getTabulation(ip.getQuadratureFormula());
+        const auto JinvT = p.getJacobianInverse().transpose();
+
+        SpatialVectorType ref(static_cast<std::uint8_t>(d));
+        ref.setZero();
+
+        for (size_t local = 0; local < fe.getCount(); ++local)
+        {
+          const auto gref = tab.getGradient(ip.getIndex(), local);
+          const auto uval =
+            gf[fes.getGlobalIndex({d, polytope.getIndex()}, local)];
+          for (size_t j = 0; j < d; ++j)
+            ref(static_cast<std::uint8_t>(j)) += uval * gref[j];
+        }
+
+        m_cache.value = JinvT * ref;
+        return m_cache.value;
+      }
 
       void interpolate(SpatialVectorType& out, const Geometry::Point& p) const
       {
@@ -145,6 +234,9 @@ namespace Rodin::Variational
       {
         return new Grad(*this);
       }
+
+    private:
+      mutable Cache m_cache;
   };
 
   /**

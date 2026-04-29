@@ -28,7 +28,10 @@
 #ifndef RODIN_VARIATIONAL_H1_JACOBIAN_H
 #define RODIN_VARIATIONAL_H1_JACOBIAN_H
 
+#include <vector>
+
 #include "Rodin/Variational/ForwardDecls.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Variational/Jacobian.h"
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
@@ -100,9 +103,130 @@ namespace Rodin::Variational
 
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
+      struct Cache
+      {
+        struct Key
+        {
+          const void* mesh = nullptr;
+          Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
+          size_t dim = 0;
+          Index cell = 0;
+          const QF::QuadratureFormulaBase* qf = nullptr;
+          size_t qp = 0;
+          bool valid = false;
+
+          explicit operator bool() const noexcept { return valid; }
+
+          bool operator==(const Key& o) const noexcept
+          {
+            if (!valid || !o.valid)
+              return false;
+            return mesh == o.mesh
+                && geom == o.geom
+                && dim  == o.dim
+                && cell == o.cell
+                && qf   == o.qf
+                && qp   == o.qp;
+          }
+        };
+
+        Key key;
+        SpatialMatrixType value;
+      };
+
+      using Parent::getValue;
+
       Jacobian(const OperandType& u) : Parent(u) {}
-      Jacobian(const Jacobian& other) : Parent(other) {}
-      Jacobian(Jacobian&& other) : Parent(std::move(other)) {}
+
+      Jacobian(const Jacobian& other)
+        : Parent(other)
+      {}
+
+      Jacobian(Jacobian&& other)
+        : Parent(std::move(other))
+      {}
+
+      const SpatialMatrixType& getValue(const IntegrationPoint& ip) const
+      {
+        const auto& p = ip.getPoint();
+        const auto& polytope = p.getPolytope();
+        const auto& gf = this->getOperand();
+        const auto& fes = gf.getFiniteElementSpace();
+
+        if (!(polytope.getMesh() == fes.getMesh()))
+        {
+          m_cache.key.valid = false;
+          m_cache.value = Parent::getValue(p);
+          return m_cache.value;
+        }
+
+        const size_t d = polytope.getDimension();
+        const auto& mesh = polytope.getMesh();
+        if (d != mesh.getDimension())
+        {
+          m_cache.key.valid = false;
+          m_cache.value = Parent::getValue(p);
+          return m_cache.value;
+        }
+
+        typename Cache::Key key;
+        key.mesh = static_cast<const void*>(&mesh);
+        key.geom = polytope.getGeometry();
+        key.dim = d;
+        key.cell = polytope.getIndex();
+        key.qf = &ip.getQuadratureFormula();
+        key.qp = ip.getIndex();
+        key.valid = true;
+
+        if (m_cache.key == key)
+          return m_cache.value;
+
+        m_cache.key = key;
+
+        const size_t i = polytope.getIndex();
+        const size_t vdim = fes.getVectorDimension();
+        const auto geom = polytope.getGeometry();
+
+        const H1Element<K, ScalarType> feS(geom);
+        const size_t nscalar = feS.getCount();
+        const auto& tab = feS.getTabulation(ip.getQuadratureFormula());
+        const auto JinvT = p.getJacobianInverse().transpose();
+
+        static thread_local SpatialVectorType s_ref;
+        static thread_local SpatialVectorType s_phys;
+        s_ref.resize(static_cast<std::uint8_t>(d));
+        s_phys.resize(static_cast<std::uint8_t>(d));
+
+        SpatialMatrixType res(
+          static_cast<std::uint8_t>(vdim),
+          static_cast<std::uint8_t>(d));
+        res.setZero();
+
+        for (size_t alpha = 0; alpha < nscalar; ++alpha)
+        {
+          const auto gref = tab.getGradient(ip.getIndex(), alpha);
+          for (size_t j = 0; j < d; ++j)
+            s_ref(static_cast<std::uint8_t>(j)) = gref[j];
+
+          s_phys = JinvT * s_ref;
+
+          for (size_t comp = 0; comp < vdim; ++comp)
+          {
+            const size_t local = alpha * vdim + comp;
+            const auto uval = gf[fes.getGlobalIndex({d, i}, local)];
+            for (size_t j = 0; j < d; ++j)
+            {
+              res(
+                static_cast<std::uint8_t>(comp),
+                static_cast<std::uint8_t>(j)) +=
+                  uval * s_phys(static_cast<std::uint8_t>(j));
+            }
+          }
+        }
+
+        m_cache.value = std::move(res);
+        return m_cache.value;
+      }
 
       void interpolate(SpatialMatrixType& out, const Geometry::Point& p) const
       {
@@ -222,6 +346,9 @@ namespace Rodin::Variational
       }
 
       Jacobian* copy() const noexcept override { return new Jacobian(*this); }
+
+    private:
+      mutable Cache m_cache;
   };
 
   /**

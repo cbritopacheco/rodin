@@ -4,6 +4,13 @@
 /**
  * @file
  * @brief MPI assembly specializations targeting PETSc objects.
+ *
+ * In this module, mesh entity pairs `(d, i)` are shard-local indices. PETSc
+ * assembly iterates over rank-local MPI mesh polytopes, filters owned entities
+ * for rows/contributions, and passes the same local pair to the MPI finite
+ * element spaces and integrators. Global bilinear forms keep the test entity
+ * owned, but may use ghost trial entities for off-process columns; those trial
+ * indices are still local to the rank shard.
  */
 
 #include <petsc.h>

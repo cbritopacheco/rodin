@@ -103,7 +103,8 @@ namespace Rodin::Variational
        * @param p Point at which to evaluate
        * @return Tangent of operand function value
        */
-      Real getValue(const Geometry::Point& p) const
+      template <class Point>
+      auto getValue(const Point& p) const
       {
         return Math::tan(getOperand().getValue(p));
       }

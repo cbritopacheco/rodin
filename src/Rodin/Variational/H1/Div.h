@@ -83,9 +83,107 @@ namespace Rodin::Variational
       using OperandType = GridFunction<FESType, Data>;
       using Parent = DivBase<OperandType, Div<OperandType>>;
 
+      struct Cache
+      {
+        struct Key
+        {
+          const void* mesh = nullptr;
+          Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
+          size_t dim = 0;
+          Index cell = 0;
+          const QF::QuadratureFormulaBase* qf = nullptr;
+          size_t qp = 0;
+          bool valid = false;
+
+          bool operator==(const Key& o) const noexcept
+          {
+            if (!valid || !o.valid)
+              return false;
+            return mesh == o.mesh
+                && geom == o.geom
+                && dim == o.dim
+                && cell == o.cell
+                && qf == o.qf
+                && qp == o.qp;
+          }
+        };
+
+        Key key;
+        ScalarType value = ScalarType(0);
+      };
+
+      using Parent::getValue;
+
       Div(const OperandType& u) : Parent(u) {}
       Div(const Div& other) : Parent(other) {}
       Div(Div&& other) : Parent(std::move(other)) {}
+
+      ScalarType getValue(const IntegrationPoint& ip) const
+      {
+        const auto& p = ip.getPoint();
+        const auto& polytope = p.getPolytope();
+        const auto& gf = this->getOperand();
+        const auto& fes = gf.getFiniteElementSpace();
+
+        if (!(polytope.getMesh() == fes.getMesh()))
+        {
+          m_cache.key.valid = false;
+          m_cache.value = Parent::getValue(p);
+          return m_cache.value;
+        }
+
+        const size_t d = polytope.getDimension();
+        const auto& mesh = polytope.getMesh();
+        if (d != mesh.getDimension())
+        {
+          m_cache.key.valid = false;
+          m_cache.value = Parent::getValue(p);
+          return m_cache.value;
+        }
+
+        typename Cache::Key key;
+        key.mesh = static_cast<const void*>(&mesh);
+        key.geom = polytope.getGeometry();
+        key.dim = d;
+        key.cell = polytope.getIndex();
+        key.qf = &ip.getQuadratureFormula();
+        key.qp = ip.getIndex();
+        key.valid = true;
+
+        if (m_cache.key == key)
+          return m_cache.value;
+
+        m_cache.key = key;
+
+        const size_t vdim = fes.getVectorDimension();
+        const H1Element<K, ScalarType> feS(polytope.getGeometry());
+        const size_t nscalar = feS.getCount();
+        const auto& tab = feS.getTabulation(ip.getQuadratureFormula());
+        const auto JinvT = p.getJacobianInverse().transpose();
+
+        SpatialVectorType ref(static_cast<std::uint8_t>(d));
+        SpatialVectorType phys(static_cast<std::uint8_t>(d));
+
+        ScalarType out = ScalarType(0);
+        for (size_t alpha = 0; alpha < nscalar; ++alpha)
+        {
+          const auto gref = tab.getGradient(ip.getIndex(), alpha);
+          for (size_t j = 0; j < d; ++j)
+            ref(static_cast<std::uint8_t>(j)) = gref[j];
+
+          phys = JinvT * ref;
+
+          for (size_t comp = 0; comp < vdim && comp < d; ++comp)
+          {
+            const size_t local = alpha * vdim + comp;
+            out += gf[fes.getGlobalIndex({d, polytope.getIndex()}, local)]
+                 * phys(static_cast<std::uint8_t>(comp));
+          }
+        }
+
+        m_cache.value = out;
+        return m_cache.value;
+      }
 
       void interpolate(ScalarType& out, const Geometry::Point& p) const
       {
@@ -211,6 +309,9 @@ namespace Rodin::Variational
       {
         return new Div(*this);
       }
+
+    private:
+      mutable Cache m_cache;
   };
 
   /**

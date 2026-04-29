@@ -203,6 +203,14 @@ namespace Rodin::Variational
         return out;
       }
 
+      RangeType getValue(const IntegrationPoint& ip) const
+      {
+        if constexpr (requires (const Derived& f, const IntegrationPoint& q) { f.getValue(q); })
+          return static_cast<const Derived&>(*this).getValue(ip);
+        else
+          return getValue(ip.getPoint());
+      }
+
       /**
        * @brief Interpolates the gradient at a point (to be overridden in derived class).
        * @param[out] out Output vector for gradient result

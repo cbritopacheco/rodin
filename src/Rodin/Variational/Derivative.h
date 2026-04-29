@@ -147,6 +147,14 @@ namespace Rodin::Variational
         return out;
       }
 
+      ScalarType getValue(const IntegrationPoint& ip) const
+      {
+        if constexpr (requires (const Derived& f, const IntegrationPoint& q) { f.getValue(q); })
+          return static_cast<const Derived&>(*this).getValue(ip);
+        else
+          return getValue(ip.getPoint());
+      }
+
       /**
        * @brief Interpolation function to be overriden in Derived type.
        */

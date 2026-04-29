@@ -22,6 +22,7 @@
 #include <array>
 #include <limits>
 #include <numeric>
+#include <utility>
 #include <vector>
 
 #include <boost/mpi/collectives.hpp>
@@ -139,6 +140,38 @@ namespace Rodin::Variational
         private:
           Geometry::Polytope m_polytope;
           std::unique_ptr<FunctionType> m_v;
+      };
+
+      template <class Callable>
+      class CallablePullback
+        : public FiniteElementSpacePullbackBase<CallablePullback<Callable>>
+      {
+        public:
+          using CallableType = Callable;
+
+          template <class Function>
+          CallablePullback(const Geometry::Polytope& polytope, Function&& v)
+            : m_polytope(polytope), m_v(std::forward<Function>(v))
+          {}
+
+          CallablePullback(const CallablePullback&) = default;
+
+          decltype(auto) operator()(const Math::SpatialVector<Real>& r) const
+          {
+            const Geometry::Point p(m_polytope, r);
+            return m_v(p);
+          }
+
+          template <class T>
+          decltype(auto) operator()(T& res, const Math::SpatialVector<Real>& r) const
+          {
+            const Geometry::Point p(m_polytope, r);
+            return m_v(res, p);
+          }
+
+        private:
+          Geometry::Polytope m_polytope;
+          CallableType m_v;
       };
 
       /**
@@ -301,6 +334,17 @@ namespace Rodin::Variational
         const auto& [d, i] = p;
         const auto& mesh = getMesh();
         return Pullback<FunctionDerived>(*mesh.getPolytope(d, i), v);
+      }
+
+      template <class Callable>
+      auto getPullback(
+          const std::pair<size_t, Index>& p,
+          Callable&& v) const
+      {
+        const auto& [d, i] = p;
+        const auto& mesh = getMesh();
+        return CallablePullback<Callable>(
+            *mesh.getPolytope(d, i), std::forward<Callable>(v));
       }
 
       /**
@@ -966,6 +1010,38 @@ namespace Rodin::Variational
           std::unique_ptr<FunctionType> m_v;
       };
 
+      template <class Callable>
+      class CallablePullback
+        : public FiniteElementSpacePullbackBase<CallablePullback<Callable>>
+      {
+        public:
+          using CallableType = Callable;
+
+          template <class Function>
+          CallablePullback(const Geometry::Polytope& polytope, Function&& v)
+            : m_polytope(polytope), m_v(std::forward<Function>(v))
+          {}
+
+          CallablePullback(const CallablePullback&) = default;
+
+          decltype(auto) operator()(const Math::SpatialVector<Real>& r) const
+          {
+            const Geometry::Point p(m_polytope, r);
+            return m_v(p);
+          }
+
+          template <class T>
+          decltype(auto) operator()(T& res, const Math::SpatialVector<Real>& r) const
+          {
+            const Geometry::Point p(m_polytope, r);
+            return m_v(res, p);
+          }
+
+        private:
+          Geometry::Polytope m_polytope;
+          CallableType m_v;
+      };
+
       /**
        * @brief Pushforward of a function from the reference polytope.
        */
@@ -1183,6 +1259,17 @@ namespace Rodin::Variational
         const auto& [d, i] = p;
         const auto& mesh = getMesh();
         return Pullback<FunctionDerived>(*mesh.getPolytope(d, i), v);
+      }
+
+      template <class Callable>
+      auto getPullback(
+          const std::pair<size_t, Index>& p,
+          Callable&& v) const
+      {
+        const auto& [d, i] = p;
+        const auto& mesh = getMesh();
+        return CallablePullback<Callable>(
+            *mesh.getPolytope(d, i), std::forward<Callable>(v));
       }
 
       /**

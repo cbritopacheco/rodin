@@ -161,6 +161,15 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
+      constexpr
+      decltype(auto) getValue(const IntegrationPoint& ip) const
+      {
+        if constexpr (requires (const Derived& f, const IntegrationPoint& q) { f.getValue(q); })
+          return static_cast<const Derived&>(*this).getValue(ip);
+        else
+          return static_cast<const Derived&>(*this).getValue(ip.getPoint());
+      }
+
       /**
        * @brief Gets the dimension of the vector object.
        * @returns Dimension of vector.

@@ -184,6 +184,14 @@ namespace Rodin::Variational
         return res;
       }
 
+      RangeType getValue(const IntegrationPoint& ip) const
+      {
+        if constexpr (requires (const Derived& f, const IntegrationPoint& q) { f.getValue(q); })
+          return static_cast<const Derived&>(*this).getValue(ip);
+        else
+          return getValue(ip.getPoint());
+      }
+
       /**
        * @brief Gets the operand grid function.
        * @return Reference to the vector-valued grid function

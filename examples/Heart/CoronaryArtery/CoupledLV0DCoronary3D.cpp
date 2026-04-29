@@ -26,17 +26,23 @@ namespace Rodin::Examples::Heart
   using namespace Rodin::Geometry;
   using namespace Rodin::Variational;
 
-  CoupledLV0DCoronary3D::CoupledLV0DCoronary3D()
-    : CoupledLV0DCoronary3D(Config{})
+  namespace
+  {
+    constexpr int RootRank = 0;
+  }
+
+  CoupledLV0DCoronary3D::CoupledLV0DCoronary3D(const Context::MPI& context)
+    : CoupledLV0DCoronary3D(context, Config{})
   {
   }
 
-  CoupledLV0DCoronary3D::CoupledLV0DCoronary3D(const Config& cfg)
+  CoupledLV0DCoronary3D::CoupledLV0DCoronary3D(
+      const Context::MPI& context, const Config& cfg)
     : m_cfg(cfg),
       m_input(makeInput()),
       m_model(m_input),
-      m_mesh(makeMesh(m_cfg)),
-      m_xdmf(m_cfg.xdmfBasename),
+      m_mesh(makeMesh(context, m_cfg)),
+      m_xdmf(context.getCommunicator(), m_cfg.xdmfBasename),
       m_uh(std::integral_constant<size_t, 2>{}, m_mesh, m_mesh.getSpaceDimension()),
       m_ph(std::integral_constant<size_t, 1>{}, m_mesh),
       m_u(m_uh),
@@ -52,35 +58,81 @@ namespace Rodin::Examples::Heart
       m_flowKSP(m_flow),
       m_flowSolver(m_flowKSP)
   {
-    Alert::Info() << "Number of elements in mesh: " << m_mesh.getCellCount() << '\n'
-                  << "Number of vertices in mesh: " << m_mesh.getVertexCount() << '\n'
-                  << "Mesh space dimension: " << m_mesh.getSpaceDimension() << '\n'
-                  << Alert::Raise;
+    auto cellCount = m_mesh.getCellCount();
+    auto vertexCount = m_mesh.getVertexCount();
+    auto spaceDim = m_mesh.getSpaceDimension();
+    auto velocityDOFs = m_uh.getSize();
+    auto pressureDOFs = m_ph.getSize();
 
-    Alert::Info() << "Velocity space has " << m_uh.getSize() << " DOFs.\n"
-                  << "Pressure space has " << m_ph.getSize() << " DOFs.\n"
-                  << Alert::Raise;
+    if (isRoot())
+    {
+      Alert::Info() << "Number of elements in mesh: " << cellCount << '\n'
+                    << "Number of vertices in mesh: " << vertexCount << '\n'
+                    << "Mesh space dimension: " << spaceDim << '\n'
+                    << Alert::Raise;
+
+      Alert::Info() << "Velocity space has " << velocityDOFs << " DOFs.\n"
+                    << "Pressure space has " << pressureDOFs << " DOFs.\n"
+                    << Alert::Raise;
+    }
   }
 
   CoupledLV0DCoronary3D::~CoupledLV0DCoronary3D() = default;
 
   CoupledLV0DCoronary3D::MeshType
-  CoupledLV0DCoronary3D::makeMesh(const Config& cfg)
+  CoupledLV0DCoronary3D::makeMesh(const Context::MPI& context, const Config& cfg)
   {
-    MeshType mesh;
-    mesh.load(cfg.meshPath, IO::FileFormat::MEDIT);
+    const auto& comm = context.getCommunicator();
+
+    Rodin::MPI::Sharder sharder(context);
+    if (comm.rank() == RootRank)
+    {
+      Geometry::Mesh<Context::Local> mesh;
+      mesh.load(cfg.meshPath, IO::FileFormat::MEDIT);
+
+      if (mesh.getSpaceDimension() != 3)
+        throw std::runtime_error("Expected a 3D coronary mesh.");
+
+      Alert::Info() << "Computing connectivity for " << cfg.meshPath << " ..."
+                    << Alert::Raise;
+
+      const size_t D = mesh.getDimension();
+      mesh.getConnectivity().compute(D, D);
+      mesh.getConnectivity().compute(D, 0);
+      mesh.getConnectivity().compute(D, D - 1);
+      mesh.getConnectivity().compute(D - 1, D);
+      mesh.getConnectivity().compute(D - 1, 0);
+      mesh.getConnectivity().compute(D - 1, 1);
+      mesh.getConnectivity().compute(1, 0);
+
+      Alert::Info() << "Partitioning coronary mesh over "
+                    << comm.size() << " MPI ranks ..."
+                    << Alert::Raise;
+
+      Geometry::BalancedCompactPartitioner partitioner(mesh);
+      partitioner.partition(static_cast<size_t>(comm.size()));
+      sharder.shard(partitioner);
+      sharder.scatter(RootRank);
+    }
+
+    MeshType mesh = sharder.gather(RootRank);
     mesh.scale(cfg.meshScale);
 
-    if (mesh.getSpaceDimension() != 3)
-      throw std::runtime_error("Expected a 3D coronary mesh.");
-
-    Alert::Info() << "Computing connectivity for " << cfg.meshPath << " ..."
-                  << Alert::Raise;
-
-    mesh.getConnectivity().compute(3, 2);
-    mesh.getConnectivity().compute(2, 1);
+    const size_t D = mesh.getDimension();
+    mesh.getConnectivity().compute(D, D);
+    mesh.getConnectivity().compute(D, 0);
+    mesh.getConnectivity().compute(D, D - 1);
+    mesh.getConnectivity().compute(D - 1, D);
+    mesh.getConnectivity().compute(D - 1, 0);
+    mesh.getConnectivity().compute(D - 1, 1);
     mesh.getConnectivity().compute(1, 0);
-    mesh.getConnectivity().compute(2, 3);
+    mesh.reconcile(2);
+    mesh.reconcile(1);
+
+    mesh.save(
+        cfg.xdmfBasename + "_partitioned"
+        + std::to_string(mesh.getContext().getCommunicator().rank()) + ".mesh",
+        IO::FileFormat::MEDIT);
 
     return mesh;
   }
@@ -501,8 +553,9 @@ namespace Rodin::Examples::Heart
 
   void CoupledLV0DCoronary3D::setupMeshAndSpaces()
   {
-    Alert::Info() << "Setting up " << m_cfg.xdmfBasename << ".xdmf ..."
-                  << Alert::Raise;
+    if (isRoot())
+      Alert::Info() << "Setting up " << m_cfg.xdmfBasename << ".xdmf ..."
+                    << Alert::Raise;
 
     m_xdmf.setMesh(m_mesh);
 
@@ -531,6 +584,9 @@ namespace Rodin::Examples::Heart
 
   void CoupledLV0DCoronary3D::setupDiagnostics()
   {
+    if (!isRoot())
+      return;
+
     m_csv.open(m_cfg.csvPath);
 
     if (!m_csv)
@@ -541,6 +597,9 @@ namespace Rodin::Examples::Heart
 
   void CoupledLV0DCoronary3D::printInitialState() const
   {
+    if (!isRoot())
+      return;
+
     const auto& s = m_model.getState();
 
     std::cout << "Initial 0D state:\n"
@@ -556,21 +615,30 @@ namespace Rodin::Examples::Heart
               << "  tauc  = " << s.tauc << '\n';
   }
 
+  bool CoupledLV0DCoronary3D::isRoot() const
+  {
+    return m_mesh.getContext().getCommunicator().rank() == RootRank;
+  }
+
   bool CoupledLV0DCoronary3D::advance0D()
   {
-    Alert::Info() << "\t[0D] Advancing LV model ..." << Alert::Raise;
+    if (isRoot())
+      Alert::Info() << "\t[0D] Advancing LV model ..." << Alert::Raise;
 
     const auto rep = m_model.step(m_cfg.dt);
 
-    Alert::Info()
-      << "\t[0D] Newton: "
-      << (rep.converged ? "converged" : "NOT converged")
-      << "  iter = " << rep.iterations
-      << "  |F| = " << rep.finalResidual
-      << "  |dx| = " << rep.finalStepNorm
-      << Alert::Raise;
+    if (isRoot())
+    {
+      Alert::Info()
+        << "\t[0D] Newton: "
+        << (rep.converged ? "converged" : "NOT converged")
+        << "  iter = " << rep.iterations
+        << "  |F| = " << rep.finalResidual
+        << "  |dx| = " << rep.finalStepNorm
+        << Alert::Raise;
+    }
 
-    if (rep.converged)
+    if (isRoot() && rep.converged)
     {
       const auto& s = m_model.getState();
       Alert::Info()
@@ -707,7 +775,8 @@ namespace Rodin::Examples::Heart
 
         + DirichletBC(m_u, -uState).on(m_cfg.wall);
 
-    Alert::Info() << "\t\t[3D] Assembling Newton system ..." << Alert::Raise;
+    if (isRoot())
+      Alert::Info() << "\t\t[3D] Assembling Newton system ..." << Alert::Raise;
 
     m_flow.assemble();
 
@@ -717,15 +786,19 @@ namespace Rodin::Examples::Heart
       m_flowFieldSplitsSet = true;
     }
 
-    Alert::Info() << "\t\t[3D] Solving with PETSc SNES ..." << Alert::Raise;
+    if (isRoot())
+      Alert::Info() << "\t\t[3D] Solving with PETSc SNES ..." << Alert::Raise;
 
     m_flowSolver.solve();
 
-    Alert::Info()
-      << "\t\t\t[SNES] "
-      << (m_flowSolver.converged() ? "Converged" : "Did NOT converge")
-      << "  iterations = " << m_flowSolver.getIterationNumber()
-      << Alert::Raise;
+    if (isRoot())
+    {
+      Alert::Info()
+        << "\t\t\t[SNES] "
+        << (m_flowSolver.converged() ? "Converged" : "Did NOT converge")
+        << "  iterations = " << m_flowSolver.getIterationNumber()
+        << Alert::Raise;
+    }
   }
 
   void CoupledLV0DCoronary3D::computeFluxes()
@@ -819,6 +892,9 @@ namespace Rodin::Examples::Heart
 
   void CoupledLV0DCoronary3D::writeCSVHeader()
   {
+    if (!isRoot())
+      return;
+
     m_csv
       << "t,"
       << "LeftAtriumPressure,"
@@ -863,6 +939,9 @@ namespace Rodin::Examples::Heart
 
   void CoupledLV0DCoronary3D::writeCSVRow()
   {
+    if (!isRoot())
+      return;
+
     const StepData d = collectStepData();
 
     auto get = [](const std::map<Attribute, Real>& m, Attribute a) -> Real
@@ -922,12 +1001,15 @@ namespace Rodin::Examples::Heart
     {
       const Real t_current = m_model.getState().t;
 
-      Alert::Info()
-        << "━━━ Step " << (i + 1) << " / " << m_cfg.nsteps
-        << "  t = " << t_current << " s"
-        << "  (dt = " << m_cfg.dt << " s)"
-        << " ━━━"
-        << Alert::Raise;
+      if (isRoot())
+      {
+        Alert::Info()
+          << "━━━ Step " << (i + 1) << " / " << m_cfg.nsteps
+          << "  t = " << t_current << " s"
+          << "  (dt = " << m_cfg.dt << " s)"
+          << " ━━━"
+          << Alert::Raise;
+      }
 
       if (!advance0D())
       {
@@ -953,4 +1035,3 @@ namespace Rodin::Examples::Heart
     return 0;
   }
 }
-
