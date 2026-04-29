@@ -196,6 +196,11 @@ namespace Rodin::Variational
         return m_cache.value;
       }
 
+      void interpolate(ScalarType& out, const IntegrationPoint& ip) const
+      {
+        out = getValue(ip);
+      }
+
       /**
        * @brief Interpolates the partial derivative at a given point.
        * @param[out] out Output scalar for derivative value

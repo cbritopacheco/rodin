@@ -105,17 +105,17 @@ namespace Rodin::Variational
        * @brief Pullback of a function to the reference polytope.
        */
       template <class FunctionDerived>
-      class Pullback
-        : public FiniteElementSpacePullbackBase<Pullback<FunctionDerived>>
+      class FunctionPullback
+        : public FiniteElementSpacePullbackBase<FunctionPullback<FunctionDerived>>
       {
         public:
           using FunctionType = FunctionBase<FunctionDerived>;
 
-          Pullback(const Geometry::Polytope& polytope, const FunctionType& v)
+          FunctionPullback(const Geometry::Polytope& polytope, const FunctionType& v)
             : m_polytope(polytope), m_v(v.copy())
           {}
 
-          Pullback(const Pullback&) = default;
+          FunctionPullback(const FunctionPullback&) = default;
 
           auto operator()(const Math::SpatialVector<Real>& r) const
           {
@@ -143,18 +143,18 @@ namespace Rodin::Variational
       };
 
       template <class Callable>
-      class CallablePullback
-        : public FiniteElementSpacePullbackBase<CallablePullback<Callable>>
+      class Pullback
+        : public FiniteElementSpacePullbackBase<Pullback<Callable>>
       {
         public:
           using CallableType = Callable;
 
           template <class Function>
-          CallablePullback(const Geometry::Polytope& polytope, Function&& v)
+          Pullback(const Geometry::Polytope& polytope, Function&& v)
             : m_polytope(polytope), m_v(std::forward<Function>(v))
           {}
 
-          CallablePullback(const CallablePullback&) = default;
+          Pullback(const Pullback&) = default;
 
           decltype(auto) operator()(const Math::SpatialVector<Real>& r) const
           {
@@ -333,7 +333,7 @@ namespace Rodin::Variational
       {
         const auto& [d, i] = p;
         const auto& mesh = getMesh();
-        return Pullback<FunctionDerived>(*mesh.getPolytope(d, i), v);
+        return FunctionPullback<FunctionDerived>(*mesh.getPolytope(d, i), v);
       }
 
       template <class Callable>
@@ -343,7 +343,7 @@ namespace Rodin::Variational
       {
         const auto& [d, i] = p;
         const auto& mesh = getMesh();
-        return CallablePullback<Callable>(
+        return Pullback<Callable>(
             *mesh.getPolytope(d, i), std::forward<Callable>(v));
       }
 
@@ -973,17 +973,17 @@ namespace Rodin::Variational
        * @brief Pullback of a function to the reference polytope.
        */
       template <class FunctionDerived>
-      class Pullback
-        : public FiniteElementSpacePullbackBase<Pullback<FunctionDerived>>
+      class FunctionPullback
+        : public FiniteElementSpacePullbackBase<FunctionPullback<FunctionDerived>>
       {
         public:
           using FunctionType = FunctionBase<FunctionDerived>;
 
-          Pullback(const Geometry::Polytope& polytope, const FunctionType& v)
+          FunctionPullback(const Geometry::Polytope& polytope, const FunctionType& v)
             : m_polytope(polytope), m_v(v.copy())
           {}
 
-          Pullback(const Pullback&) = default;
+          FunctionPullback(const FunctionPullback&) = default;
 
           auto operator()(const Math::SpatialVector<Real>& r) const
           {
@@ -1011,18 +1011,18 @@ namespace Rodin::Variational
       };
 
       template <class Callable>
-      class CallablePullback
-        : public FiniteElementSpacePullbackBase<CallablePullback<Callable>>
+      class Pullback
+        : public FiniteElementSpacePullbackBase<Pullback<Callable>>
       {
         public:
           using CallableType = Callable;
 
           template <class Function>
-          CallablePullback(const Geometry::Polytope& polytope, Function&& v)
+          Pullback(const Geometry::Polytope& polytope, Function&& v)
             : m_polytope(polytope), m_v(std::forward<Function>(v))
           {}
 
-          CallablePullback(const CallablePullback&) = default;
+          Pullback(const Pullback&) = default;
 
           decltype(auto) operator()(const Math::SpatialVector<Real>& r) const
           {
@@ -1258,7 +1258,7 @@ namespace Rodin::Variational
       {
         const auto& [d, i] = p;
         const auto& mesh = getMesh();
-        return Pullback<FunctionDerived>(*mesh.getPolytope(d, i), v);
+        return FunctionPullback<FunctionDerived>(*mesh.getPolytope(d, i), v);
       }
 
       template <class Callable>
@@ -1268,7 +1268,7 @@ namespace Rodin::Variational
       {
         const auto& [d, i] = p;
         const auto& mesh = getMesh();
-        return CallablePullback<Callable>(
+        return Pullback<Callable>(
             *mesh.getPolytope(d, i), std::forward<Callable>(v));
       }
 

@@ -185,6 +185,11 @@ namespace Rodin::Variational
         return m_cache.value;
       }
 
+      void interpolate(ScalarType& out, const IntegrationPoint& ip) const
+      {
+        out = getValue(ip);
+      }
+
       void interpolate(ScalarType& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();

@@ -138,10 +138,34 @@ namespace Rodin::Variational
         return s_out;
       }
 
-      template <class Point>
-      ScalarType getValue(const Point& ip) const
+      ScalarType getValue(const IntegrationPoint& ip) const
       {
-        return static_cast<const Derived&>(*this).getValue(ip);
+        static thread_local ScalarType s_out;
+        const auto& p = ip.getPoint();
+        const auto& polytope = p.getPolytope();
+        const auto& polytopeMesh = polytope.getMesh();
+        const auto& gf = getOperand();
+        const auto& fes = gf.getFiniteElementSpace();
+        const auto& fesMesh = fes.getMesh();
+        if (polytopeMesh == fesMesh)
+        {
+          this->interpolate(s_out, ip);
+        }
+        else if (const auto inclusion = fesMesh.inclusion(p))
+        {
+          this->interpolate(s_out, *inclusion);
+        }
+        else if (fesMesh.isSubMesh())
+        {
+          const auto& submesh = fesMesh.asSubMesh();
+          const auto restriction = submesh.restriction(p);
+          this->interpolate(s_out, *restriction);
+        }
+        else
+        {
+          assert(false);
+        }
+        return s_out;
       }
 
       /**
@@ -166,6 +190,15 @@ namespace Rodin::Variational
       void interpolate(ScalarType& out, const Geometry::Point& p) const
       {
         static_cast<const Derived&>(*this).interpolate(out, p);
+      }
+
+      constexpr
+      void interpolate(ScalarType& out, const IntegrationPoint& ip) const
+      {
+        if constexpr (requires (const Derived& f, ScalarType& r, const IntegrationPoint& q) { f.interpolate(r, q); })
+          static_cast<const Derived&>(*this).interpolate(out, ip);
+        else
+          static_cast<const Derived&>(*this).interpolate(out, ip.getPoint());
       }
 
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept

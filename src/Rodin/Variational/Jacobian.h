@@ -186,10 +186,33 @@ namespace Rodin::Variational
 
       RangeType getValue(const IntegrationPoint& ip) const
       {
-        if constexpr (requires (const Derived& f, const IntegrationPoint& q) { f.getValue(q); })
-          return static_cast<const Derived&>(*this).getValue(ip);
+        const auto& p = ip.getPoint();
+        const auto& polytope = p.getPolytope();
+        const auto& polytopeMesh = polytope.getMesh();
+        const auto& gf = getOperand();
+        const auto& fes = gf.getFiniteElementSpace();
+        const auto& fesMesh = fes.getMesh();
+
+        SpatialMatrixType res;
+        if (polytopeMesh == fesMesh)
+        {
+          this->interpolate(res, ip);
+        }
+        else if (const auto inclusion = fesMesh.inclusion(p))
+        {
+          this->interpolate(res, *inclusion);
+        }
+        else if (fesMesh.isSubMesh())
+        {
+          const auto& submesh = fesMesh.asSubMesh();
+          const auto restriction = submesh.restriction(p);
+          this->interpolate(res, *restriction);
+        }
         else
-          return getValue(ip.getPoint());
+        {
+          assert(false);
+        }
+        return res;
       }
 
       /**
@@ -214,6 +237,15 @@ namespace Rodin::Variational
       void interpolate(SpatialMatrixType& out, const Geometry::Point& p) const
       {
         static_cast<const Derived&>(*this).interpolate(out, p);
+      }
+
+      constexpr
+      void interpolate(SpatialMatrixType& out, const IntegrationPoint& ip) const
+      {
+        if constexpr (requires (const Derived& f, SpatialMatrixType& r, const IntegrationPoint& q) { f.interpolate(r, q); })
+          static_cast<const Derived&>(*this).interpolate(out, ip);
+        else
+          static_cast<const Derived&>(*this).interpolate(out, ip.getPoint());
       }
 
       constexpr

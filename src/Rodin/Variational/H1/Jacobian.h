@@ -228,6 +228,11 @@ namespace Rodin::Variational
         return m_cache.value;
       }
 
+      void interpolate(SpatialMatrixType& out, const IntegrationPoint& ip) const
+      {
+        out = getValue(ip);
+      }
+
       void interpolate(SpatialMatrixType& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
