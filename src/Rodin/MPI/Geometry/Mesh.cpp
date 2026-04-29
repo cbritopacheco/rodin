@@ -977,6 +977,85 @@ namespace Rodin::Geometry
       assert(distId[i] != kInvalidId);
 
     // --------------------------------------------------------------------------
+    // Iterative holder-set propagation.
+    //
+    // Builds a complete per-entity holder set by flooding (entity, holder rank)
+    // pairs through the direct-neighbor stencil built from the cell halo.  A
+    // rank "holds" an entity when the entity is present in its local shard
+    // (Owned, Shared, or Ghost).  After convergence the owner knows every
+    // non-owner rank that stores the entity, enabling a complete halo[d].
+    //
+    // For UniformGrid meshes this converges in 1 round.  For
+    // Sharder-partitioned meshes (face-adjacent-only cell halo) it converges
+    // in O(partition-graph diameter) rounds; ranks that share an entity but
+    // are not direct neighbors learn about each other through intermediate
+    // ranks.
+    // --------------------------------------------------------------------------
+    using HolderEntry = std::pair<Index, Index>; // (localEntityIdx, holderRank)
+
+    std::vector<IndexSet> holderSet(nd);
+    for (Index i = 0; i < static_cast<Index>(nd); ++i)
+      holderSet[i].insert(static_cast<Index>(rank));
+
+    for (size_t k = 0; k < neighbors.size(); ++k)
+    {
+      const Index nbr = static_cast<Index>(neighbors[k]);
+      for (const Index i : convergeSend[k])
+        holderSet[i].insert(nbr);
+    }
+
+    {
+      while (true)
+      {
+        bool epochChanged = false;
+
+        std::vector<std::vector<HolderEntry>> sendbuf(neighbors.size());
+        for (size_t k = 0; k < neighbors.size(); ++k)
+        {
+          auto& sb = sendbuf[k];
+          for (const Index i : convergeSend[k])
+            for (const Index h : holderSet[i])
+              sb.push_back({ i, h });
+        }
+
+        const int tagHolder = 2500 + static_cast<int>(d);
+
+        std::vector<boost::mpi::request> reqs;
+        reqs.reserve(neighbors.size());
+
+        for (size_t k = 0; k < neighbors.size(); ++k)
+          reqs.push_back(comm.isend(neighbors[k], tagHolder, sendbuf[k]));
+
+        for (size_t k = 0; k < neighbors.size(); ++k)
+        {
+          std::vector<HolderEntry> recvbuf;
+          comm.recv(neighbors[k], tagHolder, recvbuf);
+
+          const auto& rtl = remoteToLocal[k];
+          for (const auto& [remoteIdx, holderRank] : recvbuf)
+          {
+            const auto it = rtl.find(remoteIdx);
+            if (it == rtl.end())
+              continue;
+
+            const Index i = it->second;
+            if (holderSet[i].insert(holderRank).second)
+              epochChanged = true;
+          }
+        }
+
+        boost::mpi::wait_all(reqs.begin(), reqs.end());
+
+        bool globallyChanged = false;
+        boost::mpi::all_reduce(
+            comm, epochChanged, globallyChanged, std::logical_or<bool>());
+
+        if (!globallyChanged)
+          break;
+      }
+    }
+
+    // --------------------------------------------------------------------------
     // Rewrite shard metadata for dimension d.
     // --------------------------------------------------------------------------
     {
@@ -1018,13 +1097,15 @@ namespace Rodin::Geometry
         }
       }
 
-      for (size_t k = 0; k < neighbors.size(); ++k)
+      for (Index i = 0; i < static_cast<Index>(nd); ++i)
       {
-        const Index nbr = static_cast<Index>(neighbors[k]);
-        for (const Index i : convergeSend[k])
+        if (ownerRank[i] == rank)
         {
-          if (ownerRank[i] == rank)
-            halo[i].insert(nbr);
+          for (const Index h : holderSet[i])
+          {
+            if (static_cast<int>(h) != rank)
+              halo[i].insert(h);
+          }
         }
       }
     }
