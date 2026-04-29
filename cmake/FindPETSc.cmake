@@ -56,6 +56,9 @@ if (PETSc_FOUND)
   set(PETSc_INCLUDE_DIRS "${PETSc_INCLUDE_DIR}")
   set(PETSc_LIBRARIES "${PETSc_LIBRARY}")
 
+  # PETSc headers include mpi.h, so MPI must be on the include path.
+  # Also link the C++ MPI wrappers (libmpi_cxx) because PETSc installations
+  # built with C++ support pull in MPI::Win and other C++-binding symbols.
   # MPI::MPI_CXX must also be linked: libpetsc.so is typically compiled with
   # C++ MPI bindings (libmpi_cxx), and newer linkers (GCC 12+) require every
   # DSO that provides needed symbols to appear explicitly on the link line.
