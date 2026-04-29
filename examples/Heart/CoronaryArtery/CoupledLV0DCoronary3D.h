@@ -1,3 +1,4 @@
+// CoupledLV0DCoronary3D.h
 #ifndef EXAMPLES_HEART_CORONARYARTERY_COUPLEDLV0DCORONARY3D_H
 #define EXAMPLES_HEART_CORONARYARTERY_COUPLEDLV0DCORONARY3D_H
 
@@ -30,29 +31,11 @@ namespace Rodin::Examples::Heart
       using PressureFESType =
         Rodin::Variational::H1<1, Real, MeshType>;
 
-      using ViscosityFESType =
-        Rodin::Variational::P1<Real, MeshType>;
-
-      using TauFESType =
-          Rodin::Variational::P1<Real, MeshType>;
-
-      using VMSFESType =
-        Rodin::Variational::H1<2, Rodin::Math::SpatialVector<Real>, MeshType>;
-
       using VelocityGridFunctionType =
         Rodin::PETSc::Variational::GridFunction<VelocityFESType>;
 
       using PressureGridFunctionType =
         Rodin::PETSc::Variational::GridFunction<PressureFESType>;
-
-      using ViscosityGridFunctionType =
-        Rodin::PETSc::Variational::GridFunction<ViscosityFESType>;
-
-      using VMSGridFunctionType =
-        Rodin::PETSc::Variational::GridFunction<VMSFESType>;
-
-      using TauGridFunctionType =
-        Rodin::PETSc::Variational::GridFunction<TauFESType>;
 
       using VelocityTrialFunctionType =
         Rodin::PETSc::Variational::TrialFunction<VelocityGridFunctionType, VelocityFESType>;
@@ -66,41 +49,11 @@ namespace Rodin::Examples::Heart
       using PressureTestFunctionType =
         Rodin::PETSc::Variational::TestFunction<PressureFESType>;
 
-      using ViscosityTrialFunctionType =
-        Rodin::PETSc::Variational::TrialFunction<ViscosityGridFunctionType, ViscosityFESType>;
-
-      using ViscosityTestFunctionType =
-        Rodin::PETSc::Variational::TestFunction<ViscosityFESType>;
-
-      using TauTrialFunctionType =
-        Rodin::PETSc::Variational::TrialFunction<TauGridFunctionType, TauFESType>;
-
-      using TauTestFunctionType =
-        Rodin::PETSc::Variational::TestFunction<TauFESType>;
-
-      using VMSTrialFunctionType =
-        Rodin::PETSc::Variational::TrialFunction<VMSGridFunctionType, VMSFESType>;
-
-      using VMSTestFunctionType =
-        Rodin::PETSc::Variational::TestFunction<VMSFESType>;
-
       using FluxLinearFormType =
         Rodin::Variational::LinearForm<PressureFESType, ::Vec>;
 
       using LinearSystemType =
         Rodin::PETSc::Math::LinearSystem;
-
-      using ViscosityProblemType =
-        Rodin::Variational::Problem<
-          LinearSystemType, ViscosityTrialFunctionType, ViscosityTestFunctionType>;
-
-      using VMSProblemType =
-        Rodin::Variational::Problem<
-          LinearSystemType, VMSTrialFunctionType, VMSTestFunctionType>;
-
-      using TauProblemType =
-        Rodin::Variational::Problem<
-          LinearSystemType, TauTrialFunctionType, TauTestFunctionType>;
 
       using FlowProblemType =
         Rodin::Variational::Problem<
@@ -203,7 +156,7 @@ namespace Rodin::Examples::Heart
 
       bool advance0D();
       void solve3D();
-      void computeFluxesAndUpdateRCR();
+      void computeFluxes();
       void updateHistory();
       void writeOutputs();
       void writeCSVHeader();
@@ -219,21 +172,12 @@ namespace Rodin::Examples::Heart
 
       VelocityFESType m_uh;
       PressureFESType m_ph;
-      ViscosityFESType m_muh;
-      VMSFESType m_uph;
-      TauFESType m_tauh;
 
       VelocityTrialFunctionType m_u;
       PressureTrialFunctionType m_p;
-      ViscosityTrialFunctionType m_mu;
-      VMSTrialFunctionType m_up;
-      TauTrialFunctionType m_tau;
 
       VelocityTestFunctionType m_v;
       PressureTestFunctionType m_q;
-      ViscosityTestFunctionType m_w;
-      VMSTestFunctionType m_vp;
-      TauTestFunctionType m_t;
 
       VelocityGridFunctionType m_uOld;
       PressureGridFunctionType m_pOld;
@@ -242,21 +186,7 @@ namespace Rodin::Examples::Heart
 
       FluxLinearFormType m_flux;
 
-      VMSTrialFunctionType m_sub;
-      VMSGridFunctionType m_subOld;
-
-      TauGridFunctionType m_tauOld;
-
-      ViscosityProblemType m_muProjection;
-      VMSProblemType m_l2ConvU;
-      VMSProblemType m_subProjection;
       FlowProblemType m_flow;
-      TauProblemType m_tauProjection;
-
-      Rodin::Solver::KSP m_muProjectionSolver;
-      Rodin::Solver::KSP m_l2ConvUSolver;
-      Rodin::Solver::KSP m_subProjectionSolver;
-      Rodin::Solver::KSP m_tauProjectionSolver;
       Rodin::Solver::KSP m_flowKSP;
       Rodin::Solver::SNES m_flowSolver;
 

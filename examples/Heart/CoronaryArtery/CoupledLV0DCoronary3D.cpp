@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <iostream>
 #include <limits>
@@ -6,51 +7,16 @@
 #include <stdexcept>
 #include <type_traits>
 
+#include <petscvec.h>
+
 #include <Rodin/Alert.h>
 #include <Rodin/Solver.h>
 
 #include "CoupledLV0DCoronary3D.h"
+#include "Rodin/Alert/Exception.h"
 #include "Rodin/Math/RungeKutta/RK4.h"
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Math/RootFinding/NewtonRaphson.h"
-#include "VMSConvectionIntegrator.h"
-
-/**
- * @file CoupledLV0DCoronary3D.cpp
- * @brief Partitioned 0D--3D coronary haemodynamics example.
- *
- * This file implements a one-way coupled model:
- *
- *   LV 0D model
- *      -> inlet pressure for the 3D coronary domain
- *      -> semi-implicit generalized-Newtonian Navier--Stokes solve
- *      -> outlet fluxes
- *      -> nonlinear rheological RCR outlet updates.
- *
- * The 3D fluid model is a backward-Euler, fully nonlinear
- * incompressible Navier--Stokes problem solved via PETSc SNES
- * (Newton--Raphson) with:
- *
- *   - Newton-linearized convection:
- *       (grad du) uState + (grad uState) du,
- *     plus residual term (grad uState) uState,
- *   - Carreau--Yasuda viscosity lagged from u^n (Picard for viscosity),
- *   - dynamic projected VMS convective stabilization (lagged from u^n),
- *   - pressure regularization,
- *   - inlet/outlet pressure tractions,
- *   - outlet backflow stabilization (lagged beta from u^n).
- *
- * The outlet model replaces the constant RCR resistances by nonlinear
- * rheological pipe-flow laws derived from the WRMS/Rabinowitsch correction
- * for generalized Newtonian fluids.
- *
- * The coupling is partitioned and one-way at the cardiac/aortic level:
- *
- *   p_ar(t) from the 0D model drives the coronary inlet.
- *
- * The coronary outlet states are updated from the 3D outlet fluxes, but they
- * are not fed back into the LV/aortic 0D model in this driver.
- */
 
 namespace Rodin::Examples::Heart
 {
@@ -73,36 +39,16 @@ namespace Rodin::Examples::Heart
       m_xdmf(m_cfg.xdmfBasename),
       m_uh(std::integral_constant<size_t, 2>{}, m_mesh, m_mesh.getSpaceDimension()),
       m_ph(std::integral_constant<size_t, 1>{}, m_mesh),
-      m_muh(m_mesh),
-      m_tauh(m_mesh),
-      m_uph(std::integral_constant<size_t, 2>{}, m_mesh, m_mesh.getSpaceDimension()),
       m_u(m_uh),
       m_p(m_ph),
-      m_tau(m_tauh),
-      m_t(m_tauh),
-      m_tauOld(m_tauh),
-      m_mu(m_muh),
-      m_up(m_uph),
-      m_sub(m_uph),
-      m_subOld(m_uph),
       m_v(m_uh),
       m_q(m_ph),
-      m_w(m_muh),
-      m_vp(m_uph),
       m_uOld(m_uh),
       m_pOld(m_ph),
       m_one(m_ph),
       m_qFlux(m_ph),
       m_flux(m_qFlux),
-      m_muProjection(m_mu, m_w),
-      m_l2ConvU(m_up, m_vp),
-      m_subProjection(m_sub, m_vp),
       m_flow(m_u, m_p, m_v, m_q),
-      m_tauProjection(m_tau, m_t),
-      m_muProjectionSolver(m_muProjection),
-      m_l2ConvUSolver(m_l2ConvU),
-      m_subProjectionSolver(m_subProjection),
-      m_tauProjectionSolver(m_tauProjection),
       m_flowKSP(m_flow),
       m_flowSolver(m_flowKSP)
   {
@@ -196,27 +142,6 @@ namespace Rodin::Examples::Heart
     return input;
   }
 
-  /**
-   * Constant-resistance RCR update:
-   *
-   *   C (pc^{n+1} - pc^n) / dt + (pc^{n+1} - pd) / Rd = Q,
-   *
-   * hence
-   *
-   *   pc^{n+1}
-   *     =
-   *   ((C/dt) pc^n + Q + pd/Rd) / (C/dt + 1/Rd),
-   *
-   * and
-   *
-   *   pout^{n+1} = pc^{n+1} + Rp Q.
-   *
-   * Sign convention:
-   *
-   *   Q = int_Gamma u · n
-   *
-   * so Q > 0 means flow leaving the 3D coronary domain.
-   */
   void CoupledLV0DCoronary3D::updateRCR(RCR& bc, Real Q, Real dt)
   {
     const Real a = bc.C / dt;
@@ -228,94 +153,20 @@ namespace Rodin::Examples::Heart
     bc.pout = bc.pc + bc.Rp * Q;
   }
 
-  /**
-   * Nonlinear rheological RCR update.
-   *
-   * This replaces the constant distal/proximal resistance laws by nonlinear
-   * pipe-flow laws:
-   *
-   *   Q = Q_pipe(dp; L, R).
-   *
-   * The distal capacitor equation is solved implicitly:
-   *
-   *   C (pc^{n+1} - pc^n) / dt
-   *   + Q_d(pc^{n+1} - pd)
-   *   = Q_out.
-   *
-   * The proximal pressure is then recovered from:
-   *
-   *   Q_out = Q_p(pout - pc).
-   *
-   * This is still an outlet model. It is not a monolithic 0D--3D nonlinear
-   * coupling because the 3D solve uses the previous outlet pressures and the
-   * RCR states are updated after the 3D solve.
-   */
   void CoupledLV0DCoronary3D::updateRCRNonNew(
       const Model& model, RCR& bc, Real Q, Real dt)
   {
-    (void) model;
-
-    const auto& s = m_model.getState();
+    const auto& s = model.getState();
 
     const Real cap = bc.C / dt;
     const Real pcOld = bc.pc;
 
-    /*
-     * Equivalent unresolved segment dimensions.
-     *
-     * These are modelling parameters for the lumped proximal and distal
-     * rheological closures, not geometric data extracted from the mesh.
-     */
     const Real radiusP = 0.004;
     const Real lengthP = 0.015;
 
     const Real radiusD = 0.0004;
     const Real lengthD = 0.002;
 
-    /*
-     * Fully developed generalized-Newtonian pipe-flow law.
-     *
-     * Input:
-     *   dp     = pressure drop across the unresolved segment
-     *   L      = segment length
-     *   radius = segment radius
-     *
-     * Output:
-     *   Q(dp)  = volumetric flow rate
-     *   dQ/ddp = differential conductance
-     *
-     * Constitutive law:
-     *
-     *   mu(gamma)
-     *     =
-     *   mu_inf
-     *   + (mu_0 - mu_inf)
-     *     [1 + (lambda gamma)^a]^((n - 1) / a).
-     *
-     * Wall shear stress:
-     *
-     *   tau_w = R |dp| / (2 L).
-     *
-     * Wall shear rate:
-     *
-     *   tau_w = mu(gamma_w) gamma_w.
-     *
-     * WRMS/Rabinowitsch integral:
-     *
-     *   I =
-     *   int_0^{gamma_w}
-     *     gamma^3 mu(gamma)^2 d tau/d gamma d gamma,
-     *
-     * where
-     *
-     *   tau(gamma) = mu(gamma) gamma.
-     *
-     * Flow rate:
-     *
-     *   |Q| = pi R^3 I / tau_w^3,
-     *
-     * with sign(Q) = sign(dp).
-     */
     auto flowLaw = [](Real dp, Real L, Real radius) -> std::pair<Real, Real>
     {
       const Real mu0    = 0.04868;
@@ -328,14 +179,6 @@ namespace Rodin::Examples::Heart
       const Real sgn = (dp >= 0.0) ? 1.0 : -1.0;
       const Real adp = std::abs(dp);
 
-      /*
-       * Low-pressure-drop fallback.
-       *
-       * At vanishing shear, Carreau--Yasuda gives mu -> mu0, so the
-       * pipe law reduces to Poiseuille with viscosity mu0:
-       *
-       *   R0 = 8 mu0 L / (pi R^4).
-       */
       const Real R0 =
         8.0 * mu0 * L /
         (std::numbers::pi_v<Real> * std::pow(radius, 4.0));
@@ -363,36 +206,16 @@ namespace Rodin::Examples::Heart
           * std::pow(g, yasuda - 1.0);
       };
 
-      /*
-       * Solve:
-       *
-       *   F(gamma) = gamma mu(gamma) - tau_w = 0.
-       *
-       * Exact derivative:
-       *
-       *   F'(gamma) = mu(gamma) + gamma mu'(gamma).
-       */
       auto tauMinusTauW = [&](Real g) -> std::pair<Real, Real>
       {
         const Real m  = mu(g);
         const Real dm = dmu(g);
-
         return {g * m - tauW, m + g * dm};
       };
 
       Math::RootFinding::NewtonRaphson<Real> rootFinder(
         1e-12, 1e-10, 1e-12, 50);
 
-      /*
-       * Safeguarded Newton needs a bracket.
-       *
-       * At gamma ~= 0:
-       *
-       *   gamma mu(gamma) - tau_w < 0.
-       *
-       * For large gamma, the left-hand side becomes positive. We expand the
-       * upper bound until the sign changes.
-       */
       Real gHi = std::max<Real>(tauW / muInf, 1e-8);
 
       for (int k = 0; k < 100 && tauMinusTauW(gHi).first < 0.0; ++k)
@@ -417,15 +240,6 @@ namespace Rodin::Examples::Heart
 
       const Real gammaW = *gammaRoot;
 
-      /*
-       * Rheological integral:
-       *
-       *   I =
-       *   int_0^{gamma_w}
-       *     gamma^3 mu(gamma)^2
-       *     [mu(gamma) + gamma mu'(gamma)]
-       *   d gamma.
-       */
       auto integrand = [&](Real g) -> Real
       {
         if (g <= 0.0)
@@ -451,9 +265,6 @@ namespace Rodin::Examples::Heart
         return integrand(g);
       };
 
-      /*
-       * Integrate dI/dgamma = integrand(gamma), I(0) = 0.
-       */
       for (int i = 0; i < steps; ++i)
       {
         const Real g = static_cast<Real>(i) * h;
@@ -471,17 +282,6 @@ namespace Rodin::Examples::Heart
         std::numbers::pi_v<Real> * std::pow(radius, 3.0) * I /
         std::pow(tauW, 3.0);
 
-      /*
-       * Differential conductance.
-       *
-       * From the Rabinowitsch relation:
-       *
-       *   d|Q| / d|dp|
-       *     =
-       *   (pi R^3 gamma_w - 3 |Q|) / |dp|.
-       *
-       * Since Q(dp) is odd, dQ/ddp is positive for both signs of dp.
-       */
       const Real dqAbs =
         (std::numbers::pi_v<Real> * std::pow(radius, 3.0) * gammaW
          - 3.0 * qAbs) / adp;
@@ -496,13 +296,6 @@ namespace Rodin::Examples::Heart
       return {sgn * qAbs, dqAbs};
     };
 
-    /*
-     * Invert the nonlinear pipe law.
-     *
-     * Given targetQ, find dp such that:
-     *
-     *   Q_pipe(dp) = targetQ.
-     */
     auto solvePressureDropForFlow =
       [&](Real targetQ, Real L, Real radius, Real guess) -> Real
       {
@@ -512,13 +305,6 @@ namespace Rodin::Examples::Heart
         const Real sgn  = (targetQ >= 0.0) ? 1.0 : -1.0;
         const Real qAbs = std::abs(targetQ);
 
-        /*
-         * Solve in x = |dp| >= 0:
-         *
-         *   F(x) = sign(Q) Q_pipe(sign(Q) x) - |Q| = 0.
-         *
-         * Its derivative is dQ/ddp because Q_pipe is odd.
-         */
         auto F = [&](Real x) -> std::pair<Real, Real>
         {
           const auto [q, dq] = flowLaw(sgn * x, L, radius);
@@ -553,20 +339,6 @@ namespace Rodin::Examples::Heart
         return sgn * (*root);
       };
 
-    /*
-     * Distal nonlinear capacitor equation:
-     *
-     *   F(pc)
-     *     =
-     *   C/dt (pc - pcOld)
-     *   + Q_d(pc - pd)
-     *   - Q_out
-     *   = 0.
-     *
-     * Exact derivative:
-     *
-     *   F'(pc) = C/dt + dQ_d/d(pc - pd).
-     */
     auto distalResidual = [&](Real pc) -> std::pair<Real, Real>
     {
       const Real x = pc - s.pv;
@@ -581,12 +353,6 @@ namespace Rodin::Examples::Heart
     Math::RootFinding::NewtonRaphson<Real> solver(
       1e-10, 1e-9, 1e-12, 50);
 
-    /*
-     * Bracket pc^{n+1}.
-     *
-     * The pressure can move above or below pd depending on the sign of Q.
-     * Therefore the bracket is expanded symmetrically around pcOld and pd.
-     */
     Real span = std::max<Real>(std::abs(Q) / cap + 1000.0, 1000.0);
 
     Real lo = std::min(pcOld, s.pv) - span;
@@ -624,15 +390,6 @@ namespace Rodin::Examples::Heart
       }
     }
 
-    /*
-     * Proximal nonlinear pressure recovery:
-     *
-     *   Q_out = Q_p(pout - pc).
-     *
-     * Recover dpP = pout - pc from the nonlinear pipe law, then set:
-     *
-     *   pout = pc + dpP.
-     */
     const Real oldGuess = bc.pout - bc.pc;
     const Real dpP =
       solvePressureDropForFlow(Q, lengthP, radiusP, oldGuess);
@@ -751,36 +508,18 @@ namespace Rodin::Examples::Heart
 
     m_u.setName("u");
     m_p.setName("p");
-    m_mu.setName("mu_nonNew");
-    m_up.setName("projected_convection");
-    m_sub.setName("subscale");
-    m_tau.setName("tau");
 
     m_uOld = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
     m_pOld = 0.0;
-
-    m_tauOld = 0.0;
-    m_subOld = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
-
     m_one = 1.0;
 
     m_xdmf.add("velocity", m_u.getSolution());
     m_xdmf.add("pressure", m_p.getSolution());
-    m_xdmf.add("viscosity", m_mu.getSolution());
-    m_xdmf.add("subscale", m_sub.getSolution());
-    m_xdmf.add("tau", m_tau.getSolution());
 
     m_wk.clear();
     for (const Attribute tag : m_cfg.outlets)
       m_wk.emplace(tag, m_cfg.defaultRCR);
 
-    /*
-     * SNES state update:
-     *
-     * Before each residual/Jacobian assembly, copy the monolithic SNES
-     * iterate back into the velocity and pressure GridFunctions so that
-     * the nonlinear variational form sees the current Newton iterate.
-     */
     m_flowSolver
       .setTolerances(1e-10, 1e-8, 1e-10, 50, 10000)
       .setStateUpdate([this](const PETSc::Math::Vector& x)
@@ -819,14 +558,27 @@ namespace Rodin::Examples::Heart
 
   bool CoupledLV0DCoronary3D::advance0D()
   {
+    Alert::Info() << "\t[0D] Advancing LV model ..." << Alert::Raise;
+
     const auto rep = m_model.step(m_cfg.dt);
 
-    std::cout << "  0D Newton step: "
-              << (rep.converged ? "converged" : "not converged")
-              << ", iterations = " << rep.iterations
-              << ", final residual = " << rep.finalResidual
-              << ", final step norm = " << rep.finalStepNorm
-              << '\n';
+    Alert::Info()
+      << "\t[0D] Newton: "
+      << (rep.converged ? "converged" : "NOT converged")
+      << "  iter = " << rep.iterations
+      << "  |F| = " << rep.finalResidual
+      << "  |dx| = " << rep.finalStepNorm
+      << Alert::Raise;
+
+    if (rep.converged)
+    {
+      const auto& s = m_model.getState();
+      Alert::Info()
+        << "\t\t pv  = " << s.pv  << " Pa"
+        << "  par = " << s.par << " Pa"
+        << "  pd  = " << s.pd  << " Pa"
+        << Alert::Raise;
+    }
 
     return rep.converged;
   }
@@ -834,324 +586,88 @@ namespace Rodin::Examples::Heart
   void CoupledLV0DCoronary3D::solve3D()
   {
     const auto& s = m_model.getState();
-
-    /*
-     * One-way coupling:
-     *
-     *   p_in = p_ar(t)
-     *
-     * from the 0D model. This pressure is imposed as a Neumann traction at
-     * the coronary inlet.
-     */
     const Real pin = s.par;
 
-    const auto n = BoundaryNormal(m_mesh);
+    const auto normal = BoundaryNormal(m_mesh);
 
-    /*
-     * Current SNES iterate, updated each Newton step via the state-update
-     * callback registered in setupMeshAndSpaces().
-     *
-     * uState / pState are the GridFunctions backing m_u / m_p.  The SNES
-     * callback calls setData on them from the monolithic iterate vector
-     * before every residual/Jacobian assembly, so expressions referencing
-     * these objects always see the latest Newton iterate.
-     */
     const auto& uState = m_u.getSolution();
     const auto& pState = m_p.getSolution();
 
-    /*
-     * Newton convection:
-     *
-     *   Jacobian part (bilinear in m_u):
-     *
-     *     (grad m_u) uState + (grad uState) m_u
-     *
-     *   Residual part (evaluated at uState):
-     *
-     *     (grad uState) uState
-     */
+    const auto gradDU = Jacobian(m_u);
+    const auto gradU  = Jacobian(uState);
+
     const auto newtonConvection =
-      Mult(Jacobian(m_u), uState) + Mult(Jacobian(uState), m_u);
+      Mult(gradDU, uState) + Mult(gradU, m_u);
 
-    const auto stateConvection = Mult(Jacobian(uState), uState);
+    const auto stateConvection = Mult(gradU, uState);
 
-    /*
-     * Skew-symmetric / Temam-style correction.
-     *
-     * div(u^n) is lagged from the previous time step for both the Jacobian
-     * and residual Temam terms.
-     */
-    const auto div_u_old = Div(m_uOld);
+    const auto divDU = Div(m_u);
+    const auto divU  = Div(uState);
 
-    /*
-     * Backflow coefficient on outlets:
-     *
-     *   beta = max(-u^n · n, 0).
-     */
-    const auto beta = Max(-Dot(m_uOld, n), 0.0);
+    const auto temamJacobian1 =
+      Dot(divDU * uState, m_v);
 
-    auto symU =
+    const auto temamJacobian2 =
+      divU * Dot(m_u, m_v);
+
+    const auto temamResidual =
+      divU * Dot(uState, m_v);
+
+    const auto beta = Max(-Dot(m_uOld, normal), 0.0);
+
+    const auto symDU =
       0.5 * (Jacobian(m_u) + Transpose(Jacobian(m_u)));
 
-    auto symV =
+    const auto symV =
       0.5 * (Jacobian(m_v) + Transpose(Jacobian(m_v)));
 
-    auto symUState =
+    const auto symU =
       0.5 * (Jacobian(uState) + Transpose(Jacobian(uState)));
 
-    auto symUOld =
-      0.5 * (Jacobian(m_uOld) + Transpose(Jacobian(m_uOld)));
+    const Real gammaReg = 1.0e-3;
+    const Real mu0      = 0.04868;
+    const Real muInf    = 0.003605;
+    const Real lambda   = 3.39;
+    const Real nCY      = 0.198;
+    const Real yasuda   = 1.235;
+    const Real deltaMu  = mu0 - muInf;
 
-    /*
-     * Carreau--Yasuda viscosity:
-     *
-     *   mu(gamma)
-     *     =
-     *   mu_inf
-     *   + (mu_0 - mu_inf)
-     *     [1 + (lambda gamma)^a]^((n - 1) / a),
-     *
-     * with:
-     *
-     *   gamma = sqrt(2 D(u^n) : D(u^n)).
-     *
-     * The viscosity is evaluated explicitly from u^n, making the 3D solve
-     * linear in (u^{n+1}, p^{n+1}).
-     */
-    const Real gamma_min = 1.0e-3;
-    const Real mu_0 = 0.04868;
-    const Real mu_inf = 0.003605;
-    const Real lambda = 3.39;
-    const Real n_cy = 0.198;
-    const Real a = 1.235;
+    const auto gamma =
+      Sqrt(gammaReg * gammaReg + 2.0 * Dot(symU, symU));
 
-    /*
-     * VMS stabilization constants.
-     *
-     * tau_K is computed as:
-     *
-     *   tau_K =
-     *   vmsScale /
-     *   sqrt(
-     *     (2 rho / dt)^2
-     *     + (c2 rho |u^n| / h_K)^2
-     *     + (c1 mu / h_K^2)^2
-     *   ).
-     */
-    const Real c1 = 4.0;
-    const Real c2 = 2.0;
-    const Real vmsScale = 1.0;
+    const auto carreauBase =
+      1.0 + Pow(lambda * gamma, yasuda);
 
-    RealFunction muNonNew = [=, this](const Point& p) -> Real
-    {
-      const auto S = symUOld.getValue(p);
+    const auto mu =
+      muInf + deltaMu * Pow(carreauBase, (nCY - 1.0) / yasuda);
 
-      const Real gamma =
-        std::max(gamma_min, std::sqrt(2.0 * dot(S, S)));
+    const auto dgamma =
+      2.0 * Dot(symU, symDU) / gamma;
 
-      return mu_inf
-        + (mu_0 - mu_inf)
-        * Math::pow(
-            1.0 + Math::pow(lambda * gamma, a),
-            (n_cy - 1.0) / a);
-    };
+    const auto dmu =
+        deltaMu
+      * (nCY - 1.0)
+      * Pow(carreauBase, (nCY - 1.0 - yasuda) / yasuda)
+      * std::pow(lambda, yasuda)
+      * Pow(gamma, yasuda - 1.0)
+      * dgamma;
 
-    Alert::Info() << "Projecting non-Newtonian viscosity ..." << Alert::Raise;
-
-    /*
-     * L2 projection of the explicit viscosity into the P0/Pcell space m_muh:
-     *
-     *   int mu_h w = int mu(u^n) w.
-     */
-    m_muProjection =
-        Integral(m_mu, m_w)
-      - Integral(muNonNew, m_w);
-
-    m_muProjection.assemble();
-    m_muProjectionSolver.solve();
-
-    /*
-     * Convective residual target:
-     *
-     *   a^n = (grad u^n) u^n.
-     */
-    const auto convectionTarget = Mult(Jacobian(m_uOld), m_uOld);
-
-    RealFunction tau = [=, this](const Point& p) -> Real {
-        const auto conv = convectionTarget.getValue(p);
-        const auto proj = m_up.getSolution().getValue(p);
-        const auto old  = m_subOld.getValue(p);
-        const auto uOld = m_uOld.getValue(p);
-
-        const Real mu = m_mu.getSolution().getValue(p);
-
-        const Real hK =
-          std::pow(
-            p.getPolytope().getMeasure(),
-            1.0 / p.getPolytope().getDimension());
-
-        const Real speed = std::sqrt(dot(uOld, uOld));
-
-        const Real invTau =
-          std::sqrt(
-              Math::pow2(2.0 * m_cfg.rho / m_cfg.dt)
-            + Math::pow2(c2 * m_cfg.rho * speed / hK)
-            + Math::pow2(c1 * mu / (hK * hK)));
-
-         return vmsScale / invTau;
-    }
-    /*
-     * L2 projection:
-     *
-     *   int u_proj · v = int a^n · v.
-     *
-     * Thus:
-     *
-     *   u_proj = Pi_h[(grad u^n) u^n].
-     */
-    m_l2ConvU =
-        Integral(m_up, m_vp)
-      - Integral(convectionTarget, m_vp);
-
-    m_l2ConvU.assemble();
-    m_l2ConvUSolver.solve();
-
-    /*
-     * Dynamic unresolved convective subscale:
-     *
-     *   u'^{n+1}
-     *     =
-     *   tau_K rho (a^n - Pi_h a^n)
-     *   + tau_K (rho / dt) u'^n.
-     *
-     * This is explicit in the resolved velocity because a^n and Pi_h a^n
-     * are both computed from u^n.
-     */
-
-    m_tauProjection =
-        Integral(m_tau, m_t)
-      - Integral(tau, m_t);
-
-    m_tauProjection.assemble();
-    m_tauProjectionSolver.solve();
-
-    m_l2ConvU =
-        Integral(m_up, m_vp)
-      - Integral(convectionTarget, m_vp);
-
-    m_l2ConvU.assemble();
-    m_l2ConvUSolver.solve();
-
-    auto subUpdate = VectorFunction(
-        m_mesh.getSpaceDimension(),
-        [=, this](const Point& p) -> Math::SpatialVector<Real>
-        {
-          const auto conv = convectionTarget.getValue(p);
-          const auto proj = m_up.getSolution().getValue(p);
-          const auto old  = m_subOld.getValue(p);
-          const auto uOld = m_uOld.getValue(p);
-
-          const Real mu = m_mu.getSolution().getValue(p);
-
-          const Real tau = m_tau.getSolution().getValue(p);
-
-          Math::SpatialVector<Real> out(m_mesh.getSpaceDimension());
-
-          for (size_t c = 0; c < out.size(); ++c)
-          {
-            out[c] =
-                tau * m_cfg.rho * (conv[c] - proj[c])
-              + tau * (m_cfg.rho / m_cfg.dt) * old[c];
-          }
-
-          return out;
-        });
-
-    /*
-     * L2 projection of the dynamic subscale into m_sub:
-     *
-     *   int sub_h · v = int subUpdate · v.
-     */
-    m_subProjection =
-        Integral(m_sub, m_vp)
-      - Integral(subUpdate, m_vp);
-
-    m_subProjection.assemble();
-    m_subProjectionSolver.solve();
-
-    /*
-     * Nonlinear Newton weak form.
-     *
-     * At each SNES Newton step, given the current iterate (uState, pState),
-     * find the Newton increment (m_u, m_p) such that, for all (v, q):
-     *
-     * --- Jacobian part (bilinear in m_u, m_p) ---
-     *
-     *   rho/dt (m_u, v)
-     * + rho ((grad m_u) uState + (grad uState) m_u, v)
-     * + 0.5 rho (div u^n) (m_u, v)
-     * + 2 (mu^n D(m_u), D(v))
-     * - (m_p, div v)
-     * + (div m_u, q)
-     * + eps (m_p, q)
-     * + VMS bilinear (Jacobian)
-     * - 0.5 rho beta (m_u, v) [backflow, Jacobian]
-     *
-     * --- Residual part (linear in v, q — evaluated at uState, pState) ---
-     *
-     * - rho/dt (u^n, v)
-     * + rho/dt (uState, v)
-     * + rho ((grad uState) uState, v)
-     * + 0.5 rho (div u^n) (uState, v)
-     * + 2 (mu^n D(uState), D(v))
-     * - (pState, div v)
-     * + (div uState, q)
-     * + eps (pState, q)
-     * - VMS linear (subscale correction)
-     * + pressure tractions (inlet + outlets)
-     * - 0.5 rho beta (uState, v) [backflow, residual]
-     *
-     * DirichletBC: m_u = -uState on wall so that uState + m_u = 0 (no-slip).
-     *
-     * mu^n and div u^n are lagged from the previous time step for
-     * viscosity and the Temam correction, respectively.  The VMS
-     * stabilization also uses the previous-time-step velocity.
-     */
     m_flow =
-          /* --- Jacobian (bilinear in m_u, m_p) --- */
-
+          /* Jacobian */
           (m_cfg.rho / m_cfg.dt) * Integral(m_u, m_v)
 
         + m_cfg.rho * Integral(Dot(newtonConvection, m_v))
 
-        + 0.5 * m_cfg.rho * Integral(div_u_old * Dot(m_u, m_v))
+        + 0.5 * m_cfg.rho * Integral(temamJacobian1)
+        + 0.5 * m_cfg.rho * Integral(temamJacobian2)
 
-        + 2.0 * Integral(m_mu.getSolution() * symU, symV)
+        + 2.0 * Integral(mu * symDU, symV)
+        + 2.0 * Integral(dmu * symU, symV)
 
         - Integral(m_p, Div(m_v))
         + Integral(Div(m_u), m_q)
         + m_cfg.eps * Integral(m_p, m_q)
 
-        /*
-         * VMS bilinear Jacobian contribution:
-         *
-         *   int_K tau_K rho^2
-         *     ((grad m_u) uState + (grad uState) m_u)
-         *     ·
-         *     ((grad v) uState).
-         *
-         * The advection velocity in the VMS operator is still taken from
-         * u^n (m_uOld) for stability; only the convection Jacobian uses
-         * the Newton linearization.
-         */
-        + VMSConvectionBilinearIntegrator(
-            m_u, m_v, m_uOld, m_tau.getSolution())
-
-        /*
-         * Backflow stabilization — Jacobian part:
-         *
-         *   - 0.5 rho beta (m_u, v),   beta = max(-u^n · n, 0).
-         */
         - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(4)
         - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(5)
         - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(6)
@@ -1159,52 +675,29 @@ namespace Rodin::Examples::Heart
         - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(8)
         - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(9)
 
-          /* --- Residual (linear in v, q) --- */
-
-        - (m_cfg.rho / m_cfg.dt) * Integral(m_uOld, m_v)
+          /* Residual */
         + (m_cfg.rho / m_cfg.dt) * Integral(uState, m_v)
+        - (m_cfg.rho / m_cfg.dt) * Integral(m_uOld, m_v)
 
         + m_cfg.rho * Integral(Dot(stateConvection, m_v))
 
-        + 0.5 * m_cfg.rho * Integral(div_u_old * Dot(uState, m_v))
+        + 0.5 * m_cfg.rho * Integral(temamResidual)
 
-        + 2.0 * Integral(m_mu.getSolution() * symUState, symV)
+        + 2.0 * Integral(mu * symU, symV)
 
         - Integral(pState, Div(m_v))
         + Integral(Div(uState), m_q)
         + m_cfg.eps * Integral(pState, m_q)
 
-        /*
-         * VMS linear subscale contribution (residual term):
-         *
-         *   - int_K rho
-         *       (tau_K rho u_proj + u')
-         *       ·
-         *       ((grad v) u^n).
-         */
-        - VMSConvectionLinearIntegrator(
-            m_v, m_sub.getSolution(), m_uOld, m_up.getSolution(), m_tau.getSolution())
+        + BoundaryIntegral(pin * Dot(m_v, normal)).over(m_cfg.inlet)
 
-        /*
-         * Inlet pressure traction.
-         */
-        + BoundaryIntegral(pin * Dot(m_v, n)).over(m_cfg.inlet)
+        + BoundaryIntegral(m_wk.at(4).pout * Dot(m_v, normal)).over(4)
+        + BoundaryIntegral(m_wk.at(5).pout * Dot(m_v, normal)).over(5)
+        + BoundaryIntegral(m_wk.at(6).pout * Dot(m_v, normal)).over(6)
+        + BoundaryIntegral(m_wk.at(7).pout * Dot(m_v, normal)).over(7)
+        + BoundaryIntegral(m_wk.at(8).pout * Dot(m_v, normal)).over(8)
+        + BoundaryIntegral(m_wk.at(9).pout * Dot(m_v, normal)).over(9)
 
-        /*
-         * Outlet pressure tractions.
-         */
-        + BoundaryIntegral(m_wk.at(4).pout * Dot(m_v, n)).over(4)
-        + BoundaryIntegral(m_wk.at(5).pout * Dot(m_v, n)).over(5)
-        + BoundaryIntegral(m_wk.at(6).pout * Dot(m_v, n)).over(6)
-        + BoundaryIntegral(m_wk.at(7).pout * Dot(m_v, n)).over(7)
-        + BoundaryIntegral(m_wk.at(8).pout * Dot(m_v, n)).over(8)
-        + BoundaryIntegral(m_wk.at(9).pout * Dot(m_v, n)).over(9)
-
-        /*
-         * Backflow stabilization — residual part:
-         *
-         *   - 0.5 rho beta (uState, v).
-         */
         - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(4)
         - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(5)
         - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(6)
@@ -1212,45 +705,36 @@ namespace Rodin::Examples::Heart
         - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(8)
         - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(9)
 
-        /*
-         * No-slip wall: Newton increment m_u = -uState so that
-         *   uState + m_u = 0
-         * after the SNES update.
-         */
         + DirichletBC(m_u, -uState).on(m_cfg.wall);
 
-    Alert::Info() << "Assembling and solving 3D time step (nonlinear SNES) ..."
-                  << Alert::Raise;
+    Alert::Info() << "\t\t[3D] Assembling Newton system ..." << Alert::Raise;
+
+    m_flow.assemble();
 
     if (!m_flowFieldSplitsSet)
     {
-      m_flow.assemble();
       m_flow.setFieldSplits();
       m_flowFieldSplitsSet = true;
     }
 
+    Alert::Info() << "\t\t[3D] Solving with PETSc SNES ..." << Alert::Raise;
+
     m_flowSolver.solve();
 
     Alert::Info()
-      << "SNES: " << (m_flowSolver.converged() ? "converged" : "did NOT converge")
-      << ", iterations = " << m_flowSolver.getIterationNumber()
+      << "\t\t\t[SNES] "
+      << (m_flowSolver.converged() ? "Converged" : "Did NOT converge")
+      << "  iterations = " << m_flowSolver.getIterationNumber()
       << Alert::Raise;
   }
 
-  void CoupledLV0DCoronary3D::computeFluxesAndUpdateRCR()
+  void CoupledLV0DCoronary3D::computeFluxes()
   {
-    const auto n = BoundaryNormal(m_mesh);
+    const auto normal = BoundaryNormal(m_mesh);
     const auto& s = m_model.getState();
 
-    /*
-     * Inlet flux:
-     *
-     *   Q_in = int_Gamma_in u · n.
-     *
-     * With outward normals, an entering inflow usually gives Q_in < 0.
-     */
     m_flux =
-      BoundaryIntegral(Dot(m_u.getSolution(), n), m_qFlux).over(m_cfg.inlet);
+      BoundaryIntegral(Dot(m_u.getSolution(), normal), m_qFlux).over(m_cfg.inlet);
 
     m_flux.assemble();
     m_stepData.qIn = m_flux(m_one);
@@ -1258,17 +742,10 @@ namespace Rodin::Examples::Heart
     m_stepData.qOut.clear();
     m_stepData.qOutSum = 0.0;
 
-    /*
-     * Outlet fluxes:
-     *
-     *   Q_out,k = int_Gamma_k u · n.
-     *
-     * With outward normals, Q_out,k > 0 means blood leaves the 3D domain.
-     */
     for (const Attribute tag : m_cfg.outlets)
     {
       m_flux =
-        BoundaryIntegral(Dot(m_u.getSolution(), n), m_qFlux).over(tag);
+        BoundaryIntegral(Dot(m_u.getSolution(), normal), m_qFlux).over(tag);
 
       m_flux.assemble();
 
@@ -1276,15 +753,8 @@ namespace Rodin::Examples::Heart
 
       m_stepData.qOut[tag] = qOut;
       m_stepData.qOutSum += qOut;
-
-      updateRCRNonNew(m_model, m_wk[tag], qOut, m_cfg.dt);
     }
 
-    /*
-     * For an exactly conservative incompressible solve:
-     *
-     *   Q_in + sum_k Q_out,k ~= 0.
-     */
     m_stepData.flowBalance = m_stepData.qIn + m_stepData.qOutSum;
     m_stepData.t = s.t;
   }
@@ -1293,17 +763,10 @@ namespace Rodin::Examples::Heart
   {
     m_uOld.setData(m_u.getSolution().getData());
     m_pOld.setData(m_p.getSolution().getData());
-    m_subOld.setData(m_sub.getSolution().getData());
-    m_tauOld.setData(m_tau.getSolution().getData());
   }
 
   void CoupledLV0DCoronary3D::writeOutputs()
   {
-    /*
-     * The 0D model has already advanced to t^{n+1}, while the current 3D
-     * solution corresponds to the just-computed time slab. The existing driver
-     * writes at t - dt to preserve the original output convention.
-     */
     m_xdmf.write(m_model.getState().t - m_cfg.dt).flush();
   }
 
@@ -1457,17 +920,30 @@ namespace Rodin::Examples::Heart
 
     for (int i = 0; i < static_cast<int>(m_cfg.nsteps); ++i)
     {
-      std::cout << "Step " << i << ": t = " << m_model.getState().t << "\n";
+      const Real t_current = m_model.getState().t;
+
+      Alert::Info()
+        << "━━━ Step " << (i + 1) << " / " << m_cfg.nsteps
+        << "  t = " << t_current << " s"
+        << "  (dt = " << m_cfg.dt << " s)"
+        << " ━━━"
+        << Alert::Raise;
 
       if (!advance0D())
       {
-        std::cerr << "0D solver failed to converge at step "
-                  << i << ", t = " << m_model.getState().t << "\n";
+        Alert::Exception()
+          << "0D solver failed to converge at step "
+          << (i + 1) << ", t = " << m_model.getState().t
+          << Alert::Raise;
         return 1;
       }
 
       solve3D();
-      computeFluxesAndUpdateRCR();
+      computeFluxes();
+
+      for (const Attribute tag : m_cfg.outlets)
+        updateRCRNonNew(m_model, m_wk[tag], m_stepData.qOut.at(tag), m_cfg.dt);
+
       writeCSVRow();
       updateHistory();
       writeOutputs();
@@ -1477,3 +953,4 @@ namespace Rodin::Examples::Heart
     return 0;
   }
 }
+

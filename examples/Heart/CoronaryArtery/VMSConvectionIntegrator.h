@@ -71,7 +71,7 @@
  * - vector-valued quadratic H1 velocity fields,
  * - diagonal component-wise vector assembly,
  * - explicit frozen convective velocity @f$u_h^n@f$,
- * - explicit effective viscosity @f$\mu_h@f$,
+ * - projected stabilization parameter @f$\tau_K@f$,
  * - local stabilization length @f$h_K = |K|^{1/3}@f$.
  */
 
@@ -127,7 +127,7 @@ namespace Rodin::Examples::Heart
    * @tparam TrialFunction Trial velocity field type.
    * @tparam TestFunction Test velocity field type.
    * @tparam OldVelocity Frozen convective velocity field type.
-   * @tparam Viscosity Explicit effective viscosity field type.
+   * @tparam ProjectedTau Projected stabilization parameter field type.
    */
   template <class TrialFunction, class TestFunction, class OldVelocity, class ProjectedTau>
   class VMSConvectionBilinearIntegrator final
@@ -144,34 +144,22 @@ namespace Rodin::Examples::Heart
        * @param[in] u Trial velocity @f$u_h@f$.
        * @param[in] v Test velocity @f$v_h@f$.
        * @param[in] uOld Frozen convective velocity @f$u_h^n@f$.
-       * @param[in] mu Explicit viscosity @f$\mu_h@f$.
        * @param[in] rho Fluid density @f$\rho@f$.
-       * @param[in] dt Time step @f$\Delta t@f$.
-       * @param[in] c1 Diffusive stabilization constant.
-       * @param[in] c2 Convective stabilization constant.
-       * @param[in] vmsScale Optional empirical scaling of @f$\tau_K@f$.
+       * @param[in] tau Projected stabilization parameter @f$\tau_K@f$.
        */
       VMSConvectionBilinearIntegrator(
           const TrialFunction& u,
           const TestFunction& v,
           const OldVelocity& uOld,
-          const ProjectedTau& tau)
+          const ProjectedTau& tau,
+          ScalarType rho)
         : Parent(u.getLeaf(), v.getLeaf()),
           m_u(u),
           m_v(v),
           m_uOld(uOld),
-<<<<<<< HEAD
           m_tau(tau),
-          m_polytope(nullptr)
-=======
-          m_mu(mu),
-          m_c1(c1),
-          m_c2(c2),
           m_polytope(nullptr),
-          m_rho(rho),
-          m_dt(dt),
-          m_vmsScale(vmsScale)
->>>>>>> 3a2326bf910870a6a40f046b1d0f6bcdca7c27ee
+          m_rho(rho)
       {}
 
       VMSConvectionBilinearIntegrator(
@@ -263,16 +251,6 @@ namespace Rodin::Examples::Heart
         for (auto& g : Gte)
           g.resize(static_cast<std::uint8_t>(d));
 
-        /*
-         * Cell length scale:
-         *
-         *   h_K = |K|^{1/3}.
-         */
-        const ScalarType hK =
-          std::pow(
-            polytope.getMeasure(),
-            ScalarType(1) / static_cast<ScalarType>(d));
-
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
@@ -286,24 +264,7 @@ namespace Rodin::Examples::Heart
           fillPhysicalGradients3D(qp, Jinv, teTab, Gte);
 
           const auto uOld = m_uOld.getValue(p);
-<<<<<<< HEAD
           const auto tau = m_tau.getValue(p);
-=======
-          const ScalarType mu = m_mu.getValue(p);
-
-          const ScalarType speed = std::sqrt(Math::dot(uOld, uOld));
-
-          /*
-           * Dynamic VMS time/transport/diffusion stabilization scale.
-           */
-          const ScalarType invTau =
-            std::sqrt(
-                Math::pow2(ScalarType(2) * m_rho / m_dt)
-              + Math::pow2(m_c2 * m_rho * speed / hK)
-              + Math::pow2(m_c1 * mu / (hK * hK)));
-
-          const ScalarType tau = m_vmsScale / invTau;
->>>>>>> 3a2326bf910870a6a40f046b1d0f6bcdca7c27ee
 
           /*
            * Directional derivatives along frozen velocity:
@@ -407,6 +368,7 @@ namespace Rodin::Examples::Heart
       const ProjectedTau& m_tau;
 
       const Geometry::Polytope* m_polytope;
+      ScalarType m_rho;
 
       Eigen::Matrix<
         ScalarType,
@@ -452,18 +414,9 @@ namespace Rodin::Examples::Heart
    * @tparam OldSubScale Dynamic subscale field type.
    * @tparam OldVelocity Frozen convective velocity field type.
    * @tparam ProjectedVelocity Projected convective acceleration type.
-   * @tparam Viscosity Explicit effective viscosity field type.
+   * @tparam ProjectedTau Projected stabilization parameter field type.
    */
-<<<<<<< HEAD
   template <class TestFunction, class OldSubScale, class OldVelocity, class ProjectedVelocity, class ProjectedTau>
-=======
-  template <
-    class TestFunction,
-    class OldSubScale,
-    class OldVelocity,
-    class ProjectedVelocity,
-    class Viscosity>
->>>>>>> 3a2326bf910870a6a40f046b1d0f6bcdca7c27ee
   class VMSConvectionLinearIntegrator final
     : public Variational::LinearFormIntegratorBase<
         typename TestFunction::ScalarType>
@@ -480,36 +433,24 @@ namespace Rodin::Examples::Heart
        * @param[in] uOld Frozen convective velocity @f$u_h^n@f$.
        * @param[in] uProj Projected convective acceleration
        *                  @f$\Pi_h[(\nabla u_h^n)u_h^n]@f$.
-       * @param[in] mu Explicit viscosity @f$\mu_h@f$.
        * @param[in] rho Fluid density @f$\rho@f$.
-       * @param[in] dt Time step @f$\Delta t@f$.
-       * @param[in] c1 Diffusive stabilization constant.
-       * @param[in] c2 Convective stabilization constant.
-       * @param[in] vmsScale Optional empirical scaling of @f$\tau_K@f$.
+       * @param[in] tau Projected stabilization parameter @f$\tau_K@f$.
        */
       VMSConvectionLinearIntegrator(
           const TestFunction& v,
           const OldSubScale& subOld,
           const OldVelocity& uOld,
           const ProjectedVelocity& uProj,
-          const ProjectedTau& tau)
+          const ProjectedTau& tau,
+          ScalarType rho)
         : Parent(v.getLeaf()),
           m_v(v),
           m_sub(subOld),
           m_uOld(uOld),
           m_uProj(uProj),
-<<<<<<< HEAD
           m_tau(tau),
-          m_polytope(nullptr)
-=======
-          m_mu(mu),
-          m_c1(c1),
-          m_c2(c2),
           m_polytope(nullptr),
-          m_rho(rho),
-          m_dt(dt),
-          m_vmsScale(vmsScale)
->>>>>>> 3a2326bf910870a6a40f046b1d0f6bcdca7c27ee
+          m_rho(rho)
       {}
 
       VMSConvectionLinearIntegrator(
@@ -576,16 +517,6 @@ namespace Rodin::Examples::Heart
         for (auto& g : Gte)
           g.resize(static_cast<std::uint8_t>(d));
 
-        /*
-         * Cell length scale:
-         *
-         *   h_K = |K|^{1/3}.
-         */
-        const ScalarType hK =
-          std::pow(
-            polytope.getMeasure(),
-            ScalarType(1) / static_cast<ScalarType>(d));
-
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
@@ -597,30 +528,10 @@ namespace Rodin::Examples::Heart
 
           fillPhysicalGradients3D(qp, Jinv, tab, Gte);
 
-<<<<<<< HEAD
           const auto uOld  = m_uOld.getValue(p);
           const auto uProj = m_uProj.getValue(p);
           const auto subScale = m_sub.getValue(p);
           const auto tau = m_tau.getValue(p);
-=======
-          const auto uOld    = m_uOld.getValue(p);
-          const auto uProj   = m_uProj.getValue(p);
-          const auto sub     = m_sub.getValue(p);
-          const ScalarType mu = m_mu.getValue(p);
-
-          const ScalarType speed = std::sqrt(Math::dot(uOld, uOld));
-
-          /*
-           * Same stabilization parameter as in the bilinear integrator.
-           */
-          const ScalarType invTau =
-            std::sqrt(
-                Math::pow2(ScalarType(2) * m_rho / m_dt)
-              + Math::pow2(m_c2 * m_rho * speed / hK)
-              + Math::pow2(m_c1 * mu / (hK * hK)));
-
-          const ScalarType tau = m_vmsScale / invTau;
->>>>>>> 3a2326bf910870a6a40f046b1d0f6bcdca7c27ee
 
           /*
            * Directional derivative of test basis along frozen velocity:
@@ -648,7 +559,7 @@ namespace Rodin::Examples::Heart
               m_vec(static_cast<Eigen::Index>(row)) +=
                 wdet
                 * m_rho
-                * (tau * m_rho * uProj[c] + sub[c])
+                * (tau * m_rho * uProj[c] + subScale[c])
                 * teDir[b];
             }
           }
@@ -715,6 +626,7 @@ namespace Rodin::Examples::Heart
       const ProjectedTau& m_tau;
 
       const Geometry::Polytope* m_polytope;
+      ScalarType m_rho;
 
       Math::Vector<ScalarType> m_vec;
 
