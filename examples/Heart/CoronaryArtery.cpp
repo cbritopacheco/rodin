@@ -25,7 +25,7 @@ int main(int argc, char** argv)
 
     {
       Rodin::Examples::Heart::CoupledLV0DCoronary3D::Config cfg;
-      cfg.meshPath = "../resources/examples/Heart/CoronaryArtery_Fluid.medit.mesh";
+      cfg.meshPath = "../resources/examples/Heart/CoronaryArtery_Fluid.medit.o.mesh";
       cfg.xdmfBasename = "CoronaryArtery";
       cfg.csvPath = "CoronaryArtery.csv";
 
