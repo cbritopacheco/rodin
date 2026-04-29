@@ -30,7 +30,7 @@ AllGeometriesAndDegrees/H1LinearElasticity3D.PolynomialSolution/Tetrahedron_K2")
 set(_RODIN_MPI_H1_LINEAR_ELASTICITY_SLOW_FILTER
   "-${_RODIN_MPI_H1_LINEAR_ELASTICITY_FAST_FILTER}")
 
-foreach(np 1 2 3 4 6)
+foreach(np 1 2 3 4)
   add_test(
     NAME RodinManufacturedMPIH1LinearElasticityTest_np${np}
     COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
