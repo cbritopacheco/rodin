@@ -97,9 +97,11 @@ jobs:
         run: |
           BREW_PACKAGES="boost boost-mpi eigen libomp"
           if [ "${{ matrix.petsc }}" = "ON" ]; then
-            BREW_PACKAGES="$BREW_PACKAGES petsc"
+            BREW_PACKAGES="$BREW_PACKAGES petsc hdf5-mpi"
           elif [ "${{ matrix.mpi }}" = "ON" ]; then
-            BREW_PACKAGES="$BREW_PACKAGES open-mpi"
+            BREW_PACKAGES="$BREW_PACKAGES open-mpi hdf5-mpi"
+          else
+            BREW_PACKAGES="$BREW_PACKAGES hdf5"
           fi
           brew install $BREW_PACKAGES
 

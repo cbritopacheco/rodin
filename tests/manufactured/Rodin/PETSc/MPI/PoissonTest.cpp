@@ -59,6 +59,7 @@
 #include <Rodin/MPI/Geometry/Mesh.h>
 #include <Rodin/MPI/IO.h>
 #include <Rodin/MPI/Variational/P1.h>
+#include <Rodin/MPI/Variational/H1.h>
 #include <Rodin/PETSc.h>
 
 #if defined(_WIN32)
@@ -493,6 +494,287 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
 
     P1<Real, Mesh<Context::MPI>> sh(mesh);
     GridFunction<P1<Real, Mesh<Context::MPI>>, ::Vec> diff(sh);
+    diff = Pow(u.getSolution() - solution, 2);
+
+    const Real localError = Integral(diff).compute();
+
+    Real globalError = 0;
+    boost::mpi::all_reduce(world, localError, globalError, std::plus<Real>());
+
+    EXPECT_NEAR(globalError, 0, RODIN_FUZZY_CONSTANT);
+  }
+}
+
+namespace Rodin::Tests::Manufactured::PETSc::MPI
+{
+  namespace PETSc = ::Rodin::PETSc;
+
+  // =========================================================================
+  // Distributed H1 Poisson tests
+  // =========================================================================
+
+  /**
+   * @brief Distributed H1 K=1 Poisson test on triangles (CG solver).
+   *
+   * Manufactured solution: @f$ u(x,y) = \sin(\pi x)\sin(\pi y) @f$.
+   * H1 with K=1 should reproduce P1 behavior on the same mesh.
+   */
+  TEST(PETSc_MPI_H1Poisson, CG_K1_SimpleSine_Triangle)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 4)
+      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
+
+    const auto pi = Math::Constants::pi();
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, { 16, 16 });
+
+    constexpr auto order = std::integral_constant<size_t, 1>{};
+    H1 vh(order, mesh);
+
+    auto f = 2 * pi * pi * sin(pi * F::x) * sin(pi * F::y);
+
+    PETSc::Variational::TrialFunction u(vh);
+    PETSc::Variational::TestFunction  v(vh);
+
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, Zero());
+
+    PETSc::Solver::CG solver(poisson);
+    solver.solve();
+
+    auto solution = sin(pi * F::x) * sin(pi * F::y);
+
+    H1 sh(order, mesh);
+    GridFunction<decltype(sh), ::Vec> diff(sh);
+    diff = Pow(u.getSolution() - solution, 2);
+
+    const Real localError = Integral(diff).compute();
+
+    Real globalError = 0;
+    boost::mpi::all_reduce(world, localError, globalError, std::plus<Real>());
+
+    EXPECT_NEAR(globalError, 0, RODIN_FUZZY_CONSTANT);
+  }
+
+  /**
+   * @brief Distributed H1 K=2 Poisson test on triangles (CG solver).
+   *
+   * Manufactured solution: @f$ u(x,y) = \sin(\pi x)\sin(\pi y) @f$.
+   * H1 with K=2 (quadratic) distributes DOFs on vertices and edge interiors.
+   */
+  TEST(PETSc_MPI_H1Poisson, CG_K2_SimpleSine_Triangle)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 4)
+      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
+
+    const auto pi = Math::Constants::pi();
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, { 16, 16 });
+
+    constexpr auto order = std::integral_constant<size_t, 2>{};
+    H1 vh(order, mesh);
+
+    auto f = 2 * pi * pi * sin(pi * F::x) * sin(pi * F::y);
+
+    PETSc::Variational::TrialFunction u(vh);
+    PETSc::Variational::TestFunction  v(vh);
+
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, Zero());
+
+    PETSc::Solver::CG solver(poisson);
+    solver.solve();
+
+    auto solution = sin(pi * F::x) * sin(pi * F::y);
+
+    H1 sh(order, mesh);
+    GridFunction<decltype(sh), ::Vec> diff(sh);
+    diff = Pow(u.getSolution() - solution, 2);
+
+    const Real localError = Integral(diff).compute();
+
+    Real globalError = 0;
+    boost::mpi::all_reduce(world, localError, globalError, std::plus<Real>());
+
+    EXPECT_NEAR(globalError, 0, RODIN_FUZZY_CONSTANT);
+  }
+
+  /**
+   * @brief Distributed H1 K=2 Poisson test on quadrilaterals.
+   *
+   * Manufactured solution: @f$ u(x,y) = \sin(\pi x)\sin(\pi y) @f$.
+   */
+  TEST(PETSc_MPI_H1Poisson, CG_K2_SimpleSine_Quadrilateral)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 4)
+      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
+
+    const auto pi = Math::Constants::pi();
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx, Polytope::Type::Quadrilateral, { 16, 16 });
+
+    constexpr auto order = std::integral_constant<size_t, 2>{};
+    H1 vh(order, mesh);
+
+    auto f = 2 * pi * pi * sin(pi * F::x) * sin(pi * F::y);
+
+    PETSc::Variational::TrialFunction u(vh);
+    PETSc::Variational::TestFunction  v(vh);
+
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, Zero());
+
+    PETSc::Solver::CG solver(poisson);
+    solver.solve();
+
+    auto solution = sin(pi * F::x) * sin(pi * F::y);
+
+    H1 sh(order, mesh);
+    GridFunction<decltype(sh), ::Vec> diff(sh);
+    diff = Pow(u.getSolution() - solution, 2);
+
+    const Real localError = Integral(diff).compute();
+
+    Real globalError = 0;
+    boost::mpi::all_reduce(world, localError, globalError, std::plus<Real>());
+
+    EXPECT_NEAR(globalError, 0, RODIN_FUZZY_CONSTANT);
+  }
+
+  /**
+   * @brief P2-exact distributed H1 K=2 Poisson test.
+   *
+   * Manufactured solution: @f$ u(x,y) = x(1-x)y(1-y) @f$.
+   * Because this is a degree-2 polynomial, H1 K=2 should reproduce it exactly.
+   */
+  TEST(PETSc_MPI_H1Poisson, CG_K2_P2Exact_Triangle)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 4)
+      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, { 8, 8 });
+
+    constexpr auto order = std::integral_constant<size_t, 2>{};
+    H1 vh(order, mesh);
+
+    auto solution = F::x * (1 - F::x) * F::y * (1 - F::y);
+    auto f = 2 * F::y * (1 - F::y) + 2 * F::x * (1 - F::x);
+
+    PETSc::Variational::TrialFunction u(vh);
+    PETSc::Variational::TestFunction  v(vh);
+
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, Zero());
+
+    PETSc::Solver::CG solver(poisson);
+    solver.solve();
+
+    H1 sh(order, mesh);
+    GridFunction<decltype(sh), ::Vec> diff(sh);
+    diff = Pow(u.getSolution() - solution, 2);
+
+    const Real localError = Integral(diff).compute();
+
+    Real globalError = 0;
+    boost::mpi::all_reduce(world, localError, globalError, std::plus<Real>());
+
+    EXPECT_NEAR(globalError, 0, RODIN_FUZZY_CONSTANT);
+  }
+
+  /**
+   * @brief Single-rank H1 K=2 consistency check.
+   *
+   * On exactly 1 rank, the distributed H1 K=2 solve must match the
+   * manufactured-solution tolerance of the sequential path.
+   */
+  TEST(PETSc_MPI_H1Poisson, SingleRank_K2_MatchesSequential_Triangle)
+  {
+    const auto& world = *g_world;
+    if (world.size() != 1)
+      GTEST_SKIP() << "This test is designed for exactly 1 MPI rank.";
+
+    const auto pi = Math::Constants::pi();
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, { 16, 16 });
+
+    constexpr auto order = std::integral_constant<size_t, 2>{};
+    H1 vh(order, mesh);
+
+    auto f = 2 * pi * pi * sin(pi * F::x) * sin(pi * F::y);
+
+    PETSc::Variational::TrialFunction u(vh);
+    PETSc::Variational::TestFunction  v(vh);
+
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, Zero());
+
+    PETSc::Solver::CG solver(poisson);
+    solver.solve();
+
+    auto solution = sin(pi * F::x) * sin(pi * F::y);
+
+    H1 sh(order, mesh);
+    GridFunction<decltype(sh), ::Vec> diff(sh);
+    diff = Pow(u.getSolution() - solution, 2);
+    const Real localError = Integral(diff).compute();
+
+    EXPECT_NEAR(localError, 0, RODIN_FUZZY_CONSTANT);
+  }
+
+  /**
+   * @brief H1 K=2 with nonhomogeneous Dirichlet BC, distributed.
+   *
+   * Manufactured solution: @f$ u(x,y) = \cos(\pi x)\cos(\pi y) @f$.
+   */
+  TEST(PETSc_MPI_H1Poisson, CG_K2_NonhomogeneousDirichlet_Triangle)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 4)
+      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
+
+    const auto pi = Math::Constants::pi();
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, { 16, 16 });
+
+    constexpr auto order = std::integral_constant<size_t, 2>{};
+    H1 vh(order, mesh);
+
+    auto solution = cos(pi * F::x) * cos(pi * F::y);
+    auto f = 2 * pi * pi * solution;
+
+    PETSc::Variational::TrialFunction u(vh);
+    PETSc::Variational::TestFunction  v(vh);
+
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, solution);
+
+    PETSc::Solver::CG solver(poisson);
+    solver.solve();
+
+    H1 sh(order, mesh);
+    GridFunction<decltype(sh), ::Vec> diff(sh);
     diff = Pow(u.getSolution() - solution, 2);
 
     const Real localError = Integral(diff).compute();
