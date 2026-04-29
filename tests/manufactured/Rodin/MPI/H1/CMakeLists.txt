@@ -21,17 +21,16 @@ if (MPIEXEC_EXECUTABLE)
   endif()
 endif()
 
-set(_RODIN_MPI_H1_LINEAR_ELASTICITY_SLOW_FILTER
-  "AllGeometriesAndDegrees/H1LinearElasticity3D.PolynomialSolution/*_K3:AllGeometriesAndDegrees/H1LinearElasticity3D.PolynomialSolution/*_K4:AllGeometriesAndDegrees/H1LinearElasticity3D.PolynomialSolution/*_K6")
+# Keep normal CI small. High-order/vector 3D elasticity belongs to slow CI.
 set(_RODIN_MPI_H1_LINEAR_ELASTICITY_FAST_FILTER
-  "-${_RODIN_MPI_H1_LINEAR_ELASTICITY_SLOW_FILTER}")
+  "AllGeometriesAndDegrees/H1LinearElasticity2D.SineSolution/Triangle_K1:\
+AllGeometriesAndDegrees/H1LinearElasticity2D.SineSolution/Quadrilateral_K2:\
+AllGeometriesAndDegrees/H1LinearElasticity3D.PolynomialSolution/Tetrahedron_K2")
+
+set(_RODIN_MPI_H1_LINEAR_ELASTICITY_SLOW_FILTER
+  "-${_RODIN_MPI_H1_LINEAR_ELASTICITY_FAST_FILTER}")
 
 foreach(np 1 2 3 4 6)
-  set(_RODIN_MPI_H1_LINEAR_ELASTICITY_LABELS "manufactured;petsc;distributed")
-  if (NOT np EQUAL 1)
-    set(_RODIN_MPI_H1_LINEAR_ELASTICITY_LABELS "${_RODIN_MPI_H1_LINEAR_ELASTICITY_LABELS};slow")
-  endif()
-
   add_test(
     NAME RodinManufacturedMPIH1LinearElasticityTest_np${np}
     COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
@@ -39,7 +38,7 @@ foreach(np 1 2 3 4 6)
             $<TARGET_FILE:RodinManufacturedMPIH1LinearElasticityTest>
             --gtest_filter=${_RODIN_MPI_H1_LINEAR_ELASTICITY_FAST_FILTER})
   set_tests_properties(RodinManufacturedMPIH1LinearElasticityTest_np${np} PROPERTIES
-    LABELS "${_RODIN_MPI_H1_LINEAR_ELASTICITY_LABELS}"
+    LABELS "manufactured;petsc;distributed"
   )
   rodin_suppress_external_mpi_lsan_for_test(
     RodinManufacturedMPIH1LinearElasticityTest_np${np}
@@ -71,7 +70,10 @@ target_link_libraries(RodinManufacturedMPIH1PoissonTest
   Rodin::PETSc)
 
 set(_RODIN_MPI_H1_POISSON_FAST_FILTER
-  "AllGeometriesAndDegrees/H1Poisson2D_Workflow2.*/*_K1:AllGeometriesAndDegrees/H1Poisson2D_Workflow2.*/*_K2:AllGeometriesAndDegrees/H1Poisson3D_Workflow2.*/*_K1:AllGeometriesAndDegrees/H1Poisson3D_Workflow2.*/*_K2")
+  "AllGeometriesAndDegrees/H1Poisson2D_Workflow2.*/*_K1:\
+AllGeometriesAndDegrees/H1Poisson2D_Workflow2.*/*_K2:\
+AllGeometriesAndDegrees/H1Poisson3D_Workflow2.*/*_K1:\
+AllGeometriesAndDegrees/H1Poisson3D_Workflow2.*/*_K2")
 
 foreach(np 1 2 3 4 6)
   add_test(
