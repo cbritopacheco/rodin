@@ -50,9 +50,9 @@
   @image html PDEs/NavierStokes_placeholder.png width=360px
 
   The @ref examples-pdes-navierstokes "Navier–Stokes" tutorial covers the
-  steady incompressible Navier–Stokes equations using Taylor–Hood elements
+  transient incompressible Navier–Stokes equations using Taylor–Hood elements
   (@ref Rodin::Variational::H1 "H1" order 2 for velocity, order 1 for
-  pressure) with Picard iteration.
+  pressure) with PETSc SNES.
 
   @subsection gallery-pdes-periodic Periodic Poisson Equation
 
