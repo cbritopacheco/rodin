@@ -27,14 +27,18 @@
  *      -> outlet fluxes
  *      -> nonlinear rheological RCR outlet updates.
  *
- * The 3D fluid model is a backward-Euler, Oseen-linearized,
- * incompressible Navier--Stokes problem with:
+ * The 3D fluid model is a backward-Euler, fully nonlinear
+ * incompressible Navier--Stokes problem solved via PETSc SNES
+ * (Newton--Raphson) with:
  *
- *   - Carreau--Yasuda viscosity evaluated explicitly from u^n,
- *   - dynamic projected VMS convective stabilization,
+ *   - Newton-linearized convection:
+ *       (grad du) uState + (grad uState) du,
+ *     plus residual term (grad uState) uState,
+ *   - Carreau--Yasuda viscosity lagged from u^n (Picard for viscosity),
+ *   - dynamic projected VMS convective stabilization (lagged from u^n),
  *   - pressure regularization,
  *   - inlet/outlet pressure tractions,
- *   - outlet backflow stabilization.
+ *   - outlet backflow stabilization (lagged beta from u^n).
  *
  * The outlet model replaces the constant RCR resistances by nonlinear
  * rheological pipe-flow laws derived from the WRMS/Rabinowitsch correction
@@ -98,8 +102,9 @@ namespace Rodin::Examples::Heart
       m_muProjectionSolver(m_muProjection),
       m_l2ConvUSolver(m_l2ConvU),
       m_subProjectionSolver(m_subProjection),
-      m_flowSolver(m_flow),
-      m_tauProjectionSolver(m_tauProjection)
+      m_tauProjectionSolver(m_tauProjection),
+      m_flowKSP(m_flow),
+      m_flowSolver(m_flowKSP)
   {
     Alert::Info() << "Number of elements in mesh: " << m_mesh.getCellCount() << '\n'
                   << "Number of vertices in mesh: " << m_mesh.getVertexCount() << '\n'
@@ -768,6 +773,21 @@ namespace Rodin::Examples::Heart
     m_wk.clear();
     for (const Attribute tag : m_cfg.outlets)
       m_wk.emplace(tag, m_cfg.defaultRCR);
+
+    /*
+     * SNES state update:
+     *
+     * Before each residual/Jacobian assembly, copy the monolithic SNES
+     * iterate back into the velocity and pressure GridFunctions so that
+     * the nonlinear variational form sees the current Newton iterate.
+     */
+    m_flowSolver
+      .setTolerances(1e-10, 1e-8, 1e-10, 50, 10000)
+      .setStateUpdate([this](const PETSc::Math::Vector& x)
+      {
+        m_u.getSolution().setData(x, 0);
+        m_p.getSolution().setData(x, m_uh.getSize());
+      });
   }
 
   void CoupledLV0DCoronary3D::setupDiagnostics()
@@ -828,24 +848,38 @@ namespace Rodin::Examples::Heart
     const auto n = BoundaryNormal(m_mesh);
 
     /*
-     * Oseen-linearized convection:
+     * Current SNES iterate, updated each Newton step via the state-update
+     * callback registered in setupMeshAndSpaces().
      *
-     *   (u · grad) u
-     *   approximated by
-     *   (u^n · grad) u^{n+1}
-     *
-     * in Rodin notation:
-     *
-     *   Mult(Jacobian(m_u), m_uOld)
-     *
-     * i.e. (grad u^{n+1}) u^n.
+     * uState / pState are the GridFunctions backing m_u / m_p.  The SNES
+     * callback calls setData on them from the monolithic iterate vector
+     * before every residual/Jacobian assembly, so expressions referencing
+     * these objects always see the latest Newton iterate.
      */
-    const auto conv_u = Mult(Jacobian(m_u), m_uOld);
+    const auto& uState = m_u.getSolution();
+    const auto& pState = m_p.getSolution();
 
     /*
-     * Skew-symmetric / Temam-style correction:
+     * Newton convection:
      *
-     *   0.5 rho (div u^n) u^{n+1}.
+     *   Jacobian part (bilinear in m_u):
+     *
+     *     (grad m_u) uState + (grad uState) m_u
+     *
+     *   Residual part (evaluated at uState):
+     *
+     *     (grad uState) uState
+     */
+    const auto newtonConvection =
+      Mult(Jacobian(m_u), uState) + Mult(Jacobian(uState), m_u);
+
+    const auto stateConvection = Mult(Jacobian(uState), uState);
+
+    /*
+     * Skew-symmetric / Temam-style correction.
+     *
+     * div(u^n) is lagged from the previous time step for both the Jacobian
+     * and residual Temam terms.
      */
     const auto div_u_old = Div(m_uOld);
 
@@ -861,6 +895,9 @@ namespace Rodin::Examples::Heart
 
     auto symV =
       0.5 * (Jacobian(m_v) + Transpose(Jacobian(m_v)));
+
+    auto symUState =
+      0.5 * (Jacobian(uState) + Transpose(Jacobian(uState)));
 
     auto symUOld =
       0.5 * (Jacobian(m_uOld) + Transpose(Jacobian(m_uOld)));
@@ -1043,27 +1080,50 @@ namespace Rodin::Examples::Heart
     m_subProjectionSolver.solve();
 
     /*
-     * Semi-implicit weak form:
+     * Nonlinear Newton weak form.
      *
-     * Find (u^{n+1}, p^{n+1}) such that, for all (v, q),
+     * At each SNES Newton step, given the current iterate (uState, pState),
+     * find the Newton increment (m_u, m_p) such that, for all (v, q):
      *
-     *   rho/dt (u^{n+1}, v)
+     * --- Jacobian part (bilinear in m_u, m_p) ---
+     *
+     *   rho/dt (m_u, v)
+     * + rho ((grad m_u) uState + (grad uState) m_u, v)
+     * + 0.5 rho (div u^n) (m_u, v)
+     * + 2 (mu^n D(m_u), D(v))
+     * - (m_p, div v)
+     * + (div m_u, q)
+     * + eps (m_p, q)
+     * + VMS bilinear (Jacobian)
+     * - 0.5 rho beta (m_u, v) [backflow, Jacobian]
+     *
+     * --- Residual part (linear in v, q — evaluated at uState, pState) ---
+     *
      * - rho/dt (u^n, v)
-     * + rho ((grad u^{n+1}) u^n, v)
-     * + 0.5 rho ((div u^n) u^{n+1}, v)
-     * + 2 (mu^n D(u^{n+1}), D(v))
-     * - (p^{n+1}, div v)
-     * + (div u^{n+1}, q)
-     * + eps (p^{n+1}, q)
+     * + rho/dt (uState, v)
+     * + rho ((grad uState) uState, v)
+     * + 0.5 rho (div u^n) (uState, v)
+     * + 2 (mu^n D(uState), D(v))
+     * - (pState, div v)
+     * + (div uState, q)
+     * + eps (pState, q)
+     * - VMS linear (subscale correction)
+     * + pressure tractions (inlet + outlets)
+     * - 0.5 rho beta (uState, v) [backflow, residual]
      *
-     * plus VMS stabilization, pressure tractions, backflow stabilization,
-     * and wall no-slip conditions.
+     * DirichletBC: m_u = -uState on wall so that uState + m_u = 0 (no-slip).
+     *
+     * mu^n and div u^n are lagged from the previous time step for
+     * viscosity and the Temam correction, respectively.  The VMS
+     * stabilization also uses the previous-time-step velocity.
      */
     m_flow =
-          (m_cfg.rho / m_cfg.dt) * Integral(m_u, m_v)
-        - (m_cfg.rho / m_cfg.dt) * Integral(m_uOld, m_v)
+          /* --- Jacobian (bilinear in m_u, m_p) --- */
 
-        + m_cfg.rho * Integral(Dot(conv_u, m_v))
+          (m_cfg.rho / m_cfg.dt) * Integral(m_u, m_v)
+
+        + m_cfg.rho * Integral(Dot(newtonConvection, m_v))
+
         + 0.5 * m_cfg.rho * Integral(div_u_old * Dot(m_u, m_v))
 
         + 2.0 * Integral(m_mu.getSolution() * symU, symV)
@@ -1073,22 +1133,52 @@ namespace Rodin::Examples::Heart
         + m_cfg.eps * Integral(m_p, m_q)
 
         /*
-         * VMS bilinear contribution:
+         * VMS bilinear Jacobian contribution:
          *
          *   int_K tau_K rho^2
-         *     ((grad u^{n+1}) u^n)
+         *     ((grad m_u) uState + (grad uState) m_u)
          *     ·
-         *     ((grad v) u^n).
+         *     ((grad v) uState).
+         *
+         * The advection velocity in the VMS operator is still taken from
+         * u^n (m_uOld) for stability; only the convection Jacobian uses
+         * the Newton linearization.
          */
-
         + VMSConvectionBilinearIntegrator(
             m_u, m_v, m_uOld, m_tau.getSolution())
 
         /*
-         * VMS linear contribution subtracted from the residual:
+         * Backflow stabilization — Jacobian part:
+         *
+         *   - 0.5 rho beta (m_u, v),   beta = max(-u^n · n, 0).
+         */
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(4)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(5)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(6)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(7)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(8)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(9)
+
+          /* --- Residual (linear in v, q) --- */
+
+        - (m_cfg.rho / m_cfg.dt) * Integral(m_uOld, m_v)
+        + (m_cfg.rho / m_cfg.dt) * Integral(uState, m_v)
+
+        + m_cfg.rho * Integral(Dot(stateConvection, m_v))
+
+        + 0.5 * m_cfg.rho * Integral(div_u_old * Dot(uState, m_v))
+
+        + 2.0 * Integral(m_mu.getSolution() * symUState, symV)
+
+        - Integral(pState, Div(m_v))
+        + Integral(Div(uState), m_q)
+        + m_cfg.eps * Integral(pState, m_q)
+
+        /*
+         * VMS linear subscale contribution (residual term):
          *
          *   - int_K rho
-         *       (tau_K rho u_proj + u'^{n+1})
+         *       (tau_K rho u_proj + u')
          *       ·
          *       ((grad v) u^n).
          */
@@ -1111,34 +1201,40 @@ namespace Rodin::Examples::Heart
         + BoundaryIntegral(m_wk.at(9).pout * Dot(m_v, n)).over(9)
 
         /*
-         * Outlet backflow stabilization:
+         * Backflow stabilization — residual part:
          *
-         *   - 0.5 rho int_Gamma max(-u^n · n, 0) u^{n+1} · v.
+         *   - 0.5 rho beta (uState, v).
          */
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(4)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(5)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(6)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(7)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(8)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(9)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(4)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(5)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(6)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(7)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(8)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(9)
 
         /*
-         * No-slip wall.
+         * No-slip wall: Newton increment m_u = -uState so that
+         *   uState + m_u = 0
+         * after the SNES update.
          */
-        + DirichletBC(m_u, Zero(m_mesh.getSpaceDimension())).on(m_cfg.wall);
+        + DirichletBC(m_u, -uState).on(m_cfg.wall);
 
-    Alert::Info() << "Assembling 3D time step ..." << Alert::Raise;
-
-    m_flow.assemble();
+    Alert::Info() << "Assembling and solving 3D time step (nonlinear SNES) ..."
+                  << Alert::Raise;
 
     if (!m_flowFieldSplitsSet)
     {
+      m_flow.assemble();
       m_flow.setFieldSplits();
       m_flowFieldSplitsSet = true;
     }
 
-    Alert::Info() << "Solving 3D time step ..." << Alert::Raise;
     m_flowSolver.solve();
+
+    Alert::Info()
+      << "SNES: " << (m_flowSolver.converged() ? "converged" : "did NOT converge")
+      << ", iterations = " << m_flowSolver.getIterationNumber()
+      << Alert::Raise;
   }
 
   void CoupledLV0DCoronary3D::computeFluxesAndUpdateRCR()

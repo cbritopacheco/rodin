@@ -257,7 +257,8 @@ namespace Rodin::Examples::Heart
       Rodin::Solver::KSP m_l2ConvUSolver;
       Rodin::Solver::KSP m_subProjectionSolver;
       Rodin::Solver::KSP m_tauProjectionSolver;
-      Rodin::Solver::KSP m_flowSolver;
+      Rodin::Solver::KSP m_flowKSP;
+      Rodin::Solver::SNES m_flowSolver;
 
       std::map<Attribute, RCR> m_wk;
 
