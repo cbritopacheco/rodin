@@ -10,6 +10,7 @@
 
 #include "CoupledLV0DCoronary3D.h"
 #include "Rodin/Math/RungeKutta/RK4.h"
+#include "Rodin/Variational/ForwardDecls.h"
 #include "VMSConvectionIntegrator.h"
 
 namespace Rodin::Examples::Heart
@@ -34,9 +35,13 @@ namespace Rodin::Examples::Heart
       m_uh(std::integral_constant<size_t, 2>{}, m_mesh, m_mesh.getSpaceDimension()),
       m_ph(std::integral_constant<size_t, 1>{}, m_mesh),
       m_muh(m_mesh),
+      m_tauh(m_mesh),
       m_uph(std::integral_constant<size_t, 2>{}, m_mesh, m_mesh.getSpaceDimension()),
       m_u(m_uh),
       m_p(m_ph),
+      m_tau(m_tauh),
+      m_t(m_tauh),
+      m_tauOld(m_tauh),
       m_mu(m_muh),
       m_up(m_uph),
       m_sub(m_uph),
@@ -54,10 +59,12 @@ namespace Rodin::Examples::Heart
       m_l2ConvU(m_up, m_vp),
       m_subProjection(m_sub, m_vp),
       m_flow(m_u, m_p, m_v, m_q),
+      m_tauProjection(m_tau, m_t),
       m_muProjectionSolver(m_muProjection),
       m_l2ConvUSolver(m_l2ConvU),
       m_subProjectionSolver(m_subProjection),
-      m_flowSolver(m_flow)
+      m_flowSolver(m_flow),
+      m_tauProjectionSolver(m_tauProjection)
   {
     Alert::Info() << "Number of elements in mesh: " << m_mesh.getCellCount() << '\n'
                   << "Number of vertices in mesh: " << m_mesh.getVertexCount() << '\n'
@@ -159,23 +166,23 @@ namespace Rodin::Examples::Heart
   {
     const Real a = bc.C / dt;
 
-    const Real radiusP = 0.004;
+    const Real radiusP = 0.0025;
     const Real lengthP = 0.015;
 
-    const Real radiusD = 0.0005;
+    const Real radiusD = 0.0004;
     const Real lengthD = 0.002;
 
     auto resistance = [](Real pp, Real pd, Real L, Real radius) -> Real
     {
-        const Real mu_0 = 0.04868;
-        const Real mu_inf = 0.003605;
-        const Real lambda = 3.39;
-        const Real n = 0.198;
-        const Real a = 1.235;
+        const Real mu_0 = 0.060194;
+        const Real mu_inf = 0.001614;
+        const Real lambda = 4.237;
+        const Real n = 0.564;
+        const Real a = 1.487;
         const Real delta = mu_0 - mu_inf;
 
         const Real dp = pp - pd;
-        if (std::abs(dp) < 1e-10) return 1e10;
+        if (std::abs(dp) < 1e-10) return 1e8;
 
         const Real tauW = radius * std::abs(dp) / (2.0 * L);
 
@@ -231,7 +238,7 @@ namespace Rodin::Examples::Heart
 
     const Real Rd = resistance(bc.pd, pv, lengthD, radiusD);
 
-    bc.pc = (a * bc.pc + Q + bc.pd / Rd) / (a + 1.0 / Rd);
+    bc.pc = (a * bc.pc + Q + pv / Rd) / (a + 1.0 / Rd);
     bc.pout = bc.pc + Rp * Q;
   }
 
@@ -347,9 +354,11 @@ namespace Rodin::Examples::Heart
     m_mu.setName("mu_nonNew");
     m_up.setName("projected_convection");
     m_sub.setName("subscale");
+    m_tau.setName("tau");
 
     m_uOld = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
     m_pOld = 0.0;
+    m_tauOld = 0.0;
 
     m_subOld = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
 
@@ -359,6 +368,7 @@ namespace Rodin::Examples::Heart
     m_xdmf.add("pressure", m_p.getSolution());
     m_xdmf.add("viscosity", m_mu.getSolution());
     m_xdmf.add("subscale", m_sub.getSolution());
+    m_xdmf.add("tau", m_tau.getSolution());
 
     m_wk.clear();
     for (const Attribute tag : m_cfg.outlets)
@@ -426,15 +436,15 @@ namespace Rodin::Examples::Heart
     //const Real mu_min = m_cfg.mu;
     const Real gamma_min = 1.0e-3;
     //const Real mu_max = 5.0e-2;
-    const Real mu_0 = 0.04868;
-    const Real mu_inf = 0.003605;
-    const Real lambda = 3.39;
-    const Real n_cy = 0.198;
-    const Real a = 1.235;
+    const Real mu_0 = 0.060194;
+    const Real mu_inf = 0.001614;
+    const Real lambda = 4.237;
+    const Real n_cy = 0.564;
+    const Real a = 1.487;
 
     const Real c1 = 4.0;
     const Real c2 = 2.0;
-    const Real vmsScale = 0.05;
+    const Real vmsScale = 1.0;
 
     //RealFunction muNonNew = [=, this](const Point& p) -> Real
     //{
@@ -473,16 +483,7 @@ namespace Rodin::Examples::Heart
 
     const auto convectionTarget = Mult(Jacobian(m_uOld), m_uOld);
 
-    m_l2ConvU =
-        Integral(m_up, m_vp)
-      - Integral(convectionTarget, m_vp);
-
-    m_l2ConvU.assemble();
-    m_l2ConvUSolver.solve();
-
-    auto subUpdate = VectorFunction(
-        m_mesh.getSpaceDimension(),
-        [=, this](const Point& p) -> Math::SpatialVector<Real>
+    RealFunction tau = [=, this](const Point& p) -> Real
         {
           const auto conv = convectionTarget.getValue(p);
           const auto proj = m_up.getSolution().getValue(p);
@@ -504,7 +505,35 @@ namespace Rodin::Examples::Heart
               + Math::pow2(c2 * m_cfg.rho * speed / hK)
               + Math::pow2(c1 * mu / (hK * hK)));
 
-          const Real tau = vmsScale / invTau;
+           return vmsScale / invTau;
+        };
+
+    m_tauProjection =
+        Integral(m_tau, m_t)
+      - Integral(tau, m_t);
+
+    m_tauProjection.assemble();
+    m_tauProjectionSolver.solve();
+
+    m_l2ConvU =
+        Integral(m_up, m_vp)
+      - Integral(convectionTarget, m_vp);
+
+    m_l2ConvU.assemble();
+    m_l2ConvUSolver.solve();
+
+    auto subUpdate = VectorFunction(
+        m_mesh.getSpaceDimension(),
+        [=, this](const Point& p) -> Math::SpatialVector<Real>
+        {
+          const auto conv = convectionTarget.getValue(p);
+          const auto proj = m_up.getSolution().getValue(p);
+          const auto old  = m_subOld.getValue(p);
+          const auto uOld = m_uOld.getValue(p);
+
+          const Real mu = m_mu.getSolution().getValue(p);
+
+          const Real tau = m_tau.getSolution().getValue(p);
 
           Math::SpatialVector<Real> out(m_mesh.getSpaceDimension());
           for (size_t c = 0; c < out.size(); ++c)
@@ -520,23 +549,24 @@ namespace Rodin::Examples::Heart
     m_subProjection.assemble();
     m_subProjectionSolver.solve();
 
+    //const auto viscUold = Mult(Transpose(Jacobian(m_uOld)), Grad(m_mu.getSolution()));
+
     m_flow =
           (m_cfg.rho / m_cfg.dt) * Integral(m_u, m_v)
         - (m_cfg.rho / m_cfg.dt) * Integral(m_uOld, m_v)
         + m_cfg.rho * Integral(Dot(conv_u, m_v))
         + 0.5 * m_cfg.rho * Integral(div_u_old * Dot(m_u, m_v))
         + 2.0 * Integral(m_mu.getSolution() * symU, symV)
+        //+ Integral(m_mu.getSolution() * Jacobian(m_u), Jacobian(m_v))
         - Integral(m_p, Div(m_v))
         + Integral(Div(m_u), m_q)
         + m_cfg.eps * Integral(m_p, m_q)
-
+        //- Integral(viscUold, m_v)
         + VMSConvectionBilinearIntegrator(
-            m_u, m_v, m_uOld, m_mu.getSolution(),
-            m_cfg.rho, m_cfg.dt, c1, c2, vmsScale)
+            m_u, m_v, m_uOld, m_tau.getSolution())
 
         - VMSConvectionLinearIntegrator(
-            m_v, m_sub.getSolution(), m_uOld, m_up.getSolution(), m_mu.getSolution(),
-            m_cfg.rho, m_cfg.dt, c1, c2, vmsScale)
+            m_v, m_sub.getSolution(), m_uOld, m_up.getSolution(), m_tau.getSolution())
 
         + BoundaryIntegral(pin * Dot(m_v, n)).over(m_cfg.inlet)
 
@@ -589,8 +619,8 @@ namespace Rodin::Examples::Heart
       m_stepData.qOut[tag] = qOut;
       m_stepData.qOutSum += qOut;
 
-      updateRCR(m_wk[tag], qOut, m_cfg.dt);
-      // updateRCRNonNew(m_model, m_wk[tag], qOut, m_cfg.dt);
+      //updateRCR(m_wk[tag], qOut, m_cfg.dt);
+      updateRCRNonNew(m_model, m_wk[tag], qOut, m_cfg.dt);
     }
 
     m_stepData.flowBalance = m_stepData.qIn + m_stepData.qOutSum;
@@ -602,6 +632,7 @@ namespace Rodin::Examples::Heart
     m_uOld.setData(m_u.getSolution().getData());
     m_pOld.setData(m_p.getSolution().getData());
     m_subOld.setData(m_sub.getSolution().getData());
+    m_tauOld.setData(m_tau.getSolution().getData());
   }
 
   void CoupledLV0DCoronary3D::writeOutputs()

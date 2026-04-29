@@ -107,7 +107,7 @@ namespace Rodin::Examples::Heart
    * @tparam OldVelocity Frozen convective velocity field type.
    * @tparam Viscosity Effective viscosity field type.
    */
-  template <class TrialFunction, class TestFunction, class OldVelocity, class Viscosity>
+  template <class TrialFunction, class TestFunction, class OldVelocity, class ProjectedTau>
   class VMSConvectionBilinearIntegrator final
     : public Variational::LocalBilinearFormIntegratorBase<
         typename TrialFunction::ScalarType>
@@ -120,22 +120,12 @@ namespace Rodin::Examples::Heart
           const TrialFunction& u,
           const TestFunction& v,
           const OldVelocity& uOld,
-          const Viscosity& mu,
-          ScalarType rho,
-          ScalarType dt,
-          ScalarType c1 = 4.0,
-          ScalarType c2 = 2.0,
-          ScalarType vmsScale = 0.05)
+          const ProjectedTau& tau)
         : Parent(u.getLeaf(), v.getLeaf()),
           m_u(u),
           m_v(v),
           m_uOld(uOld),
-          m_mu(mu),
-          m_c1(c1),
-          m_c2(c2),
-          m_rho(rho),
-          m_dt(dt),
-          m_vmsScale(vmsScale),
+          m_tau(tau),
           m_polytope(nullptr)
       {}
 
@@ -232,17 +222,7 @@ namespace Rodin::Examples::Heart
           fillPhysicalGradients3D(qp, Jinv, teTab, Gte);
 
           const auto uOld = m_uOld.getValue(p);
-          const ScalarType mu = m_mu.getValue(p);
-
-          const ScalarType speed = std::sqrt(Math::dot(uOld, uOld));
-
-          const ScalarType invTau =
-            std::sqrt(
-                Math::pow2(ScalarType(2) * m_rho / m_dt)
-              + Math::pow2(m_c2 * m_rho * speed / hK)
-              + Math::pow2(m_c1 * mu / (hK * hK)));
-
-          const ScalarType tau = m_vmsScale / invTau;
+          const auto tau = m_tau.getValue(p);
 
           for (size_t a = 0; a < ntrS; ++a)
             trDir[a] = Math::dot(Gtr[a], uOld);
@@ -315,10 +295,7 @@ namespace Rodin::Examples::Heart
       const TrialFunction& m_u;
       const TestFunction& m_v;
       const OldVelocity& m_uOld;
-      const Viscosity& m_mu;
-
-      ScalarType m_c1;
-      ScalarType m_c2;
+      const ProjectedTau& m_tau;
 
       const Geometry::Polytope* m_polytope;
 
@@ -327,10 +304,6 @@ namespace Rodin::Examples::Heart
         Eigen::Dynamic,
         Eigen::Dynamic,
         Eigen::RowMajor> m_mat;
-
-      ScalarType m_rho;
-      ScalarType m_dt;
-      ScalarType m_vmsScale;
   };
 
   /**
@@ -406,7 +379,7 @@ namespace Rodin::Examples::Heart
    * @tparam ProjectedVelocity Projected convective acceleration field type.
    * @tparam Viscosity Effective viscosity field type.
    */
-  template <class TestFunction, class OldSubScale, class OldVelocity, class ProjectedVelocity, class Viscosity>
+  template <class TestFunction, class OldSubScale, class OldVelocity, class ProjectedVelocity, class ProjectedTau>
   class VMSConvectionLinearIntegrator final
     : public Variational::LinearFormIntegratorBase<
         typename TestFunction::ScalarType>
@@ -420,23 +393,13 @@ namespace Rodin::Examples::Heart
           const OldSubScale& subOld,
           const OldVelocity& uOld,
           const ProjectedVelocity& uProj,
-          const Viscosity& mu,
-          ScalarType rho,
-          ScalarType dt,
-          ScalarType c1 = 4.0,
-          ScalarType c2 = 2.0,
-          ScalarType vmsScale = 0.05)
+          const ProjectedTau& tau)
         : Parent(v.getLeaf()),
           m_v(v),
           m_sub(subOld),
           m_uOld(uOld),
           m_uProj(uProj),
-          m_mu(mu),
-          m_c1(c1),
-          m_c2(c2),
-          m_rho(rho),
-          m_dt(dt),
-          m_vmsScale(vmsScale),
+          m_tau(tau),
           m_polytope(nullptr)
       {}
 
@@ -514,17 +477,7 @@ namespace Rodin::Examples::Heart
           const auto uOld  = m_uOld.getValue(p);
           const auto uProj = m_uProj.getValue(p);
           const auto subScale = m_sub.getValue(p);
-          const ScalarType mu = m_mu.getValue(p);
-
-          const ScalarType speed = std::sqrt(Math::dot(uOld, uOld));
-
-          const ScalarType invTau =
-            std::sqrt(
-                Math::pow2(ScalarType(2) * m_rho / m_dt)
-              + Math::pow2(m_c2 * m_rho * speed / hK)
-              + Math::pow2(m_c1 * mu / (hK * hK)));
-
-          const ScalarType tau = m_vmsScale / invTau;
+          const auto tau = m_tau.getValue(p);
 
           for (size_t b = 0; b < nteS; ++b)
             teDir[b] = Math::dot(Gte[b], uOld);
@@ -588,18 +541,12 @@ namespace Rodin::Examples::Heart
       const OldSubScale& m_sub;
       const OldVelocity& m_uOld;
       const ProjectedVelocity& m_uProj;
-      const Viscosity& m_mu;
-
-      ScalarType m_c1;
-      ScalarType m_c2;
+      const ProjectedTau& m_tau;
 
       const Geometry::Polytope* m_polytope;
 
       Math::Vector<ScalarType> m_vec;
 
-      ScalarType m_rho;
-      ScalarType m_dt;
-      ScalarType m_vmsScale;
   };
 }
 

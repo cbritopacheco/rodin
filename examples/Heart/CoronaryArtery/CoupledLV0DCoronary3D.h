@@ -33,6 +33,9 @@ namespace Rodin::Examples::Heart
       using ViscosityFESType =
         Rodin::Variational::P1<Real, MeshType>;
 
+      using TauFESType =
+          Rodin::Variational::P1<Real, MeshType>;
+
       using VMSFESType =
         Rodin::Variational::H1<2, Rodin::Math::SpatialVector<Real>, MeshType>;
 
@@ -47,6 +50,9 @@ namespace Rodin::Examples::Heart
 
       using VMSGridFunctionType =
         Rodin::PETSc::Variational::GridFunction<VMSFESType>;
+
+      using TauGridFunctionType =
+        Rodin::PETSc::Variational::GridFunction<TauFESType>;
 
       using VelocityTrialFunctionType =
         Rodin::PETSc::Variational::TrialFunction<VelocityGridFunctionType, VelocityFESType>;
@@ -65,6 +71,12 @@ namespace Rodin::Examples::Heart
 
       using ViscosityTestFunctionType =
         Rodin::PETSc::Variational::TestFunction<ViscosityFESType>;
+
+      using TauTrialFunctionType =
+        Rodin::PETSc::Variational::TrialFunction<TauGridFunctionType, TauFESType>;
+
+      using TauTestFunctionType =
+        Rodin::PETSc::Variational::TestFunction<TauFESType>;
 
       using VMSTrialFunctionType =
         Rodin::PETSc::Variational::TrialFunction<VMSGridFunctionType, VMSFESType>;
@@ -85,6 +97,10 @@ namespace Rodin::Examples::Heart
       using VMSProblemType =
         Rodin::Variational::Problem<
           LinearSystemType, VMSTrialFunctionType, VMSTestFunctionType>;
+
+      using TauProblemType =
+        Rodin::Variational::Problem<
+          LinearSystemType, TauTrialFunctionType, TauTestFunctionType>;
 
       using FlowProblemType =
         Rodin::Variational::Problem<
@@ -122,7 +138,7 @@ namespace Rodin::Examples::Heart
         Real dt = 1.0e-3;
         size_t nsteps = 3 * static_cast<int>(0.85 / 1.0e-3);
 
-        RCR defaultRCR{1.0e9, 1.0e-10, 5.0e9, 8000.0, 8000.0, 8000.0};
+        RCR defaultRCR{5.0e8, 5.0e-9, 1.0e9, 400.0, 10500.0, 11000.0};
       };
 
       CoupledLV0DCoronary3D();
@@ -205,16 +221,19 @@ namespace Rodin::Examples::Heart
       PressureFESType m_ph;
       ViscosityFESType m_muh;
       VMSFESType m_uph;
+      TauFESType m_tauh;
 
       VelocityTrialFunctionType m_u;
       PressureTrialFunctionType m_p;
       ViscosityTrialFunctionType m_mu;
       VMSTrialFunctionType m_up;
+      TauTrialFunctionType m_tau;
 
       VelocityTestFunctionType m_v;
       PressureTestFunctionType m_q;
       ViscosityTestFunctionType m_w;
       VMSTestFunctionType m_vp;
+      TauTestFunctionType m_t;
 
       VelocityGridFunctionType m_uOld;
       PressureGridFunctionType m_pOld;
@@ -226,14 +245,18 @@ namespace Rodin::Examples::Heart
       VMSTrialFunctionType m_sub;
       VMSGridFunctionType m_subOld;
 
+      TauGridFunctionType m_tauOld;
+
       ViscosityProblemType m_muProjection;
       VMSProblemType m_l2ConvU;
       VMSProblemType m_subProjection;
       FlowProblemType m_flow;
+      TauProblemType m_tauProjection;
 
       Rodin::Solver::KSP m_muProjectionSolver;
       Rodin::Solver::KSP m_l2ConvUSolver;
       Rodin::Solver::KSP m_subProjectionSolver;
+      Rodin::Solver::KSP m_tauProjectionSolver;
       Rodin::Solver::KSP m_flowSolver;
 
       std::map<Attribute, RCR> m_wk;
