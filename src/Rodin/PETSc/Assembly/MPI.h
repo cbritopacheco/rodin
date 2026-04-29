@@ -365,8 +365,6 @@ namespace Rodin::Assembly
         assert(ierr == PETSC_SUCCESS);
         ierr = VecSetFromOptions(x);
         assert(ierr == PETSC_SUCCESS);
-        ierr = VecZeroEntries(x);
-        assert(ierr == PETSC_SUCCESS);
 
         // ------------------------
         // Local BFIs (owned elements only)
@@ -753,8 +751,6 @@ namespace Rodin::Assembly
             static_cast<PetscInt>(ncols));
         assert(ierr == PETSC_SUCCESS);
         ierr = VecSetFromOptions(x);
-        assert(ierr == PETSC_SUCCESS);
-        ierr = VecZeroEntries(x);
         assert(ierr == PETSC_SUCCESS);
 
         // ------------------------

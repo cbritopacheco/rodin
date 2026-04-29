@@ -82,6 +82,39 @@ namespace Rodin::Solver
     return *this;
   }
 
+  void SNES::solve()
+  {
+    auto& x = this->getProblem().getLinearSystem().getSolution();
+    solve(x);
+  }
+
+  PetscInt SNES::getIterationNumber() const
+  {
+    PetscInt its = 0;
+    PetscErrorCode ierr = SNESGetIterationNumber(m_snes, &its);
+    assert(ierr == PETSC_SUCCESS);
+    (void) ierr;
+    return its;
+  }
+
+  ::SNESConvergedReason SNES::getConvergedReason() const
+  {
+    ::SNESConvergedReason reason;
+    PetscErrorCode ierr = SNESGetConvergedReason(m_snes, &reason);
+    assert(ierr == PETSC_SUCCESS);
+    (void) ierr;
+    return reason;
+  }
+
+  bool SNES::converged() const
+  {
+    ::SNESConvergedReason reason;
+    PetscErrorCode ierr = SNESGetConvergedReason(m_snes, &reason);
+    assert(ierr == PETSC_SUCCESS);
+    (void) ierr;
+    return reason > 0;
+  }
+
   PetscErrorCode SNES::Residual(::SNES, ::Vec x, ::Vec f, void* ctx)
   {
     auto* self = static_cast<SNES*>(ctx);
