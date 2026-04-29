@@ -80,10 +80,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md513">Finite Element Spaces</a></li>
-            <li><a href="#autotoc_md514">Functions</a></li>
-            <li><a href="#autotoc_md515">Variational Forms</a></li>
-            <li><a href="#autotoc_md516">Problem</a></li>
+            <li><a href="#autotoc_md517">Finite Element Spaces</a></li>
+            <li><a href="#autotoc_md518">Functions</a></li>
+            <li><a href="#autotoc_md519">Variational Forms</a></li>
+            <li><a href="#autotoc_md520">Problem</a></li>
             <li>
               Reference
               <ul>
@@ -95,7 +95,7 @@
             </li>
           </ul>
         </nav>
-<p>The <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> module is the core of the <a href="namespace_rodin.html" class="m-doc">Rodin</a> finite element framework. It provides classes for defining finite element spaces, trial and test functions, variational forms, boundary conditions, and problems.</p><section id="autotoc_md513"><h3><a href="#autotoc_md513">Finite Element Spaces</a></h3><ul><li><a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> — Piecewise constant (discontinuous) finite element space</li><li><a href="class_rodin_1_1_variational_1_1_p0g.html" class="m-doc">P0g</a> — Global constant space (1 DOF for scalar, vdim for vector)</li><li><a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> — Piecewise linear (continuous) finite element space</li><li><a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> — Higher-order <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
+<p>The <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> module is the core of the <a href="namespace_rodin.html" class="m-doc">Rodin</a> finite element framework. It provides classes for defining finite element spaces, trial and test functions, variational forms, boundary conditions, and problems.</p><section id="autotoc_md517"><h3><a href="#autotoc_md517">Finite Element Spaces</a></h3><ul><li><a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> — Piecewise constant (discontinuous) finite element space</li><li><a href="class_rodin_1_1_variational_1_1_p0g.html" class="m-doc">P0g</a> — Global constant space (1 DOF for scalar, vdim for vector)</li><li><a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> — Piecewise linear (continuous) finite element space</li><li><a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> — Higher-order <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
 <title>
 $ H^1 $
 </title>
@@ -107,7 +107,7 @@ $ H^1 $
 <use x='0' y='0' xlink:href='#eq1-g0-72'/>
 <use x='10.62261' y='-4.338437' xlink:href='#eq1-g1-49'/>
 </g>
-</svg>-conforming finite element space (arbitrary polynomial order)</li></ul></section><section id="autotoc_md514"><h3><a href="#autotoc_md514">Functions</a></h3><ul><li><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a> — Represents the unknown solution <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
+</svg>-conforming finite element space (arbitrary polynomial order)</li></ul></section><section id="autotoc_md518"><h3><a href="#autotoc_md518">Functions</a></h3><ul><li><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a> — Represents the unknown solution <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
 $ u $
 </title>
@@ -127,7 +127,7 @@ $ v $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-118'/>
 </g>
-</svg></li><li><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> — A concrete function storing DOF values in a finite element space</li></ul></section><section id="autotoc_md515"><h3><a href="#autotoc_md515">Variational Forms</a></h3><p>The module supports building variational problems of the form:</p><div class="m-math"><svg style="width: 24.319em; height: 1.245em;" viewBox="77.53888 -11.955168 233.465314 11.955168">
+</svg></li><li><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> — A concrete function storing DOF values in a finite element space</li></ul></section><section id="autotoc_md519"><h3><a href="#autotoc_md519">Variational Forms</a></h3><p>The module supports building variational problems of the form:</p><div class="m-math"><svg style="width: 24.319em; height: 1.245em;" viewBox="77.53888 -11.955168 233.465314 11.955168">
 <title>
 \[
   \text{Find} \quad u \in U \quad \text{ s.t. } \quad \forall v \in V \quad
@@ -354,7 +354,7 @@ $ u|_{\partial\Omega} $
 <use x='9.98333' y='1.793263' xlink:href='#eq13-g1-64'/>
 <use x='14.914894' y='1.793263' xlink:href='#eq13-g3-10'/>
 </g>
-</svg></li><li><code>LinearElasticityIntegral(u, v)(lambda, mu)</code> — Hooke elasticity bilinear form</li></ul></section><section id="autotoc_md516"><h3><a href="#autotoc_md516">Problem</a></h3><p>The <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> class assembles all forms and boundary conditions into a solvable linear system.</p><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg></li><li><code>LinearElasticityIntegral(u, v)(lambda, mu)</code> — Hooke elasticity bilinear form</li></ul></section><section id="autotoc_md520"><h3><a href="#autotoc_md520">Problem</a></h3><p>The <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> class assembles all forms and boundary conditions into a solvable linear system.</p><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="n">TestFunction</span><span class="w">  </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 
@@ -878,9 +878,19 @@ $ u $
             <dd>Vector-valued continuous piecewise polynomial (degree K) Lagrange finite element space.</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_g81bac0b4db4b0ddd8bd3c1859864d005.html" class="m-doc">H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Geometry::Mesh&lt;Context::MPI&gt;&gt;</a>
+            </dt>
+            <dd>Distributed vector-valued <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> finite element space for <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> meshes.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_local_01_4_01_4.html" class="m-doc">H1&lt;K, Scalar, Geometry::Mesh&lt;Context::Local&gt;&gt;</a>
             </dt>
             <dd>Degree K H1-conforming Lagrange finite element space.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4.html" class="m-doc">H1&lt;K, Scalar, Geometry::Mesh&lt;Context::MPI&gt;&gt;</a>
+            </dt>
+            <dd>Distributed <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> finite element space for <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> meshes (scalar range).</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>
