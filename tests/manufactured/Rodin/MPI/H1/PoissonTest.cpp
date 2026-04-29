@@ -698,11 +698,12 @@ int main(int argc, char** argv)
   g_env   = &env;
   g_world = &world;
 
+  ::testing::InitGoogleTest(&argc, argv);
+
   [[maybe_unused]] PetscErrorCode ierr =
       PetscInitialize(&argc, &argv, nullptr, nullptr);
   assert(ierr == PETSC_SUCCESS);
 
-  ::testing::InitGoogleTest(&argc, argv);
   const int result = RUN_ALL_TESTS();
 
   PetscFinalize();
