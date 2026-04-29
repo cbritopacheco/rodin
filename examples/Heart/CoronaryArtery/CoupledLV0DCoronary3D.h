@@ -63,6 +63,34 @@ namespace Rodin::Examples::Heart
           VelocityTestFunctionType,
           PressureTestFunctionType>;
 
+      using TauFESType = Rodin::Variational::P1<Real, MeshType>;
+      using VMSFESType =
+        Rodin::Variational::H1<2, Rodin::Math::SpatialVector<Real>, MeshType>;
+
+      using TauGridFunctionType =
+        Rodin::PETSc::Variational::GridFunction<TauFESType>;
+
+      using VMSGridFunctionType =
+        Rodin::PETSc::Variational::GridFunction<VMSFESType>;
+
+      using TauTrialFunctionType =
+        Rodin::PETSc::Variational::TrialFunction<TauGridFunctionType, TauFESType>;
+
+      using TauTestFunctionType =
+        Rodin::PETSc::Variational::TestFunction<TauFESType>;
+
+      using VMSTrialFunctionType =
+        Rodin::PETSc::Variational::TrialFunction<VMSGridFunctionType, VMSFESType>;
+
+      using VMSTestFunctionType =
+        Rodin::PETSc::Variational::TestFunction<VMSFESType>;
+
+      using VMSProblemType =
+        Rodin::Variational::Problem<LinearSystemType, VMSTrialFunctionType, VMSTestFunctionType>;
+
+      using TauProblemType =
+        Rodin::Variational::Problem<LinearSystemType, TauTrialFunctionType, TauTestFunctionType>;
+
       struct RCR
       {
         Real Rp = 0.0;
@@ -196,6 +224,27 @@ namespace Rodin::Examples::Heart
       std::ofstream m_csv;
       bool m_flowFieldSplitsSet = false;
       bool m_initialized = false;
+
+      VMSFESType m_uph;
+      TauFESType m_tauh;
+
+      VMSTrialFunctionType m_up;
+      VMSTrialFunctionType m_sub;
+      TauTrialFunctionType m_tau;
+
+      VMSTestFunctionType m_vp;
+      TauTestFunctionType m_t;
+
+      VMSGridFunctionType m_subOld;
+      TauGridFunctionType m_tauOld;
+
+      VMSProblemType m_l2ConvU;
+      VMSProblemType m_subProjection;
+      TauProblemType m_tauProjection;
+
+      Solver::KSP m_l2ConvUSolver;
+      Solver::KSP m_subProjectionSolver;
+      Solver::KSP m_tauProjectionSolver;
   };
 }
 
