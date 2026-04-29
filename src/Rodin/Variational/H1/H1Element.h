@@ -773,7 +773,17 @@ namespace Rodin::Variational
           ScalarType operator()(const T& v) const
           {
             const auto value = v(H1Element<K, ScalarType>::getNodes(m_g)[m_local / m_vdim]);
-            return value(static_cast<std::uint8_t>(m_local % m_vdim));
+            // `DirichletBC(u, scalar_func)` on a vector-valued space evaluates
+            // to a scalar at each DOF node and must broadcast that scalar to
+            // every vector component.  `DirichletBC(u, vector_func)` evaluates
+            // to a vector and we extract the component corresponding to
+            // `m_local % m_vdim`.  Without this branch the scalar case
+            // would attempt to call the scalar result as a function, causing
+            // a compile error.
+            if constexpr (std::is_convertible_v<std::decay_t<decltype(value)>, ScalarType>)
+              return static_cast<ScalarType>(value);
+            else
+              return value(static_cast<std::uint8_t>(m_local % m_vdim));
           }
 
         private:
