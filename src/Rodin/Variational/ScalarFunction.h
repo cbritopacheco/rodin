@@ -99,13 +99,13 @@ namespace Rodin::Variational
        * @returns Scalar value at the given point
        */
       constexpr
-      decltype(auto) getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
       constexpr
-      decltype(auto) getValue(const IntegrationPoint& ip) const
+      auto getValue(const IntegrationPoint& ip) const
       {
         if constexpr (requires (const Derived& f, const IntegrationPoint& q) { f.getValue(q); })
           return static_cast<const Derived&>(*this).getValue(ip);

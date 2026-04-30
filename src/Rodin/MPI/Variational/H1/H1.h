@@ -118,14 +118,14 @@ namespace Rodin::Variational
 
           Pullback(const Pullback&) = default;
 
-          decltype(auto) operator()(const Math::SpatialVector<Real>& r) const
+          auto operator()(const Math::SpatialVector<Real>& r) const
           {
             const Geometry::Point p(m_polytope, r);
             return m_v(p);
           }
 
           template <class T>
-          decltype(auto) operator()(T& res, const Math::SpatialVector<Real>& r) const
+          auto operator()(T& res, const Math::SpatialVector<Real>& r) const
           {
             const Geometry::Point p(m_polytope, r);
             return m_v(res, p);
@@ -938,14 +938,14 @@ namespace Rodin::Variational
 
           Pullback(const Pullback&) = default;
 
-          decltype(auto) operator()(const Math::SpatialVector<Real>& r) const
+          auto operator()(const Math::SpatialVector<Real>& r) const
           {
             const Geometry::Point p(m_polytope, r);
             return m_v(p);
           }
 
           template <class T>
-          decltype(auto) operator()(T& res, const Math::SpatialVector<Real>& r) const
+          auto operator()(T& res, const Math::SpatialVector<Real>& r) const
           {
             const Geometry::Point p(m_polytope, r);
             return m_v(res, p);

@@ -597,12 +597,10 @@ namespace Rodin::Variational
       RangeType getValue(const Geometry::Point& p) const
       {
         RangeType out{};
-        const auto& polytope = p.getPolytope();
-        const auto& polytopeMesh = polytope.getMesh();
         const auto& fes = m_fes.get();
         const auto& fesMesh = fes.getMesh();
 
-        if (polytopeMesh == fesMesh)
+        if (fesMesh.isLocalPoint(p))
         {
           static_cast<const Derived&>(*this).interpolate(out, p);
         }
@@ -639,12 +637,10 @@ namespace Rodin::Variational
       {
         RangeType out{};
         const auto& p = ip.getPoint();
-        const auto& polytope = p.getPolytope();
-        const auto& polytopeMesh = polytope.getMesh();
         const auto& fes = m_fes.get();
         const auto& fesMesh = fes.getMesh();
 
-        if (polytopeMesh == fesMesh)
+        if (fesMesh.isLocalPoint(p))
         {
           static_cast<const Derived&>(*this).interpolate(out, ip);
         }

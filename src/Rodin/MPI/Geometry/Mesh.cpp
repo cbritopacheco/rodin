@@ -30,26 +30,29 @@ namespace Rodin::Geometry
   {
     MPIMesh mesh(m_context);
     mesh.m_shard = std::move(m_shard);
-    mesh.m_quadratures.initialize(mesh.getDimension());
     return mesh;
   }
 
   MPIMesh& MPIMesh::scale(Real c)
   {
     this->getShard().scale(c);
-    m_quadratures.clear();
     return *this;
   }
 
   void MPIMesh::flush()
   {
     this->getShard().flush();
-    m_quadratures.clear();
   }
 
   bool MPIMesh::isSubMesh() const
   {
     return false;
+  }
+
+  bool MPIMesh::isLocalPoint(const Point& p) const
+  {
+    const auto& mesh = p.getPolytope().getMesh();
+    return mesh == *this || mesh == this->getShard();
   }
 
   size_t MPIMesh::getDimension() const
@@ -409,13 +412,7 @@ namespace Rodin::Geometry
   {
     const auto& shard = this->getShard();
     assert(localIdx < shard.getPolytopeCount(dimension));
-    return m_quadratures.get(
-        { dimension, localIdx }, shard.getPolytopeCount(dimension), qf,
-        [this, dimension, localIdx, &qf]()
-        {
-          return std::make_unique<PolytopeQuadrature>(
-              Polytope(dimension, localIdx, *this), qf);
-        });
+    return shard.getQuadrature(dimension, localIdx, qf);
   }
 
   Polytope::Type MPIMesh::getGeometry(size_t dimension, Index localIdx) const
@@ -448,7 +445,6 @@ namespace Rodin::Geometry
     auto& shard = this->getShard();
     assert(localIdx < shard.getVertexCount());
     shard.setVertexCoordinates(localIdx, s, i);
-    m_quadratures.clear();
     return *this;
   }
 
@@ -457,7 +453,6 @@ namespace Rodin::Geometry
     auto& shard = this->getShard();
     assert(localIdx < shard.getVertexCount());
     shard.setVertexCoordinates(localIdx, coords);
-    m_quadratures.clear();
     return *this;
   }
 
@@ -468,7 +463,6 @@ namespace Rodin::Geometry
     auto& shard = this->getShard();
     assert(localIdx < shard.getPolytopeCount(d));
     shard.setPolytopeTransformation({ d, localIdx }, trans);
-    m_quadratures.clear();
     return *this;
   }
 
@@ -489,7 +483,6 @@ namespace Rodin::Geometry
         break;
       }
     }
-    m_quadratures.initialize(getDimension());
     return *this;
   }
 

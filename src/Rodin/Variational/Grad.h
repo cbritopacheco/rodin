@@ -210,15 +210,13 @@ namespace Rodin::Variational
        * @c interpolate. Falls back to inclusion / submesh restriction
        * when the polytope's mesh is not the FES mesh.
        */
-      const SpatialVectorType& getValue(const Geometry::Point& p) const
+      SpatialVectorType getValue(const Geometry::Point& p) const
       {
-        const auto& polytope = p.getPolytope();
-        const auto& polytopeMesh = polytope.getMesh();
         const auto& fes = getOperand().getFiniteElementSpace();
         const auto& fesMesh = fes.getMesh();
 
         m_cache.key.valid = false;
-        if (polytopeMesh == fesMesh)
+        if (fesMesh.isLocalPoint(p))
         {
           this->interpolate(m_cache.value, p);
         }
@@ -247,15 +245,14 @@ namespace Rodin::Variational
        * @c interpolate(out, ip) and caches the result. Falls back to
        * inclusion / submesh restriction otherwise.
        */
-      const SpatialVectorType& getValue(const IntegrationPoint& ip) const
+      SpatialVectorType getValue(const IntegrationPoint& ip) const
       {
         const auto& p = ip.getPoint();
         const auto& polytope = p.getPolytope();
-        const auto& polytopeMesh = polytope.getMesh();
         const auto& fes = getOperand().getFiniteElementSpace();
         const auto& fesMesh = fes.getMesh();
 
-        if (polytopeMesh == fesMesh)
+        if (fesMesh.isLocalPoint(p))
         {
           typename Cache::Key key;
           key.mesh = static_cast<const void*>(&fesMesh);

@@ -360,6 +360,7 @@ namespace Rodin::Geometry
   {
     for (size_t i = 0; i < static_cast<size_t>(coords.size()); ++i)
       m_vertices(i, idx) = coords[i];
+    flush();
     return *this;
   }
 
@@ -367,6 +368,7 @@ namespace Rodin::Geometry
   Mesh<Context::Local>::setVertexCoordinates(Index idx, Real xi, size_t i)
   {
     m_vertices(i, idx) = xi;
+    flush();
     return *this;
   }
 
@@ -392,6 +394,7 @@ namespace Rodin::Geometry
     const size_t d = p.first;
     m_transformations.set(
         p, this->getPolytopeCount(d), std::unique_ptr<PolytopeTransformation>(trans));
+    m_quadratures.clear();
     return *this;
   }
 
@@ -727,6 +730,11 @@ namespace Rodin::Geometry
     assert(isSubMesh());
     RODIN_GEOMETRY_MESH_REQUIRE_SUBMESH();
     return static_cast<const SubMesh<Context>&>(*this);
+  }
+
+  bool MeshBase::isLocalPoint(const Point& p) const
+  {
+    return p.getPolytope().getMesh() == *this;
   }
 
   Optional<Point> MeshBase::inclusion(const Point& p) const

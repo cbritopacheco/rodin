@@ -185,7 +185,7 @@ namespace Rodin::Variational
 
           const auto& gf  = this->getOperand();
           const auto& fes = gf.getFiniteElementSpace();
-          decltype(auto) fe  = fes.getFiniteElement(d, i);
+          const auto& fe  = fes.getFiniteElement(d, i);
           const auto& rc  = p.getReferenceCoordinates();
 
           // div(u) = trace( Jinv^T * sum_a u_a * grad_ref(phi_a) )
@@ -202,7 +202,6 @@ namespace Rodin::Variational
 
           for (size_t a = 0; a < fe.getCount(); ++a)
           {
-            const auto& basis = fe.getBasis(a); // vector basis
             // basis.getDerivative<1>(comp, j)(rc) exists but expensive in H1 vector element;
             // use scalar reference gradients and component structure if available is hard.
             // So: compute physical gradients component-wise via basis.getDerivative<1>(i,j).
@@ -398,7 +397,7 @@ namespace Rodin::Variational
         const size_t vdim = fes.getVectorDimension();
 
         // Scalar FE for reference gradients
-        decltype(auto) feS = H1Element<K, ScalarType>(geom);
+        const auto feS = H1Element<K, ScalarType>(geom);
 
         const size_t nscalar = feS.getCount();
         const size_t ndof = vdim * nscalar;

@@ -219,7 +219,7 @@ namespace Rodin::Variational
         return *m_u;
       }
 
-      decltype(auto) getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
         const auto& kernel = getKernel();
         const auto& operand = getOperand();
@@ -492,4 +492,3 @@ namespace Rodin::Variational
 }
 
 #endif
-
