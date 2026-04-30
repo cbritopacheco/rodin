@@ -8,6 +8,7 @@
  * - XDMF basename: `CoronaryArtery`
  * - CSV output: `CoronaryArtery.csv`
  */
+#include <cassert>
 #include <exception>
 #include <iostream>
 
@@ -22,6 +23,24 @@
 int main(int argc, char** argv)
 {
   PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
+
+  const auto setPETScDefault =
+    [](const char* name, const char* value)
+    {
+      PetscBool set = PETSC_FALSE;
+      PetscErrorCode ierr = PetscOptionsHasName(PETSC_NULLPTR, PETSC_NULLPTR, name, &set);
+      if (ierr == PETSC_SUCCESS && !set)
+        ierr = PetscOptionsSetValue(PETSC_NULLPTR, name, value);
+      assert(ierr == PETSC_SUCCESS);
+      (void) ierr;
+    };
+
+  setPETScDefault("-ksp_type", "preonly");
+  setPETScDefault("-pc_type", "lu");
+  setPETScDefault("-pc_factor_mat_solver_type", "mumps");
+  setPETScDefault("-mat_mumps_icntl_20", "0");
+  setPETScDefault("-mat_mumps_icntl_21", "0");
+
   boost::mpi::environment env(argc, argv);
   boost::mpi::communicator world(PETSC_COMM_WORLD, boost::mpi::comm_attach);
   Rodin::Context::MPI context(env, world);
@@ -32,7 +51,7 @@ int main(int argc, char** argv)
 
     {
       Rodin::Examples::Heart::CoupledLV0DCoronary3D::Config cfg;
-      cfg.meshPath = "../resources/examples/Heart/CoronaryArtery_Fluid.medit.o.mesh";
+      cfg.meshPath = "../resources/examples/Heart/CoronaryArtery_Fluid.medit.mesh";
       cfg.xdmfBasename = "CoronaryArtery";
       cfg.csvPath = "CoronaryArtery.csv";
 

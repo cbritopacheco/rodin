@@ -365,13 +365,21 @@ namespace Rodin::Assembly
 
         auto& x = axb.getSolution();
         assert(x);
-        ierr = VecSetSizes(
-            x,
-            static_cast<PetscInt>(localCols),
-            static_cast<PetscInt>(globalCols));
+        VecType xType = nullptr;
+        ierr = VecGetType(x, &xType);
         assert(ierr == PETSC_SUCCESS);
-        ierr = VecSetFromOptions(x);
-        assert(ierr == PETSC_SUCCESS);
+        if (!xType)
+        {
+          ierr = VecSetSizes(
+              x,
+              static_cast<PetscInt>(localCols),
+              static_cast<PetscInt>(globalCols));
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecSetFromOptions(x);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecZeroEntries(x);
+          assert(ierr == PETSC_SUCCESS);
+        }
 
         // ------------------------
         // Local BFIs (owned elements only)
@@ -752,13 +760,21 @@ namespace Rodin::Assembly
 
         auto& x = axb.getSolution();
         assert(x);
-        ierr = VecSetSizes(
-            x,
-            static_cast<PetscInt>(localCols),
-            static_cast<PetscInt>(ncols));
+        VecType xType = nullptr;
+        ierr = VecGetType(x, &xType);
         assert(ierr == PETSC_SUCCESS);
-        ierr = VecSetFromOptions(x);
-        assert(ierr == PETSC_SUCCESS);
+        if (!xType)
+        {
+          ierr = VecSetSizes(
+              x,
+              static_cast<PetscInt>(localCols),
+              static_cast<PetscInt>(ncols));
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecSetFromOptions(x);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecZeroEntries(x);
+          assert(ierr == PETSC_SUCCESS);
+        }
 
         // ------------------------
         // Assemble bilinear terms into A

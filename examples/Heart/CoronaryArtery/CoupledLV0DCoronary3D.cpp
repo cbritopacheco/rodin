@@ -651,7 +651,7 @@ namespace Rodin::Examples::Heart
     return rep.converged;
   }
 
-  void CoupledLV0DCoronary3D::solve3D()
+  bool CoupledLV0DCoronary3D::solve3D()
   {
     const auto& s = m_model.getState();
     const Real pin = s.par;
@@ -799,6 +799,7 @@ namespace Rodin::Examples::Heart
         << "  iterations = " << m_flowSolver.getIterationNumber()
         << Alert::Raise;
     }
+    return m_flowSolver.converged();
   }
 
   void CoupledLV0DCoronary3D::computeFluxes()
@@ -1020,7 +1021,14 @@ namespace Rodin::Examples::Heart
         return 1;
       }
 
-      solve3D();
+      if (!solve3D())
+      {
+        Alert::Exception()
+          << "3D SNES solver failed to converge at step "
+          << (i + 1) << ", t = " << m_model.getState().t
+          << Alert::Raise;
+        return 1;
+      }
       computeFluxes();
 
       for (const Attribute tag : m_cfg.outlets)

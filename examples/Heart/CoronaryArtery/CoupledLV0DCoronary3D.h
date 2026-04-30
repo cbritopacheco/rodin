@@ -157,7 +157,7 @@ namespace Rodin::Examples::Heart
       bool isRoot() const;
 
       bool advance0D();
-      void solve3D();
+      bool solve3D();
       void computeFluxes();
       void updateHistory();
       void writeOutputs();

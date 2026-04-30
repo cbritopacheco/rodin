@@ -516,6 +516,7 @@ namespace Rodin::Variational
 
       GridFunction& operator=(const ScalarType& value)
       {
+        static_cast<const GridFunction&>(*this).flush();
         this->flush();
         PetscErrorCode ierr = VecSet(m_data, value);
         assert(ierr == PETSC_SUCCESS);
@@ -656,6 +657,7 @@ namespace Rodin::Variational
       GridFunction& operator+=(const ScalarType& rhs)
       {
         static_assert(std::is_same_v<RangeType, ScalarType>);
+        static_cast<const GridFunction&>(*this).flush();
         this->flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
@@ -683,6 +685,7 @@ namespace Rodin::Variational
       GridFunction& operator-=(const ScalarType& rhs)
       {
         static_assert(std::is_same_v<RangeType, ScalarType>);
+        static_cast<const GridFunction&>(*this).flush();
         this->flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
@@ -709,6 +712,7 @@ namespace Rodin::Variational
        */
       GridFunction& operator*=(const ScalarType& rhs)
       {
+        static_cast<const GridFunction&>(*this).flush();
         this->flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
@@ -735,6 +739,7 @@ namespace Rodin::Variational
        */
       GridFunction& operator/=(const ScalarType& rhs)
       {
+        static_cast<const GridFunction&>(*this).flush();
         this->flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
@@ -766,6 +771,7 @@ namespace Rodin::Variational
       GridFunction& operator+=(const GridFunction& rhs)
       {
         assert(&this->getFiniteElementSpace() == &rhs.getFiniteElementSpace());
+        static_cast<const GridFunction&>(*this).flush();
         this->flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
@@ -796,6 +802,7 @@ namespace Rodin::Variational
       GridFunction& operator-=(const GridFunction& rhs)
       {
         assert(&this->getFiniteElementSpace() == &rhs.getFiniteElementSpace());
+        static_cast<const GridFunction&>(*this).flush();
         this->flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
@@ -823,6 +830,7 @@ namespace Rodin::Variational
        */
       GridFunction& operator*=(const GridFunction& rhs)
       {
+        static_cast<const GridFunction&>(*this).flush();
         this->flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
@@ -851,6 +859,7 @@ namespace Rodin::Variational
        */
       GridFunction& operator/=(const GridFunction& rhs)
       {
+        static_cast<const GridFunction&>(*this).flush();
         this->flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
@@ -884,6 +893,7 @@ namespace Rodin::Variational
        */
       GridFunction& setData(const DataType& data, size_t offset = 0)
       {
+        static_cast<const GridFunction&>(*this).flush();
         this->flush();
 
         PetscErrorCode ierr;

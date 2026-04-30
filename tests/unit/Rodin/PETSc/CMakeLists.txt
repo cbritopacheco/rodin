@@ -14,6 +14,20 @@ set_tests_properties(RodinPETScGridFunctionTest PROPERTIES
 )
 rodin_suppress_external_mpi_lsan_for_test(RodinPETScGridFunctionTest)
 
+add_executable(RodinPETScLinearSystemTest LinearSystemTest.cpp)
+target_link_libraries(RodinPETScLinearSystemTest
+  PUBLIC
+  GTest::gtest
+  Rodin::PETSc)
+add_test(
+  NAME RodinPETScLinearSystemTest
+  COMMAND $<TARGET_FILE:RodinPETScLinearSystemTest>
+)
+set_tests_properties(RodinPETScLinearSystemTest PROPERTIES
+  LABELS "unit;petsc"
+)
+rodin_suppress_external_mpi_lsan_for_test(RodinPETScLinearSystemTest)
+
 add_executable(RodinPETScMPIGridFunctionTest MPIGridFunctionTest.cpp)
 target_link_libraries(RodinPETScMPIGridFunctionTest
   PUBLIC
