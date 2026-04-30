@@ -28,7 +28,6 @@
 #ifndef RODIN_VARIATIONAL_H1_JACOBIAN_H
 #define RODIN_VARIATIONAL_H1_JACOBIAN_H
 
-#include <type_traits>
 #include <vector>
 
 #include "Rodin/Variational/ForwardDecls.h"
@@ -114,16 +113,6 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      void interpolate(SpatialMatrixType& out, const IntegrationPoint& ip) const
-      {
-        interpolateImpl(out, ip);
-      }
-
-      void interpolate(SpatialMatrixType& out, const Geometry::Point& p) const
-      {
-        interpolateImpl(out, p);
-      }
-
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
@@ -133,129 +122,20 @@ namespace Rodin::Variational
 
       Jacobian* copy() const noexcept override { return new Jacobian(*this); }
 
-    private:
-      static const Geometry::Point& getPoint(const Geometry::Point& p) noexcept
+      void interpolate(SpatialMatrixType& out, const IntegrationPoint& ip) const
       {
-        return p;
-      }
-
-      static const Geometry::Point& getPoint(const IntegrationPoint& ip) noexcept
-      {
-        return ip.getPoint();
-      }
-
-      template <class PointLike>
-      void interpolateImpl(SpatialMatrixType& out, const PointLike& pointLike) const
-      {
-        using PointLikeType = std::decay_t<PointLike>;
-        static_assert(
-            std::is_same_v<PointLikeType, Geometry::Point>
-              || std::is_same_v<PointLikeType, IntegrationPoint>,
-            "H1 Jacobian interpolation only supports Geometry::Point and IntegrationPoint.");
-
-        const auto& p = getPoint(pointLike);
-        const auto& polytope = p.getPolytope();
-        const auto& d = polytope.getDimension();
-        const auto& i = polytope.getIndex();
-        const auto& mesh = polytope.getMesh();
-        const size_t meshDim = mesh.getDimension();
-
-        if constexpr (std::is_same_v<PointLikeType, Geometry::Point>)
-        {
-          if (d == meshDim - 1) // face
-          {
-            const auto& conn = mesh.getConnectivity();
-            const auto& inc  = conn.getIncidence({ meshDim - 1, meshDim }, i);
-            const auto& pc   = p.getPhysicalCoordinates();
-
-            assert(inc.size() == 1 || inc.size() == 2);
-
-            if (inc.size() == 1)
-            {
-              const auto& tracePolytope = mesh.getPolytope(meshDim, *inc.begin());
-              Math::SpatialPoint rc;
-              tracePolytope->getTransformation().inverse(rc, pc);
-              const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
-              interpolateImpl(out, np);
-              return;
-            }
-            else
-            {
-              const auto& traceDomain = this->getTraceDomain();
-              if (traceDomain.size() == 0)
-              {
-                Alert::MemberFunctionException(*this, __func__)
-                  << "No trace domain provided: "
-                  << Alert::Notation::Predicate(true, "getTraceDomain().size() == 0")
-                  << ". Jacobian at an interface with no trace domain is undefined."
-                  << Alert::Raise;
-              }
-
-              for (auto& idx : inc)
-              {
-                const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
-                const auto a = tracePolytope->getAttribute();
-                if (a && traceDomain.count(*a))
-                {
-                  Math::SpatialPoint rc;
-                  tracePolytope->getTransformation().inverse(rc, pc);
-                  const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
-                  interpolateImpl(out, np);
-                  return;
-                }
-              }
-
-              UndeterminedTraceDomainException(
-                  *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()) << Alert::Raise;
-              return;
-            }
-          }
-        }
-
-        assert(d == mesh.getDimension());
-
-        const auto& gf  = this->getOperand();
-        const auto& fes = gf.getFiniteElementSpace();
-
-        const auto geom = polytope.getGeometry();
-        const auto feS = H1Element<K, ScalarType>(geom);
-        const size_t nscalar = feS.getCount();
-
-        if constexpr (std::is_same_v<PointLikeType, IntegrationPoint>)
-        {
-          const auto& tab = feS.getTabulation(pointLike.getQuadratureFormula());
-          interpolateCell(
-              out, p, fes, gf, nscalar,
-              [&tab, qp = pointLike.getIndex()](size_t alpha, size_t j)
-              {
-                return tab.getGradient(qp, alpha)[j];
-              });
-        }
-        else
-        {
-          const auto& rc = p.getReferenceCoordinates();
-          interpolateCell(
-              out, p, fes, gf, nscalar,
-              [&feS, &rc](size_t alpha, size_t j)
-              {
-                return feS.getBasis(alpha).getGradient()(rc)(j);
-              });
-        }
-      }
-
-      template <class FES, class GF, class RefGradient>
-      void interpolateCell(
-          SpatialMatrixType& out,
-          const Geometry::Point& p,
-          const FES& fes,
-          const GF& gf,
-          size_t nscalar,
-          const RefGradient& refGradient) const
-      {
+        const auto& p = ip.getPoint();
         const auto& polytope = p.getPolytope();
         const size_t d = polytope.getDimension();
         const Index i = polytope.getIndex();
+
+        const auto& gf  = this->getOperand();
+        const auto& fes = gf.getFiniteElementSpace();
         const size_t vdim = fes.getVectorDimension();
+
+        const auto feS = H1Element<K, ScalarType>(polytope.getGeometry());
+        const size_t nscalar = feS.getCount();
+        const auto& tab = feS.getTabulation(ip.getQuadratureFormula());
         const auto JinvT = p.getJacobianInverse().transpose();
 
         SpatialVectorType ref(d);
@@ -266,8 +146,102 @@ namespace Rodin::Variational
 
         for (size_t alpha = 0; alpha < nscalar; ++alpha)
         {
+          const auto gref = tab.getGradient(ip.getIndex(), alpha);
           for (size_t j = 0; j < d; ++j)
-            ref(j) = refGradient(alpha, j);
+            ref(j) = gref[j];
+
+          phys = JinvT * ref;
+
+          for (size_t comp = 0; comp < vdim; ++comp)
+          {
+            const size_t local = alpha * vdim + comp;
+            const auto uval = gf[fes.getGlobalIndex({d, i}, local)];
+            for (size_t j = 0; j < d; ++j)
+              out(comp, j) += uval * phys(j);
+          }
+        }
+      }
+
+      void interpolate(SpatialMatrixType& out, const Geometry::Point& p) const
+      {
+        const auto& polytope = p.getPolytope();
+        const auto& d = polytope.getDimension();
+        const auto& i = polytope.getIndex();
+        const auto& mesh = polytope.getMesh();
+        const size_t meshDim = mesh.getDimension();
+
+        if (d == meshDim - 1) // face
+        {
+          const auto& conn = mesh.getConnectivity();
+          const auto& inc  = conn.getIncidence({ meshDim - 1, meshDim }, i);
+          const auto& pc   = p.getPhysicalCoordinates();
+
+          assert(inc.size() == 1 || inc.size() == 2);
+
+          if (inc.size() == 1)
+          {
+            const auto& tracePolytope = mesh.getPolytope(meshDim, *inc.begin());
+            Math::SpatialPoint rc;
+            tracePolytope->getTransformation().inverse(rc, pc);
+            const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
+            interpolate(out, np);
+            return;
+          }
+          else
+          {
+            const auto& traceDomain = this->getTraceDomain();
+            if (traceDomain.size() == 0)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "No trace domain provided: "
+                << Alert::Notation::Predicate(true, "getTraceDomain().size() == 0")
+                << ". Jacobian at an interface with no trace domain is undefined."
+                << Alert::Raise;
+            }
+
+            for (auto& idx : inc)
+            {
+              const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
+              const auto a = tracePolytope->getAttribute();
+              if (a && traceDomain.count(*a))
+              {
+                Math::SpatialPoint rc;
+                tracePolytope->getTransformation().inverse(rc, pc);
+                const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
+                interpolate(out, np);
+                return;
+              }
+            }
+
+            UndeterminedTraceDomainException(
+                *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()) << Alert::Raise;
+            return;
+          }
+        }
+
+        assert(d == mesh.getDimension());
+
+        const auto& gf  = this->getOperand();
+        const auto& fes = gf.getFiniteElementSpace();
+        const size_t vdim = fes.getVectorDimension();
+
+        const auto geom = polytope.getGeometry();
+        const auto feS = H1Element<K, ScalarType>(geom);
+        const size_t nscalar = feS.getCount();
+        const auto& rc = p.getReferenceCoordinates();
+        const auto JinvT = p.getJacobianInverse().transpose();
+
+        SpatialVectorType ref(d);
+        SpatialVectorType phys(d);
+
+        out.resize(vdim, d);
+        out.setZero();
+
+        for (size_t alpha = 0; alpha < nscalar; ++alpha)
+        {
+          const auto gref = feS.getBasis(alpha).getGradient()(rc);
+          for (size_t j = 0; j < d; ++j)
+            ref(j) = gref(j);
 
           phys = JinvT * ref;
 
