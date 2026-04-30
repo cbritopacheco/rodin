@@ -142,6 +142,21 @@ namespace Rodin::Examples::Heart
         std::map<Attribute, Real> pOut;
       };
 
+      struct StepTiming
+      {
+        Real total = 0.0;
+        Real advance0D = 0.0;
+        Real setup3DForm = 0.0;
+        Real assemble3D = 0.0;
+        Real fieldSplits = 0.0;
+        Real solve3D = 0.0;
+        Real fluxes = 0.0;
+        Real outletRCR = 0.0;
+        Real csv = 0.0;
+        Real history = 0.0;
+        Real output = 0.0;
+      };
+
       static Model::Input makeInput();
       static MeshType makeMesh(const Rodin::Context::MPI& context, const Config& cfg);
 
@@ -164,6 +179,7 @@ namespace Rodin::Examples::Heart
       void writeCSVHeader();
       void writeCSVRow();
       StepData collectStepData() const;
+      void printStepTiming(int step) const;
 
       Config m_cfg;
       Model::Input m_input;
@@ -196,6 +212,7 @@ namespace Rodin::Examples::Heart
 
       mutable StepData m_stepData;
       std::ofstream m_csv;
+      StepTiming m_stepTiming;
       bool m_flowFieldSplitsSet = false;
       bool m_initialized = false;
   };

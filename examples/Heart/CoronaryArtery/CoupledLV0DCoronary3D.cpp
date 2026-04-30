@@ -1,11 +1,14 @@
 #include <algorithm>
 #include <cassert>
+#include <chrono>
 #include <cmath>
 #include <iostream>
 #include <limits>
 #include <numbers>
 #include <stdexcept>
 #include <type_traits>
+
+#include <boost/mpi/collectives.hpp>
 
 #include <petscvec.h>
 
@@ -29,6 +32,21 @@ namespace Rodin::Examples::Heart
   namespace
   {
     constexpr int RootRank = 0;
+
+    using Clock = std::chrono::steady_clock;
+
+    struct MaxReal
+    {
+      Rodin::Real operator()(Rodin::Real lhs, Rodin::Real rhs) const
+      {
+        return std::max(lhs, rhs);
+      }
+    };
+
+    Rodin::Real secondsSince(Clock::time_point start)
+    {
+      return std::chrono::duration<Rodin::Real>(Clock::now() - start).count();
+    }
   }
 
   CoupledLV0DCoronary3D::CoupledLV0DCoronary3D(const Context::MPI& context)
@@ -653,6 +671,8 @@ namespace Rodin::Examples::Heart
 
   bool CoupledLV0DCoronary3D::solve3D()
   {
+    const auto setup3DStart = Clock::now();
+
     const auto& s = m_model.getState();
     const Real pin = s.par;
 
@@ -775,21 +795,29 @@ namespace Rodin::Examples::Heart
 
         + DirichletBC(m_u, -uState).on(m_cfg.wall);
 
-    if (isRoot())
-      Alert::Info() << "\t\t[3D] Assembling Newton system ..." << Alert::Raise;
-
-    m_flow.assemble();
+    m_stepTiming.setup3DForm = secondsSince(setup3DStart);
 
     if (!m_flowFieldSplitsSet)
     {
+      if (isRoot())
+        Alert::Info() << "\t\t[3D] Initializing Newton system ..." << Alert::Raise;
+
+      const auto assemble3DStart = Clock::now();
+      m_flow.assemble();
+      m_stepTiming.assemble3D = secondsSince(assemble3DStart);
+
+      const auto fieldSplitsStart = Clock::now();
       m_flow.setFieldSplits();
+      m_stepTiming.fieldSplits = secondsSince(fieldSplitsStart);
       m_flowFieldSplitsSet = true;
     }
 
     if (isRoot())
       Alert::Info() << "\t\t[3D] Solving with PETSc SNES ..." << Alert::Raise;
 
+    const auto solve3DStart = Clock::now();
     m_flowSolver.solve();
+    m_stepTiming.solve3D = secondsSince(solve3DStart);
 
     if (isRoot())
     {
@@ -993,6 +1021,45 @@ namespace Rodin::Examples::Heart
     m_csv.flush();
   }
 
+  void CoupledLV0DCoronary3D::printStepTiming(int step) const
+  {
+    const auto& comm = m_mesh.getContext().getCommunicator();
+    auto maxTime = [&](Real local)
+    {
+      return boost::mpi::all_reduce(comm, local, MaxReal{});
+    };
+
+    const Real total       = maxTime(m_stepTiming.total);
+    const Real advance0D   = maxTime(m_stepTiming.advance0D);
+    const Real setup3DForm = maxTime(m_stepTiming.setup3DForm);
+    const Real assemble3D  = maxTime(m_stepTiming.assemble3D);
+    const Real fieldSplits = maxTime(m_stepTiming.fieldSplits);
+    const Real solve3D     = maxTime(m_stepTiming.solve3D);
+    const Real fluxes      = maxTime(m_stepTiming.fluxes);
+    const Real outletRCR   = maxTime(m_stepTiming.outletRCR);
+    const Real csv         = maxTime(m_stepTiming.csv);
+    const Real history     = maxTime(m_stepTiming.history);
+    const Real output      = maxTime(m_stepTiming.output);
+
+    if (isRoot())
+    {
+      Alert::Info()
+        << "\t[Timing max/rank] step = " << step
+        << "  total = " << total << " s"
+        << "  0D = " << advance0D << " s"
+        << "  3D-form = " << setup3DForm << " s"
+        << "  3D-assemble = " << assemble3D << " s"
+        << "  field-splits = " << fieldSplits << " s"
+        << "  3D-solve = " << solve3D << " s"
+        << "  fluxes = " << fluxes << " s"
+        << "  RCR = " << outletRCR << " s"
+        << "  csv = " << csv << " s"
+        << "  history = " << history << " s"
+        << "  output = " << output << " s"
+        << Alert::Raise;
+    }
+  }
+
   int CoupledLV0DCoronary3D::run()
   {
     if (!m_initialized)
@@ -1000,6 +1067,8 @@ namespace Rodin::Examples::Heart
 
     for (int i = 0; i < static_cast<int>(m_cfg.nsteps); ++i)
     {
+      m_stepTiming = StepTiming{};
+      const auto stepStart = Clock::now();
       const Real t_current = m_model.getState().t;
 
       if (isRoot())
@@ -1012,7 +1081,11 @@ namespace Rodin::Examples::Heart
           << Alert::Raise;
       }
 
-      if (!advance0D())
+      const auto advance0DStart = Clock::now();
+      const bool advanced0D = advance0D();
+      m_stepTiming.advance0D = secondsSince(advance0DStart);
+
+      if (!advanced0D)
       {
         Alert::Exception()
           << "0D solver failed to converge at step "
@@ -1029,14 +1102,30 @@ namespace Rodin::Examples::Heart
           << Alert::Raise;
         return 1;
       }
-      computeFluxes();
 
+      const auto fluxesStart = Clock::now();
+      computeFluxes();
+      m_stepTiming.fluxes = secondsSince(fluxesStart);
+
+      const auto outletRCRStart = Clock::now();
       for (const Attribute tag : m_cfg.outlets)
         updateRCRNonNew(m_model, m_wk[tag], m_stepData.qOut.at(tag), m_cfg.dt);
+      m_stepTiming.outletRCR = secondsSince(outletRCRStart);
 
+      const auto csvStart = Clock::now();
       writeCSVRow();
+      m_stepTiming.csv = secondsSince(csvStart);
+
+      const auto historyStart = Clock::now();
       updateHistory();
+      m_stepTiming.history = secondsSince(historyStart);
+
+      const auto outputStart = Clock::now();
       writeOutputs();
+      m_stepTiming.output = secondsSince(outputStart);
+
+      m_stepTiming.total = secondsSince(stepStart);
+      printStepTiming(i + 1);
     }
 
     m_xdmf.close();
