@@ -179,6 +179,12 @@ namespace Rodin::Variational
       }
 
       constexpr
+      auto getValue(const IntegrationPoint& ip) const
+      {
+        return m_nested->getValue(ip);
+      }
+
+      constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         return m_nested->getOrder(geom);
@@ -350,6 +356,15 @@ namespace Rodin::Variational
       Real getValue(const Geometry::Point& v) const
       {
         return m_f(v);
+      }
+
+      constexpr
+      Real getValue(const IntegrationPoint& ip) const
+      {
+        if constexpr (std::is_invocable_r_v<Real, F, const IntegrationPoint&>)
+          return m_f(ip);
+        else
+          return m_f(ip.getPoint());
       }
 
       template <class ... Args>

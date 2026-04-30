@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "Rodin/Test/Random.h"
 
+#include "Rodin/QF/Centroid.h"
 #include "Rodin/Variational.h"
 
 using namespace Rodin;
@@ -11,6 +12,49 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  namespace
+  {
+    struct IntegrationPointFirstComponentCallable
+    {
+      Real operator()(const Geometry::Point&) const
+      {
+        return 1.0;
+      }
+
+      Real operator()(const IntegrationPoint& ip) const
+      {
+        return 10.0 + static_cast<Real>(ip.getIndex());
+      }
+    };
+
+    struct IntegrationPointSecondComponentCallable
+    {
+      Real operator()(const Geometry::Point&) const
+      {
+        return 2.0;
+      }
+
+      Real operator()(const IntegrationPoint& ip) const
+      {
+        return 20.0 + static_cast<Real>(ip.getIndex());
+      }
+    };
+
+    struct IntegrationPointVectorCallable
+    {
+      Math::Vector<Real> operator()(const Geometry::Point&) const
+      {
+        return Math::Vector<Real>{{1.0, 2.0}};
+      }
+
+      Math::Vector<Real> operator()(const IntegrationPoint& ip) const
+      {
+        const auto idx = static_cast<Real>(ip.getIndex());
+        return Math::Vector<Real>{{10.0 + idx, 20.0 + idx}};
+      }
+    };
+  }
+
   TEST(Rodin_Variational_VectorFunction, ConstantVector_2D_Construction)
   {
     VectorFunction vf{1.0, 2.0};
@@ -193,5 +237,47 @@ namespace Rodin::Tests::Unit
     Point p(polytope, rc);
     auto value = vf.getValue(p);
     EXPECT_NEAR(value.norm(), 0.0, 1e-10);
+  }
+
+  TEST(Rodin_Variational_VectorFunction, ComponentCallables_UseIntegrationPointFastPath)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    auto it = mesh.getPolytope(mesh.getDimension(), 0);
+    const Math::Vector<Real> rc{{0.25, 0.25}};
+    Point p(*it, rc);
+    QF::Centroid qf(Polytope::Type::Triangle);
+    IntegrationPoint ip(p, qf, 5);
+
+    VectorFunction vf{
+      IntegrationPointFirstComponentCallable{},
+      IntegrationPointSecondComponentCallable{}};
+
+    const auto pointValue = vf.getValue(p);
+    const auto ipValue = vf.getValue(ip);
+
+    EXPECT_NEAR(pointValue(0), 1.0, 1e-10);
+    EXPECT_NEAR(pointValue(1), 2.0, 1e-10);
+    EXPECT_NEAR(ipValue(0), 15.0, 1e-10);
+    EXPECT_NEAR(ipValue(1), 25.0, 1e-10);
+  }
+
+  TEST(Rodin_Variational_VectorFunction, Callable_UsesIntegrationPointFastPath)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    auto it = mesh.getPolytope(mesh.getDimension(), 0);
+    const Math::Vector<Real> rc{{0.25, 0.25}};
+    Point p(*it, rc);
+    QF::Centroid qf(Polytope::Type::Triangle);
+    IntegrationPoint ip(p, qf, 6);
+
+    VectorFunction vf(size_t{2}, IntegrationPointVectorCallable{});
+
+    const auto pointValue = vf.getValue(p);
+    const auto ipValue = vf.getValue(ip);
+
+    EXPECT_NEAR(pointValue(0), 1.0, 1e-10);
+    EXPECT_NEAR(pointValue(1), 2.0, 1e-10);
+    EXPECT_NEAR(ipValue(0), 16.0, 1e-10);
+    EXPECT_NEAR(ipValue(1), 26.0, 1e-10);
   }
 }

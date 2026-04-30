@@ -236,7 +236,8 @@ namespace Rodin::Variational
             for (size_t i = 0; i < quadrature.getSize(); i++)
             {
               const auto& y = quadrature.getPoint(i);
-              res += qf.getWeight(i) * y.getDistortion() * kernel(p, y) * operand(y);
+              const IntegrationPoint ip(y, qf, i);
+              res += qf.getWeight(i) * y.getDistortion() * kernel(p, y) * operand.getValue(ip);
             }
           }
           return res;

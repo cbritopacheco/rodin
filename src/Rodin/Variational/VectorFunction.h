@@ -453,6 +453,14 @@ namespace Rodin::Variational
         return m_f(p);
       }
 
+      auto getValue(const IntegrationPoint& ip) const
+      {
+        if constexpr (std::is_invocable_v<F, const IntegrationPoint&>)
+          return m_f(ip);
+        else
+          return m_f(ip.getPoint());
+      }
+
       constexpr
       VectorFunction& traceOf(const FlatSet<Geometry::Attribute>& attr)
       {
