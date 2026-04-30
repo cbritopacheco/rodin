@@ -383,6 +383,22 @@ namespace Rodin::Variational
         return { m_re->getValue(p), m_imag->getValue(p) };
       }
 
+      constexpr
+      Complex getValue(const IntegrationPoint& ip) const
+      {
+        Complex res;
+        if constexpr (requires { m_re->getValue(ip); })
+          res.real(m_re->getValue(ip));
+        else
+          res.real(m_re->getValue(ip.getPoint()));
+
+        if constexpr (requires { m_imag->getValue(ip); })
+          res.imag(m_imag->getValue(ip));
+        else
+          res.imag(m_imag->getValue(ip.getPoint()));
+        return res;
+      }
+
       template <class ... Args>
       constexpr
       ComplexFunction& traceOf(const Args&... args)

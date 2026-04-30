@@ -87,6 +87,7 @@
 #include <Rodin/Math/SpatialVector.h>
 #include <Rodin/QF/PolytopeQuadratureFormula.h>
 #include <Rodin/Variational/H1/H1Element.h>
+#include <Rodin/Variational/IntegrationPoint.h>
 
 namespace Rodin::Examples::Heart
 {
@@ -254,6 +255,7 @@ namespace Rodin::Examples::Heart
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
+          const Variational::IntegrationPoint ip(p, qf, qp);
 
           const ScalarType wdet =
             static_cast<ScalarType>(qf.getWeight(qp) * p.getDistortion());
@@ -263,8 +265,8 @@ namespace Rodin::Examples::Heart
           fillPhysicalGradients3D(qp, Jinv, trTab, Gtr);
           fillPhysicalGradients3D(qp, Jinv, teTab, Gte);
 
-          const auto uOld = m_uOld.getValue(p);
-          const auto tau = m_tau.getValue(p);
+          const auto uOld = m_uOld.getValue(ip);
+          const auto tau = m_tau.getValue(ip);
 
           /*
            * Directional derivatives along frozen velocity:
@@ -520,6 +522,7 @@ namespace Rodin::Examples::Heart
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
+          const Variational::IntegrationPoint ip(p, qf, qp);
 
           const ScalarType wdet =
             static_cast<ScalarType>(qf.getWeight(qp) * p.getDistortion());
@@ -528,10 +531,10 @@ namespace Rodin::Examples::Heart
 
           fillPhysicalGradients3D(qp, Jinv, tab, Gte);
 
-          const auto uOld  = m_uOld.getValue(p);
-          const auto uProj = m_uProj.getValue(p);
-          const auto subScale = m_sub.getValue(p);
-          const auto tau = m_tau.getValue(p);
+          const auto uOld  = m_uOld.getValue(ip);
+          const auto uProj = m_uProj.getValue(ip);
+          const auto subScale = m_sub.getValue(ip);
+          const auto tau = m_tau.getValue(ip);
 
           /*
            * Directional derivative of test basis along frozen velocity:

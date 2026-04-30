@@ -189,13 +189,14 @@ namespace Rodin::Variational
           for (size_t qp = 0; qp < m_quadrature->getSize(); ++qp)
           {
             const auto& p  = m_quadrature->getPoint(qp);
+            const Variational::IntegrationPoint ip(p, *m_qf, qp);
             const auto& rc = m_qf->getPoint(qp);
 
             const ScalarType wdet =
               static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
-            const auto lambda = getLameFirstParameter().getValue(p);
-            const auto mu     = getShearModulus().getValue(p);
+            const auto lambda = getLameFirstParameter().getValue(ip);
+            const auto mu     = getShearModulus().getValue(ip);
 
             for (size_t i = 0; i < nte; ++i)
             {
@@ -254,13 +255,14 @@ namespace Rodin::Variational
           for (size_t qp = 0; qp < m_quadrature->getSize(); ++qp)
           {
             const auto& p  = m_quadrature->getPoint(qp);
+            const Variational::IntegrationPoint ip(p, *m_qf, qp);
             const auto& rc = m_qf->getPoint(qp);
 
             const ScalarType wdet =
               static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
-            const auto lambda = getLameFirstParameter().getValue(p);
-            const auto mu     = getShearModulus().getValue(p);
+            const auto lambda = getLameFirstParameter().getValue(ip);
+            const auto mu     = getShearModulus().getValue(ip);
 
             for (size_t i = 0; i < nte; ++i)
             {

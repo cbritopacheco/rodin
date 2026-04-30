@@ -344,6 +344,38 @@ namespace Rodin::Variational
         return res;
       }
 
+      RangeType getValue(const IntegrationPoint& ip) const
+      {
+        RangeType res;
+        if constexpr (Dimension <= Math::SpatialVector<ScalarType>::MaxSize)
+        {
+          res.resize(Dimension);
+          Utility::ForIndex<Dimension>(
+            [&](auto i)
+            {
+              const auto& f = std::get<i>(m_fs);
+              if constexpr (requires { f.getValue(ip); })
+                res[static_cast<std::uint8_t>(i)] = f.getValue(ip);
+              else
+                res[static_cast<std::uint8_t>(i)] = f.getValue(ip.getPoint());
+            });
+        }
+        else
+        {
+          res.resize(Dimension);
+          Utility::ForIndex<Dimension>(
+            [&](auto i)
+            {
+              const auto& f = std::get<i>(m_fs);
+              if constexpr (requires { f.getValue(ip); })
+                res.coeffRef(i) = f.getValue(ip);
+              else
+                res.coeffRef(i) = f.getValue(ip.getPoint());
+            });
+        }
+        return res;
+      }
+
       constexpr
       size_t getDimension() const
       {
