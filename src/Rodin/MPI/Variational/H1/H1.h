@@ -102,46 +102,8 @@ namespace Rodin::Variational
       using Parent::getGlobalIndex;
 
       /**
-       * @brief Pullback of a function to the reference polytope.
+       * @brief Pullback of a callable (or FunctionBase) to the reference polytope.
        */
-      template <class FunctionDerived>
-      class FunctionPullback
-        : public FiniteElementSpacePullbackBase<FunctionPullback<FunctionDerived>>
-      {
-        public:
-          using FunctionType = FunctionBase<FunctionDerived>;
-
-          FunctionPullback(const Geometry::Polytope& polytope, const FunctionType& v)
-            : m_polytope(polytope), m_v(v.copy())
-          {}
-
-          FunctionPullback(const FunctionPullback&) = default;
-
-          auto operator()(const Math::SpatialVector<Real>& r) const
-          {
-            const Geometry::Point p(m_polytope, r);
-            return getFunction()(p);
-          }
-
-          template <class T>
-          auto operator()(T& res, const Math::SpatialVector<Real>& r) const
-          {
-            const Geometry::Point p(m_polytope, r);
-            return getFunction()(res, p);
-          }
-
-          constexpr
-          const FunctionType& getFunction() const
-          {
-            assert(m_v);
-            return *m_v;
-          }
-
-        private:
-          Geometry::Polytope m_polytope;
-          std::unique_ptr<FunctionType> m_v;
-      };
-
       template <class Callable>
       class Pullback
         : public FiniteElementSpacePullbackBase<Pullback<Callable>>
@@ -324,18 +286,8 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Returns a pullback wrapper for a function on local polytope @f$(d, i)@f$.
+       * @brief Returns a pullback wrapper for a callable (or FunctionBase) on local polytope @f$(d, i)@f$.
        */
-      template <class FunctionDerived>
-      auto getPullback(
-          const std::pair<size_t, Index>& p,
-          const FunctionBase<FunctionDerived>& v) const
-      {
-        const auto& [d, i] = p;
-        const auto& mesh = getMesh();
-        return FunctionPullback<FunctionDerived>(*mesh.getPolytope(d, i), v);
-      }
-
       template <class Callable>
       auto getPullback(
           const std::pair<size_t, Index>& p,
@@ -970,46 +922,8 @@ namespace Rodin::Variational
       using Parent::getGlobalIndex;
 
       /**
-       * @brief Pullback of a function to the reference polytope.
+       * @brief Pullback of a callable (or FunctionBase) to the reference polytope.
        */
-      template <class FunctionDerived>
-      class FunctionPullback
-        : public FiniteElementSpacePullbackBase<FunctionPullback<FunctionDerived>>
-      {
-        public:
-          using FunctionType = FunctionBase<FunctionDerived>;
-
-          FunctionPullback(const Geometry::Polytope& polytope, const FunctionType& v)
-            : m_polytope(polytope), m_v(v.copy())
-          {}
-
-          FunctionPullback(const FunctionPullback&) = default;
-
-          auto operator()(const Math::SpatialVector<Real>& r) const
-          {
-            const Geometry::Point p(m_polytope, r);
-            return getFunction()(p);
-          }
-
-          template <class T>
-          auto operator()(T& res, const Math::SpatialVector<Real>& r) const
-          {
-            const Geometry::Point p(m_polytope, r);
-            return getFunction()(res, p);
-          }
-
-          constexpr
-          const FunctionType& getFunction() const
-          {
-            assert(m_v);
-            return *m_v;
-          }
-
-        private:
-          Geometry::Polytope m_polytope;
-          std::unique_ptr<FunctionType> m_v;
-      };
-
       template <class Callable>
       class Pullback
         : public FiniteElementSpacePullbackBase<Pullback<Callable>>
@@ -1249,18 +1163,8 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Returns a pullback wrapper for a function on local polytope @f$(d, i)@f$.
+       * @brief Returns a pullback wrapper for a callable (or FunctionBase) on local polytope @f$(d, i)@f$.
        */
-      template <class FunctionDerived>
-      auto getPullback(
-          const std::pair<size_t, Index>& p,
-          const FunctionBase<FunctionDerived>& v) const
-      {
-        const auto& [d, i] = p;
-        const auto& mesh = getMesh();
-        return FunctionPullback<FunctionDerived>(*mesh.getPolytope(d, i), v);
-      }
-
       template <class Callable>
       auto getPullback(
           const std::pair<size_t, Index>& p,

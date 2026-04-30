@@ -45,6 +45,7 @@
 #include "ForwardDecls.h"
 #include "Rodin/Math/SpatialMatrix.h"
 #include "MatrixFunction.h"
+#include "IntegrationPoint.h"
 
 namespace Rodin::Variational
 {
@@ -145,74 +146,134 @@ namespace Rodin::Variational
         return getOperand().getFiniteElementSpace().getMesh().getSpaceDimension();
       }
 
+    protected:
       /**
-       * @brief Evaluates the Jacobian matrix at a point.
-       * @param[in] p Point at which to evaluate
-       * @return Jacobian matrix @f$ J(\mathbf{u})(p) @f$
+       * @brief Evaluation cache keyed by (mesh, polytope, quadrature point).
        *
-       * Computes the Jacobian by assembling partial derivatives:
-       * @f$ J_{ij}(p) = \frac{\partial u_i}{\partial x_j}(p) @f$
-       * Handles mesh inclusion and submesh restrictions automatically.
+       * Populated on a hit-miss path by getValue(IntegrationPoint). The
+       * matching cell-level key is invalidated whenever evaluation falls
+       * back to inclusion/restriction.
        */
-      RangeType getValue(const Geometry::Point& p) const
+      struct Cache
+      {
+        struct Key
+        {
+          const void* mesh = nullptr;
+          Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
+          size_t dim = 0;
+          Index cell = 0;
+          const QF::QuadratureFormulaBase* qf = nullptr;
+          size_t qp = 0;
+          bool valid = false;
+
+          bool operator==(const Key& o) const noexcept
+          {
+            if (!valid || !o.valid)
+              return false;
+            return mesh == o.mesh
+                && geom == o.geom
+                && dim  == o.dim
+                && cell == o.cell
+                && qf   == o.qf
+                && qp   == o.qp;
+          }
+        };
+
+        Key key;
+        SpatialMatrixType value;
+      };
+
+      mutable Cache m_cache;
+
+    public:
+      /**
+       * @brief Evaluates the Jacobian matrix at a Point.
+       *
+       * Resolves mesh ownership and dispatches to the derived class's
+       * @c interpolate. Falls back to inclusion / submesh restriction
+       * when the polytope's mesh is not the FES mesh.
+       */
+      const SpatialMatrixType& getValue(const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
-        const auto& gf = getOperand();
-        const auto& fes = gf.getFiniteElementSpace();
+        const auto& fes = getOperand().getFiniteElementSpace();
         const auto& fesMesh = fes.getMesh();
 
-        SpatialMatrixType res;
+        m_cache.key.valid = false;
         if (polytopeMesh == fesMesh)
         {
-          this->interpolate(res, p);
+          this->interpolate(m_cache.value, p);
         }
         else if (const auto inclusion = fesMesh.inclusion(p))
         {
-          this->interpolate(res, *inclusion);
+          this->interpolate(m_cache.value, *inclusion);
         }
         else if (fesMesh.isSubMesh())
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
-          this->interpolate(res, *restriction);
+          this->interpolate(m_cache.value, *restriction);
         }
         else
         {
           assert(false);
         }
-        return res;
+        return m_cache.value;
       }
 
-      RangeType getValue(const IntegrationPoint& ip) const
+      /**
+       * @brief Evaluates the Jacobian matrix at an IntegrationPoint.
+       *
+       * If the polytope is owned by the FES mesh, performs a cache lookup
+       * keyed by (mesh, polytope, qf, qp); on a miss it dispatches to
+       * @c interpolate(out, ip) and caches the result. Falls back to
+       * inclusion / submesh restriction when the polytope's mesh is not
+       * the FES mesh.
+       */
+      const SpatialMatrixType& getValue(const IntegrationPoint& ip) const
       {
         const auto& p = ip.getPoint();
         const auto& polytope = p.getPolytope();
         const auto& polytopeMesh = polytope.getMesh();
-        const auto& gf = getOperand();
-        const auto& fes = gf.getFiniteElementSpace();
+        const auto& fes = getOperand().getFiniteElementSpace();
         const auto& fesMesh = fes.getMesh();
 
-        SpatialMatrixType res;
         if (polytopeMesh == fesMesh)
         {
-          this->interpolate(res, ip);
+          typename Cache::Key key;
+          key.mesh = static_cast<const void*>(&fesMesh);
+          key.geom = polytope.getGeometry();
+          key.dim  = polytope.getDimension();
+          key.cell = polytope.getIndex();
+          key.qf   = &ip.getQuadratureFormula();
+          key.qp   = ip.getIndex();
+          key.valid = true;
+
+          if (m_cache.key == key)
+            return m_cache.value;
+
+          m_cache.key = key;
+          this->interpolate(m_cache.value, ip);
+          return m_cache.value;
         }
-        else if (const auto inclusion = fesMesh.inclusion(p))
+
+        m_cache.key.valid = false;
+        if (const auto inclusion = fesMesh.inclusion(p))
         {
-          this->interpolate(res, *inclusion);
+          this->interpolate(m_cache.value, *inclusion);
         }
         else if (fesMesh.isSubMesh())
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
-          this->interpolate(res, *restriction);
+          this->interpolate(m_cache.value, *restriction);
         }
         else
         {
           assert(false);
         }
-        return res;
+        return m_cache.value;
       }
 
       /**
@@ -227,11 +288,6 @@ namespace Rodin::Variational
 
       /**
        * @brief Interpolates the Jacobian at a point (to be overridden in derived class).
-       * @param[out] out Output matrix for Jacobian result
-       * @param[in] p Point at which to interpolate
-       *
-       * This virtual function is overridden in derived classes (e.g., P1::Jacobian)
-       * to provide finite element-specific Jacobian computation.
        */
       constexpr
       void interpolate(SpatialMatrixType& out, const Geometry::Point& p) const
@@ -239,6 +295,13 @@ namespace Rodin::Variational
         static_cast<const Derived&>(*this).interpolate(out, p);
       }
 
+      /**
+       * @brief Interpolates the Jacobian at an integration point.
+       *
+       * Forwards to the derived class's @c interpolate(IntegrationPoint)
+       * if it provides one; otherwise falls back to the Point overload
+       * via @c ip.getPoint().
+       */
       constexpr
       void interpolate(SpatialMatrixType& out, const IntegrationPoint& ip) const
       {
