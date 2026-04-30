@@ -7,6 +7,14 @@
  * - Mesh: `../resources/examples/Heart/CoronaryArtery_Fluid.medit.mesh`
  * - XDMF basename: `CoronaryArtery`
  * - CSV output: `CoronaryArtery.csv`
+ *
+ * VECLIB_MAXIMUM_THREADS=1 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
+ * > mpirun -n 8 ./examples/Heart/CoronaryArtery \
+ * >   -snes_atol 1e-8 \
+ * >   -snes_rtol 1e-8 \
+ * >   -snes_stol 1e-10 \
+ * >   -mat_mumps_icntl_7 7 \
+ * >   -ksp_converged_reason -snes_monitor -snes_converged_reason -ksp_monitor
  */
 #include <cassert>
 #include <exception>
