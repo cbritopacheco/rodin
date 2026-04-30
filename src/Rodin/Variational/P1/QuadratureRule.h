@@ -930,8 +930,8 @@ namespace Rodin::Variational
             static_assert(FormLanguage::IsVectorRange<MultiplicandRangeType>::Value);
             static_assert(FormLanguage::IsVectorRange<RHSRangeType>::Value);
 
-            static thread_local Math::Matrix<ScalarType> s_cmv;
-            coeff.getValue(s_cmv, p);
+            Math::SpatialMatrix<ScalarType> cmv;
+            coeff.getValue(cmv, p);
 
             for (size_t ib = 0; ib < nte; ++ib)
             {
@@ -939,7 +939,7 @@ namespace Rodin::Variational
               for (size_t ia = 0; ia < ntr; ++ia)
               {
                 const auto& phi_tr = trialfe.getBasis(ia)(rc);
-                m_matrix(ib, ia) += wdet * Math::dot(phi_te, s_cmv * phi_tr);
+                m_matrix(ib, ia) += wdet * Math::dot(phi_te, cmv * phi_tr);
               }
             }
           }
@@ -1480,15 +1480,15 @@ namespace Rodin::Variational
           }
           else if constexpr (FormLanguage::IsMatrixRange<CoefficientRangeType>::Value)
           {
-            static thread_local Math::Matrix<ScalarType> s_cmv;
-            coeff.getValue(s_cmv, p);
+            Math::SpatialMatrix<ScalarType> cmv;
+            coeff.getValue(cmv, p);
 
             if (trialfes == testfes)
             {
               const size_t n = m_trialRefGrad.size();
               for (size_t i = 0; i < n; ++i)
               {
-                const auto AGgi = s_cmv * (G * m_trialRefGrad[i]);
+                const auto AGgi = cmv * (G * m_trialRefGrad[i]);
                 m_matrix(i, i) += wdet * Math::dot(AGgi, m_trialRefGrad[i]);
                 for (size_t j = 0; j < i; ++j)
                   m_matrix(i, j) += wdet * Math::dot(AGgi, m_trialRefGrad[j]);
@@ -1497,7 +1497,7 @@ namespace Rodin::Variational
               for (size_t i = 0; i < n; ++i)
                 for (size_t j = i + 1; j < n; ++j)
                   m_matrix(i, j) += wdet * Math::dot(
-                    s_cmv * (G * m_trialRefGrad[j]), m_trialRefGrad[i]);
+                    cmv * (G * m_trialRefGrad[j]), m_trialRefGrad[i]);
             }
             else
             {
@@ -1507,7 +1507,7 @@ namespace Rodin::Variational
               for (size_t te = 0; te < nte; ++te)
                 for (size_t tr = 0; tr < ntr; ++tr)
                   m_matrix(te, tr) += wdet * Math::dot(
-                    s_cmv * (G * m_trialRefGrad[tr]), m_testRefGrad[te]);
+                    cmv * (G * m_trialRefGrad[tr]), m_testRefGrad[te]);
             }
           }
           else
@@ -2786,8 +2786,8 @@ namespace Rodin::Variational
           }
           else if constexpr (FormLanguage::IsMatrixRange<CoefficientRangeType>::Value)
           {
-            static thread_local Math::Matrix<ScalarType> s_cmv;
-            coeff.getValue(s_cmv, p);
+            Math::SpatialMatrix<ScalarType> cmv;
+            coeff.getValue(cmv, p);
 
             if (trialfes == testfes)
             {
@@ -2795,16 +2795,16 @@ namespace Rodin::Variational
               for (size_t i = 0; i < n; ++i)
               {
                 const auto Ji = m_trialRefJac[i] * Jinv;
-                m_matrix(i, i) += wdet * Math::dot(s_cmv * Ji, Ji);
+                m_matrix(i, i) += wdet * Math::dot(cmv * Ji, Ji);
 
                 for (size_t j = 0; j < i; ++j)
-                  m_matrix(i, j) += wdet * Math::dot(s_cmv * (m_trialRefJac[j] * Jinv), Ji);
+                  m_matrix(i, j) += wdet * Math::dot(cmv * (m_trialRefJac[j] * Jinv), Ji);
               }
 
               for (size_t i = 0; i < n; ++i)
                 for (size_t j = i + 1; j < n; ++j)
                   m_matrix(i, j) += wdet * Math::dot(
-                    s_cmv * (m_trialRefJac[j] * Jinv), m_trialRefJac[i] * Jinv);
+                    cmv * (m_trialRefJac[j] * Jinv), m_trialRefJac[i] * Jinv);
             }
             else
             {
@@ -2816,7 +2816,7 @@ namespace Rodin::Variational
                 const auto Jte = m_testRefJac[te] * Jinv;
                 for (size_t tr = 0; tr < ntr; ++tr)
                   m_matrix(te, tr) += wdet * Math::dot(
-                    s_cmv * (m_trialRefJac[tr] * Jinv), Jte);
+                    cmv * (m_trialRefJac[tr] * Jinv), Jte);
               }
             }
           }

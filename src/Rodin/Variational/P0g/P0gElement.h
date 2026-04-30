@@ -140,46 +140,46 @@ namespace Rodin::Variational
       {
         case G::Point:
         {
-          static thread_local const Math::SpatialVector<Real> s_node{};
+          static const Math::SpatialVector<Real> s_node{};
           return s_node;
         }
         case G::Segment:
         {
-          static thread_local const Math::SpatialVector<Real> s_node{ 0.5 };
+          static const Math::SpatialVector<Real> s_node{ 0.5 };
           return s_node;
         }
         case G::Triangle:
         {
-          static thread_local const Math::SpatialVector<Real> s_node{
+          static const Math::SpatialVector<Real> s_node{
             { Real(1) / Real(3), Real(1) / Real(3) }
           };
           return s_node;
         }
         case G::Quadrilateral:
         {
-          static thread_local const Math::SpatialVector<Real> s_node{ { 0.5, 0.5 } };
+          static const Math::SpatialVector<Real> s_node{ { 0.5, 0.5 } };
           return s_node;
         }
         case G::Tetrahedron:
         {
-          static thread_local const Math::SpatialVector<Real> s_node{ { 0.25, 0.25, 0.25 } };
+          static const Math::SpatialVector<Real> s_node{ { 0.25, 0.25, 0.25 } };
           return s_node;
         }
         case G::Wedge:
         {
-          static thread_local const Math::SpatialVector<Real> s_node{
+          static const Math::SpatialVector<Real> s_node{
             { Real(1) / Real(3), Real(1) / Real(3), 0.5 }
           };
           return s_node;
         }
         case G::Hexahedron:
         {
-          static thread_local const Math::SpatialVector<Real> s_node{ { 0.5, 0.5, 0.5 } };
+          static const Math::SpatialVector<Real> s_node{ { 0.5, 0.5, 0.5 } };
           return s_node;
         }
       }
       assert(false);
-      static thread_local const Math::SpatialVector<Real> s_null{};
+      static const Math::SpatialVector<Real> s_null{};
       return s_null;
     }
 

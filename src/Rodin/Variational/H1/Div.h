@@ -193,12 +193,13 @@ namespace Rodin::Variational
           // assume vdim==d; we take dot with mapped gradients component-wise.
           const auto JinvT = p.getJacobianInverse().transpose();
 
-          static thread_local SpatialVectorType s_grad_phys;
-          s_grad_phys.resize(d);
+          SpatialVectorType grad_phys(d);
 
           out = ScalarType(0);
 
           const size_t vdim = fes.getVectorDimension();
+          const auto feS = H1Element<K, ScalarType>(polytope.getGeometry());
+          SpatialVectorType ref(d);
 
           for (size_t a = 0; a < fe.getCount(); ++a)
           {
@@ -214,13 +215,10 @@ namespace Rodin::Variational
 
             // Reference gradient of scalar basis alpha:
             // NOTE: we have access to scalar FE through H1Element<K,ScalarType>.
-            const auto& feS = H1Element<K, ScalarType>(polytope.getGeometry());
-            static thread_local SpatialVectorType s_ref;
-            s_ref.resize(d);
             for (size_t j = 0; j < d; ++j)
-              s_ref(j) = feS.getBasis(alpha).template getDerivative<1>(j)(rc);
+              ref(j) = feS.getBasis(alpha).template getDerivative<1>(j)(rc);
 
-            s_grad_phys = JinvT * s_ref;
+            grad_phys = JinvT * ref;
 
             // divergence contribution is u_comp * dphi/dx_comp if comp < d
             // (only makes sense when vdim == d; if vdim != d, we only sum over min(vdim,d))
@@ -230,7 +228,7 @@ namespace Rodin::Variational
               // u_a is vector coefficient for basis "component", but in your layout
               // GridFunction DOF for vector space is scalar (component value).
               // If gf[...] returns ScalarType (typical), then:
-              out += u_a * s_grad_phys(comp);
+              out += u_a * grad_phys(comp);
             }
           }
         }
@@ -408,10 +406,8 @@ namespace Rodin::Variational
         const auto& tab = feS.getTabulation(qf);
         const auto JinvT = p.getJacobianInverse().transpose();
 
-        static thread_local SpatialVectorType s_ref;
-        static thread_local SpatialVectorType s_phys;
-        s_ref.resize(d);
-        s_phys.resize(d);
+        SpatialVectorType ref(d);
+        SpatialVectorType phys(d);
 
         // For each vector dof (alpha, comp):
         // div( phi_alpha e_comp ) = d/dx_comp phi_alpha  (comp < d) else 0
@@ -420,14 +416,14 @@ namespace Rodin::Variational
           const auto gref = tab.getGradient(qp, alpha);
 
           for (size_t j = 0; j < d; ++j)
-            s_ref(j) = gref[j];
+            ref(j) = gref[j];
 
-          s_phys = JinvT * s_ref;
+          phys = JinvT * ref;
 
           for (size_t comp = 0; comp < vdim; ++comp)
           {
             const size_t local = alpha * vdim + comp;
-            m_cache.div_phys[local] = (comp < d) ? s_phys(comp) : ScalarType(0);
+            m_cache.div_phys[local] = (comp < d) ? phys(comp) : ScalarType(0);
           }
         }
 

@@ -902,7 +902,7 @@ namespace Rodin::Variational
       size_t m_order;
       Geometry::Polytope::Type m_geometry;
 
-      Math::Matrix<ScalarType> m_cmv;
+      Math::SpatialMatrix<ScalarType> m_cmv;
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
@@ -1234,7 +1234,7 @@ namespace Rodin::Variational
       size_t m_order;
       Geometry::Polytope::Type m_geometry;
 
-      Math::Matrix<ScalarType> m_cmv;
+      Math::SpatialMatrix<ScalarType> m_cmv;
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
@@ -2411,7 +2411,7 @@ namespace Rodin::Variational
       size_t m_order;
       Geometry::Polytope::Type m_geometry;
 
-      Math::Matrix<ScalarType> m_cmv;
+      Math::SpatialMatrix<ScalarType> m_cmv;
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 

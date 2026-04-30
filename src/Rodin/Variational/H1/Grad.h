@@ -325,17 +325,16 @@ namespace Rodin::Variational
         const auto& tab = fe.getTabulation(qf);
         const auto JinvT = p.getJacobianInverse().transpose();
 
-        static thread_local SpatialVectorType s_ref;
-        s_ref.resize(d);
+        SpatialVectorType ref(d);
 
         for (size_t a = 0; a < ndof; ++a)
         {
           const auto gref = tab.getGradient(qp, a); // span<const Scalar>, size d
 
           for (size_t ii = 0; ii < d; ++ii)
-            s_ref(ii) = gref[ii];
+            ref(ii) = gref[ii];
 
-          m_cache.grad_phys[a] = JinvT * s_ref;
+          m_cache.grad_phys[a] = JinvT * ref;
         }
 
         return *this;
