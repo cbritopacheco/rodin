@@ -347,7 +347,7 @@ namespace Rodin::Examples::Heart
         size_t nsteps = 3 * static_cast<int>(0.85 / 1.0e-3);
 
         /// @brief 3D coronary flow linearization mode. Defaults to full Newton.
-        FlowMode flowMode = FlowMode::Newton;
+        FlowMode flowMode = FlowMode::Oseen;
         /// @brief Blood viscosity model shared by 3D flow and outlet laws.
         CarreauYasuda viscosity;
         /// @brief Non-Newtonian outlet flow-law parameters.
