@@ -19,12 +19,14 @@
 #include <Rodin/Scotch/MeshPartitioner.h>
 #endif
 
+#include <Rodin/Alert/NewLine.h>
+#include <Rodin/Alert/Exception.h>
+#include <Rodin/Math/RungeKutta/RK4.h>
+#include <Rodin/Variational/ForwardDecls.h>
+#include <Rodin/Math/RootFinding/NewtonRaphson.h>
+
 #include "CoupledLV0DCoronary3D.h"
 #include "CoronaryArteryAlerts.h"
-#include "Rodin/Alert/Exception.h"
-#include "Rodin/Math/RungeKutta/RK4.h"
-#include "Rodin/Variational/ForwardDecls.h"
-#include "Rodin/Math/RootFinding/NewtonRaphson.h"
 
 namespace Rodin::Examples::Heart
 {
@@ -90,13 +92,15 @@ namespace Rodin::Examples::Heart
 
     if (isRoot())
     {
-      Alert::Info() << "Number of elements in mesh: " << cellCount << '\n'
-                    << "Number of vertices in mesh: " << vertexCount << '\n'
-                    << "Mesh space dimension: " << spaceDim << '\n'
+      Alert::Info() << "---- Mesh ----" << Alert::NewLine
+                    << "Number of elements in mesh: " << cellCount << Alert::NewLine
+                    << "Number of vertices in mesh: " << vertexCount << Alert::NewLine
+                    << "Mesh space dimension: " << spaceDim
                     << Alert::Raise;
 
-      Alert::Info() << "Velocity space has " << velocityDOFs << " DOFs.\n"
-                    << "Pressure space has " << pressureDOFs << " DOFs.\n"
+      Alert::Info() << "---- Function spaces ----" << Alert::NewLine
+                    << "Velocity space has " << velocityDOFs << " DOFs." << Alert::NewLine
+                    << "Pressure space has " << pressureDOFs << " DOFs."
                     << Alert::Raise;
     }
   }
@@ -653,17 +657,17 @@ namespace Rodin::Examples::Heart
     const auto& s = m_model.getState();
 
     Alert::Info()
-      << "Initial 0D state:\n"
-      << "  y     = " << s.y << '\n'
-      << "  v     = " << s.v << '\n'
-      << "  pv    = " << s.pv << '\n'
-      << "  par   = " << s.par << '\n'
-      << "  pd    = " << s.pd << '\n'
-      << "  ec    = " << s.ec << '\n'
-      << "  gamma = " << s.gamma << '\n'
-      << "  beta  = " << s.beta << '\n'
-      << "  kc    = " << s.kc << '\n'
-      << "  tauc  = " << s.tauc << '\n'
+      << "Initial 0D state:" << Alert::NewLine
+      << "y     = " << s.y << Alert::NewLine
+      << "v     = " << s.v << Alert::NewLine
+      << "pv    = " << s.pv << Alert::NewLine
+      << "par   = " << s.par << Alert::NewLine
+      << "pd    = " << s.pd << Alert::NewLine
+      << "ec    = " << s.ec << Alert::NewLine
+      << "gamma = " << s.gamma << Alert::NewLine
+      << "beta  = " << s.beta << Alert::NewLine
+      << "kc    = " << s.kc << Alert::NewLine
+      << "tauc  = " << s.tauc << Alert::NewLine
       << "3D flow mode: " << flowModeName(m_cfg.flowMode)
       << Alert::Raise;
   }
