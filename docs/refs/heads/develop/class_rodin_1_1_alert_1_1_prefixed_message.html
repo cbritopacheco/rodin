@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin/Variational/Division.h file | Rodin</title>
+  <title>Rodin::Alert::PrefixedMessage class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -74,41 +74,89 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_8abf735db4842a0d37da7c8b4f1d6568.html">Variational</a>/</span>Division.h <span class="m-thin">file</span>
+          <div class="m-doc-template">template&lt;class Prefix&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_alert.html">Alert</a>::<wbr/></span>PrefixedMessage <span class="m-thin">class</span>
         </h1>
-        <p>Division operation for functions.</p>
+        <p>Convenience message for custom <a href="namespace_rodin_1_1_alert.html" class="m-doc">Alert</a> prefixes.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">Prefix</td>
+              <td>Prefix type derived from <a href="class_rodin_1_1_alert_1_1_message_prefix.html" class="m-doc">MessagePrefix</a>.</td>
+            </tr>
+          </tbody>
+        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#namespaces">Namespaces</a></li>
-                <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-        <section id="namespaces">
-          <h2><a href="#namespaces">Namespaces</a></h2>
-          <dl class="m-doc">
-            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
-            <dd>Module for writing high level abstract expressions.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Module which provides the necessary tools for constructing and solving variational problems.</dd>
-          </dl>
-        </section>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
+<p>This class mirrors the default behavior of specialized messages such as <a href="class_rodin_1_1_alert_1_1_info.html" class="m-doc">Info</a>, while allowing callers to provide their own prefix type and color.</p>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_division_3_01_function_base_3_01_l_h_s_derived_01_4_00_01_functi0e71a7f47bde9c6a93b56954fff5d00b.html" class="m-doc">Rodin::Variational::Division&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class Prefix&gt;</div>
+              class <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message&lt;Prefix&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_division.html" class="m-doc">Division</a> of a function by another function.</dd>
+            <dd>Forward declaration of the <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a> template class.</dd>
           </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="aec820a3e2042896f7e838939adebce19">
+              using <a href="#aec820a3e2042896f7e838939adebce19" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>&lt;Prefix&gt;
+            </dt>
+            <dd>Parent class type alias.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="af21c05d856e7137aea1a6a26c3914f0a">
+              <span class="m-doc-wrap-bumper"><a href="#af21c05d856e7137aea1a6a26c3914f0a" class="m-doc-self">PrefixedMessage</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Constructs a message that writes to std::cout.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a1c8f330c363b2129232a1fae131d3b64" class="m-doc">PrefixedMessage</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span>
+            </dt>
+            <dd>Constructs a message that writes to the given output stream.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a1c8f330c363b2129232a1fae131d3b64"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Prefix&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />PrefixedMessage&lt;Prefix&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c8f330c363b2129232a1fae131d3b64" class="m-doc-self">PrefixedMessage</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
+            </h3>
+            <p>Constructs a message that writes to the given output stream.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>Output stream.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
