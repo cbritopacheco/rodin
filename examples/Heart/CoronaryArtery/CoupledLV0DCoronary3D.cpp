@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <cassert>
-#include <chrono>
 #include <cmath>
 #include <iostream>
 #include <limits>
@@ -21,6 +20,7 @@
 #endif
 
 #include "CoupledLV0DCoronary3D.h"
+#include "CoronaryArteryAlerts.h"
 #include "Rodin/Alert/Exception.h"
 #include "Rodin/Math/RungeKutta/RK4.h"
 #include "Rodin/Variational/ForwardDecls.h"
@@ -37,21 +37,6 @@ namespace Rodin::Examples::Heart
   namespace
   {
     constexpr int RootRank = 0;
-
-    using Clock = std::chrono::steady_clock;
-
-    struct MaxReal
-    {
-      Rodin::Real operator()(Rodin::Real lhs, Rodin::Real rhs) const
-      {
-        return std::max(lhs, rhs);
-      }
-    };
-
-    Rodin::Real secondsSince(Clock::time_point start)
-    {
-      return std::chrono::duration<Rodin::Real>(Clock::now() - start).count();
-    }
 
     const char* flowModeName(CoupledLV0DCoronary3D::FlowMode mode)
     {
@@ -667,18 +652,20 @@ namespace Rodin::Examples::Heart
 
     const auto& s = m_model.getState();
 
-    std::cout << "Initial 0D state:\n"
-              << "  y     = " << s.y << '\n'
-              << "  v     = " << s.v << '\n'
-              << "  pv    = " << s.pv << '\n'
-              << "  par   = " << s.par << '\n'
-              << "  pd    = " << s.pd << '\n'
-              << "  ec    = " << s.ec << '\n'
-              << "  gamma = " << s.gamma << '\n'
-              << "  beta  = " << s.beta << '\n'
-              << "  kc    = " << s.kc << '\n'
-              << "  tauc  = " << s.tauc << '\n'
-              << "3D flow mode: " << flowModeName(m_cfg.flowMode) << '\n';
+    Alert::Info()
+      << "Initial 0D state:\n"
+      << "  y     = " << s.y << '\n'
+      << "  v     = " << s.v << '\n'
+      << "  pv    = " << s.pv << '\n'
+      << "  par   = " << s.par << '\n'
+      << "  pd    = " << s.pd << '\n'
+      << "  ec    = " << s.ec << '\n'
+      << "  gamma = " << s.gamma << '\n'
+      << "  beta  = " << s.beta << '\n'
+      << "  kc    = " << s.kc << '\n'
+      << "  tauc  = " << s.tauc << '\n'
+      << "3D flow mode: " << flowModeName(m_cfg.flowMode)
+      << Alert::Raise;
   }
 
   bool CoupledLV0DCoronary3D::isRoot() const
@@ -689,14 +676,14 @@ namespace Rodin::Examples::Heart
   bool CoupledLV0DCoronary3D::advance0D()
   {
     if (isRoot())
-      Alert::Info() << "\t[0D] Advancing LV model ..." << Alert::Raise;
+      ZeroDInfo() << "Advancing LV model ..." << Alert::Raise;
 
     const auto rep = m_model.step(m_cfg.dt);
 
     if (isRoot())
     {
-      Alert::Info()
-        << "\t[0D] Newton: "
+      ZeroDInfo()
+        << "Newton: "
         << (rep.converged ? "converged" : "NOT converged")
         << "  iter = " << rep.iterations
         << "  |F| = " << rep.finalResidual
@@ -707,8 +694,8 @@ namespace Rodin::Examples::Heart
     if (isRoot() && rep.converged)
     {
       const auto& s = m_model.getState();
-      Alert::Info()
-        << "\t\t pv  = " << s.pv  << " Pa"
+      ZeroDInfo()
+        << "pv  = " << s.pv  << " Pa"
         << "  par = " << s.par << " Pa"
         << "  pd  = " << s.pd  << " Pa"
         << Alert::Raise;
@@ -719,7 +706,7 @@ namespace Rodin::Examples::Heart
 
   bool CoupledLV0DCoronary3D::solve3D()
   {
-    const auto setup3DStart = Clock::now();
+    const auto setup3DStart = CoronaryClock::now();
 
     const auto& s = m_model.getState();
     const Real pin = s.par;
@@ -917,19 +904,19 @@ namespace Rodin::Examples::Heart
     if (needsInitialSystem)
     {
       if (isRoot())
-        Alert::Info() << "\t\t[3D] Initializing flow system ..." << Alert::Raise;
+        ThreeDInfo() << "Initializing flow system ..." << Alert::Raise;
     }
 
     if (!isNewtonFlow || needsInitialSystem)
     {
-      const auto assemble3DStart = Clock::now();
+      const auto assemble3DStart = CoronaryClock::now();
       m_flow.assemble();
       m_stepTiming.assemble3D = secondsSince(assemble3DStart);
     }
 
     if (needsInitialSystem)
     {
-      const auto fieldSplitsStart = Clock::now();
+      const auto fieldSplitsStart = CoronaryClock::now();
       m_flow.setFieldSplits();
       m_stepTiming.fieldSplits = secondsSince(fieldSplitsStart);
       m_flowFieldSplitsSet = true;
@@ -937,14 +924,14 @@ namespace Rodin::Examples::Heart
 
     if (isRoot())
     {
-      Alert::Info()
-        << "\t\t[3D] Solving with PETSc "
+      ThreeDInfo()
+        << "Solving with PETSc "
         << (isNewtonFlow ? "SNES" : "KSP")
         << " ..."
         << Alert::Raise;
     }
 
-    const auto solve3DStart = Clock::now();
+    const auto solve3DStart = CoronaryClock::now();
     if (isNewtonFlow)
       m_flowSolver.solve();
     else
@@ -955,8 +942,7 @@ namespace Rodin::Examples::Heart
     {
       if (isRoot())
       {
-        Alert::Info()
-          << "\t\t\t[SNES] "
+        SNESInfo()
           << (m_flowSolver.converged() ? "Converged" : "Did NOT converge")
           << "  iterations = " << m_flowSolver.getIterationNumber()
           << Alert::Raise;
@@ -975,8 +961,7 @@ namespace Rodin::Examples::Heart
 
     if (isRoot())
     {
-      Alert::Info()
-        << "\t\t\t[KSP] "
+      KSPInfo()
         << (reason > 0 ? "Converged" : "Did NOT converge")
         << "  iterations = " << iterations
         << Alert::Raise;
@@ -1213,8 +1198,8 @@ namespace Rodin::Examples::Heart
 
     if (isRoot())
     {
-      Alert::Info()
-        << "\t[Timing max/rank] step = " << step
+      TimingInfo()
+        << "step = " << step
         << "  total = " << total << " s"
         << "  0D = " << advance0D << " s"
         << "  3D-form = " << setup3DForm << " s"
@@ -1238,7 +1223,7 @@ namespace Rodin::Examples::Heart
     for (int i = 0; i < static_cast<int>(m_cfg.nsteps); ++i)
     {
       m_stepTiming = StepTiming{};
-      const auto stepStart = Clock::now();
+      const auto stepStart = CoronaryClock::now();
       const Real t_current = m_model.getState().t;
 
       if (isRoot())
@@ -1251,7 +1236,7 @@ namespace Rodin::Examples::Heart
           << Alert::Raise;
       }
 
-      const auto advance0DStart = Clock::now();
+      const auto advance0DStart = CoronaryClock::now();
       const bool advanced0D = advance0D();
       m_stepTiming.advance0D = secondsSince(advance0DStart);
 
@@ -1273,24 +1258,24 @@ namespace Rodin::Examples::Heart
         return 1;
       }
 
-      const auto fluxesStart = Clock::now();
+      const auto fluxesStart = CoronaryClock::now();
       computeFluxes();
       m_stepTiming.fluxes = secondsSince(fluxesStart);
 
-      const auto outletRCRStart = Clock::now();
+      const auto outletRCRStart = CoronaryClock::now();
       for (const Attribute tag : m_cfg.outlets)
         updateRCRNonNew(m_cfg, m_model, m_wk[tag], m_stepData.qOut.at(tag), m_cfg.dt);
       m_stepTiming.outletRCR = secondsSince(outletRCRStart);
 
-      const auto csvStart = Clock::now();
+      const auto csvStart = CoronaryClock::now();
       writeCSVRow();
       m_stepTiming.csv = secondsSince(csvStart);
 
-      const auto historyStart = Clock::now();
+      const auto historyStart = CoronaryClock::now();
       updateHistory();
       m_stepTiming.history = secondsSince(historyStart);
 
-      const auto outputStart = Clock::now();
+      const auto outputStart = CoronaryClock::now();
       writeOutputs();
       m_stepTiming.output = secondsSince(outputStart);
 

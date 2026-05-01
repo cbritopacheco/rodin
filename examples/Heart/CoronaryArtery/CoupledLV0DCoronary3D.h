@@ -16,6 +16,8 @@
 #include <Rodin/PETSc.h>
 #include <Rodin/Solver.h>
 
+#include "CoronaryArteryTiming.h"
+
 namespace Rodin::Examples::Heart
 {
   class CoupledLV0DCoronary3D
@@ -405,21 +407,6 @@ namespace Rodin::Examples::Heart
         std::map<Attribute, Real> qOut;
         std::map<Attribute, Real> pc;
         std::map<Attribute, Real> pOut;
-      };
-
-      struct StepTiming
-      {
-        Real total = 0.0;
-        Real advance0D = 0.0;
-        Real setup3DForm = 0.0;
-        Real assemble3D = 0.0;
-        Real fieldSplits = 0.0;
-        Real solve3D = 0.0;
-        Real fluxes = 0.0;
-        Real outletRCR = 0.0;
-        Real csv = 0.0;
-        Real history = 0.0;
-        Real output = 0.0;
       };
 
       static Model::Input makeInput(const Config& cfg);
