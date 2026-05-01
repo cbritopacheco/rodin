@@ -28,6 +28,7 @@
 #include <petsc.h>
 #include <petscsys.h>
 #include <type_traits>
+#include <utility>
 
 #include <petscmat.h>
 #include <petscvec.h>
@@ -135,6 +136,7 @@ namespace Rodin::Variational
        */
       Problem(U& u, V& v)
         : Parent(u, v),
+          m_assembled(false),
           m_axb(
               [&]() -> MPI_Comm
               {
@@ -161,6 +163,8 @@ namespace Rodin::Variational
       constexpr
       Problem(const Problem& other)
         : Parent(other),
+          m_assembled(other.m_assembled),
+          m_pb(other.m_pb),
           m_axb(other.m_axb)
       {}
 
@@ -168,6 +172,8 @@ namespace Rodin::Variational
       constexpr
       Problem(Problem&& other) noexcept
         : Parent(std::move(other)),
+          m_assembled(std::exchange(other.m_assembled, false)),
+          m_pb(std::move(other.m_pb)),
           m_axb(std::move(other.m_axb))
       {}
 
@@ -181,6 +187,8 @@ namespace Rodin::Variational
         if (this != &other)
         {
           Parent::operator=(other);
+          m_assembled = other.m_assembled;
+          m_pb = other.m_pb;
           m_axb = other.m_axb;
         }
         return *this;
@@ -196,6 +204,8 @@ namespace Rodin::Variational
         if (this != &other)
         {
           Parent::operator=(std::move(other));
+          m_assembled = std::exchange(other.m_assembled, false);
+          m_pb = std::move(other.m_pb);
           m_axb = std::move(other.m_axb);
         }
         return *this;
@@ -222,7 +232,13 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Solves the assembled linear system and scatters the solution.
+       * @brief Assembles if stale, solves the linear system, and writes the
+       *        result to the trial function solution.
+       *
+       * Assigning a new problem body with operator=() marks the current
+       * assembly stale. If that happens, or if assemble() has not been called
+       * yet, this function calls assemble() before invoking the linear solver.
+       *
        * @param[in] solver Linear solver to use.
        */
       void solve(SolverBaseType& solver) override
@@ -253,7 +269,7 @@ namespace Rodin::Variational
       }
 
     private:
-      Boolean m_assembled;       ///< Whether the problem has been assembled.
+      Boolean m_assembled = false; ///< Whether the current problem body has been assembled.
       ProblemBodyType m_pb;      ///< The problem body (bilinear/linear forms).
       LinearSystemType m_axb;    ///< The assembled linear system.
       AssemblyType m_assembly;   ///< The assembly strategy.
@@ -580,7 +596,13 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Solves the assembled block system and scatters sub-solutions.
+       * @brief Assembles if stale, solves the block linear system, and scatters
+       *        sub-solutions into their trial functions.
+       *
+       * Assigning a new problem body with operator=() marks the current
+       * assembly stale. If that happens, or if assemble() has not been called
+       * yet, this function calls assemble() before invoking the linear solver.
+       *
        * @param[in] solver Linear solver to use.
        */
       void solve(SolverBaseType& solver) override

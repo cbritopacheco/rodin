@@ -21,6 +21,7 @@
 
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/Derivative.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 
 namespace Rodin::FormLanguage
 {
@@ -96,6 +97,11 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_i(std::move(other.m_i))
       {}
+
+      void interpolate(ScalarType& out, const IntegrationPoint& ip) const
+      {
+        interpolate(out, ip.getPoint());
+      }
 
       void interpolate(ScalarType& out, const Geometry::Point& p) const
       {

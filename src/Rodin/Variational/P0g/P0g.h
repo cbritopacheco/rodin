@@ -92,7 +92,7 @@ namespace Rodin::Variational
             : m_polytope(polytope), m_v(std::forward<Function>(v))
           {}
 
-          decltype(auto) operator()(const Math::SpatialPoint& r) const
+          auto operator()(const Math::SpatialPoint& r) const
           {
             const Geometry::Point p(m_polytope, r);
             return m_v(p);
@@ -116,7 +116,7 @@ namespace Rodin::Variational
           {}
 
           constexpr
-          decltype(auto) operator()(const Geometry::Point& p) const
+          auto operator()(const Geometry::Point& p) const
           {
             return m_v(p.getReferenceCoordinates());
           }
@@ -235,7 +235,7 @@ namespace Rodin::Variational
             : m_polytope(polytope), m_v(std::forward<Function>(v))
           {}
 
-          decltype(auto) operator()(const Math::SpatialPoint& r) const
+          auto operator()(const Math::SpatialPoint& r) const
           {
             const Geometry::Point p(m_polytope, r);
             return m_v(p);
@@ -259,7 +259,7 @@ namespace Rodin::Variational
           {}
 
           constexpr
-          decltype(auto) operator()(const Geometry::Point& p) const
+          auto operator()(const Geometry::Point& p) const
           {
             return m_v(p.getReferenceCoordinates());
           }

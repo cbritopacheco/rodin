@@ -110,7 +110,8 @@ namespace Rodin::Variational
        * @param p Point at which to evaluate
        * @returns @f$ \sin(f(p)) @f$
        */
-      Real getValue(const Geometry::Point& p) const
+      template <class Point>
+      auto getValue(const Point& p) const
       {
         return Math::sin(getOperand().getValue(p));
       }

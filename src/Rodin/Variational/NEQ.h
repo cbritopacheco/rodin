@@ -94,6 +94,12 @@ namespace Rodin::Variational
         return getLHS().getValue(p) != getRHS().getValue(p);
       }
 
+      constexpr
+      Boolean getValue(const IntegrationPoint& ip) const
+      {
+        return getLHS().getValue(ip) != getRHS().getValue(ip);
+      }
+
       NEQ* copy() const noexcept final override
       {
         return new NEQ(*this);

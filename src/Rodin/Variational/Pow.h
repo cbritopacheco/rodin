@@ -111,8 +111,9 @@ namespace Rodin::Variational
        * @param p Point at which to evaluate
        * @returns @f$ f(p)^{\text{exponent}} @f$
        */
+      template <class Point>
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      auto getValue(const Point& p) const
       {
         return Math::pow(this->getBase().getValue(p), getExponent());
       }
