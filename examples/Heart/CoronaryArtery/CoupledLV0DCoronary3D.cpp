@@ -52,6 +52,18 @@ namespace Rodin::Examples::Heart
     {
       return std::chrono::duration<Rodin::Real>(Clock::now() - start).count();
     }
+
+    const char* flowModeName(CoupledLV0DCoronary3D::FlowMode mode)
+    {
+      switch (mode)
+      {
+        case CoupledLV0DCoronary3D::FlowMode::Newton:
+          return "newton";
+        case CoupledLV0DCoronary3D::FlowMode::Oseen:
+          return "oseen";
+      }
+      return "unknown";
+    }
   }
 
   CoupledLV0DCoronary3D::CoupledLV0DCoronary3D(const Context::MPI& context)
@@ -641,7 +653,8 @@ namespace Rodin::Examples::Heart
               << "  gamma = " << s.gamma << '\n'
               << "  beta  = " << s.beta << '\n'
               << "  kc    = " << s.kc << '\n'
-              << "  tauc  = " << s.tauc << '\n';
+              << "  tauc  = " << s.tauc << '\n'
+              << "3D flow mode: " << flowModeName(m_cfg.flowMode) << '\n';
   }
 
   bool CoupledLV0DCoronary3D::isRoot() const
@@ -691,17 +704,21 @@ namespace Rodin::Examples::Heart
 
     const auto& uState = m_u.getSolution();
     const auto& pState = m_p.getSolution();
+    const auto& uLag = m_uOld;
 
     const auto gradDU = Jacobian(m_u);
     const auto gradU  = Jacobian(uState);
+    const auto gradLag = Jacobian(uLag);
 
     const auto newtonConvection =
       Mult(gradDU, uState) + Mult(gradU, m_u);
 
     const auto stateConvection = Mult(gradU, uState);
+    const auto oseenConvectionJacobian = Mult(gradDU, uLag);
 
     const auto divDU = Div(m_u);
     const auto divU  = Div(uState);
+    const auto divLag = Div(uLag);
 
     const auto temamJacobian1 =
       Dot(divDU * uState, m_v);
@@ -711,6 +728,9 @@ namespace Rodin::Examples::Heart
 
     const auto temamResidual =
       divU * Dot(uState, m_v);
+
+    const auto oseenTemamJacobian =
+      divLag * Dot(m_u, m_v);
 
     const auto beta = Max(-Dot(m_uOld, normal), 0.0);
 
@@ -723,6 +743,9 @@ namespace Rodin::Examples::Heart
     const auto symU =
       0.5 * (Jacobian(uState) + Transpose(Jacobian(uState)));
 
+    const auto symLag =
+      0.5 * (gradLag + Transpose(gradLag));
+
     const Real gammaReg = 1.0e-3;
     const Real mu0      = 0.04868;
     const Real muInf    = 0.003605;
@@ -734,11 +757,20 @@ namespace Rodin::Examples::Heart
     const auto gamma =
       Sqrt(gammaReg * gammaReg + 2.0 * Dot(symU, symU));
 
+    const auto gammaLag =
+      Sqrt(gammaReg * gammaReg + 2.0 * Dot(symLag, symLag));
+
     const auto carreauBase =
       1.0 + Pow(lambda * gamma, yasuda);
 
+    const auto carreauBaseLag =
+      1.0 + Pow(lambda * gammaLag, yasuda);
+
     const auto mu =
       muInf + deltaMu * Pow(carreauBase, (nCY - 1.0) / yasuda);
+
+    const auto muLag =
+      muInf + deltaMu * Pow(carreauBaseLag, (nCY - 1.0) / yasuda);
 
     const auto dgamma =
       2.0 * Dot(symU, symDU) / gamma;
@@ -751,7 +783,9 @@ namespace Rodin::Examples::Heart
       * Pow(gamma, yasuda - 1.0)
       * dgamma;
 
-    m_flow =
+    if (m_cfg.flowMode == FlowMode::Newton)
+    {
+      m_flow =
           /* Jacobian */
           (m_cfg.rho / m_cfg.dt) * Integral(m_u, m_v)
 
@@ -805,18 +839,65 @@ namespace Rodin::Examples::Heart
         - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(9)
 
         + DirichletBC(m_u, -uState).on(m_cfg.wall);
+    }
+    else
+    {
+      m_flow =
+          /* Jacobian */
+          (m_cfg.rho / m_cfg.dt) * Integral(m_u, m_v)
+
+        + m_cfg.rho * Integral(Dot(oseenConvectionJacobian, m_v))
+
+        + 0.5 * m_cfg.rho * Integral(oseenTemamJacobian)
+
+        + 2.0 * Integral(muLag * symDU, symV)
+
+        - Integral(m_p, Div(m_v))
+        + Integral(Div(m_u), m_q)
+        + m_cfg.eps * Integral(m_p, m_q)
+
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(4)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(5)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(6)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(7)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(8)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(9)
+
+          /* Right-hand side terms */
+        - (m_cfg.rho / m_cfg.dt) * Integral(m_uOld, m_v)
+
+        + BoundaryIntegral(pin * Dot(m_v, normal)).over(m_cfg.inlet)
+
+        + BoundaryIntegral(m_wk.at(4).pout * Dot(m_v, normal)).over(4)
+        + BoundaryIntegral(m_wk.at(5).pout * Dot(m_v, normal)).over(5)
+        + BoundaryIntegral(m_wk.at(6).pout * Dot(m_v, normal)).over(6)
+        + BoundaryIntegral(m_wk.at(7).pout * Dot(m_v, normal)).over(7)
+        + BoundaryIntegral(m_wk.at(8).pout * Dot(m_v, normal)).over(8)
+        + BoundaryIntegral(m_wk.at(9).pout * Dot(m_v, normal)).over(9)
+
+        + DirichletBC(m_u, Zero(3)).on(m_cfg.wall);
+    }
 
     m_stepTiming.setup3DForm = secondsSince(setup3DStart);
 
-    if (!m_flowFieldSplitsSet)
+    const bool isNewtonFlow = m_cfg.flowMode == FlowMode::Newton;
+    const bool needsInitialSystem = !m_flowFieldSplitsSet;
+
+    if (needsInitialSystem)
     {
       if (isRoot())
-        Alert::Info() << "\t\t[3D] Initializing Newton system ..." << Alert::Raise;
+        Alert::Info() << "\t\t[3D] Initializing flow system ..." << Alert::Raise;
+    }
 
+    if (!isNewtonFlow || needsInitialSystem)
+    {
       const auto assemble3DStart = Clock::now();
       m_flow.assemble();
       m_stepTiming.assemble3D = secondsSince(assemble3DStart);
+    }
 
+    if (needsInitialSystem)
+    {
       const auto fieldSplitsStart = Clock::now();
       m_flow.setFieldSplits();
       m_stepTiming.fieldSplits = secondsSince(fieldSplitsStart);
@@ -824,21 +905,52 @@ namespace Rodin::Examples::Heart
     }
 
     if (isRoot())
-      Alert::Info() << "\t\t[3D] Solving with PETSc SNES ..." << Alert::Raise;
+    {
+      Alert::Info()
+        << "\t\t[3D] Solving with PETSc "
+        << (isNewtonFlow ? "SNES" : "KSP")
+        << " ..."
+        << Alert::Raise;
+    }
 
     const auto solve3DStart = Clock::now();
-    m_flowSolver.solve();
+    if (isNewtonFlow)
+      m_flowSolver.solve();
+    else
+      m_flow.solve(m_flowKSP);
     m_stepTiming.solve3D = secondsSince(solve3DStart);
+
+    if (isNewtonFlow)
+    {
+      if (isRoot())
+      {
+        Alert::Info()
+          << "\t\t\t[SNES] "
+          << (m_flowSolver.converged() ? "Converged" : "Did NOT converge")
+          << "  iterations = " << m_flowSolver.getIterationNumber()
+          << Alert::Raise;
+      }
+      return m_flowSolver.converged();
+    }
+
+    ::KSPConvergedReason reason;
+    PetscErrorCode ierr = KSPGetConvergedReason(m_flowKSP.getHandle(), &reason);
+    assert(ierr == PETSC_SUCCESS);
+
+    PetscInt iterations = 0;
+    ierr = KSPGetIterationNumber(m_flowKSP.getHandle(), &iterations);
+    assert(ierr == PETSC_SUCCESS);
+    (void) ierr;
 
     if (isRoot())
     {
       Alert::Info()
-        << "\t\t\t[SNES] "
-        << (m_flowSolver.converged() ? "Converged" : "Did NOT converge")
-        << "  iterations = " << m_flowSolver.getIterationNumber()
+        << "\t\t\t[KSP] "
+        << (reason > 0 ? "Converged" : "Did NOT converge")
+        << "  iterations = " << iterations
         << Alert::Raise;
     }
-    return m_flowSolver.converged();
+    return reason > 0;
   }
 
   void CoupledLV0DCoronary3D::computeFluxes()
@@ -1108,7 +1220,7 @@ namespace Rodin::Examples::Heart
       if (!solve3D())
       {
         Alert::Exception()
-          << "3D SNES solver failed to converge at step "
+          << "3D flow solver failed to converge at step "
           << (i + 1) << ", t = " << m_model.getState().t
           << Alert::Raise;
         return 1;

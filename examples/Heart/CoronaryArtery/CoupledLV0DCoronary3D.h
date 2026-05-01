@@ -74,6 +74,32 @@ namespace Rodin::Examples::Heart
         Real pout = 0.0;
       };
 
+      /**
+       * @brief Linearization strategy for the 3D coronary flow solve.
+       */
+      enum class FlowMode
+      {
+        /**
+         * @brief Full Newton linearization of the nonlinear 3D flow residual.
+         *
+         * The convective term is differentiated with respect to the current
+         * velocity iterate, and the Carreau-Yasuda viscosity includes its
+         * directional derivative in the Jacobian.
+         */
+        Newton,
+
+        /**
+         * @brief Oseen/Picard linearization with lagged transport coefficients.
+         *
+         * The advecting velocity, Temam divergence factor, and
+         * Carreau-Yasuda viscosity are evaluated using the previous time-step
+         * velocity. This gives a lagged linearized 3D flow system that is
+         * solved directly with PETSc KSP, without PETSc SNES nonlinear
+         * iterations.
+         */
+        Oseen
+      };
+
       struct Config
       {
         std::string meshPath = "CoronaryArtery.mesh";
@@ -92,6 +118,8 @@ namespace Rodin::Examples::Heart
         Real dt = 1.0e-3;
         size_t nsteps = 3 * static_cast<int>(0.85 / 1.0e-3);
 
+        /// @brief 3D coronary flow linearization mode. Defaults to full Newton.
+        FlowMode flowMode = FlowMode::Newton;
         RCR defaultRCR{5.0e8, 5.0e-9, 1.0e9, 400.0, 10500.0, 11000.0};
       };
 
