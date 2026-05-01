@@ -51,6 +51,42 @@ namespace Rodin::Examples::Heart
       }
       return "unknown";
     }
+
+    class VecSnapshot
+    {
+      public:
+        explicit VecSnapshot(::Vec source)
+        {
+          PetscErrorCode ierr = VecDuplicate(source, &m_data);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecCopy(source, m_data);
+          assert(ierr == PETSC_SUCCESS);
+          (void) ierr;
+        }
+
+        VecSnapshot(const VecSnapshot&) = delete;
+        VecSnapshot& operator=(const VecSnapshot&) = delete;
+
+        ~VecSnapshot()
+        {
+          if (m_data)
+          {
+            PetscErrorCode ierr = VecDestroy(&m_data);
+            assert(ierr == PETSC_SUCCESS);
+            (void) ierr;
+          }
+        }
+
+        void restore(::Vec target) const
+        {
+          PetscErrorCode ierr = VecCopy(m_data, target);
+          assert(ierr == PETSC_SUCCESS);
+          (void) ierr;
+        }
+
+      private:
+        ::Vec m_data = PETSC_NULLPTR;
+    };
   }
 
   CoupledLV0DCoronary3D::CoupledLV0DCoronary3D(const Context::MPI& context)
@@ -1253,69 +1289,154 @@ namespace Rodin::Examples::Heart
     if (!m_initialized)
       initialize();
 
-    for (int i = 0; i < static_cast<int>(m_cfg.nsteps); ++i)
+    const Real baseDt = m_cfg.dt;
+    const Real factor = m_cfg.timeAdaptivityReductionFactor;
+    const int maxLevels = m_cfg.timeAdaptivityMaxLevels;
+    const Real startTime = m_model.getState().t;
+    const Real finalTime =
+      startTime + static_cast<Real>(m_cfg.nsteps) * baseDt;
+
+    if (!(factor > 0.0 && factor < 1.0))
     {
-      m_stepTiming = StepTiming{};
-      const auto stepStart = CoronaryClock::now();
-      const Real t_current = m_model.getState().t;
-
-      if (isRoot())
-      {
-        Alert::Info()
-          << "━━━ Step " << (i + 1) << " / " << m_cfg.nsteps
-          << "  t = " << t_current << " s"
-          << "  (dt = " << m_cfg.dt << " s)"
-          << " ━━━"
-          << Alert::Raise;
-      }
-
-      const auto advance0DStart = CoronaryClock::now();
-      const bool advanced0D = advance0D();
-      m_stepTiming.advance0D = secondsSince(advance0DStart);
-
-      if (!advanced0D)
-      {
-        Alert::Exception()
-          << "0D solver failed to converge at step "
-          << (i + 1) << ", t = " << m_model.getState().t
-          << Alert::Raise;
-        return 1;
-      }
-
-      if (!solve3D())
-      {
-        Alert::Exception()
-          << "3D flow solver failed to converge at step "
-          << (i + 1) << ", t = " << m_model.getState().t
-          << Alert::Raise;
-        return 1;
-      }
-
-      const auto fluxesStart = CoronaryClock::now();
-      computeFluxes();
-      m_stepTiming.fluxes = secondsSince(fluxesStart);
-
-      const auto outletRCRStart = CoronaryClock::now();
-      for (const Attribute tag : m_cfg.outlets)
-        updateRCRNonNew(m_cfg, m_model, m_wk[tag], m_stepData.qOut.at(tag), m_cfg.dt);
-      m_stepTiming.outletRCR = secondsSince(outletRCRStart);
-
-      const auto csvStart = CoronaryClock::now();
-      writeCSVRow();
-      m_stepTiming.csv = secondsSince(csvStart);
-
-      const auto historyStart = CoronaryClock::now();
-      updateHistory();
-      m_stepTiming.history = secondsSince(historyStart);
-
-      const auto outputStart = CoronaryClock::now();
-      writeOutputs();
-      m_stepTiming.output = secondsSince(outputStart);
-
-      m_stepTiming.total = secondsSince(stepStart);
-      printStepTiming(i + 1);
+      Alert::Exception()
+        << "Invalid time adaptivity reduction factor: " << factor
+        << ". Expected a value in (0, 1)."
+        << Alert::Raise;
+      return 1;
     }
 
+    if (maxLevels < 0)
+    {
+      Alert::Exception()
+        << "Invalid time adaptivity maximum levels: " << maxLevels
+        << ". Expected a non-negative value."
+        << Alert::Raise;
+      return 1;
+    }
+
+    Real nextDt = baseDt;
+    int acceptedStep = 0;
+
+    while (m_model.getState().t < finalTime - 0.5 * std::numeric_limits<Real>::epsilon())
+    {
+      const Real t_current = m_model.getState().t;
+      const Real remaining = finalTime - t_current;
+      Real attemptDt = std::min(nextDt, remaining);
+      int level = 0;
+
+      const auto savedState = m_model.getState();
+      const auto savedHistory = m_model.getHistory();
+      const auto savedUnknowns = m_model.getUnknowns();
+      const auto savedReport = m_model.getReport();
+      const auto savedRCR = m_wk;
+      const StepData savedStepData = m_stepData;
+      const VecSnapshot savedU(m_u.getSolution().getData());
+      const VecSnapshot savedP(m_p.getSolution().getData());
+
+      bool accepted = false;
+
+      while (!accepted)
+      {
+        m_cfg.dt = attemptDt;
+        m_stepTiming = StepTiming{};
+        const auto stepStart = CoronaryClock::now();
+
+        if (isRoot())
+        {
+          auto info = Alert::Info();
+          info
+            << "━━━ Step " << (acceptedStep + 1)
+            << "  t = " << t_current << " s"
+            << " / " << finalTime << " s"
+            << "  (dt = " << m_cfg.dt << " s";
+
+          if (level > 0)
+            info << ", adapt level = " << level;
+
+          info
+            << ") ━━━"
+            << Alert::Raise;
+        }
+
+        const auto advance0DStart = CoronaryClock::now();
+        const bool advanced0D = advance0D();
+        m_stepTiming.advance0D = secondsSince(advance0DStart);
+
+        if (!advanced0D)
+        {
+          Alert::Exception()
+            << "0D solver failed to converge at step "
+            << (acceptedStep + 1) << ", t = " << m_model.getState().t
+            << Alert::Raise;
+          return 1;
+        }
+
+        if (!solve3D())
+        {
+          m_model.restore(savedState, savedHistory, savedUnknowns, savedReport);
+          m_wk = savedRCR;
+          m_stepData = savedStepData;
+          savedU.restore(m_u.getSolution().getData());
+          savedP.restore(m_p.getSolution().getData());
+
+          if (level >= maxLevels)
+          {
+            Alert::Exception()
+              << "3D flow solver failed to converge at step "
+              << (acceptedStep + 1)
+              << " after " << (level + 1)
+              << " attempt(s). Minimum dt = " << attemptDt << " s."
+              << Alert::Raise;
+            return 1;
+          }
+
+          attemptDt *= factor;
+          ++level;
+
+          if (isRoot())
+          {
+            Alert::Info()
+              << "[3D] Retrying step " << (acceptedStep + 1)
+              << " with reduced dt = " << attemptDt
+              << " s  (adapt level = " << level << " / " << maxLevels << ")"
+              << Alert::Raise;
+          }
+
+          continue;
+        }
+
+        const auto fluxesStart = CoronaryClock::now();
+        computeFluxes();
+        m_stepTiming.fluxes = secondsSince(fluxesStart);
+
+        const auto outletRCRStart = CoronaryClock::now();
+        for (const Attribute tag : m_cfg.outlets)
+          updateRCRNonNew(m_cfg, m_model, m_wk[tag], m_stepData.qOut.at(tag), m_cfg.dt);
+        m_stepTiming.outletRCR = secondsSince(outletRCRStart);
+
+        const auto csvStart = CoronaryClock::now();
+        writeCSVRow();
+        m_stepTiming.csv = secondsSince(csvStart);
+
+        const auto historyStart = CoronaryClock::now();
+        updateHistory();
+        m_stepTiming.history = secondsSince(historyStart);
+
+        const auto outputStart = CoronaryClock::now();
+        writeOutputs();
+        m_stepTiming.output = secondsSince(outputStart);
+
+        m_stepTiming.total = secondsSince(stepStart);
+        printStepTiming(acceptedStep + 1);
+
+        accepted = true;
+        nextDt = std::min(baseDt, attemptDt / factor);
+      }
+
+      ++acceptedStep;
+    }
+
+    m_cfg.dt = baseDt;
     m_xdmf.close();
     return 0;
   }

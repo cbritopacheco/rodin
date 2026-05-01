@@ -11,10 +11,10 @@
  * The driver accepts the following Rodin-specific PETSc option:
  * - `-coronary_flow_mode <newton|oseen>`
  *   Selects the 3D Navier-Stokes linearization strategy. The default is
- *   `newton`, which assembles the full Newton Jacobian for the convective
- *   term and Carreau-Yasuda viscosity and solves it with PETSc SNES. `oseen`
- *   assembles one lagged linear Oseen/Picard system per time step and solves
- *   it directly with PETSc KSP, without SNES nonlinear iterations.
+ *   `oseen`, which assembles one lagged linear Oseen/Picard system per time
+ *   step and solves it directly with PETSc KSP, without SNES nonlinear
+ *   iterations. `newton` assembles the full Newton Jacobian for the convective
+ *   term and Carreau-Yasuda viscosity and solves it with PETSc SNES.
  *
  * Unless the user overrides them on the command line, the executable installs
  * the following PETSc defaults:
@@ -25,16 +25,21 @@
  * - `-mat_mumps_icntl_21 0`
  *
  * The simulation defaults inherited from `CoupledLV0DCoronary3D::Config`
- * include `dt = 1e-3 s`, `nsteps = 2550`, `rho = 1060 kg/m^3`,
+ * include `dt = 1e-4 s`, `nsteps = 2550`, `rho = 1060 kg/m^3`,
  * `eps = 1e-12`, `meshScale = 1e-3`, wall attribute `2`, inlet attribute
  * `3`, outlet attributes `4..9`, and default RCR parameters
- * `(Rp, C, Rd, pv0, pd0, par0) = (5e8, 5e-9, 1e9, 400, 10500, 11000)`.
+ * `(Rp, C, Rd, pd0, pc0, pout0) = (5e8, 5e-11, 1e9, 400, 10500, 11000)`.
+ * The 3D solve has local time-step adaptivity enabled by default: if the
+ * PETSc KSP/SNES solve fails, the coupled step is rolled back and retried with
+ * `dt *= 0.5`, down to 8 reductions. After accepted reduced steps, the next
+ * step grows by `1 / 0.5` until the original `dt` is recovered. 0D Newton
+ * failures are not retried by this mechanism.
  * The default Carreau-Yasuda blood model is
  * `(mu0, muInf, lambda, n, yasuda, gammaReg) =
  * (0.04868, 0.003605, 3.39, 0.198, 1.235, 1e-3)`.
  * The non-Newtonian outlet update uses proximal vessel
- * `(radius, length) = (0.004, 0.015)` and distal vessel
- * `(radius, length) = (0.0004, 0.002)`, with root-solve tolerances and
+ * `(radius, length) = (5e-4, 0.02)` and distal vessel
+ * `(radius, length) = (1.2e-4, 0.02)`, with root-solve tolerances and
  * bracketing limits stored in `Config::outletFlowLaw`.
  * The 0D LV model defaults, initial conditions, activation waveform, and
  * atrial pressure waveform are stored in `Config::lv`, `Config::activation`,

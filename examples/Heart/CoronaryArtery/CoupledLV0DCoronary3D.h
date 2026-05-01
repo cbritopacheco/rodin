@@ -116,13 +116,13 @@ namespace Rodin::Examples::Heart
       struct OutletFlowLaw
       {
         /// @brief Proximal surrogate vessel radius.
-        Real proximalRadius = 0.004;
+        Real proximalRadius = 5.0e-4;
         /// @brief Proximal surrogate vessel length.
-        Real proximalLength = 0.015;
+        Real proximalLength = 0.02;
         /// @brief Distal surrogate vessel radius.
-        Real distalRadius = 0.0004;
+        Real distalRadius = 1.2e-4;
         /// @brief Distal surrogate vessel length.
-        Real distalLength = 0.002;
+        Real distalLength = 0.02;
         /// @brief Pressure-drop threshold for the Poiseuille fallback.
         Real pressureDropTolerance = 1.0e-12;
         /// @brief Minimum shear-rate bracket.
@@ -347,8 +347,12 @@ namespace Rodin::Examples::Heart
         Real dt = 1.0e-3;
         /// @brief Number of time steps.
         size_t nsteps = 3 * static_cast<int>(0.85 / 1.0e-3);
+        /// @brief Factor applied to dt when the 3D KSP/SNES solve fails.
+        Real timeAdaptivityReductionFactor = 0.5;
+        /// @brief Maximum number of successive dt reductions per accepted step.
+        int timeAdaptivityMaxLevels = 8;
 
-        /// @brief 3D coronary flow linearization mode. Defaults to full Newton.
+        /// @brief 3D coronary flow linearization mode. Defaults to Oseen/Picard.
         FlowMode flowMode = FlowMode::Oseen;
         /// @brief Blood viscosity model shared by 3D flow and outlet laws.
         CarreauYasuda viscosity;
@@ -361,7 +365,7 @@ namespace Rodin::Examples::Heart
         /// @brief 0D LV model parameters and initial conditions.
         LVModel lv;
         /// @brief Default RCR parameters copied to every outlet at startup.
-        RCR defaultRCR{5.0e8, 5.0e-9, 1.0e9, 400.0, 10500.0, 11000.0};
+        RCR defaultRCR{5.0e8, 5.0e-11, 1.0e9, 400.0, 10500.0, 11000.0};
       };
 
       explicit CoupledLV0DCoronary3D(const Rodin::Context::MPI& context);
