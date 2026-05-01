@@ -330,6 +330,16 @@ namespace Rodin::Geometry
       }
 
       /**
+       * @brief Checks whether a point is already expressed in this mesh's local
+       * indexing convention.
+       *
+       * Ordinary meshes accept only points attached directly to themselves.
+       * Distributed meshes override this to also accept points attached to their
+       * rank-local shard.
+       */
+      virtual bool isLocalPoint(const Point& p) const;
+
+      /**
        * @brief Tests point inclusion in the mesh.
        * @param[in] p Point to test
        * @returns Optional point if included in mesh

@@ -105,9 +105,18 @@ namespace Rodin::Variational
        * @returns Real value at the point
        */
       constexpr
-      decltype(auto) getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
+      }
+
+      constexpr
+      auto getValue(const IntegrationPoint& ip) const
+      {
+        if constexpr (requires (const Derived& f, const IntegrationPoint& q) { f.getValue(q); })
+          return static_cast<const Derived&>(*this).getValue(ip);
+        else
+          return static_cast<const Derived&>(*this).getValue(ip.getPoint());
       }
 
       /**
@@ -164,9 +173,15 @@ namespace Rodin::Variational
       {}
 
       constexpr
-      decltype(auto) getValue(const Geometry::Point& v) const
+      auto getValue(const Geometry::Point& v) const
       {
         return m_nested->getValue(v);
+      }
+
+      constexpr
+      auto getValue(const IntegrationPoint& ip) const
+      {
+        return m_nested->getValue(ip);
       }
 
       constexpr
@@ -341,6 +356,15 @@ namespace Rodin::Variational
       Real getValue(const Geometry::Point& v) const
       {
         return m_f(v);
+      }
+
+      constexpr
+      Real getValue(const IntegrationPoint& ip) const
+      {
+        if constexpr (std::is_invocable_r_v<Real, F, const IntegrationPoint&>)
+          return m_f(ip);
+        else
+          return m_f(ip.getPoint());
       }
 
       template <class ... Args>

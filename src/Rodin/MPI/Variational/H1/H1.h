@@ -22,6 +22,7 @@
 #include <array>
 #include <limits>
 #include <numeric>
+#include <utility>
 #include <vector>
 
 #include <boost/mpi/collectives.hpp>
@@ -101,17 +102,18 @@ namespace Rodin::Variational
       using Parent::getGlobalIndex;
 
       /**
-       * @brief Pullback of a function to the reference polytope.
+       * @brief Pullback of a callable (or FunctionBase) to the reference polytope.
        */
-      template <class FunctionDerived>
+      template <class Callable>
       class Pullback
-        : public FiniteElementSpacePullbackBase<Pullback<FunctionDerived>>
+        : public FiniteElementSpacePullbackBase<Pullback<Callable>>
       {
         public:
-          using FunctionType = FunctionBase<FunctionDerived>;
+          using CallableType = Callable;
 
-          Pullback(const Geometry::Polytope& polytope, const FunctionType& v)
-            : m_polytope(polytope), m_v(v.copy())
+          template <class Function>
+          Pullback(const Geometry::Polytope& polytope, Function&& v)
+            : m_polytope(polytope), m_v(std::forward<Function>(v))
           {}
 
           Pullback(const Pullback&) = default;
@@ -119,26 +121,19 @@ namespace Rodin::Variational
           auto operator()(const Math::SpatialVector<Real>& r) const
           {
             const Geometry::Point p(m_polytope, r);
-            return getFunction()(p);
+            return m_v(p);
           }
 
           template <class T>
           auto operator()(T& res, const Math::SpatialVector<Real>& r) const
           {
             const Geometry::Point p(m_polytope, r);
-            return getFunction()(res, p);
-          }
-
-          constexpr
-          const FunctionType& getFunction() const
-          {
-            assert(m_v);
-            return *m_v;
+            return m_v(res, p);
           }
 
         private:
           Geometry::Polytope m_polytope;
-          std::unique_ptr<FunctionType> m_v;
+          CallableType m_v;
       };
 
       /**
@@ -291,16 +286,17 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Returns a pullback wrapper for a function on local polytope @f$(d, i)@f$.
+       * @brief Returns a pullback wrapper for a callable (or FunctionBase) on local polytope @f$(d, i)@f$.
        */
-      template <class FunctionDerived>
+      template <class Callable>
       auto getPullback(
           const std::pair<size_t, Index>& p,
-          const FunctionBase<FunctionDerived>& v) const
+          Callable&& v) const
       {
         const auto& [d, i] = p;
         const auto& mesh = getMesh();
-        return Pullback<FunctionDerived>(*mesh.getPolytope(d, i), v);
+        return Pullback<Callable>(
+            *mesh.getPolytope(d, i), std::forward<Callable>(v));
       }
 
       /**
@@ -926,17 +922,18 @@ namespace Rodin::Variational
       using Parent::getGlobalIndex;
 
       /**
-       * @brief Pullback of a function to the reference polytope.
+       * @brief Pullback of a callable (or FunctionBase) to the reference polytope.
        */
-      template <class FunctionDerived>
+      template <class Callable>
       class Pullback
-        : public FiniteElementSpacePullbackBase<Pullback<FunctionDerived>>
+        : public FiniteElementSpacePullbackBase<Pullback<Callable>>
       {
         public:
-          using FunctionType = FunctionBase<FunctionDerived>;
+          using CallableType = Callable;
 
-          Pullback(const Geometry::Polytope& polytope, const FunctionType& v)
-            : m_polytope(polytope), m_v(v.copy())
+          template <class Function>
+          Pullback(const Geometry::Polytope& polytope, Function&& v)
+            : m_polytope(polytope), m_v(std::forward<Function>(v))
           {}
 
           Pullback(const Pullback&) = default;
@@ -944,26 +941,19 @@ namespace Rodin::Variational
           auto operator()(const Math::SpatialVector<Real>& r) const
           {
             const Geometry::Point p(m_polytope, r);
-            return getFunction()(p);
+            return m_v(p);
           }
 
           template <class T>
           auto operator()(T& res, const Math::SpatialVector<Real>& r) const
           {
             const Geometry::Point p(m_polytope, r);
-            return getFunction()(res, p);
-          }
-
-          constexpr
-          const FunctionType& getFunction() const
-          {
-            assert(m_v);
-            return *m_v;
+            return m_v(res, p);
           }
 
         private:
           Geometry::Polytope m_polytope;
-          std::unique_ptr<FunctionType> m_v;
+          CallableType m_v;
       };
 
       /**
@@ -1173,16 +1163,17 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Returns a pullback wrapper for a function on local polytope @f$(d, i)@f$.
+       * @brief Returns a pullback wrapper for a callable (or FunctionBase) on local polytope @f$(d, i)@f$.
        */
-      template <class FunctionDerived>
+      template <class Callable>
       auto getPullback(
           const std::pair<size_t, Index>& p,
-          const FunctionBase<FunctionDerived>& v) const
+          Callable&& v) const
       {
         const auto& [d, i] = p;
         const auto& mesh = getMesh();
-        return Pullback<FunctionDerived>(*mesh.getPolytope(d, i), v);
+        return Pullback<Callable>(
+            *mesh.getPolytope(d, i), std::forward<Callable>(v));
       }
 
       /**

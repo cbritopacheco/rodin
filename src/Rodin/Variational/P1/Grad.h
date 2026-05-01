@@ -21,6 +21,7 @@
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/Grad.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Variational/ShapeFunction.h"
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
@@ -82,6 +83,11 @@ namespace Rodin::Variational
       Grad(Grad&& other)
         : Parent(std::move(other))
       {}
+
+      void interpolate(SpatialVectorType& out, const IntegrationPoint& ip) const
+      {
+        interpolate(out, ip.getPoint());
+      }
 
       /**
        * @brief Interpolates the gradient at a given point.

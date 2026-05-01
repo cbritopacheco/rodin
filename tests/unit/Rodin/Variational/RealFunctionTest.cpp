@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "Rodin/Test/Random.h"
 
+#include "Rodin/QF/Centroid.h"
 #include "Rodin/Variational.h"
 
 using namespace Rodin;
@@ -11,6 +12,22 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  namespace
+  {
+    struct IntegrationPointRealCallable
+    {
+      Real operator()(const Geometry::Point&) const
+      {
+        return 1.0;
+      }
+
+      Real operator()(const IntegrationPoint& ip) const
+      {
+        return 10.0 + static_cast<Real>(ip.getIndex());
+      }
+    };
+  }
+
   TEST(Rodin_Variational_RealFunction, ConstantReal_Construction)
   {
     RealFunction f(3.14);
@@ -138,5 +155,35 @@ namespace Rodin::Tests::Unit
     const Math::Vector<Real> rc{{0.5}};
     Point p(polytope, rc);
     EXPECT_NEAR(traced_f.getValue(p), 5.0, 1e-10);
+  }
+
+  TEST(Rodin_Variational_RealFunction, Callable_UsesIntegrationPointFastPath)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    auto it = mesh.getPolytope(mesh.getDimension(), 0);
+    const Math::Vector<Real> rc{{0.25, 0.25}};
+    Point p(*it, rc);
+    QF::Centroid qf(Polytope::Type::Triangle);
+    IntegrationPoint ip(p, qf, 7);
+
+    RealFunction f(IntegrationPointRealCallable{});
+
+    EXPECT_NEAR(f.getValue(p), 1.0, 1e-10);
+    EXPECT_NEAR(f.getValue(ip), 17.0, 1e-10);
+  }
+
+  TEST(Rodin_Variational_RealFunction, Expression_PropagatesIntegrationPointFastPath)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    auto it = mesh.getPolytope(mesh.getDimension(), 0);
+    const Math::Vector<Real> rc{{0.25, 0.25}};
+    Point p(*it, rc);
+    QF::Centroid qf(Polytope::Type::Triangle);
+    IntegrationPoint ip(p, qf, 8);
+
+    auto f = abs(-RealFunction(IntegrationPointRealCallable{})) + 1.0;
+
+    EXPECT_NEAR(f.getValue(p), 2.0, 1e-10);
+    EXPECT_NEAR(f.getValue(ip), 19.0, 1e-10);
   }
 }

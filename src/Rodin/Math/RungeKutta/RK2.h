@@ -69,10 +69,9 @@ namespace Rodin::Math::RungeKutta
     template <class T, class G, class F>
     void step(T& q, Real dt, const G& p, const F& f) const
     {
-      static thread_local T s_k1, s_k2;
-      s_k1 = f(p);
-      s_k2 = f(p + Real(0.5) * dt * s_k1);
-      q = p + dt * s_k2;
+      const auto k1 = f(p);
+      const auto k2 = f(p + Real(0.5) * dt * k1);
+      q = p + dt * k2;
     }
   };
 }

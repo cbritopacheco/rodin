@@ -417,7 +417,7 @@ namespace Rodin::Variational
         {
           case Geometry::Polytope::Type::Point:
           {
-            static thread_local const std::vector<Math::SpatialPoint> s_nodes = [] {
+            static const std::vector<Math::SpatialPoint> s_nodes = [] {
               std::vector<Math::SpatialPoint> n;
               n.emplace_back(Math::SpatialPoint{ 0 });
               return n;
@@ -427,97 +427,97 @@ namespace Rodin::Variational
 
           case Geometry::Polytope::Type::Segment:
           {
-            static thread_local std::vector<Math::SpatialPoint> s_nodes;
-            if (s_nodes.empty())
-            {
+            static const std::vector<Math::SpatialPoint> s_nodes = [] {
+              std::vector<Math::SpatialPoint> nodes;
               const auto& xi = GLL01<K>::getNodes();
-              s_nodes.reserve(K + 1);
+              nodes.reserve(K + 1);
               for (size_t i = 0; i <= K; ++i)
-                s_nodes.emplace_back(Math::SpatialPoint{{xi[i]}});
-            }
+                nodes.emplace_back(Math::SpatialPoint{{xi[i]}});
+              return nodes;
+            }();
             return s_nodes;
           }
 
           case Geometry::Polytope::Type::Triangle:
           {
-            static thread_local std::vector<Math::SpatialPoint> s_nodes;
-            if (s_nodes.empty())
-            {
+            static const std::vector<Math::SpatialPoint> s_nodes = [] {
+              std::vector<Math::SpatialPoint> nodes;
               const auto& tri = FeketeTriangle<K>::getNodes();
-              s_nodes.assign(tri.begin(), tri.end());
-            }
+              nodes.assign(tri.begin(), tri.end());
+              return nodes;
+            }();
             return s_nodes;
           }
 
           case Geometry::Polytope::Type::Quadrilateral:
           {
-            static thread_local std::vector<Math::SpatialPoint> s_nodes;
-            if (s_nodes.empty())
-            {
+            static const std::vector<Math::SpatialPoint> s_nodes = [] {
+              std::vector<Math::SpatialPoint> nodes;
               const auto& xi = GLL01<K>::getNodes();
-              s_nodes.reserve((K + 1) * (K + 1));
+              nodes.reserve((K + 1) * (K + 1));
               for (size_t j = 0; j <= K; ++j)
                 for (size_t i = 0; i <= K; ++i)
-                  s_nodes.emplace_back(Math::SpatialPoint{{xi[i], xi[j]}});
-            }
+                  nodes.emplace_back(Math::SpatialPoint{{xi[i], xi[j]}});
+              return nodes;
+            }();
             return s_nodes;
           }
 
           case Geometry::Polytope::Type::Tetrahedron:
           {
-            static thread_local std::vector<Math::SpatialPoint> s_nodes;
-            if (s_nodes.empty())
-            {
+            static const std::vector<Math::SpatialPoint> s_nodes = [] {
+              std::vector<Math::SpatialPoint> nodes;
               const auto& tet = FeketeTetrahedron<K>::getNodes();
-              s_nodes.assign(tet.begin(), tet.end());
-            }
+              nodes.assign(tet.begin(), tet.end());
+              return nodes;
+            }();
             return s_nodes;
           }
 
           case Geometry::Polytope::Type::Hexahedron:
           {
-            static thread_local std::vector<Math::SpatialPoint> s_nodes;
-            if (s_nodes.empty())
-            {
+            static const std::vector<Math::SpatialPoint> s_nodes = [] {
+              std::vector<Math::SpatialPoint> nodes;
               const auto& xi = GLL01<K>::getNodes();
-              s_nodes.reserve((K + 1) * (K + 1) * (K + 1));
+              nodes.reserve((K + 1) * (K + 1) * (K + 1));
               for (size_t k = 0; k <= K; ++k)
               {
                 for (size_t j = 0; j <= K; ++j)
                 {
                   for (size_t i = 0; i <= K; ++i)
                   {
-                    s_nodes.emplace_back(
+                    nodes.emplace_back(
                       Math::SpatialPoint{{xi[i], xi[j], xi[k]}});
                   }
                 }
               }
-            }
+              return nodes;
+            }();
             return s_nodes;
           }
 
           case Geometry::Polytope::Type::Wedge:
           {
-            static thread_local std::vector<Math::SpatialPoint> s_nodes;
-            if (s_nodes.empty())
-            {
+            static const std::vector<Math::SpatialPoint> s_nodes = [] {
+              std::vector<Math::SpatialPoint> nodes;
               const auto& tri = FeketeTriangle<K>::getNodes();
               const auto& z = GLL01<K>::getNodes();
 
-              s_nodes.reserve(tri.size() * (K + 1));
+              nodes.reserve(tri.size() * (K + 1));
               for (size_t k = 0; k <= K; ++k)
               {
                 for (const auto& p : tri)
-                  s_nodes.emplace_back(Math::SpatialPoint{{p.x(), p.y(), z[k]}});
+                  nodes.emplace_back(Math::SpatialPoint{{p.x(), p.y(), z[k]}});
               }
-            }
+              return nodes;
+            }();
             return s_nodes;
           }
         }
 
         // Should be unreachable if all enum values are handled
         assert(false && "Unsupported Polytope type.");
-        static thread_local const std::vector<Math::SpatialPoint> s_empty;
+        static const std::vector<Math::SpatialPoint> s_empty;
         return s_empty;
       }
 

@@ -297,8 +297,8 @@ namespace
   // -------------------------------------------------------------------------
 
   /**
-   * @brief Solves the 2D Poisson problem with H1 of degree K and returns the
-   *        globally reduced @f$ \int_\Omega (u - u_h)^2 @f$.
+   * @brief Solves the 2D Poisson problem with H1 of degree K and returns
+   *        @f$ \int_\Omega (u - u_h)^2 @f$.
    *
    * Manufactured solution: @f$ u = \sin(\pi x)\sin(\pi y) @f$,
    * right-hand side: @f$ f = 2\pi^2 \sin(\pi x)\sin(\pi y) @f$.
@@ -334,15 +334,12 @@ namespace
     GridFunction<FES, ::Vec> diff(sh);
     diff = Pow(u.getSolution() - solution, 2);
 
-    const Real localError = Integral(diff).compute();
-    Real globalError = 0;
-    boost::mpi::all_reduce(world, localError, globalError, std::plus<Real>());
-    return globalError;
+    return Integral(diff).compute();
   }
 
   /**
-   * @brief Solves the 3D Poisson problem with H1 of degree K and returns the
-   *        globally reduced @f$ \int_\Omega (u - u_h)^2 @f$.
+   * @brief Solves the 3D Poisson problem with H1 of degree K and returns
+   *        @f$ \int_\Omega (u - u_h)^2 @f$.
    *
    * Manufactured solution: @f$ u = x(1-x)\,y(1-y)\,z(1-z) @f$.
    * Right-hand side:
@@ -382,10 +379,7 @@ namespace
     GridFunction<FES, ::Vec> diff(sh);
     diff = Pow(u.getSolution() - solution, 2);
 
-    const Real localError = Integral(diff).compute();
-    Real globalError = 0;
-    boost::mpi::all_reduce(world, localError, globalError, std::plus<Real>());
-    return globalError;
+    return Integral(diff).compute();
   }
 
   // -------------------------------------------------------------------------

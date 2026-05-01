@@ -15,9 +15,9 @@
  * (and `PETSc::Solver::GMRES`), and verify the solution against a known
  * manufactured solution.
  *
- * The L² error is computed per-rank and then reduced with
- * `boost::mpi::all_reduce` so that every rank can independently assert
- * correctness.
+ * The L² error is computed through the PETSc-backed `Integral` path.  For MPI
+ * grid functions this evaluates a distributed `LinearForm`, so PETSc performs
+ * the communicator-wide reduction internally.
  *
  * ### Workflow
  *
@@ -31,8 +31,8 @@
  *    `P1` space.
  * 6. `Problem<PETSc::Math::LinearSystem, U, V>` is assembled with the MPI
  *    assembly backend and solved with a PETSc KSP solver.
- * 7. The local per-rank L² error is summed globally and checked against the
- *    manufactured tolerance.
+ * 7. The PETSc-backed `Integral` path returns the communicator-wide L² error,
+ *    which is checked against the manufactured tolerance.
  */
 
 #include <cmath>
@@ -189,9 +189,9 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
    *
    * Right-hand side: @f$ f = 2\pi^2 \sin(\pi x)\sin(\pi y) @f$.
    *
-   * The global @f$ L^2 @f$ error is obtained by summing local integrals
-   * across all ranks.  Expected to stay below @ref RODIN_FUZZY_CONSTANT on a
-   * 16×16 mesh.
+   * The global @f$ L^2 @f$ error is returned by `Integral(diff).compute()`
+   * through PETSc's distributed vector operations. Expected to stay below
+   * @ref RODIN_FUZZY_CONSTANT on a 16×16 mesh.
    */
   TEST(PETSc_MPI_Poisson, CG_SimpleSine_Triangle)
   {
@@ -225,10 +225,7 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
     GridFunction<P1<Real, Mesh<Context::MPI>>, ::Vec> diff(sh);
     diff = Pow(u.getSolution() - solution, 2);
 
-    const Real localError = Integral(diff).compute();
-
-    Real globalError = 0;
-    boost::mpi::all_reduce(world, localError, globalError, std::plus<Real>());
+    const Real globalError = Integral(diff).compute();
 
     EXPECT_NEAR(globalError, 0, RODIN_FUZZY_CONSTANT);
   }
@@ -268,10 +265,7 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
     GridFunction<P1<Real, Mesh<Context::MPI>>, ::Vec> diff(sh);
     diff = Pow(u.getSolution() - solution, 2);
 
-    const Real localError = Integral(diff).compute();
-
-    Real globalError = 0;
-    boost::mpi::all_reduce(world, localError, globalError, std::plus<Real>());
+    const Real globalError = Integral(diff).compute();
 
     EXPECT_NEAR(globalError, 0, RODIN_FUZZY_CONSTANT);
   }
@@ -360,10 +354,7 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
     GridFunction<P1<Real, Mesh<Context::MPI>>, ::Vec> diff(sh);
     diff = Pow(u.getSolution() - solution, 2);
 
-    const Real localError = Integral(diff).compute();
-
-    Real globalError = 0;
-    boost::mpi::all_reduce(world, localError, globalError, std::plus<Real>());
+    const Real globalError = Integral(diff).compute();
 
     EXPECT_NEAR(globalError, 0, RODIN_FUZZY_CONSTANT);
   }
@@ -374,9 +365,11 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
    * Manufactured solution: @f$ u(x,y) = x + 2y + 1 @f$.
    *
    * Because the manufactured solution lies exactly in the P1 space, the
-   * global L² error must be roundoff-zero.
+   * global L² error must be roundoff-zero. Strong nonhomogeneous Dirichlet
+   * enforcement can make the assembled operator nonsymmetric, so this uses
+   * GMRES rather than CG.
    */
-  TEST(PETSc_MPI_Poisson, CG_P1Exact_Triangle)
+  TEST(PETSc_MPI_Poisson, GMRES_P1Exact_Triangle)
   {
     const auto& world = *g_world;
     if (world.size() > 4)
@@ -398,17 +391,14 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
             - Integral(f, v)
             + DirichletBC(u, solution);
 
-    PETSc::Solver::CG solver(poisson);
+    PETSc::Solver::GMRES solver(poisson);
     solver.solve();
 
     P1<Real, Mesh<Context::MPI>> sh(mesh);
     GridFunction<P1<Real, Mesh<Context::MPI>>, ::Vec> diff(sh);
     diff = Pow(u.getSolution() - solution, 2);
 
-    const Real localError = Integral(diff).compute();
-
-    Real globalError = 0;
-    boost::mpi::all_reduce(world, localError, globalError, std::plus<Real>());
+    const Real globalError = Integral(diff).compute();
 
     EXPECT_NEAR(globalError, 0, RODIN_FUZZY_CONSTANT);
   }
@@ -450,10 +440,7 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
     GridFunction<P1<Real, Mesh<Context::MPI>>, ::Vec> diff(sh);
     diff = Pow(u.getSolution() - solution, 2);
 
-    const Real localError = Integral(diff).compute();
-
-    Real globalError = 0;
-    boost::mpi::all_reduce(world, localError, globalError, std::plus<Real>());
+    const Real globalError = Integral(diff).compute();
 
     EXPECT_NEAR(globalError, 0, RODIN_FUZZY_CONSTANT);
   }
@@ -496,10 +483,7 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
     GridFunction<P1<Real, Mesh<Context::MPI>>, ::Vec> diff(sh);
     diff = Pow(u.getSolution() - solution, 2);
 
-    const Real localError = Integral(diff).compute();
-
-    Real globalError = 0;
-    boost::mpi::all_reduce(world, localError, globalError, std::plus<Real>());
+    const Real globalError = Integral(diff).compute();
 
     EXPECT_NEAR(globalError, 0, RODIN_FUZZY_CONSTANT);
   }
@@ -552,10 +536,7 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
     GridFunction<decltype(sh), ::Vec> diff(sh);
     diff = Pow(u.getSolution() - solution, 2);
 
-    const Real localError = Integral(diff).compute();
-
-    Real globalError = 0;
-    boost::mpi::all_reduce(world, localError, globalError, std::plus<Real>());
+    const Real globalError = Integral(diff).compute();
 
     EXPECT_NEAR(globalError, 0, RODIN_FUZZY_CONSTANT);
   }
@@ -599,10 +580,7 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
     GridFunction<decltype(sh), ::Vec> diff(sh);
     diff = Pow(u.getSolution() - solution, 2);
 
-    const Real localError = Integral(diff).compute();
-
-    Real globalError = 0;
-    boost::mpi::all_reduce(world, localError, globalError, std::plus<Real>());
+    const Real globalError = Integral(diff).compute();
 
     EXPECT_NEAR(globalError, 0, RODIN_FUZZY_CONSTANT);
   }
@@ -645,10 +623,7 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
     GridFunction<decltype(sh), ::Vec> diff(sh);
     diff = Pow(u.getSolution() - solution, 2);
 
-    const Real localError = Integral(diff).compute();
-
-    Real globalError = 0;
-    boost::mpi::all_reduce(world, localError, globalError, std::plus<Real>());
+    const Real globalError = Integral(diff).compute();
 
     EXPECT_NEAR(globalError, 0, RODIN_FUZZY_CONSTANT);
   }
@@ -689,10 +664,7 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
     GridFunction<decltype(sh), ::Vec> diff(sh);
     diff = Pow(u.getSolution() - solution, 2);
 
-    const Real localError = Integral(diff).compute();
-
-    Real globalError = 0;
-    boost::mpi::all_reduce(world, localError, globalError, std::plus<Real>());
+    const Real globalError = Integral(diff).compute();
 
     EXPECT_NEAR(globalError, 0, RODIN_FUZZY_CONSTANT);
   }
@@ -777,10 +749,7 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
     GridFunction<decltype(sh), ::Vec> diff(sh);
     diff = Pow(u.getSolution() - solution, 2);
 
-    const Real localError = Integral(diff).compute();
-
-    Real globalError = 0;
-    boost::mpi::all_reduce(world, localError, globalError, std::plus<Real>());
+    const Real globalError = Integral(diff).compute();
 
     EXPECT_NEAR(globalError, 0, RODIN_FUZZY_CONSTANT);
   }

@@ -191,6 +191,11 @@ namespace Rodin::Geometry
       bool isSubMesh() const override;
 
       /**
+       * @brief Checks whether a point is attached to this mesh or its local shard.
+       */
+      bool isLocalPoint(const Point& p) const override;
+
+      /**
        * @brief Returns the topological dimension of the distributed mesh.
        *
        * The dimension corresponds to the dimension of the underlying mesh
@@ -626,6 +631,10 @@ namespace Rodin::Geometry
 
       /**
        * @brief Returns cached quadrature associated with a local polytope.
+       *
+       * The index @p localIdx is interpreted in the rank-local shard, matching
+       * MPI assembly and finite element space conventions. The shard owns the
+       * cache and the returned points are attached to the shard-local polytope.
        *
        * @param[in] dimension Topological dimension of the polytope.
        * @param[in] localIdx Local index of the polytope in the shard.

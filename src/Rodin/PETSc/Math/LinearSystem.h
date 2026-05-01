@@ -319,21 +319,34 @@ namespace Rodin::Math
         for (auto const& kv : dofs)
           rows.push_back(kv.first + offset);
 
+        Vec bc = PETSC_NULLPTR;
+        ierr = VecDuplicate(x, &bc);
+        assert(ierr == PETSC_SUCCESS);
+
+        ierr = VecCopy(x, bc);
+        assert(ierr == PETSC_SUCCESS);
+
         for (auto const& kv : dofs)
         {
           const PetscInt i = kv.first + offset;
           const auto& ui = kv.second;
-          ierr = VecSetValue(x, i, ui, INSERT_VALUES);
+          ierr = VecSetValue(bc, i, ui, INSERT_VALUES);
           assert(ierr == PETSC_SUCCESS);
         }
 
-        ierr = VecAssemblyBegin(x);
+        ierr = VecAssemblyBegin(bc);
         assert(ierr == PETSC_SUCCESS);
 
-        ierr = VecAssemblyEnd(x);
+        ierr = VecAssemblyEnd(bc);
         assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatZeroRows(a, rows.size(), rows.data(), 1.0, x, b);
+        ierr = MatSetOption(a, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
+        assert(ierr == PETSC_SUCCESS);
+
+        ierr = MatZeroRows(a, rows.size(), rows.data(), 1.0, bc, b);
+        assert(ierr == PETSC_SUCCESS);
+
+        ierr = VecDestroy(&bc);
         assert(ierr == PETSC_SUCCESS);
 
         (void) ierr;

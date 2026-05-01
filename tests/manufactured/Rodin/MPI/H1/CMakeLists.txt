@@ -22,13 +22,20 @@ if (MPIEXEC_EXECUTABLE)
 endif()
 
 # Keep normal CI small. High-order/vector 3D elasticity belongs to slow CI.
+# Very high-order hex elasticity is an assembly stress test; keep it out of
+# the normal slow bucket so the bucket remains bounded on CI runners.
 set(_RODIN_MPI_H1_LINEAR_ELASTICITY_FAST_FILTER
   "AllGeometriesAndDegrees/H1LinearElasticity2D.SineSolution/Triangle_K1:\
 AllGeometriesAndDegrees/H1LinearElasticity2D.SineSolution/Quadrilateral_K2:\
 AllGeometriesAndDegrees/H1LinearElasticity3D.PolynomialSolution/Tetrahedron_K2")
 
+set(_RODIN_MPI_H1_LINEAR_ELASTICITY_VERY_SLOW_FILTER
+  "AllGeometriesAndDegrees/H1LinearElasticity3D.PolynomialSolution/Hexahedron_K4:\
+AllGeometriesAndDegrees/H1LinearElasticity3D.PolynomialSolution/Hexahedron_K6")
+
 set(_RODIN_MPI_H1_LINEAR_ELASTICITY_SLOW_FILTER
-  "-${_RODIN_MPI_H1_LINEAR_ELASTICITY_FAST_FILTER}")
+  "-${_RODIN_MPI_H1_LINEAR_ELASTICITY_FAST_FILTER}:\
+${_RODIN_MPI_H1_LINEAR_ELASTICITY_VERY_SLOW_FILTER}")
 
 foreach(np 1 2 3 4)
   add_test(
@@ -56,7 +63,8 @@ foreach(np 1 2 3 4)
   )
   rodin_suppress_external_mpi_lsan_for_test(
     RodinManufacturedMPIH1LinearElasticityTest_slow_np${np}
-    "HDF5_USE_FILE_LOCKING=FALSE")
+    "HDF5_USE_FILE_LOCKING=FALSE"
+    "RODIN_TEST_TIMING=1")
 endforeach()
 
 add_executable(RodinManufacturedMPIH1PoissonTest PoissonTest.cpp)

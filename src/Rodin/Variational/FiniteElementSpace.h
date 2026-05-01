@@ -302,7 +302,7 @@ namespace Rodin::Variational
        *
        * @note CRTP function to be overriden in Derived class.
        */
-      decltype(auto) operator()(const Math::SpatialVector<Real>& r) const
+      auto operator()(const Math::SpatialVector<Real>& r) const
       {
         return static_cast<const Derived&>(*this).operator()(r);
       }
@@ -357,7 +357,7 @@ namespace Rodin::Variational
        *
        * @note CRTP function to be overriden in Derived class.
        */
-      decltype(auto) operator()(const Geometry::Point& pc) const
+      auto operator()(const Geometry::Point& pc) const
       {
         return static_cast<const Derived&>(*this).operator()(pc);
       }

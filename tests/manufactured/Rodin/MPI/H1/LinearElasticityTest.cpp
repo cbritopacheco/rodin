@@ -45,6 +45,9 @@
  */
 
 #include <cmath>
+#include <chrono>
+#include <cstdlib>
+#include <iostream>
 #include <limits>
 #include <string>
 #include <tuple>
@@ -94,6 +97,56 @@ static boost::mpi::communicator* g_world = nullptr;
 // ---------------------------------------------------------------------------
 namespace
 {
+  using Clock = std::chrono::steady_clock;
+
+  struct MaxReal
+  {
+    Real operator()(Real lhs, Real rhs) const
+    {
+      return std::max(lhs, rhs);
+    }
+  };
+
+  static bool timingEnabled()
+  {
+    return std::getenv("RODIN_TEST_TIMING") != nullptr;
+  }
+
+  static Real secondsSince(Clock::time_point start)
+  {
+    return std::chrono::duration<Real>(Clock::now() - start).count();
+  }
+
+  static void printTiming(
+      boost::mpi::communicator& world,
+      const std::string& label,
+      Real localSeconds)
+  {
+    if (!timingEnabled())
+      return;
+
+    const Real maxSeconds =
+      boost::mpi::all_reduce(world, localSeconds, MaxReal{});
+
+    if (world.rank() == 0)
+    {
+      std::cout << "[TIMING max/rank] " << label
+                << " = " << maxSeconds << " s\n";
+    }
+  }
+
+  static void printRootTiming(
+      const boost::mpi::communicator& world,
+      const std::string& label,
+      Real seconds)
+  {
+    if (!timingEnabled() || world.rank() != 0)
+      return;
+
+    std::cout << "[TIMING root] " << label
+              << " = " << seconds << " s\n";
+  }
+
   /**
    * @brief Builds a local mesh with the incidence data required by the
    *        Sharder for 2D and 3D meshes.
@@ -124,6 +177,8 @@ namespace
       const Context::MPI& ctx,
       Mesh<Context::MPI>&& mesh)
   {
+    auto& world = const_cast<boost::mpi::communicator&>(ctx.getCommunicator());
+    const auto start = Clock::now();
     const auto& comm = ctx.getCommunicator();
     const size_t D = mesh.getDimension();
 
@@ -168,6 +223,7 @@ namespace
 
     comm.barrier();
     boost::filesystem::remove(rankFile);
+    printTiming(world, "reloadShard", secondsSince(start));
     return r;
   }
 
@@ -179,18 +235,38 @@ namespace
       Polytope::Type type,
       std::initializer_list<size_t> shape)
   {
+    auto& world = const_cast<boost::mpi::communicator&>(ctx.getCommunicator());
+    const auto totalStart = Clock::now();
     const auto& comm = ctx.getCommunicator();
     Sharder<Context::MPI> sharder(ctx);
     if (comm.rank() == 0)
     {
+      const auto localMeshStart = Clock::now();
       auto localMesh = makeShardableMesh(type, shape);
+      printRootTiming(world, "makeShardableMesh", secondsSince(localMeshStart));
+
+      const auto partitionStart = Clock::now();
       BalancedCompactPartitioner partitioner(localMesh);
       partitioner.partition(static_cast<size_t>(comm.size()));
+      printRootTiming(world, "partition", secondsSince(partitionStart));
+
+      const auto shardStart = Clock::now();
       sharder.shard(partitioner);
+      printRootTiming(world, "sharder.shard", secondsSince(shardStart));
+
+      const auto scatterStart = Clock::now();
       sharder.scatter(0);
+      printRootTiming(world, "sharder.scatter.root", secondsSince(scatterStart));
     }
+    else
+      sharder.scatter(0);
+
+    const auto gatherStart = Clock::now();
     auto mesh = sharder.gather(0);
-    return reloadShard(ctx, std::move(mesh));
+    printTiming(world, "sharder.gather", secondsSince(gatherStart));
+    auto reloaded = reloadShard(ctx, std::move(mesh));
+    printTiming(world, "distributeFromRoot.total", secondsSince(totalStart));
+    return reloaded;
   }
 
   // -------------------------------------------------------------------------
@@ -199,7 +275,7 @@ namespace
 
   /**
    * @brief Solves the 2D linear-elasticity problem with H1 of degree K and
-   *        returns the globally reduced @f$ \int_\Omega \|\mathbf{u}-\mathbf{u}_h\|^2 @f$.
+   *        returns @f$ \int_\Omega \|\mathbf{u}-\mathbf{u}_h\|^2 @f$.
    *
    * Manufactured solution: @f$ \mathbf{u} = \sin(\pi x)\sin(\pi y)\,(1,1)^T @f$.
    * Lamé parameters: @f$ \lambda = \mu = 1 @f$.
@@ -212,6 +288,7 @@ namespace
       boost::mpi::communicator& world,
       Geometry::Mesh<Context::MPI>& mesh)
   {
+    const auto totalStart = Clock::now();
     namespace PETSc = ::Rodin::PETSc;
     using VFES = Variational::H1<K, Math::SpatialVector<Real>, Geometry::Mesh<Context::MPI>>;
     using SFES = Variational::H1<K, Real, Geometry::Mesh<Context::MPI>>;
@@ -221,7 +298,9 @@ namespace
     constexpr Real lambda = 1.0;
     constexpr Real mu     = 1.0;
 
+    const auto fesStart = Clock::now();
     VFES vh(order, mesh, mesh.getSpaceDimension());
+    printTiming(world, "computeError2D.K" + std::to_string(K) + ".fes", secondsSince(fesStart));
 
     auto A = sin(pi * F::x) * sin(pi * F::y);
     auto B = cos(pi * F::x) * cos(pi * F::y);
@@ -233,6 +312,7 @@ namespace
     PETSc::Variational::TrialFunction u(vh);
     PETSc::Variational::TestFunction  v(vh);
 
+    const auto formStart = Clock::now();
     Problem elasticity(u, v);
     elasticity = Integral(lambda * Div(u), Div(v))
                + Integral(
@@ -240,25 +320,33 @@ namespace
                    0.5 * (Jacobian(v) + Jacobian(v).T()))
                - Integral(f, v)
                + DirichletBC(u, Zero());
+    printTiming(world, "computeError2D.K" + std::to_string(K) + ".form", secondsSince(formStart));
 
+    const auto assembleStart = Clock::now();
+    elasticity.assemble();
+    printTiming(world, "computeError2D.K" + std::to_string(K) + ".assemble", secondsSince(assembleStart));
+
+    const auto solveStart = Clock::now();
     PETSc::Solver::CG solver(elasticity);
     solver.solve();
+    printTiming(world, "computeError2D.K" + std::to_string(K) + ".ksp", secondsSince(solveStart));
 
     VectorFunction solution{ A, A };
 
+    const auto errorStart = Clock::now();
     SFES sh(order, mesh);
     GridFunction<SFES, ::Vec> diff(sh);
     diff = Pow(Frobenius(u.getSolution() - solution), 2);
 
-    const Real localError = Integral(diff).compute();
-    Real globalError = 0;
-    boost::mpi::all_reduce(world, localError, globalError, std::plus<Real>());
+    const Real globalError = Integral(diff).compute();
+    printTiming(world, "computeError2D.K" + std::to_string(K) + ".error", secondsSince(errorStart));
+    printTiming(world, "computeError2D.K" + std::to_string(K) + ".total", secondsSince(totalStart));
     return globalError;
   }
 
   /**
    * @brief Solves the 3D linear-elasticity problem with H1 of degree K and
-   *        returns the globally reduced @f$ \int_\Omega \|\mathbf{u}-\mathbf{u}_h\|^2 @f$.
+   *        returns @f$ \int_\Omega \|\mathbf{u}-\mathbf{u}_h\|^2 @f$.
    *
    * Manufactured solution: @f$ \mathbf{u} = (x(1-x),\,y(1-y),\,z(1-z)) @f$.
    * Lamé parameters: @f$ \lambda = \mu = 1 @f$.
@@ -271,6 +359,7 @@ namespace
       boost::mpi::communicator& world,
       Geometry::Mesh<Context::MPI>& mesh)
   {
+    const auto totalStart = Clock::now();
     namespace PETSc = ::Rodin::PETSc;
     using VFES = Variational::H1<K, Math::SpatialVector<Real>, Geometry::Mesh<Context::MPI>>;
     using SFES = Variational::H1<K, Real, Geometry::Mesh<Context::MPI>>;
@@ -279,7 +368,9 @@ namespace
     constexpr Real lambda = 1.0;
     constexpr Real mu     = 1.0;
 
+    const auto fesStart = Clock::now();
     VFES vh(order, mesh, mesh.getSpaceDimension());
+    printTiming(world, "computeError3D.K" + std::to_string(K) + ".fes", secondsSince(fesStart));
 
     const Real c = 2.0 * (lambda + 2.0 * mu);
     VectorFunction f{ c, c, c };
@@ -293,6 +384,7 @@ namespace
       F::z * (1 - F::z)
     };
 
+    const auto formStart = Clock::now();
     Problem elasticity(u, v);
     elasticity = Integral(lambda * Div(u), Div(v))
                + Integral(
@@ -300,17 +392,25 @@ namespace
                    0.5 * (Jacobian(v) + Jacobian(v).T()))
                - Integral(f, v)
                + DirichletBC(u, solution);
+    printTiming(world, "computeError3D.K" + std::to_string(K) + ".form", secondsSince(formStart));
 
+    const auto assembleStart = Clock::now();
+    elasticity.assemble();
+    printTiming(world, "computeError3D.K" + std::to_string(K) + ".assemble", secondsSince(assembleStart));
+
+    const auto solveStart = Clock::now();
     PETSc::Solver::CG solver(elasticity);
     solver.solve();
+    printTiming(world, "computeError3D.K" + std::to_string(K) + ".ksp", secondsSince(solveStart));
 
+    const auto errorStart = Clock::now();
     SFES sh(order, mesh);
     GridFunction<SFES, ::Vec> diff(sh);
     diff = Pow(Frobenius(u.getSolution() - solution), 2);
 
-    const Real localError = Integral(diff).compute();
-    Real globalError = 0;
-    boost::mpi::all_reduce(world, localError, globalError, std::plus<Real>());
+    const Real globalError = Integral(diff).compute();
+    printTiming(world, "computeError3D.K" + std::to_string(K) + ".error", secondsSince(errorStart));
+    printTiming(world, "computeError3D.K" + std::to_string(K) + ".total", secondsSince(totalStart));
     return globalError;
   }
 

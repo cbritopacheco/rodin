@@ -49,6 +49,12 @@ namespace Rodin::Geometry
     return false;
   }
 
+  bool MPIMesh::isLocalPoint(const Point& p) const
+  {
+    const auto& mesh = p.getPolytope().getMesh();
+    return mesh == *this || mesh == this->getShard();
+  }
+
   size_t MPIMesh::getDimension() const
   {
     return this->getShard().getDimension();
