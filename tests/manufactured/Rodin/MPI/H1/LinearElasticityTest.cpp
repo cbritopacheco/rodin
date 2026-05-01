@@ -275,7 +275,7 @@ namespace
 
   /**
    * @brief Solves the 2D linear-elasticity problem with H1 of degree K and
-   *        returns the globally reduced @f$ \int_\Omega \|\mathbf{u}-\mathbf{u}_h\|^2 @f$.
+   *        returns @f$ \int_\Omega \|\mathbf{u}-\mathbf{u}_h\|^2 @f$.
    *
    * Manufactured solution: @f$ \mathbf{u} = \sin(\pi x)\sin(\pi y)\,(1,1)^T @f$.
    * Lamé parameters: @f$ \lambda = \mu = 1 @f$.
@@ -338,9 +338,7 @@ namespace
     GridFunction<SFES, ::Vec> diff(sh);
     diff = Pow(Frobenius(u.getSolution() - solution), 2);
 
-    const Real localError = Integral(diff).compute();
-    Real globalError = 0;
-    boost::mpi::all_reduce(world, localError, globalError, std::plus<Real>());
+    const Real globalError = Integral(diff).compute();
     printTiming(world, "computeError2D.K" + std::to_string(K) + ".error", secondsSince(errorStart));
     printTiming(world, "computeError2D.K" + std::to_string(K) + ".total", secondsSince(totalStart));
     return globalError;
@@ -348,7 +346,7 @@ namespace
 
   /**
    * @brief Solves the 3D linear-elasticity problem with H1 of degree K and
-   *        returns the globally reduced @f$ \int_\Omega \|\mathbf{u}-\mathbf{u}_h\|^2 @f$.
+   *        returns @f$ \int_\Omega \|\mathbf{u}-\mathbf{u}_h\|^2 @f$.
    *
    * Manufactured solution: @f$ \mathbf{u} = (x(1-x),\,y(1-y),\,z(1-z)) @f$.
    * Lamé parameters: @f$ \lambda = \mu = 1 @f$.
@@ -410,9 +408,7 @@ namespace
     GridFunction<SFES, ::Vec> diff(sh);
     diff = Pow(Frobenius(u.getSolution() - solution), 2);
 
-    const Real localError = Integral(diff).compute();
-    Real globalError = 0;
-    boost::mpi::all_reduce(world, localError, globalError, std::plus<Real>());
+    const Real globalError = Integral(diff).compute();
     printTiming(world, "computeError3D.K" + std::to_string(K) + ".error", secondsSince(errorStart));
     printTiming(world, "computeError3D.K" + std::to_string(K) + ".total", secondsSince(totalStart));
     return globalError;
