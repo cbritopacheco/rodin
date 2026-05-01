@@ -28,6 +28,22 @@ set_tests_properties(RodinPETScLinearSystemTest PROPERTIES
 )
 rodin_suppress_external_mpi_lsan_for_test(RodinPETScLinearSystemTest)
 
+add_executable(RodinPETScFormTest FormTest.cpp)
+target_link_libraries(RodinPETScFormTest
+  PUBLIC
+  GTest::gtest
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::PETSc)
+add_test(
+  NAME RodinPETScFormTest
+  COMMAND $<TARGET_FILE:RodinPETScFormTest>
+)
+set_tests_properties(RodinPETScFormTest PROPERTIES
+  LABELS "unit;petsc"
+)
+rodin_suppress_external_mpi_lsan_for_test(RodinPETScFormTest)
+
 add_executable(RodinPETScMPIGridFunctionTest MPIGridFunctionTest.cpp)
 target_link_libraries(RodinPETScMPIGridFunctionTest
   PUBLIC
@@ -61,6 +77,28 @@ foreach(np 2 4)
     TIMEOUT 10
   )
   rodin_suppress_external_mpi_lsan_for_test(RodinPETScMPIGridFunctionTest_np${np})
+endforeach()
+
+add_executable(RodinPETScMPIFormTest MPIFormTest.cpp)
+target_link_libraries(RodinPETScMPIFormTest
+  PUBLIC
+  GTest::gtest
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::MPI
+  Rodin::PETSc)
+
+foreach(np 2 4)
+  add_test(
+    NAME RodinPETScMPIFormTest_np${np}
+    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+            $<TARGET_FILE:RodinPETScMPIFormTest>)
+  set_tests_properties(RodinPETScMPIFormTest_np${np} PROPERTIES
+    LABELS "unit;petsc;distributed"
+    TIMEOUT 10
+  )
+  rodin_suppress_external_mpi_lsan_for_test(RodinPETScMPIFormTest_np${np})
 endforeach()
 
 add_subdirectory(IO)
