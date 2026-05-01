@@ -342,6 +342,10 @@ namespace Rodin::Examples::Heart
         Real eps = 1.0e-12;
         /// @brief 3D blood density.
         Real rho = 1060.0;
+        /// @brief Inlet reversed-flow damping multiplier. Set to 0 to disable.
+        Real inletBackflowStabilization = 1.0;
+        /// @brief Outlet backflow damping multiplier. Set to 0 to disable.
+        Real outletBackflowStabilization = 1.0;
 
         /// @brief Time-step size.
         Real dt = 1.0e-3;
