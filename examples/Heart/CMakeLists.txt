@@ -18,4 +18,8 @@ if (RODIN_USE_PETSC AND RODIN_USE_MPI)
     Rodin::MPI
     Rodin::Alert
     )
+
+  if (RODIN_USE_SCOTCH)
+    target_link_libraries(CoronaryArtery PUBLIC Rodin::Scotch)
+  endif()
 endif()

@@ -12,8 +12,13 @@
 
 #include <petscvec.h>
 
+#include <Rodin/Configure.h>
 #include <Rodin/Alert.h>
 #include <Rodin/Solver.h>
+
+#ifdef RODIN_USE_SCOTCH
+#include <Rodin/Scotch/MeshPartitioner.h>
+#endif
 
 #include "CoupledLV0DCoronary3D.h"
 #include "Rodin/Alert/Exception.h"
@@ -127,7 +132,13 @@ namespace Rodin::Examples::Heart
                     << comm.size() << " MPI ranks ..."
                     << Alert::Raise;
 
+#ifdef RODIN_USE_SCOTCH
+      Alert::Info() << "Using SCOTCH mesh partitioner." << Alert::Raise;
+      Scotch::Partitioner partitioner(mesh);
+#else
+      Alert::Info() << "Using balanced compact mesh partitioner." << Alert::Raise;
       Geometry::BalancedCompactPartitioner partitioner(mesh);
+#endif
       partitioner.partition(static_cast<size_t>(comm.size()));
       sharder.shard(partitioner);
       sharder.scatter(RootRank);
