@@ -86,6 +86,8 @@ namespace Rodin::Examples::Heart
         Real pc = 0.0;
         /// @brief Outlet pressure applied to the 3D model.
         Real pout = 0.0;
+        /// @brief Distal branch flow leaving the capacitor.
+        Real qd = 0.0;
       };
 
       /**
@@ -402,9 +404,12 @@ namespace Rodin::Examples::Heart
 
         Real qIn = 0.0;
         Real qOutSum = 0.0;
+        Real qDistalSum = 0.0;
+        Real qCapChargingSum = 0.0;
         Real flowBalance = 0.0;
 
         std::map<Attribute, Real> qOut;
+        std::map<Attribute, Real> qDistal;
         std::map<Attribute, Real> pc;
         std::map<Attribute, Real> pOut;
       };

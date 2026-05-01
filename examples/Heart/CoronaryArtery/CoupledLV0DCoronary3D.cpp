@@ -239,6 +239,7 @@ namespace Rodin::Examples::Heart
       (a * bc.pc + Q + bc.pd / bc.Rd)
       / (a + 1.0 / bc.Rd);
 
+    bc.qd = (bc.pc - bc.pd) / bc.Rd;
     bc.pout = bc.pc + bc.Rp * Q;
   }
 
@@ -498,6 +499,10 @@ namespace Rodin::Examples::Heart
         bc.pc = *pcNew;
       }
     }
+
+    const auto [qd, dqd] = flowLaw(bc.pc - s.pv, lengthD, radiusD);
+    (void) dqd;
+    bc.qd = qd;
 
     const Real oldGuess = bc.pout - bc.pc;
     const Real dpP =
@@ -1066,11 +1071,19 @@ namespace Rodin::Examples::Heart
 
     d.qIn = m_stepData.qIn;
     d.qOutSum = m_stepData.qOutSum;
+    d.qDistalSum = 0.0;
+    d.qCapChargingSum = 0.0;
     d.flowBalance = m_stepData.flowBalance;
     d.qOut = m_stepData.qOut;
 
     for (const auto& [tag, bc] : m_wk)
     {
+      const auto qOutIt = m_stepData.qOut.find(tag);
+      const Real qOut = (qOutIt == m_stepData.qOut.end()) ? 0.0 : qOutIt->second;
+
+      d.qDistal[tag] = bc.qd;
+      d.qDistalSum += bc.qd;
+      d.qCapChargingSum += qOut - bc.qd;
       d.pc[tag] = bc.pc;
       d.pOut[tag] = bc.pout;
     }
@@ -1103,6 +1116,14 @@ namespace Rodin::Examples::Heart
       << "CoronaryOutlet8Flux,"
       << "CoronaryOutlet9Flux,"
       << "CoronaryOutletFluxTotal,"
+      << "CoronaryOutlet4DistalFlux,"
+      << "CoronaryOutlet5DistalFlux,"
+      << "CoronaryOutlet6DistalFlux,"
+      << "CoronaryOutlet7DistalFlux,"
+      << "CoronaryOutlet8DistalFlux,"
+      << "CoronaryOutlet9DistalFlux,"
+      << "CoronaryDistalFluxTotal,"
+      << "CoronaryCapChargingFluxTotal,"
       << "CoronaryOutlet4CapPressure,"
       << "CoronaryOutlet5CapPressure,"
       << "CoronaryOutlet6CapPressure,"
@@ -1158,6 +1179,14 @@ namespace Rodin::Examples::Heart
       << get(d.qOut, 8) << ','
       << get(d.qOut, 9) << ','
       << d.qOutSum << ','
+      << get(d.qDistal, 4) << ','
+      << get(d.qDistal, 5) << ','
+      << get(d.qDistal, 6) << ','
+      << get(d.qDistal, 7) << ','
+      << get(d.qDistal, 8) << ','
+      << get(d.qDistal, 9) << ','
+      << d.qDistalSum << ','
+      << d.qCapChargingSum << ','
       << get(d.pc, 4) << ','
       << get(d.pc, 5) << ','
       << get(d.pc, 6) << ','
