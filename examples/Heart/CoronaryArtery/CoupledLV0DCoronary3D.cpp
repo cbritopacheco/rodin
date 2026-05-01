@@ -74,7 +74,7 @@ namespace Rodin::Examples::Heart
   CoupledLV0DCoronary3D::CoupledLV0DCoronary3D(
       const Context::MPI& context, const Config& cfg)
     : m_cfg(cfg),
-      m_input(makeInput()),
+      m_input(makeInput(m_cfg)),
       m_model(m_input),
       m_mesh(makeMesh(context, m_cfg)),
       m_xdmf(context.getCommunicator(), m_cfg.xdmfBasename),
@@ -82,8 +82,10 @@ namespace Rodin::Examples::Heart
       m_ph(std::integral_constant<size_t, 1>{}, m_mesh),
       m_u(m_uh),
       m_p(m_ph),
+      m_mu(m_ph),
       m_v(m_uh),
       m_q(m_ph),
+      m_r(m_ph),
       m_uOld(m_uh),
       m_pOld(m_ph),
       m_one(m_ph),
@@ -91,7 +93,9 @@ namespace Rodin::Examples::Heart
       m_flux(m_qFlux),
       m_flow(m_u, m_p, m_v, m_q),
       m_flowKSP(m_flow),
-      m_flowSolver(m_flowKSP)
+      m_flowSolver(m_flowKSP),
+      m_viscosityProjection(m_mu, m_r),
+      m_viscosityProjectionKSP(m_viscosityProjection)
   {
     auto cellCount = m_mesh.getCellCount();
     auto vertexCount = m_mesh.getVertexCount();
@@ -179,55 +183,58 @@ namespace Rodin::Examples::Heart
   }
 
   CoupledLV0DCoronary3D::Model::Input
-  CoupledLV0DCoronary3D::makeInput()
+  CoupledLV0DCoronary3D::makeInput(const Config& cfg)
   {
     Model::Input input;
 
-    input.rho = 1.0e3;
-    input.R0 = 2.36e-2;
-    input.d0 = 1.42e-2;
+    input.rho = cfg.lv.rho;
+    input.R0 = cfg.lv.R0;
+    input.d0 = cfg.lv.d0;
 
-    input.Es = 3.0e5;
-    input.mu = 70.0;
-    input.eta = 70.0;
-    input.alpha = 3.0;
-    input.k0 = 1.0e5;
-    input.sigma0 = 5.0e5;
+    input.Es = cfg.lv.Es;
+    input.mu = cfg.lv.mu;
+    input.eta = cfg.lv.eta;
+    input.alpha = cfg.lv.alpha;
+    input.k0 = cfg.lv.k0;
+    input.sigma0 = cfg.lv.sigma0;
 
-    input.Rp = 8.0e6;
-    input.Cp = 5.0e-9;
-    input.Rd = 1.0e8;
-    input.Cd = 1.0e-8;
+    input.Rp = cfg.lv.Rp;
+    input.Cp = cfg.lv.Cp;
+    input.Rd = cfg.lv.Rd;
+    input.Cd = cfg.lv.Cd;
 
-    input.Kat = 8.0e-7;
-    input.Kp  = 5.0e-10;
-    input.Kar = 1.3e-5;
+    input.Kat = cfg.lv.Kat;
+    input.Kp  = cfg.lv.Kp;
+    input.Kar = cfg.lv.Kar;
 
-    input.cavityCapacity = 5.0e-12;
+    input.cavityCapacity = cfg.lv.cavityCapacity;
 
-    input.localTolerance = 1e-12;
-    input.localMaxIterations = 50;
-    input.localDamping = 1.0;
-    input.absRegularization = 1e-14;
+    input.localTolerance = cfg.lv.localTolerance;
+    input.localMaxIterations = cfg.lv.localMaxIterations;
+    input.localDamping = cfg.lv.localDamping;
+    input.absRegularization = cfg.lv.absRegularization;
 
-    input.initFibDef = 0.0;
-    input.initActiveStiffness = 0.0;
-    input.initActiveStress = 0.0;
+    input.initFibDef = cfg.lv.initFibDef;
+    input.initActiveStiffness = cfg.lv.initActiveStiffness;
+    input.initActiveStress = cfg.lv.initActiveStress;
 
-    input.pSv = [](Real) { return 1.0e3; };
-    input.pAt = atrial_pressure;
-    input.u = periodic_activation;
+    input.pSv =
+      [p = cfg.lv.systemicVenousPressure](Real) { return p; };
+    input.pAt =
+      [p = cfg.atrialPressure](Real t) { return atrial_pressure(p, t); };
+    input.u =
+      [a = cfg.activation](Real t) { return periodic_activation(a, t); };
 
     {
       using PassiveEnergy = std::decay_t<decltype(input.passiveEnergy)>;
 
       typename PassiveEnergy::Parameters hp;
-      hp.mu1 = 0.0;
-      hp.mu2 = 0.0;
-      hp.C0 = 1.9e3;
-      hp.C1 = 1.1e-1;
-      hp.C2 = 1.9e3;
-      hp.C3 = 1.1e-1;
+      hp.mu1 = cfg.lv.passiveMu1;
+      hp.mu2 = cfg.lv.passiveMu2;
+      hp.C0 = cfg.lv.passiveC0;
+      hp.C1 = cfg.lv.passiveC1;
+      hp.C2 = cfg.lv.passiveC2;
+      hp.C3 = cfg.lv.passiveC3;
 
       input.passiveEnergy = PassiveEnergy(hp);
     }
@@ -247,26 +254,29 @@ namespace Rodin::Examples::Heart
   }
 
   void CoupledLV0DCoronary3D::updateRCRNonNew(
-      const Model& model, RCR& bc, Real Q, Real dt)
+      const Config& cfg, const Model& model, RCR& bc, Real Q, Real dt)
   {
     const auto& s = model.getState();
 
     const Real cap = bc.C / dt;
     const Real pcOld = bc.pc;
 
-    const Real radiusP = 0.004;
-    const Real lengthP = 0.015;
+    const auto& law = cfg.outletFlowLaw;
+    const auto& cy = cfg.viscosity;
 
-    const Real radiusD = 0.0004;
-    const Real lengthD = 0.002;
+    const Real radiusP = law.proximalRadius;
+    const Real lengthP = law.proximalLength;
 
-    auto flowLaw = [](Real dp, Real L, Real radius) -> std::pair<Real, Real>
+    const Real radiusD = law.distalRadius;
+    const Real lengthD = law.distalLength;
+
+    auto flowLaw = [&](Real dp, Real L, Real radius) -> std::pair<Real, Real>
     {
-      const Real mu0    = 0.04868;
-      const Real muInf  = 0.003605;
-      const Real lambda = 3.39;
-      const Real n      = 0.198;
-      const Real yasuda = 1.235;
+      const Real mu0    = cy.mu0;
+      const Real muInf  = cy.muInf;
+      const Real lambda = cy.lambda;
+      const Real n      = cy.n;
+      const Real yasuda = cy.yasuda;
       const Real delta  = mu0 - muInf;
 
       const Real sgn = (dp >= 0.0) ? 1.0 : -1.0;
@@ -276,7 +286,7 @@ namespace Rodin::Examples::Heart
         8.0 * mu0 * L /
         (std::numbers::pi_v<Real> * std::pow(radius, 4.0));
 
-      if (adp < 1e-12)
+      if (adp < law.pressureDropTolerance)
         return {dp / R0, 1.0 / R0};
 
       const Real tauW = radius * adp / (2.0 * L);
@@ -307,11 +317,16 @@ namespace Rodin::Examples::Heart
       };
 
       Math::RootFinding::NewtonRaphson<Real> rootFinder(
-        1e-12, 1e-10, 1e-12, 50);
+        law.shearAbsoluteTolerance,
+        law.shearRelativeTolerance,
+        law.shearStepTolerance,
+        law.shearMaxIterations);
 
-      Real gHi = std::max<Real>(tauW / muInf, 1e-8);
+      Real gHi = std::max<Real>(tauW / muInf, law.minShearRate);
 
-      for (int k = 0; k < 100 && tauMinusTauW(gHi).first < 0.0; ++k)
+      for (int k = 0;
+           k < law.maxBracketIterations && tauMinusTauW(gHi).first < 0.0;
+           ++k)
         gHi *= 2.0;
 
       if (tauMinusTauW(gHi).first < 0.0)
@@ -322,7 +337,7 @@ namespace Rodin::Examples::Heart
       }
 
       const auto gammaRoot =
-        rootFinder.solve(tauMinusTauW, 0.5 * gHi, 1e-12, gHi);
+        rootFinder.solve(tauMinusTauW, 0.5 * gHi, law.shearStepTolerance, gHi);
 
       if (!gammaRoot)
       {
@@ -347,7 +362,7 @@ namespace Rodin::Examples::Heart
 
       Math::RungeKutta::RK4 integrator;
 
-      constexpr int steps = 100;
+      const int steps = law.integralSteps;
       const Real h = gammaW / static_cast<Real>(steps);
 
       Real I = 0.0;
@@ -392,7 +407,7 @@ namespace Rodin::Examples::Heart
     auto solvePressureDropForFlow =
       [&](Real targetQ, Real L, Real radius, Real guess) -> Real
       {
-        if (std::abs(targetQ) < 1e-16)
+        if (std::abs(targetQ) < law.zeroFlowTolerance)
           return 0.0;
 
         const Real sgn  = (targetQ >= 0.0) ? 1.0 : -1.0;
@@ -404,9 +419,11 @@ namespace Rodin::Examples::Heart
           return {sgn * q - qAbs, dq};
         };
 
-        Real hi = std::max<Real>(std::abs(guess), 1.0);
+        Real hi = std::max<Real>(std::abs(guess), law.pressureDropBracketMin);
 
-        for (int k = 0; k < 100 && F(hi).first < 0.0; ++k)
+        for (int k = 0;
+             k < law.maxBracketIterations && F(hi).first < 0.0;
+             ++k)
           hi *= 2.0;
 
         if (F(hi).first < 0.0)
@@ -417,7 +434,10 @@ namespace Rodin::Examples::Heart
         }
 
         Math::RootFinding::NewtonRaphson<Real> solver(
-          1e-10, 1e-9, 1e-12, 50);
+          law.flowAbsoluteTolerance,
+          law.flowRelativeTolerance,
+          law.flowStepTolerance,
+          law.flowMaxIterations);
 
         const auto root =
           solver.solve(F, std::min(std::abs(guess), hi), 0.0, hi);
@@ -444,15 +464,22 @@ namespace Rodin::Examples::Heart
     };
 
     Math::RootFinding::NewtonRaphson<Real> solver(
-      1e-10, 1e-9, 1e-12, 50);
+      law.flowAbsoluteTolerance,
+      law.flowRelativeTolerance,
+      law.flowStepTolerance,
+      law.flowMaxIterations);
 
-    Real span = std::max<Real>(std::abs(Q) / cap + 1000.0, 1000.0);
+    Real span =
+      std::max<Real>(
+          std::abs(Q) / cap + law.distalPressureBracketPad,
+          law.distalPressureBracketPad);
 
     Real lo = std::min(pcOld, s.pv) - span;
     Real hi = std::max(pcOld, s.pv) + span;
 
     for (int k = 0;
-         k < 100 && distalResidual(lo).first * distalResidual(hi).first > 0.0;
+         k < law.maxBracketIterations
+         && distalResidual(lo).first * distalResidual(hi).first > 0.0;
          ++k)
     {
       span *= 2.0;
@@ -491,67 +518,61 @@ namespace Rodin::Examples::Heart
   }
 
   CoupledLV0DCoronary3D::Real
-  CoupledLV0DCoronary3D::periodic_activation(Real t)
+  CoupledLV0DCoronary3D::periodic_activation(const Activation& cfg, Real t)
   {
-    const Real T = 0.85;
+    const Real T = cfg.period;
     const Real tau = t - T * std::floor(t / T);
 
-    if (tau < 0.13)  return 0.0;
-    if (tau < 0.141) return 35.0 * ((tau - 0.13) / 0.011);
-    if (tau < 0.281) return 35.0;
-    if (tau < 0.361) return 35.0 - 47.0 * ((tau - 0.281) / 0.08);
-    if (tau < 0.45)  return -12.0;
+    if (tau < cfg.tRampStart)  return 0.0;
+    if (tau < cfg.tRampEnd)
+      return cfg.positiveValue
+        * ((tau - cfg.tRampStart) / (cfg.tRampEnd - cfg.tRampStart));
+    if (tau < cfg.tPlateauEnd) return cfg.positiveValue;
+    if (tau < cfg.tRelaxEnd)
+      return cfg.positiveValue
+        + (cfg.negativeValue - cfg.positiveValue)
+        * ((tau - cfg.tPlateauEnd) / (cfg.tRelaxEnd - cfg.tPlateauEnd));
+    if (tau < cfg.tNegativeEnd) return cfg.negativeValue;
 
     return 0.0;
   }
 
   CoupledLV0DCoronary3D::Real
-  CoupledLV0DCoronary3D::atrial_pressure(Real t)
+  CoupledLV0DCoronary3D::atrial_pressure(const AtrialPressure& cfg, Real t)
   {
-    const Real T = 0.85;
+    const Real T = cfg.period;
     const Real tau = t - T * std::floor(t / T);
 
-    const Real minValue = 500.0;
-    const Real maxValue = 1000.0;
-    const Real secondThreshold = 1250.0;
-
-    const Real t1 = 0.02;
-    const Real t2 = 0.15;
-    const Real t3 = 0.17;
-    const Real t4 = 0.56;
-    const Real t5 = 0.62;
-    const Real t6 = 0.85;
-
     Real alpha = 0.0;
-    Real value = minValue;
+    Real value = cfg.minValue;
 
-    if (tau < t1)
+    if (tau < cfg.t1)
     {
-      alpha = -(tau - t1) / t1;
-      value = alpha * minValue + (1.0 - alpha) * maxValue;
+      alpha = -(tau - cfg.t1) / cfg.t1;
+      value = alpha * cfg.minValue + (1.0 - alpha) * cfg.maxValue;
     }
-    else if (tau < t2)
+    else if (tau < cfg.t2)
     {
-      value = maxValue;
+      value = cfg.maxValue;
     }
-    else if (tau < t3)
+    else if (tau < cfg.t3)
     {
-      alpha = -(tau - t3) / (t3 - t2);
-      value = alpha * maxValue + (1.0 - alpha) * minValue;
+      alpha = -(tau - cfg.t3) / (cfg.t3 - cfg.t2);
+      value = alpha * cfg.maxValue + (1.0 - alpha) * cfg.minValue;
     }
-    else if (tau < t4)
+    else if (tau < cfg.t4)
     {
-      alpha = -(tau - t4) / (t4 - t3);
-      value = alpha * minValue + (1.0 - alpha) * secondThreshold;
+      alpha = -(tau - cfg.t4) / (cfg.t4 - cfg.t3);
+      value = alpha * cfg.minValue + (1.0 - alpha) * cfg.secondThreshold;
     }
-    else if (tau < t5)
+    else if (tau < cfg.t5)
     {
-      value = secondThreshold;
+      value = cfg.secondThreshold;
     }
-    else if (tau < t6)
+    else if (tau < cfg.t6)
     {
-      alpha = -(tau - t6) / (t6 - t5);
-      value = alpha * secondThreshold + (1.0 - alpha) * minValue;
+      alpha = -(tau - cfg.t6) / (cfg.t6 - cfg.t5);
+      value = alpha * cfg.secondThreshold + (1.0 - alpha) * cfg.minValue;
     }
 
     return value;
@@ -570,19 +591,19 @@ namespace Rodin::Examples::Heart
 
   void CoupledLV0DCoronary3D::setupModel()
   {
-    m_model.setMaxIterations(200)
-           .setAbsoluteTolerance(1e-8)
-           .setRelativeTolerance(1e-8)
-           .setStepTolerance(1e-10)
-           .setDampingFactor(1.0);
+    m_model.setMaxIterations(m_cfg.lv.maxIterations)
+           .setAbsoluteTolerance(m_cfg.lv.absoluteTolerance)
+           .setRelativeTolerance(m_cfg.lv.relativeTolerance)
+           .setStepTolerance(m_cfg.lv.stepTolerance)
+           .setDampingFactor(m_cfg.lv.dampingFactor);
 
     Model::State s0;
     s0.t = 0.0;
-    s0.y = 0.0;
-    s0.v = 0.0;
-    s0.pv = m_input.pAt(0.0) - 100.0;
-    s0.par = 11000.0;
-    s0.pd = 10000.0;
+    s0.y = m_cfg.lv.initialY;
+    s0.v = m_cfg.lv.initialV;
+    s0.pv = m_input.pAt(0.0) + m_cfg.lv.initialPvOffset;
+    s0.par = m_cfg.lv.initialPar;
+    s0.pd = m_cfg.lv.initialPd;
     s0.ec = m_input.initFibDef;
     s0.gamma = std::sqrt(std::max<Real>(m_input.initActiveStiffness, 0.0));
     s0.beta = (s0.gamma > 0.0) ? (m_input.initActiveStress / s0.gamma) : 0.0;
@@ -602,13 +623,16 @@ namespace Rodin::Examples::Heart
 
     m_u.setName("u");
     m_p.setName("p");
+    m_mu.setName("viscosity");
 
     m_uOld = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
     m_pOld = 0.0;
     m_one = 1.0;
+    m_mu.getSolution() = 0.0;
 
     m_xdmf.add("velocity", m_u.getSolution());
     m_xdmf.add("pressure", m_p.getSolution());
+    m_xdmf.add("viscosity", m_mu.getSolution());
 
     m_wk.clear();
     for (const Attribute tag : m_cfg.outlets)
@@ -701,6 +725,12 @@ namespace Rodin::Examples::Heart
     const Real pin = s.par;
 
     const auto normal = BoundaryNormal(m_mesh);
+    const Attribute outlet0 = m_cfg.outlets[0];
+    const Attribute outlet1 = m_cfg.outlets[1];
+    const Attribute outlet2 = m_cfg.outlets[2];
+    const Attribute outlet3 = m_cfg.outlets[3];
+    const Attribute outlet4 = m_cfg.outlets[4];
+    const Attribute outlet5 = m_cfg.outlets[5];
 
     const auto& uState = m_u.getSolution();
     const auto& pState = m_p.getSolution();
@@ -746,12 +776,13 @@ namespace Rodin::Examples::Heart
     const auto symLag =
       0.5 * (gradLag + Transpose(gradLag));
 
-    const Real gammaReg = 1.0e-3;
-    const Real mu0      = 0.04868;
-    const Real muInf    = 0.003605;
-    const Real lambda   = 3.39;
-    const Real nCY      = 0.198;
-    const Real yasuda   = 1.235;
+    const auto& cy = m_cfg.viscosity;
+    const Real gammaReg = cy.gammaRegularization;
+    const Real mu0      = cy.mu0;
+    const Real muInf    = cy.muInf;
+    const Real lambda   = cy.lambda;
+    const Real nCY      = cy.n;
+    const Real yasuda   = cy.yasuda;
     const Real deltaMu  = mu0 - muInf;
 
     const auto gamma =
@@ -801,12 +832,12 @@ namespace Rodin::Examples::Heart
         + Integral(Div(m_u), m_q)
         + m_cfg.eps * Integral(m_p, m_q)
 
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(4)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(5)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(6)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(7)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(8)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(9)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(outlet0)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(outlet1)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(outlet2)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(outlet3)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(outlet4)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(outlet5)
 
           /* Residual */
         + (m_cfg.rho / m_cfg.dt) * Integral(uState, m_v)
@@ -824,19 +855,19 @@ namespace Rodin::Examples::Heart
 
         + BoundaryIntegral(pin * Dot(m_v, normal)).over(m_cfg.inlet)
 
-        + BoundaryIntegral(m_wk.at(4).pout * Dot(m_v, normal)).over(4)
-        + BoundaryIntegral(m_wk.at(5).pout * Dot(m_v, normal)).over(5)
-        + BoundaryIntegral(m_wk.at(6).pout * Dot(m_v, normal)).over(6)
-        + BoundaryIntegral(m_wk.at(7).pout * Dot(m_v, normal)).over(7)
-        + BoundaryIntegral(m_wk.at(8).pout * Dot(m_v, normal)).over(8)
-        + BoundaryIntegral(m_wk.at(9).pout * Dot(m_v, normal)).over(9)
+        + BoundaryIntegral(m_wk.at(outlet0).pout * Dot(m_v, normal)).over(outlet0)
+        + BoundaryIntegral(m_wk.at(outlet1).pout * Dot(m_v, normal)).over(outlet1)
+        + BoundaryIntegral(m_wk.at(outlet2).pout * Dot(m_v, normal)).over(outlet2)
+        + BoundaryIntegral(m_wk.at(outlet3).pout * Dot(m_v, normal)).over(outlet3)
+        + BoundaryIntegral(m_wk.at(outlet4).pout * Dot(m_v, normal)).over(outlet4)
+        + BoundaryIntegral(m_wk.at(outlet5).pout * Dot(m_v, normal)).over(outlet5)
 
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(4)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(5)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(6)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(7)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(8)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(9)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(outlet0)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(outlet1)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(outlet2)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(outlet3)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(outlet4)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(outlet5)
 
         + DirichletBC(m_u, -uState).on(m_cfg.wall);
     }
@@ -856,26 +887,26 @@ namespace Rodin::Examples::Heart
         + Integral(Div(m_u), m_q)
         + m_cfg.eps * Integral(m_p, m_q)
 
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(4)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(5)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(6)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(7)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(8)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(9)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(outlet0)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(outlet1)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(outlet2)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(outlet3)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(outlet4)
+        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(outlet5)
 
           /* Right-hand side terms */
         - (m_cfg.rho / m_cfg.dt) * Integral(m_uOld, m_v)
 
         + BoundaryIntegral(pin * Dot(m_v, normal)).over(m_cfg.inlet)
 
-        + BoundaryIntegral(m_wk.at(4).pout * Dot(m_v, normal)).over(4)
-        + BoundaryIntegral(m_wk.at(5).pout * Dot(m_v, normal)).over(5)
-        + BoundaryIntegral(m_wk.at(6).pout * Dot(m_v, normal)).over(6)
-        + BoundaryIntegral(m_wk.at(7).pout * Dot(m_v, normal)).over(7)
-        + BoundaryIntegral(m_wk.at(8).pout * Dot(m_v, normal)).over(8)
-        + BoundaryIntegral(m_wk.at(9).pout * Dot(m_v, normal)).over(9)
+        + BoundaryIntegral(m_wk.at(outlet0).pout * Dot(m_v, normal)).over(outlet0)
+        + BoundaryIntegral(m_wk.at(outlet1).pout * Dot(m_v, normal)).over(outlet1)
+        + BoundaryIntegral(m_wk.at(outlet2).pout * Dot(m_v, normal)).over(outlet2)
+        + BoundaryIntegral(m_wk.at(outlet3).pout * Dot(m_v, normal)).over(outlet3)
+        + BoundaryIntegral(m_wk.at(outlet4).pout * Dot(m_v, normal)).over(outlet4)
+        + BoundaryIntegral(m_wk.at(outlet5).pout * Dot(m_v, normal)).over(outlet5)
 
-        + DirichletBC(m_u, Zero(3)).on(m_cfg.wall);
+        + DirichletBC(m_u, Zero(m_mesh.getSpaceDimension())).on(m_cfg.wall);
     }
 
     m_stepTiming.setup3DForm = secondsSince(setup3DStart);
@@ -992,6 +1023,22 @@ namespace Rodin::Examples::Heart
 
   void CoupledLV0DCoronary3D::writeOutputs()
   {
+    const auto& cy = m_cfg.viscosity;
+    const auto symU =
+      0.5 * (Jacobian(m_u.getSolution()) + Transpose(Jacobian(m_u.getSolution())));
+    const auto gamma =
+      Sqrt(cy.gammaRegularization * cy.gammaRegularization + 2.0 * Dot(symU, symU));
+    const auto carreauBase =
+      1.0 + Pow(cy.lambda * gamma, cy.yasuda);
+    const auto mu =
+      cy.muInf + (cy.mu0 - cy.muInf)
+      * Pow(carreauBase, (cy.n - 1.0) / cy.yasuda);
+
+    m_viscosityProjection =
+      Integral(m_mu, m_r)
+      - Integral(mu, m_r);
+    m_viscosityProjection.solve(m_viscosityProjectionKSP);
+
     m_xdmf.write(m_model.getState().t - m_cfg.dt).flush();
   }
 
@@ -1232,7 +1279,7 @@ namespace Rodin::Examples::Heart
 
       const auto outletRCRStart = Clock::now();
       for (const Attribute tag : m_cfg.outlets)
-        updateRCRNonNew(m_model, m_wk[tag], m_stepData.qOut.at(tag), m_cfg.dt);
+        updateRCRNonNew(m_cfg, m_model, m_wk[tag], m_stepData.qOut.at(tag), m_cfg.dt);
       m_stepTiming.outletRCR = secondsSince(outletRCRStart);
 
       const auto csvStart = Clock::now();

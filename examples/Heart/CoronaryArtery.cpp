@@ -1,6 +1,6 @@
 /**
  * @file CoronaryArtery.cpp
- * @brief Driver for the coupled LV-0D / coronary 3D Newtonian flow example.
+ * @brief Driver for the coupled LV-0D / coronary 3D flow example.
  *
  * This executable configures and runs `CoupledLV0DCoronary3D` with default
  * paths for the example mesh and output files:
@@ -29,6 +29,16 @@
  * `eps = 1e-12`, `meshScale = 1e-3`, wall attribute `2`, inlet attribute
  * `3`, outlet attributes `4..9`, and default RCR parameters
  * `(Rp, C, Rd, pv0, pd0, par0) = (5e8, 5e-9, 1e9, 400, 10500, 11000)`.
+ * The default Carreau-Yasuda blood model is
+ * `(mu0, muInf, lambda, n, yasuda, gammaReg) =
+ * (0.04868, 0.003605, 3.39, 0.198, 1.235, 1e-3)`.
+ * The non-Newtonian outlet update uses proximal vessel
+ * `(radius, length) = (0.004, 0.015)` and distal vessel
+ * `(radius, length) = (0.0004, 0.002)`, with root-solve tolerances and
+ * bracketing limits stored in `Config::outletFlowLaw`.
+ * The 0D LV model defaults, initial conditions, activation waveform, and
+ * atrial pressure waveform are stored in `Config::lv`, `Config::activation`,
+ * and `Config::atrialPressure`.
  *
  * VECLIB_MAXIMUM_THREADS=1 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
  * > mpirun -n 8 ./examples/Heart/CoronaryArtery \
