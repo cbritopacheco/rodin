@@ -33,10 +33,24 @@ namespace Rodin::Heart::CCMLC2014::Model
   enum Variable : size_t
   {
     RadialDisplacement = 0, ///< @f$ y_{n+1} @f$ — radial displacement.
+    RadialVelocity,         ///< @f$ v_{n+1} @f$ — radial velocity.
     VentricularPressure,    ///< @f$ p_v^{n+1} @f$ — left-ventricular pressure.
     ArterialPressure,       ///< @f$ p_{ar}^{n+1} @f$ — proximal arterial pressure.
     DistalPressure,         ///< @f$ p_d^{n+1} @f$ — distal pressure.
+    FiberDeformation,       ///< @f$ e_c^{n+1} @f$ — contractile deformation.
+    ActiveStiffness,        ///< @f$ k_c^{n+1} = \gamma^2 @f$.
+    ActiveStress,           ///< @f$ \tau_c^{n+1} = \gamma\beta @f$.
+    LoadDependentRelaxation, ///< @f$ w^{n+1} @f$.
     NumberOfVariables       ///< Total number of unknowns in the coupled system.
+  };
+
+  /**
+   * @brief Implicit time-integration scheme for the 0D state equations.
+   */
+  enum class TimeScheme
+  {
+    BackwardEuler, ///< First-order L-stable backward Euler.
+    BDF2           ///< Second-order stiffly-damped BDF2 with BE startup.
   };
 
   /**
@@ -101,6 +115,7 @@ namespace Rodin::Heart::CCMLC2014::Model
     size_t localMaxIterations = 50;         ///< Maximum iterations for local active solve.
     Scalar localDamping = Scalar(1.0);      ///< Damping factor for local active Newton updates.
     Scalar absRegularization = Scalar(1e-14); ///< Regularization scalar for absolute values.
+    TimeScheme timeScheme = TimeScheme::BDF2; ///< Implicit time discretization for dynamic states.
 
     Scalar initFibDef = 0.0;          ///< Initial fiber deformation @f$ e_c @f$.
     Scalar initActiveStiffness = 0.0; ///< Initial active stiffness-like value @f$ k_c @f$.
@@ -111,6 +126,9 @@ namespace Rodin::Heart::CCMLC2014::Model
 
     std::function<Scalar(Scalar)> m0 =
       [](Scalar) { return Scalar(1); }; ///< Relaxation target @f$ m_0(e_c) @f$.
+
+    std::function<Scalar(Scalar)> dm0 =
+      [](Scalar) { return Scalar(0); }; ///< Derivative @f$ m_0'(e_c) @f$.
 
     std::function<Scalar(Scalar)> pAt =
       [](Scalar) { return Scalar(0); }; ///< Atrial pressure boundary condition.
@@ -195,11 +213,17 @@ namespace Rodin::Heart::CCMLC2014::Model
     Scalar dt = 0.0;   ///< Time-step size.
 
     Scalar y = 0.0;   ///< Candidate @f$ y_{n+1} @f$.
+    Scalar v = 0.0;   ///< Candidate @f$ v_{n+1} @f$.
     Scalar pv = 0.0;  ///< Candidate @f$ p_v^{n+1} @f$.
     Scalar par = 0.0; ///< Candidate @f$ p_{ar}^{n+1} @f$.
     Scalar pd = 0.0;  ///< Candidate @f$ p_d^{n+1} @f$.
+    Scalar ec = 0.0;  ///< Candidate @f$ e_c^{n+1} @f$.
+    Scalar kc = 0.0;  ///< Candidate @f$ k_c^{n+1} @f$.
+    Scalar tauc = 0.0; ///< Candidate @f$ \tau_c^{n+1} @f$.
+    Scalar w = 1.0;   ///< Candidate @f$ w^{n+1} @f$.
 
     Scalar yPrev = 0.0;   ///< @f$ y_n @f$.
+    Scalar vPrev = 0.0;   ///< @f$ v_n @f$.
     Scalar pvPrev = 0.0;  ///< @f$ p_v^n @f$.
     Scalar parPrev = 0.0; ///< @f$ p_{ar}^n @f$.
     Scalar pdPrev = 0.0;  ///< @f$ p_d^n @f$.
@@ -221,6 +245,7 @@ namespace Rodin::Heart::CCMLC2014::Model
     Scalar diffStressPassive = 0.0;  ///< Derivative of passive stress wrt displacement.
     Scalar stressViscous = 0.0;      ///< Viscous stress contribution.
     Scalar diffStressViscous = 0.0;  ///< Derivative of viscous stress wrt displacement.
+    Scalar diffStressViscousWrtVelocity = 0.0; ///< Derivative of viscous stress wrt velocity.
 
     Scalar pAtCur = 0.0;  ///< Atrial pressure at @f$ t_{n+1} @f$.
     Scalar pAtPrev = 0.0; ///< Atrial pressure at @f$ t_n @f$.

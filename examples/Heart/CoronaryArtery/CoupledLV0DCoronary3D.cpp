@@ -265,6 +265,16 @@ namespace Rodin::Examples::Heart
         const Real s = (ec - lowEc) / (highEc - lowEc);
         return (1.0 - s) * low + s * high;
       };
+    input.dm0 =
+      [low = cfg.lv.relaxationM0Low,
+       high = cfg.lv.relaxationM0High,
+       lowEc = cfg.lv.relaxationM0LowEc,
+       highEc = cfg.lv.relaxationM0HighEc](Real ec)
+      {
+        if (highEc <= lowEc || ec <= lowEc || ec >= highEc)
+          return 0.0;
+        return (high - low) / (highEc - lowEc);
+      };
 
     {
       using PassiveEnergy = std::decay_t<decltype(input.passiveEnergy)>;

@@ -62,6 +62,57 @@ namespace
     return cardiacInput;
   }
 
+  Model::DenseVector makeCandidateState(Real scale = 1.0)
+  {
+    Model::DenseVector candidateState(CCMLC2014Vars::NumberOfVariables);
+    candidateState.setZero();
+    candidateState[CCMLC2014Vars::RadialDisplacement] = scale * 8e-5;
+    candidateState[CCMLC2014Vars::RadialVelocity] = scale * 1.5e-3;
+    candidateState[CCMLC2014Vars::VentricularPressure] = scale * 1.0e4;
+    candidateState[CCMLC2014Vars::ArterialPressure] = scale * 9.0e3;
+    candidateState[CCMLC2014Vars::DistalPressure] = scale * 8.0e3;
+    candidateState[CCMLC2014Vars::FiberDeformation] = scale * 0.012;
+    candidateState[CCMLC2014Vars::ActiveStiffness] = scale * 0.045;
+    candidateState[CCMLC2014Vars::ActiveStress] = scale * 0.065;
+    candidateState[CCMLC2014Vars::LoadDependentRelaxation] = 1.2;
+    return candidateState;
+  }
+
+  Model::State makeCurrentState(Real scale = 1.0)
+  {
+    Model::State currentState;
+    currentState.t = 0.1;
+    currentState.y = scale * 7e-5;
+    currentState.v = scale * 1.0e-3;
+    currentState.pv = scale * 9.8e3;
+    currentState.par = scale * 8.8e3;
+    currentState.pd = scale * 7.9e3;
+    currentState.ec = scale * 0.01;
+    currentState.kc = scale * 0.04;
+    currentState.tauc = scale * 0.06;
+    currentState.gamma = std::sqrt(std::max<Real>(currentState.kc, 0.0));
+    currentState.beta =
+      (currentState.gamma > 0.0) ? currentState.tauc / currentState.gamma : 0.0;
+    currentState.w = 1.0;
+    return currentState;
+  }
+
+  Model::State makePreviousState(const Model::State& currentState, Real scale = 1.0)
+  {
+    Model::State previousState = currentState;
+    previousState.t = currentState.t - 1e-3;
+    previousState.y = scale * 6e-5;
+    previousState.v = scale * 8e-4;
+    previousState.ec = scale * 0.009;
+    previousState.kc = scale * 0.05;
+    previousState.tauc = scale * 0.07;
+    previousState.gamma = std::sqrt(std::max<Real>(previousState.kc, 0.0));
+    previousState.beta =
+      (previousState.gamma > 0.0) ? previousState.tauc / previousState.gamma : 0.0;
+    previousState.w = 0.98;
+    return previousState;
+  }
+
   /**
    * @brief Computes Jacobian agreement error against a central finite-difference approximation.
    *
@@ -232,28 +283,18 @@ TEST(CCMLC2014Test, LoadDependentRelaxationAcceleratesNegativeActivationDecay)
   auto relaxedInput = baseInput;
   relaxedInput.m0 = [](Real) { return 1.6; };
 
-  Model::DenseVector candidateState(CCMLC2014Vars::NumberOfVariables);
-  candidateState[CCMLC2014Vars::RadialDisplacement] = 8e-5;
-  candidateState[CCMLC2014Vars::VentricularPressure] = 1.0e4;
-  candidateState[CCMLC2014Vars::ArterialPressure] = 9.0e3;
-  candidateState[CCMLC2014Vars::DistalPressure] = 8.0e3;
+  const Real dt = 1e-3;
+  Model::DenseVector baseCandidateState = makeCandidateState();
+  baseCandidateState[CCMLC2014Vars::LoadDependentRelaxation] = 1.0;
 
-  Model::State currentState;
-  currentState.t = 0.1;
-  currentState.y = 7e-5;
-  currentState.pv = 9.8e3;
-  currentState.par = 8.8e3;
-  currentState.pd = 7.9e3;
-  currentState.ec = 0.01;
-  currentState.gamma = 0.4;
-  currentState.beta = 0.3;
+  Model::DenseVector relaxedCandidateState = baseCandidateState;
+  relaxedCandidateState[CCMLC2014Vars::LoadDependentRelaxation] =
+    (1.0 + (dt / relaxedInput.alphaR) * 1.6) / (1.0 + dt / relaxedInput.alphaR);
+
+  Model::State currentState = makeCurrentState();
   currentState.w = 1.0;
-  currentState.kc = currentState.gamma * currentState.gamma;
-  currentState.tauc = currentState.gamma * currentState.beta;
-
-  Model::State previousState = currentState;
-  previousState.t = 0.099;
-  previousState.y = 6e-5;
+  Model::State previousState = makePreviousState(currentState);
+  previousState.w = 1.0;
 
   using InputType = Model::Input;
   Heart::CCMLC2014::Numerics::DynamicSystem<PassiveLaw, InputType>
@@ -263,42 +304,30 @@ TEST(CCMLC2014Test, LoadDependentRelaxationAcceleratesNegativeActivationDecay)
 
   Model::EvalData baseData;
   Model::EvalData relaxedData;
-  const Real dt = 1e-3;
   baseSystem.buildEvalData(
-      candidateState, currentState, previousState, currentState.t + dt, dt, baseData);
+      baseCandidateState, currentState, previousState, currentState.t + dt, dt, baseData);
   relaxedSystem.buildEvalData(
-      candidateState, currentState, previousState, currentState.t + dt, dt, relaxedData);
+      relaxedCandidateState, currentState, previousState, currentState.t + dt, dt, relaxedData);
+
+  Model::DenseVector baseResidual;
+  Model::DenseVector relaxedResidual;
+  baseSystem.evaluateResidual(baseData, baseResidual);
+  relaxedSystem.evaluateResidual(relaxedData, relaxedResidual);
 
   EXPECT_GT(relaxedData.active.wCurrent, baseData.active.wCurrent);
   EXPECT_GT(relaxedData.active.relaxationDrive, baseData.active.relaxationDrive);
-  EXPECT_LT(relaxedData.active.gammaCurrent, baseData.active.gammaCurrent);
+  EXPECT_GT(
+      relaxedResidual[CCMLC2014Vars::ActiveStiffness],
+      baseResidual[CCMLC2014Vars::ActiveStiffness]);
 }
 
 TEST(CCMLC2014Test, DynamicJacobianMatchesFiniteDifference)
 {
   auto cardiacInput = makeGenericCardiacInput();
 
-  Model::DenseVector candidateState(CCMLC2014Vars::NumberOfVariables);
-  candidateState[CCMLC2014Vars::RadialDisplacement] = 8e-5;
-  candidateState[CCMLC2014Vars::VentricularPressure] = 1.0e4;
-  candidateState[CCMLC2014Vars::ArterialPressure] = 9.0e3;
-  candidateState[CCMLC2014Vars::DistalPressure] = 8.0e3;
-
-  Model::State currentState;
-  currentState.t = 0.1;
-  currentState.y = 7e-5;
-  currentState.pv = 9.8e3;
-  currentState.par = 8.8e3;
-  currentState.pd = 7.9e3;
-  currentState.ec = 0.01;
-  currentState.gamma = 0.2;
-  currentState.beta = 0.3;
-  currentState.kc = currentState.gamma * currentState.gamma;
-  currentState.tauc = currentState.gamma * currentState.beta;
-
-  Model::State previousState = currentState;
-  previousState.t = 0.099;
-  previousState.y = 6e-5;
+  Model::DenseVector candidateState = makeCandidateState();
+  Model::State currentState = makeCurrentState();
+  Model::State previousState = makePreviousState(currentState);
 
   const Real dt = 1e-3;
   const Real relativeError = computeDynamicJacobianRelativeError(
@@ -310,27 +339,9 @@ TEST(CCMLC2014Test, DynamicJacobianMatchesFiniteDifferenceAcrossPerturbationScal
 {
   auto cardiacInput = makeGenericCardiacInput();
 
-  Model::DenseVector candidateState(CCMLC2014Vars::NumberOfVariables);
-  candidateState[CCMLC2014Vars::RadialDisplacement] = 8e-5;
-  candidateState[CCMLC2014Vars::VentricularPressure] = 1.0e4;
-  candidateState[CCMLC2014Vars::ArterialPressure] = 9.0e3;
-  candidateState[CCMLC2014Vars::DistalPressure] = 8.0e3;
-
-  Model::State currentState;
-  currentState.t = 0.1;
-  currentState.y = 7e-5;
-  currentState.pv = 9.8e3;
-  currentState.par = 8.8e3;
-  currentState.pd = 7.9e3;
-  currentState.ec = 0.01;
-  currentState.gamma = 0.2;
-  currentState.beta = 0.3;
-  currentState.kc = currentState.gamma * currentState.gamma;
-  currentState.tauc = currentState.gamma * currentState.beta;
-
-  Model::State previousState = currentState;
-  previousState.t = 0.099;
-  previousState.y = 6e-5;
+  Model::DenseVector candidateState = makeCandidateState();
+  Model::State currentState = makeCurrentState();
+  Model::State previousState = makePreviousState(currentState);
 
   const Real dt = 1e-3;
   const std::array<Real, 3> perturbations{{1e-6, 1e-7, 1e-8}};
@@ -354,27 +365,9 @@ TEST(CCMLC2014Test, DynamicJacobianMatchesFiniteDifferenceAcrossDataScales)
   const std::array<Real, 3> pressureScales{{0.2, 1.0, 5.0}};
   for (const Real pressureScale : pressureScales)
   {
-    Model::DenseVector candidateState(CCMLC2014Vars::NumberOfVariables);
-    candidateState[CCMLC2014Vars::RadialDisplacement] = pressureScale * 8e-5;
-    candidateState[CCMLC2014Vars::VentricularPressure] = pressureScale * 1.0e4;
-    candidateState[CCMLC2014Vars::ArterialPressure] = pressureScale * 9.0e3;
-    candidateState[CCMLC2014Vars::DistalPressure] = pressureScale * 8.0e3;
-
-    Model::State currentState;
-    currentState.t = 0.1;
-    currentState.y = pressureScale * 7e-5;
-    currentState.pv = pressureScale * 9.8e3;
-    currentState.par = pressureScale * 8.8e3;
-    currentState.pd = pressureScale * 7.9e3;
-    currentState.ec = pressureScale * 0.01;
-    currentState.gamma = pressureScale * 0.2;
-    currentState.beta = pressureScale * 0.3;
-    currentState.kc = currentState.gamma * currentState.gamma;
-    currentState.tauc = currentState.gamma * currentState.beta;
-
-    Model::State previousState = currentState;
-    previousState.t = 0.099;
-    previousState.y = pressureScale * 6e-5;
+    Model::DenseVector candidateState = makeCandidateState(pressureScale);
+    Model::State currentState = makeCurrentState(pressureScale);
+    Model::State previousState = makePreviousState(currentState, pressureScale);
 
     const Real relativeError = computeDynamicJacobianRelativeError(
         cardiacInput,

@@ -40,6 +40,18 @@ static Real load_dependent_relaxation_m0(Real ec)
   return (1.0 - s) * low_value + s * high_value;
 }
 
+static Real load_dependent_relaxation_dm0(Real ec)
+{
+  const Real low_ec = 0.0;
+  const Real high_ec = 2.0;
+  const Real low_value = 1.6;
+  const Real high_value = 1.0;
+
+  if (ec <= low_ec || ec >= high_ec)
+    return 0.0;
+  return (high_value - low_value) / (high_ec - low_ec);
+}
+
 static Real atrial_pressure(Real t)
 {
   const Real T = 0.85;
@@ -141,6 +153,7 @@ int main()
   in.pAt = atrial_pressure;
   in.u = periodic_activation;
   in.m0 = load_dependent_relaxation_m0;
+  in.dm0 = load_dependent_relaxation_dm0;
 
   {
     using PassiveEnergy = std::decay_t<decltype(in.passiveEnergy)>;
