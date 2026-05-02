@@ -30,8 +30,7 @@ AllGeometriesAndDegrees/H1LinearElasticity2D.SineSolution/Quadrilateral_K2:\
 AllGeometriesAndDegrees/H1LinearElasticity3D.PolynomialSolution/Tetrahedron_K2")
 
 set(_RODIN_MPI_H1_LINEAR_ELASTICITY_VERY_SLOW_FILTER
-  "AllGeometriesAndDegrees/H1LinearElasticity3D.PolynomialSolution/Hexahedron_K4:\
-AllGeometriesAndDegrees/H1LinearElasticity3D.PolynomialSolution/Hexahedron_K6")
+  "AllGeometriesAndDegrees/H1LinearElasticity3D.PolynomialSolution/Hexahedron_K4")
 
 set(_RODIN_MPI_H1_LINEAR_ELASTICITY_SLOW_FILTER
   "-${_RODIN_MPI_H1_LINEAR_ELASTICITY_FAST_FILTER}:\
