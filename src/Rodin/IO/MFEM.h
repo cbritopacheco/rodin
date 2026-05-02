@@ -9,10 +9,14 @@
 
 #include <boost/bimap.hpp>
 #include <boost/spirit/home/x3.hpp>
+#include <algorithm>
+#include <array>
+#include <map>
 #include <ostream>
 #include <iomanip>
 #include <optional>
 #include <limits>
+#include <vector>
 
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Types.h"
@@ -230,6 +234,422 @@ namespace Rodin::IO::MFEM
     size_t vdim;         ///< Vector dimension of the grid function
     Ordering ordering;   ///< Data ordering (Nodes or VectorDimension)
   };
+
+  struct FaceOrderEntry
+  {
+    Index index;
+    std::vector<Index> vertices;
+  };
+
+  inline
+  std::array<Index, 2> getSortedEdgeKey(Index v0, Index v1)
+  {
+    if (v1 < v0)
+      std::swap(v0, v1);
+    return { v0, v1 };
+  }
+
+  inline
+  std::array<Index, 3> getTriangleFaceKey(Index v0, Index v1, Index v2)
+  {
+    std::array<Index, 3> key{ v0, v1, v2 };
+    std::sort(key.begin(), key.end());
+    return key;
+  }
+
+  inline
+  std::array<Index, 3> getQuadrilateralFaceKey(Index v0, Index v1, Index v2, Index v3)
+  {
+    std::array<Index, 4> key{ v0, v1, v2, v3 };
+    std::sort(key.begin(), key.end());
+    return { key[0], key[1], key[2] };
+  }
+
+  template <class Callback>
+  inline
+  void forEachMFEMLocalEdge(Geometry::Polytope::Type geometry, Callback&& callback)
+  {
+    switch (geometry)
+    {
+      case Geometry::Polytope::Type::Segment:
+      {
+        callback(0, 1);
+        break;
+      }
+      case Geometry::Polytope::Type::Triangle:
+      {
+        callback(0, 1);
+        callback(1, 2);
+        callback(2, 0);
+        break;
+      }
+      case Geometry::Polytope::Type::Quadrilateral:
+      {
+        callback(0, 1);
+        callback(1, 2);
+        callback(2, 3);
+        callback(3, 0);
+        break;
+      }
+      case Geometry::Polytope::Type::Tetrahedron:
+      {
+        callback(0, 1);
+        callback(0, 2);
+        callback(0, 3);
+        callback(1, 2);
+        callback(1, 3);
+        callback(2, 3);
+        break;
+      }
+      case Geometry::Polytope::Type::Hexahedron:
+      {
+        callback(0, 1);
+        callback(1, 2);
+        callback(3, 2);
+        callback(0, 3);
+        callback(4, 5);
+        callback(5, 6);
+        callback(7, 6);
+        callback(4, 7);
+        callback(0, 4);
+        callback(1, 5);
+        callback(2, 6);
+        callback(3, 7);
+        break;
+      }
+      case Geometry::Polytope::Type::Wedge:
+      {
+        callback(0, 1);
+        callback(1, 2);
+        callback(2, 0);
+        callback(3, 4);
+        callback(4, 5);
+        callback(5, 3);
+        callback(0, 3);
+        callback(1, 4);
+        callback(2, 5);
+        break;
+      }
+      case Geometry::Polytope::Type::Point:
+      {
+        break;
+      }
+    }
+  }
+
+  template <class Callback>
+  inline
+  void forEachMFEMLocalFace(Geometry::Polytope::Type geometry, Callback&& callback)
+  {
+    switch (geometry)
+    {
+      case Geometry::Polytope::Type::Tetrahedron:
+      {
+        callback(std::array<int, 3>{ 1, 2, 3 });
+        callback(std::array<int, 3>{ 0, 3, 2 });
+        callback(std::array<int, 3>{ 0, 1, 3 });
+        callback(std::array<int, 3>{ 0, 2, 1 });
+        break;
+      }
+      case Geometry::Polytope::Type::Wedge:
+      {
+        callback(std::array<int, 3>{ 0, 2, 1 });
+        callback(std::array<int, 3>{ 3, 4, 5 });
+        callback(std::array<int, 4>{ 0, 1, 4, 3 });
+        callback(std::array<int, 4>{ 1, 2, 5, 4 });
+        callback(std::array<int, 4>{ 2, 0, 3, 5 });
+        break;
+      }
+      case Geometry::Polytope::Type::Hexahedron:
+      {
+        callback(std::array<int, 4>{ 3, 2, 1, 0 });
+        callback(std::array<int, 4>{ 0, 1, 5, 4 });
+        callback(std::array<int, 4>{ 1, 2, 6, 5 });
+        callback(std::array<int, 4>{ 2, 3, 7, 6 });
+        callback(std::array<int, 4>{ 3, 0, 4, 7 });
+        callback(std::array<int, 4>{ 4, 5, 6, 7 });
+        break;
+      }
+      default:
+      {
+        break;
+      }
+    }
+  }
+
+  inline
+  std::vector<Index> getMFEMEdgeOrder(const Geometry::Mesh<Context::Local>& mesh)
+  {
+    const auto& conn = mesh.getConnectivity();
+    const size_t D = mesh.getDimension();
+    const size_t edgeCount = conn.getCount(1);
+
+    std::vector<Index> out;
+    out.reserve(edgeCount);
+
+    if (D == 1)
+    {
+      for (Index e = 0; e < static_cast<Index>(edgeCount); ++e)
+        out.push_back(e);
+      return out;
+    }
+
+    std::map<std::array<Index, 2>, Index> edgeIndex;
+    const auto& conn10 = conn.getIncidence(1, 0);
+    for (Index e = 0; e < static_cast<Index>(edgeCount); ++e)
+    {
+      const auto& vertices = conn10[e];
+      assert(vertices.size() == 2);
+      edgeIndex.emplace(getSortedEdgeKey(vertices[0], vertices[1]), e);
+    }
+
+    std::map<std::array<Index, 2>, bool> seen;
+    const size_t cellCount = conn.getCount(D);
+    for (Index c = 0; c < static_cast<Index>(cellCount); ++c)
+    {
+      const auto geometry = conn.getGeometry(D, c);
+      const auto& cell = conn.getPolytope(D, c);
+      forEachMFEMLocalEdge(geometry,
+        [&](int a, int b)
+        {
+          assert(a < static_cast<int>(cell.size()));
+          assert(b < static_cast<int>(cell.size()));
+          const auto key = getSortedEdgeKey(cell[a], cell[b]);
+          const auto [seenIt, inserted] = seen.emplace(key, true);
+          (void) seenIt;
+          if (!inserted)
+            return;
+          const auto edgeIt = edgeIndex.find(key);
+          assert(edgeIt != edgeIndex.end());
+          out.push_back(edgeIt->second);
+        });
+    }
+
+    assert(out.size() == edgeCount);
+    return out;
+  }
+
+  inline
+  std::vector<FaceOrderEntry> getMFEMFaceOrder(const Geometry::Mesh<Context::Local>& mesh)
+  {
+    const auto& conn = mesh.getConnectivity();
+    const size_t D = mesh.getDimension();
+    assert(D == 3);
+
+    const size_t faceCount = conn.getCount(2);
+    std::vector<FaceOrderEntry> out;
+    out.reserve(faceCount);
+
+    std::map<std::array<Index, 3>, Index> faceIndex;
+    for (Index f = 0; f < static_cast<Index>(faceCount); ++f)
+    {
+      const auto& face = conn.getPolytope(2, f);
+      if (face.size() == 3)
+        faceIndex.emplace(getTriangleFaceKey(face[0], face[1], face[2]), f);
+      else if (face.size() == 4)
+        faceIndex.emplace(getQuadrilateralFaceKey(face[0], face[1], face[2], face[3]), f);
+      else
+        assert(false && "Unsupported face arity in MFEM face order.");
+    }
+
+    std::map<std::array<Index, 3>, bool> seen;
+    const size_t cellCount = conn.getCount(D);
+    for (Index c = 0; c < static_cast<Index>(cellCount); ++c)
+    {
+      const auto geometry = conn.getGeometry(D, c);
+      const auto& cell = conn.getPolytope(D, c);
+
+      forEachMFEMLocalFace(geometry,
+        [&](const auto& localFace)
+        {
+          std::vector<Index> vertices;
+          vertices.reserve(localFace.size());
+          for (int localVertex : localFace)
+          {
+            assert(localVertex >= 0);
+            assert(localVertex < static_cast<int>(cell.size()));
+            vertices.push_back(cell[localVertex]);
+          }
+
+          std::array<Index, 3> key;
+          if (localFace.size() == 3)
+            key = getTriangleFaceKey(vertices[0], vertices[1], vertices[2]);
+          else
+            key = getQuadrilateralFaceKey(vertices[0], vertices[1], vertices[2], vertices[3]);
+
+          const auto [seenIt, inserted] = seen.emplace(key, true);
+          (void) seenIt;
+          if (!inserted)
+            return;
+
+          const auto faceIt = faceIndex.find(key);
+          assert(faceIt != faceIndex.end());
+          out.push_back({ faceIt->second, std::move(vertices) });
+        });
+    }
+
+    assert(out.size() == faceCount);
+    return out;
+  }
+
+  template <size_t K>
+  inline
+  size_t getTriangleNodeIndex(size_t bary0, size_t bary1, size_t bary2)
+  {
+    assert(bary0 + bary1 + bary2 == K);
+    const size_t i = bary1;
+    const size_t j = bary2;
+    return j * (K + 1) - (j * (j - 1)) / 2 + i;
+  }
+
+  template <size_t K>
+  inline
+  std::vector<size_t> getTriangleNodeMap(
+      const Geometry::Polytope::Key& sourceVertices,
+      const std::vector<Index>& targetVertices)
+  {
+    assert(sourceVertices.size() == 3);
+    assert(targetVertices.size() == 3);
+
+    constexpr size_t Count = (K + 1) * (K + 2) / 2;
+    std::vector<size_t> map(Count);
+
+    std::array<int, 3> targetToSource{};
+    for (size_t t = 0; t < 3; ++t)
+    {
+      targetToSource[t] = -1;
+      for (size_t s = 0; s < 3; ++s)
+      {
+        if (sourceVertices[s] == targetVertices[t])
+        {
+          targetToSource[t] = static_cast<int>(s);
+          break;
+        }
+      }
+      assert(targetToSource[t] >= 0);
+    }
+
+    for (size_t j = 0; j <= K; ++j)
+    {
+      for (size_t i = 0; i <= K - j; ++i)
+      {
+        const std::array<size_t, 3> targetBary{ K - i - j, i, j };
+        std::array<size_t, 3> sourceBary{ 0, 0, 0 };
+        for (size_t t = 0; t < 3; ++t)
+          sourceBary[static_cast<size_t>(targetToSource[t])] = targetBary[t];
+
+        const size_t target = getTriangleNodeIndex<K>(targetBary[0], targetBary[1], targetBary[2]);
+        const size_t source = getTriangleNodeIndex<K>(sourceBary[0], sourceBary[1], sourceBary[2]);
+        map[target] = source;
+      }
+    }
+
+    return map;
+  }
+
+  template <size_t K>
+  inline
+  size_t getQuadrilateralNodeIndex(size_t i, size_t j)
+  {
+    assert(i <= K);
+    assert(j <= K);
+    return j * (K + 1) + i;
+  }
+
+  template <size_t K>
+  inline
+  std::pair<size_t, size_t> getQuadrilateralCornerCoordinates(int vertex)
+  {
+    switch (vertex)
+    {
+      case 0: return { 0, 0 };
+      case 1: return { K, 0 };
+      case 2: return { K, K };
+      case 3: return { 0, K };
+      default:
+        assert(false && "Invalid quadrilateral vertex.");
+        return { 0, 0 };
+    }
+  }
+
+  template <size_t K>
+  inline
+  std::pair<size_t, size_t> applyQuadrilateralTransform(int transform, size_t i, size_t j)
+  {
+    switch (transform)
+    {
+      case 0: return { i, j };
+      case 1: return { j, K - i };
+      case 2: return { K - i, K - j };
+      case 3: return { K - j, i };
+      case 4: return { i, K - j };
+      case 5: return { K - i, j };
+      case 6: return { j, i };
+      case 7: return { K - j, K - i };
+      default:
+        assert(false && "Invalid quadrilateral transform.");
+        return { i, j };
+    }
+  }
+
+  template <size_t K>
+  inline
+  std::vector<size_t> getQuadrilateralNodeMap(
+      const Geometry::Polytope::Key& sourceVertices,
+      const std::vector<Index>& targetVertices)
+  {
+    assert(sourceVertices.size() == 4);
+    assert(targetVertices.size() == 4);
+
+    constexpr size_t Count = (K + 1) * (K + 1);
+    std::vector<size_t> map(Count);
+
+    std::array<int, 4> targetToSource{};
+    for (size_t t = 0; t < 4; ++t)
+    {
+      targetToSource[t] = -1;
+      for (size_t s = 0; s < 4; ++s)
+      {
+        if (sourceVertices[s] == targetVertices[t])
+        {
+          targetToSource[t] = static_cast<int>(s);
+          break;
+        }
+      }
+      assert(targetToSource[t] >= 0);
+    }
+
+    std::array<std::pair<size_t, size_t>, 4> sourceCorners;
+    for (size_t t = 0; t < 4; ++t)
+      sourceCorners[t] = getQuadrilateralCornerCoordinates<K>(targetToSource[t]);
+
+    int chosen = -1;
+    for (int transform = 0; transform < 8; ++transform)
+    {
+      if (applyQuadrilateralTransform<K>(transform, 0, 0) == sourceCorners[0] &&
+          applyQuadrilateralTransform<K>(transform, K, 0) == sourceCorners[1] &&
+          applyQuadrilateralTransform<K>(transform, K, K) == sourceCorners[2] &&
+          applyQuadrilateralTransform<K>(transform, 0, K) == sourceCorners[3])
+      {
+        chosen = transform;
+        break;
+      }
+    }
+
+    assert(chosen >= 0 && "Could not determine quadrilateral orientation transform.");
+
+    for (size_t j = 0; j <= K; ++j)
+    {
+      for (size_t i = 0; i <= K; ++i)
+      {
+        const auto source = applyQuadrilateralTransform<K>(chosen, i, j);
+        map[getQuadrilateralNodeIndex<K>(i, j)] =
+          getQuadrilateralNodeIndex<K>(source.first, source.second);
+      }
+    }
+
+    return map;
+  }
 
   /**
    * @brief Converts MFEM geometry type to Rodin polytope type.
@@ -993,6 +1413,185 @@ namespace Rodin::IO::MFEM
         return s_inv;
       }
   };
+
+  /**
+   * @brief MFEM-style nodal set on the reference wedge / prism.
+   *
+   * This reproduces the local node ordering used by mfem::H1_WedgeElement:
+   * vertices, edge interiors, triangular face interiors, quadrilateral face
+   * interiors, then cell interiors. The triangular factor uses MFEM's closed
+   * H1 triangle nodes and the segment factor uses MFEM's H1 segment ordering.
+   */
+  template <size_t K>
+  class WedgeNodes
+  {
+    public:
+      static constexpr size_t TriangleCount = TriangleNodes<K>::Count;
+      static constexpr size_t Count = TriangleCount * (K + 1);
+
+      static const std::vector<Math::SpatialPoint>& getNodes()
+      {
+        static thread_local std::vector<Math::SpatialPoint> s_nodes;
+
+        if (s_nodes.empty())
+        {
+          constexpr int p = static_cast<int>(K);
+          constexpr int ne = p - 1;
+          constexpr int nt = (p - 1) * (p - 2) / 2;
+          constexpr int nq = (p - 1) * (p - 1);
+
+          const auto& triNodes = TriangleNodes<K>::getNodes();
+          const auto& cp = Variational::GLL01<K>::getNodes();
+
+          auto segmentNode = [&](int local) -> Real
+          {
+            if (local == 0)
+              return cp[0];
+            if (local == 1)
+              return cp[p];
+            return cp[local - 1];
+          };
+
+          std::vector<int> tDof(Count, -1);
+          std::vector<int> sDof(Count, -1);
+
+          tDof[0] = 0; sDof[0] = 0;
+          tDof[1] = 1; sDof[1] = 0;
+          tDof[2] = 2; sDof[2] = 0;
+          tDof[3] = 0; sDof[3] = 1;
+          tDof[4] = 1; sDof[4] = 1;
+          tDof[5] = 2; sDof[5] = 1;
+
+          int offset = 6;
+          for (int i = 1; i < p; ++i)
+          {
+            const int k = i - 1;
+
+            tDof[offset + 0 * ne + k] = 2 + 0 * ne + i; sDof[offset + 0 * ne + k] = 0;
+            tDof[offset + 1 * ne + k] = 2 + 1 * ne + i; sDof[offset + 1 * ne + k] = 0;
+            tDof[offset + 2 * ne + k] = 2 + 2 * ne + i; sDof[offset + 2 * ne + k] = 0;
+
+            tDof[offset + 3 * ne + k] = 2 + 0 * ne + i; sDof[offset + 3 * ne + k] = 1;
+            tDof[offset + 4 * ne + k] = 2 + 1 * ne + i; sDof[offset + 4 * ne + k] = 1;
+            tDof[offset + 5 * ne + k] = 2 + 2 * ne + i; sDof[offset + 5 * ne + k] = 1;
+
+            tDof[offset + 6 * ne + k] = 0; sDof[offset + 6 * ne + k] = i + 1;
+            tDof[offset + 7 * ne + k] = 1; sDof[offset + 7 * ne + k] = i + 1;
+            tDof[offset + 8 * ne + k] = 2; sDof[offset + 8 * ne + k] = i + 1;
+          }
+
+          offset += 9 * ne;
+
+          int k = 0;
+          for (int j = 1; j < p; ++j)
+          {
+            for (int i = 1; i < p - j; ++i)
+            {
+              const int l = j - p + (((2 * p - 1) - i) * i) / 2;
+              tDof[offset + k]      = 3 * p + l; sDof[offset + k]      = 0;
+              tDof[offset + nt + k] = 3 * p + k; sDof[offset + nt + k] = 1;
+              ++k;
+            }
+          }
+
+          offset += 2 * nt;
+
+          k = 0;
+          for (int j = 1; j < p; ++j)
+          {
+            for (int i = 1; i < p; ++i)
+            {
+              tDof[offset + 0 * nq + k] = 2 + 0 * ne + i;
+              tDof[offset + 1 * nq + k] = 2 + 1 * ne + i;
+              tDof[offset + 2 * nq + k] = 2 + 2 * ne + i;
+
+              sDof[offset + 0 * nq + k] = 1 + j;
+              sDof[offset + 1 * nq + k] = 1 + j;
+              sDof[offset + 2 * nq + k] = 1 + j;
+              ++k;
+            }
+          }
+
+          offset += 3 * nq;
+
+          int m = 0;
+          for (int z = 1; z < p; ++z)
+          {
+            int l = 0;
+            for (int j = 1; j < p; ++j)
+            {
+              for (int i = 1; i + j < p; ++i)
+              {
+                tDof[offset + m] = 3 * p + l;
+                sDof[offset + m] = 1 + z;
+                ++l;
+                ++m;
+              }
+            }
+          }
+
+          s_nodes.reserve(Count);
+          for (size_t i = 0; i < Count; ++i)
+          {
+            assert(tDof[i] >= 0 && sDof[i] >= 0);
+            const auto& pt = triNodes[static_cast<size_t>(tDof[i])];
+            s_nodes.emplace_back(Math::SpatialPoint{{ pt.x(), pt.y(), segmentNode(sDof[i]) }});
+          }
+
+          assert(s_nodes.size() == Count);
+        }
+
+        return s_nodes;
+      }
+  };
+
+  /**
+   * @brief Change of nodes from Rodin wedge nodes to MFEM wedge nodes.
+   *
+   * C(i,j) = phi_j(x_i), where phi_j is Rodin's wedge H1 nodal basis and x_i
+   * is the i-th MFEM wedge node.
+   */
+  template <size_t K>
+  class WedgeChange
+  {
+    public:
+      static const Math::Matrix<Real>& getMatrix()
+      {
+        static thread_local Math::Matrix<Real> s_change;
+
+        constexpr size_t N = WedgeNodes<K>::Count;
+
+        if (s_change.size() == 0)
+        {
+          s_change.resize(N, N);
+          const auto& nodes = WedgeNodes<K>::getNodes();
+          const Variational::H1Element<K, Real> fe(Geometry::Polytope::Type::Wedge);
+
+          for (size_t i = 0; i < N; ++i)
+          {
+            for (size_t j = 0; j < N; ++j)
+              s_change(static_cast<Index>(i), static_cast<Index>(j)) = fe.getBasis(j)(nodes[i]);
+          }
+        }
+
+        return s_change;
+      }
+
+      static const Math::Matrix<Real>& getInverse()
+      {
+        static thread_local Math::Matrix<Real> s_inv;
+
+        if (s_inv.size() == 0)
+        {
+          const auto& C = WedgeChange<K>::getMatrix();
+          Eigen::BDCSVD<Math::Matrix<Real>> svd(C, Eigen::ComputeThinU | Eigen::ComputeThinV);
+          const Math::Matrix<Real> I = Math::Matrix<Real>::Identity(C.rows(), C.cols());
+          s_inv = svd.solve(I);
+        }
+
+        return s_inv;
+      }
+  };
 }
 
 namespace Rodin::IO
@@ -1415,23 +2014,9 @@ namespace Rodin::IO
         std::vector<ScalarType> mfem_values;
         mfem_values.reserve(fes.getSize());
 
-        while (true)
-        {
-          line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-          if (line.empty() || is.eof())
-            break;
-
-          it = line.begin();
-          ScalarType value;
-          const auto get_value = [&](auto& ctx) { value = _attr(ctx); };
-          const auto pvalue = double_[get_value];
-          const bool rvalue = boost::spirit::x3::phrase_parse(it, line.end(), pvalue, space);
-
-          if (!rvalue || it != line.end())
-            break;
-
+        ScalarType value;
+        while (mfem_values.size() < fes.getSize() && (is >> value))
           mfem_values.push_back(value);
-        }
 
         assert(mfem_values.size() == fes.getSize() && "Mismatch in number of coefficients read");
 
@@ -1463,6 +2048,21 @@ namespace Rodin::IO
           if (vdim > 1 && dof >= static_cast<Index>(scalarSize))
             return dof % static_cast<Index>(scalarSize);
           return dof;
+        };
+
+        const auto scalar_local_size = [&](const auto& dofs) -> size_t
+        {
+          assert(static_cast<size_t>(dofs.size()) % vdim == 0);
+          return static_cast<size_t>(dofs.size()) / vdim;
+        };
+
+        const auto scalar_local_dof = [&](const auto& dofs, size_t local) -> Index
+        {
+          if (vdim == 1)
+            return to_scalar_dof(dofs(static_cast<Index>(local)));
+
+          assert(local * vdim < static_cast<size_t>(dofs.size()));
+          return to_scalar_dof(dofs(static_cast<Index>(local * vdim)));
         };
 
         // Helper: assign (all components) for a Rodin scalar DOF from current MFEM scalar position
@@ -1535,6 +2135,22 @@ namespace Rodin::IO
           return Cinv;
         }();
 
+        auto& s_wedge_change_scalar = []() -> const Math::Matrix<ScalarType>&
+        {
+          static thread_local Math::Matrix<ScalarType> C;
+          if (C.size() == 0)
+            C = MFEM::WedgeChange<K>::getMatrix().template cast<ScalarType>();
+          return C;
+        }();
+
+        auto& s_wedge_inv_change_scalar = []() -> const Math::Matrix<ScalarType>&
+        {
+          static thread_local Math::Matrix<ScalarType> Cinv;
+          if (Cinv.size() == 0)
+            Cinv = MFEM::WedgeChange<K>::getInverse().template cast<ScalarType>();
+          return Cinv;
+        }();
+
         //--------------------------------------------------------------------
         // 1. Read vertices
         //--------------------------------------------------------------------
@@ -1564,10 +2180,10 @@ namespace Rodin::IO
         if (D >= 1)
         {
           const auto& conn10  = mesh.getConnectivity().getIncidence(1, 0);
-          const size_t nEdges = mesh.getConnectivity().getCount(1);
+          const auto mfemEdges = MFEM::getMFEMEdgeOrder(mesh);
 
           std::vector<Index> interior;
-          for (Index e = 0; e < static_cast<Index>(nEdges); ++e)
+          for (Index e : mfemEdges)
           {
             const auto& edgeVerts = conn10[e];
             assert(edgeVerts.size() == 2);
@@ -1581,11 +2197,12 @@ namespace Rodin::IO
             const Index vmaxDof = vertexScalarDof[static_cast<size_t>(vmax)];
 
             const auto& edofs = fes.getDOFs(1, e);
+            const size_t edgeScalarDofs = scalar_local_size(edofs);
 
             interior.clear();
-            for (Index k = 0; k < static_cast<Index>(edofs.size()); ++k)
+            for (size_t k = 0; k < edgeScalarDofs; ++k)
             {
-              const Index sd = to_scalar_dof(edofs(k));
+              const Index sd = scalar_local_dof(edofs, k);
               if (sd != vminDof && sd != vmaxDof)
                 interior.push_back(sd);
             }
@@ -1611,22 +2228,24 @@ namespace Rodin::IO
         if (D >= 2)
         {
           const size_t faceDim   = (D == 3) ? 2 : (D - 1);
-          const size_t faceCount = mesh.getConnectivity().getCount(faceDim);
+          [[maybe_unused]] const size_t faceCount = mesh.getConnectivity().getCount(faceDim);
 
           if (D == 3)
           {
             // Triangle face parameters
             constexpr size_t TriN = MFEM::TriangleNodes<K>::Count;
+            [[maybe_unused]] constexpr size_t QuadN = (K + 1) * (K + 1);
             const int p  = static_cast<int>(K);
             const int nV = 3;
             const int nE = 3 * (p - 1);
             const int triInteriorOffset = nV + nE;
 
-            Math::Vector<ScalarType> uM_face(TriN);
             std::vector<Math::Vector<ScalarType>> uR_face(vdim, Math::Vector<ScalarType>(TriN));
+            const auto mfemFaces = MFEM::getMFEMFaceOrder(mesh);
 
-            for (Index f = 0; f < static_cast<Index>(faceCount); ++f)
+            for (const auto& mfemFace : mfemFaces)
             {
+              const Index f = mfemFace.index;
               const auto faceGeom = mesh.getGeometry(2, f);
               const auto& fdofs   = fes.getDOFs(2, f);
 
@@ -1634,19 +2253,24 @@ namespace Rodin::IO
               {
                 case Geometry::Polytope::Type::Triangle:
                 {
-                  assert(static_cast<size_t>(fdofs.size()) == TriN);
+                  assert(scalar_local_size(fdofs) == TriN);
+                  const auto& faceVertices = mesh.getConnectivity().getPolytope(2, f);
+                  const auto faceNodeMap = MFEM::getTriangleNodeMap<K>(faceVertices, mfemFace.vertices);
                   const int numInterior = static_cast<int>(TriN) - triInteriorOffset;
 
                   if (numInterior > 0)
                   {
+                    std::vector<Math::Vector<ScalarType>> uM_by_comp(
+                      vdim, Math::Vector<ScalarType>(TriN));
+
                     for (size_t comp = 0; comp < vdim; ++comp)
                     {
-                      uM_face.setZero();
+                      uM_by_comp[comp].setZero();
 
                       Math::Vector<ScalarType> temp_uR(TriN);
                       for (size_t k = 0; k < TriN; ++k)
                       {
-                        const Index sd = to_scalar_dof(fdofs(static_cast<Index>(k)));
+                        const Index sd = scalar_local_dof(fdofs, faceNodeMap[k]);
                         temp_uR(static_cast<Index>(k)) =
                           (static_cast<size_t>(sd) < scalarSize)
                             ? data.coeffRef(sd + static_cast<Index>(comp * scalarSize))
@@ -1656,23 +2280,25 @@ namespace Rodin::IO
                       Math::Vector<ScalarType> temp_uM = s_tri_change_scalar * temp_uR;
 
                       for (int k = 0; k < triInteriorOffset; ++k)
-                        uM_face(k) = temp_uM(k);
-
-                      // IMPORTANT: consume from MFEM scalar stream position (pos),
-                      // not from mfem_values directly
-                      for (int k = 0; k < numInterior; ++k)
-                      {
-                        assert(pos < scalarSize);
-                        uM_face(triInteriorOffset + k) = mfem_block[comp][pos];
-                        ++pos;
-                      }
-
-                      uR_face[comp] = s_tri_inv_change_scalar * uM_face;
+                        uM_by_comp[comp](k) = temp_uM(k);
                     }
+
+                    // IMPORTANT: consume from the MFEM scalar stream once per
+                    // scalar node, then assign all components at that position.
+                    for (int k = 0; k < numInterior; ++k)
+                    {
+                      assert(pos < scalarSize);
+                      for (size_t comp = 0; comp < vdim; ++comp)
+                        uM_by_comp[comp](triInteriorOffset + k) = mfem_block[comp][pos];
+                      ++pos;
+                    }
+
+                    for (size_t comp = 0; comp < vdim; ++comp)
+                      uR_face[comp] = s_tri_inv_change_scalar * uM_by_comp[comp];
 
                     for (size_t k = 0; k < TriN; ++k)
                     {
-                      const Index sd = to_scalar_dof(fdofs(static_cast<Index>(k)));
+                      const Index sd = scalar_local_dof(fdofs, faceNodeMap[k]);
                       const size_t s = static_cast<size_t>(sd);
                       if (s >= scalarSize)
                         continue;
@@ -1686,7 +2312,7 @@ namespace Rodin::IO
                   {
                     for (size_t k = 0; k < TriN; ++k)
                     {
-                      const Index sd = to_scalar_dof(fdofs(static_cast<Index>(k)));
+                      const Index sd = scalar_local_dof(fdofs, faceNodeMap[k]);
                       const size_t s = static_cast<size_t>(sd);
                       if (s < scalarSize)
                         written[s] = true;
@@ -1695,11 +2321,39 @@ namespace Rodin::IO
                   break;
                 }
 
+                case Geometry::Polytope::Type::Quadrilateral:
+                {
+                  assert(scalar_local_size(fdofs) == QuadN);
+                  const auto& faceVertices = mesh.getConnectivity().getPolytope(2, f);
+                  const auto faceNodeMap = MFEM::getQuadrilateralNodeMap<K>(faceVertices, mfemFace.vertices);
+
+                  for (size_t j = 1; j < K; ++j)
+                  {
+                    for (size_t i = 1; i < K; ++i)
+                    {
+                      const size_t targetLocal = MFEM::getQuadrilateralNodeIndex<K>(i, j);
+                      const Index sdof = scalar_local_dof(fdofs, faceNodeMap[targetLocal]);
+                      const size_t s = static_cast<size_t>(sdof);
+                      assert(pos < scalarSize);
+                      if (s < scalarSize)
+                      {
+                        for (size_t comp = 0; comp < vdim; ++comp)
+                          data.coeffRef(sdof + static_cast<Index>(comp * scalarSize)) =
+                            mfem_block[comp][pos];
+                        written[s] = true;
+                      }
+                      ++pos;
+                    }
+                  }
+                  break;
+                }
+
                 default:
                 {
-                  for (Index k = 0; k < static_cast<Index>(fdofs.size()); ++k)
+                  const size_t nScalarLocal = scalar_local_size(fdofs);
+                  for (size_t k = 0; k < nScalarLocal; ++k)
                   {
-                    const Index sdof = to_scalar_dof(fdofs(k));
+                    const Index sdof = scalar_local_dof(fdofs, k);
                     const size_t s = static_cast<size_t>(sdof);
                     if (s >= scalarSize || written[s])
                       continue;
@@ -1727,7 +2381,6 @@ namespace Rodin::IO
           const int nE = 3 * (p - 1);
           const int triInteriorOffset = nV + nE;
 
-          Math::Vector<ScalarType> uM_elem(TriN);
           std::vector<Math::Vector<ScalarType>> uR_elem(vdim, Math::Vector<ScalarType>(TriN));
 
           for (Index c = 0; c < static_cast<Index>(nCells); ++c)
@@ -1739,19 +2392,22 @@ namespace Rodin::IO
             {
               case Geometry::Polytope::Type::Triangle:
               {
-                assert(static_cast<size_t>(cdofs.size()) == TriN);
+                assert(scalar_local_size(cdofs) == TriN);
                 const int numInterior = static_cast<int>(TriN) - triInteriorOffset;
 
                 if (numInterior > 0)
                 {
+                  std::vector<Math::Vector<ScalarType>> uM_by_comp(
+                    vdim, Math::Vector<ScalarType>(TriN));
+
                   for (size_t comp = 0; comp < vdim; ++comp)
                   {
-                    uM_elem.setZero();
+                    uM_by_comp[comp].setZero();
 
                     Math::Vector<ScalarType> temp_uR(TriN);
                     for (size_t k = 0; k < TriN; ++k)
                     {
-                      const Index sd = to_scalar_dof(cdofs(static_cast<Index>(k)));
+                      const Index sd = scalar_local_dof(cdofs, k);
                       temp_uR(static_cast<Index>(k)) =
                         (static_cast<size_t>(sd) < scalarSize)
                           ? data.coeffRef(sd + static_cast<Index>(comp * scalarSize))
@@ -1761,21 +2417,23 @@ namespace Rodin::IO
                     Math::Vector<ScalarType> temp_uM = s_tri_change_scalar * temp_uR;
 
                     for (int k = 0; k < triInteriorOffset; ++k)
-                      uM_elem(k) = temp_uM(k);
-
-                    for (int k = 0; k < numInterior; ++k)
-                    {
-                      assert(pos < scalarSize);
-                      uM_elem(triInteriorOffset + k) = mfem_block[comp][pos];
-                      ++pos;
-                    }
-
-                    uR_elem[comp] = s_tri_inv_change_scalar * uM_elem;
+                      uM_by_comp[comp](k) = temp_uM(k);
                   }
+
+                  for (int k = 0; k < numInterior; ++k)
+                  {
+                    assert(pos < scalarSize);
+                    for (size_t comp = 0; comp < vdim; ++comp)
+                      uM_by_comp[comp](triInteriorOffset + k) = mfem_block[comp][pos];
+                    ++pos;
+                  }
+
+                  for (size_t comp = 0; comp < vdim; ++comp)
+                    uR_elem[comp] = s_tri_inv_change_scalar * uM_by_comp[comp];
 
                   for (size_t k = 0; k < TriN; ++k)
                   {
-                    const Index sd = to_scalar_dof(cdofs(static_cast<Index>(k)));
+                    const Index sd = scalar_local_dof(cdofs, k);
                     const size_t s = static_cast<size_t>(sd);
                     if (s >= scalarSize)
                       continue;
@@ -1789,7 +2447,7 @@ namespace Rodin::IO
                 {
                   for (size_t k = 0; k < TriN; ++k)
                   {
-                    const Index sd = to_scalar_dof(cdofs(static_cast<Index>(k)));
+                    const Index sd = scalar_local_dof(cdofs, k);
                     const size_t s = static_cast<size_t>(sd);
                     if (s < scalarSize)
                       written[s] = true;
@@ -1800,9 +2458,10 @@ namespace Rodin::IO
 
               default:
               {
-                for (Index k = 0; k < static_cast<Index>(cdofs.size()); ++k)
+                const size_t nScalarLocal = scalar_local_size(cdofs);
+                for (size_t k = 0; k < nScalarLocal; ++k)
                 {
-                  const Index sdof = to_scalar_dof(cdofs(k));
+                  const Index sdof = scalar_local_dof(cdofs, k);
                   const size_t s = static_cast<size_t>(sdof);
                   if (s >= scalarSize || written[s])
                     continue;
@@ -1817,8 +2476,6 @@ namespace Rodin::IO
         }
         else if (D == 3)
         {
-          const auto& conn30 = mesh.getConnectivity().getIncidence(3, 0);
-
           constexpr size_t TetN = MFEM::TetrahedronNodes<K>::Count;
           const int p = static_cast<int>(K);
 
@@ -1827,34 +2484,34 @@ namespace Rodin::IO
           const int nF    = 2 * (p - 1) * (p - 2);
           const int tetInteriorOffset = nV + nE + nF;
 
-          Math::Vector<ScalarType> uM_elem(TetN);
           std::vector<Math::Vector<ScalarType>> uR_elem(vdim, Math::Vector<ScalarType>(TetN));
 
           for (Index c = 0; c < static_cast<Index>(nCells); ++c)
           {
             const auto  cellGeom = mesh.getGeometry(3, c);
-            const auto& cellVer  = conn30[c];
             const auto& cdofs    = fes.getDOFs(3, c);
 
             switch (cellGeom)
             {
               case Geometry::Polytope::Type::Tetrahedron:
               {
-                assert(cellVer.size() == 4);
-                assert(static_cast<size_t>(cdofs.size()) == TetN);
+                assert(scalar_local_size(cdofs) == TetN);
 
                 const int numInterior = static_cast<int>(TetN) - tetInteriorOffset;
 
                 if (numInterior > 0)
                 {
+                  std::vector<Math::Vector<ScalarType>> uM_by_comp(
+                    vdim, Math::Vector<ScalarType>(TetN));
+
                   for (size_t comp = 0; comp < vdim; ++comp)
                   {
-                    uM_elem.setZero();
+                    uM_by_comp[comp].setZero();
 
                     Math::Vector<ScalarType> temp_uR(TetN);
                     for (size_t k = 0; k < TetN; ++k)
                     {
-                      const Index sd = to_scalar_dof(cdofs(static_cast<Index>(k)));
+                      const Index sd = scalar_local_dof(cdofs, k);
                       temp_uR(static_cast<Index>(k)) =
                         (static_cast<size_t>(sd) < scalarSize)
                           ? data.coeffRef(sd + static_cast<Index>(comp * scalarSize))
@@ -1864,21 +2521,23 @@ namespace Rodin::IO
                     Math::Vector<ScalarType> temp_uM = s_tet_change_scalar * temp_uR;
 
                     for (int k = 0; k < tetInteriorOffset; ++k)
-                      uM_elem(k) = temp_uM(k);
-
-                    for (int k = 0; k < numInterior; ++k)
-                    {
-                      assert(pos < scalarSize);
-                      uM_elem(tetInteriorOffset + k) = mfem_block[comp][pos];
-                      ++pos;
-                    }
-
-                    uR_elem[comp] = s_tet_inv_change_scalar * uM_elem;
+                      uM_by_comp[comp](k) = temp_uM(k);
                   }
+
+                  for (int k = 0; k < numInterior; ++k)
+                  {
+                    assert(pos < scalarSize);
+                    for (size_t comp = 0; comp < vdim; ++comp)
+                      uM_by_comp[comp](tetInteriorOffset + k) = mfem_block[comp][pos];
+                    ++pos;
+                  }
+
+                  for (size_t comp = 0; comp < vdim; ++comp)
+                    uR_elem[comp] = s_tet_inv_change_scalar * uM_by_comp[comp];
 
                   for (size_t k = 0; k < TetN; ++k)
                   {
-                    const Index sd = to_scalar_dof(cdofs(static_cast<Index>(k)));
+                    const Index sd = scalar_local_dof(cdofs, k);
                     const size_t s = static_cast<size_t>(sd);
                     if (s >= scalarSize)
                       continue;
@@ -1892,7 +2551,7 @@ namespace Rodin::IO
                 {
                   for (size_t k = 0; k < TetN; ++k)
                   {
-                    const Index sd = to_scalar_dof(cdofs(static_cast<Index>(k)));
+                    const Index sd = scalar_local_dof(cdofs, k);
                     const size_t s = static_cast<size_t>(sd);
                     if (s < scalarSize)
                       written[s] = true;
@@ -1903,15 +2562,83 @@ namespace Rodin::IO
 
               case Geometry::Polytope::Type::Wedge:
               {
-                assert(false && "Wedge elements not supported in MFEM I/O");
+                constexpr size_t WedgeN = MFEM::WedgeNodes<K>::Count;
+                const int ne = p - 1;
+                const int nt = (p - 1) * (p - 2) / 2;
+                const int nq = (p - 1) * (p - 1);
+                const int wedgeInteriorOffset = 6 + 9 * ne + 2 * nt + 3 * nq;
+
+                assert(scalar_local_size(cdofs) == WedgeN);
+
+                const int numInterior = static_cast<int>(WedgeN) - wedgeInteriorOffset;
+                if (numInterior > 0)
+                {
+                  std::vector<Math::Vector<ScalarType>> uM_by_comp(
+                    vdim, Math::Vector<ScalarType>(WedgeN));
+                  std::vector<Math::Vector<ScalarType>> uR_by_comp(
+                    vdim, Math::Vector<ScalarType>(WedgeN));
+
+                  for (size_t comp = 0; comp < vdim; ++comp)
+                  {
+                    Math::Vector<ScalarType> temp_uR(WedgeN);
+                    for (size_t k = 0; k < WedgeN; ++k)
+                    {
+                      const Index sd = scalar_local_dof(cdofs, k);
+                      temp_uR(static_cast<Index>(k)) =
+                        (static_cast<size_t>(sd) < scalarSize)
+                          ? data.coeffRef(sd + static_cast<Index>(comp * scalarSize))
+                          : ScalarType(0);
+                    }
+
+                    const Math::Vector<ScalarType> temp_uM = s_wedge_change_scalar * temp_uR;
+                    uM_by_comp[comp].setZero();
+                    for (int k = 0; k < wedgeInteriorOffset; ++k)
+                      uM_by_comp[comp](k) = temp_uM(k);
+                  }
+
+                  for (int k = 0; k < numInterior; ++k)
+                  {
+                    assert(pos < scalarSize);
+                    for (size_t comp = 0; comp < vdim; ++comp)
+                      uM_by_comp[comp](wedgeInteriorOffset + k) = mfem_block[comp][pos];
+                    ++pos;
+                  }
+
+                  for (size_t comp = 0; comp < vdim; ++comp)
+                    uR_by_comp[comp] = s_wedge_inv_change_scalar * uM_by_comp[comp];
+
+                  for (size_t k = 0; k < WedgeN; ++k)
+                  {
+                    const Index sd = scalar_local_dof(cdofs, k);
+                    const size_t s = static_cast<size_t>(sd);
+                    if (s >= scalarSize)
+                      continue;
+
+                    for (size_t comp = 0; comp < vdim; ++comp)
+                      data.coeffRef(sd + static_cast<Index>(comp * scalarSize)) =
+                        uR_by_comp[comp](static_cast<Index>(k));
+                    written[s] = true;
+                  }
+                }
+                else
+                {
+                  for (size_t k = 0; k < WedgeN; ++k)
+                  {
+                    const Index sd = scalar_local_dof(cdofs, k);
+                    const size_t s = static_cast<size_t>(sd);
+                    if (s < scalarSize)
+                      written[s] = true;
+                  }
+                }
                 break;
               }
 
               default:
               {
-                for (Index k = 0; k < static_cast<Index>(cdofs.size()); ++k)
+                const size_t nScalarLocal = scalar_local_size(cdofs);
+                for (size_t k = 0; k < nScalarLocal; ++k)
                 {
-                  const Index sdof = to_scalar_dof(cdofs(k));
+                  const Index sdof = scalar_local_dof(cdofs, k);
                   const size_t s = static_cast<size_t>(sdof);
                   if (s >= scalarSize || written[s])
                     continue;
@@ -1929,9 +2656,10 @@ namespace Rodin::IO
           for (Index c = 0; c < static_cast<Index>(nCells); ++c)
           {
             const auto& cdofs = fes.getDOFs(D, c);
-            for (Index k = 0; k < static_cast<Index>(cdofs.size()); ++k)
+            const size_t nScalarLocal = scalar_local_size(cdofs);
+            for (size_t k = 0; k < nScalarLocal; ++k)
             {
-              const Index sdof = to_scalar_dof(cdofs(k));
+              const Index sdof = scalar_local_dof(cdofs, k);
               const size_t s = static_cast<size_t>(sdof);
               if (s >= scalarSize || written[s])
                 continue;
@@ -2302,7 +3030,7 @@ namespace Rodin::IO
         os << "FiniteElementSpace\n"
            << "FiniteElementCollection: " << "H1_" << fes.getMesh().getDimension() << "D_P" << K << "\n"
            << "VDim: " << fes.getVectorDimension() << '\n'
-           << "Ordering: " << MFEM::Ordering::VectorDimension
+           << "Ordering: " << MFEM::Ordering::Nodes
            << "\n\n";
         this->printData(os);
       }
@@ -2432,6 +3160,22 @@ namespace Rodin::IO
           return dof;
         };
 
+        const auto scalar_local_size = [&](const auto& dofs) -> size_t
+        {
+          assert(static_cast<size_t>(dofs.size()) % vdim == 0);
+          return static_cast<size_t>(dofs.size()) / vdim;
+        };
+
+        const auto scalar_local_dof = [&](const auto& dofs, size_t local) -> Index
+        {
+          if (vdim == 1)
+            return to_scalar_dof(dofs(static_cast<Index>(local)));
+
+          assert(local * vdim < static_cast<size_t>(dofs.size()));
+          return to_scalar_dof(dofs(static_cast<Index>(local * vdim)));
+        };
+
+        size_t activeComponent = 0;
         const auto emit_scalar_dof = [&](Index rodin_dof)
         {
           const Index scalar_dof = to_scalar_dof(rodin_dof);
@@ -2440,24 +3184,8 @@ namespace Rodin::IO
             return;
           if (written[s])
             return;
-          for (size_t c = 0; c < vdim; ++c)
-            os << data.coeffRef(scalar_dof + c * scalarSize) << '\n';
+          os << data.coeffRef(scalar_dof + activeComponent * scalarSize) << '\n';
           written[s] = true;
-        };
-
-        auto emit_value = [&](const auto& val)
-        {
-          if constexpr (std::is_same_v<Range, Scalar>)
-          {
-            os << val << '\n';
-          }
-          else
-          {
-            static_assert(std::is_same_v<Range, Math::Vector<Scalar>>,
-                          "Range must be Scalar or Math::Vector<Scalar>.");
-            for (size_t c = 0; c < vdim; ++c)
-              os << val[c] << '\n';
-          }
         };
 
         //--------------------------------------------------------------------
@@ -2490,21 +3218,33 @@ namespace Rodin::IO
           return C;
         }();
 
-        //--------------------------------------------------------------------
-        // 1. Vertices
-        //--------------------------------------------------------------------
-
-        const size_t nVertices = mesh.getConnectivity().getCount(0);
-        std::vector<Index> vertexScalarDof(nVertices);
-        for (Index v = 0; v < static_cast<Index>(nVertices); ++v)
+        auto& s_wedge_change_scalar = []() -> const Math::Matrix<Scalar>&
         {
-          const auto& vdofs = fes.getDOFs(0, v);
-          assert(vdofs.size() >= 1 && "H1 vertex should have at least one DOF.");
-          vertexScalarDof[v] = to_scalar_dof(vdofs(0));
-        }
+          static thread_local Math::Matrix<Scalar> C;
+          if (C.size() == 0)
+            C = MFEM::WedgeChange<K>::getMatrix().template cast<Scalar>();
+          return C;
+        }();
 
-        for (Index v = 0; v < static_cast<Index>(nVertices); ++v)
-          emit_scalar_dof(vertexScalarDof[v]);
+        for (activeComponent = 0; activeComponent < vdim; ++activeComponent)
+        {
+          std::fill(written.begin(), written.end(), false);
+
+          //--------------------------------------------------------------------
+          // 1. Vertices
+          //--------------------------------------------------------------------
+
+          const size_t nVertices = mesh.getConnectivity().getCount(0);
+          std::vector<Index> vertexScalarDof(nVertices);
+          for (Index v = 0; v < static_cast<Index>(nVertices); ++v)
+          {
+            const auto& vdofs = fes.getDOFs(0, v);
+            assert(vdofs.size() >= 1 && "H1 vertex should have at least one DOF.");
+            vertexScalarDof[v] = to_scalar_dof(vdofs(0));
+          }
+
+          for (Index v = 0; v < static_cast<Index>(nVertices); ++v)
+            emit_scalar_dof(vertexScalarDof[v]);
 
         //--------------------------------------------------------------------
         // 2. Edges: interior DOFs, oriented vmin -> vmax
@@ -2513,10 +3253,10 @@ namespace Rodin::IO
         if (D >= 1)
         {
           const auto& conn10  = mesh.getConnectivity().getIncidence(1, 0);
-          const size_t nEdges = mesh.getConnectivity().getCount(1);
+          const auto mfemEdges = MFEM::getMFEMEdgeOrder(mesh);
 
           std::vector<Index> interior;
-          for (Index e = 0; e < static_cast<Index>(nEdges); ++e)
+          for (Index e : mfemEdges)
           {
             const auto& edgeVerts = conn10[e];
             assert(edgeVerts.size() == 2);
@@ -2530,11 +3270,12 @@ namespace Rodin::IO
             const Index vmaxDof = vertexScalarDof[vmax];
 
             const auto& edofs = fes.getDOFs(1, e);
+            const size_t edgeScalarDofs = scalar_local_size(edofs);
 
             interior.clear();
-            for (Index k = 0; k < static_cast<Index>(edofs.size()); ++k)
+            for (size_t k = 0; k < edgeScalarDofs; ++k)
             {
-              Index d = edofs(k);
+              Index d = scalar_local_dof(edofs, k);
               if (d != vminDof && d != vmaxDof)
                 interior.push_back(d);
             }
@@ -2558,22 +3299,21 @@ namespace Rodin::IO
 
           if (D == 3)
           {
-            const auto& conn20 = mesh.getConnectivity().getIncidence(2, 0);
-            const auto& conn32 = mesh.getConnectivity().getIncidence(3, 2);
-
             // Triangle face size / offsets in MFEM ordering
             constexpr size_t TriN = MFEM::TriangleNodes<K>::Count;
+            [[maybe_unused]] constexpr size_t QuadN = (K + 1) * (K + 1);
             const int p  = static_cast<int>(K);
             const int nV = 3;
             const int nE = 3 * (p - 1);
             const int triInteriorOffset = nV + nE;
 
             Math::Vector<Scalar> uR_face(TriN);
-            std::vector<Math::Vector<Scalar>> uM_face(
-              vdim, Math::Vector<Scalar>(TriN));
+            Math::Vector<Scalar> uM_face(TriN);
+            const auto mfemFaces = MFEM::getMFEMFaceOrder(mesh);
 
-            for (Index f = 0; f < static_cast<Index>(faceCount); ++f)
+            for (const auto& mfemFace : mfemFaces)
             {
+              const Index f = mfemFace.index;
               const auto faceGeom = mesh.getGeometry(2, f);
               const auto& fdofs   = fes.getDOFs(2, f);
 
@@ -2581,18 +3321,17 @@ namespace Rodin::IO
               {
                 case Geometry::Polytope::Type::Triangle:
                 {
-                  assert(static_cast<size_t>(fdofs.size()) == TriN);
+                  assert(scalar_local_size(fdofs) == TriN);
+                  const auto& faceVertices = mesh.getConnectivity().getPolytope(2, f);
+                  const auto faceNodeMap = MFEM::getTriangleNodeMap<K>(faceVertices, mfemFace.vertices);
 
-                  for (size_t c = 0; c < vdim; ++c)
+                  for (size_t k = 0; k < TriN; ++k)
                   {
-                    for (size_t k = 0; k < TriN; ++k)
-                    {
-                      const Index d = fdofs(static_cast<Index>(k));
-                      uR_face(static_cast<Index>(k)) =
-                        data.coeffRef(d + c * scalarSize);
-                    }
-                    uM_face[c] = s_tri_change_scalar * uR_face;
+                    const Index d = scalar_local_dof(fdofs, faceNodeMap[k]);
+                    uR_face(static_cast<Index>(k)) =
+                      data.coeffRef(d + static_cast<Index>(activeComponent * scalarSize));
                   }
+                  uM_face = s_tri_change_scalar * uR_face;
 
                   int loc = 0;
                   for (int j = 1; j < p; ++j)
@@ -2600,8 +3339,30 @@ namespace Rodin::IO
                     for (int i = 1; i + j < p; ++i)
                     {
                       const int idx = triInteriorOffset + loc++;
-                      for (size_t c = 0; c < vdim; ++c)
-                        os << uM_face[c](static_cast<Index>(idx)) << '\n';
+                      os << uM_face(static_cast<Index>(idx)) << '\n';
+                    }
+                  }
+                  break;
+                }
+
+                case Geometry::Polytope::Type::Quadrilateral:
+                {
+                  assert(scalar_local_size(fdofs) == QuadN);
+                  const auto& faceVertices = mesh.getConnectivity().getPolytope(2, f);
+                  const auto faceNodeMap = MFEM::getQuadrilateralNodeMap<K>(faceVertices, mfemFace.vertices);
+
+                  for (size_t j = 1; j < K; ++j)
+                  {
+                    for (size_t i = 1; i < K; ++i)
+                    {
+                      const size_t targetLocal = MFEM::getQuadrilateralNodeIndex<K>(i, j);
+                      const Index sdof = scalar_local_dof(fdofs, faceNodeMap[targetLocal]);
+                      const size_t s = static_cast<size_t>(sdof);
+                      if (s < scalarSize && !written[s])
+                      {
+                        os << data.coeffRef(sdof + static_cast<Index>(activeComponent * scalarSize)) << '\n';
+                        written[s] = true;
+                      }
                     }
                   }
                   break;
@@ -2609,8 +3370,9 @@ namespace Rodin::IO
 
                 default:
                 {
-                  for (Index k = 0; k < static_cast<Index>(fdofs.size()); ++k)
-                    emit_scalar_dof(fdofs(k));
+                  const size_t nScalarLocal = scalar_local_size(fdofs);
+                  for (size_t k = 0; k < nScalarLocal; ++k)
+                    emit_scalar_dof(scalar_local_dof(fdofs, k));
                   break;
                 }
               }
@@ -2622,8 +3384,9 @@ namespace Rodin::IO
             for (Index f = 0; f < static_cast<Index>(faceCount); ++f)
             {
               const auto& fdofs = fes.getDOFs(faceDim, f);
-              for (Index k = 0; k < static_cast<Index>(fdofs.size()); ++k)
-                emit_scalar_dof(fdofs(k));
+              const size_t nScalarLocal = scalar_local_size(fdofs);
+              for (size_t k = 0; k < nScalarLocal; ++k)
+                emit_scalar_dof(scalar_local_dof(fdofs, k));
             }
           }
         }
@@ -2643,8 +3406,7 @@ namespace Rodin::IO
           const int triInteriorOffset = nV + nE;
 
           Math::Vector<Scalar> uR_elem(TriN);
-          std::vector<Math::Vector<Scalar>> uM_elem(
-            vdim, Math::Vector<Scalar>(TriN));
+          Math::Vector<Scalar> uM_elem(TriN);
 
           for (Index c = 0; c < static_cast<Index>(nCells); ++c)
           {
@@ -2655,18 +3417,15 @@ namespace Rodin::IO
             {
               case Geometry::Polytope::Type::Triangle:
               {
-                assert(static_cast<size_t>(cdofs.size()) == TriN);
+                assert(scalar_local_size(cdofs) == TriN);
 
-                for (size_t comp = 0; comp < vdim; ++comp)
+                for (size_t k = 0; k < TriN; ++k)
                 {
-                  for (size_t k = 0; k < TriN; ++k)
-                  {
-                    const Index d = cdofs(static_cast<Index>(k));
-                    uR_elem(static_cast<Index>(k)) =
-                      data.coeffRef(d + comp * scalarSize);
-                  }
-                  uM_elem[comp] = s_tri_change_scalar * uR_elem;
+                  const Index d = scalar_local_dof(cdofs, k);
+                  uR_elem(static_cast<Index>(k)) =
+                    data.coeffRef(d + static_cast<Index>(activeComponent * scalarSize));
                 }
+                uM_elem = s_tri_change_scalar * uR_elem;
 
                 int loc = 0;
                 for (int j = 1; j < p; ++j)
@@ -2674,8 +3433,7 @@ namespace Rodin::IO
                   for (int i = 1; i + j < p; ++i)
                   {
                     const int idx = triInteriorOffset + loc++;
-                    for (size_t comp = 0; comp < vdim; ++comp)
-                      os << uM_elem[comp](static_cast<Index>(idx)) << '\n';
+                    os << uM_elem(static_cast<Index>(idx)) << '\n';
                   }
                 }
                 break;
@@ -2683,8 +3441,9 @@ namespace Rodin::IO
 
               default:
               {
-                for (Index k = 0; k < static_cast<Index>(cdofs.size()); ++k)
-                  emit_scalar_dof(cdofs(k));
+                const size_t nScalarLocal = scalar_local_size(cdofs);
+                for (size_t k = 0; k < nScalarLocal; ++k)
+                  emit_scalar_dof(scalar_local_dof(cdofs, k));
                 break;
               }
             }
@@ -2692,9 +3451,6 @@ namespace Rodin::IO
         }
         else if (D == 3)
         {
-          const auto& conn30 = mesh.getConnectivity().getIncidence(3, 0);
-          const auto& cp     = Variational::GLL01<K>::getNodes();
-
           constexpr size_t TetN = MFEM::TetrahedronNodes<K>::Count;
           const int p = static_cast<int>(K);
 
@@ -2704,15 +3460,11 @@ namespace Rodin::IO
           const int tetInteriorOffset = nV + nE + nF;
 
           Math::Vector<Scalar> uR_elem(TetN);
-          std::vector<Math::Vector<Scalar>> uM_elem(
-            vdim, Math::Vector<Scalar>(TetN));
+          Math::Vector<Scalar> uM_elem(TetN);
 
           for (Index c = 0; c < static_cast<Index>(nCells); ++c)
           {
             const auto  cellGeom = mesh.getGeometry(3, c);
-            const auto& cellVer  = conn30[c];
-            const auto  cellIt   = mesh.getCell(c);
-            const auto& cell     = *cellIt;
             const auto& cdofs    = fes.getDOFs(3, c);
 
             switch (cellGeom)
@@ -2722,34 +3474,47 @@ namespace Rodin::IO
               //---------------------------------------------------------------
               case Geometry::Polytope::Type::Tetrahedron:
               {
-                assert(cellVer.size() == 4);
-                assert(static_cast<size_t>(cdofs.size()) == TetN);
+                assert(scalar_local_size(cdofs) == TetN);
 
-                for (size_t comp = 0; comp < vdim; ++comp)
+                for (size_t k = 0; k < TetN; ++k)
                 {
-                  for (size_t k = 0; k < TetN; ++k)
-                  {
-                    const Index d = cdofs(static_cast<Index>(k));
-                    uR_elem(static_cast<Index>(k)) =
-                      data.coeffRef(d + comp * scalarSize);
-                  }
-                  uM_elem[comp] = s_tet_change_scalar * uR_elem;
+                  const Index d = scalar_local_dof(cdofs, k);
+                  uR_elem(static_cast<Index>(k)) =
+                    data.coeffRef(d + static_cast<Index>(activeComponent * scalarSize));
                 }
+                uM_elem = s_tet_change_scalar * uR_elem;
 
                 for (int idx = tetInteriorOffset; idx < static_cast<int>(TetN); ++idx)
-                {
-                  for (size_t comp = 0; comp < vdim; ++comp)
-                    os << uM_elem[comp](static_cast<Index>(idx)) << '\n';
-                }
+                  os << uM_elem(static_cast<Index>(idx)) << '\n';
                 break;
               }
 
               //---------------------------------------------------------------
-              // Wedge / Prism: TODO
+              // Wedge / Prism: change-of-nodes for interior DOFs
               //---------------------------------------------------------------
               case Geometry::Polytope::Type::Wedge:
               {
-                assert(false); // Unsupported
+                constexpr size_t WedgeN = MFEM::WedgeNodes<K>::Count;
+                const int ne = p - 1;
+                const int nt = (p - 1) * (p - 2) / 2;
+                const int nq = (p - 1) * (p - 1);
+                const int wedgeInteriorOffset = 6 + 9 * ne + 2 * nt + 3 * nq;
+
+                assert(scalar_local_size(cdofs) == WedgeN);
+
+                Math::Vector<Scalar> uR_wedge(WedgeN);
+                Math::Vector<Scalar> uM_wedge(WedgeN);
+
+                for (size_t k = 0; k < WedgeN; ++k)
+                {
+                  const Index d = scalar_local_dof(cdofs, k);
+                  uR_wedge(static_cast<Index>(k)) =
+                    data.coeffRef(d + static_cast<Index>(activeComponent * scalarSize));
+                }
+                uM_wedge = s_wedge_change_scalar * uR_wedge;
+
+                for (int idx = wedgeInteriorOffset; idx < static_cast<int>(WedgeN); ++idx)
+                  os << uM_wedge(static_cast<Index>(idx)) << '\n';
                 break;
               }
 
@@ -2758,8 +3523,9 @@ namespace Rodin::IO
               //---------------------------------------------------------------
               default:
               {
-                for (Index k = 0; k < static_cast<Index>(cdofs.size()); ++k)
-                  emit_scalar_dof(cdofs(k));
+                const size_t nScalarLocal = scalar_local_size(cdofs);
+                for (size_t k = 0; k < nScalarLocal; ++k)
+                  emit_scalar_dof(scalar_local_dof(cdofs, k));
                 break;
               }
             }
@@ -2771,9 +3537,11 @@ namespace Rodin::IO
           for (Index c = 0; c < static_cast<Index>(nCells); ++c)
           {
             const auto& cdofs = fes.getDOFs(D, c);
-            for (Index k = 0; k < static_cast<Index>(cdofs.size()); ++k)
-              emit_scalar_dof(cdofs(k));
+            const size_t nScalarLocal = scalar_local_size(cdofs);
+            for (size_t k = 0; k < nScalarLocal; ++k)
+              emit_scalar_dof(scalar_local_dof(cdofs, k));
           }
+        }
         }
       }
   };
