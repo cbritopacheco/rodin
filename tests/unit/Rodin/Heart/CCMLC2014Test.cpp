@@ -175,6 +175,24 @@ TEST(CCMLC2014Test, InitializeUsesProvidedGammaAndBeta)
   EXPECT_NEAR(state.tauc, 0.08, 1e-14);
 }
 
+TEST(CCMLC2014Test, InitializeUsesRelaxationTargetWhenInitialWIsZero)
+{
+  auto cardiacInput = makeGenericCardiacInput();
+  cardiacInput.m0 = [](Real) { return 1.4; };
+
+  Model model(cardiacInput);
+
+  Model::State initial;
+  initial.t = 0.0;
+  initial.ec = 0.2;
+  initial.w = 0.0;
+  model.initialize(initial);
+
+  const auto& state = model.getState();
+  EXPECT_NEAR(state.ec, 0.2, 1e-14);
+  EXPECT_NEAR(state.w, 1.4, 1e-14);
+}
+
 TEST(CCMLC2014Test, StepConvergesAndAdvancesTime)
 {
   auto cardiacInput = makeGenericCardiacInput();
@@ -202,6 +220,58 @@ TEST(CCMLC2014Test, StepConvergesAndAdvancesTime)
   const auto report = model.step(dt);
   EXPECT_TRUE(report.converged);
   EXPECT_NEAR(model.getState().t, dt, 1e-14);
+}
+
+TEST(CCMLC2014Test, LoadDependentRelaxationAcceleratesNegativeActivationDecay)
+{
+  auto baseInput = makeGenericCardiacInput();
+  baseInput.u = [](Real) { return -20.0; };
+  baseInput.m0 = [](Real) { return 1.0; };
+  baseInput.alphaR = 0.12;
+
+  auto relaxedInput = baseInput;
+  relaxedInput.m0 = [](Real) { return 1.6; };
+
+  Model::DenseVector candidateState(CCMLC2014Vars::NumberOfVariables);
+  candidateState[CCMLC2014Vars::RadialDisplacement] = 8e-5;
+  candidateState[CCMLC2014Vars::VentricularPressure] = 1.0e4;
+  candidateState[CCMLC2014Vars::ArterialPressure] = 9.0e3;
+  candidateState[CCMLC2014Vars::DistalPressure] = 8.0e3;
+
+  Model::State currentState;
+  currentState.t = 0.1;
+  currentState.y = 7e-5;
+  currentState.pv = 9.8e3;
+  currentState.par = 8.8e3;
+  currentState.pd = 7.9e3;
+  currentState.ec = 0.01;
+  currentState.gamma = 0.4;
+  currentState.beta = 0.3;
+  currentState.w = 1.0;
+  currentState.kc = currentState.gamma * currentState.gamma;
+  currentState.tauc = currentState.gamma * currentState.beta;
+
+  Model::State previousState = currentState;
+  previousState.t = 0.099;
+  previousState.y = 6e-5;
+
+  using InputType = Model::Input;
+  Heart::CCMLC2014::Numerics::DynamicSystem<PassiveLaw, InputType>
+      baseSystem(baseInput);
+  Heart::CCMLC2014::Numerics::DynamicSystem<PassiveLaw, InputType>
+      relaxedSystem(relaxedInput);
+
+  Model::EvalData baseData;
+  Model::EvalData relaxedData;
+  const Real dt = 1e-3;
+  baseSystem.buildEvalData(
+      candidateState, currentState, previousState, currentState.t + dt, dt, baseData);
+  relaxedSystem.buildEvalData(
+      candidateState, currentState, previousState, currentState.t + dt, dt, relaxedData);
+
+  EXPECT_GT(relaxedData.active.wCurrent, baseData.active.wCurrent);
+  EXPECT_GT(relaxedData.active.relaxationDrive, baseData.active.relaxationDrive);
+  EXPECT_LT(relaxedData.active.gammaCurrent, baseData.active.gammaCurrent);
 }
 
 TEST(CCMLC2014Test, DynamicJacobianMatchesFiniteDifference)

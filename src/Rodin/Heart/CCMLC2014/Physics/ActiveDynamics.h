@@ -67,9 +67,20 @@ namespace Rodin::Heart::CCMLC2014::Physics
         active.fiberDeformationPrevious = data.sn.ec;
         active.gammaPrevious = data.sn.gamma;
         active.betaPrevious = data.sn.beta;
+        active.wPrevious = data.sn.w;
         active.activationDrive = m_input.u(data.tnp1);
         active.activationDrivePositivePart =
           std::max<Scalar>(active.activationDrive, Scalar(0));
+        active.activationDriveNegativePart =
+          std::max<Scalar>(-active.activationDrive, Scalar(0));
+        active.relaxationTarget =
+          std::max<Scalar>(m_input.m0(active.fiberDeformationPrevious), Scalar(0));
+        active.wCurrent =
+          updateLoadDependentRelaxation(
+              data.dt, active.wPrevious, active.relaxationTarget);
+        active.relaxationDrive =
+          active.activationDrivePositivePart
+          + active.wCurrent * active.activationDriveNegativePart;
         active.recruitmentFraction =
           computeRecruitmentFraction(active.fiberDeformationPrevious);
 
@@ -90,6 +101,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
               active.gammaPrevious,
               active.betaPrevious,
               active.activationDrive,
+              active.wCurrent,
               active.gammaCurrent,
               active.betaCurrent,
               active.recruitmentFraction);
@@ -105,6 +117,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
                 active.gammaPrevious,
                 active.betaPrevious,
                 active.activationDrive,
+                active.wCurrent,
                 active.fiberDeformationPrevious,
                 active.fiberDeformationCurrent,
                 derivativeBetaGammaWrtFiberDeformation);
@@ -162,6 +175,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
             active.gammaPrevious,
             active.betaPrevious,
             active.activationDrive,
+            active.wCurrent,
             active.gammaCurrent,
             active.betaCurrent,
             active.recruitmentFraction);
@@ -243,6 +257,27 @@ namespace Rodin::Heart::CCMLC2014::Physics
       }
 
       /**
+       * @brief Backward-Euler update of the load-dependent relaxation
+       *        multiplier @f$ w @f$.
+       *
+       * The target @f$ m_0 @f$ is evaluated explicitly from the previous
+       * fiber deformation so that the condensed active tangent remains
+       * consistent with the global unknowns used in this step.
+       */
+      template <class Scalar>
+      Scalar updateLoadDependentRelaxation(
+          Scalar dt,
+          Scalar wPrevious,
+          Scalar relaxationTarget) const
+      {
+        if (m_input.alphaR <= std::numeric_limits<Scalar>::epsilon())
+          return relaxationTarget;
+
+        const Scalar ratio = dt / m_input.alphaR;
+        return (wPrevious + ratio * relaxationTarget) / (Scalar(1) + ratio);
+      }
+
+      /**
        * @brief Update active internal variables @f$ \gamma @f$ and @f$ \beta @f$.
        *
        * Implements the implicit time-discrete update for the active stiffness
@@ -256,6 +291,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
           Scalar gammaPrevious,
           Scalar betaPrevious,
           Scalar activationDrive,
+          Scalar loadDependentRelaxation,
           Scalar& gammaCurrent,
           Scalar& betaCurrent,
           Scalar& recruitmentFraction) const
@@ -266,13 +302,18 @@ namespace Rodin::Heart::CCMLC2014::Physics
 
         const Scalar activationDrivePositivePart =
           std::max<Scalar>(activationDrive, Scalar(0));
+        const Scalar activationDriveNegativePart =
+          std::max<Scalar>(-activationDrive, Scalar(0));
+        const Scalar activationDecayRate =
+          activationDrivePositivePart
+          + loadDependentRelaxation * activationDriveNegativePart;
 
         recruitmentFraction =
           computeRecruitmentFraction(fiberDeformationPrevious);
 
         const Scalar denominatorGamma =
           Scalar(1)
-          + dt * (std::abs(activationDrive)
+          + dt * (activationDecayRate
                   + alpha * std::abs(fiberDeformationCurrent
                                      - fiberDeformationPrevious) / dt);
 
@@ -288,7 +329,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
           + Scalar(0.5) * dt * recruitmentFraction * k0
             * activationDrivePositivePart / gammaSquare
           + Scalar(0.5) * dt
-            * (std::abs(activationDrive)
+            * (activationDecayRate
                + alpha * std::abs(fiberDeformationCurrent
                                   - fiberDeformationPrevious) / dt);
 
@@ -313,6 +354,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
           Scalar gammaPrevious,
           Scalar betaPrevious,
           Scalar activationDrive,
+          Scalar loadDependentRelaxation,
           Scalar fiberDeformationPrevious,
           Scalar fiberDeformationCurrent,
           Scalar& derivativeBetaGammaWrtFiberDeformation) const
@@ -331,11 +373,16 @@ namespace Rodin::Heart::CCMLC2014::Physics
 
         const Scalar activationDrivePositivePart =
           std::max<Scalar>(activationDrive, Scalar(0));
+        const Scalar activationDriveNegativePart =
+          std::max<Scalar>(-activationDrive, Scalar(0));
+        const Scalar activationDecayRate =
+          activationDrivePositivePart
+          + loadDependentRelaxation * activationDriveNegativePart;
         const Scalar recruitmentFraction =
           computeRecruitmentFraction(fiberDeformationPrevious);
 
         const Scalar Dg =
-          Scalar(1) + dt * std::abs(activationDrive)
+          Scalar(1) + dt * activationDecayRate
           + alpha * absoluteFiberDeformationIncrement;
 
         const Scalar Ng =
@@ -358,7 +405,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
           Scalar(1)
           + Scalar(0.5) * dt * recruitmentFraction * k0
             * activationDrivePositivePart / gammaNewSq
-          + Scalar(0.5) * dt * std::abs(activationDrive)
+          + Scalar(0.5) * dt * activationDecayRate
           + Scalar(0.5) * alpha * absoluteFiberDeformationIncrement;
 
         const Scalar dNb =

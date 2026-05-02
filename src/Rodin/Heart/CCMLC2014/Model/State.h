@@ -60,6 +60,7 @@ namespace Rodin::Heart::CCMLC2014::Model
     Scalar tauc = 0.0;  ///< Active stress-like scalar @f$ \tau_c = \gamma\beta @f$.
     Scalar gamma = 0.0; ///< Active state variable @f$ \gamma @f$.
     Scalar beta = 0.0;  ///< Active state variable @f$ \beta @f$.
+    Scalar w = 1.0;     ///< Load-dependent relaxation multiplier @f$ w @f$.
 
     Scalar t = 0.0;     ///< Time associated with this state.
   };
@@ -81,6 +82,7 @@ namespace Rodin::Heart::CCMLC2014::Model
     Scalar eta = 0.0;     ///< Viscous coefficient.
     Scalar mu = 0.0;      ///< Active-viscous coupling coefficient.
     Scalar alpha = 0.0;   ///< Active length-rate coupling coefficient.
+    Scalar alphaR = Scalar(0.12); ///< Relaxation time scale @f$ \alpha_r @f$ for @f$ w @f$.
     Scalar k0 = 0.0;      ///< Active stiffness rate coefficient.
     Scalar sigma0 = 0.0;  ///< Active stress rate coefficient.
 
@@ -106,6 +108,9 @@ namespace Rodin::Heart::CCMLC2014::Model
 
     std::function<Scalar(Scalar)> u =
       [](Scalar) { return Scalar(0); }; ///< Active input drive @f$ u(t) @f$.
+
+    std::function<Scalar(Scalar)> m0 =
+      [](Scalar) { return Scalar(1); }; ///< Relaxation target @f$ m_0(e_c) @f$.
 
     std::function<Scalar(Scalar)> pAt =
       [](Scalar) { return Scalar(0); }; ///< Atrial pressure boundary condition.
@@ -148,11 +153,16 @@ namespace Rodin::Heart::CCMLC2014::Model
 
     Scalar gammaPrevious = 0.0; ///< Previous global gamma state.
     Scalar betaPrevious = 0.0;  ///< Previous global beta state.
+    Scalar wPrevious = 1.0;     ///< Previous load-dependent relaxation state.
     Scalar gammaCurrent = 0.0;  ///< Updated gamma state.
     Scalar betaCurrent = 0.0;   ///< Updated beta state.
+    Scalar wCurrent = 1.0;      ///< Updated load-dependent relaxation state.
 
     Scalar activationDrive = 0.0;             ///< Value of @f$ u(t_{n+1}) @f$.
     Scalar activationDrivePositivePart = 0.0; ///< Positive part of activation drive.
+    Scalar activationDriveNegativePart = 0.0; ///< Negative part magnitude of activation drive.
+    Scalar relaxationTarget = 1.0;            ///< Target @f$ m_0(e_c^n) @f$ for @f$ w @f$.
+    Scalar relaxationDrive = 0.0;             ///< Effective decay drive @f$ |u|_+ + w |u|_- @f$.
     Scalar recruitmentFraction = 0.0;         ///< Recruitment fraction @f$ n_0 @f$.
 
     Scalar partialResidualWrtDisplacement = 0.0;     ///< Coupling residual derivative wrt displacement.

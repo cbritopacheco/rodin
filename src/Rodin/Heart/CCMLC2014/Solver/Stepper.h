@@ -216,6 +216,11 @@ namespace Rodin::Heart::CCMLC2014::Solver
         else
           m_state.ec = m_input.initFibDef;
 
+        if (initial.w > Scalar(0))
+          m_state.w = initial.w;
+        else
+          m_state.w = std::max<Scalar>(m_input.m0(m_state.ec), Scalar(0));
+
         m_history.nm1 = m_state;
         m_x = packUnknowns(m_state);
       }
@@ -259,6 +264,7 @@ namespace Rodin::Heart::CCMLC2014::Solver
           m_state.ec = evalData.active.fiberDeformationCurrent;
           m_state.gamma = evalData.active.gammaCurrent;
           m_state.beta = evalData.active.betaCurrent;
+          m_state.w = evalData.active.wCurrent;
           m_state.kc = m_state.gamma * m_state.gamma;
           m_state.tauc = m_state.gamma * m_state.beta;
         }

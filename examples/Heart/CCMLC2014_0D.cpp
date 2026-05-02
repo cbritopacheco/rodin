@@ -18,9 +18,26 @@ static Real periodic_activation(Real t)
   if (tau < 0.13)  return 0.0;
   if (tau < 0.141) return 35.0 * ((tau - 0.13) / 0.011);
   if (tau < 0.281) return 35.0;
-  if (tau < 0.361) return 35.0 - 47.0 * ((tau - 0.281) / 0.08);
-  if (tau < 0.45)  return -12.0;
+  if (tau < 0.361) return 35.0 - 55.0 * ((tau - 0.281) / 0.08);
+  if (tau < 0.45)  return -20.0;
   return 0.0;
+}
+
+static Real load_dependent_relaxation_m0(Real ec)
+{
+  // Piecewise-linear approximation of Caruel et al. Fig. 7.
+  const Real low_ec = 0.0;
+  const Real high_ec = 2.0;
+  const Real low_value = 1.6;
+  const Real high_value = 1.0;
+
+  if (ec <= low_ec)
+    return low_value;
+  if (ec >= high_ec)
+    return high_value;
+
+  const Real s = (ec - low_ec) / (high_ec - low_ec);
+  return (1.0 - s) * low_value + s * high_value;
 }
 
 static Real atrial_pressure(Real t)
@@ -88,23 +105,24 @@ int main()
   in.d0 = 1.42e-2;
 
   // Active law parameters
-  in.Es = 3.0e5;
+  in.Es = 3.0e7;
   in.mu = 70.0;
   in.eta = 70.0;
-  in.alpha = 3.0;
+  in.alpha = 1.5;
+  in.alphaR = 0.12;
   in.k0 = 1.0e5;
-  in.sigma0 = 5.0e5;
+  in.sigma0 = 1.24e5;
 
   // Windkessel
-  in.Rp = 1.0e7;
-  in.Cp = 5.0e-9;
+  in.Rp = 8.0e6;
+  in.Cp = 2.5e-9;
   in.Rd = 1.0e8;
-  in.Cd = 5.0e-8;
+  in.Cd = 1.0e-8;
 
   // Valve parameters
-  in.Kat = 5.0e-7;
+  in.Kat = 9.0e-6;
   in.Kp  = 5.0e-10;
-  in.Kar = 5e-5;
+  in.Kar = 1.3e-5;
 
   in.cavityCapacity = 5.0e-12;
 
@@ -122,6 +140,7 @@ int main()
   in.pSv = [](Real) { return 1.0e3; };
   in.pAt = atrial_pressure;
   in.u = periodic_activation;
+  in.m0 = load_dependent_relaxation_m0;
 
   {
     using PassiveEnergy = std::decay_t<decltype(in.passiveEnergy)>;
@@ -157,6 +176,7 @@ int main()
   s0.beta = (s0.gamma > 0.0) ? (in.initActiveStress / s0.gamma) : 0.0;
   s0.kc = s0.gamma * s0.gamma;
   s0.tauc = s0.gamma * s0.beta;
+  s0.w = in.m0(s0.ec);
 
   model.initialize(s0);
 
@@ -171,6 +191,7 @@ int main()
               << "  ec    = " << s.ec << '\n'
               << "  gamma = " << s.gamma << '\n'
               << "  beta  = " << s.beta << '\n'
+              << "  w     = " << s.w << '\n'
               << "  kc    = " << s.kc << '\n'
               << "  tauc  = " << s.tauc << '\n';
   }
@@ -179,7 +200,7 @@ int main()
   const int nsteps = 3 * static_cast<int>(0.85 / dt);
 
   std::ofstream out("ccmlc2014_0d_cycle.csv");
-  out << "t,y,v,pv,par,pd,ec,gamma,beta,kc,tauc,V,Q,pat\n";
+  out << "t,y,v,pv,par,pd,ec,gamma,beta,w,kc,tauc,V,Q,pat\n";
 
   for (int i = 0; i < nsteps; ++i)
   {
@@ -216,6 +237,7 @@ int main()
         << s.ec << ","
         << s.gamma << ","
         << s.beta << ","
+        << s.w << ","
         << s.kc << ","
         << s.tauc << ","
         << V << ","

@@ -175,7 +175,7 @@ namespace Rodin::Examples::Heart
         /// @brief Positive activation plateau value.
         Real positiveValue = 35.0;
         /// @brief Negative activation plateau value.
-        Real negativeValue = -12.0;
+        Real negativeValue = -20.0;
       };
 
       /**
@@ -217,27 +217,29 @@ namespace Rodin::Examples::Heart
         /// @brief Reference wall thickness.
         Real d0 = 1.42e-2;
         /// @brief Passive elastic stiffness.
-        Real Es = 3.0e5;
+        Real Es = 3.0e7;
         /// @brief Viscous parameter.
         Real mu = 70.0;
         /// @brief Viscous parameter.
         Real eta = 70.0;
         /// @brief Active stress gain.
-        Real alpha = 3.0;
+        Real alpha = 1.5;
+        /// @brief Load-dependent relaxation time scale.
+        Real alphaR = 0.12;
         /// @brief Active stiffness scale.
         Real k0 = 1.0e5;
         /// @brief Active stress scale.
-        Real sigma0 = 5.0e5;
+        Real sigma0 = 1.24e5;
         /// @brief Proximal arterial resistance.
         Real Rp = 8.0e6;
         /// @brief Proximal arterial compliance.
-        Real Cp = 5.0e-9;
+        Real Cp = 2.5e-9;
         /// @brief Distal arterial resistance.
         Real Rd = 1.0e8;
         /// @brief Distal arterial compliance.
         Real Cd = 1.0e-8;
         /// @brief Atrial valve coefficient.
-        Real Kat = 8.0e-7;
+        Real Kat = 9.0e-6;
         /// @brief Peripheral valve coefficient.
         Real Kp = 5.0e-10;
         /// @brief Arterial valve coefficient.
@@ -258,6 +260,14 @@ namespace Rodin::Examples::Heart
         Real initActiveStiffness = 0.0;
         /// @brief Initial active stress.
         Real initActiveStress = 0.0;
+        /// @brief Low-fiber-deformation target for load-dependent relaxation.
+        Real relaxationM0Low = 1.6;
+        /// @brief High-fiber-deformation target for load-dependent relaxation.
+        Real relaxationM0High = 1.0;
+        /// @brief Fiber deformation at which m0 reaches relaxationM0Low.
+        Real relaxationM0LowEc = 0.0;
+        /// @brief Fiber deformation at which m0 reaches relaxationM0High.
+        Real relaxationM0HighEc = 2.0;
         /// @brief Systemic venous pressure callback value.
         Real systemicVenousPressure = 1.0e3;
         /// @brief Passive energy parameter mu1.
@@ -407,6 +417,7 @@ namespace Rodin::Examples::Heart
         Real ec = 0.0;
         Real gamma = 0.0;
         Real beta = 0.0;
+        Real w = 1.0;
         Real kc = 0.0;
         Real tauc = 0.0;
 
