@@ -121,8 +121,6 @@ namespace Rodin::IO
                 << m_currentLineNumber << "."
                 << Alert::Raise;
             }
-            if (g->geometry == Geometry::Polytope::Type::Quadrilateral)
-              std::swap(g->vertices(2), g->vertices(3));
             connectivity.polytope(g->geometry, std::move(g->vertices));
             attrs.set({ m_dimension - 1, i }, g->attribute);
           }
@@ -383,5 +381,4 @@ namespace Rodin::IO
     }
   }
 }
-
 

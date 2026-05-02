@@ -5,9 +5,15 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
+#include <boost/filesystem/fstream.hpp>
+#include <boost/filesystem/path.hpp>
 #include <sstream>
 #include <fstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
+#include "Rodin/Configure.h"
 #include "Rodin/Geometry.h"
 #include "Rodin/Variational.h"
 #include "Rodin/IO.h"
@@ -19,6 +25,367 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
+  namespace
+  {
+    boost::filesystem::path mfemH1FixturePath(const std::string& filename)
+    {
+      boost::filesystem::path path(RODIN_RESOURCES_DIR);
+      path /= "mfem";
+      path /= "h1";
+      path /= filename;
+      return path;
+    }
+
+    std::string mfemH1FixtureName(
+        const std::string& geometry,
+        size_t order,
+        const std::string& field,
+        const std::string& ordering,
+        const std::string& extension)
+    {
+      return "h1_" + geometry + "_p" + std::to_string(order)
+        + "_" + field + "_mfem_" + ordering + "." + extension;
+    }
+
+    Mesh<Context::Local> loadMFEMH1FixtureMesh(const std::string& filename)
+    {
+      boost::filesystem::ifstream in(mfemH1FixturePath(filename));
+      if (!in)
+        throw std::runtime_error(std::string("Could not open fixture mesh: ") + filename);
+
+      Mesh mesh;
+      MeshLoader<FileFormat::MFEM, Context::Local> loader(mesh);
+      loader.load(in);
+
+      for (size_t d = mesh.getDimension(); d > 0; --d)
+        mesh.getConnectivity().compute(d, d - 1);
+
+      return mesh;
+    }
+
+    Real mfemH1FixtureScalar(const Geometry::Point& p)
+    {
+      const Real x = p.getDimension() > 0 ? p(0) : 0.0;
+      const Real y = p.getDimension() > 1 ? p(1) : 0.0;
+      const Real z = p.getDimension() > 2 ? p(2) : 0.0;
+
+      return 1.0 + 2.0 * x - 3.0 * y + 0.5 * z
+        + x * x + 0.25 * y * y - 0.75 * z * z
+        + x * y - 0.4 * x * z + 0.2 * y * z;
+    }
+
+    auto mfemH1FixtureScalarFunction()
+    {
+      return RealFunction([](const Geometry::Point& p)
+      {
+        return mfemH1FixtureScalar(p);
+      });
+    }
+
+    auto mfemH1FixtureVectorFunction()
+    {
+      return VectorFunction{
+        [](const Geometry::Point& p)
+        {
+          return mfemH1FixtureScalar(p);
+        },
+        [](const Geometry::Point& p)
+        {
+          const Real x = p.getDimension() > 0 ? p(0) : 0.0;
+          const Real y = p.getDimension() > 1 ? p(1) : 0.0;
+          const Real z = p.getDimension() > 2 ? p(2) : 0.0;
+          return -2.0 + x + 4.0 * y - z + x * z + 0.5 * y * y;
+        },
+        [](const Geometry::Point& p)
+        {
+          const Real x = p.getDimension() > 0 ? p(0) : 0.0;
+          const Real y = p.getDimension() > 1 ? p(1) : 0.0;
+          const Real z = p.getDimension() > 2 ? p(2) : 0.0;
+          return 3.0 - x * y + z * z + 0.25 * x * x;
+        }
+      };
+    }
+
+    std::vector<Real> readMFEMGridFunctionValues(std::istream& in)
+    {
+      std::string line;
+      bool sawOrdering = false;
+
+      while (std::getline(in, line))
+      {
+        if (!sawOrdering)
+        {
+          sawOrdering = line.rfind("Ordering:", 0) == 0;
+          continue;
+        }
+
+        if (line.find_first_not_of(" \t\r\n") == std::string::npos)
+          break;
+      }
+
+      std::vector<Real> values;
+      Real value;
+      while (in >> value)
+        values.push_back(value);
+      return values;
+    }
+
+    std::vector<Real> readMFEMGridFunctionValues(const boost::filesystem::path& path)
+    {
+      boost::filesystem::ifstream in(path);
+      if (!in)
+        throw std::runtime_error("Could not open fixture grid function: " + path.string());
+      return readMFEMGridFunctionValues(in);
+    }
+
+    std::vector<Real> readMFEMGridFunctionValues(const std::string& contents)
+    {
+      std::istringstream in(contents);
+      return readMFEMGridFunctionValues(in);
+    }
+
+    template <class GF1, class GF2>
+    void expectGridFunctionNear(const GF1& actual, const GF2& expected, Real tolerance)
+    {
+      ASSERT_EQ(actual.getSize(), expected.getSize());
+      for (Index i = 0; i < static_cast<Index>(actual.getSize()); ++i)
+        EXPECT_NEAR(actual[i], expected[i], tolerance) << "global dof " << i;
+    }
+
+    template <class FES>
+    void loadMFEMGridFunctionFixture(
+        const std::string& gfFilename,
+        GridFunction<FES, Math::Vector<Real>>& gf)
+    {
+      boost::filesystem::ifstream in(mfemH1FixturePath(gfFilename));
+      ASSERT_TRUE(static_cast<bool>(in)) << gfFilename;
+      GridFunctionLoader<FileFormat::MFEM, FES, Math::Vector<Real>> loader(gf);
+      loader.load(in);
+    }
+
+    template <class FES>
+    void roundTripMFEMGridFunctionAndCompare(
+        const GridFunction<FES, Math::Vector<Real>>& gf,
+        Real tolerance)
+    {
+      std::stringstream out;
+      GridFunctionPrinter<FileFormat::MFEM, FES, Math::Vector<Real>> printer(gf);
+      printer.print(out);
+
+      GridFunction<FES, Math::Vector<Real>> reloaded(gf.getFiniteElementSpace());
+      GridFunctionLoader<FileFormat::MFEM, FES, Math::Vector<Real>> loader(reloaded);
+      loader.load(out);
+
+      expectGridFunctionNear(reloaded, gf, tolerance);
+    }
+
+    template <class FES>
+    void loadMFEMScalarFixtureAndCompare(
+        const std::string& gfFilename,
+        const FES& fes,
+        Real tolerance)
+    {
+      GridFunction<FES, Math::Vector<Real>> gf(fes);
+      loadMFEMGridFunctionFixture(gfFilename, gf);
+
+      GridFunction expected(fes);
+      expected.project(mfemH1FixtureScalarFunction());
+
+      expectGridFunctionNear(gf, expected, tolerance);
+    }
+
+    template <size_t K>
+    void loadMFEMScalarFixtureCaseAndCompare(
+        const std::string& geometry,
+        Real tolerance)
+    {
+      const auto meshFilename =
+        mfemH1FixtureName(geometry, K, "scalar", "by_nodes", "mesh");
+      const auto gfFilename =
+        mfemH1FixtureName(geometry, K, "scalar", "by_nodes", "gf");
+
+      Mesh mesh = loadMFEMH1FixtureMesh(meshFilename);
+      H1 fes(std::integral_constant<size_t, K>{}, mesh);
+
+      loadMFEMScalarFixtureAndCompare(gfFilename, fes, tolerance);
+    }
+
+    template <size_t K>
+    void roundTripMFEMScalarFixtureCaseAndCompare(
+        const std::string& geometry,
+        Real tolerance)
+    {
+      const auto meshFilename =
+        mfemH1FixtureName(geometry, K, "scalar", "by_nodes", "mesh");
+      const auto gfFilename =
+        mfemH1FixtureName(geometry, K, "scalar", "by_nodes", "gf");
+
+      Mesh mesh = loadMFEMH1FixtureMesh(meshFilename);
+      H1<K, Real> fes(std::integral_constant<size_t, K>{}, mesh);
+
+      GridFunction<H1<K, Real>, Math::Vector<Real>> gf(fes);
+      loadMFEMGridFunctionFixture(gfFilename, gf);
+      roundTripMFEMGridFunctionAndCompare(gf, tolerance);
+    }
+
+    template <size_t K>
+    void loadMFEMScalarFileFixtureFamilyAndCompare()
+    {
+      loadMFEMScalarFixtureCaseAndCompare<K>("triangle", 1e-9);
+      loadMFEMScalarFixtureCaseAndCompare<K>("mixed2d", 1e-9);
+      loadMFEMScalarFixtureCaseAndCompare<K>("tetrahedron", 1e-9);
+      loadMFEMScalarFixtureCaseAndCompare<K>("hexahedron", 1e-9);
+      loadMFEMScalarFixtureCaseAndCompare<K>("wedge", 1e-9);
+    }
+
+    template <size_t K>
+    void roundTripMFEMScalarFileFixtureFamilyAndCompare()
+    {
+      roundTripMFEMScalarFixtureCaseAndCompare<K>("triangle", 1e-9);
+      roundTripMFEMScalarFixtureCaseAndCompare<K>("mixed2d", 1e-9);
+      roundTripMFEMScalarFixtureCaseAndCompare<K>("tetrahedron", 1e-9);
+      roundTripMFEMScalarFixtureCaseAndCompare<K>("hexahedron", 1e-9);
+      roundTripMFEMScalarFixtureCaseAndCompare<K>("wedge", 1e-9);
+    }
+
+    template <size_t K>
+    void loadMFEMVectorFixtureAndCompare(
+        const std::string& meshFilename,
+        const std::string& gfFilename,
+        Real tolerance)
+    {
+      Mesh mesh = loadMFEMH1FixtureMesh(meshFilename);
+
+      using FES = H1<K, Math::SpatialVector<Real>>;
+      FES fes(std::integral_constant<size_t, K>{}, mesh, 3);
+
+      GridFunction<FES, Math::Vector<Real>> gf(fes);
+      loadMFEMGridFunctionFixture(gfFilename, gf);
+
+      GridFunction expected(fes);
+      expected.project(mfemH1FixtureVectorFunction());
+      expectGridFunctionNear(gf, expected, tolerance);
+    }
+
+    template <size_t K>
+    void loadAndPrintMFEMVectorFixtureAndCompare(
+        const std::string& meshFilename,
+        const std::string& gfFilename,
+        const std::string& expectedGfFilename,
+        Real tolerance)
+    {
+      Mesh mesh = loadMFEMH1FixtureMesh(meshFilename);
+
+      using FES = H1<K, Math::SpatialVector<Real>>;
+      FES fes(std::integral_constant<size_t, K>{}, mesh, 3);
+
+      GridFunction<FES, Math::Vector<Real>> gf(fes);
+      loadMFEMGridFunctionFixture(gfFilename, gf);
+
+      GridFunction expected(fes);
+      expected.project(mfemH1FixtureVectorFunction());
+      expectGridFunctionNear(gf, expected, tolerance);
+
+      std::stringstream out;
+      GridFunctionPrinter<FileFormat::MFEM, FES, Math::Vector<Real>> printer(gf);
+      printer.print(out);
+
+      EXPECT_NE(out.str().find("Ordering: 0"), std::string::npos);
+
+      const auto expectedValues = readMFEMGridFunctionValues(mfemH1FixturePath(expectedGfFilename));
+      const auto actualValues = readMFEMGridFunctionValues(out.str());
+
+      ASSERT_EQ(actualValues.size(), expectedValues.size());
+      for (size_t i = 0; i < actualValues.size(); ++i)
+      {
+        EXPECT_NEAR(actualValues[i], expectedValues[i], tolerance)
+          << "MFEM stream value " << i;
+      }
+    }
+
+    template <size_t K>
+    void loadMFEMVectorFixtureCaseAndCompare(
+        const std::string& geometry,
+        const std::string& ordering,
+        Real tolerance)
+    {
+      const auto meshFilename =
+        mfemH1FixtureName(geometry, K, "vector", ordering, "mesh");
+      const auto gfFilename =
+        mfemH1FixtureName(geometry, K, "vector", ordering, "gf");
+
+      loadMFEMVectorFixtureAndCompare<K>(
+        meshFilename, gfFilename, tolerance);
+    }
+
+    template <size_t K>
+    void roundTripMFEMVectorFixtureCaseAndCompare(
+        const std::string& geometry,
+        const std::string& ordering,
+        Real tolerance)
+    {
+      const auto meshFilename =
+        mfemH1FixtureName(geometry, K, "vector", ordering, "mesh");
+      const auto gfFilename =
+        mfemH1FixtureName(geometry, K, "vector", ordering, "gf");
+
+      Mesh mesh = loadMFEMH1FixtureMesh(meshFilename);
+
+      using FES = H1<K, Math::SpatialVector<Real>>;
+      FES fes(std::integral_constant<size_t, K>{}, mesh, 3);
+
+      GridFunction<FES, Math::Vector<Real>> gf(fes);
+      loadMFEMGridFunctionFixture(gfFilename, gf);
+      roundTripMFEMGridFunctionAndCompare(gf, tolerance);
+    }
+
+    template <size_t K>
+    void loadAndPrintMFEMVectorFixtureCaseAndCompare(
+        const std::string& geometry,
+        Real tolerance)
+    {
+      const auto meshFilename =
+        mfemH1FixtureName(geometry, K, "vector", "by_vdim", "mesh");
+      const auto gfFilename =
+        mfemH1FixtureName(geometry, K, "vector", "by_vdim", "gf");
+      const auto expectedGfFilename =
+        mfemH1FixtureName(geometry, K, "vector", "by_nodes", "gf");
+
+      loadAndPrintMFEMVectorFixtureAndCompare<K>(
+        meshFilename, gfFilename, expectedGfFilename, tolerance);
+    }
+
+    template <size_t K>
+    void loadMFEMVectorFileFixtureFamilyAndCompare(const std::string& ordering)
+    {
+      loadMFEMVectorFixtureCaseAndCompare<K>("triangle", ordering, 1e-9);
+      loadMFEMVectorFixtureCaseAndCompare<K>("mixed2d", ordering, 1e-9);
+      loadMFEMVectorFixtureCaseAndCompare<K>("tetrahedron", ordering, 1e-9);
+      loadMFEMVectorFixtureCaseAndCompare<K>("hexahedron", ordering, 1e-9);
+      loadMFEMVectorFixtureCaseAndCompare<K>("wedge", ordering, 1e-9);
+    }
+
+    template <size_t K>
+    void roundTripMFEMVectorFileFixtureFamilyAndCompare(const std::string& ordering)
+    {
+      roundTripMFEMVectorFixtureCaseAndCompare<K>("triangle", ordering, 1e-9);
+      roundTripMFEMVectorFixtureCaseAndCompare<K>("mixed2d", ordering, 1e-9);
+      roundTripMFEMVectorFixtureCaseAndCompare<K>("tetrahedron", ordering, 1e-9);
+      roundTripMFEMVectorFixtureCaseAndCompare<K>("hexahedron", ordering, 1e-9);
+      roundTripMFEMVectorFixtureCaseAndCompare<K>("wedge", ordering, 1e-9);
+    }
+
+    template <size_t K>
+    void loadAndPrintMFEMVectorFileFixtureFamilyAndCompare()
+    {
+      loadAndPrintMFEMVectorFixtureCaseAndCompare<K>("triangle", 1e-9);
+      loadAndPrintMFEMVectorFixtureCaseAndCompare<K>("mixed2d", 1e-9);
+      loadAndPrintMFEMVectorFixtureCaseAndCompare<K>("tetrahedron", 1e-9);
+      loadAndPrintMFEMVectorFixtureCaseAndCompare<K>("hexahedron", 1e-9);
+      loadAndPrintMFEMVectorFixtureCaseAndCompare<K>("wedge", 1e-9);
+    }
+  }
+
   /**
    * @brief Test saving and loading H1 GridFunction with degree 1 (scalar)
    */
@@ -1433,5 +1800,226 @@ namespace Rodin::Tests::Unit
     {
       EXPECT_NEAR(gf[i], gf_loaded[i], 1e-10);
     }
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, LoadMFEMStringFixture_H1_Degree1_Triangle_Scalar_ByNodes)
+  {
+    Mesh mesh =
+      Mesh<Context::Local>::Builder()
+      .initialize(2)
+      .nodes(3)
+      .vertex({0, 0})
+      .vertex({1, 0})
+      .vertex({0, 1})
+      .polytope(Polytope::Type::Triangle, {0, 1, 2})
+      .finalize();
+
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    H1 fes(std::integral_constant<size_t, 1>{}, mesh);
+    GridFunction gf(fes);
+
+    const std::string fixture = R"(FiniteElementSpace
+FiniteElementCollection: H1_2D_P1
+VDim: 1
+Ordering: 0
+
+1
+2
+3
+)";
+
+    std::istringstream in(fixture);
+    GridFunctionLoader<FileFormat::MFEM, H1<1, Real>, Math::Vector<Real>> loader(gf);
+    loader.load(in);
+
+    GridFunction expected(fes);
+    expected.project(RealFunction([](const Geometry::Point& p)
+    {
+      return 1.0 + p.x() + 2.0 * p.y();
+    }));
+
+    expectGridFunctionNear(gf, expected, 1e-12);
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, LoadMFEMFileFixtures_H1_Degree1_Scalar_ByNodes)
+  {
+    loadMFEMScalarFileFixtureFamilyAndCompare<1>();
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, LoadMFEMFileFixtures_H1_Degree2_Scalar_ByNodes)
+  {
+    loadMFEMScalarFileFixtureFamilyAndCompare<2>();
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, LoadMFEMFileFixtures_H1_Degree3_Scalar_ByNodes)
+  {
+    loadMFEMScalarFileFixtureFamilyAndCompare<3>();
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, LoadMFEMFileFixtures_H1_Degree4_Scalar_ByNodes)
+  {
+    loadMFEMScalarFileFixtureFamilyAndCompare<4>();
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, LoadMFEMFileFixtures_H1_Degree5_Scalar_ByNodes)
+  {
+    loadMFEMScalarFileFixtureFamilyAndCompare<5>();
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, LoadMFEMFileFixtures_H1_Degree6_Scalar_ByNodes)
+  {
+    loadMFEMScalarFileFixtureFamilyAndCompare<6>();
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree1_Scalar)
+  {
+    roundTripMFEMScalarFileFixtureFamilyAndCompare<1>();
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree2_Scalar)
+  {
+    roundTripMFEMScalarFileFixtureFamilyAndCompare<2>();
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree3_Scalar)
+  {
+    roundTripMFEMScalarFileFixtureFamilyAndCompare<3>();
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree4_Scalar)
+  {
+    roundTripMFEMScalarFileFixtureFamilyAndCompare<4>();
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree5_Scalar)
+  {
+    roundTripMFEMScalarFileFixtureFamilyAndCompare<5>();
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree6_Scalar)
+  {
+    roundTripMFEMScalarFileFixtureFamilyAndCompare<6>();
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, LoadMFEMFileFixtures_H1_Degree1_Vector_ByNodes)
+  {
+    loadMFEMVectorFileFixtureFamilyAndCompare<1>("by_nodes");
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, LoadMFEMFileFixtures_H1_Degree2_Vector_ByNodes)
+  {
+    loadMFEMVectorFileFixtureFamilyAndCompare<2>("by_nodes");
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, LoadMFEMFileFixtures_H1_Degree3_Vector_ByNodes)
+  {
+    loadMFEMVectorFileFixtureFamilyAndCompare<3>("by_nodes");
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, LoadMFEMFileFixtures_H1_Degree4_Vector_ByNodes)
+  {
+    loadMFEMVectorFileFixtureFamilyAndCompare<4>("by_nodes");
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, LoadMFEMFileFixtures_H1_Degree5_Vector_ByNodes)
+  {
+    loadMFEMVectorFileFixtureFamilyAndCompare<5>("by_nodes");
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, LoadMFEMFileFixtures_H1_Degree6_Vector_ByNodes)
+  {
+    loadMFEMVectorFileFixtureFamilyAndCompare<6>("by_nodes");
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree1_Vector_ByNodes)
+  {
+    roundTripMFEMVectorFileFixtureFamilyAndCompare<1>("by_nodes");
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree2_Vector_ByNodes)
+  {
+    roundTripMFEMVectorFileFixtureFamilyAndCompare<2>("by_nodes");
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree3_Vector_ByNodes)
+  {
+    roundTripMFEMVectorFileFixtureFamilyAndCompare<3>("by_nodes");
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree4_Vector_ByNodes)
+  {
+    roundTripMFEMVectorFileFixtureFamilyAndCompare<4>("by_nodes");
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree5_Vector_ByNodes)
+  {
+    roundTripMFEMVectorFileFixtureFamilyAndCompare<5>("by_nodes");
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree6_Vector_ByNodes)
+  {
+    roundTripMFEMVectorFileFixtureFamilyAndCompare<6>("by_nodes");
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, LoadByVDimPrintByNodesMFEMFileFixtures_H1_Degree1_Vector)
+  {
+    loadAndPrintMFEMVectorFileFixtureFamilyAndCompare<1>();
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, LoadByVDimPrintByNodesMFEMFileFixtures_H1_Degree2_Vector)
+  {
+    loadAndPrintMFEMVectorFileFixtureFamilyAndCompare<2>();
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, LoadByVDimPrintByNodesMFEMFileFixtures_H1_Degree3_Vector)
+  {
+    loadAndPrintMFEMVectorFileFixtureFamilyAndCompare<3>();
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, LoadByVDimPrintByNodesMFEMFileFixtures_H1_Degree4_Vector)
+  {
+    loadAndPrintMFEMVectorFileFixtureFamilyAndCompare<4>();
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, LoadByVDimPrintByNodesMFEMFileFixtures_H1_Degree5_Vector)
+  {
+    loadAndPrintMFEMVectorFileFixtureFamilyAndCompare<5>();
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, LoadByVDimPrintByNodesMFEMFileFixtures_H1_Degree6_Vector)
+  {
+    loadAndPrintMFEMVectorFileFixtureFamilyAndCompare<6>();
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree1_Vector_ByVDim)
+  {
+    roundTripMFEMVectorFileFixtureFamilyAndCompare<1>("by_vdim");
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree2_Vector_ByVDim)
+  {
+    roundTripMFEMVectorFileFixtureFamilyAndCompare<2>("by_vdim");
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree3_Vector_ByVDim)
+  {
+    roundTripMFEMVectorFileFixtureFamilyAndCompare<3>("by_vdim");
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree4_Vector_ByVDim)
+  {
+    roundTripMFEMVectorFileFixtureFamilyAndCompare<4>("by_vdim");
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree5_Vector_ByVDim)
+  {
+    roundTripMFEMVectorFileFixtureFamilyAndCompare<5>("by_vdim");
+  }
+
+  TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree6_Vector_ByVDim)
+  {
+    roundTripMFEMVectorFileFixtureFamilyAndCompare<6>("by_vdim");
   }
 }
