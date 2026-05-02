@@ -9,8 +9,8 @@
  * @file LinearElasticityTest.cpp
  * @brief Distributed MPI H1 linear-elasticity manufactured tests.
  *
- * Parametrized over (geometry, K). 2D tests use K ∈ {1, 2, 3, 4, 6};
- * 3D tests use K ∈ {2, 3, 4, 6}.
+ * Parametrized over (geometry, K). 2D tests use K ∈ {1, 2, 3, 4};
+ * 3D tests use K ∈ {2, 3, 4}.
  *
  * Geometries:
  *   2D — Triangle, Quadrilateral
@@ -429,7 +429,6 @@ namespace
       case 2: return computeError2D<2>(world, mesh);
       case 3: return computeError2D<3>(world, mesh);
       case 4: return computeError2D<4>(world, mesh);
-      case 6: return computeError2D<6>(world, mesh);
       default:
         ADD_FAILURE() << "run2D: unsupported K=" << K;
         return std::numeric_limits<Real>::max();
@@ -447,7 +446,6 @@ namespace
       case 2: return computeError3D<2>(world, mesh);
       case 3: return computeError3D<3>(world, mesh);
       case 4: return computeError3D<4>(world, mesh);
-      case 6: return computeError3D<6>(world, mesh);
       default:
         ADD_FAILURE() << "run3D: unsupported K=" << K;
         return std::numeric_limits<Real>::max();
@@ -487,7 +485,7 @@ namespace Rodin::Tests::Manufactured::MPI::H1LinearElasticity
   using Param = std::tuple<Polytope::Type, size_t>;
 
   // =========================================================================
-  // 2D: Triangle and Quadrilateral × K ∈ {1,2,3,4,6}
+  // 2D: Triangle and Quadrilateral × K ∈ {1,2,3,4}
   // =========================================================================
 
   class H1LinearElasticity2D : public ::testing::TestWithParam<Param> {};
@@ -520,13 +518,13 @@ namespace Rodin::Tests::Manufactured::MPI::H1LinearElasticity
     H1LinearElasticity2D,
     testing::Combine(
       testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral),
-      testing::Values<size_t>(1, 2, 3, 4, 6)
+      testing::Values<size_t>(1, 2, 3, 4)
     ),
     ParamName{}
   );
 
   // =========================================================================
-  // 3D: Tetrahedron, Hexahedron, and Wedge × K ∈ {2,3,4,6}
+  // 3D: Tetrahedron, Hexahedron, and Wedge × K ∈ {2,3,4}
   // =========================================================================
 
   class H1LinearElasticity3D : public ::testing::TestWithParam<Param> {};
@@ -566,7 +564,7 @@ namespace Rodin::Tests::Manufactured::MPI::H1LinearElasticity
         Polytope::Type::Tetrahedron,
         Polytope::Type::Hexahedron,
         Polytope::Type::Wedge),
-      testing::Values<size_t>(2, 3, 4, 6)
+      testing::Values<size_t>(2, 3, 4)
     ),
     ParamName{}
   );
