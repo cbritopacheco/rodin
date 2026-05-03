@@ -138,14 +138,16 @@ namespace Rodin::Variational
           m_assembly(other.m_assembly),
           m_operator(PETSC_NULLPTR)
       {
-        PetscErrorCode ierr;
-        const MPI_Comm comm = getPETScComm(m_u.get(), m_v.get());
-        ierr = MatCreate(comm, &m_operator);
-        assert(ierr == PETSC_SUCCESS);
-
+        PetscErrorCode ierr = PETSC_SUCCESS;
         if (other.m_operator)
         {
           ierr = MatDuplicate(other.m_operator, MAT_COPY_VALUES, &m_operator);
+          assert(ierr == PETSC_SUCCESS);
+        }
+        else
+        {
+          const MPI_Comm comm = getPETScComm(m_u.get(), m_v.get());
+          ierr = MatCreate(comm, &m_operator);
           assert(ierr == PETSC_SUCCESS);
         }
         (void) ierr;
@@ -184,14 +186,16 @@ namespace Rodin::Variational
           m_v = other.m_v;
           m_assembly = other.m_assembly;
 
-          PetscErrorCode ierr;
-          const MPI_Comm comm = getPETScComm(m_u.get(), m_v.get());
-          ierr = MatCreate(comm, &m_operator);
-          assert(ierr == PETSC_SUCCESS);
-
+          PetscErrorCode ierr = PETSC_SUCCESS;
           if (other.m_operator)
           {
             ierr = MatDuplicate(other.m_operator, MAT_COPY_VALUES, &m_operator);
+            assert(ierr == PETSC_SUCCESS);
+          }
+          else
+          {
+            const MPI_Comm comm = getPETScComm(m_u.get(), m_v.get());
+            ierr = MatCreate(comm, &m_operator);
             assert(ierr == PETSC_SUCCESS);
           }
           (void) ierr;

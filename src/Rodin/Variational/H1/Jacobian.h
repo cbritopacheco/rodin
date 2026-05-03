@@ -28,7 +28,10 @@
 #ifndef RODIN_VARIATIONAL_H1_JACOBIAN_H
 #define RODIN_VARIATIONAL_H1_JACOBIAN_H
 
+#include <vector>
+
 #include "Rodin/Variational/ForwardDecls.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Variational/Jacobian.h"
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
@@ -101,8 +104,63 @@ namespace Rodin::Variational
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
       Jacobian(const OperandType& u) : Parent(u) {}
-      Jacobian(const Jacobian& other) : Parent(other) {}
-      Jacobian(Jacobian&& other) : Parent(std::move(other)) {}
+
+      Jacobian(const Jacobian& other)
+        : Parent(other)
+      {}
+
+      Jacobian(Jacobian&& other)
+        : Parent(std::move(other))
+      {}
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
+      {
+        const size_t k = H1Element<K, ScalarType>(polytope.getGeometry()).getOrder();
+        return (k == 0) ? 0 : (k - 1);
+      }
+
+      Jacobian* copy() const noexcept override { return new Jacobian(*this); }
+
+      void interpolate(SpatialMatrixType& out, const IntegrationPoint& ip) const
+      {
+        const auto& p = ip.getPoint();
+        const auto& polytope = p.getPolytope();
+        const size_t d = polytope.getDimension();
+        const Index i = polytope.getIndex();
+
+        const auto& gf  = this->getOperand();
+        const auto& fes = gf.getFiniteElementSpace();
+        const size_t vdim = fes.getVectorDimension();
+
+        const auto feS = H1Element<K, ScalarType>(polytope.getGeometry());
+        const size_t nscalar = feS.getCount();
+        const auto& tab = feS.getTabulation(ip.getQuadratureFormula());
+        const auto JinvT = p.getJacobianInverse().transpose();
+
+        SpatialVectorType ref(d);
+        SpatialVectorType phys(d);
+
+        out.resize(vdim, d);
+        out.setZero();
+
+        for (size_t alpha = 0; alpha < nscalar; ++alpha)
+        {
+          const auto gref = tab.getGradient(ip.getIndex(), alpha);
+          for (size_t j = 0; j < d; ++j)
+            ref(j) = gref[j];
+
+          phys = JinvT * ref;
+
+          for (size_t comp = 0; comp < vdim; ++comp)
+          {
+            const size_t local = alpha * vdim + comp;
+            const auto uval = gf[fes.getGlobalIndex({d, i}, local)];
+            for (size_t j = 0; j < d; ++j)
+              out(comp, j) += uval * phys(j);
+          }
+        }
+      }
 
       void interpolate(SpatialMatrixType& out, const Geometry::Point& p) const
       {
@@ -126,7 +184,7 @@ namespace Rodin::Variational
             Math::SpatialPoint rc;
             tracePolytope->getTransformation().inverse(rc, pc);
             const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
-            this->interpolate(out, np);
+            interpolate(out, np);
             return;
           }
           else
@@ -150,7 +208,7 @@ namespace Rodin::Variational
                 Math::SpatialPoint rc;
                 tracePolytope->getTransformation().inverse(rc, pc);
                 const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
-                this->interpolate(out, np);
+                interpolate(out, np);
                 return;
               }
             }
@@ -161,7 +219,6 @@ namespace Rodin::Variational
           }
         }
 
-        // cell
         assert(d == mesh.getDimension());
 
         const auto& gf  = this->getOperand();
@@ -169,59 +226,34 @@ namespace Rodin::Variational
         const size_t vdim = fes.getVectorDimension();
 
         const auto geom = polytope.getGeometry();
-        const auto& rc  = p.getReferenceCoordinates();
-
-        // scalar element gives scalar basis gradients in reference coords
         const auto feS = H1Element<K, ScalarType>(geom);
         const size_t nscalar = feS.getCount();
-
-        // phys gradient mapping
+        const auto& rc = p.getReferenceCoordinates();
         const auto JinvT = p.getJacobianInverse().transpose();
 
-        static thread_local SpatialVectorType s_ref;
-        static thread_local SpatialVectorType s_phys;
-        s_ref.resize(d);
-        s_phys.resize(d);
+        SpatialVectorType ref(d);
+        SpatialVectorType phys(d);
 
-        SpatialMatrixType res(vdim, d);
-        res.setZero();
+        out.resize(vdim, d);
+        out.setZero();
 
-        // Local ordering must match your vector H1 element:
-        // local = alpha * vdim + comp
         for (size_t alpha = 0; alpha < nscalar; ++alpha)
         {
-          const auto gref = feS.getBasis(alpha).getGradient()(rc); // length d
-
+          const auto gref = feS.getBasis(alpha).getGradient()(rc);
           for (size_t j = 0; j < d; ++j)
-            s_ref(j) = gref(j);
+            ref(j) = gref(j);
 
-          s_phys = JinvT * s_ref; // ∇_x φ_alpha
+          phys = JinvT * ref;
 
           for (size_t comp = 0; comp < vdim; ++comp)
           {
             const size_t local = alpha * vdim + comp;
-
-            // J(u) row 'comp' gets contribution u_comp(alpha) * (∇φ_alpha)^T
             const auto uval = gf[fes.getGlobalIndex({d, i}, local)];
-            if (comp < vdim)
-            {
-              for (size_t j = 0; j < d; ++j)
-                res(comp, j) += uval * s_phys(j);
-            }
+            for (size_t j = 0; j < d; ++j)
+              out(comp, j) += uval * phys(j);
           }
         }
-
-        out = std::move(res);
       }
-
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
-      {
-        const size_t k = H1Element<K, ScalarType>(polytope.getGeometry()).getOrder();
-        return (k == 0) ? 0 : (k - 1);
-      }
-
-      Jacobian* copy() const noexcept override { return new Jacobian(*this); }
   };
 
   /**
@@ -394,16 +426,15 @@ namespace Rodin::Variational
         const auto& tab   = feS.getTabulation(qf);
         const auto  JinvT = p.getJacobianInverse().transpose();
 
-        static thread_local SpatialVectorType s_ref;
-        s_ref.resize(d);
+        SpatialVectorType ref(d);
 
         for (size_t alpha = 0; alpha < nscalar; ++alpha)
         {
           const auto gref = tab.getGradient(qp, alpha); // span size d
           for (size_t j = 0; j < d; ++j)
-            s_ref(j) = gref[j];
+            ref(j) = gref[j];
 
-          m_cache.grad_phys[alpha] = JinvT * s_ref;
+          m_cache.grad_phys[alpha] = JinvT * ref;
         }
 
         return *this;

@@ -96,7 +96,8 @@ namespace Rodin::Variational
        * @param p Point at which to evaluate
        * @returns @f$ \sqrt{f(p)} @f$
        */
-      Real getValue(const Geometry::Point& p) const
+      template <class Point>
+      auto getValue(const Point& p) const
       {
         return Math::sqrt(this->getOperand().getValue(p));
       }

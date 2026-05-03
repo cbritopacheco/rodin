@@ -30,6 +30,7 @@
 #define RODIN_VARIATIONAL_P1_JACOBIAN_H
 
 #include "Rodin/Variational/ForwardDecls.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Variational/Jacobian.h"
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 #include "Rodin/Variational/Mult.h"
@@ -111,6 +112,11 @@ namespace Rodin::Variational
       Jacobian(Jacobian&& other)
         : Parent(std::move(other))
       {}
+
+      void interpolate(SpatialMatrixType& out, const IntegrationPoint& ip) const
+      {
+        interpolate(out, ip.getPoint());
+      }
 
       void interpolate(SpatialMatrixType& out, const Geometry::Point& p) const
       {

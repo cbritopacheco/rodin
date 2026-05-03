@@ -271,6 +271,18 @@ namespace Rodin::Heart::CCMLC2014::Solver
       const Report& getReport() const noexcept { return m_report; }
       const DenseVector& getUnknowns() const noexcept { return m_x; }
 
+      void restore(
+          const State& state,
+          const History& history,
+          const DenseVector& unknowns,
+          const Report& report)
+      {
+        m_state = state;
+        m_history = history;
+        m_x = unknowns;
+        m_report = report;
+      }
+
     private:
       static DenseVector packUnknowns(const State& s)
       {

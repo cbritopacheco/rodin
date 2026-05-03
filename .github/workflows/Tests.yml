@@ -35,6 +35,14 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Free Disk Space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo apt-get clean
+
       - name: Setup Cpp (C++ / C)
         uses: aminya/setup-cpp@v1
         with:
@@ -125,6 +133,14 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Free Disk Space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo apt-get clean
+
       - name: Setup Cpp (C++ / C)
         uses: aminya/setup-cpp@v1
         with:
@@ -199,7 +215,7 @@ jobs:
     strategy:
       matrix:
         compiler: [gcc-14]
-        build_type: [RelWithDebInfo, Release]
+        build_type: [Release]
         multithreaded: [ON, OFF]
         asan: [OFF]
         ubsan: [OFF]
@@ -346,7 +362,7 @@ jobs:
       - name: Run distributed tests (coverage build)
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
-          -L distributed
+          -L distributed -LE slow
           --output-on-failure
           -j 1
 

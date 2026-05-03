@@ -228,8 +228,9 @@ namespace Rodin::Variational
        * @param p Point at which to evaluate
        * @returns @f$ f(p) \cdot g(p) @f$ (scalar result)
        */
+      template <class Point>
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      auto getValue(const Point& p) const
       {
         const auto lhs = getLHS().getValue(p);
         const auto rhs = getRHS().getValue(p);
@@ -389,7 +390,7 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         const auto& ip = this->getRHS().getIntegrationPoint();
-        const auto lhs = getLHS().getValue(ip.getPoint());
+        const auto lhs = getLHS().getValue(ip);
         const auto rhs = getRHS().getBasis(local);
         return Math::dot(lhs, rhs);
       }
@@ -528,7 +529,7 @@ namespace Rodin::Variational
       {
         const auto& p = getLHS().getIntegrationPoint();
         const auto lhs = getLHS().getBasis(local);
-        const auto rhs = getRHS().getValue(p.getPoint());
+        const auto rhs = getRHS().getValue(p);
         return Math::dot(lhs, rhs);
       }
 

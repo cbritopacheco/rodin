@@ -79,6 +79,12 @@ namespace Rodin::Variational
         return getLHS().getValue(p) <= getRHS().getValue(p);
       }
 
+      constexpr
+      Boolean getValue(const IntegrationPoint& ip) const
+      {
+        return getLHS().getValue(ip) <= getRHS().getValue(ip);
+      }
+
       const auto& getLHS() const
       {
         assert(m_lhs);
@@ -133,4 +139,3 @@ namespace Rodin::Variational
 }
 
 #endif
-

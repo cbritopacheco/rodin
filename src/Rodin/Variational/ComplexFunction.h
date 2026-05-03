@@ -65,9 +65,18 @@ namespace Rodin::Variational
       virtual ~ComplexFunctionBase() = default;
 
       constexpr
-      decltype(auto) getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
+      }
+
+      constexpr
+      auto getValue(const IntegrationPoint& ip) const
+      {
+        if constexpr (requires (const Derived& f, const IntegrationPoint& q) { f.getValue(q); })
+          return static_cast<const Derived&>(*this).getValue(ip);
+        else
+          return static_cast<const Derived&>(*this).getValue(ip.getPoint());
       }
 
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
@@ -292,6 +301,12 @@ namespace Rodin::Variational
         return m_nested->getValue(v);
       }
 
+      constexpr
+      ScalarType getValue(const IntegrationPoint& ip) const
+      {
+        return m_nested->getValue(ip);
+      }
+
       template <class ... Args>
       constexpr
       ComplexFunction& traceOf(const Args&... args)
@@ -374,6 +389,22 @@ namespace Rodin::Variational
         return { m_re->getValue(p), m_imag->getValue(p) };
       }
 
+      constexpr
+      Complex getValue(const IntegrationPoint& ip) const
+      {
+        Complex res;
+        if constexpr (requires { m_re->getValue(ip); })
+          res.real(m_re->getValue(ip));
+        else
+          res.real(m_re->getValue(ip.getPoint()));
+
+        if constexpr (requires { m_imag->getValue(ip); })
+          res.imag(m_imag->getValue(ip));
+        else
+          res.imag(m_imag->getValue(ip.getPoint()));
+        return res;
+      }
+
       template <class ... Args>
       constexpr
       ComplexFunction& traceOf(const Args&... args)
@@ -447,6 +478,15 @@ namespace Rodin::Variational
         return m_f(v);
       }
 
+      constexpr
+      Complex getValue(const IntegrationPoint& ip) const
+      {
+        if constexpr (std::is_invocable_r_v<Complex, F, const IntegrationPoint&>)
+          return m_f(ip);
+        else
+          return m_f(ip.getPoint());
+      }
+
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
         return std::nullopt;
@@ -502,6 +542,22 @@ namespace Rodin::Variational
         return { m_re(p), m_imag(p) };
       }
 
+      constexpr
+      Complex getValue(const IntegrationPoint& ip) const
+      {
+        Complex res;
+        if constexpr (std::is_invocable_v<FReal, const IntegrationPoint&>)
+          res.real(m_re(ip));
+        else
+          res.real(m_re(ip.getPoint()));
+
+        if constexpr (std::is_invocable_v<FImag, const IntegrationPoint&>)
+          res.imag(m_imag(ip));
+        else
+          res.imag(m_imag(ip.getPoint()));
+        return res;
+      }
+
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
         return std::nullopt;
@@ -527,4 +583,3 @@ namespace Rodin::Variational
 }
 
 #endif
-

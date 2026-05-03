@@ -1382,6 +1382,14 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(pq.getSize(), 0u)
       << "Rank " << world.rank()
       << ": quadrature should have at least one point.";
+
+    const auto& qp = pq.getPoint(0);
+    EXPECT_EQ(qp.getPolytope().getMesh(), mpiMesh.getShard())
+      << "Rank " << world.rank()
+      << ": MPI quadrature points should remain attached to the local shard.";
+    EXPECT_TRUE(mpiMesh.isLocalPoint(qp))
+      << "Rank " << world.rank()
+      << ": distributed meshes should accept shard-local quadrature points.";
   }
 
   TEST(Rodin_MPI_Geometry_Mesh, GetBoundary_FaceCount)
