@@ -40,8 +40,10 @@ namespace Rodin::Solid
         Real stiffness = 1.0;
         Real damping = 0.0;
         Real destructionRate = 0.0;
+        Real spontaneousDecayRate = 0.0;
         Real crossBridgeStiffness = 0.0;
         Real contractility = 0.0;
+
         Initial initial;
       };
 
@@ -140,12 +142,18 @@ namespace Rodin::Solid
         const Real alpha = m_parameters.destructionRate;
         const Real k0 = m_parameters.crossBridgeStiffness;
         const Real sigma0 = m_parameters.contractility;
+        const Real lambda = m_parameters.spontaneousDecayRate;
+
         const Real delta = activeExtension - previousActiveExtension;
         const Real activationPlus = std::max<Real>(activation, 0.0);
         const Real n0 = starling(previousActiveExtension);
 
         const Real denominatorGamma =
-          1.0 + dt * std::abs(activation) + alpha * std::abs(delta);
+          1.0
+          + dt * std::abs(activation)
+          + alpha * std::abs(delta)
+          + dt * lambda;
+
         const Real gammaSquare =
           std::max<Real>(1.e-16,
               (oldState.gamma * oldState.gamma + dt * n0 * k0 * activationPlus)
@@ -158,7 +166,8 @@ namespace Rodin::Solid
           1.0
           + 0.5 * dt * n0 * k0 * activationPlus / gammaSquare
           + 0.5 * dt * std::abs(activation)
-          + 0.5 * alpha * std::abs(delta);
+          + 0.5 * alpha * std::abs(delta)
+          + dt * lambda;
 
         state.beta =
           (oldState.beta + state.gamma * delta
@@ -224,37 +233,52 @@ namespace Rodin::Solid
         const Real alpha = m_parameters.destructionRate;
         const Real k0 = m_parameters.crossBridgeStiffness;
         const Real sigma0 = m_parameters.contractility;
+        const Real lambda = m_parameters.spontaneousDecayRate;
+
         const Real delta = activeExtension - previousActiveExtension;
         const Real absDelta = std::abs(delta);
         const Real sign = delta > 0.0 ? 1.0 : (delta < 0.0 ? -1.0 : 0.0);
         const Real activationPlus = std::max<Real>(activation, 0.0);
         const Real n0 = starling(previousActiveExtension);
 
-        const Real Dg = 1.0 + dt * std::abs(activation) + alpha * absDelta;
-        const Real Ng = oldState.gamma * oldState.gamma
-                      + dt * n0 * k0 * activationPlus;
+        const Real Dg =
+          1.0
+          + dt * std::abs(activation)
+          + alpha * absDelta
+          + dt * lambda;
+
+        const Real Ng =
+          oldState.gamma * oldState.gamma
+          + dt * n0 * k0 * activationPlus;
+
         const Real gammaSquare = std::max<Real>(1.e-16, Ng / Dg);
         const Real gamma = std::sqrt(gammaSquare);
 
         const Real dGammaSquare = -Ng * alpha * sign / (Dg * Dg);
         const Real dGamma = 0.5 * dGammaSquare / gamma;
 
-        const Real Nb = oldState.beta + gamma * delta
-                      + dt * n0 * sigma0 * activationPlus / gamma;
+        const Real Nb =
+          oldState.beta
+          + gamma * delta
+          + dt * n0 * sigma0 * activationPlus / gamma;
+
         const Real Db =
           1.0
           + 0.5 * dt * n0 * k0 * activationPlus / gammaSquare
           + 0.5 * dt * std::abs(activation)
-          + 0.5 * alpha * absDelta;
+          + 0.5 * alpha * absDelta
+          + dt * lambda;
 
         const Real dNb =
           dGamma * delta
           + gamma
           - dt * n0 * sigma0 * activationPlus * dGamma / (gamma * gamma);
+
         const Real dDb =
           -0.5 * dt * n0 * k0 * activationPlus
             * dGammaSquare / (gammaSquare * gammaSquare)
           + 0.5 * alpha * sign;
+
         const Real dBeta = (dNb * Db - Nb * dDb) / (Db * Db);
 
         return dGamma * (Nb / Db) + gamma * dBeta;
