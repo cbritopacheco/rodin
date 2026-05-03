@@ -487,6 +487,35 @@ namespace
         "/tmp/rodin_hdf5_gf_dofs_" + polytopeLabel(type) + ".h5";
 
     Mesh mesh = makeMesh(type);
+    if (type == Polytope::Type::Point)
+    {
+      P0 fes(mesh);
+      GridFunction gf(fes);
+      gf[0] = 1.0;
+
+      gf.save(gfFile, FileFormat::HDF5);
+
+      hid_t h5 = H5Fopen(gfFile.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+      ASSERT_GE(h5, 0);
+      hid_t dset = H5Dopen2(h5, "/GridFunction/Values/Data", H5P_DEFAULT);
+      ASSERT_GE(dset, 0);
+      hid_t dspace = H5Dget_space(dset);
+      hsize_t count = 0;
+      H5Sget_simple_extent_dims(dspace, &count, nullptr);
+      EXPECT_EQ(static_cast<size_t>(count), static_cast<size_t>(gf.getData().size()));
+      H5Sclose(dspace);
+      H5Dclose(dset);
+      H5Fclose(h5);
+
+      GridFunction loaded(fes);
+      loaded.load(gfFile, FileFormat::HDF5);
+      ASSERT_EQ(loaded.getData().size(), gf.getData().size());
+      EXPECT_DOUBLE_EQ(loaded.getData()[0], gf.getData()[0]);
+
+      std::remove(gfFile.c_str());
+      return;
+    }
+
     P1 fes(mesh);
     GridFunction gf(fes);
     gf = [](const Geometry::Point& p) { return p.x() + 1.0; };
@@ -539,6 +568,38 @@ namespace
         "/tmp/rodin_hdf5_gf_sa_" + polytopeLabel(type) + ".h5";
 
     Mesh mesh = makeMesh(type);
+    if (type == Polytope::Type::Point)
+    {
+      P0 fes(mesh);
+      GridFunction gf(fes);
+      gf[0] = 1.0;
+
+      gf.save(gfFile, FileFormat::HDF5);
+
+      hid_t h5 = H5Fopen(gfFile.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+      ASSERT_GE(h5, 0);
+      hid_t metaSize = H5Dopen2(h5, "/GridFunction/Meta/Size", H5P_DEFAULT);
+      ASSERT_GE(metaSize, 0);
+      H5Dclose(metaSize);
+      hid_t metaDim = H5Dopen2(h5, "/GridFunction/Meta/Dimension", H5P_DEFAULT);
+      ASSERT_GE(metaDim, 0);
+      H5Dclose(metaDim);
+      hid_t values = H5Dopen2(h5, "/GridFunction/Values/Data", H5P_DEFAULT);
+      ASSERT_GE(values, 0);
+      hid_t dspace = H5Dget_space(values);
+      int rank = H5Sget_simple_extent_ndims(dspace);
+      ASSERT_EQ(rank, 1);
+      hsize_t count = 0;
+      H5Sget_simple_extent_dims(dspace, &count, nullptr);
+      EXPECT_EQ(static_cast<size_t>(count), static_cast<size_t>(gf.getData().size()));
+
+      H5Sclose(dspace);
+      H5Dclose(values);
+      H5Fclose(h5);
+      std::remove(gfFile.c_str());
+      return;
+    }
+
     P1 fes(mesh);
     GridFunction gf(fes);
     gf = [](const Geometry::Point& p) { return p.x() + 1.0; };
@@ -637,6 +698,25 @@ namespace
     const boost::filesystem::path stem = testDir / "vis";
 
     Mesh mesh = makeMesh(type);
+    if (type == Polytope::Type::Point)
+    {
+      {
+        XDMF xdmf(stem);
+        xdmf.setMesh(mesh);
+        xdmf.write(0.0);
+        xdmf.close();
+      }
+
+      const auto meshH5 = testDir / "vis.mesh.h5";
+      ASSERT_TRUE(boost::filesystem::exists(meshH5));
+      hid_t h5 = H5Fopen(meshH5.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+      ASSERT_GE(h5, 0);
+      EXPECT_GE(H5Lexists(h5, "/Mesh/XDMF/Topology", H5P_DEFAULT), 1);
+      H5Fclose(h5);
+      boost::filesystem::remove_all(testDir);
+      return;
+    }
+
     P1 fes(mesh);
     GridFunction gf(fes);
     gf.setName("field");
@@ -691,6 +771,34 @@ namespace
     const boost::filesystem::path stem = testDir / "output";
 
     Mesh mesh = makeMesh(type);
+    if (type == Polytope::Type::Point)
+    {
+      {
+        XDMF xdmf(stem);
+        xdmf.setMesh(mesh);
+        xdmf.write(0.0);
+        xdmf.write(1.0);
+        xdmf.close();
+
+        EXPECT_TRUE(xdmf.isClosed());
+        EXPECT_EQ(xdmf.getSnapshotCount(), 2u);
+        EXPECT_EQ(xdmf.getGridCount(), 1u);
+      }
+
+      const auto xdmfFile = stem.string() + ".xdmf";
+      std::ifstream ifs(xdmfFile);
+      ASSERT_TRUE(ifs.good());
+      std::ostringstream buffer;
+      buffer << ifs.rdbuf();
+      const auto text = buffer.str();
+      EXPECT_NE(text.find("Xdmf"), std::string::npos);
+      EXPECT_NE(text.find("Topology"), std::string::npos);
+      EXPECT_NE(text.find("/Mesh/XDMF/Topology"), std::string::npos);
+
+      boost::filesystem::remove_all(testDir);
+      return;
+    }
+
     P1 fes(mesh);
     GridFunction gf(fes);
     gf.setName("temperature");
