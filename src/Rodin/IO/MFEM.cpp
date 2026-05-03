@@ -124,8 +124,16 @@ namespace Rodin::IO
             }
             if (m_dimension > 0)
             {
-              connectivity.polytope(g->geometry, std::move(g->vertices));
-              attrs.set({ m_dimension - 1, i }, g->attribute);
+              if (g->geometry == Geometry::Polytope::Type::Point)
+              {
+                assert(g->vertices.size() == 1);
+                attrs.set({ 0, g->vertices[0] }, g->attribute);
+              }
+              else
+              {
+                connectivity.polytope(g->geometry, std::move(g->vertices));
+                attrs.set({ m_dimension - 1, i }, g->attribute);
+              }
             }
           }
           continue;
