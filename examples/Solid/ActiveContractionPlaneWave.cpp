@@ -118,7 +118,6 @@ int main(int, char**)
   activeParams.stiffness            = 200.0;
   activeParams.damping              = 0.5;
   activeParams.destructionRate      = 0.4;
-  activeParams.spontaneousDecayRate = 0;
   activeParams.crossBridgeStiffness = 100.0;
   activeParams.contractility        = 80.0;
   activeParams.initial.extension    = 0.0;
@@ -146,11 +145,11 @@ int main(int, char**)
   const size_t nWaves = 2;
 
   PlaneWaveParams wave;
-  wave.amplitude      = 1.5;
+  wave.amplitude      = 20;
   wave.speed          = 1.0;
   wave.width          = 0.05;
   wave.start          = -0.3;
-  wave.gap = 100;
+  wave.gap            = 5;
 
   auto activationAt = [&](Real y, Real t) -> Real
   {
@@ -165,7 +164,8 @@ int main(int, char**)
       const Real arg = (y - center) / wave.width;
       activation = std::max(activation, wave.amplitude * std::exp(-arg * arg));
     }
-    return activation;
+    return activation - 0.5 * wave.amplitude;   // offset so activation is
+                                                // negative at rest
   };
 
   const Real   dtStep = 0.02;

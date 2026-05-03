@@ -40,7 +40,6 @@ namespace Rodin::Solid
         Real stiffness = 1.0;
         Real damping = 0.0;
         Real destructionRate = 0.0;
-        Real spontaneousDecayRate = 0.0;
         Real crossBridgeStiffness = 0.0;
         Real contractility = 0.0;
 
@@ -142,7 +141,6 @@ namespace Rodin::Solid
         const Real alpha = m_parameters.destructionRate;
         const Real k0 = m_parameters.crossBridgeStiffness;
         const Real sigma0 = m_parameters.contractility;
-        const Real lambda = m_parameters.spontaneousDecayRate;
 
         const Real delta = activeExtension - previousActiveExtension;
         const Real activationPlus = std::max<Real>(activation, 0.0);
@@ -151,8 +149,7 @@ namespace Rodin::Solid
         const Real denominatorGamma =
           1.0
           + dt * std::abs(activation)
-          + alpha * std::abs(delta)
-          + dt * lambda;
+          + alpha * std::abs(delta);
 
         const Real gammaSquare =
           std::max<Real>(1.e-16,
@@ -166,8 +163,7 @@ namespace Rodin::Solid
           1.0
           + 0.5 * dt * n0 * k0 * activationPlus / gammaSquare
           + 0.5 * dt * std::abs(activation)
-          + 0.5 * alpha * std::abs(delta)
-          + dt * lambda;
+          + 0.5 * alpha * std::abs(delta);
 
         state.beta =
           (oldState.beta + state.gamma * delta
@@ -233,7 +229,6 @@ namespace Rodin::Solid
         const Real alpha = m_parameters.destructionRate;
         const Real k0 = m_parameters.crossBridgeStiffness;
         const Real sigma0 = m_parameters.contractility;
-        const Real lambda = m_parameters.spontaneousDecayRate;
 
         const Real delta = activeExtension - previousActiveExtension;
         const Real absDelta = std::abs(delta);
@@ -244,8 +239,7 @@ namespace Rodin::Solid
         const Real Dg =
           1.0
           + dt * std::abs(activation)
-          + alpha * absDelta
-          + dt * lambda;
+          + alpha * absDelta;
 
         const Real Ng =
           oldState.gamma * oldState.gamma
@@ -266,8 +260,7 @@ namespace Rodin::Solid
           1.0
           + 0.5 * dt * n0 * k0 * activationPlus / gammaSquare
           + 0.5 * dt * std::abs(activation)
-          + 0.5 * alpha * absDelta
-          + dt * lambda;
+          + 0.5 * alpha * absDelta;
 
         const Real dNb =
           dGamma * delta
