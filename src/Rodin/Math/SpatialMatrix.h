@@ -1,3 +1,11 @@
+/**
+ * @file SpatialMatrix.h
+ * @brief Fixed-capacity spatial matrix with bounded maximum dimensions.
+ *
+ * This file provides a spatial matrix class with maximum dimensions bounded by
+ * RODIN_MAXIMAL_SPACE_DIMENSION. Used for geometric transformations, Jacobians,
+ * and other spatial operators to optimize memory allocation.
+ */
 #ifndef RODIN_MATH_SPATIALMATRIX_H
 #define RODIN_MATH_SPATIALMATRIX_H
 
@@ -88,6 +96,35 @@ namespace Rodin::Math
           m_data(other)
       {
         assert(m_rows <= MaxSize && m_cols <= MaxSize);
+      }
+
+      static constexpr SpatialMatrix Identity(std::uint8_t rows, std::uint8_t cols)
+      {
+        assert(rows <= MaxSize && cols <= MaxSize);
+
+        SpatialMatrix I(rows, cols);
+        I.setZero();
+
+        const std::uint8_t n = std::min(rows, cols);
+
+        switch (n)
+        {
+          case 3:
+            I.m_data(2, 2) = ScalarType(1);
+            [[fallthrough]];
+          case 2:
+            I.m_data(1, 1) = ScalarType(1);
+            [[fallthrough]];
+          case 1:
+            I.m_data(0, 0) = ScalarType(1);
+            break;
+          case 0:
+            break;
+          default:
+            assert(false);
+        }
+
+        return I;
       }
 
       template <class EigenDerived>
@@ -748,6 +785,15 @@ namespace Rodin::Math
         return m_data(0, 0);
       }
 
+      /**
+       * @brief Solves the linear system @f$ Ax = b @f$.
+       *
+       * Uses Cramer's rule for small systems (1×1, 2×2, 3×3).
+       * The matrix must be square and non-singular.
+       *
+       * @param[in] b Right-hand side vector
+       * @return Solution vector @f$ x = A^{-1} b @f$
+       */
       [[nodiscard]] inline
       SpatialVector<ScalarType>
       solve(const SpatialVector<ScalarType>& b) const noexcept
@@ -955,6 +1001,12 @@ namespace Rodin::Math
         }
       }
 
+      /**
+       * @brief Extracts the @f$ i @f$-th row as a SpatialVector.
+       *
+       * @param[in] i Row index (0-based)
+       * @return Row vector of length cols()
+       */
       constexpr
       SpatialVector<Scalar> row(std::uint8_t i) const noexcept
       {
@@ -979,6 +1031,12 @@ namespace Rodin::Math
         return v;
       }
 
+      /**
+       * @brief Extracts the @f$ j @f$-th column as a SpatialVector.
+       *
+       * @param[in] j Column index (0-based)
+       * @return Column vector of length rows()
+       */
       constexpr
       SpatialVector<Scalar> col(std::uint8_t j) const noexcept
       {
@@ -1003,6 +1061,16 @@ namespace Rodin::Math
         return v;
       }
 
+      /**
+       * @brief Computes the Moore-Penrose pseudo-inverse.
+       *
+       * For full column rank matrices (@f$ m \geq n @f$), computes
+       * @f$ A^+ = (A^T A)^{-1} A^T @f$.
+       * For full row rank matrices (@f$ m < n @f$), computes
+       * @f$ A^+ = A^T (A A^T)^{-1} @f$.
+       *
+       * @return The pseudo-inverse @f$ A^+ @f$
+       */
       constexpr
       SpatialMatrix pseudoInverse() const noexcept
       {
@@ -1025,6 +1093,12 @@ namespace Rodin::Math
         }
       }
 
+      /**
+       * @brief Scales all elements by a scalar.
+       *
+       * @param[in] s Scalar multiplier
+       * @return Reference to @f$ *this @f$ after scaling
+       */
       constexpr
       SpatialMatrix& operator*=(const Scalar& s) noexcept
       {
@@ -1067,6 +1141,15 @@ namespace Rodin::Math
         }
       }
 
+      /**
+       * @brief In-place matrix multiplication.
+       *
+       * Replaces @f$ *this @f$ with @f$ (*this) \cdot rhs @f$.
+       * Requires cols() == rhs.rows(). Handles self-multiplication safely.
+       *
+       * @param[in] rhs Right-hand side matrix
+       * @return Reference to @f$ *this @f$ after multiplication
+       */
       constexpr
       SpatialMatrix& operator*=(const SpatialMatrix& rhs) noexcept
       {
@@ -1795,6 +1878,14 @@ namespace Rodin::Math
     }
   }
 
+  /**
+   * @brief Computes the element-wise sum of two spatial matrices.
+   *
+   * @tparam Scalar Element type
+   * @param[in] A Left-hand side matrix
+   * @param[in] B Right-hand side matrix
+   * @return @f$ A + B @f$
+   */
   template <class Scalar>
   [[nodiscard]] inline
   SpatialMatrix<Scalar>
@@ -1847,6 +1938,74 @@ namespace Rodin::Math
         C(0, 0) = A(0, 0) + B(0, 0); C(0, 1) = A(0, 1) + B(0, 1); C(0, 2) = A(0, 2) + B(0, 2);
         C(1, 0) = A(1, 0) + B(1, 0); C(1, 1) = A(1, 1) + B(1, 1); C(1, 2) = A(1, 2) + B(1, 2);
         C(2, 0) = A(2, 0) + B(2, 0); C(2, 1) = A(2, 1) + B(2, 1); C(2, 2) = A(2, 2) + B(2, 2);
+        return C;
+
+      default:
+        assert(false);
+        return C;
+    }
+  }
+
+  /**
+   * @brief Computes the element-wise difference of two spatial matrices.
+   *
+   * @tparam Scalar Element type
+   * @param[in] A Left-hand side matrix
+   * @param[in] B Right-hand side matrix
+   * @return @f$ A - B @f$
+   */
+  template <class Scalar>
+  [[nodiscard]] inline
+  SpatialMatrix<Scalar>
+  operator-(const SpatialMatrix<Scalar>& A, const SpatialMatrix<Scalar>& B)
+  {
+    assert(A.rows() == B.rows());
+    assert(A.cols() == B.cols());
+
+    SpatialMatrix<Scalar> C(A.rows(), A.cols());
+    const auto r = A.rows();
+    const auto c = A.cols();
+
+    if (r == 0 || c == 0) return C;
+
+    switch (static_cast<unsigned>(r) * 4u + static_cast<unsigned>(c))
+    {
+      case 5u:
+        C(0, 0) = A(0, 0) - B(0, 0); return C;
+
+      case 6u:
+        C(0, 0) = A(0, 0) - B(0, 0); C(0, 1) = A(0, 1) - B(0, 1); return C;
+
+      case 7u:
+        C(0, 0) = A(0, 0) - B(0, 0); C(0, 1) = A(0, 1) - B(0, 1); C(0, 2) = A(0, 2) - B(0, 2); return C;
+
+      case 9u:
+        C(0, 0) = A(0, 0) - B(0, 0); C(1, 0) = A(1, 0) - B(1, 0); return C;
+
+      case 10u:
+        C(0, 0) = A(0, 0) - B(0, 0); C(0, 1) = A(0, 1) - B(0, 1);
+        C(1, 0) = A(1, 0) - B(1, 0); C(1, 1) = A(1, 1) - B(1, 1);
+        return C;
+
+      case 11u:
+        C(0, 0) = A(0, 0) - B(0, 0); C(0, 1) = A(0, 1) - B(0, 1); C(0, 2) = A(0, 2) - B(0, 2);
+        C(1, 0) = A(1, 0) - B(1, 0); C(1, 1) = A(1, 1) - B(1, 1); C(1, 2) = A(1, 2) - B(1, 2);
+        return C;
+
+      case 13u:
+        C(0, 0) = A(0, 0) - B(0, 0); C(1, 0) = A(1, 0) - B(1, 0); C(2, 0) = A(2, 0) - B(2, 0);
+        return C;
+
+      case 14u:
+        C(0, 0) = A(0, 0) - B(0, 0); C(0, 1) = A(0, 1) - B(0, 1);
+        C(1, 0) = A(1, 0) - B(1, 0); C(1, 1) = A(1, 1) - B(1, 1);
+        C(2, 0) = A(2, 0) - B(2, 0); C(2, 1) = A(2, 1) - B(2, 1);
+        return C;
+
+      case 15u:
+        C(0, 0) = A(0, 0) - B(0, 0); C(0, 1) = A(0, 1) - B(0, 1); C(0, 2) = A(0, 2) - B(0, 2);
+        C(1, 0) = A(1, 0) - B(1, 0); C(1, 1) = A(1, 1) - B(1, 1); C(1, 2) = A(1, 2) - B(1, 2);
+        C(2, 0) = A(2, 0) - B(2, 0); C(2, 1) = A(2, 1) - B(2, 1); C(2, 2) = A(2, 2) - B(2, 2);
         return C;
 
       default:
@@ -2065,6 +2224,35 @@ namespace Rodin::Math
       result[i] = sum;
     }
     return result;
+  }
+
+  template <class Scalar, class EigenDerived>
+  [[nodiscard]] inline
+  SpatialMatrix<Scalar>
+  operator+(
+    const SpatialMatrix<Scalar>& A,
+    const Eigen::MatrixBase<EigenDerived>& B)
+  {
+    assert(A.rows() == static_cast<std::uint8_t>(B.rows()));
+    assert(A.cols() == static_cast<std::uint8_t>(B.cols()));
+
+    SpatialMatrix<Scalar> C(A.rows(), A.cols());
+
+    for (std::uint8_t i = 0; i < A.rows(); ++i)
+      for (std::uint8_t j = 0; j < A.cols(); ++j)
+        C(i, j) = A(i, j) + B(i, j);
+
+    return C;
+  }
+
+  template <class EigenDerived, class Scalar>
+  [[nodiscard]] inline
+  SpatialMatrix<Scalar>
+  operator+(
+    const Eigen::MatrixBase<EigenDerived>& A,
+    const SpatialMatrix<Scalar>& B)
+  {
+    return B + A;
   }
 
   template <class Scalar>

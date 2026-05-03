@@ -38,8 +38,18 @@ target_link_libraries(PETSc_Seq_NavierStokes
   Rodin::PETSc
   )
 
-add_executable(PETSc_Seq_LidDrivenCavity Seq_LidDrivenCavity.cpp)
-target_link_libraries(PETSc_Seq_LidDrivenCavity
+add_executable(PETSc_Seq_OseenFlow Seq_OseenFlow.cpp)
+target_link_libraries(PETSc_Seq_OseenFlow
+  PUBLIC
+  Rodin::Math
+  Rodin::Solver
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::PETSc
+  )
+
+add_executable(PETSc_Seq_OseenLidDrivenCavity Seq_OseenLidDrivenCavity.cpp)
+target_link_libraries(PETSc_Seq_OseenLidDrivenCavity
   PUBLIC
   Rodin::Math
   Rodin::Solver

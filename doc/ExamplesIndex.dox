@@ -19,7 +19,9 @@
   @f]
 
   See the @ref guides-variational "variational formulations guide" for the
-  mathematical background.
+  mathematical background, the @ref notation-index "notation reference" for
+  the symbols used, and the @ref guides-solvers "solvers guide" for choosing
+  a solver.
 
   @section examples-index-pdes Solving PDEs
 
@@ -68,5 +70,91 @@
   @section examples-index-shapeoptimization Shape optimization examples
 
   - @subpage examples-shapeoptimization-index
+
+  @section examples-index-solid Solid Mechanics
+
+  The @ref Rodin::Solid "Solid" module provides hyperelastic constitutive
+  laws and nonlinear integrators for large-deformation solid mechanics. The
+  @ref Rodin::Elasticity "LinearElasticityIntegral" covers the small-deformation
+  (linearized) case, while the Solid module handles finite-strain problems with
+  constitutive laws such as NeoHookean, Saint-Venant-Kirchhoff, and
+  Mooney-Rivlin:
+
+  | Problem | Constitutive Law | Example |
+  |---------|-----------------|---------|
+  | Linear cantilever beam | @f$ \sigma = \lambda(\operatorname{tr}\varepsilon)I + 2\mu\varepsilon @f$ | @ref examples-pdes-elasticity |
+  | Hyperelastic cantilever (NeoHookean, transient) | @f$ W = \frac{\mu}{2}(I_1-d) - \mu\ln J + \frac{\lambda}{2}(\ln J)^2 @f$ | `examples/Solid/CantileverBeam.cpp` |
+
+  @section examples-index-eikonal Distance and Eikonal
+
+  The @ref Rodin::Eikonal "Eikonal" module solves @f$ |\nabla u| = F(x) @f$
+  via the Fast Marching Method, and the @ref Rodin::Distance "Distance" module
+  wraps several distance-function computation strategies:
+
+  | Method | Description | Example |
+  |--------|-------------|---------|
+  | FMM | Exact distance on unstructured meshes | `examples/Models/Eikonal/FMM.cpp` |
+  | Spalding-Tucker | Boundary-layer wall distance | `examples/Models/Distance/SpaldingTucker.cpp` |
+
+  @section examples-index-petsc PETSc Examples
+
+  The @ref Rodin::PETSc "PETSc" module enables distributed solvers and
+  multi-field block systems. Examples include:
+
+  | Problem | Description | Example |
+  |---------|-------------|---------|
+  | Sequential Poisson | PETSc CG solver on local mesh | `examples/PETSc/PDEs/Seq_Poisson.cpp` |
+  | MPI Poisson | Distributed mesh + PETSc KSP | `examples/PETSc/PDEs/MPI_Poisson.cpp` |
+  | Sequential Stokes | Multi-field (velocity-pressure-Lagrange) | `examples/PETSc/PDEs/Seq_Stokes.cpp` |
+  | Oseen flow | Transient Picard/Oseen linearization | `examples/PETSc/PDEs/Seq_OseenFlow.cpp` |
+  | Oseen lid-driven cavity | Transient cavity with Picard/Oseen linearization | `examples/PETSc/PDEs/Seq_OseenLidDrivenCavity.cpp` |
+  | Navier-Stokes | Transient nonlinear lid-driven cavity with PETSc SNES | `examples/PETSc/PDEs/Seq_NavierStokes.cpp` |
+
+  @see @ref guides-petsc "PETSc Guide", @ref guides-mpi "MPI Guide"
+
+  @section examples-index-dg Discontinuous Galerkin
+
+  The DG example solves the Poisson equation using the Symmetric Interior
+  Penalty (SIP) method with DG-specific operators (`Jump`, `Average`,
+  `FaceIntegral`, `InterfaceIntegral`):
+
+  | Equation | Method | Example |
+  |----------|--------|---------|
+  | @f$ -\Delta u = f @f$ | SIP-DG | `examples/DG/Poisson.cpp` |
+
+  @see @ref guides-variational "Variational Formulations Guide" for the DG section.
+
+  @section examples-index-integral Integral Equations
+
+  The @ref Rodin::Variational::Potential "Potential" operator enables integral
+  equation formulations (boundary element methods). The kernel
+  @f$ K(\mathbf{x}, \mathbf{y}) @f$ is convolved with the solution on the mesh:
+
+  | Problem | Kernel | Example |
+  |---------|--------|---------|
+  | Newtonian potential | @f$ \frac{1}{4\pi\|\mathbf{x}-\mathbf{y}\|} @f$ | `examples/IntegralEquations/NewtonianPotential.cpp` |
+  | Elastic distribution | Navier 3×3 kernel | `examples/IntegralEquations/ElasticDistribution.cpp` |
+
+  @section examples-index-surfevol Surface Evolution
+
+  The surface evolution examples demonstrate conormal advection — moving
+  domain boundaries along their outward normal direction using level-set
+  methods with MMG implicit-domain meshing:
+
+  | Problem | Description | Example |
+  |---------|-------------|---------|
+  | Conormal advection | Move boundary along conormal | `examples/SurfaceEvolution/ConormalAdvection/Main.cpp` |
+  | Convergence study | Parametric sweep over resolution and CFL | `examples/SurfaceEvolution/ConormalAdvection/Test.cpp` |
+  | Plane evolution | Planar surface motion | `examples/SurfaceEvolution/ConormalAdvection/Plane.cpp` |
+
+  @section examples-index-boundaryopt Boundary Optimization
+
+  Advanced shape and topology optimization examples that combine complex-valued
+  PDE solvers, adjoint methods, Hilbert space regularization, and MMG
+  remeshing:
+
+  | Problem | Description | Example |
+  |---------|-------------|---------|
+  | Acoustic cloaking | Complex Helmholtz + adjoint-based shape gradient + conormal advection | `examples/BoundaryOptimization/AcousticCloaking.cpp` |
 
   */

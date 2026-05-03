@@ -45,7 +45,7 @@
  *
  * | Direction          | PETSc call                                 | Purpose |
  * |--------------------|--------------------------------------------|---------|
- * | owner → ghost      | `VecGhostUpdateBegin/End(INSERT, FORWARD)` | Read remote DOFs before element-level evaluation |
+ * | owner → ghost      | `VecGhostUpdateBegin/End(INSERT, FORWARD)` | Refresh ghost DOFs after collective data updates |
  * | ghost → owner      | `VecGhostUpdateBegin/End(INSERT, REVERSE)` | Scatter locally-modified ghost values back to owners |
  *
  * The `acquire()` / `flush()` / `release()` methods encapsulate
@@ -59,8 +59,8 @@
  *   between global ghost DOF indices and their local offsets in the
  *   ghosted vector.
  * - **Lazy array access**: The `operator[]` methods lazily `acquire()` the
- *   PETSc array on first use, and the `flush()` method restores it and
- *   triggers the appropriate ghost update.
+ *   PETSc array on first use.  Element access itself does not perform
+ *   collective ghost communication.
  * - **Arithmetic operations**: Overloaded `+=`, `-=`, `*=`, `/=` for both
  *   scalar and grid-function operands, delegating to optimized PETSc
  *   routines (`VecShift`, `VecScale`, `VecAXPY`, `VecPointwiseMult`, …).
@@ -108,6 +108,7 @@
 
 #include "Rodin/Types.h"
 #include "Rodin/Context/Local.h"
+#include "Rodin/Context/ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/GridFunction.h"
 
@@ -149,7 +150,7 @@ namespace Rodin::Variational
    *
    * | Method      | Direction       | PETSc calls |
    * |-------------|-----------------|-------------|
-   * | `acquire()` | begin access    | `VecGhostUpdate(FORWARD)`, `VecGetLocalForm`, `VecGetArrayWrite` |
+   * | `acquire()` | begin access    | `VecGetLocalForm`, `VecGetArrayWrite` |
    * | `flush()`   | end access      | `VecRestoreArrayWrite`, `VecGhostRestoreLocalForm`, `VecGhostUpdate(REVERSE)` |
    * | `release()` | destroy handles | Restores any acquired arrays, then `VecDestroy` |
    *
@@ -359,6 +360,11 @@ namespace Rodin::Variational
 
           ierr = VecZeroEntries(data);
           assert(ierr == PETSC_SUCCESS);
+
+          ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
         }
         else
         {
@@ -390,6 +396,13 @@ namespace Rodin::Variational
         assert(ierr == PETSC_SUCCESS);
         ierr = VecCopy(other.m_data, m_data);
         assert(ierr == PETSC_SUCCESS);
+        if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        {
+          ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+        }
         (void) ierr;
       }
 
@@ -449,6 +462,13 @@ namespace Rodin::Variational
         ierr = VecCopy(other.m_data, m_data);
         assert(ierr == PETSC_SUCCESS);
 
+        if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        {
+          ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+        }
         (void) ierr;
         return *this;
       }
@@ -496,9 +516,17 @@ namespace Rodin::Variational
 
       GridFunction& operator=(const ScalarType& value)
       {
+        static_cast<const GridFunction&>(*this).flush();
         this->flush();
         PetscErrorCode ierr = VecSet(m_data, value);
         assert(ierr == PETSC_SUCCESS);
+        if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        {
+          ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+        }
         (void) ierr;
         return *this;
       }
@@ -629,11 +657,19 @@ namespace Rodin::Variational
       GridFunction& operator+=(const ScalarType& rhs)
       {
         static_assert(std::is_same_v<RangeType, ScalarType>);
+        static_cast<const GridFunction&>(*this).flush();
         this->flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
         ierr = VecShift(data, rhs);
         assert(ierr == PETSC_SUCCESS);
+        if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        {
+          ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+        }
         (void) ierr;
         return *this;
       }
@@ -649,11 +685,19 @@ namespace Rodin::Variational
       GridFunction& operator-=(const ScalarType& rhs)
       {
         static_assert(std::is_same_v<RangeType, ScalarType>);
+        static_cast<const GridFunction&>(*this).flush();
         this->flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
         ierr = VecShift(data, -rhs);
         assert(ierr == PETSC_SUCCESS);
+        if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        {
+          ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+        }
         (void) ierr;
         return *this;
       }
@@ -668,11 +712,19 @@ namespace Rodin::Variational
        */
       GridFunction& operator*=(const ScalarType& rhs)
       {
+        static_cast<const GridFunction&>(*this).flush();
         this->flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
         ierr = VecScale(data, rhs);
         assert(ierr == PETSC_SUCCESS);
+        if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        {
+          ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+        }
         (void) ierr;
         return *this;
       }
@@ -687,11 +739,19 @@ namespace Rodin::Variational
        */
       GridFunction& operator/=(const ScalarType& rhs)
       {
+        static_cast<const GridFunction&>(*this).flush();
         this->flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
         ierr = VecScale(data, 1.0 / rhs);
         assert(ierr == PETSC_SUCCESS);
+        if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        {
+          ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+        }
         (void) ierr;
         return static_cast<GridFunction&>(*this);
       }
@@ -711,11 +771,19 @@ namespace Rodin::Variational
       GridFunction& operator+=(const GridFunction& rhs)
       {
         assert(&this->getFiniteElementSpace() == &rhs.getFiniteElementSpace());
+        static_cast<const GridFunction&>(*this).flush();
         this->flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
         ierr = VecAXPY(data, 1.0, rhs.getData());
         assert(ierr == PETSC_SUCCESS);
+        if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        {
+          ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+        }
         (void) ierr;
         return *this;
       }
@@ -734,11 +802,19 @@ namespace Rodin::Variational
       GridFunction& operator-=(const GridFunction& rhs)
       {
         assert(&this->getFiniteElementSpace() == &rhs.getFiniteElementSpace());
+        static_cast<const GridFunction&>(*this).flush();
         this->flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
         ierr = VecAXPY(data, -1.0, rhs.getData());
         assert(ierr == PETSC_SUCCESS);
+        if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        {
+          ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+        }
         (void) ierr;
         return *this;
       }
@@ -754,11 +830,19 @@ namespace Rodin::Variational
        */
       GridFunction& operator*=(const GridFunction& rhs)
       {
+        static_cast<const GridFunction&>(*this).flush();
         this->flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
         ierr = VecPointwiseMult(data, data, rhs.getData());
         assert(ierr == PETSC_SUCCESS);
+        if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        {
+          ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+        }
         (void) ierr;
         return *this;
       }
@@ -775,11 +859,19 @@ namespace Rodin::Variational
        */
       GridFunction& operator/=(const GridFunction& rhs)
       {
+        static_cast<const GridFunction&>(*this).flush();
         this->flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
         ierr = VecPointwiseDivide(data, data, rhs.getData());
         assert(ierr == PETSC_SUCCESS);
+        if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
+        {
+          ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
+          assert(ierr == PETSC_SUCCESS);
+        }
         (void) ierr;
         return *this;
       }
@@ -801,6 +893,7 @@ namespace Rodin::Variational
        */
       GridFunction& setData(const DataType& data, size_t offset = 0)
       {
+        static_cast<const GridFunction&>(*this).flush();
         this->flush();
 
         PetscErrorCode ierr;
@@ -952,11 +1045,11 @@ namespace Rodin::Variational
        * - Calls `VecGetArrayWrite(m_data, &raw)`.
        *
        * ### MPI mode
-       * 1. Performs a **forward** ghost update
-       *    (`VecGhostUpdateBegin/End(INSERT_VALUES, SCATTER_FORWARD)`)
-       *    so that ghost entries reflect the latest owner values.
-       * 2. Obtains the local (ghosted) form via `VecGhostGetLocalForm`.
-       * 3. Locks the local form with `VecGetArrayWrite`.
+       * 1. Obtains the local (ghosted) form via `VecGhostGetLocalForm`.
+       * 2. Locks the local form with `VecGetArrayWrite`.
+       *
+       * Ghost synchronization is deliberately not done here because element
+       * access may happen on only a subset of ranks during filtered assembly.
        *
        * Subsequent calls while the array is already acquired are no-ops.
        *
@@ -979,12 +1072,6 @@ namespace Rodin::Variational
         {
           if (!m_write.acquired)
           {
-            ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
-            assert(ierr == PETSC_SUCCESS);
-
-            ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
-            assert(ierr == PETSC_SUCCESS);
-
             ierr = VecGhostGetLocalForm(m_data, &m_write.ghost);
             assert(ierr == PETSC_SUCCESS);
 
@@ -1007,8 +1094,8 @@ namespace Rodin::Variational
        *
        * Behaves like the mutable `acquire()` but uses `VecGetArrayRead`
        * instead, permitting concurrent read access from multiple threads
-       * or call sites.  In MPI mode the forward ghost update is still
-       * performed to ensure ghost values are up-to-date.
+       * or call sites.  In MPI mode this only locks the ghosted local form;
+       * ghost synchronization is done by collective data-update paths.
        *
        * @returns Const reference to `*this`.
        */
@@ -1029,12 +1116,6 @@ namespace Rodin::Variational
         {
           if (!m_read.acquired)
           {
-            ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
-            assert(ierr == PETSC_SUCCESS);
-
-            ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
-            assert(ierr == PETSC_SUCCESS);
-
             ierr = VecGhostGetLocalForm(m_data, &m_read.ghost);
             assert(ierr == PETSC_SUCCESS);
 
@@ -1065,6 +1146,7 @@ namespace Rodin::Variational
        * 3. Performs a **reverse** ghost update
        *    (`VecGhostUpdateBegin/End(INSERT_VALUES, SCATTER_REVERSE)`)
        *    to propagate ghost modifications back to owners.
+       * 4. Refreshes ghosts from owner values with a forward update.
        *
        * After this call, `m_write.acquired` is `false` and subsequent
        * reads of the owned portion will reflect any changes that were
@@ -1099,6 +1181,11 @@ namespace Rodin::Variational
             assert(ierr == PETSC_SUCCESS);
 
             ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_REVERSE);
+            assert(ierr == PETSC_SUCCESS);
+
+            ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_FORWARD);
+            assert(ierr == PETSC_SUCCESS);
+            ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_FORWARD);
             assert(ierr == PETSC_SUCCESS);
 
             m_write.acquired = false;
@@ -1200,8 +1287,9 @@ namespace Rodin::Variational
        * function:
        * 1. If a read array is acquired, calls `VecRestoreArrayRead` (and
        *    `VecGhostRestoreLocalForm` in MPI mode).
-       * 2. If a write array is acquired, calls `VecRestoreArrayWrite`,
-       *    `VecGhostRestoreLocalForm`, and a reverse ghost scatter.
+       * 2. If a write array is acquired, calls `VecRestoreArrayWrite` and
+       *    `VecGhostRestoreLocalForm`.  Pending writes must be propagated by
+       *    an explicit `flush()` before release.
        * 3. Destroys the PETSc vector with `VecDestroy`.
        *
        * After this call the grid function is in an empty (null-vector)
@@ -1248,12 +1336,6 @@ namespace Rodin::Variational
             assert(ierr == PETSC_SUCCESS);
 
             ierr = VecGhostRestoreLocalForm(m_data, &m_write.ghost);
-            assert(ierr == PETSC_SUCCESS);
-
-            ierr = VecGhostUpdateBegin(m_data, INSERT_VALUES, SCATTER_REVERSE);
-            assert(ierr == PETSC_SUCCESS);
-
-            ierr = VecGhostUpdateEnd(m_data, INSERT_VALUES, SCATTER_REVERSE);
             assert(ierr == PETSC_SUCCESS);
           }
 

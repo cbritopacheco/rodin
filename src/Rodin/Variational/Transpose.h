@@ -84,10 +84,12 @@ namespace Rodin::Variational
        * @param p Point at which to evaluate
        * @returns Transposed matrix @f$ A^T(p) @f$
        */
+      template <class Point>
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      auto getValue(const Point& p) const
       {
-        return this->object(getOperand().getValue(p)).transpose();
+        const auto v = getOperand().getValue(p);
+        return v.transpose();
       }
 
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
@@ -209,7 +211,8 @@ namespace Rodin::Variational
       constexpr
       auto getBasis(size_t local) const
       {
-        return this->object(getOperand().getBasis(local)).transpose();
+        const auto v = getOperand().getBasis(local);
+        return v.transpose();
       }
 
       /**

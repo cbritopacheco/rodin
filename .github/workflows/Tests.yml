@@ -35,6 +35,14 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Free Disk Space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo apt-get clean
+
       - name: Setup Cpp (C++ / C)
         uses: aminya/setup-cpp@v1
         with:
@@ -59,6 +67,8 @@ jobs:
         run: >
           cmake -B ${{ github.workspace }}/build
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DRODIN_USE_MPI=ON
+          -DRODIN_USE_PETSC=ON
           -DRODIN_USE_ASAN=${{ matrix.asan }}
           -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
           -DRODIN_BUILD_DOC=OFF
@@ -77,7 +87,7 @@ jobs:
       - name: Run unit tests
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
-          -L unit -LE slow
+          -L unit -LE "slow|distributed"
           --output-on-failure
           -j ${{ env.CTEST_PARALLEL_LEVEL }}
 
@@ -85,7 +95,21 @@ jobs:
         if: failure()
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
-          -L unit -LE slow
+          -L unit -LE "slow|distributed"
+          --rerun-failed -V --output-on-failure
+
+      - name: Run distributed tests
+        run: >
+          ctest --test-dir ${{ github.workspace }}/build/tests
+          -L unit -L distributed -LE slow
+          --output-on-failure
+          -j 1
+
+      - name: Rerun failed distributed tests (verbose)
+        if: failure()
+        run: >
+          ctest --test-dir ${{ github.workspace }}/build/tests
+          -L unit -L distributed -LE slow
           --rerun-failed -V --output-on-failure
 
   Manufactured:
@@ -109,6 +133,14 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Free Disk Space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo apt-get clean
+
       - name: Setup Cpp (C++ / C)
         uses: aminya/setup-cpp@v1
         with:
@@ -133,6 +165,8 @@ jobs:
         run: >
           cmake -B ${{ github.workspace }}/build
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DRODIN_USE_MPI=ON
+          -DRODIN_USE_PETSC=ON
           -DRODIN_USE_ASAN=${{ matrix.asan }}
           -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
           -DRODIN_BUILD_DOC=OFF
@@ -151,7 +185,7 @@ jobs:
       - name: Run manufactured tests
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
-          -L manufactured -LE slow
+          -L manufactured -LE "slow|distributed"
           --output-on-failure
           -j ${{ env.CTEST_PARALLEL_LEVEL }}
 
@@ -159,7 +193,21 @@ jobs:
         if: failure()
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
-          -L manufactured -LE slow
+          -L manufactured -LE "slow|distributed"
+          --rerun-failed -V --output-on-failure
+
+      - name: Run manufactured distributed tests
+        run: >
+          ctest --test-dir ${{ github.workspace }}/build/tests
+          -L manufactured -L distributed -LE slow
+          --output-on-failure
+          -j 1
+
+      - name: Rerun failed manufactured distributed tests (verbose)
+        if: failure()
+        run: >
+          ctest --test-dir ${{ github.workspace }}/build/tests
+          -L manufactured -L distributed -LE slow
           --rerun-failed -V --output-on-failure
 
   Slow:
@@ -167,7 +215,7 @@ jobs:
     strategy:
       matrix:
         compiler: [gcc-14]
-        build_type: [RelWithDebInfo, Release]
+        build_type: [Release]
         multithreaded: [ON, OFF]
         asan: [OFF]
         ubsan: [OFF]
@@ -207,6 +255,8 @@ jobs:
         run: >
           cmake -B ${{ github.workspace }}/build
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DRODIN_USE_MPI=ON
+          -DRODIN_USE_PETSC=ON
           -DRODIN_USE_ASAN=${{ matrix.asan }}
           -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
           -DRODIN_BUILD_DOC=OFF
@@ -284,6 +334,8 @@ jobs:
         run: >
           cmake -B ${{ github.workspace }}/build
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DRODIN_USE_MPI=ON
+          -DRODIN_USE_PETSC=ON
           -DRODIN_USE_ASAN=${{ matrix.asan }}
           -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
           -DRODIN_BUILD_DOC=OFF
@@ -303,14 +355,21 @@ jobs:
       - name: Run unit tests (coverage build)
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
-          -L unit
+          -L unit -LE distributed
           --output-on-failure
           -j ${{ env.CTEST_PARALLEL_LEVEL }}
+
+      - name: Run distributed tests (coverage build)
+        run: >
+          ctest --test-dir ${{ github.workspace }}/build/tests
+          -L distributed -LE slow
+          --output-on-failure
+          -j 1
 
       - name: Run manufactured tests (coverage build)
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
-          -L manufactured -LE slow
+          -L manufactured -LE "slow|distributed"
           --output-on-failure
           -j 1
 

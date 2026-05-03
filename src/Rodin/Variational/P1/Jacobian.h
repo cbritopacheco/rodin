@@ -30,9 +30,11 @@
 #define RODIN_VARIATIONAL_P1_JACOBIAN_H
 
 #include "Rodin/Variational/ForwardDecls.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Variational/Jacobian.h"
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 #include "Rodin/Variational/Mult.h"
+#include "Rodin/Math/Traits.h"
 
 namespace Rodin::FormLanguage
 {
@@ -76,20 +78,20 @@ namespace Rodin::Variational
    * - Velocity gradient in fluid mechanics
    * - Deformation gradient in nonlinear mechanics
    *
-   * @tparam Range Value range type (typically Math::Vector<Scalar>)
+   * @tparam Range Value range type (typically Math::SpatialVector<Scalar>)
    * @tparam Data Data storage type
    * @tparam Mesh Mesh type
    */
   template <class Data, class Mesh, class Scalar>
-  class Jacobian<GridFunction<P1<Math::Vector<Scalar>, Mesh>, Data>> final
+  class Jacobian<GridFunction<P1<Math::SpatialVector<Scalar>, Mesh>, Data>> final
     : public JacobianBase<
-        GridFunction<P1<Math::Vector<Scalar>, Mesh>, Data>,
-        Jacobian<GridFunction<P1<Math::Vector<Scalar>, Mesh>, Data>>>
+        GridFunction<P1<Math::SpatialVector<Scalar>, Mesh>, Data>,
+        Jacobian<GridFunction<P1<Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
     public:
-      using RangeType = Math::Matrix<Scalar>;
+      using RangeType = Math::SpatialMatrix<Scalar>;
 
-      using FESType = P1<Math::Vector<Scalar>, Mesh>;
+      using FESType = P1<Math::SpatialVector<Scalar>, Mesh>;
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
@@ -110,6 +112,11 @@ namespace Rodin::Variational
       Jacobian(Jacobian&& other)
         : Parent(std::move(other))
       {}
+
+      void interpolate(SpatialMatrixType& out, const IntegrationPoint& ip) const
+      {
+        interpolate(out, ip.getPoint());
+      }
 
       void interpolate(SpatialMatrixType& out, const Geometry::Point& p) const
       {
@@ -247,7 +254,7 @@ namespace Rodin::Variational
   class Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Range, Mesh>, Space>> final
     : public ShapeFunctionBase<Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Range, Mesh>, Space>>>
   {
-    static_assert(std::is_same_v<Range, Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>,
+    static_assert(FormLanguage::IsVectorRange<Range>::Value,
                   "Jacobian<P1> specialization is intended for vector-valued P1.");
 
     public:
@@ -256,7 +263,7 @@ namespace Rodin::Variational
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
-      using RangeType = Math::Matrix<ScalarType>;
+      using RangeType = Math::SpatialMatrix<ScalarType>;
 
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
@@ -533,8 +540,8 @@ namespace Rodin::Variational
   };
 
   template <class ShapeFunctionDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
-  Jacobian(const ShapeFunction<ShapeFunctionDerived, P1<Math::Vector<Number>, Mesh>, Space>&)
-    -> Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Math::Vector<Number>, Mesh>, Space>>;
+  Jacobian(const ShapeFunction<ShapeFunctionDerived, P1<Math::SpatialVector<Number>, Mesh>, Space>&)
+    -> Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Math::SpatialVector<Number>, Mesh>, Space>>;
 }
 
 #endif

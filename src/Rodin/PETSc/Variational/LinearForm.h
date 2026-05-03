@@ -90,8 +90,8 @@ namespace Rodin::Variational
        * @brief Constructs a linear form associated with the given test
        *        function, initialising an empty PETSc vector.
        *
-       * The vector is created on `PETSC_COMM_SELF`; its sizes will be
-       * set during assembly.
+       * The vector is created on the communicator associated with the test
+       * function mesh; its sizes will be set during assembly.
        *
        * @param[in] v Reference to a PETSc test function.
        */
@@ -99,9 +99,7 @@ namespace Rodin::Variational
         : m_v(v),
           m_vector(PETSC_NULLPTR)
       {
-        PetscErrorCode ierr = VecCreate(PETSC_COMM_SELF, &m_vector);
-        assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
+        createVector();
       }
 
       /// @brief Copy constructor (deep-copies the PETSc vector).
@@ -111,7 +109,7 @@ namespace Rodin::Variational
           m_assembly(other.m_assembly),
           m_vector(PETSC_NULLPTR)
       {
-        PetscErrorCode ierr;
+        PetscErrorCode ierr = PETSC_SUCCESS;
         if (other.m_vector)
         {
           ierr = VecDuplicate(other.m_vector, &m_vector);
@@ -122,8 +120,7 @@ namespace Rodin::Variational
         }
         else
         {
-          ierr = VecCreate(PETSC_COMM_SELF, &m_vector);
-          assert(ierr == PETSC_SUCCESS);
+          createVector();
         }
         (void) ierr;
       }
@@ -159,7 +156,7 @@ namespace Rodin::Variational
           m_v = other.m_v;
           m_assembly = other.m_assembly;
 
-          PetscErrorCode ierr;
+          PetscErrorCode ierr = PETSC_SUCCESS;
           if (other.m_vector)
           {
             ierr = VecDuplicate(other.m_vector, &m_vector);
@@ -170,8 +167,7 @@ namespace Rodin::Variational
           }
           else
           {
-            ierr = VecCreate(PETSC_COMM_SELF, &m_vector);
-            assert(ierr == PETSC_SUCCESS);
+            createVector();
           }
           (void) ierr;
         }
@@ -262,6 +258,23 @@ namespace Rodin::Variational
       }
 
     private:
+      void createVector()
+      {
+        PetscErrorCode ierr;
+        if constexpr (std::is_same_v<ContextType, Context::MPI>)
+        {
+          const auto& mesh = m_v.get().getFiniteElementSpace().getMesh();
+          const auto& comm = mesh.getContext().getCommunicator();
+          ierr = VecCreate(comm, &m_vector);
+        }
+        else
+        {
+          ierr = VecCreate(PETSC_COMM_SELF, &m_vector);
+        }
+        assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
+      }
+
       std::reference_wrapper<const TestFunction<FES>> m_v; ///< Reference to the test function.
       DefaultAssembly m_assembly;                          ///< Assembly strategy.
       VectorType m_vector;                                 ///< Owned PETSc vector.

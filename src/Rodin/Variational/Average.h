@@ -128,9 +128,6 @@ namespace Rodin::Variational
        */
       auto getValue(const Geometry::Point& p) const
       {
-        static thread_local Math::SpatialPoint s_rc1;
-        static thread_local Math::SpatialPoint s_rc2;
-
         assert(p.getPolytope().isFace());
         const auto& face = p.getPolytope();
         const size_t d = face.getDimension();
@@ -142,11 +139,42 @@ namespace Rodin::Variational
         const auto it1 = mesh.getPolytope(d + 1, idx1);
         const auto it2 = mesh.getPolytope(d + 1, idx2);
         const auto& pc = p.getPhysicalCoordinates();
-        it1->getTransformation().inverse(s_rc1, pc);
-        it2->getTransformation().inverse(s_rc2, pc);
-        const Geometry::Point p1(std::cref(*it1), std::cref(s_rc1), pc);
-        const Geometry::Point p2(std::cref(*it2), std::cref(s_rc2), pc);
-        return 0.5 * (this->object(getOperand().getValue(p1)) + this->object(getOperand().getValue(p2)));
+        Math::SpatialPoint rc1;
+        Math::SpatialPoint rc2;
+        it1->getTransformation().inverse(rc1, pc);
+        it2->getTransformation().inverse(rc2, pc);
+        const Geometry::Point p1(std::cref(*it1), std::cref(rc1), pc);
+        const Geometry::Point p2(std::cref(*it2), std::cref(rc2), pc);
+        const auto v1 = getOperand().getValue(p1);
+        const auto v2 = getOperand().getValue(p2);
+        return 0.5 * (v1 + v2);
+      }
+
+      auto getValue(const IntegrationPoint& ip) const
+      {
+        const auto& p = ip.getPoint();
+        assert(p.getPolytope().isFace());
+        const auto& face = p.getPolytope();
+        const size_t d = face.getDimension();
+        const auto& mesh = face.getMesh();
+        const auto& inc = mesh.getConnectivity().getIncidence({ d, d + 1 }, face.getIndex() );
+        assert(inc.size() == 2);
+        const Index idx1 = *inc.begin();
+        const Index idx2 = *std::next(inc.begin());
+        const auto it1 = mesh.getPolytope(d + 1, idx1);
+        const auto it2 = mesh.getPolytope(d + 1, idx2);
+        const auto& pc = p.getPhysicalCoordinates();
+        Math::SpatialPoint rc1;
+        Math::SpatialPoint rc2;
+        it1->getTransformation().inverse(rc1, pc);
+        it2->getTransformation().inverse(rc2, pc);
+        const Geometry::Point p1(std::cref(*it1), std::cref(rc1), pc);
+        const Geometry::Point p2(std::cref(*it2), std::cref(rc2), pc);
+        const IntegrationPoint ip1(p1, ip.getQuadratureFormula(), ip.getIndex());
+        const IntegrationPoint ip2(p2, ip.getQuadratureFormula(), ip.getIndex());
+        const auto v1 = getOperand().getValue(ip1);
+        const auto v2 = getOperand().getValue(ip2);
+        return 0.5 * (v1 + v2);
       }
 
       constexpr
@@ -291,9 +319,6 @@ namespace Rodin::Variational
        */
       auto getBasis(size_t local) const
       {
-        static thread_local Math::SpatialPoint s_rc1;
-        static thread_local Math::SpatialPoint s_rc2;
-
         assert(m_ip);
         const auto& p = m_ip->getPoint();
         assert(p.getPolytope().isFace());
@@ -307,16 +332,18 @@ namespace Rodin::Variational
         const auto it1 = mesh.getPolytope(d + 1, idx1);
         const auto it2 = mesh.getPolytope(d + 1, idx2);
         const auto& pc = p.getPhysicalCoordinates();
-        it1->getTransformation().inverse(s_rc1, pc);
-        it2->getTransformation().inverse(s_rc2, pc);
-        const Geometry::Point p1(std::cref(*it1), std::cref(s_rc1), pc);
-        const Geometry::Point p2(std::cref(*it2), std::cref(s_rc2), pc);
+        Math::SpatialPoint rc1;
+        Math::SpatialPoint rc2;
+        it1->getTransformation().inverse(rc1, pc);
+        it2->getTransformation().inverse(rc2, pc);
+        const Geometry::Point p1(std::cref(*it1), std::cref(rc1), pc);
+        const Geometry::Point p2(std::cref(*it2), std::cref(rc2), pc);
         const IntegrationPoint ip1(p1, m_ip->getQuadratureFormula(), m_ip->getIndex());
         const IntegrationPoint ip2(p2, m_ip->getQuadratureFormula(), m_ip->getIndex());
         m_operand->setIntegrationPoint(ip1);
-        const auto& val1 = this->object(m_operand->getBasis(local));
+        const auto val1 = m_operand->getBasis(local);
         m_operand->setIntegrationPoint(ip2);
-        const auto& val2 = this->object(m_operand->getBasis(local));
+        const auto val2 = m_operand->getBasis(local);
         return 0.5 * (val1 + val2);
       }
 

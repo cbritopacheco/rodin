@@ -63,6 +63,19 @@ namespace
     }
   }
 
+  int worldRank()
+  {
+    int rank = 0;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    return rank;
+  }
+
+  boost::filesystem::path rankTempPath(const std::string& stem)
+  {
+    return boost::filesystem::temp_directory_path()
+      / (stem + "_r" + std::to_string(worldRank()));
+  }
+
   // Parameterized test fixture
   class MPIMeshHDF5 : public ::testing::TestWithParam<Polytope::Type> {};
 
@@ -71,8 +84,8 @@ namespace
   TEST_P(MPIMeshHDF5, MeshRoundTripViaPrinterLoader)
   {
     const auto type = GetParam();
-    const std::string meshFile =
-        "/tmp/rodin_mpi_hdf5_rt_" + polytopeLabel(type) + ".h5";
+    const auto meshFile =
+        rankTempPath("rodin_mpi_hdf5_rt_" + polytopeLabel(type) + ".h5");
 
     // Build a local mesh and wrap it in an MPI mesh (single-rank MPI)
     auto localMesh = makeMesh(type);
@@ -105,7 +118,7 @@ namespace
     EXPECT_EQ(loaded.getVertexCount(), localMesh.getVertexCount());
     EXPECT_EQ(loaded.getCellCount(), localMesh.getCellCount());
 
-    std::remove(meshFile.c_str());
+    boost::filesystem::remove(meshFile);
   }
 
   // --- MPI Mesh persistence does not create XDMF datasets -------------------
@@ -113,8 +126,8 @@ namespace
   TEST_P(MPIMeshHDF5, MeshPersistenceNoXDMF)
   {
     const auto type = GetParam();
-    const std::string meshFile =
-        "/tmp/rodin_mpi_hdf5_noxdmf_" + polytopeLabel(type) + ".h5";
+    const auto meshFile =
+        rankTempPath("rodin_mpi_hdf5_noxdmf_" + polytopeLabel(type) + ".h5");
 
     auto localMesh = makeMesh(type);
     MeshPrinter<FileFormat::HDF5, Context::Local> printer(localMesh);
@@ -131,7 +144,7 @@ namespace
     EXPECT_EQ(H5Lexists(h5, "/Mesh/XDMF", H5P_DEFAULT), 0);
 
     H5Fclose(h5);
-    std::remove(meshFile.c_str());
+    boost::filesystem::remove(meshFile);
   }
 
   // --- MPI Mesh XDMF visualization -------------------------------------------
@@ -140,7 +153,8 @@ namespace
   {
     const auto type = GetParam();
     const boost::filesystem::path testDir =
-        "/tmp/rodin_mpi_xdmf_topo_" + polytopeLabel(type);
+        rankTempPath("rodin_mpi_xdmf_topo_" + polytopeLabel(type));
+    boost::filesystem::remove_all(testDir);
     boost::filesystem::create_directories(testDir);
     const boost::filesystem::path stem = testDir / "vis";
 
@@ -180,7 +194,8 @@ namespace
   {
     const auto type = GetParam();
     const boost::filesystem::path testDir =
-        "/tmp/rodin_mpi_xdmf_wc_" + polytopeLabel(type);
+        rankTempPath("rodin_mpi_xdmf_wc_" + polytopeLabel(type));
+    boost::filesystem::remove_all(testDir);
     boost::filesystem::create_directories(testDir);
     const boost::filesystem::path stem = testDir / "output";
 
@@ -228,7 +243,7 @@ namespace
    */
   TEST(ShardMetadata, GroupAndDatasetLayout)
   {
-    const std::string testFile = "/tmp/rodin_shard_meta_layout.h5";
+    const auto testFile = rankTempPath("rodin_shard_meta_layout.h5");
 
     // -- Write phase: create a file with the shard layout -------------------
     {
@@ -374,7 +389,7 @@ namespace
       H5Fclose(h5);
     }
 
-    std::remove(testFile.c_str());
+    boost::filesystem::remove(testFile);
   }
 
   // --- Shard path helpers ---------------------------------------------------
@@ -425,7 +440,8 @@ namespace
   {
     const auto type = GetParam();
     const boost::filesystem::path testDir =
-        "/tmp/rodin_mpi_dist_xdmf_" + polytopeLabel(type);
+        rankTempPath("rodin_mpi_dist_xdmf_" + polytopeLabel(type));
+    boost::filesystem::remove_all(testDir);
     boost::filesystem::create_directories(testDir);
     const boost::filesystem::path stem = testDir / "sim";
 
@@ -475,7 +491,8 @@ namespace
   {
     const auto type = GetParam();
     const boost::filesystem::path testDir =
-        "/tmp/rodin_mpi_dist_xdmf_attr_" + polytopeLabel(type);
+        rankTempPath("rodin_mpi_dist_xdmf_attr_" + polytopeLabel(type));
+    boost::filesystem::remove_all(testDir);
     boost::filesystem::create_directories(testDir);
     const boost::filesystem::path stem = testDir / "field";
 

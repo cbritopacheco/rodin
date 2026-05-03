@@ -35,6 +35,7 @@
 #include "Rodin/Variational/P1/ForwardDecls.h"
 #include "Rodin/Variational/P1/P1.h"
 #include "Rodin/QF/Centroid.h"
+#include "Rodin/Math/Traits.h"
 
 namespace Rodin::Variational
 {
@@ -81,7 +82,7 @@ namespace Rodin::Variational
       using LambdaRangeType =
         typename FormLanguage::Traits<LambdaType>::RangeType;
 
-      static_assert(std::is_same_v<Range, Math::Vector<ScalarType>>);
+      static_assert(FormLanguage::IsVectorRange<Range>::Value);
 
     public:
       LinearElasticityIntegrator(
@@ -168,13 +169,14 @@ namespace Rodin::Variational
           for (size_t qp = 0; qp < m_quadrature->getSize(); ++qp)
           {
             const auto& p  = m_quadrature->getPoint(qp);
+            const Variational::IntegrationPoint ip(p, *m_qf, qp);
             const auto& rc = m_qf->getPoint(qp);
 
             const ScalarType wdet =
               static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
-            const auto lambda = getLameFirstParameter().getValue(p);
-            const auto mu     = getShearModulus().getValue(p);
+            const auto lambda = getLameFirstParameter().getValue(ip);
+            const auto mu     = getShearModulus().getValue(ip);
 
             for (size_t i = 0; i < nte; ++i)
             {
@@ -233,13 +235,14 @@ namespace Rodin::Variational
           for (size_t qp = 0; qp < m_quadrature->getSize(); ++qp)
           {
             const auto& p  = m_quadrature->getPoint(qp);
+            const Variational::IntegrationPoint ip(p, *m_qf, qp);
             const auto& rc = m_qf->getPoint(qp);
 
             const ScalarType wdet =
               static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
-            const auto lambda = getLameFirstParameter().getValue(p);
-            const auto mu     = getShearModulus().getValue(p);
+            const auto lambda = getLameFirstParameter().getValue(ip);
+            const auto mu     = getShearModulus().getValue(ip);
 
             for (size_t i = 0; i < nte; ++i)
             {

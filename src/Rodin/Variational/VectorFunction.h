@@ -22,6 +22,7 @@
 #include "ForwardDecls.h"
 
 #include "Rodin/Alert.h"
+#include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Utility/ForConstexpr.h"
 
 #include "Function.h"
@@ -155,9 +156,18 @@ namespace Rodin::Variational
       virtual ~VectorFunctionBase() = default;
 
       constexpr
-      decltype(auto) getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
+      }
+
+      constexpr
+      auto getValue(const IntegrationPoint& ip) const
+      {
+        if constexpr (requires (const Derived& f, const IntegrationPoint& q) { f.getValue(q); })
+          return static_cast<const Derived&>(*this).getValue(ip);
+        else
+          return static_cast<const Derived&>(*this).getValue(ip.getPoint());
       }
 
       /**
@@ -190,6 +200,7 @@ namespace Rodin::Variational
       using ScalarType = Scalar;
 
       using VectorType = Math::Vector<ScalarType>;
+      using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
       using Parent = VectorFunctionBase<ScalarType, VectorFunction<VectorType>>;
 
@@ -214,9 +225,9 @@ namespace Rodin::Variational
           m_vector(std::move(other.m_vector))
       {}
 
-      const VectorType& getValue(const Geometry::Point&) const
+      SpatialVectorType getValue(const Geometry::Point&) const
       {
-        return m_vector.get();
+        return SpatialVectorType(m_vector.get());
       }
 
       constexpr
@@ -276,9 +287,16 @@ namespace Rodin::Variational
     public:
       using ScalarType = Real;
 
+      static constexpr size_t Dimension = 1 + sizeof...(Values);
       using VectorType = Math::Vector<ScalarType>;
+      using SpatialVectorType = Math::SpatialVector<ScalarType>;
+      using RangeType =
+        std::conditional_t<
+          Dimension <= Math::SpatialVector<ScalarType>::MaxSize,
+          SpatialVectorType,
+          VectorType>;
 
-      using FixedSizeVectorType = Math::FixedSizeVector<ScalarType, 1 + sizeof...(Values)>;
+      using FixedSizeVectorType = Math::FixedSizeVector<ScalarType, Dimension>;
 
       using Parent = VectorFunctionBase<ScalarType, VectorFunction<V, Values...>>;
       /**
@@ -302,21 +320,66 @@ namespace Rodin::Variational
           m_fs(std::move(other.m_fs))
       {}
 
-      decltype(auto) getValue(const Geometry::Point& p) const
+      RangeType getValue(const Geometry::Point& p) const
       {
-        static thread_local Math::FixedSizeVector<ScalarType, 1 + sizeof...(Values)> s_res;
-        Utility::ForIndex<1 + sizeof...(Values)>(
-          [&](auto i)
-          {
-            s_res.coeffRef(static_cast<Eigen::Index>(i)) = std::get<i>(m_fs).getValue(p);
-          });
-        return s_res;
+        RangeType res;
+        if constexpr (Dimension <= Math::SpatialVector<ScalarType>::MaxSize)
+        {
+          res.resize(Dimension);
+          Utility::ForIndex<Dimension>(
+            [&](auto i)
+            {
+              res[static_cast<std::uint8_t>(i)] = std::get<i>(m_fs).getValue(p);
+            });
+        }
+        else
+        {
+          res.resize(Dimension);
+          Utility::ForIndex<Dimension>(
+            [&](auto i)
+            {
+              res.coeffRef(i) = std::get<i>(m_fs).getValue(p);
+            });
+        }
+        return res;
+      }
+
+      RangeType getValue(const IntegrationPoint& ip) const
+      {
+        RangeType res;
+        if constexpr (Dimension <= Math::SpatialVector<ScalarType>::MaxSize)
+        {
+          res.resize(Dimension);
+          Utility::ForIndex<Dimension>(
+            [&](auto i)
+            {
+              const auto& f = std::get<i>(m_fs);
+              if constexpr (requires { f.getValue(ip); })
+                res[static_cast<std::uint8_t>(i)] = f.getValue(ip);
+              else
+                res[static_cast<std::uint8_t>(i)] = f.getValue(ip.getPoint());
+            });
+        }
+        else
+        {
+          res.resize(Dimension);
+          Utility::ForIndex<Dimension>(
+            [&](auto i)
+            {
+              const auto& f = std::get<i>(m_fs);
+              if constexpr (requires { f.getValue(ip); })
+                res.coeffRef(i) = f.getValue(ip);
+              else
+                res.coeffRef(i) = f.getValue(ip.getPoint());
+            });
+        }
+        return res;
       }
 
       constexpr
       size_t getDimension() const
       {
-        return 1 + sizeof...(Values);
+        return Dimension;
       }
 
       template <class ... Args>
@@ -385,9 +448,17 @@ namespace Rodin::Variational
           m_f(std::move(other.m_f))
       {}
 
-      decltype(auto) getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
         return m_f(p);
+      }
+
+      auto getValue(const IntegrationPoint& ip) const
+      {
+        if constexpr (std::is_invocable_v<F, const IntegrationPoint&>)
+          return m_f(ip);
+        else
+          return m_f(ip.getPoint());
       }
 
       constexpr

@@ -94,7 +94,8 @@ namespace Rodin::Variational
        * @param p Point at which to evaluate
        * @returns Norm value @f$ \|f(x)\| @f$ at point @f$ x @f$
        */
-      auto getValue(const Geometry::Point& p) const
+      template <class Point>
+      auto getValue(const Point& p) const
       {
         if constexpr (std::is_same_v<OperandRangeType, Real>)
         {
@@ -102,9 +103,8 @@ namespace Rodin::Variational
         }
         else
         {
-          static thread_local OperandRangeType s_v;
-          s_v = this->getOperand().getValue(p);
-          return s_v.norm();
+          const auto v = this->getOperand().getValue(p);
+          return v.norm();
         }
       }
 

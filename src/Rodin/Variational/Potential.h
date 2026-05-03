@@ -57,6 +57,7 @@
 #include "ShapeFunction.h"
 #include "QuadratureRule.h"
 #include "LinearFormIntegrator.h"
+#include "Rodin/Math/Traits.h"
 
 namespace Rodin::FormLanguage
 {
@@ -92,7 +93,7 @@ namespace Rodin::FormLanguage
       // Else
       std::conditional_t<
         // If
-        std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>,
+        FormLanguage::IsVectorRange<RHSRangeType>::Value,
         // Then
         Math::Matrix<ScalarType>,
         // Else
@@ -136,7 +137,7 @@ namespace Rodin::FormLanguage
       // Else
       std::conditional_t<
         // If
-        std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>,
+        FormLanguage::IsVectorRange<RHSRangeType>::Value,
         // Then
         Math::Matrix<ScalarType>,
         // Else
@@ -183,7 +184,7 @@ namespace Rodin::Variational
         // Else
         std::conditional_t<
           // If
-          std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>,
+          FormLanguage::IsVectorRange<RHSRangeType>::Value,
           // Then
           Math::Matrix<ScalarType>,
           // Else
@@ -218,7 +219,7 @@ namespace Rodin::Variational
         return *m_u;
       }
 
-      decltype(auto) getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
         const auto& kernel = getKernel();
         const auto& operand = getOperand();
@@ -235,12 +236,13 @@ namespace Rodin::Variational
             for (size_t i = 0; i < quadrature.getSize(); i++)
             {
               const auto& y = quadrature.getPoint(i);
-              res += qf.getWeight(i) * y.getDistortion() * kernel(p, y) * operand(y);
+              const IntegrationPoint ip(y, qf, i);
+              res += qf.getWeight(i) * y.getDistortion() * kernel(p, y) * operand.getValue(ip);
             }
           }
           return res;
         }
-        else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>)
+        else if constexpr (FormLanguage::IsVectorRange<RHSRangeType>::Value)
         {
           Math::Vector<ScalarType> res;
           assert(false);
@@ -363,7 +365,7 @@ namespace Rodin::Variational
         // Else
         std::conditional_t<
           // If
-          std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>,
+          FormLanguage::IsVectorRange<RHSRangeType>::Value,
           // Then
           Math::Matrix<ScalarType>,
           // Else
@@ -491,4 +493,3 @@ namespace Rodin::Variational
 }
 
 #endif
-

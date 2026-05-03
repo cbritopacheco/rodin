@@ -52,6 +52,7 @@
 #include <utility>
 #include <fstream>
 #include <functional>
+#include <vector>
 #include <boost/filesystem.hpp>
 #include <type_traits>
 
@@ -71,6 +72,7 @@
 #include "ForwardDecls.h"
 
 #include "Function.h"
+#include "Rodin/Math/Traits.h"
 
 
 namespace Rodin::FormLanguage
@@ -174,15 +176,27 @@ namespace Rodin::Variational
       GridFunctionBaseReference& operator=(GridFunctionBaseReference&&) = delete;
 
       constexpr
-      decltype(auto) operator()(const Geometry::Point& p) const
+      auto operator()(const Geometry::Point& p) const
       {
         return m_ref.get().getValue(p);
       }
 
       constexpr
-      decltype(auto) getValue(const Geometry::Point& p) const
+      auto operator()(const IntegrationPoint& ip) const
+      {
+        return m_ref.get().getValue(ip);
+      }
+
+      constexpr
+      auto getValue(const Geometry::Point& p) const
       {
         return m_ref.get().getValue(p);
+      }
+
+      constexpr
+      auto getValue(const IntegrationPoint& ip) const
+      {
+        return m_ref.get().getValue(ip);
       }
 
       constexpr
@@ -284,7 +298,7 @@ namespace Rodin::Variational
 
       static_assert(
           std::is_same_v<RangeType, ScalarType> ||
-          std::is_same_v<RangeType, Math::Vector<ScalarType>>);
+          FormLanguage::IsVectorRange<RangeType>::Value);
 
       /**
        * @brief Constructs a grid function on the given finite element space.
@@ -357,7 +371,7 @@ namespace Rodin::Variational
       constexpr
       auto x() const
       {
-        static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
+        static_assert(FormLanguage::IsVectorRange<RangeType>::Value);
         assert(m_fes.get().getVectorDimension() >= 1);
         return Component(static_cast<const Derived&>(*this), 0);
       }
@@ -372,7 +386,7 @@ namespace Rodin::Variational
       constexpr
       auto y() const
       {
-        static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
+        static_assert(FormLanguage::IsVectorRange<RangeType>::Value);
         assert(m_fes.get().getVectorDimension() >= 2);
         return Component(static_cast<const Derived&>(*this), 1);
       }
@@ -387,7 +401,7 @@ namespace Rodin::Variational
       constexpr
       auto z() const
       {
-        static_assert(std::is_same_v<RangeType, Math::Vector<ScalarType>>);
+        static_assert(FormLanguage::IsVectorRange<RangeType>::Value);
         assert(m_fes.get().getVectorDimension() >= 3);
         return Component(static_cast<const Derived&>(*this), 2);
       }
@@ -580,28 +594,28 @@ namespace Rodin::Variational
       /**
        * @brief Gets the interpolated value at the point.
        */
-      decltype(auto) getValue(const Geometry::Point& p) const
+      RangeType getValue(const Geometry::Point& p) const
       {
-        static thread_local RangeType s_out;
-        const auto& polytope = p.getPolytope();
-        const auto& polytopeMesh = polytope.getMesh();
+        RangeType out{};
         const auto& fes = m_fes.get();
         const auto& fesMesh = fes.getMesh();
-        if (polytopeMesh == fesMesh)
+
+        if (fesMesh.isLocalPoint(p))
         {
-          static_cast<const Derived&>(*this).interpolate(s_out, p);
+          static_cast<const Derived&>(*this).interpolate(out, p);
         }
         else if (const auto inclusion = fesMesh.inclusion(p))
         {
-          static_cast<const Derived&>(*this).interpolate(s_out, *inclusion);
+          static_cast<const Derived&>(*this).interpolate(out, *inclusion);
         }
         else if (fesMesh.isSubMesh())
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
+
           if (restriction)
           {
-            static_cast<const Derived&>(*this).interpolate(s_out, *restriction);
+            static_cast<const Derived&>(*this).interpolate(out, *restriction);
           }
           else
           {
@@ -616,7 +630,25 @@ namespace Rodin::Variational
             << "Point is not contained in the finite element space mesh."
             << Alert::Raise;
         }
-        return s_out;
+        return out;
+      }
+
+      RangeType getValue(const IntegrationPoint& ip) const
+      {
+        RangeType out{};
+        const auto& p = ip.getPoint();
+        const auto& fes = m_fes.get();
+        const auto& fesMesh = fes.getMesh();
+
+        if (fesMesh.isLocalPoint(p))
+        {
+          static_cast<const Derived&>(*this).interpolate(out, ip);
+        }
+        else
+        {
+          return static_cast<const Derived&>(*this).getValue(p);
+        }
+        return out;
       }
 
       constexpr
@@ -629,10 +661,31 @@ namespace Rodin::Variational
 
         const auto& fe = fes.getFiniteElement(d, i);
         const size_t count = fe.getCount();
+        const auto& dofs = getCachedDOFs(d, i);
         for (Index local = 0; local < count; ++local)
         {
           const auto mapping = fes.getPushforward({ d, i }, fe.getBasis(local));
-          const auto k = this->operator[](fes.getGlobalIndex({ d, i }, local)) * mapping(p);
+          const auto k = this->operator[](dofs[local]) * mapping(p);
+          if (local == 0)
+            res = k;
+          else
+            res += k;
+        }
+      }
+
+      constexpr
+      void interpolate(RangeType& res, const IntegrationPoint& ip) const
+      {
+        const auto& p = ip.getPoint();
+        const auto& polytope = p.getPolytope();
+        const size_t d = polytope.getDimension();
+        const Index  i = polytope.getIndex();
+
+        const auto& dofs = getCachedDOFs(d, i);
+        const auto& basisValues = getCachedBasisValues(d, i, ip);
+        for (Index local = 0; local < basisValues.size(); ++local)
+        {
+          const auto k = this->operator[](dofs[local]) * basisValues[local];
           if (local == 0)
             res = k;
           else
@@ -705,8 +758,8 @@ namespace Rodin::Variational
       {
         return static_cast<Derived&>(*this).project(
             region,
-            [&](const Geometry::Point&) -> decltype(auto)
-            { static thread_local RangeType s_out; s_out = fn; return s_out; }, pred);
+            [&](const Geometry::Point&) -> RangeType
+            { return fn; }, pred);
       }
 
       /**
@@ -888,6 +941,75 @@ namespace Rodin::Variational
       }
 
     private:
+      struct EvaluationCache
+      {
+        const GridFunctionBase* owner = nullptr;
+        const FES* fes = nullptr;
+        size_t d = static_cast<size_t>(-1);
+        Index i = static_cast<Index>(-1);
+        std::vector<Index> dofs;
+
+        bool hasBasisValues = false;
+        const QF::QuadratureFormulaBase* qf = nullptr;
+        size_t qp = static_cast<size_t>(-1);
+        std::vector<RangeType> basisValues;
+      };
+
+      static EvaluationCache& getEvaluationCache()
+      {
+        thread_local EvaluationCache cache;
+        return cache;
+      }
+
+      const std::vector<Index>& getCachedDOFs(size_t d, Index i) const
+      {
+        auto& cache = getEvaluationCache();
+        const auto* fes = &this->getFiniteElementSpace();
+        if (cache.owner != this || cache.fes != fes || cache.d != d || cache.i != i)
+        {
+          const auto& dofs = fes->getDOFs(d, i);
+          cache.owner = this;
+          cache.fes = fes;
+          cache.d = d;
+          cache.i = i;
+          const size_t count = static_cast<size_t>(dofs.size());
+          cache.dofs.resize(count);
+          for (size_t local = 0; local < count; ++local)
+            cache.dofs[local] = dofs[local];
+          cache.hasBasisValues = false;
+        }
+        return cache.dofs;
+      }
+
+      const std::vector<RangeType>& getCachedBasisValues(
+          size_t d, Index i, const IntegrationPoint& ip) const
+      {
+        auto& cache = getEvaluationCache();
+        if (!cache.hasBasisValues
+            || cache.owner != this
+            || cache.d != d
+            || cache.i != i
+            || cache.qf != &ip.getQuadratureFormula()
+            || cache.qp != ip.getIndex())
+        {
+          const auto& fes = this->getFiniteElementSpace();
+          const auto& fe = fes.getFiniteElement(d, i);
+          const size_t count = fe.getCount();
+          const auto& p = ip.getPoint();
+
+          cache.qf = &ip.getQuadratureFormula();
+          cache.qp = ip.getIndex();
+          cache.basisValues.resize(count);
+          for (Index local = 0; local < count; ++local)
+          {
+            const auto mapping = fes.getPushforward({ d, i }, fe.getBasis(local));
+            cache.basisValues[local] = mapping(p);
+          }
+          cache.hasBasisValues = true;
+        }
+        return cache.basisValues;
+      }
+
       Optional<std::string> m_name;
       std::reference_wrapper<const FESType> m_fes;
 

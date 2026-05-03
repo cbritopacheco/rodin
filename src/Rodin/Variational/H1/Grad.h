@@ -22,6 +22,7 @@
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/Grad.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Variational/ShapeFunction.h"
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
@@ -56,6 +57,33 @@ namespace Rodin::Variational
       Grad(const OperandType& u) : Parent(u) {}
       Grad(const Grad& other) : Parent(other) {}
       Grad(Grad&& other) : Parent(std::move(other)) {}
+
+      void interpolate(SpatialVectorType& out, const IntegrationPoint& ip) const
+      {
+        const auto& p = ip.getPoint();
+        const auto& polytope = p.getPolytope();
+        const size_t d = polytope.getDimension();
+        const Index  i = polytope.getIndex();
+
+        const auto& gf  = this->getOperand();
+        const auto& fes = gf.getFiniteElementSpace();
+        const auto& fe  = fes.getFiniteElement(d, i);
+        const auto& tab = fe.getTabulation(ip.getQuadratureFormula());
+        const auto JinvT = p.getJacobianInverse().transpose();
+
+        SpatialVectorType ref(static_cast<std::uint8_t>(d));
+        ref.setZero();
+
+        for (size_t local = 0; local < fe.getCount(); ++local)
+        {
+          const auto gref = tab.getGradient(ip.getIndex(), local);
+          const auto uval = gf[fes.getGlobalIndex({d, i}, local)];
+          for (size_t j = 0; j < d; ++j)
+            ref(static_cast<std::uint8_t>(j)) += uval * gref[j];
+        }
+
+        out = JinvT * ref;
+      }
 
       void interpolate(SpatialVectorType& out, const Geometry::Point& p) const
       {
@@ -160,7 +188,7 @@ namespace Rodin::Variational
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
-      using RangeType  = Math::Vector<ScalarType>;
+      using RangeType  = Math::SpatialVector<ScalarType>;
       using OperandType = ShapeFunction<NestedDerived, FESType, Space>;
       using Parent = ShapeFunctionBase<Grad<OperandType>, FESType, Space>;
 
@@ -297,28 +325,26 @@ namespace Rodin::Variational
         const auto& tab = fe.getTabulation(qf);
         const auto JinvT = p.getJacobianInverse().transpose();
 
-        static thread_local SpatialVectorType s_ref;
-        s_ref.resize(d);
+        SpatialVectorType ref(d);
 
         for (size_t a = 0; a < ndof; ++a)
         {
           const auto gref = tab.getGradient(qp, a); // span<const Scalar>, size d
 
           for (size_t ii = 0; ii < d; ++ii)
-            s_ref(ii) = gref[ii];
+            ref(ii) = gref[ii];
 
-          m_cache.grad_phys[a] = JinvT * s_ref;
+          m_cache.grad_phys[a] = JinvT * ref;
         }
 
         return *this;
       }
 
-      constexpr
-      auto getBasis(size_t local) const
+      RangeType getBasis(size_t local) const
       {
         assert(m_cache.key);
         assert(local < m_cache.grad_phys.size());
-        return m_cache.grad_phys[local].getData().head(m_cache.key.dim);
+        return m_cache.grad_phys[local];
       }
 
       constexpr

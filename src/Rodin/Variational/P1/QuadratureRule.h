@@ -33,11 +33,14 @@
 #include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/Geometry/Region.h"
 #include "Rodin/Math/Common.h"
+#include "Rodin/Math/SpatialMatrix.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Variational/ShapeFunction.h"
 #include "Rodin/QF/Centroid.h"
 #include "Rodin/QF/PolytopeQuadratureFormula.h"
 
 #include "P1.h"
+#include "Rodin/Math/Traits.h"
 
 
 namespace Rodin::Variational
@@ -364,30 +367,30 @@ namespace Rodin::Variational
           for (size_t qp = 0; qp < q.getSize(); ++qp)
           {
             const auto& p = q.getPoint(qp);
+            const IntegrationPoint ip(p, *m_qf, qp);
             const ScalarType wdet =
               static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
             const auto& rc = m_qf->getPoint(qp);
-            const ScalarType fval = f(p);
+            const ScalarType fval = f(ip);
 
             for (size_t local = 0; local < nte; ++local)
               m_vec(local) += wdet * fval * fe.getBasis(local)(rc);
           }
         }
-        else if constexpr (std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>)
+        else if constexpr (FormLanguage::IsVectorRange<RHSRangeType>::Value)
         {
-          const size_t vdim = fes.getVectorDimension();
-
           assert(m_quadrature);
           const auto& q = *m_quadrature;
           for (size_t qp = 0; qp < q.getSize(); ++qp)
           {
             const auto& p = q.getPoint(qp);
+            const IntegrationPoint ip(p, *m_qf, qp);
             const ScalarType wdet =
               static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
             const auto& rc = m_qf->getPoint(qp);
-            s_v = f(p);
+            s_v = f(ip);
 
             for (size_t local = 0; local < nte; ++local)
               m_vec(local) += wdet * Math::dot(s_v, fe.getBasis(local)(rc));
@@ -397,7 +400,7 @@ namespace Rodin::Variational
         {
           static_assert(
             std::is_same_v<RHSRangeType, ScalarType>
-            || std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>,
+            || FormLanguage::IsVectorRange<RHSRangeType>::Value,
             "Unsupported P1 Integral(f.v) range type.");
         }
 
@@ -624,7 +627,7 @@ namespace Rodin::Variational
               }
             }
           }
-          else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>)
+          else if constexpr (FormLanguage::IsVectorRange<LHSRangeType>::Value)
           {
             if (symmetric)
             {
@@ -889,6 +892,7 @@ namespace Rodin::Variational
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
+          const IntegrationPoint ip(p, *m_qf, qp);
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
@@ -896,7 +900,7 @@ namespace Rodin::Variational
 
           if constexpr (std::is_same_v<CoefficientRangeType, ScalarType>)
           {
-            const ScalarType csv = coeff.getValue(p);
+            const ScalarType csv = coeff.getValue(ip);
 
             if constexpr (std::is_same_v<MultiplicandRangeType, ScalarType>)
             {
@@ -925,13 +929,13 @@ namespace Rodin::Variational
               }
             }
           }
-          else if constexpr (std::is_same_v<CoefficientRangeType, Math::Matrix<ScalarType>>)
+          else if constexpr (FormLanguage::IsMatrixRange<CoefficientRangeType>::Value)
           {
-            static_assert(std::is_same_v<MultiplicandRangeType, Math::Vector<ScalarType>>);
-            static_assert(std::is_same_v<RHSRangeType, Math::Vector<ScalarType>>);
+            static_assert(FormLanguage::IsVectorRange<MultiplicandRangeType>::Value);
+            static_assert(FormLanguage::IsVectorRange<RHSRangeType>::Value);
 
-            static thread_local Math::Matrix<ScalarType> s_cmv;
-            coeff.getValue(s_cmv, p);
+            Math::SpatialMatrix<ScalarType> cmv;
+            cmv = coeff.getValue(ip);
 
             for (size_t ib = 0; ib < nte; ++ib)
             {
@@ -939,7 +943,7 @@ namespace Rodin::Variational
               for (size_t ia = 0; ia < ntr; ++ia)
               {
                 const auto& phi_tr = trialfe.getBasis(ia)(rc);
-                m_matrix(ib, ia) += wdet * Math::dot(phi_te, s_cmv * phi_tr);
+                m_matrix(ib, ia) += wdet * Math::dot(phi_te, cmv * phi_tr);
               }
             }
           }
@@ -1444,6 +1448,7 @@ namespace Rodin::Variational
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
+          const IntegrationPoint ip(p, *m_qf, qp);
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
@@ -1452,7 +1457,7 @@ namespace Rodin::Variational
 
           if constexpr (std::is_same_v<CoefficientRangeType, ScalarType>)
           {
-            const ScalarType csv = coeff.getValue(p);
+            const ScalarType csv = coeff.getValue(ip);
 
             if (trialfes == testfes)
             {
@@ -1478,17 +1483,17 @@ namespace Rodin::Variational
               }
             }
           }
-          else if constexpr (std::is_same_v<CoefficientRangeType, Math::Matrix<ScalarType>>)
+          else if constexpr (FormLanguage::IsMatrixRange<CoefficientRangeType>::Value)
           {
-            static thread_local Math::Matrix<ScalarType> s_cmv;
-            coeff.getValue(s_cmv, p);
+            Math::SpatialMatrix<ScalarType> cmv;
+            cmv = coeff.getValue(ip);
 
             if (trialfes == testfes)
             {
               const size_t n = m_trialRefGrad.size();
               for (size_t i = 0; i < n; ++i)
               {
-                const auto AGgi = s_cmv * (G * m_trialRefGrad[i]);
+                const auto AGgi = cmv * (G * m_trialRefGrad[i]);
                 m_matrix(i, i) += wdet * Math::dot(AGgi, m_trialRefGrad[i]);
                 for (size_t j = 0; j < i; ++j)
                   m_matrix(i, j) += wdet * Math::dot(AGgi, m_trialRefGrad[j]);
@@ -1497,7 +1502,7 @@ namespace Rodin::Variational
               for (size_t i = 0; i < n; ++i)
                 for (size_t j = i + 1; j < n; ++j)
                   m_matrix(i, j) += wdet * Math::dot(
-                    s_cmv * (G * m_trialRefGrad[j]), m_trialRefGrad[i]);
+                    cmv * (G * m_trialRefGrad[j]), m_trialRefGrad[i]);
             }
             else
             {
@@ -1507,7 +1512,7 @@ namespace Rodin::Variational
               for (size_t te = 0; te < nte; ++te)
                 for (size_t tr = 0; tr < ntr; ++tr)
                   m_matrix(te, tr) += wdet * Math::dot(
-                    s_cmv * (G * m_trialRefGrad[tr]), m_testRefGrad[te]);
+                    cmv * (G * m_trialRefGrad[tr]), m_testRefGrad[te]);
             }
           }
           else
@@ -1727,12 +1732,13 @@ namespace Rodin::Variational
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
+          const IntegrationPoint ip(p, *m_qf, qp);
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
           const auto& rc = m_qf->getPoint(qp);
 
-          const ScalarType csv = coeff(p);
+          const ScalarType csv = coeff(ip);
 
           if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
           {
@@ -1747,7 +1753,7 @@ namespace Rodin::Variational
               }
             }
           }
-          else if constexpr (std::is_same_v<LHSRangeType, Math::Vector<ScalarType>>)
+          else if constexpr (FormLanguage::IsVectorRange<LHSRangeType>::Value)
           {
             for (size_t ib = 0; ib < nte; ++ib)
             {
@@ -1828,8 +1834,8 @@ namespace Rodin::Variational
   class QuadratureRule<
     Dot<
       ShapeFunctionBase<
-        Div<ShapeFunction<LHSDerived, P1<Math::Vector<Real>, LHSMesh>, TrialSpace>>,
-        P1<Math::Vector<Real>, LHSMesh>, TrialSpace>,
+        Div<ShapeFunction<LHSDerived, P1<Math::SpatialVector<Real>, LHSMesh>, TrialSpace>>,
+        P1<Math::SpatialVector<Real>, LHSMesh>, TrialSpace>,
       ShapeFunctionBase<
         ShapeFunction<RHSDerived, P1<Real, RHSMesh>, TestSpace>,
         P1<Real, RHSMesh>, TestSpace>>>
@@ -1837,7 +1843,7 @@ namespace Rodin::Variational
   {
     public:
       using ScalarType = typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType;
-      using TrialFESType = P1<Math::Vector<Real>, LHSMesh>;
+      using TrialFESType = P1<Math::SpatialVector<Real>, LHSMesh>;
       using TestFESType  = P1<Real, RHSMesh>;
 
       using LHSType = ShapeFunctionBase<
@@ -2012,8 +2018,8 @@ namespace Rodin::Variational
   using P1DivTrialIntegrand =
     Dot<
       ShapeFunctionBase<
-        Div<ShapeFunction<LHSDerived, P1<Math::Vector<Real>, LHSMesh>, TrialSpace>>,
-        P1<Math::Vector<Real>, LHSMesh>, TrialSpace>,
+        Div<ShapeFunction<LHSDerived, P1<Math::SpatialVector<Real>, LHSMesh>, TrialSpace>>,
+        P1<Math::SpatialVector<Real>, LHSMesh>, TrialSpace>,
       ShapeFunctionBase<
         ShapeFunction<RHSDerived, P1<Real, RHSMesh>, TestSpace>,
         P1<Real, RHSMesh>, TestSpace>>;
@@ -2052,14 +2058,14 @@ namespace Rodin::Variational
         ShapeFunction<LHSDerived, P1<Real, LHSMesh>, TrialSpace>,
         P1<Real, LHSMesh>, TrialSpace>,
       ShapeFunctionBase<
-        Div<ShapeFunction<RHSDerived, P1<Math::Vector<Real>, RHSMesh>, TestSpace>>,
-        P1<Math::Vector<Real>, RHSMesh>, TestSpace>>>
+        Div<ShapeFunction<RHSDerived, P1<Math::SpatialVector<Real>, RHSMesh>, TestSpace>>,
+        P1<Math::SpatialVector<Real>, RHSMesh>, TestSpace>>>
     : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType>
   {
     public:
       using ScalarType = typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType;
       using TrialFESType = P1<Real, LHSMesh>;
-      using TestFESType  = P1<Math::Vector<Real>, RHSMesh>;
+      using TestFESType  = P1<Math::SpatialVector<Real>, RHSMesh>;
 
       using LHSType = ShapeFunctionBase<
         ShapeFunction<LHSDerived, TrialFESType, TrialSpace>,
@@ -2236,8 +2242,8 @@ namespace Rodin::Variational
         ShapeFunction<LHSDerived, P1<Real, LHSMesh>, TrialSpace>,
         P1<Real, LHSMesh>, TrialSpace>,
       ShapeFunctionBase<
-        Div<ShapeFunction<RHSDerived, P1<Math::Vector<Real>, RHSMesh>, TestSpace>>,
-        P1<Math::Vector<Real>, RHSMesh>, TestSpace>>;
+        Div<ShapeFunction<RHSDerived, P1<Math::SpatialVector<Real>, RHSMesh>, TestSpace>>,
+        P1<Math::SpatialVector<Real>, RHSMesh>, TestSpace>>;
 
   template <class LHSDerived, class RHSDerived, class LHSMesh, class RHSMesh>
   QuadratureRule(const P1DivTestIntegrand<LHSDerived, RHSDerived, LHSMesh, RHSMesh>&)
@@ -2323,8 +2329,8 @@ namespace Rodin::Variational
       using Parent =
         LocalBilinearFormIntegratorBase<ScalarType>;
 
-      static_assert(std::is_same_v<LHSOperandRangeType, Math::Vector<ScalarType>>);
-      static_assert(std::is_same_v<RHSOperandRangeType, Math::Vector<ScalarType>>);
+      static_assert(FormLanguage::IsVectorRange<LHSOperandRangeType>::Value);
+      static_assert(FormLanguage::IsVectorRange<RHSOperandRangeType>::Value);
 
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
@@ -2628,8 +2634,8 @@ namespace Rodin::Variational
       using Parent =
         LocalBilinearFormIntegratorBase<ScalarType>;
 
-      static_assert(std::is_same_v<LHSOperandRangeType, Math::Vector<ScalarType>>);
-      static_assert(std::is_same_v<RHSOperandRangeType, Math::Vector<ScalarType>>);
+      static_assert(FormLanguage::IsVectorRange<LHSOperandRangeType>::Value);
+      static_assert(FormLanguage::IsVectorRange<RHSOperandRangeType>::Value);
 
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
@@ -2750,6 +2756,7 @@ namespace Rodin::Variational
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
+          const IntegrationPoint ip(p, *m_qf, qp);
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
@@ -2757,7 +2764,7 @@ namespace Rodin::Variational
 
           if constexpr (std::is_same_v<CoefficientRangeType, ScalarType>)
           {
-            const ScalarType csv = coeff.getValue(p);
+            const ScalarType csv = coeff.getValue(ip);
 
             if (trialfes == testfes)
             {
@@ -2784,10 +2791,10 @@ namespace Rodin::Variational
               }
             }
           }
-          else if constexpr (std::is_same_v<CoefficientRangeType, Math::Matrix<ScalarType>>)
+          else if constexpr (FormLanguage::IsMatrixRange<CoefficientRangeType>::Value)
           {
-            static thread_local Math::Matrix<ScalarType> s_cmv;
-            coeff.getValue(s_cmv, p);
+            Math::SpatialMatrix<ScalarType> cmv;
+            cmv = coeff.getValue(ip);
 
             if (trialfes == testfes)
             {
@@ -2795,16 +2802,16 @@ namespace Rodin::Variational
               for (size_t i = 0; i < n; ++i)
               {
                 const auto Ji = m_trialRefJac[i] * Jinv;
-                m_matrix(i, i) += wdet * Math::dot(s_cmv * Ji, Ji);
+                m_matrix(i, i) += wdet * Math::dot(cmv * Ji, Ji);
 
                 for (size_t j = 0; j < i; ++j)
-                  m_matrix(i, j) += wdet * Math::dot(s_cmv * (m_trialRefJac[j] * Jinv), Ji);
+                  m_matrix(i, j) += wdet * Math::dot(cmv * (m_trialRefJac[j] * Jinv), Ji);
               }
 
               for (size_t i = 0; i < n; ++i)
                 for (size_t j = i + 1; j < n; ++j)
                   m_matrix(i, j) += wdet * Math::dot(
-                    s_cmv * (m_trialRefJac[j] * Jinv), m_trialRefJac[i] * Jinv);
+                    cmv * (m_trialRefJac[j] * Jinv), m_trialRefJac[i] * Jinv);
             }
             else
             {
@@ -2816,7 +2823,7 @@ namespace Rodin::Variational
                 const auto Jte = m_testRefJac[te] * Jinv;
                 for (size_t tr = 0; tr < ntr; ++tr)
                   m_matrix(te, tr) += wdet * Math::dot(
-                    s_cmv * (m_trialRefJac[tr] * Jinv), Jte);
+                    cmv * (m_trialRefJac[tr] * Jinv), Jte);
               }
             }
           }
@@ -2872,9 +2879,9 @@ namespace Rodin::Variational
       ShapeFunctionBase<
         Mult<
           FunctionBase<LHSFunctionDerived>,
-          ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived, P1<Math::Vector<Real>, Mesh>, TrialSpace>>>>>,
+          ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived, P1<Math::SpatialVector<Real>, Mesh>, TrialSpace>>>>>,
       ShapeFunctionBase<
-        Jacobian<ShapeFunction<RHSDerived, P1<Math::Vector<Real>, Mesh>, TestSpace>>>>&)
+        Jacobian<ShapeFunction<RHSDerived, P1<Math::SpatialVector<Real>, Mesh>, TestSpace>>>>&)
   ->
   QuadratureRule<
     Dot<
@@ -2882,9 +2889,9 @@ namespace Rodin::Variational
         Mult<
           FunctionBase<LHSFunctionDerived>,
           ShapeFunctionBase<
-            Jacobian<ShapeFunction<LHSDerived, P1<Math::Vector<Real>, Mesh>, TrialSpace>>>>>,
+            Jacobian<ShapeFunction<LHSDerived, P1<Math::SpatialVector<Real>, Mesh>, TrialSpace>>>>>,
       ShapeFunctionBase<
-        Jacobian<ShapeFunction<RHSDerived, P1<Math::Vector<Real>, Mesh>, TestSpace>>>>>;
+        Jacobian<ShapeFunction<RHSDerived, P1<Math::SpatialVector<Real>, Mesh>, TestSpace>>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -3079,7 +3086,7 @@ namespace Rodin::Variational
             for (size_t v = 0; v < nVertices; ++v)
             {
               const auto& bv = testfe.getBasis(v * vdim)(rc);
-              m_basis[v] = bv.coeff(0);
+              m_basis[v] = bv(0);
             }
           }
         }
@@ -3100,11 +3107,12 @@ namespace Rodin::Variational
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
+          const IntegrationPoint ip(p, *m_qf, qp);
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
           const auto& Jinv = p.getJacobianInverse();
-          const auto fval = coeff.getValue(p);
+          const auto fval = coeff.getValue(ip);
 
           for (size_t a = 0; a < n; ++a)
           {
@@ -3483,7 +3491,7 @@ namespace Rodin::Variational
             }
           }
         }
-        else if constexpr (std::is_same_v<Range, Math::Vector<ScalarType>>)
+        else if constexpr (FormLanguage::IsVectorRange<Range>::Value)
         {
 
           if (trp == tep)
@@ -3696,10 +3704,10 @@ namespace Rodin::Variational
       Real m_distortion;
 
       ScalarType m_sk;
-      Math::Matrix<ScalarType> m_mk;
+      Math::SpatialMatrix<ScalarType> m_mk;
 
-      Math::Vector<ScalarType> m_trv, m_tev;
-      Math::Matrix<ScalarType> m_k0, m_k1, m_k2, m_k3, m_k4, m_k5;
+      Math::SpatialVector<ScalarType> m_trv, m_tev;
+      Math::SpatialMatrix<ScalarType> m_k0, m_k1, m_k2, m_k3, m_k4, m_k5;
 
       Math::Matrix<ScalarType> m_matrix;
   };

@@ -21,7 +21,7 @@ const Real lambda = (E * nu) / ((1.0 + nu) * (1.0 - 2 * nu));
 const Real mu = E / (1.0 + nu);
 
 inline
-void K(Math::Matrix<Real>& res, const Point& x, const Point& y)
+void K(Math::SpatialMatrix<Real>& res, const Point& x, const Point& y)
 {
   const auto norm = (x - y).norm();
   res.resize(3, 3);
@@ -38,9 +38,9 @@ void K(Math::Matrix<Real>& res, const Point& x, const Point& y)
   const Real L02 = -L20;
   const Real L12 = -L21;
 
-  res << L00, L01, L02,
-         L10, L11, L12,
-         L20, L21, L22;
+  res(0, 0) = L00; res(0, 1) = L01; res(0, 2) = L02;
+  res(1, 0) = L10; res(1, 1) = L11; res(1, 2) = L12;
+  res(2, 0) = L20; res(2, 1) = L21; res(2, 2) = L22;
 }
 
 int main(int, char**)

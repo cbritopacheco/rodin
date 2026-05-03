@@ -15,6 +15,28 @@
 #include "ForwardDecls.h"
 #include "Function.h"
 
+namespace Rodin::FormLanguage
+{
+  template <class LHSDerived, class RHSDerived, class FES, Variational::ShapeFunctionSpaceType Space>
+  struct Traits<
+    Variational::Division<
+      Variational::ShapeFunctionBase<LHSDerived, FES, Space>,
+      Variational::FunctionBase<RHSDerived>>>
+  {
+    using FESType = FES;
+    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+
+    using LHSType =
+      Variational::ShapeFunctionBase<LHSDerived, FES, Space>;
+
+    using RHSType =
+      Variational::FunctionBase<RHSDerived>;
+
+    using RangeType =
+      typename FormLanguage::Traits<LHSType>::RangeType;
+  };
+}
+
 namespace Rodin::Variational
 {
   /**
@@ -122,10 +144,13 @@ namespace Rodin::Variational
        * @param p Point at which to evaluate
        * @returns Value @f$ \frac{f(x)}{g(x)} @f$ at point @f$ x @f$
        */
+      template <class Point>
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      auto getValue(const Point& p) const
       {
-        return this->object(getLHS().getValue(p)) / this->object(getRHS().getValue(p));
+        const auto lhs = getLHS().getValue(p);
+        const auto rhs = getRHS().getValue(p);
+        return lhs / rhs;
       }
 
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
@@ -199,6 +224,122 @@ namespace Rodin::Variational
   operator/(Number lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return Division(RealFunction(lhs), rhs);
+  }
+
+  template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
+  class Division<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>> final
+    : public ShapeFunctionBase<
+        Division<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>>,
+        FES,
+        Space>
+  {
+    public:
+      using FESType = FES;
+      static constexpr ShapeFunctionSpaceType SpaceType = Space;
+
+      using LHSType = ShapeFunctionBase<LHSDerived, FES, Space>;
+      using RHSType = FunctionBase<RHSDerived>;
+
+      using Parent =
+        ShapeFunctionBase<Division<LHSType, RHSType>, FES, Space>;
+
+      Division(const LHSType& lhs, const RHSType& rhs)
+        : Parent(lhs.getFiniteElementSpace()),
+          m_lhs(lhs.copy()),
+          m_rhs(rhs.copy())
+      {}
+
+      Division(const Division& other)
+        : Parent(other),
+          m_lhs(other.m_lhs->copy()),
+          m_rhs(other.m_rhs->copy())
+      {}
+
+      Division(Division&& other)
+        : Parent(std::move(other)),
+          m_lhs(std::move(other.m_lhs)),
+          m_rhs(std::move(other.m_rhs))
+      {}
+
+      const auto& getLeaf() const
+      {
+        return getLHS().getLeaf();
+      }
+
+      size_t getDOFs(const Geometry::Polytope& element) const
+      {
+        return getLHS().getDOFs(element);
+      }
+
+      const auto& getFiniteElementSpace() const
+      {
+        return getLHS().getFiniteElementSpace();
+      }
+
+      const LHSType& getLHS() const
+      {
+        assert(m_lhs);
+        return *m_lhs;
+      }
+
+      const RHSType& getRHS() const
+      {
+        assert(m_rhs);
+        return *m_rhs;
+      }
+
+      const IntegrationPoint& getIntegrationPoint() const
+      {
+        return m_lhs->getIntegrationPoint();
+      }
+
+      Division& setIntegrationPoint(const IntegrationPoint& ip)
+      {
+        m_lhs->setIntegrationPoint(ip);
+        return *this;
+      }
+
+      auto getBasis(size_t local) const
+      {
+        const auto& ip = getIntegrationPoint();
+        const auto lhs = getLHS().getBasis(local);
+        const auto rhs = getRHS().getValue(ip);
+        return lhs / rhs;
+      }
+
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
+      {
+        const auto lo = getLHS().getOrder(polytope);
+        const auto ro = getRHS().getOrder(polytope);
+
+        if (!lo || !ro || *ro != 0)
+          return std::nullopt;
+
+        return lo;
+      }
+
+      Division* copy() const noexcept override
+      {
+        return new Division(*this);
+      }
+
+    private:
+      std::unique_ptr<LHSType> m_lhs;
+      std::unique_ptr<RHSType> m_rhs;
+  };
+
+  template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
+  Division(
+      const ShapeFunctionBase<LHSDerived, FES, Space>&,
+      const FunctionBase<RHSDerived>&)
+    -> Division<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>>;
+
+  template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
+  auto operator/(
+      const ShapeFunctionBase<LHSDerived, FES, Space>& lhs,
+      const FunctionBase<RHSDerived>& rhs)
+  {
+    return Division(lhs, rhs);
   }
 }
 #endif

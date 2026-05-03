@@ -116,6 +116,12 @@ namespace Rodin::Variational
         return getLHS().getValue(p) && getRHS().getValue(p);
       }
 
+      constexpr
+      auto getValue(const IntegrationPoint& ip) const
+      {
+        return getLHS().getValue(ip) && getRHS().getValue(ip);
+      }
+
       /**
        * @brief Copies the AND object.
        * @returns Pointer to copied object
@@ -181,5 +187,4 @@ namespace Rodin::Variational
 }
 
 #endif
-
 

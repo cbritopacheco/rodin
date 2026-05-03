@@ -21,11 +21,36 @@
 
   @section guides-solvers-available Available Solvers
 
-  | Solver | Type | Best For | Symmetric Required |
-  |--------|------|----------|-------------------|
-  | @ref Rodin::Solver::SparseLU "SparseLU" | Direct | Small to medium problems | No |
-  | @ref Rodin::Solver::CG "CG" | Iterative | Large SPD systems | Yes |
-  | @ref Rodin::Solver::UMFPack "UMFPack" | Direct | General sparse systems | No |
+  Rodin provides a wide range of solvers. They are organized into direct
+  solvers (exact up to floating-point precision), iterative solvers
+  (approximate via successive refinement), and nonlinear solvers.
+
+  @subsection guides-solvers-available-direct Direct Solvers
+
+  | Solver | Class | Matrix requirement | Notes |
+  |--------|-------|-------------------|-------|
+  | @ref Rodin::Solver::SparseLU "SparseLU" | `Solver::SparseLU` | Any non-singular | General-purpose, good default for small/medium problems |
+  | @ref Rodin::Solver::UMFPack "UMFPack" | `Solver::UMFPack` | Any non-singular | SuiteSparse-based, often faster than SparseLU |
+  | @ref Rodin::Solver::CHOLMOD "CHOLMOD" | `Solver::CHOLMOD` | Symmetric positive definite | SuiteSparse Cholesky factorization |
+  | @ref Rodin::Solver::SimplicialLLT "SimplicialLLT" | `Solver::SimplicialLLT` | Symmetric positive definite | Eigen's simplicial Cholesky @f$ LL^T @f$ |
+  | @ref Rodin::Solver::SimplicialLDLT "SimplicialLDLT" | `Solver::SimplicialLDLT` | Symmetric | Eigen's simplicial @f$ LDL^T @f$ factorization |
+  | @ref Rodin::Solver::LDLT "LDLT" | `Solver::LDLT` | Symmetric | Dense @f$ LDL^T @f$ factorization |
+  | @ref Rodin::Solver::HouseholderQR "HouseholderQR" | `Solver::HouseholderQR` | Any | Dense QR factorization |
+  | @ref Rodin::Solver::SparseQR "SparseQR" | `Solver::SparseQR` | Any | Sparse QR factorization |
+  | @ref Rodin::Solver::SPQR "SPQR" | `Solver::SPQR` | Any | SuiteSparse sparse QR |
+
+  @subsection guides-solvers-available-iterative Iterative Solvers
+
+  | Solver | Class | Matrix requirement | Notes |
+  |--------|-------|-------------------|-------|
+  | @ref Rodin::Solver::CG "CG" | `Solver::CG` | Symmetric positive definite | Conjugate Gradient — optimal for SPD systems |
+  | @ref Rodin::Solver::BiCGSTAB "BiCGSTAB" | `Solver::BiCGSTAB` | Any | Bi-conjugate gradient stabilized |
+  | @ref Rodin::Solver::GMRES "GMRES" | `Solver::GMRES` | Any | Generalized Minimum Residual |
+  | @ref Rodin::Solver::DGMRES "DGMRES" | `Solver::DGMRES` | Any | Deflated GMRES variant |
+  | @ref Rodin::Solver::MINRES "MINRES" | `Solver::MINRES` | Symmetric | Minimum Residual method |
+  | @ref Rodin::Solver::IDRS "IDRS" | `Solver::IDRS` | Any | Induced Dimension Reduction |
+  | @ref Rodin::Solver::IDRSTABL "IDRSTABL" | `Solver::IDRSTABL` | Any | IDR(s) with higher-order stabilization |
+  | @ref Rodin::Solver::LeastSquaresCG "LeastSquaresCG" | `Solver::LeastSquaresCG` | Any | Least-squares CG for rectangular systems |
 
   @section guides-solvers-direct Direct Solvers
 
@@ -63,7 +88,7 @@
             - Integral(RealFunction(1.0), v)
             + DirichletBC(u, Zero());
 
-    // Inline usage — creates solver, solves, and discards
+    // Inline usage — construct solver with the problem, then solve
     Solver::SparseLU(poisson).solve();
 
     return 0;
@@ -85,7 +110,6 @@
   @code{.cpp}
   #include <Rodin/Solver/UMFPack.h>
 
-  // Inline usage
   Solver::UMFPack(problem).solve();
   @endcode
 
@@ -107,7 +131,7 @@
   elasticity, heat equation):
 
   @code{.cpp}
-  // Basic inline usage
+  // Inline usage — construct with the problem and solve immediately
   Solver::CG(poisson).solve();
   @endcode
 
@@ -115,10 +139,12 @@
 
   @code{.cpp}
   Solver::CG solver(poisson);
-  solver.setMaxIterations(1000);       // Maximum number of iterations
-  solver.setRelativeTolerance(1e-10);  // Relative convergence threshold
-  solver.printIterations(true);        // Print iteration residuals
+  solver.setTolerance(1e-10);           // Relative convergence threshold
+  solver.setMaxIterations(1000);        // Maximum number of iterations
   solver.solve();
+
+  if (solver.success())
+    std::cout << "CG converged." << std::endl;
   @endcode
 
   CG is the recommended solver when:
@@ -132,28 +158,76 @@
 
   @section guides-solvers-nonlinear Newton Solver
 
-  For nonlinear problems (e.g.\ Navier–Stokes with Picard iteration),
-  Rodin provides a Newton solver that wraps a linear solver. At each
-  Newton step, the Jacobian system is assembled and solved using the
-  chosen linear solver:
+  For nonlinear variational problems (e.g.\ hyperelasticity, Navier–Stokes),
+  Rodin provides a `NewtonSolver<LinearSolver>` that wraps a linear solver
+  and performs Newton-Raphson iteration. At each iterate @f$ u^k @f$, the
+  tangent system is assembled and solved:
+
+  @f[
+    J(u^k)\,\delta u^k = -F(u^k), \qquad u^{k+1} = u^k + \delta u^k
+  @f]
+
+  where @f$ J @f$ is the Jacobian (tangent matrix) and @f$ F @f$ is the
+  nonlinear residual.
 
   @code{.cpp}
-  #include <Rodin/Solver.h>
+  #include <Rodin/Solver/NewtonSolver.h>
+  #include <Rodin/Solver/SparseLU.h>
 
-  // Create a linear solver
-  Solver::CG linear(problem);
-  linear.setMaxIterations(500);
-  linear.setRelativeTolerance(1e-10);
-
-  // Wrap it in a Newton solver
-  Solver::NewtonSolver newton(linear);
-  newton.solve();
+  Solver::SparseLU linearSolver(problem);
+  Solver::NewtonSolver newton(linearSolver);
+  newton.setMaxIterations(20);
+  newton.setAbsoluteTolerance(1e-10);
+  newton.setRelativeTolerance(1e-8);
+  newton.solve(u);  // updates u in place
   @endcode
 
-  The Newton solver is useful for:
-  - Nonlinear PDEs solved via successive linearization
-  - Coupled systems with iterative decoupling
-  - Problems where the bilinear form depends on the solution itself
+  Configuration methods:
+
+  | Method | Default | Description |
+  |--------|---------|-------------|
+  | `setMaxIterations(n)` | 100 | Maximum Newton iterations |
+  | `setAbsoluteTolerance(tol)` | @f$ 10^{-12} @f$ | Converged when @f$ \|r\| \le \mathrm{atol} @f$ |
+  | `setRelativeTolerance(tol)` | @f$ 10^{-8} @f$ | Converged when @f$ \|r\|/\|r_0\| \le \mathrm{rtol} @f$ |
+
+  Convergence is declared when **either** criterion is satisfied (not both).
+
+  @subsection guides-solvers-nonlinear-hyperelastic Hyperelastic Example
+
+  For hyperelastic problems, the Newton system is built from
+  `Solid::MaterialTangent` (tangent stiffness) and `Solid::InternalForce`
+  (nonlinear residual), both linearized about the current displacement:
+
+  @code{.cpp}
+  #include <Rodin/Solid.h>
+  #include <Rodin/Solver/NewtonSolver.h>
+  #include <Rodin/Solver/SparseLU.h>
+
+  Solid::NeoHookean law(lambda, mu);
+  GridFunction u(Vh);   // accumulated displacement
+
+  Solid::MaterialTangent tangent(law, du, v);
+  tangent.setDisplacement(u);
+
+  Solid::InternalForce residual(law, v);
+  residual.setDisplacement(u);
+
+  Problem newton(du, v);
+  newton = tangent + residual
+         - Integral(bodyForce, v)
+         + DirichletBC(du, VectorFunction{Zero(), Zero()}).on(fixedBC);
+
+  SparseLU linearSolver(newton);
+  NewtonSolver solver(linearSolver);
+  solver.setMaxIterations(50)
+        .setAbsoluteTolerance(1e-10);
+  solver.solve(u);
+  @endcode
+
+  The Newton solver is used for:
+  - Hyperelastic solid mechanics (with `Solid::InternalForce` / `MaterialTangent`)
+  - Nonlinear PDEs (Navier–Stokes, nonlinear diffusion)
+  - Any problem where the bilinear form depends on the current solution
 
   @section guides-solvers-usage Usage Patterns
 
@@ -161,8 +235,9 @@
 
   @subsection guides-solvers-usage-inline Inline Solving
 
-  For quick one-shot use, create and invoke the solver in a single
-  expression:
+  For quick one-shot use, construct the solver with the problem and call
+  `solve()` in a single expression. This is the most common pattern in
+  Rodin:
 
   @code{.cpp}
   Solver::CG(poisson).solve();
@@ -171,43 +246,44 @@
 
   @subsection guides-solvers-usage-configured Configured Solving
 
-  When you need to tune parameters, create the solver object first:
+  When you need to tune parameters, construct the solver object first,
+  configure it, then call `solve()`:
 
   @code{.cpp}
   Solver::CG solver(poisson);
   solver.setMaxIterations(500);
-  solver.setRelativeTolerance(1e-12);
-  solver.printIterations(true);
+  solver.setTolerance(1e-12);
   solver.solve();
   @endcode
 
-  @subsection guides-solvers-usage-reuse Solver Reuse via solve()
+  @subsection guides-solvers-usage-reuse Solver Reuse via problem.solve()
 
-  You can also pass a pre-configured solver to the problem:
+  You can also pass a pre-configured solver to `problem.solve()`. This
+  is useful when the same solver is applied to multiple problems (e.g.\
+  in an optimization loop):
 
   @code{.cpp}
-  Solver::CG cg;
-  cg.setMaxIterations(200);
-  cg.setRelativeTolerance(1e-12);
-  cg.printIterations(true);
-
-  problem.solve(cg);
+  Solver::SparseLU solver;
+  for (size_t i = 0; i < nIterations; ++i)
+  {
+    // ... update problem ...
+    problem.solve(solver);
+  }
   @endcode
-
-  This pattern is useful when the same solver configuration is applied
-  to multiple problems (e.g.\ in an optimization loop).
 
   @section guides-solvers-choosing Choosing a Solver
 
-  | Criterion | Recommended Solver |
-  |-----------|-------------------|
-  | Small system, any matrix | SparseLU |
-  | Large symmetric positive definite system | CG |
-  | Non-symmetric or indefinite system | SparseLU or UMFPack |
-  | Saddle-point system (Stokes, mixed FEM) | UMFPack |
-  | Need guaranteed convergence | Direct solver |
-  | Memory-constrained large system | CG |
-  | Nonlinear PDE | Newton + any linear solver |
+  | Criterion | Recommended solver | Why |
+  |-----------|-------------------|-----|
+  | Small system (< 100k DOFs), any matrix | SparseLU or UMFPack | Robust direct factorization |
+  | Large SPD system (Poisson, elasticity) | CG | Memory-efficient, optimal for SPD |
+  | Large non-symmetric system | BiCGSTAB or GMRES | General iterative methods |
+  | Symmetric indefinite (saddle-point) | UMFPack or MINRES | UMFPack is most robust |
+  | Saddle-point (Stokes, mixed FEM) | UMFPack | Handles indefinite structure |
+  | SPD with SuiteSparse available | CHOLMOD or SimplicialLLT | Exploit symmetric structure |
+  | Need guaranteed convergence | Any direct solver | No iteration needed |
+  | Memory-constrained large system | CG (if SPD), GMRES (otherwise) | Matrix-free possible |
+  | Nonlinear PDE | Newton + any linear solver | Successive linearization |
 
   @section guides-solvers-example Complete Example
 
@@ -236,12 +312,11 @@
             - Integral(RealFunction(1.0), v)
             + DirichletBC(u, Zero());
 
-    // Solve with CG and print iteration info
-    Solver::CG cg(poisson);
-    cg.setMaxIterations(1000);
-    cg.setRelativeTolerance(1e-10);
-    cg.printIterations(true);
-    cg.solve();
+    // Solve with CG
+    Solver::CG solver(poisson);
+    solver.setMaxIterations(1000);
+    solver.setTolerance(1e-10);
+    solver.solve();
 
     // Export result
     IO::XDMF xdmf("SolverExample");
@@ -252,6 +327,117 @@
   }
   @endcode
 
+  @section guides-solvers-petsc PETSc Solvers
+
+  When Rodin is built with PETSc support (`RODIN_USE_PETSC=ON`), additional
+  solvers become available that support both sequential and MPI-distributed
+  linear systems.  PETSc solvers work with
+  @ref Rodin::PETSc::Math::LinearSystem "PETSc::Math::LinearSystem" and are
+  activated by using `PETSc::Variational::TrialFunction` /
+  `PETSc::Variational::TestFunction` instead of the standard trial/test
+  functions.
+
+  @subsection guides-solvers-petsc-ksp KSP (Krylov Subspace)
+
+  @ref Rodin::Solver::KSP "KSP" is the base PETSc linear solver wrapper.
+  It provides access to the full PETSc Krylov solver library and can be
+  configured both programmatically and via PETSc command-line options.
+
+  | Method | Description |
+  |--------|-------------|
+  | `setType(KSPType)` | Select algorithm (e.g.\ `KSPCG`, `KSPGMRES`, `KSPBCGS`) |
+  | `setTolerances(rtol, abstol, dtol, maxIt)` | Set convergence tolerances and iteration limit |
+  | `setPreconditioner(Mat)` | Supply an explicit preconditioner matrix |
+  | `setPrefix(string)` | Set option prefix for multi-solver configurations |
+
+  @code{.cpp}
+  #include <Rodin/PETSc.h>
+
+  // Use the KSP base solver directly
+  Solver::KSP(problem).solve();
+
+  // Configure via PETSc command-line options:
+  //   ./myprogram -ksp_type gmres -pc_type ilu -ksp_rtol 1e-8 -ksp_monitor
+  @endcode
+
+  @subsection guides-solvers-petsc-cg PETSc CG
+
+  @ref Rodin::Solver::CG<PETSc::Math::LinearSystem> "CG\<PETSc::Math::LinearSystem\>"
+  is a convenience specialization that sets the KSP type to `KSPCG`.
+  It is the recommended iterative solver for SPD systems when using PETSc:
+
+  @code{.cpp}
+  PETSc::Variational::TrialFunction u(Vh);
+  PETSc::Variational::TestFunction  v(Vh);
+
+  Problem poisson(u, v);
+  poisson = Integral(Grad(u), Grad(v))
+          - Integral(f, v)
+          + DirichletBC(u, Zero());
+
+  Solver::CG(poisson).solve();
+  @endcode
+
+  @subsection guides-solvers-petsc-gmres PETSc GMRES
+
+  @ref Rodin::Solver::GMRES<PETSc::Math::LinearSystem> "GMRES\<PETSc::Math::LinearSystem\>"
+  sets the KSP type to `KSPGMRES`.  Suitable for non-symmetric and indefinite
+  systems:
+
+  @code{.cpp}
+  Solver::GMRES(stokes).solve();
+  @endcode
+
+  @subsection guides-solvers-petsc-snes SNES (Nonlinear)
+
+  @ref Rodin::Solver::SNES "SNES" wraps the PETSc Scalable Nonlinear Equations
+  Solver for Newton-type methods.  It uses an associated KSP for the inner
+  linear solve at each Newton step:
+
+  @code{.cpp}
+  // Create the KSP linear solver
+  Solver::KSP ksp(problem);
+  ksp.setTolerances(1e-10, 1e-14, 1e5, 200);
+
+  // Wrap it in SNES for Newton iteration
+  Solver::SNES snes(ksp);
+  snes.setTolerances(1e-8, 1e-10, 1e-6, 50, 10000);
+  snes.solve(x);
+  @endcode
+
+  @subsection guides-solvers-petsc-multifield Multi-Field Problems
+
+  PETSc solvers support block systems with multiple trial/test function pairs.
+  The resulting linear system can be solved with field-split preconditioning
+  configured via PETSc command-line options:
+
+  @code{.cpp}
+  PETSc::Variational::TrialFunction u(Vh_velocity);
+  PETSc::Variational::TrialFunction p(Vh_pressure);
+
+  PETSc::Variational::TestFunction v(Vh_velocity);
+  PETSc::Variational::TestFunction q(Vh_pressure);
+
+  Problem stokes(u, p, v, q);
+  stokes = Integral(Jacobian(u), Jacobian(v))
+         - Integral(p, Div(v))
+         + Integral(Div(u), q)
+         - Integral(f, v)
+         + DirichletBC(u, g);
+
+  Solver::KSP(stokes).solve();
+  // Run with: -ksp_type gmres -pc_type fieldsplit -ksp_monitor
+  @endcode
+
+  @subsection guides-solvers-petsc-table PETSc Solver Summary
+
+  | Solver | Class | System type | Notes |
+  |--------|-------|-------------|-------|
+  | KSP | `Solver::KSP` | Any (via PETSc type selection) | Base wrapper, full PETSc configuration |
+  | CG | `Solver::CG<PETSc::Math::LinearSystem>` | SPD | Sets `KSPCG` |
+  | GMRES | `Solver::GMRES<PETSc::Math::LinearSystem>` | Non-symmetric, indefinite | Sets `KSPGMRES` |
+  | SNES | `Solver::SNES` | Nonlinear @f$ F(x)=0 @f$ | Newton-type, uses KSP internally |
+
   @section guides-solvers-troubleshooting Troubleshooting
 
   - **CG does not converge**: The matrix may not be SPD. Switch to
@@ -260,10 +446,14 @@
     direct solver. Use CG instead (if SPD) or consider PETSc solvers.
   - **Solution is incorrect**: Check that boundary conditions are applied
     correctly and that the mesh connectivity is computed before assembling.
+  - **PETSc solver does not converge**: Use `-ksp_monitor` to inspect
+    residual history.  Try `-pc_type gamg` for AMG preconditioning or
+    `-ksp_type gmres -pc_type ilu` for non-SPD systems.
 
   @section guides-solvers-see-also See Also
 
   - @ref Rodin::Solver "Solver namespace reference"
+  - @ref Rodin::PETSc "PETSc module"
   - @ref guides-weak-formulations "Weak formulations"
   - @ref guides-boundary-conditions "Boundary conditions"
   - @ref examples-pdes-poisson "Poisson example"

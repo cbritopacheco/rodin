@@ -28,7 +28,10 @@
 #ifndef RODIN_VARIATIONAL_H1_JACOBIAN_H
 #define RODIN_VARIATIONAL_H1_JACOBIAN_H
 
+#include <vector>
+
 #include "Rodin/Variational/ForwardDecls.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Variational/Jacobian.h"
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
@@ -75,24 +78,24 @@ namespace Rodin::Variational
    * - Deformation gradient in nonlinear mechanics
    *
    * @tparam K Polynomial degree
-   * @tparam Range Value range type (typically Math::Vector<Scalar>)
+   * @tparam Range Value range type (typically Math::SpatialVector<Scalar>)
    * @tparam Data Data storage type
    * @tparam Mesh Mesh type
    */
   template <size_t K, class Scalar, class Data, class Mesh>
-  class Jacobian<GridFunction<H1<K, Math::Vector<Scalar>, Mesh>, Data>> final
+  class Jacobian<GridFunction<H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>> final
     : public JacobianBase<
-        GridFunction<H1<K, Math::Vector<Scalar>, Mesh>, Data>,
-        Jacobian<GridFunction<H1<K, Math::Vector<Scalar>, Mesh>, Data>>>
+        GridFunction<H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>,
+        Jacobian<GridFunction<H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
     public:
-      using FESType = H1<K, Math::Vector<Scalar>, Mesh>;
+      using FESType = H1<K, Math::SpatialVector<Scalar>, Mesh>;
 
       using OperandType = GridFunction<FESType, Data>;
 
       using Parent = JacobianBase<OperandType, Jacobian<OperandType>>;
 
-      using RangeType = Math::Matrix<Scalar>;
+      using RangeType = Math::SpatialMatrix<Scalar>;
 
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
@@ -101,8 +104,63 @@ namespace Rodin::Variational
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
       Jacobian(const OperandType& u) : Parent(u) {}
-      Jacobian(const Jacobian& other) : Parent(other) {}
-      Jacobian(Jacobian&& other) : Parent(std::move(other)) {}
+
+      Jacobian(const Jacobian& other)
+        : Parent(other)
+      {}
+
+      Jacobian(Jacobian&& other)
+        : Parent(std::move(other))
+      {}
+
+      constexpr
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
+      {
+        const size_t k = H1Element<K, ScalarType>(polytope.getGeometry()).getOrder();
+        return (k == 0) ? 0 : (k - 1);
+      }
+
+      Jacobian* copy() const noexcept override { return new Jacobian(*this); }
+
+      void interpolate(SpatialMatrixType& out, const IntegrationPoint& ip) const
+      {
+        const auto& p = ip.getPoint();
+        const auto& polytope = p.getPolytope();
+        const size_t d = polytope.getDimension();
+        const Index i = polytope.getIndex();
+
+        const auto& gf  = this->getOperand();
+        const auto& fes = gf.getFiniteElementSpace();
+        const size_t vdim = fes.getVectorDimension();
+
+        const auto feS = H1Element<K, ScalarType>(polytope.getGeometry());
+        const size_t nscalar = feS.getCount();
+        const auto& tab = feS.getTabulation(ip.getQuadratureFormula());
+        const auto JinvT = p.getJacobianInverse().transpose();
+
+        SpatialVectorType ref(d);
+        SpatialVectorType phys(d);
+
+        out.resize(vdim, d);
+        out.setZero();
+
+        for (size_t alpha = 0; alpha < nscalar; ++alpha)
+        {
+          const auto gref = tab.getGradient(ip.getIndex(), alpha);
+          for (size_t j = 0; j < d; ++j)
+            ref(j) = gref[j];
+
+          phys = JinvT * ref;
+
+          for (size_t comp = 0; comp < vdim; ++comp)
+          {
+            const size_t local = alpha * vdim + comp;
+            const auto uval = gf[fes.getGlobalIndex({d, i}, local)];
+            for (size_t j = 0; j < d; ++j)
+              out(comp, j) += uval * phys(j);
+          }
+        }
+      }
 
       void interpolate(SpatialMatrixType& out, const Geometry::Point& p) const
       {
@@ -126,7 +184,7 @@ namespace Rodin::Variational
             Math::SpatialPoint rc;
             tracePolytope->getTransformation().inverse(rc, pc);
             const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
-            this->interpolate(out, np);
+            interpolate(out, np);
             return;
           }
           else
@@ -150,7 +208,7 @@ namespace Rodin::Variational
                 Math::SpatialPoint rc;
                 tracePolytope->getTransformation().inverse(rc, pc);
                 const Geometry::Point np(*tracePolytope, std::cref(rc), pc);
-                this->interpolate(out, np);
+                interpolate(out, np);
                 return;
               }
             }
@@ -161,7 +219,6 @@ namespace Rodin::Variational
           }
         }
 
-        // cell
         assert(d == mesh.getDimension());
 
         const auto& gf  = this->getOperand();
@@ -169,59 +226,34 @@ namespace Rodin::Variational
         const size_t vdim = fes.getVectorDimension();
 
         const auto geom = polytope.getGeometry();
-        const auto& rc  = p.getReferenceCoordinates();
-
-        // scalar element gives scalar basis gradients in reference coords
         const auto feS = H1Element<K, ScalarType>(geom);
         const size_t nscalar = feS.getCount();
-
-        // phys gradient mapping
+        const auto& rc = p.getReferenceCoordinates();
         const auto JinvT = p.getJacobianInverse().transpose();
 
-        static thread_local SpatialVectorType s_ref;
-        static thread_local SpatialVectorType s_phys;
-        s_ref.resize(d);
-        s_phys.resize(d);
+        SpatialVectorType ref(d);
+        SpatialVectorType phys(d);
 
-        SpatialMatrixType res(vdim, d);
-        res.setZero();
+        out.resize(vdim, d);
+        out.setZero();
 
-        // Local ordering must match your vector H1 element:
-        // local = alpha * vdim + comp
         for (size_t alpha = 0; alpha < nscalar; ++alpha)
         {
-          const auto gref = feS.getBasis(alpha).getGradient()(rc); // length d
-
+          const auto gref = feS.getBasis(alpha).getGradient()(rc);
           for (size_t j = 0; j < d; ++j)
-            s_ref(j) = gref(j);
+            ref(j) = gref(j);
 
-          s_phys = JinvT * s_ref; // ∇_x φ_alpha
+          phys = JinvT * ref;
 
           for (size_t comp = 0; comp < vdim; ++comp)
           {
             const size_t local = alpha * vdim + comp;
-
-            // J(u) row 'comp' gets contribution u_comp(alpha) * (∇φ_alpha)^T
             const auto uval = gf[fes.getGlobalIndex({d, i}, local)];
-            if (comp < vdim)
-            {
-              for (size_t j = 0; j < d; ++j)
-                res(comp, j) += uval * s_phys(j);
-            }
+            for (size_t j = 0; j < d; ++j)
+              out(comp, j) += uval * phys(j);
           }
         }
-
-        out = std::move(res);
       }
-
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
-      {
-        const size_t k = H1Element<K, ScalarType>(polytope.getGeometry()).getOrder();
-        return (k == 0) ? 0 : (k - 1);
-      }
-
-      Jacobian* copy() const noexcept override { return new Jacobian(*this); }
   };
 
   /**
@@ -236,14 +268,14 @@ namespace Rodin::Variational
    * @brief Jacobian of an H1 ShapeFunction object.
    */
   template <size_t K, class NestedDerived, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
-  class Jacobian<ShapeFunction<NestedDerived, H1<K, Math::Vector<Scalar>, Mesh>, Space>> final
+  class Jacobian<ShapeFunction<NestedDerived, H1<K, Math::SpatialVector<Scalar>, Mesh>, Space>> final
     : public ShapeFunctionBase<
-        Jacobian<ShapeFunction<NestedDerived, H1<K, Math::Vector<Scalar>, Mesh>, Space>>,
-        H1<K, Math::Vector<Scalar>, Mesh>,
+        Jacobian<ShapeFunction<NestedDerived, H1<K, Math::SpatialVector<Scalar>, Mesh>, Space>>,
+        H1<K, Math::SpatialVector<Scalar>, Mesh>,
         Space>
   {
     public:
-      using FESType = H1<K, Math::Vector<Scalar>, Mesh>;
+      using FESType = H1<K, Math::SpatialVector<Scalar>, Mesh>;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
       using OperandType = ShapeFunction<NestedDerived, FESType, SpaceType>;
@@ -256,7 +288,7 @@ namespace Rodin::Variational
 
       using ScalarType        = typename FormLanguage::Traits<FESType>::ScalarType;
 
-      using RangeType         = Math::Matrix<ScalarType>;
+      using RangeType         = Math::SpatialMatrix<ScalarType>;
 
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
@@ -394,47 +426,44 @@ namespace Rodin::Variational
         const auto& tab   = feS.getTabulation(qf);
         const auto  JinvT = p.getJacobianInverse().transpose();
 
-        static thread_local SpatialVectorType s_ref;
-        s_ref.resize(d);
+        SpatialVectorType ref(d);
 
         for (size_t alpha = 0; alpha < nscalar; ++alpha)
         {
           const auto gref = tab.getGradient(qp, alpha); // span size d
           for (size_t j = 0; j < d; ++j)
-            s_ref(j) = gref[j];
+            ref(j) = gref[j];
 
-          m_cache.grad_phys[alpha] = JinvT * s_ref;
+          m_cache.grad_phys[alpha] = JinvT * ref;
         }
 
         return *this;
       }
 
-      const RangeType& getBasis(size_t local) const
+      RangeType getBasis(size_t local) const
       {
         assert(m_cache.key);
 
-        const auto& fes  = this->getFiniteElementSpace();
-        const size_t vdim = fes.getVectorDimension();
+        const auto& fes = this->getFiniteElementSpace();
+        const std::uint8_t vdim = fes.getVectorDimension();
 
         const auto& p = this->getIntegrationPoint().getPoint();
-        const size_t d = p.getPolytope().getDimension();
+        const std::uint8_t d = p.getPolytope().getDimension();
 
         const size_t alpha = local / vdim;
         const size_t comp  = local % vdim;
 
         assert(alpha < m_cache.grad_phys.size());
+        assert(vdim <= RangeType::MaxSize);
+        assert(d <= RangeType::MaxSize);
 
-        static thread_local RangeType s_J;
-        if (static_cast<size_t>(s_J.rows()) != vdim || static_cast<size_t>(s_J.cols()) != d)
-          s_J.resize(vdim, d);
+        RangeType J(vdim, d);
+        J.setZero();
 
-        s_J.setZero();
+        for (std::uint8_t j = 0; j < d; ++j)
+          J(comp, j) = m_cache.grad_phys[alpha](j);
 
-        // Only row comp is non-zero
-        for (size_t j = 0; j < d; ++j)
-          s_J(comp, j) = m_cache.grad_phys[alpha](j);
-
-        return s_J;
+        return J;
       }
 
       constexpr
@@ -459,8 +488,8 @@ namespace Rodin::Variational
   };
 
   template <size_t K, class ShapeFunctionDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
-  Jacobian(const ShapeFunction<ShapeFunctionDerived, H1<K, Math::Vector<Number>, Mesh>, Space>&)
-    -> Jacobian<ShapeFunction<ShapeFunctionDerived, H1<K, Math::Vector<Number>, Mesh>, Space>>;
+  Jacobian(const ShapeFunction<ShapeFunctionDerived, H1<K, Math::SpatialVector<Number>, Mesh>, Space>&)
+    -> Jacobian<ShapeFunction<ShapeFunctionDerived, H1<K, Math::SpatialVector<Number>, Mesh>, Space>>;
 }
 
 #endif

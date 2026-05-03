@@ -12,6 +12,7 @@
 
 #include "ForwardDecls.h"
 #include "Rodin/Variational/IntegrationPoint.h"
+#include "Rodin/Math/Traits.h"
 
 namespace Rodin::FormLanguage
 {
@@ -113,10 +114,11 @@ namespace Rodin::Variational
        * @param p Point at which to evaluate
        * @returns Scalar value @f$ f_i(p) @f$
        */
+      template <class Point>
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      auto getValue(const Point& p) const
       {
-        return this->getOperand().getValue(p).coeff(m_idx);
+        return this->getOperand().getValue(p)(m_idx);
       }
 
       constexpr
@@ -210,10 +212,11 @@ namespace Rodin::Variational
        * @param p Point at which to evaluate
        * @returns Scalar value @f$ A_{ij}(p) @f$
        */
+      template <class Point>
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      auto getValue(const Point& p) const
       {
-        return this->getOperand().getValue(p).coeff(m_i, m_j);
+        return this->getOperand().getValue(p)(m_i, m_j);
       }
 
       constexpr
@@ -313,10 +316,11 @@ namespace Rodin::Variational
        * @param p Point at which to evaluate
        * @returns Scalar value of the component
        */
+      template <class Point>
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      auto getValue(const Point& p) const
       {
-        return m_u.get().getValue(p).coeff(m_idx);
+        return m_u.get().getValue(p)(m_idx);
       }
 
       constexpr
@@ -369,7 +373,7 @@ namespace Rodin::Variational
 
       using Parent = ShapeFunctionBase<Component<OperandType>, FES, Space>;
 
-      static_assert(std::is_same_v<OperandRangeType, Math::Vector<ScalarType>>);
+      static_assert(FormLanguage::IsVectorRange<OperandRangeType>::Value);
 
       /**
        * @brief Constructs component extractor for ShapeFunction.
@@ -461,7 +465,8 @@ namespace Rodin::Variational
       constexpr
       auto getBasis(size_t local) const
       {
-        return this->object(this->getOperand().getBasis(local)).coeff(m_idx);
+        const auto basis = this->getOperand().getBasis(local);
+        return basis(m_idx);
       }
 
       constexpr
@@ -489,4 +494,3 @@ namespace Rodin::Variational
 }
 
 #endif
-

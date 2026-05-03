@@ -69,7 +69,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_P0g, VectorConstruction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
-    P0g<Math::Vector<Real>, Geometry::Mesh<Context::Local>> Vh(mesh, 2);
+    P0g<Math::SpatialVector<Real>, Geometry::Mesh<Context::Local>> Vh(mesh, 2);
 
     // Vector P0g in 2D has vdim=2 DOFs
     EXPECT_EQ(Vh.getSize(), 2u);
@@ -79,7 +79,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Variational_P0g, VectorDOFsMapping)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
-    P0g<Math::Vector<Real>, Geometry::Mesh<Context::Local>> Vh(mesh, 2);
+    P0g<Math::SpatialVector<Real>, Geometry::Mesh<Context::Local>> Vh(mesh, 2);
 
     // Every cell maps to DOFs {0, 1}
     const auto& dofs = Vh.getDOFs(mesh.getDimension(), 0);
@@ -149,7 +149,7 @@ namespace Rodin::Tests::Unit
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.getConnectivity().compute(1, 2);
-    P0g<Math::Vector<Real>, Geometry::Mesh<Context::Local>> Vh(mesh, 2);
+    P0g<Math::SpatialVector<Real>, Geometry::Mesh<Context::Local>> Vh(mesh, 2);
 
     GridFunction u(Vh);
     // Set to constant vector [1, 2]
@@ -172,7 +172,7 @@ namespace Rodin::Tests::Unit
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.getConnectivity().compute(1, 2);
-    P0g<Math::Vector<Real>, Geometry::Mesh<Context::Local>> Vh(mesh, 2);
+    P0g<Math::SpatialVector<Real>, Geometry::Mesh<Context::Local>> Vh(mesh, 2);
 
     GridFunction u(Vh);
     u.getData().resize(2);

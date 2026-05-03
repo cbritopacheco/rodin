@@ -96,10 +96,12 @@ namespace Rodin::Variational
        * @param p Point at which to evaluate
        * @returns Negated function value @f$ -f(p) @f$
        */
+      template <class Point>
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      auto getValue(const Point& p) const
       {
-        return -this->object(getOperand().getValue(p));
+        const auto v = getOperand().getValue(p);
+        return -v;
       }
 
       constexpr
@@ -233,7 +235,8 @@ namespace Rodin::Variational
       constexpr
       auto getBasis(size_t local) const
       {
-        return -this->object(getOperand().getBasis(local));
+        const auto v = getOperand().getBasis(local);
+        return -v;
       }
 
       const FES& getFiniteElementSpace() const
