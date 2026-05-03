@@ -362,7 +362,7 @@ jobs:
       - name: Run distributed tests (coverage build)
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
-          -L distributed
+          -L distributed -LE slow
           --output-on-failure
           -j 1
 
