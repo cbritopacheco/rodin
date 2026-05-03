@@ -170,7 +170,8 @@ namespace Rodin::Variational
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
-          res += qf.getWeight(qp) * p.getDistortion() * f(p);
+          const IntegrationPoint ip(p, qf, qp);
+          res += qf.getWeight(qp) * p.getDistortion() * f(ip);
         }
 
         return res;

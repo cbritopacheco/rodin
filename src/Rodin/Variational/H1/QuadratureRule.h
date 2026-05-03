@@ -5,6 +5,7 @@
 
 #include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/Math/Common.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Variational/ShapeFunction.h"
 
 #include "H1.h"
@@ -343,10 +344,11 @@ namespace Rodin::Variational
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
+          const IntegrationPoint ip(p, *m_qf, qp);
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
-          const LHSRangeType fval = f(p);
+          const LHSRangeType fval = f(ip);
 
           if constexpr (std::is_same_v<RHSRangeType, ScalarType>)
           {
@@ -842,12 +844,13 @@ namespace Rodin::Variational
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
+          const IntegrationPoint ip(p, *m_qf, qp);
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
           if constexpr (std::is_same_v<CoefficientRangeType, ScalarType>)
           {
-            const ScalarType csv = coeff.getValue(p);
+            const ScalarType csv = coeff.getValue(ip);
             for (size_t ib = 0; ib < scalarCountTe; ++ib)
             {
               const ScalarType phi_te = teTab.getBasis(qp, ib);
@@ -861,7 +864,7 @@ namespace Rodin::Variational
           }
           else if constexpr (FormLanguage::IsMatrixRange<CoefficientRangeType>::Value)
           {
-            coeff.getValue(m_cmv, p);
+            m_cmv = coeff.getValue(ip);
             for (size_t ib = 0; ib < scalarCountTe; ++ib)
             {
               const ScalarType phi_te = teTab.getBasis(qp, ib);
@@ -902,7 +905,7 @@ namespace Rodin::Variational
       size_t m_order;
       Geometry::Polytope::Type m_geometry;
 
-      Math::Matrix<ScalarType> m_cmv;
+      Math::SpatialMatrix<ScalarType> m_cmv;
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
@@ -1113,6 +1116,7 @@ namespace Rodin::Variational
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
+          const IntegrationPoint ip(p, *m_qf, qp);
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
@@ -1183,7 +1187,7 @@ namespace Rodin::Variational
 
           if constexpr (std::is_same_v<CoefficientRangeType, ScalarType>)
           {
-            const ScalarType csv = coeff.getValue(p);
+            const ScalarType csv = coeff.getValue(ip);
             for (size_t b = 0; b < nte; ++b)
             {
               ScalarType* row = A_data + b * ntr;
@@ -1194,7 +1198,7 @@ namespace Rodin::Variational
           }
           else if constexpr (FormLanguage::IsMatrixRange<CoefficientRangeType>::Value)
           {
-            coeff.getValue(m_cmv, p);
+            m_cmv = coeff.getValue(ip);
             for (size_t b = 0; b < nte; ++b)
             {
               ScalarType* row = A_data + b * ntr;
@@ -1234,7 +1238,7 @@ namespace Rodin::Variational
       size_t m_order;
       Geometry::Polytope::Type m_geometry;
 
-      Math::Matrix<ScalarType> m_cmv;
+      Math::SpatialMatrix<ScalarType> m_cmv;
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
@@ -1435,10 +1439,11 @@ namespace Rodin::Variational
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
+          const IntegrationPoint ip(p, *m_qf, qp);
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
-          const ScalarType csv = coeff(p);
+          const ScalarType csv = coeff(ip);
 
           for (size_t ib = 0; ib < scalarCountTe; ++ib)
           {
@@ -2238,6 +2243,7 @@ namespace Rodin::Variational
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
+          const IntegrationPoint ip(p, *m_qf, qp);
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
@@ -2308,7 +2314,7 @@ namespace Rodin::Variational
 
           if constexpr (std::is_same_v<CoefficientRangeType, ScalarType>)
           {
-            const ScalarType csv = coeff.getValue(p);
+            const ScalarType csv = coeff.getValue(ip);
 
             // Block-diagonal assembly with scalar coefficient
             if (symmetric)
@@ -2352,7 +2358,7 @@ namespace Rodin::Variational
           }
           else if constexpr (FormLanguage::IsMatrixRange<CoefficientRangeType>::Value)
           {
-            coeff.getValue(m_cmv, p);
+            m_cmv = coeff.getValue(ip);
 
             // With matrix coefficient, the Frobenius inner product becomes:
             // (A * J_trial) : J_test = sum_{c,j} A(c,c2) * grad_trial_c2[j] * grad_test_c[j]
@@ -2411,7 +2417,7 @@ namespace Rodin::Variational
       size_t m_order;
       Geometry::Polytope::Type m_geometry;
 
-      Math::Matrix<ScalarType> m_cmv;
+      Math::SpatialMatrix<ScalarType> m_cmv;
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
@@ -3315,6 +3321,7 @@ namespace Rodin::Variational
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
+          const IntegrationPoint ip(p, *m_qf, qp);
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
@@ -3364,7 +3371,7 @@ namespace Rodin::Variational
           }
 
           // Evaluate coefficient at this quadrature point
-          const auto fval = coeff.getValue(p);
+          const auto fval = coeff.getValue(ip);
 
           // Assemble: K(b*vdim+c, a*vdim+c) += wdet * (∇φ_a · f) * ψ_b
           for (size_t ib = 0; ib < testScalarCount; ++ib)

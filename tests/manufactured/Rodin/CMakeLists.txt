@@ -10,3 +10,7 @@ add_subdirectory(Assembly)
 if (RODIN_USE_PETSC)
   add_subdirectory(PETSc)
 endif()
+
+if (RODIN_USE_MPI AND RODIN_USE_PETSC)
+  add_subdirectory(MPI)
+endif()

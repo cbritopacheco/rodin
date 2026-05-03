@@ -95,8 +95,9 @@ namespace Rodin::Variational
        * @param[in] p Point at which to evaluate
        * @returns Conjugate value @f$ \overline{f(p)} @f$
        */
+      template <class Point>
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      auto getValue(const Point& p) const
       {
         const auto v = getOperand().getValue(p);
         return Math::conj(v);

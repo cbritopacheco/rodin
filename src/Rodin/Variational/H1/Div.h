@@ -87,6 +87,43 @@ namespace Rodin::Variational
       Div(const Div& other) : Parent(other) {}
       Div(Div&& other) : Parent(std::move(other)) {}
 
+      void interpolate(ScalarType& out, const IntegrationPoint& ip) const
+      {
+        const auto& p = ip.getPoint();
+        const auto& polytope = p.getPolytope();
+        const size_t d = polytope.getDimension();
+        const Index  i = polytope.getIndex();
+
+        const auto& gf  = this->getOperand();
+        const auto& fes = gf.getFiniteElementSpace();
+        const size_t vdim = fes.getVectorDimension();
+
+        const H1Element<K, ScalarType> feS(polytope.getGeometry());
+        const size_t nscalar = feS.getCount();
+        const auto& tab = feS.getTabulation(ip.getQuadratureFormula());
+        const auto JinvT = p.getJacobianInverse().transpose();
+
+        SpatialVectorType ref(static_cast<std::uint8_t>(d));
+        SpatialVectorType phys(static_cast<std::uint8_t>(d));
+
+        out = ScalarType(0);
+        for (size_t alpha = 0; alpha < nscalar; ++alpha)
+        {
+          const auto gref = tab.getGradient(ip.getIndex(), alpha);
+          for (size_t j = 0; j < d; ++j)
+            ref(static_cast<std::uint8_t>(j)) = gref[j];
+
+          phys = JinvT * ref;
+
+          for (size_t comp = 0; comp < vdim && comp < d; ++comp)
+          {
+            const size_t local = alpha * vdim + comp;
+            out += gf[fes.getGlobalIndex({d, i}, local)]
+                 * phys(static_cast<std::uint8_t>(comp));
+          }
+        }
+      }
+
       void interpolate(ScalarType& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
@@ -148,7 +185,7 @@ namespace Rodin::Variational
 
           const auto& gf  = this->getOperand();
           const auto& fes = gf.getFiniteElementSpace();
-          decltype(auto) fe  = fes.getFiniteElement(d, i);
+          const auto& fe  = fes.getFiniteElement(d, i);
           const auto& rc  = p.getReferenceCoordinates();
 
           // div(u) = trace( Jinv^T * sum_a u_a * grad_ref(phi_a) )
@@ -156,16 +193,16 @@ namespace Rodin::Variational
           // assume vdim==d; we take dot with mapped gradients component-wise.
           const auto JinvT = p.getJacobianInverse().transpose();
 
-          static thread_local SpatialVectorType s_grad_phys;
-          s_grad_phys.resize(d);
+          SpatialVectorType grad_phys(d);
 
           out = ScalarType(0);
 
           const size_t vdim = fes.getVectorDimension();
+          const auto feS = H1Element<K, ScalarType>(polytope.getGeometry());
+          SpatialVectorType ref(d);
 
           for (size_t a = 0; a < fe.getCount(); ++a)
           {
-            const auto& basis = fe.getBasis(a); // vector basis
             // basis.getDerivative<1>(comp, j)(rc) exists but expensive in H1 vector element;
             // use scalar reference gradients and component structure if available is hard.
             // So: compute physical gradients component-wise via basis.getDerivative<1>(i,j).
@@ -178,13 +215,10 @@ namespace Rodin::Variational
 
             // Reference gradient of scalar basis alpha:
             // NOTE: we have access to scalar FE through H1Element<K,ScalarType>.
-            const auto& feS = H1Element<K, ScalarType>(polytope.getGeometry());
-            static thread_local SpatialVectorType s_ref;
-            s_ref.resize(d);
             for (size_t j = 0; j < d; ++j)
-              s_ref(j) = feS.getBasis(alpha).template getDerivative<1>(j)(rc);
+              ref(j) = feS.getBasis(alpha).template getDerivative<1>(j)(rc);
 
-            s_grad_phys = JinvT * s_ref;
+            grad_phys = JinvT * ref;
 
             // divergence contribution is u_comp * dphi/dx_comp if comp < d
             // (only makes sense when vdim == d; if vdim != d, we only sum over min(vdim,d))
@@ -194,7 +228,7 @@ namespace Rodin::Variational
               // u_a is vector coefficient for basis "component", but in your layout
               // GridFunction DOF for vector space is scalar (component value).
               // If gf[...] returns ScalarType (typical), then:
-              out += u_a * s_grad_phys(comp);
+              out += u_a * grad_phys(comp);
             }
           }
         }
@@ -361,7 +395,7 @@ namespace Rodin::Variational
         const size_t vdim = fes.getVectorDimension();
 
         // Scalar FE for reference gradients
-        decltype(auto) feS = H1Element<K, ScalarType>(geom);
+        const auto feS = H1Element<K, ScalarType>(geom);
 
         const size_t nscalar = feS.getCount();
         const size_t ndof = vdim * nscalar;
@@ -372,10 +406,8 @@ namespace Rodin::Variational
         const auto& tab = feS.getTabulation(qf);
         const auto JinvT = p.getJacobianInverse().transpose();
 
-        static thread_local SpatialVectorType s_ref;
-        static thread_local SpatialVectorType s_phys;
-        s_ref.resize(d);
-        s_phys.resize(d);
+        SpatialVectorType ref(d);
+        SpatialVectorType phys(d);
 
         // For each vector dof (alpha, comp):
         // div( phi_alpha e_comp ) = d/dx_comp phi_alpha  (comp < d) else 0
@@ -384,14 +416,14 @@ namespace Rodin::Variational
           const auto gref = tab.getGradient(qp, alpha);
 
           for (size_t j = 0; j < d; ++j)
-            s_ref(j) = gref[j];
+            ref(j) = gref[j];
 
-          s_phys = JinvT * s_ref;
+          phys = JinvT * ref;
 
           for (size_t comp = 0; comp < vdim; ++comp)
           {
             const size_t local = alpha * vdim + comp;
-            m_cache.div_phys[local] = (comp < d) ? s_phys(comp) : ScalarType(0);
+            m_cache.div_phys[local] = (comp < d) ? phys(comp) : ScalarType(0);
           }
         }
 

@@ -100,7 +100,8 @@ namespace Rodin::Variational
        * @param p Point at which to evaluate
        * @returns @f$ \cos(f(p)) @f$
        */
-      Real getValue(const Geometry::Point& p) const
+      template <class Point>
+      auto getValue(const Point& p) const
       {
         return Math::cos(getOperand().getValue(p));
       }

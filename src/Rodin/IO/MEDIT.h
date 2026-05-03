@@ -344,8 +344,14 @@ namespace Rodin::IO::MEDIT
         Data res{ Math::SpatialPoint(m_sdim), ~Geometry::Attribute(0) };
         const auto get_x = [&](auto& ctx) { assert(i < m_sdim); res.vertex(i++) = _attr(ctx); };
         const auto get_attribute = [&](auto& ctx) { res.attribute = _attr(ctx); };
-        const auto p = double_[get_x] >> repeat(m_sdim - 1)[double_[get_x]] >> uint_[get_attribute];
-        const bool r = boost::spirit::x3::phrase_parse(begin, end, p, space);
+        const bool r = [&]()
+        {
+          if (m_sdim == 0)
+            return boost::spirit::x3::phrase_parse(begin, end, uint_[get_attribute], space);
+          const auto p =
+            double_[get_x] >> repeat(m_sdim - 1)[double_[get_x]] >> uint_[get_attribute];
+          return boost::spirit::x3::phrase_parse(begin, end, p, space);
+        }();
         if (begin != end)
           return {};
         else if (r)
@@ -750,15 +756,15 @@ namespace Rodin::IO
         }
 
         line = skipEmptyLines(is);
-        size_t solCount, vdim;
+        size_t solCount, solutionType;
         using boost::spirit::x3::space;
         using boost::spirit::x3::blank;
         using boost::spirit::x3::uint_;
         using boost::spirit::x3::_attr;
         using boost::spirit::x3::repeat;
         const auto get_sol_count = [&](auto& ctx) { solCount = _attr(ctx); };
-        const auto get_vdim = [&](auto& ctx) { vdim = _attr(ctx); };
-        const auto p = uint_[get_sol_count] >> uint_[get_vdim];
+        const auto get_solution_type = [&](auto& ctx) { solutionType = _attr(ctx); };
+        const auto p = uint_[get_sol_count] >> uint_[get_solution_type];
         auto it = line.begin();
         const bool r = boost::spirit::x3::phrase_parse(it, line.end(), p, space);
 
@@ -773,6 +779,21 @@ namespace Rodin::IO
 
         const auto& fes = gf.getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
+        const size_t vdim = fes.getVectorDimension();
+        if ((solutionType == MEDIT::SolutionType::Real && vdim != 1) ||
+            (solutionType == MEDIT::SolutionType::Vector && vdim == 1))
+        {
+          Alert::Exception()
+            << "MEDIT solution type does not match finite element space vector dimension."
+            << Alert::Raise;
+        }
+        if (solutionType != MEDIT::SolutionType::Real &&
+            solutionType != MEDIT::SolutionType::Vector)
+        {
+          Alert::Exception()
+            << "Unsupported MEDIT solution type: " << solutionType
+            << Alert::Raise;
+        }
         const size_t count = mesh.getVertexCount();
         for (size_t i = 0; i < count; ++i)
           for (size_t d = 0; d < vdim; ++d)
@@ -927,16 +948,16 @@ namespace Rodin::IO
         // 3. solCount, vdim line
         line = skipEmptyLines(is);
         size_t solCount = 0;
-        size_t fileVdim = 0;
+        size_t solutionType = 0;
 
         using boost::spirit::x3::space;
         using boost::spirit::x3::uint_;
         using boost::spirit::x3::_attr;
 
         const auto get_sol_count = [&](auto& ctx) { solCount  = _attr(ctx); };
-        const auto get_vdim      = [&](auto& ctx) { fileVdim = _attr(ctx); };
+        const auto get_solution_type = [&](auto& ctx) { solutionType = _attr(ctx); };
 
-        const auto p = uint_[get_sol_count] >> uint_[get_vdim];
+        const auto p = uint_[get_sol_count] >> uint_[get_solution_type];
         auto it = line.begin();
         const bool r = boost::spirit::x3::phrase_parse(it, line.end(), p, space);
 
@@ -956,11 +977,19 @@ namespace Rodin::IO
             << Alert::Raise;
         }
 
-        if (fileVdim != vdim)
+        if ((solutionType == MEDIT::SolutionType::Real && vdim != 1) ||
+            (solutionType == MEDIT::SolutionType::Vector && vdim == 1))
         {
           Alert::Exception()
-            << "Vector dimension mismatch: file vdim = "
-            << fileVdim << ", H1 vdim = " << vdim
+            << "MEDIT solution type does not match H1 vector dimension."
+            << Alert::Raise;
+        }
+
+        if (solutionType != MEDIT::SolutionType::Real &&
+            solutionType != MEDIT::SolutionType::Vector)
+        {
+          Alert::Exception()
+            << "Unsupported MEDIT solution type: " << solutionType
             << Alert::Raise;
         }
 

@@ -4,6 +4,13 @@
 /**
  * @file
  * @brief MPI assembly specializations targeting PETSc objects.
+ *
+ * In this module, mesh entity pairs `(d, i)` are shard-local indices. PETSc
+ * assembly iterates over rank-local MPI mesh polytopes, filters owned entities
+ * for rows/contributions, and passes the same local pair to the MPI finite
+ * element spaces and integrators. Global bilinear forms keep the test entity
+ * owned, but may use ghost trial entities for off-process columns; those trial
+ * indices are still local to the rank shard.
  */
 
 #include <petsc.h>
@@ -358,15 +365,21 @@ namespace Rodin::Assembly
 
         auto& x = axb.getSolution();
         assert(x);
-        ierr = VecSetSizes(
-            x,
-            static_cast<PetscInt>(localCols),
-            static_cast<PetscInt>(globalCols));
+        VecType xType = nullptr;
+        ierr = VecGetType(x, &xType);
         assert(ierr == PETSC_SUCCESS);
-        ierr = VecSetFromOptions(x);
-        assert(ierr == PETSC_SUCCESS);
-        ierr = VecZeroEntries(x);
-        assert(ierr == PETSC_SUCCESS);
+        if (!xType)
+        {
+          ierr = VecSetSizes(
+              x,
+              static_cast<PetscInt>(localCols),
+              static_cast<PetscInt>(globalCols));
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecSetFromOptions(x);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecZeroEntries(x);
+          assert(ierr == PETSC_SUCCESS);
+        }
 
         // ------------------------
         // Local BFIs (owned elements only)
@@ -747,15 +760,21 @@ namespace Rodin::Assembly
 
         auto& x = axb.getSolution();
         assert(x);
-        ierr = VecSetSizes(
-            x,
-            static_cast<PetscInt>(localCols),
-            static_cast<PetscInt>(ncols));
+        VecType xType = nullptr;
+        ierr = VecGetType(x, &xType);
         assert(ierr == PETSC_SUCCESS);
-        ierr = VecSetFromOptions(x);
-        assert(ierr == PETSC_SUCCESS);
-        ierr = VecZeroEntries(x);
-        assert(ierr == PETSC_SUCCESS);
+        if (!xType)
+        {
+          ierr = VecSetSizes(
+              x,
+              static_cast<PetscInt>(localCols),
+              static_cast<PetscInt>(ncols));
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecSetFromOptions(x);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecZeroEntries(x);
+          assert(ierr == PETSC_SUCCESS);
+        }
 
         // ------------------------
         // Assemble bilinear terms into A

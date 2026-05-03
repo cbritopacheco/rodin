@@ -96,15 +96,15 @@ int main()
   in.sigma0 = 5.0e5;
 
   // Windkessel
-  in.Rp = 8.0e6;
+  in.Rp = 1.0e7;
   in.Cp = 5.0e-9;
   in.Rd = 1.0e8;
-  in.Cd = 1.0e-8;
+  in.Cd = 5.0e-8;
 
   // Valve parameters
-  in.Kat = 8.0e-7;
+  in.Kat = 5.0e-7;
   in.Kp  = 5.0e-10;
-  in.Kar = 1.3e-5;
+  in.Kar = 5e-5;
 
   in.cavityCapacity = 5.0e-12;
 

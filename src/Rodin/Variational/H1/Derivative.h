@@ -28,6 +28,7 @@
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/Derivative.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
 #include "ForwardDecls.h"
@@ -105,6 +106,34 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_i(other.m_i)
       {}
+
+      void interpolate(ScalarType& out, const IntegrationPoint& ip) const
+      {
+        const auto& p = ip.getPoint();
+        const auto& polytope = p.getPolytope();
+        const size_t d = polytope.getDimension();
+        const Index  i = polytope.getIndex();
+
+        const auto& gf  = this->getOperand();
+        const auto& fes = gf.getFiniteElementSpace();
+        const auto& fe  = fes.getFiniteElement(d, i);
+        const auto& tab = fe.getTabulation(ip.getQuadratureFormula());
+        const auto JinvT = p.getJacobianInverse().transpose();
+
+        SpatialVectorType ref(static_cast<std::uint8_t>(d));
+        ref.setZero();
+
+        for (size_t local = 0; local < fe.getCount(); ++local)
+        {
+          const auto gref = tab.getGradient(ip.getIndex(), local);
+          const auto uval = gf[fes.getGlobalIndex({d, i}, local)];
+          for (size_t j = 0; j < d; ++j)
+            ref(static_cast<std::uint8_t>(j)) += uval * gref[j];
+        }
+
+        const auto phys = JinvT * ref;
+        out = phys(static_cast<std::uint8_t>(m_i));
+      }
 
       /**
        * @brief Interpolates the partial derivative at a given point.

@@ -19,6 +19,14 @@ namespace Rodin::Assembly
    * This type wraps a distributed mesh and a region descriptor and provides
    * a @ref Rodin::Geometry::PolytopeIterator suitable for local integration
    * loops.
+   *
+   * MPI assembly uses shard-local topological indices throughout. A polytope
+   * returned by this iterator belongs to the distributed mesh object, but its
+   * `(d, i)` pair addresses the rank-local shard. The same local pair is passed
+   * to finite element spaces (`getFiniteElement()`, `getDOFs()`) and to mesh
+   * geometry/quadrature routines. Owned-entity filters decide which rank
+   * contributes a row/entity; ghost entities can still appear where off-process
+   * trial columns are needed.
    */
   class MPIIteration
   {

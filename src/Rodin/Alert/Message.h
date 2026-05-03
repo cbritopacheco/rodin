@@ -276,6 +276,37 @@ namespace Rodin::Alert
   /// @brief Thread-local storage initialization for Message::s_what.
   template <class Prefix>
   thread_local std::string Message<Prefix>::s_what;
+
+  /**
+   * @brief Convenience message for custom Alert prefixes.
+   *
+   * This class mirrors the default behavior of specialized messages such as
+   * Info, while allowing callers to provide their own prefix type and color.
+   *
+   * @tparam Prefix Prefix type derived from MessagePrefix.
+   */
+  template <class Prefix>
+  class PrefixedMessage : public Message<Prefix>
+  {
+    public:
+      /// @brief Parent class type alias.
+      using Parent = Message<Prefix>;
+
+      /**
+       * @brief Constructs a message that writes to std::cout.
+       */
+      PrefixedMessage()
+        : Parent(std::cout, Prefix())
+      {}
+
+      /**
+       * @brief Constructs a message that writes to the given output stream.
+       * @param os Output stream.
+       */
+      PrefixedMessage(std::ostream& os)
+        : Parent(os, Prefix())
+      {}
+  };
 }
 
 #endif

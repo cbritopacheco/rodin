@@ -96,6 +96,12 @@ namespace Rodin::Variational
         return getLHS().getValue(p) || getRHS().getValue(p);
       }
 
+      constexpr
+      auto getValue(const IntegrationPoint& ip) const
+      {
+        return getLHS().getValue(ip) || getRHS().getValue(ip);
+      }
+
       OR* copy() const noexcept final override
       {
         return new OR(*this);
@@ -136,6 +142,5 @@ namespace Rodin::Variational
 }
 
 #endif
-
 
 

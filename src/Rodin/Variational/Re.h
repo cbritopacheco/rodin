@@ -80,8 +80,9 @@ namespace Rodin::Variational
        * @param[in] p Point at which to evaluate
        * @returns Real part @f$ u(p) @f$ where @f$ f(p) = u(p) + iv(p) @f$
        */
+      template <class Point>
       constexpr
-      Real getValue(const Geometry::Point& p) const
+      auto getValue(const Point& p) const
       {
         return getOperand().getValue(p).real();
       }

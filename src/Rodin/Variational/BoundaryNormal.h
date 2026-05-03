@@ -47,6 +47,8 @@
 #ifndef RODIN_VARIATIONAL_BOUNDARYNORMAL_H
 #define RODIN_VARIATIONAL_BOUNDARYNORMAL_H
 
+#include <cmath>
+
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/SubMesh.h"
 #include "Rodin/Geometry/PolytopeTransformation.h"
@@ -196,6 +198,10 @@ namespace Rodin::Variational
           }
           else
           {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Cannot compute BoundaryNormal from a boundary Jacobian with "
+              << jacobian.rows() << " rows on polytope (" << d << ", " << i << ")."
+              << Alert::Raise;
             assert(false);
             res.setConstant(Math::nan<ScalarType>());
             return;
@@ -219,16 +225,25 @@ namespace Rodin::Variational
           if (res.dot(xc - xf) > 0)
             res *= ScalarType(-1);
 
-          res.normalize();
+          const auto norm = res.norm();
+          if (!std::isfinite(norm) || !(norm > ScalarType(0)))
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Cannot normalize BoundaryNormal on polytope (" << d << ", " << i
+              << "). Computed norm is " << norm << "."
+              << Alert::Raise;
+            assert(false);
+            res.setConstant(Math::nan<ScalarType>());
+            return;
+          }
+          res /= norm;
         }
       }
 
       RangeType getValue(const Geometry::Point& p) const
       {
         SpatialVectorType res;
-        const auto& polytope = p.getPolytope();
-        const auto& polytopeMesh = polytope.getMesh();
-        if (polytopeMesh == m_mesh.get())
+        if (m_mesh.get().isLocalPoint(p))
         {
           this->interpolate(res, p);
         }
@@ -240,12 +255,25 @@ namespace Rodin::Variational
         {
           const auto& submesh = m_mesh.get().asSubMesh();
           const auto restriction = submesh.restriction(p);
+          if (!restriction)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Point cannot be restricted to the BoundaryNormal submesh."
+              << Alert::Raise;
+            assert(false);
+            res.setConstant(Math::nan<ScalarType>());
+            return res;
+          }
           this->interpolate(res, *restriction);
         }
         else
         {
-          res.setConstant(Math::nan<ScalarType>());
+          Alert::MemberFunctionException(*this, __func__)
+            << "Point is not contained in the BoundaryNormal mesh and no "
+               "inclusion or submesh restriction is available."
+            << Alert::Raise;
           assert(false);
+          res.setConstant(Math::nan<ScalarType>());
         }
         return res;
       }

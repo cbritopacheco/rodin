@@ -114,8 +114,9 @@ namespace Rodin::Variational
        * @param p Point at which to evaluate
        * @returns Scalar value @f$ f_i(p) @f$
        */
+      template <class Point>
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      auto getValue(const Point& p) const
       {
         return this->getOperand().getValue(p)(m_idx);
       }
@@ -211,8 +212,9 @@ namespace Rodin::Variational
        * @param p Point at which to evaluate
        * @returns Scalar value @f$ A_{ij}(p) @f$
        */
+      template <class Point>
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      auto getValue(const Point& p) const
       {
         return this->getOperand().getValue(p)(m_i, m_j);
       }
@@ -314,8 +316,9 @@ namespace Rodin::Variational
        * @param p Point at which to evaluate
        * @returns Scalar value of the component
        */
+      template <class Point>
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      auto getValue(const Point& p) const
       {
         return m_u.get().getValue(p)(m_idx);
       }

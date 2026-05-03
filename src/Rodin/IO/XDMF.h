@@ -230,6 +230,24 @@ namespace Rodin::IO
       };
 
       /**
+       * @brief Attribute export policy.
+       *
+       * Static:
+       * - the attribute is exported once (on the first write) and the same
+       *   HDF5 file is referenced by all later snapshots of the same grid.
+       * - intended for fields that do not change over time.
+       *
+       * Transient:
+       * - the attribute is exported at every snapshot.
+       * - this is the default behavior.
+       */
+      enum class AttributePolicy
+      {
+        Static,    ///< Attribute exported once, reused by all snapshots of the grid.
+        Transient  ///< Attribute exported at every snapshot (default).
+      };
+
+      /**
        * @brief Attribute location in the XDMF sense.
        *
        * Node:
@@ -256,10 +274,11 @@ namespace Rodin::IO
        */
       struct FilePatterns
       {
-        std::string xdmf          = "{stem}.xdmf";              ///< XDMF XML output filename pattern.
-        std::string staticMesh    = "{stem}.{grid}.mesh.h5";     ///< Static mesh HDF5 filename pattern.
-        std::string transientMesh = "{stem}.{grid}.mesh.{index}.h5";  ///< Transient mesh HDF5 filename pattern.
-        std::string attribute     = "{stem}.{grid}.{name}.{index}.h5"; ///< Attribute field HDF5 filename pattern.
+        std::string xdmf              = "{stem}.xdmf";                    ///< XDMF XML output filename pattern.
+        std::string staticMesh        = "{stem}.{grid}.mesh.h5";          ///< Static mesh HDF5 filename pattern.
+        std::string transientMesh     = "{stem}.{grid}.mesh.{index}.h5";  ///< Transient mesh HDF5 filename pattern.
+        std::string staticAttribute   = "{stem}.{grid}.{name}.h5";        ///< Static attribute HDF5 filename pattern.
+        std::string attribute         = "{stem}.{grid}.{name}.{index}.h5"; ///< Transient attribute HDF5 filename pattern.
       };
 
       /**
@@ -321,13 +340,17 @@ namespace Rodin::IO
            * @tparam GridFunctionType  Concrete grid function type.
            * @param[in] gf      Grid function to export (must have a name set).
            * @param[in] center  Data centering (Node or Cell).
+           * @param[in] policy  Export policy: Static (written once) or Transient (written at every snapshot).
            * @returns Reference to `*this` for method chaining.
            *
            * The grid function must have a name assigned via `setName()`.
            * Use the overload taking an explicit name string to override.
            */
           template <class GridFunctionType>
-          Grid& add(const GridFunctionType& gf, Center center = Center::Node);
+          Grid& add(
+              const GridFunctionType& gf,
+              Center center = Center::Node,
+              AttributePolicy policy = AttributePolicy::Transient);
 
           /**
            * @brief Registers a grid function attribute with an explicit name.
@@ -335,13 +358,15 @@ namespace Rodin::IO
            * @param[in] name    Attribute name for the XDMF output.
            * @param[in] gf      Grid function to export.
            * @param[in] center  Data centering (Node or Cell).
+           * @param[in] policy  Export policy: Static (written once) or Transient (written at every snapshot).
            * @returns Reference to `*this` for method chaining.
            */
           template <class GridFunctionType>
           Grid& add(
               const std::string& name,
               const GridFunctionType& gf,
-              Center center = Center::Node);
+              Center center = Center::Node,
+              AttributePolicy policy = AttributePolicy::Transient);
 
           /**
            * @brief Tests whether a mesh has been set on this grid.
@@ -506,10 +531,14 @@ namespace Rodin::IO
        * @tparam GridFunctionType  Concrete grid function type.
        * @param[in] gf      Grid function to export (must have a name).
        * @param[in] center  Data centering (Node or Cell).
+       * @param[in] policy  Export policy: Static (written once) or Transient (written at every snapshot).
        * @returns Reference to `*this` for method chaining.
        */
       template <class GridFunctionType>
-      XDMF& add(const GridFunctionType& gf, Center center = Center::Node);
+      XDMF& add(
+          const GridFunctionType& gf,
+          Center center = Center::Node,
+          AttributePolicy policy = AttributePolicy::Transient);
 
       /**
        * @brief Adds a grid function attribute with an explicit name to the
@@ -518,13 +547,15 @@ namespace Rodin::IO
        * @param[in] name    Attribute name.
        * @param[in] gf      Grid function to export.
        * @param[in] center  Data centering (Node or Cell).
+       * @param[in] policy  Export policy: Static (written once) or Transient (written at every snapshot).
        * @returns Reference to `*this` for method chaining.
        */
       template <class GridFunctionType>
       XDMF& add(
           const std::string& name,
           const GridFunctionType& gf,
-          Center center = Center::Node);
+          Center center = Center::Node,
+          AttributePolicy policy = AttributePolicy::Transient);
 
       /**
        * @brief Writes one temporal snapshot for all configured grids.
@@ -606,6 +637,9 @@ namespace Rodin::IO
         std::string name;                           ///< Attribute display name.
         Center center = Center::Node;               ///< Data centering.
         size_t dimension = 1;                       ///< Vector dimension of the attribute.
+        AttributePolicy policy = AttributePolicy::Transient; ///< Export policy.
+        bool staticWritten = false;                 ///< Whether the static HDF5 file has been exported.
+        boost::filesystem::path staticFile;         ///< Path to the static attribute file (relative).
         std::function<void(const boost::filesystem::path&, Center)> write;  ///< Save callback.
       };
 
@@ -618,6 +652,7 @@ namespace Rodin::IO
           Center center = Center::Node;
           size_t dimension = 1;
           boost::filesystem::path file;
+          bool isStatic = false;  ///< True when the attribute uses a static (once-written) HDF5 file.
         };
 
         struct MeshAttributeRecord
@@ -713,7 +748,7 @@ namespace Rodin::IO
   }
 
   template <class GridFunctionType>
-  XDMF::Grid& XDMF::Grid::add(const GridFunctionType& gf, Center center)
+  XDMF::Grid& XDMF::Grid::add(const GridFunctionType& gf, Center center, AttributePolicy policy)
   {
     const auto name = gf.getName();
     if (!name)
@@ -722,14 +757,15 @@ namespace Rodin::IO
         << "Grid function has no name. Use the overload that takes an explicit name."
         << Alert::Raise;
     }
-    return add(std::string(name->data(), name->size()), gf, center);
+    return add(std::string(name->data(), name->size()), gf, center, policy);
   }
 
   template <class GridFunctionType>
   XDMF::Grid& XDMF::Grid::add(
       const std::string& name,
       const GridFunctionType& gf,
-      Center center)
+      Center center,
+      AttributePolicy policy)
   {
     auto& gr = m_owner->m_grids[m_index];
 
@@ -755,6 +791,7 @@ namespace Rodin::IO
     rec.name = name;
     rec.center = center;
     rec.dimension = gf.getDimension();
+    rec.policy = policy;
     // Capture the effective visualization mesh (shard for MPI, local mesh
     // for serial). The attribute write helpers iterate over this mesh's
     // vertices/cells, not over gf.getFiniteElementSpace().getMesh(), which
@@ -790,9 +827,9 @@ namespace Rodin::IO
   }
 
   template <class GridFunctionType>
-  XDMF& XDMF::add(const GridFunctionType& gf, Center center)
+  XDMF& XDMF::add(const GridFunctionType& gf, Center center, AttributePolicy policy)
   {
-    grid().add(gf, center);
+    grid().add(gf, center, policy);
     return *this;
   }
 
@@ -800,9 +837,10 @@ namespace Rodin::IO
   XDMF& XDMF::add(
       const std::string& name,
       const GridFunctionType& gf,
-      Center center)
+      Center center,
+      AttributePolicy policy)
   {
-    grid().add(name, gf, center);
+    grid().add(name, gf, center, policy);
     return *this;
   }
 }

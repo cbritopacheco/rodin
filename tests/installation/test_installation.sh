@@ -13,11 +13,15 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 BUILD_DIR="${REPO_ROOT}/build"
 INSTALL_DIR="${BUILD_DIR}/install-test"
 TEST_PROJECT_DIR="${BUILD_DIR}/test-installation-project"
+RODIN_USE_MPI="${RODIN_USE_MPI:-OFF}"
+RODIN_USE_PETSC="${RODIN_USE_PETSC:-OFF}"
 
 echo "Repository root: ${REPO_ROOT}"
 echo "Build directory: ${BUILD_DIR}"
 echo "Install directory: ${INSTALL_DIR}"
 echo "Test project directory: ${TEST_PROJECT_DIR}"
+echo "MPI support: ${RODIN_USE_MPI}"
+echo "PETSc support: ${RODIN_USE_PETSC}"
 echo ""
 
 # Step 1: Initialize submodules (if not already initialized)
@@ -56,6 +60,8 @@ fi
 cmake .. \
   -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" \
   -DCMAKE_BUILD_TYPE=Release \
+  -DRODIN_USE_MPI="${RODIN_USE_MPI}" \
+  -DRODIN_USE_PETSC="${RODIN_USE_PETSC}" \
   -DRODIN_BUILD_EXAMPLES=OFF \
   -DRODIN_BUILD_UNIT_TESTS=OFF \
   -DRODIN_BUILD_MANUFACTURED_TESTS=OFF \

@@ -104,8 +104,9 @@ namespace Rodin::Variational
        * @param p Point at which to evaluate
        * @returns @f$ \min(f(p), g(p)) @f$
        */
+      template <class Point>
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      auto getValue(const Point& p) const
       {
         const auto lhs = this->getLHS().getValue(p);
         const auto rhs = this->getRHS().getValue(p);
@@ -222,8 +223,9 @@ namespace Rodin::Variational
        * @param p Point at which to evaluate
        * @returns @f$ \min(f(p), c) @f$ where @f$ c @f$ is the scalar constant
        */
+      template <class Point>
       constexpr
-      ScalarType getValue(const Geometry::Point& p) const
+      auto getValue(const Point& p) const
       {
         const auto lhs = getLHS().getValue(p);
         const auto& rhs = getRHS();

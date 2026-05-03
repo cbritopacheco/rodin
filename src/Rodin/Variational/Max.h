@@ -104,8 +104,9 @@ namespace Rodin::Variational
        * @param p Point at which to evaluate
        * @returns @f$ \max(f(p), g(p)) @f$
        */
+      template <class Point>
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      auto getValue(const Point& p) const
       {
         const auto lhs = getLHS().getValue(p);
         const auto rhs = getRHS().getValue(p);
@@ -224,8 +225,9 @@ namespace Rodin::Variational
        * @param p Point at which to evaluate
        * @returns @f$ \max(f(p), c) @f$ where @f$ c @f$ is the scalar constant
        */
+      template <class Point>
       constexpr
-      Real getValue(const Geometry::Point& p) const
+      auto getValue(const Point& p) const
       {
         const auto lhs = this->getLHS().getValue(p);
         const auto& rhs = this->getRHS();

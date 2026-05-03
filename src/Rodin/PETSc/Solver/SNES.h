@@ -17,6 +17,8 @@
 
 #include <petscsnes.h>
 
+#include <functional>
+
 #include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/PETSc/Object.h"
 #include "Rodin/PETSc/Math/LinearSystem.h"
@@ -71,6 +73,21 @@ namespace Rodin::Solver
       /// @brief PETSc vector type (`::Vec`) for the nonlinear residual and solution.
       using VectorType = ::Vec;
 
+      /**
+       * @brief Callback invoked before residual/Jacobian assembly to synchronize
+       *        state-dependent Rodin fields from the current SNES iterate.
+       *
+       * The argument is the current iterate expressed as a Rodin
+       * @ref Rodin::PETSc::Math::Vector (a PETSc `Vec`).  Typical usage:
+       * @code
+       * snes.setStateUpdate([&](const PETSc::Math::Vector& x) {
+       *   uState.setData(x, 0);
+       *   pState.setData(x, uh.getSize());
+       * });
+       * @endcode
+       */
+      using StateUpdate = std::function<void(const PETSc::Math::Vector&)>;
+
       /// @brief Base problem type that provides the linear system.
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
 
@@ -120,10 +137,60 @@ namespace Rodin::Solver
                           PetscInt maxF) noexcept;
 
       /**
+       * @brief Sets an optional callback invoked before residual/Jacobian assembly.
+       *
+       * The callback receives the current SNES iterate as a Rodin
+       * @ref PETSc::Math::Vector.  It is responsible for copying the relevant
+       * sub-vectors back into the GridFunctions that appear in the nonlinear
+       * variational form.
+       *
+       * @code
+       * snes.setStateUpdate([&](const PETSc::Math::Vector& x) {
+       *   uState.setData(x, 0);
+       *   pState.setData(x, uh.getSize());
+       * });
+       * @endcode
+       *
+       * @param update Callback to invoke on each residual/Jacobian assembly.
+       * @returns Reference to `*this`.
+       */
+      SNES& setStateUpdate(StateUpdate update);
+
+      /**
        * @brief Solves the nonlinear system @f$ F(x) = 0 @f$.
        * @param[in,out] x Initial guess on input; solution on output.
        */
       void solve(VectorType& x) override;
+
+      /**
+       * @brief Solves the nonlinear system using the linear system's solution
+       *        vector as both the initial guess and the solution storage.
+       *
+       * The solution vector is obtained directly from
+       * @c ksp.getProblem().getLinearSystem().getSolution(), so no manual
+       * initial-guess packing is needed.  After the first solve the solution
+       * vector retains its value, providing a natural warm-start for subsequent
+       * time steps.
+       */
+      void solve();
+
+      /**
+       * @brief Returns the number of SNES iterations from the most recent solve.
+       * @returns PETSc iteration count.
+       */
+      PetscInt getIterationNumber() const;
+
+      /**
+       * @brief Returns `true` if the most recent @ref solve() converged.
+       *
+       * Wraps @c SNESGetConvergedReason: a positive reason indicates
+       * convergence, a negative reason indicates divergence.
+       *
+       * @returns `true` when converged, `false` when diverged or not yet solved.
+       */
+      bool converged() const;
+
+      ::SNESConvergedReason getConvergedReason() const;
 
       /// @brief Returns a mutable reference to the underlying PETSc SNES handle.
       /// @returns Mutable reference to the SNES handle.
@@ -145,13 +212,14 @@ namespace Rodin::Solver
       static PetscErrorCode Jacobian(::SNES snes, ::Vec x, ::Mat J, ::Mat P, void* ctx);
 
     private:
-      HandleType m_snes;  ///< Underlying PETSc SNES context.
-      ::SNESType m_type;  ///< Requested SNES algorithm type.
-      PetscReal m_abstol, ///< Absolute convergence tolerance.
-                m_rtol,   ///< Relative convergence tolerance.
-                m_stol;   ///< Step norm convergence tolerance.
-      PetscInt m_maxIt,   ///< Maximum nonlinear iterations.
-               m_maxF;    ///< Maximum function evaluations.
+      HandleType m_snes;   ///< Underlying PETSc SNES context.
+      ::SNESType m_type;   ///< Requested SNES algorithm type.
+      PetscReal m_abstol,  ///< Absolute convergence tolerance.
+                m_rtol,    ///< Relative convergence tolerance.
+                m_stol;    ///< Step norm convergence tolerance.
+      PetscInt m_maxIt,    ///< Maximum nonlinear iterations.
+               m_maxF;     ///< Maximum function evaluations.
+      StateUpdate m_stateUpdate; ///< Optional state synchronization callback.
   };
 }
 

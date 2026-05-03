@@ -116,8 +116,9 @@ namespace Rodin::Variational
        *
        * Computes the sum of diagonal entries of the matrix at the given point.
        */
+      template <class Point>
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      auto getValue(const Point& p) const
       {
         return this->getOperand().getValue(p).trace();
       }

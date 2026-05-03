@@ -21,42 +21,42 @@ namespace Rodin::QF
     {
       case Geometry::Polytope::Type::Point:
       {
-        static thread_local const Math::SpatialPoint s_point{};
+        static const Math::SpatialPoint s_point{};
         return s_point;
       }
       case Geometry::Polytope::Type::Segment:
       {
-        static thread_local const Math::SpatialPoint s_point{ 0.5 };
+        static const Math::SpatialPoint s_point{ 0.5 };
         return s_point;
       }
       case Geometry::Polytope::Type::Triangle:
       {
-        static thread_local const Math::SpatialPoint s_point{{ Real(1) / Real(3), Real(1) / Real(3) }};
+        static const Math::SpatialPoint s_point{{ Real(1) / Real(3), Real(1) / Real(3) }};
         return s_point;
       }
       case Geometry::Polytope::Type::Quadrilateral:
       {
-        static thread_local const Math::SpatialPoint s_point{{ 0.5, 0.5 }};
+        static const Math::SpatialPoint s_point{{ 0.5, 0.5 }};
         return s_point;
       }
       case Geometry::Polytope::Type::Tetrahedron:
       {
-        static thread_local const Math::SpatialPoint s_point{{ 0.25, 0.25, 0.25 }};
+        static const Math::SpatialPoint s_point{{ 0.25, 0.25, 0.25 }};
         return s_point;
       }
       case Geometry::Polytope::Type::Wedge:
       {
-        static thread_local const Math::SpatialPoint s_point{{ Real(1) / Real(3), Real(1) / Real(3), 0.5 }};
+        static const Math::SpatialPoint s_point{{ Real(1) / Real(3), Real(1) / Real(3), 0.5 }};
         return s_point;
       }
       case Geometry::Polytope::Type::Hexahedron:
       {
-        static thread_local const Math::SpatialPoint s_point{{ 0.5, 0.5, 0.5 }};
+        static const Math::SpatialPoint s_point{{ 0.5, 0.5, 0.5 }};
         return s_point;
       }
     }
     assert(false);
-    static thread_local Math::SpatialPoint s_null;
+    static const Math::SpatialPoint s_null;
     return s_null;
   }
 

@@ -17,6 +17,7 @@
 #define RODIN_VARIATIONAL_PROBLEM_H
 
 #include <functional>
+#include <utility>
 #include <boost/mp11.hpp>
 
 #include "Rodin/Pair.h"
@@ -151,7 +152,12 @@ namespace Rodin::Variational
        * @param solver Solver instance to use for solving the linear system
        *
        * Solves the discrete system @f$ Au = b @f$ using the provided solver.
-       * The problem must be assembled before calling this method.
+       * Concrete problem implementations assemble automatically when the
+       * problem body has not yet been assembled, or when assignment of a new
+       * problem body has invalidated the previous assembly. After the linear
+       * solver returns, the solution stored in the linear system is copied
+       * back into the trial function solution, or scattered into each trial
+       * function for block-structured mixed problems.
        */
       virtual void solve(Solver::LinearSolverBase<LinearSystem>& solver) = 0;
 
@@ -372,7 +378,8 @@ namespace Rodin::Variational
 
       constexpr
       Problem(TrialFunction& u, TestFunction& v)
-        : Parent(u, v)
+        : Parent(u, v),
+          m_assembled(false)
       {}
 
       constexpr
@@ -425,6 +432,14 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Assembles if stale, solves the linear system, and writes the
+       *        result to the trial function solution.
+       *
+       * Assigning a new problem body with operator=() marks the current
+       * assembly stale. If that happens, or if assemble() has not been called
+       * yet, this function calls assemble() before invoking the linear solver.
+       */
       void solve(SolverBaseType& solver) override
       {
          auto& axb = this->getLinearSystem();
@@ -779,6 +794,14 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Assembles if stale, solves the block linear system, and scatters
+       *        the result into each trial function solution.
+       *
+       * Assigning a new problem body with operator=() marks the current
+       * assembly stale. If that happens, or if assemble() has not been called
+       * yet, this function calls assemble() before invoking the linear solver.
+       */
       void solve(Solver::LinearSolverBase<LinearSystemType>& solver) override
       {
         auto& axb = getLinearSystem();

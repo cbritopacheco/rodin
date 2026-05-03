@@ -337,17 +337,23 @@ namespace Rodin::Assembly
 
         auto& x = axb.getSolution();
         assert(x);
-        ierr = VecSetSizes(x, cols, cols);
+        VecType xType = nullptr;
+        ierr = VecGetType(x, &xType);
         assert(ierr == PETSC_SUCCESS);
+        if (!xType)
+        {
+          ierr = VecSetSizes(x, cols, cols);
+          assert(ierr == PETSC_SUCCESS);
 
-        ierr = VecSetType(x, VECSEQ);
-        assert(ierr == PETSC_SUCCESS);
+          ierr = VecSetType(x, VECSEQ);
+          assert(ierr == PETSC_SUCCESS);
 
-        ierr = VecSetFromOptions(x);
-        assert(ierr == PETSC_SUCCESS);
+          ierr = VecSetFromOptions(x);
+          assert(ierr == PETSC_SUCCESS);
 
-        ierr = VecZeroEntries(x);
-        assert(ierr == PETSC_SUCCESS);
+          ierr = VecZeroEntries(x);
+          assert(ierr == PETSC_SUCCESS);
+        }
 
         // Local BFIs
         using MeshType = std::decay_t<decltype(mesh)>;
@@ -646,14 +652,20 @@ namespace Rodin::Assembly
 
         auto& x = axb.getSolution();
         assert(x);
-        ierr = VecSetSizes(x, ncols, ncols);
+        VecType xType = nullptr;
+        ierr = VecGetType(x, &xType);
         assert(ierr == PETSC_SUCCESS);
-        ierr = VecSetType(x, VECSEQ);
-        assert(ierr == PETSC_SUCCESS);
-        ierr = VecSetFromOptions(x);
-        assert(ierr == PETSC_SUCCESS);
-        ierr = VecZeroEntries(x);
-        assert(ierr == PETSC_SUCCESS);
+        if (!xType)
+        {
+          ierr = VecSetSizes(x, ncols, ncols);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecSetType(x, VECSEQ);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecSetFromOptions(x);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecZeroEntries(x);
+          assert(ierr == PETSC_SUCCESS);
+        }
 
         // ------------------------
         // Helpers

@@ -233,7 +233,7 @@ namespace Rodin::Eikonal
     private:
       Real local(Index p, const SolutionType& u, const Mesh& mesh) const
       {
-        static thread_local Math::SpatialPoint s_dummy(mesh.getSpaceDimension());
+        Math::SpatialPoint dummy(mesh.getSpaceDimension());
 
         const int D = mesh.getDimension();
         const auto& conn = mesh.getConnectivity();
@@ -242,7 +242,7 @@ namespace Rodin::Eikonal
 
         const Geometry::VertexIterator vertex = mesh.getVertex(p);
         const Real s =
-          m_speed(Geometry::Point(*vertex, s_dummy, vertex->getCoordinates()));
+          m_speed(Geometry::Point(*vertex, dummy, vertex->getCoordinates()));
         const Real F =
           std::isnan(s) ?
             std::numeric_limits<Real>::infinity() : std::max(std::numeric_limits<Real>::min(), s);

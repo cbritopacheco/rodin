@@ -365,4 +365,116 @@ namespace Rodin::Tests::Unit
     // Clean up
     std::remove(filename.c_str());
   }
+
+  namespace
+  {
+    Mesh<Context::Local> makePointMesh()
+    {
+      Mesh<Context::Local>::Builder builder;
+      return builder
+        .initialize(1)
+        .nodes(1)
+        .vertex({ 0.0 })
+        .finalize();
+    }
+
+    Mesh<Context::Local> makeMeditCoverageMesh(Polytope::Type geometry)
+    {
+      switch (geometry)
+      {
+        case Polytope::Type::Point:
+          return makePointMesh();
+        case Polytope::Type::Segment:
+          return LocalMesh::UniformGrid(geometry, { 5 });
+        case Polytope::Type::Triangle:
+        case Polytope::Type::Quadrilateral:
+          return LocalMesh::UniformGrid(geometry, { 3, 3 });
+        case Polytope::Type::Tetrahedron:
+        case Polytope::Type::Hexahedron:
+        case Polytope::Type::Wedge:
+          return LocalMesh::UniformGrid(geometry, { 2, 2, 2 });
+      }
+      assert(false);
+      return {};
+    }
+
+    std::string meditGeometryName(Polytope::Type geometry)
+    {
+      switch (geometry)
+      {
+        case Polytope::Type::Point:         return "Point";
+        case Polytope::Type::Segment:       return "Segment";
+        case Polytope::Type::Triangle:      return "Triangle";
+        case Polytope::Type::Quadrilateral: return "Quadrilateral";
+        case Polytope::Type::Tetrahedron:   return "Tetrahedron";
+        case Polytope::Type::Hexahedron:    return "Hexahedron";
+        case Polytope::Type::Wedge:         return "Wedge";
+      }
+      return "Unknown";
+    }
+  }
+
+  class P1MEDITGridFunctionCoverage : public ::testing::TestWithParam<Polytope::Type>
+  {};
+
+  TEST_P(P1MEDITGridFunctionCoverage, ScalarRoundTrip)
+  {
+    Mesh mesh = makeMeditCoverageMesh(GetParam());
+
+    P1 fes(mesh);
+    GridFunction gf(fes);
+    for (Index i = 0; i < static_cast<Index>(gf.getSize()); ++i)
+      gf[i] = 0.5 + static_cast<Real>(i);
+
+    std::stringstream stream;
+    GridFunctionPrinter<FileFormat::MEDIT, P1<Real>, Math::Vector<Real>> printer(gf);
+    printer.print(stream);
+
+    GridFunction loaded(fes);
+    GridFunctionLoader<FileFormat::MEDIT, P1<Real>, Math::Vector<Real>> loader(loaded);
+    loader.load(stream);
+
+    ASSERT_EQ(loaded.getSize(), gf.getSize());
+    for (Index i = 0; i < static_cast<Index>(gf.getSize()); ++i)
+      EXPECT_DOUBLE_EQ(loaded[i], gf[i]) << "dof " << i;
+  }
+
+  INSTANTIATE_TEST_SUITE_P(
+      AllSupportedGeometries,
+      P1MEDITGridFunctionCoverage,
+      ::testing::Values(
+        Polytope::Type::Point,
+        Polytope::Type::Segment,
+        Polytope::Type::Triangle,
+        Polytope::Type::Quadrilateral,
+        Polytope::Type::Tetrahedron,
+        Polytope::Type::Hexahedron,
+        Polytope::Type::Wedge),
+      [](const ::testing::TestParamInfo<Polytope::Type>& info)
+      {
+        return meditGeometryName(info.param);
+      });
+
+  TEST(Rodin_IO_MEDIT_P1_GridFunction, Vector3DRoundTrip)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
+
+    using FES = P1<Math::SpatialVector<Real>>;
+    FES fes(mesh, 3);
+    GridFunction<FES, Math::Vector<Real>> gf(fes);
+    for (Index i = 0; i < static_cast<Index>(gf.getSize()); ++i)
+      gf[i] = 1.0 + static_cast<Real>(i);
+
+    std::stringstream stream;
+    GridFunctionPrinter<FileFormat::MEDIT, FES, Math::Vector<Real>> printer(gf);
+    printer.print(stream);
+
+    GridFunction<FES, Math::Vector<Real>> loaded(fes);
+    GridFunctionLoader<FileFormat::MEDIT, FES, Math::Vector<Real>> loader(loaded);
+    loader.load(stream);
+
+    ASSERT_EQ(loaded.getSize(), gf.getSize());
+    for (Index i = 0; i < static_cast<Index>(gf.getSize()); ++i)
+      EXPECT_DOUBLE_EQ(loaded[i], gf[i]) << "dof " << i;
+  }
 }

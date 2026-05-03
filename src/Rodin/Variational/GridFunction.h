@@ -52,6 +52,7 @@
 #include <utility>
 #include <fstream>
 #include <functional>
+#include <vector>
 #include <boost/filesystem.hpp>
 #include <type_traits>
 
@@ -181,9 +182,21 @@ namespace Rodin::Variational
       }
 
       constexpr
+      auto operator()(const IntegrationPoint& ip) const
+      {
+        return m_ref.get().getValue(ip);
+      }
+
+      constexpr
       auto getValue(const Geometry::Point& p) const
       {
         return m_ref.get().getValue(p);
+      }
+
+      constexpr
+      auto getValue(const IntegrationPoint& ip) const
+      {
+        return m_ref.get().getValue(ip);
       }
 
       constexpr
@@ -584,12 +597,10 @@ namespace Rodin::Variational
       RangeType getValue(const Geometry::Point& p) const
       {
         RangeType out{};
-        const auto& polytope = p.getPolytope();
-        const auto& polytopeMesh = polytope.getMesh();
         const auto& fes = m_fes.get();
         const auto& fesMesh = fes.getMesh();
 
-        if (polytopeMesh == fesMesh)
+        if (fesMesh.isLocalPoint(p))
         {
           static_cast<const Derived&>(*this).interpolate(out, p);
         }
@@ -622,6 +633,24 @@ namespace Rodin::Variational
         return out;
       }
 
+      RangeType getValue(const IntegrationPoint& ip) const
+      {
+        RangeType out{};
+        const auto& p = ip.getPoint();
+        const auto& fes = m_fes.get();
+        const auto& fesMesh = fes.getMesh();
+
+        if (fesMesh.isLocalPoint(p))
+        {
+          static_cast<const Derived&>(*this).interpolate(out, ip);
+        }
+        else
+        {
+          return static_cast<const Derived&>(*this).getValue(p);
+        }
+        return out;
+      }
+
       constexpr
       void interpolate(RangeType& res, const Geometry::Point& p) const
       {
@@ -632,10 +661,31 @@ namespace Rodin::Variational
 
         const auto& fe = fes.getFiniteElement(d, i);
         const size_t count = fe.getCount();
+        const auto& dofs = getCachedDOFs(d, i);
         for (Index local = 0; local < count; ++local)
         {
           const auto mapping = fes.getPushforward({ d, i }, fe.getBasis(local));
-          const auto k = this->operator[](fes.getGlobalIndex({ d, i }, local)) * mapping(p);
+          const auto k = this->operator[](dofs[local]) * mapping(p);
+          if (local == 0)
+            res = k;
+          else
+            res += k;
+        }
+      }
+
+      constexpr
+      void interpolate(RangeType& res, const IntegrationPoint& ip) const
+      {
+        const auto& p = ip.getPoint();
+        const auto& polytope = p.getPolytope();
+        const size_t d = polytope.getDimension();
+        const Index  i = polytope.getIndex();
+
+        const auto& dofs = getCachedDOFs(d, i);
+        const auto& basisValues = getCachedBasisValues(d, i, ip);
+        for (Index local = 0; local < basisValues.size(); ++local)
+        {
+          const auto k = this->operator[](dofs[local]) * basisValues[local];
           if (local == 0)
             res = k;
           else
@@ -891,6 +941,75 @@ namespace Rodin::Variational
       }
 
     private:
+      struct EvaluationCache
+      {
+        const GridFunctionBase* owner = nullptr;
+        const FES* fes = nullptr;
+        size_t d = static_cast<size_t>(-1);
+        Index i = static_cast<Index>(-1);
+        std::vector<Index> dofs;
+
+        bool hasBasisValues = false;
+        const QF::QuadratureFormulaBase* qf = nullptr;
+        size_t qp = static_cast<size_t>(-1);
+        std::vector<RangeType> basisValues;
+      };
+
+      static EvaluationCache& getEvaluationCache()
+      {
+        thread_local EvaluationCache cache;
+        return cache;
+      }
+
+      const std::vector<Index>& getCachedDOFs(size_t d, Index i) const
+      {
+        auto& cache = getEvaluationCache();
+        const auto* fes = &this->getFiniteElementSpace();
+        if (cache.owner != this || cache.fes != fes || cache.d != d || cache.i != i)
+        {
+          const auto& dofs = fes->getDOFs(d, i);
+          cache.owner = this;
+          cache.fes = fes;
+          cache.d = d;
+          cache.i = i;
+          const size_t count = static_cast<size_t>(dofs.size());
+          cache.dofs.resize(count);
+          for (size_t local = 0; local < count; ++local)
+            cache.dofs[local] = dofs[local];
+          cache.hasBasisValues = false;
+        }
+        return cache.dofs;
+      }
+
+      const std::vector<RangeType>& getCachedBasisValues(
+          size_t d, Index i, const IntegrationPoint& ip) const
+      {
+        auto& cache = getEvaluationCache();
+        if (!cache.hasBasisValues
+            || cache.owner != this
+            || cache.d != d
+            || cache.i != i
+            || cache.qf != &ip.getQuadratureFormula()
+            || cache.qp != ip.getIndex())
+        {
+          const auto& fes = this->getFiniteElementSpace();
+          const auto& fe = fes.getFiniteElement(d, i);
+          const size_t count = fe.getCount();
+          const auto& p = ip.getPoint();
+
+          cache.qf = &ip.getQuadratureFormula();
+          cache.qp = ip.getIndex();
+          cache.basisValues.resize(count);
+          for (Index local = 0; local < count; ++local)
+          {
+            const auto mapping = fes.getPushforward({ d, i }, fe.getBasis(local));
+            cache.basisValues[local] = mapping(p);
+          }
+          cache.hasBasisValues = true;
+        }
+        return cache.basisValues;
+      }
+
       Optional<std::string> m_name;
       std::reference_wrapper<const FESType> m_fes;
 
