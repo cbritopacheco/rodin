@@ -156,9 +156,18 @@ namespace Rodin::Variational
       virtual ~VectorFunctionBase() = default;
 
       constexpr
-      decltype(auto) getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
+      }
+
+      constexpr
+      auto getValue(const IntegrationPoint& ip) const
+      {
+        if constexpr (requires (const Derived& f, const IntegrationPoint& q) { f.getValue(q); })
+          return static_cast<const Derived&>(*this).getValue(ip);
+        else
+          return static_cast<const Derived&>(*this).getValue(ip.getPoint());
       }
 
       /**
@@ -335,6 +344,38 @@ namespace Rodin::Variational
         return res;
       }
 
+      RangeType getValue(const IntegrationPoint& ip) const
+      {
+        RangeType res;
+        if constexpr (Dimension <= Math::SpatialVector<ScalarType>::MaxSize)
+        {
+          res.resize(Dimension);
+          Utility::ForIndex<Dimension>(
+            [&](auto i)
+            {
+              const auto& f = std::get<i>(m_fs);
+              if constexpr (requires { f.getValue(ip); })
+                res[static_cast<std::uint8_t>(i)] = f.getValue(ip);
+              else
+                res[static_cast<std::uint8_t>(i)] = f.getValue(ip.getPoint());
+            });
+        }
+        else
+        {
+          res.resize(Dimension);
+          Utility::ForIndex<Dimension>(
+            [&](auto i)
+            {
+              const auto& f = std::get<i>(m_fs);
+              if constexpr (requires { f.getValue(ip); })
+                res.coeffRef(i) = f.getValue(ip);
+              else
+                res.coeffRef(i) = f.getValue(ip.getPoint());
+            });
+        }
+        return res;
+      }
+
       constexpr
       size_t getDimension() const
       {
@@ -407,9 +448,17 @@ namespace Rodin::Variational
           m_f(std::move(other.m_f))
       {}
 
-      decltype(auto) getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
         return m_f(p);
+      }
+
+      auto getValue(const IntegrationPoint& ip) const
+      {
+        if constexpr (std::is_invocable_v<F, const IntegrationPoint&>)
+          return m_f(ip);
+        else
+          return m_f(ip.getPoint());
       }
 
       constexpr

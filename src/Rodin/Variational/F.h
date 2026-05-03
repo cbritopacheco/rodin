@@ -68,7 +68,7 @@ namespace Rodin::Variational::F
        * @param p Point at which to evaluate
        * @returns The x-coordinate of the point
        */
-      decltype(auto) getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
         return p.x();
       }
@@ -143,7 +143,7 @@ namespace Rodin::Variational::F
        * @param p Point at which to evaluate
        * @returns The y-coordinate of the point
        */
-      decltype(auto) getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
         return p.y();
       }
@@ -218,7 +218,7 @@ namespace Rodin::Variational::F
        * @param p Point at which to evaluate
        * @returns The z-coordinate of the point
        */
-      decltype(auto) getValue(const Geometry::Point& p) const
+      auto getValue(const Geometry::Point& p) const
       {
         return p.z();
       }
