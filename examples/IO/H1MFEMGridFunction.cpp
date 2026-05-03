@@ -16,8 +16,9 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 8, 8 });
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 8, 8, 8 });
   mesh.scale(1.0 / 7.0);
+  mesh.getConnectivity().compute(3, 1);
   mesh.getConnectivity().compute(2, 1);
   mesh.getConnectivity().compute(1, 0);
 
@@ -27,15 +28,15 @@ int main(int, char**)
   GridFunction scalarField(scalarFES);
   scalarField.project(RealFunction([](const Point& p)
   {
-    return 1.0 + p.x() * p.x() - 0.5 * p.y() + p.x() * p.y();
+    return 1.0 + p.x() * p.x() - 0.5 * p.y() + p.x() * p.y() + p.z();
   }));
 
   using VectorFES = H1<order, Math::SpatialVector<Real>>;
-  VectorFES vectorFES(std::integral_constant<size_t, order>{}, mesh, 2);
+  VectorFES vectorFES(std::integral_constant<size_t, order>{}, mesh, 3);
   GridFunction<VectorFES, Math::Vector<Real>> vectorField(vectorFES);
   vectorField.project(VectorFunction{
-    [](const Point& p) { return p.x() * p.x() - p.y(); },
-    [](const Point& p) { return p.x() + p.y() * p.y(); }
+    [](const Point& p) { return p.x() * p.x() - p.y() * p.z(); },
+    [](const Point& p) { return p.x() + p.y() * p.y() * p.z(); }
   });
 
   mesh.save("H1MFEMGridFunction.mesh", IO::FileFormat::MFEM);

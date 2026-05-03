@@ -30,6 +30,7 @@ namespace Rodin::Tests::Unit
     boost::filesystem::path mfemH1FixturePath(const std::string& filename)
     {
       boost::filesystem::path path(RODIN_RESOURCES_DIR);
+      path /= "tests";
       path /= "mfem";
       path /= "h1";
       path /= filename;

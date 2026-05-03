@@ -8,7 +8,7 @@
  *   c++ -std=c++17 -I/path/to/mfem/build -I/path/to/mfem \
  *     tests/unit/Rodin/IO/MFEMH1FixtureGenerator.cpp \
  *     /path/to/mfem/build/libmfem.a -o /tmp/mfem_h1_fixture_generator
- *   /tmp/mfem_h1_fixture_generator resources/mfem/h1
+ *   /tmp/mfem_h1_fixture_generator resources/tests/mfem/h1
  */
 
 #include "mfem.hpp"
