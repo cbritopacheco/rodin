@@ -2795,29 +2795,47 @@ namespace Rodin::IO
         auto& fes = gf.getFiniteElementSpace();
         auto& data = gf.getData();
 
+        const size_t vdim = fes.getVectorDimension();
+        assert(header.vdim == vdim);
+
         const size_t dofCount = fes.getSize();
+        assert(dofCount % vdim == 0);
+        const size_t scalarDofCount = dofCount / vdim;
 
         // Resize data vector
         data.resize(dofCount);
 
-        // P0 spaces are discontinuous: one DOF per element
-        // MFEM orders by elements, and Rodin also orders by elements for P0
-        // So we can read directly in order
-        for (Index i = 0; i < static_cast<Index>(dofCount); i++)
+        std::vector<ScalarType> tmp;
+        tmp.reserve(dofCount);
+
+        ScalarType value;
+        while (is >> value)
+          tmp.push_back(value);
+
+        if (tmp.size() != dofCount)
         {
-          line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-          it = line.begin();
+          Alert::MemberFunctionException(*this, __func__)
+            << "Expected " << dofCount << " coefficient values, but found "
+            << tmp.size() << "." << Alert::Raise;
+        }
 
-          ScalarType value;
-          const auto get_value = [&](auto& ctx) { value = _attr(ctx); };
-
-          using boost::spirit::x3::double_;
-          const auto pvalue = double_[get_value];
-          const bool rvalue = boost::spirit::x3::phrase_parse(it, line.end(), pvalue, space);
-          (void) rvalue;
-          assert(rvalue && it == line.end());
-
-          data(i) = value;
+        if (header.ordering == MFEM::Ordering::Nodes)
+        {
+          for (size_t c = 0; c < vdim; ++c)
+          {
+            for (size_t i = 0; i < scalarDofCount; ++i)
+              data(static_cast<Index>(i + c * scalarDofCount)) =
+                tmp[i + c * scalarDofCount];
+          }
+        }
+        else
+        {
+          for (size_t i = 0; i < scalarDofCount; ++i)
+          {
+            for (size_t c = 0; c < vdim; ++c)
+              data(static_cast<Index>(i + c * scalarDofCount)) =
+                tmp[c + i * vdim];
+          }
         }
       }
 
