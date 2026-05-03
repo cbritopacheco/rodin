@@ -89,6 +89,7 @@
             </li>
           </ul>
         </nav>
+<p>In this module, mesh entity pairs <code>(d, i)</code> are shard-local indices. PETSc assembly iterates over rank-local MPI mesh polytopes, filters owned entities for rows/contributions, and passes the same local pair to the MPI finite element spaces and integrators. Global bilinear forms keep the test entity owned, but may use ghost trial entities for off-process columns; those trial indices are still local to the rank shard.</p>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">

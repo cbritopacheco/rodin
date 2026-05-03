@@ -125,6 +125,10 @@
             </dt>
             <dd>Inequality comparison.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab0038955a7cbdc1782e165243507d79c" class="m-doc">isLocalPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const -&gt; bool <span class="m-label m-flat m-warning">virtual</span></span>
+            </dt>
+            <dd>Checks whether a point is already expressed in this mesh&#x27;s local indexing convention.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aef53579356e98bee49318d3b43d96a85" class="m-doc">inclusion</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&gt; <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
             <dd><a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> point inclusion in the mesh.</dd>
@@ -416,6 +420,13 @@
                 </tr>
               </tfoot>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="ab0038955a7cbdc1782e165243507d79c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab0038955a7cbdc1782e165243507d79c" class="m-doc-self">isLocalPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const <span class="m-label m-warning">virtual</span></span></span>
+            </h3>
+            <p>Checks whether a point is already expressed in this mesh&#x27;s local indexing convention.</p>
+<p>Ordinary meshes accept only points attached directly to themselves. Distributed meshes override this to also accept points attached to their rank-local shard.</p>
           </div></section>
           <section class="m-doc-details" id="aef53579356e98bee49318d3b43d96a85"><div>
             <h3>

@@ -91,7 +91,7 @@
             </li>
           </ul>
         </nav>
-<p>This type wraps a distributed mesh and a region descriptor and provides a <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />PolytopeIterator</a> suitable for local integration loops.</p>
+<p>This type wraps a distributed mesh and a region descriptor and provides a <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />PolytopeIterator</a> suitable for local integration loops.</p><p><a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> assembly uses shard-local topological indices throughout. A polytope returned by this iterator belongs to the distributed mesh object, but its <code>(d, i)</code> pair addresses the rank-local shard. The same local pair is passed to finite element spaces (<code>getFiniteElement()</code>, <code>getDOFs()</code>) and to mesh geometry/quadrature routines. Owned-entity filters decide which rank contributes a row/entity; ghost entities can still appear where off-process trial columns are needed.</p>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">

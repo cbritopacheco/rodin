@@ -250,7 +250,7 @@ $ \mathbf{x} $
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a242286126958bec41dec8f80d88b0d54" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a42202ed1db5760067e78140c3583f06d" class="m-doc">SolverBaseType</a>&amp; solver) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Solves the assembled linear system and scatters the solution.</dd>
+            <dd>Assembles if stale, solves the linear system, and writes the result to the trial function solution.</dd>
             <dt id="a9087a471c7bafaa7b766ab09fb62af93">
               <span class="m-doc-wrap-bumper">auto <a href="#a9087a471c7bafaa7b766ab09fb62af93" class="m-doc-self">getLinearSystem</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
@@ -377,7 +377,7 @@ $ \mathbf{x} $
               </div>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U, V&gt;&lt;U, V&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a242286126958bec41dec8f80d88b0d54" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a42202ed1db5760067e78140c3583f06d" class="m-doc">SolverBaseType</a>&amp; solver) <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Solves the assembled linear system and scatters the solution.</p>
+            <p>Assembles if stale, solves the linear system, and writes the result to the trial function solution.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -389,6 +389,7 @@ $ \mathbf{x} $
                 </tr>
               </tbody>
             </table>
+<p>Assigning a new problem body with <a href="#a24f33cae29d53dfaa37b1732bcb0190d" class="m-doc">operator=()</a> marks the current assembly stale. If that happens, or if <a href="#ade273f2556fd4951a4e7b8dad8006d5f" class="m-doc">assemble()</a> has not been called yet, this function calls <a href="#ade273f2556fd4951a4e7b8dad8006d5f" class="m-doc">assemble()</a> before invoking the linear solver.</p>
           </div></section>
         </section>
       </div>

@@ -213,7 +213,7 @@ $ Au = b $
 <use x='18.758616' y='0' xlink:href='#eq4-g1-61'/>
 <use x='31.184096' y='0' xlink:href='#eq4-g0-98'/>
 </g>
-</svg> using the provided solver. The problem must be assembled before calling this method.</p>
+</svg> using the provided solver. Concrete problem implementations assemble automatically when the problem body has not yet been assembled, or when assignment of a new problem body has invalidated the previous assembly. After the linear solver returns, the solution stored in the linear system is copied back into the trial function solution, or scattered into each trial function for block-structured mixed problems.</p>
           </div></section>
           <section class="m-doc-details" id="a255fac0867142558d5125e854b705227"><div>
             <h3>

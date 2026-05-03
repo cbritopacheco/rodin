@@ -95,6 +95,7 @@
             <li>
               Reference
               <ul>
+                <li><a href="#derived-classes">Derived classes</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
@@ -103,6 +104,16 @@
         </nav>
 <p>Base template class for formatted message output.</p><p>Base template class for formatted message output with customizable prefixes.</p><p>Base class for creating formatted messages with customizable prefixes, colors, and styles. Messages support stream-like insertion operators for building content incrementally. This class is used as the base for <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a>, <a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a>, <a href="class_rodin_1_1_alert_1_1_info.html" class="m-doc">Info</a>, and <a href="class_rodin_1_1_alert_1_1_success.html" class="m-doc">Success</a> message types.</p><p>The <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a> class handles:</p><ul><li>Formatted output with colored prefixes</li><li>Automatic indentation for multi-line messages</li><li>Stream-like insertion operators for content</li><li>Integration with the <a href="namespace_rodin_1_1_alert.html" class="m-doc">Alert</a> tag types (NewLine, Raise, etc.)</li></ul><p>Example usage (through derived classes):</p><pre class="m-code"><span class="n">Exception</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Error in function: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">funcName</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">NewLine</span>
 <span class="w">            </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Invalid parameter value: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Raise</span><span class="p">;</span></pre>
+        <section id="derived-classes">
+          <h2><a href="#derived-classes">Derived classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Prefix&gt;</div>
+              class <a href="class_rodin_1_1_alert_1_1_prefixed_message.html" class="m-doc">PrefixedMessage</a>
+            </dt>
+            <dd>Convenience message for custom <a href="namespace_rodin_1_1_alert.html" class="m-doc">Alert</a> prefixes.</dd>
+          </dl>
+        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">

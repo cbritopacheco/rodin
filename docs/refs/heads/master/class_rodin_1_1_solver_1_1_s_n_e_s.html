@@ -173,6 +173,10 @@ $ \mathbf{x} $
               using <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc-self">VectorType</a> = ::Vec
             </dt>
             <dd><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector type (<code>::Vec</code>) for the nonlinear residual and solution.</dd>
+            <dt>
+              using <a href="#aab2697409b7c024ecd30f6ab0be52159" class="m-doc">StateUpdate</a> = std::function&lt;void(const <a href="_p_e_t_sc_2_math_2_vector_8h.html#a69736e172223988c0132229aa2bc04c2" class="m-doc">PETSc::<wbr />Math::<wbr />Vector</a>&amp;)&gt;
+            </dt>
+            <dd>Callback invoked before residual/Jacobian assembly to synchronize state-dependent <a href="namespace_rodin.html" class="m-doc">Rodin</a> fields from the current <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a> iterate.</dd>
             <dt id="ab6098d508adace773204c1e42ece893a">
               using <a href="#ab6098d508adace773204c1e42ece893a" class="m-doc-self">ProblemBaseType</a> = <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Variational::<wbr />ProblemBase</a>&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&gt;
             </dt>
@@ -212,6 +216,10 @@ $ \mathbf{x} $
             </dt>
             <dd>Sets nonlinear convergence tolerances and limits.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a117f09c747f17b1b3d838ef04e63f827" class="m-doc">setStateUpdate</a>(</span><span class="m-doc-wrap"><a href="#aab2697409b7c024ecd30f6ab0be52159" class="m-doc">StateUpdate</a> update) -&gt; <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a>&amp;</span>
+            </dt>
+            <dd>Sets an optional callback invoked before residual/Jacobian assembly.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">void <a href="#ab7d0e5809cd6fa1903a32f917e38c96e" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>&amp; x) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Solves the nonlinear system <svg class="m-math" style="width: 4.850em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 46.559654 11.955168">
@@ -236,6 +244,18 @@ $ F(x) = 0 $
 </g>
 </svg>.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc">solve</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Solves the nonlinear system using the linear system&#x27;s solution vector as both the initial guess and the solution storage.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aadcb750c27693e889490c65577fa55cf" class="m-doc">getIterationNumber</a>(</span><span class="m-doc-wrap">) const -&gt; PetscInt</span>
+            </dt>
+            <dd>Returns the number of <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a> iterations from the most recent solve.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae221d434900cb3bb42af9998c301015f" class="m-doc">converged</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
+            </dt>
+            <dd>Returns <code>true</code> if the most recent <a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc">solve()</a> converged.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a82c4e061043c378b56ebc8cc84408c84" class="m-doc">getHandle</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a4a28cc1c3b15a047bb0cd8f1eec33b09" class="m-doc">HandleType</a>&amp; <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a mutable reference to the underlying <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a> handle.</dd>
@@ -248,6 +268,19 @@ $ F(x) = 0 $
             </dt>
             <dd>Creates a heap-allocated copy of this <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a> solver.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Typedef documentation</h2>
+          <section class="m-doc-details" id="aab2697409b7c024ecd30f6ab0be52159"><div>
+            <h3>
+              using Rodin::<wbr />Solver::<wbr />SNES::<wbr /><a href="#aab2697409b7c024ecd30f6ab0be52159" class="m-doc-self">StateUpdate</a> = std::function&lt;void(const <a href="_p_e_t_sc_2_math_2_vector_8h.html#a69736e172223988c0132229aa2bc04c2" class="m-doc">PETSc::<wbr />Math::<wbr />Vector</a>&amp;)&gt;
+            </h3>
+            <p>Callback invoked before residual/Jacobian assembly to synchronize state-dependent <a href="namespace_rodin.html" class="m-doc">Rodin</a> fields from the current <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a> iterate.</p>
+<p>The argument is the current iterate expressed as a <a href="namespace_rodin.html" class="m-doc">Rodin</a> <a href="_p_e_t_sc_2_math_2_vector_8h.html#a69736e172223988c0132229aa2bc04c2" class="m-doc">Rodin::<wbr />PETSc::<wbr />Math::<wbr />Vector</a> (a <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> <code>Vec</code>). Typical usage:</p><pre class="m-code"><span class="n">snes</span><span class="p">.</span><span class="n">setStateUpdate</span><span class="p">([</span><span class="o">&amp;</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">PETSc</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><span class="n">Vector</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">uState</span><span class="p">.</span><span class="n">setData</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">  </span><span class="n">pState</span><span class="p">.</span><span class="n">setData</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">uh</span><span class="p">.</span><span class="n">getSize</span><span class="p">());</span>
+<span class="p">});</span></pre>
+          </div></section>
         </section>
         <section>
           <h2>Function documentation</h2>
@@ -334,6 +367,33 @@ $ F(x) = 0 $
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a117f09c747f17b1b3d838ef04e63f827"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a>&amp; Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a117f09c747f17b1b3d838ef04e63f827" class="m-doc-self">setStateUpdate</a>(</span><span class="m-doc-wrap"><a href="#aab2697409b7c024ecd30f6ab0be52159" class="m-doc">StateUpdate</a> update)</span></span>
+            </h3>
+            <p>Sets an optional callback invoked before residual/Jacobian assembly.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">update</td>
+                  <td>Callback to invoke on each residual/Jacobian assembly.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to <code>*this</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The callback receives the current <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a> iterate as a <a href="namespace_rodin.html" class="m-doc">Rodin</a> <a href="_p_e_t_sc_2_math_2_vector_8h.html#a69736e172223988c0132229aa2bc04c2" class="m-doc">PETSc::<wbr />Math::<wbr />Vector</a>. It is responsible for copying the relevant sub-vectors back into the GridFunctions that appear in the nonlinear variational form.</p><pre class="m-code"><span class="n">snes</span><span class="p">.</span><span class="n">setStateUpdate</span><span class="p">([</span><span class="o">&amp;</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">PETSc</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><span class="n">Vector</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">uState</span><span class="p">.</span><span class="n">setData</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">  </span><span class="n">pState</span><span class="p">.</span><span class="n">setData</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">uh</span><span class="p">.</span><span class="n">getSize</span><span class="p">());</span>
+<span class="p">});</span></pre>
+          </div></section>
           <section class="m-doc-details" id="ab7d0e5809cd6fa1903a32f917e38c96e"><div>
             <h3>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab7d0e5809cd6fa1903a32f917e38c96e" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>&amp; x) <span class="m-label m-warning">override</span></span></span>
@@ -370,6 +430,42 @@ $ F(x) = 0 $
                 </tr>
               </tbody>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="af7d39f0eac0af0ed5785935ac72a1e7d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Solves the nonlinear system using the linear system&#x27;s solution vector as both the initial guess and the solution storage.</p>
+<p>The solution vector is obtained directly from <code>ksp.getProblem()</code>.getLinearSystem().getSolution(), so no manual initial-guess packing is needed. After the first solve the solution vector retains its value, providing a natural warm-start for subsequent time steps.</p>
+          </div></section>
+          <section class="m-doc-details" id="aadcb750c27693e889490c65577fa55cf"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">PetscInt Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aadcb750c27693e889490c65577fa55cf" class="m-doc-self">getIterationNumber</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns the number of <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a> iterations from the most recent solve.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> iteration count.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae221d434900cb3bb42af9998c301015f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae221d434900cb3bb42af9998c301015f" class="m-doc-self">converged</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns <code>true</code> if the most recent <a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc">solve()</a> converged.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td><code>true</code> when converged, <code>false</code> when diverged or not yet solved.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Wraps <code>SNESGetConvergedReason:</code> a positive reason indicates convergence, a negative reason indicates divergence.</p>
           </div></section>
           <section class="m-doc-details" id="a82c4e061043c378b56ebc8cc84408c84"><div>
             <h3>

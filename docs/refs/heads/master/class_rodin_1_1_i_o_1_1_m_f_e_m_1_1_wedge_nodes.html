@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>/home/runner/work/rodin/rodin/tests/manufactured/Rodin/PETSc/MPI/PoissonTest.cpp file | Rodin</title>
+  <title>Rodin::IO::MFEM::WedgeNodes class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -74,33 +74,11 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="dir_59425e443f801f1f2fd8bbe4959a3ccf.html">/home/runner/work/rodin/rodin/tests</a>/</span><span class="m-breadcrumb"><a href="dir_ab8a8f8d651a78c5dfbfe78e3f8e7610.html">manufactured</a>/</span><span class="m-breadcrumb"><a href="dir_0e5b958760571a15dd035ef54e505657.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_b959484974822b94fec28ecc5c0d63a3.html">PETSc</a>/</span><span class="m-breadcrumb"><a href="dir_ff28d637a03900fc15533092db27ef07.html">MPI</a>/</span>PoissonTest.cpp <span class="m-thin">file</span>
+          <div class="m-doc-template">template&lt;size_t K&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_i_o.html">IO</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_i_o_1_1_m_f_e_m.html">MFEM</a>::<wbr/></span>WedgeNodes <span class="m-thin">class</span>
         </h1>
-        <p>Distributed PETSc tests for the Poisson problem on <code>Context::MPI</code> meshes.</p>
-        <nav class="m-block m-default">
-          <h3>Contents</h3>
-          <ul>
-            <li><a href="#autotoc_md500">Workflow</a></li>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#namespaces">Namespaces</a></li>
-              </ul>
-            </li>
-          </ul>
-        </nav>
-<p>These tests distribute a mesh across MPI ranks, assemble the Poisson variational problem with the PETSc backend, solve with <code><a href="_p_e_t_sc_2_solver_2_c_g_8h.html#acd85a42a8ce2254ae97d31ea641e9266" class="m-doc">PETSc::<wbr />Solver::<wbr />CG</a></code> (and <code><a href="_p_e_t_sc_2_solver_2_g_m_r_e_s_8h.html#ac5dce6c655af6ba8fd9d554d3cef1257" class="m-doc">PETSc::<wbr />Solver::<wbr />GMRES</a></code>), and verify the solution against a known manufactured solution.</p><p>The L² error is computed per-rank and then reduced with <code>boost::mpi::all_reduce</code> so that every rank can independently assert correctness.</p><section id="autotoc_md500"><h4><a href="#autotoc_md500">Workflow</a></h4><ol><li>Rank 0 builds a uniform-grid mesh, partitions it with <code>BalancedCompactPartitioner</code>, and calls <code>sharder.scatter()</code>.</li><li>Each rank saves its shard to HDF5.</li><li>Each rank rereads its shard from HDF5 through the MPI mesh loader.</li><li>Incidence data required for assembly and Dirichlet-BC enforcement is computed and the mesh is reconciled.</li><li><code>PETSc::Variational::TrialFunction / TestFunction</code> wrap the distributed <code>P1</code> space.</li><li><code>Problem&lt;<a href="_p_e_t_sc_2_math_2_linear_system_8h.html#afa0435f07e69ca0a0806164a5b7e897f" class="m-doc">PETSc::<wbr />Math::<wbr />LinearSystem</a>, U, V&gt;</code> is assembled with the MPI assembly backend and solved with a PETSc KSP solver.</li><li>The local per-rank L² error is summed globally and checked against the manufactured tolerance.</li></ol></section>
-        <section id="namespaces">
-          <h2><a href="#namespaces">Namespaces</a></h2>
-          <dl class="m-doc">
-            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_tests.html" class="m-doc">Rodin::Tests</a></dt>
-            <dd>Tests of the <a href="namespace_rodin.html" class="m-doc">Rodin</a> library</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_tests_1_1_manufactured.html" class="m-doc">Rodin::Tests::Manufactured</a></dt>
-            <dd>Manufactured solution test cases</dd>
-          </dl>
-        </section>
+        <p>MFEM-style nodal set on the reference wedge / prism.</p>
+<p>This reproduces the local node ordering used by mfem::H1_WedgeElement: vertices, edge interiors, triangular face interiors, quadrilateral face interiors, then cell interiors. The triangular factor uses MFEM&#x27;s closed H1 triangle nodes and the segment factor uses MFEM&#x27;s H1 segment ordering.</p>
       </div>
     </div>
   </div>
