@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1777317693083,
+  "lastUpdate": 1777848420213,
   "repoUrl": "https://github.com/cbritopacheco/rodin",
   "entries": {
     "C++ Rodin Benchmarks": [
@@ -17142,6 +17142,780 @@ window.BENCHMARK_DATA = {
             "value": 818069.076282304,
             "unit": "ns/iter",
             "extra": "iterations: 839\ncpu: 817953.087008304 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "carlos.brito524@gmail.com",
+            "name": "Carlos Brito-Pacheco",
+            "username": "cbritopacheco"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "745ae2869f1061ab22b1c179bf3ca9941f93be90",
+          "message": "Develop (#261)\n\n* ci: test building and installing Rodin with and without MPI/PETSc support (#255)\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/601b3179-e0ab-439d-9256-9b691ca6fd02\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Non-Newtonian model (#250)\n\n* Correct signs\n\n* Modularize\n\n* Fix modular CoronaryArtery build and move top-level driver\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/308af78c-dfd8-4661-86d2-c55dc54a4e38\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix modular CoronaryArtery class typing and model initialization\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/308af78c-dfd8-4661-86d2-c55dc54a4e38\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add CCMLC2014 finite-difference tests across scales and data\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/0dfb38f9-c839-4eb6-b1a0-cda318a29404\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Symmetrize\n\n* Update mesh path\n\n* Update mesh path\n\n* Upload good mesh\n\n* Document CoronaryArtery example driver file\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/278d7259-a5aa-4052-a70e-59319a15ada6\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* VMS stab\n\n* fix: replace decltype(auto) with explicit const T& returns in leaf getValue() functions\n\nGrad, Derivative, Jacobian, FaceNormal, BoundaryNormal, GridFunction base class,\nand the GridFunction::project lambda all returned thread-local scratch by value\nvia decltype(auto)+unparenthesized id-expression. Each call therefore produced\nan rvalue that triggered FormLanguage::Base::object() to heap-allocate a copy\n(new R(...)), causing unbounded memory growth during assembly.\n\nVectorFunction variadic specialisation is deliberately left with decltype(auto):\nit uses a compile-time fixed-size Eigen type whose allocation is bounded, and\nthe thread-local would alias when LHS and RHS are the same template instantiation\n(confirmed by test failures) -- that case needs a separate caller-side fix.\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/a6d29b98-a02b-4e31-a609-39eaed4bcb97\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix: eliminate thread_local aliasing in binary operators and VectorFunction getValue\n\nVectorFunction<V,Values...>::getValue was returning the fixed-size result vector\nby value via decltype(auto).  In binary operators that called getValue() on both\noperands (Sum, Mult, Dot, Division, Jump, Average), a left-then-right evaluation\nof two operands of the *same* template type shares a single static thread_local,\nso the second call silently overwrote the first result before the operator was\napplied — e.g. Sum(VF,VF) computed 2*VF instead of LHS+RHS.\n\nFixes:\n* VectorFunction<V,Values...>::getValue: decltype(auto) -> const FixedSizeVectorType&\n  (returns reference to the existing thread_local; no copy, no allocation).\n* Sum / Mult / Dot / Division getValue (Function×Function variants): materialize\n  the LHS result into a static thread_local LHSRangeType buffer *before* evaluating\n  the RHS.  This guarantees the LHS value is safe even when LHS and RHS share the\n  same underlying thread_local.  object() is kept on the RHS to preserve lifetime\n  extension for any callable-based VectorFunction that returns by value.\n  constexpr removed from these methods (thread_local not allowed in constexpr\n  before C++23).\n* Jump / Average getValue: same pattern — the single operand is called with two\n  different geometric points; without materialization, the second call overwrote\n  the first result.  OperandRangeType added to both class bodies.\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/c4815f05-8443-403f-91c6-a13f30d4067b\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* revert: remove materialization from binary operators; keep VectorFunction const& fix only\n\nThe materialization pattern added to Sum, Mult, Dot, Division, Jump, and Average\nwas over-broad. VectorFunction<V,Values...> is the targeted case: fixing its\ngetValue() to return const FixedSizeVectorType& (instead of a by-value copy via\ndecltype(auto)) is sufficient, consistent with how all other leaf getValue()\nfunctions were already fixed in the previous commit.\n\nThe same aliasing trade-off that exists for Grad, Jacobian, etc. (when the same\ntemplate instantiation appears on both sides of a binary operator) is accepted\nfor VectorFunction as well. Reverting Sum/Mult/Dot/Division/Jump/Average to\ntheir original constexpr form with this->object() on both operands.\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/6cd8c77a-e9df-4732-8946-36a6875e896f\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix: replace static thread_local with mutable instance members in leaf getValue functions\n\nEliminates the aliasing limitation where Sum<F,F> (or any binary operator\nwhere LHS and RHS are the same template type) would produce 2*RHS instead of\nLHS+RHS.\n\nRoot cause: static thread_local scratch is per-type, not per-instance. When\nbinary operators hold LHS and RHS as distinct unique_ptr objects of the same\ntemplate type, both calls to getValue() wrote to the same thread_local buffer.\n\nFix: replace static thread_local with mutable instance members. Since binary\noperators always store operands as distinct objects (unique_ptr), LHS and RHS\nalways have different addresses and thus independent scratch buffers — no\naliasing regardless of template type equality.\n\nAlso simplifies the GridFunction::project() lambda: the fn parameter is already\na const RangeType& that outlives the lambda call, so the intermediate\nthread_local copy is unnecessary.\n\nChanged files:\n- VectorFunction.h  — mutable FixedSizeVectorType m_res\n- Grad.h            — mutable RangeType m_res\n- Jacobian.h        — same\n- FaceNormal.h      — same\n- BoundaryNormal.h  — same\n- Derivative.h      — mutable ScalarType m_out\n- GridFunction.h    — mutable RangeType m_out; project lambda simplified\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/1ad186f1-ac77-482e-a793-be607d549164\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* UPdat\n\n* Revert back changes\n\n* Refactor variational ranges to spatial types and add range kind detection\n\n* Fix range predicate integration includes across variational headers\n\n* Update\n\n* Use capitalized trait members for vector/matrix range predicates\n\n* Map FormLanguage RangeOf to spatial vector/matrix ranges\n\n* Materialize stack-backed range objects and add Complex range kind\n\n* Fix interpolate overload conflicts after spatial RangeType migration\n\n* Guard ColsAtCompileTime detection for non-Eigen scalar ranges\n\n* Remove heap-backed object persistence from FormLanguage::Base::object\n\n* Return spatial variational evaluations by value and remove thread_local scratch\n\n* Remove Base object cache usage from variational nodes\n\n* Viscosity works !\n\n* Fix SpatialVector/SpatialMatrix migration regressions in FormLanguage and Variational range handling (#242)\n\n* fix: handle spatial vector values in vector element linear forms\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/e03813aa-8613-4bd3-be32-1f8e441e8757\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix: support spatial vector and matrix indexing in component extraction\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/e03813aa-8613-4bd3-be32-1f8e441e8757\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix: allow variadic vector functions above spatial capacity\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/e03813aa-8613-4bd3-be32-1f8e441e8757\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix: use generic indexing for vector ranges in quadrature rules\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/e03813aa-8613-4bd3-be32-1f8e441e8757\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix SpatialVector/SpatialMatrix migration regressions in FormLanguage and Variational range handling\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/e03813aa-8613-4bd3-be32-1f8e441e8757\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* ci: enable MPI/PETSc tests and add MPI np4/np8 cases\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/9f204a37-7d2e-4b07-a59c-be9e6fd3e6db\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix: add explicit braces around EXPECT_GT to fix dangling-else compile errors\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/8ef1d252-f107-4ebc-b877-7734ad939658\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 1: Migrate P0Element vector specialization to SpatialVector\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/3991a454-f6a8-4f99-ae2c-b8ff16282b34\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 2: Migrate P1Element + P1 FES vector specialization to SpatialVector\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/3991a454-f6a8-4f99-ae2c-b8ff16282b34\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 3: Migrate H1Element + H1 FES vector specialization to SpatialVector\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/3991a454-f6a8-4f99-ae2c-b8ff16282b34\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 4: Migrate P0gElement + P0g FES vector specialization to SpatialVector\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/3991a454-f6a8-4f99-ae2c-b8ff16282b34\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 5: Migrate Zero<Math::Vector> to Zero<Math::SpatialVector>\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/3991a454-f6a8-4f99-ae2c-b8ff16282b34\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 6: Update operators and QuadratureRules to use SpatialVector FES keys\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/3991a454-f6a8-4f99-ae2c-b8ff16282b34\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 7: Update tests, examples, and doc comments to use SpatialVector FES keys\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/3991a454-f6a8-4f99-ae2c-b8ff16282b34\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 8a: Fix element test accumulator types and H1Element vector specialization key in tests\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/06939da4-c5d1-4099-a9c3-d3399a24ae3c\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 8b: Fix remaining accumulator and gf value type errors in H1ElementTest and H1Test\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/06939da4-c5d1-4099-a9c3-d3399a24ae3c\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 8c: Add coeffRef and size_t overloads to SpatialVector for Eigen-compatible usage\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/06939da4-c5d1-4099-a9c3-d3399a24ae3c\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 8c fix: Remove ambiguous size_t operator overloads, keep only coeffRef(size_t)\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/06939da4-c5d1-4099-a9c3-d3399a24ae3c\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 8d: Fix MMG GridFunction VectorGridFunction alias and MMGTest to use SpatialVector\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/06939da4-c5d1-4099-a9c3-d3399a24ae3c\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix: count only owned cells in GlobalCellCount tests to avoid ghost cell double-counting\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/eb81ecf7-f17d-414c-ab82-1cc199df1864\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 9: Fix CI blockers and complete value-semantic spatial-range migration\n\n- P1/QuadratureRule.h: change m_mk, m_k0..m_k5 from Math::Matrix to Math::SpatialMatrix\n  and m_trv, m_tev from Math::Vector to Math::SpatialVector; add SpatialMatrix.h include\n- Math/SpatialVector.h: add std::enable_if_t<std::is_arithmetic_v<LHS>> constraint to\n  operator*(LHS, SpatialVector) to prevent non-scalar (e.g. Math::Matrix) LHS from\n  accidentally resolving to the element-wise scalar multiply path\n- H1Element.h: remove thread_local scratch buffers from GradientFunction::operator(),\n  JacobianFunction::operator(), and vector BasisFunction::operator(); return by value\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/3b7544f2-9030-40aa-8bed-762b779c7e3f\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add HDF5 shard workflow tests (local and MPI)\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/ddcec175-ca0a-4c82-a21a-af6a1a46b77e\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Changes before error encountered\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/aef47959-410b-4700-8838-54b7e68bde90\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Changes before error encountered\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/4c88ff7a-7640-4125-8e5c-111aedb00e4b\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix compile\n\n* Try to fix tests\n\n* update vms\n\n* Fix tests\n\n* CI\n\n* CI\n\n* CI\n\n* Remove cache\n\n* Add custom VMS integrator for performance\n\n* Add doc\n\n* Add info about velocity\n\n* Add plotting script\n\n* Update\n\n* Clamp viscosity\n\n* Update VMS\n\n* add dynamic subscale\n\n* Fix plotting script\n\n* Fix compile\n\n* CI\n\n* CI\n\n* CI\n\n* Update\n\n* Fix tests\n\n* CI\n\n* CI\n\n* CI\n\n* CI\n\n* Correct VMS\n\n* CI\n\n* CI\n\n* Copy fixes\n\n* Minor cleanup\n\n* CI\n\n* Update\n\n* Add rho\n\n* CI\n\n* CI\n\n* CI\n\n* Fix ASAN/LSan CI failures for MPI/PETSc tests: use ASAN_OPTIONS=detect_leaks=0, move PetscInitialize to main()\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/96fae0ce-7cab-4fa8-a0e9-2e46f3e17641\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix installation test: add MPI to FindPETSc.cmake and remove conflicting hdf5 on macOS (#245)\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/4619f80c-f091-4ede-a809-1af5516d8c33\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix missing Context::MPI forward declaration in PETSc GridFunction.h (#246)\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/c0205059-2a7e-4f68-900d-212756c28f36\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* update model\n\n* ci: free disk space before build steps in Tests workflow to fix ASAN+UBSAN OOM\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/ac090e40-58ed-412d-b646-ffb126849454\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\nCo-authored-by: Oscar Ruz <oscar@MacBook-Air-de-Oscar.local>\n\n* Update build options in Build.yml\n\nRemoved exclusion for mpi OFF and petsc ON in build options.\n\n* Update build options in Build.yml\n\nRemoved exclusion for mpi OFF and petsc ON in build options.\n\n* Update Installation.yml to remove exclusion conditions\n\nRemoved exclusion of MPI 'OFF' and PETSc 'ON' from the workflow.\n\n* Update installation workflow matrix exclusions\n\nRemoved exclusion for 'mpi: OFF' and 'petsc: ON' in the workflow matrix.\n\n* Conditionally add CoronaryArtery executable with PETSc\n\n* Conditionalize PETSc executable creation with MPI\n\n* Add boost-mpi to Brew packages installation\n\n* fix: Labeler workflow not tagging PRs (#256)\n\n* docs: run manufactured tests in Release by default\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/ae0d2949-1453-4c20-bf80-c72d1c0720d0\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* docs: mention RelWithDebInfo as option for manufactured tests\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/ae0d2949-1453-4c20-bf80-c72d1c0720d0\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* docs: agents should determine affected tests and run only those\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/68ab3061-d248-4cd2-8d05-da0fa41b961b\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix: correct Labeler workflow triggers\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/f89d2d7d-1705-47d4-9c60-7b9d9faee3d0\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add synchronize event to Labeler workflow trigger (#257)\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/40021b27-231d-4109-9606-60fcd142d8b9\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add non-linear navier stokes\n\n* Update build types in Tests.yml\n\nRemove 'RelWithDebInfo' from build types in CI workflow.\n\n* Implementing distributed MPI version of H1 (#254)\n\n* feat(MPI): implement distributed H1 finite element space for MPI meshes\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/dfde4522-f697-4293-9b46-d30bc22dedb4\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add distributed MPI H1 finite element space with DOF exchange\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/d91083cf-df41-4ee2-a6a6-cc8dc13ebb96\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix(MPI/H1): replace halo-based DOF exchange with two-phase request-response\n\nThe previous halo-based push was only correct when reconcile() populated\nhalo[d][e] for ALL ranks that hold entity e.  For K=2 edges on 4+ rank\npartitions an edge can be in a rank's ghost layer via an intermediate\nneighbour (rank C holds edge e through B's ghost cell, but A - the owner -\nand C do not share a cell boundary and C is absent from A's halo).\nA's send[] therefore omitted e's DOF for C; C's irecv received an unrelated\nbatch and silently left m_local_to_global.left[dof] = MAX_INDEX, causing\na PETSc \"scatter indices out of range\" error.\n\nFix: replace the one-phase halo push with a two-phase request-response:\n\n  Phase 1 (request): non-owners send the global entity IDs they need to\n  the owning rank.  A boost::mpi::all_to_all count exchange is done first\n  so every owner can post irecv calls before the isend loop, guaranteeing\n  deadlock-free operation for any partition topology.\n\n  Phase 2 (response): owners reply with (gid, firstGlobalDOF) to each\n  requester.  Non-owners know the response count from Phase 1, so no\n  second count exchange is needed.\n\nAll H1 manufactured tests now pass on 1, 2, and 4 MPI ranks.\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/0c7276f9-df10-4374-8f05-3ce5bafbc868\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix: complete entity halo in reconcile() and replace all_to_all with owner-push in H1::build()\n\nreconcile() now runs an iterative holder-set propagation phase after gid\nconvergence. Each round floods (entity, holder-rank) pairs through the\ndirect-neighbor stencil until globally converged, so halo[d] is complete\neven for multi-hop cases (e.g. a 3D edge shared by four ranks in a ring\nwhere two are not face-adjacent). For UniformGrid this converges in 1 round;\nfor Sharder-partitioned meshes in O(partition-graph diameter) rounds.\n\nH1::build() replaces the O(P) all_to_all count exchange + two-phase\nrequest-response with a direct owner-push: owners iterate halo[d] and send\n(gid, firstGlobalDOF) to each holder; non-owners post irecv from their\nowner rank. Communication cost is now O(entity-sharing neighbors) per rank\nrather than O(P). The Sharder is unchanged — its vertex and cell halos are\nalready correct by construction.\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/0da9e1f4-3848-4140-86c7-d6b22083f794\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Changes before error encountered\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/d58e0997-b6fa-4e9e-a39f-c6d16d961456\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* feat(tests): add distributed MPI H1 LinearElasticity manufactured tests; fix H1Element scalar DirichletBC for vector spaces\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/db5a0610-3434-4daf-932c-d464624a7090\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* docs: clarify per-component degree in LinearElasticityTest 3D doc comment\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/db5a0610-3434-4daf-932c-d464624a7090\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Checkout Tests.yml from develop\n\n* feat(tests): add Workflow 2 and 3 to MPI H1 PoissonTest covering all three mesh construction paths\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/f24a0f3b-3059-4521-a92e-df456e3d8eb3\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* docs: improve H1Element LinearForm comment explaining scalar/vector DirichletBC branching\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/f24a0f3b-3059-4521-a92e-df456e3d8eb3\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix(ci): add MPI::MPI_CXX to PETSc::PETSc interface and install HDF5 on macOS in Installation workflow\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/aa0710fa-df68-4622-a608-354cab466bd0\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* CI\n\n* CI\n\n* CI\n\n* Disable K=6 test\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\nCo-authored-by: cbritopacheco <carlos.brito524@gmail.com>\n\n* Use Rodin semantics in nonlinear Navier-Stokes SNES example (#258)\n\n* Rewrite NavierStokes example with Rodin semantics; add SNES setSubVector/hasConverged/getIterationNumber/solve()\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/8b20668c-09e4-4cf3-a898-63854e17eb2b\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Remove setSubVector/m_x from SNES; no-arg solve() uses system.getSolution() directly\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/207fdfe6-0ff9-4d21-b50f-134f6a57a1b5\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Rename SNES::hasConverged() to converged()\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/1593f360-1172-4070-b512-528c0efac09d\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Rodin semantics\n\n* Do not zero solution entries\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\nCo-authored-by: Carlos Brito <carlos.brito524@gmail.com>\n\n* Non Linear Navier Stokes (#260)\n\n* Correct signs\n\n* Modularize\n\n* Fix modular CoronaryArtery build and move top-level driver\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/308af78c-dfd8-4661-86d2-c55dc54a4e38\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix modular CoronaryArtery class typing and model initialization\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/308af78c-dfd8-4661-86d2-c55dc54a4e38\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add CCMLC2014 finite-difference tests across scales and data\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/0dfb38f9-c839-4eb6-b1a0-cda318a29404\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Symmetrize\n\n* Update mesh path\n\n* Update mesh path\n\n* Upload good mesh\n\n* Document CoronaryArtery example driver file\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/278d7259-a5aa-4052-a70e-59319a15ada6\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* VMS stab\n\n* fix: replace decltype(auto) with explicit const T& returns in leaf getValue() functions\n\nGrad, Derivative, Jacobian, FaceNormal, BoundaryNormal, GridFunction base class,\nand the GridFunction::project lambda all returned thread-local scratch by value\nvia decltype(auto)+unparenthesized id-expression. Each call therefore produced\nan rvalue that triggered FormLanguage::Base::object() to heap-allocate a copy\n(new R(...)), causing unbounded memory growth during assembly.\n\nVectorFunction variadic specialisation is deliberately left with decltype(auto):\nit uses a compile-time fixed-size Eigen type whose allocation is bounded, and\nthe thread-local would alias when LHS and RHS are the same template instantiation\n(confirmed by test failures) -- that case needs a separate caller-side fix.\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/a6d29b98-a02b-4e31-a609-39eaed4bcb97\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix: eliminate thread_local aliasing in binary operators and VectorFunction getValue\n\nVectorFunction<V,Values...>::getValue was returning the fixed-size result vector\nby value via decltype(auto).  In binary operators that called getValue() on both\noperands (Sum, Mult, Dot, Division, Jump, Average), a left-then-right evaluation\nof two operands of the *same* template type shares a single static thread_local,\nso the second call silently overwrote the first result before the operator was\napplied — e.g. Sum(VF,VF) computed 2*VF instead of LHS+RHS.\n\nFixes:\n* VectorFunction<V,Values...>::getValue: decltype(auto) -> const FixedSizeVectorType&\n  (returns reference to the existing thread_local; no copy, no allocation).\n* Sum / Mult / Dot / Division getValue (Function×Function variants): materialize\n  the LHS result into a static thread_local LHSRangeType buffer *before* evaluating\n  the RHS.  This guarantees the LHS value is safe even when LHS and RHS share the\n  same underlying thread_local.  object() is kept on the RHS to preserve lifetime\n  extension for any callable-based VectorFunction that returns by value.\n  constexpr removed from these methods (thread_local not allowed in constexpr\n  before C++23).\n* Jump / Average getValue: same pattern — the single operand is called with two\n  different geometric points; without materialization, the second call overwrote\n  the first result.  OperandRangeType added to both class bodies.\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/c4815f05-8443-403f-91c6-a13f30d4067b\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* revert: remove materialization from binary operators; keep VectorFunction const& fix only\n\nThe materialization pattern added to Sum, Mult, Dot, Division, Jump, and Average\nwas over-broad. VectorFunction<V,Values...> is the targeted case: fixing its\ngetValue() to return const FixedSizeVectorType& (instead of a by-value copy via\ndecltype(auto)) is sufficient, consistent with how all other leaf getValue()\nfunctions were already fixed in the previous commit.\n\nThe same aliasing trade-off that exists for Grad, Jacobian, etc. (when the same\ntemplate instantiation appears on both sides of a binary operator) is accepted\nfor VectorFunction as well. Reverting Sum/Mult/Dot/Division/Jump/Average to\ntheir original constexpr form with this->object() on both operands.\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/6cd8c77a-e9df-4732-8946-36a6875e896f\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix: replace static thread_local with mutable instance members in leaf getValue functions\n\nEliminates the aliasing limitation where Sum<F,F> (or any binary operator\nwhere LHS and RHS are the same template type) would produce 2*RHS instead of\nLHS+RHS.\n\nRoot cause: static thread_local scratch is per-type, not per-instance. When\nbinary operators hold LHS and RHS as distinct unique_ptr objects of the same\ntemplate type, both calls to getValue() wrote to the same thread_local buffer.\n\nFix: replace static thread_local with mutable instance members. Since binary\noperators always store operands as distinct objects (unique_ptr), LHS and RHS\nalways have different addresses and thus independent scratch buffers — no\naliasing regardless of template type equality.\n\nAlso simplifies the GridFunction::project() lambda: the fn parameter is already\na const RangeType& that outlives the lambda call, so the intermediate\nthread_local copy is unnecessary.\n\nChanged files:\n- VectorFunction.h  — mutable FixedSizeVectorType m_res\n- Grad.h            — mutable RangeType m_res\n- Jacobian.h        — same\n- FaceNormal.h      — same\n- BoundaryNormal.h  — same\n- Derivative.h      — mutable ScalarType m_out\n- GridFunction.h    — mutable RangeType m_out; project lambda simplified\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/1ad186f1-ac77-482e-a793-be607d549164\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* UPdat\n\n* Revert back changes\n\n* Refactor variational ranges to spatial types and add range kind detection\n\n* Fix range predicate integration includes across variational headers\n\n* Update\n\n* Use capitalized trait members for vector/matrix range predicates\n\n* Map FormLanguage RangeOf to spatial vector/matrix ranges\n\n* Materialize stack-backed range objects and add Complex range kind\n\n* Fix interpolate overload conflicts after spatial RangeType migration\n\n* Guard ColsAtCompileTime detection for non-Eigen scalar ranges\n\n* Remove heap-backed object persistence from FormLanguage::Base::object\n\n* Return spatial variational evaluations by value and remove thread_local scratch\n\n* Remove Base object cache usage from variational nodes\n\n* Viscosity works !\n\n* Fix SpatialVector/SpatialMatrix migration regressions in FormLanguage and Variational range handling (#242)\n\n* fix: handle spatial vector values in vector element linear forms\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/e03813aa-8613-4bd3-be32-1f8e441e8757\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix: support spatial vector and matrix indexing in component extraction\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/e03813aa-8613-4bd3-be32-1f8e441e8757\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix: allow variadic vector functions above spatial capacity\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/e03813aa-8613-4bd3-be32-1f8e441e8757\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix: use generic indexing for vector ranges in quadrature rules\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/e03813aa-8613-4bd3-be32-1f8e441e8757\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix SpatialVector/SpatialMatrix migration regressions in FormLanguage and Variational range handling\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/e03813aa-8613-4bd3-be32-1f8e441e8757\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* ci: enable MPI/PETSc tests and add MPI np4/np8 cases\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/9f204a37-7d2e-4b07-a59c-be9e6fd3e6db\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix: add explicit braces around EXPECT_GT to fix dangling-else compile errors\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/8ef1d252-f107-4ebc-b877-7734ad939658\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 1: Migrate P0Element vector specialization to SpatialVector\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/3991a454-f6a8-4f99-ae2c-b8ff16282b34\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 2: Migrate P1Element + P1 FES vector specialization to SpatialVector\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/3991a454-f6a8-4f99-ae2c-b8ff16282b34\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 3: Migrate H1Element + H1 FES vector specialization to SpatialVector\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/3991a454-f6a8-4f99-ae2c-b8ff16282b34\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 4: Migrate P0gElement + P0g FES vector specialization to SpatialVector\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/3991a454-f6a8-4f99-ae2c-b8ff16282b34\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 5: Migrate Zero<Math::Vector> to Zero<Math::SpatialVector>\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/3991a454-f6a8-4f99-ae2c-b8ff16282b34\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 6: Update operators and QuadratureRules to use SpatialVector FES keys\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/3991a454-f6a8-4f99-ae2c-b8ff16282b34\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 7: Update tests, examples, and doc comments to use SpatialVector FES keys\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/3991a454-f6a8-4f99-ae2c-b8ff16282b34\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 8a: Fix element test accumulator types and H1Element vector specialization key in tests\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/06939da4-c5d1-4099-a9c3-d3399a24ae3c\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 8b: Fix remaining accumulator and gf value type errors in H1ElementTest and H1Test\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/06939da4-c5d1-4099-a9c3-d3399a24ae3c\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 8c: Add coeffRef and size_t overloads to SpatialVector for Eigen-compatible usage\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/06939da4-c5d1-4099-a9c3-d3399a24ae3c\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 8c fix: Remove ambiguous size_t operator overloads, keep only coeffRef(size_t)\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/06939da4-c5d1-4099-a9c3-d3399a24ae3c\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 8d: Fix MMG GridFunction VectorGridFunction alias and MMGTest to use SpatialVector\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/06939da4-c5d1-4099-a9c3-d3399a24ae3c\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix: count only owned cells in GlobalCellCount tests to avoid ghost cell double-counting\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/eb81ecf7-f17d-414c-ab82-1cc199df1864\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Phase 9: Fix CI blockers and complete value-semantic spatial-range migration\n\n- P1/QuadratureRule.h: change m_mk, m_k0..m_k5 from Math::Matrix to Math::SpatialMatrix\n  and m_trv, m_tev from Math::Vector to Math::SpatialVector; add SpatialMatrix.h include\n- Math/SpatialVector.h: add std::enable_if_t<std::is_arithmetic_v<LHS>> constraint to\n  operator*(LHS, SpatialVector) to prevent non-scalar (e.g. Math::Matrix) LHS from\n  accidentally resolving to the element-wise scalar multiply path\n- H1Element.h: remove thread_local scratch buffers from GradientFunction::operator(),\n  JacobianFunction::operator(), and vector BasisFunction::operator(); return by value\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/3b7544f2-9030-40aa-8bed-762b779c7e3f\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add HDF5 shard workflow tests (local and MPI)\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/ddcec175-ca0a-4c82-a21a-af6a1a46b77e\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Changes before error encountered\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/aef47959-410b-4700-8838-54b7e68bde90\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Changes before error encountered\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/4c88ff7a-7640-4125-8e5c-111aedb00e4b\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix compile\n\n* Try to fix tests\n\n* update vms\n\n* Fix tests\n\n* CI\n\n* CI\n\n* CI\n\n* Remove cache\n\n* Add custom VMS integrator for performance\n\n* Add doc\n\n* Add info about velocity\n\n* Add plotting script\n\n* Update\n\n* Clamp viscosity\n\n* Update VMS\n\n* add dynamic subscale\n\n* Fix plotting script\n\n* Fix compile\n\n* CI\n\n* CI\n\n* CI\n\n* Update\n\n* Fix tests\n\n* CI\n\n* CI\n\n* CI\n\n* CI\n\n* Correct VMS\n\n* CI\n\n* CI\n\n* Copy fixes\n\n* Minor cleanup\n\n* CI\n\n* Update\n\n* Add rho\n\n* CI\n\n* CI\n\n* CI\n\n* Fix ASAN/LSan CI failures for MPI/PETSc tests: use ASAN_OPTIONS=detect_leaks=0, move PetscInitialize to main()\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/96fae0ce-7cab-4fa8-a0e9-2e46f3e17641\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix installation test: add MPI to FindPETSc.cmake and remove conflicting hdf5 on macOS (#245)\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/4619f80c-f091-4ede-a809-1af5516d8c33\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Fix missing Context::MPI forward declaration in PETSc GridFunction.h (#246)\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/c0205059-2a7e-4f68-900d-212756c28f36\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* update model\n\n* feat(MPI): implement distributed H1 finite element space for MPI meshes\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/dfde4522-f697-4293-9b46-d30bc22dedb4\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* ci: free disk space before build steps in Tests workflow to fix ASAN+UBSAN OOM\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/ac090e40-58ed-412d-b646-ffb126849454\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Add distributed MPI H1 finite element space with DOF exchange\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/d91083cf-df41-4ee2-a6a6-cc8dc13ebb96\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix(MPI/H1): replace halo-based DOF exchange with two-phase request-response\n\nThe previous halo-based push was only correct when reconcile() populated\nhalo[d][e] for ALL ranks that hold entity e.  For K=2 edges on 4+ rank\npartitions an edge can be in a rank's ghost layer via an intermediate\nneighbour (rank C holds edge e through B's ghost cell, but A - the owner -\nand C do not share a cell boundary and C is absent from A's halo).\nA's send[] therefore omitted e's DOF for C; C's irecv received an unrelated\nbatch and silently left m_local_to_global.left[dof] = MAX_INDEX, causing\na PETSc \"scatter indices out of range\" error.\n\nFix: replace the one-phase halo push with a two-phase request-response:\n\n  Phase 1 (request): non-owners send the global entity IDs they need to\n  the owning rank.  A boost::mpi::all_to_all count exchange is done first\n  so every owner can post irecv calls before the isend loop, guaranteeing\n  deadlock-free operation for any partition topology.\n\n  Phase 2 (response): owners reply with (gid, firstGlobalDOF) to each\n  requester.  Non-owners know the response count from Phase 1, so no\n  second count exchange is needed.\n\nAll H1 manufactured tests now pass on 1, 2, and 4 MPI ranks.\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/0c7276f9-df10-4374-8f05-3ce5bafbc868\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix: complete entity halo in reconcile() and replace all_to_all with owner-push in H1::build()\n\nreconcile() now runs an iterative holder-set propagation phase after gid\nconvergence. Each round floods (entity, holder-rank) pairs through the\ndirect-neighbor stencil until globally converged, so halo[d] is complete\neven for multi-hop cases (e.g. a 3D edge shared by four ranks in a ring\nwhere two are not face-adjacent). For UniformGrid this converges in 1 round;\nfor Sharder-partitioned meshes in O(partition-graph diameter) rounds.\n\nH1::build() replaces the O(P) all_to_all count exchange + two-phase\nrequest-response with a direct owner-push: owners iterate halo[d] and send\n(gid, firstGlobalDOF) to each holder; non-owners post irecv from their\nowner rank. Communication cost is now O(entity-sharing neighbors) per rank\nrather than O(P). The Sharder is unchanged — its vertex and cell halos are\nalready correct by construction.\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/0da9e1f4-3848-4140-86c7-d6b22083f794\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Changes before error encountered\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/d58e0997-b6fa-4e9e-a39f-c6d16d961456\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* feat(tests): add distributed MPI H1 LinearElasticity manufactured tests; fix H1Element scalar DirichletBC for vector spaces\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/db5a0610-3434-4daf-932c-d464624a7090\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* docs: clarify per-component degree in LinearElasticityTest 3D doc comment\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/db5a0610-3434-4daf-932c-d464624a7090\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Checkout Tests.yml from develop\n\n* feat(tests): add Workflow 2 and 3 to MPI H1 PoissonTest covering all three mesh construction paths\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/f24a0f3b-3059-4521-a92e-df456e3d8eb3\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* docs: improve H1Element LinearForm comment explaining scalar/vector DirichletBC branching\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/f24a0f3b-3059-4521-a92e-df456e3d8eb3\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* fix(ci): add MPI::MPI_CXX to PETSc::PETSc interface and install HDF5 on macOS in Installation workflow\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/aa0710fa-df68-4622-a608-354cab466bd0\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Rewrite NavierStokes example with Rodin semantics; add SNES setSubVector/hasConverged/getIterationNumber/solve()\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/8b20668c-09e4-4cf3-a898-63854e17eb2b\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Remove setSubVector/m_x from SNES; no-arg solve() uses system.getSolution() directly\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/207fdfe6-0ff9-4d21-b50f-134f6a57a1b5\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Rename SNES::hasConverged() to converged()\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/1593f360-1172-4070-b512-528c0efac09d\n\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n* Rodin semantics\n\n* Do not zero solution entries\n\n* RK design\n\n* Fix the math\n\n* Implement rheological RCR and dynamic VMS stabilization\n\n- Add safeguarded Newton-Raphson support for nonlinear scalar solves\n- Implement Carreau-Yasuda WRMS pipe-flow closure for outlet RCR updates\n- Replace linear RCR resistance update with nonlinear pressure-flow inversion\n- Add projected dynamic VMS convective stabilization terms\n- Include dynamic subscale projection and history update\n- Document VMS integrators and rheological model equations\n\n* update vms and code to account for dital prressures\n\n* CI\n\n* CI\n\n* CI\n\n* Non-linear navier stokes\n\n* Nonlinear NS\n\n* Disable K=6 test\n\n* Put lagged VMS again\n\n* Revert back\n\n* IntegrationPoint path for FunctionBase\n\n* Delete resources/examples/Heart/CoronaryArtery_Fluid.medit.mesh\n\n* Restore mesh\n\n* CI\n\n* Separation of paths for IntegrationPoint and Geometry::Point\n\n* Refactor\n\n* thread_local and spatial audit\n\n* Separate paths\n\n* Audit for fast path\n\n* Continue fast path audit\n\n* Deadlock problems\n\n* Fix slowness\n\n* Add suggested command\n\n* Add timing\n\n* Add SCOTCH partioning\n\n* Remove K4, K6 Hexahedron\n\n* Assembly-solve semantics\n\n* Re-add viscosity\n\n* Update\n\n* Default flow mode is Oseen\n\n* Update outputs\n\n* Correct bug\n\n* CI\n\n* add distal logging\n\n* time adaptivity\n\n* Stabilize coronary open-boundary backflow\n\nFix the sign of the outlet backflow stabilization terms under Rodin's\na(u, v) - b(v) = 0 convention, making them positive damping\ncontributions to the flow operator.\n\nAdd analogous reversed-flow damping on the pressure inlet to regularize\nthe inlet/no-slip wall transition without penalizing intended inflow.\nExpose inlet/outlet damping strengths and coronary time-step adaptivity\ncontrols as documented PETSc driver options.\n\nOn failed 3D KSP/SNES solves, retry only the 3D flow state with a reduced\nsolver time step while preserving the already advanced 0D state.\n\n---------\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\nCo-authored-by: Oscar Ruz <oscar@MacBook-Air-de-Oscar.local>\n\n* Disable K6\n\n* Exclude slow tests from distributed tests run\n\nAdded '-LE slow' to the distributed tests command to exclude slow tests.\n\n* MFEM H1 IO\n\n* Update\n\n* Test coverage\n\n* CI\n\n* feat(IO): add per-attribute AttributePolicy (Static/Transient) to XDMF writer (#262)\n\nAgent-Logs-Url: https://github.com/cbritopacheco/rodin/sessions/cf093030-e89e-4b1c-9b88-317e49fe2533\n\nCo-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\n\n---------\n\nCo-authored-by: Copilot <198982749+Copilot@users.noreply.github.com>\nCo-authored-by: cbritopacheco <6352283+cbritopacheco@users.noreply.github.com>\nCo-authored-by: Oscar Ruz <oscar@MacBook-Air-de-Oscar.local>",
+          "timestamp": "2026-05-04T00:33:36+02:00",
+          "tree_id": "6ee59704459684be7628a2497f6df992d539381d",
+          "url": "https://github.com/cbritopacheco/rodin/commit/745ae2869f1061ab22b1c179bf3ca9941f93be90"
+        },
+        "date": 1777848408185,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "P1Benchmark/UniformTriangular16_Build",
+            "value": 0.36455081808783546,
+            "unit": "ns/iter",
+            "extra": "iterations: 1947660405\ncpu: 0.3644545235800489 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_Build",
+            "value": 0.3525856408380774,
+            "unit": "ns/iter",
+            "extra": "iterations: 1988922678\ncpu: 0.3525288467750078 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular64_Build",
+            "value": 0.351859428574536,
+            "unit": "ns/iter",
+            "extra": "iterations: 1989099044\ncpu: 0.3517887211854695 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular128_Build",
+            "value": 0.35285623886573875,
+            "unit": "ns/iter",
+            "extra": "iterations: 1987907688\ncpu: 0.3528396893045269 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Real_SumOfComponents",
+            "value": 600.4044475879306,
+            "unit": "ns/iter",
+            "extra": "iterations: 1189049\ncpu: 600.3230674261529 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Real_SumOfComponents",
+            "value": 121281.58362675317,
+            "unit": "ns/iter",
+            "extra": "iterations: 5680\ncpu: 121272.77130281688 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Real_SumOfComponents",
+            "value": 516775.7738731686,
+            "unit": "ns/iter",
+            "extra": "iterations: 1309\ncpu: 516695.8357524828 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Vector_Components",
+            "value": 958.9750271234192,
+            "unit": "ns/iter",
+            "extra": "iterations: 726308\ncpu: 958.8479116297771 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Vector_Components",
+            "value": 206389.62572928882,
+            "unit": "ns/iter",
+            "extra": "iterations: 3428\ncpu: 206360.2873395564 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Vector_Components",
+            "value": 878092.6495619445,
+            "unit": "ns/iter",
+            "extra": "iterations: 799\ncpu: 877958.2703379232 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_NoCoefficient_ConstantSource",
+            "value": 176328.49999999788,
+            "unit": "ns/iter",
+            "extra": "iterations: 4016\ncpu: 176300.93152390447 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_ConstantCoefficient_ConstantSource",
+            "value": 171744.58239333658,
+            "unit": "ns/iter",
+            "extra": "iterations: 4078\ncpu: 171712.36243256493 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_Square",
+            "value": 15991.544503687059,
+            "unit": "ns/iter",
+            "extra": "iterations: 44075\ncpu: 15989.400726035165 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_UniformTriangular64",
+            "value": 7448225.5368420025,
+            "unit": "ns/iter",
+            "extra": "iterations: 95\ncpu: 7446922.6947368495 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_16x16",
+            "value": 144993.58973822114,
+            "unit": "ns/iter",
+            "extra": "iterations: 4775\ncpu: 144983.17486910993 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_64x64",
+            "value": 2687422.3625954012,
+            "unit": "ns/iter",
+            "extra": "iterations: 262\ncpu: 2687314.2404580205 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_128x128",
+            "value": 14088542.686275052,
+            "unit": "ns/iter",
+            "extra": "iterations: 51\ncpu: 14087052.058823477 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_256x256",
+            "value": 104772341.14285596,
+            "unit": "ns/iter",
+            "extra": "iterations: 7\ncpu: 104759480.42857145 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_512x512",
+            "value": 421945546.5000124,
+            "unit": "ns/iter",
+            "extra": "iterations: 2\ncpu: 421906904.00000006 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Cold_AllPairs",
+            "value": 1278025.781250345,
+            "unit": "ns/iter",
+            "extra": "iterations: 544\ncpu: 1277790.1029412413 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Warm_AllPairs",
+            "value": 18.290804526513856,
+            "unit": "ns/iter",
+            "extra": "iterations: 36943046\ncpu: 18.286423323079458 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Cold_Compute_0_0",
+            "value": 1294111.324123896,
+            "unit": "ns/iter",
+            "extra": "iterations: 543\ncpu: 1293894.9244935508 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Cold_Compute_0_1",
+            "value": 983435.4164279852,
+            "unit": "ns/iter",
+            "extra": "iterations: 706\ncpu: 983357.386685464 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Cold_Compute_1_0",
+            "value": 468335.50995974784,
+            "unit": "ns/iter",
+            "extra": "iterations: 1506\ncpu: 468134.2071713315 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Cold_Compute_1_1",
+            "value": 983556.3252500767,
+            "unit": "ns/iter",
+            "extra": "iterations: 701\ncpu: 983492.8088444752 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Warm_Compute_0_0",
+            "value": 4.22072099947375,
+            "unit": "ns/iter",
+            "extra": "iterations: 165844809\ncpu: 4.2201693210669 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Warm_Compute_0_1",
+            "value": 4.218575641488319,
+            "unit": "ns/iter",
+            "extra": "iterations: 165756892\ncpu: 4.21809677150559 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Warm_Compute_1_0",
+            "value": 2.4601203639328615,
+            "unit": "ns/iter",
+            "extra": "iterations: 284271037\ncpu: 2.4598124219035324 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Warm_Compute_1_1",
+            "value": 4.230283723991119,
+            "unit": "ns/iter",
+            "extra": "iterations: 165644681\ncpu: 4.229849994398553 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_AllPairs",
+            "value": 9094335.038459653,
+            "unit": "ns/iter",
+            "extra": "iterations: 78\ncpu: 9093059.692308003 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_AllPairs",
+            "value": 44.671675270221236,
+            "unit": "ns/iter",
+            "extra": "iterations: 15677823\ncpu: 44.66898669541022 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Compute_2_1",
+            "value": 5562207.119045604,
+            "unit": "ns/iter",
+            "extra": "iterations: 126\ncpu: 5561882.753968442 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Compute_1_2",
+            "value": 6237962.72321288,
+            "unit": "ns/iter",
+            "extra": "iterations: 112\ncpu: 6237553.276785323 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Compute_2_2",
+            "value": 2300532.429507123,
+            "unit": "ns/iter",
+            "extra": "iterations: 305\ncpu: 2300375.291803193 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Compute_1_1",
+            "value": 7744285.566664959,
+            "unit": "ns/iter",
+            "extra": "iterations: 90\ncpu: 7742803.8333335295 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Compute_2_1",
+            "value": 5.112029170000483,
+            "unit": "ns/iter",
+            "extra": "iterations: 100000000\ncpu: 5.111422210000001 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Compute_1_2",
+            "value": 4.924847122398042,
+            "unit": "ns/iter",
+            "extra": "iterations: 140514207\ncpu: 4.924555899176799 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Compute_2_2",
+            "value": 4.222710833112332,
+            "unit": "ns/iter",
+            "extra": "iterations: 165679893\ncpu: 4.2222615571100155 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Compute_1_1",
+            "value": 5.678799679814361,
+            "unit": "ns/iter",
+            "extra": "iterations: 124381579\ncpu: 5.678314181877364 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Build_1",
+            "value": 4039589.6878642114,
+            "unit": "ns/iter",
+            "extra": "iterations: 173\ncpu: 4039346.8034681166 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Build_1",
+            "value": 1381048.5425753116,
+            "unit": "ns/iter",
+            "extra": "iterations: 505\ncpu: 1381138.653465344 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Transpose_1_2",
+            "value": 2445409.7972016935,
+            "unit": "ns/iter",
+            "extra": "iterations: 286\ncpu: 2445053.6083917907 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Transpose_1_2",
+            "value": 568824.5224257307,
+            "unit": "ns/iter",
+            "extra": "iterations: 1204\ncpu: 569090.3272425587 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Intersection_2_2_via_0",
+            "value": 2106994.5525520137,
+            "unit": "ns/iter",
+            "extra": "iterations: 333\ncpu: 2106562.570570627 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Intersection_2_2_via_0",
+            "value": 1093588.7984382831,
+            "unit": "ns/iter",
+            "extra": "iterations: 640\ncpu: 1093661.540625157 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Intersection_1_1_via_0",
+            "value": 3631140.29166578,
+            "unit": "ns/iter",
+            "extra": "iterations: 192\ncpu: 3630580.0156250694 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Intersection_1_1_via_0",
+            "value": 1568731.2511399963,
+            "unit": "ns/iter",
+            "extra": "iterations: 438\ncpu: 1568616.0296802663 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_AllPairs",
+            "value": 5621563.319997677,
+            "unit": "ns/iter",
+            "extra": "iterations: 125\ncpu: 5621078.216000001 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_AllPairs",
+            "value": 41.87218267696071,
+            "unit": "ns/iter",
+            "extra": "iterations: 15656884\ncpu: 41.86714112463245 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Compute_2_1",
+            "value": 3296868.7417837186,
+            "unit": "ns/iter",
+            "extra": "iterations: 213\ncpu: 3296582.854460306 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Compute_1_2",
+            "value": 3733590.9786096714,
+            "unit": "ns/iter",
+            "extra": "iterations: 187\ncpu: 3733282.5080215996 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Compute_2_2",
+            "value": 1301416.4915898405,
+            "unit": "ns/iter",
+            "extra": "iterations: 535\ncpu: 1301362.3252337845 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Compute_1_1",
+            "value": 4604452.230261221,
+            "unit": "ns/iter",
+            "extra": "iterations: 152\ncpu: 4604034.611841749 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Compute_2_1",
+            "value": 4.932034236776167,
+            "unit": "ns/iter",
+            "extra": "iterations: 142084640\ncpu: 4.93122128472162 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Compute_1_2",
+            "value": 4.926942099523674,
+            "unit": "ns/iter",
+            "extra": "iterations: 142009419\ncpu: 4.926731233228994 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Compute_2_2",
+            "value": 4.222194373788285,
+            "unit": "ns/iter",
+            "extra": "iterations: 165965845\ncpu: 4.221608180888135 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Compute_1_1",
+            "value": 5.6275684178456045,
+            "unit": "ns/iter",
+            "extra": "iterations: 124482617\ncpu: 5.627235937689189 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Build_1",
+            "value": 2469187.90459104,
+            "unit": "ns/iter",
+            "extra": "iterations: 283\ncpu: 2469021.621907813 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Build_1",
+            "value": 811606.5512820008,
+            "unit": "ns/iter",
+            "extra": "iterations: 858\ncpu: 811714.7820512676 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Transpose_1_2",
+            "value": 1550892.3237890566,
+            "unit": "ns/iter",
+            "extra": "iterations: 454\ncpu: 1550528.039647456 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Transpose_1_2",
+            "value": 364513.75889154495,
+            "unit": "ns/iter",
+            "extra": "iterations: 1912\ncpu: 364681.37029275147 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Intersection_2_2_via_0",
+            "value": 1139755.6931817895,
+            "unit": "ns/iter",
+            "extra": "iterations: 616\ncpu: 1139481.2045453861 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Intersection_2_2_via_0",
+            "value": 479820.76991682156,
+            "unit": "ns/iter",
+            "extra": "iterations: 1456\ncpu: 480022.16208823473 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Intersection_1_1_via_0",
+            "value": 2191331.0977909286,
+            "unit": "ns/iter",
+            "extra": "iterations: 317\ncpu: 2191027.309147622 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Intersection_1_1_via_0",
+            "value": 851199.702898829,
+            "unit": "ns/iter",
+            "extra": "iterations: 828\ncpu: 851283.3925122905 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_AllPairs",
+            "value": 80537174.11111291,
+            "unit": "ns/iter",
+            "extra": "iterations: 9\ncpu: 80524455.33333082 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_AllPairs",
+            "value": 79.1497818525443,
+            "unit": "ns/iter",
+            "extra": "iterations: 8925614\ncpu: 79.12926326412872 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Compute_3_1",
+            "value": 22761728.68750237,
+            "unit": "ns/iter",
+            "extra": "iterations: 32\ncpu: 22759928.53124853 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Compute_3_2",
+            "value": 26033978.851840116,
+            "unit": "ns/iter",
+            "extra": "iterations: 27\ncpu: 26030427.14814992 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Compute_2_3",
+            "value": 28609163.87999396,
+            "unit": "ns/iter",
+            "extra": "iterations: 25\ncpu: 28606083.679999873 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Compute_3_3",
+            "value": 12010439.03447812,
+            "unit": "ns/iter",
+            "extra": "iterations: 58\ncpu: 12009089.689653922 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Compute_3_1",
+            "value": 4.92563290789478,
+            "unit": "ns/iter",
+            "extra": "iterations: 142046498\ncpu: 4.925084425523775 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Compute_3_2",
+            "value": 4.940172017187755,
+            "unit": "ns/iter",
+            "extra": "iterations: 142217765\ncpu: 4.939311744914572 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Compute_2_3",
+            "value": 4.9251267691482985,
+            "unit": "ns/iter",
+            "extra": "iterations: 142091157\ncpu: 4.924753628404901 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Compute_3_3",
+            "value": 4.223931166149857,
+            "unit": "ns/iter",
+            "extra": "iterations: 165917088\ncpu: 4.2231226237528245 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Build_1",
+            "value": 12466052.64285908,
+            "unit": "ns/iter",
+            "extra": "iterations: 56\ncpu: 12463975.000000056 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Build_1",
+            "value": 7306237.260412611,
+            "unit": "ns/iter",
+            "extra": "iterations: 96\ncpu: 7305600.885416652 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Build_2",
+            "value": 15443537.666660884,
+            "unit": "ns/iter",
+            "extra": "iterations: 45\ncpu: 15441044.977775203 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Build_2",
+            "value": 5823875.3884264855,
+            "unit": "ns/iter",
+            "extra": "iterations: 121\ncpu: 5823460.247933851 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Transpose_2_3",
+            "value": 8364106.59523914,
+            "unit": "ns/iter",
+            "extra": "iterations: 84\ncpu: 8362661.988094206 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Transpose_2_3",
+            "value": 1946057.0027860138,
+            "unit": "ns/iter",
+            "extra": "iterations: 359\ncpu: 1946192.0111426862 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Intersection_3_3_via_0",
+            "value": 10420536.941178765,
+            "unit": "ns/iter",
+            "extra": "iterations: 68\ncpu: 10419394.191176847 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Intersection_3_3_via_0",
+            "value": 7162024.589473205,
+            "unit": "ns/iter",
+            "extra": "iterations: 95\ncpu: 7160804.463158181 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Intersection_3_3_via_2",
+            "value": 8498190.963412598,
+            "unit": "ns/iter",
+            "extra": "iterations: 82\ncpu: 8497067.158537403 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Intersection_3_3_via_2",
+            "value": 1738863.9104456217,
+            "unit": "ns/iter",
+            "extra": "iterations: 402\ncpu: 1738955.7636812993 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_AllPairs",
+            "value": 17792399.897434037,
+            "unit": "ns/iter",
+            "extra": "iterations: 39\ncpu: 17790983.102564987 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_AllPairs",
+            "value": 81.82994859804835,
+            "unit": "ns/iter",
+            "extra": "iterations: 8610373\ncpu: 81.82198471541145 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Compute_3_1",
+            "value": 5257167.519080681,
+            "unit": "ns/iter",
+            "extra": "iterations: 131\ncpu: 5256982.213740198 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Compute_3_2",
+            "value": 4555177.915032498,
+            "unit": "ns/iter",
+            "extra": "iterations: 153\ncpu: 4554716.620915182 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Compute_2_3",
+            "value": 5147275.66666756,
+            "unit": "ns/iter",
+            "extra": "iterations: 135\ncpu: 5146628.466666959 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Compute_3_3",
+            "value": 1521593.5781580086,
+            "unit": "ns/iter",
+            "extra": "iterations: 467\ncpu: 1521586.2912203334 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Compute_3_1",
+            "value": 4.924250049397334,
+            "unit": "ns/iter",
+            "extra": "iterations: 142178931\ncpu: 4.923672882306278 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Compute_3_2",
+            "value": 4.924335072895632,
+            "unit": "ns/iter",
+            "extra": "iterations: 141904465\ncpu: 4.923617674750415 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Compute_2_3",
+            "value": 4.925744211186693,
+            "unit": "ns/iter",
+            "extra": "iterations: 142112853\ncpu: 4.92546977436305 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Compute_3_3",
+            "value": 4.23899285884033,
+            "unit": "ns/iter",
+            "extra": "iterations: 165831888\ncpu: 4.23839887778398 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Build_1",
+            "value": 4223610.281438802,
+            "unit": "ns/iter",
+            "extra": "iterations: 167\ncpu: 4223024.131736103 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Build_1",
+            "value": 2264206.515822363,
+            "unit": "ns/iter",
+            "extra": "iterations: 316\ncpu: 2264547.389239552 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Build_2",
+            "value": 3611218.117946289,
+            "unit": "ns/iter",
+            "extra": "iterations: 195\ncpu: 3610897.5230764626 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Build_2",
+            "value": 1356026.4031012855,
+            "unit": "ns/iter",
+            "extra": "iterations: 516\ncpu: 1356190.085271849 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Transpose_2_3",
+            "value": 1834649.7075719952,
+            "unit": "ns/iter",
+            "extra": "iterations: 383\ncpu: 1834393.2375990355 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Transpose_2_3",
+            "value": 484717.67499948095,
+            "unit": "ns/iter",
+            "extra": "iterations: 1440\ncpu: 484974.25347243785 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Intersection_3_3_via_0",
+            "value": 1301042.8895132917,
+            "unit": "ns/iter",
+            "extra": "iterations: 534\ncpu: 1300865.3857673975 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Intersection_3_3_via_0",
+            "value": 704056.5116749072,
+            "unit": "ns/iter",
+            "extra": "iterations: 985\ncpu: 704329.842639494 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Intersection_3_3_via_2",
+            "value": 1909811.0054365234,
+            "unit": "ns/iter",
+            "extra": "iterations: 368\ncpu: 1909480.4375001374 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Intersection_3_3_via_2",
+            "value": 406902.1889212369,
+            "unit": "ns/iter",
+            "extra": "iterations: 1715\ncpu: 407043.77726002433 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_AllPairs",
+            "value": 30396994.782600593,
+            "unit": "ns/iter",
+            "extra": "iterations: 23\ncpu: 30394623.782606922 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_AllPairs",
+            "value": 79.00344351934153,
+            "unit": "ns/iter",
+            "extra": "iterations: 8879288\ncpu: 78.99371312204293 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Compute_3_1",
+            "value": 8143251.5930233365,
+            "unit": "ns/iter",
+            "extra": "iterations: 86\ncpu: 8142043.627904892 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Compute_3_2",
+            "value": 8603945.888887385,
+            "unit": "ns/iter",
+            "extra": "iterations: 81\ncpu: 8603052.370370945 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Compute_2_3",
+            "value": 9594627.13698663,
+            "unit": "ns/iter",
+            "extra": "iterations: 73\ncpu: 9594179.05479486 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Compute_3_3",
+            "value": 2804803.349400265,
+            "unit": "ns/iter",
+            "extra": "iterations: 249\ncpu: 2804464.502007768 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Compute_3_1",
+            "value": 4.922657155169852,
+            "unit": "ns/iter",
+            "extra": "iterations: 142053774\ncpu: 4.922161005029014 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Compute_3_2",
+            "value": 4.927687201598268,
+            "unit": "ns/iter",
+            "extra": "iterations: 142002567\ncpu: 4.9274398609993115 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Compute_2_3",
+            "value": 4.925706858753862,
+            "unit": "ns/iter",
+            "extra": "iterations: 142042345\ncpu: 4.925177931975227 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Compute_3_3",
+            "value": 4.226683881233043,
+            "unit": "ns/iter",
+            "extra": "iterations: 165719348\ncpu: 4.226166597034831 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Build_1",
+            "value": 6202275.808690817,
+            "unit": "ns/iter",
+            "extra": "iterations: 115\ncpu: 6201671.408696603 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Build_1",
+            "value": 3643005.1250005607,
+            "unit": "ns/iter",
+            "extra": "iterations: 192\ncpu: 3642949.5104172523 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Build_2",
+            "value": 6729195.038461674,
+            "unit": "ns/iter",
+            "extra": "iterations: 104\ncpu: 6728704.269232657 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Build_2",
+            "value": 2325614.697672698,
+            "unit": "ns/iter",
+            "extra": "iterations: 301\ncpu: 2325699.219269714 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Transpose_2_3",
+            "value": 3251653.3953496967,
+            "unit": "ns/iter",
+            "extra": "iterations: 215\ncpu: 3248377.4372095936 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Transpose_2_3",
+            "value": 809878.5700934528,
+            "unit": "ns/iter",
+            "extra": "iterations: 856\ncpu: 810102.1179905229 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Intersection_3_3_via_0",
+            "value": 2609366.2267651134,
+            "unit": "ns/iter",
+            "extra": "iterations: 269\ncpu: 2608903.223047527 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Intersection_3_3_via_0",
+            "value": 1617110.407406999,
+            "unit": "ns/iter",
+            "extra": "iterations: 432\ncpu: 1617199.5717598053 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Intersection_3_3_via_2",
+            "value": 3416609.21256352,
+            "unit": "ns/iter",
+            "extra": "iterations: 207\ncpu: 3415790.1884062113 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Intersection_3_3_via_2",
+            "value": 734672.1207784261,
+            "unit": "ns/iter",
+            "extra": "iterations: 977\ncpu: 734790.3705216267 ns\nthreads: 1"
           }
         ]
       }
