@@ -186,3 +186,31 @@ gtest_discover_tests(RodinManufacturedP1HyperElasticity
   PROPERTIES
     LABELS manufactured
 )
+
+add_executable(RodinManufacturedDGPoisson DGPoisson.cpp)
+target_link_libraries(RodinManufacturedDGPoisson
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solver
+)
+gtest_discover_tests(RodinManufacturedDGPoisson
+  PROPERTIES
+    LABELS manufactured
+)
+
+add_executable(RodinManufacturedDGAdvection DGAdvection.cpp)
+target_link_libraries(RodinManufacturedDGAdvection
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solver
+)
+gtest_discover_tests(RodinManufacturedDGAdvection
+  PROPERTIES
+    LABELS manufactured
+)
