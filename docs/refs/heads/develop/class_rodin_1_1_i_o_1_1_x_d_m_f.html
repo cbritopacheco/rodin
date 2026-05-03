@@ -142,6 +142,11 @@
             </dt>
             <dd>Mesh export policy.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">enum class <a href="#aae6d2f6ec4b272bc2f385d416cfee44c" class="m-doc">AttributePolicy</a> { </span><span class="m-doc-wrap"><a href="#aae6d2f6ec4b272bc2f385d416cfee44ca84a8921b25f505d0d2077aeb5db4bc16" class="m-doc">Static</a>,
+              <a href="#aae6d2f6ec4b272bc2f385d416cfee44cab1f023eff9a6b5308d6024e4c6b3d475" class="m-doc">Transient</a> }</span>
+            </dt>
+            <dd>Attribute export policy.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">enum class <a href="#a42b56788639363ade366287d21b793bc" class="m-doc">Center</a> { </span><span class="m-doc-wrap"><a href="#a42b56788639363ade366287d21b793bca6c3a6944a808a7c0bbb6788dbec54a9f" class="m-doc">Node</a>,
               <a href="#a42b56788639363ade366287d21b793bca1a66ab62bfc858b7bcf9e01aa9cd1841" class="m-doc">Cell</a> }</span>
             </dt>
@@ -229,15 +234,17 @@
             <dd>Sets export options on the default grid.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class GridFunctionType&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9edfb0402b91b96b346d4c1d7d2d9e34" class="m-doc">add</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
-              <a href="#a42b56788639363ade366287d21b793bc" class="m-doc">Center</a> center = <a href="#a42b56788639363ade366287d21b793bca6c3a6944a808a7c0bbb6788dbec54a9f" class="m-doc">Center::<wbr />Node</a>) -&gt; <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#adf46dfc687fe3dd3e9f2663537af4475" class="m-doc">add</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
+              <a href="#a42b56788639363ade366287d21b793bc" class="m-doc">Center</a> center = <a href="#a42b56788639363ade366287d21b793bca6c3a6944a808a7c0bbb6788dbec54a9f" class="m-doc">Center::<wbr />Node</a>,
+              <a href="#aae6d2f6ec4b272bc2f385d416cfee44c" class="m-doc">AttributePolicy</a> policy = <a href="#aae6d2f6ec4b272bc2f385d416cfee44cab1f023eff9a6b5308d6024e4c6b3d475" class="m-doc">AttributePolicy::<wbr />Transient</a>) -&gt; <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp;</span>
             </dt>
             <dd>Adds a named grid function attribute to the default grid.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class GridFunctionType&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad9e2b05da28b6bb18bd5433846ae6415" class="m-doc">add</a>(</span><span class="m-doc-wrap">const std::string&amp; name,
+              <span class="m-doc-wrap-bumper">auto <a href="#a965b1fa5abb3d7360590f27007c60c3d" class="m-doc">add</a>(</span><span class="m-doc-wrap">const std::string&amp; name,
               const GridFunctionType&amp; gf,
-              <a href="#a42b56788639363ade366287d21b793bc" class="m-doc">Center</a> center = <a href="#a42b56788639363ade366287d21b793bca6c3a6944a808a7c0bbb6788dbec54a9f" class="m-doc">Center::<wbr />Node</a>) -&gt; <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp;</span>
+              <a href="#a42b56788639363ade366287d21b793bc" class="m-doc">Center</a> center = <a href="#a42b56788639363ade366287d21b793bca6c3a6944a808a7c0bbb6788dbec54a9f" class="m-doc">Center::<wbr />Node</a>,
+              <a href="#aae6d2f6ec4b272bc2f385d416cfee44c" class="m-doc">AttributePolicy</a> policy = <a href="#aae6d2f6ec4b272bc2f385d416cfee44cab1f023eff9a6b5308d6024e4c6b3d475" class="m-doc">AttributePolicy::<wbr />Transient</a>) -&gt; <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp;</span>
             </dt>
             <dd>Adds a grid function attribute with an explicit name to the default grid.</dd>
             <dt>
@@ -441,6 +448,30 @@
                   <td><a href="#a5852c3f28e31c45bb2a2091948923b00ab1f023eff9a6b5308d6024e4c6b3d475" class="m-doc-self" id="a5852c3f28e31c45bb2a2091948923b00ab1f023eff9a6b5308d6024e4c6b3d475">Transient</a></td>
                   <td>
                   <p>Mesh exported at every snapshot (for moving meshes).</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aae6d2f6ec4b272bc2f385d416cfee44c"><div>
+            <h3>
+              enum class Rodin::<wbr />IO::<wbr />XDMF::<wbr /><a href="#aae6d2f6ec4b272bc2f385d416cfee44c" class="m-doc-self">AttributePolicy</a>
+            </h3>
+            <p>Attribute export policy.</p>
+<p>Static:</p><ul><li>the attribute is exported once (on the first write) and the same <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file is referenced by all later snapshots of the same grid.</li><li>intended for fields that do not change over time.</li></ul><p>Transient:</p><ul><li>the attribute is exported at every snapshot.</li><li>this is the default behavior.</li></ul>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="#aae6d2f6ec4b272bc2f385d416cfee44ca84a8921b25f505d0d2077aeb5db4bc16" class="m-doc-self" id="aae6d2f6ec4b272bc2f385d416cfee44ca84a8921b25f505d0d2077aeb5db4bc16">Static</a></td>
+                  <td>
+                  <p>Attribute exported once, reused by all snapshots of the grid.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#aae6d2f6ec4b272bc2f385d416cfee44cab1f023eff9a6b5308d6024e4c6b3d475" class="m-doc-self" id="aae6d2f6ec4b272bc2f385d416cfee44cab1f023eff9a6b5308d6024e4c6b3d475">Transient</a></td>
+                  <td>
+                  <p>Attribute exported at every snapshot (default).</p>
                   </td>
                 </tr>
               </tbody>
@@ -739,13 +770,14 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a9edfb0402b91b96b346d4c1d7d2d9e34"><div>
+          <section class="m-doc-details" id="adf46dfc687fe3dd3e9f2663537af4475"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class GridFunctionType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp; Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9edfb0402b91b96b346d4c1d7d2d9e34" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
-              <a href="#a42b56788639363ade366287d21b793bc" class="m-doc">Center</a> center = <a href="#a42b56788639363ade366287d21b793bca6c3a6944a808a7c0bbb6788dbec54a9f" class="m-doc">Center::<wbr />Node</a>)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp; Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adf46dfc687fe3dd3e9f2663537af4475" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
+              <a href="#a42b56788639363ade366287d21b793bc" class="m-doc">Center</a> center = <a href="#a42b56788639363ade366287d21b793bca6c3a6944a808a7c0bbb6788dbec54a9f" class="m-doc">Center::<wbr />Node</a>,
+              <a href="#aae6d2f6ec4b272bc2f385d416cfee44c" class="m-doc">AttributePolicy</a> policy = <a href="#aae6d2f6ec4b272bc2f385d416cfee44cab1f023eff9a6b5308d6024e4c6b3d475" class="m-doc">AttributePolicy::<wbr />Transient</a>)</span></span>
             </h3>
             <p>Adds a named grid function attribute to the default grid.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -770,6 +802,10 @@
                   <td>center&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Data centering (Node or Cell).</td>
                 </tr>
+                <tr>
+                  <td>policy&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Export policy: Static (written once) or Transient (written at every snapshot).</td>
+                </tr>
               </tbody>
               <tfoot>
                 <tr>
@@ -779,14 +815,15 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="ad9e2b05da28b6bb18bd5433846ae6415"><div>
+          <section class="m-doc-details" id="a965b1fa5abb3d7360590f27007c60c3d"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class GridFunctionType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp; Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad9e2b05da28b6bb18bd5433846ae6415" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const std::string&amp; name,
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&amp; Rodin::<wbr />IO::<wbr />XDMF::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a965b1fa5abb3d7360590f27007c60c3d" class="m-doc-self">add</a>(</span><span class="m-doc-wrap">const std::string&amp; name,
               const GridFunctionType&amp; gf,
-              <a href="#a42b56788639363ade366287d21b793bc" class="m-doc">Center</a> center = <a href="#a42b56788639363ade366287d21b793bca6c3a6944a808a7c0bbb6788dbec54a9f" class="m-doc">Center::<wbr />Node</a>)</span></span>
+              <a href="#a42b56788639363ade366287d21b793bc" class="m-doc">Center</a> center = <a href="#a42b56788639363ade366287d21b793bca6c3a6944a808a7c0bbb6788dbec54a9f" class="m-doc">Center::<wbr />Node</a>,
+              <a href="#aae6d2f6ec4b272bc2f385d416cfee44c" class="m-doc">AttributePolicy</a> policy = <a href="#aae6d2f6ec4b272bc2f385d416cfee44cab1f023eff9a6b5308d6024e4c6b3d475" class="m-doc">AttributePolicy::<wbr />Transient</a>)</span></span>
             </h3>
             <p>Adds a grid function attribute with an explicit name to the default grid.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -814,6 +851,10 @@
                 <tr>
                   <td>center&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Data centering (Node or Cell).</td>
+                </tr>
+                <tr>
+                  <td>policy&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Export policy: Static (written once) or Transient (written at every snapshot).</td>
                 </tr>
               </tbody>
               <tfoot>
