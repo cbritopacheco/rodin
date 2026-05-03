@@ -59,8 +59,8 @@ namespace Rodin::Geometry
                                     QualityMetric q = QualityMetric{})
         : Parent(ls),
           m_sign_tolerance(1e-12),
-          m_snap_tolerance(1e-12),
-          m_min_quality(1e-10L),
+          m_snap_tolerance(1e-3),
+          m_min_quality(1e-4L),
           m_quality_metric(q ? std::move(q) : defaultQualityMetric())
       {}
 
@@ -72,7 +72,7 @@ namespace Rodin::Geometry
 
       LevelSetDiscretizerTetrahedra& setSnapTolerance(Real tol)
       {
-        m_snap_tolerance = tol;
+        m_snap_tolerance = std::max(Real(0), tol);
         return *this;
       }
 
@@ -254,8 +254,21 @@ namespace Rodin::Geometry
           if (finite(ls[i]))
             globalPhiScale = std::max(globalPhiScale, std::abs(ls[i]));
 
-        const Real eps_sign = std::max(eps_sign_user, rel0_global * globalPhiScale);
-        const Real eps_snap = std::max(eps_snap_user, eps_sign);
+        // A conforming exact cut can create arbitrarily bad tetrahedra when the
+        // zero set passes very close to existing mesh entities.  Use a
+        // quality-derived lower bound on the interpolation snap distance so
+        // these tiny features are collapsed before tetrahedralization.
+        const Real eps_snap_param = std::min(
+          Real(0.25),
+          std::max(
+            eps_snap_user,
+            static_cast<Real>(std::sqrt(std::max<long double>(
+              this->getMinimumQuality(), 0.0L)))));
+        const Real eps_sign = std::max({
+          eps_sign_user,
+          rel0_global * globalPhiScale,
+          eps_snap_param * globalPhiScale
+        });
 
         // --------------------------------------------------------------------
         // Global sign classification
@@ -414,14 +427,6 @@ namespace Rodin::Geometry
         auto edgeLen = [&](Index a, Index b) -> long double
         {
           return (long double) (outVerts[b] - outVerts[a]).norm();
-        };
-
-        auto triangleArea = [&](Index a, Index b, Index c) -> long double
-        {
-          const auto A = outVerts[a];
-          const auto B = outVerts[b];
-          const auto C = outVerts[c];
-          return (long double) ((B - A).cross(C - A)).norm() / 2.0L;
         };
 
         auto interfaceStats = [&](const std::vector<Tri>& tris) -> InterfaceStats
@@ -618,7 +623,9 @@ namespace Rodin::Geometry
           }
 
           const Real denom = fa - fb;
-          if (!finite(denom) || std::abs(denom) <= eps_snap)
+          const Real edgePhiScale = std::max(std::abs(fa), std::abs(fb));
+          const Real eps_snap_phi = std::max(eps_sign, eps_snap_param * edgePhiScale);
+          if (!finite(denom) || std::abs(denom) <= eps_snap_phi)
           {
             if (std::abs(fa) <= std::abs(fb))
             {
@@ -637,7 +644,7 @@ namespace Rodin::Geometry
           Real t = fa / denom;
           t = std::max(Real(0), std::min(Real(1), t));
 
-          if (t <= eps_snap)
+          if (t <= eps_snap_param)
           {
             ec.kind   = EdgeCut::Kind::EndpointA;
             ec.vertex = a;
@@ -645,7 +652,7 @@ namespace Rodin::Geometry
             continue;
           }
 
-          if (t >= Real(1) - eps_snap)
+          if (t >= Real(1) - eps_snap_param)
           {
             ec.kind   = EdgeCut::Kind::EndpointB;
             ec.vertex = b;
@@ -1001,27 +1008,120 @@ namespace Rodin::Geometry
           std::unordered_set<Index> uniq;
           uniq.reserve(boundaryTris.size() * 2);
 
-          Point c(3);
-          c.setZero();
-
-          size_t cnt = 0;
+          std::vector<Index> vertices;
+          vertices.reserve(boundaryTris.size() * 2);
           for (const auto& tri : boundaryTris)
           {
             for (int k = 0; k < 3; ++k)
             {
               const Index vi = tri[(size_t)k];
               if (uniq.insert(vi).second)
-              {
-                c += outVerts[vi];
-                cnt++;
-              }
+                vertices.push_back(vi);
             }
           }
 
-          if (cnt == 0)
+          if (vertices.empty())
             return;
 
-          c /= Real(cnt);
+          auto averagePoint = [&](const std::vector<Index>& ids)
+          {
+            Point p(3);
+            p.setZero();
+            for (Index vi : ids)
+              p += outVerts[vi];
+            p /= Real(ids.size());
+            return p;
+          };
+
+          Point centroid = averagePoint(vertices);
+
+          std::vector<Point> candidates;
+          candidates.reserve(2 + vertices.size());
+          candidates.push_back(centroid);
+
+          if (vertices.size() > 4)
+          {
+            for (size_t skip = 0; skip < vertices.size(); ++skip)
+            {
+              std::vector<Index> ids;
+              ids.reserve(vertices.size() - 1);
+              for (size_t i = 0; i < vertices.size(); ++i)
+                if (i != skip)
+                  ids.push_back(vertices[i]);
+              candidates.push_back(averagePoint(ids));
+            }
+          }
+
+          for (Index vi : vertices)
+            candidates.push_back(Real(0.75) * centroid + Real(0.25) * outVerts[vi]);
+
+          auto coneScore = [&](const Point& center)
+          {
+            struct Score
+            {
+              long double qmin = -1.0L;
+              long double qavg = -1.0L;
+            };
+
+            auto tetQ = [&](Index a, Index b, Index c) -> long double
+            {
+              const auto& A = center;
+              const auto& B = outVerts[a];
+              const auto& C = outVerts[b];
+              const auto& D = outVerts[c];
+
+              const auto AB = B - A;
+              const auto AC = C - A;
+              const auto AD = D - A;
+
+              const long double vol6 =
+                std::abs((long double) AB.dot(AC.cross(AD)));
+
+              long double hmax2 = 0.0L;
+              auto upd = [&](const auto& X, const auto& Y)
+              {
+                const auto d = Y - X;
+                hmax2 = std::max(hmax2, (long double) d.squaredNorm());
+              };
+
+              upd(A, B); upd(A, C); upd(A, D);
+              upd(B, C); upd(B, D); upd(C, D);
+
+              if (!(hmax2 > 0.0L))
+                return 0.0L;
+
+              const long double hmax = std::sqrt(hmax2);
+              return vol6 / (hmax * hmax * hmax);
+            };
+
+            Score s;
+            s.qmin = std::numeric_limits<long double>::infinity();
+            s.qavg = 0.0L;
+            for (const auto& tri : boundaryTris)
+            {
+              const long double q = tetQ(tri[0], tri[1], tri[2]);
+              if (!(q > 0.0L) || !std::isfinite((double) q))
+                return Score{};
+              s.qmin = std::min(s.qmin, q);
+              s.qavg += q;
+            }
+            s.qavg /= (long double) boundaryTris.size();
+            return s;
+          };
+
+          Point c = centroid;
+          auto best = coneScore(c);
+          for (const auto& candidate : candidates)
+          {
+            const auto score = coneScore(candidate);
+            if (score.qmin > best.qmin ||
+                (score.qmin == best.qmin && score.qavg > best.qavg))
+            {
+              best = score;
+              c = candidate;
+            }
+          }
+
           const Index center = addVertex(c);
 
           for (const auto& tri : boundaryTris)
@@ -1570,6 +1670,7 @@ namespace Rodin::Geometry
         // Output postprocessing: interface marking and attribute transfer
         // --------------------------------------------------------------------
         out.getConnectivity().compute(2, 3);
+        out.getConnectivity().compute(1, 2);
         out.getConnectivity().compute(1, 3);
         const auto& oconn = out.getConnectivity();
 
@@ -1578,7 +1679,7 @@ namespace Rodin::Geometry
 
         auto isFittedZeroV = [&](Index vi) -> bool
         {
-          return (vi < nv) && finite(ls[vi]) && (std::abs(ls[vi]) <= eps_sign_user);
+          return (vi < nv) && finite(ls[vi]) && (std::abs(ls[vi]) <= eps_sign);
         };
 
         for (auto fit = out.getPolytope(2); !fit.end(); ++fit)
@@ -1602,7 +1703,8 @@ namespace Rodin::Geometry
           const bool fittedInterface =
             allOriginal && isFittedZeroV(fv(0)) && isFittedZeroV(fv(1)) && isFittedZeroV(fv(2));
 
-          const bool isInterface = (hasNeg && hasPos) || fittedInterface;
+          const bool isInterface =
+            (hasNeg && hasPos) || (fittedInterface && inc.size() == 2);
           if (isInterface)
           {
             if (ifaceOpt2)
@@ -1637,6 +1739,100 @@ namespace Rodin::Geometry
             out.setAttribute({2, fidx}, *mapped);
         }
 
+        if (ifaceOpt2)
+        {
+          auto outTriArea = [&](Index fidx) -> long double
+          {
+            const auto& fv = out.getConnectivity().getPolytope(2, fidx);
+            const auto A = out.getVertexCoordinates(fv(0));
+            const auto B = out.getVertexCoordinates(fv(1));
+            const auto C = out.getVertexCoordinates(fv(2));
+            return (long double) ((B - A).cross(C - A)).norm() / 2.0L;
+          };
+
+          for (auto fit = out.getPolytope(2); !fit.end(); ++fit)
+          {
+            const auto attr = fit->getAttribute();
+            if (!attr || *attr != *ifaceOpt2)
+              continue;
+
+            const auto& inc = oconn.getIncidence({2, 3}, fit->getIndex());
+            if (inc.size() != 2)
+            {
+              out.setAttribute({2, fit->getIndex()}, Optional<Attribute>{});
+              continue;
+            }
+
+            const auto attr0 = out.getAttribute(3, inc[0]);
+            const auto attr1 = out.getAttribute(3, inc[1]);
+            if (!attr0 || !attr1 || *attr0 == *attr1)
+              out.setAttribute({2, fit->getIndex()}, Optional<Attribute>{});
+          }
+
+          bool changed = true;
+          while (changed)
+          {
+            changed = false;
+
+            std::map<EdgeKey, std::vector<Index>> attributedFacesByEdge;
+            for (auto fit = out.getPolytope(2); !fit.end(); ++fit)
+            {
+              if (fit->getGeometry() != Polytope::Type::Triangle)
+                continue;
+
+              const auto attr = fit->getAttribute();
+              if (!attr)
+                continue;
+
+              const auto& fv = fit->getVertices();
+              attributedFacesByEdge[makeEdgeKey(fv(0), fv(1))].push_back(fit->getIndex());
+              attributedFacesByEdge[makeEdgeKey(fv(0), fv(2))].push_back(fit->getIndex());
+              attributedFacesByEdge[makeEdgeKey(fv(1), fv(2))].push_back(fit->getIndex());
+            }
+
+            std::vector<Index> demoteFaces;
+            for (const auto& [edge, faces] : attributedFacesByEdge)
+            {
+              (void) edge;
+              if (faces.size() <= 2)
+                continue;
+
+              std::vector<Index> interfaceFaces;
+              for (Index fidx : faces)
+              {
+                const auto attr = out.getAttribute(2, fidx);
+                if (attr && *attr == *ifaceOpt2)
+                  interfaceFaces.push_back(fidx);
+              }
+
+              if (interfaceFaces.empty())
+                continue;
+
+              std::sort(
+                interfaceFaces.begin(), interfaceFaces.end(),
+                [&](Index lhs, Index rhs)
+                {
+                  return outTriArea(lhs) < outTriArea(rhs);
+                });
+
+              const size_t demoteCount =
+                std::min(interfaceFaces.size(), faces.size() - size_t(2));
+              demoteFaces.insert(
+                demoteFaces.end(), interfaceFaces.begin(), interfaceFaces.begin() + demoteCount);
+            }
+
+            std::sort(demoteFaces.begin(), demoteFaces.end());
+            demoteFaces.erase(
+              std::unique(demoteFaces.begin(), demoteFaces.end()), demoteFaces.end());
+
+            for (Index fidx : demoteFaces)
+            {
+              out.setAttribute({2, fidx}, Optional<Attribute>{});
+              changed = true;
+            }
+          }
+        }
+
         for (auto eit = out.getPolytope(1); !eit.end(); ++eit)
         {
           const Index eidx = eit->getIndex();
@@ -1655,11 +1851,28 @@ namespace Rodin::Geometry
           const bool fittedInterface =
             allOriginal && isFittedZeroV(ev(0)) && isFittedZeroV(ev(1));
 
+          auto touchesInterfaceFace = [&]() -> bool
+          {
+            if (!ifaceOpt2)
+              return false;
+
+            const auto& incFaces = oconn.getIncidence({1, 2}, eidx);
+            for (Index fidx : incFaces)
+            {
+              const auto attr = out.getAttribute(2, fidx);
+              if (attr && *attr == *ifaceOpt2)
+                return true;
+            }
+            return false;
+          };
+
           const bool isInterface = (hasNeg && hasPos) || fittedInterface;
           if (isInterface)
           {
             if (ifaceOpt1)
               out.setAttribute({1, eidx}, *ifaceOpt1);
+            else if (touchesInterfaceFace())
+              out.setAttribute({1, eidx}, *ifaceOpt2);
             continue;
           }
 
@@ -1690,10 +1903,28 @@ namespace Rodin::Geometry
             out.setAttribute({1, eidx}, *mapped);
         }
 
+        if constexpr (HasSetRidge<MeshType>::value)
+        {
+          for (auto eit = out.getPolytope(1); !eit.end(); ++eit)
+          {
+            if (eit->getAttribute())
+              out.setRidge(eit->getIndex());
+          }
+        }
+
         return out;
       }
 
     private:
+      template <class T, class = void>
+      struct HasSetRidge : std::false_type {};
+
+      template <class T>
+      struct HasSetRidge<
+        T,
+        std::void_t<decltype(std::declval<T&>().setRidge(std::declval<Index>()))>>
+        : std::true_type {};
+
       static QualityMetric defaultQualityMetric()
       {
         return [](const PointCloud& verts, const Tet& t) -> long double

@@ -21,12 +21,12 @@
  *  - transient XDMF output for visualization.
  *
  * At each optimization iteration the program:
- *  1. optimizes the current mesh with MMG,
+ *  1. optionally conditions the initial mesh with MMG,
  *  2. trims the exterior subdomain,
  *  3. solves the elasticity state equation,
  *  4. computes a regularized shape gradient,
  *  5. advects the level set function,
- *  6. reconstructs the domain using MMG,
+ *  6. reconstructs the domain using a direct tetrahedral level-set split,
  *  7. evaluates the objective,
  *  8. writes XDMF snapshots for visualization.
  *
@@ -74,7 +74,7 @@
  * During the optimization the following files are produced:
  *
  * - @c Omega0.mesh            : initial mesh
- * - @c Optimized.mesh         : mesh after MMG optimization
+ * - @c Optimized.mesh         : current mesh before trimming
  * - @c Trimmed.mesh           : mesh restricted to the current domain
  * - @c State.mesh             : mesh used for the elasticity solve
  * - @c State.gf               : displacement field
@@ -99,9 +99,8 @@
  * @section notes Notes
  *
  * - PETSc provides the linear algebra backend.
- * - MMG is used for mesh optimization and level-set discretization.
- * - If remeshing fails at some iteration, the algorithm reduces @c hmax
- *   and retries with a finer mesh.
+ * - The level set is discretized directly into tetrahedra. Remeshed domains are
+ *   not post-optimized by MMG.
  * - The XDMF output is intended for temporal visualization of the optimization.
  */
 
@@ -196,28 +195,34 @@ int main(int argc, char** argv)
   while (i < maxIt)
   {
     Alert::Info() << "----- Iteration: " << i << Alert::Raise;
-    Alert::Info() << "   | Optimizing the domain..." << Alert::Raise;
-
-    try
+    if (i == 0)
     {
-      MMG::Optimizer().setHMax(hmax)
-                      .setHMin(hmin)
-                      .setGradation(hgrad)
-                      .setHausdorff(hausd)
-                      .setAngleDetection(false)
-                      .optimize(th);
+      Alert::Info() << "   | Conditioning the initial mesh..." << Alert::Raise;
 
-      hmax = hmax0;
-      hmin = hminFactor * hmax;
+      try
+      {
+        MMG::Optimizer().setHMax(hmax)
+                        .setHMin(hmin)
+                        .setGradation(hgrad)
+                        .setHausdorff(hausd)
+                        .setAngleDetection(false)
+                        .optimize(th);
+
+        hmax = hmax0;
+        hmin = hminFactor * hmax;
+      }
+      catch (const Alert::Exception& e)
+      {
+        hmax /= 2;
+        hmin = hminFactor * hmax;
+        Alert::Warning() << "Initial mesh conditioning failed. Reducing hmax to "
+                         << hmax << " and retrying." << Alert::Raise;
+        continue;
+      }
     }
-    catch (const Alert::Exception& e)
+    else
     {
-      hmax /= 2;
-      hmin = hminFactor * hmax;
-      Alert::Warning() << "Mesh optimization failed at iteration " << i
-                       << ". Reducing hmax to " << hmax
-                       << " and retrying." << Alert::Raise;
-      continue;
+      Alert::Info() << "   | Using the current tetrahedral mesh without MMG optimization." << Alert::Raise;
     }
 
     th.save("Optimized.mesh", IO::FileFormat::MEDIT);
@@ -339,8 +344,6 @@ int main(int argc, char** argv)
     {
       LevelSetDiscretizerTetrahedra lsd(advect.getSolution());
       lsd
-        .setSignTolerance(1e-12)
-        .setSnapTolerance(1e-12)
         .split(3, Interior, {Interior, Exterior})
         .split(3, Exterior, {Interior, Exterior})
         .preserve(2, GammaD)

@@ -275,3 +275,16 @@ gtest_discover_tests(RodinGeometryPolytopeExtTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinGeometryLevelSetDiscretizerTetrahedraTest LevelSetDiscretizerTetrahedraTest.cpp)
+target_link_libraries(RodinGeometryLevelSetDiscretizerTetrahedraTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational)
+gtest_discover_tests(RodinGeometryLevelSetDiscretizerTetrahedraTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)
