@@ -6,9 +6,9 @@
  */
 
 /**
- * @example Transient 2D lid-driven cavity with Taylor–Hood elements and PETSc
+ * @example Transient 2D Oseen lid-driven cavity with Taylor–Hood elements and PETSc
  *
- * This example solves the transient incompressible Navier–Stokes equations in
+ * This example solves a transient incompressible Oseen/Picard approximation in
  * the unit square using:
  *   - a mixed finite element discretization,
  *   - Taylor–Hood spaces (quadratic velocity, linear pressure),
@@ -101,9 +101,9 @@
  * ------
  * The program writes:
  *
- *   LidDrivenCavity.mesh
- *   LidDrivenCavity_velocity_XXXXXX.gf
- *   LidDrivenCavity_pressure_XXXXXX.gf
+ *   OseenLidDrivenCavity.mesh
+ *   OseenLidDrivenCavity_velocity_XXXXXX.gf
+ *   OseenLidDrivenCavity_pressure_XXXXXX.gf
  *   cavity_centerline.txt
  *
  * Recommended PETSc options
@@ -235,8 +235,8 @@ int main(int argc, char** argv)
     mesh.setAttribute(it.key(), attr);
   }
 
-  Alert::Info() << "Setting up LidDrivenCavity.xdmf ..." << Alert::Raise;
-  IO::XDMF xdmf("LidDrivenCavity");
+  Alert::Info() << "Setting up OseenLidDrivenCavity.xdmf ..." << Alert::Raise;
+  IO::XDMF xdmf("OseenLidDrivenCavity");
   xdmf.setMesh(mesh);
 
   const size_t dim = mesh.getSpaceDimension();

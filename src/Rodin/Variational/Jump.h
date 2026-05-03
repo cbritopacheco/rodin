@@ -152,6 +152,33 @@ namespace Rodin::Variational
         return v1 - v2;
       }
 
+      auto getValue(const IntegrationPoint& ip) const
+      {
+        const auto& p = ip.getPoint();
+        assert(p.getPolytope().isFace());
+        const auto& face = p.getPolytope();
+        const size_t d = face.getDimension();
+        const auto& mesh = face.getMesh();
+        const auto& inc = mesh.getConnectivity().getIncidence({ d, d + 1 }, face.getIndex());
+        assert(inc.size() == 2);
+        const Index idx1 = *inc.begin();
+        const Index idx2 = *std::next(inc.begin());
+        const auto it1 = mesh.getPolytope(d + 1, idx1);
+        const auto it2 = mesh.getPolytope(d + 1, idx2);
+        const auto& pc = p.getPhysicalCoordinates();
+        Math::SpatialPoint rc1;
+        Math::SpatialPoint rc2;
+        it1->getTransformation().inverse(rc1, pc);
+        it2->getTransformation().inverse(rc2, pc);
+        const Geometry::Point p1(std::cref(*it1), std::cref(rc1), pc);
+        const Geometry::Point p2(std::cref(*it2), std::cref(rc2), pc);
+        const IntegrationPoint ip1(p1, ip.getQuadratureFormula(), ip.getIndex());
+        const IntegrationPoint ip2(p2, ip.getQuadratureFormula(), ip.getIndex());
+        const auto v1 = getOperand().getValue(ip1);
+        const auto v2 = getOperand().getValue(ip2);
+        return v1 - v2;
+      }
+
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
       {

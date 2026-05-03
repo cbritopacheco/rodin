@@ -214,8 +214,9 @@ namespace Rodin::Variational
        * @param p Point at which to evaluate
        * @returns Product value @f$ f(p) \cdot g(p) @f$
        */
+      template <class Point>
       constexpr
-      auto getValue(const Geometry::Point& p) const
+      auto getValue(const Point& p) const
       {
         const auto lhs = this->getLHS().getValue(p);
         const auto rhs = this->getRHS().getValue(p);
@@ -425,7 +426,7 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         const auto& p = this->getIntegrationPoint();
-        const auto lhs = getLHS().getValue(p.getPoint());
+        const auto lhs = getLHS().getValue(p);
         const auto rhs = getRHS().getBasis(local);
         return lhs * rhs;
       }
@@ -578,7 +579,7 @@ namespace Rodin::Variational
       {
         const auto& p = this->getIntegrationPoint();
         const auto lhs = this->getLHS().getBasis(local);
-        const auto rhs = this->getRHS().getValue(p.getPoint());
+        const auto rhs = this->getRHS().getValue(p);
         return lhs * rhs;
       }
 

@@ -392,17 +392,15 @@ namespace Rodin::Variational
           }
         };
 
-        // Thread-local scratch buffers to reduce temporary allocations.
-        static thread_local Index s_cell;
-        static thread_local Math::SpatialPoint s_rc{{}}, s_rc1{{}}, s_rcTmp{{}},
-                                              s_rEval{{}}, s_rIn{{}};
-        static thread_local Math::SpatialPoint s_pc{{}}, s_x{{}}, s_xIn{{}}, s_xFace{{}};
+        // Reuse dynamic work buffers while keeping stack-backed points local.
+        Index s_cell = Index(-1);
+        Math::SpatialPoint s_rc{{}}, s_rc1{{}}, s_rcTmp{{}},
+                           s_rEval{{}}, s_rIn{{}};
+        Math::SpatialPoint s_pc{{}}, s_x{{}}, s_xIn{{}}, s_xFace{{}};
         static thread_local std::vector<Candidate> s_candidates;
         static thread_local std::vector<size_t> s_faceSet;
 
         // Locate the starting cell and reference coordinates.
-        s_cell = Index(-1);
-
         if (poly0.getDimension() == cd)
         {
           s_cell = poly0.getIndex();

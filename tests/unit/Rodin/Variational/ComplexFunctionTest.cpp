@@ -6,11 +6,55 @@
 #include <cmath>
 #include <complex>
 
+#include "Rodin/QF/Centroid.h"
 #include "Rodin/Variational.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
+
+namespace
+{
+  struct IntegrationPointComplexCallable
+  {
+    Complex operator()(const Geometry::Point&) const
+    {
+      return {1.0, 2.0};
+    }
+
+    Complex operator()(const IntegrationPoint& ip) const
+    {
+      const auto idx = static_cast<Real>(ip.getIndex());
+      return {10.0 + idx, 20.0 + idx};
+    }
+  };
+
+  struct IntegrationPointRealPartCallable
+  {
+    Real operator()(const Geometry::Point&) const
+    {
+      return 1.0;
+    }
+
+    Real operator()(const IntegrationPoint& ip) const
+    {
+      return 10.0 + static_cast<Real>(ip.getIndex());
+    }
+  };
+
+  struct IntegrationPointImagPartCallable
+  {
+    Real operator()(const Geometry::Point&) const
+    {
+      return 2.0;
+    }
+
+    Real operator()(const IntegrationPoint& ip) const
+    {
+      return 20.0 + static_cast<Real>(ip.getIndex());
+    }
+  };
+}
 
 TEST(Rodin_Variational_ComplexFunction, IntegerConstant)
 {
@@ -153,4 +197,40 @@ TEST(Rodin_Variational_ComplexFunction, GetOrderCallable)
   ComplexFunction f(lambda);
   auto order = f.getOrder(*it);
   EXPECT_FALSE(order.has_value());
+}
+
+TEST(Rodin_Variational_ComplexFunction, Callable_UsesIntegrationPointFastPath)
+{
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+  auto it = mesh.getPolytope(mesh.getDimension(), 0);
+  const Math::Vector<Real> rc{{ 0.25, 0.25 }};
+  Point p(*it, rc);
+  QF::Centroid qf(Polytope::Type::Triangle);
+  IntegrationPoint ip(p, qf, 3);
+
+  ComplexFunction f(IntegrationPointComplexCallable{});
+
+  EXPECT_NEAR(f.getValue(p).real(), 1.0, 1e-10);
+  EXPECT_NEAR(f.getValue(p).imag(), 2.0, 1e-10);
+  EXPECT_NEAR(f.getValue(ip).real(), 13.0, 1e-10);
+  EXPECT_NEAR(f.getValue(ip).imag(), 23.0, 1e-10);
+}
+
+TEST(Rodin_Variational_ComplexFunction, RealAndImagParts_UseIntegrationPointFastPath)
+{
+  Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+  auto it = mesh.getPolytope(mesh.getDimension(), 0);
+  const Math::Vector<Real> rc{{ 0.25, 0.25 }};
+  Point p(*it, rc);
+  QF::Centroid qf(Polytope::Type::Triangle);
+  IntegrationPoint ip(p, qf, 4);
+
+  RealFunction re(IntegrationPointRealPartCallable{});
+  RealFunction im(IntegrationPointImagPartCallable{});
+  auto f = ComplexFunction(re, im);
+
+  EXPECT_NEAR(f.getValue(p).real(), 1.0, 1e-10);
+  EXPECT_NEAR(f.getValue(p).imag(), 2.0, 1e-10);
+  EXPECT_NEAR(f.getValue(ip).real(), 14.0, 1e-10);
+  EXPECT_NEAR(f.getValue(ip).imag(), 24.0, 1e-10);
 }
