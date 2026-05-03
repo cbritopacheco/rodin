@@ -109,7 +109,8 @@ namespace Rodin::IO
               << " count on line " << m_currentLineNumber << "."
               << Alert::Raise;
           }
-          attrs.resize(m_dimension - 1, *count);
+          if (m_dimension > 0)
+            attrs.resize(m_dimension - 1, *count);
           for (size_t i = 0; i < *count; i++)
           {
             MFEM::getline(is, line, m_currentLineNumber);
@@ -121,8 +122,11 @@ namespace Rodin::IO
                 << m_currentLineNumber << "."
                 << Alert::Raise;
             }
-            connectivity.polytope(g->geometry, std::move(g->vertices));
-            attrs.set({ m_dimension - 1, i }, g->attribute);
+            if (m_dimension > 0)
+            {
+              connectivity.polytope(g->geometry, std::move(g->vertices));
+              attrs.set({ m_dimension - 1, i }, g->attribute);
+            }
           }
           continue;
         }
@@ -149,7 +153,8 @@ namespace Rodin::IO
                 << m_currentLineNumber << "."
                 << Alert::Raise;
             }
-            connectivity.polytope(g->geometry, std::move(g->vertices));
+            if (g->geometry != Geometry::Polytope::Type::Point)
+              connectivity.polytope(g->geometry, std::move(g->vertices));
             attrs.set({ m_dimension, i }, g->attribute);
           }
           continue;
@@ -311,60 +316,64 @@ namespace Rodin::IO
     }
     os << '\n';
 
-    os << MFEM::Keyword::boundary << '\n' << mesh.getFaceCount() << '\n';
-    for (auto it = mesh.getFace(); !it.end(); ++it)
+    const size_t faceCount = mesh.getDimension() == 0 ? 0 : mesh.getFaceCount();
+    os << MFEM::Keyword::boundary << '\n' << faceCount << '\n';
+    if (mesh.getDimension() > 0)
     {
-      auto g = MFEM::getGeometry(it->getGeometry());
-      if (!g)
+      for (auto it = mesh.getFace(); !it.end(); ++it)
       {
-        Alert::MemberFunctionException(*this, __func__)
-          << "MFEM format does not support geometry: "
-          << it->getGeometry() << "."
-          << Alert::Raise;
-      }
-      os << it->getAttribute().value_or(RODIN_IO_MFEM_DEFAULT_POLYTOPE_ATTRIBUTE) << ' ' << *g << ' ';
+        auto g = MFEM::getGeometry(it->getGeometry());
+        if (!g)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "MFEM format does not support geometry: "
+            << it->getGeometry() << "."
+            << Alert::Raise;
+        }
+        os << it->getAttribute().value_or(RODIN_IO_MFEM_DEFAULT_POLYTOPE_ATTRIBUTE) << ' ' << *g << ' ';
 
-      const auto& vertices = it->getVertices();
-      switch (it->getGeometry())
-      {
-        case Geometry::Polytope::Type::Point:
+        const auto& vertices = it->getVertices();
+        switch (it->getGeometry())
         {
-          os << vertices(0);
-          break;
+          case Geometry::Polytope::Type::Point:
+          {
+            os << vertices(0);
+            break;
+          }
+          case Geometry::Polytope::Type::Triangle:
+          {
+            os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2);
+            break;
+          }
+          case Geometry::Polytope::Type::Segment:
+          {
+            os << vertices(0) << ' ' << vertices(1);
+            break;
+          }
+          case Geometry::Polytope::Type::Tetrahedron:
+          {
+            os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' ' << vertices(3);
+            break;
+          }
+          case Geometry::Polytope::Type::Quadrilateral:
+          {
+            os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' ' << vertices(3);
+            break;
+          }
+          case Geometry::Polytope::Type::Wedge:
+          {
+            os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' ' << vertices(3) << ' ' << vertices(4) << ' ' << vertices(5);
+            break;
+          }
+          case Geometry::Polytope::Type::Hexahedron:
+          {
+            os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' ' << vertices(3) << ' '
+               << vertices(4) << ' ' << vertices(5) << ' ' << vertices(6) << ' ' << vertices(7);
+            break;
+          }
         }
-        case Geometry::Polytope::Type::Triangle:
-        {
-          os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2);
-          break;
-        }
-        case Geometry::Polytope::Type::Segment:
-        {
-          os << vertices(0) << ' ' << vertices(1);
-          break;
-        }
-        case Geometry::Polytope::Type::Tetrahedron:
-        {
-          os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' ' << vertices(3);
-          break;
-        }
-        case Geometry::Polytope::Type::Quadrilateral:
-        {
-          os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' ' << vertices(3);
-          break;
-        }
-        case Geometry::Polytope::Type::Wedge:
-        {
-          os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' ' << vertices(3) << ' ' << vertices(4) << ' ' << vertices(5);
-          break;
-        }
-        case Geometry::Polytope::Type::Hexahedron:
-        {
-          os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' ' << vertices(3) << ' '
-             << vertices(4) << ' ' << vertices(5) << ' ' << vertices(6) << ' ' << vertices(7);
-          break;
-        }
+        os << '\n';
       }
-      os << '\n';
     }
     os << '\n';
 
@@ -375,10 +384,13 @@ namespace Rodin::IO
     for (auto it = mesh.getVertex(); !it.end(); ++it)
     {
       const auto& x = it->getCoordinates();
-      for (int i = 0; i < x.size() - 1; i++)
-        os << x(i) << ' ';
-      os << x(x.size() - 1) << '\n';
+      for (Index i = 0; i < x.size(); i++)
+      {
+        if (i > 0)
+          os << ' ';
+        os << x(i);
+      }
+      os << '\n';
     }
   }
 }
-

@@ -357,6 +357,15 @@ namespace
     using LocalMesh = Geometry::Mesh<Context::Local>;
     switch (type)
     {
+      case Polytope::Type::Point:
+      {
+        Mesh<Context::Local>::Builder builder;
+        return builder
+          .initialize(1)
+          .nodes(1)
+          .vertex({ 0.0 })
+          .finalize();
+      }
       case Polytope::Type::Segment:
         return LocalMesh::UniformGrid(type, { 11 });
       case Polytope::Type::Triangle:
@@ -377,6 +386,7 @@ namespace
   {
     switch (type)
     {
+      case Polytope::Type::Point:         return "Point0D";
       case Polytope::Type::Segment:       return "Segment1D";
       case Polytope::Type::Triangle:      return "Triangle2D";
       case Polytope::Type::Quadrilateral: return "Quad2D";
@@ -733,6 +743,7 @@ namespace
       HDF5MultiDim,
       ::testing::Values(
           Polytope::Type::Segment,       // 1D
+          Polytope::Type::Point,         // 0D
           Polytope::Type::Triangle,      // 2D
           Polytope::Type::Quadrilateral, // 2D
           Polytope::Type::Tetrahedron,   // 3D

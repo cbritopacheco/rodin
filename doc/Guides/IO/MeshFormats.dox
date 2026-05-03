@@ -82,15 +82,34 @@
 
   @section guides-io-meshformats-comparison Comparison
 
-  | Feature | MFEM | MEDIT |
-  |---------|------|-------|
-  | Format | Text | Text |
-  | Extension | `.mesh` | `.mesh` |
-  | Vertices | Yes | Yes |
-  | Elements | Yes | Yes |
-  | Boundary markers | Attributes | References |
-  | Region markers | Attributes | References |
-  | Best for | MFEM workflows | MMG, INRIA tools |
+  | Feature | MFEM | MEDIT | HDF5 | XDMF |
+  |---------|------|-------|------|------|
+  | Format | Text | Text | Binary | XML + HDF5 |
+  | Extension | `.mesh` | `.mesh` | `.h5` | `.xdmf`, `.h5` |
+  | Mesh loading | Yes | Yes | Yes | No |
+  | Mesh saving | Yes | Yes | Yes | Visualization output |
+  | Vertices | Yes | Yes | Yes | Yes |
+  | Elements | Yes | Yes | Yes | Yes |
+  | Boundary markers | Attributes | References | Attributes | Attributes |
+  | Region markers | Attributes | References | Attributes | Attributes |
+  | Best for | MFEM workflows | MMG, INRIA tools | Persistence/checkpointing | ParaView visualization |
+
+  @section guides-io-meshformats-coverage Geometry Coverage
+
+  Mesh I/O tests cover every local polytope geometry used by Rodin:
+
+  | Dimension | Geometries |
+  |-----------|------------|
+  | 0D | Point |
+  | 1D | Segment |
+  | 2D | Triangle, Quadrilateral |
+  | 3D | Tetrahedron, Hexahedron, Wedge |
+
+  MEDIT and MFEM are tested with string round trips for all of these
+  geometries. HDF5 persistence and XDMF visualization output are tested over
+  the same set. The 0D case is represented as point topology embedded in a
+  coordinate space so that formats with coordinate arrays can still store the
+  vertex position.
 
   @section guides-io-meshformats-see-also See Also
 
