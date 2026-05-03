@@ -119,6 +119,18 @@ namespace Rodin::Solid
     {
       using Type = Real;
     };
+
+    /// @brief Tag for the index of the current cell (polytope) being assembled.
+    struct CellIndex
+    {
+      using Type = Index;
+    };
+
+    /// @brief Tag for the index of the current quadrature point within the cell.
+    struct QuadraturePointIndex
+    {
+      using Type = std::size_t;
+    };
   }
 
   /**

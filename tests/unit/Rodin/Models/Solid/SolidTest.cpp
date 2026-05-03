@@ -544,6 +544,292 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(P(1, 1), 0.0, 1e-12);
   }
 
+  TEST(Rodin_Solid_ActiveContraction, TangentFiniteDifference2D)
+  {
+    // Pure active contribution: zero passive parameters so the FD check
+    // isolates the active fiber tangent.
+    Solid::NeoHookean passive(0.0, 0.0);
+    Solid::ActiveFiberLaw::Parameters activeInput;
+    activeInput.stiffness = 50.0;
+    activeInput.initial.extension = 0.0;
+    Solid::ActiveFiberLaw active(activeInput);
+    Solid::ActiveContraction law(passive, active);
+
+    Solid::KinematicState state(2);
+    Math::SpatialMatrix<Real> H(2, 2);
+    H(0, 0) = 0.07; H(0, 1) = 0.02;
+    H(1, 0) = -0.03; H(1, 1) = 0.05;
+    state.setDisplacementGradient(H);
+
+    Solid::ConstitutivePoint cp(state);
+    Math::SpatialVector<Real> fiber(2);
+    fiber[0] = 0.8; fiber[1] = 0.6;
+    cp.set<Solid::Tags::FiberDirection>(fiber);
+    cp.set<Solid::Tags::ActiveExtension>(-0.06);
+
+    typename decltype(law)::Cache cache;
+    law.setCache(cache, cp);
+
+    Math::SpatialMatrix<Real> dF(2, 2);
+    dF(0, 0) = 0.21; dF(0, 1) = -0.13;
+    dF(1, 0) = 0.07; dF(1, 1) = 0.18;
+
+    Math::SpatialMatrix<Real> dP;
+    law.getMaterialTangent(dP, cache, cp, dF);
+
+    const Real eps = 1e-7;
+    Solid::KinematicState statePlus(2);
+    statePlus.setDisplacementGradient(H + eps * dF);
+    Solid::ConstitutivePoint cpPlus(statePlus);
+    cpPlus.set<Solid::Tags::FiberDirection>(fiber);
+    cpPlus.set<Solid::Tags::ActiveExtension>(-0.06);
+    typename decltype(law)::Cache cachePlus;
+    law.setCache(cachePlus, cpPlus);
+
+    Math::SpatialMatrix<Real> P, PPlus;
+    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+    law.getFirstPiolaKirchhoffStress(PPlus, cachePlus, cpPlus);
+    Math::SpatialMatrix<Real> dPfd = (1.0 / eps) * PPlus + (-1.0 / eps) * P;
+
+    for (int i = 0; i < 2; ++i)
+      for (int j = 0; j < 2; ++j)
+        EXPECT_NEAR(dP(i, j), dPfd(i, j), 1e-6);
+  }
+
+  TEST(Rodin_Solid_ActiveContraction, TangentFiniteDifference3DWithPassive)
+  {
+    // Mixed passive + active in 3D, fiber not aligned with an axis.
+    Solid::NeoHookean passive(20.0, 8.0);
+    Solid::ActiveFiberLaw::Parameters activeInput;
+    activeInput.stiffness = 30.0;
+    activeInput.initial.extension = 0.0;
+    Solid::ActiveFiberLaw active(activeInput);
+    Solid::ActiveContraction law(passive, active);
+
+    Solid::KinematicState state(3);
+    Math::SpatialMatrix<Real> H(3, 3);
+    H(0,0)=0.04; H(0,1)=0.02; H(0,2)=-0.01;
+    H(1,0)=-0.03; H(1,1)=0.06; H(1,2)=0.02;
+    H(2,0)=0.01; H(2,1)=-0.02; H(2,2)=0.05;
+    state.setDisplacementGradient(H);
+
+    Solid::ConstitutivePoint cp(state);
+    Math::SpatialVector<Real> fiber(3);
+    fiber[0] = 0.7; fiber[1] = 0.5; fiber[2] = 0.3;
+    cp.set<Solid::Tags::FiberDirection>(fiber);
+    cp.set<Solid::Tags::ActiveExtension>(-0.04);
+
+    typename decltype(law)::Cache cache;
+    law.setCache(cache, cp);
+
+    Math::SpatialMatrix<Real> dF(3, 3);
+    dF(0,0)=0.18; dF(0,1)=-0.09; dF(0,2)=0.05;
+    dF(1,0)=0.04; dF(1,1)=0.13; dF(1,2)=-0.07;
+    dF(2,0)=-0.05; dF(2,1)=0.06; dF(2,2)=0.10;
+
+    Math::SpatialMatrix<Real> dP;
+    law.getMaterialTangent(dP, cache, cp, dF);
+
+    const Real eps = 1e-7;
+    Solid::KinematicState statePlus(3);
+    statePlus.setDisplacementGradient(H + eps * dF);
+    Solid::ConstitutivePoint cpPlus(statePlus);
+    cpPlus.set<Solid::Tags::FiberDirection>(fiber);
+    cpPlus.set<Solid::Tags::ActiveExtension>(-0.04);
+    typename decltype(law)::Cache cachePlus;
+    law.setCache(cachePlus, cpPlus);
+
+    Math::SpatialMatrix<Real> P, PPlus;
+    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+    law.getFirstPiolaKirchhoffStress(PPlus, cachePlus, cpPlus);
+    Math::SpatialMatrix<Real> dPfd = (1.0 / eps) * PPlus + (-1.0 / eps) * P;
+
+    for (int i = 0; i < 3; ++i)
+      for (int j = 0; j < 3; ++j)
+        EXPECT_NEAR(dP(i, j), dPfd(i, j), 1e-6);
+  }
+
+  TEST(Rodin_Solid_ActiveContraction, DynamicTangentFiniteDifference2D)
+  {
+    // Verifies that, after the per-quadrature-point local Newton on c
+    // converges, the Schur-condensed material tangent matches a finite
+    // difference of P with respect to F at fixed previous state.
+    Solid::NeoHookean passive(0.0, 0.0);
+    Solid::ActiveFiberLaw::Parameters activeInput;
+    activeInput.stiffness            = 200.0;
+    activeInput.damping              = 0.5;
+    activeInput.destructionRate      = 0.4;
+    activeInput.crossBridgeStiffness = 100.0;
+    activeInput.contractility        = 80.0;
+    Solid::ActiveFiberLaw active(activeInput);
+    Solid::ActiveContraction law(passive, active);
+
+    Solid::KinematicState state(2);
+    Math::SpatialMatrix<Real> H(2, 2);
+    H(0, 0) = 0.06; H(0, 1) = 0.02;
+    H(1, 0) = -0.03; H(1, 1) = 0.04;
+    state.setDisplacementGradient(H);
+
+    auto buildPoint = [&](const Solid::KinematicState& s) {
+      Solid::ConstitutivePoint cp(s);
+      Math::SpatialVector<Real> fiber(2);
+      fiber[0] = 0.8; fiber[1] = 0.6;
+      cp.set<Solid::Tags::FiberDirection>(fiber);
+      cp.set<Solid::Tags::TimeStep>(0.01);
+      cp.set<Solid::Tags::PreviousActiveExtension>(-0.04);
+      cp.set<Solid::Tags::PreviousActiveGamma>(2.0);
+      cp.set<Solid::Tags::PreviousActiveBeta>(1.5);
+      cp.set<Solid::Tags::ElectricalActivation>(0.7);
+      return cp;
+    };
+
+    Solid::ConstitutivePoint cp = buildPoint(state);
+    typename decltype(law)::Cache cache;
+    law.setCache(cache, cp);
+    EXPECT_TRUE(cache.dynamic);
+    EXPECT_LT(cache.localIterations, 30u);
+
+    Math::SpatialMatrix<Real> dF(2, 2);
+    dF(0, 0) = 0.21; dF(0, 1) = -0.13;
+    dF(1, 0) = 0.07; dF(1, 1) = 0.18;
+
+    Math::SpatialMatrix<Real> dP;
+    law.getMaterialTangent(dP, cache, cp, dF);
+
+    const Real eps = 1e-7;
+    Solid::KinematicState statePlus(2);
+    statePlus.setDisplacementGradient(H + eps * dF);
+    Solid::ConstitutivePoint cpPlus = buildPoint(statePlus);
+    typename decltype(law)::Cache cachePlus;
+    law.setCache(cachePlus, cpPlus);
+
+    Math::SpatialMatrix<Real> P, PPlus;
+    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+    law.getFirstPiolaKirchhoffStress(PPlus, cachePlus, cpPlus);
+    Math::SpatialMatrix<Real> dPfd = (1.0 / eps) * PPlus + (-1.0 / eps) * P;
+
+    for (int i = 0; i < 2; ++i)
+      for (int j = 0; j < 2; ++j)
+        EXPECT_NEAR(dP(i, j), dPfd(i, j), 5e-5);
+  }
+
+  TEST(Rodin_Solid_ActiveContraction, DynamicTangentFiniteDifference3DWithPassive)
+  {
+    Solid::NeoHookean passive(20.0, 8.0);
+    Solid::ActiveFiberLaw::Parameters activeInput;
+    activeInput.stiffness            = 60.0;
+    activeInput.damping              = 0.3;
+    activeInput.destructionRate      = 0.5;
+    activeInput.crossBridgeStiffness = 40.0;
+    activeInput.contractility        = 30.0;
+    Solid::ActiveFiberLaw active(activeInput);
+    Solid::ActiveContraction law(passive, active);
+
+    Solid::KinematicState state(3);
+    Math::SpatialMatrix<Real> H(3, 3);
+    H(0,0)=0.04; H(0,1)=0.02; H(0,2)=-0.01;
+    H(1,0)=-0.03; H(1,1)=0.05; H(1,2)=0.02;
+    H(2,0)=0.01; H(2,1)=-0.02; H(2,2)=0.03;
+    state.setDisplacementGradient(H);
+
+    auto buildPoint = [&](const Solid::KinematicState& s) {
+      Solid::ConstitutivePoint cp(s);
+      Math::SpatialVector<Real> fiber(3);
+      fiber[0] = 0.7; fiber[1] = 0.5; fiber[2] = 0.3;
+      cp.set<Solid::Tags::FiberDirection>(fiber);
+      cp.set<Solid::Tags::TimeStep>(0.005);
+      cp.set<Solid::Tags::PreviousActiveExtension>(-0.03);
+      cp.set<Solid::Tags::PreviousActiveGamma>(1.5);
+      cp.set<Solid::Tags::PreviousActiveBeta>(0.8);
+      cp.set<Solid::Tags::ElectricalActivation>(1.2);
+      return cp;
+    };
+
+    Solid::ConstitutivePoint cp = buildPoint(state);
+    typename decltype(law)::Cache cache;
+    law.setCache(cache, cp);
+    EXPECT_TRUE(cache.dynamic);
+
+    Math::SpatialMatrix<Real> dF(3, 3);
+    dF(0,0)=0.18; dF(0,1)=-0.09; dF(0,2)=0.05;
+    dF(1,0)=0.04; dF(1,1)=0.13; dF(1,2)=-0.07;
+    dF(2,0)=-0.05; dF(2,1)=0.06; dF(2,2)=0.10;
+
+    Math::SpatialMatrix<Real> dP;
+    law.getMaterialTangent(dP, cache, cp, dF);
+
+    const Real eps = 1e-7;
+    Solid::KinematicState statePlus(3);
+    statePlus.setDisplacementGradient(H + eps * dF);
+    Solid::ConstitutivePoint cpPlus = buildPoint(statePlus);
+    typename decltype(law)::Cache cachePlus;
+    law.setCache(cachePlus, cpPlus);
+
+    Math::SpatialMatrix<Real> P, PPlus;
+    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+    law.getFirstPiolaKirchhoffStress(PPlus, cachePlus, cpPlus);
+    Math::SpatialMatrix<Real> dPfd = (1.0 / eps) * PPlus + (-1.0 / eps) * P;
+
+    for (int i = 0; i < 3; ++i)
+      for (int j = 0; j < 3; ++j)
+        EXPECT_NEAR(dP(i, j), dPfd(i, j), 5e-5);
+  }
+
+  TEST(Rodin_Solid_ActiveContraction, DynamicLocalSolveResidualIsZero)
+  {
+    // After the local Newton converges, the dynamic residual should be at
+    // machine precision regardless of where the global state sits.
+    Solid::NeoHookean passive(0.0, 0.0);
+    Solid::ActiveFiberLaw::Parameters activeInput;
+    activeInput.stiffness            = 200.0;
+    activeInput.damping              = 0.5;
+    activeInput.destructionRate      = 0.4;
+    activeInput.crossBridgeStiffness = 100.0;
+    activeInput.contractility        = 80.0;
+    Solid::ActiveFiberLaw active(activeInput);
+    Solid::ActiveContraction law(passive, active);
+
+    Solid::KinematicState state(2);
+    Math::SpatialMatrix<Real> H(2, 2);
+    H(0, 0) = 0.10; H(0, 1) = 0.03;
+    H(1, 0) = -0.02; H(1, 1) = 0.06;
+    state.setDisplacementGradient(H);
+
+    Solid::ConstitutivePoint cp(state);
+    Math::SpatialVector<Real> fiber(2);
+    fiber[0] = 1.0; fiber[1] = 0.0;
+    cp.set<Solid::Tags::FiberDirection>(fiber);
+    cp.set<Solid::Tags::TimeStep>(0.01);
+    cp.set<Solid::Tags::PreviousActiveExtension>(-0.05);
+    cp.set<Solid::Tags::PreviousActiveGamma>(2.0);
+    cp.set<Solid::Tags::PreviousActiveBeta>(1.5);
+    cp.set<Solid::Tags::ElectricalActivation>(0.9);
+
+    typename decltype(law)::Cache cache;
+    law.setCache(cache, cp);
+
+    EXPECT_TRUE(cache.dynamic);
+    EXPECT_NEAR(cache.active.residual, 0.0, 1e-11);
+  }
+
+  TEST(Rodin_Solid_ActiveFiberLaw, StaticStressDerivativeFiniteDifference)
+  {
+    Solid::ActiveFiberLaw::Parameters params;
+    params.stiffness = 50.0;
+    Solid::ActiveFiberLaw law(params);
+
+    const Real e = 0.07;
+    const Real c = -0.06;
+    const Real eps = 1e-5;
+
+    // Central differences: O(eps^2) truncation error.
+    const Real fdDe = (law.stress(e + eps, c) - law.stress(e - eps, c)) / (2 * eps);
+    EXPECT_NEAR(law.dStressDe(c), fdDe, 1e-7);
+
+    const Real fdDc = (law.stress(e, c + eps) - law.stress(e, c - eps)) / (2 * eps);
+    EXPECT_NEAR(law.dStressDc(e, c), fdDc, 1e-5);
+  }
+
   TEST(Rodin_Solid_ActiveFiberLaw, InitialValues)
   {
     Solid::ActiveFiberLaw::Parameters parameters;
