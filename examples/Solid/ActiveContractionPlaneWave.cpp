@@ -149,7 +149,7 @@ int main(int, char**)
   wave.speed          = 1.0;
   wave.width          = 0.05;
   wave.start          = -0.3;
-  wave.gap            = 5;
+  wave.gap            = 1.5;
 
   auto activationAt = [&](Real y, Real t) -> Real
   {
