@@ -274,6 +274,88 @@ namespace Rodin::Math
       }
 
       constexpr
+      SpatialMatrix& operator+=(const SpatialMatrix& other)
+      {
+        assert(m_rows == other.m_rows);
+        assert(m_cols == other.m_cols);
+
+        if (m_rows == 0 || m_cols == 0)
+          return *this;
+
+        const auto& B = other.m_data;
+
+        switch (static_cast<unsigned>(m_rows) * 4u + static_cast<unsigned>(m_cols))
+        {
+          case 5u: // 1x1
+            m_data(0,0) += B(0,0);
+            return *this;
+
+          case 6u: // 1x2
+            m_data(0,0) += B(0,0);
+            m_data(0,1) += B(0,1);
+            return *this;
+
+          case 7u: // 1x3
+            m_data(0,0) += B(0,0);
+            m_data(0,1) += B(0,1);
+            m_data(0,2) += B(0,2);
+            return *this;
+
+          case 9u: // 2x1
+            m_data(0,0) += B(0,0);
+            m_data(1,0) += B(1,0);
+            return *this;
+
+          case 10u: // 2x2
+            m_data(0,0) += B(0,0);
+            m_data(0,1) += B(0,1);
+            m_data(1,0) += B(1,0);
+            m_data(1,1) += B(1,1);
+            return *this;
+
+          case 11u: // 2x3
+            m_data(0,0) += B(0,0);
+            m_data(0,1) += B(0,1);
+            m_data(0,2) += B(0,2);
+            m_data(1,0) += B(1,0);
+            m_data(1,1) += B(1,1);
+            m_data(1,2) += B(1,2);
+            return *this;
+
+          case 13u: // 3x1
+            m_data(0,0) += B(0,0);
+            m_data(1,0) += B(1,0);
+            m_data(2,0) += B(2,0);
+            return *this;
+
+          case 14u: // 3x2
+            m_data(0,0) += B(0,0);
+            m_data(0,1) += B(0,1);
+            m_data(1,0) += B(1,0);
+            m_data(1,1) += B(1,1);
+            m_data(2,0) += B(2,0);
+            m_data(2,1) += B(2,1);
+            return *this;
+
+          case 15u: // 3x3
+            m_data(0,0) += B(0,0);
+            m_data(0,1) += B(0,1);
+            m_data(0,2) += B(0,2);
+            m_data(1,0) += B(1,0);
+            m_data(1,1) += B(1,1);
+            m_data(1,2) += B(1,2);
+            m_data(2,0) += B(2,0);
+            m_data(2,1) += B(2,1);
+            m_data(2,2) += B(2,2);
+            return *this;
+
+          default:
+            assert(false);
+            return *this;
+        }
+      }
+
+      constexpr
       std::uint8_t rows() const noexcept
       {
         return m_rows;
