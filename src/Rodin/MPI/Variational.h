@@ -9,10 +9,12 @@
  * meshes, including:
  * - @ref Rodin::Variational::FiniteElementSpace specializations on
  *   @ref Rodin::Geometry::Mesh<Rodin::Context::MPI>
+ * - Distributed @ref Rodin::Variational::P0 spaces.
  * - Distributed @ref Rodin::Variational::P1 spaces.
  * - Distributed @ref Rodin::Variational::H1 spaces.
  */
 
+#include "Variational/P0.h"
 #include "Variational/P1.h"
 #include "Variational/H1.h"
 #include "Variational/FiniteElementSpace.h"
