@@ -7,7 +7,7 @@
 
 /**
  * @file
- * @brief DG advection example using an upwind DG formulation.
+ * @brief DG advection example using an upwind P0 DG scheme.
  *
  * Solves the steady linear advection problem
  * @f[
@@ -15,22 +15,28 @@
  *   \qquad u = g \quad \text{on } \partial\Omega_{\mathrm{in}},
  * @f]
  * where @f$ \partial\Omega_{\mathrm{in}} = \{ x \in \partial\Omega :
- * \boldsymbol{\beta} \cdot \mathbf{n} < 0 \} @f$ is the inflow boundary.
+ * \boldsymbol{\beta} \cdot \mathbf{n} < 0 \} @f$, using a piecewise-constant
+ * (P0) finite element space.
  *
- * The DG weak formulation is obtained by integration by parts over the whole
- * domain and upwinding at the boundary:
+ * Since @f$ \nabla v|_K = 0 @f$ for P0, the DG weak form is assembled
+ * element-by-element via interface integrals (no volume gradient term):
  * @f[
- *   - \int_\Omega u\,(\boldsymbol{\beta} \cdot \nabla v)\,dx
- *   + \int_{\partial\Omega} (\boldsymbol{\beta} \cdot \mathbf{n})^+ \, u \, v \, ds
- *   = \int_\Omega f \, v \, dx
- *   - \int_{\partial\Omega} (\boldsymbol{\beta} \cdot \mathbf{n})^- \, g \, v \, ds,
+ *   \sum_{E \in \Gamma_{\mathrm{int}}} \int_E
+ *     \Bigl[ (\boldsymbol{\beta}\cdot\mathbf{n})\,\{\!\{u\}\!\}
+ *           + \tfrac{1}{2}|\boldsymbol{\beta}\cdot\mathbf{n}|\,[\![u]\!]
+ *     \Bigr] [\![v]\!]\,ds
+ *   + \int_{\partial\Omega} (\boldsymbol{\beta}\cdot\mathbf{n})^+\, u\, v\, ds
+ *   = \int_\Omega f\,v\,dx
+ *   - \int_{\partial\Omega} (\boldsymbol{\beta}\cdot\mathbf{n})^-\, g\, v\, ds,
  * @f]
- * for all @f$ v @f$, where @f$ (\cdot)^+ = \max(\cdot,\,0) @f$ (outflow) and
- * @f$ (\cdot)^- = \min(\cdot,\,0) @f$ (inflow).  The upwind splitting
- * naturally handles inflow/outflow without explicit attribute restrictions.
+ * where @f$ a^+ = \max(a,0) @f$, @f$ a^- = \min(a,0) @f$, @f$
+ * \{\!\{u\}\!\} @f$ and @f$ [\![u]\!] @f$ are the average and jump across
+ * the face, and @f$ \mathbf{n} @f$ is the face normal oriented outward from
+ * the first adjacent cell.
  *
- * Manufactured solution: @f$ u = x(1-x)\,y(1-y) @f$ with
- * @f$ \boldsymbol{\beta} = (1,0)^T @f$.
+ * The face-normal orientation is fixed by assigning attribute 1 to all cells
+ * and calling @c FaceNormal.traceOf(1), which consistently picks the outward
+ * direction from the first (attribute-1) adjacent cell.
  */
 #include <Rodin/Solver.h>
 #include <Rodin/Assembly.h>
@@ -50,44 +56,51 @@ int main(int, char**)
   mesh.scale(1.0 / (N - 1));
   mesh.getConnectivity().compute(1, 2);
 
+  // Assign attribute 1 to every cell so that FaceNormal.traceOf(1) gives a
+  // consistent orientation on all interior faces.
+  for (auto it = mesh.getCell(); it; ++it)
+    mesh.setAttribute({ mesh.getDimension(), it->getIndex() }, 1);
+
   // ---- Advection velocity: β = (1, 0) --------------------------------------
   Math::Vector<Real> betaVec(2);
   betaVec << 1.0, 0.0;
   VectorFunction beta(betaVec);
 
   // ---- Manufactured solution: u = x(1-x) y(1-y) ----------------------------
-  //   β·∇u = ∂u/∂x = (1 − 2x) y(1−y)
+  //   β·∇u = (1 − 2x) y(1−y)
   auto f = (1.0 - 2.0 * F::x) * F::y * (1.0 - F::y);
-
-  // Inflow BC: g = u_exact|_{∂Ω_in}.  For β=(1,0) the inflow is x=0,
-  // where u_exact = 0.  The Max/Min splitting below enforces g = 0 on the
-  // inflow naturally.
   auto g = Zero();
 
-  // ---- FE space and functions -----------------------------------------------
-  P1 vh(mesh);
+  // ---- FE space (P0 = discontinuous piecewise constant) --------------------
+  P0 vh(mesh);
   TrialFunction u(vh);
   TestFunction  v(vh);
 
-  BoundaryNormal n(mesh);
+  // Face normals:
+  //   fn — interior faces, oriented outward from cells with attribute 1
+  //   bn — boundary faces, always oriented outward from the domain
+  FaceNormal     fn(mesh);
+  BoundaryNormal bn(mesh);
 
-  // ---- Upwind DG bilinear form (IBP) ----------------------------------------
+  auto fn1   = fn.traceOf(1);
+  auto betaN = Dot(beta, fn1);
+  auto betaBN = Dot(beta, bn);
+
+  // ---- Upwind DG bilinear form (interface-integral formulation) -------------
   //
-  //  a(u,v) = −∫_Ω u (β·∇v) dx
-  //           + ∫_∂Ω max(β·n, 0) u v ds    [outflow upwind]
+  //  a(u,v) = ∫_Γ_int  (β·n) {{u}} [[v]] ds       [advective average flux]
+  //         + ∫_Γ_int  |β·n|/2 [[u]] [[v]] ds      [upwind dissipation]
+  //         + ∫_∂Ω  (β·n)⁺ u v ds                 [outflow boundary]
   //
-  //  l(v)   = ∫_Ω f v dx
-  //           − ∫_∂Ω min(β·n, 0) g v ds    [inflow BC]
-  //
-  // On the outflow boundary β·n > 0:  max(β·n,0) contributes to LHS (u unknown)
-  // On the inflow boundary  β·n < 0:  min(β·n,0) contributes to RHS (g known)
-  // On glancing boundaries  β·n = 0:  both terms vanish (no contribution)
+  //  l(v)   = ∫_Ω  f v dx
+  //         − ∫_∂Ω (β·n)⁻ g v ds                  [inflow BC]
   //
   Problem advection(u, v);
-  advection = -Integral(u, Dot(beta, Grad(v)))
-            + BoundaryIntegral(Max(Dot(beta, n), Zero()) * u, v)
+  advection = InterfaceIntegral(betaN * Average(u), Jump(v))
+            + InterfaceIntegral(Abs(betaN) / 2.0 * Jump(u), Jump(v))
+            + BoundaryIntegral(Max(betaBN, Zero()) * u, v)
             - Integral(f, v)
-            - BoundaryIntegral(Min(Dot(beta, n), Zero()) * g, v);
+            - BoundaryIntegral(Min(betaBN, Zero()) * g, v);
 
   // ---- Solve ----------------------------------------------------------------
   Solver::SparseLU(advection).solve();
@@ -98,3 +111,4 @@ int main(int, char**)
 
   return 0;
 }
+

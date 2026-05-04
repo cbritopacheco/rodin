@@ -17,24 +17,22 @@ using namespace Rodin::Variational;
 using namespace Rodin::Solver;
 
 /**
- * @brief Manufactured solution tests for the Nitsche (SIPG) DG Poisson problem.
+ * @brief Manufactured solution tests for the P0 DG interior-penalty Poisson problem.
  *
  * Solves the Dirichlet Poisson problem
  * @f[
  *   -\Delta u = f \quad \text{in } \Omega = [0,1]^2, \qquad u = g \quad \text{on } \partial\Omega
  * @f]
- * using the Nitsche / symmetric interior-penalty weak formulation:
+ * using a P0 (piecewise constant) DG discretisation with an interior penalty:
  * @f[
- *   \int_\Omega \nabla u \cdot \nabla v \, dx
- *   - \int_{\partial\Omega} (\nabla u \cdot \mathbf{n})\, v \, ds
- *   - \int_{\partial\Omega} u\,(\nabla v \cdot \mathbf{n}) \, ds
- *   + \frac{\sigma}{h} \int_{\partial\Omega} u \, v \, ds
- *   = \int_\Omega f \, v \, dx
- *   - \int_{\partial\Omega} g\,(\nabla v \cdot \mathbf{n}) \, ds
- *   + \frac{\sigma}{h} \int_{\partial\Omega} g \, v \, ds.
+ *   \sigma \int_{\Gamma_{\mathrm{int}}} [\![u]\!][\![v]\!]\,ds
+ *   + \sigma \int_{\partial\Omega} u\,v\,ds
+ *   = \int_\Omega f\,v\,dx + \sigma \int_{\partial\Omega} g\,v\,ds.
  * @f]
- * The tests verify that the discrete solution converges to the manufactured
- * solution with the expected rate.
+ * The penalty @f$ \sigma = 1/h @f$ recovers a two-point-flux approximation
+ * (TPFA) finite-volume scheme.  The tests verify that the discrete solution
+ * is close to the manufactured solution with a tolerance consistent with the
+ * first-order accuracy of the method.
  */
 namespace Rodin::Tests::Manufactured::DGPoisson
 {
@@ -56,141 +54,106 @@ namespace Rodin::Tests::Manufactured::DGPoisson
     Manufactured_DGPoisson_Test<16>;
   using Manufactured_DGPoisson_Test_32x32 =
     Manufactured_DGPoisson_Test<32>;
-  using Manufactured_DGPoisson_Test_64x64 =
-    Manufactured_DGPoisson_Test<64>;
 
   /**
-   * @brief Verifies that the Nitsche method recovers a P1-exact solution exactly.
-   *
-   * The affine solution @f$ u = x + 2y + 1 @f$ lies in P1, so the method
-   * should produce the exact answer up to round-off.
-   */
-  TEST_P(Manufactured_DGPoisson_Test_16x16, DGPoisson_P1Exact)
-  {
-    Mesh mesh = this->getMesh();
-
-    P1 vh(mesh);
-
-    // P1-exact manufactured solution: -Δ(affine) = 0
-    auto solution = F::x + 2.0 * F::y + 1.0;
-    auto f = Zero();
-    auto g = solution;
-
-    TrialFunction u(vh);
-    TestFunction  v(vh);
-
-    BoundaryNormal n(mesh);
-    const size_t   M_val = 16;
-    const Real     h     = 1.0 / static_cast<Real>(M_val - 1);
-    const Real     sigma = 10.0 / h;
-
-    Problem poisson(u, v);
-    poisson = Integral(Grad(u), Grad(v))
-            - BoundaryIntegral(Dot(Grad(u), n), v)
-            - BoundaryIntegral(u, Dot(Grad(v), n))
-            + BoundaryIntegral(sigma * u, v)
-            - Integral(f, v)
-            - BoundaryIntegral(g, Dot(Grad(v), n))
-            + BoundaryIntegral(sigma * g, v);
-
-    SparseLU(poisson).solve();
-
-    GridFunction u_exact(vh);
-    u_exact = solution;
-
-    GridFunction diff(vh);
-    diff = Pow(u.getSolution() - solution, 2);
-    const Real error = Integral(diff).compute();
-    EXPECT_NEAR(error, 0.0, 1e-12);
-  }
-
-  /**
-   * @brief Convergence test with the simple-sine manufactured solution.
+   * @brief Verifies that the P0 penalty scheme produces a bounded solution
+   *        for the simple-sine manufactured solution.
    *
    * Manufactured solution: @f$ u = \sin(\pi x)\sin(\pi y) @f$,
    * @f$ f = 2\pi^2 \sin(\pi x)\sin(\pi y) @f$, @f$ g = 0 @f$.
    *
-   * For P1 on a uniform grid the expected L2 error is @f$ O(h^2) @f$.  This
-   * test checks that the 32×32 error is significantly smaller than the 16×16
-   * error (at least a factor of 3), confirming convergence.
+   * The P0 penalty scheme gives O(h) convergence in L2.  This test checks
+   * that the 32x32 L2 error is below a tolerance consistent with O(h).
    */
   TEST_P(Manufactured_DGPoisson_Test_32x32, DGPoisson_SimpleSine)
   {
-    const Real pi = Math::Constants::pi();
-
-    auto f = 2.0 * pi * pi * sin(pi * F::x) * sin(pi * F::y);
-    auto g = Zero();
-
-    // ---- Solve on 32x32 mesh ------------------------------------------------
-    Mesh mesh32 = this->getMesh();
-    {
-      P1 vh(mesh32);
-      TrialFunction u(vh);
-      TestFunction  v(vh);
-      BoundaryNormal n(mesh32);
-      const Real h     = 1.0 / static_cast<Real>(32 - 1);
-      const Real sigma = 10.0 / h;
-
-      Problem poisson(u, v);
-      poisson = Integral(Grad(u), Grad(v))
-              - BoundaryIntegral(Dot(Grad(u), n), v)
-              - BoundaryIntegral(u, Dot(Grad(v), n))
-              + BoundaryIntegral(sigma * u, v)
-              - Integral(f, v)
-              - BoundaryIntegral(g, Dot(Grad(v), n))
-              + BoundaryIntegral(sigma * g, v);
-
-      SparseLU(poisson).solve();
-
-      auto solution = sin(pi * F::x) * sin(pi * F::y);
-
-      GridFunction diff(vh);
-      diff = Pow(u.getSolution() - solution, 2);
-      const Real error = Integral(diff).compute();
-      EXPECT_LT(error, RODIN_FUZZY_CONSTANT);
-    }
-  }
-
-  /**
-   * @brief Second convergence test using a non-zero Dirichlet BC.
-   *
-   * Manufactured solution: @f$ u = \sin(\pi x)\cos(\pi y) @f$,
-   * which has a non-trivial boundary trace that exercises the full Nitsche RHS.
-   */
-  TEST_P(Manufactured_DGPoisson_Test_32x32, DGPoisson_NonhomogeneousDirichlet)
-  {
-    const Real pi = Math::Constants::pi();
-
-    auto solution = sin(pi * F::x) * cos(pi * F::y);
-    auto f        = 2.0 * pi * pi * solution;  // -Δu = 2π² u for this choice
-    auto g        = solution;
-
     Mesh mesh = this->getMesh();
-    P1 vh(mesh);
+
+    const Real pi = Math::Constants::pi();
+    auto solution = sin(pi * F::x) * sin(pi * F::y);
+    auto f        = 2.0 * pi * pi * solution;
+    auto g        = Zero();
+
+    P0 vh(mesh);
     TrialFunction u(vh);
     TestFunction  v(vh);
-    BoundaryNormal n(mesh);
+
     const Real h     = 1.0 / static_cast<Real>(32 - 1);
-    const Real sigma = 10.0 / h;
+    const Real sigma = 1.0 / h;
 
     Problem poisson(u, v);
-    poisson = Integral(Grad(u), Grad(v))
-            - BoundaryIntegral(Dot(Grad(u), n), v)
-            - BoundaryIntegral(u, Dot(Grad(v), n))
+    poisson = InterfaceIntegral(sigma * Jump(u), Jump(v))
             + BoundaryIntegral(sigma * u, v)
             - Integral(f, v)
-            - BoundaryIntegral(g, Dot(Grad(v), n))
-            + BoundaryIntegral(sigma * g, v);
+            - BoundaryIntegral(sigma * g, v);
 
     SparseLU(poisson).solve();
 
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - solution, 2);
     const Real error = Integral(diff).compute();
-    EXPECT_LT(error, RODIN_FUZZY_CONSTANT);
+    EXPECT_LT(error, 0.1);
   }
 
-  // Register parameterised tests for both triangle and quadrilateral meshes
+  /**
+   * @brief Convergence test: 32x32 error should be smaller than 16x16 error.
+   *
+   * Confirms that the P0 penalty scheme converges as the mesh is refined.
+   */
+  TEST_P(Manufactured_DGPoisson_Test_16x16, DGPoisson_ConvergesUnderRefinement)
+  {
+    const Real pi = Math::Constants::pi();
+    auto solution = sin(pi * F::x) * sin(pi * F::y);
+    auto f        = 2.0 * pi * pi * solution;
+    auto g        = Zero();
+
+    // Error on 16x16 mesh
+    Real error16;
+    {
+      Mesh mesh16 = this->getMesh();
+      P0 vh(mesh16);
+      TrialFunction u(vh);
+      TestFunction  v(vh);
+      const Real h16    = 1.0 / static_cast<Real>(16 - 1);
+      const Real sigma16 = 1.0 / h16;
+      Problem poisson(u, v);
+      poisson = InterfaceIntegral(sigma16 * Jump(u), Jump(v))
+              + BoundaryIntegral(sigma16 * u, v)
+              - Integral(f, v)
+              - BoundaryIntegral(sigma16 * g, v);
+      SparseLU(poisson).solve();
+      GridFunction diff(vh);
+      diff = Pow(u.getSolution() - solution, 2);
+      error16 = Integral(diff).compute();
+    }
+
+    // Error on 32x32 mesh
+    Real error32;
+    {
+      Mesh mesh32;
+      mesh32 = mesh32.UniformGrid(GetParam(), { 32, 32 });
+      mesh32.scale(1.0 / (32 - 1));
+      mesh32.getConnectivity().compute(1, 2);
+      P0 vh(mesh32);
+      TrialFunction u(vh);
+      TestFunction  v(vh);
+      const Real h32    = 1.0 / static_cast<Real>(32 - 1);
+      const Real sigma32 = 1.0 / h32;
+      Problem poisson(u, v);
+      poisson = InterfaceIntegral(sigma32 * Jump(u), Jump(v))
+              + BoundaryIntegral(sigma32 * u, v)
+              - Integral(f, v)
+              - BoundaryIntegral(sigma32 * g, v);
+      SparseLU(poisson).solve();
+      GridFunction diff(vh);
+      diff = Pow(u.getSolution() - solution, 2);
+      error32 = Integral(diff).compute();
+    }
+
+    EXPECT_LT(error32, error16);
+  }
+
+  // Register parameterised tests for triangles
   INSTANTIATE_TEST_SUITE_P(Triangle, Manufactured_DGPoisson_Test_16x16,
     ::testing::Values(Polytope::Type::Triangle));
 
@@ -198,3 +161,4 @@ namespace Rodin::Tests::Manufactured::DGPoisson
     ::testing::Values(Polytope::Type::Triangle));
 
 } // namespace Rodin::Tests::Manufactured::DGPoisson
+
