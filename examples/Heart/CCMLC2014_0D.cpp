@@ -101,6 +101,12 @@ int main()
   in.Rd = 1.0e8;
   in.Cd = 5.0e-8;
 
+  in.mu_0 = 0.04868;
+  in.mu_Inf = 0.003605;
+  in.lambda = 3.39;
+  in.n = 0.198;
+  in.yasuda = 1.235;
+
   // Valve parameters
   in.Kat = 5.0e-7;
   in.Kp  = 5.0e-10;

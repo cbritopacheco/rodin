@@ -89,6 +89,17 @@ namespace Rodin::Heart::CCMLC2014::Model
     Scalar Rp = 1.0;      ///< Peripheral/proximal resistance.
     Scalar Rd = 1.0;      ///< Distal resistance.
 
+    Scalar proximalRadius = 0.0;
+    Scalar proximalLength = 0.0;
+    Scalar distalRadius = 0.0;
+    Scalar distalLength = 0.0;
+
+    Scalar mu_0    = 0.0;
+    Scalar mu_Inf  = 0.0;
+    Scalar lambda = 0.0;
+    Scalar n = 0.0;
+    Scalar yasuda = 0.0;
+
     Scalar Kat = 0.0;     ///< Atrioventricular (mitral) conductance.
     Scalar Kp = 0.0;      ///< Valve leakage conductance.
     Scalar Kar = 0.0;     ///< Aortic conductance.
@@ -224,6 +235,14 @@ namespace Rodin::Heart::CCMLC2014::Model
     Scalar windkesselOutflow = 0.0;      ///< Outflow term toward Windkessel branch.
     Scalar dWindkesselOutflow_dPv = 0.0; ///< Derivative of outflow wrt ventricular pressure.
     Scalar dWindkesselOutflow_dPar = 0.0; ///< Derivative of outflow wrt arterial pressure.
+
+    Scalar windkesselflowP = 0.0;    ///< flow term toward Windkessel branch.
+    Scalar windkesselflowD = 0.0;    ///< flow term toward Windkessel branch.
+    Scalar dWindkesselflowP_dPar = 0.0;  ///< Derivative of flow wrt ventricular pressure.
+    Scalar dWindkesselflowP_dPd = 0.0;  ///< Derivative of flow wrt ventricular pressure.
+    Scalar dWindkesselflowD_dPar = 0.0;  ///< Derivative of flow wrt arterial pressure.
+    Scalar dWindkesselflowD_dPd = 0.0;  ///< Derivative of flow wrt arterial pressure.
+
 
     LocalActiveDataT<Scalar> active; ///< Local active-dynamics data.
   };

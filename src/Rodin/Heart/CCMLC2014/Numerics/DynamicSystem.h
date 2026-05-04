@@ -183,14 +183,12 @@ namespace Rodin::Heart::CCMLC2014::Numerics
         // Proximal Windkessel balance
         residualVector[Model::ArterialPressure] =
           m_input.Cp / evalData.dt * (evalData.par - evalData.parPrev)
-          + (evalData.parMid - evalData.pdMid) / m_input.Rp
-          - evalData.windkesselOutflow;
+          + evalData.windkesselflowP;
 
         // Distal Windkessel balance
         residualVector[Model::DistalPressure] =
           m_input.Cd / evalData.dt * (evalData.pd - evalData.pdPrev)
-          + (evalData.pdMid - evalData.parMid) / m_input.Rp
-          - (evalData.pSvMid - evalData.pdMid) / m_input.Rd;
+          + evalData.windkesselflowD;
       }
 
       /**
@@ -260,20 +258,18 @@ namespace Rodin::Heart::CCMLC2014::Numerics
           -evalData.dWindkesselOutflow_dPv;
 
         jacobianMatrix(Model::ArterialPressure, Model::ArterialPressure) +=
-          m_input.Cp / dt + Scalar(1) / (Scalar(2) * m_input.Rp)
-          - evalData.dWindkesselOutflow_dPar;
+          m_input.Cp / dt + evalData.dWindkesselflowP_dPar;
 
         jacobianMatrix(Model::ArterialPressure, Model::DistalPressure) +=
-          -Scalar(1) / (Scalar(2) * m_input.Rp);
+          evalData.dWindkesselflowP_dPd;
 
         // --- Row: DistalPressure ---
         jacobianMatrix(Model::DistalPressure, Model::ArterialPressure) +=
-          -Scalar(1) / (Scalar(2) * m_input.Rp);
+          evalData.dWindkesselflowD_dPar;
 
         jacobianMatrix(Model::DistalPressure, Model::DistalPressure) +=
           m_input.Cd / dt
-          + Scalar(1) / (Scalar(2) * m_input.Rp)
-          + Scalar(1) / (Scalar(2) * m_input.Rd);
+          + evalData.dWindkesselflowD_dPd;
       }
 
     private:

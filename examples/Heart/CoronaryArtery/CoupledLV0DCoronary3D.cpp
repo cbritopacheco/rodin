@@ -192,6 +192,17 @@ namespace Rodin::Examples::Heart
     input.Rd = cfg.lv.Rd;
     input.Cd = cfg.lv.Cd;
 
+    input.proximalRadius = cfg.lv.proximalRadius;
+    input.proximalLength = cfg.lv.proximalLength;
+    input.distalRadius = cfg.lv.distalRadius;
+    input.distalLength = cfg.lv.distalLength;
+
+    input.mu_0    = cfg.lv.mu_0;
+    input.mu_Inf  = cfg.lv.mu_Inf;
+    input.lambda = cfg.lv.lambda;
+    input.n = cfg.lv.n;
+    input.yasuda = cfg.lv.yasuda;
+
     input.Kat = cfg.lv.Kat;
     input.Kp  = cfg.lv.Kp;
     input.Kar = cfg.lv.Kar;
@@ -231,12 +242,14 @@ namespace Rodin::Examples::Heart
     return input;
   }
 
-  void CoupledLV0DCoronary3D::updateRCR(RCR& bc, Real Q, Real dt)
+  void CoupledLV0DCoronary3D::updateRCR(const Model& model, RCR& bc, Real Q, Real dt)
   {
     const Real a = bc.C / dt;
 
+    const auto& s = model.getState();
+
     bc.pc =
-      (a * bc.pc + Q + bc.pd / bc.Rd)
+      (a * bc.pc + Q + s.pv / bc.Rd)
       / (a + 1.0 / bc.Rd);
 
     bc.pout = bc.pc + bc.Rp * Q;
@@ -1268,7 +1281,7 @@ namespace Rodin::Examples::Heart
 
       const auto outletRCRStart = CoronaryClock::now();
       for (const Attribute tag : m_cfg.outlets)
-        updateRCRNonNew(m_cfg, m_model, m_wk[tag], m_stepData.qOut.at(tag), m_cfg.dt);
+        updateRCR(m_model, m_wk[tag], m_stepData.qOut.at(tag), m_cfg.dt);
       m_stepTiming.outletRCR = secondsSince(outletRCRStart);
 
       const auto csvStart = CoronaryClock::now();
