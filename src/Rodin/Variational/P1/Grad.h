@@ -343,20 +343,27 @@ namespace Rodin::Variational
 
           // Select adjacent cell.  For boundary faces there is only one
           // neighbour; for interior faces use the trace domain (if set).
+          // Note: getTraceDomain() is only available on FunctionBase-derived
+          // classes (e.g. Grad<GridFunction<...>>).  For ShapeFunction-based
+          // Grad objects (which inherit from ShapeFunctionBase), no trace
+          // domain is available, so we fall back to the first adjacent cell.
           Index cellIdx = inc[0];
           if (inc.size() > 1)
           {
-            const auto& traceDomain = this->getTraceDomain();
-            if (!traceDomain.empty())
+            if constexpr (requires { this->getTraceDomain(); })
             {
-              for (size_t k = 0; k < inc.size(); ++k)
+              const auto& traceDomain = this->getTraceDomain();
+              if (!traceDomain.empty())
               {
-                const auto cellPoly = mesh.getPolytope(d + 1, inc[k]);
-                const Optional<Geometry::Attribute> attr = cellPoly->getAttribute();
-                if (attr && traceDomain.contains(*attr))
+                for (size_t k = 0; k < inc.size(); ++k)
                 {
-                  cellIdx = inc[k];
-                  break;
+                  const auto cellPoly = mesh.getPolytope(d + 1, inc[k]);
+                  const Optional<Geometry::Attribute> attr = cellPoly->getAttribute();
+                  if (attr && traceDomain.contains(*attr))
+                  {
+                    cellIdx = inc[k];
+                    break;
+                  }
                 }
               }
             }

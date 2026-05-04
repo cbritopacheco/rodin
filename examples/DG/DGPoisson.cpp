@@ -34,6 +34,7 @@
  * @f$ for P1) times the inverse mesh size.
  */
 #include <Rodin/Solver.h>
+#include <Rodin/Assembly.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 
@@ -46,7 +47,7 @@ int main(int, char**)
   // ---- Mesh -----------------------------------------------------------------
   static constexpr size_t N = 32;
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, N, N);
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {N, N});
   mesh.scale(1.0 / (N - 1));
   mesh.getConnectivity().compute(1, 2);
 
@@ -87,8 +88,7 @@ int main(int, char**)
           + BoundaryIntegral(sigma * g, v);
 
   // ---- Solve ----------------------------------------------------------------
-  Solver::SparseLU solver;
-  poisson.solve(solver);
+  Solver::SparseLU(poisson).solve();
 
   // ---- Save -----------------------------------------------------------------
   u.getSolution().save("DGPoisson.gf", IO::FileFormat::MFEM);

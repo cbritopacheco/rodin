@@ -33,6 +33,7 @@
  * @f$ \boldsymbol{\beta} = (1,0)^T @f$.
  */
 #include <Rodin/Solver.h>
+#include <Rodin/Assembly.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 
@@ -45,7 +46,7 @@ int main(int, char**)
   // ---- Mesh -----------------------------------------------------------------
   static constexpr size_t N = 32;
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, N, N);
+  mesh = mesh.UniformGrid(Polytope::Type::Triangle, {N, N});
   mesh.scale(1.0 / (N - 1));
   mesh.getConnectivity().compute(1, 2);
 
@@ -89,8 +90,7 @@ int main(int, char**)
             - BoundaryIntegral(Min(Dot(beta, n), Zero()) * g, v);
 
   // ---- Solve ----------------------------------------------------------------
-  Solver::SparseLU solver;
-  advection.solve(solver);
+  Solver::SparseLU(advection).solve();
 
   // ---- Save -----------------------------------------------------------------
   u.getSolution().save("DGAdvection.gf", IO::FileFormat::MFEM);
