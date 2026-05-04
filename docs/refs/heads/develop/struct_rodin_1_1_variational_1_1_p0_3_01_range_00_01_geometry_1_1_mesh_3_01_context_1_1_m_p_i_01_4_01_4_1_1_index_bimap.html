@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin/MPI/Variational.h file | Rodin</title>
+  <title>Rodin::Variational::P0&lt;Range, Geometry::Mesh&lt;Context::MPI&gt;&gt;::IndexBimap struct | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -74,10 +74,44 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_e290bfab8759f47931d844dd05a08f1b.html">MPI</a>/</span>Variational.h <span class="m-thin">file</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_p0_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4.html">P0&lt;Range, Geometry::Mesh&lt;Context::MPI&gt;&gt;</a>::<wbr/></span>IndexBimap <span class="m-thin">struct</span>
+          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_p_i_2_variational_2_p0_2_p0_8h.html">&lt;Rodin/MPI/Variational/P0/P0.h&gt;</a></div>
         </h1>
-        <p>Aggregated include for MPI variational finite element components.</p>
-<p>This header provides distributed finite element-space abstractions for MPI meshes, including:</p><ul><li><a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">Rodin::<wbr />Variational::<wbr />FiniteElementSpace</a> specializations on <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />Mesh&lt;Rodin::<wbr />Context::<wbr />MPI&gt;</a></li><li>Distributed <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">Rodin::<wbr />Variational::<wbr />P0</a> spaces.</li><li>Distributed <a href="class_rodin_1_1_variational_1_1_p0g.html" class="m-doc">Rodin::<wbr />Variational::<wbr />P0g</a> spaces.</li><li>Distributed <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">Rodin::<wbr />Variational::<wbr />P1</a> spaces.</li><li>Distributed <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">Rodin::<wbr />Variational::<wbr />H1</a> spaces.</li></ul>
+        <p>Bidirectional map between local and global DOF indices.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-attribs">Public variables</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="pub-attribs">
+          <h2><a href="#pub-attribs">Public variables</a></h2>
+          <dl class="m-doc">
+            <dt>
+              std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; <a href="#abb0d0400d15a5c2a739e2f662c8c2fe5" class="m-doc">left</a>
+            </dt>
+            <dd>Local-to-global mapping (indexed by local DOF = local cell index).</dd>
+            <dt id="a566b3689128b87025efe3c9c2fb4c587">
+              <a href="group___rodin_types.html#gac254f6b6b70bc4d0f93b9bd717356963" class="m-doc">FlatMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; <a href="#a566b3689128b87025efe3c9c2fb4c587" class="m-doc-self">right</a>
+            </dt>
+            <dd>Global-to-local mapping (keyed by global DOF).</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Variable documentation</h2>
+          <section class="m-doc-details" id="abb0d0400d15a5c2a739e2f662c8c2fe5"><div>
+            <h3>
+              std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; Rodin::<wbr />Variational::<wbr />P0&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;::<wbr />IndexBimap::<wbr /><a href="#abb0d0400d15a5c2a739e2f662c8c2fe5" class="m-doc-self">left</a>
+            </h3>
+            <p>Local-to-global mapping (indexed by local DOF = local cell index).</p>
+<aside class="m-note m-info"><h4>Note</h4><p>The names <code>left</code> and <code>right</code> mirror bidirectional-map terminology:</p><ul><li><code>left[local] = global</code></li><li><code>right[global] = local</code></li></ul></aside>
+          </div></section>
+        </section>
       </div>
     </div>
   </div>

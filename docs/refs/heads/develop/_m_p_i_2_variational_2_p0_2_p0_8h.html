@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin/MPI/Variational.h file | Rodin</title>
+  <title>Rodin/MPI/Variational/P0/P0.h file | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -74,10 +74,57 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_e290bfab8759f47931d844dd05a08f1b.html">MPI</a>/</span>Variational.h <span class="m-thin">file</span>
+          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_e290bfab8759f47931d844dd05a08f1b.html">MPI</a>/</span><span class="m-breadcrumb"><a href="dir_204e8b9dc7b36d9298563c6f804581c4.html">Variational</a>/</span><span class="m-breadcrumb"><a href="dir_a810777b0f87098de08356e5439d5cc9.html">P0</a>/</span>P0.h <span class="m-thin">file</span>
         </h1>
-        <p>Aggregated include for MPI variational finite element components.</p>
-<p>This header provides distributed finite element-space abstractions for MPI meshes, including:</p><ul><li><a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">Rodin::<wbr />Variational::<wbr />FiniteElementSpace</a> specializations on <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />Mesh&lt;Rodin::<wbr />Context::<wbr />MPI&gt;</a></li><li>Distributed <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">Rodin::<wbr />Variational::<wbr />P0</a> spaces.</li><li>Distributed <a href="class_rodin_1_1_variational_1_1_p0g.html" class="m-doc">Rodin::<wbr />Variational::<wbr />P0g</a> spaces.</li><li>Distributed <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">Rodin::<wbr />Variational::<wbr />P1</a> spaces.</li><li>Distributed <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">Rodin::<wbr />Variational::<wbr />H1</a> spaces.</li></ul>
+        <p>Distributed P0 finite element space specialization on MPI meshes.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>This file provides the <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">Rodin::<wbr />Variational::<wbr />P0</a> specialization for <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />Mesh&lt;Rodin::<wbr />Context::<wbr />MPI&gt;</a>. The implementation builds a rank-local P0 space on each shard and maintains local/global degree-of- freedom mappings consistent across ownership and ghost layers.</p><p>P0 degrees of freedom are associated with mesh cells: each cell carries exactly one DOF. Cells are partitioned across ranks; owned cells receive contiguous global indices, and ghost cells synchronize their global DOF index from the owning rank via a direct owner-push exchange.</p>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
+            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
+            <dd>Module which provides the necessary tools for constructing and solving variational problems.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">Rodin::MPI</a></dt>
+            <dd>Distributed-memory parallel extensions using <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a>.</dd>
+          </dl>
+        </section>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Range&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_p0_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4.html" class="m-doc">Rodin::Variational::P0&lt;Range, Geometry::Mesh&lt;Context::MPI&gt;&gt;</a>
+            </dt>
+            <dd>Distributed <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> finite element space for <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> meshes.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_variational_1_1_p0_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4_1_1_index_bimap.html" class="m-doc">Rodin::Variational::P0&lt;Range, Geometry::Mesh&lt;Context::MPI&gt;&gt;::IndexBimap</a>
+            </dt>
+            <dd>Bidirectional map between local and global DOF indices.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Callable&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_p0_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4_1_1_pullback.html" class="m-doc">Rodin::Variational::P0&lt;Range, Geometry::Mesh&lt;Context::MPI&gt;&gt;::Pullback</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_variational_1_1_p0_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4_1_1_pullback.html" class="m-doc">Pullback</a> of a function to the reference polytope.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class CallableType&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_p0_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4_1_1_pushforward.html" class="m-doc">Rodin::Variational::P0&lt;Range, Geometry::Mesh&lt;Context::MPI&gt;&gt;::Pushforward</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_variational_1_1_p0_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4_1_1_pushforward.html" class="m-doc">Pushforward</a> of a function from the reference polytope.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

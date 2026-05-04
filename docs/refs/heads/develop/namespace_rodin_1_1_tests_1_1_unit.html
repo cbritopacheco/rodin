@@ -795,6 +795,101 @@
               Shard_HDF5_FullWorkflow_Reconcile)</span>
             </dt>
             <dd>Full HDF5 shard workflow: distribute → save → reload → reconcile.</dd>
+            <dt id="a28053c7cc2608a13d2d209c6e6b32bff">
+              <span class="m-doc-wrap-bumper"><a href="#a28053c7cc2608a13d2d209c6e6b32bff" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0gSpace,
+              GetSize_IsOne_Triangle)</span>
+            </dt>
+            <dd>Scalar P0g has exactly 1 global DOF on all ranks.</dd>
+            <dt id="a51055d5ad70a4bd89a87eb6ead2cf8fe">
+              <span class="m-doc-wrap-bumper"><a href="#a51055d5ad70a4bd89a87eb6ead2cf8fe" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0gSpace,
+              VectorDimension_IsOne_Triangle)</span>
+            </dt>
+            <dd>Scalar P0g has vector dimension 1.</dd>
+            <dt id="ad7d04ddadaf22c1bce43ef92ee36eb1c">
+              <span class="m-doc-wrap-bumper"><a href="#ad7d04ddadaf22c1bce43ef92ee36eb1c" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0gSpace,
+              AllLocalCells_MapToGlobalDOF0_Triangle)</span>
+            </dt>
+            <dd>For scalar P0g every local cell maps to global DOF 0.</dd>
+            <dt id="a25b9e1f549676865ee8a2347642a2aee">
+              <span class="m-doc-wrap-bumper"><a href="#a25b9e1f549676865ee8a2347642a2aee" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0gSpace,
+              GetGlobalIndex_ConsistentWithGetDOFs_Triangle)</span>
+            </dt>
+            <dd>getGlobalIndex() is consistent with getDOFs() for scalar P0g.</dd>
+            <dt id="a7ce5d11931e25c6c8540be5c01b79634">
+              <span class="m-doc-wrap-bumper"><a href="#a7ce5d11931e25c6c8540be5c01b79634" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0gSpace,
+              OwnershipRange_Rank0OwnsAll_OthersEmpty_Triangle)</span>
+            </dt>
+            <dd>Ownership range on rank 0 covers DOF 0; all other ranks are empty.</dd>
+            <dt id="aca57e8ab4b026e8f1672889b09413898">
+              <span class="m-doc-wrap-bumper"><a href="#aca57e8ab4b026e8f1672889b09413898" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0gSpace,
+              SingleRank_MatchesSequentialSpace_Triangle)</span>
+            </dt>
+            <dd>For single-rank run, <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> P0g matches the sequential P0g space.</dd>
+            <dt id="ac1f95858b78bd029f81b92a258141c92">
+              <span class="m-doc-wrap-bumper"><a href="#ac1f95858b78bd029f81b92a258141c92" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0gSpace,
+              VectorP0g_GetSize_Is2_Triangle)</span>
+            </dt>
+            <dd>Vector P0g(mesh, 2) has exactly 2 global DOFs.</dd>
+            <dt id="a363da34c80d569d62a9b19d3baa04e8e">
+              <span class="m-doc-wrap-bumper"><a href="#a363da34c80d569d62a9b19d3baa04e8e" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0gSpace,
+              VectorP0g_AllLocalCells_MapToGlobalDOFs_Triangle)</span>
+            </dt>
+            <dd>Vector P0g: every local cell maps to global DOFs {0, 1, ..., vdim-1}.</dd>
+            <dt id="a7c041e1d0576b2e16368c31bb9627783">
+              <span class="m-doc-wrap-bumper"><a href="#a7c041e1d0576b2e16368c31bb9627783" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0gSpace,
+              VectorP0g_OwnershipRange_Rank0OwnsAll_Triangle)</span>
+            </dt>
+            <dd>Vector P0g ownership range: rank 0 owns [0, vdim), others empty.</dd>
+            <dt id="ab5cfac1fcf9606335688b112bd6e8f19">
+              <span class="m-doc-wrap-bumper"><a href="#ab5cfac1fcf9606335688b112bd6e8f19" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0gSpace,
+              GetSize_IsOne_Tetrahedron)</span>
+            </dt>
+            <dd>Scalar P0g works on a 3D Tetrahedron mesh.</dd>
+            <dt id="a131bc39c68dc40cb14167ebc6b6b14b3">
+              <span class="m-doc-wrap-bumper"><a href="#a131bc39c68dc40cb14167ebc6b6b14b3" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0Space,
+              GetSize_EqualsGlobalCellCount_Triangle)</span>
+            </dt>
+            <dd>getSize() of the distributed P0 space equals the global cell count.</dd>
+            <dt id="a195100cea567ab77ffa4a46319505075">
+              <span class="m-doc-wrap-bumper"><a href="#a195100cea567ab77ffa4a46319505075" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0Space,
+              GetSize_EqualsGlobalCellCount_Tetrahedron)</span>
+            </dt>
+            <dd>getSize() of the distributed P0 space equals the global cell count for a Tetrahedron mesh.</dd>
+            <dt id="a938d28a8476b8909800a071876130fb6">
+              <span class="m-doc-wrap-bumper"><a href="#a938d28a8476b8909800a071876130fb6" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0Space,
+              AllLocalCells_HaveValidGlobalDOF_Triangle)</span>
+            </dt>
+            <dd>Every local cell (owned and ghost) has a valid global DOF index after construction.</dd>
+            <dt id="a5feb5a2d33495bcfb2ec8948d1b17377">
+              <span class="m-doc-wrap-bumper"><a href="#a5feb5a2d33495bcfb2ec8948d1b17377" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0Space,
+              OwnedDOFs_GloballyUnique_Triangle)</span>
+            </dt>
+            <dd>Owned global DOF indices are unique across all ranks on a Triangle mesh.</dd>
+            <dt id="afdf858c951fb2264d70878ad69925d3b">
+              <span class="m-doc-wrap-bumper"><a href="#afdf858c951fb2264d70878ad69925d3b" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0Space,
+              OwnershipRange_Contiguous_Triangle)</span>
+            </dt>
+            <dd>getOwnershipRange returns a contiguous range consistent with the number of owned cells.</dd>
+            <dt id="a55a8c4872f20b2a7aec8a50ae6e4c8a4">
+              <span class="m-doc-wrap-bumper"><a href="#a55a8c4872f20b2a7aec8a50ae6e4c8a4" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0Space,
+              GetDOFs_ConsistentWithGetGlobalIndex_Triangle)</span>
+            </dt>
+            <dd>getDOFs(D, i)[0] == getGlobalIndex({D, i}, 0) for all local cells.</dd>
+            <dt id="a199120b48da6e7d99db4ac744bbc1d23">
+              <span class="m-doc-wrap-bumper"><a href="#a199120b48da6e7d99db4ac744bbc1d23" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0Space,
+              SingleRank_MatchesSequentialSpace_Triangle)</span>
+            </dt>
+            <dd>For a single <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> rank the distributed P0 space matches the sequential P0 space: same global size and same DOF indices for all cells.</dd>
+            <dt id="a1a02e003379274ebb7231dd07fce5a1d">
+              <span class="m-doc-wrap-bumper"><a href="#a1a02e003379274ebb7231dd07fce5a1d" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0Space,
+              VectorDimension_IsOne_Triangle)</span>
+            </dt>
+            <dd>Scalar P0 has vector dimension 1.</dd>
+            <dt id="a2142958e43a277df59946c9dec64216d">
+              <span class="m-doc-wrap-bumper"><a href="#a2142958e43a277df59946c9dec64216d" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0Space,
+              QuadrilateralMesh_GlobalSizeAndUniqueDOFs)</span>
+            </dt>
+            <dd>Distributed P0 on a Quadrilateral mesh: global size and unique DOFs.</dd>
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#aa16108b846c6a27e592cb2bc3ee40f02" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_unit_1_1_flow_test.html" class="m-doc">FlowTest</a>,
               BasicConstruction)</span>
