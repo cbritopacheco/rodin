@@ -6,6 +6,14 @@ target_link_libraries(RodinMPIP0Test
   Rodin::Variational
   Rodin::MPI)
 
+add_executable(RodinMPIP0gTest P0gTest.cpp)
+target_link_libraries(RodinMPIP0gTest
+  PUBLIC
+  GTest::gtest
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::MPI)
+
 # Detect Open MPI for --oversubscribe flag (not supported by MPICH).
 set(_RODIN_MPI_OVERSUBSCRIBE_FLAG "")
 if (MPIEXEC_EXECUTABLE)
@@ -29,4 +37,14 @@ foreach(np 1 2 3 4)
     LABELS "unit;distributed"
   )
   rodin_suppress_external_mpi_lsan_for_test(RodinMPIP0Test_np${np})
+
+  add_test(
+    NAME RodinMPIP0gTest_np${np}
+    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+            $<TARGET_FILE:RodinMPIP0gTest>)
+  set_tests_properties(RodinMPIP0gTest_np${np} PROPERTIES
+    LABELS "unit;distributed"
+  )
+  rodin_suppress_external_mpi_lsan_for_test(RodinMPIP0gTest_np${np})
 endforeach()
