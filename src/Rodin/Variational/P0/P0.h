@@ -302,28 +302,53 @@ namespace Rodin::Variational
 
       /**
        * @brief Gets the global DOF indices for a polytope.
-       * @param[in] d Dimension of the polytope (must equal mesh dimension)
-       * @param[in] i Index of the polytope (element index)
-       * @return Array containing the single DOF index for this element
+       * @param[in] d Dimension of the polytope
+       * @param[in] i Index of the polytope
+       * @return Array containing the DOF index/indices for this polytope
        *
-       * For P0, each cell has exactly one DOF. The polytope must be
-       * a top-dimensional cell.
+       * For a top-dimensional cell (d == meshDim): returns the single cell DOF.
+       * For a face (d == meshDim - 1): returns the DOFs of all adjacent cells
+       * in incidence order (K1's DOFs first, then K2's for interior faces).
+       * This split-DOF convention is required for DG assembly with Jump/Average.
        */
       const IndexArray& getDOFs(size_t d, Index i) const override
       {
-        assert(d == getMesh().getDimension());
-        (void) d;
-        return m_dofs.at(i);
+        const size_t meshDim = getMesh().getDimension();
+        if (d == meshDim)
+          return m_dofs.at(i);
+
+        // Face dimension: look up adjacent cells and return their combined DOFs.
+        // Results are cached lazily in m_face_dofs on first access.
+        auto it = m_face_dofs.find(std::make_pair(d, i));
+        if (it != m_face_dofs.end())
+          return it->second;
+
+        const auto& conn = getMesh().getConnectivity();
+        const auto& inc = conn.getIncidence({ d, d + 1 }, i);
+
+        IndexArray combined;
+        combined.resize(static_cast<Eigen::Index>(inc.size()));
+        Eigen::Index k = 0;
+        for (const Index cell : inc)
+          combined(k++) = static_cast<Index>(cell);
+
+        auto res = m_face_dofs.emplace(std::make_pair(d, i), std::move(combined));
+        return res.first->second;
+      }
+
+      /// @brief P0 is a discontinuous (DG-type) finite element space.
+      bool isDiscontinuous() const override
+      {
+        return true;
       }
 
       /**
        * @brief Converts local to global DOF index.
-       * @param[in] idx Pair of (dimension, cell index)
-       * @param[in] local Local DOF index (always 0 for P0)
-       * @return Global DOF index (equals cell index)
+       * @param[in] idx Pair of (dimension, polytope index)
+       * @param[in] local Local DOF index (always 0 for cell DOFs)
+       * @return Global DOF index
        *
-       * For P0, the global DOF index equals the cell index since there
-       * is one DOF per cell.
+       * For P0, the global DOF index of a cell equals the cell index.
        */
       Index getGlobalIndex(const std::pair<size_t, Index>& idx, Index local) const override
       {
@@ -365,6 +390,7 @@ namespace Rodin::Variational
 
     private:
       std::vector<IndexArray> m_dofs;
+      mutable FlatMap<std::pair<size_t, Index>, IndexArray> m_face_dofs;
       std::reference_wrapper<const MeshType> m_mesh;
   };
 

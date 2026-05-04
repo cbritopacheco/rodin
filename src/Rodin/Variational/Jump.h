@@ -316,8 +316,15 @@ namespace Rodin::Variational
        * @param[in] local Local DOF index
        * @returns Jump of the basis function @f$ \phi^+(p) - \phi^-(p) @f$
        *
-       * Evaluates the operand's basis function at the same physical point
-       * mapped to both adjacent elements, and returns the difference.
+       * For continuous (CG) spaces: evaluates the operand's basis function at
+       * the same physical point mapped to both adjacent elements, and returns
+       * the difference (which is zero for continuous functions).
+       *
+       * For discontinuous (DG) spaces the face DOFs are enumerated in a split
+       * convention: K1's local DOFs first, then K2's. When @f$ \text{local} <
+       * n_1 @f$ the DOF belongs to K1 and its basis is 1 on K1 and 0 on K2;
+       * when @f$ \text{local} \geq n_1 @f$ it belongs to K2 and its basis is 0
+       * on K1 and 1 on K2 (with a sign flip in the jump).
        */
       auto getBasis(size_t local) const
       {
@@ -342,11 +349,30 @@ namespace Rodin::Variational
         const Geometry::Point p2(std::cref(*it2), std::cref(rc2), pc);
         const IntegrationPoint ip1(p1, m_ip->getQuadratureFormula(), m_ip->getIndex());
         const IntegrationPoint ip2(p2, m_ip->getQuadratureFormula(), m_ip->getIndex());
-        m_operand->setIntegrationPoint(ip1);
-        const auto val1 = m_operand->getBasis(local);
-        m_operand->setIntegrationPoint(ip2);
-        const auto val2 = m_operand->getBasis(local);
-        return val1 - val2;
+
+        if (getFiniteElementSpace().isDiscontinuous())
+        {
+          // Split-DOF convention: local < n1 ↦ K1 side only, else K2 side only.
+          const size_t n1 = m_operand->getDOFs(*it1);
+          if (local < n1)
+          {
+            m_operand->setIntegrationPoint(ip1);
+            return m_operand->getBasis(local);
+          }
+          else
+          {
+            m_operand->setIntegrationPoint(ip2);
+            return -m_operand->getBasis(local - n1);
+          }
+        }
+        else
+        {
+          m_operand->setIntegrationPoint(ip1);
+          const auto val1 = m_operand->getBasis(local);
+          m_operand->setIntegrationPoint(ip2);
+          const auto val2 = m_operand->getBasis(local);
+          return val1 - val2;
+        }
       }
 
       /**

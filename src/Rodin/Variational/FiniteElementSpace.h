@@ -174,6 +174,23 @@ namespace Rodin::Variational
       virtual const IndexArray& getDOFs(size_t d, Index i) const = 0;
 
       /**
+       * @brief Returns whether this FE space is discontinuous (DG-type).
+       *
+       * Discontinuous spaces (e.g. P0) use a split DOF convention for faces:
+       * `getDOFs(face_dim, face_idx)` returns the combined DOF arrays of all
+       * adjacent cells, with K1's DOFs first followed by K2's DOFs.
+       * Operators such as Jump and Average use this flag to select the correct
+       * assembly path.
+       *
+       * @return true  for discontinuous spaces (P0, broken-P1, …)
+       * @return false for continuous spaces (P1, H1, …) [default]
+       */
+      virtual bool isDiscontinuous() const
+      {
+        return false;
+      }
+
+      /**
        * @brief Gets the global index for the local degree of freedom on the
        * @f$ (d, i) @f$-polytope.
        * @param[in] idx Pair representing the @f$ (d, i) @f$-polytope.
