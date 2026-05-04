@@ -276,10 +276,9 @@ namespace Rodin::Variational
         assert(dofIdx == static_cast<Index>(m_owned));
 
         // Determine which ranks to receive ghost-DOF notifications from.
-        for (const auto& [li, own] : owner)
+        for (const auto& entry : owner)
         {
-          (void) li;
-          const int ro = static_cast<int>(own);
+          const int ro = static_cast<int>(entry.second);
           if (ro != rank)
             need_recv[ro] = 1;
         }
