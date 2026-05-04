@@ -101,4 +101,26 @@ foreach(np 2 4)
   rodin_suppress_external_mpi_lsan_for_test(RodinPETScMPIFormTest_np${np})
 endforeach()
 
+add_executable(RodinPETScMPIP0P0gTest MPIP0P0gTest.cpp)
+target_link_libraries(RodinPETScMPIP0P0gTest
+  PUBLIC
+  GTest::gtest
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::MPI
+  Rodin::PETSc)
+
+foreach(np 1 2 4)
+  add_test(
+    NAME RodinPETScMPIP0P0gTest_np${np}
+    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+            $<TARGET_FILE:RodinPETScMPIP0P0gTest>)
+  set_tests_properties(RodinPETScMPIP0P0gTest_np${np} PROPERTIES
+    LABELS "unit;petsc;distributed"
+    TIMEOUT 60
+  )
+  rodin_suppress_external_mpi_lsan_for_test(RodinPETScMPIP0P0gTest_np${np})
+endforeach()
+
 add_subdirectory(IO)
