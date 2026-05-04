@@ -404,8 +404,10 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   // =========================================================================
 
   /**
-   * @brief Project a constant onto distributed P0g and verify DOF 0 = c
-   *        on rank 0.
+   * @brief Project a constant onto distributed P0g and verify the projection
+   *        by checking ∫ u_h dΩ = c · |Ω|.
+   *
+   * The test uses a [0,1]×[0,1] mesh (area = 1), so ∫ u_h dΩ = c.
    */
   TEST(PETSc_MPI_P0g, GridFunctionProjection_ConstantFunction_Triangle)
   {
@@ -416,6 +418,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     const Real c = 4.2;
 
     Context::MPI ctx(*g_env, world);
+    // Scale to [0,1]x[0,1] → area = 1.
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, { 6, 6 },
                                    Real(1) / Real(5));
 
@@ -423,14 +426,9 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     GridFunction<decltype(fes), ::Vec> u(fes);
     u = RealFunction(c);
 
-    // Only rank 0 owns the single DOF.
-    if (world.rank() == 0)
-    {
-      const PetscScalar v = u[0];
-      EXPECT_NEAR(PetscRealPart(v), c, 1e-10);
-      u.flush();
-    }
-    world.barrier();
+    // Verify projection via collective integral: ∫ u_h dΩ = c * 1 = c
+    const Real total = Integral(u).compute();
+    EXPECT_NEAR(total, c, 1e-10);
   }
 
   // =========================================================================
