@@ -95,9 +95,39 @@ namespace Rodin::Variational
           m_fes(mesh.getShard())
       {}
 
-      P0g(const P0g&) = default;
-      P0g(P0g&&) = default;
-      P0g& operator=(P0g&&) = default;
+      P0g(const P0g& other)
+        : Parent(other),
+          m_mesh(other.m_mesh),
+          m_fes(other.m_fes)
+      {}
+
+      P0g(P0g&& other)
+        : Parent(std::move(other)),
+          m_mesh(other.m_mesh),
+          m_fes(std::move(other.m_fes))
+      {}
+
+      P0g& operator=(const P0g& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(other);
+          m_mesh = other.m_mesh;
+          m_fes = other.m_fes;
+        }
+        return *this;
+      }
+
+      P0g& operator=(P0g&& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(std::move(other));
+          m_mesh = other.m_mesh;
+          m_fes = std::move(other.m_fes);
+        }
+        return *this;
+      }
 
       ~P0g() override = default;
 
@@ -285,9 +315,39 @@ namespace Rodin::Variational
         : P0g(mesh, VDim)
       {}
 
-      P0g(const P0g&) = default;
-      P0g(P0g&&) = default;
-      P0g& operator=(P0g&&) = default;
+      P0g(const P0g& other)
+        : Parent(other),
+          m_mesh(other.m_mesh),
+          m_fes(other.m_fes)
+      {}
+
+      P0g(P0g&& other)
+        : Parent(std::move(other)),
+          m_mesh(other.m_mesh),
+          m_fes(std::move(other.m_fes))
+      {}
+
+      P0g& operator=(const P0g& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(other);
+          m_mesh = other.m_mesh;
+          m_fes = other.m_fes;
+        }
+        return *this;
+      }
+
+      P0g& operator=(P0g&& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(std::move(other));
+          m_mesh = std::move(other.m_mesh);
+          m_fes = std::move(other.m_fes);
+        }
+        return *this;
+      }
 
       ~P0g() override = default;
 
