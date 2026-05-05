@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Variational::P0&lt;Range, Geometry::Mesh&lt;Context::MPI&gt;&gt; class | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_p_i_2_variational_2_p0_2_p0_8h.html">&lt;Rodin/MPI/Variational/P0/P0.h&gt;</a></div>
+          <div class="m-doc-template">template&lt;class Range&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>P0&lt;Range, Geometry::Mesh&lt;Context::MPI&gt;&gt; <span class="m-thin">class</span>
+        </h1>
+        <p>Distributed <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> finite element space for <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> meshes.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">Range</td>
+              <td>Scalar or vector range descriptor used by <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a>.</td>
+            </tr>
+          </tbody>
+        </table>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>This specialization wraps a local shard <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> space and augments it with distributed global indexing. Each cell of the distributed mesh carries exactly one degree of freedom. Owned cells receive contiguous global indices per rank, and ghost cells synchronize their global DOF index from the owning rank.</p>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Mesh, class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace&lt;Geometry::Mesh&lt;Context::MPI&gt;, P0&lt;Range, Geometry::Mesh&lt;Context::MPI&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Represernts a finite element space.</dd>
+          </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt>
+              struct <a href="struct_rodin_1_1_variational_1_1_p0_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4_1_1_index_bimap.html" class="m-doc">IndexBimap</a>
+            </dt>
+            <dd>Bidirectional map between local and global DOF indices.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Callable&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_p0_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4_1_1_pullback.html" class="m-doc">Pullback</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_variational_1_1_p0_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4_1_1_pullback.html" class="m-doc">Pullback</a> of a function to the reference polytope.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class CallableType&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_p0_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4_1_1_pushforward.html" class="m-doc">Pushforward</a>
+            </dt>
+            <dd><a href="class_rodin_1_1_variational_1_1_p0_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4_1_1_pushforward.html" class="m-doc">Pushforward</a> of a function from the reference polytope.</dd>
+            <dt id="abccaffe1f1d9f2b4e323c3f4721a26dd">
+              using <a href="#abccaffe1f1d9f2b4e323c3f4721a26dd" class="m-doc-self">ContextType</a> = <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>
+            </dt>
+            <dd>Represents the <a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a> of the <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> space.</dd>
+            <dt id="a6ad486e9d72c307f0a01e6f889716186">
+              using <a href="#a6ad486e9d72c307f0a01e6f889716186" class="m-doc-self">FESType</a> = <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a>&lt;Range, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&gt;
+            </dt>
+            <dd>Underlying local shard finite element space type.</dd>
+            <dt id="adbcc1a2097c99bcaeca69ac2eff3c9bf">
+              using <a href="#adbcc1a2097c99bcaeca69ac2eff3c9bf" class="m-doc-self">ScalarType</a> = typename FESType::ScalarType
+            </dt>
+            <dd>Scalar type carried by DOF values.</dd>
+            <dt id="a8d2c542bf6808204c439298c8da0c0d9">
+              using <a href="#a8d2c542bf6808204c439298c8da0c0d9" class="m-doc-self">RangeType</a> = typename FESType::RangeType
+            </dt>
+            <dd>Range type of value.</dd>
+            <dt id="a4ded3263986a36723239faeabaa4a7ed">
+              using <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc-self">MeshType</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="#abccaffe1f1d9f2b4e323c3f4721a26dd" class="m-doc">ContextType</a>&gt;
+            </dt>
+            <dd>Type of mesh on which the finite element space is built.</dd>
+            <dt id="a8cd0123358b93cfcc76ec98f22e3a5a7">
+              using <a href="#a8cd0123358b93cfcc76ec98f22e3a5a7" class="m-doc-self">ElementType</a> = <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>&lt;<a href="#a8d2c542bf6808204c439298c8da0c0d9" class="m-doc">RangeType</a>&gt;
+            </dt>
+            <dd>Type of finite element.</dd>
+            <dt id="a9481c44edf58e0c7a223a39a66eaf782">
+              using <a href="#a9481c44edf58e0c7a223a39a66eaf782" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&lt;<a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>, <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a>&lt;<a href="#a8d2c542bf6808204c439298c8da0c0d9" class="m-doc">RangeType</a>, <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>&gt;&gt;
+            </dt>
+            <dd>Parent class.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ab8f52df96f9fbc3c3c6642be7e961888" class="m-doc">P0</a>(</span><span class="m-doc-wrap">const <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>&amp; mesh)</span>
+            </dt>
+            <dd>Constructs the distributed <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> space on the given mesh.</dd>
+            <dt id="ab3efe8437ab24c15cd2b896b1c43e268">
+              <span class="m-doc-wrap-bumper"><a href="#ab3efe8437ab24c15cd2b896b1c43e268" class="m-doc-self">P0</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="a8117bb29d4fc6732377f89cbd9f2324c">
+              <span class="m-doc-wrap-bumper"><a href="#a8117bb29d4fc6732377f89cbd9f2324c" class="m-doc-self">P0</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a2d73481a6bddfd78ed9b7de19f47fa5a">
+              <span class="m-doc-wrap-bumper">auto <a href="#a2d73481a6bddfd78ed9b7de19f47fa5a" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a>&amp;&amp;) -&gt; <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Move assignment operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a88987bef7972e7ef2a6aa0c6b83138b0" class="m-doc">getShard</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a6ad486e9d72c307f0a01e6f889716186" class="m-doc">FESType</a>&amp;</span>
+            </dt>
+            <dd>Returns the local shard finite element space.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a96abd8ba8f14deaed88496405eb96c1d" class="m-doc">getOwnershipRange</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; begin,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; end) const</span>
+            </dt>
+            <dd>Returns the global ownership range of this rank.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5dca55880f71baf8ba967bef5e1c992d" class="m-doc">getGlobalIndex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> localIdx) const -&gt; <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a></span>
+            </dt>
+            <dd>Returns the global distributed DOF index for a local shard DOF.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a97d707c496c30f9f2c697270b002cd98" class="m-doc">getLocalIndex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> globalIdx) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;</span>
+            </dt>
+            <dd>Returns the local shard DOF index for a global distributed DOF.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae158db2d2017a069f2ede653e5110753" class="m-doc">getFiniteElement</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; const <a href="#a8cd0123358b93cfcc76ec98f22e3a5a7" class="m-doc">ElementType</a>&amp;</span>
+            </dt>
+            <dd>Returns the finite element attached to local polytope <svg class="m-math" style="width: 2.544em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.424936 11.955168">
+<title>
+$(d, i)$
+</title>
+<defs>
+<path id='eq4-g0-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='eq4-g0-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+<path id='eq4-g0-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
+<path id='eq4-g1-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq4-g1-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+</defs>
+<g id='eq4-page1'>
+<use x='0' y='0' xlink:href='#eq4-g1-40'/>
+<use x='4.552326' y='0' xlink:href='#eq4-g0-100'/>
+<use x='10.635019' y='0' xlink:href='#eq4-g0-59'/>
+<use x='15.879178' y='0' xlink:href='#eq4-g0-105'/>
+<use x='19.87261' y='0' xlink:href='#eq4-g1-41'/>
+</g>
+</svg>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a23e73ba10e16901b2326d8212936b72b" class="m-doc">getSize</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Returns the global number of degrees of freedom.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1c88fa53fe90dcf92c359274842445e9" class="m-doc">getVectorDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Returns the vector dimension (1 for scalar <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a>).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a023a4642b6e40a2d6ea68a6bdbb096bb" class="m-doc">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Returns the distributed mesh on which the finite element space is defined.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#adba1954ca59742b5304d71dcc0854c65" class="m-doc">getDOFs</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; const <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Returns global DOF indices attached to local polytope <svg class="m-math" style="width: 2.544em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.424936 11.955168">
+<title>
+$(d, i)$
+</title>
+<defs>
+<path id='eq7-g0-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='eq7-g0-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+<path id='eq7-g0-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
+<path id='eq7-g1-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq7-g1-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+</defs>
+<g id='eq7-page1'>
+<use x='0' y='0' xlink:href='#eq7-g1-40'/>
+<use x='4.552326' y='0' xlink:href='#eq7-g0-100'/>
+<use x='10.635019' y='0' xlink:href='#eq7-g0-59'/>
+<use x='15.879178' y='0' xlink:href='#eq7-g0-105'/>
+<use x='19.87261' y='0' xlink:href='#eq7-g1-41'/>
+</g>
+</svg>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5fb549135bf5098b080495b2532a2b56" class="m-doc">getGlobalIndex</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> localDof) const -&gt; <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Returns the global DOF index for local basis function <code>localDof</code> on polytope <svg class="m-math" style="width: 2.544em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.424936 11.955168">
+<title>
+$(d, i)$
+</title>
+<defs>
+<path id='eq9-g0-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='eq9-g0-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+<path id='eq9-g0-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
+<path id='eq9-g1-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq9-g1-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+</defs>
+<g id='eq9-page1'>
+<use x='0' y='0' xlink:href='#eq9-g1-40'/>
+<use x='4.552326' y='0' xlink:href='#eq9-g0-100'/>
+<use x='10.635019' y='0' xlink:href='#eq9-g0-59'/>
+<use x='15.879178' y='0' xlink:href='#eq9-g0-105'/>
+<use x='19.87261' y='0' xlink:href='#eq9-g1-41'/>
+</g>
+</svg>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Callable&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2a363690c6d5bdf368b7b5182bc6f8b7" class="m-doc">getPullback</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              Callable&amp;&amp; v) const -&gt; auto</span>
+            </dt>
+            <dd>Returns a pullback wrapper on local polytope <svg class="m-math" style="width: 2.544em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.424936 11.955168">
+<title>
+$(d, i)$
+</title>
+<defs>
+<path id='eq11-g0-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='eq11-g0-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+<path id='eq11-g0-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
+<path id='eq11-g1-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq11-g1-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+</defs>
+<g id='eq11-page1'>
+<use x='0' y='0' xlink:href='#eq11-g1-40'/>
+<use x='4.552326' y='0' xlink:href='#eq11-g0-100'/>
+<use x='10.635019' y='0' xlink:href='#eq11-g0-59'/>
+<use x='15.879178' y='0' xlink:href='#eq11-g0-105'/>
+<use x='19.87261' y='0' xlink:href='#eq11-g1-41'/>
+</g>
+</svg>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class CallableType&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac80994529ff16c67dfc1224daa901b64" class="m-doc">getPushforward</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp;,
+              const CallableType&amp; v) const -&gt; auto</span>
+            </dt>
+            <dd>Returns a pushforward wrapper on local polytope <svg class="m-math" style="width: 2.544em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.424936 11.955168">
+<title>
+$(d, i)$
+</title>
+<defs>
+<path id='eq13-g0-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='eq13-g0-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+<path id='eq13-g0-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
+<path id='eq13-g1-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq13-g1-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+</defs>
+<g id='eq13-page1'>
+<use x='0' y='0' xlink:href='#eq13-g1-40'/>
+<use x='4.552326' y='0' xlink:href='#eq13-g0-100'/>
+<use x='10.635019' y='0' xlink:href='#eq13-g0-59'/>
+<use x='15.879178' y='0' xlink:href='#eq13-g0-105'/>
+<use x='19.87261' y='0' xlink:href='#eq13-g1-41'/>
+</g>
+</svg>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class CallableType&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad69edc9efdace02783e2ebab801bd77a" class="m-doc">getPushforward</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp;,
+              const CallableType&amp; v) const -&gt; auto</span>
+            </dt>
+            <dd>Returns a pushforward wrapper for an explicit polytope object.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ab8f52df96f9fbc3c3c6642be7e961888"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Range&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P0&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;Range&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab8f52df96f9fbc3c3c6642be7e961888" class="m-doc-self">P0</a>(</span><span class="m-doc-wrap">const <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>&amp; mesh)</span></span>
+            </h3>
+            <p>Constructs the distributed <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> space on the given mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Distributed mesh on which the space is defined.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Builds the local shard <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> space, then assigns contiguous global DOF indices to owned cells. Ghost cells obtain their global DOF index via a direct owner-push exchange:</p><ul><li>Each rank iterates its owned cells and assigns a global DOF index <svg class="m-math" style="width: 7.200em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 69.120923 10.626798">
+<title>
+$ g = \text{offset} + k $
+</title>
+<defs>
+<path id='eq1-g4-43' d='M4.770112-2.761644H8.069738C8.237111-2.761644 8.452304-2.761644 8.452304-2.976837C8.452304-3.203985 8.249066-3.203985 8.069738-3.203985H4.770112V-6.503611C4.770112-6.670984 4.770112-6.886177 4.554919-6.886177C4.327771-6.886177 4.327771-6.682939 4.327771-6.503611V-3.203985H1.028144C.860772-3.203985 .645579-3.203985 .645579-2.988792C.645579-2.761644 .848817-2.761644 1.028144-2.761644H4.327771V.537983C4.327771 .705355 4.327771 .920548 4.542964 .920548C4.770112 .920548 4.770112 .71731 4.770112 .537983V-2.761644Z'/>
+<path id='eq1-g4-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq1-g3-11' d='M4.633186-6.896182C4.478349-6.503135 4.418797-6.074357 4.406886-5.359727H2.167712V-5.871878V-5.943341C2.167712-6.479314 2.215354-6.931913 2.37019-7.217765C2.572669-7.586991 3.001447-7.837111 3.430225-7.837111C3.763719-7.837111 3.990019-7.682275 4.275871-7.277318C4.406886-7.074839 4.525991-6.955734 4.633186-6.896182ZM7.741827-7.396423C7.741827-7.825201 7.217765-8.134874 6.503135-8.134874C5.967162-8.134874 5.490742-7.968127 5.157248-7.682275C4.930949-7.968127 4.442618-8.134874 3.77563-8.134874C2.870431-8.134874 2.179622-7.837111 1.750844-7.241586C1.393529-6.741345 1.262513-6.312567 1.19105-5.359727H.369226V-4.96668H1.17914V-1.119587C1.17914-.357315 1.048124-.202479 .381136-.178658V0H3.001447V-.178658C2.334459-.2263 2.179622-.393047 2.179622-1.048124V-4.96668H4.406886V-1.238692C4.406886-.369226 4.406886-.250121 3.585062-.178658V0H6.205372V-.178658C5.514563-.23821 5.407369-.345405 5.407369-1.238692V-4.96668H6.86045V-5.359727H5.395458V-6.741345C5.395458-7.444065 5.621758-7.80138 6.074357-7.80138C6.336388-7.80138 6.491225-7.682275 6.705614-7.33687C6.896182-7.015287 7.039108-6.908092 7.241586-6.908092C7.527438-6.908092 7.741827-7.122481 7.741827-7.396423Z'/>
+<path id='eq1-g3-101' d='M5.050054-1.869949L4.859486-1.953323C4.287781-1.048124 3.77563-.70272 3.013357-.70272C2.35828-.70272 1.858039-1.012393 1.512634-1.65556C1.274424-2.12007 1.17914-2.536937 1.155319-3.29921H4.823754C4.72847-4.073392 4.609365-4.418797 4.311602-4.799933C3.954287-5.228711 3.406404-5.478832 2.787058-5.478832C1.310155-5.478832 .297763-4.287781 .297763-2.548848C.297763-.905198 1.155319 .119105 2.525027 .119105C3.668435 .119105 4.549812-.583615 5.050054-1.869949ZM3.608883-3.680346H1.17914C1.310155-4.621275 1.715113-5.050054 2.441653-5.050054S3.454046-4.716559 3.608883-3.680346Z'/>
+<path id='eq1-g3-111' d='M5.597937-2.787058C5.597937-4.347334 4.50217-5.478832 2.977626-5.478832C1.42926-5.478832 .345405-4.335423 .345405-2.691774C.345405-1.083856 1.453081 .119105 2.953805 .119105S5.597937-1.143408 5.597937-2.787058ZM4.525991-2.37019C4.525991-1.024303 3.990019-.214389 3.096731-.214389C2.632221-.214389 2.191533-.500241 1.941412-.976661C1.607918-1.596007 1.41735-2.429743 1.41735-3.275389C1.41735-4.406886 1.977144-5.145338 2.822789-5.145338C3.823272-5.145338 4.525991-4.001929 4.525991-2.37019Z'/>
+<path id='eq1-g3-115' d='M4.144855-1.405439C4.144855-2.000965 3.870914-2.394011 3.144373-2.822789L1.858039-3.585062C1.524544-3.77563 1.345887-4.073392 1.345887-4.394976C1.345887-4.883307 1.715113-5.20489 2.262996-5.20489C2.941894-5.20489 3.29921-4.811844 3.573151-3.739898H3.751809L3.704167-5.359727H3.573151L3.54933-5.335906C3.442136-5.252532 3.430225-5.240622 3.382583-5.240622C3.31112-5.240622 3.192015-5.264443 3.060999-5.323995C2.810879-5.419279 2.536937-5.466921 2.251085-5.466921C1.274424-5.466921 .607436-4.871396 .607436-4.001929C.607436-3.334941 .988572-2.870431 2.000965-2.286817L2.691774-1.89377C3.108641-1.65556 3.31112-1.369708 3.31112-1.000482C3.31112-.47642 2.929984-.142926 2.322548-.142926C1.500723-.142926 1.083856-.595525 .809914-1.810397H.619346V.047642H.774183C.857556-.071463 .905198-.095284 1.048124-.095284C1.17914-.095284 1.310155-.071463 1.596007 0C1.929502 .071463 2.227264 .119105 2.477385 .119105C3.382583 .119105 4.144855-.571704 4.144855-1.405439Z'/>
+<path id='eq1-g3-116' d='M3.323031-.786093L3.168194-.917109C2.906163-.607436 2.715595-.500241 2.453564-.500241C2.012875-.500241 1.834218-.809914 1.834218-1.572186V-4.978591H3.037178V-5.359727H1.834218V-6.741345C1.834218-6.86045 1.810397-6.896182 1.750844-6.896182C1.679381-6.777077 1.596007-6.669882 1.512634-6.562688C1.071945-5.90761 .666988-5.466921 .357315-5.288264C.2263-5.20489 .154837-5.133427 .154837-5.061964C.154837-5.026233 .166747-5.002412 .202479-4.978591H.833735V-1.393529C.833735-.393047 1.19105 .119105 1.88186 .119105C2.477385 .119105 2.929984-.166747 3.323031-.786093Z'/>
+<path id='eq1-g0-103' d='M4.040847-1.518306C3.993026-1.327024 3.969116-1.279203 3.813699-1.099875C3.323537-.466252 2.82142-.239103 2.450809-.239103C2.056289-.239103 1.685679-.549938 1.685679-1.374844C1.685679-2.008468 2.044334-3.347447 2.307347-3.88543C2.654047-4.554919 3.19203-5.033126 3.694147-5.033126C4.483188-5.033126 4.638605-4.052802 4.638605-3.981071L4.60274-3.813699L4.040847-1.518306ZM4.782067-4.483188C4.62665-4.829888 4.291905-5.272229 3.694147-5.272229C2.391034-5.272229 .908593-3.634371 .908593-1.853051C.908593-.609714 1.661768 0 2.426899 0C3.060523 0 3.622416-.502117 3.837609-.74122L3.574595 .334745C3.407223 .992279 3.335492 1.291158 2.905106 1.709589C2.414944 2.199751 1.960648 2.199751 1.697634 2.199751C1.338979 2.199751 1.0401 2.175841 .74122 2.080199C1.123786 1.972603 1.219427 1.637858 1.219427 1.506351C1.219427 1.315068 1.075965 1.123786 .812951 1.123786C.526027 1.123786 .215193 1.362889 .215193 1.75741C.215193 2.247572 .705355 2.438854 1.721544 2.438854C3.263761 2.438854 4.064757 1.446575 4.220174 .800996L5.547198-4.554919C5.583064-4.698381 5.583064-4.722291 5.583064-4.746202C5.583064-4.913574 5.451557-5.045081 5.272229-5.045081C4.985305-5.045081 4.817933-4.805978 4.782067-4.483188Z'/>
+<path id='eq1-g0-107' d='M3.359402-7.998007C3.371357-8.045828 3.395268-8.117559 3.395268-8.177335C3.395268-8.296887 3.275716-8.296887 3.251806-8.296887C3.239851-8.296887 2.809465-8.261021 2.594271-8.237111C2.391034-8.225156 2.211706-8.201245 1.996513-8.18929C1.709589-8.16538 1.625903-8.153425 1.625903-7.938232C1.625903-7.81868 1.745455-7.81868 1.865006-7.81868C2.47472-7.81868 2.47472-7.711083 2.47472-7.591532C2.47472-7.543711 2.47472-7.519801 2.414944-7.304608L.705355-.466252C.657534-.286924 .657534-.263014 .657534-.191283C.657534 .071731 .860772 .119552 .980324 .119552C1.315068 .119552 1.3868-.143462 1.482441-.514072L2.044334-2.749689C2.905106-2.654047 3.419178-2.295392 3.419178-1.721544C3.419178-1.649813 3.419178-1.601993 3.383313-1.422665C3.335492-1.243337 3.335492-1.099875 3.335492-1.0401C3.335492-.3467 3.789788 .119552 4.399502 .119552C4.94944 .119552 5.236364-.382565 5.332005-.549938C5.583064-.992279 5.738481-1.661768 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.769365 5.451557-1.578082C5.284184-.956413 5.033126-.119552 4.423412-.119552C4.184309-.119552 4.028892-.239103 4.028892-.6934C4.028892-.920548 4.076712-1.183562 4.124533-1.362889C4.172354-1.578082 4.172354-1.590037 4.172354-1.733499C4.172354-2.438854 3.53873-2.833375 2.438854-2.976837C2.86924-3.239851 3.299626-3.706102 3.466999-3.88543C4.148443-4.65056 4.614695-5.033126 5.164633-5.033126C5.439601-5.033126 5.511333-4.961395 5.595019-4.889664C5.152677-4.841843 4.985305-4.531009 4.985305-4.291905C4.985305-4.004981 5.212453-3.90934 5.379826-3.90934C5.702615-3.90934 5.989539-4.184309 5.989539-4.566874C5.989539-4.913574 5.71457-5.272229 5.176588-5.272229C4.519054-5.272229 3.981071-4.805978 3.132254-3.849564C3.012702-3.706102 2.570361-3.251806 2.12802-3.084433L3.359402-7.998007Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g0-103'/>
+<use x='9.355086' y='0' xlink:href='#eq1-g4-61'/>
+<use x='21.780567' y='0' xlink:href='#eq1-g3-111'/>
+<use x='27.758151' y='0' xlink:href='#eq1-g3-11'/>
+<use x='34.931256' y='0' xlink:href='#eq1-g3-115'/>
+<use x='39.581816' y='0' xlink:href='#eq1-g3-101'/>
+<use x='44.889913' y='0' xlink:href='#eq1-g3-116'/>
+<use x='50.870104' y='0' xlink:href='#eq1-g4-43'/>
+<use x='62.631419' y='0' xlink:href='#eq1-g0-107'/>
+</g>
+</svg> where <svg class="m-math" style="width: 0.676em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.489504 8.302191">
+<title>
+$ k $
+</title>
+<defs>
+<path id='eq2-g0-107' d='M3.359402-7.998007C3.371357-8.045828 3.395268-8.117559 3.395268-8.177335C3.395268-8.296887 3.275716-8.296887 3.251806-8.296887C3.239851-8.296887 2.809465-8.261021 2.594271-8.237111C2.391034-8.225156 2.211706-8.201245 1.996513-8.18929C1.709589-8.16538 1.625903-8.153425 1.625903-7.938232C1.625903-7.81868 1.745455-7.81868 1.865006-7.81868C2.47472-7.81868 2.47472-7.711083 2.47472-7.591532C2.47472-7.543711 2.47472-7.519801 2.414944-7.304608L.705355-.466252C.657534-.286924 .657534-.263014 .657534-.191283C.657534 .071731 .860772 .119552 .980324 .119552C1.315068 .119552 1.3868-.143462 1.482441-.514072L2.044334-2.749689C2.905106-2.654047 3.419178-2.295392 3.419178-1.721544C3.419178-1.649813 3.419178-1.601993 3.383313-1.422665C3.335492-1.243337 3.335492-1.099875 3.335492-1.0401C3.335492-.3467 3.789788 .119552 4.399502 .119552C4.94944 .119552 5.236364-.382565 5.332005-.549938C5.583064-.992279 5.738481-1.661768 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.769365 5.451557-1.578082C5.284184-.956413 5.033126-.119552 4.423412-.119552C4.184309-.119552 4.028892-.239103 4.028892-.6934C4.028892-.920548 4.076712-1.183562 4.124533-1.362889C4.172354-1.578082 4.172354-1.590037 4.172354-1.733499C4.172354-2.438854 3.53873-2.833375 2.438854-2.976837C2.86924-3.239851 3.299626-3.706102 3.466999-3.88543C4.148443-4.65056 4.614695-5.033126 5.164633-5.033126C5.439601-5.033126 5.511333-4.961395 5.595019-4.889664C5.152677-4.841843 4.985305-4.531009 4.985305-4.291905C4.985305-4.004981 5.212453-3.90934 5.379826-3.90934C5.702615-3.90934 5.989539-4.184309 5.989539-4.566874C5.989539-4.913574 5.71457-5.272229 5.176588-5.272229C4.519054-5.272229 3.981071-4.805978 3.132254-3.849564C3.012702-3.706102 2.570361-3.251806 2.12802-3.084433L3.359402-7.998007Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g0-107'/>
+</g>
+</svg> is the local owned- cell counter.</li><li>For each owned cell that also appears on neighboring ranks as a ghost (recorded in <code>shard.getHalo(D)</code>), the owner sends (globalCellID, globalDOF) to all holder ranks.</li><li>Each non-owner rank posts a matching <code>irecv</code> from its owner (recorded in <code>shard.getOwner(D)</code>) and installs the received global DOF index in the local-to-global map.</li></ul>
+          </div></section>
+          <section class="m-doc-details" id="a88987bef7972e7ef2a6aa0c6b83138b0"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Range&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="#a6ad486e9d72c307f0a01e6f889716186" class="m-doc">FESType</a>&amp; Rodin::<wbr />Variational::<wbr />P0&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;Range&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a88987bef7972e7ef2a6aa0c6b83138b0" class="m-doc-self">getShard</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns the local shard finite element space.</p>
+<p>The distributed <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> space is constructed from the <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> space defined on the local mesh shard. This method provides access to that underlying local finite element space.</p>
+          </div></section>
+          <section class="m-doc-details" id="a96abd8ba8f14deaed88496405eb96c1d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Range&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />P0&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;Range&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a96abd8ba8f14deaed88496405eb96c1d" class="m-doc-self">getOwnershipRange</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; begin,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; end) const</span></span>
+            </h3>
+            <p>Returns the global ownership range of this rank.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">begin&nbsp;<span class="m-label m-flat m-warning">out</span></td>
+                  <td>First global DOF owned by this rank.</td>
+                </tr>
+                <tr>
+                  <td>end&nbsp;<span class="m-label m-flat m-warning">out</span></td>
+                  <td>One past the last global DOF owned by this rank.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>The interval <svg class="m-math" style="width: 5.925em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 56.875797 11.955168">
+<title>
+$ [\text{begin}, \text{end}) $
+</title>
+<defs>
+<path id='eq3-g0-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='eq3-g3-98' d='M5.574116-2.894252C5.574116-4.359244 4.668917-5.478832 3.477867-5.478832C2.751326-5.478832 2.060517-5.050054 1.822307-4.466439V-8.111053L1.762755-8.134874C1.262513-7.956216 .94093-7.860932 .381136-7.706096L.035732-7.610812V-7.420244C.107195-7.432154 .154837-7.432154 .23821-7.432154C.71463-7.432154 .821825-7.32496 .821825-6.824719V-.643167C.821825-.273942 1.834218 .119105 2.787058 .119105C4.359244 .119105 5.574116-1.19105 5.574116-2.894252ZM4.525991-2.346369C4.525991-1.024303 3.954287-.262031 2.977626-.262031C2.35828-.262031 1.822307-.535973 1.822307-.833735V-3.835182C1.822307-4.299692 2.382101-4.72847 3.001447-4.72847C3.930466-4.72847 4.525991-3.799451 4.525991-2.346369Z'/>
+<path id='eq3-g3-100' d='M5.848057-.500241V-.690809C5.633668-.678899 5.609847-.678899 5.574116-.678899C5.145338-.678899 5.050054-.809914 5.050054-1.357797V-8.111053L4.990501-8.134874C4.418797-7.932395 4.001929-7.81329 3.239657-7.610812V-7.420244C3.334941-7.432154 3.406404-7.432154 3.501688-7.432154C3.942377-7.432154 4.049571-7.313049 4.049571-6.824719V-4.96668C3.596972-5.347816 3.275389-5.478832 2.798968-5.478832C1.42926-5.478832 .321584-4.132945 .321584-2.441653C.321584-.917109 1.214871 .119105 2.525027 .119105C3.192015 .119105 3.644614-.119105 4.049571-.678899V.083374L4.097213 .119105L5.848057-.500241ZM4.049571-1.214871C4.049571-1.131498 3.966198-.988572 3.847093-.857556C3.632704-.619346 3.334941-.500241 2.989536-.500241C2.000965-.500241 1.345887-1.453081 1.345887-2.918073C1.345887-4.26396 1.929502-5.145338 2.8347-5.145338C3.465957-5.145338 4.049571-4.585544 4.049571-3.954287V-1.214871Z'/>
+<path id='eq3-g3-101' d='M5.050054-1.869949L4.859486-1.953323C4.287781-1.048124 3.77563-.70272 3.013357-.70272C2.35828-.70272 1.858039-1.012393 1.512634-1.65556C1.274424-2.12007 1.17914-2.536937 1.155319-3.29921H4.823754C4.72847-4.073392 4.609365-4.418797 4.311602-4.799933C3.954287-5.228711 3.406404-5.478832 2.787058-5.478832C1.310155-5.478832 .297763-4.287781 .297763-2.548848C.297763-.905198 1.155319 .119105 2.525027 .119105C3.668435 .119105 4.549812-.583615 5.050054-1.869949ZM3.608883-3.680346H1.17914C1.310155-4.621275 1.715113-5.050054 2.441653-5.050054S3.454046-4.716559 3.608883-3.680346Z'/>
+<path id='eq3-g3-103' d='M5.597937-4.621275V-5.085785H4.680828C4.442618-5.085785 4.26396-5.121517 4.02575-5.20489L3.763719-5.300174C3.442136-5.419279 3.120552-5.478832 2.810879-5.478832C1.703202-5.478832 .821825-4.621275 .821825-3.53742C.821825-2.787058 1.143408-2.334459 1.929502-1.941412L1.41735-1.464992C1.024303-1.119587 .869467-.881377 .869467-.643167C.869467-.393047 1.012393-.250121 1.500723-.011911C.655078 .607436 .333494 1.000482 .333494 1.441171C.333494 2.072428 1.262513 2.59649 2.394011 2.59649C3.287299 2.59649 4.216318 2.286817 4.835665 1.786576C5.288264 1.41735 5.490742 1.036214 5.490742 .583615C5.490742-.154837 4.930949-.655078 4.049571-.690809L2.513116-.762272C1.88186-.786093 1.584097-.893288 1.584097-1.083856C1.584097-1.322066 1.977144-1.738934 2.298727-1.834218C2.405922-1.822307 2.489295-1.810397 2.525027-1.810397C2.751326-1.786576 2.906163-1.774665 2.977626-1.774665C3.418315-1.774665 3.894735-1.953323 4.26396-2.274906C4.657007-2.6084 4.835665-3.025268 4.835665-3.620793C4.835665-3.966198 4.776112-4.240139 4.609365-4.621275H5.597937ZM5.157248 .762272C5.157248 1.453081 4.25205 1.917591 2.906163 1.917591C1.858039 1.917591 1.167229 1.572186 1.167229 1.048124C1.167229 .774183 1.250603 .619346 1.750844 .023821C2.143891 .107195 3.096731 .178658 3.680346 .178658C4.764201 .178658 5.157248 .333494 5.157248 .762272ZM3.918556-3.156283C3.918556-2.489295 3.573151-2.072428 3.025268-2.072428C2.310638-2.072428 1.810397-2.84661 1.810397-3.990019V-4.02575C1.810397-4.72847 2.143891-5.145338 2.691774-5.145338C3.060999-5.145338 3.370673-4.942859 3.561241-4.585544C3.77563-4.168676 3.918556-3.620793 3.918556-3.156283Z'/>
+<path id='eq3-g3-105' d='M3.013357 0V-.178658C2.227264-.23821 2.13198-.357315 2.13198-1.214871V-5.4431L2.084338-5.478832L.23821-4.823754V-4.645096L.333494-4.657007C.47642-4.680828 .631257-4.692738 .738451-4.692738C1.024303-4.692738 1.131498-4.50217 1.131498-3.978108V-1.214871C1.131498-.357315 1.012393-.2263 .190568-.178658V0H3.013357ZM2.239175-7.527438C2.239175-7.860932 1.977144-8.134874 1.631739-8.134874C1.298245-8.134874 1.024303-7.860932 1.024303-7.527438C1.024303-7.182034 1.298245-6.920003 1.631739-6.920003C1.977144-6.920003 2.239175-7.182034 2.239175-7.527438Z'/>
+<path id='eq3-g3-110' d='M5.776594 0V-.178658C5.19298-.23821 5.050054-.381136 5.050054-.964751V-3.692256C5.050054-4.811844 4.525991-5.478832 3.644614-5.478832C3.096731-5.478832 2.727505-5.276353 1.917591-4.514081V-5.455011L1.834218-5.478832C1.250603-5.264443 .845646-5.133427 .190568-4.942859V-4.74038C.262031-4.776112 .381136-4.788022 .512152-4.788022C.845646-4.788022 .95284-4.609365 .95284-4.02575V-1.071945C.95284-.393047 .821825-.2263 .214389-.178658V0H2.739416V-.178658C2.13198-.2263 1.953323-.369226 1.953323-.798004V-4.144855C2.525027-4.680828 2.787058-4.823754 3.180104-4.823754C3.763719-4.823754 4.049571-4.454528 4.049571-3.668435V-1.17914C4.049571-.428778 3.894735-.2263 3.29921-.178658V0H5.776594Z'/>
+<path id='eq3-g4-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq3-g4-91' d='M2.988792 2.988792V2.546451H1.829141V-8.524035H2.988792V-8.966376H1.3868V2.988792H2.988792Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='0' y='0' xlink:href='#eq3-g4-91'/>
+<use x='3.251661' y='0' xlink:href='#eq3-g3-98'/>
+<use x='9.229245' y='0' xlink:href='#eq3-g3-101'/>
+<use x='14.537343' y='0' xlink:href='#eq3-g3-103'/>
+<use x='20.514927' y='0' xlink:href='#eq3-g3-105'/>
+<use x='23.838462' y='0' xlink:href='#eq3-g3-110'/>
+<use x='29.816046' y='0' xlink:href='#eq3-g0-59'/>
+<use x='35.060205' y='0' xlink:href='#eq3-g3-101'/>
+<use x='40.368303' y='0' xlink:href='#eq3-g3-110'/>
+<use x='46.345887' y='0' xlink:href='#eq3-g3-100'/>
+<use x='52.323471' y='0' xlink:href='#eq3-g4-41'/>
+</g>
+</svg> identifies the global degrees of freedom owned by the current <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> rank.</p>
+          </div></section>
+          <section class="m-doc-details" id="a5dca55880f71baf8ba967bef5e1c992d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Range&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> Rodin::<wbr />Variational::<wbr />P0&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;Range&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5dca55880f71baf8ba967bef5e1c992d" class="m-doc-self">getGlobalIndex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> localIdx) const</span></span>
+            </h3>
+            <p>Returns the global distributed DOF index for a local shard DOF.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">localIdx&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Local shard degree-of-freedom index (= local cell index).</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Global distributed DOF index.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a97d707c496c30f9f2c697270b002cd98"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Range&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; Rodin::<wbr />Variational::<wbr />P0&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;Range&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a97d707c496c30f9f2c697270b002cd98" class="m-doc-self">getLocalIndex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> globalIdx) const</span></span>
+            </h3>
+            <p>Returns the local shard DOF index for a global distributed DOF.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">globalIdx&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Global distributed DOF index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Local shard index if present, otherwise <code>std::nullopt</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>If the global DOF is present on this rank (owned or ghost), its local shard index (= local cell index) is returned.</p>
+          </div></section>
+          <section class="m-doc-details" id="ae158db2d2017a069f2ede653e5110753"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Range&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="#a8cd0123358b93cfcc76ec98f22e3a5a7" class="m-doc">ElementType</a>&amp; Rodin::<wbr />Variational::<wbr />P0&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;Range&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae158db2d2017a069f2ede653e5110753" class="m-doc-self">getFiniteElement</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span></span>
+            </h3>
+            <p>Returns the finite element attached to local polytope <svg class="m-math" style="width: 2.544em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.424936 11.955168">
+<title>
+$(d, i)$
+</title>
+<defs>
+<path id='eq4-g0-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='eq4-g0-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+<path id='eq4-g0-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
+<path id='eq4-g1-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq4-g1-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+</defs>
+<g id='eq4-page1'>
+<use x='0' y='0' xlink:href='#eq4-g1-40'/>
+<use x='4.552326' y='0' xlink:href='#eq4-g0-100'/>
+<use x='10.635019' y='0' xlink:href='#eq4-g0-59'/>
+<use x='15.879178' y='0' xlink:href='#eq4-g0-105'/>
+<use x='19.87261' y='0' xlink:href='#eq4-g1-41'/>
+</g>
+</svg>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Topological dimension of the polytope.</td>
+                </tr>
+                <tr>
+                  <td>i&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Local index of the polytope within the shard.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Finite element bound to the local polytope.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a23e73ba10e16901b2326d8212936b72b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Range&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />P0&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;Range&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23e73ba10e16901b2326d8212936b72b" class="m-doc-self">getSize</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Returns the global number of degrees of freedom.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Global number of degrees of freedom.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>For a <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> space, degrees of freedom are associated with mesh cells. The global dimension of the space equals the total number of cells in the distributed mesh:</p><div class="m-math"><svg style="width: 7.251em; height: 1.245em;" viewBox="159.219972 -11.955168 69.604914 11.955168">
+<title>
+\[
+  \dim(V_h) = N_c
+\]
+</title>
+<defs>
+<path id='eq5-g0-99' d='M3.259776-3.052553C2.933001-3.012702 2.82939-2.765629 2.82939-2.606227C2.82939-2.375093 3.036613-2.311333 3.140224-2.311333C3.180075-2.311333 3.58655-2.343213 3.58655-2.82939S3.060523-3.514819 2.582316-3.514819C1.45056-3.514819 .350685-2.414944 .350685-1.299128C.350685-.541968 .868742 .079701 1.753425 .079701C3.012702 .079701 3.674222-.72528 3.674222-.828892C3.674222-.900623 3.594521-.956413 3.5467-.956413S3.474969-.932503 3.435118-.884682C2.805479-.143462 1.912827-.143462 1.769365-.143462C1.338979-.143462 .996264-.406476 .996264-1.012204C.996264-1.362889 1.155666-2.207721 1.530262-2.701868C1.880946-3.148194 2.279452-3.291656 2.590286-3.291656C2.685928-3.291656 3.052553-3.283686 3.259776-3.052553Z'/>
+<path id='eq5-g0-104' d='M2.327273-5.292154C2.335243-5.308095 2.359153-5.411706 2.359153-5.419676C2.359153-5.459527 2.327273-5.531258 2.231631-5.531258C2.199751-5.531258 1.952677-5.507347 1.769365-5.491407L1.323039-5.459527C1.147696-5.443587 1.067995-5.435616 1.067995-5.292154C1.067995-5.180573 1.179577-5.180573 1.275218-5.180573C1.657783-5.180573 1.657783-5.132752 1.657783-5.061021C1.657783-5.037111 1.657783-5.021171 1.617933-4.877709L.486177-.342715C.454296-.223163 .454296-.175342 .454296-.167372C.454296-.03188 .565878 .079701 .71731 .079701C.844832 .079701 .956413 0 1.020174-.103611C1.044085-.151432 1.107846-.406476 1.147696-.565878L1.331009-1.275218C1.354919-1.39477 1.43462-1.697634 1.458531-1.817186C1.578082-2.279452 1.578082-2.295392 1.753425-2.550436C2.024408-2.940971 2.399004-3.291656 2.933001-3.291656C3.219925-3.291656 3.387298-3.124284 3.387298-2.749689C3.387298-2.311333 3.052553-1.40274 2.901121-1.012204C2.797509-.749191 2.797509-.70137 2.797509-.597758C2.797509-.143462 3.172105 .079701 3.514819 .079701C4.29589 .079701 4.622665-1.036115 4.622665-1.139726C4.622665-1.219427 4.558904-1.243337 4.503113-1.243337C4.407472-1.243337 4.391532-1.187547 4.367621-1.107846C4.176339-.454296 3.841594-.143462 3.53873-.143462C3.411208-.143462 3.347447-.223163 3.347447-.406476S3.411208-.765131 3.490909-.964384C3.610461-1.267248 3.961146-2.183811 3.961146-2.630137C3.961146-3.227895 3.5467-3.514819 2.972852-3.514819C2.526526-3.514819 2.10411-3.323537 1.737484-2.901121L2.327273-5.292154Z'/>
+<path id='eq5-g1-78' d='M8.846824-6.910087C8.978331-7.424159 9.169614-7.782814 10.078207-7.81868C10.114072-7.81868 10.257534-7.830635 10.257534-8.033873C10.257534-8.16538 10.149938-8.16538 10.102117-8.16538C9.863014-8.16538 9.2533-8.141469 9.014197-8.141469H8.440349C8.272976-8.141469 8.057783-8.16538 7.890411-8.16538C7.81868-8.16538 7.675218-8.16538 7.675218-7.938232C7.675218-7.81868 7.770859-7.81868 7.854545-7.81868C8.571856-7.79477 8.619676-7.519801 8.619676-7.304608C8.619676-7.197011 8.607721-7.161146 8.571856-6.993773L7.220922-1.601993L4.662516-7.962142C4.578829-8.153425 4.566874-8.16538 4.303861-8.16538H2.84533C2.606227-8.16538 2.49863-8.16538 2.49863-7.938232C2.49863-7.81868 2.582316-7.81868 2.809465-7.81868C2.86924-7.81868 3.574595-7.81868 3.574595-7.711083C3.574595-7.687173 3.550685-7.591532 3.53873-7.555666L1.948692-1.219427C1.80523-.633624 1.518306-.382565 .729265-.3467C.669489-.3467 .549938-.334745 .549938-.119552C.549938 0 .669489 0 .705355 0C.944458 0 1.554172-.02391 1.793275-.02391H2.367123C2.534496-.02391 2.737733 0 2.905106 0C2.988792 0 3.120299 0 3.120299-.227148C3.120299-.334745 3.000747-.3467 2.952927-.3467C2.558406-.358655 2.175841-.430386 2.175841-.860772C2.175841-.956413 2.199751-1.06401 2.223661-1.159651L3.837609-7.555666C3.90934-7.436115 3.90934-7.412204 3.957161-7.304608L6.802491-.215193C6.862267-.071731 6.886177 0 6.993773 0C7.113325 0 7.12528-.035866 7.173101-.239103L8.846824-6.910087Z'/>
+<path id='eq5-g1-86' d='M7.400249-6.838356C7.806725-7.483935 8.177335-7.770859 8.787049-7.81868C8.9066-7.830635 9.002242-7.830635 9.002242-8.045828C9.002242-8.093649 8.978331-8.16538 8.870735-8.16538C8.655542-8.16538 8.141469-8.141469 7.926276-8.141469C7.579577-8.141469 7.220922-8.16538 6.886177-8.16538C6.790535-8.16538 6.670984-8.16538 6.670984-7.938232C6.670984-7.830635 6.77858-7.81868 6.826401-7.81868C7.268742-7.782814 7.316563-7.567621 7.316563-7.424159C7.316563-7.244832 7.149191-6.969863 7.137235-6.957908L3.383313-1.004234L2.546451-7.44807C2.546451-7.79477 3.16812-7.81868 3.299626-7.81868C3.478954-7.81868 3.58655-7.81868 3.58655-8.045828C3.58655-8.16538 3.455044-8.16538 3.419178-8.16538C3.21594-8.16538 2.976837-8.141469 2.773599-8.141469H2.10411C1.231382-8.141469 .872727-8.16538 .860772-8.16538C.789041-8.16538 .645579-8.16538 .645579-7.950187C.645579-7.81868 .729265-7.81868 .920548-7.81868C1.530262-7.81868 1.566127-7.711083 1.601993-7.412204L2.558406-.035866C2.594271 .215193 2.594271 .251059 2.761644 .251059C2.905106 .251059 2.964882 .215193 3.084433 .02391L7.400249-6.838356Z'/>
+<path id='eq5-g2-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq5-g2-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq5-g2-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq5-g2-100' d='M3.58655-8.16538V-7.81868C4.399502-7.81868 4.495143-7.734994 4.495143-7.149191V-4.507098C4.244085-4.853798 3.730012-5.272229 3.000747-5.272229C1.613948-5.272229 .418431-4.100623 .418431-2.570361C.418431-1.052055 1.554172 .119552 2.86924 .119552C3.777833 .119552 4.303861-.478207 4.471233-.705355V.119552L6.156912 0V-.3467C5.34396-.3467 5.248319-.430386 5.248319-1.016189V-8.296887L3.58655-8.16538ZM4.471233-1.398755C4.471233-1.183562 4.471233-1.147696 4.303861-.884682C4.016936-.466252 3.526775-.119552 2.929016-.119552C2.618182-.119552 1.327024-.239103 1.327024-2.558406C1.327024-3.419178 1.470486-3.897385 1.733499-4.291905C1.972603-4.662516 2.450809-5.033126 3.048568-5.033126C3.789788-5.033126 4.208219-4.495143 4.327771-4.303861C4.471233-4.100623 4.471233-4.076712 4.471233-3.861519V-1.398755Z'/>
+<path id='eq5-g2-105' d='M2.080199-7.364384C2.080199-7.675218 1.829141-7.950187 1.494396-7.950187C1.183562-7.950187 .920548-7.699128 .920548-7.376339C.920548-7.017684 1.207472-6.790535 1.494396-6.790535C1.865006-6.790535 2.080199-7.10137 2.080199-7.364384ZM.430386-5.140722V-4.794022C1.195517-4.794022 1.303113-4.722291 1.303113-4.136488V-.884682C1.303113-.3467 1.171606-.3467 .394521-.3467V0C.729265-.02391 1.303113-.02391 1.649813-.02391C1.78132-.02391 2.47472-.02391 2.881196 0V-.3467C2.10411-.3467 2.056289-.406476 2.056289-.872727V-5.272229L.430386-5.140722Z'/>
+<path id='eq5-g2-109' d='M8.571856-2.905106C8.571856-4.016936 8.571856-4.351681 8.296887-4.734247C7.950187-5.200498 7.388294-5.272229 6.981818-5.272229C5.989539-5.272229 5.487422-4.554919 5.296139-4.088667C5.128767-5.009215 4.483188-5.272229 3.730012-5.272229C2.570361-5.272229 2.116065-4.27995 2.020423-4.040847H2.008468V-5.272229L.382565-5.140722V-4.794022C1.195517-4.794022 1.291158-4.710336 1.291158-4.124533V-.884682C1.291158-.3467 1.159651-.3467 .382565-.3467V0C.6934-.02391 1.338979-.02391 1.673724-.02391C2.020423-.02391 2.666002-.02391 2.976837 0V-.3467C2.211706-.3467 2.068244-.3467 2.068244-.884682V-3.108344C2.068244-4.363636 2.893151-5.033126 3.634371-5.033126S4.542964-4.423412 4.542964-3.694147V-.884682C4.542964-.3467 4.411457-.3467 3.634371-.3467V0C3.945205-.02391 4.590785-.02391 4.925529-.02391C5.272229-.02391 5.917808-.02391 6.228643 0V-.3467C5.463512-.3467 5.32005-.3467 5.32005-.884682V-3.108344C5.32005-4.363636 6.144956-5.033126 6.886177-5.033126S7.79477-4.423412 7.79477-3.694147V-.884682C7.79477-.3467 7.663263-.3467 6.886177-.3467V0C7.197011-.02391 7.84259-.02391 8.177335-.02391C8.524035-.02391 9.169614-.02391 9.480448 0V-.3467C8.88269-.3467 8.583811-.3467 8.571856-.705355V-2.905106Z'/>
+</defs>
+<g id='eq5-page1'>
+<use x='159.219972' y='-2.988792' xlink:href='#eq5-g2-100'/>
+<use x='165.723295' y='-2.988792' xlink:href='#eq5-g2-105'/>
+<use x='168.974956' y='-2.988792' xlink:href='#eq5-g2-109'/>
+<use x='178.72994' y='-2.988792' xlink:href='#eq5-g2-40'/>
+<use x='183.282265' y='-2.988792' xlink:href='#eq5-g1-86'/>
+<use x='190.106615' y='-1.195529' xlink:href='#eq5-g0-104'/>
+<use x='195.484656' y='-2.988792' xlink:href='#eq5-g2-41'/>
+<use x='203.357811' y='-2.988792' xlink:href='#eq5-g2-61'/>
+<use x='215.783292' y='-2.988792' xlink:href='#eq5-g1-78'/>
+<use x='225.157107' y='-1.195529' xlink:href='#eq5-g0-99'/>
+</g>
+</svg></div><p>where <svg class="m-math" style="width: 1.358em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 13.041594 9.962629">
+<title>
+$ N_c $
+</title>
+<defs>
+<path id='eq6-g0-99' d='M3.259776-3.052553C2.933001-3.012702 2.82939-2.765629 2.82939-2.606227C2.82939-2.375093 3.036613-2.311333 3.140224-2.311333C3.180075-2.311333 3.58655-2.343213 3.58655-2.82939S3.060523-3.514819 2.582316-3.514819C1.45056-3.514819 .350685-2.414944 .350685-1.299128C.350685-.541968 .868742 .079701 1.753425 .079701C3.012702 .079701 3.674222-.72528 3.674222-.828892C3.674222-.900623 3.594521-.956413 3.5467-.956413S3.474969-.932503 3.435118-.884682C2.805479-.143462 1.912827-.143462 1.769365-.143462C1.338979-.143462 .996264-.406476 .996264-1.012204C.996264-1.362889 1.155666-2.207721 1.530262-2.701868C1.880946-3.148194 2.279452-3.291656 2.590286-3.291656C2.685928-3.291656 3.052553-3.283686 3.259776-3.052553Z'/>
+<path id='eq6-g1-78' d='M8.846824-6.910087C8.978331-7.424159 9.169614-7.782814 10.078207-7.81868C10.114072-7.81868 10.257534-7.830635 10.257534-8.033873C10.257534-8.16538 10.149938-8.16538 10.102117-8.16538C9.863014-8.16538 9.2533-8.141469 9.014197-8.141469H8.440349C8.272976-8.141469 8.057783-8.16538 7.890411-8.16538C7.81868-8.16538 7.675218-8.16538 7.675218-7.938232C7.675218-7.81868 7.770859-7.81868 7.854545-7.81868C8.571856-7.79477 8.619676-7.519801 8.619676-7.304608C8.619676-7.197011 8.607721-7.161146 8.571856-6.993773L7.220922-1.601993L4.662516-7.962142C4.578829-8.153425 4.566874-8.16538 4.303861-8.16538H2.84533C2.606227-8.16538 2.49863-8.16538 2.49863-7.938232C2.49863-7.81868 2.582316-7.81868 2.809465-7.81868C2.86924-7.81868 3.574595-7.81868 3.574595-7.711083C3.574595-7.687173 3.550685-7.591532 3.53873-7.555666L1.948692-1.219427C1.80523-.633624 1.518306-.382565 .729265-.3467C.669489-.3467 .549938-.334745 .549938-.119552C.549938 0 .669489 0 .705355 0C.944458 0 1.554172-.02391 1.793275-.02391H2.367123C2.534496-.02391 2.737733 0 2.905106 0C2.988792 0 3.120299 0 3.120299-.227148C3.120299-.334745 3.000747-.3467 2.952927-.3467C2.558406-.358655 2.175841-.430386 2.175841-.860772C2.175841-.956413 2.199751-1.06401 2.223661-1.159651L3.837609-7.555666C3.90934-7.436115 3.90934-7.412204 3.957161-7.304608L6.802491-.215193C6.862267-.071731 6.886177 0 6.993773 0C7.113325 0 7.12528-.035866 7.173101-.239103L8.846824-6.910087Z'/>
+</defs>
+<g id='eq6-page1'>
+<use x='0' y='0' xlink:href='#eq6-g1-78'/>
+<use x='9.373814' y='1.793263' xlink:href='#eq6-g0-99'/>
+</g>
+</svg> is the global number of mesh cells.</p>
+          </div></section>
+          <section class="m-doc-details" id="a1c88fa53fe90dcf92c359274842445e9"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Range&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />P0&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;Range&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c88fa53fe90dcf92c359274842445e9" class="m-doc-self">getVectorDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Returns the vector dimension (1 for scalar <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a>).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Vector dimension of the space.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a023a4642b6e40a2d6ea68a6bdbb096bb"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Range&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>&amp; Rodin::<wbr />Variational::<wbr />P0&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;Range&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a023a4642b6e40a2d6ea68a6bdbb096bb" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Returns the distributed mesh on which the finite element space is defined.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to the distributed mesh.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="adba1954ca59742b5304d71dcc0854c65"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Range&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>&amp; Rodin::<wbr />Variational::<wbr />P0&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;Range&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adba1954ca59742b5304d71dcc0854c65" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Returns global DOF indices attached to local polytope <svg class="m-math" style="width: 2.544em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.424936 11.955168">
+<title>
+$(d, i)$
+</title>
+<defs>
+<path id='eq7-g0-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='eq7-g0-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+<path id='eq7-g0-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
+<path id='eq7-g1-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq7-g1-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+</defs>
+<g id='eq7-page1'>
+<use x='0' y='0' xlink:href='#eq7-g1-40'/>
+<use x='4.552326' y='0' xlink:href='#eq7-g0-100'/>
+<use x='10.635019' y='0' xlink:href='#eq7-g0-59'/>
+<use x='15.879178' y='0' xlink:href='#eq7-g0-105'/>
+<use x='19.87261' y='0' xlink:href='#eq7-g1-41'/>
+</g>
+</svg>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Topological dimension of the polytope (must equal mesh dimension).</td>
+                </tr>
+                <tr>
+                  <td>i&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Local polytope index in the shard.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Thread-local array containing the single global DOF index.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The local shard DOF list (= <svg class="m-math" style="width: 1.661em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 15.948646 11.955168">
+<title>
+$\{i\}$
+</title>
+<defs>
+<path id='eq8-g1-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
+<path id='eq8-g0-102' d='M3.383313-7.376339C3.383313-7.854545 3.694147-8.619676 4.99726-8.703362C5.057036-8.715318 5.104857-8.763138 5.104857-8.834869C5.104857-8.966376 5.009215-8.966376 4.877709-8.966376C3.682192-8.966376 2.594271-8.356663 2.582316-7.47198V-4.746202C2.582316-4.27995 2.582316-3.897385 2.10411-3.502864C1.685679-3.156164 1.231382-3.132254 .968369-3.120299C.908593-3.108344 .860772-3.060523 .860772-2.988792C.860772-2.86924 .932503-2.86924 1.052055-2.857285C1.841096-2.809465 2.414944-2.379078 2.546451-1.793275C2.582316-1.661768 2.582316-1.637858 2.582316-1.207472V1.159651C2.582316 1.661768 2.582316 2.044334 3.156164 2.49863C3.622416 2.857285 4.411457 2.988792 4.877709 2.988792C5.009215 2.988792 5.104857 2.988792 5.104857 2.857285C5.104857 2.737733 5.033126 2.737733 4.913574 2.725778C4.160399 2.677958 3.574595 2.295392 3.419178 1.685679C3.383313 1.578082 3.383313 1.554172 3.383313 1.123786V-1.3868C3.383313-1.936737 3.287671-2.139975 2.905106-2.52254C2.654047-2.773599 2.307347-2.893151 1.972603-2.988792C2.952927-3.263761 3.383313-3.813699 3.383313-4.507098V-7.376339Z'/>
+<path id='eq8-g0-103' d='M2.582316 1.398755C2.582316 1.876961 2.271482 2.642092 .968369 2.725778C.908593 2.737733 .860772 2.785554 .860772 2.857285C.860772 2.988792 .992279 2.988792 1.099875 2.988792C2.259527 2.988792 3.371357 2.402989 3.383313 1.494396V-1.231382C3.383313-1.697634 3.383313-2.080199 3.861519-2.47472C4.27995-2.82142 4.734247-2.84533 4.99726-2.857285C5.057036-2.86924 5.104857-2.917061 5.104857-2.988792C5.104857-3.108344 5.033126-3.108344 4.913574-3.120299C4.124533-3.16812 3.550685-3.598506 3.419178-4.184309C3.383313-4.315816 3.383313-4.339726 3.383313-4.770112V-7.137235C3.383313-7.639352 3.383313-8.021918 2.809465-8.476214C2.331258-8.846824 1.506351-8.966376 1.099875-8.966376C.992279-8.966376 .860772-8.966376 .860772-8.834869C.860772-8.715318 .932503-8.715318 1.052055-8.703362C1.80523-8.655542 2.391034-8.272976 2.546451-7.663263C2.582316-7.555666 2.582316-7.531756 2.582316-7.10137V-4.590785C2.582316-4.040847 2.677958-3.837609 3.060523-3.455044C3.311582-3.203985 3.658281-3.084433 3.993026-2.988792C3.012702-2.713823 2.582316-2.163885 2.582316-1.470486V1.398755Z'/>
+</defs>
+<g id='eq8-page1'>
+<use x='0' y='0' xlink:href='#eq8-g0-102'/>
+<use x='5.977607' y='0' xlink:href='#eq8-g1-105'/>
+<use x='9.971039' y='0' xlink:href='#eq8-g0-103'/>
+</g>
+</svg> for <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a>) is retrieved and mapped to the distributed global DOF index.</p>
+          </div></section>
+          <section class="m-doc-details" id="a5fb549135bf5098b080495b2532a2b56"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Range&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> Rodin::<wbr />Variational::<wbr />P0&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;Range&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5fb549135bf5098b080495b2532a2b56" class="m-doc-self">getGlobalIndex</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> localDof) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Returns the global DOF index for local basis function <code>localDof</code> on polytope <svg class="m-math" style="width: 2.544em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.424936 11.955168">
+<title>
+$(d, i)$
+</title>
+<defs>
+<path id='eq9-g0-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='eq9-g0-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+<path id='eq9-g0-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
+<path id='eq9-g1-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq9-g1-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+</defs>
+<g id='eq9-page1'>
+<use x='0' y='0' xlink:href='#eq9-g1-40'/>
+<use x='4.552326' y='0' xlink:href='#eq9-g0-100'/>
+<use x='10.635019' y='0' xlink:href='#eq9-g0-59'/>
+<use x='15.879178' y='0' xlink:href='#eq9-g0-105'/>
+<use x='19.87261' y='0' xlink:href='#eq9-g1-41'/>
+</g>
+</svg>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> <svg class="m-math" style="width: 2.544em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.424936 11.955168">
+<title>
+$(d, i)$
+</title>
+<defs>
+<path id='eq10-g0-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='eq10-g0-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+<path id='eq10-g0-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
+<path id='eq10-g1-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq10-g1-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+</defs>
+<g id='eq10-page1'>
+<use x='0' y='0' xlink:href='#eq10-g1-40'/>
+<use x='4.552326' y='0' xlink:href='#eq10-g0-100'/>
+<use x='10.635019' y='0' xlink:href='#eq10-g0-59'/>
+<use x='15.879178' y='0' xlink:href='#eq10-g0-105'/>
+<use x='19.87261' y='0' xlink:href='#eq10-g1-41'/>
+</g>
+</svg> identifying a local shard polytope.</td>
+                </tr>
+                <tr>
+                  <td>localDof&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Local basis-function index on the polytope (always 0 for <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a>).</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Global distributed DOF index.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2a363690c6d5bdf368b7b5182bc6f8b7"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Range&gt;
+                template&lt;class Callable&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />P0&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;Range&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2a363690c6d5bdf368b7b5182bc6f8b7" class="m-doc-self">getPullback</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              Callable&amp;&amp; v) const</span></span>
+            </h3>
+            <p>Returns a pullback wrapper on local polytope <svg class="m-math" style="width: 2.544em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.424936 11.955168">
+<title>
+$(d, i)$
+</title>
+<defs>
+<path id='eq11-g0-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='eq11-g0-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+<path id='eq11-g0-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
+<path id='eq11-g1-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq11-g1-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+</defs>
+<g id='eq11-page1'>
+<use x='0' y='0' xlink:href='#eq11-g1-40'/>
+<use x='4.552326' y='0' xlink:href='#eq11-g0-100'/>
+<use x='10.635019' y='0' xlink:href='#eq11-g0-59'/>
+<use x='15.879178' y='0' xlink:href='#eq11-g0-105'/>
+<use x='19.87261' y='0' xlink:href='#eq11-g1-41'/>
+</g>
+</svg>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Callable</td>
+                  <td>Callable type (<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> or plain callable).</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Local polytope pair <svg class="m-math" style="width: 2.544em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.424936 11.955168">
+<title>
+$(d, i)$
+</title>
+<defs>
+<path id='eq12-g0-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='eq12-g0-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+<path id='eq12-g0-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
+<path id='eq12-g1-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq12-g1-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+</defs>
+<g id='eq12-page1'>
+<use x='0' y='0' xlink:href='#eq12-g1-40'/>
+<use x='4.552326' y='0' xlink:href='#eq12-g0-100'/>
+<use x='10.635019' y='0' xlink:href='#eq12-g0-59'/>
+<use x='15.879178' y='0' xlink:href='#eq12-g0-105'/>
+<use x='19.87261' y='0' xlink:href='#eq12-g1-41'/>
+</g>
+</svg>.</td>
+                </tr>
+                <tr>
+                  <td>v&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td><a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a> defined on physical coordinates.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_variational_1_1_p0_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4_1_1_pullback.html" class="m-doc">Pullback</a> wrapper mapping reference points to physical evaluation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac80994529ff16c67dfc1224daa901b64"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Range&gt;
+                template&lt;class CallableType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />P0&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;Range&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac80994529ff16c67dfc1224daa901b64" class="m-doc-self">getPushforward</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp;,
+              const CallableType&amp; v) const</span></span>
+            </h3>
+            <p>Returns a pushforward wrapper on local polytope <svg class="m-math" style="width: 2.544em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.424936 11.955168">
+<title>
+$(d, i)$
+</title>
+<defs>
+<path id='eq13-g0-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
+<path id='eq13-g0-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
+<path id='eq13-g0-105' d='M3.383313-1.709589C3.383313-1.769365 3.335492-1.817186 3.263761-1.817186C3.156164-1.817186 3.144209-1.78132 3.084433-1.578082C2.773599-.490162 2.283437-.119552 1.888917-.119552C1.745455-.119552 1.578082-.155417 1.578082-.514072C1.578082-.836862 1.721544-1.195517 1.853051-1.554172L2.689913-3.777833C2.725778-3.873474 2.809465-4.088667 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.021171 2.139975-4.638605C2.139975-4.327771 1.984558-3.93325 1.888917-3.670237L1.052055-1.446575C.980324-1.255293 .908593-1.06401 .908593-.848817C.908593-.310834 1.279203 .119552 1.853051 .119552C2.952927 .119552 3.383313-1.625903 3.383313-1.709589ZM3.287671-7.460025C3.287671-7.639352 3.144209-7.854545 2.881196-7.854545C2.606227-7.854545 2.295392-7.591532 2.295392-7.280697C2.295392-6.981818 2.546451-6.886177 2.689913-6.886177C3.012702-6.886177 3.287671-7.197011 3.287671-7.460025Z'/>
+<path id='eq13-g1-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq13-g1-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+</defs>
+<g id='eq13-page1'>
+<use x='0' y='0' xlink:href='#eq13-g1-40'/>
+<use x='4.552326' y='0' xlink:href='#eq13-g0-100'/>
+<use x='10.635019' y='0' xlink:href='#eq13-g0-59'/>
+<use x='15.879178' y='0' xlink:href='#eq13-g0-105'/>
+<use x='19.87261' y='0' xlink:href='#eq13-g1-41'/>
+</g>
+</svg>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">CallableType</td>
+                  <td>Callable defined on reference coordinates.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>v&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Reference-space callable.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_variational_1_1_p0_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4_1_1_pushforward.html" class="m-doc">Pushforward</a> wrapper mapping physical points to reference evaluation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad69edc9efdace02783e2ebab801bd77a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Range&gt;
+                template&lt;class CallableType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />P0&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;Range&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad69edc9efdace02783e2ebab801bd77a" class="m-doc-self">getPushforward</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp;,
+              const CallableType&amp; v) const</span></span>
+            </h3>
+            <p>Returns a pushforward wrapper for an explicit polytope object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">CallableType</td>
+                  <td>Callable defined on reference coordinates.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>v&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Reference-space callable.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_variational_1_1_p0_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4_1_1_pushforward.html" class="m-doc">Pushforward</a> wrapper mapping physical points to reference evaluation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>
