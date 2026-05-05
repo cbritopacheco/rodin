@@ -79,11 +79,15 @@ namespace
 int main(int, char**)
 {
   // ---- geometry -----------------------------------------------------------
-  constexpr size_t nc = 33;
+  constexpr size_t nc = 16;
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Triangle, { nc, nc });
+  mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { nc, nc, nc });
   mesh.scale(1.0 / static_cast<Real>(nc - 1));
-  mesh.getConnectivity().compute(1, 2);
+  mesh.getConnectivity().compute(2, 3);
+  mesh.save("miaow.mesh", IO::FileFormat::MEDIT);
+
+  std::cout << "Mesh: " << mesh.getVertexCount() << " vertices, "
+            << mesh.getCellCount() << " cells." << std::endl;
 
   // ---- label top boundary -------------------------------------------------
   constexpr Attribute topBC = 1;
@@ -98,7 +102,7 @@ int main(int, char**)
       ySum += mesh.getVertexCoordinates(verts[i])(1);
     const Real yMid = ySum / static_cast<Real>(nv);
     if (yMid > 1.0 - eps)
-      mesh.setAttribute({ 1, it->getIndex() }, topBC);
+      mesh.setAttribute({ 2, it->getIndex() }, topBC);
   }
 
   // ---- finite-element spaces ----------------------------------------------
@@ -116,10 +120,10 @@ int main(int, char**)
 
   Solid::ActiveFiberLaw::Parameters activeParams;
   activeParams.stiffness            = 200.0;
-  activeParams.damping              = 0.5;
+  activeParams.damping              = 300;
   activeParams.destructionRate      = 0.4;
   activeParams.crossBridgeStiffness = 100.0;
-  activeParams.contractility        = 80.0;
+  activeParams.contractility        = 20.0;
   activeParams.initial.extension    = 0.0;
   activeParams.initial.stiffness    = 0.0;
   activeParams.initial.stress       = 0.0;
@@ -146,9 +150,9 @@ int main(int, char**)
 
   PlaneWaveParams wave;
   wave.amplitude      = 20;
-  wave.speed          = 1.0;
+  wave.speed          = 0.5;
   wave.width          = 0.05;
-  wave.start          = -0.3;
+  wave.start          = 0;
   wave.gap            = 1.5;
 
   auto activationAt = [&](Real y, Real t) -> Real
@@ -397,6 +401,13 @@ int main(int, char**)
     });
 
     solver.solve(u);
+
+    if (!solver.getReport().converged)
+    {
+      std::cerr << "Newton solver failed to converge at step " << step
+                << " (t = " << currentTime << ")" << std::endl;
+      return 1;
+    }
 
     const auto diagnostics = commitState();
     const auto& report = solver.getReport();
