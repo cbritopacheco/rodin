@@ -208,6 +208,8 @@ namespace Rodin::Solid
           state.setDisplacementGradient(H);
 
           ConstitutivePoint cp(pt, state);
+          cp.set<Tags::CellIndex>(idx);
+          cp.set<Tags::QuadraturePointIndex>(q);
 
           // Invoke input for auxiliary data injection
           if (m_input)
