@@ -247,7 +247,7 @@ namespace Rodin::Tests::Unit
     P0 fes(sub);
     GridFunction gf(fes);
 
-    // Project f(x, y) = 1  (constant) — piecewise-constant projection
+    // Project f = 1 (constant function) — piecewise-constant projection
     RealFunction f([](const Point&) { return 1.0; });
     gf = f;
 
