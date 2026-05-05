@@ -251,7 +251,7 @@ namespace Rodin::Heart::CCMLC2014::Numerics
           -evalData.dWindkesselOutflow_dPv;
 
         jacobianMatrix(Model::ArterialPressure, Model::ArterialPressure) +=
-          m_input.Cp / dt + evalData.dWindkesselflowP_dPar;
+          m_input.Cp / evalData.dt + evalData.dWindkesselflowP_dPar;
 
         jacobianMatrix(Model::ArterialPressure, Model::DistalPressure) +=
           evalData.dWindkesselflowP_dPd;
@@ -261,7 +261,7 @@ namespace Rodin::Heart::CCMLC2014::Numerics
           evalData.dWindkesselflowD_dPar;
 
         jacobianMatrix(Model::DistalPressure, Model::DistalPressure) +=
-          m_input.Cd / dt
+          m_input.Cd / evalData.dt
           + evalData.dWindkesselflowD_dPd;
 
         // Fiber-deformation equilibrium.

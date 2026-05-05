@@ -314,13 +314,13 @@ namespace Rodin::Examples::Heart
         /// @brief Yasuda transition exponent.
         Real yasuda = 1.235;
         /// @brief Proximal surrogate vessel radius.
-        Real proximalRadius = 0.01;
+        Real proximalRadius = 0.015;
         /// @brief Proximal surrogate vessel length.
-        Real proximalLength = 0.015;
+        Real proximalLength = 0.4;
         /// @brief Distal surrogate vessel radius.
-        Real distalRadius = 0.0004;
+        Real distalRadius = 0.0007;
         /// @brief Distal surrogate vessel length.
-        Real distalLength = 0.002;
+        Real distalLength = 0.004;
       };
 
       /**

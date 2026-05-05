@@ -1506,7 +1506,6 @@ namespace Rodin::Examples::Heart
       m_stepTiming.output = secondsSince(outputStart);
 
       m_stepTiming.total = secondsSince(stepStart);
-      printStepTiming(i + 1);
 
       ++acceptedStep;
 
