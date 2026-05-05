@@ -136,6 +136,12 @@ int main()
   in.lambda = 3.39;
   in.n = 0.198;
   in.yasuda = 1.235;
+  in.proximalRadius = 0.015;
+  in.proximalLength = 0.4;
+  in.distalRadius = 0.0007;
+  in.distalLength = 0.004;
+  in.windkesselRheology =
+    Rodin::Heart::CCMLC2014::Model::WindkesselRheology::CarreauYasuda;
 
   // Valve parameters
   in.Kat = 9.0e-6;

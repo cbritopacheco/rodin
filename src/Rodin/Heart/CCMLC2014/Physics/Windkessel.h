@@ -15,6 +15,14 @@
 #ifndef RODIN_HEART_CCMLC2014_PHYSICS_WINDKESSEL_H
 #define RODIN_HEART_CCMLC2014_PHYSICS_WINDKESSEL_H
 
+#include <cmath>
+#include <iostream>
+#include <numbers>
+#include <utility>
+
+#include "Rodin/Math/RootFinding/NewtonRaphson.h"
+#include "Rodin/Math/RungeKutta/RK4.h"
+
 namespace Rodin::Heart::CCMLC2014::Physics
 {
 
@@ -27,7 +35,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
         data.windkesselOutflow = (aorticFlowRate > Scalar(0)) ? aorticFlowRate : Scalar(0);
 
         const Scalar midpointDerivative = (aorticFlowRate > Scalar(0))
-                                                  ? (Scalar(0.5) * input.Kar)
+                                                  ? input.Kar
                                                   : Scalar(0);
 
         data.dWindkesselOutflow_dPv = midpointDerivative;
@@ -39,15 +47,15 @@ namespace Rodin::Heart::CCMLC2014::Physics
         data.windkesselflowD = (data.pdMid - data.parMid) / input.Rp
         - (data.pSvMid - data.pdMid) / input.Rd;
 
-        data.dWindkesselflowP_dPar = Scalar(1) / (Scalar(2) * input.Rp)
+        data.dWindkesselflowP_dPar = Scalar(1) / input.Rp
             - data.dWindkesselOutflow_dPar;
 
-        data.dWindkesselflowP_dPd = -Scalar(1) / (Scalar(2) * input.Rp);
+        data.dWindkesselflowP_dPd = -Scalar(1) / input.Rp;
 
-        data.dWindkesselflowD_dPar = -Scalar(1) / (Scalar(2) * input.Rp);
+        data.dWindkesselflowD_dPar = -Scalar(1) / input.Rp;
 
-        data.dWindkesselflowD_dPd = Scalar(1) / (Scalar(2) * input.Rp)
-            + Scalar(1) / (Scalar(2) * input.Rd);
+        data.dWindkesselflowD_dPd = Scalar(1) / input.Rp
+            + Scalar(1) / input.Rd;
       }
     };
 
@@ -91,15 +99,20 @@ namespace Rodin::Heart::CCMLC2014::Physics
             data.windkesselOutflow = (aorticFlowRate > Scalar(0)) ? aorticFlowRate : Scalar(0);
 
             const Scalar midpointDerivative = (aorticFlowRate > Scalar(0))
-                                                      ? (Scalar(0.5) * input.Kar)
+                                                      ? input.Kar
                                                       : Scalar(0);
 
             data.dWindkesselOutflow_dPv = midpointDerivative;
             data.dWindkesselOutflow_dPar = -midpointDerivative;
 
 
-            auto flowLaw = [&](Real dp, Real L, Real radius) -> std::pair<Real, Real>
+            auto flowLaw =
+              [&](Real dp, Real L, Real radius, Real fallbackResistance)
+              -> std::pair<Real, Real>
             {
+              if (L <= 0.0 || radius <= 0.0)
+                return {dp / fallbackResistance, 1.0 / fallbackResistance};
+
               const Real mu0    = input.mu_0;
               const Real muInf  = input.mu_Inf;
               const Real lambda = input.lambda;
@@ -238,10 +251,12 @@ namespace Rodin::Heart::CCMLC2014::Physics
             const Real lengthD = input.distalLength;
 
             const Scalar dp_ar_d = data.parMid - data.pdMid;
-            const auto [qp, dqp] = flowLaw(dp_ar_d, lengthP, radiusP);
+            const auto [qp, dqp] =
+              flowLaw(dp_ar_d, lengthP, radiusP, input.Rp);
 
             const Scalar dp_d_sv = data.pSvMid - data.pdMid;
-            const auto [qd, dqd] = flowLaw(dp_d_sv, lengthD, radiusD);
+            const auto [qd, dqd] =
+              flowLaw(dp_d_sv, lengthD, radiusD, input.Rd);
 
             data.windkesselflowP = qp - data.windkesselOutflow;
 

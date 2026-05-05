@@ -335,6 +335,139 @@ TEST(CCMLC2014Test, DynamicJacobianMatchesFiniteDifference)
   EXPECT_LT(relativeError, 1e-3);
 }
 
+TEST(CCMLC2014Test, WindkesselResidualAndJacobianUseBranchFlowsAndBDF2)
+{
+  auto cardiacInput = makeGenericCardiacInput();
+
+  Model::DenseVector candidateState = makeCandidateState();
+  candidateState[CCMLC2014Vars::VentricularPressure] = 1.3e4;
+  candidateState[CCMLC2014Vars::ArterialPressure] = 9.0e3;
+  candidateState[CCMLC2014Vars::DistalPressure] = 8.0e3;
+
+  Model::State currentState = makeCurrentState();
+  currentState.par = 8.8e3;
+  currentState.pd = 7.9e3;
+
+  Model::State previousState = makePreviousState(currentState);
+  previousState.par = 8.7e3;
+  previousState.pd = 7.8e3;
+
+  using InputType = Model::Input;
+  Heart::CCMLC2014::Numerics::DynamicSystem<PassiveLaw, InputType>
+      dynamicSystem(cardiacInput);
+
+  const Real dt = 1e-3;
+  const Real nextTime = currentState.t + dt;
+
+  Model::EvalData evaluationData;
+  dynamicSystem.buildEvalData(
+      candidateState, currentState, previousState, nextTime, dt, evaluationData);
+
+  Model::DenseVector residual;
+  dynamicSystem.evaluateResidual(evaluationData, residual);
+
+  Model::DenseMatrix jacobian;
+  dynamicSystem.evaluateJacobian(evaluationData, jacobian, dt);
+
+  const Real a0 = 1.5 / dt;
+  const Real parDot =
+      a0 * candidateState[CCMLC2014Vars::ArterialPressure]
+    - 2.0 / dt * currentState.par
+    + 0.5 / dt * previousState.par;
+  const Real pdDot =
+      a0 * candidateState[CCMLC2014Vars::DistalPressure]
+    - 2.0 / dt * currentState.pd
+    + 0.5 / dt * previousState.pd;
+
+  const Real expectedOutflow =
+    cardiacInput.Kar
+    * (candidateState[CCMLC2014Vars::VentricularPressure]
+       - candidateState[CCMLC2014Vars::ArterialPressure]);
+  const Real expectedProximalFlow =
+    (candidateState[CCMLC2014Vars::ArterialPressure]
+     - candidateState[CCMLC2014Vars::DistalPressure]) / cardiacInput.Rp
+    - expectedOutflow;
+  const Real expectedDistalFlow =
+    (candidateState[CCMLC2014Vars::DistalPressure]
+     - candidateState[CCMLC2014Vars::ArterialPressure]) / cardiacInput.Rp
+    - (cardiacInput.pSv(nextTime)
+       - candidateState[CCMLC2014Vars::DistalPressure]) / cardiacInput.Rd;
+
+  EXPECT_NEAR(
+      residual[CCMLC2014Vars::ArterialPressure],
+      cardiacInput.Cp * parDot + expectedProximalFlow,
+      1e-13);
+  EXPECT_NEAR(
+      residual[CCMLC2014Vars::DistalPressure],
+      cardiacInput.Cd * pdDot + expectedDistalFlow,
+      1e-13);
+
+  EXPECT_NEAR(
+      jacobian(
+        CCMLC2014Vars::ArterialPressure,
+        CCMLC2014Vars::VentricularPressure),
+      -cardiacInput.Kar,
+      1e-14);
+  EXPECT_NEAR(
+      jacobian(
+        CCMLC2014Vars::ArterialPressure,
+        CCMLC2014Vars::ArterialPressure),
+      cardiacInput.Cp * a0 + 1.0 / cardiacInput.Rp + cardiacInput.Kar,
+      1e-14);
+  EXPECT_NEAR(
+      jacobian(
+        CCMLC2014Vars::ArterialPressure,
+        CCMLC2014Vars::DistalPressure),
+      -1.0 / cardiacInput.Rp,
+      1e-14);
+  EXPECT_NEAR(
+      jacobian(
+        CCMLC2014Vars::DistalPressure,
+        CCMLC2014Vars::ArterialPressure),
+      -1.0 / cardiacInput.Rp,
+      1e-14);
+  EXPECT_NEAR(
+      jacobian(
+        CCMLC2014Vars::DistalPressure,
+        CCMLC2014Vars::DistalPressure),
+      cardiacInput.Cd * a0 + 1.0 / cardiacInput.Rp + 1.0 / cardiacInput.Rd,
+      1e-14);
+}
+
+TEST(CCMLC2014Test, NonNewtonianWindkesselPathProducesFiniteConsistentJacobian)
+{
+  auto cardiacInput = makeGenericCardiacInput();
+  cardiacInput.windkesselRheology =
+    Heart::CCMLC2014::Model::WindkesselRheology::CarreauYasuda;
+  cardiacInput.proximalRadius = 0.015;
+  cardiacInput.proximalLength = 0.4;
+  cardiacInput.distalRadius = 0.0007;
+  cardiacInput.distalLength = 0.004;
+  cardiacInput.mu_0 = 0.04868;
+  cardiacInput.mu_Inf = 0.003605;
+  cardiacInput.lambda = 3.39;
+  cardiacInput.n = 0.198;
+  cardiacInput.yasuda = 1.235;
+
+  Model::DenseVector candidateState = makeCandidateState();
+  candidateState[CCMLC2014Vars::VentricularPressure] = 1.3e4;
+  candidateState[CCMLC2014Vars::ArterialPressure] = 9.0e3;
+  candidateState[CCMLC2014Vars::DistalPressure] = 8.0e3;
+
+  Model::State currentState = makeCurrentState();
+  Model::State previousState = makePreviousState(currentState);
+
+  const Real relativeError = computeDynamicJacobianRelativeError(
+      cardiacInput,
+      candidateState,
+      currentState,
+      previousState,
+      1e-3,
+      1e-7);
+  EXPECT_TRUE(std::isfinite(relativeError));
+  EXPECT_LT(relativeError, 3e-3);
+}
+
 TEST(CCMLC2014Test, DynamicJacobianMatchesFiniteDifferenceAcrossPerturbationScales)
 {
   auto cardiacInput = makeGenericCardiacInput();
