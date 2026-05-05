@@ -54,6 +54,18 @@ namespace Rodin::Heart::CCMLC2014::Model
   };
 
   /**
+   * @brief Rheology used in the reduced Windkessel branch flow laws.
+   */
+  enum class WindkesselRheology
+  {
+    Newtonian,              ///< Linear resistance branch flows.
+    CarreauYasuda,           ///< Non-Newtonian Carreau-Yasuda tube flow.
+    Cross,
+    PowerLaw,
+    Quemada
+  };
+
+  /**
    * @brief CCMLC2014 dynamic state variables at a given time.
    *
    * The short symbols are intentionally retained to match the publication notation.
@@ -110,11 +122,19 @@ namespace Rodin::Heart::CCMLC2014::Model
     Scalar distalRadius = 0.0;
     Scalar distalLength = 0.0;
 
+    Scalar m = 0.0;
+    Scalar n = 0.0;
+
     Scalar mu_0    = 0.0;
     Scalar mu_Inf  = 0.0;
     Scalar lambda = 0.0;
-    Scalar n = 0.0;
     Scalar yasuda = 0.0;
+
+    Scalar k_0 = 0.0;
+    Scalar k_Inf = 0.0;
+    Scalar phi_quemada = 0.0;
+    Scalar mu_plasma = 0.0;
+    Scalar gamma_c = 0.0;
 
     Scalar Kat = 0.0;     ///< Atrioventricular (mitral) conductance.
     Scalar Kp = 0.0;      ///< Valve leakage conductance.
@@ -127,6 +147,8 @@ namespace Rodin::Heart::CCMLC2014::Model
     Scalar localDamping = Scalar(1.0);      ///< Damping factor for local active Newton updates.
     Scalar absRegularization = Scalar(1e-14); ///< Regularization scalar for absolute values.
     TimeScheme timeScheme = TimeScheme::BDF2; ///< Implicit time discretization for dynamic states.
+    WindkesselRheology windkesselRheology =
+      WindkesselRheology::Newtonian; ///< Rheology for reduced Windkessel branches.
 
     Scalar initFibDef = 0.0;          ///< Initial fiber deformation @f$ e_c @f$.
     Scalar initActiveStiffness = 0.0; ///< Initial active stiffness-like value @f$ k_c @f$.

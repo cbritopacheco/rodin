@@ -356,24 +356,52 @@ namespace Rodin::IO
       snapshot.attributes.clear();
       snapshot.attributes.reserve(gr.attributes.size());
 
-      for (const auto& attr : gr.attributes)
+      for (auto& attr : gr.attributes)
       {
-        const auto attrFile = expandPattern(
-            patterns.attribute,
-            stemStr,
-            gr.name,
-            attr.name,
-            indexStr,
-            rankStr);
-        const auto attrPath = m_stem.parent_path() / attrFile;
-
-        attr.write(attrPath, attr.center);
-
         SnapshotRecord::AttributeRecord snapAttr;
         snapAttr.name = attr.name;
         snapAttr.center = attr.center;
         snapAttr.dimension = attr.dimension;
-        snapAttr.file = attrFile;
+
+        if (attr.policy == AttributePolicy::Static)
+        {
+          if (!attr.staticWritten)
+          {
+            const auto attrFile = expandPattern(
+                patterns.staticAttribute,
+                stemStr,
+                gr.name,
+                attr.name,
+                "",
+                rankStr);
+            const auto attrPath = m_stem.parent_path() / attrFile;
+
+            attr.write(attrPath, attr.center);
+
+            attr.staticFile = attrFile;
+            attr.staticWritten = true;
+          }
+
+          snapAttr.file = attr.staticFile;
+          snapAttr.isStatic = true;
+        }
+        else
+        {
+          const auto attrFile = expandPattern(
+              patterns.attribute,
+              stemStr,
+              gr.name,
+              attr.name,
+              indexStr,
+              rankStr);
+          const auto attrPath = m_stem.parent_path() / attrFile;
+
+          attr.write(attrPath, attr.center);
+
+          snapAttr.file = attrFile;
+          snapAttr.isStatic = false;
+        }
+
         snapshot.attributes.push_back(std::move(snapAttr));
       }
 
@@ -578,8 +606,11 @@ namespace Rodin::IO
 
             for (const auto& attr : snap.attributes)
             {
-              const auto attrH5 = expandPattern(
-                  patterns.attribute, stemStr, gr.name, attr.name, indexStr, rStr);
+              const auto attrH5 = attr.isStatic
+                ? expandPattern(
+                    patterns.staticAttribute, stemStr, gr.name, attr.name, "", rStr)
+                : expandPattern(
+                    patterns.attribute, stemStr, gr.name, attr.name, indexStr, rStr);
 
               const char* centerStr = (attr.center == Center::Node) ? "Node" : "Cell";
               const char* attrType  = (attr.dimension == 1) ? "Scalar" : "Vector";

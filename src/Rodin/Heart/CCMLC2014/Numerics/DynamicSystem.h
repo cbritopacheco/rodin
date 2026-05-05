@@ -26,6 +26,7 @@
 #include <utility>
 
 #include "Rodin/Heart/CCMLC2014/Model/State.h"
+#include "Rodin/Heart/CCMLC2014/Physics/Windkessel.h"
 
 namespace Rodin::Heart::CCMLC2014::Numerics
 {
@@ -143,11 +144,11 @@ namespace Rodin::Heart::CCMLC2014::Numerics
             * radius * radius * evalData.v;
 
         residualVector[Model::ArterialPressure] =
-          m_input.Cp / evalData.dt * (evalData.par - evalData.parPrev)
+          m_input.Cp * parDot
           + evalData.windkesselflowP;
 
         residualVector[Model::DistalPressure] =
-          m_input.Cd / evalData.dt * (evalData.pd - evalData.pdPrev)
+          m_input.Cd * pdDot
           + evalData.windkesselflowD;
 
         {
@@ -251,7 +252,7 @@ namespace Rodin::Heart::CCMLC2014::Numerics
           -evalData.dWindkesselOutflow_dPv;
 
         jacobianMatrix(Model::ArterialPressure, Model::ArterialPressure) +=
-          m_input.Cp / evalData.dt + evalData.dWindkesselflowP_dPar;
+          m_input.Cp * a0 + evalData.dWindkesselflowP_dPar;
 
         jacobianMatrix(Model::ArterialPressure, Model::DistalPressure) +=
           evalData.dWindkesselflowP_dPd;
@@ -261,7 +262,7 @@ namespace Rodin::Heart::CCMLC2014::Numerics
           evalData.dWindkesselflowD_dPar;
 
         jacobianMatrix(Model::DistalPressure, Model::DistalPressure) +=
-          m_input.Cd / evalData.dt
+          m_input.Cd * a0
           + evalData.dWindkesselflowD_dPd;
 
         // Fiber-deformation equilibrium.
@@ -611,13 +612,38 @@ namespace Rodin::Heart::CCMLC2014::Numerics
 
         data.cavityFluxPrev = Scalar(0);
 
-        const Scalar aorticFlow = m_input.Kar * (data.pv - data.par);
-        data.windkesselOutflow =
-          (aorticFlow > Scalar(0)) ? aorticFlow : Scalar(0);
-        data.dWindkesselOutflow_dPv =
-          (aorticFlow > Scalar(0)) ? m_input.Kar : Scalar(0);
-        data.dWindkesselOutflow_dPar =
-          (aorticFlow > Scalar(0)) ? -m_input.Kar : Scalar(0);
+        if (m_input.windkesselRheology == Model::WindkesselRheology::CarreauYasuda)
+        {
+          Physics::WindkesselOutflowEvaluator<
+            Input,
+            Physics::Rheology::CarreauYasuda> windkessel(m_input);
+          windkessel.evaluate(data);
+        }
+        else if (m_input.windkesselRheology == Model::WindkesselRheology::Cross) {
+          Physics::WindkesselOutflowEvaluator<
+            Input,
+            Physics::Rheology::Cross> windkessel(m_input);
+          windkessel.evaluate(data);
+        }
+        else if (m_input.windkesselRheology == Model::WindkesselRheology::PowerLaw) {
+          Physics::WindkesselOutflowEvaluator<
+            Input,
+            Physics::Rheology::PowerLaw> windkessel(m_input);
+          windkessel.evaluate(data);
+        }
+        else if (m_input.windkesselRheology == Model::WindkesselRheology::Quemada) {
+          Physics::WindkesselOutflowEvaluator<
+            Input,
+            Physics::Rheology::Quemada> windkessel(m_input);
+          windkessel.evaluate(data);
+        }
+        else
+        {
+          Physics::WindkesselOutflowEvaluator<
+            Input,
+            Physics::Rheology::Newtonian> windkessel(m_input);
+          windkessel.evaluate(data);
+        }
       }
 
       const Input& m_input;

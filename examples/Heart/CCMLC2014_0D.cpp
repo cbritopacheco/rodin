@@ -131,11 +131,18 @@ int main()
   in.Rd = 1.0e8;
   in.Cd = 1.0e-8;
 
-  in.mu_0 = 0.04868;
-  in.mu_Inf = 0.003605;
-  in.lambda = 3.39;
-  in.n = 0.198;
-  in.yasuda = 1.235;
+  in.mu_0 = 0.0186058;
+  in.mu_Inf = 0.0042963;
+  in.lambda = 0.2435;
+  in.n = 0.2079;
+  in.m = 0.0035;
+  in.yasuda = 1.541;
+  in.proximalRadius = 0.015;
+  in.proximalLength = 0.4;
+  in.distalRadius = 0.0007;
+  in.distalLength = 0.004;
+  in.windkesselRheology =
+    Rodin::Heart::CCMLC2014::Model::WindkesselRheology::CarreauYasuda;
 
   // Valve parameters
   in.Kat = 9.0e-6;

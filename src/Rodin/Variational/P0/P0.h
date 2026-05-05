@@ -28,7 +28,7 @@ namespace Rodin::FormLanguage
     using MeshType = Mesh;
     using ScalarType = Number;
     using RangeType = ScalarType;
-    using ContextType = typename MeshType::Context;
+    using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
     using ElementType = Variational::P0Element<RangeType>;
   };
 
@@ -38,7 +38,7 @@ namespace Rodin::FormLanguage
     using MeshType = Mesh;
     using ScalarType = Number;
     using RangeType = Math::SpatialVector<ScalarType>;
-    using ContextType = typename MeshType::Context;
+    using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
     using ElementType = Variational::P0Element<Math::SpatialVector<ScalarType>>;
   };
 }
