@@ -268,7 +268,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
    *
    * @tparam Input Model input parameter type.
    */
-  template <class Input, typename RheologyModel = Rheology::NonNewtonian::CY>
+  template <class Input, typename RheologyModel = Rheology::Newtonian>
   class WindkesselOutflowEvaluator
   {
     public:
