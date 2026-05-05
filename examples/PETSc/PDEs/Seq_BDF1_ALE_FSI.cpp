@@ -32,7 +32,8 @@
  *   4. Solve one BDF1 hyperelastic solid step.
  *
  * This is not a production FSI algorithm: no subiterations, no conservative
- * mortar transfer, and only a pressure load is applied to the solid.  The point
+ * mortar transfer.  The traction transferred to the solid is the full fluid
+ * Cauchy stress: T = (-p I + mu (grad u + grad u^T)) * n_fluid.  The point
  * is to show the simplest Rodin mechanics for matching-element maps, ALE mesh
  * motion, Oseen flow, and hyperelasticity in one place.
  *
@@ -41,10 +42,6 @@
  * ./examples/PETSc/PDEs/PETSc_Seq_BDF1_ALE_FSI \
  *   -ksp_type preonly -pc_type lu \
  *   -pc_factor_shift_type nonzero -pc_factor_shift_amount 1e-10
- *
- * The option -fsi_pressure_scale controls the toy pressure load transferred to
- * the solid.  It defaults to a small nondimensional value so the explicit
- * partitioned step remains gentle on coarse meshes.
  */
 
 #include <algorithm>
@@ -364,6 +361,15 @@ namespace
     }
     return true;
   }
+
+  static bool isFinite(const Math::SpatialMatrix<Real>& A)
+  {
+    for (int i = 0; i < A.rows(); ++i)
+      for (int j = 0; j < A.cols(); ++j)
+        if (!std::isfinite(A(i, j)))
+          return false;
+    return true;
+  }
 }
 
 int main(int argc, char** argv)
@@ -375,14 +381,12 @@ int main(int argc, char** argv)
   PetscInt solidNyOpt = 3;
   PetscInt ntOpt = 25;
   PetscReal finalTimeOpt = 0.25;
-  PetscReal pressureScaleOpt = 1e-12;
 
   PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_nx", &nxOpt, PETSC_NULLPTR);
   PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_fluid_ny", &fluidNyOpt, PETSC_NULLPTR);
   PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_solid_ny", &solidNyOpt, PETSC_NULLPTR);
   PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_Nt", &ntOpt, PETSC_NULLPTR);
   PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_T", &finalTimeOpt, PETSC_NULLPTR);
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_pressure_scale", &pressureScaleOpt, PETSC_NULLPTR);
 
   const size_t nx = static_cast<size_t>(std::max<PetscInt>(2, nxOpt));
   const size_t fluidNy = static_cast<size_t>(std::max<PetscInt>(2, fluidNyOpt));
@@ -394,7 +398,6 @@ int main(int argc, char** argv)
   const Real Hs = 0.25;
   const Real T  = static_cast<Real>(finalTimeOpt);
   const Real dt = T / static_cast<Real>(Nt);
-  const Real pressureScale = static_cast<Real>(pressureScaleOpt);
 
   {
   LocalMesh fluidMesh = makeStripMesh(nx, fluidNy, L, Hf, 0.0);
@@ -448,7 +451,7 @@ int main(int argc, char** argv)
 
   solidDisplacement.setName("SolidDisplacement");
   solidVelocity.setName("SolidVelocity");
-  solidFluidTraction.setName("FluidPressureTraction");
+  solidFluidTraction.setName("FluidCauchyTraction");
 
   const auto zero = Zero(dim);
   solidDisplacement = zero;
@@ -457,7 +460,7 @@ int main(int argc, char** argv)
   solidVelocityOld = zero;
   solidFluidTraction = zero;
 
-  IO::XDMF xdmf("BDF1_ALE_FSI");
+  IO::XDMF xdmf("out/BDF1_ALE_FSI");
   auto fluidGrid = xdmf.grid("Fluid");
   fluidGrid.setMesh(fluidMesh, IO::XDMF::MeshPolicy::Transient);
   fluidGrid.add("velocity", u.getSolution());
@@ -559,27 +562,46 @@ int main(int argc, char** argv)
     Solid::InternalForce internal(law, w);
     internal.setDisplacement(solidDisplacement);
 
-    auto fluidPressureLoad = VectorFunction(dim, [&](const Point& xs)
+    static bool tractionNaNReported = false;
+    auto fluidTractionLoad = VectorFunction(dim, [&](const Point& xs)
     {
       Math::SpatialVector<Real> traction(dim);
       traction.setZero();
-      if (pressureScale == 0.0)
-        return traction;
 
       const Point xf = forwardSolidPointToFluid(xs, fluidMesh, interfaceMap);
       const Real pressure = pOld(xf);
+      const auto J = Jacobian(uOld)(xf);
       const auto normal = nFluid(xf);
-      if (!std::isfinite(pressure) || !isFinite(normal))
-        return traction;
 
-      traction = pressureScale * pressure * normal;
+      const bool pOk = std::isfinite(pressure);
+      const bool nOk = isFinite(normal);
+      const bool JOk = (J.rows() == (int)dim && J.cols() == (int)dim && isFinite(J));
+
+      if (!pOk || !nOk || !JOk)
+      {
+        if (!tractionNaNReported)
+        {
+          tractionNaNReported = true;
+          const auto& pc = xs.getPhysicalCoordinates();
+          Alert::Warning()
+            << "fluidTractionLoad: non-finite at xs=(" << pc.transpose() << ")"
+            << " pressure=" << pressure
+            << " normalOk=" << nOk
+            << " J(" << J.rows() << "x" << J.cols() << ")Ok=" << JOk
+            << Alert::Raise;
+        }
+        return traction;
+      }
+
+      traction = (-pressure * Math::Matrix<Real>::Identity(dim, dim)
+                  + muF * (J + J.transpose())) * normal;
       return traction;
     });
 
     solidFluidTraction = zero;
     solidFluidTraction.project(
         Region::Boundary,
-        fluidPressureLoad,
+        fluidTractionLoad,
         SolidBoundary::FSI);
 
     Problem solid(du, w);
@@ -591,8 +613,7 @@ int main(int argc, char** argv)
         - solidMassCoeff * Integral(solidDisplacementOld, w)
         - (rhoS / dt) * Integral(solidVelocityOld, w)
         - BoundaryIntegral(solidFluidTraction, w).over(SolidBoundary::FSI)
-        + DirichletBC(du, Zero(dim)).on(SolidBoundary::ClampLeft)
-        + DirichletBC(du, Zero(dim)).on(SolidBoundary::ClampRight);
+        + DirichletBC(du, Zero(dim)).on(SolidBoundary::ClampLeft);
 
     SparseLU solidLinearSolver(solid);
     NewtonSolver solidSolver(solidLinearSolver);
@@ -602,6 +623,14 @@ int main(int argc, char** argv)
                .setRelativeTolerance(1e-8);
 
     Alert::Info() << "Solid BDF1 hyperelastic step " << step << " / " << Nt << Alert::Raise;
+    Alert::Info() << "  solidDisplacement norm before Newton: "
+                  << solidDisplacement.getData().norm() << Alert::Raise;
+    Alert::Info() << "  solidFluidTraction norm: "
+                  << solidFluidTraction.getData().norm() << Alert::Raise;
+    solidSolver.setMonitor([](const auto& rep) {
+      Alert::Info() << "  Newton it=" << rep.iterations
+                    << " r=" << rep.final_residual << Alert::Raise;
+    });
     solidSolver.solve(solidDisplacement);
 
     solidVelocity = (1.0 / dt) * (solidDisplacement - solidDisplacementOld);
