@@ -86,6 +86,8 @@ namespace Rodin::Examples::Heart
         Real pc = 0.0;
         /// @brief Outlet pressure applied to the 3D model.
         Real pout = 0.0;
+        /// @brief Distal branch flow leaving the capacitor.
+        Real qd = 0.0;
       };
 
       /**
@@ -114,13 +116,13 @@ namespace Rodin::Examples::Heart
       struct OutletFlowLaw
       {
         /// @brief Proximal surrogate vessel radius.
-        Real proximalRadius = 0.004;
+        Real proximalRadius = 5.0e-4;
         /// @brief Proximal surrogate vessel length.
-        Real proximalLength = 0.015;
+        Real proximalLength = 0.02;
         /// @brief Distal surrogate vessel radius.
-        Real distalRadius = 0.0004;
+        Real distalRadius = 1.2e-4;
         /// @brief Distal surrogate vessel length.
-        Real distalLength = 0.002;
+        Real distalLength = 0.02;
         /// @brief Pressure-drop threshold for the Poiseuille fallback.
         Real pressureDropTolerance = 1.0e-12;
         /// @brief Minimum shear-rate bracket.
@@ -173,7 +175,7 @@ namespace Rodin::Examples::Heart
         /// @brief Positive activation plateau value.
         Real positiveValue = 35.0;
         /// @brief Negative activation plateau value.
-        Real negativeValue = -12.0;
+        Real negativeValue = -20.0;
       };
 
       /**
@@ -215,6 +217,7 @@ namespace Rodin::Examples::Heart
         /// @brief Reference wall thickness.
         Real d0 = 1.4e-2;
         /// @brief Passive elastic stiffness.
+
         Real Es = 3.0e6;
         /// @brief Viscous parameter.
         Real mu = 70.0;
@@ -222,20 +225,22 @@ namespace Rodin::Examples::Heart
         Real eta = 70.0;
         /// @brief Active stress gain.
         Real alpha = 1.5;
+        /// @brief Load-dependent relaxation time scale.
+        Real alphaR = 0.12;
         /// @brief Active stiffness scale.
         Real k0 = 1.0e5;
         /// @brief Active stress scale.
-        Real sigma0 = 2.0e5;
+        Real sigma0 = 1.24e5;
         /// @brief Proximal arterial resistance.
         Real Rp = 5e7;
         /// @brief Proximal arterial compliance.
-        Real Cp = 2.0e-8;
+        Real Cp = 2.5e-9;
         /// @brief Distal arterial resistance.
         Real Rd = 1.0e8;
         /// @brief Distal arterial compliance.
         Real Cd = 5.0e-9;
         /// @brief Atrial valve coefficient.
-        Real Kat = 8.0e-6;
+        Real Kat = 9.0e-6;
         /// @brief Peripheral valve coefficient.
         Real Kp = 5.0e-10;
         /// @brief Arterial valve coefficient.
@@ -256,6 +261,14 @@ namespace Rodin::Examples::Heart
         Real initActiveStiffness = 0.0;
         /// @brief Initial active stress.
         Real initActiveStress = 0.0;
+        /// @brief Low-fiber-deformation target for load-dependent relaxation.
+        Real relaxationM0Low = 1.6;
+        /// @brief High-fiber-deformation target for load-dependent relaxation.
+        Real relaxationM0High = 1.0;
+        /// @brief Fiber deformation at which m0 reaches relaxationM0Low.
+        Real relaxationM0LowEc = 0.0;
+        /// @brief Fiber deformation at which m0 reaches relaxationM0High.
+        Real relaxationM0HighEc = 2.0;
         /// @brief Systemic venous pressure callback value.
         Real systemicVenousPressure = 1.0e3;
         /// @brief Passive energy parameter mu1.
@@ -358,13 +371,21 @@ namespace Rodin::Examples::Heart
         Real eps = 1.0e-12;
         /// @brief 3D blood density.
         Real rho = 1060.0;
+        /// @brief Inlet reversed-flow damping multiplier. Set to 0 to disable.
+        Real inletBackflowStabilization = 1.0;
+        /// @brief Outlet backflow damping multiplier. Set to 0 to disable.
+        Real outletBackflowStabilization = 1.0;
 
         /// @brief Time-step size.
         Real dt = 1.0e-3;
         /// @brief Number of time steps.
         size_t nsteps = 3 * static_cast<int>(0.85 / 1.0e-3);
+        /// @brief Factor applied to dt when the 3D KSP/SNES solve fails.
+        Real timeAdaptivityReductionFactor = 0.5;
+        /// @brief Maximum number of successive dt reductions per accepted step.
+        int timeAdaptivityMaxLevels = 8;
 
-        /// @brief 3D coronary flow linearization mode. Defaults to full Newton.
+        /// @brief 3D coronary flow linearization mode. Defaults to Oseen/Picard.
         FlowMode flowMode = FlowMode::Oseen;
         /// @brief Blood viscosity model shared by 3D flow and outlet laws.
         CarreauYasuda viscosity;
@@ -415,14 +436,18 @@ namespace Rodin::Examples::Heart
         Real ec = 0.0;
         Real gamma = 0.0;
         Real beta = 0.0;
+        Real w = 1.0;
         Real kc = 0.0;
         Real tauc = 0.0;
 
         Real qIn = 0.0;
         Real qOutSum = 0.0;
+        Real qDistalSum = 0.0;
+        Real qCapChargingSum = 0.0;
         Real flowBalance = 0.0;
 
         std::map<Attribute, Real> qOut;
+        std::map<Attribute, Real> qDistal;
         std::map<Attribute, Real> pc;
         std::map<Attribute, Real> pOut;
       };

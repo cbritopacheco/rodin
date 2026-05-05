@@ -51,6 +51,42 @@ namespace Rodin::Examples::Heart
       }
       return "unknown";
     }
+
+    class VecSnapshot
+    {
+      public:
+        explicit VecSnapshot(::Vec source)
+        {
+          PetscErrorCode ierr = VecDuplicate(source, &m_data);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecCopy(source, m_data);
+          assert(ierr == PETSC_SUCCESS);
+          (void) ierr;
+        }
+
+        VecSnapshot(const VecSnapshot&) = delete;
+        VecSnapshot& operator=(const VecSnapshot&) = delete;
+
+        ~VecSnapshot()
+        {
+          if (m_data)
+          {
+            PetscErrorCode ierr = VecDestroy(&m_data);
+            assert(ierr == PETSC_SUCCESS);
+            (void) ierr;
+          }
+        }
+
+        void restore(::Vec target) const
+        {
+          PetscErrorCode ierr = VecCopy(m_data, target);
+          assert(ierr == PETSC_SUCCESS);
+          (void) ierr;
+        }
+
+      private:
+        ::Vec m_data = PETSC_NULLPTR;
+    };
   }
 
   CoupledLV0DCoronary3D::CoupledLV0DCoronary3D(const Context::MPI& context)
@@ -184,6 +220,7 @@ namespace Rodin::Examples::Heart
     input.mu = cfg.lv.mu;
     input.eta = cfg.lv.eta;
     input.alpha = cfg.lv.alpha;
+    input.alphaR = cfg.lv.alphaR;
     input.k0 = cfg.lv.k0;
     input.sigma0 = cfg.lv.sigma0;
 
@@ -224,6 +261,31 @@ namespace Rodin::Examples::Heart
       [p = cfg.atrialPressure](Real t) { return atrial_pressure(p, t); };
     input.u =
       [a = cfg.activation](Real t) { return periodic_activation(a, t); };
+    input.m0 =
+      [low = cfg.lv.relaxationM0Low,
+       high = cfg.lv.relaxationM0High,
+       lowEc = cfg.lv.relaxationM0LowEc,
+       highEc = cfg.lv.relaxationM0HighEc](Real ec)
+      {
+        if (highEc <= lowEc)
+          return high;
+        if (ec <= lowEc)
+          return low;
+        if (ec >= highEc)
+          return high;
+        const Real s = (ec - lowEc) / (highEc - lowEc);
+        return (1.0 - s) * low + s * high;
+      };
+    input.dm0 =
+      [low = cfg.lv.relaxationM0Low,
+       high = cfg.lv.relaxationM0High,
+       lowEc = cfg.lv.relaxationM0LowEc,
+       highEc = cfg.lv.relaxationM0HighEc](Real ec)
+      {
+        if (highEc <= lowEc || ec <= lowEc || ec >= highEc)
+          return 0.0;
+        return (high - low) / (highEc - lowEc);
+      };
 
     {
       using PassiveEnergy = std::decay_t<decltype(input.passiveEnergy)>;
@@ -252,6 +314,7 @@ namespace Rodin::Examples::Heart
       (a * bc.pc + Q + s.pv / bc.Rd)
       / (a + 1.0 / bc.Rd);
 
+    bc.qd = (bc.pc - bc.pd) / bc.Rd;
     bc.pout = bc.pc + bc.Rp * Q;
   }
 
@@ -512,6 +575,10 @@ namespace Rodin::Examples::Heart
       }
     }
 
+    const auto [qd, dqd] = flowLaw(bc.pc - s.pv, lengthD, radiusD);
+    (void) dqd;
+    bc.qd = qd;
+
     const Real oldGuess = bc.pout - bc.pc;
     const Real dpP =
       solvePressureDropForFlow(Q, lengthP, radiusP, oldGuess);
@@ -611,6 +678,7 @@ namespace Rodin::Examples::Heart
     s0.beta = (s0.gamma > 0.0) ? (m_input.initActiveStress / s0.gamma) : 0.0;
     s0.kc = s0.gamma * s0.gamma;
     s0.tauc = s0.gamma * s0.beta;
+    s0.w = m_input.m0(s0.ec);
 
     m_model.initialize(s0);
   }
@@ -679,6 +747,7 @@ namespace Rodin::Examples::Heart
       << "ec    = " << s.ec << Alert::NewLine
       << "gamma = " << s.gamma << Alert::NewLine
       << "beta  = " << s.beta << Alert::NewLine
+      << "w     = " << s.w << Alert::NewLine
       << "kc    = " << s.kc << Alert::NewLine
       << "tauc  = " << s.tauc << Alert::NewLine
       << "3D flow mode: " << flowModeName(m_cfg.flowMode)
@@ -766,7 +835,12 @@ namespace Rodin::Examples::Heart
     const auto oseenTemamJacobian =
       divLag * Dot(m_u, m_v);
 
-    const auto beta = Max(-Dot(m_uOld, normal), 0.0);
+    const auto outletBeta = Max(-Dot(m_uOld, normal), 0.0);
+    const auto inletBeta = Max(Dot(m_uOld, normal), 0.0);
+    const auto outletBackflowDamping =
+      0.5 * m_cfg.outletBackflowStabilization * m_cfg.rho * outletBeta;
+    const auto inletBackflowDamping =
+      0.5 * m_cfg.inletBackflowStabilization * m_cfg.rho * inletBeta;
 
     const auto symDU =
       0.5 * (Jacobian(m_u) + Transpose(Jacobian(m_u)));
@@ -836,12 +910,13 @@ namespace Rodin::Examples::Heart
         + Integral(Div(m_u), m_q)
         + m_cfg.eps * Integral(m_p, m_q)
 
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(outlet0)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(outlet1)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(outlet2)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(outlet3)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(outlet4)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(outlet5)
+        + BoundaryIntegral(inletBackflowDamping * Dot(m_u, m_v)).over(m_cfg.inlet)
+        + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet0)
+        + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet1)
+        + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet2)
+        + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet3)
+        + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet4)
+        + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet5)
 
           /* Residual */
         + (m_cfg.rho / m_cfg.dt) * Integral(uState, m_v)
@@ -866,12 +941,13 @@ namespace Rodin::Examples::Heart
         + BoundaryIntegral(m_wk.at(outlet4).pout * Dot(m_v, normal)).over(outlet4)
         + BoundaryIntegral(m_wk.at(outlet5).pout * Dot(m_v, normal)).over(outlet5)
 
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(outlet0)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(outlet1)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(outlet2)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(outlet3)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(outlet4)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(uState, m_v)).over(outlet5)
+        + BoundaryIntegral(inletBackflowDamping * Dot(uState, m_v)).over(m_cfg.inlet)
+        + BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet0)
+        + BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet1)
+        + BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet2)
+        + BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet3)
+        + BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet4)
+        + BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet5)
 
         + DirichletBC(m_u, -uState).on(m_cfg.wall);
     }
@@ -891,12 +967,13 @@ namespace Rodin::Examples::Heart
         + Integral(Div(m_u), m_q)
         + m_cfg.eps * Integral(m_p, m_q)
 
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(outlet0)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(outlet1)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(outlet2)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(outlet3)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(outlet4)
-        - BoundaryIntegral(0.5 * m_cfg.rho * beta * Dot(m_u, m_v)).over(outlet5)
+        + BoundaryIntegral(inletBackflowDamping * Dot(m_u, m_v)).over(m_cfg.inlet)
+        + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet0)
+        + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet1)
+        + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet2)
+        + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet3)
+        + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet4)
+        + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet5)
 
           /* Right-hand side terms */
         - (m_cfg.rho / m_cfg.dt) * Integral(m_uOld, m_v)
@@ -1074,16 +1151,25 @@ namespace Rodin::Examples::Heart
     d.ec = s.ec;
     d.gamma = s.gamma;
     d.beta = s.beta;
+    d.w = s.w;
     d.kc = s.kc;
     d.tauc = s.tauc;
 
     d.qIn = m_stepData.qIn;
     d.qOutSum = m_stepData.qOutSum;
+    d.qDistalSum = 0.0;
+    d.qCapChargingSum = 0.0;
     d.flowBalance = m_stepData.flowBalance;
     d.qOut = m_stepData.qOut;
 
     for (const auto& [tag, bc] : m_wk)
     {
+      const auto qOutIt = m_stepData.qOut.find(tag);
+      const Real qOut = (qOutIt == m_stepData.qOut.end()) ? 0.0 : qOutIt->second;
+
+      d.qDistal[tag] = bc.qd;
+      d.qDistalSum += bc.qd;
+      d.qCapChargingSum += qOut - bc.qd;
       d.pc[tag] = bc.pc;
       d.pOut[tag] = bc.pout;
     }
@@ -1116,6 +1202,14 @@ namespace Rodin::Examples::Heart
       << "CoronaryOutlet8Flux,"
       << "CoronaryOutlet9Flux,"
       << "CoronaryOutletFluxTotal,"
+      << "CoronaryOutlet4DistalFlux,"
+      << "CoronaryOutlet5DistalFlux,"
+      << "CoronaryOutlet6DistalFlux,"
+      << "CoronaryOutlet7DistalFlux,"
+      << "CoronaryOutlet8DistalFlux,"
+      << "CoronaryOutlet9DistalFlux,"
+      << "CoronaryDistalFluxTotal,"
+      << "CoronaryCapChargingFluxTotal,"
       << "CoronaryOutlet4CapPressure,"
       << "CoronaryOutlet5CapPressure,"
       << "CoronaryOutlet6CapPressure,"
@@ -1132,6 +1226,7 @@ namespace Rodin::Examples::Heart
       << "ec,"
       << "gamma,"
       << "beta,"
+      << "w,"
       << "kc,"
       << "tauc\n";
 
@@ -1171,6 +1266,14 @@ namespace Rodin::Examples::Heart
       << get(d.qOut, 8) << ','
       << get(d.qOut, 9) << ','
       << d.qOutSum << ','
+      << get(d.qDistal, 4) << ','
+      << get(d.qDistal, 5) << ','
+      << get(d.qDistal, 6) << ','
+      << get(d.qDistal, 7) << ','
+      << get(d.qDistal, 8) << ','
+      << get(d.qDistal, 9) << ','
+      << d.qDistalSum << ','
+      << d.qCapChargingSum << ','
       << get(d.pc, 4) << ','
       << get(d.pc, 5) << ','
       << get(d.pc, 6) << ','
@@ -1187,6 +1290,7 @@ namespace Rodin::Examples::Heart
       << d.ec << ','
       << d.gamma << ','
       << d.beta << ','
+      << d.w << ','
       << d.kc << ','
       << d.tauc << '\n';
 
@@ -1237,18 +1341,58 @@ namespace Rodin::Examples::Heart
     if (!m_initialized)
       initialize();
 
-    for (int i = 0; i < static_cast<int>(m_cfg.nsteps); ++i)
+    const Real baseDt = m_cfg.dt;
+    const Real factor = m_cfg.timeAdaptivityReductionFactor;
+    const int maxLevels = m_cfg.timeAdaptivityMaxLevels;
+    const Real startTime = m_model.getState().t;
+    const Real finalTime =
+      startTime + static_cast<Real>(m_cfg.nsteps) * baseDt;
+
+    if (!(factor > 0.0 && factor < 1.0))
     {
+      Alert::Exception()
+        << "Invalid time adaptivity reduction factor: " << factor
+        << ". Expected a value in (0, 1)."
+        << Alert::Raise;
+      return 1;
+    }
+
+    if (maxLevels < 0)
+    {
+      Alert::Exception()
+        << "Invalid time adaptivity maximum levels: " << maxLevels
+        << ". Expected a non-negative value."
+        << Alert::Raise;
+      return 1;
+    }
+
+    Real nextDt = baseDt;
+    int acceptedStep = 0;
+
+    while (m_model.getState().t < finalTime - 0.5 * std::numeric_limits<Real>::epsilon())
+    {
+      const Real t_current = m_model.getState().t;
+      const Real remaining = finalTime - t_current;
+      const Real physicalDt = std::min(nextDt, remaining);
+      Real solverDt = physicalDt;
+      int level = 0;
+
+      const auto savedRCR = m_wk;
+      const StepData savedStepData = m_stepData;
+      const VecSnapshot savedU(m_u.getSolution().getData());
+      const VecSnapshot savedP(m_p.getSolution().getData());
+
+      m_cfg.dt = physicalDt;
       m_stepTiming = StepTiming{};
       const auto stepStart = CoronaryClock::now();
-      const Real t_current = m_model.getState().t;
 
       if (isRoot())
       {
         Alert::Info()
-          << "━━━ Step " << (i + 1) << " / " << m_cfg.nsteps
+          << "━━━ Step " << (acceptedStep + 1)
           << "  t = " << t_current << " s"
-          << "  (dt = " << m_cfg.dt << " s)"
+          << " / " << finalTime << " s"
+          << "  (dt = " << physicalDt << " s)"
           << " ━━━"
           << Alert::Raise;
       }
@@ -1261,18 +1405,83 @@ namespace Rodin::Examples::Heart
       {
         Alert::Exception()
           << "0D solver failed to converge at step "
-          << (i + 1) << ", t = " << m_model.getState().t
+          << (acceptedStep + 1) << ", t = " << m_model.getState().t
           << Alert::Raise;
         return 1;
       }
 
-      if (!solve3D())
+      const auto advancedState = m_model.getState();
+      const auto advancedHistory = m_model.getHistory();
+      const auto advancedUnknowns = m_model.getUnknowns();
+      const auto advancedReport = m_model.getReport();
+
+      bool accepted = false;
+
+      while (!accepted)
       {
-        Alert::Exception()
-          << "3D flow solver failed to converge at step "
-          << (i + 1) << ", t = " << m_model.getState().t
-          << Alert::Raise;
-        return 1;
+        m_cfg.dt = solverDt;
+
+        if (!solve3D())
+        {
+          m_model.restore(advancedState, advancedHistory, advancedUnknowns, advancedReport);
+          m_wk = savedRCR;
+          m_stepData = savedStepData;
+          savedU.restore(m_u.getSolution().getData());
+          savedP.restore(m_p.getSolution().getData());
+
+          if (level >= maxLevels)
+          {
+            Alert::Exception()
+              << "3D flow solver failed to converge at step "
+              << (acceptedStep + 1)
+              << " after " << (level + 1)
+              << " attempt(s). Minimum solver dt = " << solverDt << " s."
+              << Alert::Raise;
+            return 1;
+          }
+
+          solverDt *= factor;
+          ++level;
+
+          if (isRoot())
+          {
+            Alert::Info()
+              << "[3D] Retrying step " << (acceptedStep + 1)
+              << " with reduced solver dt = " << solverDt
+              << " s  (adapt level = " << level << " / " << maxLevels << ")"
+              << Alert::Raise;
+          }
+
+          continue;
+        }
+
+        const auto fluxesStart = CoronaryClock::now();
+        computeFluxes();
+        m_stepTiming.fluxes = secondsSince(fluxesStart);
+
+        const auto outletRCRStart = CoronaryClock::now();
+        m_cfg.dt = physicalDt;
+        for (const Attribute tag : m_cfg.outlets)
+          updateRCRNonNew(m_cfg, m_model, m_wk[tag], m_stepData.qOut.at(tag), m_cfg.dt);
+        m_stepTiming.outletRCR = secondsSince(outletRCRStart);
+
+        const auto csvStart = CoronaryClock::now();
+        writeCSVRow();
+        m_stepTiming.csv = secondsSince(csvStart);
+
+        const auto historyStart = CoronaryClock::now();
+        updateHistory();
+        m_stepTiming.history = secondsSince(historyStart);
+
+        const auto outputStart = CoronaryClock::now();
+        writeOutputs();
+        m_stepTiming.output = secondsSince(outputStart);
+
+        m_stepTiming.total = secondsSince(stepStart);
+        printStepTiming(acceptedStep + 1);
+
+        accepted = true;
+        nextDt = std::min(baseDt, solverDt / factor);
       }
 
       const auto fluxesStart = CoronaryClock::now();
@@ -1298,8 +1507,12 @@ namespace Rodin::Examples::Heart
 
       m_stepTiming.total = secondsSince(stepStart);
       printStepTiming(i + 1);
+
+      ++acceptedStep;
+
     }
 
+    m_cfg.dt = baseDt;
     m_xdmf.close();
     return 0;
   }

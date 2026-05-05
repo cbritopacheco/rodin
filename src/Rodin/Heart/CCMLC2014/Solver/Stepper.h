@@ -216,6 +216,11 @@ namespace Rodin::Heart::CCMLC2014::Solver
         else
           m_state.ec = m_input.initFibDef;
 
+        if (initial.w > Scalar(0))
+          m_state.w = initial.w;
+        else
+          m_state.w = std::max<Scalar>(m_input.m0(m_state.ec), Scalar(0));
+
         m_history.nm1 = m_state;
         m_x = packUnknowns(m_state);
       }
@@ -242,25 +247,9 @@ namespace Rodin::Heart::CCMLC2014::Solver
 
         if (nr.converged)
         {
-          Numerics::DynamicSystem<PassiveLaw, Input> dynamicSystem(m_input);
-          EvalData evalData;
-          dynamicSystem.buildEvalData(
-              m_x,
-              m_history.n,
-              m_history.nm1,
-              m_history.n.t + dt,
-              dt,
-              evalData);
-
           m_history.nm2 = m_history.nm1;
           m_history.nm1 = m_history.n;
           m_state = unpackUnknownsIntoState(m_x, m_state, m_history.n.t + dt);
-          m_state.v = (m_state.y - m_history.n.y) / dt;
-          m_state.ec = evalData.active.fiberDeformationCurrent;
-          m_state.gamma = evalData.active.gammaCurrent;
-          m_state.beta = evalData.active.betaCurrent;
-          m_state.kc = m_state.gamma * m_state.gamma;
-          m_state.tauc = m_state.gamma * m_state.beta;
         }
 
         return m_report;
@@ -271,14 +260,31 @@ namespace Rodin::Heart::CCMLC2014::Solver
       const Report& getReport() const noexcept { return m_report; }
       const DenseVector& getUnknowns() const noexcept { return m_x; }
 
+      void restore(
+          const State& state,
+          const History& history,
+          const DenseVector& unknowns,
+          const Report& report)
+      {
+        m_state = state;
+        m_history = history;
+        m_x = unknowns;
+        m_report = report;
+      }
+
     private:
       static DenseVector packUnknowns(const State& s)
       {
         DenseVector x(Model::NumberOfVariables);
         x[Model::RadialDisplacement] = s.y;
+        x[Model::RadialVelocity] = s.v;
         x[Model::VentricularPressure] = s.pv;
         x[Model::ArterialPressure] = s.par;
         x[Model::DistalPressure] = s.pd;
+        x[Model::FiberDeformation] = s.ec;
+        x[Model::ActiveStiffness] = s.kc;
+        x[Model::ActiveStress] = s.tauc;
+        x[Model::LoadDependentRelaxation] = s.w;
         return x;
       }
 
@@ -287,11 +293,25 @@ namespace Rodin::Heart::CCMLC2014::Solver
       {
         State s = base;
         s.y = x[Model::RadialDisplacement];
+        s.v = x[Model::RadialVelocity];
         s.pv = x[Model::VentricularPressure];
         s.par = x[Model::ArterialPressure];
         s.pd = x[Model::DistalPressure];
+        s.ec = x[Model::FiberDeformation];
+        s.kc = normalizeActiveStiffness(x[Model::ActiveStiffness]);
+        s.tauc = x[Model::ActiveStress];
+        s.w = x[Model::LoadDependentRelaxation];
+        s.gamma = std::sqrt(std::max<Scalar>(s.kc, Scalar(0)));
+        s.beta = (s.gamma > Scalar(0)) ? (s.tauc / s.gamma) : Scalar(0);
         s.t = t;
         return s;
+      }
+
+      static Scalar normalizeActiveStiffness(Scalar kc)
+      {
+        if (kc < Scalar(0) && std::abs(kc) < Scalar(1e-14))
+          return Scalar(0);
+        return kc;
       }
 
     private:

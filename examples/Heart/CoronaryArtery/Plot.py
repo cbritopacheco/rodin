@@ -124,6 +124,7 @@ def add_derived_columns(df):
         df[c] = pd.to_numeric(df[c], errors="coerce")
 
     outlet_fluxes = [f"CoronaryOutlet{i}Flux" for i in OUTLET_IDS]
+    distal_fluxes = [f"CoronaryOutlet{i}DistalFlux" for i in OUTLET_IDS]
     outlet_pressures = [f"CoronaryOutlet{i}Pressure" for i in OUTLET_IDS]
     cap_pressures = [f"CoronaryOutlet{i}CapPressure" for i in OUTLET_IDS]
 
@@ -141,6 +142,14 @@ def add_derived_columns(df):
         df["CoronaryOutletFluxTotal_mL_s"] = 1e6 * df["CoronaryOutletFluxTotal"]
         df["AbsCoronaryOutletFluxTotal"] = df["CoronaryOutletFluxTotal"].abs()
 
+    if "CoronaryDistalFluxTotal" in df:
+        df["CoronaryDistalFluxTotal_mL_s"] = 1e6 * df["CoronaryDistalFluxTotal"]
+
+    if "CoronaryCapChargingFluxTotal" in df:
+        df["CoronaryCapChargingFluxTotal_mL_s"] = (
+            1e6 * df["CoronaryCapChargingFluxTotal"]
+        )
+
     if all(c in df for c in outlet_fluxes) and "CoronaryOutletFluxTotal" in df:
         df["OutletFluxSumCheck"] = df[outlet_fluxes].sum(axis=1)
         df["OutletFluxMismatch"] = (
@@ -152,6 +161,15 @@ def add_derived_columns(df):
         for c in outlet_fluxes:
             df[c + "_mL_s"] = 1e6 * df[c]
             df[c + "Fraction"] = df[c] / total
+
+    if all(c in df for c in distal_fluxes):
+        df["DistalFluxSumCheck"] = df[distal_fluxes].sum(axis=1)
+        if "CoronaryDistalFluxTotal" in df:
+            df["DistalFluxMismatch"] = (
+                df["DistalFluxSumCheck"] - df["CoronaryDistalFluxTotal"]
+            )
+        for c in distal_fluxes:
+            df[c + "_mL_s"] = 1e6 * df[c]
 
     if "FlowBalance" in df:
         df["AbsFlowBalance"] = df["FlowBalance"].abs()
@@ -371,6 +389,17 @@ def dashboard_specs():
                     df,
                     [f"CoronaryOutlet{i}FluxFraction" for i in OUTLET_IDS],
                     "Outlet flux fractions",
+                ),
+                lambda ax, df: ts(
+                    ax,
+                    df,
+                    [
+                        "CoronaryOutletFluxTotal_mL_s",
+                        "CoronaryDistalFluxTotal_mL_s",
+                        "CoronaryCapChargingFluxTotal_mL_s",
+                    ],
+                    "Coronary flux totals",
+                    "mL/s",
                 ),
                 lambda ax, df: ts(
                     ax,
@@ -735,20 +764,30 @@ def save_all_figures(df, outdir):
         "Outlet flux fractions",
     )
     make_ts(
-        "08_outlet_pressures.png",
+        "08_coronary_flux_totals.png",
+        [
+            "CoronaryOutletFluxTotal_mL_s",
+            "CoronaryDistalFluxTotal_mL_s",
+            "CoronaryCapChargingFluxTotal_mL_s",
+        ],
+        "Coronary flux totals",
+        "mL/s",
+    )
+    make_ts(
+        "09_outlet_pressures.png",
         [f"CoronaryOutlet{i}Pressure" for i in OUTLET_IDS],
         "RCR outlet pressures",
         "Pa",
     )
     make_ts(
-        "09_capacitor_pressures.png",
+        "10_capacitor_pressures.png",
         [f"CoronaryOutlet{i}CapPressure" for i in OUTLET_IDS],
         "RCR capacitor pressures",
         "Pa",
     )
     make_ts(
-        "10_flow_balance.png",
-        ["FlowBalance", "OutletFluxMismatch"],
+        "11_flow_balance.png",
+        ["FlowBalance", "OutletFluxMismatch", "DistalFluxMismatch"],
         "Flux balance",
         "m³/s",
     )
