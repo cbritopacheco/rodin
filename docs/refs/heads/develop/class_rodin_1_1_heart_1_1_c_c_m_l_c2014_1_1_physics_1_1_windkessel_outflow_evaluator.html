@@ -75,7 +75,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_windkessel_8h.html">&lt;Rodin/Heart/CCMLC2014/Physics/Windkessel.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class Input&gt;</div>
+          <div class="m-doc-template">template&lt;class Input, typename RheologyModel = <a href="struct_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_physics_1_1_rheology_1_1_non_newtonian_1_1_c_y.html" class="m-doc">Rheology::<wbr />NonNewtonian::<wbr />CY</a>&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_heart.html">Heart</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_heart_1_1_c_c_m_l_c2014.html">CCMLC2014</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_physics.html">Physics</a>::<wbr/></span>WindkesselOutflowEvaluator <span class="m-thin">class</span>
         </h1>
         <p>Evaluates the Windkessel outflow and its pressure derivatives.</p>
@@ -186,9 +186,9 @@ $ Q_{ar}^+ = \max(0, K_{ar}(p_{v,\text{mid}} - p_{ar,\text{mid}})) $
           <section class="m-doc-details" id="afb893e9bdf3cf98798db812b360cd99a"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Input&gt;
+                template&lt;class Input, typename RheologyModel&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Physics::<wbr />WindkesselOutflowEvaluator&lt;Input&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afb893e9bdf3cf98798db812b360cd99a" class="m-doc-self">WindkesselOutflowEvaluator</a>(</span><span class="m-doc-wrap">const Input&amp; input) <span class="m-label m-info">explicit</span> </span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Physics::<wbr />WindkesselOutflowEvaluator&lt;Input, RheologyModel&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afb893e9bdf3cf98798db812b360cd99a" class="m-doc-self">WindkesselOutflowEvaluator</a>(</span><span class="m-doc-wrap">const Input&amp; input) <span class="m-label m-info">explicit</span> </span></span>
             </h3>
             <p>Construct with model input parameters.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -206,10 +206,10 @@ $ Q_{ar}^+ = \max(0, K_{ar}(p_{v,\text{mid}} - p_{ar,\text{mid}})) $
           <section class="m-doc-details" id="ab2da5d8bd675473c795a0174e5d8dcfd"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Input&gt;
+                template&lt;class Input, typename RheologyModel&gt;
                 template&lt;class EvalData&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Physics::<wbr />WindkesselOutflowEvaluator&lt;Input&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab2da5d8bd675473c795a0174e5d8dcfd" class="m-doc-self">evaluate</a>(</span><span class="m-doc-wrap">EvalData&amp; data) const</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Physics::<wbr />WindkesselOutflowEvaluator&lt;Input, RheologyModel&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab2da5d8bd675473c795a0174e5d8dcfd" class="m-doc-self">evaluate</a>(</span><span class="m-doc-wrap">EvalData&amp; data) const</span></span>
             </h3>
             <p>Evaluate outflow and pressure derivatives.</p>
             <table class="m-table m-fullwidth m-flat">
