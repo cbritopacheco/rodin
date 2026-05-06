@@ -519,6 +519,247 @@ namespace Rodin::Tests::Unit
       EXPECT_EQ(combined.size(), globalVerts);
     }
   }
+
+  // ==========================================================================
+  // Group 6 — P1 FES on boundary SubMesh: owned DOF uniqueness
+  // ==========================================================================
+
+  /**
+   * @brief Owned P1 DOFs on boundary SubMesh are globally unique and cover
+   *        the expected range exactly.
+   *
+   * This is a regression test for the MPI tag-collision bug: before the fix,
+   * P0 cell SubMesh sends with tag=0 would accumulate and be consumed by a
+   * subsequent P1 boundary SubMesh irecv on the same tag, leaving some
+   * Shared vertices with invalid DOFs.
+   */
+  TEST(MPIP1FESSubMesh, BoundarySubMesh_OwnedDOFs_GloballyUnique_Triangle)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 4)
+      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+    auto sub  = makeBoundarySubMesh(mesh);
+
+    P1<Real, Mesh<Context::MPI>> fes(sub);
+
+    const auto& shard   = sub.getShard();
+    const size_t nVerts = shard.getVertexCount();
+
+    std::vector<Index> ownedDofs;
+    for (size_t i = 0; i < nVerts; ++i)
+    {
+      if (shard.isOwned(0, i))
+      {
+        const auto& dofs = fes.getDOFs(0, static_cast<Index>(i));
+        for (const Index d : dofs)
+          ownedDofs.push_back(d);
+      }
+    }
+
+    // Collective gather — must be called by all ranks.
+    const size_t globalBoundaryVerts = sub.getVertexCount();
+
+    std::vector<std::vector<Index>> allDofs;
+    boost::mpi::gather(world, ownedDofs, allDofs, 0);
+
+    if (world.rank() == 0)
+    {
+      std::vector<Index> combined;
+      for (const auto& v : allDofs)
+        combined.insert(combined.end(), v.begin(), v.end());
+
+      std::sort(combined.begin(), combined.end());
+      const size_t uniqueCount = static_cast<size_t>(
+          std::unique(combined.begin(), combined.end()) - combined.begin());
+
+      EXPECT_EQ(uniqueCount, combined.size())
+          << "Duplicate global P1 DOF indices on boundary SubMesh.";
+      EXPECT_EQ(combined.size(), globalBoundaryVerts)
+          << "Owned P1 DOF count does not match global boundary vertex count.";
+    }
+  }
+
+  // ==========================================================================
+  // Group 7 — Regression: P0 cell SubMesh then P1 boundary SubMesh (tag-leakage)
+  // ==========================================================================
+
+  /**
+   * @brief Regression test for MPI message tag collision.
+   *
+   * Previously, P0 on a cell SubMesh used tag=0 for its DOF exchange and
+   * could leave unmatched sends in the MPI buffer.  A subsequent P1 boundary
+   * SubMesh construction would irecv on tag=0 and consume those stale P0
+   * messages, corrupting Shared-vertex DOF assignments.
+   *
+   * After the fix (symmetric drain, distinct tags), the P1 boundary SubMesh
+   * must produce valid DOFs even when constructed after P0 cell and P0
+   * boundary SubMesh spaces.
+   */
+  TEST(MPIP1FESSubMesh,
+       Regression_P0CellThenP1Boundary_AllLocalVertices_HaveValidGlobalDOF)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 4)
+      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+
+    // Build both SubMeshes.
+    auto cellSub     = makeCellSubMesh(mesh);
+    auto boundarySub = makeBoundarySubMesh(mesh);
+
+    // Construct P0 on cell SubMesh first (this was the source of stale sends).
+    P0<Real, Mesh<Context::MPI>> p0cell(cellSub);
+    (void) p0cell;
+
+    // Construct P0 on boundary SubMesh (additional potential source of stale sends).
+    P0<Real, Mesh<Context::MPI>> p0bnd(boundarySub);
+    (void) p0bnd;
+
+    // Now construct P1 on boundary SubMesh.  After the symmetric-drain fix,
+    // this must not consume any stale P0 messages and must produce valid DOFs.
+    P1<Real, Mesh<Context::MPI>> p1bnd(boundarySub);
+
+    const auto& shard   = boundarySub.getShard();
+    const size_t nVerts = shard.getVertexCount();
+    const size_t globalSize = p1bnd.getSize();
+
+    for (size_t i = 0; i < nVerts; ++i)
+    {
+      const auto& dofs = p1bnd.getDOFs(0, static_cast<Index>(i));
+      for (const Index d : dofs)
+      {
+        EXPECT_LT(d, globalSize)
+            << "P1 boundary SubMesh DOF " << d
+            << " out of range for local vertex " << i
+            << " (constructed after P0 cell and boundary SubMesh spaces).";
+      }
+    }
+  }
+
+  /**
+   * @brief Same regression test but with a Tetrahedron mesh (3D variant).
+   */
+  TEST(MPIP1FESSubMesh,
+       Regression_P0CellThenP1Boundary_AllLocalVertices_HaveValidGlobalDOF_Tetrahedron)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 4)
+      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx, Polytope::Type::Tetrahedron, {3, 3, 3});
+
+    auto cellSub     = makeCellSubMesh(mesh);
+    auto boundarySub = makeBoundarySubMesh(mesh);
+
+    P0<Real, Mesh<Context::MPI>> p0cell(cellSub);
+    (void) p0cell;
+
+    P0<Real, Mesh<Context::MPI>> p0bnd(boundarySub);
+    (void) p0bnd;
+
+    P1<Real, Mesh<Context::MPI>> p1bnd(boundarySub);
+
+    const auto& shard   = boundarySub.getShard();
+    const size_t nVerts = shard.getVertexCount();
+    const size_t globalSize = p1bnd.getSize();
+
+    for (size_t i = 0; i < nVerts; ++i)
+    {
+      const auto& dofs = p1bnd.getDOFs(0, static_cast<Index>(i));
+      for (const Index d : dofs)
+      {
+        EXPECT_LT(d, globalSize)
+            << "P1 boundary SubMesh DOF " << d
+            << " out of range for local vertex " << i;
+      }
+    }
+  }
+
+  // ==========================================================================
+  // Group 8 — Regression: SubMesh orphaned vertex (2-round ownership fix)
+  // ==========================================================================
+
+  /**
+   * @brief Regression test for the SubMesh orphaned-vertex ownership bug.
+   *
+   * A vertex v with Shared(owner=A) in the volume partition is added to the
+   * boundary SubMesh on ranks B (and possibly C,D,...) when those ranks have
+   * boundary faces adjacent to v.  If rank A has no boundary face adjacent
+   * to v, the SubMesh finalize() 2-round exchange must promote the
+   * minimum-rank querier to Owned so that P1 can assign a valid global DOF.
+   *
+   * Passing this test requires the 2-round ownership fix in SubMesh::finalize.
+   */
+  TEST(MPIP1FESSubMesh,
+       Regression_OrphanVertex_AllLocalVertices_HaveValidGlobalDOF_Triangle)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 4)
+      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+
+    // A finer 8×8 mesh increases the probability of hitting corner vertices
+    // where the volume-partition owner is not adjacent to any boundary face.
+    auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {8, 8});
+    auto sub  = makeBoundarySubMesh(mesh);
+
+    P1<Real, Mesh<Context::MPI>> fes(sub);
+
+    const auto& shard   = sub.getShard();
+    const size_t nVerts = shard.getVertexCount();
+    const size_t globalSize = fes.getSize();
+
+    for (size_t i = 0; i < nVerts; ++i)
+    {
+      const auto& dofs = fes.getDOFs(0, static_cast<Index>(i));
+      for (const Index d : dofs)
+      {
+        EXPECT_LT(d, globalSize)
+            << "P1 DOF " << d << " out of range for local vertex " << i
+            << " (orphan-vertex regression, 8x8 triangle mesh).";
+      }
+    }
+
+    // Also verify owned DOFs are globally unique.
+    std::vector<Index> ownedDofs;
+    for (size_t i = 0; i < nVerts; ++i)
+    {
+      if (shard.isOwned(0, i))
+      {
+        const auto& dofs = fes.getDOFs(0, static_cast<Index>(i));
+        for (const Index d : dofs)
+          ownedDofs.push_back(d);
+      }
+    }
+
+    const size_t globalBoundaryVerts = sub.getVertexCount();
+
+    std::vector<std::vector<Index>> allDofs;
+    boost::mpi::gather(world, ownedDofs, allDofs, 0);
+
+    if (world.rank() == 0)
+    {
+      std::vector<Index> combined;
+      for (const auto& v : allDofs)
+        combined.insert(combined.end(), v.begin(), v.end());
+
+      std::sort(combined.begin(), combined.end());
+      const size_t uniqueCount = static_cast<size_t>(
+          std::unique(combined.begin(), combined.end()) - combined.begin());
+
+      EXPECT_EQ(uniqueCount, combined.size())
+          << "Duplicate owned P1 DOFs on 8x8 boundary SubMesh (orphan-vertex regression).";
+      EXPECT_EQ(combined.size(), globalBoundaryVerts)
+          << "Owned P1 DOF count does not match global boundary vertex count.";
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------

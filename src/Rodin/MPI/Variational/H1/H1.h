@@ -769,51 +769,45 @@ namespace Rodin::Variational
             }
           }
 
-          std::vector<int> need_recv(static_cast<size_t>(P), 0);
-          for (Index i = 0; i < static_cast<Index>(count); ++i)
+          // Build the symmetric neighbor set for dimension d from halo(d) ∪ owner(d).
+          // Using all neighbors ensures every isend has a matching irecv and
+          // no messages are orphaned between sequential FES constructions.
+          std::vector<int> neighbors_d;
           {
-            if (shard.isOwned(d, i))
-              continue;
-            const auto g = shard.getGeometry(d, i);
-            if (interiorPositions(g).empty())
-              continue;
-            auto oit = owner.find(i);
-            if (oit == owner.end())
-              continue;
-            const int ro = static_cast<int>(oit->second);
-            if (ro != rank)
-              need_recv[static_cast<size_t>(ro)] = 1;
+            UnorderedSet<int> nbrs;
+            const auto& halo_d_nbrs = shard.getHalo(d);
+            for (const auto& [i, peers] : halo_d_nbrs)
+              for (const Index r : peers)
+                if (static_cast<int>(r) != rank) nbrs.insert(static_cast<int>(r));
+            for (const auto& [i, r] : owner)
+              if (static_cast<int>(r) != rank) nbrs.insert(static_cast<int>(r));
+            neighbors_d.assign(nbrs.begin(), nbrs.end());
           }
 
-          std::vector<std::vector<EntityMsg>> push_recv(static_cast<size_t>(P));
+          // Tag 100+d is reserved for H1 entity-push DOF exchange at dimension d
+          // and does not overlap with SubMesh (10,11) or other FES (50,51,52) tags.
+          const int tag_push = 100 + static_cast<int>(d);
 
+          UnorderedMap<int, std::vector<EntityMsg>> push_recv;
+          std::vector<boost::mpi::request> reqs;
+          reqs.reserve(2 * neighbors_d.size());
+
+          for (int r : neighbors_d)
           {
-            std::vector<boost::mpi::request> reqs;
-            reqs.reserve(static_cast<size_t>(2 * P));
-
-            const int tag_push = static_cast<int>(d);
-
-            for (int r = 0; r < P; ++r)
-            {
-              if (need_recv[static_cast<size_t>(r)])
-                reqs.push_back(comm.irecv(r, tag_push,
-                    push_recv[static_cast<size_t>(r)]));
-            }
-            for (int r = 0; r < P; ++r)
-            {
-              if (!push_send[static_cast<size_t>(r)].empty())
-                reqs.push_back(comm.isend(r, tag_push,
-                    push_send[static_cast<size_t>(r)]));
-            }
-            boost::mpi::wait_all(reqs.begin(), reqs.end());
+            push_recv[r]; // default-construct
+            reqs.push_back(comm.irecv(r, tag_push, push_recv[r]));
+            reqs.push_back(comm.isend(r, tag_push,
+                push_send[static_cast<size_t>(r)]));
           }
+
+          boost::mpi::wait_all(reqs.begin(), reqs.end());
 
           // ----------------------------------------------------------------
           // 4c. Install received global DOF numbering for non-owned entities.
           // ----------------------------------------------------------------
-          for (int r = 0; r < P; ++r)
+          for (auto& [r, msgs] : push_recv)
           {
-            for (const auto& [gid, payload] : push_recv[static_cast<size_t>(r)])
+            for (const auto& [gid, payload] : msgs)
             {
               const auto& [firstGDOF, ownerVertexIDs] = payload;
               const auto liOpt = mesh.getLocalIndex(d, gid);

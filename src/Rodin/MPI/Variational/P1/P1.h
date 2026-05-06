@@ -15,6 +15,7 @@
 #include <mpi.h>
 #include <sys/mman.h>
 
+#include <boost/mpi/collectives.hpp>
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_free.hpp>
 #include "Rodin/Serialization/Optional.h"
@@ -259,7 +260,6 @@ namespace Rodin::Variational
         const auto& halo  = shard.getHalo(0);   // owned local vertex -> remote ranks that also contain it
         const auto& owner = shard.getOwner(0);  // shared/ghost local vertex -> owner rank
 
-        const int P    = comm.size();
         const int rank = comm.rank();
 
         // Count all owned local vertices, not just those present in halo(0).
@@ -273,9 +273,24 @@ namespace Rodin::Variational
         const size_t inclusive = boost::mpi::scan(comm, m_owned, std::plus<size_t>());
         m_offset = inclusive - m_owned;
 
-        std::vector<std::vector<std::pair<Index, Index>>> send(P); // to peer: (globalVertexId, globalDof)
-        std::vector<std::vector<std::pair<Index, Index>>> recv(P); // from owner: (globalVertexId, globalDof)
-        std::vector<char> need_recv(P, 0);
+        // Build the symmetric neighbor set from vertex halo ∪ owner.
+        // Using the full neighbor set ensures every isend has a matching
+        // irecv and no messages are orphaned between sequential FES builds.
+        std::vector<int> neighbors;
+        {
+          UnorderedSet<int> nbrs;
+          for (const auto& [i, peers] : halo)
+            for (const Index r : peers)
+              if (static_cast<int>(r) != rank) nbrs.insert(static_cast<int>(r));
+          for (const auto& [lv, own] : owner)
+            if (static_cast<int>(own) != rank) nbrs.insert(static_cast<int>(own));
+          neighbors.assign(nbrs.begin(), nbrs.end());
+        }
+
+        // send[r]: (globalVertexId, globalDof) pairs for neighbor r.
+        UnorderedMap<int, std::vector<std::pair<Index, Index>>> send;
+        for (int r : neighbors)
+          send[r]; // default-construct empty entry
 
         // owned + non-owned is a good upper bound
         std::vector<std::pair<Index, Index>> gl_pairs;
@@ -294,7 +309,7 @@ namespace Rodin::Variational
 
           gl_pairs.push_back({ global, local });
 
-          // Only shared owned vertices appear in halo(0).
+          // Notify all neighbors that also hold this vertex.
           auto hit = halo.find(lv);
           if (hit != halo.end())
           {
@@ -309,36 +324,28 @@ namespace Rodin::Variational
         }
         assert(dofIdx == static_cast<Index>(m_owned));
 
-        // Non-owned local vertices (Shared or Ghost) need owner numbering.
-        for (const auto& [lv, own] : owner)
-        {
-          (void) lv;
-          const int ro = static_cast<int>(own);
-          if (ro != rank)
-            need_recv[ro] = 1;
-        }
+        // Symmetric exchange: every neighbor always sends and receives,
+        // even if the payload is empty.  Tag 51 is reserved for scalar P1
+        // DOF exchange and does not overlap with other FES or SubMesh tags.
+        static constexpr int kTagP1Dof = 51;
 
+        UnorderedMap<int, std::vector<std::pair<Index, Index>>> recv;
         std::vector<boost::mpi::request> reqs;
-        reqs.reserve(static_cast<size_t>(2 * P));
+        reqs.reserve(2 * neighbors.size());
 
-        for (int r = 0; r < P; ++r)
+        for (int r : neighbors)
         {
-          if (need_recv[r])
-            reqs.push_back(comm.irecv(r, 0, recv[r]));
-        }
-
-        for (int r = 0; r < P; ++r)
-        {
-          if (!send[r].empty())
-            reqs.push_back(comm.isend(r, 0, send[r]));
+          recv[r]; // default-construct
+          reqs.push_back(comm.irecv(r, kTagP1Dof, recv[r]));
+          reqs.push_back(comm.isend(r, kTagP1Dof, send[r]));
         }
 
         boost::mpi::wait_all(reqs.begin(), reqs.end());
 
         // Install remote numbering for non-owned local vertices.
-        for (int r = 0; r < P; ++r)
+        for (auto& [r, msgs] : recv)
         {
-          for (const auto& [gid, global] : recv[r])
+          for (const auto& [gid, global] : msgs)
           {
             const auto lvOpt = mesh.getLocalIndex(0, gid);
             // The owner's halo is derived from the parent shard, which may
@@ -421,7 +428,24 @@ namespace Rodin::Variational
         const size_t inclusive = boost::mpi::scan(comm, m_owned, std::plus<size_t>());
         m_offset = inclusive - m_owned;
 
-        FlatMap<Index, std::vector<std::pair<Index, std::vector<Index>>>> push, pull;
+        // Build the symmetric neighbor set from vertex halo ∪ owner.
+        std::vector<int> neighbors;
+        {
+          UnorderedSet<int> nbrs;
+          for (const auto& [i, peers] : halo)
+            for (const Index r : peers)
+              if (static_cast<int>(r) != rank) nbrs.insert(static_cast<int>(r));
+          for (const auto& [lv, own] : owner)
+            if (static_cast<int>(own) != rank) nbrs.insert(static_cast<int>(own));
+          neighbors.assign(nbrs.begin(), nbrs.end());
+        }
+
+        // push[r]: (gid, [globalDOFs]) to send to neighbor r.
+        // pull[r]: (gid, [globalDOFs]) to receive from neighbor r.
+        using MsgVec = std::vector<std::pair<Index, std::vector<Index>>>;
+        UnorderedMap<int, MsgVec> push;
+        for (int r : neighbors)
+          push[r]; // default-construct empty entry
 
         Index dofIdx = 0;
         for (size_t i = 0; i < shard.getVertexCount(); ++i)
@@ -445,45 +469,43 @@ namespace Rodin::Variational
               ++dofIdx;
             }
 
-            // Only vertices that are also present remotely appear in halo.
+            // Notify all neighbors that also hold this vertex.
             auto hit = halo.find(i);
             if (hit != halo.end())
             {
               for (const Index& peer : hit->second)
               {
-                assert(peer != static_cast<Index>(rank));
-                push[peer].push_back({ gid, s_send });
+                const int rpeer = static_cast<int>(peer);
+                assert(rpeer != rank);
+                push[rpeer].push_back({ gid, s_send });
               }
             }
-          }
-          else
-          {
-            // Non-owned vertices are either Shared or Ghost and must have an owner.
-            auto oit = owner.find(i);
-            assert(oit != owner.end());
-            pull.try_emplace(oit->second);
           }
         }
 
         assert(dofIdx == static_cast<Index>(m_owned));
 
-        std::vector<boost::mpi::request> irecv;
-        irecv.reserve(pull.size());
-        for (auto& [own, requested] : pull)
-          irecv.push_back(comm.irecv(own, 0, pull[own]));
+        // Symmetric exchange: every neighbor always sends and receives,
+        // even if the payload is empty.  Tag 52 is reserved for vector P1
+        // DOF exchange and does not overlap with other FES or SubMesh tags.
+        static constexpr int kTagP1VecDof = 52;
 
-        std::vector<boost::mpi::request> isend;
-        isend.reserve(push.size());
-        for (const auto& [peer, requested] : push)
-          isend.push_back(comm.isend(peer, 0, push[peer]));
+        UnorderedMap<int, MsgVec> pull;
+        std::vector<boost::mpi::request> reqs;
+        reqs.reserve(2 * neighbors.size());
 
-        boost::mpi::wait_all(isend.begin(), isend.end());
-        boost::mpi::wait_all(irecv.begin(), irecv.end());
-
-        for (const auto& [own, requested] : pull)
+        for (int r : neighbors)
         {
-          (void) own;
-          for (const auto& [gid, global] : requested)
+          pull[r]; // default-construct
+          reqs.push_back(comm.irecv(r, kTagP1VecDof, pull[r]));
+          reqs.push_back(comm.isend(r, kTagP1VecDof, push[r]));
+        }
+
+        boost::mpi::wait_all(reqs.begin(), reqs.end());
+
+        for (auto& [own, msgs] : pull)
+        {
+          for (const auto& [gid, global] : msgs)
           {
             const auto i = mesh.getLocalIndex(0, gid);
             // The owner's halo is derived from the parent shard and may

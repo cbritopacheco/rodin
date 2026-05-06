@@ -221,7 +221,6 @@ namespace Rodin::Variational
         // owner(D): ghost/shared local cell -> owner rank
         const auto& owner = shard.getOwner(D);
 
-        const int P    = comm.size();
         const int rank = comm.rank();
 
         // Count owned local cells.
@@ -241,13 +240,28 @@ namespace Rodin::Variational
         // Pre-allocate the left map with an invalid sentinel.
         m_local_to_global.left.assign(localCellCount, std::numeric_limits<Index>::max());
 
-        // send[r]: messages to rank r — pairs (globalCellID, globalDOF)
-        std::vector<std::vector<std::pair<Index, Index>>> send(P);
-        // recv[r]: messages from rank r
-        std::vector<std::vector<std::pair<Index, Index>>> recv(P);
-        std::vector<char> need_recv(P, 0);
+        // send[r]: messages to rank r — pairs (globalCellID, globalDOF).
+        // Keyed by rank so every neighbor gets an entry (possibly empty).
+        UnorderedMap<int, std::vector<std::pair<Index, Index>>> send;
 
-        // Assign global DOFs to owned cells and prepare ghost notifications.
+        // Build the symmetric neighbor set from halo ∪ owner.
+        // Both sides of every partition interface appear, so every isend is
+        // matched by a corresponding irecv and no messages are orphaned.
+        std::vector<int> neighbors;
+        {
+          UnorderedSet<int> nbrs;
+          for (const auto& [i, peers] : halo)
+            for (const Index r : peers)
+              if (static_cast<int>(r) != rank) nbrs.insert(static_cast<int>(r));
+          for (const auto& entry : owner)
+            if (static_cast<int>(entry.second) != rank)
+              nbrs.insert(static_cast<int>(entry.second));
+          neighbors.assign(nbrs.begin(), nbrs.end());
+        }
+        for (int r : neighbors)
+          send[r]; // default-construct empty vector for every neighbor
+
+        // Assign global DOFs to owned cells and enqueue ghost notifications.
         Index dofIdx = 0;
         for (size_t i = 0; i < localCellCount; ++i)
         {
@@ -260,7 +274,7 @@ namespace Rodin::Variational
           m_local_to_global.left[i] = global;
           m_local_to_global.right.emplace(global, static_cast<Index>(i));
 
-          // Notify all ranks that have this cell as a ghost.
+          // Notify all neighbors that have this cell as a ghost.
           auto hit = halo.find(i);
           if (hit != halo.end())
           {
@@ -275,35 +289,28 @@ namespace Rodin::Variational
         }
         assert(dofIdx == static_cast<Index>(m_owned));
 
-        // Determine which ranks to receive ghost-DOF notifications from.
-        for (const auto& entry : owner)
-        {
-          const int ro = static_cast<int>(entry.second);
-          if (ro != rank)
-            need_recv[ro] = 1;
-        }
+        // Symmetric exchange: every neighbor always sends and receives,
+        // even if the payload is empty.  Tag 50 is reserved for P0 DOF
+        // exchange and does not overlap with other FES or SubMesh tags.
+        static constexpr int kTagP0Dof = 50;
 
+        UnorderedMap<int, std::vector<std::pair<Index, Index>>> recv;
         std::vector<boost::mpi::request> reqs;
-        reqs.reserve(static_cast<size_t>(2 * P));
+        reqs.reserve(2 * neighbors.size());
 
-        for (int r = 0; r < P; ++r)
+        for (int r : neighbors)
         {
-          if (need_recv[r])
-            reqs.push_back(comm.irecv(r, 0, recv[r]));
-        }
-
-        for (int r = 0; r < P; ++r)
-        {
-          if (!send[r].empty())
-            reqs.push_back(comm.isend(r, 0, send[r]));
+          recv[r]; // default-construct
+          reqs.push_back(comm.irecv(r, kTagP0Dof, recv[r]));
+          reqs.push_back(comm.isend(r, kTagP0Dof, send[r]));
         }
 
         boost::mpi::wait_all(reqs.begin(), reqs.end());
 
         // Install global DOFs for ghost cells received from owners.
-        for (int r = 0; r < P; ++r)
+        for (auto& [r, msgs] : recv)
         {
-          for (const auto& [gid, global] : recv[r])
+          for (const auto& [gid, global] : msgs)
           {
             const auto liOpt = mesh.getLocalIndex(D, gid);
             // The owner's halo is derived from the parent shard, which may
