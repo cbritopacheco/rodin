@@ -1483,32 +1483,6 @@ namespace Rodin::Examples::Heart
         accepted = true;
         nextDt = std::min(baseDt, solverDt / factor);
       }
-
-      const auto fluxesStart = CoronaryClock::now();
-      computeFluxes();
-      m_stepTiming.fluxes = secondsSince(fluxesStart);
-
-      const auto outletRCRStart = CoronaryClock::now();
-      for (const Attribute tag : m_cfg.outlets)
-        updateRCR(m_model, m_wk[tag], m_stepData.qOut.at(tag), m_cfg.dt);
-      m_stepTiming.outletRCR = secondsSince(outletRCRStart);
-
-      const auto csvStart = CoronaryClock::now();
-      writeCSVRow();
-      m_stepTiming.csv = secondsSince(csvStart);
-
-      const auto historyStart = CoronaryClock::now();
-      updateHistory();
-      m_stepTiming.history = secondsSince(historyStart);
-
-      const auto outputStart = CoronaryClock::now();
-      writeOutputs();
-      m_stepTiming.output = secondsSince(outputStart);
-
-      m_stepTiming.total = secondsSince(stepStart);
-
-      ++acceptedStep;
-
     }
 
     m_cfg.dt = baseDt;

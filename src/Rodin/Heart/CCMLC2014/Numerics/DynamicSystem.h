@@ -616,7 +616,28 @@ namespace Rodin::Heart::CCMLC2014::Numerics
         {
           Physics::WindkesselOutflowEvaluator<
             Input,
-            Physics::Rheology::NonNewtonian::CY> windkessel(m_input);
+            Physics::Rheology::CarreauYasuda> windkessel(m_input);
+          windkessel.evaluate(data);
+        }
+        else if (m_input.windkesselRheology == Model::WindkesselRheology::Cross)
+        {
+          Physics::WindkesselOutflowEvaluator<
+            Input,
+            Physics::Rheology::Cross> windkessel(m_input);
+          windkessel.evaluate(data);
+        }
+        else if (m_input.windkesselRheology == Model::WindkesselRheology::PowerLaw)
+        {
+          Physics::WindkesselOutflowEvaluator<
+            Input,
+            Physics::Rheology::PowerLaw> windkessel(m_input);
+          windkessel.evaluate(data);
+        }
+        else if (m_input.windkesselRheology == Model::WindkesselRheology::Quemada)
+        {
+          Physics::WindkesselOutflowEvaluator<
+            Input,
+            Physics::Rheology::Quemada> windkessel(m_input);
           windkessel.evaluate(data);
         }
         else

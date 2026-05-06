@@ -59,7 +59,10 @@ namespace Rodin::Heart::CCMLC2014::Model
   enum class WindkesselRheology
   {
     Newtonian,              ///< Linear resistance branch flows.
-    CarreauYasuda           ///< Non-Newtonian Carreau-Yasuda tube flow.
+    CarreauYasuda,           ///< Non-Newtonian Carreau-Yasuda tube flow.
+    Cross,
+    PowerLaw,
+    Quemada
   };
 
   /**
@@ -119,11 +122,19 @@ namespace Rodin::Heart::CCMLC2014::Model
     Scalar distalRadius = 0.0;
     Scalar distalLength = 0.0;
 
+    Scalar m = 0.0;
+    Scalar n = 0.0;
+
     Scalar mu_0    = 0.0;
     Scalar mu_Inf  = 0.0;
     Scalar lambda = 0.0;
-    Scalar n = 0.0;
     Scalar yasuda = 0.0;
+
+    Scalar k_0 = 0.0;
+    Scalar k_Inf = 0.0;
+    Scalar phi_quemada = 0.0;
+    Scalar mu_plasma = 0.0;
+    Scalar gamma_c = 0.0;
 
     Scalar Kat = 0.0;     ///< Atrioventricular (mitral) conductance.
     Scalar Kp = 0.0;      ///< Valve leakage conductance.
