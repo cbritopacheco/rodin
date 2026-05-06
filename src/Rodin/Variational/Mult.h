@@ -151,6 +151,8 @@ namespace Rodin::Variational
       using RangeType =
         typename FormLanguage::RangeOf<std::remove_cvref_t<Product>>::Type;
       RangeType out;
+      if constexpr (requires { out.setZero(); })
+        out.setZero();
       out = product;
       return out;
     }
