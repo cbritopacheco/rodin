@@ -112,7 +112,6 @@ struct Quemada {
       return {dp / fallbackResistance, 1.0 / fallbackResistance};
 
     const Real tauW = (adp * radius) / (2.0 * L);
-
     const Real k0 = input.k_0;
     const Real kInf = input.k_Inf;
     const Real phi = input.phi_quemada;
@@ -120,98 +119,88 @@ struct Quemada {
     const Real muPl = input.mu_plasma;
     const Real muInfBlood = input.mu_Inf;
 
+    const Real oneMinusHalfKInfPhi = 1.0 - 0.5 * kInf * phi;
     const Real tau_0 = muInfBlood * gammaC *
                        std::pow(0.5 * phi * (k0 - kInf), 2.0) /
-                       std::pow(1.0 - 0.5 * kInf * phi, 4.0);
-    const Real nu_inf = muInfBlood / std::pow(1.0 - 0.5 * kInf * phi, 2.0);
-    const Real lambda =
-        gammaC *
-        std::pow((1.0 - 0.5 * k0 * phi) / (1.0 - 0.5 * kInf * phi), 2.0);
+                       std::pow(oneMinusHalfKInfPhi, 4.0);
+    const Real nu_inf = muInfBlood / std::pow(oneMinusHalfKInfPhi, 2.0);
+    const Real lambda = gammaC * std::pow((1.0 - 0.5 * k0 * phi) / oneMinusHalfKInfPhi, 2.0);
 
-    const Real q_p = (std::sqrt(tau_0) - std::sqrt(nu_inf * lambda)) /
-                     (std::sqrt(tau_0) + std::sqrt(nu_inf * lambda));
-    const Real alpha =
-        (std::sqrt(tau_0) + std::sqrt(nu_inf * lambda)) / std::sqrt(tauW);
+    const Real sqrtTau0 = std::sqrt(tau_0);
+    const Real sqrtNuInfLambda = std::sqrt(nu_inf * lambda);
 
-    auto poly = [](int i, Real q) -> Real {
+    const Real q = (sqrtTau0 - sqrtNuInfLambda) / std::max(sqrtTau0 + sqrtNuInfLambda, 1e-12);
+    const Real alpha = (sqrtTau0 + sqrtNuInfLambda) / std::max(std::sqrt(tauW), 1e-12);
+
+    Real P[8];
+    {
       const Real q2 = q * q;
       const Real q3 = q2 * q;
       const Real q4 = q3 * q;
       const Real q5 = q4 * q;
-      switch (i) {
-      case 0:
-        return -(1.0 / 7.0) * (q + 8.0);
-      case 1:
-        return -(1.0 / 42.0) * (13.0 * q2 - 8.0 * q - 7.0);
-      case 2:
-        return -(1.0 / 210.0) * (143.0 * q3 - 88.0 * q2 - 113.0 * q + 48.0);
-      case 3:
-        return -(1.0 / 840.0) *
-               (1287.0 * q4 - 792.0 * q3 - 1342.0 * q2 + 632.0 * q + 175.0);
-      case 4:
-        return -(1.0 / 840.0) * (3003.0 * q5 - 1848.0 * q4 - 3894.0 * q3 +
-                                 1944.0 * q2 + 1011.0 * q - 256.0);
-      case 5:
-        return -(1.0 / 1680.0) *
-               (15015.0 * std::pow(q, 6) - 9240.0 * q5 - 23331.0 * q4 +
-                12096.0 * q3 + 9081.0 * q2 - 3179.0 * q - 525.0);
-      case 6:
-        return -(1.0 / 1680.0) *
-               (45045.0 * std::pow(q, 7) - 27720.0 * std::pow(q, 6) -
-                82005.0 * q5 + 43680.0 * q4 + 42819.0 * q3 - 17304.0 * q2 -
-                5619.0 * q + 1024.0);
-      case 7:
-        return -(1.0 / 16.0) * std::pow(1.0 - q, 2) * (1.0 + q) *
-               (429.0 * q5 + 165.0 * q4 - 330.0 * q3 - 90.0 * q2 + 45.0 * q +
-                5.0);
-      default:
-        return 0.0;
-      }
-    };
+      const Real q6 = q5 * q;
+      const Real q7 = q6 * q;
+
+      P[0] = -(1.0 / 7.0) * (q + 8.0);
+      P[1] = -(1.0 / 42.0) * (13.0 * q2 - 8.0 * q - 7.0);
+      P[2] = -(1.0 / 210.0) * (143.0 * q3 - 88.0 * q2 - 113.0 * q + 48.0);
+      P[3] = -(1.0 / 840.0) * (1287.0 * q4 - 792.0 * q3 - 1342.0 * q2 + 632.0 * q + 175.0);
+      P[4] = -(1.0 / 840.0) * (3003.0 * q5 - 1848.0 * q4 - 3894.0 * q3 + 1944.0 * q2 + 1011.0 * q - 256.0);
+      P[5] = -(1.0 / 1680.0) * (15015.0 * q6 - 9240.0 * q5 - 23331.0 * q4 + 12096.0 * q3 + 9081.0 * q2 - 3179.0 * q - 525.0);
+      P[6] = -(1.0 / 1680.0) * (45045.0 * q7 - 27720.0 * q6 - 82005.0 * q5 + 43680.0 * q4 + 42819.0 * q3 - 17304.0 * q2 - 5619.0 * q + 1024.0);
+      P[7] = -(1.0 / 16.0) * std::pow(1.0 - q, 2.0) * (1.0 + q) * (429.0 * q5 + 165.0 * q4 - 330.0 * q3 - 90.0 * q2 + 45.0 * q + 5.0);
+    }
 
     Real F = 0.0, dFdAlpha = 0.0;
 
     if (alpha > 1.0) {
-      const Real common = (2.0 / 9.0) * std::pow(1.0 - q_p, 2.0) * (1.0 + q_p);
-      F = 0.25 * std::pow(1.0 - q_p, 2.0) + common / alpha;
-      dFdAlpha = -common / (alpha * alpha);
+      const Real common = (2.0 / 9.0) * std::pow(1.0 - q, 2.0) * (1.0 + q);
+      F = 0.5 * (0.25 * std::pow(1.0 - q, 2.0) + common / alpha);
+      dFdAlpha = 0.5 * (-common / (alpha * alpha));
     } else {
+      const Real a = std::max(alpha, 1e-10);
+      const Real a2 = a * a;
+      const Real a7 = a2 * a2 * a2 * a;
+      const Real a8 = a7 * a;
+
       Real S = 0.0, derS = 0.0;
+      Real aPow = a;
       for (int i = 0; i < 7; ++i) {
-        const Real p_val = poly(i, q_p);
-        S += std::pow(alpha, i + 1) * p_val;
-        derS += (i + 1) * std::pow(alpha, i) * p_val;
+        S += aPow * P[i];
+        derS += (i + 1) * (aPow / a) * P[i];
+        aPow *= a;
       }
-      const Real P7 = poly(6, q_p);
-      const Real P8 = poly(7, q_p);
-      const Real sqrtT =
-          std::sqrt(std::max(0.0, 1.0 - 2.0 * alpha * q_p + alpha * alpha));
 
-      const Real argLog = (1.0 - alpha * q_p + sqrtT) / (alpha * (1.0 - q_p));
-      const Real logT = (q_p < 1e-8 || argLog <= 0.0) ? 0.0 : std::log(argLog);
+      const Real T = std::max(0.0, 1.0 - 2.0 * a * q + a2);
+      const Real sqrtT = std::sqrt(T);
 
-      F = 1.0 - (8.0 / 7.0) * alpha * (1.0 + q_p) +
-          (4.0 / 3.0) * alpha * alpha - std::pow(alpha, 8) * P7 +
-          (1.0 + S) * sqrtT * std::pow(alpha, 8) * P8 * logT;
+      const Real safeDenom = std::max(1.0 - q, 1e-10);
+      const Real argLog = (1.0 - a * q + sqrtT) / (a * safeDenom);
+      const Real logT = (argLog <= 1e-12) ? 0.0 : std::log(argLog);
 
-      dFdAlpha = -(8.0 / 7.0) * (1.0 + q_p) + (8.0 / 3.0) * alpha -
-                 8.0 * std::pow(alpha, 7) * P7;
-      dFdAlpha += std::pow(alpha, 8.0) * P8 * logT *
-                      ((1.0 + S) * (alpha - q_p) / std::max(sqrtT, 1e-12) +
-                       sqrtT * derS + 8.0 * sqrtT * (1.0 + S) / alpha) -
-                  (1.0 + S) * P8 * std::pow(alpha, 7.0);
+      const Real bracket = 1.0 - (8.0 / 7.0) * a * (1.0 + q) + (4.0 / 3.0) * a2
+                           - a8 * P[6] + (1.0 + S) * sqrtT + a8 * P[7] * logT;
+      F = 0.5 * bracket;
+
+      const Real eps = 1e-12;
+      const Real dSqrtT = (a - q) / std::max(sqrtT, eps);
+      const Real dLogT = ((dSqrtT - q) / std::max(1.0 - a * q + sqrtT, eps)) - (1.0 / a);
+
+      Real dBracket = -(8.0 / 7.0) * (1.0 + q) + (8.0 / 3.0) * a - 8.0 * a7 * P[6];
+      dBracket += (derS * sqrtT + (1.0 + S) * dSqrtT);
+      dBracket += P[7] * (8.0 * a7 * logT + a8 * dLogT);
+
+      dFdAlpha = 0.5 * dBracket;
     }
 
-    const Real constantC = std::pow(1.0 - 0.5 * kInf * phi, 2.0) / (4.0 * muPl);
-    const Real IQ = std::pow(tauW, 4.0) * constantC * F;
+    const Real constPart = std::pow(oneMinusHalfKInfPhi, 2.0) / (4.0 * muPl);
+    const Real IQ = std::pow(tauW, 4.0) * constPart * F;
 
-    const Real dIQdP =
-        (IQ / adp) * (4.0 - 0.5 * alpha * dFdAlpha / std::max(F, 1e-12));
-
-    const Real geomFactor =
-        std::numbers::pi_v<Real> * std::pow(radius, 3.0) / std::pow(tauW, 3.0);
+    const Real geomFactor = (8.0 * std::numbers::pi_v<Real> * std::pow(L, 3.0)) / std::pow(adp, 3.0);
     const Real qAbs = geomFactor * IQ;
-    const Real dqAbs = geomFactor * dIQdP - (3.0 * qAbs) / adp;
+
+
+    const Real dqAbs = (qAbs / adp) * (1.0 - 0.5 * alpha * dFdAlpha / std::max(F, 1e-12));
 
     if (!std::isfinite(qAbs) || !std::isfinite(dqAbs) || dqAbs <= 0.0)
       return {dp / fallbackResistance, 1.0 / fallbackResistance};
