@@ -18,6 +18,17 @@
 
 namespace Rodin::Geometry
 {
+  namespace
+  {
+    struct MaxSize
+    {
+      size_t operator()(size_t lhs, size_t rhs) const
+      {
+        return std::max(lhs, rhs);
+      }
+    };
+  }
+
   // ---------------------------------------------------------------------------
   // Builder
   // ---------------------------------------------------------------------------
@@ -26,7 +37,7 @@ namespace Rodin::Geometry
   SubMesh<Context::MPI>::Builder::initialize(const Mesh<Context::MPI>& parent)
   {
     const auto& shard = parent.getShard();
-    const size_t dim = shard.getDimension();
+    const size_t dim = parent.getDimension();
 
     m_parent = parent;
 
@@ -52,9 +63,10 @@ namespace Rodin::Geometry
     if (m_s2ps[d].right.count(parentLocalIdx))
       return *this;
 
-    // For d > 0: pre-include all vertices of this polytope.
-    // Shard::Builder::include({d, idx}) for d > 0 requires that every vertex
-    // of the polytope is already in the shard builder's vertex map.
+    // For d > 0: pre-include all vertices and any already-discovered
+    // intermediate subentities of this polytope.  Shard::Builder::include()
+    // requires vertices to exist, while higher-order FE spaces also need
+    // shard metadata for edges/faces when those entities carry DOFs.
     if (d > 0)
     {
       const auto& conn = parentShard.getConnectivity();
@@ -93,6 +105,15 @@ namespace Rodin::Geometry
             }
           }
         }
+      }
+
+      for (size_t dp = 1; dp < d; ++dp)
+      {
+        const auto& inc = conn.getIncidence(d, dp);
+        if (inc.empty())
+          continue;
+        for (const Index subentity : inc.at(parentLocalIdx))
+          include(dp, subentity);
       }
     }
 
@@ -146,8 +167,8 @@ namespace Rodin::Geometry
     // the parent-shard-local index for each dimension. We need distributed
     // indices so that global operations (e.g. reconcile, MPI reductions) work
     // correctly.
-    const size_t dim = shard.getDimension();
-    for (size_t d = 0; d <= dim; ++d)
+    const size_t localDim = shard.getDimension();
+    for (size_t d = 0; d <= localDim; ++d)
     {
       auto& pm = shard.getPolytopeMap(d);
       const auto& parentPM = parentShard.getPolytopeMap(d);
@@ -167,41 +188,37 @@ namespace Rodin::Geometry
     }
 
     // -------------------------------------------------------------------------
-    // Shared-vertex ownership resolution for dimension 0 (vertices).
+    // Shared-entity ownership resolution.
     //
-    // The SubMesh builder copies vertex ownership verbatim from the parent
+    // The SubMesh builder copies ownership verbatim from the parent
     // volume-partition shard.  This is wrong for SubMeshes built from a
-    // strict subset of polytopes (e.g. boundary faces only): a vertex v with
-    // state Shared(owner=A) in the volume partition may have NO owned boundary
-    // face on A's shard, so A never includes v in its SubMesh.  No rank then
-    // owns v → the DOF exchange in P1 (and similar FE spaces) breaks.
+    // strict subset of polytopes (e.g. boundary faces only): an entity e with
+    // state Shared(owner=A) in the volume partition may have NO selected
+    // boundary face on A's shard, so A never includes e in its SubMesh.  No
+    // rank then owns e → the DOF exchange in P1/H1 and similar FE spaces
+    // breaks.
     //
     // Fix — 2-round neighbor exchange:
     //
-    //   Round 1  Each rank sends the global IDs of its SubMesh-Shared vertices
+    //   Round 1  Each rank sends the global IDs of its SubMesh non-owned entities
     //            to their stated owner, using the parent halo/owner maps for
     //            symmetric communication (both owner rank and halo ranks appear
     //            in each other's neighbor sets).
     //
     //   Round 2  The stated owner replies per GID:
-    //            - empty list     → "I do include it as Owned; keep Shared."
+    //            - empty list     → "I do include it as Owned; keep owner."
     //            - sorted querier list → "I do not include it; min querier
     //              becomes the new Owned, others redirect their owner pointer."
     //
-    // Communication cost: O(shared-boundary-vertices / P) per rank, which is
-    // the same as the subsequent P1 DOF exchange.  No all-gather is needed.
+    // Communication cost: O(shared-submesh-entities / P) per rank for each
+    // dimension.  No all-gather is needed.
     // -------------------------------------------------------------------------
     {
       const auto& comm = parentMesh.getContext().getCommunicator();
       const int   rank = comm.rank();
+      const size_t maxDim = parentMesh.getDimension();
 
-      // Only vertices (d == 0) can be Shared in an owned-face-driven SubMesh.
-      // Faces are always Owned (getBoundary() returns only owned faces).
-      const size_t d = 0;
-
-      if (dim == 0)
-        goto after_ownership_fix; // 0-D mesh: no edges/faces, nothing to do
-
+      for (size_t d = 0; d <= maxDim; ++d)
       {
         const auto& pm    = shard.getPolytopeMap(d);
         const size_t n    = pm.left.size();
@@ -212,7 +229,7 @@ namespace Rodin::Geometry
 
         // Build the neighbor set from the PARENT shard so that the send/recv
         // pattern is symmetric across all ranks without global communication.
-        // Rationale: if v is Shared(owner=A) on B in the parent, A has B in its
+        // Rationale: if e is Shared(owner=A) on B in the parent, A has B in its
         // parent halo — both A and B therefore appear in each other's set.
         const auto& pOwner = parentShard.getOwner(d);
         const auto& pHalo  = parentShard.getHalo(d);
@@ -225,9 +242,9 @@ namespace Rodin::Geometry
             neighborSet.insert(static_cast<int>(r));
 
         if (neighborSet.empty())
-          goto after_ownership_fix;
+          continue;
 
-        // queryMap[ownerRank] = GIDs of SubMesh-Shared vertices with that owner.
+        // queryMap[ownerRank] = GIDs of SubMesh non-owned entities with that owner.
         // Initialise all neighbors to empty so we always send (even if nothing
         // to ask), ensuring the matching irecv on the other side is satisfied.
         UnorderedMap<int, std::vector<Index>> queryMap;
@@ -236,7 +253,7 @@ namespace Rodin::Geometry
 
         for (size_t i = 0; i < n; ++i)
         {
-          if (subState[i] != Shard::State::Shared)
+          if (subState[i] == Shard::State::Owned)
             continue;
           auto oit = subOwner.find(i);
           if (oit != subOwner.end())
@@ -244,13 +261,14 @@ namespace Rodin::Geometry
         }
 
         // ── Round 1: send queries, receive queries ───────────────────────────
+        const int queryTag = 10 + 2 * static_cast<int>(d);
         std::vector<boost::mpi::request> reqs;
         UnorderedMap<int, std::vector<Index>> recvQuery;
         for (int r : neighborSet)
         {
           recvQuery[r]; // default-construct
-          reqs.push_back(comm.irecv(r, 10, recvQuery[r]));
-          reqs.push_back(comm.isend(r, 10, queryMap[r]));
+          reqs.push_back(comm.irecv(r, queryTag, recvQuery[r]));
+          reqs.push_back(comm.isend(r, queryTag, queryMap[r]));
         }
         boost::mpi::wait_all(reqs.begin(), reqs.end());
 
@@ -271,19 +289,19 @@ namespace Rodin::Geometry
           for (Index gid : gids)
             gidQueriers[gid].push_back(r);
 
-        // ── Prune stale halo entries for Owned vertices ───────────────────────
+        // ── Prune stale halo entries for Owned entities ───────────────────────
         // The SubMesh builder copies the parent shard's halo map verbatim.
-        // Some entries may reference ranks that hold the vertex in the volume
+        // Some entries may reference ranks that hold the entity in the volume
         // partition but did NOT include it in this SubMesh (e.g. they have no
         // boundary face adjacent to it).  Those ranks will not participate in
-        // the subsequent P1 / P1-vector DOF exchange, so if an Owned vertex's
-        // halo still names them the P1 constructor posts an irecv/isend for a
+        // the subsequent FE-space DOF exchange, so if an Owned entity's
+        // halo still names them the constructor posts an irecv/isend for a
         // rank that never posts the matching operation — causing a deadlock.
         //
         // After Round 1 we know exactly which ranks queried about each GID:
-        // only ranks that actually included the vertex as Shared in their
+        // only ranks that actually included the entity as non-owned in their
         // SubMesh send a query.  We therefore prune every halo entry that
-        // corresponds to a rank that sent no query for that vertex.
+        // corresponds to a rank that sent no query for that entity.
         for (size_t i = 0; i < n; ++i)
         {
           if (subState[i] != Shard::State::Owned)
@@ -298,7 +316,7 @@ namespace Rodin::Geometry
           auto qIt = gidQueriers.find(gid);
           if (qIt == gidQueriers.end())
           {
-            // No rank queried this vertex → no rank has it as Shared in SubMesh.
+            // No rank queried this entity -> no rank has it as non-owned in SubMesh.
             subHalo.erase(haloIt);
           }
           else
@@ -339,13 +357,14 @@ namespace Rodin::Geometry
         }
 
         // ── Round 2: send replies, receive replies ───────────────────────────
+        const int replyTag = queryTag + 1;
         reqs.clear();
         UnorderedMap<int, std::vector<GidInfo>> recvReply;
         for (int r : neighborSet)
         {
           recvReply[r]; // default-construct
-          reqs.push_back(comm.irecv(r, 11, recvReply[r]));
-          reqs.push_back(comm.isend(r, 11, replyMap[r]));
+          reqs.push_back(comm.irecv(r, replyTag, recvReply[r]));
+          reqs.push_back(comm.isend(r, replyTag, replyMap[r]));
         }
         boost::mpi::wait_all(reqs.begin(), reqs.end());
 
@@ -355,7 +374,7 @@ namespace Rodin::Geometry
           for (auto& [gid, queriers] : replies)
           {
             if (queriers.empty())
-              continue; // stated owner does include it; keep Shared(owner=r)
+              continue; // stated owner does include it; keep the copied owner
 
             // Find the sub-local index for this GID.
             auto pit = pm.right.find(gid);
@@ -367,10 +386,10 @@ namespace Rodin::Geometry
 
             if (newOwner == rank)
             {
-              // This rank becomes the SubMesh owner of the vertex.
+              // This rank becomes the SubMesh owner of the entity.
               subState[localIdx] = Shard::State::Owned;
               subOwner.erase(localIdx);
-              // Halo: all other queriers need the DOF from us in P1.
+              // Halo: all other queriers need the DOF from us.
               for (int q : queriers)
                 if (q != rank)
                   subHalo[localIdx].insert(static_cast<Index>(q));
@@ -383,7 +402,6 @@ namespace Rodin::Geometry
           }
         }
       }
-      after_ownership_fix:;
     } // ownership resolution block
 
     Mesh<Context::MPI>::Builder meshBuilder(parentMesh.getContext());
@@ -392,6 +410,8 @@ namespace Rodin::Geometry
     SubMesh result(parentMesh);
     result.Parent::operator=(meshBuilder.finalize());
     result.m_s2ps = std::move(m_s2ps);
+    result.m_dimension = boost::mpi::all_reduce(
+        parentMesh.getContext().getCommunicator(), m_dimension, MaxSize{});
     return result;
   }
 
@@ -416,14 +436,16 @@ namespace Rodin::Geometry
     : Parent(other),
       m_parent(other.m_parent),
       m_s2ps(other.m_s2ps),
-      m_ancestors(other.m_ancestors)
+      m_ancestors(other.m_ancestors),
+      m_dimension(other.m_dimension)
   {}
 
   SubMesh<Context::MPI>::SubMesh(SubMesh&& other)
     : Parent(std::move(other)),
       m_parent(std::move(other.m_parent)),
       m_s2ps(std::move(other.m_s2ps)),
-      m_ancestors(std::move(other.m_ancestors))
+      m_ancestors(std::move(other.m_ancestors)),
+      m_dimension(other.m_dimension)
   {}
 
   const Mesh<Context::MPI>& SubMesh<Context::MPI>::getParent() const

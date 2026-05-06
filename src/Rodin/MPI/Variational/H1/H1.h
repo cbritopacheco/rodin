@@ -634,7 +634,7 @@ namespace Rodin::Variational
 
         const int P    = comm.size();
         const int rank = comm.rank();
-        const size_t D = shard.getDimension();
+        const size_t D = mesh.getDimension();
 
         // ------------------------------------------------------------------
         // Step 1: count owned DOFs per dimension to compute ownership range.

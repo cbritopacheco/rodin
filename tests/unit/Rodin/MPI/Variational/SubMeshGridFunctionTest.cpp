@@ -25,6 +25,7 @@
 #include <limits>
 #include <numeric>
 #include <algorithm>
+#include <cassert>
 
 #include <gtest/gtest.h>
 #include <boost/mpi/environment.hpp>
@@ -39,6 +40,7 @@
 #include <Rodin/MPI/Geometry/SubMesh.h>
 #include <Rodin/MPI/Variational/P0.h>
 #include <Rodin/MPI/Variational/P1.h>
+#include <Rodin/MPI/Variational/H1.h>
 #include <Rodin/Variational.h>
 
 using namespace Rodin;
@@ -64,6 +66,11 @@ namespace
     mesh.getConnectivity().compute(D, D - 1);
     mesh.getConnectivity().compute(D - 1, D);
     mesh.getConnectivity().compute(D - 1, 0);
+    if (D > 1)
+    {
+      mesh.getConnectivity().compute(D, 1);
+      mesh.getConnectivity().compute(D - 1, 1);
+    }
     return mesh;
   }
 
@@ -110,10 +117,112 @@ namespace
     }
     return builder.finalize();
   }
+
+  static SubMesh<Context::MPI> makeSparseBoundarySubMesh(
+      const Mesh<Context::MPI>& mesh,
+      const boost::mpi::communicator& comm)
+  {
+    const size_t faceDim = mesh.getDimension() - 1;
+    const auto& shard = mesh.getShard();
+
+    bool hasOwnedBoundary = false;
+    Index selectedFace = std::numeric_limits<Index>::max();
+    for (auto it = mesh.getBoundary(); it; ++it)
+    {
+      const Index faceIdx = it->getIndex();
+      if (shard.isOwned(faceDim, faceIdx))
+      {
+        hasOwnedBoundary = true;
+        selectedFace = faceIdx;
+        break;
+      }
+    }
+
+    std::vector<int> hasBoundaryByRank;
+    boost::mpi::all_gather(comm, hasOwnedBoundary ? 1 : 0, hasBoundaryByRank);
+
+    int selectedRank = -1;
+    for (int r = 0; r < static_cast<int>(hasBoundaryByRank.size()); ++r)
+    {
+      if (hasBoundaryByRank[static_cast<size_t>(r)])
+      {
+        selectedRank = r;
+        break;
+      }
+    }
+    assert(selectedRank >= 0);
+
+    SubMesh<Context::MPI>::Builder builder;
+    builder.initialize(mesh);
+    if (comm.rank() == selectedRank)
+      builder.include(faceDim, selectedFace);
+    return builder.finalize();
+  }
 }
 
 namespace Rodin::Tests::Unit
 {
+  TEST(MPISubMeshSparseSelection, EmptyRanks_ConstructP0P1H1_TriangleBoundary)
+  {
+    const auto& world = *g_world;
+    if (world.size() < 2)
+      GTEST_SKIP() << "Requires at least two MPI ranks to exercise empty submesh ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+    auto sub  = makeSparseBoundarySubMesh(mesh, world);
+
+    const size_t faceDim = mesh.getDimension() - 1;
+    ASSERT_EQ(sub.getDimension(), faceDim);
+    ASSERT_EQ(sub.getPolytopeCount(faceDim), 1u);
+
+    P0<Real, Mesh<Context::MPI>> p0(sub);
+    EXPECT_EQ(p0.getSize(), 1u);
+
+    P1<Real, Mesh<Context::MPI>> p1(sub);
+    const size_t globalVertices = sub.getPolytopeCount(0);
+    EXPECT_EQ(p1.getSize(), globalVertices);
+
+    H1<2, Real, Mesh<Context::MPI>> h1(std::integral_constant<size_t, 2>{}, sub);
+    EXPECT_EQ(h1.getSize(), globalVertices + 1u);
+
+    Index begin = 0;
+    Index end = 0;
+    h1.getOwnershipRange(begin, end);
+    const size_t localOwned = static_cast<size_t>(end - begin);
+    size_t globalOwned = 0;
+    boost::mpi::all_reduce(world, localOwned, globalOwned, std::plus<size_t>());
+    EXPECT_EQ(globalOwned, h1.getSize());
+  }
+
+  TEST(MPISubMeshH1, BoundarySubMesh_QuadraticH1_Tetrahedron)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 4)
+      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx, Polytope::Type::Tetrahedron, {2, 2, 2});
+    auto sub  = makeBoundarySubMesh(mesh);
+
+    ASSERT_EQ(sub.getDimension(), 2u);
+
+    H1<2, Real, Mesh<Context::MPI>> h1(std::integral_constant<size_t, 2>{}, sub);
+
+    const size_t globalVertices = sub.getPolytopeCount(0);
+    const size_t globalEdges = sub.getPolytopeCount(1);
+    EXPECT_EQ(h1.getSize(), globalVertices + globalEdges);
+
+    const auto& shard = sub.getShard();
+    for (Index i = 0; i < static_cast<Index>(shard.getPolytopeCount(2)); ++i)
+    {
+      const auto& dofs = h1.getDOFs(2, i);
+      EXPECT_EQ(dofs.size(), 6u);
+      for (const Index dof : dofs)
+        EXPECT_LT(dof, static_cast<Index>(h1.getSize()));
+    }
+  }
+
   // ==========================================================================
   // Group 1 — P0 FES on boundary SubMesh<Context::MPI>
   // ==========================================================================

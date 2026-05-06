@@ -18,7 +18,9 @@
  * Run with mpirun -n 1/2/3/4 as registered in CMakeLists.txt.
  */
 #include <set>
+#include <limits>
 #include <numeric>
+#include <vector>
 
 #include <gtest/gtest.h>
 #include <boost/mpi/environment.hpp>
@@ -202,6 +204,61 @@ TEST(MPI_Geometry_SubMesh, GlobalBoundaryCellCount)
   // getPolytopeCount uses MPI reduction over owned entities.
   const size_t globalCount = boundary.getPolytopeCount(faceDim);
   EXPECT_EQ(globalCount, expectedCount);
+}
+
+TEST(MPI_Geometry_SubMesh, SparseBoundarySelection_DimensionConsistentOnEmptyRanks)
+{
+  const auto& world = *g_world;
+  if (world.size() < 2)
+    GTEST_SKIP() << "Requires at least two MPI ranks to exercise empty submesh ranks.";
+
+  Context::MPI ctx(*g_env, world);
+  auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+  const size_t faceDim = mesh.getDimension() - 1;
+  const auto& shard = mesh.getShard();
+
+  bool hasOwnedBoundary = false;
+  Index selectedFace = std::numeric_limits<Index>::max();
+  for (auto it = mesh.getBoundary(); it; ++it)
+  {
+    const Index faceIdx = it->getIndex();
+    if (shard.isOwned(faceDim, faceIdx))
+    {
+      hasOwnedBoundary = true;
+      selectedFace = faceIdx;
+      break;
+    }
+  }
+
+  std::vector<int> hasBoundaryByRank;
+  boost::mpi::all_gather(world, hasOwnedBoundary ? 1 : 0, hasBoundaryByRank);
+
+  int selectedRank = -1;
+  for (int r = 0; r < static_cast<int>(hasBoundaryByRank.size()); ++r)
+  {
+    if (hasBoundaryByRank[static_cast<size_t>(r)])
+    {
+      selectedRank = r;
+      break;
+    }
+  }
+  ASSERT_GE(selectedRank, 0);
+
+  SubMesh<Context::MPI>::Builder builder;
+  builder.initialize(mesh);
+  if (world.rank() == selectedRank)
+    builder.include(faceDim, selectedFace);
+
+  SubMesh<Context::MPI> sub = builder.finalize();
+
+  EXPECT_EQ(sub.getDimension(), faceDim);
+  EXPECT_EQ(sub.getPolytopeCount(faceDim), 1u);
+
+  const size_t localFaces = sub.getShard().getPolytopeCount(faceDim);
+  const size_t localEmpty = localFaces == 0 ? 1u : 0u;
+  size_t emptyRanks = 0;
+  boost::mpi::all_reduce(world, localEmpty, emptyRanks, std::plus<size_t>());
+  EXPECT_GT(emptyRanks, 0u);
 }
 
 TEST(MPI_Geometry_SubMesh, CellSubmeshByDimension)

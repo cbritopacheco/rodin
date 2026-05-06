@@ -34,13 +34,14 @@ namespace Rodin::Geometry
    * indices.
    *
    * Each rank independently builds its portion of the submesh by including
-   * entities from its parent shard. The submesh shard inherits the ownership
-   * state (Owned, Shared, Ghost) from the parent shard for each included
-   * entity, so global counting and reductions remain correct.
+   * entities from its parent shard. The submesh keeps a collective logical
+   * dimension, so ranks that select no local top-dimensional entities still
+   * agree on the dimension of the distributed submesh.
    *
-   * The distributed vertex indices of the submesh shard are taken directly
-   * from the parent shard, so no additional reconciliation is needed for
-   * vertices. Only the inclusion call order matters.
+   * The submesh initially inherits ownership metadata from the parent shard.
+   * Finalization reconciles selected shared entities because the parent owner
+   * of an entity need not participate in a strict submesh such as a boundary
+   * skin.
    *
    * # Usage
    *
@@ -96,8 +97,9 @@ namespace Rodin::Geometry
            * polytope in the parent mesh. The ownership state (Owned, Shared,
            * Ghost) is inherited from the parent shard.
            *
-           * For polytopes of dimension @p d > 0, all associated vertices are
-           * automatically included with their parent-shard ownership state.
+           * For polytopes of dimension @p d > 0, all associated vertices and
+           * any available intermediate subentities are automatically included
+           * with their parent-shard ownership state.
            *
            * @param[in] d Topological dimension of the polytope.
            * @param[in] parentLocalIdx Local shard index in the parent mesh.
@@ -109,9 +111,11 @@ namespace Rodin::Geometry
            * @brief Finalizes construction and returns the distributed submesh.
            *
            * After finalization:
-           * - The submesh shard uses the parent shard's distributed vertex
+           * - The submesh shard uses the parent shard's distributed entity
            *   indices for consistent global operations.
-           * - Ownership and halo metadata are inherited from the parent shard.
+           * - Ownership and halo metadata are inherited from the parent shard
+           *   and reconciled for entities whose parent owner is absent from the
+           *   selected submesh.
            * - `getPolytopeMap(d)` provides the submesh-local to parent-local
            *   mapping for restriction operations.
            *
@@ -164,6 +168,7 @@ namespace Rodin::Geometry
           m_parent = std::move(other.m_parent);
           m_s2ps = std::move(other.m_s2ps);
           m_ancestors = std::move(other.m_ancestors);
+          m_dimension = other.m_dimension;
         }
         return *this;
       }
@@ -190,6 +195,20 @@ namespace Rodin::Geometry
        * @returns True if the point belongs to this submesh or its local shard.
        */
       bool isLocalPoint(const Point& p) const override;
+
+      /**
+       * @brief Gets the collective topological dimension of the distributed submesh.
+       *
+       * This is the maximum included entity dimension across all ranks, not the
+       * dimension of the rank-local shard. Empty ranks therefore report the same
+       * logical submesh dimension as ranks that own selected entities.
+       *
+       * @returns Collective topological dimension.
+       */
+      size_t getDimension() const override
+      {
+        return m_dimension;
+      }
 
       /**
        * @brief Gets the immediate parent mesh.
@@ -242,6 +261,7 @@ namespace Rodin::Geometry
       std::reference_wrapper<const Mesh<Context::MPI>> m_parent;  ///< Parent mesh reference
       std::vector<PolytopeMap> m_s2ps;                            ///< Submesh-to-parent index maps
       Deque<Ancestor> m_ancestors;                                 ///< Ancestor mesh chain
+      size_t m_dimension = 0;                                      ///< Collective submesh dimension
   };
 }
 

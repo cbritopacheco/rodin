@@ -687,8 +687,7 @@ namespace Rodin::Variational
       const IndexArray& getDOFs(size_t d, Index i) const override
       {
         static thread_local IndexArray s_dofs;
-        const auto& shard = getMesh().getShard();
-        assert(i < shard.getPolytopeCount(d));
+        assert(i < getMesh().getShard().getPolytopeCount(d));
 
         s_dofs = m_fes.getDOFs(d, i);
         for (auto& dof : s_dofs)
@@ -709,8 +708,7 @@ namespace Rodin::Variational
       Index getGlobalIndex(const std::pair<size_t, Index>& p, Index localDof) const override
       {
         const auto& [d, i] = p;
-        const auto& shard = getMesh().getShard();
-        assert(i < shard.getPolytopeCount(d));
+        assert(i < getMesh().getShard().getPolytopeCount(d));
 
         const Index local = m_fes.getGlobalIndex({ d, i }, localDof);
         return getGlobalIndex(local);

@@ -197,7 +197,7 @@ namespace Rodin::Tests::Unit
     auto it = skin.getPolytope(edgeDim, 0);
     const auto& edgePolytope = *it;
     // Midpoint of the segment in reference coordinates
-    const Math::SpatialPoint rc{{0.5}};
+    const Math::SpatialPoint rc{0.5};
     Point skinPoint(edgePolytope, rc);
 
     // The expected value is f at the physical location of skinPoint.

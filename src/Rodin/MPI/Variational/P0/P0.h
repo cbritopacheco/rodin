@@ -214,7 +214,7 @@ namespace Rodin::Variational
         const auto& comm  = ctx.getCommunicator();
         const auto& shard = mesh.getShard();
 
-        const size_t D = shard.getDimension();
+        const size_t D = mesh.getDimension();
 
         // halo(D):  owned local cell -> set of remote ranks that have it as ghost
         const auto& halo  = shard.getHalo(D);
@@ -225,7 +225,7 @@ namespace Rodin::Variational
 
         // Count owned local cells.
         m_owned = 0;
-        const size_t localCellCount = shard.getCellCount();
+        const size_t localCellCount = shard.getPolytopeCount(D);
         for (size_t i = 0; i < localCellCount; ++i)
         {
           if (shard.isOwned(D, i))
@@ -469,8 +469,7 @@ namespace Rodin::Variational
       const IndexArray& getDOFs(size_t d, Index i) const override
       {
         static thread_local IndexArray s_dofs;
-        const auto& shard = getMesh().getShard();
-        assert(i < static_cast<Index>(shard.getPolytopeCount(d)));
+        assert(i < static_cast<Index>(getMesh().getShard().getPolytopeCount(d)));
 
         s_dofs = m_fes.getDOFs(d, i);
         for (auto& dof : s_dofs)
@@ -490,8 +489,7 @@ namespace Rodin::Variational
       Index getGlobalIndex(const std::pair<size_t, Index>& p, Index localDof) const override
       {
         const auto& [d, i] = p;
-        const auto& shard = getMesh().getShard();
-        assert(i < static_cast<Index>(shard.getPolytopeCount(d)));
+        assert(i < static_cast<Index>(getMesh().getShard().getPolytopeCount(d)));
 
         const Index local = m_fes.getGlobalIndex({ d, i }, localDof);
         return getGlobalIndex(local);
