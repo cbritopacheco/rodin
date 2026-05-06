@@ -25,7 +25,7 @@
 
 namespace Rodin::Heart::CCMLC2014::Physics
 {
-  struct solverConfig
+  struct SolverConfig
   {
     /// @brief Pressure-drop threshold for the Poiseuille fallback.
     static constexpr Real pressureDropTolerance = 1.0e-12;
