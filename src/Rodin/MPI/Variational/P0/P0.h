@@ -306,7 +306,12 @@ namespace Rodin::Variational
           for (const auto& [gid, global] : recv[r])
           {
             const auto liOpt = mesh.getLocalIndex(D, gid);
-            assert(liOpt);
+            // The owner's halo is derived from the parent shard, which may
+            // list ranks that have this entity only in ghost cells.  When the
+            // mesh is a SubMesh that excludes those ghost cells the entity is
+            // absent here, so simply skip the entry.
+            if (!liOpt)
+              continue;
             const Index li = *liOpt;
             assert(!shard.isOwned(D, li));
 

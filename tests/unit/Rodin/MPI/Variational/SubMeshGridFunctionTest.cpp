@@ -4,9 +4,9 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  *
- * Unit tests for P0 finite element spaces on SubMesh<Context::MPI>.
+ * Unit tests for P0 and P1 finite element spaces on SubMesh<Context::MPI>.
  *
- * These tests verify that a distributed P0 FES can be constructed on
+ * These tests verify that distributed P0 and P1 FES can be constructed on
  * distributed SubMeshes (both boundary skin and full-cell sub-regions)
  * and that the resulting DOF mappings are consistent across all MPI ranks:
  *
@@ -16,12 +16,6 @@
  *   - getDOFs(D, i) and getGlobalIndex({D, i}, 0) are consistent.
  *   - All local polytopes have a valid (in-range) global DOF.
  *   - Owned DOFs are globally unique across all ranks.
- *
- * NOTE: P1 on distributed SubMesh is not yet fully supported — the
- * distributed P1 constructor can crash at np>=2 when ghost vertices in the
- * SubMesh shard are not present in the owner rank's SubMesh shard.
- * P1 tests on SubMesh<Context::MPI> are excluded until that limitation is
- * resolved.
  *
  * Run with: mpirun -n 1/2/3/4 as registered in CMakeLists.txt.
  */
@@ -44,6 +38,7 @@
 #include <Rodin/MPI/Geometry/Mesh.h>
 #include <Rodin/MPI/Geometry/SubMesh.h>
 #include <Rodin/MPI/Variational/P0.h>
+#include <Rodin/MPI/Variational/P1.h>
 #include <Rodin/Variational.h>
 
 using namespace Rodin;
@@ -361,6 +356,168 @@ namespace Rodin::Tests::Unit
 
     const size_t globalFaces = sub.getPolytopeCount(sub.getDimension());
     EXPECT_EQ(fes.getSize(), globalFaces);
+  }
+
+  // ==========================================================================
+  // Group 4 — P1 FES on boundary SubMesh<Context::MPI>
+  // ==========================================================================
+
+  /**
+   * @brief Scalar P1 FES on boundary SubMesh: global DOF count equals the
+   *        number of boundary vertices.
+   */
+  TEST(MPIP1FESSubMesh, BoundarySubMesh_GetSize_EqualsVertexCount_Triangle)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 4)
+      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+    auto sub  = makeBoundarySubMesh(mesh);
+
+    P1<Real, Mesh<Context::MPI>> fes(sub);
+
+    const size_t globalVerts = sub.getPolytopeCount(0);
+    EXPECT_EQ(fes.getSize(), globalVerts);
+  }
+
+  /**
+   * @brief Ownership range of P1 on boundary SubMesh has width equal to
+   *        the number of locally owned boundary vertices.
+   */
+  TEST(MPIP1FESSubMesh, BoundarySubMesh_OwnershipRange_MatchesOwnedVertices_Triangle)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 4)
+      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+    auto sub  = makeBoundarySubMesh(mesh);
+
+    P1<Real, Mesh<Context::MPI>> fes(sub);
+
+    const auto& shard = sub.getShard();
+    const size_t nVert = shard.getVertexCount();
+
+    size_t ownedCount = 0;
+    for (size_t i = 0; i < nVert; ++i)
+    {
+      if (shard.isOwned(0, i))
+        ++ownedCount;
+    }
+
+    Index begin = 0, end = 0;
+    fes.getOwnershipRange(begin, end);
+    EXPECT_EQ(static_cast<size_t>(end - begin), ownedCount);
+  }
+
+  /**
+   * @brief All local boundary vertices have a valid global P1 DOF index.
+   */
+  TEST(MPIP1FESSubMesh, BoundarySubMesh_AllLocalVertices_HaveValidGlobalDOF_Triangle)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 4)
+      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+    auto sub  = makeBoundarySubMesh(mesh);
+
+    P1<Real, Mesh<Context::MPI>> fes(sub);
+
+    const auto& shard = sub.getShard();
+    const size_t nVert = shard.getVertexCount();
+
+    const size_t globalSize = fes.getSize();
+
+    for (size_t i = 0; i < nVert; ++i)
+    {
+      const auto& dofs = fes.getDOFs(0, static_cast<Index>(i));
+      for (const Index d : dofs)
+      {
+        EXPECT_LT(d, globalSize)
+            << "Global P1 DOF " << d << " out of range for local vertex " << i;
+      }
+    }
+  }
+
+  // ==========================================================================
+  // Group 5 — P1 FES on full-cell SubMesh<Context::MPI>
+  // ==========================================================================
+
+  /**
+   * @brief P1 FES on full-cell SubMesh: global DOF count equals the parent
+   *        mesh global vertex count.
+   */
+  TEST(MPIP1FESSubMesh, CellSubMesh_GetSize_EqualsParentVertexCount_Triangle)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 4)
+      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+    auto sub  = makeCellSubMesh(mesh);
+
+    P1<Real, Mesh<Context::MPI>> fes(sub);
+
+    const size_t parentVerts = mesh.getVertexCount();
+    EXPECT_EQ(fes.getSize(), parentVerts);
+  }
+
+  /**
+   * @brief Owned P1 DOFs on the full-cell SubMesh are globally unique.
+   *
+   * Gather all owned DOFs on rank 0 and verify no duplicates appear.
+   */
+  TEST(MPIP1FESSubMesh, CellSubMesh_OwnedDOFs_GloballyUnique_Triangle)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 4)
+      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+    auto sub  = makeCellSubMesh(mesh);
+
+    P1<Real, Mesh<Context::MPI>> fes(sub);
+
+    const auto& shard    = sub.getShard();
+    const size_t nVerts  = shard.getVertexCount();
+
+    std::vector<Index> ownedDofs;
+    for (size_t i = 0; i < nVerts; ++i)
+    {
+      if (shard.isOwned(0, i))
+      {
+        const auto& dofs = fes.getDOFs(0, static_cast<Index>(i));
+        for (const Index d : dofs)
+          ownedDofs.push_back(d);
+      }
+    }
+
+    const size_t globalVerts = mesh.getVertexCount();
+
+    std::vector<std::vector<Index>> allDofs;
+    boost::mpi::gather(world, ownedDofs, allDofs, 0);
+
+    if (world.rank() == 0)
+    {
+      std::vector<Index> combined;
+      for (const auto& v : allDofs)
+        combined.insert(combined.end(), v.begin(), v.end());
+
+      std::sort(combined.begin(), combined.end());
+      const size_t uniqueCount = static_cast<size_t>(
+          std::unique(combined.begin(), combined.end()) - combined.begin());
+
+      EXPECT_EQ(uniqueCount, combined.size())
+          << "Duplicate global P1 DOF indices on cell SubMesh.";
+      EXPECT_EQ(combined.size(), globalVerts);
+    }
   }
 }
 

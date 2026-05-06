@@ -340,7 +340,12 @@ namespace Rodin::Variational
           for (const auto& [gid, global] : recv[r])
           {
             const auto lvOpt = mesh.getLocalIndex(0, gid);
-            assert(lvOpt);
+            // The owner's halo is derived from the parent shard, which may
+            // list ranks that have this vertex only in ghost cells.  When the
+            // mesh is a SubMesh that excludes those ghost cells the vertex is
+            // absent here, so simply skip the entry.
+            if (!lvOpt)
+              continue;
             const Index lv = *lvOpt;
 
             // This should only populate non-owned vertices.
@@ -480,7 +485,12 @@ namespace Rodin::Variational
           for (const auto& [gid, global] : requested)
           {
             const auto i = mesh.getLocalIndex(0, gid);
-            assert(i);
+            // The owner's halo is derived from the parent shard and may
+            // include ranks that only have this vertex via ghost cells.
+            // When the mesh is a SubMesh that excludes those ghost cells
+            // the vertex is absent here, so skip the entry.
+            if (!i)
+              continue;
 
             const auto& dofs = m_fes.getDOFs(0, *i);
             assert(dofs.size() == global.size());
