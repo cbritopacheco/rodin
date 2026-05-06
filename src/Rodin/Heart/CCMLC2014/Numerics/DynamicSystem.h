@@ -619,19 +619,22 @@ namespace Rodin::Heart::CCMLC2014::Numerics
             Physics::Rheology::CarreauYasuda> windkessel(m_input);
           windkessel.evaluate(data);
         }
-        else if (m_input.windkesselRheology == Model::WindkesselRheology::Cross) {
+        else if (m_input.windkesselRheology == Model::WindkesselRheology::Cross)
+        {
           Physics::WindkesselOutflowEvaluator<
             Input,
             Physics::Rheology::Cross> windkessel(m_input);
           windkessel.evaluate(data);
         }
-        else if (m_input.windkesselRheology == Model::WindkesselRheology::PowerLaw) {
+        else if (m_input.windkesselRheology == Model::WindkesselRheology::PowerLaw)
+        {
           Physics::WindkesselOutflowEvaluator<
             Input,
             Physics::Rheology::PowerLaw> windkessel(m_input);
           windkessel.evaluate(data);
         }
-        else if (m_input.windkesselRheology == Model::WindkesselRheology::Quemada) {
+        else if (m_input.windkesselRheology == Model::WindkesselRheology::Quemada)
+        {
           Physics::WindkesselOutflowEvaluator<
             Input,
             Physics::Rheology::Quemada> windkessel(m_input);
