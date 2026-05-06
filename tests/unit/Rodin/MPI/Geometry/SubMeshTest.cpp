@@ -328,24 +328,38 @@ TEST(MPI_Geometry_SubMesh, RestrictionBoundaryPoint)
   }
 }
 
-/**
- * @brief Regression test for restriction() with quadrature-produced Points.
- *
- * When Mesh<Context::MPI>::getQuadrature() delegates to the shard, the
- * resulting Points carry the shard (a Mesh<Context::Local>) as their mesh
- * rather than the MPI wrapper.  restriction() must still map such points
- * to the submesh correctly.
- *
- * This test calls polytope.getQuadrature() on a parent MPI mesh polytope and
- * then calls boundary.restriction() on the resulting quadrature points.  It
- * would have returned nullopt before the shard-aware match was added.
- */
-TEST(MPI_Geometry_SubMesh, Regression_RestrictionQuadraturePoints_ShardOwnedMesh)
+TEST(MPI_Geometry_SubMesh, QuadraturePointsUseMPIParentMeshIdentity)
+{
+  Context::MPI ctx(*g_env, *g_world);
+  auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+  const size_t d = mesh.getDimension();
+  const auto& shard = mesh.getShard();
+
+  if (shard.getPolytopeCount(d) == 0)
+    return;
+
+  const Index localIdx = 0;
+  const auto& qf = QF::PolytopeQuadratureFormula::get(
+      1, mesh.getGeometry(d, localIdx));
+  const auto& q = mesh.getQuadrature(d, localIdx, qf);
+  ASSERT_GT(q.getSize(), 0u);
+
+  const Point& p = q.getPoint(0);
+  const MeshBase& pointMesh = p.getPolytope().getMesh();
+  const MeshBase& mpiMesh = static_cast<const MeshBase&>(mesh);
+  const MeshBase& shardMesh = static_cast<const MeshBase&>(mesh.getShard());
+
+  EXPECT_TRUE(pointMesh == mpiMesh);
+  EXPECT_FALSE(pointMesh == shardMesh);
+  EXPECT_FALSE(pointMesh.isSubMesh());
+  EXPECT_EQ(p.getPolytope().getIndex(), localIdx);
+}
+
+TEST(MPI_Geometry_SubMesh, QuadraturePointsUseMPISubMeshIdentity)
 {
   Context::MPI ctx(*g_env, *g_world);
   auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
   const size_t faceDim = mesh.getDimension() - 1;
-  const auto& shard = mesh.getShard();
 
   SubMesh<Context::MPI>::Builder builder;
   builder.initialize(mesh);
@@ -353,42 +367,71 @@ TEST(MPI_Geometry_SubMesh, Regression_RestrictionQuadraturePoints_ShardOwnedMesh
     builder.include(faceDim, it->getIndex());
 
   SubMesh<Context::MPI> boundary = builder.finalize();
+  const size_t d = boundary.getDimension();
+  const auto& shard = boundary.getShard();
 
-  // Use the default order-1 quadrature formula for faces.
-  // Only execute this block if the shard has at least one face.
-  if (shard.getPolytopeCount(faceDim) == 0)
+  if (shard.getPolytopeCount(d) == 0)
     return;
 
+  const Index localIdx = 0;
   const auto& qf = QF::PolytopeQuadratureFormula::get(
-      1, shard.getGeometry(faceDim, 0));
+      1, boundary.getGeometry(d, localIdx));
+  const auto& q = boundary.getQuadrature(d, localIdx, qf);
+  ASSERT_GT(q.getSize(), 0u);
 
-  // For each owned boundary face, get quadrature points via the mesh's
-  // getQuadrature() (which now delegates to the shard) and restrict each
-  // point to the boundary submesh.
+  const Point& p = q.getPoint(0);
+  const MeshBase& pointMesh = p.getPolytope().getMesh();
+  const MeshBase& submeshIdentity =
+      static_cast<const MeshBase&>(static_cast<const Mesh<Context::MPI>&>(boundary));
+  const MeshBase& shardMesh = static_cast<const MeshBase&>(boundary.getShard());
+
+  EXPECT_TRUE(pointMesh == submeshIdentity);
+  EXPECT_FALSE(pointMesh == shardMesh);
+  EXPECT_TRUE(pointMesh.isSubMesh());
+  EXPECT_EQ(p.getPolytope().getIndex(), localIdx);
+}
+
+TEST(MPI_Geometry_SubMesh, QuadratureCacheSeparatesParentAndSubMeshIdentities)
+{
+  Context::MPI ctx(*g_env, *g_world);
+  auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+  const size_t faceDim = mesh.getDimension() - 1;
+
+  SubMesh<Context::MPI>::Builder builder;
+  builder.initialize(mesh);
   for (auto it = mesh.getBoundary(); it; ++it)
-  {
-    const Index faceIdx = it->getIndex();
-    if (!shard.isOwned(faceDim, faceIdx))
-      continue;
+    builder.include(faceDim, it->getIndex());
 
-    // These points have p.getPolytope().getMesh() == shard, not MPIMesh.
-    const auto& quadrature = mesh.getQuadrature(faceDim, faceIdx, qf);
+  SubMesh<Context::MPI> boundary = builder.finalize();
+  const size_t d = boundary.getDimension();
+  const auto& shard = boundary.getShard();
 
-    for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
-    {
-      const auto& p = quadrature.getPoint(qp);
+  if (shard.getPolytopeCount(d) == 0)
+    return;
 
-      Optional<Point> subPoint = boundary.restriction(p);
-      EXPECT_TRUE(subPoint.has_value())
-          << "restriction() returned nullopt for quadrature point " << qp
-          << " on boundary face " << faceIdx
-          << " (shard-owned-mesh regression).";
+  const Index subLocalIdx = 0;
+  const Index parentLocalIdx = boundary.getPolytopeMap(d).left.at(subLocalIdx);
 
-      if (subPoint) {
-        EXPECT_TRUE(boundary.isLocalPoint(*subPoint));
-      }
-    }
-  }
+  const auto& parentQF = QF::PolytopeQuadratureFormula::get(
+      1, mesh.getGeometry(d, parentLocalIdx));
+  const auto& subQF = QF::PolytopeQuadratureFormula::get(
+      1, boundary.getGeometry(d, subLocalIdx));
+
+  const auto& parentQ = mesh.getQuadrature(d, parentLocalIdx, parentQF);
+  const auto& subQ = boundary.getQuadrature(d, subLocalIdx, subQF);
+  ASSERT_GT(parentQ.getSize(), 0u);
+  ASSERT_GT(subQ.getSize(), 0u);
+
+  const MeshBase& parentIdentity = static_cast<const MeshBase&>(mesh);
+  const MeshBase& submeshIdentity =
+      static_cast<const MeshBase&>(static_cast<const Mesh<Context::MPI>&>(boundary));
+
+  EXPECT_TRUE(parentQ.getPoint(0).getPolytope().getMesh() == parentIdentity);
+  EXPECT_EQ(parentQ.getPoint(0).getPolytope().getIndex(), parentLocalIdx);
+
+  EXPECT_TRUE(subQ.getPoint(0).getPolytope().getMesh() == submeshIdentity);
+  EXPECT_TRUE(subQ.getPoint(0).getPolytope().getMesh().isSubMesh());
+  EXPECT_EQ(subQ.getPoint(0).getPolytope().getIndex(), subLocalIdx);
 }
 
 // ---------------------------------------------------------------------------
