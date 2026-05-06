@@ -96,15 +96,15 @@ namespace Rodin::Examples::Heart
       struct CarreauYasuda
       {
         /// @brief Low-shear viscosity.
-        Real mu0 = 0.04868;
+        Real mu0 = 0.0186058;
         /// @brief Infinite-shear viscosity.
-        Real muInf = 0.003605;
+        Real muInf = 0.0042963;
         /// @brief Relaxation time.
-        Real lambda = 3.39;
+        Real lambda = 0.2435;
         /// @brief Power-law index.
-        Real n = 0.198;
+        Real n = 0.2079;
         /// @brief Yasuda transition exponent.
-        Real yasuda = 1.235;
+        Real yasuda = 1.5410;
         /// @brief Shear-rate regularization used in the 3D viscosity.
         Real gammaRegularization = 1.0e-3;
       };
@@ -304,21 +304,21 @@ namespace Rodin::Examples::Heart
         /// @brief Initial distal pressure.
         Real initialPd = 10000.0;
         /// @brief Low-shear viscosity.
-        Real mu_0 = 0.04868;
+        Real mu_0 = 0.0186058;
         /// @brief Infinite-shear viscosity.
-        Real mu_Inf = 0.003605;
+        Real mu_Inf = 0.0042963;
         /// @brief Relaxation time.
-        Real lambda = 3.39;
+        Real lambda = 0.2435;
         /// @brief Power-law index.
-        Real n = 0.198;
+        Real n = 0.2079;
         /// @brief Yasuda transition exponent.
-        Real yasuda = 1.235;
+        Real yasuda = 1.5410;
         /// @brief Proximal surrogate vessel radius.
         Real proximalRadius = 0.015;
         /// @brief Proximal surrogate vessel length.
         Real proximalLength = 0.4;
         /// @brief Distal surrogate vessel radius.
-        Real distalRadius = 0.0007;
+        Real distalRadius = 0.0005;
         /// @brief Distal surrogate vessel length.
         Real distalLength = 0.004;
       };
@@ -398,7 +398,7 @@ namespace Rodin::Examples::Heart
         /// @brief 0D LV model parameters and initial conditions.
         LVModel lv;
         /// @brief Default RCR parameters copied to every outlet at startup.
-        RCR defaultRCR{1.0e8, 1.0e-10, 2.0e9, 500.0, 10500.0, 11000.0};
+        RCR defaultRCR{1.0e8, 1.0e-11, 1.0e9, 500.0, 10500.0, 11000.0};
       };
 
       explicit CoupledLV0DCoronary3D(const Rodin::Context::MPI& context);
