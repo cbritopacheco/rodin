@@ -271,6 +271,50 @@ namespace Rodin::Geometry
           for (Index gid : gids)
             gidQueriers[gid].push_back(r);
 
+        // ── Prune stale halo entries for Owned vertices ───────────────────────
+        // The SubMesh builder copies the parent shard's halo map verbatim.
+        // Some entries may reference ranks that hold the vertex in the volume
+        // partition but did NOT include it in this SubMesh (e.g. they have no
+        // boundary face adjacent to it).  Those ranks will not participate in
+        // the subsequent P1 / P1-vector DOF exchange, so if an Owned vertex's
+        // halo still names them the P1 constructor posts an irecv/isend for a
+        // rank that never posts the matching operation — causing a deadlock.
+        //
+        // After Round 1 we know exactly which ranks queried about each GID:
+        // only ranks that actually included the vertex as Shared in their
+        // SubMesh send a query.  We therefore prune every halo entry that
+        // corresponds to a rank that sent no query for that vertex.
+        for (size_t i = 0; i < n; ++i)
+        {
+          if (subState[i] != Shard::State::Owned)
+            continue;
+          auto haloIt = subHalo.find(i);
+          if (haloIt == subHalo.end())
+            continue;
+
+          const Index gid = pm.left[i];
+          IndexSet& haloSet = haloIt->second;
+
+          auto qIt = gidQueriers.find(gid);
+          if (qIt == gidQueriers.end())
+          {
+            // No rank queried this vertex → no rank has it as Shared in SubMesh.
+            subHalo.erase(haloIt);
+          }
+          else
+          {
+            const UnorderedSet<int> querierSet(qIt->second.begin(), qIt->second.end());
+            IndexSet newHalo;
+            for (const Index r : haloSet)
+              if (querierSet.count(static_cast<int>(r)))
+                newHalo.insert(r);
+            if (newHalo.empty())
+              subHalo.erase(haloIt);
+            else
+              haloSet = std::move(newHalo);
+          }
+        }
+
         // Reply type: { gid, querier_list }.
         // Empty querier_list = "I own it."
         // Non-empty sorted querier_list = "I don't; min rank should own it."
