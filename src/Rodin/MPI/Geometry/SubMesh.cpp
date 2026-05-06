@@ -6,7 +6,10 @@
  */
 #include <vector>
 #include <utility>
+#include <algorithm>
 
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/utility.hpp>
 #include <boost/mpi/collectives.hpp>
 
 #include "Rodin/Geometry/Polytope.h"
@@ -164,124 +167,180 @@ namespace Rodin::Geometry
     }
 
     // -------------------------------------------------------------------------
-    // Orphan-ownership resolution.
+    // Shared-vertex ownership resolution for dimension 0 (vertices).
     //
-    // A Ghost/Shared entity in this shard can be "orphaned" when its stated
-    // parent-shard owner did not include it in the SubMesh (e.g. a boundary
-    // vertex whose parent owner has no boundary faces on its shard).  In that
-    // case no rank will ever send a DOF for it, crashing or silently corrupting
-    // FES constructors (P1, etc.) that rely on owner→ghost DOF exchange.
+    // The SubMesh builder copies vertex ownership verbatim from the parent
+    // volume-partition shard.  This is wrong for SubMeshes built from a
+    // strict subset of polytopes (e.g. boundary faces only): a vertex v with
+    // state Shared(owner=A) in the volume partition may have NO owned boundary
+    // face on A's shard, so A never includes v in its SubMesh.  No rank then
+    // owns v → the DOF exchange in P1 (and similar FE spaces) breaks.
     //
-    // Fix: for each dimension, do one all-gather of (distributedGlobalID, rank)
-    // pairs for Owned entities.  Any Ghost/Shared entity whose stated owner is
-    // absent from the gathered set is re-owned by the minimum rank that has it,
-    // determined from a second all-gather of all (not just Owned) entity GIDs.
+    // Fix — 2-round neighbor exchange:
+    //
+    //   Round 1  Each rank sends the global IDs of its SubMesh-Shared vertices
+    //            to their stated owner, using the parent halo/owner maps for
+    //            symmetric communication (both owner rank and halo ranks appear
+    //            in each other's neighbor sets).
+    //
+    //   Round 2  The stated owner replies per GID:
+    //            - empty list     → "I do include it as Owned; keep Shared."
+    //            - sorted querier list → "I do not include it; min querier
+    //              becomes the new Owned, others redirect their owner pointer."
+    //
+    // Communication cost: O(shared-boundary-vertices / P) per rank, which is
+    // the same as the subsequent P1 DOF exchange.  No all-gather is needed.
     // -------------------------------------------------------------------------
     {
       const auto& comm = parentMesh.getContext().getCommunicator();
       const int   rank = comm.rank();
-      const int   P    = comm.size();
 
-      for (size_t d = 0; d <= dim; ++d)
+      // Only vertices (d == 0) can be Shared in an owned-face-driven SubMesh.
+      // Faces are always Owned (getBoundary() returns only owned faces).
+      const size_t d = 0;
+
+      if (dim == 0)
+        goto after_ownership_fix; // 0-D mesh: no edges/faces, nothing to do
+
       {
         const auto& pm    = shard.getPolytopeMap(d);
-        const auto& state = shard.getState(d);
         const size_t n    = pm.left.size();
 
-        // Collect global IDs of Owned entities on this rank.
-        std::vector<Index> myOwnedGids;
-        myOwnedGids.reserve(n);
+        auto& subState = shard.getState(d);
+        auto& subOwner = shard.getOwner(d);
+        auto& subHalo  = shard.getHalo(d);
+
+        // Build the neighbor set from the PARENT shard so that the send/recv
+        // pattern is symmetric across all ranks without global communication.
+        // Rationale: if v is Shared(owner=A) on B in the parent, A has B in its
+        // parent halo — both A and B therefore appear in each other's set.
+        const auto& pOwner = parentShard.getOwner(d);
+        const auto& pHalo  = parentShard.getHalo(d);
+
+        UnorderedSet<int> neighborSet;
+        for (const auto& [li, r] : pOwner)
+          neighborSet.insert(static_cast<int>(r));
+        for (const auto& [li, rs] : pHalo)
+          for (Index r : rs)
+            neighborSet.insert(static_cast<int>(r));
+
+        if (neighborSet.empty())
+          goto after_ownership_fix;
+
+        // queryMap[ownerRank] = GIDs of SubMesh-Shared vertices with that owner.
+        // Initialise all neighbors to empty so we always send (even if nothing
+        // to ask), ensuring the matching irecv on the other side is satisfied.
+        UnorderedMap<int, std::vector<Index>> queryMap;
+        for (int r : neighborSet)
+          queryMap[r]; // default-construct empty vector
+
         for (size_t i = 0; i < n; ++i)
-          if (state[i] == Shard::State::Owned)
-            myOwnedGids.push_back(pm.left[i]);
-
-        // All-gather: find out which global IDs are owned by at least one rank.
-        std::vector<std::vector<Index>> allOwnedGids;
-        boost::mpi::all_gather(comm, myOwnedGids, allOwnedGids);
-
-        UnorderedSet<Index> globallyOwned;
-        for (const auto& v : allOwnedGids)
-          for (Index gid : v)
-            globallyOwned.insert(gid);
-
-        // Check whether any Ghost/Shared entity on this rank is orphaned.
-        bool hasOrphan = false;
-        for (size_t i = 0; i < n && !hasOrphan; ++i)
-          if (state[i] != Shard::State::Owned && !globallyOwned.count(pm.left[i]))
-            hasOrphan = true;
-
-        bool anyOrphan = false;
-        boost::mpi::all_reduce(comm, hasOrphan, anyOrphan, std::logical_or<bool>());
-        if (!anyOrphan)
-          continue;
-
-        // Second all-gather: for each rank, the list of ALL entity GIDs
-        // present in its SubMesh shard (regardless of state).
-        std::vector<Index> myAllGids;
-        myAllGids.reserve(n);
-        for (size_t i = 0; i < n; ++i)
-          myAllGids.push_back(pm.left[i]);
-
-        std::vector<std::vector<Index>> allAllGids;
-        boost::mpi::all_gather(comm, myAllGids, allAllGids);
-
-        // For each orphaned GID, the new owner is the minimum rank (in
-        // communicator order) that has it in its SubMesh.
-        UnorderedMap<Index, int> orphanNewOwner;
-        for (int r = 0; r < P; ++r)
         {
-          for (Index gid : allAllGids[r])
-          {
-            if (!globallyOwned.count(gid) && !orphanNewOwner.count(gid))
-              orphanNewOwner.emplace(gid, r); // first (= minimum) rank wins
-          }
+          if (subState[i] != Shard::State::Shared)
+            continue;
+          auto oit = subOwner.find(i);
+          if (oit != subOwner.end())
+            queryMap[static_cast<int>(oit->second)].push_back(pm.left[i]);
         }
 
-        if (orphanNewOwner.empty())
-          continue;
-
-        // Apply ownership changes to this rank's shard.
-        auto& mutableState = shard.getState(d);
-        auto& ownerMap     = shard.getOwner(d);
-        auto& haloMap      = shard.getHalo(d);
-
-        for (size_t i = 0; i < n; ++i)
+        // ── Round 1: send queries, receive queries ───────────────────────────
+        std::vector<boost::mpi::request> reqs;
+        UnorderedMap<int, std::vector<Index>> recvQuery;
+        for (int r : neighborSet)
         {
-          const Index gid = pm.left[i];
-          auto it = orphanNewOwner.find(gid);
-          if (it == orphanNewOwner.end())
-            continue;
+          recvQuery[r]; // default-construct
+          reqs.push_back(comm.irecv(r, 10, recvQuery[r]));
+          reqs.push_back(comm.isend(r, 10, queryMap[r]));
+        }
+        boost::mpi::wait_all(reqs.begin(), reqs.end());
 
-          const int newOwner = it->second;
+        // ── Build replies ────────────────────────────────────────────────────
+        // For each GID queried of us: if it is Owned in our SubMesh → reply
+        // with empty querier list.  Otherwise collect all queriers and reply
+        // with the sorted list (each querier computes the min independently).
 
-          if (newOwner == rank)
+        // Build owned-GID → sub-local-index lookup.
+        UnorderedMap<Index, Index> ownedGidIdx;
+        for (size_t i = 0; i < n; ++i)
+          if (subState[i] == Shard::State::Owned)
+            ownedGidIdx.emplace(pm.left[i], static_cast<Index>(i));
+
+        // Aggregate queriers per GID.
+        UnorderedMap<Index, std::vector<int>> gidQueriers;
+        for (auto& [r, gids] : recvQuery)
+          for (Index gid : gids)
+            gidQueriers[gid].push_back(r);
+
+        // Reply type: { gid, querier_list }.
+        // Empty querier_list = "I own it."
+        // Non-empty sorted querier_list = "I don't; min rank should own it."
+        using GidInfo = std::pair<Index, std::vector<int>>;
+        UnorderedMap<int, std::vector<GidInfo>> replyMap;
+        for (int r : neighborSet)
+          replyMap[r]; // default-construct
+
+        for (auto& [gid, queriers] : gidQueriers)
+        {
+          if (ownedGidIdx.count(gid))
           {
-            // This rank becomes the Owned entity.
-            mutableState[i] = Shard::State::Owned;
-            ownerMap.erase(i);
-            // Register all other ranks that have this entity as halo members.
-            for (int r = 0; r < P; ++r)
-            {
-              if (r == rank)
-                continue;
-              for (Index otherGid : allAllGids[r])
-              {
-                if (otherGid == gid)
-                {
-                  haloMap[i].insert(static_cast<Index>(r));
-                  break;
-                }
-              }
-            }
+            for (int q : queriers)
+              replyMap[q].push_back({gid, {}});
           }
           else
           {
-            // Update the stated owner to the new owner rank.
-            ownerMap[i] = static_cast<Index>(newOwner);
+            std::sort(queriers.begin(), queriers.end());
+            for (int q : queriers)
+              replyMap[q].push_back({gid, queriers});
+          }
+        }
+
+        // ── Round 2: send replies, receive replies ───────────────────────────
+        reqs.clear();
+        UnorderedMap<int, std::vector<GidInfo>> recvReply;
+        for (int r : neighborSet)
+        {
+          recvReply[r]; // default-construct
+          reqs.push_back(comm.irecv(r, 11, recvReply[r]));
+          reqs.push_back(comm.isend(r, 11, replyMap[r]));
+        }
+        boost::mpi::wait_all(reqs.begin(), reqs.end());
+
+        // ── Apply ownership corrections ──────────────────────────────────────
+        for (auto& [r, replies] : recvReply)
+        {
+          for (auto& [gid, queriers] : replies)
+          {
+            if (queriers.empty())
+              continue; // stated owner does include it; keep Shared(owner=r)
+
+            // Find the sub-local index for this GID.
+            auto pit = pm.right.find(gid);
+            if (pit == pm.right.end())
+              continue; // should not happen
+
+            const Index localIdx = static_cast<Index>(pit->second);
+            const int   newOwner = queriers.front(); // already sorted, front = min
+
+            if (newOwner == rank)
+            {
+              // This rank becomes the SubMesh owner of the vertex.
+              subState[localIdx] = Shard::State::Owned;
+              subOwner.erase(localIdx);
+              // Halo: all other queriers need the DOF from us in P1.
+              for (int q : queriers)
+                if (q != rank)
+                  subHalo[localIdx].insert(static_cast<Index>(q));
+            }
+            else
+            {
+              // Redirect the owner pointer from r (old owner) to newOwner.
+              subOwner[localIdx] = static_cast<Index>(newOwner);
+            }
           }
         }
       }
-    }
+      after_ownership_fix:;
+    } // ownership resolution block
 
     Mesh<Context::MPI>::Builder meshBuilder(parentMesh.getContext());
     meshBuilder.initialize(std::move(shard));
