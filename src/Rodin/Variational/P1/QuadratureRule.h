@@ -633,7 +633,7 @@ namespace Rodin::Variational
             {
               for (size_t ib = 0; ib < nte; ++ib)
               {
-                const auto& phi_te = testfe.getBasis(ib)(rc);
+                const auto phi_te = testfe.getBasis(ib)(rc);
 
                 {
                   const ScalarType kii =
@@ -643,8 +643,8 @@ namespace Rodin::Variational
 
                 for (size_t ia = 0; ia < ib; ++ia)
                 {
-                  const ScalarType kij =
-                    wdet * Math::dot(phi_te, trialfe.getBasis(ia)(rc));
+                  const auto phi_tr = trialfe.getBasis(ia)(rc);
+                  const ScalarType kij = wdet * Math::dot(phi_te, phi_tr);
                   m_matrix(ib, ia) += kij;
                 }
               }
@@ -653,11 +653,11 @@ namespace Rodin::Variational
             {
               for (size_t ib = 0; ib < nte; ++ib)
               {
-                const auto& phi_te = testfe.getBasis(ib)(rc);
+                const auto phi_te = testfe.getBasis(ib)(rc);
                 for (size_t ia = 0; ia < ntr; ++ia)
                 {
-                  const ScalarType kij =
-                    wdet * Math::dot(phi_te, trialfe.getBasis(ia)(rc));
+                  const auto phi_tr = trialfe.getBasis(ia)(rc);
+                  const ScalarType kij = wdet * Math::dot(phi_te, phi_tr);
                   m_matrix(ib, ia) += kij;
                 }
               }
@@ -919,11 +919,11 @@ namespace Rodin::Variational
             {
               for (size_t ib = 0; ib < nte; ++ib)
               {
-                const auto& phi_te = testfe.getBasis(ib)(rc);
+                const auto phi_te = testfe.getBasis(ib)(rc);
                 for (size_t ia = 0; ia < ntr; ++ia)
                 {
-                  const ScalarType kij =
-                    wdet * csv * Math::dot(phi_te, trialfe.getBasis(ia)(rc));
+                  const auto phi_tr = trialfe.getBasis(ia)(rc);
+                  const ScalarType kij = wdet * csv * Math::dot(phi_te, phi_tr);
                   m_matrix(ib, ia) += kij;
                 }
               }
@@ -939,10 +939,10 @@ namespace Rodin::Variational
 
             for (size_t ib = 0; ib < nte; ++ib)
             {
-              const auto& phi_te = testfe.getBasis(ib)(rc);
+              const auto phi_te = testfe.getBasis(ib)(rc);
               for (size_t ia = 0; ia < ntr; ++ia)
               {
-                const auto& phi_tr = trialfe.getBasis(ia)(rc);
+                const auto phi_tr = trialfe.getBasis(ia)(rc);
                 m_matrix(ib, ia) += wdet * Math::dot(phi_te, cmv * phi_tr);
               }
             }
@@ -1757,11 +1757,11 @@ namespace Rodin::Variational
           {
             for (size_t ib = 0; ib < nte; ++ib)
             {
-              const auto& phi_te = testfe.getBasis(ib)(rc);
+              const auto phi_te = testfe.getBasis(ib)(rc);
               for (size_t ia = 0; ia < ntr; ++ia)
               {
-                const ScalarType kij =
-                  wdet * csv * Math::dot(phi_te, trialfe.getBasis(ia)(rc));
+                const auto phi_tr = trialfe.getBasis(ia)(rc);
+                const ScalarType kij = wdet * csv * Math::dot(phi_te, phi_tr);
                 m_matrix(ib, ia) += kij;
               }
             }
@@ -3085,7 +3085,7 @@ namespace Rodin::Variational
             m_basis.resize(nVertices);
             for (size_t v = 0; v < nVertices; ++v)
             {
-              const auto& bv = testfe.getBasis(v * vdim)(rc);
+              const auto bv = testfe.getBasis(v * vdim)(rc);
               m_basis[v] = bv(0);
             }
           }
@@ -3301,7 +3301,7 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
-      QuadratureRule& setPolytope(const Geometry::Polytope& trp, const Geometry::Polytope& tep)
+      QuadratureRule& setPolytope(const Geometry::Polytope& trp, const Geometry::Polytope& tep) override
       {
         m_trp = trp;
         m_tep = tep;
@@ -3598,12 +3598,25 @@ namespace Rodin::Variational
                   for (size_t m = 0; m < trialfe.getCount(); ++m)
                   {
                     const auto& trb = trialfe.getBasis(m);
-                    m_matrix(l, m) = s0 * (m_k0 * trb(rx0)).dot(teb(rz0));
-                    m_matrix(l, m) += s1 * (m_k1 * trb(rx1)).dot(teb(rz1));
-                    m_matrix(l, m) += s2 * (m_k2 * trb(rx2)).dot(teb(rz2));
-                    m_matrix(l, m) += s3 * (m_k3 * trb(rx3)).dot(teb(rz3));
-                    m_matrix(l, m) += s4 * (m_k4 * trb(rx4)).dot(teb(rz4));
-                    m_matrix(l, m) += s5 * (m_k5 * trb(rx5)).dot(teb(rz5));
+                    const auto trv0 = trb(rx0);
+                    const auto tev0 = teb(rz0);
+                    const auto trv1 = trb(rx1);
+                    const auto tev1 = teb(rz1);
+                    const auto trv2 = trb(rx2);
+                    const auto tev2 = teb(rz2);
+                    const auto trv3 = trb(rx3);
+                    const auto tev3 = teb(rz3);
+                    const auto trv4 = trb(rx4);
+                    const auto tev4 = teb(rz4);
+                    const auto trv5 = trb(rx5);
+                    const auto tev5 = teb(rz5);
+
+                    m_matrix(l, m) = s0 * (m_k0 * trv0).dot(tev0);
+                    m_matrix(l, m) += s1 * (m_k1 * trv1).dot(tev1);
+                    m_matrix(l, m) += s2 * (m_k2 * trv2).dot(tev2);
+                    m_matrix(l, m) += s3 * (m_k3 * trv3).dot(tev3);
+                    m_matrix(l, m) += s4 * (m_k4 * trv4).dot(tev4);
+                    m_matrix(l, m) += s5 * (m_k5 * trv5).dot(tev5);
                   }
                 }
                 break;

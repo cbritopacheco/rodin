@@ -412,7 +412,7 @@ namespace Rodin::Variational
       {
         assert(m_cache.cellKey);
         assert(local < m_cache.grad.size());
-        return m_cache.grad[local].getData().head(m_cache.cellKey.d);
+        return m_cache.grad[local];
       }
 
       constexpr
