@@ -4,6 +4,11 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <vector>
+#include <utility>
+
+#include <boost/mpi/collectives.hpp>
+
 #include "Rodin/Geometry/Polytope.h"
 
 #include "SubMesh.h"
@@ -156,6 +161,126 @@ namespace Rodin::Geometry
       }
 
       pm.right = std::move(newRight);
+    }
+
+    // -------------------------------------------------------------------------
+    // Orphan-ownership resolution.
+    //
+    // A Ghost/Shared entity in this shard can be "orphaned" when its stated
+    // parent-shard owner did not include it in the SubMesh (e.g. a boundary
+    // vertex whose parent owner has no boundary faces on its shard).  In that
+    // case no rank will ever send a DOF for it, crashing or silently corrupting
+    // FES constructors (P1, etc.) that rely on owner→ghost DOF exchange.
+    //
+    // Fix: for each dimension, do one all-gather of (distributedGlobalID, rank)
+    // pairs for Owned entities.  Any Ghost/Shared entity whose stated owner is
+    // absent from the gathered set is re-owned by the minimum rank that has it,
+    // determined from a second all-gather of all (not just Owned) entity GIDs.
+    // -------------------------------------------------------------------------
+    {
+      const auto& comm = parentMesh.getContext().getCommunicator();
+      const int   rank = comm.rank();
+      const int   P    = comm.size();
+
+      for (size_t d = 0; d <= dim; ++d)
+      {
+        const auto& pm    = shard.getPolytopeMap(d);
+        const auto& state = shard.getState(d);
+        const size_t n    = pm.left.size();
+
+        // Collect global IDs of Owned entities on this rank.
+        std::vector<Index> myOwnedGids;
+        myOwnedGids.reserve(n);
+        for (size_t i = 0; i < n; ++i)
+          if (state[i] == Shard::State::Owned)
+            myOwnedGids.push_back(pm.left[i]);
+
+        // All-gather: find out which global IDs are owned by at least one rank.
+        std::vector<std::vector<Index>> allOwnedGids;
+        boost::mpi::all_gather(comm, myOwnedGids, allOwnedGids);
+
+        UnorderedSet<Index> globallyOwned;
+        for (const auto& v : allOwnedGids)
+          for (Index gid : v)
+            globallyOwned.insert(gid);
+
+        // Check whether any Ghost/Shared entity on this rank is orphaned.
+        bool hasOrphan = false;
+        for (size_t i = 0; i < n && !hasOrphan; ++i)
+          if (state[i] != Shard::State::Owned && !globallyOwned.count(pm.left[i]))
+            hasOrphan = true;
+
+        bool anyOrphan = false;
+        boost::mpi::all_reduce(comm, hasOrphan, anyOrphan, std::logical_or<bool>());
+        if (!anyOrphan)
+          continue;
+
+        // Second all-gather: for each rank, the list of ALL entity GIDs
+        // present in its SubMesh shard (regardless of state).
+        std::vector<Index> myAllGids;
+        myAllGids.reserve(n);
+        for (size_t i = 0; i < n; ++i)
+          myAllGids.push_back(pm.left[i]);
+
+        std::vector<std::vector<Index>> allAllGids;
+        boost::mpi::all_gather(comm, myAllGids, allAllGids);
+
+        // For each orphaned GID, the new owner is the minimum rank (in
+        // communicator order) that has it in its SubMesh.
+        UnorderedMap<Index, int> orphanNewOwner;
+        for (int r = 0; r < P; ++r)
+        {
+          for (Index gid : allAllGids[r])
+          {
+            if (!globallyOwned.count(gid) && !orphanNewOwner.count(gid))
+              orphanNewOwner.emplace(gid, r); // first (= minimum) rank wins
+          }
+        }
+
+        if (orphanNewOwner.empty())
+          continue;
+
+        // Apply ownership changes to this rank's shard.
+        auto& mutableState = shard.getState(d);
+        auto& ownerMap     = shard.getOwner(d);
+        auto& haloMap      = shard.getHalo(d);
+
+        for (size_t i = 0; i < n; ++i)
+        {
+          const Index gid = pm.left[i];
+          auto it = orphanNewOwner.find(gid);
+          if (it == orphanNewOwner.end())
+            continue;
+
+          const int newOwner = it->second;
+
+          if (newOwner == rank)
+          {
+            // This rank becomes the Owned entity.
+            mutableState[i] = Shard::State::Owned;
+            ownerMap.erase(i);
+            // Register all other ranks that have this entity as halo members.
+            for (int r = 0; r < P; ++r)
+            {
+              if (r == rank)
+                continue;
+              for (Index otherGid : allAllGids[r])
+              {
+                if (otherGid == gid)
+                {
+                  haloMap[i].insert(static_cast<Index>(r));
+                  break;
+                }
+              }
+            }
+          }
+          else
+          {
+            // Update the stated owner to the new owner rank.
+            ownerMap[i] = static_cast<Index>(newOwner);
+          }
+        }
+      }
     }
 
     Mesh<Context::MPI>::Builder meshBuilder(parentMesh.getContext());
