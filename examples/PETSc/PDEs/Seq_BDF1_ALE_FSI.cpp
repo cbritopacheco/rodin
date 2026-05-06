@@ -133,18 +133,6 @@ namespace
     return { std::min(x0, x1), std::max(x0, x1) };
   }
 
-  static Real segmentReferenceCoordinate(const LocalMesh& mesh, const Polytope& segment, Real x)
-  {
-    const auto& vertices = segment.getVertices();
-    const Real x0 = mesh.getVertexCoordinates(vertices[0]).x();
-    const Real x1 = mesh.getVertexCoordinates(vertices[1]).x();
-
-    if (std::abs(x1 - x0) < 1e-14)
-      return 0.5;
-
-    return std::clamp((x - x0) / (x1 - x0), 0.0, 1.0);
-  }
-
   static void mapMeshToBox(LocalMesh& mesh, Real L, Real H, Real y0)
   {
     Real xmin =  std::numeric_limits<Real>::max();
@@ -301,17 +289,35 @@ namespace
       const InterfaceMap& map,
       const Real x)
   {
-    constexpr Real eps = 1e-12;
+    constexpr Real eps = 1e-10;
+
+    if (map.segments.empty())
+      throw std::runtime_error("Empty FSI interface map.");
+
+    Real xc = x;
+
+    // Clamp endpoint roundoff / small ALE horizontal drift.
+    xc = std::max(xc, map.segments.front().xmin);
+    xc = std::min(xc, map.segments.back().xmax);
+
     for (const auto& seg : map.segments)
     {
-      if (x + eps < seg.xmin || x - eps > seg.xmax)
+      if (xc + eps < seg.xmin || xc - eps > seg.xmax)
         continue;
 
       auto face = fluidMesh.getFace(seg.fluid);
-      const Real r = segmentReferenceCoordinate(fluidMesh, *face, x);
+
+      Real r = 0.5;
+      if (std::abs(seg.xmax - seg.xmin) > 1e-14)
+        r = std::clamp((xc - seg.xmin) / (seg.xmax - seg.xmin), 0.0, 1.0);
+
       return Point(*face, Math::SpatialPoint{ r });
     }
-    throw std::runtime_error("Point abscissa is outside the mapped FSI interface.");
+
+    // Fallback for rare roundoff at the right endpoint.
+    const auto& seg = map.segments.back();
+    auto face = fluidMesh.getFace(seg.fluid);
+    return Point(*face, Math::SpatialPoint{ 1.0 });
   }
 
   template <class SolidGridFunction>
@@ -387,6 +393,43 @@ int main(int argc, char** argv)
   PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_solid_ny", &solidNyOpt, PETSC_NULLPTR);
   PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_Nt", &ntOpt, PETSC_NULLPTR);
   PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_T", &finalTimeOpt, PETSC_NULLPTR);
+
+  PetscReal pressureScaleOpt = 1.0;
+  PetscReal viscousScaleOpt = 1.0;
+  PetscReal tractionScaleOpt = 1.0;
+  PetscReal solidEOpt = 8.0e2;
+  PetscReal solidNuOpt = 0.3;
+  PetscReal solidDensityOpt = 5.0e-2;
+  PetscReal solidDampingOpt = 2.5e-3;
+  PetscReal newtonDampingOpt = 0.5;
+  PetscBool checkSolidJacobianOpt = PETSC_FALSE;
+
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
+      "-fsi_pressure_scale", &pressureScaleOpt, PETSC_NULLPTR);
+
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
+      "-fsi_viscous_scale", &viscousScaleOpt, PETSC_NULLPTR);
+
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
+      "-fsi_traction_scale", &tractionScaleOpt, PETSC_NULLPTR);
+
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
+      "-fsi_solid_E", &solidEOpt, PETSC_NULLPTR);
+
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
+      "-fsi_solid_nu", &solidNuOpt, PETSC_NULLPTR);
+
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
+      "-fsi_solid_density", &solidDensityOpt, PETSC_NULLPTR);
+
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
+      "-fsi_solid_damping", &solidDampingOpt, PETSC_NULLPTR);
+
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
+      "-fsi_solid_newton_damping", &newtonDampingOpt, PETSC_NULLPTR);
+
+  PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR,
+      "-fsi_check_solid_jacobian", &checkSolidJacobianOpt, PETSC_NULLPTR);
 
   const size_t nx = static_cast<size_t>(std::max<PetscInt>(2, nxOpt));
   const size_t fluidNy = static_cast<size_t>(std::max<PetscInt>(2, fluidNyOpt));
@@ -477,13 +520,13 @@ int main(int argc, char** argv)
   const Real rhoF = 1.0;
   const Real muF  = 0.02;
 
-  const Real solidE = 8.0e2;
-  const Real solidNu = 0.3;
+  const Real solidE = static_cast<Real>(solidEOpt);
+  const Real solidNu = static_cast<Real>(solidNuOpt);
   const Real solidLambda =
     solidE * solidNu / ((1.0 + solidNu) * (1.0 - 2.0 * solidNu));
   const Real solidMu = solidE / (2.0 * (1.0 + solidNu));
-  const Real rhoS = 5.0;
-  const Real dampingS = 0.25;
+  const Real rhoS = static_cast<Real>(solidDensityOpt);
+  const Real dampingS = static_cast<Real>(solidDampingOpt);
   const Real solidMassCoeff = rhoS / (dt * dt) + dampingS / dt;
 
   Solid::NeoHookean law(solidLambda, solidMu);
@@ -563,6 +606,10 @@ int main(int argc, char** argv)
     internal.setDisplacement(solidDisplacement);
 
     static bool tractionNaNReported = false;
+    const Real pressureScale = static_cast<Real>(pressureScaleOpt);
+    const Real viscousScale = static_cast<Real>(viscousScaleOpt);
+    const Real tractionScale = static_cast<Real>(tractionScaleOpt);
+
     auto fluidTractionLoad = VectorFunction(dim, [&](const Point& xs)
     {
       Math::SpatialVector<Real> traction(dim);
@@ -593,8 +640,14 @@ int main(int argc, char** argv)
         return traction;
       }
 
-      traction = (-pressure * Math::Matrix<Real>::Identity(dim, dim)
-                  + muF * (J + J.transpose())) * normal;
+      const auto I = Math::SpatialMatrix<Real>::Identity(dim, dim);
+
+      const auto sigmaF =
+          -pressureScale * pressure * I
+          + viscousScale * muF * (J + J.transpose());
+
+      traction = -tractionScale * sigmaF * normal;
+
       return traction;
     });
 
@@ -606,32 +659,181 @@ int main(int argc, char** argv)
 
     Problem solid(du, w);
     solid =
-          tangent
-        + solidMassCoeff * Integral(du, w)
-        + internal
-        + solidMassCoeff * Integral(solidDisplacement, w)
-        - solidMassCoeff * Integral(solidDisplacementOld, w)
-        - (rhoS / dt) * Integral(solidVelocityOld, w)
-        - BoundaryIntegral(solidFluidTraction, w).over(SolidBoundary::FSI)
-        + DirichletBC(du, Zero(dim)).on(SolidBoundary::ClampLeft);
+        tangent
+      + solidMassCoeff * Integral(du, w)
 
-    SparseLU solidLinearSolver(solid);
-    NewtonSolver solidSolver(solidLinearSolver);
-    solidSolver.setMaxIterations(25)
-               .setDampingFactor(1.0)
-               .setAbsoluteTolerance(1e-10)
-               .setRelativeTolerance(1e-8);
+      + internal
+      + solidMassCoeff * Integral(solidDisplacement, w)
+      - solidMassCoeff * Integral(solidDisplacementOld, w)
+      - (rhoS / dt) * Integral(solidVelocityOld, w)
+      - BoundaryIntegral(solidFluidTraction, w).over(SolidBoundary::FSI)
+
+      + DirichletBC(du, Zero(dim)).on(SolidBoundary::ClampLeft)
+      + DirichletBC(du, Zero(dim)).on(SolidBoundary::ClampRight);
 
     Alert::Info() << "Solid BDF1 hyperelastic step " << step << " / " << Nt << Alert::Raise;
     Alert::Info() << "  solidDisplacement norm before Newton: "
                   << solidDisplacement.getData().norm() << Alert::Raise;
     Alert::Info() << "  solidFluidTraction norm: "
                   << solidFluidTraction.getData().norm() << Alert::Raise;
-    solidSolver.setMonitor([](const auto& rep) {
-      Alert::Info() << "  Newton it=" << rep.iterations
-                    << " r=" << rep.final_residual << Alert::Raise;
-    });
-    solidSolver.solve(solidDisplacement);
+
+    const auto solidDisplacementInitial = solidDisplacement.getData();
+    const Real tightSolidTolerance = 1e-10;
+    const Real basinSolidTolerance = 1e-8;
+
+    if (checkSolidJacobianOpt && step == 1)
+    {
+      solid.assemble();
+      const auto& A = solid.getLinearSystem().getOperator();
+      const auto b0 = solid.getLinearSystem().getVector();
+
+      auto x0 = solidDisplacement.getData();
+      auto eta = x0;
+      for (Index i = 0; i < eta.size(); ++i)
+      {
+        const Real ii = static_cast<Real>(i + 1);
+        eta(i) = std::sin(0.173 * ii) + 0.5 * std::cos(0.071 * ii);
+      }
+
+      auto zeroClamp = Zero(dim);
+      auto leftClamp = DirichletBC(du, zeroClamp).on(SolidBoundary::ClampLeft);
+      auto rightClamp = DirichletBC(du, zeroClamp).on(SolidBoundary::ClampRight);
+      leftClamp.assemble();
+      rightClamp.assemble();
+      for (const auto& [local, value] : leftClamp.getDOFs())
+      {
+        (void) value;
+        eta(local) = 0.0;
+      }
+      for (const auto& [local, value] : rightClamp.getDOFs())
+      {
+        (void) value;
+        eta(local) = 0.0;
+      }
+
+      const auto Aeta = A * eta;
+
+      SparseLU diagnosticLinearSolver(solid);
+      diagnosticLinearSolver.solve(solid.getLinearSystem());
+      auto linearResidual = solid.getLinearSystem().getVector();
+      linearResidual = A * solid.getLinearSystem().getSolution();
+      linearResidual -= b0;
+
+      Alert::Info() << "  solid Jacobian check |b|=" << b0.norm()
+                    << " |eta|=" << eta.norm()
+                    << " |A eta|=" << Aeta.norm()
+                    << " |A dx - b|=" << linearResidual.norm()
+                    << Alert::Raise;
+
+      for (const Real eps : { 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8 })
+      {
+        auto xeps = x0;
+        xeps += eps * eta;
+        solidDisplacement.setData(xeps);
+        solid.assemble();
+
+        auto fd = solid.getLinearSystem().getVector();
+        fd -= b0;
+        fd *= 1.0 / eps;
+
+        auto err = fd;
+        err += Aeta;
+
+        Alert::Info() << "    eps=" << eps
+                      << " |FD|=" << fd.norm()
+                      << " |FD + Aeta|=" << err.norm()
+                      << Alert::Raise;
+      }
+
+      solidDisplacement.setData(x0);
+      solid.assemble();
+
+      eta = solid.getLinearSystem().getSolution();
+      const auto Adx = A * eta;
+      Alert::Info() << "  solid Newton-direction check |dx|=" << eta.norm()
+                    << " |A dx|=" << Adx.norm() << Alert::Raise;
+      for (const Real eps : { 1.0, 1e-1, 1e-2, 1e-3, 1e-4 })
+      {
+        auto xeps = x0;
+        xeps += eps * eta;
+        solidDisplacement.setData(xeps);
+        solid.assemble();
+
+        auto fd = solid.getLinearSystem().getVector();
+        fd -= b0;
+        fd *= 1.0 / eps;
+
+        auto err = fd;
+        err += Adx;
+
+        Alert::Info() << "    eps=" << eps
+                      << " |FD|=" << fd.norm()
+                      << " |FD + A dx|=" << err.norm()
+                      << Alert::Raise;
+      }
+
+      solidDisplacement.setData(x0);
+      solid.assemble();
+    }
+
+    auto solveSolidNewton =
+      [&](const char* label, Real damping, Real absoluteTolerance, Real relativeTolerance)
+      {
+        SparseLU solidLinearSolver(solid);
+        NewtonSolver solidSolver(solidLinearSolver);
+        solidSolver.setMaxIterations(75)
+                   .setDampingFactor(damping)
+                   .setAbsoluteTolerance(absoluteTolerance)
+                   .setRelativeTolerance(relativeTolerance);
+
+        Alert::Info() << "  " << label
+                      << " alpha=" << damping
+                      << " atol=" << absoluteTolerance << Alert::Raise;
+
+        solidSolver.setMonitor(
+            [](const auto& rep)
+            {
+              Alert::Info() << "    it=" << rep.iterations
+                            << " r=" << rep.final_residual
+                            << " dx=" << rep.final_step_norm
+                            << Alert::Raise;
+            });
+        solidSolver.solve(solidDisplacement);
+        return solidSolver.converged();
+      };
+
+    solidDisplacement.setData(solidDisplacementInitial);
+    bool solidNewtonConverged =
+      solveSolidNewton("full Newton attempt", 1.0, tightSolidTolerance, 1e-8);
+
+    Real solidNewtonDamping = std::min<Real>(newtonDampingOpt, 0.5);
+    for (Index attempt = 0; !solidNewtonConverged && attempt < 8; ++attempt)
+    {
+      solidDisplacement.setData(solidDisplacementInitial);
+
+      Alert::Warning() << "  full Newton did not converge; seeking basin with alpha="
+                       << solidNewtonDamping << Alert::Raise;
+
+      const bool reachedBasin =
+        solveSolidNewton("damped basin attempt", solidNewtonDamping, basinSolidTolerance, 0.0);
+
+      if (reachedBasin)
+      {
+        solidNewtonConverged =
+          solveSolidNewton("full Newton final", 1.0, tightSolidTolerance, 1e-8);
+
+        if (solidNewtonConverged)
+          break;
+
+        Alert::Warning() << "  full Newton failed from damped iterate; reducing alpha."
+                         << Alert::Raise;
+      }
+
+      solidNewtonDamping *= 0.5;
+    }
+
+    if (!solidNewtonConverged)
+      throw std::runtime_error("Solid Newton failed to converge after basin damping retries.");
 
     solidVelocity = (1.0 / dt) * (solidDisplacement - solidDisplacementOld);
     solidDisplacementOld = solidDisplacement;

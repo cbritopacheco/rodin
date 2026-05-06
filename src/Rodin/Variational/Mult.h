@@ -142,6 +142,20 @@ namespace Rodin::FormLanguage
 
 namespace Rodin::Variational
 {
+  namespace Internal
+  {
+    template <class Product>
+    constexpr
+    auto materializeProduct(const Product& product)
+    {
+      using RangeType =
+        typename FormLanguage::RangeOf<std::remove_cvref_t<Product>>::Type;
+      RangeType out;
+      out = product;
+      return out;
+    }
+  }
+
   /**
    * @defgroup MultSpecializations Mult Template Specializations
    * @brief Template specializations of the Mult class.
@@ -220,7 +234,8 @@ namespace Rodin::Variational
       {
         const auto lhs = this->getLHS().getValue(p);
         const auto rhs = this->getRHS().getValue(p);
-        return lhs * rhs;
+        const auto product = lhs * rhs;
+        return Internal::materializeProduct(product);
       }
 
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
@@ -428,7 +443,8 @@ namespace Rodin::Variational
         const auto& p = this->getIntegrationPoint();
         const auto lhs = getLHS().getValue(p);
         const auto rhs = getRHS().getBasis(local);
-        return lhs * rhs;
+        const auto product = lhs * rhs;
+        return Internal::materializeProduct(product);
       }
 
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
@@ -580,7 +596,8 @@ namespace Rodin::Variational
         const auto& p = this->getIntegrationPoint();
         const auto lhs = this->getLHS().getBasis(local);
         const auto rhs = this->getRHS().getValue(p);
-        return lhs * rhs;
+        const auto product = lhs * rhs;
+        return Internal::materializeProduct(product);
       }
 
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
