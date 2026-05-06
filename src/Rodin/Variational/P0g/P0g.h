@@ -35,7 +35,7 @@ namespace Rodin::FormLanguage
     using MeshType    = Mesh;
     using ScalarType  = Number;
     using RangeType   = ScalarType;
-    using ContextType = typename MeshType::Context;
+    using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
     using ElementType = Variational::P0gElement<RangeType>;
   };
 
@@ -45,7 +45,7 @@ namespace Rodin::FormLanguage
     using MeshType    = Mesh;
     using ScalarType  = Number;
     using RangeType   = Math::SpatialVector<ScalarType>;
-    using ContextType = typename MeshType::Context;
+    using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
     using ElementType = Variational::P0gElement<Math::SpatialVector<ScalarType>>;
   };
 }
@@ -129,11 +129,37 @@ namespace Rodin::Variational
         : m_mesh(mesh)
       {}
 
-      P0g(const P0g&) = default;
+      P0g(const P0g& other)
+        : Parent(other),
+          m_mesh(other.m_mesh)
+      {}
 
-      P0g(P0g&&) = default;
+      P0g(P0g&& other)
+        : Parent(std::move(other)),
+          m_mesh(std::move(other.m_mesh))
+      {}
 
       ~P0g() override = default;
+
+      P0g& operator=(const P0g& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(other);
+          m_mesh = other.m_mesh;
+        }
+        return *this;
+      }
+
+      P0g& operator=(P0g&& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(std::move(other));
+          m_mesh = std::move(other.m_mesh);
+        }
+        return *this;
+      }
 
       size_t getSize() const override
       {
@@ -282,11 +308,48 @@ namespace Rodin::Variational
         : P0g(mesh, VDim)
       {}
 
-      P0g(const P0g&) = default;
-      P0g(P0g&&) = default;
+      P0g(const P0g& other)
+        : Parent(other),
+          m_dofs(other.m_dofs),
+          m_mesh(other.m_mesh),
+          m_vdim(other.m_vdim)
+      {}
+
+      P0g(P0g&& other)
+        : Parent(std::move(other)),
+          m_dofs(std::move(other.m_dofs)),
+          m_mesh(std::move(other.m_mesh)),
+          m_vdim(std::move(other.m_vdim))
+      {}
+
       ~P0g() override = default;
 
+      P0g& operator=(const P0g& other)
+      {
+        Parent::operator=(other);
+        if (this != &other)
+        {
+          m_dofs = other.m_dofs;
+          m_vdim = other.m_vdim;
+          m_mesh = other.m_mesh;
+        }
+        return *this;
+      }
+
+      P0g& operator=(P0g&& other)
+      {
+        Parent::operator=(std::move(other));
+        if (this != &other)
+        {
+          m_dofs = std::move(other.m_dofs);
+          m_vdim = std::move(other.m_vdim);
+          m_mesh = std::move(other.m_mesh);
+        }
+        return *this;
+      }
+
       size_t getSize() const override { return m_vdim; }
+
       size_t getVectorDimension() const override { return m_vdim; }
 
       const MeshType& getMesh() const override { return m_mesh.get(); }
