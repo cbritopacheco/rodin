@@ -167,7 +167,8 @@ namespace Rodin::Advection
         Geometry::Point qface(cell, r, x);
         const auto JinvT = qface.getJacobianInverse().transpose();
 
-        Math::SpatialVector<Real> nu = JinvT * nref; // unnormalized physical normal
+        Math::SpatialMatrix<Real> JinvT_nref = (JinvT * nref);
+        Math::SpatialVector<Real> nu = (JinvT * nref).col(0); // unnormalized physical normal
         Real nn = nu.dot(nu);
         if (!(nn > Real(0)) || !std::isfinite(nn))
         {
@@ -326,7 +327,7 @@ namespace Rodin::Advection
         Geometry::Point q_hit(cell, r, x_hit);
         const auto JinvT = q_hit.getJacobianInverse().transpose();
 
-        Math::SpatialVector<Real> nu = JinvT * nref; // unnormalized physical normal
+        Math::SpatialVector<Real> nu = (JinvT * nref).col(0); // unnormalized physical normal
         const Real nn = nu.dot(nu);
         if (!(nn > Real(0)) || !std::isfinite(nn))
         {

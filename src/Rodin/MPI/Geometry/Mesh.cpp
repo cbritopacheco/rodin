@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <memory>
 
 #include <boost/dynamic_bitset.hpp>
 #include <boost/serialization/version.hpp>
@@ -8,6 +9,7 @@
 #include "Rodin/Alert/NamespacedException.h"
 #include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Geometry/Polytope.h"
+#include "Rodin/Geometry/PolytopeQuadrature.h"
 #include "Rodin/Geometry/PolytopeTransformation.h"
 #include "Rodin/Types.h"
 #include "Rodin/MPI/IO.h"
@@ -30,7 +32,50 @@ namespace Rodin::Geometry
   {
     MPIMesh mesh(m_context);
     mesh.m_shard = std::move(m_shard);
+    mesh.m_quadratures.initialize(mesh.getSpaceDimension());
     return mesh;
+  }
+
+  MPIMesh::Mesh(const Mesh& other)
+    : MeshBase(other),
+      m_context(other.m_context),
+      m_shard(other.m_shard)
+  {
+    m_quadratures.initialize(getSpaceDimension());
+  }
+
+  MPIMesh::Mesh(Mesh&& other)
+    : MeshBase(std::move(other)),
+      m_context(std::move(other.m_context)),
+      m_shard(std::move(other.m_shard))
+  {
+    m_quadratures.initialize(getSpaceDimension());
+  }
+
+  MPIMesh& MPIMesh::operator=(const Mesh& other)
+  {
+    if (this != &other)
+    {
+      MeshBase::operator=(other);
+      m_context = other.m_context;
+      m_shard = Shard(other.m_shard);
+      m_quadratures.clear();
+      m_quadratures.initialize(getSpaceDimension());
+    }
+    return *this;
+  }
+
+  MPIMesh& MPIMesh::operator=(Mesh&& other)
+  {
+    if (this != &other)
+    {
+      MeshBase::operator=(std::move(other));
+      m_context = std::move(other.m_context);
+      m_shard = std::move(other.m_shard);
+      m_quadratures.clear();
+      m_quadratures.initialize(getSpaceDimension());
+    }
+    return *this;
   }
 
   MPIMesh& MPIMesh::scale(Real c)
@@ -42,6 +87,7 @@ namespace Rodin::Geometry
   void MPIMesh::flush()
   {
     this->getShard().flush();
+    m_quadratures.clear();
   }
 
   bool MPIMesh::isSubMesh() const
@@ -412,7 +458,15 @@ namespace Rodin::Geometry
   {
     const auto& shard = this->getShard();
     assert(localIdx < shard.getPolytopeCount(dimension));
-    return shard.getQuadrature(dimension, localIdx, qf);
+    return m_quadratures.get(
+        { dimension, localIdx },
+        shard.getPolytopeCount(dimension),
+        qf,
+        [&]() -> std::unique_ptr<PolytopeQuadrature>
+        {
+          return std::make_unique<PolytopeQuadrature>(
+              *this->getPolytope(dimension, localIdx), qf);
+        });
   }
 
   Polytope::Type MPIMesh::getGeometry(size_t dimension, Index localIdx) const
@@ -483,6 +537,8 @@ namespace Rodin::Geometry
         break;
       }
     }
+    m_quadratures.clear();
+    m_quadratures.initialize(getSpaceDimension());
     return *this;
   }
 
