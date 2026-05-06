@@ -1,6 +1,7 @@
 #ifndef RODIN_MPI_VARIATIONAL_P1_P1_H
 #define RODIN_MPI_VARIATIONAL_P1_P1_H
 
+
 /**
  * @file
  * @brief Distributed P1 finite element space specialization on MPI meshes.
