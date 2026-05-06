@@ -221,7 +221,7 @@ namespace Rodin::Solver
       /**
        * @brief Reason why the most recent solve terminated.
        */
-      enum class TerminationREason
+      enum class ConvergedReason
       {
         /**
          * @brief The absolute residual tolerance was satisfied.
@@ -297,7 +297,7 @@ namespace Rodin::Solver
          * The default value corresponds to non-convergence by exhaustion of the
          * iteration budget.
          */
-        TerminationREason reason = TerminationREason::MaxIterations;
+        ConvergedReason reason = ConvergedReason::MaxIterations;
 
         /**
          * @brief Whether the solve terminated by a convergence criterion.
@@ -609,7 +609,7 @@ namespace Rodin::Solver
             m_report.initial_residual = r0;
             m_report.final_residual = r;
             m_report.final_step_norm = 0.0;
-            m_report.reason = TerminationREason::ResidualNormIsNotFinite;
+            m_report.reason = ConvergedReason::ResidualNormIsNotFinite;
             m_report.converged = false;
             notify();
             return;
@@ -625,7 +625,7 @@ namespace Rodin::Solver
 
           if (r <= m_atol)
           {
-            m_report.reason = TerminationREason::AbsoluteTolerance;
+            m_report.reason = ConvergedReason::AbsoluteTolerance;
             m_report.converged = true;
             notify();
             return;
@@ -633,7 +633,7 @@ namespace Rodin::Solver
 
           if (r0 > 0.0 && r <= m_rtol * r0)
           {
-            m_report.reason = TerminationREason::RelativeTolerance;
+            m_report.reason = ConvergedReason::RelativeTolerance;
             m_report.converged = true;
             notify();
             return;
@@ -644,7 +644,7 @@ namespace Rodin::Solver
           const Real dxNorm = m_alpha * linearSystem.getSolution().norm();
           if (!std::isfinite(dxNorm))
           {
-            m_report.reason = TerminationREason::StepNormIsNotFinite;
+            m_report.reason = ConvergedReason::StepNormIsNotFinite;
             m_report.converged = false;
             notify();
             return;
@@ -654,7 +654,7 @@ namespace Rodin::Solver
 
           if (m_stol > 0.0 && dxNorm <= m_stol)
           {
-            m_report.reason = TerminationREason::StepTolerance;
+            m_report.reason = ConvergedReason::StepTolerance;
             m_report.converged = true;
             notify();
             x += m_alpha * linearSystem.getSolution();
@@ -666,7 +666,7 @@ namespace Rodin::Solver
         }
 
         m_report.iterations = m_maxIt;
-        m_report.reason = TerminationREason::MaxIterations;
+        m_report.reason = ConvergedReason::MaxIterations;
         m_report.converged = false;
       }
 
