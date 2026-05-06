@@ -384,8 +384,9 @@ TEST(MPI_Geometry_SubMesh, Regression_RestrictionQuadraturePoints_ShardOwnedMesh
           << " on boundary face " << faceIdx
           << " (shard-owned-mesh regression).";
 
-      if (subPoint)
+      if (subPoint) {
         EXPECT_TRUE(boundary.isLocalPoint(*subPoint));
+      }
     }
   }
 }
