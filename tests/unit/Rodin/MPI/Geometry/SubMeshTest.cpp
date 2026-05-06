@@ -30,6 +30,7 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Geometry/BalancedCompactPartitioner.h>
 #include <Rodin/Math/SpatialVector.h>
+#include <Rodin/QF/PolytopeQuadratureFormula.h>
 #include <Rodin/MPI/Context/MPI.h>
 #include <Rodin/MPI/Geometry/Sharder.h>
 #include <Rodin/MPI/Geometry/Mesh.h>
@@ -325,6 +326,112 @@ TEST(MPI_Geometry_SubMesh, RestrictionBoundaryPoint)
     // The restricted point must be in the submesh.
     EXPECT_TRUE(boundary.isLocalPoint(*subPoint));
   }
+}
+
+TEST(MPI_Geometry_SubMesh, QuadraturePointsUseMPIParentMeshIdentity)
+{
+  Context::MPI ctx(*g_env, *g_world);
+  auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+  const size_t d = mesh.getDimension();
+  const auto& shard = mesh.getShard();
+
+  if (shard.getPolytopeCount(d) == 0)
+    return;
+
+  const Index localIdx = 0;
+  const auto& qf = QF::PolytopeQuadratureFormula::get(
+      1, mesh.getGeometry(d, localIdx));
+  const auto& q = mesh.getQuadrature(d, localIdx, qf);
+  ASSERT_GT(q.getSize(), 0u);
+
+  const Point& p = q.getPoint(0);
+  const MeshBase& pointMesh = p.getPolytope().getMesh();
+  const MeshBase& mpiMesh = static_cast<const MeshBase&>(mesh);
+  const MeshBase& shardMesh = static_cast<const MeshBase&>(mesh.getShard());
+
+  EXPECT_TRUE(pointMesh == mpiMesh);
+  EXPECT_FALSE(pointMesh == shardMesh);
+  EXPECT_FALSE(pointMesh.isSubMesh());
+  EXPECT_EQ(p.getPolytope().getIndex(), localIdx);
+}
+
+TEST(MPI_Geometry_SubMesh, QuadraturePointsUseMPISubMeshIdentity)
+{
+  Context::MPI ctx(*g_env, *g_world);
+  auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+  const size_t faceDim = mesh.getDimension() - 1;
+
+  SubMesh<Context::MPI>::Builder builder;
+  builder.initialize(mesh);
+  for (auto it = mesh.getBoundary(); it; ++it)
+    builder.include(faceDim, it->getIndex());
+
+  SubMesh<Context::MPI> boundary = builder.finalize();
+  const size_t d = boundary.getDimension();
+  const auto& shard = boundary.getShard();
+
+  if (shard.getPolytopeCount(d) == 0)
+    return;
+
+  const Index localIdx = 0;
+  const auto& qf = QF::PolytopeQuadratureFormula::get(
+      1, boundary.getGeometry(d, localIdx));
+  const auto& q = boundary.getQuadrature(d, localIdx, qf);
+  ASSERT_GT(q.getSize(), 0u);
+
+  const Point& p = q.getPoint(0);
+  const MeshBase& pointMesh = p.getPolytope().getMesh();
+  const MeshBase& submeshIdentity =
+      static_cast<const MeshBase&>(static_cast<const Mesh<Context::MPI>&>(boundary));
+  const MeshBase& shardMesh = static_cast<const MeshBase&>(boundary.getShard());
+
+  EXPECT_TRUE(pointMesh == submeshIdentity);
+  EXPECT_FALSE(pointMesh == shardMesh);
+  EXPECT_TRUE(pointMesh.isSubMesh());
+  EXPECT_EQ(p.getPolytope().getIndex(), localIdx);
+}
+
+TEST(MPI_Geometry_SubMesh, QuadratureCacheSeparatesParentAndSubMeshIdentities)
+{
+  Context::MPI ctx(*g_env, *g_world);
+  auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+  const size_t faceDim = mesh.getDimension() - 1;
+
+  SubMesh<Context::MPI>::Builder builder;
+  builder.initialize(mesh);
+  for (auto it = mesh.getBoundary(); it; ++it)
+    builder.include(faceDim, it->getIndex());
+
+  SubMesh<Context::MPI> boundary = builder.finalize();
+  const size_t d = boundary.getDimension();
+  const auto& shard = boundary.getShard();
+
+  if (shard.getPolytopeCount(d) == 0)
+    return;
+
+  const Index subLocalIdx = 0;
+  const Index parentLocalIdx = boundary.getPolytopeMap(d).left.at(subLocalIdx);
+
+  const auto& parentQF = QF::PolytopeQuadratureFormula::get(
+      1, mesh.getGeometry(d, parentLocalIdx));
+  const auto& subQF = QF::PolytopeQuadratureFormula::get(
+      1, boundary.getGeometry(d, subLocalIdx));
+
+  const auto& parentQ = mesh.getQuadrature(d, parentLocalIdx, parentQF);
+  const auto& subQ = boundary.getQuadrature(d, subLocalIdx, subQF);
+  ASSERT_GT(parentQ.getSize(), 0u);
+  ASSERT_GT(subQ.getSize(), 0u);
+
+  const MeshBase& parentIdentity = static_cast<const MeshBase&>(mesh);
+  const MeshBase& submeshIdentity =
+      static_cast<const MeshBase&>(static_cast<const Mesh<Context::MPI>&>(boundary));
+
+  EXPECT_TRUE(parentQ.getPoint(0).getPolytope().getMesh() == parentIdentity);
+  EXPECT_EQ(parentQ.getPoint(0).getPolytope().getIndex(), parentLocalIdx);
+
+  EXPECT_TRUE(subQ.getPoint(0).getPolytope().getMesh() == submeshIdentity);
+  EXPECT_TRUE(subQ.getPoint(0).getPolytope().getMesh().isSubMesh());
+  EXPECT_EQ(subQ.getPoint(0).getPolytope().getIndex(), subLocalIdx);
 }
 
 // ---------------------------------------------------------------------------
