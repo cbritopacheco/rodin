@@ -890,6 +890,91 @@
               QuadrilateralMesh_GlobalSizeAndUniqueDOFs)</span>
             </dt>
             <dd>Distributed P0 on a Quadrilateral mesh: global size and unique DOFs.</dd>
+            <dt id="a5e51e7ab8c4b87f87c3f2cccb5ecc255">
+              <span class="m-doc-wrap-bumper"><a href="#a5e51e7ab8c4b87f87c3f2cccb5ecc255" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0FESSubMesh,
+              BoundarySubMesh_GetSize_EqualsFaceCount_Triangle)</span>
+            </dt>
+            <dd>Scalar P0 FES on boundary SubMesh: global DOF count equals the number of boundary faces.</dd>
+            <dt id="a9960fc44606b0678550340b08cbda03f">
+              <span class="m-doc-wrap-bumper"><a href="#a9960fc44606b0678550340b08cbda03f" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0FESSubMesh,
+              BoundarySubMesh_VectorDimension_IsOne_Triangle)</span>
+            </dt>
+            <dd>Scalar P0 on boundary SubMesh has vector dimension 1.</dd>
+            <dt id="adf51a06dbc741ddf4fdde5843aaeb089">
+              <span class="m-doc-wrap-bumper"><a href="#adf51a06dbc741ddf4fdde5843aaeb089" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0FESSubMesh,
+              BoundarySubMesh_OwnershipRange_MatchesOwnedFaces_Triangle)</span>
+            </dt>
+            <dd>Ownership range of P0 on boundary SubMesh has width equal to the number of locally owned boundary faces.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a3f5b5888be1dc69d5a4a558b4e9e7569" class="m-doc">TEST</a>(</span><span class="m-doc-wrap">MPIP0FESSubMesh,
+              BoundarySubMesh_GetDOFs_ConsistentWithGetGlobalIndex_Triangle)</span>
+            </dt>
+            <dd>getDOFs and getGlobalIndex are consistent for P0 on boundary SubMesh.</dd>
+            <dt id="aba224fc0cb524db7bc73a6fba4e91ae4">
+              <span class="m-doc-wrap-bumper"><a href="#aba224fc0cb524db7bc73a6fba4e91ae4" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0FESSubMesh,
+              BoundarySubMesh_AllLocalFaces_HaveValidGlobalDOF_Triangle)</span>
+            </dt>
+            <dd>All local boundary faces have a valid global P0 DOF index.</dd>
+            <dt id="ae24b615d96d8ea36eadd5f87543d42c0">
+              <span class="m-doc-wrap-bumper"><a href="#ae24b615d96d8ea36eadd5f87543d42c0" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0FESSubMesh,
+              CellSubMesh_GetSize_EqualsParentCellCount_Triangle)</span>
+            </dt>
+            <dd>P0 FES on full-cell SubMesh: global DOF count equals the parent mesh global cell count (SubMesh covers the whole domain).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a346460d51f9d096a5ee0b4a2f5bbfc7a" class="m-doc">TEST</a>(</span><span class="m-doc-wrap">MPIP0FESSubMesh,
+              CellSubMesh_OwnedDOFs_GloballyUnique_Triangle)</span>
+            </dt>
+            <dd>Owned P0 DOFs on the full-cell SubMesh are globally unique.</dd>
+            <dt id="ac4af0a02fc2b4f9d0fa6ccb2f7bc1eef">
+              <span class="m-doc-wrap-bumper"><a href="#ac4af0a02fc2b4f9d0fa6ccb2f7bc1eef" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0FESSubMesh,
+              BoundarySubMesh_GetSize_EqualsFaceCount_Tetrahedron)</span>
+            </dt>
+            <dd>P0 on boundary SubMesh of a Tetrahedron mesh: size equals face count.</dd>
+            <dt id="a4ec9add4244ac2421fa3d14d52ed2a5d">
+              <span class="m-doc-wrap-bumper"><a href="#a4ec9add4244ac2421fa3d14d52ed2a5d" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP1FESSubMesh,
+              BoundarySubMesh_GetSize_EqualsVertexCount_Triangle)</span>
+            </dt>
+            <dd>Scalar P1 FES on boundary SubMesh: global DOF count equals the number of boundary vertices.</dd>
+            <dt id="a1e7a27fbd2526755835936762efd23ed">
+              <span class="m-doc-wrap-bumper"><a href="#a1e7a27fbd2526755835936762efd23ed" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP1FESSubMesh,
+              BoundarySubMesh_OwnershipRange_MatchesOwnedVertices_Triangle)</span>
+            </dt>
+            <dd>Ownership range of P1 on boundary SubMesh has width equal to the number of locally owned boundary vertices.</dd>
+            <dt id="abdd215503674060b379555b60c33604e">
+              <span class="m-doc-wrap-bumper"><a href="#abdd215503674060b379555b60c33604e" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP1FESSubMesh,
+              BoundarySubMesh_AllLocalVertices_HaveValidGlobalDOF_Triangle)</span>
+            </dt>
+            <dd>All local boundary vertices have a valid global P1 DOF index.</dd>
+            <dt id="a8504f3c77df591c491f27372f129c189">
+              <span class="m-doc-wrap-bumper"><a href="#a8504f3c77df591c491f27372f129c189" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP1FESSubMesh,
+              CellSubMesh_GetSize_EqualsParentVertexCount_Triangle)</span>
+            </dt>
+            <dd>P1 FES on full-cell SubMesh: global DOF count equals the parent mesh global vertex count.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ab9e66089d832cf99fb5f8078243508d7" class="m-doc">TEST</a>(</span><span class="m-doc-wrap">MPIP1FESSubMesh,
+              CellSubMesh_OwnedDOFs_GloballyUnique_Triangle)</span>
+            </dt>
+            <dd>Owned P1 DOFs on the full-cell SubMesh are globally unique.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a13928521aad47810f7618418602afe2a" class="m-doc">TEST</a>(</span><span class="m-doc-wrap">MPIP1FESSubMesh,
+              BoundarySubMesh_OwnedDOFs_GloballyUnique_Triangle)</span>
+            </dt>
+            <dd>Owned P1 DOFs on boundary SubMesh are globally unique and cover the expected range exactly.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a8771db174b6c9a3cf13bfbe021530726" class="m-doc">TEST</a>(</span><span class="m-doc-wrap">MPIP1FESSubMesh,
+              Regression_P0CellThenP1Boundary_AllLocalVertices_HaveValidGlobalDOF)</span>
+            </dt>
+            <dd>Regression test for <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> message tag collision.</dd>
+            <dt id="a71cf122522ebf69a33927f87c1329521">
+              <span class="m-doc-wrap-bumper"><a href="#a71cf122522ebf69a33927f87c1329521" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP1FESSubMesh,
+              Regression_P0CellThenP1Boundary_AllLocalVertices_HaveValidGlobalDOF_Tetrahedron)</span>
+            </dt>
+            <dd>Same regression test but with a Tetrahedron mesh (3D variant).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a316843c41ad637443066c8d500bcb8a9" class="m-doc">TEST</a>(</span><span class="m-doc-wrap">MPIP1FESSubMesh,
+              Regression_OrphanVertex_AllLocalVertices_HaveValidGlobalDOF_Triangle)</span>
+            </dt>
+            <dd>Regression test for the SubMesh orphaned-vertex ownership bug.</dd>
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#aa16108b846c6a27e592cb2bc3ee40f02" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_unit_1_1_flow_test.html" class="m-doc">FlowTest</a>,
               BasicConstruction)</span>
@@ -1066,6 +1151,54 @@
             </h3>
             <p>Full HDF5 shard workflow: distribute → save → reload → reconcile.</p>
 <p>Exercises all four steps of the workflow:</p><ol><li>Mesh is sharded (distributed via <code>distributeFromRoot</code>).</li><li>Each rank saves its shard to a per-rank HDF5 file using the <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> printer (writes base mesh + /Shard/... metadata).</li><li>Each rank rereads its shard from HDF5 through the <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mesh loader.</li><li>Edge connectivity is then computed and reconciled.</li></ol><p>After reconciliation, the global sum of locally-owned edges must equal the total edge count of the reference mesh.</p>
+          </div></section>
+          <section class="m-doc-details" id="a3f5b5888be1dc69d5a4a558b4e9e7569"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Unit::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3f5b5888be1dc69d5a4a558b4e9e7569" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0FESSubMesh,
+              BoundarySubMesh_GetDOFs_ConsistentWithGetGlobalIndex_Triangle)</span></span>
+            </h3>
+            <p>getDOFs and getGlobalIndex are consistent for P0 on boundary SubMesh.</p>
+<p>For P0 each element has exactly one DOF. getDOFs(D, i)[0] must equal getGlobalIndex({D, i}, 0).</p>
+          </div></section>
+          <section class="m-doc-details" id="a346460d51f9d096a5ee0b4a2f5bbfc7a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Unit::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a346460d51f9d096a5ee0b4a2f5bbfc7a" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0FESSubMesh,
+              CellSubMesh_OwnedDOFs_GloballyUnique_Triangle)</span></span>
+            </h3>
+            <p>Owned P0 DOFs on the full-cell SubMesh are globally unique.</p>
+<p>Gather all owned DOFs on rank 0 and verify no duplicates appear.</p>
+          </div></section>
+          <section class="m-doc-details" id="ab9e66089d832cf99fb5f8078243508d7"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Unit::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab9e66089d832cf99fb5f8078243508d7" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP1FESSubMesh,
+              CellSubMesh_OwnedDOFs_GloballyUnique_Triangle)</span></span>
+            </h3>
+            <p>Owned P1 DOFs on the full-cell SubMesh are globally unique.</p>
+<p>Gather all owned DOFs on rank 0 and verify no duplicates appear.</p>
+          </div></section>
+          <section class="m-doc-details" id="a13928521aad47810f7618418602afe2a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Unit::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a13928521aad47810f7618418602afe2a" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP1FESSubMesh,
+              BoundarySubMesh_OwnedDOFs_GloballyUnique_Triangle)</span></span>
+            </h3>
+            <p>Owned P1 DOFs on boundary SubMesh are globally unique and cover the expected range exactly.</p>
+<p>This is a regression test for the <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> tag-collision bug: before the fix, P0 cell SubMesh sends with tag=0 would accumulate and be consumed by a subsequent P1 boundary SubMesh irecv on the same tag, leaving some Shared vertices with invalid DOFs.</p>
+          </div></section>
+          <section class="m-doc-details" id="a8771db174b6c9a3cf13bfbe021530726"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Unit::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8771db174b6c9a3cf13bfbe021530726" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP1FESSubMesh,
+              Regression_P0CellThenP1Boundary_AllLocalVertices_HaveValidGlobalDOF)</span></span>
+            </h3>
+            <p>Regression test for <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> message tag collision.</p>
+<p>Previously, P0 on a cell SubMesh used tag=0 for its DOF exchange and could leave unmatched sends in the <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> buffer. A subsequent P1 boundary SubMesh construction would irecv on tag=0 and consume those stale P0 messages, corrupting Shared-vertex DOF assignments.</p><p>After the fix (symmetric drain, distinct tags), the P1 boundary SubMesh must produce valid DOFs even when constructed after P0 cell and P0 boundary SubMesh spaces.</p>
+          </div></section>
+          <section class="m-doc-details" id="a316843c41ad637443066c8d500bcb8a9"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Unit::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a316843c41ad637443066c8d500bcb8a9" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP1FESSubMesh,
+              Regression_OrphanVertex_AllLocalVertices_HaveValidGlobalDOF_Triangle)</span></span>
+            </h3>
+            <p>Regression test for the SubMesh orphaned-vertex ownership bug.</p>
+<p>A vertex v with Shared(owner=A) in the volume partition is added to the boundary SubMesh on ranks B (and possibly C,D,...) when those ranks have boundary faces adjacent to v. If rank A has no boundary face adjacent to v, the SubMesh finalize() 2-round exchange must promote the minimum-rank querier to Owned so that P1 can assign a valid global DOF.</p><p>Passing this test requires the 2-round ownership fix in SubMesh::finalize.</p>
           </div></section>
           <section class="m-doc-details" id="aa16108b846c6a27e592cb2bc3ee40f02"><div>
             <h3>

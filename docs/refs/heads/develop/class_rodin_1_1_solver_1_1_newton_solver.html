@@ -355,10 +355,12 @@ $ \alpha &gt; 0 $
             </dt>
             <dd>Summary of the most recent call to <code><a href="class_rodin_1_1_solver_1_1_newton_solver.html#a2fe35f38ff66536b7a056d638cfca0e2" class="m-doc">solve()</a></code>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">enum class <a href="#a8f70c7d44393f5564d5277627ac752a3" class="m-doc">ConvergenceReason</a> { </span><span class="m-doc-wrap"><a href="#a8f70c7d44393f5564d5277627ac752a3a2b8a839510abc89dba8e46c717f74669" class="m-doc">AbsoluteTolerance</a>,
-              <a href="#a8f70c7d44393f5564d5277627ac752a3a72c08d6c0eaa7ae1d31b80816542088d" class="m-doc">RelativeTolerance</a>,
-              <a href="#a8f70c7d44393f5564d5277627ac752a3af9051c7eec0adbd28d6238bd7833e249" class="m-doc">StepTolerance</a>,
-              <a href="#a8f70c7d44393f5564d5277627ac752a3a89d18cc81de326d8fc836491777795e0" class="m-doc">MaxIterations</a> }</span>
+              <span class="m-doc-wrap-bumper">enum class <a href="#ab6f3733afe697ffa45ba5cd2b4059da4" class="m-doc">ConvergedReason</a> { </span><span class="m-doc-wrap"><a href="#ab6f3733afe697ffa45ba5cd2b4059da4a2b8a839510abc89dba8e46c717f74669" class="m-doc">AbsoluteTolerance</a>,
+              <a href="#ab6f3733afe697ffa45ba5cd2b4059da4a72c08d6c0eaa7ae1d31b80816542088d" class="m-doc">RelativeTolerance</a>,
+              <a href="#ab6f3733afe697ffa45ba5cd2b4059da4af9051c7eec0adbd28d6238bd7833e249" class="m-doc">StepTolerance</a>,
+              <a href="#ab6f3733afe697ffa45ba5cd2b4059da4a89d18cc81de326d8fc836491777795e0" class="m-doc">MaxIterations</a>,
+              <a href="#ab6f3733afe697ffa45ba5cd2b4059da4a9dd14417950fb2e12f328ae0493e1997" class="m-doc">ResidualNormIsNotFinite</a>,
+              <a href="#ab6f3733afe697ffa45ba5cd2b4059da4ac9a5af2bafab9f6b3798b231f2d6a8d8" class="m-doc">StepNormIsNotFinite</a> }</span>
             </dt>
             <dd>Reason why the most recent solve terminated.</dd>
             <dt>
@@ -456,39 +458,49 @@ $ \alpha &gt; 0 $
         </section>
         <section>
           <h2>Enum documentation</h2>
-          <section class="m-doc-details" id="a8f70c7d44393f5564d5277627ac752a3"><div>
+          <section class="m-doc-details" id="ab6f3733afe697ffa45ba5cd2b4059da4"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class LinearSolver&gt;
               </div>
-              enum class Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /><a href="#a8f70c7d44393f5564d5277627ac752a3" class="m-doc-self">ConvergenceReason</a>
+              enum class Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /><a href="#ab6f3733afe697ffa45ba5cd2b4059da4" class="m-doc-self">ConvergedReason</a>
             </h3>
             <p>Reason why the most recent solve terminated.</p>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
                 <tr>
-                  <td><a href="#a8f70c7d44393f5564d5277627ac752a3a2b8a839510abc89dba8e46c717f74669" class="m-doc-self" id="a8f70c7d44393f5564d5277627ac752a3a2b8a839510abc89dba8e46c717f74669">AbsoluteTolerance</a></td>
+                  <td><a href="#ab6f3733afe697ffa45ba5cd2b4059da4a2b8a839510abc89dba8e46c717f74669" class="m-doc-self" id="ab6f3733afe697ffa45ba5cd2b4059da4a2b8a839510abc89dba8e46c717f74669">AbsoluteTolerance</a></td>
                   <td>
                   <p>The absolute residual tolerance was satisfied.</p>
                   </td>
                 </tr>
                 <tr>
-                  <td><a href="#a8f70c7d44393f5564d5277627ac752a3a72c08d6c0eaa7ae1d31b80816542088d" class="m-doc-self" id="a8f70c7d44393f5564d5277627ac752a3a72c08d6c0eaa7ae1d31b80816542088d">RelativeTolerance</a></td>
+                  <td><a href="#ab6f3733afe697ffa45ba5cd2b4059da4a72c08d6c0eaa7ae1d31b80816542088d" class="m-doc-self" id="ab6f3733afe697ffa45ba5cd2b4059da4a72c08d6c0eaa7ae1d31b80816542088d">RelativeTolerance</a></td>
                   <td>
                   <p>The relative residual tolerance was satisfied.</p>
                   </td>
                 </tr>
                 <tr>
-                  <td><a href="#a8f70c7d44393f5564d5277627ac752a3af9051c7eec0adbd28d6238bd7833e249" class="m-doc-self" id="a8f70c7d44393f5564d5277627ac752a3af9051c7eec0adbd28d6238bd7833e249">StepTolerance</a></td>
+                  <td><a href="#ab6f3733afe697ffa45ba5cd2b4059da4af9051c7eec0adbd28d6238bd7833e249" class="m-doc-self" id="ab6f3733afe697ffa45ba5cd2b4059da4af9051c7eec0adbd28d6238bd7833e249">StepTolerance</a></td>
                   <td>
                   <p>The step tolerance was satisfied.</p>
                   </td>
                 </tr>
                 <tr>
-                  <td><a href="#a8f70c7d44393f5564d5277627ac752a3a89d18cc81de326d8fc836491777795e0" class="m-doc-self" id="a8f70c7d44393f5564d5277627ac752a3a89d18cc81de326d8fc836491777795e0">MaxIterations</a></td>
+                  <td><a href="#ab6f3733afe697ffa45ba5cd2b4059da4a89d18cc81de326d8fc836491777795e0" class="m-doc-self" id="ab6f3733afe697ffa45ba5cd2b4059da4a89d18cc81de326d8fc836491777795e0">MaxIterations</a></td>
                   <td>
                   <p>The maximum number of Newton iterations was reached.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab6f3733afe697ffa45ba5cd2b4059da4a9dd14417950fb2e12f328ae0493e1997" class="m-doc-self" id="ab6f3733afe697ffa45ba5cd2b4059da4a9dd14417950fb2e12f328ae0493e1997">ResidualNormIsNotFinite</a></td>
+                  <td>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#ab6f3733afe697ffa45ba5cd2b4059da4ac9a5af2bafab9f6b3798b231f2d6a8d8" class="m-doc-self" id="ab6f3733afe697ffa45ba5cd2b4059da4ac9a5af2bafab9f6b3798b231f2d6a8d8">StepNormIsNotFinite</a></td>
+                  <td>
                   </td>
                 </tr>
               </tbody>

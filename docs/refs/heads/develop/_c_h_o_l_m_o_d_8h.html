@@ -80,12 +80,12 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md234">Algorithm</a></li>
-            <li><a href="#autotoc_md235">Applicability</a></li>
-            <li><a href="#autotoc_md236">Usage Example</a></li>
+            <li><a href="#autotoc_md236">Algorithm</a></li>
+            <li><a href="#autotoc_md237">Applicability</a></li>
+            <li><a href="#autotoc_md238">Usage Example</a></li>
           </ul>
         </nav>
-<p>This header provides a wrapper for CHOLMOD from SuiteSparse, a high-performance solver for sparse symmetric positive definite systems using supernodal LLT Cholesky factorization.</p><section id="autotoc_md234"><h3><a href="#autotoc_md234">Algorithm</a></h3><p>CHOLMOD computes:</p><div class="m-math"><svg style="width: 4.850em; height: 1.082em;" viewBox="170.743911 -10.382422 46.557028 10.382422">
+<p>This header provides a wrapper for CHOLMOD from SuiteSparse, a high-performance solver for sparse symmetric positive definite systems using supernodal LLT Cholesky factorization.</p><section id="autotoc_md236"><h3><a href="#autotoc_md236">Algorithm</a></h3><p>CHOLMOD computes:</p><div class="m-math"><svg style="width: 4.850em; height: 1.082em;" viewBox="170.743911 -10.382422 46.557028 10.382422">
 <title>
 \[
   A = LL^T
@@ -114,7 +114,7 @@ $ L $
 <g id='eq2-page1'>
 <use x='0' y='0' xlink:href='#eq2-g0-76'/>
 </g>
-</svg> is lower triangular. The supernodal method groups columns with similar sparsity patterns to exploit dense matrix operations (BLAS) for improved performance.</p></section><section id="autotoc_md235"><h3><a href="#autotoc_md235">Applicability</a></h3><ul><li>Symmetric positive definite sparse matrices</li><li>Large-scale finite element problems</li><li>Structural mechanics</li><li>Heat transfer problems</li><li>Graph Laplacian systems</li></ul></section><section id="autotoc_md236"><h3><a href="#autotoc_md236">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+</svg> is lower triangular. The supernodal method groups columns with similar sparsity patterns to exploit dense matrix operations (BLAS) for improved performance.</p></section><section id="autotoc_md237"><h3><a href="#autotoc_md237">Applicability</a></h3><ul><li>Symmetric positive definite sparse matrices</li><li>Large-scale finite element problems</li><li>Structural mechanics</li><li>Heat transfer problems</li><li>Graph Laplacian systems</li></ul></section><section id="autotoc_md238"><h3><a href="#autotoc_md238">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 
 <span class="n">Solver</span><span class="o">::</span><span class="n">CHOLMOD</span><span class="o">::</span><span class="n">SupernodalLLT</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>

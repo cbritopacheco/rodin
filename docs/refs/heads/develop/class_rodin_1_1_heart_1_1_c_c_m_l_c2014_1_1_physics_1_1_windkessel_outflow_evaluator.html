@@ -75,7 +75,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_windkessel_8h.html">&lt;Rodin/Heart/CCMLC2014/Physics/Windkessel.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class Input, typename RheologyModel = <a href="struct_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_physics_1_1_rheology_1_1_non_newtonian_1_1_c_y.html" class="m-doc">Rheology::<wbr />NonNewtonian::<wbr />CY</a>&gt;</div>
+          <div class="m-doc-template">template&lt;class Input, typename RheologyModel = <a href="struct_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_physics_1_1_rheology_1_1_newtonian.html" class="m-doc">Rheology::<wbr />Newtonian</a>&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_heart.html">Heart</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_heart_1_1_c_c_m_l_c2014.html">CCMLC2014</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_physics.html">Physics</a>::<wbr/></span>WindkesselOutflowEvaluator <span class="m-thin">class</span>
         </h1>
         <p>Evaluates the Windkessel outflow and its pressure derivatives.</p>
@@ -90,18 +90,6 @@
             </tr>
           </tbody>
         </table>
-        <nav class="m-block m-default">
-          <h3>Contents</h3>
-          <ul>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
-                <li><a href="#pub-methods">Public functions</a></li>
-              </ul>
-            </li>
-          </ul>
-        </nav>
 <p>The outflow is the positive part of the aortic flow rate <svg class="m-math" style="width: 18.076em; height: 1.302em; vertical-align: -0.350em;" viewBox="0 -9.153753 173.53432 12.496762">
 <title>
 $ Q_{ar}^+ = \max(0, K_{ar}(p_{v,\text{mid}} - p_{ar,\text{mid}})) $
@@ -162,79 +150,6 @@ $ Q_{ar}^+ = \max(0, K_{ar}(p_{v,\text{mid}} - p_{ar,\text{mid}})) $
 <use x='168.981994' y='0' xlink:href='#eq1-g7-41'/>
 </g>
 </svg>.</p>
-        <section id="typeless-methods">
-          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper"><a href="#afb893e9bdf3cf98798db812b360cd99a" class="m-doc">WindkesselOutflowEvaluator</a>(</span><span class="m-doc-wrap">const Input&amp; input) <span class="m-label m-flat m-info">explicit</span> </span>
-            </dt>
-            <dd>Construct with model input parameters.</dd>
-          </dl>
-        </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class EvalData&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#ab2da5d8bd675473c795a0174e5d8dcfd" class="m-doc">evaluate</a>(</span><span class="m-doc-wrap">EvalData&amp; data) const</span>
-            </dt>
-            <dd>Evaluate outflow and pressure derivatives.</dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="afb893e9bdf3cf98798db812b360cd99a"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class Input, typename RheologyModel&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Physics::<wbr />WindkesselOutflowEvaluator&lt;Input, RheologyModel&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afb893e9bdf3cf98798db812b360cd99a" class="m-doc-self">WindkesselOutflowEvaluator</a>(</span><span class="m-doc-wrap">const Input&amp; input) <span class="m-label m-info">explicit</span> </span></span>
-            </h3>
-            <p>Construct with model input parameters.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">input&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Model parameters (aortic valve conductance).</td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="ab2da5d8bd675473c795a0174e5d8dcfd"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class Input, typename RheologyModel&gt;
-                template&lt;class EvalData&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Physics::<wbr />WindkesselOutflowEvaluator&lt;Input, RheologyModel&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab2da5d8bd675473c795a0174e5d8dcfd" class="m-doc-self">evaluate</a>(</span><span class="m-doc-wrap">EvalData&amp; data) const</span></span>
-            </h3>
-            <p>Evaluate outflow and pressure derivatives.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">EvalData</td>
-                  <td>Evaluation data structure type.</td>
-                </tr>
-              </tbody>
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>data&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
-                  <td>Evaluation data with midpoint pressures set.</td>
-                </tr>
-              </tbody>
-            </table>
-<p>Reads midpoint pressures from <code>data</code> and writes <code>data.windkesselOutflow</code> and its pressure derivatives.</p>
-          </div></section>
-        </section>
       </div>
     </div>
   </div>

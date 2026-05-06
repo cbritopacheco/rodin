@@ -80,9 +80,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md260">Algorithm</a></li>
-            <li><a href="#autotoc_md261">Applicability</a></li>
-            <li><a href="#autotoc_md262">Notes</a></li>
+            <li><a href="#autotoc_md262">Algorithm</a></li>
+            <li><a href="#autotoc_md263">Applicability</a></li>
+            <li><a href="#autotoc_md264">Notes</a></li>
             <li>
               Reference
               <ul>
@@ -92,7 +92,7 @@
             </li>
           </ul>
         </nav>
-<p>This header provides the PartialPivLU solver class, which implements dense LU factorization for general square matrices using Eigen&#x27;s PartialPivLU solver.</p><section id="autotoc_md260"><h3><a href="#autotoc_md260">Algorithm</a></h3><p>The solver computes</p><div class="m-math"><svg style="width: 6.477em; height: 1.049em;" viewBox="163.183928 -10.072488 62.175138 10.072488">
+<p>This header provides the PartialPivLU solver class, which implements dense LU factorization for general square matrices using Eigen&#x27;s PartialPivLU solver.</p><section id="autotoc_md262"><h3><a href="#autotoc_md262">Algorithm</a></h3><p>The solver computes</p><div class="m-math"><svg style="width: 6.477em; height: 1.049em;" viewBox="163.183928 -10.072488 62.175138 10.072488">
 <title>
 \[
   A = P^{-1} L U
@@ -166,7 +166,7 @@ $ U $
 <g id='eq5-page1'>
 <use x='0' y='0' xlink:href='#eq5-g0-85'/>
 </g>
-</svg> is upper triangular.</p></section><section id="autotoc_md261"><h3><a href="#autotoc_md261">Applicability</a></h3><ul><li>General dense square matrices</li><li>Non-symmetric systems</li><li>Newton systems with dense Jacobians</li></ul></section><section id="autotoc_md262"><h3><a href="#autotoc_md262">Notes</a></h3><ul><li>This solver does not assume symmetry.</li><li>Eigen&#x27;s PartialPivLU assumes the matrix is square and invertible.</li><li>If rank deficiency is possible and must be handled robustly, FullPivLU is safer.</li></ul><aside class="m-note m-default"><h4>See also</h4><p>Eigen::PartialPivLU</p></aside></section>
+</svg> is upper triangular.</p></section><section id="autotoc_md263"><h3><a href="#autotoc_md263">Applicability</a></h3><ul><li>General dense square matrices</li><li>Non-symmetric systems</li><li>Newton systems with dense Jacobians</li></ul></section><section id="autotoc_md264"><h3><a href="#autotoc_md264">Notes</a></h3><ul><li>This solver does not assume symmetry.</li><li>Eigen&#x27;s PartialPivLU assumes the matrix is square and invertible.</li><li>If rank deficiency is possible and must be handled robustly, FullPivLU is safer.</li></ul><aside class="m-note m-default"><h4>See also</h4><p>Eigen::PartialPivLU</p></aside></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
