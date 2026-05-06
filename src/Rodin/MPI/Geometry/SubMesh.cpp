@@ -472,11 +472,27 @@ namespace Rodin::Geometry
 
     for (auto it = ancestors.begin(); it != ancestors.end(); ++it)
     {
-      if (it->get() == polytope.getMesh())
+      const MeshBase& ancestor = it->get();
+
+      // Primary check: point's mesh is this ancestor.
+      bool match = (ancestor == polytope.getMesh());
+
+      // Secondary check: MPI meshes delegate getQuadrature() to their shard,
+      // so quadrature Points carry the shard (Mesh<Context::Local>) as their
+      // mesh rather than the MPI wrapper.  Accept such points by verifying
+      // that the point's mesh is the shard of this ancestor.
+      if (!match && !ancestor.isSubMesh())
+      {
+        const auto* mpiAncestor = dynamic_cast<const Mesh<Context::MPI>*>(&ancestor);
+        if (mpiAncestor)
+          match = (static_cast<const MeshBase&>(mpiAncestor->getShard()) == polytope.getMesh());
+      }
+
+      if (match)
       {
         break;
       }
-      else if (!it->get().isSubMesh())
+      else if (!ancestor.isSubMesh())
       {
         // Invalid restriction: the SubMesh is not a descendant of the mesh
         // to which the Point belongs.
@@ -484,7 +500,7 @@ namespace Rodin::Geometry
       }
       else
       {
-        descendants.push_front(it->get().asSubMesh());
+        descendants.push_front(ancestor.asSubMesh());
       }
     }
 

@@ -30,6 +30,7 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Geometry/BalancedCompactPartitioner.h>
 #include <Rodin/Math/SpatialVector.h>
+#include <Rodin/QF/PolytopeQuadratureFormula.h>
 #include <Rodin/MPI/Context/MPI.h>
 #include <Rodin/MPI/Geometry/Sharder.h>
 #include <Rodin/MPI/Geometry/Mesh.h>
@@ -324,6 +325,68 @@ TEST(MPI_Geometry_SubMesh, RestrictionBoundaryPoint)
 
     // The restricted point must be in the submesh.
     EXPECT_TRUE(boundary.isLocalPoint(*subPoint));
+  }
+}
+
+/**
+ * @brief Regression test for restriction() with quadrature-produced Points.
+ *
+ * When Mesh<Context::MPI>::getQuadrature() delegates to the shard, the
+ * resulting Points carry the shard (a Mesh<Context::Local>) as their mesh
+ * rather than the MPI wrapper.  restriction() must still map such points
+ * to the submesh correctly.
+ *
+ * This test calls polytope.getQuadrature() on a parent MPI mesh polytope and
+ * then calls boundary.restriction() on the resulting quadrature points.  It
+ * would have returned nullopt before the shard-aware match was added.
+ */
+TEST(MPI_Geometry_SubMesh, Regression_RestrictionQuadraturePoints_ShardOwnedMesh)
+{
+  Context::MPI ctx(*g_env, *g_world);
+  auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+  const size_t faceDim = mesh.getDimension() - 1;
+  const auto& shard = mesh.getShard();
+
+  SubMesh<Context::MPI>::Builder builder;
+  builder.initialize(mesh);
+  for (auto it = mesh.getBoundary(); it; ++it)
+    builder.include(faceDim, it->getIndex());
+
+  SubMesh<Context::MPI> boundary = builder.finalize();
+
+  // Use the default order-1 quadrature formula for faces.
+  // Only execute this block if the shard has at least one face.
+  if (shard.getPolytopeCount(faceDim) == 0)
+    return;
+
+  const auto& qf = QF::PolytopeQuadratureFormula::get(
+      1, shard.getGeometry(faceDim, 0));
+
+  // For each owned boundary face, get quadrature points via the mesh's
+  // getQuadrature() (which now delegates to the shard) and restrict each
+  // point to the boundary submesh.
+  for (auto it = mesh.getBoundary(); it; ++it)
+  {
+    const Index faceIdx = it->getIndex();
+    if (!shard.isOwned(faceDim, faceIdx))
+      continue;
+
+    // These points have p.getPolytope().getMesh() == shard, not MPIMesh.
+    const auto& quadrature = mesh.getQuadrature(faceDim, faceIdx, qf);
+
+    for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
+    {
+      const auto& p = quadrature.getPoint(qp);
+
+      Optional<Point> subPoint = boundary.restriction(p);
+      EXPECT_TRUE(subPoint.has_value())
+          << "restriction() returned nullopt for quadrature point " << qp
+          << " on boundary face " << faceIdx
+          << " (shard-owned-mesh regression).";
+
+      if (subPoint)
+        EXPECT_TRUE(boundary.isLocalPoint(*subPoint));
+    }
   }
 }
 
