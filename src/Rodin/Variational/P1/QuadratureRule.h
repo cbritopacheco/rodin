@@ -935,7 +935,6 @@ namespace Rodin::Variational
             static_assert(FormLanguage::IsVectorRange<RHSRangeType>::Value);
 
             Math::SpatialMatrix<ScalarType> cmv;
-            cmv.setZero();
             cmv = coeff.getValue(ip);
 
             for (size_t ib = 0; ib < nte; ++ib)
@@ -1487,7 +1486,6 @@ namespace Rodin::Variational
           else if constexpr (FormLanguage::IsMatrixRange<CoefficientRangeType>::Value)
           {
             Math::SpatialMatrix<ScalarType> cmv;
-            cmv.setZero();
             cmv = coeff.getValue(ip);
 
             if (trialfes == testfes)
@@ -2796,7 +2794,6 @@ namespace Rodin::Variational
           else if constexpr (FormLanguage::IsMatrixRange<CoefficientRangeType>::Value)
           {
             Math::SpatialMatrix<ScalarType> cmv;
-            cmv.setZero();
             cmv = coeff.getValue(ip);
 
             if (trialfes == testfes)
