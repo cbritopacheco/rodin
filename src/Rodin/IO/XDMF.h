@@ -753,7 +753,7 @@ namespace Rodin::IO
     const auto name = gf.getName();
     if (!name)
     {
-      Alert::Exception()
+      Alert::MemberFunctionException(*this, __func__)
         << "Grid function has no name. Use the overload that takes an explicit name."
         << Alert::Raise;
     }
@@ -771,7 +771,7 @@ namespace Rodin::IO
 
     if (gr.sourceMesh && gr.sourceMesh != &gf.getFiniteElementSpace().getMesh())
     {
-      Alert::Exception()
+      Alert::MemberFunctionException(*this, __func__)
         << "Attribute mesh does not match the grid mesh."
         << Alert::Raise;
     }
@@ -780,7 +780,7 @@ namespace Rodin::IO
     {
       if (attr.name == name)
       {
-        Alert::Exception()
+        Alert::MemberFunctionException(*this, __func__)
           << "Duplicate XDMF attribute name \"" << name
           << "\" in grid \"" << gr.name << "\"."
           << Alert::Raise;
