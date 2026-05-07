@@ -44,105 +44,107 @@ set_tests_properties(RodinPETScFormTest PROPERTIES
 )
 rodin_suppress_external_mpi_lsan_for_test(RodinPETScFormTest)
 
-add_executable(RodinPETScMPIGridFunctionTest MPIGridFunctionTest.cpp)
-target_link_libraries(RodinPETScMPIGridFunctionTest
-  PUBLIC
-  GTest::gtest
-  Rodin::Geometry
-  Rodin::Variational
-  Rodin::MPI
-  Rodin::PETSc)
+if (RODIN_USE_MPI)
+  add_executable(RodinPETScMPIGridFunctionTest MPIGridFunctionTest.cpp)
+  target_link_libraries(RodinPETScMPIGridFunctionTest
+    PUBLIC
+    GTest::gtest
+    Rodin::Geometry
+    Rodin::Variational
+    Rodin::MPI
+    Rodin::PETSc)
 
-# Detect Open MPI for --oversubscribe flag (not supported by MPICH).
-set(_RODIN_MPI_OVERSUBSCRIBE_FLAG "")
-if (MPIEXEC_EXECUTABLE)
-  execute_process(
-    COMMAND ${MPIEXEC_EXECUTABLE} --version
-    OUTPUT_VARIABLE _mpi_version_output
-    ERROR_VARIABLE  _mpi_version_output
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-  if (_mpi_version_output MATCHES "Open MPI|OpenRTE")
-    set(_RODIN_MPI_OVERSUBSCRIBE_FLAG "--oversubscribe")
+  # Detect Open MPI for --oversubscribe flag (not supported by MPICH).
+  set(_RODIN_MPI_OVERSUBSCRIBE_FLAG "")
+  if (MPIEXEC_EXECUTABLE)
+    execute_process(
+      COMMAND ${MPIEXEC_EXECUTABLE} --version
+      OUTPUT_VARIABLE _mpi_version_output
+      ERROR_VARIABLE  _mpi_version_output
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if (_mpi_version_output MATCHES "Open MPI|OpenRTE")
+      set(_RODIN_MPI_OVERSUBSCRIBE_FLAG "--oversubscribe")
+    endif()
   endif()
+
+  foreach(np 2 4)
+    add_test(
+      NAME RodinPETScMPIGridFunctionTest_np${np}
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+              ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+              $<TARGET_FILE:RodinPETScMPIGridFunctionTest>)
+    set_tests_properties(RodinPETScMPIGridFunctionTest_np${np} PROPERTIES
+      LABELS "unit;petsc;distributed"
+      TIMEOUT 10
+    )
+    rodin_suppress_external_mpi_lsan_for_test(RodinPETScMPIGridFunctionTest_np${np})
+  endforeach()
+
+  add_executable(RodinPETScMPIFormTest MPIFormTest.cpp)
+  target_link_libraries(RodinPETScMPIFormTest
+    PUBLIC
+    GTest::gtest
+    Rodin::Geometry
+    Rodin::Variational
+    Rodin::MPI
+    Rodin::PETSc)
+
+  foreach(np 2 4)
+    add_test(
+      NAME RodinPETScMPIFormTest_np${np}
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+              ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+              $<TARGET_FILE:RodinPETScMPIFormTest>)
+    set_tests_properties(RodinPETScMPIFormTest_np${np} PROPERTIES
+      LABELS "unit;petsc;distributed"
+      TIMEOUT 10
+    )
+    rodin_suppress_external_mpi_lsan_for_test(RodinPETScMPIFormTest_np${np})
+  endforeach()
+
+  add_executable(RodinPETScMPIP0P0gTest MPIP0P0gTest.cpp)
+  target_link_libraries(RodinPETScMPIP0P0gTest
+    PUBLIC
+    GTest::gtest
+    Rodin::Geometry
+    Rodin::Variational
+    Rodin::MPI
+    Rodin::PETSc)
+
+  foreach(np 1 2 4)
+    add_test(
+      NAME RodinPETScMPIP0P0gTest_np${np}
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+              ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+              $<TARGET_FILE:RodinPETScMPIP0P0gTest>)
+    set_tests_properties(RodinPETScMPIP0P0gTest_np${np} PROPERTIES
+      LABELS "unit;petsc;distributed"
+      TIMEOUT 60
+    )
+    rodin_suppress_external_mpi_lsan_for_test(RodinPETScMPIP0P0gTest_np${np})
+  endforeach()
+
+  add_executable(RodinPETScMPISubMeshGridFunctionTest MPISubMeshGridFunctionTest.cpp)
+  target_link_libraries(RodinPETScMPISubMeshGridFunctionTest
+    PUBLIC
+    GTest::gtest
+    Rodin::Geometry
+    Rodin::Variational
+    Rodin::MPI
+    Rodin::PETSc)
+
+  foreach(np 1 2 4)
+    add_test(
+      NAME RodinPETScMPISubMeshGridFunctionTest_np${np}
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+              ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+              $<TARGET_FILE:RodinPETScMPISubMeshGridFunctionTest>)
+    set_tests_properties(RodinPETScMPISubMeshGridFunctionTest_np${np} PROPERTIES
+      LABELS "unit;petsc;distributed"
+      TIMEOUT 60
+    )
+    rodin_suppress_external_mpi_lsan_for_test(RodinPETScMPISubMeshGridFunctionTest_np${np})
+  endforeach()
 endif()
-
-foreach(np 2 4)
-  add_test(
-    NAME RodinPETScMPIGridFunctionTest_np${np}
-    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
-            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
-            $<TARGET_FILE:RodinPETScMPIGridFunctionTest>)
-  set_tests_properties(RodinPETScMPIGridFunctionTest_np${np} PROPERTIES
-    LABELS "unit;petsc;distributed"
-    TIMEOUT 10
-  )
-  rodin_suppress_external_mpi_lsan_for_test(RodinPETScMPIGridFunctionTest_np${np})
-endforeach()
-
-add_executable(RodinPETScMPIFormTest MPIFormTest.cpp)
-target_link_libraries(RodinPETScMPIFormTest
-  PUBLIC
-  GTest::gtest
-  Rodin::Geometry
-  Rodin::Variational
-  Rodin::MPI
-  Rodin::PETSc)
-
-foreach(np 2 4)
-  add_test(
-    NAME RodinPETScMPIFormTest_np${np}
-    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
-            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
-            $<TARGET_FILE:RodinPETScMPIFormTest>)
-  set_tests_properties(RodinPETScMPIFormTest_np${np} PROPERTIES
-    LABELS "unit;petsc;distributed"
-    TIMEOUT 10
-  )
-  rodin_suppress_external_mpi_lsan_for_test(RodinPETScMPIFormTest_np${np})
-endforeach()
-
-add_executable(RodinPETScMPIP0P0gTest MPIP0P0gTest.cpp)
-target_link_libraries(RodinPETScMPIP0P0gTest
-  PUBLIC
-  GTest::gtest
-  Rodin::Geometry
-  Rodin::Variational
-  Rodin::MPI
-  Rodin::PETSc)
-
-foreach(np 1 2 4)
-  add_test(
-    NAME RodinPETScMPIP0P0gTest_np${np}
-    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
-            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
-            $<TARGET_FILE:RodinPETScMPIP0P0gTest>)
-  set_tests_properties(RodinPETScMPIP0P0gTest_np${np} PROPERTIES
-    LABELS "unit;petsc;distributed"
-    TIMEOUT 60
-  )
-  rodin_suppress_external_mpi_lsan_for_test(RodinPETScMPIP0P0gTest_np${np})
-endforeach()
-
-add_executable(RodinPETScMPISubMeshGridFunctionTest MPISubMeshGridFunctionTest.cpp)
-target_link_libraries(RodinPETScMPISubMeshGridFunctionTest
-  PUBLIC
-  GTest::gtest
-  Rodin::Geometry
-  Rodin::Variational
-  Rodin::MPI
-  Rodin::PETSc)
-
-foreach(np 1 2 4)
-  add_test(
-    NAME RodinPETScMPISubMeshGridFunctionTest_np${np}
-    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
-            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
-            $<TARGET_FILE:RodinPETScMPISubMeshGridFunctionTest>)
-  set_tests_properties(RodinPETScMPISubMeshGridFunctionTest_np${np} PROPERTIES
-    LABELS "unit;petsc;distributed"
-    TIMEOUT 60
-  )
-  rodin_suppress_external_mpi_lsan_for_test(RodinPETScMPISubMeshGridFunctionTest_np${np})
-endforeach()
 
 add_subdirectory(IO)
