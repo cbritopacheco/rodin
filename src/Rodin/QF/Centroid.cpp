@@ -44,6 +44,11 @@ namespace Rodin::QF
         static const Math::SpatialPoint s_point{{ 0.25, 0.25, 0.25 }};
         return s_point;
       }
+      case Geometry::Polytope::Type::Pyramid:
+      {
+        static const Math::SpatialPoint s_point{{ 0.375, 0.375, 0.25 }};
+        return s_point;
+      }
       case Geometry::Polytope::Type::Wedge:
       {
         static const Math::SpatialPoint s_point{{ Real(1) / Real(3), Real(1) / Real(3), 0.5 }};
@@ -75,6 +80,8 @@ namespace Rodin::QF
         return 1;
       case Geometry::Polytope::Type::Tetrahedron:
         return Real(1.0) / Real(6);
+      case Geometry::Polytope::Type::Pyramid:
+        return Real(1.0) / Real(3);
       case Geometry::Polytope::Type::Wedge:
         return 0.5;
       case Geometry::Polytope::Type::Hexahedron:

@@ -233,6 +233,34 @@ TEST_F(GaussLegendreTest, WedgeGeometry)
   EXPECT_NEAR(total_weight, 0.5, 1e-12);
 }
 
+// Test Pyramid geometry
+TEST_F(GaussLegendreTest, PyramidGeometry)
+{
+  GaussLegendre gl_pyr(Polytope::Type::Pyramid, 2, 2, 2);
+  EXPECT_EQ(gl_pyr.getSize(), 8);  // 2x2x2 collapsed tensor points
+  EXPECT_EQ(gl_pyr.getGeometry(), Polytope::Type::Pyramid);
+
+  double total_weight = 0.0;
+  double z_moment = 0.0;
+  for (size_t i = 0; i < gl_pyr.getSize(); ++i)
+  {
+    const auto& point = gl_pyr.getPoint(i);
+    EXPECT_EQ(point.size(), 3);
+    EXPECT_GE(point[0], 0.0);
+    EXPECT_GE(point[1], 0.0);
+    EXPECT_GE(point[2], 0.0);
+    EXPECT_LE(point[2], 1.0);
+    EXPECT_LE(point[0], 1.0 - point[2] + 1e-14);
+    EXPECT_LE(point[1], 1.0 - point[2] + 1e-14);
+
+    total_weight += gl_pyr.getWeight(i);
+    z_moment += gl_pyr.getWeight(i) * point[2];
+  }
+
+  EXPECT_NEAR(total_weight, 1.0 / 3.0, 1e-12);
+  EXPECT_NEAR(z_moment, 1.0 / 12.0, 1e-12);
+}
+
 // Test copy functionality
 TEST_F(GaussLegendreTest, CopyFunctionality)
 {

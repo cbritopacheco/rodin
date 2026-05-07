@@ -428,6 +428,44 @@ namespace Rodin::Variational
             break;
           }
 
+          case Geometry::Polytope::Type::Pyramid:
+          {
+            switch (i)
+            {
+              case 0:
+              {
+                static thread_local LinearForm s_lf(0, g);
+                return s_lf;
+              }
+              case 1:
+              {
+                static thread_local LinearForm s_lf(1, g);
+                return s_lf;
+              }
+              case 2:
+              {
+                static thread_local LinearForm s_lf(2, g);
+                return s_lf;
+              }
+              case 3:
+              {
+                static thread_local LinearForm s_lf(3, g);
+                return s_lf;
+              }
+              case 4:
+              {
+                static thread_local LinearForm s_lf(4, g);
+                return s_lf;
+              }
+              default:
+              {
+                assert(false);
+                break;
+              }
+            }
+            break;
+          }
+
           case Geometry::Polytope::Type::Wedge:
           {
             switch (i)
@@ -653,6 +691,43 @@ namespace Rodin::Variational
             }
             break;
           }
+          case Geometry::Polytope::Type::Pyramid:
+          {
+            switch (i)
+            {
+              case 0:
+              {
+                static thread_local BasisFunction s_basis(0, g);
+                return s_basis;
+              }
+              case 1:
+              {
+                static thread_local BasisFunction s_basis(1, g);
+                return s_basis;
+              }
+              case 2:
+              {
+                static thread_local BasisFunction s_basis(2, g);
+                return s_basis;
+              }
+              case 3:
+              {
+                static thread_local BasisFunction s_basis(3, g);
+                return s_basis;
+              }
+              case 4:
+              {
+                static thread_local BasisFunction s_basis(4, g);
+                return s_basis;
+              }
+              default:
+              {
+                assert(false);
+                break;
+              }
+            }
+            break;
+          }
           case Geometry::Polytope::Type::Wedge:
           {
             switch (i)
@@ -766,6 +841,7 @@ namespace Rodin::Variational
             return 1;
           case Geometry::Polytope::Type::Quadrilateral:
           case Geometry::Polytope::Type::Wedge:
+          case Geometry::Polytope::Type::Pyramid:
             return 2;
           case Geometry::Polytope::Type::Hexahedron:
             return 3;

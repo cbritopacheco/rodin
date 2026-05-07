@@ -45,4 +45,25 @@ namespace Rodin::Tests::Unit
       EXPECT_EQ(mesh.getCellCount(), 450);
     }
   }
+
+  TEST(Rodin_Geometry_Mesh_UniformGrid, Pyramid_OneBrick)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Pyramid, { 2, 2, 2 });
+
+    EXPECT_EQ(mesh.getVertexCount(), 9);
+    EXPECT_EQ(mesh.getCellCount(), 6);
+
+    auto& connectivity = mesh.getConnectivity();
+    connectivity.compute(3, 0);
+    EXPECT_EQ(connectivity.getCount(3), 6);
+    EXPECT_EQ(connectivity.getCount(Polytope::Type::Pyramid), 6);
+
+    connectivity.compute(2, 0);
+    EXPECT_EQ(connectivity.getCount(2), 18);
+    EXPECT_EQ(connectivity.getCount(Polytope::Type::Quadrilateral), 6);
+    EXPECT_EQ(connectivity.getCount(Polytope::Type::Triangle), 12);
+
+    connectivity.compute(1, 0);
+    EXPECT_EQ(connectivity.getCount(1), 20);
+  }
 }

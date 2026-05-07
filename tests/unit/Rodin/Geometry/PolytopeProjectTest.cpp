@@ -185,6 +185,44 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(out(2), 0.0, 1e-14);
   }
 
+  // ---- Pyramid projections ----
+
+  TEST(Geometry_PolytopeProject, Pyramid_Cell)
+  {
+    Polytope::Project proj(Polytope::Type::Pyramid);
+    Math::SpatialPoint rc{0.2, 0.3, 0.4};
+    Math::SpatialPoint out(3);
+    proj.cell(out, rc);
+    EXPECT_NEAR(out(0), 0.2, 1e-14);
+    EXPECT_NEAR(out(1), 0.3, 1e-14);
+    EXPECT_NEAR(out(2), 0.4, 1e-14);
+
+    Math::SpatialPoint outside{2.0, 2.0, 0.5};
+    proj.cell(out, outside);
+    EXPECT_GE(out(0), -1e-14);
+    EXPECT_GE(out(1), -1e-14);
+    EXPECT_GE(out(2), -1e-14);
+    EXPECT_LE(out(0), 1.0 - out(2) + 1e-14);
+    EXPECT_LE(out(1), 1.0 - out(2) + 1e-14);
+  }
+
+  TEST(Geometry_PolytopeProject, Pyramid_Faces)
+  {
+    Polytope::Project proj(Polytope::Type::Pyramid);
+    Math::SpatialPoint rc{0.2, 0.3, 0.4};
+    Math::SpatialPoint out(3);
+
+    for (size_t f = 0; f < 5; ++f)
+    {
+      proj.face(f, out, rc);
+      EXPECT_GE(out(0), -1e-14);
+      EXPECT_GE(out(1), -1e-14);
+      EXPECT_GE(out(2), -1e-14);
+      EXPECT_LE(out(0), 1.0 - out(2) + 1e-14);
+      EXPECT_LE(out(1), 1.0 - out(2) + 1e-14);
+    }
+  }
+
   // ---- Hexahedron projections ----
 
   TEST(Geometry_PolytopeProject, Hexahedron_Cell)

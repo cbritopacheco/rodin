@@ -1507,6 +1507,47 @@ namespace Rodin::Tests::Unit
       << ": Manual owned cell sum should match getPolytopeCount(D).";
   }
 
+  TEST(Rodin_MPI_Geometry_Mesh, UniformGrid_Pyramid)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh =
+      Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Pyramid, {3, 3, 3});
+
+    EXPECT_EQ(mpiMesh.getDimension(), 3u)
+      << "Rank " << world.rank()
+      << ": Pyramid UniformGrid dimension should be 3.";
+    EXPECT_EQ(mpiMesh.getSpaceDimension(), 3u)
+      << "Rank " << world.rank()
+      << ": Pyramid UniformGrid space dimension should be 3.";
+
+    const auto refMesh =
+      Mesh<Context::Local>::UniformGrid(Polytope::Type::Pyramid, {3, 3, 3});
+    const size_t D = mpiMesh.getDimension();
+
+    EXPECT_EQ(mpiMesh.getPolytopeCount(D), refMesh.getPolytopeCount(D))
+      << "Rank " << world.rank()
+      << ": Pyramid UniformGrid global cell count mismatch.";
+    EXPECT_EQ(mpiMesh.getPolytopeCount(Polytope::Type::Pyramid),
+              refMesh.getPolytopeCount(Polytope::Type::Pyramid))
+      << "Rank " << world.rank()
+      << ": Pyramid UniformGrid geometry count mismatch.";
+    EXPECT_EQ(mpiMesh.getPolytopeCount(0), refMesh.getPolytopeCount(0))
+      << "Rank " << world.rank()
+      << ": Pyramid UniformGrid global vertex count mismatch.";
+
+    const auto& shard = mpiMesh.getShard();
+    for (Index i = 0; i < static_cast<Index>(shard.getPolytopeCount(D)); ++i)
+    {
+      EXPECT_EQ(shard.getGeometry(D, i), Polytope::Type::Pyramid)
+        << "Rank " << world.rank() << " cell " << i
+        << ": expected Pyramid geometry.";
+    }
+  }
+
   TEST(Rodin_MPI_Geometry_Mesh, SaveLoad_RoundTrip)
   {
     const auto& world = *g_world;

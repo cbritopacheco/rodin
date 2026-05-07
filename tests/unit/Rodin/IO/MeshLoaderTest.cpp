@@ -47,6 +47,7 @@ namespace Rodin::Tests::Unit
         case Polytope::Type::Quadrilateral:
           return LocalMesh::UniformGrid(geometry, { 3, 3 });
         case Polytope::Type::Tetrahedron:
+        case Polytope::Type::Pyramid:
         case Polytope::Type::Hexahedron:
         case Polytope::Type::Wedge:
           return LocalMesh::UniformGrid(geometry, { 2, 2, 2 });
@@ -64,6 +65,7 @@ namespace Rodin::Tests::Unit
         case Polytope::Type::Triangle:      return "Triangle";
         case Polytope::Type::Quadrilateral: return "Quadrilateral";
         case Polytope::Type::Tetrahedron:   return "Tetrahedron";
+        case Polytope::Type::Pyramid:       return "Pyramid";
         case Polytope::Type::Hexahedron:    return "Hexahedron";
         case Polytope::Type::Wedge:         return "Wedge";
       }
@@ -152,6 +154,7 @@ namespace Rodin::Tests::Unit
         Polytope::Type::Triangle,
         Polytope::Type::Quadrilateral,
         Polytope::Type::Tetrahedron,
+        Polytope::Type::Pyramid,
         Polytope::Type::Hexahedron,
         Polytope::Type::Wedge),
       [](const ::testing::TestParamInfo<Polytope::Type>& info)

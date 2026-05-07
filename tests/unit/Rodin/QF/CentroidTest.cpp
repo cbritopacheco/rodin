@@ -80,6 +80,7 @@ TEST_F(CentroidTest, DifferentGeometryTypes)
     Polytope::Type::Triangle,
     Polytope::Type::Quadrilateral,
     Polytope::Type::Tetrahedron,
+    Polytope::Type::Pyramid,
   };
 
   for (auto geom : geometries) {
@@ -105,6 +106,18 @@ TEST_F(CentroidTest, QuadratureAccuracy)
   // Reference triangle has area 0.5
   EXPECT_GT(integral_approx, 0.1);  // Should be positive and reasonable
   EXPECT_LT(integral_approx, 1.0);  // Should not be too large
+}
+
+TEST_F(CentroidTest, Pyramid)
+{
+  Centroid qf(Polytope::Type::Pyramid);
+
+  ASSERT_EQ(qf.getSize(), 1);
+  ASSERT_EQ(qf.getPoint(0).size(), 3);
+  EXPECT_NEAR(qf.getPoint(0)(0), 0.375, 1e-14);
+  EXPECT_NEAR(qf.getPoint(0)(1), 0.375, 1e-14);
+  EXPECT_NEAR(qf.getPoint(0)(2), 0.25, 1e-14);
+  EXPECT_NEAR(qf.getWeight(0), 1.0 / 3.0, 1e-14);
 }
 
 // Error handling tests
