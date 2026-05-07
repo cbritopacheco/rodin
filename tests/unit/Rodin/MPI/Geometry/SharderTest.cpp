@@ -532,6 +532,45 @@ namespace Rodin::Tests::Unit
   }
 
   // =========================================================================
+  // MPI Sharder — 3D Pyramid mesh
+  // =========================================================================
+
+  TEST(Rodin_MPI_Geometry_Sharder, Distribute_Pyramid_GlobalCellCount)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 3)
+      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+
+    size_t totalCells = 0;
+    size_t D = 0;
+    if (world.rank() == 0)
+    {
+      auto localMesh = makeShardableMesh(Polytope::Type::Pyramid, {3, 3, 3});
+      totalCells = localMesh.getCellCount();
+      D = localMesh.getDimension();
+    }
+    boost::mpi::broadcast(world, totalCells, 0);
+    boost::mpi::broadcast(world, D, 0);
+
+    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Pyramid, {3, 3, 3});
+
+    const auto& shard = mpiMesh.getShard();
+    size_t ownedLocal = 0;
+    for (Index ci = 0; ci < shard.getCellCount(); ci++)
+    {
+      if (shard.isOwned(D, ci))
+        ownedLocal++;
+    }
+
+    size_t ownedGlobal = 0;
+    boost::mpi::all_reduce(world, ownedLocal, ownedGlobal, std::plus<size_t>());
+
+    EXPECT_EQ(ownedGlobal, totalCells);
+  }
+
+  // =========================================================================
   // MPI Sharder — 3D Wedge mesh
   // =========================================================================
 
@@ -1515,7 +1554,7 @@ namespace Rodin::Tests::Unit
 
     Context::MPI ctx(*g_env, world);
     auto mpiMesh =
-      Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Pyramid, {3, 3, 3});
+      Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Pyramid, {4, 3, 3});
 
     EXPECT_EQ(mpiMesh.getDimension(), 3u)
       << "Rank " << world.rank()
@@ -1525,8 +1564,8 @@ namespace Rodin::Tests::Unit
       << ": Pyramid UniformGrid space dimension should be 3.";
 
     const auto refMesh =
-      Mesh<Context::Local>::UniformGrid(Polytope::Type::Pyramid, {3, 3, 3});
-    const size_t D = mpiMesh.getDimension();
+      Mesh<Context::Local>::UniformGrid(Polytope::Type::Pyramid, {4, 3, 3});
+    const size_t D = 3;
 
     EXPECT_EQ(mpiMesh.getPolytopeCount(D), refMesh.getPolytopeCount(D))
       << "Rank " << world.rank()
@@ -1540,7 +1579,9 @@ namespace Rodin::Tests::Unit
       << ": Pyramid UniformGrid global vertex count mismatch.";
 
     const auto& shard = mpiMesh.getShard();
-    for (Index i = 0; i < static_cast<Index>(shard.getPolytopeCount(D)); ++i)
+    for (Index i = 0;
+         i < static_cast<Index>(shard.getPolytopeCount(D));
+         ++i)
     {
       EXPECT_EQ(shard.getGeometry(D, i), Polytope::Type::Pyramid)
         << "Rank " << world.rank() << " cell " << i

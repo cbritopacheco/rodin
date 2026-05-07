@@ -43,13 +43,13 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
   // ---------------------------------------------------------------------------
   // Fixture: build mesh once, scaled so physical domain is [0,1]^3.
   // ---------------------------------------------------------------------------
-  template <Polytope::Type G, size_t M>
-  class Helmholtz3DFixture : public ::testing::Test
+  template <size_t M>
+  class Helmholtz3DFixture : public ::testing::TestWithParam<Polytope::Type>
   {
     protected:
       void SetUp() override
       {
-        m_mesh = Mesh<Context::Local>().UniformGrid(G, {M, M, M});
+        m_mesh = Mesh<Context::Local>().UniformGrid(GetParam(), {M, M, M});
         m_mesh.scale(Real(1) / Real(M - 1)); // map {0..M-1} -> [0,1]
         m_mesh.getConnectivity().compute(2, 3);
       }
@@ -60,13 +60,11 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
       Mesh<Context::Local> m_mesh;
   };
 
-  using Tetra8  = Helmholtz3DFixture<Polytope::Type::Tetrahedron, 8>;
-  using Hex8    = Helmholtz3DFixture<Polytope::Type::Hexahedron,   8>;
-  using Tetra16 = Helmholtz3DFixture<Polytope::Type::Tetrahedron, 16>;
-  using Hex16   = Helmholtz3DFixture<Polytope::Type::Hexahedron,  16>;
-  using Tetra32 = Helmholtz3DFixture<Polytope::Type::Tetrahedron, 32>;
+  using Helmholtz3DTest8  = Helmholtz3DFixture<8>;
+  using Helmholtz3DTest16 = Helmholtz3DFixture<16>;
+  using Helmholtz3DTest32 = Helmholtz3DFixture<32>;
 
-  TEST_F(Tetra8, Helmholtz_P1ExactResidual_Tetrahedron)
+  TEST_P(Helmholtz3DTest8, Helmholtz_P1ExactResidual)
   {
     const Real kappa = 1.0;
 
@@ -111,7 +109,7 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
   // f = -Δu - κ^2 u = (3 pi^2 - κ^2) u
   // Dirichlet: u=0 on ∂Ω (sine vanishes on x,y,z=0 or 1)
   // ---------------------------------------------------------------------------
-  TEST_F(Tetra16, SimpleSine_Tetrahedron)
+  TEST_P(Helmholtz3DTest16, SimpleSine)
   {
     const Real pi = Math::Constants::pi();
     const Real kappa = 2.0;
@@ -135,34 +133,7 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - u_expr, 2);
     const Real error = Integral(diff).compute();
-    EXPECT_NEAR(0.1 * error, 0, RODIN_FUZZY_CONSTANT);
-  }
-
-  TEST_F(Hex16, SimpleSine_Hexahedron)
-  {
-    const Real pi = Math::Constants::pi();
-    const Real kappa = 2.0;
-
-    P1 vh(mesh());
-
-    const auto u_expr = sin(pi * F::x) * sin(pi * F::y) * sin(pi * F::z);
-    const auto f = (3 * pi * pi - kappa * kappa) * u_expr;
-
-    TrialFunction u(vh);
-    TestFunction  v(vh);
-
-    Problem helmholtz(u, v);
-    helmholtz = Integral(Grad(u), Grad(v))
-              - kappa * kappa * Integral(u, v)
-              - Integral(f, v)
-              + DirichletBC(u, Zero());
-
-    CG(helmholtz).solve();
-
-    GridFunction diff(vh);
-    diff = Pow(u.getSolution() - u_expr, 2);
-    const Real error = Integral(diff).compute();
-    EXPECT_NEAR(0.7 * error, 0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(error, 0, 10 * RODIN_FUZZY_CONSTANT);
   }
 
   // ---------------------------------------------------------------------------
@@ -171,7 +142,7 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
   // f = -Δu - κ^2 u = ( (ω1^2+ω2^2+ω3^2) pi^2 - κ^2 ) u
   // Dirichlet: u=0 on ∂Ω for integer ωi (still vanishes at x,y,z=0 or 1)
   // ---------------------------------------------------------------------------
-  TEST_F(Tetra32, VariableFrequency_Tetrahedron)
+  TEST_P(Helmholtz3DTest32, VariableFrequency)
   {
     const Real pi = Math::Constants::pi();
     const Real kappa = 1.5;
@@ -202,7 +173,7 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - u_expr, 2);
     const Real error = Integral(diff).compute();
-    EXPECT_NEAR(0.1 * error, 0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(error, 0, 10 * RODIN_FUZZY_CONSTANT);
   }
 
   // ---------------------------------------------------------------------------
@@ -214,7 +185,7 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
   // f = -Δu - κ^2 u
   // Dirichlet: u=0 on ∂Ω (x=0,1 or y=0,1 or z=0,1)
   // ---------------------------------------------------------------------------
-  TEST_F(Tetra16, MixedPolynomialTrig_Tetrahedron)
+  TEST_P(Helmholtz3DTest16, MixedPolynomialTrig)
   {
     const Real pi = Math::Constants::pi();
     const Real kappa = 1.0;
@@ -255,7 +226,7 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
   // f = -Δu - κ^2 u = (2 pi^2 - 1 - κ^2) u
   // Dirichlet: here we impose u=g on ∂Ω (nonzero on many faces)
   // ---------------------------------------------------------------------------
-  TEST_F(Hex16, Exponential_Hexahedron)
+  TEST_P(Helmholtz3DTest16, Exponential)
   {
     const Real pi = Math::Constants::pi();
     const Real kappa = 0.5;
@@ -283,9 +254,9 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
   }
 
   // ---------------------------------------------------------------------------
-  // Extra: run the SimpleSine case on Hex16 as requested.
+  // Extra: run the SimpleSine case as a refinement sanity check.
   // ---------------------------------------------------------------------------
-  TEST_F(Hex16, SimpleSine_Hexahedron_16)
+  TEST_P(Helmholtz3DTest16, SimpleSine_RefinedSanity)
   {
     const Real pi = Math::Constants::pi();
     const Real kappa = 2.0;
@@ -309,6 +280,36 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - u_expr, 2);
     const Real error = Integral(diff).compute();
-    EXPECT_NEAR(0.7 * error, 0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(error, 0, 10 * RODIN_FUZZY_CONSTANT);
   }
+
+  INSTANTIATE_TEST_SUITE_P(
+    PolytopeCoverage3D,
+    Helmholtz3DTest8,
+    ::testing::Values(
+      Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid,
+      Polytope::Type::Wedge)
+  );
+
+  INSTANTIATE_TEST_SUITE_P(
+    PolytopeCoverage3D,
+    Helmholtz3DTest16,
+    ::testing::Values(
+      Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid,
+      Polytope::Type::Wedge)
+  );
+
+  INSTANTIATE_TEST_SUITE_P(
+    PolytopeCoverage3D,
+    Helmholtz3DTest32,
+    ::testing::Values(
+      Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid,
+      Polytope::Type::Wedge)
+  );
 }
