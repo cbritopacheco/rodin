@@ -387,7 +387,7 @@ TEST(MPI_Geometry_SubMesh, RestrictionOfParentQuadraturePoint)
     << "SubMesh should restrict parent MPI quadrature points on selected faces.";
   EXPECT_TRUE(boundary.isLocalPoint(*subPoint));
   EXPECT_EQ(subPoint->getPolytope().getIndex(), subLocal);
-  EXPECT_EQ(subPoint->getPolytope().getMesh(), boundary);
+  EXPECT_EQ(subPoint->getPolytope().getMesh(), static_cast<const MeshBase&>(boundary));
 }
 
 TEST(MPI_Geometry_SubMesh, RestrictionRejectsParentCellPointOnBoundarySubMesh)
