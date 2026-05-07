@@ -616,6 +616,8 @@ namespace Rodin::IO
       Alert::Exception()
         << "Unsupported polytope type for XDMF mixed topology."
         << Alert::Raise;
+      // Unreachable after Alert::Raise; keeps compilers satisfied about return paths.
+      return std::numeric_limits<U64>::max();
     }
 
     /**
