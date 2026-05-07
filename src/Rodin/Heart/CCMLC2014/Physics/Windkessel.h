@@ -83,7 +83,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
       const Real adp = std::abs(dp);
       const Real sgn = (dp >= 0.0) ? 1.0 : -1.0;
 
-      if (adp < solverConfig::pressureDropTolerance)
+      if (adp < SolverConfig::pressureDropTolerance)
         return {dp / fallbackResistance, 1.0 / fallbackResistance};
 
       const Real m = input.m;
@@ -115,7 +115,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
       const Real adp = std::abs(dp);
       const Real sgn = (dp >= 0.0) ? 1.0 : -1.0;
 
-      if (adp < solverConfig::pressureDropTolerance)
+      if (adp < SolverConfig::pressureDropTolerance)
         return {dp / fallbackResistance, 1.0 / fallbackResistance};
 
       const Real tauW = (adp * radius) / (2.0 * L);
@@ -243,7 +243,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
       const Real R0 =
           8.0 * mu0 * L / (std::numbers::pi_v<Real> * std::pow(radius, 4.0));
 
-      if (adp < solverConfig::pressureDropTolerance)
+      if (adp < SolverConfig::pressureDropTolerance)
         return {dp / R0, 1.0 / R0};
 
       const Real tauW = radius * adp / (2.0 * L);
@@ -272,13 +272,13 @@ namespace Rodin::Heart::CCMLC2014::Physics
       };
 
       Math::RootFinding::NewtonRaphson<Real> rootFinder(
-          solverConfig::shearAbsoluteTolerance,
-          solverConfig::shearRelativeTolerance, solverConfig::shearStepTolerance,
-          solverConfig::shearMaxIterations);
+          SolverConfig::shearAbsoluteTolerance,
+          SolverConfig::shearRelativeTolerance, SolverConfig::shearStepTolerance,
+          SolverConfig::shearMaxIterations);
 
-      Real gHi = std::max<Real>(tauW / muInf, solverConfig::minShearRate);
+      Real gHi = std::max<Real>(tauW / muInf, SolverConfig::minShearRate);
 
-      for (int k = 0; k < solverConfig::maxBracketIterations && tauMinusTauW(gHi).first < 0.0; ++k)
+      for (int k = 0; k < SolverConfig::maxBracketIterations && tauMinusTauW(gHi).first < 0.0; ++k)
         gHi *= 2.0;
 
       if (tauMinusTauW(gHi).first < 0.0)
@@ -289,7 +289,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
       }
 
       const auto gammaRoot = rootFinder.solve(
-          tauMinusTauW, 0.5 * gHi, solverConfig::shearStepTolerance, gHi);
+          tauMinusTauW, 0.5 * gHi, SolverConfig::shearStepTolerance, gHi);
 
       if (!gammaRoot)
       {
@@ -314,7 +314,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
 
       Math::RungeKutta::RK4 integrator;
 
-      const int steps = solverConfig::integralSteps;
+      const int steps = SolverConfig::integralSteps;
       const Real h = gammaW / static_cast<Real>(steps);
 
       Real I = 0.0;
@@ -380,7 +380,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
       const Real R0 =
           8.0 * mu0 * L / (std::numbers::pi_v<Real> * std::pow(radius, 4.0));
 
-      if (adp < solverConfig::pressureDropTolerance)
+      if (adp < SolverConfig::pressureDropTolerance)
         return {dp / R0, 1.0 / R0};
 
       const Real tauW = radius * adp / (2.0 * L);
@@ -407,13 +407,13 @@ namespace Rodin::Heart::CCMLC2014::Physics
       };
 
       Math::RootFinding::NewtonRaphson<Real> rootFinder(
-          solverConfig::shearAbsoluteTolerance,
-          solverConfig::shearRelativeTolerance, solverConfig::shearStepTolerance,
-          solverConfig::shearMaxIterations);
+          SolverConfig::shearAbsoluteTolerance,
+          SolverConfig::shearRelativeTolerance, SolverConfig::shearStepTolerance,
+          SolverConfig::shearMaxIterations);
 
-      Real gHi = std::max<Real>(tauW / muInf, solverConfig::minShearRate);
+      Real gHi = std::max<Real>(tauW / muInf, SolverConfig::minShearRate);
 
-      for (int k = 0; k < solverConfig::maxBracketIterations &&
+      for (int k = 0; k < SolverConfig::maxBracketIterations &&
                       tauMinusTauW(gHi).first < 0.0;
            ++k)
         gHi *= 2.0;
@@ -426,7 +426,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
       }
 
       const auto gammaRoot = rootFinder.solve(
-          tauMinusTauW, 0.5 * gHi, solverConfig::shearStepTolerance, gHi);
+          tauMinusTauW, 0.5 * gHi, SolverConfig::shearStepTolerance, gHi);
 
       if (!gammaRoot)
       {
@@ -451,7 +451,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
 
       Math::RungeKutta::RK4 integrator;
 
-      const int steps = solverConfig::integralSteps;
+      const int steps = SolverConfig::integralSteps;
       const Real h = gammaW / static_cast<Real>(steps);
 
       Real I = 0.0;
@@ -491,7 +491,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
       }
 
       return {sgn * qAbs, dqAbs};
-    };
+    }
   };
 } // namespace Rheology
 

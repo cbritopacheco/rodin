@@ -96,14 +96,6 @@ namespace Rodin::Geometry
       PointBase(const Polytope& polytope, const Math::SpatialPoint& pc);
 
       /**
-       * @brief Constructs a point with physical coordinates (move).
-       * @param[in] polytope The polytope containing this point
-       * @param[in] pc Physical coordinates
-       */
-      explicit
-      PointBase(const Polytope& polytope, Math::SpatialPoint&& pc);
-
-      /**
        * @brief Copy constructor.
        */
       PointBase(const PointBase& other);
@@ -341,14 +333,6 @@ namespace Rodin::Geometry
       Point(const Polytope& polytope, const Math::SpatialPoint& rc);
 
       /**
-       * @brief Constructs a point with reference coordinates (move).
-       * @param[in] polytope Polytope containing the point
-       * @param[in] rc Reference coordinates
-       */
-      explicit
-      Point(const Polytope& polytope, Math::SpatialPoint&& rc);
-
-      /**
        * @brief Constructs with both reference and physical coordinates.
        * @param[in] polytope Polytope containing the point
        * @param[in] rc Reference coordinates
@@ -356,33 +340,6 @@ namespace Rodin::Geometry
        */
       explicit
       Point(const Polytope& polytope, const Math::SpatialPoint& rc, const Math::SpatialPoint& pc);
-
-      /**
-       * @brief Constructs with reference and physical coordinates (mixed).
-       * @param[in] polytope Polytope containing the point
-       * @param[in] rc Reference coordinates
-       * @param[in] pc Physical coordinates (move)
-       */
-      explicit
-      Point(const Polytope& polytope, const Math::SpatialPoint& rc, Math::SpatialPoint&& pc);
-
-      /**
-       * @brief Constructs with reference and physical coordinates (mixed).
-       * @param[in] polytope Polytope containing the point
-       * @param[in] rc Reference coordinates (move)
-       * @param[in] pc Physical coordinates
-       */
-      explicit
-      Point(const Polytope& polytope, Math::SpatialPoint&& rc, const Math::SpatialPoint& pc);
-
-      /**
-       * @brief Constructs with reference and physical coordinates (move both).
-       * @param[in] polytope Polytope containing the point
-       * @param[in] rc Reference coordinates (move)
-       * @param[in] pc Physical coordinates (move)
-       */
-      explicit
-      Point(const Polytope& polytope, Math::SpatialPoint&& rc, Math::SpatialPoint&& pc);
 
       /**
        * @brief Copy constructor.
@@ -401,7 +358,7 @@ namespace Rodin::Geometry
       const Math::SpatialPoint& getReferenceCoordinates() const override;
 
     private:
-      std::variant<const Math::SpatialPoint, std::reference_wrapper<Math::SpatialPoint>> m_rc;
+      Math::SpatialPoint m_rc;
   };
 
   /**

@@ -19,6 +19,9 @@
 #include <cstddef>
 
 #include "Rodin/Context.h"
+#ifdef RODIN_USE_MPI
+#  include "Rodin/MPI/Context/ForwardDecls.h"
+#endif
 #include "Types.h"
 
 namespace Rodin::Geometry
@@ -205,6 +208,15 @@ namespace Rodin::Geometry
    */
   template <>
   class SubMesh<Context::Local>;
+
+  /**
+   * @brief Distributed MPI SubMesh specialization.
+   * @see Rodin/MPI/Geometry/SubMesh.h
+   */
+#ifdef RODIN_USE_MPI
+  template <>
+  class SubMesh<Context::MPI>;
+#endif
 
   /**
    * @brief Builder for constructing SubMesh objects.

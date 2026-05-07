@@ -7,11 +7,13 @@
  *
  * This header groups the MPI-enabled geometry components:
  * - @ref Rodin::Geometry::Mesh<Rodin::Context::MPI> for distributed mesh access
+ * - @ref Rodin::Geometry::SubMesh<Rodin::Context::MPI> for distributed submeshes
  * - @ref Rodin::Geometry::Sharder<Rodin::Context::MPI> for mesh partitioning
  *   and distribution across ranks.
  */
 
 #include "Geometry/Mesh.h"
+#include "Geometry/SubMesh.h"
 #include "Geometry/Sharder.h"
 
 #endif

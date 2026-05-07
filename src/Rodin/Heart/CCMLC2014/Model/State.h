@@ -186,7 +186,7 @@ namespace Rodin::Heart::CCMLC2014::Model
     Scalar finalResidual = 0.0; ///< Final residual norm.
     Scalar finalStepNorm = 0.0; ///< Final step norm.
     using ConvergenceReason =
-      typename Solver::NewtonSolver<::Rodin::Solver::PartialPivLU<DenseLinearSystem>>::ConvergenceReason;
+      typename Solver::NewtonSolver<::Rodin::Solver::PartialPivLU<DenseLinearSystem>>::ConvergedReason;
     ConvergenceReason reason = ConvergenceReason::MaxIterations; ///< Nonlinear convergence reason.
   };
 
