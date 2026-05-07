@@ -1198,7 +1198,7 @@ namespace Rodin::Variational
       GridFunction& setData(const DataType& data, size_t offset = 0)
       {
         const auto sz = this->getFiniteElementSpace().getSize();
-        assert(offset + sz <= data.size());
+        assert(offset + static_cast<size_t>(sz) <= data.size());
         this->getData() = data.segment(offset, sz);
         return *this;
       }
