@@ -38,6 +38,7 @@
 #include <Rodin/MPI/Geometry/Sharder.h>
 #include <Rodin/MPI/Geometry/Mesh.h>
 #include <Rodin/MPI/Geometry/SubMesh.h>
+#include <Rodin/MPI/Variational/P0g.h>
 #include <Rodin/MPI/Variational/P0.h>
 #include <Rodin/MPI/Variational/P1.h>
 #include <Rodin/MPI/Variational/H1.h>
@@ -193,6 +194,116 @@ namespace Rodin::Tests::Unit
     size_t globalOwned = 0;
     boost::mpi::all_reduce(world, localOwned, globalOwned, std::plus<size_t>());
     EXPECT_EQ(globalOwned, h1.getSize());
+  }
+
+  TEST(MPISubMeshP0g, BoundarySubMesh_ScalarGlobalConstantDOFs_Triangle)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 4)
+      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+    auto sub  = makeBoundarySubMesh(mesh);
+
+    P0g<Real, Mesh<Context::MPI>> fes(sub);
+    EXPECT_EQ(fes.getSize(), 1u);
+    EXPECT_EQ(fes.getVectorDimension(), 1u);
+
+    Index begin = 0;
+    Index end = 0;
+    fes.getOwnershipRange(begin, end);
+    if (world.rank() == 0)
+    {
+      EXPECT_EQ(begin, Index(0));
+      EXPECT_EQ(end, Index(1));
+    }
+    else
+    {
+      EXPECT_EQ(begin, Index(1));
+      EXPECT_EQ(end, Index(1));
+    }
+
+    const size_t d = sub.getDimension();
+    const auto& shard = sub.getShard();
+    for (Index i = 0; i < static_cast<Index>(shard.getPolytopeCount(d)); ++i)
+    {
+      const auto& dofs = fes.getDOFs(d, i);
+      ASSERT_EQ(dofs.size(), 1u);
+      EXPECT_EQ(dofs[0], Index(0));
+      EXPECT_EQ(fes.getGlobalIndex({d, i}, 0), Index(0));
+    }
+  }
+
+  TEST(MPISubMeshP0g, CellSubMesh_VectorGlobalConstantDOFs_Triangle)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 4)
+      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+    auto sub  = makeCellSubMesh(mesh);
+
+    const size_t vdim = 3;
+    P0g<Math::SpatialVector<Real>, Mesh<Context::MPI>> fes(sub, vdim);
+    EXPECT_EQ(fes.getSize(), vdim);
+    EXPECT_EQ(fes.getVectorDimension(), vdim);
+
+    Index begin = 0;
+    Index end = 0;
+    fes.getOwnershipRange(begin, end);
+    if (world.rank() == 0)
+    {
+      EXPECT_EQ(begin, Index(0));
+      EXPECT_EQ(end, static_cast<Index>(vdim));
+    }
+    else
+    {
+      EXPECT_EQ(begin, static_cast<Index>(vdim));
+      EXPECT_EQ(end, static_cast<Index>(vdim));
+    }
+
+    const size_t d = sub.getDimension();
+    const auto& shard = sub.getShard();
+    for (Index i = 0; i < static_cast<Index>(shard.getPolytopeCount(d)); ++i)
+    {
+      const auto& dofs = fes.getDOFs(d, i);
+      ASSERT_EQ(dofs.size(), vdim);
+      for (size_t k = 0; k < vdim; ++k)
+      {
+        EXPECT_EQ(dofs[k], static_cast<Index>(k));
+        EXPECT_EQ(fes.getGlobalIndex({d, i}, static_cast<Index>(k)),
+                  static_cast<Index>(k));
+      }
+    }
+  }
+
+  TEST(MPISubMeshP0g, SparseBoundarySubMesh_ConstructsOnEmptyRanks)
+  {
+    const auto& world = *g_world;
+    if (world.size() < 2)
+      GTEST_SKIP() << "Requires at least two MPI ranks to exercise empty submesh ranks.";
+    if (world.size() > 4)
+      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+    auto sub  = makeSparseBoundarySubMesh(mesh, world);
+
+    const size_t d = sub.getDimension();
+    ASSERT_EQ(sub.getPolytopeCount(d), 1u);
+
+    P0g<Real, Mesh<Context::MPI>> fes(sub);
+    EXPECT_EQ(fes.getSize(), 1u);
+
+    const auto& shard = sub.getShard();
+    for (Index i = 0; i < static_cast<Index>(shard.getPolytopeCount(d)); ++i)
+    {
+      const auto& dofs = fes.getDOFs(d, i);
+      ASSERT_EQ(dofs.size(), 1u);
+      EXPECT_EQ(dofs[0], Index(0));
+    }
   }
 
   TEST(MPISubMeshH1, BoundarySubMesh_QuadraticH1_Tetrahedron)

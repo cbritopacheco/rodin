@@ -53,8 +53,10 @@
 #include <Rodin/MPI/Geometry/Sharder.h>
 #include <Rodin/MPI/Geometry/Mesh.h>
 #include <Rodin/MPI/Geometry/SubMesh.h>
+#include <Rodin/MPI/Variational/P0g.h>
 #include <Rodin/MPI/Variational/P0.h>
 #include <Rodin/MPI/Variational/P1.h>
+#include <Rodin/MPI/Variational/H1.h>
 #include <Rodin/PETSc.h>
 
 using namespace Rodin;
@@ -139,6 +141,87 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   // ==========================================================================
   // Group 1 — P0 on boundary SubMesh: constant projection, owned DOF check
   // ==========================================================================
+
+  TEST(PETSc_MPI_P0g_SubMesh, BoundarySubMesh_ConstantProjection_Integral_Triangle)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 4)
+      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
+
+    const Real c = 2.25;
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(
+        ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
+    auto sub  = makeBoundarySubMesh(mesh);
+
+    P0g<Real, Mesh<Context::MPI>> fes(sub);
+    GridFunction<decltype(fes), ::Vec> u(fes);
+    u = RealFunction(c);
+
+    const Real total = Integral(u).compute();
+    EXPECT_NEAR(total, 4.0 * c, 1e-9);
+  }
+
+  TEST(PETSc_MPI_P0g_SubMesh, CellSubMesh_InclusionAndRestrictionPaths_Triangle)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 4)
+      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
+
+    const Real parentValue = 1.75;
+    const Real subValue = 3.5;
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(
+        ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
+    auto sub  = makeCellSubMesh(mesh);
+
+    P0g<Real, Mesh<Context::MPI>> parentFes(mesh);
+    GridFunction<decltype(parentFes), ::Vec> parentGF(parentFes);
+    parentGF = RealFunction(parentValue);
+
+    P0g<Real, Mesh<Context::MPI>> subFes(sub);
+    PETSc::Variational::TestFunction subTest(subFes);
+    LinearForm inclusion(subTest);
+    inclusion = Integral(parentGF, subTest);
+    inclusion.assemble();
+
+    PetscReal inclusionSum = 0.0;
+    VecSum(inclusion.getVector(), &inclusionSum);
+    EXPECT_NEAR(static_cast<Real>(inclusionSum), parentValue, 1e-9);
+
+    GridFunction<decltype(subFes), ::Vec> subGF(subFes);
+    subGF = RealFunction(subValue);
+
+    PETSc::Variational::TestFunction parentTest(parentFes);
+    LinearForm restriction(parentTest);
+    restriction = Integral(subGF, parentTest);
+    restriction.assemble();
+
+    PetscReal restrictionSum = 0.0;
+    VecSum(restriction.getVector(), &restrictionSum);
+    EXPECT_NEAR(static_cast<Real>(restrictionSum), subValue, 1e-9);
+  }
+
+  TEST(PETSc_MPI_H1_SubMesh, BoundarySubMesh_ConstantProjection_Integral_Triangle)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 4)
+      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(
+        ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
+    auto sub  = makeBoundarySubMesh(mesh);
+
+    H1<1, Real, Mesh<Context::MPI>> fes(std::integral_constant<size_t, 1>{}, sub);
+    GridFunction<decltype(fes), ::Vec> u(fes);
+    u = RealFunction(1.0);
+
+    const Real total = Integral(u).compute();
+    EXPECT_NEAR(total, 4.0, 1e-9);
+  }
 
   /**
    * @brief Project a constant function onto distributed P0 on the boundary

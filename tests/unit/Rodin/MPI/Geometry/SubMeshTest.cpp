@@ -328,6 +328,92 @@ TEST(MPI_Geometry_SubMesh, RestrictionBoundaryPoint)
   }
 }
 
+TEST(MPI_Geometry_SubMesh, ParentInclusionOfSubMeshBoundaryPoint)
+{
+  Context::MPI ctx(*g_env, *g_world);
+  auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+  const size_t faceDim = mesh.getDimension() - 1;
+
+  SubMesh<Context::MPI>::Builder builder;
+  builder.initialize(mesh);
+  for (auto it = mesh.getBoundary(); it; ++it)
+    builder.include(faceDim, it->getIndex());
+
+  SubMesh<Context::MPI> boundary = builder.finalize();
+
+  const auto& shard = boundary.getShard();
+  if (shard.getPolytopeCount(faceDim) == 0)
+    return;
+
+  const Index subLocal = 0;
+  const Index parentLocal = boundary.getPolytopeMap(faceDim).left.at(subLocal);
+  const Math::SpatialPoint refCoords = Math::SpatialPoint::Zero(faceDim);
+  Point subPoint(*boundary.getPolytope(faceDim, subLocal), refCoords);
+
+  Optional<Point> parentPoint = mesh.inclusion(subPoint);
+  ASSERT_TRUE(parentPoint.has_value())
+    << "Parent MPI mesh should include points attached to an MPI SubMesh.";
+  EXPECT_TRUE(mesh.isLocalPoint(*parentPoint));
+  EXPECT_EQ(parentPoint->getPolytope().getIndex(), parentLocal);
+  EXPECT_EQ(parentPoint->getPolytope().getMesh(), mesh);
+}
+
+TEST(MPI_Geometry_SubMesh, RestrictionOfParentQuadraturePoint)
+{
+  Context::MPI ctx(*g_env, *g_world);
+  auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+  const size_t faceDim = mesh.getDimension() - 1;
+
+  SubMesh<Context::MPI>::Builder builder;
+  builder.initialize(mesh);
+  for (auto it = mesh.getBoundary(); it; ++it)
+    builder.include(faceDim, it->getIndex());
+
+  SubMesh<Context::MPI> boundary = builder.finalize();
+
+  const auto& pmap = boundary.getPolytopeMap(faceDim);
+  if (pmap.left.empty())
+    return;
+
+  const Index subLocal = 0;
+  const Index parentLocal = pmap.left.at(subLocal);
+  const auto& qf = QF::PolytopeQuadratureFormula::get(
+      1, mesh.getGeometry(faceDim, parentLocal));
+  const auto& parentQ = mesh.getQuadrature(faceDim, parentLocal, qf);
+  ASSERT_GT(parentQ.getSize(), 0u);
+
+  Optional<Point> subPoint = boundary.restriction(parentQ.getPoint(0));
+  ASSERT_TRUE(subPoint.has_value())
+    << "SubMesh should restrict parent MPI quadrature points on selected faces.";
+  EXPECT_TRUE(boundary.isLocalPoint(*subPoint));
+  EXPECT_EQ(subPoint->getPolytope().getIndex(), subLocal);
+  EXPECT_EQ(subPoint->getPolytope().getMesh(), boundary);
+}
+
+TEST(MPI_Geometry_SubMesh, RestrictionRejectsParentCellPointOnBoundarySubMesh)
+{
+  Context::MPI ctx(*g_env, *g_world);
+  auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+  const size_t cellDim = mesh.getDimension();
+  const size_t faceDim = cellDim - 1;
+
+  SubMesh<Context::MPI>::Builder builder;
+  builder.initialize(mesh);
+  for (auto it = mesh.getBoundary(); it; ++it)
+    builder.include(faceDim, it->getIndex());
+
+  SubMesh<Context::MPI> boundary = builder.finalize();
+
+  if (mesh.getShard().getPolytopeCount(cellDim) == 0)
+    return;
+
+  const Math::SpatialPoint refCoords = Math::SpatialPoint::Zero(cellDim);
+  Point parentCellPoint(*mesh.getPolytope(cellDim, 0), refCoords);
+
+  EXPECT_FALSE(boundary.restriction(parentCellPoint).has_value())
+    << "Boundary SubMesh should reject parent cell points outside its selected dimension.";
+}
+
 TEST(MPI_Geometry_SubMesh, QuadraturePointsUseMPIParentMeshIdentity)
 {
   Context::MPI ctx(*g_env, *g_world);
