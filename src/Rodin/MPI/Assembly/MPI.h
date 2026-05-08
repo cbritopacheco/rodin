@@ -195,6 +195,90 @@ namespace Rodin::Assembly
         return new MPI(*this);
       }
   };
+
+  /**
+   * @brief MPI assembler for the identification Dirichlet BC `u = A(v)`.
+   *
+   * Iterates the locally owned boundary entities of the MPI mesh shard,
+   * filters by essential boundary attributes, and emits, for each slave DOF
+   * on a shared face, the master-DOF/coefficient pair
+   * @c (masterDOFs[local], 1.0) — exact, tolerance-free pairing via the FES's
+   * own DOF connectivity. Generalises to non-trivial @f$ A @f$ via
+   * @c Av.setIntegrationPoint(...).getBasis(j).
+   */
+  template <class Scalar, class Sol1, class FES1,
+            class Derived2, class FES2,
+            Variational::ShapeFunctionSpaceType Sp>
+  class MPI<
+    IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>,
+    Variational::DirichletBC<
+      Variational::TrialFunction<Sol1, FES1>,
+      Variational::ShapeFunctionBase<Derived2, FES2, Sp>>> final
+    : public AssemblyBase<
+        IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>,
+        Variational::DirichletBC<
+          Variational::TrialFunction<Sol1, FES1>,
+          Variational::ShapeFunctionBase<Derived2, FES2, Sp>>>
+  {
+    public:
+      using OutputType = IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>;
+      using TrialFunctionType = Variational::TrialFunction<Sol1, FES1>;
+      using ValueType = Variational::ShapeFunctionBase<Derived2, FES2, Sp>;
+      using DirichletBCType =
+        Variational::DirichletBC<TrialFunctionType, ValueType>;
+      using Parent = AssemblyBase<OutputType, DirichletBCType>;
+      using InputType = typename Parent::InputType;
+
+      MPI() = default;
+      MPI(const MPI& other) : Parent(other) {}
+      MPI(MPI&& other) : Parent(std::move(other)) {}
+
+      void execute(OutputType& res, const InputType& input) const override
+      {
+        const auto& u      = input.getOperand();
+        const auto& Av     = input.getShapeFunction();
+        const auto& essBdr = input.getEssentialBoundary();
+        const auto& fes_u  = u.getFiniteElementSpace();
+        const auto& fes_v  = Av.getLeaf().getFiniteElementSpace();
+        const auto& mesh   = fes_u.getMesh();
+        const size_t faceDim = mesh.getDimension() - 1;
+
+        for (auto it = mesh.getBoundary(); it; ++it)
+        {
+          const auto& face = *it;
+          const Index fi = face.getIndex();
+
+          if (!essBdr.empty())
+          {
+            const auto a = face.getAttribute();
+            if (!a || !essBdr.contains(*a)) continue;
+          }
+
+          const auto& slaveDOFs  = fes_u.getDOFs(faceDim, fi);
+          const auto& masterDOFs = fes_v.getDOFs(faceDim, fi);
+          assert(slaveDOFs.size() == masterDOFs.size());
+          for (Index local = 0;
+               local < static_cast<Index>(slaveDOFs.size());
+               local++)
+          {
+            const Index slave = slaveDOFs[local];
+            auto pos = res.find(slave);
+            if (pos != res.end()) continue;
+            IndexArray masters(1);
+            masters.coeffRef(0) = masterDOFs[local];
+            Math::Vector<Scalar> coeffs(1);
+            coeffs.coeffRef(0) = static_cast<Scalar>(1);
+            res.emplace_hint(pos, slave,
+                std::pair{ std::move(masters), std::move(coeffs) });
+          }
+        }
+      }
+
+      MPI* copy() const noexcept override
+      {
+        return new MPI(*this);
+      }
+  };
 }
 
 #endif

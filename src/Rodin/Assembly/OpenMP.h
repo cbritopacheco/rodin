@@ -859,9 +859,11 @@ namespace Rodin::Assembly
             ? static_cast<int>(m_threadCount.value())
             : omp_get_max_threads();
 
-        // ---- Dirichlet fixed values (NaN sentinel) ----
+        // ---- Dirichlet fixed values + identification ----
         const size_t ndofs = std::max(rows, cols);
         std::vector<ScalarType> fixed(ndofs, Math::nan<ScalarType>());
+        std::vector<std::vector<std::pair<Index, ScalarType>>>
+            identified(ndofs);
 
         auto isFixed = [&](Index i) -> bool
         {
@@ -869,17 +871,54 @@ namespace Rodin::Assembly
           return k < fixed.size() && !Math::isNaN(fixed[k]);
         };
 
+        auto isIdentified = [&](Index i) -> bool
+        {
+          const size_t k = static_cast<size_t>(i);
+          return k < identified.size() && !identified[k].empty();
+        };
+
+        using DBCBaseType = Variational::DirichletBCBase<ScalarType>;
+        using ValueDOFsType = typename DBCBaseType::ValueDOFs;
+        using IdentDOFsType = typename DBCBaseType::IdentifiedDOFs;
+
         for (auto& dbc : pb.getDBCs())
         {
           if (dbc.getOperand().getUUID() != u.getUUID())
             continue;
 
           dbc.assemble();
-          for (const auto& [local, value] : dbc.getDOFs())
+          std::visit([&](auto&& dofs)
           {
-            const Index I = static_cast<Index>(local);
-            fixed[static_cast<size_t>(I)] = static_cast<ScalarType>(value);
-          }
+            using T = std::decay_t<decltype(dofs)>;
+            if constexpr (std::is_same_v<T, ValueDOFsType>)
+            {
+              for (const auto& [local, value] : dofs)
+              {
+                const Index I = static_cast<Index>(local);
+                fixed[static_cast<size_t>(I)] =
+                    static_cast<ScalarType>(value);
+              }
+            }
+            else if constexpr (std::is_same_v<T, IdentDOFsType>)
+            {
+              // Single-FES path: master = same FES as slave, no offset.
+              for (const auto& [slave, pair] : dofs)
+              {
+                const auto& masters = pair.first;
+                const auto& coeffs  = pair.second;
+                if (static_cast<size_t>(slave) >= identified.size())
+                  continue;
+                const Index n =
+                    static_cast<Index>(masters.size());
+                for (Index k = 0; k < n; k++)
+                {
+                  identified[static_cast<size_t>(slave)].emplace_back(
+                      static_cast<Index>(masters[k]),
+                      static_cast<ScalarType>(coeffs[k]));
+                }
+              }
+            }
+          }, dbc.getDOFs());
         }
 
         if constexpr (IsSparse)
@@ -902,13 +941,21 @@ namespace Rodin::Assembly
             const bool rowFixed = isFixed(row);
             const bool colFixed = isFixed(col);
 
-            if (rowFixed)
+            if (rowFixed || isIdentified(row))
               return;
 
             if (colFixed && row != col)
             {
               localRhs[static_cast<size_t>(row)] -=
                 val * fixed[static_cast<size_t>(col)];
+              return;
+            }
+
+            if (isIdentified(col))
+            {
+              for (const auto& [gm, c]
+                     : identified[static_cast<size_t>(col)])
+                localT.emplace_back(row, gm, val * c);
               return;
             }
 
@@ -1111,6 +1158,17 @@ namespace Rodin::Assembly
             }
           }
 
+          // Identification constraint rows
+          for (size_t gs = 0; gs < identified.size(); gs++)
+          {
+            if (identified[gs].empty()) continue;
+            const Index gsi = static_cast<Index>(gs);
+            all.emplace_back(gsi, gsi, ScalarType(1));
+            for (const auto& [gm, c] : identified[gs])
+              all.emplace_back(gsi, gm, -c);
+            b.coeffRef(static_cast<size_t>(gsi)) = ScalarType(0);
+          }
+
           A.resize(rows, cols);
           A.setFromTriplets(all.begin(), all.end());
         }
@@ -1299,6 +1357,19 @@ namespace Rodin::Assembly
           for (auto& lf : pb.getLFs())
             b += lf.getVector();
 
+          // Dense identification constraint rows
+          for (size_t gs = 0; gs < identified.size(); gs++)
+          {
+            if (identified[gs].empty()) continue;
+            const Index gsi = static_cast<Index>(gs);
+            for (size_t c = 0; c < cols; ++c)
+              A(gsi, c) = ScalarType(0);
+            A(gsi, gsi) = ScalarType(1);
+            for (const auto& [gm, c] : identified[gs])
+              A(gsi, gm) -= c;
+            b.coeffRef(static_cast<size_t>(gsi)) = ScalarType(0);
+          }
+
           // Dense elimination afterwards
           for (Index idx = 0; idx < static_cast<Index>(rows); ++idx)
           {
@@ -1437,16 +1508,28 @@ namespace Rodin::Assembly
         }();
 
         // ------------------------------------------------------------------
-        // Dirichlet: NaN sentinel (global indices!)
+        // Dirichlet: NaN sentinel + identification (global indices!)
         // ------------------------------------------------------------------
         const size_t ndofs = std::max(nrows, ncols);
         std::vector<ScalarType> fixed(ndofs, Math::nan<ScalarType>());
+        std::vector<std::vector<std::pair<Index, ScalarType>>>
+            identified(ndofs);
 
         auto isFixed = [&](Index I) -> bool
         {
           const size_t k = static_cast<size_t>(I);
           return k < fixed.size() && !Math::isNaN(fixed[k]);
         };
+
+        auto isIdentified = [&](Index I) -> bool
+        {
+          const size_t k = static_cast<size_t>(I);
+          return k < identified.size() && !identified[k].empty();
+        };
+
+        using DBCBaseType = Variational::DirichletBCBase<ScalarType>;
+        using ValueDOFsType = typename DBCBaseType::ValueDOFs;
+        using IdentDOFsType = typename DBCBaseType::IdentifiedDOFs;
 
         for (auto& dbc : pb.getDBCs())
         {
@@ -1455,11 +1538,46 @@ namespace Rodin::Assembly
           const size_t uOff   = trialOffsets[uBlock];
 
           dbc.assemble();
-          for (const auto& [local, value] : dbc.getDOFs())
+          std::visit([&](auto&& dofs)
           {
-            const Index I = static_cast<Index>(uOff + static_cast<size_t>(local));
-            fixed[static_cast<size_t>(I)] = static_cast<ScalarType>(value);
-          }
+            using T = std::decay_t<decltype(dofs)>;
+            if constexpr (std::is_same_v<T, ValueDOFsType>)
+            {
+              for (const auto& [local, value] : dofs)
+              {
+                const Index I = static_cast<Index>(
+                    uOff + static_cast<size_t>(local));
+                fixed[static_cast<size_t>(I)] =
+                    static_cast<ScalarType>(value);
+              }
+            }
+            else if constexpr (std::is_same_v<T, IdentDOFsType>)
+            {
+              const auto vUUIDOpt = dbc.getValueUUID();
+              assert(vUUIDOpt
+                  && "Identification DBC missing value UUID");
+              const size_t vBlock = findTrialBlock(*vUUIDOpt);
+              const size_t vOff   = trialOffsets[vBlock];
+              for (const auto& [slave, pair] : dofs)
+              {
+                const auto& masters = pair.first;
+                const auto& coeffs  = pair.second;
+                const Index gs = static_cast<Index>(
+                    uOff + static_cast<size_t>(slave));
+                if (static_cast<size_t>(gs) >= identified.size())
+                  continue;
+                const Index n =
+                    static_cast<Index>(masters.size());
+                for (Index k = 0; k < n; k++)
+                {
+                  const Index gm = static_cast<Index>(
+                      vOff + static_cast<size_t>(masters[k]));
+                  identified[static_cast<size_t>(gs)].emplace_back(
+                      gm, static_cast<ScalarType>(coeffs[k]));
+                }
+              }
+            }
+          }, dbc.getDOFs());
         }
 
         // ------------------------------------------------------------------
@@ -1495,13 +1613,21 @@ namespace Rodin::Assembly
           const bool rowFixed = isFixed(row);
           const bool colFixed = isFixed(col);
 
-          if (rowFixed)
+          if (rowFixed || isIdentified(row))
             return;
 
           if (colFixed && row != col)
           {
             rhsChunks[static_cast<size_t>(tid)][static_cast<size_t>(row)] -=
               val * fixed[static_cast<size_t>(col)];
+            return;
+          }
+
+          if (isIdentified(col))
+          {
+            for (const auto& [gm, c]
+                   : identified[static_cast<size_t>(col)])
+              tchunks[static_cast<size_t>(tid)].emplace_back(row, gm, val * c);
             return;
           }
 
@@ -1803,6 +1929,17 @@ namespace Rodin::Assembly
             }
           }
 
+          // Identification constraint rows
+          for (size_t gs = 0; gs < identified.size(); gs++)
+          {
+            if (identified[gs].empty()) continue;
+            const Index gsi = static_cast<Index>(gs);
+            all.emplace_back(gsi, gsi, ScalarType(1));
+            for (const auto& [gm, c] : identified[gs])
+              all.emplace_back(gsi, gm, -c);
+            b.coeffRef(static_cast<size_t>(gsi)) = ScalarType(0);
+          }
+
           A.resize(nrows, ncols);
           A.setFromTriplets(all.begin(), all.end());
         }
@@ -1838,6 +1975,19 @@ namespace Rodin::Assembly
               }
           }
 
+          // Dense identification constraint rows
+          for (size_t gs = 0; gs < identified.size(); gs++)
+          {
+            if (identified[gs].empty()) continue;
+            const Index gsi = static_cast<Index>(gs);
+            for (size_t c = 0; c < ncols; ++c)
+              A(gsi, c) = ScalarType(0);
+            A(gsi, gsi) = ScalarType(1);
+            for (const auto& [gm, c] : identified[gs])
+              A(gsi, gm) -= c;
+            b.coeffRef(static_cast<size_t>(gsi)) = ScalarType(0);
+          }
+
           // Dense elimination after assembly
           for (Index idx = 0; idx < static_cast<Index>(nrows); ++idx)
           {
@@ -1870,6 +2020,83 @@ namespace Rodin::Assembly
 
     private:
       Optional<size_t> m_threadCount;
+  };
+
+  /**
+   * @brief OpenMP assembler for the identification Dirichlet BC `u = A(v)`.
+   *
+   * Same logic as the sequential variant; the boundary face loop is the
+   * cheaper part of identification assembly so we keep it sequential here.
+   * The expensive part (the linear-system constraint application) is
+   * parallelized inside the problem-level OpenMP assembler above.
+   */
+  template <class Scalar, class Sol1, class FES1,
+            class Derived2, class FES2,
+            Variational::ShapeFunctionSpaceType Sp>
+  class OpenMP<
+    IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>,
+    Variational::DirichletBC<
+      Variational::TrialFunction<Sol1, FES1>,
+      Variational::ShapeFunctionBase<Derived2, FES2, Sp>>> final
+    : public AssemblyBase<
+        IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>,
+        Variational::DirichletBC<
+          Variational::TrialFunction<Sol1, FES1>,
+          Variational::ShapeFunctionBase<Derived2, FES2, Sp>>>
+  {
+    public:
+      using OutputType = IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>;
+      using TrialFunctionType = Variational::TrialFunction<Sol1, FES1>;
+      using ValueType = Variational::ShapeFunctionBase<Derived2, FES2, Sp>;
+      using DirichletBCType =
+        Variational::DirichletBC<TrialFunctionType, ValueType>;
+      using Parent = AssemblyBase<OutputType, DirichletBCType>;
+      using InputType = typename Parent::InputType;
+
+      OpenMP() = default;
+      OpenMP(const OpenMP& other) : Parent(other) {}
+      OpenMP(OpenMP&& other) : Parent(std::move(other)) {}
+
+      void execute(OutputType& res, const InputType& input) const override
+      {
+        const auto& u      = input.getOperand();
+        const auto& Av     = input.getShapeFunction();
+        const auto& essBdr = input.getEssentialBoundary();
+
+        const auto& fes_u  = u.getFiniteElementSpace();
+        const auto& fes_v  = Av.getLeaf().getFiniteElementSpace();
+        const auto& mesh   = fes_u.getMesh();
+        const size_t faceDim = mesh.getDimension() - 1;
+
+        res.clear();
+        for (Index fi = 0; fi < mesh.getFaceCount(); fi++)
+        {
+          if (!mesh.isBoundary(fi)) continue;
+          if (!essBdr.empty())
+          {
+            const auto a = mesh.getAttribute(faceDim, fi);
+            if (!a || !essBdr.count(*a)) continue;
+          }
+          const auto& slaveDOFs  = fes_u.getDOFs(faceDim, fi);
+          const auto& masterDOFs = fes_v.getDOFs(faceDim, fi);
+          assert(slaveDOFs.size() == masterDOFs.size());
+          for (Index local = 0;
+               local < static_cast<Index>(slaveDOFs.size());
+               local++)
+          {
+            const Index slave = slaveDOFs[local];
+            if (res.find(slave) != res.end()) continue;
+            IndexArray masters(1);
+            masters.coeffRef(0) = masterDOFs[local];
+            Math::Vector<Scalar> coeffs(1);
+            coeffs.coeffRef(0) = static_cast<Scalar>(1);
+            res.emplace(slave,
+                std::pair{ std::move(masters), std::move(coeffs) });
+          }
+        }
+      }
+
+      OpenMP* copy() const noexcept override { return new OpenMP(*this); }
   };
 }
 

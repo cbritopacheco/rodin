@@ -302,7 +302,7 @@ int main(int, char**)
   DirichletBC dbc(uBC, zero);
   dbc.on(leftBC);
   dbc.assemble();
-  const IndexMap<Real> dbcMap = dbc.getDOFs();
+  const IndexMap<Real> dbcMap = std::get<IndexMap<Real>>(dbc.getDOFs());
 
   // ---- output -------------------------------------------------------------
   IO::XDMF xdmf("CantileverBeam");

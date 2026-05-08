@@ -717,12 +717,30 @@ namespace Rodin::Assembly
             continue;
 
           dbc.assemble();
-          const auto& dofs = dbc.getDOFs();
-          for (const auto& [local, value] : dofs)
+          std::visit([&](auto&& dofs)
           {
-            bcIdx.push_back(static_cast<PetscInt>(local));
-            bcVals.push_back(static_cast<PetscScalar>(value));
-          }
+            using T = std::decay_t<decltype(dofs)>;
+            using MappedT = typename T::mapped_type;
+            if constexpr (std::is_arithmetic_v<MappedT>
+                       || std::is_same_v<MappedT, std::complex<float>>
+                       || std::is_same_v<MappedT, std::complex<double>>)
+            {
+              for (const auto& [local, value] : dofs)
+              {
+                bcIdx.push_back(static_cast<PetscInt>(local));
+                bcVals.push_back(static_cast<PetscScalar>(value));
+              }
+            }
+            else
+            {
+              for (const auto& [slave, pair] : dofs)
+              {
+                (void) pair;
+                bcIdx.push_back(static_cast<PetscInt>(slave));
+                bcVals.push_back(static_cast<PetscScalar>(0));
+              }
+            }
+          }, dbc.getDOFs());
         }
 
         if (!bcIdx.empty())
@@ -1305,6 +1323,9 @@ namespace Rodin::Assembly
         // ------------------------
         std::vector<PetscInt>    bcIdx;
         std::vector<PetscScalar> bcVals;
+        std::vector<std::pair<PetscInt,
+                              std::vector<std::pair<PetscInt, PetscScalar>>>>
+            identRows;
 
         for (auto& dbc : pb.getDBCs())
         {
@@ -1313,12 +1334,87 @@ namespace Rodin::Assembly
           const size_t uOff   = trialOffsets[uBlock];
 
           dbc.assemble();
-          const auto& dofs = dbc.getDOFs();
-          for (const auto& [local, value] : dofs)
+          std::visit([&](auto&& dofs)
           {
-            bcIdx.push_back(static_cast<PetscInt>(uOff + local));
-            bcVals.push_back(static_cast<PetscScalar>(value));
+            using T = std::decay_t<decltype(dofs)>;
+            using MappedT = typename T::mapped_type;
+            if constexpr (std::is_arithmetic_v<MappedT>
+                       || std::is_same_v<MappedT, std::complex<float>>
+                       || std::is_same_v<MappedT, std::complex<double>>)
+            {
+              for (const auto& [local, value] : dofs)
+              {
+                bcIdx.push_back(
+                    static_cast<PetscInt>(uOff + local));
+                bcVals.push_back(
+                    static_cast<PetscScalar>(value));
+              }
+            }
+            else
+            {
+              const auto vUUIDOpt = dbc.getValueUUID();
+              assert(vUUIDOpt);
+              const size_t vBlock = findTrialBlock(*vUUIDOpt);
+              const size_t vOff   = trialOffsets[vBlock];
+              for (const auto& [slave, pair] : dofs)
+              {
+                const auto& masters = pair.first;
+                const auto& coeffs  = pair.second;
+                std::vector<std::pair<PetscInt, PetscScalar>> entries;
+                entries.reserve(static_cast<size_t>(masters.size()));
+                for (Index k = 0; k < masters.size(); k++)
+                {
+                  entries.emplace_back(
+                      static_cast<PetscInt>(
+                          vOff + static_cast<size_t>(masters[k])),
+                      static_cast<PetscScalar>(coeffs[k]));
+                }
+                identRows.emplace_back(
+                    static_cast<PetscInt>(uOff + slave),
+                    std::move(entries));
+              }
+            }
+          }, dbc.getDOFs());
+        }
+
+        // Identification constraint rows
+        if (!identRows.empty())
+        {
+          std::vector<PetscInt> zeroRowsIdx;
+          zeroRowsIdx.reserve(identRows.size());
+          for (const auto& r : identRows)
+            zeroRowsIdx.push_back(r.first);
+          ierr = MatZeroRows(
+              A,
+              static_cast<PetscInt>(zeroRowsIdx.size()),
+              zeroRowsIdx.data(),
+              0.0,
+              nullptr, nullptr);
+          assert(ierr == PETSC_SUCCESS);
+
+          for (const auto& [gs, entries] : identRows)
+          {
+            const PetscScalar one = 1.0;
+            ierr = MatSetValues(A, 1, &gs, 1, &gs, &one, INSERT_VALUES);
+            assert(ierr == PETSC_SUCCESS);
+            for (const auto& [gm, c] : entries)
+            {
+              const PetscScalar v = -c;
+              ierr = MatSetValues(A, 1, &gs, 1, &gm, &v, ADD_VALUES);
+              assert(ierr == PETSC_SUCCESS);
+            }
+            const PetscScalar zero = 0.0;
+            ierr = VecSetValue(b, gs, zero, INSERT_VALUES);
+            assert(ierr == PETSC_SUCCESS);
           }
+          ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecAssemblyBegin(b);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecAssemblyEnd(b);
+          assert(ierr == PETSC_SUCCESS);
         }
 
         if (!bcIdx.empty())

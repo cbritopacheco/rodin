@@ -26,7 +26,7 @@ namespace Rodin::Tests::Unit
     DirichletBC dbc(u, c);
     dbc.assemble();
 
-    EXPECT_EQ(dbc.getDOFs().size(), 4);
+    EXPECT_EQ(std::get<IndexMap<Real>>(dbc.getDOFs()).size(), 4);
   }
 
   TEST(Rodin_Variational_Real_P1_SanityTest, TriangularUniformGrid16)
@@ -52,6 +52,46 @@ namespace Rodin::Tests::Unit
     dbc.on(attr);
     dbc.assemble();
 
-    EXPECT_EQ(dbc.getDOFs().size(), 60);
+    EXPECT_EQ(std::get<IndexMap<Real>>(dbc.getDOFs()).size(), 60);
+  }
+
+  TEST(Rodin_Variational_Real_P1_SanityTest, DirichletBCShapeFunctionIdentity)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    const size_t D = mesh.getDimension();
+    const Attribute attr = 1;
+
+    mesh.getConnectivity().compute(D - 1, D);
+
+    for (auto it = mesh.getBoundary(); !it.end(); ++it)
+    {
+      mesh.setAttribute(it.key(), attr);
+    }
+
+    P1 fes(mesh);
+
+    TrialFunction u(fes);
+    TrialFunction v(fes);
+
+    DirichletBC dbc(u, v);
+    dbc.on(attr);
+    dbc.assemble();
+
+    using IdentifiedDOFs = DirichletBCBase<Real>::IdentifiedDOFs;
+    ASSERT_TRUE(std::holds_alternative<IdentifiedDOFs>(dbc.getDOFs()));
+
+    const auto& dofs = std::get<IdentifiedDOFs>(dbc.getDOFs());
+    EXPECT_EQ(dofs.size(), 4);
+
+    for (const auto& [slave, pair] : dofs)
+    {
+      const auto& masters = pair.first;
+      const auto& coeffs = pair.second;
+
+      ASSERT_EQ(masters.size(), 1);
+      ASSERT_EQ(coeffs.size(), 1);
+      EXPECT_EQ(masters.coeff(0), slave);
+      EXPECT_DOUBLE_EQ(coeffs.coeff(0), 1.0);
+    }
   }
 }

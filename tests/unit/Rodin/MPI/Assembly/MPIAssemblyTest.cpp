@@ -193,7 +193,7 @@ namespace Rodin::Tests::Unit
     dbc.assemble();
 
     // At least globally some DOFs must be fixed on the boundary
-    const size_t localFixed = dbc.getDOFs().size();
+    const size_t localFixed = std::get<IndexMap<Real>>(dbc.getDOFs()).size();
     size_t globalFixed = 0;
     boost::mpi::reduce(world, localFixed, globalFixed, std::plus<size_t>(), 0);
 
@@ -220,7 +220,7 @@ namespace Rodin::Tests::Unit
     TrialFunction uMPI(mpiFes);
     DirichletBC dbcMPI(uMPI, RealFunction(1.0));
     dbcMPI.assemble();
-    const size_t mpiFixed = dbcMPI.getDOFs().size();
+    const size_t mpiFixed = std::get<IndexMap<Real>>(dbcMPI.getDOFs()).size();
 
     // Sequential reference
     auto localMesh = makeShardableMesh(Polytope::Type::Triangle, { 4, 4 });
@@ -228,7 +228,7 @@ namespace Rodin::Tests::Unit
     TrialFunction uSeq(seqFes);
     DirichletBC dbcSeq(uSeq, RealFunction(1.0));
     dbcSeq.assemble();
-    const size_t seqFixed = dbcSeq.getDOFs().size();
+    const size_t seqFixed = std::get<IndexMap<Real>>(dbcSeq.getDOFs()).size();
 
     EXPECT_EQ(mpiFixed, seqFixed);
   }
@@ -254,7 +254,8 @@ namespace Rodin::Tests::Unit
     DirichletBC dbc(u, RealFunction(gValue));
     dbc.assemble();
 
-    for (const auto& [local, value] : dbc.getDOFs())
+    for (const auto& [local, value]
+           : std::get<IndexMap<Real>>(dbc.getDOFs()))
       EXPECT_NEAR(value, gValue, 1e-12);
   }
 
@@ -384,7 +385,7 @@ namespace Rodin::Tests::Unit
     DirichletBC dbc(u, RealFunction(gValue));
     dbc.assemble();
 
-    const size_t localFixed = dbc.getDOFs().size();
+    const size_t localFixed = std::get<IndexMap<Real>>(dbc.getDOFs()).size();
     size_t globalFixed = 0;
     boost::mpi::reduce(world, localFixed, globalFixed, std::plus<size_t>(), 0);
 
@@ -393,7 +394,8 @@ namespace Rodin::Tests::Unit
       EXPECT_GT(globalFixed, 0u);
     }
 
-    for (const auto& [local, value] : dbc.getDOFs())
+    for (const auto& [local, value]
+           : std::get<IndexMap<Real>>(dbc.getDOFs()))
       EXPECT_NEAR(value, gValue, 1e-12);
   }
 
@@ -416,7 +418,7 @@ namespace Rodin::Tests::Unit
     DirichletBC dbc(u, RealFunction(1.0));
     dbc.assemble();
 
-    const size_t localFixed = dbc.getDOFs().size();
+    const size_t localFixed = std::get<IndexMap<Real>>(dbc.getDOFs()).size();
     size_t globalFixed = 0;
     boost::mpi::reduce(world, localFixed, globalFixed, std::plus<size_t>(), 0);
 
@@ -445,7 +447,7 @@ namespace Rodin::Tests::Unit
     DirichletBC dbc(u, RealFunction(1.0));
     dbc.assemble();
 
-    const size_t localFixed = dbc.getDOFs().size();
+    const size_t localFixed = std::get<IndexMap<Real>>(dbc.getDOFs()).size();
     size_t globalFixed = 0;
     boost::mpi::reduce(world, localFixed, globalFixed, std::plus<size_t>(), 0);
 

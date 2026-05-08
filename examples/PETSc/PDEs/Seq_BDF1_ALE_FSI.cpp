@@ -813,7 +813,8 @@ int main(int argc, char** argv)
         Real maxFluidFSIVelocity = 0.0;
         Real maxWallFSIVelocity = 0.0;
 
-        for (const auto& [local, target] : fsiNoSlip.getDOFs())
+        for (const auto& [local, target]
+               : std::get<IndexMap<Real>>(fsiNoSlip.getDOFs()))
         {
           const PetscInt idx = static_cast<PetscInt>(local);
           PetscScalar actual = 0.0;

@@ -564,7 +564,23 @@ namespace Rodin::Assembly
           if (dbc.getOperand().getUUID() != u.getUUID())
             continue;
           dbc.assemble();
-          axb.eliminate(dbc.getDOFs());
+          std::visit([&](auto&& dofs)
+          {
+            using T = std::decay_t<decltype(dofs)>;
+            using MappedT = typename T::mapped_type;
+            if constexpr (std::is_arithmetic_v<MappedT>
+                       || std::is_same_v<MappedT, std::complex<float>>
+                       || std::is_same_v<MappedT, std::complex<double>>)
+            {
+              axb.eliminate(dofs);
+            }
+            else
+            {
+              // Identification BCs require a future axb.identify(...) hook
+              // on the PETSc linear-system shim; left as a no-op for now.
+              (void) dofs;
+            }
+          }, dbc.getDOFs());
         }
 
         (void) ierr;
@@ -1039,8 +1055,24 @@ namespace Rodin::Assembly
           const size_t uOff   = trialOffsets[uBlock];
 
           dbc.assemble();
-          const auto& dofs = dbc.getDOFs();
-          axb.eliminate(dofs, uOff);
+          std::visit([&](auto&& dofs)
+          {
+            using T = std::decay_t<decltype(dofs)>;
+            using MappedT = typename T::mapped_type;
+            if constexpr (std::is_arithmetic_v<MappedT>
+                       || std::is_same_v<MappedT, std::complex<float>>
+                       || std::is_same_v<MappedT, std::complex<double>>)
+            {
+              axb.eliminate(dofs, uOff);
+            }
+            else
+            {
+              // Identification BCs in this multi-block PETSc MPI path
+              // require a future axb.identify(dofs, uOff, vOff) hook;
+              // left as no-op for now.
+              (void) dofs;
+            }
+          }, dbc.getDOFs());
         }
 
         (void) ierr;

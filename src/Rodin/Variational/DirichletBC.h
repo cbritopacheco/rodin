@@ -43,6 +43,7 @@
 #include <variant>
 
 #include "Rodin/Utility.h"
+#include "Rodin/Math/Vector.h"
 #include "Rodin/FormLanguage/List.h"
 
 #include "Rodin/Assembly/ForwardDecls.h"
@@ -78,25 +79,47 @@ namespace Rodin::Variational
     public:
       using ScalarType = Scalar;
 
-      using DOFs = IndexMap<ScalarType>;
+      /**
+       * @brief DOF map for the value-based Dirichlet condition `u = g`.
+       *
+       * Maps each constrained global FES DOF index to its prescribed scalar
+       * value @f$ g(x_i) @f$.
+       */
+      using ValueDOFs = IndexMap<ScalarType>;
+
+      /**
+       * @brief DOF map for the identification-based Dirichlet condition
+       *        `u = A(v)`.
+       *
+       * Maps each slave DOF (in @f$ u @f$'s FES) to a pair of arrays:
+       *  - the master DOF indices in @f$ v @f$'s FES (FES-global, pre-offset),
+       *  - the corresponding scalar coefficients @f$ C_{sj} = [A(\varphi_j^v)](x_s) @f$.
+       *
+       * The constraint encoded is @f$ u_s = \sum_j C_{sj}\, v_j @f$.
+       */
+      using IdentifiedDOFs =
+        IndexMap<std::pair<IndexArray, Math::Vector<ScalarType>>>;
+
+      /**
+       * @brief Variant DOF type covering both Dirichlet semantics.
+       *
+       * The active alternative depends on which subclass produced it: a
+       * value-prescribing BC writes the @ref ValueDOFs alternative, an
+       * identification BC writes the @ref IdentifiedDOFs alternative.
+       */
+      using DOFs = std::variant<ValueDOFs, IdentifiedDOFs>;
 
       /**
        * @brief Assembles the Dirichlet boundary condition.
        *
-       * Computes the global DOF map for the Dirichlet boundary by evaluating
-       * the prescribed value at each boundary DOF. The result is a map
-       * @f$ \{(i, g(x_i))\} @f$ where @f$ i @f$ is the global DOF index and
-       * @f$ g(x_i) @f$ is the prescribed value at that DOF.
+       * Either fills the @ref ValueDOFs alternative (for value-prescribing
+       * BCs) or the @ref IdentifiedDOFs alternative (for identification BCs).
        */
       virtual void assemble() = 0;
 
       /**
-       * @brief Gets the map of constrained DOFs and their values.
-       * @return Map from global DOF index to prescribed value
-       *
-       * Returns the assembled DOF map containing pairs @f$ (i, g_i) @f$ where
-       * @f$ i @f$ is the global DOF index and @f$ g_i @f$ is the prescribed
-       * boundary value.
+       * @brief Gets the map of constrained DOFs.
+       * @return Variant holding either the ValueDOFs or the IdentifiedDOFs map.
        */
       virtual const DOFs& getDOFs() const = 0;
 
@@ -117,6 +140,16 @@ namespace Rodin::Variational
        * @return Reference to the function defining the BC value
        */
       virtual const FormLanguage::Base& getValue() const = 0;
+
+      /**
+       * @brief Returns the UUID of @f$ v @f$'s leaf trial function for an
+       *        identification BC, or @c nullopt for a value-prescribing BC.
+       *
+       * Consumer assemblies use this to locate @f$ v @f$'s trial block and
+       * apply the correct global offset when assembling identified-DOF
+       * constraints.
+       */
+      virtual Optional<Identifiable::UUID> getValueUUID() const { return {}; }
 
       /**
        * @brief Creates a polymorphic copy of this BC.
@@ -159,8 +192,14 @@ namespace Rodin::Variational
       using ScalarType =
         typename FormLanguage::Traits<FESType>::ScalarType;
 
-      using DOFs =
-        IndexMap<ScalarType>;
+      /// Parent class
+      using Parent = DirichletBCBase<ScalarType>;
+
+      /// Value DOF map type (the alternative populated by this specialization)
+      using ValueDOFs = typename Parent::ValueDOFs;
+
+      /// Variant DOFs type, inherited from Parent
+      using DOFs = typename Parent::DOFs;
 
       /// Value type
       using ValueType =
@@ -176,13 +215,10 @@ namespace Rodin::Variational
         typename FormLanguage::Traits<FESMeshType>::ContextType;
 
       using DefaultAssemblyType =
-        typename Assembly::Default<FESMeshContextType>::template Type<DOFs, DirichletBC>;
+        typename Assembly::Default<FESMeshContextType>::template Type<ValueDOFs, DirichletBC>;
 
       using AssemblyType =
         DefaultAssemblyType;
-
-      /// Parent class
-      using Parent = DirichletBCBase<ScalarType>;
 
       /**
        * @brief Constructs the object given the Operand and Value.
@@ -276,7 +312,11 @@ namespace Rodin::Variational
        */
       void assemble() override
       {
-        m_assembly.execute(m_dofs, { m_u.get(), *m_value, m_essBdr });
+        // Ensure variant holds the ValueDOFs alternative.
+        if (!std::holds_alternative<ValueDOFs>(m_dofs))
+          m_dofs = ValueDOFs{};
+        m_assembly.execute(
+            std::get<ValueDOFs>(m_dofs), { m_u.get(), *m_value, m_essBdr });
       }
 
       bool isComponent() const override
@@ -300,7 +340,7 @@ namespace Rodin::Variational
         return m_dofs;
       }
 
-      const Assembly::AssemblyBase<IndexMap<ScalarType>, DirichletBC>& getAssembly() const
+      const Assembly::AssemblyBase<ValueDOFs, DirichletBC>& getAssembly() const
       {
         assert(m_assembly);
         return *m_assembly;
@@ -315,7 +355,7 @@ namespace Rodin::Variational
       std::reference_wrapper<const OperandType> m_u;
       std::unique_ptr<ValueType> m_value;
       FlatSet<Geometry::Attribute> m_essBdr;
-      IndexMap<ScalarType> m_dofs;
+      DOFs m_dofs{ValueDOFs{}};
       AssemblyType m_assembly;
   };
 
@@ -328,6 +368,200 @@ namespace Rodin::Variational
   template <class Solution, class FES, class FunctionDerived>
   DirichletBC(const TrialFunction<Solution, FES>&, const FunctionBase<FunctionDerived>&)
     -> DirichletBC<TrialFunction<Solution, FES>, FunctionBase<FunctionDerived>>;
+
+  /**
+   * @ingroup DirichletBCSpecializations
+   * @brief Identification Dirichlet boundary condition `u = A(v)`.
+   *
+   * Constrains the DOFs of @f$ u @f$ on a boundary subset to equal a linear
+   * expression @f$ A(v) @f$, where @f$ v @f$ is itself a (trial) shape
+   * function and @f$ A @f$ is any expression that yields a
+   * @ref ShapeFunctionBase (e.g. @f$ v @f$ itself, a component
+   * @f$ v_x @f$, a product @f$ f \cdot v @f$, a matrix product
+   * @f$ R \cdot v @f$, etc.).
+   *
+   * The constraint encoded for each slave DOF @f$ s @f$ is
+   * @f[
+   *   u_s \;=\; \sum_j C_{sj}\, v_j \,, \qquad
+   *   C_{sj} \;=\; [A(\varphi_j^v)](x_s)
+   * @f]
+   * with all DOF pairings determined exactly by the FES connectivity
+   * (`getDOFs(face)`) — no geometric search and no tolerance.
+   *
+   * @tparam Solution Solution type of the trial @f$ u @f$
+   * @tparam FES1 Finite element space of @f$ u @f$
+   * @tparam Derived2 CRTP-derived type of @f$ A(v) @f$
+   * @tparam FES2 Finite element space of @f$ v @f$
+   * @tparam Sp Shape function space type (Trial or Test) of @f$ A(v) @f$
+   */
+  template <class Solution, class FES1,
+            class Derived2, class FES2, ShapeFunctionSpaceType Sp>
+  class DirichletBC<TrialFunction<Solution, FES1>,
+                    ShapeFunctionBase<Derived2, FES2, Sp>> final
+    : public DirichletBCBase<typename FormLanguage::Traits<FES1>::ScalarType>
+  {
+    public:
+      using FESType = FES1;
+
+      /// Operand type (the slave trial function)
+      using OperandType = TrialFunction<Solution, FESType>;
+
+      /// Value type (the right-hand-side shape function expression)
+      using ValueType = ShapeFunctionBase<Derived2, FES2, Sp>;
+
+      /// Scalar type
+      using ScalarType =
+        typename FormLanguage::Traits<FESType>::ScalarType;
+
+      /// Parent class
+      using Parent = DirichletBCBase<ScalarType>;
+
+      /// Identified-DOFs alternative populated by this specialization
+      using IdentifiedDOFs = typename Parent::IdentifiedDOFs;
+
+      /// Variant DOFs type
+      using DOFs = typename Parent::DOFs;
+
+      using FESMeshType =
+        typename FormLanguage::Traits<FESType>::MeshType;
+
+      using FESRangeType =
+        typename FormLanguage::Traits<FESType>::RangeType;
+
+      using FESMeshContextType =
+        typename FormLanguage::Traits<FESMeshType>::ContextType;
+
+      using DefaultAssemblyType =
+        typename Assembly::Default<FESMeshContextType>::template Type<IdentifiedDOFs, DirichletBC>;
+
+      using AssemblyType =
+        DefaultAssemblyType;
+
+      /**
+       * @brief Constructs the identification Dirichlet BC.
+       * @param[in] u Slave trial function
+       * @param[in] v Right-hand-side shape function expression @f$ A(v) @f$
+       */
+      DirichletBC(const OperandType& u, const ValueType& v)
+        : m_u(u), m_v(v.copy())
+      {}
+
+      /// Copy constructor
+      DirichletBC(const DirichletBC& other)
+        : Parent(other),
+          m_u(other.m_u),
+          m_v(other.m_v->copy()),
+          m_essBdr(other.m_essBdr),
+          m_dofs(other.m_dofs),
+          m_assembly(other.m_assembly)
+      {}
+
+      /// Move constructor
+      DirichletBC(DirichletBC&& other)
+        : Parent(std::move(other)),
+          m_u(std::move(other.m_u)),
+          m_v(std::move(other.m_v)),
+          m_essBdr(std::move(other.m_essBdr)),
+          m_dofs(std::move(other.m_dofs)),
+          m_assembly(std::move(other.m_assembly))
+      {}
+
+      /**
+       * @brief Specifies the boundary attribute over which the BC applies.
+       */
+      constexpr
+      DirichletBC& on(Geometry::Attribute bdrAtr)
+      {
+        return on(FlatSet<Geometry::Attribute>{bdrAtr});
+      }
+
+      template <class A1, class A2, class ... As>
+      constexpr
+      DirichletBC& on(A1 a1, A2 a2, As... as)
+      {
+        return on(FlatSet<Geometry::Attribute>{ a1, a2, as... });
+      }
+
+      /**
+       * @brief Specifies the set of boundary attributes for the BC.
+       */
+      constexpr
+      DirichletBC& on(const FlatSet<Geometry::Attribute>& bdrAttrs)
+      {
+        assert(bdrAttrs.size() > 0);
+        m_essBdr = bdrAttrs;
+        return *this;
+      }
+
+      constexpr
+      const FlatSet<Geometry::Attribute>& getAttributes() const
+      {
+        return m_essBdr;
+      }
+
+      void assemble() override
+      {
+        if (!std::holds_alternative<IdentifiedDOFs>(m_dofs))
+          m_dofs = IdentifiedDOFs{};
+        m_assembly.execute(
+            std::get<IdentifiedDOFs>(m_dofs), { m_u.get(), *m_v, m_essBdr });
+      }
+
+      bool isComponent() const override
+      {
+        return false;
+      }
+
+      const OperandType& getOperand() const override
+      {
+        return m_u.get();
+      }
+
+      const ValueType& getValue() const override
+      {
+        assert(m_v);
+        return *m_v;
+      }
+
+      const DOFs& getDOFs() const override
+      {
+        return m_dofs;
+      }
+
+      Optional<Identifiable::UUID> getValueUUID() const override
+      {
+        assert(m_v);
+        return m_v->getLeaf().getUUID();
+      }
+
+      const Assembly::AssemblyBase<IdentifiedDOFs, DirichletBC>& getAssembly() const
+      {
+        return m_assembly;
+      }
+
+      DirichletBC* copy() const noexcept override
+      {
+        return new DirichletBC(*this);
+      }
+
+    private:
+      std::reference_wrapper<const OperandType> m_u;
+      std::unique_ptr<ValueType> m_v;
+      FlatSet<Geometry::Attribute> m_essBdr;
+      DOFs m_dofs{IdentifiedDOFs{}};
+      AssemblyType m_assembly;
+  };
+
+  /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for the identification DirichletBC.
+   */
+  template <class Solution, class FES1,
+            class Derived2, class FES2, ShapeFunctionSpaceType Sp>
+  DirichletBC(const TrialFunction<Solution, FES1>&,
+              const ShapeFunctionBase<Derived2, FES2, Sp>&)
+    -> DirichletBC<TrialFunction<Solution, FES1>,
+                   ShapeFunctionBase<Derived2, FES2, Sp>>;
 }
 
 #endif

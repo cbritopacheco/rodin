@@ -771,10 +771,15 @@ namespace Rodin::Assembly
         }();
 
         // ------------------------------------------------------------
-        // Dirichlet BC elimination data (NaN sentinel, global indexing)
+        // Dirichlet BC elimination + identification data
         // ------------------------------------------------------------
         const size_t ndofs = std::max(nrows, ncols);
+        // Value-prescribed DOFs: NaN sentinel = "not fixed", scalar = value.
         std::vector<ScalarType> fixed(ndofs, Math::nan<ScalarType>());
+        // Identification entries: identified[gs] = list of (gm, c) so that
+        // u_{gs} = sum_k c_k * u_{gm_k}.
+        std::vector<std::vector<std::pair<Index, ScalarType>>>
+            identified(ndofs);
 
         auto isFixed = [&](Index i) -> bool
         {
@@ -787,6 +792,17 @@ namespace Rodin::Assembly
           return fixed[static_cast<size_t>(i)];
         };
 
+        auto isIdentified = [&](Index i) -> bool
+        {
+          const size_t k = static_cast<size_t>(i);
+          return k < identified.size() && !identified[k].empty();
+        };
+
+        using DBCBaseType =
+          Variational::DirichletBCBase<ScalarType>;
+        using ValueDOFsType    = typename DBCBaseType::ValueDOFs;
+        using IdentDOFsType    = typename DBCBaseType::IdentifiedDOFs;
+
         for (auto& dbc : pb.getDBCs())
         {
           const auto uUUID = dbc.getOperand().getUUID();
@@ -794,13 +810,47 @@ namespace Rodin::Assembly
           const size_t uOff   = trialOffsets[uBlock];
 
           dbc.assemble();
-          const auto& dofs = dbc.getDOFs();
-          for (const auto& [local, value] : dofs)
+          std::visit([&](auto&& dofs)
           {
-            const Index g = static_cast<Index>(uOff + static_cast<size_t>(local));
-            if (static_cast<size_t>(g) < fixed.size())
-              fixed[static_cast<size_t>(g)] = static_cast<ScalarType>(value);
-          }
+            using T = std::decay_t<decltype(dofs)>;
+            if constexpr (std::is_same_v<T, ValueDOFsType>)
+            {
+              for (const auto& [local, value] : dofs)
+              {
+                const Index g = static_cast<Index>(
+                    uOff + static_cast<size_t>(local));
+                if (static_cast<size_t>(g) < fixed.size())
+                  fixed[static_cast<size_t>(g)] =
+                      static_cast<ScalarType>(value);
+              }
+            }
+            else if constexpr (std::is_same_v<T, IdentDOFsType>)
+            {
+              const auto vUUIDOpt = dbc.getValueUUID();
+              assert(vUUIDOpt
+                  && "Identification DBC missing value UUID");
+              const size_t vBlock = findTrialBlock(*vUUIDOpt);
+              const size_t vOff   = trialOffsets[vBlock];
+              for (const auto& [slave, pair] : dofs)
+              {
+                const auto& masters = pair.first;
+                const auto& coeffs  = pair.second;
+                const Index gs = static_cast<Index>(
+                    uOff + static_cast<size_t>(slave));
+                if (static_cast<size_t>(gs) >= identified.size())
+                  continue;
+                const Index n =
+                    static_cast<Index>(masters.size());
+                for (Index k = 0; k < n; k++)
+                {
+                  const Index gm = static_cast<Index>(
+                      vOff + static_cast<size_t>(masters[k]));
+                  identified[static_cast<size_t>(gs)].emplace_back(
+                      gm, static_cast<ScalarType>(coeffs[k]));
+                }
+              }
+            }
+          }, dbc.getDOFs());
         }
 
         // ------------------------------------------------------------
@@ -816,12 +866,24 @@ namespace Rodin::Assembly
             const bool rowFixed = isFixed(row);
             const bool colFixed = isFixed(col);
 
-            if (rowFixed)
+            // Slave rows of identification BCs are written separately as
+            // constraint rows after the main triplet pass.
+            if (rowFixed || isIdentified(row))
               return;
 
             if (colFixed && row != col)
             {
               b.coeffRef(row) -= val * fixedValue(col);
+              return;
+            }
+
+            // Redirect contributions from identified slave columns to their
+            // master(s), preserving u_slave = sum_k c_k * u_master_k.
+            if (isIdentified(col))
+            {
+              for (const auto& [gm, c]
+                     : identified[static_cast<size_t>(col)])
+                triplets.emplace_back(row, gm, val * c);
               return;
             }
 
@@ -1071,11 +1133,36 @@ namespace Rodin::Assembly
             }
           }
 
+          // Write identification constraint rows:
+          //   u_gs - sum_k c_k * u_gm_k = 0
+          for (size_t gs = 0; gs < identified.size(); gs++)
+          {
+            if (identified[gs].empty()) continue;
+            const Index gsi = static_cast<Index>(gs);
+            triplets.emplace_back(gsi, gsi, ScalarType(1));
+            for (const auto& [gm, c] : identified[gs])
+              triplets.emplace_back(gsi, gm, -c);
+            b.coeffRef(gsi) = ScalarType(0);
+          }
+
           A.resize(nrows, ncols);
           A.setFromTriplets(triplets.begin(), triplets.end());
         }
         else
         {
+          // Dense: write identification constraint rows directly.
+          for (size_t gs = 0; gs < identified.size(); gs++)
+          {
+            if (identified[gs].empty()) continue;
+            const Index gsi = static_cast<Index>(gs);
+            for (Index c = 0; c < static_cast<Index>(ncols); ++c)
+              A(gsi, c) = ScalarType(0);
+            A(gsi, gsi) = ScalarType(1);
+            for (const auto& [gm, c] : identified[gs])
+              A(gsi, gm) -= c;
+            b.coeffRef(gsi) = ScalarType(0);
+          }
+
           for (Index idx = 0; idx < static_cast<Index>(nrows); ++idx)
           {
             if (!isFixed(idx))
@@ -1172,14 +1259,27 @@ namespace Rodin::Assembly
           std::is_base_of_v<Eigen::SparseMatrixBase<OperatorType>, OperatorType>;
 
         // ------------------------------------------------------------
-        // Dirichlet BC elimination data (NaN sentinel)
+        // Dirichlet BC elimination + identification data
         // ------------------------------------------------------------
         std::vector<ScalarType> fixed(rows, Math::nan<ScalarType>());
+        std::vector<std::vector<std::pair<Index, ScalarType>>>
+            identified(cols);
 
         auto isFixed = [&](Index i) -> bool
         {
           return !Math::isNaN(fixed[static_cast<size_t>(i)]);
         };
+
+        auto isIdentified = [&](Index i) -> bool
+        {
+          const size_t k = static_cast<size_t>(i);
+          return k < identified.size() && !identified[k].empty();
+        };
+
+        using DBCBaseType =
+          Variational::DirichletBCBase<ScalarType>;
+        using ValueDOFsType = typename DBCBaseType::ValueDOFs;
+        using IdentDOFsType = typename DBCBaseType::IdentifiedDOFs;
 
         for (auto& dbc : pb.getDBCs())
         {
@@ -1187,9 +1287,37 @@ namespace Rodin::Assembly
             continue;
 
           dbc.assemble();
-          const auto& dofs = dbc.getDOFs();
-          for (const auto& [local, value] : dofs)
-            fixed[static_cast<size_t>(local)] = static_cast<ScalarType>(value);
+          std::visit([&](auto&& dofs)
+          {
+            using T = std::decay_t<decltype(dofs)>;
+            if constexpr (std::is_same_v<T, ValueDOFsType>)
+            {
+              for (const auto& [local, value] : dofs)
+                fixed[static_cast<size_t>(local)] =
+                    static_cast<ScalarType>(value);
+            }
+            else if constexpr (std::is_same_v<T, IdentDOFsType>)
+            {
+              // Single-FES problem: master must live in the same block as
+              // the slave (i.e. v.getLeaf() and u share the same FES); we
+              // therefore use no offset.
+              for (const auto& [slave, pair] : dofs)
+              {
+                const auto& masters = pair.first;
+                const auto& coeffs  = pair.second;
+                if (static_cast<size_t>(slave) >= identified.size())
+                  continue;
+                const Index n =
+                    static_cast<Index>(masters.size());
+                for (Index k = 0; k < n; k++)
+                {
+                  identified[static_cast<size_t>(slave)].emplace_back(
+                      static_cast<Index>(masters[k]),
+                      static_cast<ScalarType>(coeffs[k]));
+                }
+              }
+            }
+          }, dbc.getDOFs());
         }
 
         // ------------------------------------------------------------
@@ -1216,12 +1344,20 @@ namespace Rodin::Assembly
             const bool rowFixed = isFixed(row);
             const bool colFixed = isFixed(col);
 
-            if (rowFixed)
+            if (rowFixed || isIdentified(row))
               return;
 
             if (colFixed && row != col)
             {
               b.coeffRef(row) -= val * fixed[static_cast<size_t>(col)];
+              return;
+            }
+
+            if (isIdentified(col))
+            {
+              for (const auto& [gm, c]
+                     : identified[static_cast<size_t>(col)])
+                triplets.emplace_back(row, gm, val * c);
               return;
             }
 
@@ -1373,11 +1509,35 @@ namespace Rodin::Assembly
             }
           }
 
+          // Identification constraint rows: u_gs - sum_k c_k * u_gm_k = 0
+          for (size_t gs = 0; gs < identified.size(); gs++)
+          {
+            if (identified[gs].empty()) continue;
+            const Index gsi = static_cast<Index>(gs);
+            triplets.emplace_back(gsi, gsi, ScalarType(1));
+            for (const auto& [gm, c] : identified[gs])
+              triplets.emplace_back(gsi, gm, -c);
+            b.coeffRef(gsi) = ScalarType(0);
+          }
+
           A.resize(rows, cols);
           A.setFromTriplets(triplets.begin(), triplets.end());
         }
         else
         {
+          // Dense: identification constraint rows
+          for (size_t gs = 0; gs < identified.size(); gs++)
+          {
+            if (identified[gs].empty()) continue;
+            const Index gsi = static_cast<Index>(gs);
+            for (size_t c = 0; c < cols; ++c)
+              A(gsi, c) = ScalarType(0);
+            A(gsi, gsi) = ScalarType(1);
+            for (const auto& [gm, c] : identified[gs])
+              A(gsi, gm) -= c;
+            b.coeffRef(gsi) = ScalarType(0);
+          }
+
           // Dense elimination after full assembly (your original approach, driven by fixedValue)
           for (Index idx = 0; idx < static_cast<Index>(rows); ++idx)
           {
@@ -1478,6 +1638,124 @@ namespace Rodin::Assembly
               if (find == res.end())
                 res.insert(find, std::pair{ global, fe.getLinearForm(local)(mapping) });
             }
+          }
+        }
+      }
+
+      Sequential* copy() const noexcept override
+      {
+        return new Sequential(*this);
+      }
+  };
+
+  /**
+   * @brief Sequential assembler for the identification Dirichlet BC
+   *        `u = A(v)`.
+   *
+   * Iterates the boundary faces of @f$ u @f$'s mesh that match the requested
+   * essential-boundary attributes; on each face, the slave DOFs (from
+   * @f$ u @f$'s FES) and the master DOFs (from @f$ v @f$'s FES) are obtained
+   * exactly via @c FiniteElementSpaceBase::getDOFs(face) — no geometric
+   * matching, no tolerance.
+   *
+   * For each slave DOF a pair @c (masters, coefficients) is emitted. The
+   * coefficient computation uses the simple-case shortcut (coefficient
+   * @c 1.0 for the matching local index), which is exact for Lagrange
+   * same-FES same-mesh identification with @f$ A = \mathrm{id} @f$. The
+   * extension point for general @f$ A(v) @f$ is documented inline.
+   */
+  template <class Scalar, class Sol1, class FES1,
+            class Derived2, class FES2,
+            Variational::ShapeFunctionSpaceType Sp>
+  class Sequential<
+    IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>,
+    Variational::DirichletBC<
+      Variational::TrialFunction<Sol1, FES1>,
+      Variational::ShapeFunctionBase<Derived2, FES2, Sp>>> final
+    : public AssemblyBase<
+        IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>,
+        Variational::DirichletBC<
+          Variational::TrialFunction<Sol1, FES1>,
+          Variational::ShapeFunctionBase<Derived2, FES2, Sp>>>
+  {
+    public:
+      using OutputType = IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>;
+
+      using TrialFunctionType = Variational::TrialFunction<Sol1, FES1>;
+
+      using ValueType = Variational::ShapeFunctionBase<Derived2, FES2, Sp>;
+
+      using DirichletBCType =
+        Variational::DirichletBC<TrialFunctionType, ValueType>;
+
+      using Parent = AssemblyBase<OutputType, DirichletBCType>;
+
+      using InputType = typename Parent::InputType;
+
+      Sequential() = default;
+
+      Sequential(const Sequential& other)
+        : Parent(other)
+      {}
+
+      Sequential(Sequential&& other)
+        : Parent(std::move(other))
+      {}
+
+      void execute(OutputType& res, const InputType& input) const override
+      {
+        const auto& u      = input.getOperand();
+        const auto& Av     = input.getShapeFunction();
+        const auto& essBdr = input.getEssentialBoundary();
+
+        const auto& fes_u  = u.getFiniteElementSpace();
+        const auto& fes_v  = Av.getLeaf().getFiniteElementSpace();
+        const auto& mesh   = fes_u.getMesh();
+        const size_t faceCount = mesh.getFaceCount();
+        const size_t faceDim   = mesh.getDimension() - 1;
+
+        res.clear();
+        for (Index fi = 0; fi < faceCount; fi++)
+        {
+          if (!mesh.isBoundary(fi))
+            continue;
+
+          if (!essBdr.empty())
+          {
+            const auto a = mesh.getAttribute(faceDim, fi);
+            if (!a || !essBdr.count(*a))
+              continue;
+          }
+
+          const auto& slaveDOFs  = fes_u.getDOFs(faceDim, fi);
+          const auto& masterDOFs = fes_v.getDOFs(faceDim, fi);
+          assert(slaveDOFs.size() == masterDOFs.size()
+                 && "DirichletBC(u, A(v)): slave and master FES disagree on "
+                    "DOF count for a shared face. Both FES must agree on "
+                    "boundary DOF layout.");
+
+          for (Index local = 0;
+               local < static_cast<Index>(slaveDOFs.size());
+               local++)
+          {
+            const Index slave = slaveDOFs[local];
+            if (res.find(slave) != res.end())
+              continue;
+
+            // Simple-case coefficient computation: for matching FES on the
+            // same face with A = identity, only the local-th basis is
+            // non-zero at slave node `local` (Lagrange/nodal). The
+            // coefficient is therefore 1.0. General A(v) should be routed
+            // through a small FE/FES interpolation-functional API so this
+            // code asks to evaluate Av at the slave DOF functional, rather
+            // than manufacturing an IntegrationPoint here.
+            IndexArray masters(1);
+            masters.coeffRef(0) = masterDOFs[local];
+            Math::Vector<Scalar> coeffs(1);
+            coeffs.coeffRef(0) = static_cast<Scalar>(1);
+
+            res.emplace(slave,
+                std::pair{ std::move(masters), std::move(coeffs) });
           }
         }
       }

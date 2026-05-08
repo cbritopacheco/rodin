@@ -432,7 +432,7 @@ int main(int argc, char** argv)
     const PetscInt np = static_cast<PetscInt>(ph.getSize());
 
     dbc.assemble();
-    const auto& bc_dofs = dbc.getDOFs();
+    const auto& bc_dofs = std::get<IndexMap<Real>>(dbc.getDOFs());
     const std::vector<PetscInt> bc_u_idx = ExtractConstrainedIndices(bc_dofs);
 
     MatNullSpace nsp = AttachPressureNullspace(A, nu, np);
