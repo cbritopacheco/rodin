@@ -81,6 +81,8 @@ TEST_F(CentroidTest, DifferentGeometryTypes)
     Polytope::Type::Quadrilateral,
     Polytope::Type::Tetrahedron,
     Polytope::Type::Pyramid,
+    Polytope::Type::Hexahedron,
+    Polytope::Type::Wedge,
   };
 
   for (auto geom : geometries) {
