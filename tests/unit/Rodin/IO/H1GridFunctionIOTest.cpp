@@ -249,7 +249,7 @@ namespace Rodin::Tests::Unit
       roundTripMFEMScalarFixtureCaseAndCompare<K>("wedge", 1e-9);
     }
 
-    Mesh makeUniform3DMeshForH1RoundTrip(Polytope::Type geometry)
+    Mesh<Context::Local> makeUniform3DMeshForH1RoundTrip(Polytope::Type geometry)
     {
       return LocalMesh::UniformGrid(geometry, { 3, 3, 3 });
     }
