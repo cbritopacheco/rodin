@@ -233,6 +233,31 @@ TEST_F(GaussLegendreTest, WedgeGeometry)
   EXPECT_NEAR(total_weight, 0.5, 1e-12);
 }
 
+// Test Hexahedron geometry
+TEST_F(GaussLegendreTest, HexahedronGeometry)
+{
+  GaussLegendre gl_hex(Polytope::Type::Hexahedron, 2, 2, 2);
+  EXPECT_EQ(gl_hex.getSize(), 8);
+  EXPECT_EQ(gl_hex.getGeometry(), Polytope::Type::Hexahedron);
+
+  double total_weight = 0.0;
+  for (size_t i = 0; i < gl_hex.getSize(); ++i)
+  {
+    const auto& point = gl_hex.getPoint(i);
+    EXPECT_EQ(point.size(), 3);
+    EXPECT_GE(point[0], 0.0);
+    EXPECT_GE(point[1], 0.0);
+    EXPECT_GE(point[2], 0.0);
+    EXPECT_LE(point[0], 1.0);
+    EXPECT_LE(point[1], 1.0);
+    EXPECT_LE(point[2], 1.0);
+
+    total_weight += gl_hex.getWeight(i);
+  }
+
+  EXPECT_NEAR(total_weight, 1.0, 1e-12);
+}
+
 // Test Pyramid geometry
 TEST_F(GaussLegendreTest, PyramidGeometry)
 {
