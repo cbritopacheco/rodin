@@ -283,25 +283,14 @@ namespace Rodin::Variational
        * This is the preferred path while integrating: it carries both the
        * geometric point and its quadrature metadata so shape functions can
        * reuse tabulations and cache entries tied to the active quadrature rule.
+       * For pointwise evaluations outside a quadrature loop, construct an
+       * @ref IntegrationPoint from a @ref Geometry::Point (which sets a
+       * @c nullptr quadrature formula) and pass it here.
        */
       constexpr
       Derived& setIntegrationPoint(const IntegrationPoint& ip)
       {
         return static_cast<Derived&>(*this).setIntegrationPoint(ip);
-      }
-
-      /**
-       * @brief Sets the current evaluation point outside a quadrature loop.
-       *
-       * Use this for point evaluation contexts, such as DOF functionals that
-       * already provide a @ref Geometry::Point. Prefer @ref setIntegrationPoint
-       * inside integration loops.
-       */
-      Derived& setPoint(const Geometry::Point& p)
-      {
-        m_pointIntegrationPoint.emplace(p);
-        return static_cast<Derived&>(*this).setIntegrationPoint(
-            *m_pointIntegrationPoint);
       }
 
       /**
@@ -389,7 +378,6 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const FES> m_fes;
-      Optional<IntegrationPoint> m_pointIntegrationPoint;
   };
 }
 

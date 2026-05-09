@@ -2101,7 +2101,7 @@ namespace Rodin::Assembly
               auto basisCallable = [&Av, j]
                                    (const Geometry::Point& p)
               {
-                Av.setPoint(p);
+                Av.setIntegrationPoint(Variational::IntegrationPoint(p));
                 return Av.getBasis(static_cast<size_t>(j));
               };
               const auto mapping =

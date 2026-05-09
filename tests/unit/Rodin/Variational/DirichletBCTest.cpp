@@ -224,7 +224,7 @@ namespace Rodin::Tests::Unit
     auto it = mesh.getPolytope(D, 0);
     const Geometry::Point p(*it, rc);
 
-    v.setPoint(p);
+    v.setIntegrationPoint(IntegrationPoint(p));
 
     const auto& fe = fes.getFiniteElement(D, 0);
     for (size_t local = 0; local < fe.getCount(); local++)
@@ -248,7 +248,7 @@ namespace Rodin::Tests::Unit
     auto it = mesh.getPolytope(D, 0);
     const Geometry::Point p(*it, rc);
 
-    gv.setPoint(p);
+    gv.setIntegrationPoint(IntegrationPoint(p));
 
     const auto& fe = fes.getFiniteElement(D, 0);
     const auto JinvT = p.getJacobianInverse().transpose();
