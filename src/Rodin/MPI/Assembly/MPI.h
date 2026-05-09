@@ -7,6 +7,9 @@
  */
 
 #include "Rodin/Variational/Integrator.h"
+#include "Rodin/Variational/IntegrationPoint.h"
+
+#include "Rodin/QF/SinglePointQF.h"
 
 #include "Rodin/MPI/Geometry/Mesh.h"
 #include "Rodin/Assembly/AssemblyBase.h"
@@ -235,12 +238,12 @@ namespace Rodin::Assembly
 
       void execute(OutputType& res, const InputType& input) const override
       {
-        const auto& u      = input.getOperand();
-        const auto& Av     = input.getShapeFunction();
+        const auto& u = input.getOperand();
+        auto& Av = const_cast<ValueType&>(input.getShapeFunction());
         const auto& essBdr = input.getEssentialBoundary();
-        const auto& fes_u  = u.getFiniteElementSpace();
-        const auto& fes_v  = Av.getLeaf().getFiniteElementSpace();
-        const auto& mesh   = fes_u.getMesh();
+        const auto& fes_u = u.getFiniteElementSpace();
+        const auto& fes_v = Av.getLeaf().getFiniteElementSpace();
+        const auto& mesh  = fes_u.getMesh();
         const size_t faceDim = mesh.getDimension() - 1;
 
         for (auto it = mesh.getBoundary(); it; ++it)
@@ -254,20 +257,58 @@ namespace Rodin::Assembly
             if (!a || !essBdr.contains(*a)) continue;
           }
 
+          const auto& fe_u = fes_u.getFiniteElement(faceDim, fi);
+          const auto& fe_v = fes_v.getFiniteElement(faceDim, fi);
           const auto& slaveDOFs  = fes_u.getDOFs(faceDim, fi);
           const auto& masterDOFs = fes_v.getDOFs(faceDim, fi);
-          assert(slaveDOFs.size() == masterDOFs.size());
-          for (Index local = 0;
-               local < static_cast<Index>(slaveDOFs.size());
-               local++)
+
+          const Index nMasters = static_cast<Index>(fe_v.getCount());
+          size_t ipCounter = 0;
+
+          for (Index s = 0;
+               s < static_cast<Index>(fe_u.getCount());
+               s++)
           {
-            const Index slave = slaveDOFs[local];
+            const Index slave = slaveDOFs[s];
             auto pos = res.find(slave);
             if (pos != res.end()) continue;
-            IndexArray masters(1);
-            masters.coeffRef(0) = masterDOFs[local];
-            Math::Vector<Scalar> coeffs(1);
-            coeffs.coeffRef(0) = static_cast<Scalar>(1);
+
+            std::vector<Index>  mIdx;
+            std::vector<Scalar> mCoef;
+            mIdx.reserve(static_cast<size_t>(nMasters));
+            mCoef.reserve(static_cast<size_t>(nMasters));
+
+            for (Index j = 0; j < nMasters; j++)
+            {
+              auto basisCallable = [&Av, j, &ipCounter]
+                                   (const Geometry::Point& p)
+              {
+                QF::SinglePointQF qf(p.getReferenceCoordinates());
+                Variational::IntegrationPoint ip(p, qf, ipCounter++);
+                Av.setIntegrationPoint(ip);
+                return Av.getBasis(static_cast<size_t>(j));
+              };
+              const auto mapping =
+                fes_u.getPullback({ faceDim, fi }, std::move(basisCallable));
+              const Scalar c =
+                static_cast<Scalar>(fe_u.getLinearForm(s)(mapping));
+              if (c != Scalar(0))
+              {
+                mIdx.push_back(masterDOFs[j]);
+                mCoef.push_back(c);
+              }
+            }
+
+            if (mIdx.empty()) continue;
+
+            const Index n = static_cast<Index>(mIdx.size());
+            IndexArray masters(n);
+            Math::Vector<Scalar> coeffs(n);
+            for (Index k = 0; k < n; k++)
+            {
+              masters.coeffRef(k) = mIdx[static_cast<size_t>(k)];
+              coeffs.coeffRef(k)  = mCoef[static_cast<size_t>(k)];
+            }
             res.emplace_hint(pos, slave,
                 std::pair{ std::move(masters), std::move(coeffs) });
           }

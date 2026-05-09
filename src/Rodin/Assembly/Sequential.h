@@ -24,6 +24,9 @@
 #include "Rodin/Geometry/Region.h"
 
 #include "Rodin/Variational/ForwardDecls.h"
+#include "Rodin/Variational/IntegrationPoint.h"
+
+#include "Rodin/QF/SinglePointQF.h"
 
 #include "Rodin/Assembly/AssemblyBase.h"
 
@@ -1704,13 +1707,17 @@ namespace Rodin::Assembly
 
       void execute(OutputType& res, const InputType& input) const override
       {
-        const auto& u      = input.getOperand();
-        const auto& Av     = input.getShapeFunction();
+        const auto& u = input.getOperand();
+        // setIntegrationPoint mutates internal evaluation state; the input
+        // exposes Av as const, but we need to drive its IP cursor while
+        // probing each basis. The mutation is purely evaluation state, not
+        // semantic.
+        auto& Av = const_cast<ValueType&>(input.getShapeFunction());
         const auto& essBdr = input.getEssentialBoundary();
 
-        const auto& fes_u  = u.getFiniteElementSpace();
-        const auto& fes_v  = Av.getLeaf().getFiniteElementSpace();
-        const auto& mesh   = fes_u.getMesh();
+        const auto& fes_u = u.getFiniteElementSpace();
+        const auto& fes_v = Av.getLeaf().getFiniteElementSpace();
+        const auto& mesh  = fes_u.getMesh();
         const size_t faceCount = mesh.getFaceCount();
         const size_t faceDim   = mesh.getDimension() - 1;
 
@@ -1727,33 +1734,75 @@ namespace Rodin::Assembly
               continue;
           }
 
+          const auto& fe_u = fes_u.getFiniteElement(faceDim, fi);
+          const auto& fe_v = fes_v.getFiniteElement(faceDim, fi);
           const auto& slaveDOFs  = fes_u.getDOFs(faceDim, fi);
           const auto& masterDOFs = fes_v.getDOFs(faceDim, fi);
-          assert(slaveDOFs.size() == masterDOFs.size()
-                 && "DirichletBC(u, A(v)): slave and master FES disagree on "
-                    "DOF count for a shared face. Both FES must agree on "
-                    "boundary DOF layout.");
 
-          for (Index local = 0;
-               local < static_cast<Index>(slaveDOFs.size());
-               local++)
+          const Index nMasters = static_cast<Index>(fe_v.getCount());
+
+          // Counter forwarded as the IP's qp index. Shape-function caches
+          // typically key on (QF*, qp); incrementing this monotonically per
+          // sample point guarantees cache invalidation between distinct
+          // physical positions even when the SinglePointQF stack address is
+          // reused across iterations.
+          size_t ipCounter = 0;
+
+          for (Index s = 0;
+               s < static_cast<Index>(fe_u.getCount());
+               s++)
           {
-            const Index slave = slaveDOFs[local];
+            const Index slave = slaveDOFs[s];
             if (res.find(slave) != res.end())
               continue;
 
-            // Simple-case coefficient computation: for matching FES on the
-            // same face with A = identity, only the local-th basis is
-            // non-zero at slave node `local` (Lagrange/nodal). The
-            // coefficient is therefore 1.0. General A(v) should be routed
-            // through a small FE/FES interpolation-functional API so this
-            // code asks to evaluate Av at the slave DOF functional, rather
-            // than manufacturing an IntegrationPoint here.
-            IndexArray masters(1);
-            masters.coeffRef(0) = masterDOFs[local];
-            Math::Vector<Scalar> coeffs(1);
-            coeffs.coeffRef(0) = static_cast<Scalar>(1);
+            // Compute the constraint row C_{sj} = ℓ_s^u(A(φ_j^v)) for each
+            // master j. We construct a callable that, given a Geometry::Point
+            // p, evaluates A(φ_j^v)(p) by setting Av's integration point at
+            // p's reference coordinates (carried by a single-point QF) and
+            // pulling the j-th basis. The slave-FES pullback drives this
+            // through whatever evaluation pattern the slave DOF functional
+            // uses (point evaluation for Lagrange, integral for moment-based
+            // elements, etc.) — making this work for any FES whose
+            // FiniteElement::LinearForm operates on a (Geometry::Point ->
+            // value) callable through the FES pullback.
+            std::vector<Index>  mIdx;
+            std::vector<Scalar> mCoef;
+            mIdx.reserve(static_cast<size_t>(nMasters));
+            mCoef.reserve(static_cast<size_t>(nMasters));
 
+            for (Index j = 0; j < nMasters; j++)
+            {
+              auto basisCallable = [&Av, j, &ipCounter]
+                                   (const Geometry::Point& p)
+              {
+                QF::SinglePointQF qf(p.getReferenceCoordinates());
+                Variational::IntegrationPoint ip(p, qf, ipCounter++);
+                Av.setIntegrationPoint(ip);
+                return Av.getBasis(static_cast<size_t>(j));
+              };
+              const auto mapping =
+                fes_u.getPullback({ faceDim, fi }, std::move(basisCallable));
+              const Scalar c =
+                static_cast<Scalar>(fe_u.getLinearForm(s)(mapping));
+              if (c != Scalar(0))
+              {
+                mIdx.push_back(masterDOFs[j]);
+                mCoef.push_back(c);
+              }
+            }
+
+            if (mIdx.empty())
+              continue;
+
+            const Index n = static_cast<Index>(mIdx.size());
+            IndexArray masters(n);
+            Math::Vector<Scalar> coeffs(n);
+            for (Index k = 0; k < n; k++)
+            {
+              masters.coeffRef(k) = mIdx[static_cast<size_t>(k)];
+              coeffs.coeffRef(k)  = mCoef[static_cast<size_t>(k)];
+            }
             res.emplace(slave,
                 std::pair{ std::move(masters), std::move(coeffs) });
           }
