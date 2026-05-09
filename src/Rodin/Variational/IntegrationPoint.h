@@ -7,6 +7,8 @@
 #ifndef RODIN_VARIATIONAL_INTEGRATIONPOINT_H
 #define RODIN_VARIATIONAL_INTEGRATIONPOINT_H
 
+#include <cassert>
+
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/QF/QuadratureFormula.h"
 
@@ -15,9 +17,20 @@ namespace Rodin::Variational
   class IntegrationPoint
   {
     public:
+      IntegrationPoint(const Geometry::Point& p)
+        : m_p(p), m_qf(nullptr), m_qp(0)
+      {}
+
       IntegrationPoint(
           const Geometry::Point& p,
           const QF::QuadratureFormulaBase& qf,
+          size_t qp)
+        : m_p(p), m_qf(&qf), m_qp(qp)
+      {}
+
+      IntegrationPoint(
+          const Geometry::Point& p,
+          const QF::QuadratureFormulaBase* qf,
           size_t qp)
         : m_p(p), m_qf(qf), m_qp(qp)
       {}
@@ -29,6 +42,12 @@ namespace Rodin::Variational
 
       const QF::QuadratureFormulaBase& getQuadratureFormula() const
       {
+        assert(m_qf);
+        return *m_qf;
+      }
+
+      const QF::QuadratureFormulaBase* getQuadratureFormulaPtr() const
+      {
         return m_qf;
       }
 
@@ -39,7 +58,7 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const Geometry::Point> m_p;
-      std::reference_wrapper<const QF::QuadratureFormulaBase> m_qf;
+      const QF::QuadratureFormulaBase* m_qf;
       size_t m_qp;
   };
 }
