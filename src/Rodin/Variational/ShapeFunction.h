@@ -283,6 +283,12 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this).setIntegrationPoint(ip);
       }
 
+      Derived& setPoint(const Geometry::Point& p)
+      {
+        m_pointIntegrationPoint.emplace(p);
+        return static_cast<Derived&>(*this).setIntegrationPoint(*m_pointIntegrationPoint);
+      }
+
       /**
        * @brief Gets the basis function at the specified local index.
        * @param[in] local Local index of the basis function
@@ -368,6 +374,7 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const FES> m_fes;
+      Optional<IntegrationPoint> m_pointIntegrationPoint;
   };
 }
 
