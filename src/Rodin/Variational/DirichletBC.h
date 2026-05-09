@@ -26,6 +26,17 @@
  * 2. Setting their values to @f$ g @f$
  * 3. Modifying the system matrix and right-hand side
  *
+ * In Rodin, `DirichletBC` has two semantics:
+ * - **Value-prescribing BC**: `DirichletBC(u, g)` encodes @f$ u=g @f$ on a
+ *   selected boundary subset.
+ * - **Identification BC**: `DirichletBC(u, A(v))` encodes linear constraints
+ *   of the form @f$ u_s=\sum_j C_{sj}v_j @f$ on that subset.
+ *
+ * Code-wise, each `DirichletBC` specialization assembles constrained DOFs into
+ * a typed map (`ValueDOFs` or `IdentifiedDOFs`) through its Assembly backend.
+ * `Problem` / `ProblemBody` consume these maps during global assembly/solve to
+ * impose essential constraints strongly.
+ *
  * ## Usage Example
  * ```cpp
  * // Homogeneous Dirichlet BC (u = 0 on boundary)
