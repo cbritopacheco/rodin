@@ -19,14 +19,14 @@ namespace Rodin::Variational
   {
     public:
       IntegrationPoint(const Geometry::Point& p)
-        : m_p(p), m_qp(0)
+        : m_p(p), m_qf(nullptr), m_qp(0)
       {}
 
       IntegrationPoint(
           const Geometry::Point& p,
           const QF::QuadratureFormulaBase& qf,
           size_t qp)
-        : m_p(p), m_qf(qf), m_qp(qp)
+        : m_p(p), m_qf(&qf), m_qp(qp)
       {}
 
       const Geometry::Point& getPoint() const
@@ -34,15 +34,15 @@ namespace Rodin::Variational
         return m_p;
       }
 
-      bool hasQuadratureFormula() const
-      {
-        return m_qf.has_value();
-      }
-
       const QF::QuadratureFormulaBase& getQuadratureFormula() const
       {
         assert(m_qf);
-        return m_qf->get();
+        return *m_qf;
+      }
+
+      const QF::QuadratureFormulaBase* getQuadratureFormulaPointer() const
+      {
+        return m_qf;
       }
 
       size_t getIndex() const
@@ -52,7 +52,7 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const Geometry::Point> m_p;
-      Optional<std::reference_wrapper<const QF::QuadratureFormulaBase>> m_qf;
+      const QF::QuadratureFormulaBase* m_qf;
       size_t m_qp;
   };
 }

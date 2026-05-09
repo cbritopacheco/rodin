@@ -367,7 +367,7 @@ namespace Rodin::Variational
         const auto   geom = poly.getGeometry();
 
         const int transOrder = poly.getTransformation().getOrder();
-        const bool hasQF = ip.hasQuadratureFormula();
+        const auto* qf = ip.getQuadratureFormulaPointer();
 
         const auto& fes = this->getFiniteElementSpace();
         const size_t vdim = fes.getVectorDimension();
@@ -398,8 +398,8 @@ namespace Rodin::Variational
         typename Cache::QpKey qkey;
         if (needs_qp)
         {
-          qkey.qf = hasQF ? &ip.getQuadratureFormula() : nullptr;
-          qkey.qp = hasQF ? ip.getIndex() : 0;
+          qkey.qf = qf;
+          qkey.qp = qf ? ip.getIndex() : 0;
           qkey.valid = true;
         }
         else
@@ -409,7 +409,7 @@ namespace Rodin::Variational
           qkey.valid = true;
         }
 
-        const bool qp_changed = !hasQF || !(m_cache.qpKey == qkey);
+        const bool qp_changed = !qf || !(m_cache.qpKey == qkey);
         if (cell_changed || qp_changed)
         {
           m_cache.qpKey = qkey;
@@ -418,8 +418,8 @@ namespace Rodin::Variational
           const size_t nv = fe_scalar.getCount();
 
           const auto& rc =
-            hasQF
-              ? ip.getQuadratureFormula().getPoint(ip.getIndex())
+            qf
+              ? qf->getPoint(ip.getIndex())
               : pt.getReferenceCoordinates();
 
           const auto& Jinv = pt.getJacobianInverse();

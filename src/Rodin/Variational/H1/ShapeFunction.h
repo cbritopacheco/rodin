@@ -105,9 +105,8 @@ namespace Rodin::Variational
         const auto& poly = p.getPolytope();
         const auto  geom = poly.getGeometry();
 
-        const bool hasQF = ip.hasQuadratureFormula();
-        const auto* qf = hasQF ? &ip.getQuadratureFormula() : nullptr;
-        const size_t qp = hasQF ? ip.getIndex() : 0;
+        const auto* qf = ip.getQuadratureFormulaPointer();
+        const size_t qp = qf ? ip.getIndex() : 0;
 
         typename Cache::Key key;
         key.geom  = geom;
@@ -115,7 +114,7 @@ namespace Rodin::Variational
         key.qp    = qp;
         key.valid = true;
 
-        if (!hasQF || !(m_cache.key == key))
+        if (!qf || !(m_cache.key == key))
         {
           m_cache.key = key;
 
@@ -124,7 +123,7 @@ namespace Rodin::Variational
 
           m_cache.basis.resize(ndof);
 
-          if (hasQF)
+          if (qf)
           {
             // Fast path: use element tabulation inside quadrature loops.
             const auto& tab = fe.getTabulation(*qf);
@@ -273,9 +272,8 @@ namespace Rodin::Variational
         const auto& poly = p.getPolytope();
         const auto  geom = poly.getGeometry();
 
-        const bool hasQF = ip.hasQuadratureFormula();
-        const auto* qf = hasQF ? &ip.getQuadratureFormula() : nullptr;
-        const size_t qp = hasQF ? ip.getIndex() : 0;
+        const auto* qf = ip.getQuadratureFormulaPointer();
+        const size_t qp = qf ? ip.getIndex() : 0;
 
         const size_t vdim = this->getFiniteElementSpace().getVectorDimension();
 
@@ -286,7 +284,7 @@ namespace Rodin::Variational
         key.vdim  = vdim;
         key.valid = true;
 
-        if (!hasQF || !(m_cache.key == key))
+        if (!qf || !(m_cache.key == key))
         {
           m_cache.key = key;
 
@@ -297,14 +295,14 @@ namespace Rodin::Variational
 
           m_cache.basis.resize(ndof);
 
-          const auto* tab = hasQF ? &fe_scalar.getTabulation(*qf) : nullptr;
+          const auto* tab = qf ? &fe_scalar.getTabulation(*qf) : nullptr;
           const auto& rc = p.getReferenceCoordinates();
 
           // φ_{a,c} = φ_a e_c
           for (size_t a = 0; a < ndof_scalar; ++a)
           {
             const ScalarType val =
-              hasQF
+              qf
                 ? tab->getBasis(qp, a)
                 : fe_scalar.getBasis(a)(rc);
             for (size_t c = 0; c < vdim; ++c)
