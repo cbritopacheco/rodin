@@ -30,7 +30,7 @@ namespace Rodin::Tests::Manufactured::H1Poisson
     constexpr Attribute TopAttribute = 4;
 
     void labelBoundaryAttributes(
-      Mesh& mesh,
+      Geometry::Mesh<Context::Local>& mesh,
       Attribute left = LeftAttribute,
       Attribute right = RightAttribute,
       Attribute bottom = BottomAttribute,

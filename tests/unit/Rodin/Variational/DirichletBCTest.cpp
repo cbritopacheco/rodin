@@ -21,16 +21,17 @@ namespace Rodin::Tests::Unit
     constexpr Attribute BottomAttribute = 3;
     constexpr Attribute TopAttribute = 4;
 
-    Mesh makeUnitSquareMesh(size_t n)
+    Geometry::Mesh<Context::Local> makeUnitSquareMesh(size_t n)
     {
-      Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { n, n });
+      Geometry::Mesh<Context::Local> mesh =
+        LocalMesh::UniformGrid(Polytope::Type::Triangle, { n, n });
       mesh.scale(1.0 / (n - 1));
       mesh.getConnectivity().compute(mesh.getDimension() - 1, mesh.getDimension());
       return mesh;
     }
 
     void labelBoundaryAttributes(
-      Mesh& mesh,
+      Geometry::Mesh<Context::Local>& mesh,
       Attribute left = LeftAttribute,
       Attribute right = RightAttribute,
       Attribute bottom = BottomAttribute,
@@ -64,7 +65,7 @@ namespace Rodin::Tests::Unit
     }
 
     FlatSet<Index> getBoundaryVertices(
-      const Mesh& mesh,
+      const Geometry::Mesh<Context::Local>& mesh,
       const FlatSet<Attribute>& attrs)
     {
       FlatSet<Index> res;
@@ -210,6 +211,7 @@ namespace Rodin::Tests::Unit
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     const size_t D = mesh.getDimension();
+    mesh.getConnectivity().compute(D - 1, 0);
 
     H1<2, Real> fes(std::integral_constant<size_t, 2>{}, mesh);
     TestFunction v(fes);
@@ -232,6 +234,7 @@ namespace Rodin::Tests::Unit
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     const size_t D = mesh.getDimension();
+    mesh.getConnectivity().compute(D - 1, 0);
 
     H1<2, Real> fes(std::integral_constant<size_t, 2>{}, mesh);
     TestFunction v(fes);

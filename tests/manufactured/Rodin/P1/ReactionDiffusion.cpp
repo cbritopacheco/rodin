@@ -48,7 +48,7 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion
     constexpr Attribute TopAttribute = 4;
 
     void labelBoundaryAttributes(
-      Mesh& mesh,
+      Geometry::Mesh<Context::Local>& mesh,
       Attribute left = LeftAttribute,
       Attribute right = RightAttribute,
       Attribute bottom = BottomAttribute,
