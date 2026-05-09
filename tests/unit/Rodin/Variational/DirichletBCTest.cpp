@@ -23,6 +23,7 @@ namespace Rodin::Tests::Unit
 
     Geometry::Mesh<Context::Local> makeUnitSquareMesh(size_t n)
     {
+      assert(n >= 2);
       Geometry::Mesh<Context::Local> mesh =
         LocalMesh::UniformGrid(Polytope::Type::Triangle, { n, n });
       mesh.scale(1.0 / (n - 1));
