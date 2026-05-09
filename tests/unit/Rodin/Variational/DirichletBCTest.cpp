@@ -1,3 +1,6 @@
+#include <cmath>
+#include <memory>
+
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
@@ -10,6 +13,74 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
+  namespace
+  {
+    constexpr Real BoundaryTolerance = 1e-12;
+    constexpr Attribute LeftAttribute = 1;
+    constexpr Attribute RightAttribute = 2;
+    constexpr Attribute BottomAttribute = 3;
+    constexpr Attribute TopAttribute = 4;
+
+    Mesh makeUnitSquareMesh(size_t n)
+    {
+      Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { n, n });
+      mesh.scale(1.0 / (n - 1));
+      mesh.getConnectivity().compute(mesh.getDimension() - 1, mesh.getDimension());
+      return mesh;
+    }
+
+    void labelBoundaryAttributes(
+      Mesh& mesh,
+      Attribute left = LeftAttribute,
+      Attribute right = RightAttribute,
+      Attribute bottom = BottomAttribute,
+      Attribute top = TopAttribute)
+    {
+      for (auto it = mesh.getBoundary(); !it.end(); ++it)
+      {
+        Real x = 0;
+        Real y = 0;
+        size_t count = 0;
+        for (const auto vertex : it->getVertices())
+        {
+          const auto coords = mesh.getVertexCoordinates(vertex);
+          x += coords(0);
+          y += coords(1);
+          count++;
+        }
+
+        x /= count;
+        y /= count;
+
+        if (std::abs(x) < BoundaryTolerance)
+          mesh.setAttribute(it.key(), left);
+        else if (std::abs(x - 1.0) < BoundaryTolerance)
+          mesh.setAttribute(it.key(), right);
+        else if (std::abs(y) < BoundaryTolerance)
+          mesh.setAttribute(it.key(), bottom);
+        else if (std::abs(y - 1.0) < BoundaryTolerance)
+          mesh.setAttribute(it.key(), top);
+      }
+    }
+
+    FlatSet<Index> getBoundaryVertices(
+      const Mesh& mesh,
+      const FlatSet<Attribute>& attrs)
+    {
+      FlatSet<Index> res;
+      for (auto it = mesh.getBoundary(); !it.end(); ++it)
+      {
+        const auto attr = it->getAttribute();
+        if (!attr || attrs.find(*attr) == attrs.end())
+          continue;
+
+        for (const auto vertex : it->getVertices())
+          res.insert(vertex);
+      }
+      return res;
+    }
+  }
+
   TEST(Rodin_Variational_Real_P1_SanityTest, TriangularUniformGrid2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -137,7 +208,7 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_Variational_ShapeFunctionSetPoint, H1MatchesBasis)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 1, 1 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     const size_t D = mesh.getDimension();
 
     H1<2, Real> fes(std::integral_constant<size_t, 2>{}, mesh);
@@ -159,7 +230,7 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_Variational_ShapeFunctionSetPoint, H1GradMatchesBasisGradient)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 1, 1 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     const size_t D = mesh.getDimension();
 
     H1<2, Real> fes(std::integral_constant<size_t, 2>{}, mesh);
@@ -187,6 +258,176 @@ namespace Rodin::Tests::Unit
       const auto actual = gv.getBasis(local);
       for (size_t d = 0; d < D; d++)
         EXPECT_NEAR(actual(d), expected(d), 1e-14);
+    }
+  }
+
+  TEST(Rodin_Variational_DirichletBC, ValueAPIAndBoundarySelection)
+  {
+    Mesh mesh = makeUnitSquareMesh(4);
+    labelBoundaryAttributes(mesh);
+
+    P1 fes(mesh);
+    TrialFunction u(fes);
+
+    auto g = F::x + 2 * F::y;
+    DirichletBC dbc(u, g);
+    dbc.on(LeftAttribute, RightAttribute);
+
+    const FlatSet<Attribute> attrs{ LeftAttribute, RightAttribute };
+    EXPECT_EQ(dbc.getAttributes(), attrs);
+    EXPECT_FALSE(dbc.isComponent());
+    EXPECT_FALSE(dbc.getValueUUID().has_value());
+    EXPECT_EQ(dbc.getOperand().getUUID(), u.getUUID());
+
+    dbc.assemble();
+
+    ASSERT_TRUE(std::holds_alternative<IndexMap<Real>>(dbc.getDOFs()));
+    const auto& dofs = std::get<IndexMap<Real>>(dbc.getDOFs());
+    const auto expectedVertices = getBoundaryVertices(mesh, attrs);
+    ASSERT_EQ(dofs.size(), expectedVertices.size());
+
+    for (const auto vertex : expectedVertices)
+    {
+      const auto it = dofs.find(vertex);
+      ASSERT_NE(it, dofs.end());
+
+      const auto coords = mesh.getVertexCoordinates(vertex);
+      EXPECT_DOUBLE_EQ(it->second, coords(0) + 2 * coords(1));
+    }
+
+    std::unique_ptr<DirichletBCBase<Real>> copy(dbc.copy());
+    ASSERT_NE(copy, nullptr);
+    ASSERT_TRUE(std::holds_alternative<IndexMap<Real>>(copy->getDOFs()));
+    EXPECT_EQ(copy->getOperand().getUUID(), u.getUUID());
+    EXPECT_FALSE(copy->getValueUUID().has_value());
+    EXPECT_EQ(std::get<IndexMap<Real>>(copy->getDOFs()).size(), dofs.size());
+  }
+
+  TEST(Rodin_Variational_DirichletBC, ValueFlatSetSelection)
+  {
+    Mesh mesh = makeUnitSquareMesh(4);
+    labelBoundaryAttributes(mesh);
+
+    P1 fes(mesh);
+    TrialFunction u(fes);
+
+    const FlatSet<Attribute> attrs{ BottomAttribute, TopAttribute };
+    DirichletBC dbc(u, RealFunction(3.0));
+    dbc.on(attrs);
+    dbc.assemble();
+
+    ASSERT_TRUE(std::holds_alternative<IndexMap<Real>>(dbc.getDOFs()));
+    const auto& dofs = std::get<IndexMap<Real>>(dbc.getDOFs());
+    const auto expectedVertices = getBoundaryVertices(mesh, attrs);
+    ASSERT_EQ(dofs.size(), expectedVertices.size());
+
+    for (const auto vertex : expectedVertices)
+    {
+      const auto it = dofs.find(vertex);
+      ASSERT_NE(it, dofs.end());
+      EXPECT_DOUBLE_EQ(it->second, 3.0);
+    }
+  }
+
+  TEST(Rodin_Variational_DirichletBC, IdentificationAPIAndScaledRows)
+  {
+    Mesh mesh = makeUnitSquareMesh(4);
+    labelBoundaryAttributes(mesh);
+
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TrialFunction v(fes);
+
+    const FlatSet<Attribute> attrs{ LeftAttribute, TopAttribute };
+    DirichletBC dbc(u, (RealFunction(1.0) + F::x) * v);
+    dbc.on(attrs);
+
+    EXPECT_EQ(dbc.getAttributes(), attrs);
+    EXPECT_FALSE(dbc.isComponent());
+    ASSERT_TRUE(dbc.getValueUUID().has_value());
+    EXPECT_EQ(*dbc.getValueUUID(), v.getUUID());
+    EXPECT_EQ(dbc.getOperand().getUUID(), u.getUUID());
+
+    dbc.assemble();
+
+    using IdentifiedDOFs = DirichletBCBase<Real>::IdentifiedDOFs;
+    ASSERT_TRUE(std::holds_alternative<IdentifiedDOFs>(dbc.getDOFs()));
+    const auto& dofs = std::get<IdentifiedDOFs>(dbc.getDOFs());
+    const auto expectedVertices = getBoundaryVertices(mesh, attrs);
+    ASSERT_EQ(dofs.size(), expectedVertices.size());
+
+    for (const auto vertex : expectedVertices)
+    {
+      const auto it = dofs.find(vertex);
+      ASSERT_NE(it, dofs.end());
+
+      const auto& masters = it->second.first;
+      const auto& coeffs = it->second.second;
+      ASSERT_EQ(masters.size(), 1);
+      ASSERT_EQ(coeffs.size(), 1);
+      EXPECT_EQ(masters.coeff(0), vertex);
+
+      const auto coords = mesh.getVertexCoordinates(vertex);
+      EXPECT_DOUBLE_EQ(coeffs.coeff(0), 1.0 + coords(0));
+    }
+
+    std::unique_ptr<DirichletBCBase<Real>> copy(dbc.copy());
+    ASSERT_NE(copy, nullptr);
+    ASSERT_TRUE(copy->getValueUUID().has_value());
+    EXPECT_EQ(*copy->getValueUUID(), v.getUUID());
+    ASSERT_TRUE(std::holds_alternative<IdentifiedDOFs>(copy->getDOFs()));
+    EXPECT_EQ(std::get<IdentifiedDOFs>(copy->getDOFs()).size(), dofs.size());
+  }
+
+  TEST(Rodin_Variational_DirichletBC, IdentificationComponentSelection)
+  {
+    Mesh mesh = makeUnitSquareMesh(4);
+    labelBoundaryAttributes(mesh);
+
+    P1 scalarFes(mesh);
+    P1 vectorFes(mesh, mesh.getSpaceDimension());
+    TrialFunction u(scalarFes);
+    TrialFunction v(vectorFes);
+
+    const FlatSet<Attribute> attrs{
+      LeftAttribute, RightAttribute, BottomAttribute, TopAttribute
+    };
+    const auto expectedVertices = getBoundaryVertices(mesh, attrs);
+    const auto vertexCount = mesh.getVertexCount();
+
+    DirichletBC xbc(u, v.x());
+    xbc.on(attrs);
+    xbc.assemble();
+
+    using IdentifiedDOFs = DirichletBCBase<Real>::IdentifiedDOFs;
+    ASSERT_TRUE(std::holds_alternative<IdentifiedDOFs>(xbc.getDOFs()));
+    const auto& xdofs = std::get<IdentifiedDOFs>(xbc.getDOFs());
+    ASSERT_EQ(xdofs.size(), expectedVertices.size());
+    for (const auto vertex : expectedVertices)
+    {
+      const auto it = xdofs.find(vertex);
+      ASSERT_NE(it, xdofs.end());
+      ASSERT_EQ(it->second.first.size(), 1);
+      ASSERT_EQ(it->second.second.size(), 1);
+      EXPECT_EQ(it->second.first.coeff(0), vertex);
+      EXPECT_DOUBLE_EQ(it->second.second.coeff(0), 1.0);
+    }
+
+    DirichletBC ybc(u, v.y());
+    ybc.on(attrs);
+    ybc.assemble();
+
+    ASSERT_TRUE(std::holds_alternative<IdentifiedDOFs>(ybc.getDOFs()));
+    const auto& ydofs = std::get<IdentifiedDOFs>(ybc.getDOFs());
+    ASSERT_EQ(ydofs.size(), expectedVertices.size());
+    for (const auto vertex : expectedVertices)
+    {
+      const auto it = ydofs.find(vertex);
+      ASSERT_NE(it, ydofs.end());
+      ASSERT_EQ(it->second.first.size(), 1);
+      ASSERT_EQ(it->second.second.size(), 1);
+      EXPECT_EQ(it->second.first.coeff(0), vertex + vertexCount);
+      EXPECT_DOUBLE_EQ(it->second.second.coeff(0), 1.0);
     }
   }
 }

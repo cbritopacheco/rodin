@@ -1,9 +1,12 @@
+#include <cmath>
+
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
 #include "Rodin/Variational.h"
 
 #include "Rodin/Solver/CG.h"
+#include "Rodin/Solver/GMRES.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -36,6 +39,49 @@ using namespace Rodin::Solver;
  */
 namespace Rodin::Tests::Manufactured::ReactionDiffusion
 {
+  namespace
+  {
+    constexpr Real BoundaryTolerance = 1e-12;
+    constexpr Attribute LeftAttribute = 1;
+    constexpr Attribute RightAttribute = 2;
+    constexpr Attribute BottomAttribute = 3;
+    constexpr Attribute TopAttribute = 4;
+
+    void labelBoundaryAttributes(
+      Mesh& mesh,
+      Attribute left = LeftAttribute,
+      Attribute right = RightAttribute,
+      Attribute bottom = BottomAttribute,
+      Attribute top = TopAttribute)
+    {
+      for (auto it = mesh.getBoundary(); !it.end(); ++it)
+      {
+        Real x = 0;
+        Real y = 0;
+        size_t count = 0;
+        for (const auto vertex : it->getVertices())
+        {
+          const auto coords = mesh.getVertexCoordinates(vertex);
+          x += coords(0);
+          y += coords(1);
+          count++;
+        }
+
+        x /= count;
+        y /= count;
+
+        if (std::abs(x) < BoundaryTolerance)
+          mesh.setAttribute(it.key(), left);
+        else if (std::abs(x - 1.0) < BoundaryTolerance)
+          mesh.setAttribute(it.key(), right);
+        else if (std::abs(y) < BoundaryTolerance)
+          mesh.setAttribute(it.key(), bottom);
+        else if (std::abs(y - 1.0) < BoundaryTolerance)
+          mesh.setAttribute(it.key(), top);
+      }
+    }
+  }
+
   template <size_t M>
   class ManufacturedReactionDiffusionTest : public ::testing::TestWithParam<Polytope::Type>
   {
@@ -253,6 +299,47 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion
 
       EXPECT_NEAR(error_u, 0, RODIN_FUZZY_CONSTANT);
       EXPECT_NEAR(error_v, 0, RODIN_FUZZY_CONSTANT);
+  }
+
+  TEST_P(ManufacturedReactionDiffusionTest16x16, IdentificationDirichletOnLabeledBoundary)
+  {
+    Mesh mesh = this->getMesh();
+    labelBoundaryAttributes(mesh);
+
+    P1 vh(mesh);
+    const auto solution = 2 * F::x + 3 * F::y + 1;
+    const auto forcing = solution;
+
+    TrialFunction u(vh), w(vh);
+    TestFunction phi(vh), psi(vh);
+
+    const FlatSet<Attribute> boundary{
+      LeftAttribute, RightAttribute, BottomAttribute, TopAttribute
+    };
+
+    Problem rd(u, w, phi, psi);
+    rd = Integral(Grad(u), Grad(phi))
+       + Integral(u, phi)
+       - Integral(forcing, phi)
+       + Integral(Grad(w), Grad(psi))
+       + Integral(w, psi)
+       - Integral(forcing, psi)
+       + DirichletBC(u, w).on(boundary)
+       + DirichletBC(w, solution).on(
+           LeftAttribute,
+           RightAttribute,
+           BottomAttribute,
+           TopAttribute);
+
+    GMRES(rd).solve();
+
+    GridFunction diffU(vh);
+    diffU = Pow(u.getSolution() - solution, 2);
+    EXPECT_NEAR(Integral(diffU).compute(), 0, 1e-12);
+
+    GridFunction diffW(vh);
+    diffW = Pow(w.getSolution() - solution, 2);
+    EXPECT_NEAR(Integral(diffW).compute(), 0, 1e-12);
   }
 
   INSTANTIATE_TEST_SUITE_P(

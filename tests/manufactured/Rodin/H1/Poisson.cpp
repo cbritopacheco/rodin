@@ -5,6 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <algorithm>
+#include <cmath>
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
@@ -20,6 +21,49 @@ using namespace Rodin::Solver;
 
 namespace Rodin::Tests::Manufactured::H1Poisson
 {
+  namespace
+  {
+    constexpr Real BoundaryTolerance = 1e-12;
+    constexpr Attribute LeftAttribute = 1;
+    constexpr Attribute RightAttribute = 2;
+    constexpr Attribute BottomAttribute = 3;
+    constexpr Attribute TopAttribute = 4;
+
+    void labelBoundaryAttributes(
+      Mesh& mesh,
+      Attribute left = LeftAttribute,
+      Attribute right = RightAttribute,
+      Attribute bottom = BottomAttribute,
+      Attribute top = TopAttribute)
+    {
+      for (auto it = mesh.getBoundary(); !it.end(); ++it)
+      {
+        Real x = 0;
+        Real y = 0;
+        size_t count = 0;
+        for (const auto vertex : it->getVertices())
+        {
+          const auto coords = mesh.getVertexCoordinates(vertex);
+          x += coords(0);
+          y += coords(1);
+          count++;
+        }
+
+        x /= count;
+        y /= count;
+
+        if (std::abs(x) < BoundaryTolerance)
+          mesh.setAttribute(it.key(), left);
+        else if (std::abs(x - 1.0) < BoundaryTolerance)
+          mesh.setAttribute(it.key(), right);
+        else if (std::abs(y) < BoundaryTolerance)
+          mesh.setAttribute(it.key(), bottom);
+        else if (std::abs(y - 1.0) < BoundaryTolerance)
+          mesh.setAttribute(it.key(), top);
+      }
+    }
+  }
+
   template <size_t M>
   class Manufactured_Poisson_H1_Test : public ::testing::TestWithParam<Polytope::Type>
   {
@@ -138,6 +182,40 @@ namespace Rodin::Tests::Manufactured::H1Poisson
     diff = Pow(u.getSolution() - solution, 2);
 
     Real error = Integral(diff).compute();
+    EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
+  }
+
+  TEST_P(Manufactured_Poisson_H1_Test_16x16, Poisson_NonhomogeneousDirichlet_H1_2_LabeledBoundary)
+  {
+    auto pi = Rodin::Math::Constants::pi();
+
+    Mesh mesh = this->getMesh();
+    labelBoundaryAttributes(mesh);
+
+    constexpr auto order = std::integral_constant<size_t, 2>{};
+
+    H1 vh(order, mesh);
+
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+
+    const auto solution = cos(pi * F::x) * cos(pi * F::y);
+    const auto f = 2 * pi * pi * solution;
+
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, solution).on(
+                LeftAttribute,
+                RightAttribute,
+                BottomAttribute,
+                TopAttribute);
+    CG(poisson).solve();
+
+    GridFunction diff(vh);
+    diff = Pow(u.getSolution() - solution, 2);
+
+    const Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
 
