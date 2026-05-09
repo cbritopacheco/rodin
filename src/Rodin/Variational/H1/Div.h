@@ -370,8 +370,9 @@ namespace Rodin::Variational
         m_ip = &ip;
 
         const auto& p  = ip.getPoint();
-        const auto& qf = ip.getQuadratureFormula();
-        const size_t qp = ip.getIndex();
+        const bool hasQF = ip.hasQuadratureFormula();
+        const auto* qf = hasQF ? &ip.getQuadratureFormula() : nullptr;
+        const size_t qp = hasQF ? ip.getIndex() : 0;
 
         const auto& poly = p.getPolytope();
         const size_t d   = poly.getDimension();
@@ -382,11 +383,11 @@ namespace Rodin::Variational
         key.geom  = geom;
         key.dim   = d;
         key.cell  = cell;
-        key.qf    = &qf;
+        key.qf    = qf;
         key.qp    = qp;
         key.valid = true;
 
-        if (m_cache.key == key)
+        if (hasQF && m_cache.key == key)
           return *this;
 
         m_cache.key = key;
@@ -403,7 +404,8 @@ namespace Rodin::Variational
         if (m_cache.div_phys.size() != ndof)
           m_cache.div_phys.resize(ndof);
 
-        const auto& tab = feS.getTabulation(qf);
+        const auto* tab = hasQF ? &feS.getTabulation(*qf) : nullptr;
+        const auto& rc = p.getReferenceCoordinates();
         const auto JinvT = p.getJacobianInverse().transpose();
 
         SpatialVectorType ref(d);
@@ -413,10 +415,11 @@ namespace Rodin::Variational
         // div( phi_alpha e_comp ) = d/dx_comp phi_alpha  (comp < d) else 0
         for (size_t alpha = 0; alpha < nscalar; ++alpha)
         {
-          const auto gref = tab.getGradient(qp, alpha);
-
           for (size_t j = 0; j < d; ++j)
-            ref(j) = gref[j];
+            ref(j) =
+              hasQF
+                ? tab->getGradient(qp, alpha)[j]
+                : feS.getBasis(alpha).template getDerivative<1>(j)(rc);
 
           phys = JinvT * ref;
 

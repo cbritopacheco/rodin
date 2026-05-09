@@ -9,8 +9,6 @@
 #include "Rodin/Variational/Integrator.h"
 #include "Rodin/Variational/IntegrationPoint.h"
 
-#include "Rodin/QF/SinglePointQF.h"
-
 #include "Rodin/MPI/Geometry/Mesh.h"
 #include "Rodin/Assembly/AssemblyBase.h"
 
@@ -207,7 +205,7 @@ namespace Rodin::Assembly
    * on a shared face, the master-DOF/coefficient pair
    * @c (masterDOFs[local], 1.0) — exact, tolerance-free pairing via the FES's
    * own DOF connectivity. Generalises to non-trivial @f$ A @f$ via
-   * @c Av.setIntegrationPoint(...).getBasis(j).
+   * @c Av.setPoint(...).getBasis(j).
    */
   template <class Scalar, class Sol1, class FES1,
             class Derived2, class FES2,
@@ -263,7 +261,6 @@ namespace Rodin::Assembly
           const auto& masterDOFs = fes_v.getDOFs(faceDim, fi);
 
           const Index nMasters = static_cast<Index>(fe_v.getCount());
-          size_t ipCounter = 0;
 
           for (Index s = 0;
                s < static_cast<Index>(fe_u.getCount());
@@ -280,12 +277,10 @@ namespace Rodin::Assembly
 
             for (Index j = 0; j < nMasters; j++)
             {
-              auto basisCallable = [&Av, j, &ipCounter]
+              auto basisCallable = [&Av, j]
                                    (const Geometry::Point& p)
               {
-                QF::SinglePointQF qf(p.getReferenceCoordinates());
-                Variational::IntegrationPoint ip(p, qf, ipCounter++);
-                Av.setIntegrationPoint(ip);
+                Av.setPoint(p);
                 return Av.getBasis(static_cast<size_t>(j));
               };
               const auto mapping =

@@ -26,8 +26,6 @@
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/IntegrationPoint.h"
 
-#include "Rodin/QF/SinglePointQF.h"
-
 #include "Rodin/Assembly/AssemblyBase.h"
 
 #include "ForwardDecls.h"
@@ -1741,13 +1739,6 @@ namespace Rodin::Assembly
 
           const Index nMasters = static_cast<Index>(fe_v.getCount());
 
-          // Counter forwarded as the IP's qp index. Shape-function caches
-          // typically key on (QF*, qp); incrementing this monotonically per
-          // sample point guarantees cache invalidation between distinct
-          // physical positions even when the SinglePointQF stack address is
-          // reused across iterations.
-          size_t ipCounter = 0;
-
           for (Index s = 0;
                s < static_cast<Index>(fe_u.getCount());
                s++)
@@ -1773,12 +1764,10 @@ namespace Rodin::Assembly
 
             for (Index j = 0; j < nMasters; j++)
             {
-              auto basisCallable = [&Av, j, &ipCounter]
+              auto basisCallable = [&Av, j]
                                    (const Geometry::Point& p)
               {
-                QF::SinglePointQF qf(p.getReferenceCoordinates());
-                Variational::IntegrationPoint ip(p, qf, ipCounter++);
-                Av.setIntegrationPoint(ip);
+                Av.setPoint(p);
                 return Av.getBasis(static_cast<size_t>(j));
               };
               const auto mapping =

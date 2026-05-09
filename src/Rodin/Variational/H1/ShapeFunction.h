@@ -105,16 +105,17 @@ namespace Rodin::Variational
         const auto& poly = p.getPolytope();
         const auto  geom = poly.getGeometry();
 
-        const auto& qf  = ip.getQuadratureFormula();
-        const size_t qp = ip.getIndex();
+        const bool hasQF = ip.hasQuadratureFormula();
+        const auto* qf = hasQF ? &ip.getQuadratureFormula() : nullptr;
+        const size_t qp = hasQF ? ip.getIndex() : 0;
 
         typename Cache::Key key;
         key.geom  = geom;
-        key.qf    = &qf;
+        key.qf    = qf;
         key.qp    = qp;
         key.valid = true;
 
-        if (!(m_cache.key == key))
+        if (!hasQF || !(m_cache.key == key))
         {
           m_cache.key = key;
 
@@ -123,11 +124,19 @@ namespace Rodin::Variational
 
           m_cache.basis.resize(ndof);
 
-          // Fast path: use element tabulation (basis + gradients in ref coords)
-          const auto& tab = fe.getTabulation(qf);
-
-          for (size_t a = 0; a < ndof; ++a)
-            m_cache.basis[a] = tab.getBasis(qp, a);
+          if (hasQF)
+          {
+            // Fast path: use element tabulation inside quadrature loops.
+            const auto& tab = fe.getTabulation(*qf);
+            for (size_t a = 0; a < ndof; ++a)
+              m_cache.basis[a] = tab.getBasis(qp, a);
+          }
+          else
+          {
+            const auto& rc = p.getReferenceCoordinates();
+            for (size_t a = 0; a < ndof; ++a)
+              m_cache.basis[a] = fe.getBasis(a)(rc);
+          }
         }
 
         return *this;
@@ -264,19 +273,20 @@ namespace Rodin::Variational
         const auto& poly = p.getPolytope();
         const auto  geom = poly.getGeometry();
 
-        const auto& qf  = ip.getQuadratureFormula();
-        const size_t qp = ip.getIndex();
+        const bool hasQF = ip.hasQuadratureFormula();
+        const auto* qf = hasQF ? &ip.getQuadratureFormula() : nullptr;
+        const size_t qp = hasQF ? ip.getIndex() : 0;
 
         const size_t vdim = this->getFiniteElementSpace().getVectorDimension();
 
         typename Cache::Key key;
         key.geom  = geom;
-        key.qf    = &qf;
+        key.qf    = qf;
         key.qp    = qp;
         key.vdim  = vdim;
         key.valid = true;
 
-        if (!(m_cache.key == key))
+        if (!hasQF || !(m_cache.key == key))
         {
           m_cache.key = key;
 
@@ -287,12 +297,16 @@ namespace Rodin::Variational
 
           m_cache.basis.resize(ndof);
 
-          const auto& tab = fe_scalar.getTabulation(qf);
+          const auto* tab = hasQF ? &fe_scalar.getTabulation(*qf) : nullptr;
+          const auto& rc = p.getReferenceCoordinates();
 
           // φ_{a,c} = φ_a e_c
           for (size_t a = 0; a < ndof_scalar; ++a)
           {
-            const ScalarType val = tab.getBasis(qp, a);
+            const ScalarType val =
+              hasQF
+                ? tab->getBasis(qp, a)
+                : fe_scalar.getBasis(a)(rc);
             for (size_t c = 0; c < vdim; ++c)
             {
               RangeType v;

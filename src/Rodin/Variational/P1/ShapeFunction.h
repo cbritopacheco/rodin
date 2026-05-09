@@ -143,8 +143,9 @@ namespace Rodin::Variational
         m_ip = &ip;
 
         const auto& p  = ip.getPoint();
-        const auto& qf = ip.getQuadratureFormula();
-        const size_t qp = ip.getIndex();
+        const bool hasQF = ip.hasQuadratureFormula();
+        const auto* qf = hasQF ? &ip.getQuadratureFormula() : nullptr;
+        const size_t qp = hasQF ? ip.getIndex() : 0;
 
         const auto& poly = p.getPolytope();
         const auto geom  = poly.getGeometry();
@@ -194,16 +195,17 @@ namespace Rodin::Variational
 
         // ---- value cache: update once per (qf, qp)
         typename Cache::ValueKey vkey;
-        vkey.qf    = &qf;
+        vkey.qf    = qf;
         vkey.qp    = qp;
         vkey.valid = true;
 
-        const bool value_changed = !(m_cache.vkey == vkey);
+        const bool value_changed = !hasQF || !(m_cache.vkey == vkey);
         if (value_changed)
         {
           m_cache.vkey = vkey;
 
-          const auto& rq = qf.getPoint(qp);
+          const auto& rq =
+            hasQF ? qf->getPoint(qp) : p.getReferenceCoordinates();
 
           // Cheap scalar P1 element (no allocations)
           const P1Element<ScalarType> fe_scalar(geom);
@@ -270,4 +272,3 @@ namespace Rodin::Variational
 }
 
 #endif
-

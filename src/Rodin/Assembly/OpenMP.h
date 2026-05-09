@@ -2084,8 +2084,6 @@ namespace Rodin::Assembly
           const auto& masterDOFs = fes_v.getDOFs(faceDim, fi);
 
           const Index nMasters = static_cast<Index>(fe_v.getCount());
-          // Monotonically increasing IP qp index — see Sequential.h note.
-          size_t ipCounter = 0;
           for (Index s = 0;
                s < static_cast<Index>(fe_u.getCount());
                s++)
@@ -2100,12 +2098,10 @@ namespace Rodin::Assembly
 
             for (Index j = 0; j < nMasters; j++)
             {
-              auto basisCallable = [&Av, j, &ipCounter]
+              auto basisCallable = [&Av, j]
                                    (const Geometry::Point& p)
               {
-                QF::SinglePointQF qf(p.getReferenceCoordinates());
-                Variational::IntegrationPoint ip(p, qf, ipCounter++);
-                Av.setIntegrationPoint(ip);
+                Av.setPoint(p);
                 return Av.getBasis(static_cast<size_t>(j));
               };
               const auto mapping =
