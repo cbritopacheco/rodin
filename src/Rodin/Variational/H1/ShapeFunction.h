@@ -105,7 +105,7 @@ namespace Rodin::Variational
         const auto& poly = p.getPolytope();
         const auto  geom = poly.getGeometry();
 
-        const auto* qf = ip.getQuadratureFormulaPointer();
+        const auto* qf = ip.getQuadratureFormula();
         const size_t qp = qf ? ip.getIndex() : 0;
 
         typename Cache::Key key;
@@ -272,7 +272,7 @@ namespace Rodin::Variational
         const auto& poly = p.getPolytope();
         const auto  geom = poly.getGeometry();
 
-        const auto* qf = ip.getQuadratureFormulaPointer();
+        const auto* qf = ip.getQuadratureFormula();
         const size_t qp = qf ? ip.getIndex() : 0;
 
         const size_t vdim = this->getFiniteElementSpace().getVectorDimension();

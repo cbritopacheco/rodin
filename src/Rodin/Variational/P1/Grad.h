@@ -328,7 +328,7 @@ namespace Rodin::Variational
         const auto   geom = poly.getGeometry();
 
         const int transOrder = poly.getTransformation().getOrder();
-        const auto* qf = ip.getQuadratureFormulaPointer();
+        const auto* qf = ip.getQuadratureFormula();
 
         // ---- cell key: allocate/size once per cell
         typename Cache::CellKey ckey;

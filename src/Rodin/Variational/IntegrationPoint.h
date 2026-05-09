@@ -34,13 +34,7 @@ namespace Rodin::Variational
         return m_p;
       }
 
-      const QF::QuadratureFormulaBase& getQuadratureFormula() const
-      {
-        assert(m_qf);
-        return *m_qf;
-      }
-
-      const QF::QuadratureFormulaBase* getQuadratureFormulaPointer() const
+      const QF::QuadratureFormulaBase* getQuadratureFormula() const
       {
         return m_qf;
       }
