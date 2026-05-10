@@ -186,3 +186,18 @@ gtest_discover_tests(RodinManufacturedP1HyperElasticity
   PROPERTIES
     LABELS manufactured
 )
+
+add_executable(RodinManufacturedDirichletBCIdentification
+  DirichletBCIdentification.cpp)
+target_link_libraries(RodinManufacturedDirichletBCIdentification
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solver
+)
+gtest_discover_tests(RodinManufacturedDirichletBCIdentification
+  PROPERTIES
+    LABELS manufactured
+)

@@ -436,4 +436,307 @@ namespace Rodin::Tests::Unit
       EXPECT_DOUBLE_EQ(it->second.second.coeff(0), 1.0);
     }
   }
+
+  /**
+   * @brief Verifies that `DirichletBC(u, -v)` produces coefficient -1.
+   *
+   * Mathematical content:
+   * @f[
+   *   C_{sj} = \ell_s^u(-\varphi_j^v) = -\delta_{sj}
+   *   \;\Longrightarrow\; \text{coeff} = -1.
+   * @f]
+   */
+  TEST(Rodin_Variational_DirichletBC, IdentificationUnaryMinus)
+  {
+    Mesh mesh = makeUnitSquareMesh(4);
+    labelBoundaryAttributes(mesh);
+
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TrialFunction v(fes);
+
+    const FlatSet<Attribute> attrs{ LeftAttribute, RightAttribute };
+    DirichletBC dbc(u, -v);
+    dbc.on(attrs);
+    dbc.assemble();
+
+    using IdentifiedDOFs = DirichletBCBase<Real>::IdentifiedDOFs;
+    ASSERT_TRUE(std::holds_alternative<IdentifiedDOFs>(dbc.getDOFs()));
+    const auto& dofs = std::get<IdentifiedDOFs>(dbc.getDOFs());
+    const auto expectedVertices = getBoundaryVertices(mesh, attrs);
+    ASSERT_EQ(dofs.size(), expectedVertices.size());
+
+    for (const auto vertex : expectedVertices)
+    {
+      const auto it = dofs.find(vertex);
+      ASSERT_NE(it, dofs.end());
+      ASSERT_EQ(it->second.first.size(), 1);
+      ASSERT_EQ(it->second.second.size(), 1);
+      EXPECT_EQ(it->second.first.coeff(0), vertex);
+      EXPECT_DOUBLE_EQ(it->second.second.coeff(0), -1.0);
+    }
+  }
+
+  /**
+   * @brief `DirichletBC(u, c*v)` with constant scalar `c` produces
+   *        coefficient `c` for the matching DOF.
+   */
+  TEST(Rodin_Variational_DirichletBC, IdentificationScalarMultiplication)
+  {
+    Mesh mesh = makeUnitSquareMesh(8);
+    labelBoundaryAttributes(mesh);
+
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TrialFunction v(fes);
+
+    const Real c = 3.5;
+    const FlatSet<Attribute> attrs{ LeftAttribute, RightAttribute };
+    DirichletBC dbc(u, RealFunction(c) * v);
+    dbc.on(attrs);
+    dbc.assemble();
+
+    using IdentifiedDOFs = DirichletBCBase<Real>::IdentifiedDOFs;
+    ASSERT_TRUE(std::holds_alternative<IdentifiedDOFs>(dbc.getDOFs()));
+    const auto& dofs = std::get<IdentifiedDOFs>(dbc.getDOFs());
+    const auto expectedVertices = getBoundaryVertices(mesh, attrs);
+    ASSERT_EQ(dofs.size(), expectedVertices.size());
+
+    for (const auto vertex : expectedVertices)
+    {
+      const auto it = dofs.find(vertex);
+      ASSERT_NE(it, dofs.end());
+      ASSERT_EQ(it->second.first.size(), 1);
+      ASSERT_EQ(it->second.second.size(), 1);
+      EXPECT_EQ(it->second.first.coeff(0), vertex);
+      EXPECT_DOUBLE_EQ(it->second.second.coeff(0), c);
+    }
+  }
+
+  /**
+   * @brief Self-identification `DirichletBC(u, u).on(Γ)` produces, for each
+   * slave DOF on Γ, the same DOF as master with coefficient 1 — a row
+   * @f$ u_s - u_s = 0 @f$ which is algebraically vacuous (singular slave
+   * row) but assembled correctly.
+   *
+   * This test only checks the assembled `IdentifiedDOFs` map; using the BC
+   * in a Problem solve would yield a singular system. For periodicity use
+   * `PeriodicBC` with an explicit DOF adjacency map.
+   */
+  TEST(Rodin_Variational_DirichletBC, IdentificationSelfDegenerate)
+  {
+    Mesh mesh = makeUnitSquareMesh(4);
+    labelBoundaryAttributes(mesh);
+
+    P1 fes(mesh);
+    TrialFunction u(fes);
+
+    const FlatSet<Attribute> attrs{ LeftAttribute };
+    DirichletBC dbc(u, u);
+    dbc.on(attrs);
+
+    EXPECT_EQ(dbc.getOperand().getUUID(), u.getUUID());
+    ASSERT_TRUE(dbc.getValueUUID().has_value());
+    EXPECT_EQ(*dbc.getValueUUID(), u.getUUID());
+
+    dbc.assemble();
+
+    using IdentifiedDOFs = DirichletBCBase<Real>::IdentifiedDOFs;
+    ASSERT_TRUE(std::holds_alternative<IdentifiedDOFs>(dbc.getDOFs()));
+    const auto& dofs = std::get<IdentifiedDOFs>(dbc.getDOFs());
+    const auto expectedVertices = getBoundaryVertices(mesh, attrs);
+    ASSERT_EQ(dofs.size(), expectedVertices.size());
+
+    for (const auto vertex : expectedVertices)
+    {
+      const auto it = dofs.find(vertex);
+      ASSERT_NE(it, dofs.end());
+      ASSERT_EQ(it->second.first.size(), 1);
+      ASSERT_EQ(it->second.second.size(), 1);
+      EXPECT_EQ(it->second.first.coeff(0), vertex);
+      EXPECT_DOUBLE_EQ(it->second.second.coeff(0), 1.0);
+    }
+  }
+
+  /**
+   * @brief Vector-to-vector identification: `DirichletBC(u_vec, v_vec)`.
+   *
+   * Both u and v are vector P1 trial functions on the same vector FES.
+   * The slave/master DOFs share the same global indices (same FES) and
+   * each master appears exactly once with coefficient 1.
+   */
+  TEST(Rodin_Variational_DirichletBC, IdentificationVectorVector)
+  {
+    Mesh mesh = makeUnitSquareMesh(4);
+    labelBoundaryAttributes(mesh);
+
+    const size_t d = mesh.getSpaceDimension();
+    P1 vfes(mesh, d);
+    TrialFunction u(vfes);
+    TrialFunction v(vfes);
+
+    const FlatSet<Attribute> attrs{ LeftAttribute };
+    DirichletBC dbc(u, v);
+    dbc.on(attrs);
+    dbc.assemble();
+
+    using IdentifiedDOFs = DirichletBCBase<Real>::IdentifiedDOFs;
+    ASSERT_TRUE(std::holds_alternative<IdentifiedDOFs>(dbc.getDOFs()));
+    const auto& dofs = std::get<IdentifiedDOFs>(dbc.getDOFs());
+
+    // Each boundary vertex contributes d slave DOFs (one per component).
+    const auto expectedVertices = getBoundaryVertices(mesh, attrs);
+    ASSERT_EQ(dofs.size(), expectedVertices.size() * d);
+
+    // For each slave we expect exactly one master DOF (the same global
+    // index, since slave and master FES coincide) with coefficient 1.
+    for (const auto& [slave, pair] : dofs)
+    {
+      const auto& masters = pair.first;
+      const auto& coeffs = pair.second;
+      ASSERT_EQ(masters.size(), 1);
+      ASSERT_EQ(coeffs.size(), 1);
+      EXPECT_EQ(masters.coeff(0), slave);
+      EXPECT_DOUBLE_EQ(coeffs.coeff(0), 1.0);
+    }
+  }
+
+  /**
+   * @brief When `.on()` is never called, the identification BC defaults to
+   * ALL boundary faces.
+   */
+  TEST(Rodin_Variational_DirichletBC, IdentificationDefaultBoundaryAllFaces)
+  {
+    Mesh mesh = makeUnitSquareMesh(4);
+    labelBoundaryAttributes(mesh);
+
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TrialFunction v(fes);
+
+    DirichletBC dbc(u, v);
+    EXPECT_TRUE(dbc.getAttributes().empty());
+
+    dbc.assemble();
+
+    using IdentifiedDOFs = DirichletBCBase<Real>::IdentifiedDOFs;
+    ASSERT_TRUE(std::holds_alternative<IdentifiedDOFs>(dbc.getDOFs()));
+    const auto& dofs = std::get<IdentifiedDOFs>(dbc.getDOFs());
+
+    const FlatSet<Attribute> all{
+      LeftAttribute, RightAttribute, BottomAttribute, TopAttribute
+    };
+    const auto expectedVertices = getBoundaryVertices(mesh, all);
+    EXPECT_EQ(dofs.size(), expectedVertices.size());
+  }
+
+  /**
+   * @brief getValue() returns a reference whose getUUID() matches v's UUID
+   * when the value is a plain shape function.
+   */
+  TEST(Rodin_Variational_DirichletBC, IdentificationGetValueReturnsShapeFunction)
+  {
+    Mesh mesh = makeUnitSquareMesh(4);
+    labelBoundaryAttributes(mesh);
+
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TrialFunction v(fes);
+
+    DirichletBC dbc(u, v);
+    dbc.on(LeftAttribute);
+
+    const auto& valueRef = dbc.getValue();
+    EXPECT_EQ(valueRef.getUUID(), v.getUUID());
+  }
+
+  /**
+   * @brief Verify isComponent() returns false for both BC kinds — the
+   * `Component<...>` case is handled inside `getBasis` / `evaluateBasis`,
+   * not via the legacy `isComponent()` flag.
+   */
+  TEST(Rodin_Variational_DirichletBC, IsComponentAlwaysFalse)
+  {
+    Mesh mesh = makeUnitSquareMesh(4);
+    labelBoundaryAttributes(mesh);
+
+    P1 sfes(mesh);
+    P1 vfes(mesh, mesh.getSpaceDimension());
+    TrialFunction us(sfes);
+    TrialFunction vv(vfes);
+
+    DirichletBC valueBC(us, F::x);
+    EXPECT_FALSE(valueBC.isComponent());
+
+    DirichletBC identBC(us, vv.x());
+    EXPECT_FALSE(identBC.isComponent());
+  }
+
+  /**
+   * @brief `DirichletBC(u, A(v) + B(v))`: the assembler should propagate
+   * `evaluateBasis` through `Sum` and produce the sum of the two
+   * coefficient rows. For Lagrange same-FES with both summands being v
+   * itself, this collapses to coefficient 2 at the matching DOF.
+   */
+  TEST(Rodin_Variational_DirichletBC, IdentificationSumOfShapeFunctions)
+  {
+    Mesh mesh = makeUnitSquareMesh(4);
+    labelBoundaryAttributes(mesh);
+
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TrialFunction v(fes);
+
+    const FlatSet<Attribute> attrs{ LeftAttribute };
+    // A(v) = 1*v + 1*v = 2*v at every basis. (A SUM of two ShapeFunction
+    // expressions sharing the same underlying TrialFunction.)
+    DirichletBC dbc(u, RealFunction(1.0) * v + RealFunction(1.0) * v);
+    dbc.on(attrs);
+    dbc.assemble();
+
+    using IdentifiedDOFs = DirichletBCBase<Real>::IdentifiedDOFs;
+    ASSERT_TRUE(std::holds_alternative<IdentifiedDOFs>(dbc.getDOFs()));
+    const auto& dofs = std::get<IdentifiedDOFs>(dbc.getDOFs());
+    const auto expectedVertices = getBoundaryVertices(mesh, attrs);
+    ASSERT_EQ(dofs.size(), expectedVertices.size());
+
+    for (const auto vertex : expectedVertices)
+    {
+      const auto it = dofs.find(vertex);
+      ASSERT_NE(it, dofs.end());
+      ASSERT_EQ(it->second.first.size(), 1);
+      ASSERT_EQ(it->second.second.size(), 1);
+      EXPECT_EQ(it->second.first.coeff(0), vertex);
+      EXPECT_DOUBLE_EQ(it->second.second.coeff(0), 2.0);
+    }
+  }
+
+  /**
+   * @brief Re-assembling after changing the boundary attribute set
+   * regenerates the IdentifiedDOFs map for the new region.
+   */
+  TEST(Rodin_Variational_DirichletBC, IdentificationReassemblesAfterOn)
+  {
+    Mesh mesh = makeUnitSquareMesh(4);
+    labelBoundaryAttributes(mesh);
+
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TrialFunction v(fes);
+
+    DirichletBC dbc(u, v);
+    using IdentifiedDOFs = DirichletBCBase<Real>::IdentifiedDOFs;
+
+    dbc.on(LeftAttribute);
+    dbc.assemble();
+    const size_t leftSize = std::get<IdentifiedDOFs>(dbc.getDOFs()).size();
+    EXPECT_EQ(leftSize, getBoundaryVertices(mesh, { LeftAttribute }).size());
+
+    dbc.on(LeftAttribute, RightAttribute);
+    dbc.assemble();
+    const size_t bothSize = std::get<IdentifiedDOFs>(dbc.getDOFs()).size();
+    EXPECT_EQ(bothSize,
+        getBoundaryVertices(mesh, { LeftAttribute, RightAttribute }).size());
+    EXPECT_GT(bothSize, leftSize);
+  }
 }
