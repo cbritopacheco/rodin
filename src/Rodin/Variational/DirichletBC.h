@@ -89,17 +89,20 @@
  * machinery used. Coefficient pruning uses strict `c != 0` so that
  * Lagrange-dual-induced sparsity is preserved bit-for-bit.
  *
- * The identification assembler invokes `Av.evaluateBasis(j, p)` on the
- * second argument: this is a direct point-evaluation path on
- * @ref ShapeFunctionBase that bypasses the
- * `setIntegrationPoint`/`getBasis` cache, so each per-point evaluation is
- * a fresh re-evaluation of the reference-element basis at
- * `p.getReferenceCoordinates()`.
+ * The identification assembler constructs a pointwise
+ * @ref IntegrationPoint from each @ref Geometry::Point and passes it to
+ * @ref ShapeFunctionBase::setIntegrationPoint before querying
+ * @ref ShapeFunctionBase::getBasis. The pointwise integration point has
+ * `getQuadratureFormula() == nullptr`, which selects direct reference-point
+ * evaluation without inventing a single-point quadrature rule. During
+ * integration, @ref ShapeFunctionBase::setIntegrationPoint remains the
+ * preferred path with a non-null quadrature formula pointer and quadrature
+ * index so cached basis tabulations remain available.
  *
  * # Linear-system effect
  *
- * The same problem-level consumer loop handles both flavours by visiting
- * the variant returned from @ref DirichletBCBase::getDOFs:
+ * Problem assembly handles the two flavours differently by visiting the
+ * variant returned from @ref DirichletBCBase::getDOFs:
  *
  * - For @ref DirichletBCBase::ValueDOFs at slave global index @f$ g_s @f$:
  *   @f[
@@ -109,18 +112,47 @@
  *   @f]
  *   with the column at @f$ g_s @f$ moved to the RHS as
  *   @f$ b_{r} \mathrel{-}= A_{r,g_s}\cdot g_{s} @f$ before being zeroed
- *   (sparse path) or eliminated (dense path).
+ *   according to the current backend's classical essential-BC convention.
  *
  * - For @ref DirichletBCBase::IdentifiedDOFs at slave global index
  *   @f$ g_s @f$ with masters @f$ \{g_{m_k}\} @f$ and coefficients
  *   @f$ \{c_k\} @f$:
+ *   define an expansion map
  *   @f[
- *     A_{g_s,g_s}     \leftarrow 1, \quad
- *     A_{g_s,g_{m_k}} \leftarrow -c_k, \quad
- *     b_{g_s}         \leftarrow 0,
+ *     \operatorname{expand}(i)=
+ *       \begin{cases}
+ *         \{(i,1)\}, & i \text{ unconstrained},\\
+ *         \{(g_{m_k},c_k)\}_k, & i=g_s.
+ *       \end{cases}
  *   @f]
- *   with the column at @f$ g_s @f$ redirected to the master columns
- *   @f$ g_{m_k} @f$ scaled by @f$ c_k @f$ before being eliminated.
+ *   Every matrix entry @f$ A_{ij}\mathrel{+}=a @f$ is assembled as
+ *   @f[
+ *     A_{r,c}\mathrel{+}= \alpha_r\,a\,\alpha_c
+ *     \quad\forall(r,\alpha_r)\in\operatorname{expand}(i),\;
+ *          (c,\alpha_c)\in\operatorname{expand}(j),
+ *   @f]
+ *   and every vector entry @f$ b_i\mathrel{+}=f @f$ as
+ *   @f[
+ *     b_r\mathrel{+}= \alpha_r f
+ *     \quad\forall(r,\alpha_r)\in\operatorname{expand}(i).
+ *   @f]
+ *   This is the variational transformation
+ *   @f[
+ *     A \leftarrow T^T A T,\qquad b \leftarrow T^T b.
+ *   @f]
+ *   If slave DOFs remain in the unknown vector, reconstruction rows are then
+ *   written as
+ *   @f[
+ *     A_{g_s,g_s}\leftarrow 1,\quad
+ *     A_{g_s,g_{m_k}}\leftarrow -c_k,\quad
+ *     b_{g_s}\leftarrow 0.
+ *   @f]
+ *
+ * Identification mode is not zero-pinning, not row-only replacement, and not
+ * merely slave-column redirection.  It is appropriate for tied fields,
+ * same-face linear identifications, periodic-like identifications, and
+ * monolithic FSI kinematic coupling where slave residuals/reactions must be
+ * transferred into the master equations.
  *
  * # Boundary specification
  *
@@ -602,10 +634,9 @@ namespace Rodin::Variational
    *
    * - **Component extraction.**  @f$ A(v)=v_x @f$ for a vector
    *   @f$ v\in V_h^v @f$ and scalar @f$ u @f$. The
-   *   @ref Component<ShapeFunctionBase<...>> propagation of
-   *   @c evaluateBasis projects the chosen component, so each slave
-   *   depends only on the @f$ x @f$-component DOFs of @f$ v @f$ with
-   *   coefficient @f$ 1 @f$.
+   *   @ref Component<ShapeFunctionBase<...>> propagation projects the chosen
+   *   component, so each slave depends only on the @f$ x @f$-component DOFs
+   *   of @f$ v @f$ with coefficient @f$ 1 @f$.
    *
    * # Assembly: how @f$ C_{sj} @f$ is computed exactly
    *
@@ -617,10 +648,14 @@ namespace Rodin::Variational
    * @f]
    * via the slave-FES pullback, and then asking
    * @c fe_u.getLinearForm(s) to apply *its own* DOF functional to it. The
-   * callable in turn invokes
-   * @ref ShapeFunctionBase::evaluateBasis on @f$ A(v) @f$, which is the
-   * direct point-evaluation path that bypasses the
-   * @c setIntegrationPoint cache.
+   * callable in turn constructs a pointwise @ref IntegrationPoint from
+   * @f$ p @f$, passes it to @ref ShapeFunctionBase::setIntegrationPoint on
+   * @f$ A(v) @f$, and queries @ref ShapeFunctionBase::getBasis for the
+   * selected master basis. That pointwise integration point carries a null
+   * quadrature-formula pointer, so no synthetic single-point quadrature rule
+   * is needed. During quadrature integration, callers should continue to use
+   * @ref ShapeFunctionBase::setIntegrationPoint with the active quadrature
+   * formula and quadrature index so quadrature metadata remains available.
    *
    * The slave FE decides where to sample the callable — point evaluation
    * for Lagrange, an integral over the face for moment-based FEs,
@@ -644,15 +679,19 @@ namespace Rodin::Variational
    * # Linear-system effect
    *
    * For each slave global index @f$ g_s @f$ with masters
-   * @f$ \{g_{m_k}\} @f$ and coefficients @f$ \{c_k\} @f$, the consumer
-   * loop replaces the slave row with the constraint row
+   * @f$ \{g_{m_k}\} @f$ and coefficients @f$ \{c_k\} @f$, problem assembly
+   * distributes every matrix and vector contribution through the expansion
+   * map.  This implements
    * @f[
-   *   1\cdot u_{g_s} \;-\; \sum_k c_k\,u_{g_{m_k}} \;=\; 0,
+   *   A \leftarrow T^T A T,\qquad b \leftarrow T^T b,
    * @f]
-   * and redirects every slave-column contribution
-   * @f$ A_{r,g_s} @f$ into the master columns as
-   * @f$ A_{r,g_{m_k}} \mathrel{+}= A_{r,g_s}\cdot c_k @f$, after which
-   * @f$ A_{r,g_s} @f$ is zeroed.
+   * then writes reconstruction rows
+   * @f[
+   *   u_{g_s} - \sum_k c_k u_{g_{m_k}} = 0
+   * @f]
+   * when slave DOFs remain in the unknown vector.  This is a variational
+   * identification constraint; it is not zero-pinning, row-only replacement,
+   * or column-only redirection.
    *
    * @tparam Solution Solution type of the slave trial @f$ u @f$
    * @tparam FES1 Finite element space of @f$ u @f$
@@ -661,7 +700,7 @@ namespace Rodin::Variational
    * @tparam Sp Shape function space type (Trial or Test) of @f$ A(v) @f$
    *
    * @see DirichletBCBase
-   * @see ShapeFunctionBase::evaluateBasis
+   * @see ShapeFunctionBase::setIntegrationPoint
    * @see PeriodicBC
    */
   template <class Solution, class FES1,
@@ -795,11 +834,13 @@ namespace Rodin::Variational
        * by handing the slave finite element the callable
        * @f$ p\mapsto A(\varphi_j^{v,K})(p) @f$ via the slave-FES
        * pullback and asking @c fe_u.getLinearForm(s) to apply its DOF
-       * functional to it. The callable invokes
-       * @ref ShapeFunctionBase::evaluateBasis on @f$ A(v) @f$, which
-       * bypasses the @c setIntegrationPoint cache and re-evaluates the
-       * reference-element basis at @c p.getReferenceCoordinates() each
-       * call.
+       * functional to it. The callable builds a pointwise
+       * @ref IntegrationPoint with a null quadrature-formula pointer, passes
+       * it to @ref ShapeFunctionBase::setIntegrationPoint on @f$ A(v) @f$,
+       * and then queries @ref ShapeFunctionBase::getBasis. Quadrature
+       * integration code should continue to use
+       * @ref ShapeFunctionBase::setIntegrationPoint with the active
+       * quadrature formula and quadrature index.
        *
        * Strict @f$ C_{sj}\neq 0 @f$ pruning is applied; the result is the
        * @ref DirichletBCBase::IdentifiedDOFs alternative of the variant

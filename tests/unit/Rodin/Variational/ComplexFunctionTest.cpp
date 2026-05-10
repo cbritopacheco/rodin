@@ -206,7 +206,7 @@ TEST(Rodin_Variational_ComplexFunction, Callable_UsesIntegrationPointFastPath)
   const Math::Vector<Real> rc{{ 0.25, 0.25 }};
   Point p(*it, rc);
   QF::Centroid qf(Polytope::Type::Triangle);
-  IntegrationPoint ip(p, qf, 3);
+  IntegrationPoint ip(p, &qf, 3);
 
   ComplexFunction f(IntegrationPointComplexCallable{});
 
@@ -223,7 +223,7 @@ TEST(Rodin_Variational_ComplexFunction, RealAndImagParts_UseIntegrationPointFast
   const Math::Vector<Real> rc{{ 0.25, 0.25 }};
   Point p(*it, rc);
   QF::Centroid qf(Polytope::Type::Triangle);
-  IntegrationPoint ip(p, qf, 4);
+  IntegrationPoint ip(p, &qf, 4);
 
   RealFunction re(IntegrationPointRealPartCallable{});
   RealFunction im(IntegrationPointImagPartCallable{});

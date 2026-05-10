@@ -16,6 +16,8 @@
  */
 #include <gtest/gtest.h>
 
+#include <boost/bimap.hpp>
+
 #include "Rodin/Configure.h"
 #include "Rodin/Variational.h"
 #include "Rodin/Assembly/Sequential.h"
@@ -362,6 +364,125 @@ namespace Rodin::Tests::Unit
 
     EXPECT_EQ(A.rows(), expected);
     EXPECT_EQ(A.cols(), expected);
+  }
+
+  TEST(Assembly_OpenMP_Problem, IdentificationVectorMasterMatchesSequential)
+  {
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    mesh.getConnectivity().compute(1, 2);
+
+    P1 slaveFES(mesh);
+    P1 masterFES(mesh, mesh.getSpaceDimension());
+
+    TrialFunction u(slaveFES);
+    TestFunction  v(slaveFES);
+    TrialFunction eta(masterFES);
+    TestFunction  zeta(masterFES);
+
+    auto bc =
+      DirichletBC(
+          u,
+          RealFunction(2.0) * eta.x() + RealFunction(-0.5) * eta.y());
+    bc.assemble();
+
+    using IdentifiedDOFs = DirichletBCBase<Real>::IdentifiedDOFs;
+    ASSERT_TRUE(std::holds_alternative<IdentifiedDOFs>(bc.getDOFs()));
+    const auto& ident = std::get<IdentifiedDOFs>(bc.getDOFs());
+    ASSERT_FALSE(ident.empty());
+
+    bool sawMultiMaster = false;
+    for (const auto& [slave, row] : ident)
+    {
+      (void) slave;
+      if (row.first.size() >= 2)
+        sawMultiMaster = true;
+    }
+    ASSERT_TRUE(sawMultiMaster);
+
+    const Index nSlave  = static_cast<Index>(slaveFES.getSize());
+    const Index nMaster = static_cast<Index>(masterFES.getSize());
+    const Index nTotal  = nSlave + nMaster;
+
+    BilinearForm uu(u, v);
+    uu.getOperator().resize(nSlave, nSlave);
+    std::vector<Eigen::Triplet<Real>> triplets{
+      Eigen::Triplet<Real>(0, 0, 2.0),
+      Eigen::Triplet<Real>(0, 1, 3.0),
+      Eigen::Triplet<Real>(1, 0, 5.0),
+      Eigen::Triplet<Real>(1, 1, 7.0)
+    };
+    uu.getOperator().setFromTriplets(triplets.begin(), triplets.end());
+
+    LinearForm loadU(v);
+    loadU.getVector().resize(nSlave);
+    loadU.getVector().setZero();
+    loadU.getVector().coeffRef(0) = 11.0;
+    loadU.getVector().coeffRef(1) = -13.0;
+
+    auto body = uu + bc - loadU;
+
+    using LinearSystemType =
+      Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
+    using ProblemType =
+      Problem<LinearSystemType,
+              decltype(u), decltype(v), decltype(eta), decltype(zeta)>;
+
+    auto trialFunctions = Tuple{ std::ref(u), std::ref(eta) };
+    auto testFunctions  = Tuple{ std::ref(v), std::ref(zeta) };
+
+    std::array<size_t, 2> trialOffsets{
+      0, static_cast<size_t>(nSlave)
+    };
+    std::array<size_t, 2> testOffsets{
+      0, static_cast<size_t>(nSlave)
+    };
+
+    boost::bimap<FormLanguage::Base::UUID, size_t> trialUUIDMap;
+    boost::bimap<FormLanguage::Base::UUID, size_t> testUUIDMap;
+    trialUUIDMap.right.insert({ 0, u.getUUID() });
+    trialUUIDMap.right.insert({ 1, eta.getUUID() });
+    testUUIDMap.right.insert({ 0, v.getUUID() });
+    testUUIDMap.right.insert({ 1, zeta.getUUID() });
+
+    Assembly::ProblemAssemblyInput<
+      std::decay_t<decltype(body)>,
+      decltype(u), decltype(v), decltype(eta), decltype(zeta)> input(
+          body,
+          trialFunctions,
+          testFunctions,
+          trialOffsets,
+          testOffsets,
+          trialUUIDMap,
+          testUUIDMap,
+          static_cast<size_t>(nTotal),
+          static_cast<size_t>(nTotal));
+
+    LinearSystemType seqLS;
+    LinearSystemType ompLS;
+    Assembly::Sequential<LinearSystemType, ProblemType> seqAsm;
+    Assembly::OpenMP<LinearSystemType, ProblemType> ompAsm;
+    seqAsm.execute(seqLS, input);
+    ompAsm.execute(ompLS, input);
+
+    const auto& ASeq = seqLS.getOperator();
+    const auto& AOmp = ompLS.getOperator();
+    const auto& bSeq = seqLS.getVector();
+    const auto& bOmp = ompLS.getVector();
+
+    ASSERT_EQ(ASeq.rows(), static_cast<Eigen::Index>(nTotal));
+    ASSERT_EQ(AOmp.rows(), ASeq.rows());
+    ASSERT_EQ(AOmp.cols(), ASeq.cols());
+    ASSERT_EQ(bOmp.size(), bSeq.size());
+
+    for (Index i = 0; i < nTotal; i++)
+    {
+      EXPECT_NEAR(bOmp.coeff(i), bSeq.coeff(i), 1e-14) << "row " << i;
+      for (Index j = 0; j < nTotal; j++)
+      {
+        EXPECT_NEAR(AOmp.coeff(i, j), ASeq.coeff(i, j), 1e-14)
+          << "entry (" << i << ", " << j << ")";
+      }
+    }
   }
 
   INSTANTIATE_TEST_SUITE_P(

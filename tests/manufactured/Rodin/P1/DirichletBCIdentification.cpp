@@ -263,6 +263,59 @@ namespace Rodin::Tests::Manufactured::DirichletBCIdentification
     EXPECT_EQ(*dbc.getValueUUID(), v.getUUID());
   }
 
+  TEST_P(Test_16x16, CrossFieldVectorMasterMatchesValueReference)
+  {
+    const auto etaX = 1.0 + F::x;
+    const auto etaY = 2.0 - F::y;
+    const auto uBoundary = 2.0 * etaX - 0.5 * etaY;
+
+    Mesh meshRef = this->getMesh();
+    P1 scalarRef(meshRef);
+    P1 vectorRef(meshRef, meshRef.getSpaceDimension());
+    TrialFunction uRef(scalarRef);
+    TestFunction  vRef(scalarRef);
+    TrialFunction etaRef(vectorRef);
+    TestFunction  zetaRef(vectorRef);
+
+    Problem refProblem(uRef, vRef, etaRef, zetaRef);
+    refProblem =
+      Integral(uRef, vRef)
+      + Integral(etaRef, zetaRef)
+      + DirichletBC(uRef, uBoundary)
+      + DirichletBC(etaRef, VectorFunction{ etaX, etaY });
+    SparseLU(refProblem).solve();
+
+    Mesh meshId = this->getMesh();
+    P1 scalarId(meshId);
+    P1 vectorId(meshId, meshId.getSpaceDimension());
+    TrialFunction uId(scalarId);
+    TestFunction  vId(scalarId);
+    TrialFunction etaId(vectorId);
+    TestFunction  zetaId(vectorId);
+
+    Problem idProblem(uId, vId, etaId, zetaId);
+    idProblem =
+      Integral(uId, vId)
+      + Integral(etaId, zetaId)
+      + DirichletBC(
+          uId,
+          RealFunction(2.0) * etaId.x() + RealFunction(-0.5) * etaId.y())
+      + DirichletBC(etaId, VectorFunction{ etaX, etaY });
+    SparseLU(idProblem).solve();
+
+    const auto& uRefData = uRef.getSolution().getData();
+    const auto& uIdData  = uId.getSolution().getData();
+    ASSERT_EQ(uRefData.size(), uIdData.size());
+    for (Eigen::Index i = 0; i < uRefData.size(); i++)
+      EXPECT_NEAR(uRefData(i), uIdData(i), 1e-10) << "u dof " << i;
+
+    const auto& etaRefData = etaRef.getSolution().getData();
+    const auto& etaIdData  = etaId.getSolution().getData();
+    ASSERT_EQ(etaRefData.size(), etaIdData.size());
+    for (Eigen::Index i = 0; i < etaRefData.size(); i++)
+      EXPECT_NEAR(etaRefData(i), etaIdData(i), 1e-10) << "eta dof " << i;
+  }
+
   INSTANTIATE_TEST_SUITE_P(
     MeshParams16x16,
     Test_16x16,

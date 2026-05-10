@@ -208,7 +208,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  TEST(Rodin_Variational_ShapeFunctionSetPoint, H1MatchesBasis)
+  TEST(Rodin_Variational_PointIntegrationPoint, H1MatchesBasis)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     const size_t D = mesh.getDimension();
@@ -232,7 +232,7 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(v.getBasis(local), fe.getBasis(local)(rc), 1e-14);
   }
 
-  TEST(Rodin_Variational_ShapeFunctionSetPoint, H1GradMatchesBasisGradient)
+  TEST(Rodin_Variational_PointIntegrationPoint, H1GradMatchesBasisGradient)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
     const size_t D = mesh.getDimension();
@@ -652,7 +652,7 @@ namespace Rodin::Tests::Unit
 
   /**
    * @brief Verify isComponent() returns false for both BC kinds — the
-   * `Component<...>` case is handled inside `getBasis` / `evaluateBasis`,
+   * `Component<...>` case is handled inside `getBasis`,
    * not via the legacy `isComponent()` flag.
    */
   TEST(Rodin_Variational_DirichletBC, IsComponentAlwaysFalse)
@@ -674,9 +674,9 @@ namespace Rodin::Tests::Unit
 
   /**
    * @brief `DirichletBC(u, A(v) + B(v))`: the assembler should propagate
-   * `evaluateBasis` through `Sum` and produce the sum of the two
-   * coefficient rows. For Lagrange same-FES with both summands being v
-   * itself, this collapses to coefficient 2 at the matching DOF.
+   * pointwise basis evaluation through `Sum` and produce the sum of the two
+   * coefficient rows. For Lagrange same-FES with both summands being v itself,
+   * this collapses to coefficient 2 at the matching DOF.
    */
   TEST(Rodin_Variational_DirichletBC, IdentificationSumOfShapeFunctions)
   {
