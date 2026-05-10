@@ -9,6 +9,8 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
+#include <limits>
 #include <stdexcept>
 #include <vector>
 
@@ -152,18 +154,22 @@ namespace Rodin::Assembly
           }
         }
 
-        if (selfCoefficient == Scalar(1))
+        const Scalar scale = Scalar(1) - selfCoefficient;
+        using MagnitudeType = decltype(std::abs(scale));
+        constexpr MagnitudeType epsilon =
+          std::numeric_limits<MagnitudeType>::epsilon();
+
+        if (std::abs(scale) <= epsilon)
         {
           if (reduced.empty())
             return;
 
           throw std::invalid_argument(
-            "DirichletBC singular identification: slave DOF cannot appear with coefficient 1 alongside other masters.");
+            "DirichletBC invalid identification: a slave DOF cannot also appear as a master with coefficient 1 alongside other masters.");
         }
 
         if (selfCoefficient != Scalar(0))
         {
-          const Scalar scale = Scalar(1) - selfCoefficient;
           for (auto& e : reduced)
             e.coefficient /= scale;
         }
