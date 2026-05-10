@@ -212,6 +212,71 @@ namespace
     }
   }
 
+  template <template <class, class> class Assembler>
+  void checkPETScSelfIdentificationMatchesZeroValueConstraint()
+  {
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(1, 2);
+
+    P1 refFES(mesh);
+    PETSc::Variational::TrialFunction uRef(refFES);
+    PETSc::Variational::TestFunction  vRef(refFES);
+
+    auto refBody =
+      Integral(Grad(uRef), Grad(vRef))
+      - Integral(RealFunction(1.0), vRef)
+      + DirichletBC(uRef, Zero());
+
+    P1 idFES(mesh);
+    PETSc::Variational::TrialFunction uId(idFES);
+    PETSc::Variational::TestFunction  vId(idFES);
+
+    auto idBody =
+      Integral(Grad(uId), Grad(vId))
+      - Integral(RealFunction(1.0), vId)
+      + DirichletBC(uId, -uId);
+
+    using LinearSystemType = PETSc::Math::LinearSystem;
+    using ProblemType =
+      Problem<LinearSystemType, decltype(uRef), decltype(vRef)>;
+
+    LinearSystemType refLS(PETSC_COMM_SELF);
+    LinearSystemType idLS(PETSC_COMM_SELF);
+
+    Assembler<LinearSystemType, ProblemType> assembler;
+    assembler.execute(refLS, { refBody, uRef, vRef });
+    assembler.execute(idLS, { idBody, uId, vId });
+
+    auto& ARef = refLS.getOperator();
+    auto& AId  = idLS.getOperator();
+    auto& bRef = refLS.getVector();
+    auto& bId  = idLS.getVector();
+
+    const PetscInt n = static_cast<PetscInt>(refFES.getSize());
+    for (PetscInt i = 0; i < n; i++)
+    {
+      PetscErrorCode ierr;
+      PetscScalar refValue = 0;
+      PetscScalar idValue  = 0;
+
+      ierr = VecGetValues(bRef, 1, &i, &refValue);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      ierr = VecGetValues(bId, 1, &i, &idValue);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      EXPECT_NEAR(refValue, idValue, 1e-12) << "row " << i;
+
+      for (PetscInt j = 0; j < n; j++)
+      {
+        ierr = MatGetValues(ARef, 1, &i, 1, &j, &refValue);
+        ASSERT_EQ(ierr, PETSC_SUCCESS);
+        ierr = MatGetValues(AId, 1, &i, 1, &j, &idValue);
+        ASSERT_EQ(ierr, PETSC_SUCCESS);
+        EXPECT_NEAR(refValue, idValue, 1e-12)
+          << "entry (" << i << ", " << j << ")";
+      }
+    }
+  }
+
   TEST(PETSc_Form, SequentialLinearFormUsesSelfCommunicatorAndAssembles)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
@@ -385,9 +450,19 @@ namespace
     checkPETScVectorMasterIdentification<PETSc::Assembly::Sequential>();
   }
 
+  TEST(PETSc_Form, SequentialSelfIdentificationMatchesZeroValueConstraint)
+  {
+    checkPETScSelfIdentificationMatchesZeroValueConstraint<PETSc::Assembly::Sequential>();
+  }
+
   TEST(PETSc_Form, OpenMPVectorMasterIdentificationProjectsMatrixAndVector)
   {
     checkPETScVectorMasterIdentification<PETSc::Assembly::OpenMP>();
+  }
+
+  TEST(PETSc_Form, OpenMPSelfIdentificationMatchesZeroValueConstraint)
+  {
+    checkPETScSelfIdentificationMatchesZeroValueConstraint<PETSc::Assembly::OpenMP>();
   }
 }
 
