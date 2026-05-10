@@ -1063,7 +1063,10 @@ namespace Rodin::Assembly
               {
                 const auto val = op(i, j);
                 if (val != ScalarType(0))
-                  A(static_cast<Index>(vOff) + i, static_cast<Index>(uOff) + j) += val;
+                  matrix_entry(
+                      static_cast<Index>(vOff) + i,
+                      static_cast<Index>(uOff) + j,
+                      val);
               }
           }
         }

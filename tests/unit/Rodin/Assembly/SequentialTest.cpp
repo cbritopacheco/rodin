@@ -744,6 +744,215 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  TEST(Assembly_Problem_Identification, DensePreassembledFormsProjectRowsColumnsAndVector)
+  {
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    mesh.getConnectivity().compute(1, 2);
+
+    P1 slaveFES(mesh);
+    P1 masterFES(mesh, mesh.getSpaceDimension());
+
+    TrialFunction u(slaveFES);
+    TestFunction  v(slaveFES);
+    TrialFunction eta(masterFES);
+    TestFunction  zeta(masterFES);
+
+    auto bc =
+      DirichletBC(
+          u,
+          RealFunction(2.0) * eta.x() + RealFunction(-0.5) * eta.y());
+    bc.assemble();
+
+    using IdentifiedDOFs = DirichletBCBase<Real>::IdentifiedDOFs;
+    ASSERT_TRUE(std::holds_alternative<IdentifiedDOFs>(bc.getDOFs()));
+    const auto& ident = std::get<IdentifiedDOFs>(bc.getDOFs());
+    ASSERT_FALSE(ident.empty());
+
+    bool sawMultiMaster = false;
+    for (const auto& [slave, row] : ident)
+    {
+      (void) slave;
+      if (row.first.size() >= 2)
+        sawMultiMaster = true;
+    }
+    ASSERT_TRUE(sawMultiMaster);
+
+    const Index nSlave  = static_cast<Index>(slaveFES.getSize());
+    const Index nMaster = static_cast<Index>(masterFES.getSize());
+    const Index nTotal  = nSlave + nMaster;
+
+    struct MatrixEntry
+    {
+      Index row;
+      Index col;
+      Real value;
+    };
+    const std::vector<MatrixEntry> matrixEntries{
+      { 0, 0, 2.0 },
+      { 0, 1, 3.0 },
+      { 1, 0, 5.0 },
+      { 1, 1, 7.0 }
+    };
+    const std::vector<std::pair<Index, Real>> vectorEntries{
+      { 0, 11.0 },
+      { 1, -13.0 }
+    };
+
+    BilinearForm uu(u, v);
+    uu.getOperator().resize(nSlave, nSlave);
+    std::vector<Eigen::Triplet<Real>> triplets;
+    triplets.reserve(matrixEntries.size());
+    for (const auto& e : matrixEntries)
+      triplets.emplace_back(e.row, e.col, e.value);
+    uu.getOperator().setFromTriplets(triplets.begin(), triplets.end());
+
+    LinearForm loadU(v);
+    loadU.getVector().resize(nSlave);
+    loadU.getVector().setZero();
+    for (const auto& [row, value] : vectorEntries)
+      loadU.getVector().coeffRef(row) = value;
+
+    auto body = uu + bc - loadU;
+
+    using LinearSystemType =
+      Math::LinearSystem<Math::Matrix<Real>, Math::Vector<Real>>;
+    using ProblemType =
+      Problem<LinearSystemType,
+              decltype(u), decltype(v), decltype(eta), decltype(zeta)>;
+
+    auto trialFunctions = Tuple{ std::ref(u), std::ref(eta) };
+    auto testFunctions  = Tuple{ std::ref(v), std::ref(zeta) };
+
+    std::array<size_t, 2> trialOffsets{
+      0, static_cast<size_t>(nSlave)
+    };
+    std::array<size_t, 2> testOffsets{
+      0, static_cast<size_t>(nSlave)
+    };
+
+    boost::bimap<FormLanguage::Base::UUID, size_t> trialUUIDMap;
+    boost::bimap<FormLanguage::Base::UUID, size_t> testUUIDMap;
+    trialUUIDMap.right.insert({ 0, u.getUUID() });
+    trialUUIDMap.right.insert({ 1, eta.getUUID() });
+    testUUIDMap.right.insert({ 0, v.getUUID() });
+    testUUIDMap.right.insert({ 1, zeta.getUUID() });
+
+    Assembly::ProblemAssemblyInput<
+      std::decay_t<decltype(body)>,
+      decltype(u), decltype(v), decltype(eta), decltype(zeta)> input(
+          body,
+          trialFunctions,
+          testFunctions,
+          trialOffsets,
+          testOffsets,
+          trialUUIDMap,
+          testUUIDMap,
+          static_cast<size_t>(nTotal),
+          static_cast<size_t>(nTotal));
+
+    LinearSystemType ls;
+    Assembly::Sequential<LinearSystemType, ProblemType> assembler;
+    assembler.execute(ls, input);
+
+    Eigen::MatrixXd expectedA =
+      Eigen::MatrixXd::Zero(
+          static_cast<Eigen::Index>(nTotal),
+          static_cast<Eigen::Index>(nTotal));
+    Eigen::VectorXd expectedB =
+      Eigen::VectorXd::Zero(static_cast<Eigen::Index>(nTotal));
+
+    auto expand = [&](Index local)
+    {
+      std::vector<std::pair<Index, Real>> res;
+      const auto it = ident.find(local);
+      if (it == ident.end())
+      {
+        res.emplace_back(local, 1.0);
+        return res;
+      }
+
+      const auto& masters = it->second.first;
+      const auto& coeffs  = it->second.second;
+      for (Index k = 0; k < static_cast<Index>(masters.size()); k++)
+        res.emplace_back(nSlave + masters[k], coeffs[k]);
+      return res;
+    };
+
+    for (const auto& e : matrixEntries)
+      for (const auto& r : expand(e.row))
+        for (const auto& c : expand(e.col))
+          expectedA(r.first, c.first) += r.second * e.value * c.second;
+
+    for (const auto& [row, value] : vectorEntries)
+      for (const auto& r : expand(row))
+        expectedB(r.first) += r.second * value;
+
+    for (const auto& [slave, row] : ident)
+    {
+      expectedA.row(static_cast<Eigen::Index>(slave)).setZero();
+      expectedA(slave, slave) = 1.0;
+      const auto& masters = row.first;
+      const auto& coeffs  = row.second;
+      for (Index k = 0; k < static_cast<Index>(masters.size()); k++)
+        expectedA(slave, nSlave + masters[k]) -= coeffs[k];
+      expectedB(slave) = 0.0;
+    }
+
+    const auto& A = ls.getOperator();
+    const auto& b = ls.getVector();
+    ASSERT_EQ(A.rows(), static_cast<Eigen::Index>(nTotal));
+    ASSERT_EQ(A.cols(), static_cast<Eigen::Index>(nTotal));
+    ASSERT_EQ(b.size(), static_cast<Eigen::Index>(nTotal));
+
+    for (Index i = 0; i < nTotal; i++)
+    {
+      EXPECT_NEAR(b.coeff(i), expectedB(i), 1e-14) << "row " << i;
+      for (Index j = 0; j < nTotal; j++)
+      {
+        EXPECT_NEAR(A.coeff(i, j), expectedA(i, j), 1e-14)
+          << "entry (" << i << ", " << j << ")";
+      }
+    }
+  }
+
+  TEST(Assembly_Problem_Identification, SelfIdentificationMatchesZeroValueConstraint)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(1, 2);
+
+    P1 refFES(mesh);
+    TrialFunction uRef(refFES);
+    TestFunction  vRef(refFES);
+
+    Problem refProblem(uRef, vRef);
+    refProblem = Integral(Grad(uRef), Grad(vRef))
+               - Integral(RealFunction(1.0), vRef)
+               + DirichletBC(uRef, Zero());
+    refProblem.assemble();
+
+    P1 idFES(mesh);
+    TrialFunction uId(idFES);
+    TestFunction  vId(idFES);
+
+    Problem idProblem(uId, vId);
+    idProblem = Integral(Grad(uId), Grad(vId))
+              - Integral(RealFunction(1.0), vId)
+              + DirichletBC(uId, -uId);
+    idProblem.assemble();
+
+    const auto& ARef = refProblem.getLinearSystem().getOperator();
+    const auto& bRef = refProblem.getLinearSystem().getVector();
+    const auto& AId  = idProblem.getLinearSystem().getOperator();
+    const auto& bId  = idProblem.getLinearSystem().getVector();
+
+    ASSERT_EQ(ARef.rows(), AId.rows());
+    ASSERT_EQ(ARef.cols(), AId.cols());
+    ASSERT_EQ(bRef.size(), bId.size());
+
+    EXPECT_NEAR((ARef - AId).norm(), 0.0, 1e-12);
+    EXPECT_NEAR((bRef - bId).norm(), 0.0, 1e-12);
+  }
+
   TEST(Assembly_Problem_Identification, OverlappingValueAndIdentificationThrows)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
