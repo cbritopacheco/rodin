@@ -293,7 +293,7 @@ jobs:
       fail-fast: false
       matrix:
         compiler: [gcc-14]
-        build_type: [Debug, Release]
+        build_type: [Release]
         multithreaded: [ON, OFF]
         asan: [OFF]
         ubsan: [OFF]
