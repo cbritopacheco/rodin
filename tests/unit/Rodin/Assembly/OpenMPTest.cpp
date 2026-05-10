@@ -62,8 +62,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  template <template <class, class> class Assembler>
-  void checkSelfIdentificationMatchesZeroValueConstraint()
+  void checkOpenMPSelfIdentificationMatchesZeroValueConstraint()
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
     mesh.getConnectivity().compute(1, 2);
@@ -86,20 +85,20 @@ namespace Rodin::Tests::Unit
       - Integral(RealFunction(1.0), vId)
       + DirichletBC(uId, -uId);
 
-    using LinearSystemType =
-      Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
-    using ProblemType =
-      Problem<LinearSystemType, decltype(uRef), decltype(vRef)>;
+    Problem refProblem(uRef, vRef);
+    refProblem = refBody;
+    refProblem.assemble();
 
-    LinearSystemType refLS;
-    LinearSystemType idLS;
+    Problem idProblem(uId, vId);
+    idProblem = idBody;
+    idProblem.assemble();
 
-    Assembler<LinearSystemType, ProblemType> assembler;
-    assembler.execute(refLS, { refBody, uRef, vRef });
-    assembler.execute(idLS, { idBody, uId, vId });
-
-    const auto matrixDiff = refLS.getOperator() - idLS.getOperator();
-    const auto vectorDiff = refLS.getVector() - idLS.getVector();
+    const auto matrixDiff =
+      refProblem.getLinearSystem().getOperator()
+      - idProblem.getLinearSystem().getOperator();
+    const auto vectorDiff =
+      refProblem.getLinearSystem().getVector()
+      - idProblem.getLinearSystem().getVector();
 
     EXPECT_NEAR(matrixDiff.norm(), 0.0, 1e-12);
     EXPECT_NEAR(vectorDiff.norm(), 0.0, 1e-12);
@@ -530,7 +529,7 @@ namespace Rodin::Tests::Unit
 
   TEST(Assembly_OpenMP_Problem, SelfIdentificationMatchesZeroValueConstraint)
   {
-    checkSelfIdentificationMatchesZeroValueConstraint<Assembly::OpenMP>();
+    checkOpenMPSelfIdentificationMatchesZeroValueConstraint();
   }
 
   INSTANTIATE_TEST_SUITE_P(
