@@ -204,8 +204,8 @@ namespace Rodin::Assembly
    * filters by essential boundary attributes, and emits, for each slave DOF
    * on a shared face, the master-DOF/coefficient pair
    * @c (masterDOFs[local], 1.0) — exact, tolerance-free pairing via the FES's
-   * own DOF connectivity. Generalises to non-trivial @f$ A @f$ via
-   * @c Av.setIntegrationPoint(IntegrationPoint(p)).getBasis(j).
+   * own DOF connectivity. Generalises to non-trivial @f$ A @f$ by evaluating
+   * @c Av.getBasis(j) with a live @c IntegrationPoint built from @p p.
    */
   template <class Scalar, class Sol1, class FES1,
             class Derived2, class FES2,
@@ -280,7 +280,8 @@ namespace Rodin::Assembly
               auto basisCallable = [&Av, j]
                                    (const Geometry::Point& p)
               {
-                Av.setIntegrationPoint(Variational::IntegrationPoint(p));
+                const Variational::IntegrationPoint ip(p);
+                Av.setIntegrationPoint(ip);
                 return Av.getBasis(static_cast<size_t>(j));
               };
               const auto mapping =
