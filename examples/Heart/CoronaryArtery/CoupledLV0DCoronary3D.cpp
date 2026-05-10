@@ -309,12 +309,16 @@ namespace Rodin::Examples::Heart
     const Real a = bc.C / dt;
 
     const auto& s = model.getState();
+    const auto& h = model.getHistory();
+
+    const Real dPim = (s.pv - h.nm1.pv) / dt;
+    const Real Qim  = bc.C * 0.3  * dPim;
 
     bc.pc =
-      (a * bc.pc + Q + s.pv / bc.Rd)
+      (a * bc.pc + Q + Qim + s.pv / bc.Rd)
       / (a + 1.0 / bc.Rd);
 
-    bc.qd = (bc.pc - bc.pd) / bc.Rd;
+    bc.qd = (bc.pc - s.pv) / bc.Rd;
     bc.pout = bc.pc + bc.Rp * Q;
   }
 
@@ -322,6 +326,7 @@ namespace Rodin::Examples::Heart
       const Config& cfg, const Model& model, RCR& bc, Real Q, Real dt)
   {
     const auto& s = model.getState();
+    const auto& h = model.getHistory();
 
     const Real cap = bc.C / dt;
     const Real pcOld = bc.pc;
@@ -517,12 +522,15 @@ namespace Rodin::Examples::Heart
         return sgn * (*root);
       };
 
+    const Real dPim = (s.pv - h.nm1.pv) / dt;
+    const Real Qim  = bc.C * 0.3  * dPim;
+
     auto distalResidual = [&](Real pc) -> std::pair<Real, Real>
     {
       const Real x = pc - s.pv;
       const auto [qd, dqd] = flowLaw(x, lengthD, radiusD);
 
-      const Real f  = cap * (pc - pcOld) + qd - Q;
+      const Real f  = cap * (pc - pcOld) + qd - Qim - Q;
       const Real df = cap + dqd;
 
       return {f, df};

@@ -88,6 +88,7 @@ namespace Rodin::Examples::Heart
         Real pout = 0.0;
         /// @brief Distal branch flow leaving the capacitor.
         Real qd = 0.0;
+
       };
 
       /**
@@ -116,13 +117,13 @@ namespace Rodin::Examples::Heart
       struct OutletFlowLaw
       {
         /// @brief Proximal surrogate vessel radius.
-        Real proximalRadius = 5.0e-4;
+        Real proximalRadius = 8.0e-4;
         /// @brief Proximal surrogate vessel length.
-        Real proximalLength = 0.02;
+        Real proximalLength = 0.0001;
         /// @brief Distal surrogate vessel radius.
-        Real distalRadius = 1.2e-4;
+        Real distalRadius = 2.0e-4;
         /// @brief Distal surrogate vessel length.
-        Real distalLength = 0.02;
+        Real distalLength = 0.005;
         /// @brief Pressure-drop threshold for the Poiseuille fallback.
         Real pressureDropTolerance = 1.0e-12;
         /// @brief Minimum shear-rate bracket.
@@ -213,7 +214,7 @@ namespace Rodin::Examples::Heart
         /// @brief 0D fluid density.
         Real rho = 1.0e3;
         /// @brief Reference radius.
-        Real R0 = 2.3e-2;
+        Real R0 = 2.45e-2;
         /// @brief Reference wall thickness.
         Real d0 = 1.4e-2;
         /// @brief Passive elastic stiffness.
@@ -230,21 +231,21 @@ namespace Rodin::Examples::Heart
         /// @brief Active stiffness scale.
         Real k0 = 1.0e5;
         /// @brief Active stress scale.
-        Real sigma0 = 1.24e5;
+        Real sigma0 = 1.4e5;
         /// @brief Proximal arterial resistance.
         Real Rp = 5e7;
         /// @brief Proximal arterial compliance.
-        Real Cp = 2.5e-9;
+        Real Cp = 5e-9;
         /// @brief Distal arterial resistance.
         Real Rd = 1.0e8;
         /// @brief Distal arterial compliance.
-        Real Cd = 5.0e-9;
+        Real Cd = 1.0e-8;
         /// @brief Atrial valve coefficient.
-        Real Kat = 9.0e-6;
+        Real Kat = 8.0e-7;
         /// @brief Peripheral valve coefficient.
         Real Kp = 5.0e-10;
         /// @brief Arterial valve coefficient.
-        Real Kar = 1.e-6;
+        Real Kar = 1.e-7;
         /// @brief LV cavity capacity.
         Real cavityCapacity = 5.0e-12;
         /// @brief Local 0D Newton absolute tolerance.
@@ -314,13 +315,13 @@ namespace Rodin::Examples::Heart
         /// @brief Yasuda transition exponent.
         Real yasuda = 1.5410;
         /// @brief Proximal surrogate vessel radius.
-        Real proximalRadius = 0.015;
+        Real proximalRadius = 0.00125;
         /// @brief Proximal surrogate vessel length.
-        Real proximalLength = 0.4;
+        Real proximalLength = 0.05;
         /// @brief Distal surrogate vessel radius.
-        Real distalRadius = 0.0005;
+        Real distalRadius = 0.0007;
         /// @brief Distal surrogate vessel length.
-        Real distalLength = 0.004;
+        Real distalLength = 0.2;
       };
 
       /**
@@ -398,7 +399,7 @@ namespace Rodin::Examples::Heart
         /// @brief 0D LV model parameters and initial conditions.
         LVModel lv;
         /// @brief Default RCR parameters copied to every outlet at startup.
-        RCR defaultRCR{1.0e8, 1.0e-11, 1.0e9, 500.0, 10500.0, 11000.0};
+        RCR defaultRCR{5.0e8, 5.0e-10, 1.0e9, 500.0, 10000.0, 11000.0};
       };
 
       explicit CoupledLV0DCoronary3D(const Rodin::Context::MPI& context);
