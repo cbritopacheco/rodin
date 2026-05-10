@@ -44,13 +44,16 @@ namespace Rodin::Math
       constexpr
       SpatialMatrix() noexcept
         : m_rows(0), m_cols(0)
-      {}
+      {
+        zeroStorage();
+      }
 
       constexpr
       SpatialMatrix(std::uint8_t rows, std::uint8_t cols)
         : m_rows(rows), m_cols(cols)
       {
         assert(rows <= MaxSize && cols <= MaxSize);
+        zeroStorage();
       }
 
       constexpr
@@ -58,6 +61,7 @@ namespace Rodin::Math
         : m_rows(static_cast<std::uint8_t>(vec.size())),
           m_cols(1)
       {
+        zeroStorage();
         switch (m_rows)
         {
           case 3:
@@ -91,11 +95,11 @@ namespace Rodin::Math
       template <class EigenDerived>
       constexpr
       SpatialMatrix(const Eigen::MatrixBase<EigenDerived>& other)
-        : m_rows(static_cast<std::uint8_t>(other.rows())),
-          m_cols(static_cast<std::uint8_t>(other.cols())),
-          m_data(other)
+        : m_rows(0),
+          m_cols(0)
       {
-        assert(m_rows <= MaxSize && m_cols <= MaxSize);
+        zeroStorage();
+        *this = other;
       }
 
       static constexpr SpatialMatrix Identity(std::uint8_t rows, std::uint8_t cols)
@@ -136,6 +140,7 @@ namespace Rodin::Math
         assert(r <= MaxSize && c <= MaxSize);
         m_rows = r;
         m_cols = c;
+        zeroStorage();
         switch (m_rows)
         {
           case 3:
@@ -209,6 +214,7 @@ namespace Rodin::Math
         assert(r <= MaxSize && c <= MaxSize);
         m_rows = r;
         m_cols = c;
+        zeroStorage();
         switch (m_rows)
         {
           case 3:
@@ -1485,6 +1491,12 @@ namespace Rodin::Math
       }
 
     private:
+      constexpr
+      void zeroStorage() noexcept
+      {
+        m_data.setZero();
+      }
+
       std::uint8_t m_rows;
       std::uint8_t m_cols;
       Data m_data;
@@ -2277,9 +2289,16 @@ namespace Rodin::Math
     const Eigen::MatrixBase<EigenDerived>& s,
     const SpatialMatrix<Scalar>& m)
   {
-    return s * m.getData().topLeftCorner(
+    using OutScalar =
+      typename FormLanguage::Mult<typename EigenDerived::Scalar, Scalar>::Type;
+    assert(static_cast<std::uint8_t>(s.cols()) == m.rows());
+    assert(static_cast<std::uint8_t>(s.rows()) <= SpatialMatrix<OutScalar>::MaxSize);
+    SpatialMatrix<OutScalar> result(
+      static_cast<std::uint8_t>(s.rows()), m.cols());
+    result = s * m.getData().topLeftCorner(
       static_cast<Eigen::Index>(m.rows()),
       static_cast<Eigen::Index>(m.cols()));
+    return result;
   }
 
   template <class Scalar, class EigenDerived>
@@ -2288,9 +2307,16 @@ namespace Rodin::Math
     const SpatialMatrix<Scalar>& m,
     const Eigen::MatrixBase<EigenDerived>& s)
   {
-    return m.getData().topLeftCorner(
+    using OutScalar =
+      typename FormLanguage::Mult<Scalar, typename EigenDerived::Scalar>::Type;
+    assert(m.cols() == static_cast<std::uint8_t>(s.rows()));
+    assert(static_cast<std::uint8_t>(s.cols()) <= SpatialMatrix<OutScalar>::MaxSize);
+    SpatialMatrix<OutScalar> result(
+      m.rows(), static_cast<std::uint8_t>(s.cols()));
+    result = m.getData().topLeftCorner(
       static_cast<Eigen::Index>(m.rows()),
       static_cast<Eigen::Index>(m.cols())) * s;
+    return result;
   }
 
   template <class Scalar>

@@ -50,4 +50,32 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mat.cols(), static_cast<Eigen::Index>(fesTr.getSize()));
     EXPECT_GT(mat.norm(), 0.0);
   }
+
+  TEST(Rodin_Variational_H1QuadratureRule, VectorMass_MatchesGridFunctionLinearForm)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    mesh.getConnectivity().compute(1, 0);
+
+    const size_t vdim = 2;
+    H1<2, Math::SpatialVector<Real>> fes(std::integral_constant<size_t, 2>{}, mesh, vdim);
+    TrialFunction u(fes);
+    TestFunction v(fes);
+
+    GridFunction gf(fes);
+    auto& x = gf.getData();
+    ASSERT_EQ(x.size(), static_cast<Eigen::Index>(fes.getSize()));
+    for (Eigen::Index i = 0; i < x.size(); ++i)
+      x(i) = static_cast<Real>(i + 1);
+
+    BilinearForm mass(u, v);
+    mass = Integral(Dot(u, v));
+    mass.assemble();
+
+    LinearForm load(v);
+    load = Integral(Dot(gf, v));
+    load.assemble();
+
+    const auto residual = mass.getOperator() * x - load.getVector();
+    EXPECT_NEAR(residual.norm(), 0.0, 1e-13);
+  }
 }

@@ -127,6 +127,39 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&q2.getQuadratureFormula(), &qf);
   }
 
+  TEST(Geometry_PolytopeQuadratureIndex, MeshMoveConstructorDropsStaleEntries)
+  {
+    auto mesh = makeTriangleMesh();
+    QF::Centroid qf(Polytope::Type::Triangle);
+
+    mesh.getQuadrature(2, 0, qf);
+
+    Mesh<Context::Local> moved(std::move(mesh));
+    const auto& quadrature = moved.getQuadrature(2, 0, qf);
+    const auto& point = quadrature.getPoint(0);
+
+    EXPECT_EQ(
+      &point.getPolytope().getMesh(),
+      &static_cast<const MeshBase&>(moved));
+  }
+
+  TEST(Geometry_PolytopeQuadratureIndex, MeshMoveAssignmentDropsStaleEntries)
+  {
+    auto mesh = makeTriangleMesh();
+    QF::Centroid qf(Polytope::Type::Triangle);
+
+    mesh.getQuadrature(2, 0, qf);
+
+    Mesh<Context::Local> moved;
+    moved = std::move(mesh);
+    const auto& quadrature = moved.getQuadrature(2, 0, qf);
+    const auto& point = quadrature.getPoint(0);
+
+    EXPECT_EQ(
+      &point.getPolytope().getMesh(),
+      &static_cast<const MeshBase&>(moved));
+  }
+
   TEST(Geometry_PolytopeQuadratureIndex, ThrowsOnInvalidDimension)
   {
     auto mesh = makeTriangleMesh();

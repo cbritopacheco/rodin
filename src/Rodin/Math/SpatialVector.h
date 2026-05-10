@@ -54,13 +54,16 @@ namespace Rodin::Math
       constexpr
       SpatialVector() noexcept
         : m_size(0)
-      {}
+      {
+        zeroStorage();
+      }
 
       constexpr
       explicit SpatialVector(std::uint8_t size)
         : m_size(size)
       {
         assert(size <= MaxSize);
+        zeroStorage();
       }
 
       constexpr
@@ -68,6 +71,7 @@ namespace Rodin::Math
         : m_size(init.size())
       {
         assert(init.size() <= MaxSize);
+        zeroStorage();
         switch (m_size)
         {
           case 3:
@@ -92,6 +96,7 @@ namespace Rodin::Math
         : m_size(static_cast<std::uint8_t>(other.size()))
       {
         assert(m_size <= MaxSize);
+        zeroStorage();
         switch (m_size)
         {
           case 3:
@@ -273,6 +278,7 @@ namespace Rodin::Math
         const std::uint8_t n = static_cast<std::uint8_t>(other.size());
         assert(n <= MaxSize);
         m_size = n;
+        zeroStorage();
         switch (m_size)
         {
           case 3:
@@ -298,6 +304,7 @@ namespace Rodin::Math
         const std::uint8_t n = static_cast<std::uint8_t>(v.size());
         assert(n <= MaxSize);
         m_size = n;
+        zeroStorage();
         switch (m_size)
         {
           case 3:
@@ -747,6 +754,14 @@ namespace Rodin::Math
       }
 
     private:
+      constexpr
+      void zeroStorage() noexcept
+      {
+        m_data[0] = ScalarType(0);
+        m_data[1] = ScalarType(0);
+        m_data[2] = ScalarType(0);
+      }
+
       std::uint8_t m_size;
       Data m_data;
   };
@@ -936,8 +951,12 @@ namespace Rodin::Math
     const Eigen::MatrixBase<EigenDerived>& a,
     const SpatialVector<Scalar>& b)
   {
+    using OutScalar =
+      typename FormLanguage::Minus<typename EigenDerived::Scalar, Scalar>::Type;
     assert(static_cast<std::uint8_t>(a.size()) == b.size());
-    return a - b.getData().head(static_cast<Eigen::Index>(b.size()));
+    SpatialVector<OutScalar> result(static_cast<std::uint8_t>(a.size()));
+    result = a - b.getData().head(static_cast<Eigen::Index>(b.size()));
+    return result;
   }
 
   template <class Scalar, class EigenDerived>
@@ -945,8 +964,12 @@ namespace Rodin::Math
     const SpatialVector<Scalar>& a,
     const Eigen::MatrixBase<EigenDerived>& b)
   {
+    using OutScalar =
+      typename FormLanguage::Minus<Scalar, typename EigenDerived::Scalar>::Type;
     assert(static_cast<std::uint8_t>(b.size()) == a.size());
-    return a.getData().head(static_cast<Eigen::Index>(a.size())) - b;
+    SpatialVector<OutScalar> result(static_cast<std::uint8_t>(b.size()));
+    result = a.getData().head(static_cast<Eigen::Index>(a.size())) - b;
+    return result;
   }
 
   template <class Scalar, class EigenDerived>
@@ -954,8 +977,13 @@ namespace Rodin::Math
       const SpatialVector<Scalar>& v,
       const Eigen::MatrixBase<EigenDerived>& m)
   {
+    using OutScalar =
+      typename FormLanguage::Mult<Scalar, typename EigenDerived::Scalar>::Type;
     assert(static_cast<std::uint8_t>(m.rows()) == v.size());
-    return v.getData().head(static_cast<Eigen::Index>(v.size())) * m;
+    assert(static_cast<std::uint8_t>(m.cols()) <= SpatialMatrix<OutScalar>::MaxSize);
+    SpatialMatrix<OutScalar> result(1, static_cast<std::uint8_t>(m.cols()));
+    result = v.getData().head(static_cast<Eigen::Index>(v.size())).transpose() * m;
+    return result;
   }
 
   template <class EigenDerived, class Scalar>
@@ -963,8 +991,13 @@ namespace Rodin::Math
       const Eigen::MatrixBase<EigenDerived>& m,
       const SpatialVector<Scalar>& v)
   {
+    using OutScalar =
+      typename FormLanguage::Mult<typename EigenDerived::Scalar, Scalar>::Type;
     assert(static_cast<std::uint8_t>(m.cols()) == v.size());
-    return m * v.getData().head(static_cast<Eigen::Index>(v.size()));
+    assert(static_cast<std::uint8_t>(m.rows()) <= SpatialVector<OutScalar>::MaxSize);
+    SpatialVector<OutScalar> result(static_cast<std::uint8_t>(m.rows()));
+    result = m * v.getData().head(static_cast<Eigen::Index>(v.size()));
+    return result;
   }
 
   template <class Scalar, class EigenDerived>

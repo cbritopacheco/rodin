@@ -7,12 +7,17 @@ Distributed under the Boost Software License, Version 1.0.
 
 set(RodinSolid_HEADERS
   ForwardDecls.h
+  Local/Input.h
+  Local/FiberKinematics.h
   Kinematics/KinematicState.h
   Kinematics/Invariants.h
   Constitutive/HyperElasticLaw.h
   Constitutive/NeoHookean.h
   Constitutive/SaintVenantKirchhoff.h
   Constitutive/MooneyRivlin.h
+  Constitutive/HolzapfelOgden.h
+  Constitutive/ActiveFiberLaw.h
+  Constitutive/ActiveContraction.h
   Integrators/InternalForce.h
   Integrators/MaterialTangent.h
   Integrators/BodyForce.h

@@ -50,7 +50,10 @@ namespace Rodin::Geometry
       m_attributes(std::move(other.m_attributes)),
       m_transformations(std::move(other.m_transformations)),
       m_quadratures(std::move(other.m_quadratures))
-  {}
+  {
+    // Cached quadrature points store polytopes bound to the source mesh.
+    m_quadratures.clear();
+  }
 
   Mesh<Context::Local>& Mesh<Context::Local>::operator=(Mesh&& other)
   {
@@ -60,6 +63,8 @@ namespace Rodin::Geometry
     m_connectivity = std::move(other.m_connectivity);
     m_transformations = std::move(other.m_transformations);
     m_quadratures = std::move(other.m_quadratures);
+    // Cached quadrature points store polytopes bound to the source mesh.
+    m_quadratures.clear();
     m_attributes = std::move(other.m_attributes);
     return *this;
   }
