@@ -497,7 +497,7 @@ namespace Rodin::Assembly
                       static_cast<Index>(masters[k]),
                       static_cast<PetscScalar>(coeffs[k]) });
                 }
-                constraints.addIdentification(static_cast<Index>(slave), entries);
+                constraints.setIdentification(static_cast<Index>(slave), entries);
               }
             }
           }, dbc.getDOFs());
@@ -1163,7 +1163,7 @@ namespace Rodin::Assembly
                       static_cast<Index>(vOff + static_cast<size_t>(masters[k])),
                       static_cast<PetscScalar>(coeffs[k]) });
                 }
-                constraints.addIdentification(
+                constraints.setIdentification(
                     static_cast<Index>(uOff + static_cast<size_t>(slave)),
                     entries);
               }
