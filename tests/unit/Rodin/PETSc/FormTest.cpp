@@ -506,6 +506,7 @@ namespace
     checkPETScSelfIdentificationMatchesZeroValueConstraint<PETSc::Assembly::Sequential>();
   }
 
+#ifdef RODIN_USE_OPENMP
   TEST(PETSc_Form, OpenMPVectorMasterIdentificationProjectsMatrixAndVector)
   {
     checkPETScVectorMasterIdentification<PETSc::Assembly::OpenMP>();
@@ -515,6 +516,7 @@ namespace
   {
     checkPETScSelfIdentificationMatchesZeroValueConstraint<PETSc::Assembly::OpenMP>();
   }
+#endif
 }
 
 int main(int argc, char** argv)
