@@ -9,9 +9,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cmath>
-#include <limits>
-#include <stdexcept>
 #include <vector>
 
 #include "Rodin/Alert/MemberFunctionException.h"
@@ -24,11 +21,20 @@ namespace Rodin::Assembly
    * @brief Read-only expansion map for value and identification constraints.
    *
    * Identification constraints are stored as rows of the expansion map
-   * @f$ x_s = \sum_k c_k x_{m_k} @f$.  For unconstrained DOFs,
+   * @f$ x_s = \sum_k c_k x_{m_k} @f$. For unconstrained DOFs,
    * @ref expand returns the identity row `{ { i, 1 } }`.
    *
-   * Once populated, this object is read-only and can be shared by OpenMP
-   * assembly loops.
+   * The map supports canonicalization of identification constraints:
+   * - duplicate masters are merged;
+   * - zero coefficients are pruned;
+   * - self-references are removed algebraically;
+   * - identity constraints are ignored;
+   * - constraints such as @f$ x_s = c x_s @f$, @f$ c \ne 1 @f$,
+   *   are converted to homogeneous fixed constraints;
+   * - transitive identifications are flattened by @ref finalize.
+   *
+   * After calling @ref finalize, this object can be shared by OpenMP assembly
+   * loops as a read-only expansion map.
    */
   template <class Scalar>
   class ConstraintMap
@@ -56,7 +62,8 @@ namespace Rodin::Assembly
         m_expansions.resize(size);
         m_isIdentified.assign(size, false);
         m_identifiedRows.clear();
-        for (Index i = 0; i < size; i++)
+
+        for (Index i = 0; i < static_cast<Index>(size); i++)
           m_expansions[static_cast<size_t>(i)].push_back({ i, Scalar(1) });
       }
 
@@ -97,9 +104,14 @@ namespace Rodin::Assembly
       void setFixed(Index i, Scalar value)
       {
         check(i);
+
         if (isIdentified(i))
-          throw std::invalid_argument(
-            "DirichletBC conflict: a DOF cannot be both value-prescribed and identified.");
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Conflict detected. A DOF cannot be both value-prescribed and identified."
+            << Alert::Raise;
+        }
+
         m_fixed[static_cast<size_t>(i)] = value;
       }
 
@@ -107,6 +119,7 @@ namespace Rodin::Assembly
       void setIdentification(Index slave, const Entries& entries)
       {
         check(slave);
+
         if (isFixed(slave))
         {
           Alert::MemberFunctionException(*this, __func__)
@@ -121,75 +134,100 @@ namespace Rodin::Assembly
             << Alert::Raise;
         }
 
-        Expansion expansion;
-        for (const auto& e : entries)
-        {
-          check(e.index);
-          if (e.coefficient == Scalar(0))
-            continue;
+        Expansion canonical = canonicalize(slave, entries);
 
-          auto it = std::find_if(
-              expansion.begin(),
-              expansion.end(),
-              [&] (const Entry& entry)
-              {
-                return entry.index == e.index;
-              });
-          if (it == expansion.end())
-          {
-            expansion.push_back(e);
-          }
-          else
-          {
-            it->coefficient += e.coefficient;
-          }
-        }
-
-        Expansion reduced;
-        reduced.reserve(expansion.size());
-        Scalar selfCoefficient = Scalar(0);
-        for (const auto& e : expansion)
-        {
-          if (e.coefficient == Scalar(0))
-            continue;
-
-          if (e.index == slave)
-          {
-            selfCoefficient += e.coefficient;
-          }
-          else
-          {
-            reduced.push_back(e);
-          }
-        }
-
-        const Scalar scale = Scalar(1) - selfCoefficient;
-
-        if (scale == Scalar(0))
-        {
-          if (reduced.empty())
-            return;
-
-          Alert::MemberFunctionException(*this, __func__)
-            << "Invalid identification: A slave DOF cannot also appear as a"
-            << " master with coefficient 1 alongside other masters" << Alert::Raise;
-        }
-
-        if (selfCoefficient != Scalar(0))
-        {
-          for (auto& e : reduced)
-            e.coefficient /= scale;
-        }
-
-        if (reduced.empty())
-        {
-          setFixed(slave, Scalar(0));
+        if (canonical.empty())
           return;
-        }
 
-        m_expansions[static_cast<size_t>(slave)] = std::move(reduced);
+        if (isFixed(slave))
+          return;
+
+        m_expansions[static_cast<size_t>(slave)] = std::move(canonical);
         m_isIdentified[static_cast<size_t>(slave)] = true;
         m_identifiedRows.push_back(slave);
+      }
+
+      /**
+       * @brief Flattens transitive identification constraints.
+       *
+       * Example:
+       * @f[
+       *   x_1 = x_2, \qquad x_2 = x_3
+       * @f]
+       * becomes:
+       * @f[
+       *   x_1 = x_3, \qquad x_2 = x_3.
+       * @f]
+       *
+       * Cycles such as @f$ x_1 = x_2 @f$, @f$ x_2 = x_1 @f$ are rejected.
+       */
+      void finalize()
+      {
+        enum class State
+        {
+          Unvisited,
+          Visiting,
+          Done
+        };
+
+        std::vector<State> state(size(), State::Unvisited);
+
+        auto flatten = [&] (auto&& self, Index i) -> Expansion
+        {
+          check(i);
+
+          const size_t idx = static_cast<size_t>(i);
+
+          if (!m_isIdentified[idx])
+            return Expansion{ Entry{ i, Scalar(1) } };
+
+          if (state[idx] == State::Visiting)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Invalid identification constraints: cyclic dependency involving DOF "
+              << i << "." << Alert::Raise;
+          }
+
+          if (state[idx] == State::Done)
+            return m_expansions[idx];
+
+          state[idx] = State::Visiting;
+
+          Expansion flattened;
+          for (const auto& e : m_expansions[idx])
+          {
+            check(e.index);
+
+            if (e.coefficient == Scalar(0))
+              continue;
+
+            const Expansion masterExpansion = self(self, e.index);
+            for (const auto& me : masterExpansion)
+            {
+              if (me.coefficient == Scalar(0))
+                continue;
+
+              accumulate(
+                  flattened,
+                  me.index,
+                  e.coefficient * me.coefficient);
+            }
+          }
+
+          canonicalize(i, flattened);
+
+          state[idx] = State::Done;
+          return m_expansions[idx];
+        };
+
+        const std::vector<Index> rows = m_identifiedRows;
+        for (const Index row : rows)
+        {
+          if (isIdentified(row))
+            flatten(flatten, row);
+        }
+
+        rebuild();
       }
 
     private:
@@ -199,7 +237,170 @@ namespace Rodin::Assembly
         {
           Alert::MemberFunctionException(*this, __func__)
             << "ConstraintMap index out of range: " << i
-            << " is not in [0, " << m_expansions.size() << ")" << Alert::Raise;
+            << " is not in [0, " << m_expansions.size() << ")."
+            << Alert::Raise;
+        }
+      }
+
+      static void accumulate(Expansion& expansion, Index index, Scalar coefficient)
+      {
+        if (coefficient == Scalar(0))
+          return;
+
+        auto it = std::find_if(
+            expansion.begin(),
+            expansion.end(),
+            [&] (const Entry& entry)
+            {
+              return entry.index == index;
+            });
+
+        if (it == expansion.end())
+        {
+          expansion.push_back({ index, coefficient });
+        }
+        else
+        {
+          it->coefficient += coefficient;
+        }
+      }
+
+      static void prune(Expansion& expansion)
+      {
+        expansion.erase(
+            std::remove_if(
+              expansion.begin(),
+              expansion.end(),
+              [] (const Entry& e)
+              {
+                return e.coefficient == Scalar(0);
+              }),
+            expansion.end());
+      }
+
+      template <class Entries>
+      Expansion merge(const Entries& entries)
+      {
+        Expansion expansion;
+
+        for (const auto& e : entries)
+        {
+          check(e.index);
+
+          if (e.coefficient == Scalar(0))
+            continue;
+
+          accumulate(expansion, e.index, e.coefficient);
+        }
+
+        prune(expansion);
+        return expansion;
+      }
+
+      /**
+       * @brief Canonicalizes the row @f$ x_s = \sum_k c_k x_{m_k} @f$.
+       *
+       * If the row contains a self term,
+       * @f[
+       *   x_s = c_s x_s + \sum_m c_m x_m,
+       * @f]
+       * it is rewritten as
+       * @f[
+       *   x_s = \sum_m \frac{c_m}{1 - c_s} x_m.
+       * @f]
+       *
+       * Special cases:
+       * - @f$ x_s = x_s @f$ is ignored;
+       * - @f$ x_s = c x_s @f$, @f$ c \ne 1 @f$, becomes @f$ x_s = 0 @f$;
+       * - @f$ x_s = x_s + \sum_m c_m x_m @f$ is rejected.
+       */
+      template <class Entries>
+      Expansion canonicalize(Index slave, const Entries& entries)
+      {
+        Expansion expansion = merge(entries);
+
+        Expansion reduced;
+        reduced.reserve(expansion.size());
+
+        Scalar selfCoefficient = Scalar(0);
+
+        for (const auto& e : expansion)
+        {
+          if (e.coefficient == Scalar(0))
+            continue;
+
+          if (e.index == slave)
+            selfCoefficient += e.coefficient;
+          else
+            reduced.push_back(e);
+        }
+
+        prune(reduced);
+
+        const Scalar scale = Scalar(1) - selfCoefficient;
+
+        if (scale == Scalar(0))
+        {
+          if (reduced.empty())
+          {
+            // x_s = x_s. Identity constraint: ignore.
+            return {};
+          }
+
+          Alert::MemberFunctionException(*this, __func__)
+            << "Invalid identification: slave DOF " << slave
+            << " appears as a master with coefficient exactly 1 alongside "
+            << "other masters." << Alert::Raise;
+        }
+
+        if (selfCoefficient != Scalar(0))
+        {
+          for (auto& e : reduced)
+            e.coefficient /= scale;
+        }
+
+        prune(reduced);
+
+        if (reduced.empty())
+        {
+          // x_s = c x_s with c != 1, or all non-self terms cancelled:
+          // (1 - c) x_s = 0, hence x_s = 0.
+          setFixed(slave, Scalar(0));
+          return {};
+        }
+
+        return reduced;
+      }
+
+      /**
+       * @brief Canonicalizes and stores an already merged expansion row.
+       *
+       * Used by @ref finalize after recursive flattening.
+       */
+      void canonicalize(Index slave, Expansion& expansion)
+      {
+        Expansion canonical = canonicalize(slave, expansion);
+
+        if (canonical.empty())
+        {
+          m_expansions[static_cast<size_t>(slave)].clear();
+          m_expansions[static_cast<size_t>(slave)].push_back({ slave, Scalar(1) });
+          m_isIdentified[static_cast<size_t>(slave)] = false;
+          return;
+        }
+
+        m_expansions[static_cast<size_t>(slave)] = std::move(canonical);
+        m_isIdentified[static_cast<size_t>(slave)] = true;
+      }
+
+      void rebuild()
+      {
+        m_identifiedRows.clear();
+
+        for (Index i = 0; i < static_cast<Index>(m_isIdentified.size()); i++)
+        {
+          if (m_isIdentified[static_cast<size_t>(i)])
+            m_identifiedRows.push_back(i);
         }
       }
 
