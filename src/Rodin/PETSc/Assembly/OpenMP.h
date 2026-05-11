@@ -478,7 +478,7 @@ namespace Rodin::Assembly
             {
               for (const auto& [local, value] : dofs)
               {
-                constraints.addFixed(
+                constraints.setFixed(
                     static_cast<Index>(local),
                     static_cast<PetscScalar>(value));
               }
@@ -1141,7 +1141,7 @@ namespace Rodin::Assembly
             if constexpr (std::is_same_v<T, ValueDOFsType>)
             {
               for (const auto& [local, value] : dofs)
-                constraints.addFixed(
+                constraints.setFixed(
                     static_cast<Index>(uOff + static_cast<size_t>(local)),
                     static_cast<PetscScalar>(value));
             }

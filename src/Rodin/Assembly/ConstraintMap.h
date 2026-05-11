@@ -14,6 +14,8 @@
 #include <stdexcept>
 #include <vector>
 
+#include "Rodin/Alert/MemberFunctionException.h"
+#include "Rodin/Alert/Raise.h"
 #include "Rodin/Types.h"
 
 namespace Rodin::Assembly
@@ -92,9 +94,9 @@ namespace Rodin::Assembly
         return m_identifiedRows;
       }
 
-      void addFixed(Index i, Scalar value)
+      void setFixed(Index i, Scalar value)
       {
-        checkIndex(i);
+        check(i);
         if (isIdentified(i))
           throw std::invalid_argument(
             "DirichletBC conflict: a DOF cannot be both value-prescribed and identified.");
@@ -102,20 +104,27 @@ namespace Rodin::Assembly
       }
 
       template <class Entries>
-      void addIdentification(Index slave, const Entries& entries)
+      void setIdentification(Index slave, const Entries& entries)
       {
-        checkIndex(slave);
+        check(slave);
         if (isFixed(slave))
-          throw std::invalid_argument(
-            "DirichletBC conflict: a DOF cannot be both value-prescribed and identified.");
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Conflict detected. A DOF cannot be both value-prescribed and identified."
+            << Alert::Raise;
+        }
+
         if (isIdentified(slave))
-          throw std::invalid_argument(
-            "DirichletBC conflict: a DOF has multiple identification constraints.");
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Conflict detected. A DOF cannot have multiple identification constraints."
+            << Alert::Raise;
+        }
 
         Expansion expansion;
         for (const auto& e : entries)
         {
-          checkIndex(e.index);
+          check(e.index);
           if (e.coefficient == Scalar(0))
             continue;
 
@@ -155,17 +164,15 @@ namespace Rodin::Assembly
         }
 
         const Scalar scale = Scalar(1) - selfCoefficient;
-        using MagnitudeType = decltype(std::abs(scale));
-        constexpr MagnitudeType epsilon =
-          std::numeric_limits<MagnitudeType>::epsilon();
 
-        if (std::abs(scale) <= epsilon)
+        if (scale == Scalar(0))
         {
           if (reduced.empty())
             return;
 
-          throw std::invalid_argument(
-            "DirichletBC invalid identification: a slave DOF cannot also appear as a master with coefficient 1 alongside other masters.");
+          Alert::MemberFunctionException(*this, __func__)
+            << "Invalid identification: A slave DOF cannot also appear as a"
+            << " master with coefficient 1 alongside other masters" << Alert::Raise;
         }
 
         if (selfCoefficient != Scalar(0))
@@ -176,7 +183,7 @@ namespace Rodin::Assembly
 
         if (reduced.empty())
         {
-          addFixed(slave, Scalar(0));
+          setFixed(slave, Scalar(0));
           return;
         }
 
@@ -186,10 +193,14 @@ namespace Rodin::Assembly
       }
 
     private:
-      void checkIndex(Index i) const
+      void check(Index i) const
       {
         if (static_cast<size_t>(i) >= m_expansions.size())
-          throw std::out_of_range("ConstraintMap index out of range.");
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "ConstraintMap index out of range: " << i
+            << " is not in [0, " << m_expansions.size() << ")" << Alert::Raise;
+        }
       }
 
       std::vector<Optional<Scalar>> m_fixed;

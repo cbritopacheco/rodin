@@ -372,7 +372,7 @@ namespace Rodin::Assembly
             if constexpr (std::is_same_v<T, ValueDOFsType>)
             {
               for (const auto& [local, value] : dofs)
-                constraints.addFixed(
+                constraints.setFixed(
                     static_cast<Index>(local),
                     static_cast<PetscScalar>(value));
             }
@@ -390,7 +390,7 @@ namespace Rodin::Assembly
                       static_cast<Index>(masters[k]),
                       static_cast<PetscScalar>(coeffs[k]) });
                 }
-                constraints.addIdentification(static_cast<Index>(slave), entries);
+                constraints.setIdentification(static_cast<Index>(slave), entries);
               }
             }
           }, dbc.getDOFs());
@@ -881,7 +881,7 @@ namespace Rodin::Assembly
             if constexpr (std::is_same_v<T, ValueDOFsType>)
             {
               for (const auto& [local, value] : dofs)
-                constraints.addFixed(
+                constraints.setFixed(
                     static_cast<Index>(uOff + static_cast<size_t>(local)),
                     static_cast<PetscScalar>(value));
             }
@@ -903,7 +903,7 @@ namespace Rodin::Assembly
                       static_cast<Index>(vOff + static_cast<size_t>(masters[k])),
                       static_cast<PetscScalar>(coeffs[k]) });
                 }
-                constraints.addIdentification(
+                constraints.setIdentification(
                     static_cast<Index>(uOff + static_cast<size_t>(slave)),
                     entries);
               }
