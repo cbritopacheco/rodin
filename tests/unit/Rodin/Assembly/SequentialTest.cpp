@@ -796,7 +796,7 @@ namespace Rodin::Tests::Unit
             + DirichletBC(u, RealFunction(0.0))
             + DirichletBC(u, RealFunction(2.0) * u);
 
-    EXPECT_THROW(problem.assemble(), std::invalid_argument);
+    EXPECT_THROW(problem.assemble(), Alert::Exception);
   }
 
   // =========================================================================
