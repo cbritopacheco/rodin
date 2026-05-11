@@ -7,7 +7,10 @@
 #ifndef RODIN_ASSEMBLY_CONSTRAINTMAP_H
 #define RODIN_ASSEMBLY_CONSTRAINTMAP_H
 
+#include <algorithm>
 #include <cassert>
+#include <cmath>
+#include <limits>
 #include <stdexcept>
 #include <vector>
 
@@ -113,19 +116,71 @@ namespace Rodin::Assembly
         for (const auto& e : entries)
         {
           checkIndex(e.index);
-          if (e.coefficient != Scalar(0))
+          if (e.coefficient == Scalar(0))
+            continue;
+
+          auto it = std::find_if(
+              expansion.begin(),
+              expansion.end(),
+              [&] (const Entry& entry)
+              {
+                return entry.index == e.index;
+              });
+          if (it == expansion.end())
+          {
             expansion.push_back(e);
+          }
+          else
+          {
+            it->coefficient += e.coefficient;
+          }
         }
 
-        if (expansion.empty())
-          return;
+        Expansion reduced;
+        reduced.reserve(expansion.size());
+        Scalar selfCoefficient = Scalar(0);
+        for (const auto& e : expansion)
+        {
+          if (e.coefficient == Scalar(0))
+            continue;
 
-        if (expansion.size() == 1
-            && expansion.front().index == slave
-            && expansion.front().coefficient == Scalar(1))
-          return;
+          if (e.index == slave)
+          {
+            selfCoefficient += e.coefficient;
+          }
+          else
+          {
+            reduced.push_back(e);
+          }
+        }
 
-        m_expansions[static_cast<size_t>(slave)] = std::move(expansion);
+        const Scalar scale = Scalar(1) - selfCoefficient;
+        using MagnitudeType = decltype(std::abs(scale));
+        constexpr MagnitudeType epsilon =
+          std::numeric_limits<MagnitudeType>::epsilon();
+
+        if (std::abs(scale) <= epsilon)
+        {
+          if (reduced.empty())
+            return;
+
+          throw std::invalid_argument(
+            "DirichletBC invalid identification: a slave DOF cannot also appear as a master with coefficient 1 alongside other masters.");
+        }
+
+        if (selfCoefficient != Scalar(0))
+        {
+          for (auto& e : reduced)
+            e.coefficient /= scale;
+        }
+
+        if (reduced.empty())
+        {
+          addFixed(slave, Scalar(0));
+          return;
+        }
+
+        m_expansions[static_cast<size_t>(slave)] = std::move(reduced);
         m_isIdentified[static_cast<size_t>(slave)] = true;
         m_identifiedRows.push_back(slave);
       }

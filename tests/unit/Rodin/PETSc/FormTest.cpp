@@ -212,6 +212,122 @@ namespace
     }
   }
 
+  template <template <class, class> class Assembler>
+  void checkPETScSelfIdentificationMatchesZeroValueConstraint()
+  {
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    mesh.getConnectivity().compute(1, 2);
+
+    P1 refFES(mesh);
+    PETSc::Variational::TrialFunction uRef(refFES);
+    PETSc::Variational::TestFunction  vRef(refFES);
+
+    const PetscInt n = static_cast<PetscInt>(refFES.getSize());
+
+    auto setOperator = [&](auto& form)
+    {
+      auto& op = form.getOperator();
+      PetscErrorCode ierr = MatSetSizes(op, n, n, n, n);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      ierr = MatSetFromOptions(op);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      ierr = MatSetUp(op);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      const PetscInt rows[4] = { 0, 0, 1, 1 };
+      const PetscInt cols[4] = { 0, 1, 0, 1 };
+      const PetscScalar vals[4] = { 2.0, 3.0, 5.0, 7.0 };
+      for (PetscInt k = 0; k < 4; k++)
+      {
+        ierr = MatSetValue(op, rows[k], cols[k], vals[k], INSERT_VALUES);
+        ASSERT_EQ(ierr, PETSC_SUCCESS);
+      }
+      ierr = MatAssemblyBegin(op, MAT_FINAL_ASSEMBLY);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      ierr = MatAssemblyEnd(op, MAT_FINAL_ASSEMBLY);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+    };
+
+    auto setVector = [&](auto& form)
+    {
+      auto& vec = form.getVector();
+      PetscErrorCode ierr = VecSetSizes(vec, n, n);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      ierr = VecSetFromOptions(vec);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      const PetscInt rows[2] = { 0, 1 };
+      const PetscScalar vals[2] = { 11.0, -13.0 };
+      ierr = VecSetValues(vec, 2, rows, vals, INSERT_VALUES);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      ierr = VecAssemblyBegin(vec);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      ierr = VecAssemblyEnd(vec);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+    };
+
+    BilinearForm uuRef(uRef, vRef);
+    setOperator(uuRef);
+    LinearForm loadRef(vRef);
+    setVector(loadRef);
+
+    auto refBody = uuRef + DirichletBC(uRef, Zero()) - loadRef;
+
+    P1 idFES(mesh);
+    PETSc::Variational::TrialFunction uId(idFES);
+    PETSc::Variational::TestFunction  vId(idFES);
+
+    BilinearForm uuId(uId, vId);
+    setOperator(uuId);
+    LinearForm loadId(vId);
+    setVector(loadId);
+
+    auto idBody = uuId + DirichletBC(uId, -uId) - loadId;
+
+    using LinearSystemType = PETSc::Math::LinearSystem;
+    using ProblemType =
+      Problem<LinearSystemType, decltype(uRef), decltype(vRef)>;
+
+    LinearSystemType refLS(PETSC_COMM_SELF);
+    LinearSystemType idLS(PETSC_COMM_SELF);
+    Assembly::ProblemAssemblyInput<
+      std::decay_t<decltype(refBody)>,
+      decltype(uRef), decltype(vRef)> refInput(refBody, uRef, vRef);
+    Assembly::ProblemAssemblyInput<
+      std::decay_t<decltype(idBody)>,
+      decltype(uId), decltype(vId)> idInput(idBody, uId, vId);
+
+    Assembler<LinearSystemType, ProblemType> assembler;
+    assembler.execute(refLS, refInput);
+    assembler.execute(idLS, idInput);
+
+    auto& ARef = refLS.getOperator();
+    auto& AId  = idLS.getOperator();
+    auto& bRef = refLS.getVector();
+    auto& bId  = idLS.getVector();
+
+    for (PetscInt i = 0; i < n; i++)
+    {
+      PetscErrorCode ierr;
+      PetscScalar refValue = 0;
+      PetscScalar idValue  = 0;
+
+      ierr = VecGetValues(bRef, 1, &i, &refValue);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      ierr = VecGetValues(bId, 1, &i, &idValue);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      EXPECT_NEAR(refValue, idValue, 1e-12) << "row " << i;
+
+      for (PetscInt j = 0; j < n; j++)
+      {
+        ierr = MatGetValues(ARef, 1, &i, 1, &j, &refValue);
+        ASSERT_EQ(ierr, PETSC_SUCCESS);
+        ierr = MatGetValues(AId, 1, &i, 1, &j, &idValue);
+        ASSERT_EQ(ierr, PETSC_SUCCESS);
+        EXPECT_NEAR(refValue, idValue, 1e-12)
+          << "entry (" << i << ", " << j << ")";
+      }
+    }
+  }
+
   TEST(PETSc_Form, SequentialLinearFormUsesSelfCommunicatorAndAssembles)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
@@ -385,9 +501,19 @@ namespace
     checkPETScVectorMasterIdentification<PETSc::Assembly::Sequential>();
   }
 
+  TEST(PETSc_Form, SequentialSelfIdentificationMatchesZeroValueConstraint)
+  {
+    checkPETScSelfIdentificationMatchesZeroValueConstraint<PETSc::Assembly::Sequential>();
+  }
+
   TEST(PETSc_Form, OpenMPVectorMasterIdentificationProjectsMatrixAndVector)
   {
     checkPETScVectorMasterIdentification<PETSc::Assembly::OpenMP>();
+  }
+
+  TEST(PETSc_Form, OpenMPSelfIdentificationMatchesZeroValueConstraint)
+  {
+    checkPETScSelfIdentificationMatchesZeroValueConstraint<PETSc::Assembly::OpenMP>();
   }
 }
 

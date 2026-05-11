@@ -245,6 +245,67 @@ namespace
     }
   }
 
+  TEST(PETSc_MPI_Form, DistributedSelfIdentificationMatchesZeroValueConstraint)
+  {
+    const auto& world = *g_world;
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx);
+
+    P1 refFES(mesh);
+    PETSc::Variational::TrialFunction uRef(refFES);
+    PETSc::Variational::TestFunction  vRef(refFES);
+
+    Problem refProblem(uRef, vRef);
+    refProblem = Integral(Grad(uRef), Grad(vRef))
+               - Integral(RealFunction(1.0), vRef)
+               + DirichletBC(uRef, Zero());
+    refProblem.assemble();
+
+    P1 idFES(mesh);
+    PETSc::Variational::TrialFunction uId(idFES);
+    PETSc::Variational::TestFunction  vId(idFES);
+
+    Problem idProblem(uId, vId);
+    idProblem = Integral(Grad(uId), Grad(vId))
+              - Integral(RealFunction(1.0), vId)
+              + DirichletBC(uId, -uId);
+    idProblem.assemble();
+
+    auto& ARef = refProblem.getLinearSystem().getOperator();
+    auto& AId  = idProblem.getLinearSystem().getOperator();
+    auto& bRef = refProblem.getLinearSystem().getVector();
+    auto& bId  = idProblem.getLinearSystem().getVector();
+
+    size_t begin = 0;
+    size_t end   = 0;
+    refFES.getOwnershipRange(begin, end);
+
+    const PetscInt n = static_cast<PetscInt>(refFES.getSize());
+    for (PetscInt i = static_cast<PetscInt>(begin);
+         i < static_cast<PetscInt>(end); i++)
+    {
+      PetscErrorCode ierr;
+      PetscScalar refValue = 0;
+      PetscScalar idValue  = 0;
+
+      ierr = VecGetValues(bRef, 1, &i, &refValue);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      ierr = VecGetValues(bId, 1, &i, &idValue);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      EXPECT_NEAR(refValue, idValue, 1e-12) << "row " << i;
+
+      for (PetscInt j = 0; j < n; j++)
+      {
+        ierr = MatGetValues(ARef, 1, &i, 1, &j, &refValue);
+        ASSERT_EQ(ierr, PETSC_SUCCESS);
+        ierr = MatGetValues(AId, 1, &i, 1, &j, &idValue);
+        ASSERT_EQ(ierr, PETSC_SUCCESS);
+        EXPECT_NEAR(refValue, idValue, 1e-12)
+          << "entry (" << i << ", " << j << ")";
+      }
+    }
+  }
+
   TEST(PETSc_MPI_Form, DistributedVectorMasterIdentificationProjectsOwnedSlaveRow)
   {
     const auto& world = *g_world;

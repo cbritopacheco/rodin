@@ -62,6 +62,48 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  void checkOpenMPSelfIdentificationMatchesZeroValueConstraint()
+  {
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(1, 2);
+
+    P1 refFES(mesh);
+    TrialFunction uRef(refFES);
+    TestFunction  vRef(refFES);
+
+    auto refBody =
+      Integral(Grad(uRef), Grad(vRef))
+      - Integral(RealFunction(1.0), vRef)
+      + DirichletBC(uRef, Zero());
+
+    P1 idFES(mesh);
+    TrialFunction uId(idFES);
+    TestFunction  vId(idFES);
+
+    auto idBody =
+      Integral(Grad(uId), Grad(vId))
+      - Integral(RealFunction(1.0), vId)
+      + DirichletBC(uId, -uId);
+
+    Problem refProblem(uRef, vRef);
+    refProblem = refBody;
+    refProblem.assemble();
+
+    Problem idProblem(uId, vId);
+    idProblem = idBody;
+    idProblem.assemble();
+
+    const auto matrixDiff =
+      refProblem.getLinearSystem().getOperator()
+      - idProblem.getLinearSystem().getOperator();
+    const auto vectorDiff =
+      refProblem.getLinearSystem().getVector()
+      - idProblem.getLinearSystem().getVector();
+
+    EXPECT_NEAR(matrixDiff.norm(), 0.0, 1e-12);
+    EXPECT_NEAR(vectorDiff.norm(), 0.0, 1e-12);
+  }
+
   // =========================================================================
   // LinearForm — OpenMP matches Sequential across geometries
   // =========================================================================
@@ -483,6 +525,11 @@ namespace Rodin::Tests::Unit
           << "entry (" << i << ", " << j << ")";
       }
     }
+  }
+
+  TEST(Assembly_OpenMP_Problem, SelfIdentificationMatchesZeroValueConstraint)
+  {
+    checkOpenMPSelfIdentificationMatchesZeroValueConstraint();
   }
 
   INSTANTIATE_TEST_SUITE_P(

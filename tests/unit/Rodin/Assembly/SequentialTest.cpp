@@ -744,6 +744,44 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  TEST(Assembly_Problem_Identification, SelfIdentificationMatchesZeroValueConstraint)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(1, 2);
+
+    P1 refFES(mesh);
+    TrialFunction uRef(refFES);
+    TestFunction  vRef(refFES);
+
+    Problem refProblem(uRef, vRef);
+    refProblem = Integral(Grad(uRef), Grad(vRef))
+               - Integral(RealFunction(1.0), vRef)
+               + DirichletBC(uRef, Zero());
+    refProblem.assemble();
+
+    P1 idFES(mesh);
+    TrialFunction uId(idFES);
+    TestFunction  vId(idFES);
+
+    Problem idProblem(uId, vId);
+    idProblem = Integral(Grad(uId), Grad(vId))
+              - Integral(RealFunction(1.0), vId)
+              + DirichletBC(uId, -uId);
+    idProblem.assemble();
+
+    const auto& ARef = refProblem.getLinearSystem().getOperator();
+    const auto& bRef = refProblem.getLinearSystem().getVector();
+    const auto& AId  = idProblem.getLinearSystem().getOperator();
+    const auto& bId  = idProblem.getLinearSystem().getVector();
+
+    ASSERT_EQ(ARef.rows(), AId.rows());
+    ASSERT_EQ(ARef.cols(), AId.cols());
+    ASSERT_EQ(bRef.size(), bId.size());
+
+    EXPECT_NEAR((ARef - AId).norm(), 0.0, 1e-12);
+    EXPECT_NEAR((bRef - bId).norm(), 0.0, 1e-12);
+  }
+
   TEST(Assembly_Problem_Identification, OverlappingValueAndIdentificationThrows)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
