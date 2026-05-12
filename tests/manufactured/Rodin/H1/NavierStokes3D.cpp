@@ -261,6 +261,7 @@ namespace Rodin::Tests::Manufactured::NavierStokes3D
     ::testing::Values(
       Polytope::Type::Tetrahedron,
       Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid,
       Polytope::Type::Wedge
     )
   );

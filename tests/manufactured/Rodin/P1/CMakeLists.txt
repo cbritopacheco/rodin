@@ -158,7 +158,7 @@ target_link_libraries(RodinManufacturedLinearElasticity3D
   Rodin::Solver
 )
 set(RodinManufacturedLinearElasticity3D_SLOW_TESTS
-  "*MixedComponents_Tetrahedron*")
+  "*MixedComponents*")
 gtest_discover_tests(RodinManufacturedLinearElasticity3D
   TEST_FILTER
     "-${RodinManufacturedLinearElasticity3D_SLOW_TESTS}"

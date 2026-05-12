@@ -48,6 +48,7 @@ namespace Rodin::IO::MEDIT
     Tetrahedra,            ///< Tetrahedral elements section
     Hexahedra,             ///< Hexahedral elements section
     Wedges,                ///< Wedge (prism) elements section
+    Pyramids,              ///< Pyramid elements section
     Corners,               ///< Corner vertices section
     Ridges,                ///< Ridge edges section
     Edges,                 ///< Edge elements section
@@ -94,6 +95,8 @@ namespace Rodin::IO::MEDIT
         return "Hexahedra";
       case Keyword::Wedges:
         return "Wedges";
+      case Keyword::Pyramids:
+        return "Pyramids";
       case Keyword::Corners:
         return "Corners";
       case Keyword::Ridges:
@@ -207,6 +210,8 @@ namespace Rodin::IO::MEDIT
       res = Keyword::Hexahedra;
     else if (str == Keyword::Wedges)
       res = Keyword::Wedges;
+    else if (str == Keyword::Pyramids)
+      res = Keyword::Pyramids;
     else if (str == Keyword::Corners)
       res = Keyword::Corners;
     else if (str == Keyword::Ridges)
@@ -1114,6 +1119,23 @@ namespace Rodin::IO
                + psi3 * u[3] + psi4 * u[4] + psi5 * u[5];
         };
 
+        auto evalP1_on_pyramid = [&](Real x, Real y, Real z,
+                                     const ScalarType* u) -> ScalarType
+        {
+          const Real q = Real(1) - z;
+          if (q == Real(0))
+            return u[4];
+
+          const Real psi0 = (q - x) * (q - y) / q;
+          const Real psi1 = x * (q - y) / q;
+          const Real psi2 = x * y / q;
+          const Real psi3 = (q - x) * y / q;
+          const Real psi4 = z;
+
+          return psi0 * u[0] + psi1 * u[1] + psi2 * u[2]
+               + psi3 * u[3] + psi4 * u[4];
+        };
+
         // Element loop
         for (Index c = 0; c < static_cast<Index>(nCells); ++c)
         {
@@ -1146,6 +1168,9 @@ namespace Rodin::IO
               break;
             case Geometry::Polytope::Type::Tetrahedron:
               nCellVertices = 4;
+              break;
+            case Geometry::Polytope::Type::Pyramid:
+              nCellVertices = 5;
               break;
             case Geometry::Polytope::Type::Wedge:
               nCellVertices = 6;
@@ -1211,6 +1236,14 @@ namespace Rodin::IO
                   const Real y = pt.y();
                   const Real z = pt.z();
                   u_val = evalP1_on_tet(x, y, z, u_vert);
+                  break;
+                }
+                case Geometry::Polytope::Type::Pyramid:
+                {
+                  const Real x = pt.x();
+                  const Real y = pt.y();
+                  const Real z = pt.z();
+                  u_val = evalP1_on_pyramid(x, y, z, u_vert);
                   break;
                 }
                 case Geometry::Polytope::Type::Wedge:

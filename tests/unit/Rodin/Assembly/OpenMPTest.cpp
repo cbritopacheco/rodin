@@ -9,7 +9,7 @@
  * These tests exercise the OpenMP assembler directly — verifying that
  * LinearForm vectors and BilinearForm matrices assembled with OpenMP are
  * numerically identical to those assembled with Sequential for all
- * supported 2-D polygon types (Triangle, Quadrilateral).
+ * supported cell types.
  *
  * The file is only compiled when RODIN_USE_OPENMP is defined; the
  * CMakeLists.txt registers the target inside an if(RODIN_USE_OPENMP) block.
@@ -47,6 +47,8 @@ namespace Rodin::Tests::Unit
       }
       case Polytope::Type::Tetrahedron:
       case Polytope::Type::Hexahedron:
+      case Polytope::Type::Pyramid:
+      case Polytope::Type::Wedge:
       {
         auto mesh = LocalMesh::UniformGrid(geom, { n, n, n });
         mesh.getConnectivity().compute(2, 3);
@@ -172,7 +174,9 @@ namespace Rodin::Tests::Unit
       Polytope::Type::Triangle,
       Polytope::Type::Quadrilateral,
       Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron
+      Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid,
+      Polytope::Type::Wedge
     )
   );
 
@@ -350,7 +354,9 @@ namespace Rodin::Tests::Unit
       Polytope::Type::Triangle,
       Polytope::Type::Quadrilateral,
       Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron
+      Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid,
+      Polytope::Type::Wedge
     )
   );
 
@@ -540,7 +546,9 @@ namespace Rodin::Tests::Unit
       Polytope::Type::Triangle,
       Polytope::Type::Quadrilateral,
       Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron
+      Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid,
+      Polytope::Type::Wedge
     )
   );
 }

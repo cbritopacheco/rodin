@@ -336,6 +336,54 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  TEST(Rodin_Variational_RealP1Element, SanityTest_3D_Reference_Pyramid)
+  {
+    RealP1Element k(Polytope::Type::Pyramid);
+
+    EXPECT_EQ(k.getCount(), 5);
+    EXPECT_EQ(k.getOrder(), 2);
+
+    for (size_t i = 0; i < k.getCount(); ++i)
+    {
+      const auto& node = k.getNode(i);
+      for (size_t j = 0; j < k.getCount(); ++j)
+      {
+        const Real expected = (i == j) ? 1.0 : 0.0;
+        EXPECT_NEAR(k.getBasis(j)(node), expected, RODIN_FUZZY_CONSTANT);
+      }
+    }
+
+    Math::Vector<Real> p{{0.2, 0.3, 0.4}};
+    Real sum = 0.0;
+    Math::SpatialVector<Real> grad_sum(3);
+    grad_sum.setZero();
+    for (size_t i = 0; i < k.getCount(); ++i)
+    {
+      sum += k.getBasis(i)(p);
+      grad_sum += k.getBasis(i).getGradient()(p);
+    }
+    EXPECT_NEAR(sum, 1.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(grad_sum(0), 0.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(grad_sum(1), 0.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(grad_sum(2), 0.0, RODIN_FUZZY_CONSTANT);
+  }
+
+  TEST(Rodin_Variational_RealP1Element, LinearReproduction_Pyramid)
+  {
+    RealP1Element elem(Polytope::Type::Pyramid);
+
+    auto f = [](const Math::SpatialPoint& x) -> Real {
+      return 2.0 + 3.0 * x.x() + 4.0 * x.y() + 5.0 * x.z();
+    };
+
+    Math::Vector<Real> p{{0.2, 0.3, 0.4}};
+    Real interpolated = 0.0;
+    for (size_t i = 0; i < elem.getCount(); ++i)
+      interpolated += elem.getLinearForm(i)(f) * elem.getBasis(i)(p);
+
+    EXPECT_NEAR(interpolated, f(p), RODIN_FUZZY_CONSTANT);
+  }
+
   // Test P1 element on Quadrilateral
   TEST(Rodin_Variational_RealP1Element, SanityTest_2D_Reference_Quadrilateral)
   {
@@ -806,6 +854,12 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(elem.getCount(), 18);  // 3 components × 6 nodes
   }
 
+  TEST(FinalTest_P1Element_Vector, VectorDimensions_Pyramid)
+  {
+    VectorP1Element<Real> elem(Polytope::Type::Pyramid, 3);
+    EXPECT_EQ(elem.getCount(), 15);  // 3 components × 5 nodes
+  }
+
   // ========================================================================
   // LINEARFORM TESTS FOR P1ELEMENT
   // ========================================================================
@@ -815,7 +869,7 @@ namespace Rodin::Tests::Unit
     // Test LinearForm evaluation for P1 elements across all geometries
     for (auto geom : {Polytope::Type::Segment, Polytope::Type::Triangle,
                       Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
-                      Polytope::Type::Wedge})
+                      Polytope::Type::Pyramid, Polytope::Type::Wedge})
     {
       RealP1Element elem(geom);
 
@@ -829,6 +883,7 @@ namespace Rodin::Tests::Unit
           case Polytope::Type::Quadrilateral:
             return 1.0 + 2.0 * x.x() + 3.0 * x.y();
           case Polytope::Type::Tetrahedron:
+          case Polytope::Type::Pyramid:
           case Polytope::Type::Wedge:
             return 1.0 + 2.0 * x.x() + 3.0 * x.y() + 4.0 * x.z();
           default:
@@ -889,7 +944,7 @@ namespace Rodin::Tests::Unit
   {
     // Test that gradient functions work correctly across geometries
     for (auto geom : {Polytope::Type::Segment, Polytope::Type::Triangle,
-                      Polytope::Type::Tetrahedron})
+                      Polytope::Type::Tetrahedron, Polytope::Type::Pyramid})
     {
       RealP1Element elem(geom);
 
@@ -906,6 +961,9 @@ namespace Rodin::Tests::Unit
           break;
         case Polytope::Type::Tetrahedron:
           p = Math::Vector<Real>{{0.25, 0.25, 0.25}};
+          break;
+        case Polytope::Type::Pyramid:
+          p = Math::Vector<Real>{{0.2, 0.3, 0.4}};
           break;
         default:
           continue;
@@ -1049,7 +1107,7 @@ namespace Rodin::Tests::Unit
   {
     // Test that P1 element exactly interpolates linear functions
     for (auto geom : {Polytope::Type::Segment, Polytope::Type::Triangle,
-                      Polytope::Type::Tetrahedron})
+                      Polytope::Type::Tetrahedron, Polytope::Type::Pyramid})
     {
       RealP1Element elem(geom);
 
@@ -1062,6 +1120,7 @@ namespace Rodin::Tests::Unit
           case Polytope::Type::Triangle:
             return 2.0 + 3.0 * x.x() + 4.0 * x.y();
           case Polytope::Type::Tetrahedron:
+          case Polytope::Type::Pyramid:
             return 2.0 + 3.0 * x.x() + 4.0 * x.y() + 5.0 * x.z();
           default:
             return 0.0;
@@ -1096,6 +1155,13 @@ namespace Rodin::Tests::Unit
             Real t = gen() * (1 - s);
             Real u = gen() * (1 - s - t);
             p = Math::Vector<Real>{{s, t, u}};
+            break;
+          }
+          case Polytope::Type::Pyramid:
+          {
+            Real z = gen();
+            Real q = 1.0 - z;
+            p = Math::Vector<Real>{{gen() * q, gen() * q, z}};
             break;
           }
           default:

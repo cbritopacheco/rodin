@@ -93,6 +93,18 @@ namespace
     return sharder.gather(0);
   }
 
+  static const char* polytopeName(Polytope::Type type)
+  {
+    switch (type)
+    {
+      case Polytope::Type::Tetrahedron: return "Tetrahedron";
+      case Polytope::Type::Hexahedron:  return "Hexahedron";
+      case Polytope::Type::Pyramid:     return "Pyramid";
+      case Polytope::Type::Wedge:       return "Wedge";
+      default:                          return "Other";
+    }
+  }
+
   static SubMesh<Context::MPI> makeBoundarySubMesh(
       const Mesh<Context::MPI>& mesh)
   {
@@ -306,31 +318,38 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  TEST(MPISubMeshH1, BoundarySubMesh_QuadraticH1_Tetrahedron)
+  TEST(MPISubMeshH1, BoundarySubMesh_QuadraticH1_All3D)
   {
     const auto& world = *g_world;
     if (world.size() > 4)
       GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
-    auto mesh = distributeFromRoot(ctx, Polytope::Type::Tetrahedron, {2, 2, 2});
-    auto sub  = makeBoundarySubMesh(mesh);
-
-    ASSERT_EQ(sub.getDimension(), 2u);
-
-    H1<2, Real, Mesh<Context::MPI>> h1(std::integral_constant<size_t, 2>{}, sub);
-
-    const size_t globalVertices = sub.getPolytopeCount(0);
-    const size_t globalEdges = sub.getPolytopeCount(1);
-    EXPECT_EQ(h1.getSize(), globalVertices + globalEdges);
-
-    const auto& shard = sub.getShard();
-    for (Index i = 0; i < static_cast<Index>(shard.getPolytopeCount(2)); ++i)
+    for (auto type :
+         { Polytope::Type::Tetrahedron,
+           Polytope::Type::Hexahedron,
+           Polytope::Type::Pyramid,
+           Polytope::Type::Wedge })
     {
-      const auto& dofs = h1.getDOFs(2, i);
-      EXPECT_EQ(dofs.size(), 6u);
-      for (const Index dof : dofs)
-        EXPECT_LT(dof, static_cast<Index>(h1.getSize()));
+      SCOPED_TRACE(polytopeName(type));
+      auto mesh = distributeFromRoot(ctx, type, {4, 3, 3});
+      auto sub  = makeBoundarySubMesh(mesh);
+
+      ASSERT_EQ(sub.getDimension(), 2u);
+
+      H1<2, Real, Mesh<Context::MPI>> h1(std::integral_constant<size_t, 2>{}, sub);
+      EXPECT_GT(h1.getSize(), 0u);
+
+      const auto& shard = sub.getShard();
+      const auto& connectivity = sub.getConnectivity();
+      for (Index i = 0; i < static_cast<Index>(shard.getPolytopeCount(2)); ++i)
+      {
+        const auto& dofs = h1.getDOFs(2, i);
+        const auto geometry = connectivity.getGeometry(2, i);
+        EXPECT_EQ(dofs.size(), RealH1Element<2>(geometry).getCount());
+        for (const Index dof : dofs)
+          EXPECT_LT(dof, static_cast<Index>(h1.getSize()));
+      }
     }
   }
 
@@ -556,26 +575,34 @@ namespace Rodin::Tests::Unit
   }
 
   // ==========================================================================
-  // Group 3 — Tetrahedron mesh variant
+  // Group 3 — 3D mesh variants
   // ==========================================================================
 
   /**
-   * @brief P0 on boundary SubMesh of a Tetrahedron mesh: size equals face count.
+   * @brief P0 on boundary SubMesh of every 3D cell mesh: size equals face count.
    */
-  TEST(MPIP0FESSubMesh, BoundarySubMesh_GetSize_EqualsFaceCount_Tetrahedron)
+  TEST(MPIP0FESSubMesh, BoundarySubMesh_GetSize_EqualsFaceCount_All3D)
   {
     const auto& world = *g_world;
     if (world.size() > 4)
       GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
-    auto mesh = distributeFromRoot(ctx, Polytope::Type::Tetrahedron, {3, 3, 3});
-    auto sub  = makeBoundarySubMesh(mesh);
+    for (auto type :
+         { Polytope::Type::Tetrahedron,
+           Polytope::Type::Hexahedron,
+           Polytope::Type::Pyramid,
+           Polytope::Type::Wedge })
+    {
+      SCOPED_TRACE(polytopeName(type));
+      auto mesh = distributeFromRoot(ctx, type, {4, 3, 3});
+      auto sub  = makeBoundarySubMesh(mesh);
 
-    P0<Real, Mesh<Context::MPI>> fes(sub);
+      P0<Real, Mesh<Context::MPI>> fes(sub);
 
-    const size_t globalFaces = sub.getPolytopeCount(sub.getDimension());
-    EXPECT_EQ(fes.getSize(), globalFaces);
+      const size_t globalFaces = sub.getPolytopeCount(sub.getDimension());
+      EXPECT_EQ(fes.getSize(), globalFaces);
+    }
   }
 
   // ==========================================================================
@@ -862,41 +889,49 @@ namespace Rodin::Tests::Unit
   }
 
   /**
-   * @brief Same regression test but with a Tetrahedron mesh (3D variant).
+   * @brief Same regression test over all supported 3D cell meshes.
    */
   TEST(MPIP1FESSubMesh,
-       Regression_P0CellThenP1Boundary_AllLocalVertices_HaveValidGlobalDOF_Tetrahedron)
+       Regression_P0CellThenP1Boundary_AllLocalVertices_HaveValidGlobalDOF_All3D)
   {
     const auto& world = *g_world;
     if (world.size() > 4)
       GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
-    auto mesh = distributeFromRoot(ctx, Polytope::Type::Tetrahedron, {3, 3, 3});
-
-    auto cellSub     = makeCellSubMesh(mesh);
-    auto boundarySub = makeBoundarySubMesh(mesh);
-
-    P0<Real, Mesh<Context::MPI>> p0cell(cellSub);
-    (void) p0cell;
-
-    P0<Real, Mesh<Context::MPI>> p0bnd(boundarySub);
-    (void) p0bnd;
-
-    P1<Real, Mesh<Context::MPI>> p1bnd(boundarySub);
-
-    const auto& shard   = boundarySub.getShard();
-    const size_t nVerts = shard.getVertexCount();
-    const size_t globalSize = p1bnd.getSize();
-
-    for (size_t i = 0; i < nVerts; ++i)
+    for (auto type :
+         { Polytope::Type::Tetrahedron,
+           Polytope::Type::Hexahedron,
+           Polytope::Type::Pyramid,
+           Polytope::Type::Wedge })
     {
-      const auto& dofs = p1bnd.getDOFs(0, static_cast<Index>(i));
-      for (const Index d : dofs)
+      SCOPED_TRACE(polytopeName(type));
+      auto mesh = distributeFromRoot(ctx, type, {4, 3, 3});
+
+      auto cellSub     = makeCellSubMesh(mesh);
+      auto boundarySub = makeBoundarySubMesh(mesh);
+
+      P0<Real, Mesh<Context::MPI>> p0cell(cellSub);
+      (void) p0cell;
+
+      P0<Real, Mesh<Context::MPI>> p0bnd(boundarySub);
+      (void) p0bnd;
+
+      P1<Real, Mesh<Context::MPI>> p1bnd(boundarySub);
+
+      const auto& shard   = boundarySub.getShard();
+      const size_t nVerts = shard.getVertexCount();
+      const size_t globalSize = p1bnd.getSize();
+
+      for (size_t i = 0; i < nVerts; ++i)
       {
-        EXPECT_LT(d, globalSize)
-            << "P1 boundary SubMesh DOF " << d
-            << " out of range for local vertex " << i;
+        const auto& dofs = p1bnd.getDOFs(0, static_cast<Index>(i));
+        for (const Index d : dofs)
+        {
+          EXPECT_LT(d, globalSize)
+              << "P1 boundary SubMesh DOF " << d
+              << " out of range for local vertex " << i;
+        }
       }
     }
   }

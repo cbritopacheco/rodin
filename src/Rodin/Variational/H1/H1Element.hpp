@@ -40,6 +40,236 @@
 
 namespace Rodin::Variational
 {
+  template <size_t K>
+  struct PyramidIndex
+  {
+    static constexpr size_t Count = (K + 1) * (K + 2) * (2 * K + 3) / 6;
+
+    struct IJ
+    {
+      size_t i;
+      size_t j;
+    };
+
+    static constexpr size_t getLayerOffset(size_t layer)
+    {
+      size_t out = 0;
+      for (size_t k = 0; k < layer; ++k)
+      {
+        const size_t n = K - k + 1;
+        out += n * n;
+      }
+      return out;
+    }
+
+    static constexpr size_t getIndex(size_t i, size_t j, size_t k)
+    {
+      const size_t n = K - k + 1;
+      return getLayerOffset(k) + j * n + i;
+    }
+
+    static constexpr void decode(size_t idx, size_t& i, size_t& j, size_t& k)
+    {
+      size_t rem = idx;
+      for (k = 0; k <= K; ++k)
+      {
+        const size_t n = K - k + 1;
+        const size_t layer = n * n;
+        if (rem < layer)
+        {
+          j = rem / n;
+          i = rem % n;
+          return;
+        }
+        rem -= layer;
+      }
+
+      i = j = k = 0;
+    }
+
+    static constexpr IJ getTriangleLattice(size_t alpha)
+    {
+      size_t pos = 0;
+      for (size_t j = 0; j <= K; ++j)
+      {
+        for (size_t i = 0; i <= K - j; ++i, ++pos)
+        {
+          if (pos == alpha)
+            return IJ{ i, j };
+        }
+      }
+      return IJ{ 0, 0 };
+    }
+
+    static constexpr size_t getSideIndex(size_t local, size_t alpha)
+    {
+      const auto ij = getTriangleLattice(alpha);
+      const size_t i = ij.i;
+      const size_t k = ij.j;
+      const size_t n = K - k;
+
+      switch (local)
+      {
+        case 1:
+          return getIndex(i, 0, k);
+        case 2:
+          return getIndex(n, i, k);
+        case 3:
+          return getIndex(n - i, n, k);
+        case 4:
+          return getIndex(0, n - i, k);
+        default:
+          return 0;
+      }
+    }
+  };
+
+  template <size_t K>
+  class BernsteinPyramid
+  {
+    public:
+      static Real getBinomial(size_t n, size_t k)
+      {
+        if (k > n)
+          return 0;
+        if (k > n - k)
+          k = n - k;
+
+        Real out = 1;
+        for (size_t i = 1; i <= k; ++i)
+        {
+          out *= static_cast<Real>(n + 1 - i);
+          out /= static_cast<Real>(i);
+        }
+        return out;
+      }
+
+      static Real getBasis(size_t n, size_t i, Real x)
+      {
+        if (i > n)
+          return 0;
+
+        Real out = getBinomial(n, i);
+        for (size_t p = 0; p < i; ++p)
+          out *= x;
+        for (size_t p = 0; p < n - i; ++p)
+          out *= (Real(1) - x);
+        return out;
+      }
+
+      static Real getDerivative(size_t n, size_t i, Real x)
+      {
+        if (n == 0)
+          return 0;
+
+        Real left = 0;
+        if (i > 0)
+          left = getBasis(n - 1, i - 1, x);
+
+        Real right = 0;
+        if (i < n)
+          right = getBasis(n - 1, i, x);
+
+        return static_cast<Real>(n) * (left - right);
+      }
+  };
+
+  template <size_t K>
+  class PyramidModal
+  {
+    public:
+      static Real getBasis(size_t mode, const Math::SpatialPoint& r)
+      {
+        size_t i, j, k;
+        PyramidIndex<K>::decode(mode, i, j, k);
+
+        const Real z = r.z();
+        const Real q = Real(1) - z;
+        if (q <= RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE)
+          return k == K ? Real(1) : Real(0);
+
+        const size_t n = K - k;
+        const Real a = r.x() / q;
+        const Real b = r.y() / q;
+
+        return BernsteinPyramid<K>::getBasis(n, i, a)
+             * BernsteinPyramid<K>::getBasis(n, j, b)
+             * BernsteinPyramid<K>::getBasis(K, k, z);
+      }
+
+      static Real getDerivative(size_t mode, size_t deriv, const Math::SpatialPoint& r)
+      {
+        size_t i, j, k;
+        PyramidIndex<K>::decode(mode, i, j, k);
+
+        const Real z = r.z();
+        const Real q = Real(1) - z;
+        if (q <= RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE)
+          return 0;
+
+        const size_t n = K - k;
+        const Real a = r.x() / q;
+        const Real b = r.y() / q;
+
+        const Real Ba  = BernsteinPyramid<K>::getBasis(n, i, a);
+        const Real Bb  = BernsteinPyramid<K>::getBasis(n, j, b);
+        const Real Bz  = BernsteinPyramid<K>::getBasis(K, k, z);
+        const Real dBa = BernsteinPyramid<K>::getDerivative(n, i, a);
+        const Real dBb = BernsteinPyramid<K>::getDerivative(n, j, b);
+        const Real dBz = BernsteinPyramid<K>::getDerivative(K, k, z);
+
+        if (deriv == 0)
+          return dBa * Bb * Bz / q;
+        if (deriv == 1)
+          return Ba * dBb * Bz / q;
+        if (deriv == 2)
+          return (dBa * (a / q) * Bb + Ba * dBb * (b / q)) * Bz
+               + Ba * Bb * dBz;
+        return 0;
+      }
+  };
+
+  template <size_t K>
+  class VandermondePyramid
+  {
+    public:
+      static const Math::Matrix<Real>& getMatrix()
+      {
+        static thread_local Math::Matrix<Real> s_vandermonde;
+        constexpr size_t N = PyramidIndex<K>::Count;
+
+        if (s_vandermonde.size() == 0)
+        {
+          const auto& nodes =
+            H1Element<K, Real>::getNodes(Geometry::Polytope::Type::Pyramid);
+          s_vandermonde.resize(N, N);
+
+          for (size_t node = 0; node < N; ++node)
+          {
+            for (size_t mode = 0; mode < N; ++mode)
+              s_vandermonde(node, mode) = PyramidModal<K>::getBasis(mode, nodes[node]);
+          }
+        }
+
+        return s_vandermonde;
+      }
+
+      static const Math::Matrix<Real>& getInverse()
+      {
+        static thread_local Math::Matrix<Real> s_inv;
+
+        if (s_inv.size() == 0)
+        {
+          const auto& V = getMatrix();
+          Eigen::BDCSVD<Math::Matrix<Real>> svd(V, Eigen::ComputeThinU | Eigen::ComputeThinV);
+          const Math::Matrix<Real> I = Math::Matrix<Real>::Identity(V.rows(), V.cols());
+          s_inv = svd.solve(I);
+        }
+
+        return s_inv;
+      }
+  };
+
   template <size_t K, class Scalar>
   const typename H1Element<K, Scalar>::Tabulation&
   H1Element<K, Scalar>::getTabulation(const QF::QuadratureFormulaBase& qf) const
@@ -203,6 +433,18 @@ namespace Rodin::Variational
         }
         return s_lfs[i];
       }
+      case Geometry::Polytope::Type::Pyramid:
+      {
+        static thread_local std::vector<LinearForm> s_lfs;
+        if (s_lfs.empty())
+        {
+          const size_t count = getCount();
+          s_lfs.reserve(count);
+          for (size_t j = 0; j < count; ++j)
+            s_lfs.emplace_back(j, g);
+        }
+        return s_lfs[i];
+      }
       case Geometry::Polytope::Type::Wedge:
       {
         static thread_local std::vector<LinearForm> s_lfs;
@@ -292,6 +534,18 @@ namespace Rodin::Variational
         return s_bs[i];
       }
       case Geometry::Polytope::Type::Tetrahedron:
+      {
+        static thread_local std::vector<BasisFunction> s_bs;
+        if (s_bs.empty())
+        {
+          const size_t count = getCount();
+          s_bs.reserve(count);
+          for (size_t j = 0; j < count; ++j)
+            s_bs.emplace_back(j, g);
+        }
+        return s_bs[i];
+      }
+      case Geometry::Polytope::Type::Pyramid:
       {
         static thread_local std::vector<BasisFunction> s_bs;
         if (s_bs.empty())
@@ -418,6 +672,17 @@ namespace Rodin::Variational
                         });
                   });
             });
+
+        return result;
+      }
+      case Geometry::Polytope::Type::Pyramid:
+      {
+        const auto& inverse = VandermondePyramid<K>::getInverse();
+        constexpr size_t count = PyramidIndex<K>::Count;
+
+        Scalar result = Scalar(0);
+        for (size_t mode = 0; mode < count; ++mode)
+          result += inverse(mode, m_local) * PyramidModal<K>::getBasis(mode, r);
 
         return result;
       }
@@ -672,6 +937,20 @@ namespace Rodin::Variational
                           });
                     });
               });
+
+          return result;
+        }
+        case Geometry::Polytope::Type::Pyramid:
+        {
+          const auto& inverse = VandermondePyramid<K>::getInverse();
+          constexpr size_t count = PyramidIndex<K>::Count;
+
+          Scalar result = Scalar(0);
+          for (size_t mode = 0; mode < count; ++mode)
+          {
+            result += inverse(mode, m_local)
+                    * PyramidModal<K>::getDerivative(mode, m_i, r);
+          }
 
           return result;
         }
