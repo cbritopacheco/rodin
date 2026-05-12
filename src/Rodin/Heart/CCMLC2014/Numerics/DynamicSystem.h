@@ -145,7 +145,7 @@ namespace Rodin::Heart::CCMLC2014::Numerics
 
         residualVector[Model::ArterialPressure] =
           m_input.Cp * parDot
-          + evalData.windkesselflowP;
+          + evalData.windkesselflowP - evalData.windkesselOutflow;
 
         residualVector[Model::DistalPressure] =
           m_input.Cd * pdDot
@@ -252,7 +252,7 @@ namespace Rodin::Heart::CCMLC2014::Numerics
           -evalData.dWindkesselOutflow_dPv;
 
         jacobianMatrix(Model::ArterialPressure, Model::ArterialPressure) +=
-          m_input.Cp * a0 + evalData.dWindkesselflowP_dPar;
+          m_input.Cp * a0 + evalData.dWindkesselflowP_dPar + evalData.dWindkesselOutflow_dPar;
 
         jacobianMatrix(Model::ArterialPressure, Model::DistalPressure) +=
           evalData.dWindkesselflowP_dPd;

@@ -97,15 +97,15 @@ namespace Rodin::Examples::Heart
       struct CarreauYasuda
       {
         /// @brief Low-shear viscosity.
-        Real mu0 = 0.0186058;
+        Real mu0 = 0.0035;
         /// @brief Infinite-shear viscosity.
-        Real muInf = 0.0042963;
+        Real muInf = 0.0035;
         /// @brief Relaxation time.
-        Real lambda = 0.2435;
+        Real lambda = 4.9438;
         /// @brief Power-law index.
-        Real n = 0.2079;
+        Real n = 0.1703;
         /// @brief Yasuda transition exponent.
-        Real yasuda = 1.5410;
+        Real yasuda = 1.0324;
         /// @brief Shear-rate regularization used in the 3D viscosity.
         Real gammaRegularization = 1.0e-3;
       };
@@ -117,13 +117,13 @@ namespace Rodin::Examples::Heart
       struct OutletFlowLaw
       {
         /// @brief Proximal surrogate vessel radius.
-        Real proximalRadius = 8.0e-4;
+        Real proximalRadius = 9.0e-4;
         /// @brief Proximal surrogate vessel length.
-        Real proximalLength = 0.0001;
+        Real proximalLength = 0.0005;
         /// @brief Distal surrogate vessel radius.
-        Real distalRadius = 2.0e-4;
+        Real distalRadius = 5.0e-4;
         /// @brief Distal surrogate vessel length.
-        Real distalLength = 0.005;
+        Real distalLength = 0.0075;
         /// @brief Pressure-drop threshold for the Poiseuille fallback.
         Real pressureDropTolerance = 1.0e-12;
         /// @brief Minimum shear-rate bracket.
@@ -166,13 +166,13 @@ namespace Rodin::Examples::Heart
         /// @brief Activation ramp start.
         Real tRampStart = 0.15;
         /// @brief Activation ramp end.
-        Real tRampEnd = 0.17;
+        Real tRampEnd = 0.225;
         /// @brief Activation plateau end.
-        Real tPlateauEnd = 0.22;
+        Real tPlateauEnd = 0.375;
         /// @brief Relaxation ramp end.
-        Real tRelaxEnd = 0.36;
+        Real tRelaxEnd = 0.5;
         /// @brief Negative activation plateau end.
-        Real tNegativeEnd = 0.45;
+        Real tNegativeEnd = 0.6;
         /// @brief Positive activation plateau value.
         Real positiveValue = 35.0;
         /// @brief Negative activation plateau value.
@@ -214,7 +214,7 @@ namespace Rodin::Examples::Heart
         /// @brief 0D fluid density.
         Real rho = 1.0e3;
         /// @brief Reference radius.
-        Real R0 = 2.45e-2;
+        Real R0 = 2.4e-2;
         /// @brief Reference wall thickness.
         Real d0 = 1.4e-2;
         /// @brief Passive elastic stiffness.
@@ -235,17 +235,17 @@ namespace Rodin::Examples::Heart
         /// @brief Proximal arterial resistance.
         Real Rp = 5e7;
         /// @brief Proximal arterial compliance.
-        Real Cp = 5e-9;
+        Real Cp = 1e-8;
         /// @brief Distal arterial resistance.
         Real Rd = 1.0e8;
         /// @brief Distal arterial compliance.
-        Real Cd = 1.0e-8;
+        Real Cd = 5.0e-9;
         /// @brief Atrial valve coefficient.
-        Real Kat = 8.0e-7;
+        Real Kat = 1.0e-6;
         /// @brief Peripheral valve coefficient.
         Real Kp = 5.0e-10;
         /// @brief Arterial valve coefficient.
-        Real Kar = 1.e-7;
+        Real Kar = 1.25e-7;
         /// @brief LV cavity capacity.
         Real cavityCapacity = 5.0e-12;
         /// @brief Local 0D Newton absolute tolerance.
@@ -305,23 +305,23 @@ namespace Rodin::Examples::Heart
         /// @brief Initial distal pressure.
         Real initialPd = 10000.0;
         /// @brief Low-shear viscosity.
-        Real mu_0 = 0.0186058;
+        Real mu_0 = 0.0035;
         /// @brief Infinite-shear viscosity.
-        Real mu_Inf = 0.0042963;
+        Real mu_Inf = 0.0035;
         /// @brief Relaxation time.
-        Real lambda = 0.2435;
+        Real lambda = 4.9438;
         /// @brief Power-law index.
-        Real n = 0.2079;
+        Real n = 0.1703;
         /// @brief Yasuda transition exponent.
-        Real yasuda = 1.5410;
+        Real yasuda = 1.0324;
         /// @brief Proximal surrogate vessel radius.
-        Real proximalRadius = 0.00125;
+        Real proximalRadius = 0.0125;
         /// @brief Proximal surrogate vessel length.
-        Real proximalLength = 0.05;
+        Real proximalLength = 0.4;
         /// @brief Distal surrogate vessel radius.
-        Real distalRadius = 0.0007;
+        Real distalRadius = 0.002;
         /// @brief Distal surrogate vessel length.
-        Real distalLength = 0.2;
+        Real distalLength = 0.125;
       };
 
       /**

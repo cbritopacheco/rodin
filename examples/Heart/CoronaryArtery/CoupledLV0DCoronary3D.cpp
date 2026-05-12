@@ -523,7 +523,7 @@ namespace Rodin::Examples::Heart
       };
 
     const Real dPim = (s.pv - h.nm1.pv) / dt;
-    const Real Qim  = bc.C * 0.3  * dPim;
+    const Real Qim  = bc.C * 0.125  * dPim;
 
     auto distalResidual = [&](Real pc) -> std::pair<Real, Real>
     {

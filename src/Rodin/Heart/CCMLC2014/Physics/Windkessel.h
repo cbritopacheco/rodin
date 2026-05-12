@@ -163,7 +163,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
       if (alpha > 1.0)
       {
         const Real common = (2.0 / 9.0) * std::pow(1.0 - q, 2.0) * (1.0 + q);
-        F = 0.5 * (0.25 * std::pow(1.0 - q, 2.0) + common / alpha);
+        F = (0.25 * std::pow(1.0 - q, 2.0) + common / alpha);
         dFdAlpha = 0.5 * (-common / (alpha * alpha));
       }
       else
@@ -191,7 +191,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
 
         const Real bracket = 1.0 - (8.0 / 7.0) * a * (1.0 + q) + (4.0 / 3.0) * a2
                              - a8 * P[6] + (1.0 + S) * sqrtT + a8 * P[7] * logT;
-        F = 0.5 * bracket;
+        F = bracket;
 
         const Real eps = 1e-12;
         const Real dSqrtT = (a - q) / std::max(sqrtT, eps);
@@ -276,7 +276,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
           SolverConfig::shearRelativeTolerance, SolverConfig::shearStepTolerance,
           SolverConfig::shearMaxIterations);
 
-      Real gHi = std::max<Real>(tauW / muInf, SolverConfig::minShearRate);
+      Real gHi = std::max<Real>(tauW / ((muInf + mu0) * 0.5), SolverConfig::minShearRate);
 
       for (int k = 0; k < SolverConfig::maxBracketIterations && tauMinusTauW(gHi).first < 0.0; ++k)
         gHi *= 2.0;
@@ -411,7 +411,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
           SolverConfig::shearRelativeTolerance, SolverConfig::shearStepTolerance,
           SolverConfig::shearMaxIterations);
 
-      Real gHi = std::max<Real>(tauW / muInf, SolverConfig::minShearRate);
+      Real gHi = std::max<Real>(tauW / ((muInf + mu0) * 0.5), SolverConfig::minShearRate);
 
       for (int k = 0; k < SolverConfig::maxBracketIterations &&
                       tauMinusTauW(gHi).first < 0.0;
@@ -531,10 +531,10 @@ namespace Rodin::Heart::CCMLC2014::Physics
             RheologyModel::flowLaw(data.pSvMid - data.pdMid, m_input.distalLength,
                                    m_input.distalRadius, m_input.Rd, m_input);
 
-        data.windkesselflowP = qp - data.windkesselOutflow;
+        data.windkesselflowP = qp;
         data.windkesselflowD = -qp - qd;
 
-        data.dWindkesselflowP_dPar = dqp - data.dWindkesselOutflow_dPar;
+        data.dWindkesselflowP_dPar = dqp;
         data.dWindkesselflowP_dPd = -dqp;
         data.dWindkesselflowD_dPar = -dqp;
         data.dWindkesselflowD_dPd = dqp + dqd;

@@ -15,12 +15,11 @@ static Real periodic_activation(Real t)
   const Real T = 0.85;
   const Real tau = t - T * std::floor(t / T);
 
-  if (tau < 0.13)  return 0.0;
-  if (tau < 0.141) return 35.0 * ((tau - 0.13) / 0.011);
-  if (tau < 0.281) return 35.0;
-  if (tau < 0.361) return 35.0 - 55.0 * ((tau - 0.281) / 0.08);
-  if (tau < 0.45)  return -20.0;
-  return 0.0;
+  if (tau < 0.15)  return 0.0;
+    if (tau < 0.225) return 35.0 * ((tau - 0.15) / 0.075);
+    if (tau < 0.375) return 35.0;
+    if (tau < 0.5) return 35.0 - 55.0 * ((tau - 0.375) / 0.125);
+    if (tau < 0.8)  return -20.0;
 }
 
 static Real load_dependent_relaxation_m0(Real ec)
@@ -113,45 +112,46 @@ int main()
 
   // Geometry / inertia
   in.rho = 1.0e3;
-  in.R0 = 2.4e-2;
-  in.d0 = 1.45e-2;
+  in.R0 = 2.3e-2;
+  in.d0 = 1.4e-2;
 
   // Active law parameters
   in.Es = 3.0e6;
   in.mu = 70.0;
   in.eta = 70.0;
   in.alpha = 1.5;
-  in.alphaR = 0.12;
+  in.alphaR = 0.0;
   in.k0 = 1.0e5;
-  in.sigma0 = 1.25e5;
+  in.sigma0 = 1.5e5;
 
   // Windkessel
   in.Rp = 5.0e7;
-  in.Cp = 4e-9;
+  in.Cp = 2e-8;
   in.Rd = 1.0e8;
-  in.Cd = 1.0e-8;
+  in.Cd = 5.0e-9;
 
   in.mu_0 = 0.0186058;
   in.mu_Inf = 0.0042963;
   in.lambda = 0.2435;
-  in.n = 0.2079;
+  in.n = 0.565;
   in.m = 0.0035;
-  in.yasuda = 1.541;
-  in.mu_plasma = 0.0032704;
-  in.k_0 = 3.5678;
-  in.gamma_c = 10.2754;
-  in.k_Inf = 1.5352;
-  in.proximalRadius = 0.0015;
-  in.proximalLength = 0.05;
-  in.distalRadius = 0.0005;
-  in.distalLength = 0.2;
+  in.yasuda = 0.6497;
+  in.mu_plasma = 0.0869;
+  in.phi_quemada = 0.2;
+  in.k_0 = 2.785;
+  in.gamma_c = 14.0;
+  in.k_Inf = 0.552;
+  in.proximalRadius = 0.015;
+  in.proximalLength = 0.4;
+  in.distalRadius = 0.00065;
+  in.distalLength = 0.004;
   in.windkesselRheology =
-    Rodin::Heart::CCMLC2014::Model::WindkesselRheology::CarreauYasuda;
+    Rodin::Heart::CCMLC2014::Model::WindkesselRheology::Newtonian;
 
   // Valve parameters
-  in.Kat = 5.0e-7;
-  in.Kp  = 5.0e-11;
-  in.Kar = 1e-7;
+  in.Kat = 5.0e-6;
+  in.Kp  = 5.0e-12;
+  in.Kar = 1.e-7;
 
   in.cavityCapacity = 5.0e-12;
 
@@ -227,7 +227,7 @@ int main()
   }
 
   const Real dt = 1e-3;
-  const int nsteps = 3 * static_cast<int>(0.85 / dt);
+  const int nsteps = 10 * static_cast<int>(0.85 / dt);
 
   std::ofstream out("ccmlc2014_0d_cycle.csv");
   out << "t,y,v,pv,par,pd,ec,gamma,beta,w,kc,tauc,V,Q,pat\n";
