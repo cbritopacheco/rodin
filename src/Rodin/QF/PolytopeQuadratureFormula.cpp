@@ -114,6 +114,12 @@ namespace Rodin::QF
         return std::make_unique<GaussLegendre>(g, n, n);
       }
 
+      case Geometry::Polytope::Type::Pyramid:
+      {
+        const size_t n = std::max<size_t>(1, (order + 3) / 2);
+        return std::make_unique<GaussLegendre>(g, n, n, n);
+      }
+
       case Geometry::Polytope::Type::Hexahedron:
       {
         const size_t n = std::max<size_t>(1, (order + 2) / 2);

@@ -981,6 +981,12 @@ namespace Rodin::Geometry
           }
 
           template <class T>
+          Builder& pyramid(T&& vs)
+          {
+            return polytope(Polytope::Type::Pyramid, std::forward<T>(vs));
+          }
+
+          template <class T>
           Builder& hexahedron(T&& vs)
           {
             return polytope(Polytope::Type::Hexahedron, std::forward<T>(vs));

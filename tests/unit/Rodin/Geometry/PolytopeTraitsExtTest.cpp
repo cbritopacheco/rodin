@@ -60,6 +60,13 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(traits.isTensorProduct());
   }
 
+  TEST(Geometry_PolytopeTraitsExt, Pyramid_IsNotTensorProduct)
+  {
+    Polytope::Traits traits(Polytope::Type::Pyramid);
+    EXPECT_FALSE(traits.isSimplex());
+    EXPECT_FALSE(traits.isTensorProduct());
+  }
+
   TEST(Geometry_PolytopeTraitsExt, Wedge_IsTensorProduct)
   {
     // Wedge = triangle × segment, so it is a tensor product element
@@ -78,6 +85,12 @@ namespace Rodin::Tests::Unit
   {
     Polytope::Traits traits(Polytope::Type::Hexahedron);
     EXPECT_EQ(traits.getVertexCount(), 8);
+  }
+
+  TEST(Geometry_PolytopeTraitsExt, Pyramid_VertexCount)
+  {
+    Polytope::Traits traits(Polytope::Type::Pyramid);
+    EXPECT_EQ(traits.getVertexCount(), 5);
   }
 
   // ---- getCentroid ----
@@ -130,6 +143,16 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(c(2), 0.25, 1e-14);
   }
 
+  TEST(Geometry_PolytopeTraitsExt, PyramidCentroid)
+  {
+    Polytope::Traits traits(Polytope::Type::Pyramid);
+    const auto& c = traits.getCentroid();
+    EXPECT_EQ(c.size(), 3);
+    EXPECT_NEAR(c(0), 0.375, 1e-14);
+    EXPECT_NEAR(c(1), 0.375, 1e-14);
+    EXPECT_NEAR(c(2), 0.25, 1e-14);
+  }
+
   TEST(Geometry_PolytopeTraitsExt, HexahedronCentroid)
   {
     Polytope::Traits traits(Polytope::Type::Hexahedron);
@@ -171,6 +194,15 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(hs.matrix.rows(), 4);
     EXPECT_EQ(hs.matrix.cols(), 3);
     EXPECT_EQ(hs.vector.size(), 4);
+  }
+
+  TEST(Geometry_PolytopeTraitsExt, PyramidHalfSpace_Values)
+  {
+    Polytope::Traits traits(Polytope::Type::Pyramid);
+    const auto& hs = traits.getHalfSpace();
+    EXPECT_EQ(hs.matrix.rows(), 5);
+    EXPECT_EQ(hs.matrix.cols(), 3);
+    EXPECT_EQ(hs.vector.size(), 5);
   }
 
   TEST(Geometry_PolytopeTraitsExt, HexahedronHalfSpace_Values)
@@ -216,6 +248,19 @@ namespace Rodin::Tests::Unit
   TEST(Geometry_PolytopeTraitsExt, CentroidInsideReferenceElement_Tet)
   {
     Polytope::Traits traits(Polytope::Type::Tetrahedron);
+    const auto& c = traits.getCentroid();
+    const auto& hs = traits.getHalfSpace();
+    Eigen::VectorXd cv(c.size());
+    for (int j = 0; j < cv.size(); ++j)
+      cv(j) = c(j);
+    Eigen::VectorXd result = hs.matrix * cv;
+    for (int i = 0; i < result.size(); ++i)
+      EXPECT_LE(result(i), hs.vector(i) + 1e-14);
+  }
+
+  TEST(Geometry_PolytopeTraitsExt, CentroidInsideReferenceElement_Pyramid)
+  {
+    Polytope::Traits traits(Polytope::Type::Pyramid);
     const auto& c = traits.getCentroid();
     const auto& hs = traits.getHalfSpace();
     Eigen::VectorXd cv(c.size());

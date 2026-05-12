@@ -308,6 +308,12 @@ namespace Rodin::IO
           os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' ' << vertices(3);
           break;
         }
+        case Geometry::Polytope::Type::Pyramid:
+        {
+          os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' '
+             << vertices(3) << ' ' << vertices(4);
+          break;
+        }
         case Geometry::Polytope::Type::Wedge:
         {
           os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' ' << vertices(3) << ' ' << vertices(4) << ' ' << vertices(5);
@@ -361,6 +367,12 @@ namespace Rodin::IO
           case Geometry::Polytope::Type::Tetrahedron:
           {
             os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' ' << vertices(3);
+            break;
+          }
+          case Geometry::Polytope::Type::Pyramid:
+          {
+            os << vertices(0) << ' ' << vertices(1) << ' ' << vertices(2) << ' '
+               << vertices(3) << ' ' << vertices(4);
             break;
           }
           case Geometry::Polytope::Type::Quadrilateral:

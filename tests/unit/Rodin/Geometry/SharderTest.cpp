@@ -734,6 +734,79 @@ namespace Rodin::Tests::Unit
   }
 
   // ---------------------------------------------------------------------------
+  // SharderBase — 3D Pyramid mesh sharding
+  // ---------------------------------------------------------------------------
+
+  TEST(Rodin_Geometry_Sharder, PyramidMesh_BasicSharding)
+  {
+    auto mesh = makeShardableMesh(Polytope::Type::Pyramid, {3, 3, 3});
+    const size_t D = mesh.getDimension();
+    EXPECT_EQ(D, 3u);
+
+    BalancedCompactPartitioner partitioner(mesh);
+    partitioner.partition(2);
+
+    Context::Local ctx;
+    SharderBase<Context::Local> sharder(ctx);
+    sharder.shard(partitioner);
+
+    const auto& shards = sharder.getShards();
+    EXPECT_EQ(shards.size(), 2u);
+
+    std::set<Index> ownedCells;
+    for (const auto& shard : shards)
+    {
+      const auto& cmap = shard.getPolytopeMap(D);
+      for (Index ci = 0; ci < shard.getCellCount(); ci++)
+      {
+        if (shard.isOwned(D, ci))
+        {
+          auto [it, ins] = ownedCells.insert(cmap.left[ci]);
+          EXPECT_TRUE(ins);
+        }
+      }
+    }
+    EXPECT_EQ(ownedCells.size(), mesh.getCellCount());
+  }
+
+  TEST(Rodin_Geometry_Sharder, PyramidMesh_HaloMapConsistency)
+  {
+    auto mesh = makeShardableMesh(Polytope::Type::Pyramid, {3, 3, 3});
+    const size_t D = mesh.getDimension();
+
+    BalancedCompactPartitioner partitioner(mesh);
+    partitioner.partition(2);
+
+    Context::Local ctx;
+    SharderBase<Context::Local> sharder(ctx);
+    sharder.shard(partitioner);
+
+    const auto& shards = sharder.getShards();
+
+    for (size_t si = 0; si < shards.size(); si++)
+    {
+      const auto& shard = shards[si];
+      for (size_t d = 0; d <= D; d++)
+      {
+        const auto& haloMap = shard.getHalo(d);
+        const auto& pmap = shard.getPolytopeMap(d);
+        for (const auto& [localIdx, remoteRanks] : haloMap)
+        {
+          EXPECT_TRUE(shard.isOwned(d, localIdx));
+          Index parentIdx = pmap.left[localIdx];
+          for (const Index remoteRank : remoteRanks)
+          {
+            EXPECT_LT(remoteRank, shards.size());
+            EXPECT_NE(remoteRank, si);
+            const auto& remotePmap = shards[remoteRank].getPolytopeMap(d);
+            EXPECT_NE(remotePmap.right.find(parentIdx), remotePmap.right.end());
+          }
+        }
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // SharderBase — 3D Wedge mesh sharding
   // ---------------------------------------------------------------------------
 
@@ -1140,6 +1213,7 @@ namespace Rodin::Tests::Unit
     // Test all 3D uniform grid types with multiple partition counts
     for (Polytope::Type type : { Polytope::Type::Tetrahedron,
                                   Polytope::Type::Hexahedron,
+                                  Polytope::Type::Pyramid,
                                   Polytope::Type::Wedge })
     {
       auto mesh = makeShardableMesh(type, {3, 3, 3});

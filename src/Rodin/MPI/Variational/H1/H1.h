@@ -422,6 +422,36 @@ namespace Rodin::Variational
             break;
           }
 
+          case Geometry::Polytope::Type::Pyramid:
+          {
+            // Pyramid DOF ordering follows horizontal square layers:
+            // layer k has (K-k+1)^2 nodes. Interior DOFs are strictly away
+            // from the base and all four triangular side faces.
+            auto offset = [](size_t layer)
+            {
+              size_t out = 0;
+              for (size_t kk = 0; kk < layer; ++kk)
+              {
+                const size_t n = K - kk + 1;
+                out += n * n;
+              }
+              return out;
+            };
+
+            for (size_t k = 1; k < K; ++k)
+            {
+              const size_t n = K - k;
+              const size_t layerOffset = offset(k);
+              const size_t n1 = n + 1;
+              for (size_t j = 1; j < n; ++j)
+              {
+                for (size_t i = 1; i < n; ++i)
+                  res.push_back(layerOffset + j * n1 + i);
+              }
+            }
+            break;
+          }
+
           case Geometry::Polytope::Type::Hexahedron:
           {
             // Tensor GLL grid: hexIdx(i,j,k) = k*N1^2 + j*N1 + i

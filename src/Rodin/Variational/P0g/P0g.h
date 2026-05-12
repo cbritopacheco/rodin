@@ -186,6 +186,7 @@ namespace Rodin::Variational
           case Geometry::Polytope::Type::Triangle:
           case Geometry::Polytope::Type::Quadrilateral:
           case Geometry::Polytope::Type::Tetrahedron:
+          case Geometry::Polytope::Type::Pyramid:
           case Geometry::Polytope::Type::Wedge:
           case Geometry::Polytope::Type::Hexahedron:
           {
@@ -364,6 +365,7 @@ namespace Rodin::Variational
           case Geometry::Polytope::Type::Triangle:
           case Geometry::Polytope::Type::Quadrilateral:
           case Geometry::Polytope::Type::Tetrahedron:
+          case Geometry::Polytope::Type::Pyramid:
           case Geometry::Polytope::Type::Wedge:
           case Geometry::Polytope::Type::Hexahedron:
           {

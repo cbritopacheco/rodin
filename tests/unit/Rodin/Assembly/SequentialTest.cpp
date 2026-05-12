@@ -530,7 +530,7 @@ namespace Rodin::Tests::Unit
   // These tests verify correctness across all supported mesh geometry types:
   //   1D: Segment
   //   2D: Triangle, Quadrilateral
-  //   3D: Tetrahedron, Hexahedron
+  //   3D: Tetrahedron, Hexahedron, Pyramid, Wedge
   // =========================================================================
 
   /**
@@ -552,6 +552,8 @@ namespace Rodin::Tests::Unit
       }
       case Polytope::Type::Tetrahedron:
       case Polytope::Type::Hexahedron:
+      case Polytope::Type::Pyramid:
+      case Polytope::Type::Wedge:
       {
         auto mesh = LocalMesh::UniformGrid(geom, { n, n, n });
         mesh.getConnectivity().compute(2, 3);
@@ -719,7 +721,9 @@ namespace Rodin::Tests::Unit
       Polytope::Type::Triangle,
       Polytope::Type::Quadrilateral,
       Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron
+      Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid,
+      Polytope::Type::Wedge
     )
   );
 }

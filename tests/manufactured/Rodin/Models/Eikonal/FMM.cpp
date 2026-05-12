@@ -30,6 +30,9 @@ namespace Rodin::Tests::Manufactured::Eikonal
       static constexpr Real TIGHT_TOLERANCE = 1e-3;  // Tighter tolerance for simple cases
   };
 
+  class FMMManufactured3DTest : public ::testing::TestWithParam<Polytope::Type>
+  {};
+
   // Test 1: Point source with constant speed - 2D Euclidean distance
   TEST_F(FMMManufacturedTest, PointSource_ConstantSpeed_2D_EuclideanDistance)
   {
@@ -306,12 +309,15 @@ namespace Rodin::Tests::Manufactured::Eikonal
   }
 
   // Test 5: 3D volumetric manufactured test - Constant speed in cube
-  TEST_F(FMMManufacturedTest, Volume3D_ConstantSpeed_CubeCenter)
+  TEST_P(FMMManufactured3DTest, Volume3D_ConstantSpeed_CubeCenter)
   {
-    // Create 3D tetrahedral mesh
+    constexpr size_t n = 10;
+    constexpr Real h = 2.0 / (n - 1);
+
+    // Create 3D mesh
     Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { 16, 16, 16 });
-    mesh.scale(2.0 / 15.0);  // Scale to [0, 2]^3
+    mesh = mesh.UniformGrid(GetParam(), { n, n, n });
+    mesh.scale(h);  // Scale to [0, 2]^3
     mesh.displace(VectorFunction{ -1.0, -1.0, -1.0 });  // Center at origin: [-1, 1]^3
     mesh.getConnectivity().compute(3, 0);
     mesh.getConnectivity().compute(2, 3);
@@ -361,10 +367,20 @@ namespace Rodin::Tests::Manufactured::Eikonal
     if (count > 0)
     {
       Real avg_error = total_error / count;
-      EXPECT_LT(avg_error, 2.0 / 15.0)
+      EXPECT_LT(avg_error, h)
         << "Average error should be within tolerance";
     }
   }
+
+  INSTANTIATE_TEST_SUITE_P(
+    AllGeometries3D,
+    FMMManufactured3DTest,
+    ::testing::Values(
+      Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid,
+      Polytope::Type::Wedge)
+  );
 
   // Test 6: Anisotropic speed function test
   TEST_F(FMMManufacturedTest, AnisotropicSpeed_2D)

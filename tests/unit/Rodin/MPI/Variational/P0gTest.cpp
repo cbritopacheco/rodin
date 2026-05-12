@@ -86,6 +86,18 @@ namespace
     }
     return sharder.gather(0);
   }
+
+  static const char* polytopeName(Polytope::Type type)
+  {
+    switch (type)
+    {
+      case Polytope::Type::Tetrahedron: return "Tetrahedron";
+      case Polytope::Type::Hexahedron:  return "Hexahedron";
+      case Polytope::Type::Pyramid:     return "Pyramid";
+      case Polytope::Type::Wedge:       return "Wedge";
+      default:                          return "Other";
+    }
+  }
 } // anonymous namespace
 
 namespace Rodin::Tests::Unit
@@ -308,19 +320,27 @@ namespace Rodin::Tests::Unit
   }
 
   /**
-   * @brief Scalar P0g works on a 3D Tetrahedron mesh.
+   * @brief Scalar P0g works on every supported 3D cell mesh.
    */
-  TEST(MPIP0gSpace, GetSize_IsOne_Tetrahedron)
+  TEST(MPIP0gSpace, GetSize_IsOne_All3D)
   {
     const auto& world = *g_world;
     if (world.size() > 4)
       GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
-    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Tetrahedron, { 3, 3, 3 });
+    for (auto type :
+         { Polytope::Type::Tetrahedron,
+           Polytope::Type::Hexahedron,
+           Polytope::Type::Pyramid,
+           Polytope::Type::Wedge })
+    {
+      SCOPED_TRACE(polytopeName(type));
+      auto mpiMesh = distributeFromRoot(ctx, type, { 4, 3, 3 });
 
-    P0g<Real, Mesh<Context::MPI>> fes(mpiMesh);
-    EXPECT_EQ(fes.getSize(), 1u);
+      P0g<Real, Mesh<Context::MPI>> fes(mpiMesh);
+      EXPECT_EQ(fes.getSize(), 1u);
+    }
   }
 } // namespace Rodin::Tests::Unit
 
