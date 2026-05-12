@@ -1446,7 +1446,7 @@
 <g id="node121" class="node">
 <title>Rodin/Solver/LinearSolver.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="2280" cy="-1332" rx="72" ry="72"/>
-<text text-anchor="middle" x="2280" y="-1329.8" font-family="Times,serif" font-size="9.00">Rodin/Solver/LinearSolver.h</text>
+<text text-anchor="middle" x="2280" y="-1330.1" font-family="Times,serif" font-size="8.00">Rodin/Solver/LinearSolver.h</text>
 </g>
 <!-- Rodin/Solver.h&#45;&gt;Rodin/Solver/LinearSolver.h -->
 <g id="edge120" class="edge">
