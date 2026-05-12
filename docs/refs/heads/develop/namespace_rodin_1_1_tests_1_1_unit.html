@@ -580,31 +580,21 @@
               GlobalCellCount_MatchesLocal_Segment)</span>
             </dt>
             <dd>Global cell count for a 1D Segment mesh equals the expected value.</dd>
-            <dt id="a88a21589a95a34c105776bf0e27dae98">
-              <span class="m-doc-wrap-bumper"><a href="#a88a21589a95a34c105776bf0e27dae98" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_MPI_Iteration,
-              TetrahedronMesh_HasCells)</span>
+            <dt id="ab071938e3bd5950e4f06b729c06ce3b6">
+              <span class="m-doc-wrap-bumper"><a href="#ab071938e3bd5950e4f06b729c06ce3b6" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_MPI_Iteration,
+              All3DMeshes_HaveCells)</span>
             </dt>
-            <dd>MPIIteration over a Tetrahedron mesh yields at least one cell.</dd>
-            <dt id="aa37fd487c9191208b0d46a5381172280">
-              <span class="m-doc-wrap-bumper"><a href="#aa37fd487c9191208b0d46a5381172280" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_MPI_Iteration,
-              HexahedronMesh_HasCells)</span>
-            </dt>
-            <dd>MPIIteration over a Hexahedron mesh yields at least one cell.</dd>
+            <dd>MPIIteration over every supported 3D cell mesh yields cells.</dd>
             <dt id="a14e81f1706bf0f021ea1d5c5493c9f41">
               <span class="m-doc-wrap-bumper"><a href="#a14e81f1706bf0f021ea1d5c5493c9f41" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_MPI_DirichletBC,
               ConstantBC_Segment)</span>
             </dt>
             <dd><a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> DirichletBC assembly on Segment (1D) mesh: at least one boundary DOF is found and its value matches the prescribed constant.</dd>
-            <dt id="ab546b6e465707b15658c3dd4ccd2c472">
-              <span class="m-doc-wrap-bumper"><a href="#ab546b6e465707b15658c3dd4ccd2c472" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_MPI_DirichletBC,
-              ConstantBC_NonEmpty_Tetrahedron)</span>
+            <dt id="a81dbd56baf6445d319020695d20cbb03">
+              <span class="m-doc-wrap-bumper"><a href="#a81dbd56baf6445d319020695d20cbb03" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_MPI_DirichletBC,
+              ConstantBC_NonEmpty_All3D)</span>
             </dt>
-            <dd><a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> DirichletBC assembly on Tetrahedron (3D) mesh: at least one boundary DOF found globally.</dd>
-            <dt id="aa06d94e010bcd25ed78a2413b62916a8">
-              <span class="m-doc-wrap-bumper"><a href="#aa06d94e010bcd25ed78a2413b62916a8" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Assembly_MPI_DirichletBC,
-              ConstantBC_NonEmpty_Hexahedron)</span>
-            </dt>
-            <dd><a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> DirichletBC assembly on Hexahedron (3D) mesh: at least one boundary DOF found globally.</dd>
+            <dd><a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> DirichletBC assembly on every 3D cell fixes boundary DOFs.</dd>
             <dt id="ab890ec53040a969469ec1d4188be497e">
               <span class="m-doc-wrap-bumper"><a href="#ab890ec53040a969469ec1d4188be497e" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_MPI_Geometry_Mesh,
               GetPolytopeCount_Cells)</span>
@@ -840,21 +830,21 @@
               VectorP0g_OwnershipRange_Rank0OwnsAll_Triangle)</span>
             </dt>
             <dd>Vector P0g ownership range: rank 0 owns [0, vdim), others empty.</dd>
-            <dt id="ab5cfac1fcf9606335688b112bd6e8f19">
-              <span class="m-doc-wrap-bumper"><a href="#ab5cfac1fcf9606335688b112bd6e8f19" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0gSpace,
-              GetSize_IsOne_Tetrahedron)</span>
+            <dt id="a0720105b6851a20dcf424ea36093181a">
+              <span class="m-doc-wrap-bumper"><a href="#a0720105b6851a20dcf424ea36093181a" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0gSpace,
+              GetSize_IsOne_All3D)</span>
             </dt>
-            <dd>Scalar P0g works on a 3D Tetrahedron mesh.</dd>
+            <dd>Scalar P0g works on every supported 3D cell mesh.</dd>
             <dt id="a131bc39c68dc40cb14167ebc6b6b14b3">
               <span class="m-doc-wrap-bumper"><a href="#a131bc39c68dc40cb14167ebc6b6b14b3" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0Space,
               GetSize_EqualsGlobalCellCount_Triangle)</span>
             </dt>
             <dd>getSize() of the distributed P0 space equals the global cell count.</dd>
-            <dt id="a195100cea567ab77ffa4a46319505075">
-              <span class="m-doc-wrap-bumper"><a href="#a195100cea567ab77ffa4a46319505075" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0Space,
-              GetSize_EqualsGlobalCellCount_Tetrahedron)</span>
+            <dt id="af55a1d932d89b7827043ad5d143025ad">
+              <span class="m-doc-wrap-bumper"><a href="#af55a1d932d89b7827043ad5d143025ad" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0Space,
+              GetSize_EqualsGlobalCellCount_All3D)</span>
             </dt>
-            <dd>getSize() of the distributed P0 space equals the global cell count for a Tetrahedron mesh.</dd>
+            <dd>getSize() of the distributed P0 space equals the global cell count for every supported 3D cell mesh.</dd>
             <dt id="a938d28a8476b8909800a071876130fb6">
               <span class="m-doc-wrap-bumper"><a href="#a938d28a8476b8909800a071876130fb6" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0Space,
               AllLocalCells_HaveValidGlobalDOF_Triangle)</span>
@@ -925,11 +915,11 @@
               CellSubMesh_OwnedDOFs_GloballyUnique_Triangle)</span>
             </dt>
             <dd>Owned P0 DOFs on the full-cell SubMesh are globally unique.</dd>
-            <dt id="ac4af0a02fc2b4f9d0fa6ccb2f7bc1eef">
-              <span class="m-doc-wrap-bumper"><a href="#ac4af0a02fc2b4f9d0fa6ccb2f7bc1eef" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0FESSubMesh,
-              BoundarySubMesh_GetSize_EqualsFaceCount_Tetrahedron)</span>
+            <dt id="a5ceeec1f68aabe1feec307be4f5dbf87">
+              <span class="m-doc-wrap-bumper"><a href="#a5ceeec1f68aabe1feec307be4f5dbf87" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP0FESSubMesh,
+              BoundarySubMesh_GetSize_EqualsFaceCount_All3D)</span>
             </dt>
-            <dd>P0 on boundary SubMesh of a Tetrahedron mesh: size equals face count.</dd>
+            <dd>P0 on boundary SubMesh of every 3D cell mesh: size equals face count.</dd>
             <dt id="a4ec9add4244ac2421fa3d14d52ed2a5d">
               <span class="m-doc-wrap-bumper"><a href="#a4ec9add4244ac2421fa3d14d52ed2a5d" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP1FESSubMesh,
               BoundarySubMesh_GetSize_EqualsVertexCount_Triangle)</span>
@@ -965,11 +955,11 @@
               Regression_P0CellThenP1Boundary_AllLocalVertices_HaveValidGlobalDOF)</span>
             </dt>
             <dd>Regression test for <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> message tag collision.</dd>
-            <dt id="a71cf122522ebf69a33927f87c1329521">
-              <span class="m-doc-wrap-bumper"><a href="#a71cf122522ebf69a33927f87c1329521" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP1FESSubMesh,
-              Regression_P0CellThenP1Boundary_AllLocalVertices_HaveValidGlobalDOF_Tetrahedron)</span>
+            <dt id="a95240e9cff3b0080582e3c58cfba23ee">
+              <span class="m-doc-wrap-bumper"><a href="#a95240e9cff3b0080582e3c58cfba23ee" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">MPIP1FESSubMesh,
+              Regression_P0CellThenP1Boundary_AllLocalVertices_HaveValidGlobalDOF_All3D)</span>
             </dt>
-            <dd>Same regression test but with a Tetrahedron mesh (3D variant).</dd>
+            <dd>Same regression test over all supported 3D cell meshes.</dd>
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#a316843c41ad637443066c8d500bcb8a9" class="m-doc">TEST</a>(</span><span class="m-doc-wrap">MPIP1FESSubMesh,
               Regression_OrphanVertex_AllLocalVertices_HaveValidGlobalDOF_Triangle)</span>
