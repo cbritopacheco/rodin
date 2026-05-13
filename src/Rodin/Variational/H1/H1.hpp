@@ -75,6 +75,9 @@ namespace Rodin::Variational
       /// Number of nodal DOFs on a reference wedge ((triangle) × (K+1) in z).
       static constexpr size_t WedgeCount = (K + 1) * FeketeTriangle<K>::Count;
 
+      /// Number of nodal DOFs on a reference pyramid.
+      static constexpr size_t PyramidCount = (K + 1) * (K + 2) * (2 * K + 3) / 6;
+
       /// Number of nodal DOFs on a reference hexahedron ((K+1)³ tensor GLL grid).
       static constexpr size_t HexahedronCount = (K + 1) * (K + 1) * (K + 1);
 
@@ -93,6 +96,8 @@ namespace Rodin::Variational
             return QuadrilateralCount;
           else if constexpr (G == Geometry::Polytope::Type::Tetrahedron)
             return TetrahedronCount;
+          else if constexpr (G == Geometry::Polytope::Type::Pyramid)
+            return PyramidCount;
           else if constexpr (G == Geometry::Polytope::Type::Wedge)
             return WedgeCount;
           else if constexpr (G == Geometry::Polytope::Type::Hexahedron)
@@ -549,6 +554,48 @@ namespace Rodin::Variational
                 });
               });
             }
+          }
+        }
+
+        // -------------------------------------------------------------------
+        // G = Pyramid: from Quadrilateral base or Triangle side -> Pyramid
+        //
+        // Pyramid vertices:
+        //   0:(0,0,0), 1:(1,0,0), 2:(1,1,0), 3:(0,1,0), 4:(0,0,1)
+        //
+        // Faces (dim=2, Connectivity::getSubPolytopes):
+        //   Local 0 : Quadrilateral (0,1,2,3) base
+        //   Local 1 : Triangle      (0,1,4)
+        //   Local 2 : Triangle      (1,2,4)
+        //   Local 3 : Triangle      (2,3,4)
+        //   Local 4 : Triangle      (3,0,4)
+        // -------------------------------------------------------------------
+        else if constexpr (G == Type::Pyramid)
+        {
+          assert(local < 5 && "Pyramid has 5 faces (Local = 0..4).");
+
+          if (local == 0)
+          {
+            Utility::ForIndex<K + 1>([&](auto jj)
+            {
+              constexpr size_t j = jj.value;
+              Utility::ForIndex<K + 1>([&](auto ii)
+              {
+                constexpr size_t i = ii.value;
+                constexpr size_t qIdx = j * (K + 1) + i;
+                constexpr size_t pIdx = PyramidIndex<K>::getIndex(i, j, 0);
+                codomain[pIdx] = domain[qIdx];
+              });
+            });
+          }
+          else
+          {
+            Utility::ForIndex<TriangleCount>([&](auto aa)
+            {
+              constexpr size_t triIdx = aa.value;
+              const size_t pIdx = PyramidIndex<K>::getSideIndex(local, triIdx);
+              codomain[pIdx] = domain[triIdx];
+            });
           }
         }
 
@@ -1356,6 +1403,329 @@ namespace Rodin::Variational
         {
           if (!used[tId])
             local[tId] = m_size++;
+        }
+
+        break;
+      }
+
+      case Geometry::Polytope::Type::Pyramid:
+      {
+        const auto& mesh = m_mesh.get();
+        const auto& conn = mesh.getConnectivity();
+
+        const auto& inc = conn.getIncidence({ d, d - 1 }, idx);
+        assert(inc.size() == 5);
+
+        using PyrCochain  = Cochain<Geometry::Polytope::Type::Pyramid>;
+        using TriCochain  = Cochain<Geometry::Polytope::Type::Triangle>;
+        using QuadCochain = Cochain<Geometry::Polytope::Type::Quadrilateral>;
+
+        constexpr size_t TriCount  = TriCochain::Count;
+        constexpr size_t QuadCount = QuadCochain::Count;
+        constexpr size_t N1        = K + 1;
+
+        std::array<uint8_t, PyrCochain::Count> used{};
+        used.fill(0);
+
+        const auto& cellVertsIA = conn.getPolytope(d, idx);
+        assert(cellVertsIA.size() == 5);
+        std::array<Index,5> v = {
+          cellVertsIA(0),
+          cellVertsIA(1),
+          cellVertsIA(2),
+          cellVertsIA(3),
+          cellVertsIA(4)
+        };
+
+        auto sort4 = [](std::array<Index,4> a)
+        {
+          std::sort(a.begin(), a.end());
+          return a;
+        };
+
+        auto canonicalTriFaceVerts = [&](size_t lf) -> std::array<Index,3>
+        {
+          switch (lf)
+          {
+            case 1: return { v[0], v[1], v[4] };
+            case 2: return { v[1], v[2], v[4] };
+            case 3: return { v[2], v[3], v[4] };
+            case 4: return { v[3], v[0], v[4] };
+            default:
+              assert(false && "Invalid local triangular face index for pyramid.");
+              return { 0, 0, 0 };
+          }
+        };
+
+        auto canonicalQuadFaceVerts = [&]() -> std::array<Index,4>
+        {
+          return { v[0], v[1], v[2], v[3] };
+        };
+
+        static constexpr int perms3[6][3] =
+        {
+          {0,1,2}, {1,2,0}, {2,0,1},
+          {0,2,1}, {2,1,0}, {1,0,2}
+        };
+
+        static constexpr int perms4[24][4] =
+        {
+          {0,1,2,3}, {0,1,3,2}, {0,2,1,3}, {0,2,3,1},
+          {0,3,1,2}, {0,3,2,1}, {1,0,2,3}, {1,0,3,2},
+          {1,2,0,3}, {1,2,3,0}, {1,3,0,2}, {1,3,2,0},
+          {2,0,1,3}, {2,0,3,1}, {2,1,0,3}, {2,1,3,0},
+          {2,3,0,1}, {2,3,1,0}, {3,0,1,2}, {3,0,2,1},
+          {3,1,0,2}, {3,1,2,0}, {3,2,0,1}, {3,2,1,0}
+        };
+
+        auto getTriFaceEntityAndPerm =
+          [&](size_t lf, std::array<int,3>& canonToTri) -> Index
+        {
+          const auto wanted = canonicalTriFaceVerts(lf);
+
+          for (Index f : inc)
+          {
+            if (conn.getGeometry(d - 1, f) != Geometry::Polytope::Type::Triangle)
+              continue;
+
+            const auto& fVertsIA = conn.getPolytope(d - 1, f);
+            assert(fVertsIA.size() == 3);
+
+            std::array<Index,3> tv = {
+              fVertsIA(0),
+              fVertsIA(1),
+              fVertsIA(2)
+            };
+
+            for (int pi = 0; pi < 6; ++pi)
+            {
+              const int a = perms3[pi][0];
+              const int b = perms3[pi][1];
+              const int c = perms3[pi][2];
+
+              if (tv[a] == wanted[0] &&
+                  tv[b] == wanted[1] &&
+                  tv[c] == wanted[2])
+              {
+                canonToTri[0] = a;
+                canonToTri[1] = b;
+                canonToTri[2] = c;
+                return f;
+              }
+            }
+          }
+
+          assert(false && "Could not match pyramid triangular face to incident triangle entity.");
+          return -1;
+        };
+
+        auto buildCanonicalTriFace =
+          [&](Index fIdx,
+              const std::array<int,3>& canonToTri,
+              IndexArray& faceCanon)
+        {
+          const auto& faceLocal = m_closure[d - 1][fIdx];
+          faceCanon.resize(TriCount);
+
+          std::array<int,3> triToCanon{};
+          for (int p = 0; p < 3; ++p)
+            triToCanon[canonToTri[p]] = p;
+
+          size_t canonIdx = 0;
+          for (size_t j2 = 0; j2 <= K; ++j2)
+          {
+            for (size_t i2 = 0; i2 <= K - j2; ++i2, ++canonIdx)
+            {
+              const size_t a = K - i2 - j2;
+              const size_t b = i2;
+              const size_t c = j2;
+              const size_t abc[3] = { a, b, c };
+
+              const size_t b_t = abc[triToCanon[1]];
+              const size_t c_t = abc[triToCanon[2]];
+
+              const size_t rowStartLoc =
+                  c_t * (K + 1) - (c_t * (c_t - 1)) / 2;
+              const size_t locIdx = rowStartLoc + b_t;
+
+              faceCanon[canonIdx] = faceLocal[locIdx];
+            }
+          }
+        };
+
+        auto getQuadFaceEntityAndPerm =
+          [&](std::array<int,4>& canonToQuad) -> Index
+        {
+          const auto wanted = canonicalQuadFaceVerts();
+          const auto wantedS = sort4(wanted);
+
+          for (Index f : inc)
+          {
+            if (conn.getGeometry(d - 1, f) != Geometry::Polytope::Type::Quadrilateral)
+              continue;
+
+            const auto& fVertsIA = conn.getPolytope(d - 1, f);
+            assert(fVertsIA.size() == 4);
+
+            std::array<Index,4> qv = {
+              fVertsIA(0),
+              fVertsIA(1),
+              fVertsIA(2),
+              fVertsIA(3)
+            };
+
+            if (sort4(qv) != wantedS)
+              continue;
+
+            for (int pi = 0; pi < 24; ++pi)
+            {
+              const int a = perms4[pi][0];
+              const int b = perms4[pi][1];
+              const int c = perms4[pi][2];
+              const int d4 = perms4[pi][3];
+
+              if (qv[a] == wanted[0] &&
+                  qv[b] == wanted[1] &&
+                  qv[c] == wanted[2] &&
+                  qv[d4] == wanted[3])
+              {
+                canonToQuad[0] = a;
+                canonToQuad[1] = b;
+                canonToQuad[2] = c;
+                canonToQuad[3] = d4;
+                return f;
+              }
+            }
+          }
+
+          assert(false && "Could not match pyramid quadrilateral base to incident quadrilateral entity.");
+          return -1;
+        };
+
+        auto vertCornerCoords = [](int vidx) -> std::pair<size_t,size_t>
+        {
+          switch (vidx)
+          {
+            case 0: return { 0, 0 };
+            case 1: return { static_cast<size_t>(K), 0 };
+            case 2: return { static_cast<size_t>(K), static_cast<size_t>(K) };
+            case 3: return { 0, static_cast<size_t>(K) };
+            default:
+              assert(false && "Invalid quad vertex index for corner coords.");
+              return { 0, 0 };
+          }
+        };
+
+        auto applyTransform = [](int tid, size_t i, size_t j) -> std::pair<size_t,size_t>
+        {
+          switch (tid)
+          {
+            case 0: return { i, j };
+            case 1: return { j, static_cast<size_t>(K) - i };
+            case 2: return { static_cast<size_t>(K) - i, static_cast<size_t>(K) - j };
+            case 3: return { static_cast<size_t>(K) - j, i };
+            case 4: return { i, static_cast<size_t>(K) - j };
+            case 5: return { static_cast<size_t>(K) - i, j };
+            case 6: return { j, i };
+            case 7: return { static_cast<size_t>(K) - j, static_cast<size_t>(K) - i };
+            default:
+              assert(false && "Invalid transform id.");
+              return { i, j };
+          }
+        };
+
+        auto buildCanonicalQuadFace =
+          [&](Index fIdx,
+              const std::array<int,4>& canonToQuad,
+              IndexArray& faceCanon)
+        {
+          const IndexArray& faceLocal = m_closure[d - 1][fIdx];
+          assert(faceLocal.size() == QuadCount);
+
+          faceCanon.resize(QuadCount);
+
+          std::pair<size_t,size_t> oldCorners[4];
+          for (int kCorner = 0; kCorner < 4; ++kCorner)
+            oldCorners[kCorner] = vertCornerCoords(canonToQuad[kCorner]);
+
+          int chosenT = -1;
+          for (int tid = 0; tid < 8; ++tid)
+          {
+            auto p0 = applyTransform(tid, 0, 0);
+            auto p1 = applyTransform(tid, static_cast<size_t>(K), 0);
+            auto p2 = applyTransform(tid, static_cast<size_t>(K), static_cast<size_t>(K));
+            auto p3 = applyTransform(tid, 0, static_cast<size_t>(K));
+
+            if (p0 == oldCorners[0] &&
+                p1 == oldCorners[1] &&
+                p2 == oldCorners[2] &&
+                p3 == oldCorners[3])
+            {
+              chosenT = tid;
+              break;
+            }
+          }
+
+          assert(chosenT >= 0 && "Could not determine pyramid quad base transform.");
+
+          for (size_t j = 0; j < N1; ++j)
+          {
+            for (size_t i = 0; i < N1; ++i)
+            {
+              const size_t qCanon = j * N1 + i;
+              auto pOld = applyTransform(chosenT, i, j);
+              const size_t qOld = pOld.second * N1 + pOld.first;
+              faceCanon[qCanon] = faceLocal[qOld];
+            }
+          }
+        };
+
+        {
+          std::array<int,4> canonToQuad{};
+          const Index f = getQuadFaceEntityAndPerm(canonToQuad);
+          this->getClosure(d - 1, f);
+
+          IndexArray faceCanon;
+          buildCanonicalQuadFace(f, canonToQuad, faceCanon);
+
+          Utility::ForIndex<N1>([&](auto jj)
+          {
+            constexpr size_t j = jj.value;
+            Utility::ForIndex<N1>([&](auto ii)
+            {
+              constexpr size_t i = ii.value;
+              constexpr size_t qIdx = j * N1 + i;
+              constexpr size_t pIdx = PyramidIndex<K>::getIndex(i, j, 0);
+              local[pIdx] = faceCanon[qIdx];
+              used[pIdx] = 1;
+            });
+          });
+        }
+
+        for (size_t lf = 1; lf <= 4; ++lf)
+        {
+          std::array<int,3> canonToTri{};
+          const Index f = getTriFaceEntityAndPerm(lf, canonToTri);
+          this->getClosure(d - 1, f);
+
+          IndexArray faceCanon;
+          buildCanonicalTriFace(f, canonToTri, faceCanon);
+
+          for (size_t triIdx = 0; triIdx < TriCount; ++triIdx)
+          {
+            const size_t pIdx = PyramidIndex<K>::getSideIndex(lf, triIdx);
+            if (!used[pIdx])
+            {
+              local[pIdx] = faceCanon[triIdx];
+              used[pIdx] = 1;
+            }
+          }
+        }
+
+        for (size_t pId = 0; pId < PyrCochain::Count; ++pId)
+        {
+          if (!used[pId])
+            local[pId] = m_size++;
         }
 
         break;
@@ -2175,6 +2545,12 @@ namespace Rodin::Variational
           {
             m_closure[d][i].resize(
               Cochain<Geometry::Polytope::Type::Tetrahedron>::Count);
+            break;
+          }
+          case Geometry::Polytope::Type::Pyramid:
+          {
+            m_closure[d][i].resize(
+              Cochain<Geometry::Polytope::Type::Pyramid>::Count);
             break;
           }
           case Geometry::Polytope::Type::Wedge:

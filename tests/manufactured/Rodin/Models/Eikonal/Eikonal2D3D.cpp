@@ -117,7 +117,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     fmm.seed(interface);
     fmm.solve();
 
-    const Real tol = 9e-2;
+    const Real tol = GetParam() == Polytope::Type::Wedge ? 1.1e-1 : 9e-2;
     checkDistance(mesh, u, tol);
   }
 
@@ -132,6 +132,9 @@ namespace Rodin::Tests::Manufactured::Eikonal
     PolytopeCoverage3D,
     Eikonal3DTest,
     ::testing::Values(
-      Polytope::Type::Tetrahedron)
+      Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid,
+      Polytope::Type::Wedge)
   );
 }

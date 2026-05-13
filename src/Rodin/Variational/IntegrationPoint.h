@@ -34,6 +34,10 @@ namespace Rodin::Variational
   class IntegrationPoint
   {
     public:
+      IntegrationPoint(const Geometry::Point& p)
+        : m_p(p), m_qf(nullptr), m_qp(0)
+      {}
+
       /**
        * @brief Constructs a quadrature-associated integration point.
        * @param[in] p Geometric point (usually built from quadrature sample coordinates)
@@ -47,20 +51,6 @@ namespace Rodin::Variational
           const QF::QuadratureFormulaBase* qf,
           size_t qp)
         : m_p(p), m_qf(qf), m_qp(qp)
-      {}
-
-      /**
-       * @brief Constructs a pointwise integration point.
-       *
-       * This constructor intentionally leaves the quadrature formula pointer
-       * null. Consumers should treat this as direct point evaluation, using
-       * the reference coordinates carried by @p p instead of quadrature
-       * tabulation.
-       *
-       * @param[in] p Geometric point to evaluate at
-       */
-      IntegrationPoint(const Geometry::Point& p)
-        : m_p(p), m_qf(nullptr), m_qp(0)
       {}
 
       /**

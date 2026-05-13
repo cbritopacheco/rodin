@@ -109,8 +109,9 @@ namespace Rodin::Tests::Manufactured::Stokes3D
     PolytopeCoverage3D,
     Manufactured_Stokes3D_Test_12,
     ::testing::Values(
-      // Polytope::Type::Tetrahedron,
-      // Polytope::Type::Hexahedron,
+      Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid,
       Polytope::Type::Wedge
       )
   );

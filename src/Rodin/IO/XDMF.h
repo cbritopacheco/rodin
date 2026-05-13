@@ -166,6 +166,7 @@ namespace Rodin::IO
           case PT::Triangle:      return Topology::TRIANGLE;
           case PT::Quadrilateral: return Topology::QUADRILATERAL;
           case PT::Tetrahedron:   return Topology::TETRAHEDRON;
+          case PT::Pyramid:       return Topology::PYRAMID;
           case PT::Wedge:         return Topology::WEDGE;
           case PT::Hexahedron:    return Topology::HEXAHEDRON;
         }
@@ -190,10 +191,10 @@ namespace Rodin::IO
           case Topology::TRIANGLE:        return PT::Triangle;
           case Topology::QUADRILATERAL:   return PT::Quadrilateral;
           case Topology::TETRAHEDRON:     return PT::Tetrahedron;
+          case Topology::PYRAMID:         return PT::Pyramid;
           case Topology::WEDGE:           return PT::Wedge;
           case Topology::HEXAHEDRON:      return PT::Hexahedron;
 
-          case Topology::PYRAMID:
           case Topology::EDGE_3:
           case Topology::QUADRILATERAL_9:
           case Topology::TRIANGLE_6:
