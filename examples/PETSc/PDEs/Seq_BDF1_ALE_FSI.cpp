@@ -857,14 +857,11 @@ int main(int argc, char** argv)
       TrialFunction du(solidVh);
       TestFunction  w(solidVh);
 
-      Solid::MaterialTangent tangent(law, du, w);
-      tangent.setDisplacement(solidDisplacement);
+      Solid::MaterialTangent tangent(law, du, w, solidDisplacement);
 
-      Solid::InternalForce internal(law, w);
-      internal.setDisplacement(solidDisplacement);
+      Solid::InternalForce internal(law, w, solidDisplacement);
 
-      Solid::InternalForce internalOld(law, w);
-      internalOld.setDisplacement(solidDisplacementOld);
+      Solid::InternalForce internalOld(law, w, solidDisplacementOld);
 
       /*
        * Transfer fluid traction to the solid interface.

@@ -39,25 +39,26 @@
  *
  *   du = deta / dt  on Gamma_FSI.
  *
- * This requires the variational identification support from PR #276:
+ * This uses Rodin's affine identification boundary condition:
  *
- *   DirichletBC(du, (1.0 / dt) * deta).on(Boundary::FSI)
+ *   DirichletBC(du,
+ *               (1.0 / dt) * deta,
+ *               (1.0 / dt) * etaState - uState)
+ *     .on(Boundary::FSI)
  *
- * Because this is a homogeneous correction constraint, the initial Newton
- * guess at each time step is chosen so that
+ * which is the affine Newton row
  *
- *   uState = etaState / dt
+ *   du - deta / dt = etaState / dt - uState.
  *
- * already holds on Gamma_FSI.  The correction constraint then preserves the
- * nonlinear kinematic relation.
+ * This is the exact correction equation for the nonlinear kinematic residual
+ * uState - etaState / dt = 0 on Gamma_FSI.
  *
  * Notes:
  *
  * 1. This example assumes Integral(...).over(Attribute) and solid form
  *    restrictions such as solidTangent.over(Volume::Solid) are available.
- *    If Solid::MaterialTangent / Solid::InternalForce do not currently support
- *    .over(attr), add domain restriction to those forms or assemble them on a
- *    solid submesh.
+ *    The solid integrators evaluate the current displacement through Rodin's
+ *    Jacobian(GridFunction) infrastructure, so the state can be PETSc-backed.
  *
  * 2. DirichletBC identification is attribute-driven here: without `.on(...)`
  *    it scans the exterior boundary, while `.on(Boundary::FSI)` selects the
@@ -67,12 +68,27 @@
  *    physical equations are restricted to the fluid.  The small inactive-region
  *    regularization terms avoid null rows in the solid part.  A cleaner future
  *    implementation should use subdomain-restricted spaces.
+ *
+ * 4. This is a moving-mesh ALE example: the mesh coordinates are reset to the
+ *    reference strip, moved by the current total displacement dState, and
+ *    flushed before solving and before XDMF output.  By default the geometry is
+ *    frozen during a Newton solve, because the hand Jacobian below does not
+ *    include shape derivatives of quadrature weights, basis gradients, or
+ *    normals with respect to the mesh displacement.  Passing
+ *    `-fsi_move_mesh_during_newton true` updates the mesh on every SNES state
+ *    update, but then the method is intentionally a quasi-Newton method unless
+ *    those geometric derivative terms are added.
+ *
+ *    In post-processing, do not warp the transient mesh again by the
+ *    displacement field unless you intentionally want an exaggerated view.
  */
 
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <cstddef>
 #include <limits>
+#include <vector>
 
 #include <petscsys.h>
 
@@ -204,6 +220,42 @@ namespace
     mesh.flush();
   }
 
+  static void saveReferenceVertices(
+      const LocalMesh& mesh,
+      std::vector<Math::SpatialPoint>& vertices)
+  {
+    vertices.resize(mesh.getVertexCount());
+
+    for (auto it = mesh.getVertex(); it; ++it)
+      vertices[it->getIndex()] = mesh.getVertexCoordinates(it->getIndex());
+  }
+
+  template <class FESType, class GridFunctionType>
+  static void moveMeshWithVertexDisplacement(
+      LocalMesh& mesh,
+      const std::vector<Math::SpatialPoint>& referenceVertices,
+      const FESType& displacementFES,
+      const GridFunctionType& displacement)
+  {
+    assert(mesh.getVertexCount() == referenceVertices.size());
+    assert(displacementFES.getVectorDimension() >= mesh.getSpaceDimension());
+
+    const size_t dim = mesh.getSpaceDimension();
+
+    for (auto it = mesh.getVertex(); it; ++it)
+    {
+      const Index vertex = it->getIndex();
+      auto x = referenceVertices[vertex];
+
+      for (Index c = 0; c < static_cast<Index>(dim); ++c)
+        x(c) += displacement[displacementFES.getGlobalIndex({ 0, vertex }, c)];
+
+      mesh.setVertexCoordinates(vertex, x);
+    }
+
+    mesh.flush();
+  }
+
   static LocalMesh makeFSIMesh(size_t nx, size_t nfy, size_t nsy, Real L, Real Hf, Real Hs)
   {
     Mesh mesh;
@@ -304,6 +356,7 @@ int main(int argc, char** argv)
   PetscReal solidDensityOpt = 5.0e-1;
   PetscReal solidRayleighAlphaOpt = 5.0e-2;
   PetscReal inactiveOpt = 1e-8;
+  PetscBool moveMeshDuringNewtonOpt = PETSC_FALSE;
 
   PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_nx", &nxOpt, PETSC_NULLPTR);
   PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-fsi_fluid_ny", &fluidNyOpt, PETSC_NULLPTR);
@@ -330,6 +383,8 @@ int main(int argc, char** argv)
       "-fsi_solid_rayleigh_alpha", &solidRayleighAlphaOpt, PETSC_NULLPTR);
   PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
       "-fsi_inactive_regularization", &inactiveOpt, PETSC_NULLPTR);
+  PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR,
+      "-fsi_move_mesh_during_newton", &moveMeshDuringNewtonOpt, PETSC_NULLPTR);
 
   const size_t nx = static_cast<size_t>(std::max<PetscInt>(3, nxOpt));
   const size_t nfy = static_cast<size_t>(std::max<PetscInt>(2, fluidNyOpt));
@@ -344,6 +399,10 @@ int main(int argc, char** argv)
 
   LocalMesh mesh = makeFSIMesh(nx, nfy, nsy, L, Hf, Hs);
   const size_t dim = mesh.getSpaceDimension();
+  const bool moveMeshDuringNewton = (moveMeshDuringNewtonOpt == PETSC_TRUE);
+
+  std::vector<Math::SpatialPoint> referenceVertices;
+  saveReferenceVertices(mesh, referenceVertices);
 
   /* Global spaces.
    *
@@ -385,6 +444,11 @@ int main(int argc, char** argv)
   PETSc::Variational::GridFunction meshVelocity(dh);
   PETSc::Variational::GridFunction inletVelocity(uh);
 
+  auto moveMeshToCurrentDisplacement = [&]()
+  {
+    moveMeshWithVertexDisplacement(mesh, referenceVertices, dh, dState);
+  };
+
   uState.setName("FluidVelocity");
   pState.setName("FluidPressure");
   lambdaState.setName("PressureGauge");
@@ -406,7 +470,7 @@ int main(int argc, char** argv)
 
   IO::XDMF xdmf("out/Seq_BDF1_Monolithic_ALE_FSI");
   auto grid = xdmf.grid("FSI");
-  grid.setMesh(mesh, IO::XDMF::MeshPolicy::Static);
+  grid.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
   grid.add("velocity", uState);
   grid.add("pressure", pState);
   grid.add("displacement", dState);
@@ -427,11 +491,9 @@ int main(int argc, char** argv)
 
   Solid::NeoHookean law(solidLambda, solidMu);
 
-  Solid::MaterialTangent solidTangent(law, deta, z);
-  solidTangent.setDisplacement(dState);
+  Solid::MaterialTangent solidTangent(law, deta, z, dState);
 
-  Solid::InternalForce solidInternal(law, z);
-  solidInternal.setDisplacement(dState);
+  Solid::InternalForce solidInternal(law, z, dState);
 
   auto n = BoundaryNormal(mesh);
 
@@ -530,7 +592,10 @@ int main(int argc, char** argv)
       + DirichletBC(du, -uState).on(Boundary::FluidWall)
       + DirichletBC(deta, -etaState).on(Boundary::Inlet, Boundary::Outlet, Boundary::FluidWall)
       + DirichletBC(deta, -etaState).on(Boundary::SolidClampLeft, Boundary::SolidClampRight)
-      + DirichletBC(du, (1.0 / dt) * deta).on(Boundary::FSI);
+      + DirichletBC(
+          du,
+          (1.0 / dt) * deta,
+          (1.0 / dt) * etaState - uState).on(Boundary::FSI);
 
   fsi.assemble().setFieldSplits();
 
@@ -553,6 +618,8 @@ int main(int argc, char** argv)
 
     dState = dOld + etaState;
     meshVelocity = (1.0 / dt) * etaState;
+    if (moveMeshDuringNewton)
+      moveMeshToCurrentDisplacement();
   });
 
   Real t = 0.0;
@@ -580,10 +647,9 @@ int main(int argc, char** argv)
 
     /* Initial Newton guess.
      *
-     * The homogeneous correction constraint du = deta / dt preserves the
-     * nonlinear relation only if the initial state already satisfies it on the
-     * interface.  Use etaState = dt * uOld as a simple consistent interface
-     * guess, then Newton corrections preserve du = deta / dt.
+     * Use etaState = dt * uOld as a simple interface-consistent warm start.
+     * The affine FSI correction row below still drives the nonlinear
+     * kinematic residual to zero if this guess is not exact.
      */
     uState = uOld;
     pState = pOld;
@@ -591,6 +657,7 @@ int main(int argc, char** argv)
     etaState = dt * uOld;
     dState = dOld + etaState;
     meshVelocity = (1.0 / dt) * etaState;
+    moveMeshToCurrentDisplacement();
 
     Alert::Info()
       << "Monolithic BDF1 ALE FSI step " << step << " / " << Nt
@@ -609,6 +676,7 @@ int main(int argc, char** argv)
     etaOld.setData(etaState.getData());
     dOld.setData(dState.getData());
 
+    moveMeshToCurrentDisplacement();
     xdmf.write(t);
     xdmf.flush();
   }

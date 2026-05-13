@@ -38,6 +38,14 @@
  *    both sides of the constraint involve degrees of freedom that are still
  *    unknown at solve time, not pre-evaluated values.
  *
+ *    The optional three-argument spelling `DirichletBC(u, A(v), d)` keeps the
+ *    same linear unknown-dependent part and adds a known defect:
+ *    @f[
+ *      u(x) \;=\; A(v)(x) + d(x), \qquad x \in \Gamma_D.
+ *    @f]
+ *    This is the form used for exact Newton correction rows such as
+ *    @f$ \delta u = A(\delta v) + d @f$.
+ *
  * # Mathematical model
  *
  * Let @f$ V_h^u @f$ have basis @f$ \{\varphi_i^u\}_{i=1}^{N_u} @f$ and dual
@@ -61,17 +69,22 @@
  * **Identification.** For each slave DOF @f$ s @f$ on @f$ \Gamma_D @f$ and
  * with @f$ A @f$ linear,
  * @f[
- *   \ell_s^u(u) \;=\; \ell_s^u(A(v))
+ *   \ell_s^u(u) \;=\; \ell_s^u(A(v)) + \ell_s^u(d)
  *               \;=\; \sum_j \ell_s^u\!\bigl(A(\varphi_j^v)\bigr)\, v_j
- *               \;=\; \sum_j C_{sj}\, v_j,
+ *                    + d_s
+ *               \;=\; \sum_j C_{sj}\, v_j + d_s,
  * @f]
  * with the constraint coefficients
  * @f[
- *   C_{sj} \;:=\; \ell_s^u\!\bigl(A(\varphi_j^v)\bigr).
+ *   C_{sj} \;:=\; \ell_s^u\!\bigl(A(\varphi_j^v)\bigr),
+ *   \qquad
+ *   d_s \;:=\; \ell_s^u(d).
  * @f]
  * The assembled object is a map @f$ s \mapsto (\{j_k\}, \{C_{s,j_k}\}) @f$
  * over the non-zero coefficients (the
- * @ref Rodin::Variational::DirichletBCBase::IdentifiedDOFs alternative).
+ * @ref Rodin::Variational::DirichletBCBase::IdentifiedDOFs alternative), plus
+ * an optional defect map for the known @f$ d_s @f$ values. The two-argument
+ * spelling is exactly the homogeneous case @f$ d\equiv 0 @f$.
  *
  * For Lagrange + same FES + @f$ A=\mathrm{id} @f$: the dual property gives
  * @f$ C_{sj}=\delta_{sj} @f$, so each slave maps to the same DOF index of
@@ -138,16 +151,22 @@
  *     b_r\mathrel{+}= \alpha_r f
  *     \quad\forall(r,\alpha_r)\in\operatorname{expand}(i).
  *   @f]
- *   This is the variational transformation
+ *   For homogeneous identifications this is the variational transformation
  *   @f[
  *     A \leftarrow T^T A T,\qquad b \leftarrow T^T b.
+ *   @f]
+ *   For affine identifications @f$ x = T\hat{x}+\hat{d} @f$, the known
+ *   defect also shifts the RHS:
+ *   @f[
+ *     A \leftarrow T^T A T,\qquad
+ *     b \leftarrow T^T\!\left(b - A\hat{d}\right).
  *   @f]
  *   If slave DOFs remain in the unknown vector, reconstruction rows are then
  *   written as
  *   @f[
  *     A_{g_s,g_s}\leftarrow 1,\quad
  *     A_{g_s,g_{m_k}}\leftarrow -c_k,\quad
- *     b_{g_s}\leftarrow 0.
+ *     b_{g_s}\leftarrow d_{g_s}.
  *   @f]
  *
  * Identification mode is not zero-pinning, not row-only replacement, and not
@@ -186,12 +205,16 @@
  *
  * // Identification: scalar u equal to vector v's x-component
  * auto bc = DirichletBC(u, v.x()).on(1);
+ *
+ * // Affine identification: u = A(v) + d
+ * auto bc = DirichletBC(u, R * v, d).on(1);
  * @endcode
  */
 #ifndef RODIN_VARIATIONAL_DIRICHLETBC_H
 #define RODIN_VARIATIONAL_DIRICHLETBC_H
 
 #include <set>
+#include <memory>
 #include <variant>
 
 #include "Rodin/Utility.h"
@@ -276,6 +299,19 @@ namespace Rodin::Variational
         IndexMap<std::pair<IndexArray, Math::Vector<ScalarType>>>;
 
       /**
+       * @brief Optional defects for affine identification rows.
+       *
+       * For an affine identification constraint
+       * @f[
+       *   u_s = \sum_j C_{sj}\,v_j + d_s,
+       * @f]
+       * this map stores @f$ d_s @f$ using the same slave DOF numbering as
+       * @ref IdentifiedDOFs. Missing entries mean @f$ d_s = 0 @f$, which is
+       * the historical homogeneous `DirichletBC(u, A(v))` behavior.
+       */
+      using IdentificationValues = IndexMap<ScalarType>;
+
+      /**
        * @brief Variant DOF type covering both Dirichlet semantics.
        *
        * The active alternative depends on which subclass produced it: a
@@ -325,6 +361,19 @@ namespace Rodin::Variational
        * constraints.
        */
       virtual Optional<Identifiable::UUID> getValueUUID() const { return {}; }
+
+      /**
+       * @brief Returns optional defects for affine identification BCs.
+       *
+       * Value-prescribing BCs and homogeneous identification BCs return an
+       * empty map. Affine identification BCs override this to provide the
+       * known additive defect value for each slave row.
+       */
+      virtual const IdentificationValues& getIdentificationValues() const
+      {
+        static const IdentificationValues empty;
+        return empty;
+      }
 
       /**
        * @brief Creates a polymorphic copy of this BC.
@@ -572,15 +621,17 @@ namespace Rodin::Variational
 
   /**
    * @ingroup DirichletBCSpecializations
-   * @brief Identification Dirichlet boundary condition, @f$ u = A(v) @f$.
+   * @brief Identification Dirichlet boundary condition,
+   *        @f$ u = A(v) @f$ or @f$ u = A(v) + d @f$.
    *
    * Imposes a *linear-in-DOFs* identification of the slave trial function
    * @f$ u\in V_h^u @f$ with a shape-function expression @f$ A(v) @f$ over
    * @f$ \Gamma_D \subset \mathcal{B}_h @f$:
    * @f[
-   *   u(x) \;=\; A(v)(x), \qquad x\in\Gamma_D,
+   *   u(x) \;=\; A(v)(x) + d(x), \qquad x\in\Gamma_D,
    * @f]
-   * where @f$ v\in V_h^v @f$ is another (trial) shape function and
+   * with @f$ d\equiv 0 @f$ in the two-argument constructor. Here
+   * @f$ v\in V_h^v @f$ is another (trial) shape function and
    * @f$ A @f$ is any operator producing a @ref ShapeFunctionBase
    * (e.g. the identity @f$ A=\mathrm{id} @f$, a component @f$ A(v)=v_x @f$,
    * a left product @f$ A(v)=f\,v @f$, a matrix product @f$ A(v)=R\,v @f$,
@@ -598,22 +649,25 @@ namespace Rodin::Variational
    * @f]
    *
    * Applying the slave DOF functional @f$ \ell_s^u @f$ on both sides of
-   * @f$ u = A(v) @f$ yields the constraint row for each slave DOF
+   * @f$ u = A(v) + d @f$ yields the constraint row for each slave DOF
    * @f$ s @f$ on @f$ \Gamma_D @f$:
    * @f[
    *   \boxed{\;
-   *     u_s \;=\; \ell_s^u(A(v))
-   *           \;=\; \sum_j C_{sj}\, v_j,
+   *     u_s \;=\; \ell_s^u(A(v)) + \ell_s^u(d)
+   *           \;=\; \sum_j C_{sj}\, v_j + d_s,
    *     \quad\text{where}\quad
-   *     C_{sj} \;:=\; \ell_s^u\!\bigl(A(\varphi_j^v)\bigr).
+   *     C_{sj} \;:=\; \ell_s^u\!\bigl(A(\varphi_j^v)\bigr),
+   *     \quad d_s := \ell_s^u(d).
    *   \;}
    * @f]
    *
-   * The assembler stores the per-slave row as the
+   * The assembler stores the per-slave linear row as the
    * @ref DirichletBCBase::IdentifiedDOFs alternative — a sparse list of
    * `(master DOF index, coefficient)` pairs, with strict @f$ C_{sj}=0 @f$
    * pruning so that Lagrange-dual sparsity (e.g. @f$ \delta_{sj} @f$ for
-   * @f$ A=\mathrm{id} @f$ on the same FES) is preserved bit-for-bit.
+   * @f$ A=\mathrm{id} @f$ on the same FES) is preserved bit-for-bit. If a
+   * defect @f$ d @f$ is provided, its slave DOF values @f$ d_s @f$ are stored
+   * separately in @ref DirichletBCBase::IdentificationValues.
    *
    * # Concrete examples
    *
@@ -687,15 +741,22 @@ namespace Rodin::Variational
    * For each slave global index @f$ g_s @f$ with masters
    * @f$ \{g_{m_k}\} @f$ and coefficients @f$ \{c_k\} @f$, problem assembly
    * distributes every matrix and vector contribution through the expansion
-   * map.  This implements
+   * map.  In the homogeneous case this implements
    * @f[
    *   A \leftarrow T^T A T,\qquad b \leftarrow T^T b,
    * @f]
+   * while an affine defect @f$ d @f$ uses
+   * @f[
+   *   b \leftarrow T^T(b - A\hat{d}).
+   * @f]
+   * Equivalently, every matrix column contribution through an identified slave
+   * subtracts the known value @f$ A_{:,g_s}d_{g_s} @f$ from the assembled RHS.
    * then writes reconstruction rows
    * @f[
-   *   u_{g_s} - \sum_k c_k u_{g_{m_k}} = 0
+   *   u_{g_s} - \sum_k c_k u_{g_{m_k}} = d_{g_s}
    * @f]
-   * when slave DOFs remain in the unknown vector.  This is a variational
+   * when slave DOFs remain in the unknown vector, with @f$ d_{g_s}=0 @f$ for
+   * homogeneous `DirichletBC(u, A(v))`.  This is a variational
    * identification constraint; it is not zero-pinning, row-only replacement,
    * or column-only redirection.
    *
@@ -734,6 +795,8 @@ namespace Rodin::Variational
       /// Identified-DOFs alternative populated by this specialization
       using IdentifiedDOFs = typename Parent::IdentifiedDOFs;
 
+      using IdentificationValues = typename Parent::IdentificationValues;
+
       /// Variant DOFs type
       using DOFs = typename Parent::DOFs;
 
@@ -752,8 +815,46 @@ namespace Rodin::Variational
       using AssemblyType =
         DefaultAssemblyType;
 
+      class DefectBase
+      {
+        public:
+          virtual ~DefectBase() = default;
+
+          virtual FESRangeType getValue(const Geometry::Point& p) const = 0;
+
+          virtual DefectBase* copy() const noexcept = 0;
+      };
+
+      template <class DefectDerived>
+      class Defect final : public DefectBase
+      {
+        public:
+          using FunctionType = FunctionBase<DefectDerived>;
+
+          explicit Defect(const FunctionType& value)
+            : m_value(value.copy())
+          {}
+
+          Defect(const Defect& other)
+            : m_value(other.m_value->copy())
+          {}
+
+          FESRangeType getValue(const Geometry::Point& p) const override
+          {
+            return (*m_value)(p);
+          }
+
+          Defect* copy() const noexcept override
+          {
+            return new Defect(*this);
+          }
+
+        private:
+          std::unique_ptr<FunctionType> m_value;
+      };
+
       /**
-       * @brief Constructs the identification Dirichlet BC.
+       * @brief Constructs the homogeneous identification Dirichlet BC.
        * @param[in] u Slave trial function
        * @param[in] v Right-hand-side shape function expression @f$ A(v) @f$
        */
@@ -761,13 +862,41 @@ namespace Rodin::Variational
         : m_u(u), m_v(v.copy())
       {}
 
+      /**
+       * @brief Constructs the affine identification Dirichlet BC.
+       *
+       * The condition is
+       * @f[
+       *   u = A(v) + d
+       * @f]
+       * where @f$ A(v) @f$ is the shape-function expression used to build the
+       * slave/master coefficient rows and @f$ d @f$ is a known function
+       * evaluated by the slave DOF functional. This is useful for Newton
+       * correction rows such as @f$ \delta u = A(\delta v) + d @f$.
+       *
+       * @param[in] u Slave trial function
+       * @param[in] v Right-hand-side shape function expression @f$ A(v) @f$
+       * @param[in] defect Known additive defect @f$ d @f$
+       */
+      template <class DefectDerived>
+      DirichletBC(
+          const OperandType& u,
+          const ValueType& v,
+          const FunctionBase<DefectDerived>& defect)
+        : m_u(u),
+          m_v(v.copy()),
+          m_defect(std::make_unique<Defect<DefectDerived>>(defect))
+      {}
+
       /// Copy constructor
       DirichletBC(const DirichletBC& other)
         : Parent(other),
           m_u(other.m_u),
           m_v(other.m_v->copy()),
+          m_defect(other.m_defect ? other.m_defect->copy() : nullptr),
           m_essBdr(other.m_essBdr),
           m_dofs(other.m_dofs),
+          m_values(other.m_values),
           m_assembly(other.m_assembly)
       {}
 
@@ -776,8 +905,10 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
           m_v(std::move(other.m_v)),
+          m_defect(std::move(other.m_defect)),
           m_essBdr(std::move(other.m_essBdr)),
           m_dofs(std::move(other.m_dofs)),
+          m_values(std::move(other.m_values)),
           m_assembly(std::move(other.m_assembly))
       {}
 
@@ -826,7 +957,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Computes the constraint rows
-       *        @f$ u_s = \sum_j C_{sj}\,v_j @f$ for every slave DOF on
+       *        @f$ u_s = \sum_j C_{sj}\,v_j + d_s @f$ for every slave DOF on
        *        @f$ \Gamma_D @f$.
        *
        * Iterates exterior boundary faces by default. When attributes are
@@ -849,9 +980,11 @@ namespace Rodin::Variational
        * @ref ShapeFunctionBase::setIntegrationPoint with the active
        * quadrature formula and quadrature index.
        *
-       * Strict @f$ C_{sj}\neq 0 @f$ pruning is applied; the result is the
+       * Strict @f$ C_{sj}\neq 0 @f$ pruning is applied; the linear part is the
        * @ref DirichletBCBase::IdentifiedDOFs alternative of the variant
-       * returned by @ref getDOFs.
+       * returned by @ref getDOFs. If the three-argument constructor was used,
+       * the same slave linear form is applied to the known defect and exposed
+       * through @ref getIdentificationValues.
        */
       void assemble() override
       {
@@ -859,6 +992,44 @@ namespace Rodin::Variational
           m_dofs = IdentifiedDOFs{};
         m_assembly.execute(
             std::get<IdentifiedDOFs>(m_dofs), { m_u.get(), *m_v, m_essBdr });
+
+        m_values.clear();
+        if (m_defect)
+        {
+          const auto& fes = m_u.get().getFiniteElementSpace();
+          const auto& mesh = fes.getMesh();
+          const size_t faceCount = mesh.getFaceCount();
+          const size_t faceDim = mesh.getDimension() - 1;
+
+          for (Index i = 0; i < faceCount; i++)
+          {
+            if (m_essBdr.empty() && !mesh.isBoundary(i))
+              continue;
+
+            if (!m_essBdr.empty())
+            {
+              const auto a = mesh.getAttribute(faceDim, i);
+              if (!a || !m_essBdr.count(*a))
+                continue;
+            }
+
+            const auto& fe = fes.getFiniteElement(faceDim, i);
+            const auto mapping = fes.getPullback(
+                { faceDim, i },
+                [defect = m_defect.get()](const Geometry::Point& p)
+                {
+                  return defect->getValue(p);
+                });
+
+            for (Index local = 0; local < fe.getCount(); local++)
+            {
+              const Index global = fes.getGlobalIndex({ faceDim, i }, local);
+              auto find = m_values.find(global);
+              if (find == m_values.end())
+                m_values.insert(find, std::pair{ global, fe.getLinearForm(local)(mapping) });
+            }
+          }
+        }
       }
 
       bool isComponent() const override
@@ -903,6 +1074,11 @@ namespace Rodin::Variational
         return m_v->getLeaf().getUUID();
       }
 
+      const IdentificationValues& getIdentificationValues() const override
+      {
+        return m_values;
+      }
+
       const Assembly::AssemblyBase<IdentifiedDOFs, DirichletBC>& getAssembly() const
       {
         return m_assembly;
@@ -916,8 +1092,10 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const OperandType> m_u;
       std::unique_ptr<ValueType> m_v;
+      std::unique_ptr<DefectBase> m_defect;
       FlatSet<Geometry::Attribute> m_essBdr;
       DOFs m_dofs{IdentifiedDOFs{}};
+      IdentificationValues m_values;
       AssemblyType m_assembly;
   };
 
@@ -929,6 +1107,15 @@ namespace Rodin::Variational
             class Derived2, class FES2, ShapeFunctionSpaceType Sp>
   DirichletBC(const TrialFunction<Solution, FES1>&,
               const ShapeFunctionBase<Derived2, FES2, Sp>&)
+    -> DirichletBC<TrialFunction<Solution, FES1>,
+                   ShapeFunctionBase<Derived2, FES2, Sp>>;
+
+  template <class Solution, class FES1,
+            class Derived2, class FES2, ShapeFunctionSpaceType Sp,
+            class DefectDerived>
+  DirichletBC(const TrialFunction<Solution, FES1>&,
+              const ShapeFunctionBase<Derived2, FES2, Sp>&,
+              const FunctionBase<DefectDerived>&)
     -> DirichletBC<TrialFunction<Solution, FES1>,
                    ShapeFunctionBase<Derived2, FES2, Sp>>;
 }

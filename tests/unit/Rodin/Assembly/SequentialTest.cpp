@@ -575,6 +575,61 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(b.coeff(n + 1), gamma * 11.0, 1e-14);
   }
 
+  TEST(Assembly_Problem_Identification, AffineIdentificationWritesDefectRows)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    mesh.getConnectivity().compute(1, 2);
+
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TestFunction  v(fes);
+    TrialFunction eta(fes);
+    TestFunction  zeta(fes);
+
+    constexpr Real gamma = 2.0;
+    constexpr Real defect = 3.0;
+    const Index n = static_cast<Index>(fes.getSize());
+
+    BilinearForm uu(u, v);
+    uu.getOperator().resize(n, n);
+    std::vector<Eigen::Triplet<Real>> triplets;
+    for (Index i = 0; i < n; i++)
+      triplets.emplace_back(i, i, 1.0);
+    uu.getOperator().setFromTriplets(triplets.begin(), triplets.end());
+
+    LinearForm zero(v);
+    zero.getVector().resize(n);
+    zero.getVector().setZero();
+
+    Problem problem(u, v, eta, zeta);
+    problem = uu
+            + DirichletBC(
+                u,
+                RealFunction(gamma) * eta,
+                RealFunction(defect))
+            - zero;
+    problem.assemble();
+
+    const auto& A = problem.getLinearSystem().getOperator();
+    const auto& b = problem.getLinearSystem().getVector();
+    ASSERT_EQ(A.rows(), static_cast<Eigen::Index>(2 * n));
+    ASSERT_EQ(A.cols(), static_cast<Eigen::Index>(2 * n));
+    ASSERT_EQ(b.size(), static_cast<Eigen::Index>(2 * n));
+
+    for (Index i = 0; i < n; i++)
+    {
+      EXPECT_NEAR(b.coeff(i), defect, 1e-14) << "row " << i;
+      EXPECT_NEAR(A.coeff(i, i), 1.0, 1e-14)
+        << "entry (" << i << ", " << i << ")";
+      EXPECT_NEAR(A.coeff(i, n + i), -gamma, 1e-14)
+        << "entry (" << i << ", " << (n + i) << ")";
+      EXPECT_NEAR(b.coeff(n + i), -gamma * defect, 1e-14)
+        << "projected row " << (n + i);
+      EXPECT_NEAR(A.coeff(n + i, n + i), gamma * gamma, 1e-14)
+        << "projected entry (" << (n + i) << ", " << (n + i) << ")";
+    }
+  }
+
   TEST(Assembly_Problem_Identification, SequentialVectorMasterProjectsMultipleFiniteSpaces)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });

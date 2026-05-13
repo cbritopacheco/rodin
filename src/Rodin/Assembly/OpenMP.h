@@ -888,6 +888,7 @@ namespace Rodin::Assembly
             else if constexpr (std::is_same_v<T, IdentDOFsType>)
             {
               // Single-FES path: master = same FES as slave, no offset.
+              const auto& affineValues = dbc.getIdentificationValues();
               for (const auto& [slave, pair] : dofs)
               {
                 const auto& masters = pair.first;
@@ -902,7 +903,12 @@ namespace Rodin::Assembly
                       static_cast<Index>(masters[k]),
                       static_cast<ScalarType>(coeffs[k]) });
                 }
-                constraints.setIdentification(static_cast<Index>(slave), entries);
+                const auto valueIt = affineValues.find(slave);
+                const ScalarType value =
+                  valueIt == affineValues.end()
+                    ? ScalarType(0)
+                    : static_cast<ScalarType>(valueIt->second);
+                constraints.setIdentification(static_cast<Index>(slave), entries, value);
               }
             }
           }, dbc.getDOFs());
@@ -925,11 +931,20 @@ namespace Rodin::Assembly
             if (val == ScalarType(0))
               return;
 
-            (void) localRhs;
+            const ScalarType colValue =
+              constraints.isIdentified(col)
+                ? constraints.getIdentificationValue(col)
+                : ScalarType(0);
+
             for (const auto& r : constraints.expand(row))
+            {
+              if (colValue != ScalarType(0))
+                localRhs[static_cast<size_t>(r.index)] -=
+                  r.coefficient * val * colValue;
               for (const auto& c : constraints.expand(col))
                 localT.emplace_back(
                     r.index, c.index, r.coefficient * val * c.coefficient);
+            }
           };
 
           auto vector_entry =
@@ -1143,7 +1158,7 @@ namespace Rodin::Assembly
             all.emplace_back(gs, gs, ScalarType(1));
             for (const auto& e : constraints.expand(gs))
               all.emplace_back(gs, e.index, -e.coefficient);
-            b.coeffRef(static_cast<size_t>(gs)) = ScalarType(0);
+            b.coeffRef(static_cast<size_t>(gs)) = constraints.getIdentificationValue(gs);
           }
 
           std::vector<Eigen::Triplet<ScalarType>> filtered;
@@ -1207,6 +1222,7 @@ namespace Rodin::Assembly
             {
               const int tid = omp_get_thread_num();
               auto& Alocal = Achunks[static_cast<size_t>(tid)];
+              auto& localRhs = rhsChunks[static_cast<size_t>(tid)];
 
               std::unique_ptr<LocalBilinearFormIntegratorBaseType> integrator(bfi.copy());
 
@@ -1234,10 +1250,21 @@ namespace Rodin::Assembly
                     const Index J = colsDOF(j);
                     const ScalarType val = Math::conj(integrator->integrate(j, i));
                     if (val != ScalarType(0))
+                    {
+                      const ScalarType colValue =
+                        constraints.isIdentified(J)
+                          ? constraints.getIdentificationValue(J)
+                          : ScalarType(0);
                       for (const auto& r : constraints.expand(I))
+                      {
+                        if (colValue != ScalarType(0))
+                          localRhs[static_cast<size_t>(r.index)] -=
+                            r.coefficient * val * colValue;
                         for (const auto& c : constraints.expand(J))
                           Alocal(r.index, c.index) +=
                             r.coefficient * val * c.coefficient;
+                      }
+                    }
                   }
                 }
               }
@@ -1260,6 +1287,7 @@ namespace Rodin::Assembly
             {
               const int tid = omp_get_thread_num();
               auto& Alocal = Achunks[static_cast<size_t>(tid)];
+              auto& localRhs = rhsChunks[static_cast<size_t>(tid)];
 
               std::unique_ptr<GlobalBilinearFormIntegratorBaseType> integrator(bfi.copy());
 
@@ -1302,10 +1330,21 @@ namespace Rodin::Assembly
                       const Index J = colsDOF(j);
                       const ScalarType val = Math::conj(integrator->integrate(j, i));
                       if (val != ScalarType(0))
+                      {
+                        const ScalarType colValue =
+                          constraints.isIdentified(J)
+                            ? constraints.getIdentificationValue(J)
+                            : ScalarType(0);
                         for (const auto& r : constraints.expand(I))
+                        {
+                          if (colValue != ScalarType(0))
+                            localRhs[static_cast<size_t>(r.index)] -=
+                              r.coefficient * val * colValue;
                           for (const auto& c : constraints.expand(J))
                             Alocal(r.index, c.index) +=
                               r.coefficient * val * c.coefficient;
+                        }
+                      }
                     }
                   }
                 }
@@ -1324,10 +1363,20 @@ namespace Rodin::Assembly
               {
                 const auto val = op(i, j);
                 if (val != ScalarType(0))
+                {
+                  const ScalarType colValue =
+                    constraints.isIdentified(static_cast<Index>(j))
+                      ? constraints.getIdentificationValue(static_cast<Index>(j))
+                      : ScalarType(0);
                   for (const auto& r : constraints.expand(static_cast<Index>(i)))
+                  {
+                    if (colValue != ScalarType(0))
+                      b.coeffRef(r.index) -= r.coefficient * val * colValue;
                     for (const auto& c : constraints.expand(static_cast<Index>(j)))
                       A(r.index, c.index) +=
                         r.coefficient * val * c.coefficient;
+                  }
+                }
               }
           }
 
@@ -1406,7 +1455,7 @@ namespace Rodin::Assembly
             A(gs, gs) = ScalarType(1);
             for (const auto& e : constraints.expand(gs))
               A(gs, e.index) -= e.coefficient;
-            b.coeffRef(static_cast<size_t>(gs)) = ScalarType(0);
+            b.coeffRef(static_cast<size_t>(gs)) = constraints.getIdentificationValue(gs);
           }
 
           for (Index idx = 0; idx < static_cast<Index>(rows); ++idx)
@@ -1580,6 +1629,7 @@ namespace Rodin::Assembly
                   && "Identification DBC missing value UUID");
               const size_t vBlock = findTrialBlock(*vUUIDOpt);
               const size_t vOff   = trialOffsets[vBlock];
+              const auto& affineValues = dbc.getIdentificationValues();
               for (const auto& [slave, pair] : dofs)
               {
                 const auto& masters = pair.first;
@@ -1597,7 +1647,12 @@ namespace Rodin::Assembly
                   entries.push_back(
                       { gm, static_cast<ScalarType>(coeffs[k]) });
                 }
-                constraints.setIdentification(gs, entries);
+                const auto valueIt = affineValues.find(slave);
+                const ScalarType value =
+                  valueIt == affineValues.end()
+                    ? ScalarType(0)
+                    : static_cast<ScalarType>(valueIt->second);
+                constraints.setIdentification(gs, entries, value);
               }
             }
           }, dbc.getDOFs());
@@ -1633,10 +1688,20 @@ namespace Rodin::Assembly
           if (val == ScalarType(0))
             return;
 
+          const ScalarType colValue =
+            constraints.isIdentified(col)
+              ? constraints.getIdentificationValue(col)
+              : ScalarType(0);
+
           for (const auto& r : constraints.expand(row))
+          {
+            if (colValue != ScalarType(0))
+              rhsChunks[static_cast<size_t>(tid)][static_cast<size_t>(r.index)] -=
+                r.coefficient * val * colValue;
             for (const auto& c : constraints.expand(col))
               tchunks[static_cast<size_t>(tid)].emplace_back(
                   r.index, c.index, r.coefficient * val * c.coefficient);
+          }
         };
 
         // ------------------------------------------------------------------
@@ -1707,10 +1772,19 @@ namespace Rodin::Assembly
                         sparse_entry(tid, I, J, val);
                       else
                       {
+                        const ScalarType colValue =
+                          constraints.isIdentified(J)
+                            ? constraints.getIdentificationValue(J)
+                            : ScalarType(0);
                         for (const auto& r : constraints.expand(I))
+                        {
+                          if (colValue != ScalarType(0))
+                            rhsChunks[static_cast<size_t>(tid)][static_cast<size_t>(r.index)] -=
+                              r.coefficient * val * colValue;
                           for (const auto& c : constraints.expand(J))
                             (*Alocal)(r.index, c.index) +=
                               r.coefficient * val * c.coefficient;
+                        }
                       }
                     }
                   }
@@ -1807,10 +1881,19 @@ namespace Rodin::Assembly
                           sparse_entry(tid, I, J, val);
                         else
                         {
+                          const ScalarType colValue =
+                            constraints.isIdentified(J)
+                              ? constraints.getIdentificationValue(J)
+                              : ScalarType(0);
                           for (const auto& r : constraints.expand(I))
+                          {
+                            if (colValue != ScalarType(0))
+                              rhsChunks[static_cast<size_t>(tid)][static_cast<size_t>(r.index)] -=
+                                r.coefficient * val * colValue;
                             for (const auto& c : constraints.expand(J))
                               (*Alocal)(r.index, c.index) +=
                                 r.coefficient * val * c.coefficient;
+                          }
                         }
                       }
                     }
@@ -1880,9 +1963,12 @@ namespace Rodin::Assembly
         // ------------------------------------------------------------------
         for (int tid = 0; tid < tc; ++tid)
         {
-          const auto& localRhs = rhsChunks[static_cast<size_t>(tid)];
+          auto& localRhs = rhsChunks[static_cast<size_t>(tid)];
           for (size_t i = 0; i < nrows; ++i)
+          {
             b.coeffRef(i) += localRhs[i];
+            localRhs[i] = ScalarType(0);
+          }
         }
 
         // Preassembled LFs (serial, with block offsets)
@@ -1921,10 +2007,20 @@ namespace Rodin::Assembly
             const auto& op = bf.getOperator();
             for (int k = 0; k < op.outerSize(); ++k)
               for (typename OperatorType::InnerIterator it(op, k); it; ++it)
-                sparse_entry(0,
-                  static_cast<Index>(vOff) + it.row(),
-                  static_cast<Index>(uOff) + it.col(),
-                  it.value());
+	                sparse_entry(0,
+	                  static_cast<Index>(vOff) + it.row(),
+	                  static_cast<Index>(uOff) + it.col(),
+	                  it.value());
+	          }
+
+          for (int tid = 0; tid < tc; ++tid)
+          {
+            auto& localRhs = rhsChunks[static_cast<size_t>(tid)];
+            for (size_t i = 0; i < nrows; ++i)
+            {
+              b.coeffRef(i) += localRhs[i];
+              localRhs[i] = ScalarType(0);
+            }
           }
 
           // Merge triplets
@@ -1949,7 +2045,7 @@ namespace Rodin::Assembly
             all.emplace_back(gs, gs, ScalarType(1));
             for (const auto& e : constraints.expand(gs))
               all.emplace_back(gs, e.index, -e.coefficient);
-            b.coeffRef(static_cast<size_t>(gs)) = ScalarType(0);
+            b.coeffRef(static_cast<size_t>(gs)) = constraints.getIdentificationValue(gs);
           }
 
           std::vector<Eigen::Triplet<ScalarType>> filtered;
@@ -2014,10 +2110,18 @@ namespace Rodin::Assembly
                 {
                   const Index I = static_cast<Index>(vOff) + i;
                   const Index J = static_cast<Index>(uOff) + j;
+                  const ScalarType colValue =
+                    constraints.isIdentified(J)
+                      ? constraints.getIdentificationValue(J)
+                      : ScalarType(0);
                   for (const auto& r : constraints.expand(I))
+                  {
+                    if (colValue != ScalarType(0))
+                      b.coeffRef(r.index) -= r.coefficient * val * colValue;
                     for (const auto& c : constraints.expand(J))
                       A(r.index, c.index) +=
                         r.coefficient * val * c.coefficient;
+                  }
                 }
               }
           }
@@ -2031,7 +2135,7 @@ namespace Rodin::Assembly
             A(gs, gs) = ScalarType(1);
             for (const auto& e : constraints.expand(gs))
               A(gs, e.index) -= e.coefficient;
-            b.coeffRef(static_cast<size_t>(gs)) = ScalarType(0);
+            b.coeffRef(static_cast<size_t>(gs)) = constraints.getIdentificationValue(gs);
           }
 
           for (Index idx = 0; idx < static_cast<Index>(nrows); ++idx)

@@ -404,6 +404,7 @@ namespace Rodin::Assembly
             }
             else if constexpr (std::is_same_v<T, IdentDOFsType>)
             {
+              const auto& affineValues = dbc.getIdentificationValues();
               for (const auto& [slave, pair] : dofs)
               {
                 const auto& masters = pair.first;
@@ -416,7 +417,12 @@ namespace Rodin::Assembly
                       static_cast<Index>(masters[k]),
                       static_cast<PetscScalar>(coeffs[k]) });
                 }
-                constraints.setIdentification(static_cast<Index>(slave), entries);
+                const auto valueIt = affineValues.find(slave);
+                const PetscScalar value =
+                  valueIt == affineValues.end()
+                    ? PetscScalar(0)
+                    : static_cast<PetscScalar>(valueIt->second);
+                constraints.setIdentification(static_cast<Index>(slave), entries, value);
               }
             }
           }, dbc.getDOFs());
@@ -426,9 +432,19 @@ namespace Rodin::Assembly
         {
           if (val == PetscScalar(0))
             return;
+          const PetscScalar colValue =
+            constraints.isIdentified(col)
+              ? constraints.getIdentificationValue(col)
+              : PetscScalar(0);
           for (const auto& r : constraints.expand(row))
           {
             const PetscInt I = static_cast<PetscInt>(r.index);
+            if (colValue != PetscScalar(0))
+            {
+              const PetscScalar rhsShift = -r.coefficient * val * colValue;
+              ierr = VecSetValue(b, I, rhsShift, ADD_VALUES);
+              assert(ierr == PETSC_SUCCESS);
+            }
             for (const auto& c : constraints.expand(col))
             {
               const PetscInt J = static_cast<PetscInt>(c.index);
@@ -678,8 +694,8 @@ namespace Rodin::Assembly
               ierr = MatSetValue(A, I, J, v, ADD_VALUES);
               assert(ierr == PETSC_SUCCESS);
             }
-            const PetscScalar zero = 0.0;
-            ierr = VecSetValue(b, I, zero, INSERT_VALUES);
+            const PetscScalar rhs = constraints.getIdentificationValue(gs);
+            ierr = VecSetValue(b, I, rhs, INSERT_VALUES);
             assert(ierr == PETSC_SUCCESS);
           }
 
@@ -970,6 +986,7 @@ namespace Rodin::Assembly
               assert(vUUIDOpt);
               const size_t vBlock = findTrialBlock(*vUUIDOpt);
               const size_t vOff = trialOffsets[vBlock];
+              const auto& affineValues = dbc.getIdentificationValues();
               for (const auto& [slave, pair] : dofs)
               {
                 const auto& masters = pair.first;
@@ -982,9 +999,15 @@ namespace Rodin::Assembly
                       static_cast<Index>(vOff + static_cast<size_t>(masters[k])),
                       static_cast<PetscScalar>(coeffs[k]) });
                 }
+                const auto valueIt = affineValues.find(slave);
+                const PetscScalar value =
+                  valueIt == affineValues.end()
+                    ? PetscScalar(0)
+                    : static_cast<PetscScalar>(valueIt->second);
                 constraints.setIdentification(
                     static_cast<Index>(uOff + static_cast<size_t>(slave)),
-                    entries);
+                    entries,
+                    value);
               }
             }
           }, dbc.getDOFs());
@@ -1008,9 +1031,19 @@ namespace Rodin::Assembly
         {
           if (val == PetscScalar(0))
             return;
+          const PetscScalar colValue =
+            constraints.isIdentified(col)
+              ? constraints.getIdentificationValue(col)
+              : PetscScalar(0);
           for (const auto& r : constraints.expand(row))
           {
             const PetscInt I = static_cast<PetscInt>(r.index);
+            if (colValue != PetscScalar(0))
+            {
+              const PetscScalar rhsShift = -r.coefficient * val * colValue;
+              ierr = VecSetValue(b, I, rhsShift, ADD_VALUES);
+              assert(ierr == PETSC_SUCCESS);
+            }
             for (const auto& c : constraints.expand(col))
             {
               const PetscInt J = static_cast<PetscInt>(c.index);
@@ -1308,8 +1341,8 @@ namespace Rodin::Assembly
               ierr = MatSetValue(A, I, J, v, ADD_VALUES);
               assert(ierr == PETSC_SUCCESS);
             }
-            const PetscScalar zero = 0.0;
-            ierr = VecSetValue(b, I, zero, INSERT_VALUES);
+            const PetscScalar rhs = constraints.getIdentificationValue(gs);
+            ierr = VecSetValue(b, I, rhs, INSERT_VALUES);
             assert(ierr == PETSC_SUCCESS);
           }
 

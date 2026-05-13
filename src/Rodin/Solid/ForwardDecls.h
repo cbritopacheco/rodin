@@ -50,10 +50,11 @@ namespace Rodin::Solid
   template <class PassiveLaw, class ActiveLaw>
   class ActiveContraction;
 
-  template <class LawDerived, class FES>
+  template <class LawDerived, class TestFunctionType, class DisplacementType>
   class InternalForce;
 
-  template <class LawDerived, class Solution, class FES>
+  template <class LawDerived, class TrialFunctionType,
+            class TestFunctionType, class DisplacementType>
   class MaterialTangent;
 }
 

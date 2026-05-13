@@ -356,12 +356,10 @@ int main(int, char**)
       << " |u_guess| = " << u.getData().norm()
       << std::endl;
 
-    Solid::MaterialTangent tangent(law, du, v);
-    tangent.setDisplacement(u);
+    Solid::MaterialTangent tangent(law, du, v, u);
     tangent.setInput(activeInput);
 
-    Solid::InternalForce residual(law, v);
-    residual.setDisplacement(u);
+    Solid::InternalForce residual(law, v, u);
     residual.setInput(activeInput);
 
     Problem newton(du, v);

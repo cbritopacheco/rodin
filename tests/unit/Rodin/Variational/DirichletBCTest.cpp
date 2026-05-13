@@ -760,6 +760,55 @@ namespace Rodin::Tests::Unit
   }
 
   /**
+   * @brief `DirichletBC(u, A(v), d)` keeps the generic shape-function
+   * identification row for `A(v)` and stores the known defect through the
+   * slave FE's own DOF functional.
+   */
+  TEST(Rodin_Variational_DirichletBC, AffineIdentificationStoresDefectValues)
+  {
+    Mesh mesh = makeUnitSquareMesh(4);
+    labelBoundaryAttributes(mesh);
+
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TrialFunction v(fes);
+
+    constexpr Real gamma = 2.5;
+    RealFunction defect = [](const Point& p)
+    {
+      return 3.0 + 2.0 * p.x();
+    };
+
+    const FlatSet<Attribute> attrs{ TopAttribute };
+    DirichletBC dbc(u, RealFunction(gamma) * v, defect);
+    dbc.on(attrs);
+    dbc.assemble();
+
+    using IdentifiedDOFs = DirichletBCBase<Real>::IdentifiedDOFs;
+    ASSERT_TRUE(std::holds_alternative<IdentifiedDOFs>(dbc.getDOFs()));
+    const auto& dofs = std::get<IdentifiedDOFs>(dbc.getDOFs());
+    const auto& values = dbc.getIdentificationValues();
+    const auto expectedVertices = getBoundaryVertices(mesh, attrs);
+    ASSERT_EQ(dofs.size(), expectedVertices.size());
+    ASSERT_EQ(values.size(), expectedVertices.size());
+
+    for (const auto vertex : expectedVertices)
+    {
+      const auto it = dofs.find(vertex);
+      ASSERT_NE(it, dofs.end());
+      ASSERT_EQ(it->second.first.size(), 1);
+      ASSERT_EQ(it->second.second.size(), 1);
+      EXPECT_EQ(it->second.first.coeff(0), vertex);
+      EXPECT_DOUBLE_EQ(it->second.second.coeff(0), gamma);
+
+      const auto valueIt = values.find(vertex);
+      ASSERT_NE(valueIt, values.end());
+      const auto coords = mesh.getVertexCoordinates(vertex);
+      EXPECT_NEAR(valueIt->second, 3.0 + 2.0 * coords(0), 1e-14);
+    }
+  }
+
+  /**
    * @brief Re-assembling after changing the boundary attribute set
    * regenerates the IdentifiedDOFs map for the new region.
    */

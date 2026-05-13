@@ -26,6 +26,7 @@
 #ifndef RODIN_SOLID_INTEGRATORS_MATERIALTANGENT_H
 #define RODIN_SOLID_INTEGRATORS_MATERIALTANGENT_H
 
+#include <algorithm>
 #include <cassert>
 #include <functional>
 #include <type_traits>
@@ -38,6 +39,8 @@
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/GridFunction.h"
 #include "Rodin/Variational/BilinearFormIntegrator.h"
+#include "Rodin/Variational/Jacobian.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Variational/TrialFunction.h"
 #include "Rodin/Variational/TestFunction.h"
 #include "Rodin/QF/PolytopeQuadratureFormula.h"
@@ -59,18 +62,20 @@ namespace Rodin::Solid
    *   K^e_{ij} = \int_{K} D\mathbf{P}[\nabla \phi_j] : \nabla \phi_i \, dX
    * @f]
    *
-   * Obtains the finite element basis from the FE space via
-   * @c getFiniteElement(), supports configurable quadrature order, and
-   * builds a ConstitutivePoint (composed over Geometry::Point) at each
-   * quadrature point for constitutive evaluation.  An optional
-   * Input can inject auxiliary data (fiber directions, activation,
+   * The trial function, test function, and current displacement state are kept
+   * as their concrete Rodin types. Gradients are evaluated through
+   * @c Variational::Jacobian(...), so PETSc or other storage backends work as
+   * long as they provide the usual Rodin traits and Jacobian specialization.
+   * An optional Input can inject auxiliary data (fiber directions, activation,
    * etc.) into the ConstitutivePoint at each quadrature point.
    *
    * @tparam LawDerived The hyperelastic constitutive law type
-   * @tparam Solution The solution type of the trial function
-   * @tparam FES The finite element space type
+   * @tparam TrialFunctionType The trial function type (backend-generic)
+   * @tparam TestFunctionType The test function type (backend-generic)
+   * @tparam DisplacementType The current displacement grid-function type
    */
-  template <class LawDerived, class Solution, class FES>
+  template <class LawDerived, class TrialFunctionType,
+            class TestFunctionType, class DisplacementType>
   class MaterialTangent final
     : public Variational::LocalBilinearFormIntegratorBase<Real>
   {
@@ -78,59 +83,67 @@ namespace Rodin::Solid
       using ScalarType = Real;
       using Parent = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
       using LawType = LawDerived;
-      using FESType = FES;
-      using DofValueFunction = std::function<ScalarType(Index)>;
+      using TrialType = TrialFunctionType;
+      using TestType = TestFunctionType;
+      using StateType = DisplacementType;
+
+      using TrialFESType = typename FormLanguage::Traits<TrialType>::FESType;
+      using TestFESType = typename FormLanguage::Traits<TestType>::FESType;
+      using StateFESType = typename FormLanguage::Traits<StateType>::FESType;
+
+      static_assert(Variational::IsTrialFunction<TrialType>::Value,
+        "Solid::MaterialTangent expects a Rodin trial function.");
+      static_assert(Variational::IsTestFunction<TestType>::Value,
+        "Solid::MaterialTangent expects a Rodin test function.");
 
       /**
        * @brief Constructs the material tangent integrator.
        * @param law The constitutive law (stored by value)
        * @param u The trial function
        * @param v The test function
+       * @param displacement Current displacement grid function
        */
-      template <class S, class TrialFES, class TestFES>
       MaterialTangent(
           const LawDerived& law,
-          const Variational::TrialFunction<S, TrialFES>& u,
-          const Variational::TestFunction<TestFES>& v)
+          const TrialType& u,
+          const TestType& v,
+          const StateType& displacement)
         : Parent(u, v),
           m_law(law),
+          m_trial(u),
+          m_test(v),
+          m_displacement(displacement),
           m_trialfes(u.getFiniteElementSpace()),
           m_testfes(v.getFiniteElementSpace()),
+          m_statefes(displacement.getFiniteElementSpace()),
           m_quadOrder(0)
       {
-        static_assert(std::is_same_v<TrialFES, FES>);
-        static_assert(std::is_same_v<TestFES, FES>);
+        checkCompatibility(displacement);
       }
 
       MaterialTangent(const MaterialTangent& other)
         : Parent(other),
           m_law(other.m_law),
+          m_trial(other.m_trial),
+          m_test(other.m_test),
+          m_displacement(other.m_displacement),
           m_trialfes(other.m_trialfes),
           m_testfes(other.m_testfes),
-          m_dofValue(other.m_dofValue),
+          m_statefes(other.m_statefes),
           m_quadOrder(other.m_quadOrder),
           m_input(other.m_input)
       {}
 
       /**
-       * @brief Sets the linearization point (current displacement GridFunction).
-       * @param gf Reference to the displacement GridFunction
+       * @brief Rebinds the linearization point.
+       * @param gf Displacement grid function with the same concrete state type
        * @returns Reference to this object for chaining
        */
-      template <class GridFunctionType>
-      MaterialTangent& setDisplacement(const GridFunctionType& gf)
+      MaterialTangent& setDisplacement(const StateType& gf)
       {
-        using GridFunctionFES =
-          std::remove_cvref_t<decltype(gf.getFiniteElementSpace())>;
-        static_assert(std::is_same_v<GridFunctionFES, FESType>,
-          "Solid::MaterialTangent displacement GridFunction must use the same "
-          "finite element space as the trial/test functions.");
-
-        assert(&gf.getFiniteElementSpace() == &m_trialfes.get());
-        m_dofValue = [&gf](Index global)
-        {
-          return static_cast<ScalarType>(gf[global]);
-        };
+        checkCompatibility(gf);
+        m_displacement = std::cref(gf);
+        m_statefes = std::cref(gf.getFiniteElementSpace());
         return *this;
       }
 
@@ -169,63 +182,51 @@ namespace Rodin::Solid
 
       MaterialTangent& setPolytope(const Geometry::Polytope& polytope) final override
       {
-        assert(m_dofValue);
         m_polytope = polytope;
 
         const size_t d = polytope.getDimension();
-        const auto d_u8 = static_cast<std::uint8_t>(d);
         const Index idx = polytope.getIndex();
-        const auto& fes = m_trialfes.get();
-        const size_t vdim = fes.getVectorDimension();
+        const auto& trialFES = m_trialfes.get();
+        const auto& testFES = m_testfes.get();
+        const auto& stateFES = m_statefes.get();
+        const size_t vdim = testFES.getVectorDimension();
 
-        // Get element from the FE space (not hardcoded to any element type)
-        const auto& fe = fes.getFiniteElement(d, idx);
-        const size_t ndof = fe.getCount();
+        const auto& trialFE = trialFES.getFiniteElement(d, idx);
+        const auto& testFE = testFES.getFiniteElement(d, idx);
+        const auto& stateFE = stateFES.getFiniteElement(d, idx);
+        const size_t trialDofs = trialFE.getCount();
+        const size_t testDofs = testFE.getCount();
 
         // Determine effective quadrature order
         const size_t effectiveOrder = (m_quadOrder > 0)
           ? m_quadOrder
-          : 2 * fe.getOrder();
+          : 2 * std::max({ trialFE.getOrder(),
+                           testFE.getOrder(),
+                           stateFE.getOrder() });
         const auto& qf = QF::PolytopeQuadratureFormula::get(effectiveOrder, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
         const size_t nqp = quadrature.getSize();
 
         // Zero element stiffness matrix
-        m_matrix.resize(ndof, ndof);
+        m_matrix.resize(testDofs, trialDofs);
         m_matrix.setZero();
+
+        auto stateGradient = Variational::Jacobian(m_displacement.get());
+        auto trialGradient = Variational::Jacobian(m_trial.get());
+        auto testGradient = Variational::Jacobian(m_test.get());
 
         // Loop over quadrature points
         for (size_t q = 0; q < nqp; ++q)
         {
           const auto& pt = quadrature.getPoint(q);
-          const auto& rc = qf.getPoint(q);
+          const Variational::IntegrationPoint ip(pt, &qf, q);
           const ScalarType wq = qf.getWeight(q);
 
           const ScalarType distortion = pt.getDistortion();
-          const auto& JacInv = pt.getJacobianInverse();
 
-          // Precompute physical Jacobians for each DOF via the FE element.
-          // physJacs[dof] = refJac(dof) * JacInv, where refJac is the
-          // vdim × d reference Jacobian of the basis function.
-          std::vector<Math::SpatialMatrix<ScalarType>> physJacs(ndof);
-          for (size_t dof = 0; dof < ndof; ++dof)
-          {
-            Math::SpatialMatrix<ScalarType> refJac = fe.getBasis(dof).getJacobian()(rc);
-            physJacs[dof] = refJac * JacInv;
-          }
-
-          // Evaluate displacement gradient H from DOF values
-          Math::SpatialMatrix<ScalarType> H;
-          H.resize(static_cast<std::uint8_t>(vdim), d_u8);
-          H.setZero();
-          for (size_t dof = 0; dof < ndof; ++dof)
-          {
-            const ScalarType u_dof =
-              m_dofValue(fes.getGlobalIndex({d, idx}, dof));
-            for (size_t c = 0; c < vdim; ++c)
-              for (size_t k = 0; k < d; ++k)
-                H(c, k) += u_dof * physJacs[dof](c, k);
-          }
+          trialGradient.setIntegrationPoint(ip);
+          testGradient.setIntegrationPoint(ip);
+          const auto H = stateGradient.getValue(ip);
 
           // Build ConstitutivePoint composed over Geometry::Point
           KinematicState state(d);
@@ -244,22 +245,23 @@ namespace Rodin::Solid
 
           // Build element stiffness at this quadrature point.
           // For trial DOF tr, the deformation gradient perturbation dF equals
-          // physJacs[tr] (the physical Jacobian of the basis function).
-          for (size_t tr = 0; tr < ndof; ++tr)
+          // the physical Jacobian of the trial basis function.
+          for (size_t tr = 0; tr < trialDofs; ++tr)
           {
-            const auto& dF = physJacs[tr];
+            const auto dF = trialGradient.getBasis(tr);
 
             // Compute material tangent action dP = DP[dF]
             Math::SpatialMatrix<ScalarType> dP;
             m_law.getMaterialTangent(dP, cache, cp, dF);
 
-            // K_{te,tr} += wq * distortion * (dP : physJac_te)
-            for (size_t te = 0; te < ndof; ++te)
+            // K_{te,tr} += wq * distortion * (dP : grad psi_te)
+            for (size_t te = 0; te < testDofs; ++te)
             {
+              const auto gradTest = testGradient.getBasis(te);
               ScalarType val = 0;
               for (size_t c = 0; c < vdim; ++c)
                 for (size_t k = 0; k < d; ++k)
-                  val += dP(c, k) * physJacs[te](c, k);
+                  val += dP(c, k) * gradTest(c, k);
               m_matrix(te, tr) += wq * distortion * val;
             }
           }
@@ -293,10 +295,28 @@ namespace Rodin::Solid
       const LawType& getLaw() const { return m_law; }
 
     private:
+      void checkCompatibility(const StateType& displacement) const
+      {
+        const auto& trialFES = m_trialfes.get();
+        const auto& testFES = m_testfes.get();
+        const auto& stateFES = displacement.getFiniteElementSpace();
+
+        assert(&trialFES.getMesh() == &testFES.getMesh());
+        assert(&stateFES.getMesh() == &testFES.getMesh());
+        assert(trialFES.getVectorDimension() == testFES.getVectorDimension());
+        assert(stateFES.getVectorDimension() == testFES.getVectorDimension());
+        (void) trialFES;
+        (void) testFES;
+        (void) stateFES;
+      }
+
       LawType m_law;
-      std::reference_wrapper<const FESType> m_trialfes;
-      std::reference_wrapper<const FESType> m_testfes;
-      DofValueFunction m_dofValue;
+      std::reference_wrapper<const TrialType> m_trial;
+      std::reference_wrapper<const TestType> m_test;
+      std::reference_wrapper<const StateType> m_displacement;
+      std::reference_wrapper<const TrialFESType> m_trialfes;
+      std::reference_wrapper<const TestFESType> m_testfes;
+      std::reference_wrapper<const StateFESType> m_statefes;
       size_t m_quadOrder;
       InputFunction m_input;
 
@@ -305,11 +325,17 @@ namespace Rodin::Solid
   };
 
   /// CTAD deduction guide for MaterialTangent
-  template <class LawDerived, class S, class TrialFES, class TestFES>
+  template <class LawDerived, class TrialFunctionType,
+            class TestFunctionType, class DisplacementType>
   MaterialTangent(const LawDerived&,
-                  const Variational::TrialFunction<S, TrialFES>&,
-                  const Variational::TestFunction<TestFES>&)
-    -> MaterialTangent<LawDerived, S, TrialFES>;
+                  const TrialFunctionType&,
+                  const TestFunctionType&,
+                  const DisplacementType&)
+    -> MaterialTangent<
+         LawDerived,
+         std::decay_t<TrialFunctionType>,
+         std::decay_t<TestFunctionType>,
+         std::decay_t<DisplacementType>>;
 }
 
 #endif

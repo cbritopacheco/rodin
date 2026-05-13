@@ -21,7 +21,7 @@ namespace Rodin::Assembly
    * @brief Read-only expansion map for value and identification constraints.
    *
    * Identification constraints are stored as rows of the expansion map
-   * @f$ x_s = \sum_k c_k x_{m_k} @f$. For unconstrained DOFs,
+   * @f$ x_s = \sum_k c_k x_{m_k} + d_s @f$. For unconstrained DOFs,
    * @ref expand returns the identity row `{ { i, 1 } }`.
    *
    * The map supports canonicalization of identification constraints:
@@ -29,8 +29,8 @@ namespace Rodin::Assembly
    * - zero coefficients are pruned;
    * - self-references are removed algebraically;
    * - identity constraints are ignored;
-   * - constraints such as @f$ x_s = c x_s @f$, @f$ c \ne 1 @f$,
-   *   are converted to homogeneous fixed constraints;
+   * - constraints such as @f$ x_s = c x_s + d_s @f$, @f$ c \ne 1 @f$,
+   *   are converted to fixed constraints;
    * - transitive identifications are flattened by @ref finalize.
    *
    * After calling @ref finalize, this object can be shared by OpenMP assembly
@@ -61,6 +61,7 @@ namespace Rodin::Assembly
         m_expansions.clear();
         m_expansions.resize(size);
         m_isIdentified.assign(size, false);
+        m_identificationValues.assign(size, Scalar(0));
         m_identifiedRows.clear();
 
         for (Index i = 0; i < static_cast<Index>(size); i++)
@@ -101,6 +102,12 @@ namespace Rodin::Assembly
         return m_identifiedRows;
       }
 
+      Scalar getIdentificationValue(Index i) const
+      {
+        check(i);
+        return m_identificationValues[static_cast<size_t>(i)];
+      }
+
       void setFixed(Index i, Scalar value)
       {
         check(i);
@@ -118,6 +125,12 @@ namespace Rodin::Assembly
       template <class Entries>
       void setIdentification(Index slave, const Entries& entries)
       {
+        setIdentification(slave, entries, Scalar(0));
+      }
+
+      template <class Entries>
+      void setIdentification(Index slave, const Entries& entries, Scalar value)
+      {
         check(slave);
 
         if (isFixed(slave))
@@ -134,7 +147,7 @@ namespace Rodin::Assembly
             << Alert::Raise;
         }
 
-        Expansion canonical = canonicalize(slave, entries);
+        Expansion canonical = canonicalize(slave, entries, value);
 
         if (canonical.empty())
           return;
@@ -143,6 +156,7 @@ namespace Rodin::Assembly
           return;
 
         m_expansions[static_cast<size_t>(slave)] = std::move(canonical);
+        m_identificationValues[static_cast<size_t>(slave)] = value;
         m_isIdentified[static_cast<size_t>(slave)] = true;
         m_identifiedRows.push_back(slave);
       }
@@ -298,24 +312,28 @@ namespace Rodin::Assembly
       }
 
       /**
-       * @brief Canonicalizes the row @f$ x_s = \sum_k c_k x_{m_k} @f$.
+       * @brief Canonicalizes the row
+       *        @f$ x_s = \sum_k c_k x_{m_k} + d_s @f$.
        *
        * If the row contains a self term,
        * @f[
-       *   x_s = c_s x_s + \sum_m c_m x_m,
+       *   x_s = c_s x_s + \sum_m c_m x_m + d_s,
        * @f]
        * it is rewritten as
        * @f[
-       *   x_s = \sum_m \frac{c_m}{1 - c_s} x_m.
+       *   x_s = \sum_m \frac{c_m}{1 - c_s} x_m
+       *       + \frac{d_s}{1 - c_s}.
        * @f]
        *
        * Special cases:
-       * - @f$ x_s = x_s @f$ is ignored;
-       * - @f$ x_s = c x_s @f$, @f$ c \ne 1 @f$, becomes @f$ x_s = 0 @f$;
-       * - @f$ x_s = x_s + \sum_m c_m x_m @f$ is rejected.
+       * - @f$ x_s = x_s @f$ is ignored when @f$ d_s=0 @f$;
+       * - @f$ x_s = x_s + d_s @f$ with @f$ d_s\ne 0 @f$ is rejected;
+       * - @f$ x_s = c x_s + d_s @f$, @f$ c \ne 1 @f$, becomes
+       *   @f$ x_s = d_s/(1-c) @f$;
+       * - @f$ x_s = x_s + \sum_m c_m x_m + d_s @f$ is rejected.
        */
       template <class Entries>
-      Expansion canonicalize(Index slave, const Entries& entries)
+      Expansion canonicalize(Index slave, const Entries& entries, Scalar& value)
       {
         Expansion expansion = merge(entries);
 
@@ -343,20 +361,29 @@ namespace Rodin::Assembly
         {
           if (reduced.empty())
           {
-            // x_s = x_s. Identity constraint: ignore.
-            return {};
+            if (value == Scalar(0))
+            {
+              // x_s = x_s. Identity constraint: ignore.
+              return {};
+            }
+
+            Alert::MemberFunctionException(*this, __func__)
+              << "Invalid affine identification: slave DOF " << slave
+              << " is constrained by x_s = x_s + d with nonzero d."
+              << Alert::Raise;
           }
 
           Alert::MemberFunctionException(*this, __func__)
             << "Invalid identification: slave DOF " << slave
             << " appears as a master with coefficient exactly 1 alongside "
-            << "other masters." << Alert::Raise;
+            << "other masters or a nonzero defect." << Alert::Raise;
         }
 
         if (selfCoefficient != Scalar(0))
         {
           for (auto& e : reduced)
             e.coefficient /= scale;
+          value /= scale;
         }
 
         prune(reduced);
@@ -364,8 +391,8 @@ namespace Rodin::Assembly
         if (reduced.empty())
         {
           // x_s = c x_s with c != 1, or all non-self terms cancelled:
-          // (1 - c) x_s = 0, hence x_s = 0.
-          setFixed(slave, Scalar(0));
+          // (1 - c) x_s = d, hence x_s = d / (1 - c).
+          setFixed(slave, value);
           return {};
         }
 
@@ -379,17 +406,20 @@ namespace Rodin::Assembly
        */
       void canonicalize(Index slave, Expansion& expansion)
       {
-        Expansion canonical = canonicalize(slave, expansion);
+        Scalar value = m_identificationValues[static_cast<size_t>(slave)];
+        Expansion canonical = canonicalize(slave, expansion, value);
 
         if (canonical.empty())
         {
           m_expansions[static_cast<size_t>(slave)].clear();
           m_expansions[static_cast<size_t>(slave)].push_back({ slave, Scalar(1) });
           m_isIdentified[static_cast<size_t>(slave)] = false;
+          m_identificationValues[static_cast<size_t>(slave)] = Scalar(0);
           return;
         }
 
         m_expansions[static_cast<size_t>(slave)] = std::move(canonical);
+        m_identificationValues[static_cast<size_t>(slave)] = value;
         m_isIdentified[static_cast<size_t>(slave)] = true;
       }
 
@@ -407,6 +437,7 @@ namespace Rodin::Assembly
       std::vector<Optional<Scalar>> m_fixed;
       std::vector<Expansion> m_expansions;
       std::vector<bool> m_isIdentified;
+      std::vector<Scalar> m_identificationValues;
       std::vector<Index> m_identifiedRows;
   };
 }

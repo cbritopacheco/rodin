@@ -23,6 +23,7 @@
 #ifndef RODIN_SOLID_INTEGRATORS_INTERNALFORCE_H
 #define RODIN_SOLID_INTEGRATORS_INTERNALFORCE_H
 
+#include <algorithm>
 #include <cassert>
 #include <functional>
 #include <type_traits>
@@ -34,6 +35,8 @@
 #include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/GridFunction.h"
+#include "Rodin/Variational/Jacobian.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Variational/LinearFormIntegrator.h"
 #include "Rodin/Variational/TestFunction.h"
 #include "Rodin/QF/PolytopeQuadratureFormula.h"
@@ -55,17 +58,19 @@ namespace Rodin::Solid
    *   R^e_i = \int_{K} \mathbf{P} : \nabla \phi_i \, dX
    * @f]
    *
-   * Obtains the finite element basis from the FE space via
-   * @c getFiniteElement(), supports configurable quadrature order, and
-   * builds a ConstitutivePoint (composed over Geometry::Point) at each
-   * quadrature point for constitutive evaluation.  An optional
-   * Input can inject auxiliary data (fiber directions, activation,
-   * etc.) into the ConstitutivePoint at each quadrature point.
+   * The test function and current displacement state are kept as their
+   * concrete Rodin types. The displacement gradient and test-basis gradients
+   * are evaluated through @c Variational::Jacobian(...), so PETSc or other
+   * storage backends work as long as they provide the usual Rodin traits and
+   * Jacobian specialization. An optional Input can inject auxiliary data
+   * (fiber directions, activation, etc.) into the ConstitutivePoint at each
+   * quadrature point.
    *
    * @tparam LawDerived The hyperelastic constitutive law type
-   * @tparam FES The finite element space type
+   * @tparam TestFunctionType The test function type (backend-generic)
+   * @tparam DisplacementType The current displacement grid-function type
    */
-  template <class LawDerived, class FES>
+  template <class LawDerived, class TestFunctionType, class DisplacementType>
   class InternalForce final
     : public Variational::LinearFormIntegratorBase<Real>
   {
@@ -73,51 +78,56 @@ namespace Rodin::Solid
       using ScalarType = Real;
       using Parent = Variational::LinearFormIntegratorBase<ScalarType>;
       using LawType = LawDerived;
-      using FESType = FES;
-      using DofValueFunction = std::function<ScalarType(Index)>;
+      using TestType = TestFunctionType;
+      using StateType = DisplacementType;
+
+      using TestFESType = typename FormLanguage::Traits<TestType>::FESType;
+      using StateFESType = typename FormLanguage::Traits<StateType>::FESType;
+
+      static_assert(Variational::IsTestFunction<TestType>::Value,
+        "Solid::InternalForce expects a Rodin test function.");
 
       /**
        * @brief Constructs the internal force integrator.
        * @param law The constitutive law (stored by value)
        * @param v The test function
+       * @param displacement Current displacement grid function
        */
-      template <class TestFES>
-      InternalForce(const LawDerived& law, const Variational::TestFunction<TestFES>& v)
+      InternalForce(
+          const LawDerived& law,
+          const TestType& v,
+          const StateType& displacement)
         : Parent(v),
           m_law(law),
-          m_fes(v.getFiniteElementSpace()),
+          m_test(v),
+          m_displacement(displacement),
+          m_testfes(v.getFiniteElementSpace()),
+          m_statefes(displacement.getFiniteElementSpace()),
           m_quadOrder(0)
       {
-        static_assert(std::is_same_v<TestFES, FES>);
+        checkCompatibility(displacement);
       }
 
       InternalForce(const InternalForce& other)
         : Parent(other),
           m_law(other.m_law),
-          m_fes(other.m_fes),
-          m_dofValue(other.m_dofValue),
+          m_test(other.m_test),
+          m_displacement(other.m_displacement),
+          m_testfes(other.m_testfes),
+          m_statefes(other.m_statefes),
           m_quadOrder(other.m_quadOrder),
           m_input(other.m_input)      {}
 
       /**
-       * @brief Sets the linearization point (current displacement GridFunction).
-       * @param gf Reference to the displacement GridFunction
+       * @brief Rebinds the current displacement state.
+       * @param gf Displacement grid function with the same concrete state type
        * @returns Reference to this object for chaining
        */
-      template <class GridFunctionType>
-      InternalForce& setDisplacement(const GridFunctionType& gf)
+      InternalForce& setDisplacement(const StateType& gf)
       {
-        using GridFunctionFES =
-          std::remove_cvref_t<decltype(gf.getFiniteElementSpace())>;
-        static_assert(std::is_same_v<GridFunctionFES, FESType>,
-          "Solid::InternalForce displacement GridFunction must use the same "
-          "finite element space as the test function.");
-
-        assert(&gf.getFiniteElementSpace() == &m_fes.get());
-        m_dofValue = [&gf](Index global)
-        {
-          return static_cast<ScalarType>(gf[global]);
-        };
+        checkCompatibility(gf);
+        m_displacement = std::cref(gf);
+        m_statefes = std::cref(gf.getFiniteElementSpace());
         return *this;
       }
 
@@ -156,63 +166,44 @@ namespace Rodin::Solid
 
       InternalForce& setPolytope(const Geometry::Polytope& polytope) final override
       {
-        assert(m_dofValue);
         m_polytope = polytope;
 
         const size_t d = polytope.getDimension();
-        const auto d_u8 = static_cast<std::uint8_t>(d);
         const Index idx = polytope.getIndex();
-        const auto& fes = m_fes.get();
-        const size_t vdim = fes.getVectorDimension();
+        const auto& testFES = m_testfes.get();
+        const auto& stateFES = m_statefes.get();
+        const size_t vdim = testFES.getVectorDimension();
 
-        // Get element from the FE space (not hardcoded to any element type)
-        const auto& fe = fes.getFiniteElement(d, idx);
-        const size_t ndof = fe.getCount();
+        const auto& testFE = testFES.getFiniteElement(d, idx);
+        const auto& stateFE = stateFES.getFiniteElement(d, idx);
+        const size_t testDofs = testFE.getCount();
 
         // Determine effective quadrature order
         const size_t effectiveOrder = (m_quadOrder > 0)
           ? m_quadOrder
-          : 2 * fe.getOrder();
+          : 2 * std::max(testFE.getOrder(), stateFE.getOrder());
         const auto& qf = QF::PolytopeQuadratureFormula::get(effectiveOrder, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
         const size_t nqp = quadrature.getSize();
 
         // Zero element vector
-        m_elemVec.resize(ndof);
+        m_elemVec.resize(testDofs);
         m_elemVec.setZero();
+
+        auto stateGradient = Variational::Jacobian(m_displacement.get());
+        auto testGradient = Variational::Jacobian(m_test.get());
 
         // Loop over quadrature points
         for (size_t q = 0; q < nqp; ++q)
         {
           const auto& pt = quadrature.getPoint(q);
-          const auto& rc = qf.getPoint(q);
+          const Variational::IntegrationPoint ip(pt, &qf, q);
           const ScalarType wq = qf.getWeight(q);
 
           const ScalarType distortion = pt.getDistortion();
-          const auto& JacInv = pt.getJacobianInverse();
 
-          // Precompute physical Jacobians for each DOF via the FE element.
-          // physJacs[dof] = refJac(dof) * JacInv, where refJac is the
-          // vdim × d reference Jacobian of the basis function.
-          std::vector<Math::SpatialMatrix<ScalarType>> physJacs(ndof);
-          for (size_t dof = 0; dof < ndof; ++dof)
-          {
-            Math::SpatialMatrix<ScalarType> refJac = fe.getBasis(dof).getJacobian()(rc);
-            physJacs[dof] = refJac * JacInv;
-          }
-
-          // Evaluate displacement gradient H from DOF values
-          Math::SpatialMatrix<ScalarType> H;
-          H.resize(static_cast<std::uint8_t>(vdim), d_u8);
-          H.setZero();
-          for (size_t dof = 0; dof < ndof; ++dof)
-          {
-            const ScalarType u_dof =
-              m_dofValue(fes.getGlobalIndex({d, idx}, dof));
-            for (size_t c = 0; c < vdim; ++c)
-              for (size_t k = 0; k < d; ++k)
-                H(c, k) += u_dof * physJacs[dof](c, k);
-          }
+          testGradient.setIntegrationPoint(ip);
+          const auto H = stateGradient.getValue(ip);
 
           // Build ConstitutivePoint composed over Geometry::Point
           KinematicState state(d);
@@ -232,13 +223,14 @@ namespace Rodin::Solid
           Math::SpatialMatrix<ScalarType> P;
           m_law.getFirstPiolaKirchhoffStress(P, cache, cp);
 
-          // Accumulate into element vector: R_te = Σ_{c,k} P(c,k) * physJac_te(c,k)
-          for (size_t te = 0; te < ndof; ++te)
+          // Accumulate into element vector: R_te = P : grad psi_te
+          for (size_t te = 0; te < testDofs; ++te)
           {
+            const auto gradTest = testGradient.getBasis(te);
             ScalarType val = 0;
             for (size_t c = 0; c < vdim; ++c)
               for (size_t k = 0; k < d; ++k)
-                val += P(c, k) * physJacs[te](c, k);
+                val += P(c, k) * gradTest(c, k);
             m_elemVec(te) += wq * distortion * val;
           }
         }
@@ -271,9 +263,22 @@ namespace Rodin::Solid
       const LawType& getLaw() const { return m_law; }
 
     private:
+      void checkCompatibility(const StateType& displacement) const
+      {
+        const auto& testFES = m_testfes.get();
+        const auto& stateFES = displacement.getFiniteElementSpace();
+
+        assert(&stateFES.getMesh() == &testFES.getMesh());
+        assert(stateFES.getVectorDimension() == testFES.getVectorDimension());
+        (void) testFES;
+        (void) stateFES;
+      }
+
       LawType m_law;
-      std::reference_wrapper<const FESType> m_fes;
-      DofValueFunction m_dofValue;
+      std::reference_wrapper<const TestType> m_test;
+      std::reference_wrapper<const StateType> m_displacement;
+      std::reference_wrapper<const TestFESType> m_testfes;
+      std::reference_wrapper<const StateFESType> m_statefes;
       size_t m_quadOrder;
       InputFunction m_input;
 
@@ -282,9 +287,14 @@ namespace Rodin::Solid
   };
 
   /// CTAD deduction guide for InternalForce
-  template <class LawDerived, class TestFES>
-  InternalForce(const LawDerived&, const Variational::TestFunction<TestFES>&)
-    -> InternalForce<LawDerived, TestFES>;
+  template <class LawDerived, class TestFunctionType, class DisplacementType>
+  InternalForce(const LawDerived&,
+                const TestFunctionType&,
+                const DisplacementType&)
+    -> InternalForce<
+         LawDerived,
+         std::decay_t<TestFunctionType>,
+         std::decay_t<DisplacementType>>;
 }
 
 #endif

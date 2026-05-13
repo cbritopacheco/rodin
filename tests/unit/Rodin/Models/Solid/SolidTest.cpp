@@ -1023,11 +1023,10 @@ namespace Rodin::Tests::Unit
     const Real lambda = 2.0, mu = 1.0;
     Solid::NeoHookean law(lambda, mu);
 
-    Solid::InternalForce force(law, v);
-
     GridFunction gf(Vh);
     gf.getData().setZero();
-    force.setDisplacement(gf);
+
+    Solid::InternalForce force(law, v, gf);
 
     auto cellIt = mesh.getCell(0);
     force.setPolytope(*cellIt);
@@ -1049,12 +1048,11 @@ namespace Rodin::Tests::Unit
     P1 Vh(mesh, vdim);
     TestFunction v(Vh);
 
-    Solid::SaintVenantKirchhoff law(2.0, 1.0);
-    Solid::InternalForce force(law, v);
-
     GridFunction gf(Vh);
     gf.getData().setZero();
-    force.setDisplacement(gf);
+
+    Solid::SaintVenantKirchhoff law(2.0, 1.0);
+    Solid::InternalForce force(law, v, gf);
 
     auto cellIt = mesh.getCell(0);
     force.setPolytope(*cellIt);
@@ -1076,12 +1074,11 @@ namespace Rodin::Tests::Unit
     P1 Vh(mesh, vdim);
     TestFunction v(Vh);
 
-    Solid::MooneyRivlin law(0.5, 0.2, 5.0);
-    Solid::InternalForce force(law, v);
-
     GridFunction gf(Vh);
     gf.getData().setZero();
-    force.setDisplacement(gf);
+
+    Solid::MooneyRivlin law(0.5, 0.2, 5.0);
+    Solid::InternalForce force(law, v, gf);
 
     auto cellIt = mesh.getCell(0);
     force.setPolytope(*cellIt);
@@ -1103,15 +1100,14 @@ namespace Rodin::Tests::Unit
     P1 Vh(mesh, vdim);
     TestFunction v(Vh);
 
-    Solid::NeoHookean law(2.0, 1.0);
-    Solid::InternalForce force(law, v);
-
     // Set a non-trivial displacement (uniform extension)
     GridFunction gf(Vh);
     gf.getData().setZero();
     for (Index i = 0; i < static_cast<Index>(Vh.getSize()); ++i)
       gf.getData()(i) = 0.01 * static_cast<Real>(i % 3);
-    force.setDisplacement(gf);
+
+    Solid::NeoHookean law(2.0, 1.0);
+    Solid::InternalForce force(law, v, gf);
 
     auto cellIt = mesh.getCell(0);
     force.setPolytope(*cellIt);
@@ -1136,9 +1132,11 @@ namespace Rodin::Tests::Unit
     P1 Vh(mesh, vdim);
     TestFunction v(Vh);
 
-    Solid::NeoHookean law(2.0, 1.0);
-    Solid::InternalForce force(law, v);
+    GridFunction gf(Vh);
+    gf.getData().setZero();
 
+    Solid::NeoHookean law(2.0, 1.0);
+    Solid::InternalForce force(law, v, gf);
     bool inputCalled = false;
     force.setInput([&](Solid::ConstitutivePoint& cp) {
       inputCalled = true;
@@ -1146,10 +1144,6 @@ namespace Rodin::Tests::Unit
       fiber[0] = 1.0; fiber[1] = 0.0;
       cp.set<Solid::Tags::FiberDirection>(fiber);
     });
-
-    GridFunction gf(Vh);
-    gf.getData().setZero();
-    force.setDisplacement(gf);
 
     auto cellIt = mesh.getCell(0);
     force.setPolytope(*cellIt);
@@ -1178,11 +1172,10 @@ namespace Rodin::Tests::Unit
     const Real lambda = 2.0, mu = 1.0;
     Solid::NeoHookean law(lambda, mu);
 
-    Solid::MaterialTangent tangent(law, u, v);
-
     GridFunction gf(Vh);
     gf.getData().setZero();
-    tangent.setDisplacement(gf);
+
+    Solid::MaterialTangent tangent(law, u, v, gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);
@@ -1206,12 +1199,11 @@ namespace Rodin::Tests::Unit
     TrialFunction u(Vh);
     TestFunction v(Vh);
 
-    Solid::SaintVenantKirchhoff law(2.0, 1.0);
-    Solid::MaterialTangent tangent(law, u, v);
-
     GridFunction gf(Vh);
     gf.getData().setZero();
-    tangent.setDisplacement(gf);
+
+    Solid::SaintVenantKirchhoff law(2.0, 1.0);
+    Solid::MaterialTangent tangent(law, u, v, gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);
@@ -1235,12 +1227,11 @@ namespace Rodin::Tests::Unit
     TrialFunction u(Vh);
     TestFunction v(Vh);
 
-    Solid::MooneyRivlin law(0.5, 0.2, 5.0);
-    Solid::MaterialTangent tangent(law, u, v);
-
     GridFunction gf(Vh);
     gf.getData().setZero();
-    tangent.setDisplacement(gf);
+
+    Solid::MooneyRivlin law(0.5, 0.2, 5.0);
+    Solid::MaterialTangent tangent(law, u, v, gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);
@@ -1264,15 +1255,14 @@ namespace Rodin::Tests::Unit
     TrialFunction u(Vh);
     TestFunction v(Vh);
 
-    Solid::NeoHookean law(2.0, 1.0);
-    Solid::MaterialTangent tangent(law, u, v);
-
     // Non-trivial linearization point
     GridFunction gf(Vh);
     gf.getData().setZero();
     for (Index i = 0; i < static_cast<Index>(Vh.getSize()); ++i)
       gf.getData()(i) = 0.01 * static_cast<Real>(i % 3);
-    tangent.setDisplacement(gf);
+
+    Solid::NeoHookean law(2.0, 1.0);
+    Solid::MaterialTangent tangent(law, u, v, gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);
@@ -1296,14 +1286,13 @@ namespace Rodin::Tests::Unit
     TrialFunction u(Vh);
     TestFunction v(Vh);
 
-    Solid::NeoHookean law(2.0, 1.0);
-    Solid::MaterialTangent tangent(law, u, v);
-
     GridFunction gf(Vh);
     gf.getData().setZero();
     for (Index i = 0; i < static_cast<Index>(Vh.getSize()); ++i)
       gf.getData()(i) = 0.01 * static_cast<Real>(i % 3);
-    tangent.setDisplacement(gf);
+
+    Solid::NeoHookean law(2.0, 1.0);
+    Solid::MaterialTangent tangent(law, u, v, gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);
@@ -1330,18 +1319,16 @@ namespace Rodin::Tests::Unit
     TrialFunction u(Vh);
     TestFunction v(Vh);
 
-    Solid::NeoHookean law(2.0, 1.0);
-    Solid::MaterialTangent tangent(law, u, v);
+    GridFunction gf(Vh);
+    gf.getData().setZero();
 
+    Solid::NeoHookean law(2.0, 1.0);
+    Solid::MaterialTangent tangent(law, u, v, gf);
     bool inputCalled = false;
     tangent.setInput([&](Solid::ConstitutivePoint& cp) {
       inputCalled = true;
       cp.set<Solid::Tags::Activation>(1.0);
     });
-
-    GridFunction gf(Vh);
-    gf.getData().setZero();
-    tangent.setDisplacement(gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);

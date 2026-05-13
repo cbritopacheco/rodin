@@ -148,13 +148,15 @@ namespace
     PETSc::Variational::TestFunction  zeta(fes);
 
     constexpr PetscScalar gamma = 2.0;
+    constexpr PetscScalar defect = 3.0;
     const PetscInt n = static_cast<PetscInt>(fes.getSize());
     size_t begin = 0;
     size_t end = 0;
     fes.getOwnershipRange(begin, end);
     const PetscInt localSize = static_cast<PetscInt>(end - begin);
 
-    auto dbc = DirichletBC(u, RealFunction(gamma) * eta);
+    auto dbc =
+      DirichletBC(u, RealFunction(gamma) * eta, RealFunction(defect));
     dbc.assemble();
     using IdentifiedDOFs = DirichletBCBase<Real>::IdentifiedDOFs;
     ASSERT_TRUE(std::holds_alternative<IdentifiedDOFs>(dbc.getDOFs()));
@@ -241,7 +243,12 @@ namespace
       r = master;
       ierr = VecGetValues(b, 1, &r, &value);
       ASSERT_EQ(ierr, PETSC_SUCCESS);
-      EXPECT_NEAR(value, coefficient * 7.0, 1e-14);
+      EXPECT_NEAR(value, coefficient * 7.0 - coefficient * 2.0 * defect, 1e-14);
+
+      r = slave;
+      ierr = VecGetValues(b, 1, &r, &value);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      EXPECT_NEAR(value, defect, 1e-14);
     }
   }
 

@@ -342,11 +342,9 @@ int main(int, char**)
     u = uPred;
 
     // ---- nonlinear solid operators ----------------------------------------
-    Solid::MaterialTangent tangent(law, du, w);
-    tangent.setDisplacement(u);
+    Solid::MaterialTangent tangent(law, du, w, u);
 
-    Solid::InternalForce internal(law, w);
-    internal.setDisplacement(u);
+    Solid::InternalForce internal(law, w, u);
 
     // Effective nonlinear problem:
     //

@@ -414,6 +414,109 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(A.cols(), expected);
   }
 
+  TEST(Assembly_OpenMP_Problem, AffineIdentificationDefectMatchesSequential)
+  {
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    mesh.getConnectivity().compute(1, 2);
+
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TestFunction  v(fes);
+    TrialFunction eta(fes);
+    TestFunction  zeta(fes);
+
+    constexpr Real gamma = 2.0;
+    constexpr Real defect = 3.0;
+    const Index n = static_cast<Index>(fes.getSize());
+    const Index nTotal = 2 * n;
+
+    BilinearForm uu(u, v);
+    uu.getOperator().resize(n, n);
+    std::vector<Eigen::Triplet<Real>> triplets;
+    for (Index i = 0; i < n; i++)
+      triplets.emplace_back(i, i, 1.0);
+    uu.getOperator().setFromTriplets(triplets.begin(), triplets.end());
+
+    auto bc =
+      DirichletBC(
+          u,
+          RealFunction(gamma) * eta,
+          RealFunction(defect));
+    LinearForm zero(v);
+    zero.getVector().resize(n);
+    zero.getVector().setZero();
+
+    auto body = uu + bc - zero;
+
+    using LinearSystemType =
+      Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
+    using ProblemType =
+      Problem<LinearSystemType,
+              decltype(u), decltype(v), decltype(eta), decltype(zeta)>;
+
+    auto trialFunctions = Tuple{ std::ref(u), std::ref(eta) };
+    auto testFunctions  = Tuple{ std::ref(v), std::ref(zeta) };
+
+    std::array<size_t, 2> offsets{ 0, static_cast<size_t>(n) };
+
+    boost::bimap<FormLanguage::Base::UUID, size_t> trialUUIDMap;
+    boost::bimap<FormLanguage::Base::UUID, size_t> testUUIDMap;
+    trialUUIDMap.right.insert({ 0, u.getUUID() });
+    trialUUIDMap.right.insert({ 1, eta.getUUID() });
+    testUUIDMap.right.insert({ 0, v.getUUID() });
+    testUUIDMap.right.insert({ 1, zeta.getUUID() });
+
+    Assembly::ProblemAssemblyInput<
+      std::decay_t<decltype(body)>,
+      decltype(u), decltype(v), decltype(eta), decltype(zeta)> input(
+          body,
+          trialFunctions,
+          testFunctions,
+          offsets,
+          offsets,
+          trialUUIDMap,
+          testUUIDMap,
+          static_cast<size_t>(nTotal),
+          static_cast<size_t>(nTotal));
+
+    LinearSystemType seqLS;
+    LinearSystemType ompLS;
+    Assembly::Sequential<LinearSystemType, ProblemType> seqAsm;
+    Assembly::OpenMP<LinearSystemType, ProblemType> ompAsm;
+    seqAsm.execute(seqLS, input);
+    ompAsm.execute(ompLS, input);
+
+    const auto& ASeq = seqLS.getOperator();
+    const auto& AOmp = ompLS.getOperator();
+    const auto& bSeq = seqLS.getVector();
+    const auto& bOmp = ompLS.getVector();
+    ASSERT_EQ(ASeq.rows(), static_cast<Eigen::Index>(nTotal));
+    ASSERT_EQ(AOmp.rows(), ASeq.rows());
+    ASSERT_EQ(AOmp.cols(), ASeq.cols());
+    ASSERT_EQ(bOmp.size(), bSeq.size());
+
+    for (Index i = 0; i < nTotal; i++)
+    {
+      EXPECT_NEAR(bOmp.coeff(i), bSeq.coeff(i), 1e-14) << "row " << i;
+      for (Index j = 0; j < nTotal; j++)
+      {
+        EXPECT_NEAR(AOmp.coeff(i, j), ASeq.coeff(i, j), 1e-14)
+          << "entry (" << i << ", " << j << ")";
+      }
+    }
+
+    for (Index i = 0; i < n; i++)
+    {
+      EXPECT_NEAR(bOmp.coeff(i), defect, 1e-14) << "row " << i;
+      EXPECT_NEAR(AOmp.coeff(i, i), 1.0, 1e-14);
+      EXPECT_NEAR(AOmp.coeff(i, n + i), -gamma, 1e-14);
+      EXPECT_NEAR(bOmp.coeff(n + i), -gamma * defect, 1e-14)
+        << "projected row " << (n + i);
+      EXPECT_NEAR(AOmp.coeff(n + i, n + i), gamma * gamma, 1e-14)
+        << "projected entry (" << (n + i) << ", " << (n + i) << ")";
+    }
+  }
+
   TEST(Assembly_OpenMP_Problem, IdentificationVectorMasterMatchesSequential)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 2, 2 });

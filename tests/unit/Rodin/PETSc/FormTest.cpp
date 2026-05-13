@@ -22,6 +22,128 @@ using namespace Rodin::Variational;
 namespace
 {
   template <template <class, class> class Assembler>
+  void checkPETScAffineIdentificationDefect()
+  {
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    mesh.getConnectivity().compute(1, 2);
+
+    P1 fes(mesh);
+    PETSc::Variational::TrialFunction u(fes);
+    PETSc::Variational::TestFunction  v(fes);
+    PETSc::Variational::TrialFunction eta(fes);
+    PETSc::Variational::TestFunction  zeta(fes);
+
+    constexpr PetscScalar gamma = 2.0;
+    constexpr PetscScalar defect = 3.0;
+    const PetscInt n = static_cast<PetscInt>(fes.getSize());
+    const PetscInt nTotal = 2 * n;
+
+    auto bc =
+      DirichletBC(u, RealFunction(gamma) * eta, RealFunction(defect));
+
+    BilinearForm uu(u, v);
+    auto& op = uu.getOperator();
+    PetscErrorCode ierr = MatSetSizes(op, n, n, n, n);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = MatSetFromOptions(op);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = MatSetUp(op);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    for (PetscInt i = 0; i < n; i++)
+    {
+      ierr = MatSetValue(op, i, i, 1.0, INSERT_VALUES);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+    }
+    ierr = MatAssemblyBegin(op, MAT_FINAL_ASSEMBLY);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = MatAssemblyEnd(op, MAT_FINAL_ASSEMBLY);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+
+    LinearForm zero(v);
+    auto& zeroVec = zero.getVector();
+    ierr = VecSetSizes(zeroVec, n, n);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = VecSetFromOptions(zeroVec);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = VecSetUp(zeroVec);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = VecZeroEntries(zeroVec);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = VecAssemblyBegin(zeroVec);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = VecAssemblyEnd(zeroVec);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+
+    auto body = uu + bc - zero;
+
+    using LinearSystemType = PETSc::Math::LinearSystem;
+    using ProblemType =
+      Problem<LinearSystemType,
+              decltype(u), decltype(v), decltype(eta), decltype(zeta)>;
+
+    auto trialFunctions = Tuple{ std::ref(u), std::ref(eta) };
+    auto testFunctions  = Tuple{ std::ref(v), std::ref(zeta) };
+
+    std::array<size_t, 2> offsets{ 0, static_cast<size_t>(n) };
+
+    boost::bimap<FormLanguage::Base::UUID, size_t> trialUUIDMap;
+    boost::bimap<FormLanguage::Base::UUID, size_t> testUUIDMap;
+    trialUUIDMap.right.insert({ 0, u.getUUID() });
+    trialUUIDMap.right.insert({ 1, eta.getUUID() });
+    testUUIDMap.right.insert({ 0, v.getUUID() });
+    testUUIDMap.right.insert({ 1, zeta.getUUID() });
+
+    Assembly::ProblemAssemblyInput<
+      std::decay_t<decltype(body)>,
+      decltype(u), decltype(v), decltype(eta), decltype(zeta)> input(
+          body,
+          trialFunctions,
+          testFunctions,
+          offsets,
+          offsets,
+          trialUUIDMap,
+          testUUIDMap,
+          static_cast<size_t>(nTotal),
+          static_cast<size_t>(nTotal));
+
+    LinearSystemType ls(PETSC_COMM_SELF);
+    Assembler<LinearSystemType, ProblemType> assembler;
+    assembler.execute(ls, input);
+
+    auto& A = ls.getOperator();
+    auto& b = ls.getVector();
+
+    for (PetscInt i = 0; i < n; i++)
+    {
+      PetscScalar value = 0;
+      ierr = VecGetValues(b, 1, &i, &value);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      EXPECT_NEAR(value, defect, 1e-14) << "row " << i;
+
+      PetscInt col = i;
+      ierr = MatGetValues(A, 1, &i, 1, &col, &value);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      EXPECT_NEAR(value, 1.0, 1e-14) << "entry (" << i << ", " << col << ")";
+
+      col = n + i;
+      ierr = MatGetValues(A, 1, &i, 1, &col, &value);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      EXPECT_NEAR(value, -gamma, 1e-14) << "entry (" << i << ", " << col << ")";
+
+      PetscInt row = n + i;
+      ierr = VecGetValues(b, 1, &row, &value);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      EXPECT_NEAR(value, -gamma * defect, 1e-14) << "projected row " << row;
+
+      col = n + i;
+      ierr = MatGetValues(A, 1, &row, 1, &col, &value);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      EXPECT_NEAR(value, gamma * gamma, 1e-14)
+        << "projected entry (" << row << ", " << col << ")";
+    }
+  }
+
+  template <template <class, class> class Assembler>
   void checkPETScVectorMasterIdentification()
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -501,6 +623,11 @@ namespace
     checkPETScVectorMasterIdentification<PETSc::Assembly::Sequential>();
   }
 
+  TEST(PETSc_Form, SequentialAffineIdentificationHasDefect)
+  {
+    checkPETScAffineIdentificationDefect<PETSc::Assembly::Sequential>();
+  }
+
   TEST(PETSc_Form, SequentialSelfIdentificationMatchesZeroValueConstraint)
   {
     checkPETScSelfIdentificationMatchesZeroValueConstraint<PETSc::Assembly::Sequential>();
@@ -510,6 +637,11 @@ namespace
   TEST(PETSc_Form, OpenMPVectorMasterIdentificationProjectsMatrixAndVector)
   {
     checkPETScVectorMasterIdentification<PETSc::Assembly::OpenMP>();
+  }
+
+  TEST(PETSc_Form, OpenMPAffineIdentificationHasDefect)
+  {
+    checkPETScAffineIdentificationDefect<PETSc::Assembly::OpenMP>();
   }
 
   TEST(PETSc_Form, OpenMPSelfIdentificationMatchesZeroValueConstraint)
