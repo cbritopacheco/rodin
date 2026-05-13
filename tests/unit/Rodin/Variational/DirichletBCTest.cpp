@@ -630,6 +630,54 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(dofs.size(), expectedVertices.size());
   }
 
+  TEST(Rodin_Variational_DirichletBC, IdentificationOnTaggedInteriorFace)
+  {
+    constexpr Attribute InterfaceAttribute = 9;
+
+    Mesh mesh = makeUnitSquareMesh(4);
+    const size_t faceDim = mesh.getDimension() - 1;
+
+    FlatSet<Index> interfaceVertices;
+    bool tagged = false;
+    for (auto it = mesh.getFace(); !it.end(); ++it)
+    {
+      const Index face = it->getIndex();
+      if (mesh.isBoundary(face))
+        continue;
+
+      mesh.setAttribute({ faceDim, face }, InterfaceAttribute);
+      for (const auto vertex : it->getVertices())
+        interfaceVertices.insert(vertex);
+      tagged = true;
+      break;
+    }
+    ASSERT_TRUE(tagged);
+    ASSERT_FALSE(interfaceVertices.empty());
+
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TrialFunction v(fes);
+
+    DirichletBC dbc(u, RealFunction(2.0) * v);
+    dbc.on(InterfaceAttribute);
+    dbc.assemble();
+
+    using IdentifiedDOFs = DirichletBCBase<Real>::IdentifiedDOFs;
+    ASSERT_TRUE(std::holds_alternative<IdentifiedDOFs>(dbc.getDOFs()));
+    const auto& dofs = std::get<IdentifiedDOFs>(dbc.getDOFs());
+    ASSERT_EQ(dofs.size(), interfaceVertices.size());
+
+    for (const auto vertex : interfaceVertices)
+    {
+      const auto it = dofs.find(vertex);
+      ASSERT_NE(it, dofs.end());
+      ASSERT_EQ(it->second.first.size(), 1);
+      ASSERT_EQ(it->second.second.size(), 1);
+      EXPECT_EQ(it->second.first.coeff(0), vertex);
+      EXPECT_DOUBLE_EQ(it->second.second.coeff(0), 2.0);
+    }
+  }
+
   /**
    * @brief getValue() returns a reference whose getUUID() matches v's UUID
    * when the value is a plain shape function.

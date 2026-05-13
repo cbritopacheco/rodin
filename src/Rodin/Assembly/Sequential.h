@@ -1610,24 +1610,24 @@ namespace Rodin::Assembly
         res.clear();
         for (Index i = 0; i < faceCount; i++)
         {
-          if (mesh.isBoundary(i))
-          {
-            if (!essBdr.empty())
-            {
-              const auto a = mesh.getAttribute(faceDim, i);
-              if (!a || !essBdr.count(*a))
-                continue;
-            }
+          if (essBdr.empty() && !mesh.isBoundary(i))
+            continue;
 
-            const auto& fe = fes.getFiniteElement(faceDim, i);
-            const auto& mapping = fes.getPullback({ faceDim, i }, value);
-            for (Index local = 0; local < fe.getCount(); local++)
-            {
-              const Index global = fes.getGlobalIndex({ faceDim, i }, local);
-              auto find = res.find(global);
-              if (find == res.end())
-                res.insert(find, std::pair{ global, fe.getLinearForm(local)(mapping) });
-            }
+          if (!essBdr.empty())
+          {
+            const auto a = mesh.getAttribute(faceDim, i);
+            if (!a || !essBdr.count(*a))
+              continue;
+          }
+
+          const auto& fe = fes.getFiniteElement(faceDim, i);
+          const auto& mapping = fes.getPullback({ faceDim, i }, value);
+          for (Index local = 0; local < fe.getCount(); local++)
+          {
+            const Index global = fes.getGlobalIndex({ faceDim, i }, local);
+            auto find = res.find(global);
+            if (find == res.end())
+              res.insert(find, std::pair{ global, fe.getLinearForm(local)(mapping) });
           }
         }
       }
@@ -1642,17 +1642,18 @@ namespace Rodin::Assembly
    * @brief Sequential assembler for the identification Dirichlet BC
    *        `u = A(v)`.
    *
-   * Iterates the boundary faces of @f$ u @f$'s mesh that match the requested
-   * essential-boundary attributes; on each face, the slave DOFs (from
+   * Iterates the default exterior boundary when no attributes are specified.
+   * When attributes are specified, every tagged codimension-one face is
+   * eligible, including interior interface faces. On each selected face, the
+   * slave DOFs (from
    * @f$ u @f$'s FES) and the master DOFs (from @f$ v @f$'s FES) are obtained
    * exactly via @c FiniteElementSpaceBase::getDOFs(face) — no geometric
    * matching, no tolerance.
    *
-   * For each slave DOF a pair @c (masters, coefficients) is emitted. The
-   * coefficient computation uses the simple-case shortcut (coefficient
-   * @c 1.0 for the matching local index), which is exact for Lagrange
-   * same-FES same-mesh identification with @f$ A = \mathrm{id} @f$. The
-   * extension point for general @f$ A(v) @f$ is documented inline.
+   * For each slave DOF a pair @c (masters, coefficients) is emitted. Each
+   * coefficient is computed as @f$ \ell_s^u(A(\phi_j^v)) @f$: the master
+   * basis is evaluated through @f$ A(v) @f$ and then sampled by the slave
+   * finite element's DOF functional.
    */
   template <class Scalar, class Sol1, class FES1,
             class Derived2, class FES2,
@@ -1711,7 +1712,7 @@ namespace Rodin::Assembly
         res.clear();
         for (Index fi = 0; fi < faceCount; fi++)
         {
-          if (!mesh.isBoundary(fi))
+          if (essBdr.empty() && !mesh.isBoundary(fi))
             continue;
 
           if (!essBdr.empty())

@@ -158,16 +158,17 @@ namespace Rodin::Assembly
         const auto& mesh = fes.getMesh();
         const size_t faceDim = mesh.getDimension() - 1;
 
-        for (auto it = mesh.getBoundary(); it; ++it)
+        res.clear();
+
+        auto assembleFace = [&](const Geometry::Polytope& face)
         {
-          const auto& face = *it;
           const Index i = face.getIndex();
 
           if (!essBdr.empty())
           {
             const auto a = face.getAttribute();
             if (!a || !essBdr.contains(*a))
-              continue;
+              return;
           }
 
           const auto& fe = fes.getFiniteElement(faceDim, i);
@@ -184,6 +185,17 @@ namespace Rodin::Assembly
               res.emplace_hint(pos, global, s);
             }
           }
+        };
+
+        if (essBdr.empty())
+        {
+          for (auto it = mesh.getBoundary(); it; ++it)
+            assembleFace(*it);
+        }
+        else
+        {
+          for (auto it = mesh.getFace(); it; ++it)
+            assembleFace(*it);
         }
       }
 
@@ -244,15 +256,16 @@ namespace Rodin::Assembly
         const auto& mesh  = fes_u.getMesh();
         const size_t faceDim = mesh.getDimension() - 1;
 
-        for (auto it = mesh.getBoundary(); it; ++it)
+        res.clear();
+
+        auto assembleFace = [&](const Geometry::Polytope& face)
         {
-          const auto& face = *it;
           const Index fi = face.getIndex();
 
           if (!essBdr.empty())
           {
             const auto a = face.getAttribute();
-            if (!a || !essBdr.contains(*a)) continue;
+            if (!a || !essBdr.contains(*a)) return;
           }
 
           const auto& fe_u = fes_u.getFiniteElement(faceDim, fi);
@@ -308,6 +321,17 @@ namespace Rodin::Assembly
             res.emplace_hint(pos, slave,
                 std::pair{ std::move(masters), std::move(coeffs) });
           }
+        };
+
+        if (essBdr.empty())
+        {
+          for (auto it = mesh.getBoundary(); it; ++it)
+            assembleFace(*it);
+        }
+        else
+        {
+          for (auto it = mesh.getFace(); it; ++it)
+            assembleFace(*it);
         }
       }
 

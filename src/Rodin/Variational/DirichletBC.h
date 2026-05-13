@@ -9,8 +9,10 @@
  * @brief Essential (Dirichlet) boundary conditions, in two flavours.
  *
  * Rodin's @ref DirichletBC encodes a strongly-imposed essential constraint on
- * a slave trial function @f$ u\in V_h^u @f$ over a subset
- * @f$ \Gamma_D \subset \mathcal{B}_h @f$ of the boundary. Two flavours share
+ * a slave trial function @f$ u\in V_h^u @f$ over selected codimension-one
+ * mesh facets. With no `.on(...)` selector, this means the exterior boundary.
+ * With attributes, this also includes tagged interior facets such as FSI
+ * interfaces. Two flavours share
  * the same template name and the same abstract base
  * @ref Rodin::Variational::DirichletBCBase, separated only by the type of the
  * second argument:
@@ -80,8 +82,8 @@
  *
  * # Exactness, by construction
  *
- * Slave/master DOF pairings are determined entirely by the FES's own
- * connectivity (`fes_u.getDOFs(faceDim, fi)` and
+ * Slave/master DOF pairings are determined entirely by the selected face and
+ * the FES's own connectivity (`fes_u.getDOFs(faceDim, fi)` and
  * `fes_v.getDOFs(faceDim, fi)`). There is no geometric search and no
  * tolerance anywhere in the assembly — the FE's DOF-functional contract
  * (`fe_u.getLinearForm(s)` applied to a callable
@@ -157,9 +159,12 @@
  * # Boundary specification
  *
  * `.on(attr)` (or `.on(attr1, attr2, ...)`) selects the subset
- * @f$ \Gamma_D @f$ from the mesh's boundary attribute set. Both slave and
- * master DOFs are read from the *same* face polytopes — the assembler
- * never matches DOFs across distinct faces (no geometric pairing). For a
+ * @f$ \Gamma_D @f$ from the mesh's codimension-one attribute set. If no
+ * attributes are given, only exterior boundary faces are selected; if
+ * attributes are given, tagged interior interface faces are selected too.
+ * Both slave and master DOFs are read from the *same* face polytopes — the
+ * assembler never matches DOFs across distinct faces (no geometric pairing).
+ * For a
  * cross-face periodic relation use @ref Rodin::Variational::PeriodicBC,
  * which takes an explicit DOF adjacency map.
  *
@@ -363,7 +368,8 @@ namespace Rodin::Variational
    *   A_{r,g_s}\leftarrow 0,\; r\neq g_s.
    * @f]
    *
-   * `.on(attr...)` selects the boundary attribute(s) for @f$ \Gamma_D @f$.
+   * `.on(attr...)` selects tagged codimension-one facets for
+   * @f$ \Gamma_D @f$; without `.on(...)`, all exterior boundary faces are used.
    *
    * @tparam Solution Solution type of the trial function being constrained
    * @tparam FES Finite element space of the trial function
@@ -778,10 +784,9 @@ namespace Rodin::Variational
       /**
        * @brief Sets @f$ \Gamma_D @f$ to a single boundary attribute.
        *
-       * Selects the subset of @f$ \mathcal{B}_h @f$ over which the
-       * identification @f$ u=A(v) @f$ is enforced. Both slave and master
-       * DOFs are read from the *same* face polytopes — there is no
-       * cross-face matching.
+       * Selects tagged codimension-one facets over which the identification
+       * @f$ u=A(v) @f$ is enforced. Both slave and master DOFs are read from
+       * the *same* face polytopes — there is no cross-face matching.
        */
       constexpr
       DirichletBC& on(Geometry::Attribute bdrAtr)
@@ -824,8 +829,10 @@ namespace Rodin::Variational
        *        @f$ u_s = \sum_j C_{sj}\,v_j @f$ for every slave DOF on
        *        @f$ \Gamma_D @f$.
        *
-       * Iterates the boundary face polytopes whose attribute lies in
-       * @ref getAttributes. For each face @f$ K @f$ and slave-local index
+       * Iterates exterior boundary faces by default. When attributes are
+       * present, it iterates codimension-one face polytopes whose attribute
+       * lies in @ref getAttributes, including interior interface facets. For
+       * each face @f$ K @f$ and slave-local index
        * @f$ s @f$, computes
        * @f[
        *   C_{sj} \;=\; \ell_s^{u,K}\!\bigl(A(\varphi_j^{v,K})\bigr),

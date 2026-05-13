@@ -736,7 +736,7 @@ namespace Rodin::Assembly
 #pragma omp for
           for (Index i = 0; i < faceCount; ++i)
           {
-            if (!mesh.isBoundary(i)) continue;
+            if (essBdr.empty() && !mesh.isBoundary(i)) continue;
             if (!essBdr.empty())
             {
               const auto a = mesh.getAttribute(faceDim, i);
@@ -2070,8 +2070,10 @@ namespace Rodin::Assembly
   /**
    * @brief OpenMP assembler for the identification Dirichlet BC `u = A(v)`.
    *
-   * Same logic as the sequential variant; the boundary face loop is the
-   * cheaper part of identification assembly so we keep it sequential here.
+   * Same logic as the sequential variant; the face loop is the cheaper part
+   * of identification assembly so we keep it sequential here. With no
+   * attributes it scans the exterior boundary. With attributes it accepts
+   * matching tagged codimension-one faces, including interior interfaces.
    * The expensive part (the linear-system constraint application) is
    * parallelized inside the problem-level OpenMP assembler above.
    */
@@ -2116,7 +2118,7 @@ namespace Rodin::Assembly
         res.clear();
         for (Index fi = 0; fi < mesh.getFaceCount(); fi++)
         {
-          if (!mesh.isBoundary(fi)) continue;
+          if (essBdr.empty() && !mesh.isBoundary(fi)) continue;
           if (!essBdr.empty())
           {
             const auto a = mesh.getAttribute(faceDim, fi);
