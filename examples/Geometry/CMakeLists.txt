@@ -75,3 +75,11 @@ target_link_libraries(AttributeDetection PUBLIC Rodin::Geometry)
 
 add_executable(LevelSetDiscretizer LevelSetDiscretizer.cpp)
 target_link_libraries(LevelSetDiscretizer PUBLIC Rodin::Geometry Rodin::Variational)
+
+add_executable(LevelSetMovingCircle LevelSetMovingCircle.cpp)
+target_link_libraries(LevelSetMovingCircle
+  PUBLIC
+  Rodin::Adaptation
+  Rodin::Geometry
+  Rodin::IO
+  Rodin::Variational)

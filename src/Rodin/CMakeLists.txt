@@ -7,6 +7,7 @@ set(Rodin_HEADERS
   Solver.h
   Heart.h
   Variational.h
+  Adaptation.h
 )
 
 set(Rodin_SRCS
@@ -60,6 +61,7 @@ add_subdirectory(Context)
 add_subdirectory(Geometry)
 add_subdirectory(Assembly)
 add_subdirectory(Variational)
+add_subdirectory(Adaptation)
 add_subdirectory(FormLanguage)
 add_subdirectory(Serialization)
 
