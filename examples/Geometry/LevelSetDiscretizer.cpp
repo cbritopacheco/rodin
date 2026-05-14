@@ -8,7 +8,6 @@
 #include <array>
 #include <fstream>
 #include <iostream>
-#include <limits>
 
 #include <Rodin/Geometry.h>
 #include <Rodin/Geometry/LevelSetInterfaceGraph.h>
@@ -48,6 +47,8 @@ int main(int, char**)
 
   LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {n, n});
   mesh.scale(1.0 / static_cast<Real>(n - 1));
+  mesh.getConnectivity().compute(2, 1);
+  mesh.getConnectivity().compute(1, 0);
   mesh.save("LevelSetInterfaceGraph.background.mesh", IO::FileFormat::MEDIT);
 
   P1 phiSpace(mesh);
@@ -65,16 +66,17 @@ int main(int, char**)
     {0.70, 0.35, 0.14},
     {0.50, 0.72, 0.12}
   }};
+  const Real openLineX = 0.08;
 
   for (Index i = 0; i < mesh.getVertexCount(); ++i)
   {
     const auto x = mesh.getVertexCoordinates(i);
-    Real value = std::numeric_limits<Real>::infinity();
+    Real value = x[0] - openLineX;
     for (const auto& circle : circles)
     {
       const Real dx = x[0] - circle.cx;
       const Real dy = x[1] - circle.cy;
-      value = std::min(value, dx * dx + dy * dy - circle.r * circle.r);
+      value *= dx * dx + dy * dy - circle.r * circle.r;
     }
     phi[i] = value;
   }

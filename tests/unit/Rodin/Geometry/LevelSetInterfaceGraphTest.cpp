@@ -121,6 +121,27 @@ namespace Rodin::Tests::Unit
     return res;
   }
 
+  static void expectRawPSLGMatchesGraph(const InterfaceGraph& graph)
+  {
+    const auto pslg = InterfaceGraphPSLGBuilder().build(graph);
+
+    EXPECT_EQ(pslg.vertices.size(), graph.vertices.size());
+    ASSERT_EQ(pslg.segments.size(), graph.edges.size());
+
+    for (Index i = 0; i < pslg.segments.size(); ++i)
+    {
+      const auto& segment = pslg.segments[i];
+      const auto& edge = graph.edges[i];
+
+      EXPECT_EQ(segment.v0, edge.v0);
+      EXPECT_EQ(segment.v1, edge.v1);
+      ASSERT_TRUE(segment.attribute);
+      EXPECT_EQ(*segment.attribute, edge.interfaceAttribute);
+      ASSERT_EQ(segment.sourceInterfaceEdges.size(), 1);
+      EXPECT_EQ(segment.sourceInterfaceEdges.front(), i);
+    }
+  }
+
   TEST(Rodin_Geometry_LevelSetInterfaceGraph, TriangleAllNegative)
   {
     auto mesh = makeSingleTriangle();
@@ -237,6 +258,30 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(graph.edges.empty());
     ASSERT_EQ(graph.degenerateCells.size(), 1);
     EXPECT_EQ(graph.degenerateCells.front(), 0);
+  }
+
+  TEST(Rodin_Geometry_LevelSetInterfaceGraph, IsolatedZeroPositiveNeighborsCreatesNoInterface)
+  {
+    auto mesh = makeSingleTriangle();
+    const auto graph = extract(mesh, {0, 1, 1});
+
+    EXPECT_TRUE(graph.vertices.empty());
+    EXPECT_TRUE(graph.edges.empty());
+    EXPECT_TRUE(graph.chains.empty());
+    EXPECT_TRUE(graph.degenerateCells.empty());
+    EXPECT_TRUE(graph.invalidCells.empty());
+  }
+
+  TEST(Rodin_Geometry_LevelSetInterfaceGraph, IsolatedZeroNegativeNeighborsCreatesNoInterface)
+  {
+    auto mesh = makeSingleTriangle();
+    const auto graph = extract(mesh, {0, -1, -1});
+
+    EXPECT_TRUE(graph.vertices.empty());
+    EXPECT_TRUE(graph.edges.empty());
+    EXPECT_TRUE(graph.chains.empty());
+    EXPECT_TRUE(graph.degenerateCells.empty());
+    EXPECT_TRUE(graph.invalidCells.empty());
   }
 
   TEST(Rodin_Geometry_LevelSetInterfaceGraph, SharedCutEdgeProducesOneVertex)
@@ -390,5 +435,25 @@ namespace Rodin::Tests::Unit
     const auto graph = extract(mesh, {1, 0, 0, -1});
 
     EXPECT_EQ(unorderedEdgePairs(graph).size(), graph.edges.size());
+  }
+
+  TEST(Rodin_Geometry_LevelSetInterfaceGraph, BuildsRawPSLGForOpenChain)
+  {
+    auto mesh = makeTwoTriangleSquare();
+    const auto graph = extract(mesh, {-1, 1, -1, 1});
+
+    ASSERT_EQ(graph.chains.size(), 1);
+    ASSERT_FALSE(graph.chains.front().closed);
+    expectRawPSLGMatchesGraph(graph);
+  }
+
+  TEST(Rodin_Geometry_LevelSetInterfaceGraph, BuildsRawPSLGForClosedChain)
+  {
+    auto mesh = makeFourTriangleFan();
+    const auto graph = extract(mesh, {1, 1, 1, 1, -1});
+
+    ASSERT_EQ(graph.chains.size(), 1);
+    ASSERT_TRUE(graph.chains.front().closed);
+    expectRawPSLGMatchesGraph(graph);
   }
 }

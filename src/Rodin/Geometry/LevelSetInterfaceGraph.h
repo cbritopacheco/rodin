@@ -27,7 +27,7 @@
 
 namespace Rodin::Geometry
 {
-  enum class Sign
+  enum class LevelSetSign
   {
     Negative,
     Zero,
@@ -69,6 +69,12 @@ namespace Rodin::Geometry
 
   struct InterfaceChain
   {
+    // Open chains satisfy vertices.size() == edges.size() + 1, with
+    // edges[k] connecting vertices[k] to vertices[k + 1].
+    // Closed chains satisfy vertices.size() == edges.size(), with
+    // edges[k] connecting vertices[k] to vertices[(k + 1) % vertices.size()].
+    // The orientation is deterministic, but does not yet encode inside/outside
+    // or positive/negative side.
     std::vector<Index> vertices;
     std::vector<Index> edges;
     bool closed = false;
@@ -82,6 +88,47 @@ namespace Rodin::Geometry
 
     std::vector<Index> degenerateCells;
     std::vector<Index> invalidCells;
+  };
+
+  struct ProtectedSegment
+  {
+    Index v0 = std::numeric_limits<Index>::max();
+    Index v1 = std::numeric_limits<Index>::max();
+    Optional<Attribute> attribute;
+    std::vector<Index> sourceInterfaceEdges;
+  };
+
+  struct PlanarStraightLineGraph
+  {
+    std::vector<Math::SpatialPoint> vertices;
+    std::vector<ProtectedSegment> segments;
+  };
+
+  class InterfaceGraphPSLGBuilder
+  {
+    public:
+      PlanarStraightLineGraph build(const InterfaceGraph& graph) const
+      {
+        PlanarStraightLineGraph res;
+        res.vertices.reserve(graph.vertices.size());
+        for (const auto& vertex : graph.vertices)
+          res.vertices.push_back(vertex.x);
+
+        res.segments.reserve(graph.edges.size());
+        for (Index i = 0; i < graph.edges.size(); ++i)
+        {
+          const auto& edge = graph.edges[i];
+
+          ProtectedSegment segment;
+          segment.v0 = edge.v0;
+          segment.v1 = edge.v1;
+          segment.attribute = edge.interfaceAttribute;
+          segment.sourceInterfaceEdges.push_back(i);
+
+          res.segments.push_back(std::move(segment));
+        }
+        return res;
+      }
   };
 
   template <class... Params>
@@ -127,15 +174,15 @@ namespace Rodin::Geometry
         return m_interfaceAttribute;
       }
 
-      Sign classify(Real value) const
+      LevelSetSign classify(Real value) const
       {
         if (!std::isfinite(value))
-          return Sign::Invalid;
+          return LevelSetSign::Invalid;
         if (value < -m_signTolerance)
-          return Sign::Negative;
+          return LevelSetSign::Negative;
         if (value > m_signTolerance)
-          return Sign::Positive;
-        return Sign::Zero;
+          return LevelSetSign::Positive;
+        return LevelSetSign::Zero;
       }
 
       GraphType extract() const
@@ -148,12 +195,10 @@ namespace Rodin::Geometry
             << "Expected a mesh of topological dimension 2."
             << Alert::Raise;
 
-        // Connectivity is a mesh topology cache; fill the required incidences
-        // lazily so extraction works on freshly built triangular meshes.
-        auto& mutableMesh = const_cast<MeshType&>(mesh);
-        auto& conn = mutableMesh.getConnectivity();
-        conn.compute(2, 1);
-        conn.compute(1, 0);
+        RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 2, 1);
+        RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 1, 0);
+
+        const auto& conn = mesh.getConnectivity();
 
         for (Index c = 0; c < mesh.getCellCount(); ++c)
         {
@@ -199,12 +244,12 @@ namespace Rodin::Geometry
           const Index b = e(1);
           const Real fa = phi[a];
           const Real fb = phi[b];
-          const Sign sa = classify(fa);
-          const Sign sb = classify(fb);
+          const LevelSetSign sa = classify(fa);
+          const LevelSetSign sb = classify(fb);
 
-          if (sa == Sign::Zero)
+          if (sa == LevelSetSign::Zero)
             return makeOriginalVertex(a);
-          if (sb == Sign::Zero)
+          if (sb == LevelSetSign::Zero)
             return makeOriginalVertex(b);
 
           const Real denom = fa - fb;
@@ -276,8 +321,13 @@ namespace Rodin::Geometry
             const auto sameProvenance =
               [&provenance](const InterfaceEdgeProvenance& existing)
               {
+                const bool sameParentEdges =
+                  existing.parentEdges == provenance.parentEdges ||
+                  (existing.parentEdges[0] == provenance.parentEdges[1] &&
+                   existing.parentEdges[1] == provenance.parentEdges[0]);
+
                 return existing.parentCell == provenance.parentCell &&
-                       existing.parentEdges == provenance.parentEdges;
+                       sameParentEdges;
               };
             if (std::find_if(edge.provenance.begin(), edge.provenance.end(),
                              sameProvenance) == edge.provenance.end())
@@ -304,7 +354,7 @@ namespace Rodin::Geometry
           const auto& cell = conn.getPolytope(2, c);
           const auto& cellEdges = conn.getIncidence({2, 1}, c);
 
-          std::array<Sign, 3> signs;
+          std::array<LevelSetSign, 3> signs;
           size_t negativeCount = 0;
           size_t zeroCount = 0;
           size_t positiveCount = 0;
@@ -315,16 +365,16 @@ namespace Rodin::Geometry
             signs[i] = classify(phi[cell(i)]);
             switch (signs[i])
             {
-              case Sign::Negative:
+              case LevelSetSign::Negative:
                 negativeCount++;
                 break;
-              case Sign::Zero:
+              case LevelSetSign::Zero:
                 zeroCount++;
                 break;
-              case Sign::Positive:
+              case LevelSetSign::Positive:
                 positiveCount++;
                 break;
-              case Sign::Invalid:
+              case LevelSetSign::Invalid:
                 invalid = true;
                 break;
             }
@@ -345,13 +395,16 @@ namespace Rodin::Geometry
           if (negativeCount == 3 || positiveCount == 3)
             continue;
 
+          if (zeroCount == 1 && (negativeCount == 2 || positiveCount == 2))
+            continue;
+
           if (zeroCount == 2)
           {
             std::array<std::uint8_t, 2> zeroLocal = {{0, 0}};
             size_t pos = 0;
             for (std::uint8_t i = 0; i < 3; ++i)
             {
-              if (signs[i] == Sign::Zero)
+              if (signs[i] == LevelSetSign::Zero)
                 zeroLocal[pos++] = i;
             }
 
@@ -373,16 +426,20 @@ namespace Rodin::Geometry
             const std::uint8_t j = localEdge[1];
             const Index parentEdge = findCellEdge(cell, cellEdges, i, j);
 
-            if (signs[i] == Sign::Zero && signs[j] != Sign::Zero)
+            if (signs[i] == LevelSetSign::Zero &&
+                signs[j] != LevelSetSign::Zero)
             {
               addCandidate(candidates, { makeOriginalVertex(cell(i)), InvalidIndex });
             }
-            else if (signs[j] == Sign::Zero && signs[i] != Sign::Zero)
+            else if (signs[j] == LevelSetSign::Zero &&
+                     signs[i] != LevelSetSign::Zero)
             {
               addCandidate(candidates, { makeOriginalVertex(cell(j)), InvalidIndex });
             }
-            else if ((signs[i] == Sign::Negative && signs[j] == Sign::Positive) ||
-                     (signs[i] == Sign::Positive && signs[j] == Sign::Negative))
+            else if ((signs[i] == LevelSetSign::Negative &&
+                      signs[j] == LevelSetSign::Positive) ||
+                     (signs[i] == LevelSetSign::Positive &&
+                      signs[j] == LevelSetSign::Negative))
             {
               addCandidate(candidates, { makeEdgeVertex(parentEdge), parentEdge });
             }
