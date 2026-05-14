@@ -19,7 +19,7 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-static LocalMesh makeInterfaceMesh(const P1InterfaceGraph& graph)
+static LocalMesh makeInterfaceMesh(const InterfaceGraph& graph)
 {
   LocalMesh::Builder builder;
   builder
@@ -94,46 +94,71 @@ int main(int, char**)
   xdmf.close();
 
   std::ofstream points("LevelSetInterfaceGraph.points.csv");
-  points << "id,x,y,parent_edge,t,snapped,original_vertex\n";
+  points << "id,x,y,kind,original_vertex,parent_edge,t\n";
   for (Index i = 0; i < graph.vertices.size(); ++i)
   {
     const auto& v = graph.vertices[i];
     points << i << ','
            << v.x[0] << ','
            << v.x[1] << ','
-           << v.parentEdge << ','
-           << v.t << ','
-           << (v.snappedToOriginalVertex ? 1 : 0) << ',';
+           << (v.kind == InterfaceVertexKind::OriginalVertex ? "original" : "edge_cut")
+           << ',';
     if (v.originalVertex)
       points << *v.originalVertex;
+    points << ',';
+    if (v.parentEdge)
+      points << *v.parentEdge;
+    points << ',';
+    if (v.t)
+      points << *v.t;
     points << '\n';
   }
 
   std::ofstream segments("LevelSetInterfaceGraph.segments.csv");
-  segments << "id,v0,v1,parent_cell,parent_edge0,parent_edge1,attribute\n";
+  segments << "id,v0,v1,attribute,provenance_count\n";
   for (Index i = 0; i < graph.edges.size(); ++i)
   {
     const auto& e = graph.edges[i];
     segments << i << ','
              << e.v0 << ','
              << e.v1 << ','
-             << e.parentCell << ','
-             << e.parentEdges[0] << ','
-             << e.parentEdges[1] << ','
-             << e.interfaceAttribute << '\n';
+             << e.interfaceAttribute << ','
+             << e.provenance.size() << '\n';
   }
 
-  std::ofstream loops("LevelSetInterfaceGraph.loops.csv");
-  loops << "loop,position,vertex,edge\n";
-  for (Index i = 0; i < graph.loops.size(); ++i)
+  std::ofstream provenance("LevelSetInterfaceGraph.edge-provenance.csv");
+  provenance << "edge,entry,parent_cell,parent_edge0,parent_edge1,parent_cell_attribute\n";
+  for (Index i = 0; i < graph.edges.size(); ++i)
   {
-    const auto& loop = graph.loops[i];
-    for (Index j = 0; j < loop.vertices.size(); ++j)
+    const auto& edge = graph.edges[i];
+    for (Index j = 0; j < edge.provenance.size(); ++j)
     {
-      loops << i << ','
-            << j << ','
-            << loop.vertices[j] << ','
-            << loop.edges[j] << '\n';
+      const auto& p = edge.provenance[j];
+      provenance << i << ','
+                 << j << ','
+                 << p.parentCell << ','
+                 << p.parentEdges[0] << ','
+                 << p.parentEdges[1] << ',';
+      if (p.parentCellAttribute)
+        provenance << *p.parentCellAttribute;
+      provenance << '\n';
+    }
+  }
+
+  std::ofstream chains("LevelSetInterfaceGraph.chains.csv");
+  chains << "chain,closed,position,vertex,edge\n";
+  for (Index i = 0; i < graph.chains.size(); ++i)
+  {
+    const auto& chain = graph.chains[i];
+    for (Index j = 0; j < chain.vertices.size(); ++j)
+    {
+      chains << i << ','
+             << (chain.closed ? 1 : 0) << ','
+             << j << ','
+             << chain.vertices[j] << ',';
+      if (j < chain.edges.size())
+        chains << chain.edges[j];
+      chains << '\n';
     }
   }
 
@@ -144,14 +169,15 @@ int main(int, char**)
             << " LevelSetInterfaceGraph.background.mesh and"
             << " LevelSetInterfaceGraph.interface.mesh." << std::endl;
   std::cout << "Wrote XDMF overlay: LevelSetInterfaceGraph.xdmf." << std::endl;
-  std::cout << "Detected " << graph.loops.size()
-            << " closed interface loops." << std::endl;
-  for (Index i = 0; i < graph.loops.size(); ++i)
+  std::cout << "Detected " << graph.chains.size()
+            << " ordered interface chains." << std::endl;
+  for (Index i = 0; i < graph.chains.size(); ++i)
   {
-    const auto& loop = graph.loops[i];
-    std::cout << "  loop " << i << ": "
-              << loop.vertices.size() << " vertices, "
-              << loop.edges.size() << " segments" << std::endl;
+    const auto& chain = graph.chains[i];
+    std::cout << "  chain " << i << " ("
+              << (chain.closed ? "closed" : "open") << "): "
+              << chain.vertices.size() << " vertices, "
+              << chain.edges.size() << " segments" << std::endl;
   }
   return 0;
 }

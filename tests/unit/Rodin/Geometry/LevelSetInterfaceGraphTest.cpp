@@ -85,7 +85,7 @@ namespace Rodin::Tests::Unit
     return std::numeric_limits<Index>::max();
   }
 
-  static P1InterfaceGraph extract(LocalMesh& mesh, std::initializer_list<Real> values)
+  static InterfaceGraph extract(LocalMesh& mesh, std::initializer_list<Real> values)
   {
     computeConnectivity(mesh);
 
@@ -104,7 +104,21 @@ namespace Rodin::Tests::Unit
 
   static bool hasParentEdge(const InterfaceEdge& edge, Index parent)
   {
-    return edge.parentEdges[0] == parent || edge.parentEdges[1] == parent;
+    return std::any_of(
+      edge.provenance.begin(), edge.provenance.end(),
+      [parent](const InterfaceEdgeProvenance& provenance)
+      {
+        return provenance.parentEdges[0] == parent ||
+               provenance.parentEdges[1] == parent;
+      });
+  }
+
+  static std::set<std::pair<Index, Index>> unorderedEdgePairs(const InterfaceGraph& graph)
+  {
+    std::set<std::pair<Index, Index>> res;
+    for (const auto& edge : graph.edges)
+      res.insert(std::minmax(edge.v0, edge.v1));
+    return res;
   }
 
   TEST(Rodin_Geometry_LevelSetInterfaceGraph, TriangleAllNegative)
@@ -114,6 +128,7 @@ namespace Rodin::Tests::Unit
 
     EXPECT_TRUE(graph.vertices.empty());
     EXPECT_TRUE(graph.edges.empty());
+    EXPECT_TRUE(graph.chains.empty());
     EXPECT_TRUE(graph.degenerateCells.empty());
     EXPECT_TRUE(graph.invalidCells.empty());
   }
@@ -125,6 +140,7 @@ namespace Rodin::Tests::Unit
 
     EXPECT_TRUE(graph.vertices.empty());
     EXPECT_TRUE(graph.edges.empty());
+    EXPECT_TRUE(graph.chains.empty());
     EXPECT_TRUE(graph.degenerateCells.empty());
     EXPECT_TRUE(graph.invalidCells.empty());
   }
@@ -141,7 +157,8 @@ namespace Rodin::Tests::Unit
     const Index e20 = findEdge(mesh, 2, 0);
     const auto& edge = graph.edges.front();
 
-    EXPECT_EQ(edge.parentCell, 0);
+    ASSERT_EQ(edge.provenance.size(), 1);
+    EXPECT_EQ(edge.provenance.front().parentCell, 0);
     EXPECT_TRUE(hasParentEdge(edge, e01));
     EXPECT_TRUE(hasParentEdge(edge, e20));
     EXPECT_EQ(edge.interfaceAttribute, 42);
@@ -174,12 +191,14 @@ namespace Rodin::Tests::Unit
       graph.vertices.begin(), graph.vertices.end(),
       [](const InterfaceVertex& vertex)
       {
-        return vertex.snappedToOriginalVertex &&
+        return vertex.kind == InterfaceVertexKind::OriginalVertex &&
                vertex.originalVertex &&
                *vertex.originalVertex == 0;
       });
 
     ASSERT_NE(zero, graph.vertices.end());
+    EXPECT_FALSE(zero->parentEdge);
+    EXPECT_FALSE(zero->t);
     EXPECT_TRUE(hasParentEdge(graph.edges.front(), findEdge(mesh, 1, 2)));
   }
 
@@ -190,16 +209,19 @@ namespace Rodin::Tests::Unit
 
     ASSERT_EQ(graph.vertices.size(), 2);
     ASSERT_EQ(graph.edges.size(), 1);
+    ASSERT_EQ(graph.edges.front().provenance.size(), 1);
 
     const Index e01 = findEdge(mesh, 0, 1);
-    EXPECT_EQ(graph.edges.front().parentEdges[0], e01);
-    EXPECT_EQ(graph.edges.front().parentEdges[1], e01);
+    EXPECT_EQ(graph.edges.front().provenance.front().parentEdges[0], e01);
+    EXPECT_EQ(graph.edges.front().provenance.front().parentEdges[1], e01);
 
     std::set<Index> originals;
     for (const auto& vertex : graph.vertices)
     {
-      ASSERT_TRUE(vertex.snappedToOriginalVertex);
+      EXPECT_EQ(vertex.kind, InterfaceVertexKind::OriginalVertex);
       ASSERT_TRUE(vertex.originalVertex);
+      EXPECT_FALSE(vertex.parentEdge);
+      EXPECT_FALSE(vertex.t);
       originals.insert(*vertex.originalVertex);
     }
 
@@ -226,8 +248,12 @@ namespace Rodin::Tests::Unit
     size_t sharedVertices = 0;
     for (const auto& vertex : graph.vertices)
     {
-      if (!vertex.snappedToOriginalVertex && vertex.parentEdge == shared)
+      if (vertex.kind == InterfaceVertexKind::EdgeCut &&
+          vertex.parentEdge &&
+          *vertex.parentEdge == shared)
+      {
         sharedVertices++;
+      }
     }
 
     EXPECT_EQ(sharedVertices, 1);
@@ -250,9 +276,10 @@ namespace Rodin::Tests::Unit
 
     EXPECT_EQ(graph.vertices.size(), 4);
     EXPECT_EQ(graph.edges.size(), 4);
-    ASSERT_EQ(graph.loops.size(), 1);
-    EXPECT_EQ(graph.loops.front().vertices.size(), 4);
-    EXPECT_EQ(graph.loops.front().edges.size(), 4);
+    ASSERT_EQ(graph.chains.size(), 1);
+    EXPECT_TRUE(graph.chains.front().closed);
+    EXPECT_EQ(graph.chains.front().vertices.size(), 4);
+    EXPECT_EQ(graph.chains.front().edges.size(), 4);
   }
 
   TEST(Rodin_Geometry_LevelSetInterfaceGraph, PreservesCellAttributeProvenance)
@@ -263,10 +290,9 @@ namespace Rodin::Tests::Unit
     const auto graph = extract(mesh, {-1, 1, 1});
 
     ASSERT_EQ(graph.edges.size(), 1);
-    ASSERT_TRUE(graph.edges.front().negativeCellAttribute);
-    ASSERT_TRUE(graph.edges.front().positiveCellAttribute);
-    EXPECT_EQ(*graph.edges.front().negativeCellAttribute, 7);
-    EXPECT_EQ(*graph.edges.front().positiveCellAttribute, 7);
+    ASSERT_EQ(graph.edges.front().provenance.size(), 1);
+    ASSERT_TRUE(graph.edges.front().provenance.front().parentCellAttribute);
+    EXPECT_EQ(*graph.edges.front().provenance.front().parentCellAttribute, 7);
   }
 
   TEST(Rodin_Geometry_LevelSetInterfaceGraph, NoDuplicatedVerticesOnSharedMeshEdges)
@@ -277,8 +303,92 @@ namespace Rodin::Tests::Unit
     std::set<Index> parentEdges;
     for (const auto& vertex : graph.vertices)
     {
-      ASSERT_TRUE(parentEdges.insert(vertex.parentEdge).second)
-        << "duplicated interface vertex on mesh edge " << vertex.parentEdge;
+      ASSERT_EQ(vertex.kind, InterfaceVertexKind::EdgeCut);
+      ASSERT_TRUE(vertex.parentEdge);
+      ASSERT_TRUE(parentEdges.insert(*vertex.parentEdge).second)
+        << "duplicated interface vertex on mesh edge " << *vertex.parentEdge;
     }
+  }
+
+  TEST(Rodin_Geometry_LevelSetInterfaceGraph, SharedZeroEdgeCreatesOneGraphEdge)
+  {
+    auto mesh = makeTwoTriangleSquare();
+    const auto graph = extract(mesh, {1, 0, 0, 1});
+
+    ASSERT_EQ(graph.vertices.size(), 2);
+    ASSERT_EQ(graph.edges.size(), 1);
+    ASSERT_EQ(graph.edges.front().provenance.size(), 2);
+    EXPECT_TRUE(hasParentEdge(graph.edges.front(), findEdge(mesh, 1, 2)));
+  }
+
+  TEST(Rodin_Geometry_LevelSetInterfaceGraph, ExtractsOpenChainAcrossSquare)
+  {
+    auto mesh = makeTwoTriangleSquare();
+    const auto graph = extract(mesh, {-1, 1, -1, 1});
+
+    ASSERT_EQ(graph.vertices.size(), 3);
+    ASSERT_EQ(graph.edges.size(), 2);
+    ASSERT_EQ(graph.chains.size(), 1);
+
+    const auto& chain = graph.chains.front();
+    EXPECT_FALSE(chain.closed);
+    EXPECT_EQ(chain.vertices.size(), 3);
+    EXPECT_EQ(chain.edges.size(), 2);
+  }
+
+  TEST(Rodin_Geometry_LevelSetInterfaceGraph, InvalidPhiValueMarksCell)
+  {
+    auto mesh = makeSingleTriangle();
+    const auto graph = extract(mesh, {
+      std::numeric_limits<Real>::quiet_NaN(), -1, 1});
+
+    EXPECT_TRUE(graph.vertices.empty());
+    EXPECT_TRUE(graph.edges.empty());
+    ASSERT_EQ(graph.invalidCells.size(), 1);
+    EXPECT_EQ(graph.invalidCells.front(), 0);
+  }
+
+  TEST(Rodin_Geometry_LevelSetInterfaceGraph, EdgeCutStoresExactInterpolation)
+  {
+    auto mesh = makeSingleTriangle();
+    computeConnectivity(mesh);
+
+    P1 space(mesh);
+    GridFunction phi(space);
+    phi[0] = -1;
+    phi[1] = 3;
+    phi[2] = 3;
+
+    const auto graph = LevelSetInterfaceGraph(phi)
+      .setSignTolerance(1e-12)
+      .extract();
+
+    ASSERT_EQ(graph.vertices.size(), 2);
+    for (const auto& vertex : graph.vertices)
+    {
+      ASSERT_EQ(vertex.kind, InterfaceVertexKind::EdgeCut);
+      ASSERT_TRUE(vertex.parentEdge);
+      ASSERT_TRUE(vertex.t);
+
+      const auto& edge = mesh.getConnectivity().getPolytope(1, *vertex.parentEdge);
+      const Index a = edge(0);
+      const Index b = edge(1);
+      const Real expectedT = phi[a] / (phi[a] - phi[b]);
+      const auto expectedX =
+        (Real(1) - expectedT) * mesh.getVertexCoordinates(a) +
+        expectedT * mesh.getVertexCoordinates(b);
+
+      EXPECT_NEAR(*vertex.t, expectedT, 1e-14);
+      EXPECT_NEAR(vertex.x[0], expectedX[0], 1e-14);
+      EXPECT_NEAR(vertex.x[1], expectedX[1], 1e-14);
+    }
+  }
+
+  TEST(Rodin_Geometry_LevelSetInterfaceGraph, NoDuplicatedGraphEdges)
+  {
+    auto mesh = makeTwoTriangleSquare();
+    const auto graph = extract(mesh, {1, 0, 0, -1});
+
+    EXPECT_EQ(unorderedEdgePairs(graph).size(), graph.edges.size());
   }
 }

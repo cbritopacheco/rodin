@@ -35,13 +35,27 @@ namespace Rodin::Geometry
     Invalid
   };
 
+  enum class InterfaceVertexKind
+  {
+    OriginalVertex,
+    EdgeCut
+  };
+
   struct InterfaceVertex
   {
     Math::SpatialPoint x;
-    Index parentEdge = std::numeric_limits<Index>::max();
-    Real t = 0;
-    bool snappedToOriginalVertex = false;
+    InterfaceVertexKind kind = InterfaceVertexKind::EdgeCut;
     Optional<Index> originalVertex;
+    Optional<Index> parentEdge;
+    Optional<Real> t;
+  };
+
+  struct InterfaceEdgeProvenance
+  {
+    Index parentCell = std::numeric_limits<Index>::max();
+    std::array<Index, 2> parentEdges =
+      {{ std::numeric_limits<Index>::max(), std::numeric_limits<Index>::max() }};
+    Optional<Attribute> parentCellAttribute;
   };
 
   struct InterfaceEdge
@@ -49,26 +63,22 @@ namespace Rodin::Geometry
     Index v0 = std::numeric_limits<Index>::max();
     Index v1 = std::numeric_limits<Index>::max();
 
-    Index parentCell = std::numeric_limits<Index>::max();
-    std::array<Index, 2> parentEdges =
-      {{ std::numeric_limits<Index>::max(), std::numeric_limits<Index>::max() }};
-
     Attribute interfaceAttribute = 0;
-    Optional<Attribute> negativeCellAttribute;
-    Optional<Attribute> positiveCellAttribute;
+    std::vector<InterfaceEdgeProvenance> provenance;
   };
 
-  struct InterfaceLoop
+  struct InterfaceChain
   {
     std::vector<Index> vertices;
     std::vector<Index> edges;
+    bool closed = false;
   };
 
-  struct P1InterfaceGraph
+  struct InterfaceGraph
   {
     std::vector<InterfaceVertex> vertices;
     std::vector<InterfaceEdge> edges;
-    std::vector<InterfaceLoop> loops;
+    std::vector<InterfaceChain> chains;
 
     std::vector<Index> degenerateCells;
     std::vector<Index> invalidCells;
@@ -85,7 +95,7 @@ namespace Rodin::Geometry
       using MeshType = Mesh;
       using FESType = Variational::P1<Real, Mesh>;
       using GridFunctionType = Variational::GridFunction<FESType, Data>;
-      using GraphType = P1InterfaceGraph;
+      using GraphType = InterfaceGraph;
 
       static constexpr Index InvalidIndex = std::numeric_limits<Index>::max();
 
@@ -158,29 +168,13 @@ namespace Rodin::Geometry
         const Index nv = static_cast<Index>(mesh.getVertexCount());
         const Index ne = static_cast<Index>(conn.getCount(1));
 
-        struct OriginalVertexProvenance
-        {
-          Index parentEdge = InvalidIndex;
-          Real t = 0;
-        };
-
-        std::vector<OriginalVertexProvenance> originalProvenance(nv);
-        for (Index e = 0; e < ne; ++e)
-        {
-          const auto& edge = conn.getPolytope(1, e);
-          for (std::uint8_t i = 0; i < edge.size(); ++i)
-          {
-            const Index v = edge(i);
-            if (e < originalProvenance[v].parentEdge)
-            {
-              originalProvenance[v].parentEdge = e;
-              originalProvenance[v].t = (i == 0) ? Real(0) : Real(1);
-            }
-          }
-        }
-
         std::vector<Optional<Index>> originalVertexToGraph(nv);
         std::vector<Optional<Index>> edgeToGraph(ne);
+        UnorderedMap<
+          Polytope::Key,
+          Index,
+          Polytope::Key::SymmetricHash,
+          Polytope::Key::SymmetricEquality> graphEdgeToIndex;
 
         auto makeOriginalVertex = [&](Index original) -> Index
         {
@@ -189,9 +183,7 @@ namespace Rodin::Geometry
 
           InterfaceVertex vertex;
           vertex.x = mesh.getVertexCoordinates(original);
-          vertex.parentEdge = originalProvenance[original].parentEdge;
-          vertex.t = originalProvenance[original].t;
-          vertex.snappedToOriginalVertex = true;
+          vertex.kind = InterfaceVertexKind::OriginalVertex;
           vertex.originalVertex = original;
 
           const Index idx = static_cast<Index>(graph.vertices.size());
@@ -226,9 +218,9 @@ namespace Rodin::Geometry
           InterfaceVertex vertex;
           vertex.x = (Real(1) - t) * mesh.getVertexCoordinates(a)
                    + t * mesh.getVertexCoordinates(b);
+          vertex.kind = InterfaceVertexKind::EdgeCut;
           vertex.parentEdge = edge;
           vertex.t = t;
-          vertex.snappedToOriginalVertex = false;
 
           const Index idx = static_cast<Index>(graph.vertices.size());
           graph.vertices.push_back(std::move(vertex));
@@ -262,33 +254,45 @@ namespace Rodin::Geometry
           {
             if (existing.vertex == candidate.vertex)
             {
-              existing.parentEdge = std::min(existing.parentEdge, candidate.parentEdge);
+              if (existing.parentEdge == InvalidIndex)
+                existing.parentEdge = candidate.parentEdge;
               return;
             }
           }
           candidates.push_back(candidate);
         };
 
-        auto addEdge = [&](Index a, Index b, Index parentCell,
-                           std::array<Index, 2> parentEdges)
+        auto addEdge = [&](Index a, Index b, InterfaceEdgeProvenance provenance)
         {
           if (a == b)
             return;
 
-          if (b < a)
+          const Polytope::Key key({ a, b });
+
+          auto it = graphEdgeToIndex.find(key);
+          if (it != graphEdgeToIndex.end())
           {
-            std::swap(a, b);
-            std::swap(parentEdges[0], parentEdges[1]);
+            auto& edge = graph.edges[it->second];
+            const auto sameProvenance =
+              [&provenance](const InterfaceEdgeProvenance& existing)
+              {
+                return existing.parentCell == provenance.parentCell &&
+                       existing.parentEdges == provenance.parentEdges;
+              };
+            if (std::find_if(edge.provenance.begin(), edge.provenance.end(),
+                             sameProvenance) == edge.provenance.end())
+            {
+              edge.provenance.push_back(std::move(provenance));
+            }
+            return;
           }
 
           InterfaceEdge edge;
           edge.v0 = a;
           edge.v1 = b;
-          edge.parentCell = parentCell;
-          edge.parentEdges = parentEdges;
           edge.interfaceAttribute = m_interfaceAttribute;
-          edge.negativeCellAttribute = mesh.getCellAttribute(parentCell);
-          edge.positiveCellAttribute = mesh.getCellAttribute(parentCell);
+          edge.provenance.push_back(std::move(provenance));
+          graphEdgeToIndex.emplace(key, static_cast<Index>(graph.edges.size()));
           graph.edges.push_back(std::move(edge));
         };
 
@@ -356,8 +360,7 @@ namespace Rodin::Geometry
             addEdge(
               makeOriginalVertex(cell(zeroLocal[0])),
               makeOriginalVertex(cell(zeroLocal[1])),
-              c,
-              {{ parentEdge, parentEdge }});
+              { c, {{ parentEdge, parentEdge }}, mesh.getCellAttribute(c) });
             continue;
           }
 
@@ -372,11 +375,11 @@ namespace Rodin::Geometry
 
             if (signs[i] == Sign::Zero && signs[j] != Sign::Zero)
             {
-              addCandidate(candidates, { makeOriginalVertex(cell(i)), parentEdge });
+              addCandidate(candidates, { makeOriginalVertex(cell(i)), InvalidIndex });
             }
             else if (signs[j] == Sign::Zero && signs[i] != Sign::Zero)
             {
-              addCandidate(candidates, { makeOriginalVertex(cell(j)), parentEdge });
+              addCandidate(candidates, { makeOriginalVertex(cell(j)), InvalidIndex });
             }
             else if ((signs[i] == Sign::Negative && signs[j] == Sign::Positive) ||
                      (signs[i] == Sign::Positive && signs[j] == Sign::Negative))
@@ -390,8 +393,9 @@ namespace Rodin::Geometry
             addEdge(
               candidates[0].vertex,
               candidates[1].vertex,
-              c,
-              {{ candidates[0].parentEdge, candidates[1].parentEdge }});
+              { c,
+                {{ candidates[0].parentEdge, candidates[1].parentEdge }},
+                mesh.getCellAttribute(c) });
           }
           else if (candidates.size() > 2)
           {
@@ -399,7 +403,7 @@ namespace Rodin::Geometry
           }
         }
 
-        extractLoops(graph);
+        extractChains(graph);
         return graph;
       }
 
@@ -409,7 +413,7 @@ namespace Rodin::Geometry
         return m_phi.get();
       }
 
-      void extractLoops(GraphType& graph) const
+      void extractChains(GraphType& graph) const
       {
         std::vector<std::vector<std::array<Index, 2>>> adjacency(graph.vertices.size());
         for (Index e = 0; e < graph.edges.size(); ++e)
@@ -473,45 +477,56 @@ namespace Rodin::Geometry
           for (Index e : componentEdges)
             visited[e] = true;
 
-          bool closed = true;
+          std::vector<Index> endpoints;
+          bool ordered = true;
           for (Index v : componentVertices)
           {
-            if (adjacency[v].size() != 2)
+            const size_t degree = adjacency[v].size();
+            if (degree == 1)
+              endpoints.push_back(v);
+            else if (degree != 2)
             {
-              closed = false;
+              ordered = false;
               break;
             }
           }
-          if (!closed)
+
+          const bool closed = ordered && endpoints.empty();
+          const bool open = ordered && endpoints.size() == 2;
+          if (!closed && !open)
             continue;
 
-          const Index startVertex =
-            *std::min_element(componentVertices.begin(), componentVertices.end());
+          const Index startVertex = closed
+            ? *std::min_element(componentVertices.begin(), componentVertices.end())
+            : *std::min_element(endpoints.begin(), endpoints.end());
 
-          InterfaceLoop loop;
-          std::vector<bool> loopEdgeSeen(graph.edges.size(), false);
+          InterfaceChain chain;
+          chain.closed = closed;
+          std::vector<bool> chainEdgeSeen(graph.edges.size(), false);
           Index currentVertex = startVertex;
           Index previousEdge = InvalidIndex;
 
           while (true)
           {
-            loop.vertices.push_back(currentVertex);
+            chain.vertices.push_back(currentVertex);
 
             Index nextEdge = InvalidIndex;
             for (const auto& next : adjacency[currentVertex])
             {
               const Index candidate = next[1];
-              if (!edgeInComponent[candidate] || candidate == previousEdge)
+              if (!edgeInComponent[candidate] ||
+                  candidate == previousEdge ||
+                  chainEdgeSeen[candidate])
                 continue;
               nextEdge = candidate;
               break;
             }
 
-            if (nextEdge == InvalidIndex || loopEdgeSeen[nextEdge])
+            if (nextEdge == InvalidIndex)
               break;
 
-            loopEdgeSeen[nextEdge] = true;
-            loop.edges.push_back(nextEdge);
+            chainEdgeSeen[nextEdge] = true;
+            chain.edges.push_back(nextEdge);
 
             const auto& edge = graph.edges[nextEdge];
             currentVertex = edge.v0 == currentVertex ? edge.v1 : edge.v0;
@@ -521,8 +536,11 @@ namespace Rodin::Geometry
               break;
           }
 
-          if (currentVertex == startVertex && loop.edges.size() == componentEdges.size())
-            graph.loops.push_back(std::move(loop));
+          if (chain.edges.size() == componentEdges.size() &&
+              (closed ? currentVertex == startVertex : currentVertex != startVertex))
+          {
+            graph.chains.push_back(std::move(chain));
+          }
         }
       }
 
