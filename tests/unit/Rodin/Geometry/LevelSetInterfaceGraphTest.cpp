@@ -8,6 +8,7 @@
 #include <initializer_list>
 #include <limits>
 #include <set>
+#include <string>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -135,8 +136,7 @@ namespace Rodin::Tests::Unit
 
       EXPECT_EQ(segment.v0, edge.v0);
       EXPECT_EQ(segment.v1, edge.v1);
-      ASSERT_TRUE(segment.attribute);
-      EXPECT_EQ(*segment.attribute, edge.interfaceAttribute);
+      EXPECT_EQ(segment.attribute, edge.interfaceAttribute);
       ASSERT_EQ(segment.sourceInterfaceEdges.size(), 1);
       EXPECT_EQ(segment.sourceInterfaceEdges.front(), i);
     }
@@ -182,7 +182,76 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(edge.provenance.front().parentCell, 0);
     EXPECT_TRUE(hasParentEdge(edge, e01));
     EXPECT_TRUE(hasParentEdge(edge, e20));
-    EXPECT_EQ(edge.interfaceAttribute, 42);
+    ASSERT_TRUE(edge.interfaceAttribute);
+    EXPECT_EQ(*edge.interfaceAttribute, 42);
+  }
+
+  TEST(Rodin_Geometry_LevelSetInterfaceGraph, DefaultInterfaceAttributeIsUnset)
+  {
+    auto mesh = makeSingleTriangle();
+    computeConnectivity(mesh);
+
+    P1 space(mesh);
+    GridFunction phi(space);
+    phi[0] = -1;
+    phi[1] = 1;
+    phi[2] = 1;
+
+    const auto graph = LevelSetInterfaceGraph(phi).extract();
+
+    ASSERT_EQ(graph.edges.size(), 1);
+    EXPECT_FALSE(graph.edges.front().interfaceAttribute);
+    const auto pslg = InterfaceGraphPSLGBuilder().build(graph);
+    ASSERT_EQ(pslg.segments.size(), 1);
+    EXPECT_FALSE(pslg.segments.front().attribute);
+  }
+
+  TEST(Rodin_Geometry_LevelSetInterfaceGraph, RequiresCellToEdgeConnectivity)
+  {
+    auto mesh = makeSingleTriangle();
+
+    P1 space(mesh);
+    GridFunction phi(space);
+    phi[0] = -1;
+    phi[1] = 1;
+    phi[2] = 1;
+
+    try
+    {
+      (void) LevelSetInterfaceGraph(phi).extract();
+      FAIL() << "Expected missing cell-to-edge connectivity to throw.";
+    }
+    catch (const Alert::Exception& e)
+    {
+      EXPECT_NE(
+        std::string(e.what()).find("has not been computed"),
+        std::string::npos);
+    }
+  }
+
+  TEST(Rodin_Geometry_LevelSetInterfaceGraph, RequiresEdgeToVertexConnectivity)
+  {
+    auto mesh = makeSingleTriangle();
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().clear(1, 0);
+
+    P1 space(mesh);
+    GridFunction phi(space);
+    phi[0] = -1;
+    phi[1] = 1;
+    phi[2] = 1;
+
+    try
+    {
+      (void) LevelSetInterfaceGraph(phi).extract();
+      FAIL() << "Expected missing edge-to-vertex connectivity to throw.";
+    }
+    catch (const Alert::Exception& e)
+    {
+      EXPECT_NE(
+        std::string(e.what()).find("has not been computed"),
+        std::string::npos);
+    }
   }
 
   TEST(Rodin_Geometry_LevelSetInterfaceGraph, TwoNegativeOnePositive)

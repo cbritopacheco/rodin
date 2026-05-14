@@ -63,7 +63,7 @@ namespace Rodin::Geometry
     Index v0 = std::numeric_limits<Index>::max();
     Index v1 = std::numeric_limits<Index>::max();
 
-    Attribute interfaceAttribute = 0;
+    Optional<Attribute> interfaceAttribute;
     std::vector<InterfaceEdgeProvenance> provenance;
   };
 
@@ -148,8 +148,7 @@ namespace Rodin::Geometry
 
       explicit LevelSetInterfaceGraph(const GridFunctionType& phi)
         : m_phi(phi),
-          m_signTolerance(1e-12),
-          m_interfaceAttribute(0)
+          m_signTolerance(1e-12)
       {}
 
       LevelSetInterfaceGraph& setSignTolerance(Real tol)
@@ -158,7 +157,7 @@ namespace Rodin::Geometry
         return *this;
       }
 
-      LevelSetInterfaceGraph& setInterfaceAttribute(Attribute attr)
+      LevelSetInterfaceGraph& setInterfaceAttribute(const Optional<Attribute>& attr)
       {
         m_interfaceAttribute = attr;
         return *this;
@@ -169,7 +168,7 @@ namespace Rodin::Geometry
         return m_signTolerance;
       }
 
-      Attribute getInterfaceAttribute() const
+      const Optional<Attribute>& getInterfaceAttribute() const
       {
         return m_interfaceAttribute;
       }
@@ -603,7 +602,7 @@ namespace Rodin::Geometry
 
       std::reference_wrapper<const GridFunctionType> m_phi;
       Real m_signTolerance;
-      Attribute m_interfaceAttribute;
+      Optional<Attribute> m_interfaceAttribute;
   };
 
   template <class Mesh, class Data>

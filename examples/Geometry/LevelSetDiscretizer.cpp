@@ -123,8 +123,10 @@ int main(int, char**)
     const auto& e = graph.edges[i];
     segments << i << ','
              << e.v0 << ','
-             << e.v1 << ','
-             << e.interfaceAttribute << ','
+             << e.v1 << ',';
+    if (e.interfaceAttribute)
+      segments << *e.interfaceAttribute;
+    segments << ','
              << e.provenance.size() << '\n';
   }
 
