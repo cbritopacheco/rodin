@@ -97,7 +97,6 @@
  * - The XDMF output is intended for temporal visualization of the optimization.
  */
 
-#include "Rodin/Geometry/LevelSetDiscretizerTetrahedra.h"
 #include <Rodin/Alert/Exception.h>
 #include <Rodin/Alert/Success.h>
 #include <Rodin/Alert/Warning.h>
@@ -325,43 +324,43 @@ int main(int, char**)
     xdmf.write(i).flush();
 
     // Recover the implicit domain
-Alert::Info() << "   | Meshing the domain." << Alert::Raise;
-try
-{
-  LevelSetDiscretizerTetrahedra lsd(advect.getSolution());
-  lsd
-    .setSignTolerance(1e-12)
-    .setSnapTolerance(1e-12)
-    .split(3, Interior, {Interior, Exterior})
-    .split(3, Exterior, {Interior, Exterior})
-    .preserve(2, GammaD)
-    .preserve(2, GammaN)
-    .setInterface(2, Gamma)
-    .setInterface(1, Gamma);
-
-  th = lsd.discretize();
-  th.getConnectivity().compute(2, 3);
-  for (auto it = th.getBoundary(); it; ++it)
-  {
-    const auto attr = it->getAttribute();
-    if (!attr)
+    Alert::Info() << "   | Meshing the domain." << Alert::Raise;
+    try
     {
-      th.setAttribute(it.key(), Gamma0);
-    }
-  }
+      th = MMG::LevelSetDiscretizer()
+        .split(Interior, {Interior, Exterior})
+        .split(Exterior, {Interior, Exterior})
+        .setRMC(1e-6)
+        .setHMax(hmax)
+        .setHMin(hmin)
+        .setHausdorff(hausd)
+        .setAngleDetection(false)
+        .setBoundaryReference(Gamma)
+        .setBaseReferences(GammaD)
+        .discretize(advect.getSolution());
 
-  hmax = hmax0;
-  hmin = 0.1 * hmax;
-}
-catch (const Alert::Exception& e)
-{
-  hmax /= 2;
-  hmin = 0.1 * hmax;
-  Alert::Warning() << "Level-set discretization failed at iteration " << i
-                   << ". Reducing hmax to " << hmax
-                   << " and retrying." << Alert::Raise;
-  continue;
-}
+      th.getConnectivity().compute(2, 3);
+      for (auto it = th.getBoundary(); it; ++it)
+      {
+        const auto attr = it->getAttribute();
+        if (!attr)
+        {
+          th.setAttribute(it.key(), Gamma0);
+        }
+      }
+
+      hmax = hmax0;
+      hmin = 0.1 * hmax;
+    }
+    catch (const Alert::Exception& e)
+    {
+      hmax /= 2;
+      hmin = 0.1 * hmax;
+      Alert::Warning() << "Level-set discretization failed at iteration " << i
+                       << ". Reducing hmax to " << hmax
+                       << " and retrying." << Alert::Raise;
+      continue;
+    }
 
     i++;
     th.save("Omega.mesh", IO::FileFormat::MEDIT);

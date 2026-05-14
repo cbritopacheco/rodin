@@ -74,4 +74,4 @@ add_executable(AttributeDetection AttributeDetection.cpp)
 target_link_libraries(AttributeDetection PUBLIC Rodin::Geometry)
 
 add_executable(LevelSetDiscretizer LevelSetDiscretizer.cpp)
-target_link_libraries(LevelSetDiscretizer PUBLIC Rodin::Geometry Rodin::MMG)
+target_link_libraries(LevelSetDiscretizer PUBLIC Rodin::Geometry Rodin::Variational)

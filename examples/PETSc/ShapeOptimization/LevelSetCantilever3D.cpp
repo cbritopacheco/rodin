@@ -99,12 +99,10 @@
  * @section notes Notes
  *
  * - PETSc provides the linear algebra backend.
- * - The level set is discretized directly into tetrahedra. Remeshed domains are
- *   not post-optimized by MMG.
+ * - MMG is used for level-set discretization and mesh optimization.
  * - The XDMF output is intended for temporal visualization of the optimization.
  */
 
-#include "Rodin/Geometry/LevelSetDiscretizerTetrahedra.h"
 #include <Rodin/MMG.h>
 #include <Rodin/PETSc.h>
 #include <Rodin/IO/XDMF.h>
@@ -342,15 +340,18 @@ int main(int argc, char** argv)
     Alert::Info() << "   | Meshing the domain." << Alert::Raise;
     try
     {
-      LevelSetDiscretizerTetrahedra lsd(advect.getSolution());
-      lsd
-        .split(3, Interior, {Interior, Exterior})
-        .split(3, Exterior, {Interior, Exterior})
-        .preserve(2, GammaD)
-        .preserve(2, GammaN)
-        .setInterface(2, Gamma);
+      th = MMG::LevelSetDiscretizer()
+        .split(Interior, {Interior, Exterior})
+        .split(Exterior, {Interior, Exterior})
+        .setRMC(1e-6)
+        .setHMax(hmax)
+        .setHMin(hmin)
+        .setHausdorff(hausd)
+        .setAngleDetection(false)
+        .setBoundaryReference(Gamma)
+        .setBaseReferences(GammaD)
+        .discretize(advect.getSolution());
 
-      th = lsd.discretize();
       th.getConnectivity().compute(2, 3);
       for (auto it = th.getBoundary(); it; ++it)
       {

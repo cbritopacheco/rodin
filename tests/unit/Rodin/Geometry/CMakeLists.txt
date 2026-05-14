@@ -288,3 +288,16 @@ gtest_discover_tests(RodinGeometryLevelSetDiscretizerTetrahedraTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinGeometryLevelSetInterfaceGraphTest LevelSetInterfaceGraphTest.cpp)
+target_link_libraries(RodinGeometryLevelSetInterfaceGraphTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational)
+gtest_discover_tests(RodinGeometryLevelSetInterfaceGraphTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)

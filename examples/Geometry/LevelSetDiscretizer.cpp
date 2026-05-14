@@ -4,222 +4,154 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <algorithm>
+#include <array>
 #include <fstream>
-#include <iomanip>
-#include <sstream>
-#include <string>
+#include <iostream>
+#include <limits>
 
-#include <Rodin/Types.h>
 #include <Rodin/Geometry.h>
+#include <Rodin/Geometry/LevelSetInterfaceGraph.h>
+#include <Rodin/IO.h>
 #include <Rodin/Variational.h>
-#include <Rodin/IO/XDMF.h>
-#include <Rodin/MMG.h>
-#include <Rodin/Geometry/LevelSetDiscretizerTetrahedra.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-int main(int, char**)
+static LocalMesh makeInterfaceMesh(const P1InterfaceGraph& graph)
 {
-  using MeshType = MMG::Mesh;
+  LocalMesh::Builder builder;
+  builder
+    .initialize(2)
+    .nodes(graph.vertices.size())
+    .reserve(1, graph.edges.size());
 
-  Alert::Info() << "Initializing evolving sphere example." << Alert::Raise;
+  for (const auto& vertex : graph.vertices)
+    builder.vertex(vertex.x);
 
-  // --------------------------------------------------------------------------
-  // Parameters
-  // --------------------------------------------------------------------------
-  static constexpr Attribute bulk    = 1;
-  static constexpr Attribute inside  = 10;
-  static constexpr Attribute outside = 20;
-  static constexpr Attribute gamma   = 30;
-
-  const Real cx = 0.5;
-  const Real cy = 0.5;
-  const Real cz = 0.5;
-
-  const Real R0    = 0.18;
-  const Real speed = 0.015;  // radius change per unit time
-  const Real dt    = 0.05;
-  const size_t nt  = 20;
-
-  const Real hmax  = 0.06;
-  const Real hmin  = 0.015;
-  const Real hausd = 0.005;
-
-  // Background mesh resolution
-  const size_t nx = 24;
-  const size_t ny = 24;
-  const size_t nz = 24;
-
-  Alert::Info() << "Parameters set." << Alert::Raise;
-
-  // --------------------------------------------------------------------------
-  // Initial background mesh
-  // --------------------------------------------------------------------------
-  Alert::Info() << "Building initial background mesh." << Alert::Raise;
-  MeshType th;
-  th = th.UniformGrid(Polytope::Type::Tetrahedron, { nx, ny, nz });
-  th.scale(1.0 / (nx - 1)); // unit cube
-
-  Alert::Info() << "Assigning bulk attribute to initial cells." << Alert::Raise;
-  for (auto c = th.getCell(); !c.end(); ++c)
-    th.setAttribute({3, c->getIndex()}, bulk);
-
-  Alert::Info() << "Saving initial mesh." << Alert::Raise;
-  th.save("out/Initial.mesh", IO::FileFormat::MEDIT);
-
-  // --------------------------------------------------------------------------
-  // XDMF output
-  // --------------------------------------------------------------------------
-  Alert::Info() << "Initializing XDMF output." << Alert::Raise;
-  IO::XDMF xdmf("out/EvolvingSphere");
-
-  auto domain = xdmf.grid("domain");
-  domain.setMesh(th, IO::XDMF::MeshPolicy::Transient);
-
-  // --------------------------------------------------------------------------
-  // Time loop
-  // --------------------------------------------------------------------------
-  for (size_t it = 0; it < nt; ++it)
+  for (Index i = 0; i < graph.edges.size(); ++i)
   {
-    const Real t = it * dt;
-    const Real R = R0 + speed * t;
-
-    Alert::Info() << "----- Iteration: " << it
-                  << " | time = " << t
-                  << " | radius = " << R
-                  << Alert::Raise;
-
-    // ------------------------------------------------------------------------
-    // Build/connectivity on current mesh
-    // ------------------------------------------------------------------------
-    Alert::Info() << "   | Computing connectivity on current mesh." << Alert::Raise;
-    auto& conn = th.getConnectivity();
-    conn.compute(3, 2);
-    conn.compute(2, 3);
-    conn.compute(3, 1);
-    conn.compute(2, 1);
-    conn.compute(1, 0);
-
-    // ------------------------------------------------------------------------
-    // Level set on current mesh:
-    // phi(x) = |x-c|^2 - R^2
-    // negative inside sphere, positive outside
-    // ------------------------------------------------------------------------
-    Alert::Info() << "   | Building P1 level-set field on current mesh." << Alert::Raise;
-    P1 phiSpace(th);
-    GridFunction phi(phiSpace);
-
-    Alert::Info() << "   | Evaluating level-set values." << Alert::Raise;
-    for (Index i = 0; i < th.getVertexCount(); ++i)
-    {
-      const auto& x = th.getVertexCoordinates(i);
-      const Real dx = x(0) - cx;
-      const Real dy = x(1) - cy;
-      const Real dz = x(2) - cz;
-      phi[i] = dx * dx + dy * dy + dz * dz - R * R;
-    }
-
-    Alert::Info() << "   | Saving current level-set field." << Alert::Raise;
-    {
-      std::ostringstream oss;
-      oss << "SpherePhi_" << std::setw(4) << std::setfill('0') << it;
-      IO::XDMF phiOut("out/" + oss.str());
-      phiOut.grid().setMesh(th).add("phi", phi, IO::XDMF::Center::Node);
-      phiOut.write();
-      phiOut.close();
-    }
-
-    // ------------------------------------------------------------------------
-    // Conforming level-set discretization
-    // ------------------------------------------------------------------------
-    Alert::Info() << "   | Configuring level-set discretizer." << Alert::Raise;
-    LevelSetDiscretizerTetrahedra lsd(phi);
-    lsd
-      .setSignTolerance(1e-14)
-      .setSnapTolerance(1e-14)
-      .setInterface(2, gamma)
-      .split(3, bulk,    {inside, outside})
-      .split(3, inside,  {inside, outside})
-      .split(3, outside, {inside, outside});
-
-    Alert::Info() << "   | Discretizing level-set conformingly." << Alert::Raise;
-    MeshType split = lsd.discretize();
-
-    Alert::Info() << "   | Saving split mesh." << Alert::Raise;
-    split.save(
-      "out/Split_" + std::to_string(it) + ".mesh",
-      IO::FileFormat::MEDIT
-    );
-
-    // ------------------------------------------------------------------------
-    // Recompute connectivity on the split mesh
-    // ------------------------------------------------------------------------
-    Alert::Info() << "   | Computing connectivity on split mesh." << Alert::Raise;
-    auto& sconn = split.getConnectivity();
-    sconn.compute(3, 2);
-    sconn.compute(2, 3);
-    sconn.compute(3, 1);
-    sconn.compute(2, 1);
-    sconn.compute(1, 0);
-
-    // ------------------------------------------------------------------------
-    // MMG optimization / parametrization of the fitted mesh
-    // ------------------------------------------------------------------------
-    Alert::Info() << "   | Optimizing split mesh with MMG." << Alert::Raise;
-    try
-    {
-      MMG::Optimizer()
-        .setHMax(hmax)
-        .setHMin(hmin)
-        .setHausdorff(hausd)
-        .setAngleDetection(false)
-        .optimize(split);
-    }
-    catch (const Alert::Exception& e)
-    {
-      Alert::Warning()
-        << "MMG optimization failed at iteration " << it
-        << ". Keeping the split mesh without optimization."
-        << Alert::Raise;
-    }
-
-    Alert::Info() << "   | Saving optimized mesh." << Alert::Raise;
-    split.save(
-      "out/Optimized." + std::to_string(it) + ".mesh",
-      IO::FileFormat::MEDIT
-    );
-
-    // ------------------------------------------------------------------------
-    // Transient XDMF output
-    // ------------------------------------------------------------------------
-    Alert::Info() << "   | Recomputing level-set field on optimized mesh." << Alert::Raise;
-    P1 phiSplitSpace(split);
-    GridFunction phiSplit(phiSplitSpace);
-
-    for (Index i = 0; i < split.getVertexCount(); ++i)
-    {
-      const auto& x = split.getVertexCoordinates(i);
-      const Real dx = x(0) - cx;
-      const Real dy = x(1) - cy;
-      const Real dz = x(2) - cz;
-      phiSplit[i] = dx * dx + dy * dy + dz * dz - R * R;
-    }
-
-    Alert::Info() << "   | Writing transient XDMF snapshot." << Alert::Raise;
-    domain.clear();
-    domain.setMesh(split, IO::XDMF::MeshPolicy::Transient);
-    domain.add("phi", phiSplit, IO::XDMF::Center::Node);
-    xdmf.write(it).flush();
-
-    Alert::Info() << "   | Updating mesh for next iteration." << Alert::Raise;
-    th = std::move(split);
+    const auto& edge = graph.edges[i];
+    builder
+      .polytope(Polytope::Type::Segment, {edge.v0, edge.v1})
+      .attribute({1, i}, edge.interfaceAttribute);
   }
 
-  Alert::Info() << "Closing XDMF output." << Alert::Raise;
+  return builder.finalize();
+}
+
+int main(int, char**)
+{
+  static constexpr Attribute Gamma = 10;
+  static constexpr size_t n = 20;
+
+  LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {n, n});
+  mesh.scale(1.0 / static_cast<Real>(n - 1));
+  mesh.save("LevelSetInterfaceGraph.background.mesh", IO::FileFormat::MEDIT);
+
+  P1 phiSpace(mesh);
+  GridFunction phi(phiSpace);
+
+  struct Circle
+  {
+    Real cx;
+    Real cy;
+    Real r;
+  };
+
+  const std::array<Circle, 3> circles = {{
+    {0.30, 0.35, 0.16},
+    {0.70, 0.35, 0.14},
+    {0.50, 0.72, 0.12}
+  }};
+
+  for (Index i = 0; i < mesh.getVertexCount(); ++i)
+  {
+    const auto x = mesh.getVertexCoordinates(i);
+    Real value = std::numeric_limits<Real>::infinity();
+    for (const auto& circle : circles)
+    {
+      const Real dx = x[0] - circle.cx;
+      const Real dy = x[1] - circle.cy;
+      value = std::min(value, dx * dx + dy * dy - circle.r * circle.r);
+    }
+    phi[i] = value;
+  }
+
+  const auto graph = LevelSetInterfaceGraph(phi)
+    .setSignTolerance(1e-12)
+    .setInterfaceAttribute(Gamma)
+    .extract();
+
+  const auto interfaceMesh = makeInterfaceMesh(graph);
+  interfaceMesh.save("LevelSetInterfaceGraph.interface.mesh", IO::FileFormat::MEDIT);
+
+  IO::XDMF xdmf("LevelSetInterfaceGraph");
+  xdmf.grid("background").setMesh(mesh);
+  xdmf.grid("interface").setMesh(interfaceMesh);
+  xdmf.write();
   xdmf.close();
 
-  Alert::Success() << "Finished evolving sphere example." << Alert::Raise;
+  std::ofstream points("LevelSetInterfaceGraph.points.csv");
+  points << "id,x,y,parent_edge,t,snapped,original_vertex\n";
+  for (Index i = 0; i < graph.vertices.size(); ++i)
+  {
+    const auto& v = graph.vertices[i];
+    points << i << ','
+           << v.x[0] << ','
+           << v.x[1] << ','
+           << v.parentEdge << ','
+           << v.t << ','
+           << (v.snappedToOriginalVertex ? 1 : 0) << ',';
+    if (v.originalVertex)
+      points << *v.originalVertex;
+    points << '\n';
+  }
+
+  std::ofstream segments("LevelSetInterfaceGraph.segments.csv");
+  segments << "id,v0,v1,parent_cell,parent_edge0,parent_edge1,attribute\n";
+  for (Index i = 0; i < graph.edges.size(); ++i)
+  {
+    const auto& e = graph.edges[i];
+    segments << i << ','
+             << e.v0 << ','
+             << e.v1 << ','
+             << e.parentCell << ','
+             << e.parentEdges[0] << ','
+             << e.parentEdges[1] << ','
+             << e.interfaceAttribute << '\n';
+  }
+
+  std::ofstream loops("LevelSetInterfaceGraph.loops.csv");
+  loops << "loop,position,vertex,edge\n";
+  for (Index i = 0; i < graph.loops.size(); ++i)
+  {
+    const auto& loop = graph.loops[i];
+    for (Index j = 0; j < loop.vertices.size(); ++j)
+    {
+      loops << i << ','
+            << j << ','
+            << loop.vertices[j] << ','
+            << loop.edges[j] << '\n';
+    }
+  }
+
+  std::cout << "Wrote " << graph.vertices.size()
+            << " interface vertices and " << graph.edges.size()
+            << " interface segments." << std::endl;
+  std::cout << "Wrote MEDIT meshes:"
+            << " LevelSetInterfaceGraph.background.mesh and"
+            << " LevelSetInterfaceGraph.interface.mesh." << std::endl;
+  std::cout << "Wrote XDMF overlay: LevelSetInterfaceGraph.xdmf." << std::endl;
+  std::cout << "Detected " << graph.loops.size()
+            << " closed interface loops." << std::endl;
+  for (Index i = 0; i < graph.loops.size(); ++i)
+  {
+    const auto& loop = graph.loops[i];
+    std::cout << "  loop " << i << ": "
+              << loop.vertices.size() << " vertices, "
+              << loop.edges.size() << " segments" << std::endl;
+  }
   return 0;
 }
