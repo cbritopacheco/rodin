@@ -20,12 +20,13 @@ using namespace Rodin::Solver;
 namespace Rodin::Tests::Manufactured::H1LinearElasticity3D
 {
   template <size_t M>
-  class Manufactured_LinearElasticity3D_H1_Test : public ::testing::Test
+  class Manufactured_LinearElasticity3D_H1_Test
+    : public ::testing::TestWithParam<Polytope::Type>
   {
   protected:
     void SetUp() override
     {
-      m_mesh = Mesh().UniformGrid(Polytope::Type::Tetrahedron, { M, M, M });
+      m_mesh = Mesh().UniformGrid(GetParam(), { M, M, M });
       m_mesh.scale(1.0 / (M - 1));
       m_mesh.getConnectivity().compute(2, 3);
       m_mesh.getConnectivity().compute(3, 2);
@@ -69,7 +70,7 @@ namespace Rodin::Tests::Manufactured::H1LinearElasticity3D
   using Manufactured_LinearElasticity3D_H1_Test_32 =
     Manufactured_LinearElasticity3D_H1_Test<32>;
 
-  TEST_F(Manufactured_LinearElasticity3D_H1_Test_8, LinearElasticity3D_P1ExactResidual)
+  TEST_P(Manufactured_LinearElasticity3D_H1_Test_8, LinearElasticity3D_P1ExactResidual)
   {
     constexpr auto order = std::integral_constant<size_t, 1>{};
     const Real lambda = 1.0;
@@ -115,7 +116,7 @@ namespace Rodin::Tests::Manufactured::H1LinearElasticity3D
     EXPECT_NEAR(Integral(diff).compute(), 0, 1e-12);
   }
 
-  TEST_F(Manufactured_LinearElasticity3D_H1_Test_8, Manufactured_LinearElasticity3D_H1_2)
+  TEST_P(Manufactured_LinearElasticity3D_H1_Test_8, Manufactured_LinearElasticity3D_H1_2)
   {
     constexpr auto order = std::integral_constant<size_t, 2>{};
     const Real lambda = 1.5;
@@ -150,12 +151,13 @@ namespace Rodin::Tests::Manufactured::H1LinearElasticity3D
   }
 
   template <size_t M>
-  class Constant_LinearElasticity3D_H1_Test : public ::testing::Test
+  class Constant_LinearElasticity3D_H1_Test
+    : public ::testing::TestWithParam<Polytope::Type>
   {
   protected:
     void SetUp() override
     {
-      m_mesh = Mesh().UniformGrid(Polytope::Type::Tetrahedron, { M, M, M });
+      m_mesh = Mesh().UniformGrid(GetParam(), { M, M, M });
       m_mesh.scale(1.0 / (M - 1));
       m_mesh.getConnectivity().compute(2, 3);
       m_mesh.getConnectivity().compute(3, 2);
@@ -183,7 +185,7 @@ namespace Rodin::Tests::Manufactured::H1LinearElasticity3D
   using Constant_LinearElasticity3D_H1_Test_8  = Constant_LinearElasticity3D_H1_Test<8>;
   using Constant_LinearElasticity3D_H1_Test_16 = Constant_LinearElasticity3D_H1_Test<16>;
 
-  TEST_F(Constant_LinearElasticity3D_H1_Test_8, ConstantSolution_H1_1)
+  TEST_P(Constant_LinearElasticity3D_H1_Test_8, ConstantSolution_H1_1)
   {
     constexpr auto order = std::integral_constant<size_t, 1>{};
     const Real lambda = 2.0;
@@ -217,7 +219,7 @@ namespace Rodin::Tests::Manufactured::H1LinearElasticity3D
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
 
-  TEST_F(Constant_LinearElasticity3D_H1_Test_16, ConstantSolution_H1_2)
+  TEST_P(Constant_LinearElasticity3D_H1_Test_16, ConstantSolution_H1_2)
   {
     constexpr auto order = std::integral_constant<size_t, 2>{};
     const Real lambda = 1.5;
@@ -250,4 +252,34 @@ namespace Rodin::Tests::Manufactured::H1LinearElasticity3D
     const Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
+
+  INSTANTIATE_TEST_SUITE_P(
+    PolytopeCoverage3D,
+    Manufactured_LinearElasticity3D_H1_Test_8,
+    ::testing::Values(
+      Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid,
+      Polytope::Type::Wedge)
+  );
+
+  INSTANTIATE_TEST_SUITE_P(
+    PolytopeCoverage3D,
+    Constant_LinearElasticity3D_H1_Test_8,
+    ::testing::Values(
+      Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid,
+      Polytope::Type::Wedge)
+  );
+
+  INSTANTIATE_TEST_SUITE_P(
+    PolytopeCoverage3D,
+    Constant_LinearElasticity3D_H1_Test_16,
+    ::testing::Values(
+      Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid,
+      Polytope::Type::Wedge)
+  );
 }

@@ -6,6 +6,14 @@ target_link_libraries(RodinMPIGeometrySharderTest
   Rodin::MPI
   Rodin::IO)
 
+add_executable(RodinMPIGeometrySubMeshTest SubMeshTest.cpp)
+target_link_libraries(RodinMPIGeometrySubMeshTest
+  PUBLIC
+  GTest::gtest
+  Rodin::Geometry
+  Rodin::MPI
+  Rodin::IO)
+
 # Detect Open MPI for --oversubscribe flag (not supported by MPICH).
 set(_RODIN_MPI_OVERSUBSCRIBE_FLAG "")
 if (MPIEXEC_EXECUTABLE)
@@ -30,5 +38,19 @@ foreach(np 1 2 3 4 8)
   )
   rodin_suppress_external_mpi_lsan_for_test(
     RodinMPIGeometrySharderTest_np${np}
+    "HDF5_USE_FILE_LOCKING=FALSE")
+endforeach()
+
+foreach(np 1 2 3 4)
+  add_test(
+    NAME RodinMPIGeometrySubMeshTest_np${np}
+    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+            $<TARGET_FILE:RodinMPIGeometrySubMeshTest>)
+  set_tests_properties(RodinMPIGeometrySubMeshTest_np${np} PROPERTIES
+    LABELS "unit;distributed"
+  )
+  rodin_suppress_external_mpi_lsan_for_test(
+    RodinMPIGeometrySubMeshTest_np${np}
     "HDF5_USE_FILE_LOCKING=FALSE")
 endforeach()

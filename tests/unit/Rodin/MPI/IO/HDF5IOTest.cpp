@@ -41,6 +41,7 @@ namespace
         return LocalMesh::UniformGrid(type, { 4, 4 });
       case Polytope::Type::Tetrahedron:
       case Polytope::Type::Hexahedron:
+      case Polytope::Type::Pyramid:
       case Polytope::Type::Wedge:
         return LocalMesh::UniformGrid(type, { 3, 3, 3 });
       default:
@@ -58,6 +59,7 @@ namespace
       case Polytope::Type::Quadrilateral: return "Quad2D";
       case Polytope::Type::Tetrahedron:   return "Tet3D";
       case Polytope::Type::Hexahedron:    return "Hex3D";
+      case Polytope::Type::Pyramid:       return "Pyramid3D";
       case Polytope::Type::Wedge:         return "Wedge3D";
       default:                            return "Unknown";
     }
@@ -422,6 +424,7 @@ namespace
           Polytope::Type::Quadrilateral,
           Polytope::Type::Tetrahedron,
           Polytope::Type::Hexahedron,
+          Polytope::Type::Pyramid,
           Polytope::Type::Wedge
       ),
       MPIPolytopeNameGenerator());
@@ -535,6 +538,7 @@ namespace
           Polytope::Type::Quadrilateral,
           Polytope::Type::Tetrahedron,
           Polytope::Type::Hexahedron,
+          Polytope::Type::Pyramid,
           Polytope::Type::Wedge
       ),
       MPIPolytopeNameGenerator());

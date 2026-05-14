@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <memory>
 
 #include <boost/dynamic_bitset.hpp>
 #include <boost/serialization/version.hpp>
@@ -8,6 +9,7 @@
 #include "Rodin/Alert/NamespacedException.h"
 #include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Geometry/Polytope.h"
+#include "Rodin/Geometry/PolytopeQuadrature.h"
 #include "Rodin/Geometry/PolytopeTransformation.h"
 #include "Rodin/Types.h"
 #include "Rodin/MPI/IO.h"
@@ -30,7 +32,50 @@ namespace Rodin::Geometry
   {
     MPIMesh mesh(m_context);
     mesh.m_shard = std::move(m_shard);
+    mesh.m_quadratures.initialize(mesh.getSpaceDimension());
     return mesh;
+  }
+
+  MPIMesh::Mesh(const Mesh& other)
+    : MeshBase(other),
+      m_context(other.m_context),
+      m_shard(other.m_shard)
+  {
+    m_quadratures.initialize(getSpaceDimension());
+  }
+
+  MPIMesh::Mesh(Mesh&& other)
+    : MeshBase(std::move(other)),
+      m_context(std::move(other.m_context)),
+      m_shard(std::move(other.m_shard))
+  {
+    m_quadratures.initialize(getSpaceDimension());
+  }
+
+  MPIMesh& MPIMesh::operator=(const Mesh& other)
+  {
+    if (this != &other)
+    {
+      MeshBase::operator=(other);
+      m_context = other.m_context;
+      m_shard = Shard(other.m_shard);
+      m_quadratures.clear();
+      m_quadratures.initialize(getSpaceDimension());
+    }
+    return *this;
+  }
+
+  MPIMesh& MPIMesh::operator=(Mesh&& other)
+  {
+    if (this != &other)
+    {
+      MeshBase::operator=(std::move(other));
+      m_context = std::move(other.m_context);
+      m_shard = std::move(other.m_shard);
+      m_quadratures.clear();
+      m_quadratures.initialize(getSpaceDimension());
+    }
+    return *this;
   }
 
   MPIMesh& MPIMesh::scale(Real c)
@@ -42,6 +87,7 @@ namespace Rodin::Geometry
   void MPIMesh::flush()
   {
     this->getShard().flush();
+    m_quadratures.clear();
   }
 
   bool MPIMesh::isSubMesh() const
@@ -412,7 +458,15 @@ namespace Rodin::Geometry
   {
     const auto& shard = this->getShard();
     assert(localIdx < shard.getPolytopeCount(dimension));
-    return shard.getQuadrature(dimension, localIdx, qf);
+    return m_quadratures.get(
+        { dimension, localIdx },
+        shard.getPolytopeCount(dimension),
+        qf,
+        [&]() -> std::unique_ptr<PolytopeQuadrature>
+        {
+          return std::make_unique<PolytopeQuadrature>(
+              *this->getPolytope(dimension, localIdx), qf);
+        });
   }
 
   Polytope::Type MPIMesh::getGeometry(size_t dimension, Index localIdx) const
@@ -483,6 +537,8 @@ namespace Rodin::Geometry
         break;
       }
     }
+    m_quadratures.clear();
+    m_quadratures.initialize(getSpaceDimension());
     return *this;
   }
 
@@ -1784,6 +1840,7 @@ namespace Rodin::Geometry
       }
 
       case Polytope::Type::Tetrahedron:
+      case Polytope::Type::Pyramid:
       case Polytope::Type::Hexahedron:
       case Polytope::Type::Wedge:
       {
@@ -2016,6 +2073,45 @@ namespace Rodin::Geometry
           }
         }
 
+        if (g == Polytope::Type::Pyramid)
+        {
+          const Index centerOffset = static_cast<Index>(nx * ny * nz);
+          for (size_t k = ghostZ.begin; k < ghostZ.end; ++k)
+          {
+            for (size_t j = ghostY.begin; j < ghostY.end; ++j)
+            {
+              for (size_t i = ghostX.begin; i < ghostX.end; ++i)
+              {
+                const Index gvid = centerOffset + macroId3(i, j, k, cx, cy);
+                const int owner = ownerOfCell(i, j, k);
+                const Shard::State state =
+                  (owner == rank ? Shard::State::Owned : Shard::State::Ghost);
+
+                const Index lv = sb.vertex(
+                  gvid,
+                  sp3(static_cast<Real>(i) + Real(0.5),
+                      static_cast<Real>(j) + Real(0.5),
+                      static_cast<Real>(k) + Real(0.5)),
+                  state);
+                gv2lv.emplace(gvid, lv);
+
+                if (state == Shard::State::Owned)
+                {
+                  for (const int r : holdersOfCell(i, j, k))
+                  {
+                    if (r != rank)
+                      sb.halo(0, lv, static_cast<Index>(r));
+                  }
+                }
+                else
+                {
+                  sb.setOwner(0, lv, static_cast<Index>(owner));
+                }
+              }
+            }
+          }
+        }
+
         for (size_t k = ghostZ.begin; k < ghostZ.end; ++k)
         {
           for (size_t j = ghostY.begin; j < ghostY.end; ++j)
@@ -2089,6 +2185,65 @@ namespace Rodin::Geometry
                   const Index ow = static_cast<Index>(owner);
                   sb.setOwner(3, lc0, ow);
                   sb.setOwner(3, lc1, ow);
+                }
+              }
+              else if (g == Polytope::Type::Pyramid)
+              {
+                const Index centerOffset = static_cast<Index>(nx * ny * nz);
+
+                const Index v0 = gv2lv.at(vid3(i,     j,     k,     nx, ny));
+                const Index v1 = gv2lv.at(vid3(i + 1, j,     k,     nx, ny));
+                const Index v2 = gv2lv.at(vid3(i + 1, j + 1, k,     nx, ny));
+                const Index v3 = gv2lv.at(vid3(i,     j + 1, k,     nx, ny));
+                const Index v4 = gv2lv.at(vid3(i,     j,     k + 1, nx, ny));
+                const Index v5 = gv2lv.at(vid3(i + 1, j,     k + 1, nx, ny));
+                const Index v6 = gv2lv.at(vid3(i + 1, j + 1, k + 1, nx, ny));
+                const Index v7 = gv2lv.at(vid3(i,     j + 1, k + 1, nx, ny));
+                const Index c  = gv2lv.at(centerOffset + macroId3(i, j, k, cx, cy));
+
+                const Index lc0 = sb.polytope(
+                  3, static_cast<Index>(6 * mid + 0), Polytope::Type::Pyramid,
+                  makeIndexArray(v0, v1, v2, v3, c), state);
+                const Index lc1 = sb.polytope(
+                  3, static_cast<Index>(6 * mid + 1), Polytope::Type::Pyramid,
+                  makeIndexArray(v4, v5, v6, v7, c), state);
+                const Index lc2 = sb.polytope(
+                  3, static_cast<Index>(6 * mid + 2), Polytope::Type::Pyramid,
+                  makeIndexArray(v0, v4, v5, v1, c), state);
+                const Index lc3 = sb.polytope(
+                  3, static_cast<Index>(6 * mid + 3), Polytope::Type::Pyramid,
+                  makeIndexArray(v1, v5, v6, v2, c), state);
+                const Index lc4 = sb.polytope(
+                  3, static_cast<Index>(6 * mid + 4), Polytope::Type::Pyramid,
+                  makeIndexArray(v2, v6, v7, v3, c), state);
+                const Index lc5 = sb.polytope(
+                  3, static_cast<Index>(6 * mid + 5), Polytope::Type::Pyramid,
+                  makeIndexArray(v3, v7, v4, v0, c), state);
+
+                if (state == Shard::State::Owned)
+                {
+                  for (const int r : holdersOfCell(i, j, k))
+                  {
+                    if (r != rank)
+                    {
+                      sb.halo(3, lc0, static_cast<Index>(r));
+                      sb.halo(3, lc1, static_cast<Index>(r));
+                      sb.halo(3, lc2, static_cast<Index>(r));
+                      sb.halo(3, lc3, static_cast<Index>(r));
+                      sb.halo(3, lc4, static_cast<Index>(r));
+                      sb.halo(3, lc5, static_cast<Index>(r));
+                    }
+                  }
+                }
+                else
+                {
+                  const Index ow = static_cast<Index>(owner);
+                  sb.setOwner(3, lc0, ow);
+                  sb.setOwner(3, lc1, ow);
+                  sb.setOwner(3, lc2, ow);
+                  sb.setOwner(3, lc3, ow);
+                  sb.setOwner(3, lc4, ow);
+                  sb.setOwner(3, lc5, ow);
                 }
               }
               else // Tetrahedron

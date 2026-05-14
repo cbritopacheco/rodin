@@ -220,6 +220,7 @@ namespace Rodin::Examples::Heart
     input.mu = cfg.lv.mu;
     input.eta = cfg.lv.eta;
     input.alpha = cfg.lv.alpha;
+    input.alphaR = cfg.lv.alphaR;
     input.k0 = cfg.lv.k0;
     input.sigma0 = cfg.lv.sigma0;
 
@@ -227,6 +228,17 @@ namespace Rodin::Examples::Heart
     input.Cp = cfg.lv.Cp;
     input.Rd = cfg.lv.Rd;
     input.Cd = cfg.lv.Cd;
+
+    input.proximalRadius = cfg.lv.proximalRadius;
+    input.proximalLength = cfg.lv.proximalLength;
+    input.distalRadius = cfg.lv.distalRadius;
+    input.distalLength = cfg.lv.distalLength;
+
+    input.mu_0    = cfg.lv.mu_0;
+    input.mu_Inf  = cfg.lv.mu_Inf;
+    input.lambda = cfg.lv.lambda;
+    input.n = cfg.lv.n;
+    input.yasuda = cfg.lv.yasuda;
 
     input.Kat = cfg.lv.Kat;
     input.Kp  = cfg.lv.Kp;
@@ -249,6 +261,31 @@ namespace Rodin::Examples::Heart
       [p = cfg.atrialPressure](Real t) { return atrial_pressure(p, t); };
     input.u =
       [a = cfg.activation](Real t) { return periodic_activation(a, t); };
+    input.m0 =
+      [low = cfg.lv.relaxationM0Low,
+       high = cfg.lv.relaxationM0High,
+       lowEc = cfg.lv.relaxationM0LowEc,
+       highEc = cfg.lv.relaxationM0HighEc](Real ec)
+      {
+        if (highEc <= lowEc)
+          return high;
+        if (ec <= lowEc)
+          return low;
+        if (ec >= highEc)
+          return high;
+        const Real s = (ec - lowEc) / (highEc - lowEc);
+        return (1.0 - s) * low + s * high;
+      };
+    input.dm0 =
+      [low = cfg.lv.relaxationM0Low,
+       high = cfg.lv.relaxationM0High,
+       lowEc = cfg.lv.relaxationM0LowEc,
+       highEc = cfg.lv.relaxationM0HighEc](Real ec)
+      {
+        if (highEc <= lowEc || ec <= lowEc || ec >= highEc)
+          return 0.0;
+        return (high - low) / (highEc - lowEc);
+      };
 
     {
       using PassiveEnergy = std::decay_t<decltype(input.passiveEnergy)>;
@@ -267,12 +304,14 @@ namespace Rodin::Examples::Heart
     return input;
   }
 
-  void CoupledLV0DCoronary3D::updateRCR(RCR& bc, Real Q, Real dt)
+  void CoupledLV0DCoronary3D::updateRCR(const Model& model, RCR& bc, Real Q, Real dt)
   {
     const Real a = bc.C / dt;
 
+    const auto& s = model.getState();
+
     bc.pc =
-      (a * bc.pc + Q + bc.pd / bc.Rd)
+      (a * bc.pc + Q + s.pv / bc.Rd)
       / (a + 1.0 / bc.Rd);
 
     bc.qd = (bc.pc - bc.pd) / bc.Rd;
@@ -639,6 +678,7 @@ namespace Rodin::Examples::Heart
     s0.beta = (s0.gamma > 0.0) ? (m_input.initActiveStress / s0.gamma) : 0.0;
     s0.kc = s0.gamma * s0.gamma;
     s0.tauc = s0.gamma * s0.beta;
+    s0.w = m_input.m0(s0.ec);
 
     m_model.initialize(s0);
   }
@@ -707,6 +747,7 @@ namespace Rodin::Examples::Heart
       << "ec    = " << s.ec << Alert::NewLine
       << "gamma = " << s.gamma << Alert::NewLine
       << "beta  = " << s.beta << Alert::NewLine
+      << "w     = " << s.w << Alert::NewLine
       << "kc    = " << s.kc << Alert::NewLine
       << "tauc  = " << s.tauc << Alert::NewLine
       << "3D flow mode: " << flowModeName(m_cfg.flowMode)
@@ -1110,6 +1151,7 @@ namespace Rodin::Examples::Heart
     d.ec = s.ec;
     d.gamma = s.gamma;
     d.beta = s.beta;
+    d.w = s.w;
     d.kc = s.kc;
     d.tauc = s.tauc;
 
@@ -1184,6 +1226,7 @@ namespace Rodin::Examples::Heart
       << "ec,"
       << "gamma,"
       << "beta,"
+      << "w,"
       << "kc,"
       << "tauc\n";
 
@@ -1247,6 +1290,7 @@ namespace Rodin::Examples::Heart
       << d.ec << ','
       << d.gamma << ','
       << d.beta << ','
+      << d.w << ','
       << d.kc << ','
       << d.tauc << '\n';
 
@@ -1439,8 +1483,6 @@ namespace Rodin::Examples::Heart
         accepted = true;
         nextDt = std::min(baseDt, solverDt / factor);
       }
-
-      ++acceptedStep;
     }
 
     m_cfg.dt = baseDt;

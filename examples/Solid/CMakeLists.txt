@@ -11,3 +11,10 @@ target_link_libraries(RodinSolidBlockGravity
   Rodin::Solid
   Rodin::Variational
   Rodin::IO)
+
+add_executable(RodinSolidActiveContractionPlaneWave ActiveContractionPlaneWave.cpp)
+target_link_libraries(RodinSolidActiveContractionPlaneWave
+  PUBLIC
+  Rodin::Solid
+  Rodin::Variational
+  Rodin::IO)

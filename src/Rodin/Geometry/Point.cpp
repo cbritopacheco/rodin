@@ -21,10 +21,6 @@ namespace Rodin::Geometry
     : m_polytope(polytope), m_pc(pc)
   {}
 
-  PointBase::PointBase(const Polytope& polytope, Math::SpatialPoint&& pc)
-    : m_polytope(polytope), m_pc(std::move(pc))
-  {}
-
   bool PointBase::operator<(const PointBase& p) const
   {
     assert(this->getDimension() == p.getDimension());
@@ -331,32 +327,12 @@ namespace Rodin::Geometry
 
   Point::Point(const Polytope& polytope, const Math::SpatialPoint& rc)
     : PointBase(polytope),
-      m_rc(std::cref(rc))
-  {}
-
-  Point::Point(const Polytope& polytope, Math::SpatialPoint&& rc)
-    : PointBase(polytope),
-      m_rc(std::move(rc))
+      m_rc(rc)
   {}
 
   Point::Point(const Polytope& polytope, const Math::SpatialPoint& rc, const Math::SpatialPoint& pc)
     : PointBase(polytope, pc),
-      m_rc(std::cref(rc))
-  {}
-
-  Point::Point(const Polytope& polytope, const Math::SpatialPoint& rc, Math::SpatialPoint&& pc)
-    : PointBase(polytope, std::move(pc)),
-      m_rc(std::cref(rc))
-  {}
-
-  Point::Point(const Polytope& polytope, Math::SpatialPoint&& rc, const Math::SpatialPoint& pc)
-    : PointBase(polytope, pc),
-      m_rc(std::move(rc))
-  {}
-
-  Point::Point(const Polytope& polytope, Math::SpatialPoint&& rc, Math::SpatialPoint&& pc)
-    : PointBase(polytope, std::move(pc)),
-      m_rc(std::move(rc))
+      m_rc(rc)
   {}
 
   Point::Point(const Point& other)
@@ -371,13 +347,6 @@ namespace Rodin::Geometry
 
   const Math::SpatialVector<Real>& Point::getReferenceCoordinates() const
   {
-    if (std::holds_alternative<const Math::SpatialPoint>(m_rc))
-    {
-      return std::get<const Math::SpatialPoint>(m_rc);
-    }
-    else
-    {
-      return std::get<std::reference_wrapper<Math::SpatialPoint>>(m_rc).get();
-    }
+    return m_rc;
   }
 }
