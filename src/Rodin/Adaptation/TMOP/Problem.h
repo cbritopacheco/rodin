@@ -33,11 +33,11 @@ namespace Rodin::Adaptation::TMOP
   };
 
   /**
-   * @brief Rodin-style TMOP problem facade for fixed-topology geometry quality.
+   * @brief Facade for fixed-topology TMOP geometry adaptation.
    *
-   * Problem is the user-facing entry point for the first TMOP implementation.
    * It reuses Rodin mesh/connectivity infrastructure, constructs the order-2
-   * geometry representation, configures the objective, and runs the optimizer.
+   * geometry representation, configures the objective, and advances the mesh
+   * geometry while keeping topology fixed.
    *
    * Example:
    * @code
@@ -52,8 +52,8 @@ namespace Rodin::Adaptation::TMOP
    * @endcode
    *
    * The problem keeps topology fixed. It does not triangulate, coarsen, insert
-   * or delete cells, or move fixed nodes. This is the intended optimization
-   * stage after level-set cutting has already produced the fitted topology.
+   * or delete cells, or move fixed nodes. Rodin-native TMOP terms provide the
+   * residual and tangent pieces used by LinearProblem/Newton assembly.
    */
   class Problem
   {

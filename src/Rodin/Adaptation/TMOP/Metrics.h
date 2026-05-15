@@ -73,8 +73,8 @@ namespace Rodin::Adaptation::TMOP
       /**
        * @brief Returns zero for admissible Jacobians and a large penalty otherwise.
        *
-       * The penalty is intentionally simple. It is a guardrail for objective
-       * evaluation, not a substitute for a production TMOP barrier metric.
+       * The penalty is intentionally simple. It guards objective evaluation
+       * against inverted sampled Jacobians.
        */
       Real invalidPenalty(const Matrix2& A) const
       {
@@ -93,9 +93,8 @@ namespace Rodin::Adaptation::TMOP
    * Simple infrastructure metric:
    *   W(A) = 1/2 ||A - I||_F^2
    *
-   * This is intentionally not a full TMOP production metric. It is a clear,
-   * differentiable quality metric for validating the evaluator and optimizer
-   * pipeline before adding the richer metric catalog.
+   * This is the initial differentiable quality metric used by the TMOP
+   * evaluator and residual/tangent terms.
    */
   class SquaredDistanceMetric final : public MetricBase
   {

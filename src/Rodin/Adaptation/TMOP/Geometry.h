@@ -39,8 +39,8 @@ namespace Rodin::Adaptation::TMOP
    * The topology is fixed. Each cell stores six node indices ordered as
    * `{v0, v1, v2, e01, e12, e20}` using quadratic Lagrange triangle shape
    * functions. This representation deliberately separates geometry nodes from
-   * mesh vertices so later curved fitting can move midside/interface nodes
-   * without changing the linear fitted topology.
+   * mesh vertices so midside and interface geometry can move without changing
+   * the fitted topology.
    */
   struct HighOrderTriangleGeometry
   {

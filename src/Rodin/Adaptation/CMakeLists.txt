@@ -9,6 +9,7 @@ set(RodinAdaptation_HEADERS
   TMOP.h
   TMOP/Metrics.h
   TMOP/Functions.h
+  TMOP/Terms.h
   TMOP/Geometry.h
   TMOP/Objective.h
   TMOP/Optimizer.h

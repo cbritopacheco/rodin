@@ -30,14 +30,13 @@ namespace Rodin::Adaptation::TMOP
   {
     public:
       /**
-       * @brief Builds a fixed-topology TMOP objective from a quality metric.
+       * @brief Builds a fixed-topology objective from a quality metric.
        *
        * The current objective is:
        *   quality(geometry) + mu * deviation_from_initial_geometry.
        *
-       * The interface-fit term is intentionally represented by the
-       * InterfaceFitPenalty extension point, but not coupled to level-set
-       * cutting in this first reusable implementation.
+       * Rodin-native TMOP terms expose the corresponding residual and tangent
+       * contributions for LinearProblem assembly.
        */
       explicit Objective(const MetricBase& metric)
         : m_metric(metric)

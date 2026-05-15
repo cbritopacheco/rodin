@@ -40,7 +40,16 @@ namespace Rodin::Geometry
       m_vertices(other.m_vertices),
       m_connectivity(other.m_connectivity),
       m_attributes(other.m_attributes)
-  {}
+  {
+    m_transformations.initialize(m_sdim);
+    m_quadratures.initialize(m_sdim);
+    for (size_t d = 0; d <= getDimension(); ++d)
+    {
+      const size_t count = m_connectivity.getCount(d);
+      m_transformations.resize(d, count);
+      m_quadratures.resize(d, count);
+    }
+  }
 
   Mesh<Context::Local>::Mesh(Mesh&& other)
     : MeshBase(std::move(other)),

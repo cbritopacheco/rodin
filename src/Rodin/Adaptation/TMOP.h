@@ -9,17 +9,23 @@
 
 /**
  * @file
- * @brief Initial TMOP-style mesh quality infrastructure.
+ * @brief Rodin-native TMOP mesh adaptation components.
  *
- * These utilities provide the reusable pieces needed after level-set cutting:
- * quality metrics on target-normalized Jacobians, P2 geometry nodes on linear
- * triangles, objective evaluation, and a small damped optimizer skeleton. They
- * keep topology fixed; they do not remesh, coarsen, or alter interface
- * constraints.
+ * The production direction is fixed-topology TMOP assembled as ordinary Rodin
+ * residual and tangent terms into LinearProblem objects, then solved by
+ * NewtonSolver and the existing local/PETSc/MPI/OpenMP backends.
+ *
+ * TMOP exposes metrics, high-order geometry helpers, and Rodin-native
+ * residual/tangent terms. The residual/tangent terms are the production path:
+ * they assemble into LinearProblem objects and use the existing solver
+ * backends.
  */
 
 #include "TMOP/Metrics.h"
 #include "TMOP/Functions.h"
+#include "TMOP/Terms.h"
+
+// Fixed-topology geometry and adaptation helpers.
 #include "TMOP/Geometry.h"
 #include "TMOP/Objective.h"
 #include "TMOP/Optimizer.h"

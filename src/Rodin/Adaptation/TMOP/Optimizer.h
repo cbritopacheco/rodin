@@ -41,13 +41,13 @@ namespace Rodin::Adaptation::TMOP
   {
     public:
       /**
-       * @brief Damped finite-difference optimizer for small TMOP problems.
+       * @brief Damped finite-difference optimizer for fixed-topology geometry.
        *
        * This optimizer is deliberately conservative and fixed-topology:
        * it respects GeometryNode::fixed, rejects steps with invalid sampled
-       * Jacobians, and uses backtracking. It is intended as the first complete
-       * execution path for tests and small examples while Rodin grows a fuller
-       * nonlinear solver-backed TMOP implementation.
+       * Jacobians, and uses backtracking. It provides a fixed-topology
+       * execution path for tests and small examples while the residual and
+       * tangent terms provide the LinearProblem/Newton assembly path.
        */
       Optimizer(HighOrderTriangleGeometry& geometry, const Objective& objective)
         : m_geometry(geometry),

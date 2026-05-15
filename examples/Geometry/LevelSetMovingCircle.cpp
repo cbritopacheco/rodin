@@ -11,14 +11,18 @@
 #include <iostream>
 
 #include <Rodin/Adaptation.h>
+#include <Rodin/Assembly/Default.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Geometry/LevelSetDiscretizerTriangles.h>
 #include <Rodin/IO.h>
+#include <Rodin/Solver/NewtonSolver.h>
+#include <Rodin/Solver/SparseLU.h>
 #include <Rodin/Variational.h>
 
 using namespace Rodin;
 using namespace Rodin::Adaptation::TMOP;
 using namespace Rodin::Geometry;
+using namespace Rodin::Solver;
 using namespace Rodin::Variational;
 
 namespace
@@ -92,6 +96,23 @@ namespace
         std::sqrt(residuals.analyticL2 / static_cast<Real>(graph.vertices.size()));
     return residuals;
   }
+
+  template <class FES, class Data>
+  void applyDisplacement(
+      LocalMesh& mesh,
+      const GridFunction<FES, Data>& displacement)
+  {
+    const auto& data = displacement.getData();
+    const Index vertexCount = static_cast<Index>(mesh.getVertexCount());
+    const size_t sdim = mesh.getSpaceDimension();
+    for (Index vertex = 0; vertex < vertexCount; ++vertex)
+    {
+      auto x = mesh.getVertexCoordinates(vertex);
+      for (size_t c = 0; c < sdim; ++c)
+        x[c] += data(vertex + static_cast<Index>(c) * vertexCount);
+      mesh.setVertexCoordinates(vertex, x);
+    }
+  }
 }
 
 int main(int, char**)
@@ -122,7 +143,9 @@ int main(int, char**)
     << "interface_p1_linf,interface_analytic_linf,interface_analytic_l2,"
     << "graph_vertices,graph_edges,chains,cut_vertices,cut_cells,"
     << "degenerate_cells,pathological_cuts,min_output_area,min_output_quality,"
-    << "linear_metric,tmop_initial,tmop_final,tmop_min_jacobian,tmop_invalid_elements\n";
+    << "linear_metric,optimized_linear_metric,fit_initial,fit_final,"
+    << "newton_initial_residual,newton_final_residual,newton_step_norm,"
+    << "newton_iterations,newton_converged,optimized_geometry_applied\n";
 
   SquaredDistanceMetric metric;
 
@@ -150,20 +173,40 @@ int main(int, char**)
       .setPositiveCellAttribute(PositiveAttribute)
       .discretize();
 
-    auto geometry = HighOrderGeometryUpgrade()
-      .setFixOriginalVertices(true)
-      .upgrade(result.mesh, 2);
+    P1 displacementSpace(result.mesh, result.mesh.getSpaceDimension());
+    GridFunction displacement(displacementSpace);
+    displacement.getData().setZero();
 
-    Objective objective(metric);
-    objective.setDeviationWeight(1e-3);
-    const Real tmopInitial = objective.value(geometry);
+    TrialFunction du(displacementSpace);
+    TestFunction v(displacementSpace);
 
-    OptimizerOptions options;
-    options.maxIterations = 1;
-    options.initialStepSize = 1e-3;
-    const auto report = Optimizer(geometry, objective)
-      .setOptions(options)
-      .optimize();
+    QualityTerm quality(1.0);
+    DeviationTerm deviation(1e-2);
+    LevelSetFitTerm fit(result.interfaceGraph, result.report, 100.0);
+
+    Variational::Problem tangentialProblem(du, v);
+    // Rodin assembles LFIs with a minus sign in the RHS, so adding residual
+    // terms here gives the Newton system J(u_k) du = -R(u_k).
+    tangentialProblem =
+        quality.tangent(displacement, du, v)
+      + deviation.tangent(du, v)
+      + fit.tangent(displacement, du, v)
+      + quality.residual(displacement, v)
+      + deviation.residual(displacement, v)
+      + fit.residual(displacement, v);
+
+    SparseLU linearSolver{tangentialProblem};
+    NewtonSolver newton(linearSolver);
+    newton
+      .setMaxIterations(3)
+      .setDampingFactor(0.01)
+      .setAbsoluteTolerance(1e-10)
+      .setRelativeTolerance(1e-8)
+      .setStepTolerance(1e-10);
+
+    const Real fitInitial = fit.sourceSegmentDistanceEnergy(result.mesh);
+    newton.solve(displacement);
+    const auto newtonReport = newton.getReport();
 
     const auto residuals = measureInterfaceResiduals(
         background,
@@ -173,8 +216,14 @@ int main(int, char**)
         time);
 
     const Real linearMetric = LinearMeshMetricObjective(metric).compute(result.mesh);
+    LocalMesh optimizedMesh = result.mesh;
+    applyDisplacement(optimizedMesh, displacement);
+    const bool optimizedGeometryApplied = true;
+    const Real optimizedLinearMetric =
+      LinearMeshMetricObjective(metric).compute(optimizedMesh);
+    const Real fitFinal = fit.sourceSegmentDistanceEnergy(optimizedMesh);
 
-    fittedGrid.setMesh(result.mesh, IO::XDMF::MeshPolicy::Transient);
+    fittedGrid.setMesh(optimizedMesh, IO::XDMF::MeshPolicy::Transient);
     xdmf.write(time).flush();
 
     diagnostics
@@ -197,10 +246,15 @@ int main(int, char**)
       << result.report.minOutputCellArea << ','
       << result.report.minOutputCellQuality << ','
       << linearMetric << ','
-      << tmopInitial << ','
-      << report.finalObjective << ','
-      << report.minJacobian << ','
-      << report.invalidElements << '\n';
+      << optimizedLinearMetric << ','
+      << fitInitial << ','
+      << fitFinal << ','
+      << newtonReport.initial_residual << ','
+      << newtonReport.final_residual << ','
+      << newtonReport.final_step_norm << ','
+      << newtonReport.iterations << ','
+      << newtonReport.converged << ','
+      << optimizedGeometryApplied << '\n';
 
     std::cout << "step " << step
               << " t=" << time
@@ -209,7 +263,10 @@ int main(int, char**)
               << " segments)"
               << " p1 residual=" << residuals.p1LInf
               << " analytic residual=" << residuals.analyticLInf
-              << " tmop " << tmopInitial << " -> " << report.finalObjective
+              << " tmop residual " << newtonReport.initial_residual
+              << " -> " << newtonReport.final_residual
+              << " fit " << fitInitial << " -> " << fitFinal
+              << " optimized_geometry_applied=" << optimizedGeometryApplied
               << std::endl;
   }
 
@@ -222,6 +279,10 @@ int main(int, char**)
             << std::endl;
   std::cout << "The interface analytic residual measures the expected P1"
             << " polygonal approximation error to the moving circle."
+            << std::endl;
+  std::cout << "Each step cuts a fresh fitted mesh, solves a Rodin Newton"
+            << " tangential TMOP problem on that fitted topology, and exports"
+            << " the displaced fitted mesh."
             << std::endl;
   return 0;
 }

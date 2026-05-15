@@ -13,6 +13,7 @@
 
 #include <gtest/gtest.h>
 
+#include <Rodin/Assembly/Default.h>
 #include <Rodin/Adaptation.h>
 #include <Rodin/Geometry/LevelSetDiscretizerTriangles.h>
 #include <Rodin/Geometry.h>
@@ -73,6 +74,25 @@ namespace Rodin::Tests::Unit
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
     return mesh;
+  }
+
+  static LevelSetDiscretizerTrianglesResult cutTwoTriangleSquare()
+  {
+    auto mesh = makeTwoTriangleSquare();
+
+    P1 space(mesh);
+    GridFunction phi(space);
+    phi[0] = -1;
+    phi[1] = 1;
+    phi[2] = -1;
+    phi[3] = 1;
+
+    return LevelSetDiscretizerTriangles(phi)
+      .setSignTolerance(1e-12)
+      .setInterfaceAttribute(99)
+      .setNegativeCellAttribute(1)
+      .setPositiveCellAttribute(2)
+      .discretize();
   }
 
   static HighOrderTriangleGeometry upgradeUnitTriangle()
@@ -284,20 +304,7 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_Adaptation_TMOP, CutMeshCanBeUpgradedAndEvaluated)
   {
-    auto mesh = makeTwoTriangleSquare();
-
-    P1 space(mesh);
-    GridFunction phi(space);
-    phi[0] = -1;
-    phi[1] = 1;
-    phi[2] = -1;
-    phi[3] = 1;
-
-    auto cut = LevelSetDiscretizerTriangles(phi)
-      .setSignTolerance(1e-12)
-      .setInterfaceAttribute(99)
-      .discretize();
-
+    auto cut = cutTwoTriangleSquare();
     auto geometry = HighOrderGeometryUpgrade().upgrade(cut.mesh, 2);
     SquaredDistanceMetric metric;
     Objective objective(metric);
@@ -305,6 +312,78 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(cut.interfaceGraph.edges.size(), 0);
     EXPECT_EQ(objective.invalidElementCount(geometry), 0);
     EXPECT_TRUE(std::isfinite(objective.value(geometry)));
+  }
+
+  TEST(Rodin_Adaptation_TMOP, DeviationTermAssemblesResidualAndTangent)
+  {
+    auto mesh = makeTwoTriangleSquare();
+    constexpr size_t vdim = 2;
+    P1 space(mesh, vdim);
+
+    GridFunction displacement(space);
+    auto& data = displacement.getData();
+    for (Eigen::Index i = 0; i < data.size(); ++i)
+      data(i) = static_cast<Real>(i + 1) / static_cast<Real>(data.size());
+
+    TrialFunction du(space);
+    TestFunction v(space);
+    DeviationTerm term;
+
+    BilinearForm tangent(du, v);
+    tangent = term.tangent(du, v);
+    tangent.assemble();
+
+    LinearForm residual(v);
+    residual = term.residual(displacement, v);
+    residual.assemble();
+
+    const auto mismatch =
+      tangent.getOperator() * displacement.getData() - residual.getVector();
+    EXPECT_NEAR(mismatch.norm(), 0, 1e-13);
+    EXPECT_GT(residual.getVector().dot(displacement.getData()), 0);
+  }
+
+  TEST(Rodin_Adaptation_TMOP, LevelSetFitTermIsZeroOnFreshCutInterface)
+  {
+    const auto cut = cutTwoTriangleSquare();
+    LevelSetFitTerm fit(cut.interfaceGraph, cut.report);
+
+    EXPECT_GT(cut.report.interfaceEdgeProvenance.size(), 0);
+    EXPECT_NEAR(fit.sourceSegmentDistanceEnergy(cut.mesh), 0, 1e-28);
+  }
+
+  TEST(Rodin_Adaptation_TMOP, LevelSetFitTermIncreasesWhenInterfaceIsPerturbed)
+  {
+    auto cut = cutTwoTriangleSquare();
+    LevelSetFitTerm fit(cut.interfaceGraph, cut.report);
+
+    ASSERT_GT(cut.report.interfaceEdgeProvenance.size(), 0);
+    const Index outputEdge = cut.report.interfaceEdgeProvenance.begin()->first;
+    const auto& edge = cut.mesh.getConnectivity().getPolytope(1, outputEdge);
+    auto x = cut.mesh.getVertexCoordinates(edge(0));
+    x[0] += 0.05;
+    cut.mesh.setVertexCoordinates(edge(0), x);
+
+    EXPECT_GT(fit.sourceSegmentDistanceEnergy(cut.mesh), 1e-8);
+  }
+
+  TEST(Rodin_Adaptation_TMOP, CutMeshZeroDisplacementTermSmoke)
+  {
+    const auto cut = cutTwoTriangleSquare();
+    constexpr size_t vdim = 2;
+    P1 space(cut.mesh, vdim);
+    GridFunction displacement(space);
+    displacement = VectorFunction{ Zero(), Zero() };
+
+    DeviationTerm deviation;
+    LevelSetFitTerm fit(cut.interfaceGraph, cut.report);
+    TestFunction v(space);
+    LinearForm residual(v);
+    residual = deviation.residual(displacement, v);
+    residual.assemble();
+
+    EXPECT_NEAR(residual.getVector().norm(), 0, 1e-14);
+    EXPECT_NEAR(fit.sourceSegmentDistanceEnergy(cut.mesh), 0, 1e-28);
   }
 
   struct MetricMatrixCase
