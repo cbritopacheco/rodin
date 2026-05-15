@@ -260,9 +260,27 @@ namespace Rodin::Adaptation::TMOP
           const size_t localSize = cell.getVertices().size() * sdim;
           std::vector<Real> local(localSize * localSize, Real(0));
 
+          const auto& mesh = m_u.get().getFiniteElementSpace().getMesh();
+          std::array<Math::SpatialPoint, 3> X;
           std::array<Math::SpatialPoint, 3> x;
           for (size_t i = 0; i < 3; ++i)
+          {
+            X[i] = mesh.getVertexCoordinates(cell.getVertices()(i));
             x[i] = deformedVertex(m_u.get(), cell, i, sdim);
+          }
+
+          // Same rest length as the residual (equilateral length from the
+          // undeformed area, with a fallback), so the tangent below is the
+          // exact Jacobian of the residual edge force.
+          const Real area = triangleArea2D(X[0], X[1], X[2]);
+          Real target = equilateralEdgeLengthFromArea(area);
+          if (target <= Real(0))
+          {
+            target =
+              (edgeLength(X[0], X[1])
+             + edgeLength(X[1], X[2])
+             + edgeLength(X[2], X[0])) / Real(3);
+          }
 
           static constexpr std::array<std::array<size_t, 2>, 3> Edges = {{
             {{0, 1}}, {{1, 2}}, {{2, 0}}
@@ -286,15 +304,25 @@ namespace Rodin::Adaptation::TMOP
             if (length <= Real(1e-14))
               continue;
             const auto direction = (Real(1) / length) * e;
+            // d/dx of f = w (|e| - L0) e/|e| :
+            //   K = w [ ee^T/|e|^2  +  (|e|-L0)/|e| (I - ee^T/|e|^2) ].
+            // The first term is the axial stiffness; the second is the
+            // geometric stiffness that the previous tangent omitted, which
+            // is what broke residual/Jacobian consistency away from
+            // equilibrium and forced tiny damping.
+            const Real geom = (length - target) / length;
             for (size_t r = 0; r < sdim; ++r)
             {
-              for (size_t c = 0; c < sdim; ++c)
+              for (size_t cc = 0; cc < sdim; ++cc)
               {
-                const Real value = m_weight * direction[r] * direction[c];
-                add(a, r, a, c,  value);
-                add(a, r, b, c, -value);
-                add(b, r, a, c, -value);
-                add(b, r, b, c,  value);
+                const Real dd = direction[r] * direction[cc];
+                const Real identity = (r == cc) ? Real(1) : Real(0);
+                const Real value =
+                  m_weight * (dd + geom * (identity - dd));
+                add(a, r, a, cc,  value);
+                add(a, r, b, cc, -value);
+                add(b, r, a, cc, -value);
+                add(b, r, b, cc,  value);
               }
             }
           }
@@ -438,6 +466,187 @@ namespace Rodin::Adaptation::TMOP
     };
 
   template <class GridFunctionType>
+  class DeviationResidualIntegrator final
+      : public Variational::LinearFormIntegratorBase<Real>
+    {
+      public:
+        using Parent = Variational::LinearFormIntegratorBase<Real>;
+
+        template <class TestFES>
+        DeviationResidualIntegrator(
+            const GridFunctionType& u,
+            const Variational::TestFunction<TestFES>& v,
+            Real weight)
+          : Parent(v),
+            m_u(u),
+            m_weight(std::max(Real(0), weight))
+        {}
+
+        DeviationResidualIntegrator(
+            const DeviationResidualIntegrator& other)
+          : Parent(other),
+            m_u(other.m_u),
+            m_weight(other.m_weight),
+            m_polytope(other.m_polytope)
+        {}
+
+        const Geometry::Polytope& getPolytope() const override
+        {
+          assert(m_polytope);
+          return *m_polytope;
+        }
+
+        DeviationResidualIntegrator& setPolytope(
+            const Geometry::Polytope& polytope) override
+        {
+          m_polytope = &polytope;
+          return *this;
+        }
+
+        Real integrate(size_t local) override
+        {
+          if (!m_polytope || m_polytope->getDimension() != 2
+              || m_polytope->getVertices().size() != 3)
+            return 0;
+
+          const auto& mesh = m_u.get().getFiniteElementSpace().getMesh();
+          const size_t sdim = mesh.getSpaceDimension();
+          const size_t localSize = m_polytope->getVertices().size() * sdim;
+          if (sdim != 2 || local >= localSize)
+            return 0;
+
+          const auto values = computeLocalResidual(*m_polytope, sdim);
+          return values[local];
+        }
+
+        Geometry::Region getRegion() const override
+        {
+          return Geometry::Region::Cells;
+        }
+
+        DeviationResidualIntegrator* copy() const noexcept override
+        {
+          return new DeviationResidualIntegrator(*this);
+        }
+
+      private:
+        std::vector<Real> computeLocalResidual(
+            const Geometry::Polytope& cell,
+            size_t sdim) const
+        {
+          const size_t localSize = cell.getVertices().size() * sdim;
+          std::vector<Real> local(localSize, Real(0));
+
+          const auto& mesh = m_u.get().getFiniteElementSpace().getMesh();
+          const auto x0 = mesh.getVertexCoordinates(cell.getVertices()(0));
+          const auto x1 = mesh.getVertexCoordinates(cell.getVertices()(1));
+          const auto x2 = mesh.getVertexCoordinates(cell.getVertices()(2));
+          const Real area = triangleArea2D(x0, x1, x2);
+          const auto& data = m_u.get().getData();
+          const Index vertexCount = static_cast<Index>(mesh.getVertexCount());
+
+          for (size_t a = 0; a < 3; ++a)
+          {
+            for (size_t b = 0; b < 3; ++b)
+            {
+              const Real mass = m_weight * area
+                * ((a == b) ? Real(1) / Real(6) : Real(1) / Real(12));
+              const Index vertexB = cell.getVertices()(b);
+              for (size_t c = 0; c < sdim; ++c)
+              {
+                local[a * sdim + c] +=
+                  mass * data(vertexB + static_cast<Index>(c) * vertexCount);
+              }
+            }
+          }
+
+          return local;
+        }
+
+        std::reference_wrapper<const GridFunctionType> m_u;
+        Real m_weight = 1;
+        const Geometry::Polytope* m_polytope = nullptr;
+    };
+
+  class DeviationTangentIntegrator final
+      : public Variational::LocalBilinearFormIntegratorBase<Real>
+    {
+      public:
+        using Parent = Variational::LocalBilinearFormIntegratorBase<Real>;
+
+        template <class Solution, class TrialFES, class TestFES>
+        DeviationTangentIntegrator(
+            const Variational::TrialFunction<Solution, TrialFES>& du,
+            const Variational::TestFunction<TestFES>& v,
+            Real weight)
+          : Parent(du, v),
+            m_weight(std::max(Real(0), weight))
+        {}
+
+        DeviationTangentIntegrator(
+            const DeviationTangentIntegrator& other)
+          : Parent(other),
+            m_weight(other.m_weight),
+            m_polytope(other.m_polytope)
+        {}
+
+        const Geometry::Polytope& getPolytope() const override
+        {
+          assert(m_polytope);
+          return *m_polytope;
+        }
+
+        DeviationTangentIntegrator& setPolytope(
+            const Geometry::Polytope& polytope) override
+        {
+          m_polytope = &polytope;
+          return *this;
+        }
+
+        Real integrate(size_t trial, size_t test) override
+        {
+          if (!m_polytope || m_polytope->getDimension() != 2
+              || m_polytope->getVertices().size() != 3)
+            return 0;
+
+          const size_t sdim = 2;
+          const size_t localSize = m_polytope->getVertices().size() * sdim;
+          if (trial >= localSize || test >= localSize)
+            return 0;
+
+          const size_t trialNode = trial / sdim;
+          const size_t trialComponent = trial % sdim;
+          const size_t testNode = test / sdim;
+          const size_t testComponent = test % sdim;
+          if (trialComponent != testComponent)
+            return 0;
+
+          const auto& cell = *m_polytope;
+          const auto& mesh = cell.getMesh();
+          const auto x0 = mesh.getVertexCoordinates(cell.getVertices()(0));
+          const auto x1 = mesh.getVertexCoordinates(cell.getVertices()(1));
+          const auto x2 = mesh.getVertexCoordinates(cell.getVertices()(2));
+          const Real area = triangleArea2D(x0, x1, x2);
+          return m_weight * area
+            * ((trialNode == testNode) ? Real(1) / Real(6) : Real(1) / Real(12));
+        }
+
+        Geometry::Region getRegion() const override
+        {
+          return Geometry::Region::Cells;
+        }
+
+        DeviationTangentIntegrator* copy() const noexcept override
+        {
+          return new DeviationTangentIntegrator(*this);
+        }
+
+      private:
+        Real m_weight = 1;
+        const Geometry::Polytope* m_polytope = nullptr;
+    };
+
+  template <class GridFunctionType>
   class SourceSegmentFitTangentIntegrator final
       : public Variational::LocalBilinearFormIntegratorBase<Real>
     {
@@ -538,6 +747,7 @@ namespace Rodin::Adaptation::TMOP
           const Real length = (x1 - x0).norm();
           if (length <= Real(1e-14))
             return local;
+          const auto edgeDirection = (Real(1) / length) * (x1 - x0);
 
           const auto t = (Real(1) / std::sqrt(denom)) * ab;
 
@@ -555,10 +765,15 @@ namespace Rodin::Adaptation::TMOP
           for (Real q : Points)
           {
             const std::array<Real, 2> N = {{Real(1) - q, q}};
+            const auto x = N[0] * x0 + N[1] * x1;
+            auto d = x - a;
+            d -= d.dot(t) * t;
             for (size_t testNode = 0; testNode < 2; ++testNode)
             {
               for (size_t trialNode = 0; trialNode < 2; ++trialNode)
               {
+                const Real lengthDerivativeSign =
+                  (trialNode == 0) ? Real(-1) : Real(1);
                 for (size_t r = 0; r < sdim; ++r)
                 {
                   for (size_t c = 0; c < sdim; ++c)
@@ -568,6 +783,10 @@ namespace Rodin::Adaptation::TMOP
                     local[row * localSize + col] +=
                       m_weight * Weight * length
                     * N[testNode] * N[trialNode] * projection(r, c);
+                    local[row * localSize + col] +=
+                      m_weight * Weight
+                    * N[testNode] * lengthDerivativeSign
+                    * edgeDirection[c] * d[r];
                   }
                 }
               }
@@ -674,7 +893,8 @@ namespace Rodin::Adaptation::TMOP
           const Variational::GridFunction<FES, Data>& u,
           const Variational::TestFunction<TestFES>& v) const
       {
-        return m_weight * Variational::Integral(Variational::Dot(u, v));
+        return DeviationResidualIntegrator<
+          Variational::GridFunction<FES, Data>>(u, v, m_weight);
       }
 
       template <class Solution, class TrialFES, class TestFES>
@@ -682,7 +902,7 @@ namespace Rodin::Adaptation::TMOP
           const Variational::TrialFunction<Solution, TrialFES>& du,
           const Variational::TestFunction<TestFES>& v) const
       {
-        return m_weight * Variational::Integral(Variational::Dot(du, v));
+        return DeviationTangentIntegrator(du, v, m_weight);
       }
 
     private:

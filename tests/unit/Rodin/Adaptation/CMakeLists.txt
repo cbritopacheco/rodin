@@ -5,6 +5,7 @@ target_link_libraries(RodinAdaptationTMOPTest
   GTest::gtest_main
   Rodin::Adaptation
   Rodin::Geometry
+  Rodin::Solver
   Rodin::Variational)
 gtest_discover_tests(RodinAdaptationTMOPTest
   DISCOVERY_MODE PRE_TEST

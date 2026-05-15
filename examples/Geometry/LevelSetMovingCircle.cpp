@@ -9,6 +9,9 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <limits>
+#include <utility>
+#include <vector>
 
 #include <Rodin/Adaptation.h>
 #include <Rodin/Assembly/Default.h>
@@ -58,16 +61,117 @@ namespace
     Real analyticL2 = 0;
   };
 
+  struct MeshQualitySummary
+  {
+    Real minSignedArea = std::numeric_limits<Real>::infinity();
+    Real minAbsArea = std::numeric_limits<Real>::infinity();
+    Real minQuality = std::numeric_limits<Real>::infinity();
+    Index invertedCells = 0;
+    Index degenerateCells = 0;
+    Index poorQualityCells = 0;
+  };
+
+  Real signedTriangleArea(
+      const Math::SpatialPoint& x0,
+      const Math::SpatialPoint& x1,
+      const Math::SpatialPoint& x2)
+  {
+    return Real(0.5)
+      * ((x1[0] - x0[0]) * (x2[1] - x0[1])
+       - (x1[1] - x0[1]) * (x2[0] - x0[0]));
+  }
+
+  Real triangleQuality(
+      const Math::SpatialPoint& x0,
+      const Math::SpatialPoint& x1,
+      const Math::SpatialPoint& x2)
+  {
+    const Real area = std::abs(signedTriangleArea(x0, x1, x2));
+    const Real l0 = (x1 - x0).norm();
+    const Real l1 = (x2 - x1).norm();
+    const Real l2 = (x0 - x2).norm();
+    const Real denom = l0 * l0 + l1 * l1 + l2 * l2;
+    if (denom <= Real(0))
+      return Real(0);
+    return Real(4) * std::sqrt(Real(3)) * area / denom;
+  }
+
+  MeshQualitySummary summarizeMeshQuality(
+      const LocalMesh& mesh,
+      Real areaTolerance = 1e-14,
+      Real qualityTolerance = 1e-8)
+  {
+    MeshQualitySummary summary;
+    const auto& conn = mesh.getConnectivity();
+
+    for (Index cellIndex = 0; cellIndex < static_cast<Index>(mesh.getCellCount()); ++cellIndex)
+    {
+      if (conn.getGeometry(2, cellIndex) != Polytope::Type::Triangle)
+        continue;
+      const auto& cell = conn.getPolytope(2, cellIndex);
+      const auto x0 = mesh.getVertexCoordinates(cell(0));
+      const auto x1 = mesh.getVertexCoordinates(cell(1));
+      const auto x2 = mesh.getVertexCoordinates(cell(2));
+
+      const Real signedArea = signedTriangleArea(x0, x1, x2);
+      const Real absArea = std::abs(signedArea);
+      const Real quality = triangleQuality(x0, x1, x2);
+
+      summary.minSignedArea = std::min(summary.minSignedArea, signedArea);
+      summary.minAbsArea = std::min(summary.minAbsArea, absArea);
+      summary.minQuality = std::min(summary.minQuality, quality);
+      if (signedArea <= Real(0))
+        summary.invertedCells++;
+      if (absArea <= areaTolerance)
+        summary.degenerateCells++;
+      if (quality <= qualityTolerance)
+        summary.poorQualityCells++;
+    }
+
+    if (!std::isfinite(summary.minSignedArea))
+    {
+      summary.minSignedArea = 0;
+      summary.minAbsArea = 0;
+      summary.minQuality = 0;
+    }
+    return summary;
+  }
+
+  Real lastQuadraticRatio(const std::vector<Real>& residuals)
+  {
+    for (size_t i = residuals.size(); i-- > 1;)
+    {
+      const Real previous = residuals[i - 1];
+      const Real current = residuals[i];
+      if (std::isfinite(previous) && std::isfinite(current)
+          && previous > Real(0))
+        return current / (previous * previous);
+    }
+    return std::numeric_limits<Real>::quiet_NaN();
+  }
+
+  Real maxResidualGrowth(const std::vector<Real>& residuals)
+  {
+    Real growth = 0;
+    for (size_t i = 1; i < residuals.size(); ++i)
+    {
+      if (std::isfinite(residuals[i]) && std::isfinite(residuals[i - 1])
+          && residuals[i - 1] > Real(0))
+        growth = std::max(growth, residuals[i] / residuals[i - 1]);
+    }
+    return growth;
+  }
+
   template <class FES, class Data>
   InterfaceResiduals measureInterfaceResiduals(
-      const LocalMesh& background,
+      const LocalMesh& cutMesh,
       const GridFunction<FES, Data>& phi,
       const InterfaceGraph& graph,
       const MovingCircle& circle,
       Real time)
   {
     InterfaceResiduals residuals;
-    const auto& conn = background.getConnectivity();
+    const auto& conn = cutMesh.getConnectivity();
 
     for (const auto& vertex : graph.vertices)
     {
@@ -100,7 +204,8 @@ namespace
   template <class FES, class Data>
   void applyDisplacement(
       LocalMesh& mesh,
-      const GridFunction<FES, Data>& displacement)
+      const GridFunction<FES, Data>& displacement,
+      Real scale = 1)
   {
     const auto& data = displacement.getData();
     const Index vertexCount = static_cast<Index>(mesh.getVertexCount());
@@ -109,9 +214,33 @@ namespace
     {
       auto x = mesh.getVertexCoordinates(vertex);
       for (size_t c = 0; c < sdim; ++c)
-        x[c] += data(vertex + static_cast<Index>(c) * vertexCount);
+        x[c] += scale * data(vertex + static_cast<Index>(c) * vertexCount);
       mesh.setVertexCoordinates(vertex, x);
     }
+  }
+
+  // Analytic fit energy 1/2 * integral over the cut interface of phi^2, with
+  // phi the manufactured signed distance. No discretizer report is needed:
+  // the interface facets are identified purely by InterfaceAttribute.
+  Real interfacePhiEnergy(
+      const LocalMesh& mesh, const MovingCircle& circle, Real time)
+  {
+    const auto& conn = mesh.getConnectivity();
+    Real energy = 0;
+    for (Index e = 0; e < conn.getCount(1); ++e)
+    {
+      const auto attr = mesh.getAttribute(1, e);
+      if (!attr || *attr != InterfaceAttribute)
+        continue;
+      const auto& edge = conn.getPolytope(1, e);
+      const auto x0 = mesh.getVertexCoordinates(edge(0));
+      const auto x1 = mesh.getVertexCoordinates(edge(1));
+      const Real length = (x1 - x0).norm();
+      const Math::SpatialPoint mid = Real(0.5) * (x0 + x1);
+      const Real phi = circle.signedDistance(mid, time);
+      energy += length * phi * phi;
+    }
+    return Real(0.5) * energy;
   }
 }
 
@@ -119,35 +248,43 @@ int main(int, char**)
 {
   static constexpr size_t resolution = 20;
   static constexpr Index timeSteps = 100;
+  static constexpr size_t maxCarryForwardCells = 6000;
 
-  LocalMesh background =
-    LocalMesh::UniformGrid(Polytope::Type::Triangle, {resolution, resolution});
-  background.scale(1.0 / static_cast<Real>(resolution - 1));
-  background.getConnectivity().compute(2, 1);
-  background.getConnectivity().compute(1, 0);
-
-  P1<Real, LocalMesh> phiSpace(background);
-  GridFunction phi(phiSpace);
   MovingCircle circle;
 
   IO::XDMF xdmf("LevelSetMovingCircle");
-  auto backgroundGrid = xdmf.grid("background");
-  backgroundGrid.setMesh(background, IO::XDMF::MeshPolicy::Static);
-  backgroundGrid.add("phi", phi, IO::XDMF::Center::Node);
-  auto fittedGrid = xdmf.grid("fitted");
 
   std::ofstream diagnostics("LevelSetMovingCircle.csv");
   diagnostics << std::setprecision(17);
   diagnostics
     << "step,time,cx,cy,radius,nodal_linf,"
     << "interface_p1_linf,interface_analytic_linf,interface_analytic_l2,"
+    << "background_vertices,background_cells,background_min_area,"
+    << "background_min_quality,background_inverted_cells,"
     << "graph_vertices,graph_edges,chains,cut_vertices,cut_cells,"
     << "degenerate_cells,pathological_cuts,min_output_area,min_output_quality,"
+    << "cut_min_area,cut_min_quality,cut_inverted_cells,cut_poor_quality_cells,"
+    << "optimized_min_area,optimized_min_quality,optimized_inverted_cells,"
+    << "optimized_degenerate_cells,optimized_poor_quality_cells,"
     << "linear_metric,optimized_linear_metric,fit_initial,fit_final,"
+    << "source_fit_initial,source_fit_final,"
+    << "geometry_step_scale,"
+    << "jacobian_fd_relative_error,newton_max_residual_growth,"
+    << "newton_last_quadratic_ratio,"
     << "newton_initial_residual,newton_final_residual,newton_step_norm,"
     << "newton_iterations,newton_converged,optimized_geometry_applied\n";
 
   SquaredDistanceMetric metric;
+
+  // The uniform lattice is created ONCE at startup as the initial background.
+  // Each step projects phi onto the current background, cuts it, TMOP-optimizes
+  // the cut mesh, then that optimized cut mesh becomes the next step's
+  // background (carry-forward). A clean triangle-only rebuild between steps
+  // keeps it re-cuttable. Note: re-cutting an already-cut mesh inserts new
+  // interface vertices every step, so the mesh grows over time.
+  LocalMesh background =
+    LocalMesh::UniformGrid(Polytope::Type::Triangle, {resolution, resolution});
+  background.scale(1.0 / static_cast<Real>(resolution - 1));
 
   for (Index step = 0; step < timeSteps; ++step)
   {
@@ -155,6 +292,14 @@ int main(int, char**)
       static_cast<Real>(step) / static_cast<Real>(timeSteps - 1);
     const auto c = circle.center(time);
 
+    background.getConnectivity().compute(2, 1);
+    background.getConnectivity().compute(1, 0);
+    const auto backgroundQuality = summarizeMeshQuality(background);
+
+    P1<Real, LocalMesh> phiSpace(background);
+    GridFunction phi(phiSpace);
+
+    // Project phi onto the current background for the current time.
     Real nodalLInf = 0;
     for (Index i = 0; i < background.getVertexCount(); ++i)
     {
@@ -172,6 +317,7 @@ int main(int, char**)
       .setNegativeCellAttribute(NegativeAttribute)
       .setPositiveCellAttribute(PositiveAttribute)
       .discretize();
+    const auto cutQuality = summarizeMeshQuality(result.mesh);
 
     P1 displacementSpace(result.mesh, result.mesh.getSpaceDimension());
     GridFunction displacement(displacementSpace);
@@ -180,9 +326,70 @@ int main(int, char**)
     TrialFunction du(displacementSpace);
     TestFunction v(displacementSpace);
 
-    QualityTerm quality(1.0);
-    DeviationTerm deviation(1e-2);
-    LevelSetFitTerm fit(result.interfaceGraph, result.report, 100.0);
+    static constexpr Real qualityWeight = 1.0;
+    static constexpr Real deviationWeight = 1000000000000000.0;
+    QualityTerm quality(qualityWeight);
+    DeviationTerm deviation(deviationWeight);
+
+    // Source-segment fit: this is the Rodin-native level-set fit term used by
+    // the nonlinear TMOP problem. It uses cutter provenance to keep the fitted
+    // interface near the P1 interface segments that produced it.
+    static constexpr Real fitWeight = 100000000000000000.0;
+    LevelSetFitTerm fit(result.interfaceGraph, result.report, fitWeight);
+    LevelSetFitTerm fitDiagnostic(result.interfaceGraph, result.report, 1.0);
+
+    auto makeTangent = [&]()
+    {
+      return
+          quality.tangent(displacement, du, v)
+        + deviation.tangent(du, v)
+        + fit.tangent(displacement, du, v);
+    };
+
+    auto makeResidual = [&]()
+    {
+      return
+          quality.residual(displacement, v)
+        + deviation.residual(displacement, v)
+        + fit.residual(displacement, v);
+    };
+
+    auto computeJacobianError = [&]()
+    {
+      BilinearForm tangentForm(du, v);
+      tangentForm = makeTangent();
+      tangentForm.assemble();
+
+      LinearForm residualForm(v);
+      residualForm = makeResidual();
+      residualForm.assemble();
+      const auto residual0 = residualForm.getVector();
+
+      auto direction = displacement.getData();
+      for (Eigen::Index i = 0; i < direction.size(); ++i)
+        direction(i) = std::sin(static_cast<Real>(i + 1));
+      const Real directionNorm = direction.norm();
+      if (directionNorm <= Real(0))
+        return std::numeric_limits<Real>::quiet_NaN();
+      direction /= directionNorm;
+
+      const auto original = displacement.getData();
+      const Real eps = 1e-7;
+      displacement.getData() = original + eps * direction;
+
+      LinearForm residualPerturbed(v);
+      residualPerturbed = makeResidual();
+      residualPerturbed.assemble();
+      const auto fd = (residualPerturbed.getVector() - residual0) / eps;
+      const auto jd = tangentForm.getOperator() * direction;
+
+      displacement.getData() = original;
+
+      const Real denom = std::max<Real>({Real(1), fd.norm(), jd.norm()});
+      return (fd - jd).norm() / denom;
+    };
+
+    const Real jacobianError = computeJacobianError();
 
     Variational::Problem tangentialProblem(du, v);
     // Rodin assembles LFIs with a minus sign in the RHS, so adding residual
@@ -198,15 +405,25 @@ int main(int, char**)
     SparseLU linearSolver{tangentialProblem};
     NewtonSolver newton(linearSolver);
     newton
-      .setMaxIterations(3)
-      .setDampingFactor(0.01)
+      .setMaxIterations(30)
+      .setDampingFactor(1)
       .setAbsoluteTolerance(1e-10)
       .setRelativeTolerance(1e-8)
       .setStepTolerance(1e-10);
 
-    const Real fitInitial = fit.sourceSegmentDistanceEnergy(result.mesh);
+    std::vector<Real> newtonResiduals;
+    newton.setMonitor([&](const auto& report)
+    {
+      newtonResiduals.push_back(report.final_residual);
+    });
+
+    const Real fitInitial = interfacePhiEnergy(result.mesh, circle, time);
+    const Real sourceFitInitial =
+      fitDiagnostic.sourceSegmentDistanceEnergy(result.mesh);
     newton.solve(displacement);
     const auto newtonReport = newton.getReport();
+    const Real newtonGrowth = maxResidualGrowth(newtonResiduals);
+    const Real newtonQuadraticRatio = lastQuadraticRatio(newtonResiduals);
 
     const auto residuals = measureInterfaceResiduals(
         background,
@@ -216,14 +433,36 @@ int main(int, char**)
         time);
 
     const Real linearMetric = LinearMeshMetricObjective(metric).compute(result.mesh);
+    Real geometryStepScale = 1;
     LocalMesh optimizedMesh = result.mesh;
-    applyDisplacement(optimizedMesh, displacement);
+    // Full Newton update only: no line search, damping, or post-solve scaling.
+    applyDisplacement(optimizedMesh, displacement, geometryStepScale);
+    optimizedMesh.getConnectivity().compute(2, 1);
+    optimizedMesh.getConnectivity().compute(1, 0);
     const bool optimizedGeometryApplied = true;
     const Real optimizedLinearMetric =
       LinearMeshMetricObjective(metric).compute(optimizedMesh);
-    const Real fitFinal = fit.sourceSegmentDistanceEnergy(optimizedMesh);
 
+    // Rebuild the finite element space on the optimized cut mesh and reproject
+    // phi onto it (exact resample of the manufactured signed distance), so the
+    // field is visualized on the fitted geometry instead of the background.
+    optimizedMesh.getConnectivity().compute(2, 1);
+    optimizedMesh.getConnectivity().compute(1, 0);
+    const auto optimizedQuality = summarizeMeshQuality(optimizedMesh);
+    const Real fitFinal = interfacePhiEnergy(optimizedMesh, circle, time);
+    const Real sourceFitFinal =
+      fitDiagnostic.sourceSegmentDistanceEnergy(optimizedMesh);
+    P1<Real, LocalMesh> optimizedPhiSpace(optimizedMesh);
+    GridFunction optimizedPhi(optimizedPhiSpace);
+    for (Index i = 0; i < optimizedMesh.getVertexCount(); ++i)
+      optimizedPhi[i] =
+        circle.signedDistance(optimizedMesh.getVertexCoordinates(i), time);
+
+    auto fittedGrid = xdmf.grid("fitted");
     fittedGrid.setMesh(optimizedMesh, IO::XDMF::MeshPolicy::Transient);
+    fittedGrid.clear();
+    fittedGrid.add("phi", optimizedPhi, IO::XDMF::Center::Node);
+
     xdmf.write(time).flush();
 
     diagnostics
@@ -236,6 +475,11 @@ int main(int, char**)
       << residuals.p1LInf << ','
       << residuals.analyticLInf << ','
       << residuals.analyticL2 << ','
+      << background.getVertexCount() << ','
+      << background.getCellCount() << ','
+      << backgroundQuality.minAbsArea << ','
+      << backgroundQuality.minQuality << ','
+      << backgroundQuality.invertedCells << ','
       << result.interfaceGraph.vertices.size() << ','
       << result.interfaceGraph.edges.size() << ','
       << result.interfaceGraph.chains.size() << ','
@@ -245,10 +489,25 @@ int main(int, char**)
       << result.report.pathologicalCutCount << ','
       << result.report.minOutputCellArea << ','
       << result.report.minOutputCellQuality << ','
+      << cutQuality.minAbsArea << ','
+      << cutQuality.minQuality << ','
+      << cutQuality.invertedCells << ','
+      << cutQuality.poorQualityCells << ','
+      << optimizedQuality.minAbsArea << ','
+      << optimizedQuality.minQuality << ','
+      << optimizedQuality.invertedCells << ','
+      << optimizedQuality.degenerateCells << ','
+      << optimizedQuality.poorQualityCells << ','
       << linearMetric << ','
       << optimizedLinearMetric << ','
       << fitInitial << ','
       << fitFinal << ','
+      << sourceFitInitial << ','
+      << sourceFitFinal << ','
+      << geometryStepScale << ','
+      << jacobianError << ','
+      << newtonGrowth << ','
+      << newtonQuadraticRatio << ','
       << newtonReport.initial_residual << ','
       << newtonReport.final_residual << ','
       << newtonReport.final_step_norm << ','
@@ -265,9 +524,31 @@ int main(int, char**)
               << " analytic residual=" << residuals.analyticLInf
               << " tmop residual " << newtonReport.initial_residual
               << " -> " << newtonReport.final_residual
-              << " fit " << fitInitial << " -> " << fitFinal
+              << " analytic_fit " << fitInitial << " -> " << fitFinal
+              << " source_fit " << sourceFitInitial << " -> " << sourceFitFinal
+              << " step_scale=" << geometryStepScale
+              << " qmin " << cutQuality.minQuality
+              << " -> " << optimizedQuality.minQuality
+              << " inverted " << cutQuality.invertedCells
+              << " -> " << optimizedQuality.invertedCells
+              << " jac_fd=" << jacobianError
+              << " qratio=" << newtonQuadraticRatio
               << " optimized_geometry_applied=" << optimizedGeometryApplied
+              << " bg_in=" << background.getCellCount()
+              << " cut_cells=" << result.mesh.getCellCount()
               << std::endl;
+
+    // Carry-forward: the optimized cut mesh becomes the next step's
+    // background. Direct move, no rebuild workaround (Connectivity now copies
+    // its index correctly, so the cut mesh round-trips through the cutter).
+    background = std::move(optimizedMesh);
+    if (background.getCellCount() > maxCarryForwardCells)
+    {
+      std::cout << "Stopping early: carry-forward mesh reached "
+                << background.getCellCount() << " cells, above diagnostic cap "
+                << maxCarryForwardCells << "." << std::endl;
+      break;
+    }
   }
 
   xdmf.close();
@@ -280,9 +561,16 @@ int main(int, char**)
   std::cout << "The interface analytic residual measures the expected P1"
             << " polygonal approximation error to the moving circle."
             << std::endl;
-  std::cout << "Each step cuts a fresh fitted mesh, solves a Rodin Newton"
-            << " tangential TMOP problem on that fitted topology, and exports"
-            << " the displaced fitted mesh."
+  std::cout << "The uniform lattice is created once at startup as the initial"
+            << " background. Each step projects phi onto the current"
+            << " background, cuts it, solves the active TMOP terms (quality +"
+            << " deviation + source-segment level-set fit),"
+            << " reprojects phi onto"
+            << " the optimized cut mesh for export, and then carries that"
+            << " optimized cut mesh forward as the next step's background. The"
+            << " mesh grows over time since each re-cut inserts new interface"
+            << " vertices; this diagnostic run stops once the carry-forward"
+            << " mesh exceeds " << maxCarryForwardCells << " cells."
             << std::endl;
   return 0;
 }
