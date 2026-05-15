@@ -8,7 +8,10 @@
 #define RODIN_ADAPTATION_TMOP_METRICS_H
 
 #include <cmath>
+#include <vector>
 
+#include "Rodin/Geometry/Mesh.h"
+#include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Math.h"
 #include "Rodin/Types.h"
 
@@ -22,11 +25,7 @@ namespace Rodin::Adaptation::TMOP
   };
 
   /**
-   * @brief Constant identity target for early TMOP infrastructure tests.
-   *
-   * Future target evaluators can supply element- and quadrature-dependent
-   * targets. This first one keeps the weighted Jacobian equal to the geometric
-   * Jacobian, which is sufficient for exercising the metric/objective pipeline.
+   * @brief Legacy constant identity target for detached prototype code.
    */
   class IdentityTargetEvaluator
   {
@@ -35,6 +34,88 @@ namespace Rodin::Adaptation::TMOP
       {
         return {};
       }
+  };
+
+  /**
+   * @brief Production identity target Jacobian for the strict TMOP term.
+   *
+   * The strict quality term evaluates @f$T = A W^{-1}@f$ at element
+   * quadrature/sample points. This target supplies @f$W = I@f$, so the
+   * weighted Jacobian is the reference-coordinate Jacobian of the deformed
+   * mesh coordinate map.
+   */
+  class IdentityTargetJacobian
+  {
+    public:
+      Matrix2 evaluate(
+          const Geometry::Polytope&,
+          const Math::SpatialPoint&) const
+      {
+        return Matrix2::Identity();
+      }
+  };
+
+  inline Matrix2 linearCellJacobian2D(const Geometry::Polytope& cell)
+  {
+    const auto& mesh = cell.getMesh();
+    const auto& vertices = cell.getVertices();
+    const auto x0 = mesh.getVertexCoordinates(vertices(0));
+    const auto x1 = mesh.getVertexCoordinates(vertices(1));
+    const auto x2 = mesh.getVertexCoordinates(vertices(2));
+
+    Matrix2 W;
+    W(0, 0) = x1[0] - x0[0];
+    W(0, 1) = x2[0] - x0[0];
+    W(1, 0) = x1[1] - x0[1];
+    W(1, 1) = x2[1] - x0[1];
+    return W;
+  }
+
+  /**
+   * @brief Fixed per-element target Jacobian captured from an initial mesh.
+   *
+   * This target implements the common TMOP pattern where @f$W@f$ is frozen at
+   * the start of one nonlinear solve. With this target, the strict quality
+   * energy is zero at @f$u = 0@f$ if the current mesh is the same mesh used to
+   * construct the target. Passing a separate reference mesh lets tests verify
+   * that the residual/tangent drive a perturbed mesh back toward that fixed
+   * target without changing the TMOP formulation.
+   */
+  class InitialElementTargetJacobian
+  {
+    public:
+      InitialElementTargetJacobian() = default;
+
+      template <class Mesh>
+      explicit InitialElementTargetJacobian(const Mesh& mesh)
+      {
+        const auto& conn = mesh.getConnectivity();
+        m_targets.resize(mesh.getCellCount(), Matrix2::Identity());
+        for (Index cellIndex = 0;
+             cellIndex < static_cast<Index>(mesh.getCellCount());
+             ++cellIndex)
+        {
+          if (conn.getGeometry(2, cellIndex)
+              != Geometry::Polytope::Type::Triangle)
+            continue;
+          auto cellIterator = mesh.getPolytope(2, cellIndex);
+          m_targets[static_cast<size_t>(cellIndex)] =
+            linearCellJacobian2D(*cellIterator);
+        }
+      }
+
+      Matrix2 evaluate(
+          const Geometry::Polytope& cell,
+          const Math::SpatialPoint&) const
+      {
+        const auto index = static_cast<size_t>(cell.getIndex());
+        if (index < m_targets.size())
+          return m_targets[index];
+        return linearCellJacobian2D(cell);
+      }
+
+    private:
+      std::vector<Matrix2> m_targets;
   };
 
   class MetricBase
@@ -90,20 +171,29 @@ namespace Rodin::Adaptation::TMOP
   };
 
   /**
-   * Simple infrastructure metric:
-   *   W(A) = 1/2 ||A - I||_F^2
+   * Strict TMOP metric:
+   *   mu(T) = 1/2 ||T - I||_F^2
    *
-   * This is the initial differentiable quality metric used by the TMOP
-   * evaluator and residual/tangent terms.
+   * This first metric is deliberately small, but it is a real target-matrix
+   * TMOP metric because it is evaluated on @f$T = A W^{-1}@f$, not on edge
+   * lengths or triangle quality heuristics.
    */
   class SquaredDistanceMetric final : public MetricBase
   {
     public:
-      Real value(const Matrix2& A) const override
+      Real value(const Matrix2& T) const override
       {
-        if (const Real penalty = invalidPenalty(A); penalty > Real(0))
-          return penalty;
-        return Real(0.5) * (A - Matrix2::Identity()).squaredNorm();
+        return Real(0.5) * (T - Matrix2::Identity()).squaredNorm();
+      }
+
+      Matrix2 gradient(const Matrix2& T) const
+      {
+        return T - Matrix2::Identity();
+      }
+
+      Matrix2 hessianAction(const Matrix2&, const Matrix2& dT) const
+      {
+        return dT;
       }
   };
 

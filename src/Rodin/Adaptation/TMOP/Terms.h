@@ -21,9 +21,13 @@
 #include <array>
 #include <cmath>
 #include <functional>
+#include <stdexcept>
+#include <utility>
 #include <vector>
 
+#include "Rodin/Adaptation/TMOP/Metrics.h"
 #include "Rodin/Geometry/LevelSetDiscretizerTriangles.h"
+#include "Rodin/QF/PolytopeQuadratureFormula.h"
 #include "Rodin/Variational.h"
 
 namespace Rodin::Adaptation::TMOP
@@ -68,6 +72,290 @@ namespace Rodin::Adaptation::TMOP
         x[c] += data(vertex + static_cast<Index>(c) * vertexCount);
       return x;
     }
+
+  inline Real frobeniusInner(const Matrix2& a, const Matrix2& b)
+  {
+    return a(0, 0) * b(0, 0) + a(0, 1) * b(0, 1)
+         + a(1, 0) * b(1, 0) + a(1, 1) * b(1, 1);
+  }
+
+  template <class MatrixType>
+  Matrix2 toMatrix2(const MatrixType& matrix)
+  {
+    Matrix2 out;
+    out(0, 0) = matrix(0, 0);
+    out(0, 1) = matrix(0, 1);
+    out(1, 0) = matrix(1, 0);
+    out(1, 1) = matrix(1, 1);
+    return out;
+  }
+
+  inline void requireStrictTMOPCell(
+      const Geometry::Polytope& cell,
+      size_t vectorDimension,
+      size_t localSize)
+  {
+    const auto geometry =
+      cell.getMesh().getGeometry(cell.getDimension(), cell.getIndex());
+    if (cell.getDimension() != 2
+        || geometry != Geometry::Polytope::Type::Triangle
+        || vectorDimension != 2
+        || localSize == 0
+        || localSize % vectorDimension != 0)
+    {
+      throw std::runtime_error(
+          "TMOP::QualityTerm currently supports 2D triangular vector "
+          "finite element spaces with two displacement components.");
+    }
+  }
+
+  template <class ElementType>
+  Matrix2 basisJacobian2D(
+      const ElementType& fe,
+      size_t local,
+      const Math::SpatialPoint& rc)
+  {
+    return toMatrix2(fe.getBasis(local).getJacobian()(rc));
+  }
+
+  template <class GridFunctionType>
+  Matrix2 deformedCoordinateJacobian(
+      const GridFunctionType& u,
+      const Geometry::Polytope& cell,
+      const Math::SpatialPoint& rc)
+  {
+    const auto& fes = u.getFiniteElementSpace();
+    const auto& fe = fes.getFiniteElement(cell.getDimension(), cell.getIndex());
+    const size_t vdim = fes.getVectorDimension();
+    const size_t localSize = fe.getCount();
+    requireStrictTMOPCell(cell, vdim, localSize);
+
+    Matrix2 A = Matrix2::Zero();
+    const auto& data = u.getData();
+    const size_t scalarLocalSize = localSize / vdim;
+    for (size_t node = 0; node < scalarLocalSize; ++node)
+    {
+      const auto& nodeRef = fe.getNode(node * vdim);
+      const Geometry::Point point(cell, nodeRef);
+      const auto& X = point.getPhysicalCoordinates();
+      for (size_t component = 0; component < vdim; ++component)
+      {
+        const size_t local = node * vdim + component;
+        const Index global = fes.getGlobalIndex(
+            {cell.getDimension(), cell.getIndex()},
+            static_cast<Index>(local));
+        A += (X[component] + data(global))
+          * basisJacobian2D(fe, local, rc);
+      }
+    }
+    return A;
+  }
+
+  template <class GridFunctionType, class Metric, class TargetJacobian>
+  class TMOPQualityResidualIntegrator final
+      : public Variational::LinearFormIntegratorBase<Real>
+    {
+      public:
+        using Parent = Variational::LinearFormIntegratorBase<Real>;
+
+        template <class TestFES>
+        TMOPQualityResidualIntegrator(
+            const GridFunctionType& u,
+            const Variational::TestFunction<TestFES>& v,
+            Metric metric,
+            TargetJacobian target,
+            Real weight,
+            size_t quadratureOrder)
+          : Parent(v),
+            m_u(u),
+            m_metric(std::move(metric)),
+            m_target(std::move(target)),
+            m_weight(std::max(Real(0), weight)),
+            m_quadratureOrder(quadratureOrder)
+        {}
+
+        TMOPQualityResidualIntegrator(
+            const TMOPQualityResidualIntegrator& other)
+          : Parent(other),
+            m_u(other.m_u),
+            m_metric(other.m_metric),
+            m_target(other.m_target),
+            m_weight(other.m_weight),
+            m_quadratureOrder(other.m_quadratureOrder),
+            m_polytope(other.m_polytope)
+        {}
+
+        const Geometry::Polytope& getPolytope() const override
+        {
+          assert(m_polytope);
+          return *m_polytope;
+        }
+
+        TMOPQualityResidualIntegrator& setPolytope(
+            const Geometry::Polytope& polytope) override
+        {
+          m_polytope = &polytope;
+          return *this;
+        }
+
+        Real integrate(size_t local) override
+        {
+          assert(m_polytope);
+          const auto& cell = *m_polytope;
+          const auto& fes = m_u.get().getFiniteElementSpace();
+          const auto& fe = fes.getFiniteElement(
+              cell.getDimension(), cell.getIndex());
+          requireStrictTMOPCell(cell, fes.getVectorDimension(), fe.getCount());
+          if (local >= fe.getCount())
+            return 0;
+
+          Real value = 0;
+          const auto geometry =
+            cell.getMesh().getGeometry(cell.getDimension(), cell.getIndex());
+          const auto& qf =
+            QF::PolytopeQuadratureFormula::get(m_quadratureOrder, geometry);
+          for (size_t q = 0; q < qf.getSize(); ++q)
+          {
+            const auto& rc = qf.getPoint(q);
+            const Matrix2 A =
+              deformedCoordinateJacobian(m_u.get(), cell, rc);
+            const Matrix2 W = m_target.evaluate(cell, rc);
+            const Real detW = W.determinant();
+            if (std::abs(detW) <= Real(1e-30))
+              throw std::runtime_error(
+                  "TMOP::QualityTerm target Jacobian is singular.");
+            const Matrix2 Winv = W.inverse();
+            const Matrix2 T = A * Winv;
+            const Matrix2 dT = basisJacobian2D(fe, local, rc) * Winv;
+            value += qf.getWeight(q) * detW
+              * frobeniusInner(m_metric.gradient(T), dT);
+          }
+          return m_weight * value;
+        }
+
+        Geometry::Region getRegion() const override
+        {
+          return Geometry::Region::Cells;
+        }
+
+        TMOPQualityResidualIntegrator* copy() const noexcept override
+        {
+          return new TMOPQualityResidualIntegrator(*this);
+        }
+
+      private:
+        std::reference_wrapper<const GridFunctionType> m_u;
+        Metric m_metric;
+        TargetJacobian m_target;
+        Real m_weight = 1;
+        size_t m_quadratureOrder = 2;
+        const Geometry::Polytope* m_polytope = nullptr;
+    };
+
+  template <class GridFunctionType, class Metric, class TargetJacobian>
+  class TMOPQualityTangentIntegrator final
+      : public Variational::LocalBilinearFormIntegratorBase<Real>
+    {
+      public:
+        using Parent = Variational::LocalBilinearFormIntegratorBase<Real>;
+
+        template <class Solution, class TrialFES, class TestFES>
+        TMOPQualityTangentIntegrator(
+            const GridFunctionType& u,
+            const Variational::TrialFunction<Solution, TrialFES>& du,
+            const Variational::TestFunction<TestFES>& v,
+            Metric metric,
+            TargetJacobian target,
+            Real weight,
+            size_t quadratureOrder)
+          : Parent(du, v),
+            m_u(u),
+            m_metric(std::move(metric)),
+            m_target(std::move(target)),
+            m_weight(std::max(Real(0), weight)),
+            m_quadratureOrder(quadratureOrder)
+        {}
+
+        TMOPQualityTangentIntegrator(
+            const TMOPQualityTangentIntegrator& other)
+          : Parent(other),
+            m_u(other.m_u),
+            m_metric(other.m_metric),
+            m_target(other.m_target),
+            m_weight(other.m_weight),
+            m_quadratureOrder(other.m_quadratureOrder),
+            m_polytope(other.m_polytope)
+        {}
+
+        const Geometry::Polytope& getPolytope() const override
+        {
+          assert(m_polytope);
+          return *m_polytope;
+        }
+
+        TMOPQualityTangentIntegrator& setPolytope(
+            const Geometry::Polytope& polytope) override
+        {
+          m_polytope = &polytope;
+          return *this;
+        }
+
+        Real integrate(size_t trial, size_t test) override
+        {
+          assert(m_polytope);
+          const auto& cell = *m_polytope;
+          const auto& fes = m_u.get().getFiniteElementSpace();
+          const auto& fe = fes.getFiniteElement(
+              cell.getDimension(), cell.getIndex());
+          requireStrictTMOPCell(cell, fes.getVectorDimension(), fe.getCount());
+          if (trial >= fe.getCount() || test >= fe.getCount())
+            return 0;
+
+          Real value = 0;
+          const auto geometry =
+            cell.getMesh().getGeometry(cell.getDimension(), cell.getIndex());
+          const auto& qf =
+            QF::PolytopeQuadratureFormula::get(m_quadratureOrder, geometry);
+          for (size_t q = 0; q < qf.getSize(); ++q)
+          {
+            const auto& rc = qf.getPoint(q);
+            const Matrix2 A =
+              deformedCoordinateJacobian(m_u.get(), cell, rc);
+            const Matrix2 W = m_target.evaluate(cell, rc);
+            const Real detW = W.determinant();
+            if (std::abs(detW) <= Real(1e-30))
+              throw std::runtime_error(
+                  "TMOP::QualityTerm target Jacobian is singular.");
+            const Matrix2 Winv = W.inverse();
+            const Matrix2 T = A * Winv;
+            const Matrix2 dTTrial = basisJacobian2D(fe, trial, rc) * Winv;
+            const Matrix2 dTTest = basisJacobian2D(fe, test, rc) * Winv;
+            value += qf.getWeight(q) * detW
+              * frobeniusInner(
+                  m_metric.hessianAction(T, dTTrial),
+                  dTTest);
+          }
+          return m_weight * value;
+        }
+
+        Geometry::Region getRegion() const override
+        {
+          return Geometry::Region::Cells;
+        }
+
+        TMOPQualityTangentIntegrator* copy() const noexcept override
+        {
+          return new TMOPQualityTangentIntegrator(*this);
+        }
+
+      private:
+        std::reference_wrapper<const GridFunctionType> m_u;
+        Metric m_metric;
+        TargetJacobian m_target;
+        Real m_weight = 1;
+        size_t m_quadratureOrder = 2;
+        const Geometry::Polytope* m_polytope = nullptr;
+    };
 
   template <class GridFunctionType>
   class EdgeSpringQualityResidualIntegrator final
@@ -804,21 +1092,152 @@ namespace Rodin::Adaptation::TMOP
     };
 
   /**
-   * @brief Initial fixed-topology mesh quality term.
+   * @brief Strict target-matrix TMOP quality term.
    *
-   * This term penalizes deviations of deformed cell edge lengths from the
-   * equilateral length associated with the cell area. It is assembled as normal
-   * Rodin residual/tangent integrators, so it can participate directly in a
-   * Newton tangential problem.
+   * The mesh coordinate map is represented by the same finite element space as
+   * the displacement unknown:
+   * @f[
+   *   x_h = X_h + u_h, \qquad A = \nabla_{\hat x} x_h.
+   * @f]
+   *
+   * At each element quadrature/sample point this term evaluates a fixed target
+   * matrix @f$W@f$, the weighted Jacobian @f$T = A W^{-1}@f$, and the metric
+   * objective
+   * @f[
+   *   \int_K \det(W)\,\mu(T)\,d\hat x.
+   * @f]
+   *
+   * Current implementation status: 2D triangular vector finite element spaces
+   * with two displacement components are supported and tested on P1. The public
+   * API is intentionally finite-element based, so P2/H1 support can use the
+   * same local-basis Jacobian path as assembly coverage grows.
    */
+  template <
+      class Metric = SquaredDistanceMetric,
+      class TargetJacobian = IdentityTargetJacobian>
   class QualityTerm
   {
     public:
-      explicit QualityTerm(Real weight = 1)
-        : m_weight(std::max(Real(0), weight))
+      QualityTerm(
+          Metric metric = Metric{},
+          TargetJacobian target = TargetJacobian{},
+          Real weight = 1)
+        : m_metric(std::move(metric)),
+          m_target(std::move(target)),
+          m_weight(std::max(Real(0), weight))
+      {}
+
+      explicit QualityTerm(Real weight)
+        : QualityTerm(Metric{}, TargetJacobian{}, weight)
       {}
 
       QualityTerm& setWeight(Real weight)
+      {
+        m_weight = std::max(Real(0), weight);
+        return *this;
+      }
+
+      QualityTerm& setQuadratureOrder(size_t order)
+      {
+        m_quadratureOrder = order;
+        return *this;
+      }
+
+      Real getWeight() const
+      {
+        return m_weight;
+      }
+
+      size_t getQuadratureOrder() const
+      {
+        return m_quadratureOrder;
+      }
+
+      template <class FES, class Data, class TestFES>
+      auto residual(
+          const Variational::GridFunction<FES, Data>& u,
+          const Variational::TestFunction<TestFES>& v) const
+      {
+        return TMOPQualityResidualIntegrator<
+          Variational::GridFunction<FES, Data>, Metric, TargetJacobian>(
+              u, v, m_metric, m_target, m_weight, m_quadratureOrder);
+      }
+
+      template <class FES, class Data, class Solution, class TrialFES, class TestFES>
+      auto tangent(
+          const Variational::GridFunction<FES, Data>& u,
+          const Variational::TrialFunction<Solution, TrialFES>& du,
+          const Variational::TestFunction<TestFES>& v) const
+      {
+        return TMOPQualityTangentIntegrator<
+          Variational::GridFunction<FES, Data>, Metric, TargetJacobian>(
+              u, du, v, m_metric, m_target, m_weight, m_quadratureOrder);
+      }
+
+      template <class FES, class Data>
+      Real energy(const Variational::GridFunction<FES, Data>& u) const
+      {
+        const auto& mesh = u.getFiniteElementSpace().getMesh();
+        const auto& conn = mesh.getConnectivity();
+        Real value = 0;
+        for (Index cellIndex = 0;
+             cellIndex < static_cast<Index>(mesh.getCellCount());
+             ++cellIndex)
+        {
+          if (conn.getGeometry(2, cellIndex)
+              != Geometry::Polytope::Type::Triangle)
+            continue;
+          auto cellIterator = mesh.getPolytope(2, cellIndex);
+          const auto& cell = *cellIterator;
+          const auto& qf = QF::PolytopeQuadratureFormula::get(
+              m_quadratureOrder,
+              conn.getGeometry(2, cellIndex));
+          for (size_t q = 0; q < qf.getSize(); ++q)
+          {
+            const auto& rc = qf.getPoint(q);
+            const Matrix2 A = deformedCoordinateJacobian(u, cell, rc);
+            const Matrix2 W = m_target.evaluate(cell, rc);
+            const Real detW = W.determinant();
+            if (std::abs(detW) <= Real(1e-30))
+              throw std::runtime_error(
+                  "TMOP::QualityTerm target Jacobian is singular.");
+            const Matrix2 T = A * W.inverse();
+            value += qf.getWeight(q) * detW * m_metric.value(T);
+          }
+        }
+        return m_weight * value;
+      }
+
+    private:
+      Metric m_metric;
+      TargetJacobian m_target;
+      Real m_weight = 1;
+      size_t m_quadratureOrder = 2;
+  };
+
+  QualityTerm() -> QualityTerm<>;
+  QualityTerm(Real) -> QualityTerm<>;
+  template <class Metric, class TargetJacobian>
+  QualityTerm(Metric, TargetJacobian, Real) -> QualityTerm<Metric, TargetJacobian>;
+  template <class Metric, class TargetJacobian>
+  QualityTerm(Metric, TargetJacobian) -> QualityTerm<Metric, TargetJacobian>;
+
+  /**
+   * @brief Legacy edge-spring smoother, not a TMOP quality metric.
+   *
+   * This term penalizes deviations of deformed cell edge lengths from an
+   * equilateral rest length. It can remain useful as a diagnostic smoother, but
+   * it is intentionally not exposed as TMOP::QualityTerm and must not be
+   * reported as TMOP energy.
+   */
+  class EdgeSpringSmoothingTerm
+  {
+    public:
+      explicit EdgeSpringSmoothingTerm(Real weight = 1)
+        : m_weight(std::max(Real(0), weight))
+      {}
+
+      EdgeSpringSmoothingTerm& setWeight(Real weight)
       {
         m_weight = std::max(Real(0), weight);
         return *this;

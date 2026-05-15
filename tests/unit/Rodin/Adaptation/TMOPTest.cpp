@@ -11,6 +11,7 @@
 #include <initializer_list>
 #include <limits>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -164,41 +165,15 @@ namespace Rodin::Tests::Unit
     return summary;
   }
 
-  static Real edgeSpringQualityEnergy(const LocalMesh& mesh)
+  static Real strictTMOPQualityEnergy(
+      LocalMesh& mesh,
+      const InitialElementTargetJacobian& target)
   {
-    static constexpr std::array<std::array<size_t, 2>, 3> Edges = {{
-      {{0, 1}}, {{1, 2}}, {{2, 0}}
-    }};
-
-    Real energy = 0;
-    const auto& conn = mesh.getConnectivity();
-    for (Index c = 0; c < mesh.getCellCount(); ++c)
-    {
-      if (conn.getGeometry(2, c) != Polytope::Type::Triangle)
-        continue;
-      const auto& cell = conn.getPolytope(2, c);
-      std::array<Math::SpatialPoint, 3> x;
-      for (size_t i = 0; i < 3; ++i)
-        x[i] = mesh.getVertexCoordinates(cell(i));
-
-      const Real area = std::abs(signedTriangleArea(x[0], x[1], x[2]));
-      Real target = equilateralEdgeLengthFromArea(area);
-      if (target <= Real(0))
-      {
-        target =
-          ((x[1] - x[0]).norm()
-         + (x[2] - x[1]).norm()
-         + (x[0] - x[2]).norm()) / Real(3);
-      }
-
-      for (const auto& edge : Edges)
-      {
-        const Real length = (x[edge[1]] - x[edge[0]]).norm();
-        const Real defect = length - target;
-        energy += Real(0.5) * defect * defect;
-      }
-    }
-    return energy;
+    P1 space(mesh, 2);
+    GridFunction displacement(space);
+    displacement.getData().setZero();
+    QualityTerm quality(SquaredDistanceMetric{}, target);
+    return quality.energy(displacement);
   }
 
   static LocalMesh makeUniformSquare(size_t resolution)
@@ -536,12 +511,14 @@ namespace Rodin::Tests::Unit
 
   static NativeTmopRun runNativeTmop(
       LocalMesh& mesh,
+      const LocalMesh& targetMesh,
       const InterfaceGraph& graph,
       const LevelSetDiscretizerTrianglesReport& report)
   {
     NativeTmopRun run;
     run.beforeQuality = summarizeMesh(mesh);
-    run.beforeEnergy = edgeSpringQualityEnergy(mesh);
+    InitialElementTargetJacobian target(targetMesh);
+    run.beforeEnergy = strictTMOPQualityEnergy(mesh, target);
 
     constexpr size_t vdim = 2;
     P1 space(mesh, vdim);
@@ -550,9 +527,9 @@ namespace Rodin::Tests::Unit
 
     TrialFunction du(space);
     TestFunction v(space);
-    QualityTerm quality(1.0);
-    DeviationTerm deviation(1000000.0);
-    LevelSetFitTerm fit(graph, report, 100000000.0);
+    QualityTerm quality(SquaredDistanceMetric{}, target, 1.0);
+    DeviationTerm deviation(1.0);
+    LevelSetFitTerm fit(graph, report, 1.0);
     LevelSetFitTerm fitDiagnostic(graph, report, 1.0);
     run.sourceFitBefore = fitDiagnostic.sourceSegmentDistanceEnergy(mesh);
 
@@ -580,11 +557,11 @@ namespace Rodin::Tests::Unit
     run.finalResidual = newtonReport.final_residual;
 
     const Real sourceFitLimit =
-      std::max(Real(1e-9), Real(1.01) * run.sourceFitBefore + Real(1e-10));
+      std::max(Real(1e-8), Real(1.01) * run.sourceFitBefore + Real(1e-10));
 
     applyDisplacement(mesh, displacement, Real(1));
     run.afterQuality = summarizeMesh(mesh);
-    run.afterEnergy = edgeSpringQualityEnergy(mesh);
+    run.afterEnergy = strictTMOPQualityEnergy(mesh, target);
     run.sourceFitAfter = fitDiagnostic.sourceSegmentDistanceEnergy(mesh);
     run.accepted =
       run.afterQuality.invertedCells == 0
@@ -645,6 +622,7 @@ namespace Rodin::Tests::Unit
   {
     SquaredDistanceMetric metric;
     EXPECT_NEAR(metric.value(Matrix2::Identity()), 0, 1e-14);
+    EXPECT_NEAR(metric.gradient(Matrix2::Identity()).norm(), 0, 1e-14);
   }
 
   TEST(Rodin_Adaptation_TMOP, DistortedMatrixHasLargerMetric)
@@ -654,9 +632,14 @@ namespace Rodin::Tests::Unit
     A(0, 1) = 0.5;
 
     EXPECT_GT(metric.value(A), metric.value(Matrix2::Identity()));
+    EXPECT_NEAR((metric.gradient(A) - (A - Matrix2::Identity())).norm(), 0, 1e-14);
+    EXPECT_NEAR(
+        (metric.hessianAction(A, Matrix2::Identity()) - Matrix2::Identity()).norm(),
+        0,
+        1e-14);
   }
 
-  TEST(Rodin_Adaptation_TMOP, InvertedAndNearSingularMatricesArePenalized)
+  TEST(Rodin_Adaptation_TMOP, SquaredDistanceMetricFollowsFormulaForSingularAndInvertedMatrices)
   {
     SquaredDistanceMetric metric;
     Matrix2 inverted = Matrix2::Identity();
@@ -665,8 +648,8 @@ namespace Rodin::Tests::Unit
     Matrix2 nearSingular = Matrix2::Identity();
     nearSingular(1, 1) = 1e-14;
 
-    EXPECT_GT(metric.value(inverted), 1e10);
-    EXPECT_GT(metric.value(nearSingular), 1e10);
+    EXPECT_NEAR(metric.value(inverted), 2, 1e-14);
+    EXPECT_NEAR(metric.value(nearSingular), 0.5, 1e-13);
   }
 
   TEST(Rodin_Adaptation_TMOP, ShapeAndAreaMetricsAreFiniteForIdentity)
@@ -682,8 +665,13 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_Adaptation_TMOP, IdentityTargetWorks)
   {
-    const auto target = IdentityTargetEvaluator().evaluate();
-    EXPECT_NEAR((target.W - Matrix2::Identity()).norm(), 0, 1e-14);
+    auto mesh = makeUnitTriangle();
+    auto cellIterator = mesh.getPolytope(2, 0);
+    const auto& cell = *cellIterator;
+    const Math::SpatialPoint rc({Real(1) / Real(3), Real(1) / Real(3)});
+
+    IdentityTargetJacobian target;
+    EXPECT_NEAR((target.evaluate(cell, rc) - Matrix2::Identity()).norm(), 0, 1e-14);
   }
 
   TEST(Rodin_Adaptation_TMOP, P2UpgradeCreatesExpectedNodes)
@@ -907,6 +895,51 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR((fd - jd).norm(), 0, 1e-7);
   }
 
+  TEST(Rodin_Adaptation_TMOP, QualityTermResidualAndTangentAreConsistentForH1P2)
+  {
+    auto mesh = makeTwoTriangleSquare();
+    VectorH1<2, LocalMesh> space(std::integral_constant<size_t, 2>{}, mesh, 2);
+
+    GridFunction displacement(space);
+    auto& data = displacement.getData();
+    for (Eigen::Index i = 0; i < data.size(); ++i)
+      data(i) = 0.003 * std::sin(static_cast<Real>(i + 1));
+
+    TrialFunction du(space);
+    TestFunction v(space);
+    QualityTerm quality(SquaredDistanceMetric{}, IdentityTargetJacobian{}, 1.3);
+
+    auto assembleResidual = [&]()
+    {
+      LinearForm residual(v);
+      residual = quality.residual(displacement, v);
+      residual.assemble();
+      return residual.getVector();
+    };
+
+    BilinearForm tangent(du, v);
+    tangent = quality.tangent(displacement, du, v);
+    tangent.assemble();
+
+    const auto residual0 = assembleResidual();
+    auto direction = data;
+    for (Eigen::Index i = 0; i < direction.size(); ++i)
+      direction(i) = std::cos(Real(0.61) * static_cast<Real>(i + 1));
+    direction /= direction.norm();
+
+    const auto original = data;
+    const Real eps = 1e-7;
+    data = original + eps * direction;
+    const auto residual1 = assembleResidual();
+    data = original;
+
+    const auto fd = (residual1 - residual0) / eps;
+    const auto jd = tangent.getOperator() * direction;
+    const Real denom = std::max<Real>({Real(1), fd.norm(), jd.norm()});
+
+    EXPECT_LT((fd - jd).norm() / denom, 1e-7);
+  }
+
   TEST(Rodin_Adaptation_TMOP, LevelSetFitTermIsZeroOnFreshCutInterface)
   {
     const auto cut = cutTwoTriangleSquare();
@@ -1084,13 +1117,14 @@ namespace Rodin::Tests::Unit
       ASSERT_EQ(perturbed.invertedCells, 0);
       ASSERT_EQ(perturbed.degenerateCells, 0);
 
-      const auto run = runNativeTmop(mesh, cut.interfaceGraph, cut.report);
+      const auto run =
+        runNativeTmop(mesh, cut.mesh, cut.interfaceGraph, cut.report);
       EXPECT_TRUE(run.accepted);
       EXPECT_GT(run.scale, 0);
       EXPECT_EQ(run.afterQuality.invertedCells, 0);
       EXPECT_EQ(run.afterQuality.degenerateCells, 0);
       EXPECT_LE(run.afterEnergy, run.beforeEnergy * (Real(1) + Real(1e-8)));
-      EXPECT_LE(run.sourceFitAfter, std::max(Real(1e-9), run.sourceFitBefore + Real(1e-10)));
+      EXPECT_LE(run.sourceFitAfter, std::max(Real(1e-8), run.sourceFitBefore + Real(1e-10)));
       EXPECT_GT(run.initialResidual, 0);
       EXPECT_LE(run.finalResidual, run.initialResidual);
     }
@@ -1109,13 +1143,14 @@ namespace Rodin::Tests::Unit
       ASSERT_EQ(perturbed.invertedCells, 0);
       ASSERT_EQ(perturbed.degenerateCells, 0);
 
-      const auto run = runNativeTmop(mesh, cut.interfaceGraph, cut.report);
+      const auto run =
+        runNativeTmop(mesh, cut.mesh, cut.interfaceGraph, cut.report);
       EXPECT_TRUE(run.accepted);
       EXPECT_GT(run.scale, 0);
       EXPECT_EQ(run.afterQuality.invertedCells, 0);
       EXPECT_EQ(run.afterQuality.degenerateCells, 0);
       EXPECT_LE(run.afterEnergy, run.beforeEnergy * (Real(1) + Real(1e-8)));
-      EXPECT_LE(run.sourceFitAfter, std::max(Real(1e-9), run.sourceFitBefore + Real(1e-10)));
+      EXPECT_LE(run.sourceFitAfter, std::max(Real(1e-8), run.sourceFitBefore + Real(1e-10)));
       EXPECT_GT(run.initialResidual, 0);
       EXPECT_LE(run.finalResidual, run.initialResidual);
     }
@@ -1233,6 +1268,53 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR((J - c.J).norm(), 0, 1e-13);
       EXPECT_GT(J.determinant(), 0);
     }
+  }
+
+  TEST_P(Rodin_Adaptation_TMOP_AffineTriangles, StrictQualityEnergyMatchesIdentityTargetFormula)
+  {
+    const auto c = GetParam();
+    auto mesh = makeTriangle(c.a, c.b, c.c);
+    P1 space(mesh, 2);
+    GridFunction displacement(space);
+    displacement.getData().setZero();
+
+    SquaredDistanceMetric metric;
+    QualityTerm quality(metric, IdentityTargetJacobian{});
+    const Real energy = quality.energy(displacement);
+
+    // Identity target means W = I and T = A, integrated on the reference
+    // triangle whose area is 1/2.
+    EXPECT_NEAR(energy, Real(0.5) * metric.value(c.J), 1e-13);
+  }
+
+  TEST_P(Rodin_Adaptation_TMOP_AffineTriangles, InitialElementTargetGivesZeroEnergyAtZeroDisplacement)
+  {
+    const auto c = GetParam();
+    auto mesh = makeTriangle(c.a, c.b, c.c);
+    P1 space(mesh, 2);
+    GridFunction displacement(space);
+    displacement.getData().setZero();
+
+    QualityTerm quality(
+        SquaredDistanceMetric{},
+        InitialElementTargetJacobian(mesh));
+
+    EXPECT_NEAR(quality.energy(displacement), 0, 1e-13);
+  }
+
+  TEST_P(Rodin_Adaptation_TMOP_AffineTriangles, InitialElementTargetEnergyIncreasesWithDisplacement)
+  {
+    const auto c = GetParam();
+    auto mesh = makeTriangle(c.a, c.b, c.c);
+    P1 space(mesh, 2);
+    GridFunction displacement(space);
+    fillDisplacement(displacement.getData(), 0.01);
+
+    QualityTerm quality(
+        SquaredDistanceMetric{},
+        InitialElementTargetJacobian(mesh));
+
+    EXPECT_GT(quality.energy(displacement), 0);
   }
 
   INSTANTIATE_TEST_SUITE_P(

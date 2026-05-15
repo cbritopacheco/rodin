@@ -33,11 +33,14 @@ namespace Rodin::Adaptation::TMOP
   };
 
   /**
-   * @brief Facade for fixed-topology TMOP geometry adaptation.
+   * @brief Legacy standalone diagnostic facade for fixed-topology adaptation.
    *
-   * It reuses Rodin mesh/connectivity infrastructure, constructs the order-2
-   * geometry representation, configures the objective, and advances the mesh
-   * geometry while keeping topology fixed.
+   * This class predates the Rodin-native residual/tangent TMOP path. It reuses
+   * Rodin mesh/connectivity infrastructure, constructs a detached order-2
+   * geometry representation, configures the prototype objective, and advances
+   * that detached geometry while keeping topology fixed. It is kept only as a
+   * diagnostic bridge while the production path moves to QualityTerm,
+   * DeviationTerm, LevelSetFitTerm, Variational::Problem, and NewtonSolver.
    *
    * Example:
    * @code
@@ -51,9 +54,8 @@ namespace Rodin::Adaptation::TMOP
    *   .optimize();
    * @endcode
    *
-   * The problem keeps topology fixed. It does not triangulate, coarsen, insert
-   * or delete cells, or move fixed nodes. Rodin-native TMOP terms provide the
-   * residual and tangent pieces used by LinearProblem/Newton assembly.
+   * The production API is not this class. Use the Rodin-native TMOP terms for
+   * residual/tangent assembly into LinearProblem/Newton infrastructure.
    */
   class Problem
   {

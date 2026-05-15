@@ -247,8 +247,8 @@ namespace
 int main(int, char**)
 {
   static constexpr size_t resolution = 20;
-  static constexpr Index timeSteps = 100;
-  static constexpr size_t maxCarryForwardCells = 6000;
+  static constexpr Index timeSteps = 20;
+  static constexpr size_t maxCarryForwardCells = 200e3;
 
   MovingCircle circle;
 
@@ -266,7 +266,7 @@ int main(int, char**)
     << "cut_min_area,cut_min_quality,cut_inverted_cells,cut_poor_quality_cells,"
     << "optimized_min_area,optimized_min_quality,optimized_inverted_cells,"
     << "optimized_degenerate_cells,optimized_poor_quality_cells,"
-    << "linear_metric,optimized_linear_metric,fit_initial,fit_final,"
+    << "tmop_energy_initial,tmop_energy_final,fit_initial,fit_final,"
     << "source_fit_initial,source_fit_final,"
     << "geometry_step_scale,"
     << "jacobian_fd_relative_error,newton_max_residual_growth,"
@@ -275,7 +275,6 @@ int main(int, char**)
     << "newton_iterations,newton_converged,optimized_geometry_applied\n";
 
   SquaredDistanceMetric metric;
-
   // The uniform lattice is created ONCE at startup as the initial background.
   // Each step projects phi onto the current background, cuts it, TMOP-optimizes
   // the cut mesh, then that optimized cut mesh becomes the next step's
@@ -326,15 +325,16 @@ int main(int, char**)
     TrialFunction du(displacementSpace);
     TestFunction v(displacementSpace);
 
+    InitialElementTargetJacobian target(result.mesh);
     static constexpr Real qualityWeight = 1.0;
-    static constexpr Real deviationWeight = 1000000000000000.0;
-    QualityTerm quality(qualityWeight);
+    static constexpr Real deviationWeight = 1.0;
+    QualityTerm quality(metric, target, qualityWeight);
     DeviationTerm deviation(deviationWeight);
 
     // Source-segment fit: this is the Rodin-native level-set fit term used by
     // the nonlinear TMOP problem. It uses cutter provenance to keep the fitted
     // interface near the P1 interface segments that produced it.
-    static constexpr Real fitWeight = 100000000000000000.0;
+    static constexpr Real fitWeight = 1.0;
     LevelSetFitTerm fit(result.interfaceGraph, result.report, fitWeight);
     LevelSetFitTerm fitDiagnostic(result.interfaceGraph, result.report, 1.0);
 
@@ -417,6 +417,7 @@ int main(int, char**)
       newtonResiduals.push_back(report.final_residual);
     });
 
+    const Real tmopEnergyInitial = quality.energy(displacement);
     const Real fitInitial = interfacePhiEnergy(result.mesh, circle, time);
     const Real sourceFitInitial =
       fitDiagnostic.sourceSegmentDistanceEnergy(result.mesh);
@@ -432,7 +433,6 @@ int main(int, char**)
         circle,
         time);
 
-    const Real linearMetric = LinearMeshMetricObjective(metric).compute(result.mesh);
     Real geometryStepScale = 1;
     LocalMesh optimizedMesh = result.mesh;
     // Full Newton update only: no line search, damping, or post-solve scaling.
@@ -440,8 +440,6 @@ int main(int, char**)
     optimizedMesh.getConnectivity().compute(2, 1);
     optimizedMesh.getConnectivity().compute(1, 0);
     const bool optimizedGeometryApplied = true;
-    const Real optimizedLinearMetric =
-      LinearMeshMetricObjective(metric).compute(optimizedMesh);
 
     // Rebuild the finite element space on the optimized cut mesh and reproject
     // phi onto it (exact resample of the manufactured signed distance), so the
@@ -449,6 +447,12 @@ int main(int, char**)
     optimizedMesh.getConnectivity().compute(2, 1);
     optimizedMesh.getConnectivity().compute(1, 0);
     const auto optimizedQuality = summarizeMeshQuality(optimizedMesh);
+    P1 optimizedDisplacementSpace(
+        optimizedMesh, optimizedMesh.getSpaceDimension());
+    GridFunction optimizedZero(optimizedDisplacementSpace);
+    optimizedZero.getData().setZero();
+    QualityTerm optimizedTmopQuality(metric, target, qualityWeight);
+    const Real tmopEnergyFinal = optimizedTmopQuality.energy(optimizedZero);
     const Real fitFinal = interfacePhiEnergy(optimizedMesh, circle, time);
     const Real sourceFitFinal =
       fitDiagnostic.sourceSegmentDistanceEnergy(optimizedMesh);
@@ -498,8 +502,8 @@ int main(int, char**)
       << optimizedQuality.invertedCells << ','
       << optimizedQuality.degenerateCells << ','
       << optimizedQuality.poorQualityCells << ','
-      << linearMetric << ','
-      << optimizedLinearMetric << ','
+      << tmopEnergyInitial << ','
+      << tmopEnergyFinal << ','
       << fitInitial << ','
       << fitFinal << ','
       << sourceFitInitial << ','
@@ -524,6 +528,8 @@ int main(int, char**)
               << " analytic residual=" << residuals.analyticLInf
               << " tmop residual " << newtonReport.initial_residual
               << " -> " << newtonReport.final_residual
+              << " tmop_energy " << tmopEnergyInitial
+              << " -> " << tmopEnergyFinal
               << " analytic_fit " << fitInitial << " -> " << fitFinal
               << " source_fit " << sourceFitInitial << " -> " << sourceFitFinal
               << " step_scale=" << geometryStepScale
@@ -563,7 +569,8 @@ int main(int, char**)
             << std::endl;
   std::cout << "The uniform lattice is created once at startup as the initial"
             << " background. Each step projects phi onto the current"
-            << " background, cuts it, solves the active TMOP terms (quality +"
+            << " background, cuts it, solves the active TMOP terms (strict"
+            << " target-matrix quality +"
             << " deviation + source-segment level-set fit),"
             << " reprojects phi onto"
             << " the optimized cut mesh for export, and then carries that"

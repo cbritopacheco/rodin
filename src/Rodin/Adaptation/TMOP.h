@@ -15,10 +15,11 @@
  * residual and tangent terms into LinearProblem objects, then solved by
  * NewtonSolver and the existing local/PETSc/MPI/OpenMP backends.
  *
- * TMOP exposes metrics, high-order geometry helpers, and Rodin-native
- * residual/tangent terms. The residual/tangent terms are the production path:
- * they assemble into LinearProblem objects and use the existing solver
- * backends.
+ * TMOP exposes metrics, target Jacobians, and Rodin-native residual/tangent
+ * terms. The residual/tangent terms are the production path: they assemble into
+ * LinearProblem objects and use the existing solver backends. The detached
+ * high-order geometry/objective/optimizer helpers remain diagnostic bridges and
+ * are not the production nonlinear solve architecture.
  */
 
 #include "TMOP/Metrics.h"
