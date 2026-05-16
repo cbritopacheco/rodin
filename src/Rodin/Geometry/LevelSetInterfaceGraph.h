@@ -82,12 +82,26 @@ namespace Rodin::Geometry
 
   struct InterfaceGraph
   {
+    static constexpr Index InvalidIndex = std::numeric_limits<Index>::max();
+
     std::vector<InterfaceVertex> vertices;
     std::vector<InterfaceEdge> edges;
     std::vector<InterfaceChain> chains;
 
+    /**
+     * Maps a background edge carrying a strict sign-changing crossing to the
+     * InterfaceGraph vertex used for that crossing. When crossing snap is
+     * enabled, the mapped graph vertex may be an original mesh vertex.
+     */
+    std::vector<Index> parentEdgeToVertex;
+
     std::vector<Index> degenerateCells;
     std::vector<Index> invalidCells;
+
+    Index nearVertexCrossingCount = 0;
+    Index snappedCrossingCount = 0;
+    Real maxSnapDistance = 0;
+    Real maxInterfaceDeviation = 0;
   };
 
   struct ProtectedSegment
@@ -163,6 +177,22 @@ namespace Rodin::Geometry
         return *this;
       }
 
+      /**
+       * @brief Snaps strict edge crossings close to an endpoint.
+       *
+       * The tolerance is measured in edge interpolation coordinates. With the
+       * default value zero the extracted P1 interface is exact. For @f$\tau>0@f$,
+       * crossings with @f$t \le \tau@f$ or @f$1-t \le \tau@f$ are represented by
+       * the corresponding existing endpoint and reported in the graph
+       * diagnostics. This deliberately trades a bounded local interface
+       * deviation for eliminating near-vertex sliver topology.
+       */
+      LevelSetInterfaceGraph& setCrossingSnapTolerance(Real tol)
+      {
+        m_crossingSnapTolerance = std::max(Real(0), tol);
+        return *this;
+      }
+
       Real getSignTolerance() const
       {
         return m_signTolerance;
@@ -171,6 +201,11 @@ namespace Rodin::Geometry
       const Optional<Attribute>& getInterfaceAttribute() const
       {
         return m_interfaceAttribute;
+      }
+
+      Real getCrossingSnapTolerance() const
+      {
+        return m_crossingSnapTolerance;
       }
 
       LevelSetSign classify(Real value) const
@@ -211,6 +246,7 @@ namespace Rodin::Geometry
 
         const Index nv = static_cast<Index>(mesh.getVertexCount());
         const Index ne = static_cast<Index>(conn.getCount(1));
+        graph.parentEdgeToVertex.assign(ne, GraphType::InvalidIndex);
 
         std::vector<Optional<Index>> originalVertexToGraph(nv);
         std::vector<Optional<Index>> edgeToGraph(ne);
@@ -258,10 +294,30 @@ namespace Rodin::Geometry
             return *edgeToGraph[edge];
 
           t = std::max(Real(0), std::min(Real(1), t));
+          const auto exactX = (Real(1) - t) * mesh.getVertexCoordinates(a)
+                            + t * mesh.getVertexCoordinates(b);
+
+          if (m_crossingSnapTolerance > Real(0) &&
+              (t <= m_crossingSnapTolerance ||
+               Real(1) - t <= m_crossingSnapTolerance))
+          {
+            graph.nearVertexCrossingCount++;
+            const Index original = (t <= Real(1) - t) ? a : b;
+            const auto snappedX = mesh.getVertexCoordinates(original);
+            const Real distance = (exactX - snappedX).norm();
+            graph.maxSnapDistance = std::max(graph.maxSnapDistance, distance);
+            graph.maxInterfaceDeviation =
+              std::max(graph.maxInterfaceDeviation, distance);
+
+            const Index idx = makeOriginalVertex(original);
+            edgeToGraph[edge] = idx;
+            graph.parentEdgeToVertex[edge] = idx;
+            graph.snappedCrossingCount++;
+            return idx;
+          }
 
           InterfaceVertex vertex;
-          vertex.x = (Real(1) - t) * mesh.getVertexCoordinates(a)
-                   + t * mesh.getVertexCoordinates(b);
+          vertex.x = exactX;
           vertex.kind = InterfaceVertexKind::EdgeCut;
           vertex.parentEdge = edge;
           vertex.t = t;
@@ -269,6 +325,7 @@ namespace Rodin::Geometry
           const Index idx = static_cast<Index>(graph.vertices.size());
           graph.vertices.push_back(std::move(vertex));
           edgeToGraph[edge] = idx;
+          graph.parentEdgeToVertex[edge] = idx;
           return idx;
         };
 
@@ -602,6 +659,7 @@ namespace Rodin::Geometry
 
       std::reference_wrapper<const GridFunctionType> m_phi;
       Real m_signTolerance;
+      Real m_crossingSnapTolerance = 0;
       Optional<Attribute> m_interfaceAttribute;
   };
 

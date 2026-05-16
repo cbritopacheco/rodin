@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ADAPTATION_TMOP_OPTIMIZER_H
-#define RODIN_ADAPTATION_TMOP_OPTIMIZER_H
+#ifndef RODIN_ADAPTATION_TARGETMATRIXOPTIMIZATION_OPTIMIZER_H
+#define RODIN_ADAPTATION_TARGETMATRIXOPTIMIZATION_OPTIMIZER_H
 
 #include <array>
 #include <cmath>
@@ -15,7 +15,7 @@
 
 #include "Objective.h"
 
-namespace Rodin::Adaptation::TMOP
+namespace Rodin::Adaptation::TargetMatrixOptimization
 {
   struct OptimizerOptions
   {

@@ -1,5 +1,5 @@
-add_executable(RodinAdaptationTMOPTest TMOPTest.cpp)
-target_link_libraries(RodinAdaptationTMOPTest
+add_executable(RodinAdaptationTargetMatrixOptimizationTest TargetMatrixOptimizationTest.cpp)
+target_link_libraries(RodinAdaptationTargetMatrixOptimizationTest
   PUBLIC
   GTest::gtest
   GTest::gtest_main
@@ -7,7 +7,7 @@ target_link_libraries(RodinAdaptationTMOPTest
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational)
-gtest_discover_tests(RodinAdaptationTMOPTest
+gtest_discover_tests(RodinAdaptationTargetMatrixOptimizationTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit

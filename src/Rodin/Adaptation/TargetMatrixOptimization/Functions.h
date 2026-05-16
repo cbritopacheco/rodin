@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ADAPTATION_TMOP_FUNCTIONS_H
-#define RODIN_ADAPTATION_TMOP_FUNCTIONS_H
+#ifndef RODIN_ADAPTATION_TARGETMATRIXOPTIMIZATION_FUNCTIONS_H
+#define RODIN_ADAPTATION_TARGETMATRIXOPTIMIZATION_FUNCTIONS_H
 
 #include <functional>
 
@@ -16,7 +16,7 @@
 
 #include "Metrics.h"
 
-namespace Rodin::Adaptation::TMOP
+namespace Rodin::Adaptation::TargetMatrixOptimization
 {
   /**
    * @brief Rodin FunctionBase adapter for TMOP metric evaluation.

@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ADAPTATION_TMOP_H
-#define RODIN_ADAPTATION_TMOP_H
+#ifndef RODIN_ADAPTATION_TARGETMATRIXOPTIMIZATION_H
+#define RODIN_ADAPTATION_TARGETMATRIXOPTIMIZATION_H
 
 /**
  * @file
@@ -22,14 +22,14 @@
  * are not the production nonlinear solve architecture.
  */
 
-#include "TMOP/Metrics.h"
-#include "TMOP/Functions.h"
-#include "TMOP/Terms.h"
+#include "TargetMatrixOptimization/Metrics.h"
+#include "TargetMatrixOptimization/Functions.h"
+#include "TargetMatrixOptimization/Terms.h"
 
 // Fixed-topology geometry and adaptation helpers.
-#include "TMOP/Geometry.h"
-#include "TMOP/Objective.h"
-#include "TMOP/Optimizer.h"
-#include "TMOP/Problem.h"
+#include "TargetMatrixOptimization/Geometry.h"
+#include "TargetMatrixOptimization/Objective.h"
+#include "TargetMatrixOptimization/Optimizer.h"
+#include "TargetMatrixOptimization/Problem.h"
 
 #endif

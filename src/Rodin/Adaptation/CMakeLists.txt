@@ -6,14 +6,14 @@ Distributed under the Boost Software License, Version 1.0.
 ]]
 
 set(RodinAdaptation_HEADERS
-  TMOP.h
-  TMOP/Metrics.h
-  TMOP/Functions.h
-  TMOP/Terms.h
-  TMOP/Geometry.h
-  TMOP/Objective.h
-  TMOP/Optimizer.h
-  TMOP/Problem.h
+  TargetMatrixOptimization.h
+  TargetMatrixOptimization/Metrics.h
+  TargetMatrixOptimization/Functions.h
+  TargetMatrixOptimization/Terms.h
+  TargetMatrixOptimization/Geometry.h
+  TargetMatrixOptimization/Objective.h
+  TargetMatrixOptimization/Optimizer.h
+  TargetMatrixOptimization/Problem.h
 )
 
 add_library(RodinAdaptation INTERFACE)

@@ -12,6 +12,6 @@
  * @brief Top level include for Rodin adaptation utilities.
  */
 
-#include "Adaptation/TMOP.h"
+#include "Adaptation/TargetMatrixOptimization.h"
 
 #endif

@@ -82,4 +82,5 @@ target_link_libraries(LevelSetMovingCircle
   Rodin::Adaptation
   Rodin::Geometry
   Rodin::IO
+  Rodin::MMG
   Rodin::Variational)

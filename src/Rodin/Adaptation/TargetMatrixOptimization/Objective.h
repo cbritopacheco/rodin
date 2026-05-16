@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ADAPTATION_TMOP_OBJECTIVE_H
-#define RODIN_ADAPTATION_TMOP_OBJECTIVE_H
+#ifndef RODIN_ADAPTATION_TARGETMATRIXOPTIMIZATION_OBJECTIVE_H
+#define RODIN_ADAPTATION_TARGETMATRIXOPTIMIZATION_OBJECTIVE_H
 
 #include <vector>
 
@@ -14,7 +14,7 @@
 #include "Geometry.h"
 #include "Metrics.h"
 
-namespace Rodin::Adaptation::TMOP
+namespace Rodin::Adaptation::TargetMatrixOptimization
 {
   class InterfaceFitPenalty
   {

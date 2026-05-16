@@ -314,3 +314,16 @@ gtest_discover_tests(RodinGeometryLevelSetDiscretizerTrianglesTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinGeometryTriangleMeshOptimizerTest TriangleMeshOptimizerTest.cpp)
+target_link_libraries(RodinGeometryTriangleMeshOptimizerTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational)
+gtest_discover_tests(RodinGeometryTriangleMeshOptimizerTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)

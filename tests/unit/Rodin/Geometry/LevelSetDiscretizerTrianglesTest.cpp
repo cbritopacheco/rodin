@@ -110,6 +110,50 @@ namespace Rodin::Tests::Unit
       }));
   }
 
+  static Real signedTriangleArea(
+      const Math::SpatialPoint& a,
+      const Math::SpatialPoint& b,
+      const Math::SpatialPoint& c)
+  {
+    return Real(0.5)
+      * ((b[0] - a[0]) * (c[1] - a[1])
+       - (b[1] - a[1]) * (c[0] - a[0]));
+  }
+
+  static Real triangleQuality(
+      const Math::SpatialPoint& a,
+      const Math::SpatialPoint& b,
+      const Math::SpatialPoint& c)
+  {
+    const Real area = std::abs(signedTriangleArea(a, b, c));
+    const Real l0 = (b - a).squaredNorm();
+    const Real l1 = (c - b).squaredNorm();
+    const Real l2 = (a - c).squaredNorm();
+    const Real denom = l0 + l1 + l2;
+    if (denom <= Real(0))
+      return Real(0);
+    return Real(4) * std::sqrt(Real(3)) * area / denom;
+  }
+
+  static Real minTriangleQuality(const LocalMesh& mesh)
+  {
+    Real qmin = std::numeric_limits<Real>::infinity();
+    const auto& conn = mesh.getConnectivity();
+    for (Index c = 0; c < mesh.getCellCount(); ++c)
+    {
+      if (conn.getGeometry(2, c) != Polytope::Type::Triangle)
+        continue;
+      const auto& cell = conn.getPolytope(2, c);
+      qmin = std::min(
+          qmin,
+          triangleQuality(
+            mesh.getVertexCoordinates(cell(0)),
+            mesh.getVertexCoordinates(cell(1)),
+            mesh.getVertexCoordinates(cell(2))));
+    }
+    return std::isfinite(qmin) ? qmin : Real(0);
+  }
+
   static void expectEveryGraphEdgeAppearsAsOutputEdge(
       const LevelSetDiscretizerTrianglesResult& result)
   {
@@ -399,6 +443,79 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(result.report.pathologicalCutCount, 0);
   }
 
+  TEST(Rodin_Geometry_LevelSetDiscretizerTriangles, CrossingSnapToleranceRemovesNearVertexSliver)
+  {
+    auto exactMesh = makeSingleTriangle();
+    computeConnectivity(exactMesh);
+    P1 exactSpace(exactMesh);
+    GridFunction exactPhi(exactSpace);
+    exactPhi[0] = -1e-3;
+    exactPhi[1] = 1;
+    exactPhi[2] = 1;
+
+    const auto exact = LevelSetDiscretizerTriangles(exactPhi)
+      .setSignTolerance(1e-12)
+      .setCrossingSnapTolerance(0)
+      .setInterfaceAttribute(42)
+      .discretize();
+
+    auto snappedMesh = makeSingleTriangle();
+    computeConnectivity(snappedMesh);
+    P1 snappedSpace(snappedMesh);
+    GridFunction snappedPhi(snappedSpace);
+    snappedPhi[0] = -1e-3;
+    snappedPhi[1] = 1;
+    snappedPhi[2] = 1;
+
+    const Real tau = 0.01;
+    const auto snapped = LevelSetDiscretizerTriangles(snappedPhi)
+      .setSignTolerance(1e-12)
+      .setCrossingSnapTolerance(tau)
+      .setInterfaceAttribute(42)
+      .discretize();
+
+    EXPECT_EQ(exact.report.snappedCrossingCount, 0);
+    EXPECT_EQ(exact.mesh.getCellCount(), 3);
+    EXPECT_EQ(exact.interfaceGraph.edges.size(), 1);
+
+    EXPECT_EQ(snapped.report.nearVertexCrossingCount, 2);
+    EXPECT_EQ(snapped.report.snappedCrossingCount, 2);
+    EXPECT_EQ(snapped.interfaceGraph.edges.size(), 0);
+    EXPECT_EQ(snapped.mesh.getCellCount(), 1);
+    EXPECT_LE(snapped.report.maxInterfaceDeviation, tau);
+    EXPECT_GT(minTriangleQuality(snapped.mesh), minTriangleQuality(exact.mesh));
+  }
+
+  TEST(Rodin_Geometry_LevelSetDiscretizerTriangles, QuadCutUsesBetterInteriorDiagonal)
+  {
+    auto mesh = LocalMesh::Builder()
+      .initialize(2)
+      .nodes(3)
+      .vertex({0, 0})
+      .vertex({0.7613897502566094, -0.14872607731865958})
+      .vertex({-0.08520978320152678, 0.8421406330301072})
+      .polytope(Polytope::Type::Triangle, {0, 1, 2})
+      .finalize();
+    computeConnectivity(mesh);
+
+    P1 space(mesh);
+    GridFunction phi(space);
+    phi[0] = -1;
+    phi[1] = 7.610724711258564;
+    phi[2] = 2.160684226493828;
+
+    const auto result = LevelSetDiscretizerTriangles(phi)
+      .setSignTolerance(1e-12)
+      .setInterfaceAttribute(42)
+      .discretize();
+
+    EXPECT_EQ(result.report.improvedPolygonTriangulationCount, 1);
+    EXPECT_EQ(result.report.snappedCrossingCount, 0);
+    EXPECT_EQ(result.mesh.getCellCount(), 3);
+    EXPECT_GT(minTriangleQuality(result.mesh), 0.44);
+    expectEveryGraphEdgeAppearsAsOutputEdge(result);
+  }
+
   TEST(Rodin_Geometry_LevelSetDiscretizerTriangles, RequiresPreparedConnectivity)
   {
     auto mesh = makeSingleTriangle();
@@ -668,4 +785,67 @@ namespace Rodin::Tests::Unit
         std::array<Real, 3>{{0.01, -1, -1}},
         std::array<Real, 3>{{-1, 0.01, -1}},
         std::array<Real, 3>{{-1, -1, 0.01}}));
+
+  TEST(Rodin_Geometry_LevelSetDiscretizerTriangles, MinCutQualityZeroPreservesExactCut)
+  {
+    auto mesh = makeSingleTriangle();
+    computeConnectivity(mesh);
+    P1 space(mesh);
+    GridFunction phi(space);
+    phi[0] = -1e-3; phi[1] = 1; phi[2] = 1;  // near-vertex sliver cut
+
+    const auto r = LevelSetDiscretizerTriangles(phi)
+      .setSignTolerance(1e-12)
+      .setInterfaceAttribute(42)
+      .setMinCutQuality(0)
+      .discretize();
+
+    EXPECT_EQ(r.report.uncutCellCount, 0);
+    EXPECT_EQ(r.mesh.getCellCount(), 3);
+    EXPECT_EQ(r.interfaceGraph.edges.size(), 1);
+  }
+
+  TEST(Rodin_Geometry_LevelSetDiscretizerTriangles, MinCutQualitySuppressesSliverCut)
+  {
+    auto mesh = makeSingleTriangle();
+    computeConnectivity(mesh);
+    P1 space(mesh);
+    GridFunction phi(space);
+    phi[0] = -1e-3; phi[1] = 1; phi[2] = 1;  // would split into a thin sliver
+
+    const auto r = LevelSetDiscretizerTriangles(phi)
+      .setSignTolerance(1e-12)
+      .setInterfaceAttribute(42)
+      .setMinCutQuality(0.1)
+      .discretize();
+
+    // The crossed cell is kept whole on its dominant side instead of cut.
+    EXPECT_EQ(r.report.uncutCellCount, 1);
+    EXPECT_EQ(r.mesh.getCellCount(), 1);
+    // Suppressed segment must not be miscounted as a pathology.
+    EXPECT_EQ(r.report.pathologicalCutCount, 0);
+    // Whole-triangle quality is far above the tiny sliver it replaced.
+    EXPECT_GT(r.report.minOutputCellQuality, 0.1);
+  }
+
+  TEST(Rodin_Geometry_LevelSetDiscretizerTriangles, CustomQualityMeasureIsUsed)
+  {
+    auto mesh = makeSingleTriangle();
+    computeConnectivity(mesh);
+    P1 space(mesh);
+    GridFunction phi(space);
+    phi[0] = -1; phi[1] = 1; phi[2] = 1;
+
+    bool called = false;
+    const auto r = LevelSetDiscretizerTriangles(phi)
+      .setSignTolerance(1e-12)
+      .setInterfaceAttribute(42)
+      .setQualityMeasure(
+        [&](const Math::SpatialPoint&, const Math::SpatialPoint&,
+            const Math::SpatialPoint&) { called = true; return Real(0.5); })
+      .discretize();
+
+    EXPECT_TRUE(called);
+    EXPECT_NEAR(r.report.minOutputCellQuality, 0.5, 1e-12);
+  }
 }

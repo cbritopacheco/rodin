@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ADAPTATION_TMOP_TERMS_H
-#define RODIN_ADAPTATION_TMOP_TERMS_H
+#ifndef RODIN_ADAPTATION_TARGETMATRIXOPTIMIZATION_TERMS_H
+#define RODIN_ADAPTATION_TARGETMATRIXOPTIMIZATION_TERMS_H
 
 /**
  * @file
@@ -25,12 +25,12 @@
 #include <utility>
 #include <vector>
 
-#include "Rodin/Adaptation/TMOP/Metrics.h"
+#include "Rodin/Adaptation/TargetMatrixOptimization/Metrics.h"
 #include "Rodin/Geometry/LevelSetDiscretizerTriangles.h"
 #include "Rodin/QF/PolytopeQuadratureFormula.h"
 #include "Rodin/Variational.h"
 
-namespace Rodin::Adaptation::TMOP
+namespace Rodin::Adaptation::TargetMatrixOptimization
 {
   inline Real triangleArea2D(
         const Math::SpatialPoint& x0,

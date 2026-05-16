@@ -107,8 +107,14 @@ namespace Rodin::Geometry
 
     Index degenerateCellCount = 0;
     Index pathologicalCutCount = 0;
+    Index uncutCellCount = 0;
+    Index nearVertexCrossingCount = 0;
+    Index snappedCrossingCount = 0;
+    Index improvedPolygonTriangulationCount = 0;
     Real minOutputCellArea = 0;
     Real minOutputCellQuality = 0;
+    Real maxSnapDistance = 0;
+    Real maxInterfaceDeviation = 0;
   };
 
   struct LevelSetDiscretizerTrianglesResult
@@ -188,6 +194,21 @@ namespace Rodin::Geometry
         return *this;
       }
 
+      /**
+       * @brief Snaps strict edge crossings close to a background vertex.
+       *
+       * The tolerance is measured as an edge interpolation fraction. The
+       * default value zero preserves the exact P1 cut. Positive values collapse
+       * near-vertex crossings onto the existing endpoint and report the bounded
+       * interface deviation, eliminating the most common sliver topology before
+       * TMOP sees the mesh.
+       */
+      LevelSetDiscretizerTriangles& setCrossingSnapTolerance(Real tol)
+      {
+        m_crossingSnapTolerance = std::max(Real(0), tol);
+        return *this;
+      }
+
       LevelSetDiscretizerTriangles& setAreaTolerance(Real tol)
       {
         m_areaTolerance = std::max(Real(0), tol);
@@ -197,6 +218,41 @@ namespace Rodin::Geometry
       LevelSetDiscretizerTriangles& setQualityTolerance(Real tol)
       {
         m_qualityTolerance = std::max(Real(0), tol);
+        return *this;
+      }
+
+      /// Triangle quality measure: (p0, p1, p2) -> quality in [0, 1].
+      using QualityMeasure = std::function<Real(
+          const Math::SpatialPoint&,
+          const Math::SpatialPoint&,
+          const Math::SpatialPoint&)>;
+
+      /**
+       * @brief Overrides the triangle quality measure used by the robust cut.
+       *
+       * Defaults to the normalized shape measure
+       * @f$4\sqrt3\,A/\sum \ell^2 @f$. The measure drives the quad-diagonal
+       * choice, the reported min quality, and the no-cut quality fallback.
+       */
+      LevelSetDiscretizerTriangles& setQualityMeasure(QualityMeasure measure)
+      {
+        m_qualityMeasure = std::move(measure);
+        return *this;
+      }
+
+      /**
+       * @brief Minimum child-triangle quality required to perform a cut.
+       *
+       * Default zero preserves the exact cut (every crossed cell is split).
+       * When positive, a cell whose split would produce a child triangle below
+       * this quality is left whole on its dominant sign side instead of being
+       * cut. The interface is then not body-fitted through that cell (a later
+       * TargetMatrixOptimization fit recovers it); the cell is counted in
+       * report.uncutCellCount.
+       */
+      LevelSetDiscretizerTriangles& setMinCutQuality(Real q)
+      {
+        m_minCutQuality = std::max(Real(0), q);
         return *this;
       }
 
@@ -233,12 +289,17 @@ namespace Rodin::Geometry
 
         InterfaceGraph graph = LevelSetInterfaceGraph(phi)
           .setSignTolerance(m_signTolerance)
+          .setCrossingSnapTolerance(m_crossingSnapTolerance)
           .setInterfaceAttribute(m_interfaceAttribute)
           .extract();
 
         ResultType result;
         result.interfaceGraph = graph;
         auto& report = result.report;
+        report.nearVertexCrossingCount = graph.nearVertexCrossingCount;
+        report.snappedCrossingCount = graph.snappedCrossingCount;
+        report.maxSnapDistance = graph.maxSnapDistance;
+        report.maxInterfaceDeviation = graph.maxInterfaceDeviation;
 
         const Index originalVertexCount =
           static_cast<Index>(mesh.getVertexCount());
@@ -291,6 +352,13 @@ namespace Rodin::Geometry
             report.graphVertexToOutputVertex.emplace(gv, graphVertexToOutput[gv]);
         }
 
+        for (Index edge = 0; edge < static_cast<Index>(graph.parentEdgeToVertex.size()); ++edge)
+        {
+          const Index gv = graph.parentEdgeToVertex[static_cast<size_t>(edge)];
+          if (gv != InterfaceGraph::InvalidIndex)
+            meshEdgeToGraphVertex[edge] = gv;
+        }
+
         std::vector<std::array<Index, 3>> outputCells;
         std::vector<Optional<Attribute>> outputCellAttributes;
 
@@ -310,6 +378,9 @@ namespace Rodin::Geometry
 
         auto triangleQuality = [&](Index a, Index b, Index c)
         {
+          if (m_qualityMeasure)
+            return m_qualityMeasure(
+                outputVertices[a], outputVertices[b], outputVertices[c]);
           const Real area = std::abs(signedArea2(a, b, c)) / Real(2);
           const Real l0 = edgeLength(a, b);
           const Real l1 = edgeLength(b, c);
@@ -432,10 +503,10 @@ namespace Rodin::Geometry
           return res;
         };
 
-        auto addSidePolygon =
+        auto buildSidePolygon =
           [&](const Polytope::Key& cell, const IndexVector& cellEdges,
               const std::array<LevelSetSign, 3>& signs,
-              Index parentCell, LevelSetSide side)
+              LevelSetSide side) -> std::vector<Index>
         {
           std::vector<Index> polygon;
           polygon.reserve(4);
@@ -456,14 +527,87 @@ namespace Rodin::Geometry
             polygon.pop_back();
 
           if (polygon.size() < 3)
-            return;
+            return {};
 
           if (polygonArea2(polygon) < Real(0))
             std::reverse(polygon.begin(), polygon.end());
-
-          for (Index i = 1; i + 1 < polygon.size(); ++i)
-            addTriangle(polygon[0], polygon[i], polygon[i + 1], parentCell, side);
+          return polygon;
         };
+
+        // Triangulates a side polygon, choosing the better quad diagonal.
+        // Pure (no report mutation): improved is set when the alternate
+        // diagonal wins, so the commit path can update the diagnostic.
+        auto sidePolygonTriangles =
+          [&](const std::vector<Index>& polygon, bool& improved)
+          -> std::vector<std::array<Index, 3>>
+        {
+          improved = false;
+          std::vector<std::array<Index, 3>> tris;
+          if (polygon.size() < 3)
+            return tris;
+          if (polygon.size() == 4)
+          {
+            const Real firstDiagonalQuality = std::min(
+                triangleQuality(polygon[0], polygon[1], polygon[2]),
+                triangleQuality(polygon[0], polygon[2], polygon[3]));
+            const Real secondDiagonalQuality = std::min(
+                triangleQuality(polygon[1], polygon[2], polygon[3]),
+                triangleQuality(polygon[1], polygon[3], polygon[0]));
+            if (secondDiagonalQuality > firstDiagonalQuality)
+            {
+              improved = true;
+              tris.push_back({{ polygon[1], polygon[2], polygon[3] }});
+              tris.push_back({{ polygon[1], polygon[3], polygon[0] }});
+              return tris;
+            }
+          }
+          for (Index i = 1; i + 1 < polygon.size(); ++i)
+            tris.push_back({{ polygon[0], polygon[i], polygon[i + 1] }});
+          return tris;
+        };
+
+        auto trianglesMinQuality =
+          [&](const std::vector<std::array<Index, 3>>& tris) -> Real
+        {
+          if (tris.empty())
+            return Real(0);
+          Real q = std::numeric_limits<Real>::infinity();
+          for (const auto& t : tris)
+            q = std::min(q, triangleQuality(t[0], t[1], t[2]));
+          return q;
+        };
+
+        auto addSidePolygon =
+          [&](const Polytope::Key& cell, const IndexVector& cellEdges,
+              const std::array<LevelSetSign, 3>& signs,
+              Index parentCell, LevelSetSide side)
+        {
+          const auto polygon = buildSidePolygon(cell, cellEdges, signs, side);
+          bool improved = false;
+          const auto tris = sidePolygonTriangles(polygon, improved);
+          if (improved)
+            report.improvedPolygonTriangulationCount++;
+          for (const auto& t : tris)
+            addTriangle(t[0], t[1], t[2], parentCell, side);
+        };
+
+        // Worst child quality the cut of this cell would produce, over both
+        // sides. Used by the no-cut quality fallback.
+        auto cutMinQuality =
+          [&](const Polytope::Key& cell, const IndexVector& cellEdges,
+              const std::array<LevelSetSign, 3>& signs) -> Real
+        {
+          bool dummy = false;
+          const Real qn = trianglesMinQuality(sidePolygonTriangles(
+              buildSidePolygon(cell, cellEdges, signs, LevelSetSide::Negative),
+              dummy));
+          const Real qp = trianglesMinQuality(sidePolygonTriangles(
+              buildSidePolygon(cell, cellEdges, signs, LevelSetSide::Positive),
+              dummy));
+          return std::min(qn, qp);
+        };
+
+        std::unordered_set<Index> suppressedCells;
 
         for (Index c = 0; c < mesh.getCellCount(); ++c)
         {
@@ -509,6 +653,26 @@ namespace Rodin::Geometry
               report.originalVertexToOutputVertex[cell(2)],
               c,
               LevelSetSide::Degenerate);
+            continue;
+          }
+
+          // No-cut quality fallback: if splitting this genuinely-crossed cell
+          // would produce a child below the requested quality, keep it whole
+          // on its dominant sign side. The interface is not body-fitted here;
+          // a later TargetMatrixOptimization fit recovers it.
+          if (m_minCutQuality > Real(0) && negative > 0 && positive > 0
+              && cutMinQuality(cell, cellEdges, signs) < m_minCutQuality)
+          {
+            const LevelSetSide dominant = (negative >= positive)
+              ? LevelSetSide::Negative : LevelSetSide::Positive;
+            addTriangle(
+              report.originalVertexToOutputVertex[cell(0)],
+              report.originalVertexToOutputVertex[cell(1)],
+              report.originalVertexToOutputVertex[cell(2)],
+              c,
+              dominant);
+            report.uncutCellCount++;
+            suppressedCells.insert(c);
             continue;
           }
 
@@ -578,7 +742,12 @@ namespace Rodin::Geometry
             graphVertexToOutput[edge.v1]);
           if (outEdge == InvalidIndex)
           {
-            report.pathologicalCutCount++;
+            // Expected when the cell that would carry this segment was left
+            // whole by the no-cut quality fallback; not a pathology then.
+            const bool fromSuppressed = !edge.provenance.empty()
+              && suppressedCells.count(edge.provenance.front().parentCell) > 0;
+            if (!fromSuppressed)
+              report.pathologicalCutCount++;
             continue;
           }
 
@@ -630,8 +799,11 @@ namespace Rodin::Geometry
       Optional<Attribute> m_negativeCellAttribute;
       Optional<Attribute> m_positiveCellAttribute;
       Real m_diagnosticTolerance = 1e-10;
+      Real m_crossingSnapTolerance = 0;
       Real m_areaTolerance = 1e-14;
       Real m_qualityTolerance = 1e-8;
+      QualityMeasure m_qualityMeasure;
+      Real m_minCutQuality = 0;
   };
 
   template <class Mesh, class Data>

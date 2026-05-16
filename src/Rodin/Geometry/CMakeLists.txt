@@ -10,6 +10,7 @@ set(RodinGeometry_HEADERS
   SubMesh.h
   LevelSetInterfaceGraph.h
   LevelSetDiscretizerTriangles.h
+  TriangleMeshOptimizer.h
   LevelSetDiscretizerBase.h
   LevelSetDiscretizerTetrahedra.h
   Polytope.h
