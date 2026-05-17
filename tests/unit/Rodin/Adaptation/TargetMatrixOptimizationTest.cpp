@@ -495,6 +495,50 @@ namespace Rodin::Tests::Unit
     return (fd - jd).norm() / denom;
   }
 
+  template <class Metric>
+  static Real finiteDifferenceStrictQualityMetricError(Metric metric)
+  {
+    auto mesh = makeUniformSquare(6);
+    perturbMesh(mesh, 0.006);
+
+    P1 space(mesh, 2);
+    GridFunction displacement(space);
+    fillDisplacement(displacement.getData(), 0.003);
+
+    TrialFunction du(space);
+    TestFunction v(space);
+    QualityTerm quality(
+        metric,
+        OrientedEquilateralSameAreaTargetJacobian(mesh),
+        0.7);
+
+    auto assembleResidual = [&]()
+    {
+      LinearForm residual(v);
+      residual = quality.residual(displacement, v);
+      residual.assemble();
+      return residual.getVector();
+    };
+
+    BilinearForm tangent(du, v);
+    tangent = quality.tangent(displacement, du, v);
+    tangent.assemble();
+
+    const auto residual0 = assembleResidual();
+    auto direction = displacement.getData();
+    fillDirection(direction);
+    const auto original = displacement.getData();
+    const Real eps = 1e-7;
+    displacement.getData() = original + eps * direction;
+    const auto residual1 = assembleResidual();
+    displacement.getData() = original;
+
+    const auto fd = (residual1 - residual0) / eps;
+    const auto jd = tangent.getOperator() * direction;
+    const Real denom = std::max<Real>({Real(1), fd.norm(), jd.norm()});
+    return (fd - jd).norm() / denom;
+  }
+
   struct NativeTmopRun
   {
     bool accepted = false;
@@ -585,7 +629,10 @@ namespace Rodin::Tests::Unit
 
     const auto quality = summarizeMesh(cut.mesh);
     EXPECT_EQ(quality.invertedCells, 0);
-    EXPECT_EQ(quality.degenerateCells, 0);
+    // No degenerate-count assertion: the cutter no longer silently drops
+    // sub-tolerance triangles (that left holes). A pathological near-vertex
+    // cut now keeps a reported thin cell so the mesh stays watertight; every
+    // emitted cell still has provenance (checked above) and none is inverted.
 
     LevelSetFitTerm fit(cut.interfaceGraph, cut.report);
     EXPECT_NEAR(fit.sourceSegmentDistanceEnergy(cut.mesh), 0, 1e-24);
@@ -1010,6 +1057,103 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR((fd - jd).norm() / denom, 0, 1e-7);
   }
 
+  TEST(Rodin_Adaptation_TargetMatrixOptimization, AnalyticLevelSetFitTermIsZeroOnFreshCutInterface)
+  {
+    const auto cut = cutTwoTriangleSquare();
+    auto value = [](const Math::SpatialPoint& x)
+    {
+      return x[0] - Real(0.5);
+    };
+    auto gradient = [](const Math::SpatialPoint&)
+    {
+      return Math::SpatialPoint{1, 0};
+    };
+
+    AnalyticLevelSetFitTerm fit(
+        value, gradient, Optional<Attribute>(99), 1.0);
+
+    EXPECT_NEAR(fit.energy(cut.mesh), 0, 1e-28);
+  }
+
+  TEST(Rodin_Adaptation_TargetMatrixOptimization, AnalyticLevelSetFitTermIncreasesWhenInterfaceIsPerturbed)
+  {
+    auto cut = cutTwoTriangleSquare();
+    auto value = [](const Math::SpatialPoint& x)
+    {
+      return x[0] - Real(0.5);
+    };
+    auto gradient = [](const Math::SpatialPoint&)
+    {
+      return Math::SpatialPoint{1, 0};
+    };
+    AnalyticLevelSetFitTerm fit(
+        value, gradient, Optional<Attribute>(99), 1.0);
+
+    ASSERT_GT(cut.report.interfaceEdgeProvenance.size(), 0);
+    const Index outputEdge = cut.report.interfaceEdgeProvenance.begin()->first;
+    const auto& edge = cut.mesh.getConnectivity().getPolytope(1, outputEdge);
+    auto x = cut.mesh.getVertexCoordinates(edge(0));
+    x[0] += 0.05;
+    cut.mesh.setVertexCoordinates(edge(0), x);
+
+    EXPECT_GT(fit.energy(cut.mesh), 1e-8);
+  }
+
+  TEST(Rodin_Adaptation_TargetMatrixOptimization, AnalyticLevelSetFitTermResidualAndTangentAreConsistent)
+  {
+    const auto cut = cutTwoTriangleSquare();
+    constexpr size_t vdim = 2;
+    P1 space(cut.mesh, vdim);
+
+    GridFunction displacement(space);
+    auto& data = displacement.getData();
+    for (Eigen::Index i = 0; i < data.size(); ++i)
+      data(i) = 0.01 * std::sin(static_cast<Real>(i + 1));
+
+    TrialFunction du(space);
+    TestFunction v(space);
+    auto value = [](const Math::SpatialPoint& x)
+    {
+      return x[0] - Real(0.5);
+    };
+    auto gradient = [](const Math::SpatialPoint&)
+    {
+      return Math::SpatialPoint{1, 0};
+    };
+    AnalyticLevelSetFitTerm fit(
+        value, gradient, Optional<Attribute>(99), 2.25);
+
+    auto assembleResidual = [&]()
+    {
+      LinearForm residual(v);
+      residual = fit.residual(displacement, v);
+      residual.assemble();
+      return residual.getVector();
+    };
+
+    BilinearForm tangent(du, v);
+    tangent = fit.tangent(displacement, du, v);
+    tangent.assemble();
+
+    const auto residual0 = assembleResidual();
+    auto direction = data;
+    for (Eigen::Index i = 0; i < direction.size(); ++i)
+      direction(i) = std::cos(Real(0.73) * static_cast<Real>(i + 1));
+    direction /= direction.norm();
+
+    const auto original = data;
+    const Real eps = 1e-7;
+    data = original + eps * direction;
+    const auto residual1 = assembleResidual();
+    data = original;
+
+    const auto fd = (residual1 - residual0) / eps;
+    const auto jd = tangent.getOperator() * direction;
+    const Real denom = std::max<Real>({Real(1), fd.norm(), jd.norm()});
+
+    EXPECT_NEAR((fd - jd).norm() / denom, 0, 1e-7);
+  }
+
   TEST(Rodin_Adaptation_TargetMatrixOptimization, CutMeshZeroDisplacementTermSmoke)
   {
     const auto cut = cutTwoTriangleSquare();
@@ -1280,6 +1424,23 @@ namespace Rodin::Tests::Unit
       // invariant the example's detT diagnostic checks for.
       EXPECT_NEAR(std::abs(A0.determinant() / W.determinant()), Real(1), 1e-12);
     }
+  }
+
+  TEST(Rodin_Adaptation_TargetMatrixOptimization, OrientedEquilateralSameAreaTargetPreservesAreaAndBestRotation)
+  {
+    Matrix2 A0;
+    A0 << 0.18, -0.04,
+          0.03,  0.11;
+    const Matrix2 fixed =
+      EquilateralSameAreaTargetJacobian::equilateralSameArea(A0);
+    const Matrix2 oriented =
+      OrientedEquilateralSameAreaTargetJacobian::orientedEquilateralSameArea(A0);
+
+    EXPECT_NEAR(
+        std::abs(oriented.determinant()),
+        std::abs(fixed.determinant()),
+        1e-14);
+    EXPECT_LE((A0 - oriented).squaredNorm(), (A0 - fixed).squaredNorm());
   }
 
   // The production target on the regime where W = I fails: a [0,1]-scaled
@@ -1625,6 +1786,74 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  TEST(Rodin_Adaptation_TargetMatrixOptimization, AreaDistortionMetricDerivativesFiniteDifference)
+  {
+    AreaDistortionMetric metric;
+    std::vector<Matrix2> cases(4);
+    cases[0] << 1.2, 0.3, 0.1, 0.9;
+    cases[1] << 0.7, -0.2, 0.25, 1.4;
+    cases[2] << 2.0, 0.0, 0.0, 0.5;
+    cases[3] << 1.0, 0.8, -0.3, 1.1;
+    Matrix2 H;
+    H << 0.13, -0.21, 0.07, 0.31;
+
+    const Real eps = 1e-7;
+    for (const auto& T : cases)
+    {
+      const Matrix2 g = metric.gradient(T);
+      for (int i = 0; i < 2; ++i)
+        for (int j = 0; j < 2; ++j)
+        {
+          Matrix2 Tp = T, Tm = T;
+          Tp(i, j) += eps;
+          Tm(i, j) -= eps;
+          const Real fd =
+            (metric.value(Tp) - metric.value(Tm)) / (Real(2) * eps);
+          EXPECT_NEAR(g(i, j), fd, 1e-6);
+        }
+
+      const Matrix2 ha = metric.hessianAction(T, H);
+      const Matrix2 fd =
+        (metric.gradient(T + eps * H) - metric.gradient(T - eps * H))
+        / (Real(2) * eps);
+      EXPECT_LT((ha - fd).norm() / std::max(Real(1), fd.norm()), 1e-6);
+    }
+  }
+
+  TEST(Rodin_Adaptation_TargetMatrixOptimization, ShapeSizeMetricDerivativesFiniteDifference)
+  {
+    ShapeSizeMetric metric;
+    std::vector<Matrix2> cases(4);
+    cases[0] << 1.2, 0.3, 0.1, 0.9;
+    cases[1] << 0.7, -0.2, 0.25, 1.4;
+    cases[2] << 2.0, 0.0, 0.0, 0.5;
+    cases[3] << 1.0, 0.8, -0.3, 1.1;
+    Matrix2 H;
+    H << 0.13, -0.21, 0.07, 0.31;
+
+    const Real eps = 1e-7;
+    for (const auto& T : cases)
+    {
+      const Matrix2 g = metric.gradient(T);
+      for (int i = 0; i < 2; ++i)
+        for (int j = 0; j < 2; ++j)
+        {
+          Matrix2 Tp = T, Tm = T;
+          Tp(i, j) += eps;
+          Tm(i, j) -= eps;
+          const Real fd =
+            (metric.value(Tp) - metric.value(Tm)) / (Real(2) * eps);
+          EXPECT_NEAR(g(i, j), fd, 1e-5);
+        }
+
+      const Matrix2 ha = metric.hessianAction(T, H);
+      const Matrix2 fd =
+        (metric.gradient(T + eps * H) - metric.gradient(T - eps * H))
+        / (Real(2) * eps);
+      EXPECT_LT((ha - fd).norm() / std::max(Real(1), fd.norm()), 2e-5);
+    }
+  }
+
   TEST(Rodin_Adaptation_TargetMatrixOptimization, ShapeDistortionMetricIsBarrier)
   {
     ShapeDistortionMetric metric;
@@ -1688,6 +1917,20 @@ namespace Rodin::Tests::Unit
     const auto jd = tangent.getOperator() * direction;
     const Real denom = std::max<Real>({Real(1), fd.norm(), jd.norm()});
     EXPECT_LT((fd - jd).norm() / denom, 2e-6);
+  }
+
+  TEST(Rodin_Adaptation_TargetMatrixOptimization, AreaDistortionResidualTangentFiniteDifferenceConsistent)
+  {
+    EXPECT_LT(
+      finiteDifferenceStrictQualityMetricError(AreaDistortionMetric{}),
+      2e-6);
+  }
+
+  TEST(Rodin_Adaptation_TargetMatrixOptimization, ShapeSizeResidualTangentFiniteDifferenceConsistent)
+  {
+    EXPECT_LT(
+      finiteDifferenceStrictQualityMetricError(ShapeSizeMetric{}),
+      3e-6);
   }
 
   // NOTE: a full Newton minimization with ShapeDistortionMetric is

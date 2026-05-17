@@ -75,6 +75,23 @@ namespace Rodin::Geometry
   };
 
   /**
+   * @brief Parent-cell reference coordinates for one output triangle.
+   *
+   * vertexBarycentric[i] stores the barycentric coordinates, in the parent
+   * background triangle, of local output vertex i. This is the cell-local map
+   * needed to transfer a background FunctionBase/GridFunction onto the fitted
+   * mesh without guessing from global vertex provenance alone.
+   */
+  struct OutputCellReference
+  {
+    Index parentCell = std::numeric_limits<Index>::max();
+    std::array<std::array<Real, 3>, 3> vertexBarycentric = {{
+      {{Real(0), Real(0), Real(0)}},
+      {{Real(0), Real(0), Real(0)}},
+      {{Real(0), Real(0), Real(0)}} }};
+  };
+
+  /**
    * @brief Provenance for one output mesh edge constrained to the interface.
    *
    * The map in LevelSetDiscretizerTrianglesReport is keyed by the output mesh
@@ -100,6 +117,7 @@ namespace Rodin::Geometry
   {
     std::vector<OutputVertexOrigin> vertexOrigins;
     std::vector<OutputCellProvenance> cellProvenance;
+    std::vector<OutputCellReference> cellReferences;
 
     std::unordered_map<Index, Index> originalVertexToOutputVertex;
     std::unordered_map<Index, Index> graphVertexToOutputVertex;
@@ -371,6 +389,39 @@ namespace Rodin::Geometry
                  (x1[1] - x0[1]) * (x2[0] - x0[0]);
         };
 
+        auto parentBarycentric = [&](Index parentCell, Index outputVertex)
+        {
+          std::array<Real, 3> bary = {{
+            Real(0), Real(0), Real(0) }};
+          if (parentCell == InvalidIndex
+              || parentCell >= static_cast<Index>(mesh.getCellCount()))
+            return bary;
+
+          const auto& cell = conn.getPolytope(2, parentCell);
+          const auto x0 = mesh.getVertexCoordinates(cell(0));
+          const auto x1 = mesh.getVertexCoordinates(cell(1));
+          const auto x2 = mesh.getVertexCoordinates(cell(2));
+          const auto& x = outputVertices[outputVertex];
+
+          auto orient = [](
+              const Math::SpatialPoint& a,
+              const Math::SpatialPoint& b,
+              const Math::SpatialPoint& c)
+          {
+            return (b[0] - a[0]) * (c[1] - a[1])
+                 - (b[1] - a[1]) * (c[0] - a[0]);
+          };
+
+          const Real denominator = orient(x0, x1, x2);
+          if (std::abs(denominator) <= Real(1e-30))
+            return bary;
+
+          bary[0] = orient(x,  x1, x2) / denominator;
+          bary[1] = orient(x0, x,  x2) / denominator;
+          bary[2] = orient(x0, x1, x ) / denominator;
+          return bary;
+        };
+
         auto edgeLength = [&](Index a, Index b)
         {
           return (outputVertices[a] - outputVertices[b]).norm();
@@ -415,11 +466,12 @@ namespace Rodin::Geometry
 
           const Real area = std::abs(signedArea2(a, b, c)) / Real(2);
           const Real quality = triangleQuality(a, b, c);
+          // Never drop a produced element: a small/poor cell is reported but
+          // always emitted, so the output mesh stays watertight. Degenerate
+          // children are prevented upstream by the conforming snap, not by
+          // discarding them here.
           if (area <= m_areaTolerance)
-          {
-            report.pathologicalCutCount++;
-            return;
-          }
+            report.degenerateCellCount++;
           if (quality <= m_qualityTolerance)
             report.pathologicalCutCount++;
 
@@ -438,6 +490,13 @@ namespace Rodin::Geometry
           outputCells.push_back({{ a, b, c }});
           outputCellAttributes.push_back(cellAttribute(parentCell, side));
           report.cellProvenance.push_back({ parentCell, side });
+
+          OutputCellReference reference;
+          reference.parentCell = parentCell;
+          reference.vertexBarycentric[0] = parentBarycentric(parentCell, a);
+          reference.vertexBarycentric[1] = parentBarycentric(parentCell, b);
+          reference.vertexBarycentric[2] = parentBarycentric(parentCell, c);
+          report.cellReferences.push_back(std::move(reference));
         };
 
         auto findCellEdge = [&](const Polytope::Key& cell, const IndexVector& edges,
@@ -607,6 +666,31 @@ namespace Rodin::Geometry
           return std::min(qn, qp);
         };
 
+        // A cell may only be kept whole (no-cut fallback) if NONE of its edges
+        // carries a real interior crossing vertex: otherwise the neighbouring
+        // cut cell would reference a vertex this whole cell does not, creating
+        // a hanging node (non-conforming mesh). Crossings that were snapped to
+        // an endpoint are not "real" (shared, conforming) so they do not block
+        // keeping the cell whole. The conforming knob for avoiding bad cuts is
+        // therefore setCrossingSnapTolerance, not the per-cell fallback.
+        auto cellHasRealCrossing =
+          [&](const Polytope::Key& cell, const IndexVector& cellEdges) -> bool
+        {
+          static constexpr std::array<std::array<std::uint8_t, 2>, 3> E = {{
+            {{0, 1}}, {{1, 2}}, {{2, 0}} }};
+          for (const auto& pr : E)
+          {
+            const Index pe = findCellEdge(cell, cellEdges, pr[0], pr[1]);
+            const auto it = meshEdgeToGraphVertex.find(pe);
+            if (it == meshEdgeToGraphVertex.end())
+              continue;
+            if (graph.vertices[it->second].kind
+                == InterfaceVertexKind::EdgeCut)
+              return true;
+          }
+          return false;
+        };
+
         std::unordered_set<Index> suppressedCells;
 
         for (Index c = 0; c < mesh.getCellCount(); ++c)
@@ -661,6 +745,7 @@ namespace Rodin::Geometry
           // on its dominant sign side. The interface is not body-fitted here;
           // a later TargetMatrixOptimization fit recovers it.
           if (m_minCutQuality > Real(0) && negative > 0 && positive > 0
+              && !cellHasRealCrossing(cell, cellEdges)
               && cutMinQuality(cell, cellEdges, signs) < m_minCutQuality)
           {
             const LevelSetSide dominant = (negative >= positive)

@@ -4,13 +4,14 @@ set(RodinBenchmarks_SRCS
   MeshIO.cpp
   UniformGrid.cpp
   Connectivity.cpp
+  LevelSetPipeline.cpp
   )
 
 add_executable(RodinBenchmarks ${RodinBenchmarks_SRCS})
 target_link_libraries(RodinBenchmarks
   PRIVATE
+  Rodin::Adaptation
   Rodin::Variational
   Rodin::Solver
   benchmark::benchmark
   benchmark::benchmark_main)
-

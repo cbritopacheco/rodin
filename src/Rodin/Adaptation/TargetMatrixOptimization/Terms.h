@@ -1091,6 +1091,302 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         const Geometry::Polytope* m_polytope = nullptr;
     };
 
+  template <class GridFunctionType, class ValueFunction, class GradientFunction>
+  class AnalyticLevelSetFitResidualIntegrator final
+      : public Variational::LinearFormIntegratorBase<Real>
+    {
+      public:
+        using Parent = Variational::LinearFormIntegratorBase<Real>;
+
+        template <class TestFES>
+        AnalyticLevelSetFitResidualIntegrator(
+            const GridFunctionType& u,
+            const Variational::TestFunction<TestFES>& v,
+            ValueFunction value,
+            GradientFunction gradient,
+            Optional<Geometry::Attribute> interfaceAttribute,
+            Real weight)
+          : Parent(v),
+            m_u(u),
+            m_value(std::move(value)),
+            m_gradient(std::move(gradient)),
+            m_interfaceAttribute(interfaceAttribute),
+            m_weight(std::max(Real(0), weight))
+        {}
+
+        AnalyticLevelSetFitResidualIntegrator(
+            const AnalyticLevelSetFitResidualIntegrator& other)
+          : Parent(other),
+            m_u(other.m_u),
+            m_value(other.m_value),
+            m_gradient(other.m_gradient),
+            m_interfaceAttribute(other.m_interfaceAttribute),
+            m_weight(other.m_weight),
+            m_polytope(other.m_polytope)
+        {}
+
+        const Geometry::Polytope& getPolytope() const override
+        {
+          assert(m_polytope);
+          return *m_polytope;
+        }
+
+        AnalyticLevelSetFitResidualIntegrator& setPolytope(
+            const Geometry::Polytope& polytope) override
+        {
+          m_polytope = &polytope;
+          return *this;
+        }
+
+        Real integrate(size_t local) override
+        {
+          if (!m_polytope || !isActiveInterfaceEdge(*m_polytope))
+            return 0;
+
+          const auto& mesh = m_u.get().getFiniteElementSpace().getMesh();
+          const size_t sdim = mesh.getSpaceDimension();
+          const size_t localSize = m_polytope->getVertices().size() * sdim;
+          if (sdim != 2 || local >= localSize)
+            return 0;
+
+          const auto values = computeLocalResidual(*m_polytope, sdim);
+          return values[local];
+        }
+
+        Geometry::Region getRegion() const override
+        {
+          return Geometry::Region::Faces;
+        }
+
+        AnalyticLevelSetFitResidualIntegrator* copy() const noexcept override
+        {
+          return new AnalyticLevelSetFitResidualIntegrator(*this);
+        }
+
+      private:
+        bool isActiveInterfaceEdge(const Geometry::Polytope& edge) const
+        {
+          if (edge.getDimension() != 1 || edge.getVertices().size() != 2)
+            return false;
+          if (!m_interfaceAttribute)
+            return true;
+          const auto attr = edge.getMesh().getAttribute(1, edge.getIndex());
+          return attr && *attr == *m_interfaceAttribute;
+        }
+
+        std::vector<Real> computeLocalResidual(
+            const Geometry::Polytope& edge,
+            size_t sdim) const
+        {
+          const size_t localSize = edge.getVertices().size() * sdim;
+          std::vector<Real> local(localSize, Real(0));
+
+          const auto x0 = deformedVertex(m_u.get(), edge, 0, sdim);
+          const auto x1 = deformedVertex(m_u.get(), edge, 1, sdim);
+          const auto e = x1 - x0;
+          const Real length = e.norm();
+          if (length <= Real(1e-14))
+            return local;
+          const auto direction = (Real(1) / length) * e;
+
+          static constexpr std::array<Real, 2> Points = {{
+            Real(0.5) - Real(0.5) / Real(1.7320508075688772935274463415059),
+            Real(0.5) + Real(0.5) / Real(1.7320508075688772935274463415059)
+          }};
+          static constexpr Real Weight = Real(0.5);
+
+          for (Real q : Points)
+          {
+            const std::array<Real, 2> N = {{Real(1) - q, q}};
+            const auto x = N[0] * x0 + N[1] * x1;
+            const Real phi = m_value(x);
+            const auto grad = m_gradient(x);
+            for (size_t node = 0; node < 2; ++node)
+            {
+              const Real lengthSign = (node == 0) ? Real(-1) : Real(1);
+              for (size_t c = 0; c < sdim; ++c)
+              {
+                local[node * sdim + c] += m_weight * Weight
+                  * (length * N[node] * phi * grad[c]
+                   + Real(0.5) * phi * phi * lengthSign * direction[c]);
+              }
+            }
+          }
+
+          return local;
+        }
+
+        std::reference_wrapper<const GridFunctionType> m_u;
+        ValueFunction m_value;
+        GradientFunction m_gradient;
+        Optional<Geometry::Attribute> m_interfaceAttribute;
+        Real m_weight = 1;
+        const Geometry::Polytope* m_polytope = nullptr;
+    };
+
+  template <class GridFunctionType, class ValueFunction, class GradientFunction>
+  class AnalyticLevelSetFitTangentIntegrator final
+      : public Variational::LocalBilinearFormIntegratorBase<Real>
+    {
+      public:
+        using Parent = Variational::LocalBilinearFormIntegratorBase<Real>;
+
+        template <class Solution, class TrialFES, class TestFES>
+        AnalyticLevelSetFitTangentIntegrator(
+            const GridFunctionType& u,
+            const Variational::TrialFunction<Solution, TrialFES>& du,
+            const Variational::TestFunction<TestFES>& v,
+            ValueFunction value,
+            GradientFunction gradient,
+            Optional<Geometry::Attribute> interfaceAttribute,
+            Real weight)
+          : Parent(du, v),
+            m_u(u),
+            m_value(std::move(value)),
+            m_gradient(std::move(gradient)),
+            m_interfaceAttribute(interfaceAttribute),
+            m_weight(std::max(Real(0), weight))
+        {}
+
+        AnalyticLevelSetFitTangentIntegrator(
+            const AnalyticLevelSetFitTangentIntegrator& other)
+          : Parent(other),
+            m_u(other.m_u),
+            m_value(other.m_value),
+            m_gradient(other.m_gradient),
+            m_interfaceAttribute(other.m_interfaceAttribute),
+            m_weight(other.m_weight),
+            m_polytope(other.m_polytope)
+        {}
+
+        const Geometry::Polytope& getPolytope() const override
+        {
+          assert(m_polytope);
+          return *m_polytope;
+        }
+
+        AnalyticLevelSetFitTangentIntegrator& setPolytope(
+            const Geometry::Polytope& polytope) override
+        {
+          m_polytope = &polytope;
+          return *this;
+        }
+
+        Real integrate(size_t trial, size_t test) override
+        {
+          if (!m_polytope || !isActiveInterfaceEdge(*m_polytope))
+            return 0;
+
+          const auto& mesh = m_u.get().getFiniteElementSpace().getMesh();
+          const size_t sdim = mesh.getSpaceDimension();
+          const size_t localSize = m_polytope->getVertices().size() * sdim;
+          if (sdim != 2 || trial >= localSize || test >= localSize)
+            return 0;
+
+          const auto matrix = computeLocalTangent(*m_polytope, sdim);
+          return matrix[test * localSize + trial];
+        }
+
+        Geometry::Region getRegion() const override
+        {
+          return Geometry::Region::Faces;
+        }
+
+        AnalyticLevelSetFitTangentIntegrator* copy() const noexcept override
+        {
+          return new AnalyticLevelSetFitTangentIntegrator(*this);
+        }
+
+      private:
+        bool isActiveInterfaceEdge(const Geometry::Polytope& edge) const
+        {
+          if (edge.getDimension() != 1 || edge.getVertices().size() != 2)
+            return false;
+          if (!m_interfaceAttribute)
+            return true;
+          const auto attr = edge.getMesh().getAttribute(1, edge.getIndex());
+          return attr && *attr == *m_interfaceAttribute;
+        }
+
+        std::vector<Real> computeLocalTangent(
+            const Geometry::Polytope& edge,
+            size_t sdim) const
+        {
+          const size_t localSize = edge.getVertices().size() * sdim;
+          std::vector<Real> local(localSize * localSize, Real(0));
+
+          const auto x0 = deformedVertex(m_u.get(), edge, 0, sdim);
+          const auto x1 = deformedVertex(m_u.get(), edge, 1, sdim);
+          const auto e = x1 - x0;
+          const Real length = e.norm();
+          if (length <= Real(1e-14))
+            return local;
+          const auto direction = (Real(1) / length) * e;
+
+          static constexpr std::array<Real, 2> Points = {{
+            Real(0.5) - Real(0.5) / Real(1.7320508075688772935274463415059),
+            Real(0.5) + Real(0.5) / Real(1.7320508075688772935274463415059)
+          }};
+          static constexpr Real Weight = Real(0.5);
+
+          auto lengthHessian = [&](size_t r, size_t c)
+          {
+            const Real identity = (r == c) ? Real(1) : Real(0);
+            return (identity - direction[r] * direction[c]) / length;
+          };
+
+          for (Real q : Points)
+          {
+            const std::array<Real, 2> N = {{Real(1) - q, q}};
+            const auto x = N[0] * x0 + N[1] * x1;
+            const Real phi = m_value(x);
+            const auto grad = m_gradient(x);
+
+            for (size_t testNode = 0; testNode < 2; ++testNode)
+            {
+              const Real testLengthSign =
+                (testNode == 0) ? Real(-1) : Real(1);
+              for (size_t trialNode = 0; trialNode < 2; ++trialNode)
+              {
+                const Real trialLengthSign =
+                  (trialNode == 0) ? Real(-1) : Real(1);
+                for (size_t r = 0; r < sdim; ++r)
+                {
+                  const Real dLengthTest =
+                    testLengthSign * direction[r];
+                  for (size_t c = 0; c < sdim; ++c)
+                  {
+                    const Real dPhiTrial = N[trialNode] * grad[c];
+                    const Real dLengthTrial =
+                      trialLengthSign * direction[c];
+                    const Real d2Length =
+                      testLengthSign * trialLengthSign
+                    * lengthHessian(r, c);
+
+                    const size_t row = testNode * sdim + r;
+                    const size_t col = trialNode * sdim + c;
+                    local[row * localSize + col] += m_weight * Weight
+                      * (dLengthTrial * N[testNode] * phi * grad[r]
+                       + length * N[testNode] * dPhiTrial * grad[r]
+                       + phi * dPhiTrial * dLengthTest
+                       + Real(0.5) * phi * phi * d2Length);
+                  }
+                }
+              }
+            }
+          }
+
+          return local;
+        }
+
+        std::reference_wrapper<const GridFunctionType> m_u;
+        ValueFunction m_value;
+        GradientFunction m_gradient;
+        Optional<Geometry::Attribute> m_interfaceAttribute;
+        Real m_weight = 1;
+        const Geometry::Polytope* m_polytope = nullptr;
+    };
+
   /**
    * @brief Strict target-matrix TMOP quality term.
    *
@@ -1444,6 +1740,176 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       std::reference_wrapper<const Geometry::LevelSetDiscretizerTrianglesReport> m_report;
       Real m_weight = 1;
   };
+
+  /**
+   * @brief Analytic level-set interface-fit penalty.
+   *
+   * This term evaluates the current fitted interface against an analytic level
+   * set rather than against the source P1 cut segment:
+   * @f[
+   *   J_\phi(u) = \frac12 \int_\Gamma \phi(X + u)^2\,dS.
+   * @f]
+   *
+   * The residual uses @f$\phi\nabla\phi@f$ on interface edges. The tangent is a
+   * Gauss-Newton linearization with the interface edge-length variation
+   * included, but without the analytic Hessian of @f$\phi@f$. This makes it
+   * exact for affine level sets and a robust first production fit term for
+   * smooth nonlinear level sets such as moving circles.
+   */
+  template <class ValueFunction, class GradientFunction>
+  class AnalyticLevelSetFitTerm
+  {
+    public:
+      AnalyticLevelSetFitTerm(
+          ValueFunction value,
+          GradientFunction gradient,
+          Optional<Geometry::Attribute> interfaceAttribute = {},
+          Real weight = 1)
+        : m_value(std::move(value)),
+          m_gradient(std::move(gradient)),
+          m_interfaceAttribute(interfaceAttribute),
+          m_weight(std::max(Real(0), weight))
+      {}
+
+      AnalyticLevelSetFitTerm& setWeight(Real weight)
+      {
+        m_weight = std::max(Real(0), weight);
+        return *this;
+      }
+
+      Real getWeight() const
+      {
+        return m_weight;
+      }
+
+      template <class FES, class Data, class TestFES>
+      auto residual(
+          const Variational::GridFunction<FES, Data>& u,
+          const Variational::TestFunction<TestFES>& v) const
+      {
+        return AnalyticLevelSetFitResidualIntegrator<
+          Variational::GridFunction<FES, Data>, ValueFunction, GradientFunction>(
+              u, v, m_value, m_gradient, m_interfaceAttribute, m_weight);
+      }
+
+      template <class FES, class Data, class Solution, class TrialFES, class TestFES>
+      auto tangent(
+          const Variational::GridFunction<FES, Data>& u,
+          const Variational::TrialFunction<Solution, TrialFES>& du,
+          const Variational::TestFunction<TestFES>& v) const
+      {
+        return AnalyticLevelSetFitTangentIntegrator<
+          Variational::GridFunction<FES, Data>, ValueFunction, GradientFunction>(
+              u, du, v, m_value, m_gradient, m_interfaceAttribute, m_weight);
+      }
+
+      template <class FES, class Data>
+      Real energy(const Variational::GridFunction<FES, Data>& u) const
+      {
+        const auto& mesh = u.getFiniteElementSpace().getMesh();
+        RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 1, 0);
+
+        const auto& conn = mesh.getConnectivity();
+        const size_t sdim = mesh.getSpaceDimension();
+        if (sdim != 2)
+          return 0;
+
+        static constexpr std::array<Real, 2> Points = {{
+          Real(0.5) - Real(0.5) / Real(1.7320508075688772935274463415059),
+          Real(0.5) + Real(0.5) / Real(1.7320508075688772935274463415059)
+        }};
+        static constexpr Real Weight = Real(0.5);
+
+        Real value = 0;
+        for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
+        {
+          if (!isActiveInterfaceEdge(mesh, e))
+            continue;
+          const auto edgeIterator = mesh.getPolytope(1, e);
+          const auto& edge = *edgeIterator;
+          const auto x0 = deformedVertex(u, edge, 0, sdim);
+          const auto x1 = deformedVertex(u, edge, 1, sdim);
+          const Real length = (x1 - x0).norm();
+          if (length <= Real(0))
+            continue;
+          for (Real q : Points)
+          {
+            const auto x = (Real(1) - q) * x0 + q * x1;
+            const Real phi = m_value(x);
+            value += Weight * length * phi * phi;
+          }
+        }
+        return Real(0.5) * m_weight * value;
+      }
+
+      template <class Mesh>
+      Real energy(const Mesh& mesh) const
+      {
+        RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 1, 0);
+
+        static constexpr std::array<Real, 2> Points = {{
+          Real(0.5) - Real(0.5) / Real(1.7320508075688772935274463415059),
+          Real(0.5) + Real(0.5) / Real(1.7320508075688772935274463415059)
+        }};
+        static constexpr Real Weight = Real(0.5);
+
+        const auto& conn = mesh.getConnectivity();
+        Real value = 0;
+        for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
+        {
+          if (!isActiveInterfaceEdge(mesh, e))
+            continue;
+          const auto& edge = conn.getPolytope(1, e);
+          const auto x0 = mesh.getVertexCoordinates(edge(0));
+          const auto x1 = mesh.getVertexCoordinates(edge(1));
+          const Real length = (x1 - x0).norm();
+          if (length <= Real(0))
+            continue;
+          for (Real q : Points)
+          {
+            const auto x = (Real(1) - q) * x0 + q * x1;
+            const Real phi = m_value(x);
+            value += Weight * length * phi * phi;
+          }
+        }
+        return Real(0.5) * m_weight * value;
+      }
+
+    private:
+      template <class Mesh>
+      bool isActiveInterfaceEdge(const Mesh& mesh, Index edge) const
+      {
+        if (!m_interfaceAttribute)
+          return true;
+        const auto attr = mesh.getAttribute(1, edge);
+        return attr && *attr == *m_interfaceAttribute;
+      }
+
+      ValueFunction m_value;
+      GradientFunction m_gradient;
+      Optional<Geometry::Attribute> m_interfaceAttribute;
+      Real m_weight = 1;
+  };
+
+  template <class ValueFunction, class GradientFunction>
+  AnalyticLevelSetFitTerm(
+      ValueFunction,
+      GradientFunction,
+      Optional<Geometry::Attribute>,
+      Real) -> AnalyticLevelSetFitTerm<ValueFunction, GradientFunction>;
+
+  template <class ValueFunction, class GradientFunction>
+  AnalyticLevelSetFitTerm(
+      ValueFunction,
+      GradientFunction,
+      Optional<Geometry::Attribute>) ->
+        AnalyticLevelSetFitTerm<ValueFunction, GradientFunction>;
+
+  template <class ValueFunction, class GradientFunction>
+  AnalyticLevelSetFitTerm(
+      ValueFunction,
+      GradientFunction) ->
+        AnalyticLevelSetFitTerm<ValueFunction, GradientFunction>;
 }
 
 #endif

@@ -44,6 +44,22 @@ namespace Rodin::Tests::Unit
     return q;
   }
 
+  static Real coverageArea(const LocalMesh& m)
+  {
+    const auto& conn = m.getConnectivity();
+    Real area = 0;
+    for (Index c = 0; c < static_cast<Index>(m.getCellCount()); ++c)
+    {
+      const auto& t = conn.getPolytope(2, c);
+      const auto a = m.getVertexCoordinates(t(0));
+      const auto b = m.getVertexCoordinates(t(1));
+      const auto cc = m.getVertexCoordinates(t(2));
+      area += Real(0.5) * std::abs((b[0]-a[0])*(cc[1]-a[1])
+                                 - (b[1]-a[1])*(cc[0]-a[0]));
+    }
+    return area;
+  }
+
   static std::array<Real, 4> bbox(const LocalMesh& m)
   {
     Real x0 = 1e30, y0 = 1e30, x1 = -1e30, y1 = -1e30;
@@ -116,12 +132,20 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(r.splits, 0u);
     EXPECT_EQ(r.collapses, 0u);
     EXPECT_EQ(r.swaps, 0u);
+    // No operation fired, so the geometry is unchanged. rebuild() may
+    // re-index vertices, so compare coordinate SETS, not per-index.
     ASSERT_EQ(m.getVertexCount(), nv);
     for (Index v = 0; v < nv; ++v)
     {
-      const auto p = m.getVertexCoordinates(v);
-      EXPECT_NEAR(p[0], before[v][0], 1e-15);
-      EXPECT_NEAR(p[1], before[v][1], 1e-15);
+      bool found = false;
+      for (Index w = 0; w < static_cast<Index>(m.getVertexCount()); ++w)
+      {
+        const auto p = m.getVertexCoordinates(w);
+        if (std::abs(p[0]-before[v][0]) < 1e-15
+            && std::abs(p[1]-before[v][1]) < 1e-15)
+        { found = true; break; }
+      }
+      EXPECT_TRUE(found);
     }
   }
 
@@ -183,5 +207,37 @@ namespace Rodin::Tests::Unit
 
     EXPECT_GT(minSignedArea(mesh), 0.0);
     EXPECT_GE(r.minQualityAfter, r.minQualityBefore);
+  }
+
+  TEST(Rodin_Geometry_TriangleMeshOptimizer, SwapRejectsNonConvexCavity)
+  {
+    // The shared edge (0,1) is a valid diagonal of a concave four-vertex
+    // patch. Flipping to (2,3) would place vertices 0 and 1 on the same side
+    // of the new diagonal, creating two individually positive but overlapping
+    // triangles. The optimizer must reject that flip.
+    auto mesh = LocalMesh::Builder()
+      .initialize(2)
+      .nodes(4)
+      .vertex({0.2, 0.5}) // u
+      .vertex({0.8, 0.1}) // v
+      .vertex({0.0, 0.0}) // a
+      .vertex({1.0, 0.0}) // b
+      .polytope(Polytope::Type::Triangle, {0, 1, 3})
+      .polytope(Polytope::Type::Triangle, {1, 0, 2})
+      .finalize();
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    const Real beforeCoverage = coverageArea(mesh);
+    const auto r = TriangleMeshOptimizer()
+      .setHMin(0)
+      .setHMax(std::numeric_limits<Real>::infinity())
+      .setSwapImprovement(1)
+      .setMaxIterations(1)
+      .optimize(mesh);
+
+    EXPECT_EQ(r.swaps, 0u);
+    EXPECT_NEAR(coverageArea(mesh), beforeCoverage, 1e-14);
+    EXPECT_GT(minSignedArea(mesh), 0.0);
   }
 }

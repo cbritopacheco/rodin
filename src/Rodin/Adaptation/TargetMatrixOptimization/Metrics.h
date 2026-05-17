@@ -22,6 +22,29 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
 {
   using Matrix2 = Math::FixedSizeMatrix<Real, 2, 2>;
 
+  inline Real matrixInner2D(const Matrix2& a, const Matrix2& b)
+  {
+    return a(0, 0) * b(0, 0) + a(0, 1) * b(0, 1)
+         + a(1, 0) * b(1, 0) + a(1, 1) * b(1, 1);
+  }
+
+  /**
+   * @brief Derivative of det(M) with respect to a 2x2 matrix M.
+   *
+   * For @f$M = \begin{pmatrix}a&b\\c&d\end{pmatrix}@f$ this returns the
+   * cofactor matrix @f$\begin{pmatrix}d&-c\\-b&a\end{pmatrix}@f$, so
+   * @f$d\,\det(M)[H] = \mathrm{cof}(M):H@f$.
+   */
+  inline Matrix2 cofactor2D(const Matrix2& M)
+  {
+    Matrix2 C;
+    C(0, 0) =  M(1, 1);
+    C(0, 1) = -M(1, 0);
+    C(1, 0) = -M(0, 1);
+    C(1, 1) =  M(0, 0);
+    return C;
+  }
+
   struct Target
   {
     Matrix2 W = Matrix2::Identity();
@@ -186,6 +209,76 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         W(1, 0) = Real(0);
         W(1, 1) = l * std::sqrt(Real(3)) / Real(2);
         return W;
+      }
+
+    private:
+      std::vector<Matrix2> m_targets;
+  };
+
+  /**
+   * @brief Per-cell equilateral target with the closest initial orientation.
+   *
+   * This target keeps the same area prescription as
+   * EquilateralSameAreaTargetJacobian, but rotates the equilateral target to
+   * be the closest Frobenius-norm fit to the initial element Jacobian. It is
+   * better suited to free-boundary moving-mesh solves because neighboring
+   * cells are not all driven toward one global reference orientation.
+   */
+  class OrientedEquilateralSameAreaTargetJacobian
+  {
+    public:
+      OrientedEquilateralSameAreaTargetJacobian() = default;
+
+      template <class Mesh>
+      explicit OrientedEquilateralSameAreaTargetJacobian(const Mesh& mesh)
+      {
+        const auto& conn = mesh.getConnectivity();
+        m_targets.resize(mesh.getCellCount(), Matrix2::Identity());
+        for (Index cellIndex = 0;
+             cellIndex < static_cast<Index>(mesh.getCellCount());
+             ++cellIndex)
+        {
+          if (conn.getGeometry(2, cellIndex)
+              != Geometry::Polytope::Type::Triangle)
+            continue;
+          auto cellIterator = mesh.getPolytope(2, cellIndex);
+          m_targets[static_cast<size_t>(cellIndex)] =
+            orientedEquilateralSameArea(linearCellJacobian2D(*cellIterator));
+        }
+      }
+
+      Matrix2 evaluate(
+          const Geometry::Polytope& cell,
+          const Math::SpatialPoint&) const
+      {
+        const auto index = static_cast<size_t>(cell.getIndex());
+        if (index < m_targets.size())
+          return m_targets[index];
+        return orientedEquilateralSameArea(linearCellJacobian2D(cell));
+      }
+
+      static Matrix2 orientedEquilateralSameArea(const Matrix2& A0)
+      {
+        const Matrix2 E =
+          EquilateralSameAreaTargetJacobian::equilateralSameArea(A0);
+        if (std::abs(E.determinant()) <= Real(1e-30))
+          return E;
+
+        const Matrix2 M = A0 * E.transpose();
+        const Real c0 = M(0, 0) + M(1, 1);
+        const Real s0 = M(1, 0) - M(0, 1);
+        const Real n = std::hypot(c0, s0);
+        if (n <= Real(1e-30))
+          return E;
+
+        Matrix2 R;
+        const Real c = c0 / n;
+        const Real s = s0 / n;
+        R(0, 0) = c;
+        R(0, 1) = -s;
+        R(1, 0) = s;
+        R(1, 1) = c;
+        return R * E;
       }
 
     private:
@@ -485,7 +578,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       {
         const Real d = T.determinant();
         const Real F = T.squaredNorm();
-        const Matrix2 C = detGradient(T);
+        const Matrix2 C = cofactor2D(T);
         // dmu/dT = T/d - (F / (2 d^2)) * C.
         return (Real(1) / d) * T - (F / (Real(2) * d * d)) * C;
       }
@@ -494,10 +587,10 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       {
         const Real d = T.determinant();
         const Real F = T.squaredNorm();
-        const Matrix2 C = detGradient(T);
-        const Matrix2 CofH = detGradient(H);
-        const Real ChH = frob(C, H);  // d(det) in direction H
-        const Real ThH = frob(T, H);  // (1/2) d(F) in direction H
+        const Matrix2 C = cofactor2D(T);
+        const Matrix2 CofH = cofactor2D(H);
+        const Real ChH = matrixInner2D(C, H);  // d(det) in direction H
+        const Real ThH = matrixInner2D(T, H);  // (1/2) d(F) in direction H
         const Real invd = Real(1) / d;
         const Real invd2 = invd * invd;
         const Real invd3 = invd2 * invd;
@@ -505,24 +598,6 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
              - (ChH * invd2) * T
              - (ThH * invd2 - F * ChH * invd3) * C
              - (Real(0.5) * F * invd2) * CofH;
-      }
-
-    private:
-      // d(det(M))/dM for 2x2 (cofactor matrix); also the linear cofactor map.
-      static Matrix2 detGradient(const Matrix2& M)
-      {
-        Matrix2 C;
-        C(0, 0) =  M(1, 1);
-        C(0, 1) = -M(1, 0);
-        C(1, 0) = -M(0, 1);
-        C(1, 1) =  M(0, 0);
-        return C;
-      }
-
-      static Real frob(const Matrix2& a, const Matrix2& b)
-      {
-        return a(0, 0) * b(0, 0) + a(0, 1) * b(0, 1)
-             + a(1, 0) * b(1, 0) + a(1, 1) * b(1, 1);
       }
   };
 
@@ -540,6 +615,19 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         const Real d = A.determinant() - Real(1);
         return Real(0.5) * d * d;
       }
+
+      Matrix2 gradient(const Matrix2& T) const
+      {
+        const Real d = T.determinant() - Real(1);
+        return d * cofactor2D(T);
+      }
+
+      Matrix2 hessianAction(const Matrix2& T, const Matrix2& H) const
+      {
+        const Matrix2 C = cofactor2D(T);
+        const Real ddet = matrixInner2D(C, H);
+        return ddet * C + (T.determinant() - Real(1)) * cofactor2D(H);
+      }
   };
 
   class ShapeSizeMetric final : public MetricBase
@@ -550,6 +638,17 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         if (const Real penalty = invalidPenalty(A); penalty > Real(0))
           return penalty;
         return m_shape.value(A) + m_area.value(A);
+      }
+
+      Matrix2 gradient(const Matrix2& T) const
+      {
+        return m_shape.gradient(T) + m_area.gradient(T);
+      }
+
+      Matrix2 hessianAction(const Matrix2& T, const Matrix2& H) const
+      {
+        return m_shape.hessianAction(T, H)
+             + m_area.hessianAction(T, H);
       }
 
     private:

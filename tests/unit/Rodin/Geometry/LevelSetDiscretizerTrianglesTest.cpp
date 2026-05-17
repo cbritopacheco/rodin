@@ -221,6 +221,49 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  static Math::SpatialPoint reconstructFromParent(
+      const LocalMesh& parent,
+      Index parentCell,
+      const std::array<Real, 3>& barycentric)
+  {
+    const auto& cell = parent.getConnectivity().getPolytope(2, parentCell);
+    Math::SpatialPoint x{0, 0};
+    for (std::uint8_t i = 0; i < 3; ++i)
+    {
+      const auto p = parent.getVertexCoordinates(cell(i));
+      x[0] += barycentric[i] * p[0];
+      x[1] += barycentric[i] * p[1];
+    }
+    return x;
+  }
+
+  static void expectCellReferencesReconstructVertices(
+      const LocalMesh& parent,
+      const LevelSetDiscretizerTrianglesResult& result)
+  {
+    const auto& conn = result.mesh.getConnectivity();
+    ASSERT_EQ(result.report.cellReferences.size(), result.mesh.getCellCount());
+    ASSERT_EQ(result.report.cellProvenance.size(), result.mesh.getCellCount());
+
+    for (Index c = 0; c < result.mesh.getCellCount(); ++c)
+    {
+      const auto& reference = result.report.cellReferences[c];
+      EXPECT_EQ(reference.parentCell, result.report.cellProvenance[c].parentCell);
+      ASSERT_LT(reference.parentCell, parent.getCellCount());
+
+      const auto& outCell = conn.getPolytope(2, c);
+      for (std::uint8_t local = 0; local < 3; ++local)
+      {
+        const auto& bary = reference.vertexBarycentric[local];
+        EXPECT_NEAR(bary[0] + bary[1] + bary[2], 1, 1e-12);
+        const auto reconstructed =
+          reconstructFromParent(parent, reference.parentCell, bary);
+        const auto actual = result.mesh.getVertexCoordinates(outCell(local));
+        EXPECT_NEAR((reconstructed - actual).norm(), 0, 1e-12);
+      }
+    }
+  }
+
   TEST(Rodin_Geometry_LevelSetDiscretizerTriangles, AllNegativeTriangle)
   {
     auto mesh = makeSingleTriangle();
@@ -349,8 +392,41 @@ namespace Rodin::Tests::Unit
     const auto result = discretize(mesh, {-1, 1, 1});
 
     ASSERT_EQ(result.report.cellProvenance.size(), 3);
+    ASSERT_EQ(result.report.cellReferences.size(), 3);
     for (const auto& provenance : result.report.cellProvenance)
       EXPECT_EQ(provenance.parentCell, 0);
+    expectCellReferencesReconstructVertices(mesh, result);
+  }
+
+  TEST(Rodin_Geometry_LevelSetDiscretizerTriangles, OutputCellReferencesTransferLinearP1Data)
+  {
+    auto mesh = makeTwoTriangleSquare();
+    const std::vector<Real> nodalPhi = {-1, 1, -1, 1};
+    const auto result = discretize(
+        mesh,
+        {nodalPhi[0], nodalPhi[1], nodalPhi[2], nodalPhi[3]});
+
+    expectCellReferencesReconstructVertices(mesh, result);
+
+    const auto& parentConn = mesh.getConnectivity();
+    for (Index c = 0; c < result.mesh.getCellCount(); ++c)
+    {
+      const auto& reference = result.report.cellReferences[c];
+      const auto& parentCell =
+        parentConn.getPolytope(2, reference.parentCell);
+      for (std::uint8_t local = 0; local < 3; ++local)
+      {
+        const auto& bary = reference.vertexBarycentric[local];
+        Real transferred = 0;
+        for (std::uint8_t i = 0; i < 3; ++i)
+          transferred += bary[i] * nodalPhi[parentCell(i)];
+
+        const auto x = reconstructFromParent(
+            mesh, reference.parentCell, bary);
+        const Real exact = Real(2) * x[0] - Real(1);
+        EXPECT_NEAR(transferred, exact, 1e-12);
+      }
+    }
   }
 
   TEST(Rodin_Geometry_LevelSetDiscretizerTriangles, InterfaceEdgeProvenance)
@@ -805,27 +881,56 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(r.interfaceGraph.edges.size(), 1);
   }
 
-  TEST(Rodin_Geometry_LevelSetDiscretizerTriangles, MinCutQualitySuppressesSliverCut)
+  static Real totalArea(const LocalMesh& m)
   {
+    const auto& conn = m.getConnectivity();
+    Real s = 0;
+    for (Index c = 0; c < static_cast<Index>(m.getCellCount()); ++c)
+    {
+      const auto& t = conn.getPolytope(2, c);
+      s += std::abs(signedTriangleArea(m.getVertexCoordinates(t(0)),
+                                       m.getVertexCoordinates(t(1)),
+                                       m.getVertexCoordinates(t(2))));
+    }
+    return s;
+  }
+
+  TEST(Rodin_Geometry_LevelSetDiscretizerTriangles, MinCutQualityNeverDropsAndStaysConforming)
+  {
+    // A near-vertex crossing that would split into a thin sliver.
     auto mesh = makeSingleTriangle();
     computeConnectivity(mesh);
     P1 space(mesh);
     GridFunction phi(space);
-    phi[0] = -1e-3; phi[1] = 1; phi[2] = 1;  // would split into a thin sliver
+    phi[0] = -1e-3; phi[1] = 1; phi[2] = 1;
 
-    const auto r = LevelSetDiscretizerTriangles(phi)
+    // With no snap, the crossing is a real interior vertex: keeping the cell
+    // whole would create a hanging node, so the cut MUST proceed (conformity
+    // wins). Crucially, the produced sliver is never dropped: the output is
+    // watertight (area conserved).
+    const auto cut = LevelSetDiscretizerTriangles(phi)
       .setSignTolerance(1e-12)
       .setInterfaceAttribute(42)
       .setMinCutQuality(0.1)
       .discretize();
+    EXPECT_EQ(cut.report.uncutCellCount, 0u);
+    EXPECT_EQ(cut.mesh.getCellCount(), 3);
+    EXPECT_NEAR(totalArea(cut.mesh), 0.5, 1e-12);   // nothing dropped/holed
 
-    // The crossed cell is kept whole on its dominant side instead of cut.
-    EXPECT_EQ(r.report.uncutCellCount, 1);
-    EXPECT_EQ(r.mesh.getCellCount(), 1);
-    // Suppressed segment must not be miscounted as a pathology.
-    EXPECT_EQ(r.report.pathologicalCutCount, 0);
-    // Whole-triangle quality is far above the tiny sliver it replaced.
-    EXPECT_GT(r.report.minOutputCellQuality, 0.1);
+    // The conforming way to avoid the bad cut is the per-edge snap, which is
+    // shared by both incident cells (no hanging node). It removes the sliver.
+    auto mesh2 = makeSingleTriangle();
+    computeConnectivity(mesh2);
+    P1 s2(mesh2);
+    GridFunction phi2(s2);
+    phi2[0] = -1e-3; phi2[1] = 1; phi2[2] = 1;
+    const auto snapped = LevelSetDiscretizerTriangles(phi2)
+      .setSignTolerance(1e-12)
+      .setInterfaceAttribute(42)
+      .setCrossingSnapTolerance(0.01)
+      .discretize();
+    EXPECT_EQ(snapped.mesh.getCellCount(), 1);
+    EXPECT_NEAR(totalArea(snapped.mesh), 0.5, 1e-12);
   }
 
   TEST(Rodin_Geometry_LevelSetDiscretizerTriangles, CustomQualityMeasureIsUsed)

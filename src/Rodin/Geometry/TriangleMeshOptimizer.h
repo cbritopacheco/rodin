@@ -153,6 +153,19 @@ namespace Rodin::Geometry
           m_alive.push_back(1);
         }
 
+        // Preserve attributed 1-D polytopes (e.g. the level-set interface):
+        // their endpoints are expected to be frozen via setProtectedVertices,
+        // so the edges survive the optimization and are re-stamped on rebuild.
+        m_E.clear(); m_AE.clear();
+        for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
+        {
+          const auto attr = mesh.getAttribute(1, e);
+          if (!attr) continue;
+          const auto& ed = conn.getPolytope(1, e);
+          m_E.push_back({{ ed(0), ed(1) }});
+          m_AE.push_back(attr);
+        }
+
         report.minQualityBefore = minQuality();
 
         for (std::size_t it = 0; it < m_maxIterations; ++it)
@@ -198,6 +211,41 @@ namespace Rodin::Geometry
         if (std::abs(o) <= m_areaRel * scale)
           return false;
         return q3(t) >= m_minQuality;
+      }
+
+      bool strictlyOppositeSides(
+          Index a,
+          Index b,
+          Index p,
+          Index q) const
+      {
+        const auto& xa = m_X[a];
+        const auto& xb = m_X[b];
+        const auto& xp = m_X[p];
+        const auto& xq = m_X[q];
+        const Real op = triangleOrient2(xa, xb, xp);
+        const Real oq = triangleOrient2(xa, xb, xq);
+        const Real scale = std::max({
+            (xb - xa).squaredNorm(),
+            (xp - xa).squaredNorm(),
+            (xq - xa).squaredNorm(),
+            (xp - xb).squaredNorm(),
+            (xq - xb).squaredNorm() });
+        const Real eps = m_areaRel * scale;
+        return (op > eps && oq < -eps) || (op < -eps && oq > eps);
+      }
+
+      bool validSwapCavity(Index u, Index v, Index a, Index b) const
+      {
+        if (u == v || a == b || u == a || u == b || v == a || v == b)
+          return false;
+        // The two old triangles are a valid local patch only when a and b
+        // straddle the old diagonal uv, and the flipped patch is valid only
+        // when u and v straddle the new diagonal ab. Per-triangle orientation
+        // alone is weaker: a non-convex cavity can produce two positive
+        // triangles that overlap.
+        return strictlyOppositeSides(u, v, a, b)
+            && strictlyOppositeSides(a, b, u, v);
       }
 
       Real minQuality() const
@@ -275,8 +323,14 @@ namespace Rodin::Geometry
       }
 
       struct EdgeRec { Index a = 0, b = 0; std::array<std::size_t, 2> t{{0,0}}; std::uint8_t n = 0; };
+      // cav = the full set of vertices the operation rewrites. The commit
+      // accepts a vertex-disjoint independent set, so cav MUST cover every
+      // vertex whose incident triangles change — for a collapse that is the
+      // entire 1-ring of the removed vertex, not just the 4 edge vertices.
+      // Under-specifying cav lets two "independent" collapses with disjoint
+      // edge endpoints but overlapping rings both commit and fold the mesh.
       struct Proposal { int kind = 0; Index a = 0, b = 0; Real gain = 0;
-                        std::array<Index, 4> cav{{0,0,0,0}}; std::uint8_t ncav = 0; };
+                        std::vector<Index> cav; };
 
       // --- SPLIT ----------------------------------------------------------
 
@@ -296,12 +350,9 @@ namespace Rodin::Geometry
           const Real len = (m_X[r.a] - m_X[r.b]).norm();
           if (len <= m_hmax || r.n == 0 || r.n > 2) continue;
           Proposal p; p.kind = 1; p.a = r.a; p.b = r.b; p.gain = len;
-          p.cav = {{ r.a, r.b, 0, 0 }}; p.ncav = 2;
+          p.cav = { r.a, r.b };
           for (std::uint8_t k = 0; k < r.n; ++k)
-          {
-            const Index o = third(r.t[k], r.a, r.b);
-            if (p.ncav < 4) p.cav[p.ncav++] = o;
-          }
+            p.cav.push_back(third(r.t[k], r.a, r.b));
           prop[e] = p; ok[e] = 1;
         }
         return commit(prop, ok, [&](const Proposal& p)
@@ -365,13 +416,16 @@ namespace Rodin::Geometry
           if (!collapseValid(rem, keep)) continue;
           Proposal p; p.kind = 2; p.a = rem; p.b = keep;
           p.gain = m_hmin - len;
-          // Cavity: removed vertex one-ring + kept vertex.
-          p.cav[0] = keep; p.ncav = 1;
-          // (full ring is locked at commit via the ring scan; here we lock
-          //  the two endpoints + the two edge-apex vertices conservatively)
-          p.cav[p.ncav++] = rem;
-          p.cav[p.ncav++] = third(r.t[0], rem, keep);
-          p.cav[p.ncav++] = third(r.t[1], rem, keep);
+          // Cavity = the ENTIRE 1-ring of rem (every vertex of every triangle
+          // that the collapse rewrites) plus keep. This is what makes the
+          // independent-set commit actually correct: two collapses can only
+          // both fire if their full rings are vertex-disjoint, so they cannot
+          // jointly fold the mesh.
+          p.cav = { rem, keep };
+          forVertexTris(rem, [&](std::size_t ti)
+          {
+            for (Index x : m_T[ti]) p.cav.push_back(x);
+          });
           prop[e] = p; ok[e] = 1;
         }
         return commit(prop, ok, [&](const Proposal& p)
@@ -454,6 +508,7 @@ namespace Rodin::Geometry
           const Index a = third(r.t[0], u, v);
           const Index b = third(r.t[1], u, v);
           if (a == b) continue;
+          if (!validSwapCavity(u, v, a, b)) continue;
           const Real qOld = std::min(q3(m_T[r.t[0]]), q3(m_T[r.t[1]]));
           Tri n0 = {{ a, u, b }}, n1 = {{ b, v, a }};
           const Real s0 = triangleOrient2(m_X[a], m_X[u], m_X[b]);
@@ -463,7 +518,7 @@ namespace Rodin::Geometry
           const Real qNew = std::min(q3(n0), q3(n1));
           if (qNew <= m_swapImprovement * qOld) continue;
           Proposal p; p.kind = 3; p.a = u; p.b = v; p.gain = qNew - qOld;
-          p.cav = {{ u, v, a, b }}; p.ncav = 4;
+          p.cav = { u, v, a, b };
           prop[e] = p; ok[e] = 1;
         }
         return commit(prop, ok, [&](const Proposal& p)
@@ -473,6 +528,7 @@ namespace Rodin::Geometry
           if (r.n != 2 || !m_alive[r.t[0]] || !m_alive[r.t[1]]) return false;
           const Index u = p.a, v = p.b;
           const Index a = third(r.t[0], u, v), b = third(r.t[1], u, v);
+          if (!validSwapCavity(u, v, a, b)) return false;
           Tri n0 = {{ a, u, b }}, n1 = {{ b, v, a }};
           const Real s0 = triangleOrient2(m_X[a], m_X[u], m_X[b]);
           const Real s1 = triangleOrient2(m_X[b], m_X[v], m_X[a]);
@@ -502,12 +558,12 @@ namespace Rodin::Geometry
         {
           const Proposal& p = prop[idx];
           bool free = true;
-          for (std::uint8_t k = 0; k < p.ncav; ++k)
-            if (p.cav[k] < locked.size() && locked[p.cav[k]]) free = false;
+          for (Index cv : p.cav)
+            if (cv < locked.size() && locked[cv]) { free = false; break; }
           if (!free) continue;                  // disjoint-cavity scheduling
           if (!apply(p)) continue;              // bulletproof re-validation
-          for (std::uint8_t k = 0; k < p.ncav; ++k)
-            if (p.cav[k] < locked.size()) locked[p.cav[k]] = 1;
+          for (Index cv : p.cav)
+            if (cv < locked.size()) locked[cv] = 1;
           ++n;
         }
         return n;
@@ -548,6 +604,35 @@ namespace Rodin::Geometry
         mesh = builder.finalize();
         mesh.getConnectivity().compute(2, 1);
         mesh.getConnectivity().compute(1, 0);
+
+        // Re-stamp preserved attributed edges (the interface). Their endpoints
+        // are frozen, so the edge still exists in the rebuilt triangulation;
+        // we only need to locate it and restore its attribute.
+        if (!m_E.empty())
+        {
+          const auto& oc = mesh.getConnectivity();
+          UnorderedMap<Index, Index> pair2edge;
+          pair2edge.reserve(oc.getCount(1) * 2);
+          const Index n = mesh.getVertexCount();
+          for (Index e = 0; e < static_cast<Index>(oc.getCount(1)); ++e)
+          {
+            const auto& ed = oc.getPolytope(1, e);
+            const Index a = ed(0), b = ed(1);
+            pair2edge[a < b ? a * n + b : b * n + a] = e;
+          }
+          for (std::size_t k = 0; k < m_E.size(); ++k)
+          {
+            const Index v0 = m_E[k][0], v1 = m_E[k][1];
+            if (remap[v0] == std::numeric_limits<Index>::max()
+                || remap[v1] == std::numeric_limits<Index>::max())
+              continue;                       // region legitimately coarsened
+            const Index a = remap[v0], b = remap[v1];
+            const auto it =
+              pair2edge.find(a < b ? a * n + b : b * n + a);
+            if (it != pair2edge.end())
+              mesh.setAttribute({ 1, it->second }, m_AE[k]);
+          }
+        }
       }
 
       Quality m_quality{};
@@ -561,6 +646,8 @@ namespace Rodin::Geometry
       mutable std::vector<Math::SpatialPoint> m_X;
       mutable std::vector<Tri> m_T;
       mutable std::vector<Optional<Attribute>> m_A;
+      mutable std::vector<std::array<Index, 2>> m_E;
+      mutable std::vector<Optional<Attribute>> m_AE;
       mutable std::vector<char> m_alive;
       mutable UnorderedMap<Index, EdgeRec> m_edge;
       mutable std::vector<Index> m_edges;
