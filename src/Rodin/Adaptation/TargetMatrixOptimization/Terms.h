@@ -1656,6 +1656,48 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         return DeviationTangentIntegrator(du, v, m_weight);
       }
 
+      template <class FES, class Data>
+      Real energy(const Variational::GridFunction<FES, Data>& u) const
+      {
+        const auto& mesh = u.getFiniteElementSpace().getMesh();
+        const size_t sdim = mesh.getSpaceDimension();
+        if (sdim != 2)
+          return 0;
+
+        const auto& conn = mesh.getConnectivity();
+        const auto& data = u.getData();
+        const Index vertexCount = static_cast<Index>(mesh.getVertexCount());
+        Real value = 0;
+        for (Index cellIndex = 0;
+             cellIndex < static_cast<Index>(mesh.getCellCount());
+             ++cellIndex)
+        {
+          if (conn.getGeometry(2, cellIndex)
+              != Geometry::Polytope::Type::Triangle)
+            continue;
+          const auto& cell = conn.getPolytope(2, cellIndex);
+          const auto x0 = mesh.getVertexCoordinates(cell(0));
+          const auto x1 = mesh.getVertexCoordinates(cell(1));
+          const auto x2 = mesh.getVertexCoordinates(cell(2));
+          const Real area = triangleArea2D(x0, x1, x2);
+          for (size_t a = 0; a < 3; ++a)
+          {
+            const Index va = cell(a);
+            for (size_t b = 0; b < 3; ++b)
+            {
+              const Index vb = cell(b);
+              const Real mass = area
+                * ((a == b) ? Real(1) / Real(6) : Real(1) / Real(12));
+              for (size_t c = 0; c < sdim; ++c)
+                value += mass
+                  * data(va + static_cast<Index>(c) * vertexCount)
+                  * data(vb + static_cast<Index>(c) * vertexCount);
+            }
+          }
+        }
+        return Real(0.5) * m_weight * value;
+      }
+
     private:
       Real m_weight = 1;
   };

@@ -12,6 +12,7 @@
 #include <cmath>
 #include <cstdint>
 #include <limits>
+#include <functional>
 #include <vector>
 
 #ifdef _OPENMP
@@ -62,8 +63,35 @@ namespace Rodin::Geometry
     std::size_t splits = 0;
     std::size_t collapses = 0;
     std::size_t swaps = 0;
+    std::size_t smooths = 0;
+    std::size_t featureSmooths = 0;
     Real minQualityBefore = 0;
     Real minQualityAfter = 0;
+  };
+
+  struct TriangleMeshOptimizerParameters
+  {
+    Real hMin = 0;
+    Real hMax = std::numeric_limits<Real>::infinity();
+    Real minQuality = 1e-4;
+    Real swapImprovement = 1.01;
+    Real areaRelativeTolerance = 1e-12;
+    std::size_t maxIterations = 5;
+    std::size_t smoothingPasses = 0;
+    std::size_t featureSmoothingPasses = 0;
+
+    static TriangleMeshOptimizerParameters levelSetCarryForward(Real h)
+    {
+      TriangleMeshOptimizerParameters p;
+      p.hMin = Real(0.50) * h;
+      p.hMax = Real(2.00) * h;
+      p.minQuality = Real(0.1);
+      p.swapImprovement = Real(1.0001);
+      p.maxIterations = 12;
+      p.smoothingPasses = 3;
+      p.featureSmoothingPasses = 3;
+      return p;
+    }
   };
 
   /**
@@ -114,6 +142,40 @@ namespace Rodin::Geometry
       TriangleMeshOptimizer& setSwapImprovement(Real r)
       { m_swapImprovement = std::max(Real(1), r); return *this; }
 
+      /**
+       * @brief Quality-improving vertex relocation sweeps per outer iteration.
+       *
+       * 0 (default) disables it. When > 0, after the topological operators
+       * each free interior vertex (NOT protected, NOT on the domain boundary)
+       * is moved toward its one-ring centroid only if the move strictly
+       * improves the minimum incident-triangle quality and keeps every
+       * incident triangle valid (orientation preserved, no inversion). This is
+       * the optimization-based smoothing every production remesher has; it is
+       * fit-neutral because the interface/boundary are frozen, and it cannot
+       * invert because it is validity-gated.
+       */
+      TriangleMeshOptimizer& setSmoothingPasses(std::size_t n)
+      { m_smoothingPasses = n; return *this; }
+
+      using FeatureProjection =
+        std::function<Math::SpatialPoint(const Math::SpatialPoint&)>;
+
+      /**
+       * @brief Enables tangential smoothing of protected (interface) vertices.
+       *
+       * Without this, protected vertices are frozen. With a projection set,
+       * each protected non-domain-boundary vertex is smoothed toward its
+       * one-ring centroid and then snapped back onto the feature by `proj`
+       * (e.g. the analytic phi=0), so the fit stays exact while interface-
+       * adjacent element quality improves. Validity-gated and monotone in
+       * qmin. `n` = sweeps per outer iteration (0 default = off).
+       */
+      TriangleMeshOptimizer& setFeatureProjection(FeatureProjection proj)
+      { m_featureProjection = std::move(proj); return *this; }
+
+      TriangleMeshOptimizer& setFeatureSmoothingPasses(std::size_t n)
+      { m_featureSmoothingPasses = n; return *this; }
+
       /// Scale-relative twice-area floor used by the validity gate.
       TriangleMeshOptimizer& setAreaRelativeTolerance(Real r)
       { m_areaRel = std::max(Real(0), r); return *this; }
@@ -121,13 +183,29 @@ namespace Rodin::Geometry
       TriangleMeshOptimizer& setQuality(Quality q)
       { m_quality = std::move(q); return *this; }
 
+      TriangleMeshOptimizer& setParameters(
+          const TriangleMeshOptimizerParameters& p)
+      {
+        return setHMin(p.hMin)
+          .setHMax(p.hMax)
+          .setMinQuality(p.minQuality)
+          .setSwapImprovement(p.swapImprovement)
+          .setAreaRelativeTolerance(p.areaRelativeTolerance)
+          .setMaxIterations(p.maxIterations)
+          .setSmoothingPasses(p.smoothingPasses)
+          .setFeatureSmoothingPasses(p.featureSmoothingPasses);
+      }
+
       /**
-       * @brief Freezes a set of vertices (indexed by input mesh vertex id).
+       * @brief Protects vertices from topological operators.
        *
        * No operator touches an edge with a protected endpoint: protected
-       * vertices are never moved, removed, relabeled or swapped. Use this to
-       * preserve a fitted level-set interface (or any feature) exactly through
-       * coarsening/optimization.
+       * vertices are never removed, relabeled, split across or swapped through.
+       * Use this to preserve a fitted level-set interface (or any feature)
+       * through coarsening/optimization. Protected vertices remain geometrically
+       * fixed unless setFeatureProjection() and setFeatureSmoothingPasses() are
+       * enabled, in which case feature smoothing may move them tangentially and
+       * project them back onto the supplied feature.
        */
       TriangleMeshOptimizer& setProtectedVertices(std::vector<char> mask)
       { m_protected = std::move(mask); return *this; }
@@ -172,10 +250,26 @@ namespace Rodin::Geometry
         {
           ++report.iterations;
           const std::size_t s = m_hmax > Real(0) ? splitPass() : 0;
-          const std::size_t c = m_hmin > Real(0) ? collapsePass() : 0;
           const std::size_t w = swapPass();
-          report.splits += s; report.collapses += c; report.swaps += w;
-          if (s == 0 && c == 0 && w == 0)
+          std::size_t sm = 0;
+          for (std::size_t p = 0; p < m_smoothingPasses; ++p)
+          {
+            const std::size_t m = smoothPass();
+            sm += m;
+            if (m == 0) break;
+          }
+          std::size_t fsm = 0;
+          for (std::size_t p = 0; p < m_featureSmoothingPasses; ++p)
+          {
+            const std::size_t m = featureSmoothPass();
+            fsm += m;
+            if (m == 0) break;
+          }
+          const std::size_t c = m_hmin > Real(0) ? collapsePass() : 0;
+          report.splits += s; report.collapses += c;
+          report.swaps += w; report.smooths += sm;
+          report.featureSmooths += fsm;
+          if (s == 0 && c == 0 && w == 0 && sm == 0 && fsm == 0)
             break;
         }
 
@@ -360,18 +454,31 @@ namespace Rodin::Geometry
           const Index w = static_cast<Index>(m_X.size());
           m_X.push_back(Real(0.5) * (m_X[p.a] + m_X[p.b]));
           const auto it = m_edge.find(ekey(p.a, p.b));
+          if (it == m_edge.end())
+          {
+            m_X.pop_back();
+            return false;
+          }
           std::array<Tri, 4> nw; int cnt = 0;
           std::array<std::size_t, 2> kill; std::uint8_t nk = 0;
           for (std::uint8_t k = 0; k < it->second.n && k < 2; ++k)
           {
             const std::size_t ti = it->second.t[k];
-            if (!m_alive[ti]) return false;
+            if (!m_alive[ti])
+            {
+              m_X.pop_back();
+              return false;
+            }
             Tri t1 = m_T[ti], t2 = m_T[ti];
             for (int j = 0; j < 3; ++j)
             { if (t1[j] == p.b) t1[j] = w; if (t2[j] == p.a) t2[j] = w; }
             const Real s = triangleOrient2(
                 m_X[m_T[ti][0]], m_X[m_T[ti][1]], m_X[m_T[ti][2]]);
-            if (!validTri(t1, s) || !validTri(t2, s)) return false;
+            if (!validTri(t1, s) || !validTri(t2, s))
+            {
+              m_X.pop_back();
+              return false;
+            }
             nw[cnt++] = t1; nw[cnt++] = t2; kill[nk++] = ti;
           }
           for (std::uint8_t k = 0; k < nk; ++k) m_alive[kill[k]] = 0;
@@ -569,6 +676,147 @@ namespace Rodin::Geometry
         return n;
       }
 
+      // --- SMOOTH (quality-improving vertex relocation) -------------------
+
+      // Sequential optimization-based smoothing: each free interior vertex is
+      // pulled toward its one-ring centroid, accepted only if it strictly
+      // improves the minimum incident-triangle quality and every incident
+      // triangle stays valid (orientation preserved, no inversion). Protected
+      // (interface) and domain-boundary vertices are frozen, so the fit is
+      // untouched. Monotone in qmin by construction.
+      std::size_t smoothPass() const
+      {
+        buildVertexRing();
+        buildEdges();
+        const Index nv = m_X.size();
+        std::vector<char> bnd(nv, 0);
+        for (const Index ek : m_edges)
+        {
+          const auto& r = m_edge.at(ek);
+          if (r.n == 1) { bnd[r.a] = 1; bnd[r.b] = 1; }
+        }
+
+        std::size_t moved = 0;
+        std::vector<std::size_t> ring;
+        std::vector<Index> nbr;
+        std::vector<Real> oldSign;
+        for (Index v = 0; v < nv; ++v)
+        {
+          if (prot(v) || bnd[v]) continue;
+          ring.clear(); nbr.clear(); oldSign.clear();
+          forVertexTris(v, [&](std::size_t ti) { ring.push_back(ti); });
+          if (ring.empty()) continue;
+
+          Real qOld = std::numeric_limits<Real>::infinity();
+          for (std::size_t ti : ring)
+          {
+            const auto& t = m_T[ti];
+            qOld = std::min(qOld, q3(t));
+            oldSign.push_back(
+                triangleOrient2(m_X[t[0]], m_X[t[1]], m_X[t[2]]));
+            for (Index w : t)
+              if (w != v
+                  && std::find(nbr.begin(), nbr.end(), w) == nbr.end())
+                nbr.push_back(w);
+          }
+          if (nbr.empty()) continue;
+
+          Math::SpatialPoint centroid = m_X[nbr[0]];
+          for (std::size_t k = 1; k < nbr.size(); ++k)
+            centroid = centroid + m_X[nbr[k]];
+          centroid = (Real(1) / static_cast<Real>(nbr.size())) * centroid;
+
+          const Math::SpatialPoint orig = m_X[v];
+          bool accepted = false;
+          for (const Real f : { Real(1), Real(0.5), Real(0.25) })
+          {
+            m_X[v] = orig + f * (centroid - orig);
+            Real qNew = std::numeric_limits<Real>::infinity();
+            bool ok = true;
+            for (std::size_t r = 0; r < ring.size() && ok; ++r)
+            {
+              const auto& t = m_T[ring[r]];
+              if (!validTri(t, oldSign[r])) ok = false;
+              else qNew = std::min(qNew, q3(t));
+            }
+            if (ok && qNew > qOld * (Real(1) + Real(1e-12)))
+            { accepted = true; ++moved; break; }
+          }
+          if (!accepted) m_X[v] = orig;
+        }
+        return moved;
+      }
+
+      // Tangential feature smoothing: relocate PROTECTED (interface) vertices
+      // toward their one-ring centroid but snap the candidate back onto the
+      // feature via m_featureProjection (e.g. the analytic phi=0), so the fit
+      // stays exact while interface-adjacent element quality improves.
+      // Domain-boundary vertices stay frozen. Inert if no projection is set.
+      std::size_t featureSmoothPass() const
+      {
+        if (!m_featureProjection) return 0;
+        buildVertexRing();
+        buildEdges();
+        const Index nv = m_X.size();
+        std::vector<char> bnd(nv, 0);
+        for (const Index ek : m_edges)
+        {
+          const auto& r = m_edge.at(ek);
+          if (r.n == 1) { bnd[r.a] = 1; bnd[r.b] = 1; }
+        }
+
+        std::size_t moved = 0;
+        std::vector<std::size_t> ring;
+        std::vector<Index> nbr;
+        std::vector<Real> oldSign;
+        for (Index v = 0; v < nv; ++v)
+        {
+          if (!prot(v) || bnd[v]) continue;       // interface vertices only
+          ring.clear(); nbr.clear(); oldSign.clear();
+          forVertexTris(v, [&](std::size_t ti) { ring.push_back(ti); });
+          if (ring.empty()) continue;
+
+          Real qOld = std::numeric_limits<Real>::infinity();
+          for (std::size_t ti : ring)
+          {
+            const auto& t = m_T[ti];
+            qOld = std::min(qOld, q3(t));
+            oldSign.push_back(
+                triangleOrient2(m_X[t[0]], m_X[t[1]], m_X[t[2]]));
+            for (Index w : t)
+              if (w != v
+                  && std::find(nbr.begin(), nbr.end(), w) == nbr.end())
+                nbr.push_back(w);
+          }
+          if (nbr.empty()) continue;
+
+          Math::SpatialPoint centroid = m_X[nbr[0]];
+          for (std::size_t k = 1; k < nbr.size(); ++k)
+            centroid = centroid + m_X[nbr[k]];
+          centroid = (Real(1) / static_cast<Real>(nbr.size())) * centroid;
+
+          const Math::SpatialPoint orig = m_X[v];
+          bool accepted = false;
+          for (const Real f : { Real(1), Real(0.5), Real(0.25) })
+          {
+            const Math::SpatialPoint cand = orig + f * (centroid - orig);
+            m_X[v] = m_featureProjection(cand);   // snap back onto phi=0
+            Real qNew = std::numeric_limits<Real>::infinity();
+            bool ok = true;
+            for (std::size_t r = 0; r < ring.size() && ok; ++r)
+            {
+              const auto& t = m_T[ring[r]];
+              if (!validTri(t, oldSign[r])) ok = false;
+              else qNew = std::min(qNew, q3(t));
+            }
+            if (ok && qNew > qOld * (Real(1) + Real(1e-12)))
+            { accepted = true; ++moved; break; }
+          }
+          if (!accepted) m_X[v] = orig;
+        }
+        return moved;
+      }
+
       // --- rebuild --------------------------------------------------------
 
       void rebuild(LocalMesh& mesh) const
@@ -642,6 +890,9 @@ namespace Rodin::Geometry
       Real m_swapImprovement = 1.01;
       Real m_areaRel = 1e-12;
       std::size_t m_maxIterations = 5;
+      std::size_t m_smoothingPasses = 0;
+      std::size_t m_featureSmoothingPasses = 0;
+      FeatureProjection m_featureProjection;
 
       mutable std::vector<Math::SpatialPoint> m_X;
       mutable std::vector<Tri> m_T;

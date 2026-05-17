@@ -22,6 +22,9 @@
 #include <Rodin/Solver/SparseLU.h>
 #include <Rodin/Variational.h>
 
+#include <type_traits>
+#include <Eigen/SparseLU>
+
 using namespace Rodin;
 using namespace Rodin::Adaptation::TargetMatrixOptimization;
 using namespace Rodin::Geometry;
@@ -43,7 +46,13 @@ namespace Rodin::Tests::Benchmarks
       CircleOrbit = 0,
       SquareOrbit = 1,
       TriangleOrbit = 2,
-      CircleEnterLeave = 3
+      CircleEnterLeave = 3,
+      CircleFigureEight = 4,
+      SquareFigureEight = 5,
+      TriangleFigureEight = 6,
+      WavyCircleOrbit = 7,
+      WavyCircleFigureEight = 8,
+      WavyCircleEnterLeave = 9
     };
 
     enum class MetricCase : int
@@ -52,6 +61,16 @@ namespace Rodin::Tests::Benchmarks
       AreaDistortion = 1,
       ShapeSize = 2,
       ShapeDistortion = 3
+    };
+
+    enum class StageCase : int
+    {
+      TMOPOnly = 0,
+      OptimizeOnly = 1,
+      TMOPThenOptimize = 2,
+      OptimizeThenTMOP = 3,
+      OptimizeNoFeature = 4,
+      OptimizeNoInterior = 5
     };
 
     struct MeshStats
@@ -73,6 +92,8 @@ namespace Rodin::Tests::Benchmarks
       Index splits = 0;
       Index collapses = 0;
       Index swaps = 0;
+      Index smooths = 0;
+      Index featureSmooths = 0;
       Real cutMinQuality = 0;
       Real finalMinQuality = 0;
       Real fitRms = 0;
@@ -100,6 +121,35 @@ namespace Rodin::Tests::Benchmarks
       };
     }
 
+    Math::SpatialPoint figureEightCenter(Real t)
+    {
+      return Math::SpatialPoint{
+        Real(0.5) + Real(0.22) * std::sin(Real(2) * Pi * t),
+        Real(0.5) + Real(0.15) * std::sin(Real(4) * Pi * t + Real(0.35))
+      };
+    }
+
+    Math::SpatialPoint shapeCenter(ShapeCase shape, Real t)
+    {
+      switch (shape)
+      {
+        case ShapeCase::CircleOrbit:
+        case ShapeCase::SquareOrbit:
+        case ShapeCase::TriangleOrbit:
+        case ShapeCase::WavyCircleOrbit:
+          return orbitCenter(t);
+        case ShapeCase::CircleEnterLeave:
+        case ShapeCase::WavyCircleEnterLeave:
+          return enterLeaveCenter(t);
+        case ShapeCase::CircleFigureEight:
+        case ShapeCase::SquareFigureEight:
+        case ShapeCase::TriangleFigureEight:
+        case ShapeCase::WavyCircleFigureEight:
+          return figureEightCenter(t);
+      }
+      return orbitCenter(t);
+    }
+
     Real circleValue(
         const Math::SpatialPoint& x,
         const Math::SpatialPoint& c,
@@ -120,9 +170,10 @@ namespace Rodin::Tests::Benchmarks
       return Math::SpatialPoint{dx / r, dy / r};
     }
 
-    Real squareValue(const Math::SpatialPoint& x, Real t)
+    Real squareValue(
+        const Math::SpatialPoint& x,
+        const Math::SpatialPoint& c)
     {
-      const auto c = orbitCenter(t);
       const Real half = Real(0.16);
       const Real ax = std::abs(x[0] - c[0]) - half;
       const Real ay = std::abs(x[1] - c[1]) - half;
@@ -133,9 +184,10 @@ namespace Rodin::Tests::Benchmarks
       return outside + inside;
     }
 
-    Math::SpatialPoint squareGradient(const Math::SpatialPoint& x, Real t)
+    Math::SpatialPoint squareGradient(
+        const Math::SpatialPoint& x,
+        const Math::SpatialPoint& c)
     {
-      const auto c = orbitCenter(t);
       const Real half = Real(0.16);
       const Real dx = x[0] - c[0];
       const Real dy = x[1] - c[1];
@@ -153,9 +205,9 @@ namespace Rodin::Tests::Benchmarks
       return Math::SpatialPoint{0, sy};
     }
 
-    std::array<Math::SpatialPoint, 3> triangleVertices(Real t)
+    std::array<Math::SpatialPoint, 3> triangleVertices(
+        const Math::SpatialPoint& c)
     {
-      const auto c = orbitCenter(t);
       return {{
         Math::SpatialPoint{c[0], c[1] + Real(0.20)},
         Math::SpatialPoint{c[0] - Real(0.18), c[1] - Real(0.12)},
@@ -163,9 +215,11 @@ namespace Rodin::Tests::Benchmarks
       }};
     }
 
-    Real triangleValue(const Math::SpatialPoint& x, Real t)
+    Real triangleValue(
+        const Math::SpatialPoint& x,
+        const Math::SpatialPoint& c)
     {
-      const auto vertices = triangleVertices(t);
+      const auto vertices = triangleVertices(c);
       Real phi = -std::numeric_limits<Real>::infinity();
       for (std::uint8_t i = 0; i < 3; ++i)
       {
@@ -181,9 +235,11 @@ namespace Rodin::Tests::Benchmarks
       return phi;
     }
 
-    Math::SpatialPoint triangleGradient(const Math::SpatialPoint& x, Real t)
+    Math::SpatialPoint triangleGradient(
+        const Math::SpatialPoint& x,
+        const Math::SpatialPoint& c)
     {
-      const auto vertices = triangleVertices(t);
+      const auto vertices = triangleVertices(c);
       Real phi = -std::numeric_limits<Real>::infinity();
       Math::SpatialPoint gradient{1, 0};
       for (std::uint8_t i = 0; i < 3; ++i)
@@ -204,18 +260,68 @@ namespace Rodin::Tests::Benchmarks
       return gradient;
     }
 
+    Real wavyCircleRadius(Real theta, Real t)
+    {
+      return Real(0.17)
+        + Real(0.035) * std::sin(Real(5) * theta + Real(0.65) * std::sin(Real(2) * Pi * t));
+    }
+
+    Real wavyCircleRadiusDerivative(Real theta, Real t)
+    {
+      return Real(0.175) * std::cos(
+          Real(5) * theta + Real(0.65) * std::sin(Real(2) * Pi * t));
+    }
+
+    Real wavyCircleValue(
+        const Math::SpatialPoint& x,
+        const Math::SpatialPoint& c,
+        Real t)
+    {
+      const Real dx = x[0] - c[0];
+      const Real dy = x[1] - c[1];
+      const Real theta = std::atan2(dy, dx);
+      return std::hypot(dx, dy) - wavyCircleRadius(theta, t);
+    }
+
+    Math::SpatialPoint wavyCircleGradient(
+        const Math::SpatialPoint& x,
+        const Math::SpatialPoint& c,
+        Real t)
+    {
+      const Real dx = x[0] - c[0];
+      const Real dy = x[1] - c[1];
+      const Real rho2 = dx * dx + dy * dy;
+      const Real rho = std::sqrt(rho2);
+      if (rho <= Real(1e-14))
+        return Math::SpatialPoint{1, 0};
+      const Real theta = std::atan2(dy, dx);
+      const Real dr = wavyCircleRadiusDerivative(theta, t);
+      return Math::SpatialPoint{
+        dx / rho + dr * dy / rho2,
+        dy / rho - dr * dx / rho2
+      };
+    }
+
     Real levelSetValue(ShapeCase shape, const Math::SpatialPoint& x, Real t)
     {
+      const auto c = shapeCenter(shape, t);
       switch (shape)
       {
         case ShapeCase::CircleOrbit:
-          return circleValue(x, orbitCenter(t), Real(0.18));
+        case ShapeCase::CircleFigureEight:
+          return circleValue(x, c, Real(0.18));
         case ShapeCase::SquareOrbit:
-          return squareValue(x, t);
+        case ShapeCase::SquareFigureEight:
+          return squareValue(x, c);
         case ShapeCase::TriangleOrbit:
-          return triangleValue(x, t);
+        case ShapeCase::TriangleFigureEight:
+          return triangleValue(x, c);
         case ShapeCase::CircleEnterLeave:
-          return circleValue(x, enterLeaveCenter(t), Real(0.18));
+          return circleValue(x, c, Real(0.18));
+        case ShapeCase::WavyCircleOrbit:
+        case ShapeCase::WavyCircleFigureEight:
+        case ShapeCase::WavyCircleEnterLeave:
+          return wavyCircleValue(x, c, t);
       }
       return 1;
     }
@@ -225,16 +331,24 @@ namespace Rodin::Tests::Benchmarks
         const Math::SpatialPoint& x,
         Real t)
     {
+      const auto c = shapeCenter(shape, t);
       switch (shape)
       {
         case ShapeCase::CircleOrbit:
-          return circleGradient(x, orbitCenter(t));
+        case ShapeCase::CircleFigureEight:
+          return circleGradient(x, c);
         case ShapeCase::SquareOrbit:
-          return squareGradient(x, t);
+        case ShapeCase::SquareFigureEight:
+          return squareGradient(x, c);
         case ShapeCase::TriangleOrbit:
-          return triangleGradient(x, t);
+        case ShapeCase::TriangleFigureEight:
+          return triangleGradient(x, c);
         case ShapeCase::CircleEnterLeave:
-          return circleGradient(x, enterLeaveCenter(t));
+          return circleGradient(x, c);
+        case ShapeCase::WavyCircleOrbit:
+        case ShapeCase::WavyCircleFigureEight:
+        case ShapeCase::WavyCircleEnterLeave:
+          return wavyCircleGradient(x, c, t);
       }
       return Math::SpatialPoint{0, 0};
     }
@@ -443,26 +557,76 @@ namespace Rodin::Tests::Benchmarks
       AnalyticLevelSetFitTerm boundaryFit(
           boxBoundaryValue, boxBoundaryGradient, Optional<Attribute>(Boundary), 1.0);
 
-      Variational::Problem problem(du, v);
-      problem =
-          quality.tangent(u, du, v)
-        + deviation.tangent(du, v)
-        + fit.tangent(u, du, v)
-        + boundaryFit.tangent(u, du, v)
-        + quality.residual(u, v)
-        + deviation.residual(u, v)
-        + fit.residual(u, v)
-        + boundaryFit.residual(u, v);
+      // Local Armijo/validity line-searched Newton. Unlike NewtonSolver
+      // (constant damping only) this backtracks the step until the barrier
+      // quality energy is finite and does not increase, so a barrier metric
+      // (ShapeDistortion) cannot cross det<=0 and is actually usable.
+      auto makeTangent = [&]()
+      {
+        return quality.tangent(u, du, v) + deviation.tangent(du, v)
+             + fit.tangent(u, du, v) + boundaryFit.tangent(u, du, v);
+      };
+      auto makeResidual = [&]()
+      {
+        return quality.residual(u, v) + deviation.residual(u, v)
+             + fit.residual(u, v) + boundaryFit.residual(u, v);
+      };
+      auto meritEnergy = [&]()
+      {
+        return quality.energy(u)
+          + deviation.energy(u)
+          + fit.energy(u)
+          + boundaryFit.energy(u);
+      };
 
-      SparseLU solver{problem};
-      NewtonSolver newton(solver);
-      newton.setMaxIterations(maxIterations)
-            .setDampingFactor(1.0)
-            .setAbsoluteTolerance(1e-10)
-            .setRelativeTolerance(1e-8);
       try
       {
-        newton.solve(u);
+        for (Index it = 0; it < maxIterations; ++it)
+        {
+          LinearForm R(v);
+          R = makeResidual();
+          R.assemble();
+          const auto r = R.getVector();
+          if (!r.allFinite())
+            return false;
+          if (r.norm() <= Real(1e-10))
+            break;
+
+          BilinearForm J(du, v);
+          J = makeTangent();
+          J.assemble();
+          Eigen::SparseLU<std::decay_t<decltype(J.getOperator())>> lu;
+          lu.compute(J.getOperator());
+          if (lu.info() != Eigen::Success)
+            return false;
+          const Math::Vector<Real> rhs = -r;          // Newton: J dx = -R
+          const Math::Vector<Real> dx = lu.solve(rhs);
+          if (lu.info() != Eigen::Success || !dx.allFinite())
+            return false;
+
+          const Real e0 = meritEnergy();
+          const Math::Vector<Real> u0 = u.getData();
+          Real alpha = Real(1);
+          bool accepted = false;
+          for (int ls = 0; ls < 30; ++ls)
+          {
+            u.getData() = u0 + alpha * dx;
+            const Real e = meritEnergy();
+            if (std::isfinite(e) && e <= e0 * (Real(1) + Real(1e-12)))
+            {
+              accepted = true;
+              break;
+            }
+            alpha *= Real(0.5);
+          }
+          if (!accepted)
+          {
+            u.getData() = u0;                          // keep best so far
+            break;
+          }
+          if (alpha * dx.norm() <= Real(1e-10))
+            break;
+        }
       }
       catch (...)
       {
@@ -547,7 +711,31 @@ namespace Rodin::Tests::Benchmarks
           mesh, shape, t, SquaredDistanceMetric{}, qualityWeight, 5);
     }
 
-    TriangleMeshOptimizerReport coarsen(LocalMesh& mesh, size_t resolution)
+    TriangleMeshOptimizerParameters defaultOptimizerParameters(
+        size_t resolution)
+    {
+      const Real h = Real(1) / static_cast<Real>(resolution - 1);
+      return TriangleMeshOptimizerParameters::levelSetCarryForward(h);
+    }
+
+    TriangleMeshOptimizerParameters optimizerParametersForStage(
+        size_t resolution,
+        StageCase stage)
+    {
+      auto parameters = defaultOptimizerParameters(resolution);
+      if (stage == StageCase::OptimizeNoFeature)
+        parameters.featureSmoothingPasses = 0;
+      if (stage == StageCase::OptimizeNoInterior)
+        parameters.smoothingPasses = 0;
+      return parameters;
+    }
+
+    TriangleMeshOptimizerReport coarsen(
+        LocalMesh& mesh,
+        size_t resolution,
+        ShapeCase shape,
+        Real t,
+        const TriangleMeshOptimizerParameters& parameters)
     {
       std::vector<char> frozen(mesh.getVertexCount(), 0);
       const auto& conn = mesh.getConnectivity();
@@ -561,13 +749,40 @@ namespace Rodin::Tests::Benchmarks
         frozen[edge(1)] = 1;
       }
 
+      // Snap a candidate point back onto phi=0 via two Newton steps on the
+      // analytic level set: x <- x - phi(x) grad(x) / |grad|^2. Keeps the
+      // fit exact while interface vertices are tangentially smoothed.
+      auto projectToInterface =
+        [shape, t](const Math::SpatialPoint& x) -> Math::SpatialPoint
+      {
+        Math::SpatialPoint p = x;
+        for (int i = 0; i < 2; ++i)
+        {
+          const Real f = levelSetValue(shape, p, t);
+          const auto g = levelSetGradient(shape, p, t);
+          const Real gg = g[0] * g[0] + g[1] * g[1];
+          if (gg < Real(1e-30)) break;
+          p = Math::SpatialPoint{ p[0] - f * g[0] / gg,
+                                  p[1] - f * g[1] / gg };
+        }
+        return p;
+      };
+
       return TriangleMeshOptimizer()
-        .setHMin(Real(0.35) / static_cast<Real>(resolution - 1))
-        .setHMax(std::numeric_limits<Real>::infinity())
-        .setMinQuality(0.1)
-        .setMaxIterations(4)
+        .setParameters(parameters)
+        .setFeatureProjection(projectToInterface)
         .setProtectedVertices(std::move(frozen))
         .optimize(mesh);
+    }
+
+    TriangleMeshOptimizerReport coarsen(
+        LocalMesh& mesh,
+        size_t resolution,
+        ShapeCase shape,
+        Real t)
+    {
+      return coarsen(mesh, resolution, shape, t,
+          defaultOptimizerParameters(resolution));
     }
 
     StageCounters setCounters(
@@ -602,6 +817,8 @@ namespace Rodin::Tests::Benchmarks
         counters.splits = optReport->splits;
         counters.collapses = optReport->collapses;
         counters.swaps = optReport->swaps;
+        counters.smooths = optReport->smooths;
+        counters.featureSmooths = optReport->featureSmooths;
       }
 
       st.counters["cut_cells"] = benchmark::Counter(counters.cutCells);
@@ -623,6 +840,9 @@ namespace Rodin::Tests::Benchmarks
       st.counters["splits"] = benchmark::Counter(counters.splits);
       st.counters["collapses"] = benchmark::Counter(counters.collapses);
       st.counters["swaps"] = benchmark::Counter(counters.swaps);
+      st.counters["smooths"] = benchmark::Counter(counters.smooths);
+      st.counters["feature_smooths"] =
+        benchmark::Counter(counters.featureSmooths);
       return counters;
     }
 
@@ -701,11 +921,53 @@ namespace Rodin::Tests::Benchmarks
       auto optimized = cut.mesh;
       const bool tmopOk =
         solveTMOP(optimized, shape, Real(0.25), MetricCase::SquaredDistance);
-      const auto report = coarsen(optimized, resolution);
+      const auto report = coarsen(optimized, resolution, shape, Real(0.25));
       benchmark::DoNotOptimize(optimized.getCellCount());
       counters =
         setCounters(st, cut, optimized, &report, shape, tmopOk, Real(0.25));
     }
+    st.SetItemsProcessed(st.iterations() * counters.finalCells);
+  }
+
+  static void BM_LevelSetPipeline_StageFreshCut(benchmark::State& st)
+  {
+    const auto resolution = static_cast<size_t>(st.range(0));
+    const auto shape = static_cast<ShapeCase>(st.range(1));
+    const auto metric = static_cast<MetricCase>(st.range(2));
+    const auto stage = static_cast<StageCase>(st.range(3));
+    StageCounters counters;
+    for (auto _ : st)
+    {
+      auto background = makeBackground(resolution);
+      auto cut = cutShape(background, shape, Real(0.25), Real(0.05), Real(0.2));
+      auto optimized = cut.mesh;
+      bool tmopOk = true;
+      TriangleMeshOptimizerReport report;
+      const auto config = optimizerParametersForStage(resolution, stage);
+      switch (stage)
+      {
+        case StageCase::TMOPOnly:
+          tmopOk = solveTMOP(optimized, shape, Real(0.25), metric);
+          break;
+        case StageCase::OptimizeOnly:
+          report = coarsen(optimized, resolution, shape, Real(0.25), config);
+          break;
+        case StageCase::TMOPThenOptimize:
+        case StageCase::OptimizeNoFeature:
+        case StageCase::OptimizeNoInterior:
+          tmopOk = solveTMOP(optimized, shape, Real(0.25), metric);
+          report = coarsen(optimized, resolution, shape, Real(0.25), config);
+          break;
+        case StageCase::OptimizeThenTMOP:
+          report = coarsen(optimized, resolution, shape, Real(0.25), config);
+          tmopOk = solveTMOP(optimized, shape, Real(0.25), metric);
+          break;
+      }
+      benchmark::DoNotOptimize(optimized.getCellCount());
+      counters =
+        setCounters(st, cut, optimized, &report, shape, tmopOk, Real(0.25));
+    }
+    st.counters["stage_case"] = benchmark::Counter(static_cast<int>(stage));
     st.SetItemsProcessed(st.iterations() * counters.finalCells);
   }
 
@@ -752,7 +1014,7 @@ namespace Rodin::Tests::Benchmarks
         const bool tmopOk = solveTMOP(optimized, shape, t, metric);
         if (!tmopOk)
           tmopFailures++;
-        const auto report = coarsen(optimized, resolution);
+        const auto report = coarsen(optimized, resolution, shape, t);
         optimized.getConnectivity().compute(2, 1);
         optimized.getConnectivity().compute(1, 0);
         counters = setCounters(st, cut, optimized, &report, shape, tmopOk, t);
@@ -790,7 +1052,7 @@ namespace Rodin::Tests::Benchmarks
           solveSquaredTMOP(optimized, shape, t, qualityWeight);
         if (!tmopOk)
           tmopFailures++;
-        const auto report = coarsen(optimized, resolution);
+        const auto report = coarsen(optimized, resolution, shape, t);
         optimized.getConnectivity().compute(2, 1);
         optimized.getConnectivity().compute(1, 0);
         counters = setCounters(st, cut, optimized, &report, shape, tmopOk, t);
@@ -802,6 +1064,69 @@ namespace Rodin::Tests::Benchmarks
     }
     st.counters["orbit_steps"] = benchmark::Counter(steps);
     st.counters["quality_weight"] = benchmark::Counter(qualityWeight);
+    st.counters["tmop_failed"] = benchmark::Counter(counters.tmopFailures);
+    st.SetItemsProcessed(st.iterations() * counters.finalCells);
+  }
+
+  static void BM_LevelSetPipeline_CarryForwardStage(benchmark::State& st)
+  {
+    const auto resolution = static_cast<size_t>(st.range(0));
+    const auto steps = static_cast<Index>(st.range(1));
+    const auto shape = static_cast<ShapeCase>(st.range(2));
+    const auto metric = static_cast<MetricCase>(st.range(3));
+    const auto stage = static_cast<StageCase>(st.range(4));
+    StageCounters counters;
+    for (auto _ : st)
+    {
+      auto background = makeBackground(resolution);
+      Index tmopFailures = 0;
+      TriangleMeshOptimizerReport accumulated;
+      for (Index step = 0; step < steps; ++step)
+      {
+        const Real t = static_cast<Real>(step)
+          / static_cast<Real>(std::max<Index>(1, steps - 1));
+        auto cut = cutShape(background, shape, t, Real(0.05), Real(0.2));
+        auto optimized = cut.mesh;
+        bool tmopOk = true;
+        TriangleMeshOptimizerReport report;
+        const auto config = optimizerParametersForStage(resolution, stage);
+        switch (stage)
+        {
+          case StageCase::TMOPOnly:
+            tmopOk = solveTMOP(optimized, shape, t, metric);
+            break;
+          case StageCase::OptimizeOnly:
+            report = coarsen(optimized, resolution, shape, t, config);
+            break;
+          case StageCase::TMOPThenOptimize:
+          case StageCase::OptimizeNoFeature:
+          case StageCase::OptimizeNoInterior:
+            tmopOk = solveTMOP(optimized, shape, t, metric);
+            report = coarsen(optimized, resolution, shape, t, config);
+            break;
+          case StageCase::OptimizeThenTMOP:
+            report = coarsen(optimized, resolution, shape, t, config);
+            tmopOk = solveTMOP(optimized, shape, t, metric);
+            break;
+        }
+        if (!tmopOk)
+          tmopFailures++;
+        accumulated.splits += report.splits;
+        accumulated.collapses += report.collapses;
+        accumulated.swaps += report.swaps;
+        accumulated.smooths += report.smooths;
+        accumulated.featureSmooths += report.featureSmooths;
+        optimized.getConnectivity().compute(2, 1);
+        optimized.getConnectivity().compute(1, 0);
+        counters = setCounters(st, cut, optimized, &accumulated, shape, tmopOk, t);
+        demoteInterface(optimized);
+        background = std::move(optimized);
+      }
+      counters.tmopFailures = tmopFailures;
+      benchmark::DoNotOptimize(background.getCellCount());
+    }
+    st.counters["orbit_steps"] = benchmark::Counter(steps);
+    st.counters["stage_case"] = benchmark::Counter(static_cast<int>(stage));
     st.counters["tmop_failed"] = benchmark::Counter(counters.tmopFailures);
     st.SetItemsProcessed(st.iterations() * counters.finalCells);
   }
@@ -850,16 +1175,44 @@ namespace Rodin::Tests::Benchmarks
     ->Args({24, 8, static_cast<int>(ShapeCase::SHAPE_ENUM), WEIGHT_MILLI}) \
     ->Unit(benchmark::kMillisecond);
 
+#define RODIN_STAGE_FRESH_BENCH(SHAPE_LABEL, SHAPE_ENUM, METRIC_LABEL, METRIC_ENUM, STAGE_LABEL, STAGE_ENUM) \
+  BENCHMARK(BM_LevelSetPipeline_StageFreshCut) \
+    ->Name("LevelSetPipeline/StageFresh/" SHAPE_LABEL "/" METRIC_LABEL "/" STAGE_LABEL "/24") \
+    ->Args({24, static_cast<int>(ShapeCase::SHAPE_ENUM), \
+      static_cast<int>(MetricCase::METRIC_ENUM), \
+      static_cast<int>(StageCase::STAGE_ENUM)}) \
+    ->Unit(benchmark::kMillisecond);
+
+#define RODIN_STAGE_ORBIT_BENCH(SHAPE_LABEL, SHAPE_ENUM, METRIC_LABEL, METRIC_ENUM, STAGE_LABEL, STAGE_ENUM, STEPS) \
+  BENCHMARK(BM_LevelSetPipeline_CarryForwardStage) \
+    ->Name("LevelSetPipeline/CarryForwardStage/" SHAPE_LABEL "/" METRIC_LABEL "/" STAGE_LABEL "/24x" #STEPS) \
+    ->Args({24, STEPS, static_cast<int>(ShapeCase::SHAPE_ENUM), \
+      static_cast<int>(MetricCase::METRIC_ENUM), \
+      static_cast<int>(StageCase::STAGE_ENUM)}) \
+    ->Unit(benchmark::kMillisecond);
+
   RODIN_CUT_EXACT_BENCH("Circle", CircleOrbit)
   RODIN_CUT_EXACT_BENCH("Square", SquareOrbit)
   RODIN_CUT_EXACT_BENCH("Triangle", TriangleOrbit)
   RODIN_CUT_EXACT_BENCH("CircleEnterLeave", CircleEnterLeave)
+  RODIN_CUT_EXACT_BENCH("CircleFigureEight", CircleFigureEight)
+  RODIN_CUT_EXACT_BENCH("SquareFigureEight", SquareFigureEight)
+  RODIN_CUT_EXACT_BENCH("TriangleFigureEight", TriangleFigureEight)
+  RODIN_CUT_EXACT_BENCH("WavyCircle", WavyCircleOrbit)
+  RODIN_CUT_EXACT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight)
+  RODIN_CUT_EXACT_BENCH("WavyCircleEnterLeave", WavyCircleEnterLeave)
 
   RODIN_CUT_QUALITY_BENCH("Circle", CircleOrbit, 24)
   RODIN_CUT_QUALITY_BENCH("Circle", CircleOrbit, 48)
   RODIN_CUT_QUALITY_BENCH("Square", SquareOrbit, 24)
   RODIN_CUT_QUALITY_BENCH("Triangle", TriangleOrbit, 24)
   RODIN_CUT_QUALITY_BENCH("CircleEnterLeave", CircleEnterLeave, 24)
+  RODIN_CUT_QUALITY_BENCH("CircleFigureEight", CircleFigureEight, 24)
+  RODIN_CUT_QUALITY_BENCH("SquareFigureEight", SquareFigureEight, 24)
+  RODIN_CUT_QUALITY_BENCH("TriangleFigureEight", TriangleFigureEight, 24)
+  RODIN_CUT_QUALITY_BENCH("WavyCircle", WavyCircleOrbit, 24)
+  RODIN_CUT_QUALITY_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, 24)
+  RODIN_CUT_QUALITY_BENCH("WavyCircleEnterLeave", WavyCircleEnterLeave, 24)
 
   RODIN_TMOP_METRIC_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance)
   RODIN_TMOP_METRIC_BENCH("Circle", CircleOrbit, "AreaDistortion", AreaDistortion)
@@ -877,6 +1230,15 @@ namespace Rodin::Tests::Benchmarks
   RODIN_TMOP_METRIC_BENCH("CircleEnterLeave", CircleEnterLeave, "AreaDistortion", AreaDistortion)
   RODIN_TMOP_METRIC_BENCH("CircleEnterLeave", CircleEnterLeave, "ShapeSize", ShapeSize)
   RODIN_TMOP_METRIC_BENCH("CircleEnterLeave", CircleEnterLeave, "ShapeDistortion", ShapeDistortion)
+  RODIN_TMOP_METRIC_BENCH("CircleFigureEight", CircleFigureEight, "SquaredDistance", SquaredDistance)
+  RODIN_TMOP_METRIC_BENCH("SquareFigureEight", SquareFigureEight, "SquaredDistance", SquaredDistance)
+  RODIN_TMOP_METRIC_BENCH("TriangleFigureEight", TriangleFigureEight, "SquaredDistance", SquaredDistance)
+  RODIN_TMOP_METRIC_BENCH("WavyCircle", WavyCircleOrbit, "SquaredDistance", SquaredDistance)
+  RODIN_TMOP_METRIC_BENCH("WavyCircle", WavyCircleOrbit, "AreaDistortion", AreaDistortion)
+  RODIN_TMOP_METRIC_BENCH("WavyCircle", WavyCircleOrbit, "ShapeSize", ShapeSize)
+  RODIN_TMOP_METRIC_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance)
+  RODIN_TMOP_METRIC_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "AreaDistortion", AreaDistortion)
+  RODIN_TMOP_METRIC_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize)
 
   RODIN_WEIGHT_FRESH_BENCH("Circle", CircleOrbit, 50)
   RODIN_WEIGHT_FRESH_BENCH("Circle", CircleOrbit, 100)
@@ -887,14 +1249,130 @@ namespace Rodin::Tests::Benchmarks
   RODIN_COARSEN_BENCH("Square", SquareOrbit)
   RODIN_COARSEN_BENCH("Triangle", TriangleOrbit)
   RODIN_COARSEN_BENCH("CircleEnterLeave", CircleEnterLeave)
+  RODIN_COARSEN_BENCH("CircleFigureEight", CircleFigureEight)
+  RODIN_COARSEN_BENCH("SquareFigureEight", SquareFigureEight)
+  RODIN_COARSEN_BENCH("TriangleFigureEight", TriangleFigureEight)
+  RODIN_COARSEN_BENCH("WavyCircle", WavyCircleOrbit)
+  RODIN_COARSEN_BENCH("WavyCircleFigureEight", WavyCircleFigureEight)
+
+  RODIN_STAGE_FRESH_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, "TMOPOnly", TMOPOnly)
+  RODIN_STAGE_FRESH_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, "OptimizeOnly", OptimizeOnly)
+  RODIN_STAGE_FRESH_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, "TMOPThenOptimize", TMOPThenOptimize)
+  RODIN_STAGE_FRESH_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, "OptimizeThenTMOP", OptimizeThenTMOP)
+  RODIN_STAGE_FRESH_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, "OptimizeNoFeature", OptimizeNoFeature)
+  RODIN_STAGE_FRESH_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, "OptimizeNoInterior", OptimizeNoInterior)
+  RODIN_STAGE_FRESH_BENCH("Circle", CircleOrbit, "AreaDistortion", AreaDistortion, "TMOPThenOptimize", TMOPThenOptimize)
+  RODIN_STAGE_FRESH_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize, "TMOPThenOptimize", TMOPThenOptimize)
+  RODIN_STAGE_FRESH_BENCH("Square", SquareOrbit, "SquaredDistance", SquaredDistance, "TMOPThenOptimize", TMOPThenOptimize)
+  RODIN_STAGE_FRESH_BENCH("Square", SquareOrbit, "AreaDistortion", AreaDistortion, "TMOPThenOptimize", TMOPThenOptimize)
+  RODIN_STAGE_FRESH_BENCH("Square", SquareOrbit, "ShapeSize", ShapeSize, "TMOPThenOptimize", TMOPThenOptimize)
+  RODIN_STAGE_FRESH_BENCH("Square", SquareOrbit, "SquaredDistance", SquaredDistance, "OptimizeOnly", OptimizeOnly)
+  RODIN_STAGE_FRESH_BENCH("Triangle", TriangleOrbit, "SquaredDistance", SquaredDistance, "TMOPThenOptimize", TMOPThenOptimize)
+  RODIN_STAGE_FRESH_BENCH("Triangle", TriangleOrbit, "AreaDistortion", AreaDistortion, "TMOPThenOptimize", TMOPThenOptimize)
+  RODIN_STAGE_FRESH_BENCH("Triangle", TriangleOrbit, "ShapeSize", ShapeSize, "TMOPThenOptimize", TMOPThenOptimize)
+  RODIN_STAGE_FRESH_BENCH("Triangle", TriangleOrbit, "SquaredDistance", SquaredDistance, "OptimizeOnly", OptimizeOnly)
+  RODIN_STAGE_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, "TMOPOnly", TMOPOnly)
+  RODIN_STAGE_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, "OptimizeOnly", OptimizeOnly)
+  RODIN_STAGE_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, "TMOPThenOptimize", TMOPThenOptimize)
+  RODIN_STAGE_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, "OptimizeThenTMOP", OptimizeThenTMOP)
+  RODIN_STAGE_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, "OptimizeNoFeature", OptimizeNoFeature)
+  RODIN_STAGE_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, "OptimizeNoInterior", OptimizeNoInterior)
+  RODIN_STAGE_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "AreaDistortion", AreaDistortion, "TMOPThenOptimize", TMOPThenOptimize)
+  RODIN_STAGE_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, "TMOPThenOptimize", TMOPThenOptimize)
 
   RODIN_ORBIT_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance)
+  BENCHMARK(BM_LevelSetPipeline_CarryForwardOrbit)
+    ->Name("LevelSetPipeline/CarryForward/Circle/SquaredDistance/24x20")
+    ->Args({24, 20, static_cast<int>(ShapeCase::CircleOrbit),
+      static_cast<int>(MetricCase::SquaredDistance)})
+    ->Unit(benchmark::kMillisecond);
   RODIN_ORBIT_BENCH("Circle", CircleOrbit, "AreaDistortion", AreaDistortion)
+  BENCHMARK(BM_LevelSetPipeline_CarryForwardOrbit)
+    ->Name("LevelSetPipeline/CarryForward/Circle/AreaDistortion/24x20")
+    ->Args({24, 20, static_cast<int>(ShapeCase::CircleOrbit),
+      static_cast<int>(MetricCase::AreaDistortion)})
+    ->Unit(benchmark::kMillisecond);
   RODIN_ORBIT_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize)
+  BENCHMARK(BM_LevelSetPipeline_CarryForwardOrbit)
+    ->Name("LevelSetPipeline/CarryForward/Circle/ShapeSize/24x20")
+    ->Args({24, 20, static_cast<int>(ShapeCase::CircleOrbit),
+      static_cast<int>(MetricCase::ShapeSize)})
+    ->Unit(benchmark::kMillisecond);
   RODIN_ORBIT_BENCH("Circle", CircleOrbit, "ShapeDistortion", ShapeDistortion)
   RODIN_ORBIT_BENCH("Square", SquareOrbit, "SquaredDistance", SquaredDistance)
+  RODIN_ORBIT_BENCH("Square", SquareOrbit, "AreaDistortion", AreaDistortion)
+  RODIN_ORBIT_BENCH("Square", SquareOrbit, "ShapeSize", ShapeSize)
   RODIN_ORBIT_BENCH("Triangle", TriangleOrbit, "SquaredDistance", SquaredDistance)
+  RODIN_ORBIT_BENCH("Triangle", TriangleOrbit, "AreaDistortion", AreaDistortion)
+  RODIN_ORBIT_BENCH("Triangle", TriangleOrbit, "ShapeSize", ShapeSize)
   RODIN_ORBIT_BENCH("CircleEnterLeave", CircleEnterLeave, "SquaredDistance", SquaredDistance)
+  RODIN_ORBIT_BENCH("CircleFigureEight", CircleFigureEight, "SquaredDistance", SquaredDistance)
+  RODIN_ORBIT_BENCH("SquareFigureEight", SquareFigureEight, "SquaredDistance", SquaredDistance)
+  RODIN_ORBIT_BENCH("TriangleFigureEight", TriangleFigureEight, "SquaredDistance", SquaredDistance)
+  RODIN_ORBIT_BENCH("WavyCircle", WavyCircleOrbit, "SquaredDistance", SquaredDistance)
+  RODIN_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance)
+  RODIN_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "AreaDistortion", AreaDistortion)
+  RODIN_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize)
+  RODIN_ORBIT_BENCH("WavyCircleEnterLeave", WavyCircleEnterLeave, "SquaredDistance", SquaredDistance)
+
+  RODIN_STAGE_ORBIT_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, "TMOPOnly", TMOPOnly, 8)
+  RODIN_STAGE_ORBIT_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, "OptimizeOnly", OptimizeOnly, 8)
+  RODIN_STAGE_ORBIT_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, "TMOPThenOptimize", TMOPThenOptimize, 8)
+  RODIN_STAGE_ORBIT_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, "OptimizeThenTMOP", OptimizeThenTMOP, 8)
+  RODIN_STAGE_ORBIT_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, "OptimizeOnly", OptimizeOnly, 20)
+  RODIN_STAGE_ORBIT_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, "TMOPThenOptimize", TMOPThenOptimize, 20)
+  RODIN_STAGE_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, "TMOPOnly", TMOPOnly, 8)
+  RODIN_STAGE_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, "OptimizeOnly", OptimizeOnly, 8)
+  RODIN_STAGE_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, "TMOPThenOptimize", TMOPThenOptimize, 8)
+  RODIN_STAGE_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, "OptimizeThenTMOP", OptimizeThenTMOP, 8)
+  RODIN_STAGE_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, "OptimizeOnly", OptimizeOnly, 20)
+  RODIN_STAGE_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, "TMOPThenOptimize", TMOPThenOptimize, 20)
+
+  BENCHMARK(BM_LevelSetPipeline_CarryForwardOrbit)
+    ->Name("LevelSetPipeline/CarryForward/Square/SquaredDistance/24x20")
+    ->Args({24, 20, static_cast<int>(ShapeCase::SquareOrbit),
+      static_cast<int>(MetricCase::SquaredDistance)})
+    ->Unit(benchmark::kMillisecond);
+  BENCHMARK(BM_LevelSetPipeline_CarryForwardOrbit)
+    ->Name("LevelSetPipeline/CarryForward/Square/AreaDistortion/24x20")
+    ->Args({24, 20, static_cast<int>(ShapeCase::SquareOrbit),
+      static_cast<int>(MetricCase::AreaDistortion)})
+    ->Unit(benchmark::kMillisecond);
+  BENCHMARK(BM_LevelSetPipeline_CarryForwardOrbit)
+    ->Name("LevelSetPipeline/CarryForward/Square/ShapeSize/24x20")
+    ->Args({24, 20, static_cast<int>(ShapeCase::SquareOrbit),
+      static_cast<int>(MetricCase::ShapeSize)})
+    ->Unit(benchmark::kMillisecond);
+  BENCHMARK(BM_LevelSetPipeline_CarryForwardOrbit)
+    ->Name("LevelSetPipeline/CarryForward/Triangle/SquaredDistance/24x20")
+    ->Args({24, 20, static_cast<int>(ShapeCase::TriangleOrbit),
+      static_cast<int>(MetricCase::SquaredDistance)})
+    ->Unit(benchmark::kMillisecond);
+  BENCHMARK(BM_LevelSetPipeline_CarryForwardOrbit)
+    ->Name("LevelSetPipeline/CarryForward/Triangle/AreaDistortion/24x20")
+    ->Args({24, 20, static_cast<int>(ShapeCase::TriangleOrbit),
+      static_cast<int>(MetricCase::AreaDistortion)})
+    ->Unit(benchmark::kMillisecond);
+  BENCHMARK(BM_LevelSetPipeline_CarryForwardOrbit)
+    ->Name("LevelSetPipeline/CarryForward/Triangle/ShapeSize/24x20")
+    ->Args({24, 20, static_cast<int>(ShapeCase::TriangleOrbit),
+      static_cast<int>(MetricCase::ShapeSize)})
+    ->Unit(benchmark::kMillisecond);
+  BENCHMARK(BM_LevelSetPipeline_CarryForwardOrbit)
+    ->Name("LevelSetPipeline/CarryForward/WavyCircleFigureEight/SquaredDistance/24x20")
+    ->Args({24, 20, static_cast<int>(ShapeCase::WavyCircleFigureEight),
+      static_cast<int>(MetricCase::SquaredDistance)})
+    ->Unit(benchmark::kMillisecond);
+  BENCHMARK(BM_LevelSetPipeline_CarryForwardOrbit)
+    ->Name("LevelSetPipeline/CarryForward/WavyCircleFigureEight/AreaDistortion/24x20")
+    ->Args({24, 20, static_cast<int>(ShapeCase::WavyCircleFigureEight),
+      static_cast<int>(MetricCase::AreaDistortion)})
+    ->Unit(benchmark::kMillisecond);
+  BENCHMARK(BM_LevelSetPipeline_CarryForwardOrbit)
+    ->Name("LevelSetPipeline/CarryForward/WavyCircleFigureEight/ShapeSize/24x20")
+    ->Args({24, 20, static_cast<int>(ShapeCase::WavyCircleFigureEight),
+      static_cast<int>(MetricCase::ShapeSize)})
+    ->Unit(benchmark::kMillisecond);
 
   RODIN_WEIGHT_ORBIT_BENCH("Circle", CircleOrbit, 50)
   RODIN_WEIGHT_ORBIT_BENCH("Circle", CircleOrbit, 100)
@@ -907,4 +1385,6 @@ namespace Rodin::Tests::Benchmarks
 #undef RODIN_ORBIT_BENCH
 #undef RODIN_WEIGHT_FRESH_BENCH
 #undef RODIN_WEIGHT_ORBIT_BENCH
+#undef RODIN_STAGE_FRESH_BENCH
+#undef RODIN_STAGE_ORBIT_BENCH
 }

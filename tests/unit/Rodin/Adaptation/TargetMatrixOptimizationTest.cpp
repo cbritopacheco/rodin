@@ -920,6 +920,10 @@ namespace Rodin::Tests::Unit
       tangent.getOperator() * displacement.getData() - residual.getVector();
     EXPECT_NEAR(mismatch.norm(), 0, 1e-13);
     EXPECT_GT(residual.getVector().dot(displacement.getData()), 0);
+    EXPECT_NEAR(
+        residual.getVector().dot(displacement.getData()),
+        2 * term.energy(displacement),
+        1e-13);
   }
 
   TEST(Rodin_Adaptation_TargetMatrixOptimization, QualityTermResidualAndTangentAreConsistent)
