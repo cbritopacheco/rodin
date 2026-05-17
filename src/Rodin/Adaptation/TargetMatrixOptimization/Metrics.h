@@ -20,34 +20,56 @@
 
 namespace Rodin::Adaptation::TargetMatrixOptimization
 {
-  using Matrix2 = Math::FixedSizeMatrix<Real, 2, 2>;
+  using Matrix2 = Math::SpatialMatrix<Real>;
 
+  /// Frobenius inner product, any (matching) dimension.
   inline Real matrixInner2D(const Matrix2& a, const Matrix2& b)
   {
-    return a(0, 0) * b(0, 0) + a(0, 1) * b(0, 1)
-         + a(1, 0) * b(1, 0) + a(1, 1) * b(1, 1);
+    Real s = 0;
+    for (std::uint8_t i = 0; i < a.rows(); ++i)
+      for (std::uint8_t j = 0; j < a.cols(); ++j)
+        s += a(i, j) * b(i, j);
+    return s;
   }
 
   /**
-   * @brief Derivative of det(M) with respect to a 2x2 matrix M.
+   * @brief Cofactor (derivative of det) of a square matrix, n in {1,2,3}.
    *
-   * For @f$M = \begin{pmatrix}a&b\\c&d\end{pmatrix}@f$ this returns the
-   * cofactor matrix @f$\begin{pmatrix}d&-c\\-b&a\end{pmatrix}@f$, so
-   * @f$d\,\det(M)[H] = \mathrm{cof}(M):H@f$.
+   * Returns @f$C@f$ with @f$d\,\det(M)[H] = C:H@f$, i.e. the cofactor matrix
+   * (@f$C_{ij} = \partial\det/\partial M_{ij}@f$). Sized from M so the strict
+   * TMOP path is dimension-generic; the 2x2 branch is byte-identical to the
+   * previous fixed implementation.
    */
   inline Matrix2 cofactor2D(const Matrix2& M)
   {
-    Matrix2 C;
-    C(0, 0) =  M(1, 1);
-    C(0, 1) = -M(1, 0);
-    C(1, 0) = -M(0, 1);
-    C(1, 1) =  M(0, 0);
+    const std::uint8_t n = M.rows();
+    Matrix2 C(n, n);
+    if (n == 1)
+    {
+      C(0, 0) = Real(1);
+      return C;
+    }
+    if (n == 2)
+    {
+      C(0, 0) =  M(1, 1);
+      C(0, 1) = -M(1, 0);
+      C(1, 0) = -M(0, 1);
+      C(1, 1) =  M(0, 0);
+      return C;
+    }
+    for (std::uint8_t i = 0; i < 3; ++i)
+      for (std::uint8_t j = 0; j < 3; ++j)
+      {
+        const std::uint8_t i1 = (i + 1) % 3, i2 = (i + 2) % 3;
+        const std::uint8_t j1 = (j + 1) % 3, j2 = (j + 2) % 3;
+        C(i, j) = M(i1, j1) * M(i2, j2) - M(i1, j2) * M(i2, j1);
+      }
     return C;
   }
 
   struct Target
   {
-    Matrix2 W = Matrix2::Identity();
+    Matrix2 W = Matrix2::Identity(2, 2);
   };
 
   /**
@@ -74,10 +96,11 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
   {
     public:
       Matrix2 evaluate(
-          const Geometry::Polytope&,
+          const Geometry::Polytope& cell,
           const Math::SpatialPoint&) const
       {
-        return Matrix2::Identity();
+        const auto d = static_cast<std::uint8_t>(cell.getDimension());
+        return Matrix2::Identity(d, d);
       }
   };
 
@@ -89,7 +112,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
     const auto x1 = mesh.getVertexCoordinates(vertices(1));
     const auto x2 = mesh.getVertexCoordinates(vertices(2));
 
-    Matrix2 W;
+    Matrix2 W(2, 2);
     W(0, 0) = x1[0] - x0[0];
     W(0, 1) = x2[0] - x0[0];
     W(1, 0) = x1[1] - x0[1];
@@ -116,7 +139,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       explicit InitialElementTargetJacobian(const Mesh& mesh)
       {
         const auto& conn = mesh.getConnectivity();
-        m_targets.resize(mesh.getCellCount(), Matrix2::Identity());
+        m_targets.resize(mesh.getCellCount(), Matrix2::Identity(static_cast<std::uint8_t>(mesh.getDimension()), static_cast<std::uint8_t>(mesh.getDimension())));
         for (Index cellIndex = 0;
              cellIndex < static_cast<Index>(mesh.getCellCount());
              ++cellIndex)
@@ -171,7 +194,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       explicit EquilateralSameAreaTargetJacobian(const Mesh& mesh)
       {
         const auto& conn = mesh.getConnectivity();
-        m_targets.resize(mesh.getCellCount(), Matrix2::Identity());
+        m_targets.resize(mesh.getCellCount(), Matrix2::Identity(static_cast<std::uint8_t>(mesh.getDimension()), static_cast<std::uint8_t>(mesh.getDimension())));
         for (Index cellIndex = 0;
              cellIndex < static_cast<Index>(mesh.getCellCount());
              ++cellIndex)
@@ -203,7 +226,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         if (area <= Real(1e-30))
           return A0;
         const Real l = std::sqrt(Real(4) * area / std::sqrt(Real(3)));
-        Matrix2 W;
+        Matrix2 W(2, 2);
         W(0, 0) = l;
         W(0, 1) = Real(0.5) * l;
         W(1, 0) = Real(0);
@@ -233,7 +256,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       explicit OrientedEquilateralSameAreaTargetJacobian(const Mesh& mesh)
       {
         const auto& conn = mesh.getConnectivity();
-        m_targets.resize(mesh.getCellCount(), Matrix2::Identity());
+        m_targets.resize(mesh.getCellCount(), Matrix2::Identity(static_cast<std::uint8_t>(mesh.getDimension()), static_cast<std::uint8_t>(mesh.getDimension())));
         for (Index cellIndex = 0;
              cellIndex < static_cast<Index>(mesh.getCellCount());
              ++cellIndex)
@@ -271,7 +294,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         if (n <= Real(1e-30))
           return E;
 
-        Matrix2 R;
+        Matrix2 R(2, 2);
         const Real c = c0 / n;
         const Real s = s0 / n;
         R(0, 0) = c;
@@ -298,7 +321,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
     const Math::SpatialPoint rc = traits.getCentroid();
     const Geometry::Point point(cell, rc);
     const auto& J = point.getJacobian();
-    Matrix2 W;
+    Matrix2 W(2, 2);
     W(0, 0) = J(0, 0);
     W(0, 1) = J(0, 1);
     W(1, 0) = J(1, 0);
@@ -319,7 +342,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
   {
     public:
       ConstantTargetJacobian()
-        : m_W(Matrix2::Identity())
+        : m_W(Matrix2::Identity(2, 2))
       {}
 
       explicit ConstantTargetJacobian(const Matrix2& W)
@@ -340,12 +363,12 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
 
       static ConstantTargetJacobian identity()
       {
-        return ConstantTargetJacobian(Matrix2::Identity());
+        return ConstantTargetJacobian(Matrix2::Identity(2, 2));
       }
 
       static ConstantTargetJacobian uniformScale(Real s)
       {
-        Matrix2 W = Matrix2::Identity();
+        Matrix2 W = Matrix2::Identity(2, 2);
         W(0, 0) = s;
         W(1, 1) = s;
         return ConstantTargetJacobian(W);
@@ -353,7 +376,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
 
       static ConstantTargetJacobian diagonal(Real sx, Real sy)
       {
-        Matrix2 W = Matrix2::Zero();
+        Matrix2 W = Matrix2(2, 2);
         W(0, 0) = sx;
         W(1, 1) = sy;
         return ConstantTargetJacobian(W);
@@ -363,7 +386,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       {
         const Real c = std::cos(theta);
         const Real s = std::sin(theta);
-        Matrix2 W;
+        Matrix2 W(2, 2);
         W(0, 0) = c;
         W(0, 1) = -s;
         W(1, 0) = s;
@@ -376,7 +399,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         const Real c = std::cos(theta);
         const Real s = std::sin(theta);
         // W = R(theta) * diag(sx, sy).
-        Matrix2 W;
+        Matrix2 W(2, 2);
         W(0, 0) = c * sx;
         W(0, 1) = -s * sy;
         W(1, 0) = s * sx;
@@ -445,7 +468,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       explicit IsoparametricTargetJacobian(const Mesh& mesh)
       {
         const auto& conn = mesh.getConnectivity();
-        m_targets.resize(mesh.getCellCount(), Matrix2::Identity());
+        m_targets.resize(mesh.getCellCount(), Matrix2::Identity(static_cast<std::uint8_t>(mesh.getDimension()), static_cast<std::uint8_t>(mesh.getDimension())));
         for (Index cellIndex = 0;
              cellIndex < static_cast<Index>(mesh.getCellCount());
              ++cellIndex)
@@ -537,12 +560,13 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
     public:
       Real value(const Matrix2& T) const override
       {
-        return Real(0.5) * (T - Matrix2::Identity()).squaredNorm();
+        return Real(0.5)
+          * (T - Matrix2::Identity(T.rows(), T.cols())).squaredNorm();
       }
 
       Matrix2 gradient(const Matrix2& T) const
       {
-        return T - Matrix2::Identity();
+        return T - Matrix2::Identity(T.rows(), T.cols());
       }
 
       Matrix2 hessianAction(const Matrix2&, const Matrix2& dT) const

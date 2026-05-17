@@ -48,7 +48,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       Real getValue(const Geometry::Point& point) const
       {
         const auto& J = point.getJacobian();
-        Matrix2 A;
+        Matrix2 A(2, 2);
         A(0, 0) = J(0, 0);
         A(0, 1) = J(0, 1);
         A(1, 0) = J(1, 0);

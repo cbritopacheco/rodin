@@ -75,18 +75,24 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
 
   inline Real frobeniusInner(const Matrix2& a, const Matrix2& b)
   {
-    return a(0, 0) * b(0, 0) + a(0, 1) * b(0, 1)
-         + a(1, 0) * b(1, 0) + a(1, 1) * b(1, 1);
+    Real s = 0;
+    for (std::uint8_t i = 0; i < a.rows(); ++i)
+      for (std::uint8_t j = 0; j < a.cols(); ++j)
+        s += a(i, j) * b(i, j);
+    return s;
   }
 
+  // Copies an arbitrary (square) matrix-like into a SpatialMatrix sized from
+  // the source, so the strict path is dimension-generic. 2D is unchanged.
   template <class MatrixType>
   Matrix2 toMatrix2(const MatrixType& matrix)
   {
-    Matrix2 out;
-    out(0, 0) = matrix(0, 0);
-    out(0, 1) = matrix(0, 1);
-    out(1, 0) = matrix(1, 0);
-    out(1, 1) = matrix(1, 1);
+    const auto r = static_cast<std::uint8_t>(matrix.rows());
+    const auto c = static_cast<std::uint8_t>(matrix.cols());
+    Matrix2 out(r, c);
+    for (std::uint8_t i = 0; i < r; ++i)
+      for (std::uint8_t j = 0; j < c; ++j)
+        out(i, j) = matrix(i, j);
     return out;
   }
 
@@ -130,7 +136,8 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
     const size_t localSize = fe.getCount();
     requireStrictTMOPCell(cell, vdim, localSize);
 
-    Matrix2 A = Matrix2::Zero();
+    Matrix2 A(static_cast<std::uint8_t>(vdim),
+              static_cast<std::uint8_t>(vdim));
     const auto& data = u.getData();
     const size_t scalarLocalSize = localSize / vdim;
     for (size_t node = 0; node < scalarLocalSize; ++node)
@@ -191,45 +198,57 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
           return *m_polytope;
         }
 
+        // Per-cell cache. The deformed Jacobian, target, T and metric
+        // gradient are functions of the cell+quadrature only (NOT of the test
+        // dof), and basisJacobian2D depends only on (local, q). Computing them
+        // once per cell here turns integrate(local) into a cheap contraction
+        // instead of recomputing the heavy Geometry::Point-based Jacobian for
+        // every local dof (the dominant assembly cost).
         TMOPQualityResidualIntegrator& setPolytope(
             const Geometry::Polytope& polytope) override
         {
           m_polytope = &polytope;
-          return *this;
-        }
-
-        Real integrate(size_t local) override
-        {
-          assert(m_polytope);
-          const auto& cell = *m_polytope;
+          const auto& cell = polytope;
           const auto& fes = m_u.get().getFiniteElementSpace();
           const auto& fe = fes.getFiniteElement(
               cell.getDimension(), cell.getIndex());
           requireStrictTMOPCell(cell, fes.getVectorDimension(), fe.getCount());
-          if (local >= fe.getCount())
-            return 0;
-
-          Real value = 0;
+          m_localCount = fe.getCount();
           const auto geometry =
             cell.getMesh().getGeometry(cell.getDimension(), cell.getIndex());
           const auto& qf =
             QF::PolytopeQuadratureFormula::get(m_quadratureOrder, geometry);
-          for (size_t q = 0; q < qf.getSize(); ++q)
+          const size_t nq = qf.getSize();
+          m_wdetW.assign(nq, 0);
+          const auto d = static_cast<std::uint8_t>(fes.getVectorDimension());
+          m_G.assign(nq, Matrix2(d, d));
+          m_dT.assign(nq, std::vector<Matrix2>(m_localCount));
+          for (size_t q = 0; q < nq; ++q)
           {
             const auto& rc = qf.getPoint(q);
-            const Matrix2 A =
-              deformedCoordinateJacobian(m_u.get(), cell, rc);
+            const Matrix2 A = deformedCoordinateJacobian(m_u.get(), cell, rc);
             const Matrix2 W = m_target.evaluate(cell, rc);
             const Real detW = W.determinant();
             if (std::abs(detW) <= Real(1e-30))
               throw std::runtime_error(
                   "TMOP::QualityTerm target Jacobian is singular.");
             const Matrix2 Winv = W.inverse();
-            const Matrix2 T = A * Winv;
-            const Matrix2 dT = basisJacobian2D(fe, local, rc) * Winv;
-            value += qf.getWeight(q) * detW
-              * frobeniusInner(m_metric.gradient(T), dT);
+            m_wdetW[q] = qf.getWeight(q) * detW;
+            m_G[q] = m_metric.gradient(A * Winv);
+            for (size_t l = 0; l < m_localCount; ++l)
+              m_dT[q][l] = basisJacobian2D(fe, l, rc) * Winv;
           }
+          return *this;
+        }
+
+        Real integrate(size_t local) override
+        {
+          if (local >= m_localCount)
+            return 0;
+          Real value = 0;
+          for (size_t q = 0; q < m_wdetW.size(); ++q)
+            value += m_wdetW[q]
+              * frobeniusInner(m_G[q], m_dT[q][local]);
           return m_weight * value;
         }
 
@@ -250,6 +269,10 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         Real m_weight = 1;
         size_t m_quadratureOrder = 2;
         const Geometry::Polytope* m_polytope = nullptr;
+        size_t m_localCount = 0;
+        std::vector<Real> m_wdetW;
+        std::vector<Matrix2> m_G;
+        std::vector<std::vector<Matrix2>> m_dT;
     };
 
   template <class GridFunctionType, class Metric, class TargetJacobian>
@@ -293,34 +316,33 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
           return *m_polytope;
         }
 
+        // Per-cell cache: A, T, target and the metric Hessian action on every
+        // trial dof are functions of (cell, quadrature) only. Precomputing
+        // them here makes integrate(trial,test) an O(nq) contraction instead
+        // of recomputing the Geometry::Point-based deformed Jacobian and the
+        // metric Hessian for every one of the O(localDofs^2) dof pairs.
         TMOPQualityTangentIntegrator& setPolytope(
             const Geometry::Polytope& polytope) override
         {
           m_polytope = &polytope;
-          return *this;
-        }
-
-        Real integrate(size_t trial, size_t test) override
-        {
-          assert(m_polytope);
-          const auto& cell = *m_polytope;
+          const auto& cell = polytope;
           const auto& fes = m_u.get().getFiniteElementSpace();
           const auto& fe = fes.getFiniteElement(
               cell.getDimension(), cell.getIndex());
           requireStrictTMOPCell(cell, fes.getVectorDimension(), fe.getCount());
-          if (trial >= fe.getCount() || test >= fe.getCount())
-            return 0;
-
-          Real value = 0;
+          m_localCount = fe.getCount();
           const auto geometry =
             cell.getMesh().getGeometry(cell.getDimension(), cell.getIndex());
           const auto& qf =
             QF::PolytopeQuadratureFormula::get(m_quadratureOrder, geometry);
-          for (size_t q = 0; q < qf.getSize(); ++q)
+          const size_t nq = qf.getSize();
+          m_wdetW.assign(nq, 0);
+          m_dT.assign(nq, std::vector<Matrix2>(m_localCount));
+          m_Hd.assign(nq, std::vector<Matrix2>(m_localCount));
+          for (size_t q = 0; q < nq; ++q)
           {
             const auto& rc = qf.getPoint(q);
-            const Matrix2 A =
-              deformedCoordinateJacobian(m_u.get(), cell, rc);
+            const Matrix2 A = deformedCoordinateJacobian(m_u.get(), cell, rc);
             const Matrix2 W = m_target.evaluate(cell, rc);
             const Real detW = W.determinant();
             if (std::abs(detW) <= Real(1e-30))
@@ -328,13 +350,23 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
                   "TMOP::QualityTerm target Jacobian is singular.");
             const Matrix2 Winv = W.inverse();
             const Matrix2 T = A * Winv;
-            const Matrix2 dTTrial = basisJacobian2D(fe, trial, rc) * Winv;
-            const Matrix2 dTTest = basisJacobian2D(fe, test, rc) * Winv;
-            value += qf.getWeight(q) * detW
-              * frobeniusInner(
-                  m_metric.hessianAction(T, dTTrial),
-                  dTTest);
+            m_wdetW[q] = qf.getWeight(q) * detW;
+            for (size_t l = 0; l < m_localCount; ++l)
+              m_dT[q][l] = basisJacobian2D(fe, l, rc) * Winv;
+            for (size_t l = 0; l < m_localCount; ++l)
+              m_Hd[q][l] = m_metric.hessianAction(T, m_dT[q][l]);
           }
+          return *this;
+        }
+
+        Real integrate(size_t trial, size_t test) override
+        {
+          if (trial >= m_localCount || test >= m_localCount)
+            return 0;
+          Real value = 0;
+          for (size_t q = 0; q < m_wdetW.size(); ++q)
+            value += m_wdetW[q]
+              * frobeniusInner(m_Hd[q][trial], m_dT[q][test]);
           return m_weight * value;
         }
 
@@ -355,6 +387,10 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         Real m_weight = 1;
         size_t m_quadratureOrder = 2;
         const Geometry::Polytope* m_polytope = nullptr;
+        size_t m_localCount = 0;
+        std::vector<Real> m_wdetW;
+        std::vector<std::vector<Matrix2>> m_dT;
+        std::vector<std::vector<Matrix2>> m_Hd;
     };
 
   template <class GridFunctionType>

@@ -221,7 +221,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
           Real(4) * L1,
           Real(4) * (L0 - L2) }};
 
-        Matrix2 J = Matrix2::Zero();
+        Matrix2 J = Matrix2(2, 2);
         for (std::uint8_t i = 0; i < 6; ++i)
         {
           const auto& x = geometry.nodes[c[i]].x;
