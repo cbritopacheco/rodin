@@ -22,13 +22,13 @@ gtest_discover_tests(RodinGeometryMeshTest
     LABELS unit
 )
 
-add_executable(RodinGeometryIsoparametricTransformationTest IsoparametricTransformationTest.cpp)
-target_link_libraries(RodinGeometryIsoparametricTransformationTest
+add_executable(RodinGeometryParametricTransformationTest ParametricTransformationTest.cpp)
+target_link_libraries(RodinGeometryParametricTransformationTest
   PUBLIC
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryIsoparametricTransformationTest
+gtest_discover_tests(RodinGeometryParametricTransformationTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit

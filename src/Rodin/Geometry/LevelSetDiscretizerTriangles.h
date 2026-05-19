@@ -206,6 +206,20 @@ namespace Rodin::Geometry
         return *this;
       }
 
+      /**
+       * @brief Sets the optional fallback attribute for invalid/all-zero cells.
+       *
+       * Such cells are reported with LevelSetSide::Degenerate because there is
+       * no unique negative/positive side decision. If unset, the parent cell
+       * attribute is preserved.
+       */
+      LevelSetDiscretizerTriangles& setDegenerateCellAttribute(
+          const Optional<Attribute>& attr)
+      {
+        m_degenerateCellAttribute = attr;
+        return *this;
+      }
+
       LevelSetDiscretizerTriangles& setDiagnosticTolerance(Real tol)
       {
         m_diagnosticTolerance = std::max(Real(0), tol);
@@ -449,6 +463,8 @@ namespace Rodin::Geometry
             return m_negativeCellAttribute;
           if (side == LevelSetSide::Positive && m_positiveCellAttribute)
             return m_positiveCellAttribute;
+          if (side == LevelSetSide::Degenerate && m_degenerateCellAttribute)
+            return m_degenerateCellAttribute;
           return mesh.getCellAttribute(parentCell);
         };
 
@@ -883,6 +899,7 @@ namespace Rodin::Geometry
       Optional<Attribute> m_interfaceAttribute;
       Optional<Attribute> m_negativeCellAttribute;
       Optional<Attribute> m_positiveCellAttribute;
+      Optional<Attribute> m_degenerateCellAttribute;
       Real m_diagnosticTolerance = 1e-10;
       Real m_crossingSnapTolerance = 0;
       Real m_areaTolerance = 1e-14;

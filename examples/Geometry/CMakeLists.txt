@@ -84,3 +84,12 @@ target_link_libraries(LevelSetMovingCircle
   Rodin::IO
   Rodin::MMG
   Rodin::Variational)
+
+add_executable(LevelSetMovingCurvedCircle LevelSetMovingCurvedCircle.cpp)
+target_link_libraries(LevelSetMovingCurvedCircle
+  PUBLIC
+  Rodin::Adaptation
+  Rodin::Geometry
+  Rodin::IO
+  Rodin::MMG
+  Rodin::Variational)

@@ -4,6 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include "Rodin/Adaptation/TargetMatrixOptimization/Metrics.h"
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -180,22 +181,26 @@ namespace
     }
   }
 
-  void reclassifyCells(LocalMesh& mesh, Real t)
+  std::vector<Math::SpatialPoint> vertexCoordinates(const LocalMesh& mesh)
   {
-    const auto& conn = mesh.getConnectivity();
-    for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()); ++c)
-    {
-      const auto& cell = conn.getPolytope(2, c);
-      const auto x0 = mesh.getVertexCoordinates(cell(0));
-      const auto x1 = mesh.getVertexCoordinates(cell(1));
-      const auto x2 = mesh.getVertexCoordinates(cell(2));
-      const Math::SpatialPoint centroid{
-        (x0[0] + x1[0] + x2[0]) / Real(3),
-        (x0[1] + x1[1] + x2[1]) / Real(3)
-      };
-      mesh.setAttribute({ 2, c },
-          phiAt(centroid, t) < 0 ? Negative : Positive);
-    }
+    std::vector<Math::SpatialPoint> coordinates;
+    coordinates.reserve(static_cast<size_t>(mesh.getVertexCount()));
+    for (Index v = 0; v < mesh.getVertexCount(); ++v)
+      coordinates.push_back(mesh.getVertexCoordinates(v));
+    return coordinates;
+  }
+
+  void restoreVertexCoordinates(
+      LocalMesh& mesh,
+      const std::vector<Math::SpatialPoint>& coordinates)
+  {
+    const Index count = std::min(
+        mesh.getVertexCount(),
+        static_cast<Index>(coordinates.size()));
+    for (Index v = 0; v < count; ++v)
+      mesh.setVertexCoordinates(v, coordinates[static_cast<size_t>(v)]);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
   }
 
   void demoteInterface(LocalMesh& mesh)
@@ -240,15 +245,20 @@ namespace
 
 int main(int, char**)
 {
-  constexpr size_t resolution = 48;
-  constexpr Index steps = 50;
+  constexpr size_t resolution = 32;
+  constexpr Index steps = 40;
   constexpr Real h = Real(1) / static_cast<Real>(resolution - 1);
 
   LocalMesh background =
     LocalMesh::UniformGrid(Polytope::Type::Triangle, { resolution, resolution });
   background.scale(h);
 
-  IO::XDMF xdmf("LevelSetMovingWavyCircle");
+  IO::XDMF xdmf("LevelSetMovingCircle");
+
+  // Diagnostics are accumulated and reported as an average over the whole
+  // process, not just the final step.
+  Real sumQmin = 0, sumFit = 0;
+  Index sumInverted = 0, rejectedTMOP = 0, diagSteps = 0;
 
   for (Index step = 0; step < steps; ++step)
   {
@@ -273,30 +283,58 @@ int main(int, char**)
       .discretize();
     annotateBoundary(cut.mesh);
 
-    P1 space(cut.mesh, cut.mesh.getSpaceDimension());
+    // ===== PRODUCTION / PDE-ready order =====
+    //   cut -> optimize/coarsen -> rebuild feature targets -> TMOP (last)
+    // Topology-changing operations (coarsen/swap/collapse/feature-smooth)
+    // run BEFORE TMOP. TMOP is the final mesh-quality recovery step before
+    // the PDE solve / export; nothing changes topology after it. The
+    // alternative cut -> TMOP -> optimize order is kept only as a
+    // benchmark-matrix diagnostic (StageCase), never as the main pipeline.
+
+    // 1) optimize / coarsen on the raw cut mesh (interface frozen, feature
+    //    vertices smoothed tangentially on phi=0).
+    LocalMesh optimized = cut.mesh;
+    {
+      const auto cutInterfaceMask = interfaceVertexMask(optimized);
+      const auto parameters =
+        TriangleMeshOptimizerParameters::levelSetCarryForward(h);
+      TriangleMeshOptimizer()
+        .setParameters(parameters)
+        .setFeatureProjection([t](const Math::SpatialPoint& x)
+          { return projectToInterface(x, t); })
+        .setProtectedVertices(cutInterfaceMask)
+        .optimize(optimized);
+    }
+    optimized.getConnectivity().compute(2, 1);
+    optimized.getConnectivity().compute(1, 0);
+
+    // 2) rebuild feature/target metadata on the CURRENT (coarsened) mesh.
+    //    Cut provenance is stale after topology changes, so the protected
+    //    feature mask and the per-cell target Jacobian are rebuilt here from
+    //    the coarsened mesh, before TMOP. The fit is analytic in phi(t), so
+    //    it is inherently current and needs no rebuild.
+    const auto featureMask = interfaceVertexMask(optimized);
+    IdealElementTargetJacobian target(optimized);
+
+    // 3) TMOP LAST: final mesh-quality recovery before PDE/export.
+    P1 space(optimized, optimized.getSpaceDimension());
+    optimized.getConnectivity().compute(1, 2);
     GridFunction u(space);
     u.getData().setZero();
     TrialFunction du(space);
     TestFunction v(space);
 
-    auto phiValue = [t](const Math::SpatialPoint& x)
-    {
-      return phiAt(x, t);
-    };
-    auto phiGradient = [t](const Math::SpatialPoint& x)
-    {
-      return gradPhiAt(x, t);
-    };
+    auto phiValue = [t](const Math::SpatialPoint& x) { return phiAt(x, t); };
+    auto phiGradient =
+      [t](const Math::SpatialPoint& x) { return gradPhiAt(x, t); };
 
-    QualityTerm quality(
-        SquaredDistanceMetric{},
-        OrientedEquilateralSameAreaTargetJacobian(cut.mesh),
-        0.05);
+    QualityTerm quality(ShapeSizeMetric{}, target, 0.03);
     DeviationTerm deviation(1.0);
     AnalyticLevelSetFitTerm fit(
         phiValue, phiGradient, Optional<Attribute>(Interface), 1.0);
     AnalyticLevelSetFitTerm boundaryFit(
-        boxBoundaryValue, boxBoundaryGradient, Optional<Attribute>(Boundary), 1.0);
+        boxBoundaryValue, boxBoundaryGradient,
+        Optional<Attribute>(Boundary), 1.0);
 
     Variational::Problem tmop(du, v);
     tmop = quality.tangent(u, du, v)
@@ -306,7 +344,9 @@ int main(int, char**)
          + quality.residual(u, v)
          + deviation.residual(u, v)
          + fit.residual(u, v)
-         + boundaryFit.residual(u, v);
+         + boundaryFit.residual(u, v)
+         // + DirichletBC(du, Zero(space.getMesh().getSpaceDimension()));
+         ;
 
     SparseLU solver{tmop};
     NewtonSolver newton(solver);
@@ -315,25 +355,27 @@ int main(int, char**)
           .setAbsoluteTolerance(1e-10)
           .setRelativeTolerance(1e-8);
     newton.solve(u);
-
-    LocalMesh optimized = cut.mesh;
+    const auto beforeTMOP = vertexCoordinates(optimized);
     applyDisplacement(optimized, u);
-
-    const auto protectedVertices = interfaceVertexMask(optimized);
-    const auto parameters = TriangleMeshOptimizerParameters::levelSetCarryForward(h);
-    TriangleMeshOptimizer()
-      .setParameters(parameters)
-      .setFeatureProjection([t](const Math::SpatialPoint& x)
-      {
-        return projectToInterface(x, t);
-      })
-      .setProtectedVertices(protectedVertices)
-      .optimize(optimized);
 
     optimized.getConnectivity().compute(2, 1);
     optimized.getConnectivity().compute(1, 0);
-    reclassifyCells(optimized, t);
+    const auto [tmopQmin, tmopInverted] = meshQuality(optimized);
+    const bool acceptedTMOP =
+      tmopInverted == 0 && std::isfinite(tmopQmin) && tmopQmin > Real(0);
+    if (!acceptedTMOP)
+    {
+      restoreVertexCoordinates(optimized, beforeTMOP);
+      ++rejectedTMOP;
+    }
+    optimized.getConnectivity().compute(2, 1);
+    optimized.getConnectivity().compute(1, 0);
+    // Cell side attributes come from the cutter's exact P1 side topology and
+    // are preserved through the optimizer. Do not overwrite them with a
+    // centroid phi heuristic after TMOP: fitted/interface-adjacent cells can be
+    // mis-tagged that way, especially under strong quality weights.
 
+    // 4) export (a PDE solve would run on `optimized` here).
     P1<Real, LocalMesh> outputSpace(optimized);
     GridFunction outputPhi(outputSpace);
     for (Index i = 0; i < optimized.getVertexCount(); ++i)
@@ -345,18 +387,40 @@ int main(int, char**)
     grid.add("phi", outputPhi, IO::XDMF::Center::Node);
     xdmf.write(t).flush();
 
+    // 5) diagnostics (accumulated for the whole-process average).
     const auto [qmin, inverted] = meshQuality(optimized);
+    Real fitErr = 0;
+    for (Index i = 0; i < optimized.getVertexCount(); ++i)
+      if (i < featureMask.size() && featureMask[i])
+        fitErr = std::max(fitErr,
+            std::abs(phiAt(optimized.getVertexCoordinates(i), t)));
+    sumQmin += qmin;
+    sumInverted += inverted;
+    sumFit += fitErr;
+    ++diagSteps;
     std::cout << "step " << step
               << " t=" << t
               << " cells=" << optimized.getCellCount()
               << " qmin=" << qmin
               << " inverted=" << inverted
+              << " fit=" << fitErr
+              << " tmop_accepted=" << (acceptedTMOP ? 1 : 0)
               << std::endl;
 
     demoteInterface(optimized);
+    optimized.flush();
     background = std::move(optimized);
   }
 
   xdmf.close();
+
+  if (diagSteps > 0)
+    std::cout << "AVERAGE over " << diagSteps << " steps:"
+              << " qmin=" << sumQmin / static_cast<Real>(diagSteps)
+              << " inverted="
+              << static_cast<Real>(sumInverted) / static_cast<Real>(diagSteps)
+              << " fit=" << sumFit / static_cast<Real>(diagSteps)
+              << " rejected_tmop=" << rejectedTMOP
+              << std::endl;
   return 0;
 }

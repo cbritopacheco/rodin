@@ -20,10 +20,10 @@
 
 namespace Rodin::Adaptation::TargetMatrixOptimization
 {
-  using Matrix2 = Math::SpatialMatrix<Real>;
-
   /// Frobenius inner product, any (matching) dimension.
-  inline Real matrixInner2D(const Matrix2& a, const Matrix2& b)
+  inline Real matrixInner2D(
+      const Math::SpatialMatrix<Real>& a,
+      const Math::SpatialMatrix<Real>& b)
   {
     Real s = 0;
     for (std::uint8_t i = 0; i < a.rows(); ++i)
@@ -40,10 +40,10 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
    * TMOP path is dimension-generic; the 2x2 branch is byte-identical to the
    * previous fixed implementation.
    */
-  inline Matrix2 cofactor2D(const Matrix2& M)
+  inline Math::SpatialMatrix<Real> cofactor2D(const Math::SpatialMatrix<Real>& M)
   {
     const std::uint8_t n = M.rows();
-    Matrix2 C(n, n);
+    Math::SpatialMatrix<Real> C(n, n);
     if (n == 1)
     {
       C(0, 0) = Real(1);
@@ -69,7 +69,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
 
   struct Target
   {
-    Matrix2 W = Matrix2::Identity(2, 2);
+    Math::SpatialMatrix<Real> W = Math::SpatialMatrix<Real>::Identity(2, 2);
   };
 
   /**
@@ -95,16 +95,16 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
   class IdentityTargetJacobian
   {
     public:
-      Matrix2 evaluate(
+      Math::SpatialMatrix<Real> evaluate(
           const Geometry::Polytope& cell,
           const Math::SpatialPoint&) const
       {
         const auto d = static_cast<std::uint8_t>(cell.getDimension());
-        return Matrix2::Identity(d, d);
+        return Math::SpatialMatrix<Real>::Identity(d, d);
       }
   };
 
-  inline Matrix2 linearCellJacobian2D(const Geometry::Polytope& cell)
+  inline Math::SpatialMatrix<Real> linearCellJacobian2D(const Geometry::Polytope& cell)
   {
     const auto& mesh = cell.getMesh();
     const auto& vertices = cell.getVertices();
@@ -112,7 +112,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
     const auto x1 = mesh.getVertexCoordinates(vertices(1));
     const auto x2 = mesh.getVertexCoordinates(vertices(2));
 
-    Matrix2 W(2, 2);
+    Math::SpatialMatrix<Real> W(2, 2);
     W(0, 0) = x1[0] - x0[0];
     W(0, 1) = x2[0] - x0[0];
     W(1, 0) = x1[1] - x0[1];
@@ -139,7 +139,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       explicit InitialElementTargetJacobian(const Mesh& mesh)
       {
         const auto& conn = mesh.getConnectivity();
-        m_targets.resize(mesh.getCellCount(), Matrix2::Identity(static_cast<std::uint8_t>(mesh.getDimension()), static_cast<std::uint8_t>(mesh.getDimension())));
+        m_targets.resize(mesh.getCellCount(), Math::SpatialMatrix<Real>::Identity(static_cast<std::uint8_t>(mesh.getDimension()), static_cast<std::uint8_t>(mesh.getDimension())));
         for (Index cellIndex = 0;
              cellIndex < static_cast<Index>(mesh.getCellCount());
              ++cellIndex)
@@ -153,7 +153,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         }
       }
 
-      Matrix2 evaluate(
+      Math::SpatialMatrix<Real> evaluate(
           const Geometry::Polytope& cell,
           const Math::SpatialPoint&) const
       {
@@ -164,7 +164,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       }
 
     private:
-      std::vector<Matrix2> m_targets;
+      std::vector<Math::SpatialMatrix<Real>> m_targets;
   };
 
   /**
@@ -194,7 +194,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       explicit EquilateralSameAreaTargetJacobian(const Mesh& mesh)
       {
         const auto& conn = mesh.getConnectivity();
-        m_targets.resize(mesh.getCellCount(), Matrix2::Identity(static_cast<std::uint8_t>(mesh.getDimension()), static_cast<std::uint8_t>(mesh.getDimension())));
+        m_targets.resize(mesh.getCellCount(), Math::SpatialMatrix<Real>::Identity(static_cast<std::uint8_t>(mesh.getDimension()), static_cast<std::uint8_t>(mesh.getDimension())));
         for (Index cellIndex = 0;
              cellIndex < static_cast<Index>(mesh.getCellCount());
              ++cellIndex)
@@ -208,7 +208,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         }
       }
 
-      Matrix2 evaluate(
+      Math::SpatialMatrix<Real> evaluate(
           const Geometry::Polytope& cell,
           const Math::SpatialPoint&) const
       {
@@ -218,7 +218,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         return equilateralSameArea(linearCellJacobian2D(cell));
       }
 
-      static Matrix2 equilateralSameArea(const Matrix2& A0)
+      static Math::SpatialMatrix<Real> equilateralSameArea(const Math::SpatialMatrix<Real>& A0)
       {
         const Real area = Real(0.5) * std::abs(A0.determinant());
         // Degenerate initial element: keep its (tiny) Jacobian so W stays in
@@ -226,7 +226,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         if (area <= Real(1e-30))
           return A0;
         const Real l = std::sqrt(Real(4) * area / std::sqrt(Real(3)));
-        Matrix2 W(2, 2);
+        Math::SpatialMatrix<Real> W(2, 2);
         W(0, 0) = l;
         W(0, 1) = Real(0.5) * l;
         W(1, 0) = Real(0);
@@ -235,7 +235,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       }
 
     private:
-      std::vector<Matrix2> m_targets;
+      std::vector<Math::SpatialMatrix<Real>> m_targets;
   };
 
   /**
@@ -256,7 +256,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       explicit OrientedEquilateralSameAreaTargetJacobian(const Mesh& mesh)
       {
         const auto& conn = mesh.getConnectivity();
-        m_targets.resize(mesh.getCellCount(), Matrix2::Identity(static_cast<std::uint8_t>(mesh.getDimension()), static_cast<std::uint8_t>(mesh.getDimension())));
+        m_targets.resize(mesh.getCellCount(), Math::SpatialMatrix<Real>::Identity(static_cast<std::uint8_t>(mesh.getDimension()), static_cast<std::uint8_t>(mesh.getDimension())));
         for (Index cellIndex = 0;
              cellIndex < static_cast<Index>(mesh.getCellCount());
              ++cellIndex)
@@ -270,7 +270,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         }
       }
 
-      Matrix2 evaluate(
+      Math::SpatialMatrix<Real> evaluate(
           const Geometry::Polytope& cell,
           const Math::SpatialPoint&) const
       {
@@ -280,21 +280,21 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         return orientedEquilateralSameArea(linearCellJacobian2D(cell));
       }
 
-      static Matrix2 orientedEquilateralSameArea(const Matrix2& A0)
+      static Math::SpatialMatrix<Real> orientedEquilateralSameArea(const Math::SpatialMatrix<Real>& A0)
       {
-        const Matrix2 E =
+        const Math::SpatialMatrix<Real> E =
           EquilateralSameAreaTargetJacobian::equilateralSameArea(A0);
         if (std::abs(E.determinant()) <= Real(1e-30))
           return E;
 
-        const Matrix2 M = A0 * E.transpose();
+        const Math::SpatialMatrix<Real> M = A0 * E.transpose();
         const Real c0 = M(0, 0) + M(1, 1);
         const Real s0 = M(1, 0) - M(0, 1);
         const Real n = std::hypot(c0, s0);
         if (n <= Real(1e-30))
           return E;
 
-        Matrix2 R(2, 2);
+        Math::SpatialMatrix<Real> R(2, 2);
         const Real c = c0 / n;
         const Real s = s0 / n;
         R(0, 0) = c;
@@ -305,23 +305,130 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       }
 
     private:
-      std::vector<Matrix2> m_targets;
+      std::vector<Math::SpatialMatrix<Real>> m_targets;
+  };
+
+  inline Math::SpatialMatrix<Real> parametricCellJacobian2D(
+      const Geometry::Polytope& cell);
+
+  /**
+   * @brief Closest orientation-preserving regular target with matching measure.
+   *
+   * This is the quality-improving production target-map abstraction. It does
+   * not preserve the current element shape. Instead, each cell receives an
+   * ideal same-measure target:
+   *
+   * - triangles: equilateral same area, rotated to the closest initial
+   *   orientation;
+   * - quadrilaterals: square same area, rotated to the closest initial
+   *   orientation.
+   *
+   * The current strict TMOP assembly path supports 2D triangles, so the
+   * triangle branch is the one exercised today. The quadrilateral branch keeps
+   * the target abstraction polytope-oriented for the future without changing
+   * the present assembly contract.
+   */
+  class IdealElementTargetJacobian
+  {
+    public:
+      IdealElementTargetJacobian() = default;
+
+      template <class Mesh>
+      explicit IdealElementTargetJacobian(const Mesh& mesh)
+      {
+        const auto& conn = mesh.getConnectivity();
+        const auto d = static_cast<std::uint8_t>(mesh.getDimension());
+        m_targets.resize(
+            mesh.getCellCount(),
+            Math::SpatialMatrix<Real>::Identity(d, d));
+        for (Index cellIndex = 0;
+             cellIndex < static_cast<Index>(mesh.getCellCount());
+             ++cellIndex)
+        {
+          const auto type = conn.getGeometry(2, cellIndex);
+          if (type != Geometry::Polytope::Type::Triangle
+              && type != Geometry::Polytope::Type::Quadrilateral)
+            continue;
+          auto cellIterator = mesh.getPolytope(2, cellIndex);
+          m_targets[static_cast<size_t>(cellIndex)] =
+            idealSameMeasure(*cellIterator);
+        }
+      }
+
+      Math::SpatialMatrix<Real> evaluate(
+          const Geometry::Polytope& cell,
+          const Math::SpatialPoint&) const
+      {
+        const auto index = static_cast<size_t>(cell.getIndex());
+        if (index < m_targets.size())
+          return m_targets[index];
+        return idealSameMeasure(cell);
+      }
+
+      static Math::SpatialMatrix<Real> idealSameMeasure(
+          const Geometry::Polytope& cell)
+      {
+        const auto type =
+          cell.getMesh().getGeometry(cell.getDimension(), cell.getIndex());
+        const Math::SpatialMatrix<Real> A0 =
+          type == Geometry::Polytope::Type::Triangle
+            ? linearCellJacobian2D(cell)
+            : parametricCellJacobian2D(cell);
+        if (type == Geometry::Polytope::Type::Quadrilateral)
+          return orientedSquareSameArea(A0);
+        return OrientedEquilateralSameAreaTargetJacobian::
+          orientedEquilateralSameArea(A0);
+      }
+
+      static Math::SpatialMatrix<Real> orientedSquareSameArea(
+          const Math::SpatialMatrix<Real>& A0)
+      {
+        const Real area = std::abs(A0.determinant());
+        if (area <= Real(1e-30))
+          return A0;
+
+        Math::SpatialMatrix<Real> S(2, 2);
+        const Real l = std::sqrt(area);
+        S(0, 0) = l;
+        S(0, 1) = Real(0);
+        S(1, 0) = Real(0);
+        S(1, 1) = l;
+
+        const Math::SpatialMatrix<Real> M = A0 * S.transpose();
+        const Real c0 = M(0, 0) + M(1, 1);
+        const Real s0 = M(1, 0) - M(0, 1);
+        const Real n = std::hypot(c0, s0);
+        if (n <= Real(1e-30))
+          return S;
+
+        Math::SpatialMatrix<Real> R(2, 2);
+        const Real c = c0 / n;
+        const Real s = s0 / n;
+        R(0, 0) = c;
+        R(0, 1) = -s;
+        R(1, 0) = s;
+        R(1, 1) = c;
+        return R * S;
+      }
+
+    private:
+      std::vector<Math::SpatialMatrix<Real>> m_targets;
   };
 
   /**
    * @brief Generic, polytope- and FES-independent reference Jacobian helper.
    *
-   * Uses the cell's isoparametric map evaluated at the reference-element
+   * Uses the cell's parametric map evaluated at the reference-element
    * centroid, so it works for any 2D polytope (triangle, quadrilateral, ...)
    * and any element order without baking in P1/triangle vertex indexing.
    */
-  inline Matrix2 isoparametricCellJacobian2D(const Geometry::Polytope& cell)
+  inline Math::SpatialMatrix<Real> parametricCellJacobian2D(const Geometry::Polytope& cell)
   {
     const Geometry::Polytope::Traits traits(cell.getGeometry());
     const Math::SpatialPoint rc = traits.getCentroid();
     const Geometry::Point point(cell, rc);
     const auto& J = point.getJacobian();
-    Matrix2 W(2, 2);
+    Math::SpatialMatrix<Real> W(2, 2);
     W(0, 0) = J(0, 0);
     W(0, 1) = J(0, 1);
     W(1, 0) = J(1, 0);
@@ -342,33 +449,33 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
   {
     public:
       ConstantTargetJacobian()
-        : m_W(Matrix2::Identity(2, 2))
+        : m_W(Math::SpatialMatrix<Real>::Identity(2, 2))
       {}
 
-      explicit ConstantTargetJacobian(const Matrix2& W)
+      explicit ConstantTargetJacobian(const Math::SpatialMatrix<Real>& W)
         : m_W(W)
       {}
 
-      Matrix2 evaluate(
+      Math::SpatialMatrix<Real> evaluate(
           const Geometry::Polytope&,
           const Math::SpatialPoint&) const
       {
         return m_W;
       }
 
-      const Matrix2& getMatrix() const
+      const Math::SpatialMatrix<Real>& getMatrix() const
       {
         return m_W;
       }
 
       static ConstantTargetJacobian identity()
       {
-        return ConstantTargetJacobian(Matrix2::Identity(2, 2));
+        return ConstantTargetJacobian(Math::SpatialMatrix<Real>::Identity(2, 2));
       }
 
       static ConstantTargetJacobian uniformScale(Real s)
       {
-        Matrix2 W = Matrix2::Identity(2, 2);
+        Math::SpatialMatrix<Real> W = Math::SpatialMatrix<Real>::Identity(2, 2);
         W(0, 0) = s;
         W(1, 1) = s;
         return ConstantTargetJacobian(W);
@@ -376,7 +483,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
 
       static ConstantTargetJacobian diagonal(Real sx, Real sy)
       {
-        Matrix2 W = Matrix2(2, 2);
+        Math::SpatialMatrix<Real> W = Math::SpatialMatrix<Real>(2, 2);
         W(0, 0) = sx;
         W(1, 1) = sy;
         return ConstantTargetJacobian(W);
@@ -386,7 +493,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       {
         const Real c = std::cos(theta);
         const Real s = std::sin(theta);
-        Matrix2 W(2, 2);
+        Math::SpatialMatrix<Real> W(2, 2);
         W(0, 0) = c;
         W(0, 1) = -s;
         W(1, 0) = s;
@@ -399,7 +506,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         const Real c = std::cos(theta);
         const Real s = std::sin(theta);
         // W = R(theta) * diag(sx, sy).
-        Matrix2 W(2, 2);
+        Math::SpatialMatrix<Real> W(2, 2);
         W(0, 0) = c * sx;
         W(0, 1) = -s * sy;
         W(1, 0) = s * sx;
@@ -408,7 +515,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       }
 
     private:
-      Matrix2 m_W;
+      Math::SpatialMatrix<Real> m_W;
   };
 
   /**
@@ -416,7 +523,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
    * @f$W = f(x)@f$ of the physical point.
    *
    * Polytope- and FES-independent: it only maps the reference sample point to
-   * physical coordinates through the cell's isoparametric map and evaluates the
+   * physical coordinates through the cell's parametric map and evaluates the
    * callable, so it works for any element type. Use makeAnalyticTargetJacobian
    * for class template argument deduction from a lambda.
    */
@@ -428,7 +535,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         : m_f(std::move(f))
       {}
 
-      Matrix2 evaluate(
+      Math::SpatialMatrix<Real> evaluate(
           const Geometry::Polytope& cell,
           const Math::SpatialPoint& rc) const
       {
@@ -452,23 +559,23 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
    * @brief Polytope- and FES-independent generalization of
    * InitialElementTargetJacobian.
    *
-   * Captures, per cell, the initial isoparametric Jacobian evaluated at the
+   * Captures, per cell, the initial parametric Jacobian evaluated at the
    * reference centroid via Geometry::Point, so it is correct for triangles,
    * quadrilaterals and higher-order elements alike. On affine triangles it
    * reproduces InitialElementTargetJacobian exactly (and thus gives zero strict
    * energy at @f$u = 0@f$ on the captured mesh), but it does not assume P1
    * triangle vertex indexing.
    */
-  class IsoparametricTargetJacobian
+  class ParametricTargetJacobian
   {
     public:
-      IsoparametricTargetJacobian() = default;
+      ParametricTargetJacobian() = default;
 
       template <class Mesh>
-      explicit IsoparametricTargetJacobian(const Mesh& mesh)
+      explicit ParametricTargetJacobian(const Mesh& mesh)
       {
         const auto& conn = mesh.getConnectivity();
-        m_targets.resize(mesh.getCellCount(), Matrix2::Identity(static_cast<std::uint8_t>(mesh.getDimension()), static_cast<std::uint8_t>(mesh.getDimension())));
+        m_targets.resize(mesh.getCellCount(), Math::SpatialMatrix<Real>::Identity(static_cast<std::uint8_t>(mesh.getDimension()), static_cast<std::uint8_t>(mesh.getDimension())));
         for (Index cellIndex = 0;
              cellIndex < static_cast<Index>(mesh.getCellCount());
              ++cellIndex)
@@ -477,22 +584,134 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
             continue;
           auto cellIterator = mesh.getPolytope(2, cellIndex);
           m_targets[static_cast<size_t>(cellIndex)] =
-            isoparametricCellJacobian2D(*cellIterator);
+            parametricCellJacobian2D(*cellIterator);
         }
       }
 
-      Matrix2 evaluate(
+      Math::SpatialMatrix<Real> evaluate(
           const Geometry::Polytope& cell,
           const Math::SpatialPoint&) const
       {
         const auto index = static_cast<size_t>(cell.getIndex());
         if (index < m_targets.size())
           return m_targets[index];
-        return isoparametricCellJacobian2D(cell);
+        return parametricCellJacobian2D(cell);
       }
 
     private:
-      std::vector<Matrix2> m_targets;
+      std::vector<Math::SpatialMatrix<Real>> m_targets;
+  };
+
+  /**
+   * @brief Quadrature-point target that preserves the current mesh geometry.
+   *
+   * This is a diagnostic/elastic target, not the production quality-improving
+   * target. It evaluates @f$W@f$ as the Jacobian of the current mesh coordinate
+   * map at the same reference sample point used by TMOP. Therefore, at zero
+   * displacement @f$A = W@f$ and @f$T = A W^{-1} = I@f$ at every sample point.
+   * The quality term then regularizes later interface-fit/boundary movement
+   * around the current shape instead of driving bad cells toward ideal shapes.
+   *
+   * Unlike triangle-only targets, this does not hard-code P1 triangle vertex
+   * indexing. It uses Geometry::Point and is therefore the natural target-map
+   * abstraction for any polytope supported by Rodin's geometry mapping.
+   */
+  class QualityPreservingTargetJacobian
+  {
+    public:
+      Math::SpatialMatrix<Real> evaluate(
+          const Geometry::Polytope& cell,
+          const Math::SpatialPoint& rc) const
+      {
+        const Geometry::Point point(cell, rc);
+        const auto& J = point.getJacobian();
+        const auto rows = static_cast<std::uint8_t>(J.rows());
+        const auto cols = static_cast<std::uint8_t>(J.cols());
+        Math::SpatialMatrix<Real> W(rows, cols);
+        for (std::uint8_t i = 0; i < rows; ++i)
+          for (std::uint8_t j = 0; j < cols; ++j)
+            W(i, j) = J(i, j);
+        return W;
+      }
+  };
+
+  /**
+   * @brief Curved-geometry target with a quality-improving bias.
+   *
+   * Curved elements should not be optimized against a purely affine target at
+   * every sample point: that asks TMOP to erase curvature while the fit term is
+   * trying to place the curved edge on the analytic interface. This target uses
+   * the current parametric Jacobian at each quadrature point as the natural
+   * curved baseline, then blends it toward an ideal same-measure target for the
+   * cell:
+   *
+   *   W(q) = (1 - theta) J_X(q) + theta W_ideal(K).
+   *
+   * theta = 0 is purely quality-preserving; theta = 1 is the fully ideal
+   * target. Small positive values keep the P2 map natural while still giving a
+   * strict quality-improving direction. The blend is locally guarded so the
+   * returned target remains orientation preserving whenever the current curved
+   * geometry is orientation preserving.
+   */
+  class CurvedQualityTargetJacobian
+  {
+    public:
+      CurvedQualityTargetJacobian() = default;
+
+      template <class Mesh>
+      explicit CurvedQualityTargetJacobian(const Mesh& mesh, Real idealWeight = 0.2)
+        : m_ideal(mesh),
+          m_idealWeight(clampWeight(idealWeight))
+      {}
+
+      CurvedQualityTargetJacobian& setIdealWeight(Real idealWeight)
+      {
+        m_idealWeight = clampWeight(idealWeight);
+        return *this;
+      }
+
+      Real getIdealWeight() const
+      {
+        return m_idealWeight;
+      }
+
+      Math::SpatialMatrix<Real> evaluate(
+          const Geometry::Polytope& cell,
+          const Math::SpatialPoint& rc) const
+      {
+        const Math::SpatialMatrix<Real> preserve =
+          m_preserve.evaluate(cell, rc);
+        const Math::SpatialMatrix<Real> ideal =
+          m_ideal.evaluate(cell, rc);
+
+        Real theta = m_idealWeight;
+        for (int attempt = 0; attempt < 12; ++attempt)
+        {
+          const Math::SpatialMatrix<Real> W =
+            (Real(1) - theta) * preserve + theta * ideal;
+          const Real det = W.determinant();
+          if (std::isfinite(det) && det > Real(1e-30))
+            return W;
+          theta *= Real(0.5);
+        }
+        return preserve;
+      }
+
+    private:
+      static Real clampWeight(Real idealWeight)
+      {
+        if (!std::isfinite(idealWeight))
+          return Real(0);
+        if (idealWeight < Real(0))
+          return Real(0);
+        if (idealWeight > Real(1))
+          return Real(1);
+        return idealWeight;
+      }
+
+      QualityPreservingTargetJacobian m_preserve;
+      IdealElementTargetJacobian m_ideal;
+      Real m_idealWeight = 0.2;
   };
 
   class MetricBase
@@ -500,7 +719,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
     public:
       virtual ~MetricBase() = default;
 
-      virtual Real value(const Matrix2& A) const = 0;
+      virtual Real value(const Math::SpatialMatrix<Real>& A) const = 0;
 
       /**
        * @brief Sets the determinant threshold below which a Jacobian is invalid.
@@ -534,7 +753,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
        * The penalty is intentionally simple. It guards objective evaluation
        * against inverted sampled Jacobians.
        */
-      Real invalidPenalty(const Matrix2& A) const
+      Real invalidPenalty(const Math::SpatialMatrix<Real>& A) const
       {
         const Real det = A.determinant();
         if (det > m_detTolerance)
@@ -558,18 +777,18 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
   class SquaredDistanceMetric final : public MetricBase
   {
     public:
-      Real value(const Matrix2& T) const override
+      Real value(const Math::SpatialMatrix<Real>& T) const override
       {
         return Real(0.5)
-          * (T - Matrix2::Identity(T.rows(), T.cols())).squaredNorm();
+          * (T - Math::SpatialMatrix<Real>::Identity(T.rows(), T.cols())).squaredNorm();
       }
 
-      Matrix2 gradient(const Matrix2& T) const
+      Math::SpatialMatrix<Real> gradient(const Math::SpatialMatrix<Real>& T) const
       {
-        return T - Matrix2::Identity(T.rows(), T.cols());
+        return T - Math::SpatialMatrix<Real>::Identity(T.rows(), T.cols());
       }
 
-      Matrix2 hessianAction(const Matrix2&, const Matrix2& dT) const
+      Math::SpatialMatrix<Real> hessianAction(const Math::SpatialMatrix<Real>&, const Math::SpatialMatrix<Real>& dT) const
       {
         return dT;
       }
@@ -591,28 +810,28 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
   class ShapeDistortionMetric final : public MetricBase
   {
     public:
-      Real value(const Matrix2& A) const override
+      Real value(const Math::SpatialMatrix<Real>& A) const override
       {
         if (const Real penalty = invalidPenalty(A); penalty > Real(0))
           return penalty;
         return A.squaredNorm() / (Real(2) * A.determinant()) - Real(1);
       }
 
-      Matrix2 gradient(const Matrix2& T) const
+      Math::SpatialMatrix<Real> gradient(const Math::SpatialMatrix<Real>& T) const
       {
         const Real d = T.determinant();
         const Real F = T.squaredNorm();
-        const Matrix2 C = cofactor2D(T);
+        const Math::SpatialMatrix<Real> C = cofactor2D(T);
         // dmu/dT = T/d - (F / (2 d^2)) * C.
         return (Real(1) / d) * T - (F / (Real(2) * d * d)) * C;
       }
 
-      Matrix2 hessianAction(const Matrix2& T, const Matrix2& H) const
+      Math::SpatialMatrix<Real> hessianAction(const Math::SpatialMatrix<Real>& T, const Math::SpatialMatrix<Real>& H) const
       {
         const Real d = T.determinant();
         const Real F = T.squaredNorm();
-        const Matrix2 C = cofactor2D(T);
-        const Matrix2 CofH = cofactor2D(H);
+        const Math::SpatialMatrix<Real> C = cofactor2D(T);
+        const Math::SpatialMatrix<Real> CofH = cofactor2D(H);
         const Real ChH = matrixInner2D(C, H);  // d(det) in direction H
         const Real ThH = matrixInner2D(T, H);  // (1/2) d(F) in direction H
         const Real invd = Real(1) / d;
@@ -632,7 +851,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
   class AreaDistortionMetric final : public MetricBase
   {
     public:
-      Real value(const Matrix2& A) const override
+      Real value(const Math::SpatialMatrix<Real>& A) const override
       {
         if (const Real penalty = invalidPenalty(A); penalty > Real(0))
           return penalty;
@@ -640,15 +859,15 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         return Real(0.5) * d * d;
       }
 
-      Matrix2 gradient(const Matrix2& T) const
+      Math::SpatialMatrix<Real> gradient(const Math::SpatialMatrix<Real>& T) const
       {
         const Real d = T.determinant() - Real(1);
         return d * cofactor2D(T);
       }
 
-      Matrix2 hessianAction(const Matrix2& T, const Matrix2& H) const
+      Math::SpatialMatrix<Real> hessianAction(const Math::SpatialMatrix<Real>& T, const Math::SpatialMatrix<Real>& H) const
       {
-        const Matrix2 C = cofactor2D(T);
+        const Math::SpatialMatrix<Real> C = cofactor2D(T);
         const Real ddet = matrixInner2D(C, H);
         return ddet * C + (T.determinant() - Real(1)) * cofactor2D(H);
       }
@@ -657,19 +876,19 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
   class ShapeSizeMetric final : public MetricBase
   {
     public:
-      Real value(const Matrix2& A) const override
+      Real value(const Math::SpatialMatrix<Real>& A) const override
       {
         if (const Real penalty = invalidPenalty(A); penalty > Real(0))
           return penalty;
         return m_shape.value(A) + m_area.value(A);
       }
 
-      Matrix2 gradient(const Matrix2& T) const
+      Math::SpatialMatrix<Real> gradient(const Math::SpatialMatrix<Real>& T) const
       {
         return m_shape.gradient(T) + m_area.gradient(T);
       }
 
-      Matrix2 hessianAction(const Matrix2& T, const Matrix2& H) const
+      Math::SpatialMatrix<Real> hessianAction(const Math::SpatialMatrix<Real>& T, const Math::SpatialMatrix<Real>& H) const
       {
         return m_shape.hessianAction(T, H)
              + m_area.hessianAction(T, H);

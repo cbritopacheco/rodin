@@ -359,6 +359,30 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(result.report.cellProvenance.front().side, LevelSetSide::Degenerate);
   }
 
+  TEST(Rodin_Geometry_LevelSetDiscretizerTriangles, DegenerateCellAttributeCanBeCustomized)
+  {
+    auto mesh = makeSingleTriangle();
+    computeConnectivity(mesh);
+    mesh.setAttribute({2, 0}, Attribute(55));
+
+    P1 space(mesh);
+    GridFunction phi(space);
+    phi[0] = 0;
+    phi[1] = 0;
+    phi[2] = 0;
+
+    const auto result = LevelSetDiscretizerTriangles(phi)
+      .setDegenerateCellAttribute(Attribute(99))
+      .discretize();
+
+    ASSERT_EQ(result.mesh.getCellCount(), 1);
+    ASSERT_EQ(result.report.cellProvenance.front().side,
+        LevelSetSide::Degenerate);
+    const auto attr = result.mesh.getCellAttribute(0);
+    ASSERT_TRUE(attr);
+    EXPECT_EQ(*attr, Attribute(99));
+  }
+
   TEST(Rodin_Geometry_LevelSetDiscretizerTriangles, SharedCutEdgeReusesOutputVertex)
   {
     auto mesh = makeTwoTriangleSquare();

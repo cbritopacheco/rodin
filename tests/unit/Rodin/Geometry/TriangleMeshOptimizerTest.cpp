@@ -209,6 +209,41 @@ namespace Rodin::Tests::Unit
     EXPECT_GE(r.minQualityAfter, r.minQualityBefore);
   }
 
+  TEST(Rodin_Geometry_TriangleMeshOptimizer, SwapDoesNotCrossAttributeInterface)
+  {
+    // Same skewed quad as the quality-improving swap test, but the two
+    // triangles represent different material/level-set sides. The optimizer
+    // must not swap this interface-away diagonal, because the two new
+    // triangles would not have a well-defined inherited side attribute.
+    auto mesh = LocalMesh::Builder()
+      .initialize(2)
+      .nodes(4)
+      .vertex({0, 0})
+      .vertex({1, 0})
+      .vertex({1, 1})
+      .vertex({0.05, 0.05})
+      .polytope(Polytope::Type::Triangle, {0, 1, 3})
+      .attribute({2, 0}, Attribute(1))
+      .polytope(Polytope::Type::Triangle, {1, 2, 3})
+      .attribute({2, 1}, Attribute(2))
+      .finalize();
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    const auto r = TriangleMeshOptimizer()
+      .setHMin(0)
+      .setHMax(std::numeric_limits<Real>::infinity())
+      .setSwapImprovement(1)
+      .setMaxIterations(3)
+      .optimize(mesh);
+
+    EXPECT_EQ(r.swaps, 0u);
+    ASSERT_EQ(mesh.getCellCount(), 2);
+    EXPECT_EQ(*mesh.getCellAttribute(0), Attribute(1));
+    EXPECT_EQ(*mesh.getCellAttribute(1), Attribute(2));
+    EXPECT_GT(minSignedArea(mesh), 0.0);
+  }
+
   TEST(Rodin_Geometry_TriangleMeshOptimizer, SwapRejectsNonConvexCavity)
   {
     // The shared edge (0,1) is a valid diagonal of a concave four-vertex

@@ -23,7 +23,7 @@
 
 #include "Polytope.h"
 #include "PolytopeIterator.h"
-#include "IsoparametricTransformation.h"
+#include "ParametricTransformation.h"
 
 namespace Rodin::Geometry
 {
@@ -436,7 +436,7 @@ namespace Rodin::Geometry
       PointCloud pm(sdim, 1);
       for (size_t i = 0; i < sdim; ++i)
         pm(i, 0) = m_vertices(i, idx);
-      return new IsoparametricTransformation(std::move(pm), std::move(fe));
+      return new ParametricTransformation(std::move(pm), std::move(fe));
     }
     else
     {
@@ -453,7 +453,7 @@ namespace Rodin::Geometry
           pm(i, v.index()) = m_vertices(i, v.value());
       }
       Variational::RealP1Element fe(g);
-      return new IsoparametricTransformation(std::move(pm), std::move(fe));
+      return new ParametricTransformation(std::move(pm), std::move(fe));
     }
   }
 

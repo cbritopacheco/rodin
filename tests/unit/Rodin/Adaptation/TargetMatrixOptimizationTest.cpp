@@ -33,25 +33,24 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
-  // Matrix2 is now Math::SpatialMatrix (runtime-sized). These test-only
-  // helpers keep the existing Eigen-style 2x2 literals working with
-  // identical row-major semantics so the suite is unchanged.
-  inline Matrix2 mat2(Real a, Real b, Real c, Real d)
+  // These test-only helpers keep Eigen-style 2x2 literals working with
+  // SpatialMatrix while preserving the suite's existing row-major semantics.
+  inline Math::SpatialMatrix<Real> mat2(Real a, Real b, Real c, Real d)
   {
-    Matrix2 m(2, 2);
+    Math::SpatialMatrix<Real> m(2, 2);
     m(0, 0) = a; m(0, 1) = b; m(1, 0) = c; m(1, 1) = d;
     return m;
   }
 
   struct Mat2Init
   {
-    Matrix2& t;
+    Math::SpatialMatrix<Real>& t;
     int i;
-    explicit Mat2Init(Matrix2& m) : t(m), i(0) { t.resize(2, 2); }
+    explicit Mat2Init(Math::SpatialMatrix<Real>& m) : t(m), i(0) { t.resize(2, 2); }
     Mat2Init& operator,(Real v) { t(i / 2, i % 2) = v; ++i; return *this; }
   };
 
-  inline Mat2Init operator<<(Matrix2& m, Real v)
+  inline Mat2Init operator<<(Math::SpatialMatrix<Real>& m, Real v)
   {
     Mat2Init s(m);
     s.t(0, 0) = v; s.i = 1;
@@ -105,6 +104,38 @@ namespace Rodin::Tests::Unit
       .finalize();
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
+    return mesh;
+  }
+
+  static LocalMesh makeCurvedP2Triangle()
+  {
+    auto mesh = makeUnitTriangle();
+    Variational::RealH1Element<2> fe(Polytope::Type::Triangle);
+    PointCloud pm(2, fe.getCount());
+    for (size_t i = 0; i < fe.getCount(); ++i)
+    {
+      const auto& rc = fe.getNode(i);
+      Math::SpatialPoint x{
+        rc[0],
+        rc[1]
+      };
+
+      const bool vertex =
+        (std::abs(rc[0]) <= Real(1e-12) && std::abs(rc[1]) <= Real(1e-12))
+     || (std::abs(rc[0] - Real(1)) <= Real(1e-12) && std::abs(rc[1]) <= Real(1e-12))
+     || (std::abs(rc[0]) <= Real(1e-12) && std::abs(rc[1] - Real(1)) <= Real(1e-12));
+      if (!vertex && std::abs(rc[1]) <= Real(1e-12))
+        x[1] += Real(0.08);
+      if (!vertex && std::abs(rc[0]) <= Real(1e-12))
+        x[0] += Real(0.04);
+
+      pm(0, i) = x[0];
+      pm(1, i) = x[1];
+    }
+    mesh.setPolytopeTransformation(
+        {2, 0},
+        new ParametricTransformation<Variational::RealH1Element<2>>(
+            pm, fe));
     return mesh;
   }
 
@@ -693,20 +724,20 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Adaptation_TargetMatrixOptimization, SquaredDistanceMetricIsZeroAtIdentity)
   {
     SquaredDistanceMetric metric;
-    EXPECT_NEAR(metric.value(Matrix2::Identity(2, 2)), 0, 1e-14);
-    EXPECT_NEAR(metric.gradient(Matrix2::Identity(2, 2)).norm(), 0, 1e-14);
+    EXPECT_NEAR(metric.value(Math::SpatialMatrix<Real>::Identity(2, 2)), 0, 1e-14);
+    EXPECT_NEAR(metric.gradient(Math::SpatialMatrix<Real>::Identity(2, 2)).norm(), 0, 1e-14);
   }
 
   TEST(Rodin_Adaptation_TargetMatrixOptimization, DistortedMatrixHasLargerMetric)
   {
     SquaredDistanceMetric metric;
-    Matrix2 A = Matrix2::Identity(2, 2);
+    Math::SpatialMatrix<Real> A = Math::SpatialMatrix<Real>::Identity(2, 2);
     A(0, 1) = 0.5;
 
-    EXPECT_GT(metric.value(A), metric.value(Matrix2::Identity(2, 2)));
-    EXPECT_NEAR((metric.gradient(A) - (A - Matrix2::Identity(2, 2))).norm(), 0, 1e-14);
+    EXPECT_GT(metric.value(A), metric.value(Math::SpatialMatrix<Real>::Identity(2, 2)));
+    EXPECT_NEAR((metric.gradient(A) - (A - Math::SpatialMatrix<Real>::Identity(2, 2))).norm(), 0, 1e-14);
     EXPECT_NEAR(
-        (metric.hessianAction(A, Matrix2::Identity(2, 2)) - Matrix2::Identity(2, 2)).norm(),
+        (metric.hessianAction(A, Math::SpatialMatrix<Real>::Identity(2, 2)) - Math::SpatialMatrix<Real>::Identity(2, 2)).norm(),
         0,
         1e-14);
   }
@@ -714,10 +745,10 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Adaptation_TargetMatrixOptimization, SquaredDistanceMetricFollowsFormulaForSingularAndInvertedMatrices)
   {
     SquaredDistanceMetric metric;
-    Matrix2 inverted = Matrix2::Identity(2, 2);
+    Math::SpatialMatrix<Real> inverted = Math::SpatialMatrix<Real>::Identity(2, 2);
     inverted(0, 0) = -1;
 
-    Matrix2 nearSingular = Matrix2::Identity(2, 2);
+    Math::SpatialMatrix<Real> nearSingular = Math::SpatialMatrix<Real>::Identity(2, 2);
     nearSingular(1, 1) = 1e-14;
 
     EXPECT_NEAR(metric.value(inverted), 2, 1e-14);
@@ -730,9 +761,9 @@ namespace Rodin::Tests::Unit
     AreaDistortionMetric area;
     ShapeSizeMetric shapeSize;
 
-    EXPECT_NEAR(shape.value(Matrix2::Identity(2, 2)), 0, 1e-14);
-    EXPECT_NEAR(area.value(Matrix2::Identity(2, 2)), 0, 1e-14);
-    EXPECT_NEAR(shapeSize.value(Matrix2::Identity(2, 2)), 0, 1e-14);
+    EXPECT_NEAR(shape.value(Math::SpatialMatrix<Real>::Identity(2, 2)), 0, 1e-14);
+    EXPECT_NEAR(area.value(Math::SpatialMatrix<Real>::Identity(2, 2)), 0, 1e-14);
+    EXPECT_NEAR(shapeSize.value(Math::SpatialMatrix<Real>::Identity(2, 2)), 0, 1e-14);
   }
 
   TEST(Rodin_Adaptation_TargetMatrixOptimization, IdentityTargetWorks)
@@ -743,7 +774,7 @@ namespace Rodin::Tests::Unit
     const Math::SpatialPoint rc({Real(1) / Real(3), Real(1) / Real(3)});
 
     IdentityTargetJacobian target;
-    EXPECT_NEAR((target.evaluate(cell, rc) - Matrix2::Identity(2, 2)).norm(), 0, 1e-14);
+    EXPECT_NEAR((target.evaluate(cell, rc) - Math::SpatialMatrix<Real>::Identity(2, 2)).norm(), 0, 1e-14);
   }
 
   TEST(Rodin_Adaptation_TargetMatrixOptimization, P2UpgradeCreatesExpectedNodes)
@@ -774,7 +805,7 @@ namespace Rodin::Tests::Unit
            { Real(0.2), Real(0.6) } })
     {
       const auto J = evaluator.jacobian(geometry, 0, point);
-      EXPECT_NEAR((J - Matrix2::Identity(2, 2)).norm(), 0, 1e-13);
+      EXPECT_NEAR((J - Math::SpatialMatrix<Real>::Identity(2, 2)).norm(), 0, 1e-13);
       EXPECT_NEAR(J.determinant(), 1, 1e-13);
     }
   }
@@ -1439,9 +1470,9 @@ namespace Rodin::Tests::Unit
   {
     for (Real area : { Real(0.5), Real(0.013), Real(7.25) })
     {
-      Matrix2 A0;
+      Math::SpatialMatrix<Real> A0;
       A0 << std::sqrt(Real(2) * area), 0, 0, std::sqrt(Real(2) * area);
-      const Matrix2 W =
+      const Math::SpatialMatrix<Real> W =
         EquilateralSameAreaTargetJacobian::equilateralSameArea(A0);
       EXPECT_NEAR(Real(0.5) * std::abs(W.determinant()), area, 1e-12);
       const Real l = std::sqrt(Real(4) * area / std::sqrt(Real(3)));
@@ -1457,12 +1488,12 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_Adaptation_TargetMatrixOptimization, OrientedEquilateralSameAreaTargetPreservesAreaAndBestRotation)
   {
-    Matrix2 A0;
+    Math::SpatialMatrix<Real> A0;
     A0 << 0.18, -0.04,
           0.03,  0.11;
-    const Matrix2 fixed =
+    const Math::SpatialMatrix<Real> fixed =
       EquilateralSameAreaTargetJacobian::equilateralSameArea(A0);
-    const Matrix2 oriented =
+    const Math::SpatialMatrix<Real> oriented =
       OrientedEquilateralSameAreaTargetJacobian::orientedEquilateralSameArea(A0);
 
     EXPECT_NEAR(
@@ -1470,6 +1501,48 @@ namespace Rodin::Tests::Unit
         std::abs(fixed.determinant()),
         1e-14);
     EXPECT_LE((A0 - oriented).squaredNorm(), (A0 - fixed).squaredNorm());
+  }
+
+  TEST(Rodin_Adaptation_TargetMatrixOptimization, IdealElementTargetImprovesDistortedTriangleShape)
+  {
+    auto mesh = makeTriangle({0, 0}, {1.4, 0.0}, {0.08, 0.18});
+    auto cell = mesh.getPolytope(2, 0);
+    const Math::SpatialPoint rc({Real(1) / 3, Real(1) / 3});
+
+    IdealElementTargetJacobian target(mesh);
+    const Math::SpatialMatrix<Real> A0 = linearCellJacobian2D(*cell);
+    const Math::SpatialMatrix<Real> W = target.evaluate(*cell, rc);
+    const Math::SpatialMatrix<Real> oriented =
+      OrientedEquilateralSameAreaTargetJacobian::orientedEquilateralSameArea(A0);
+
+    EXPECT_NEAR((W - oriented).norm(), 0, 1e-14);
+    EXPECT_NEAR(std::abs(W.determinant()), std::abs(A0.determinant()), 1e-14);
+
+    const auto x0 = mesh.getVertexCoordinates(0);
+    const auto x1 = mesh.getVertexCoordinates(1);
+    const auto x2 = mesh.getVertexCoordinates(2);
+    const Real beforeQuality = triangleQuality(x0, x1, x2);
+    const Real targetQuality = triangleQuality(
+        Math::SpatialPoint{0, 0},
+        Math::SpatialPoint{W(0, 0), W(1, 0)},
+        Math::SpatialPoint{W(0, 1), W(1, 1)});
+
+    EXPECT_GT(targetQuality, beforeQuality);
+    EXPECT_NEAR(targetQuality, 1, 1e-12);
+  }
+
+  TEST(Rodin_Adaptation_TargetMatrixOptimization, IdealElementTargetSupportsSquareSameAreaTarget)
+  {
+    Math::SpatialMatrix<Real> A0;
+    A0 << 1.4, 0.2,
+          0.1, 0.6;
+    const Math::SpatialMatrix<Real> W =
+      IdealElementTargetJacobian::orientedSquareSameArea(A0);
+    const Real area = std::abs(A0.determinant());
+
+    EXPECT_NEAR(std::abs(W.determinant()), area, 1e-14);
+    EXPECT_NEAR(W.col(0).norm(), W.col(1).norm(), 1e-14);
+    EXPECT_NEAR(W.col(0).dot(W.col(1)), 0, 1e-14);
   }
 
   // The production target on the regime where W = I fails: a [0,1]-scaled
@@ -1553,7 +1626,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Adaptation_TargetMatrixOptimization, ConstantTargetJacobianFactoriesProduceExpectedMatrices)
   {
     EXPECT_NEAR(
-        (ConstantTargetJacobian::identity().getMatrix() - Matrix2::Identity(2, 2))
+        (ConstantTargetJacobian::identity().getMatrix() - Math::SpatialMatrix<Real>::Identity(2, 2))
           .norm(), 0, 1e-14);
 
     const auto us = ConstantTargetJacobian::uniformScale(2.5).getMatrix();
@@ -1570,7 +1643,7 @@ namespace Rodin::Tests::Unit
     const Real theta = 0.7;
     const auto rot = ConstantTargetJacobian::rotation(theta).getMatrix();
     EXPECT_NEAR(rot.determinant(), 1, 1e-13);
-    EXPECT_NEAR((rot.transpose() * rot - Matrix2::Identity(2, 2)).norm(), 0, 1e-13);
+    EXPECT_NEAR((rot.transpose() * rot - Math::SpatialMatrix<Real>::Identity(2, 2)).norm(), 0, 1e-13);
 
     const auto st = ConstantTargetJacobian::stretch(2, 3, theta).getMatrix();
     // det(R * diag(sx,sy)) = sx * sy.
@@ -1588,8 +1661,8 @@ namespace Rodin::Tests::Unit
 
     const Math::SpatialPoint rcA({Real(0.25), Real(0.25)});
     const Math::SpatialPoint rcB({Real(0.6), Real(0.1)});
-    const Matrix2 wTri = target.evaluate(*triIt, rcA);
-    const Matrix2 wQuad = target.evaluate(*quadIt, rcB);
+    const Math::SpatialMatrix<Real> wTri = target.evaluate(*triIt, rcA);
+    const Math::SpatialMatrix<Real> wQuad = target.evaluate(*quadIt, rcB);
 
     // Same matrix regardless of polytope type or sample point.
     EXPECT_NEAR((wTri - wQuad).norm(), 0, 1e-15);
@@ -1600,7 +1673,7 @@ namespace Rodin::Tests::Unit
   {
     // Affine triangle with map J = [b-a, c-a].
     auto mesh = makeTriangle({0.2, 0.1}, {1.2, 0.3}, {0.4, 1.4});
-    Matrix2 J;
+    Math::SpatialMatrix<Real> J;
     J << 1.0, 0.2, 0.2, 1.3;
 
     P1 space(mesh, 2);
@@ -1612,8 +1685,8 @@ namespace Rodin::Tests::Unit
     QualityTerm quality(metric, target);
     const Real energy = quality.energy(displacement);
 
-    const Matrix2 W = target.getMatrix();
-    const Matrix2 T = J * W.inverse();
+    const Math::SpatialMatrix<Real> W = target.getMatrix();
+    const Math::SpatialMatrix<Real> T = J * W.inverse();
     // Reference triangle area 1/2; affine integrand is constant.
     const Real expected = Real(0.5) * W.determinant() * metric.value(T);
     EXPECT_NEAR(energy, expected, 1e-12);
@@ -1627,7 +1700,7 @@ namespace Rodin::Tests::Unit
 
     auto f = [](const Math::SpatialPoint& x)
     {
-      Matrix2 W = Matrix2::Identity(2, 2);
+      Math::SpatialMatrix<Real> W = Math::SpatialMatrix<Real>::Identity(2, 2);
       W(0, 0) = Real(1) + x[0];
       W(1, 1) = Real(2) + x[1];
       return W;
@@ -1637,8 +1710,8 @@ namespace Rodin::Tests::Unit
     const Math::SpatialPoint rc({Real(0.25), Real(0.5)});
     const Geometry::Point point(cell, rc);
     const auto phys = point.getPhysicalCoordinates();
-    const Matrix2 expected = f(phys);
-    const Matrix2 got = target.evaluate(cell, rc);
+    const Math::SpatialMatrix<Real> expected = f(phys);
+    const Math::SpatialMatrix<Real> got = target.evaluate(cell, rc);
     EXPECT_NEAR((got - expected).norm(), 0, 1e-13);
   }
 
@@ -1655,7 +1728,7 @@ namespace Rodin::Tests::Unit
     TestFunction v(space);
     auto f = [](const Math::SpatialPoint& x)
     {
-      Matrix2 W = Matrix2::Identity(2, 2);
+      Math::SpatialMatrix<Real> W = Math::SpatialMatrix<Real>::Identity(2, 2);
       W(0, 0) = Real(0.15) + Real(0.1) * x[0];
       W(1, 1) = Real(0.15) + Real(0.1) * x[1];
       return W;
@@ -1694,7 +1767,7 @@ namespace Rodin::Tests::Unit
     EXPECT_LT((fd - jd).norm() / denom, 1e-7);
   }
 
-  TEST(Rodin_Adaptation_TargetMatrixOptimization, IsoparametricTargetMatchesAffineTriangleInitialElement)
+  TEST(Rodin_Adaptation_TargetMatrixOptimization, ParametricTargetMatchesAffineTriangleInitialElement)
   {
     for (const auto& tri : {
            makeTriangle({0, 0}, {1, 0}, {0, 1}),
@@ -1702,13 +1775,13 @@ namespace Rodin::Tests::Unit
            makeTriangle({2, -1}, {2.5, -0.5}, {1.5, 1}) })
     {
       auto mesh = tri;
-      IsoparametricTargetJacobian iso(mesh);
+      ParametricTargetJacobian parametric(mesh);
       InitialElementTargetJacobian initial(mesh);
       auto it = mesh.getPolytope(2, 0);
       const Math::SpatialPoint rc({Real(1) / 3, Real(1) / 3});
-      // Affine triangle: isoparametric Jacobian == P1 element Jacobian.
+      // Affine triangle: parametric Jacobian == P1 element Jacobian.
       EXPECT_NEAR(
-          (iso.evaluate(*it, rc) - initial.evaluate(*it, rc)).norm(),
+          (parametric.evaluate(*it, rc) - initial.evaluate(*it, rc)).norm(),
           0, 1e-12);
 
       // Hence zero strict energy at u = 0 on the captured mesh, exactly like
@@ -1716,15 +1789,15 @@ namespace Rodin::Tests::Unit
       P1 space(mesh, 2);
       GridFunction displacement(space);
       displacement.getData().setZero();
-      QualityTerm quality(SquaredDistanceMetric{}, iso);
+      QualityTerm quality(SquaredDistanceMetric{}, parametric);
       EXPECT_NEAR(quality.energy(displacement), 0, 1e-12);
     }
   }
 
-  TEST(Rodin_Adaptation_TargetMatrixOptimization, IsoparametricTargetWorksOnQuadrilateralPolytope)
+  TEST(Rodin_Adaptation_TargetMatrixOptimization, ParametricTargetWorksOnQuadrilateralPolytope)
   {
     auto mesh = makeUnitQuad();
-    IsoparametricTargetJacobian target(mesh);
+    ParametricTargetJacobian target(mesh);
     auto it = mesh.getPolytope(2, 0);
     const auto& cell = *it;
 
@@ -1732,30 +1805,65 @@ namespace Rodin::Tests::Unit
     const Math::SpatialPoint rc = traits.getCentroid();
     const Geometry::Point point(cell, rc);
     const auto& J = point.getJacobian();
-    Matrix2 expected(2, 2);
+    Math::SpatialMatrix<Real> expected(2, 2);
     expected(0, 0) = J(0, 0);
     expected(0, 1) = J(0, 1);
     expected(1, 0) = J(1, 0);
     expected(1, 1) = J(1, 1);
 
-    const Matrix2 got = target.evaluate(cell, rc);
+    const Math::SpatialMatrix<Real> got = target.evaluate(cell, rc);
     // The generic captured target runs on a non-triangle polytope and returns
-    // that cell's isoparametric Jacobian (FES/polytope independent).
+    // that cell's parametric Jacobian (FES/polytope independent).
     EXPECT_NEAR((got - expected).norm(), 0, 1e-12);
     EXPECT_GT(std::abs(got.determinant()), 1e-12);
+  }
+
+  TEST(Rodin_Adaptation_TargetMatrixOptimization, QualityPreservingTargetIsZeroEnergyOnCurvedP2Geometry)
+  {
+    auto mesh = makeCurvedP2Triangle();
+    VectorH1<2, LocalMesh> space(std::integral_constant<size_t, 2>{}, mesh, 2);
+    GridFunction displacement(space);
+    displacement.getData().setZero();
+
+    QualityTerm quality(
+        SquaredDistanceMetric{},
+        QualityPreservingTargetJacobian{});
+    quality.setQuadratureOrder(4);
+
+    EXPECT_NEAR(quality.energy(displacement), 0, 1e-12);
+  }
+
+  TEST(Rodin_Adaptation_TargetMatrixOptimization, CurvedQualityTargetBlendsNaturalAndIdealJacobians)
+  {
+    auto mesh = makeCurvedP2Triangle();
+    auto cellIterator = mesh.getPolytope(2, 0);
+    const auto& cell = *cellIterator;
+    const Math::SpatialPoint rc{Real(1) / Real(3), Real(1) / Real(3)};
+
+    QualityPreservingTargetJacobian natural;
+    IdealElementTargetJacobian ideal(mesh);
+    CurvedQualityTargetJacobian target(mesh, 0.25);
+
+    const Math::SpatialMatrix<Real> Wnatural = natural.evaluate(cell, rc);
+    const Math::SpatialMatrix<Real> Wideal = ideal.evaluate(cell, rc);
+    const Math::SpatialMatrix<Real> W = target.evaluate(cell, rc);
+
+    EXPECT_GT(W.determinant(), 0);
+    EXPECT_GT((W - Wnatural).norm(), 1e-12);
+    EXPECT_LT((W - Wnatural).norm(), (Wideal - Wnatural).norm());
   }
 
   TEST(Rodin_Adaptation_TargetMatrixOptimization, ShapeDistortionMetricZeroOnRotationsAndScalings)
   {
     ShapeDistortionMetric metric;
-    EXPECT_NEAR(metric.value(Matrix2::Identity(2, 2)), 0, 1e-13);
-    EXPECT_NEAR(metric.gradient(Matrix2::Identity(2, 2)).norm(), 0, 1e-13);
+    EXPECT_NEAR(metric.value(Math::SpatialMatrix<Real>::Identity(2, 2)), 0, 1e-13);
+    EXPECT_NEAR(metric.gradient(Math::SpatialMatrix<Real>::Identity(2, 2)).norm(), 0, 1e-13);
 
     for (Real theta : { Real(0.3), Real(1.1), Real(-0.7) })
     {
       const Real c = std::cos(theta);
       const Real s = std::sin(theta);
-      Matrix2 R;
+      Math::SpatialMatrix<Real> R;
       R << c, -s, s, c;
       // Scale-invariant: rotations and uniform scalings are exactly minimal.
       EXPECT_NEAR(metric.value(R), 0, 1e-12);
@@ -1763,7 +1871,7 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(metric.gradient(R).norm(), 0, 1e-12);
     }
 
-    Matrix2 shear;
+    Math::SpatialMatrix<Real> shear;
     shear << 1, 0.6, 0, 1;
     EXPECT_GT(metric.value(shear), 0);
   }
@@ -1771,7 +1879,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Adaptation_TargetMatrixOptimization, ShapeDistortionMetricGradientFiniteDifference)
   {
     ShapeDistortionMetric metric;
-    std::vector<Matrix2> cases(4);
+    std::vector<Math::SpatialMatrix<Real>> cases(4);
     cases[0] << 1.2, 0.3, 0.1, 0.9;
     cases[1] << 0.7, -0.2, 0.25, 1.4;
     cases[2] << 2.0, 0.0, 0.0, 0.5;
@@ -1780,11 +1888,11 @@ namespace Rodin::Tests::Unit
     const Real eps = 1e-7;
     for (const auto& T : cases)
     {
-      const Matrix2 g = metric.gradient(T);
+      const Math::SpatialMatrix<Real> g = metric.gradient(T);
       for (int i = 0; i < 2; ++i)
         for (int j = 0; j < 2; ++j)
         {
-          Matrix2 Tp = T, Tm = T;
+          Math::SpatialMatrix<Real> Tp = T, Tm = T;
           Tp(i, j) += eps;
           Tm(i, j) -= eps;
           const Real fd =
@@ -1797,18 +1905,18 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Adaptation_TargetMatrixOptimization, ShapeDistortionMetricHessianActionFiniteDifference)
   {
     ShapeDistortionMetric metric;
-    std::vector<Matrix2> cases(3);
+    std::vector<Math::SpatialMatrix<Real>> cases(3);
     cases[0] << 1.2, 0.3, 0.1, 0.9;
     cases[1] << 0.7, -0.2, 0.25, 1.4;
     cases[2] << 1.0, 0.8, -0.3, 1.1;
-    Matrix2 H;
+    Math::SpatialMatrix<Real> H;
     H << 0.13, -0.21, 0.07, 0.31;
 
     const Real eps = 1e-7;
     for (const auto& T : cases)
     {
-      const Matrix2 ha = metric.hessianAction(T, H);
-      const Matrix2 fd =
+      const Math::SpatialMatrix<Real> ha = metric.hessianAction(T, H);
+      const Math::SpatialMatrix<Real> fd =
         (Real(1) / (Real(2) * eps))
         * (metric.gradient(T + eps * H) - metric.gradient(T - eps * H));
       EXPECT_LT((ha - fd).norm() / std::max(Real(1), fd.norm()), 1e-5);
@@ -1818,22 +1926,22 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Adaptation_TargetMatrixOptimization, AreaDistortionMetricDerivativesFiniteDifference)
   {
     AreaDistortionMetric metric;
-    std::vector<Matrix2> cases(4);
+    std::vector<Math::SpatialMatrix<Real>> cases(4);
     cases[0] << 1.2, 0.3, 0.1, 0.9;
     cases[1] << 0.7, -0.2, 0.25, 1.4;
     cases[2] << 2.0, 0.0, 0.0, 0.5;
     cases[3] << 1.0, 0.8, -0.3, 1.1;
-    Matrix2 H;
+    Math::SpatialMatrix<Real> H;
     H << 0.13, -0.21, 0.07, 0.31;
 
     const Real eps = 1e-7;
     for (const auto& T : cases)
     {
-      const Matrix2 g = metric.gradient(T);
+      const Math::SpatialMatrix<Real> g = metric.gradient(T);
       for (int i = 0; i < 2; ++i)
         for (int j = 0; j < 2; ++j)
         {
-          Matrix2 Tp = T, Tm = T;
+          Math::SpatialMatrix<Real> Tp = T, Tm = T;
           Tp(i, j) += eps;
           Tm(i, j) -= eps;
           const Real fd =
@@ -1841,8 +1949,8 @@ namespace Rodin::Tests::Unit
           EXPECT_NEAR(g(i, j), fd, 1e-6);
         }
 
-      const Matrix2 ha = metric.hessianAction(T, H);
-      const Matrix2 fd =
+      const Math::SpatialMatrix<Real> ha = metric.hessianAction(T, H);
+      const Math::SpatialMatrix<Real> fd =
         (Real(1) / (Real(2) * eps))
         * (metric.gradient(T + eps * H) - metric.gradient(T - eps * H));
       EXPECT_LT((ha - fd).norm() / std::max(Real(1), fd.norm()), 1e-6);
@@ -1852,22 +1960,22 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Adaptation_TargetMatrixOptimization, ShapeSizeMetricDerivativesFiniteDifference)
   {
     ShapeSizeMetric metric;
-    std::vector<Matrix2> cases(4);
+    std::vector<Math::SpatialMatrix<Real>> cases(4);
     cases[0] << 1.2, 0.3, 0.1, 0.9;
     cases[1] << 0.7, -0.2, 0.25, 1.4;
     cases[2] << 2.0, 0.0, 0.0, 0.5;
     cases[3] << 1.0, 0.8, -0.3, 1.1;
-    Matrix2 H;
+    Math::SpatialMatrix<Real> H;
     H << 0.13, -0.21, 0.07, 0.31;
 
     const Real eps = 1e-7;
     for (const auto& T : cases)
     {
-      const Matrix2 g = metric.gradient(T);
+      const Math::SpatialMatrix<Real> g = metric.gradient(T);
       for (int i = 0; i < 2; ++i)
         for (int j = 0; j < 2; ++j)
         {
-          Matrix2 Tp = T, Tm = T;
+          Math::SpatialMatrix<Real> Tp = T, Tm = T;
           Tp(i, j) += eps;
           Tm(i, j) -= eps;
           const Real fd =
@@ -1875,8 +1983,8 @@ namespace Rodin::Tests::Unit
           EXPECT_NEAR(g(i, j), fd, 1e-5);
         }
 
-      const Matrix2 ha = metric.hessianAction(T, H);
-      const Matrix2 fd =
+      const Math::SpatialMatrix<Real> ha = metric.hessianAction(T, H);
+      const Math::SpatialMatrix<Real> fd =
         (Real(1) / (Real(2) * eps))
         * (metric.gradient(T + eps * H) - metric.gradient(T - eps * H));
       EXPECT_LT((ha - fd).norm() / std::max(Real(1), fd.norm()), 2e-5);
@@ -1889,7 +1997,7 @@ namespace Rodin::Tests::Unit
     Real previous = -1;
     for (Real s : { Real(0.5), Real(0.1), Real(0.02), Real(0.004) })
     {
-      Matrix2 T;
+      Math::SpatialMatrix<Real> T;
       T << 1, 0, 0, s;  // det = s -> 0+
       const Real v = metric.value(T);
       EXPECT_GT(v, previous);  // strictly increasing as det -> 0+
@@ -2001,7 +2109,7 @@ namespace Rodin::Tests::Unit
 
   struct MetricMatrixCase
   {
-    Matrix2 A;
+    Math::SpatialMatrix<Real> A;
     Real expectedSquaredDistance;
   };
 
@@ -2030,7 +2138,7 @@ namespace Rodin::Tests::Unit
         MetricMatrixCase{mat2(0.75, 0.1, -0.2, 1.25), 0.0875}));
 
   class Rodin_Adaptation_TargetMatrixOptimization_ShapeAreaMetrics
-    : public testing::TestWithParam<Matrix2>
+    : public testing::TestWithParam<Math::SpatialMatrix<Real>>
   {};
 
   TEST_P(Rodin_Adaptation_TargetMatrixOptimization_ShapeAreaMetrics, ShapeSizeIsNonnegativeForValidMaps)
@@ -2064,7 +2172,7 @@ namespace Rodin::Tests::Unit
     Math::SpatialPoint a;
     Math::SpatialPoint b;
     Math::SpatialPoint c;
-    Matrix2 J;
+    Math::SpatialMatrix<Real> J;
   };
 
   class Rodin_Adaptation_TargetMatrixOptimization_AffineTriangles

@@ -610,6 +610,7 @@ namespace Rodin::Geometry
         {
           const auto& r = m_edge.at(m_edges[e]);
           if (r.n != 2) continue;                       // interior only
+          if (m_A[r.t[0]] != m_A[r.t[1]]) continue;      // do not mix regions
           const Index u = r.a, v = r.b;
           if (prot(u) || prot(v)) continue;             // keep feature edges
           const Index a = third(r.t[0], u, v);
@@ -633,6 +634,7 @@ namespace Rodin::Geometry
           const auto it = m_edge.find(ekey(p.a, p.b));
           const auto& r = it->second;
           if (r.n != 2 || !m_alive[r.t[0]] || !m_alive[r.t[1]]) return false;
+          if (m_A[r.t[0]] != m_A[r.t[1]]) return false;
           const Index u = p.a, v = p.b;
           const Index a = third(r.t[0], u, v), b = third(r.t[1], u, v);
           if (!validSwapCavity(u, v, a, b)) return false;

@@ -195,7 +195,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       /**
        * @brief Evaluates the 2x2 Jacobian of a P2 triangular geometry map.
        */
-      Matrix2 jacobian(
+      Math::SpatialMatrix<Real> jacobian(
           const HighOrderTriangleGeometry& geometry,
           Index cell,
           const ReferencePoint& p = {}) const
@@ -221,7 +221,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
           Real(4) * L1,
           Real(4) * (L0 - L2) }};
 
-        Matrix2 J = Matrix2(2, 2);
+        Math::SpatialMatrix<Real> J = Math::SpatialMatrix<Real>(2, 2);
         for (std::uint8_t i = 0; i < 6; ++i)
         {
           const auto& x = geometry.nodes[c[i]].x;
