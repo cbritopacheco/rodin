@@ -655,6 +655,39 @@ namespace Rodin::IO
     }
 
     inline
+    const char* getXDMFQuadraticTopologyName(Geometry::Polytope::Type t)
+    {
+      using PT = Geometry::Polytope::Type;
+      switch (t)
+      {
+        case PT::Segment:       return "Edge_3";
+        case PT::Triangle:      return "Triangle_6";
+        case PT::Quadrilateral: return "Quadrilateral_9";
+        case PT::Tetrahedron:   return "Tetrahedron_10";
+        case PT::Pyramid:       return "Pyramid_13";
+        case PT::Wedge:         return "Wedge_18";
+        case PT::Hexahedron:    return "Hexahedron_27";
+        case PT::Point:
+          return "Polyvertex";
+      }
+
+      Alert::Exception()
+        << "XDMF curved visualization does not support quadratic Rodin "
+        << "polytope type " << static_cast<int>(t) << "."
+        << Alert::Raise;
+      return nullptr;
+    }
+
+    struct XDMFTopologyLayout
+    {
+      bool isUniform = false;
+      std::string topologyType = "Mixed";
+      size_t rowCount = 0;
+      size_t columnCount = 0;
+      size_t entryCount = 0;
+    };
+
+    inline
     Math::SpatialPoint xdmfReferencePoint(std::initializer_list<Real> values)
     {
       Math::SpatialPoint p;
@@ -907,6 +940,62 @@ namespace Rodin::IO
           size += 1;
       }
       return size;
+    }
+
+    inline
+    XDMFTopologyLayout getXDMFTopologyLayout(
+        const Geometry::MeshBase& mesh,
+        bool allowUniformCurvedTopology = true)
+    {
+      XDMFTopologyLayout layout;
+      layout.entryCount = getXDMFMixedTopologySize(mesh);
+
+      if (!allowUniformCurvedTopology || !hasCurvedXDMFGeometry(mesh))
+        return layout;
+
+      const auto& localMesh =
+          static_cast<const Geometry::Mesh<Context::Local>&>(mesh);
+      const auto& connectivity = localMesh.getConnectivity();
+      const size_t D = connectivity.getDimension();
+
+      bool first = true;
+      Geometry::Polytope::Type firstGeometry = Geometry::Polytope::Type::Point;
+      size_t nodesPerCell = 0;
+
+      for (Index i = 0; i < static_cast<Index>(connectivity.getCount(D)); ++i)
+      {
+        const auto geometry = connectivity.getGeometry(D, i);
+        const auto& trans = localMesh.getPolytopeTransformation(D, i);
+        const size_t order = trans.getOrder();
+
+        // Uniform high-order XDMF is used only when every cell is exported
+        // through the same quadratic topology. Mixed remains the robust
+        // fallback for hybrid or partially curved meshes.
+        if (order <= 1)
+          return layout;
+
+        const auto nodes = getXDMFReferenceNodes(geometry, order);
+        if (first)
+        {
+          first = false;
+          firstGeometry = geometry;
+          nodesPerCell = nodes.size();
+          continue;
+        }
+
+        if (geometry != firstGeometry || nodes.size() != nodesPerCell)
+          return layout;
+      }
+
+      if (first)
+        return layout;
+
+      layout.isUniform = true;
+      layout.topologyType = getXDMFQuadraticTopologyName(firstGeometry);
+      layout.rowCount = static_cast<size_t>(connectivity.getCount(D));
+      layout.columnCount = nodesPerCell;
+      layout.entryCount = layout.rowCount * layout.columnCount;
+      return layout;
     }
 
     /**
@@ -1213,7 +1302,10 @@ namespace Rodin::IO
      * @param[in] mesh  Local mesh whose cells provide the topology data.
      */
     inline
-    void writeXDMFTopology(hid_t file, const Geometry::MeshBase& mesh)
+    void writeXDMFTopology(
+        hid_t file,
+        const Geometry::MeshBase& mesh,
+        bool allowUniformCurvedTopology = true)
     {
       {
         const auto g = Group(H5Gcreate2(file, Path::MeshXDMF, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
@@ -1228,6 +1320,29 @@ namespace Rodin::IO
       const auto& connectivity =
           static_cast<const Geometry::Mesh<Context::Local>&>(mesh).getConnectivity();
       const size_t D = connectivity.getDimension();
+      const auto layout =
+        getXDMFTopologyLayout(mesh, allowUniformCurvedTopology);
+
+      if (layout.isUniform)
+      {
+        std::vector<U64> topology(layout.entryCount);
+        U64 nextNode = 0;
+        for (size_t i = 0; i < layout.rowCount; ++i)
+          for (size_t k = 0; k < layout.columnCount; ++k)
+            topology[i * layout.columnCount + k] = nextNode++;
+
+        writeMatrixDataset(
+            file,
+            Path::MeshXDMFTopology,
+            topology,
+            static_cast<hsize_t>(layout.rowCount),
+            static_cast<hsize_t>(layout.columnCount));
+        writeScalarDataset(
+            file,
+            Path::MeshXDMFTopologySize,
+            static_cast<U64>(layout.entryCount));
+        return;
+      }
 
       std::vector<U64> topology;
       topology.reserve(getXDMFMixedTopologySize(mesh));
@@ -1292,7 +1407,8 @@ namespace Rodin::IO
     inline
     void writeXDMFTopology(
         const boost::filesystem::path& filename,
-        const Geometry::MeshBase& mesh)
+        const Geometry::MeshBase& mesh,
+        bool allowUniformCurvedTopology = true)
     {
       const auto file = File(H5Fopen(filename.c_str(), H5F_ACC_RDWR, H5P_DEFAULT));
       if (!file)
@@ -1302,7 +1418,7 @@ namespace Rodin::IO
           << Alert::Raise;
       }
 
-      writeXDMFTopology(file.get(), mesh);
+      writeXDMFTopology(file.get(), mesh, allowUniformCurvedTopology);
     }
 
     /**
@@ -1444,7 +1560,8 @@ namespace Rodin::IO
     inline
     void writeXDMFMesh(
         const boost::filesystem::path& filename,
-        const Geometry::MeshBase& mesh)
+        const Geometry::MeshBase& mesh,
+        bool allowUniformCurvedTopology = true)
     {
       const auto file = File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
       if (!file)
@@ -1465,7 +1582,7 @@ namespace Rodin::IO
       }
 
       writeXDMFVertices(file.get(), mesh);
-      writeXDMFTopology(file.get(), mesh);
+      writeXDMFTopology(file.get(), mesh, allowUniformCurvedTopology);
       writeXDMFRegionAttribute(file.get(), mesh);
     }
 

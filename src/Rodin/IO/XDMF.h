@@ -683,6 +683,10 @@ namespace Rodin::IO
         size_t meshDimension = 0;
         size_t spaceDimension = 0;
         size_t topologySize = 0;
+        bool topologyIsUniform = false;
+        std::string topologyType = "Mixed";
+        size_t topologyRows = 0;
+        size_t topologyColumns = 0;
 
         /// @brief Per-rank metadata (size 1 in serial, numRanks on root in distributed).
         std::vector<PieceMeta> pieces;

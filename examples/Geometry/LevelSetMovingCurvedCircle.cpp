@@ -317,10 +317,41 @@ namespace
     }
   }
 
-  std::pair<Real, Real> curvedInterfaceFit(const LocalMesh& mesh, Real t)
+  struct CurvedGeometryStats
   {
+    Real fitRms = 0;
+    Real fitMax = 0;
+    Real minJacobian = std::numeric_limits<Real>::infinity();
+    Real minQuality = std::numeric_limits<Real>::infinity();
+    Index invalidJacobianSamples = 0;
+  };
+
+  Real triangleQuality(
+      const Math::SpatialPoint& x0,
+      const Math::SpatialPoint& x1,
+      const Math::SpatialPoint& x2)
+  {
+    const Real orient =
+      (x1[0] - x0[0]) * (x2[1] - x0[1])
+    - (x1[1] - x0[1]) * (x2[0] - x0[0]);
+    if (!(orient > Real(0)) || !std::isfinite(orient))
+      return 0;
+    const Real area = Real(0.5) * orient;
+    const Real den = (x1 - x0).squaredNorm()
+                   + (x2 - x1).squaredNorm()
+                   + (x0 - x2).squaredNorm();
+    if (!(den > Real(0)) || !std::isfinite(den))
+      return 0;
+    return Real(4) * std::sqrt(Real(3)) * area / den;
+  }
+
+  CurvedGeometryStats curvedGeometryStats(
+      const LocalMesh& mesh,
+      Real t,
+      Index samples = 4)
+  {
+    CurvedGeometryStats stats;
     Real sq = 0;
-    Real max = 0;
     Index count = 0;
     const auto& conn = mesh.getConnectivity();
     for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()); ++c)
@@ -329,55 +360,78 @@ namespace
         continue;
       const auto cellIt = mesh.getPolytope(2, c);
       const auto& trans = cellIt->getTransformation();
+
+      auto map = [&](Index i, Index j)
+      {
+        Math::SpatialPoint x;
+        trans.transform(
+            x,
+            Math::SpatialPoint{
+              static_cast<Real>(i) / static_cast<Real>(samples),
+              static_cast<Real>(j) / static_cast<Real>(samples)});
+        return x;
+      };
+
+      for (Index i = 0; i <= samples; ++i)
+      {
+        for (Index j = 0; j <= samples - i; ++j)
+        {
+          const Math::SpatialPoint rc{
+            static_cast<Real>(i) / static_cast<Real>(samples),
+            static_cast<Real>(j) / static_cast<Real>(samples)};
+          Math::SpatialMatrix<Real> J;
+          trans.jacobian(J, rc);
+          const bool shaped = J.rows() == 2 && J.cols() == 2;
+          const Real det = shaped ? J.determinant() : Real(0);
+          if (!shaped || !(det > Real(0)) || !std::isfinite(det))
+            ++stats.invalidJacobianSamples;
+          else
+            stats.minJacobian = std::min(stats.minJacobian, det);
+        }
+      }
+
+      for (Index i = 0; i < samples; ++i)
+      {
+        for (Index j = 0; j < samples - i; ++j)
+        {
+          const auto x00 = map(i, j);
+          const auto x10 = map(i + 1, j);
+          const auto x01 = map(i, j + 1);
+          stats.minQuality =
+            std::min(stats.minQuality, triangleQuality(x00, x10, x01));
+          if (i + j + 1 < samples)
+          {
+            const auto x11 = map(i + 1, j + 1);
+            stats.minQuality =
+              std::min(stats.minQuality, triangleQuality(x10, x11, x01));
+          }
+        }
+      }
+
       for (const auto& edge : interfaceLocalEdges(mesh, c))
       {
-        for (Real s : {Real(0.25), Real(0.5), Real(0.75)})
+        for (Index k = 0; k <= samples; ++k)
         {
           Math::SpatialPoint x;
-          trans.transform(x, triangleReferenceEdgePoint(edge[0], edge[1], s));
+          trans.transform(
+              x,
+              triangleReferenceEdgePoint(
+                edge[0], edge[1],
+                static_cast<Real>(k) / static_cast<Real>(samples)));
           const Real phi = std::abs(phiAt(x, t));
-          max = std::max(max, phi);
+          stats.fitMax = std::max(stats.fitMax, phi);
           sq += phi * phi;
           ++count;
         }
       }
     }
-    return {
-      count > 0 ? std::sqrt(sq / static_cast<Real>(count)) : Real(0),
-      max
-    };
-  }
-
-  std::pair<Real, Index> curvedJacobianStats(const LocalMesh& mesh)
-  {
-    Real minJacobian = std::numeric_limits<Real>::infinity();
-    Index invalid = 0;
-    const auto& conn = mesh.getConnectivity();
-    for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()); ++c)
-    {
-      if (conn.getGeometry(2, c) != Polytope::Type::Triangle)
-        continue;
-      const auto cellIt = mesh.getPolytope(2, c);
-      const auto& trans = cellIt->getTransformation();
-      for (const Math::SpatialPoint& rc : {
-            Math::SpatialPoint{Real(1) / Real(3), Real(1) / Real(3)},
-            Math::SpatialPoint{Real(0.5), Real(0.25)},
-            Math::SpatialPoint{Real(0.25), Real(0.5)},
-            Math::SpatialPoint{Real(0.25), Real(0.25)}})
-      {
-        Math::SpatialMatrix<Real> J;
-        trans.jacobian(J, rc);
-        const bool shaped = J.rows() == 2 && J.cols() == 2;
-        const Real det = shaped ? J.determinant() : Real(0);
-        if (!shaped || !(det > Real(0)) || !std::isfinite(det))
-          ++invalid;
-        else
-          minJacobian = std::min(minJacobian, det);
-      }
-    }
-    if (!std::isfinite(minJacobian))
-      minJacobian = 0;
-    return {minJacobian, invalid};
+    if (count > 0)
+      stats.fitRms = std::sqrt(sq / static_cast<Real>(count));
+    if (!std::isfinite(stats.minJacobian))
+      stats.minJacobian = 0;
+    if (!std::isfinite(stats.minQuality))
+      stats.minQuality = 0;
+    return stats;
   }
 
   LocalMesh curvedInterfacePolyline(
@@ -676,8 +730,8 @@ namespace
 
 int main(int, char**)
 {
-  constexpr size_t resolution = 10;
-  constexpr Index steps = 40;
+  constexpr size_t resolution = 16;
+  constexpr Index steps = 8;
   constexpr Real h = Real(1) / static_cast<Real>(resolution - 1);
 
   LocalMesh background =
@@ -688,7 +742,7 @@ int main(int, char**)
 
   // Diagnostics are accumulated and reported as an average over the whole
   // process, not just the final step.
-  Real sumQmin = 0, sumFit = 0;
+  Real sumQmin = 0, sumCurvedQmin = 0, sumFit = 0;
   Index sumInverted = 0, rejectedTMOP = 0, diagSteps = 0;
 
   for (Index step = 0; step < steps; ++step)
@@ -776,6 +830,7 @@ int main(int, char**)
     };
 
     bool solvedTMOP = true;
+    bool hadAcceptedTMOPStep = false;
     Real lastAlpha = 1;
     Index tmopIterations = 0;
     try
@@ -789,7 +844,7 @@ int main(int, char**)
         const auto r = R.getVector();
         if (!r.allFinite())
         {
-          solvedTMOP = false;
+          solvedTMOP = hadAcceptedTMOPStep;
           break;
         }
         if (r.norm() <= Real(1e-10))
@@ -803,13 +858,13 @@ int main(int, char**)
         lu.compute(J.getOperator());
         if (lu.info() != Eigen::Success)
         {
-          solvedTMOP = false;
+          solvedTMOP = hadAcceptedTMOPStep;
           break;
         }
         const Math::Vector<Real> dx = lu.solve(-r);
         if (lu.info() != Eigen::Success || !dx.allFinite())
         {
-          solvedTMOP = false;
+          solvedTMOP = hadAcceptedTMOPStep;
           break;
         }
 
@@ -823,8 +878,17 @@ int main(int, char**)
           const Real e = meritEnergy();
           if (std::isfinite(e) && e <= e0 * (Real(1) + Real(1e-12)))
           {
-            acceptedStep = true;
-            break;
+            LocalMesh trialMesh(optimized);
+            installQuadraticGeometry(trialMesh, t);
+            applyParametricDisplacement(trialMesh, u);
+            const auto trialStats = curvedGeometryStats(trialMesh, t);
+            if (trialStats.invalidJacobianSamples == 0
+                && trialStats.minJacobian > Real(0)
+                && trialStats.minQuality > Real(0))
+            {
+              acceptedStep = true;
+              break;
+            }
           }
           alpha *= Real(0.5);
         }
@@ -834,6 +898,7 @@ int main(int, char**)
           u.getData() = u0;
           break;
         }
+        hadAcceptedTMOPStep = true;
         if (alpha * dx.norm() <= Real(1e-10))
           break;
       }
@@ -852,23 +917,21 @@ int main(int, char**)
     optimized.getConnectivity().compute(2, 1);
     optimized.getConnectivity().compute(1, 0);
     const auto [tmopQmin, tmopInverted] = meshQuality(optimized);
-    auto [tmopMinJacobian, tmopInvalidJacobianSamples] =
-      curvedJacobianStats(optimized);
+    auto tmopCurvedStats = curvedGeometryStats(optimized, t);
     const bool acceptedTMOP =
       solvedTMOP
       && tmopInverted == 0
       && std::isfinite(tmopQmin)
       && tmopQmin > Real(0)
-      && tmopInvalidJacobianSamples == 0
-      && tmopMinJacobian > Real(0)
-      && std::isfinite(tmopMinJacobian);
+      && tmopCurvedStats.invalidJacobianSamples == 0
+      && tmopCurvedStats.minJacobian > Real(0)
+      && std::isfinite(tmopCurvedStats.minJacobian);
     if (!acceptedTMOP)
     {
       optimized = std::move(beforeTMOP);
+      installQuadraticGeometry(optimized, t);
       ++rejectedTMOP;
-      const auto fallbackJacobianStats = curvedJacobianStats(optimized);
-      tmopMinJacobian = fallbackJacobianStats.first;
-      tmopInvalidJacobianSamples = fallbackJacobianStats.second;
+      tmopCurvedStats = curvedGeometryStats(optimized, t);
     }
     optimized.getConnectivity().compute(2, 1);
     optimized.getConnectivity().compute(1, 0);
@@ -895,25 +958,28 @@ int main(int, char**)
     xdmf.write(t).flush();
 
     const auto [qmin, inverted] = meshQuality(optimized);
-    const auto [curvedFitRms, curvedFitMax] = curvedInterfaceFit(optimized, t);
+    const auto curvedStats = curvedGeometryStats(optimized, t);
     Real fitErr = 0;
     for (Index i = 0; i < optimized.getVertexCount(); ++i)
       if (i < featureMask.size() && featureMask[i])
         fitErr = std::max(fitErr,
             std::abs(phiAt(optimized.getVertexCoordinates(i), t)));
     sumQmin += qmin;
+    sumCurvedQmin += curvedStats.minQuality;
     sumInverted += inverted;
-    sumFit += fitErr;
+    sumFit += curvedStats.fitRms;
     ++diagSteps;
     std::cout << "step " << step
               << " t=" << t
               << " cells=" << optimized.getCellCount()
               << " qmin=" << qmin
+              << " curved_qmin=" << curvedStats.minQuality
               << " inverted=" << inverted
               << " fit=" << fitErr
-              << " curved_fit_rms=" << curvedFitRms
-              << " curved_fit_max=" << curvedFitMax
-              << " curved_min_jac=" << tmopMinJacobian
+              << " curved_fit_rms=" << curvedStats.fitRms
+              << " curved_fit_max=" << curvedStats.fitMax
+              << " curved_min_jac=" << curvedStats.minJacobian
+              << " curved_invalid_jac=" << curvedStats.invalidJacobianSamples
               << " tmop_iterations=" << tmopIterations
               << " tmop_last_alpha=" << lastAlpha
               << " tmop_accepted=" << (acceptedTMOP ? 1 : 0)
@@ -929,9 +995,11 @@ int main(int, char**)
   if (diagSteps > 0)
     std::cout << "AVERAGE over " << diagSteps << " steps:"
               << " qmin=" << sumQmin / static_cast<Real>(diagSteps)
+              << " curved_qmin="
+              << sumCurvedQmin / static_cast<Real>(diagSteps)
               << " inverted="
               << static_cast<Real>(sumInverted) / static_cast<Real>(diagSteps)
-              << " fit=" << sumFit / static_cast<Real>(diagSteps)
+              << " curved_fit_rms=" << sumFit / static_cast<Real>(diagSteps)
               << " rejected_tmop=" << rejectedTMOP
               << std::endl;
   return 0;

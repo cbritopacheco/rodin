@@ -253,10 +253,11 @@ namespace Rodin::Tests::Unit
     hid_t tdset = H5Dopen2(h5, "/Mesh/XDMF/Topology", H5P_DEFAULT);
     ASSERT_GE(tdset, 0);
     hid_t tspace = H5Dget_space(tdset);
-    hsize_t tdims[1] = {0};
-    ASSERT_EQ(H5Sget_simple_extent_dims(tspace, tdims, nullptr), 1);
-    ASSERT_EQ(static_cast<size_t>(tdims[0]), 7u);
-    std::vector<unsigned long long> topology(7);
+    hsize_t tdims[2] = {0, 0};
+    ASSERT_EQ(H5Sget_simple_extent_dims(tspace, tdims, nullptr), 2);
+    ASSERT_EQ(static_cast<size_t>(tdims[0]), 1u);
+    ASSERT_EQ(static_cast<size_t>(tdims[1]), 6u);
+    std::vector<unsigned long long> topology(6);
     ASSERT_GE(H5Dread(
           tdset,
           H5T_NATIVE_ULLONG,
@@ -264,9 +265,8 @@ namespace Rodin::Tests::Unit
           H5S_ALL,
           H5P_DEFAULT,
           topology.data()), 0);
-    EXPECT_EQ(topology[0], 36u);
-    for (size_t i = 1; i < topology.size(); ++i)
-      EXPECT_EQ(topology[i], static_cast<unsigned long long>(i - 1));
+    for (size_t i = 0; i < topology.size(); ++i)
+      EXPECT_EQ(topology[i], static_cast<unsigned long long>(i));
     H5Sclose(tspace);
     H5Dclose(tdset);
     H5Fclose(h5);
@@ -278,7 +278,8 @@ namespace Rodin::Tests::Unit
     std::stringstream buffer;
     buffer << in.rdbuf();
     const auto xml = buffer.str();
-    EXPECT_NE(xml.find("Dimensions=\"7\""), std::string::npos);
+    EXPECT_NE(xml.find("TopologyType=\"Triangle_6\""), std::string::npos);
+    EXPECT_NE(xml.find("Dimensions=\"1 6\""), std::string::npos);
     EXPECT_NE(xml.find("Dimensions=\"6 2\""), std::string::npos);
 
     boost::filesystem::remove_all(testDir);
@@ -395,11 +396,13 @@ namespace Rodin::Tests::Unit
     hid_t tdset = H5Dopen2(h5, "/Mesh/XDMF/Topology", H5P_DEFAULT);
     ASSERT_GE(tdset, 0);
     hid_t tspace = H5Dget_space(tdset);
-    hsize_t tdims[1] = {0};
-    ASSERT_EQ(H5Sget_simple_extent_dims(tspace, tdims, nullptr), 1);
-    EXPECT_EQ(static_cast<size_t>(tdims[0]), mesh.getCellCount() * (1 + c.nodesPerCell));
+    hsize_t tdims[2] = {0, 0};
+    ASSERT_EQ(H5Sget_simple_extent_dims(tspace, tdims, nullptr), 2);
+    EXPECT_EQ(static_cast<size_t>(tdims[0]), mesh.getCellCount());
+    EXPECT_EQ(static_cast<size_t>(tdims[1]), c.nodesPerCell);
 
-    std::vector<unsigned long long> topology(static_cast<size_t>(tdims[0]));
+    std::vector<unsigned long long> topology(
+        static_cast<size_t>(tdims[0] * tdims[1]));
     ASSERT_GE(H5Dread(
           tdset,
           H5T_NATIVE_ULLONG,
@@ -408,7 +411,8 @@ namespace Rodin::Tests::Unit
           H5P_DEFAULT,
           topology.data()), 0);
     ASSERT_FALSE(topology.empty());
-    EXPECT_EQ(topology[0], c.topologyId);
+    for (size_t i = 0; i < topology.size(); ++i)
+      EXPECT_EQ(topology[i], static_cast<unsigned long long>(i));
     H5Sclose(tspace);
     H5Dclose(tdset);
     H5Fclose(h5);

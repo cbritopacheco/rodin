@@ -303,7 +303,13 @@ namespace Rodin::IO
       snapshot.cellCount = gr.mesh->getCellCount();
       snapshot.meshDimension = gr.mesh->getDimension();
       snapshot.spaceDimension = gr.mesh->getSpaceDimension();
-      snapshot.topologySize = HDF5::getXDMFMixedTopologySize(*gr.mesh);
+      const auto topologyLayout =
+        HDF5::getXDMFTopologyLayout(*gr.mesh, !m_distributed);
+      snapshot.topologySize = topologyLayout.entryCount;
+      snapshot.topologyIsUniform = topologyLayout.isUniform;
+      snapshot.topologyType = topologyLayout.topologyType;
+      snapshot.topologyRows = topologyLayout.rowCount;
+      snapshot.topologyColumns = topologyLayout.columnCount;
 
       gatherPieceMeta(snapshot);
 
@@ -320,7 +326,7 @@ namespace Rodin::IO
               rankStr);
           const auto meshPath = m_stem.parent_path() / meshFile;
 
-          HDF5::writeXDMFMesh(meshPath, *gr.mesh);
+          HDF5::writeXDMFMesh(meshPath, *gr.mesh, !m_distributed);
 
           gr.staticMeshFile = meshFile;
           gr.staticMeshWritten = true;
@@ -339,7 +345,7 @@ namespace Rodin::IO
             rankStr);
         const auto meshPath = m_stem.parent_path() / meshFile;
 
-        HDF5::writeXDMFMesh(meshPath, *gr.mesh);
+        HDF5::writeXDMFMesh(meshPath, *gr.mesh, !m_distributed);
 
         snapshot.meshFile = meshFile;
       }
@@ -422,14 +428,19 @@ namespace Rodin::IO
     os << indent(bi) << "<Grid Name=\"" << gridName << "\" GridType=\"Uniform\">\n";
     os << indent(bi + 1) << "<Time Value=\"" << snap.time << "\" />\n";
 
-    os << indent(bi + 1) << "<Topology TopologyType=\"Mixed\" NumberOfElements=\""
+    os << indent(bi + 1) << "<Topology TopologyType=\""
+       << snap.topologyType << "\" NumberOfElements=\""
        << snap.cellCount << "\">\n";
     // Precision="8" is required here because the HDF5 topology dataset is U64.
     // Without Precision, some XDMF readers may assume 32-bit UInt and misread
     // the dataset.
-    os << indent(bi + 2) << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Precision=\"8\" Dimensions=\""
-       << snap.topologySize << "\">"
-       << meshH5 << ":" << HDF5::Path::MeshXDMFTopology
+    os << indent(bi + 2)
+       << "<DataItem Format=\"HDF\" NumberType=\"UInt\" Precision=\"8\" Dimensions=\"";
+    if (snap.topologyIsUniform)
+      os << snap.topologyRows << " " << snap.topologyColumns;
+    else
+      os << snap.topologySize;
+    os << "\">" << meshH5 << ":" << HDF5::Path::MeshXDMFTopology
        << "</DataItem>\n";
     os << indent(bi + 1) << "</Topology>\n";
 

@@ -1304,6 +1304,7 @@ namespace Rodin::Tests::Benchmarks
           + boundaryFit.energy(u);
       };
 
+      bool acceptedAny = false;
       try
       {
         for (Index it = 0; it < maxIterations; ++it)
@@ -1318,7 +1319,11 @@ namespace Rodin::Tests::Benchmarks
             tmopStats->assemblySeconds += elapsedSeconds(start);
           const auto r = R.getVector();
           if (!r.allFinite())
+          {
+            if (acceptedAny)
+              break;
             return false;
+          }
           if (r.norm() <= Real(1e-10))
             break;
 
@@ -1333,13 +1338,21 @@ namespace Rodin::Tests::Benchmarks
           Eigen::SparseLU<std::decay_t<decltype(J.getOperator())>> lu;
           lu.compute(J.getOperator());
           if (lu.info() != Eigen::Success)
+          {
+            if (acceptedAny)
+              break;
             return false;
+          }
           const Math::Vector<Real> rhs = -r;          // Newton: J dx = -R
           const Math::Vector<Real> dx = lu.solve(rhs);
           if (tmopStats)
             tmopStats->solveSeconds += elapsedSeconds(start);
           if (lu.info() != Eigen::Success || !dx.allFinite())
+          {
+            if (acceptedAny)
+              break;
             return false;
+          }
 
           start = BenchClock::now();
           const Real e0 = meritEnergy();
@@ -1357,8 +1370,16 @@ namespace Rodin::Tests::Benchmarks
               tmopStats->meritSeconds += elapsedSeconds(start);
             if (std::isfinite(e) && e <= e0 * (Real(1) + Real(1e-12)))
             {
-              accepted = true;
-              break;
+              LocalMesh trialMesh(mesh);
+              applyParametricDisplacement(trialMesh, u);
+              const auto trialStats = curvedInterfaceStats(trialMesh, shape, t);
+              if (trialStats.invalidJacobianSamples == 0
+                  && trialStats.minJacobian > Real(0)
+                  && trialStats.minQuality > Real(0))
+              {
+                accepted = true;
+                break;
+              }
             }
             alpha *= Real(0.5);
           }
@@ -1367,6 +1388,7 @@ namespace Rodin::Tests::Benchmarks
             u.getData() = u0;                          // keep best so far
             break;
           }
+          acceptedAny = true;
           if (alpha * dx.norm() <= Real(1e-10))
             break;
         }
@@ -1500,6 +1522,7 @@ namespace Rodin::Tests::Benchmarks
           + boundaryFit.energy(u);
       };
 
+      bool acceptedAny = false;
       try
       {
         for (Index it = 0; it < maxIterations; ++it)
@@ -1514,7 +1537,11 @@ namespace Rodin::Tests::Benchmarks
             tmopStats->assemblySeconds += elapsedSeconds(start);
           const auto r = R.getVector();
           if (!r.allFinite())
+          {
+            if (acceptedAny)
+              break;
             return false;
+          }
           if (r.norm() <= Real(1e-10))
             break;
 
@@ -1529,12 +1556,20 @@ namespace Rodin::Tests::Benchmarks
           Eigen::SparseLU<std::decay_t<decltype(J.getOperator())>> lu;
           lu.compute(J.getOperator());
           if (lu.info() != Eigen::Success)
+          {
+            if (acceptedAny)
+              break;
             return false;
+          }
           const Math::Vector<Real> dx = lu.solve(-r);
           if (tmopStats)
             tmopStats->solveSeconds += elapsedSeconds(start);
           if (lu.info() != Eigen::Success || !dx.allFinite())
+          {
+            if (acceptedAny)
+              break;
             return false;
+          }
 
           start = BenchClock::now();
           const Real e0 = meritEnergy();
@@ -1562,6 +1597,7 @@ namespace Rodin::Tests::Benchmarks
             u.getData() = u0;
             break;
           }
+          acceptedAny = true;
           if (alpha * dx.norm() <= Real(1e-10))
             break;
         }
