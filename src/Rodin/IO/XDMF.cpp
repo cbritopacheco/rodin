@@ -297,10 +297,9 @@ namespace Rodin::IO
       }
 
       const auto& patterns = gr.options.patterns ? *gr.options.patterns : m_patterns;
-
       SnapshotRecord snapshot;
       snapshot.time = time;
-      snapshot.vertexCount = gr.mesh->getVertexCount();
+      snapshot.vertexCount = HDF5::getXDMFVisualizationVertexCount(*gr.mesh);
       snapshot.cellCount = gr.mesh->getCellCount();
       snapshot.meshDimension = gr.mesh->getDimension();
       snapshot.spaceDimension = gr.mesh->getSpaceDimension();

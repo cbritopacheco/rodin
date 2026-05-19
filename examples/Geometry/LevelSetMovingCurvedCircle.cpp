@@ -878,7 +878,7 @@ int main(int, char**)
     for (Index i = 0; i < optimized.getVertexCount(); ++i)
       outputPhi[i] = phiAt(optimized.getVertexCoordinates(i), t);
 
-    auto grid = xdmf.grid("linear-control-mesh");
+    auto grid = xdmf.grid("curved-p2-xdmf");
     grid.setMesh(optimized, IO::XDMF::MeshPolicy::Transient);
     grid.clear();
     grid.add("phi", outputPhi, IO::XDMF::Center::Node);

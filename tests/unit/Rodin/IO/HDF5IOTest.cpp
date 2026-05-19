@@ -13,6 +13,7 @@
 #include <boost/filesystem.hpp>
 
 #include <Rodin/Geometry.h>
+#include <Rodin/Geometry/ParametricTransformation.h>
 #include <Rodin/Variational.h>
 #include <Rodin/IO.h>
 
@@ -198,6 +199,234 @@ namespace Rodin::Tests::Unit
     H5Fclose(h5);
     boost::filesystem::remove_all(testDir);
   }
+
+  TEST(Rodin_IO_HDF5, XDMFQuadraticTriangleVisualizationTopology)
+  {
+    const boost::filesystem::path testDir = "/tmp/rodin_xdmf_p2_triangle_test";
+    boost::filesystem::create_directories(testDir);
+    const boost::filesystem::path stem = testDir / "vis";
+
+    Mesh mesh = LocalMesh::Builder()
+      .initialize(2)
+      .nodes(3)
+      .vertex({0, 0})
+      .vertex({1, 0})
+      .vertex({0, 1})
+      .polytope(Polytope::Type::Triangle, {0, 1, 2})
+      .finalize();
+
+    RealH1Element<2> fe(Polytope::Type::Triangle);
+    PointCloud pm(2, fe.getCount());
+    for (size_t i = 0; i < fe.getCount(); ++i)
+    {
+      const auto& rc = fe.getNode(i);
+      pm(0, i) = rc[0];
+      pm(1, i) = rc[1];
+    }
+    mesh.setPolytopeTransformation(
+        {2, 0},
+        new ParametricTransformation<RealH1Element<2>>(pm, fe));
+
+    {
+      XDMF xdmf(stem);
+      xdmf.setMesh(mesh);
+      xdmf.write(0.0);
+      xdmf.close();
+    }
+
+    const auto meshH5 = testDir / "vis.mesh.h5";
+    ASSERT_TRUE(boost::filesystem::exists(meshH5));
+
+    hid_t h5 = H5Fopen(meshH5.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+    ASSERT_GE(h5, 0);
+
+    hid_t vdset = H5Dopen2(h5, "/Mesh/Geometry/Vertices", H5P_DEFAULT);
+    ASSERT_GE(vdset, 0);
+    hid_t vspace = H5Dget_space(vdset);
+    hsize_t vdims[2] = {0, 0};
+    ASSERT_EQ(H5Sget_simple_extent_dims(vspace, vdims, nullptr), 2);
+    EXPECT_EQ(static_cast<size_t>(vdims[0]), 6u);
+    EXPECT_EQ(static_cast<size_t>(vdims[1]), 2u);
+    H5Sclose(vspace);
+    H5Dclose(vdset);
+
+    hid_t tdset = H5Dopen2(h5, "/Mesh/XDMF/Topology", H5P_DEFAULT);
+    ASSERT_GE(tdset, 0);
+    hid_t tspace = H5Dget_space(tdset);
+    hsize_t tdims[1] = {0};
+    ASSERT_EQ(H5Sget_simple_extent_dims(tspace, tdims, nullptr), 1);
+    ASSERT_EQ(static_cast<size_t>(tdims[0]), 7u);
+    std::vector<unsigned long long> topology(7);
+    ASSERT_GE(H5Dread(
+          tdset,
+          H5T_NATIVE_ULLONG,
+          H5S_ALL,
+          H5S_ALL,
+          H5P_DEFAULT,
+          topology.data()), 0);
+    EXPECT_EQ(topology[0], 36u);
+    for (size_t i = 1; i < topology.size(); ++i)
+      EXPECT_EQ(topology[i], static_cast<unsigned long long>(i - 1));
+    H5Sclose(tspace);
+    H5Dclose(tdset);
+    H5Fclose(h5);
+
+    const auto xdmfFile = testDir / "vis.xdmf";
+    ASSERT_TRUE(boost::filesystem::exists(xdmfFile));
+    std::ifstream in(xdmfFile.string());
+    ASSERT_TRUE(in.good());
+    std::stringstream buffer;
+    buffer << in.rdbuf();
+    const auto xml = buffer.str();
+    EXPECT_NE(xml.find("Dimensions=\"7\""), std::string::npos);
+    EXPECT_NE(xml.find("Dimensions=\"6 2\""), std::string::npos);
+
+    boost::filesystem::remove_all(testDir);
+  }
+
+  static Geometry::Mesh<Context::Local> makeQuadraticXDMFBaseMesh(Polytope::Type type)
+  {
+    using LocalMesh = Geometry::Mesh<Context::Local>;
+    switch (type)
+    {
+      case Polytope::Type::Segment:
+        return LocalMesh::UniformGrid(type, { 3 });
+      case Polytope::Type::Triangle:
+      case Polytope::Type::Quadrilateral:
+        return LocalMesh::UniformGrid(type, { 2, 2 });
+      case Polytope::Type::Tetrahedron:
+      case Polytope::Type::Pyramid:
+      case Polytope::Type::Hexahedron:
+      case Polytope::Type::Wedge:
+        return LocalMesh::UniformGrid(type, { 2, 2, 2 });
+      case Polytope::Type::Point:
+        break;
+    }
+
+    Alert::Exception()
+      << "Unsupported quadratic XDMF test polytope."
+      << Alert::Raise;
+    return {};
+  }
+
+  static std::string quadraticXDMFLabel(Polytope::Type type)
+  {
+    switch (type)
+    {
+      case Polytope::Type::Segment:       return "Segment1D";
+      case Polytope::Type::Triangle:      return "Triangle2D";
+      case Polytope::Type::Quadrilateral: return "Quad2D";
+      case Polytope::Type::Tetrahedron:   return "Tet3D";
+      case Polytope::Type::Pyramid:       return "Pyramid3D";
+      case Polytope::Type::Wedge:         return "Wedge3D";
+      case Polytope::Type::Hexahedron:    return "Hex3D";
+      case Polytope::Type::Point:         return "Point0D";
+    }
+    return "Unknown";
+  }
+
+  static void setQuadraticCellTransformations(Geometry::Mesh<Context::Local>& mesh)
+  {
+    const size_t D = mesh.getDimension();
+    for (Index i = 0; i < static_cast<Index>(mesh.getCellCount()); ++i)
+    {
+      const auto geometry = mesh.getConnectivity().getGeometry(D, i);
+      RealH1Element<2> fe(geometry);
+      PointCloud pm(mesh.getSpaceDimension(), fe.getCount());
+      const auto& base = mesh.getPolytopeTransformation(D, i);
+      for (size_t j = 0; j < fe.getCount(); ++j)
+      {
+        Math::SpatialPoint pc;
+        base.transform(pc, fe.getNode(j));
+        for (size_t d = 0; d < mesh.getSpaceDimension(); ++d)
+          pm(d, j) = pc(static_cast<Eigen::Index>(d));
+      }
+      mesh.setPolytopeTransformation(
+          {D, i},
+          new ParametricTransformation<RealH1Element<2>>(pm, fe));
+    }
+  }
+
+  struct QuadraticXDMFCase
+  {
+    Polytope::Type type;
+    unsigned long long topologyId;
+    size_t nodesPerCell;
+  };
+
+  class Rodin_IO_HDF5_QuadraticXDMF
+    : public testing::TestWithParam<QuadraticXDMFCase>
+  {};
+
+  TEST_P(Rodin_IO_HDF5_QuadraticXDMF, SupportedQuadraticTopology)
+  {
+    const auto c = GetParam();
+    const boost::filesystem::path testDir =
+        "/tmp/rodin_xdmf_p2_" + quadraticXDMFLabel(c.type);
+    boost::filesystem::create_directories(testDir);
+    const boost::filesystem::path stem = testDir / "vis";
+
+    auto mesh = makeQuadraticXDMFBaseMesh(c.type);
+    setQuadraticCellTransformations(mesh);
+
+    {
+      XDMF xdmf(stem);
+      xdmf.setMesh(mesh);
+      xdmf.write(0.0);
+      xdmf.close();
+    }
+
+    const auto meshH5 = testDir / "vis.mesh.h5";
+    ASSERT_TRUE(boost::filesystem::exists(meshH5));
+
+    hid_t h5 = H5Fopen(meshH5.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+    ASSERT_GE(h5, 0);
+
+    hid_t vdset = H5Dopen2(h5, "/Mesh/Geometry/Vertices", H5P_DEFAULT);
+    ASSERT_GE(vdset, 0);
+    hid_t vspace = H5Dget_space(vdset);
+    hsize_t vdims[2] = {0, 0};
+    ASSERT_EQ(H5Sget_simple_extent_dims(vspace, vdims, nullptr), 2);
+    EXPECT_EQ(static_cast<size_t>(vdims[0]), mesh.getCellCount() * c.nodesPerCell);
+    EXPECT_EQ(static_cast<size_t>(vdims[1]), mesh.getSpaceDimension());
+    H5Sclose(vspace);
+    H5Dclose(vdset);
+
+    hid_t tdset = H5Dopen2(h5, "/Mesh/XDMF/Topology", H5P_DEFAULT);
+    ASSERT_GE(tdset, 0);
+    hid_t tspace = H5Dget_space(tdset);
+    hsize_t tdims[1] = {0};
+    ASSERT_EQ(H5Sget_simple_extent_dims(tspace, tdims, nullptr), 1);
+    EXPECT_EQ(static_cast<size_t>(tdims[0]), mesh.getCellCount() * (1 + c.nodesPerCell));
+
+    std::vector<unsigned long long> topology(static_cast<size_t>(tdims[0]));
+    ASSERT_GE(H5Dread(
+          tdset,
+          H5T_NATIVE_ULLONG,
+          H5S_ALL,
+          H5S_ALL,
+          H5P_DEFAULT,
+          topology.data()), 0);
+    ASSERT_FALSE(topology.empty());
+    EXPECT_EQ(topology[0], c.topologyId);
+    H5Sclose(tspace);
+    H5Dclose(tdset);
+    H5Fclose(h5);
+
+    boost::filesystem::remove_all(testDir);
+  }
+
+  INSTANTIATE_TEST_SUITE_P(
+      Rodin_IO_HDF5,
+      Rodin_IO_HDF5_QuadraticXDMF,
+      testing::Values(
+        QuadraticXDMFCase{Polytope::Type::Segment,       34u, 3u},
+        QuadraticXDMFCase{Polytope::Type::Triangle,      36u, 6u},
+        QuadraticXDMFCase{Polytope::Type::Quadrilateral, 35u, 9u},
+        QuadraticXDMFCase{Polytope::Type::Tetrahedron,   38u, 10u},
+        QuadraticXDMFCase{Polytope::Type::Pyramid,       39u, 13u},
+        QuadraticXDMFCase{Polytope::Type::Wedge,         41u, 18u},
+        QuadraticXDMFCase{Polytope::Type::Hexahedron,    50u, 27u}));
 
   TEST(Rodin_IO_HDF5, XDMFVisualizationEvaluatedAttributes)
   {
@@ -680,7 +909,7 @@ namespace
     hid_t vspace = H5Dget_space(vdset);
     hsize_t vdims[2] = {0, 0};
     H5Sget_simple_extent_dims(vspace, vdims, nullptr);
-    EXPECT_EQ(static_cast<size_t>(vdims[0]), mesh.getVertexCount());
+    EXPECT_EQ(static_cast<size_t>(vdims[0]), HDF5::getXDMFVisualizationVertexCount(mesh));
     EXPECT_EQ(static_cast<size_t>(vdims[1]), mesh.getSpaceDimension());
     H5Sclose(vspace);
     H5Dclose(vdset);
@@ -753,8 +982,9 @@ namespace
     hsize_t count = 0;
     H5Sget_simple_extent_dims(dspace, &count, nullptr);
 
-    // For Node-centered data, size = vertex count (not DOF count)
-    EXPECT_EQ(static_cast<size_t>(count), mesh.getVertexCount());
+    // For Node-centered XDMF data, size follows visualization nodes. Curved
+    // visualization samples order > 1 transformations at quadratic XDMF nodes.
+    EXPECT_EQ(static_cast<size_t>(count), HDF5::getXDMFVisualizationVertexCount(mesh));
 
     H5Sclose(dspace);
     H5Dclose(dset);
