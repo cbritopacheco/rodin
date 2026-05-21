@@ -135,7 +135,9 @@ namespace Rodin::Variational
 
         const auto feS = H1Element<K, ScalarType>(polytope.getGeometry());
         const size_t nscalar = feS.getCount();
-        const auto& tab = feS.getTabulation(ip.getQuadratureFormula());
+        const auto* qf = ip.getQuadratureFormula();
+        assert(qf);
+        const auto& tab = feS.getTabulation(*qf);
         const auto JinvT = p.getJacobianInverse().transpose();
 
         SpatialVectorType ref(d);
@@ -392,8 +394,8 @@ namespace Rodin::Variational
         m_ip = &ip;
 
         const auto& p  = ip.getPoint();
-        const auto& qf = ip.getQuadratureFormula();
-        const size_t qp = ip.getIndex();
+        const auto* qf = ip.getQuadratureFormula();
+        const size_t qp = qf ? ip.getIndex() : 0;
 
         const auto& poly = p.getPolytope();
         const auto  geom = poly.getGeometry();
@@ -404,11 +406,11 @@ namespace Rodin::Variational
         key.geom  = geom;
         key.dim   = d;
         key.cell  = cell;
-        key.qf    = &qf;
+        key.qf    = qf;
         key.qp    = qp;
         key.valid = true;
 
-        if (m_cache.key == key)
+        if (qf && m_cache.key == key)
           return *this;
 
         m_cache.key = key;
@@ -423,16 +425,19 @@ namespace Rodin::Variational
         for (auto& g : m_cache.grad_phys)
           if (g.size() != d) g.resize(d);
 
-        const auto& tab   = feS.getTabulation(qf);
+        const auto* tab = qf ? &feS.getTabulation(*qf) : nullptr;
+        const auto& rc = p.getReferenceCoordinates();
         const auto  JinvT = p.getJacobianInverse().transpose();
 
         SpatialVectorType ref(d);
 
         for (size_t alpha = 0; alpha < nscalar; ++alpha)
         {
-          const auto gref = tab.getGradient(qp, alpha); // span size d
           for (size_t j = 0; j < d; ++j)
-            ref(j) = gref[j];
+            ref(j) =
+              qf
+                ? tab->getGradient(qp, alpha)[j]
+                : feS.getBasis(alpha).template getDerivative<1>(j)(rc);
 
           m_cache.grad_phys[alpha] = JinvT * ref;
         }

@@ -243,7 +243,7 @@ namespace Rodin::Variational
           key.geom = polytope.getGeometry();
           key.dim  = polytope.getDimension();
           key.cell = polytope.getIndex();
-          key.qf   = &ip.getQuadratureFormula();
+          key.qf   = ip.getQuadratureFormula();
           key.qp   = ip.getIndex();
           key.valid = true;
 

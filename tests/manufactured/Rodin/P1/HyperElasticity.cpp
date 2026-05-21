@@ -60,11 +60,9 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
     TestFunction v(Vh);
 
     // Both tangent and residual are linearized at the same iterate.
-    Solid::MaterialTangent tangent(law, du, v);
-    tangent.setDisplacement(uCurrent);
+    Solid::MaterialTangent tangent(law, du, v, uCurrent);
 
-    Solid::InternalForce residual(law, v);
-    residual.setDisplacement(uCurrent);
+    Solid::InternalForce residual(law, v, uCurrent);
 
     Problem newtonProblem(du, v);
     newtonProblem = tangent

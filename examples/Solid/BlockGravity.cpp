@@ -104,11 +104,9 @@ int main(int, char**)
 
     auto bodyForce = VectorFunction{ Zero(), RealFunction(gy) };
 
-    Solid::MaterialTangent tangent(law, du, v);
-    tangent.setDisplacement(u);
+    Solid::MaterialTangent tangent(law, du, v, u);
 
-    Solid::InternalForce residual(law, v);
-    residual.setDisplacement(u);
+    Solid::InternalForce residual(law, v, u);
 
     // Newton linearization:  K δu = -F_int(u) + F_body
     Problem newton(du, v);

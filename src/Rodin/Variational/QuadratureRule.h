@@ -170,7 +170,7 @@ namespace Rodin::Variational
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
-          const IntegrationPoint ip(p, qf, qp);
+          const IntegrationPoint ip(p, &qf, qp);
           res += qf.getWeight(qp) * p.getDistortion() * f(ip);
         }
 
@@ -555,7 +555,7 @@ namespace Rodin::Variational
             static_cast<ScalarType>(m_qf->getWeight(qp))
             * static_cast<ScalarType>(p.getDistortion());
 
-          const IntegrationPoint ip(p, *m_qf, qp);
+          const IntegrationPoint ip(p, m_qf, qp);
           integrand.setIntegrationPoint(ip);
 
           for (size_t tr = 0; tr < ntr; ++tr)
@@ -764,7 +764,7 @@ namespace Rodin::Variational
             static_cast<ScalarType>(m_qf->getWeight(qp))
             * static_cast<ScalarType>(p.getDistortion());
 
-          const IntegrationPoint ip(p, *m_qf, qp);
+          const IntegrationPoint ip(p, m_qf, qp);
           integrand.setIntegrationPoint(ip);
 
           for (size_t te = 0; te < nte; ++te)

@@ -56,6 +56,14 @@ namespace Rodin::Solver
    * Supports both programmatic configuration (`setType`, `setTolerances`)
    * and PETSc command-line overrides (`-snes_type`, `-snes_rtol`, …).
    *
+   * @note Rodin variational Newton problems assemble linear systems in the
+   * convention @f$ J(x)\,\delta x = -F(x) @f$: the assembled vector is the
+   * Newton right-hand side @f$ -F(x) @f$, while the assembled operator is the
+   * tangent @f$ J(x) @f$.  The PETSc callback therefore negates the assembled
+   * vector when exposing a SNES residual.  PETSc's finite-difference Jacobian
+   * checker differentiates that exposed residual, so its raw matrix-difference
+   * report is not a direct check of the Rodin tangent sign convention.
+   *
    * @see Rodin::Solver::KSP,
    *      Rodin::Solver::NewtonSolverBase,
    *      Rodin::PETSc::Math::LinearSystem

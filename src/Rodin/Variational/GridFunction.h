@@ -989,7 +989,7 @@ namespace Rodin::Variational
             || cache.owner != this
             || cache.d != d
             || cache.i != i
-            || cache.qf != &ip.getQuadratureFormula()
+            || cache.qf != ip.getQuadratureFormula()
             || cache.qp != ip.getIndex())
         {
           const auto* fes = &this->getFiniteElementSpace();
@@ -1001,7 +1001,7 @@ namespace Rodin::Variational
           cache.fes = fes;
           cache.d = d;
           cache.i = i;
-          cache.qf = &ip.getQuadratureFormula();
+          cache.qf = ip.getQuadratureFormula();
           cache.qp = ip.getIndex();
           cache.basisValues.resize(count);
           for (Index local = 0; local < count; ++local)

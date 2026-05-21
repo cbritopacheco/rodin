@@ -277,6 +277,16 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getIntegrationPoint();
       }
 
+      /**
+       * @brief Sets the current integration point.
+       *
+       * This is the preferred path while integrating: it carries both the
+       * geometric point and its quadrature metadata so shape functions can
+       * reuse tabulations and cache entries tied to the active quadrature rule.
+       * For pointwise evaluations outside a quadrature loop, construct an
+       * @ref IntegrationPoint from a @ref Geometry::Point (which sets a
+       * @c nullptr quadrature formula) and pass it here.
+       */
       constexpr
       Derived& setIntegrationPoint(const IntegrationPoint& ip)
       {
