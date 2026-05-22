@@ -12,6 +12,8 @@
 #include <vector>
 
 #include <Rodin/Adaptation.h>
+#include <Rodin/Adaptation/TargetMatrixOptimization/IsoparametricGeometry.h>
+#include <Rodin/Adaptation/TargetMatrixOptimization/Metrics.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/Geometry/LevelSetDiscretizerTriangles.h>
 #include <Rodin/Geometry/TriangleMeshOptimizer.h>
@@ -271,7 +273,9 @@ int main(int, char**)
   Real avgLinQmin = 0, avgLinFit = 0;
   Real avgCurvedQmin = 0, avgCurvedFitRms = 0, avgCurvedFitMax = 0;
   Real avgCurvedMinDet = 0;
-  Index sumInverted = 0, sumOverlap = 0, diagSteps = 0;
+  Real avgTargetMaxMu = 0, avgTargetMinDetT = 0;
+  Index sumInverted = 0, sumOverlap = 0, sumCurvedInvalid = 0;
+  Index sumTargetInvalid = 0, diagSteps = 0;
 
   for (Index step = 0; step < steps; ++step)
   {
@@ -368,10 +372,13 @@ int main(int, char**)
     TrialFunction du(space);
     TestFunction  v (space);
 
-    // Best-net recipe (Knupp-Kolev-Mittal-Tomov 2021):
-    //  * metric  = mu_80 shape+size barrier (gamma=0.5), NOT pure shape
+    // Curved TMOP recipe:
+    //  * metric  = shape+size blend barrier (gamma=0.5), NOT pure shape
     //              (pure shape is scale-rank-deficient -> slivers survive);
-    //  * target  = ideal element (equilateral, size from the cut element);
+    //  * target  = a P2 fitted target whose interface midside nodes are
+    //              projected onto analytic phi=0, with a small ideal-element
+    //              bias. This keeps the target curved and fit-compatible
+    //              while still pushing away from cut sliver geometry;
     //  * fit     = smooth level-set penalty, c_sigma-normalized so the
     //              weight is resolution-portable, ramped by CONTINUATION;
     //  * no deviation term (it fights both fit and quality).
@@ -392,9 +399,10 @@ int main(int, char**)
     }
     const Real cSigma = std::max(interfaceLen, Real(1e-12));
 
-    QualityTerm quality(ShapeSizeBlendMetric(Real(0.5)),
-                        IdealElementTargetJacobian(mesh),
-                        Real(1));
+    ShapeSizeBlendMetric metric(Real(0.5));
+    ProjectedQualityTargetJacobian target(
+        mesh, Interface, projectToInterface, Real(0.05));
+    QualityTerm quality(metric, target, Real(1));
     AnalyticLevelSetFitTerm fit(
         phi, gradPhi, Optional<Attribute>(Interface), Real(1));
     fit.setNormalization(cSigma);
@@ -431,6 +439,7 @@ int main(int, char**)
     }
 
     const auto curved = curvedMetrics(mesh, phi, Interface);
+    const auto targetStats = targetQualityMetrics(mesh, metric, target);
     syncLinearBackbone(mesh, fe);
     demoteTransformations(mesh);
 
@@ -462,8 +471,12 @@ int main(int, char**)
     avgCurvedFitRms  += curved.fitRms;
     avgCurvedFitMax  += curved.fitMax;
     avgCurvedMinDet  += curved.minDet;
+    avgTargetMaxMu   += targetStats.maxMetric;
+    avgTargetMinDetT += targetStats.minDetT;
     sumInverted      += linv;
+    sumCurvedInvalid += curved.invalidJacobianSamples;
     sumOverlap       += curved.overlapSamples;
+    sumTargetInvalid += targetStats.invalidSamples;
     ++diagSteps;
 
     std::cout << "step " << step << " t=" << t
@@ -475,7 +488,11 @@ int main(int, char**)
               << " fit_rms="   << curved.fitRms
               << " fit_max="   << curved.fitMax
               << " minDet="    << curved.minDet
+              << " invalid="   << curved.invalidJacobianSamples
               << " overlap="   << curved.overlapSamples << "]"
+              << " TMOP_TARGET[max_mu=" << targetStats.maxMetric
+              << " minDetT=" << targetStats.minDetT
+              << " invalid=" << targetStats.invalidSamples << "]"
               << " it="     << report.iterations
               << " r0="     << report.initialResidual
               << " r1="     << report.finalResidual
@@ -501,7 +518,12 @@ int main(int, char**)
               << " fit_rms="   << avgCurvedFitRms * inv
               << " fit_max="   << avgCurvedFitMax * inv
               << " minDet="    << avgCurvedMinDet * inv
+              << " invalid="   << static_cast<Real>(sumCurvedInvalid) * inv
               << " overlap="   << static_cast<Real>(sumOverlap) * inv
+              << "]"
+              << " TMOP_TARGET[max_mu=" << avgTargetMaxMu * inv
+              << " minDetT=" << avgTargetMinDetT * inv
+              << " invalid=" << static_cast<Real>(sumTargetInvalid) * inv
               << "]" << std::endl;
   }
   return 0;

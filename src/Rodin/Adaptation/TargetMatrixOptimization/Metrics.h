@@ -919,6 +919,89 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       Real m_idealWeight = 0.2;
   };
 
+  /**
+   * @brief Fit-compatible curved target with a controlled quality bias.
+   *
+   * ProjectedInterfaceTargetJacobian is excellent for not fighting the
+   * level-set fit, but it largely preserves the linear cut shape. This target
+   * keeps that projected P2 map as the baseline and blends its sampled
+   * Jacobian toward the ideal same-measure element:
+   *
+   *   W(q) = (1 - theta) W_projected(q) + theta W_ideal(K).
+   *
+   * The important difference from CurvedQualityTargetJacobian is that the
+   * baseline already contains the projected interface midside nodes, so the
+   * quality term remains compatible with the analytic fit penalty. Small
+   * theta values provide a quality-improving direction without asking TMOP to
+   * erase the fitted curvature. If a blend would make the target invalid, the
+   * weight is halved locally and the projected target is used as the fallback.
+   */
+  class ProjectedQualityTargetJacobian
+  {
+    public:
+      ProjectedQualityTargetJacobian() = default;
+
+      template <class Mesh, class Projector>
+      ProjectedQualityTargetJacobian(
+          const Mesh& mesh,
+          Geometry::Attribute interfaceAttribute,
+          Projector project,
+          Real idealWeight = Real(0.05))
+        : m_projected(mesh, interfaceAttribute, std::move(project)),
+          m_ideal(mesh),
+          m_idealWeight(clampWeight(idealWeight))
+      {}
+
+      ProjectedQualityTargetJacobian& setIdealWeight(Real idealWeight)
+      {
+        m_idealWeight = clampWeight(idealWeight);
+        return *this;
+      }
+
+      Real getIdealWeight() const
+      {
+        return m_idealWeight;
+      }
+
+      Math::SpatialMatrix<Real> evaluate(
+          const Geometry::Polytope& cell,
+          const Math::SpatialPoint& rc) const
+      {
+        const Math::SpatialMatrix<Real> projected =
+          m_projected.evaluate(cell, rc);
+        const Math::SpatialMatrix<Real> ideal =
+          m_ideal.evaluate(cell, rc);
+
+        Real theta = m_idealWeight;
+        for (int attempt = 0; attempt < 12; ++attempt)
+        {
+          const Math::SpatialMatrix<Real> W =
+            (Real(1) - theta) * projected + theta * ideal;
+          const Real det = W.determinant();
+          if (std::isfinite(det) && det > Real(1e-30))
+            return W;
+          theta *= Real(0.5);
+        }
+        return projected;
+      }
+
+    private:
+      static Real clampWeight(Real idealWeight)
+      {
+        if (!std::isfinite(idealWeight))
+          return Real(0);
+        if (idealWeight < Real(0))
+          return Real(0);
+        if (idealWeight > Real(1))
+          return Real(1);
+        return idealWeight;
+      }
+
+      ProjectedInterfaceTargetJacobian m_projected;
+      IdealElementTargetJacobian m_ideal;
+      Real m_idealWeight = Real(0.05);
+  };
+
   class MetricBase
   {
     public:

@@ -1884,6 +1884,40 @@ namespace Rodin::Tests::Unit
     EXPECT_GT((Wcurved - Waffine).norm(), Real(1e-6));
   }
 
+  TEST(Rodin_Adaptation_TargetMatrixOptimization, ProjectedQualityTargetBlendsFitTargetTowardIdeal)
+  {
+    auto mesh = makeTriangle({0, 0}, {1, 0}, {0, 0.5});
+    const auto& conn = mesh.getConnectivity();
+    for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
+    {
+      const auto& edge = conn.getPolytope(1, e);
+      if ((edge(0) == 0 && edge(1) == 1)
+          || (edge(0) == 1 && edge(1) == 0))
+        mesh.setAttribute({1, e}, 99);
+    }
+
+    auto project = [](const Math::SpatialPoint& x)
+    {
+      return Math::SpatialPoint{
+        x[0],
+        Real(0.1) * std::sin(Real(3.14159265358979323846) * x[0]) };
+    };
+    ProjectedInterfaceTargetJacobian projected(mesh, 99, project);
+    IdealElementTargetJacobian ideal(mesh);
+    ProjectedQualityTargetJacobian target(mesh, 99, project, Real(0.10));
+
+    auto cellIterator = mesh.getPolytope(2, 0);
+    const auto& cell = *cellIterator;
+    const Math::SpatialPoint rc{Real(1) / Real(3), Real(1) / Real(3)};
+    const auto Wprojected = projected.evaluate(cell, rc);
+    const auto Wideal = ideal.evaluate(cell, rc);
+    const auto W = target.evaluate(cell, rc);
+
+    EXPECT_GT(W.determinant(), 0);
+    EXPECT_GT((W - Wprojected).norm(), Real(1e-12));
+    EXPECT_LT((W - Wprojected).norm(), (Wideal - Wprojected).norm());
+  }
+
   TEST(Rodin_Adaptation_TargetMatrixOptimization, ShapeDistortionMetricZeroOnRotationsAndScalings)
   {
     ShapeDistortionMetric metric;

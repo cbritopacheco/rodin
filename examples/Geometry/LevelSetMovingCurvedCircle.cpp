@@ -5,6 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include "Rodin/Adaptation/TargetMatrixOptimization/Metrics.h"
+#include "Rodin/Adaptation/TargetMatrixOptimization/IsoparametricGeometry.h"
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -20,6 +21,7 @@
 #include <Rodin/Geometry/LevelSetDiscretizerTriangles.h>
 #include <Rodin/Geometry/TriangleMeshOptimizer.h>
 #include <Rodin/IO.h>
+#include <Rodin/QF/PolytopeQuadratureFormula.h>
 #include <Rodin/Variational.h>
 
 using namespace Rodin;
@@ -372,22 +374,18 @@ namespace
         return x;
       };
 
-      for (Index i = 0; i <= samples; ++i)
+      const auto& qf = QF::PolytopeQuadratureFormula::get(
+          4, Polytope::Type::Triangle);
+      for (size_t q = 0; q < qf.getSize(); ++q)
       {
-        for (Index j = 0; j <= samples - i; ++j)
-        {
-          const Math::SpatialPoint rc{
-            static_cast<Real>(i) / static_cast<Real>(samples),
-            static_cast<Real>(j) / static_cast<Real>(samples)};
-          Math::SpatialMatrix<Real> J;
-          trans.jacobian(J, rc);
-          const bool shaped = J.rows() == 2 && J.cols() == 2;
-          const Real det = shaped ? J.determinant() : Real(0);
-          if (!shaped || !(det > Real(0)) || !std::isfinite(det))
-            ++stats.invalidJacobianSamples;
-          else
-            stats.minJacobian = std::min(stats.minJacobian, det);
-        }
+        Math::SpatialMatrix<Real> J;
+        trans.jacobian(J, qf.getPoint(q));
+        const bool shaped = J.rows() == 2 && J.cols() == 2;
+        const Real det = shaped ? J.determinant() : Real(0);
+        if (!shaped || !(det > Real(0)) || !std::isfinite(det))
+          ++stats.invalidJacobianSamples;
+        else
+          stats.minJacobian = std::min(stats.minJacobian, det);
       }
 
       for (Index i = 0; i < samples; ++i)
@@ -743,7 +741,9 @@ int main(int, char**)
   // Diagnostics are accumulated and reported as an average over the whole
   // process, not just the final step.
   Real sumQmin = 0, sumCurvedQmin = 0, sumFit = 0;
-  Index sumInverted = 0, rejectedTMOP = 0, diagSteps = 0;
+  Real sumTargetMaxMu = 0, sumTargetMinDetT = 0;
+  Index sumInverted = 0, sumTargetInvalid = 0;
+  Index rejectedTMOP = 0, diagSteps = 0;
 
   for (Index step = 0; step < steps; ++step)
   {
@@ -785,7 +785,13 @@ int main(int, char**)
     installQuadraticGeometry(optimized, t);
 
     const auto featureMask = interfaceVertexMask(optimized);
-    CurvedQualityTargetJacobian target(optimized, 0.75);
+    auto projectToCurrentInterface = [t](const Math::SpatialPoint& x)
+    {
+      return projectToInterface(x, t);
+    };
+    ProjectedQualityTargetJacobian target(
+        optimized, Interface, projectToCurrentInterface, Real(0.05));
+    ShapeSizeBlendMetric metric(Real(0.5));
 
     VectorH1<2, LocalMesh> space(std::integral_constant<size_t, 2>{}, optimized, 2);
     optimized.getConnectivity().compute(1, 2);
@@ -798,7 +804,7 @@ int main(int, char**)
     auto phiGradient =
       [t](const Math::SpatialPoint& x) { return gradPhiAt(x, t); };
 
-    QualityTerm quality(SquaredDistanceMetric{}, target, 1.0);
+    QualityTerm quality(metric, target, 1.0);
     quality.setQuadratureOrder(4);
     DeviationTerm deviation(1.0);
     AnalyticLevelSetFitTerm fit(
@@ -959,6 +965,7 @@ int main(int, char**)
 
     const auto [qmin, inverted] = meshQuality(optimized);
     const auto curvedStats = curvedGeometryStats(optimized, t);
+    const auto targetStats = targetQualityMetrics(optimized, metric, target);
     Real fitErr = 0;
     for (Index i = 0; i < optimized.getVertexCount(); ++i)
       if (i < featureMask.size() && featureMask[i])
@@ -968,6 +975,9 @@ int main(int, char**)
     sumCurvedQmin += curvedStats.minQuality;
     sumInverted += inverted;
     sumFit += curvedStats.fitRms;
+    sumTargetMaxMu += targetStats.maxMetric;
+    sumTargetMinDetT += targetStats.minDetT;
+    sumTargetInvalid += targetStats.invalidSamples;
     ++diagSteps;
     std::cout << "step " << step
               << " t=" << t
@@ -980,6 +990,9 @@ int main(int, char**)
               << " curved_fit_max=" << curvedStats.fitMax
               << " curved_min_jac=" << curvedStats.minJacobian
               << " curved_invalid_jac=" << curvedStats.invalidJacobianSamples
+              << " tmop_target_max_mu=" << targetStats.maxMetric
+              << " tmop_target_min_detT=" << targetStats.minDetT
+              << " tmop_target_invalid=" << targetStats.invalidSamples
               << " tmop_iterations=" << tmopIterations
               << " tmop_last_alpha=" << lastAlpha
               << " tmop_accepted=" << (acceptedTMOP ? 1 : 0)
@@ -1000,6 +1013,12 @@ int main(int, char**)
               << " inverted="
               << static_cast<Real>(sumInverted) / static_cast<Real>(diagSteps)
               << " curved_fit_rms=" << sumFit / static_cast<Real>(diagSteps)
+              << " tmop_target_max_mu="
+              << sumTargetMaxMu / static_cast<Real>(diagSteps)
+              << " tmop_target_min_detT="
+              << sumTargetMinDetT / static_cast<Real>(diagSteps)
+              << " tmop_target_invalid="
+              << static_cast<Real>(sumTargetInvalid) / static_cast<Real>(diagSteps)
               << " rejected_tmop=" << rejectedTMOP
               << std::endl;
   return 0;

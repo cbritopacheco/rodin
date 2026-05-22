@@ -55,8 +55,84 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
     Real fitMax = 0;
     Real qmin = std::numeric_limits<Real>::infinity();
     Real minDet = std::numeric_limits<Real>::infinity();
+    Index invalidJacobianSamples = 0;
     Index overlapSamples = 0;
   };
+
+  /// Target-relative TMOP diagnostics sampled at cell quadrature points.
+  /// maxMetric is the worst sampled distortion mu(J W^{-1}); lower is better.
+  struct TargetQualityMetrics
+  {
+    Real minDetJ = std::numeric_limits<Real>::infinity();
+    Real minDetT = std::numeric_limits<Real>::infinity();
+    Real maxMetric = 0;
+    Index invalidSamples = 0;
+  };
+
+  template <class Metric, class Target>
+  TargetQualityMetrics targetQualityMetrics(
+      Geometry::LocalMesh& mesh,
+      const Metric& metric,
+      const Target& target,
+      Geometry::Polytope::Type geometry = Geometry::Polytope::Type::Triangle,
+      Index quadratureOrder = 4)
+  {
+    TargetQualityMetrics stats;
+    const auto& conn = mesh.getConnectivity();
+    const auto& qf = QF::PolytopeQuadratureFormula::get(
+        quadratureOrder, geometry);
+    for (Index ci = 0; ci < static_cast<Index>(mesh.getCellCount()); ++ci)
+    {
+      if (conn.getGeometry(2, ci) != geometry)
+        continue;
+      auto it = mesh.getPolytope(2, ci);
+      for (size_t q = 0; q < qf.getSize(); ++q)
+      {
+        const auto rc = qf.getPoint(q);
+        const auto rawJ = Geometry::Point(*it, rc).getJacobian();
+        if (rawJ.rows() != 2 || rawJ.cols() != 2)
+        {
+          ++stats.invalidSamples;
+          continue;
+        }
+        Math::SpatialMatrix<Real> J(2, 2);
+        for (std::uint8_t i = 0; i < 2; ++i)
+          for (std::uint8_t j = 0; j < 2; ++j)
+            J(i, j) = rawJ(i, j);
+
+        const auto W = target.evaluate(*it, rc);
+        if (W.rows() != 2 || W.cols() != 2)
+        {
+          ++stats.invalidSamples;
+          continue;
+        }
+
+        const Real detJ = J.determinant();
+        const Real detW = W.determinant();
+        stats.minDetJ = std::min(stats.minDetJ, detJ);
+        if (!std::isfinite(detJ) || !std::isfinite(detW)
+            || !(detJ > Real(0)) || !(detW > Real(0)))
+        {
+          ++stats.invalidSamples;
+          continue;
+        }
+
+        const Math::SpatialMatrix<Real> T = J * W.inverse();
+        const Real detT = T.determinant();
+        stats.minDetT = std::min(stats.minDetT, detT);
+        const Real mu = metric.value(T);
+        if (!std::isfinite(detT) || !(detT > Real(0)) || !std::isfinite(mu))
+        {
+          ++stats.invalidSamples;
+          continue;
+        }
+        stats.maxMetric = std::max(stats.maxMetric, mu);
+      }
+    }
+    if (!std::isfinite(stats.minDetJ)) stats.minDetJ = 0;
+    if (!std::isfinite(stats.minDetT)) stats.minDetT = 0;
+    return stats;
+  }
 
   namespace Detail
   {
@@ -415,10 +491,13 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         continue;
       auto it = mesh.getPolytope(2, ci);
       for (size_t q = 0; q < qf.getSize(); ++q)
-        m.minDet = std::min(
-            m.minDet,
-            Geometry::Point(*it, qf.getPoint(q))
-              .getJacobian().determinant());
+      {
+        const Real det =
+          Geometry::Point(*it, qf.getPoint(q)).getJacobian().determinant();
+        if (!std::isfinite(det) || !(det > Real(0)))
+          ++m.invalidJacobianSamples;
+        m.minDet = std::min(m.minDet, det);
+      }
       auto sample = [&](int i, int j)
       {
         return Geometry::Point(*it, Math::SpatialPoint{
