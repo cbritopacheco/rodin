@@ -176,6 +176,24 @@ namespace Rodin::Geometry
       TriangleMeshOptimizer& setFeatureSmoothingPasses(std::size_t n)
       { m_featureSmoothingPasses = n; return *this; }
 
+      /// Enables collapse of SHORT feature (interface) edges along the
+      /// feature, even though both endpoints are protected.
+      ///
+      /// Tangential smoothing redistributes protected vertices but never
+      /// removes one, so a sliver wedged between two interface vertices
+      /// survives and the downstream TMOP solve (fixed topology) cannot fix
+      /// it. This pass collapses an interface edge shorter than @p length by
+      /// merging its two endpoints into one vertex placed on the feature via
+      /// setFeatureProjection (so the interface stays on phi=0 and one fewer
+      /// node). Requires setFeatureProjection. A feature edge is detected
+      /// geometrically: a short edge between two protected vertices whose
+      /// midpoint already lies on the feature (projection moves it < 1/4 of
+      /// the edge length). Bulletproof: manifold link condition + every
+      /// rewritten triangle re-validated with the survivor at its new
+      /// position. 0 (default) disables it.
+      TriangleMeshOptimizer& setFeatureCollapseLength(Real length)
+      { m_featureCollapseLength = std::max(Real(0), length); return *this; }
+
       /// Scale-relative twice-area floor used by the validity gate.
       TriangleMeshOptimizer& setAreaRelativeTolerance(Real r)
       { m_areaRel = std::max(Real(0), r); return *this; }
@@ -266,10 +284,13 @@ namespace Rodin::Geometry
             if (m == 0) break;
           }
           const std::size_t c = m_hmin > Real(0) ? collapsePass() : 0;
-          report.splits += s; report.collapses += c;
+          const std::size_t fc =
+            (m_featureCollapseLength > Real(0) && m_featureProjection)
+              ? featureCollapsePass() : 0;
+          report.splits += s; report.collapses += c + fc;
           report.swaps += w; report.smooths += sm;
           report.featureSmooths += fsm;
-          if (s == 0 && c == 0 && w == 0 && sm == 0 && fsm == 0)
+          if (s == 0 && c == 0 && fc == 0 && w == 0 && sm == 0 && fsm == 0)
             break;
         }
 
@@ -595,6 +616,122 @@ namespace Rodin::Geometry
         return good;
       }
 
+      // --- FEATURE COLLAPSE (collapse a short interface edge ALONG phi=0) -
+
+      // validTri but with explicit vertex positions (the survivor moves).
+      bool triValidPos(
+          const std::array<Math::SpatialPoint, 3>& p, Real sign) const
+      {
+        const Real o = triangleOrient2(p[0], p[1], p[2]);
+        if ((o > 0) != (sign > 0)) return false;
+        const Real scale = std::max({ (p[1] - p[0]).squaredNorm(),
+                                      (p[2] - p[1]).squaredNorm(),
+                                      (p[0] - p[2]).squaredNorm() });
+        if (std::abs(o) <= m_areaRel * scale) return false;
+        return m_quality(p[0], p[1], p[2]) >= m_minQuality;
+      }
+
+      // Collapse rem->keep AND relocate the survivor to `nk`. Every triangle
+      // around either endpoint (except the two that die on the shared edge)
+      // must stay strictly valid with the new vertex positions.
+      bool featureCollapseValid(
+          Index rem, Index keep, const Math::SpatialPoint& nk) const
+      {
+        bool good = true;
+        auto checkRing = [&](Index pivot)
+        {
+          forVertexTris(pivot, [&](std::size_t ti)
+          {
+            if (!good) return;
+            const auto& t = m_T[ti];
+            const bool hasRem = (t[0]==rem||t[1]==rem||t[2]==rem);
+            const bool hasKeep = (t[0]==keep||t[1]==keep||t[2]==keep);
+            if (hasRem && hasKeep) return;       // dies on the collapsed edge
+            const Real s =
+              triangleOrient2(m_X[t[0]], m_X[t[1]], m_X[t[2]]);
+            std::array<Math::SpatialPoint, 3> p;
+            for (int j = 0; j < 3; ++j)
+            {
+              Index v = t[j];
+              if (v == rem) v = keep;            // rem maps onto keep
+              p[j] = (v == keep) ? nk : m_X[v];  // survivor at new position
+            }
+            if (!triValidPos(p, s)) good = false;
+          });
+        };
+        checkRing(rem);
+        checkRing(keep);
+        return good;
+      }
+
+      std::size_t featureCollapsePass() const
+      {
+        buildVertexRing();
+        buildEdges();
+        const Index nv = m_X.size();
+        std::vector<char> bnd(nv, 0);
+        for (const Index ek : m_edges)
+        { const auto& r = m_edge.at(ek);
+          if (r.n == 1) { bnd[r.a] = 1; bnd[r.b] = 1; } }
+
+        std::vector<Proposal> prop(m_edges.size());
+        std::vector<char> ok(m_edges.size(), 0);
+        for (std::size_t e = 0; e < m_edges.size(); ++e)
+        {
+          const auto& r = m_edge.at(m_edges[e]);
+          if (!prot(r.a) || !prot(r.b)) continue;   // BOTH on the feature
+          if (r.n != 2) continue;                   // interior only
+          if (bnd[r.a] || bnd[r.b]) continue;       // not domain boundary
+          const Real len = (m_X[r.a] - m_X[r.b]).norm();
+          if (len >= m_featureCollapseLength || len <= Real(0)) continue;
+          // Feature-edge test: the midpoint must already lie on the feature.
+          const Math::SpatialPoint mid =
+            Real(0.5) * (m_X[r.a] + m_X[r.b]);
+          const Math::SpatialPoint proj = m_featureProjection(mid);
+          if ((proj - mid).norm() > Real(0.25) * len) continue;
+          const Index rem = r.a, keep = r.b;
+          if (!linkCondition(rem, keep, r)) continue;
+          if (!featureCollapseValid(rem, keep, proj)) continue;
+          Proposal p; p.kind = 2; p.a = rem; p.b = keep;
+          p.gain = m_featureCollapseLength - len;  // shortest first
+          p.cav = { rem, keep };
+          forVertexTris(rem, [&](std::size_t ti)
+          { for (Index x : m_T[ti]) p.cav.push_back(x); });
+          forVertexTris(keep, [&](std::size_t ti)
+          { for (Index x : m_T[ti]) p.cav.push_back(x); });
+          prop[e] = p; ok[e] = 1;
+        }
+        return commit(prop, ok, [&](const Proposal& p)
+        {
+          const Index rem = p.a, keep = p.b;
+          const Math::SpatialPoint mid =
+            Real(0.5) * (m_X[rem] + m_X[keep]);
+          const Math::SpatialPoint proj = m_featureProjection(mid);
+          if (!featureCollapseValid(rem, keep, proj)) return false;
+          std::vector<std::size_t> ring;
+          forVertexTris(rem, [&](std::size_t ti){ ring.push_back(ti); });
+          for (std::size_t ti : ring)
+          {
+            auto& t = m_T[ti];
+            const bool hasK = (t[0]==keep||t[1]==keep||t[2]==keep);
+            if (hasK) { m_alive[ti] = 0; continue; }
+            for (int j = 0; j < 3; ++j) if (t[j]==rem) t[j]=keep;
+          }
+          m_X[keep] = proj;                        // survivor lands on phi=0
+          // Keep the preserved interface-edge list consistent so rebuild()
+          // re-stamps the Interface attribute onto the surviving edges
+          // (rem -> keep). Entries that become {keep,keep} are the collapsed
+          // edge itself; they never match a real edge at re-stamp and are
+          // harmlessly ignored.
+          for (auto& pr : m_E)
+          {
+            if (pr[0] == rem) pr[0] = keep;
+            if (pr[1] == rem) pr[1] = keep;
+          }
+          return true;
+        });
+      }
+
       // --- SWAP -----------------------------------------------------------
 
       std::size_t swapPass() const
@@ -894,6 +1031,7 @@ namespace Rodin::Geometry
       std::size_t m_maxIterations = 5;
       std::size_t m_smoothingPasses = 0;
       std::size_t m_featureSmoothingPasses = 0;
+      Real m_featureCollapseLength = 0;
       FeatureProjection m_featureProjection;
 
       mutable std::vector<Math::SpatialPoint> m_X;

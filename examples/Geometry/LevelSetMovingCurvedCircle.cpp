@@ -247,7 +247,57 @@ namespace
 
     Variational::RealH1Element<2> fe(Polytope::Type::Triangle);
     Variational::RealH1Element<2> edgeFe(Polytope::Type::Segment);
+    mesh.getConnectivity().compute(1, 2);
     const auto& conn = mesh.getConnectivity();
+
+    // Conformity-safe interface-projection clamp. Limit each interface
+    // mid-edge node's projection displacement to a fraction of the minimum
+    // perpendicular height across the edge's incident cells. The cut +
+    // coarsen can leave slivers where the analytic projection of the chord
+    // midpoint overshoots and folds the P2 cell (or "tongues" it: det>0 yet
+    // a sub-triangle inverts). The barrier metric then cannot step away from
+    // such a start. Both the edge loop and the cell loop use the SAME
+    // per-edge limit, so the curved geometry stays conformal AND no cell is
+    // bent beyond what its own height admits.
+    std::vector<Real> edgeSafeMag(
+        static_cast<size_t>(conn.getCount(1)),
+        std::numeric_limits<Real>::infinity());
+    for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
+    {
+      const auto attr = mesh.getAttribute(1, e);
+      if (!attr || *attr != Interface) continue;
+      const auto& edge = conn.getPolytope(1, e);
+      const auto p0 = mesh.getVertexCoordinates(edge(0));
+      const auto p1 = mesh.getVertexCoordinates(edge(1));
+      const Real chord = (p1 - p0).norm();
+      Real minPerp = std::numeric_limits<Real>::infinity();
+      for (Index ci : conn.getIncidence({ 1, 2 }, e))
+      {
+        const auto& cell = conn.getPolytope(2, ci);
+        Index vo = std::numeric_limits<Index>::max();
+        for (size_t k = 0; k < 3; ++k)
+          if (cell(k) != edge(0) && cell(k) != edge(1)) { vo = cell(k); break; }
+        if (vo == std::numeric_limits<Index>::max()) continue;
+        const auto po = mesh.getVertexCoordinates(vo);
+        const Real perp = std::abs(
+              (p1[0] - p0[0]) * (po[1] - p0[1])
+            - (p1[1] - p0[1]) * (po[0] - p0[0]))
+          / std::max(chord, Real(1e-30));
+        minPerp = std::min(minPerp, perp);
+      }
+      edgeSafeMag[e] = Real(0.35) * minPerp;
+    }
+    auto clampedProject = [&](const Math::SpatialPoint& mid, Real limit)
+    {
+      auto p = projectToInterface(mid, t);
+      const Real d = std::hypot(p[0] - mid[0], p[1] - mid[1]);
+      if (d > limit && d > Real(0))
+        p = Math::SpatialPoint{
+          mid[0] + (limit / d) * (p[0] - mid[0]),
+          mid[1] + (limit / d) * (p[1] - mid[1]) };
+      return p;
+    };
+
     for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
     {
       const auto attr = mesh.getAttribute(1, e);
@@ -263,7 +313,7 @@ namespace
         if (isInterface
             && s > Real(1e-12)
             && s < Real(1) - Real(1e-12))
-          x = projectToInterface(x, t);
+          x = clampedProject(x, edgeSafeMag[e]);
         for (size_t d = 0; d < static_cast<size_t>(x.size()); ++d)
           pm(d, local) = x[d];
       }
@@ -279,9 +329,24 @@ namespace
         continue;
       const auto featureEdges = interfaceLocalEdges(mesh, c);
       const auto& cell = conn.getPolytope(2, c);
+      const auto cellEdges = conn.getIncidence({ 2, 1 }, c);
       const auto x0 = mesh.getVertexCoordinates(cell(0));
       const auto x1 = mesh.getVertexCoordinates(cell(1));
       const auto x2 = mesh.getVertexCoordinates(cell(2));
+      // Per-edge safe-magnitude lookup for this cell's local ref-edges, so
+      // the cell loop clamps with the SAME limit as the edge loop above.
+      auto edgeMagFor = [&](Index la, Index lb) -> Real
+      {
+        const Index va = cell(la), vb = cell(lb);
+        for (Index ge : cellEdges)
+        {
+          const auto& ep = conn.getPolytope(1, ge);
+          if ((ep(0) == va && ep(1) == vb) || (ep(0) == vb && ep(1) == va))
+            return (ge < static_cast<Index>(edgeSafeMag.size()))
+              ? edgeSafeMag[ge] : std::numeric_limits<Real>::infinity();
+        }
+        return std::numeric_limits<Real>::infinity();
+      };
       PointCloud pm(mesh.getSpaceDimension(), fe.getCount());
       for (size_t local = 0; local < fe.getCount(); ++local)
       {
@@ -289,28 +354,40 @@ namespace
         Math::SpatialPoint x =
           (Real(1) - rc[0] - rc[1]) * x0 + rc[0] * x1 + rc[1] * x2;
         bool onInterfaceEdge = false;
+        Real limit = std::numeric_limits<Real>::infinity();
         for (const auto& edge : featureEdges)
-          onInterfaceEdge = onInterfaceEdge
-            || referencePointOnTriangleEdge(rc, edge[0], edge[1]);
+          if (referencePointOnTriangleEdge(rc, edge[0], edge[1]))
+          {
+            onInterfaceEdge = true;
+            limit = std::min(limit, edgeMagFor(edge[0], edge[1]));
+          }
         if (!referencePointIsTriangleVertex(rc) && onInterfaceEdge)
-          x = projectToInterface(x, t);
+          x = clampedProject(x, limit);
         for (size_t d = 0; d < static_cast<size_t>(x.size()); ++d)
           pm(d, local) = x[d];
       }
       auto* trans =
         new ParametricTransformation<Variational::RealH1Element<2>>(
             pm, Variational::RealH1Element<2>(fe));
+      // Validate against the SAME order-4 quadrature the acceptance gate and
+      // the diagnostics use -- otherwise install passes a curved cell on a
+      // few mild interior points while it is actually folded near a corner,
+      // producing a degenerate starting mesh the barrier metric cannot step
+      // away from. Cells whose projected curve fails fall back to the affine
+      // P2 lift (always valid); the interface fit then re-curves them within
+      // the solve if the local geometry permits.
       bool valid = true;
-      for (const Math::SpatialPoint& rc : {
-            Math::SpatialPoint{Real(1) / Real(3), Real(1) / Real(3)},
-            Math::SpatialPoint{Real(0.5), Real(0.25)},
-            Math::SpatialPoint{Real(0.25), Real(0.5)},
-            Math::SpatialPoint{Real(0.25), Real(0.25)}})
       {
-        Math::SpatialMatrix<Real> J;
-        trans->jacobian(J, rc);
-        valid = valid && J.rows() == 2 && J.cols() == 2
-          && std::isfinite(J.determinant()) && J.determinant() > Real(1e-14);
+        const auto& qf = QF::PolytopeQuadratureFormula::get(
+            4, Polytope::Type::Triangle);
+        for (size_t q = 0; q < qf.getSize() && valid; ++q)
+        {
+          Math::SpatialMatrix<Real> J;
+          trans->jacobian(J, qf.getPoint(q));
+          valid = J.rows() == 2 && J.cols() == 2
+            && std::isfinite(J.determinant())
+            && J.determinant() > Real(1e-12);
+        }
       }
       if (valid)
         mesh.setPolytopeTransformation({2, c}, trans);
@@ -326,7 +403,28 @@ namespace
     Real minJacobian = std::numeric_limits<Real>::infinity();
     Real minQuality = std::numeric_limits<Real>::infinity();
     Index invalidJacobianSamples = 0;
+    Index overlapSamples = 0;  ///< curved interface samples inside a vertex-adjacent (non-edge-adjacent) neighbour cell -> cell-cell overlap canary
   };
+
+  // Linear point-in-triangle (barycentric); coarse cell-cell overlap proxy.
+  bool pointInLinearTriangle(
+      const Math::SpatialPoint& p,
+      const Math::SpatialPoint& a,
+      const Math::SpatialPoint& b,
+      const Math::SpatialPoint& c)
+  {
+    const Real d = (b[0] - a[0]) * (c[1] - a[1])
+                 - (b[1] - a[1]) * (c[0] - a[0]);
+    if (std::abs(d) <= Real(1e-30)) return false;
+    const Real inv = Real(1) / d;
+    const Real wb = ((c[1] - a[1]) * (p[0] - a[0])
+                  - (c[0] - a[0]) * (p[1] - a[1])) * inv;
+    const Real wc = ((b[0] - a[0]) * (p[1] - a[1])
+                  - (b[1] - a[1]) * (p[0] - a[0])) * inv;
+    const Real wa = Real(1) - wb - wc;
+    const Real eps = Real(1e-9);
+    return wa > eps && wb > eps && wc > eps;
+  }
 
   Real triangleQuality(
       const Math::SpatialPoint& x0,
@@ -429,6 +527,53 @@ namespace
       stats.minJacobian = 0;
     if (!std::isfinite(stats.minQuality))
       stats.minQuality = 0;
+
+    // Cell-cell overlap canary: sample each interface edge's curved
+    // transformation and test membership in cells that share a vertex with
+    // the edge but NOT the edge itself. A hit means the curved interface
+    // has bowed into a non-incident neighbour's region (global-injectivity
+    // failure, invisible to per-cell det/quality).
+    const_cast<LocalMesh&>(mesh).getConnectivity().compute(0, 2);
+    const_cast<LocalMesh&>(mesh).getConnectivity().compute(1, 2);
+    static const std::array<Real, 5> sOv = {{
+      Real(0.1), Real(0.25), Real(0.5), Real(0.75), Real(0.9) }};
+    for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
+    {
+      const auto attr = mesh.getAttribute(1, e);
+      if (!attr || *attr != Interface) continue;
+      const auto& ep = conn.getPolytope(1, e);
+      std::array<Index, 2> edgeAdj{
+        std::numeric_limits<Index>::max(),
+        std::numeric_limits<Index>::max() };
+      { size_t k = 0;
+        for (Index ci : conn.getIncidence({ 1, 2 }, e))
+          if (k < 2) edgeAdj[k++] = ci; }
+      std::vector<Index> nbrs;
+      for (Index vEnd : { ep(0), ep(1) })
+        for (Index ci : conn.getIncidence({ 0, 2 }, vEnd))
+          if (ci != edgeAdj[0] && ci != edgeAdj[1])
+            nbrs.push_back(ci);
+      std::sort(nbrs.begin(), nbrs.end());
+      nbrs.erase(std::unique(nbrs.begin(), nbrs.end()), nbrs.end());
+      if (nbrs.empty()) continue;
+      const auto edgeIt = mesh.getPolytope(1, e);
+      const auto& etrans = edgeIt->getTransformation();
+      for (Real s : sOv)
+      {
+        Math::SpatialPoint x;
+        etrans.transform(x, Math::SpatialPoint{ s });
+        for (Index ci : nbrs)
+        {
+          const auto& cell = conn.getPolytope(2, ci);
+          if (pointInLinearTriangle(
+                x,
+                mesh.getVertexCoordinates(cell(0)),
+                mesh.getVertexCoordinates(cell(1)),
+                mesh.getVertexCoordinates(cell(2))))
+          { ++stats.overlapSamples; break; }
+        }
+      }
+    }
     return stats;
   }
 
@@ -743,6 +888,7 @@ int main(int, char**)
   Real sumQmin = 0, sumCurvedQmin = 0, sumFit = 0;
   Real sumTargetMaxMu = 0, sumTargetMinDetT = 0;
   Index sumInverted = 0, sumTargetInvalid = 0;
+  Index sumOverlap = 0, topologyInsufficient = 0;
   Index rejectedTMOP = 0, diagSteps = 0;
 
   for (Index step = 0; step < steps; ++step)
@@ -764,7 +910,7 @@ int main(int, char**)
       .setNegativeCellAttribute(Negative)
       .setPositiveCellAttribute(Positive)
       .setCrossingSnapTolerance(0.05)
-      .setMinCutQuality(0.05)
+      .setMinCutQuality(0.2)
       .discretize();
     annotateBoundary(cut.mesh);
 
@@ -777,6 +923,10 @@ int main(int, char**)
         .setParameters(parameters)
         .setFeatureProjection([t](const Math::SpatialPoint& x)
           { return projectToInterface(x, t); })
+        // Collapse interface slivers ALONG phi=0: merge the two endpoints of
+        // a short interface edge into one node kept on the interface. This
+        // removes the cut slivers the fixed-topology TMOP solve cannot fix.
+        .setFeatureCollapseLength(Real(0.5) * h)
         .setProtectedVertices(cutInterfaceMask)
         .optimize(optimized);
     }
@@ -978,6 +1128,15 @@ int main(int, char**)
     sumTargetMaxMu += targetStats.maxMetric;
     sumTargetMinDetT += targetStats.minDetT;
     sumTargetInvalid += targetStats.invalidSamples;
+    sumOverlap += curvedStats.overlapSamples;
+    // Topology/resolution insufficient: TMOP made no real step (the line
+    // search backtracked to ~0) because the start has a cell the fixed
+    // topology cannot improve -- either a leftover sliver, or an interface
+    // cell that cannot be validly curved at this resolution (the curve would
+    // fold it, so it stays affine and reads high distortion against the
+    // curved target). Report it rather than pretend the optimizer succeeded.
+    const bool topoInsufficient = lastAlpha < Real(1e-6);
+    if (topoInsufficient) ++topologyInsufficient;
     ++diagSteps;
     std::cout << "step " << step
               << " t=" << t
@@ -990,12 +1149,14 @@ int main(int, char**)
               << " curved_fit_max=" << curvedStats.fitMax
               << " curved_min_jac=" << curvedStats.minJacobian
               << " curved_invalid_jac=" << curvedStats.invalidJacobianSamples
+              << " curved_overlap=" << curvedStats.overlapSamples
               << " tmop_target_max_mu=" << targetStats.maxMetric
               << " tmop_target_min_detT=" << targetStats.minDetT
               << " tmop_target_invalid=" << targetStats.invalidSamples
               << " tmop_iterations=" << tmopIterations
               << " tmop_last_alpha=" << lastAlpha
               << " tmop_accepted=" << (acceptedTMOP ? 1 : 0)
+              << " topology_insufficient=" << (topoInsufficient ? 1 : 0)
               << std::endl;
 
     demoteInterface(optimized);
@@ -1019,7 +1180,11 @@ int main(int, char**)
               << sumTargetMinDetT / static_cast<Real>(diagSteps)
               << " tmop_target_invalid="
               << static_cast<Real>(sumTargetInvalid) / static_cast<Real>(diagSteps)
+              << " curved_overlap="
+              << static_cast<Real>(sumOverlap) / static_cast<Real>(diagSteps)
               << " rejected_tmop=" << rejectedTMOP
+              << " topology_insufficient=" << topologyInsufficient
+              << "/" << diagSteps
               << std::endl;
   return 0;
 }
